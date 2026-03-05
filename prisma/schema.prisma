@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- NextAuth 必须的表 ---
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- 我们的核心用户表 ---
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("USER") // 默认为普通用户，后续可手动将自己改为 "ADMIN"
+  
+  accounts      Account[]
+  sessions      Session[]
+  articles      Article[]  // 之前设计的文章表关联
+  revisions     Revision[] // 之前设计的审核表关联
+}
+
+// schema.prisma
+
+// 枚举：审核状态
+enum ReviewStatus {
+  DRAFT      // 草稿（仅自己可见）
+  PENDING    // 待审核（提交给管理员）
+  APPROVED   // 已通过/已发布
+  REJECTED   // 已拒绝
+}
+
+// 用户表 (配合 NextAuth.js)
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  role          String    @default("USER") // "USER" 或 "ADMIN"
+  articles      Article[] // 用户创建的文章
+  revisions     Revision[] // 用户的提交记录
+}
+
+// 核心文章表 (永远只存放线上干净的、已发布的数据)
+model Article {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique // 用于 URL 路由，如 /docs/my-article
+  content     String     @db.Text // Markdown 正文
+  authorId    String
+  author      User       @relation(fields: [authorId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  // 关联的修改记录
+  revisions   Revision[] 
+}
+
+// 修订记录表 (承载数据交换与审核流的核心)
+model Revision {
+  id          String       @id @default(cuid())
+  articleId   String?      // 如果是修改已有文章，关联ID；如果是全新文章，初始为 null
+  article     Article?     @relation(fields: [articleId], references: [id])
+  
+  title       String       // 提交的新标题
+  content     String       @db.Text // 提交的新内容
+  status      ReviewStatus @default(DRAFT)
+  rejectReason String?     // 如果被拒绝，管理员填写的理由
+  
+  submitterId String
+  submitter   User         @relation(fields: [submitterId], references: [id])
+  createdAt   DateTime     @default(now())
+}

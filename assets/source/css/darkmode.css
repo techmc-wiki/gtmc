@@ -1,0 +1,80 @@
+:root {
+    --dark-base-background: #222;
+    --dark-base-color: #bbc0c4;
+    --dark-theme-color: #42b983;
+    --dark-heading-color: var(--dark-theme-color);
+    --dark-cover-background: #000000a8;
+    --dark-code-color: rgba(213, 213, 213, 0.68);
+    --dark-code-background: rgba(42, 41, 41, 0.47);
+    --dark-tip-background: #2c0000;
+    --dark-warn-background: #005842;
+    --dark-icon-size: 25px;
+    --dark-icon-transition: .1s ease-in-out .1s;
+    --dark-moon-color: #000000;
+    --dark-sun-color: #ffffff;
+}
+
+/*更改切换按钮的位置跟紫薯统计错开*/
+button[onclick="docsifyDarkSwitcher()"] {
+    position: fixed;
+    left: 10px;
+ }
+
+/*更改左下角菜单按钮防止跟深色模式冲突*/
+.docsify-dark-mode .sidebar-toggle span{
+    background-color: #80eddd !important;
+}
+.docsify-dark-mode .sidebar-toggle {
+    background: transparent !important;
+}
+
+/*图片亮度*/
+.docsify-dark-mode .medium-zoom-image{
+    filter: brightness(0.8);
+}
+
+/*搜索栏适配夜间模式*/
+.docsify-dark-mode .search a {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.docsify-dark-mode .search a:hover{
+    color: #ffffff !important;
+    .search-keyword {
+        color: rgba(99, 246, 111, 0.78);
+    }
+}
+
+.docsify-dark-mode .search .search-keyword {
+   color: rgba(70, 185, 66, 0.55);
+}
+
+/*彩蛋*/
+.docsify-dark-mode #easter-egg-overlay img{
+    filter: brightness(0.7);
+}
+
+.docsify-dark-mode .easter-egg-toggle {
+    opacity: 0.01;
+}
+
+.docsify-dark-mode .easter-egg-toggle:hover {
+    opacity: 0.1;
+}
+
+/*下载按钮*/
+.docsify-dark-mode .download-button{
+    background-color: rgba(0, 0, 0, 0.06);
+    border-color: rgba(4, 4, 4, 0.18);
+    box-shadow: 0 0 5px 2px rgba(255, 255, 255, 0.02);
+}
+
+.docsify-dark-mode .download-button:hover {
+    background-color: rgba(0, 0, 0, 0.16);
+    border-color: rgba(4, 4, 4, 0.18);
+    transform: scale(1.05);
+}
+
+.docsify-dark-mode .download-modal {
+    background-color: rgba(62, 62, 62, 0.89);
+}

@@ -1,0 +1,15 @@
+/* user <hidden>something</hidden> to hide your text under a hover block */
+
+hidden {
+    background-color: #000;
+    transition: all 200ms;
+    border-radius: 5px;
+}
+  
+.docsify-dark-mode hidden {
+    background-color: var(--dark-base-color);
+}
+
+hidden:hover {
+    background-color: transparent;
+}

@@ -26,12 +26,18 @@ export async function saveDraftAction(formData: FormData) {
   let savedRevision;
 
   if (revisionId) {
+    const existing = await prisma.revision.findUnique({ where: { id: revisionId } });
+    if (existing && (existing.status === "PENDING" || existing.status === "APPROVED")) {
+      throw new Error("Cannot edit a draft that is pending or approved");
+    }
+
     // Update existing draft
     savedRevision = await prisma.revision.update({
       where: { id: revisionId },
       data: {
         title,
         content,
+        filePath,
         status: "DRAFT", 
       },
     });
@@ -57,7 +63,10 @@ export async function submitForReviewAction(revisionId: string) {
   if (!revisionId) {
     throw new Error("Revision ID is required");
   }
-
+  const existing = await prisma.revision.findUnique({ where: { id: revisionId } });
+  if (existing && existing.status === "APPROVED") {
+    throw new Error("Cannot submit an already approved draft");
+  }
   // TODO: Session 验证
   
   await prisma.revision.update({

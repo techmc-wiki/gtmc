@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BrutalButton } from "@/components/ui/brutal-button";
+import { Logo } from "@/components/ui/logo";
 
 export default function Home() {
   return (
@@ -22,43 +23,45 @@ export default function Home() {
       {/* 右上角HUD：模拟服务器/图纸数据 */}
       <div className="absolute top-8 right-12 text-[10px] font-mono text-tech-main opacity-40 text-right space-y-1 z-0 select-none hidden sm:block">
         <p>SYS.TPS   :: <span className="text-tech-main-dark font-bold">20.0 *</span></p>
-        <p>JVM.HEAP  :: 16,384M / 32,768M [50%]</p>
-        <p>LOAD.CHKS :: 4,201</p>
-        <p>GC.TYPE   :: G1GC (12ms)</p>
+        <p>SYS.MSPT  :: 12.4ms</p>
+        <p>ENTITIES  :: 342 / 1024</p>
+        <p>BLOCK.ENT :: 1,204</p>
         <div className="w-full h-[1px] bg-tech-main/30 my-2"></div>
         <p>COORD : X:1024 Y:64 Z:-512</p>
         <p className="mt-2 text-[8px] opacity-70">
-          -XX:+UseG1GC <br/> -XX:MaxGCPauseMillis=50
+          Light: 15 (15 sky, 0 block) <br/> Biome: minecraft:plains
         </p>
       </div>
       
       {/* Java 代码片段漂浮层 (Decompiled Source Code) */}
       <div className="absolute left-10 md:left-20 bottom-[15%] opacity-40 hidden lg:block select-none pointer-events-none transform -rotate-2 mix-blend-multiply">
         <div className="text-[11px] font-mono text-tech-main whitespace-pre leading-relaxed border-l-4 border-tech-main/40 pl-4 bg-tech-main/5 py-2">
-          <span className="text-tech-main-dark font-bold">@Override</span>{"\n"}
-          <span className="text-tech-main-dark font-bold">public void</span> onInitialize() {"{"}{"\n"}
-          {"  "}LOGGER.info(<span className="text-tech-main-dark">"Initializing GTMC Core..."</span>);{"\n"}
-          {"  "}Registry.register(Registry.ITEM, new Identifier(ID, <span className="text-tech-main-dark">"wiki_tablet"</span>),{"\n"}
-          {"    "}new WikiItem(new Item.Settings().group(GROUP)));{"\n"}
-          {"  "}<span className="opacity-80">{'//'} TODO: Implement packet handling for sync</span>{"\n"}
+          {"{"}"\n"
+          {"  "}<span className="text-tech-main-dark">"Id"</span>: <span className="text-tech-main-dark font-bold">"minecraft:chest"</span>,{"\n"}
+          {"  "}<span className="text-tech-main-dark">"x"</span>: 1024, <span className="text-tech-main-dark">"y"</span>: 64, <span className="text-tech-main-dark">"z"</span>: -512,{"\n"}
+          {"  "}<span className="text-tech-main-dark">"Items"</span>: [{"\n"}
+          {"    "}{"{"}<span className="text-tech-main-dark">"Slot"</span>: 0b, <span className="text-tech-main-dark">"id"</span>: <span className="text-tech-main-dark font-bold">"minecraft:diamond"</span>, <span className="text-tech-main-dark">"Count"</span>: 64b{"}"},{"\n"}
+          {"    "}{"{"}<span className="text-tech-main-dark">"Slot"</span>: 1b, <span className="text-tech-main-dark">"id"</span>: <span className="text-tech-main-dark font-bold">"minecraft:redstone"</span>, <span className="text-tech-main-dark">"Count"</span>: 64b{"}"}{"\n"}
+          {"  "}],{"\n"}
+          {"  "}<span className="opacity-80">{'//'} BlockEntityTag</span>{"\n"}
           {"}"}
         </div>
       </div>
 
-      {/* 字节码/Hex Dump 背景层 (底层纹理) */}
+      {/* NBT二进制/Hex Dump 背景层 (底层纹理) */}
       <div className="absolute top-[20%] left-[5%] text-[10px] font-mono text-tech-main opacity-[0.25] select-none pointer-events-none whitespace-pre leading-tight hidden xl:block mix-blend-multiply">
-        00000000: cafe babe 0000 0034 001e 0a00 0300 0f07  .......4........{"\n"}
-        00000010: 0010 0700 1101 0006 3c69 6e69 743e 0100  ........&lt;init&gt;..{"\n"}
-        00000020: 0328 2956 0100 0443 6f64 6501 000f 4c69  .()V...Code...Li{"\n"}
-        00000030: 6e65 4e75 6d62 6572 5461 626c 6501 0012  neNumberTable...{"\n"}
-        00000040: 4c6f 6361 6c56 6172 6961 626c 6554 6162  LocalVariableTab{"\n"}
+        00000000: 1f8b 0800 0000 0000 0000 edc1 0b00 0000  .......4........{"\n"}
+        00000010: 0010 0700 1101 0005 6c65 7665 6c00 0800  ........level...{"\n"}
+        00000020: 0b44 6174 6101 0006 7261 6e64 6f6d 5365  .Data...randomSe{"\n"}
+        00000030: 6564 0000 0000 3b9a ca00 0400 0c62 6c6f  ed....;......blo{"\n"}
+        00000040: 636b 5f6c 6967 6874 5f64 6174 610a 0000  ck_light_data...{"\n"}
       </div>
 
       {/* 堆栈跟踪装饰 (Stack Trace Decor) */}
       <div className="absolute bottom-8 left-8 text-[10px] font-mono text-red-500/40 select-none pointer-events-none hidden md:block mix-blend-multiply">
-        <span className="font-bold">at net.minecraft.server.MinecraftServer.run</span>(MinecraftServer.java:1) {"\n"}<br/>
-        <span className="font-bold">at java.lang.Thread.run</span>(Thread.java:833) {"\n"}<br/>
-        <span className="text-red-600/60 font-bold">Caused by: com.gtmc.core.ReflectiveAccesException: Blueprint not found</span>
+        <span className="font-bold">at net.minecraft.world.level.block.piston.PistonBaseBlock.moveBlocks</span>(PistonBaseBlock.java:492) {"\n"}<br/>
+        <span className="font-bold">at net.minecraft.world.level.Level.tickBlockEntities</span>(Level.java:833) {"\n"}<br/>
+        <span className="text-red-600/60 font-bold">Caused by: java.util.ConcurrentModificationException: Ticking block entity</span>
       </div>
 
       {/* 分散的瞄准/坐标十字 */}
@@ -227,11 +230,13 @@ export default function Home() {
               </h2>
             </div>
             
-            <h1 className="text-6xl md:text-7xl font-bold tracking-tight text-tech-main-dark mb-6 relative overflow-hidden">
-              <span className="inline-block animate-tech-slide-in [animation-delay:0.5s] opacity-0 [animation-fill-mode:forwards]">GTMC</span> 
-              <span className="inline-block opacity-0 font-light mix-blend-multiply text-tech-main animate-tech-slide-in [animation-delay:0.7s] [animation-fill-mode:forwards] ml-4">Wiki</span>
-              {/* 阅读头光标闪烁动画 */}
-              <span className="inline-block w-6 h-[1em] bg-tech-main opacity-0 ml-2 animate-pulse align-middle [animation-delay:1s] [animation-fill-mode:forwards]"></span>
+                        <h1 className="flex items-center text-6xl md:text-7xl font-bold tracking-tight text-tech-main-dark mb-6 relative overflow-hidden">
+              <span className="inline-block animate-tech-slide-in [animation-delay:0.5s] opacity-0 [animation-fill-mode:forwards] mr-6">
+                <Logo size="2xl" showSlash={false} className="pointer-events-none" />
+              </span>
+              <span className="inline-block opacity-0 font-light mix-blend-multiply text-tech-main animate-tech-slide-in [animation-delay:0.7s] [animation-fill-mode:forwards]">Wiki</span>
+              {/* �Ķ�ͷ�����˸���� */}
+              <span className="inline-block w-6 h-[1em] bg-tech-main opacity-0 ml-4 animate-pulse align-middle [animation-delay:1s] [animation-fill-mode:forwards]"></span>
             </h1>
             
             <p className="text-base md:text-lg text-tech-main-dark/80 tracking-wide max-w-xl leading-relaxed border-l-[3px] border-tech-main/40 pl-5 opacity-0 animate-fade-in [animation-delay:1.2s] [animation-translate-y:20px] [animation-duration:1s] [animation-fill-mode:forwards]">

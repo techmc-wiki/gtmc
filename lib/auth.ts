@@ -2,7 +2,17 @@ import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
+import { ProxyAgent, setGlobalDispatcher } from "undici";
 
+// Allow NextAuth to proxy requests when running in local development (useful in mainland China)
+if (process.env.HTTPS_PROXY || process.env.http_proxy) {
+  const proxyUrl = process.env.HTTPS_PROXY || process.env.http_proxy;
+  if (proxyUrl) {
+    const dispatcher = new ProxyAgent(proxyUrl);
+    setGlobalDispatcher(dispatcher);
+    console.log(`[NextAuth] Global proxy dispatcher set to: ${proxyUrl}`);
+  }
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),

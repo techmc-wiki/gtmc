@@ -28,8 +28,16 @@ export async function approveRevisionAction(formData: FormData) {
     throw new Error("Unauthorized");
   }
 
+  const adminUser = await prisma.user.findUnique({
+    where: { id: session.user.id }
+  });
+
   const revisionId = formData.get("revisionId") as string;
   if (!revisionId) throw new Error("Revision ID required");
+
+  if (!adminUser?.githubPat) {
+    throw new Error("GitHub PAT not found. Please bind your PAT in your Profile Configuration first.");
+  }
 
   const revision = await prisma.revision.findUnique({
     where: { id: revisionId },
@@ -51,7 +59,7 @@ export async function approveRevisionAction(formData: FormData) {
 
   // 2. Trigger GitHub Action to create PR
   try {
-    const githubToken = process.env.GITHUB_PAT_FOR_ACTION;
+    const githubToken = adminUser.githubPat;
     const repoOwner = process.env.GITHUB_REPO_OWNER; 
     const repoName = process.env.GITHUB_REPO_NAME;
 

@@ -20,7 +20,6 @@
 - 附录-专有名词解释
   - [#00 专有名词解释](./Appendix/00-专有名词解释.md)
   - [#01 栈与调用栈](./Appendix/01-栈.md)
-  <!-- - [#06 元件与特性](./MicroTiming/06-元件与特性.md) -->
 - 附录-元件与特性
   - [#01 铁轨](./Components&Features/01-铁轨.md)
   - [#02 活塞](./Components&Features/02-活塞.md)
@@ -99,8 +98,3 @@
   - [#a 附页-辅助mod](./LoadingTicket/a-附页-辅助mod.md)
   - [#b 附页-一些译名](./LoadingTicket/b-附页-一些译名.md)
 
----
-
-- **世界生成**
-- 世界生成
-  - [#00 序](./WorldSpawn/404.md)

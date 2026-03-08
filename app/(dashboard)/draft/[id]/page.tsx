@@ -60,7 +60,8 @@ export default async function EditDraftPage({ params }: { params: Promise<{ id: 
             title: draft.title, 
             content: draft.content, 
             filePath: draft.filePath || undefined,
-            articleId: draft.articleId || undefined
+            articleId: draft.articleId || undefined,
+            status: draft.status
           }} 
         />
       </div>

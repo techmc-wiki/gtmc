@@ -8,7 +8,7 @@ datasource db {
 }
 
 // ==========================================
-// 1. Auth.js (NextAuth) 标准账户体系与扩展
+// 1. Auth.js (NextAuth) 鏍囧噯璐︽埛浣撶郴涓庢墿锟?
 // ==========================================
 
 model User {
@@ -18,7 +18,9 @@ model User {
   emailVerified DateTime?
   image         String?
   role          String    @default("USER")
-  
+  githubPat     String?
+
+
   accounts      Account[]
   sessions      Session[]
 
@@ -58,7 +60,7 @@ model Session {
 }
 
 // ==========================================
-// 3. 核心业务：文章与版本协同控制体系
+// 3. 鏍稿績涓氬姟锛氭枃绔犱笌鐗堟湰鍗忓悓鎺у埗浣撶郴
 // ==========================================
 
 model Article {
@@ -99,3 +101,6 @@ model Revision {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 }
+
+
+

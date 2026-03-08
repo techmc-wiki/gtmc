@@ -1,12 +1,15 @@
-"use client";
+﻿"use client";
 
 import { signOut } from "next-auth/react";
-import { BrutalButton } from "@/components/ui/brutal-button";
 
-export function SignOutButton() {
+export function SignOutButton({ className = "" }: { className?: string }) {
   return (
-    <BrutalButton variant="ghost" onClick={() => signOut({ callbackUrl: "/" })} className="text-red-500 hover:text-red-600 hover:bg-red-50 border-red-500 w-full mt-4">
+    <button 
+      onClick={() => signOut({ callbackUrl: "/" })} 
+      className={`font-black tracking-widest uppercase text-[#3c4a63] hover:text-red-500 transition-colors text-sm flex items-center justify-center ${className}`}
+      type="button"
+    >
       SIGN OUT
-    </BrutalButton>
+    </button>
   );
 }

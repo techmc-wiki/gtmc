@@ -80,7 +80,7 @@ export default async function DraftDashboardPage() {
               
               <Link href={`/draft/${draft.id}`} className="relative z-10 mt-auto">
                 <BrutalButton variant="ghost" className="w-full text-xs font-mono tracking-widest h-10 border border-tech-main/20 hover:border-tech-main/50 bg-white/50 hover:bg-white/80 transition-all">
-                  {draft.status === 'DRAFT' || draft.status === 'REJECTED' ? '&gt; EDIT_RECORD' : '&gt; VIEW_STREAM'}
+                  {draft.status === 'DRAFT' || draft.status === 'REJECTED' ? '> EDIT_RECORD' : '> VIEW_STREAM'}
                 </BrutalButton>
               </Link>
             </BrutalCard>

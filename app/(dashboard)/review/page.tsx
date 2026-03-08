@@ -12,7 +12,7 @@ export default async function ReviewHubPage() {
     return (
       <div className="max-w-6xl mx-auto p-8 text-center mt-20">
         <h1 className="text-6xl font-black text-red-500 uppercase">ACCESS DENIED</h1>
-        <p className="text-xl font-bold mt-4">ADMIM CLEARANCE REQUIRED.</p>
+        <p className="text-xl font-bold mt-4">ADMIN CLEARANCE REQUIRED.</p>
         <Link href="/">
           <BrutalButton variant="primary" className="mt-8">RETURN TO BASE</BrutalButton>
         </Link>

@@ -48,6 +48,7 @@ export function BrutalAvatar({ src, alt, size, fallback, className = "" }: Bruta
           src={src}
           alt={alt || "Avatar"}
           fill
+          unoptimized
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover p-1 group-hover:scale-105 transition-transform duration-500 saturate-[0.85] group-hover:saturate-100"
         />

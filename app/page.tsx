@@ -187,7 +187,7 @@ export default function Home() {
       {/* ======================================================== */}
       {/* 核心交互区：带有微弱堆叠感和景深的卡片 */}
       {/* ======================================================== */}
-      <main className="relative z-10 flex flex-col justify-center items-center w-full max-w-7xl mx-auto py-24 min-h-[max-content] px-4">
+      <main className="relative z-10 flex flex-col justify-center items-center w-full max-w-7xl mx-auto py-24 min-h-[max-content] px-4 mt-[7vh]">
         
         {/* 数据连接线装饰 (已移除以适应居中布局) */}
         {/* <div className="absolute left-[8%] lg:left-[24%] top-[12%] h-[60%] w-[1px] border-l border-dashed border-tech-main/30"></div>

@@ -87,7 +87,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-tech-main/50"></div>
       <div className="absolute top-4 right-4 md:top-8 md:right-8 group z-20 flex flex-col items-end gap-2">
         <Link href={`/draft/new?file=${encodeURIComponent(editPath)}`}>
-          <button className="flex items-center gap-2 border border-tech-main/50 bg-tech-main/10 hover:bg-tech-main text-tech-main hover:text-black px-4 py-2 font-mono text-[10px] md:text-xs uppercase tracking-widest transition-all duration-300 relative overflow-hidden">
+          <button className="flex items-center gap-2 border border-tech-main/50 bg-tech-main/10 hover:bg-tech-main text-tech-main hover:text-white px-4 py-2 font-mono text-[10px] md:text-xs uppercase tracking-widest transition-all duration-300 relative overflow-hidden">
             <span className="relative z-10 font-bold">[EDIT_TARGET]</span>
           </button>
         </Link>

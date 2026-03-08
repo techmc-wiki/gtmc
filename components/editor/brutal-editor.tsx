@@ -70,7 +70,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
         body: formData,
       });
 
-      const data = await res.json();
+      let data; try { data = await res.json(); } catch(e) { throw new Error("HTTP " + res.status + " : " + await res.text()); }
       
       if (res.ok && data.url) {
         setContent(prev => prev.replace(placeholder, `![${file.name}](${data.url})\n`));

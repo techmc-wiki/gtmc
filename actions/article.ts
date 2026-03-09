@@ -80,3 +80,33 @@ export async function submitForReviewAction(revisionId: string) {
   revalidatePath("/review");
   return { success: true };
 }
+
+export async function deleteDraftAction(revisionId: string) {
+  const session = await auth();
+
+  if (!session || !session.user) {
+    throw new Error("Unauthorized");
+  }
+
+  const userId = session.user.id;
+  const existing = await prisma.revision.findUnique({ where: { id: revisionId } });
+
+  if (!existing) {
+    throw new Error("Draft not found");
+  }
+
+  if (existing.authorId !== userId) {
+    throw new Error("Unauthorized to delete this draft");
+  }
+
+  if (existing.status === "PENDING" || existing.status === "APPROVED") {
+    throw new Error("Cannot delete a pending or approved draft");
+  }
+
+  await prisma.revision.delete({
+    where: { id: revisionId }
+  });
+
+  revalidatePath("/draft");
+  return { success: true };
+}

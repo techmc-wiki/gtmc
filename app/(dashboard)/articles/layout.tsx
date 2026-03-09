@@ -31,7 +31,7 @@ export default async function ArticlesLayout({
                 SYS.DIR_TREE
               </div>
               <div className="flex items-center gap-2">
-                <Link href="/draft/new?file=_sidebar.md" className="hidden group-hover/title:block text-[10px] md:text-[11px] border border-tech-main/40 px-1 hover:bg-tech-main hover:text-black transition-colors">
+                <Link href="/draft/new?file=_sidebar.md" className="hidden group-hover/title:block text-[10px] md:text-[11px] border border-tech-main/40 px-1 hover:bg-tech-main hover:text-white transition-colors">
                   EDIT
                 </Link>
                 <div className="text-[10px] md:text-[11px] font-mono text-tech-main/40 hidden xl:block">READ-ONLY</div>

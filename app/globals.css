@@ -60,6 +60,8 @@
 
 body {
   background-color: var(--background);
+  background-image: radial-gradient(var(--color-tech-line) 1px, transparent 1px);
+  background-size: 20px 20px;
   color: var(--foreground);
   font-family: var(--font-sans);
 }

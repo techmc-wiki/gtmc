@@ -1,0 +1,184 @@
+"use client"
+
+import { useState, useMemo } from "react"
+import Link from "next/link"
+import { BrutalCard } from "@/components/ui/brutal-card"
+
+export function StatusBadge({ status }: { status: string }) {
+  let styles = "px-2 py-1 text-xs font-bold uppercase border"
+  let label = status
+
+  switch (status) {
+    case "PENDING":
+      styles += " bg-yellow-100 border-yellow-400 text-yellow-800"
+      label = "待解决"
+      break
+    case "IN_PROGRESS":
+      styles += " bg-blue-100 border-blue-400 text-blue-800"
+      label = "解决中"
+      break
+    case "RESOLVED":
+      styles += " bg-green-100 border-green-400 text-green-800"
+      label = "已解决"
+      break
+    default:
+      styles += " bg-zinc-100 border-zinc-300 text-zinc-600"
+  }
+
+  return <span className={styles}>{label}</span>
+}
+
+export function FeatureList({ features }: { features: any[] }) {
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [statusFilter, setStatusFilter] = useState<string>("ALL")
+
+  // Extract all unique tags
+  const allTags = useMemo(() => {
+    const tags = new Set<string>()
+    features.forEach(f => {
+      f.tags?.forEach((t: string) => tags.add(t))
+    })
+    return Array.from(tags)
+  }, [features])
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    )
+  }
+
+  // Filter features
+  const filteredFeatures = useMemo(() => {
+    return features.filter(f => {
+      const matchTags = selectedTags.length === 0 || selectedTags.every(tag => f.tags?.includes(tag))
+      const matchStatus = statusFilter === "ALL" 
+                          || (statusFilter === "UNRESOLVED" && f.status !== "RESOLVED")
+                          || f.status === statusFilter
+      return matchTags && matchStatus
+    })
+  }, [features, selectedTags, statusFilter])
+
+  const pendingFeatures = filteredFeatures.filter(f => f.status === "PENDING")
+  const inProgressFeatures = filteredFeatures.filter(f => f.status === "IN_PROGRESS")
+  const resolvedFeatures = filteredFeatures.filter(f => f.status === "RESOLVED")
+
+  const renderFeatureGroup = (title: string, groupFeatures: any[], emptyText: string) => {
+    if (groupFeatures.length === 0) {
+      return null
+    }
+
+    return (
+      <div className="mb-8">
+        <h3 className="text-xl font-bold tracking-widest uppercase mb-4 border-l-4 border-tech-main pl-3 text-tech-main">
+          {title} ({groupFeatures.length})
+        </h3>
+        <div className="grid gap-4">
+          {groupFeatures.map(feature => (
+            <Link key={feature.id} href={`/features/${feature.id}`} className="block">
+              <BrutalCard className="hover:border-zinc-800 transition-colors flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center p-4 cursor-pointer bg-white/60 backdrop-blur-sm">
+                <div className="space-y-2 flex-grow">
+                  <div className="flex items-center gap-2">
+                    <StatusBadge status={feature.status} />
+                    <h2 className="text-xl font-bold">{feature.title}</h2>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2 text-xs font-mono">
+                    <span className="bg-zinc-100 px-2 py-0.5 border border-zinc-200">
+                      Author: {feature.author?.name || "Unknown"}
+                    </span>
+                    <span className="bg-zinc-100 px-2 py-0.5 border border-zinc-200 text-zinc-500" suppressHydrationWarning>
+                      {new Date(feature.createdAt).toLocaleDateString()}
+                    </span>
+                    {feature.assignee && (
+                      <span className="bg-blue-50 text-blue-800 px-2 py-0.5 border border-blue-200">
+                        Assignee: {feature.assignee.name || "Unknown"}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {feature.tags && feature.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {feature.tags.map((tag: string) => (
+                        <span key={tag} className="text-xs font-mono uppercase border border-tech-main text-tech-main bg-tech-accent/10 px-2 py-0.5">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </BrutalCard>
+            </Link>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* 过滤器 */}
+      <BrutalCard className="p-4 bg-white/60 backdrop-blur-sm border-tech-main/30 md:px-6">
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main mb-2">
+              FILTER_BY_STATUS_
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {["ALL", "UNRESOLVED", "PENDING", "IN_PROGRESS", "RESOLVED"].map(status => (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`text-xs font-mono px-3 py-1.5 border transition-all ${
+                    statusFilter === status
+                      ? "bg-tech-main text-white border-tech-main"
+                      : "bg-transparent text-tech-main border-tech-main/30 hover:border-tech-main"
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {allTags.length > 0 && (
+            <div>
+              <h4 className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main mb-2">
+                FILTER_BY_TAGS_
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {allTags.map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={`text-xs font-mono uppercase px-3 py-1.5 border transition-all ${
+                      selectedTags.includes(tag)
+                        ? "bg-tech-accent text-white border-tech-accent"
+                        : "bg-tech-accent/5 text-tech-main border-tech-main/20 hover:border-tech-main/50"
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </BrutalCard>
+
+      {/* 列表分组展示 */}
+      <div className="mt-8">
+        {filteredFeatures.length === 0 ? (
+          <div className="text-center py-12 border border-dashed border-tech-main/30 font-mono text-tech-main/50 bg-white/20">
+            NO_FEATURES_FOUND_
+          </div>
+        ) : (
+          <>
+            {renderFeatureGroup("待解决 / PENDING", pendingFeatures, "No pending features")}
+            {renderFeatureGroup("解决中 / IN PROGRESS", inProgressFeatures, "No features in progress")}
+            {renderFeatureGroup("已解决 / RESOLVED", resolvedFeatures, "No resolved features")}
+          </>
+        )}
+      </div>
+    </div>
+  )
+}

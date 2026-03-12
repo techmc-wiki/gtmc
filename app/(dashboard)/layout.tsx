@@ -28,6 +28,9 @@ export default function DashboardLayout({
                 <Link href="/review" className="font-mono text-xs tracking-[0.15em] border-b-2 border-transparent hover:border-tech-main text-tech-main-dark hover:text-tech-main transition-colors pb-1">
                   REVIEW HUB
                 </Link>
+                <Link href="/features" className="font-mono text-xs tracking-[0.15em] border-b-2 border-transparent hover:border-tech-main text-tech-main-dark hover:text-tech-main transition-colors pb-1">
+                  FEATURES
+                </Link>
               </div>
             </div>
             

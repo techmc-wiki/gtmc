@@ -27,6 +27,9 @@ model User {
   articles      Article[]  @relation("ArticleAuthor")
   revisions     Revision[] @relation("RevisionAuthor")
   reviews       Revision[] @relation("RevisionReviewer")
+  features         Feature[] @relation("FeatureAuthor")
+  assignedFeatures Feature[] @relation("FeatureAssignee")
+  featureComments  FeatureComment[] @relation("CommentAuthor")
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -100,6 +103,43 @@ model Revision {
 
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+}
+
+// ==========================================
+// 4. Feature Report
+// ==========================================
+
+model Feature {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  explanation String?
+  tags        String[]
+  status      String   @default("PENDING") // PENDING, IN_PROGRESS, RESOLVED
+  
+  authorId    String
+  author      User     @relation("FeatureAuthor", fields: [authorId], references: [id])
+  
+  assigneeId  String?
+  assignee    User?    @relation("FeatureAssignee", fields: [assigneeId], references: [id])
+
+  comments    FeatureComment[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FeatureComment {
+  id          String   @id @default(cuid())
+  content     String
+  
+  featureId   String
+  feature     Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  
+  authorId    String
+  author      User     @relation("CommentAuthor", fields: [authorId], references: [id])
+  
+  createdAt   DateTime @default(now())
 }
 
 

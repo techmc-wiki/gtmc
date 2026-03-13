@@ -96,7 +96,7 @@ export function PendingCreationBanner() {
           href={`/features/${state.featureId}`}
           className="underline text-tech-accent hover:text-tech-main ml-2"
         >
-          VIEW_FEATURE_{state.featureId}_
+          VIEW_ISSUE_#{state.featureId}_
         </Link>
       </div>
     );

@@ -112,9 +112,10 @@ export async function createFeature(data: {
    // Send structured payload for AstrBot
    await sendQQBotNotification({
      type: "new_feature",
-     text: `New feature report from [${session.user.name || session.user.email}]: ${data.title}\nID: ${created.number}`,
+     text: `New feature report from [${session.user.name || session.user.email}]: ${data.title}\nIssue #${created.number}`,
      data: {
        id: String(created.number),
+       issueNumber: created.number,
        title: data.title,
        author: session.user.name || session.user.email,
        tags: data.tags,
@@ -142,7 +143,7 @@ export async function updateFeature(
   if (!session?.user?.id) throw new Error("Unauthorized");
 
   const issueNumber = parseInt(id, 10);
-  if (isNaN(issueNumber)) throw new Error("Invalid feature ID");
+   if (isNaN(issueNumber)) throw new Error("Invalid issue number");
 
    const feature = await getFeatureByIssueNumber(issueNumber);
    if (!feature) throw new Error("Not found");
@@ -208,7 +209,7 @@ export async function updateFeatureExplanation(
   if (!session?.user?.id) throw new Error("Unauthorized");
 
   const issueNumber = parseInt(id, 10);
-  if (isNaN(issueNumber)) throw new Error("Invalid feature ID");
+   if (isNaN(issueNumber)) throw new Error("Invalid issue number");
 
    const feature = await getFeatureByIssueNumber(issueNumber);
    if (!feature) throw new Error("Not found");
@@ -240,7 +241,7 @@ export async function assignFeature(id: string) {
   if (!session?.user?.id) throw new Error("Unauthorized");
 
   const issueNumber = parseInt(id, 10);
-  if (isNaN(issueNumber)) throw new Error("Invalid feature ID");
+   if (isNaN(issueNumber)) throw new Error("Invalid issue number");
 
    const feature = await getFeatureByIssueNumber(issueNumber);
    if (!feature) throw new Error("Not found");
@@ -305,7 +306,7 @@ export async function unassignFeature(id: string) {
   if (!session?.user?.id) throw new Error("Unauthorized");
 
   const issueNumber = parseInt(id, 10);
-  if (isNaN(issueNumber)) throw new Error("Invalid feature ID");
+   if (isNaN(issueNumber)) throw new Error("Invalid issue number");
 
    const feature = await getFeatureByIssueNumber(issueNumber);
    if (!feature) throw new Error("Not found");
@@ -378,7 +379,7 @@ export async function resolveFeature(id: string, resolutionComment?: string) {
   if (!session?.user?.id) throw new Error("Unauthorized");
 
   const issueNumber = parseInt(id, 10);
-  if (isNaN(issueNumber)) throw new Error("Invalid feature ID");
+   if (isNaN(issueNumber)) throw new Error("Invalid issue number");
 
   if (session.user.role !== "ADMIN") throw new Error("Admin only");
 
@@ -418,7 +419,7 @@ export async function addFeatureComment(id: string, content: string) {
   if (!session?.user?.id) throw new Error("Unauthorized");
 
   const issueNumber = parseInt(id, 10);
-  if (isNaN(issueNumber)) throw new Error("Invalid feature ID");
+   if (isNaN(issueNumber)) throw new Error("Invalid issue number");
 
    const feature = await getFeatureByIssueNumber(issueNumber);
    if (!feature) throw new Error("Not found");

@@ -62,6 +62,8 @@ export default async function FeatureDetailPage({
 
   const feature = {
     id: String(issue.number),
+    issueNumber: issue.number,
+    htmlUrl: issue.htmlUrl,
     title: issue.title,
     status: labelsToStatus(issue.labels),
     tags: labelsToTags(issue.labels),
@@ -99,7 +101,7 @@ export default async function FeatureDetailPage({
             {canEdit ? "Edit Feature" : "View Feature"}
           </h1>
           <p className="text-sm mt-2 font-mono text-zinc-600">
-            ID: {feature.id}
+            Issue #{feature.id}
           </p>
         </div>
 
@@ -150,6 +152,19 @@ export default async function FeatureDetailPage({
               {new Date(feature.createdAt).toLocaleString()}
             </span>
           </div>
+          {feature.issueNumber && feature.htmlUrl && (
+            <div className="flex gap-2">
+              <span className="font-bold text-zinc-500 w-24">ISSUE:</span>
+              <a 
+                href={feature.htmlUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-tech-main border-b border-tech-main/50 font-mono hover:text-white hover:bg-tech-main/80 transition-colors"
+              >
+                #{feature.issueNumber}
+              </a>
+            </div>
+          )}
         </div>
       </BrutalCard>
 

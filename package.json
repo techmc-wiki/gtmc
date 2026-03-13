@@ -17,6 +17,7 @@
     "github-slugger": "^2.0.0",
     "katex": "^0.16.38",
     "lucide-react": "^0.577.0",
+    "memfs": "^4.56.11",
     "mime-types": "^3.0.2",
     "next": "16.1.6",
     "next-auth": "^5.0.0-beta.30",

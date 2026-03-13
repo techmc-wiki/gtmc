@@ -73,6 +73,12 @@ model Article {
   content     String
   coverImage  String?
   
+  // 树状结构支持 (用于文件夹与文件)
+  isFolder    Boolean  @default(false)
+  parentId    String?
+  parent      Article?  @relation("ArticleTree", fields: [parentId], references: [id])
+  children    Article[] @relation("ArticleTree")
+
   authorId    String
   author      User     @relation("ArticleAuthor", fields: [authorId], references: [id])
 

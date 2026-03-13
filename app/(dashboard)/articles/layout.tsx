@@ -1,21 +1,14 @@
 ﻿import * as React from "react";
-import fs from "fs";
-import path from "path";
 import Link from "next/link";
 import { SidebarClient } from "./sidebar-client";
+import { getSidebarTree } from "@/actions/sidebar";
 
 export default async function ArticlesLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const sidebarPath = path.join(process.cwd(), "assets", "_sidebar.md");
-  let sidebarContent = "";
-  try {
-    sidebarContent = fs.readFileSync(sidebarPath, "utf-8");
-  } catch (error) {
-    sidebarContent = "Sidebar not found.";
-  }
+  const tree = await getSidebarTree();
 
   return (
     <div className="max-w-full mx-auto flex flex-col md:flex-row relative min-h-[calc(100vh-8rem)]">
@@ -30,16 +23,10 @@ export default async function ArticlesLayout({
                 <span className="w-1.5 h-1.5 bg-tech-main/60 inline-block mr-2 animate-pulse"></span>
                 SYS.DIR_TREE
               </div>
-              <div className="flex items-center gap-2">
-                <Link href="/draft/new?file=_sidebar.md" className="hidden group-hover/title:block text-[10px] md:text-[11px] border border-tech-main/40 px-1 hover:bg-tech-main hover:text-white transition-colors">
-                  EDIT
-                </Link>
-                <div className="text-[10px] md:text-[11px] font-mono text-tech-main/40 hidden xl:block">READ-ONLY</div>
-              </div>
             </div>
 
             <div className="overflow-y-auto flex-1 min-h-0 custom-left-scrollbar h-full pl-3 md:pl-6 -mt-2"><div className="prose prose-base text-[15px] md:text-base prose-tech font-mono w-full overflow-hidden break-words [&>ul]:pl-0 [&_ul]:list-none [&_li]:mt-1.5 [&_ul_ul]:pl-3 [&_ul_ul]:border-l [&_ul_ul]:border-tech-main/20 [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 pb-8 pt-2">
-              <SidebarClient content={sidebarContent} />
+              <SidebarClient tree={tree} />
                 </div>
               </div>
             </div>

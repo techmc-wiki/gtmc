@@ -1,4 +1,5 @@
 ﻿/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+import { prisma } from "@/lib/prisma";
 import fs from "fs";
 import path from "path";
 import ReactMarkdown from "react-markdown";
@@ -28,53 +29,75 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   let rawPath = filePathArray.map(decodeURIComponent).join("/");
 
-  let fullPath = path.join(process.cwd(), "assets", rawPath);
+  let content = "";
+  let editPath = rawPath;
 
-  if (!fs.existsSync(fullPath)) {
-    if (fs.existsSync(fullPath + ".md")) {
-      fullPath += ".md";
+  const dbArticle = await prisma.article.findUnique({
+    where: { slug: rawPath },
+  });
+
+  if (dbArticle) {
+    if (dbArticle.isFolder) {
+      const children = await prisma.article.findMany({
+        where: { parentId: dbArticle.id },
+      });
+      content = `# ${dbArticle.title}\n\n[SYS.DIR_CONTENTS]\n\n`;
+      children.forEach(child => {
+        content += `- [${child.title}](/articles/${child.slug})\n`;
+      });
     } else {
-      try {
-        const stat = fs.statSync(fullPath);
-        if (stat.isDirectory()) {
-          const readmePath = path.join(fullPath, "README.md");
-          if (fs.existsSync(readmePath)) {
-            fullPath = readmePath;
-            rawPath = path.join(rawPath, "README.md");
+      content = dbArticle.content;
+    }
+    editPath = `db:${dbArticle.id}`;
+  } else {
+    let fullPath = path.join(process.cwd(), "assets", rawPath);
+
+    if (!fs.existsSync(fullPath)) {
+      if (fs.existsSync(fullPath + ".md")) {
+        fullPath += ".md";
+      } else {
+        try {
+          const stat = fs.statSync(fullPath);
+          if (stat.isDirectory()) {
+            const readmePath = path.join(fullPath, "README.md");
+            if (fs.existsSync(readmePath)) {
+              fullPath = readmePath;
+              rawPath = path.join(rawPath, "README.md");
+            }
           }
+        } catch (e) {
         }
-      } catch (e) {
+      }
+    }
+
+    try {
+      const stat = fs.statSync(fullPath);
+      if (!stat.isFile()) {
+         if (stat.isDirectory()) {
+           const readmePath = path.join(fullPath, "README.md");
+           if (fs.existsSync(readmePath)) {
+              content = fs.readFileSync(readmePath, "utf-8");
+           } else {
+              notFound();
+           }
+         } else {
+           notFound();
+         }
+      } else {
+         content = fs.readFileSync(fullPath, "utf-8");
+      }
+      // ONLY re-assign editPath on success!
+      editPath = path.relative(path.join(process.cwd(), "assets"), fullPath).replace(/\\/g, "/");
+    } catch (error) {
+      if (rawPath.includes("404")) {
+        content = "# 404 Not Found\n\nThe requested article is not available yet.";
+      } else {
+        notFound();
       }
     }
   }
 
-  let content = "";
-  try {
-    const stat = fs.statSync(fullPath);
-    if (!stat.isFile()) {
-       if (stat.isDirectory()) {
-         const readmePath = path.join(fullPath, "README.md");
-         if (fs.existsSync(readmePath)) {
-            content = fs.readFileSync(readmePath, "utf-8");
-         } else {
-            notFound();
-         }
-       } else {
-         notFound();
-       }
-    } else {
-       content = fs.readFileSync(fullPath, "utf-8");
-    }
-  } catch (error) {
-    if (rawPath.includes("404")) {
-      content = "# 404 Not Found\n\nThe requested article is not available yet.";
-    } else {
-      notFound();
-    }
-  }
-
   const relativeLinkPrefix = "/articles";
-  const editPath = path.relative(path.join(process.cwd(), "assets"), fullPath).replace(/\\/g, "/");
 
   const cjkCount = (content.match(/[\u4e00-\u9fa5]/g) || []).length;
   const westernWordCount = (content.match(/[a-zA-Z0-9]+/g) || []).length;

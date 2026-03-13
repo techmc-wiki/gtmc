@@ -25,23 +25,17 @@ export default async function ArticlesLayout({
               </div>
             </div>
 
-            <div className="overflow-y-auto flex-1 min-h-0 custom-left-scrollbar h-full pl-3 md:pl-6 -mt-2"><div className="prose prose-base text-[15px] md:text-base prose-tech font-mono w-full overflow-hidden break-words [&>ul]:pl-0 [&_ul]:list-none [&_li]:mt-1.5 [&_ul_ul]:pl-3 [&_ul_ul]:border-l [&_ul_ul]:border-tech-main/20 [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 pb-8 pt-2">
-              <SidebarClient tree={tree} />
-            </div>
-            </div>
-          </div>
-
-          <div className="overflow-y-auto flex-1 min-h-0 custom-left-scrollbar h-full pl-3 md:pl-6 -mt-2">
-            <div className="prose prose-base text-[15px] md:text-base prose-tech font-mono w-full overflow-hidden break-words [&>ul]:pl-0 [&_ul]:list-none [&_li]:mt-1.5 [&_ul_ul]:pl-3 [&_ul_ul]:border-l [&_ul_ul]:border-tech-main/20 [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 pb-8 pt-2">
-              <SidebarClient content={sidebarContent} />
+            <div className="overflow-y-auto flex-1 min-h-0 custom-left-scrollbar h-full pl-3 md:pl-6 -mt-2">
+              <div className="prose prose-base text-[15px] md:text-base prose-tech font-mono w-full overflow-hidden break-words [&>ul]:pl-0 [&_ul]:list-none [&_li]:mt-1.5 [&_ul_ul]:pl-3 [&_ul_ul]:border-l [&_ul_ul]:border-tech-main/20 [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 pb-8 pt-2">
+                <SidebarClient tree={tree} />
+              </div>
             </div>
           </div>
         </div>
+      </aside>
+      <main className="flex-1 min-w-0 md:pl-10 lg:pl-16 py-6 border-l border-transparent overflow-x-hidden relative">
+        {children}
+      </main>
     </div>
-      </aside >
-    <main className="flex-1 min-w-0 md:pl-10 lg:pl-16 py-6 border-l border-transparent overflow-x-hidden relative">
-      {children}
-    </main>
-    </div >
   );
 }

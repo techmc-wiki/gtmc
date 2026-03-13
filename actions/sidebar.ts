@@ -1,30 +1,32 @@
-'use server';
+"use server";
 
-import { prisma } from '@/lib/prisma';
-import { auth } from '@/lib/auth';
-import fs from 'fs';
-import path from 'path';
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import fs from "fs";
+import path from "path";
 
 /**
  * Helper to recursively read local assets
  */
-function getLocalFiles(dir: string, basePath = ''): any[] {
+function getLocalFiles(dir: string, basePath = ""): any[] {
   let results: any[] = [];
   try {
     const list = fs.readdirSync(dir);
     for (const item of list) {
       if (
-        item.startsWith('.') || 
-        item === 'node_modules' || 
-        item.toLowerCase() === 'readme.md' ||
-        ['img', 'oldimg', 'image', 'images', 'source', 'asset'].includes(item.toLowerCase())
+        item.startsWith(".") ||
+        item === "node_modules" ||
+        item.toLowerCase() === "readme.md" ||
+        ["img", "oldimg", "image", "images", "source", "asset"].includes(
+          item.toLowerCase(),
+        )
       ) {
         continue;
       }
       const fullPath = path.join(dir, item);
       const stat = fs.statSync(fullPath);
       const slug = basePath ? `${basePath}/${item}` : item;
-      
+
       if (stat.isDirectory()) {
         results.push({
           id: `local-${slug}`,
@@ -32,10 +34,10 @@ function getLocalFiles(dir: string, basePath = ''): any[] {
           slug: slug,
           isFolder: true,
           parentId: basePath ? `local-${basePath}` : null,
-          children: getLocalFiles(fullPath, slug)
+          children: getLocalFiles(fullPath, slug),
         });
-      } else if (item.endsWith('.md')) {
-        const titleName = item.replace(/\.md$/, '');
+      } else if (item.endsWith(".md")) {
+        const titleName = item.replace(/\.md$/, "");
         const fileSlug = basePath ? `${basePath}/${titleName}` : titleName;
         results.push({
           id: `local-${fileSlug}`,
@@ -43,12 +45,12 @@ function getLocalFiles(dir: string, basePath = ''): any[] {
           slug: fileSlug,
           isFolder: false,
           parentId: basePath ? `local-${basePath}` : null,
-          children: []
+          children: [],
         });
       }
     }
   } catch (e) {
-    console.error('Error reading local files', e);
+    console.error("Error reading local files", e);
   }
   return results.sort((a, b) => {
     if (a.isFolder === b.isFolder) return a.title.localeCompare(b.title);
@@ -70,10 +72,7 @@ export async function getSidebarTree() {
       parentId: true,
       updatedAt: true,
     },
-    orderBy: [
-      { isFolder: 'desc' },
-      { title: 'asc' }
-    ]
+    orderBy: [{ isFolder: "desc" }, { title: "asc" }],
   });
 
   // Build DB tree
@@ -98,7 +97,7 @@ export async function getSidebarTree() {
   });
 
   // 2. Get local filesystem entries
-  const assetsPath = path.join(process.cwd(), 'assets');
+  const assetsPath = path.join(process.cwd(), "assets");
   const localTree = getLocalFiles(assetsPath);
 
   // 3. Merge them based on same path/slug hierarchy
@@ -122,26 +121,26 @@ export async function createDocument({
 }) {
   const session = await auth();
   if (!session?.user?.id) {
-    throw new Error('未授权，请先登录');
+    throw new Error("未授权，请先登录");
   }
 
   // Check if slug exists
   const existing = await prisma.article.findUnique({
-    where: { slug }
+    where: { slug },
   });
   if (existing) {
-    throw new Error('该路径 (Slug) 已存在');
+    throw new Error("该路径 (Slug) 已存在");
   }
 
   const newDoc = await prisma.article.create({
     data: {
       title,
       slug,
-      content: isFolder ? '' : '# ' + title,
+      content: isFolder ? "" : "# " + title,
       isFolder,
       parentId,
-      authorId: session.user.id
-    }
+      authorId: session.user.id,
+    },
   });
 
   return newDoc;

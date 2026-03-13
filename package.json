@@ -13,6 +13,8 @@
     "@auth/prisma-adapter": "^2.11.1",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "7.5.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "cos-nodejs-sdk-v5": "^2.15.4",
     "dotenv": "^17.3.1",
     "github-slugger": "^2.0.0",

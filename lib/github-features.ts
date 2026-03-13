@@ -173,12 +173,14 @@ function normalizeIssue(raw: GithubIssueResponse): GithubIssue {
     title: raw.title,
     body: raw.body ?? "",
     state: raw.state === "closed" ? "closed" : "open",
-    labels: (raw.labels ?? []).map((label) => {
-      if (typeof label === "string") {
-        return label;
-      }
-      return label.name ?? "";
-    }).filter(Boolean),
+    labels: (raw.labels ?? [])
+      .map((label) => {
+        if (typeof label === "string") {
+          return label;
+        }
+        return label.name ?? "";
+      })
+      .filter(Boolean),
     assignees: (raw.assignees ?? [])
       .map((assignee) => assignee.login ?? "")
       .filter(Boolean),
@@ -309,9 +311,12 @@ export async function listAllIssues(
   let nextUrl: string | null = `${baseUrl}?state=${state}&per_page=100&page=1`;
 
   while (nextUrl) {
-    const { data, response } = await requestGithub<GithubIssueResponse[]>(nextUrl, {
-      method: "GET",
-    });
+    const { data, response } = await requestGithub<GithubIssueResponse[]>(
+      nextUrl,
+      {
+        method: "GET",
+      },
+    );
 
     const pageItems = Array.isArray(data) ? data : [];
     const filteredItems = pageItems.filter((item) => !item.pull_request);
@@ -325,7 +330,9 @@ export async function listAllIssues(
 
 export const listIssues = listAllIssues;
 
-export async function getIssue(issueNumber: number): Promise<GithubIssue | null> {
+export async function getIssue(
+  issueNumber: number,
+): Promise<GithubIssue | null> {
   const config = getGithubRepoConfig();
   const url = `${getRepoIssuesBaseUrl(config)}/${issueNumber}`;
 
@@ -353,7 +360,10 @@ export async function createIssue(
 ): Promise<GithubIssue> {
   const config = getGithubRepoConfig();
   const url = getRepoIssuesBaseUrl(config);
-  const payload: { title: string; body: string; labels?: string[] } = { title, body };
+  const payload: { title: string; body: string; labels?: string[] } = {
+    title,
+    body,
+  };
 
   if (labels.length > 0) {
     payload.labels = labels;
@@ -433,9 +443,12 @@ export async function listIssueComments(
   let nextUrl: string | null = `${baseUrl}?per_page=100&page=1`;
 
   while (nextUrl) {
-    const { data, response } = await requestGithub<GithubCommentResponse[]>(nextUrl, {
-      method: "GET",
-    });
+    const { data, response } = await requestGithub<GithubCommentResponse[]>(
+      nextUrl,
+      {
+        method: "GET",
+      },
+    );
 
     const pageItems = Array.isArray(data) ? data : [];
     allComments.push(...pageItems.map(normalizeComment));
@@ -560,7 +573,9 @@ function serializeMetadata(metadata: IssueMetadata | CommentMetadata): string {
     serialized.assigneeName =
       typeof metadata.assigneeName === "string" ? metadata.assigneeName : null;
     serialized.assigneeEmail =
-      typeof metadata.assigneeEmail === "string" ? metadata.assigneeEmail : null;
+      typeof metadata.assigneeEmail === "string"
+        ? metadata.assigneeEmail
+        : null;
   }
 
   return JSON.stringify(serialized);

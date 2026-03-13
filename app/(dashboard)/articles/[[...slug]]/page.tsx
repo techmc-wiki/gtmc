@@ -42,7 +42,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         where: { parentId: dbArticle.id },
       });
       content = `# ${dbArticle.title}\n\n[SYS.DIR_CONTENTS]\n\n`;
-      children.forEach(child => {
+      children.forEach((child) => {
         content += `- [${child.title}](/articles/${child.slug})\n`;
       });
     } else {
@@ -65,8 +65,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               rawPath = path.join(rawPath, "README.md");
             }
           }
-        } catch (e) {
-        }
+        } catch (e) {}
       }
     }
 
@@ -87,10 +86,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         content = fs.readFileSync(fullPath, "utf-8");
       }
       // ONLY re-assign editPath on success!
-      editPath = path.relative(path.join(process.cwd(), "assets"), fullPath).replace(/\\/g, "/");
+      editPath = path
+        .relative(path.join(process.cwd(), "assets"), fullPath)
+        .replace(/\\/g, "/");
     } catch (error) {
       if (rawPath.includes("404")) {
-        content = "# 404 Not Found\n\nThe requested article is not available yet.";
+        content =
+          "# 404 Not Found\n\nThe requested article is not available yet.";
       } else {
         notFound();
       }
@@ -281,7 +283,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                       .join(currentDir, href)
                       .replace(/\\/g, "/");
                     href = `/articles/${resolved}`;
-                  } catch (e) { }
+                  } catch (e) {}
                 } else if (
                   !href.startsWith("http") &&
                   !href.startsWith("#") &&

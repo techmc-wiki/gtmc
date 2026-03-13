@@ -146,7 +146,10 @@ export async function updateFeature(
   }
 
   const currentStatus = labelsToStatus(issue.labels);
-  const newLabels = [...tagsToLabels(data.tags), ...statusToLabels(currentStatus)];
+  const newLabels = [
+    ...tagsToLabels(data.tags),
+    ...statusToLabels(currentStatus),
+  ];
 
   const fallbackMetadata: IssueMetadata = {
     appUserId: "",

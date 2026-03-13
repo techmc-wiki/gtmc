@@ -1,7 +1,6 @@
 import * as React from "react";
 
-export interface BrutalInputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface BrutalInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: boolean;
 }
 

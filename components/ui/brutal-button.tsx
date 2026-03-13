@@ -1,7 +1,6 @@
 import * as React from "react";
 
-export interface BrutalButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface BrutalButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "danger" | "ghost";
   size?: "sm" | "md" | "lg";
 }

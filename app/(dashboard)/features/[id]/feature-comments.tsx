@@ -72,8 +72,8 @@ export function FeatureComments({
         )}
       </div>
 
-      {!isClosed && (
-        userId ? (
+      {!isClosed &&
+        (userId ? (
           <form onSubmit={handleSubmit} className="mt-8">
             <BrutalCard className="p-4 bg-white/60 backdrop-blur-sm border-tech-main/30 border">
               <label className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main border-b border-tech-main/30 inline-block pb-1 mb-4">
@@ -101,8 +101,7 @@ export function FeatureComments({
           <div className="text-center py-4 bg-white/20 border border-tech-main/30 font-mono text-sm mt-8 text-tech-main/70">
             PLEASE_LOG_IN_TO_LEAVE_A_REPLY_
           </div>
-        )
-      )}
+        ))}
     </div>
   );
 }

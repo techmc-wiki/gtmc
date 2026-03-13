@@ -66,7 +66,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               rawPath = path.join(rawPath, "README.md");
             }
           }
-        } catch (e) { }
+        } catch (e) {}
       }
     }
 
@@ -284,7 +284,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                       .join(currentDir, href)
                       .replace(/\\/g, "/");
                     href = `/articles/${resolved}`;
-                  } catch (e) { }
+                  } catch (e) {}
                 } else if (
                   !href.startsWith("http") &&
                   !href.startsWith("#") &&

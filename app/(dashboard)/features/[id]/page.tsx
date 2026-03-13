@@ -42,9 +42,10 @@ export default async function FeatureDetailPage({
   const rawComments = await listIssueComments(issue.number);
 
   const comments = rawComments
-    .filter((comment) =>
-      !comment.body.includes(EXPLANATION_MARKER) &&
-      !comment.body.includes(SYSTEM_COMMENT_MARKER)
+    .filter(
+      (comment) =>
+        !comment.body.includes(EXPLANATION_MARKER) &&
+        !comment.body.includes(SYSTEM_COMMENT_MARKER),
     )
     .map((comment) => {
       const parsedComment = parseCommentBody(comment.body);
@@ -121,7 +122,8 @@ export default async function FeatureDetailPage({
         <div className="border-2 border-red-500 bg-red-50 p-4 font-mono text-sm text-red-800 uppercase tracking-wider mb-8 shadow-[4px_4px_0px_rgba(239,68,68,1)]">
           <span className="font-bold">⚠ FEATURE DELETED (READ-ONLY)</span>
           <p className="mt-1 text-xs text-red-600 normal-case tracking-normal">
-            This feature has been closed/deleted. The content is preserved for historical reference. No changes can be made.
+            This feature has been closed/deleted. The content is preserved for
+            historical reference. No changes can be made.
           </p>
         </div>
       )}
@@ -155,10 +157,10 @@ export default async function FeatureDetailPage({
           {feature.issueNumber && feature.htmlUrl && (
             <div className="flex gap-2">
               <span className="font-bold text-zinc-500 w-24">ISSUE:</span>
-              <a 
-                href={feature.htmlUrl} 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href={feature.htmlUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-tech-main border-b border-tech-main/50 font-mono hover:text-white hover:bg-tech-main/80 transition-colors"
               >
                 #{feature.issueNumber}

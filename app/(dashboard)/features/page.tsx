@@ -43,10 +43,10 @@ export default async function FeaturesPage({
       },
       assignee: assigneeId
         ? {
-          name: parsed.metadata?.assigneeName ?? null,
-          email: parsed.metadata?.assigneeEmail ?? null,
-          image: null,
-        }
+            name: parsed.metadata?.assigneeName ?? null,
+            email: parsed.metadata?.assigneeEmail ?? null,
+            image: null,
+          }
         : null,
     };
   });

@@ -74,7 +74,10 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
 
       if (result.error) {
         setContent((prev) =>
-          prev.replace(placeholder, `<!-- Upload failed: ${result.error} -->\n`),
+          prev.replace(
+            placeholder,
+            `<!-- Upload failed: ${result.error} -->\n`,
+          ),
         );
         alert(result.error);
         setIsUploading(false);
@@ -91,7 +94,9 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
       });
 
       if (res.status === 413) {
-        throw new Error("Image is too large to upload. Please use a smaller image.");
+        throw new Error(
+          "Image is too large to upload. Please use a smaller image.",
+        );
       }
 
       let data;
@@ -300,7 +305,11 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
                   disabled={isUploading}
                   className="text-[10px] font-mono tracking-widest text-tech-main bg-tech-main/10 hover:bg-tech-main hover:text-white transition-colors px-2 py-1 border border-tech-main/30"
                 >
-                  {isCompressing ? "[ COMPRESSING... ]" : isUploading ? "[ UPLOADING... ]" : "[ UPLOAD_IMG ]"}
+                  {isCompressing
+                    ? "[ COMPRESSING... ]"
+                    : isUploading
+                      ? "[ UPLOADING... ]"
+                      : "[ UPLOAD_IMG ]"}
                 </button>
               </>
             )}

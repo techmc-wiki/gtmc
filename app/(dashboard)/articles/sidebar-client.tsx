@@ -12,7 +12,7 @@ interface TocItem {
   text: string;
 }
 
-export function SidebarClient({ tree }: { tree: any[]; }) {
+export function SidebarClient({ tree }: { tree: any[] }) {
   const pathname = usePathname();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [formData, setFormData] = React.useState({

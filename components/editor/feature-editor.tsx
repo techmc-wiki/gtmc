@@ -65,7 +65,10 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
 
       if (result.error) {
         setContent((prev) =>
-          prev.replace(placeholder, `<!-- Upload failed: ${result.error} -->\n`),
+          prev.replace(
+            placeholder,
+            `<!-- Upload failed: ${result.error} -->\n`,
+          ),
         );
         alert(result.error);
         setIsUploading(false);
@@ -81,7 +84,9 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
       });
 
       if (res.status === 413) {
-        throw new Error("Image is too large to upload. Please use a smaller image.");
+        throw new Error(
+          "Image is too large to upload. Please use a smaller image.",
+        );
       }
 
       let data;
@@ -287,7 +292,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             disabled={isReadOnly || isUploading}
             className="hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
           >
-            {isCompressing ? "[ COMPRESSING... ]" : isUploading ? "[ UPLOADING... ]" : "[ UPLOAD_IMG ]"}
+            {isCompressing
+              ? "[ COMPRESSING... ]"
+              : isUploading
+                ? "[ UPLOADING... ]"
+                : "[ UPLOAD_IMG ]"}
           </button>
           <input
             ref={fileInputRef}
@@ -317,8 +326,12 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             onChange={(e) => setContent(e.target.value)}
             onPaste={handlePaste}
             onDrop={handleDrop}
-            onDragOver={(e) => { if (!isReadOnly) e.preventDefault(); }}
-            onDragEnter={(e) => { if (!isReadOnly) e.preventDefault(); }}
+            onDragOver={(e) => {
+              if (!isReadOnly) e.preventDefault();
+            }}
+            onDragEnter={(e) => {
+              if (!isReadOnly) e.preventDefault();
+            }}
             readOnly={isReadOnly}
           />
 

@@ -22,7 +22,12 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const url = await uploadImageToGithub(buffer, file.name, file.type, "features/images");
+    const url = await uploadImageToGithub(
+      buffer,
+      file.name,
+      file.type,
+      "features/images",
+    );
 
     return NextResponse.json({ success: true, url });
   } catch (error) {

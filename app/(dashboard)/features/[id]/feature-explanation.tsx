@@ -10,6 +10,7 @@ interface FeatureExplanationProps {
   initialExplanation: string | null;
   isAssignee: boolean;
   isAdmin: boolean;
+  isClosed?: boolean;
 }
 
 export function FeatureExplanation({
@@ -17,12 +18,14 @@ export function FeatureExplanation({
   initialExplanation,
   isAssignee,
   isAdmin,
+  isClosed,
 }: FeatureExplanationProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [explanation, setExplanation] = useState(initialExplanation || "");
   const [isPending, startTransition] = useTransition();
 
   const canEdit = isAssignee || isAdmin;
+  const effectiveCanEdit = canEdit && !isClosed;
 
   const handleSave = () => {
     startTransition(async () => {
@@ -31,7 +34,7 @@ export function FeatureExplanation({
     });
   };
 
-  if (!initialExplanation && !canEdit) return null;
+  if (!initialExplanation && !effectiveCanEdit) return null;
 
   if (isEditing) {
     return (
@@ -77,7 +80,7 @@ export function FeatureExplanation({
           <h3 className="text-lg font-bold tracking-widest uppercase text-tech-main">
             OFFICIAL_RESOLUTION_
           </h3>
-          {canEdit && (
+          {effectiveCanEdit && (
             <button
               onClick={() => setIsEditing(true)}
               className="text-xs font-mono text-tech-main hover:underline px-2"

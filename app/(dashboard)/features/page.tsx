@@ -26,12 +26,12 @@ export default async function FeaturesPage({
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
 
-  const features = allIssues.map((issue, index) => {
+  const features = allIssues.map((issue) => {
     const parsed = parseIssueBody(issue.body);
     const assigneeId = parsed.metadata?.assigneeId;
 
     return {
-      id: String(index),
+      id: String(issue.number),
       title: issue.title,
       status: labelsToStatus(issue.labels),
       tags: labelsToTags(issue.labels),

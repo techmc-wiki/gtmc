@@ -20,10 +20,12 @@ export function FeatureComments({
   featureId,
   initialComments,
   userId,
+  isClosed,
 }: {
   featureId: string;
   initialComments: Comment[];
   userId: string | undefined;
+  isClosed?: boolean;
 }) {
   const [content, setContent] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -70,34 +72,36 @@ export function FeatureComments({
         )}
       </div>
 
-      {userId ? (
-        <form onSubmit={handleSubmit} className="mt-8">
-          <BrutalCard className="p-4 bg-white/60 backdrop-blur-sm border-tech-main/30 border">
-            <label className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main border-b border-tech-main/30 inline-block pb-1 mb-4">
-              LEAVE_A_REPLY_
-            </label>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="w-full min-h-[100px] p-3 border border-tech-main/40 text-black placeholder-zinc-500 focus:border-tech-main bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-0 font-mono text-sm resize-y"
-              placeholder="ENTER COMMENT..."
-              disabled={isPending}
-            />
-            <div className="mt-4 flex justify-end">
-              <BrutalButton
-                type="submit"
-                disabled={isPending || !content.trim()}
-                variant="primary"
-              >
-                {isPending ? "POSTING..." : "POST_COMMENT"}
-              </BrutalButton>
-            </div>
-          </BrutalCard>
-        </form>
-      ) : (
-        <div className="text-center py-4 bg-white/20 border border-tech-main/30 font-mono text-sm mt-8 text-tech-main/70">
-          PLEASE_LOG_IN_TO_LEAVE_A_REPLY_
-        </div>
+      {!isClosed && (
+        userId ? (
+          <form onSubmit={handleSubmit} className="mt-8">
+            <BrutalCard className="p-4 bg-white/60 backdrop-blur-sm border-tech-main/30 border">
+              <label className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main border-b border-tech-main/30 inline-block pb-1 mb-4">
+                LEAVE_A_REPLY_
+              </label>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="w-full min-h-[100px] p-3 border border-tech-main/40 text-black placeholder-zinc-500 focus:border-tech-main bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-0 font-mono text-sm resize-y"
+                placeholder="ENTER COMMENT..."
+                disabled={isPending}
+              />
+              <div className="mt-4 flex justify-end">
+                <BrutalButton
+                  type="submit"
+                  disabled={isPending || !content.trim()}
+                  variant="primary"
+                >
+                  {isPending ? "POSTING..." : "POST_COMMENT"}
+                </BrutalButton>
+              </div>
+            </BrutalCard>
+          </form>
+        ) : (
+          <div className="text-center py-4 bg-white/20 border border-tech-main/30 font-mono text-sm mt-8 text-tech-main/70">
+            PLEASE_LOG_IN_TO_LEAVE_A_REPLY_
+          </div>
+        )
       )}
     </div>
   );

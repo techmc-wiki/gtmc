@@ -89,17 +89,29 @@ const GITHUB_ACCEPT_HEADER = "application/vnd.github.v3+json";
 function getGithubRepoConfig(): GithubRepoConfig {
   const owner = process.env.GITHUB_REPO_OWNER;
   const repo = process.env.GITHUB_REPO_NAME;
-  const token = process.env.GITHUB_SYSTEM_PAT;
+  const token = process.env.GITHUB_FEATURES_ISSUES_PAT;
 
   if (!owner || !repo || !token) {
     throw new GithubFeaturesError({
       code: "CONFIG_MISSING",
       message:
-        "Missing GitHub configuration. Required env vars: GITHUB_REPO_OWNER, GITHUB_REPO_NAME, GITHUB_SYSTEM_PAT.",
+        "Missing GitHub configuration. Required env vars: GITHUB_REPO_OWNER, GITHUB_REPO_NAME, GITHUB_FEATURES_ISSUES_PAT.",
     });
   }
 
   return { owner, repo, token };
+}
+
+function getGithubWriteToken(): string {
+  const token = process.env.GITHUB_FEATURES_WRITE_PAT;
+  if (!token) {
+    throw new GithubFeaturesError({
+      code: "CONFIG_MISSING",
+      message:
+        "Missing GitHub write configuration. Required env var: GITHUB_FEATURES_WRITE_PAT.",
+    });
+  }
+  return token;
 }
 
 function getRepoIssuesBaseUrl(config: GithubRepoConfig): string {
@@ -232,6 +244,7 @@ async function requestGithub<T>(
   url: string,
   init: RequestInit,
   options?: { allow404?: boolean },
+  tokenOverride?: string,
 ): Promise<{ data: T | null; response: Response }> {
   const config = getGithubRepoConfig();
 
@@ -241,7 +254,7 @@ async function requestGithub<T>(
       ...init,
       headers: {
         Accept: GITHUB_ACCEPT_HEADER,
-        Authorization: `token ${config.token}`,
+        Authorization: `token ${tokenOverride ?? config.token}`,
         "Content-Type": "application/json",
         ...(init.headers ?? {}),
       },
@@ -840,4 +853,87 @@ export function tagsToLabels(tags: string[]): string[] {
 
 export function labelsToTags(labels: string[]): string[] {
   return labels.filter((label) => !label.startsWith(STATUS_LABEL_PREFIX));
+}
+
+// ---------------------------------------------------------------------------
+// GitHub Contents API image upload
+// ---------------------------------------------------------------------------
+
+interface GithubContentsUploadResponse {
+  content?: {
+    download_url?: string | null;
+    [key: string]: unknown;
+  };
+}
+
+export async function uploadImageToGithub(
+  buffer: Buffer,
+  originalName: string,
+  mimeType: string,
+  folder: string,
+): Promise<string> {
+  // Validate MIME type
+  const allowedMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+  if (!allowedMimeTypes.includes(mimeType)) {
+    throw new GithubFeaturesError({
+      code: "API_ERROR",
+      message: "Only image files are accepted (JPEG, PNG, GIF, WebP).",
+    });
+  }
+
+  // Validate MIME type by extension
+  const extMatch = originalName.match(/\.([a-zA-Z0-9]+)$/);
+  const ext = extMatch ? extMatch[1].toLowerCase() : "";
+  const validExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
+
+  if (!validExtensions.includes(ext)) {
+    throw new GithubFeaturesError({
+      code: "API_ERROR",
+      message: "Only image files are accepted (JPEG, PNG, GIF, WebP).",
+    });
+  }
+
+  // Validate file size
+  const maxSize = 10485760; // 10 MB
+  if (buffer.length > maxSize) {
+    throw new GithubFeaturesError({
+      code: "API_ERROR",
+      message: "Image exceeds maximum upload size of 10 MB.",
+    });
+  }
+
+  // Get repo config
+  const config = getGithubRepoConfig();
+
+  // Generate filename: {timestamp}-{random}.{ext}
+  const timestamp = Date.now();
+  const random = Math.round(Math.random() * 1000);
+  const filename = `${timestamp}-${random}.${ext}`;
+
+  // Construct path
+  const path = `${folder}/${filename}`;
+
+  // Call GitHub Contents API
+  const url = `${GITHUB_API_BASE}/repos/${config.owner}/${config.repo}/contents/${path}`;
+
+  const writeToken = getGithubWriteToken();
+
+  const { data } = await requestGithub<GithubContentsUploadResponse>(url, {
+    method: "PUT",
+    body: JSON.stringify({
+      message: `Upload feature image: ${filename}`,
+      content: buffer.toString("base64"),
+    }),
+  }, undefined, writeToken);
+
+  // Validate response shape
+  if (!data?.content?.download_url || typeof data.content.download_url !== "string") {
+    throw new GithubFeaturesError({
+      code: "INVALID_RESPONSE",
+      message: "GitHub API returned an invalid contents upload response.",
+      details: data,
+    });
+  }
+
+  return data.content.download_url;
 }

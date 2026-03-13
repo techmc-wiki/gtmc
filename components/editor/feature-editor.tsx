@@ -5,6 +5,7 @@ import { BrutalButton } from "../ui/brutal-button";
 import { BrutalInput } from "../ui/brutal-input";
 import { useRouter } from "next/navigation";
 import { updateFeature } from "@/actions/feature";
+import { compressImageForUpload } from "@/lib/image-compression";
 
 interface FeatureEditorProps {
   initialData?: {
@@ -23,8 +24,10 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
   const [tags, setTags] = React.useState(initialData?.tags?.join(", ") || "");
   const [isSaving, setIsSaving] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState(false);
+  const [isCompressing, setIsCompressing] = React.useState(false);
 
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const isReadOnly = false; // Everyone can edit their own or admins can edit. Handled server-side usually, but we keep it simple here.
 
@@ -52,24 +55,40 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
     }
 
     setIsUploading(true);
+    setIsCompressing(true);
     const placeholder = `![Uploading ${file.name}...]()\n`;
     insertTextAtCursor(placeholder);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("filePath", "features/images"); // Generic path for feature images
+      const result = await compressImageForUpload(file);
+      setIsCompressing(false);
 
-      const res = await fetch("/api/upload", {
+      if (result.error) {
+        setContent((prev) =>
+          prev.replace(placeholder, `<!-- Upload failed: ${result.error} -->\n`),
+        );
+        alert(result.error);
+        setIsUploading(false);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", result.file);
+
+      const res = await fetch("/api/upload/feature", {
         method: "POST",
         body: formData,
       });
 
+      if (res.status === 413) {
+        throw new Error("Image is too large to upload. Please use a smaller image.");
+      }
+
       let data;
       try {
         data = await res.json();
-      } catch (e) {
-        throw new Error("HTTP " + res.status + " : " + (await res.text()));
+      } catch {
+        throw new Error(`HTTP ${res.status}`);
       }
 
       if (res.ok && data.url) {
@@ -83,12 +102,15 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         alert(data.error || "Upload failed");
       }
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Upload error";
       setContent((prev) =>
-        prev.replace(placeholder, `<!-- Upload error -->\n`),
+        prev.replace(placeholder, `<!-- Upload failed: ${message} -->\n`),
       );
+      alert(message);
       console.error(error);
     } finally {
       setIsUploading(false);
+      setIsCompressing(false);
     }
   };
 
@@ -258,6 +280,28 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           >
             Block
           </button>
+          <div className="w-px h-4 bg-white/30 mx-1"></div>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isReadOnly || isUploading}
+            className="hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
+          >
+            {isCompressing ? "[ COMPRESSING... ]" : isUploading ? "[ UPLOADING... ]" : "[ UPLOAD_IMG ]"}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                uploadImage(file);
+                e.target.value = "";
+              }
+            }}
+          />
           <span className="ml-auto text-tech-accent/60 opacity-60 flex items-center gap-2 text-xs">
             MARKDOWN_SUPPORTED_
           </span>
@@ -273,13 +317,15 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             onChange={(e) => setContent(e.target.value)}
             onPaste={handlePaste}
             onDrop={handleDrop}
+            onDragOver={(e) => { if (!isReadOnly) e.preventDefault(); }}
+            onDragEnter={(e) => { if (!isReadOnly) e.preventDefault(); }}
             readOnly={isReadOnly}
           />
 
           {isUploading && (
             <div className="absolute top-4 right-4 bg-tech-main text-tech-accent text-xs font-mono px-3 py-1.5 border border-tech-accent shadow-sm shadow-tech-accent/20 z-20 flex items-center gap-2 backdrop-blur-sm">
               <span className="inline-block w-2 h-2 bg-tech-accent animate-pulse"></span>
-              UPLOADING_IMAGE...
+              {isCompressing ? "COMPRESSING_IMAGE..." : "UPLOADING_IMAGE..."}
             </div>
           )}
         </div>

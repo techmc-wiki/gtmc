@@ -5,6 +5,7 @@ import { BrutalButton } from "../ui/brutal-button";
 import { BrutalInput } from "../ui/brutal-input";
 import { saveDraftAction, submitForReviewAction } from "@/actions/article";
 import { useRouter } from "next/navigation";
+import { compressImageForUpload } from "@/lib/image-compression";
 
 interface BrutalEditorProps {
   initialData?: {
@@ -27,6 +28,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
   );
   const [isSaving, setIsSaving] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState(false);
+  const [isCompressing, setIsCompressing] = React.useState(false);
 
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -62,12 +64,25 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
     }
 
     setIsUploading(true);
+    setIsCompressing(true);
     const placeholder = `![Uploading ${file.name}...]()\n`;
     insertTextAtCursor(placeholder);
 
     try {
+      const result = await compressImageForUpload(file);
+      setIsCompressing(false);
+
+      if (result.error) {
+        setContent((prev) =>
+          prev.replace(placeholder, `<!-- Upload failed: ${result.error} -->\n`),
+        );
+        alert(result.error);
+        setIsUploading(false);
+        return;
+      }
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", result.file);
       formData.append("filePath", filePath);
 
       const res = await fetch("/api/upload", {
@@ -75,11 +90,15 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
         body: formData,
       });
 
+      if (res.status === 413) {
+        throw new Error("Image is too large to upload. Please use a smaller image.");
+      }
+
       let data;
       try {
         data = await res.json();
-      } catch (e) {
-        throw new Error("HTTP " + res.status + " : " + (await res.text()));
+      } catch {
+        throw new Error(`HTTP ${res.status}`);
       }
 
       if (res.ok && data.url) {
@@ -93,12 +112,15 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
         alert(data.error || "Upload failed");
       }
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Upload error";
       setContent((prev) =>
-        prev.replace(placeholder, `<!-- Upload error -->\n`),
+        prev.replace(placeholder, `<!-- Upload failed: ${message} -->\n`),
       );
+      alert(message);
       console.error(error);
     } finally {
       setIsUploading(false);
+      setIsCompressing(false);
     }
   };
 
@@ -278,7 +300,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
                   disabled={isUploading}
                   className="text-[10px] font-mono tracking-widest text-tech-main bg-tech-main/10 hover:bg-tech-main hover:text-white transition-colors px-2 py-1 border border-tech-main/30"
                 >
-                  {isUploading ? "[ UPLOADING... ]" : "[ UPLOAD_IMG ]"}
+                  {isCompressing ? "[ COMPRESSING... ]" : isUploading ? "[ UPLOADING... ]" : "[ UPLOAD_IMG ]"}
                 </button>
               </>
             )}

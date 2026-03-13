@@ -37,7 +37,7 @@ export default function LoginPage() {
         </p>
         <p>ENCRYPTION:: AES-256-GCM</p>
         <p>HANDSHAKE :: WAITING...</p>
-        <div className="w-full h-[1px] bg-tech-main/30 my-2"></div>
+        <div className="w-full h-px bg-tech-main/30 my-2"></div>
         <p>SESSION : NULL</p>
       </div>
 
@@ -45,7 +45,7 @@ export default function LoginPage() {
       <div className="absolute right-10 md:right-20 bottom-[20%] opacity-20 hidden lg:block select-none pointer-events-none transform rotate-2">
         <div className="text-[10px] font-mono text-tech-main whitespace-pre leading-relaxed border-r-2 border-tech-main/20 pr-4 text-right">
           <span className="text-tech-main-dark font-bold">@PostMapping</span>(
-          <span className="text-tech-main-dark">"/login"</span>){"\n"}
+          <span className="text-tech-main-dark">&quot;/login&quot;</span>){"\n"}
           <span className="text-tech-main-dark">public</span>{" "}
           ResponseEntity&lt;?&gt; authenticate(Request req) {"{"}
           {"\n"}
@@ -57,10 +57,10 @@ export default function LoginPage() {
       </div>
 
       {/* 贯穿全图的低调主辅助线 */}
-      <div className="absolute top-[50%] left-0 w-full h-[1px] bg-tech-main/10 flex items-center justify-center">
+      <div className="absolute top-[50%] left-0 w-full h-px bg-tech-main/10 flex items-center justify-center">
         <div className="w-2 h-2 bg-tech-bg border border-tech-main/50"></div>
       </div>
-      <div className="absolute top-0 left-[50%] w-[1px] h-full bg-tech-main/10"></div>
+      <div className="absolute top-0 left-[50%] w-pxfull bg-tech-main/10"></div>
 
       {/* 巨型背景水印 */}
       <div className="absolute bottom-0 -left-20 text-[8rem] font-black text-tech-main opacity-[0.03] select-none pointer-events-none whitespace-nowrap hidden lg:block tracking-tighter">
@@ -78,22 +78,22 @@ export default function LoginPage() {
 
           {/* 尺寸标注 decoration */}
           <div className="absolute -right-6 top-1/2 -translate-y-1/2 text-[10px] font-mono opacity-0 flex-col items-center h-full animate-fade-in [animation-delay:1.5s] [animation-fill-mode:forwards] hidden sm:flex">
-            <span className="block border-l border-tech-main/30 h-10 w-[1px]"></span>
+            <span className="block border-l border-tech-main/30 h-10 w-px"></span>
             <span className="py-2 rotate-90 whitespace-nowrap">
               SECURE FORM
             </span>
-            <span className="block border-l border-tech-main/30 h-10 w-[1px]"></span>
+            <span className="block border-l border-tech-main/30 h-10 w-px"></span>
           </div>
 
           <div className="relative border border-tech-main/40 bg-white/60 backdrop-blur-md p-6 md:p-10 shadow-sm overflow-hidden text-center">
             {/* 闪光扫过效果 */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 translate-x-[-200%] animate-[shimmer_3s_infinite_2s] pointer-events-none"></div>
+            <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/40 to-transparent -skew-x-12 translate-x-[-200%] animate-[shimmer_3s_infinite_2s] pointer-events-none"></div>
 
             {/* 角落刻度 */}
-            <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-tech-main -translate-x-[2px] -translate-y-[2px]"></div>
-            <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-tech-main translate-x-[2px] -translate-y-[2px]"></div>
-            <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-tech-main -translate-x-[2px] translate-y-[2px]"></div>
-            <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-tech-main translate-x-[2px] translate-y-[2px]"></div>
+            <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-tech-main -translate-x-0.5 -translate-y-0.5"></div>
+            <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-tech-main translate-x-0.5 -translate-y-0.5"></div>
+            <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-tech-main -translate-x-0.5 translate-y-0.5"></div>
+            <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-tech-main translate-x-0.5 translate-y-0.5"></div>
 
             <div className="flex flex-col items-center mb-8">
               <div className="w-12 h-12 bg-tech-main/5 flex items-center justify-center border border-tech-main/40 mb-4 animate-tech-pop-in [animation-delay:0.6s] opacity-0 [animation-fill-mode:forwards]">
@@ -137,7 +137,7 @@ export default function LoginPage() {
                 onClick={handleLogin}
                 disabled={isLoading}
                 variant="primary"
-                className="w-full uppercase text-sm tracking-[0.1em] h-12 flex items-center justify-center hover:scale-[1.02] transition-transform active:scale-[0.98] duration-200"
+                className="w-full uppercase text-sm tracking-widest h-12 flex items-center justify-center hover:scale-[1.02] transition-transform active:scale-[0.98] duration-200"
               >
                 {isLoading ? (
                   <span className="flex items-center">

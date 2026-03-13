@@ -8,13 +8,20 @@ import {
 import Link from "next/link";
 import { BrutalButton } from "@/components/ui/brutal-button";
 import { FeatureList } from "./feature-list";
+import { PendingCreationBanner } from "./pending-creation-banner";
 
 export const revalidate = 60;
 
-export default async function FeaturesPage() {
+export default async function FeaturesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const session = await auth();
+  const params = await searchParams;
+  const isCreated = params?.created === "true";
 
-  const allIssues = await listAllIssues("all");
+  const allIssues = await listAllIssues();
   allIssues.sort(
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
@@ -36,10 +43,10 @@ export default async function FeaturesPage() {
       },
       assignee: assigneeId
         ? {
-            name: parsed.metadata?.assigneeName ?? null,
-            email: parsed.metadata?.assigneeEmail ?? null,
-            image: null,
-          }
+          name: parsed.metadata?.assigneeName ?? null,
+          email: parsed.metadata?.assigneeEmail ?? null,
+          image: null,
+        }
         : null,
     };
   });
@@ -62,6 +69,8 @@ export default async function FeaturesPage() {
           </Link>
         )}
       </div>
+
+      {isCreated && <PendingCreationBanner />}
 
       <div className="mt-8 pt-4">
         <FeatureList features={features} />

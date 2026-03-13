@@ -15,6 +15,7 @@ import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { notFound } from "next/navigation";
 import { BrutalCard } from "@/components/ui/brutal-card";
 import Link from "next/link";
+import Image from "next/image";
 
 interface ArticlePageProps {
   params: Promise<{
@@ -65,7 +66,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               rawPath = path.join(rawPath, "README.md");
             }
           }
-        } catch (e) {}
+        } catch (e) { }
       }
     }
 
@@ -141,7 +142,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </div>
       </div>
 
-      <div className="prose prose-tech max-w-none w-full overflow-hidden break-words text-slate-800 selection:bg-tech-main/20 selection:text-slate-900">
+      <div className="prose prose-tech max-w-none w-full overflow-hidden wrap-break-word text-slate-800 selection:bg-tech-main/20 selection:text-slate-900">
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
           rehypePlugins={[rehypeRaw, rehypeKatex, rehypeSlug]}
@@ -193,7 +194,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               table: ({ node, ...props }: any) => (
                 <div className="w-full overflow-x-auto my-6 border border-tech-main/30 bg-white/50 backdrop-blur-sm">
                   <table
-                    className="w-full text-left border-collapse font-mono text-sm min-w-[600px]"
+                    className="w-full text-left border-collapse font-mono text-sm min-w-150"
                     {...props}
                   />
                 </div>
@@ -220,7 +221,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               h1: ({ node, ...props }: any) => (
                 <h1
                   id={props.id}
-                  className="group relative text-3xl lg:text-4xl font-mono uppercase mt-8 mb-6 tracking-[0.1em] border-b border-tech-main/30 pb-4 text-slate-900 scroll-m-20 target:animate-target-blink target:border-tech-main"
+                  className="group relative text-3xl lg:text-4xl font-mono uppercase mt-8 mb-6 tracking-widest border-b border-tech-main/30 pb-4 text-slate-900 scroll-m-20 target:animate-target-blink target:border-tech-main"
                 >
                   {props.id && (
                     <a
@@ -236,7 +237,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               h2: ({ node, ...props }: any) => (
                 <h2
                   id={props.id}
-                  className="group relative text-2xl font-mono uppercase mt-12 mb-6 tracking-[0.1em] text-slate-800 border-b border-tech-main/30 inline-block pr-8 scroll-m-20 target:animate-target-blink target:border-tech-main"
+                  className="group relative text-2xl font-mono uppercase mt-12 mb-6 tracking-widest text-slate-800 border-b border-tech-main/30 inline-block pr-8 scroll-m-20 target:animate-target-blink target:border-tech-main"
                 >
                   {props.id && (
                     <a
@@ -283,7 +284,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                       .join(currentDir, href)
                       .replace(/\\/g, "/");
                     href = `/articles/${resolved}`;
-                  } catch (e) {}
+                  } catch (e) { }
                 } else if (
                   !href.startsWith("http") &&
                   !href.startsWith("#") &&
@@ -345,7 +346,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   src = `/api/assets?path=${encodeURIComponent(resolved)}`;
                 }
                 return (
-                  <img
+                  <Image
                     src={src}
                     alt={props.alt || ""}
                     className="max-w-full h-auto border border-tech-main/30 p-1 bg-tech-main/5 my-8 shadow-sm"

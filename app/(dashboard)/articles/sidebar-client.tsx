@@ -12,7 +12,7 @@ interface TocItem {
   text: string;
 }
 
-export function SidebarClient({ tree }: { tree: any[] }) {
+export function SidebarClient({ tree }: { tree: any[]; }) {
   const pathname = usePathname();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [formData, setFormData] = React.useState({
@@ -94,7 +94,7 @@ export function SidebarClient({ tree }: { tree: any[] }) {
                       &gt;
                     </span>
                     <span
-                      className={`border-b pb-[1px] ${isActive ? "border-tech-main/50" : "border-transparent group-hover:border-tech-main/30"}`}
+                      className={`border-b pb-px ${isActive ? "border-tech-main/50" : "border-transparent group-hover:border-tech-main/30"}`}
                     >
                       {item.title}
                     </span>
@@ -105,11 +105,11 @@ export function SidebarClient({ tree }: { tree: any[] }) {
                       {toc.map((h2) => (
                         <li
                           key={h2.id}
-                          className="text-[13px] md:text-sm text-tech-main/70 hover:text-tech-main transition-colors relative before:content-[''] before:w-2 before:h-[1px] before:bg-tech-main/30 before:absolute before:-left-4 before:top-1/2 before:-translate-y-1/2"
+                          className="text-[13px] md:text-sm text-tech-main/70 hover:text-tech-main transition-colors relative before:content-[''] before:w-2 before:h-px before:bg-tech-main/30 before:absolute before:-left-4 before:top-1/2 before:-translate-y-1/2"
                         >
                           <Link
                             href={`#${h2.id}`}
-                            className="block break-words"
+                            className="block wrap-break-word"
                           >
                             {h2.text}
                           </Link>
@@ -165,7 +165,7 @@ export function SidebarClient({ tree }: { tree: any[] }) {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white dark:bg-black border-2 border-tech-main p-6 max-w-md w-full rounded shadow-[8px_8px_0_0_rgba(var(--tech-main),1)]">
-            <h3 className="text-lg font-bold font-mono text-tech-main mb-6 uppercase tracking-[0.1em] border-b border-tech-main/20 pb-2">
+            <h3 className="text-lg font-bold font-mono text-tech-main mb-6 uppercase tracking-widest border-b border-tech-main/20 pb-2">
               CREATE_SYS_OBJECT
             </h3>
 

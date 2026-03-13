@@ -4,7 +4,7 @@ import * as React from "react";
 import { BrutalButton } from "../ui/brutal-button";
 import { BrutalInput } from "../ui/brutal-input";
 import { useRouter } from "next/navigation";
-import { createFeature, updateFeature } from "@/actions/feature";
+import { updateFeature } from "@/actions/feature";
 
 interface FeatureEditorProps {
   initialData?: {
@@ -139,26 +139,30 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const tagArray = tags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+    if (!initialData?.id) {
+      // Stage payload and redirect immediately — PendingCreationBanner handles the actual creation
+      sessionStorage.setItem(
+        "pendingFeatureCreate.v1",
+        JSON.stringify({ title, content, tags: tagArray }),
+      );
+      router.push("/features?created=true");
+      return;
+    }
+
+    // Update path
     setIsSaving(true);
-
     try {
-      const tagArray = tags
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean);
-
-      if (initialData?.id) {
-        await updateFeature(initialData.id, { title, content, tags: tagArray });
-        alert("Feature updated!");
-      } else {
-        const res = await createFeature({ title, content, tags: tagArray });
-        alert("Feature reported!");
-        router.push(`/features/${res.feature.id}`);
-        return; // Don't reset state if navigating away
-      }
-    } catch (error: any) {
+      await updateFeature(initialData.id, { title, content, tags: tagArray });
+      alert("Feature updated!");
+    } catch (error: unknown) {
       console.error(error);
-      alert(error.message || "Save Failed");
+      alert(error instanceof Error ? error.message : "Save Failed");
     } finally {
       setIsSaving(false);
     }
@@ -169,8 +173,8 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
       onSubmit={handleSave}
       className="flex flex-col space-y-6 w-full max-w-5xl mx-auto p-6 md:p-10 border border-tech-main/30 bg-white/60 backdrop-blur-md relative group"
     >
-      <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-tech-main -translate-x-[2px] -translate-y-[2px]"></div>
-      <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-tech-main translate-x-[2px] translate-y-[2px]"></div>
+      <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-tech-main -translate-x-0.5 -translate-y-0.5"></div>
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-tech-main translate-x-0.5 translate-y-0.5"></div>
 
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
@@ -201,7 +205,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         </div>
       </div>
 
-      <div className="flex flex-col flex-grow min-h-[500px] border border-tech-main/30 bg-white/40 backdrop-blur-sm relative">
+      <div className="flex flex-col grow min-h-125 border border-tech-main/30 bg-white/40 backdrop-blur-sm relative">
         {/* 工具栏 */}
         <div className="bg-tech-main text-white/90 p-2 flex flex-wrap gap-2 items-center sticky top-0 z-10 font-mono text-xs border-b border-tech-dark px-4">
           <button
@@ -260,10 +264,10 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         </div>
 
         {/* 編輯區 */}
-        <div className="relative flex-grow flex flex-col bg-white">
+        <div className="relative grow flex flex-col bg-white">
           <textarea
             ref={textareaRef}
-            className={`w-full flex-grow p-6 font-mono text-sm leading-relaxed text-black placeholder-zinc-500 border-none outline-none resize-none ${isReadOnly ? "bg-gray-50 cursor-not-allowed" : "bg-transparent"}`}
+            className={`w-full grow p-6 font-mono text-sm leading-relaxed text-black placeholder-zinc-500 border-none outline-none resize-none ${isReadOnly ? "bg-gray-50 cursor-not-allowed" : "bg-transparent"}`}
             placeholder="ENTER FEATURE DESCRIPTION... (Use Markdown)"
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -283,7 +287,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
 
       {!isReadOnly && (
         <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-tech-main/10 relative">
-          <div className="absolute top-0 right-0 w-8 h-[1px] bg-tech-main"></div>
+          <div className="absolute top-0 right-0 w-8 h-px bg-tech-main"></div>
 
           <BrutalButton
             type="button"

@@ -1,8 +1,0 @@
-## Task 4 — Wrong-Key Regression Check
-Date: 2026-03-13
-
-### Grep: lib/github-features.ts message for bare GITHUB_REPO_OWNER and GITHUB_REPO_NAME (non-FEATURES prefix)
-Command: grep for "GITHUB_REPO_OWNER" NOT preceded by "FEATURES_"
-Result: zero matches — the error message no longer references bare shared keys.
-
-### Result: PASS — no unqualified GITHUB_REPO_OWNER or GITHUB_REPO_NAME in Features config error message.

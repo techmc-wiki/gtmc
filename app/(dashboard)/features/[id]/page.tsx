@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import {
   EXPLANATION_MARKER,
+  SYSTEM_COMMENT_MARKER,
   labelsToStatus,
   labelsToTags,
   listAllIssues,
@@ -44,7 +45,10 @@ export default async function FeatureDetailPage({
   const rawComments = await listIssueComments(issue.number);
 
   const comments = rawComments
-    .filter((comment) => !comment.body.includes(EXPLANATION_MARKER))
+    .filter((comment) =>
+      !comment.body.includes(EXPLANATION_MARKER) &&
+      !comment.body.includes(SYSTEM_COMMENT_MARKER)
+    )
     .map((comment) => {
       const parsedComment = parseCommentBody(comment.body);
       return {

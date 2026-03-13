@@ -1,7 +1,0 @@
-## Task 3 — Legacy Key Residue Check (Failure Case)
-Date: 2026-03-13
-
-### Grep: lib/github-features.ts for process.env.GITHUB_REPO_OWNER and process.env.GITHUB_REPO_NAME
-Result: (no output — zero matches)
-
-### Result: PASS — zero legacy key references remain in lib/github-features.ts.

@@ -193,8 +193,8 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
       onSubmit={handleSaveDraft}
       className="flex flex-col space-y-6 w-full max-w-5xl mx-auto p-6 md:p-10 border border-tech-main/30 bg-white/60 backdrop-blur-md relative group"
     >
-      <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-tech-main -translate-x-[2px] -translate-y-[2px]"></div>
-      <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-tech-main translate-x-[2px] translate-y-[2px]"></div>
+      <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-tech-main -translate-x-0.5 -translate-y-0.5"></div>
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-tech-main translate-x-0.5 translate-y-0.5"></div>
 
       {/* 标题区 */}
       <div className="flex flex-col space-y-4">
@@ -227,7 +227,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
       </div>
 
       {/* 编辑器主区域 (双栏布局或单栏) */}
-      <div className="flex flex-col space-y-2 flex-grow">
+      <div className="flex flex-col space-y-2 grow">
         <div className="flex justify-between items-end mb-2">
           <label className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main border-b border-tech-main/30 inline-block pb-1">
             CONTENT (MARKDOWN)_
@@ -312,7 +312,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
           onDragEnter={(e) => {
             if (!isReadOnly) e.preventDefault();
           }}
-          className={`w-full min-h-[500px] border border-tech-main/30 p-4 font-mono text-sm leading-relaxed resize-y focus:outline-none focus:border-tech-main text-tech-main-dark transition-colors backdrop-blur-sm shadow-inner ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/50"}`}
+          className={`w-full min-h-125 border border-tech-main/30 p-4 font-mono text-sm leading-relaxed resize-y focus:outline-none focus:border-tech-main text-tech-main-dark transition-colors backdrop-blur-sm shadow-inner ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/50"}`}
           placeholder="Write your markdown here... Use syntax logic. Drag&Drop or Paste images directly here."
           readOnly={isReadOnly}
         />

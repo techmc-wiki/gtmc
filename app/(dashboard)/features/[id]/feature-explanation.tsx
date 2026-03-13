@@ -40,7 +40,7 @@ export function FeatureExplanation({
           EDIT_RESOLUTION_EXPLANATION_
         </h3>
         <textarea
-          className="w-full min-h-[120px] p-3 border border-tech-accent/40 text-black placeholder-zinc-500 focus:border-tech-accent bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-0 font-mono text-sm resize-y mb-4"
+          className="w-full min-h-30 p-3 border border-tech-accent/40 text-black placeholder-zinc-500 focus:border-tech-accent bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-0 font-mono text-sm resize-y mb-4"
           value={explanation}
           onChange={(e) => setExplanation(e.target.value)}
           placeholder="PROVIDE OFFICIAL EXPLANATION / RESOLUTION..."

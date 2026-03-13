@@ -1,7 +1,0 @@
-## Task 5 — Fallback Guard (Failure Case)
-Date: 2026-03-13
-
-### Grep: lib/github-features.ts for FEATURES_GITHUB_REPO_(OWNER|NAME)\s*\|\|\s*process\.env\.GITHUB_REPO_
-Result: zero matches
-
-### Result: PASS — no fallback logic exists anywhere in lib/github-features.ts.

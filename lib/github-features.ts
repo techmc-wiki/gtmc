@@ -755,6 +755,38 @@ const STATUS_LABEL_PREFIX = "status:";
 
 export const EXPLANATION_MARKER = "<!-- GTMC_EXPLANATION";
 export const METADATA_MARKER = "<!-- GTMC_METADATA";
+export const SYSTEM_COMMENT_MARKER = "<!-- GTMC_SYSTEM_ASSIGNMENT -->";
+
+export function serializeSystemComment(content: string): string {
+  return `${SYSTEM_COMMENT_MARKER}\n\n${content}`;
+}
+
+export async function getGithubLoginByAccountId(
+  accountId: string,
+): Promise<string | null> {
+  // Guard against non-numeric input
+  if (isNaN(Number(accountId))) {
+    return null;
+  }
+
+  try {
+    const { data } = await requestGithub<{
+      login: string;
+      id: number;
+      [key: string]: unknown;
+    }>(`https://api.github.com/user/${accountId}`, {
+      method: "GET",
+    });
+
+    if (!data || !data.login) {
+      return null;
+    }
+
+    return data.login;
+  } catch {
+    return null;
+  }
+}
 
 export function statusToLabels(status: string): string[] {
   // Each app status maps to exactly one status:* label.

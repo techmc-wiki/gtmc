@@ -194,8 +194,7 @@ export async function updateFeatureExplanation(
   const { issue, parsed } = feature;
 
   const isAdmin = session.user.role === "ADMIN";
-  const isAssignee =
-    (parsed.metadata as any)?.assigneeId === session.user.id;
+  const isAssignee = parsed.metadata?.assigneeId === session.user.id;
   if (!isAssignee && !isAdmin) throw new Error("Forbidden");
 
   const newBody = serializeIssueBody(

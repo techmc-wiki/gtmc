@@ -6,7 +6,11 @@ interface LogoProps {
   showSlash?: boolean;
 }
 
-export function Logo({ className = "", size = "md", showSlash = true }: LogoProps) {
+export function Logo({
+  className = "",
+  size = "md",
+  showSlash = true,
+}: LogoProps) {
   const sizeClasses = {
     sm: "text-sm",
     md: "text-xl",
@@ -28,7 +32,13 @@ export function Logo({ className = "", size = "md", showSlash = true }: LogoProp
       href="/"
       className={`inline-flex items-center font-sans tracking-widest transition-opacity hover:opacity-80 ${sizeClasses[size]} ${className}`}
     >
-      {showSlash && <span className={`opacity-40 font-light mr-1 text-tech-main ${slashClasses[size]}`}>{"//"}</span>}
+      {showSlash && (
+        <span
+          className={`opacity-40 font-light mr-1 text-tech-main ${slashClasses[size]}`}
+        >
+          {"//"}
+        </span>
+      )}
       <span className="font-bold text-tech-main-dark">GTMC</span>
     </Link>
   );

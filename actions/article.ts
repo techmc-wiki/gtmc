@@ -26,8 +26,13 @@ export async function saveDraftAction(formData: FormData) {
   let savedRevision;
 
   if (revisionId) {
-    const existing = await prisma.revision.findUnique({ where: { id: revisionId } });
-    if (existing && (existing.status === "PENDING" || existing.status === "APPROVED")) {
+    const existing = await prisma.revision.findUnique({
+      where: { id: revisionId },
+    });
+    if (
+      existing &&
+      (existing.status === "PENDING" || existing.status === "APPROVED")
+    ) {
       throw new Error("Cannot edit a draft that is pending or approved");
     }
 
@@ -38,7 +43,7 @@ export async function saveDraftAction(formData: FormData) {
         title,
         content,
         filePath,
-        status: "DRAFT", 
+        status: "DRAFT",
       },
     });
   } else {
@@ -50,7 +55,7 @@ export async function saveDraftAction(formData: FormData) {
         status: "DRAFT",
         authorId: userId,
         ...(articleId ? { articleId } : {}),
-        ...(filePath ? { filePath } : {})
+        ...(filePath ? { filePath } : {}),
       },
     });
   }
@@ -63,12 +68,14 @@ export async function submitForReviewAction(revisionId: string) {
   if (!revisionId) {
     throw new Error("Revision ID is required");
   }
-  const existing = await prisma.revision.findUnique({ where: { id: revisionId } });
+  const existing = await prisma.revision.findUnique({
+    where: { id: revisionId },
+  });
   if (existing && existing.status === "APPROVED") {
     throw new Error("Cannot submit an already approved draft");
   }
   // TODO: Session 验证
-  
+
   await prisma.revision.update({
     where: { id: revisionId },
     data: {
@@ -89,7 +96,9 @@ export async function deleteDraftAction(revisionId: string) {
   }
 
   const userId = session.user.id;
-  const existing = await prisma.revision.findUnique({ where: { id: revisionId } });
+  const existing = await prisma.revision.findUnique({
+    where: { id: revisionId },
+  });
 
   if (!existing) {
     throw new Error("Draft not found");
@@ -104,7 +113,7 @@ export async function deleteDraftAction(revisionId: string) {
   }
 
   await prisma.revision.delete({
-    where: { id: revisionId }
+    where: { id: revisionId },
   });
 
   revalidatePath("/draft");

@@ -27,7 +27,9 @@ export async function updateProfileAction(formData: FormData) {
     data: {
       name,
       ...(image ? { image } : {}),
-      ...(user?.role === "ADMIN" && typeof githubPat === 'string' ? { githubPat: githubPat || null } : {}),
+      ...(user?.role === "ADMIN" && typeof githubPat === "string"
+        ? { githubPat: githubPat || null }
+        : {}),
     },
   });
 

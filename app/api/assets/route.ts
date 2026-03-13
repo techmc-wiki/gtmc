@@ -12,11 +12,11 @@ export async function GET(request: Request) {
   }
 
   // Prevent directory traversal attacks
-  const normalizedPath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, '');
+  const normalizedPath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, "");
   const fullPath = path.join(process.cwd(), "assets", normalizedPath);
 
   if (!fullPath.startsWith(path.join(process.cwd(), "assets"))) {
-     return new NextResponse("Forbidden", { status: 403 });
+    return new NextResponse("Forbidden", { status: 403 });
   }
 
   if (!fs.existsSync(fullPath)) {

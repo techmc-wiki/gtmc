@@ -40,14 +40,14 @@ jobs:
         run: |
           CONTRIBUTOR_FILE="assets/CONTRIBUTORS.md"
           SUBMITTER="${{ github.event.inputs.submitterName }}"
-          
+
           if [ ! -f "$CONTRIBUTOR_FILE" ]; then
             echo "# Contributors Database" > "$CONTRIBUTOR_FILE"
             echo "" >> "$CONTRIBUTOR_FILE"
             echo "A list of rebels who fed the database." >> "$CONTRIBUTOR_FILE"
             echo "" >> "$CONTRIBUTOR_FILE"
           fi
-          
+
           if ! grep -q "$SUBMITTER" "$CONTRIBUTOR_FILE"; then
             echo "- $SUBMITTER" >> "$CONTRIBUTOR_FILE"
             echo "Added $SUBMITTER to contributors list"
@@ -63,13 +63,13 @@ jobs:
           title: "Content Update: ${{ github.event.inputs.title }} by ${{ github.event.inputs.submitterName }}"
           body: |
             ## Automated Content Update 🚀
-            
+
             **Submitted by:** ${{ github.event.inputs.submitterName }}
             **Approved by:** ${{ github.event.inputs.reviewerName }}
             **Target File:** `assets/${{ github.event.inputs.filePath }}`
-            
+
             This PR was automatically generated after passing the review hub. If the submitter is new, they have been appended to `CONTRIBUTORS.md`.
-            
+
             Please review the changes and merge them to update the database.
           branch: "update-content-${{ github.event.inputs.submitterName }}-${{ github.run_id }}"
           base: main

@@ -1,11 +1,11 @@
 function createDownloadButton(text, path) {
-    const encodedPath = path
-        .trim()
-        .split('/')
-        .map(segment => encodeURIComponent(segment))
-        .join('/');
+  const encodedPath = path
+    .trim()
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
 
-    return `
+  return `
     <button class="download-button" onclick="showDownloadModal('${encodedPath}')">
       ${text.trim()}
       <svg class="download-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -16,18 +16,43 @@ function createDownloadButton(text, path) {
 }
 
 function showDownloadModal(encodedPath) {
-    const mirrors = [
-        { name: 'Github Raw 国内访问速度可能较慢', baseUrl: 'https://github.com/tanhHeng/GraduateTextsInTechnicalMC/raw/main/' },
-        { name: '镜像站1 github.tbedu.top', baseUrl: 'https://github.tbedu.top/https://github.com/tanhHeng/GraduateTextsInTechnicalMC/raw/main/' },
-        { name: '镜像站2 gh.llkk.cc', baseUrl: 'https://gh.llkk.cc/https://github.com/tanhHeng/GraduateTextsInTechnicalMC/raw/main/' },
-        { name: '镜像站3 gh-proxy.com', baseUrl: 'https://gh-proxy.com/https://github.com/tanhHeng/GraduateTextsInTechnicalMC/raw/main/' },
-        { name: '镜像站4 github.7boe.top', baseUrl: 'https://github.7boe.top/https://github.com/tanhHeng/GraduateTextsInTechnicalMC/raw/main/' },
-        { name: '镜像站5 fastgit.cc', baseUrl: 'https://fastgit.cc/https://github.com/tanhHeng/GraduateTextsInTechnicalMC/raw/main/' }
-    ];
+  const mirrors = [
+    {
+      name: "Github Raw 国内访问速度可能较慢",
+      baseUrl:
+        "https://github.com/tanhHeng/GraduateTextsInTechnicalMC/raw/main/",
+    },
+    {
+      name: "镜像站1 github.tbedu.top",
+      baseUrl:
+        "https://github.tbedu.top/https://github.com/tanhHeng/GraduateTextsInTechnicalMC/raw/main/",
+    },
+    {
+      name: "镜像站2 gh.llkk.cc",
+      baseUrl:
+        "https://gh.llkk.cc/https://github.com/tanhHeng/GraduateTextsInTechnicalMC/raw/main/",
+    },
+    {
+      name: "镜像站3 gh-proxy.com",
+      baseUrl:
+        "https://gh-proxy.com/https://github.com/tanhHeng/GraduateTextsInTechnicalMC/raw/main/",
+    },
+    {
+      name: "镜像站4 github.7boe.top",
+      baseUrl:
+        "https://github.7boe.top/https://github.com/tanhHeng/GraduateTextsInTechnicalMC/raw/main/",
+    },
+    {
+      name: "镜像站5 fastgit.cc",
+      baseUrl:
+        "https://fastgit.cc/https://github.com/tanhHeng/GraduateTextsInTechnicalMC/raw/main/",
+    },
+  ];
 
-    const modalContent = mirrors.map(mirror => {
-        const downloadUrl = mirror.baseUrl + encodedPath;
-        return `
+  const modalContent = mirrors
+    .map((mirror) => {
+      const downloadUrl = mirror.baseUrl + encodedPath;
+      return `
             <a href="${downloadUrl}" class="download-button" download>
                 ${mirror.name}
                 <svg class="download-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -35,9 +60,10 @@ function showDownloadModal(encodedPath) {
                 </svg>
             </a>
         `;
-    }).join('');
+    })
+    .join("");
 
-    const modalHtml = `
+  const modalHtml = `
         <div class="download-modal-overlay" onclick="closeDownloadModal()"></div>
         <div class="download-modal">
         <a>请选择下载源</a>
@@ -45,16 +71,16 @@ function showDownloadModal(encodedPath) {
         </div>
     `;
 
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
 }
 
 function closeDownloadModal() {
-    const modalOverlay = document.querySelector('.download-modal-overlay');
-    const modal = document.querySelector('.download-modal');
-    if (modalOverlay && modal) {
-        modalOverlay.remove();
-        modal.remove();
-    }
+  const modalOverlay = document.querySelector(".download-modal-overlay");
+  const modal = document.querySelector(".download-modal");
+  if (modalOverlay && modal) {
+    modalOverlay.remove();
+    modal.remove();
+  }
 }
 
 var css = `
@@ -152,13 +178,13 @@ div.download-modal {
 styleInject(css);
 
 function install(hook, vm) {
-    hook.afterEach(function (html) {
-        const modifiedHtml = html.replace(
-            /\[\[([^|\]]+)\|([^\]]+)\]\]/g,
-            (match, text, path) => createDownloadButton(text, path)
-        );
-        return modifiedHtml;
-    });
+  hook.afterEach(function (html) {
+    const modifiedHtml = html.replace(
+      /\[\[([^|\]]+)\|([^\]]+)\]\]/g,
+      (match, text, path) => createDownloadButton(text, path),
+    );
+    return modifiedHtml;
+  });
 }
 
 window.$docsify = window.$docsify || {};

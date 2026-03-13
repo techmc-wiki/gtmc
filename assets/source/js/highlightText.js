@@ -28,18 +28,18 @@
           }
           isOpen = true;
           return `</mark>`;
-        }
+        },
       );
 
       // 3. 处理转义字符：
       // 将之前被忽略的 "\==" 替换为 "=="
-      const htmlUnescaped = htmlHighlighted.replace(/\\==/g, '==');
+      const htmlUnescaped = htmlHighlighted.replace(/\\==/g, "==");
 
       // 4. 还原代码块
       let codeBlockIndex = 0;
       const htmlCodeBlockResumed = htmlUnescaped.replace(
         /CODE_BLOCK_PLACEHOLDER/g,
-        () => codeBlocks[codeBlockIndex++]
+        () => codeBlocks[codeBlockIndex++],
       );
 
       next(htmlCodeBlockResumed);

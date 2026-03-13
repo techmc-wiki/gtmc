@@ -1,39 +1,41 @@
 function adjustFontSize(action) {
-    const markdownSection = document.querySelector('.markdown-section#main');
-    let currentSize = parseFloat(window.getComputedStyle(markdownSection).fontSize);
+  const markdownSection = document.querySelector(".markdown-section#main");
+  let currentSize = parseFloat(
+    window.getComputedStyle(markdownSection).fontSize,
+  );
 
-    if (action === 'increase') {
-        currentSize += 1;
-    } else if (action === 'decrease') {
-        currentSize -= 1;
-    }
+  if (action === "increase") {
+    currentSize += 1;
+  } else if (action === "decrease") {
+    currentSize -= 1;
+  }
 
-    markdownSection.style.setProperty('--font-size', `${currentSize}px`);
-    updateFontSizeDisplay(currentSize);
-    localStorage.setItem('font-size', currentSize);
+  markdownSection.style.setProperty("--font-size", `${currentSize}px`);
+  updateFontSizeDisplay(currentSize);
+  localStorage.setItem("font-size", currentSize);
 }
 
 function applyInitialStyles() {
-    const savedSize = localStorage.getItem('font-size');
-    if (savedSize) {
-        const markdownSection = document.querySelector('.markdown-section#main');
-        markdownSection.style.setProperty('--font-size', `${savedSize}px`);
-    }
+  const savedSize = localStorage.getItem("font-size");
+  if (savedSize) {
+    const markdownSection = document.querySelector(".markdown-section#main");
+    markdownSection.style.setProperty("--font-size", `${savedSize}px`);
+  }
 }
 
 function updateFontSizeDisplay(fontSize) {
-    const fontSizeDisplay = document.querySelector('.font-size-display');
-    const lang = document.documentElement.lang;
-    if (fontSizeDisplay) {
-        if (lang === 'zh') {
-            fontSizeDisplay.textContent = `当前字体大小: ${fontSize}px`;
-        } else {
-            fontSizeDisplay.textContent = `Font size: ${fontSize}px`;
-        }
+  const fontSizeDisplay = document.querySelector(".font-size-display");
+  const lang = document.documentElement.lang;
+  if (fontSizeDisplay) {
+    if (lang === "zh") {
+      fontSizeDisplay.textContent = `当前字体大小: ${fontSize}px`;
+    } else {
+      fontSizeDisplay.textContent = `Font size: ${fontSize}px`;
     }
+  }
 }
 
-document.addEventListener('DOMContentLoaded', applyInitialStyles);
+document.addEventListener("DOMContentLoaded", applyInitialStyles);
 
 var css = `
 .markdown-section {
@@ -119,17 +121,20 @@ button.font-size-button[onclick="adjustFontSize('decrease')"] {
 styleInject(css);
 
 function install(hook, vm) {
-    hook.afterEach(function (html) {
-        const savedSize = localStorage.getItem('font-size') || 15;
-        const lang = document.documentElement.lang;
-        const fontSizeText = lang === 'zh' ? `当前字体大小: ${savedSize}px` : `Font size: ${savedSize}px`;
-        var fontSizeButtons = `
+  hook.afterEach(function (html) {
+    const savedSize = localStorage.getItem("font-size") || 15;
+    const lang = document.documentElement.lang;
+    const fontSizeText =
+      lang === "zh"
+        ? `当前字体大小: ${savedSize}px`
+        : `Font size: ${savedSize}px`;
+    var fontSizeButtons = `
             <button onclick="adjustFontSize('increase')" class="font-size-button" aria-label="Increase font size" title="Increase font size">A+</button>
             <button onclick="adjustFontSize('decrease')" class="font-size-button" aria-label="Decrease font size" title="Decrease font size">A-</button>
             <div class="font-size-display">${fontSizeText}</div>
         `;
-        return fontSizeButtons + html;
-    });
+    return fontSizeButtons + html;
+  });
 }
 
 $docsify.plugins = [].concat(install, $docsify.plugins);

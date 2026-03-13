@@ -14,7 +14,7 @@ export default async function NewDraftPage({
 
   let initialTitle = "UNTITLED";
   let initialContent = "";
-  
+
   if (filePath) {
     initialTitle = filePath;
     try {
@@ -44,7 +44,13 @@ export default async function NewDraftPage({
       <div className="bg-tech-main/5 border border-tech-main/30 p-6 mx-auto relative backdrop-blur-sm">
         <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-tech-main/50"></div>
         <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-tech-main/50"></div>
-        <BrutalEditor initialData={{ title: initialTitle, content: initialContent, filePath }} />
+        <BrutalEditor
+          initialData={{
+            title: initialTitle,
+            content: initialContent,
+            filePath,
+          }}
+        />
       </div>
     </div>
   );

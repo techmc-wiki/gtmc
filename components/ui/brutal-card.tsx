@@ -1,7 +1,13 @@
 import * as React from "react";
 
 export interface BrutalCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  color?: "white" | "electric-blue" | "neon-green" | "hot-pink" | "black" | "sun-yellow";
+  color?:
+    | "white"
+    | "electric-blue"
+    | "neon-green"
+    | "hot-pink"
+    | "black"
+    | "sun-yellow";
   pattern?: "none" | "dots" | "grid";
 }
 
@@ -9,23 +15,20 @@ export interface BrutalCardProps extends React.HTMLAttributes<HTMLDivElement> {
 export const BrutalCard = React.forwardRef<HTMLDivElement, BrutalCardProps>(
   ({ className = "", color, pattern, children, ...props }, ref) => {
     // 技术扁平图纸感：细边框，无圆角，纯色几何
-    let baseStyles = "relative border border-tech-main bg-white/80 backdrop-blur-sm p-6 transition-colors duration-300 hover:bg-tech-accent/10 text-tech-main";
+    let baseStyles =
+      "relative border border-tech-main bg-white/80 backdrop-blur-sm p-6 transition-colors duration-300 hover:bg-tech-accent/10 text-tech-main";
 
     return (
-      <div
-        ref={ref}
-        className={`${baseStyles} ${className} group`}
-        {...props}
-      >
+      <div ref={ref} className={`${baseStyles} ${className} group`} {...props}>
         {/* 卡片的十字定位角标 */}
         <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main -translate-x-[1px] -translate-y-[1px] pointer-events-none"></div>
         <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-tech-main translate-x-[1px] -translate-y-[1px] pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-tech-main -translate-x-[1px] translate-y-[1px] pointer-events-none"></div>
         <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main translate-x-[1px] translate-y-[1px] pointer-events-none"></div>
-        
+
         {children}
       </div>
     );
-  }
+  },
 );
 BrutalCard.displayName = "BrutalCard";

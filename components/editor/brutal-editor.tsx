@@ -22,25 +22,30 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
   const [title, setTitle] = React.useState(initialData?.title || "");
   const [content, setContent] = React.useState(initialData?.content || "");
   const [filePath, setFilePath] = React.useState(initialData?.filePath || "");
-  const [revisionId, setRevisionId] = React.useState<string | undefined>(initialData?.id);
+  const [revisionId, setRevisionId] = React.useState<string | undefined>(
+    initialData?.id,
+  );
   const [isSaving, setIsSaving] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState(false);
-  
+
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const isReadOnly = initialData?.status === "PENDING" || initialData?.status === "APPROVED";
+  const isReadOnly =
+    initialData?.status === "PENDING" || initialData?.status === "APPROVED";
 
   const insertTextAtCursor = (text: string) => {
     if (!textareaRef.current) return;
     const start = textareaRef.current.selectionStart;
     const end = textareaRef.current.selectionEnd;
-    const newContent = content.substring(0, start) + text + content.substring(end);
+    const newContent =
+      content.substring(0, start) + text + content.substring(end);
     setContent(newContent);
-    
+
     setTimeout(() => {
       if (textareaRef.current) {
-        textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + text.length;
+        textareaRef.current.selectionStart = textareaRef.current.selectionEnd =
+          start + text.length;
         textareaRef.current.focus();
       }
     }, 0);
@@ -55,7 +60,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
       alert("Please specify a FILE_PATH first before uploading images!");
       return;
     }
-    
+
     setIsUploading(true);
     const placeholder = `![Uploading ${file.name}...]()\n`;
     insertTextAtCursor(placeholder);
@@ -70,16 +75,27 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
         body: formData,
       });
 
-      let data; try { data = await res.json(); } catch(e) { throw new Error("HTTP " + res.status + " : " + await res.text()); }
-      
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        throw new Error("HTTP " + res.status + " : " + (await res.text()));
+      }
+
       if (res.ok && data.url) {
-        setContent(prev => prev.replace(placeholder, `![${file.name}](${data.url})\n`));
+        setContent((prev) =>
+          prev.replace(placeholder, `![${file.name}](${data.url})\n`),
+        );
       } else {
-        setContent(prev => prev.replace(placeholder, `<!-- Upload failed: ${data.error} -->\n`));
+        setContent((prev) =>
+          prev.replace(placeholder, `<!-- Upload failed: ${data.error} -->\n`),
+        );
         alert(data.error || "Upload failed");
       }
     } catch (error) {
-      setContent(prev => prev.replace(placeholder, `<!-- Upload error -->\n`));
+      setContent((prev) =>
+        prev.replace(placeholder, `<!-- Upload error -->\n`),
+      );
       console.error(error);
     } finally {
       setIsUploading(false);
@@ -118,14 +134,15 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
     const end = textareaRef.current.selectionEnd;
     const selectedText = content.substring(start, end);
     const newText = prefix + selectedText + suffix;
-    
+
     setContent(content.substring(0, start) + newText + content.substring(end));
-    
+
     setTimeout(() => {
       if (textareaRef.current) {
         textareaRef.current.focus();
         textareaRef.current.selectionStart = start + prefix.length;
-        textareaRef.current.selectionEnd = start + prefix.length + selectedText.length;
+        textareaRef.current.selectionEnd =
+          start + prefix.length + selectedText.length;
       }
     }, 0);
   };
@@ -133,14 +150,15 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
   const handleSaveDraft = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    
+
     try {
       const formData = new FormData();
       formData.append("title", title);
       formData.append("content", content);
       formData.append("filePath", filePath);
       if (revisionId) formData.append("revisionId", revisionId);
-      if (initialData?.articleId) formData.append("articleId", initialData.articleId);
+      if (initialData?.articleId)
+        formData.append("articleId", initialData.articleId);
 
       const result = await saveDraftAction(formData);
       if (result.success && result.revisionId) {
@@ -160,7 +178,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
       alert("请先保存草稿 / Please save draft first");
       return;
     }
-    
+
     try {
       await submitForReviewAction(revisionId);
       alert("已提交审核 / Submitted for Review!");
@@ -171,20 +189,23 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
   };
 
   return (
-    <form onSubmit={handleSaveDraft} className="flex flex-col space-y-6 w-full max-w-5xl mx-auto p-6 md:p-10 border border-tech-main/30 bg-white/60 backdrop-blur-md relative group">
+    <form
+      onSubmit={handleSaveDraft}
+      className="flex flex-col space-y-6 w-full max-w-5xl mx-auto p-6 md:p-10 border border-tech-main/30 bg-white/60 backdrop-blur-md relative group"
+    >
       <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-tech-main -translate-x-[2px] -translate-y-[2px]"></div>
       <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-tech-main translate-x-[2px] translate-y-[2px]"></div>
-      
+
       {/* 标题区 */}
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main border-b border-tech-main/30 inline-block pb-1 mb-2">
             TITLE_
           </label>
-          <BrutalInput 
+          <BrutalInput
             required
-            placeholder="ENTER TITLE..." 
-            className={`text-lg py-3 font-mono border-tech-main/40 focus:border-tech-main backdrop-blur-sm ${isReadOnly ? 'bg-gray-100 cursor-not-allowed opacity-70' : 'bg-white/50'}`}
+            placeholder="ENTER TITLE..."
+            className={`text-lg py-3 font-mono border-tech-main/40 focus:border-tech-main backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/50"}`}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             readOnly={isReadOnly}
@@ -195,9 +216,9 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
           <label className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main border-b border-tech-main/30 inline-block pb-1 mb-2">
             FILE_PATH (e.g. Folder/My-Article.md)_
           </label>
-          <BrutalInput 
-            placeholder="e.g. SlimeTech/Molforte/04-新机器.md" 
-            className={`text-sm py-2 font-mono border-tech-main/40 focus:border-tech-main backdrop-blur-sm ${isReadOnly ? 'bg-gray-100 cursor-not-allowed opacity-70' : 'bg-white/50'}`}
+          <BrutalInput
+            placeholder="e.g. SlimeTech/Molforte/04-新机器.md"
+            className={`text-sm py-2 font-mono border-tech-main/40 focus:border-tech-main backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/50"}`}
             value={filePath}
             onChange={(e) => setFilePath(e.target.value)}
             readOnly={isReadOnly}
@@ -215,14 +236,44 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
             {!isReadOnly && (
               <>
                 <div className="flex items-center gap-1 border-r border-tech-main/30 pr-2 mr-1">
-                  <button type="button" onClick={() => insertSyntax("**", "**")} className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs font-bold transition-colors">B</button>
-                  <button type="button" onClick={() => insertSyntax("*", "*")} className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs italic transition-colors">I</button>
-                  <button type="button" onClick={() => insertSyntax("### ")} className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs transition-colors">H3</button>
-                  <button type="button" onClick={() => insertSyntax("`", "`")} className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs font-mono transition-colors">&lt;/&gt;</button>
-                  <button type="button" onClick={() => insertSyntax("[", "](url)")} className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs transition-colors">LINK</button>
+                  <button
+                    type="button"
+                    onClick={() => insertSyntax("**", "**")}
+                    className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs font-bold transition-colors"
+                  >
+                    B
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertSyntax("*", "*")}
+                    className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs italic transition-colors"
+                  >
+                    I
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertSyntax("### ")}
+                    className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs transition-colors"
+                  >
+                    H3
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertSyntax("`", "`")}
+                    className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs font-mono transition-colors"
+                  >
+                    &lt;/&gt;
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertSyntax("[", "](url)")}
+                    className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs transition-colors"
+                  >
+                    LINK
+                  </button>
                 </div>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
                   className="text-[10px] font-mono tracking-widest text-tech-main bg-tech-main/10 hover:bg-tech-main hover:text-white transition-colors px-2 py-1 border border-tech-main/30"
@@ -231,11 +282,11 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
                 </button>
               </>
             )}
-            <input 
-              type="file" 
-              accept="image/*" 
-              ref={fileInputRef} 
-              className="hidden" 
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) uploadImage(file);
@@ -247,17 +298,21 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
             </span>
           </div>
         </div>
-        
-        <textarea 
+
+        <textarea
           required
           ref={textareaRef}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onPaste={handlePaste}
           onDrop={handleDrop}
-          onDragOver={(e) => { if(!isReadOnly) e.preventDefault() }}
-          onDragEnter={(e) => { if(!isReadOnly) e.preventDefault() }}
-          className={`w-full min-h-[500px] border border-tech-main/30 p-4 font-mono text-sm leading-relaxed resize-y focus:outline-none focus:border-tech-main text-tech-main-dark transition-colors backdrop-blur-sm shadow-inner ${isReadOnly ? 'bg-gray-100 cursor-not-allowed opacity-70' : 'bg-white/50'}`}
+          onDragOver={(e) => {
+            if (!isReadOnly) e.preventDefault();
+          }}
+          onDragEnter={(e) => {
+            if (!isReadOnly) e.preventDefault();
+          }}
+          className={`w-full min-h-[500px] border border-tech-main/30 p-4 font-mono text-sm leading-relaxed resize-y focus:outline-none focus:border-tech-main text-tech-main-dark transition-colors backdrop-blur-sm shadow-inner ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/50"}`}
           placeholder="Write your markdown here... Use syntax logic. Drag&Drop or Paste images directly here."
           readOnly={isReadOnly}
         />
@@ -266,12 +321,17 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
       {/* 操作区 */}
       {!isReadOnly && (
         <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-tech-main/30">
-          <BrutalButton type="submit" disabled={isSaving} variant="primary" className="w-full sm:w-1/2 rounded-none">
+          <BrutalButton
+            type="submit"
+            disabled={isSaving}
+            variant="primary"
+            className="w-full sm:w-1/2 rounded-none"
+          >
             {isSaving ? "SAVING..." : "SAVE DRAFT"}
           </BrutalButton>
-          <BrutalButton 
-            type="button" 
-            onClick={handleSubmitReview} 
+          <BrutalButton
+            type="button"
+            onClick={handleSubmitReview}
             disabled={!revisionId}
             variant="secondary"
             className="w-full sm:w-1/2 rounded-none"

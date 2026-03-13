@@ -5,14 +5,18 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { notFound, redirect } from "next/navigation";
 
-export default async function EditDraftPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditDraftPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const session = await auth();
   if (!session?.user) {
     redirect("/login");
   }
 
   const { id } = await params;
-  
+
   const draft = await prisma.revision.findUnique({
     where: { id },
   });
@@ -22,7 +26,7 @@ export default async function EditDraftPage({ params }: { params: Promise<{ id: 
   }
 
   // Only DRAFT or REJECTED statuses should be editable usually
-  // If it is PENDING or APPROVED, maybe we show it as read-only, 
+  // If it is PENDING or APPROVED, maybe we show it as read-only,
   // but let's let them view it in the editor for now.
 
   return (
@@ -47,22 +51,23 @@ export default async function EditDraftPage({ params }: { params: Promise<{ id: 
       <div className="bg-tech-main/5 border border-tech-main/30 p-6 mx-auto relative backdrop-blur-sm">
         <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-tech-main/50"></div>
         <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-tech-main/50"></div>
-        
+
         {draft.status === "PENDING" || draft.status === "APPROVED" ? (
-           <div className="mb-4 bg-tech-main/20 border border-tech-main/50 p-4 font-mono text-sm text-tech-main-dark">
-             // CAUTION: This revision is currently in [{draft.status}] state. Submitting changes will update it as a DRAFT.
-           </div>
+          <div className="mb-4 bg-tech-main/20 border border-tech-main/50 p-4 font-mono text-sm text-tech-main-dark">
+            // CAUTION: This revision is currently in [{draft.status}] state.
+            Submitting changes will update it as a DRAFT.
+          </div>
         ) : null}
-        
-        <BrutalEditor 
-          initialData={{ 
+
+        <BrutalEditor
+          initialData={{
             id: draft.id,
-            title: draft.title, 
-            content: draft.content, 
+            title: draft.title,
+            content: draft.content,
             filePath: draft.filePath || undefined,
             articleId: draft.articleId || undefined,
-            status: draft.status
-          }} 
+            status: draft.status,
+          }}
         />
       </div>
     </div>

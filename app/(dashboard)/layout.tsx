@@ -19,23 +19,39 @@ export default function DashboardLayout({
             <div className="flex items-center space-x-4 md:space-x-8">
               <Logo size="md" />
               <div className="hidden md:flex space-x-6 pt-1">
-                <Link href="/articles" className="font-mono text-xs tracking-[0.15em] border-b-2 border-transparent hover:border-tech-main text-tech-main-dark hover:text-tech-main transition-colors pb-1">
+                <Link
+                  href="/articles"
+                  className="font-mono text-xs tracking-[0.15em] border-b-2 border-transparent hover:border-tech-main text-tech-main-dark hover:text-tech-main transition-colors pb-1"
+                >
                   DATABASE
                 </Link>
-                <Link href="/draft" className="font-mono text-xs tracking-[0.15em] border-b-2 border-transparent hover:border-tech-main text-tech-main-dark hover:text-tech-main transition-colors pb-1">
+                <Link
+                  href="/draft"
+                  className="font-mono text-xs tracking-[0.15em] border-b-2 border-transparent hover:border-tech-main text-tech-main-dark hover:text-tech-main transition-colors pb-1"
+                >
                   MY DRAFTS
                 </Link>
-                <Link href="/review" className="font-mono text-xs tracking-[0.15em] border-b-2 border-transparent hover:border-tech-main text-tech-main-dark hover:text-tech-main transition-colors pb-1">
+                <Link
+                  href="/review"
+                  className="font-mono text-xs tracking-[0.15em] border-b-2 border-transparent hover:border-tech-main text-tech-main-dark hover:text-tech-main transition-colors pb-1"
+                >
                   REVIEW HUB
                 </Link>
-                <Link href="/features" className="font-mono text-xs tracking-[0.15em] border-b-2 border-transparent hover:border-tech-main text-tech-main-dark hover:text-tech-main transition-colors pb-1">
+                <Link
+                  href="/features"
+                  className="font-mono text-xs tracking-[0.15em] border-b-2 border-transparent hover:border-tech-main text-tech-main-dark hover:text-tech-main transition-colors pb-1"
+                >
                   FEATURES
                 </Link>
               </div>
             </div>
-            
+
             <div className="flex items-center">
-              <React.Suspense fallback={<div className="w-8 h-8 md:w-10 md:h-10 border border-tech-main/40 rounded-none bg-tech-main/10 animate-pulse" />}>
+              <React.Suspense
+                fallback={
+                  <div className="w-8 h-8 md:w-10 md:h-10 border border-tech-main/40 rounded-none bg-tech-main/10 animate-pulse" />
+                }
+              >
                 <ProfileButton />
               </React.Suspense>
             </div>
@@ -51,9 +67,3 @@ export default function DashboardLayout({
     </div>
   );
 }
-
-
-
-
-
-

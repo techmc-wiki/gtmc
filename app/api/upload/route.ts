@@ -28,26 +28,36 @@ export async function POST(req: NextRequest) {
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
-    
+
     // Check Config
-    if (!process.env.COS_SECRET_ID || !process.env.COS_SECRET_KEY || !BUCKET || !REGION) {
-       console.error("Missing COS configuration");
-       return NextResponse.json({ error: "Server configuration error: COS credentials missing" }, { status: 500 });
+    if (
+      !process.env.COS_SECRET_ID ||
+      !process.env.COS_SECRET_KEY ||
+      !BUCKET ||
+      !REGION
+    ) {
+      console.error("Missing COS configuration");
+      return NextResponse.json(
+        { error: "Server configuration error: COS credentials missing" },
+        { status: 500 },
+      );
     }
-    
+
     // Construct local path simulation
     // assets/SlimeTech/Molforte/timestamp-random.png
     const parsedPath = { dir: "" };
     if (documentPath) {
-        const p = path.parse(documentPath);
-        parsedPath.dir = p.dir;
+      const p = path.parse(documentPath);
+      parsedPath.dir = p.dir;
     }
     // Normalize path to forward slashes and remove leading/trailing slashes
-    const safeDir = (parsedPath.dir || "").replace(/\\/g, "/").replace(/^\/+|\/+$/g, "");
-    
-    const ext = file.name.split('.').pop() || "bin";
+    const safeDir = (parsedPath.dir || "")
+      .replace(/\\/g, "/")
+      .replace(/^\/+|\/+$/g, "");
+
+    const ext = file.name.split(".").pop() || "bin";
     const filename = `${Date.now()}-${Math.round(Math.random() * 1000)}.${ext}`;
-    
+
     // COS Key
     const key = `assets/${safeDir ? safeDir + "/" : ""}asset/${filename}`;
 
@@ -56,18 +66,21 @@ export async function POST(req: NextRequest) {
 
     // Upload to Tencent Cloud COS
     const data: any = await new Promise((resolve, reject) => {
-        cos.putObject({
-            Bucket: BUCKET,
-            Region: REGION,
-            Key: key,
-            Body: buffer,
-        }, function(err, data) {
-            if(err) {
-                reject(err);
-            } else {
-                resolve(data);
-            }
-        });
+      cos.putObject(
+        {
+          Bucket: BUCKET,
+          Region: REGION,
+          Key: key,
+          Body: buffer,
+        },
+        function (err, data) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(data);
+          }
+        },
+      );
     });
 
     // Build Public URL for Vercel Proxy
@@ -76,11 +89,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      url: fileUrl
+      url: fileUrl,
     });
-
   } catch (error: any) {
     console.error("Upload error:", error);
-    return NextResponse.json({ error: "Upload failed: " + (error.message || String(error)) }, { status: 500 });
+    return NextResponse.json(
+      { error: "Upload failed: " + (error.message || String(error)) },
+      { status: 500 },
+    );
   }
 }

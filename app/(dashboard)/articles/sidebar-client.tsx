@@ -1,9 +1,9 @@
 ﻿"use client";
 
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createDocument } from "@/actions/sidebar";
 
 // 定义 H2 标题的数据结构
@@ -14,6 +14,7 @@ interface TocItem {
 
 export function SidebarClient({ tree }: { tree: any[] }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [formData, setFormData] = React.useState({
     title: "",
@@ -25,23 +26,36 @@ export function SidebarClient({ tree }: { tree: any[] }) {
   const [toc, setToc] = useState<TocItem[]>([]);
 
   useEffect(() => {
-    // 监听路由变化后，抓取主干 DOM 中的 h2
-    // 设置一个小延时，确保页面完成挂载
-    const timer = setTimeout(() => {
-      const headings = document.querySelectorAll("main h2");
-      const tocItems: TocItem[] = [];
-      headings.forEach((heading) => {
-        if (heading.id && heading.textContent) {
-          tocItems.push({
-            id: heading.id,
-            text: heading.textContent.replace(/^#\s*/, ""), // 清理哈希标志
-          });
-        }
-      });
-      setToc(tocItems);
-    }, 150);
+    let frameCount = 0;
+    const maxFrames = 10;
 
-    return () => clearTimeout(timer);
+    const scanHeadings = () => {
+      const headings = document.querySelectorAll("main h2");
+      if (headings.length > 0) {
+        const tocItems: TocItem[] = [];
+        headings.forEach((heading) => {
+          if (heading.id && heading.textContent) {
+            tocItems.push({
+              id: heading.id,
+              text: heading.textContent.replace(/^#\s*/, ""),
+            });
+          }
+        });
+        setToc(tocItems);
+        return true;
+      }
+      return false;
+    };
+
+    const retryWithRAF = () => {
+      if (scanHeadings()) return;
+      if (frameCount < maxFrames) {
+        frameCount++;
+        requestAnimationFrame(retryWithRAF);
+      }
+    };
+
+    retryWithRAF();
   }, [pathname]);
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -54,7 +68,7 @@ export function SidebarClient({ tree }: { tree: any[] }) {
         parentId: formData.parentId || null,
       });
       setIsModalOpen(false);
-      window.location.reload(); // Simple refresh to update sidebar
+      router.refresh();
     } catch (error: any) {
       alert(error.message);
     }
@@ -130,7 +144,7 @@ export function SidebarClient({ tree }: { tree: any[] }) {
     return folders;
   };
 
-  const availableFolders = flattenFolders(tree);
+  const availableFolders = useMemo(() => flattenFolders(tree), [tree]);
 
   return (
     <div>

@@ -39,13 +39,19 @@ export async function compressImageForUpload(file: File): Promise<CompressionRes
 
   // Compress the file
   try {
-    const compressed = await imageCompression(file, {
+    const compressedBlob = await imageCompression(file, {
       maxSizeMB: COMPRESS_TARGET_MB,
       maxWidthOrHeight: 4096,
       useWebWorker: true,
       preserveExif: false,
       initialQuality: 0.8,
       maxIteration: 15,
+    });
+
+    // Rewrap compressed result as File with preserved metadata
+    const compressed = new File([compressedBlob], file.name, {
+      type: file.type,
+      lastModified: file.lastModified,
     });
 
     // Still too large after compression (library is best-effort)

@@ -835,14 +835,18 @@ export async function uploadImageToGithub(
 
   // Validate MIME type by extension
   const extMatch = originalName.match(/\.([a-zA-Z0-9]+)$/);
-  const ext = extMatch ? extMatch[1].toLowerCase() : "";
+  let ext = extMatch ? extMatch[1].toLowerCase() : "";
   const validExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
+  const mimeToExt: Record<string, string> = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/gif": "gif",
+    "image/webp": "webp",
+  };
 
+  // If extension is missing or invalid, derive from MIME type
   if (!validExtensions.includes(ext)) {
-    throw new GithubFeaturesError({
-      code: "API_ERROR",
-      message: "Only image files are accepted (JPEG, PNG, GIF, WebP).",
-    });
+    ext = mimeToExt[mimeType];
   }
 
   // Validate file size

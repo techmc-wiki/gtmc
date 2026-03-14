@@ -133,7 +133,7 @@ function parseErrorMessage(details: unknown): string | undefined {
     return undefined;
   }
 
-  const candidate = details as { message?: unknown; error?: unknown };
+  const candidate = details as { message?: unknown; error?: unknown; };
   if (typeof candidate.message === "string") {
     return candidate.message;
   }
@@ -239,9 +239,9 @@ function parseNextLink(linkHeader: string | null): string | null {
 async function requestGithub<T>(
   url: string,
   init: RequestInit,
-  options?: { allow404?: boolean },
+  options?: { allow404?: boolean; },
   tokenOverride?: string,
-): Promise<{ data: T | null; response: Response }> {
+): Promise<{ data: T | null; response: Response; }> {
   const config = getGithubRepoConfig();
 
   let response: Response;
@@ -403,7 +403,7 @@ export async function createIssue(
 ): Promise<GithubIssue> {
   const config = getGithubRepoConfig();
   const url = getRepoIssuesBaseUrl(config);
-  const payload: { title: string; body: string; labels?: string[] } = {
+  const payload: { title: string; body: string; labels?: string[]; } = {
     title,
     body,
   };
@@ -751,7 +751,11 @@ export function parseCommentBody(body: string): {
 
   const rest = body.slice(firstNewline === -1 ? body.length : firstNewline + 1);
   const content = rest.replace(/^\n/, "");
-  const contentWithoutAttribution = content.replace(/^\[By\]:[^\n]*\n\n/, "");
+  const contentWithoutAuthorMarker = content.replace(/^<!-- GTMC_COMMENT_AUTHOR_LINE -->\n/, "");
+  const contentWithoutAttribution = contentWithoutAuthorMarker.replace(
+    /^(?:\[By\]:|By:|\*\*By:\*\*|\> \*\*\[BY\]\*\* :)[^\n]*\n\n/,
+    "",
+  );
 
   return { content: contentWithoutAttribution, metadata };
 }
@@ -781,21 +785,53 @@ export function serializeSystemComment(content: string): string {
 }
 
 export async function getGithubLoginByAccountId(accountId: string): Promise<string | null> {
-  // Guard against non-numeric input
-  if (isNaN(Number(accountId))) {
+  const normalizedAccountId = accountId.trim();
+  if (!normalizedAccountId) {
     return null;
   }
+
+  const endpoint = Number.isNaN(Number(normalizedAccountId))
+    ? `${GITHUB_API_BASE}/users/${encodeURIComponent(normalizedAccountId)}`
+    : `${GITHUB_API_BASE}/user/${normalizedAccountId}`;
 
   try {
     const { data } = await requestGithub<{
       login: string;
       id: number;
       [key: string]: unknown;
-    }>(`https://api.github.com/user/${accountId}`, {
+    }>(endpoint, {
       method: "GET",
     });
 
     if (!data || !data.login) {
+      return null;
+    }
+
+    return data.login;
+  } catch {
+    return null;
+  }
+}
+
+export async function getGithubLoginByToken(token: string): Promise<string | null> {
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const { data } = await requestGithub<{
+      login?: string;
+      [key: string]: unknown;
+    }>(
+      `${GITHUB_API_BASE}/user`,
+      {
+        method: "GET",
+      },
+      undefined,
+      token,
+    );
+
+    if (!data || typeof data.login !== "string" || data.login.length === 0) {
       return null;
     }
 

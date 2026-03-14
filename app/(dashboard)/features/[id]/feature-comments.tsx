@@ -84,7 +84,7 @@ export function FeatureComments({
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full min-h-[100px] p-3 border border-tech-main/40 text-black placeholder-zinc-500 focus:border-tech-main bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-0 font-mono text-sm resize-y"
+                className="w-full min-h-25 p-3 border border-tech-main/40 text-black placeholder-zinc-500 focus:border-tech-main bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-0 font-mono text-sm resize-y"
                 placeholder="ENTER COMMENT..."
                 disabled={isPending}
               />

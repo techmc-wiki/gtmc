@@ -1,94 +1,125 @@
-import { BrutalCard } from "@/components/ui/brutal-card";
+import { SectionFrame, SectionRail, SegmentedBar, SweepOverlay } from "../loading-shell-primitives";
 
 export default function FeatureDetailLoading() {
   return (
-    <div className="container mx-auto p-4 md:p-8 space-y-6 max-w-26l" aria-busy="true" aria-label="Loading feature details">
-      {/* Title/Action Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-        <div>
-          <div className="h-10 w-48 bg-tech-accent animate-pulse rounded"></div>
+    <div
+      className="container mx-auto p-4 md:p-8 space-y-8 max-w-5xl"
+      aria-busy="true"
+      aria-label="Loading feature details"
+    >
+      {/* FEATURE_HEADER_ */}
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 animate-tech-slide-in">
+        <div className="space-y-2">
+          <SectionRail label="FEATURE_HEADER" />
+          <SegmentedBar opacity="high" className="w-64 h-8" />
         </div>
-        <div className="h-10 w-32 bg-tech-accent animate-pulse rounded"></div>
+        <SegmentedBar opacity="medium" className="w-32 h-10" />
       </div>
 
-      {/* Metadata Card */}
-      <BrutalCard className="mb-8">
-        <div className="flex flex-col gap-3 font-mono text-sm">
-          <div className="h-5 w-64 bg-tech-accent animate-pulse rounded"></div>
-          <div className="h-5 w-56 bg-tech-accent animate-pulse rounded"></div>
-          <div className="h-5 w-60 bg-tech-accent animate-pulse rounded"></div>
-          <div className="h-5 w-52 bg-tech-accent animate-pulse rounded"></div>
-          <div className="h-5 w-48 bg-tech-accent animate-pulse rounded"></div>
+      {/* ISSUE_METADATA_ */}
+      <SectionFrame
+        showBrackets
+        className="animate-tech-slide-in"
+        style={{ animationDelay: "100ms" }}
+      >
+        <SectionRail label="ISSUE_METADATA" />
+        <div className="flex flex-col gap-3 font-mono text-sm mt-4">
+          <SegmentedBar opacity="high" className="w-64 h-4" />
+          <SegmentedBar opacity="medium" className="w-56 h-4" />
+          <SegmentedBar opacity="high" className="w-60 h-4" />
+          <SegmentedBar opacity="medium" className="w-52 h-4" />
+          <SegmentedBar opacity="low" className="w-48 h-4" />
         </div>
-      </BrutalCard>
+      </SectionFrame>
 
-      {/* Explanation Block */}
-      <BrutalCard className="mb-8 border-tech-accent/50 bg-tech-accent/5">
-        <div className="flex flex-col gap-3">
-          <div className="h-6 w-40 bg-tech-accent animate-pulse rounded"></div>
-          <div className="space-y-2">
-            <div className="h-4 w-full bg-tech-accent animate-pulse rounded"></div>
-            <div className="h-4 w-5/6 bg-tech-accent animate-pulse rounded"></div>
-          </div>
+      {/* RESOLUTION_BLOCK_ */}
+      <SectionFrame
+        className="relative border-l-4 border-tech-main bg-tech-accent/5 animate-tech-slide-in"
+        style={{ animationDelay: "200ms" }}
+      >
+        <SweepOverlay />
+        <SectionRail label="RESOLUTION_BLOCK" />
+        <div className="space-y-2 mt-4">
+          <SegmentedBar opacity="high" className="w-40 h-5" />
+          <SegmentedBar opacity="medium" className="w-full h-3" />
+          <SegmentedBar opacity="low" className="w-5/6 h-3" />
         </div>
-      </BrutalCard>
+      </SectionFrame>
 
-      {/* Editor/Content Block (biased toward edit layout) */}
-      <div className="pt-4">
-        <div className="flex flex-col space-y-6 w-full max-w-5xl mx-auto p-6 md:p-10 border border-tech-main/30 bg-white/60">
-          {/* Title input */}
+      {/* EDITOR_BUFFER_ */}
+      <SectionFrame
+        showBrackets
+        className="animate-tech-slide-in"
+        style={{ animationDelay: "300ms" }}
+      >
+        <SectionRail label="EDITOR_BUFFER" />
+
+        <div className="flex flex-col space-y-6 mt-4">
+          {/* Title */}
           <div className="flex flex-col space-y-2">
-            <div className="h-4 w-20 bg-tech-accent animate-pulse rounded"></div>
-            <div className="h-10 w-full bg-tech-accent animate-pulse rounded"></div>
+            <div className="font-mono text-xs text-tech-main uppercase tracking-wider">Title_</div>
+            <SegmentedBar opacity="high" className="w-full h-10" />
           </div>
 
-          {/* Tags input */}
+          {/* Tags */}
           <div className="flex flex-col space-y-2">
-            <div className="h-4 w-32 bg-tech-accent animate-pulse rounded"></div>
-            <div className="h-10 w-full bg-tech-accent animate-pulse rounded"></div>
+            <div className="font-mono text-xs text-tech-main uppercase tracking-wider">Tags_</div>
+            <SegmentedBar opacity="medium" className="w-full h-10" />
           </div>
 
-          {/* Editor area */}
-          <div className="flex flex-col grow min-h-125 border border-tech-main/30 bg-white/40">
-            <div className="bg-tech-main/20 p-2 border-b border-tech-main/30 h-10"></div>
+          {/* Editor area with toolbar */}
+          <div className="flex flex-col min-h-[300px] border border-tech-main/30 bg-white/40">
+            {/* Toolbar strip */}
+            <div className="bg-tech-main h-10 border-b border-tech-main flex items-center gap-2 px-3">
+              <SegmentedBar opacity="high" className="w-8 h-6" />
+              <div className="w-px h-6 bg-tech-accent/30" />
+              <SegmentedBar opacity="medium" className="w-8 h-6" />
+              <div className="w-px h-6 bg-tech-accent/30" />
+              <SegmentedBar opacity="medium" className="w-8 h-6" />
+            </div>
+
+            {/* Text buffer */}
             <div className="flex-1 p-4 space-y-2">
-              <div className="h-4 w-full bg-tech-accent animate-pulse rounded"></div>
-              <div className="h-4 w-5/6 bg-tech-accent animate-pulse rounded"></div>
-              <div className="h-4 w-4/5 bg-tech-accent animate-pulse rounded"></div>
+              <SegmentedBar opacity="high" className="w-full h-3" />
+              <SegmentedBar opacity="medium" className="w-5/6 h-3" />
+              <SegmentedBar opacity="low" className="w-4/5 h-3" />
+              <SegmentedBar opacity="low" className="w-3/4 h-3" />
             </div>
           </div>
 
           {/* Save button */}
-          <div className="h-10 w-24 bg-tech-accent animate-pulse rounded"></div>
+          <SegmentedBar opacity="high" className="w-24 h-10" />
         </div>
-      </div>
+      </SectionFrame>
 
-      {/* Comments Section */}
-      <div className="mt-8 space-y-6">
-        <div className="h-8 w-32 bg-tech-accent animate-pulse rounded"></div>
+      {/* DISCUSSION_LOG_ */}
+      <div className="space-y-6 animate-tech-slide-in" style={{ animationDelay: "400ms" }}>
+        <SectionRail label="DISCUSSION_LOG" />
 
-        {/* Comments list */}
+        {/* Comment cards */}
         <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <BrutalCard key={i} className="p-4 bg-white/60 border-tech-main/30 border">
-              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-dashed border-tech-main/30">
-                <div className="h-4 w-32 bg-tech-accent animate-pulse rounded"></div>
-                <div className="h-4 w-40 bg-tech-accent animate-pulse rounded"></div>
+          {[1, 2].map((i) => (
+            <SectionFrame key={i}>
+              <div className="flex items-center gap-2 pb-2 border-b border-dashed border-tech-main/30">
+                <SegmentedBar opacity="high" className="w-32 h-4" />
+                <SegmentedBar opacity="medium" className="w-40 h-4" />
               </div>
-              <div className="space-y-2">
-                <div className="h-4 w-full bg-tech-accent animate-pulse rounded"></div>
-                <div className="h-4 w-5/6 bg-tech-accent animate-pulse rounded"></div>
+              <div className="space-y-2 mt-3">
+                <SegmentedBar opacity="medium" className="w-full h-3" />
+                <SegmentedBar opacity="low" className="w-5/6 h-3" />
               </div>
-            </BrutalCard>
+            </SectionFrame>
           ))}
         </div>
 
         {/* Comment form */}
-        <BrutalCard className="p-4 bg-white/60 border-tech-main/30 border">
-          <div className="h-4 w-32 bg-tech-accent animate-pulse rounded mb-4"></div>
-          <div className="h-24 w-full bg-tech-accent animate-pulse rounded mb-4"></div>
-          <div className="h-10 w-24 bg-tech-accent animate-pulse rounded"></div>
-        </BrutalCard>
+        <SectionFrame>
+          <div className="font-mono text-xs text-tech-main uppercase tracking-wider mb-3">
+            New_Comment_
+          </div>
+          <SegmentedBar opacity="medium" className="w-full h-24 mb-4" />
+          <SegmentedBar opacity="high" className="w-24 h-10" />
+        </SectionFrame>
       </div>
     </div>
   );

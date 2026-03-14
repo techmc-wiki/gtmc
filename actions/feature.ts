@@ -14,6 +14,7 @@ import {
   serializeCommentBody,
   serializeSystemComment,
   getGithubLoginByAccountId,
+  getGithubLoginByToken,
   ensureLabel,
   tagsToLabels,
   statusToLabels,
@@ -55,14 +56,38 @@ async function getFeatureByIssueNumber(issueNumber: number) {
   return { issue, parsed };
 }
 
+async function resolveGithubLoginFromAccount(
+  account: {
+    providerAccountId: string;
+    access_token: string | null;
+  } | null,
+): Promise<string | null> {
+  if (!account) {
+    return null;
+  }
+
+  const loginByAccountId = await getGithubLoginByAccountId(account.providerAccountId);
+  if (loginByAccountId) {
+    return loginByAccountId;
+  }
+
+  if (!account.access_token) {
+    return null;
+  }
+
+  return getGithubLoginByToken(account.access_token);
+}
+
 async function resolveMentionToken(appUserId: string, displayName: string | null): Promise<string> {
   try {
     const account = await prisma.account.findFirst({
       where: { provider: "github", userId: appUserId },
     });
     if (account) {
-      const login = await getGithubLoginByAccountId(account.providerAccountId);
-      if (login) return `@${login}`;
+      const login = await resolveGithubLoginFromAccount(account);
+      if (login) {
+        return `@${login}`;
+      }
     }
   } catch {
     // fallthrough to plain text
@@ -85,7 +110,7 @@ function getMetadataForWrite(
   };
 }
 
-export async function createFeature(data: { title: string; content: string; tags: string[] }) {
+export async function createFeature(data: { title: string; content: string; tags: string[]; }) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 
@@ -134,7 +159,7 @@ export async function createFeature(data: { title: string; content: string; tags
 
 export async function updateFeature(
   id: string,
-  data: { title: string; content: string; tags: string[] },
+  data: { title: string; content: string; tags: string[]; },
 ) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
@@ -422,27 +447,25 @@ export async function addFeatureComment(id: string, content: string) {
   const visibility = await getGithubEmailVisibility(account?.access_token || "");
   const isPrivate = visibility === "private";
 
-  const githubLogin = account?.providerAccountId
-    ? await getGithubLoginByAccountId(account.providerAccountId)
-    : null;
+  const githubLogin = await resolveGithubLoginFromAccount(account);
   const fallbackAuthorLabel = session.user.name ?? session.user.email ?? session.user.id;
   const mentionToken = githubLogin ? `@${githubLogin}` : fallbackAuthorLabel;
   const authorLine = githubLogin
-    ? `[By]: ${mentionToken} (${fallbackAuthorLabel})`
-    : `[By]: ${mentionToken}`;
-
-  console.log("[addFeatureComment] githubLogin:", githubLogin);
-  console.log("[addFeatureComment] authorLine:", authorLine);
+    ? `> **\[BY\]** ${mentionToken} (${fallbackAuthorLabel})`
+    : `> **\[BY\]** ${mentionToken}`;
 
   const authorEmail = isPrivate ? null : (session.user.email ?? null);
   const emailRedacted = isPrivate;
 
-  const commentBody = serializeCommentBody(`${authorLine}\n\n${content}`, {
-    appUserId: session.user.id,
-    authorName: session.user.name ?? null,
-    authorEmail,
-    emailRedacted,
-  });
+  const commentBody = serializeCommentBody(
+    `<!-- GTMC_COMMENT_AUTHOR_LINE -->\n${authorLine}\n\n${content}`,
+    {
+      appUserId: session.user.id,
+      authorName: session.user.name ?? null,
+      authorEmail,
+      emailRedacted,
+    },
+  );
 
   const ghComment = await addIssueComment(feature.issue.number, commentBody);
 
@@ -457,7 +480,7 @@ export async function addFeatureComment(id: string, content: string) {
       author: {
         name: session.user.name ?? null,
         email: authorEmail,
-        image: (session.user as { image?: string | null }).image ?? null,
+        image: (session.user as { image?: string | null; }).image ?? null,
       },
       emailRedacted,
     },

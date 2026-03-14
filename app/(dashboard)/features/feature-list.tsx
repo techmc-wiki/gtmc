@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { BrutalCard } from "@/components/ui/brutal-card";
+import { RevealSection } from "./reveal-helpers";
 
 export function StatusBadge({ status }: { status: string }) {
   let styles = "px-2 text-xs font-bold uppercase border";
@@ -82,116 +83,125 @@ export function FeatureList({ features }: { features: any[] }) {
   const inProgressFeatures = groupedFeatures.IN_PROGRESS;
   const resolvedFeatures = groupedFeatures.RESOLVED;
 
-  const renderFeatureGroup = (title: string, groupFeatures: any[], emptyText: string) => {
+  const renderFeatureGroup = (
+    title: string,
+    groupFeatures: any[],
+    emptyText: string,
+    delay: 0 | 100 | 200 | 300 | 400,
+  ) => {
     if (groupFeatures.length === 0) {
       return null;
     }
 
     return (
-      <div className="mb-8">
-        <h3 className="text-sm sm:text-base md:text-lg font-bold tracking-widest uppercase mb-4 border-l-4 border-tech-main pl-3 text-tech-main">
-          {title} ({groupFeatures.length})
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {groupFeatures.map((feature) => (
-            <Link key={feature.id} href={`/features/${feature.id}`} className="block">
-              <BrutalCard className="hover:border-zinc-800 transition-colors flex flex-col gap-4 p-4 sm:p-6 cursor-pointer bg-white/60 backdrop-blur-sm">
-                <div className="space-y-2 flex-grow">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                    <StatusBadge status={feature.status} />
-                    <h2 className="text-sm sm:text-base md:text-lg font-bold break-words">
-                      {feature.title}
-                    </h2>
-                  </div>
+      <RevealSection delay={delay}>
+        <div className="mb-8">
+          <h3 className="text-sm sm:text-base md:text-lg font-bold tracking-widest uppercase mb-4 border-l-4 border-tech-main pl-3 text-tech-main">
+            {title} ({groupFeatures.length})
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {groupFeatures.map((feature) => (
+              <Link key={feature.id} href={`/features/${feature.id}`} className="block">
+                <BrutalCard className="hover:border-zinc-800 transition-colors flex flex-col gap-4 p-4 sm:p-6 cursor-pointer bg-white/60 backdrop-blur-sm">
+                  <div className="space-y-2 flex-grow">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                      <StatusBadge status={feature.status} />
+                      <h2 className="text-sm sm:text-base md:text-lg font-bold break-words">
+                        {feature.title}
+                      </h2>
+                    </div>
 
-                  <div className="flex flex-wrap gap-2 text-xs font-mono">
-                    <span className="bg-zinc-100 px-2 py-0.5 border border-zinc-200">
-                      Author: {feature.author?.name || "Unknown"}
-                    </span>
-                    <span
-                      className="bg-zinc-100 px-2 py-0.5 border border-zinc-200 text-zinc-500"
-                      suppressHydrationWarning
-                    >
-                      {new Date(feature.createdAt).toLocaleDateString()}
-                    </span>
-                    {feature.assignee && (
-                      <span className="bg-blue-50 text-blue-800 px-2 py-0.5 border border-blue-200">
-                        Assignee: {feature.assignee.name || "Unknown"}
+                    <div className="flex flex-wrap gap-2 text-xs font-mono">
+                      <span className="bg-zinc-100 px-2 py-0.5 border border-zinc-200">
+                        Author: {feature.author?.name || "Unknown"}
                       </span>
+                      <span
+                        className="bg-zinc-100 px-2 py-0.5 border border-zinc-200 text-zinc-500"
+                        suppressHydrationWarning
+                      >
+                        {new Date(feature.createdAt).toLocaleDateString()}
+                      </span>
+                      {feature.assignee && (
+                        <span className="bg-blue-50 text-blue-800 px-2 py-0.5 border border-blue-200">
+                          Assignee: {feature.assignee.name || "Unknown"}
+                        </span>
+                      )}
+                    </div>
+
+                    {feature.tags && feature.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {feature.tags.map((tag: string) => (
+                          <span
+                            key={tag}
+                            className="text-xs font-mono uppercase border border-tech-main text-tech-main bg-tech-accent/10 px-2 py-0.5"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
-
-                  {feature.tags && feature.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {feature.tags.map((tag: string) => (
-                        <span
-                          key={tag}
-                          className="text-xs font-mono uppercase border border-tech-main text-tech-main bg-tech-accent/10 px-2 py-0.5"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </BrutalCard>
-            </Link>
-          ))}
+                </BrutalCard>
+              </Link>
+            ))}
+          </div>
         </div>
-      </div>
+      </RevealSection>
     );
   };
 
   return (
     <div className="space-y-6">
       {/* 过滤器 */}
-      <BrutalCard className="p-4 sm:p-6 bg-white/60 backdrop-blur-sm border-tech-main/30">
-        <div className="space-y-4">
-          <div>
-            <h4 className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main mb-2">
-              FILTER_BY_STATUS_
-            </h4>
-            <div className="flex flex-wrap gap-2">
-              {["ALL", "UNRESOLVED", "PENDING", "IN_PROGRESS", "RESOLVED"].map((status) => (
-                <button
-                  key={status}
-                  onClick={() => setStatusFilter(status)}
-                  className={`text-xs font-mono px-3 py-2 border transition-all min-h-[44px] flex items-center justify-center ${
-                    statusFilter === status
-                      ? "bg-tech-main text-white border-tech-main"
-                      : "bg-transparent text-tech-main border-tech-main/30 hover:border-tech-main"
-                  }`}
-                >
-                  {status}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {allTags.length > 0 && (
+      <RevealSection delay={0}>
+        <BrutalCard className="p-4 sm:p-6 bg-white/60 backdrop-blur-sm border-tech-main/30">
+          <div className="space-y-4">
             <div>
               <h4 className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main mb-2">
-                FILTER_BY_TAGS_
+                FILTER_BY_STATUS_
               </h4>
               <div className="flex flex-wrap gap-2">
-                {allTags.map((tag) => (
+                {["ALL", "UNRESOLVED", "PENDING", "IN_PROGRESS", "RESOLVED"].map((status) => (
                   <button
-                    key={tag}
-                    onClick={() => toggleTag(tag)}
-                    className={`text-xs font-mono uppercase px-3 py-2 border transition-all min-h-[44px] flex items-center justify-center ${
-                      selectedTags.includes(tag)
-                        ? "bg-tech-accent text-white border-tech-accent"
-                        : "bg-tech-accent/5 text-tech-main border-tech-main/20 hover:border-tech-main/50"
+                    key={status}
+                    onClick={() => setStatusFilter(status)}
+                    className={`text-xs font-mono px-3 py-2 border transition-all min-h-[44px] flex items-center justify-center ${
+                      statusFilter === status
+                        ? "bg-tech-main text-white border-tech-main"
+                        : "bg-transparent text-tech-main border-tech-main/30 hover:border-tech-main"
                     }`}
                   >
-                    {tag}
+                    {status}
                   </button>
                 ))}
               </div>
             </div>
-          )}
-        </div>
-      </BrutalCard>
+
+            {allTags.length > 0 && (
+              <div>
+                <h4 className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main mb-2">
+                  FILTER_BY_TAGS_
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {allTags.map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => toggleTag(tag)}
+                      className={`text-xs font-mono uppercase px-3 py-2 border transition-all min-h-[44px] flex items-center justify-center ${
+                        selectedTags.includes(tag)
+                          ? "bg-tech-accent text-white border-tech-accent"
+                          : "bg-tech-accent/5 text-tech-main border-tech-main/20 hover:border-tech-main/50"
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </BrutalCard>
+      </RevealSection>
 
       {/* 列表分组展示 */}
       <div className="mt-8">
@@ -201,13 +211,14 @@ export function FeatureList({ features }: { features: any[] }) {
           </div>
         ) : (
           <>
-            {renderFeatureGroup("待解决 / PENDING", pendingFeatures, "No pending features")}
+            {renderFeatureGroup("待解决 / PENDING", pendingFeatures, "No pending features", 200)}
             {renderFeatureGroup(
               "解决中 / IN PROGRESS",
               inProgressFeatures,
               "No features in progress",
+              300,
             )}
-            {renderFeatureGroup("已解决 / RESOLVED", resolvedFeatures, "No resolved features")}
+            {renderFeatureGroup("已解决 / RESOLVED", resolvedFeatures, "No resolved features", 400)}
           </>
         )}
       </div>

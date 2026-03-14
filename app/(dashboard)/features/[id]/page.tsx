@@ -16,6 +16,7 @@ import { FeatureActions } from "./feature-actions";
 import { FeatureComments } from "./feature-comments";
 import { FeatureExplanation } from "./feature-explanation";
 import { StatusBadge } from "@/app/(dashboard)/features/feature-list";
+import { RevealSection } from "@/app/(dashboard)/features/reveal-helpers";
 
 export const revalidate = 60;
 
@@ -93,24 +94,26 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="container mx-auto p-4 sm:p-6 md:p-8 space-y-6 max-w-26l">
-      <div className="flex flex-col gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tighter uppercase border-b-2 border-tech-main pb-2 inline-block">
-            {canEdit ? "Edit Feature" : "View Feature"}
-          </h1>
-        </div>
+      <RevealSection delay={0}>
+        <div className="flex flex-col gap-4">
+          <div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tighter uppercase border-b-2 border-tech-main pb-2 inline-block">
+              {canEdit ? "Edit Feature" : "View Feature"}
+            </h1>
+          </div>
 
-        {/* Status Actions for logged in users */}
-        {session?.user && !isClosed && (
-          <FeatureActions
-            featureId={feature.id}
-            status={feature.status}
-            isAssignee={isAssignee}
-            isAdmin={isAdmin}
-            hasAssignee={!!feature.assigneeId}
-          />
-        )}
-      </div>
+          {/* Status Actions for logged in users */}
+          {session?.user && !isClosed && (
+            <FeatureActions
+              featureId={feature.id}
+              status={feature.status}
+              isAssignee={isAssignee}
+              isAdmin={isAdmin}
+              hasAssignee={!!feature.assigneeId}
+            />
+          )}
+        </div>
+      </RevealSection>
 
       {isClosed && (
         <div className="border-2 border-red-500 bg-red-50 p-4 sm:p-6 font-mono text-xs sm:text-sm text-red-800 uppercase tracking-wider mb-8 shadow-[4px_4px_0px_rgba(239,68,68,1)]">
@@ -122,97 +125,105 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
         </div>
       )}
 
-      <BrutalCard className="mb-8 p-4 sm:p-6">
-        <div className="flex flex-col gap-2 font-mono text-xs sm:text-sm">
-          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-            <span className="font-bold text-zinc-500 sm:w-24">STATUS:</span>
-            <StatusBadge status={feature.status} />
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-            <span className="font-bold text-zinc-500 sm:w-24">AUTHOR:</span>
-            <span className="break-words">
-              {feature.author.name || feature.author.email || "Unknown"}
-            </span>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-            <span className="font-bold text-zinc-500 sm:w-24">ASSIGNEE:</span>
-            <span className="break-words">
-              {feature.assignee ? feature.assignee.name || feature.assignee.email : "Unassigned"}
-            </span>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-            <span className="font-bold text-zinc-500 sm:w-24">CREATED:</span>
-            <span suppressHydrationWarning>{new Date(feature.createdAt).toLocaleString()}</span>
-          </div>
-          {feature.issueNumber && feature.htmlUrl && (
+      <RevealSection delay={100}>
+        <BrutalCard className="mb-8 p-4 sm:p-6">
+          <div className="flex flex-col gap-2 font-mono text-xs sm:text-sm">
             <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-              <span className="font-bold text-zinc-500 sm:w-24">GITHUB:</span>
-              <div className="flex gap-1 items-center flex-wrap">
-                Linked to
-                <a
-                  href={feature.htmlUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-tech-main border-b border-tech-main/50 font-mono hover:text-white hover:bg-tech-main/80 transition-colors break-words"
-                >
-                  Issue #{feature.issueNumber}
-                </a>
-              </div>
+              <span className="font-bold text-zinc-500 sm:w-24">STATUS:</span>
+              <StatusBadge status={feature.status} />
             </div>
-          )}
-        </div>
-      </BrutalCard>
-
-      <FeatureExplanation
-        featureId={feature.id}
-        initialExplanation={feature.explanation}
-        isAssignee={isAssignee}
-        isAdmin={isAdmin}
-        isClosed={isClosed}
-      />
-
-      <div className="pt-4">
-        {!isClosed && canEdit ? (
-          <FeatureEditor
-            initialData={{
-              id: feature.id,
-              title: feature.title,
-              content: feature.content,
-              tags: feature.tags,
-              status: feature.status,
-            }}
-          />
-        ) : (
-          <BrutalCard>
-            <h2 className="text-sm sm:text-base md:text-lg font-bold mb-4">{feature.title}</h2>
-
-            {feature.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-6">
-                {feature.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-xs font-mono uppercase border border-tech-main text-tech-main bg-tech-accent/10 px-2 py-1"
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+              <span className="font-bold text-zinc-500 sm:w-24">AUTHOR:</span>
+              <span className="break-words">
+                {feature.author.name || feature.author.email || "Unknown"}
+              </span>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+              <span className="font-bold text-zinc-500 sm:w-24">ASSIGNEE:</span>
+              <span className="break-words">
+                {feature.assignee ? feature.assignee.name || feature.assignee.email : "Unassigned"}
+              </span>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+              <span className="font-bold text-zinc-500 sm:w-24">CREATED:</span>
+              <span suppressHydrationWarning>{new Date(feature.createdAt).toLocaleString()}</span>
+            </div>
+            {feature.issueNumber && feature.htmlUrl && (
+              <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                <span className="font-bold text-zinc-500 sm:w-24">GITHUB:</span>
+                <div className="flex gap-1 items-center flex-wrap">
+                  Linked to
+                  <a
+                    href={feature.htmlUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-tech-main border-b border-tech-main/50 font-mono hover:text-white hover:bg-tech-main/80 transition-colors break-words"
                   >
-                    {tag}
-                  </span>
-                ))}
+                    Issue #{feature.issueNumber}
+                  </a>
+                </div>
               </div>
             )}
+          </div>
+        </BrutalCard>
+      </RevealSection>
 
-            <div className="prose prose-zinc max-w-26ne mt-8 border-t border-dashed border-tech-main/30 pt-6">
-              {/* Very simple non-editable view, actual MD rendering could be added here */}
-              <div className="whitespace-pre-wrap font-mono text-sm">{feature.content}</div>
-            </div>
-          </BrutalCard>
-        )}
-      </div>
+      <RevealSection delay={200}>
+        <FeatureExplanation
+          featureId={feature.id}
+          initialExplanation={feature.explanation}
+          isAssignee={isAssignee}
+          isAdmin={isAdmin}
+          isClosed={isClosed}
+        />
+      </RevealSection>
 
-      <FeatureComments
-        featureId={feature.id}
-        initialComments={feature.comments}
-        userId={session?.user?.id}
-        isClosed={isClosed}
-      />
+      <RevealSection delay={300}>
+        <div className="pt-4">
+          {!isClosed && canEdit ? (
+            <FeatureEditor
+              initialData={{
+                id: feature.id,
+                title: feature.title,
+                content: feature.content,
+                tags: feature.tags,
+                status: feature.status,
+              }}
+            />
+          ) : (
+            <BrutalCard>
+              <h2 className="text-sm sm:text-base md:text-lg font-bold mb-4">{feature.title}</h2>
+
+              {feature.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {feature.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-xs font-mono uppercase border border-tech-main text-tech-main bg-tech-accent/10 px-2 py-1"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <div className="prose prose-zinc max-w-26ne mt-8 border-t border-dashed border-tech-main/30 pt-6">
+                {/* Very simple non-editable view, actual MD rendering could be added here */}
+                <div className="whitespace-pre-wrap font-mono text-sm">{feature.content}</div>
+              </div>
+            </BrutalCard>
+          )}
+        </div>
+      </RevealSection>
+
+      <RevealSection delay={400}>
+        <FeatureComments
+          featureId={feature.id}
+          initialComments={feature.comments}
+          userId={session?.user?.id}
+          isClosed={isClosed}
+        />
+      </RevealSection>
     </div>
   );
 }

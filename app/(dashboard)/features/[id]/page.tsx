@@ -19,7 +19,7 @@ import { StatusBadge } from "@/app/(dashboard)/features/feature-list";
 
 export const revalidate = 60;
 
-export default async function FeatureDetailPage({ params }: { params: Promise<{ id: string; }>; }) {
+export default async function FeatureDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const issueNumber = Number.parseInt(id, 10);
   if (Number.isNaN(issueNumber) || issueNumber <= 0) {
@@ -54,6 +54,7 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
           email: parsedComment.metadata?.authorEmail ?? null,
           image: null,
         },
+        emailRedacted: parsedComment.metadata?.emailRedacted ?? false,
       };
     });
 
@@ -76,10 +77,10 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
     },
     assignee: parsedIssue.metadata?.assigneeId
       ? {
-        name: parsedIssue.metadata?.assigneeName ?? null,
-        email: parsedIssue.metadata?.assigneeEmail ?? null,
-        image: null,
-      }
+          name: parsedIssue.metadata?.assigneeName ?? null,
+          email: parsedIssue.metadata?.assigneeEmail ?? null,
+          image: null,
+        }
       : null,
     comments,
   };

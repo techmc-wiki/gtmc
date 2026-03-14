@@ -310,6 +310,41 @@ async function requestGithub<T>(
   return { data: parsed as T, response };
 }
 
+interface GithubEmailRecord {
+  email: string;
+  primary: boolean;
+  verified: boolean;
+  visibility: "public" | "private";
+}
+
+export async function getGithubEmailVisibility(token: string): Promise<"private" | "public"> {
+  if (!token) {
+    return "private";
+  }
+
+  try {
+    const { data } = await requestGithub<GithubEmailRecord[]>(
+      `${GITHUB_API_BASE}/user/emails`,
+      { method: "GET" },
+      undefined,
+      token,
+    );
+
+    if (!data || !Array.isArray(data)) {
+      return "private";
+    }
+
+    const primaryEmail = data.find((email) => email.primary);
+    if (!primaryEmail) {
+      return "private";
+    }
+
+    return primaryEmail.visibility === "public" ? "public" : "private";
+  } catch {
+    return "private";
+  }
+}
+
 async function _listAllIssuesUncached(
   state: "open" | "closed" | "all" = "open",
 ): Promise<GithubIssue[]> {
@@ -527,6 +562,7 @@ export interface CommentMetadata {
   appUserId: string;
   authorName: string | null;
   authorEmail: string | null;
+  emailRedacted?: boolean;
 }
 
 const METADATA_START = "<!-- GTMC_METADATA";
@@ -546,6 +582,7 @@ function serializeMetadata(metadata: IssueMetadata | CommentMetadata): string {
     assigneeId?: string;
     assigneeName?: string | null;
     assigneeEmail?: string | null;
+    emailRedacted?: boolean;
   } = {
     appUserId: metadata.appUserId,
     authorName: metadata.authorName,
@@ -564,6 +601,10 @@ function serializeMetadata(metadata: IssueMetadata | CommentMetadata): string {
       typeof metadata.assigneeEmail === "string" ? metadata.assigneeEmail : null;
   }
 
+  if ("emailRedacted" in metadata && metadata.emailRedacted === true) {
+    serialized.emailRedacted = true;
+  }
+
   return JSON.stringify(serialized);
 }
 
@@ -576,14 +617,18 @@ function parseMetadata<T extends IssueMetadata | CommentMetadata>(json: string):
     if (typeof parsed.appUserId !== "string") {
       return null;
     }
-    return {
+    const result: Record<string, unknown> = {
       appUserId: parsed.appUserId,
       authorName: typeof parsed.authorName === "string" ? parsed.authorName : null,
       authorEmail: typeof parsed.authorEmail === "string" ? parsed.authorEmail : null,
       assigneeId: typeof parsed.assigneeId === "string" ? parsed.assigneeId : undefined,
       assigneeName: typeof parsed.assigneeName === "string" ? parsed.assigneeName : null,
       assigneeEmail: typeof parsed.assigneeEmail === "string" ? parsed.assigneeEmail : null,
-    } as T;
+    };
+    if (typeof parsed.emailRedacted === "boolean") {
+      result.emailRedacted = parsed.emailRedacted;
+    }
+    return result as T;
   } catch {
     return null;
   }

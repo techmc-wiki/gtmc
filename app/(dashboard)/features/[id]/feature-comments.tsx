@@ -14,6 +14,7 @@ interface Comment {
     email: string | null;
     image: string | null;
   };
+  emailRedacted?: boolean;
 }
 
 export function FeatureComments({
@@ -54,7 +55,9 @@ export function FeatureComments({
           >
             <div className="flex items-center gap-2 mb-2 pb-2 border-b border-dashed border-tech-main/30 text-sm font-mono">
               <span className="font-bold text-tech-main uppercase tracking-wider">
-                {comment.author.name || comment.author.email || "Unknown"}
+                {comment.author.name ||
+                  (comment.emailRedacted ? "email redacted for privacy" : comment.author.email) ||
+                  "Unknown"}
               </span>
               <span className="text-zinc-500" suppressHydrationWarning>
                 {new Date(comment.createdAt).toLocaleString()}

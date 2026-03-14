@@ -20,6 +20,7 @@ import {
   labelsToStatus,
   labelsToTags,
   getIssue,
+  getGithubEmailVisibility,
   type IssueMetadata,
 } from "@/lib/github-features";
 
@@ -409,10 +410,25 @@ export async function addFeatureComment(id: string, content: string) {
     throw new Error("Feature is deleted and read-only");
   }
 
+  // Query GitHub Account and check email visibility
+  const account = await prisma.account.findFirst({
+    where: {
+      provider: "github",
+      userId: session.user.id,
+    },
+  });
+
+  const visibility = await getGithubEmailVisibility(account?.access_token || "");
+  const isPrivate = visibility === "private";
+
+  const authorEmail = isPrivate ? null : (session.user.email ?? null);
+  const emailRedacted = isPrivate;
+
   const commentBody = serializeCommentBody(content, {
     appUserId: session.user.id,
     authorName: session.user.name ?? null,
-    authorEmail: session.user.email ?? null,
+    authorEmail,
+    emailRedacted,
   });
 
   const ghComment = await addIssueComment(feature.issue.number, commentBody);
@@ -427,9 +443,10 @@ export async function addFeatureComment(id: string, content: string) {
       createdAt: new Date(ghComment.createdAt),
       author: {
         name: session.user.name ?? null,
-        email: session.user.email ?? null,
+        email: authorEmail,
         image: (session.user as any).image ?? null,
       },
+      emailRedacted,
     },
   };
 }

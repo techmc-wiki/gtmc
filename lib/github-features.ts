@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+
 export interface GithubIssue {
   number: number;
   title: string;
@@ -308,7 +310,7 @@ async function requestGithub<T>(
   return { data: parsed as T, response };
 }
 
-export async function listAllIssues(
+async function _listAllIssuesUncached(
   state: "open" | "closed" | "all" = "open",
 ): Promise<GithubIssue[]> {
   const config = getGithubRepoConfig();
@@ -331,6 +333,10 @@ export async function listAllIssues(
 
   return allIssues;
 }
+
+export const listAllIssues = unstable_cache(_listAllIssuesUncached, ["github-issues"], {
+  revalidate: 300,
+});
 
 export const listIssues = listAllIssues;
 

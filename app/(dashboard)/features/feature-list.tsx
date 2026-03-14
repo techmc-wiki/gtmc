@@ -5,21 +5,21 @@ import Link from "next/link";
 import { BrutalCard } from "@/components/ui/brutal-card";
 
 export function StatusBadge({ status }: { status: string }) {
-  let styles = "px-2 py-1 text-xs font-bold uppercase border";
+  let styles = "px-2 text-xs font-bold uppercase border";
   let label = status;
 
   switch (status) {
     case "PENDING":
       styles += " bg-yellow-100 border-yellow-400 text-yellow-800";
-      label = "待解决";
+      label = "UNRESOLVED";
       break;
     case "IN_PROGRESS":
       styles += " bg-blue-100 border-blue-400 text-blue-800";
-      label = "解决中";
+      label = "IN_PROGRESS";
       break;
     case "RESOLVED":
       styles += " bg-green-100 border-green-400 text-green-800";
-      label = "已解决";
+      label = "RESOLVED";
       break;
     default:
       styles += " bg-zinc-100 border-zinc-300 text-zinc-600";
@@ -47,9 +47,9 @@ export function FeatureList({ features }: { features: any[] }) {
     );
   };
 
-  // Filter features
-  const filteredFeatures = useMemo(() => {
-    return features.filter((f) => {
+  // Filter and group features in a single pass
+  const { filteredFeatures, groupedFeatures } = useMemo(() => {
+    const filtered = features.filter((f) => {
       const matchTags =
         selectedTags.length === 0 || selectedTags.every((tag) => f.tags?.includes(tag));
       const matchStatus =
@@ -58,11 +58,29 @@ export function FeatureList({ features }: { features: any[] }) {
         f.status === statusFilter;
       return matchTags && matchStatus;
     });
+
+    const grouped = {
+      PENDING: [] as any[],
+      IN_PROGRESS: [] as any[],
+      RESOLVED: [] as any[],
+    };
+
+    filtered.forEach((f) => {
+      if (f.status === "PENDING") {
+        grouped.PENDING.push(f);
+      } else if (f.status === "IN_PROGRESS") {
+        grouped.IN_PROGRESS.push(f);
+      } else if (f.status === "RESOLVED") {
+        grouped.RESOLVED.push(f);
+      }
+    });
+
+    return { filteredFeatures: filtered, groupedFeatures: grouped };
   }, [features, selectedTags, statusFilter]);
 
-  const pendingFeatures = filteredFeatures.filter((f) => f.status === "PENDING");
-  const inProgressFeatures = filteredFeatures.filter((f) => f.status === "IN_PROGRESS");
-  const resolvedFeatures = filteredFeatures.filter((f) => f.status === "RESOLVED");
+  const pendingFeatures = groupedFeatures.PENDING;
+  const inProgressFeatures = groupedFeatures.IN_PROGRESS;
+  const resolvedFeatures = groupedFeatures.RESOLVED;
 
   const renderFeatureGroup = (title: string, groupFeatures: any[], emptyText: string) => {
     if (groupFeatures.length === 0) {

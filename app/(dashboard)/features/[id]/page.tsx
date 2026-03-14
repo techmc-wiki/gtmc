@@ -15,10 +15,11 @@ import { BrutalCard } from "@/components/ui/brutal-card";
 import { FeatureActions } from "./feature-actions";
 import { FeatureComments } from "./feature-comments";
 import { FeatureExplanation } from "./feature-explanation";
+import { StatusBadge } from "@/app/(dashboard)/features/feature-list";
 
 export const revalidate = 60;
 
-export default async function FeatureDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function FeatureDetailPage({ params }: { params: Promise<{ id: string; }>; }) {
   const { id } = await params;
   const issueNumber = Number.parseInt(id, 10);
   if (Number.isNaN(issueNumber) || issueNumber <= 0) {
@@ -75,10 +76,10 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
     },
     assignee: parsedIssue.metadata?.assigneeId
       ? {
-          name: parsedIssue.metadata?.assigneeName ?? null,
-          email: parsedIssue.metadata?.assigneeEmail ?? null,
-          image: null,
-        }
+        name: parsedIssue.metadata?.assigneeName ?? null,
+        email: parsedIssue.metadata?.assigneeEmail ?? null,
+        image: null,
+      }
       : null,
     comments,
   };
@@ -209,28 +210,4 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
       />
     </div>
   );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  let styles = "px-2 text-xs font-bold uppercase border";
-  let label = status;
-
-  switch (status) {
-    case "PENDING":
-      styles += " bg-yellow-100 border-yellow-400 text-yellow-800";
-      label = "UNRESOLVED";
-      break;
-    case "IN_PROGRESS":
-      styles += " bg-blue-100 border-blue-400 text-blue-800";
-      label = "IN_PROGRESS";
-      break;
-    case "RESOLVED":
-      styles += " bg-green-100 border-green-400 text-green-800";
-      label = "RESOLVED";
-      break;
-    default:
-      styles += " bg-zinc-100 border-zinc-300 text-zinc-600";
-  }
-
-  return <span className={styles}>{label}</span>;
 }

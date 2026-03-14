@@ -9,7 +9,9 @@
     "lint": "eslint",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "postinstall": "prisma generate && node scripts/fix-prisma.js"
+    "postinstall": "prisma generate && node scripts/fix-prisma.js",
+    "analyze": "ANALYZE=true pnpm build",
+    "lighthouse": "lhci autorun"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
@@ -38,6 +40,8 @@
     "undici": "^7.24.0"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
+    "@next/bundle-analyzer": "^16.1.6",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/mime-types": "^3.0.1",
     "@types/node": "^25.5.0",

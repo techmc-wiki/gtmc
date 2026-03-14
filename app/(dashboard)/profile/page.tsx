@@ -5,6 +5,7 @@ import { BrutalInput } from "@/components/ui/brutal-input";
 import { BrutalAvatar } from "@/components/ui/brutal-avatar";
 import { updateProfileAction } from "@/actions/profile";
 import { SignOutButton } from "@/components/ui/sign-out-button";
+import { getGithubEmailVisibility } from "@/lib/github-features";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -19,6 +20,11 @@ export default async function ProfilePage() {
   if (!user) {
     redirect("/login");
   }
+
+  const account = await prisma.account.findFirst({
+    where: { provider: "github", userId: user.id },
+  });
+  const emailVisibility = await getGithubEmailVisibility(account?.access_token || "");
 
   return (
     <div className="max-w-4xl mx-auto space-y-12 pb-20 mt-8 animate-fade-in">
@@ -114,12 +120,22 @@ export default async function ProfilePage() {
                 <span className="border border-tech-main/30 px-1 text-[9px] bg-tech-main/5 text-tech-main/60">
                   RO
                 </span>
+                {emailVisibility === "private" && (
+                  <span className="border border-amber-400/60 px-1 text-[9px] bg-amber-50 text-amber-600">
+                    PRIVATE
+                  </span>
+                )}
               </label>
               <BrutalInput
                 defaultValue={user.email || ""}
                 disabled
                 className="font-mono text-sm border border-tech-main/20 bg-tech-main/5 text-tech-main/60 shadow-none cursor-not-allowed w-full rounded-none tracking-wide"
               />
+              {emailVisibility === "private" && (
+                <p className="text-[10px] text-amber-600/70 font-mono uppercase tracking-widest mt-2 border-l border-amber-400/40 pl-2">
+                  {">"} YOUR GITHUB PRIMARY EMAIL VISIBILITY IS SET TO PRIVATE
+                </p>
+              )}
             </div>
           </div>
 

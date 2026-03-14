@@ -6,6 +6,7 @@ import { BrutalInput } from "../ui/brutal-input";
 import { useRouter } from "next/navigation";
 import { updateFeature } from "@/actions/feature";
 import { compressImageForUpload } from "@/lib/image-compression";
+import { LoadingIndicator, PENDING_LABELS } from "@/app/(dashboard)/features/loading-indicator";
 
 interface FeatureEditorProps {
   initialData?: {
@@ -201,6 +202,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             readOnly={isReadOnly}
+            aria-busy={isSaving}
           />
         </div>
 
@@ -214,6 +216,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             readOnly={isReadOnly}
+            aria-busy={isSaving}
           />
         </div>
       </div>
@@ -277,6 +280,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             onClick={() => fileInputRef.current?.click()}
             disabled={isReadOnly || isUploading}
             className="hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
+            aria-busy={isUploading}
           >
             {isCompressing
               ? "[ COMPRESSING... ]"
@@ -319,10 +323,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
               if (!isReadOnly) e.preventDefault();
             }}
             readOnly={isReadOnly}
+            aria-busy={isSaving}
           />
 
           {isUploading && (
-            <div className="absolute top-4 right-4 bg-tech-main text-tech-accent text-xs font-mono px-3 py-1.5 border border-tech-accent shadow-sm shadow-tech-accent/20 z-20 flex items-center gap-2 backdrop-blur-sm">
+            <div className="absolute top-4 right-4 bg-tech-main text-tech-accent text-xs font-mono px-3 py-1.5 border border-tech-accent shadow-sm shadow-tech-accent/20 z-20 flex items-center gap-2 backdrop-blur-sm" aria-live="polite" aria-label="Image upload status">
               <span className="inline-block w-2 h-2 bg-tech-accent animate-pulse"></span>
               {isCompressing ? "COMPRESSING_IMAGE..." : "UPLOADING_IMAGE..."}
             </div>
@@ -338,8 +343,14 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             CANCEL_
           </BrutalButton>
 
-          <BrutalButton type="submit" variant="primary" disabled={isSaving}>
-            {isSaving ? "SAVING..." : "SAVE_FEATURE_"}
+          <BrutalButton type="submit" variant="primary" disabled={isSaving} aria-busy={isSaving && initialData?.id ? true : false}>
+            {isSaving && initialData?.id ? (
+              <LoadingIndicator label={PENDING_LABELS.SAVING_FEATURE} />
+            ) : isSaving ? (
+              "SAVING..."
+            ) : (
+              "SAVE_FEATURE_"
+            )}
           </BrutalButton>
         </div>
       )}

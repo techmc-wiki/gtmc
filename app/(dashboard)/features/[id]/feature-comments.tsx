@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { addFeatureComment } from "@/actions/feature";
 import { BrutalButton } from "@/components/ui/brutal-button";
 import { BrutalCard } from "@/components/ui/brutal-card";
+import { LoadingIndicator, PENDING_LABELS } from "../loading-indicator";
 
 interface Comment {
   id: string;
@@ -92,8 +93,13 @@ export function FeatureComments({
                   type="submit"
                   disabled={isPending || !content.trim()}
                   variant="primary"
+                  aria-busy={isPending}
                 >
-                  {isPending ? "POSTING..." : "POST_COMMENT"}
+                  {isPending ? (
+                    <LoadingIndicator label={PENDING_LABELS.POSTING_COMMENT} />
+                  ) : (
+                    "POST_COMMENT"
+                  )}
                 </BrutalButton>
               </div>
             </BrutalCard>

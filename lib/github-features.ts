@@ -751,8 +751,9 @@ export function parseCommentBody(body: string): {
 
   const rest = body.slice(firstNewline === -1 ? body.length : firstNewline + 1);
   const content = rest.replace(/^\n/, "");
+  const contentWithoutAttribution = content.replace(/^\[By\]:[^\n]*\n\n/, "");
 
-  return { content, metadata };
+  return { content: contentWithoutAttribution, metadata };
 }
 
 export type AppFeatureStatus = "PENDING" | "IN_PROGRESS" | "RESOLVED";

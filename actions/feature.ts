@@ -26,7 +26,11 @@ import {
 
 const QQ_BOT_WEBHOOK = process.env.QQ_BOT_WEBHOOK || "";
 
-async function sendQQBotNotification(payload: any) {
+async function sendQQBotNotification(payload: {
+  type?: string;
+  text: string;
+  data?: Record<string, unknown>;
+}) {
   if (!QQ_BOT_WEBHOOK) {
     console.log("[Mock QQ Bot] Would send payload to webhook: ", payload.text);
     return;
@@ -51,11 +55,7 @@ async function getFeatureByIssueNumber(issueNumber: number) {
   return { issue, parsed };
 }
 
-async function resolveMentionToken(
-  appUserId: string,
-  displayName: string | null,
-  displayEmail: string | null,
-): Promise<string> {
+async function resolveMentionToken(appUserId: string, displayName: string | null): Promise<string> {
   try {
     const account = await prisma.account.findFirst({
       where: { provider: "github", userId: appUserId },
@@ -67,7 +67,7 @@ async function resolveMentionToken(
   } catch {
     // fallthrough to plain text
   }
-  return displayName ?? displayEmail ?? appUserId;
+  return displayName ?? appUserId;
 }
 
 function getMetadataForWrite(
@@ -264,16 +264,25 @@ export async function assignFeature(id: string) {
 
   // Post claim bot comment (best-effort, does not fail the action)
   try {
-    const mentionToken = await resolveMentionToken(
-      session.user.id,
-      session.user.name ?? null,
-      session.user.email ?? null,
-    );
+    const mentionToken = await resolveMentionToken(session.user.id, session.user.name ?? null);
+
+    // Query GitHub Account and check email visibility
+    const account = await prisma.account.findFirst({
+      where: {
+        provider: "github",
+        userId: session.user.id,
+      },
+    });
+
+    const visibility = await getGithubEmailVisibility(account?.access_token || "");
+    const assigneeEmail =
+      visibility === "private" ? "REDACTED FOR PRIVACY" : (session.user.email ?? "Unknown");
+
     const payload = `[Assignment Notice]
 Action: CLAIMED
 Assignee: ${mentionToken}
 AssigneeId: ${session.user.id}
-AssigneeEmail: ${session.user.email ?? "N/A"}
+AssigneeEmail: ${assigneeEmail}
 By: ${mentionToken}
 At: ${new Date().toISOString()}`;
     await addIssueComment(issue.number, serializeSystemComment(payload));
@@ -327,18 +336,10 @@ export async function unassignFeature(id: string) {
 
   // Post drop bot comment (best-effort, does not fail the action)
   try {
-    const mentionToken = await resolveMentionToken(
-      session.user.id,
-      session.user.name ?? null,
-      session.user.email ?? null,
-    );
+    const mentionToken = await resolveMentionToken(session.user.id, session.user.name ?? null);
     const prevAssigneeId = parsed.metadata?.assigneeId ?? "";
     const previousMentionToken = prevAssigneeId
-      ? await resolveMentionToken(
-          prevAssigneeId,
-          parsed.metadata?.assigneeName ?? null,
-          parsed.metadata?.assigneeEmail ?? null,
-        )
+      ? await resolveMentionToken(prevAssigneeId, parsed.metadata?.assigneeName ?? null)
       : "N/A";
     const payload = `[Assignment Notice]
 Action: DROPPED
@@ -421,10 +422,19 @@ export async function addFeatureComment(id: string, content: string) {
   const visibility = await getGithubEmailVisibility(account?.access_token || "");
   const isPrivate = visibility === "private";
 
+  const githubLogin = account?.providerAccountId
+    ? await getGithubLoginByAccountId(account.providerAccountId)
+    : null;
+  const fallbackAuthorLabel = session.user.name ?? session.user.email ?? session.user.id;
+  const mentionToken = githubLogin ? `@${githubLogin}` : fallbackAuthorLabel;
+  const authorLine = githubLogin
+    ? `[By]: ${mentionToken} (${fallbackAuthorLabel})`
+    : `[By]: ${mentionToken}`;
+
   const authorEmail = isPrivate ? null : (session.user.email ?? null);
   const emailRedacted = isPrivate;
 
-  const commentBody = serializeCommentBody(content, {
+  const commentBody = serializeCommentBody(`${authorLine}\n\n${content}`, {
     appUserId: session.user.id,
     authorName: session.user.name ?? null,
     authorEmail,
@@ -444,7 +454,7 @@ export async function addFeatureComment(id: string, content: string) {
       author: {
         name: session.user.name ?? null,
         email: authorEmail,
-        image: (session.user as any).image ?? null,
+        image: (session.user as { image?: string | null }).image ?? null,
       },
       emailRedacted,
     },

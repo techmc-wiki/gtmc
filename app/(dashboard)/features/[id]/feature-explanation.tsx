@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { BrutalCard } from "@/components/ui/brutal-card";
 import { BrutalButton } from "@/components/ui/brutal-button";
 import { updateFeatureExplanation } from "@/actions/feature";
+import { LoadingIndicator, PENDING_LABELS } from "../loading-indicator";
 
 interface FeatureExplanationProps {
   featureId: string;
@@ -48,6 +49,7 @@ export function FeatureExplanation({
           onChange={(e) => setExplanation(e.target.value)}
           placeholder="PROVIDE OFFICIAL EXPLANATION / RESOLUTION..."
           disabled={isPending}
+          aria-busy={isPending}
         />
         <div className="flex gap-2 justify-end">
           <BrutalButton
@@ -64,8 +66,13 @@ export function FeatureExplanation({
             className="bg-tech-accent border-tech-accent text-white hover:bg-tech-accent/90"
             onClick={handleSave}
             disabled={isPending}
+            aria-busy={isPending}
           >
-            {isPending ? "SAVING..." : "SAVE_EXPLANATION"}
+            {isPending ? (
+              <LoadingIndicator label={PENDING_LABELS.SAVING_EXPLANATION} />
+            ) : (
+              "SAVE_EXPLANATION"
+            )}
           </BrutalButton>
         </div>
       </BrutalCard>

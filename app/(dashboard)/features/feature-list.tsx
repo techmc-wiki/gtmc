@@ -51,8 +51,7 @@ export function FeatureList({ features }: { features: any[] }) {
   const filteredFeatures = useMemo(() => {
     return features.filter((f) => {
       const matchTags =
-        selectedTags.length === 0 ||
-        selectedTags.every((tag) => f.tags?.includes(tag));
+        selectedTags.length === 0 || selectedTags.every((tag) => f.tags?.includes(tag));
       const matchStatus =
         statusFilter === "ALL" ||
         (statusFilter === "UNRESOLVED" && f.status !== "RESOLVED") ||
@@ -61,21 +60,11 @@ export function FeatureList({ features }: { features: any[] }) {
     });
   }, [features, selectedTags, statusFilter]);
 
-  const pendingFeatures = filteredFeatures.filter(
-    (f) => f.status === "PENDING",
-  );
-  const inProgressFeatures = filteredFeatures.filter(
-    (f) => f.status === "IN_PROGRESS",
-  );
-  const resolvedFeatures = filteredFeatures.filter(
-    (f) => f.status === "RESOLVED",
-  );
+  const pendingFeatures = filteredFeatures.filter((f) => f.status === "PENDING");
+  const inProgressFeatures = filteredFeatures.filter((f) => f.status === "IN_PROGRESS");
+  const resolvedFeatures = filteredFeatures.filter((f) => f.status === "RESOLVED");
 
-  const renderFeatureGroup = (
-    title: string,
-    groupFeatures: any[],
-    emptyText: string,
-  ) => {
+  const renderFeatureGroup = (title: string, groupFeatures: any[], emptyText: string) => {
     if (groupFeatures.length === 0) {
       return null;
     }
@@ -87,11 +76,7 @@ export function FeatureList({ features }: { features: any[] }) {
         </h3>
         <div className="grid gap-4">
           {groupFeatures.map((feature) => (
-            <Link
-              key={feature.id}
-              href={`/features/${feature.id}`}
-              className="block"
-            >
+            <Link key={feature.id} href={`/features/${feature.id}`} className="block">
               <BrutalCard className="hover:border-zinc-800 transition-colors flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center p-4 cursor-pointer bg-white/60 backdrop-blur-sm">
                 <div className="space-y-2 flex-grow">
                   <div className="flex items-center gap-2">
@@ -147,21 +132,19 @@ export function FeatureList({ features }: { features: any[] }) {
               FILTER_BY_STATUS_
             </h4>
             <div className="flex flex-wrap gap-2">
-              {["ALL", "UNRESOLVED", "PENDING", "IN_PROGRESS", "RESOLVED"].map(
-                (status) => (
-                  <button
-                    key={status}
-                    onClick={() => setStatusFilter(status)}
-                    className={`text-xs font-mono px-3 py-1.5 border transition-all ${
-                      statusFilter === status
-                        ? "bg-tech-main text-white border-tech-main"
-                        : "bg-transparent text-tech-main border-tech-main/30 hover:border-tech-main"
-                    }`}
-                  >
-                    {status}
-                  </button>
-                ),
-              )}
+              {["ALL", "UNRESOLVED", "PENDING", "IN_PROGRESS", "RESOLVED"].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`text-xs font-mono px-3 py-1.5 border transition-all ${
+                    statusFilter === status
+                      ? "bg-tech-main text-white border-tech-main"
+                      : "bg-transparent text-tech-main border-tech-main/30 hover:border-tech-main"
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -198,21 +181,13 @@ export function FeatureList({ features }: { features: any[] }) {
           </div>
         ) : (
           <>
-            {renderFeatureGroup(
-              "待解决 / PENDING",
-              pendingFeatures,
-              "No pending features",
-            )}
+            {renderFeatureGroup("待解决 / PENDING", pendingFeatures, "No pending features")}
             {renderFeatureGroup(
               "解决中 / IN PROGRESS",
               inProgressFeatures,
               "No features in progress",
             )}
-            {renderFeatureGroup(
-              "已解决 / RESOLVED",
-              resolvedFeatures,
-              "No resolved features",
-            )}
+            {renderFeatureGroup("已解决 / RESOLVED", resolvedFeatures, "No resolved features")}
           </>
         )}
       </div>

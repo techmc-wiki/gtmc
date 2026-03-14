@@ -18,9 +18,7 @@ type State =
   | { status: "success"; featureId: string }
   | { status: "error"; message: string };
 
-function isPendingFeaturePayload(
-  value: unknown,
-): value is PendingFeaturePayload {
+function isPendingFeaturePayload(value: unknown): value is PendingFeaturePayload {
   if (!value || typeof value !== "object") {
     return false;
   }
@@ -84,18 +82,14 @@ export function PendingCreationBanner() {
 
   // If no payload ever, render nothing
   const raw =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem(PENDING_FEATURE_CREATE_KEY)
-      : null;
+    typeof window !== "undefined" ? sessionStorage.getItem(PENDING_FEATURE_CREATE_KEY) : null;
   if (!raw && state.status === "pending") return null;
 
   if (state.status === "success") {
     return (
       <div className="border border-tech-main/40 bg-white/60 backdrop-blur-sm px-4 py-3 font-mono text-sm flex items-center gap-3">
         <span className="w-2 h-2 bg-tech-main inline-block" />
-        <span className="text-tech-main uppercase tracking-[0.1em]">
-          FEATURE_CREATED_
-        </span>
+        <span className="text-tech-main uppercase tracking-[0.1em]">FEATURE_CREATED_</span>
         <Link
           href={`/features/${state.featureId}`}
           className="underline text-tech-accent hover:text-tech-main ml-2"
@@ -110,9 +104,7 @@ export function PendingCreationBanner() {
     return (
       <div className="border border-red-400/60 bg-red-50/60 backdrop-blur-sm px-4 py-3 font-mono text-sm flex items-center gap-3">
         <span className="w-2 h-2 bg-red-500 inline-block" />
-        <span className="text-red-700 uppercase tracking-[0.1em]">
-          CREATION_FAILED_
-        </span>
+        <span className="text-red-700 uppercase tracking-[0.1em]">CREATION_FAILED_</span>
         <span className="text-red-600 text-xs ml-2">{state.message}</span>
         <button
           onClick={() =>
@@ -134,9 +126,7 @@ export function PendingCreationBanner() {
   return (
     <div className="border border-tech-main/40 bg-white/60 backdrop-blur-sm px-4 py-3 font-mono text-sm flex items-center gap-3">
       <span className="w-2 h-2 bg-tech-accent animate-pulse inline-block" />
-      <span className="text-tech-main uppercase tracking-[0.1em]">
-        CREATING_FEATURE_...
-      </span>
+      <span className="text-tech-main uppercase tracking-[0.1em]">CREATING_FEATURE_...</span>
     </div>
   );
 }

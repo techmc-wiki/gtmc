@@ -35,14 +35,12 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
     if (!textareaRef.current) return;
     const start = textareaRef.current.selectionStart;
     const end = textareaRef.current.selectionEnd;
-    const newContent =
-      content.substring(0, start) + text + content.substring(end);
+    const newContent = content.substring(0, start) + text + content.substring(end);
     setContent(newContent);
 
     setTimeout(() => {
       if (textareaRef.current) {
-        textareaRef.current.selectionStart = textareaRef.current.selectionEnd =
-          start + text.length;
+        textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + text.length;
         textareaRef.current.focus();
       }
     }, 0);
@@ -65,10 +63,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
 
       if (result.error) {
         setContent((prev) =>
-          prev.replace(
-            placeholder,
-            `<!-- Upload failed: ${result.error} -->\n`,
-          ),
+          prev.replace(placeholder, `<!-- Upload failed: ${result.error} -->\n`),
         );
         alert(result.error);
         setIsUploading(false);
@@ -84,9 +79,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
       });
 
       if (res.status === 413) {
-        throw new Error(
-          "Image is too large to upload. Please use a smaller image.",
-        );
+        throw new Error("Image is too large to upload. Please use a smaller image.");
       }
 
       let data;
@@ -97,20 +90,14 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
       }
 
       if (res.ok && data.url) {
-        setContent((prev) =>
-          prev.replace(placeholder, `![${file.name}](${data.url})\n`),
-        );
+        setContent((prev) => prev.replace(placeholder, `![${file.name}](${data.url})\n`));
       } else {
-        setContent((prev) =>
-          prev.replace(placeholder, `<!-- Upload failed: ${data.error} -->\n`),
-        );
+        setContent((prev) => prev.replace(placeholder, `<!-- Upload failed: ${data.error} -->\n`));
         alert(data.error || "Upload failed");
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Upload error";
-      setContent((prev) =>
-        prev.replace(placeholder, `<!-- Upload failed: ${message} -->\n`),
-      );
+      setContent((prev) => prev.replace(placeholder, `<!-- Upload failed: ${message} -->\n`));
       alert(message);
       console.error(error);
     } finally {
@@ -158,8 +145,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
       if (textareaRef.current) {
         textareaRef.current.focus();
         textareaRef.current.selectionStart = start + prefix.length;
-        textareaRef.current.selectionEnd =
-          start + prefix.length + selectedText.length;
+        textareaRef.current.selectionEnd = start + prefix.length + selectedText.length;
       }
     }, 0);
   };
@@ -348,11 +334,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-tech-main/10 relative">
           <div className="absolute top-0 right-0 w-8 h-px bg-tech-main"></div>
 
-          <BrutalButton
-            type="button"
-            variant="ghost"
-            onClick={() => router.back()}
-          >
+          <BrutalButton type="button" variant="ghost" onClick={() => router.back()}>
             CANCEL_
           </BrutalButton>
 

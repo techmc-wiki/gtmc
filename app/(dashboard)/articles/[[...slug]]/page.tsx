@@ -87,13 +87,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         content = fs.readFileSync(fullPath, "utf-8");
       }
       // ONLY re-assign editPath on success!
-      editPath = path
-        .relative(path.join(process.cwd(), "assets"), fullPath)
-        .replace(/\\/g, "/");
+      editPath = path.relative(path.join(process.cwd(), "assets"), fullPath).replace(/\\/g, "/");
     } catch (error) {
       if (rawPath.includes("404")) {
-        content =
-          "# 404 Not Found\n\nThe requested article is not available yet.";
+        content = "# 404 Not Found\n\nThe requested article is not available yet.";
       } else {
         notFound();
       }
@@ -136,9 +133,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             <span className="w-2 h-2 bg-tech-main/50 mr-2 animate-pulse"></span>
             SYS.READ_STREAM | UTF-8
           </div>
-          <div className="text-[10px] font-mono text-slate-500 break-all">
-            PATH: {rawPath}
-          </div>
+          <div className="text-[10px] font-mono text-slate-500 break-all">PATH: {rawPath}</div>
         </div>
       </div>
 
@@ -148,9 +143,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           rehypePlugins={[rehypeRaw, rehypeKatex, rehypeSlug]}
           components={
             {
-              wtucolor: ({ node, ...props }: any) => (
-                <span style={{ color: "red" }} {...props} />
-              ),
+              wtucolor: ({ node, ...props }: any) => <span style={{ color: "red" }} {...props} />,
 
               ttcolor: ({ node, ...props }: any) => (
                 <span style={{ color: "#ff7300" }} {...props} />
@@ -160,29 +153,21 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 <span style={{ color: "#ffae00" }} {...props} />
               ),
 
-              becolor: ({ node, ...props }: any) => (
-                <span style={{ color: "green" }} {...props} />
-              ),
+              becolor: ({ node, ...props }: any) => <span style={{ color: "green" }} {...props} />,
 
-              eucolor: ({ node, ...props }: any) => (
-                <span style={{ color: "blue" }} {...props} />
-              ),
+              eucolor: ({ node, ...props }: any) => <span style={{ color: "blue" }} {...props} />,
 
               tecolor: ({ node, ...props }: any) => (
                 <span style={{ color: "blueviolet" }} {...props} />
               ),
 
-              atcolor: ({ node, ...props }: any) => (
-                <span style={{ color: "purple" }} {...props} />
-              ),
+              atcolor: ({ node, ...props }: any) => <span style={{ color: "purple" }} {...props} />,
 
               heightlightnormal: ({ node, ...props }: any) => (
                 <span style={{ color: "chartreuse" }} {...props} />
               ),
               nc: ({ node, ...props }: any) => <span {...props} />,
-              hidden: ({ node, ...props }: any) => (
-                <span style={{ display: "none" }} {...props} />
-              ),
+              hidden: ({ node, ...props }: any) => <span style={{ display: "none" }} {...props} />,
 
               heightlightwarning: ({ node, ...props }: any) => (
                 <span style={{ color: "crimson" }} {...props} />
@@ -200,10 +185,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 </div>
               ),
               thead: ({ node, ...props }: any) => (
-                <thead
-                  className="bg-tech-main/10 border-b border-tech-main/30"
-                  {...props}
-                />
+                <thead className="bg-tech-main/10 border-b border-tech-main/30" {...props} />
               ),
               th: ({ node, ...props }: any) => (
                 <th
@@ -268,21 +250,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               ),
 
               p: ({ node, ...props }: any) => (
-                <p
-                  className="text-base leading-relaxed mb-6 font-mono text-slate-800"
-                  {...props}
-                />
+                <p className="text-base leading-relaxed mb-6 font-mono text-slate-800" {...props} />
               ),
               a: ({ node, ...props }: any) => {
                 let href = props.href || "";
                 if (href.startsWith("./") || href.startsWith("../")) {
-                  const currentDir = path
-                    .dirname("/" + rawPath)
-                    .replace(/^\/+/, "");
+                  const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "");
                   try {
-                    const resolved = path
-                      .join(currentDir, href)
-                      .replace(/\\/g, "/");
+                    const resolved = path.join(currentDir, href).replace(/\\/g, "/");
                     href = `/articles/${resolved}`;
                   } catch (e) {}
                 } else if (
@@ -290,12 +265,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   !href.startsWith("#") &&
                   !href.startsWith("/")
                 ) {
-                  const currentDir = path
-                    .dirname("/" + rawPath)
-                    .replace(/^\/+/, "");
-                  const resolved = path
-                    .join(currentDir, href)
-                    .replace(/\\/g, "/");
+                  const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "");
+                  const resolved = path.join(currentDir, href).replace(/\\/g, "/");
                   href = `/articles/${resolved}`;
                 }
                 return (
@@ -337,12 +308,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   src.startsWith("../") ||
                   (!src.startsWith("http") && !src.startsWith("/"))
                 ) {
-                  const currentDir = path
-                    .dirname("/" + rawPath)
-                    .replace(/^\/+/, "");
-                  const resolved = path
-                    .join(currentDir, src)
-                    .replace(/\\/g, "/");
+                  const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "");
+                  const resolved = path.join(currentDir, src).replace(/\\/g, "/");
                   src = `/api/assets?path=${encodeURIComponent(resolved)}`;
                 }
                 return (
@@ -359,9 +326,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   <div className="my-6 border border-tech-main/30 font-mono text-sm max-w-full overflow-hidden bg-[#1e1e1e] shadow-sm">
                     <div className="bg-tech-main/10 text-tech-main px-4 py-1 text-xs font-mono uppercase tracking-widest flex justify-between items-center border-b border-tech-main/30">
                       <span>{match[1]}</span>
-                      <span className="opacity-50">
-                        {"//"} EXECUTABLE_BLOCK
-                      </span>
+                      <span className="opacity-50">{"//"} EXECUTABLE_BLOCK</span>
                     </div>
                     <div className="overflow-x-auto">
                       <SyntaxHighlighter

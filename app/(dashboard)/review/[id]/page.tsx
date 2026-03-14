@@ -15,11 +15,7 @@ import { BrutalButton } from "@/components/ui/brutal-button";
 import { BrutalCard } from "@/components/ui/brutal-card";
 import { approveRevisionAction, rejectRevisionAction } from "@/actions/admin";
 
-export default async function ReviewDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function ReviewDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user || session.user.role !== "ADMIN") {
     redirect("/");
@@ -53,9 +49,7 @@ export default async function ReviewDetailPage({
           </h1>
           <div className="flex flex-wrap items-center gap-4 text-xs font-mono bg-tech-main/10 text-tech-main-dark p-3 inline-flex border border-tech-main/30">
             <span className="text-tech-main">AUTHOR:</span>
-            <span className="uppercase">
-              {revision.author?.name || "UNKNOWN_USER"}
-            </span>
+            <span className="uppercase">{revision.author?.name || "UNKNOWN_USER"}</span>
             <span className="text-tech-main/50 px-2">{"//"}</span>
             <span className="text-tech-main">TARGET_FILE:</span>
             <span>{revision.filePath || "NEW_ARTICLE"}</span>
@@ -99,9 +93,7 @@ export default async function ReviewDetailPage({
             rehypePlugins={[rehypeRaw, rehypeKatex]}
             components={
               {
-                wtucolor: ({ node, ...props }: any) => (
-                  <span style={{ color: "red" }} {...props} />
-                ),
+                wtucolor: ({ node, ...props }: any) => <span style={{ color: "red" }} {...props} />,
                 ttcolor: ({ node, ...props }: any) => (
                   <span style={{ color: "#ff7300" }} {...props} />
                 ),
@@ -111,9 +103,7 @@ export default async function ReviewDetailPage({
                 becolor: ({ node, ...props }: any) => (
                   <span style={{ color: "green" }} {...props} />
                 ),
-                eucolor: ({ node, ...props }: any) => (
-                  <span style={{ color: "blue" }} {...props} />
-                ),
+                eucolor: ({ node, ...props }: any) => <span style={{ color: "blue" }} {...props} />,
                 tecolor: ({ node, ...props }: any) => (
                   <span style={{ color: "blueviolet" }} {...props} />
                 ),
@@ -142,10 +132,7 @@ export default async function ReviewDetailPage({
                   </div>
                 ),
                 thead: ({ node, ...props }: any) => (
-                  <thead
-                    className="bg-tech-main/10 border-b border-tech-main/30"
-                    {...props}
-                  />
+                  <thead className="bg-tech-main/10 border-b border-tech-main/30" {...props} />
                 ),
                 th: ({ node, ...props }: any) => (
                   <th
@@ -216,9 +203,7 @@ export default async function ReviewDetailPage({
                     <div className="my-6 border border-tech-main/30 font-mono text-sm max-w-full overflow-hidden bg-[#1e1e1e]">
                       <div className="bg-tech-main/10 text-tech-main px-4 py-1 text-xs font-mono uppercase tracking-widest flex justify-between items-center border-b border-tech-main/30">
                         <span>{match[1]}</span>
-                        <span className="opacity-50">
-                          {"//"} EXECUTABLE_BLOCK
-                        </span>
+                        <span className="opacity-50">{"//"} EXECUTABLE_BLOCK</span>
                       </div>
                       <div className="overflow-x-auto">
                         <SyntaxHighlighter

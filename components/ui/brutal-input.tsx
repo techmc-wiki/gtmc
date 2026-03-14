@@ -13,9 +13,7 @@ export const BrutalInput = React.forwardRef<HTMLInputElement, BrutalInputProps>(
       baseStyles += " border-red-500 focus:border-red-500 text-red-600";
     }
 
-    return (
-      <input ref={ref} className={`${baseStyles} ${className}`} {...props} />
-    );
+    return <input ref={ref} className={`${baseStyles} ${className}`} {...props} />;
   },
 );
 BrutalInput.displayName = "BrutalInput";

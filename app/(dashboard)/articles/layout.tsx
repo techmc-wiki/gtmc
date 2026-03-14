@@ -2,11 +2,7 @@
 import { SidebarClient } from "./sidebar-client";
 import { getSidebarTree } from "@/actions/sidebar";
 
-export default async function ArticlesLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function ArticlesLayout({ children }: { children: React.ReactNode }) {
   const tree = await getSidebarTree();
 
   return (

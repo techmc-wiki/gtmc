@@ -1,10 +1,5 @@
 import { auth } from "@/lib/auth";
-import {
-  labelsToStatus,
-  labelsToTags,
-  listAllIssues,
-  parseIssueBody,
-} from "@/lib/github-features";
+import { labelsToStatus, labelsToTags, listAllIssues, parseIssueBody } from "@/lib/github-features";
 import Link from "next/link";
 import { BrutalButton } from "@/components/ui/brutal-button";
 import { FeatureList } from "./feature-list";
@@ -22,9 +17,7 @@ export default async function FeaturesPage({
   const isCreated = params?.created === "true";
 
   const allIssues = await listAllIssues();
-  allIssues.sort(
-    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-  );
+  allIssues.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
   const features = allIssues.map((issue) => {
     const parsed = parseIssueBody(issue.body);

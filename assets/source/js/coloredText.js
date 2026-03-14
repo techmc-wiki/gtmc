@@ -8,15 +8,7 @@
       // Replace matches with colored spans
       const newHtml = html.replace(
         colorRegex,
-        (
-          match,
-          escapeColor,
-          colorSpecifier,
-          text,
-          escapeHex,
-          hexColor,
-          hexText,
-        ) => {
+        (match, escapeColor, colorSpecifier, text, escapeHex, hexColor, hexText) => {
           let colorValue;
           let finalText;
           let escapeUsed;

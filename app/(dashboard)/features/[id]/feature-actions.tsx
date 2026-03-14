@@ -2,11 +2,7 @@
 
 import { useTransition } from "react";
 import { BrutalButton } from "@/components/ui/brutal-button";
-import {
-  assignFeature,
-  unassignFeature,
-  resolveFeature,
-} from "@/actions/feature";
+import { assignFeature, unassignFeature, resolveFeature } from "@/actions/feature";
 
 interface Props {
   featureId: string;
@@ -16,13 +12,7 @@ interface Props {
   hasAssignee: boolean;
 }
 
-export function FeatureActions({
-  featureId,
-  status,
-  isAssignee,
-  isAdmin,
-  hasAssignee,
-}: Props) {
+export function FeatureActions({ featureId, status, isAssignee, isAdmin, hasAssignee }: Props) {
   const [isPending, startTransition] = useTransition();
 
   const handleAssign = () => {
@@ -51,23 +41,13 @@ export function FeatureActions({
       {status !== "RESOLVED" && (
         <>
           {!hasAssignee && (
-            <BrutalButton
-              onClick={handleAssign}
-              disabled={isPending}
-              variant="secondary"
-              size="sm"
-            >
+            <BrutalButton onClick={handleAssign} disabled={isPending} variant="secondary" size="sm">
               CLAIM ISSUE
             </BrutalButton>
           )}
 
           {isAssignee && (
-            <BrutalButton
-              onClick={handleUnassign}
-              disabled={isPending}
-              variant="ghost"
-              size="sm"
-            >
+            <BrutalButton onClick={handleUnassign} disabled={isPending} variant="ghost" size="sm">
               DROP ISSUE
             </BrutalButton>
           )}

@@ -1,13 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const prismaClientPath = path.join(
-  __dirname,
-  "..",
-  "node_modules",
-  ".prisma",
-  "client",
-);
+const prismaClientPath = path.join(__dirname, "..", "node_modules", ".prisma", "client");
 const pkgPath = path.join(prismaClientPath, "package.json");
 
 if (fs.existsSync(pkgPath)) {
@@ -23,9 +17,7 @@ if (fs.existsSync(pkgPath)) {
     fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
     console.log("Fixed .prisma/client/package.json exports");
   } else {
-    console.log(
-      ".prisma/client/package.json already has ./default export or no exports field",
-    );
+    console.log(".prisma/client/package.json already has ./default export or no exports field");
   }
 } else {
   console.log(

@@ -84,11 +84,7 @@ function getMetadataForWrite(
   };
 }
 
-export async function createFeature(data: {
-  title: string;
-  content: string;
-  tags: string[];
-}) {
+export async function createFeature(data: { title: string; content: string; tags: string[] }) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 
@@ -154,10 +150,7 @@ export async function updateFeature(
 
   const { issue, parsed } = feature;
 
-  if (
-    parsed.metadata?.appUserId !== session.user.id &&
-    session.user.role !== "ADMIN"
-  ) {
+  if (parsed.metadata?.appUserId !== session.user.id && session.user.role !== "ADMIN") {
     throw new Error("Forbidden");
   }
 
@@ -166,10 +159,7 @@ export async function updateFeature(
   }
 
   const currentStatus = labelsToStatus(issue.labels);
-  const newLabels = [
-    ...tagsToLabels(data.tags),
-    ...statusToLabels(currentStatus),
-  ];
+  const newLabels = [...tagsToLabels(data.tags), ...statusToLabels(currentStatus)];
 
   const fallbackMetadata: IssueMetadata = {
     appUserId: "",
@@ -201,10 +191,7 @@ export async function updateFeature(
   };
 }
 
-export async function updateFeatureExplanation(
-  id: string,
-  explanation: string,
-) {
+export async function updateFeatureExplanation(id: string, explanation: string) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 
@@ -251,10 +238,7 @@ export async function assignFeature(id: string) {
   }
 
   const { issue, parsed } = feature;
-  const metadataForWrite = getMetadataForWrite(
-    parsed.metadata,
-    `legacy-issue-${issue.number}`,
-  );
+  const metadataForWrite = getMetadataForWrite(parsed.metadata, `legacy-issue-${issue.number}`);
 
   const newBodyWithAssignee = serializeIssueBody(
     parsed.userContent,
@@ -320,10 +304,7 @@ export async function unassignFeature(id: string) {
   const isAssignee = parsed.metadata?.assigneeId === session.user.id;
   if (!isAssignee && !isAdmin) throw new Error("Forbidden");
 
-  const metadataForWrite = getMetadataForWrite(
-    parsed.metadata,
-    `legacy-issue-${issue.number}`,
-  );
+  const metadataForWrite = getMetadataForWrite(parsed.metadata, `legacy-issue-${issue.number}`);
 
   const newBody = serializeIssueBody(
     parsed.userContent,

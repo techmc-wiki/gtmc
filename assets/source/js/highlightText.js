@@ -19,17 +19,14 @@
       // 高亮逻辑保持不变
       const highlightRegex = /(?<!\\)==/g;
       let isOpen = true;
-      const htmlHighlighted = htmlNoCodeBlock.replace(
-        highlightRegex,
-        (_match) => {
-          if (isOpen) {
-            isOpen = false;
-            return `<mark>`;
-          }
-          isOpen = true;
-          return `</mark>`;
-        },
-      );
+      const htmlHighlighted = htmlNoCodeBlock.replace(highlightRegex, (_match) => {
+        if (isOpen) {
+          isOpen = false;
+          return `<mark>`;
+        }
+        isOpen = true;
+        return `</mark>`;
+      });
 
       // 3. 处理转义字符：
       // 将之前被忽略的 "\==" 替换为 "=="

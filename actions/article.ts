@@ -29,10 +29,7 @@ export async function saveDraftAction(formData: FormData) {
     const existing = await prisma.revision.findUnique({
       where: { id: revisionId },
     });
-    if (
-      existing &&
-      (existing.status === "PENDING" || existing.status === "APPROVED")
-    ) {
+    if (existing && (existing.status === "PENDING" || existing.status === "APPROVED")) {
       throw new Error("Cannot edit a draft that is pending or approved");
     }
 

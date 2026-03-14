@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import {
-  uploadImageToGithub,
-  GithubFeaturesError,
-} from "@/lib/github-features";
+import { uploadImageToGithub, GithubFeaturesError } from "@/lib/github-features";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -22,12 +19,7 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const url = await uploadImageToGithub(
-      buffer,
-      file.name,
-      file.type,
-      "features/images",
-    );
+    const url = await uploadImageToGithub(buffer, file.name, file.type, "features/images");
 
     return NextResponse.json({ success: true, url });
   } catch (error) {
@@ -42,8 +34,7 @@ export async function POST(req: NextRequest) {
       if (error.code === "AUTH_FAILED") {
         return NextResponse.json(
           {
-            error:
-              "Upload authorization failed. Please contact an administrator.",
+            error: "Upload authorization failed. Please contact an administrator.",
           },
           { status: 403 },
         );
@@ -52,8 +43,7 @@ export async function POST(req: NextRequest) {
       if (error.code === "RATE_LIMITED") {
         return NextResponse.json(
           {
-            error:
-              "Upload service is temporarily unavailable (rate limited). Try again shortly.",
+            error: "Upload service is temporarily unavailable (rate limited). Try again shortly.",
           },
           { status: 429 },
         );
@@ -61,8 +51,7 @@ export async function POST(req: NextRequest) {
 
       if (error.code === "API_ERROR") {
         const isValidationError =
-          error.message ===
-            "Only image files are accepted (JPEG, PNG, GIF, WebP)." ||
+          error.message === "Only image files are accepted (JPEG, PNG, GIF, WebP)." ||
           error.message === "Image exceeds maximum upload size of 10 MB.";
         if (isValidationError) {
           return NextResponse.json({ error: error.message }, { status: 400 });

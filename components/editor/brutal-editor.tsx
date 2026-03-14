@@ -23,9 +23,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
   const [title, setTitle] = React.useState(initialData?.title || "");
   const [content, setContent] = React.useState(initialData?.content || "");
   const [filePath, setFilePath] = React.useState(initialData?.filePath || "");
-  const [revisionId, setRevisionId] = React.useState<string | undefined>(
-    initialData?.id,
-  );
+  const [revisionId, setRevisionId] = React.useState<string | undefined>(initialData?.id);
   const [isSaving, setIsSaving] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState(false);
   const [isCompressing, setIsCompressing] = React.useState(false);
@@ -33,21 +31,18 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const isReadOnly =
-    initialData?.status === "PENDING" || initialData?.status === "APPROVED";
+  const isReadOnly = initialData?.status === "PENDING" || initialData?.status === "APPROVED";
 
   const insertTextAtCursor = (text: string) => {
     if (!textareaRef.current) return;
     const start = textareaRef.current.selectionStart;
     const end = textareaRef.current.selectionEnd;
-    const newContent =
-      content.substring(0, start) + text + content.substring(end);
+    const newContent = content.substring(0, start) + text + content.substring(end);
     setContent(newContent);
 
     setTimeout(() => {
       if (textareaRef.current) {
-        textareaRef.current.selectionStart = textareaRef.current.selectionEnd =
-          start + text.length;
+        textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + text.length;
         textareaRef.current.focus();
       }
     }, 0);
@@ -74,10 +69,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
 
       if (result.error) {
         setContent((prev) =>
-          prev.replace(
-            placeholder,
-            `<!-- Upload failed: ${result.error} -->\n`,
-          ),
+          prev.replace(placeholder, `<!-- Upload failed: ${result.error} -->\n`),
         );
         alert(result.error);
         setIsUploading(false);
@@ -94,9 +86,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
       });
 
       if (res.status === 413) {
-        throw new Error(
-          "Image is too large to upload. Please use a smaller image.",
-        );
+        throw new Error("Image is too large to upload. Please use a smaller image.");
       }
 
       let data;
@@ -107,20 +97,14 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
       }
 
       if (res.ok && data.url) {
-        setContent((prev) =>
-          prev.replace(placeholder, `![${file.name}](${data.url})\n`),
-        );
+        setContent((prev) => prev.replace(placeholder, `![${file.name}](${data.url})\n`));
       } else {
-        setContent((prev) =>
-          prev.replace(placeholder, `<!-- Upload failed: ${data.error} -->\n`),
-        );
+        setContent((prev) => prev.replace(placeholder, `<!-- Upload failed: ${data.error} -->\n`));
         alert(data.error || "Upload failed");
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Upload error";
-      setContent((prev) =>
-        prev.replace(placeholder, `<!-- Upload failed: ${message} -->\n`),
-      );
+      setContent((prev) => prev.replace(placeholder, `<!-- Upload failed: ${message} -->\n`));
       alert(message);
       console.error(error);
     } finally {
@@ -168,8 +152,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
       if (textareaRef.current) {
         textareaRef.current.focus();
         textareaRef.current.selectionStart = start + prefix.length;
-        textareaRef.current.selectionEnd =
-          start + prefix.length + selectedText.length;
+        textareaRef.current.selectionEnd = start + prefix.length + selectedText.length;
       }
     }, 0);
   };
@@ -184,8 +167,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
       formData.append("content", content);
       formData.append("filePath", filePath);
       if (revisionId) formData.append("revisionId", revisionId);
-      if (initialData?.articleId)
-        formData.append("articleId", initialData.articleId);
+      if (initialData?.articleId) formData.append("articleId", initialData.articleId);
 
       const result = await saveDraftAction(formData);
       if (result.success && result.revisionId) {

@@ -18,9 +18,7 @@ export interface CompressionResult {
   error?: string;
 }
 
-export async function compressImageForUpload(
-  file: File,
-): Promise<CompressionResult> {
+export async function compressImageForUpload(file: File): Promise<CompressionResult> {
   // GIF bypass — compressing GIFs destroys animation
   if (file.type === "image/gif") {
     if (file.size > UPLOAD_SAFE_LIMIT_BYTES) {

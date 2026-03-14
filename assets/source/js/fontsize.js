@@ -1,8 +1,6 @@
 function adjustFontSize(action) {
   const markdownSection = document.querySelector(".markdown-section#main");
-  let currentSize = parseFloat(
-    window.getComputedStyle(markdownSection).fontSize,
-  );
+  let currentSize = parseFloat(window.getComputedStyle(markdownSection).fontSize);
 
   if (action === "increase") {
     currentSize += 1;
@@ -125,9 +123,7 @@ function install(hook, vm) {
     const savedSize = localStorage.getItem("font-size") || 15;
     const lang = document.documentElement.lang;
     const fontSizeText =
-      lang === "zh"
-        ? `当前字体大小: ${savedSize}px`
-        : `Font size: ${savedSize}px`;
+      lang === "zh" ? `当前字体大小: ${savedSize}px` : `Font size: ${savedSize}px`;
     var fontSizeButtons = `
             <button onclick="adjustFontSize('increase')" class="font-size-button" aria-label="Increase font size" title="Increase font size">A+</button>
             <button onclick="adjustFontSize('decrease')" class="font-size-button" aria-label="Decrease font size" title="Decrease font size">A-</button>

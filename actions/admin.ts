@@ -78,13 +78,9 @@ export async function approveRevisionAction(formData: FormData) {
           body: JSON.stringify({
             ref: "main",
             inputs: {
-              submitterName:
-                revision.author?.name ||
-                revision.author?.email ||
-                "Unknown User",
+              submitterName: revision.author?.name || revision.author?.email || "Unknown User",
               reviewerName: session.user.name || "Admin",
-              filePath:
-                revision.filePath || `${revision.title.replace(/ /g, "-")}.md`,
+              filePath: revision.filePath || `${revision.title.replace(/ /g, "-")}.md`,
               content: revision.content,
               title: revision.title,
             },
@@ -93,15 +89,10 @@ export async function approveRevisionAction(formData: FormData) {
       );
 
       if (!response.ok) {
-        console.error(
-          "Failed to trigger GitHub Action:",
-          await response.text(),
-        );
+        console.error("Failed to trigger GitHub Action:", await response.text());
       }
     } else {
-      console.warn(
-        "GitHub PAT or Repo details missing, could not trigger PR creation.",
-      );
+      console.warn("GitHub PAT or Repo details missing, could not trigger PR creation.");
     }
   } catch (e) {
     console.error("Error triggering GH action", e);

@@ -21,9 +21,7 @@ export default async function DraftDashboardPage() {
     },
   });
 
-  const activeDrafts = allDrafts.filter(
-    (d) => d.status !== "APPROVED" && d.status !== "ARCHIVED",
-  );
+  const activeDrafts = allDrafts.filter((d) => d.status !== "APPROVED" && d.status !== "ARCHIVED");
   const archivedDrafts = allDrafts.filter(
     (d) => d.status === "APPROVED" || d.status === "ARCHIVED",
   );
@@ -80,8 +78,7 @@ export default async function DraftDashboardPage() {
         </h3>
         {draft.articleId && (
           <p className="text-xs font-mono text-tech-main mt-4 flex items-center tracking-widest opacity-80">
-            <span className="inline-block w-1.5 h-1.5 bg-tech-main mr-2"></span>{" "}
-            MOD_LIVE_DB
+            <span className="inline-block w-1.5 h-1.5 bg-tech-main mr-2"></span> MOD_LIVE_DB
           </p>
         )}
       </div>

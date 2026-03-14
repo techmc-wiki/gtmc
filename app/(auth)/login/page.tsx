@@ -46,8 +46,8 @@ export default function LoginPage() {
         <div className="text-[10px] font-mono text-tech-main whitespace-pre leading-relaxed border-r-2 border-tech-main/20 pr-4 text-right">
           <span className="text-tech-main-dark font-bold">@PostMapping</span>(
           <span className="text-tech-main-dark">&quot;/login&quot;</span>){"\n"}
-          <span className="text-tech-main-dark">public</span>{" "}
-          ResponseEntity&lt;?&gt; authenticate(Request req) {"{"}
+          <span className="text-tech-main-dark">public</span> ResponseEntity&lt;?&gt;
+          authenticate(Request req) {"{"}
           {"\n"}
           {"  "}SecurityContext ctx = Security.getContext();{"\n"}
           {"  "}if (!ctx.isAuthenticated()) throw new AuthException();{"\n"}
@@ -79,9 +79,7 @@ export default function LoginPage() {
           {/* 尺寸标注 decoration */}
           <div className="absolute -right-6 top-1/2 -translate-y-1/2 text-[10px] font-mono opacity-0 flex-col items-center h-full animate-fade-in [animation-delay:1.5s] [animation-fill-mode:forwards] hidden sm:flex">
             <span className="block border-l border-tech-main/30 h-10 w-px"></span>
-            <span className="py-2 rotate-90 whitespace-nowrap">
-              SECURE FORM
-            </span>
+            <span className="py-2 rotate-90 whitespace-nowrap">SECURE FORM</span>
             <span className="block border-l border-tech-main/30 h-10 w-px"></span>
           </div>
 
@@ -106,14 +104,7 @@ export default function LoginPage() {
                   strokeWidth="1.5"
                   className="text-tech-main-dark"
                 >
-                  <rect
-                    x="3"
-                    y="11"
-                    width="18"
-                    height="11"
-                    rx="2"
-                    ry="2"
-                  ></rect>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
               </div>
@@ -128,8 +119,7 @@ export default function LoginPage() {
             </div>
 
             <p className="text-sm text-tech-main-dark/70 mb-8 max-w-xs mx-auto opacity-0 animate-fade-in [animation-delay:1.1s] [animation-fill-mode:forwards]">
-              Please authenticate with your GitHub account to access the
-              restricted database.
+              Please authenticate with your GitHub account to access the restricted database.
             </p>
 
             <div className="w-full opacity-0 animate-slide-up-fade [animation-delay:1.3s] [animation-fill-mode:forwards]">

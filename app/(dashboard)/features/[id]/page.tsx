@@ -18,11 +18,7 @@ import { FeatureExplanation } from "./feature-explanation";
 
 export const revalidate = 60;
 
-export default async function FeatureDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function FeatureDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const issueNumber = Number.parseInt(id, 10);
   if (Number.isNaN(issueNumber) || issueNumber <= 0) {
@@ -44,8 +40,7 @@ export default async function FeatureDetailPage({
   const comments = rawComments
     .filter(
       (comment) =>
-        !comment.body.includes(EXPLANATION_MARKER) &&
-        !comment.body.includes(SYSTEM_COMMENT_MARKER),
+        !comment.body.includes(EXPLANATION_MARKER) && !comment.body.includes(SYSTEM_COMMENT_MARKER),
     )
     .map((comment) => {
       const parsedComment = parseCommentBody(comment.body);
@@ -95,15 +90,12 @@ export default async function FeatureDetailPage({
   const canEdit = isAuthor || isAdmin;
 
   return (
-    <div className="container mx-auto p-4 md:p-8 space-y-6 max-w-5xl">
+    <div className="container mx-auto p-4 md:p-8 space-y-6 max-w-26l">
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tighter uppercase border-b-2 border-tech-main pb-2 pr-8 inline-block">
             {canEdit ? "Edit Feature" : "View Feature"}
           </h1>
-          <p className="text-sm mt-2 font-mono text-zinc-600">
-            Issue #{feature.id}
-          </p>
         </div>
 
         {/* Status Actions for logged in users */}
@@ -122,48 +114,43 @@ export default async function FeatureDetailPage({
         <div className="border-2 border-red-500 bg-red-50 p-4 font-mono text-sm text-red-800 uppercase tracking-wider mb-8 shadow-[4px_4px_0px_rgba(239,68,68,1)]">
           <span className="font-bold">⚠ FEATURE DELETED (READ-ONLY)</span>
           <p className="mt-1 text-xs text-red-600 normal-case tracking-normal">
-            This feature has been closed/deleted. The content is preserved for
-            historical reference. No changes can be made.
+            This feature has been deleted. The content is preserved for historical reference. No
+            changes can be made.
           </p>
         </div>
       )}
 
       <BrutalCard className="mb-8">
-        <div className="flex flex-col gap-2 font-mono text-sm">
+        <div className="flex flex-col gap-1 font-mono text-sm">
           <div className="flex gap-2 items-center">
             <span className="font-bold text-zinc-500 w-24">STATUS:</span>
             <StatusBadge status={feature.status} />
           </div>
           <div className="flex gap-2">
             <span className="font-bold text-zinc-500 w-24">AUTHOR:</span>
-            <span>
-              {feature.author.name || feature.author.email || "Unknown"}
-            </span>
+            <span>{feature.author.name || feature.author.email || "Unknown"}</span>
           </div>
           <div className="flex gap-2">
             <span className="font-bold text-zinc-500 w-24">ASSIGNEE:</span>
             <span>
-              {feature.assignee
-                ? feature.assignee.name || feature.assignee.email
-                : "Unassigned"}
+              {feature.assignee ? feature.assignee.name || feature.assignee.email : "Unassigned"}
             </span>
           </div>
           <div className="flex gap-2">
             <span className="font-bold text-zinc-500 w-24">CREATED:</span>
-            <span suppressHydrationWarning>
-              {new Date(feature.createdAt).toLocaleString()}
-            </span>
+            <span suppressHydrationWarning>{new Date(feature.createdAt).toLocaleString()}</span>
           </div>
           {feature.issueNumber && feature.htmlUrl && (
             <div className="flex gap-2">
-              <span className="font-bold text-zinc-500 w-24">ISSUE:</span>
+              <span className="font-bold text-zinc-500 w-24">GITHUB:</span>
+              Linked to
               <a
                 href={feature.htmlUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-tech-main border-b border-tech-main/50 font-mono hover:text-white hover:bg-tech-main/80 transition-colors"
               >
-                #{feature.issueNumber}
+                Issue #{feature.issueNumber}
               </a>
             </div>
           )}
@@ -206,11 +193,9 @@ export default async function FeatureDetailPage({
               </div>
             )}
 
-            <div className="prose prose-zinc max-w-none mt-8 border-t border-dashed border-tech-main/30 pt-6">
+            <div className="prose prose-zinc max-w-26ne mt-8 border-t border-dashed border-tech-main/30 pt-6">
               {/* Very simple non-editable view, actual MD rendering could be added here */}
-              <div className="whitespace-pre-wrap font-mono text-sm">
-                {feature.content}
-              </div>
+              <div className="whitespace-pre-wrap font-mono text-sm">{feature.content}</div>
             </div>
           </BrutalCard>
         )}
@@ -227,21 +212,21 @@ export default async function FeatureDetailPage({
 }
 
 function StatusBadge({ status }: { status: string }) {
-  let styles = "px-2 py-1 text-xs font-bold uppercase border";
+  let styles = "px-2 text-xs font-bold uppercase border";
   let label = status;
 
   switch (status) {
     case "PENDING":
       styles += " bg-yellow-100 border-yellow-400 text-yellow-800";
-      label = "待解决";
+      label = "UNRESOLVED";
       break;
     case "IN_PROGRESS":
       styles += " bg-blue-100 border-blue-400 text-blue-800";
-      label = "解决中";
+      label = "IN_PROGRESS";
       break;
     case "RESOLVED":
       styles += " bg-green-100 border-green-400 text-green-800";
-      label = "已解决";
+      label = "RESOLVED";
       break;
     default:
       styles += " bg-zinc-100 border-zinc-300 text-zinc-600";

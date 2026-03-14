@@ -49,8 +49,7 @@ export default async function ProfilePage() {
           </p>
         </div>
         <div className="font-mono text-xs text-tech-main/50 mt-4 md:mt-0 tracking-[0.2em] uppercase">
-          SYS.STATE ::{" "}
-          <span className="text-tech-main-dark font-bold">ACTIVE *</span>
+          SYS.STATE :: <span className="text-tech-main-dark font-bold">ACTIVE *</span>
         </div>
       </div>
 
@@ -62,10 +61,7 @@ export default async function ProfilePage() {
         <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main -translate-x-[2px] -translate-y-[2px]"></div>
         <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main translate-x-[2px] translate-y-[2px]"></div>
 
-        <form
-          action={updateProfileAction}
-          className="p-8 md:p-12 space-y-10 relative z-10"
-        >
+        <form action={updateProfileAction} className="p-8 md:p-12 space-y-10 relative z-10">
           <div className="flex flex-col md:flex-row gap-8 items-start">
             <div className="relative p-1 border border-tech-main/30 w-32 h-32 md:w-40 md:h-40 shrink-0 bg-tech-main/5">
               <div className="absolute -top-1 -left-1 w-2 h-2 bg-tech-main"></div>
@@ -166,8 +162,7 @@ export default async function ProfilePage() {
                   GITHUB PAT TOKEN
                 </h3>
                 <p className="text-[11px] font-mono text-tech-main-dark mt-2 tracking-wide">
-                  Store your GitHub Personal Access Token to enable PR
-                  automation.
+                  Store your GitHub Personal Access Token to enable PR automation.
                 </p>
                 <p className="text-[10px] font-mono text-red-500/60 mt-1 uppercase tracking-widest">
                   {"//"} REQUIRED SCOPES: 'repo', 'workflow'

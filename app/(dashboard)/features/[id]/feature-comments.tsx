@@ -60,9 +60,7 @@ export function FeatureComments({
                 {new Date(comment.createdAt).toLocaleString()}
               </span>
             </div>
-            <div className="whitespace-pre-wrap font-mono text-sm">
-              {comment.content}
-            </div>
+            <div className="whitespace-pre-wrap font-mono text-sm">{comment.content}</div>
           </BrutalCard>
         ))}
         {initialComments.length === 0 && (

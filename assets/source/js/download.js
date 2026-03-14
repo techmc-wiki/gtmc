@@ -19,8 +19,7 @@ function showDownloadModal(encodedPath) {
   const mirrors = [
     {
       name: "Github Raw 国内访问速度可能较慢",
-      baseUrl:
-        "https://github.com/tanhHeng/GraduateTextsInTechnicalMC/raw/main/",
+      baseUrl: "https://github.com/tanhHeng/GraduateTextsInTechnicalMC/raw/main/",
     },
     {
       name: "镜像站1 github.tbedu.top",
@@ -179,9 +178,8 @@ styleInject(css);
 
 function install(hook, vm) {
   hook.afterEach(function (html) {
-    const modifiedHtml = html.replace(
-      /\[\[([^|\]]+)\|([^\]]+)\]\]/g,
-      (match, text, path) => createDownloadButton(text, path),
+    const modifiedHtml = html.replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g, (match, text, path) =>
+      createDownloadButton(text, path),
     );
     return modifiedHtml;
   });

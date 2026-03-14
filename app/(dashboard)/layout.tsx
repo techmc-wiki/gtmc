@@ -4,11 +4,7 @@ import Link from "next/link";
 import { ProfileButton } from "@/components/ui/profile-button";
 import { Logo } from "@/components/ui/logo";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen text-tech-main font-sans selection:bg-tech-main/20 selection:text-tech-main-dark flex flex-col relative w-full">
       {/* Top Navigation - Tech/Brutalist Style */}

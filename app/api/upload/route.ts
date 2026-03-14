@@ -30,12 +30,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check Config
-    if (
-      !process.env.COS_SECRET_ID ||
-      !process.env.COS_SECRET_KEY ||
-      !BUCKET ||
-      !REGION
-    ) {
+    if (!process.env.COS_SECRET_ID || !process.env.COS_SECRET_KEY || !BUCKET || !REGION) {
       console.error("Missing COS configuration");
       return NextResponse.json(
         { error: "Server configuration error: COS credentials missing" },
@@ -51,9 +46,7 @@ export async function POST(req: NextRequest) {
       parsedPath.dir = p.dir;
     }
     // Normalize path to forward slashes and remove leading/trailing slashes
-    const safeDir = (parsedPath.dir || "")
-      .replace(/\\/g, "/")
-      .replace(/^\/+|\/+$/g, "");
+    const safeDir = (parsedPath.dir || "").replace(/\\/g, "/").replace(/^\/+|\/+$/g, "");
 
     const ext = file.name.split(".").pop() || "bin";
     const filename = `${Date.now()}-${Math.round(Math.random() * 1000)}.${ext}`;

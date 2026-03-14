@@ -22,8 +22,7 @@ export default function Home() {
       {/* 右上角HUD：模拟服务器/图纸数据 */}
       <div className="absolute top-8 right-12 text-[10px] font-mono text-tech-main opacity-40 text-right space-y-1 z-0 select-none hidden sm:block">
         <p>
-          SYS.TPS ::{" "}
-          <span className="text-tech-main-dark font-bold">20.0 *</span>
+          SYS.TPS :: <span className="text-tech-main-dark font-bold">20.0 *</span>
         </p>
         <p>SYS.MSPT :: 12.4ms</p>
         <p>ENTITIES :: 342 / 1024</p>
@@ -41,10 +40,7 @@ export default function Home() {
           {"{"}"\n"
           {"  "}
           <span className="text-tech-main-dark">"Id"</span>:{" "}
-          <span className="text-tech-main-dark font-bold">
-            "minecraft:chest"
-          </span>
-          ,{"\n"}
+          <span className="text-tech-main-dark font-bold">"minecraft:chest"</span>,{"\n"}
           {"  "}
           <span className="text-tech-main-dark">"x"</span>: 1024,{" "}
           <span className="text-tech-main-dark">"y"</span>: 64,{" "}
@@ -55,19 +51,14 @@ export default function Home() {
           {"{"}
           <span className="text-tech-main-dark">"Slot"</span>: 0b,{" "}
           <span className="text-tech-main-dark">"id"</span>:{" "}
-          <span className="text-tech-main-dark font-bold">
-            "minecraft:diamond"
-          </span>
-          , <span className="text-tech-main-dark">"Count"</span>: 64b{"}"},
-          {"\n"}
+          <span className="text-tech-main-dark font-bold">"minecraft:diamond"</span>,{" "}
+          <span className="text-tech-main-dark">"Count"</span>: 64b{"}"},{"\n"}
           {"    "}
           {"{"}
           <span className="text-tech-main-dark">"Slot"</span>: 1b,{" "}
           <span className="text-tech-main-dark">"id"</span>:{" "}
-          <span className="text-tech-main-dark font-bold">
-            "minecraft:redstone"
-          </span>
-          , <span className="text-tech-main-dark">"Count"</span>: 64b{"}"}
+          <span className="text-tech-main-dark font-bold">"minecraft:redstone"</span>,{" "}
+          <span className="text-tech-main-dark">"Count"</span>: 64b{"}"}
           {"\n"}
           {"  "}],{"\n"}
           {"  "}
@@ -93,14 +84,11 @@ export default function Home() {
         </span>
         (PistonBaseBlock.java:492) {"\n"}
         <br />
-        <span className="font-bold">
-          at net.minecraft.world.level.Level.tickBlockEntities
-        </span>
+        <span className="font-bold">at net.minecraft.world.level.Level.tickBlockEntities</span>
         (Level.java:833) {"\n"}
         <br />
         <span className="text-red-600/60 font-bold">
-          Caused by: java.util.ConcurrentModificationException: Ticking block
-          entity
+          Caused by: java.util.ConcurrentModificationException: Ticking block entity
         </span>
       </div>
 
@@ -122,9 +110,7 @@ export default function Home() {
 
       {/* 贯穿全图的低调主辅助线 (X轴/Y轴) */}
       <div className="absolute top-[35%] right-0 w-[40%] h-[1px] bg-tech-main/20">
-        <span className="absolute -top-4 right-10 text-[10px] font-mono opacity-50">
-          L-AXIS
-        </span>
+        <span className="absolute -top-4 right-10 text-[10px] font-mono opacity-50">L-AXIS</span>
       </div>
       <div className="absolute top-0 left-[25%] w-[1px] h-[100%] bg-tech-main/10 flex flex-col items-center">
         {/* 轴线上的点缀 */}
@@ -134,24 +120,16 @@ export default function Home() {
       {/* 技术图纸刻度尺 (模拟Photoshop/CAD边缘) */}
       <div className="absolute top-0 left-0 w-full h-2 border-b border-tech-main/10 flex overflow-hidden opacity-30">
         {Array.from({ length: 100 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex-none w-8 border-l border-tech-main/40 h-full relative"
-          >
+          <div key={i} className="flex-none w-8 border-l border-tech-main/40 h-full relative">
             {i % 4 === 0 && (
-              <span className="absolute top-2 left-1 text-[8px] font-mono">
-                {i * 10}
-              </span>
+              <span className="absolute top-2 left-1 text-[8px] font-mono">{i * 10}</span>
             )}
           </div>
         ))}
       </div>
       <div className="absolute top-0 left-0 h-full w-2 border-r border-tech-main/10 flex flex-col overflow-hidden opacity-30">
         {Array.from({ length: 50 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex-none h-8 border-t border-tech-main/40 w-full relative"
-          ></div>
+          <div key={i} className="flex-none h-8 border-t border-tech-main/40 w-full relative"></div>
         ))}
       </div>
 
@@ -172,30 +150,9 @@ export default function Home() {
           <line x1="60" y1="67" x2="10" y2="38" />
           <line x1="60" y1="67" x2="110" y2="38" />
           {/* Dashed hidden lines */}
-          <line
-            x1="60"
-            y1="10"
-            x2="60"
-            y2="67"
-            strokeDasharray="2 2"
-            className="opacity-50"
-          />
-          <line
-            x1="10"
-            y1="95"
-            x2="60"
-            y2="67"
-            strokeDasharray="2 2"
-            className="opacity-50"
-          />
-          <line
-            x1="110"
-            y1="95"
-            x2="60"
-            y2="67"
-            strokeDasharray="2 2"
-            className="opacity-50"
-          />
+          <line x1="60" y1="10" x2="60" y2="67" strokeDasharray="2 2" className="opacity-50" />
+          <line x1="10" y1="95" x2="60" y2="67" strokeDasharray="2 2" className="opacity-50" />
+          <line x1="110" y1="95" x2="60" y2="67" strokeDasharray="2 2" className="opacity-50" />
         </svg>
         <span className="absolute bottom-4 -right-12 text-[10px] font-mono opacity-80">
           FIG 1. ISOMETRIC_BLOCK
@@ -237,9 +194,7 @@ export default function Home() {
 
       {/* 红石逻辑代数/布尔运算 */}
       <div className="absolute top-[40%] right-[6%] text-[11px] font-mono text-tech-main opacity-[0.35] select-none pointer-events-none hidden 2xl:block leading-relaxed border-l border-tech-main/40 pl-4 mix-blend-multiply">
-        <div className="text-tech-main-dark mb-2 font-bold">
-          {"//"} REDSTONE_BOOLEAN_LOGIC
-        </div>
+        <div className="text-tech-main-dark mb-2 font-bold">{"//"} REDSTONE_BOOLEAN_LOGIC</div>
         <span>Y = (A ∧ B) ∨ (¬C)</span>
         <br />
         <span>T_delay = ∑(repeater_ticks) + 1_GT</span>
@@ -311,14 +266,7 @@ export default function Home() {
           stroke="currentColor"
           strokeWidth="1"
         >
-          <rect
-            x="30"
-            y="80"
-            width="60"
-            height="50"
-            fill="currentColor"
-            fillOpacity="0.15"
-          />
+          <rect x="30" y="80" width="60" height="50" fill="currentColor" fillOpacity="0.15" />
           <rect x="45" y="40" width="30" height="40" strokeWidth="1.5" />
           <rect
             x="20"
@@ -393,11 +341,7 @@ export default function Home() {
 
             <h1 className="flex items-center text-6xl md:text-7xl font-bold tracking-tight text-tech-main-dark mb-6 relative overflow-hidden">
               <span className="inline-block animate-tech-slide-in [animation-delay:0.5s] opacity-0 [animation-fill-mode:forwards] mr-6">
-                <Logo
-                  size="2xl"
-                  showSlash={false}
-                  className="pointer-events-none"
-                />
+                <Logo size="2xl" showSlash={false} className="pointer-events-none" />
               </span>
               <span className="inline-block opacity-0 font-light mix-blend-multiply text-tech-main animate-tech-slide-in [animation-delay:0.7s] [animation-fill-mode:forwards]">
                 Wiki
@@ -447,9 +391,7 @@ export default function Home() {
               className={`w-8 h-8 flex items-center justify-center ${i === 3 ? "border-2 border-tech-main-dark bg-tech-main/10 shadow-[0_0_8px_rgba(96,112,143,0.3)]" : "border border-tech-main/40"}`}
             >
               {/* 给某个格子放一个小方块隐喻正在持有的物品 */}
-              {i === 3 && (
-                <div className="w-4 h-4 bg-tech-main-dark/80 rotate-45"></div>
-              )}
+              {i === 3 && <div className="w-4 h-4 bg-tech-main-dark/80 rotate-45"></div>}
             </div>
           ))}
         </div>

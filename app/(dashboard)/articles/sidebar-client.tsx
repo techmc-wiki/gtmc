@@ -49,8 +49,7 @@ export function SidebarClient({ tree }: { tree: any[] }) {
     try {
       await createDocument({
         title: formData.title,
-        slug:
-          formData.slug || formData.title.toLowerCase().replace(/\s+/g, "-"),
+        slug: formData.slug || formData.title.toLowerCase().replace(/\s+/g, "-"),
         isFolder: formData.isFolder,
         parentId: formData.parentId || null,
       });
@@ -70,14 +69,10 @@ export function SidebarClient({ tree }: { tree: any[] }) {
           const decodedRoute = decodeURIComponent(fileRoute);
           const isActive =
             !item.isFolder &&
-            (decodedPathname === decodedRoute ||
-              decodedPathname === `${decodedRoute}/`);
+            (decodedPathname === decodedRoute || decodedPathname === `${decodedRoute}/`);
 
           return (
-            <li
-              key={item.id}
-              className="my-1.5 text-[15px] md:text-base font-mono list-none"
-            >
+            <li key={item.id} className="my-1.5 text-[15px] md:text-base font-mono list-none">
               {item.isFolder ? (
                 <span className="text-tech-main/80 font-bold opacity-80 uppercase block mt-3 mb-1">
                   ► {item.title}
@@ -107,10 +102,7 @@ export function SidebarClient({ tree }: { tree: any[] }) {
                           key={h2.id}
                           className="text-[13px] md:text-sm text-tech-main/70 hover:text-tech-main transition-colors relative before:content-[''] before:w-2 before:h-px before:bg-tech-main/30 before:absolute before:-left-4 before:top-1/2 before:-translate-y-1/2"
                         >
-                          <Link
-                            href={`#${h2.id}`}
-                            className="block wrap-break-word"
-                          >
+                          <Link href={`#${h2.id}`} className="block wrap-break-word">
                             {h2.text}
                           </Link>
                         </li>
@@ -119,9 +111,7 @@ export function SidebarClient({ tree }: { tree: any[] }) {
                   )}
                 </div>
               )}
-              {item.children &&
-                item.children.length > 0 &&
-                renderTree(item.children)}
+              {item.children && item.children.length > 0 && renderTree(item.children)}
             </li>
           );
         })}
@@ -134,8 +124,7 @@ export function SidebarClient({ tree }: { tree: any[] }) {
     items.forEach((item) => {
       if (item.isFolder) {
         folders.push(item);
-        if (item.children)
-          folders = [...folders, ...flattenFolders(item.children)];
+        if (item.children) folders = [...folders, ...flattenFolders(item.children)];
       }
     });
     return folders;
@@ -155,9 +144,7 @@ export function SidebarClient({ tree }: { tree: any[] }) {
       </div>
 
       {tree.length === 0 ? (
-        <div className="text-tech-main/40 text-sm font-mono mt-4">
-          SYS.DIR_TREE_EMPTY
-        </div>
+        <div className="text-tech-main/40 text-sm font-mono mt-4">SYS.DIR_TREE_EMPTY</div>
       ) : (
         <div className="-ml-4">{renderTree(tree)}</div>
       )}
@@ -178,9 +165,7 @@ export function SidebarClient({ tree }: { tree: any[] }) {
                   type="text"
                   required
                   value={formData.title}
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className="w-full bg-tech-main/5 border border-tech-main/40 px-3 py-2 outline-none focus:border-tech-main text-tech-main text-sm"
                   placeholder="e.g. Overview"
                 />
@@ -193,9 +178,7 @@ export function SidebarClient({ tree }: { tree: any[] }) {
                 <input
                   type="text"
                   value={formData.slug}
-                  onChange={(e) =>
-                    setFormData({ ...formData, slug: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   className="w-full bg-tech-main/5 border border-tech-main/40 px-3 py-2 outline-none focus:border-tech-main text-tech-main text-sm"
                   placeholder="Leave empty to auto-generate"
                 />
@@ -206,9 +189,7 @@ export function SidebarClient({ tree }: { tree: any[] }) {
                   type="checkbox"
                   id="isFolder"
                   checked={formData.isFolder}
-                  onChange={(e) =>
-                    setFormData({ ...formData, isFolder: e.target.checked })
-                  }
+                  onChange={(e) => setFormData({ ...formData, isFolder: e.target.checked })}
                   className="accent-tech-main w-4 h-4"
                 />
                 <label
@@ -225,9 +206,7 @@ export function SidebarClient({ tree }: { tree: any[] }) {
                 </label>
                 <select
                   value={formData.parentId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, parentId: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
                   className="w-full bg-tech-main/5 border border-tech-main/40 px-3 py-2 outline-none text-tech-main text-sm"
                 >
                   <option value="">[ ROOT_DIRECTORY ]</option>

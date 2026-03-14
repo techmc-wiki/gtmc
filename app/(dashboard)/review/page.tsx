@@ -11,9 +11,7 @@ export default async function ReviewHubPage() {
   if (!session?.user || session.user.role !== "ADMIN") {
     return (
       <div className="max-w-6xl mx-auto p-8 text-center mt-20">
-        <h1 className="text-6xl font-black text-red-500 uppercase">
-          ACCESS DENIED
-        </h1>
+        <h1 className="text-6xl font-black text-red-500 uppercase">ACCESS DENIED</h1>
         <p className="text-xl font-bold mt-4">ADMIN CLEARANCE REQUIRED.</p>
         <Link href="/">
           <BrutalButton variant="primary" className="mt-8">
@@ -88,8 +86,7 @@ export default async function ReviewHubPage() {
                 </p>
                 {rev.filePath && (
                   <p className="inline-flex items-center px-2 py-1 bg-tech-main/5 border border-tech-main/20 text-[10px] font-mono text-tech-main ml-3">
-                    <span className="w-1.5 h-1.5 bg-tech-main mr-2"></span>{" "}
-                    TARGET: {rev.filePath}
+                    <span className="w-1.5 h-1.5 bg-tech-main mr-2"></span> TARGET: {rev.filePath}
                   </p>
                 )}
               </div>

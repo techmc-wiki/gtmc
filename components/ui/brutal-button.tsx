@@ -23,10 +23,12 @@ export const BrutalButton = React.forwardRef<HTMLButtonElement, BrutalButtonProp
         " bg-transparent border-transparent text-tech-main hover:underline decoration-1 underline-offset-4";
     }
 
-    // Sizes
-    if (size === "sm") baseStyles += " px-4 py-1.5 text-xs text-sm";
-    else if (size === "md") baseStyles += " px-6 py-2 text-sm";
-    else if (size === "lg") baseStyles += " px-8 py-3 text-base";
+    // Sizes: responsive touch targets (min 44px on mobile)
+    if (size === "sm") baseStyles += " px-3 py-2 sm:px-4 sm:py-1.5 text-xs sm:text-sm";
+    else if (size === "md")
+      baseStyles += " px-4 py-2.5 sm:px-6 sm:py-2 text-sm min-h-[44px] sm:min-h-auto";
+    else if (size === "lg")
+      baseStyles += " px-6 py-3 sm:px-8 sm:py-3 text-base min-h-[44px] sm:min-h-auto";
 
     return (
       <button

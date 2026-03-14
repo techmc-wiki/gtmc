@@ -43,7 +43,7 @@ export function LoadingIndicator({
       <span className="w-2 h-2 bg-tech-accent animate-pulse inline-block" />
 
       {/* Uppercase monospace text */}
-      <span className="text-tech-main uppercase tracking-[0.1em]">{label}</span>
+      <span className="text-tech-main uppercase tracking-widest">{label}</span>
 
       {/* Optional decorative square (aria-hidden) */}
       <span className="w-1 h-1 bg-tech-line inline-block" aria-hidden="true" />

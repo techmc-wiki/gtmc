@@ -223,12 +223,12 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
 
       <div className="flex flex-col grow min-h-125 border border-tech-main/30 bg-white/40 backdrop-blur-sm relative">
         {/* 工具栏 */}
-        <div className="bg-tech-main text-white/90 p-2 flex flex-wrap gap-2 items-center sticky top-0 z-10 font-mono text-xs border-b border-tech-dark px-4">
+        <div className="bg-tech-main text-white/90 p-2 flex flex-wrap gap-1 sm:gap-2 items-center sticky top-0 z-10 font-mono text-xs border-b border-tech-dark px-2 sm:px-4">
           <button
             type="button"
             onClick={() => insertSyntax("**", "**")}
             disabled={isReadOnly}
-            className="hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
+            className="h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
           >
             <b>B</b>
           </button>
@@ -236,33 +236,41 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="button"
             onClick={() => insertSyntax("*", "*")}
             disabled={isReadOnly}
-            className="hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
+            className="h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
           >
             <i>I</i>
           </button>
           <button
             type="button"
-            onClick={() => insertSyntax("### ")}
-            disabled={isReadOnly}
-            className="hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
-          >
-            H3
-          </button>
-          <div className="w-px h-4 bg-white/30 mx-1"></div>
-          <button
-            type="button"
             onClick={() => insertSyntax("[", "](url)")}
             disabled={isReadOnly}
-            className="hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
+            className="h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
           >
             Link
           </button>
-          <div className="w-px h-4 bg-white/30 mx-1"></div>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isReadOnly || isUploading}
+            className="h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
+            aria-busy={isUploading}
+          >
+            {isCompressing ? "CMP" : isUploading ? "UPL" : "IMG"}
+          </button>
+          <div className="hidden sm:block w-px h-4 bg-white/30 mx-1"></div>
+          <button
+            type="button"
+            onClick={() => insertSyntax("### ")}
+            disabled={isReadOnly}
+            className="hidden sm:block hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
+          >
+            H3
+          </button>
           <button
             type="button"
             onClick={() => insertSyntax("`", "`")}
             disabled={isReadOnly}
-            className="hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
+            className="hidden sm:block hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
           >
             Code
           </button>
@@ -270,23 +278,9 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="button"
             onClick={() => insertSyntax("```\n", "\n```")}
             disabled={isReadOnly}
-            className="hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
+            className="hidden sm:block hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
           >
             Block
-          </button>
-          <div className="w-px h-4 bg-white/30 mx-1"></div>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isReadOnly || isUploading}
-            className="hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
-            aria-busy={isUploading}
-          >
-            {isCompressing
-              ? "[ COMPRESSING... ]"
-              : isUploading
-                ? "[ UPLOADING... ]"
-                : "[ UPLOAD_IMG ]"}
           </button>
           <input
             ref={fileInputRef}
@@ -301,7 +295,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
               }
             }}
           />
-          <span className="ml-auto text-tech-accent/60 opacity-60 flex items-center gap-2 text-xs">
+          <span className="hidden sm:flex ml-auto text-tech-accent/60 opacity-60 items-center gap-2 text-xs">
             MARKDOWN_SUPPORTED_
           </span>
         </div>
@@ -327,7 +321,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           />
 
           {isUploading && (
-            <div className="absolute top-4 right-4 bg-tech-main text-tech-accent text-xs font-mono px-3 py-1.5 border border-tech-accent shadow-sm shadow-tech-accent/20 z-20 flex items-center gap-2 backdrop-blur-sm" aria-live="polite" aria-label="Image upload status">
+            <div
+              className="absolute top-4 right-4 bg-tech-main text-tech-accent text-xs font-mono px-3 py-1.5 border border-tech-accent shadow-sm shadow-tech-accent/20 z-20 flex items-center gap-2 backdrop-blur-sm"
+              aria-live="polite"
+              aria-label="Image upload status"
+            >
               <span className="inline-block w-2 h-2 bg-tech-accent animate-pulse"></span>
               {isCompressing ? "COMPRESSING_IMAGE..." : "UPLOADING_IMAGE..."}
             </div>
@@ -343,7 +341,12 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             CANCEL_
           </BrutalButton>
 
-          <BrutalButton type="submit" variant="primary" disabled={isSaving} aria-busy={isSaving && initialData?.id ? true : false}>
+          <BrutalButton
+            type="submit"
+            variant="primary"
+            disabled={isSaving}
+            aria-busy={isSaving && initialData?.id ? true : false}
+          >
             {isSaving && initialData?.id ? (
               <LoadingIndicator label={PENDING_LABELS.SAVING_FEATURE} />
             ) : isSaving ? (

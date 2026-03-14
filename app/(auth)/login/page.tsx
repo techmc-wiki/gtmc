@@ -21,7 +21,7 @@ export default function LoginPage() {
       {/* ======================================================== */}
 
       {/* 左上角系统序列号 */}
-      <div className="absolute top-8 left-8 flex flex-col space-y-1 z-0">
+      <div className="absolute top-8 left-8 flex flex-col space-y-1 z-0 hidden md:flex">
         <div className="text-xs tracking-widest font-mono text-tech-main-dark opacity-50 uppercase">
           [ GTMC_AUTH_GATEWAY ]
         </div>
@@ -42,7 +42,7 @@ export default function LoginPage() {
       </div>
 
       {/* Java 代码片段漂浮层 (Decompiled Source Code) */}
-      <div className="absolute right-10 md:right-20 bottom-[20%] opacity-20 hidden lg:block select-none pointer-events-none transform rotate-2">
+      <div className="absolute right-10 md:right-20 bottom-[20%] opacity-20 hidden lg:block select-none pointer-events-none transform rotate-2 decor-desktop-only">
         <div className="text-[10px] font-mono text-tech-main whitespace-pre leading-relaxed border-r-2 border-tech-main/20 pr-4 text-right">
           <span className="text-tech-main-dark font-bold">@PostMapping</span>(
           <span className="text-tech-main-dark">&quot;/login&quot;</span>){"\n"}
@@ -57,13 +57,13 @@ export default function LoginPage() {
       </div>
 
       {/* 贯穿全图的低调主辅助线 */}
-      <div className="absolute top-[50%] left-0 w-full h-px bg-tech-main/10 flex items-center justify-center">
+      <div className="absolute top-[50%] left-0 w-full h-px bg-tech-main/10 flex items-center justify-center hidden md:flex decor-desktop-only">
         <div className="w-2 h-2 bg-tech-bg border border-tech-main/50"></div>
       </div>
-      <div className="absolute top-0 left-[50%] w-pxfull bg-tech-main/10"></div>
+      <div className="absolute top-0 left-[50%] w-pxfull bg-tech-main/10 hidden md:block decor-desktop-only"></div>
 
       {/* 巨型背景水印 */}
-      <div className="absolute bottom-0 -left-20 text-[8rem] font-black text-tech-main opacity-[0.03] select-none pointer-events-none whitespace-nowrap hidden lg:block tracking-tighter">
+      <div className="absolute bottom-0 -left-20 text-[8rem] font-black text-tech-main opacity-[0.03] select-none pointer-events-none whitespace-nowrap hidden lg:block tracking-tighter decor-desktop-only">
         ACCESS_CONTROL
       </div>
 

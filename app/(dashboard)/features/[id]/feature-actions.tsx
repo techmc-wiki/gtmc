@@ -73,7 +73,7 @@ export function FeatureActions({ featureId, status, isAssignee, isAdmin, hasAssi
               <BrutalButton
                 onClick={handleUnassign}
                 disabled={isPending}
-                variant="ghost"
+                variant="secondary"
                 size="sm"
                 aria-busy={pendingAction === "unassign"}
               >

@@ -40,7 +40,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         where: { parentId: dbArticle.id },
       });
       content = `# ${dbArticle.title}\n\n[SYS.DIR_CONTENTS]\n\n`;
-      children.forEach((child) => {
+      children.forEach((child: typeof dbArticle) => {
         content += `- [${child.title}](/articles/${child.slug})\n`;
       });
     } else {

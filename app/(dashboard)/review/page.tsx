@@ -35,14 +35,14 @@ export default async function ReviewHubPage() {
   });
 
   return (
-    <div className="max-w-6xl mx-auto space-y-12">
-      <div className="border-b border-tech-main/40 pb-6 relative">
+    <div className="max-w-6xl mx-auto space-y-6 sm:space-y-12 px-4 sm:px-0">
+      <div className="border-b border-tech-main/40 pb-4 sm:pb-6 relative">
         <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-tech-main/20 -translate-y-[1px] translate-x-[1px]"></div>
-        <h1 className="text-4xl md:text-5xl font-bold uppercase tracking-tight text-tech-main-dark flex items-center">
+        <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold uppercase tracking-tight text-tech-main-dark flex items-center">
           <span className="w-4 h-4 bg-tech-main/20 border border-tech-main/50 mr-4"></span>
           REVIEW HUB
         </h1>
-        <p className="text-sm font-mono tracking-[0.2em] mt-3 text-tech-main/80 flex items-center">
+        <p className="text-xs sm:text-sm font-mono tracking-[0.2em] mt-3 text-tech-main/80 flex items-center">
           <span className="w-2 h-2 rounded-full bg-tech-main mr-2 animate-pulse"></span>
           APPROVE CONTENT. MERGE REBELLION.
         </p>
@@ -57,10 +57,10 @@ export default async function ReviewHubPage() {
             </h2>
           </div>
         ) : (
-          pendingRevisions.map((rev) => (
+          pendingRevisions.map((rev: (typeof pendingRevisions)[0]) => (
             <BrutalCard
               key={rev.id}
-              className="flex flex-col md:flex-row justify-between items-start md:items-center border border-tech-main/30 bg-white/60 backdrop-blur-sm p-6 relative group space-y-4 md:space-y-0"
+              className="flex flex-col md:flex-row justify-between items-start md:items-center border border-tech-main/30 bg-white/60 backdrop-blur-sm p-4 sm:p-6 relative group space-y-4 md:space-y-0"
             >
               {/* 边角 */}
               <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main -translate-x-[1px] -translate-y-[1px] opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -75,7 +75,7 @@ export default async function ReviewHubPage() {
                     {rev.updatedAt.toLocaleString()}
                   </span>
                 </div>
-                <h3 className="text-2xl font-semibold uppercase tracking-tight mb-2 text-tech-main-dark border-l-[3px] border-tech-main/40 pl-3">
+                <h3 className="text-lg sm:text-2xl font-semibold uppercase tracking-tight mb-2 text-tech-main-dark border-l-[3px] border-tech-main/40 pl-3">
                   {rev.title || "UNTITLED"}
                 </h3>
                 <p className="text-tech-main/80 font-mono text-xs mb-3 pl-3">
@@ -91,11 +91,11 @@ export default async function ReviewHubPage() {
                 )}
               </div>
 
-              <div className="w-full md:w-auto flex flex-col md:flex-row gap-4 relative z-10">
-                <Link href={`/review/${rev.id}`}>
+              <div className="w-full md:w-auto flex flex-col md:flex-row gap-3 sm:gap-4 relative z-10">
+                <Link href={`/review/${rev.id}`} className="w-full md:w-auto">
                   <BrutalButton
                     variant="primary"
-                    className="w-full md:w-auto h-12 px-6 flex items-center justify-center uppercase text-sm tracking-[0.1em] hover:scale-[1.02] transition-transform"
+                    className="w-full md:w-auto h-11 sm:h-12 px-4 sm:px-6 flex items-center justify-center uppercase text-xs sm:text-sm tracking-[0.1em] hover:scale-[1.02] transition-transform"
                   >
                     REVIEW CONTENT →
                   </BrutalButton>

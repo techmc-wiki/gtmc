@@ -105,15 +105,54 @@
 
 body {
   background-color: var(--background);
+  /* Mobile: simplified background; desktop: full dot grid */
   background-image: radial-gradient(var(--color-tech-line) 1px, transparent 1px);
-  background-size: 20px 20px;
+  background-size: clamp(20px, 5vw, 20px) clamp(20px, 5vw, 20px);
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+@media (max-width: 640px) {
+  body {
+    /* Reduce background pattern density on mobile for performance */
+    background-size: 40px 40px;
+  }
 }
 
 @layer utilities {
   .animate-page-transit {
     animation: page-transit 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Mobile baseline: container and spacing constraints */
+  .container-safe {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  @media (min-width: 768px) {
+    .container-safe {
+      max-width: 1280px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  /* Hide decorative absolute-positioned layers on mobile */
+  .decor-desktop-only {
+    @apply hidden md:block;
+  }
+
+  /* Responsive touch target sizing */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Mobile-safe text scaling */
+  .text-balance-mobile {
+    @apply text-xs sm:text-sm md:text-base;
   }
 }
 
@@ -148,4 +187,18 @@ body {
 }
 .custom-left-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: rgba(96, 112, 143, 0.8);
+}
+
+@media (max-width: 767px) {
+  .absolute.hidden.lg\:block,
+  .absolute.hidden.md\:block,
+  .absolute.hidden.xl\:block {
+    display: none !important;
+  }
+
+  .opacity-\[0\.03\],
+  .opacity-\[0\.25\],
+  .opacity-40 {
+    opacity: 0 !important;
+  }
 }

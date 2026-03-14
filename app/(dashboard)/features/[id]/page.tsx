@@ -92,10 +92,10 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
   const canEdit = isAuthor || isAdmin;
 
   return (
-    <div className="container mx-auto p-4 md:p-8 space-y-6 max-w-26l">
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+    <div className="container mx-auto p-4 sm:p-6 md:p-8 space-y-6 max-w-26l">
+      <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tighter uppercase border-b-2 border-tech-main pb-2 pr-8 inline-block">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tighter uppercase border-b-2 border-tech-main pb-2 inline-block">
             {canEdit ? "Edit Feature" : "View Feature"}
           </h1>
         </div>
@@ -113,7 +113,7 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
       </div>
 
       {isClosed && (
-        <div className="border-2 border-red-500 bg-red-50 p-4 font-mono text-sm text-red-800 uppercase tracking-wider mb-8 shadow-[4px_4px_0px_rgba(239,68,68,1)]">
+        <div className="border-2 border-red-500 bg-red-50 p-4 sm:p-6 font-mono text-xs sm:text-sm text-red-800 uppercase tracking-wider mb-8 shadow-[4px_4px_0px_rgba(239,68,68,1)]">
           <span className="font-bold">⚠ FEATURE DELETED (READ-ONLY)</span>
           <p className="mt-1 text-xs text-red-600 normal-case tracking-normal">
             This feature has been deleted. The content is preserved for historical reference. No
@@ -122,38 +122,42 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
         </div>
       )}
 
-      <BrutalCard className="mb-8">
-        <div className="flex flex-col gap-1 font-mono text-sm">
-          <div className="flex gap-2 items-center">
-            <span className="font-bold text-zinc-500 w-24">STATUS:</span>
+      <BrutalCard className="mb-8 p-4 sm:p-6">
+        <div className="flex flex-col gap-2 font-mono text-xs sm:text-sm">
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <span className="font-bold text-zinc-500 sm:w-24">STATUS:</span>
             <StatusBadge status={feature.status} />
           </div>
-          <div className="flex gap-2">
-            <span className="font-bold text-zinc-500 w-24">AUTHOR:</span>
-            <span>{feature.author.name || feature.author.email || "Unknown"}</span>
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <span className="font-bold text-zinc-500 sm:w-24">AUTHOR:</span>
+            <span className="break-words">
+              {feature.author.name || feature.author.email || "Unknown"}
+            </span>
           </div>
-          <div className="flex gap-2">
-            <span className="font-bold text-zinc-500 w-24">ASSIGNEE:</span>
-            <span>
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <span className="font-bold text-zinc-500 sm:w-24">ASSIGNEE:</span>
+            <span className="break-words">
               {feature.assignee ? feature.assignee.name || feature.assignee.email : "Unassigned"}
             </span>
           </div>
-          <div className="flex gap-2">
-            <span className="font-bold text-zinc-500 w-24">CREATED:</span>
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <span className="font-bold text-zinc-500 sm:w-24">CREATED:</span>
             <span suppressHydrationWarning>{new Date(feature.createdAt).toLocaleString()}</span>
           </div>
           {feature.issueNumber && feature.htmlUrl && (
-            <div className="flex gap-2">
-              <span className="font-bold text-zinc-500 w-24">GITHUB:</span>
-              Linked to
-              <a
-                href={feature.htmlUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-tech-main border-b border-tech-main/50 font-mono hover:text-white hover:bg-tech-main/80 transition-colors"
-              >
-                Issue #{feature.issueNumber}
-              </a>
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+              <span className="font-bold text-zinc-500 sm:w-24">GITHUB:</span>
+              <div className="flex gap-1 items-center flex-wrap">
+                Linked to
+                <a
+                  href={feature.htmlUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-tech-main border-b border-tech-main/50 font-mono hover:text-white hover:bg-tech-main/80 transition-colors break-words"
+                >
+                  Issue #{feature.issueNumber}
+                </a>
+              </div>
             </div>
           )}
         </div>
@@ -180,7 +184,7 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
           />
         ) : (
           <BrutalCard>
-            <h2 className="text-2xl font-bold mb-4">{feature.title}</h2>
+            <h2 className="text-sm sm:text-base md:text-lg font-bold mb-4">{feature.title}</h2>
 
             {feature.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-6">

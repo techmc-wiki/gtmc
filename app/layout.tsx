@@ -15,9 +15,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      </head>
       <Analytics />
       <SpeedInsights />
-      <body className="antialiased bg-tech-bg/50">{children}</body>
+      <body className="antialiased bg-tech-bg/50 w-full overflow-x-hidden">{children}</body>
     </html>
   );
 }

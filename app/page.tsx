@@ -10,7 +10,7 @@ export default function Home() {
       {/* ======================================================== */}
 
       {/* 左上角系统序列号 */}
-      <div className="absolute top-8 left-8 flex flex-col space-y-1 z-0">
+      <div className="absolute top-8 left-8 flex flex-col space-y-1 z-0 hidden md:flex">
         <div className="text-xs tracking-widest font-mono text-tech-main-dark opacity-50 uppercase">
           [ GTMC_WIKI_SYSTEM ]
         </div>
@@ -35,7 +35,7 @@ export default function Home() {
       </div>
 
       {/* Java 代码片段漂浮层 (Decompiled Source Code) */}
-      <div className="absolute left-10 md:left-20 bottom-[15%] opacity-40 hidden lg:block select-none pointer-events-none transform -rotate-2 mix-blend-multiply">
+      <div className="absolute left-10 md:left-20 bottom-[15%] opacity-40 hidden lg:block select-none pointer-events-none transform -rotate-2 mix-blend-multiply decor-desktop-only">
         <div className="text-[11px] font-mono text-tech-main whitespace-pre leading-relaxed border-l-4 border-tech-main/40 pl-4 bg-tech-main/5 py-2">
           {"{"}"\n"
           {"  "}
@@ -69,7 +69,7 @@ export default function Home() {
       </div>
 
       {/* NBT二进制/Hex Dump 背景层 (底层纹理) */}
-      <div className="absolute top-[20%] left-[5%] text-[10px] font-mono text-tech-main opacity-[0.25] select-none pointer-events-none whitespace-pre leading-tight hidden xl:block mix-blend-multiply">
+      <div className="absolute top-[20%] left-[5%] text-[10px] font-mono text-tech-main opacity-[0.25] select-none pointer-events-none whitespace-pre leading-tight hidden xl:block mix-blend-multiply decor-desktop-only">
         00000000: 1f8b 0800 0000 0000 0000 edc1 0b00 0000 .......4........{"\n"}
         00000010: 0010 0700 1101 0005 6c65 7665 6c00 0800 ........level...{"\n"}
         00000020: 0b44 6174 6101 0006 7261 6e64 6f6d 5365 .Data...randomSe{"\n"}
@@ -78,7 +78,7 @@ export default function Home() {
       </div>
 
       {/* 堆栈跟踪装饰 (Stack Trace Decor) */}
-      <div className="absolute bottom-8 left-8 text-[10px] font-mono text-red-500/40 select-none pointer-events-none hidden md:block mix-blend-multiply">
+      <div className="absolute bottom-8 left-8 text-[10px] font-mono text-red-500/40 select-none pointer-events-none hidden lg:block mix-blend-multiply decor-desktop-only">
         <span className="font-bold">
           at net.minecraft.world.level.block.piston.PistonBaseBlock.moveBlocks
         </span>
@@ -93,32 +93,32 @@ export default function Home() {
       </div>
 
       {/* 分散的瞄准/坐标十字 */}
-      <div className="absolute top-1/4 right-[25%] text-xl font-light opacity-30 select-none">
+      <div className="absolute top-1/4 right-[25%] text-xl font-light opacity-30 select-none hidden md:block decor-desktop-only">
         +
       </div>
-      <div className="absolute bottom-1/3 left-[8%] text-xl font-light opacity-30 select-none">
+      <div className="absolute bottom-1/3 left-[8%] text-xl font-light opacity-30 select-none hidden md:block decor-desktop-only">
         +
       </div>
-      <div className="absolute top-[15%] left-[45%] text-sm font-light opacity-30 select-none">
+      <div className="absolute top-[15%] left-[45%] text-sm font-light opacity-30 select-none hidden md:block decor-desktop-only">
         +
       </div>
 
       {/* 巨型背景水印 (侧边倒置) */}
-      <div className="absolute top-1/3 -right-20 text-[10rem] font-black text-tech-main opacity-[0.05] rotate-90 select-none pointer-events-none whitespace-nowrap hidden lg:block tracking-tighter mix-blend-multiply">
+      <div className="absolute top-1/3 -right-20 text-[10rem] font-black text-tech-main opacity-[0.05] rotate-90 select-none pointer-events-none whitespace-nowrap hidden lg:block tracking-tighter mix-blend-multiply decor-desktop-only">
         SCHEMATIC_01
       </div>
 
       {/* 贯穿全图的低调主辅助线 (X轴/Y轴) */}
-      <div className="absolute top-[35%] right-0 w-[40%] h-[1px] bg-tech-main/20">
+      <div className="absolute top-[35%] right-0 w-[40%] h-[1px] bg-tech-main/20 hidden md:block decor-desktop-only">
         <span className="absolute -top-4 right-10 text-[10px] font-mono opacity-50">L-AXIS</span>
       </div>
-      <div className="absolute top-0 left-[25%] w-[1px] h-[100%] bg-tech-main/10 flex flex-col items-center">
+      <div className="absolute top-0 left-[25%] w-[1px] h-[100%] bg-tech-main/10 flex flex-col items-center hidden md:flex decor-desktop-only">
         {/* 轴线上的点缀 */}
         <div className="w-2 h-2 bg-tech-bg border border-tech-main/50 mt-[50vh]"></div>
       </div>
 
       {/* 技术图纸刻度尺 (模拟Photoshop/CAD边缘) */}
-      <div className="absolute top-0 left-0 w-full h-2 border-b border-tech-main/10 flex overflow-hidden opacity-30">
+      <div className="absolute top-0 left-0 w-full h-2 border-b border-tech-main/10 flex overflow-hidden opacity-30 hidden md:flex decor-desktop-only">
         {Array.from({ length: 100 }).map((_, i) => (
           <div key={i} className="flex-none w-8 border-l border-tech-main/40 h-full relative">
             {i % 4 === 0 && (
@@ -127,14 +127,14 @@ export default function Home() {
           </div>
         ))}
       </div>
-      <div className="absolute top-0 left-0 h-full w-2 border-r border-tech-main/10 flex flex-col overflow-hidden opacity-30">
+      <div className="absolute top-0 left-0 h-full w-2 border-r border-tech-main/10 flex flex-col overflow-hidden opacity-30 hidden md:flex decor-desktop-only">
         {Array.from({ length: 50 }).map((_, i) => (
           <div key={i} className="flex-none h-8 border-t border-tech-main/40 w-full relative"></div>
         ))}
       </div>
 
       {/* MC 方块视角的几何线条叠加 (等距视角线框) */}
-      <div className="absolute bottom-[20%] right-[10%] opacity-20 pointer-events-none hidden md:block">
+      <div className="absolute bottom-[20%] right-[10%] opacity-20 pointer-events-none hidden lg:block decor-desktop-only">
         <svg
           width="200"
           height="200"
@@ -171,7 +171,7 @@ export default function Home() {
       </div>
 
       {/* 圆形/雷达阵列结构 */}
-      <div className="absolute bottom-16 left-[20%] opacity-10 pointer-events-none hidden lg:block">
+      <div className="absolute bottom-16 left-[20%] opacity-10 pointer-events-none hidden lg:block decor-desktop-only">
         <svg
           width="150"
           height="150"
@@ -193,7 +193,7 @@ export default function Home() {
       {/* ======================================================== */}
 
       {/* 红石逻辑代数/布尔运算 */}
-      <div className="absolute top-[40%] right-[6%] text-[11px] font-mono text-tech-main opacity-[0.35] select-none pointer-events-none hidden 2xl:block leading-relaxed border-l border-tech-main/40 pl-4 mix-blend-multiply">
+      <div className="absolute top-[40%] right-[6%] text-[11px] font-mono text-tech-main opacity-[0.35] select-none pointer-events-none hidden 2xl:block leading-relaxed border-l border-tech-main/40 pl-4 mix-blend-multiply decor-desktop-only">
         <div className="text-tech-main-dark mb-2 font-bold">{"//"} REDSTONE_BOOLEAN_LOGIC</div>
         <span>Y = (A ∧ B) ∨ (¬C)</span>
         <br />
@@ -208,7 +208,7 @@ export default function Home() {
       </div>
 
       {/* 空间坐标变换矩阵 (线性代数) */}
-      <div className="absolute bottom-[30%] right-[25%] opacity-[0.35] text-[11px] font-mono select-none pointer-events-none hidden 2xl:block mix-blend-multiply">
+      <div className="absolute bottom-[30%] right-[25%] opacity-[0.35] text-[11px] font-mono select-none pointer-events-none hidden 2xl:block mix-blend-multiply decor-desktop-only">
         <div className="text-tech-main-dark mb-2 font-bold tracking-widest">
           TRANSFORM_MATRIX_4x4
         </div>
@@ -233,7 +233,7 @@ export default function Home() {
       </div>
 
       {/* 内存簇/寄存器网格 */}
-      <div className="absolute top-[60%] left-[3%] opacity-[0.35] text-[10px] font-mono select-none pointer-events-none hidden 2xl:block mix-blend-multiply">
+      <div className="absolute top-[60%] left-[3%] opacity-[0.35] text-[10px] font-mono select-none pointer-events-none hidden 2xl:block mix-blend-multiply decor-desktop-only">
         <div className="mb-2 text-tech-main-dark font-bold tracking-widest">
           TICK_PHASE_ALLOCATION
         </div>
@@ -257,7 +257,7 @@ export default function Home() {
       </div>
 
       {/* 力学/机械引擎图纸 (活塞结构抽象) */}
-      <div className="absolute top-[15%] right-[15%] opacity-[0.25] select-none pointer-events-none hidden xl:block mix-blend-multiply">
+      <div className="absolute top-[15%] right-[15%] opacity-[0.25] select-none pointer-events-none hidden xl:block mix-blend-multiply decor-desktop-only">
         <svg
           width="140"
           height="160"

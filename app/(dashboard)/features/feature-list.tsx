@@ -89,17 +89,19 @@ export function FeatureList({ features }: { features: any[] }) {
 
     return (
       <div className="mb-8">
-        <h3 className="text-xl font-bold tracking-widest uppercase mb-4 border-l-4 border-tech-main pl-3 text-tech-main">
+        <h3 className="text-sm sm:text-base md:text-lg font-bold tracking-widest uppercase mb-4 border-l-4 border-tech-main pl-3 text-tech-main">
           {title} ({groupFeatures.length})
         </h3>
-        <div className="grid gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {groupFeatures.map((feature) => (
             <Link key={feature.id} href={`/features/${feature.id}`} className="block">
-              <BrutalCard className="hover:border-zinc-800 transition-colors flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center p-4 cursor-pointer bg-white/60 backdrop-blur-sm">
+              <BrutalCard className="hover:border-zinc-800 transition-colors flex flex-col gap-4 p-4 sm:p-6 cursor-pointer bg-white/60 backdrop-blur-sm">
                 <div className="space-y-2 flex-grow">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                     <StatusBadge status={feature.status} />
-                    <h2 className="text-xl font-bold">{feature.title}</h2>
+                    <h2 className="text-sm sm:text-base md:text-lg font-bold break-words">
+                      {feature.title}
+                    </h2>
                   </div>
 
                   <div className="flex flex-wrap gap-2 text-xs font-mono">
@@ -143,7 +145,7 @@ export function FeatureList({ features }: { features: any[] }) {
   return (
     <div className="space-y-6">
       {/* 过滤器 */}
-      <BrutalCard className="p-4 bg-white/60 backdrop-blur-sm border-tech-main/30 md:px-6">
+      <BrutalCard className="p-4 sm:p-6 bg-white/60 backdrop-blur-sm border-tech-main/30">
         <div className="space-y-4">
           <div>
             <h4 className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main mb-2">
@@ -154,7 +156,7 @@ export function FeatureList({ features }: { features: any[] }) {
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
-                  className={`text-xs font-mono px-3 py-1.5 border transition-all ${
+                  className={`text-xs font-mono px-3 py-2 border transition-all min-h-[44px] flex items-center justify-center ${
                     statusFilter === status
                       ? "bg-tech-main text-white border-tech-main"
                       : "bg-transparent text-tech-main border-tech-main/30 hover:border-tech-main"
@@ -176,7 +178,7 @@ export function FeatureList({ features }: { features: any[] }) {
                   <button
                     key={tag}
                     onClick={() => toggleTag(tag)}
-                    className={`text-xs font-mono uppercase px-3 py-1.5 border transition-all ${
+                    className={`text-xs font-mono uppercase px-3 py-2 border transition-all min-h-[44px] flex items-center justify-center ${
                       selectedTags.includes(tag)
                         ? "bg-tech-accent text-white border-tech-accent"
                         : "bg-tech-accent/5 text-tech-main border-tech-main/20 hover:border-tech-main/50"

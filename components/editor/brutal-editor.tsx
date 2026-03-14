@@ -237,28 +237,45 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
 
       {/* 编辑器主区域 (双栏布局或单栏) */}
       <div className="flex flex-col space-y-2 grow">
-        <div className="flex justify-between items-end mb-2">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-2 sm:gap-0 mb-2">
           <label className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main border-b border-tech-main/30 inline-block pb-1">
             CONTENT (MARKDOWN)_
           </label>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             {!isReadOnly && (
               <>
-                <div className="flex items-center gap-1 border-r border-tech-main/30 pr-2 mr-1">
+                <div className="flex flex-wrap gap-1 sm:gap-1 sm:border-r sm:border-tech-main/30 sm:pr-2 sm:mr-1">
                   <button
                     type="button"
                     onClick={() => insertSyntax("**", "**")}
-                    className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs font-bold transition-colors"
+                    className="h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-xs sm:text-xs font-bold text-tech-main/70 hover:bg-tech-main hover:text-white transition-colors flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
                   >
                     B
                   </button>
                   <button
                     type="button"
                     onClick={() => insertSyntax("*", "*")}
-                    className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs italic transition-colors"
+                    className="h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-xs sm:text-xs italic text-tech-main/70 hover:bg-tech-main hover:text-white transition-colors flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
                   >
                     I
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => insertSyntax("[", "](url)")}
+                    className="h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-xs sm:text-xs text-tech-main/70 hover:bg-tech-main hover:text-white transition-colors flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
+                  >
+                    LINK
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-[10px] sm:text-[10px] font-mono tracking-widest text-tech-main bg-tech-main/10 hover:bg-tech-main hover:text-white transition-colors border border-tech-main/30 flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
+                  >
+                    {isCompressing ? "CMP" : isUploading ? "UPL" : "IMG"}
+                  </button>
+                </div>
+                <div className="hidden sm:flex items-center gap-1 border-r border-tech-main/30 pr-2 mr-1">
                   <button
                     type="button"
                     onClick={() => insertSyntax("### ")}
@@ -273,26 +290,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
                   >
                     &lt;/&gt;
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => insertSyntax("[", "](url)")}
-                    className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs transition-colors"
-                  >
-                    LINK
-                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                  className="text-[10px] font-mono tracking-widest text-tech-main bg-tech-main/10 hover:bg-tech-main hover:text-white transition-colors px-2 py-1 border border-tech-main/30"
-                >
-                  {isCompressing
-                    ? "[ COMPRESSING... ]"
-                    : isUploading
-                      ? "[ UPLOADING... ]"
-                      : "[ UPLOAD_IMG ]"}
-                </button>
               </>
             )}
             <input

@@ -1,13 +1,14 @@
 import { BrutalCard } from "@/components/ui/brutal-card";
-import { SectionRail, SegmentedBar, ScanConfirmOverlay } from "./loading-shell-primitives";
+import { SectionRail, SegmentedBar, ScanConfirmOverlay, SkeletonExitWrapper } from "./loading-shell-primitives";
 
 export default function FeaturesLoading() {
   return (
-    <div
-      className="max-w-6xl mx-auto space-y-8 px-6 pb-12"
-      aria-busy="true"
-      aria-label="Loading features list"
-    >
+    <SkeletonExitWrapper>
+      <div
+        className="max-w-6xl mx-auto space-y-8 px-6 pb-12"
+        aria-busy="true"
+        aria-label="Loading features list"
+      >
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-tech-main/40 pb-6 relative gap-4 mt-8 animate-tech-slide-in">
         <ScanConfirmOverlay />
         <div className="w-full md:w-auto">
@@ -116,6 +117,7 @@ export default function FeaturesLoading() {
           </div>
         ))}
       </div>
-    </div>
+      </div>
+    </SkeletonExitWrapper>
   );
 }

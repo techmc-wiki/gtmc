@@ -99,34 +99,46 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     <div className="p-6 sm:p-8 pb-32 min-h-screen bg-transparent relative border border-tech-main/40 backdrop-blur-sm">
       <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-tech-main/40"></div>
       <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-tech-main/40"></div>
-      <div className="absolute top-6 right-6 sm:top-8 sm:right-8 group z-20 flex flex-col sm:items-end items-start gap-2 w-full sm:w-auto sm:max-w-none max-w-[calc(100%-3rem)]">
-        <Link href={`/draft/new?file=${encodeURIComponent(editPath)}`}>
-          <button className="flex items-center gap-2 border border-tech-main/40 bg-tech-main/10 hover:bg-tech-main text-tech-main hover:text-white px-4 py-2 font-mono text-xs uppercase tracking-widest transition-all duration-300 relative overflow-hidden min-h-[44px] w-full sm:w-auto">
-            <span className="relative z-10 font-bold">[EDIT_TARGET]</span>
-          </button>
-        </Link>
-        <div className="text-xs font-mono text-tech-main flex flex-col sm:flex-row sm:items-center gap-2 opacity-80 transition-opacity hover:opacity-100 w-full sm:w-auto">
-          <div className="flex items-center gap-1">
-            <span className="opacity-50">WORDS:</span>
-            <span className="font-bold">{wordCount.toLocaleString()}</span>
-          </div>
-          <span className="opacity-30 hidden sm:inline">|</span>
-          <div className="flex items-center gap-1">
-            <span className="opacity-50">EST_TIME:</span>
-            <span className="font-bold">{readingTime} MIN</span>
-          </div>
-        </div>
-      </div>
 
-      <div className="mb-8 border-b border-tech-main/20 pb-6 pt-4 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div className="md:w-auto w-full">
-          <div className="text-xs font-mono text-tech-main/50 flex items-center mb-1">
-            <span className="w-2 h-2 bg-tech-main/50 mr-2 animate-pulse"></span>
-            SYS.READ_STREAM | UTF-8
-          </div>
-          <div className="text-xs font-mono text-slate-500 break-all">PATH: {rawPath}</div>
-        </div>
-      </div>
+       {/* Article Header Region - Mobile-first in-flow card */}
+       <div className="relative mb-8 border border-tech-main/20 bg-white/80 backdrop-blur-sm p-4 sm:p-6 flex flex-col gap-4">
+         {/* Corner markers matching BrutalCard pattern */}
+         <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main/40 -translate-x-[1px] -translate-y-[1px] pointer-events-none"></div>
+         <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-tech-main/40 translate-x-[1px] -translate-y-[1px] pointer-events-none"></div>
+         <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-tech-main/40 -translate-x-[1px] translate-y-[1px] pointer-events-none"></div>
+         <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main/40 translate-x-[1px] translate-y-[1px] pointer-events-none"></div>
+
+         {/* Region 1: System/Read Label */}
+         <div className="text-xs font-mono text-tech-main/50 flex items-center">
+           <span className="w-2 h-2 bg-tech-main/50 mr-2 animate-pulse"></span>
+           SYS.READ_STREAM | UTF-8
+         </div>
+
+         {/* Region 2: Path Line */}
+         <div className="text-xs font-mono text-slate-500 break-all">
+           PATH: {rawPath}
+         </div>
+
+         {/* Region 3: Reading Stats Row */}
+         <div className="text-xs font-mono text-tech-main flex flex-col sm:flex-row sm:items-center gap-2 opacity-80 transition-opacity hover:opacity-100">
+           <div className="flex items-center gap-1">
+             <span className="opacity-50">WORDS:</span>
+             <span className="font-bold">{wordCount.toLocaleString()}</span>
+           </div>
+           <span className="opacity-30 hidden sm:inline">|</span>
+           <div className="flex items-center gap-1">
+             <span className="opacity-50">EST_TIME:</span>
+             <span className="font-bold">{readingTime} MIN</span>
+           </div>
+         </div>
+
+         {/* Region 4: Edit Action Row */}
+         <Link href={`/draft/new?file=${encodeURIComponent(editPath)}`}>
+           <button className="flex items-center gap-2 border border-tech-main/40 bg-tech-main/10 hover:bg-tech-main text-tech-main hover:text-white px-4 py-2 font-mono text-xs uppercase tracking-widest transition-all duration-300 relative overflow-hidden min-h-[44px] w-full sm:w-auto">
+             <span className="relative z-10 font-bold">[EDIT_TARGET]</span>
+           </button>
+         </Link>
+       </div>
 
       <div className="prose prose-tech max-w-none w-full overflow-hidden wrap-break-word text-slate-800 selection:bg-tech-main/20 selection:text-slate-900">
         <ReactMarkdown

@@ -74,6 +74,23 @@ export const SegmentedBar = React.forwardRef<
 SegmentedBar.displayName = "SegmentedBar";
 
 /**
+ * Skeleton exit wrapper for loading shell handoff.
+ * Applies skeleton-exit animation: opacity fade + subtle translateY + blur.
+ * Motion-reduce fallback: opacity-only fade.
+ */
+export const SkeletonExitWrapper = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { isExiting?: boolean }
+>(({ isExiting = false, className = "", ...props }, ref) => (
+  <div
+    ref={ref}
+    className={`${isExiting ? "animate-skeleton-exit motion-reduce:animate-fade-out" : ""} ${className}`}
+    {...props}
+  />
+));
+SkeletonExitWrapper.displayName = "SkeletonExitWrapper";
+
+/**
  * Scan/sweep overlay with blueprint animation.
  * Absolute positioned shimmer effect with motion-reduce fallback.
  */

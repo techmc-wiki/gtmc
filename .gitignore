@@ -49,3 +49,6 @@ AGENTS.md
 
 # worktrees
 .worktrees
+
+# prevent anyone accidently not using pnpm
+package-lock.json

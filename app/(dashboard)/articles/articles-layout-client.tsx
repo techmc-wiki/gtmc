@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { SidebarClient } from "./sidebar-client";
 import { MobileTreeCard } from "./mobile-tree-card";
@@ -25,19 +26,22 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const [isFloating, setIsFloating] = useState(false);
   const pathname = usePathname();
   const inlineShellRef = useRef<HTMLDivElement>(null);
+  const canUseDOM = typeof document !== "undefined";
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOpen(false);
   }, [pathname]);
 
-  // IntersectionObserver to detect when inline shell leaves viewport
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsFloating(!entry.isIntersecting);
       },
-      { threshold: 0 }
+      {
+        threshold: 0,
+        rootMargin: "-64px 0px 0px 0px",
+      },
     );
 
     if (inlineShellRef.current) {
@@ -58,7 +62,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       {/* Mobile inline tree shell (default state) */}
       <div
         ref={inlineShellRef}
-        className="md:hidden flex items-center border-b border-tech-main/40 bg-white/95 backdrop-blur-md"
+        className="md:hidden border-b border-tech-main/40 bg-white/95 backdrop-blur-md"
         data-testid="mobile-tree-inline-shell"
       >
         <button
@@ -71,24 +75,31 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           <span className="text-xs font-mono uppercase tracking-[0.15em] font-bold">TREE</span>
           <span className="text-sm font-mono font-bold">{isOpen ? "▼" : "▶"}</span>
         </button>
+
+        {!isFloating && isOpen ? (
+          <div className="border-t border-tech-main/20 px-4 pb-4 pt-3">{treeContent}</div>
+        ) : null}
       </div>
 
       {/* Mobile floating trigger (appears after scroll) */}
-      {isFloating && (
-        <div
-          className="md:hidden fixed top-20 right-4 z-40 flex items-center"
-          data-testid="mobile-tree-floating-trigger"
-        >
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="min-h-[44px] px-4 py-2 text-tech-main hover:bg-tech-main/5 transition-colors border border-tech-main/40 bg-white/95 backdrop-blur-md font-mono text-xs uppercase tracking-[0.15em] font-bold"
-            aria-label="Toggle article tree"
-            aria-expanded={isOpen}
-          >
-            TREE
-          </button>
-        </div>
-      )}
+      {canUseDOM && isFloating
+        ? createPortal(
+            <div
+              className="md:hidden fixed top-20 right-4 z-[58] flex items-center animate-tech-pop-in"
+              data-testid="mobile-tree-floating-trigger"
+            >
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="min-h-[44px] border border-tech-main/40 bg-white/95 px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.15em] text-tech-main backdrop-blur-md transition-all duration-300 hover:bg-tech-main/5"
+                aria-label="Toggle article tree"
+                aria-expanded={isOpen}
+              >
+                TREE
+              </button>
+            </div>,
+            document.body,
+          )
+        : null}
 
       {/* Mobile floating tree card */}
       <MobileTreeCard isOpen={isOpen} onClose={() => setIsOpen(false)} isFloating={isFloating}>

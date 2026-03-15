@@ -1,13 +1,14 @@
-import { SectionFrame, SegmentedBar, ScanConfirmOverlay } from "../loading-shell-primitives";
+import { SectionFrame, SegmentedBar, ScanConfirmOverlay, SkeletonExitWrapper } from "../loading-shell-primitives";
 import { BrutalCard } from "@/components/ui/brutal-card";
 
 export default function FeatureDetailLoading() {
   return (
-    <div
-      className="container mx-auto p-4 sm:p-6 md:p-8 space-y-6 max-w-4xl"
-      aria-busy="true"
-      aria-label="Loading feature details"
-    >
+    <SkeletonExitWrapper>
+      <div
+        className="container mx-auto p-4 sm:p-6 md:p-8 space-y-6 max-w-4xl"
+        aria-busy="true"
+        aria-label="Loading feature details"
+      >
       {/* FEATURE_HEADER_ */}
       <div className="flex flex-col gap-4 animate-tech-slide-in relative">
         <ScanConfirmOverlay />
@@ -131,6 +132,7 @@ export default function FeatureDetailLoading() {
            </div>
          </SectionFrame>
        </div>
-    </div>
+      </div>
+    </SkeletonExitWrapper>
   );
 }

@@ -376,7 +376,6 @@ export const listAllIssues = unstable_cache(_listAllIssuesUncached, ["github-iss
 export const listIssues = listAllIssues;
 
 // Cache TTL constants for GitHub feature reads
-const LIST_TTL = 300; // 5 minutes for issue list
 const ISSUE_TTL = 60; // 1 minute for individual issue detail
 const COMMENTS_TTL = 25; // 25 seconds for issue comments
 

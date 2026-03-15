@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { useState, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarClient } from "./sidebar-client";
-import { MobileTreeSheet } from "./mobile-tree-sheet";
+import { MobileTreeCard } from "./mobile-tree-card";
 
 interface TreeNode {
   id: string;
@@ -22,22 +22,44 @@ interface ArticlesLayoutProps {
 
 export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isFloating, setIsFloating] = useState(false);
   const pathname = usePathname();
+  const inlineShellRef = useRef<HTMLDivElement>(null);
 
-  const handleNavigate = useCallback(() => {
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOpen(false);
+  }, [pathname]);
+
+  // IntersectionObserver to detect when inline shell leaves viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsFloating(!entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    if (inlineShellRef.current) {
+      observer.observe(inlineShellRef.current);
+    }
+
+    return () => observer.disconnect();
   }, []);
 
-  React.useEffect(() => {
-    handleNavigate();
-  }, [pathname, handleNavigate]);
+  const treeContent = (
+    <div className="prose prose-base text-[15px] prose-tech font-mono w-full overflow-hidden wrap-break-word [&>ul]:pl-0 [&_ul]:list-none [&_li]:mt-1.5 [&_ul_ul]:pl-3 [&_ul_ul]:border-l [&_ul_ul]:border-tech-main/20 [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 pb-4">
+      <SidebarClient tree={tree} onNavigate={() => setIsOpen(false)} />
+    </div>
+  );
 
   return (
     <div className="max-w-full mx-auto flex flex-col md:flex-row relative min-h-[calc(100vh-8rem)]">
-      {/* Mobile sticky tree access bar */}
+      {/* Mobile inline tree shell (default state) */}
       <div
-        className="md:hidden sticky top-16 z-40 flex items-center border-b border-tech-main/40 bg-white/95 backdrop-blur-md"
-        data-testid="mobile-tree-sticky-bar"
+        ref={inlineShellRef}
+        className="md:hidden flex items-center border-b border-tech-main/40 bg-white/95 backdrop-blur-md"
+        data-testid="mobile-tree-inline-shell"
       >
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -51,12 +73,27 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         </button>
       </div>
 
-      {/* Mobile tree sheet */}
-      <MobileTreeSheet isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        <div className="prose prose-base text-[15px] prose-tech font-mono w-full overflow-hidden wrap-break-word [&>ul]:pl-0 [&_ul]:list-none [&_li]:mt-1.5 [&_ul_ul]:pl-3 [&_ul_ul]:border-l [&_ul_ul]:border-tech-main/20 [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 pb-4">
-          <SidebarClient tree={tree} onNavigate={handleNavigate} />
+      {/* Mobile floating trigger (appears after scroll) */}
+      {isFloating && (
+        <div
+          className="md:hidden fixed top-20 right-4 z-40 flex items-center"
+          data-testid="mobile-tree-floating-trigger"
+        >
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="min-h-[44px] px-4 py-2 text-tech-main hover:bg-tech-main/5 transition-colors border border-tech-main/40 bg-white/95 backdrop-blur-md font-mono text-xs uppercase tracking-[0.15em] font-bold"
+            aria-label="Toggle article tree"
+            aria-expanded={isOpen}
+          >
+            TREE
+          </button>
         </div>
-      </MobileTreeSheet>
+      )}
+
+      {/* Mobile floating tree card */}
+      <MobileTreeCard isOpen={isOpen} onClose={() => setIsOpen(false)} isFloating={isFloating}>
+        {treeContent}
+      </MobileTreeCard>
 
       {/* Desktop sidebar */}
       <aside className="hidden md:block w-64 lg:w-75 shrink-0 border-r border-tech-main/20">
@@ -80,7 +117,6 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         </div>
       </aside>
 
-      {/* Main content */}
       <main className="flex-1 min-w-0 md:pl-10 lg:pl-16 py-6 border-l border-transparent overflow-x-hidden relative">
         {children}
       </main>

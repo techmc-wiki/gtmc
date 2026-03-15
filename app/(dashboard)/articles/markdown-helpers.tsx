@@ -1,7 +1,6 @@
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import Link from "next/link";
-import Image from "next/image";
 import path from "path";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";

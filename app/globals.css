@@ -210,6 +210,18 @@ body {
   .transition-transform {
     @apply transition-transform duration-500;
   }
+
+  /* Homepage motion performance hints */
+  .homepage-decor-background,
+  .homepage-decor-midground,
+  .homepage-decor-foreground {
+    will-change: transform;
+  }
+
+  .homepage-decor-foreground {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
 }
 
 @keyframes page-transit {

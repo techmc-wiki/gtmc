@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { BrutalButton } from "@/components/ui/brutal-button";
 import { Logo } from "@/components/ui/logo";
+import { useHomepageMotion } from "@/lib/motion/use-homepage-motion";
+import { motion } from "motion/react";
 
 const HEX_VALUES = [
   "a1b2",
@@ -32,41 +34,214 @@ const HEX_VALUES = [
 ];
 
 export default function Home() {
+  const motionDriver = useHomepageMotion();
+  const { background: bgTransform, midground: mgTransform, foreground: fgTransform } = motionDriver;
+
   return (
     <div className="flex min-h-screen w-full relative overflow-y-auto overflow-x-hidden text-tech-main font-sans selection:bg-tech-main/20 selection:text-tech-main-dark">
-      {/* ======================================================== */}
-      {/* 结构层：背景图纸修饰、HUD、辅助线、标记、透视几何 */}
-      {/* ======================================================== */}
-
-      {/* 左上角系统序列号 */}
-      <div className="absolute top-8 left-8 flex flex-col space-y-1 z-0 hidden md:flex">
-        <div className="text-xs tracking-widest font-mono text-tech-main-dark opacity-50 uppercase">
-          [ GTMC_WIKI_SYSTEM ]
+      {/* Background Layer - Furthest depth, slowest motion */}
+      <motion.div 
+        className="homepage-decor-background absolute inset-0 z-0"
+        style={{ x: bgTransform.x, y: bgTransform.y, filter: bgTransform.filter }}
+      >
+        {/* 巨型背景水印 */}
+        <div className="absolute top-1/3 -right-20 text-[10rem] font-black text-tech-main opacity-[0.05] rotate-90 select-none pointer-events-none whitespace-nowrap hidden lg:block tracking-tighter mix-blend-multiply decor-desktop-only">
+          SCHEMATIC_01
         </div>
-        <div className="text-[10px] tracking-widest font-mono text-tech-main opacity-30">
-          BUILD.2026.03 // SECTOR-7G
+
+        {/* NBT二进制/Hex Dump 背景层 */}
+        <div className="absolute top-[20%] left-[5%] text-[10px] font-mono text-tech-main opacity-[0.25] select-none pointer-events-none whitespace-pre leading-tight hidden xl:block mix-blend-multiply decor-desktop-only">
+          00000000: 1f8b 0800 0000 0000 0000 edc1 0b00 0000 .......4........{"\n"}
+          00000010: 0010 0700 1101 0005 6c65 7665 6c00 0800 ........level...{"\n"}
+          00000020: 0b44 6174 6101 0006 7261 6e64 6f6d 5365 .Data...randomSe{"\n"}
+          00000030: 6564 0000 0000 3b9a ca00 0400 0c62 6c6f ed....;......blo{"\n"}
+          00000040: 636b 5f6c 6967 6874 5f64 6174 610a 0000 ck_light_data...{"\n"}
         </div>
-      </div>
 
-      {/* 右上角HUD：模拟服务器/图纸数据 */}
-      <div className="absolute top-8 right-12 text-[10px] font-mono text-tech-main opacity-40 text-right space-y-1 z-0 select-none hidden sm:block">
-        <p>
-          SYS.TPS :: <span className="text-tech-main-dark font-bold">20.0 *</span>
-        </p>
-        <p>SYS.MSPT :: 12.4ms</p>
-        <p>ENTITIES :: 342 / 1024</p>
-        <p>BLOCK.ENT :: 1,204</p>
-        <div className="w-full h-[1px] bg-tech-main/30 my-2"></div>
-        <p>COORD : X:1024 Y:64 Z:-512</p>
-        <p className="mt-2 text-[8px] opacity-70">
-          Light: 15 (15 sky, 0 block) <br /> Biome: minecraft:plains
-        </p>
-      </div>
+        {/* MC 方块视角的几何线条叠加 */}
+        <div className="absolute bottom-[20%] right-[10%] opacity-20 pointer-events-none hidden lg:block decor-desktop-only">
+          <svg
+            width="200"
+            height="200"
+            viewBox="0 0 120 120"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="0.5"
+          >
+            <polygon points="60,10 110,38 110,95 60,123 10,95 10,38" />
+            <line x1="60" y1="67" x2="60" y2="123" />
+            <line x1="60" y1="67" x2="10" y2="38" />
+            <line x1="60" y1="67" x2="110" y2="38" />
+            <line x1="60" y1="10" x2="60" y2="67" strokeDasharray="2 2" className="opacity-50" />
+            <line x1="10" y1="95" x2="60" y2="67" strokeDasharray="2 2" className="opacity-50" />
+            <line x1="110" y1="95" x2="60" y2="67" strokeDasharray="2 2" className="opacity-50" />
+          </svg>
+          <span className="absolute bottom-4 -right-12 text-[10px] font-mono opacity-80">
+            FIG 1. ISOMETRIC_BLOCK
+          </span>
+          <svg
+            className="absolute -top-10 -left-10"
+            width="60"
+            height="60"
+            fill="none"
+            stroke="currentColor"
+          >
+            <line x1="10" y1="10" x2="50" y2="50" strokeWidth="1" />
+            <polygon points="50,50 40,50 50,40" fill="currentColor" />
+          </svg>
+        </div>
 
-      {/* Java 代码片段漂浮层 (Decompiled Source Code) */}
-      <div className="absolute right-10 xl:right-16 top-[18%] opacity-40 hidden lg:block select-none pointer-events-none mix-blend-multiply decor-desktop-only">
-        <div className="text-[11px] font-mono text-tech-main whitespace-pre leading-relaxed border-l-4 border-tech-main/40 pl-4 bg-tech-main/5 py-2">
-          {`{
+        {/* 圆形/雷达阵列结构 */}
+        <div className="absolute bottom-16 left-[20%] opacity-10 pointer-events-none hidden lg:block decor-desktop-only">
+          <svg
+            width="150"
+            height="150"
+            viewBox="0 0 150 150"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
+          >
+            <circle cx="75" cy="75" r="60" strokeDasharray="4 4" />
+            <circle cx="75" cy="75" r="40" />
+            <circle cx="75" cy="75" r="10" fill="currentColor" />
+            <line x1="15" y1="75" x2="135" y2="75" />
+            <line x1="75" y1="15" x2="75" y2="135" />
+          </svg>
+        </div>
+
+        {/* 2XL 专属：红石逻辑代数 */}
+        <div className="absolute top-[40%] right-[6%] text-[11px] font-mono text-tech-main opacity-[0.35] select-none pointer-events-none hidden 2xl:block leading-relaxed border-l border-tech-main/40 pl-4 mix-blend-multiply decor-desktop-only">
+          <div className="text-tech-main-dark mb-2 font-bold">{"//"} REDSTONE_BOOLEAN_LOGIC</div>
+          <span>Y = (A ∧ B) ∨ (¬C)</span>
+          <br />
+          <span>T_delay = ∑(repeater_ticks) + 1_GT</span>
+          <br />
+          <span>C_out = MUX(S, A, B)</span>
+          <br />
+          <div className="mt-2 text-[9px] opacity-80">
+            * VALIDATING SIGNAL STRENGTH (0-15)
+            <br />* QUASI_CONNECTIVITY = TRUE
+          </div>
+        </div>
+
+        {/* 2XL 专属：空间坐标变换矩阵 */}
+        <div className="absolute bottom-[30%] right-[25%] opacity-[0.35] text-[11px] font-mono select-none pointer-events-none hidden 2xl:block mix-blend-multiply decor-desktop-only">
+          <div className="text-tech-main-dark mb-2 font-bold tracking-widest">
+            TRANSFORM_MATRIX_4x4
+          </div>
+          <div className="grid grid-cols-4 gap-2 text-center border-l-2 border-r-2 border-tech-main/60 px-3 py-1 bg-tech-main/5">
+            <span>1.0</span>
+            <span>0.0</span>
+            <span>0.0</span>
+            <span>dx</span>
+            <span>0.0</span>
+            <span>1.0</span>
+            <span>0.0</span>
+            <span>dy</span>
+            <span>0.0</span>
+            <span>0.0</span>
+            <span>1.0</span>
+            <span>dz</span>
+            <span>0.0</span>
+            <span>0.0</span>
+            <span>0.0</span>
+            <span>1.0</span>
+          </div>
+        </div>
+
+        {/* 2XL 专属：内存簇/寄存器网格 */}
+        <div className="absolute top-[60%] left-[3%] opacity-[0.35] text-[10px] font-mono select-none pointer-events-none hidden 2xl:block mix-blend-multiply decor-desktop-only">
+          <div className="mb-2 text-tech-main-dark font-bold tracking-widest">
+            TICK_PHASE_ALLOCATION
+          </div>
+          <div className="grid grid-cols-6 gap-x-4 gap-y-2 bg-tech-main/5 p-2 border border-tech-main/20">
+            {HEX_VALUES.map((hexValue, i) => (
+              <span
+                key={i}
+                className={
+                  i % 7 === 0
+                    ? "text-tech-main-dark font-bold relative before:content-['>'] before:absolute before:-left-3"
+                    : ""
+                }
+              >
+                {hexValue}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* 力学/机械引擎图纸 */}
+        <div className="absolute top-[15%] right-[15%] opacity-[0.25] select-none pointer-events-none hidden xl:block mix-blend-multiply decor-desktop-only">
+          <svg
+            width="140"
+            height="160"
+            viewBox="0 0 120 140"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
+          >
+            <rect x="30" y="80" width="60" height="50" fill="currentColor" fillOpacity="0.15" />
+            <rect x="45" y="40" width="30" height="40" strokeWidth="1.5" />
+            <rect
+              x="20"
+              y="20"
+              width="80"
+              height="20"
+              fill="currentColor"
+              fillOpacity="0.25"
+              strokeWidth="1.5"
+            />
+            <line x1="60" y1="20" x2="60" y2="0" strokeDasharray="3 3" />
+            <line x1="45" y1="0" x2="75" y2="0" />
+            <path d="M60 90 L60 110 M55 105 L60 110 L65 105" strokeWidth="1.5" />
+            <text
+              x="70"
+              y="110"
+              fontSize="9"
+              fontFamily="monospace"
+              fill="currentColor"
+              fontWeight="bold"
+            >
+              F_push
+            </text>
+          </svg>
+        </div>
+      </motion.div>
+
+      {/* Midground Layer - Medium depth, moderate motion */}
+      <motion.div 
+        className="homepage-decor-midground absolute inset-0 z-[1]"
+        style={{ x: mgTransform.x, y: mgTransform.y, filter: mgTransform.filter }}
+      >
+        {/* 左上角系统序列号 */}
+        <div className="absolute top-8 left-8 flex flex-col space-y-1 hidden md:flex">
+          <div className="text-xs tracking-widest font-mono text-tech-main-dark opacity-50 uppercase">
+            [ GTMC_WIKI_SYSTEM ]
+          </div>
+          <div className="text-[10px] tracking-widest font-mono text-tech-main opacity-30">
+            BUILD.2026.03 // SECTOR-7G
+          </div>
+        </div>
+
+        {/* 右上角HUD */}
+        <div className="absolute top-8 right-12 text-[10px] font-mono text-tech-main opacity-40 text-right space-y-1 select-none hidden sm:block">
+          <p>
+            SYS.TPS :: <span className="text-tech-main-dark font-bold">20.0 *</span>
+          </p>
+          <p>SYS.MSPT :: 12.4ms</p>
+          <p>ENTITIES :: 342 / 1024</p>
+          <p>BLOCK.ENT :: 1,204</p>
+          <div className="w-full h-[1px] bg-tech-main/30 my-2"></div>
+          <p>COORD : X:1024 Y:64 Z:-512</p>
+          <p className="mt-2 text-[8px] opacity-70">
+            Light: 15 (15 sky, 0 block) <br /> Biome: minecraft:plains
+          </p>
+        </div>
+
+        {/* Java 代码片段漂浮层 */}
+        <div className="absolute right-10 xl:right-16 top-[18%] opacity-40 hidden lg:block select-none pointer-events-none mix-blend-multiply decor-desktop-only">
+          <div className="text-[11px] font-mono text-tech-main whitespace-pre leading-relaxed border-l-4 border-tech-main/40 pl-4 bg-tech-main/5 py-2">
+            {`{
   "Id": "minecraft:chest",
   "x": 1024, "y": 64, "z": -512,
   "Items": [
@@ -79,244 +254,74 @@ export default function Home() {
   ],
   // BlockEntityTag
 }`}
-        </div>
-      </div>
-
-      {/* NBT二进制/Hex Dump 背景层 (底层纹理) */}
-      <div className="absolute top-[20%] left-[5%] text-[10px] font-mono text-tech-main opacity-[0.25] select-none pointer-events-none whitespace-pre leading-tight hidden xl:block mix-blend-multiply decor-desktop-only">
-        00000000: 1f8b 0800 0000 0000 0000 edc1 0b00 0000 .......4........{"\n"}
-        00000010: 0010 0700 1101 0005 6c65 7665 6c00 0800 ........level...{"\n"}
-        00000020: 0b44 6174 6101 0006 7261 6e64 6f6d 5365 .Data...randomSe{"\n"}
-        00000030: 6564 0000 0000 3b9a ca00 0400 0c62 6c6f ed....;......blo{"\n"}
-        00000040: 636b 5f6c 6967 6874 5f64 6174 610a 0000 ck_light_data...{"\n"}
-      </div>
-
-      {/* 堆栈跟踪装饰 (Stack Trace Decor) */}
-      <div className="absolute bottom-8 left-8 text-[10px] font-mono text-red-500/40 select-none pointer-events-none hidden lg:block mix-blend-multiply decor-desktop-only">
-        <span className="font-bold">
-          at net.minecraft.world.level.block.piston.PistonBaseBlock.moveBlocks
-        </span>
-        (PistonBaseBlock.java:492) {"\n"}
-        <br />
-        <span className="font-bold">at net.minecraft.world.level.Level.tickBlockEntities</span>
-        (Level.java:833) {"\n"}
-        <br />
-        <span className="text-red-600/60 font-bold">
-          Caused by: java.util.ConcurrentModificationException: Ticking block entity
-        </span>
-      </div>
-
-      {/* 分散的瞄准/坐标十字 */}
-      <div className="absolute top-1/4 right-[25%] text-xl font-light opacity-30 select-none hidden md:block decor-desktop-only">
-        +
-      </div>
-      <div className="absolute bottom-1/3 left-[8%] text-xl font-light opacity-30 select-none hidden md:block decor-desktop-only">
-        +
-      </div>
-      <div className="absolute top-[15%] left-[45%] text-sm font-light opacity-30 select-none hidden md:block decor-desktop-only">
-        +
-      </div>
-
-      {/* 巨型背景水印 (侧边倒置) */}
-      <div className="absolute top-1/3 -right-20 text-[10rem] font-black text-tech-main opacity-[0.05] rotate-90 select-none pointer-events-none whitespace-nowrap hidden lg:block tracking-tighter mix-blend-multiply decor-desktop-only">
-        SCHEMATIC_01
-      </div>
-
-      {/* 贯穿全图的低调主辅助线 (X轴/Y轴) */}
-      <div className="absolute top-[35%] right-0 w-[40%] h-[1px] bg-tech-main/20 hidden md:block decor-desktop-only">
-        <span className="absolute -top-4 right-10 text-[10px] font-mono opacity-50">L-AXIS</span>
-      </div>
-      <div className="absolute top-0 left-[25%] w-[1px] h-[100%] bg-tech-main/10 flex flex-col items-center hidden md:flex decor-desktop-only">
-        {/* 轴线上的点缀 */}
-        <div className="w-2 h-2 bg-tech-bg border border-tech-main/50 mt-[50vh]"></div>
-      </div>
-
-      {/* 技术图纸刻度尺 (模拟Photoshop/CAD边缘) */}
-      <div className="absolute top-0 left-0 w-full h-2 border-b border-tech-main/10 flex overflow-hidden opacity-30 hidden md:flex decor-desktop-only">
-        {Array.from({ length: 100 }).map((_, i) => (
-          <div key={i} className="flex-none w-8 border-l border-tech-main/40 h-full relative">
-            {i % 4 === 0 && (
-              <span className="absolute top-2 left-1 text-[8px] font-mono">{i * 10}</span>
-            )}
           </div>
-        ))}
-      </div>
-      <div className="absolute top-0 left-0 h-full w-2 border-r border-tech-main/10 flex flex-col overflow-hidden opacity-30 hidden md:flex decor-desktop-only">
-        {Array.from({ length: 50 }).map((_, i) => (
-          <div key={i} className="flex-none h-8 border-t border-tech-main/40 w-full relative"></div>
-        ))}
-      </div>
-
-      {/* MC 方块视角的几何线条叠加 (等距视角线框) */}
-      <div className="absolute bottom-[20%] right-[10%] opacity-20 pointer-events-none hidden lg:block decor-desktop-only">
-        <svg
-          width="200"
-          height="200"
-          viewBox="0 0 120 120"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="0.5"
-        >
-          {/* Hexagon outline (isometric cube boundary) */}
-          <polygon points="60,10 110,38 110,95 60,123 10,95 10,38" />
-          {/* Inner Y lines */}
-          <line x1="60" y1="67" x2="60" y2="123" />
-          <line x1="60" y1="67" x2="10" y2="38" />
-          <line x1="60" y1="67" x2="110" y2="38" />
-          {/* Dashed hidden lines */}
-          <line x1="60" y1="10" x2="60" y2="67" strokeDasharray="2 2" className="opacity-50" />
-          <line x1="10" y1="95" x2="60" y2="67" strokeDasharray="2 2" className="opacity-50" />
-          <line x1="110" y1="95" x2="60" y2="67" strokeDasharray="2 2" className="opacity-50" />
-        </svg>
-        <span className="absolute bottom-4 -right-12 text-[10px] font-mono opacity-80">
-          FIG 1. ISOMETRIC_BLOCK
-        </span>
-        {/* 指示箭头 */}
-        <svg
-          className="absolute -top-10 -left-10"
-          width="60"
-          height="60"
-          fill="none"
-          stroke="currentColor"
-        >
-          <line x1="10" y1="10" x2="50" y2="50" strokeWidth="1" />
-          <polygon points="50,50 40,50 50,40" fill="currentColor" />
-        </svg>
-      </div>
-
-      {/* 圆形/雷达阵列结构 */}
-      <div className="absolute bottom-16 left-[20%] opacity-10 pointer-events-none hidden lg:block decor-desktop-only">
-        <svg
-          width="150"
-          height="150"
-          viewBox="0 0 150 150"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1"
-        >
-          <circle cx="75" cy="75" r="60" strokeDasharray="4 4" />
-          <circle cx="75" cy="75" r="40" />
-          <circle cx="75" cy="75" r="10" fill="currentColor" />
-          <line x1="15" y1="75" x2="135" y2="75" />
-          <line x1="75" y1="15" x2="75" y2="135" />
-        </svg>
-      </div>
-
-      {/* ======================================================== */}
-      {/* 超大屏幕 (2K/4K/27寸) 专属扩展设计元素 - 多学科图纸 */}
-      {/* ======================================================== */}
-
-      {/* 红石逻辑代数/布尔运算 */}
-      <div className="absolute top-[40%] right-[6%] text-[11px] font-mono text-tech-main opacity-[0.35] select-none pointer-events-none hidden 2xl:block leading-relaxed border-l border-tech-main/40 pl-4 mix-blend-multiply decor-desktop-only">
-        <div className="text-tech-main-dark mb-2 font-bold">{"//"} REDSTONE_BOOLEAN_LOGIC</div>
-        <span>Y = (A ∧ B) ∨ (¬C)</span>
-        <br />
-        <span>T_delay = ∑(repeater_ticks) + 1_GT</span>
-        <br />
-        <span>C_out = MUX(S, A, B)</span>
-        <br />
-        <div className="mt-2 text-[9px] opacity-80">
-          * VALIDATING SIGNAL STRENGTH (0-15)
-          <br />* QUASI_CONNECTIVITY = TRUE
         </div>
-      </div>
 
-      {/* 空间坐标变换矩阵 (线性代数) */}
-      <div className="absolute bottom-[30%] right-[25%] opacity-[0.35] text-[11px] font-mono select-none pointer-events-none hidden 2xl:block mix-blend-multiply decor-desktop-only">
-        <div className="text-tech-main-dark mb-2 font-bold tracking-widest">
-          TRANSFORM_MATRIX_4x4
+        {/* 堆栈跟踪装饰 */}
+        <div className="absolute bottom-8 left-8 text-[10px] font-mono text-red-500/40 select-none pointer-events-none hidden lg:block mix-blend-multiply decor-desktop-only">
+          <span className="font-bold">
+            at net.minecraft.world.level.block.piston.PistonBaseBlock.moveBlocks
+          </span>
+          (PistonBaseBlock.java:492) {"\n"}
+          <br />
+          <span className="font-bold">at net.minecraft.world.level.Level.tickBlockEntities</span>
+          (Level.java:833) {"\n"}
+          <br />
+          <span className="text-red-600/60 font-bold">
+            Caused by: java.util.ConcurrentModificationException: Ticking block entity
+          </span>
         </div>
-        <div className="grid grid-cols-4 gap-2 text-center border-l-2 border-r-2 border-tech-main/60 px-3 py-1 bg-tech-main/5">
-          <span>1.0</span>
-          <span>0.0</span>
-          <span>0.0</span>
-          <span>dx</span>
-          <span>0.0</span>
-          <span>1.0</span>
-          <span>0.0</span>
-          <span>dy</span>
-          <span>0.0</span>
-          <span>0.0</span>
-          <span>1.0</span>
-          <span>dz</span>
-          <span>0.0</span>
-          <span>0.0</span>
-          <span>0.0</span>
-          <span>1.0</span>
-        </div>
-      </div>
 
-      {/* 内存簇/寄存器网格 */}
-      <div className="absolute top-[60%] left-[3%] opacity-[0.35] text-[10px] font-mono select-none pointer-events-none hidden 2xl:block mix-blend-multiply decor-desktop-only">
-        <div className="mb-2 text-tech-main-dark font-bold tracking-widest">
-          TICK_PHASE_ALLOCATION
+        {/* 分散的瞄准/坐标十字 */}
+        <div className="absolute top-1/4 right-[25%] text-xl font-light opacity-30 select-none hidden md:block decor-desktop-only">
+          +
         </div>
-        <div className="grid grid-cols-6 gap-x-4 gap-y-2 bg-tech-main/5 p-2 border border-tech-main/20">
-          {HEX_VALUES.map((hexValue, i) => (
-            <span
-              key={i}
-              className={
-                i % 7 === 0
-                  ? "text-tech-main-dark font-bold relative before:content-['>'] before:absolute before:-left-3"
-                  : ""
-              }
-            >
-              {hexValue}
-            </span>
+        <div className="absolute bottom-1/3 left-[8%] text-xl font-light opacity-30 select-none hidden md:block decor-desktop-only">
+          +
+        </div>
+        <div className="absolute top-[15%] left-[45%] text-sm font-light opacity-30 select-none hidden md:block decor-desktop-only">
+          +
+        </div>
+
+        {/* 贯穿全图的低调主辅助线 */}
+        <div className="absolute top-[35%] right-0 w-[40%] h-[1px] bg-tech-main/20 hidden md:block decor-desktop-only">
+          <span className="absolute -top-4 right-10 text-[10px] font-mono opacity-50">L-AXIS</span>
+        </div>
+        <div className="absolute top-0 left-[25%] w-[1px] h-[100%] bg-tech-main/10 flex flex-col items-center hidden md:flex decor-desktop-only">
+          <div className="w-2 h-2 bg-tech-bg border border-tech-main/50 mt-[50vh]"></div>
+        </div>
+
+        {/* 技术图纸刻度尺 */}
+        <div className="absolute top-0 left-0 w-full h-2 border-b border-tech-main/10 flex overflow-hidden opacity-30 hidden md:flex decor-desktop-only">
+          {Array.from({ length: 100 }).map((_, i) => (
+            <div key={i} className="flex-none w-8 border-l border-tech-main/40 h-full relative">
+              {i % 4 === 0 && (
+                <span className="absolute top-2 left-1 text-[8px] font-mono">{i * 10}</span>
+              )}
+            </div>
           ))}
         </div>
-      </div>
+        <div className="absolute top-0 left-0 h-full w-2 border-r border-tech-main/10 flex flex-col overflow-hidden opacity-30 hidden md:flex decor-desktop-only">
+          {Array.from({ length: 50 }).map((_, i) => (
+            <div key={i} className="flex-none h-8 border-t border-tech-main/40 w-full relative"></div>
+          ))}
+        </div>
+      </motion.div>
 
-      {/* 力学/机械引擎图纸 (活塞结构抽象) */}
-      <div className="absolute top-[15%] right-[15%] opacity-[0.25] select-none pointer-events-none hidden xl:block mix-blend-multiply decor-desktop-only">
-        <svg
-          width="140"
-          height="160"
-          viewBox="0 0 120 140"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1"
-        >
-          <rect x="30" y="80" width="60" height="50" fill="currentColor" fillOpacity="0.15" />
-          <rect x="45" y="40" width="30" height="40" strokeWidth="1.5" />
-          <rect
-            x="20"
-            y="20"
-            width="80"
-            height="20"
-            fill="currentColor"
-            fillOpacity="0.25"
-            strokeWidth="1.5"
-          />
-          {/* Extension line */}
-          <line x1="60" y1="20" x2="60" y2="0" strokeDasharray="3 3" />
-          <line x1="45" y1="0" x2="75" y2="0" />
-          {/* Forces */}
-          <path d="M60 90 L60 110 M55 105 L60 110 L65 105" strokeWidth="1.5" />
-          <text
-            x="70"
-            y="110"
-            fontSize="9"
-            fontFamily="monospace"
-            fill="currentColor"
-            fontWeight="bold"
-          >
-            F_push
-          </text>
-        </svg>
-      </div>
-
-      {/* ======================================================== */}
-      {/* 核心交互区：带有微弱堆叠感和景深的卡片 */}
-      {/* ======================================================== */}
+      {/* Hero Content - Highest z-index, stable positioning */}
       <main className="relative z-10 flex flex-col justify-center items-center w-full max-w-7xl mx-auto py-24 min-h-[max-content] px-4 mt-[7vh]">
-        {/* 数据连接线装饰 (已移除以适应居中布局) */}
-        {/* <div className="absolute left-[8%] lg:left-[24%] top-[12%] h-[60%] w-[1px] border-l border-dashed border-tech-main/30"></div>
-        <div className="absolute left-[8%] lg:left-[24%] top-[25%] w-[4%] h-[1px] bg-tech-main/30"></div> */}
-
-        {/* 信息卡片主体：增加堆叠层数与框线粗细变化 */}
-        <div className="relative w-full max-w-3xl mb-8 group animate-tech-pop-in [animation-duration:0.8s] [animation-delay:0.2s] opacity-0 [animation-fill-mode:forwards]">
-          {/* 下层错位阴影框 (模拟堆叠图纸) */}
+        {/* Foreground Layer - Card chrome and nearby accents */}
+        <motion.div 
+          className="homepage-decor-foreground relative w-full max-w-3xl mb-8 group animate-tech-pop-in [animation-duration:0.8s] [animation-delay:0.2s] opacity-0 [animation-fill-mode:forwards]"
+          style={{ 
+            x: fgTransform.x, 
+            y: fgTransform.y,
+            rotateX: fgTransform.rotateX,
+            rotateY: fgTransform.rotateY,
+            transformStyle: 'preserve-3d'
+          }}
+        >
+          {/* 下层错位阴影框 */}
           <div className="absolute inset-0 bg-transparent border border-tech-main/20 translate-x-3 translate-y-3 -z-10 group-hover:translate-x-4 group-hover:translate-y-4 transition-transform duration-500 ease-out"></div>
 
           {/* 尺寸标注装饰 */}
@@ -329,7 +334,7 @@ export default function Home() {
           </div>
 
           <div className="relative border border-tech-main/40 bg-white/60 backdrop-blur-md p-6 sm:p-10 md:p-14 shadow-sm overflow-hidden">
-            {/* 闪光扫过效果 (Shiny Scan Line) */}
+            {/* 闪光扫过效果 */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 translate-x-[-200%] animate-[shimmer_3s_infinite_2s] pointer-events-none"></div>
 
             {/* 工业感/图纸感的定位刻度 */}
@@ -341,7 +346,6 @@ export default function Home() {
             <div className="absolute bottom-4 left-4 w-1.5 h-1.5 rounded-full border border-tech-main/50 bg-tech-bg/50"></div>
 
             <div className="flex items-center space-x-4 mb-6 opacity-0 animate-fade-in [animation-delay:0.8s] [animation-fill-mode:forwards]">
-              {/* 正体方块元素隐喻 MC */}
               <div className="w-10 h-10 bg-tech-main/5 flex items-center justify-center border border-tech-main/40 relative group-hover:rotate-90 transition-transform duration-500">
                 <div className="w-4 h-4 bg-tech-main/30 group-hover:bg-tech-main/60 transition-colors"></div>
               </div>
@@ -357,7 +361,6 @@ export default function Home() {
               <span className="inline-block opacity-0 font-light mix-blend-multiply text-tech-main animate-tech-slide-in [animation-delay:0.7s] [animation-fill-mode:forwards]">
                 Wiki
               </span>
-              {/* �Ķ�ͷ�����˸���� */}
               <span className="inline-block w-6 h-[1em] bg-tech-main opacity-0 ml-4 animate-pulse align-middle [animation-delay:1s] [animation-fill-mode:forwards]"></span>
             </h1>
 
@@ -369,7 +372,7 @@ export default function Home() {
               </span>
             </p>
           </div>
-        </div>
+        </motion.div>
 
         {/* 操作入口 */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-5 relative z-20 w-full sm:w-auto opacity-0 animate-slide-up-fade [animation-delay:1.4s] [animation-fill-mode:forwards]">
@@ -401,7 +404,6 @@ export default function Home() {
               key={i}
               className={`w-8 h-8 flex items-center justify-center ${i === 3 ? "border-2 border-tech-main-dark bg-tech-main/10 shadow-[0_0_8px_rgba(96,112,143,0.3)]" : "border border-tech-main/40"}`}
             >
-              {/* 给某个格子放一个小方块隐喻正在持有的物品 */}
               {i === 3 && <div className="w-4 h-4 bg-tech-main-dark/80 rotate-45"></div>}
             </div>
           ))}

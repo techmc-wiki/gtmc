@@ -9,7 +9,7 @@ export interface BrutalButtonProps extends React.ButtonHTMLAttributes<HTMLButton
 export const BrutalButton = React.forwardRef<HTMLButtonElement, BrutalButtonProps>(
   ({ className = "", variant = "primary", size = "md", ...props }, ref) => {
     let baseStyles =
-      "relative inline-flex items-center justify-center font-bold tracking-widest transition-all duration-300 focus:outline-none overflow-hidden group border border-tech-main";
+      "relative inline-flex items-center justify-center font-bold tracking-widest transition-all duration-300 focus:outline-none overflow-hidden group border border-tech-main cursor-pointer";
 
     // Tech Flat style based on image reference
     if (variant === "primary") {

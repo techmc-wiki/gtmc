@@ -204,7 +204,7 @@ export default async function ProfilePage() {
             <SignOutButton className="w-full bg-tech-main/10 hover:bg-tech-main text-tech-main hover:text-white border border-tech-main/40 px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 font-mono text-xs font-bold tracking-widest uppercase transition-colors relative min-h-11 flex items-center justify-center" />
             <button
               type="submit"
-              className="w-full bg-tech-main/10 hover:bg-tech-main text-tech-main hover:text-white border border-tech-main/40 px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 font-mono text-xs font-bold tracking-widest uppercase transition-colors relative min-h-11 flex items-center justify-center"
+              className="w-full bg-tech-main/10 hover:bg-tech-main text-tech-main hover:text-white border border-tech-main/40 px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 font-mono text-xs font-bold tracking-widest uppercase transition-colors relative min-h-11 flex items-center justify-center cursor-pointer"
             >
               SAVE_CONFIG
             </button>

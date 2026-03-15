@@ -158,7 +158,7 @@ export function SidebarClient({ tree, onNavigate }: { tree: TreeNode[]; onNaviga
               {item.isFolder ? (
                 <button
                   onClick={(e) => toggleFolder(item.id, e)}
-                  className="w-full text-left flex items-center text-tech-main/80 font-bold opacity-80 uppercase mt-3 mb-1 hover:text-tech-main transition-colors focus:outline-none"
+                  className="w-full text-left flex items-center text-tech-main/80 font-bold opacity-80 uppercase mt-3 mb-1 hover:text-tech-main transition-colors focus:outline-none cursor-pointer"
                 >
                   <span className="w-4 inline-block text-xs text-tech-main/50">
                     {folderExpanded ? "▼" : "▶"}
@@ -173,7 +173,7 @@ export function SidebarClient({ tree, onNavigate }: { tree: TreeNode[]; onNaviga
                     {isActive && toc.length > 0 ? (
                       <button
                         onClick={toggleFileExp}
-                        className="absolute left-0 top-1/2 -translate-y-1/2 transition-opacity text-[10px] md:text-xs text-tech-main hover:text-tech-main/80 focus:outline-none z-10"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 transition-opacity text-[10px] md:text-xs text-tech-main hover:text-tech-main/80 focus:outline-none z-10 cursor-pointer"
                         title={isFileExpanded ? "收起目录" : "展开目录"}
                       >
                         {isFileExpanded ? "▼" : "▶"}
@@ -265,7 +265,7 @@ export function SidebarClient({ tree, onNavigate }: { tree: TreeNode[]; onNaviga
       <div className="mb-4">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="text-[11px] font-mono border border-tech-main/40 px-3 py-1.5 hover:bg-tech-main hover:text-white transition-colors"
+          className="text-[11px] font-mono border border-tech-main/40 px-3 py-1.5 hover:bg-tech-main hover:text-white transition-colors cursor-pointer"
         >
           + NEW DIR / FILE
         </button>
@@ -350,13 +350,13 @@ export function SidebarClient({ tree, onNavigate }: { tree: TreeNode[]; onNaviga
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-tech-main/40 text-[11px] text-tech-main hover:bg-tech-main/10 uppercase tracking-widest transition-colors font-bold"
+                  className="px-4 py-2 border border-tech-main/40 text-[11px] text-tech-main hover:bg-tech-main/10 uppercase tracking-widest transition-colors font-bold cursor-pointer"
                 >
                   ABORT
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-tech-main text-white font-bold hover:opacity-90 text-[11px] uppercase tracking-widest transition-opacity shadow-[2px_2px_0_0_rgba(var(--tech-main),0.4)]"
+                  className="px-4 py-2 bg-tech-main text-white font-bold hover:opacity-90 text-[11px] uppercase tracking-widest transition-opacity shadow-[2px_2px_0_0_rgba(var(--tech-main),0.4)] cursor-pointer"
                 >
                   EXECUTE
                 </button>

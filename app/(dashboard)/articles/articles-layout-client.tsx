@@ -67,7 +67,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       >
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full min-h-[44px] flex items-center justify-between px-4 text-tech-main hover:bg-tech-main/5 transition-colors"
+          className="w-full min-h-[44px] flex items-center justify-between px-4 text-tech-main hover:bg-tech-main/5 transition-colors cursor-pointer"
           aria-label="Toggle article tree"
           aria-expanded={isOpen}
           data-testid="mobile-tree-toggle"
@@ -90,7 +90,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
             >
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="min-h-[44px] border border-tech-main/40 bg-white/95 px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.15em] text-tech-main backdrop-blur-md transition-all duration-300 hover:bg-tech-main/5"
+                className="min-h-[44px] border border-tech-main/40 bg-white/95 px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.15em] text-tech-main backdrop-blur-md transition-all duration-300 hover:bg-tech-main/5 cursor-pointer"
                 aria-label="Toggle article tree"
                 aria-expanded={isOpen}
               >

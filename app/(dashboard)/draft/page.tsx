@@ -67,7 +67,7 @@ export default async function DraftDashboardPage() {
               >
                 <button
                   type="submit"
-                  className="text-xs uppercase font-mono text-red-500 hover:text-red-700 hover:underline min-h-[44px] flex items-center"
+                  className="text-xs uppercase font-mono text-red-500 hover:text-red-700 hover:underline min-h-[44px] flex items-center cursor-pointer"
                 >
                   [DELETE]
                 </button>

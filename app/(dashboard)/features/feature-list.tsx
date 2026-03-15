@@ -181,7 +181,7 @@ export function FeatureList({ features }: { features: Feature[]; }) {
                   <button
                     key={status}
                     onClick={() => setStatusFilter(status)}
-                    className={`text-xs font-mono px-3 py-2 border transition-all min-h-8 flex items-center justify-center ${statusFilter === status
+                    className={`text-xs font-mono px-3 py-2 border transition-all min-h-8 flex items-center justify-center cursor-pointer ${statusFilter === status
                       ? "bg-tech-main text-white border-tech-main"
                       : "bg-transparent text-tech-main border-tech-main/40 hover:border-tech-main/60"
                       }`}
@@ -202,7 +202,7 @@ export function FeatureList({ features }: { features: Feature[]; }) {
                     <button
                       key={tag}
                       onClick={() => toggleTag(tag)}
-                      className={`text-xs font-mono uppercase px-3 py-2 border transition-all min-h-8 flex items-center justify-center ${selectedTags.includes(tag)
+                      className={`text-xs font-mono uppercase px-3 py-2 border transition-all min-h-8 flex items-center justify-center cursor-pointer ${selectedTags.includes(tag)
                         ? "bg-tech-accent text-white border-tech-accent"
                         : "bg-tech-accent/5 text-tech-main border-tech-main/40 hover:border-tech-main/60"
                         }`}

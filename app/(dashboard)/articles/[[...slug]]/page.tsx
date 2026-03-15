@@ -133,11 +133,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
          </div>
 
          {/* Region 4: Edit Action Row */}
-         <Link href={`/draft/new?file=${encodeURIComponent(editPath)}`}>
-           <button className="flex items-center gap-2 border border-tech-main/40 bg-tech-main/10 hover:bg-tech-main text-tech-main hover:text-white px-4 py-2 font-mono text-xs uppercase tracking-widest transition-all duration-300 relative overflow-hidden min-h-[44px] w-full sm:w-auto">
-             <span className="relative z-10 font-bold">[EDIT_TARGET]</span>
-           </button>
-         </Link>
+          <Link href={`/draft/new?file=${encodeURIComponent(editPath)}`}>
+            <button className="flex items-center gap-2 border border-tech-main/40 bg-tech-main/10 hover:bg-tech-main text-tech-main hover:text-white px-4 py-2 font-mono text-xs uppercase tracking-widest transition-all duration-300 relative overflow-hidden min-h-[44px] w-full sm:w-auto cursor-pointer">
+              <span className="relative z-10 font-bold">[EDIT_TARGET]</span>
+            </button>
+          </Link>
        </div>
 
       <div className="prose prose-tech max-w-none w-full overflow-hidden wrap-break-word text-slate-800 selection:bg-tech-main/20 selection:text-slate-900">

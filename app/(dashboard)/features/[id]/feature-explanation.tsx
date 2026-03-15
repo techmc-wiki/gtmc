@@ -90,7 +90,7 @@ export function FeatureExplanation({
           {effectiveCanEdit && (
             <button
               onClick={() => setIsEditing(true)}
-              className="text-xs font-mono text-tech-main hover:underline px-2"
+              className="text-xs font-mono text-tech-main hover:underline px-2 cursor-pointer"
             >
               [EDIT]
             </button>

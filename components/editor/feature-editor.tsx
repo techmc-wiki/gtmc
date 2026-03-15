@@ -230,7 +230,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="button"
             onClick={() => insertSyntax("**", "**")}
             disabled={isReadOnly}
-            className="h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
+            className={`h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0 ${isReadOnly ? '' : 'cursor-pointer'}`}
           >
             <b>B</b>
           </button>
@@ -238,7 +238,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="button"
             onClick={() => insertSyntax("*", "*")}
             disabled={isReadOnly}
-            className="h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
+            className={`h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0 ${isReadOnly ? '' : 'cursor-pointer'}`}
           >
             <i>I</i>
           </button>
@@ -246,7 +246,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="button"
             onClick={() => insertSyntax("[", "](url)")}
             disabled={isReadOnly}
-            className="h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
+            className={`h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0 ${isReadOnly ? '' : 'cursor-pointer'}`}
           >
             Link
           </button>
@@ -254,7 +254,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isReadOnly || isUploading}
-            className="h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
+            className={`h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0 ${isReadOnly || isUploading ? '' : 'cursor-pointer'}`}
             aria-busy={isUploading}
           >
             {isCompressing ? "CMP" : isUploading ? "UPL" : "IMG"}
@@ -264,7 +264,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="button"
             onClick={() => insertSyntax("### ")}
             disabled={isReadOnly}
-            className="hidden sm:block hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
+            className={`hidden sm:block hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none ${isReadOnly ? '' : 'cursor-pointer'}`}
           >
             H3
           </button>
@@ -272,7 +272,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="button"
             onClick={() => insertSyntax("`", "`")}
             disabled={isReadOnly}
-            className="hidden sm:block hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
+            className={`hidden sm:block hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none ${isReadOnly ? '' : 'cursor-pointer'}`}
           >
             Code
           </button>
@@ -280,7 +280,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="button"
             onClick={() => insertSyntax("```\n", "\n```")}
             disabled={isReadOnly}
-            className="hidden sm:block hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none"
+            className={`hidden sm:block hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none ${isReadOnly ? '' : 'cursor-pointer'}`}
           >
             Block
           </button>

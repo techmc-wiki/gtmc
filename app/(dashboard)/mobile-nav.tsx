@@ -25,7 +25,7 @@ export function MobileNav({ navLinks }: MobileNavProps) {
     <>
       <button
         onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-        className="md:hidden flex flex-col gap-1.5 p-2 min-h-[44px] min-w-[44px] items-center justify-center hover:bg-tech-main/10 transition-colors"
+        className="md:hidden flex flex-col gap-1.5 p-2 min-h-[44px] min-w-[44px] items-center justify-center hover:bg-tech-main/10 transition-colors cursor-pointer"
         aria-label="Toggle navigation menu"
         aria-expanded={isDrawerOpen}
       >

@@ -61,7 +61,7 @@ export function MobileTreeCard({ isOpen, onClose, children, isFloating }: Mobile
           </div>
           <button
             onClick={onClose}
-            className="font-mono text-xs tracking-[0.15em] text-tech-main hover:bg-tech-main/10 px-3 py-2 transition-colors font-bold uppercase"
+            className="font-mono text-xs tracking-[0.15em] text-tech-main hover:bg-tech-main/10 px-3 py-2 transition-colors font-bold uppercase cursor-pointer"
             data-testid="mobile-tree-card-close"
             aria-label="Close tree"
           >

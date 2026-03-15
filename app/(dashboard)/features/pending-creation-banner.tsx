@@ -114,7 +114,7 @@ export function PendingCreationBanner() {
             })
           }
           disabled={isRetrying}
-          className="ml-auto border border-red-400 px-2 py-0.5 text-xs text-red-600 hover:bg-red-100 uppercase"
+          className="ml-auto border border-red-400 px-2 py-0.5 text-xs text-red-600 hover:bg-red-100 uppercase cursor-pointer"
         >
           {isRetrying ? "RETRYING..." : "RETRY_"}
         </button>

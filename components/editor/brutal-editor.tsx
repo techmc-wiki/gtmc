@@ -248,21 +248,21 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
                   <button
                     type="button"
                     onClick={() => insertSyntax("**", "**")}
-                    className="h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-xs sm:text-xs font-bold text-tech-main/70 hover:bg-tech-main hover:text-white transition-colors flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
+                    className="h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-xs sm:text-xs font-bold text-tech-main/70 hover:bg-tech-main hover:text-white transition-colors flex-1 sm:flex-none min-w-[44px] sm:min-w-0 cursor-pointer"
                   >
                     B
                   </button>
                   <button
                     type="button"
                     onClick={() => insertSyntax("*", "*")}
-                    className="h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-xs sm:text-xs italic text-tech-main/70 hover:bg-tech-main hover:text-white transition-colors flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
+                    className="h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-xs sm:text-xs italic text-tech-main/70 hover:bg-tech-main hover:text-white transition-colors flex-1 sm:flex-none min-w-[44px] sm:min-w-0 cursor-pointer"
                   >
                     I
                   </button>
                   <button
                     type="button"
                     onClick={() => insertSyntax("[", "](url)")}
-                    className="h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-xs sm:text-xs text-tech-main/70 hover:bg-tech-main hover:text-white transition-colors flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
+                    className="h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-xs sm:text-xs text-tech-main/70 hover:bg-tech-main hover:text-white transition-colors flex-1 sm:flex-none min-w-[44px] sm:min-w-0 cursor-pointer"
                   >
                     LINK
                   </button>
@@ -270,7 +270,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-[10px] sm:text-[10px] font-mono tracking-widest text-tech-main bg-tech-main/10 hover:bg-tech-main hover:text-white transition-colors border border-tech-main/30 flex-1 sm:flex-none min-w-[44px] sm:min-w-0"
+                    className={`h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-[10px] sm:text-[10px] font-mono tracking-widest text-tech-main bg-tech-main/10 hover:bg-tech-main hover:text-white transition-colors border border-tech-main/30 flex-1 sm:flex-none min-w-[44px] sm:min-w-0 ${isUploading ? '' : 'cursor-pointer'}`}
                   >
                     {isCompressing ? "CMP" : isUploading ? "UPL" : "IMG"}
                   </button>
@@ -279,14 +279,14 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
                   <button
                     type="button"
                     onClick={() => insertSyntax("### ")}
-                    className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs transition-colors"
+                    className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs transition-colors cursor-pointer"
                   >
                     H3
                   </button>
                   <button
                     type="button"
                     onClick={() => insertSyntax("`", "`")}
-                    className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs font-mono transition-colors"
+                    className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs font-mono transition-colors cursor-pointer"
                   >
                     &lt;/&gt;
                   </button>

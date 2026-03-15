@@ -375,7 +375,12 @@ export const listAllIssues = unstable_cache(_listAllIssuesUncached, ["github-iss
 
 export const listIssues = listAllIssues;
 
-export async function getIssue(issueNumber: number): Promise<GithubIssue | null> {
+// Cache TTL constants for GitHub feature reads
+const LIST_TTL = 300; // 5 minutes for issue list
+const ISSUE_TTL = 60; // 1 minute for individual issue detail
+const COMMENTS_TTL = 25; // 25 seconds for issue comments
+
+async function _getIssueUncached(issueNumber: number): Promise<GithubIssue | null> {
   const config = getGithubRepoConfig();
   const url = `${getRepoIssuesBaseUrl(config)}/${issueNumber}`;
 
@@ -395,6 +400,10 @@ export async function getIssue(issueNumber: number): Promise<GithubIssue | null>
 
   return normalizeIssue(data);
 }
+
+export const getIssue = unstable_cache(_getIssueUncached, ["github-issue"], {
+  revalidate: ISSUE_TTL,
+});
 
 export async function createIssue(
   title: string,
@@ -473,7 +482,7 @@ export async function addIssueComment(issueNumber: number, body: string): Promis
   return normalizeComment(data);
 }
 
-export async function listIssueComments(issueNumber: number): Promise<GithubComment[]> {
+async function _listIssueCommentsUncached(issueNumber: number): Promise<GithubComment[]> {
   const config = getGithubRepoConfig();
   const baseUrl = `${getRepoIssuesBaseUrl(config)}/${issueNumber}/comments`;
 
@@ -493,6 +502,10 @@ export async function listIssueComments(issueNumber: number): Promise<GithubComm
 
   return allComments;
 }
+
+export const listIssueComments = unstable_cache(_listIssueCommentsUncached, ["github-comments"], {
+  revalidate: COMMENTS_TTL,
+});
 
 export async function ensureLabel(name: string, color = "ededed"): Promise<void> {
   const config = getGithubRepoConfig();

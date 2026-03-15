@@ -64,7 +64,7 @@ export default function Home() {
       </div>
 
       {/* Java 代码片段漂浮层 (Decompiled Source Code) */}
-      <div className="absolute left-10 md:left-20 bottom-[15%] opacity-40 hidden lg:block select-none pointer-events-none transform -rotate-2 mix-blend-multiply decor-desktop-only">
+      <div className="absolute right-10 xl:right-16 top-[18%] opacity-40 hidden lg:block select-none pointer-events-none mix-blend-multiply decor-desktop-only">
         <div className="text-[11px] font-mono text-tech-main whitespace-pre leading-relaxed border-l-4 border-tech-main/40 pl-4 bg-tech-main/5 py-2">
           {`{
   "Id": "minecraft:chest",

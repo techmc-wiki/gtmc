@@ -21,7 +21,7 @@ interface TreeNode {
   children: TreeNode[];
 }
 
-export function SidebarClient({ tree }: { tree: TreeNode[] }) {
+export function SidebarClient({ tree, onNavigate }: { tree: TreeNode[]; onNavigate?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -107,7 +107,7 @@ export function SidebarClient({ tree }: { tree: TreeNode[] }) {
       if (!mounted) return false; // 服务器渲染和初次加载时默认全部闭合
       return expandedFolders.has(id);
     },
-    [expandedFolders, mounted]
+    [expandedFolders, mounted],
   );
 
   const toggleFolder = (id: string, e: React.MouseEvent) => {
@@ -167,7 +167,9 @@ export function SidebarClient({ tree }: { tree: TreeNode[] }) {
                 </button>
               ) : (
                 <div className="relative">
-                  <div className={`group relative transition-colors flex items-center py-1.5 pl-4 -ml-4 ${isActive ? "text-tech-main font-bold" : "text-slate-700 hover:text-tech-main"}`}>
+                  <div
+                    className={`group relative transition-colors flex items-center py-1.5 pl-4 -ml-4 ${isActive ? "text-tech-main font-bold" : "text-slate-700 hover:text-tech-main"}`}
+                  >
                     {isActive && toc.length > 0 ? (
                       <button
                         onClick={toggleFileExp}
@@ -189,6 +191,8 @@ export function SidebarClient({ tree }: { tree: TreeNode[] }) {
                         if (isActive) {
                           e.preventDefault();
                           setIsFileExpanded((prev) => !prev);
+                        } else {
+                          onNavigate?.();
                         }
                       }}
                       className={`block w-full border-b pb-px pl-1 ${isActive ? "border-tech-main/50 cursor-pointer" : "border-transparent group-hover:border-tech-main/30"}`}
@@ -210,7 +214,11 @@ export function SidebarClient({ tree }: { tree: TreeNode[] }) {
                               key={h2.id}
                               className="text-[13px] md:text-sm text-tech-main/70 hover:text-tech-main transition-colors relative before:content-[''] before:w-2 before:h-px before:bg-tech-main/30 before:absolute before:-left-4 before:top-1/2 before:-translate-y-1/2"
                             >
-                              <Link href={`#${h2.id}`} className="block wrap-break-word">
+                              <Link
+                                href={`#${h2.id}`}
+                                onClick={() => onNavigate?.()}
+                                className="block wrap-break-word"
+                              >
                                 {h2.text}
                               </Link>
                             </li>
@@ -229,9 +237,7 @@ export function SidebarClient({ tree }: { tree: TreeNode[] }) {
                       : "grid-rows-[0fr] opacity-0"
                   }`}
                 >
-                  <div className="overflow-hidden">
-                    {renderTree(item.children, level + 1)}
-                  </div>
+                  <div className="overflow-hidden">{renderTree(item.children, level + 1)}</div>
                 </div>
               )}
             </li>

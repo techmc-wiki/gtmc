@@ -4,6 +4,7 @@ import * as React from "react";
 import { useState, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarClient } from "./sidebar-client";
+import { MobileTreeSheet } from "./mobile-tree-sheet";
 
 interface TreeNode {
   id: string;
@@ -33,29 +34,29 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
   return (
     <div className="max-w-full mx-auto flex flex-col md:flex-row relative min-h-[calc(100vh-8rem)]">
-      {/* Mobile toggle button */}
-      <div className="md:hidden flex items-center border-b border-tech-main/20 bg-white/50 backdrop-blur-sm">
+      {/* Mobile sticky tree access bar */}
+      <div
+        className="md:hidden sticky top-16 z-40 flex items-center border-b border-tech-main/40 bg-white/95 backdrop-blur-md"
+        data-testid="mobile-tree-sticky-bar"
+      >
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="min-h-[44px] min-w-[44px] flex items-center justify-center px-4 text-tech-main hover:bg-tech-main/5 transition-colors"
+          className="w-full min-h-[44px] flex items-center justify-between px-4 text-tech-main hover:bg-tech-main/5 transition-colors"
           aria-label="Toggle article tree"
           aria-expanded={isOpen}
+          data-testid="mobile-tree-toggle"
         >
-          <span className="text-sm font-mono font-bold">{isOpen ? "▼" : "▶"} TREE</span>
+          <span className="text-xs font-mono uppercase tracking-[0.15em] font-bold">TREE</span>
+          <span className="text-sm font-mono font-bold">{isOpen ? "▼" : "▶"}</span>
         </button>
       </div>
 
-      {/* Mobile collapsible drawer */}
-      <aside
-        className="md:hidden overflow-hidden transition-all duration-300 ease-out"
-        style={{ maxHeight: isOpen ? "100vh" : "0px" }}
-      >
-        <div className="bg-white/50 backdrop-blur-sm border-b border-tech-main/20 p-4">
-          <div className="prose prose-base text-[15px] prose-tech font-mono w-full overflow-hidden wrap-break-word [&>ul]:pl-0 [&_ul]:list-none [&_li]:mt-1.5 [&_ul_ul]:pl-3 [&_ul_ul]:border-l [&_ul_ul]:border-tech-main/20 [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 pb-4">
-            <SidebarClient tree={tree} />
-          </div>
+      {/* Mobile tree sheet */}
+      <MobileTreeSheet isOpen={isOpen} onClose={() => setIsOpen(false)}>
+        <div className="prose prose-base text-[15px] prose-tech font-mono w-full overflow-hidden wrap-break-word [&>ul]:pl-0 [&_ul]:list-none [&_li]:mt-1.5 [&_ul_ul]:pl-3 [&_ul_ul]:border-l [&_ul_ul]:border-tech-main/20 [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 pb-4">
+          <SidebarClient tree={tree} onNavigate={handleNavigate} />
         </div>
-      </aside>
+      </MobileTreeSheet>
 
       {/* Desktop sidebar */}
       <aside className="hidden md:block w-64 lg:w-75 shrink-0 border-r border-tech-main/20">

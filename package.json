@@ -49,6 +49,7 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "eslint": "^9.39.4",
     "eslint-config-next": "16.1.6",
+    "playwright": "^1.58.2",
     "pnpm": "^10.32.1",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.2.1",

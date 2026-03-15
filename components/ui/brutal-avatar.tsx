@@ -21,17 +21,17 @@ export function BrutalAvatar({ src, alt, size, fallback, className = "" }: Bruta
         <div className="absolute top-1/2 left-1/2 h-4 w-[1px] bg-tech-main/40 -translate-x-1/2 -translate-y-1/2"></div>
 
         {/* 动态扫描线 */}
-        <div className="absolute top-1/4 left-0 right-0 h-[1px] bg-tech-main/30 opacity-50"></div>
-        <div className="absolute bottom-1/4 left-0 right-0 h-[1px] bg-tech-main/30 opacity-50"></div>
+        <div className="absolute top-1/4 left-0 right-0 h-[1px] bg-tech-main/40"></div>
+        <div className="absolute bottom-1/4 left-0 right-0 h-[1px] bg-tech-main/40"></div>
 
         {/* 边角装饰 - 左上 */}
-        <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-tech-main"></div>
+        <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-tech-main/40"></div>
         {/* 边角装饰 - 右上 */}
-        <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-tech-main"></div>
+        <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-tech-main/40"></div>
         {/* 边角装饰 - 左下 */}
-        <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-tech-main"></div>
+        <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-tech-main/40"></div>
         {/* 边角装饰 - 右下 */}
-        <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-tech-main"></div>
+        <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-tech-main/40"></div>
 
         {/* 额外的数据点 */}
         <div className="absolute top-1 left-4 w-1 h-1 bg-tech-main/60"></div>

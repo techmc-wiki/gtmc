@@ -42,7 +42,7 @@ export const BrutalButton = React.forwardRef<HTMLButtonElement, BrutalButtonProp
 
         {/* 装饰性的小方块点缀 */}
         {variant !== "ghost" && (
-          <span className="absolute bottom-0 right-0 w-2 h-2 bg-tech-background opacity-50 border-t border-l border-tech-main mix-blend-overlay"></span>
+          <span className="absolute bottom-0 right-0 w-2 h-2 bg-tech-bg opacity-50 border-t border-l border-tech-main mix-blend-overlay"></span>
         )}
       </button>
     );

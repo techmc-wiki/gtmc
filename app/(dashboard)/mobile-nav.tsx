@@ -53,7 +53,7 @@ export function MobileNav({ navLinks }: MobileNavProps) {
           isDrawerOpen ? "max-h-screen" : "max-h-0"
         }`}
       >
-        <div className="p-4 space-y-2">
+        <div className="p-4 sm:p-6 space-y-2">
           {navLinks.map((link) => (
             <Link
               key={link.href}

@@ -15,10 +15,10 @@ export const BrutalCard = React.forwardRef<HTMLDivElement, BrutalCardProps>(
     return (
       <div ref={ref} className={`${baseStyles} ${className} group`} {...props}>
         {/* 卡片的十字定位角标 */}
-        <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main -translate-x-[1px] -translate-y-[1px] pointer-events-none"></div>
-        <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-tech-main translate-x-[1px] -translate-y-[1px] pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-tech-main -translate-x-[1px] translate-y-[1px] pointer-events-none"></div>
-        <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main translate-x-[1px] translate-y-[1px] pointer-events-none"></div>
+        <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main/40 -translate-x-[1px] -translate-y-[1px] pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-tech-main/40 translate-x-[1px] -translate-y-[1px] pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-tech-main/40 -translate-x-[1px] translate-y-[1px] pointer-events-none"></div>
+        <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main/40 translate-x-[1px] translate-y-[1px] pointer-events-none"></div>
 
         {children}
       </div>

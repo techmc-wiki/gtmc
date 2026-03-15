@@ -49,8 +49,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </nav>
 
       <main className="flex-1 w-full max-w-[1800px] mx-auto relative z-10 p-4 sm:p-6 lg:p-8">
-        <div className="absolute top-0 left-0 w-[1px] h-full bg-tech-main/10 hidden lg:block"></div>
-        <div className="absolute top-0 right-0 w-[1px] h-full bg-tech-main/10 hidden lg:block"></div>
+        <div className="absolute top-0 left-0 w-[1px] h-full bg-tech-main/20 hidden lg:block"></div>
+        <div className="absolute top-0 right-0 w-[1px] h-full bg-tech-main/20 hidden lg:block"></div>
         {children}
       </main>
     </div>

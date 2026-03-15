@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import * as React from "react";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createDocument } from "@/actions/sidebar";
@@ -12,7 +12,16 @@ interface TocItem {
   text: string;
 }
 
-export function SidebarClient({ tree }: { tree: any[] }) {
+interface TreeNode {
+  id: string;
+  title: string;
+  slug: string;
+  isFolder: boolean;
+  parentId: string | null;
+  children: TreeNode[];
+}
+
+export function SidebarClient({ tree }: { tree: TreeNode[] }) {
   const pathname = usePathname();
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -69,12 +78,13 @@ export function SidebarClient({ tree }: { tree: any[] }) {
       });
       setIsModalOpen(false);
       router.refresh();
-    } catch (error: any) {
-      alert(error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      alert(message);
     }
   };
 
-  const renderTree = (items: any[]) => {
+  const renderTree = (items: TreeNode[]) => {
     return (
       <ul className="pl-4 border-l border-tech-main/20 my-1">
         {items.map((item) => {
@@ -133,8 +143,8 @@ export function SidebarClient({ tree }: { tree: any[] }) {
     );
   };
 
-  const flattenFolders = (items: any[]): any[] => {
-    let folders: any[] = [];
+  const flattenFolders = useCallback((items: TreeNode[]): TreeNode[] => {
+    let folders: TreeNode[] = [];
     items.forEach((item) => {
       if (item.isFolder) {
         folders.push(item);
@@ -142,9 +152,9 @@ export function SidebarClient({ tree }: { tree: any[] }) {
       }
     });
     return folders;
-  };
+  }, []);
 
-  const availableFolders = useMemo(() => flattenFolders(tree), [tree]);
+  const availableFolders = useMemo(() => flattenFolders(tree), [tree, flattenFolders]);
 
   return (
     <div>

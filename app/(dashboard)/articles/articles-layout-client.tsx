@@ -1,22 +1,35 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarClient } from "./sidebar-client";
 
+interface TreeNode {
+  id: string;
+  title: string;
+  slug: string;
+  isFolder: boolean;
+  parentId: string | null;
+  children: TreeNode[];
+}
+
 interface ArticlesLayoutProps {
   children: React.ReactNode;
-  tree: any[];
+  tree: TreeNode[];
 }
 
 export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
-  useEffect(() => {
+  const handleNavigate = useCallback(() => {
     setIsOpen(false);
-  }, [pathname]);
+  }, []);
+
+  React.useEffect(() => {
+    handleNavigate();
+  }, [pathname, handleNavigate]);
 
   return (
     <div className="max-w-full mx-auto flex flex-col md:flex-row relative min-h-[calc(100vh-8rem)]">

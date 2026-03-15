@@ -4,6 +4,18 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { ProxyAgent, setGlobalDispatcher } from "undici";
 
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id?: string;
+      role?: string;
+      email?: string | null;
+      name?: string | null;
+      image?: string | null;
+    };
+  }
+}
+
 // Allow NextAuth to proxy requests when running in local development (useful in mainland China)
 if (process.env.HTTPS_PROXY || process.env.http_proxy) {
   const proxyUrl = process.env.HTTPS_PROXY || process.env.http_proxy;
@@ -23,13 +35,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    // @ts-ignore
     async session({ session, user }) {
       if (session?.user && user) {
-        // @ts-ignore
         session.user.id = user.id;
-        // @ts-ignore
-        session.user.role = user.role || "USER";
+        session.user.role = (user as { role?: string }).role || "USER";
       }
       return session;
     },

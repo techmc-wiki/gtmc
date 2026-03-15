@@ -15,6 +15,7 @@ function createDownloadButton(text, path) {
   `;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function showDownloadModal(encodedPath) {
   const mirrors = [
     {
@@ -73,6 +74,7 @@ function showDownloadModal(encodedPath) {
   document.body.insertAdjacentHTML("beforeend", modalHtml);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function closeDownloadModal() {
   const modalOverlay = document.querySelector(".download-modal-overlay");
   const modal = document.querySelector(".download-modal");
@@ -176,7 +178,7 @@ div.download-modal {
 `;
 styleInject(css);
 
-function install(hook, vm) {
+function install(hook) {
   hook.afterEach(function (html) {
     const modifiedHtml = html.replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g, (match, text, path) =>
       createDownloadButton(text, path),

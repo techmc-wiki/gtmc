@@ -29,7 +29,17 @@ export function StatusBadge({ status }: { status: string }) {
   return <span className={styles}>{label}</span>;
 }
 
-export function FeatureList({ features }: { features: any[] }) {
+interface Feature {
+  id: string;
+  title: string;
+  status: "PENDING" | "IN_PROGRESS" | "RESOLVED";
+  tags?: string[];
+  author?: { name?: string };
+  assignee?: { name?: string };
+  createdAt: string | Date;
+}
+
+export function FeatureList({ features }: { features: Feature[] }) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
@@ -61,9 +71,9 @@ export function FeatureList({ features }: { features: any[] }) {
     });
 
     const grouped = {
-      PENDING: [] as any[],
-      IN_PROGRESS: [] as any[],
-      RESOLVED: [] as any[],
+      PENDING: [] as Feature[],
+      IN_PROGRESS: [] as Feature[],
+      RESOLVED: [] as Feature[],
     };
 
     filtered.forEach((f) => {
@@ -85,7 +95,7 @@ export function FeatureList({ features }: { features: any[] }) {
 
   const renderFeatureGroup = (
     title: string,
-    groupFeatures: any[],
+    groupFeatures: Feature[],
     emptyText: string,
     delay: 0 | 100 | 200 | 300 | 400,
   ) => {

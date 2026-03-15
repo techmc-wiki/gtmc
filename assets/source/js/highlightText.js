@@ -1,7 +1,7 @@
 // This plugin implements a custom syntax for highlighting text in markdowns: ==highlighted text==,
 // which will be rendered as <mark>highlighted text</mark>.
 (function () {
-  function install(hook, _vm) {
+  function install(hook) {
     hook.beforeEach(function (html, next) {
       // 修改正则表达式，使其同时匹配 ```...``` 和 <code>...</code>
       // 使用 | (或) 操作符来组合两种模式
@@ -19,7 +19,7 @@
       // 高亮逻辑保持不变
       const highlightRegex = /(?<!\\)==/g;
       let isOpen = true;
-      const htmlHighlighted = htmlNoCodeBlock.replace(highlightRegex, (_match) => {
+      const htmlHighlighted = htmlNoCodeBlock.replace(highlightRegex, () => {
         if (isOpen) {
           isOpen = false;
           return `<mark>`;

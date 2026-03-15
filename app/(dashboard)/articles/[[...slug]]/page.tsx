@@ -4,9 +4,7 @@ import path from "path";
 import ReactMarkdown from "react-markdown";
 import "katex/dist/katex.min.css";
 import { notFound } from "next/navigation";
-import { BrutalCard } from "@/components/ui/brutal-card";
 import Link from "next/link";
-import Image from "next/image";
 import {
   calculateReadingMetrics,
   getMarkdownComponents,
@@ -62,7 +60,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               rawPath = path.join(rawPath, "README.md");
             }
           }
-        } catch (e) {}
+        } catch {}
       }
     }
 
@@ -82,18 +80,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       } else {
         content = fs.readFileSync(fullPath, "utf-8");
       }
-      // ONLY re-assign editPath on success!
-      editPath = path.relative(path.join(process.cwd(), "assets"), fullPath).replace(/\\/g, "/");
-    } catch (error) {
-      if (rawPath.includes("404")) {
-        content = "# 404 Not Found\n\nThe requested article is not available yet.";
-      } else {
-        notFound();
-      }
-    }
+       // ONLY re-assign editPath on success!
+       editPath = path.relative(path.join(process.cwd(), "assets"), fullPath).replace(/\\/g, "/");
+     } catch {
+       if (rawPath.includes("404")) {
+         content = "# 404 Not Found\n\nThe requested article is not available yet.";
+       } else {
+         notFound();
+       }
+     }
   }
-
-  const relativeLinkPrefix = "/articles";
 
   const { wordCount, readingTime } = calculateReadingMetrics(content);
   const { remarkPlugins, rehypePlugins } = getPluginsForContent(content);

@@ -1,11 +1,14 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const prismaClientPath = path.join(__dirname, "..", "node_modules", ".prisma", "client");
 const pkgPath = path.join(prismaClientPath, "package.json");
 
 if (fs.existsSync(pkgPath)) {
-  const pkg = require(pkgPath);
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
 
   // Patch exports to include ./default
   if (pkg.exports && !pkg.exports["./default"]) {

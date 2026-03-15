@@ -31,17 +31,17 @@ export default async function FeaturesPage({
       tags: labelsToTags(issue.labels),
       createdAt: new Date(issue.createdAt),
       author: {
-        name: parsed.metadata?.authorName ?? null,
-        email: parsed.metadata?.authorEmail ?? null,
-        image: null,
+        name: parsed.metadata?.authorName || undefined,
+        email: parsed.metadata?.authorEmail || undefined,
+        image: undefined,
       },
       assignee: assigneeId
         ? {
-            name: parsed.metadata?.assigneeName ?? null,
-            email: parsed.metadata?.assigneeEmail ?? null,
-            image: null,
+            name: parsed.metadata?.assigneeName || undefined,
+            email: parsed.metadata?.assigneeEmail || undefined,
+            image: undefined,
           }
-        : null,
+        : undefined,
     };
   });
 

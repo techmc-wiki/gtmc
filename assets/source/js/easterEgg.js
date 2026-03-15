@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function easterEggSwitcher() {
   var overlay = document.createElement("div");
   overlay.style.position = "fixed";
@@ -41,7 +42,7 @@ function easterEggSwitcher() {
   });
 }
 
-function installEasterEgg(hook, vm) {
+function installEasterEgg(hook) {
   hook.afterEach(function (html) {
     var easterEggButton =
       '<button onclick="easterEggSwitcher()" aria-label="Show Easter Egg"  class="easter-egg-toggle">🎉</button>';

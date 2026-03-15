@@ -12,7 +12,6 @@ const cos = new COS({
 
 const BUCKET = process.env.COS_BUCKET;
 const REGION = process.env.COS_REGION;
-const DOMAIN = process.env.COS_DOMAIN; // Optional: Custom CDN Domain
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -57,24 +56,24 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Upload to Tencent Cloud COS
-    const data: any = await new Promise((resolve, reject) => {
-      cos.putObject(
-        {
-          Bucket: BUCKET,
-          Region: REGION,
-          Key: key,
-          Body: buffer,
-        },
-        function (err, data) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(data);
-          }
-        },
-      );
-    });
+     // Upload to Tencent Cloud COS
+     await new Promise<Record<string, unknown>>((resolve, reject) => {
+       cos.putObject(
+         {
+           Bucket: BUCKET,
+           Region: REGION,
+           Key: key,
+           Body: buffer,
+         },
+         function (err: unknown, data: unknown) {
+           if (err) {
+             reject(err);
+           } else {
+             resolve(data as Record<string, unknown>);
+           }
+         },
+       );
+     });
 
     // Build Public URL for Vercel Proxy
     // We rewrite /cos-assets/* to the actual COS bucket URL
@@ -84,10 +83,11 @@ export async function POST(req: NextRequest) {
       success: true,
       url: fileUrl,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Upload error:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: "Upload failed: " + (error.message || String(error)) },
+      { error: "Upload failed: " + errorMessage },
       { status: 500 },
     );
   }

@@ -32,7 +32,7 @@ export async function GET(request: Request) {
         "Content-Type": mimeType,
       },
     });
-  } catch (err) {
+  } catch {
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

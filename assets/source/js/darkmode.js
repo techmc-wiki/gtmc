@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function docsifyDarkSwitcher() {
   var element = document.querySelector("body");
   element.classList.toggle("docsify-dark-mode");
@@ -116,7 +117,7 @@ button[onclick="docsifyDarkSwitcher()"] {
 `;
 styleInject(css);
 
-function install(hook, vm) {
+function install(hook) {
   hook.afterEach(function (html) {
     var docsifyDarkSwitcherButton =
       '<button onclick="docsifyDarkSwitcher()" aria-label="Toggle dark mode" title="Toggle dark mode"></button>';

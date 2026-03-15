@@ -1,5 +1,5 @@
 (function () {
-  function install(hook, vm) {
+  function install(hook) {
     hook.beforeEach(function (html, next) {
       const colorRegex = /(?<escape>\\?)<color\s(?<color>.+?)>/g;
 

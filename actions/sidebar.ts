@@ -5,11 +5,20 @@ import { auth } from "@/lib/auth";
 import fs from "fs";
 import path from "path";
 
+interface TreeNode {
+  id: string;
+  title: string;
+  slug: string;
+  isFolder: boolean;
+  parentId: string | null;
+  children: TreeNode[];
+}
+
 /**
  * Helper to recursively read local assets
  */
-function getLocalFiles(dir: string, basePath = ""): any[] {
-  const results: any[] = [];
+function getLocalFiles(dir: string, basePath = ""): TreeNode[] {
+  const results: TreeNode[] = [];
   try {
     const list = fs.readdirSync(dir);
     for (const item of list) {
@@ -59,7 +68,7 @@ function getLocalFiles(dir: string, basePath = ""): any[] {
 /**
  * 获取树状结构的目录树 (Sidebar)
  */
-export async function getSidebarTree() {
+export async function getSidebarTree(): Promise<TreeNode[]> {
   // 1. Get database entries
   const allItems = await prisma.article.findMany({
     select: {
@@ -74,23 +83,32 @@ export async function getSidebarTree() {
   });
 
   // Build DB tree
-  const itemMap = new Map();
-  const rootItems: any[] = [];
+  const itemMap = new Map<string, TreeNode>();
+  const rootItems: TreeNode[] = [];
 
-  allItems.forEach((item: any) => {
+  allItems.forEach((item) => {
     itemMap.set(item.id, { ...item, children: [] });
   });
 
-  allItems.forEach((item: any) => {
+  allItems.forEach((item) => {
     if (item.parentId) {
       const parent = itemMap.get(item.parentId);
       if (parent) {
-        parent.children.push(itemMap.get(item.id));
+        const child = itemMap.get(item.id);
+        if (child) {
+          parent.children.push(child);
+        }
       } else {
-        rootItems.push(itemMap.get(item.id));
+        const child = itemMap.get(item.id);
+        if (child) {
+          rootItems.push(child);
+        }
       }
     } else {
-      rootItems.push(itemMap.get(item.id));
+      const child = itemMap.get(item.id);
+      if (child) {
+        rootItems.push(child);
+      }
     }
   });
 

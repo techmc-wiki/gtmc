@@ -28,7 +28,7 @@ export default async function DraftDashboardPage() {
     (d: (typeof allDrafts)[0]) => d.status === "APPROVED" || d.status === "ARCHIVED",
   );
 
-  const renderDraftCard = (draft: any) => (
+  const renderDraftCard = (draft: (typeof allDrafts)[0]) => (
     <BrutalCard
       key={draft.id}
       className="flex flex-col h-auto sm:h-64 justify-between border border-tech-main/40 bg-white/80 backdrop-blur-sm p-6 relative group"

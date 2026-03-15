@@ -9,7 +9,7 @@ interface BrutalAvatarProps {
   className?: string;
 }
 
-export function BrutalAvatar({ src, alt, size, fallback, className = "" }: BrutalAvatarProps) {
+export function BrutalAvatar({ src, alt, fallback, className = "" }: BrutalAvatarProps) {
   return (
     <div
       className={`relative flex items-center justify-center bg-slate-100 border-2 border-tech-main/40 overflow-hidden w-full h-full aspect-square group transition-all duration-300 hover:border-tech-main box-border ${className}`}

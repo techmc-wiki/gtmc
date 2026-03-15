@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import type { Prisma } from "@prisma/client";
 
 export async function saveDraftAction(formData: FormData) {
   const session = await auth();
@@ -45,15 +46,20 @@ export async function saveDraftAction(formData: FormData) {
     });
   } else {
     // Create new draft
+    const createData: Prisma.RevisionCreateInput = {
+      title,
+      content,
+      status: "DRAFT",
+      author: { connect: { id: userId } },
+    };
+    if (articleId) {
+      createData.article = { connect: { id: articleId } };
+    }
+    if (filePath) {
+      createData.filePath = filePath;
+    }
     savedRevision = await prisma.revision.create({
-      data: {
-        title,
-        content,
-        status: "DRAFT",
-        authorId: userId,
-        ...(articleId ? { articleId } : {}),
-        ...(filePath ? { filePath } : {}),
-      },
+      data: createData,
     });
   }
 

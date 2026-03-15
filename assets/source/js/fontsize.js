@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function adjustFontSize(action) {
   const markdownSection = document.querySelector(".markdown-section#main");
   let currentSize = parseFloat(window.getComputedStyle(markdownSection).fontSize);
@@ -118,7 +119,7 @@ button.font-size-button[onclick="adjustFontSize('decrease')"] {
 
 styleInject(css);
 
-function install(hook, vm) {
+function install(hook) {
   hook.afterEach(function (html) {
     const savedSize = localStorage.getItem("font-size") || 15;
     const lang = document.documentElement.lang;

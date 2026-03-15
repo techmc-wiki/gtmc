@@ -1,6 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { BrutalButton } from "@/components/ui/brutal-button";
 import { Logo } from "@/components/ui/logo";
+
+const HEX_VALUES = [
+  "a1b2", "c3d4", "e5f6", "7890", "1234", "5678",
+  "9abc", "def0", "1357", "2468", "abcd", "ef01",
+  "2345", "6789", "bcde", "f012", "3456", "7890",
+  "cdef", "0123", "4567", "89ab", "cdef", "0123",
+];
 
 export default function Home() {
   return (
@@ -34,39 +43,24 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Java 代码片段漂浮层 (Decompiled Source Code) */}
-      <div className="absolute left-10 md:left-20 bottom-[15%] opacity-40 hidden lg:block select-none pointer-events-none transform -rotate-2 mix-blend-multiply decor-desktop-only">
-        <div className="text-[11px] font-mono text-tech-main whitespace-pre leading-relaxed border-l-4 border-tech-main/40 pl-4 bg-tech-main/5 py-2">
-          {"{"}"\n"
-          {"  "}
-          <span className="text-tech-main-dark">"Id"</span>:{" "}
-          <span className="text-tech-main-dark font-bold">"minecraft:chest"</span>,{"\n"}
-          {"  "}
-          <span className="text-tech-main-dark">"x"</span>: 1024,{" "}
-          <span className="text-tech-main-dark">"y"</span>: 64,{" "}
-          <span className="text-tech-main-dark">"z"</span>: -512,{"\n"}
-          {"  "}
-          <span className="text-tech-main-dark">"Items"</span>: [{"\n"}
-          {"    "}
-          {"{"}
-          <span className="text-tech-main-dark">"Slot"</span>: 0b,{" "}
-          <span className="text-tech-main-dark">"id"</span>:{" "}
-          <span className="text-tech-main-dark font-bold">"minecraft:diamond"</span>,{" "}
-          <span className="text-tech-main-dark">"Count"</span>: 64b{"}"},{"\n"}
-          {"    "}
-          {"{"}
-          <span className="text-tech-main-dark">"Slot"</span>: 1b,{" "}
-          <span className="text-tech-main-dark">"id"</span>:{" "}
-          <span className="text-tech-main-dark font-bold">"minecraft:redstone"</span>,{" "}
-          <span className="text-tech-main-dark">"Count"</span>: 64b{"}"}
-          {"\n"}
-          {"  "}],{"\n"}
-          {"  "}
-          <span className="opacity-80">{"//"} BlockEntityTag</span>
-          {"\n"}
-          {"}"}
-        </div>
-      </div>
+       {/* Java 代码片段漂浮层 (Decompiled Source Code) */}
+       <div className="absolute left-10 md:left-20 bottom-[15%] opacity-40 hidden lg:block select-none pointer-events-none transform -rotate-2 mix-blend-multiply decor-desktop-only">
+         <div className="text-[11px] font-mono text-tech-main whitespace-pre leading-relaxed border-l-4 border-tech-main/40 pl-4 bg-tech-main/5 py-2">
+           {`{
+  "Id": "minecraft:chest",
+  "x": 1024, "y": 64, "z": -512,
+  "Items": [
+    {
+      "Slot": 0b, "id": "minecraft:diamond", "Count": 64b
+    },
+    {
+      "Slot": 1b, "id": "minecraft:redstone", "Count": 64b
+    }
+  ],
+  // BlockEntityTag
+}`}
+         </div>
+       </div>
 
       {/* NBT二进制/Hex Dump 背景层 (底层纹理) */}
       <div className="absolute top-[20%] left-[5%] text-[10px] font-mono text-tech-main opacity-[0.25] select-none pointer-events-none whitespace-pre leading-tight hidden xl:block mix-blend-multiply decor-desktop-only">
@@ -232,29 +226,26 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 内存簇/寄存器网格 */}
-      <div className="absolute top-[60%] left-[3%] opacity-[0.35] text-[10px] font-mono select-none pointer-events-none hidden 2xl:block mix-blend-multiply decor-desktop-only">
-        <div className="mb-2 text-tech-main-dark font-bold tracking-widest">
-          TICK_PHASE_ALLOCATION
-        </div>
-        <div className="grid grid-cols-6 gap-x-4 gap-y-2 bg-tech-main/5 p-2 border border-tech-main/20">
-          {Array.from({ length: 24 }).map((_, i) => (
-            <span
-              key={i}
-              className={
-                i % 7 === 0
-                  ? "text-tech-main-dark font-bold relative before:content-['>'] before:absolute before:-left-3"
-                  : ""
-              }
-            >
-              {Math.floor(Math.random() * 0xffff)
-                .toString(16)
-                .padStart(4, "0")
-                .toUpperCase()}
-            </span>
-          ))}
-        </div>
-      </div>
+       {/* 内存簇/寄存器网格 */}
+       <div className="absolute top-[60%] left-[3%] opacity-[0.35] text-[10px] font-mono select-none pointer-events-none hidden 2xl:block mix-blend-multiply decor-desktop-only">
+         <div className="mb-2 text-tech-main-dark font-bold tracking-widest">
+           TICK_PHASE_ALLOCATION
+         </div>
+         <div className="grid grid-cols-6 gap-x-4 gap-y-2 bg-tech-main/5 p-2 border border-tech-main/20">
+           {HEX_VALUES.map((hexValue, i) => (
+             <span
+               key={i}
+               className={
+                 i % 7 === 0
+                   ? "text-tech-main-dark font-bold relative before:content-['>'] before:absolute before:-left-3"
+                   : ""
+               }
+             >
+               {hexValue}
+             </span>
+           ))}
+         </div>
+       </div>
 
       {/* 力学/机械引擎图纸 (活塞结构抽象) */}
       <div className="absolute top-[15%] right-[15%] opacity-[0.25] select-none pointer-events-none hidden xl:block mix-blend-multiply decor-desktop-only">

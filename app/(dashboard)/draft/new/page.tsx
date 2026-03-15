@@ -22,7 +22,7 @@ export default async function NewDraftPage({
       if (fullPath.startsWith(path.join(process.cwd(), "assets"))) {
         initialContent = fs.readFileSync(fullPath, "utf-8");
       }
-    } catch (e) {
+    } catch {
       initialContent = `Failed to load file at ${filePath}.`;
     }
   }

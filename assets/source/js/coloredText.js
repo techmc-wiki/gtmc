@@ -1,5 +1,5 @@
 (function () {
-  function install(hook, vm) {
+  function install(hook) {
     hook.beforeEach(function (html, next) {
       // Regular expression to find #color:colorname{text} or #RRGGBB{text}
       const colorRegex =

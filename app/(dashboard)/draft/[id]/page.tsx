@@ -50,8 +50,7 @@ export default async function EditDraftPage({ params }: { params: Promise<{ id: 
 
         {draft.status === "PENDING" || draft.status === "APPROVED" ? (
           <div className="mb-4 bg-tech-main/20 border border-tech-main/50 p-4 font-mono text-sm text-tech-main-dark">
-            // CAUTION: This revision is currently in [{draft.status}] state. Submitting changes
-            will update it as a DRAFT.
+            {`// CAUTION: This revision is currently in [${draft.status}] state. Submitting changes will update it as a DRAFT.`}
           </div>
         ) : null}
 

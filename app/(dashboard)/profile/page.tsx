@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import { BrutalInput } from "@/components/ui/brutal-input";
 import { BrutalAvatar } from "@/components/ui/brutal-avatar";
 import { updateProfileAction } from "@/actions/profile";
-import { SignOutButton } from "@/components/ui/sign-out-button";
 import { getGithubEmailVisibility } from "@/lib/github-features";
+import { signOut } from "next-auth/react";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -65,8 +65,8 @@ export default async function ProfilePage() {
           CONFIG.PANEL_V2
         </div>
         {/* 角落刻度 */}
-        <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main -translate-x-[2px] -translate-y-[2px]"></div>
-        <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main translate-x-[2px] translate-y-[2px]"></div>
+        <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main -translate-x-0.5 -translate-y-0.5"></div>
+        <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main translate-x-0.5 translate-y-0.5"></div>
 
         <form
           action={updateProfileAction}
@@ -185,7 +185,7 @@ export default async function ProfilePage() {
                   Store your GitHub Personal Access Token to enable PR automation.
                 </p>
                 <p className="text-[9px] sm:text-[10px] font-mono text-red-500/60 mt-1 uppercase tracking-widest">
-                  {"//"} REQUIRED SCOPES: 'repo', 'workflow'
+                  {"//"} REQUIRED SCOPES: &apos;repo&apos;, &apos;workflow&apos;
                 </p>
               </div>
               <BrutalInput
@@ -198,15 +198,19 @@ export default async function ProfilePage() {
             </div>
           )}
 
-          <div className="w-full h-[1px] bg-tech-main/30 my-6 sm:my-8"></div>
+          <div className="w-full h-px bg-tech-main/30 my-6 sm:my-8"></div>
 
-          <div className="flex flex-col gap-3 sm:gap-4 md:gap-6">
-            <div className="w-full text-left">
-              <SignOutButton className="!text-tech-main/80 hover:!text-red-500 font-mono text-xs uppercase tracking-widest transition-colors flex items-center gap-2 before:content-['<'] after:content-['>'] min-h-[44px] sm:min-h-auto" />
-            </div>
+          <div className="flex flex-col gap-3 sm:gap-4 md:gap-6 md:flex-row items-stretch md:items-center justify-end">
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="w-full bg-tech-main/10 hover:bg-tech-main text-tech-main hover:text-white border border-tech-main/40 px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 font-mono text-xs font-bold tracking-widest uppercase transition-colors relative min-h-11 flex items-center justify-center"
+              type="button"
+            >
+              SIGN OUT
+            </button>
             <button
               type="submit"
-              className="w-full bg-tech-main/10 hover:bg-tech-main text-tech-main hover:text-white border border-tech-main/40 px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 font-mono text-xs font-bold tracking-widest uppercase transition-colors relative min-h-[44px] flex items-center justify-center"
+              className="w-full bg-tech-main/10 hover:bg-tech-main text-tech-main hover:text-white border border-tech-main/40 px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 font-mono text-xs font-bold tracking-widest uppercase transition-colors relative min-h-11 flex items-center justify-center"
             >
               SAVE_CONFIG
             </button>

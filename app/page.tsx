@@ -361,8 +361,8 @@ export default function Home() {
         </div>
 
         {/* 操作入口 */}
-        <div className="flex flex-wrap justify-center gap-5 relative z-20 w-full opacity-0 animate-slide-up-fade [animation-delay:1.4s] [animation-fill-mode:forwards]">
-          <Link href="/articles">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-5 relative z-20 w-full sm:w-auto opacity-0 animate-slide-up-fade [animation-delay:1.4s] [animation-fill-mode:forwards]">
+          <Link href="/articles" className="w-full sm:w-auto">
             <BrutalButton
               variant="primary"
               className="uppercase text-sm tracking-[0.1em] px-8 py-3 w-full sm:w-auto h-12 flex items-center justify-center hover:scale-105 transition-transform active:scale-95 duration-200 shadow-md"
@@ -370,7 +370,7 @@ export default function Home() {
               ACCESS DATABASE →
             </BrutalButton>
           </Link>
-          <Link href="/login">
+          <Link href="/login" className="w-full sm:w-auto">
             <BrutalButton
               variant="ghost"
               className="uppercase text-sm tracking-[0.1em] px-8 py-3 w-full sm:w-auto h-12 flex items-center justify-center text-tech-main-dark font-medium border border-tech-main/40 hover:border-tech-main bg-white/70 backdrop-blur-md hover:bg-white shadow-sm transition-all duration-300"

@@ -39,7 +39,7 @@ export function FeatureExplanation({
 
   if (isEditing) {
     return (
-      <BrutalCard className="mb-8 border-tech-accent/40 bg-white/80 backdrop-blur-sm">
+      <BrutalCard className="border-tech-accent/40 bg-white/80 backdrop-blur-sm">
         <h3 className="text-lg font-bold tracking-widest uppercase mb-2 text-tech-main border-b border-tech-accent/40 pb-2">
           EDIT_RESOLUTION_EXPLANATION_
         </h3>
@@ -81,7 +81,7 @@ export function FeatureExplanation({
 
   if (initialExplanation) {
     return (
-      <BrutalCard className="mb-8 border-tech-accent/40 bg-tech-accent/5 backdrop-blur-sm relative overflow-hidden group">
+      <BrutalCard className="border-tech-accent/40 bg-tech-accent/5 backdrop-blur-sm relative overflow-hidden group">
         <div className="absolute top-0 left-0 w-2 h-full bg-tech-accent/60"></div>
         <div className="flex justify-between items-start mb-4 border-b border-tech-accent/40 pb-2 pl-4">
           <h3 className="text-lg font-bold tracking-widest uppercase text-tech-main">
@@ -105,7 +105,7 @@ export function FeatureExplanation({
 
   // NO explanation yet, but user CAN edit
   return (
-    <BrutalCard className="mb-8 border-dashed border-tech-accent/40 bg-white/40 py-6 text-center">
+    <BrutalCard className="border-dashed border-tech-accent/40 bg-white/40 py-6 text-center">
       <div className="flex flex-col items-center gap-3 text-tech-accent/80">
         <span className="font-mono text-sm uppercase tracking-wider">
           AWAITING_OFFICIAL_RESOLUTION_

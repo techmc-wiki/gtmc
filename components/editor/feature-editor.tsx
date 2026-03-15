@@ -185,10 +185,12 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
   return (
     <form
       onSubmit={handleSave}
-      className="flex flex-col space-y-6 w-full max-w-5xl mx-auto p-6 sm:p-8 border border-tech-main/40 bg-white/80 backdrop-blur-sm relative group"
+      className="flex flex-col space-y-6 w-full p-4 sm:p-6 border border-tech-main bg-white/80 backdrop-blur-sm relative group"
     >
-      <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main/60 -translate-x-0.5 -translate-y-0.5"></div>
-      <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main/60 translate-x-0.5 translate-y-0.5"></div>
+      <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main/40 -translate-x-[1px] -translate-y-[1px] pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-tech-main/40 translate-x-[1px] -translate-y-[1px] pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-tech-main/40 -translate-x-[1px] translate-y-[1px] pointer-events-none"></div>
+      <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main/40 translate-x-[1px] translate-y-[1px] pointer-events-none"></div>
 
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">

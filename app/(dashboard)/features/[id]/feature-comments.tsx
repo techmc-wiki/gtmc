@@ -43,7 +43,7 @@ export function FeatureComments({
   };
 
   return (
-    <div className="mt-8 space-y-6">
+    <div className="space-y-6">
       <h3 className="text-2xl font-bold tracking-tighter uppercase border-b-2 border-tech-main pb-2 inline-block">
         Discussions
       </h3>

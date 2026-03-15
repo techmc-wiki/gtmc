@@ -5,28 +5,28 @@ import Link from "next/link";
 import { BrutalCard } from "@/components/ui/brutal-card";
 import { RevealSection } from "./reveal-helpers";
 
-export function StatusBadge({ status }: { status: string }) {
-  let styles = "px-2 text-xs font-bold uppercase border";
+export function StatusBadge({ status }: { status: string; }) {
+  let styles = "px-2 py-0.5 text-xs font-mono tracking-wider border flex-shrink-0";
   let label = status;
 
   switch (status) {
     case "PENDING":
-      styles += " bg-yellow-100 border-yellow-400 text-yellow-800";
+      styles += " border-yellow-500/40 text-yellow-600 bg-yellow-500/10";
       label = "UNRESOLVED";
       break;
     case "IN_PROGRESS":
-      styles += " bg-blue-100 border-blue-400 text-blue-800";
+      styles += " border-blue-500/40 text-blue-600 bg-blue-500/10";
       label = "IN_PROGRESS";
       break;
     case "RESOLVED":
-      styles += " bg-green-100 border-green-400 text-green-800";
+      styles += " border-green-500/40 text-green-600 bg-green-500/10";
       label = "RESOLVED";
       break;
     default:
-      styles += " bg-zinc-100 border-zinc-300 text-zinc-600";
+      styles += " border-gray-500/40 text-gray-600 bg-gray-500/10";
   }
 
-  return <span className={styles}>{label}</span>;
+  return <span className={styles}>[{label}]</span>;
 }
 
 interface Feature {
@@ -34,12 +34,12 @@ interface Feature {
   title: string;
   status: "PENDING" | "IN_PROGRESS" | "RESOLVED";
   tags?: string[];
-  author?: { name?: string };
-  assignee?: { name?: string };
+  author?: { name?: string; };
+  assignee?: { name?: string; };
   createdAt: string | Date;
 }
 
-export function FeatureList({ features }: { features: Feature[] }) {
+export function FeatureList({ features }: { features: Feature[]; }) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
@@ -106,44 +106,50 @@ export function FeatureList({ features }: { features: Feature[] }) {
     return (
       <RevealSection delay={delay}>
         <div className="mb-8">
-          <h3 className="text-sm md:text-base font-bold tracking-widest uppercase mb-4 border-l-2 border-tech-main pl-3 text-tech-main">
+          <h2 className="text-lg md:text-xl font-bold tracking-widest uppercase mb-6 border-b border-tech-main/20 pb-2 text-tech-main-dark">
             {title} ({groupFeatures.length})
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {groupFeatures.map((feature) => (
               <Link key={feature.id} href={`/features/${feature.id}`} className="block">
-                <BrutalCard className="hover:border-zinc-800 transition-colors flex flex-col gap-4 p-6 cursor-pointer bg-white/80 backdrop-blur-sm border-tech-main/40">
-                  <div className="space-y-2 grow">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                <BrutalCard className="flex flex-col h-auto sm:h-64 justify-between border border-tech-main/40 bg-white/80 backdrop-blur-sm p-6 relative group hover:border-tech-main/60 transition-colors">
+                  {/* Corner brackets */}
+                  <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main/40 -translate-x-[1px] -translate-y-[1px] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main/40 translate-x-[1px] translate-y-[1px] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+                  <div className="relative z-10 flex flex-col h-full">
+                    <div className="flex justify-between items-start mb-4 gap-2">
                       <StatusBadge status={feature.status} />
-                      <h2 className="text-sm md:text-base font-bold wrap-break-word">
-                        {feature.title}
-                      </h2>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="text-xs font-mono text-tech-main/50" suppressHydrationWarning>
+                          {new Date(feature.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 text-xs font-mono">
-                      <span className="bg-zinc-100 px-2 py-0.5 border border-zinc-200">
-                        Author: {feature.author?.name || "Unknown"}
-                      </span>
-                      <span
-                        className="bg-zinc-100 px-2 py-0.5 border border-zinc-200 text-zinc-500"
-                        suppressHydrationWarning
-                      >
-                        {new Date(feature.createdAt).toLocaleDateString()}
-                      </span>
+                    <h3 className="text-lg font-bold line-clamp-2 uppercase tracking-tight text-tech-main-dark mt-2 border-l-2 border-tech-main/40 pl-3">
+                      {feature.title}
+                    </h3>
+
+                    <div className="mt-4 flex flex-col gap-2">
+                      <p className="text-xs font-mono text-tech-main flex items-center tracking-widest opacity-80">
+                        <span className="inline-block w-1.5 h-1.5 bg-tech-main mr-2"></span>
+                        AUTHOR: {feature.author?.name || "UNKNOWN_USER"}
+                      </p>
                       {feature.assignee && (
-                        <span className="bg-blue-50 text-blue-800 px-2 py-0.5 border border-blue-200">
-                          Assignee: {feature.assignee.name || "Unknown"}
-                        </span>
+                        <p className="text-xs font-mono text-blue-600 flex items-center tracking-widest opacity-80">
+                          <span className="inline-block w-1.5 h-1.5 bg-blue-600 mr-2"></span>
+                          ASSIGNEE: {feature.assignee.name || "UNKNOWN_USER"}
+                        </p>
                       )}
                     </div>
 
                     {feature.tags && feature.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
+                      <div className="flex flex-wrap gap-1 mt-auto pt-4">
                         {feature.tags.map((tag: string) => (
                           <span
                             key={tag}
-                            className="text-xs font-mono uppercase border border-tech-main text-tech-main bg-tech-accent/10 px-2 py-0.5"
+                            className="text-[10px] font-mono uppercase bg-tech-main/5 border border-tech-main/20 text-tech-main/70 px-1.5 py-0.5"
                           >
                             {tag}
                           </span>
@@ -175,11 +181,10 @@ export function FeatureList({ features }: { features: Feature[] }) {
                   <button
                     key={status}
                     onClick={() => setStatusFilter(status)}
-                    className={`text-xs font-mono px-3 py-2 border transition-all min-h-8 flex items-center justify-center ${
-                      statusFilter === status
-                        ? "bg-tech-main text-white border-tech-main"
-                        : "bg-transparent text-tech-main border-tech-main/40 hover:border-tech-main/60"
-                    }`}
+                    className={`text-xs font-mono px-3 py-2 border transition-all min-h-8 flex items-center justify-center ${statusFilter === status
+                      ? "bg-tech-main text-white border-tech-main"
+                      : "bg-transparent text-tech-main border-tech-main/40 hover:border-tech-main/60"
+                      }`}
                   >
                     {status}
                   </button>
@@ -197,11 +202,10 @@ export function FeatureList({ features }: { features: Feature[] }) {
                     <button
                       key={tag}
                       onClick={() => toggleTag(tag)}
-                      className={`text-xs font-mono uppercase px-3 py-2 border transition-all min-h-8 flex items-center justify-center ${
-                        selectedTags.includes(tag)
-                          ? "bg-tech-accent text-white border-tech-accent"
-                          : "bg-tech-accent/5 text-tech-main border-tech-main/40 hover:border-tech-main/60"
-                      }`}
+                      className={`text-xs font-mono uppercase px-3 py-2 border transition-all min-h-8 flex items-center justify-center ${selectedTags.includes(tag)
+                        ? "bg-tech-accent text-white border-tech-accent"
+                        : "bg-tech-accent/5 text-tech-main border-tech-main/40 hover:border-tech-main/60"
+                        }`}
                     >
                       {tag}
                     </button>

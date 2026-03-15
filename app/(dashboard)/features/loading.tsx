@@ -1,5 +1,5 @@
 import { BrutalCard } from "@/components/ui/brutal-card";
-import { SectionRail, SegmentedBar } from "./loading-shell-primitives";
+import { SectionRail, SegmentedBar, ScanConfirmOverlay } from "./loading-shell-primitives";
 
 export default function FeaturesLoading() {
   return (
@@ -8,7 +8,8 @@ export default function FeaturesLoading() {
       aria-busy="true"
       aria-label="Loading features list"
     >
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-tech-slide-in">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-tech-slide-in relative">
+        <ScanConfirmOverlay />
         <div>
           <SectionRail label="FEATURE_HEADER" />
           <SegmentedBar opacity="high" className="w-64 h-10 mt-2 border-b border-tech-main/40" />

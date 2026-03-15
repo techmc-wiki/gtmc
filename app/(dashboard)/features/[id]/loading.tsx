@@ -1,4 +1,4 @@
-import { SectionFrame, SectionRail, SegmentedBar, SweepOverlay } from "../loading-shell-primitives";
+import { SectionFrame, SectionRail, SegmentedBar, SweepOverlay, ScanConfirmOverlay } from "../loading-shell-primitives";
 
 export default function FeatureDetailLoading() {
   return (
@@ -8,7 +8,8 @@ export default function FeatureDetailLoading() {
       aria-label="Loading feature details"
     >
       {/* FEATURE_HEADER_ */}
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 animate-tech-slide-in">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 animate-tech-slide-in relative">
+        <ScanConfirmOverlay />
         <div className="space-y-2">
           <SectionRail label="FEATURE_HEADER" />
           <SegmentedBar opacity="high" className="w-64 h-8" />

@@ -90,15 +90,16 @@ SweepOverlay.displayName = "SweepOverlay";
 
 /**
  * Single-pass scan confirmation overlay.
- * Absolute positioned gradient with scan-confirm animation (0.6s fade).
+ * Absolute positioned gradient fade for loading-to-content transition.
  */
-export const ScanConfirmOverlay = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className = "", ...props }, ref) => (
-    <div
-      ref={ref}
-      className={`absolute inset-0 bg-gradient-to-r from-transparent via-tech-accent/30 to-transparent animate-scan-confirm motion-reduce:animate-none ${className}`}
-      {...props}
-    />
-  ),
-);
+export const ScanConfirmOverlay = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className = "", ...props }, ref) => (
+  <div
+    ref={ref}
+    className={`absolute inset-0 bg-gradient-to-r from-transparent via-tech-accent/30 to-transparent animate-scan-confirm motion-reduce:animate-none ${className}`}
+    {...props}
+  />
+));
 ScanConfirmOverlay.displayName = "ScanConfirmOverlay";

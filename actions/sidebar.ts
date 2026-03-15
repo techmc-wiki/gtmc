@@ -116,9 +116,31 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
   const assetsPath = path.join(process.cwd(), "assets");
   const localTree = getLocalFiles(assetsPath);
 
+  // Read translations configuration
+  let translations: Record<string, string> = {};
+  try {
+    const transPath = path.join(process.cwd(), "assets", "sidebar-translations.json");
+    if (fs.existsSync(transPath)) {
+      const fileContent = fs.readFileSync(transPath, "utf-8");
+      // Remove UTF-8 BOM if present
+      translations = JSON.parse(fileContent.replace(/^\uFEFF/, ''));
+    }
+  } catch (e) {
+    console.error("加载侧边栏翻译配置失败", e);
+  }
+
   // 3. Merge them based on same path/slug hierarchy
   // For simplicity we just return them side by side, local first, then DB
-  return [...localTree, ...rootItems];
+  const mergedTree = [...localTree, ...rootItems];
+
+  // 4. Translate top-level folders/items
+  mergedTree.forEach((node) => {
+    if (translations[node.title]) {
+      node.title = translations[node.title];
+    }
+  });
+
+  return mergedTree;
 }
 
 /**

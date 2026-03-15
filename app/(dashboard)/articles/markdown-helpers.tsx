@@ -58,6 +58,7 @@ export function getMarkdownComponents(rawPath: string) {
       <span style={{ color: "chartreuse" }} {...props} />
     ),
     nc: ({ ...props }: MarkdownComponentProps) => <span {...props} />,
+    pp: ({ ...props }: MarkdownComponentProps) => <span {...props} />,
     hidden: ({ ...props }: MarkdownComponentProps) => (
       <span style={{ display: "none" }} {...props} />
     ),
@@ -197,7 +198,8 @@ export function getMarkdownComponents(rawPath: string) {
         src = `/api/assets?path=${encodeURIComponent(resolved)}`;
       }
       return (
-        <Image
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
           src={src}
           alt={(alt as string) || ""}
           className="max-w-full h-auto border border-tech-main/30 p-1 bg-tech-main/5 my-8 shadow-sm"

@@ -61,7 +61,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       <aside className="hidden md:block w-64 lg:w-75 shrink-0 border-r border-tech-main/20">
         <div className="sticky top-20 sm:top-26 lg:top-28 hover:z-20 h-[calc(100vh-96px)] sm:h-[calc(100vh-128px)] lg:h-[calc(100vh-144px)] flex flex-col">
           <div className="py-4 md:py-6 pr-2 flex-1 min-h-0 text-tech-main border-b border-tech-main/20 relative group flex flex-col pl-0 md:pl-0">
-            <div className="absolute left-0 top-0 w-px h-0 bg-tech-main group-hover:h-full transition-all duration-1000 ease-out opacity-20"></div>
+            <div className="absolute left-0 top-0 w-px h-0 bg-tech-main group-hover:h-full transition-all duration-500 ease-out opacity-20"></div>
 
             <div className="flex items-center justify-between mb-6 pb-2 pt-8 pl-6 border-b border-tech-main/20 group/title shrink-0">
               <div className="text-xs font-mono uppercase tracking-[0.2em] text-tech-main/60 font-bold flex items-center">

@@ -33,18 +33,34 @@ export function calculateReadingMetrics(content: string) {
 
 export function getMarkdownComponents(rawPath: string) {
   return {
-    wtucolor: ({ ...props }: MarkdownComponentProps) => <span style={{ color: "red" }} {...props} />,
-    ttcolor: ({ ...props }: MarkdownComponentProps) => <span style={{ color: "#ff7300" }} {...props} />,
-    ctcolor: ({ ...props }: MarkdownComponentProps) => <span style={{ color: "#ffae00" }} {...props} />,
-    becolor: ({ ...props }: MarkdownComponentProps) => <span style={{ color: "green" }} {...props} />,
-    eucolor: ({ ...props }: MarkdownComponentProps) => <span style={{ color: "blue" }} {...props} />,
-    tecolor: ({ ...props }: MarkdownComponentProps) => <span style={{ color: "blueviolet" }} {...props} />,
-    atcolor: ({ ...props }: MarkdownComponentProps) => <span style={{ color: "purple" }} {...props} />,
+    wtucolor: ({ ...props }: MarkdownComponentProps) => (
+      <span style={{ color: "red" }} {...props} />
+    ),
+    ttcolor: ({ ...props }: MarkdownComponentProps) => (
+      <span style={{ color: "#ff7300" }} {...props} />
+    ),
+    ctcolor: ({ ...props }: MarkdownComponentProps) => (
+      <span style={{ color: "#ffae00" }} {...props} />
+    ),
+    becolor: ({ ...props }: MarkdownComponentProps) => (
+      <span style={{ color: "green" }} {...props} />
+    ),
+    eucolor: ({ ...props }: MarkdownComponentProps) => (
+      <span style={{ color: "blue" }} {...props} />
+    ),
+    tecolor: ({ ...props }: MarkdownComponentProps) => (
+      <span style={{ color: "blueviolet" }} {...props} />
+    ),
+    atcolor: ({ ...props }: MarkdownComponentProps) => (
+      <span style={{ color: "purple" }} {...props} />
+    ),
     heightlightnormal: ({ ...props }: MarkdownComponentProps) => (
       <span style={{ color: "chartreuse" }} {...props} />
     ),
     nc: ({ ...props }: MarkdownComponentProps) => <span {...props} />,
-    hidden: ({ ...props }: MarkdownComponentProps) => <span style={{ display: "none" }} {...props} />,
+    hidden: ({ ...props }: MarkdownComponentProps) => (
+      <span style={{ display: "none" }} {...props} />
+    ),
     heightlightwarning: ({ ...props }: MarkdownComponentProps) => (
       <span style={{ color: "crimson" }} {...props} />
     ),
@@ -52,7 +68,7 @@ export function getMarkdownComponents(rawPath: string) {
       <span style={{ color: "darkseagreen" }} {...props} />
     ),
     table: ({ ...props }: MarkdownComponentProps) => (
-      <div className="w-full overflow-x-auto my-6 border border-tech-main/30 bg-white/50 backdrop-blur-sm">
+      <div className="w-full overflow-x-auto my-6 border border-tech-main/30 bg-white/50 backdrop-blur-sm -mx-6 sm:-mx-8 px-6 sm:px-8">
         <table
           className="w-full text-left border-collapse font-mono text-sm min-w-150"
           {...props}
@@ -77,7 +93,7 @@ export function getMarkdownComponents(rawPath: string) {
     h1: ({ id, children }: MarkdownComponentProps) => (
       <h1
         id={id}
-        className="group relative text-3xl lg:text-4xl font-mono uppercase mt-8 mb-6 tracking-widest border-b border-tech-main/30 pb-4 text-slate-900 scroll-m-20 target:animate-target-blink target:border-tech-main"
+        className="group relative text-2xl sm:text-3xl lg:text-4xl font-mono uppercase mt-8 mb-6 tracking-widest border-b border-tech-main/30 pb-4 text-slate-900 scroll-m-20 target:animate-target-blink target:border-tech-main"
       >
         {id && (
           <a
@@ -191,25 +207,27 @@ export function getMarkdownComponents(rawPath: string) {
     code: ({ className, children, ...props }: MarkdownComponentProps) => {
       const match = /language-(\w+)/.exec((className as string) || "");
       return match ? (
-        <div className="my-6 border border-tech-main/30 font-mono text-sm max-w-full overflow-hidden bg-[#1e1e1e] shadow-sm">
+        <div className="my-6 border border-tech-main/30 font-mono text-sm max-w-full overflow-hidden bg-[#1e1e1e] shadow-sm -mx-6 sm:-mx-8">
           <div className="bg-tech-main/10 text-tech-main px-4 py-1 text-xs font-mono uppercase tracking-widest flex justify-between items-center border-b border-tech-main/30">
             <span>{match[1]}</span>
             <span className="opacity-50">{"//"} EXECUTABLE_BLOCK</span>
           </div>
           <div className="overflow-x-auto">
-            <SyntaxHighlighter
-              style={vscDarkPlus as Record<string, Record<string, string>>}
-              language={match[1]}
-              PreTag="div"
-              customStyle={{
-                margin: 0,
-                padding: "1rem",
-                background: "transparent",
-              }}
-              {...props}
-            >
-              {String(children).replace(/\n$/, "")}
-            </SyntaxHighlighter>
+            <div className="px-6 sm:px-8">
+              <SyntaxHighlighter
+                style={vscDarkPlus as Record<string, Record<string, string>>}
+                language={match[1]}
+                PreTag="div"
+                customStyle={{
+                  margin: 0,
+                  padding: "1rem 0",
+                  background: "transparent",
+                }}
+                {...props}
+              >
+                {String(children).replace(/\n$/, "")}
+              </SyntaxHighlighter>
+            </div>
           </div>
         </div>
       ) : (
@@ -225,8 +243,14 @@ export function getMarkdownComponents(rawPath: string) {
 }
 
 export function getPluginsForContent(content: string) {
-  const remarkPlugins: Array<typeof remarkGfm | typeof remarkMath | typeof remarkBreaks> = [remarkGfm, remarkBreaks];
-  const rehypePlugins: Array<typeof rehypeRaw | typeof rehypeKatex | typeof rehypeSlug> = [rehypeRaw, rehypeSlug];
+  const remarkPlugins: Array<typeof remarkGfm | typeof remarkMath | typeof remarkBreaks> = [
+    remarkGfm,
+    remarkBreaks,
+  ];
+  const rehypePlugins: Array<typeof rehypeRaw | typeof rehypeKatex | typeof rehypeSlug> = [
+    rehypeRaw,
+    rehypeSlug,
+  ];
 
   if (content.includes("$") || content.includes("\\(") || content.includes("\\[")) {
     remarkPlugins.push(remarkMath);

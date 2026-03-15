@@ -19,6 +19,7 @@
   --color-tech-line: #cbd5e1; /* 更柔和的淡色点阵 */
 
   --animate-fade-in: fade-in 0.8s ease-out forwards;
+  --animate-fade-out: fade-out 0.3s ease-out forwards;
   --animate-slide-up-fade: slide-up-fade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-tech-pop-in: tech-pop-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   --animate-tech-slide-in: tech-slide-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
@@ -32,6 +33,15 @@
     }
     100% {
       opacity: 1;
+    }
+  }
+
+  @keyframes fade-out {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
     }
   }
 
@@ -69,6 +79,17 @@
       opacity: 1;
       transform: translateX(0);
       clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @keyframes resolved-handoff {
+    0% {
+      opacity: 0.72;
+      transform: translateY(6px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
@@ -154,6 +175,28 @@ body {
   /* Mobile-safe text scaling */
   .text-balance-mobile {
     @apply text-xs sm:text-sm md:text-base;
+  }
+
+  /* Shared decorative motifs */
+  .corner-bracket {
+    @apply border-2 border-tech-main/40;
+  }
+
+  .guide-line {
+    @apply border-tech-main/20;
+  }
+
+  .hud-block {
+    @apply font-mono text-[10px] opacity-40 hidden sm:block;
+  }
+
+  /* Standard motion transitions */
+  .transition-standard {
+    @apply transition-colors duration-300;
+  }
+
+  .transition-transform {
+    @apply transition-transform duration-500;
   }
 }
 

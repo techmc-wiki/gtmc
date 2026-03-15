@@ -110,7 +110,7 @@ function getMetadataForWrite(
   };
 }
 
-export async function createFeature(data: { title: string; content: string; tags: string[]; }) {
+export async function createFeature(data: { title: string; content: string; tags: string[] }) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 
@@ -159,7 +159,7 @@ export async function createFeature(data: { title: string; content: string; tags
 
 export async function updateFeature(
   id: string,
-  data: { title: string; content: string; tags: string[]; },
+  data: { title: string; content: string; tags: string[] },
 ) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
@@ -480,7 +480,7 @@ export async function addFeatureComment(id: string, content: string) {
       author: {
         name: session.user.name ?? null,
         email: authorEmail,
-        image: (session.user as { image?: string | null; }).image ?? null,
+        image: (session.user as { image?: string | null }).image ?? null,
       },
       emailRedacted,
     },

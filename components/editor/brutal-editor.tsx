@@ -200,10 +200,10 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
   return (
     <form
       onSubmit={handleSaveDraft}
-      className="flex flex-col space-y-6 w-full max-w-5xl mx-auto p-6 md:p-10 border border-tech-main/30 bg-white/60 backdrop-blur-md relative group"
+      className="flex flex-col space-y-6 w-full max-w-5xl mx-auto p-6 sm:p-8 border border-tech-main/40 bg-white/80 backdrop-blur-sm relative group"
     >
-      <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-tech-main -translate-x-0.5 -translate-y-0.5"></div>
-      <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-tech-main translate-x-0.5 translate-y-0.5"></div>
+      <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main/60 -translate-x-0.5 -translate-y-0.5"></div>
+      <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main/60 translate-x-0.5 translate-y-0.5"></div>
 
       {/* 标题区 */}
       <div className="flex flex-col space-y-4">
@@ -214,7 +214,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
           <BrutalInput
             required
             placeholder="ENTER TITLE..."
-            className={`text-lg py-3 font-mono border-tech-main/40 focus:border-tech-main backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/50"}`}
+            className={`text-lg py-3 font-mono border-tech-main/40 focus:border-tech-main/60 backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/80"}`}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             readOnly={isReadOnly}
@@ -227,7 +227,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
           </label>
           <BrutalInput
             placeholder="e.g. SlimeTech/Molforte/04-新机器.md"
-            className={`text-sm py-2 font-mono border-tech-main/40 focus:border-tech-main backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/50"}`}
+            className={`text-sm py-2 font-mono border-tech-main/40 focus:border-tech-main/60 backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/80"}`}
             value={filePath}
             onChange={(e) => setFilePath(e.target.value)}
             readOnly={isReadOnly}
@@ -323,7 +323,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
           onDragEnter={(e) => {
             if (!isReadOnly) e.preventDefault();
           }}
-          className={`w-full min-h-125 border border-tech-main/30 p-4 font-mono text-sm leading-relaxed resize-y focus:outline-none focus:border-tech-main text-tech-main-dark transition-colors backdrop-blur-sm shadow-inner ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/50"}`}
+          className={`w-full min-h-125 border border-tech-main/40 p-6 font-mono text-sm leading-relaxed resize-y focus:outline-none focus:border-tech-main/60 text-tech-main-dark transition-colors backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/80"}`}
           placeholder="Write your markdown here... Use syntax logic. Drag&Drop or Paste images directly here."
           readOnly={isReadOnly}
         />
@@ -331,7 +331,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
 
       {/* 操作区 */}
       {!isReadOnly && (
-        <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-tech-main/30">
+        <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-tech-main/40">
           <BrutalButton
             type="submit"
             disabled={isSaving}

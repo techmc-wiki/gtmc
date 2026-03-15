@@ -29,8 +29,8 @@ export default async function NewDraftPage({
 
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
-      <div className="flex items-center space-x-6 border-b border-tech-main/30 pb-4 relative">
-        <div className="absolute -bottom-[5px] left-0 w-2 h-2 border border-tech-main/50 bg-tech-main/20"></div>
+      <div className="flex items-center space-x-6 border-b border-tech-main/40 pb-4 relative">
+        <div className="absolute -bottom-[5px] left-0 w-2 h-2 border border-tech-main/40 bg-tech-main/10"></div>
         <Link href="/draft">
           <BrutalButton variant="ghost" size="sm">
             {"<"} BACK
@@ -41,9 +41,9 @@ export default async function NewDraftPage({
         </h1>
       </div>
 
-      <div className="bg-tech-main/5 border border-tech-main/30 p-6 mx-auto relative backdrop-blur-sm">
-        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-tech-main/50"></div>
-        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-tech-main/50"></div>
+      <div className="bg-tech-main/5 border border-tech-main/40 p-6 mx-auto relative backdrop-blur-sm">
+        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-tech-main/40"></div>
+        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-tech-main/40"></div>
         <BrutalEditor
           initialData={{
             title: initialTitle,

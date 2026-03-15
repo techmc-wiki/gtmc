@@ -133,7 +133,7 @@ function parseErrorMessage(details: unknown): string | undefined {
     return undefined;
   }
 
-  const candidate = details as { message?: unknown; error?: unknown; };
+  const candidate = details as { message?: unknown; error?: unknown };
   if (typeof candidate.message === "string") {
     return candidate.message;
   }
@@ -239,9 +239,9 @@ function parseNextLink(linkHeader: string | null): string | null {
 async function requestGithub<T>(
   url: string,
   init: RequestInit,
-  options?: { allow404?: boolean; },
+  options?: { allow404?: boolean },
   tokenOverride?: string,
-): Promise<{ data: T | null; response: Response; }> {
+): Promise<{ data: T | null; response: Response }> {
   const config = getGithubRepoConfig();
 
   let response: Response;
@@ -403,7 +403,7 @@ export async function createIssue(
 ): Promise<GithubIssue> {
   const config = getGithubRepoConfig();
   const url = getRepoIssuesBaseUrl(config);
-  const payload: { title: string; body: string; labels?: string[]; } = {
+  const payload: { title: string; body: string; labels?: string[] } = {
     title,
     body,
   };
@@ -753,7 +753,7 @@ export function parseCommentBody(body: string): {
   const content = rest.replace(/^\n/, "");
   const contentWithoutAuthorMarker = content.replace(/^<!-- GTMC_COMMENT_AUTHOR_LINE -->\n/, "");
   const contentWithoutAttribution = contentWithoutAuthorMarker.replace(
-    /^(?:\[By\]:|By:|\*\*By:\*\*|\> \*\*\[BY\]\*\* :)[^\n]*\n\n/,
+    /^(?:\[By\]:|By:|\*\*By:\*\*|\> \*\*\[BY\]\*\*(?:\s*:)?)[^\n]*\n\n/,
     "",
   );
 

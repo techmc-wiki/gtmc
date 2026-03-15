@@ -185,10 +185,10 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
   return (
     <form
       onSubmit={handleSave}
-      className="flex flex-col space-y-6 w-full max-w-5xl mx-auto p-6 md:p-10 border border-tech-main/30 bg-white/60 backdrop-blur-md relative group"
+      className="flex flex-col space-y-6 w-full max-w-5xl mx-auto p-6 sm:p-8 border border-tech-main/40 bg-white/80 backdrop-blur-sm relative group"
     >
-      <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-tech-main -translate-x-0.5 -translate-y-0.5"></div>
-      <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-tech-main translate-x-0.5 translate-y-0.5"></div>
+      <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main/60 -translate-x-0.5 -translate-y-0.5"></div>
+      <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main/60 translate-x-0.5 translate-y-0.5"></div>
 
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
@@ -198,7 +198,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           <BrutalInput
             required
             placeholder="ENTER TITLE..."
-            className={`text-lg py-3 font-mono border-tech-main/40 focus:border-tech-main backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/50"}`}
+            className={`text-lg py-3 font-mono border-tech-main/40 focus:border-tech-main/60 backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/80"}`}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             readOnly={isReadOnly}
@@ -212,7 +212,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           </label>
           <BrutalInput
             placeholder="e.g. bug, enhancement, UI"
-            className={`text-sm py-2 font-mono border-tech-main/40 focus:border-tech-main backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/50"}`}
+            className={`text-sm py-2 font-mono border-tech-main/40 focus:border-tech-main/60 backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/80"}`}
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             readOnly={isReadOnly}
@@ -221,9 +221,9 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         </div>
       </div>
 
-      <div className="flex flex-col grow min-h-125 border border-tech-main/30 bg-white/40 backdrop-blur-sm relative">
+      <div className="flex flex-col grow min-h-125 border border-tech-main/40 bg-white/80 backdrop-blur-sm relative">
         {/* 工具栏 */}
-        <div className="bg-tech-main text-white/90 p-2 flex flex-wrap gap-1 sm:gap-2 items-center sticky top-0 z-10 font-mono text-xs border-b border-tech-dark px-2 sm:px-4">
+        <div className="bg-tech-main text-white/90 p-2 flex flex-wrap gap-1 sm:gap-2 items-center sticky top-0 z-10 font-mono text-xs border-b border-tech-main/40 px-2 sm:px-4">
           <button
             type="button"
             onClick={() => insertSyntax("**", "**")}

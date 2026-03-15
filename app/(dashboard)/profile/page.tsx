@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import { BrutalInput } from "@/components/ui/brutal-input";
 import { BrutalAvatar } from "@/components/ui/brutal-avatar";
 import { updateProfileAction } from "@/actions/profile";
+import { SignOutButton } from "@/components/ui/sign-out-button";
 import { getGithubEmailVisibility } from "@/lib/github-features";
-import { signOut } from "next-auth/react";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -201,13 +201,7 @@ export default async function ProfilePage() {
           <div className="w-full h-px bg-tech-main/30 my-6 sm:my-8"></div>
 
           <div className="flex flex-col gap-3 sm:gap-4 md:gap-6 md:flex-row items-stretch md:items-center justify-end">
-            <button
-              onClick={() => signOut({ callbackUrl: "/" })}
-              className="w-full bg-tech-main/10 hover:bg-tech-main text-tech-main hover:text-white border border-tech-main/40 px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 font-mono text-xs font-bold tracking-widest uppercase transition-colors relative min-h-11 flex items-center justify-center"
-              type="button"
-            >
-              SIGN OUT
-            </button>
+            <SignOutButton className="w-full bg-tech-main/10 hover:bg-tech-main text-tech-main hover:text-white border border-tech-main/40 px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 font-mono text-xs font-bold tracking-widest uppercase transition-colors relative min-h-11 flex items-center justify-center" />
             <button
               type="submit"
               className="w-full bg-tech-main/10 hover:bg-tech-main text-tech-main hover:text-white border border-tech-main/40 px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 font-mono text-xs font-bold tracking-widest uppercase transition-colors relative min-h-11 flex items-center justify-center"

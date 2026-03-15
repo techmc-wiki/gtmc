@@ -113,10 +113,10 @@ export function FeatureList({ features }: { features: Feature[] }) {
             {groupFeatures.map((feature) => (
               <Link key={feature.id} href={`/features/${feature.id}`} className="block">
                 <BrutalCard className="hover:border-zinc-800 transition-colors flex flex-col gap-4 p-6 cursor-pointer bg-white/80 backdrop-blur-sm border-tech-main/40">
-                  <div className="space-y-2 flex-grow">
+                  <div className="space-y-2 grow">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                       <StatusBadge status={feature.status} />
-                      <h2 className="text-sm md:text-base font-bold break-words">
+                      <h2 className="text-sm md:text-base font-bold wrap-break-word">
                         {feature.title}
                       </h2>
                     </div>
@@ -175,7 +175,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                   <button
                     key={status}
                     onClick={() => setStatusFilter(status)}
-                    className={`text-xs font-mono px-3 py-2 border transition-all min-h-[44px] flex items-center justify-center ${
+                    className={`text-xs font-mono px-3 py-2 border transition-all min-h-8 flex items-center justify-center ${
                       statusFilter === status
                         ? "bg-tech-main text-white border-tech-main"
                         : "bg-transparent text-tech-main border-tech-main/40 hover:border-tech-main/60"
@@ -197,7 +197,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                     <button
                       key={tag}
                       onClick={() => toggleTag(tag)}
-                      className={`text-xs font-mono uppercase px-3 py-2 border transition-all min-h-[44px] flex items-center justify-center ${
+                      className={`text-xs font-mono uppercase px-3 py-2 border transition-all min-h-8 flex items-center justify-center ${
                         selectedTags.includes(tag)
                           ? "bg-tech-accent text-white border-tech-accent"
                           : "bg-tech-accent/5 text-tech-main border-tech-main/40 hover:border-tech-main/60"

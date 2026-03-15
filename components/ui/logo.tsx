@@ -11,16 +11,16 @@ export function Logo({ className = "", size = "md", showSlash = true }: LogoProp
     sm: "text-sm",
     md: "text-xl",
     lg: "text-3xl",
-    xl: "text-5xl md:text-6xl",
-    "2xl": "text-6xl md:text-7xl", // 同步原版 Wiki 的字号
+    xl: "text-2xl sm:text-3xl md:text-5xl lg:text-6xl",
+    "2xl": "text-3xl sm:text-4xl md:text-6xl lg:text-7xl",
   };
 
   const slashClasses = {
     sm: "text-[10px]",
     md: "text-sm",
     lg: "text-lg",
-    xl: "text-2xl",
-    "2xl": "text-3xl md:text-4xl",
+    xl: "text-sm sm:text-base md:text-2xl lg:text-3xl",
+    "2xl": "text-base sm:text-lg md:text-3xl lg:text-4xl",
   };
 
   return (

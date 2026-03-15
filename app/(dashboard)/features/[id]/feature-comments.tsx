@@ -52,7 +52,7 @@ export function FeatureComments({
         {initialComments.map((comment) => (
           <BrutalCard
             key={comment.id}
-            className="p-4 bg-white/60 backdrop-blur-sm border-tech-main/30 border"
+            className="p-6 bg-white/80 backdrop-blur-sm border-tech-main/40 border"
           >
             <div className="flex items-center gap-2 mb-2 pb-2 border-b border-dashed border-tech-main/30 text-sm font-mono">
               <span className="font-bold text-tech-main uppercase tracking-wider">
@@ -68,7 +68,7 @@ export function FeatureComments({
           </BrutalCard>
         ))}
         {initialComments.length === 0 && (
-          <div className="text-center py-8 text-tech-main/50 font-mono border border-dashed border-tech-main/30 bg-white/20">
+          <div className="text-center py-8 text-tech-main/50 font-mono border border-dashed border-tech-main/40 bg-white/40">
             NO_COMMENTS_YET_
           </div>
         )}
@@ -77,14 +77,14 @@ export function FeatureComments({
       {!isClosed &&
         (userId ? (
           <form onSubmit={handleSubmit} className="mt-8">
-            <BrutalCard className="p-4 bg-white/60 backdrop-blur-sm border-tech-main/30 border">
-              <label className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main border-b border-tech-main/30 inline-block pb-1 mb-4">
+            <BrutalCard className="p-6 bg-white/80 backdrop-blur-sm border-tech-main/40 border">
+              <label className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main border-b border-tech-main/40 inline-block pb-1 mb-4">
                 LEAVE_A_REPLY_
               </label>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full min-h-25 p-3 border border-tech-main/40 text-black placeholder-zinc-500 focus:border-tech-main bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-0 font-mono text-sm resize-y"
+                className="w-full min-h-25 p-4 border border-tech-main/40 text-black placeholder-zinc-500 focus:border-tech-main/60 bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-0 font-mono text-sm resize-y"
                 placeholder="ENTER COMMENT..."
                 disabled={isPending}
               />
@@ -105,7 +105,7 @@ export function FeatureComments({
             </BrutalCard>
           </form>
         ) : (
-          <div className="text-center py-4 bg-white/20 border border-tech-main/30 font-mono text-sm mt-8 text-tech-main/70">
+          <div className="text-center py-4 bg-white/40 border border-tech-main/40 font-mono text-sm mt-8 text-tech-main/70">
             PLEASE_LOG_IN_TO_LEAVE_A_REPLY_
           </div>
         ))}

@@ -11,15 +11,15 @@ export default function FeaturesLoading() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-tech-slide-in">
         <div>
           <SectionRail label="FEATURE_HEADER" />
-          <SegmentedBar opacity="high" className="w-64 h-10 mt-2 border-b-2 border-tech-main/30" />
+          <SegmentedBar opacity="high" className="w-64 h-10 mt-2 border-b border-tech-main/40" />
           <SegmentedBar opacity="low" className="w-80 h-4 mt-2" />
         </div>
-        <SegmentedBar opacity="high" className="w-48 h-10 border border-tech-main/30" />
+        <SegmentedBar opacity="high" className="w-48 h-10 border border-tech-main/40" />
       </div>
 
       <div className="mt-8 pt-4 space-y-6">
         <BrutalCard
-          className="p-4 bg-white/60 backdrop-blur-sm border-tech-main/30 md:px-6 animate-tech-slide-in"
+          className="p-6 bg-white/80 backdrop-blur-sm border-tech-main/40 md:px-8 animate-tech-slide-in"
           style={{ animationDelay: "100ms" }}
         >
           <SectionRail label="FILTER_MATRIX" />
@@ -50,7 +50,7 @@ export default function FeaturesLoading() {
             {group.cards.map((cardNum) => (
               <BrutalCard
                 key={cardNum}
-                className="p-4 bg-white/60 backdrop-blur-sm border-tech-main/30 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center"
+                className="p-6 bg-white/80 backdrop-blur-sm border-tech-main/40 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center"
               >
                 <div className="space-y-2 flex-grow w-full">
                   <div className="flex items-center gap-2">

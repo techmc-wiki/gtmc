@@ -174,7 +174,7 @@ export function SidebarClient({ tree }: { tree: TreeNode[] }) {
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
           <div className="bg-white dark:bg-black border-2 border-tech-main p-6 max-w-md w-full rounded shadow-[8px_8px_0_0_rgba(var(--tech-main),1)]">
             <h3 className="text-lg font-bold font-mono text-tech-main mb-6 uppercase tracking-widest border-b border-tech-main/20 pb-2">
               CREATE_SYS_OBJECT

@@ -127,7 +127,7 @@ export default function LoginPage() {
                 onClick={handleLogin}
                 disabled={isLoading}
                 variant="primary"
-                className="w-full uppercase text-sm tracking-widest h-12 flex items-center justify-center hover:scale-[1.02] transition-transform active:scale-[0.98] duration-200"
+                className="w-full uppercase text-sm tracking-widest h-12 flex items-center justify-center hover:scale-[1.02] transition-transform active:scale-[0.98] duration-300"
               >
                 {isLoading ? (
                   <span className="flex items-center">

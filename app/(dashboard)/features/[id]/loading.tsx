@@ -34,7 +34,7 @@ export default function FeatureDetailLoading() {
 
       {/* RESOLUTION_BLOCK_ */}
       <SectionFrame
-        className="relative border-l-4 border-tech-main bg-tech-accent/5 animate-tech-slide-in"
+        className="relative border-l-4 border-tech-main/60 bg-tech-accent/5 animate-tech-slide-in"
         style={{ animationDelay: "200ms" }}
       >
         <SweepOverlay />
@@ -68,9 +68,9 @@ export default function FeatureDetailLoading() {
           </div>
 
           {/* Editor area with toolbar */}
-          <div className="flex flex-col min-h-[300px] border border-tech-main/30 bg-white/40">
+          <div className="flex flex-col min-h-[300px] border border-tech-main/40 bg-white/80">
             {/* Toolbar strip */}
-            <div className="bg-tech-main h-10 border-b border-tech-main flex items-center gap-2 px-3">
+            <div className="bg-tech-main h-10 border-b border-tech-main/40 flex items-center gap-2 px-3">
               <SegmentedBar opacity="high" className="w-8 h-6" />
               <div className="w-px h-6 bg-tech-accent/30" />
               <SegmentedBar opacity="medium" className="w-8 h-6" />
@@ -100,7 +100,7 @@ export default function FeatureDetailLoading() {
         <div className="space-y-4">
           {[1, 2].map((i) => (
             <SectionFrame key={i}>
-              <div className="flex items-center gap-2 pb-2 border-b border-dashed border-tech-main/30">
+              <div className="flex items-center gap-2 pb-2 border-b border-dashed border-tech-main/40">
                 <SegmentedBar opacity="high" className="w-32 h-4" />
                 <SegmentedBar opacity="medium" className="w-40 h-4" />
               </div>

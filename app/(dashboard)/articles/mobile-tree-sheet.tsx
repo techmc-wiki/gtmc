@@ -43,19 +43,19 @@ export function MobileTreeSheet({ isOpen, onClose, children }: MobileTreeSheetPr
       />
 
       {/* Panel */}
-      <div className="absolute inset-0 bg-white/95 backdrop-blur-md border-b border-tech-main/40 flex flex-col overflow-hidden">
+      <div className="border-tech-main/40 absolute inset-0 flex flex-col overflow-hidden border-b bg-white/95 backdrop-blur-md">
         {/* Header */}
         <div
-          className="flex items-center justify-between border-b border-tech-main/40 px-4 py-3 flex-shrink-0"
+          className="border-tech-main/40 flex shrink-0 items-center justify-between border-b px-4 py-3"
           data-testid="mobile-tree-panel-header"
         >
-          <div className="text-xs font-mono uppercase tracking-[0.2em] text-tech-main/60 font-bold flex items-center">
-            <span className="w-1.5 h-1.5 bg-tech-main/60 inline-block mr-2 animate-pulse"></span>
+          <div className="text-tech-main/60 flex items-center font-mono text-xs font-bold tracking-[0.2em] uppercase">
+            <span className="bg-tech-main/60 mr-2 inline-block h-1.5 w-1.5 animate-pulse"></span>
             SYS.DIR_TREE
           </div>
           <button
             onClick={onClose}
-            className="font-mono text-xs tracking-[0.15em] text-tech-main hover:bg-tech-main/10 px-3 py-2 transition-colors font-bold uppercase cursor-pointer"
+            className="text-tech-main hover:bg-tech-main/10 cursor-pointer px-3 py-2 font-mono text-xs font-bold tracking-[0.15em] uppercase transition-colors"
             data-testid="mobile-tree-close"
             aria-label="Close tree"
           >

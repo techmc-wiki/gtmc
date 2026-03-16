@@ -44,7 +44,7 @@ export function FeatureComments({
 
   return (
     <div className="space-y-6">
-      <h3 className="text-2xl font-bold tracking-tighter uppercase border-b-2 border-tech-main pb-2 inline-block">
+      <h3 className="border-tech-main inline-block border-b-2 pb-2 text-2xl font-bold tracking-tighter uppercase">
         Discussions
       </h3>
 
@@ -52,10 +52,10 @@ export function FeatureComments({
         {initialComments.map((comment) => (
           <BrutalCard
             key={comment.id}
-            className="p-6 bg-white/80 backdrop-blur-sm border-tech-main/40 border"
+            className="border-tech-main/40 border bg-white/80 p-6 backdrop-blur-sm"
           >
-            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-dashed border-tech-main/30 text-sm font-mono">
-              <span className="font-bold text-tech-main uppercase tracking-wider">
+            <div className="border-tech-main/30 mb-2 flex items-center gap-2 border-b border-dashed pb-2 font-mono text-sm">
+              <span className="text-tech-main font-bold tracking-wider uppercase">
                 {comment.author.name ||
                   (comment.emailRedacted ? "email redacted for privacy" : comment.author.email) ||
                   "Unknown"}
@@ -64,11 +64,11 @@ export function FeatureComments({
                 {new Date(comment.createdAt).toLocaleString()}
               </span>
             </div>
-            <div className="whitespace-pre-wrap font-mono text-sm">{comment.content}</div>
+            <div className="font-mono text-sm whitespace-pre-wrap">{comment.content}</div>
           </BrutalCard>
         ))}
         {initialComments.length === 0 && (
-          <div className="text-center py-8 text-tech-main/50 font-mono border border-dashed border-tech-main/40 bg-white/40">
+          <div className="text-tech-main/50 border-tech-main/40 border border-dashed bg-white/40 py-8 text-center font-mono">
             NO_COMMENTS_YET_
           </div>
         )}
@@ -77,14 +77,14 @@ export function FeatureComments({
       {!isClosed &&
         (userId ? (
           <form onSubmit={handleSubmit} className="mt-8">
-            <BrutalCard className="p-6 bg-white/80 backdrop-blur-sm border-tech-main/40 border">
-              <label className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main border-b border-tech-main/40 inline-block pb-1 mb-4">
+            <BrutalCard className="border-tech-main/40 border bg-white/80 p-6 backdrop-blur-sm">
+              <label className="text-tech-main border-tech-main/40 mb-4 inline-block border-b pb-1 font-mono text-sm tracking-[0.2em] uppercase">
                 LEAVE_A_REPLY_
               </label>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full min-h-25 p-4 border border-tech-main/40 text-black placeholder-zinc-500 focus:border-tech-main/60 bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-0 font-mono text-sm resize-y"
+                className="border-tech-main/40 focus:border-tech-main/60 min-h-25 w-full resize-y border bg-white/80 p-4 font-mono text-sm text-black placeholder-zinc-500 backdrop-blur-sm focus:ring-0 focus:outline-none"
                 placeholder="ENTER COMMENT..."
                 disabled={isPending}
               />
@@ -105,7 +105,7 @@ export function FeatureComments({
             </BrutalCard>
           </form>
         ) : (
-          <div className="text-center py-4 bg-white/40 border border-tech-main/40 font-mono text-sm mt-8 text-tech-main/70">
+          <div className="border-tech-main/40 text-tech-main/70 mt-8 border bg-white/40 py-4 text-center font-mono text-sm">
             PLEASE_LOG_IN_TO_LEAVE_A_REPLY_
           </div>
         ))}

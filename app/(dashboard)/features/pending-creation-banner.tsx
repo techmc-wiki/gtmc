@@ -87,12 +87,12 @@ export function PendingCreationBanner() {
 
   if (state.status === "success") {
     return (
-      <div className="border border-tech-main/40 bg-white/60 backdrop-blur-sm px-4 py-3 font-mono text-sm flex items-center gap-3">
-        <span className="w-2 h-2 bg-tech-main inline-block" />
-        <span className="text-tech-main uppercase tracking-[0.1em]">FEATURE_CREATED_</span>
+      <div className="border-tech-main/40 flex items-center gap-3 border bg-white/60 px-4 py-3 font-mono text-sm backdrop-blur-sm">
+        <span className="bg-tech-main inline-block h-2 w-2" />
+        <span className="text-tech-main tracking-[0.1em] uppercase">FEATURE_CREATED_</span>
         <Link
           href={`/features/${state.featureId}`}
-          className="underline text-tech-accent hover:text-tech-main ml-2"
+          className="text-tech-accent hover:text-tech-main ml-2 underline"
         >
           VIEW_ISSUE_#{state.featureId}_
         </Link>
@@ -102,10 +102,10 @@ export function PendingCreationBanner() {
 
   if (state.status === "error") {
     return (
-      <div className="border border-red-400/60 bg-red-50/60 backdrop-blur-sm px-4 py-3 font-mono text-sm flex items-center gap-3">
-        <span className="w-2 h-2 bg-red-500 inline-block" />
-        <span className="text-red-700 uppercase tracking-[0.1em]">CREATION_FAILED_</span>
-        <span className="text-red-600 text-xs ml-2">{state.message}</span>
+      <div className="flex items-center gap-3 border border-red-400/60 bg-red-50/60 px-4 py-3 font-mono text-sm backdrop-blur-sm">
+        <span className="inline-block h-2 w-2 bg-red-500" />
+        <span className="tracking-[0.1em] text-red-700 uppercase">CREATION_FAILED_</span>
+        <span className="ml-2 text-xs text-red-600">{state.message}</span>
         <button
           onClick={() =>
             startRetry(() => {
@@ -114,7 +114,7 @@ export function PendingCreationBanner() {
             })
           }
           disabled={isRetrying}
-          className="ml-auto border border-red-400 px-2 py-0.5 text-xs text-red-600 hover:bg-red-100 uppercase cursor-pointer"
+          className="ml-auto cursor-pointer border border-red-400 px-2 py-0.5 text-xs text-red-600 uppercase hover:bg-red-100"
         >
           {isRetrying ? "RETRYING..." : "RETRY_"}
         </button>
@@ -124,9 +124,9 @@ export function PendingCreationBanner() {
 
   // pending
   return (
-    <div className="border border-tech-main/40 bg-white/60 backdrop-blur-sm px-4 py-3 font-mono text-sm flex items-center gap-3">
-      <span className="w-2 h-2 bg-tech-accent animate-pulse inline-block" />
-      <span className="text-tech-main uppercase tracking-[0.1em]">CREATING_FEATURE_...</span>
+    <div className="border-tech-main/40 flex items-center gap-3 border bg-white/60 px-4 py-3 font-mono text-sm backdrop-blur-sm">
+      <span className="bg-tech-accent inline-block h-2 w-2 animate-pulse" />
+      <span className="text-tech-main tracking-[0.1em] uppercase">CREATING_FEATURE_...</span>
     </div>
   );
 }

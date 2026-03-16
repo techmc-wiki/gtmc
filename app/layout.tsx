@@ -20,7 +20,7 @@ export default function RootLayout({
       </head>
       <Analytics />
       <SpeedInsights />
-      <body className="antialiased bg-tech-bg/50 w-full overflow-x-hidden">{children}</body>
+      <body className="bg-tech-bg/50 w-full overflow-x-hidden antialiased">{children}</body>
     </html>
   );
 }

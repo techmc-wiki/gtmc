@@ -15,35 +15,35 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen w-full relative overflow-hidden text-tech-main font-sans selection:bg-tech-main/20 selection:text-tech-main-dark">
+    <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative flex min-h-screen w-full overflow-hidden font-sans">
       {/* ======================================================== */}
       {/* 结构层：背景图纸修饰、HUD、辅助线、标记、透视几何 */}
       {/* ======================================================== */}
 
       {/* 左上角系统序列号 */}
-      <div className="absolute top-8 left-8 flex flex-col space-y-1 z-0 hidden md:flex">
-        <div className="text-xs tracking-widest font-mono text-tech-main-dark opacity-50 uppercase">
+      <div className="absolute top-8 left-8 z-0 flex hidden flex-col space-y-1 md:flex">
+        <div className="text-tech-main-dark font-mono text-xs tracking-widest uppercase opacity-50">
           [ GTMC_AUTH_GATEWAY ]
         </div>
-        <div className="text-[10px] tracking-widest font-mono text-tech-main opacity-30">
+        <div className="text-tech-main font-mono text-[10px] tracking-widest opacity-30">
           SECURE.CONN // PORT-443
         </div>
       </div>
 
       {/* 右上角HUD：模拟服务器/图纸数据 */}
-      <div className="absolute top-8 right-12 text-[10px] font-mono text-tech-main opacity-40 text-right space-y-1 z-0 select-none hidden sm:block">
+      <div className="text-tech-main absolute top-8 right-12 z-0 hidden space-y-1 text-right font-mono text-[10px] opacity-40 select-none sm:block">
         <p>
-          STATUS :: <span className="text-red-500 font-bold">LOCKED *</span>
+          STATUS :: <span className="font-bold text-red-500">LOCKED *</span>
         </p>
         <p>ENCRYPTION:: AES-256-GCM</p>
         <p>HANDSHAKE :: WAITING...</p>
-        <div className="w-full h-px bg-tech-main/30 my-2"></div>
+        <div className="bg-tech-main/30 my-2 h-px w-full"></div>
         <p>SESSION : NULL</p>
       </div>
 
       {/* Java 代码片段漂浮层 (Decompiled Source Code) */}
-      <div className="absolute right-10 md:right-20 bottom-[20%] opacity-20 hidden lg:block select-none pointer-events-none transform rotate-2 decor-desktop-only">
-        <div className="text-[10px] font-mono text-tech-main whitespace-pre leading-relaxed border-r-2 border-tech-main/20 pr-4 text-right">
+      <div className="decor-desktop-only pointer-events-none absolute right-10 bottom-[20%] hidden rotate-2 opacity-20 select-none md:right-20 lg:block">
+        <div className="text-tech-main border-tech-main/20 border-r-2 pr-4 text-right font-mono text-[10px] leading-relaxed whitespace-pre">
           <span className="text-tech-main-dark font-bold">@PostMapping</span>(
           <span className="text-tech-main-dark">&quot;/login&quot;</span>){"\n"}
           <span className="text-tech-main-dark">public</span> ResponseEntity&lt;?&gt;
@@ -57,44 +57,44 @@ export default function LoginPage() {
       </div>
 
       {/* 贯穿全图的低调主辅助线 */}
-      <div className="absolute top-[50%] left-0 w-full h-px bg-tech-main/10 flex items-center justify-center hidden md:flex decor-desktop-only">
-        <div className="w-2 h-2 bg-tech-bg border border-tech-main/50"></div>
+      <div className="bg-tech-main/10 decor-desktop-only absolute top-[50%] left-0 flex hidden h-px w-full items-center justify-center md:flex">
+        <div className="bg-tech-bg border-tech-main/50 h-2 w-2 border"></div>
       </div>
-      <div className="absolute top-0 left-[50%] w-pxfull bg-tech-main/10 hidden md:block decor-desktop-only"></div>
+      <div className="w-pxfull bg-tech-main/10 decor-desktop-only absolute top-0 left-[50%] hidden md:block"></div>
 
       {/* 巨型背景水印 */}
-      <div className="absolute bottom-0 -left-20 text-[8rem] font-black text-tech-main opacity-[0.03] select-none pointer-events-none whitespace-nowrap hidden lg:block tracking-tighter decor-desktop-only">
+      <div className="text-tech-main decor-desktop-only pointer-events-none absolute bottom-0 -left-20 hidden text-[8rem] font-black tracking-tighter whitespace-nowrap opacity-[0.03] select-none lg:block">
         ACCESS_CONTROL
       </div>
 
       {/* ======================================================== */}
       {/* 核心交互区 */}
       {/* ======================================================== */}
-      <main className="relative z-10 flex flex-col justify-center items-center w-full px-4 md:px-0 max-w-lg mx-auto">
+      <main className="relative z-10 mx-auto flex w-full max-w-lg flex-col items-center justify-center px-4 md:px-0">
         {/* 信息卡片主体 */}
-        <div className="relative w-full mb-8 group animate-tech-pop-in [animation-duration:0.8s] [animation-delay:0.2s] opacity-0 [animation-fill-mode:forwards]">
+        <div className="group animate-tech-pop-in relative mb-8 w-full opacity-0 [animation-delay:0.2s] [animation-duration:0.8s] [animation-fill-mode:forwards]">
           {/* 下层错位阴影框 */}
-          <div className="absolute inset-0 bg-transparent border border-tech-main/20 translate-x-2 translate-y-2 md:translate-x-3 md:translate-y-3 -z-10 group-hover:translate-x-3 group-hover:translate-y-3 md:group-hover:translate-x-4 md:group-hover:translate-y-4 transition-transform duration-500 ease-out"></div>
+          <div className="border-tech-main/20 absolute inset-0 -z-10 translate-x-2 translate-y-2 border bg-transparent transition-transform duration-500 ease-out group-hover:translate-x-3 group-hover:translate-y-3 md:translate-x-3 md:translate-y-3 md:group-hover:translate-x-4 md:group-hover:translate-y-4"></div>
 
           {/* 尺寸标注 decoration */}
-          <div className="absolute -right-6 top-1/2 -translate-y-1/2 text-[10px] font-mono opacity-0 flex-col items-center h-full animate-fade-in [animation-delay:1.5s] [animation-fill-mode:forwards] hidden sm:flex">
-            <span className="block border-l border-tech-main/30 h-10 w-px"></span>
-            <span className="py-2 rotate-90 whitespace-nowrap">SECURE FORM</span>
-            <span className="block border-l border-tech-main/30 h-10 w-px"></span>
+          <div className="animate-fade-in absolute top-1/2 -right-6 hidden h-full -translate-y-1/2 flex-col items-center font-mono text-[10px] opacity-0 [animation-delay:1.5s] [animation-fill-mode:forwards] sm:flex">
+            <span className="border-tech-main/30 block h-10 w-px border-l"></span>
+            <span className="rotate-90 py-2 whitespace-nowrap">SECURE FORM</span>
+            <span className="border-tech-main/30 block h-10 w-px border-l"></span>
           </div>
 
-          <div className="relative border border-tech-main/40 bg-white/60 backdrop-blur-md p-6 md:p-10 shadow-sm overflow-hidden text-center">
+          <div className="border-tech-main/40 relative overflow-hidden border bg-white/60 p-6 text-center shadow-sm backdrop-blur-md md:p-10">
             {/* 闪光扫过效果 */}
-            <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/40 to-transparent -skew-x-12 translate-x-[-200%] animate-[shimmer_3s_infinite_2s] pointer-events-none"></div>
+            <div className="pointer-events-none absolute inset-0 translate-x-[-200%] -skew-x-12 animate-[shimmer_3s_infinite_2s] bg-linear-to-r from-transparent via-white/40 to-transparent"></div>
 
             {/* 角落刻度 */}
-            <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-tech-main -translate-x-0.5 -translate-y-0.5"></div>
-            <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-tech-main translate-x-0.5 -translate-y-0.5"></div>
-            <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-tech-main -translate-x-0.5 translate-y-0.5"></div>
-            <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-tech-main translate-x-0.5 translate-y-0.5"></div>
+            <div className="border-tech-main absolute top-0 left-0 h-3 w-3 -translate-x-0.5 -translate-y-0.5 border-t-2 border-l-2"></div>
+            <div className="border-tech-main absolute top-0 right-0 h-3 w-3 translate-x-0.5 -translate-y-0.5 border-t-2 border-r-2"></div>
+            <div className="border-tech-main absolute bottom-0 left-0 h-3 w-3 -translate-x-0.5 translate-y-0.5 border-b-2 border-l-2"></div>
+            <div className="border-tech-main absolute right-0 bottom-0 h-3 w-3 translate-x-0.5 translate-y-0.5 border-r-2 border-b-2"></div>
 
-            <div className="flex flex-col items-center mb-8">
-              <div className="w-12 h-12 bg-tech-main/5 flex items-center justify-center border border-tech-main/40 mb-4 animate-tech-pop-in [animation-delay:0.6s] opacity-0 [animation-fill-mode:forwards]">
+            <div className="mb-8 flex flex-col items-center">
+              <div className="bg-tech-main/5 border-tech-main/40 animate-tech-pop-in mb-4 flex h-12 w-12 items-center justify-center border opacity-0 [animation-delay:0.6s] [animation-fill-mode:forwards]">
                 <svg
                   width="24"
                   height="24"
@@ -108,30 +108,30 @@ export default function LoginPage() {
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
               </div>
-              <h1 className="text-3xl font-bold tracking-tight text-tech-main-dark relative overflow-hidden">
-                <span className="inline-block animate-tech-slide-in [animation-delay:0.7s] opacity-0 [animation-fill-mode:forwards]">
+              <h1 className="text-tech-main-dark relative overflow-hidden text-3xl font-bold tracking-tight">
+                <span className="animate-tech-slide-in inline-block opacity-0 [animation-delay:0.7s] [animation-fill-mode:forwards]">
                   IDENTITY
                 </span>
-                <span className="inline-block animate-tech-slide-in [animation-delay:0.9s] opacity-0 [animation-fill-mode:forwards] ml-2 text-tech-main font-light">
+                <span className="animate-tech-slide-in text-tech-main ml-2 inline-block font-light opacity-0 [animation-delay:0.9s] [animation-fill-mode:forwards]">
                   VERIFICATION
                 </span>
               </h1>
             </div>
 
-            <p className="text-sm text-tech-main-dark/70 mb-8 max-w-xs mx-auto opacity-0 animate-fade-in [animation-delay:1.1s] [animation-fill-mode:forwards]">
+            <p className="text-tech-main-dark/70 animate-fade-in mx-auto mb-8 max-w-xs text-sm opacity-0 [animation-delay:1.1s] [animation-fill-mode:forwards]">
               Please authenticate with your GitHub account to access the restricted database.
             </p>
 
-            <div className="w-full opacity-0 animate-slide-up-fade [animation-delay:1.3s] [animation-fill-mode:forwards]">
+            <div className="animate-slide-up-fade w-full opacity-0 [animation-delay:1.3s] [animation-fill-mode:forwards]">
               <BrutalButton
                 onClick={handleLogin}
                 disabled={isLoading}
                 variant="primary"
-                className="w-full uppercase text-sm tracking-widest h-12 flex items-center justify-center hover:scale-[1.02] transition-transform active:scale-[0.98] duration-300"
+                className="flex h-12 w-full items-center justify-center text-sm tracking-widest uppercase transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98]"
               >
                 {isLoading ? (
                   <span className="flex items-center">
-                    <span className="w-2 h-2 bg-white/50 rounded-full mr-2 animate-ping"></span>
+                    <span className="mr-2 h-2 w-2 animate-ping rounded-full bg-white/50"></span>
                     CONNECTING...
                   </span>
                 ) : (
@@ -140,11 +140,11 @@ export default function LoginPage() {
               </BrutalButton>
             </div>
 
-            <div className="mt-6 text-[10px] font-mono opacity-40 animate-fade-in [animation-delay:1.6s] [animation-fill-mode:forwards]">
+            <div className="animate-fade-in mt-6 font-mono text-[10px] opacity-40 [animation-delay:1.6s] [animation-fill-mode:forwards]">
               <p>PROTECTED BY GTMC_SECURE_GATEWAY v2.0</p>
               <Link
                 href="/"
-                className="hover:text-tech-main-dark decoration-dashed underline underline-offset-4 mt-2 inline-block transition-colors"
+                className="hover:text-tech-main-dark mt-2 inline-block underline decoration-dashed underline-offset-4 transition-colors"
               >
                 &lt; RETURN TO PUBLIC ACCESS
               </Link>

@@ -185,22 +185,22 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
   return (
     <form
       onSubmit={handleSave}
-      className="flex flex-col space-y-6 w-full p-4 sm:p-6 border border-tech-main bg-white/80 backdrop-blur-sm relative group"
+      className="border-tech-main group relative flex w-full flex-col space-y-6 border bg-white/80 p-4 backdrop-blur-sm sm:p-6"
     >
-      <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main/40 -translate-x-[1px] -translate-y-[1px] pointer-events-none"></div>
-      <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-tech-main/40 translate-x-[1px] -translate-y-[1px] pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-tech-main/40 -translate-x-[1px] translate-y-[1px] pointer-events-none"></div>
-      <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main/40 translate-x-[1px] translate-y-[1px] pointer-events-none"></div>
+      <div className="border-tech-main/40 pointer-events-none absolute top-0 left-0 h-2 w-2 -translate-x-[1px] -translate-y-[1px] border-t-2 border-l-2"></div>
+      <div className="border-tech-main/40 pointer-events-none absolute top-0 right-0 h-2 w-2 translate-x-[1px] -translate-y-[1px] border-t-2 border-r-2"></div>
+      <div className="border-tech-main/40 pointer-events-none absolute bottom-0 left-0 h-2 w-2 -translate-x-[1px] translate-y-[1px] border-b-2 border-l-2"></div>
+      <div className="border-tech-main/40 pointer-events-none absolute right-0 bottom-0 h-2 w-2 translate-x-[1px] translate-y-[1px] border-r-2 border-b-2"></div>
 
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
-          <label className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main border-b border-tech-main/30 inline-block pb-1 mb-2">
+          <label className="text-tech-main border-tech-main/30 mb-2 inline-block border-b pb-1 font-mono text-sm tracking-[0.2em] uppercase">
             TITLE_
           </label>
           <BrutalInput
             required
             placeholder="ENTER TITLE..."
-            className={`text-lg py-3 font-mono border-tech-main/40 focus:border-tech-main/60 backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/80"}`}
+            className={`border-tech-main/40 focus:border-tech-main/60 py-3 font-mono text-lg backdrop-blur-sm ${isReadOnly ? "cursor-not-allowed bg-gray-100 opacity-70" : "bg-white/80"}`}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             readOnly={isReadOnly}
@@ -209,12 +209,12 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main border-b border-tech-main/30 inline-block pb-1 mb-2">
+          <label className="text-tech-main border-tech-main/30 mb-2 inline-block border-b pb-1 font-mono text-sm tracking-[0.2em] uppercase">
             TAGS_ (comma separated)
           </label>
           <BrutalInput
             placeholder="e.g. bug, enhancement, UI"
-            className={`text-sm py-2 font-mono border-tech-main/40 focus:border-tech-main/60 backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/80"}`}
+            className={`border-tech-main/40 focus:border-tech-main/60 py-2 font-mono text-sm backdrop-blur-sm ${isReadOnly ? "cursor-not-allowed bg-gray-100 opacity-70" : "bg-white/80"}`}
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             readOnly={isReadOnly}
@@ -223,14 +223,14 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         </div>
       </div>
 
-      <div className="flex flex-col grow min-h-125 border border-tech-main/40 bg-white/80 backdrop-blur-sm relative">
+      <div className="border-tech-main/40 relative flex min-h-125 grow flex-col border bg-white/80 backdrop-blur-sm">
         {/* 工具栏 */}
-        <div className="bg-tech-main text-white/90 p-2 flex flex-wrap gap-1 sm:gap-2 items-center sticky top-0 z-10 font-mono text-xs border-b border-tech-main/40 px-2 sm:px-4">
+        <div className="bg-tech-main border-tech-main/40 sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b p-2 px-2 font-mono text-xs text-white/90 sm:gap-2 sm:px-4">
           <button
             type="button"
             onClick={() => insertSyntax("**", "**")}
             disabled={isReadOnly}
-            className={`h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0 ${isReadOnly ? '' : 'cursor-pointer'}`}
+            className={`hover:bg-tech-accent/20 h-11 min-w-[44px] flex-1 border border-transparent px-3 transition-colors select-none hover:border-white/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${isReadOnly ? "" : "cursor-pointer"}`}
           >
             <b>B</b>
           </button>
@@ -238,7 +238,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="button"
             onClick={() => insertSyntax("*", "*")}
             disabled={isReadOnly}
-            className={`h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0 ${isReadOnly ? '' : 'cursor-pointer'}`}
+            className={`hover:bg-tech-accent/20 h-11 min-w-[44px] flex-1 border border-transparent px-3 transition-colors select-none hover:border-white/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${isReadOnly ? "" : "cursor-pointer"}`}
           >
             <i>I</i>
           </button>
@@ -246,7 +246,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="button"
             onClick={() => insertSyntax("[", "](url)")}
             disabled={isReadOnly}
-            className={`h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0 ${isReadOnly ? '' : 'cursor-pointer'}`}
+            className={`hover:bg-tech-accent/20 h-11 min-w-[44px] flex-1 border border-transparent px-3 transition-colors select-none hover:border-white/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${isReadOnly ? "" : "cursor-pointer"}`}
           >
             Link
           </button>
@@ -254,17 +254,17 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isReadOnly || isUploading}
-            className={`h-11 sm:h-auto sm:py-1.5 px-3 hover:bg-tech-accent/20 transition-colors border border-transparent hover:border-white/20 select-none flex-1 sm:flex-none min-w-[44px] sm:min-w-0 ${isReadOnly || isUploading ? '' : 'cursor-pointer'}`}
+            className={`hover:bg-tech-accent/20 h-11 min-w-[44px] flex-1 border border-transparent px-3 transition-colors select-none hover:border-white/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${isReadOnly || isUploading ? "" : "cursor-pointer"}`}
             aria-busy={isUploading}
           >
             {isCompressing ? "CMP" : isUploading ? "UPL" : "IMG"}
           </button>
-          <div className="hidden sm:block w-px h-4 bg-white/30 mx-1"></div>
+          <div className="mx-1 hidden h-4 w-px bg-white/30 sm:block"></div>
           <button
             type="button"
             onClick={() => insertSyntax("### ")}
             disabled={isReadOnly}
-            className={`hidden sm:block hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none ${isReadOnly ? '' : 'cursor-pointer'}`}
+            className={`hover:bg-tech-accent/20 hidden border border-transparent px-3 py-1.5 transition-colors select-none hover:border-white/20 sm:block ${isReadOnly ? "" : "cursor-pointer"}`}
           >
             H3
           </button>
@@ -272,7 +272,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="button"
             onClick={() => insertSyntax("`", "`")}
             disabled={isReadOnly}
-            className={`hidden sm:block hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none ${isReadOnly ? '' : 'cursor-pointer'}`}
+            className={`hover:bg-tech-accent/20 hidden border border-transparent px-3 py-1.5 transition-colors select-none hover:border-white/20 sm:block ${isReadOnly ? "" : "cursor-pointer"}`}
           >
             Code
           </button>
@@ -280,7 +280,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="button"
             onClick={() => insertSyntax("```\n", "\n```")}
             disabled={isReadOnly}
-            className={`hidden sm:block hover:bg-tech-accent/20 px-3 py-1.5 transition-colors border border-transparent hover:border-white/20 select-none ${isReadOnly ? '' : 'cursor-pointer'}`}
+            className={`hover:bg-tech-accent/20 hidden border border-transparent px-3 py-1.5 transition-colors select-none hover:border-white/20 sm:block ${isReadOnly ? "" : "cursor-pointer"}`}
           >
             Block
           </button>
@@ -297,16 +297,16 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
               }
             }}
           />
-          <span className="hidden sm:flex ml-auto text-tech-accent/60 opacity-60 items-center gap-2 text-xs">
+          <span className="text-tech-accent/60 ml-auto hidden items-center gap-2 text-xs opacity-60 sm:flex">
             MARKDOWN_SUPPORTED_
           </span>
         </div>
 
         {/* 編輯區 */}
-        <div className="relative grow flex flex-col bg-white">
+        <div className="relative flex grow flex-col bg-white">
           <textarea
             ref={textareaRef}
-            className={`w-full grow p-6 font-mono text-sm leading-relaxed text-black placeholder-zinc-500 border-none outline-none resize-none ${isReadOnly ? "bg-gray-50 cursor-not-allowed" : "bg-transparent"}`}
+            className={`w-full grow resize-none border-none p-6 font-mono text-sm leading-relaxed text-black placeholder-zinc-500 outline-none ${isReadOnly ? "cursor-not-allowed bg-gray-50" : "bg-transparent"}`}
             placeholder="ENTER FEATURE DESCRIPTION... (Use Markdown)"
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -324,11 +324,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
 
           {isUploading && (
             <div
-              className="absolute top-4 right-4 bg-tech-main text-tech-accent text-xs font-mono px-3 py-1.5 border border-tech-accent shadow-sm shadow-tech-accent/20 z-20 flex items-center gap-2 backdrop-blur-sm"
+              className="bg-tech-main text-tech-accent border-tech-accent shadow-tech-accent/20 absolute top-4 right-4 z-20 flex items-center gap-2 border px-3 py-1.5 font-mono text-xs shadow-sm backdrop-blur-sm"
               aria-live="polite"
               aria-label="Image upload status"
             >
-              <span className="inline-block w-2 h-2 bg-tech-accent animate-pulse"></span>
+              <span className="bg-tech-accent inline-block h-2 w-2 animate-pulse"></span>
               {isCompressing ? "COMPRESSING_IMAGE..." : "UPLOADING_IMAGE..."}
             </div>
           )}
@@ -336,8 +336,8 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
       </div>
 
       {!isReadOnly && (
-        <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-tech-main/10 relative">
-          <div className="absolute top-0 right-0 w-8 h-px bg-tech-main"></div>
+        <div className="border-tech-main/10 relative mt-6 flex justify-end gap-4 border-t pt-4">
+          <div className="bg-tech-main absolute top-0 right-0 h-px w-8"></div>
 
           <BrutalButton type="button" variant="ghost" onClick={() => router.back()}>
             CANCEL_

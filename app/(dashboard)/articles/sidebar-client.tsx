@@ -142,7 +142,7 @@ export function SidebarClient({ tree, onNavigate }: { tree: TreeNode[]; onNaviga
 
   const renderTree = (items: TreeNode[], level = 0) => {
     return (
-      <ul className="pl-4 border-l border-tech-main/20 my-1">
+      <ul className="border-tech-main/20 my-1 border-l pl-4">
         {items.map((item) => {
           const fileRoute = `/articles/${item.slug}`;
           const decodedPathname = decodeURIComponent(pathname);
@@ -154,13 +154,13 @@ export function SidebarClient({ tree, onNavigate }: { tree: TreeNode[]; onNaviga
           const folderExpanded = item.isFolder ? isFolderExpanded(item.id) : false;
 
           return (
-            <li key={item.id} className="my-1.5 text-[15px] md:text-base font-mono list-none">
+            <li key={item.id} className="my-1.5 list-none font-mono text-[15px] md:text-base">
               {item.isFolder ? (
                 <button
                   onClick={(e) => toggleFolder(item.id, e)}
-                  className="w-full text-left flex items-center text-tech-main/80 font-bold opacity-80 uppercase mt-3 mb-1 hover:text-tech-main transition-colors focus:outline-none cursor-pointer"
+                  className="text-tech-main/80 hover:text-tech-main mt-3 mb-1 flex w-full cursor-pointer items-center text-left font-bold uppercase opacity-80 transition-colors focus:outline-none"
                 >
-                  <span className="w-4 inline-block text-xs text-tech-main/50">
+                  <span className="text-tech-main/50 inline-block w-4 text-xs">
                     {folderExpanded ? "▼" : "▶"}
                   </span>
                   <span>{item.title}</span>
@@ -168,19 +168,19 @@ export function SidebarClient({ tree, onNavigate }: { tree: TreeNode[]; onNaviga
               ) : (
                 <div className="relative">
                   <div
-                    className={`group relative transition-colors flex items-center py-1.5 pl-4 -ml-4 ${isActive ? "text-tech-main font-bold" : "text-slate-700 hover:text-tech-main"}`}
+                    className={`group relative -ml-4 flex items-center py-1.5 pl-4 transition-colors ${isActive ? "text-tech-main font-bold" : "hover:text-tech-main text-slate-700"}`}
                   >
                     {isActive && toc.length > 0 ? (
                       <button
                         onClick={toggleFileExp}
-                        className="absolute left-0 top-1/2 -translate-y-1/2 transition-opacity text-[10px] md:text-xs text-tech-main hover:text-tech-main/80 focus:outline-none z-10 cursor-pointer"
+                        className="text-tech-main hover:text-tech-main/80 absolute top-1/2 left-0 z-10 -translate-y-1/2 cursor-pointer text-[10px] transition-opacity focus:outline-none md:text-xs"
                         title={isFileExpanded ? "收起目录" : "展开目录"}
                       >
                         {isFileExpanded ? "▼" : "▶"}
                       </button>
                     ) : (
                       <span
-                        className={`absolute left-0 top-1/2 -translate-y-1/2 transition-opacity text-xs md:text-sm ${isActive ? "opacity-100 text-tech-main" : "opacity-0 group-hover:opacity-100 text-tech-main"}`}
+                        className={`absolute top-1/2 left-0 -translate-y-1/2 text-xs transition-opacity md:text-sm ${isActive ? "text-tech-main opacity-100" : "text-tech-main opacity-0 group-hover:opacity-100"}`}
                       >
                         &gt;
                       </span>
@@ -195,7 +195,7 @@ export function SidebarClient({ tree, onNavigate }: { tree: TreeNode[]; onNaviga
                           onNavigate?.();
                         }
                       }}
-                      className={`block w-full border-b pb-px pl-1 ${isActive ? "border-tech-main/50 cursor-pointer" : "border-transparent group-hover:border-tech-main/30"}`}
+                      className={`block w-full border-b pb-px pl-1 ${isActive ? "border-tech-main/50 cursor-pointer" : "group-hover:border-tech-main/30 border-transparent"}`}
                     >
                       {item.title}
                     </Link>
@@ -208,11 +208,11 @@ export function SidebarClient({ tree, onNavigate }: { tree: TreeNode[]; onNaviga
                       }`}
                     >
                       <div className="overflow-hidden">
-                        <ul className="pl-4 mt-1 mb-2 space-y-2 border-l border-tech-main/20 ml-1">
+                        <ul className="border-tech-main/20 mt-1 mb-2 ml-1 space-y-2 border-l pl-4">
                           {toc.map((h2) => (
                             <li
                               key={h2.id}
-                              className="text-[13px] md:text-sm text-tech-main/70 hover:text-tech-main transition-colors relative before:content-[''] before:w-2 before:h-px before:bg-tech-main/30 before:absolute before:-left-4 before:top-1/2 before:-translate-y-1/2"
+                              className="text-tech-main/70 hover:text-tech-main before:bg-tech-main/30 relative text-[13px] transition-colors before:absolute before:top-1/2 before:-left-4 before:h-px before:w-2 before:-translate-y-1/2 before:content-[''] md:text-sm"
                             >
                               <Link
                                 href={`#${h2.id}`}
@@ -265,28 +265,28 @@ export function SidebarClient({ tree, onNavigate }: { tree: TreeNode[]; onNaviga
       <div className="mb-4">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="text-[11px] font-mono border border-tech-main/40 px-3 py-1.5 hover:bg-tech-main hover:text-white transition-colors cursor-pointer"
+          className="border-tech-main/40 hover:bg-tech-main cursor-pointer border px-3 py-1.5 font-mono text-[11px] transition-colors hover:text-white"
         >
           + NEW DIR / FILE
         </button>
       </div>
 
       {tree.length === 0 ? (
-        <div className="text-tech-main/40 text-sm font-mono mt-4">SYS.DIR_TREE_EMPTY</div>
+        <div className="text-tech-main/40 mt-4 font-mono text-sm">SYS.DIR_TREE_EMPTY</div>
       ) : (
         <div className="-ml-4">{renderTree(tree)}</div>
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-black border-2 border-tech-main p-6 max-w-md w-full rounded shadow-[8px_8px_0_0_rgba(var(--tech-main),1)]">
-            <h3 className="text-lg font-bold font-mono text-tech-main mb-6 uppercase tracking-widest border-b border-tech-main/20 pb-2">
+        <div className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 duration-300">
+          <div className="border-tech-main w-full max-w-md rounded border-2 bg-white p-6 shadow-[8px_8px_0_0_rgba(var(--tech-main),1)] dark:bg-black">
+            <h3 className="text-tech-main border-tech-main/20 mb-6 border-b pb-2 font-mono text-lg font-bold tracking-widest uppercase">
               CREATE_SYS_OBJECT
             </h3>
 
             <form onSubmit={handleCreate} className="space-y-4 font-mono">
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-tech-main/80 mb-1">
+                <label className="text-tech-main/80 mb-1 block text-[11px] tracking-wider uppercase">
                   Title
                 </label>
                 <input
@@ -294,48 +294,48 @@ export function SidebarClient({ tree, onNavigate }: { tree: TreeNode[]; onNaviga
                   required
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full bg-tech-main/5 border border-tech-main/40 px-3 py-2 outline-none focus:border-tech-main text-tech-main text-sm"
+                  className="bg-tech-main/5 border-tech-main/40 focus:border-tech-main text-tech-main w-full border px-3 py-2 text-sm outline-none"
                   placeholder="e.g. Overview"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-tech-main/80 mb-1">
+                <label className="text-tech-main/80 mb-1 block text-[11px] tracking-wider uppercase">
                   Slug (URL path)
                 </label>
                 <input
                   type="text"
                   value={formData.slug}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                  className="w-full bg-tech-main/5 border border-tech-main/40 px-3 py-2 outline-none focus:border-tech-main text-tech-main text-sm"
+                  className="bg-tech-main/5 border-tech-main/40 focus:border-tech-main text-tech-main w-full border px-3 py-2 text-sm outline-none"
                   placeholder="Leave empty to auto-generate"
                 />
               </div>
 
-              <div className="flex items-center gap-3 py-2 bg-tech-main/5 px-3 border border-tech-main/20">
+              <div className="bg-tech-main/5 border-tech-main/20 flex items-center gap-3 border px-3 py-2">
                 <input
                   type="checkbox"
                   id="isFolder"
                   checked={formData.isFolder}
                   onChange={(e) => setFormData({ ...formData, isFolder: e.target.checked })}
-                  className="accent-tech-main w-4 h-4"
+                  className="accent-tech-main h-4 w-4"
                 />
                 <label
                   htmlFor="isFolder"
-                  className="text-sm text-tech-main/80 cursor-pointer select-none"
+                  className="text-tech-main/80 cursor-pointer text-sm select-none"
                 >
                   Create as Directory (Folder)
                 </label>
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-tech-main/80 mb-1">
+                <label className="text-tech-main/80 mb-1 block text-[11px] tracking-wider uppercase">
                   Parent Directory
                 </label>
                 <select
                   value={formData.parentId}
                   onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
-                  className="w-full bg-tech-main/5 border border-tech-main/40 px-3 py-2 outline-none text-tech-main text-sm"
+                  className="bg-tech-main/5 border-tech-main/40 text-tech-main w-full border px-3 py-2 text-sm outline-none"
                 >
                   <option value="">[ ROOT_DIRECTORY ]</option>
                   {availableFolders.map((f) => (
@@ -346,17 +346,17 @@ export function SidebarClient({ tree, onNavigate }: { tree: TreeNode[]; onNaviga
                 </select>
               </div>
 
-              <div className="flex gap-2 justify-end pt-4 mt-6 border-t border-tech-main/20">
+              <div className="border-tech-main/20 mt-6 flex justify-end gap-2 border-t pt-4">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-tech-main/40 text-[11px] text-tech-main hover:bg-tech-main/10 uppercase tracking-widest transition-colors font-bold cursor-pointer"
+                  className="border-tech-main/40 text-tech-main hover:bg-tech-main/10 cursor-pointer border px-4 py-2 text-[11px] font-bold tracking-widest uppercase transition-colors"
                 >
                   ABORT
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-tech-main text-white font-bold hover:opacity-90 text-[11px] uppercase tracking-widest transition-opacity shadow-[2px_2px_0_0_rgba(var(--tech-main),0.4)] cursor-pointer"
+                  className="bg-tech-main cursor-pointer px-4 py-2 text-[11px] font-bold tracking-widest text-white uppercase shadow-[2px_2px_0_0_rgba(var(--tech-main),0.4)] transition-opacity hover:opacity-90"
                 >
                   EXECUTE
                 </button>

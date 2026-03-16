@@ -36,32 +36,32 @@ export function MobileTreeCard({ isOpen, onClose, children, isFloating }: Mobile
   return createPortal(
     <div className="fixed inset-0 z-[59] md:hidden">
       <div
-        className="absolute inset-0 bg-slate-950/35 backdrop-blur-md animate-fade-in"
+        className="animate-fade-in absolute inset-0 bg-slate-950/35 backdrop-blur-md"
         onClick={onClose}
         data-testid="mobile-tree-card-backdrop"
         aria-hidden="true"
       />
 
       <div
-        className="absolute top-20 right-4 left-4 z-[60] ml-auto flex max-h-[calc(100vh-5rem)] max-w-[24rem] flex-col border border-tech-main/40 bg-white/95 backdrop-blur-md animate-tech-pop-in"
+        className="border-tech-main/40 animate-tech-pop-in absolute top-1/2 left-1/2 z-[60] flex max-h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-[24rem] -translate-x-1/2 -translate-y-1/2 flex-col border bg-white/95 backdrop-blur-md"
         data-testid="mobile-tree-card"
       >
-        <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main/40 -translate-x-[1px] -translate-y-[1px] pointer-events-none" />
-        <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-tech-main/40 translate-x-[1px] -translate-y-[1px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-tech-main/40 -translate-x-[1px] translate-y-[1px] pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main/40 translate-x-[1px] translate-y-[1px] pointer-events-none" />
+        <div className="border-tech-main/40 pointer-events-none absolute top-0 left-0 h-2 w-2 -translate-x-[1px] -translate-y-[1px] border-t-2 border-l-2" />
+        <div className="border-tech-main/40 pointer-events-none absolute top-0 right-0 h-2 w-2 translate-x-[1px] -translate-y-[1px] border-t-2 border-r-2" />
+        <div className="border-tech-main/40 pointer-events-none absolute bottom-0 left-0 h-2 w-2 -translate-x-[1px] translate-y-[1px] border-b-2 border-l-2" />
+        <div className="border-tech-main/40 pointer-events-none absolute right-0 bottom-0 h-2 w-2 translate-x-[1px] translate-y-[1px] border-r-2 border-b-2" />
 
         <div
-          className="flex items-center justify-between border-b border-tech-main/40 px-4 py-3 flex-shrink-0"
+          className="border-tech-main/40 flex shrink-0 items-center justify-between border-b px-4 py-3"
           data-testid="mobile-tree-card-header"
         >
-          <div className="text-xs font-mono uppercase tracking-[0.2em] text-tech-main/60 font-bold flex items-center gap-2">
-            <span className="w-1.5 h-1.5 bg-tech-main/60 animate-pulse" />
+          <div className="text-tech-main/60 flex items-center gap-2 font-mono text-xs font-bold tracking-[0.2em] uppercase">
+            <span className="bg-tech-main/60 h-1.5 w-1.5 animate-pulse" />
             SYS.DIR_TREE
           </div>
           <button
             onClick={onClose}
-            className="font-mono text-xs tracking-[0.15em] text-tech-main hover:bg-tech-main/10 px-3 py-2 transition-colors font-bold uppercase cursor-pointer"
+            className="text-tech-main hover:bg-tech-main/10 cursor-pointer px-3 py-2 font-mono text-xs font-bold tracking-[0.15em] uppercase transition-colors"
             data-testid="mobile-tree-card-close"
             aria-label="Close tree"
           >

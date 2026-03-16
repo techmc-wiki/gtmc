@@ -38,10 +38,10 @@ export function LoadingIndicator({
       aria-hidden={ariaHidden}
     >
       {/* Pulsing square */}
-      <span className="w-2 h-2 bg-current opacity-60 animate-pulse inline-block" />
+      <span className="inline-block h-2 w-2 animate-pulse bg-current opacity-60" />
 
       {/* Uppercase monospace text */}
-      <span className="uppercase tracking-widest">{label}</span>
+      <span className="tracking-widest uppercase">{label}</span>
 
       {/* Screen reader text if provided */}
       {screenReaderText && <span className="sr-only">{screenReaderText}</span>}

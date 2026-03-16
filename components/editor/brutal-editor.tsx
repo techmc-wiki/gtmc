@@ -200,21 +200,21 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
   return (
     <form
       onSubmit={handleSaveDraft}
-      className="flex flex-col space-y-6 w-full max-w-5xl mx-auto p-6 sm:p-8 border border-tech-main/40 bg-white/80 backdrop-blur-sm relative group"
+      className="border-tech-main/40 group relative mx-auto flex w-full max-w-5xl flex-col space-y-6 border bg-white/80 p-6 backdrop-blur-sm sm:p-8"
     >
-      <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main/60 -translate-x-0.5 -translate-y-0.5"></div>
-      <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main/60 translate-x-0.5 translate-y-0.5"></div>
+      <div className="border-tech-main/60 absolute top-0 left-0 h-2 w-2 -translate-x-0.5 -translate-y-0.5 border-t-2 border-l-2"></div>
+      <div className="border-tech-main/60 absolute right-0 bottom-0 h-2 w-2 translate-x-0.5 translate-y-0.5 border-r-2 border-b-2"></div>
 
       {/* 标题区 */}
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
-          <label className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main border-b border-tech-main/30 inline-block pb-1 mb-2">
+          <label className="text-tech-main border-tech-main/30 mb-2 inline-block border-b pb-1 font-mono text-sm tracking-[0.2em] uppercase">
             TITLE_
           </label>
           <BrutalInput
             required
             placeholder="ENTER TITLE..."
-            className={`text-lg py-3 font-mono border-tech-main/40 focus:border-tech-main/60 backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/80"}`}
+            className={`border-tech-main/40 focus:border-tech-main/60 py-3 font-mono text-lg backdrop-blur-sm ${isReadOnly ? "cursor-not-allowed bg-gray-100 opacity-70" : "bg-white/80"}`}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             readOnly={isReadOnly}
@@ -222,12 +222,12 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main border-b border-tech-main/30 inline-block pb-1 mb-2">
+          <label className="text-tech-main border-tech-main/30 mb-2 inline-block border-b pb-1 font-mono text-sm tracking-[0.2em] uppercase">
             FILE_PATH (e.g. Folder/My-Article.md)_
           </label>
           <BrutalInput
             placeholder="e.g. SlimeTech/Molforte/04-新机器.md"
-            className={`text-sm py-2 font-mono border-tech-main/40 focus:border-tech-main/60 backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/80"}`}
+            className={`border-tech-main/40 focus:border-tech-main/60 py-2 font-mono text-sm backdrop-blur-sm ${isReadOnly ? "cursor-not-allowed bg-gray-100 opacity-70" : "bg-white/80"}`}
             value={filePath}
             onChange={(e) => setFilePath(e.target.value)}
             readOnly={isReadOnly}
@@ -236,33 +236,33 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
       </div>
 
       {/* 编辑器主区域 (双栏布局或单栏) */}
-      <div className="flex flex-col space-y-2 grow">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-2 sm:gap-0 mb-2">
-          <label className="text-sm font-mono uppercase tracking-[0.2em] text-tech-main border-b border-tech-main/30 inline-block pb-1">
+      <div className="flex grow flex-col space-y-2">
+        <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-0">
+          <label className="text-tech-main border-tech-main/30 inline-block border-b pb-1 font-mono text-sm tracking-[0.2em] uppercase">
             CONTENT (MARKDOWN)_
           </label>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             {!isReadOnly && (
               <>
-                <div className="flex flex-wrap gap-1 sm:gap-1 sm:border-r sm:border-tech-main/30 sm:pr-2 sm:mr-1">
+                <div className="sm:border-tech-main/30 flex flex-wrap gap-1 sm:mr-1 sm:gap-1 sm:border-r sm:pr-2">
                   <button
                     type="button"
                     onClick={() => insertSyntax("**", "**")}
-                    className="h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-xs sm:text-xs font-bold text-tech-main/70 hover:bg-tech-main hover:text-white transition-colors flex-1 sm:flex-none min-w-[44px] sm:min-w-0 cursor-pointer"
+                    className="text-tech-main/70 hover:bg-tech-main h-11 min-w-[44px] flex-1 cursor-pointer px-3 text-xs font-bold transition-colors hover:text-white sm:h-auto sm:min-w-0 sm:flex-none sm:px-2 sm:py-0 sm:text-xs"
                   >
                     B
                   </button>
                   <button
                     type="button"
                     onClick={() => insertSyntax("*", "*")}
-                    className="h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-xs sm:text-xs italic text-tech-main/70 hover:bg-tech-main hover:text-white transition-colors flex-1 sm:flex-none min-w-[44px] sm:min-w-0 cursor-pointer"
+                    className="text-tech-main/70 hover:bg-tech-main h-11 min-w-[44px] flex-1 cursor-pointer px-3 text-xs italic transition-colors hover:text-white sm:h-auto sm:min-w-0 sm:flex-none sm:px-2 sm:py-0 sm:text-xs"
                   >
                     I
                   </button>
                   <button
                     type="button"
                     onClick={() => insertSyntax("[", "](url)")}
-                    className="h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-xs sm:text-xs text-tech-main/70 hover:bg-tech-main hover:text-white transition-colors flex-1 sm:flex-none min-w-[44px] sm:min-w-0 cursor-pointer"
+                    className="text-tech-main/70 hover:bg-tech-main h-11 min-w-[44px] flex-1 cursor-pointer px-3 text-xs transition-colors hover:text-white sm:h-auto sm:min-w-0 sm:flex-none sm:px-2 sm:py-0 sm:text-xs"
                   >
                     LINK
                   </button>
@@ -270,23 +270,23 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className={`h-11 sm:h-auto sm:py-0 px-3 sm:px-2 text-[10px] sm:text-[10px] font-mono tracking-widest text-tech-main bg-tech-main/10 hover:bg-tech-main hover:text-white transition-colors border border-tech-main/30 flex-1 sm:flex-none min-w-[44px] sm:min-w-0 ${isUploading ? '' : 'cursor-pointer'}`}
+                    className={`text-tech-main bg-tech-main/10 hover:bg-tech-main border-tech-main/30 h-11 min-w-[44px] flex-1 border px-3 font-mono text-[10px] tracking-widest transition-colors hover:text-white sm:h-auto sm:min-w-0 sm:flex-none sm:px-2 sm:py-0 sm:text-[10px] ${isUploading ? "" : "cursor-pointer"}`}
                   >
                     {isCompressing ? "CMP" : isUploading ? "UPL" : "IMG"}
                   </button>
                 </div>
-                <div className="hidden sm:flex items-center gap-1 border-r border-tech-main/30 pr-2 mr-1">
+                <div className="border-tech-main/30 mr-1 hidden items-center gap-1 border-r pr-2 sm:flex">
                   <button
                     type="button"
                     onClick={() => insertSyntax("### ")}
-                    className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs transition-colors cursor-pointer"
+                    className="hover:bg-tech-main text-tech-main/70 cursor-pointer px-2 text-xs transition-colors hover:text-white"
                   >
                     H3
                   </button>
                   <button
                     type="button"
                     onClick={() => insertSyntax("`", "`")}
-                    className="hover:bg-tech-main hover:text-white text-tech-main/70 px-2 text-xs font-mono transition-colors cursor-pointer"
+                    className="hover:bg-tech-main text-tech-main/70 cursor-pointer px-2 font-mono text-xs transition-colors hover:text-white"
                   >
                     &lt;/&gt;
                   </button>
@@ -304,7 +304,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
                 if (fileInputRef.current) fileInputRef.current.value = "";
               }}
             />
-            <span className="text-[10px] font-mono tracking-widest text-tech-main bg-tech-main/5 px-2 py-1 border border-tech-main/30 hidden sm:inline-block">
+            <span className="text-tech-main bg-tech-main/5 border-tech-main/30 hidden border px-2 py-1 font-mono text-[10px] tracking-widest sm:inline-block">
               {isReadOnly ? "READ_ONLY" : "SUPPORT_PASTE/DROP_IMG"}
             </span>
           </div>
@@ -323,7 +323,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
           onDragEnter={(e) => {
             if (!isReadOnly) e.preventDefault();
           }}
-          className={`w-full min-h-125 border border-tech-main/40 p-6 font-mono text-sm leading-relaxed resize-y focus:outline-none focus:border-tech-main/60 text-tech-main-dark transition-colors backdrop-blur-sm ${isReadOnly ? "bg-gray-100 cursor-not-allowed opacity-70" : "bg-white/80"}`}
+          className={`border-tech-main/40 focus:border-tech-main/60 text-tech-main-dark min-h-125 w-full resize-y border p-6 font-mono text-sm leading-relaxed backdrop-blur-sm transition-colors focus:outline-none ${isReadOnly ? "cursor-not-allowed bg-gray-100 opacity-70" : "bg-white/80"}`}
           placeholder="Write your markdown here... Use syntax logic. Drag&Drop or Paste images directly here."
           readOnly={isReadOnly}
         />
@@ -331,12 +331,12 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
 
       {/* 操作区 */}
       {!isReadOnly && (
-        <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-tech-main/40">
+        <div className="border-tech-main/40 flex flex-col gap-4 border-t pt-6 sm:flex-row">
           <BrutalButton
             type="submit"
             disabled={isSaving}
             variant="primary"
-            className="w-full sm:w-1/2 rounded-none"
+            className="w-full rounded-none sm:w-1/2"
           >
             {isSaving ? "SAVING..." : "SAVE DRAFT"}
           </BrutalButton>
@@ -345,7 +345,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
             onClick={handleSubmitReview}
             disabled={!revisionId}
             variant="secondary"
-            className="w-full sm:w-1/2 rounded-none"
+            className="w-full rounded-none sm:w-1/2"
           >
             SUBMIT FOR REVIEW
           </BrutalButton>

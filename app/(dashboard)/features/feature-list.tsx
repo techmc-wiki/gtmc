@@ -5,8 +5,8 @@ import Link from "next/link";
 import { BrutalCard } from "@/components/ui/brutal-card";
 import { RevealSection } from "./reveal-helpers";
 
-export function StatusBadge({ status }: { status: string; }) {
-  let styles = "px-2 py-0.5 text-xs font-mono tracking-wider border flex-shrink-0";
+export function StatusBadge({ status }: { status: string }) {
+  let styles = "px-2 py-0.5 text-xs font-mono tracking-wider border shrink-0";
   let label = status;
 
   switch (status) {
@@ -34,12 +34,12 @@ interface Feature {
   title: string;
   status: "PENDING" | "IN_PROGRESS" | "RESOLVED";
   tags?: string[];
-  author?: { name?: string; };
-  assignee?: { name?: string; };
+  author?: { name?: string };
+  assignee?: { name?: string };
   createdAt: string | Date;
 }
 
-export function FeatureList({ features }: { features: Feature[]; }) {
+export function FeatureList({ features }: { features: Feature[] }) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
@@ -106,50 +106,53 @@ export function FeatureList({ features }: { features: Feature[]; }) {
     return (
       <RevealSection delay={delay}>
         <div className="mb-8">
-          <h2 className="text-lg md:text-xl font-bold tracking-widest uppercase mb-6 border-b border-tech-main/20 pb-2 text-tech-main-dark">
+          <h2 className="border-tech-main/20 text-tech-main-dark mb-6 border-b pb-2 text-lg font-bold tracking-widest uppercase md:text-xl">
             {title} ({groupFeatures.length})
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {groupFeatures.map((feature) => (
               <Link key={feature.id} href={`/features/${feature.id}`} className="block">
-                <BrutalCard className="flex flex-col h-auto sm:h-64 justify-between border border-tech-main/40 bg-white/80 backdrop-blur-sm p-6 relative group hover:border-tech-main/60 transition-colors">
+                <BrutalCard className="border-tech-main/40 group hover:border-tech-main/60 relative flex h-auto flex-col justify-between border bg-white/80 p-6 backdrop-blur-sm transition-colors sm:h-64">
                   {/* Corner brackets */}
-                  <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-tech-main/40 -translate-x-[1px] -translate-y-[1px] opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-tech-main/40 translate-x-[1px] translate-y-[1px] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="border-tech-main/40 absolute top-0 left-0 h-2 w-2 -translate-x-[1px] -translate-y-[1px] border-t-2 border-l-2 opacity-0 transition-opacity group-hover:opacity-100"></div>
+                  <div className="border-tech-main/40 absolute right-0 bottom-0 h-2 w-2 translate-x-[1px] translate-y-[1px] border-r-2 border-b-2 opacity-0 transition-opacity group-hover:opacity-100"></div>
 
-                  <div className="relative z-10 flex flex-col h-full">
-                    <div className="flex justify-between items-start mb-4 gap-2">
+                  <div className="relative z-10 flex h-full flex-col">
+                    <div className="mb-4 flex items-start justify-between gap-2">
                       <StatusBadge status={feature.status} />
                       <div className="flex flex-col items-end gap-1">
-                        <span className="text-xs font-mono text-tech-main/50" suppressHydrationWarning>
+                        <span
+                          className="text-tech-main/50 font-mono text-xs"
+                          suppressHydrationWarning
+                        >
                           {new Date(feature.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
 
-                    <h3 className="text-lg font-bold line-clamp-2 uppercase tracking-tight text-tech-main-dark mt-2 border-l-2 border-tech-main/40 pl-3">
+                    <h3 className="text-tech-main-dark border-tech-main/40 mt-2 line-clamp-2 border-l-2 pl-3 text-lg font-bold tracking-tight uppercase">
                       {feature.title}
                     </h3>
 
                     <div className="mt-4 flex flex-col gap-2">
-                      <p className="text-xs font-mono text-tech-main flex items-center tracking-widest opacity-80">
-                        <span className="inline-block w-1.5 h-1.5 bg-tech-main mr-2"></span>
+                      <p className="text-tech-main flex items-center font-mono text-xs tracking-widest opacity-80">
+                        <span className="bg-tech-main mr-2 inline-block h-1.5 w-1.5"></span>
                         AUTHOR: {feature.author?.name || "UNKNOWN_USER"}
                       </p>
                       {feature.assignee && (
-                        <p className="text-xs font-mono text-blue-600 flex items-center tracking-widest opacity-80">
-                          <span className="inline-block w-1.5 h-1.5 bg-blue-600 mr-2"></span>
+                        <p className="flex items-center font-mono text-xs tracking-widest text-blue-600 opacity-80">
+                          <span className="mr-2 inline-block h-1.5 w-1.5 bg-blue-600"></span>
                           ASSIGNEE: {feature.assignee.name || "UNKNOWN_USER"}
                         </p>
                       )}
                     </div>
 
                     {feature.tags && feature.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-auto pt-4">
+                      <div className="mt-auto flex flex-wrap gap-1 pt-4">
                         {feature.tags.map((tag: string) => (
                           <span
                             key={tag}
-                            className="text-[10px] font-mono uppercase bg-tech-main/5 border border-tech-main/20 text-tech-main/70 px-1.5 py-0.5"
+                            className="bg-tech-main/5 border-tech-main/20 text-tech-main/70 border px-1.5 py-0.5 font-mono text-[10px] uppercase"
                           >
                             {tag}
                           </span>
@@ -170,10 +173,10 @@ export function FeatureList({ features }: { features: Feature[]; }) {
     <div className="space-y-6">
       {/* 过滤器 */}
       <RevealSection delay={0}>
-        <BrutalCard className="p-6 bg-white/80 backdrop-blur-sm border-tech-main/40">
+        <BrutalCard className="border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm">
           <div className="space-y-4">
             <div>
-              <h4 className="text-sm font-mono uppercase tracking-widest text-tech-main mb-3">
+              <h4 className="text-tech-main mb-3 font-mono text-sm tracking-widest uppercase">
                 FILTER_BY_STATUS_
               </h4>
               <div className="flex flex-wrap gap-2">
@@ -181,10 +184,11 @@ export function FeatureList({ features }: { features: Feature[]; }) {
                   <button
                     key={status}
                     onClick={() => setStatusFilter(status)}
-                    className={`text-xs font-mono px-3 py-2 border transition-all min-h-8 flex items-center justify-center cursor-pointer ${statusFilter === status
-                      ? "bg-tech-main text-white border-tech-main"
-                      : "bg-transparent text-tech-main border-tech-main/40 hover:border-tech-main/60"
-                      }`}
+                    className={`flex min-h-8 cursor-pointer items-center justify-center border px-3 py-2 font-mono text-xs transition-all ${
+                      statusFilter === status
+                        ? "bg-tech-main border-tech-main text-white"
+                        : "text-tech-main border-tech-main/40 hover:border-tech-main/60 bg-transparent"
+                    }`}
                   >
                     {status}
                   </button>
@@ -194,7 +198,7 @@ export function FeatureList({ features }: { features: Feature[]; }) {
 
             {allTags.length > 0 && (
               <div>
-                <h4 className="text-sm font-mono uppercase tracking-widest text-tech-main mb-3">
+                <h4 className="text-tech-main mb-3 font-mono text-sm tracking-widest uppercase">
                   FILTER_BY_TAGS_
                 </h4>
                 <div className="flex flex-wrap gap-2">
@@ -202,10 +206,11 @@ export function FeatureList({ features }: { features: Feature[]; }) {
                     <button
                       key={tag}
                       onClick={() => toggleTag(tag)}
-                      className={`text-xs font-mono uppercase px-3 py-2 border transition-all min-h-8 flex items-center justify-center cursor-pointer ${selectedTags.includes(tag)
-                        ? "bg-tech-accent text-white border-tech-accent"
-                        : "bg-tech-accent/5 text-tech-main border-tech-main/40 hover:border-tech-main/60"
-                        }`}
+                      className={`flex min-h-8 cursor-pointer items-center justify-center border px-3 py-2 font-mono text-xs uppercase transition-all ${
+                        selectedTags.includes(tag)
+                          ? "bg-tech-accent border-tech-accent text-white"
+                          : "bg-tech-accent/5 text-tech-main border-tech-main/40 hover:border-tech-main/60"
+                      }`}
                     >
                       {tag}
                     </button>
@@ -220,7 +225,7 @@ export function FeatureList({ features }: { features: Feature[]; }) {
       {/* List grouping display */}
       <div className="mt-8">
         {filteredFeatures.length === 0 ? (
-          <div className="text-center py-16 border border-dashed border-tech-main/40 font-mono text-tech-main/50 bg-white/30">
+          <div className="border-tech-main/40 text-tech-main/50 border border-dashed bg-white/30 py-16 text-center font-mono">
             NO_FEATURES_FOUND_
           </div>
         ) : (

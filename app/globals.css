@@ -213,7 +213,7 @@ body {
 
   /* Shared decorative motifs */
   .corner-bracket {
-    @apply border-2 border-tech-main/40;
+    @apply border-tech-main/40 border-2;
   }
 
   .guide-line {
@@ -221,7 +221,7 @@ body {
   }
 
   .hud-block {
-    @apply font-mono text-[10px] opacity-40 hidden sm:block;
+    @apply hidden font-mono text-[10px] opacity-40 sm:block;
   }
 
   /* Standard motion transitions */

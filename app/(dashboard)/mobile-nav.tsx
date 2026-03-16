@@ -25,40 +25,40 @@ export function MobileNav({ navLinks }: MobileNavProps) {
     <>
       <button
         onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-        className="md:hidden flex flex-col gap-1.5 p-2 min-h-[44px] min-w-[44px] items-center justify-center hover:bg-tech-main/10 transition-colors cursor-pointer"
+        className="hover:bg-tech-main/10 flex min-h-[44px] min-w-[44px] cursor-pointer flex-col items-center justify-center gap-1.5 p-2 transition-colors md:hidden"
         aria-label="Toggle navigation menu"
         aria-expanded={isDrawerOpen}
       >
         <span
-          className={`w-5 h-0.5 bg-tech-main transition-all ${isDrawerOpen ? "rotate-45 translate-y-2" : ""}`}
+          className={`bg-tech-main h-0.5 w-5 transition-all ${isDrawerOpen ? "translate-y-2 rotate-45" : ""}`}
         ></span>
         <span
-          className={`w-5 h-0.5 bg-tech-main transition-all ${isDrawerOpen ? "opacity-0" : ""}`}
+          className={`bg-tech-main h-0.5 w-5 transition-all ${isDrawerOpen ? "opacity-0" : ""}`}
         ></span>
         <span
-          className={`w-5 h-0.5 bg-tech-main transition-all ${isDrawerOpen ? "-rotate-45 -translate-y-2" : ""}`}
+          className={`bg-tech-main h-0.5 w-5 transition-all ${isDrawerOpen ? "-translate-y-2 -rotate-45" : ""}`}
         ></span>
       </button>
 
       {isDrawerOpen && (
         <div
-          className="fixed inset-0 bg-black/20 z-40 md:hidden"
+          className="fixed inset-0 z-40 bg-black/20 md:hidden"
           onClick={() => setIsDrawerOpen(false)}
           aria-hidden="true"
         />
       )}
 
       <div
-        className={`fixed top-16 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-tech-main/40 z-40 md:hidden transition-all duration-300 overflow-hidden ${
+        className={`border-tech-main/40 fixed top-16 right-0 left-0 z-40 overflow-hidden border-b bg-white/95 backdrop-blur-md transition-all duration-300 md:hidden ${
           isDrawerOpen ? "max-h-screen" : "max-h-0"
         }`}
       >
-        <div className="p-4 sm:p-6 space-y-2">
+        <div className="space-y-2 p-4 sm:p-6">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="block font-mono text-xs tracking-[0.15em] border border-tech-main/40 bg-white/60 hover:bg-tech-main hover:text-white text-tech-main-dark transition-colors p-3 min-h-[44px] flex items-center"
+              className="border-tech-main/40 hover:bg-tech-main text-tech-main-dark block flex min-h-[44px] items-center border bg-white/60 p-3 font-mono text-xs tracking-[0.15em] transition-colors hover:text-white"
             >
               {link.label}
             </Link>

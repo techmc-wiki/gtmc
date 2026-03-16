@@ -26,30 +26,30 @@ export default async function EditDraftPage({ params }: { params: Promise<{ id: 
   // but let's let them view it in the editor for now.
 
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-tech-main/30 pb-4 relative space-y-4 md:space-y-0">
-        <div className="absolute -bottom-[5px] left-0 w-2 h-2 border border-tech-main/50 bg-tech-main/20"></div>
+    <div className="mx-auto max-w-6xl space-y-8 p-4 md:p-8">
+      <div className="border-tech-main/30 relative flex flex-col items-start justify-between space-y-4 border-b pb-4 md:flex-row md:items-end md:space-y-0">
+        <div className="border-tech-main/50 bg-tech-main/20 absolute -bottom-[5px] left-0 h-2 w-2 border"></div>
         <div className="flex items-center space-x-4 md:space-x-6">
           <Link href="/draft">
             <BrutalButton variant="ghost" size="sm">
               {"<"} BACK
             </BrutalButton>
           </Link>
-          <h1 className="text-xl md:text-3xl font-mono uppercase tracking-[0.2em] text-tech-main">
+          <h1 className="text-tech-main font-mono text-xl tracking-[0.2em] uppercase md:text-3xl">
             EDIT_SUBMISSION
           </h1>
         </div>
-        <div className="text-xs font-mono border border-tech-main/50 bg-tech-main/10 text-tech-main px-3 py-1 uppercase tracking-widest">
+        <div className="border-tech-main/50 bg-tech-main/10 text-tech-main border px-3 py-1 font-mono text-xs tracking-widest uppercase">
           STATUS: [{draft.status}]
         </div>
       </div>
 
-      <div className="bg-tech-main/5 border border-tech-main/30 p-6 mx-auto relative backdrop-blur-sm">
-        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-tech-main/50"></div>
-        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-tech-main/50"></div>
+      <div className="bg-tech-main/5 border-tech-main/30 relative mx-auto border p-6 backdrop-blur-sm">
+        <div className="border-tech-main/50 absolute top-0 left-0 h-2 w-2 border-t border-l"></div>
+        <div className="border-tech-main/50 absolute right-0 bottom-0 h-2 w-2 border-r border-b"></div>
 
         {draft.status === "PENDING" || draft.status === "APPROVED" ? (
-          <div className="mb-4 bg-tech-main/20 border border-tech-main/50 p-4 font-mono text-sm text-tech-main-dark">
+          <div className="bg-tech-main/20 border-tech-main/50 text-tech-main-dark mb-4 border p-4 font-mono text-sm">
             {`// CAUTION: This revision is currently in [${draft.status}] state. Submitting changes will update it as a DRAFT.`}
           </div>
         ) : null}

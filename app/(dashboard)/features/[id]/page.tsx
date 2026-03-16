@@ -20,7 +20,7 @@ import { RevealSection } from "@/app/(dashboard)/features/reveal-helpers";
 
 export const revalidate = 60;
 
-export default async function FeatureDetailPage({ params }: { params: Promise<{ id: string; }>; }) {
+export default async function FeatureDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const issueNumber = Number.parseInt(id, 10);
   if (Number.isNaN(issueNumber) || issueNumber <= 0) {
@@ -78,10 +78,10 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
     },
     assignee: parsedIssue.metadata?.assigneeId
       ? {
-        name: parsedIssue.metadata?.assigneeName ?? null,
-        email: parsedIssue.metadata?.assigneeEmail ?? null,
-        image: null,
-      }
+          name: parsedIssue.metadata?.assigneeName ?? null,
+          email: parsedIssue.metadata?.assigneeEmail ?? null,
+          image: null,
+        }
       : null,
     comments,
   };
@@ -93,11 +93,11 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
   const canEdit = isAuthor || isAdmin;
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 md:p-8 space-y-6 max-w-4xl">
+    <div className="container mx-auto max-w-4xl space-y-6 p-4 sm:p-6 md:p-8">
       <RevealSection delay={0}>
         <div className="flex flex-col gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tighter uppercase border-b-2 border-tech-main pb-2 inline-block">
+            <h1 className="border-tech-main inline-block border-b-2 pb-2 text-xl font-bold tracking-tighter uppercase sm:text-2xl md:text-3xl">
               {canEdit ? "Edit Feature" : "View Feature"}
             </h1>
           </div>
@@ -116,16 +116,16 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
       </RevealSection>
 
       {isClosed && (
-        <div className="relative border border-red-500/50 bg-red-500/5 p-4 sm:p-6 font-mono text-xs sm:text-sm text-red-600 uppercase tracking-wider backdrop-blur-sm">
-          <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-red-500/50 -translate-x-[1px] -translate-y-[1px] pointer-events-none"></div>
-          <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-red-500/50 translate-x-[1px] -translate-y-[1px] pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-red-500/50 -translate-x-[1px] translate-y-[1px] pointer-events-none"></div>
-          <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-red-500/50 translate-x-[1px] translate-y-[1px] pointer-events-none"></div>
+        <div className="relative border border-red-500/50 bg-red-500/5 p-4 font-mono text-xs tracking-wider text-red-600 uppercase backdrop-blur-sm sm:p-6 sm:text-sm">
+          <div className="pointer-events-none absolute top-0 left-0 h-2 w-2 -translate-x-[1px] -translate-y-[1px] border-t-2 border-l-2 border-red-500/50"></div>
+          <div className="pointer-events-none absolute top-0 right-0 h-2 w-2 translate-x-[1px] -translate-y-[1px] border-t-2 border-r-2 border-red-500/50"></div>
+          <div className="pointer-events-none absolute bottom-0 left-0 h-2 w-2 -translate-x-[1px] translate-y-[1px] border-b-2 border-l-2 border-red-500/50"></div>
+          <div className="pointer-events-none absolute right-0 bottom-0 h-2 w-2 translate-x-[1px] translate-y-[1px] border-r-2 border-b-2 border-red-500/50"></div>
 
-          <span className="font-bold flex items-center gap-2">
+          <span className="flex items-center gap-2 font-bold">
             <span className="text-red-500">⚠</span> FEATURE DELETED (READ-ONLY)
           </span>
-          <p className="mt-2 text-xs normal-case tracking-normal opacity-80 border-t border-dashed border-red-500/30 pt-2">
+          <p className="mt-2 border-t border-dashed border-red-500/30 pt-2 text-xs tracking-normal normal-case opacity-80">
             This feature has been deleted. The content is preserved for historical reference. No
             changes can be made.
           </p>
@@ -135,36 +135,36 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
       <RevealSection delay={100}>
         <BrutalCard className="mb-8 p-4 sm:p-6">
           <div className="flex flex-col gap-2 font-mono text-xs sm:text-sm">
-            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <span className="font-bold text-zinc-500 sm:w-24">STATUS:</span>
               <StatusBadge status={feature.status} />
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <span className="font-bold text-zinc-500 sm:w-24">AUTHOR:</span>
               <span className="break-words">
                 {feature.author.name || feature.author.email || "Unknown"}
               </span>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <span className="font-bold text-zinc-500 sm:w-24">ASSIGNEE:</span>
               <span className="break-words">
                 {feature.assignee ? feature.assignee.name || feature.assignee.email : "Unassigned"}
               </span>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <span className="font-bold text-zinc-500 sm:w-24">CREATED:</span>
               <span suppressHydrationWarning>{new Date(feature.createdAt).toLocaleString()}</span>
             </div>
             {feature.issueNumber && feature.htmlUrl && (
-              <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <span className="font-bold text-zinc-500 sm:w-24">GITHUB:</span>
-                <div className="flex gap-1 items-center flex-wrap">
+                <div className="flex flex-wrap items-center gap-1">
                   Linked to
                   <a
                     href={feature.htmlUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-tech-main border-b border-tech-main/50 font-mono hover:text-white hover:bg-tech-main/80 transition-colors break-words"
+                    className="text-tech-main border-tech-main/50 hover:bg-tech-main/80 border-b font-mono break-words transition-colors hover:text-white"
                   >
                     Issue #{feature.issueNumber}
                   </a>
@@ -199,14 +199,14 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
             />
           ) : (
             <BrutalCard>
-              <h2 className="text-sm sm:text-base md:text-lg font-bold mb-4">{feature.title}</h2>
+              <h2 className="mb-4 text-sm font-bold sm:text-base md:text-lg">{feature.title}</h2>
 
               {feature.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-6">
+                <div className="mb-6 flex flex-wrap gap-2">
                   {feature.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="text-xs font-mono uppercase border border-tech-main text-tech-main bg-tech-accent/10 px-2 py-1"
+                      className="border-tech-main text-tech-main bg-tech-accent/10 border px-2 py-1 font-mono text-xs uppercase"
                     >
                       {tag}
                     </span>
@@ -214,9 +214,9 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
                 </div>
               )}
 
-              <div className="prose prose-zinc max-w-none mt-8 border-t border-dashed border-tech-main/30 pt-6">
+              <div className="prose prose-zinc border-tech-main/30 mt-8 max-w-none border-t border-dashed pt-6">
                 {/* Very simple non-editable view, actual MD rendering could be added here */}
-                <div className="whitespace-pre-wrap font-mono text-sm">{feature.content}</div>
+                <div className="font-mono text-sm whitespace-pre-wrap">{feature.content}</div>
               </div>
             </BrutalCard>
           )}

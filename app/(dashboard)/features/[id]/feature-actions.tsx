@@ -93,7 +93,7 @@ export function FeatureActions({ featureId, status, isAssignee, isAdmin, hasAssi
                 disabled={isPending}
                 variant="primary"
                 size="sm"
-                className="bg-green-600 hover:bg-green-700 text-white border-green-800"
+                className="border-green-800 bg-green-600 text-white hover:bg-green-700"
                 aria-busy={pendingAction === "resolve"}
               >
                 {pendingAction === "resolve" ? (

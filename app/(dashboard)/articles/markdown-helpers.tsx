@@ -139,7 +139,7 @@ export function getMarkdownComponents(rawPath: string) {
       </h3>
     ),
     p: ({ ...props }: MarkdownComponentProps) => (
-      <p className="mb-6 font-mono text-base leading-relaxed text-slate-800" {...props} />
+      <p className="font-mono text-base leading-relaxed mb-4 text-slate-800" {...props} />
     ),
     a: ({ href: initialHref, ...props }: MarkdownComponentProps) => {
       let href = (initialHref as string) || "";
@@ -166,7 +166,7 @@ export function getMarkdownComponents(rawPath: string) {
     },
     ul: ({ ...props }: MarkdownComponentProps) => (
       <ul
-        className="border-tech-main/30 mb-6 list-none space-y-2 border-l pl-6 font-mono text-slate-800"
+        className="border-tech-main/30 mb-6 list-none space-y-2 border-l-[1.5] pl-8 font-mono text-slate-800 text-[0.9em]"
         {...props}
       />
     ),
@@ -175,13 +175,13 @@ export function getMarkdownComponents(rawPath: string) {
     ),
     li: ({ ...props }: MarkdownComponentProps) => (
       <li
-        className="before:text-tech-main/50 relative text-slate-800 before:absolute before:-left-6 before:content-['>']"
+        className="before:text-tech-main/50 relative text-slate-800 before:absolute before:-left-4 before:content-['>']"
         {...props}
       />
     ),
     blockquote: ({ ...props }: MarkdownComponentProps) => (
       <blockquote
-        className="border-tech-main bg-tech-main/5 mb-6 border-l-2 p-4 font-mono text-slate-700 italic"
+        className="border-tech-main bg-tech-main/5 mb-6 border-l-2 p-4 pb-[0.01] font-mono text-slate-700 italic"
         {...props}
       />
     ),
@@ -213,7 +213,7 @@ export function getMarkdownComponents(rawPath: string) {
             <span>{match[1]}</span>
             <span className="opacity-50">{"//"} EXECUTABLE_BLOCK</span>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-scroll px-4 sm:px-6">
             <div className="px-6 sm:px-8">
               <SyntaxHighlighter
                 style={vscDarkPlus as Record<string, Record<string, string>>}
@@ -233,7 +233,7 @@ export function getMarkdownComponents(rawPath: string) {
         </div>
       ) : (
         <code
-          className="bg-tech-main/10 text-tech-main border-tech-main/30 rounded-none border px-1 py-0.5 font-mono text-[13px]"
+          className="bg-tech-main/10 text-tech-main border-tech-main/30 rounded-none border px-1 py-[0.05rem] mx-1 font-mono text-[0.8em]"
           {...props}
         >
           {children}

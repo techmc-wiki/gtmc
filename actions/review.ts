@@ -1,11 +1,11 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { getOctokit } from "@/lib/github-pr";
+import { getOctokit, ARTICLES_REPO_OWNER, ARTICLES_REPO_NAME } from "@/lib/github-pr";
 import { revalidatePath } from "next/cache";
 
-const owner = process.env.GITHUB_REPO_OWNER || "gtmc-dev";
-const repo = process.env.GITHUB_REPO_NAME || "Articles";
+const owner = ARTICLES_REPO_OWNER;
+const repo = ARTICLES_REPO_NAME;
 
 export async function mergePRAction(prNumber: number) {
   const session = await auth();

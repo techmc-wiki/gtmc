@@ -31,8 +31,8 @@ export async function saveDraftAction(formData: FormData) {
     const existing = await prisma.revision.findUnique({
       where: { id: revisionId },
     });
-    if (existing && (existing.status === "PENDING" || existing.status === "APPROVED")) {
-      throw new Error("Cannot edit a draft that is pending or approved");
+    if (existing && existing.status === "SUBMITTED") {
+      throw new Error("Cannot edit a draft that has already been submitted");
     }
 
     // Update existing draft
@@ -146,8 +146,8 @@ export async function deleteDraftAction(revisionId: string) {
     throw new Error("Unauthorized to delete this draft");
   }
 
-  if (existing.status === "PENDING" || existing.status === "APPROVED") {
-    throw new Error("Cannot delete a pending or approved draft");
+  if (existing.status === "SUBMITTED") {
+    throw new Error("Cannot delete a submitted draft");
   }
 
   await prisma.revision.delete({

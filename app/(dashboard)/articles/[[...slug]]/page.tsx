@@ -10,6 +10,7 @@ import {
   getMarkdownComponents,
   getPluginsForContent,
 } from "../markdown-helpers";
+import { getRepoFileContent } from "@/lib/github-pr";
 
 interface ArticlePageProps {
   params: Promise<{
@@ -88,6 +89,20 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       } else {
         notFound();
       }
+    }
+
+    // Fallback: fetch from GitHub when not found locally
+    if (!content) {
+      const pathsToTry = [rawPath, rawPath + ".md"];
+      for (const tryPath of pathsToTry) {
+        const githubContent = await getRepoFileContent(tryPath);
+        if (githubContent) {
+          content = githubContent;
+          editPath = tryPath.replace(/\.md$/, "");
+          break;
+        }
+      }
+      if (!content) notFound();
     }
   }
 

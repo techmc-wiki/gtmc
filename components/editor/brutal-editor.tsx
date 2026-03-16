@@ -31,7 +31,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const isReadOnly = initialData?.status === "PENDING" || initialData?.status === "APPROVED";
+  const isReadOnly = initialData?.status === "SUBMITTED";
 
   const insertTextAtCursor = (text: string) => {
     if (!textareaRef.current) return;

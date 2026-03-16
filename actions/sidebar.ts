@@ -2,8 +2,12 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import fs from "fs";
-import path from "path";
+import { unstable_cache } from "next/cache";
+import {
+  getRepoContentTree,
+  getRepoTranslations,
+  type RepoTreeNode,
+} from "@/lib/github-pr";
 
 interface TreeNode {
   id: string;
@@ -14,62 +18,28 @@ interface TreeNode {
   children: TreeNode[];
 }
 
-/**
- * Helper to recursively read local assets
- */
-function getLocalFiles(dir: string, basePath = ""): TreeNode[] {
-  const results: TreeNode[] = [];
-  try {
-    const list = fs.readdirSync(dir);
-    for (const item of list) {
-      if (
-        item.startsWith(".") ||
-        item === "node_modules" ||
-        item.toLowerCase() === "readme.md" ||
-        ["img", "oldimg", "image", "images", "source", "asset"].includes(item.toLowerCase())
-      ) {
-        continue;
-      }
-      const fullPath = path.join(dir, item);
-      const stat = fs.statSync(fullPath);
-      const slug = basePath ? `${basePath}/${item}` : item;
+const getCachedRepoTree = unstable_cache(
+  async () => {
+    return getRepoContentTree();
+  },
+  ["github-repo-tree"],
+  { revalidate: 300 }
+);
 
-      if (stat.isDirectory()) {
-        results.push({
-          id: `local-${slug}`,
-          title: item,
-          slug: slug,
-          isFolder: true,
-          parentId: basePath ? `local-${basePath}` : null,
-          children: getLocalFiles(fullPath, slug),
-        });
-      } else if (item.endsWith(".md")) {
-        const titleName = item.replace(/\.md$/, "");
-        const fileSlug = basePath ? `${basePath}/${titleName}` : titleName;
-        results.push({
-          id: `local-${fileSlug}`,
-          title: titleName,
-          slug: fileSlug,
-          isFolder: false,
-          parentId: basePath ? `local-${basePath}` : null,
-          children: [],
-        });
-      }
-    }
-  } catch (e) {
-    console.error("Error reading local files", e);
-  }
-  return results.sort((a, b) => {
-    if (a.isFolder === b.isFolder) return a.title.localeCompare(b.title);
-    return a.isFolder ? -1 : 1;
-  });
-}
+const getCachedTranslations = unstable_cache(
+  async () => {
+    return getRepoTranslations();
+  },
+  ["github-sidebar-translations"],
+  { revalidate: 3600 }
+);
 
 /**
  * 获取树状结构的目录树 (Sidebar)
+ * Tree is built from the GitHub repository, merged with DB articles.
  */
 export async function getSidebarTree(): Promise<TreeNode[]> {
-  // 1. Get database entries
+  // 1. Get DB article entries (always fresh)
   const allItems = await prisma.article.findMany({
     select: {
       id: true,
@@ -82,9 +52,8 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
     orderBy: [{ isFolder: "desc" }, { title: "asc" }],
   });
 
-  // Build DB tree
   const itemMap = new Map<string, TreeNode>();
-  const rootItems: TreeNode[] = [];
+  const dbRootItems: TreeNode[] = [];
 
   allItems.forEach((item) => {
     itemMap.set(item.id, { ...item, children: [] });
@@ -93,47 +62,41 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
   allItems.forEach((item) => {
     if (item.parentId) {
       const parent = itemMap.get(item.parentId);
-      if (parent) {
-        const child = itemMap.get(item.id);
-        if (child) {
-          parent.children.push(child);
-        }
-      } else {
-        const child = itemMap.get(item.id);
-        if (child) {
-          rootItems.push(child);
-        }
+      const child = itemMap.get(item.id);
+      if (parent && child) {
+        parent.children.push(child);
+      } else if (child) {
+        dbRootItems.push(child);
       }
     } else {
       const child = itemMap.get(item.id);
-      if (child) {
-        rootItems.push(child);
-      }
+      if (child) dbRootItems.push(child);
     }
   });
 
-  // 2. Get local filesystem entries
-  const assetsPath = path.join(process.cwd(), "assets");
-  const localTree = getLocalFiles(assetsPath);
-
-  // Read translations configuration
-  let translations: Record<string, string> = {};
+  // 2. Get GitHub repo tree (cached)
+  let githubTree: RepoTreeNode[] = [];
   try {
-    const transPath = path.join(process.cwd(), "assets", "sidebar-translations.json");
-    if (fs.existsSync(transPath)) {
-      const fileContent = fs.readFileSync(transPath, "utf-8");
-      // Remove UTF-8 BOM if present
-      translations = JSON.parse(fileContent.replace(/^\uFEFF/, ""));
-    }
+    githubTree = await getCachedRepoTree();
   } catch (e) {
-    console.error("加载侧边栏翻译配置失败", e);
+    console.error("Failed to fetch GitHub repo tree:", e);
   }
 
-  // 3. Merge them based on same path/slug hierarchy
-  // For simplicity we just return them side by side, local first, then DB
-  const mergedTree = [...localTree, ...rootItems];
+  // 3. Get translations (cached)
+  let translations: Record<string, string> = {};
+  try {
+    translations = await getCachedTranslations();
+  } catch (e) {
+    console.error("Failed to fetch sidebar translations:", e);
+  }
 
-  // 4. Translate top-level folders/items
+  // 4. Merge: GitHub tree first, then DB articles
+  const mergedTree: TreeNode[] = [
+    ...(githubTree as TreeNode[]),
+    ...dbRootItems,
+  ];
+
+  // 5. Apply translations to top-level titles
   mergedTree.forEach((node) => {
     if (translations[node.title]) {
       node.title = translations[node.title];
@@ -144,7 +107,7 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
 }
 
 /**
- * 新建文件或文件夹
+ * 新建文件或文件夹（DB 侧边栏条目）
  */
 export async function createDocument({
   title,
@@ -162,10 +125,7 @@ export async function createDocument({
     throw new Error("未授权，请先登录");
   }
 
-  // Check if slug exists
-  const existing = await prisma.article.findUnique({
-    where: { slug },
-  });
+  const existing = await prisma.article.findUnique({ where: { slug } });
   if (existing) {
     throw new Error("该路径 (Slug) 已存在");
   }

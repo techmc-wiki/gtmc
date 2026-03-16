@@ -10,12 +10,12 @@ import "katex/dist/katex.min.css";
 import Link from "next/link";
 import { BrutalButton } from "@/components/ui/brutal-button";
 import { getMarkdownComponents } from "@/app/(dashboard)/articles/markdown-helpers";
-import { getOctokit } from "@/lib/github-pr";
+import { getOctokit, ARTICLES_REPO_OWNER, ARTICLES_REPO_NAME } from "@/lib/github-pr";
 import { mergePRAction, closePRAction } from "@/actions/review";
 import ConflictResolver from "./components/conflict-resolver";
 
-const owner = process.env.GITHUB_REPO_OWNER || "gtmc-dev";
-const repo = process.env.GITHUB_REPO_NAME || "Articles";
+const owner = ARTICLES_REPO_OWNER;
+const repo = ARTICLES_REPO_NAME;
 
 export default async function ReviewDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();

@@ -48,9 +48,9 @@ export default async function EditDraftPage({ params }: { params: Promise<{ id: 
         <div className="border-tech-main/50 absolute top-0 left-0 h-2 w-2 border-t border-l"></div>
         <div className="border-tech-main/50 absolute right-0 bottom-0 h-2 w-2 border-r border-b"></div>
 
-        {draft.status === "PENDING" || draft.status === "APPROVED" ? (
+        {draft.status === "SUBMITTED" ? (
           <div className="bg-tech-main/20 border-tech-main/50 text-tech-main-dark mb-4 border p-4 font-mono text-sm">
-            {`// CAUTION: This revision is currently in [${draft.status}] state. Submitting changes will update it as a DRAFT.`}
+            {`// CAUTION: This revision is currently in [SUBMITTED] state. A PR has been opened on GitHub. Edits made here will not affect the open PR.`}
           </div>
         ) : null}
 

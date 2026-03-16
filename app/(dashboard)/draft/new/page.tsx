@@ -1,8 +1,7 @@
 import { BrutalEditor } from "@/components/editor/brutal-editor";
 import Link from "next/link";
 import { BrutalButton } from "@/components/ui/brutal-button";
-import fs from "fs";
-import path from "path";
+import { getRepoFileContent } from "@/lib/github-pr";
 
 export default async function NewDraftPage({
   searchParams,
@@ -17,12 +16,21 @@ export default async function NewDraftPage({
 
   if (filePath) {
     initialTitle = filePath;
-    try {
-      const fullPath = path.join(process.cwd(), "assets", filePath);
-      if (fullPath.startsWith(path.join(process.cwd(), "assets"))) {
-        initialContent = fs.readFileSync(fullPath, "utf-8");
+    // Read initial content from Articles repo instead of local assets filesystem.
+    const normalizedPath = filePath.replace(/^\/+/, "");
+    const candidates = normalizedPath.endsWith(".md")
+      ? [normalizedPath]
+      : [normalizedPath, `${normalizedPath}.md`];
+
+    for (const candidate of candidates) {
+      const content = await getRepoFileContent(candidate);
+      if (content !== null) {
+        initialContent = content;
+        break;
       }
-    } catch {
+    }
+
+    if (!initialContent) {
       initialContent = `Failed to load file at ${filePath}.`;
     }
   }

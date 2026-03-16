@@ -205,6 +205,23 @@ export async function getRepoFileContent(filePath: string): Promise<string | nul
   }
 }
 
+export async function getRepoFileBuffer(filePath: string): Promise<Buffer | null> {
+  const octokit = getOctokit(process.env.GITHUB_TOKEN)
+  try {
+    const { data } = await octokit.repos.getContent({
+      owner: ARTICLES_REPO_OWNER,
+      repo: ARTICLES_REPO_NAME,
+      path: filePath,
+    })
+    if (!Array.isArray(data) && data.type === "file") {
+      return Buffer.from(data.content, "base64")
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
 export async function getRepoTranslations(): Promise<Record<string, string>> {
   const content = await getRepoFileContent("sidebar-translations.json")
   if (content) {

@@ -1,6 +1,4 @@
 ﻿import { prisma } from "@/lib/prisma";
-import fs from "fs";
-import path from "path";
 import ReactMarkdown from "react-markdown";
 import "katex/dist/katex.min.css";
 import { notFound } from "next/navigation";
@@ -21,7 +19,7 @@ interface ArticlePageProps {
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
 
-  const filePathArray = slug || ["README.md"];
+  const filePathArray = slug || ["Preface.md"];
 
   let rawPath = filePathArray.map(decodeURIComponent).join("/");
 
@@ -46,63 +44,27 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     }
     editPath = `db:${dbArticle.id}`;
   } else {
-    let fullPath = path.join(process.cwd(), "assets", rawPath);
+    const normalizedPath = rawPath.replace(/^\/+/, "");
+    const pathsToTry = normalizedPath.endsWith(".md")
+      ? [normalizedPath, normalizedPath.replace(/\.md$/, ""), `${normalizedPath.replace(/\.md$/, "")}/Preface.md`]
+      : [normalizedPath, `${normalizedPath}.md`, `${normalizedPath}/Preface.md`];
 
-    if (!fs.existsSync(fullPath)) {
-      if (fs.existsSync(fullPath + ".md")) {
-        fullPath += ".md";
-      } else {
-        try {
-          const stat = fs.statSync(fullPath);
-          if (stat.isDirectory()) {
-            const readmePath = path.join(fullPath, "README.md");
-            if (fs.existsSync(readmePath)) {
-              fullPath = readmePath;
-              rawPath = path.join(rawPath, "README.md");
-            }
-          }
-        } catch {}
+    for (const tryPath of pathsToTry) {
+      const githubContent = await getRepoFileContent(tryPath);
+      if (githubContent !== null) {
+        content = githubContent;
+        rawPath = tryPath;
+        editPath = tryPath.replace(/\.md$/, "");
+        break;
       }
     }
 
-    try {
-      const stat = fs.statSync(fullPath);
-      if (!stat.isFile()) {
-        if (stat.isDirectory()) {
-          const readmePath = path.join(fullPath, "README.md");
-          if (fs.existsSync(readmePath)) {
-            content = fs.readFileSync(readmePath, "utf-8");
-          } else {
-            notFound();
-          }
-        } else {
-          notFound();
-        }
-      } else {
-        content = fs.readFileSync(fullPath, "utf-8");
-      }
-      // ONLY re-assign editPath on success!
-      editPath = path.relative(path.join(process.cwd(), "assets"), fullPath).replace(/\\/g, "/");
-    } catch {
+    if (!content) {
       if (rawPath.includes("404")) {
         content = "# 404 Not Found\n\nThe requested article is not available yet.";
       } else {
         notFound();
       }
-    }
-
-    // Fallback: fetch from GitHub when not found locally
-    if (!content) {
-      const pathsToTry = [rawPath, rawPath + ".md"];
-      for (const tryPath of pathsToTry) {
-        const githubContent = await getRepoFileContent(tryPath);
-        if (githubContent) {
-          content = githubContent;
-          editPath = tryPath.replace(/\.md$/, "");
-          break;
-        }
-      }
-      if (!content) notFound();
     }
   }
 

@@ -1,7 +1,11 @@
 {
-  "printWidth": 100,
-  "semi": true,
+  "$schema": "https://json.schemastore.org/prettierrc",
+  "bracketSameLine": true,
+  "plugins": [
+    "prettier-plugin-tailwindcss"
+  ],
+  "printWidth": 70,
+  "semi": false,
   "singleQuote": false,
-  "trailingComma": "all",
-  "plugins": ["prettier-plugin-tailwindcss"]
+  "trailingComma": "all"
 }

@@ -1,4 +1,4 @@
-import imageCompression from "browser-image-compression";
+// import imageCompression from "browser-image-compression";
 
 // Vercel serverless function hard payload limit (4.5 MB)
 export const VERCEL_PAYLOAD_LIMIT_BYTES = 4.5 * 1024 * 1024;
@@ -19,6 +19,8 @@ export interface CompressionResult {
 }
 
 export async function compressImageForUpload(file: File): Promise<CompressionResult> {
+  const imageCompression = (await import("browser-image-compression")).default;
+
   // GIF bypass — compressing GIFs destroys animation
   if (file.type === "image/gif") {
     if (file.size > UPLOAD_SAFE_LIMIT_BYTES) {

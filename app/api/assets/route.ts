@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
 import path from "path";
 import mime from "mime-types";
+import { getRepoFileBuffer } from "@/lib/github-pr";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -13,26 +13,21 @@ export async function GET(request: Request) {
 
   // Prevent directory traversal attacks
   const normalizedPath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, "");
-  const fullPath = path.join(process.cwd(), "assets", normalizedPath);
+  const safePath = normalizedPath.replace(/^\/+/, "");
+  const pathsToTry = safePath.endsWith(".md") ? [safePath] : [safePath, `${safePath}.md`];
 
-  if (!fullPath.startsWith(path.join(process.cwd(), "assets"))) {
-    return new NextResponse("Forbidden", { status: 403 });
+  for (const candidate of pathsToTry) {
+    const fileBuffer = await getRepoFileBuffer(candidate);
+    if (fileBuffer) {
+      const mimeType = mime.lookup(candidate) || "application/octet-stream";
+      return new NextResponse(new Uint8Array(fileBuffer), {
+        headers: {
+          "Content-Type": String(mimeType),
+          "Cache-Control": "public, max-age=300, s-maxage=300",
+        },
+      });
+    }
   }
 
-  if (!fs.existsSync(fullPath)) {
-    return new NextResponse("Not Found", { status: 404 });
-  }
-
-  try {
-    const fileBuffer = fs.readFileSync(fullPath);
-    const mimeType = mime.lookup(fullPath) || "application/octet-stream";
-
-    return new NextResponse(fileBuffer, {
-      headers: {
-        "Content-Type": mimeType,
-      },
-    });
-  } catch {
-    return new NextResponse("Internal Server Error", { status: 500 });
-  }
+  return new NextResponse("Not Found", { status: 404 });
 }

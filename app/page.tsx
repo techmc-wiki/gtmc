@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRef, useCallback } from "react";
 import { BrutalButton } from "@/components/ui/brutal-button";
 import { Logo } from "@/components/ui/logo";
 import { useHomepageMotion } from "@/lib/motion/use-homepage-motion";
-import { motion } from "motion/react";
+import { HOMEPAGE_MOTION } from "@/lib/motion/homepage-constants";
+import { motion, useTransform, MotionValue } from "motion/react";
 
 const HEX_VALUES = [
   "a1b2",
@@ -33,33 +35,95 @@ const HEX_VALUES = [
   "0123",
 ];
 
+function DecorElement({
+  children,
+  className,
+  smoothMouseX,
+  smoothMouseY,
+  blurMax,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  smoothMouseX: MotionValue<number>;
+  smoothMouseY: MotionValue<number>;
+  blurMax: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const getCenter = useCallback(() => {
+    if (!ref.current) return { cx: 0, cy: 0 };
+    const rect = ref.current.getBoundingClientRect();
+    return { cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 };
+  }, []);
+
+  const filter = useTransform([smoothMouseX, smoothMouseY], ([mx, my]: number[]) => {
+    const { cx, cy } = getCenter();
+    const dx = mx - cx;
+    const dy = my - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const t = Math.min(1, dist / HOMEPAGE_MOTION.blurRadius);
+    return `blur(${t * blurMax}px)`;
+  });
+
+  return (
+    <motion.div ref={ref} className={className} style={{ filter }}>
+      {children}
+    </motion.div>
+  );
+}
+
 export default function Home() {
   const motionDriver = useHomepageMotion();
-  const { background: bgTransform, midground: mgTransform, foreground: fgTransform } = motionDriver;
+  const {
+    background: bgTransform,
+    midground: mgTransform,
+    foreground: fgTransform,
+    smoothMouseX,
+    smoothMouseY,
+    isReducedMotion,
+  } = motionDriver;
+
+  const bgBlurMax = isReducedMotion ? 0 : HOMEPAGE_MOTION.blurMax.background;
+  const mgBlurMax = isReducedMotion ? 0 : HOMEPAGE_MOTION.blurMax.midground;
 
   return (
     <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative flex h-screen w-full overflow-hidden font-sans">
       {/* Background Layer - Furthest depth, slowest motion */}
       <motion.div
         className="homepage-decor-background absolute inset-0 z-0"
-        style={{ x: bgTransform.x, y: bgTransform.y, filter: bgTransform.filter }}
+        style={{ x: bgTransform.x, y: bgTransform.y }}
       >
         {/* 巨型背景水印 */}
-        <div className="text-tech-main decor-desktop-only pointer-events-none absolute top-1/3 -right-20 hidden rotate-90 text-[10rem] font-black tracking-tighter whitespace-nowrap opacity-[0.05] mix-blend-multiply select-none lg:block">
+        <DecorElement
+          className="text-tech-main decor-desktop-only pointer-events-none absolute top-1/3 -right-20 hidden rotate-90 text-[10rem] font-black tracking-tighter whitespace-nowrap opacity-[0.05] mix-blend-multiply select-none lg:block"
+          smoothMouseX={smoothMouseX}
+          smoothMouseY={smoothMouseY}
+          blurMax={bgBlurMax}
+        >
           SCHEMATIC_01
-        </div>
+        </DecorElement>
 
         {/* NBT二进制/Hex Dump 背景层 */}
-        <div className="text-tech-main decor-desktop-only pointer-events-none absolute top-[20%] left-[5%] hidden font-mono text-[10px] leading-tight whitespace-pre opacity-[0.25] mix-blend-multiply select-none xl:block">
+        <DecorElement
+          className="text-tech-main decor-desktop-only pointer-events-none absolute top-[20%] left-[5%] hidden font-mono text-[10px] leading-tight whitespace-pre opacity-[0.25] mix-blend-multiply select-none xl:block"
+          smoothMouseX={smoothMouseX}
+          smoothMouseY={smoothMouseY}
+          blurMax={bgBlurMax}
+        >
           00000000: 1f8b 0800 0000 0000 0000 edc1 0b00 0000 .......4........{"\n"}
           00000010: 0010 0700 1101 0005 6c65 7665 6c00 0800 ........level...{"\n"}
           00000020: 0b44 6174 6101 0006 7261 6e64 6f6d 5365 .Data...randomSe{"\n"}
           00000030: 6564 0000 0000 3b9a ca00 0400 0c62 6c6f ed....;......blo{"\n"}
           00000040: 636b 5f6c 6967 6874 5f64 6174 610a 0000 ck_light_data...{"\n"}
-        </div>
+        </DecorElement>
 
         {/* MC 方块视角的几何线条叠加 */}
-        <div className="decor-desktop-only pointer-events-none absolute right-[10%] bottom-[20%] hidden opacity-20 lg:block">
+        <DecorElement
+          className="decor-desktop-only pointer-events-none absolute right-[10%] bottom-[20%] hidden opacity-20 lg:block"
+          smoothMouseX={smoothMouseX}
+          smoothMouseY={smoothMouseY}
+          blurMax={bgBlurMax}
+        >
           <svg
             width="200"
             height="200"
@@ -89,10 +153,15 @@ export default function Home() {
             <line x1="10" y1="10" x2="50" y2="50" strokeWidth="1" />
             <polygon points="50,50 40,50 50,40" fill="currentColor" />
           </svg>
-        </div>
+        </DecorElement>
 
         {/* 圆形/雷达阵列结构 */}
-        <div className="decor-desktop-only pointer-events-none absolute bottom-16 left-[20%] hidden opacity-10 lg:block">
+        <DecorElement
+          className="decor-desktop-only pointer-events-none absolute bottom-16 left-[20%] hidden opacity-10 lg:block"
+          smoothMouseX={smoothMouseX}
+          smoothMouseY={smoothMouseY}
+          blurMax={bgBlurMax}
+        >
           <svg
             width="150"
             height="150"
@@ -107,10 +176,15 @@ export default function Home() {
             <line x1="15" y1="75" x2="135" y2="75" />
             <line x1="75" y1="15" x2="75" y2="135" />
           </svg>
-        </div>
+        </DecorElement>
 
         {/* 2XL 专属：红石逻辑代数 */}
-        <div className="text-tech-main border-tech-main/40 decor-desktop-only pointer-events-none absolute top-[40%] right-[6%] hidden border-l pl-4 font-mono text-[11px] leading-relaxed opacity-[0.35] mix-blend-multiply select-none 2xl:block">
+        <DecorElement
+          className="text-tech-main border-tech-main/40 decor-desktop-only pointer-events-none absolute top-[40%] right-[6%] hidden border-l pl-4 font-mono text-[11px] leading-relaxed opacity-[0.35] mix-blend-multiply select-none 2xl:block"
+          smoothMouseX={smoothMouseX}
+          smoothMouseY={smoothMouseY}
+          blurMax={bgBlurMax}
+        >
           <div className="text-tech-main-dark mb-2 font-bold">{"//"} REDSTONE_BOOLEAN_LOGIC</div>
           <span>Y = (A ∧ B) ∨ (¬C)</span>
           <br />
@@ -122,10 +196,15 @@ export default function Home() {
             * VALIDATING SIGNAL STRENGTH (0-15)
             <br />* QUASI_CONNECTIVITY = TRUE
           </div>
-        </div>
+        </DecorElement>
 
         {/* 2XL 专属：空间坐标变换矩阵 */}
-        <div className="decor-desktop-only pointer-events-none absolute right-[25%] bottom-[30%] hidden font-mono text-[11px] opacity-[0.35] mix-blend-multiply select-none 2xl:block">
+        <DecorElement
+          className="decor-desktop-only pointer-events-none absolute right-[25%] bottom-[30%] hidden font-mono text-[11px] opacity-[0.35] mix-blend-multiply select-none 2xl:block"
+          smoothMouseX={smoothMouseX}
+          smoothMouseY={smoothMouseY}
+          blurMax={bgBlurMax}
+        >
           <div className="text-tech-main-dark mb-2 font-bold tracking-widest">
             TRANSFORM_MATRIX_4x4
           </div>
@@ -147,10 +226,15 @@ export default function Home() {
             <span>0.0</span>
             <span>1.0</span>
           </div>
-        </div>
+        </DecorElement>
 
         {/* 2XL 专属：内存簇/寄存器网格 */}
-        <div className="decor-desktop-only pointer-events-none absolute top-[60%] left-[3%] hidden font-mono text-[10px] opacity-[0.35] mix-blend-multiply select-none 2xl:block">
+        <DecorElement
+          className="decor-desktop-only pointer-events-none absolute top-[60%] left-[3%] hidden font-mono text-[10px] opacity-[0.35] mix-blend-multiply select-none 2xl:block"
+          smoothMouseX={smoothMouseX}
+          smoothMouseY={smoothMouseY}
+          blurMax={bgBlurMax}
+        >
           <div className="text-tech-main-dark mb-2 font-bold tracking-widest">
             TICK_PHASE_ALLOCATION
           </div>
@@ -168,10 +252,15 @@ export default function Home() {
               </span>
             ))}
           </div>
-        </div>
+        </DecorElement>
 
         {/* 力学/机械引擎图纸 */}
-        <div className="decor-desktop-only pointer-events-none absolute top-[15%] right-[15%] hidden opacity-[0.25] mix-blend-multiply select-none xl:block">
+        <DecorElement
+          className="decor-desktop-only pointer-events-none absolute top-[15%] right-[15%] hidden opacity-[0.25] mix-blend-multiply select-none xl:block"
+          smoothMouseX={smoothMouseX}
+          smoothMouseY={smoothMouseY}
+          blurMax={bgBlurMax}
+        >
           <svg
             width="140"
             height="160"
@@ -205,13 +294,13 @@ export default function Home() {
               F_push
             </text>
           </svg>
-        </div>
+        </DecorElement>
       </motion.div>
 
       {/* Midground Layer - Medium depth, moderate motion */}
       <motion.div
         className="homepage-decor-midground absolute inset-0 z-[1]"
-        style={{ x: mgTransform.x, y: mgTransform.y, filter: mgTransform.filter }}
+        style={{ x: mgTransform.x, y: mgTransform.y }}
       >
         {/* 左上角系统序列号 */}
         <div className="absolute top-8 left-8 flex hidden flex-col space-y-1 md:flex">
@@ -239,7 +328,12 @@ export default function Home() {
         </div>
 
         {/* Java 代码片段漂浮层 */}
-        <div className="decor-desktop-only pointer-events-none absolute top-[18%] right-10 hidden opacity-40 mix-blend-multiply select-none lg:block xl:right-16">
+        <DecorElement
+          className="decor-desktop-only pointer-events-none absolute top-[18%] right-10 hidden opacity-40 mix-blend-multiply select-none lg:block xl:right-16"
+          smoothMouseX={smoothMouseX}
+          smoothMouseY={smoothMouseY}
+          blurMax={mgBlurMax}
+        >
           <div className="text-tech-main border-tech-main/40 bg-tech-main/5 border-l-4 py-2 pl-4 font-mono text-[11px] leading-relaxed whitespace-pre">
             {`{
   "Id": "minecraft:chest",
@@ -255,10 +349,15 @@ export default function Home() {
   // BlockEntityTag
 }`}
           </div>
-        </div>
+        </DecorElement>
 
         {/* 堆栈跟踪装饰 */}
-        <div className="decor-desktop-only pointer-events-none absolute bottom-8 left-8 hidden font-mono text-[10px] text-red-500/40 mix-blend-multiply select-none lg:block">
+        <DecorElement
+          className="decor-desktop-only pointer-events-none absolute bottom-8 left-8 hidden font-mono text-[10px] text-red-500/40 mix-blend-multiply select-none lg:block"
+          smoothMouseX={smoothMouseX}
+          smoothMouseY={smoothMouseY}
+          blurMax={mgBlurMax}
+        >
           <span className="font-bold">
             at net.minecraft.world.level.block.piston.PistonBaseBlock.moveBlocks
           </span>
@@ -270,7 +369,7 @@ export default function Home() {
           <span className="font-bold text-red-600/60">
             Caused by: java.util.ConcurrentModificationException: Ticking block entity
           </span>
-        </div>
+        </DecorElement>
 
         {/* 分散的瞄准/坐标十字 */}
         <div className="decor-desktop-only absolute top-1/4 right-[25%] hidden text-xl font-light opacity-30 select-none md:block">

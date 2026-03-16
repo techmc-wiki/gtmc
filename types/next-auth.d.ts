@@ -8,10 +8,12 @@ declare module "next-auth" {
     user: {
       id: string;
       role?: string;
+      githubPat?: string;
     } & DefaultSession["user"];
   }
 
   interface User extends DefaultUser {
     role?: string;
+    githubPat?: string;
   }
 }

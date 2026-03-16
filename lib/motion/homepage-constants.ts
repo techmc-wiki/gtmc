@@ -16,6 +16,9 @@ export const HOMEPAGE_MOTION = {
     background: 1.5,
   },
 
+  /** Pixel distance from mouse at which blur reaches blurMax */
+  blurRadius: 500,
+
   desktop: {
     pointerAmplitude: 1.0,
   },

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import type { Prisma } from "@prisma/client";
+import { createPR } from "@/lib/github-pr";
 
 export async function saveDraftAction(formData: FormData) {
   const session = await auth();
@@ -68,27 +69,61 @@ export async function saveDraftAction(formData: FormData) {
 }
 
 export async function submitForReviewAction(revisionId: string) {
+  const session = await auth();
+  if (!session || !session.user) {
+    throw new Error("Unauthorized");
+  }
+
   if (!revisionId) {
     throw new Error("Revision ID is required");
   }
+  
   const existing = await prisma.revision.findUnique({
     where: { id: revisionId },
+    include: { author: true }
   });
-  if (existing && existing.status === "APPROVED") {
-    throw new Error("Cannot submit an already approved draft");
+
+  if (!existing) {
+    throw new Error("Revision not found");
   }
-  // TODO: Session 验证
 
-  await prisma.revision.update({
-    where: { id: revisionId },
-    data: {
-      status: "PENDING",
-    },
-  });
+  if (existing.status !== "DRAFT") {
+    throw new Error("Only an unsubmitted draft can be submitted");
+  }
 
-  revalidatePath("/draft");
-  revalidatePath("/review");
-  return { success: true };
+  if (!existing.filePath) {
+    throw new Error("File path is requires. Please specify the target file path in editor.");
+  }
+
+  const token = existing.author.githubPat || process.env.GITHUB_TOKEN;
+  const authorName = session.user.name || "GTMC Author";
+  const authorEmail = session.user.email || "author@gtmc.dev";
+
+  try {
+    const prNumber = await createPR({
+      title: existing.title,
+      content: existing.content,
+      filePath: existing.filePath,
+      authorName,
+      authorEmail,
+      token
+    });
+
+    await prisma.revision.update({
+      where: { id: revisionId },
+      data: {
+        status: "SUBMITTED",
+        githubPrNum: prNumber,
+        githubPrUrl: `https://github.com/gtmc-dev/Articles/pull/${prNumber}`
+      },
+    });
+
+    revalidatePath("/draft");
+    revalidatePath("/review");
+    return { success: true };
+  } catch (error) {
+    throw new Error(`Failed to create PR: ${error instanceof Error ? error.message : "Unknown error"}`);
+  }
 }
 
 export async function deleteDraftAction(revisionId: string) {

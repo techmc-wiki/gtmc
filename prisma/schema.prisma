@@ -93,8 +93,9 @@ model Revision {
   content     String
   coverImage  String?
   
-  status      String         @default("DRAFT")
-  reviewNote  String?
+  status      String         @default("DRAFT") // DRAFT, SUBMITTED
+  githubPrUrl String?
+  githubPrNum Int?
   filePath    String?
 
   articleId   String?

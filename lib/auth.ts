@@ -39,6 +39,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session?.user && user) {
         session.user.id = user.id;
         session.user.role = (user as { role?: string }).role || "USER";
+        session.user.githubPat = (user as { githubPat?: string }).githubPat;
       }
       return session;
     },

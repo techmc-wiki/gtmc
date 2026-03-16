@@ -1,4 +1,3 @@
-import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
@@ -10,8 +9,13 @@ import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import Link from "next/link";
 import { BrutalButton } from "@/components/ui/brutal-button";
-import { approveRevisionAction, rejectRevisionAction } from "@/actions/admin";
 import { getMarkdownComponents } from "@/app/(dashboard)/articles/markdown-helpers";
+import { getOctokit } from "@/lib/github-pr";
+import { mergePRAction, closePRAction } from "@/actions/review";
+import ConflictResolver from "./components/conflict-resolver";
+
+const owner = process.env.GITHUB_REPO_OWNER || "gtmc-dev";
+const repo = process.env.GITHUB_REPO_NAME || "Articles";
 
 export default async function ReviewDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -20,16 +24,45 @@ export default async function ReviewDetailPage({ params }: { params: Promise<{ i
   }
 
   const { id } = await params;
-  const revision = await prisma.revision.findUnique({
-    where: { id },
-    include: {
-      author: true,
-    },
-  });
-
-  if (!revision) {
+  const prNumber = parseInt(id, 10);
+  if (isNaN(prNumber)) {
     notFound();
   }
+
+  const token = (session.user as { githubPat?: string }).githubPat || process.env.GITHUB_TOKEN;
+  const octokit = getOctokit(token);
+
+  let pr;
+  try {
+    pr = (await octokit.pulls.get({ owner, repo, pull_number: prNumber })).data;
+  } catch {
+    notFound();
+  }
+
+  // Get PR files
+  const { data: files } = await octokit.pulls.listFiles({ owner, repo, pull_number: prNumber });
+  const mainFile = files.find(f => f.filename.endsWith('.md')) || files[0];
+
+  let rawContent = "";
+  if (mainFile) {
+    try {
+      const { data: fileData } = await octokit.repos.getContent({
+        owner,
+        repo,
+        path: mainFile.filename,
+        ref: pr.head.ref
+      });
+      if (!Array.isArray(fileData) && fileData.type === "file") {
+        rawContent = Buffer.from(fileData.content, "base64").toString("utf8");
+      }
+    } catch (e) {
+      console.error(e);
+      // maybe file was deleted or something
+    }
+  }
+
+  const isMergeable = pr.mergeable === true;
+  const hasConflict = pr.mergeable === false;
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 p-4 pb-32 md:p-8">
@@ -43,58 +76,79 @@ export default async function ReviewDetailPage({ params }: { params: Promise<{ i
         <div className="border-tech-main/50 bg-tech-main/20 absolute -bottom-[5px] left-0 h-2 w-2 border"></div>
         <div>
           <h1 className="text-tech-main-dark mb-4 font-mono text-3xl leading-tight tracking-[0.1em] break-words uppercase lg:text-4xl">
-            {revision.title}
+            {pr.title} <span className="text-tech-main/50">#{pr.number}</span>
           </h1>
           <div className="bg-tech-main/10 text-tech-main-dark border-tech-main/30 flex inline-flex flex-wrap items-center gap-4 border p-3 font-mono text-xs">
             <span className="text-tech-main">AUTHOR:</span>
-            <span className="uppercase">{revision.author?.name || "UNKNOWN_USER"}</span>
+            <span className="uppercase">{pr.user?.login || "UNKNOWN_USER"}</span>
             <span className="text-tech-main/50 px-2">{"//"}</span>
             <span className="text-tech-main">TARGET_FILE:</span>
-            <span>{revision.filePath || "NEW_ARTICLE"}</span>
+            <span>{mainFile?.filename || "UNKNOWN"}</span>
+            <span className="text-tech-main/50 px-2">{"//"}</span>
+            <span className="text-tech-main">STATUS:</span>
+            <span className={hasConflict ? "text-red-600 font-bold" : (isMergeable ? "text-green-600 font-bold" : "text-yellow-600")}>
+              {pr.state.toUpperCase()} {hasConflict && "(CONFLICT)"}
+            </span>
           </div>
         </div>
 
-        {revision.status === "PENDING" && (
+        {pr.state === "open" && (
           <div className="flex w-full gap-4 md:w-auto">
-            <form action={rejectRevisionAction}>
-              <input type="hidden" name="revisionId" value={revision.id} />
+            <form action={async () => {
+              "use server";
+              await closePRAction(prNumber);
+            }}>
               <BrutalButton
                 type="submit"
                 variant="secondary"
                 className="w-full border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
               >
-                DENY
+                CLOSE
               </BrutalButton>
             </form>
-            <form action={approveRevisionAction}>
-              <input type="hidden" name="revisionId" value={revision.id} />
-              <BrutalButton type="submit" variant="primary" className="w-full">
-                APPROVE_&_MERGE
-              </BrutalButton>
-            </form>
+            {isMergeable && (
+              <form action={async () => {
+                "use server";
+                await mergePRAction(prNumber);
+              }}>
+                <BrutalButton type="submit" variant="primary" className="w-full">
+                  APPROVE_&_MERGE
+                </BrutalButton>
+              </form>
+            )}
           </div>
         )}
       </div>
 
-      <div>
-        <h2 className="border-tech-main/50 text-tech-main mb-4 inline-block border-b font-mono text-xl tracking-widest uppercase">
-          CONTENT_PREVIEW
-        </h2>
-      </div>
+      {hasConflict ? (
+        <ConflictResolver prNumber={prNumber} filePath={mainFile?.filename || ""} initialContent={rawContent} />
+      ) : (
+        <>
+          <div>
+            <h2 className="border-tech-main/50 text-tech-main mb-4 inline-block border-b font-mono text-xl tracking-widest uppercase">
+              CONTENT_PREVIEW
+            </h2>
+          </div>
 
-      <div className="bg-tech-main/5 border-tech-main/30 relative mx-auto border p-8 backdrop-blur-sm">
-        <div className="border-tech-main/50 absolute top-0 left-0 h-2 w-2 border-t border-l"></div>
-        <div className="border-tech-main/50 absolute right-0 bottom-0 h-2 w-2 border-r border-b"></div>
-        <div className="prose prose-tech text-tech-main-dark selection:bg-tech-main/20 selection:text-tech-main-dark w-full max-w-none overflow-hidden break-words">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-            rehypePlugins={[rehypeRaw, rehypeKatex]}
-            components={getMarkdownComponents(revision.filePath || "")}
-          >
-            {revision.content}
-          </ReactMarkdown>
-        </div>
-      </div>
+          <div className="bg-tech-main/5 border-tech-main/30 relative mx-auto border p-8 backdrop-blur-sm">
+            <div className="border-tech-main/50 absolute top-0 left-0 h-2 w-2 border-t border-l"></div>
+            <div className="border-tech-main/50 absolute right-0 bottom-0 h-2 w-2 border-r border-b"></div>
+            <div className="prose prose-tech text-tech-main-dark selection:bg-tech-main/20 selection:text-tech-main-dark w-full max-w-none overflow-hidden break-words">
+              {rawContent ? (
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
+                  rehypePlugins={[rehypeRaw, rehypeKatex]}
+                  components={getMarkdownComponents(mainFile?.filename || "")}
+                >
+                  {rawContent}
+                </ReactMarkdown>
+              ) : (
+                <div className="text-center font-mono opacity-50 py-10">NO PREVIEW AVAILABLE</div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

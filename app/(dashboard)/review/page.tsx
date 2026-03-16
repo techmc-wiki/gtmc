@@ -1,7 +1,7 @@
 import { BrutalCard } from "@/components/ui/brutal-card";
 import { BrutalButton } from "@/components/ui/brutal-button";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { getOpenPRs } from "@/lib/github-pr";
 import { auth } from "@/lib/auth";
 
 export default async function ReviewHubPage() {
@@ -21,17 +21,22 @@ export default async function ReviewHubPage() {
     );
   }
 
-  const pendingRevisions = await prisma.revision.findMany({
-    where: {
-      status: "PENDING",
-    },
-    include: {
-      author: true,
-    },
-    orderBy: {
-      updatedAt: "asc",
-    },
-  });
+  // Fetch PRs from GitHub using admin's PAT or default SERVER TOKEN
+  const token = (session.user as { githubPat?: string }).githubPat || process.env.GITHUB_TOKEN;
+  let openPRs: Array<{
+    id: number;
+    number: number;
+    created_at: string;
+    title: string;
+    user: { login: string } | null;
+    head: { ref: string };
+  }> = [];
+  try {
+    const prs = await getOpenPRs(token);
+    openPRs = prs as unknown as typeof openPRs;
+  } catch (error) {
+    console.error("Failed to fetch PRs:", error);
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-6">
@@ -48,7 +53,7 @@ export default async function ReviewHubPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        {pendingRevisions.length === 0 ? (
+        {openPRs.length === 0 ? (
           <div className="border-tech-main/40 group relative border border-dashed bg-white/30 py-16 text-center backdrop-blur-sm">
             <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(96,112,143,0.05)_10px,rgba(96,112,143,0.05)_20px)]"></div>
             <h2 className="text-tech-main/50 relative z-10 font-mono text-lg tracking-widest uppercase">
@@ -56,9 +61,9 @@ export default async function ReviewHubPage() {
             </h2>
           </div>
         ) : (
-          pendingRevisions.map((rev: (typeof pendingRevisions)[0]) => (
+          openPRs.map((pr) => (
             <BrutalCard
-              key={rev.id}
+              key={pr.id}
               className="border-tech-main/40 group relative flex flex-col items-start justify-between space-y-4 border bg-white/80 p-6 backdrop-blur-sm md:flex-row md:items-center md:space-y-0"
             >
               <div className="border-tech-main/40 absolute top-0 left-0 h-2 w-2 -translate-x-[1px] -translate-y-[1px] border-t-2 border-l-2 opacity-0 transition-opacity group-hover:opacity-100"></div>
@@ -67,30 +72,28 @@ export default async function ReviewHubPage() {
               <div className="relative z-10 flex-1">
                 <div className="mb-3 flex items-center gap-3">
                   <span className="border border-blue-500/40 bg-blue-500/10 px-2 py-0.5 font-mono text-xs tracking-wider text-blue-600">
-                    [PENDING]
+                    [PR #{pr.number}]
                   </span>
                   <span className="text-tech-main/50 font-mono text-xs">
-                    {rev.updatedAt.toLocaleString()}
+                    {new Date(pr.created_at).toLocaleString()}
                   </span>
                 </div>
                 <h3 className="text-tech-main-dark border-tech-main/40 mb-2 border-l-2 pl-3 text-lg font-bold tracking-tight uppercase md:text-xl">
-                  {rev.title || "UNTITLED"}
+                  {pr.title || "UNTITLED"}
                 </h3>
                 <p className="text-tech-main/80 mb-3 pl-3 font-mono text-xs">
                   Submitted by:{" "}
                   <span className="text-tech-main-dark font-bold">
-                    {rev.author?.name || rev.author?.email || "UNKNOWN"}
+                    {pr.user?.login || "UNKNOWN"}
                   </span>
                 </p>
-                {rev.filePath && (
-                  <p className="bg-tech-main/5 border-tech-main/20 text-tech-main ml-3 inline-flex items-center border px-2 py-1 font-mono text-xs">
-                    <span className="bg-tech-main mr-2 h-1.5 w-1.5"></span> TARGET: {rev.filePath}
-                  </p>
-                )}
+                <p className="bg-tech-main/5 border-tech-main/20 text-tech-main ml-3 inline-flex items-center border px-2 py-1 font-mono text-xs">
+                  <span className="bg-tech-main mr-2 h-1.5 w-1.5"></span> TARGET: {pr.head.ref}
+                </p>
               </div>
 
               <div className="relative z-10 flex w-full flex-col gap-4 md:w-auto md:flex-row">
-                <Link href={`/review/${rev.id}`} className="w-full md:w-auto">
+                <Link href={`/review/${pr.number}`} className="w-full md:w-auto">
                   <BrutalButton
                     variant="primary"
                     className="flex min-h-[44px] w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto"

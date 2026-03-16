@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   useMotionValue,
   useSpring,
   useTransform,
   useReducedMotion,
   MotionValue,
-} from 'motion/react';
-import { HOMEPAGE_MOTION } from './homepage-constants';
+} from "motion/react";
+import { HOMEPAGE_MOTION } from "./homepage-constants";
 
 export interface LayerTransform {
   x: MotionValue<number>;
@@ -42,8 +42,8 @@ export function useHomepageMotion(): HomepageMotionValues {
       setIsMobile(window.innerWidth < 768);
     };
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   useEffect(() => {
@@ -58,8 +58,8 @@ export function useHomepageMotion(): HomepageMotionValues {
       pointerY.set(normalizedY);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [pointerX, pointerY, isMobile, reducedMotionQuery]);
 
   const smoothX = useSpring(pointerX, { damping: 20, stiffness: 300 });
@@ -67,7 +67,7 @@ export function useHomepageMotion(): HomepageMotionValues {
 
   // Pointer distance from center (0 at center, ~1.41 at corners), clamped to [0,1]
   const pointerDist = useTransform([smoothX, smoothY], ([x, y]: number[]) =>
-    Math.min(1, Math.sqrt(x * x + y * y))
+    Math.min(1, Math.sqrt(x * x + y * y)),
   );
 
   const config = reducedMotionQuery
@@ -85,22 +85,40 @@ export function useHomepageMotion(): HomepageMotionValues {
   const bgBlur = useTransform(pointerDist, (d) => d * blurMax.background);
 
   const foreground: ForegroundTransform = {
-    x: useTransform(smoothX, (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.foreground * 20),
-    y: useTransform(smoothY, (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.foreground * 20),
+    x: useTransform(
+      smoothX,
+      (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.foreground * 20,
+    ),
+    y: useTransform(
+      smoothY,
+      (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.foreground * 20,
+    ),
     filter: useTransform(fgBlur, (v) => `blur(${v}px)`),
     rotateX: useTransform(smoothY, (v) => v * -2),
     rotateY: useTransform(smoothX, (v) => v * 2),
   };
 
   const midground: LayerTransform = {
-    x: useTransform(smoothX, (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.midground * 20),
-    y: useTransform(smoothY, (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.midground * 20),
+    x: useTransform(
+      smoothX,
+      (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.midground * 20,
+    ),
+    y: useTransform(
+      smoothY,
+      (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.midground * 20,
+    ),
     filter: useTransform(mgBlur, (v) => `blur(${v}px)`),
   };
 
   const background: LayerTransform = {
-    x: useTransform(smoothX, (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.background * 20),
-    y: useTransform(smoothY, (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.background * 20),
+    x: useTransform(
+      smoothX,
+      (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.background * 20,
+    ),
+    y: useTransform(
+      smoothY,
+      (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.background * 20,
+    ),
     filter: useTransform(bgBlur, (v) => `blur(${v}px)`),
   };
 

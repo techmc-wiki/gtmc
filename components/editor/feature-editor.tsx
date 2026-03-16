@@ -194,9 +194,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
 
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
-          <label className="text-tech-main border-tech-main/30 mb-2 inline-block border-b pb-1 font-mono text-sm tracking-[0.2em] uppercase">
-            TITLE_
-          </label>
+          <label className="section-label">TITLE_</label>
           <BrutalInput
             required
             placeholder="ENTER TITLE..."
@@ -209,9 +207,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="text-tech-main border-tech-main/30 mb-2 inline-block border-b pb-1 font-mono text-sm tracking-[0.2em] uppercase">
-            TAGS_ (comma separated)
-          </label>
+          <label className="section-label">TAGS_ (comma separated)</label>
           <BrutalInput
             placeholder="e.g. bug, enhancement, UI"
             className={`border-tech-main/40 focus:border-tech-main/60 py-2 font-mono text-sm backdrop-blur-sm ${isReadOnly ? "cursor-not-allowed bg-gray-100 opacity-70" : "bg-white/80"}`}

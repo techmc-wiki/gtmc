@@ -38,7 +38,7 @@ export const SectionRail = React.forwardRef<
 >(({ label, className = "", ...props }, ref) => (
   <div
     ref={ref}
-    className={`text-tech-main font-mono text-xs tracking-[0.2em] uppercase ${className}`}
+    className={`text-tech-main tracking-tech-wide font-mono text-xs uppercase ${className}`}
     {...props}
   >
     {label}_

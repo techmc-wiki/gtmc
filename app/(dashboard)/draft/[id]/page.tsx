@@ -35,7 +35,7 @@ export default async function EditDraftPage({ params }: { params: Promise<{ id: 
               {"<"} BACK
             </BrutalButton>
           </Link>
-          <h1 className="text-tech-main font-mono text-xl tracking-[0.2em] uppercase md:text-3xl">
+          <h1 className="text-tech-main tracking-tech-wide font-mono text-xl uppercase md:text-3xl">
             EDIT_SUBMISSION
           </h1>
         </div>

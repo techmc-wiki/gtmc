@@ -123,7 +123,7 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
     if (fs.existsSync(transPath)) {
       const fileContent = fs.readFileSync(transPath, "utf-8");
       // Remove UTF-8 BOM if present
-      translations = JSON.parse(fileContent.replace(/^\uFEFF/, ''));
+      translations = JSON.parse(fileContent.replace(/^\uFEFF/, ""));
     }
   } catch (e) {
     console.error("加载侧边栏翻译配置失败", e);

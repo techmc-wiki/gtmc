@@ -49,7 +49,7 @@ export function MobileTreeSheet({ isOpen, onClose, children }: MobileTreeSheetPr
           className="border-tech-main/40 flex shrink-0 items-center justify-between border-b px-4 py-3"
           data-testid="mobile-tree-panel-header"
         >
-          <div className="text-tech-main/60 flex items-center font-mono text-xs font-bold tracking-[0.2em] uppercase">
+          <div className="text-tech-main/60 tracking-tech-wide flex items-center font-mono text-xs font-bold uppercase">
             <span className="bg-tech-main/60 mr-2 inline-block h-1.5 w-1.5 animate-pulse"></span>
             SYS.DIR_TREE
           </div>

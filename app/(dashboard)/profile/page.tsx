@@ -30,7 +30,7 @@ export default async function ProfilePage() {
     <div className="animate-fade-in mx-auto mt-4 max-w-4xl space-y-8 px-4 pb-20 sm:mt-8 sm:space-y-12 sm:px-0">
       <div className="border-tech-main/40 flex flex-col items-start justify-between border-b-2 pb-4 md:flex-row md:items-end">
         <div>
-          <p className="text-tech-main/60 mb-2 font-mono text-[10px] tracking-[0.2em] uppercase sm:text-xs">
+          <p className="text-tech-main/60 tracking-tech-wide mb-2 font-mono text-[10px] uppercase sm:text-xs">
             [ USER_PROFILE_SYS ]
           </p>
           <h1 className="text-tech-main-dark flex items-center gap-2 text-xl font-bold tracking-widest uppercase sm:gap-4 sm:text-2xl md:text-4xl lg:text-5xl">
@@ -50,12 +50,12 @@ export default async function ProfilePage() {
             </span>
             USER_PROFILE
           </h1>
-          <p className="text-tech-main/70 mt-2 flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] sm:mt-3 sm:text-sm">
+          <p className="text-tech-main/70 tracking-tech-wide mt-2 flex items-center gap-2 font-mono text-[10px] sm:mt-3 sm:text-sm">
             <span className="bg-tech-main h-1 w-1 animate-pulse sm:h-1.5 sm:w-1.5"></span>
             CONFIG // IDENTITY // TOKENS
           </p>
         </div>
-        <div className="text-tech-main/50 mt-4 font-mono text-[9px] tracking-[0.2em] uppercase sm:text-xs md:mt-0">
+        <div className="text-tech-main/50 tracking-tech-wide mt-4 font-mono text-[9px] uppercase sm:text-xs md:mt-0">
           SYS.STATE :: <span className="text-tech-main-dark font-bold">ACTIVE *</span>
         </div>
       </div>
@@ -85,7 +85,7 @@ export default async function ProfilePage() {
             </div>
 
             <div className="w-full flex-1 space-y-3 sm:space-y-4">
-              <label className="text-tech-main-dark border-tech-main block border-l-2 pl-2.5 font-mono text-[10px] font-bold tracking-[0.2em] uppercase sm:text-xs">
+              <label className="text-tech-main-dark border-tech-main tracking-tech-wide block border-l-2 pl-2.5 font-mono text-[10px] font-bold uppercase sm:text-xs">
                 AVATAR URL
               </label>
               <BrutalInput
@@ -108,7 +108,7 @@ export default async function ProfilePage() {
 
           <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
             <div className="space-y-3 sm:space-y-4">
-              <label className="text-tech-main-dark border-tech-main block border-l-2 pl-2.5 font-mono text-[10px] font-bold tracking-[0.2em] uppercase sm:text-xs">
+              <label className="text-tech-main-dark border-tech-main tracking-tech-wide block border-l-2 pl-2.5 font-mono text-[10px] font-bold uppercase sm:text-xs">
                 USERNAME
               </label>
               <BrutalInput
@@ -119,7 +119,7 @@ export default async function ProfilePage() {
               />
             </div>
             <div className="space-y-3 sm:space-y-4">
-              <label className="text-tech-main/60 border-tech-main/40 flex items-center gap-2 border-l-2 pl-2.5 font-mono text-[10px] font-bold tracking-[0.2em] uppercase sm:text-xs">
+              <label className="text-tech-main/60 border-tech-main/40 tracking-tech-wide flex items-center gap-2 border-l-2 pl-2.5 font-mono text-[10px] font-bold uppercase sm:text-xs">
                 EMAIL{" "}
                 <span className="border-tech-main/30 bg-tech-main/5 text-tech-main/60 border px-1 text-[8px] sm:text-[9px]">
                   RO

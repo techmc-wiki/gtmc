@@ -123,7 +123,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
             <div className="bg-tech-main absolute top-0 left-0 h-0 w-px opacity-20 transition-all duration-500 ease-out group-hover:h-full"></div>
 
             <div className="border-tech-main/20 group/title mb-6 flex shrink-0 items-center justify-between border-b pt-8 pb-2 pl-6">
-              <div className="text-tech-main/60 flex items-center font-mono text-xs font-bold tracking-[0.2em] uppercase">
+              <div className="text-tech-main/60 tracking-tech-wide flex items-center font-mono text-xs font-bold uppercase">
                 <span className="bg-tech-main/60 mr-2 inline-block h-1.5 w-1.5 animate-pulse"></span>
                 SYS.DIR_TREE
               </div>

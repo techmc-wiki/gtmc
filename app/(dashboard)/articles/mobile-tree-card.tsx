@@ -55,7 +55,7 @@ export function MobileTreeCard({ isOpen, onClose, children, isFloating }: Mobile
           className="border-tech-main/40 flex shrink-0 items-center justify-between border-b px-4 py-3"
           data-testid="mobile-tree-card-header"
         >
-          <div className="text-tech-main/60 flex items-center gap-2 font-mono text-xs font-bold tracking-[0.2em] uppercase">
+          <div className="text-tech-main/60 tracking-tech-wide flex items-center gap-2 font-mono text-xs font-bold uppercase">
             <span className="bg-tech-main/60 h-1.5 w-1.5 animate-pulse" />
             SYS.DIR_TREE
           </div>

@@ -78,7 +78,7 @@ export function FeatureComments({
         (userId ? (
           <form onSubmit={handleSubmit} className="mt-8">
             <BrutalCard className="border-tech-main/40 border bg-white/80 p-6 backdrop-blur-sm">
-              <label className="text-tech-main border-tech-main/40 mb-4 inline-block border-b pb-1 font-mono text-sm tracking-[0.2em] uppercase">
+              <label className="text-tech-main border-tech-main/40 tracking-tech-wide mb-4 inline-block border-b pb-1 font-mono text-sm uppercase">
                 LEAVE_A_REPLY_
               </label>
               <textarea

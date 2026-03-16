@@ -167,7 +167,17 @@ body {
   }
 }
 
+@utility tracking-tech-wide {
+  letter-spacing: 0.2em;
+}
+
 @layer utilities {
+  /* Extracted utilities */
+
+  .section-label {
+    @apply border-tech-main/30 tracking-tech-wide text-tech-main mb-2 inline-block border-b pb-1 font-mono text-sm uppercase;
+  }
+
   .animate-page-transit {
     animation: page-transit 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }

@@ -208,9 +208,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
       {/* 标题区 */}
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
-          <label className="text-tech-main border-tech-main/30 mb-2 inline-block border-b pb-1 font-mono text-sm tracking-[0.2em] uppercase">
-            TITLE_
-          </label>
+          <label className="section-label">TITLE_</label>
           <BrutalInput
             required
             placeholder="ENTER TITLE..."
@@ -222,9 +220,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="text-tech-main border-tech-main/30 mb-2 inline-block border-b pb-1 font-mono text-sm tracking-[0.2em] uppercase">
-            FILE_PATH (e.g. Folder/My-Article.md)_
-          </label>
+          <label className="section-label">FILE_PATH (e.g. Folder/My-Article.md)_</label>
           <BrutalInput
             placeholder="e.g. SlimeTech/Molforte/04-新机器.md"
             className={`border-tech-main/40 focus:border-tech-main/60 py-2 font-mono text-sm backdrop-blur-sm ${isReadOnly ? "cursor-not-allowed bg-gray-100 opacity-70" : "bg-white/80"}`}
@@ -238,7 +234,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
       {/* 编辑器主区域 (双栏布局或单栏) */}
       <div className="flex grow flex-col space-y-2">
         <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-0">
-          <label className="text-tech-main border-tech-main/30 inline-block border-b pb-1 font-mono text-sm tracking-[0.2em] uppercase">
+          <label className="text-tech-main border-tech-main/30 tracking-tech-wide inline-block border-b pb-1 font-mono text-sm uppercase">
             CONTENT (MARKDOWN)_
           </label>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">

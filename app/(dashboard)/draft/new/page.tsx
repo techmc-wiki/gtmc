@@ -36,7 +36,7 @@ export default async function NewDraftPage({
             {"<"} BACK
           </BrutalButton>
         </Link>
-        <h1 className="text-tech-main font-mono text-xl tracking-[0.2em] uppercase md:text-3xl">
+        <h1 className="text-tech-main tracking-tech-wide font-mono text-xl uppercase md:text-3xl">
           NEW_SUBMISSION
         </h1>
       </div>

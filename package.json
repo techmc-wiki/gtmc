@@ -23,10 +23,10 @@
     "browser-image-compression": "^2.0.2",
     "cos-nodejs-sdk-v5": "^2.15.4",
     "dotenv": "^17.3.1",
-    "katex": "^0.16.38",
+    "katex": "^0.16.40",
     "mime-types": "^3.0.2",
     "motion": "^12.36.0",
-    "next": "16.1.6",
+    "next": "16.2.0",
     "next-auth": "5.0.0-beta.30",
     "prisma": "7.5.0",
     "react": "19.2.3",
@@ -39,11 +39,11 @@
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
-    "undici": "^7.24.0"
+    "undici": "^7.24.5"
   },
   "devDependencies": {
     "@lhci/cli": "^0.15.1",
-    "@next/bundle-analyzer": "^16.1.6",
+    "@next/bundle-analyzer": "^16.2.0",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/mime-types": "^3.0.1",
     "@types/node": "^25.5.0",

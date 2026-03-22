@@ -65,5 +65,13 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.1"
+  },
+  "resolutions": {
+    "form-data": "4.0.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "form-data": "4.0.5"
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { FeatureEditor } from "@/components/editor/feature-editor";
+import { FeatureEditor } from "@/components/editor/feature-editor"
 
 export default function NewFeaturePage() {
   return (
@@ -16,5 +16,5 @@ export default function NewFeaturePage() {
         <FeatureEditor />
       </div>
     </div>
-  );
+  )
 }

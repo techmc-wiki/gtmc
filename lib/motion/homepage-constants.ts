@@ -30,4 +30,4 @@ export const HOMEPAGE_MOTION = {
   reducedMotion: {
     pointerAmplitude: 0,
   },
-} as const;
+} as const

@@ -1,8 +1,8 @@
-"use server";
+"use server"
 
-import { auth } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth"
+import { revalidatePath } from "next/cache"
+import { prisma } from "@/lib/prisma"
 import {
   addIssueComment,
   createIssue,
@@ -23,18 +23,21 @@ import {
   getIssue,
   getGithubEmailVisibility,
   type IssueMetadata,
-} from "@/lib/github-features";
+} from "@/lib/github-features"
 
-const QQ_BOT_WEBHOOK = process.env.QQ_BOT_WEBHOOK || "";
+const QQ_BOT_WEBHOOK = process.env.QQ_BOT_WEBHOOK || ""
 
 async function sendQQBotNotification(payload: {
-  type?: string;
-  text: string;
-  data?: Record<string, unknown>;
+  type?: string
+  text: string
+  data?: Record<string, unknown>
 }) {
   if (!QQ_BOT_WEBHOOK) {
-    console.log("[Mock QQ Bot] Would send payload to webhook: ", payload.text);
-    return;
+    console.log(
+      "[Mock QQ Bot] Would send payload to webhook: ",
+      payload.text,
+    )
+    return
   }
 
   try {
@@ -43,56 +46,61 @@ async function sendQQBotNotification(payload: {
       headers: { "Content-Type": "application/json" },
       // Send a structured payload that AstrBot can easily parse in a custom plugin
       body: JSON.stringify(payload),
-    });
+    })
   } catch (error) {
-    console.error("Failed to send QQ Bot Notification:", error);
+    console.error("Failed to send QQ Bot Notification:", error)
   }
 }
 
 async function getFeatureByIssueNumber(issueNumber: number) {
-  const issue = await getIssue(issueNumber);
-  if (!issue) return null;
-  const parsed = parseIssueBody(issue.body);
-  return { issue, parsed };
+  const issue = await getIssue(issueNumber)
+  if (!issue) return null
+  const parsed = parseIssueBody(issue.body)
+  return { issue, parsed }
 }
 
 async function resolveGithubLoginFromAccount(
   account: {
-    providerAccountId: string;
-    access_token: string | null;
+    providerAccountId: string
+    access_token: string | null
   } | null,
 ): Promise<string | null> {
   if (!account) {
-    return null;
+    return null
   }
 
-  const loginByAccountId = await getGithubLoginByAccountId(account.providerAccountId);
+  const loginByAccountId = await getGithubLoginByAccountId(
+    account.providerAccountId,
+  )
   if (loginByAccountId) {
-    return loginByAccountId;
+    return loginByAccountId
   }
 
   if (!account.access_token) {
-    return null;
+    return null
   }
 
-  return getGithubLoginByToken(account.access_token);
+  return getGithubLoginByToken(account.access_token)
 }
 
-async function resolveMentionToken(appUserId: string, displayName: string | null): Promise<string> {
+async function resolveMentionToken(
+  appUserId: string,
+  displayName: string | null,
+): Promise<string> {
   try {
     const account = await prisma.account.findFirst({
       where: { provider: "github", userId: appUserId },
-    });
+    })
     if (account) {
-      const login = await resolveGithubLoginFromAccount(account);
+      const login = await resolveGithubLoginFromAccount(account)
       if (login) {
-        return `@${login}`;
+        return `@${login}`
       }
     }
   } catch {
     // fallthrough to plain text
   }
-  return displayName ?? appUserId;
+  return displayName ?? appUserId
 }
 
 function getMetadataForWrite(
@@ -100,36 +108,43 @@ function getMetadataForWrite(
   fallbackAppUserId: string,
 ): IssueMetadata {
   if (metadata) {
-    return metadata;
+    return metadata
   }
 
   return {
     appUserId: fallbackAppUserId,
     authorName: null,
     authorEmail: null,
-  };
+  }
 }
 
-export async function createFeature(data: { title: string; content: string; tags: string[] }) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+export async function createFeature(data: {
+  title: string
+  content: string
+  tags: string[]
+}) {
+  const session = await auth()
+  if (!session?.user?.id) throw new Error("Unauthorized")
 
   const metadata: IssueMetadata = {
     appUserId: session.user.id,
     authorName: session.user.name ?? null,
     authorEmail: session.user.email ?? null,
-  };
+  }
 
-  const body = serializeIssueBody(data.content, metadata, undefined);
+  const body = serializeIssueBody(data.content, metadata, undefined)
 
   // Ensure all tag labels exist on the repo
   for (const tag of data.tags) {
-    await ensureLabel(tag);
+    await ensureLabel(tag)
   }
 
-  const labels = [...tagsToLabels(data.tags), ...statusToLabels("PENDING")];
+  const labels = [
+    ...tagsToLabels(data.tags),
+    ...statusToLabels("PENDING"),
+  ]
 
-  const created = await createIssue(data.title, body, labels);
+  const created = await createIssue(data.title, body, labels)
 
   // Send structured payload for AstrBot
   await sendQQBotNotification({
@@ -143,9 +158,9 @@ export async function createFeature(data: { title: string; content: string; tags
       tags: data.tags,
       url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/features/${created.number}`,
     },
-  });
+  })
 
-  revalidatePath("/features");
+  revalidatePath("/features")
   return {
     success: true,
     feature: {
@@ -154,58 +169,64 @@ export async function createFeature(data: { title: string; content: string; tags
       content: data.content,
       tags: data.tags,
     },
-  };
+  }
 }
 
 export async function updateFeature(
   id: string,
   data: { title: string; content: string; tags: string[] },
 ) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const session = await auth()
+  if (!session?.user?.id) throw new Error("Unauthorized")
 
-  const issueNumber = parseInt(id, 10);
-  if (isNaN(issueNumber)) throw new Error("Invalid issue number");
+  const issueNumber = parseInt(id, 10)
+  if (isNaN(issueNumber)) throw new Error("Invalid issue number")
 
-  const feature = await getFeatureByIssueNumber(issueNumber);
-  if (!feature) throw new Error("Not found");
+  const feature = await getFeatureByIssueNumber(issueNumber)
+  if (!feature) throw new Error("Not found")
 
   if (feature.issue.state === "closed") {
-    throw new Error("Feature is deleted and read-only");
+    throw new Error("Feature is deleted and read-only")
   }
 
-  const { issue, parsed } = feature;
+  const { issue, parsed } = feature
 
-  if (parsed.metadata?.appUserId !== session.user.id && session.user.role !== "ADMIN") {
-    throw new Error("Forbidden");
+  if (
+    parsed.metadata?.appUserId !== session.user.id &&
+    session.user.role !== "ADMIN"
+  ) {
+    throw new Error("Forbidden")
   }
 
   for (const tag of data.tags) {
-    await ensureLabel(tag);
+    await ensureLabel(tag)
   }
 
-  const currentStatus = labelsToStatus(issue.labels);
-  const newLabels = [...tagsToLabels(data.tags), ...statusToLabels(currentStatus)];
+  const currentStatus = labelsToStatus(issue.labels)
+  const newLabels = [
+    ...tagsToLabels(data.tags),
+    ...statusToLabels(currentStatus),
+  ]
 
   const fallbackMetadata: IssueMetadata = {
     appUserId: "",
     authorName: null,
     authorEmail: null,
-  };
+  }
   const newBody = serializeIssueBody(
     data.content,
     parsed.metadata ?? fallbackMetadata,
     parsed.explanation ?? undefined,
-  );
+  )
 
   await updateIssue(issue.number, {
     title: data.title,
     body: newBody,
     labels: newLabels,
-  });
+  })
 
-  revalidatePath("/features");
-  revalidatePath(`/features/${id}`);
+  revalidatePath("/features")
+  revalidatePath(`/features/${id}`)
   return {
     success: true,
     feature: {
@@ -214,57 +235,67 @@ export async function updateFeature(
       content: data.content,
       tags: data.tags,
     },
-  };
+  }
 }
 
-export async function updateFeatureExplanation(id: string, explanation: string) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+export async function updateFeatureExplanation(
+  id: string,
+  explanation: string,
+) {
+  const session = await auth()
+  if (!session?.user?.id) throw new Error("Unauthorized")
 
-  const issueNumber = parseInt(id, 10);
-  if (isNaN(issueNumber)) throw new Error("Invalid issue number");
+  const issueNumber = parseInt(id, 10)
+  if (isNaN(issueNumber)) throw new Error("Invalid issue number")
 
-  const feature = await getFeatureByIssueNumber(issueNumber);
-  if (!feature) throw new Error("Not found");
+  const feature = await getFeatureByIssueNumber(issueNumber)
+  if (!feature) throw new Error("Not found")
 
   if (feature.issue.state === "closed") {
-    throw new Error("Feature is deleted and read-only");
+    throw new Error("Feature is deleted and read-only")
   }
 
-  const { issue, parsed } = feature;
+  const { issue, parsed } = feature
 
-  const isAdmin = session.user.role === "ADMIN";
-  const isAssignee = parsed.metadata?.assigneeId === session.user.id;
-  if (!isAssignee && !isAdmin) throw new Error("Forbidden");
+  const isAdmin = session.user.role === "ADMIN"
+  const isAssignee = parsed.metadata?.assigneeId === session.user.id
+  if (!isAssignee && !isAdmin) throw new Error("Forbidden")
 
   const newBody = serializeIssueBody(
     parsed.userContent,
-    parsed.metadata ?? { appUserId: "", authorName: null, authorEmail: null },
+    parsed.metadata ?? {
+      appUserId: "",
+      authorName: null,
+      authorEmail: null,
+    },
     explanation || undefined,
-  );
+  )
 
-  await updateIssue(issue.number, { body: newBody });
+  await updateIssue(issue.number, { body: newBody })
 
-  revalidatePath(`/features/${id}`);
-  return { success: true };
+  revalidatePath(`/features/${id}`)
+  return { success: true }
 }
 
 export async function assignFeature(id: string) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const session = await auth()
+  if (!session?.user?.id) throw new Error("Unauthorized")
 
-  const issueNumber = parseInt(id, 10);
-  if (isNaN(issueNumber)) throw new Error("Invalid issue number");
+  const issueNumber = parseInt(id, 10)
+  if (isNaN(issueNumber)) throw new Error("Invalid issue number")
 
-  const feature = await getFeatureByIssueNumber(issueNumber);
-  if (!feature) throw new Error("Not found");
+  const feature = await getFeatureByIssueNumber(issueNumber)
+  if (!feature) throw new Error("Not found")
 
   if (feature.issue.state === "closed") {
-    throw new Error("Feature is deleted and read-only");
+    throw new Error("Feature is deleted and read-only")
   }
 
-  const { issue, parsed } = feature;
-  const metadataForWrite = getMetadataForWrite(parsed.metadata, `legacy-issue-${issue.number}`);
+  const { issue, parsed } = feature
+  const metadataForWrite = getMetadataForWrite(
+    parsed.metadata,
+    `legacy-issue-${issue.number}`,
+  )
 
   const newBodyWithAssignee = serializeIssueBody(
     parsed.userContent,
@@ -277,19 +308,25 @@ export async function assignFeature(id: string) {
       assigneeEmail: session.user.email ?? null,
     },
     parsed.explanation ?? undefined,
-  );
+  )
 
-  const tags = labelsToTags(issue.labels);
-  const newLabels = [...tagsToLabels(tags), ...statusToLabels("IN_PROGRESS")];
+  const tags = labelsToTags(issue.labels)
+  const newLabels = [
+    ...tagsToLabels(tags),
+    ...statusToLabels("IN_PROGRESS"),
+  ]
 
   await Promise.all([
     setIssueLabels(issue.number, newLabels),
     updateIssue(issue.number, { body: newBodyWithAssignee }),
-  ]);
+  ])
 
   // Post claim bot comment (best-effort, does not fail the action)
   try {
-    const mentionToken = await resolveMentionToken(session.user.id, session.user.name ?? null);
+    const mentionToken = await resolveMentionToken(
+      session.user.id,
+      session.user.name ?? null,
+    )
 
     // Query GitHub Account and check email visibility
     const account = await prisma.account.findFirst({
@@ -297,11 +334,15 @@ export async function assignFeature(id: string) {
         provider: "github",
         userId: session.user.id,
       },
-    });
+    })
 
-    const visibility = await getGithubEmailVisibility(account?.access_token || "");
+    const visibility = await getGithubEmailVisibility(
+      account?.access_token || "",
+    )
     const assigneeEmail =
-      visibility === "private" ? "REDACTED FOR PRIVACY" : (session.user.email ?? "Unknown");
+      visibility === "private"
+        ? "REDACTED FOR PRIVACY"
+        : (session.user.email ?? "Unknown")
 
     const payload = `[Assignment Notice]
 Action: CLAIMED
@@ -309,37 +350,43 @@ Assignee: ${mentionToken}
 AssigneeId: ${session.user.id}
 AssigneeEmail: ${assigneeEmail}
 By: ${mentionToken}
-At: ${new Date().toISOString()}`;
-    await addIssueComment(issue.number, serializeSystemComment(payload));
+At: ${new Date().toISOString()}`
+    await addIssueComment(
+      issue.number,
+      serializeSystemComment(payload),
+    )
   } catch (error) {
-    console.warn("Failed to post claim bot comment:", error);
+    console.warn("Failed to post claim bot comment:", error)
   }
 
-  revalidatePath("/features");
-  revalidatePath(`/features/${id}`);
-  return { success: true, feature: { id } };
+  revalidatePath("/features")
+  revalidatePath(`/features/${id}`)
+  return { success: true, feature: { id } }
 }
 
 export async function unassignFeature(id: string) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const session = await auth()
+  if (!session?.user?.id) throw new Error("Unauthorized")
 
-  const issueNumber = parseInt(id, 10);
-  if (isNaN(issueNumber)) throw new Error("Invalid issue number");
+  const issueNumber = parseInt(id, 10)
+  if (isNaN(issueNumber)) throw new Error("Invalid issue number")
 
-  const feature = await getFeatureByIssueNumber(issueNumber);
-  if (!feature) throw new Error("Not found");
+  const feature = await getFeatureByIssueNumber(issueNumber)
+  if (!feature) throw new Error("Not found")
 
   if (feature.issue.state === "closed") {
-    throw new Error("Feature is deleted and read-only");
+    throw new Error("Feature is deleted and read-only")
   }
 
-  const { issue, parsed } = feature;
-  const isAdmin = session.user.role === "ADMIN";
-  const isAssignee = parsed.metadata?.assigneeId === session.user.id;
-  if (!isAssignee && !isAdmin) throw new Error("Forbidden");
+  const { issue, parsed } = feature
+  const isAdmin = session.user.role === "ADMIN"
+  const isAssignee = parsed.metadata?.assigneeId === session.user.id
+  if (!isAssignee && !isAdmin) throw new Error("Forbidden")
 
-  const metadataForWrite = getMetadataForWrite(parsed.metadata, `legacy-issue-${issue.number}`);
+  const metadataForWrite = getMetadataForWrite(
+    parsed.metadata,
+    `legacy-issue-${issue.number}`,
+  )
 
   const newBody = serializeIssueBody(
     parsed.userContent,
@@ -349,62 +396,80 @@ export async function unassignFeature(id: string) {
       authorEmail: metadataForWrite.authorEmail,
     },
     parsed.explanation ?? undefined,
-  );
+  )
 
-  const tags = labelsToTags(issue.labels);
-  const newLabels = [...tagsToLabels(tags), ...statusToLabels("PENDING")];
+  const tags = labelsToTags(issue.labels)
+  const newLabels = [
+    ...tagsToLabels(tags),
+    ...statusToLabels("PENDING"),
+  ]
 
   await Promise.all([
     setIssueLabels(issue.number, newLabels),
     updateIssue(issue.number, { body: newBody }),
-  ]);
+  ])
 
   // Post drop bot comment (best-effort, does not fail the action)
   try {
-    const mentionToken = await resolveMentionToken(session.user.id, session.user.name ?? null);
-    const prevAssigneeId = parsed.metadata?.assigneeId ?? "";
+    const mentionToken = await resolveMentionToken(
+      session.user.id,
+      session.user.name ?? null,
+    )
+    const prevAssigneeId = parsed.metadata?.assigneeId ?? ""
     const previousMentionToken = prevAssigneeId
-      ? await resolveMentionToken(prevAssigneeId, parsed.metadata?.assigneeName ?? null)
-      : "N/A";
+      ? await resolveMentionToken(
+          prevAssigneeId,
+          parsed.metadata?.assigneeName ?? null,
+        )
+      : "N/A"
     const payload = `[Assignment Notice]
 Action: DROPPED
 PreviousAssignee: ${previousMentionToken}
 PreviousAssigneeId: ${parsed.metadata?.assigneeId ?? "N/A"}
 By: ${mentionToken}
-At: ${new Date().toISOString()}`;
-    await addIssueComment(issue.number, serializeSystemComment(payload));
+At: ${new Date().toISOString()}`
+    await addIssueComment(
+      issue.number,
+      serializeSystemComment(payload),
+    )
   } catch (error) {
-    console.warn("Failed to post drop bot comment:", error);
+    console.warn("Failed to post drop bot comment:", error)
   }
 
-  revalidatePath("/features");
-  revalidatePath(`/features/${id}`);
-  return { success: true, feature: { id } };
+  revalidatePath("/features")
+  revalidatePath(`/features/${id}`)
+  return { success: true, feature: { id } }
 }
 
-export async function resolveFeature(id: string, resolutionComment?: string) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+export async function resolveFeature(
+  id: string,
+  resolutionComment?: string,
+) {
+  const session = await auth()
+  if (!session?.user?.id) throw new Error("Unauthorized")
 
-  const issueNumber = parseInt(id, 10);
-  if (isNaN(issueNumber)) throw new Error("Invalid issue number");
+  const issueNumber = parseInt(id, 10)
+  if (isNaN(issueNumber)) throw new Error("Invalid issue number")
 
-  if (session.user.role !== "ADMIN") throw new Error("Admin only");
+  if (session.user.role !== "ADMIN") throw new Error("Admin only")
 
-  const feature = await getFeatureByIssueNumber(issueNumber);
-  if (!feature) throw new Error("Not found");
+  const feature = await getFeatureByIssueNumber(issueNumber)
+  if (!feature) throw new Error("Not found")
 
   if (feature.issue.state === "closed") {
-    throw new Error("Feature is deleted and read-only");
+    throw new Error("Feature is deleted and read-only")
   }
 
-  const { issue } = feature;
+  const { issue } = feature
 
-  const tags = labelsToTags(issue.labels);
-  const newLabels = [...tagsToLabels(tags), ...statusToLabels("RESOLVED")];
+  const tags = labelsToTags(issue.labels)
+  const newLabels = [
+    ...tagsToLabels(tags),
+    ...statusToLabels("RESOLVED"),
+  ]
 
-  await setIssueLabels(issue.number, newLabels);
-  await setIssueState(issue.number, "closed");
+  await setIssueLabels(issue.number, newLabels)
+  await setIssueState(issue.number, "closed")
 
   if (resolutionComment) {
     await addIssueComment(
@@ -414,26 +479,26 @@ export async function resolveFeature(id: string, resolutionComment?: string) {
         authorName: session.user.name ?? null,
         authorEmail: session.user.email ?? null,
       }),
-    );
+    )
   }
 
-  revalidatePath("/features");
-  revalidatePath(`/features/${id}`);
-  return { success: true, feature: { id } };
+  revalidatePath("/features")
+  revalidatePath(`/features/${id}`)
+  return { success: true, feature: { id } }
 }
 
 export async function addFeatureComment(id: string, content: string) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const session = await auth()
+  if (!session?.user?.id) throw new Error("Unauthorized")
 
-  const issueNumber = parseInt(id, 10);
-  if (isNaN(issueNumber)) throw new Error("Invalid issue number");
+  const issueNumber = parseInt(id, 10)
+  if (isNaN(issueNumber)) throw new Error("Invalid issue number")
 
-  const feature = await getFeatureByIssueNumber(issueNumber);
-  if (!feature) throw new Error("Not found");
+  const feature = await getFeatureByIssueNumber(issueNumber)
+  if (!feature) throw new Error("Not found")
 
   if (feature.issue.state === "closed") {
-    throw new Error("Feature is deleted and read-only");
+    throw new Error("Feature is deleted and read-only")
   }
 
   // Query GitHub Account and check email visibility
@@ -442,20 +507,25 @@ export async function addFeatureComment(id: string, content: string) {
       provider: "github",
       userId: session.user.id,
     },
-  });
+  })
 
-  const visibility = await getGithubEmailVisibility(account?.access_token || "");
-  const isPrivate = visibility === "private";
+  const visibility = await getGithubEmailVisibility(
+    account?.access_token || "",
+  )
+  const isPrivate = visibility === "private"
 
-  const githubLogin = await resolveGithubLoginFromAccount(account);
-  const fallbackAuthorLabel = session.user.name ?? session.user.email ?? session.user.id;
-  const mentionToken = githubLogin ? `@${githubLogin}` : fallbackAuthorLabel;
+  const githubLogin = await resolveGithubLoginFromAccount(account)
+  const fallbackAuthorLabel =
+    session.user.name ?? session.user.email ?? session.user.id
+  const mentionToken = githubLogin
+    ? `@${githubLogin}`
+    : fallbackAuthorLabel
   const authorLine = githubLogin
     ? `> **\[BY\]** ${mentionToken} (${fallbackAuthorLabel})`
-    : `> **\[BY\]** ${mentionToken}`;
+    : `> **\[BY\]** ${mentionToken}`
 
-  const authorEmail = isPrivate ? null : (session.user.email ?? null);
-  const emailRedacted = isPrivate;
+  const authorEmail = isPrivate ? null : (session.user.email ?? null)
+  const emailRedacted = isPrivate
 
   const commentBody = serializeCommentBody(
     `<!-- GTMC_COMMENT_AUTHOR_LINE -->\n${authorLine}\n\n${content}`,
@@ -465,11 +535,14 @@ export async function addFeatureComment(id: string, content: string) {
       authorEmail,
       emailRedacted,
     },
-  );
+  )
 
-  const ghComment = await addIssueComment(feature.issue.number, commentBody);
+  const ghComment = await addIssueComment(
+    feature.issue.number,
+    commentBody,
+  )
 
-  revalidatePath(`/features/${id}`);
+  revalidatePath(`/features/${id}`)
 
   return {
     success: true,
@@ -480,9 +553,10 @@ export async function addFeatureComment(id: string, content: string) {
       author: {
         name: session.user.name ?? null,
         email: authorEmail,
-        image: (session.user as { image?: string | null }).image ?? null,
+        image:
+          (session.user as { image?: string | null }).image ?? null,
       },
       emailRedacted,
     },
-  };
+  }
 }

@@ -19,6 +19,7 @@
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "7.5.0",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/blob": "^2.3.1",
     "@vercel/speed-insights": "^2.0.0",
     "browser-image-compression": "^2.0.2",
     "cos-nodejs-sdk-v5": "^2.15.4",

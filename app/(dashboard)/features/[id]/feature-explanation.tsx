@@ -1,17 +1,20 @@
-"use client";
+"use client"
 
-import { useState, useTransition } from "react";
-import { BrutalCard } from "@/components/ui/brutal-card";
-import { BrutalButton } from "@/components/ui/brutal-button";
-import { updateFeatureExplanation } from "@/actions/feature";
-import { LoadingIndicator, PENDING_LABELS } from "../loading-indicator";
+import { useState, useTransition } from "react"
+import { BrutalCard } from "@/components/ui/brutal-card"
+import { BrutalButton } from "@/components/ui/brutal-button"
+import { updateFeatureExplanation } from "@/actions/feature"
+import {
+  LoadingIndicator,
+  PENDING_LABELS,
+} from "../loading-indicator"
 
 interface FeatureExplanationProps {
-  featureId: string;
-  initialExplanation: string | null;
-  isAssignee: boolean;
-  isAdmin: boolean;
-  isClosed?: boolean;
+  featureId: string
+  initialExplanation: string | null
+  isAssignee: boolean
+  isAdmin: boolean
+  isClosed?: boolean
 }
 
 export function FeatureExplanation({
@@ -21,21 +24,23 @@ export function FeatureExplanation({
   isAdmin,
   isClosed,
 }: FeatureExplanationProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [explanation, setExplanation] = useState(initialExplanation || "");
-  const [isPending, startTransition] = useTransition();
+  const [isEditing, setIsEditing] = useState(false)
+  const [explanation, setExplanation] = useState(
+    initialExplanation || "",
+  )
+  const [isPending, startTransition] = useTransition()
 
-  const canEdit = isAssignee || isAdmin;
-  const effectiveCanEdit = canEdit && !isClosed;
+  const canEdit = isAssignee || isAdmin
+  const effectiveCanEdit = canEdit && !isClosed
 
   const handleSave = () => {
     startTransition(async () => {
-      await updateFeatureExplanation(featureId, explanation);
-      setIsEditing(false);
-    });
-  };
+      await updateFeatureExplanation(featureId, explanation)
+      setIsEditing(false)
+    })
+  }
 
-  if (!initialExplanation && !effectiveCanEdit) return null;
+  if (!initialExplanation && !effectiveCanEdit) return null
 
   if (isEditing) {
     return (
@@ -56,8 +61,7 @@ export function FeatureExplanation({
             variant="ghost"
             size="sm"
             onClick={() => setIsEditing(false)}
-            disabled={isPending}
-          >
+            disabled={isPending}>
             CANCEL
           </BrutalButton>
           <BrutalButton
@@ -66,17 +70,18 @@ export function FeatureExplanation({
             className="bg-tech-accent border-tech-accent hover:bg-tech-accent/90 text-white"
             onClick={handleSave}
             disabled={isPending}
-            aria-busy={isPending}
-          >
+            aria-busy={isPending}>
             {isPending ? (
-              <LoadingIndicator label={PENDING_LABELS.SAVING_EXPLANATION} />
+              <LoadingIndicator
+                label={PENDING_LABELS.SAVING_EXPLANATION}
+              />
             ) : (
               "SAVE_EXPLANATION"
             )}
           </BrutalButton>
         </div>
       </BrutalCard>
-    );
+    )
   }
 
   if (initialExplanation) {
@@ -90,8 +95,7 @@ export function FeatureExplanation({
           {effectiveCanEdit && (
             <button
               onClick={() => setIsEditing(true)}
-              className="text-tech-main cursor-pointer px-2 font-mono text-xs hover:underline"
-            >
+              className="text-tech-main cursor-pointer px-2 font-mono text-xs hover:underline">
               [EDIT]
             </button>
           )}
@@ -100,7 +104,7 @@ export function FeatureExplanation({
           {initialExplanation}
         </div>
       </BrutalCard>
-    );
+    )
   }
 
   // NO explanation yet, but user CAN edit
@@ -114,11 +118,10 @@ export function FeatureExplanation({
           variant="ghost"
           size="sm"
           onClick={() => setIsEditing(true)}
-          className="border-tech-accent/40 text-tech-accent hover:bg-tech-accent/10 border"
-        >
+          className="border-tech-accent/40 text-tech-accent hover:bg-tech-accent/10 border">
           PROVIDE EXPLANATION
         </BrutalButton>
       </div>
     </BrutalCard>
-  );
+  )
 }

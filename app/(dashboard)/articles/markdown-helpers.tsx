@@ -1,33 +1,34 @@
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import Link from "next/link";
-import path from "path";
-import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
-import remarkBreaks from "remark-breaks";
-import rehypeRaw from "rehype-raw";
-import rehypeKatex from "rehype-katex";
-import rehypeSlug from "rehype-slug";
-import type { ReactNode } from "react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
+import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism"
+import Link from "next/link"
+import path from "path"
+import remarkGfm from "remark-gfm"
+import remarkMath from "remark-math"
+import remarkBreaks from "remark-breaks"
+import rehypeRaw from "rehype-raw"
+import rehypeKatex from "rehype-katex"
+import rehypeSlug from "rehype-slug"
+import type { ReactNode } from "react"
 
 type MarkdownComponentProps = {
-  children?: ReactNode;
-  id?: string;
-  href?: string;
-  src?: string;
-  alt?: string;
-  className?: string;
-  [key: string]: unknown;
-};
+  children?: ReactNode
+  id?: string
+  href?: string
+  src?: string
+  alt?: string
+  className?: string
+  [key: string]: unknown
+}
 
-type MarkdownComponent = (props: MarkdownComponentProps) => ReactNode;
+type MarkdownComponent = (props: MarkdownComponentProps) => ReactNode
 
 export function calculateReadingMetrics(content: string) {
-  const cjkCount = (content.match(/[\u4e00-\u9fa5]/g) || []).length;
-  const westernWordCount = (content.match(/[a-zA-Z0-9]+/g) || []).length;
-  const wordCount = cjkCount + westernWordCount;
-  const readingTime = Math.max(1, Math.ceil(wordCount / 300));
-  return { wordCount, readingTime };
+  const cjkCount = (content.match(/[\u4e00-\u9fa5]/g) || []).length
+  const westernWordCount = (content.match(/[a-zA-Z0-9]+/g) || [])
+    .length
+  const wordCount = cjkCount + westernWordCount
+  const readingTime = Math.max(1, Math.ceil(wordCount / 300))
+  return { wordCount, readingTime }
 }
 
 export function getMarkdownComponents(rawPath: string) {
@@ -76,7 +77,10 @@ export function getMarkdownComponents(rawPath: string) {
       </div>
     ),
     thead: ({ ...props }: MarkdownComponentProps) => (
-      <thead className="bg-tech-main/10 border-tech-main/30 border-b" {...props} />
+      <thead
+        className="bg-tech-main/10 border-tech-main/30 border-b"
+        {...props}
+      />
     ),
     th: ({ ...props }: MarkdownComponentProps) => (
       <th
@@ -93,13 +97,11 @@ export function getMarkdownComponents(rawPath: string) {
     h1: ({ id, children }: MarkdownComponentProps) => (
       <h1
         id={id}
-        className="group border-tech-main/30 target:animate-target-blink target:border-tech-main relative mt-8 mb-6 scroll-m-20 border-b pb-4 font-mono text-2xl tracking-widest text-slate-900 uppercase sm:text-3xl lg:text-4xl"
-      >
+        className="group border-tech-main/30 target:animate-target-blink target:border-tech-main relative mt-8 mb-6 scroll-m-20 border-b pb-4 font-mono text-2xl tracking-widest text-slate-900 uppercase sm:text-3xl lg:text-4xl">
         {id && (
           <a
             href={`#${id}`}
-            className="text-tech-main absolute top-1/2 -left-6 -translate-y-1/2 text-xl font-normal no-underline opacity-0 transition-opacity group-hover:opacity-100"
-          >
+            className="text-tech-main absolute top-1/2 -left-6 -translate-y-1/2 text-xl font-normal no-underline opacity-0 transition-opacity group-hover:opacity-100">
             #
           </a>
         )}
@@ -109,13 +111,11 @@ export function getMarkdownComponents(rawPath: string) {
     h2: ({ id, children }: MarkdownComponentProps) => (
       <h2
         id={id}
-        className="group border-tech-main/30 target:animate-target-blink target:border-tech-main relative mt-12 mb-6 inline-block scroll-m-20 border-b pr-8 font-mono text-2xl tracking-widest text-slate-800 uppercase"
-      >
+        className="group border-tech-main/30 target:animate-target-blink target:border-tech-main relative mt-12 mb-6 inline-block scroll-m-20 border-b pr-8 font-mono text-2xl tracking-widest text-slate-800 uppercase">
         {id && (
           <a
             href={`#${id}`}
-            className="text-tech-main absolute top-1/2 -left-5 -translate-y-1/2 text-lg font-normal no-underline opacity-0 transition-opacity group-hover:opacity-100"
-          >
+            className="text-tech-main absolute top-1/2 -left-5 -translate-y-1/2 text-lg font-normal no-underline opacity-0 transition-opacity group-hover:opacity-100">
             #
           </a>
         )}
@@ -125,13 +125,11 @@ export function getMarkdownComponents(rawPath: string) {
     h3: ({ id, children }: MarkdownComponentProps) => (
       <h3
         id={id}
-        className="group target:animate-target-blink relative mt-8 mb-4 scroll-m-20 font-mono text-xl tracking-widest text-slate-700 uppercase"
-      >
+        className="group target:animate-target-blink relative mt-8 mb-4 scroll-m-20 font-mono text-xl tracking-widest text-slate-700 uppercase">
         {id && (
           <a
             href={`#${id}`}
-            className="text-tech-main absolute top-1/2 -left-4 -translate-y-1/2 text-base font-normal no-underline opacity-0 transition-opacity group-hover:opacity-100"
-          >
+            className="text-tech-main absolute top-1/2 -left-4 -translate-y-1/2 text-base font-normal no-underline opacity-0 transition-opacity group-hover:opacity-100">
             #
           </a>
         )}
@@ -139,22 +137,37 @@ export function getMarkdownComponents(rawPath: string) {
       </h3>
     ),
     p: ({ ...props }: MarkdownComponentProps) => (
-      <p className="font-mono text-base leading-relaxed mb-4 text-slate-800" {...props} />
+      <p
+        className="mb-4 font-mono text-base leading-relaxed text-slate-800"
+        {...props}
+      />
     ),
     a: ({ href: initialHref, ...props }: MarkdownComponentProps) => {
-      let href = (initialHref as string) || "";
+      let href = (initialHref as string) || ""
       if (href.startsWith("./") || href.startsWith("../")) {
-        const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "");
+        const currentDir = path
+          .dirname("/" + rawPath)
+          .replace(/^\/+/, "")
         try {
-          const resolved = path.join(currentDir, href).replace(/\\/g, "/");
-          href = `/articles/${resolved}`;
+          const resolved = path
+            .join(currentDir, href)
+            .replace(/\\/g, "/")
+          href = `/articles/${resolved}`
         } catch {
           // ignore path resolution errors
         }
-      } else if (!href.startsWith("http") && !href.startsWith("#") && !href.startsWith("/")) {
-        const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "");
-        const resolved = path.join(currentDir, href).replace(/\\/g, "/");
-        href = `/articles/${resolved}`;
+      } else if (
+        !href.startsWith("http") &&
+        !href.startsWith("#") &&
+        !href.startsWith("/")
+      ) {
+        const currentDir = path
+          .dirname("/" + rawPath)
+          .replace(/^\/+/, "")
+        const resolved = path
+          .join(currentDir, href)
+          .replace(/\\/g, "/")
+        href = `/articles/${resolved}`
       }
       return (
         <Link
@@ -162,16 +175,19 @@ export function getMarkdownComponents(rawPath: string) {
           className="text-tech-main border-tech-main/50 hover:bg-tech-main/80 border-b font-mono transition-colors hover:text-white"
           {...props}
         />
-      );
+      )
     },
     ul: ({ ...props }: MarkdownComponentProps) => (
       <ul
-        className="border-tech-main/30 mb-6 list-none space-y-2 border-l-[1.5] pl-8 font-mono text-slate-800 text-[0.9em]"
+        className="border-tech-main/30 mb-6 list-none space-y-2 border-l-[1.5] pl-8 font-mono text-[0.9em] text-slate-800"
         {...props}
       />
     ),
     ol: ({ ...props }: MarkdownComponentProps) => (
-      <ol className="mb-6 list-decimal space-y-2 pl-6 font-mono text-slate-800" {...props} />
+      <ol
+        className="mb-6 list-decimal space-y-2 pl-6 font-mono text-slate-800"
+        {...props}
+      />
     ),
     li: ({ ...props }: MarkdownComponentProps) => (
       <li
@@ -186,15 +202,19 @@ export function getMarkdownComponents(rawPath: string) {
       />
     ),
     img: ({ src: initialSrc, alt }: MarkdownComponentProps) => {
-      let src = (initialSrc as string) || "";
+      let src = (initialSrc as string) || ""
       if (
         src.startsWith("./") ||
         src.startsWith("../") ||
         (!src.startsWith("http") && !src.startsWith("/"))
       ) {
-        const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "");
-        const resolved = path.join(currentDir, src).replace(/\\/g, "/");
-        src = `/api/assets?path=${encodeURIComponent(resolved)}`;
+        const currentDir = path
+          .dirname("/" + rawPath)
+          .replace(/^\/+/, "")
+        const resolved = path
+          .join(currentDir, src)
+          .replace(/\\/g, "/")
+        src = `/api/assets?path=${encodeURIComponent(resolved)}`
       }
       return (
         // eslint-disable-next-line @next/next/no-img-element
@@ -203,20 +223,31 @@ export function getMarkdownComponents(rawPath: string) {
           alt={(alt as string) || ""}
           className="border-tech-main/30 bg-tech-main/5 my-8 h-auto max-w-full border p-1 shadow-sm"
         />
-      );
+      )
     },
-    code: ({ className, children, ...props }: MarkdownComponentProps) => {
-      const match = /language-(\w+)/.exec((className as string) || "");
+    code: ({
+      className,
+      children,
+      ...props
+    }: MarkdownComponentProps) => {
+      const match = /language-(\w+)/.exec((className as string) || "")
       return match ? (
         <div className="border-tech-main/30 -mx-6 my-6 max-w-full overflow-hidden border bg-[#1e1e1e] font-mono text-sm shadow-sm sm:-mx-8">
           <div className="bg-tech-main/10 text-tech-main border-tech-main/30 flex items-center justify-between border-b px-4 py-1 font-mono text-xs tracking-widest uppercase">
             <span>{match[1]}</span>
-            <span className="opacity-50">{"//"} EXECUTABLE_BLOCK</span>
+            <span className="opacity-50">
+              {"//"} EXECUTABLE_BLOCK
+            </span>
           </div>
           <div className="overflow-x-scroll px-4 sm:px-6">
             <div className="px-6 sm:px-8">
               <SyntaxHighlighter
-                style={vscDarkPlus as Record<string, Record<string, string>>}
+                style={
+                  vscDarkPlus as Record<
+                    string,
+                    Record<string, string>
+                  >
+                }
                 language={match[1]}
                 PreTag="div"
                 customStyle={{
@@ -224,8 +255,7 @@ export function getMarkdownComponents(rawPath: string) {
                   padding: "1rem 0",
                   background: "transparent",
                 }}
-                {...props}
-              >
+                {...props}>
                 {String(children).replace(/\n$/, "")}
               </SyntaxHighlighter>
             </div>
@@ -233,30 +263,31 @@ export function getMarkdownComponents(rawPath: string) {
         </div>
       ) : (
         <code
-          className="bg-tech-main/10 text-tech-main border-tech-main/30 rounded-none border px-1 py-[0.05rem] mx-1 font-mono text-[0.8em]"
-          {...props}
-        >
+          className="bg-tech-main/10 text-tech-main border-tech-main/30 mx-1 rounded-none border px-1 py-[0.05rem] font-mono text-[0.8em]"
+          {...props}>
           {children}
         </code>
-      );
+      )
     },
-  } as Record<string, MarkdownComponent>;
+  } as Record<string, MarkdownComponent>
 }
 
 export function getPluginsForContent(content: string) {
-  const remarkPlugins: Array<typeof remarkGfm | typeof remarkMath | typeof remarkBreaks> = [
-    remarkGfm,
-    remarkBreaks,
-  ];
-  const rehypePlugins: Array<typeof rehypeRaw | typeof rehypeKatex | typeof rehypeSlug> = [
-    rehypeRaw,
-    rehypeSlug,
-  ];
+  const remarkPlugins: Array<
+    typeof remarkGfm | typeof remarkMath | typeof remarkBreaks
+  > = [remarkGfm, remarkBreaks]
+  const rehypePlugins: Array<
+    typeof rehypeRaw | typeof rehypeKatex | typeof rehypeSlug
+  > = [rehypeRaw, rehypeSlug]
 
-  if (content.includes("$") || content.includes("\\(") || content.includes("\\[")) {
-    remarkPlugins.push(remarkMath);
-    rehypePlugins.push(rehypeKatex);
+  if (
+    content.includes("$") ||
+    content.includes("\\(") ||
+    content.includes("\\[")
+  ) {
+    remarkPlugins.push(remarkMath)
+    rehypePlugins.push(rehypeKatex)
   }
 
-  return { remarkPlugins, rehypePlugins };
+  return { remarkPlugins, rehypePlugins }
 }

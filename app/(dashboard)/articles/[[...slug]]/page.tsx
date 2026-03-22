@@ -1,76 +1,88 @@
-﻿import { prisma } from "@/lib/prisma";
-import ReactMarkdown from "react-markdown";
-import "katex/dist/katex.min.css";
-import { notFound } from "next/navigation";
-import Link from "next/link";
+﻿import { prisma } from "@/lib/prisma"
+import ReactMarkdown from "react-markdown"
+import "katex/dist/katex.min.css"
+import { notFound } from "next/navigation"
+import Link from "next/link"
 import {
   calculateReadingMetrics,
   getMarkdownComponents,
   getPluginsForContent,
-} from "../markdown-helpers";
-import { getRepoFileContent } from "@/lib/github-pr";
+} from "../markdown-helpers"
+import { getRepoFileContent } from "@/lib/github-pr"
 
 interface ArticlePageProps {
   params: Promise<{
-    slug?: string[];
-  }>;
+    slug?: string[]
+  }>
 }
 
-export default async function ArticlePage({ params }: ArticlePageProps) {
-  const { slug } = await params;
+export default async function ArticlePage({
+  params,
+}: ArticlePageProps) {
+  const { slug } = await params
 
-  const filePathArray = slug || ["Preface.md"];
+  const filePathArray = slug || ["Preface.md"]
 
-  let rawPath = filePathArray.map(decodeURIComponent).join("/");
+  let rawPath = filePathArray.map(decodeURIComponent).join("/")
 
-  let content = "";
-  let editPath = rawPath;
+  let content = ""
+  let editPath = rawPath
 
   const dbArticle = await prisma.article.findUnique({
     where: { slug: rawPath },
-  });
+  })
 
   if (dbArticle) {
     if (dbArticle.isFolder) {
       const children = await prisma.article.findMany({
         where: { parentId: dbArticle.id },
-      });
-      content = `# ${dbArticle.title}\n\n[SYS.DIR_CONTENTS]\n\n`;
+      })
+      content = `# ${dbArticle.title}\n\n[SYS.DIR_CONTENTS]\n\n`
       children.forEach((child: typeof dbArticle) => {
-        content += `- [${child.title}](/articles/${child.slug})\n`;
-      });
+        content += `- [${child.title}](/articles/${child.slug})\n`
+      })
     } else {
-      content = dbArticle.content;
+      content = dbArticle.content
     }
-    editPath = `db:${dbArticle.id}`;
+    editPath = `db:${dbArticle.id}`
   } else {
-    const normalizedPath = rawPath.replace(/^\/+/, "");
+    const normalizedPath = rawPath.replace(/^\/+/, "")
     const pathsToTry = normalizedPath.endsWith(".md")
-      ? [normalizedPath, normalizedPath.replace(/\.md$/, ""), `${normalizedPath.replace(/\.md$/, "")}/Preface.md`]
-      : [normalizedPath, `${normalizedPath}.md`, `${normalizedPath}/Preface.md`];
+      ? [
+          normalizedPath,
+          normalizedPath.replace(/\.md$/, ""),
+          `${normalizedPath.replace(/\.md$/, "")}/Preface.md`,
+        ]
+      : [
+          normalizedPath,
+          `${normalizedPath}.md`,
+          `${normalizedPath}/Preface.md`,
+        ]
 
     for (const tryPath of pathsToTry) {
-      const githubContent = await getRepoFileContent(tryPath);
+      const githubContent = await getRepoFileContent(tryPath)
       if (githubContent !== null) {
-        content = githubContent;
-        rawPath = tryPath;
-        editPath = tryPath.replace(/\.md$/, "");
-        break;
+        content = githubContent
+        rawPath = tryPath
+        editPath = tryPath.replace(/\.md$/, "")
+        break
       }
     }
 
     if (!content) {
       if (rawPath.includes("404")) {
-        content = "# 404 Not Found\n\nThe requested article is not available yet.";
+        content =
+          "# 404 Not Found\n\nThe requested article is not available yet."
       } else {
-        notFound();
+        notFound()
       }
     }
   }
 
-  const { wordCount, readingTime } = calculateReadingMetrics(content);
-  const { remarkPlugins, rehypePlugins } = getPluginsForContent(content);
-  const markdownComponents = getMarkdownComponents(rawPath);
+  const { wordCount, readingTime } = calculateReadingMetrics(content)
+  const { remarkPlugins, rehypePlugins } =
+    getPluginsForContent(content)
+  const markdownComponents = getMarkdownComponents(rawPath)
 
   return (
     <div className="border-tech-main/40 relative min-h-screen border bg-transparent p-6 pb-32 backdrop-blur-sm sm:p-8">
@@ -92,13 +104,17 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </div>
 
         {/* Region 2: Path Line */}
-        <div className="font-mono text-xs break-all text-slate-500">PATH: {rawPath}</div>
+        <div className="font-mono text-xs break-all text-slate-500">
+          PATH: {rawPath}
+        </div>
 
         {/* Region 3: Reading Stats Row */}
         <div className="text-tech-main flex flex-col gap-2 font-mono text-xs opacity-80 transition-opacity hover:opacity-100 sm:flex-row sm:items-center">
           <div className="flex items-center gap-1">
             <span className="opacity-50">WORDS:</span>
-            <span className="font-bold">{wordCount.toLocaleString()}</span>
+            <span className="font-bold">
+              {wordCount.toLocaleString()}
+            </span>
           </div>
           <span className="hidden opacity-30 sm:inline">|</span>
           <div className="flex items-center gap-1">
@@ -108,9 +124,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </div>
 
         {/* Region 4: Edit Action Row */}
-        <Link href={`/draft/new?file=${encodeURIComponent(editPath)}`}>
+        <Link
+          href={`/draft/new?file=${encodeURIComponent(editPath)}`}>
           <button className="border-tech-main/40 bg-tech-main/10 hover:bg-tech-main text-tech-main relative flex min-h-[44px] w-full cursor-pointer items-center gap-2 overflow-hidden border px-4 py-2 font-mono text-xs tracking-widest uppercase transition-all duration-300 hover:text-white sm:w-auto">
-            <span className="relative z-10 font-bold">[EDIT_TARGET]</span>
+            <span className="relative z-10 font-bold">
+              [EDIT_TARGET]
+            </span>
           </button>
         </Link>
       </div>
@@ -119,11 +138,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <ReactMarkdown
           remarkPlugins={remarkPlugins}
           rehypePlugins={rehypePlugins}
-          components={markdownComponents}
-        >
+          components={markdownComponents}>
           {content}
         </ReactMarkdown>
       </div>
     </div>
-  );
+  )
 }

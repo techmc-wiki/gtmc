@@ -1,15 +1,15 @@
-import { BrutalCard } from "@/components/ui/brutal-card";
-import { BrutalButton } from "@/components/ui/brutal-button";
-import Link from "next/link";
-import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import { deleteDraftAction } from "@/actions/article";
+import { BrutalCard } from "@/components/ui/brutal-card"
+import { BrutalButton } from "@/components/ui/brutal-button"
+import Link from "next/link"
+import { prisma } from "@/lib/prisma"
+import { auth } from "@/lib/auth"
+import { redirect } from "next/navigation"
+import { deleteDraftAction } from "@/actions/article"
 
 export default async function DraftDashboardPage() {
-  const session = await auth();
+  const session = await auth()
   if (!session?.user) {
-    redirect("/login");
+    redirect("/login")
   }
 
   const allDrafts = await prisma.revision.findMany({
@@ -19,20 +19,21 @@ export default async function DraftDashboardPage() {
     orderBy: {
       updatedAt: "desc",
     },
-  });
+  })
 
   const activeDrafts = allDrafts.filter(
-    (d: (typeof allDrafts)[0]) => d.status !== "APPROVED" && d.status !== "ARCHIVED",
-  );
+    (d: (typeof allDrafts)[0]) =>
+      d.status !== "APPROVED" && d.status !== "ARCHIVED",
+  )
   const archivedDrafts = allDrafts.filter(
-    (d: (typeof allDrafts)[0]) => d.status === "APPROVED" || d.status === "ARCHIVED",
-  );
+    (d: (typeof allDrafts)[0]) =>
+      d.status === "APPROVED" || d.status === "ARCHIVED",
+  )
 
   const renderDraftCard = (draft: (typeof allDrafts)[0]) => (
     <BrutalCard
       key={draft.id}
-      className="border-tech-main/40 group relative flex h-auto flex-col justify-between border bg-white/80 p-6 backdrop-blur-sm sm:h-64"
-    >
+      className="border-tech-main/40 group relative flex h-auto flex-col justify-between border bg-white/80 p-6 backdrop-blur-sm sm:h-64">
       {/* Corner brackets */}
       <div className="border-tech-main/40 absolute top-0 left-0 h-2 w-2 -translate-x-[1px] -translate-y-[1px] border-t-2 border-l-2 opacity-0 transition-opacity group-hover:opacity-100"></div>
       <div className="border-tech-main/40 absolute right-0 bottom-0 h-2 w-2 translate-x-[1px] translate-y-[1px] border-r-2 border-b-2 opacity-0 transition-opacity group-hover:opacity-100"></div>
@@ -50,29 +51,27 @@ export default async function DraftDashboardPage() {
                     : draft.status === "ARCHIVED"
                       ? "border-gray-500/40 bg-gray-500/10 text-gray-600"
                       : "border-green-500/40 bg-green-500/10 text-green-600"
-            }`}
-          >
+            }`}>
             [{draft.status}]
           </span>
           <div className="flex flex-col items-end gap-1">
             <span className="text-tech-main/50 font-mono text-xs">
               {draft.updatedAt.toLocaleDateString()}
             </span>
-            {draft.status !== "PENDING" && draft.status !== "APPROVED" && (
-              <form
-                action={async () => {
-                  "use server";
-                  await deleteDraftAction(draft.id);
-                }}
-              >
-                <button
-                  type="submit"
-                  className="flex min-h-[44px] cursor-pointer items-center font-mono text-xs text-red-500 uppercase hover:text-red-700 hover:underline"
-                >
-                  [DELETE]
-                </button>
-              </form>
-            )}
+            {draft.status !== "PENDING" &&
+              draft.status !== "APPROVED" && (
+                <form
+                  action={async () => {
+                    "use server"
+                    await deleteDraftAction(draft.id)
+                  }}>
+                  <button
+                    type="submit"
+                    className="flex min-h-[44px] cursor-pointer items-center font-mono text-xs text-red-500 uppercase hover:text-red-700 hover:underline">
+                    [DELETE]
+                  </button>
+                </form>
+              )}
           </div>
         </div>
         <h3 className="text-tech-main-dark border-tech-main/40 mt-2 line-clamp-2 border-l-2 pl-3 text-lg font-bold tracking-tight uppercase">
@@ -80,23 +79,25 @@ export default async function DraftDashboardPage() {
         </h3>
         {draft.articleId && (
           <p className="text-tech-main mt-4 flex items-center font-mono text-xs tracking-widest opacity-80">
-            <span className="bg-tech-main mr-2 inline-block h-1.5 w-1.5"></span> MOD_LIVE_DB
+            <span className="bg-tech-main mr-2 inline-block h-1.5 w-1.5"></span>{" "}
+            MOD_LIVE_DB
           </p>
         )}
       </div>
 
-      <Link href={`/draft/${draft.id}`} className="relative z-10 mt-4 sm:mt-auto">
+      <Link
+        href={`/draft/${draft.id}`}
+        className="relative z-10 mt-4 sm:mt-auto">
         <BrutalButton
           variant="ghost"
-          className="border-tech-main/40 hover:border-tech-main/60 min-h-[44px] w-full border bg-white/50 font-mono text-xs tracking-widest transition-all hover:bg-white/80"
-        >
+          className="border-tech-main/40 hover:border-tech-main/60 min-h-[44px] w-full border bg-white/50 font-mono text-xs tracking-widest transition-all hover:bg-white/80">
           {draft.status === "DRAFT" || draft.status === "REJECTED"
             ? "> EDIT_RECORD"
             : "> VIEW_STREAM"}
         </BrutalButton>
       </Link>
     </BrutalCard>
-  );
+  )
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-6">
@@ -109,15 +110,16 @@ export default async function DraftDashboardPage() {
           </h1>
           <p className="text-tech-main/80 mt-3 flex items-center gap-2 font-mono text-xs tracking-widest sm:text-sm">
             <span className="bg-tech-main h-1.5 w-1.5 shrink-0 animate-pulse rounded-full"></span>
-            <span className="break-words">YOUR DIGITAL WORKSHOP / DRAFTS & REVISIONS</span>
+            <span className="break-words">
+              YOUR DIGITAL WORKSHOP / DRAFTS & REVISIONS
+            </span>
           </p>
         </div>
 
         <Link href="/draft/new" className="w-full md:w-auto">
           <BrutalButton
             variant="primary"
-            className="flex min-h-[44px] w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto"
-          >
+            className="flex min-h-[44px] w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
             + INITIALIZE SUBMISSION
           </BrutalButton>
         </Link>
@@ -154,5 +156,5 @@ export default async function DraftDashboardPage() {
         )}
       </div>
     </div>
-  );
+  )
 }

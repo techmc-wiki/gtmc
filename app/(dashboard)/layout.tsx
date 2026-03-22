@@ -1,17 +1,21 @@
-import * as React from "react";
-import Link from "next/link";
+import * as React from "react"
+import Link from "next/link"
 
-import { ProfileButton } from "@/components/ui/profile-button";
-import { Logo } from "@/components/ui/logo";
-import { MobileNav } from "./mobile-nav";
+import { ProfileButton } from "@/components/ui/profile-button"
+import { Logo } from "@/components/ui/logo"
+import { MobileNav } from "./mobile-nav"
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const navLinks = [
     { href: "/articles", label: "DATABASE" },
     { href: "/draft", label: "MY DRAFTS" },
     { href: "/review", label: "REVIEW HUB" },
     { href: "/features", label: "FEATURES" },
-  ];
+  ]
 
   return (
     <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative flex min-h-screen w-full flex-col font-sans">
@@ -26,8 +30,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="hover:border-tech-main text-tech-main-dark hover:text-tech-main border-b-2 border-transparent pb-1 font-mono text-xs tracking-[0.15em] transition-colors"
-                  >
+                    className="hover:border-tech-main text-tech-main-dark hover:text-tech-main border-b-2 border-transparent pb-1 font-mono text-xs tracking-[0.15em] transition-colors">
                     {link.label}
                   </Link>
                 ))}
@@ -39,8 +42,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <React.Suspense
                 fallback={
                   <div className="border-tech-main/40 bg-tech-main/10 h-8 w-8 animate-pulse rounded-none border md:h-10 md:w-10" />
-                }
-              >
+                }>
                 <ProfileButton />
               </React.Suspense>
             </div>
@@ -54,5 +56,5 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {children}
       </main>
     </div>
-  );
+  )
 }

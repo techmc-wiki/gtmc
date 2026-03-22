@@ -1,9 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/prettierrc",
   "bracketSameLine": true,
-  "plugins": [
-    "prettier-plugin-tailwindcss"
-  ],
+  "plugins": ["prettier-plugin-tailwindcss"],
   "printWidth": 70,
   "semi": false,
   "singleQuote": false,

@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth"
 import {
   EXPLANATION_MARKER,
   SYSTEM_COMMENT_MARKER,
@@ -8,44 +8,49 @@ import {
   listIssueComments,
   parseCommentBody,
   parseIssueBody,
-} from "@/lib/github-features";
-import { FeatureEditor } from "@/components/editor/feature-editor";
-import { notFound } from "next/navigation";
-import { BrutalCard } from "@/components/ui/brutal-card";
-import { FeatureActions } from "./feature-actions";
-import { FeatureComments } from "./feature-comments";
-import { FeatureExplanation } from "./feature-explanation";
-import { StatusBadge } from "@/app/(dashboard)/features/feature-list";
-import { RevealSection } from "@/app/(dashboard)/features/reveal-helpers";
+} from "@/lib/github-features"
+import { FeatureEditor } from "@/components/editor/feature-editor"
+import { notFound } from "next/navigation"
+import { BrutalCard } from "@/components/ui/brutal-card"
+import { FeatureActions } from "./feature-actions"
+import { FeatureComments } from "./feature-comments"
+import { FeatureExplanation } from "./feature-explanation"
+import { StatusBadge } from "@/app/(dashboard)/features/feature-list"
+import { RevealSection } from "@/app/(dashboard)/features/reveal-helpers"
 
-export const revalidate = 60;
+export const revalidate = 60
 
-export default async function FeatureDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const issueNumber = Number.parseInt(id, 10);
+export default async function FeatureDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const issueNumber = Number.parseInt(id, 10)
   if (Number.isNaN(issueNumber) || issueNumber <= 0) {
-    notFound();
+    notFound()
   }
 
-  const session = await auth();
+  const session = await auth()
 
-  const issue = await getIssue(issueNumber);
+  const issue = await getIssue(issueNumber)
   if (!issue) {
-    notFound();
+    notFound()
   }
 
-  const isClosed = issue.state === "closed";
+  const isClosed = issue.state === "closed"
 
-  const parsedIssue = parseIssueBody(issue.body);
-  const rawComments = await listIssueComments(issue.number);
+  const parsedIssue = parseIssueBody(issue.body)
+  const rawComments = await listIssueComments(issue.number)
 
   const comments = rawComments
     .filter(
       (comment) =>
-        !comment.body.includes(EXPLANATION_MARKER) && !comment.body.includes(SYSTEM_COMMENT_MARKER),
+        !comment.body.includes(EXPLANATION_MARKER) &&
+        !comment.body.includes(SYSTEM_COMMENT_MARKER),
     )
     .map((comment) => {
-      const parsedComment = parseCommentBody(comment.body);
+      const parsedComment = parseCommentBody(comment.body)
       return {
         id: String(comment.id),
         content: parsedComment.content,
@@ -56,8 +61,8 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
           image: null,
         },
         emailRedacted: parsedComment.metadata?.emailRedacted ?? false,
-      };
-    });
+      }
+    })
 
   const feature = {
     id: String(issue.number),
@@ -84,13 +89,13 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
         }
       : null,
     comments,
-  };
+  }
 
-  const isAuthor = session?.user?.id === feature.authorId;
-  const isAdmin = session?.user?.role === "ADMIN";
-  const isAssignee = session?.user?.id === feature.assigneeId;
+  const isAuthor = session?.user?.id === feature.authorId
+  const isAdmin = session?.user?.role === "ADMIN"
+  const isAssignee = session?.user?.id === feature.assigneeId
 
-  const canEdit = isAuthor || isAdmin;
+  const canEdit = isAuthor || isAdmin
 
   return (
     <div className="container mx-auto max-w-4xl space-y-6 p-4 sm:p-6 md:p-8">
@@ -123,11 +128,12 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
           <div className="pointer-events-none absolute right-0 bottom-0 h-2 w-2 translate-x-[1px] translate-y-[1px] border-r-2 border-b-2 border-red-500/50"></div>
 
           <span className="flex items-center gap-2 font-bold">
-            <span className="text-red-500">⚠</span> FEATURE DELETED (READ-ONLY)
+            <span className="text-red-500">⚠</span> FEATURE DELETED
+            (READ-ONLY)
           </span>
           <p className="mt-2 border-t border-dashed border-red-500/30 pt-2 text-xs tracking-normal normal-case opacity-80">
-            This feature has been deleted. The content is preserved for historical reference. No
-            changes can be made.
+            This feature has been deleted. The content is preserved
+            for historical reference. No changes can be made.
           </p>
         </div>
       )}
@@ -136,36 +142,51 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
         <BrutalCard className="mb-8 p-4 sm:p-6">
           <div className="flex flex-col gap-2 font-mono text-xs sm:text-sm">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <span className="font-bold text-zinc-500 sm:w-24">STATUS:</span>
+              <span className="font-bold text-zinc-500 sm:w-24">
+                STATUS:
+              </span>
               <StatusBadge status={feature.status} />
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <span className="font-bold text-zinc-500 sm:w-24">AUTHOR:</span>
+              <span className="font-bold text-zinc-500 sm:w-24">
+                AUTHOR:
+              </span>
               <span className="break-words">
-                {feature.author.name || feature.author.email || "Unknown"}
+                {feature.author.name ||
+                  feature.author.email ||
+                  "Unknown"}
               </span>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <span className="font-bold text-zinc-500 sm:w-24">ASSIGNEE:</span>
+              <span className="font-bold text-zinc-500 sm:w-24">
+                ASSIGNEE:
+              </span>
               <span className="break-words">
-                {feature.assignee ? feature.assignee.name || feature.assignee.email : "Unassigned"}
+                {feature.assignee
+                  ? feature.assignee.name || feature.assignee.email
+                  : "Unassigned"}
               </span>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <span className="font-bold text-zinc-500 sm:w-24">CREATED:</span>
-              <span suppressHydrationWarning>{new Date(feature.createdAt).toLocaleString()}</span>
+              <span className="font-bold text-zinc-500 sm:w-24">
+                CREATED:
+              </span>
+              <span suppressHydrationWarning>
+                {new Date(feature.createdAt).toLocaleString()}
+              </span>
             </div>
             {feature.issueNumber && feature.htmlUrl && (
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <span className="font-bold text-zinc-500 sm:w-24">GITHUB:</span>
+                <span className="font-bold text-zinc-500 sm:w-24">
+                  GITHUB:
+                </span>
                 <div className="flex flex-wrap items-center gap-1">
                   Linked to
                   <a
                     href={feature.htmlUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-tech-main border-tech-main/50 hover:bg-tech-main/80 border-b font-mono break-words transition-colors hover:text-white"
-                  >
+                    className="text-tech-main border-tech-main/50 hover:bg-tech-main/80 border-b font-mono break-words transition-colors hover:text-white">
                     Issue #{feature.issueNumber}
                   </a>
                 </div>
@@ -199,15 +220,16 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
             />
           ) : (
             <BrutalCard>
-              <h2 className="mb-4 text-sm font-bold sm:text-base md:text-lg">{feature.title}</h2>
+              <h2 className="mb-4 text-sm font-bold sm:text-base md:text-lg">
+                {feature.title}
+              </h2>
 
               {feature.tags.length > 0 && (
                 <div className="mb-6 flex flex-wrap gap-2">
                   {feature.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="border-tech-main text-tech-main bg-tech-accent/10 border px-2 py-1 font-mono text-xs uppercase"
-                    >
+                      className="border-tech-main text-tech-main bg-tech-accent/10 border px-2 py-1 font-mono text-xs uppercase">
                       {tag}
                     </span>
                   ))}
@@ -216,7 +238,9 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
 
               <div className="prose prose-zinc border-tech-main/30 mt-8 max-w-none border-t border-dashed pt-6">
                 {/* Very simple non-editable view, actual MD rendering could be added here */}
-                <div className="font-mono text-sm whitespace-pre-wrap">{feature.content}</div>
+                <div className="font-mono text-sm whitespace-pre-wrap">
+                  {feature.content}
+                </div>
               </div>
             </BrutalCard>
           )}
@@ -232,5 +256,5 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
         />
       </RevealSection>
     </div>
-  );
+  )
 }

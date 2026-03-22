@@ -1,61 +1,67 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
-import { usePathname } from "next/navigation";
-import { SidebarClient } from "./sidebar-client";
-import { MobileTreeCard } from "./mobile-tree-card";
+import * as React from "react"
+import { useState, useRef, useEffect } from "react"
+import { createPortal } from "react-dom"
+import { usePathname } from "next/navigation"
+import { SidebarClient } from "./sidebar-client"
+import { MobileTreeCard } from "./mobile-tree-card"
 
 interface TreeNode {
-  id: string;
-  title: string;
-  slug: string;
-  isFolder: boolean;
-  parentId: string | null;
-  children: TreeNode[];
+  id: string
+  title: string
+  slug: string
+  isFolder: boolean
+  parentId: string | null
+  children: TreeNode[]
 }
 
 interface ArticlesLayoutProps {
-  children: React.ReactNode;
-  tree: TreeNode[];
+  children: React.ReactNode
+  tree: TreeNode[]
 }
 
-export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isFloating, setIsFloating] = useState(false);
-  const pathname = usePathname();
-  const inlineShellRef = useRef<HTMLDivElement>(null);
-  const canUseDOM = typeof document !== "undefined";
+export function ArticlesLayoutClient({
+  children,
+  tree,
+}: ArticlesLayoutProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [isFloating, setIsFloating] = useState(false)
+  const pathname = usePathname()
+  const inlineShellRef = useRef<HTMLDivElement>(null)
+  const canUseDOM = typeof document !== "undefined"
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsOpen(false);
-  }, [pathname]);
+    setIsOpen(false)
+  }, [pathname])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsFloating(!entry.isIntersecting);
+        setIsFloating(!entry.isIntersecting)
       },
       {
         threshold: 0,
         rootMargin: "-64px 0px 0px 0px",
       },
-    );
+    )
 
     if (inlineShellRef.current) {
-      observer.observe(inlineShellRef.current);
+      observer.observe(inlineShellRef.current)
     }
 
-    return () => observer.disconnect();
-  }, []);
+    return () => observer.disconnect()
+  }, [])
 
   const treeContent = (
     <div className="prose prose-base prose-tech [&_ul_ul]:border-tech-main/20 w-full pb-4 font-mono text-[15px] wrap-break-word [&_li]:mt-1.5 [&_ul]:list-none [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l [&_ul_ul]:pl-3 [&>ul]:pl-0">
-      <SidebarClient tree={tree} onNavigate={() => setIsOpen(false)} />
+      <SidebarClient
+        tree={tree}
+        onNavigate={() => setIsOpen(false)}
+      />
     </div>
-  );
+  )
 
   return (
     <div className="relative mx-auto flex min-h-[calc(100vh-8rem)] max-w-full flex-col md:flex-row">
@@ -63,25 +69,28 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       <div
         ref={inlineShellRef}
         className="border-tech-main/40 border-b bg-white/95 backdrop-blur-md md:hidden"
-        data-testid="mobile-tree-inline-shell"
-      >
+        data-testid="mobile-tree-inline-shell">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="text-tech-main hover:bg-tech-main/5 flex min-h-[44px] w-full cursor-pointer items-center justify-between px-4 transition-colors"
           aria-label="Toggle article tree"
           aria-expanded={isOpen}
-          data-testid="mobile-tree-toggle"
-        >
-          <span className="font-mono text-xs font-bold tracking-[0.15em] uppercase">TREE</span>
-          <span className="font-mono text-sm font-bold">{isOpen ? "▼" : "▶"}</span>
+          data-testid="mobile-tree-toggle">
+          <span className="font-mono text-xs font-bold tracking-[0.15em] uppercase">
+            TREE
+          </span>
+          <span className="font-mono text-sm font-bold">
+            {isOpen ? "▼" : "▶"}
+          </span>
         </button>
 
         {!isFloating && (
           <div
             className={`grid transition-all duration-300 ease-out ${
-              isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-            }`}
-          >
+              isOpen
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0"
+            }`}>
             <div className="overflow-hidden">
               <div className="border-tech-main/20 max-h-[calc(100vh-12rem)] overflow-y-auto overscroll-contain border-t px-4 pt-3 pb-4">
                 {treeContent}
@@ -96,14 +105,12 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         ? createPortal(
             <div
               className="animate-tech-pop-in fixed top-20 right-4 z-[58] flex items-center md:hidden"
-              data-testid="mobile-tree-floating-trigger"
-            >
+              data-testid="mobile-tree-floating-trigger">
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="border-tech-main/40 text-tech-main hover:bg-tech-main/5 min-h-[44px] cursor-pointer border bg-white/95 px-4 py-2 font-mono text-xs font-bold tracking-[0.15em] uppercase backdrop-blur-md transition-all duration-300"
                 aria-label="Toggle article tree"
-                aria-expanded={isOpen}
-              >
+                aria-expanded={isOpen}>
                 TREE
               </button>
             </div>,
@@ -112,7 +119,10 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         : null}
 
       {/* Mobile floating tree card */}
-      <MobileTreeCard isOpen={isOpen} onClose={() => setIsOpen(false)} isFloating={isFloating}>
+      <MobileTreeCard
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        isFloating={isFloating}>
         {treeContent}
       </MobileTreeCard>
 
@@ -142,5 +152,5 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         {children}
       </main>
     </div>
-  );
+  )
 }

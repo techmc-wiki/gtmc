@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 /**
  * Pending labels for GitHub API operations in features area.
@@ -11,14 +11,15 @@ export const PENDING_LABELS = {
   POSTING_COMMENT: "POSTING_COMMENT...",
   SAVING_EXPLANATION: "SAVING_EXPLANATION...",
   SAVING_FEATURE: "SAVING_FEATURE...",
-} as const;
+} as const
 
-export type PendingLabel = (typeof PENDING_LABELS)[keyof typeof PENDING_LABELS];
+export type PendingLabel =
+  (typeof PENDING_LABELS)[keyof typeof PENDING_LABELS]
 
 export interface LoadingIndicatorProps {
-  label: PendingLabel;
-  ariaHidden?: boolean;
-  screenReaderText?: string;
+  label: PendingLabel
+  ariaHidden?: boolean
+  screenReaderText?: string
 }
 
 /**
@@ -35,8 +36,7 @@ export function LoadingIndicator({
     <div
       className="flex items-center gap-3 font-mono text-sm"
       role={ariaHidden ? "presentation" : undefined}
-      aria-hidden={ariaHidden}
-    >
+      aria-hidden={ariaHidden}>
       {/* Pulsing square */}
       <span className="inline-block h-2 w-2 animate-pulse bg-current opacity-60" />
 
@@ -44,7 +44,9 @@ export function LoadingIndicator({
       <span className="tracking-widest uppercase">{label}</span>
 
       {/* Screen reader text if provided */}
-      {screenReaderText && <span className="sr-only">{screenReaderText}</span>}
+      {screenReaderText && (
+        <span className="sr-only">{screenReaderText}</span>
+      )}
     </div>
-  );
+  )
 }

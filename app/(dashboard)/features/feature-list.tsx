@@ -1,97 +1,102 @@
-"use client";
+"use client"
 
-import { useState, useMemo } from "react";
-import Link from "next/link";
-import { BrutalCard } from "@/components/ui/brutal-card";
-import { RevealSection } from "./reveal-helpers";
+import { useState, useMemo } from "react"
+import Link from "next/link"
+import { BrutalCard } from "@/components/ui/brutal-card"
+import { RevealSection } from "./reveal-helpers"
 
 export function StatusBadge({ status }: { status: string }) {
-  let styles = "px-2 py-0.5 text-xs font-mono tracking-wider border shrink-0";
-  let label = status;
+  let styles =
+    "px-2 py-0.5 text-xs font-mono tracking-wider border shrink-0"
+  let label = status
 
   switch (status) {
     case "PENDING":
-      styles += " border-yellow-500/40 text-yellow-600 bg-yellow-500/10";
-      label = "UNRESOLVED";
-      break;
+      styles +=
+        " border-yellow-500/40 text-yellow-600 bg-yellow-500/10"
+      label = "UNRESOLVED"
+      break
     case "IN_PROGRESS":
-      styles += " border-blue-500/40 text-blue-600 bg-blue-500/10";
-      label = "IN_PROGRESS";
-      break;
+      styles += " border-blue-500/40 text-blue-600 bg-blue-500/10"
+      label = "IN_PROGRESS"
+      break
     case "RESOLVED":
-      styles += " border-green-500/40 text-green-600 bg-green-500/10";
-      label = "RESOLVED";
-      break;
+      styles += " border-green-500/40 text-green-600 bg-green-500/10"
+      label = "RESOLVED"
+      break
     default:
-      styles += " border-gray-500/40 text-gray-600 bg-gray-500/10";
+      styles += " border-gray-500/40 text-gray-600 bg-gray-500/10"
   }
 
-  return <span className={styles}>[{label}]</span>;
+  return <span className={styles}>[{label}]</span>
 }
 
 interface Feature {
-  id: string;
-  title: string;
-  status: "PENDING" | "IN_PROGRESS" | "RESOLVED";
-  tags?: string[];
-  author?: { name?: string };
-  assignee?: { name?: string };
-  createdAt: string | Date;
+  id: string
+  title: string
+  status: "PENDING" | "IN_PROGRESS" | "RESOLVED"
+  tags?: string[]
+  author?: { name?: string }
+  assignee?: { name?: string }
+  createdAt: string | Date
 }
 
 export function FeatureList({ features }: { features: Feature[] }) {
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [statusFilter, setStatusFilter] = useState<string>("ALL")
 
   // Extract all unique tags
   const allTags = useMemo(() => {
-    const tags = new Set<string>();
+    const tags = new Set<string>()
     features.forEach((f) => {
-      f.tags?.forEach((t: string) => tags.add(t));
-    });
-    return Array.from(tags);
-  }, [features]);
+      f.tags?.forEach((t: string) => tags.add(t))
+    })
+    return Array.from(tags)
+  }, [features])
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
-    );
-  };
+      prev.includes(tag)
+        ? prev.filter((t) => t !== tag)
+        : [...prev, tag],
+    )
+  }
 
   // Filter and group features in a single pass
   const { filteredFeatures, groupedFeatures } = useMemo(() => {
     const filtered = features.filter((f) => {
       const matchTags =
-        selectedTags.length === 0 || selectedTags.every((tag) => f.tags?.includes(tag));
+        selectedTags.length === 0 ||
+        selectedTags.every((tag) => f.tags?.includes(tag))
       const matchStatus =
         statusFilter === "ALL" ||
         (statusFilter === "UNRESOLVED" && f.status !== "RESOLVED") ||
-        f.status === statusFilter;
-      return matchTags && matchStatus;
-    });
+        f.status === statusFilter
+      return matchTags && matchStatus
+    })
 
     const grouped = {
       PENDING: [] as Feature[],
       IN_PROGRESS: [] as Feature[],
       RESOLVED: [] as Feature[],
-    };
+    }
 
     filtered.forEach((f) => {
       if (f.status === "PENDING") {
-        grouped.PENDING.push(f);
+        grouped.PENDING.push(f)
       } else if (f.status === "IN_PROGRESS") {
-        grouped.IN_PROGRESS.push(f);
+        grouped.IN_PROGRESS.push(f)
       } else if (f.status === "RESOLVED") {
-        grouped.RESOLVED.push(f);
+        grouped.RESOLVED.push(f)
       }
-    });
+    })
 
-    return { filteredFeatures: filtered, groupedFeatures: grouped };
-  }, [features, selectedTags, statusFilter]);
+    return { filteredFeatures: filtered, groupedFeatures: grouped }
+  }, [features, selectedTags, statusFilter])
 
-  const pendingFeatures = groupedFeatures.PENDING;
-  const inProgressFeatures = groupedFeatures.IN_PROGRESS;
-  const resolvedFeatures = groupedFeatures.RESOLVED;
+  const pendingFeatures = groupedFeatures.PENDING
+  const inProgressFeatures = groupedFeatures.IN_PROGRESS
+  const resolvedFeatures = groupedFeatures.RESOLVED
 
   const renderFeatureGroup = (
     title: string,
@@ -100,7 +105,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
     delay: 0 | 100 | 200 | 300 | 400,
   ) => {
     if (groupFeatures.length === 0) {
-      return null;
+      return null
     }
 
     return (
@@ -111,7 +116,10 @@ export function FeatureList({ features }: { features: Feature[] }) {
           </h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {groupFeatures.map((feature) => (
-              <Link key={feature.id} href={`/features/${feature.id}`} className="block">
+              <Link
+                key={feature.id}
+                href={`/features/${feature.id}`}
+                className="block">
                 <BrutalCard className="border-tech-main/40 group hover:border-tech-main/60 relative flex h-auto flex-col justify-between border bg-white/80 p-6 backdrop-blur-sm transition-colors sm:h-64">
                   {/* Corner brackets */}
                   <div className="border-tech-main/40 absolute top-0 left-0 h-2 w-2 -translate-x-[1px] -translate-y-[1px] border-t-2 border-l-2 opacity-0 transition-opacity group-hover:opacity-100"></div>
@@ -123,9 +131,10 @@ export function FeatureList({ features }: { features: Feature[] }) {
                       <div className="flex flex-col items-end gap-1">
                         <span
                           className="text-tech-main/50 font-mono text-xs"
-                          suppressHydrationWarning
-                        >
-                          {new Date(feature.createdAt).toLocaleDateString()}
+                          suppressHydrationWarning>
+                          {new Date(
+                            feature.createdAt,
+                          ).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
@@ -137,12 +146,14 @@ export function FeatureList({ features }: { features: Feature[] }) {
                     <div className="mt-4 flex flex-col gap-2">
                       <p className="text-tech-main flex items-center font-mono text-xs tracking-widest opacity-80">
                         <span className="bg-tech-main mr-2 inline-block h-1.5 w-1.5"></span>
-                        AUTHOR: {feature.author?.name || "UNKNOWN_USER"}
+                        AUTHOR:{" "}
+                        {feature.author?.name || "UNKNOWN_USER"}
                       </p>
                       {feature.assignee && (
                         <p className="flex items-center font-mono text-xs tracking-widest text-blue-600 opacity-80">
                           <span className="mr-2 inline-block h-1.5 w-1.5 bg-blue-600"></span>
-                          ASSIGNEE: {feature.assignee.name || "UNKNOWN_USER"}
+                          ASSIGNEE:{" "}
+                          {feature.assignee.name || "UNKNOWN_USER"}
                         </p>
                       )}
                     </div>
@@ -152,8 +163,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                         {feature.tags.map((tag: string) => (
                           <span
                             key={tag}
-                            className="bg-tech-main/5 border-tech-main/20 text-tech-main/70 border px-1.5 py-0.5 font-mono text-[10px] uppercase"
-                          >
+                            className="bg-tech-main/5 border-tech-main/20 text-tech-main/70 border px-1.5 py-0.5 font-mono text-[10px] uppercase">
                             {tag}
                           </span>
                         ))}
@@ -166,8 +176,8 @@ export function FeatureList({ features }: { features: Feature[] }) {
           </div>
         </div>
       </RevealSection>
-    );
-  };
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -180,7 +190,13 @@ export function FeatureList({ features }: { features: Feature[] }) {
                 FILTER_BY_STATUS_
               </h4>
               <div className="flex flex-wrap gap-2">
-                {["ALL", "UNRESOLVED", "PENDING", "IN_PROGRESS", "RESOLVED"].map((status) => (
+                {[
+                  "ALL",
+                  "UNRESOLVED",
+                  "PENDING",
+                  "IN_PROGRESS",
+                  "RESOLVED",
+                ].map((status) => (
                   <button
                     key={status}
                     onClick={() => setStatusFilter(status)}
@@ -188,8 +204,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                       statusFilter === status
                         ? "bg-tech-main border-tech-main text-white"
                         : "text-tech-main border-tech-main/40 hover:border-tech-main/60 bg-transparent"
-                    }`}
-                  >
+                    }`}>
                     {status}
                   </button>
                 ))}
@@ -210,8 +225,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                         selectedTags.includes(tag)
                           ? "bg-tech-accent border-tech-accent text-white"
                           : "bg-tech-accent/5 text-tech-main border-tech-main/40 hover:border-tech-main/60"
-                      }`}
-                    >
+                      }`}>
                       {tag}
                     </button>
                   ))}
@@ -230,17 +244,27 @@ export function FeatureList({ features }: { features: Feature[] }) {
           </div>
         ) : (
           <>
-            {renderFeatureGroup("待解决 / PENDING", pendingFeatures, "No pending features", 200)}
+            {renderFeatureGroup(
+              "待解决 / PENDING",
+              pendingFeatures,
+              "No pending features",
+              200,
+            )}
             {renderFeatureGroup(
               "解决中 / IN PROGRESS",
               inProgressFeatures,
               "No features in progress",
               300,
             )}
-            {renderFeatureGroup("已解决 / RESOLVED", resolvedFeatures, "No resolved features", 400)}
+            {renderFeatureGroup(
+              "已解决 / RESOLVED",
+              resolvedFeatures,
+              "No resolved features",
+              400,
+            )}
           </>
         )}
       </div>
     </div>
-  );
+  )
 }

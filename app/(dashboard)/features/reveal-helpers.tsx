@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from "react"
 
 /**
  * Server-safe reveal wrapper for resolved content sections.
@@ -7,7 +7,9 @@ import * as React from "react";
  */
 export const RevealSection = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { delay?: 0 | 100 | 200 | 300 | 400 }
+  React.HTMLAttributes<HTMLDivElement> & {
+    delay?: 0 | 100 | 200 | 300 | 400
+  }
 >(({ delay = 0, className = "", ...props }, ref) => (
   <div
     ref={ref}
@@ -15,8 +17,8 @@ export const RevealSection = React.forwardRef<
     style={{ animationDelay: `${delay}ms` }}
     {...props}
   />
-));
-RevealSection.displayName = "RevealSection";
+))
+RevealSection.displayName = "RevealSection"
 
 /**
  * Fade-in wrapper for content that should reveal after frame settles.
@@ -24,7 +26,9 @@ RevealSection.displayName = "RevealSection";
  */
 export const RevealContent = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { delay?: 0 | 100 | 200 | 300 | 400 }
+  React.HTMLAttributes<HTMLDivElement> & {
+    delay?: 0 | 100 | 200 | 300 | 400
+  }
 >(({ delay = 0, className = "", ...props }, ref) => (
   <div
     ref={ref}
@@ -32,5 +36,5 @@ export const RevealContent = React.forwardRef<
     style={{ animationDelay: `${delay}ms` }}
     {...props}
   />
-));
-RevealContent.displayName = "RevealContent";
+))
+RevealContent.displayName = "RevealContent"

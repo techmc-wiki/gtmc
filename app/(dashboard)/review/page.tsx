@@ -1,41 +1,47 @@
-import { BrutalCard } from "@/components/ui/brutal-card";
-import { BrutalButton } from "@/components/ui/brutal-button";
-import Link from "next/link";
-import { getOpenPRs } from "@/lib/github-pr";
-import { auth } from "@/lib/auth";
+import { BrutalCard } from "@/components/ui/brutal-card"
+import { BrutalButton } from "@/components/ui/brutal-button"
+import Link from "next/link"
+import { getOpenPRs } from "@/lib/github-pr"
+import { auth } from "@/lib/auth"
 
 export default async function ReviewHubPage() {
-  const session = await auth();
+  const session = await auth()
 
   if (!session?.user || session.user.role !== "ADMIN") {
     return (
       <div className="mx-auto mt-20 max-w-6xl p-8 text-center">
-        <h1 className="text-6xl font-black text-red-500 uppercase">ACCESS DENIED</h1>
-        <p className="mt-4 text-xl font-bold">ADMIN CLEARANCE REQUIRED.</p>
+        <h1 className="text-6xl font-black text-red-500 uppercase">
+          ACCESS DENIED
+        </h1>
+        <p className="mt-4 text-xl font-bold">
+          ADMIN CLEARANCE REQUIRED.
+        </p>
         <Link href="/">
           <BrutalButton variant="primary" className="mt-8">
             RETURN TO BASE
           </BrutalButton>
         </Link>
       </div>
-    );
+    )
   }
 
   // Fetch PRs from GitHub using admin's PAT or default SERVER TOKEN
-  const token = (session.user as { githubPat?: string }).githubPat || process.env.GITHUB_TOKEN;
+  const token =
+    (session.user as { githubPat?: string }).githubPat ||
+    process.env.GITHUB_TOKEN
   let openPRs: Array<{
-    id: number;
-    number: number;
-    created_at: string;
-    title: string;
-    user: { login: string } | null;
-    head: { ref: string };
-  }> = [];
+    id: number
+    number: number
+    created_at: string
+    title: string
+    user: { login: string } | null
+    head: { ref: string }
+  }> = []
   try {
-    const prs = await getOpenPRs(token);
-    openPRs = prs as unknown as typeof openPRs;
+    const prs = await getOpenPRs(token)
+    openPRs = prs as unknown as typeof openPRs
   } catch (error) {
-    console.error("Failed to fetch PRs:", error);
+    console.error("Failed to fetch PRs:", error)
   }
 
   return (
@@ -64,8 +70,7 @@ export default async function ReviewHubPage() {
           openPRs.map((pr) => (
             <BrutalCard
               key={pr.id}
-              className="border-tech-main/40 group relative flex flex-col items-start justify-between space-y-4 border bg-white/80 p-6 backdrop-blur-sm md:flex-row md:items-center md:space-y-0"
-            >
+              className="border-tech-main/40 group relative flex flex-col items-start justify-between space-y-4 border bg-white/80 p-6 backdrop-blur-sm md:flex-row md:items-center md:space-y-0">
               <div className="border-tech-main/40 absolute top-0 left-0 h-2 w-2 -translate-x-[1px] -translate-y-[1px] border-t-2 border-l-2 opacity-0 transition-opacity group-hover:opacity-100"></div>
               <div className="border-tech-main/40 absolute right-0 bottom-0 h-2 w-2 translate-x-[1px] translate-y-[1px] border-r-2 border-b-2 opacity-0 transition-opacity group-hover:opacity-100"></div>
 
@@ -88,16 +93,18 @@ export default async function ReviewHubPage() {
                   </span>
                 </p>
                 <p className="bg-tech-main/5 border-tech-main/20 text-tech-main ml-3 inline-flex items-center border px-2 py-1 font-mono text-xs">
-                  <span className="bg-tech-main mr-2 h-1.5 w-1.5"></span> TARGET: {pr.head.ref}
+                  <span className="bg-tech-main mr-2 h-1.5 w-1.5"></span>{" "}
+                  TARGET: {pr.head.ref}
                 </p>
               </div>
 
               <div className="relative z-10 flex w-full flex-col gap-4 md:w-auto md:flex-row">
-                <Link href={`/review/${pr.number}`} className="w-full md:w-auto">
+                <Link
+                  href={`/review/${pr.number}`}
+                  className="w-full md:w-auto">
                   <BrutalButton
                     variant="primary"
-                    className="flex min-h-[44px] w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto"
-                  >
+                    className="flex min-h-[44px] w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
                     REVIEW CONTENT →
                   </BrutalButton>
                 </Link>
@@ -107,5 +114,5 @@ export default async function ReviewHubPage() {
         )}
       </div>
     </div>
-  );
+  )
 }

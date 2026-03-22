@@ -1,37 +1,40 @@
-import { BrutalEditor } from "@/components/editor/brutal-editor";
-import Link from "next/link";
-import { BrutalButton } from "@/components/ui/brutal-button";
-import { getRepoFileContent } from "@/lib/github-pr";
+import { BrutalEditor } from "@/components/editor/brutal-editor"
+import Link from "next/link"
+import { BrutalButton } from "@/components/ui/brutal-button"
+import { getRepoFileContent } from "@/lib/github-pr"
 
 export default async function NewDraftPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<{
+    [key: string]: string | string[] | undefined
+  }>
 }) {
-  const { file: fileParam } = await searchParams;
-  const filePath = typeof fileParam === "string" ? fileParam : undefined;
+  const { file: fileParam } = await searchParams
+  const filePath =
+    typeof fileParam === "string" ? fileParam : undefined
 
-  let initialTitle = "UNTITLED";
-  let initialContent = "";
+  let initialTitle = "UNTITLED"
+  let initialContent = ""
 
   if (filePath) {
-    initialTitle = filePath;
+    initialTitle = filePath
     // Read initial content from Articles repo instead of local assets filesystem.
-    const normalizedPath = filePath.replace(/^\/+/, "");
+    const normalizedPath = filePath.replace(/^\/+/, "")
     const candidates = normalizedPath.endsWith(".md")
       ? [normalizedPath]
-      : [normalizedPath, `${normalizedPath}.md`];
+      : [normalizedPath, `${normalizedPath}.md`]
 
     for (const candidate of candidates) {
-      const content = await getRepoFileContent(candidate);
+      const content = await getRepoFileContent(candidate)
       if (content !== null) {
-        initialContent = content;
-        break;
+        initialContent = content
+        break
       }
     }
 
     if (!initialContent) {
-      initialContent = `Failed to load file at ${filePath}.`;
+      initialContent = `Failed to load file at ${filePath}.`
     }
   }
 
@@ -61,5 +64,5 @@ export default async function NewDraftPage({
         />
       </div>
     </div>
-  );
+  )
 }

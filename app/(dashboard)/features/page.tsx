@@ -1,28 +1,39 @@
-import { auth } from "@/lib/auth";
-import { labelsToStatus, labelsToTags, listAllIssues, parseIssueBody } from "@/lib/github-features";
-import Link from "next/link";
-import { BrutalButton } from "@/components/ui/brutal-button";
-import { FeatureList } from "./feature-list";
-import { PendingCreationBanner } from "./pending-creation-banner";
-import { RevealSection } from "./reveal-helpers";
+import { auth } from "@/lib/auth"
+import {
+  labelsToStatus,
+  labelsToTags,
+  listAllIssues,
+  parseIssueBody,
+} from "@/lib/github-features"
+import Link from "next/link"
+import { BrutalButton } from "@/components/ui/brutal-button"
+import { FeatureList } from "./feature-list"
+import { PendingCreationBanner } from "./pending-creation-banner"
+import { RevealSection } from "./reveal-helpers"
 
-export const revalidate = 60;
+export const revalidate = 60
 
 export default async function FeaturesPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams?: Promise<{
+    [key: string]: string | string[] | undefined
+  }>
 }) {
-  const session = await auth();
-  const params = await searchParams;
-  const isCreated = params?.created === "true";
+  const session = await auth()
+  const params = await searchParams
+  const isCreated = params?.created === "true"
 
-  const allIssues = await listAllIssues();
-  allIssues.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  const allIssues = await listAllIssues()
+  allIssues.sort(
+    (a, b) =>
+      new Date(a.createdAt).getTime() -
+      new Date(b.createdAt).getTime(),
+  )
 
   const features = allIssues.map((issue) => {
-    const parsed = parseIssueBody(issue.body);
-    const assigneeId = parsed.metadata?.assigneeId;
+    const parsed = parseIssueBody(issue.body)
+    const assigneeId = parsed.metadata?.assigneeId
 
     return {
       id: String(issue.number),
@@ -42,8 +53,8 @@ export default async function FeaturesPage({
             image: undefined,
           }
         : undefined,
-    };
-  });
+    }
+  })
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-6 pb-12">
@@ -57,7 +68,9 @@ export default async function FeaturesPage({
             </h1>
             <p className="text-tech-main/80 mt-3 flex items-center gap-2 font-mono text-xs tracking-widest sm:text-sm">
               <span className="bg-tech-main h-1.5 w-1.5 shrink-0 animate-pulse rounded-full"></span>
-              <span className="break-words">BUG REPORTS, FEATURE REQUESTS, AND ISSUE TRACKING</span>
+              <span className="break-words">
+                BUG REPORTS, FEATURE REQUESTS, AND ISSUE TRACKING
+              </span>
             </p>
           </div>
 
@@ -65,8 +78,7 @@ export default async function FeaturesPage({
             <Link href="/features/new" className="w-full md:w-auto">
               <BrutalButton
                 variant="primary"
-                className="flex min-h-[44px] w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto"
-              >
+                className="flex min-h-[44px] w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
                 + REPORT NEW FEATURE
               </BrutalButton>
             </Link>
@@ -82,5 +94,5 @@ export default async function FeaturesPage({
         </div>
       </RevealSection>
     </div>
-  );
+  )
 }

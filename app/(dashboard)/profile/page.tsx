@@ -1,30 +1,32 @@
-﻿import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
-import { BrutalInput } from "@/components/ui/brutal-input";
-import { BrutalAvatar } from "@/components/ui/brutal-avatar";
-import { updateProfileAction } from "@/actions/profile";
-import { SignOutButton } from "@/components/ui/sign-out-button";
-import { getGithubEmailVisibility } from "@/lib/github-features";
+﻿import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
+import { redirect } from "next/navigation"
+import { BrutalInput } from "@/components/ui/brutal-input"
+import { BrutalAvatar } from "@/components/ui/brutal-avatar"
+import { updateProfileAction } from "@/actions/profile"
+import { SignOutButton } from "@/components/ui/sign-out-button"
+import { getGithubEmailVisibility } from "@/lib/github-features"
 
 export default async function ProfilePage() {
-  const session = await auth();
+  const session = await auth()
   if (!session?.user?.id) {
-    redirect("/login");
+    redirect("/login")
   }
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-  });
+  })
 
   if (!user) {
-    redirect("/login");
+    redirect("/login")
   }
 
   const account = await prisma.account.findFirst({
     where: { provider: "github", userId: user.id },
-  });
-  const emailVisibility = await getGithubEmailVisibility(account?.access_token || "");
+  })
+  const emailVisibility = await getGithubEmailVisibility(
+    account?.access_token || "",
+  )
 
   return (
     <div className="animate-fade-in mx-auto mt-4 max-w-4xl space-y-8 px-4 pb-20 sm:mt-8 sm:space-y-12 sm:px-0">
@@ -42,8 +44,7 @@ export default async function ProfilePage() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className="sm:h-5 sm:w-5"
-              >
+                className="sm:h-5 sm:w-5">
                 <circle cx="12" cy="8" r="5" />
                 <path d="M20 21a8 8 0 0 0-16 0" />
               </svg>
@@ -56,7 +57,10 @@ export default async function ProfilePage() {
           </p>
         </div>
         <div className="text-tech-main/50 tracking-tech-wide mt-4 font-mono text-[9px] uppercase sm:text-xs md:mt-0">
-          SYS.STATE :: <span className="text-tech-main-dark font-bold">ACTIVE *</span>
+          SYS.STATE ::{" "}
+          <span className="text-tech-main-dark font-bold">
+            ACTIVE *
+          </span>
         </div>
       </div>
 
@@ -70,8 +74,7 @@ export default async function ProfilePage() {
 
         <form
           action={updateProfileAction}
-          className="relative z-10 space-y-6 p-4 sm:space-y-8 sm:p-6 md:space-y-10 md:p-8 lg:p-12"
-        >
+          className="relative z-10 space-y-6 p-4 sm:space-y-8 sm:p-6 md:space-y-10 md:p-8 lg:p-12">
           <div className="flex flex-col items-start gap-4 sm:gap-6 md:gap-8">
             <div className="border-tech-main/30 bg-tech-main/5 relative h-24 w-24 shrink-0 border p-1 sm:h-32 sm:w-32 md:h-40 md:w-40">
               <div className="bg-tech-main absolute -top-1 -left-1 h-2 w-2"></div>
@@ -137,7 +140,8 @@ export default async function ProfilePage() {
               />
               {emailVisibility === "private" && (
                 <p className="border-l border-amber-400/40 pl-2 font-mono text-[9px] tracking-widest text-amber-600/70 uppercase sm:text-[10px]">
-                  {">"} YOUR GITHUB PRIMARY EMAIL VISIBILITY IS SET TO PRIVATE
+                  {">"} YOUR GITHUB PRIMARY EMAIL VISIBILITY IS SET TO
+                  PRIVATE
                 </p>
               )}
             </div>
@@ -170,8 +174,7 @@ export default async function ProfilePage() {
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
-                >
+                  strokeWidth="2">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
                 ADMIN.SECURE.ZONE
@@ -182,10 +185,12 @@ export default async function ProfilePage() {
                   GITHUB PAT TOKEN
                 </h3>
                 <p className="text-tech-main-dark mt-2 font-mono text-[10px] tracking-wide sm:text-[11px]">
-                  Store your GitHub Personal Access Token to enable PR automation.
+                  Store your GitHub Personal Access Token to enable PR
+                  automation.
                 </p>
                 <p className="mt-1 font-mono text-[9px] tracking-widest text-red-500/60 uppercase sm:text-[10px]">
-                  {"//"} REQUIRED SCOPES: &apos;repo&apos;, &apos;workflow&apos;
+                  {"//"} REQUIRED SCOPES: &apos;repo&apos;,
+                  &apos;workflow&apos;
                 </p>
               </div>
               <BrutalInput
@@ -204,13 +209,12 @@ export default async function ProfilePage() {
             <SignOutButton className="bg-tech-main/10 hover:bg-tech-main text-tech-main border-tech-main/40 relative flex min-h-11 w-full items-center justify-center border px-4 py-2.5 font-mono text-xs font-bold tracking-widest uppercase transition-colors hover:text-white sm:px-6 sm:py-3 md:px-8" />
             <button
               type="submit"
-              className="bg-tech-main/10 hover:bg-tech-main text-tech-main border-tech-main/40 relative flex min-h-11 w-full cursor-pointer items-center justify-center border px-4 py-2.5 font-mono text-xs font-bold tracking-widest uppercase transition-colors hover:text-white sm:px-6 sm:py-3 md:px-8"
-            >
+              className="bg-tech-main/10 hover:bg-tech-main text-tech-main border-tech-main/40 relative flex min-h-11 w-full cursor-pointer items-center justify-center border px-4 py-2.5 font-mono text-xs font-bold tracking-widest uppercase transition-colors hover:text-white sm:px-6 sm:py-3 md:px-8">
               SAVE_CONFIG
             </button>
           </div>
         </form>
       </div>
     </div>
-  );
+  )
 }

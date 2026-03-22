@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import * as React from "react";
+import * as React from "react"
 
 /**
  * Square section frame with optional corner brackets.
@@ -9,24 +9,28 @@ import * as React from "react";
 export const SectionFrame = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { showBrackets?: boolean }
->(({ className = "", showBrackets = true, children, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={`border-tech-main/40 relative border bg-white/80 p-6 backdrop-blur-sm sm:p-8 ${className}`}
-    {...props}
-  >
-    {showBrackets && (
-      <>
-        <div className="border-tech-main/60 pointer-events-none absolute top-0 left-0 h-2 w-2 -translate-x-[1px] -translate-y-[1px] border-t-2 border-l-2" />
-        <div className="border-tech-main/60 pointer-events-none absolute top-0 right-0 h-2 w-2 translate-x-[1px] -translate-y-[1px] border-t-2 border-r-2" />
-        <div className="border-tech-main/60 pointer-events-none absolute bottom-0 left-0 h-2 w-2 -translate-x-[1px] translate-y-[1px] border-b-2 border-l-2" />
-        <div className="border-tech-main/60 pointer-events-none absolute right-0 bottom-0 h-2 w-2 translate-x-[1px] translate-y-[1px] border-r-2 border-b-2" />
-      </>
-    )}
-    {children}
-  </div>
-));
-SectionFrame.displayName = "SectionFrame";
+>(
+  (
+    { className = "", showBrackets = true, children, ...props },
+    ref,
+  ) => (
+    <div
+      ref={ref}
+      className={`border-tech-main/40 relative border bg-white/80 p-6 backdrop-blur-sm sm:p-8 ${className}`}
+      {...props}>
+      {showBrackets && (
+        <>
+          <div className="border-tech-main/60 pointer-events-none absolute top-0 left-0 h-2 w-2 -translate-x-[1px] -translate-y-[1px] border-t-2 border-l-2" />
+          <div className="border-tech-main/60 pointer-events-none absolute top-0 right-0 h-2 w-2 translate-x-[1px] -translate-y-[1px] border-t-2 border-r-2" />
+          <div className="border-tech-main/60 pointer-events-none absolute bottom-0 left-0 h-2 w-2 -translate-x-[1px] translate-y-[1px] border-b-2 border-l-2" />
+          <div className="border-tech-main/60 pointer-events-none absolute right-0 bottom-0 h-2 w-2 translate-x-[1px] translate-y-[1px] border-r-2 border-b-2" />
+        </>
+      )}
+      {children}
+    </div>
+  ),
+)
+SectionFrame.displayName = "SectionFrame"
 
 /**
  * Monospace section rail label with trailing underscore.
@@ -39,12 +43,11 @@ export const SectionRail = React.forwardRef<
   <div
     ref={ref}
     className={`text-tech-main tracking-tech-wide font-mono text-xs uppercase ${className}`}
-    {...props}
-  >
+    {...props}>
     {label}_
   </div>
-));
-SectionRail.displayName = "SectionRail";
+))
+SectionRail.displayName = "SectionRail"
 
 /**
  * Segmented bar placeholder with opacity tier.
@@ -53,25 +56,35 @@ SectionRail.displayName = "SectionRail";
 export const SegmentedBar = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & {
-    opacity?: "high" | "medium" | "low";
-    showBorder?: boolean;
+    opacity?: "high" | "medium" | "low"
+    showBorder?: boolean
   }
->(({ opacity = "medium", showBorder = false, className = "", ...props }, ref) => {
-  const opacityMap = {
-    high: "bg-tech-accent/20",
-    medium: "bg-tech-accent/15",
-    low: "bg-tech-accent/10",
-  };
+>(
+  (
+    {
+      opacity = "medium",
+      showBorder = false,
+      className = "",
+      ...props
+    },
+    ref,
+  ) => {
+    const opacityMap = {
+      high: "bg-tech-accent/20",
+      medium: "bg-tech-accent/15",
+      low: "bg-tech-accent/10",
+    }
 
-  return (
-    <div
-      ref={ref}
-      className={`h-2 ${opacityMap[opacity]} ${showBorder ? "border-tech-line border" : ""} ${className}`}
-      {...props}
-    />
-  );
-});
-SegmentedBar.displayName = "SegmentedBar";
+    return (
+      <div
+        ref={ref}
+        className={`h-2 ${opacityMap[opacity]} ${showBorder ? "border-tech-line border" : ""} ${className}`}
+        {...props}
+      />
+    )
+  },
+)
+SegmentedBar.displayName = "SegmentedBar"
 
 /**
  * Skeleton exit wrapper for loading shell handoff.
@@ -87,23 +100,24 @@ export const SkeletonExitWrapper = React.forwardRef<
     className={`${isExiting ? "animate-skeleton-exit motion-reduce:animate-fade-out" : ""} ${className}`}
     {...props}
   />
-));
-SkeletonExitWrapper.displayName = "SkeletonExitWrapper";
+))
+SkeletonExitWrapper.displayName = "SkeletonExitWrapper"
 
 /**
  * Scan/sweep overlay with blueprint animation.
  * Absolute positioned shimmer effect with motion-reduce fallback.
  */
-export const SweepOverlay = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className = "", ...props }, ref) => (
-    <div
-      ref={ref}
-      className={`via-tech-accent/30 animate-blueprint-sweep absolute inset-0 bg-gradient-to-r from-transparent to-transparent motion-reduce:animate-none ${className}`}
-      {...props}
-    />
-  ),
-);
-SweepOverlay.displayName = "SweepOverlay";
+export const SweepOverlay = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className = "", ...props }, ref) => (
+  <div
+    ref={ref}
+    className={`via-tech-accent/30 animate-blueprint-sweep absolute inset-0 bg-gradient-to-r from-transparent to-transparent motion-reduce:animate-none ${className}`}
+    {...props}
+  />
+))
+SweepOverlay.displayName = "SweepOverlay"
 
 /**
  * Single-pass scan confirmation overlay.
@@ -118,5 +132,5 @@ export const ScanConfirmOverlay = React.forwardRef<
     className={`via-tech-accent/30 animate-scan-confirm absolute inset-0 bg-gradient-to-r from-transparent to-transparent motion-reduce:animate-none ${className}`}
     {...props}
   />
-));
-ScanConfirmOverlay.displayName = "ScanConfirmOverlay";
+))
+ScanConfirmOverlay.displayName = "ScanConfirmOverlay"

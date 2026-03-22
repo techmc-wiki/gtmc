@@ -1,18 +1,18 @@
 // 后现代技术风登录页
-"use client";
+"use client"
 
-import { signIn } from "next-auth/react";
-import { BrutalButton } from "@/components/ui/brutal-button";
-import { useState } from "react";
-import Link from "next/link";
+import { signIn } from "next-auth/react"
+import { BrutalButton } from "@/components/ui/brutal-button"
+import { useState } from "react"
+import Link from "next/link"
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleLogin = async () => {
-    setIsLoading(true);
-    await signIn("github", { callbackUrl: "/draft" });
-  };
+    setIsLoading(true)
+    await signIn("github", { callbackUrl: "/draft" })
+  }
 
   return (
     <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative flex min-h-screen w-full overflow-hidden font-sans">
@@ -33,7 +33,8 @@ export default function LoginPage() {
       {/* 右上角HUD：模拟服务器/图纸数据 */}
       <div className="text-tech-main absolute top-8 right-12 z-0 hidden space-y-1 text-right font-mono text-[10px] opacity-40 select-none sm:block">
         <p>
-          STATUS :: <span className="font-bold text-red-500">LOCKED *</span>
+          STATUS ::{" "}
+          <span className="font-bold text-red-500">LOCKED *</span>
         </p>
         <p>ENCRYPTION:: AES-256-GCM</p>
         <p>HANDSHAKE :: WAITING...</p>
@@ -44,13 +45,20 @@ export default function LoginPage() {
       {/* Java 代码片段漂浮层 (Decompiled Source Code) */}
       <div className="decor-desktop-only pointer-events-none absolute right-10 bottom-[20%] hidden rotate-2 opacity-20 select-none md:right-20 lg:block">
         <div className="text-tech-main border-tech-main/20 border-r-2 pr-4 text-right font-mono text-[10px] leading-relaxed whitespace-pre">
-          <span className="text-tech-main-dark font-bold">@PostMapping</span>(
-          <span className="text-tech-main-dark">&quot;/login&quot;</span>){"\n"}
-          <span className="text-tech-main-dark">public</span> ResponseEntity&lt;?&gt;
-          authenticate(Request req) {"{"}
+          <span className="text-tech-main-dark font-bold">
+            @PostMapping
+          </span>
+          (
+          <span className="text-tech-main-dark">
+            &quot;/login&quot;
+          </span>
+          ){"\n"}
+          <span className="text-tech-main-dark">public</span>{" "}
+          ResponseEntity&lt;?&gt; authenticate(Request req) {"{"}
           {"\n"}
           {"  "}SecurityContext ctx = Security.getContext();{"\n"}
-          {"  "}if (!ctx.isAuthenticated()) throw new AuthException();{"\n"}
+          {"  "}if (!ctx.isAuthenticated()) throw new AuthException();
+          {"\n"}
           {"  "}return ResponseEntity.ok(token);{"\n"}
           {"}"}
         </div>
@@ -79,7 +87,9 @@ export default function LoginPage() {
           {/* 尺寸标注 decoration */}
           <div className="animate-fade-in absolute top-1/2 -right-6 hidden h-full -translate-y-1/2 flex-col items-center font-mono text-[10px] opacity-0 [animation-delay:1.5s] [animation-fill-mode:forwards] sm:flex">
             <span className="border-tech-main/30 block h-10 w-px border-l"></span>
-            <span className="rotate-90 py-2 whitespace-nowrap">SECURE FORM</span>
+            <span className="rotate-90 py-2 whitespace-nowrap">
+              SECURE FORM
+            </span>
             <span className="border-tech-main/30 block h-10 w-px border-l"></span>
           </div>
 
@@ -102,9 +112,14 @@ export default function LoginPage() {
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.5"
-                  className="text-tech-main-dark"
-                >
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  className="text-tech-main-dark">
+                  <rect
+                    x="3"
+                    y="11"
+                    width="18"
+                    height="11"
+                    rx="2"
+                    ry="2"></rect>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
               </div>
@@ -119,7 +134,8 @@ export default function LoginPage() {
             </div>
 
             <p className="text-tech-main-dark/70 animate-fade-in mx-auto mb-8 max-w-xs text-sm opacity-0 [animation-delay:1.1s] [animation-fill-mode:forwards]">
-              Please authenticate with your GitHub account to access the restricted database.
+              Please authenticate with your GitHub account to access
+              the restricted database.
             </p>
 
             <div className="animate-slide-up-fade w-full opacity-0 [animation-delay:1.3s] [animation-fill-mode:forwards]">
@@ -127,8 +143,7 @@ export default function LoginPage() {
                 onClick={handleLogin}
                 disabled={isLoading}
                 variant="primary"
-                className="flex h-12 w-full items-center justify-center text-sm tracking-widest uppercase transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98]"
-              >
+                className="flex h-12 w-full items-center justify-center text-sm tracking-widest uppercase transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98]">
                 {isLoading ? (
                   <span className="flex items-center">
                     <span className="mr-2 h-2 w-2 animate-ping rounded-full bg-white/50"></span>
@@ -144,8 +159,7 @@ export default function LoginPage() {
               <p>PROTECTED BY GTMC_SECURE_GATEWAY v2.0</p>
               <Link
                 href="/"
-                className="hover:text-tech-main-dark mt-2 inline-block underline decoration-dashed underline-offset-4 transition-colors"
-              >
+                className="hover:text-tech-main-dark mt-2 inline-block underline decoration-dashed underline-offset-4 transition-colors">
                 &lt; RETURN TO PUBLIC ACCESS
               </Link>
             </div>
@@ -153,5 +167,5 @@ export default function LoginPage() {
         </div>
       </main>
     </div>
-  );
+  )
 }

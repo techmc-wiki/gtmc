@@ -1,33 +1,38 @@
-import { NextResponse } from "next/server";
-import path from "path";
-import mime from "mime-types";
-import { getRepoFileBuffer } from "@/lib/github-pr";
+import { NextResponse } from "next/server"
+import path from "path"
+import mime from "mime-types"
+import { getRepoFileBuffer } from "@/lib/github-pr"
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const filePath = searchParams.get("path");
+  const { searchParams } = new URL(request.url)
+  const filePath = searchParams.get("path")
 
   if (!filePath) {
-    return new NextResponse("Not Found", { status: 404 });
+    return new NextResponse("Not Found", { status: 404 })
   }
 
   // Prevent directory traversal attacks
-  const normalizedPath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, "");
-  const safePath = normalizedPath.replace(/^\/+/, "");
-  const pathsToTry = safePath.endsWith(".md") ? [safePath] : [safePath, `${safePath}.md`];
+  const normalizedPath = path
+    .normalize(filePath)
+    .replace(/^(\.\.[\/\\])+/, "")
+  const safePath = normalizedPath.replace(/^\/+/, "")
+  const pathsToTry = safePath.endsWith(".md")
+    ? [safePath]
+    : [safePath, `${safePath}.md`]
 
   for (const candidate of pathsToTry) {
-    const fileBuffer = await getRepoFileBuffer(candidate);
+    const fileBuffer = await getRepoFileBuffer(candidate)
     if (fileBuffer) {
-      const mimeType = mime.lookup(candidate) || "application/octet-stream";
+      const mimeType =
+        mime.lookup(candidate) || "application/octet-stream"
       return new NextResponse(new Uint8Array(fileBuffer), {
         headers: {
           "Content-Type": String(mimeType),
           "Cache-Control": "public, max-age=300, s-maxage=300",
         },
-      });
+      })
     }
   }
 
-  return new NextResponse("Not Found", { status: 404 });
+  return new NextResponse("Not Found", { status: 404 })
 }

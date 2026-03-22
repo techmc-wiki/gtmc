@@ -1,21 +1,24 @@
-"use client";
+"use client"
 
-import { useState, useTransition } from "react";
-import { addFeatureComment } from "@/actions/feature";
-import { BrutalButton } from "@/components/ui/brutal-button";
-import { BrutalCard } from "@/components/ui/brutal-card";
-import { LoadingIndicator, PENDING_LABELS } from "../loading-indicator";
+import { useState, useTransition } from "react"
+import { addFeatureComment } from "@/actions/feature"
+import { BrutalButton } from "@/components/ui/brutal-button"
+import { BrutalCard } from "@/components/ui/brutal-card"
+import {
+  LoadingIndicator,
+  PENDING_LABELS,
+} from "../loading-indicator"
 
 interface Comment {
-  id: string;
-  content: string;
-  createdAt: Date;
+  id: string
+  content: string
+  createdAt: Date
   author: {
-    name: string | null;
-    email: string | null;
-    image: string | null;
-  };
-  emailRedacted?: boolean;
+    name: string | null
+    email: string | null
+    image: string | null
+  }
+  emailRedacted?: boolean
 }
 
 export function FeatureComments({
@@ -24,23 +27,23 @@ export function FeatureComments({
   userId,
   isClosed,
 }: {
-  featureId: string;
-  initialComments: Comment[];
-  userId: string | undefined;
-  isClosed?: boolean;
+  featureId: string
+  initialComments: Comment[]
+  userId: string | undefined
+  isClosed?: boolean
 }) {
-  const [content, setContent] = useState("");
-  const [isPending, startTransition] = useTransition();
+  const [content, setContent] = useState("")
+  const [isPending, startTransition] = useTransition()
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content.trim()) return;
+    e.preventDefault()
+    if (!content.trim()) return
 
     startTransition(async () => {
-      await addFeatureComment(featureId, content);
-      setContent("");
-    });
-  };
+      await addFeatureComment(featureId, content)
+      setContent("")
+    })
+  }
 
   return (
     <div className="space-y-6">
@@ -52,19 +55,24 @@ export function FeatureComments({
         {initialComments.map((comment) => (
           <BrutalCard
             key={comment.id}
-            className="border-tech-main/40 border bg-white/80 p-6 backdrop-blur-sm"
-          >
+            className="border-tech-main/40 border bg-white/80 p-6 backdrop-blur-sm">
             <div className="border-tech-main/30 mb-2 flex items-center gap-2 border-b border-dashed pb-2 font-mono text-sm">
               <span className="text-tech-main font-bold tracking-wider uppercase">
                 {comment.author.name ||
-                  (comment.emailRedacted ? "email redacted for privacy" : comment.author.email) ||
+                  (comment.emailRedacted
+                    ? "email redacted for privacy"
+                    : comment.author.email) ||
                   "Unknown"}
               </span>
-              <span className="text-zinc-500" suppressHydrationWarning>
+              <span
+                className="text-zinc-500"
+                suppressHydrationWarning>
                 {new Date(comment.createdAt).toLocaleString()}
               </span>
             </div>
-            <div className="font-mono text-sm whitespace-pre-wrap">{comment.content}</div>
+            <div className="font-mono text-sm whitespace-pre-wrap">
+              {comment.content}
+            </div>
           </BrutalCard>
         ))}
         {initialComments.length === 0 && (
@@ -93,10 +101,11 @@ export function FeatureComments({
                   type="submit"
                   disabled={isPending || !content.trim()}
                   variant="primary"
-                  aria-busy={isPending}
-                >
+                  aria-busy={isPending}>
                   {isPending ? (
-                    <LoadingIndicator label={PENDING_LABELS.POSTING_COMMENT} />
+                    <LoadingIndicator
+                      label={PENDING_LABELS.POSTING_COMMENT}
+                    />
                   ) : (
                     "POST_COMMENT"
                   )}
@@ -110,5 +119,5 @@ export function FeatureComments({
           </div>
         ))}
     </div>
-  );
+  )
 }

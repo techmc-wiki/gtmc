@@ -1,24 +1,28 @@
-import { BrutalEditor } from "@/components/editor/brutal-editor";
-import Link from "next/link";
-import { BrutalButton } from "@/components/ui/brutal-button";
-import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { notFound, redirect } from "next/navigation";
+import { BrutalEditor } from "@/components/editor/brutal-editor"
+import Link from "next/link"
+import { BrutalButton } from "@/components/ui/brutal-button"
+import { prisma } from "@/lib/prisma"
+import { auth } from "@/lib/auth"
+import { notFound, redirect } from "next/navigation"
 
-export default async function EditDraftPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
+export default async function EditDraftPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const session = await auth()
   if (!session?.user) {
-    redirect("/login");
+    redirect("/login")
   }
 
-  const { id } = await params;
+  const { id } = await params
 
   const draft = await prisma.revision.findUnique({
     where: { id },
-  });
+  })
 
   if (!draft || draft.authorId !== session.user.id) {
-    notFound();
+    notFound()
   }
 
   // Only DRAFT or REJECTED statuses should be editable usually
@@ -66,5 +70,5 @@ export default async function EditDraftPage({ params }: { params: Promise<{ id: 
         />
       </div>
     </div>
-  );
+  )
 }

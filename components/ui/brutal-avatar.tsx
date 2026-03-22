@@ -1,19 +1,23 @@
-import React from "react";
-import Image from "next/image";
+import React from "react"
+import Image from "next/image"
 
 interface BrutalAvatarProps {
-  src?: string | null;
-  alt?: string | null;
-  size?: string;
-  fallback?: string;
-  className?: string;
+  src?: string | null
+  alt?: string | null
+  size?: string
+  fallback?: string
+  className?: string
 }
 
-export function BrutalAvatar({ src, alt, fallback, className = "" }: BrutalAvatarProps) {
+export function BrutalAvatar({
+  src,
+  alt,
+  fallback,
+  className = "",
+}: BrutalAvatarProps) {
   return (
     <div
-      className={`border-tech-main/40 group hover:border-tech-main relative box-border flex aspect-square h-full w-full items-center justify-center overflow-hidden border-2 bg-slate-100 transition-all duration-300 ${className}`}
-    >
+      className={`border-tech-main/40 group hover:border-tech-main relative box-border flex aspect-square h-full w-full items-center justify-center overflow-hidden border-2 bg-slate-100 transition-all duration-300 ${className}`}>
       {/* 科技感装饰元素 */}
       <div className="pointer-events-none absolute inset-0 z-10 opacity-70 transition-opacity duration-300 group-hover:opacity-100">
         {/* 中心十字准星 */}
@@ -60,5 +64,5 @@ export function BrutalAvatar({ src, alt, fallback, className = "" }: BrutalAvata
         </span>
       )}
     </div>
-  );
+  )
 }

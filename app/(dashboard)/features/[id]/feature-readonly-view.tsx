@@ -1,6 +1,3 @@
-"use client"
-
-import { useState } from "react"
 import ReactMarkdown from "react-markdown"
 import { BrutalCard } from "@/components/ui/brutal-card"
 import { getMarkdownComponents, getPluginsForContent } from "@/lib/markdown"
@@ -17,7 +14,6 @@ export function FeatureReadonlyView({
   content,
   tags,
 }: FeatureReadonlyViewProps) {
-  const [activeTab, setActiveTab] = useState<"rendered" | "source">("rendered")
   const { remarkPlugins, rehypePlugins } = getPluginsForContent(content)
   const markdownComponents = getMarkdownComponents("")
 
@@ -54,93 +50,54 @@ export function FeatureReadonlyView({
             backdrop-blur-sm
           ">
           <div
-            role="tablist"
-            aria-label="Editor mode"
             className="
-              flex items-center border-b border-tech-main/40 bg-tech-main/10
-              font-mono text-xs
+              border-b border-tech-main/40 bg-tech-main/10 px-4 py-2 font-mono
+              text-xs text-tech-main/80
             ">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === "rendered"}
-              aria-controls="feature-rendered-panel"
-              onClick={() => setActiveTab("rendered")}
-              className={`
-                px-4 py-2 transition-colors select-none
-                ${
-                  activeTab === "rendered"
-                    ? "bg-tech-main text-white"
-                    : `
-                      cursor-pointer text-tech-main/60
-                      hover:bg-tech-main/10
-                    `
-                }
-              `}>
-              RENDERED_
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === "source"}
-              aria-controls="feature-source-panel"
-              onClick={() => setActiveTab("source")}
-              className={`
-                px-4 py-2 transition-colors select-none
-                ${
-                  activeTab === "source"
-                    ? "bg-tech-main text-white"
-                    : `
-                      cursor-pointer text-tech-main/60
-                      hover:bg-tech-main/10
-                    `
-                }
-              `}>
-              SOURCE_
-            </button>
+            RENDERED_PREVIEW
           </div>
 
           <div className="min-h-[200px]">
-            {activeTab === "rendered" ? (
+            {content?.trim() ? (
               <div
-                id="feature-rendered-panel"
-                role="tabpanel"
-                aria-labelledby="tab-rendered">
-                {content?.trim() ? (
-                  <div className="prose prose-tech w-full max-w-none overflow-hidden wrap-break-word p-6 sm:p-8 selection:bg-tech-main/20 selection:text-slate-900">
-                    <ReactMarkdown
-                      remarkPlugins={remarkPlugins}
-                      rehypePlugins={rehypePlugins}
-                      components={markdownComponents}>
-                      {content}
-                    </ReactMarkdown>
-                  </div>
-                ) : (
-                  <p className="p-6 font-mono text-xs text-tech-main/40">
-                    NOTHING_TO_PREVIEW_
-                  </p>
-                )}
+                className="
+                  prose w-full max-w-none overflow-hidden p-6 wrap-break-word
+                  prose-tech
+                  selection:bg-tech-main/20 selection:text-slate-900
+                  sm:p-8
+                ">
+                <ReactMarkdown
+                  remarkPlugins={remarkPlugins}
+                  rehypePlugins={rehypePlugins}
+                  components={markdownComponents}>
+                  {content}
+                </ReactMarkdown>
               </div>
             ) : (
-              <div
-                id="feature-source-panel"
-                role="tabpanel"
-                aria-labelledby="tab-source">
-                {content?.trim() ? (
-                  <pre
-                    className="
-                      p-6 font-mono text-sm/relaxed whitespace-pre-wrap
-                    ">
-                    {content}
-                  </pre>
-                ) : (
-                  <p className="p-6 font-mono text-xs text-tech-main/40">
-                    NOTHING_TO_PREVIEW_
-                  </p>
-                )}
-              </div>
+              <p className="p-6 font-mono text-xs text-tech-main/40">
+                NOTHING_TO_PREVIEW_
+              </p>
             )}
           </div>
+
+          <details className="border-t guide-line">
+            <summary
+              className="
+                cursor-pointer list-none border-b guide-line bg-tech-main/5 px-4
+                py-2 font-mono text-xs text-tech-main/70
+              ">
+              SOURCE_
+            </summary>
+            {content?.trim() ? (
+              <pre className="p-6 font-mono text-sm/relaxed whitespace-pre-wrap">
+                {content}
+              </pre>
+            ) : (
+              <p className="p-6 font-mono text-xs text-tech-main/40">
+                NOTHING_TO_PREVIEW_
+              </p>
+            )}
+          </details>
         </div>
       </div>
     </BrutalCard>

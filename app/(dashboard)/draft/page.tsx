@@ -37,7 +37,7 @@ export default async function DraftDashboardPage() {
             displayStatus = isMerged ? "MERGED" : "CLOSED"
           }
         } catch (e) {
-          // ignore
+          console.error(`Failed to fetch PR #${d.githubPrNum}:`, e)
         }
       }
       return { ...d, displayStatus, isClosed, isMerged }
@@ -46,16 +46,16 @@ export default async function DraftDashboardPage() {
 
   const activeDrafts = allDrafts.filter(
     (d) =>
-      d.displayStatus !== "APPROVED" && 
-      d.displayStatus !== "ARCHIVED" && 
-      d.displayStatus !== "MERGED" && 
+      d.displayStatus !== "APPROVED" &&
+      d.displayStatus !== "ARCHIVED" &&
+      d.displayStatus !== "MERGED" &&
       d.displayStatus !== "CLOSED"
   )
   const archivedDrafts = allDrafts.filter(
     (d) =>
-      d.displayStatus === "APPROVED" || 
-      d.displayStatus === "ARCHIVED" || 
-      d.displayStatus === "MERGED" || 
+      d.displayStatus === "APPROVED" ||
+      d.displayStatus === "ARCHIVED" ||
+      d.displayStatus === "MERGED" ||
       d.displayStatus === "CLOSED"
   )
 
@@ -89,9 +89,11 @@ export default async function DraftDashboardPage() {
               ${
                 draft.displayStatus === "DRAFT"
                   ? "border-tech-main/40 bg-tech-main/5 text-tech-main"
-                  : draft.displayStatus === "PENDING" || draft.displayStatus === "SUBMITTED"
+                  : draft.displayStatus === "PENDING" ||
+                      draft.displayStatus === "SUBMITTED"
                     ? "border-blue-500/40 bg-blue-500/10 text-blue-600"
-                    : draft.displayStatus === "REJECTED" || draft.displayStatus === "CLOSED"
+                    : draft.displayStatus === "REJECTED" ||
+                        draft.displayStatus === "CLOSED"
                       ? "border-red-500/40 bg-red-500/10 text-red-600"
                       : draft.displayStatus === "ARCHIVED"
                         ? "border-gray-500/40 bg-gray-500/10 text-gray-600"
@@ -117,7 +119,7 @@ export default async function DraftDashboardPage() {
                   <button
                     type="submit"
                     className="
-                      flex min-h-[44px] cursor-pointer items-center font-mono
+                      flex min-h-11 cursor-pointer items-center font-mono
                       text-xs text-red-500 uppercase
                       hover:text-red-700 hover:underline
                     ">
@@ -155,11 +157,13 @@ export default async function DraftDashboardPage() {
         <BrutalButton
           variant="ghost"
           className="
-            min-h-[44px] w-full border border-tech-main/40 bg-white/50 font-mono
+            min-h-11 w-full border border-tech-main/40 bg-white/50 font-mono
             text-xs tracking-widest transition-all
             hover:border-tech-main/60 hover:bg-white/80
           ">
-          {draft.displayStatus === "DRAFT" || draft.displayStatus === "REJECTED" || draft.displayStatus === "CLOSED"
+          {draft.displayStatus === "DRAFT" ||
+          draft.displayStatus === "REJECTED" ||
+          draft.displayStatus === "CLOSED"
             ? "> EDIT_RECORD"
             : "> VIEW_STREAM"}
         </BrutalButton>
@@ -222,7 +226,7 @@ export default async function DraftDashboardPage() {
           <BrutalButton
             variant="primary"
             className="
-              flex min-h-[44px] w-full items-center justify-center px-6 text-xs
+              flex min-h-11 w-full items-center justify-center px-6 text-xs
               tracking-widest uppercase transition-transform
               hover:scale-[1.02]
               md:w-auto

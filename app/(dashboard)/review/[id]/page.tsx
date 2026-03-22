@@ -71,7 +71,10 @@ export default async function ReviewDetailPage({
       })
       if (!Array.isArray(fileData) && fileData.type === "file") {
         currentPrText = Buffer.from(fileData.content, "base64").toString("utf8")
-        if (currentPrText.includes("<<<<<<< Current Change") && pr.state === "open") {
+        if (
+          currentPrText.includes("<<<<<<< Current Change") &&
+          pr.state === "open"
+        ) {
           // It has leftover literal conflict markers, we MUST treat it as a conflict
           // even if GitHub says it's technically mergeable based on tree history!
           hasConflict = true

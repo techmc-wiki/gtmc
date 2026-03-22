@@ -30,9 +30,10 @@ function TreeLoadingPlaceholder() {
   return (
     <div
       className="
-        relative h-full min-h-full min-h-[30rem] animate-tree-drop-in
-        overflow-hidden border guide-line bg-white/80 px-3 py-4
-        motion-reduce:animate-none md:min-h-[40rem] md:px-4 md:py-5
+        relative h-full animate-tree-drop-in overflow-hidden border guide-line
+        bg-white/80 px-3 py-4
+        motion-reduce:animate-none
+        md:min-h-160 md:px-4 md:py-5
       "
       style={{
         animation: "tree-drop-in 1.05s cubic-bezier(0.16, 1, 0.3, 1) both",
@@ -61,7 +62,7 @@ function TreeLoadingPlaceholder() {
               <SegmentedBar opacity="medium" className="h-3.5 w-2/3" />
             </div>
 
-            <div className="ml-2 space-y-3 border-l border-tech-main/20 pl-3">
+            <div className="ml-2 space-y-3 border-l guide-line pl-3">
               <div className="flex items-center gap-2">
                 <span className="size-1 rounded-full bg-tech-main/35" />
                 <SegmentedBar opacity="low" className="h-3 w-3/5" />
@@ -125,7 +126,6 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   }, [])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOpen(false)
   }, [pathname])
 
@@ -191,7 +191,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       active = false
       controller.abort()
     }
-  }, [tree.length])
+  }, [tree, tree.length])
 
   const showTreePlaceholder = isTreeLoading && treeData.length === 0
 
@@ -205,7 +205,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l [&_ul_ul]:guide-line
         [&_ul_ul]:pl-3
         [&>ul]:pl-0
-        ${showTreePlaceholder ? "h-full min-h-full pb-0" : "pb-4"}
+        ${showTreePlaceholder ? "h-full min-h-full pb-0" : ""}
       `}
       aria-busy={showTreePlaceholder}>
       {showTreePlaceholder ? (
@@ -235,14 +235,15 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="
-            flex min-h-[44px] w-full cursor-pointer items-center justify-between
+            flex min-h-11 w-full cursor-pointer items-center justify-between
             px-4 text-tech-main transition-colors
             hover:bg-tech-main/5
           "
           aria-label="Toggle article tree"
           aria-expanded={isOpen}
           data-testid="mobile-tree-toggle">
-          <span className="font-mono text-xs font-bold tracking-[0.15em] uppercase">
+          <span
+            className="font-mono text-xs font-bold tracking-[0.15em] uppercase">
             TREE
           </span>
           <span className="font-mono text-sm font-bold">
@@ -367,7 +368,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                   [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l
                   [&_ul_ul]:guide-line [&_ul_ul]:pl-3
                   [&>ul]:pl-0
-                  ${showTreePlaceholder ? "h-full min-h-full pb-2" : "pb-8"}
+                  ${showTreePlaceholder ? "h-full min-h-full pb-2" : ""}
                 `}>
                 {showTreePlaceholder ? (
                   <div className="h-full min-h-full pr-4">

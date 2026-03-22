@@ -68,23 +68,63 @@ export function getMarkdownComponents(rawPath: string) {
       <span style={{ color: "darkseagreen" }} {...props} />
     ),
     table: ({ ...props }: MarkdownComponentProps) => (
-      <div className="-mx-6 my-6 w-full overflow-x-auto border border-tech-main/30 bg-white/50 px-6 backdrop-blur-sm sm:-mx-8 sm:px-8">
-        <table className="w-full min-w-150 border-collapse text-left font-mono text-sm" {...props} />
+      <div
+        className="
+          -mx-6 my-6 w-full overflow-x-auto border border-tech-main/30
+          bg-white/50 px-6 backdrop-blur-sm
+          sm:-mx-8 sm:px-8
+        ">
+        <table
+          className="
+            w-full min-w-150 border-collapse text-left font-mono text-sm
+          "
+          {...props}
+        />
       </div>
     ),
     thead: ({ ...props }: MarkdownComponentProps) => (
-      <thead className="border-b border-tech-main/30 bg-tech-main/10" {...props} />
+      <thead
+        className="border-b border-tech-main/30 bg-tech-main/10"
+        {...props}
+      />
     ),
     th: ({ ...props }: MarkdownComponentProps) => (
-      <th className="border-r border-tech-main/10 p-3 font-semibold whitespace-nowrap text-tech-main last:border-r-0" {...props} />
+      <th
+        className="
+          border-r border-tech-main/10 p-3 font-semibold whitespace-nowrap
+          text-tech-main
+          last:border-r-0
+        "
+        {...props}
+      />
     ),
     td: ({ ...props }: MarkdownComponentProps) => (
-      <td className="border-t border-r border-tech-main/10 p-3 text-slate-700 last:border-r-0" {...props} />
+      <td
+        className="
+          border-t border-r border-tech-main/10 p-3 text-slate-700
+          last:border-r-0
+        "
+        {...props}
+      />
     ),
     h1: ({ id, children }: MarkdownComponentProps) => (
-      <h1 id={id} className="group relative mt-8 mb-6 scroll-m-20 border-b border-tech-main/30 pb-4 font-mono text-2xl tracking-widest text-slate-900 uppercase target:animate-target-blink target:border-tech-main sm:text-3xl lg:text-4xl">
+      <h1
+        id={id}
+        className="
+          group relative mt-8 mb-6 scroll-m-20 border-b border-tech-main/30 pb-4
+          font-mono text-2xl tracking-widest text-slate-900 uppercase
+          target:animate-target-blink target:border-tech-main
+          sm:text-3xl
+          lg:text-4xl
+        ">
         {id && (
-          <a href={`#${id}`} className="absolute top-1/2 -left-6 -translate-y-1/2 text-xl font-normal text-tech-main no-underline opacity-0 transition-opacity group-hover:opacity-100">
+          <a
+            href={`#${id}`}
+            className="
+              absolute top-1/2 -left-6 -translate-y-1/2 text-xl font-normal
+              text-tech-main no-underline opacity-0 transition-opacity
+              group-hover:opacity-100
+            ">
             #
           </a>
         )}
@@ -92,9 +132,22 @@ export function getMarkdownComponents(rawPath: string) {
       </h1>
     ),
     h2: ({ id, children }: MarkdownComponentProps) => (
-      <h2 id={id} className="group relative mt-12 mb-6 inline-block scroll-m-20 border-b border-tech-main/30 pr-8 font-mono text-2xl tracking-widest text-slate-800 uppercase target:animate-target-blink target:border-tech-main">
+      <h2
+        id={id}
+        className="
+          group relative mt-12 mb-6 inline-block scroll-m-20 border-b
+          border-tech-main/30 pr-8 font-mono text-2xl tracking-widest
+          text-slate-800 uppercase
+          target:animate-target-blink target:border-tech-main
+        ">
         {id && (
-          <a href={`#${id}`} className="absolute top-1/2 -left-5 -translate-y-1/2 text-lg font-normal text-tech-main no-underline opacity-0 transition-opacity group-hover:opacity-100">
+          <a
+            href={`#${id}`}
+            className="
+              absolute top-1/2 -left-5 -translate-y-1/2 text-lg font-normal
+              text-tech-main no-underline opacity-0 transition-opacity
+              group-hover:opacity-100
+            ">
             #
           </a>
         )}
@@ -102,9 +155,21 @@ export function getMarkdownComponents(rawPath: string) {
       </h2>
     ),
     h3: ({ id, children }: MarkdownComponentProps) => (
-      <h3 id={id} className="group relative mt-8 mb-4 scroll-m-20 font-mono text-xl tracking-widest text-slate-700 uppercase target:animate-target-blink">
+      <h3
+        id={id}
+        className="
+          group relative mt-8 mb-4 scroll-m-20 font-mono text-xl tracking-widest
+          text-slate-700 uppercase
+          target:animate-target-blink
+        ">
         {id && (
-          <a href={`#${id}`} className="absolute top-1/2 -left-4 -translate-y-1/2 text-base font-normal text-tech-main no-underline opacity-0 transition-opacity group-hover:opacity-100">
+          <a
+            href={`#${id}`}
+            className="
+              absolute top-1/2 -left-4 -translate-y-1/2 text-base font-normal
+              text-tech-main no-underline opacity-0 transition-opacity
+              group-hover:opacity-100
+            ">
             #
           </a>
         )}
@@ -112,7 +177,10 @@ export function getMarkdownComponents(rawPath: string) {
       </h3>
     ),
     p: ({ ...props }: MarkdownComponentProps) => (
-      <p className="mb-4 font-mono text-base/relaxed text-slate-800" {...props} />
+      <p
+        className="mb-4 font-mono text-base/relaxed text-slate-800"
+        {...props}
+      />
     ),
     a: ({ href: initialHref, ...props }: MarkdownComponentProps) => {
       let href = (initialHref as string) || ""
@@ -133,19 +201,51 @@ export function getMarkdownComponents(rawPath: string) {
         const resolved = path.join(currentDir, href).replace(/\\/g, "/")
         href = `/articles/${resolved}`
       }
-      return <Link href={href} className="border-b border-tech-main/50 font-mono text-tech-main transition-colors hover:bg-tech-main/80 hover:text-white" {...props} />
+      return (
+        <Link
+          href={href}
+          className="
+            border-b border-tech-main/50 font-mono text-tech-main
+            transition-colors
+            hover:bg-tech-main/80 hover:text-white
+          "
+          {...props}
+        />
+      )
     },
     ul: ({ ...props }: MarkdownComponentProps) => (
-      <ul className="mb-6 list-none space-y-2 border-l-[1.5] border-tech-main/30 pl-8 font-mono text-[0.9em] text-slate-800" {...props} />
+      <ul
+        className="
+          mb-6 list-none space-y-2 border-l-[1.5] border-tech-main/30 pl-8
+          font-mono text-[0.9em] text-slate-800
+        "
+        {...props}
+      />
     ),
     ol: ({ ...props }: MarkdownComponentProps) => (
-      <ol className="mb-6 list-decimal space-y-2 pl-6 font-mono text-slate-800" {...props} />
+      <ol
+        className="mb-6 list-decimal space-y-2 pl-6 font-mono text-slate-800"
+        {...props}
+      />
     ),
     li: ({ ...props }: MarkdownComponentProps) => (
-      <li className="relative text-slate-800 before:absolute before:-left-4 before:text-tech-main/50 before:content-['>']" {...props} />
+      <li
+        className="
+          relative text-slate-800
+          before:absolute before:-left-4 before:text-tech-main/50
+          before:content-['>']
+        "
+        {...props}
+      />
     ),
     blockquote: ({ ...props }: MarkdownComponentProps) => (
-      <blockquote className="mb-6 border-l-2 border-tech-main bg-tech-main/5 p-4 pb-[0.01] font-mono text-slate-700 italic" {...props} />
+      <blockquote
+        className="
+          mb-6 border-l-2 border-tech-main bg-tech-main/5 p-4 pb-[0.01]
+          font-mono text-slate-700 italic
+        "
+        {...props}
+      />
     ),
     img: ({ src: initialSrc, alt }: MarkdownComponentProps) => {
       let src = (initialSrc as string) || ""
@@ -160,19 +260,44 @@ export function getMarkdownComponents(rawPath: string) {
       }
       return (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt={(alt as string) || ""} className="my-8 h-auto max-w-full border border-tech-main/30 bg-tech-main/5 p-1 shadow-sm" />
+        <img
+          src={src}
+          alt={(alt as string) || ""}
+          className="
+            my-8 h-auto max-w-full border border-tech-main/30 bg-tech-main/5 p-1
+            shadow-sm
+          "
+        />
       )
     },
     code: ({ className, children, ...props }: MarkdownComponentProps) => {
       const match = /language-(\w+)/.exec((className as string) || "")
       return match ? (
-        <div className="-mx-6 my-6 max-w-full overflow-hidden border border-tech-main/30 bg-[#1e1e1e] font-mono text-sm shadow-sm sm:-mx-8">
-          <div className="flex items-center justify-between border-b border-tech-main/30 bg-tech-main/10 px-4 py-1 font-mono text-xs tracking-widest text-tech-main uppercase">
+        <div
+          className="
+            -mx-6 my-6 max-w-full overflow-hidden border border-tech-main/30
+            bg-[#1e1e1e] font-mono text-sm shadow-sm
+            sm:-mx-8
+          ">
+          <div
+            className="
+              flex items-center justify-between border-b border-tech-main/30
+              bg-tech-main/10 px-4 py-1 font-mono text-xs tracking-widest
+              text-tech-main uppercase
+            ">
             <span>{match[1]}</span>
             <span className="opacity-50">{"//"} EXECUTABLE_BLOCK</span>
           </div>
-          <div className="overflow-x-scroll px-4 sm:px-6">
-            <div className="px-6 sm:px-8">
+          <div
+            className="
+              overflow-x-scroll px-4
+              sm:px-6
+            ">
+            <div
+              className="
+                px-6
+                sm:px-8
+              ">
               <SyntaxHighlighter
                 style={vscDarkPlus as Record<string, Record<string, string>>}
                 language={match[1]}
@@ -189,7 +314,12 @@ export function getMarkdownComponents(rawPath: string) {
           </div>
         </div>
       ) : (
-        <code className="mx-1 rounded-none border border-tech-main/30 bg-tech-main/10 px-1 py-[0.05rem] font-mono text-[0.8em] text-tech-main" {...props}>
+        <code
+          className="
+            mx-1 rounded-none border border-tech-main/30 bg-tech-main/10 px-1
+            py-[0.05rem] font-mono text-[0.8em] text-tech-main
+          "
+          {...props}>
           {children}
         </code>
       )

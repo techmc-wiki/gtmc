@@ -654,7 +654,13 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           hidden={activeTab !== "preview"}
           className="flex min-h-125 grow flex-col">
           {content?.trim() ? (
-            <div className="prose prose-tech w-full max-w-none overflow-hidden wrap-break-word p-6 sm:p-8 selection:bg-tech-main/20 selection:text-slate-900">
+            <div
+              className="
+                prose w-full max-w-none overflow-hidden p-6 wrap-break-word
+                prose-tech
+                selection:bg-tech-main/20 selection:text-slate-900
+                sm:p-8
+              ">
               <ReactMarkdown
                 remarkPlugins={getPluginsForContent(content).remarkPlugins}
                 rehypePlugins={getPluginsForContent(content).rehypePlugins}

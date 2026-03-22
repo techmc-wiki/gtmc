@@ -61,7 +61,7 @@ async function analyzePRConflictStatus(prNumber: number, token?: string) {
           }
         }
       }
-    } catch { }
+    } catch {}
   }
   return isConflict
 }
@@ -141,9 +141,10 @@ export default async function ReviewHubPage() {
           <span
             className={`
               border px-2 py-0.5 font-mono text-xs tracking-wider
-              ${isConflict
-                ? `border-red-500/40 bg-red-500/20 text-red-600`
-                : `border-blue-500/40 bg-blue-500/10 text-blue-600`
+              ${
+                isConflict
+                  ? `border-red-500/40 bg-red-500/20 text-red-600`
+                  : `border-blue-500/40 bg-blue-500/10 text-blue-600`
               }
             `}>
             [PR #{pr.number}]

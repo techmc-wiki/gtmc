@@ -76,18 +76,29 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
 
   // 2. Get GitHub repo tree (cached)
   let githubTree: RepoTreeNode[] = []
-  try {
-    githubTree = await getCachedRepoTree()
-  } catch (e) {
-    console.error("Failed to fetch GitHub repo tree:", e)
+  let translations: Record<string, string> = {}
+
+  const githubTreePromise = getCachedRepoTree()
+  const translationsPromise = getCachedTranslations()
+
+  const [treeResult, translationsResult] = await Promise.allSettled([
+    githubTreePromise,
+    translationsPromise,
+  ])
+
+  if (treeResult.status === "fulfilled") {
+    githubTree = treeResult.value
+  } else {
+    console.error("Failed to fetch GitHub repo tree:", treeResult.reason)
   }
 
-  // 3. Get translations (cached)
-  let translations: Record<string, string> = {}
-  try {
-    translations = await getCachedTranslations()
-  } catch (e) {
-    console.error("Failed to fetch sidebar translations:", e)
+  if (translationsResult.status === "fulfilled") {
+    translations = translationsResult.value
+  } else {
+    console.error(
+      "Failed to fetch sidebar translations:",
+      translationsResult.reason
+    )
   }
 
   // 4. Merge: GitHub tree first, then DB articles

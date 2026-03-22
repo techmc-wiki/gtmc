@@ -6,9 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "format": "prettier . --write",
-    "format:check": "prettier . --check",
+    "lint": "prettier --write . && eslint --fix .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "postinstall": "prisma generate && node scripts/fix-prisma.js",
     "analyze": "ANALYZE=true pnpm build",
     "lighthouse": "lhci autorun"

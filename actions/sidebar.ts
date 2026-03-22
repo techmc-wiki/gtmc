@@ -1,4 +1,4 @@
-"use server"
+﻿"use server"
 
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
@@ -6,6 +6,8 @@ import { unstable_cache } from "next/cache"
 import {
   getRepoContentTree,
   getRepoTranslations,
+  createPR,
+  createDirectFile,
   type RepoTreeNode,
 } from "@/lib/github-pr"
 
@@ -23,7 +25,7 @@ const getCachedRepoTree = unstable_cache(
     return getRepoContentTree()
   },
   ["github-repo-tree"],
-  { revalidate: 300 }
+  { revalidate: 60, tags: ["github-repo-tree"] }
 )
 
 const getCachedTranslations = unstable_cache(
@@ -31,7 +33,7 @@ const getCachedTranslations = unstable_cache(
     return getRepoTranslations()
   },
   ["github-sidebar-translations"],
-  { revalidate: 3600 }
+  { revalidate: 3600, tags: ["github-repo-translations"] }
 )
 
 /**
@@ -133,18 +135,75 @@ export async function createDocument({
     throw new Error("未授权，请先登录")
   }
 
-  const existing = await prisma.article.findUnique({
-    where: { slug },
-  })
-  if (existing) {
-    throw new Error("该路径 (Slug) 已存在")
+  // 1. Resolve parent directory path
+  let parentPath = ""
+  if (parentId) {
+    if (parentId.startsWith("gh-")) {
+      parentPath = parentId.replace(/^gh-/, "")
+    } else {
+      const parentDoc = await prisma.article.findUnique({
+        where: { id: parentId },
+        select: { slug: true }
+      })
+      if (parentDoc) {
+        parentPath = parentDoc.slug
+      }
+    }
   }
 
+  // Determine full path/slug
+  let finalSlug = slug
+  if (parentPath) {
+    if (!slug.includes("/")) {
+      finalSlug = `${parentPath}/${slug}`
+    } else if (!slug.startsWith(parentPath + "/")) {
+      finalSlug = `${parentPath}/${slug}`
+    }
+  }
+  finalSlug = finalSlug.replace(/^\/+/, "")
+
+  const existing = await prisma.article.findUnique({
+    where: { slug: finalSlug },
+  })
+  if (existing) {
+    throw new Error("该路径已存在")
+  }
+
+  const initialContent = isFolder ? "" : "# " + title
+  const filePath = isFolder ? `${finalSlug}/.gitkeep` : `${finalSlug}.md`
+
+  const authorName = session.user.name || "Unknown"
+  const authorEmail = session.user.email || "unknown@gtmc.dev"
+
+  // 2. Sync to GitHub
+  try {
+    if (session.user.role === "ADMIN") {
+      await createDirectFile({
+        title: isFolder ? `Create folder ${title}` : `Create file ${title}`,
+        content: initialContent,
+        filePath,
+        authorName,
+        authorEmail,
+      })
+    } else {
+      await createPR({
+        title: isFolder ? `[系统自动生成] Request to create folder ${title}` : `[系统自动生成] Request to create file ${title}`,
+        content: initialContent,
+        filePath,
+        authorName,
+        authorEmail,
+      })
+    }
+  } catch (error) {
+    console.error("Failed to sync to GitHub:", error)
+  }
+
+  // 3. Create local DB entry
   const newDoc = await prisma.article.create({
     data: {
       title,
-      slug,
-      content: isFolder ? "" : "# " + title,
+      slug: finalSlug,
+      content: initialContent,
       isFolder,
       parentId,
       authorId: session.user.id,

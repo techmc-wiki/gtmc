@@ -126,6 +126,48 @@ export async function createPR({
   return pr.number
 }
 
+export async function createDirectFile({
+  title,
+  content,
+  filePath,
+  authorName,
+  authorEmail,
+  token,
+}: {
+  title: string
+  content: string
+  filePath: string
+  authorName: string
+  authorEmail: string
+  token?: string
+}) {
+  const octokit = getOctokit(token)
+
+  let sha: string | undefined
+  try {
+    const { data: file } = await octokit.repos.getContent({
+      owner: ARTICLES_REPO_OWNER,
+      repo: ARTICLES_REPO_NAME,
+      path: filePath,
+      ref: "main",
+    })
+    if (!Array.isArray(file) && file.type === "file") {
+      sha = file.sha
+    }
+  } catch {}
+
+  await octokit.repos.createOrUpdateFileContents({
+    owner: ARTICLES_REPO_OWNER,
+    repo: ARTICLES_REPO_NAME,
+    path: filePath,
+    message: `docs: ${title}`,
+    content: Buffer.from(content).toString("base64"),
+    branch: "main",
+    sha,
+    author: { name: authorName, email: authorEmail },
+  })
+}
+
 export async function getOpenPRs(token?: string) {
   const octokit = getOctokit(token)
   const { data } = await octokit.pulls.list({
@@ -157,11 +199,13 @@ const IGNORED_DIRS = new Set([
   "source",
   "asset",
   "exampleworld",
+  "desynchronized",
 ])
 const IGNORED_ROOT_FILES = new Set([
   "readme.md",
   "contributors.md",
   "_sidebar.md",
+  "desynchronized.md",
 ])
 
 export interface RepoTreeNode {

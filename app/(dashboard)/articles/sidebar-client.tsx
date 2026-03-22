@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useEffect, useState, useMemo, useCallback } from "react"
+import { createPortal } from "react-dom"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { createDocument } from "@/actions/sidebar"
@@ -362,13 +363,15 @@ export function SidebarClient({
         <div className="-ml-4">{renderTree(tree)}</div>
       )}
 
-      {isModalOpen && (
-        <div
-          className="
-            fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4
-            duration-300 animate-in fade-in
-          ">
+      {mounted &&
+        isModalOpen &&
+        createPortal(
           <div
+            className="
+              fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4
+              duration-300 animate-in fade-in
+            ">
+            <div
             className="
               w-full max-w-md rounded-sm border-2 border-tech-main bg-white p-6
               shadow-[8px_8px_0_0_rgba(var(--tech-main),1)]
@@ -515,7 +518,8 @@ export function SidebarClient({
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

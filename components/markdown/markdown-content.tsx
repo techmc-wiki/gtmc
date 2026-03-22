@@ -33,6 +33,7 @@ export function MarkdownContent({
     <div
       className={`
         prose w-full max-w-none overflow-hidden wrap-break-word text-slate-800
+        p-6 sm:p-8
         prose-tech
         selection:bg-tech-main/20
         selection:text-slate-900${

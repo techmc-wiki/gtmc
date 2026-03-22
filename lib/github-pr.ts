@@ -273,14 +273,31 @@ export async function getPRFiles(prNumber: number, token?: string) {
   return data
 }
 
+export async function determineMergeMethod(prNumber: number, token?: string): Promise<"squash" | "rebase"> {
+  const pr = await getPR(prNumber, token)
+  
+  // 按照规范自动判断是否符合 rebase 的特殊情况：
+  // 1. 分支包含较长且有价值的提交历史（如 5 个以上 commits）
+  // 2. 分支包含大量修改，难以合理压缩为单个提交（如 修改了 10 个以上文件，或增删代码超过 500 行）
+  const isLongHistory = pr.commits >= 5
+  const isLargeModification = pr.changed_files >= 10 || (pr.additions + pr.deletions) >= 500
+  
+  if (isLongHistory || isLargeModification) {
+    return "rebase"
+  }
+  return "squash"
+}
+
 export async function resolveConflictAndMerge(
   prNumber: number,
   filePath: string,
   resolvedContent: string,
-  token?: string
+  token?: string,
+  mergeMethod?: "squash" | "rebase"
 ) {
   const octokit = getOctokit(token)
   const pr = await getPR(prNumber, token)
+  const actualMergeMethod = mergeMethod || await determineMergeMethod(prNumber, token)
   const branchName = pr.head.ref
   const prHeadSha = pr.head.sha
 
@@ -383,18 +400,20 @@ export async function resolveConflictAndMerge(
     owner: ARTICLES_REPO_OWNER,
     repo: ARTICLES_REPO_NAME,
     pull_number: prNumber,
-    merge_method: "rebase",
+    merge_method: actualMergeMethod,
   })
   return data
 }
 
-export async function mergePR(prNumber: number, token?: string) {
+export async function mergePR(prNumber: number, token?: string, mergeMethod?: "squash" | "rebase") {
   const octokit = getOctokit(token)
+  const actualMergeMethod = mergeMethod || await determineMergeMethod(prNumber, token)
+  
   const { data } = await octokit.pulls.merge({
     owner: ARTICLES_REPO_OWNER,
     repo: ARTICLES_REPO_NAME,
     pull_number: prNumber,
-    merge_method: "rebase",
+    merge_method: actualMergeMethod,
   })
   return data
 }

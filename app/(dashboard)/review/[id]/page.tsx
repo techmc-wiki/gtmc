@@ -55,8 +55,8 @@ export default async function ReviewDetailPage({
   })
   const mainFile = files.find((f) => f.filename.endsWith(".md")) || files[0]
 
-  let isMergeable = pr.mergeable === true
-  let hasConflict = pr.mergeable === false
+  let isMergeable = pr.mergeable === true && pr.state === "open"
+  let hasConflict = pr.mergeable === false && pr.state === "open"
 
   let rawContent = ""
   if (mainFile) {
@@ -71,7 +71,7 @@ export default async function ReviewDetailPage({
       })
       if (!Array.isArray(fileData) && fileData.type === "file") {
         currentPrText = Buffer.from(fileData.content, "base64").toString("utf8")
-        if (currentPrText.includes("<<<<<<< Current Change")) {
+        if (currentPrText.includes("<<<<<<< Current Change") && pr.state === "open") {
           // It has leftover literal conflict markers, we MUST treat it as a conflict
           // even if GitHub says it's technically mergeable based on tree history!
           hasConflict = true

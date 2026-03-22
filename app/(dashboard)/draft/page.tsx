@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { deleteDraftAction } from "@/actions/article"
+import { getPR } from "@/lib/github-pr"
 
 export default async function DraftDashboardPage() {
   const session = await auth()
@@ -12,7 +13,7 @@ export default async function DraftDashboardPage() {
     redirect("/login")
   }
 
-  const allDrafts = await prisma.revision.findMany({
+  const allDraftsRaw = await prisma.revision.findMany({
     where: {
       authorId: session.user.id,
     },
@@ -21,13 +22,41 @@ export default async function DraftDashboardPage() {
     },
   })
 
+  const allDrafts = await Promise.all(
+    allDraftsRaw.map(async (d) => {
+      let displayStatus = d.status
+      let isClosed = false
+      let isMerged = false
+
+      if (d.status === "SUBMITTED" && d.githubPrNum) {
+        try {
+          const pr = await getPR(d.githubPrNum)
+          if (pr.state === "closed") {
+            isClosed = true
+            isMerged = !!pr.merged
+            displayStatus = isMerged ? "MERGED" : "CLOSED"
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+      return { ...d, displayStatus, isClosed, isMerged }
+    })
+  )
+
   const activeDrafts = allDrafts.filter(
-    (d: (typeof allDrafts)[0]) =>
-      d.status !== "APPROVED" && d.status !== "ARCHIVED"
+    (d) =>
+      d.displayStatus !== "APPROVED" && 
+      d.displayStatus !== "ARCHIVED" && 
+      d.displayStatus !== "MERGED" && 
+      d.displayStatus !== "CLOSED"
   )
   const archivedDrafts = allDrafts.filter(
-    (d: (typeof allDrafts)[0]) =>
-      d.status === "APPROVED" || d.status === "ARCHIVED"
+    (d) =>
+      d.displayStatus === "APPROVED" || 
+      d.displayStatus === "ARCHIVED" || 
+      d.displayStatus === "MERGED" || 
+      d.displayStatus === "CLOSED"
   )
 
   const renderDraftCard = (draft: (typeof allDrafts)[0]) => (
@@ -58,40 +87,44 @@ export default async function DraftDashboardPage() {
             className={`
               shrink-0 border px-2 py-0.5 font-mono text-xs tracking-wider
               ${
-                draft.status === "DRAFT"
+                draft.displayStatus === "DRAFT"
                   ? "border-tech-main/40 bg-tech-main/5 text-tech-main"
-                  : draft.status === "PENDING"
+                  : draft.displayStatus === "PENDING" || draft.displayStatus === "SUBMITTED"
                     ? "border-blue-500/40 bg-blue-500/10 text-blue-600"
-                    : draft.status === "REJECTED"
+                    : draft.displayStatus === "REJECTED" || draft.displayStatus === "CLOSED"
                       ? "border-red-500/40 bg-red-500/10 text-red-600"
-                      : draft.status === "ARCHIVED"
+                      : draft.displayStatus === "ARCHIVED"
                         ? "border-gray-500/40 bg-gray-500/10 text-gray-600"
                         : "border-green-500/40 bg-green-500/10 text-green-600"
               }
             `}>
-            [{draft.status}]
+            [{draft.displayStatus}]
           </span>
           <div className="flex flex-col items-end gap-1">
             <span className="font-mono text-xs text-tech-main/50">
               {draft.updatedAt.toLocaleDateString()}
             </span>
-            {draft.status !== "PENDING" && draft.status !== "APPROVED" && (
-              <form
-                action={async () => {
-                  "use server"
-                  await deleteDraftAction(draft.id)
-                }}>
-                <button
-                  type="submit"
-                  className="
-                    flex min-h-[44px] cursor-pointer items-center font-mono
-                    text-xs text-red-500 uppercase
-                    hover:text-red-700 hover:underline
-                  ">
-                  [DELETE]
-                </button>
-              </form>
-            )}
+            {draft.displayStatus !== "PENDING" &&
+              draft.displayStatus !== "APPROVED" &&
+              draft.displayStatus !== "SUBMITTED" &&
+              draft.displayStatus !== "MERGED" &&
+              draft.displayStatus !== "CLOSED" && (
+                <form
+                  action={async () => {
+                    "use server"
+                    await deleteDraftAction(draft.id)
+                  }}>
+                  <button
+                    type="submit"
+                    className="
+                      flex min-h-[44px] cursor-pointer items-center font-mono
+                      text-xs text-red-500 uppercase
+                      hover:text-red-700 hover:underline
+                    ">
+                    [DELETE]
+                  </button>
+                </form>
+              )}
           </div>
         </div>
         <h3
@@ -126,7 +159,7 @@ export default async function DraftDashboardPage() {
             text-xs tracking-widest transition-all
             hover:border-tech-main/60 hover:bg-white/80
           ">
-          {draft.status === "DRAFT" || draft.status === "REJECTED"
+          {draft.displayStatus === "DRAFT" || draft.displayStatus === "REJECTED" || draft.displayStatus === "CLOSED"
             ? "> EDIT_RECORD"
             : "> VIEW_STREAM"}
         </BrutalButton>

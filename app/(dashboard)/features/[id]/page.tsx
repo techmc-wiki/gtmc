@@ -15,6 +15,7 @@ import { BrutalCard } from "@/components/ui/brutal-card"
 import { FeatureActions } from "./feature-actions"
 import { FeatureComments } from "./feature-comments"
 import { FeatureExplanation } from "./feature-explanation"
+import { FeatureReadonlyView } from "./feature-readonly-view"
 import { StatusBadge } from "@/app/(dashboard)/features/feature-list"
 import { RevealSection } from "@/app/(dashboard)/features/reveal-helpers"
 
@@ -219,30 +220,11 @@ export default async function FeatureDetailPage({
               }}
             />
           ) : (
-            <BrutalCard>
-              <h2 className="mb-4 text-sm font-bold sm:text-base md:text-lg">
-                {feature.title}
-              </h2>
-
-              {feature.tags.length > 0 && (
-                <div className="mb-6 flex flex-wrap gap-2">
-                  {feature.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="border-tech-main text-tech-main bg-tech-accent/10 border px-2 py-1 font-mono text-xs uppercase">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <div className="prose prose-zinc border-tech-main/30 mt-8 max-w-none border-t border-dashed pt-6">
-                {/* Very simple non-editable view, actual MD rendering could be added here */}
-                <div className="font-mono text-sm whitespace-pre-wrap">
-                  {feature.content}
-                </div>
-              </div>
-            </BrutalCard>
+            <FeatureReadonlyView
+              title={feature.title}
+              content={feature.content}
+              tags={feature.tags}
+            />
           )}
         </div>
       </RevealSection>

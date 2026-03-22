@@ -85,6 +85,10 @@ export default function Home() {
   const [isAccessingDatabase, setIsAccessingDatabase] = useState(false)
 
   useEffect(() => {
+    if (process.env.NODE_ENV !== "production") {
+      return
+    }
+
     router.prefetch("/articles")
   }, [router])
 

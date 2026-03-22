@@ -7,8 +7,6 @@ const EXT_TO_INLINE_MIME: Record<string, string> = {
   pdf: "application/pdf",
 }
 
-const PATH_REGEX = /^data\/(images|videos|files)\/[^/]+$/
-
 export async function GET(req: NextRequest) {
   const session = await auth()
   if (!session?.user) {
@@ -39,24 +37,33 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Invalid path" }, { status: 400 })
   }
 
-  if (!PATH_REGEX.test(decodedPath)) {
+  const match = decodedPath.match(/^data\/(images|videos|files)\/([^/]+)$/)
+  if (!match) {
     return NextResponse.json({ error: "Invalid path" }, { status: 400 })
   }
 
+  const safeCategory = match[1]
+  const safeFilename = match[2]
+
   // Derive MIME from extension — GitHub's CDN returns application/octet-stream
-  const pathFilename = decodedPath.split("/").pop() || ""
-  const pathExt = pathFilename.split(".").pop()?.toLowerCase() || ""
+  const pathExt = safeFilename.split(".").pop()?.toLowerCase() || ""
   const derivedMime = EXT_TO_INLINE_MIME[pathExt]
 
-  const owner = process.env.GITHUB_REPO_OWNER
-  const repo = process.env.GITHUB_REPO_NAME
+  const ownerStr = process.env.GITHUB_REPO_OWNER
+  const repoStr = process.env.GITHUB_REPO_NAME
   const token = process.env.GITHUB_FEATURES_ISSUES_PAT
 
-  if (!owner || !repo || !token) {
+  if (!ownerStr || !repoStr || !token) {
     return NextResponse.json({ error: "Server misconfigured" }, { status: 500 })
   }
 
-  const githubUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/${decodedPath}`
+  const owner = encodeURIComponent(ownerStr)
+  const repo = encodeURIComponent(repoStr)
+  // Safely construct the URL to prevent SSRF
+  const githubUrl = new URL(
+    `/${owner}/${repo}/main/data/${safeCategory}/${encodeURIComponent(safeFilename)}`,
+    "https://raw.githubusercontent.com"
+  ).toString()
 
   const fetchHeaders: Record<string, string> = {
     Authorization: `token ${token}`,

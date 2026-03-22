@@ -61,23 +61,21 @@ const MIME_ALLOWLIST: Record<string, MimeConfig> = {
     maxBytes: 50 * 1024 * 1024,
     proxyable: false,
   },
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-    {
-      category: "files",
-      maxBytes: 50 * 1024 * 1024,
-      proxyable: false,
-    },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
+    category: "files",
+    maxBytes: 50 * 1024 * 1024,
+    proxyable: false,
+  },
   "application/vnd.ms-excel": {
     category: "files",
     maxBytes: 50 * 1024 * 1024,
     proxyable: false,
   },
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-    {
-      category: "files",
-      maxBytes: 50 * 1024 * 1024,
-      proxyable: false,
-    },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+    category: "files",
+    maxBytes: 50 * 1024 * 1024,
+    proxyable: false,
+  },
   "application/zip": {
     category: "files",
     maxBytes: 50 * 1024 * 1024,
@@ -119,8 +117,7 @@ const MIME_TO_EXT: Record<string, string> = {
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
     "docx",
   "application/vnd.ms-excel": "xls",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-    "xlsx",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
   "application/zip": "zip",
   "text/plain": "txt",
   "text/csv": "csv",
@@ -137,9 +134,7 @@ export interface FileClassification {
   mimeType: string
 }
 
-export function classifyFile(
-  mimeType: string,
-): FileClassification | null {
+export function classifyFile(mimeType: string): FileClassification | null {
   const config = MIME_ALLOWLIST[mimeType]
   if (!config) return null
   return { ...config, mimeType }
@@ -164,19 +159,16 @@ export function getNonImageMimeTypes(): string[] {
 
 export function sanitizeFilename(
   originalName: string,
-  mimeType: string,
+  mimeType: string
 ): string {
   // Extract basename and extension
   const lastDot = originalName.lastIndexOf(".")
-  let basename =
-    lastDot > 0 ? originalName.substring(0, lastDot) : originalName
+  let basename = lastDot > 0 ? originalName.substring(0, lastDot) : originalName
 
   // MIME-derived extension takes precedence
   const ext =
     MIME_TO_EXT[mimeType] ||
-    (lastDot > 0
-      ? originalName.substring(lastDot + 1).toLowerCase()
-      : "bin")
+    (lastDot > 0 ? originalName.substring(lastDot + 1).toLowerCase() : "bin")
 
   // Sanitize basename: spaces → dashes, strip non-allowed chars, truncate
   basename = basename
@@ -216,7 +208,7 @@ export function generateMarkdownBlock(
   filename: string,
   rawGithubUrl: string,
   mimeType: string,
-  fileSize: number,
+  fileSize: number
 ): string {
   const classification = classifyFile(mimeType)
   if (!classification) return `[${filename}](${rawGithubUrl})`

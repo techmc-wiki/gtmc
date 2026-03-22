@@ -156,11 +156,7 @@ export async function getRepoContentTree(): Promise<RepoTreeNode[]> {
     const parentPath = parts.slice(0, -1).join("/")
 
     // Skip if any ancestor directory is in ignored list
-    if (
-      parts
-        .slice(0, -1)
-        .some((p) => IGNORED_DIRS.has(p.toLowerCase()))
-    )
+    if (parts.slice(0, -1).some((p) => IGNORED_DIRS.has(p.toLowerCase())))
       continue
 
     if (item.type === "tree") {
@@ -176,8 +172,7 @@ export async function getRepoContentTree(): Promise<RepoTreeNode[]> {
       })
     } else if (item.type === "blob") {
       if (!name.endsWith(".md")) continue
-      if (!parentPath && IGNORED_ROOT_FILES.has(name.toLowerCase()))
-        continue
+      if (!parentPath && IGNORED_ROOT_FILES.has(name.toLowerCase())) continue
 
       const titleName = name.replace(/\.md$/, "")
       const slugWithoutExt = item.path.replace(/\.md$/, "")
@@ -211,8 +206,7 @@ export async function getRepoContentTree(): Promise<RepoTreeNode[]> {
 
   function sortNodes(nodes: RepoTreeNode[]) {
     nodes.sort((a, b) => {
-      if (a.isFolder === b.isFolder)
-        return a.title.localeCompare(b.title)
+      if (a.isFolder === b.isFolder) return a.title.localeCompare(b.title)
       return a.isFolder ? -1 : 1
     })
     for (const node of nodes) sortNodes(node.children)
@@ -223,7 +217,7 @@ export async function getRepoContentTree(): Promise<RepoTreeNode[]> {
 }
 
 export async function getRepoFileContent(
-  filePath: string,
+  filePath: string
 ): Promise<string | null> {
   const octokit = getOctokit(process.env.GITHUB_ARTICLES_WRITE_PAT)
   try {
@@ -242,7 +236,7 @@ export async function getRepoFileContent(
 }
 
 export async function getRepoFileBuffer(
-  filePath: string,
+  filePath: string
 ): Promise<Buffer | null> {
   const octokit = getOctokit(process.env.GITHUB_ARTICLES_WRITE_PAT)
   try {
@@ -260,12 +254,8 @@ export async function getRepoFileBuffer(
   }
 }
 
-export async function getRepoTranslations(): Promise<
-  Record<string, string>
-> {
-  const content = await getRepoFileContent(
-    "sidebar-translations.json",
-  )
+export async function getRepoTranslations(): Promise<Record<string, string>> {
+  const content = await getRepoFileContent("sidebar-translations.json")
   if (content) {
     try {
       return JSON.parse(content.replace(/^\uFEFF/, ""))
@@ -287,7 +277,7 @@ export async function resolveConflictAndMerge(
   prNumber: number,
   filePath: string,
   resolvedContent: string,
-  token?: string,
+  token?: string
 ) {
   const octokit = getOctokit(token)
   const pr = await getPR(prNumber, token)

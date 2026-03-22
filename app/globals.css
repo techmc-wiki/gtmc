@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@plugin "tailwindcss-animate";
 
 :root {
   --background: #f8f9fc;
@@ -7,26 +9,26 @@
 
 @theme {
   --font-sans:
-    "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang SC",
-    "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", sans-serif;
+    "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "微软雅黑", sans-serif;
   --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
   --color-tech-bg: #f8f9fc;
-  --color-tech-main: #60708f; /* 灰蓝色，主色�?*/
+  --color-tech-main: #60708f;
   --color-tech-main-dark: #4a5a78;
-  --color-tech-accent: #c4d0df; /* 浅蓝灰辅助色 */
-  --color-tech-line: #cbd5e1; /* 更柔和的淡色点阵 */
+  --color-tech-accent: #c4d0df;
+  --color-tech-line: #cbd5e1;
 
   --animate-fade-in: fade-in 0.8s ease-out forwards;
   --animate-fade-out: fade-out 0.3s ease-out forwards;
-  --animate-slide-up-fade: slide-up-fade 0.8s
-    cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-tech-pop-in: tech-pop-in 0.6s
-    cubic-bezier(0.16, 1, 0.3, 1) backwards;
-  --animate-tech-slide-in: tech-slide-in 0.8s
-    cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  --animate-slide-up-fade: slide-up-fade 0.8s cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  --animate-tech-pop-in: tech-pop-in 0.6s cubic-bezier(0.16, 1, 0.3, 1)
+    backwards;
+  --animate-tech-slide-in: tech-slide-in 0.8s cubic-bezier(0.16, 1, 0.3, 1)
+    backwards;
   --animate-tech-glitch: tech-glitch 2s infinite;
   --animate-target-blink: target-blink 1.2s ease-out forwards;
   --animate-blueprint-sweep: shimmer 2s ease-out infinite;
@@ -167,7 +169,6 @@
 
 body {
   background-color: var(--background);
-  /* Mobile: simplified background; desktop: full dot grid */
   background-image: radial-gradient(
     var(--color-tech-line) 1px,
     transparent 1px
@@ -179,101 +180,11 @@ body {
 
 @media (max-width: 640px) {
   body {
-    /* Reduce background pattern density on mobile for performance */
     background-size: 40px 40px;
   }
 }
 
-@utility tracking-tech-wide {
-  letter-spacing: 0.2em;
-}
-
-@layer utilities {
-  /* Extracted utilities */
-
-  .section-label {
-    @apply border-tech-main/30 tracking-tech-wide text-tech-main mb-2 inline-block border-b pb-1 font-mono text-sm uppercase;
-  }
-
-  .animate-page-transit {
-    animation: page-transit 0.5s cubic-bezier(0.16, 1, 0.3, 1)
-      forwards;
-  }
-
-  .animate-skeleton-exit {
-    animation: skeleton-exit 0.25s ease-out forwards;
-  }
-
-  .animate-fade-out {
-    animation: fade-out 0.3s ease-out forwards;
-  }
-
-  /* Mobile baseline: container and spacing constraints */
-  .container-safe {
-    width: 100%;
-    max-width: 100vw;
-    overflow-x: hidden;
-  }
-
-  @media (min-width: 768px) {
-    .container-safe {
-      max-width: 1280px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-  }
-
-  /* Hide decorative absolute-positioned layers on mobile */
-  .decor-desktop-only {
-    @apply hidden md:block;
-  }
-
-  /* Responsive touch target sizing */
-  .touch-target {
-    min-height: 44px;
-    min-width: 44px;
-  }
-
-  /* Mobile-safe text scaling */
-  .text-balance-mobile {
-    @apply text-xs sm:text-sm md:text-base;
-  }
-
-  /* Shared decorative motifs */
-  .corner-bracket {
-    @apply border-tech-main/40 border-2;
-  }
-
-  .guide-line {
-    @apply border-tech-main/20;
-  }
-
-  .hud-block {
-    @apply hidden font-mono text-[10px] opacity-40 sm:block;
-  }
-
-  /* Standard motion transitions */
-  .transition-standard {
-    @apply transition-colors duration-300;
-  }
-
-  .transition-transform {
-    @apply transition-transform duration-500;
-  }
-
-  /* Homepage motion performance hints */
-  .homepage-decor-background,
-  .homepage-decor-midground,
-  .homepage-decor-foreground {
-    will-change: transform;
-  }
-
-  .homepage-decor-foreground {
-    transform-style: preserve-3d;
-    perspective: 1000px;
-  }
-
-  /* Button cursor semantics */
+@layer base {
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]) {
     @apply cursor-pointer;
@@ -283,18 +194,111 @@ body {
   [role="button"][aria-disabled="true"] {
     @apply cursor-not-allowed;
   }
+}
 
-  /* Homepage motion performance hints */
-  .homepage-decor-background,
-  .homepage-decor-midground,
-  .homepage-decor-foreground {
-    will-change: transform;
-  }
+@utility tracking-tech-wide {
+  letter-spacing: 0.2em;
+}
 
-  .homepage-decor-foreground {
-    transform-style: preserve-3d;
-    perspective: 1000px;
+@utility w-pxfull {
+  width: 1px;
+  height: 100%;
+}
+
+@utility prose-tech {
+  --tw-prose-body: var(--color-tech-main);
+  --tw-prose-headings: var(--color-tech-main-dark);
+  --tw-prose-lead: var(--color-tech-main);
+  --tw-prose-links: var(--color-tech-main-dark);
+  --tw-prose-bold: var(--color-tech-main-dark);
+  --tw-prose-counters: var(--color-tech-main);
+  --tw-prose-bullets: var(--color-tech-accent);
+  --tw-prose-hr: var(--color-tech-line);
+  --tw-prose-quotes: var(--color-tech-main);
+  --tw-prose-quote-borders: var(--color-tech-accent);
+  --tw-prose-captions: var(--color-tech-main);
+  --tw-prose-code: var(--color-tech-main-dark);
+  --tw-prose-pre-code: var(--color-tech-main);
+  --tw-prose-pre-bg: var(--color-tech-accent);
+  --tw-prose-th-borders: var(--color-tech-line);
+  --tw-prose-td-borders: var(--color-tech-line);
+}
+
+@utility section-label {
+  @apply border-tech-main/30 tracking-tech-wide text-tech-main mb-2 inline-block border-b pb-1 font-mono text-sm uppercase;
+}
+
+@utility animate-page-transit {
+  animation: page-transit 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@utility animate-skeleton-exit {
+  animation: skeleton-exit 0.25s ease-out forwards;
+}
+
+@utility animate-fade-out {
+  animation: fade-out 0.3s ease-out forwards;
+}
+
+@utility container-safe {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+
+  @media (min-width: 768px) {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
   }
+}
+
+@utility decor-desktop-only {
+  @apply hidden md:block;
+}
+
+@utility touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+@utility text-balance-mobile {
+  @apply text-xs sm:text-sm md:text-base;
+}
+
+@utility corner-bracket {
+  @apply border-tech-main/40 border-2;
+}
+
+@utility guide-line {
+  @apply border-tech-main/20;
+}
+
+@utility hud-block {
+  @apply hidden font-mono text-[10px] opacity-40 sm:block;
+}
+
+@utility transition-standard {
+  @apply transition-colors duration-300;
+}
+
+@utility transition-transform {
+  transition-property: transform, translate, scale, rotate;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 500ms;
+}
+
+@utility homepage-decor-background {
+  will-change: transform;
+}
+
+@utility homepage-decor-midground {
+  will-change: transform;
+}
+
+@utility homepage-decor-foreground {
+  will-change: transform;
+  transform-style: preserve-3d;
+  perspective: 1000px;
 }
 
 @keyframes page-transit {
@@ -308,26 +312,31 @@ body {
   }
 }
 
-.custom-left-scrollbar {
+@utility custom-left-scrollbar {
   direction: rtl;
-}
-.custom-left-scrollbar > * {
-  direction: ltr;
-}
-.custom-left-scrollbar::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-.custom-left-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-  border-right: 1px dashed rgba(96, 112, 143, 0.2);
-}
-.custom-left-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(96, 112, 143, 0.4);
-  border-radius: 0;
-}
-.custom-left-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(96, 112, 143, 0.8);
+
+  & > * {
+    direction: ltr;
+  }
+
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    border-right: 1px dashed rgba(96, 112, 143, 0.2);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(96, 112, 143, 0.4);
+    border-radius: 0;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(96, 112, 143, 0.8);
+  }
 }
 
 @media (max-width: 767px) {

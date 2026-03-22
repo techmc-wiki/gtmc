@@ -49,10 +49,11 @@ export function MobileTreeSheet({
       />
 
       {/* Panel */}
-      <div className="
-        absolute inset-0 flex flex-col overflow-hidden border-b
-        border-tech-main/40 bg-white/95 backdrop-blur-md
-      ">
+      <div
+        className="
+          absolute inset-0 flex flex-col overflow-hidden border-b
+          border-tech-main/40 bg-white/95 backdrop-blur-md
+        ">
         {/* Header */}
         <div
           className="
@@ -60,13 +61,15 @@ export function MobileTreeSheet({
             border-tech-main/40 px-4 py-3
           "
           data-testid="mobile-tree-panel-header">
-          <div className="
-            flex items-center font-mono text-xs font-bold tracking-tech-wide
-            text-tech-main/60 uppercase
-          ">
-            <span className="
-              mr-2 inline-block size-1.5 animate-pulse bg-tech-main/60
-            "></span>
+          <div
+            className="
+              flex items-center font-mono text-xs font-bold tracking-tech-wide
+              text-tech-main/60 uppercase
+            ">
+            <span
+              className="
+                mr-2 inline-block size-1.5 animate-pulse bg-tech-main/60
+              "></span>
             SYS.DIR_TREE
           </div>
           <button
@@ -83,10 +86,11 @@ export function MobileTreeSheet({
         </div>
 
         {/* Content */}
-        <div className="
-          flex-1 overflow-y-auto p-4
-          sm:p-6
-        ">
+        <div
+          className="
+            flex-1 overflow-y-auto p-4
+            sm:p-6
+          ">
           {children}
         </div>
       </div>

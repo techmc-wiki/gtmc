@@ -48,6 +48,7 @@
     "@lhci/cli": "^0.15.1",
     "@next/bundle-analyzer": "^16.2.1",
     "@tailwindcss/postcss": "^4.2.2",
+    "@tailwindcss/typography": "^0.5.19",
     "@types/diff": "^7.0.2",
     "@types/mime-types": "^3.0.1",
     "@types/node": "^25.5.0",
@@ -55,12 +56,14 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "eslint": "^9.39.4",
     "eslint-config-next": "16.2.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-better-tailwindcss": "^4.3.2",
     "playwright": "^1.58.2",
     "pnpm": "^10.32.1",
     "prettier": "^3.8.1",
-    "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4.2.2",
-    "typescript": "^5.9.3"
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.1"
   }
 }

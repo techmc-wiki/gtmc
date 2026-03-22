@@ -30,10 +30,7 @@ export async function ProfileButton() {
         hover:scale-110
         md:size-10
       ">
-      <BrutalAvatar
-        src={session.user.image}
-        alt={session.user.name}
-      />
+      <BrutalAvatar src={session.user.image} alt={session.user.name} />
     </Link>
   )
 }

@@ -9,43 +9,46 @@ import * as React from "react"
 export const SectionFrame = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { showBrackets?: boolean }
->(
-  (
-    { className = "", showBrackets = true, children, ...props },
-    ref,
-  ) => (
-    <div
-      ref={ref}
-      className={`
-        relative border border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
-        sm:p-8
-        ${className}
-      `}
-      {...props}>
-      {showBrackets && (
-        <>
-          <div className="
+>(({ className = "", showBrackets = true, children, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={`
+      relative border border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
+      sm:p-8
+      ${className}
+    `}
+    {...props}>
+    {showBrackets && (
+      <>
+        <div
+          className="
             pointer-events-none absolute top-0 left-0 size-2 -translate-px
             border-t-2 border-l-2 border-tech-main/60
-          " />
-          <div className="
+          "
+        />
+        <div
+          className="
             pointer-events-none absolute top-0 right-0 size-2 translate-x-px
             -translate-y-px border-t-2 border-r-2 border-tech-main/60
-          " />
-          <div className="
+          "
+        />
+        <div
+          className="
             pointer-events-none absolute bottom-0 left-0 size-2 -translate-x-px
             translate-y-px border-b-2 border-l-2 border-tech-main/60
-          " />
-          <div className="
+          "
+        />
+        <div
+          className="
             pointer-events-none absolute right-0 bottom-0 size-2 translate-px
             border-r-2 border-b-2 border-tech-main/60
-          " />
-        </>
-      )}
-      {children}
-    </div>
-  ),
-)
+          "
+        />
+      </>
+    )}
+    {children}
+  </div>
+))
 SectionFrame.displayName = "SectionFrame"
 
 /**
@@ -80,13 +83,8 @@ export const SegmentedBar = React.forwardRef<
   }
 >(
   (
-    {
-      opacity = "medium",
-      showBorder = false,
-      className = "",
-      ...props
-    },
-    ref,
+    { opacity = "medium", showBorder = false, className = "", ...props },
+    ref
   ) => {
     const opacityMap = {
       high: "bg-tech-accent/20",
@@ -106,7 +104,7 @@ export const SegmentedBar = React.forwardRef<
         {...props}
       />
     )
-  },
+  }
 )
 SegmentedBar.displayName = "SegmentedBar"
 
@@ -122,10 +120,14 @@ export const SkeletonExitWrapper = React.forwardRef<
   <div
     ref={ref}
     className={`
-      ${isExiting ? `
-        animate-skeleton-exit
-        motion-reduce:animate-fade-out
-      ` : ""}
+      ${
+        isExiting
+          ? `
+            animate-skeleton-exit
+            motion-reduce:animate-fade-out
+          `
+          : ""
+      }
       ${className}
     `}
     {...props}

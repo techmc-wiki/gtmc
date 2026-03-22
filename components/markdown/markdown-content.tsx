@@ -26,19 +26,22 @@ export function MarkdownContent({
     )
   }
 
-  const { remarkPlugins, rehypePlugins } =
-    getPluginsForContent(content)
+  const { remarkPlugins, rehypePlugins } = getPluginsForContent(content)
   const markdownComponents = getMarkdownComponents(rawPath)
 
   return (
     <div
       className={`
-        prose prose-tech w-full max-w-none overflow-hidden wrap-break-word
-        text-slate-800
+        prose w-full max-w-none overflow-hidden wrap-break-word text-slate-800
+        prose-tech
         selection:bg-tech-main/20
-        selection:text-slate-900${className ? `
-          ${className}
-        ` : ""}
+        selection:text-slate-900${
+          className
+            ? `
+              ${className}
+            `
+            : ""
+        }
       `}>
       <ReactMarkdown
         remarkPlugins={remarkPlugins}

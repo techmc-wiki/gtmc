@@ -12,9 +12,7 @@ export async function GET(request: Request) {
   }
 
   // Prevent directory traversal attacks
-  const normalizedPath = path
-    .normalize(filePath)
-    .replace(/^(\.\.[\/\\])+/, "")
+  const normalizedPath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, "")
   const safePath = normalizedPath.replace(/^\/+/, "")
   const pathsToTry = safePath.endsWith(".md")
     ? [safePath]
@@ -23,8 +21,7 @@ export async function GET(request: Request) {
   for (const candidate of pathsToTry) {
     const fileBuffer = await getRepoFileBuffer(candidate)
     if (fileBuffer) {
-      const mimeType =
-        mime.lookup(candidate) || "application/octet-stream"
+      const mimeType = mime.lookup(candidate) || "application/octet-stream"
       return new NextResponse(new Uint8Array(fileBuffer), {
         headers: {
           "Content-Type": String(mimeType),

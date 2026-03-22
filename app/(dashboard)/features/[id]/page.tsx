@@ -48,7 +48,7 @@ export default async function FeatureDetailPage({
     .filter(
       (comment) =>
         !comment.body.includes(EXPLANATION_MARKER) &&
-        !comment.body.includes(SYSTEM_COMMENT_MARKER),
+        !comment.body.includes(SYSTEM_COMMENT_MARKER)
     )
     .map((comment) => {
       const parsedComment = parseCommentBody(comment.body)
@@ -99,20 +99,22 @@ export default async function FeatureDetailPage({
   const canEdit = isAuthor || isAdmin
 
   return (
-    <div className="
-      container mx-auto max-w-4xl space-y-6 p-4
-      sm:p-6
-      md:p-8
-    ">
+    <div
+      className="
+        container mx-auto max-w-4xl space-y-6 p-4
+        sm:p-6
+        md:p-8
+      ">
       <RevealSection delay={0}>
         <div className="flex flex-col gap-4">
           <div>
-            <h1 className="
-              inline-block border-b-2 border-tech-main pb-2 text-xl font-bold
-              tracking-tighter uppercase
-              sm:text-2xl
-              md:text-3xl
-            ">
+            <h1
+              className="
+                inline-block border-b-2 border-tech-main pb-2 text-xl font-bold
+                tracking-tighter uppercase
+                sm:text-2xl
+                md:text-3xl
+              ">
               {canEdit ? "Edit Feature" : "View Feature"}
             </h1>
           </div>
@@ -131,87 +133,99 @@ export default async function FeatureDetailPage({
       </RevealSection>
 
       {isClosed && (
-        <div className="
-          relative border border-red-500/50 bg-red-500/5 p-4 font-mono text-xs
-          tracking-wider text-red-600 uppercase backdrop-blur-sm
-          sm:p-6 sm:text-sm
-        ">
-          <div className="
-            pointer-events-none absolute top-0 left-0 size-2 -translate-px
-            border-t-2 border-l-2 border-red-500/50
-          "></div>
-          <div className="
-            pointer-events-none absolute top-0 right-0 size-2 translate-x-px
-            -translate-y-px border-t-2 border-r-2 border-red-500/50
-          "></div>
-          <div className="
-            pointer-events-none absolute bottom-0 left-0 size-2 -translate-x-px
-            translate-y-px border-b-2 border-l-2 border-red-500/50
-          "></div>
-          <div className="
-            pointer-events-none absolute right-0 bottom-0 size-2 translate-px
-            border-r-2 border-b-2 border-red-500/50
-          "></div>
+        <div
+          className="
+            relative border border-red-500/50 bg-red-500/5 p-4 font-mono text-xs
+            tracking-wider text-red-600 uppercase backdrop-blur-sm
+            sm:p-6 sm:text-sm
+          ">
+          <div
+            className="
+              pointer-events-none absolute top-0 left-0 size-2 -translate-px
+              border-t-2 border-l-2 border-red-500/50
+            "></div>
+          <div
+            className="
+              pointer-events-none absolute top-0 right-0 size-2 translate-x-px
+              -translate-y-px border-t-2 border-r-2 border-red-500/50
+            "></div>
+          <div
+            className="
+              pointer-events-none absolute bottom-0 left-0 size-2
+              -translate-x-px translate-y-px border-b-2 border-l-2
+              border-red-500/50
+            "></div>
+          <div
+            className="
+              pointer-events-none absolute right-0 bottom-0 size-2 translate-px
+              border-r-2 border-b-2 border-red-500/50
+            "></div>
 
           <span className="flex items-center gap-2 font-bold">
-            <span className="text-red-500">⚠</span> FEATURE DELETED
-            (READ-ONLY)
+            <span className="text-red-500">⚠</span> FEATURE DELETED (READ-ONLY)
           </span>
-          <p className="
-            mt-2 border-t border-dashed border-red-500/30 pt-2 text-xs
-            tracking-normal normal-case opacity-80
-          ">
-            This feature has been deleted. The content is preserved
-            for historical reference. No changes can be made.
+          <p
+            className="
+              mt-2 border-t border-dashed border-red-500/30 pt-2 text-xs
+              tracking-normal normal-case opacity-80
+            ">
+            This feature has been deleted. The content is preserved for
+            historical reference. No changes can be made.
           </p>
         </div>
       )}
 
       <RevealSection delay={100}>
-        <BrutalCard className="
-          mb-8 p-4
-          sm:p-6
-        ">
-          <div className="
-            flex flex-col gap-2 font-mono text-xs
-            sm:text-sm
+        <BrutalCard
+          className="
+            mb-8 p-4
+            sm:p-6
           ">
-            <div className="
-              flex flex-col gap-2
-              sm:flex-row sm:items-center
+          <div
+            className="
+              flex flex-col gap-2 font-mono text-xs
+              sm:text-sm
             ">
-              <span className="
-                font-bold text-zinc-500
-                sm:w-24
+            <div
+              className="
+                flex flex-col gap-2
+                sm:flex-row sm:items-center
               ">
+              <span
+                className="
+                  font-bold text-zinc-500
+                  sm:w-24
+                ">
                 STATUS:
               </span>
               <StatusBadge status={feature.status} />
             </div>
-            <div className="
-              flex flex-col gap-2
-              sm:flex-row sm:items-center
-            ">
-              <span className="
-                font-bold text-zinc-500
-                sm:w-24
+            <div
+              className="
+                flex flex-col gap-2
+                sm:flex-row sm:items-center
               ">
+              <span
+                className="
+                  font-bold text-zinc-500
+                  sm:w-24
+                ">
                 AUTHOR:
               </span>
               <span className="wrap-break-word">
-                {feature.author.name ||
-                  feature.author.email ||
-                  "Unknown"}
+                {feature.author.name || feature.author.email || "Unknown"}
               </span>
             </div>
-            <div className="
-              flex flex-col gap-2
-              sm:flex-row sm:items-center
-            ">
-              <span className="
-                font-bold text-zinc-500
-                sm:w-24
+            <div
+              className="
+                flex flex-col gap-2
+                sm:flex-row sm:items-center
               ">
+              <span
+                className="
+                  font-bold text-zinc-500
+                  sm:w-24
+                ">
                 ASSIGNEE:
               </span>
               <span className="wrap-break-word">
@@ -220,14 +234,16 @@ export default async function FeatureDetailPage({
                   : "Unassigned"}
               </span>
             </div>
-            <div className="
-              flex flex-col gap-2
-              sm:flex-row sm:items-center
-            ">
-              <span className="
-                font-bold text-zinc-500
-                sm:w-24
+            <div
+              className="
+                flex flex-col gap-2
+                sm:flex-row sm:items-center
               ">
+              <span
+                className="
+                  font-bold text-zinc-500
+                  sm:w-24
+                ">
                 CREATED:
               </span>
               <span suppressHydrationWarning>
@@ -235,14 +251,16 @@ export default async function FeatureDetailPage({
               </span>
             </div>
             {feature.issueNumber && feature.htmlUrl && (
-              <div className="
-                flex flex-col gap-2
-                sm:flex-row sm:items-center
-              ">
-                <span className="
-                  font-bold text-zinc-500
-                  sm:w-24
+              <div
+                className="
+                  flex flex-col gap-2
+                  sm:flex-row sm:items-center
                 ">
+                <span
+                  className="
+                    font-bold text-zinc-500
+                    sm:w-24
+                  ">
                   GITHUB:
                 </span>
                 <div className="flex flex-wrap items-center gap-1">

@@ -19,7 +19,7 @@ type State =
   | { status: "error"; message: string }
 
 function isPendingFeaturePayload(
-  value: unknown,
+  value: unknown
 ): value is PendingFeaturePayload {
   if (!value || typeof value !== "object") {
     return false
@@ -72,8 +72,7 @@ export function PendingCreationBanner() {
       inFlightRef.current = false // Allow retry
       setState({
         status: "error",
-        message:
-          error instanceof Error ? error.message : "Unknown error",
+        message: error instanceof Error ? error.message : "Unknown error",
       })
     }
   }, [router])
@@ -94,10 +93,11 @@ export function PendingCreationBanner() {
 
   if (state.status === "success") {
     return (
-      <div className="
-        flex items-center gap-3 border border-tech-main/40 bg-white/60 px-4 py-3
-        font-mono text-sm backdrop-blur-sm
-      ">
+      <div
+        className="
+          flex items-center gap-3 border border-tech-main/40 bg-white/60 px-4
+          py-3 font-mono text-sm backdrop-blur-sm
+        ">
         <span className="inline-block size-2 bg-tech-main" />
         <span className="tracking-widest text-tech-main uppercase">
           FEATURE_CREATED_
@@ -116,17 +116,16 @@ export function PendingCreationBanner() {
 
   if (state.status === "error") {
     return (
-      <div className="
-        flex items-center gap-3 border border-red-400/60 bg-red-50/60 px-4 py-3
-        font-mono text-sm backdrop-blur-sm
-      ">
+      <div
+        className="
+          flex items-center gap-3 border border-red-400/60 bg-red-50/60 px-4
+          py-3 font-mono text-sm backdrop-blur-sm
+        ">
         <span className="inline-block size-2 bg-red-500" />
         <span className="tracking-widest text-red-700 uppercase">
           CREATION_FAILED_
         </span>
-        <span className="ml-2 text-xs text-red-600">
-          {state.message}
-        </span>
+        <span className="ml-2 text-xs text-red-600">{state.message}</span>
         <button
           onClick={() =>
             startRetry(() => {
@@ -148,10 +147,11 @@ export function PendingCreationBanner() {
 
   // pending
   return (
-    <div className="
-      flex items-center gap-3 border border-tech-main/40 bg-white/60 px-4 py-3
-      font-mono text-sm backdrop-blur-sm
-    ">
+    <div
+      className="
+        flex items-center gap-3 border border-tech-main/40 bg-white/60 px-4 py-3
+        font-mono text-sm backdrop-blur-sm
+      ">
       <span className="inline-block size-2 animate-pulse bg-tech-accent" />
       <span className="tracking-widest text-tech-main uppercase">
         CREATING_FEATURE_...

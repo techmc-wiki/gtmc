@@ -33,40 +33,31 @@ interface FeatureEditorProps {
 export function FeatureEditor({ initialData }: FeatureEditorProps) {
   const router = useRouter()
   const [title, setTitle] = React.useState(initialData?.title || "")
-  const [content, setContent] = React.useState(
-    initialData?.content || "",
-  )
-  const [tags, setTags] = React.useState(
-    initialData?.tags?.join(", ") || "",
-  )
+  const [content, setContent] = React.useState(initialData?.content || "")
+  const [tags, setTags] = React.useState(initialData?.tags?.join(", ") || "")
   const [isSaving, setIsSaving] = React.useState(false)
   const [isUploading, setIsUploading] = React.useState(false)
   const [isCompressing, setIsCompressing] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState<
-    "write" | "preview"
-  >("write")
+  const [activeTab, setActiveTab] = React.useState<"write" | "preview">("write")
 
   type BadgeType = "info" | "error" | "progress"
   const [badge, setBadge] = React.useState<{
     message: string
     type: BadgeType
   } | null>(null)
-  const badgeTimeoutRef = React.useRef<ReturnType<
-    typeof setTimeout
-  > | null>(null)
+  const badgeTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
 
   const showBadge = (
     message: string,
     type: BadgeType,
-    autoClearMs?: number,
+    autoClearMs?: number
   ) => {
     if (badgeTimeoutRef.current) clearTimeout(badgeTimeoutRef.current)
     setBadge({ message, type })
     if (autoClearMs) {
-      badgeTimeoutRef.current = setTimeout(
-        () => setBadge(null),
-        autoClearMs,
-      )
+      badgeTimeoutRef.current = setTimeout(() => setBadge(null), autoClearMs)
     }
   }
 
@@ -90,8 +81,8 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
 
     setTimeout(() => {
       if (textareaRef.current) {
-        textareaRef.current.selectionStart =
-          textareaRef.current.selectionEnd = start + text.length
+        textareaRef.current.selectionStart = textareaRef.current.selectionEnd =
+          start + text.length
         textareaRef.current.focus()
       }
     }, 0)
@@ -107,9 +98,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
     }
 
     if (file.size > classification.maxBytes) {
-      const maxMB = Math.round(
-        classification.maxBytes / (1024 * 1024),
-      )
+      const maxMB = Math.round(classification.maxBytes / (1024 * 1024))
       showBadge(`FILE TOO LARGE_ (max ${maxMB}MB)`, "error", 4000)
       return
     }
@@ -134,11 +123,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         setIsCompressing(false)
 
         if (compressed.error) {
-          showBadge(
-            `UPLOAD FAILED_ ${compressed.error}`,
-            "error",
-            5000,
-          )
+          showBadge(`UPLOAD FAILED_ ${compressed.error}`, "error", 5000)
           setContent((prev) => prev.replace(placeholder + "\n", ""))
           setIsUploading(false)
           return
@@ -201,12 +186,9 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
               originalSize: file.size,
             }),
             onUploadProgress: ({ percentage }) => {
-              showBadge(
-                `UPLOADING_ ${Math.round(percentage)}%`,
-                "progress",
-              )
+              showBadge(`UPLOADING_ ${Math.round(percentage)}%`, "progress")
             },
-          },
+          }
         )
 
         showBadge("COMMITTING_TO_GITHUB...", "progress")
@@ -223,8 +205,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         })
 
         const commitData = await commitRes.json()
-        if (!commitRes.ok)
-          throw new Error(commitData.error || "Commit failed")
+        if (!commitRes.ok) throw new Error(commitData.error || "Commit failed")
 
         resultUrl = commitData.url
         resultFilename = commitData.filename
@@ -236,13 +217,12 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         resultFilename,
         resultUrl,
         resultMimeType,
-        resultFileSize,
+        resultFileSize
       )
       setContent((prev) => prev.replace(placeholder, markdownBlock))
       clearBadge()
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Upload error"
+      const message = error instanceof Error ? error.message : "Upload error"
       showBadge(`UPLOAD FAILED_ ${message}`, "error", 5000)
       setContent((prev) => prev.replace(placeholder + "\n", ""))
       console.error("File upload error:", error)
@@ -283,9 +263,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
     const selectedText = content.substring(start, end)
     const newText = prefix + selectedText + suffix
 
-    setContent(
-      content.substring(0, start) + newText + content.substring(end),
-    )
+    setContent(content.substring(0, start) + newText + content.substring(end))
 
     setTimeout(() => {
       if (textareaRef.current) {
@@ -308,7 +286,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
     if (!initialData?.id) {
       sessionStorage.setItem(
         "pendingFeatureCreate.v1",
-        JSON.stringify({ title, content, tags: tagArray }),
+        JSON.stringify({ title, content, tags: tagArray })
       )
       router.push("/features?created=true")
       return
@@ -338,22 +316,26 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         bg-white/80 p-4 backdrop-blur-sm
         sm:p-6
       ">
-      <div className="
-        pointer-events-none absolute top-0 left-0 size-2 -translate-px
-        border-t-2 border-l-2 border-tech-main/40
-      "></div>
-      <div className="
-        pointer-events-none absolute top-0 right-0 size-2 translate-x-px
-        -translate-y-px border-t-2 border-r-2 border-tech-main/40
-      "></div>
-      <div className="
-        pointer-events-none absolute bottom-0 left-0 size-2 -translate-x-px
-        translate-y-px border-b-2 border-l-2 border-tech-main/40
-      "></div>
-      <div className="
-        pointer-events-none absolute right-0 bottom-0 size-2 translate-px
-        border-r-2 border-b-2 border-tech-main/40
-      "></div>
+      <div
+        className="
+          pointer-events-none absolute top-0 left-0 size-2 -translate-px
+          border-t-2 border-l-2 border-tech-main/40
+        "></div>
+      <div
+        className="
+          pointer-events-none absolute top-0 right-0 size-2 translate-x-px
+          -translate-y-px border-t-2 border-r-2 border-tech-main/40
+        "></div>
+      <div
+        className="
+          pointer-events-none absolute bottom-0 left-0 size-2 -translate-x-px
+          translate-y-px border-b-2 border-l-2 border-tech-main/40
+        "></div>
+      <div
+        className="
+          pointer-events-none absolute right-0 bottom-0 size-2 translate-px
+          border-r-2 border-b-2 border-tech-main/40
+        "></div>
 
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
@@ -364,9 +346,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             className={`
               border-tech-main/40 py-3 font-mono text-lg backdrop-blur-sm
               focus:border-tech-main/60
-              ${isReadOnly ? `cursor-not-allowed bg-gray-100 opacity-70` : `
-                bg-white/80
-              `}
+              ${
+                isReadOnly
+                  ? `cursor-not-allowed bg-gray-100 opacity-70`
+                  : `bg-white/80`
+              }
             `}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -376,17 +360,17 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="section-label">
-            TAGS_ (comma separated)
-          </label>
+          <label className="section-label">TAGS_ (comma separated)</label>
           <BrutalInput
             placeholder="e.g. bug, enhancement, UI"
             className={`
               border-tech-main/40 py-2 font-mono text-sm backdrop-blur-sm
               focus:border-tech-main/60
-              ${isReadOnly ? `cursor-not-allowed bg-gray-100 opacity-70` : `
-                bg-white/80
-              `}
+              ${
+                isReadOnly
+                  ? `cursor-not-allowed bg-gray-100 opacity-70`
+                  : `bg-white/80`
+              }
             `}
             value={tags}
             onChange={(e) => setTags(e.target.value)}
@@ -396,10 +380,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         </div>
       </div>
 
-      <div className="
-        relative flex min-h-125 grow flex-col border border-tech-main/40
-        bg-white/80 backdrop-blur-sm
-      ">
+      <div
+        className="
+          relative flex min-h-125 grow flex-col border border-tech-main/40
+          bg-white/80 backdrop-blur-sm
+        ">
         {/* Tab strip */}
         <div
           role="tablist"
@@ -421,10 +406,14 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             }}
             className={`
               px-4 py-2 transition-colors select-none
-              ${activeTab === "write" ? `bg-tech-main text-white` : `
-                cursor-pointer text-tech-main/60
-                hover:bg-tech-main/10
-              `}
+              ${
+                activeTab === "write"
+                  ? `bg-tech-main text-white`
+                  : `
+                    cursor-pointer text-tech-main/60
+                    hover:bg-tech-main/10
+                  `
+              }
             `}>
             WRITE_
           </button>
@@ -441,22 +430,27 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             }}
             className={`
               px-4 py-2 transition-colors select-none
-              ${activeTab === "preview" ? `bg-tech-main text-white` : `
-                cursor-pointer text-tech-main/60
-                hover:bg-tech-main/10
-              `}
+              ${
+                activeTab === "preview"
+                  ? `bg-tech-main text-white`
+                  : `
+                    cursor-pointer text-tech-main/60
+                    hover:bg-tech-main/10
+                  `
+              }
             `}>
             PREVIEW_
           </button>
         </div>
 
         {activeTab === "write" && (
-          <div className="
-            sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b
-            border-tech-main/40 bg-tech-main p-2 px-2 font-mono text-xs
-            text-white/90
-            sm:gap-2 sm:px-4
-          ">
+          <div
+            className="
+              sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b
+              border-tech-main/40 bg-tech-main p-2 px-2 font-mono text-xs
+              text-white/90
+              sm:gap-2 sm:px-4
+            ">
             <button
               type="button"
               onClick={() => insertSyntax("**", "**")}
@@ -510,10 +504,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
               aria-busy={isUploading}>
               {isCompressing ? "CMP" : isUploading ? "UPL" : "FILES"}
             </button>
-            <div className="
-              mx-1 hidden h-4 w-px bg-white/30
-              sm:block
-            "></div>
+            <div
+              className="
+                mx-1 hidden h-4 w-px bg-white/30
+                sm:block
+              "></div>
             <button
               type="button"
               onClick={() => insertSyntax("### ")}
@@ -566,11 +561,12 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
                 }
               }}
             />
-            <span className="
-              ml-auto hidden items-center gap-2 text-xs text-tech-accent/60
-              opacity-60
-              sm:flex
-            ">
+            <span
+              className="
+                ml-auto hidden items-center gap-2 text-xs text-tech-accent/60
+                opacity-60
+                sm:flex
+              ">
               MARKDOWN_SUPPORTED_
             </span>
           </div>
@@ -587,9 +583,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
               className={`
                 w-full grow resize-none border-none p-6 font-mono
                 text-sm/relaxed text-black placeholder-zinc-500 outline-none
-                ${isReadOnly ? `cursor-not-allowed bg-gray-50` : `
-                  bg-transparent
-                `}
+                ${
+                  isReadOnly
+                    ? `cursor-not-allowed bg-gray-50`
+                    : `bg-transparent`
+                }
               `}
               placeholder="ENTER FEATURE DESCRIPTION... (Use Markdown)"
               value={content}
@@ -612,20 +610,20 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
                   absolute top-4 right-4 z-20 flex items-center gap-2 border
                   px-3 py-1.5 font-mono text-xs shadow-sm backdrop-blur-sm
                   ${
-                  badge.type === "error"
-                    ? "border-red-400 bg-red-900 text-red-200"
-                    : `
-                      border-tech-accent bg-tech-main text-tech-accent
-                      shadow-tech-accent/20
-                    `
-                }
+                    badge.type === "error"
+                      ? "border-red-400 bg-red-900 text-red-200"
+                      : `
+                        border-tech-accent bg-tech-main text-tech-accent
+                        shadow-tech-accent/20
+                      `
+                  }
                 `}
                 role="status"
                 aria-live="polite">
                 {badge.type === "progress" && (
-                  <span className="
-                    inline-block size-2 animate-pulse bg-tech-accent
-                  " />
+                  <span
+                    className="inline-block size-2 animate-pulse bg-tech-accent"
+                  />
                 )}
                 {badge.type === "error" && (
                   <span className="inline-block size-2 bg-red-400" />
@@ -658,9 +656,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
       </div>
 
       {!isReadOnly && (
-        <div className="
-          relative mt-6 flex justify-end gap-4 border-t border-tech-main/10 pt-4
-        ">
+        <div
+          className="
+            relative mt-6 flex justify-end gap-4 border-t border-tech-main/10
+            pt-4
+          ">
           <div className="absolute top-0 right-0 h-px w-8 bg-tech-main"></div>
 
           <BrutalButton
@@ -676,9 +676,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             disabled={isSaving}
             aria-busy={isSaving && initialData?.id ? true : false}>
             {isSaving && initialData?.id ? (
-              <LoadingIndicator
-                label={PENDING_LABELS.SAVING_FEATURE}
-              />
+              <LoadingIndicator label={PENDING_LABELS.SAVING_FEATURE} />
             ) : isSaving ? (
               "SAVING..."
             ) : (

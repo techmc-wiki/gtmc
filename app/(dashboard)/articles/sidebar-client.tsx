@@ -84,9 +84,7 @@ export function SidebarClient({
     setIsFileExpanded((prev) => !prev)
   }
 
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
-    new Set(),
-  )
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -108,7 +106,7 @@ export function SidebarClient({
     if (mounted) {
       localStorage.setItem(
         "gtmc_sidebar_expanded",
-        JSON.stringify(Array.from(expandedFolders)),
+        JSON.stringify(Array.from(expandedFolders))
       )
     }
   }, [expandedFolders, mounted])
@@ -118,7 +116,7 @@ export function SidebarClient({
       if (!mounted) return false // 服务器渲染和初次加载时默认全部闭合
       return expandedFolders.has(id)
     },
-    [expandedFolders, mounted],
+    [expandedFolders, mounted]
   )
 
   const toggleFolder = (id: string, e: React.MouseEvent) => {
@@ -140,23 +138,21 @@ export function SidebarClient({
       await createDocument({
         title: formData.title,
         slug:
-          formData.slug ||
-          formData.title.toLowerCase().replace(/\s+/g, "-"),
+          formData.slug || formData.title.toLowerCase().replace(/\s+/g, "-"),
         isFolder: formData.isFolder,
         parentId: formData.parentId || null,
       })
       setIsModalOpen(false)
       router.refresh()
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Unknown error"
+      const message = error instanceof Error ? error.message : "Unknown error"
       alert(message)
     }
   }
 
   const renderTree = (items: TreeNode[], level = 0) => {
     return (
-      <ul className="my-1 border-l border-tech-main/20 pl-4">
+      <ul className="my-1 border-l guide-line pl-4">
         {items.map((item) => {
           const fileRoute = `/articles/${item.slug}`
           const decodedPathname = decodeURIComponent(pathname)
@@ -198,10 +194,14 @@ export function SidebarClient({
                     className={`
                       group relative -ml-4 flex items-center py-1.5 pl-4
                       transition-colors
-                      ${isActive ? `font-bold text-tech-main` : `
-                        text-slate-700
-                        hover:text-tech-main
-                      `}
+                      ${
+                        isActive
+                          ? `font-bold text-tech-main`
+                          : `
+                            text-slate-700
+                            hover:text-tech-main
+                          `
+                      }
                     `}>
                     {isActive && toc.length > 0 ? (
                       <button
@@ -214,9 +214,7 @@ export function SidebarClient({
                           focus:outline-none
                           md:text-xs
                         "
-                        title={
-                          isFileExpanded ? "收起目录" : "展开目录"
-                        }>
+                        title={isFileExpanded ? "收起目录" : "展开目录"}>
                         {isFileExpanded ? "▼" : "▶"}
                       </button>
                     ) : (
@@ -225,10 +223,14 @@ export function SidebarClient({
                           absolute top-1/2 left-0 -translate-y-1/2 text-xs
                           transition-opacity
                           md:text-sm
-                          ${isActive ? `text-tech-main opacity-100` : `
-                            text-tech-main opacity-0
-                            group-hover:opacity-100
-                          `}
+                          ${
+                            isActive
+                              ? `text-tech-main opacity-100`
+                              : `
+                                text-tech-main opacity-0
+                                group-hover:opacity-100
+                              `
+                          }
                         `}>
                         &gt;
                       </span>
@@ -245,10 +247,14 @@ export function SidebarClient({
                       }}
                       className={`
                         block w-full border-b pb-px pl-1
-                        ${isActive ? `cursor-pointer border-tech-main/50` : `
-                          border-transparent
-                          group-hover:border-tech-main/30
-                        `}
+                        ${
+                          isActive
+                            ? `cursor-pointer border-tech-main/50`
+                            : `
+                              border-transparent
+                              group-hover:border-tech-main/30
+                            `
+                        }
                       `}>
                       {item.title}
                     </Link>
@@ -259,16 +265,16 @@ export function SidebarClient({
                       className={`
                         grid transition-all duration-300 ease-out
                         ${
-                        isFileExpanded
-                          ? "grid-rows-[1fr] opacity-100"
-                          : "grid-rows-[0fr] opacity-0"
-                      }
+                          isFileExpanded
+                            ? "grid-rows-[1fr] opacity-100"
+                            : "grid-rows-[0fr] opacity-0"
+                        }
                       `}>
                       <div className="overflow-hidden">
-                        <ul className="
-                          mt-1 mb-2 ml-1 space-y-2 border-l border-tech-main/20
-                          pl-4
-                        ">
+                        <ul
+                          className="
+                            mt-1 mb-2 ml-1 space-y-2 border-l guide-line pl-4
+                          ">
                           {toc.map((h2) => (
                             <li
                               key={h2.id}
@@ -300,10 +306,10 @@ export function SidebarClient({
                   className={`
                     grid transition-all duration-300 ease-out
                     ${
-                    !item.isFolder || folderExpanded
-                      ? "grid-rows-[1fr] opacity-100"
-                      : "grid-rows-[0fr] opacity-0"
-                  }
+                      !item.isFolder || folderExpanded
+                        ? "grid-rows-[1fr] opacity-100"
+                        : "grid-rows-[0fr] opacity-0"
+                    }
                   `}>
                   <div className="overflow-hidden">
                     {renderTree(item.children, level + 1)}
@@ -317,24 +323,21 @@ export function SidebarClient({
     )
   }
 
-  const flattenFolders = useCallback(
-    (items: TreeNode[]): TreeNode[] => {
-      let folders: TreeNode[] = []
-      items.forEach((item) => {
-        if (item.isFolder) {
-          folders.push(item)
-          if (item.children)
-            folders = [...folders, ...flattenFolders(item.children)]
-        }
-      })
-      return folders
-    },
-    [],
-  )
+  const flattenFolders = useCallback((items: TreeNode[]): TreeNode[] => {
+    let folders: TreeNode[] = []
+    items.forEach((item) => {
+      if (item.isFolder) {
+        folders.push(item)
+        if (item.children)
+          folders = [...folders, ...flattenFolders(item.children)]
+      }
+    })
+    return folders
+  }, [])
 
   const availableFolders = useMemo(
     () => flattenFolders(tree),
-    [tree, flattenFolders],
+    [tree, flattenFolders]
   )
 
   return (
@@ -360,30 +363,32 @@ export function SidebarClient({
       )}
 
       {isModalOpen && (
-        <div className="
-          animate-in fade-in fixed inset-0 z-50 flex items-center justify-center
-          bg-black/80 p-4 duration-300
-        ">
-          <div className="
-            w-full max-w-md rounded-sm border-2 border-tech-main bg-white p-6
-            shadow-[8px_8px_0_0_rgba(var(--tech-main),1)]
-            dark:bg-black
+        <div
+          className="
+            fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4
+            duration-300 animate-in fade-in
           ">
-            <h3 className="
-              mb-6 border-b border-tech-main/20 pb-2 font-mono text-lg font-bold
-              tracking-widest text-tech-main uppercase
+          <div
+            className="
+              w-full max-w-md rounded-sm border-2 border-tech-main bg-white p-6
+              shadow-[8px_8px_0_0_rgba(var(--tech-main),1)]
+              dark:bg-black
             ">
+            <h3
+              className="
+                mb-6 border-b guide-line pb-2 font-mono text-lg font-bold
+                tracking-widest text-tech-main uppercase
+              ">
               CREATE_SYS_OBJECT
             </h3>
 
-            <form
-              onSubmit={handleCreate}
-              className="space-y-4 font-mono">
+            <form onSubmit={handleCreate} className="space-y-4 font-mono">
               <div>
-                <label className="
-                  mb-1 block text-[11px] tracking-wider text-tech-main/80
-                  uppercase
-                ">
+                <label
+                  className="
+                    mb-1 block text-[11px] tracking-wider text-tech-main/80
+                    uppercase
+                  ">
                   Title
                 </label>
                 <input
@@ -406,10 +411,11 @@ export function SidebarClient({
               </div>
 
               <div>
-                <label className="
-                  mb-1 block text-[11px] tracking-wider text-tech-main/80
-                  uppercase
-                ">
+                <label
+                  className="
+                    mb-1 block text-[11px] tracking-wider text-tech-main/80
+                    uppercase
+                  ">
                   Slug (URL path)
                 </label>
                 <input
@@ -427,10 +433,11 @@ export function SidebarClient({
                 />
               </div>
 
-              <div className="
-                flex items-center gap-3 border border-tech-main/20
-                bg-tech-main/5 px-3 py-2
-              ">
+              <div
+                className="
+                  flex items-center gap-3 border guide-line bg-tech-main/5 px-3
+                  py-2
+                ">
                 <input
                   type="checkbox"
                   id="isFolder"
@@ -453,10 +460,11 @@ export function SidebarClient({
               </div>
 
               <div>
-                <label className="
-                  mb-1 block text-[11px] tracking-wider text-tech-main/80
-                  uppercase
-                ">
+                <label
+                  className="
+                    mb-1 block text-[11px] tracking-wider text-tech-main/80
+                    uppercase
+                  ">
                   Parent Directory
                 </label>
                 <select
@@ -480,9 +488,8 @@ export function SidebarClient({
                 </select>
               </div>
 
-              <div className="
-                mt-6 flex justify-end gap-2 border-t border-tech-main/20 pt-4
-              ">
+              <div
+                className="mt-6 flex justify-end gap-2 border-t guide-line pt-4">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}

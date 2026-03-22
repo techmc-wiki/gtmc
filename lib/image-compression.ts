@@ -19,10 +19,9 @@ export interface CompressionResult {
 }
 
 export async function compressImageForUpload(
-  file: File,
+  file: File
 ): Promise<CompressionResult> {
-  const imageCompression = (await import("browser-image-compression"))
-    .default
+  const imageCompression = (await import("browser-image-compression")).default
 
   // GIF bypass — compressing GIFs destroys animation
   if (file.type === "image/gif") {

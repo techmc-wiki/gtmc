@@ -6,9 +6,7 @@ type SignOutButtonProps = {
   className?: string
 }
 
-export function SignOutButton({
-  className = "",
-}: SignOutButtonProps) {
+export function SignOutButton({ className = "" }: SignOutButtonProps) {
   return (
     <button
       onClick={() => signOut({ callbackUrl: "/" })}

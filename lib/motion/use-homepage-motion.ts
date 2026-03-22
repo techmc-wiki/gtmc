@@ -62,16 +62,8 @@ export function useHomepageMotion(): HomepageMotionValues {
     }
 
     window.addEventListener("mousemove", handleMouseMove)
-    return () =>
-      window.removeEventListener("mousemove", handleMouseMove)
-  }, [
-    pointerX,
-    pointerY,
-    rawMouseX,
-    rawMouseY,
-    isMobile,
-    reducedMotionQuery,
-  ])
+    return () => window.removeEventListener("mousemove", handleMouseMove)
+  }, [pointerX, pointerY, rawMouseX, rawMouseY, isMobile, reducedMotionQuery])
 
   const smoothX = useSpring(pointerX, { damping: 20, stiffness: 300 })
   const smoothY = useSpring(pointerY, { damping: 20, stiffness: 300 })
@@ -94,18 +86,12 @@ export function useHomepageMotion(): HomepageMotionValues {
     x: useTransform(
       smoothX,
       (v) =>
-        v *
-        config.pointerAmplitude *
-        HOMEPAGE_MOTION.layers.foreground *
-        20,
+        v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.foreground * 20
     ),
     y: useTransform(
       smoothY,
       (v) =>
-        v *
-        config.pointerAmplitude *
-        HOMEPAGE_MOTION.layers.foreground *
-        20,
+        v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.foreground * 20
     ),
     rotateX: useTransform(smoothY, (v) => v * -2),
     rotateY: useTransform(smoothX, (v) => v * 2),
@@ -114,19 +100,11 @@ export function useHomepageMotion(): HomepageMotionValues {
   const midground: LayerTransform = {
     x: useTransform(
       smoothX,
-      (v) =>
-        v *
-        config.pointerAmplitude *
-        HOMEPAGE_MOTION.layers.midground *
-        20,
+      (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.midground * 20
     ),
     y: useTransform(
       smoothY,
-      (v) =>
-        v *
-        config.pointerAmplitude *
-        HOMEPAGE_MOTION.layers.midground *
-        20,
+      (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.midground * 20
     ),
   }
 
@@ -134,18 +112,12 @@ export function useHomepageMotion(): HomepageMotionValues {
     x: useTransform(
       smoothX,
       (v) =>
-        v *
-        config.pointerAmplitude *
-        HOMEPAGE_MOTION.layers.background *
-        20,
+        v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.background * 20
     ),
     y: useTransform(
       smoothY,
       (v) =>
-        v *
-        config.pointerAmplitude *
-        HOMEPAGE_MOTION.layers.background *
-        20,
+        v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.background * 20
     ),
   }
 

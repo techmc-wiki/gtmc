@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import {
-  uploadFileToGithub,
-  GithubFeaturesError,
-} from "@/lib/github-features"
+import { uploadFileToGithub, GithubFeaturesError } from "@/lib/github-features"
 import { classifyFile, sanitizeFilename } from "@/lib/file-upload"
 
 export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session?.user) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 },
-    )
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   try {
@@ -20,17 +14,14 @@ export async function POST(req: NextRequest) {
     const file = formData.get("file") as File | null
 
     if (!file) {
-      return NextResponse.json(
-        { error: "No file provided." },
-        { status: 400 },
-      )
+      return NextResponse.json({ error: "No file provided." }, { status: 400 })
     }
 
     const classification = classifyFile(file.type)
     if (!classification) {
       return NextResponse.json(
         { error: "File type not allowed." },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
@@ -38,14 +29,12 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(arrayBuffer)
 
     if (buffer.length > classification.maxBytes) {
-      const maxMB = Math.round(
-        classification.maxBytes / (1024 * 1024),
-      )
+      const maxMB = Math.round(classification.maxBytes / (1024 * 1024))
       return NextResponse.json(
         {
           error: `File too large (max ${maxMB}MB for ${classification.category}).`,
         },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
@@ -55,7 +44,7 @@ export async function POST(req: NextRequest) {
       buffer,
       filename,
       file.type,
-      classification.category,
+      classification.category
     )
 
     return NextResponse.json({
@@ -72,36 +61,32 @@ export async function POST(req: NextRequest) {
       if (error.code === "CONFIG_MISSING") {
         return NextResponse.json(
           { error: "Upload is not configured on this server." },
-          { status: 500 },
+          { status: 500 }
         )
       }
       if (error.code === "AUTH_FAILED") {
         return NextResponse.json(
           { error: "Upload authorization failed." },
-          { status: 403 },
+          { status: 403 }
         )
       }
       if (error.code === "RATE_LIMITED") {
         return NextResponse.json(
           {
-            error:
-              "Upload service temporarily unavailable. Try again shortly.",
+            error: "Upload service temporarily unavailable. Try again shortly.",
           },
-          { status: 429 },
+          { status: 429 }
         )
       }
       if (error.code === "API_ERROR") {
         return NextResponse.json(
           { error: "File upload failed. Please try again." },
-          { status: 502 },
+          { status: 502 }
         )
       }
     }
 
     console.error("Feature upload error:", error)
-    return NextResponse.json(
-      { error: "Upload failed." },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: "Upload failed." }, { status: 500 })
   }
 }

@@ -19,66 +19,75 @@ export function BrutalAvatar({
     <div
       className={`
         group relative box-border flex aspect-square size-full items-center
-        justify-center overflow-hidden border-2 border-tech-main/40 bg-slate-100
+        justify-center overflow-hidden corner-bracket bg-slate-100
         transition-all duration-300
         hover:border-tech-main
         ${className}
       `}>
       {/* 科技感装饰元素 */}
-      <div className="
-        pointer-events-none absolute inset-0 z-10 opacity-70 transition-opacity
-        duration-300
-        group-hover:opacity-100
-      ">
+      <div
+        className="
+          pointer-events-none absolute inset-0 z-10 opacity-70
+          transition-opacity duration-300
+          group-hover:opacity-100
+        ">
         {/* 中心十字准星 */}
-        <div className="
-          absolute top-1/2 left-1/2 h-px w-4 -translate-1/2 bg-tech-main/40
-        "></div>
-        <div className="
-          absolute top-1/2 left-1/2 h-4 w-px -translate-1/2 bg-tech-main/40
-        "></div>
+        <div
+          className="
+            absolute top-1/2 left-1/2 h-px w-4 -translate-1/2 bg-tech-main/40
+          "></div>
+        <div
+          className="
+            absolute top-1/2 left-1/2 h-4 w-px -translate-1/2 bg-tech-main/40
+          "></div>
 
         {/* 动态扫描线 */}
         <div className="absolute inset-x-0 top-1/4 h-px bg-tech-main/40"></div>
         <div className="absolute inset-x-0 bottom-1/4 h-px bg-tech-main/40"></div>
 
         {/* 边角装饰 - 左上 */}
-        <div className="
-          absolute top-0 left-0 size-3 border-t-2 border-l-2 border-tech-main/40
-        "></div>
+        <div
+          className="
+            absolute top-0 left-0 size-3 border-t-2 border-l-2
+            border-tech-main/40
+          "></div>
         {/* 边角装饰 - 右上 */}
-        <div className="
-          absolute top-0 right-0 size-3 border-t-2 border-r-2
-          border-tech-main/40
-        "></div>
+        <div
+          className="
+            absolute top-0 right-0 size-3 border-t-2 border-r-2
+            border-tech-main/40
+          "></div>
         {/* 边角装饰 - 左下 */}
-        <div className="
-          absolute bottom-0 left-0 size-3 border-b-2 border-l-2
-          border-tech-main/40
-        "></div>
+        <div
+          className="
+            absolute bottom-0 left-0 size-3 border-b-2 border-l-2
+            border-tech-main/40
+          "></div>
         {/* 边角装饰 - 右下 */}
-        <div className="
-          absolute right-0 bottom-0 size-3 border-r-2 border-b-2
-          border-tech-main/40
-        "></div>
+        <div
+          className="
+            absolute right-0 bottom-0 size-3 border-r-2 border-b-2
+            border-tech-main/40
+          "></div>
 
         {/* 额外的数据点 */}
         <div className="absolute top-1 left-4 size-1 bg-tech-main/60"></div>
         <div className="absolute right-4 bottom-1 size-1 bg-tech-main/60"></div>
 
         {/* 边框缺口效果 */}
-        <div className="
-          absolute top-0 left-1/2 h-[2px] w-4 -translate-x-1/2 bg-white
-        "></div>
-        <div className="
-          absolute bottom-0 left-1/2 h-[2px] w-4 -translate-x-1/2 bg-white
-        "></div>
+        <div
+          className="
+            absolute top-0 left-1/2 h-[2px] w-4 -translate-x-1/2 bg-white
+          "></div>
+        <div
+          className="
+            absolute bottom-0 left-1/2 h-[2px] w-4 -translate-x-1/2 bg-white
+          "></div>
       </div>
 
       {/* 内层框架 */}
-      <div className="
-        pointer-events-none absolute inset-1 z-5 border border-tech-main/20
-      "></div>
+      <div
+        className="pointer-events-none absolute inset-1 z-5 border guide-line"></div>
 
       {src ? (
         <Image
@@ -93,11 +102,12 @@ export function BrutalAvatar({
           "
         />
       ) : (
-        <span className="
-          z-0 font-mono text-xl font-bold tracking-widest text-tech-main/50
-          uppercase transition-colors
-          group-hover:text-tech-main
-        ">
+        <span
+          className="
+            z-0 font-mono text-xl font-bold tracking-widest text-tech-main/50
+            uppercase transition-colors
+            group-hover:text-tech-main
+          ">
           {(fallback || alt || "?")[0]}
         </span>
       )}

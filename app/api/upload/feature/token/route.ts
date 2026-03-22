@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import {
-  handleUpload,
-  type HandleUploadBody,
-} from "@vercel/blob/client"
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client"
 import { auth } from "@/lib/auth"
 import {
   classifyFile,
@@ -45,9 +42,7 @@ export async function POST(req: NextRequest) {
         }
 
         return {
-          allowedContentTypes: mimeType
-            ? [mimeType]
-            : getNonImageMimeTypes(),
+          allowedContentTypes: mimeType ? [mimeType] : getNonImageMimeTypes(),
           maximumSizeInBytes: 50 * 1024 * 1024,
           addRandomSuffix: false,
           allowedOrigins: process.env.NEXT_PUBLIC_APP_URL
@@ -60,9 +55,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(jsonResponse)
   } catch (error) {
     const message =
-      error instanceof Error
-        ? error.message
-        : "Token generation failed"
+      error instanceof Error ? error.message : "Token generation failed"
     if (message === "Unauthorized") {
       return NextResponse.json({ error: message }, { status: 401 })
     }

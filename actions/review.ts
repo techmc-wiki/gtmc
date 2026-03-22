@@ -31,14 +31,14 @@ export async function mergePRAction(prNumber: number) {
     return { success: true }
   } catch (error) {
     throw new Error(
-      `Merge failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      `Merge failed: ${error instanceof Error ? error.message : "Unknown error"}`
     )
   }
 }
 
 export async function resolveConflictAction(
   prNumber: number,
-  formData: FormData,
+  formData: FormData
 ) {
   const session = await auth()
   if (!session?.user || session.user.role !== "ADMIN") {
@@ -56,9 +56,8 @@ export async function resolveConflictAction(
   }
 
   try {
-    const pr = (
-      await octokit.pulls.get({ owner, repo, pull_number: prNumber })
-    ).data
+    const pr = (await octokit.pulls.get({ owner, repo, pull_number: prNumber }))
+      .data
     const branchName = pr.head.ref
     const prHeadSha = pr.head.sha
 
@@ -132,10 +131,10 @@ export async function resolveConflictAction(
       owner,
       repo,
       base_tree: mainSha,
-        tree: treeEntries as TreeEntry[],
-      })
+      tree: treeEntries as TreeEntry[],
+    })
 
-      const { data: newCommit } = await octokit.git.createCommit({
+    const { data: newCommit } = await octokit.git.createCommit({
       owner,
       repo,
       message: `Resolve conflicts for ${filePath}\n\nOriginal message:\n${originalMessage}`,
@@ -159,7 +158,7 @@ export async function resolveConflictAction(
     return { success: true }
   } catch (error) {
     throw new Error(
-      `Conflict resolution failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      `Conflict resolution failed: ${error instanceof Error ? error.message : "Unknown error"}`
     )
   }
 }
@@ -184,7 +183,7 @@ export async function closePRAction(prNumber: number) {
     return { success: true }
   } catch (error) {
     throw new Error(
-      `Close failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      `Close failed: ${error instanceof Error ? error.message : "Unknown error"}`
     )
   }
 }

@@ -12,17 +12,14 @@ const PATH_REGEX = /^data\/(images|videos|files)\/[^/]+$/
 export async function GET(req: NextRequest) {
   const session = await auth()
   if (!session?.user) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 },
-    )
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   const rawPath = req.nextUrl.searchParams.get("path")
   if (!rawPath) {
     return NextResponse.json(
       { error: "Missing path parameter" },
-      { status: 400 },
+      { status: 400 }
     )
   }
 
@@ -32,24 +29,18 @@ export async function GET(req: NextRequest) {
   } catch {
     return NextResponse.json(
       { error: "Invalid path encoding" },
-      { status: 400 },
+      { status: 400 }
     )
   }
 
   decodedPath = decodedPath.replace(/\/+/g, "/")
 
   if (decodedPath.includes("..") || decodedPath.includes("\\")) {
-    return NextResponse.json(
-      { error: "Invalid path" },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: "Invalid path" }, { status: 400 })
   }
 
   if (!PATH_REGEX.test(decodedPath)) {
-    return NextResponse.json(
-      { error: "Invalid path" },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: "Invalid path" }, { status: 400 })
   }
 
   // Derive MIME from extension — GitHub's CDN returns application/octet-stream
@@ -62,10 +53,7 @@ export async function GET(req: NextRequest) {
   const token = process.env.GITHUB_FEATURES_ISSUES_PAT
 
   if (!owner || !repo || !token) {
-    return NextResponse.json(
-      { error: "Server misconfigured" },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: "Server misconfigured" }, { status: 500 })
   }
 
   const githubUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/${decodedPath}`
@@ -82,23 +70,14 @@ export async function GET(req: NextRequest) {
   try {
     upstream = await fetch(githubUrl, { headers: fetchHeaders })
   } catch {
-    return NextResponse.json(
-      { error: "Failed to fetch file" },
-      { status: 502 },
-    )
+    return NextResponse.json({ error: "Failed to fetch file" }, { status: 502 })
   }
 
   if (!upstream.ok && upstream.status !== 206) {
     if (upstream.status === 404) {
-      return NextResponse.json(
-        { error: "File not found" },
-        { status: 404 },
-      )
+      return NextResponse.json({ error: "File not found" }, { status: 404 })
     }
-    return NextResponse.json(
-      { error: "Failed to fetch file" },
-      { status: 502 },
-    )
+    return NextResponse.json({ error: "Failed to fetch file" }, { status: 502 })
   }
 
   if (!derivedMime) {

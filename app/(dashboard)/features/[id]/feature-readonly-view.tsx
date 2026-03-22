@@ -15,17 +15,16 @@ export function FeatureReadonlyView({
   content,
   tags,
 }: FeatureReadonlyViewProps) {
-  const [activeTab, setActiveTab] = useState<"rendered" | "source">(
-    "rendered",
-  )
+  const [activeTab, setActiveTab] = useState<"rendered" | "source">("rendered")
 
   return (
     <BrutalCard>
-      <h2 className="
-        mb-4 text-sm font-bold
-        sm:text-base
-        md:text-lg
-      ">
+      <h2
+        className="
+          mb-4 text-sm font-bold
+          sm:text-base
+          md:text-lg
+        ">
         {title}
       </h2>
 
@@ -45,10 +44,11 @@ export function FeatureReadonlyView({
       )}
 
       <div className="mt-8 border-t border-dashed border-tech-main/30 pt-6">
-        <div className="
-          flex flex-col overflow-hidden border border-tech-main/40 bg-white/50
-          backdrop-blur-sm
-        ">
+        <div
+          className="
+            flex flex-col overflow-hidden border border-tech-main/40 bg-white/50
+            backdrop-blur-sm
+          ">
           <div
             role="tablist"
             aria-label="Editor mode"
@@ -65,13 +65,13 @@ export function FeatureReadonlyView({
               className={`
                 px-4 py-2 transition-colors select-none
                 ${
-                activeTab === "rendered"
-                  ? "bg-tech-main text-white"
-                  : `
-                    cursor-pointer text-tech-main/60
-                    hover:bg-tech-main/10
-                  `
-              }
+                  activeTab === "rendered"
+                    ? "bg-tech-main text-white"
+                    : `
+                      cursor-pointer text-tech-main/60
+                      hover:bg-tech-main/10
+                    `
+                }
               `}>
               RENDERED_
             </button>
@@ -84,13 +84,13 @@ export function FeatureReadonlyView({
               className={`
                 px-4 py-2 transition-colors select-none
                 ${
-                activeTab === "source"
-                  ? "bg-tech-main text-white"
-                  : `
-                    cursor-pointer text-tech-main/60
-                    hover:bg-tech-main/10
-                  `
-              }
+                  activeTab === "source"
+                    ? "bg-tech-main text-white"
+                    : `
+                      cursor-pointer text-tech-main/60
+                      hover:bg-tech-main/10
+                    `
+                }
               `}>
               SOURCE_
             </button>
@@ -110,9 +110,10 @@ export function FeatureReadonlyView({
                 role="tabpanel"
                 aria-labelledby="tab-source">
                 {content?.trim() ? (
-                  <pre className="
-                    p-6 font-mono text-sm/relaxed whitespace-pre-wrap
-                  ">
+                  <pre
+                    className="
+                      p-6 font-mono text-sm/relaxed whitespace-pre-wrap
+                    ">
                     {content}
                   </pre>
                 ) : (

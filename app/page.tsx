@@ -68,7 +68,7 @@ function DecorElement({
       const dist = Math.sqrt(dx * dx + dy * dy)
       const t = Math.min(1, dist / HOMEPAGE_MOTION.blurRadius)
       return `blur(${t * blurMax}px)`
-    },
+    }
   )
 
   return (
@@ -89,26 +89,23 @@ export default function Home() {
     isReducedMotion,
   } = motionDriver
 
-  const bgBlurMax = isReducedMotion
-    ? 0
-    : HOMEPAGE_MOTION.blurMax.background
-  const mgBlurMax = isReducedMotion
-    ? 0
-    : HOMEPAGE_MOTION.blurMax.midground
+  const bgBlurMax = isReducedMotion ? 0 : HOMEPAGE_MOTION.blurMax.background
+  const mgBlurMax = isReducedMotion ? 0 : HOMEPAGE_MOTION.blurMax.midground
 
   return (
-    <div className="
-      relative flex h-screen w-full overflow-hidden font-sans text-tech-main
-      selection:bg-tech-main/20 selection:text-tech-main-dark
-    ">
+    <div
+      className="
+        relative flex h-screen w-full overflow-hidden font-sans text-tech-main
+        selection:bg-tech-main/20 selection:text-tech-main-dark
+      ">
       {/* Background Layer - Furthest depth, slowest motion */}
       <motion.div
-        className="homepage-decor-background absolute inset-0 z-0"
+        className="absolute inset-0 z-0 homepage-decor-background"
         style={{ x: bgTransform.x, y: bgTransform.y }}>
         {/* 巨型背景水印 */}
         <DecorElement
           className="
-            decor-desktop-only pointer-events-none absolute top-1/3 -right-20
+            pointer-events-none absolute top-1/3 -right-20 decor-desktop-only
             hidden rotate-90 text-[10rem] font-black tracking-tighter
             whitespace-nowrap text-tech-main opacity-[0.05] mix-blend-multiply
             select-none
@@ -123,7 +120,7 @@ export default function Home() {
         {/* NBT二进制/Hex Dump 背景层 */}
         <DecorElement
           className="
-            decor-desktop-only pointer-events-none absolute top-[20%] left-[5%]
+            pointer-events-none absolute top-[20%] left-[5%] decor-desktop-only
             hidden font-mono text-[10px] leading-tight whitespace-pre
             text-tech-main opacity-[0.25] mix-blend-multiply select-none
             xl:block
@@ -131,23 +128,23 @@ export default function Home() {
           smoothMouseX={smoothMouseX}
           smoothMouseY={smoothMouseY}
           blurMax={bgBlurMax}>
-          00000000: 1f8b 0800 0000 0000 0000 edc1 0b00 0000
-          .......4........{"\n"}
-          00000010: 0010 0700 1101 0005 6c65 7665 6c00 0800
-          ........level...{"\n"}
-          00000020: 0b44 6174 6101 0006 7261 6e64 6f6d 5365
-          .Data...randomSe{"\n"}
-          00000030: 6564 0000 0000 3b9a ca00 0400 0c62 6c6f
-          ed....;......blo{"\n"}
-          00000040: 636b 5f6c 6967 6874 5f64 6174 610a 0000
-          ck_light_data...{"\n"}
+          00000000: 1f8b 0800 0000 0000 0000 edc1 0b00 0000 .......4........
+          {"\n"}
+          00000010: 0010 0700 1101 0005 6c65 7665 6c00 0800 ........level...
+          {"\n"}
+          00000020: 0b44 6174 6101 0006 7261 6e64 6f6d 5365 .Data...randomSe
+          {"\n"}
+          00000030: 6564 0000 0000 3b9a ca00 0400 0c62 6c6f ed....;......blo
+          {"\n"}
+          00000040: 636b 5f6c 6967 6874 5f64 6174 610a 0000 ck_light_data...
+          {"\n"}
         </DecorElement>
 
         {/* MC 方块视角的几何线条叠加 */}
         <DecorElement
           className="
-            decor-desktop-only pointer-events-none absolute right-[10%]
-            bottom-[20%] hidden opacity-20
+            pointer-events-none absolute right-[10%] bottom-[20%]
+            decor-desktop-only hidden opacity-20
             lg:block
           "
           smoothMouseX={smoothMouseX}
@@ -189,9 +186,10 @@ export default function Home() {
               className="opacity-50"
             />
           </svg>
-          <span className="
-            absolute -right-12 bottom-4 font-mono text-[10px] opacity-80
-          ">
+          <span
+            className="
+              absolute -right-12 bottom-4 font-mono text-[10px] opacity-80
+            ">
             FIG 1. ISOMETRIC_BLOCK
           </span>
           <svg
@@ -208,7 +206,7 @@ export default function Home() {
         {/* 圆形/雷达阵列结构 */}
         <DecorElement
           className="
-            decor-desktop-only pointer-events-none absolute bottom-16 left-[20%]
+            pointer-events-none absolute bottom-16 left-[20%] decor-desktop-only
             hidden opacity-10
             lg:block
           "
@@ -233,7 +231,7 @@ export default function Home() {
         {/* 2XL 专属：红石逻辑代数 */}
         <DecorElement
           className="
-            decor-desktop-only pointer-events-none absolute top-[40%] right-[6%]
+            pointer-events-none absolute top-[40%] right-[6%] decor-desktop-only
             hidden border-l border-tech-main/40 pl-4 font-mono text-[11px]
             leading-relaxed text-tech-main opacity-[0.35] mix-blend-multiply
             select-none
@@ -260,8 +258,8 @@ export default function Home() {
         {/* 2XL 专属：空间坐标变换矩阵 */}
         <DecorElement
           className="
-            decor-desktop-only pointer-events-none absolute right-[25%]
-            bottom-[30%] hidden font-mono text-[11px] opacity-[0.35]
+            pointer-events-none absolute right-[25%] bottom-[30%]
+            decor-desktop-only hidden font-mono text-[11px] opacity-[0.35]
             mix-blend-multiply select-none
             2xl:block
           "
@@ -271,10 +269,11 @@ export default function Home() {
           <div className="mb-2 font-bold tracking-widest text-tech-main-dark">
             TRANSFORM_MATRIX_4x4
           </div>
-          <div className="
-            grid grid-cols-4 gap-2 border-x-2 border-tech-main/60 bg-tech-main/5
-            px-3 py-1 text-center
-          ">
+          <div
+            className="
+              grid grid-cols-4 gap-2 border-x-2 border-tech-main/60
+              bg-tech-main/5 px-3 py-1 text-center
+            ">
             <span>1.0</span>
             <span>0.0</span>
             <span>0.0</span>
@@ -297,7 +296,7 @@ export default function Home() {
         {/* 2XL 专属：内存簇/寄存器网格 */}
         <DecorElement
           className="
-            decor-desktop-only pointer-events-none absolute top-[60%] left-[3%]
+            pointer-events-none absolute top-[60%] left-[3%] decor-desktop-only
             hidden font-mono text-[10px] opacity-[0.35] mix-blend-multiply
             select-none
             2xl:block
@@ -308,10 +307,11 @@ export default function Home() {
           <div className="mb-2 font-bold tracking-widest text-tech-main-dark">
             TICK_PHASE_ALLOCATION
           </div>
-          <div className="
-            grid grid-cols-6 gap-x-4 gap-y-2 border border-tech-main/20
-            bg-tech-main/5 p-2
-          ">
+          <div
+            className="
+              grid grid-cols-6 gap-x-4 gap-y-2 border guide-line bg-tech-main/5
+              p-2
+            ">
             {HEX_VALUES.map((hexValue, i) => (
               <span
                 key={i}
@@ -332,8 +332,9 @@ export default function Home() {
         {/* 力学/机械引擎图纸 */}
         <DecorElement
           className="
-            decor-desktop-only pointer-events-none absolute top-[15%]
-            right-[15%] hidden opacity-[0.25] mix-blend-multiply select-none
+            pointer-events-none absolute top-[15%] right-[15%]
+            decor-desktop-only hidden opacity-[0.25] mix-blend-multiply
+            select-none
             xl:block
           "
           smoothMouseX={smoothMouseX}
@@ -354,13 +355,7 @@ export default function Home() {
               fill="currentColor"
               fillOpacity="0.15"
             />
-            <rect
-              x="45"
-              y="40"
-              width="30"
-              height="40"
-              strokeWidth="1.5"
-            />
+            <rect x="45" y="40" width="30" height="40" strokeWidth="1.5" />
             <rect
               x="20"
               y="20"
@@ -370,13 +365,7 @@ export default function Home() {
               fillOpacity="0.25"
               strokeWidth="1.5"
             />
-            <line
-              x1="60"
-              y1="20"
-              x2="60"
-              y2="0"
-              strokeDasharray="3 3"
-            />
+            <line x1="60" y1="20" x2="60" y2="0" strokeDasharray="3 3" />
             <line x1="45" y1="0" x2="75" y2="0" />
             <path
               d="M60 90 L60 110 M55 105 L60 110 L65 105"
@@ -397,37 +386,39 @@ export default function Home() {
 
       {/* Midground Layer - Medium depth, moderate motion */}
       <motion.div
-        className="homepage-decor-midground absolute inset-0 z-1"
+        className="absolute inset-0 z-1 homepage-decor-midground"
         style={{ x: mgTransform.x, y: mgTransform.y }}>
         {/* 左上角系统序列号 */}
-        <div className="
-          absolute top-8 left-8 flex hidden flex-col space-y-1
-          md:flex
-        ">
-          <div className="
-            font-mono text-xs tracking-widest text-tech-main-dark uppercase
-            opacity-50
+        <div
+          className="
+            absolute top-8 left-8 hidden flex-col space-y-1
+            md:flex
           ">
+          <div
+            className="
+              font-mono text-xs tracking-widest text-tech-main-dark uppercase
+              opacity-50
+            ">
             [ GTMC_WIKI_SYSTEM ]
           </div>
-          <div className="
-            font-mono text-[10px] tracking-widest text-tech-main opacity-30
-          ">
+          <div
+            className="
+              font-mono text-[10px] tracking-widest text-tech-main opacity-30
+            ">
             BUILD.2026.03 // SECTOR-7G
           </div>
         </div>
 
         {/* 右上角HUD */}
-        <div className="
-          absolute top-8 right-12 hidden space-y-1 text-right font-mono
-          text-[10px] text-tech-main opacity-40 select-none
-          sm:block
-        ">
+        <div
+          className="
+            absolute top-8 right-12 hidden space-y-1 text-right font-mono
+            text-[10px] text-tech-main opacity-40 select-none
+            sm:block
+          ">
           <p>
             SYS.TPS ::{" "}
-            <span className="font-bold text-tech-main-dark">
-              20.0 *
-            </span>
+            <span className="font-bold text-tech-main-dark">20.0 *</span>
           </p>
           <p>SYS.MSPT :: 12.4ms</p>
           <p>ENTITIES :: 342 / 1024</p>
@@ -442,7 +433,7 @@ export default function Home() {
         {/* Java 代码片段漂浮层 */}
         <DecorElement
           className="
-            decor-desktop-only pointer-events-none absolute top-[18%] right-10
+            pointer-events-none absolute top-[18%] right-10 decor-desktop-only
             hidden opacity-40 mix-blend-multiply select-none
             lg:block
             xl:right-16
@@ -450,10 +441,11 @@ export default function Home() {
           smoothMouseX={smoothMouseX}
           smoothMouseY={smoothMouseY}
           blurMax={mgBlurMax}>
-          <div className="
-            border-l-4 border-tech-main/40 bg-tech-main/5 py-2 pl-4 font-mono
-            text-[11px] leading-relaxed whitespace-pre text-tech-main
-          ">
+          <div
+            className="
+              border-l-4 border-tech-main/40 bg-tech-main/5 py-2 pl-4 font-mono
+              text-[11px] leading-relaxed whitespace-pre text-tech-main
+            ">
             {`{
   "Id": "minecraft:chest",
   "x": 1024, "y": 64, "z": -512,
@@ -473,7 +465,7 @@ export default function Home() {
         {/* 堆栈跟踪装饰 */}
         <DecorElement
           className="
-            decor-desktop-only pointer-events-none absolute bottom-8 left-8
+            pointer-events-none absolute bottom-8 left-8 decor-desktop-only
             hidden font-mono text-[10px] text-red-500/40 mix-blend-multiply
             select-none
             lg:block
@@ -482,8 +474,7 @@ export default function Home() {
           smoothMouseY={smoothMouseY}
           blurMax={mgBlurMax}>
           <span className="font-bold">
-            at
-            net.minecraft.world.level.block.piston.PistonBaseBlock.moveBlocks
+            at net.minecraft.world.level.block.piston.PistonBaseBlock.moveBlocks
           </span>
           (PistonBaseBlock.java:492) {"\n"}
           <br />
@@ -493,62 +484,68 @@ export default function Home() {
           (Level.java:833) {"\n"}
           <br />
           <span className="font-bold text-red-600/60">
-            Caused by: java.util.ConcurrentModificationException:
-            Ticking block entity
+            Caused by: java.util.ConcurrentModificationException: Ticking block
+            entity
           </span>
         </DecorElement>
 
         {/* 分散的瞄准/坐标十字 */}
-        <div className="
-          decor-desktop-only absolute top-1/4 right-[25%] hidden text-xl
-          font-light opacity-30 select-none
-          md:block
-        ">
+        <div
+          className="
+            absolute top-1/4 right-[25%] decor-desktop-only hidden text-xl
+            font-light opacity-30 select-none
+            md:block
+          ">
           +
         </div>
-        <div className="
-          decor-desktop-only absolute bottom-1/3 left-[8%] hidden text-xl
-          font-light opacity-30 select-none
-          md:block
-        ">
+        <div
+          className="
+            absolute bottom-1/3 left-[8%] decor-desktop-only hidden text-xl
+            font-light opacity-30 select-none
+            md:block
+          ">
           +
         </div>
-        <div className="
-          decor-desktop-only absolute top-[15%] left-[45%] hidden text-sm
-          font-light opacity-30 select-none
-          md:block
-        ">
+        <div
+          className="
+            absolute top-[15%] left-[45%] decor-desktop-only hidden text-sm
+            font-light opacity-30 select-none
+            md:block
+          ">
           +
         </div>
 
         {/* 贯穿全图的低调主辅助线 */}
-        <div className="
-          decor-desktop-only absolute top-[35%] right-0 hidden h-px w-[40%]
-          bg-tech-main/20
-          md:block
-        ">
-          <span className="
-            absolute -top-4 right-10 font-mono text-[10px] opacity-50
+        <div
+          className="
+            absolute top-[35%] right-0 decor-desktop-only hidden h-px w-[40%]
+            bg-tech-main/20
+            md:block
           ">
+          <span
+            className="
+              absolute -top-4 right-10 font-mono text-[10px] opacity-50
+            ">
             L-AXIS
           </span>
         </div>
-        <div className="
-          decor-desktop-only absolute top-0 left-[25%] flex hidden h-full w-px
-          flex-col items-center bg-tech-main/10
-          md:flex
-        ">
-          <div className="
-            mt-[50vh] size-2 border border-tech-main/50 bg-tech-bg
-          "></div>
+        <div
+          className="
+            absolute top-0 left-[25%] decor-desktop-only hidden w-pxfull
+            flex-col items-center bg-tech-main/10
+            md:flex
+          ">
+          <div
+            className="mt-[50vh] size-2 border border-tech-main/50 bg-tech-bg"></div>
         </div>
 
         {/* 技术图纸刻度尺 */}
-        <div className="
-          decor-desktop-only absolute top-0 left-0 flex hidden h-2 w-full
-          overflow-hidden border-b border-tech-main/10 opacity-30
-          md:flex
-        ">
+        <div
+          className="
+            absolute top-0 left-0 decor-desktop-only hidden h-2 w-full
+            overflow-hidden border-b border-tech-main/10 opacity-30
+            md:flex
+          ">
           {Array.from({ length: 100 }).map((_, i) => (
             <div
               key={i}
@@ -563,11 +560,12 @@ export default function Home() {
             </div>
           ))}
         </div>
-        <div className="
-          decor-desktop-only absolute top-0 left-0 flex hidden h-full w-2
-          flex-col overflow-hidden border-r border-tech-main/10 opacity-30
-          md:flex
-        ">
+        <div
+          className="
+            absolute top-0 left-0 decor-desktop-only hidden h-full w-2 flex-col
+            overflow-hidden border-r border-tech-main/10 opacity-30
+            md:flex
+          ">
           {Array.from({ length: 50 }).map((_, i) => (
             <div
               key={i}
@@ -579,16 +577,17 @@ export default function Home() {
       </motion.div>
 
       {/* Hero Content - Highest z-index, stable positioning */}
-      <main className="
-        relative z-10 mx-auto mt-[7vh] flex min-h-max w-full max-w-7xl flex-col
-        items-center justify-center px-4 py-24
-      ">
+      <main
+        className="
+          relative z-10 mx-auto mt-[7vh] flex min-h-max w-full max-w-7xl
+          flex-col items-center justify-center px-4 py-24
+        ">
         {/* Foreground Layer - Card chrome and nearby accents */}
         <motion.div
           className="
-            homepage-decor-foreground group relative mb-8 w-full max-w-3xl
-            animate-tech-pop-in opacity-0 [animation-delay:0.2s]
-            [animation-duration:0.8s] [animation-fill-mode:forwards]
+            group relative mb-8 w-full max-w-3xl animate-tech-pop-in opacity-0
+            homepage-decor-foreground [animation-delay:0.2s]
+            [animation-duration:0.8s] fill-mode-forwards
           "
           style={{
             x: fgTransform.x,
@@ -598,18 +597,20 @@ export default function Home() {
             transformStyle: "preserve-3d",
           }}>
           {/* 下层错位阴影框 */}
-          <div className="
-            absolute inset-0 -z-10 translate-3 border border-tech-main/20
-            bg-transparent transition-transform duration-500 ease-out
-            group-hover:translate-4
-          "></div>
+          <div
+            className="
+              absolute inset-0 -z-10 translate-3 border guide-line
+              bg-transparent transition-transform duration-500 ease-out
+              group-hover:translate-4
+            "></div>
 
           {/* 尺寸标注装饰 */}
-          <div className="
-            absolute -top-6 left-0 flex w-full animate-fade-in items-center
-            font-mono text-[10px] opacity-0 [animation-delay:1.5s]
-            [animation-fill-mode:forwards]
-          ">
+          <div
+            className="
+              absolute -top-6 left-0 flex w-full animate-fade-in items-center
+              font-mono text-[10px] opacity-0 [animation-delay:1.5s]
+              fill-mode-forwards
+            ">
             <span>|&lt;</span>
             <span className="mx-2 grow border-t border-tech-main/30"></span>
             <span>900px</span>
@@ -617,108 +618,123 @@ export default function Home() {
             <span>&gt;|</span>
           </div>
 
-          <div className="
-            relative overflow-hidden border border-tech-main/40 bg-white/60 p-6
-            shadow-sm backdrop-blur-md
-            sm:p-10
-            md:p-14
-          ">
+          <div
+            className="
+              relative overflow-hidden border border-tech-main/40 bg-white/60
+              p-6 shadow-sm backdrop-blur-md
+              sm:p-10
+              md:p-14
+            ">
             {/* 闪光扫过效果 */}
-            <div className="
-              pointer-events-none absolute inset-0 translate-x-[-200%]
-              -skew-x-12 animate-[shimmer_3s_infinite_2s] bg-linear-to-r
-              from-transparent via-white/40 to-transparent
-            "></div>
+            <div
+              className="
+                pointer-events-none absolute inset-0 translate-x-[-200%]
+                -skew-x-12 animate-[shimmer_3s_infinite_2s] bg-linear-to-r
+                from-transparent via-white/40 to-transparent
+              "></div>
 
             {/* 工业感/图纸感的定位刻度 */}
-            <div className="
-              absolute top-0 left-0 size-3 -translate-x-[2px] -translate-y-[2px]
-              border-t-2 border-l-2 border-tech-main
-            "></div>
-            <div className="
-              absolute right-0 bottom-0 size-3 translate-x-[2px]
-              translate-y-[2px] border-r-2 border-b-2 border-tech-main
-            "></div>
+            <div
+              className="
+                absolute top-0 left-0 size-3 -translate-0.5 border-t-2
+                border-l-2 border-tech-main
+              "></div>
+            <div
+              className="
+                absolute right-0 bottom-0 size-3 translate-0.5 border-r-2
+                border-b-2 border-tech-main
+              "></div>
 
             {/* 钉子/打孔装饰 */}
-            <div className="
-              absolute top-4 right-4 size-1.5 rounded-full border
-              border-tech-main/50 bg-tech-bg/50
-            "></div>
-            <div className="
-              absolute bottom-4 left-4 size-1.5 rounded-full border
-              border-tech-main/50 bg-tech-bg/50
-            "></div>
+            <div
+              className="
+                absolute top-4 right-4 size-1.5 rounded-full border
+                border-tech-main/50 bg-tech-bg/50
+              "></div>
+            <div
+              className="
+                absolute bottom-4 left-4 size-1.5 rounded-full border
+                border-tech-main/50 bg-tech-bg/50
+              "></div>
 
-            <div className="
-              mb-6 flex animate-fade-in items-center space-x-4 opacity-0
-              [animation-delay:0.8s] [animation-fill-mode:forwards]
-            ">
-              <div className="
-                relative flex size-10 items-center justify-center border
-                border-tech-main/40 bg-tech-main/5 transition-transform
-                duration-500
-                group-hover:rotate-90
+            <div
+              className="
+                mb-6 flex animate-fade-in items-center space-x-4 opacity-0
+                [animation-delay:0.8s] fill-mode-forwards
               ">
-                <div className="
-                  size-4 bg-tech-main/30 transition-colors
-                  group-hover:bg-tech-main/60
-                "></div>
+              <div
+                className="
+                  relative flex size-10 items-center justify-center border
+                  border-tech-main/40 bg-tech-main/5 transition-transform
+                  duration-500
+                  group-hover:rotate-90
+                ">
+                <div
+                  className="
+                    size-4 bg-tech-main/30 transition-colors
+                    group-hover:bg-tech-main/60
+                  "></div>
               </div>
-              <h2 className="
-                font-mono text-sm tracking-[0.3em] text-tech-main/80 uppercase
-              ">
+              <h2
+                className="
+                  font-mono text-sm tracking-[0.3em] text-tech-main/80 uppercase
+                ">
                 Knowledge Base_
               </h2>
             </div>
 
-            <h1 className="
-              relative mb-6 flex items-center overflow-hidden text-3xl font-bold
-              tracking-tight text-tech-main-dark
-              sm:text-4xl
-              md:text-6xl
-              lg:text-7xl
-            ">
-              <span className="
-                mr-6 inline-block animate-tech-slide-in opacity-0
-                [animation-delay:0.5s] [animation-fill-mode:forwards]
+            <h1
+              className="
+                relative mb-6 flex items-center overflow-hidden text-3xl
+                font-bold tracking-tight text-tech-main-dark
+                sm:text-4xl
+                md:text-6xl
+                lg:text-7xl
               ">
+              <span
+                className="
+                  mr-6 inline-block animate-tech-slide-in opacity-0
+                  [animation-delay:0.5s] fill-mode-forwards
+                ">
                 <Logo
                   size="2xl"
                   showSlash={false}
                   className="pointer-events-none"
                 />
               </span>
-              <span className="
-                inline-block animate-tech-slide-in font-light text-tech-main
-                opacity-0 mix-blend-multiply [animation-delay:0.7s]
-                [animation-fill-mode:forwards]
-              ">
+              <span
+                className="
+                  inline-block animate-tech-slide-in font-light text-tech-main
+                  opacity-0 mix-blend-multiply [animation-delay:0.7s]
+                  fill-mode-forwards
+                ">
                 Wiki
               </span>
-              <span className="
-                ml-4 inline-block h-[1em] w-6 animate-pulse bg-tech-main
-                align-middle opacity-0 [animation-delay:1s]
-                [animation-fill-mode:forwards]
-              "></span>
+              <span
+                className="
+                  ml-4 inline-block h-[1em] w-6 animate-pulse bg-tech-main
+                  align-middle opacity-0 [animation-delay:1s] fill-mode-forwards
+                "></span>
             </h1>
 
-            <p className="
-              max-w-xl animate-fade-in border-l-[3px] border-tech-main/40 pl-5
-              text-base/relaxed tracking-wide text-tech-main-dark/80 opacity-0
-              [animation-delay:1.2s] [animation-duration:1s]
-              [animation-fill-mode:forwards] [animation-translate-y:20px]
-              md:text-lg
-            ">
-              支持多人协作、内容审核与 Git 自动备份的 MC
-              资源与知识整合站点。
-              <span className="
-                mt-4 flex items-center font-mono text-[11px] tracking-tech-wide
-                opacity-60
+            <p
+              className="
+                max-w-xl animate-fade-in border-l-[3px] border-tech-main/40 pl-5
+                text-base/relaxed tracking-wide text-tech-main-dark/80 opacity-0
+                [animation-delay:1.2s] [animation-duration:1s]
+                [animation-translate-y:20px] fill-mode-forwards
+                md:text-lg
               ">
-                <span className="
-                  mr-2 size-2 animate-pulse rounded-full bg-tech-main
-                "></span>
+              支持多人协作、内容审核与 Git 自动备份的 MC 资源与知识整合站点。
+              <span
+                className="
+                  mt-4 flex items-center font-mono text-[11px]
+                  tracking-tech-wide opacity-60
+                ">
+                <span
+                  className="
+                    mr-2 size-2 animate-pulse rounded-full bg-tech-main
+                  "></span>
                 &gt;&gt; MODPACKS | MECHANICS | TUTORIALS
               </span>
             </p>
@@ -726,16 +742,19 @@ export default function Home() {
         </motion.div>
 
         {/* 操作入口 */}
-        <div className="
-          relative z-20 flex w-full animate-slide-up-fade flex-col items-stretch
-          justify-center gap-5 opacity-0 [animation-delay:1.4s]
-          [animation-fill-mode:forwards]
-          sm:w-auto sm:flex-row sm:items-center
-        ">
-          <Link href="/articles" className="
-            w-full
-            sm:w-auto
+        <div
+          className="
+            relative z-20 flex w-full animate-slide-up-fade flex-col
+            items-stretch justify-center gap-5 opacity-0 [animation-delay:1.4s]
+            fill-mode-forwards
+            sm:w-auto sm:flex-row sm:items-center
           ">
+          <Link
+            href="/articles"
+            className="
+              w-full
+              sm:w-auto
+            ">
             <BrutalButton
               variant="primary"
               className="
@@ -749,10 +768,12 @@ export default function Home() {
               ACCESS DATABASE →
             </BrutalButton>
           </Link>
-          <Link href="/login" className="
-            w-full
-            sm:w-auto
-          ">
+          <Link
+            href="/login"
+            className="
+              w-full
+              sm:w-auto
+            ">
             <BrutalButton
               variant="ghost"
               className="
@@ -769,12 +790,12 @@ export default function Home() {
         </div>
 
         {/* 底部隐喻：MC典型的格子/合成槽堆叠图形列阵 */}
-        <div className="
-          pointer-events-none relative mt-12 flex space-x-1 opacity-40
-        ">
-          <div className="
-            absolute -top-4 font-mono text-[8px] text-tech-main/60
+        <div
+          className="
+            pointer-events-none relative mt-12 flex space-x-1 opacity-40
           ">
+          <div
+            className="absolute -top-4 font-mono text-[8px] text-tech-main/60">
             INVENTORY_SLOTS_
           </div>
           {[...Array(9)].map((_, i) => (
@@ -782,10 +803,13 @@ export default function Home() {
               key={i}
               className={`
                 flex size-8 items-center justify-center
-                ${i === 3 ? `
-                  border-2 border-tech-main-dark bg-tech-main/10
-                  shadow-[0_0_8px_rgba(96,112,143,0.3)]
-                ` : `border border-tech-main/40`}
+                ${i === 3
+                  ? `
+                    border-2 border-tech-main-dark bg-tech-main/10
+                    shadow-[0_0_8px_rgba(96,112,143,0.3)]
+                  `
+                  : `border border-tech-main/40`
+                }
               `}>
               {i === 3 && (
                 <div className="size-4 rotate-45 bg-tech-main-dark/80"></div>

@@ -16,10 +16,7 @@ const REGION = process.env.COS_REGION
 export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session || !session.user) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 },
-    )
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   try {
@@ -28,10 +25,7 @@ export async function POST(req: NextRequest) {
     const documentPath = formData.get("filePath") as string
 
     if (!file) {
-      return NextResponse.json(
-        { error: "No file provided" },
-        { status: 400 },
-      )
+      return NextResponse.json({ error: "No file provided" }, { status: 400 })
     }
 
     // Check Config
@@ -44,10 +38,9 @@ export async function POST(req: NextRequest) {
       console.error("Missing COS configuration")
       return NextResponse.json(
         {
-          error:
-            "Server configuration error: COS credentials missing",
+          error: "Server configuration error: COS credentials missing",
         },
-        { status: 500 },
+        { status: 500 }
       )
     }
 
@@ -87,7 +80,7 @@ export async function POST(req: NextRequest) {
           } else {
             resolve(data as Record<string, unknown>)
           }
-        },
+        }
       )
     })
 
@@ -101,11 +94,10 @@ export async function POST(req: NextRequest) {
     })
   } catch (error: unknown) {
     console.error("Upload error:", error)
-    const errorMessage =
-      error instanceof Error ? error.message : String(error)
+    const errorMessage = error instanceof Error ? error.message : String(error)
     return NextResponse.json(
       { error: "Upload failed: " + errorMessage },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

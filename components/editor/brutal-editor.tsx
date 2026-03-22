@@ -3,10 +3,7 @@
 import * as React from "react"
 import { BrutalButton } from "../ui/brutal-button"
 import { BrutalInput } from "../ui/brutal-input"
-import {
-  saveDraftAction,
-  submitForReviewAction,
-} from "@/actions/article"
+import { saveDraftAction, submitForReviewAction } from "@/actions/article"
 import { useRouter } from "next/navigation"
 import { compressImageForUpload } from "@/lib/image-compression"
 
@@ -24,15 +21,11 @@ interface BrutalEditorProps {
 export function BrutalEditor({ initialData }: BrutalEditorProps) {
   const router = useRouter()
   const [title, setTitle] = React.useState(initialData?.title || "")
-  const [content, setContent] = React.useState(
-    initialData?.content || "",
+  const [content, setContent] = React.useState(initialData?.content || "")
+  const [filePath, setFilePath] = React.useState(initialData?.filePath || "")
+  const [revisionId, setRevisionId] = React.useState<string | undefined>(
+    initialData?.id
   )
-  const [filePath, setFilePath] = React.useState(
-    initialData?.filePath || "",
-  )
-  const [revisionId, setRevisionId] = React.useState<
-    string | undefined
-  >(initialData?.id)
   const [isSaving, setIsSaving] = React.useState(false)
   const [isUploading, setIsUploading] = React.useState(false)
   const [isCompressing, setIsCompressing] = React.useState(false)
@@ -52,8 +45,8 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
 
     setTimeout(() => {
       if (textareaRef.current) {
-        textareaRef.current.selectionStart =
-          textareaRef.current.selectionEnd = start + text.length
+        textareaRef.current.selectionStart = textareaRef.current.selectionEnd =
+          start + text.length
         textareaRef.current.focus()
       }
     }, 0)
@@ -65,9 +58,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
       return
     }
     if (!filePath) {
-      alert(
-        "Please specify a FILE_PATH first before uploading images!",
-      )
+      alert("Please specify a FILE_PATH first before uploading images!")
       return
     }
 
@@ -82,10 +73,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
 
       if (result.error) {
         setContent((prev) =>
-          prev.replace(
-            placeholder,
-            `<!-- Upload failed: ${result.error} -->\n`,
-          ),
+          prev.replace(placeholder, `<!-- Upload failed: ${result.error} -->\n`)
         )
         alert(result.error)
         setIsUploading(false)
@@ -103,7 +91,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
 
       if (res.status === 413) {
         throw new Error(
-          "Image is too large to upload. Please use a smaller image.",
+          "Image is too large to upload. Please use a smaller image."
         )
       }
 
@@ -116,25 +104,18 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
 
       if (res.ok && data.url) {
         setContent((prev) =>
-          prev.replace(placeholder, `![${file.name}](${data.url})\n`),
+          prev.replace(placeholder, `![${file.name}](${data.url})\n`)
         )
       } else {
         setContent((prev) =>
-          prev.replace(
-            placeholder,
-            `<!-- Upload failed: ${data.error} -->\n`,
-          ),
+          prev.replace(placeholder, `<!-- Upload failed: ${data.error} -->\n`)
         )
         alert(data.error || "Upload failed")
       }
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Upload error"
+      const message = error instanceof Error ? error.message : "Upload error"
       setContent((prev) =>
-        prev.replace(
-          placeholder,
-          `<!-- Upload failed: ${message} -->\n`,
-        ),
+        prev.replace(placeholder, `<!-- Upload failed: ${message} -->\n`)
       )
       alert(message)
       console.error(error)
@@ -177,9 +158,7 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
     const selectedText = content.substring(start, end)
     const newText = prefix + selectedText + suffix
 
-    setContent(
-      content.substring(0, start) + newText + content.substring(end),
-    )
+    setContent(content.substring(0, start) + newText + content.substring(end))
 
     setTimeout(() => {
       if (textareaRef.current) {
@@ -240,14 +219,16 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
         border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
         sm:p-8
       ">
-      <div className="
-        absolute top-0 left-0 size-2 -translate-0.5 border-t-2 border-l-2
-        border-tech-main/60
-      "></div>
-      <div className="
-        absolute right-0 bottom-0 size-2 translate-0.5 border-r-2 border-b-2
-        border-tech-main/60
-      "></div>
+      <div
+        className="
+          absolute top-0 left-0 size-2 -translate-0.5 border-t-2 border-l-2
+          border-tech-main/60
+        "></div>
+      <div
+        className="
+          absolute right-0 bottom-0 size-2 translate-0.5 border-r-2 border-b-2
+          border-tech-main/60
+        "></div>
 
       {/* 标题区 */}
       <div className="flex flex-col space-y-4">
@@ -259,9 +240,11 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
             className={`
               border-tech-main/40 py-3 font-mono text-lg backdrop-blur-sm
               focus:border-tech-main/60
-              ${isReadOnly ? `cursor-not-allowed bg-gray-100 opacity-70` : `
-                bg-white/80
-              `}
+              ${
+                isReadOnly
+                  ? `cursor-not-allowed bg-gray-100 opacity-70`
+                  : `bg-white/80`
+              }
             `}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -278,9 +261,11 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
             className={`
               border-tech-main/40 py-2 font-mono text-sm backdrop-blur-sm
               focus:border-tech-main/60
-              ${isReadOnly ? `cursor-not-allowed bg-gray-100 opacity-70` : `
-                bg-white/80
-              `}
+              ${
+                isReadOnly
+                  ? `cursor-not-allowed bg-gray-100 opacity-70`
+                  : `bg-white/80`
+              }
             `}
             value={filePath}
             onChange={(e) => setFilePath(e.target.value)}
@@ -291,26 +276,30 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
 
       {/* 编辑器主区域 (双栏布局或单栏) */}
       <div className="flex grow flex-col space-y-2">
-        <div className="
-          mb-2 flex flex-col gap-2
-          sm:flex-row sm:items-end sm:justify-between sm:gap-0
-        ">
-          <label className="
-            inline-block border-b border-tech-main/30 pb-1 font-mono text-sm
-            tracking-tech-wide text-tech-main uppercase
+        <div
+          className="
+            mb-2 flex flex-col gap-2
+            sm:flex-row sm:items-end sm:justify-between sm:gap-0
           ">
+          <label
+            className="
+              inline-block border-b border-tech-main/30 pb-1 font-mono text-sm
+              tracking-tech-wide text-tech-main uppercase
+            ">
             CONTENT (MARKDOWN)_
           </label>
-          <div className="
-            flex flex-col gap-2
-            sm:flex-row sm:items-center
-          ">
+          <div
+            className="
+              flex flex-col gap-2
+              sm:flex-row sm:items-center
+            ">
             {!isReadOnly && (
               <>
-                <div className="
-                  flex flex-wrap gap-1
-                  sm:mr-1 sm:gap-1 sm:border-r sm:border-tech-main/30 sm:pr-2
-                ">
+                <div
+                  className="
+                    flex flex-wrap gap-1
+                    sm:mr-1 sm:gap-1 sm:border-r sm:border-tech-main/30 sm:pr-2
+                  ">
                   <button
                     type="button"
                     onClick={() => insertSyntax("**", "**")}
@@ -360,18 +349,15 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
                       sm:text-[10px]
                       ${isUploading ? "" : `cursor-pointer`}
                     `}>
-                    {isCompressing
-                      ? "CMP"
-                      : isUploading
-                        ? "UPL"
-                        : "IMG"}
+                    {isCompressing ? "CMP" : isUploading ? "UPL" : "IMG"}
                   </button>
                 </div>
-                <div className="
-                  mr-1 hidden items-center gap-1 border-r border-tech-main/30
-                  pr-2
-                  sm:flex
-                ">
+                <div
+                  className="
+                    mr-1 hidden items-center gap-1 border-r border-tech-main/30
+                    pr-2
+                    sm:flex
+                  ">
                   <button
                     type="button"
                     onClick={() => insertSyntax("### ")}
@@ -403,15 +389,15 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
               onChange={(e) => {
                 const file = e.target.files?.[0]
                 if (file) uploadImage(file)
-                if (fileInputRef.current)
-                  fileInputRef.current.value = ""
+                if (fileInputRef.current) fileInputRef.current.value = ""
               }}
             />
-            <span className="
-              hidden border border-tech-main/30 bg-tech-main/5 px-2 py-1
-              font-mono text-[10px] tracking-widest text-tech-main
-              sm:inline-block
-            ">
+            <span
+              className="
+                hidden border border-tech-main/30 bg-tech-main/5 px-2 py-1
+                font-mono text-[10px] tracking-widest text-tech-main
+                sm:inline-block
+              ">
               {isReadOnly ? "READ_ONLY" : "SUPPORT_PASTE/DROP_IMG"}
             </span>
           </div>
@@ -435,9 +421,11 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
             text-sm/relaxed text-tech-main-dark backdrop-blur-sm
             transition-colors
             focus:border-tech-main/60 focus:outline-none
-            ${isReadOnly ? `cursor-not-allowed bg-gray-100 opacity-70` : `
-              bg-white/80
-            `}
+            ${
+              isReadOnly
+                ? `cursor-not-allowed bg-gray-100 opacity-70`
+                : `bg-white/80`
+            }
           `}
           placeholder="Write your markdown here... Use syntax logic. Drag&Drop or Paste images directly here."
           readOnly={isReadOnly}
@@ -446,10 +434,11 @@ export function BrutalEditor({ initialData }: BrutalEditorProps) {
 
       {/* 操作区 */}
       {!isReadOnly && (
-        <div className="
-          flex flex-col gap-4 border-t border-tech-main/40 pt-6
-          sm:flex-row
-        ">
+        <div
+          className="
+            flex flex-col gap-4 border-t border-tech-main/40 pt-6
+            sm:flex-row
+          ">
           <BrutalButton
             type="submit"
             disabled={isSaving}

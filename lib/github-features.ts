@@ -149,10 +149,7 @@ function parseErrorMessage(details: unknown): string | undefined {
   return undefined
 }
 
-function isRateLimited(
-  response: Response,
-  details: unknown,
-): boolean {
+function isRateLimited(response: Response, details: unknown): boolean {
   if (response.status === 429) {
     return true
   }
@@ -215,8 +212,7 @@ function normalizeComment(raw: GithubCommentResponse): GithubComment {
   ) {
     throw new GithubFeaturesError({
       code: "INVALID_RESPONSE",
-      message:
-        "GitHub API returned an invalid comment response shape.",
+      message: "GitHub API returned an invalid comment response shape.",
       details: raw,
     })
   }
@@ -250,7 +246,7 @@ async function requestGithub<T>(
   url: string,
   init: RequestInit,
   options?: { allow404?: boolean },
-  tokenOverride?: string,
+  tokenOverride?: string
 ): Promise<{ data: T | null; response: Response }> {
   const config = getGithubRepoConfig()
 
@@ -328,7 +324,7 @@ interface GithubEmailRecord {
 }
 
 export async function getGithubEmailVisibility(
-  token: string,
+  token: string
 ): Promise<"private" | "public"> {
   if (!token) {
     return "private"
@@ -339,7 +335,7 @@ export async function getGithubEmailVisibility(
       `${GITHUB_API_BASE}/user/emails`,
       { method: "GET" },
       undefined,
-      token,
+      token
     )
 
     if (!data || !Array.isArray(data)) {
@@ -358,26 +354,24 @@ export async function getGithubEmailVisibility(
 }
 
 async function _listAllIssuesUncached(
-  state: "open" | "closed" | "all" = "open",
+  state: "open" | "closed" | "all" = "open"
 ): Promise<GithubIssue[]> {
   const config = getGithubRepoConfig()
   const baseUrl = getRepoIssuesBaseUrl(config)
 
   const allIssues: GithubIssue[] = []
-  let nextUrl: string | null =
-    `${baseUrl}?state=${state}&per_page=100&page=1`
+  let nextUrl: string | null = `${baseUrl}?state=${state}&per_page=100&page=1`
 
   while (nextUrl) {
-    const { data, response } = await requestGithub<
-      GithubIssueResponse[]
-    >(nextUrl, {
-      method: "GET",
-    })
+    const { data, response } = await requestGithub<GithubIssueResponse[]>(
+      nextUrl,
+      {
+        method: "GET",
+      }
+    )
 
     const pageItems = Array.isArray(data) ? data : []
-    const filteredItems = pageItems.filter(
-      (item) => !item.pull_request,
-    )
+    const filteredItems = pageItems.filter((item) => !item.pull_request)
     allIssues.push(...filteredItems.map(normalizeIssue))
 
     nextUrl = parseNextLink(response.headers.get("link"))
@@ -391,7 +385,7 @@ export const listAllIssues = unstable_cache(
   ["github-issues"],
   {
     revalidate: 300,
-  },
+  }
 )
 
 export const listIssues = listAllIssues
@@ -401,7 +395,7 @@ const ISSUE_TTL = 60 // 1 minute for individual issue detail
 const COMMENTS_TTL = 25 // 25 seconds for issue comments
 
 async function _getIssueUncached(
-  issueNumber: number,
+  issueNumber: number
 ): Promise<GithubIssue | null> {
   const config = getGithubRepoConfig()
   const url = `${getRepoIssuesBaseUrl(config)}/${issueNumber}`
@@ -409,7 +403,7 @@ async function _getIssueUncached(
   const { data } = await requestGithub<GithubIssueResponse>(
     url,
     { method: "GET" },
-    { allow404: true },
+    { allow404: true }
   )
 
   if (!data) {
@@ -423,26 +417,21 @@ async function _getIssueUncached(
   return normalizeIssue(data)
 }
 
-export const getIssue = unstable_cache(
-  _getIssueUncached,
-  ["github-issue"],
-  {
-    revalidate: ISSUE_TTL,
-  },
-)
+export const getIssue = unstable_cache(_getIssueUncached, ["github-issue"], {
+  revalidate: ISSUE_TTL,
+})
 
 export async function createIssue(
   title: string,
   body: string,
-  labels: string[] = [],
+  labels: string[] = []
 ): Promise<GithubIssue> {
   const config = getGithubRepoConfig()
   const url = getRepoIssuesBaseUrl(config)
-  const payload: { title: string; body: string; labels?: string[] } =
-    {
-      title,
-      body,
-    }
+  const payload: { title: string; body: string; labels?: string[] } = {
+    title,
+    body,
+  }
 
   if (labels.length > 0) {
     payload.labels = labels
@@ -470,18 +459,15 @@ export async function updateIssue(
     body?: string
     state?: "open" | "closed"
     labels?: string[]
-  },
+  }
 ): Promise<GithubIssue> {
   const config = getGithubRepoConfig()
   const url = `${getRepoIssuesBaseUrl(config)}/${issueNumber}`
 
-  const { data: issue } = await requestGithub<GithubIssueResponse>(
-    url,
-    {
-      method: "PATCH",
-      body: JSON.stringify(data),
-    },
-  )
+  const { data: issue } = await requestGithub<GithubIssueResponse>(url, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  })
 
   if (!issue) {
     throw new GithubFeaturesError({
@@ -495,7 +481,7 @@ export async function updateIssue(
 
 export async function addIssueComment(
   issueNumber: number,
-  body: string,
+  body: string
 ): Promise<GithubComment> {
   const config = getGithubRepoConfig()
   const url = `${getRepoIssuesBaseUrl(config)}/${issueNumber}/comments`
@@ -508,8 +494,7 @@ export async function addIssueComment(
   if (!data) {
     throw new GithubFeaturesError({
       code: "INVALID_RESPONSE",
-      message:
-        "GitHub API returned empty response for addIssueComment.",
+      message: "GitHub API returned empty response for addIssueComment.",
     })
   }
 
@@ -517,7 +502,7 @@ export async function addIssueComment(
 }
 
 async function _listIssueCommentsUncached(
-  issueNumber: number,
+  issueNumber: number
 ): Promise<GithubComment[]> {
   const config = getGithubRepoConfig()
   const baseUrl = `${getRepoIssuesBaseUrl(config)}/${issueNumber}/comments`
@@ -526,11 +511,12 @@ async function _listIssueCommentsUncached(
   let nextUrl: string | null = `${baseUrl}?per_page=100&page=1`
 
   while (nextUrl) {
-    const { data, response } = await requestGithub<
-      GithubCommentResponse[]
-    >(nextUrl, {
-      method: "GET",
-    })
+    const { data, response } = await requestGithub<GithubCommentResponse[]>(
+      nextUrl,
+      {
+        method: "GET",
+      }
+    )
 
     const pageItems = Array.isArray(data) ? data : []
     allComments.push(...pageItems.map(normalizeComment))
@@ -546,12 +532,12 @@ export const listIssueComments = unstable_cache(
   ["github-comments"],
   {
     revalidate: COMMENTS_TTL,
-  },
+  }
 )
 
 export async function ensureLabel(
   name: string,
-  color = "ededed",
+  color = "ededed"
 ): Promise<void> {
   const config = getGithubRepoConfig()
   const url = `${GITHUB_API_BASE}/repos/${config.owner}/${config.repo}/labels`
@@ -575,7 +561,7 @@ export async function ensureLabel(
 
 export async function setIssueLabels(
   issueNumber: number,
-  labels: string[],
+  labels: string[]
 ): Promise<void> {
   const config = getGithubRepoConfig()
   const url = `${getRepoIssuesBaseUrl(config)}/${issueNumber}/labels`
@@ -588,7 +574,7 @@ export async function setIssueLabels(
 
 export async function setIssueState(
   issueNumber: number,
-  state: "open" | "closed",
+  state: "open" | "closed"
 ): Promise<void> {
   const config = getGithubRepoConfig()
   const url = `${getRepoIssuesBaseUrl(config)}/${issueNumber}`
@@ -601,7 +587,7 @@ export async function setIssueState(
 
 export async function setIssueAssignees(
   issueNumber: number,
-  assignees: string[],
+  assignees: string[]
 ): Promise<void> {
   const config = getGithubRepoConfig()
   const url = `${getRepoIssuesBaseUrl(config)}/${issueNumber}`
@@ -641,9 +627,7 @@ const COMMENT_META_SUFFIX = " -->"
 
 // ---- Helpers ----------------------------------------------------------------
 
-function serializeMetadata(
-  metadata: IssueMetadata | CommentMetadata,
-): string {
+function serializeMetadata(metadata: IssueMetadata | CommentMetadata): string {
   const serialized: {
     appUserId: string
     authorName: string | null
@@ -665,19 +649,12 @@ function serializeMetadata(
   ) {
     serialized.assigneeId = metadata.assigneeId
     serialized.assigneeName =
-      typeof metadata.assigneeName === "string"
-        ? metadata.assigneeName
-        : null
+      typeof metadata.assigneeName === "string" ? metadata.assigneeName : null
     serialized.assigneeEmail =
-      typeof metadata.assigneeEmail === "string"
-        ? metadata.assigneeEmail
-        : null
+      typeof metadata.assigneeEmail === "string" ? metadata.assigneeEmail : null
   }
 
-  if (
-    "emailRedacted" in metadata &&
-    metadata.emailRedacted === true
-  ) {
+  if ("emailRedacted" in metadata && metadata.emailRedacted === true) {
     serialized.emailRedacted = true
   }
 
@@ -685,7 +662,7 @@ function serializeMetadata(
 }
 
 function parseMetadata<T extends IssueMetadata | CommentMetadata>(
-  json: string,
+  json: string
 ): T | null {
   try {
     const parsed = JSON.parse(json)
@@ -698,25 +675,15 @@ function parseMetadata<T extends IssueMetadata | CommentMetadata>(
     const result: Record<string, unknown> = {
       appUserId: parsed.appUserId,
       authorName:
-        typeof parsed.authorName === "string"
-          ? parsed.authorName
-          : null,
+        typeof parsed.authorName === "string" ? parsed.authorName : null,
       authorEmail:
-        typeof parsed.authorEmail === "string"
-          ? parsed.authorEmail
-          : null,
+        typeof parsed.authorEmail === "string" ? parsed.authorEmail : null,
       assigneeId:
-        typeof parsed.assigneeId === "string"
-          ? parsed.assigneeId
-          : undefined,
+        typeof parsed.assigneeId === "string" ? parsed.assigneeId : undefined,
       assigneeName:
-        typeof parsed.assigneeName === "string"
-          ? parsed.assigneeName
-          : null,
+        typeof parsed.assigneeName === "string" ? parsed.assigneeName : null,
       assigneeEmail:
-        typeof parsed.assigneeEmail === "string"
-          ? parsed.assigneeEmail
-          : null,
+        typeof parsed.assigneeEmail === "string" ? parsed.assigneeEmail : null,
     }
     if (typeof parsed.emailRedacted === "boolean") {
       result.emailRedacted = parsed.emailRedacted
@@ -732,7 +699,7 @@ function parseMetadata<T extends IssueMetadata | CommentMetadata>(
 export function serializeIssueBody(
   userContent: string,
   metadata: IssueMetadata,
-  explanation?: string,
+  explanation?: string
 ): string {
   const metaBlock = `${METADATA_START}\n${serializeMetadata(metadata)}\n${METADATA_END}`
 
@@ -789,10 +756,7 @@ export function parseIssueBody(body: string): {
   const explStartIdx = afterMeta.indexOf(EXPLANATION_START)
   if (explStartIdx !== -1) {
     const explJsonStart = explStartIdx + EXPLANATION_START.length
-    const explEndIdx = afterMeta.indexOf(
-      EXPLANATION_END,
-      explJsonStart,
-    )
+    const explEndIdx = afterMeta.indexOf(EXPLANATION_END, explJsonStart)
     if (explEndIdx !== -1) {
       explanation = afterMeta.slice(explJsonStart, explEndIdx).trim()
       if (!explanation) {
@@ -813,7 +777,7 @@ export function parseIssueBody(body: string): {
 
 export function serializeCommentBody(
   content: string,
-  metadata?: CommentMetadata,
+  metadata?: CommentMetadata
 ): string {
   if (!metadata) {
     return content
@@ -832,8 +796,7 @@ export function parseCommentBody(body: string): {
   }
 
   const firstNewline = body.indexOf("\n")
-  const firstLine =
-    firstNewline === -1 ? body : body.slice(0, firstNewline)
+  const firstLine = firstNewline === -1 ? body : body.slice(0, firstNewline)
 
   if (
     !firstLine.startsWith(COMMENT_META_PREFIX) ||
@@ -844,7 +807,7 @@ export function parseCommentBody(body: string): {
 
   const json = firstLine.slice(
     COMMENT_META_PREFIX.length,
-    firstLine.length - COMMENT_META_SUFFIX.length,
+    firstLine.length - COMMENT_META_SUFFIX.length
   )
   const metadata = parseMetadata<CommentMetadata>(json)
 
@@ -852,19 +815,16 @@ export function parseCommentBody(body: string): {
     return { content: body, metadata: null }
   }
 
-  const rest = body.slice(
-    firstNewline === -1 ? body.length : firstNewline + 1,
-  )
+  const rest = body.slice(firstNewline === -1 ? body.length : firstNewline + 1)
   const content = rest.replace(/^\n/, "")
   const contentWithoutAuthorMarker = content.replace(
     /^<!-- GTMC_COMMENT_AUTHOR_LINE -->\n/,
-    "",
+    ""
   )
-  const contentWithoutAttribution =
-    contentWithoutAuthorMarker.replace(
-      /^(?:\[By\]:|By:|\*\*By:\*\*|\> \*\*\[BY\]\*\*(?:\s*:)?)[^\n]*\n\n/,
-      "",
-    )
+  const contentWithoutAttribution = contentWithoutAuthorMarker.replace(
+    /^(?:\[By\]:|By:|\*\*By:\*\*|\> \*\*\[BY\]\*\*(?:\s*:)?)[^\n]*\n\n/,
+    ""
+  )
 
   return { content: contentWithoutAttribution, metadata }
 }
@@ -894,7 +854,7 @@ export function serializeSystemComment(content: string): string {
 }
 
 export async function getGithubLoginByAccountId(
-  accountId: string,
+  accountId: string
 ): Promise<string | null> {
   const normalizedAccountId = accountId.trim()
   if (!normalizedAccountId) {
@@ -925,7 +885,7 @@ export async function getGithubLoginByAccountId(
 }
 
 export async function getGithubLoginByToken(
-  token: string,
+  token: string
 ): Promise<string | null> {
   if (!token) {
     return null
@@ -941,14 +901,10 @@ export async function getGithubLoginByToken(
         method: "GET",
       },
       undefined,
-      token,
+      token
     )
 
-    if (
-      !data ||
-      typeof data.login !== "string" ||
-      data.login.length === 0
-    ) {
+    if (!data || typeof data.login !== "string" || data.login.length === 0) {
       return null
     }
 
@@ -995,9 +951,7 @@ export function labelsToStatus(labels: string[]): AppFeatureStatus {
   return "PENDING"
 }
 
-export function issueStateForStatus(
-  status: string,
-): "open" | "closed" {
+export function issueStateForStatus(status: string): "open" | "closed" {
   // Only RESOLVED closes the issue; all other statuses stay open.
   if (status === "RESOLVED") {
     return "closed"
@@ -1011,9 +965,7 @@ export function tagsToLabels(tags: string[]): string[] {
 }
 
 export function labelsToTags(labels: string[]): string[] {
-  return labels.filter(
-    (label) => !label.startsWith(STATUS_LABEL_PREFIX),
-  )
+  return labels.filter((label) => !label.startsWith(STATUS_LABEL_PREFIX))
 }
 
 // ---------------------------------------------------------------------------
@@ -1031,7 +983,7 @@ export async function uploadFileToGithub(
   buffer: Buffer,
   filename: string,
   mimeType: string,
-  category: "images" | "videos" | "files",
+  category: "images" | "videos" | "files"
 ): Promise<string> {
   // Get repo config
   const config = getGithubRepoConfig()
@@ -1054,7 +1006,7 @@ export async function uploadFileToGithub(
       }),
     },
     undefined,
-    writeToken,
+    writeToken
   )
 
   // Validate response shape
@@ -1064,8 +1016,7 @@ export async function uploadFileToGithub(
   ) {
     throw new GithubFeaturesError({
       code: "INVALID_RESPONSE",
-      message:
-        "GitHub API returned an invalid contents upload response.",
+      message: "GitHub API returned an invalid contents upload response.",
       details: data,
     })
   }

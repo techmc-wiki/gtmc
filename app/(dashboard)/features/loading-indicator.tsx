@@ -13,8 +13,7 @@ export const PENDING_LABELS = {
   SAVING_FEATURE: "SAVING_FEATURE...",
 } as const
 
-export type PendingLabel =
-  (typeof PENDING_LABELS)[keyof typeof PENDING_LABELS]
+export type PendingLabel = (typeof PENDING_LABELS)[keyof typeof PENDING_LABELS]
 
 export interface LoadingIndicatorProps {
   label: PendingLabel
@@ -44,9 +43,7 @@ export function LoadingIndicator({
       <span className="tracking-widest uppercase">{label}</span>
 
       {/* Screen reader text if provided */}
-      {screenReaderText && (
-        <span className="sr-only">{screenReaderText}</span>
-      )}
+      {screenReaderText && <span className="sr-only">{screenReaderText}</span>}
     </div>
   )
 }

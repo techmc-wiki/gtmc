@@ -24,8 +24,7 @@ type MarkdownComponent = (props: MarkdownComponentProps) => ReactNode
 
 export function calculateReadingMetrics(content: string) {
   const cjkCount = (content.match(/[\u4e00-\u9fa5]/g) || []).length
-  const westernWordCount = (content.match(/[a-zA-Z0-9]+/g) || [])
-    .length
+  const westernWordCount = (content.match(/[a-zA-Z0-9]+/g) || []).length
   const wordCount = cjkCount + westernWordCount
   const readingTime = Math.max(1, Math.ceil(wordCount / 300))
   return { wordCount, readingTime }
@@ -69,11 +68,12 @@ export function getMarkdownComponents(rawPath: string) {
       <span style={{ color: "darkseagreen" }} {...props} />
     ),
     table: ({ ...props }: MarkdownComponentProps) => (
-      <div className="
-        -mx-6 my-6 w-full overflow-x-auto border border-tech-main/30 bg-white/50
-        px-6 backdrop-blur-sm
-        sm:-mx-8 sm:px-8
-      ">
+      <div
+        className="
+          -mx-6 my-6 w-full overflow-x-auto border border-tech-main/30
+          bg-white/50 px-6 backdrop-blur-sm
+          sm:-mx-8 sm:px-8
+        ">
         <table
           className="
             w-full min-w-150 border-collapse text-left font-mono text-sm
@@ -185,13 +185,9 @@ export function getMarkdownComponents(rawPath: string) {
     a: ({ href: initialHref, ...props }: MarkdownComponentProps) => {
       let href = (initialHref as string) || ""
       if (href.startsWith("./") || href.startsWith("../")) {
-        const currentDir = path
-          .dirname("/" + rawPath)
-          .replace(/^\/+/, "")
+        const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
         try {
-          const resolved = path
-            .join(currentDir, href)
-            .replace(/\\/g, "/")
+          const resolved = path.join(currentDir, href).replace(/\\/g, "/")
           href = `/articles/${resolved}`
         } catch {
           // ignore path resolution errors
@@ -201,12 +197,8 @@ export function getMarkdownComponents(rawPath: string) {
         !href.startsWith("#") &&
         !href.startsWith("/")
       ) {
-        const currentDir = path
-          .dirname("/" + rawPath)
-          .replace(/^\/+/, "")
-        const resolved = path
-          .join(currentDir, href)
-          .replace(/\\/g, "/")
+        const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
+        const resolved = path.join(currentDir, href).replace(/\\/g, "/")
         href = `/articles/${resolved}`
       }
       return (
@@ -262,12 +254,8 @@ export function getMarkdownComponents(rawPath: string) {
         src.startsWith("../") ||
         (!src.startsWith("http") && !src.startsWith("/"))
       ) {
-        const currentDir = path
-          .dirname("/" + rawPath)
-          .replace(/^\/+/, "")
-        const resolved = path
-          .join(currentDir, src)
-          .replace(/\\/g, "/")
+        const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
+        const resolved = path.join(currentDir, src).replace(/\\/g, "/")
         src = `/api/assets?path=${encodeURIComponent(resolved)}`
       }
       return (
@@ -282,43 +270,36 @@ export function getMarkdownComponents(rawPath: string) {
         />
       )
     },
-    code: ({
-      className,
-      children,
-      ...props
-    }: MarkdownComponentProps) => {
+    code: ({ className, children, ...props }: MarkdownComponentProps) => {
       const match = /language-(\w+)/.exec((className as string) || "")
       return match ? (
-        <div className="
-          -mx-6 my-6 max-w-full overflow-hidden border border-tech-main/30
-          bg-[#1e1e1e] font-mono text-sm shadow-sm
-          sm:-mx-8
-        ">
-          <div className="
-            flex items-center justify-between border-b border-tech-main/30
-            bg-tech-main/10 px-4 py-1 font-mono text-xs tracking-widest
-            text-tech-main uppercase
+        <div
+          className="
+            -mx-6 my-6 max-w-full overflow-hidden border border-tech-main/30
+            bg-[#1e1e1e] font-mono text-sm shadow-sm
+            sm:-mx-8
           ">
-            <span>{match[1]}</span>
-            <span className="opacity-50">
-              {"//"} EXECUTABLE_BLOCK
-            </span>
-          </div>
-          <div className="
-            overflow-x-scroll px-4
-            sm:px-6
-          ">
-            <div className="
-              px-6
-              sm:px-8
+          <div
+            className="
+              flex items-center justify-between border-b border-tech-main/30
+              bg-tech-main/10 px-4 py-1 font-mono text-xs tracking-widest
+              text-tech-main uppercase
             ">
+            <span>{match[1]}</span>
+            <span className="opacity-50">{"//"} EXECUTABLE_BLOCK</span>
+          </div>
+          <div
+            className="
+              overflow-x-scroll px-4
+              sm:px-6
+            ">
+            <div
+              className="
+                px-6
+                sm:px-8
+              ">
               <SyntaxHighlighter
-                style={
-                  vscDarkPlus as Record<
-                    string,
-                    Record<string, string>
-                  >
-                }
+                style={vscDarkPlus as Record<string, Record<string, string>>}
                 language={match[1]}
                 PreTag="div"
                 customStyle={{

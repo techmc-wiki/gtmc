@@ -77,14 +77,13 @@ export function MobileNav({ navLinks }: MobileNavProps) {
                 border-tech-main/40 bg-white/95 backdrop-blur-md transition-all
                 duration-300
                 md:hidden
-                ${
-                isDrawerOpen ? "max-h-screen" : "max-h-0"
-              }
+                ${isDrawerOpen ? "max-h-screen" : "max-h-0"}
               `}>
-              <div className="
-                space-y-2 p-4
-                sm:p-6
-              ">
+              <div
+                className="
+                  space-y-2 p-4
+                  sm:p-6
+                ">
                 {navLinks.map((link) => (
                   <Link
                     key={link.href}
@@ -101,7 +100,7 @@ export function MobileNav({ navLinks }: MobileNavProps) {
               </div>
             </div>
           </div>,
-          document.body,
+          document.body
         )}
     </div>
   )

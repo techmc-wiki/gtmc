@@ -4,10 +4,7 @@ import { useState, useTransition } from "react"
 import { addFeatureComment } from "@/actions/feature"
 import { BrutalButton } from "@/components/ui/brutal-button"
 import { BrutalCard } from "@/components/ui/brutal-card"
-import {
-  LoadingIndicator,
-  PENDING_LABELS,
-} from "../loading-indicator"
+import { LoadingIndicator, PENDING_LABELS } from "../loading-indicator"
 
 interface Comment {
   id: string
@@ -47,10 +44,11 @@ export function FeatureComments({
 
   return (
     <div className="space-y-6">
-      <h3 className="
-        inline-block border-b-2 border-tech-main pb-2 text-2xl font-bold
-        tracking-tighter uppercase
-      ">
+      <h3
+        className="
+          inline-block border-b-2 border-tech-main pb-2 text-2xl font-bold
+          tracking-tighter uppercase
+        ">
         Discussions
       </h3>
 
@@ -61,22 +59,20 @@ export function FeatureComments({
             className="
               border border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
             ">
-            <div className="
-              mb-2 flex items-center gap-2 border-b border-dashed
-              border-tech-main/30 pb-2 font-mono text-sm
-            ">
-              <span className="
-                font-bold tracking-wider text-tech-main uppercase
+            <div
+              className="
+                mb-2 flex items-center gap-2 border-b border-dashed
+                border-tech-main/30 pb-2 font-mono text-sm
               ">
+              <span
+                className="font-bold tracking-wider text-tech-main uppercase">
                 {comment.author.name ||
                   (comment.emailRedacted
                     ? "email redacted for privacy"
                     : comment.author.email) ||
                   "Unknown"}
               </span>
-              <span
-                className="text-zinc-500"
-                suppressHydrationWarning>
+              <span className="text-zinc-500" suppressHydrationWarning>
                 {new Date(comment.createdAt).toLocaleString()}
               </span>
             </div>
@@ -86,10 +82,11 @@ export function FeatureComments({
           </BrutalCard>
         ))}
         {initialComments.length === 0 && (
-          <div className="
-            border border-dashed border-tech-main/40 bg-white/40 py-8
-            text-center font-mono text-tech-main/50
-          ">
+          <div
+            className="
+              border border-dashed border-tech-main/40 bg-white/40 py-8
+              text-center font-mono text-tech-main/50
+            ">
             NO_COMMENTS_YET_
           </div>
         )}
@@ -98,13 +95,15 @@ export function FeatureComments({
       {!isClosed &&
         (userId ? (
           <form onSubmit={handleSubmit} className="mt-8">
-            <BrutalCard className="
-              border border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
-            ">
-              <label className="
-                mb-4 inline-block border-b border-tech-main/40 pb-1 font-mono
-                text-sm tracking-tech-wide text-tech-main uppercase
+            <BrutalCard
+              className="
+                border border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
               ">
+              <label
+                className="
+                  mb-4 inline-block border-b border-tech-main/40 pb-1 font-mono
+                  text-sm tracking-tech-wide text-tech-main uppercase
+                ">
                 LEAVE_A_REPLY_
               </label>
               <textarea
@@ -126,9 +125,7 @@ export function FeatureComments({
                   variant="primary"
                   aria-busy={isPending}>
                   {isPending ? (
-                    <LoadingIndicator
-                      label={PENDING_LABELS.POSTING_COMMENT}
-                    />
+                    <LoadingIndicator label={PENDING_LABELS.POSTING_COMMENT} />
                   ) : (
                     "POST_COMMENT"
                   )}
@@ -137,10 +134,11 @@ export function FeatureComments({
             </BrutalCard>
           </form>
         ) : (
-          <div className="
-            mt-8 border border-tech-main/40 bg-white/40 py-4 text-center
-            font-mono text-sm text-tech-main/70
-          ">
+          <div
+            className="
+              mt-8 border border-tech-main/40 bg-white/40 py-4 text-center
+              font-mono text-sm text-tech-main/70
+            ">
             PLEASE_LOG_IN_TO_LEAVE_A_REPLY_
           </div>
         ))}

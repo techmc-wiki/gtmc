@@ -9,7 +9,7 @@ const prismaClientPath = path.join(
   "..",
   "node_modules",
   ".prisma",
-  "client",
+  "client"
 )
 const pkgPath = path.join(prismaClientPath, "package.json")
 
@@ -27,11 +27,11 @@ if (fs.existsSync(pkgPath)) {
     console.log("Fixed .prisma/client/package.json exports")
   } else {
     console.log(
-      ".prisma/client/package.json already has ./default export or no exports field",
+      ".prisma/client/package.json already has ./default export or no exports field"
     )
   }
 } else {
   console.log(
-    "node_modules/.prisma/client/package.json not found (maybe already deleted or not generated)",
+    "node_modules/.prisma/client/package.json not found (maybe already deleted or not generated)"
   )
 }

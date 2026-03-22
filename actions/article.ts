@@ -32,9 +32,7 @@ export async function saveDraftAction(formData: FormData) {
       where: { id: revisionId },
     })
     if (existing && existing.status === "SUBMITTED") {
-      throw new Error(
-        "Cannot edit a draft that has already been submitted",
-      )
+      throw new Error("Cannot edit a draft that has already been submitted")
     }
 
     // Update existing draft
@@ -95,7 +93,7 @@ export async function submitForReviewAction(revisionId: string) {
 
   if (!existing.filePath) {
     throw new Error(
-      "File path is requires. Please specify the target file path in editor.",
+      "File path is requires. Please specify the target file path in editor."
     )
   }
 
@@ -127,7 +125,7 @@ export async function submitForReviewAction(revisionId: string) {
     return { success: true }
   } catch (error) {
     throw new Error(
-      `Failed to create PR: ${error instanceof Error ? error.message : "Unknown error"}`,
+      `Failed to create PR: ${error instanceof Error ? error.message : "Unknown error"}`
     )
   }
 }

@@ -1,25 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { del } from "@vercel/blob"
 import { auth } from "@/lib/auth"
-import {
-  uploadFileToGithub,
-  GithubFeaturesError,
-} from "@/lib/github-features"
-import {
-  classifyFile,
-  isImageMime,
-  sanitizeFilename,
-} from "@/lib/file-upload"
+import { uploadFileToGithub, GithubFeaturesError } from "@/lib/github-features"
+import { classifyFile, isImageMime, sanitizeFilename } from "@/lib/file-upload"
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024
 
 export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session?.user) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 },
-    )
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   let blobUrl: string | undefined
@@ -30,16 +20,10 @@ export async function POST(req: NextRequest) {
     const filename = body.filename
 
     if (!blobUrl || typeof blobUrl !== "string") {
-      return NextResponse.json(
-        { error: "Missing blobUrl" },
-        { status: 400 },
-      )
+      return NextResponse.json({ error: "Missing blobUrl" }, { status: 400 })
     }
     if (!filename || typeof filename !== "string") {
-      return NextResponse.json(
-        { error: "Missing filename" },
-        { status: 400 },
-      )
+      return NextResponse.json({ error: "Missing filename" }, { status: 400 })
     }
 
     const blobHostname = process.env.BLOB_STORE_HOSTNAME
@@ -47,7 +31,7 @@ export async function POST(req: NextRequest) {
       console.error("BLOB_STORE_HOSTNAME not configured")
       return NextResponse.json(
         { error: "Server misconfigured" },
-        { status: 500 },
+        { status: 500 }
       )
     }
 
@@ -55,46 +39,34 @@ export async function POST(req: NextRequest) {
     try {
       parsedUrl = new URL(blobUrl)
     } catch {
-      return NextResponse.json(
-        { error: "Invalid blob URL" },
-        { status: 400 },
-      )
+      return NextResponse.json({ error: "Invalid blob URL" }, { status: 400 })
     }
 
     if (
       parsedUrl.protocol !== "https:" ||
       parsedUrl.hostname !== blobHostname
     ) {
-      return NextResponse.json(
-        { error: "Invalid blob URL" },
-        { status: 400 },
-      )
+      return NextResponse.json({ error: "Invalid blob URL" }, { status: 400 })
     }
 
     const blobResponse = await fetch(blobUrl, { redirect: "error" })
     if (!blobResponse.ok) {
       return NextResponse.json(
         { error: "Failed to fetch uploaded file" },
-        { status: 502 },
+        { status: 502 }
       )
     }
 
     const contentLength = blobResponse.headers.get("content-length")
-    if (
-      contentLength &&
-      parseInt(contentLength, 10) > MAX_FILE_BYTES
-    ) {
-      return NextResponse.json(
-        { error: "File too large" },
-        { status: 400 },
-      )
+    if (contentLength && parseInt(contentLength, 10) > MAX_FILE_BYTES) {
+      return NextResponse.json({ error: "File too large" }, { status: 400 })
     }
 
     const reader = blobResponse.body?.getReader()
     if (!reader) {
       return NextResponse.json(
         { error: "Failed to read uploaded file" },
-        { status: 502 },
+        { status: 502 }
       )
     }
 
@@ -107,10 +79,7 @@ export async function POST(req: NextRequest) {
       totalBytes += value.byteLength
       if (totalBytes > MAX_FILE_BYTES) {
         reader.cancel()
-        return NextResponse.json(
-          { error: "File too large" },
-          { status: 400 },
-        )
+        return NextResponse.json({ error: "File too large" }, { status: 400 })
       }
       chunks.push(value)
     }
@@ -122,24 +91,20 @@ export async function POST(req: NextRequest) {
       offset += chunk.byteLength
     }
 
-    const rawContentType =
-      blobResponse.headers.get("content-type") || ""
-    const derivedMime = rawContentType
-      .split(";")[0]
-      .trim()
-      .toLowerCase()
+    const rawContentType = blobResponse.headers.get("content-type") || ""
+    const derivedMime = rawContentType.split(";")[0].trim().toLowerCase()
 
     if (!derivedMime) {
       return NextResponse.json(
         { error: "Unable to determine file type" },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
     if (isImageMime(derivedMime)) {
       return NextResponse.json(
         { error: "Images must use direct upload" },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
@@ -147,17 +112,15 @@ export async function POST(req: NextRequest) {
     if (!classification) {
       return NextResponse.json(
         { error: "File type not allowed" },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
     if (totalBytes > classification.maxBytes) {
-      const maxMB = Math.round(
-        classification.maxBytes / (1024 * 1024),
-      )
+      const maxMB = Math.round(classification.maxBytes / (1024 * 1024))
       return NextResponse.json(
         { error: `File too large (max ${maxMB}MB).` },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
@@ -168,7 +131,7 @@ export async function POST(req: NextRequest) {
       buffer,
       sanitized,
       derivedMime,
-      classification.category,
+      classification.category
     )
 
     del(blobUrl).catch((err) => {
@@ -193,27 +156,24 @@ export async function POST(req: NextRequest) {
       if (error.code === "CONFIG_MISSING") {
         return NextResponse.json(
           { error: "Upload not configured." },
-          { status: 500 },
+          { status: 500 }
         )
       }
       if (error.code === "AUTH_FAILED") {
         return NextResponse.json(
           { error: "Upload authorization failed." },
-          { status: 403 },
+          { status: 403 }
         )
       }
       if (error.code === "RATE_LIMITED") {
         return NextResponse.json(
           { error: "Rate limited. Try again shortly." },
-          { status: 429 },
+          { status: 429 }
         )
       }
     }
 
     console.error("Commit route error:", error)
-    return NextResponse.json(
-      { error: "Upload failed." },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: "Upload failed." }, { status: 500 })
   }
 }

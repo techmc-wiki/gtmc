@@ -39,10 +39,11 @@ export function MobileTreeCard({
   if (!canUseDOM || !isOpen || !isFloating) return null
 
   return createPortal(
-    <div className="
-      fixed inset-0 z-59
-      md:hidden
-    ">
+    <div
+      className="
+        fixed inset-0 z-59
+        md:hidden
+      ">
       <div
         className="
           absolute inset-0 animate-fade-in bg-tech-main-dark/20 backdrop-blur-xs
@@ -59,22 +60,30 @@ export function MobileTreeCard({
           flex-col border border-tech-main/40 bg-white/95 backdrop-blur-md
         "
         data-testid="mobile-tree-card">
-        <div className="
-          pointer-events-none absolute top-0 left-0 size-2 -translate-px
-          border-t-2 border-l-2 border-tech-main/40
-        " />
-        <div className="
-          pointer-events-none absolute top-0 right-0 size-2 translate-x-px
-          -translate-y-px border-t-2 border-r-2 border-tech-main/40
-        " />
-        <div className="
-          pointer-events-none absolute bottom-0 left-0 size-2 -translate-x-px
-          translate-y-px border-b-2 border-l-2 border-tech-main/40
-        " />
-        <div className="
-          pointer-events-none absolute right-0 bottom-0 size-2 translate-px
-          border-r-2 border-b-2 border-tech-main/40
-        " />
+        <div
+          className="
+            pointer-events-none absolute top-0 left-0 size-2 -translate-px
+            border-t-2 border-l-2 border-tech-main/40
+          "
+        />
+        <div
+          className="
+            pointer-events-none absolute top-0 right-0 size-2 translate-x-px
+            -translate-y-px border-t-2 border-r-2 border-tech-main/40
+          "
+        />
+        <div
+          className="
+            pointer-events-none absolute bottom-0 left-0 size-2 -translate-x-px
+            translate-y-px border-b-2 border-l-2 border-tech-main/40
+          "
+        />
+        <div
+          className="
+            pointer-events-none absolute right-0 bottom-0 size-2 translate-px
+            border-r-2 border-b-2 border-tech-main/40
+          "
+        />
 
         <div
           className="
@@ -82,10 +91,11 @@ export function MobileTreeCard({
             border-tech-main/40 px-4
           "
           data-testid="mobile-tree-card-header">
-          <div className="
-            flex items-center gap-2 font-mono text-xs font-bold
-            tracking-tech-wide text-tech-main/60 uppercase
-          ">
+          <div
+            className="
+              flex items-center gap-2 font-mono text-xs font-bold
+              tracking-tech-wide text-tech-main/60 uppercase
+            ">
             <span className="size-1.5 animate-pulse bg-tech-main/60" />
             SYS.DIR_TREE
           </div>
@@ -102,14 +112,15 @@ export function MobileTreeCard({
           </button>
         </div>
 
-        <div className="
-          min-h-0 overflow-y-auto p-4
-          sm:p-6
-        ">
+        <div
+          className="
+            min-h-0 overflow-y-auto p-4
+            sm:p-6
+          ">
           {children}
         </div>
       </div>
     </div>,
-    document.body,
+    document.body
   )
 }

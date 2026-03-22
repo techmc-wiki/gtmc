@@ -33,10 +33,7 @@ async function sendQQBotNotification(payload: {
   data?: Record<string, unknown>
 }) {
   if (!QQ_BOT_WEBHOOK) {
-    console.log(
-      "[Mock QQ Bot] Would send payload to webhook: ",
-      payload.text,
-    )
+    console.log("[Mock QQ Bot] Would send payload to webhook: ", payload.text)
     return
   }
 
@@ -63,14 +60,14 @@ async function resolveGithubLoginFromAccount(
   account: {
     providerAccountId: string
     access_token: string | null
-  } | null,
+  } | null
 ): Promise<string | null> {
   if (!account) {
     return null
   }
 
   const loginByAccountId = await getGithubLoginByAccountId(
-    account.providerAccountId,
+    account.providerAccountId
   )
   if (loginByAccountId) {
     return loginByAccountId
@@ -85,7 +82,7 @@ async function resolveGithubLoginFromAccount(
 
 async function resolveMentionToken(
   appUserId: string,
-  displayName: string | null,
+  displayName: string | null
 ): Promise<string> {
   try {
     const account = await prisma.account.findFirst({
@@ -105,7 +102,7 @@ async function resolveMentionToken(
 
 function getMetadataForWrite(
   metadata: IssueMetadata | null,
-  fallbackAppUserId: string,
+  fallbackAppUserId: string
 ): IssueMetadata {
   if (metadata) {
     return metadata
@@ -139,10 +136,7 @@ export async function createFeature(data: {
     await ensureLabel(tag)
   }
 
-  const labels = [
-    ...tagsToLabels(data.tags),
-    ...statusToLabels("PENDING"),
-  ]
+  const labels = [...tagsToLabels(data.tags), ...statusToLabels("PENDING")]
 
   const created = await createIssue(data.title, body, labels)
 
@@ -174,7 +168,7 @@ export async function createFeature(data: {
 
 export async function updateFeature(
   id: string,
-  data: { title: string; content: string; tags: string[] },
+  data: { title: string; content: string; tags: string[] }
 ) {
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")
@@ -216,7 +210,7 @@ export async function updateFeature(
   const newBody = serializeIssueBody(
     data.content,
     parsed.metadata ?? fallbackMetadata,
-    parsed.explanation ?? undefined,
+    parsed.explanation ?? undefined
   )
 
   await updateIssue(issue.number, {
@@ -240,7 +234,7 @@ export async function updateFeature(
 
 export async function updateFeatureExplanation(
   id: string,
-  explanation: string,
+  explanation: string
 ) {
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")
@@ -268,7 +262,7 @@ export async function updateFeatureExplanation(
       authorName: null,
       authorEmail: null,
     },
-    explanation || undefined,
+    explanation || undefined
   )
 
   await updateIssue(issue.number, { body: newBody })
@@ -294,7 +288,7 @@ export async function assignFeature(id: string) {
   const { issue, parsed } = feature
   const metadataForWrite = getMetadataForWrite(
     parsed.metadata,
-    `legacy-issue-${issue.number}`,
+    `legacy-issue-${issue.number}`
   )
 
   const newBodyWithAssignee = serializeIssueBody(
@@ -307,14 +301,11 @@ export async function assignFeature(id: string) {
       assigneeName: session.user.name ?? null,
       assigneeEmail: session.user.email ?? null,
     },
-    parsed.explanation ?? undefined,
+    parsed.explanation ?? undefined
   )
 
   const tags = labelsToTags(issue.labels)
-  const newLabels = [
-    ...tagsToLabels(tags),
-    ...statusToLabels("IN_PROGRESS"),
-  ]
+  const newLabels = [...tagsToLabels(tags), ...statusToLabels("IN_PROGRESS")]
 
   await Promise.all([
     setIssueLabels(issue.number, newLabels),
@@ -325,7 +316,7 @@ export async function assignFeature(id: string) {
   try {
     const mentionToken = await resolveMentionToken(
       session.user.id,
-      session.user.name ?? null,
+      session.user.name ?? null
     )
 
     // Query GitHub Account and check email visibility
@@ -337,7 +328,7 @@ export async function assignFeature(id: string) {
     })
 
     const visibility = await getGithubEmailVisibility(
-      account?.access_token || "",
+      account?.access_token || ""
     )
     const assigneeEmail =
       visibility === "private"
@@ -351,10 +342,7 @@ AssigneeId: ${session.user.id}
 AssigneeEmail: ${assigneeEmail}
 By: ${mentionToken}
 At: ${new Date().toISOString()}`
-    await addIssueComment(
-      issue.number,
-      serializeSystemComment(payload),
-    )
+    await addIssueComment(issue.number, serializeSystemComment(payload))
   } catch (error) {
     console.warn("Failed to post claim bot comment:", error)
   }
@@ -385,7 +373,7 @@ export async function unassignFeature(id: string) {
 
   const metadataForWrite = getMetadataForWrite(
     parsed.metadata,
-    `legacy-issue-${issue.number}`,
+    `legacy-issue-${issue.number}`
   )
 
   const newBody = serializeIssueBody(
@@ -395,14 +383,11 @@ export async function unassignFeature(id: string) {
       authorName: metadataForWrite.authorName,
       authorEmail: metadataForWrite.authorEmail,
     },
-    parsed.explanation ?? undefined,
+    parsed.explanation ?? undefined
   )
 
   const tags = labelsToTags(issue.labels)
-  const newLabels = [
-    ...tagsToLabels(tags),
-    ...statusToLabels("PENDING"),
-  ]
+  const newLabels = [...tagsToLabels(tags), ...statusToLabels("PENDING")]
 
   await Promise.all([
     setIssueLabels(issue.number, newLabels),
@@ -413,13 +398,13 @@ export async function unassignFeature(id: string) {
   try {
     const mentionToken = await resolveMentionToken(
       session.user.id,
-      session.user.name ?? null,
+      session.user.name ?? null
     )
     const prevAssigneeId = parsed.metadata?.assigneeId ?? ""
     const previousMentionToken = prevAssigneeId
       ? await resolveMentionToken(
           prevAssigneeId,
-          parsed.metadata?.assigneeName ?? null,
+          parsed.metadata?.assigneeName ?? null
         )
       : "N/A"
     const payload = `[Assignment Notice]
@@ -428,10 +413,7 @@ PreviousAssignee: ${previousMentionToken}
 PreviousAssigneeId: ${parsed.metadata?.assigneeId ?? "N/A"}
 By: ${mentionToken}
 At: ${new Date().toISOString()}`
-    await addIssueComment(
-      issue.number,
-      serializeSystemComment(payload),
-    )
+    await addIssueComment(issue.number, serializeSystemComment(payload))
   } catch (error) {
     console.warn("Failed to post drop bot comment:", error)
   }
@@ -441,10 +423,7 @@ At: ${new Date().toISOString()}`
   return { success: true, feature: { id } }
 }
 
-export async function resolveFeature(
-  id: string,
-  resolutionComment?: string,
-) {
+export async function resolveFeature(id: string, resolutionComment?: string) {
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")
 
@@ -463,10 +442,7 @@ export async function resolveFeature(
   const { issue } = feature
 
   const tags = labelsToTags(issue.labels)
-  const newLabels = [
-    ...tagsToLabels(tags),
-    ...statusToLabels("RESOLVED"),
-  ]
+  const newLabels = [...tagsToLabels(tags), ...statusToLabels("RESOLVED")]
 
   await setIssueLabels(issue.number, newLabels)
   await setIssueState(issue.number, "closed")
@@ -478,7 +454,7 @@ export async function resolveFeature(
         appUserId: session.user.id,
         authorName: session.user.name ?? null,
         authorEmail: session.user.email ?? null,
-      }),
+      })
     )
   }
 
@@ -509,17 +485,13 @@ export async function addFeatureComment(id: string, content: string) {
     },
   })
 
-  const visibility = await getGithubEmailVisibility(
-    account?.access_token || "",
-  )
+  const visibility = await getGithubEmailVisibility(account?.access_token || "")
   const isPrivate = visibility === "private"
 
   const githubLogin = await resolveGithubLoginFromAccount(account)
   const fallbackAuthorLabel =
     session.user.name ?? session.user.email ?? session.user.id
-  const mentionToken = githubLogin
-    ? `@${githubLogin}`
-    : fallbackAuthorLabel
+  const mentionToken = githubLogin ? `@${githubLogin}` : fallbackAuthorLabel
   const authorLine = githubLogin
     ? `> **\[BY\]** ${mentionToken} (${fallbackAuthorLabel})`
     : `> **\[BY\]** ${mentionToken}`
@@ -534,13 +506,10 @@ export async function addFeatureComment(id: string, content: string) {
       authorName: session.user.name ?? null,
       authorEmail,
       emailRedacted,
-    },
+    }
   )
 
-  const ghComment = await addIssueComment(
-    feature.issue.number,
-    commentBody,
-  )
+  const ghComment = await addIssueComment(feature.issue.number, commentBody)
 
   revalidatePath(`/features/${id}`)
 
@@ -553,8 +522,7 @@ export async function addFeatureComment(id: string, content: string) {
       author: {
         name: session.user.name ?? null,
         email: authorEmail,
-        image:
-          (session.user as { image?: string | null }).image ?? null,
+        image: (session.user as { image?: string | null }).image ?? null,
       },
       emailRedacted,
     },

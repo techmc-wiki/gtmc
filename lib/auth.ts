@@ -22,9 +22,7 @@ if (process.env.HTTPS_PROXY || process.env.http_proxy) {
   if (proxyUrl) {
     const dispatcher = new ProxyAgent(proxyUrl)
     setGlobalDispatcher(dispatcher)
-    console.log(
-      `[NextAuth] Global proxy dispatcher set to: ${proxyUrl}`,
-    )
+    console.log(`[NextAuth] Global proxy dispatcher set to: ${proxyUrl}`)
   }
 }
 
@@ -41,9 +39,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session?.user && user) {
         session.user.id = user.id
         session.user.role = (user as { role?: string }).role || "USER"
-        session.user.githubPat = (
-          user as { githubPat?: string }
-        ).githubPat
+        session.user.githubPat = (user as { githubPat?: string }).githubPat
       }
       return session
     },

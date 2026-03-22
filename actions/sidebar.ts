@@ -23,7 +23,7 @@ const getCachedRepoTree = unstable_cache(
     return getRepoContentTree()
   },
   ["github-repo-tree"],
-  { revalidate: 300 },
+  { revalidate: 300 }
 )
 
 const getCachedTranslations = unstable_cache(
@@ -31,7 +31,7 @@ const getCachedTranslations = unstable_cache(
     return getRepoTranslations()
   },
   ["github-sidebar-translations"],
-  { revalidate: 3600 },
+  { revalidate: 3600 }
 )
 
 /**
@@ -91,10 +91,7 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
   }
 
   // 4. Merge: GitHub tree first, then DB articles
-  const mergedTree: TreeNode[] = [
-    ...(githubTree as TreeNode[]),
-    ...dbRootItems,
-  ]
+  const mergedTree: TreeNode[] = [...(githubTree as TreeNode[]), ...dbRootItems]
 
   // 5. Apply translations to top-level titles
   mergedTree.forEach((node) => {

@@ -4,10 +4,7 @@ import { useState, useTransition } from "react"
 import { BrutalCard } from "@/components/ui/brutal-card"
 import { BrutalButton } from "@/components/ui/brutal-button"
 import { updateFeatureExplanation } from "@/actions/feature"
-import {
-  LoadingIndicator,
-  PENDING_LABELS,
-} from "../loading-indicator"
+import { LoadingIndicator, PENDING_LABELS } from "../loading-indicator"
 
 interface FeatureExplanationProps {
   featureId: string
@@ -25,9 +22,7 @@ export function FeatureExplanation({
   isClosed,
 }: FeatureExplanationProps) {
   const [isEditing, setIsEditing] = useState(false)
-  const [explanation, setExplanation] = useState(
-    initialExplanation || "",
-  )
+  const [explanation, setExplanation] = useState(initialExplanation || "")
   const [isPending, startTransition] = useTransition()
 
   const canEdit = isAssignee || isAdmin
@@ -45,10 +40,11 @@ export function FeatureExplanation({
   if (isEditing) {
     return (
       <BrutalCard className="border-tech-accent/40 bg-white/80 backdrop-blur-sm">
-        <h3 className="
-          mb-2 border-b border-tech-accent/40 pb-2 text-lg font-bold
-          tracking-widest text-tech-main uppercase
-        ">
+        <h3
+          className="
+            mb-2 border-b border-tech-accent/40 pb-2 text-lg font-bold
+            tracking-widest text-tech-main uppercase
+          ">
           EDIT_RESOLUTION_EXPLANATION_
         </h3>
         <textarea
@@ -83,9 +79,7 @@ export function FeatureExplanation({
             disabled={isPending}
             aria-busy={isPending}>
             {isPending ? (
-              <LoadingIndicator
-                label={PENDING_LABELS.SAVING_EXPLANATION}
-              />
+              <LoadingIndicator label={PENDING_LABELS.SAVING_EXPLANATION} />
             ) : (
               "SAVE_EXPLANATION"
             )}
@@ -97,18 +91,21 @@ export function FeatureExplanation({
 
   if (initialExplanation) {
     return (
-      <BrutalCard className="
-        group relative overflow-hidden border-tech-accent/40 bg-tech-accent/5
-        backdrop-blur-sm
-      ">
-        <div className="absolute top-0 left-0 h-full w-2 bg-tech-accent/60"></div>
-        <div className="
-          mb-4 flex items-start justify-between border-b border-tech-accent/40
-          pb-2 pl-4
+      <BrutalCard
+        className="
+          group relative overflow-hidden border-tech-accent/40 bg-tech-accent/5
+          backdrop-blur-sm
         ">
-          <h3 className="
-            text-lg font-bold tracking-widest text-tech-main uppercase
+        <div className="absolute top-0 left-0 h-full w-2 bg-tech-accent/60"></div>
+        <div
+          className="
+            mb-4 flex items-start justify-between border-b border-tech-accent/40
+            pb-2 pl-4
           ">
+          <h3
+            className="
+              text-lg font-bold tracking-widest text-tech-main uppercase
+            ">
             OFFICIAL_RESOLUTION_
           </h3>
           {effectiveCanEdit && (
@@ -122,9 +119,8 @@ export function FeatureExplanation({
             </button>
           )}
         </div>
-        <div className="
-          pl-4 font-mono text-sm whitespace-pre-wrap text-zinc-800
-        ">
+        <div
+          className="pl-4 font-mono text-sm whitespace-pre-wrap text-zinc-800">
           {initialExplanation}
         </div>
       </BrutalCard>
@@ -133,9 +129,10 @@ export function FeatureExplanation({
 
   // NO explanation yet, but user CAN edit
   return (
-    <BrutalCard className="
-      border-dashed border-tech-accent/40 bg-white/40 py-6 text-center
-    ">
+    <BrutalCard
+      className="
+        border-dashed border-tech-accent/40 bg-white/40 py-6 text-center
+      ">
       <div className="flex flex-col items-center gap-3 text-tech-accent/80">
         <span className="font-mono text-sm tracking-wider uppercase">
           AWAITING_OFFICIAL_RESOLUTION_

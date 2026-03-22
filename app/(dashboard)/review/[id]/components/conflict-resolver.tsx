@@ -23,12 +23,12 @@ interface TokenBlock {
 function parseConflicts(text: string): TokenBlock[] {
   const lines = text.split(/\r?\n/)
   const blocks: TokenBlock[] = []
-  
+
   let currentBlockType = "text"
   let buffer: string[] = []
   let currentChange: string[] = []
   let incomingChange: string[] = []
-  
+
   let currentName = "Current Change"
   let incomingName = "Incoming Change"
 
@@ -38,35 +38,79 @@ function parseConflicts(text: string): TokenBlock[] {
     const line = lines[i]
     if (line.startsWith("<<<<<<< ")) {
       if (buffer.length > 0) {
-         blocks.push({ id: generateId(), type: "text", content: buffer.join("\n") })
-         buffer = []
+        blocks.push({
+          id: generateId(),
+          type: "text",
+          content: buffer.join("\n"),
+        })
+        buffer = []
       }
       currentBlockType = "current"
       currentName = line.substring(8)
     } else if (line === "=======") {
       if (currentBlockType === "current") {
-         currentBlockType = "incoming"
+        currentBlockType = "incoming"
       } else {
-         buffer.push(line)
+        buffer.push(line)
       }
     } else if (line.startsWith(">>>>>>> ")) {
       if (currentBlockType === "incoming") {
-         incomingName = line.substring(8)
-         blocks.push({
-           id: generateId(),
-           type: "conflict",
-           current: currentChange.join("\n"),
-           incoming: incomingChange.join("\n"),
-           currentName,
-           incomingName,
-           resolvedMode: null,
-           resolvedContent: ""
-         })
-         currentChange = []
-         incomingChange = []
-         currentBlockType = "text"
+        incomingName = line.substring(8)
+
+        // Shrink conflict block to the minimal changed lines
+        let start = 0
+        while (
+          start < currentChange.length &&
+          start < incomingChange.length &&
+          currentChange[start] === incomingChange[start]
+        ) {
+          start++
+        }
+
+        let endC = currentChange.length - 1
+        let endI = incomingChange.length - 1
+        while (
+          endC >= start &&
+          endI >= start &&
+          currentChange[endC] === incomingChange[endI]
+        ) {
+          endC--
+          endI--
+        }
+
+        // Push common start to text
+        if (start > 0) {
+          blocks.push({
+            id: generateId(),
+            type: "text",
+            content: currentChange.slice(0, start).join("\n"),
+          })
+        }
+
+        // Push actual differences
+        if (start <= endC || start <= endI) {
+          blocks.push({
+            id: generateId(),
+            type: "conflict",
+            current: currentChange.slice(start, endC + 1).join("\n"),
+            incoming: incomingChange.slice(start, endI + 1).join("\n"),
+            currentName,
+            incomingName,
+            resolvedMode: null,
+            resolvedContent: "",
+          })
+        }
+
+        // Store common end in buffer to merge with subsequent text
+        if (endC < currentChange.length - 1) {
+          buffer.push(...currentChange.slice(endC + 1))
+        }
+
+        currentChange = []
+        incomingChange = []
+        currentBlockType = "text"
       } else {
-         buffer.push(line)
+        buffer.push(line)
       }
     } else {
       if (currentBlockType === "text") buffer.push(line)
@@ -91,7 +135,9 @@ export default function ConflictResolver({
   filePath: string
   initialContent: string
 }) {
-  const [blocks, setBlocks] = useState<TokenBlock[]>(() => parseConflicts(initialContent))
+  const [blocks, setBlocks] = useState<TokenBlock[]>(() =>
+    parseConflicts(initialContent)
+  )
   const [viewMode, setViewMode] = useState<"visual" | "raw">("visual")
   const [rawContent, setRawContent] = useState(initialContent)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -112,9 +158,14 @@ export default function ConflictResolver({
     (b) => b.type === "text" || b.resolvedMode !== null
   )
 
-  const remainingConflicts = blocks.filter(b => b.type === "conflict" && b.resolvedMode === null).length
+  const remainingConflicts = blocks.filter(
+    (b) => b.type === "conflict" && b.resolvedMode === null
+  ).length
 
-  function handleAccept(blockId: string, mode: "current" | "incoming" | "both") {
+  function handleAccept(
+    blockId: string,
+    mode: "current" | "incoming" | "both"
+  ) {
     setBlocks((prev) =>
       prev.map((b) => {
         if (b.id !== blockId || b.type !== "conflict") return b
@@ -146,7 +197,9 @@ export default function ConflictResolver({
   function updateResolvedContent(blockId: string, value: string) {
     setBlocks((prev) =>
       prev.map((b) =>
-        b.id === blockId ? { ...b, resolvedContent: value, resolvedMode: "manual" } : b
+        b.id === blockId
+          ? { ...b, resolvedContent: value, resolvedMode: "manual" }
+          : b
       )
     )
   }
@@ -175,11 +228,12 @@ export default function ConflictResolver({
   return (
     <div className="space-y-4">
       {/* Top Banner */}
-      <div className="
-        flex flex-col items-start justify-between border-l-4 border-tech-main
-        bg-tech-main/10 p-4
-        sm:flex-row sm:items-center
-      ">
+      <div
+        className="
+          flex flex-col items-start justify-between border-l-4 border-tech-main
+          bg-tech-main/10 p-4
+          sm:flex-row sm:items-center
+        ">
         <div>
           <p className="font-bold tracking-widest text-tech-main uppercase">
             Merge Conflict Detected
@@ -192,18 +246,18 @@ export default function ConflictResolver({
               : "Raw text mode active."}
           </p>
         </div>
-        <div className="
-          mt-4 flex gap-2
-          sm:mt-0
-        ">
+        <div
+          className="
+            mt-4 flex gap-2
+            sm:mt-0
+          ">
           <BrutalButton
             variant={viewMode === "visual" ? "primary" : "secondary"}
             onClick={(e) => {
               e.preventDefault()
               if (viewMode === "raw") syncRawToBlocks()
               setViewMode("visual")
-            }}
-          >
+            }}>
             Visual Mode
           </BrutalButton>
           <BrutalButton
@@ -212,8 +266,7 @@ export default function ConflictResolver({
               e.preventDefault()
               if (viewMode === "visual") syncBlocksToRaw()
               setViewMode("raw")
-            }}
-          >
+            }}>
             Raw Editor
           </BrutalButton>
         </div>
@@ -222,22 +275,23 @@ export default function ConflictResolver({
       <form action={handleResolve} className="space-y-4">
         <input type="hidden" name="filePath" value={filePath} />
 
-        <div className="
-          relative w-full rounded-sm border border-tech-main/30 bg-tech-main/5
-          p-1
-        ">
+        <div
+          className="
+            relative w-full rounded-sm border border-tech-main/30 bg-tech-main/5
+            p-1
+          ">
           {viewMode === "raw" ? (
             <textarea
               name="content"
               value={rawContent}
               onChange={(e) => setRawContent(e.target.value)}
               className="
-                min-h-[600px] w-full resize-y bg-transparent p-4 font-mono
-                text-sm text-tech-main-dark outline-none
+                min-h-150 w-full resize-y bg-transparent p-4 font-mono text-sm
+                text-tech-main-dark outline-none
               "
             />
           ) : (
-            <div className="flex min-h-[600px] flex-col bg-transparent">
+            <div className="flex min-h-150 flex-col bg-transparent">
               {blocks.map((b) => {
                 if (b.type === "text") {
                   return (
@@ -250,16 +304,21 @@ export default function ConflictResolver({
                 }
 
                 if (b.resolvedMode) {
-                  const linesCount = (b.resolvedContent?.split("\n").length || 0) + 1
+                  const linesCount =
+                    (b.resolvedContent?.split("\n").length || 0) + 1
                   return (
-                    <div key={b.id} className="
-                      my-2 border border-green-500/50 bg-green-500/10 shadow-sm
-                    ">
-                      <div className="
-                        flex items-center justify-between border-b
-                        border-green-500/30 bg-green-500/20 px-3 py-1 text-xs
-                        font-bold text-green-700
+                    <div
+                      key={b.id}
+                      className="
+                        my-2 border border-green-500/50 bg-green-500/10
+                        shadow-sm
                       ">
+                      <div
+                        className="
+                          flex items-center justify-between border-b
+                          border-green-500/30 bg-green-500/20 px-3 py-1 text-xs
+                          font-bold text-green-700
+                        ">
                         <span>Resolved ({b.resolvedMode})</span>
                         <button
                           type="button"
@@ -267,8 +326,7 @@ export default function ConflictResolver({
                             text-red-600
                             hover:underline
                           "
-                          onClick={() => handleRevert(b.id)}
-                        >
+                          onClick={() => handleRevert(b.id)}>
                           Revert
                         </button>
                       </div>
@@ -279,7 +337,9 @@ export default function ConflictResolver({
                         "
                         rows={Math.max(3, linesCount)}
                         value={b.resolvedContent}
-                        onChange={(e) => updateResolvedContent(b.id, e.target.value)}
+                        onChange={(e) =>
+                          updateResolvedContent(b.id, e.target.value)
+                        }
                       />
                     </div>
                   )
@@ -287,23 +347,25 @@ export default function ConflictResolver({
 
                 // Unresolved Conflict Block
                 return (
-                  <div key={b.id} className="
-                    my-2 flex flex-col border border-red-500/50 font-mono
-                    text-sm shadow-sm
-                  ">
-                    {/* Actions Bar */}
-                    <div className="
-                      flex gap-2 border-b border-red-500/30 bg-red-500/10 p-2
-                      text-xs text-red-800
+                  <div
+                    key={b.id}
+                    className="
+                      my-2 flex flex-col border border-red-500/50 font-mono
+                      text-sm shadow-sm
                     ">
+                    {/* Actions Bar */}
+                    <div
+                      className="
+                        flex gap-2 border-b border-red-500/30 bg-red-500/10 p-2
+                        text-xs text-red-800
+                      ">
                       <button
                         type="button"
                         className="
                           font-bold
                           hover:underline
                         "
-                        onClick={() => handleAccept(b.id, "current")}
-                      >
+                        onClick={() => handleAccept(b.id, "current")}>
                         Accept Current
                       </button>
                       <span>|</span>
@@ -313,8 +375,7 @@ export default function ConflictResolver({
                           font-bold
                           hover:underline
                         "
-                        onClick={() => handleAccept(b.id, "incoming")}
-                      >
+                        onClick={() => handleAccept(b.id, "incoming")}>
                         Accept Incoming
                       </button>
                       <span>|</span>
@@ -324,19 +385,18 @@ export default function ConflictResolver({
                           font-bold
                           hover:underline
                         "
-                        onClick={() => handleAccept(b.id, "both")}
-                      >
+                        onClick={() => handleAccept(b.id, "both")}>
                         Accept Both
                       </button>
                     </div>
 
                     {/* Current Change */}
-                    <div className="
-                      border-l-4 border-blue-500 bg-blue-500/10 p-2
-                    ">
-                      <div className="
-                        mb-1 text-xs font-bold text-blue-600/80 opacity-70
-                      ">
+                    <div
+                      className="border-l-4 border-blue-500 bg-blue-500/10 p-2">
+                      <div
+                        className="
+                          mb-1 text-xs font-bold text-blue-600/80 opacity-70
+                        ">
                         {b.currentName}
                       </div>
                       <InlineDiff
@@ -347,13 +407,15 @@ export default function ConflictResolver({
                     </div>
 
                     {/* Incoming Change */}
-                    <div className="
-                      border-t border-l-4 border-green-500 border-red-500/30
-                      bg-green-500/10 p-2
-                    ">
-                      <div className="
-                        mb-1 text-xs font-bold text-green-600/80 opacity-70
+                    <div
+                      className="
+                        border-t border-l-4 border-green-500 border-t-red-500/30
+                        bg-green-500/10 p-2
                       ">
+                      <div
+                        className="
+                          mb-1 text-xs font-bold text-green-600/80 opacity-70
+                        ">
                         {b.incomingName}
                       </div>
                       <InlineDiff
@@ -372,8 +434,7 @@ export default function ConflictResolver({
         <BrutalButton
           type="submit"
           variant="primary"
-          disabled={isSubmitting || (viewMode === "visual" && !allResolved)}
-        >
+          disabled={isSubmitting || (viewMode === "visual" && !allResolved)}>
           {isSubmitting ? "RESOLVING..." : "MARK COMPLETED & SUBMIT"}
         </BrutalButton>
       </form>

@@ -9,9 +9,5 @@ export default async function ArticlesLayout({
 }) {
   const tree = await getSidebarTree()
 
-  return (
-    <ArticlesLayoutClient tree={tree}>
-      {children}
-    </ArticlesLayoutClient>
-  )
+  return <ArticlesLayoutClient tree={tree}>{children}</ArticlesLayoutClient>
 }

@@ -7,10 +7,7 @@ import {
   unassignFeature,
   resolveFeature,
 } from "@/actions/feature"
-import {
-  LoadingIndicator,
-  PENDING_LABELS,
-} from "../loading-indicator"
+import { LoadingIndicator, PENDING_LABELS } from "../loading-indicator"
 
 interface Props {
   featureId: string
@@ -72,9 +69,7 @@ export function FeatureActions({
                 size="sm"
                 aria-busy={pendingAction === "assign"}>
                 {pendingAction === "assign" ? (
-                  <LoadingIndicator
-                    label={PENDING_LABELS.CLAIMING_ISSUE}
-                  />
+                  <LoadingIndicator label={PENDING_LABELS.CLAIMING_ISSUE} />
                 ) : (
                   "CLAIM ISSUE"
                 )}
@@ -91,9 +86,7 @@ export function FeatureActions({
                 size="sm"
                 aria-busy={pendingAction === "unassign"}>
                 {pendingAction === "unassign" ? (
-                  <LoadingIndicator
-                    label={PENDING_LABELS.DROPPING_ISSUE}
-                  />
+                  <LoadingIndicator label={PENDING_LABELS.DROPPING_ISSUE} />
                 ) : (
                   "DROP ISSUE"
                 )}
@@ -114,9 +107,7 @@ export function FeatureActions({
                 "
                 aria-busy={pendingAction === "resolve"}>
                 {pendingAction === "resolve" ? (
-                  <LoadingIndicator
-                    label={PENDING_LABELS.RESOLVING_ISSUE}
-                  />
+                  <LoadingIndicator label={PENDING_LABELS.RESOLVING_ISSUE} />
                 ) : (
                   "MARK AS RESOLVED"
                 )}

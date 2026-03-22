@@ -46,6 +46,9 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
   const [isSaving, setIsSaving] = React.useState(false)
   const [isUploading, setIsUploading] = React.useState(false)
   const [isCompressing, setIsCompressing] = React.useState(false)
+  const [activeTab, setActiveTab] = React.useState<
+    "write" | "preview"
+  >("write")
 
   type BadgeType = "info" | "error" | "progress"
   const [badge, setBadge] = React.useState<{
@@ -189,7 +192,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         resultMimeType = data.mimeType
         resultFileSize = data.fileSize
       } else {
-        showBadge("LARGE FILE — MAY TAKE LONGER_", "info")
+        showBadge("UPLOADING_ 0%", "progress")
 
         const blobResult = await upload(
           sanitizeFilename(file.name, file.type),
@@ -197,10 +200,17 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           {
             access: "public",
             handleUploadUrl: "/api/upload/feature/token",
+            multipart: true,
             clientPayload: JSON.stringify({
               mimeType: file.type,
               originalSize: file.size,
             }),
+            onUploadProgress: ({ percentage }) => {
+              showBadge(
+                `UPLOADING_ ${Math.round(percentage)}%`,
+                "progress",
+              )
+            },
           },
         )
 
@@ -364,120 +374,187 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
       </div>
 
       <div className="border-tech-main/40 relative flex min-h-125 grow flex-col border bg-white/80 backdrop-blur-sm">
-        <div className="bg-tech-main border-tech-main/40 sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b p-2 px-2 font-mono text-xs text-white/90 sm:gap-2 sm:px-4">
+        {/* Tab strip */}
+        <div
+          role="tablist"
+          aria-label="Editor mode"
+          className="bg-tech-main/10 border-tech-main/40 flex items-center border-b font-mono text-xs">
           <button
             type="button"
-            onClick={() => insertSyntax("**", "**")}
-            disabled={isReadOnly}
-            className={`hover:bg-tech-accent/20 h-11 min-w-[44px] flex-1 border border-transparent px-3 transition-colors select-none hover:border-white/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${isReadOnly ? "" : "cursor-pointer"}`}>
-            <b>B</b>
-          </button>
-          <button
-            type="button"
-            onClick={() => insertSyntax("*", "*")}
-            disabled={isReadOnly}
-            className={`hover:bg-tech-accent/20 h-11 min-w-[44px] flex-1 border border-transparent px-3 transition-colors select-none hover:border-white/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${isReadOnly ? "" : "cursor-pointer"}`}>
-            <i>I</i>
-          </button>
-          <button
-            type="button"
-            onClick={() => insertSyntax("[", "](url)")}
-            disabled={isReadOnly}
-            className={`hover:bg-tech-accent/20 h-11 min-w-[44px] flex-1 border border-transparent px-3 transition-colors select-none hover:border-white/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${isReadOnly ? "" : "cursor-pointer"}`}>
-            Link
-          </button>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isReadOnly || isUploading}
-            className={`hover:bg-tech-accent/20 h-11 min-w-[44px] flex-1 border border-transparent px-3 transition-colors select-none hover:border-white/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${isReadOnly || isUploading ? "" : "cursor-pointer"}`}
-            aria-busy={isUploading}>
-            {isCompressing ? "CMP" : isUploading ? "UPL" : "FILES"}
-          </button>
-          <div className="mx-1 hidden h-4 w-px bg-white/30 sm:block"></div>
-          <button
-            type="button"
-            onClick={() => insertSyntax("### ")}
-            disabled={isReadOnly}
-            className={`hover:bg-tech-accent/20 hidden border border-transparent px-3 py-1.5 transition-colors select-none hover:border-white/20 sm:block ${isReadOnly ? "" : "cursor-pointer"}`}>
-            H3
-          </button>
-          <button
-            type="button"
-            onClick={() => insertSyntax("`", "`")}
-            disabled={isReadOnly}
-            className={`hover:bg-tech-accent/20 hidden border border-transparent px-3 py-1.5 transition-colors select-none hover:border-white/20 sm:block ${isReadOnly ? "" : "cursor-pointer"}`}>
-            Code
-          </button>
-          <button
-            type="button"
-            onClick={() => insertSyntax("```\n", "\n```")}
-            disabled={isReadOnly}
-            className={`hover:bg-tech-accent/20 hidden border border-transparent px-3 py-1.5 transition-colors select-none hover:border-white/20 sm:block ${isReadOnly ? "" : "cursor-pointer"}`}>
-            Block
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,text/plain,text/csv"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0]
-              if (file) {
-                uploadFile(file)
-                e.target.value = ""
+            role="tab"
+            aria-selected={activeTab === "write"}
+            aria-controls="editor-write-panel"
+            onClick={() => setActiveTab("write")}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowRight") {
+                setActiveTab("preview")
               }
             }}
-          />
-          <span className="text-tech-accent/60 ml-auto hidden items-center gap-2 text-xs opacity-60 sm:flex">
-            MARKDOWN_SUPPORTED_
-          </span>
+            className={`px-4 py-2 transition-colors select-none ${activeTab === "write" ? "bg-tech-main text-white" : "text-tech-main/60 hover:bg-tech-main/10 cursor-pointer"}`}>
+            WRITE_
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "preview"}
+            aria-controls="editor-preview-panel"
+            onClick={() => setActiveTab("preview")}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowLeft") {
+                setActiveTab("write")
+              }
+            }}
+            className={`px-4 py-2 transition-colors select-none ${activeTab === "preview" ? "bg-tech-main text-white" : "text-tech-main/60 hover:bg-tech-main/10 cursor-pointer"}`}>
+            PREVIEW_
+          </button>
         </div>
 
-        <div className="relative flex grow flex-col bg-white">
-          <textarea
-            ref={textareaRef}
-            className={`w-full grow resize-none border-none p-6 font-mono text-sm leading-relaxed text-black placeholder-zinc-500 outline-none ${isReadOnly ? "cursor-not-allowed bg-gray-50" : "bg-transparent"}`}
-            placeholder="ENTER FEATURE DESCRIPTION... (Use Markdown)"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            onPaste={handlePaste}
-            onDrop={handleDrop}
-            onDragOver={(e) => {
-              if (!isReadOnly) e.preventDefault()
-            }}
-            onDragEnter={(e) => {
-              if (!isReadOnly) e.preventDefault()
-            }}
-            readOnly={isReadOnly}
-            aria-busy={isSaving}
-          />
+        {activeTab === "write" && (
+          <div className="bg-tech-main border-tech-main/40 sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b p-2 px-2 font-mono text-xs text-white/90 sm:gap-2 sm:px-4">
+            <button
+              type="button"
+              onClick={() => insertSyntax("**", "**")}
+              disabled={isReadOnly}
+              className={`hover:bg-tech-accent/20 h-11 min-w-[44px] flex-1 border border-transparent px-3 transition-colors select-none hover:border-white/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${isReadOnly ? "" : "cursor-pointer"}`}>
+              <b>B</b>
+            </button>
+            <button
+              type="button"
+              onClick={() => insertSyntax("*", "*")}
+              disabled={isReadOnly}
+              className={`hover:bg-tech-accent/20 h-11 min-w-[44px] flex-1 border border-transparent px-3 transition-colors select-none hover:border-white/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${isReadOnly ? "" : "cursor-pointer"}`}>
+              <i>I</i>
+            </button>
+            <button
+              type="button"
+              onClick={() => insertSyntax("[", "](url)")}
+              disabled={isReadOnly}
+              className={`hover:bg-tech-accent/20 h-11 min-w-[44px] flex-1 border border-transparent px-3 transition-colors select-none hover:border-white/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${isReadOnly ? "" : "cursor-pointer"}`}>
+              Link
+            </button>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isReadOnly || isUploading}
+              className={`hover:bg-tech-accent/20 h-11 min-w-[44px] flex-1 border border-transparent px-3 transition-colors select-none hover:border-white/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${isReadOnly || isUploading ? "" : "cursor-pointer"}`}
+              aria-busy={isUploading}>
+              {isCompressing ? "CMP" : isUploading ? "UPL" : "FILES"}
+            </button>
+            <div className="mx-1 hidden h-4 w-px bg-white/30 sm:block"></div>
+            <button
+              type="button"
+              onClick={() => insertSyntax("### ")}
+              disabled={isReadOnly}
+              className={`hover:bg-tech-accent/20 hidden border border-transparent px-3 py-1.5 transition-colors select-none hover:border-white/20 sm:block ${isReadOnly ? "" : "cursor-pointer"}`}>
+              H3
+            </button>
+            <button
+              type="button"
+              onClick={() => insertSyntax("`", "`")}
+              disabled={isReadOnly}
+              className={`hover:bg-tech-accent/20 hidden border border-transparent px-3 py-1.5 transition-colors select-none hover:border-white/20 sm:block ${isReadOnly ? "" : "cursor-pointer"}`}>
+              Code
+            </button>
+            <button
+              type="button"
+              onClick={() => insertSyntax("```\n", "\n```")}
+              disabled={isReadOnly}
+              className={`hover:bg-tech-accent/20 hidden border border-transparent px-3 py-1.5 transition-colors select-none hover:border-white/20 sm:block ${isReadOnly ? "" : "cursor-pointer"}`}>
+              Block
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,text/plain,text/csv"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) {
+                  uploadFile(file)
+                  e.target.value = ""
+                }
+              }}
+            />
+            <span className="text-tech-accent/60 ml-auto hidden items-center gap-2 text-xs opacity-60 sm:flex">
+              MARKDOWN_SUPPORTED_
+            </span>
+          </div>
+        )}
 
-          {badge && (
-            <div
-              className={`absolute top-4 right-4 z-20 flex items-center gap-2 border px-3 py-1.5 font-mono text-xs shadow-sm backdrop-blur-sm ${
-                badge.type === "error"
-                  ? "border-red-400 bg-red-900 text-red-200"
-                  : "bg-tech-main text-tech-accent border-tech-accent shadow-tech-accent/20"
-              }`}
-              role="status"
-              aria-live="polite">
-              {badge.type === "progress" && (
-                <span className="bg-tech-accent inline-block h-2 w-2 animate-pulse" />
-              )}
-              {badge.type === "error" && (
-                <span className="inline-block h-2 w-2 bg-red-400" />
-              )}
-              {badge.message}
-              {badge.type === "error" && (
-                <button
-                  type="button"
-                  onClick={clearBadge}
-                  className="ml-2 text-red-300 hover:text-white"
-                  aria-label="Dismiss">
-                  ✕
-                </button>
-              )}
+        <div
+          id="editor-write-panel"
+          role="tabpanel"
+          hidden={activeTab !== "write"}>
+          <div className="relative flex grow flex-col bg-white">
+            <textarea
+              ref={textareaRef}
+              className={`w-full grow resize-none border-none p-6 font-mono text-sm leading-relaxed text-black placeholder-zinc-500 outline-none ${isReadOnly ? "cursor-not-allowed bg-gray-50" : "bg-transparent"}`}
+              placeholder="ENTER FEATURE DESCRIPTION... (Use Markdown)"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              onPaste={handlePaste}
+              onDrop={handleDrop}
+              onDragOver={(e) => {
+                if (!isReadOnly) e.preventDefault()
+              }}
+              onDragEnter={(e) => {
+                if (!isReadOnly) e.preventDefault()
+              }}
+              readOnly={isReadOnly}
+              aria-busy={isSaving}
+            />
+
+            {badge && (
+              <div
+                className={`absolute top-4 right-4 z-20 flex items-center gap-2 border px-3 py-1.5 font-mono text-xs shadow-sm backdrop-blur-sm ${
+                  badge.type === "error"
+                    ? "border-red-400 bg-red-900 text-red-200"
+                    : "bg-tech-main text-tech-accent border-tech-accent shadow-tech-accent/20"
+                }`}
+                role="status"
+                aria-live="polite">
+                {badge.type === "progress" && (
+                  <span className="bg-tech-accent inline-block h-2 w-2 animate-pulse" />
+                )}
+                {badge.type === "error" && (
+                  <span className="inline-block h-2 w-2 bg-red-400" />
+                )}
+                {badge.message}
+                {badge.type === "error" && (
+                  <button
+                    type="button"
+                    onClick={clearBadge}
+                    className="ml-2 text-red-300 hover:text-white"
+                    aria-label="Dismiss">
+                    ✕
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div
+          id="editor-preview-panel"
+          role="tabpanel"
+          hidden={activeTab !== "preview"}
+          className="flex min-h-125 grow flex-col">
+          {content.trim() === "" ? (
+            <p className="text-tech-main/40 p-6 font-mono text-xs">
+              NOTHING_TO_PREVIEW_
+            </p>
+          ) : (
+            <div className="grow overflow-y-auto p-6">
+              <ReactMarkdown
+                components={getMarkdownComponents("")}
+                remarkPlugins={
+                  getPluginsForContent(content).remarkPlugins
+                }
+                rehypePlugins={
+                  getPluginsForContent(content).rehypePlugins
+                }>
+                {content}
+              </ReactMarkdown>
             </div>
           )}
         </div>

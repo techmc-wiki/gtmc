@@ -13,6 +13,7 @@ import {
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as HandleUploadBody
+    const origin = req.headers.get("origin") ?? undefined
 
     const jsonResponse = await handleUpload({
       body,
@@ -50,9 +51,7 @@ export async function POST(req: NextRequest) {
             : getNonImageMimeTypes(),
           maximumSizeInBytes: 50 * 1024 * 1024,
           addRandomSuffix: false,
-          allowedOrigins: process.env.NEXT_PUBLIC_APP_URL
-            ? [process.env.NEXT_PUBLIC_APP_URL]
-            : undefined,
+          allowedOrigins: origin ? [origin] : undefined,
         }
       },
     })

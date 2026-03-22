@@ -11,11 +11,7 @@ import {
   LoadingIndicator,
   PENDING_LABELS,
 } from "@/app/(dashboard)/features/loading-indicator"
-import ReactMarkdown from "react-markdown"
-import {
-  getMarkdownComponents,
-  getPluginsForContent,
-} from "@/app/(dashboard)/articles/markdown-helpers"
+import { MarkdownContent } from "@/components/markdown/markdown-content"
 import {
   classifyFile,
   isImageMime,
@@ -539,24 +535,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           role="tabpanel"
           hidden={activeTab !== "preview"}
           className="flex min-h-125 grow flex-col">
-          {content.trim() === "" ? (
-            <p className="text-tech-main/40 p-6 font-mono text-xs">
-              NOTHING_TO_PREVIEW_
-            </p>
-          ) : (
-            <div className="grow overflow-y-auto p-6">
-              <ReactMarkdown
-                components={getMarkdownComponents("")}
-                remarkPlugins={
-                  getPluginsForContent(content).remarkPlugins
-                }
-                rehypePlugins={
-                  getPluginsForContent(content).rehypePlugins
-                }>
-                {content}
-              </ReactMarkdown>
-            </div>
-          )}
+          <MarkdownContent content={content} />
         </div>
       </div>
 

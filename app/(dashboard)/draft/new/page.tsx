@@ -1,4 +1,4 @@
-import { BrutalEditor } from "@/components/editor/brutal-editor"
+import { DraftEditor } from "@/components/editor/draft-editor"
 import Link from "next/link"
 import { BrutalButton } from "@/components/ui/brutal-button"
 import { getRepoFileContent } from "@/lib/github-pr"
@@ -80,7 +80,7 @@ export default async function NewDraftPage({
             absolute right-0 bottom-0 size-2 border-r border-b
             border-tech-main/40
           "></div>
-        <BrutalEditor
+        <DraftEditor
           initialData={{
             title: initialTitle,
             content: initialContent,

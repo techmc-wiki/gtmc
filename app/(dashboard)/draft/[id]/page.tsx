@@ -1,4 +1,4 @@
-import { BrutalEditor } from "@/components/editor/brutal-editor"
+import { DraftEditor } from "@/components/editor/draft-editor"
 import Link from "next/link"
 import { BrutalButton } from "@/components/ui/brutal-button"
 import { prisma } from "@/lib/prisma"
@@ -98,7 +98,7 @@ export default async function EditDraftPage({
           </div>
         ) : null}
 
-        <BrutalEditor
+        <DraftEditor
           initialData={{
             id: draft.id,
             title: draft.title,

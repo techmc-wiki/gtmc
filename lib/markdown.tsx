@@ -1,5 +1,5 @@
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
-import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism"
+import { solarizedlight } from "react-syntax-highlighter/dist/cjs/styles/prism"
 import Link from "next/link"
 import path from "path"
 import remarkGfm from "remark-gfm"
@@ -70,9 +70,8 @@ export function getMarkdownComponents(rawPath: string) {
     table: ({ ...props }: MarkdownComponentProps) => (
       <div
         className="
-          -mx-6 my-6 w-full overflow-x-auto border border-tech-main/30
-          bg-white/50 px-6 backdrop-blur-sm
-          sm:-mx-8 sm:px-8
+          custom-bottom-scrollbar my-6 w-full overflow-x-auto border border-tech-main/30
+          bg-tech-bg/50 backdrop-blur-sm
         ">
         <table
           className="
@@ -270,58 +269,150 @@ export function getMarkdownComponents(rawPath: string) {
         />
       )
     },
+    pre: ({ children }: MarkdownComponentProps) => <>{children}</>,
     code: ({ className, children, ...props }: MarkdownComponentProps) => {
       const match = /language-(\w+)/.exec((className as string) || "")
-      return match ? (
+      if (!match) {
+        return (
+          <code
+            className="
+              mx-1 rounded-none border border-tech-main/30 bg-tech-main/10 px-1
+              py-[0.05rem] font-mono text-[0.8em] text-tech-main
+            "
+            {...props}>
+            {children}
+          </code>
+        )
+      }
+
+      const lang = match[1]
+      const lineCount = String(children).split("\n").filter(Boolean).length
+
+      return (
         <div
           className="
-            -mx-6 my-6 max-w-full overflow-hidden border border-tech-main/30
-            bg-[#1e1e1e] font-mono text-sm shadow-sm
-            sm:-mx-8
+            not-prose relative my-6 w-full border border-tech-main/30 bg-tech-bg
+            font-mono text-sm
           ">
+          {/* Corner brackets */}
           <div
             className="
-              flex items-center justify-between border-b border-tech-main/30
-              bg-tech-main/10 px-4 py-1 font-mono text-xs tracking-widest
-              text-tech-main uppercase
-            ">
-            <span>{match[1]}</span>
-            <span className="opacity-50">{"//"} EXECUTABLE_BLOCK</span>
-          </div>
+              pointer-events-none absolute top-0 left-0 size-3 -translate-px
+              border-t-2 border-l-2 border-tech-main/30
+            "
+          />
           <div
             className="
-              overflow-x-scroll px-4
-              sm:px-6
+              pointer-events-none absolute top-0 right-0 size-3 translate-x-px
+              -translate-y-px border-t-2 border-r-2 border-tech-main/30
+            "
+          />
+          <div
+            className="
+              pointer-events-none absolute bottom-0 left-0 size-3
+              -translate-x-px translate-y-px border-b-2 border-l-2
+              border-tech-main/30
+            "
+          />
+          <div
+            className="
+              pointer-events-none absolute right-0 bottom-0 size-3 translate-px
+              border-r-2 border-b-2 border-tech-main/30
+            "
+          />
+
+          {/* Header bar */}
+          <div
+            className="
+              flex items-center justify-between border-b guide-line
+              bg-tech-main/10 px-4 py-1.5
             ">
+            {/* Left: status dot + language */}
+            <div className="flex items-center gap-2">
+              <span className="size-1.5 animate-pulse bg-tech-main/40" />
+              <span className="text-xs tracking-widest text-tech-main uppercase">
+                {lang}
+              </span>
+            </div>
+            {/* Right: line count + system label */}
             <div
               className="
-                px-6
-                sm:px-8
+                flex items-center gap-3 font-mono text-[10px] tracking-widest
+                text-tech-main
               ">
-              <SyntaxHighlighter
-                style={vscDarkPlus as Record<string, Record<string, string>>}
-                language={match[1]}
-                PreTag="div"
-                customStyle={{
-                  margin: 0,
-                  padding: "1rem 0",
-                  background: "transparent",
-                }}
-                {...props}>
-                {String(children).replace(/\n$/, "")}
-              </SyntaxHighlighter>
+              <span>{lineCount} LINES</span>
+              <span className="text-tech-main/50">|</span>
+              <span>SYS.CODE_BLOCK</span>
             </div>
           </div>
+
+          {/* Code area with inner frame */}
+          <div className="relative">
+            {/* Inner frame line */}
+            <div
+              className="
+                pointer-events-none absolute inset-0 border border-tech-main/10
+              "
+            />
+
+            {/* Scan line decorations */}
+            <div
+              className="
+                pointer-events-none absolute inset-x-0 top-1/4 h-px
+                bg-tech-main/3
+              "
+            />
+            <div
+              className="
+                pointer-events-none absolute inset-x-0 top-3/4 h-px
+                bg-tech-main/3
+              "
+            />
+
+            {/* Scroll container */}
+            <div
+              className="
+                custom-bottom-scrollbar overflow-x-auto px-4
+                sm:px-6
+              ">
+              <div className="px-0" dir="ltr">
+                <SyntaxHighlighter
+                  style={
+                    solarizedlight as Record<string, Record<string, string>>
+                  }
+                  language={lang}
+                  PreTag="div"
+                  customStyle={{
+                    margin: 0,
+                    padding: "1rem 0",
+                    background: "transparent",
+                    overflow: "visible",
+                  }}
+                  codeTagProps={{
+                    style: { background: "transparent" },
+                  }}
+                  {...props}>
+                  {String(children).replace(/\n$/, "")}
+                </SyntaxHighlighter>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom HUD strip */}
+          <div
+            className="
+              flex items-center justify-end border-t border-tech-main/10 px-4
+              py-1
+            ">
+            <span
+              className="
+                font-mono text-[9px] tracking-widest text-tech-main/50 uppercase
+                select-none
+              ">
+              {"//"} SYNTAX_HIGHLIGHT
+            </span>
+          </div>
         </div>
-      ) : (
-        <code
-          className="
-            mx-1 rounded-none border border-tech-main/30 bg-tech-main/10 px-1
-            py-[0.05rem] font-mono text-[0.8em] text-tech-main
-          "
-          {...props}>
-          {children}
-        </code>
       )
     },
   } as Record<string, MarkdownComponent>

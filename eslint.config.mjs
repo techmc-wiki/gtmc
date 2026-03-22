@@ -28,6 +28,12 @@ const eslintConfig = defineConfig([
         entryPoint: "app/globals.css",
       },
     },
+    rules: {
+      "better-tailwindcss/no-unknown-classes": [
+        "warn",
+        { ignore: ["not-prose"] },
+      ],
+    },
   },
   {
     files: ["**/*.{ts,tsx,cts,mts}"],

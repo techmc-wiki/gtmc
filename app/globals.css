@@ -327,6 +327,27 @@ body {
   }
 }
 
+@utility custom-bottom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklab, var(--color-tech-main) 30%, transparent);
+    border-radius: 0;
+    opacity: 0.5;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in oklab, var(--color-tech-main-dark) 70%, transparent);
+  }
+}
+
 @utility custom-left-scrollbar {
   direction: rtl;
 

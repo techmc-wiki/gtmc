@@ -200,7 +200,6 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           {
             access: "public",
             handleUploadUrl: "/api/upload/feature/token",
-            multipart: true,
             clientPayload: JSON.stringify({
               mimeType: file.type,
               originalSize: file.size,
@@ -484,6 +483,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         <div
           id="editor-write-panel"
           role="tabpanel"
+          className="flex min-h-125 grow flex-col"
           hidden={activeTab !== "write"}>
           <div className="relative flex grow flex-col bg-white">
             <textarea

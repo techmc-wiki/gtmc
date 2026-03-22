@@ -38,7 +38,7 @@ export function LoadingIndicator({
       role={ariaHidden ? "presentation" : undefined}
       aria-hidden={ariaHidden}>
       {/* Pulsing square */}
-      <span className="inline-block h-2 w-2 animate-pulse bg-current opacity-60" />
+      <span className="inline-block size-2 animate-pulse bg-current opacity-60" />
 
       {/* Uppercase monospace text */}
       <span className="tracking-widest uppercase">{label}</span>

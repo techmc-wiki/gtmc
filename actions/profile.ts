@@ -18,11 +18,6 @@ export async function updateProfileAction(formData: FormData) {
     throw new Error("Name is required")
   }
 
-  // Find user to check role, so we only update githubPat if they are actually an admin
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-  })
-
   await prisma.user.update({
     where: { id: session.user.id },
     data: {

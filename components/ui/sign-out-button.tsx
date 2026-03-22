@@ -12,7 +12,10 @@ export function SignOutButton({
   return (
     <button
       onClick={() => signOut({ callbackUrl: "/" })}
-      className={`cursor-pointer ${className}`}
+      className={`
+        cursor-pointer
+        ${className}
+      `}
       type="button">
       SIGN OUT
     </button>

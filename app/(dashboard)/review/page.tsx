@@ -1,8 +1,52 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BrutalCard } from "@/components/ui/brutal-card"
 import { BrutalButton } from "@/components/ui/brutal-button"
 import Link from "next/link"
-import { getOpenPRs } from "@/lib/github-pr"
+import { getOpenPRs, getPR, getOctokit, ARTICLES_REPO_OWNER, ARTICLES_REPO_NAME } from "@/lib/github-pr"
 import { auth } from "@/lib/auth"
+
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
+async function analyzePRConflictStatus(prNumber: number, token?: string) {
+  const prDetail = await getPR(prNumber, token)
+  let isConflict = false
+  if (prDetail.mergeable === false) {
+    isConflict = true
+  } else {
+    const octokit = getOctokit(token)
+    try {
+      const { data: files } = await octokit.pulls.listFiles({
+        owner: ARTICLES_REPO_OWNER,
+        repo: ARTICLES_REPO_NAME,
+        pull_number: prNumber,
+      })
+      for (const f of files) {
+        if (f.patch && f.patch.includes("<<<<<<< ")) {
+          isConflict = true;
+          break;
+        } else if (!f.patch && (f.filename.endsWith(".md") || f.filename.endsWith(".mdx"))) {
+          try {
+            const { data: contentData } = await octokit.repos.getContent({
+               owner: ARTICLES_REPO_OWNER,
+               repo: ARTICLES_REPO_NAME,
+               path: f.filename,
+               ref: prDetail.head.sha
+            });
+            if (!Array.isArray(contentData) && contentData.type === "file" && contentData.content) {
+               const decoded = Buffer.from(contentData.content, "base64").toString("utf-8");
+               if (decoded.includes("<<<<<<< ")) {
+                 isConflict = true;
+                 break;
+               }
+            }
+          } catch(e) {}
+        }
+      }
+    } catch {}
+  }
+  return isConflict
+}
 
 export default async function ReviewHubPage() {
   const session = await auth()
@@ -25,92 +69,133 @@ export default async function ReviewHubPage() {
     )
   }
 
-  // Fetch PRs from GitHub using admin's PAT or default SERVER TOKEN
   const token = process.env.GITHUB_ARTICLES_WRITE_PAT
-  let openPRs: Array<{
-    id: number
-    number: number
-    created_at: string
-    title: string
-    user: { login: string } | null
-    head: { ref: string }
-  }> = []
+  let openPRs: Array<any> = []
+  const groupedPRs = {
+    conflicts: [] as any[],
+    pending: [] as any[]
+  }
+
   try {
-    const prs = await getOpenPRs(token)
-    openPRs = prs as unknown as typeof openPRs
+    openPRs = await getOpenPRs(token) as any[]
+    
+    const analysisResults = await Promise.all(
+       openPRs.map(async (pr) => {
+         const isConflict = await analyzePRConflictStatus(pr.number, token)
+         return { pr, isConflict }
+       })
+    )
+
+    for (const result of analysisResults) {
+      if (result.isConflict) {
+        groupedPRs.conflicts.push(result.pr)
+      } else {
+        groupedPRs.pending.push(result.pr)
+      }
+    }
   } catch (error) {
     console.error("Failed to fetch PRs:", error)
   }
 
+  const renderPRCard = (pr: any, isConflict: boolean) => (
+    <BrutalCard
+      key={pr.id}
+      className={`border-tech-main/40 group relative flex flex-col items-start justify-between space-y-4 border ${isConflict ? 'bg-red-500/10 border-red-500/50' : 'bg-white/80'} p-6 backdrop-blur-sm md:flex-row md:items-center md:space-y-0`}
+    >
+      <div className="border-tech-main/40 absolute top-0 left-0 h-2 w-2 -translate-x-[1px] -translate-y-[1px] border-t-2 border-l-2 opacity-0 transition-opacity group-hover:opacity-100"></div>
+      <div className="border-tech-main/40 absolute right-0 bottom-0 h-2 w-2 translate-x-[1px] translate-y-[1px] border-r-2 border-b-2 opacity-0 transition-opacity group-hover:opacity-100"></div>
+      
+      <div className="relative z-10 flex-1">
+        <div className="mb-3 flex items-center gap-3">
+          <span className={`border px-2 py-0.5 font-mono text-xs tracking-wider ${isConflict ? 'border-red-500/40 bg-red-500/20 text-red-600' : 'border-blue-500/40 bg-blue-500/10 text-blue-600'}`}>
+            [PR #{pr.number}]
+          </span>
+          <span className="text-tech-main/50 font-mono text-xs">
+            {new Date(pr.created_at).toLocaleString()}
+          </span>
+          {isConflict && (
+            <span className="bg-red-500 text-white px-2 py-0.5 text-xs font-bold animate-pulse">
+              UNRESOLVED CONFLICTS
+            </span>
+          )}
+        </div>
+        <h3 className={`border-tech-main/40 mb-2 border-l-2 pl-3 text-lg font-bold tracking-tight uppercase md:text-xl ${isConflict ? 'text-red-700' : 'text-tech-main-dark'}`}>
+          {pr.title || "UNTITLED"}
+        </h3>
+        <p className="text-tech-main/80 mb-3 pl-3 font-mono text-xs">
+          Submitted by:{" "}
+          <span className="text-tech-main-dark font-bold">
+            {pr.user?.login || "UNKNOWN"}
+          </span>
+        </p>
+        <p className="bg-tech-main/5 border-tech-main/20 text-tech-main ml-3 inline-flex items-center border px-2 py-1 font-mono text-xs">
+          <span className="bg-tech-main mr-2 h-1.5 w-1.5"></span>{" "}
+          TARGET: {pr.head.ref}
+        </p>
+      </div>
+
+      <div className="relative z-10 flex w-full flex-col gap-4 md:w-auto md:flex-row">
+        <Link href={`/review/${pr.number}`} className="w-full md:w-auto">
+          <BrutalButton
+            variant={isConflict ? "danger" : "primary"}
+            className="flex min-h-[44px] w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto"
+          >
+            {isConflict ? "RESOLVE CONFLICT \u2192" : "REVIEW CONTENT \u2192"}
+          </BrutalButton>
+        </Link>
+      </div>
+    </BrutalCard>
+  )
+
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-6">
-      <div className="border-tech-main/40 relative border-b pb-6">
-        <div className="border-tech-main/20 absolute top-0 right-0 h-8 w-8 translate-x-[1px] -translate-y-[1px] border-t border-r"></div>
-        <h1 className="text-tech-main-dark flex items-center text-2xl font-bold tracking-tight uppercase md:text-4xl">
-          <span className="bg-tech-main/20 border-tech-main/40 mr-4 h-4 w-4 border"></span>
+      <div className="relative border-b border-tech-main/40 pb-6">
+        <div className="absolute top-0 right-0 size-8 translate-x-px -translate-y-px border-t border-r border-tech-main/20"></div>
+        <h1 className="flex items-center text-2xl font-bold tracking-tight text-tech-main-dark uppercase md:text-4xl">
+          <span className="mr-4 size-4 border border-tech-main/40 bg-tech-main/20"></span>
           REVIEW HUB
         </h1>
-        <p className="text-tech-main/80 mt-3 flex items-center font-mono text-xs tracking-widest sm:text-sm">
-          <span className="bg-tech-main mr-2 h-2 w-2 animate-pulse rounded-full"></span>
+        <p className="mt-3 flex items-center font-mono text-xs tracking-widest text-tech-main/80 sm:text-sm">
+          <span className="mr-2 size-2 animate-pulse rounded-full bg-tech-main"></span>
           APPROVE CONTENT. MERGE REBELLION.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-6">
         {openPRs.length === 0 ? (
-          <div className="border-tech-main/40 group relative border border-dashed bg-white/30 py-16 text-center backdrop-blur-sm">
+          <div className="group relative border border-dashed border-tech-main/40 bg-white/30 py-16 text-center backdrop-blur-sm">
             <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(96,112,143,0.05)_10px,rgba(96,112,143,0.05)_20px)]"></div>
-            <h2 className="text-tech-main/50 relative z-10 font-mono text-lg tracking-widest uppercase">
+            <h2 className="relative z-10 font-mono text-lg tracking-widest text-tech-main/50 uppercase">
               NO PENDING REVIEWS. SILENCE IN THE COMM.
             </h2>
           </div>
         ) : (
-          openPRs.map((pr) => (
-            <BrutalCard
-              key={pr.id}
-              className="border-tech-main/40 group relative flex flex-col items-start justify-between space-y-4 border bg-white/80 p-6 backdrop-blur-sm md:flex-row md:items-center md:space-y-0">
-              <div className="border-tech-main/40 absolute top-0 left-0 h-2 w-2 -translate-x-[1px] -translate-y-[1px] border-t-2 border-l-2 opacity-0 transition-opacity group-hover:opacity-100"></div>
-              <div className="border-tech-main/40 absolute right-0 bottom-0 h-2 w-2 translate-x-[1px] translate-y-[1px] border-r-2 border-b-2 opacity-0 transition-opacity group-hover:opacity-100"></div>
-
-              <div className="relative z-10 flex-1">
-                <div className="mb-3 flex items-center gap-3">
-                  <span className="border border-blue-500/40 bg-blue-500/10 px-2 py-0.5 font-mono text-xs tracking-wider text-blue-600">
-                    [PR #{pr.number}]
-                  </span>
-                  <span className="text-tech-main/50 font-mono text-xs">
-                    {new Date(pr.created_at).toLocaleString()}
-                  </span>
+          <div className="flex flex-col gap-10">
+            {groupedPRs.conflicts.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="border-b-2 border-red-500/50 pb-2 font-bold tracking-widest text-red-600 uppercase">
+                  PRIORITY: RESOLVE CONFLICTS
+                </h2>
+                <div className="grid grid-cols-1 gap-6">
+                  {groupedPRs.conflicts.map((pr) => renderPRCard(pr, true))}
                 </div>
-                <h3 className="text-tech-main-dark border-tech-main/40 mb-2 border-l-2 pl-3 text-lg font-bold tracking-tight uppercase md:text-xl">
-                  {pr.title || "UNTITLED"}
-                </h3>
-                <p className="text-tech-main/80 mb-3 pl-3 font-mono text-xs">
-                  Submitted by:{" "}
-                  <span className="text-tech-main-dark font-bold">
-                    {pr.user?.login || "UNKNOWN"}
-                  </span>
-                </p>
-                <p className="bg-tech-main/5 border-tech-main/20 text-tech-main ml-3 inline-flex items-center border px-2 py-1 font-mono text-xs">
-                  <span className="bg-tech-main mr-2 h-1.5 w-1.5"></span>{" "}
-                  TARGET: {pr.head.ref}
-                </p>
               </div>
+            )}
 
-              <div className="relative z-10 flex w-full flex-col gap-4 md:w-auto md:flex-row">
-                <Link
-                  href={`/review/${pr.number}`}
-                  className="w-full md:w-auto">
-                  <BrutalButton
-                    variant="primary"
-                    className="flex min-h-[44px] w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
-                    REVIEW CONTENT →
-                  </BrutalButton>
-                </Link>
+            {groupedPRs.pending.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="border-b-2 border-tech-main/50 pb-2 font-bold tracking-widest text-tech-main uppercase">
+                  PENDING REVIEWS
+                </h2>
+                <div className="grid grid-cols-1 gap-6">
+                  {groupedPRs.pending.map((pr) => renderPRCard(pr, false))}
+                </div>
               </div>
-            </BrutalCard>
-          ))
+            )}
+          </div>
         )}
       </div>
     </div>
   )
 }
+

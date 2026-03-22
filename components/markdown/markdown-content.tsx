@@ -20,7 +20,7 @@ export function MarkdownContent({
 }: MarkdownContentProps) {
   if (!content?.trim()) {
     return (
-      <p className="text-tech-main/40 p-6 font-mono text-xs">
+      <p className="p-6 font-mono text-xs text-tech-main/40">
         NOTHING_TO_PREVIEW_
       </p>
     )
@@ -32,7 +32,14 @@ export function MarkdownContent({
 
   return (
     <div
-      className={`prose prose-tech selection:bg-tech-main/20 w-full max-w-none overflow-hidden wrap-break-word text-slate-800 selection:text-slate-900${className ? ` ${className}` : ""}`}>
+      className={`
+        prose prose-tech w-full max-w-none overflow-hidden wrap-break-word
+        text-slate-800
+        selection:bg-tech-main/20
+        selection:text-slate-900${className ? `
+          ${className}
+        ` : ""}
+      `}>
       <ReactMarkdown
         remarkPlugins={remarkPlugins}
         rehypePlugins={rehypePlugins}

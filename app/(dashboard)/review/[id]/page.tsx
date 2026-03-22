@@ -58,8 +58,13 @@ export default async function ReviewDetailPage({
   const mainFile =
     files.find((f) => f.filename.endsWith(".md")) || files[0]
 
+  let isMergeable = pr.mergeable === true
+  let hasConflict = pr.mergeable === false
+
   let rawContent = ""
   if (mainFile) {
+    // 1. Fetch current PR head file to check if it has unresolved conflict markers left behind
+    let currentPrText = ""
     try {
       const { data: fileData } = await octokit.repos.getContent({
         owner,
@@ -68,43 +73,135 @@ export default async function ReviewDetailPage({
         ref: pr.head.ref,
       })
       if (!Array.isArray(fileData) && fileData.type === "file") {
-        rawContent = Buffer.from(fileData.content, "base64").toString(
-          "utf8",
-        )
+        currentPrText = Buffer.from(fileData.content, "base64").toString("utf8")
+        if (currentPrText.includes("<<<<<<< Current Change")) {
+          // It has leftover literal conflict markers, we MUST treat it as a conflict
+          // even if GitHub says it's technically mergeable based on tree history!
+          hasConflict = true
+          isMergeable = false
+          rawContent = currentPrText
+        }
       }
     } catch (e) {
       console.error(e)
-      // maybe file was deleted or something
+    }
+
+    if (hasConflict) {
+      if (rawContent && rawContent.includes("<<<<<<< Current Change")) {
+        // We already have the completely formatted conflict text!
+        // No need to run diff3Merge again.
+      } else {
+        try {
+          const { data: mainRef } = await octokit.git.getRef({
+          owner,
+          repo,
+          ref: "heads/main",
+        })
+        const mainSha = mainRef.object.sha
+        const prHeadSha = pr.head.sha
+
+        const { data: compare } = await octokit.repos.compareCommits({
+          owner,
+          repo,
+          base: mainSha,
+          head: prHeadSha,
+        })
+        const ancestorSha = compare.merge_base_commit.sha
+
+        const fetchFileRaw = async (refStr: string) => {
+          try {
+            const { data } = await octokit.repos.getContent({
+              owner,
+              repo,
+              path: mainFile.filename,
+              ref: refStr,
+            })
+            if (!Array.isArray(data) && data.type === "file") {
+              return Buffer.from(data.content, "base64").toString("utf8")
+            }
+          } catch {
+            return ""
+          }
+          return ""
+        }
+
+        const [mainText, ancestorText, prText] = await Promise.all([
+          fetchFileRaw(mainSha),
+          fetchFileRaw(ancestorSha),
+          fetchFileRaw(prHeadSha),
+        ])
+
+        const { diff3Merge } = await import("node-diff3")
+        const merged = diff3Merge(
+          mainText.split(/\r?\n/),
+          ancestorText.split(/\r?\n/),
+          prText.split(/\r?\n/)
+        )
+        const output: string[] = []
+        for (const block of merged) {
+          if (block.ok) {
+            output.push(...block.ok)
+          } else if (block.conflict) {
+            output.push(`<<<<<<< Current Change (main)`)
+            output.push(...block.conflict.a)
+            output.push("=======")
+            output.push(...block.conflict.b)
+            output.push(`>>>>>>> Incoming Change (PR)`)
+          }
+        }
+        rawContent = output.join("\n")
+      } catch (e) {
+        console.error("Three-way merge failed, falling back to PR text", e)
+        if (!rawContent) rawContent = currentPrText
+      }
+      }
+    } else {
+      if (!rawContent) rawContent = currentPrText
     }
   }
 
-  const isMergeable = pr.mergeable === true
-  const hasConflict = pr.mergeable === false
-
   return (
-    <div className="mx-auto max-w-6xl space-y-8 p-4 pb-32 md:p-8">
+    <div className="
+      mx-auto max-w-6xl space-y-8 p-4 pb-32
+      md:p-8
+    ">
       <Link href="/review">
         <BrutalButton variant="ghost" size="sm">
           {"<"} BACK_TO_HUB
         </BrutalButton>
       </Link>
 
-      <div className="border-tech-main/30 relative flex flex-col items-end justify-between gap-4 border-b pb-8 md:flex-row">
-        <div className="border-tech-main/50 bg-tech-main/20 absolute -bottom-[5px] left-0 h-2 w-2 border"></div>
+      <div className="
+        relative flex flex-col items-end justify-between gap-4 border-b
+        border-tech-main/30 pb-8
+        md:flex-row
+      ">
+        <div className="
+          absolute -bottom-[5px] left-0 size-2 border border-tech-main/50
+          bg-tech-main/20
+        "></div>
         <div>
-          <h1 className="text-tech-main-dark mb-4 font-mono text-3xl leading-tight tracking-[0.1em] break-words uppercase lg:text-4xl">
+          <h1 className="
+            mb-4 font-mono text-3xl/tight tracking-widest wrap-break-word
+            text-tech-main-dark uppercase
+            lg:text-4xl
+          ">
             {pr.title}{" "}
             <span className="text-tech-main/50">#{pr.number}</span>
           </h1>
-          <div className="bg-tech-main/10 text-tech-main-dark border-tech-main/30 flex inline-flex flex-wrap items-center gap-4 border p-3 font-mono text-xs">
+          <div className="
+            flex inline-flex flex-wrap items-center gap-4 border
+            border-tech-main/30 bg-tech-main/10 p-3 font-mono text-xs
+            text-tech-main-dark
+          ">
             <span className="text-tech-main">AUTHOR:</span>
             <span className="uppercase">
               {pr.user?.login || "UNKNOWN_USER"}
             </span>
-            <span className="text-tech-main/50 px-2">{"//"}</span>
+            <span className="px-2 text-tech-main/50">{"//"}</span>
             <span className="text-tech-main">TARGET_FILE:</span>
             <span>{mainFile?.filename || "UNKNOWN"}</span>
-            <span className="text-tech-main/50 px-2">{"//"}</span>
+            <span className="px-2 text-tech-main/50">{"//"}</span>
             <span className="text-tech-main">STATUS:</span>
             <span
               className={
@@ -120,7 +217,10 @@ export default async function ReviewDetailPage({
         </div>
 
         {pr.state === "open" && (
-          <div className="flex w-full gap-4 md:w-auto">
+          <div className="
+            flex w-full gap-4
+            md:w-auto
+          ">
             <form
               action={async () => {
                 "use server"
@@ -129,7 +229,10 @@ export default async function ReviewDetailPage({
               <BrutalButton
                 type="submit"
                 variant="secondary"
-                className="w-full border-red-600 text-red-600 hover:bg-red-600 hover:text-white">
+                className="
+                  w-full border-red-600 text-red-600
+                  hover:bg-red-600 hover:text-white
+                ">
                 CLOSE
               </BrutalButton>
             </form>
@@ -160,15 +263,30 @@ export default async function ReviewDetailPage({
       ) : (
         <>
           <div>
-            <h2 className="border-tech-main/50 text-tech-main mb-4 inline-block border-b font-mono text-xl tracking-widest uppercase">
+            <h2 className="
+              mb-4 inline-block border-b border-tech-main/50 font-mono text-xl
+              tracking-widest text-tech-main uppercase
+            ">
               CONTENT_PREVIEW
             </h2>
           </div>
 
-          <div className="bg-tech-main/5 border-tech-main/30 relative mx-auto border p-8 backdrop-blur-sm">
-            <div className="border-tech-main/50 absolute top-0 left-0 h-2 w-2 border-t border-l"></div>
-            <div className="border-tech-main/50 absolute right-0 bottom-0 h-2 w-2 border-r border-b"></div>
-            <div className="prose prose-tech text-tech-main-dark selection:bg-tech-main/20 selection:text-tech-main-dark w-full max-w-none overflow-hidden break-words">
+          <div className="
+            relative mx-auto border border-tech-main/30 bg-tech-main/5 p-8
+            backdrop-blur-sm
+          ">
+            <div className="
+              absolute top-0 left-0 size-2 border-t border-l border-tech-main/50
+            "></div>
+            <div className="
+              absolute right-0 bottom-0 size-2 border-r border-b
+              border-tech-main/50
+            "></div>
+            <div className="
+              prose prose-tech w-full max-w-none overflow-hidden wrap-break-word
+              text-tech-main-dark
+              selection:bg-tech-main/20 selection:text-tech-main-dark
+            ">
               {rawContent ? (
                 <ReactMarkdown
                   remarkPlugins={[

@@ -85,21 +85,46 @@ export default async function ArticlePage({
   const markdownComponents = getMarkdownComponents(rawPath)
 
   return (
-    <div className="border-tech-main/40 relative min-h-screen border bg-transparent p-6 pb-32 backdrop-blur-sm sm:p-8">
-      <div className="border-tech-main/40 absolute top-0 left-0 h-4 w-4 border-t-2 border-l-2"></div>
-      <div className="border-tech-main/40 absolute right-0 bottom-0 h-4 w-4 border-r-2 border-b-2"></div>
+    <div className="
+      relative min-h-screen border border-tech-main/40 bg-transparent p-6 pb-32
+      backdrop-blur-sm
+      sm:p-8
+    ">
+      <div className="
+        absolute top-0 left-0 size-4 border-t-2 border-l-2 border-tech-main/40
+      "></div>
+      <div className="
+        absolute right-0 bottom-0 size-4 border-r-2 border-b-2
+        border-tech-main/40
+      "></div>
 
       {/* Article Header Region - Mobile-first in-flow card */}
-      <div className="border-tech-main/20 relative mb-8 flex flex-col gap-4 border bg-white/80 p-4 backdrop-blur-sm sm:p-6">
+      <div className="
+        relative mb-8 flex flex-col gap-4 border border-tech-main/20 bg-white/80
+        p-4 backdrop-blur-sm
+        sm:p-6
+      ">
         {/* Corner markers matching BrutalCard pattern */}
-        <div className="border-tech-main/40 pointer-events-none absolute top-0 left-0 h-2 w-2 -translate-x-[1px] -translate-y-[1px] border-t-2 border-l-2"></div>
-        <div className="border-tech-main/40 pointer-events-none absolute top-0 right-0 h-2 w-2 translate-x-[1px] -translate-y-[1px] border-t-2 border-r-2"></div>
-        <div className="border-tech-main/40 pointer-events-none absolute bottom-0 left-0 h-2 w-2 -translate-x-[1px] translate-y-[1px] border-b-2 border-l-2"></div>
-        <div className="border-tech-main/40 pointer-events-none absolute right-0 bottom-0 h-2 w-2 translate-x-[1px] translate-y-[1px] border-r-2 border-b-2"></div>
+        <div className="
+          pointer-events-none absolute top-0 left-0 size-2 -translate-px
+          border-t-2 border-l-2 border-tech-main/40
+        "></div>
+        <div className="
+          pointer-events-none absolute top-0 right-0 size-2 translate-x-px
+          -translate-y-px border-t-2 border-r-2 border-tech-main/40
+        "></div>
+        <div className="
+          pointer-events-none absolute bottom-0 left-0 size-2 -translate-x-px
+          translate-y-px border-b-2 border-l-2 border-tech-main/40
+        "></div>
+        <div className="
+          pointer-events-none absolute right-0 bottom-0 size-2 translate-px
+          border-r-2 border-b-2 border-tech-main/40
+        "></div>
 
         {/* Region 1: System/Read Label */}
-        <div className="text-tech-main/50 flex items-center font-mono text-xs">
-          <span className="bg-tech-main/50 mr-2 h-2 w-2 animate-pulse"></span>
+        <div className="flex items-center font-mono text-xs text-tech-main/50">
+          <span className="mr-2 size-2 animate-pulse bg-tech-main/50"></span>
           SYS.READ_STREAM | UTF-8
         </div>
 
@@ -109,14 +134,22 @@ export default async function ArticlePage({
         </div>
 
         {/* Region 3: Reading Stats Row */}
-        <div className="text-tech-main flex flex-col gap-2 font-mono text-xs opacity-80 transition-opacity hover:opacity-100 sm:flex-row sm:items-center">
+        <div className="
+          flex flex-col gap-2 font-mono text-xs text-tech-main opacity-80
+          transition-opacity
+          hover:opacity-100
+          sm:flex-row sm:items-center
+        ">
           <div className="flex items-center gap-1">
             <span className="opacity-50">WORDS:</span>
             <span className="font-bold">
               {wordCount.toLocaleString()}
             </span>
           </div>
-          <span className="hidden opacity-30 sm:inline">|</span>
+          <span className="
+            hidden opacity-30
+            sm:inline
+          ">|</span>
           <div className="flex items-center gap-1">
             <span className="opacity-50">EST_TIME:</span>
             <span className="font-bold">{readingTime} MIN</span>
@@ -126,7 +159,14 @@ export default async function ArticlePage({
         {/* Region 4: Edit Action Row */}
         <Link
           href={`/draft/new?file=${encodeURIComponent(editPath)}`}>
-          <button className="border-tech-main/40 bg-tech-main/10 hover:bg-tech-main text-tech-main relative flex min-h-[44px] w-full cursor-pointer items-center gap-2 overflow-hidden border px-4 py-2 font-mono text-xs tracking-widest uppercase transition-all duration-300 hover:text-white sm:w-auto">
+          <button className="
+            relative flex min-h-[44px] w-full cursor-pointer items-center gap-2
+            overflow-hidden border border-tech-main/40 bg-tech-main/10 px-4 py-2
+            font-mono text-xs tracking-widest text-tech-main uppercase
+            transition-all duration-300
+            hover:bg-tech-main hover:text-white
+            sm:w-auto
+          ">
             <span className="relative z-10 font-bold">
               [EDIT_TARGET]
             </span>
@@ -134,7 +174,11 @@ export default async function ArticlePage({
         </Link>
       </div>
 
-      <div className="prose prose-tech selection:bg-tech-main/20 w-full max-w-none overflow-hidden wrap-break-word text-slate-800 selection:text-slate-900">
+      <div className="
+        prose prose-tech w-full max-w-none overflow-hidden wrap-break-word
+        text-slate-800
+        selection:bg-tech-main/20 selection:text-slate-900
+      ">
         <ReactMarkdown
           remarkPlugins={remarkPlugins}
           rehypePlugins={rehypePlugins}

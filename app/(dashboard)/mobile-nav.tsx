@@ -31,15 +31,29 @@ export function MobileNav({ navLinks }: MobileNavProps) {
     <div>
       <button
         onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-        className="hover:bg-tech-main/10 flex min-h-11 min-w-11 cursor-pointer flex-col items-center justify-center gap-1.5 p-2 transition-colors md:hidden"
+        className="
+          flex min-h-11 min-w-11 cursor-pointer flex-col items-center
+          justify-center gap-1.5 p-2 transition-colors
+          hover:bg-tech-main/10
+          md:hidden
+        "
         aria-label="Toggle navigation menu"
         aria-expanded={isDrawerOpen}>
         <span
-          className={`bg-tech-main h-0.5 w-5 transition-all ${isDrawerOpen ? "translate-y-2 rotate-45" : ""}`}></span>
+          className={`
+            h-0.5 w-5 bg-tech-main transition-all
+            ${isDrawerOpen ? `translate-y-2 rotate-45` : ""}
+          `}></span>
         <span
-          className={`bg-tech-main h-0.5 w-5 transition-all ${isDrawerOpen ? "opacity-0" : ""}`}></span>
+          className={`
+            h-0.5 w-5 bg-tech-main transition-all
+            ${isDrawerOpen ? `opacity-0` : ""}
+          `}></span>
         <span
-          className={`bg-tech-main h-0.5 w-5 transition-all ${isDrawerOpen ? "-translate-y-2 -rotate-45" : ""}`}></span>
+          className={`
+            h-0.5 w-5 bg-tech-main transition-all
+            ${isDrawerOpen ? `-translate-y-2 -rotate-45` : ""}
+          `}></span>
       </button>
 
       {isMounted &&
@@ -47,22 +61,40 @@ export function MobileNav({ navLinks }: MobileNavProps) {
           <div>
             {isDrawerOpen && (
               <div
-                className="bg-tech-main-dark/20 fixed top-16 left-0 z-40 h-[calc(100dvh-4rem)] w-dvw backdrop-blur-xs md:hidden"
+                className="
+                  fixed top-16 left-0 z-40 h-[calc(100dvh-4rem)] w-dvw
+                  bg-tech-main-dark/20 backdrop-blur-xs
+                  md:hidden
+                "
                 onClick={() => setIsDrawerOpen(false)}
                 aria-hidden="true"
               />
             )}
 
             <div
-              className={`border-tech-main/40 fixed top-16 right-0 left-0 z-40 overflow-hidden border-b bg-white/95 backdrop-blur-md transition-all duration-300 md:hidden ${
+              className={`
+                fixed inset-x-0 top-16 z-40 overflow-hidden border-b
+                border-tech-main/40 bg-white/95 backdrop-blur-md transition-all
+                duration-300
+                md:hidden
+                ${
                 isDrawerOpen ? "max-h-screen" : "max-h-0"
-              }`}>
-              <div className="space-y-2 p-4 sm:p-6">
+              }
+              `}>
+              <div className="
+                space-y-2 p-4
+                sm:p-6
+              ">
                 {navLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="border-tech-main/40 hover:bg-tech-main text-tech-main-dark flex min-h-11 items-center border bg-white/60 p-3 font-mono text-xs tracking-[0.15em] transition-colors hover:text-white">
+                    className="
+                      flex min-h-11 items-center border border-tech-main/40
+                      bg-white/60 p-3 font-mono text-xs tracking-[0.15em]
+                      text-tech-main-dark transition-colors
+                      hover:bg-tech-main hover:text-white
+                    ">
                     {link.label}
                   </Link>
                 ))}

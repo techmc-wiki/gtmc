@@ -18,7 +18,10 @@ export const BrutalInput = React.forwardRef<
   return (
     <input
       ref={ref}
-      className={`${baseStyles} ${className}`}
+      className={`
+        ${baseStyles}
+        ${className}
+      `}
       {...props}
     />
   )

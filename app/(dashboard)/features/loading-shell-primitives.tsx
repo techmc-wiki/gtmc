@@ -16,14 +16,30 @@ export const SectionFrame = React.forwardRef<
   ) => (
     <div
       ref={ref}
-      className={`border-tech-main/40 relative border bg-white/80 p-6 backdrop-blur-sm sm:p-8 ${className}`}
+      className={`
+        relative border border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
+        sm:p-8
+        ${className}
+      `}
       {...props}>
       {showBrackets && (
         <>
-          <div className="border-tech-main/60 pointer-events-none absolute top-0 left-0 h-2 w-2 -translate-x-[1px] -translate-y-[1px] border-t-2 border-l-2" />
-          <div className="border-tech-main/60 pointer-events-none absolute top-0 right-0 h-2 w-2 translate-x-[1px] -translate-y-[1px] border-t-2 border-r-2" />
-          <div className="border-tech-main/60 pointer-events-none absolute bottom-0 left-0 h-2 w-2 -translate-x-[1px] translate-y-[1px] border-b-2 border-l-2" />
-          <div className="border-tech-main/60 pointer-events-none absolute right-0 bottom-0 h-2 w-2 translate-x-[1px] translate-y-[1px] border-r-2 border-b-2" />
+          <div className="
+            pointer-events-none absolute top-0 left-0 size-2 -translate-px
+            border-t-2 border-l-2 border-tech-main/60
+          " />
+          <div className="
+            pointer-events-none absolute top-0 right-0 size-2 translate-x-px
+            -translate-y-px border-t-2 border-r-2 border-tech-main/60
+          " />
+          <div className="
+            pointer-events-none absolute bottom-0 left-0 size-2 -translate-x-px
+            translate-y-px border-b-2 border-l-2 border-tech-main/60
+          " />
+          <div className="
+            pointer-events-none absolute right-0 bottom-0 size-2 translate-px
+            border-r-2 border-b-2 border-tech-main/60
+          " />
         </>
       )}
       {children}
@@ -42,7 +58,10 @@ export const SectionRail = React.forwardRef<
 >(({ label, className = "", ...props }, ref) => (
   <div
     ref={ref}
-    className={`text-tech-main tracking-tech-wide font-mono text-xs uppercase ${className}`}
+    className={`
+      font-mono text-xs tracking-tech-wide text-tech-main uppercase
+      ${className}
+    `}
     {...props}>
     {label}_
   </div>
@@ -78,7 +97,12 @@ export const SegmentedBar = React.forwardRef<
     return (
       <div
         ref={ref}
-        className={`h-2 ${opacityMap[opacity]} ${showBorder ? "border-tech-line border" : ""} ${className}`}
+        className={`
+          h-2
+          ${opacityMap[opacity]}
+          ${showBorder ? `border border-tech-line` : ""}
+          ${className}
+        `}
         {...props}
       />
     )
@@ -97,7 +121,13 @@ export const SkeletonExitWrapper = React.forwardRef<
 >(({ isExiting = false, className = "", ...props }, ref) => (
   <div
     ref={ref}
-    className={`${isExiting ? "animate-skeleton-exit motion-reduce:animate-fade-out" : ""} ${className}`}
+    className={`
+      ${isExiting ? `
+        animate-skeleton-exit
+        motion-reduce:animate-fade-out
+      ` : ""}
+      ${className}
+    `}
     {...props}
   />
 ))
@@ -113,7 +143,12 @@ export const SweepOverlay = React.forwardRef<
 >(({ className = "", ...props }, ref) => (
   <div
     ref={ref}
-    className={`via-tech-accent/30 animate-blueprint-sweep absolute inset-0 bg-gradient-to-r from-transparent to-transparent motion-reduce:animate-none ${className}`}
+    className={`
+      absolute inset-0 animate-blueprint-sweep bg-linear-to-r from-transparent
+      via-tech-accent/30 to-transparent
+      motion-reduce:animate-none
+      ${className}
+    `}
     {...props}
   />
 ))
@@ -129,7 +164,12 @@ export const ScanConfirmOverlay = React.forwardRef<
 >(({ className = "", ...props }, ref) => (
   <div
     ref={ref}
-    className={`via-tech-accent/30 animate-scan-confirm absolute inset-0 bg-gradient-to-r from-transparent to-transparent motion-reduce:animate-none ${className}`}
+    className={`
+      absolute inset-0 animate-scan-confirm bg-linear-to-r from-transparent
+      via-tech-accent/30 to-transparent
+      motion-reduce:animate-none
+      ${className}
+    `}
     {...props}
   />
 ))

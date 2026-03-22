@@ -1,0 +1,1 @@
+import { getOctokit, ARTICLES_REPO_OWNER, ARTICLES_REPO_NAME } from "./lib/github-pr"; getOctokit().issues.listEvents({owner: ARTICLES_REPO_OWNER, repo: ARTICLES_REPO_NAME, issue_number: 2}).then(x => console.log(x.data.map(e => ({event: e.event, commit_id: e.commit_id}))))

@@ -35,7 +35,10 @@ export function MobileTreeSheet({
 
   return (
     <div
-      className="fixed inset-x-0 top-16 bottom-0 z-[60] md:hidden"
+      className="
+        fixed inset-x-0 top-16 bottom-0 z-60
+        md:hidden
+      "
       data-testid="mobile-tree-sheet">
       {/* Backdrop */}
       <div
@@ -46,18 +49,33 @@ export function MobileTreeSheet({
       />
 
       {/* Panel */}
-      <div className="border-tech-main/40 absolute inset-0 flex flex-col overflow-hidden border-b bg-white/95 backdrop-blur-md">
+      <div className="
+        absolute inset-0 flex flex-col overflow-hidden border-b
+        border-tech-main/40 bg-white/95 backdrop-blur-md
+      ">
         {/* Header */}
         <div
-          className="border-tech-main/40 flex shrink-0 items-center justify-between border-b px-4 py-3"
+          className="
+            flex shrink-0 items-center justify-between border-b
+            border-tech-main/40 px-4 py-3
+          "
           data-testid="mobile-tree-panel-header">
-          <div className="text-tech-main/60 tracking-tech-wide flex items-center font-mono text-xs font-bold uppercase">
-            <span className="bg-tech-main/60 mr-2 inline-block h-1.5 w-1.5 animate-pulse"></span>
+          <div className="
+            flex items-center font-mono text-xs font-bold tracking-tech-wide
+            text-tech-main/60 uppercase
+          ">
+            <span className="
+              mr-2 inline-block size-1.5 animate-pulse bg-tech-main/60
+            "></span>
             SYS.DIR_TREE
           </div>
           <button
             onClick={onClose}
-            className="text-tech-main hover:bg-tech-main/10 cursor-pointer px-3 py-2 font-mono text-xs font-bold tracking-[0.15em] uppercase transition-colors"
+            className="
+              cursor-pointer px-3 py-2 font-mono text-xs font-bold
+              tracking-[0.15em] text-tech-main uppercase transition-colors
+              hover:bg-tech-main/10
+            "
             data-testid="mobile-tree-close"
             aria-label="Close tree">
             CLOSE
@@ -65,7 +83,10 @@ export function MobileTreeSheet({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <div className="
+          flex-1 overflow-y-auto p-4
+          sm:p-6
+        ">
           {children}
         </div>
       </div>

@@ -10,7 +10,13 @@ export async function ProfileButton() {
     return (
       <Link
         href="/login"
-        className="border-tech-main/40 bg-tech-main/10 hover:bg-tech-main text-tech-main relative flex items-center gap-2 overflow-hidden border px-4 py-1.5 font-mono text-[10px] tracking-widest uppercase transition-all duration-300 hover:text-white md:text-xs">
+        className="
+          relative flex items-center gap-2 overflow-hidden border
+          border-tech-main/40 bg-tech-main/10 px-4 py-1.5 font-mono text-[10px]
+          tracking-widest text-tech-main uppercase transition-all duration-300
+          hover:bg-tech-main hover:text-white
+          md:text-xs
+        ">
         <span className="relative z-10 font-bold">LOGIN</span>
       </Link>
     )
@@ -19,7 +25,11 @@ export async function ProfileButton() {
   return (
     <Link
       href="/profile"
-      className="block h-8 w-8 transition-transform hover:scale-110 md:h-10 md:w-10">
+      className="
+        block size-8 transition-transform
+        hover:scale-110
+        md:size-10
+      ">
       <BrutalAvatar
         src={session.user.image}
         alt={session.user.name}

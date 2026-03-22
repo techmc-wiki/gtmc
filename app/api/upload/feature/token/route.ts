@@ -13,7 +13,6 @@ import {
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as HandleUploadBody
-    const origin = req.headers.get("origin") ?? undefined
 
     const jsonResponse = await handleUpload({
       body,

@@ -29,14 +29,35 @@ export default async function ProfilePage() {
   )
 
   return (
-    <div className="animate-fade-in mx-auto mt-4 max-w-4xl space-y-8 px-4 pb-20 sm:mt-8 sm:space-y-12 sm:px-0">
-      <div className="border-tech-main/40 flex flex-col items-start justify-between border-b-2 pb-4 md:flex-row md:items-end">
+    <div className="
+      mx-auto mt-4 max-w-4xl animate-fade-in space-y-8 px-4 pb-20
+      sm:mt-8 sm:space-y-12 sm:px-0
+    ">
+      <div className="
+        flex flex-col items-start justify-between border-b-2 border-tech-main/40
+        pb-4
+        md:flex-row md:items-end
+      ">
         <div>
-          <p className="text-tech-main/60 tracking-tech-wide mb-2 font-mono text-[10px] uppercase sm:text-xs">
+          <p className="
+            mb-2 font-mono text-[10px] tracking-tech-wide text-tech-main/60
+            uppercase
+            sm:text-xs
+          ">
             [ USER_PROFILE_SYS ]
           </p>
-          <h1 className="text-tech-main-dark flex items-center gap-2 text-xl font-bold tracking-widest uppercase sm:gap-4 sm:text-2xl md:text-4xl lg:text-5xl">
-            <span className="border-tech-main/40 bg-tech-main/5 text-tech-main flex h-8 w-8 shrink-0 items-center justify-center border sm:h-10 sm:w-10">
+          <h1 className="
+            flex items-center gap-2 text-xl font-bold tracking-widest
+            text-tech-main-dark uppercase
+            sm:gap-4 sm:text-2xl
+            md:text-4xl
+            lg:text-5xl
+          ">
+            <span className="
+              flex size-8 shrink-0 items-center justify-center border
+              border-tech-main/40 bg-tech-main/5 text-tech-main
+              sm:size-10
+            ">
               <svg
                 width="16"
                 height="16"
@@ -44,91 +65,184 @@ export default async function ProfilePage() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className="sm:h-5 sm:w-5">
+                className="sm:size-5">
                 <circle cx="12" cy="8" r="5" />
                 <path d="M20 21a8 8 0 0 0-16 0" />
               </svg>
             </span>
             USER_PROFILE
           </h1>
-          <p className="text-tech-main/70 tracking-tech-wide mt-2 flex items-center gap-2 font-mono text-[10px] sm:mt-3 sm:text-sm">
-            <span className="bg-tech-main h-1 w-1 animate-pulse sm:h-1.5 sm:w-1.5"></span>
+          <p className="
+            mt-2 flex items-center gap-2 font-mono text-[10px]
+            tracking-tech-wide text-tech-main/70
+            sm:mt-3 sm:text-sm
+          ">
+            <span className="
+              size-1 animate-pulse bg-tech-main
+              sm:size-1.5
+            "></span>
             CONFIG // IDENTITY // TOKENS
           </p>
         </div>
-        <div className="text-tech-main/50 tracking-tech-wide mt-4 font-mono text-[9px] uppercase sm:text-xs md:mt-0">
+        <div className="
+          mt-4 font-mono text-[9px] tracking-tech-wide text-tech-main/50
+          uppercase
+          sm:text-xs
+          md:mt-0
+        ">
           SYS.STATE ::{" "}
-          <span className="text-tech-main-dark font-bold">
+          <span className="font-bold text-tech-main-dark">
             ACTIVE *
           </span>
         </div>
       </div>
 
-      <div className="border-tech-main/40 relative w-full border bg-white/60 shadow-sm backdrop-blur-md">
-        <div className="bg-tech-main/5 border-tech-main/20 text-tech-main/60 absolute top-0 right-0 border-b border-l px-2 py-1 font-mono text-[9px] tracking-widest sm:text-[10px]">
+      <div className="
+        relative w-full border border-tech-main/40 bg-white/60 shadow-sm
+        backdrop-blur-md
+      ">
+        <div className="
+          absolute top-0 right-0 border-b border-l border-tech-main/20
+          bg-tech-main/5 px-2 py-1 font-mono text-[9px] tracking-widest
+          text-tech-main/60
+          sm:text-[10px]
+        ">
           CONFIG.PANEL_V2
         </div>
         {/* 角落刻度 */}
-        <div className="border-tech-main absolute top-0 left-0 h-2 w-2 -translate-x-0.5 -translate-y-0.5 border-t-2 border-l-2"></div>
-        <div className="border-tech-main absolute right-0 bottom-0 h-2 w-2 translate-x-0.5 translate-y-0.5 border-r-2 border-b-2"></div>
+        <div className="
+          absolute top-0 left-0 size-2 -translate-0.5 border-t-2 border-l-2
+          border-tech-main
+        "></div>
+        <div className="
+          absolute right-0 bottom-0 size-2 translate-0.5 border-r-2 border-b-2
+          border-tech-main
+        "></div>
 
         <form
           action={updateProfileAction}
-          className="relative z-10 space-y-6 p-4 sm:space-y-8 sm:p-6 md:space-y-10 md:p-8 lg:p-12">
-          <div className="flex flex-col items-start gap-4 sm:gap-6 md:gap-8">
-            <div className="border-tech-main/30 bg-tech-main/5 relative h-24 w-24 shrink-0 border p-1 sm:h-32 sm:w-32 md:h-40 md:w-40">
-              <div className="bg-tech-main absolute -top-1 -left-1 h-2 w-2"></div>
-              <div className="bg-tech-main absolute -right-1 -bottom-1 h-2 w-2"></div>
+          className="
+            relative z-10 space-y-6 p-4
+            sm:space-y-8 sm:p-6
+            md:space-y-10 md:p-8
+            lg:p-12
+          ">
+          <div className="
+            flex flex-col items-start gap-4
+            sm:gap-6
+            md:gap-8
+          ">
+            <div className="
+              relative size-24 shrink-0 border border-tech-main/30
+              bg-tech-main/5 p-1
+              sm:size-32
+              md:size-40
+            ">
+              <div className="absolute -top-1 -left-1 size-2 bg-tech-main"></div>
+              <div className="absolute -right-1 -bottom-1 size-2 bg-tech-main"></div>
               <BrutalAvatar
                 src={user.image}
                 alt={user.name}
                 size="lg"
-                className="h-full w-full rounded-none"
+                className="size-full rounded-none"
               />
             </div>
 
-            <div className="w-full flex-1 space-y-3 sm:space-y-4">
-              <label className="text-tech-main-dark border-tech-main tracking-tech-wide block border-l-2 pl-2.5 font-mono text-[10px] font-bold uppercase sm:text-xs">
+            <div className="
+              w-full flex-1 space-y-3
+              sm:space-y-4
+            ">
+              <label className="
+                block border-l-2 border-tech-main pl-2.5 font-mono text-[10px]
+                font-bold tracking-tech-wide text-tech-main-dark uppercase
+                sm:text-xs
+              ">
                 AVATAR URL
               </label>
               <BrutalInput
                 name="image"
                 defaultValue={user.image || ""}
                 placeholder="https://..."
-                className="border-tech-main/30 focus:border-tech-main w-full rounded-none border bg-white font-mono text-xs shadow-none transition-colors sm:text-sm"
+                className="
+                  w-full rounded-none border border-tech-main/30 bg-white
+                  font-mono text-xs shadow-none transition-colors
+                  focus:border-tech-main
+                  sm:text-sm
+                "
               />
-              <p className="text-tech-main/60 border-tech-main/30 border-l pl-2 font-mono text-[9px] tracking-widest uppercase sm:text-[10px]">
+              <p className="
+                border-l border-tech-main/30 pl-2 font-mono text-[9px]
+                tracking-widest text-tech-main/60 uppercase
+                sm:text-[10px]
+              ">
                 {">"} REQUIRED: DIRECT IMAGE LINK (.PNG/.JPG/.GIF)
               </p>
             </div>
           </div>
 
-          <div className="border-tech-main/30 flex justify-end border-b border-dashed pb-2">
-            <span className="text-tech-main/50 font-mono text-[9px] tracking-widest sm:text-[10px]">
+          <div className="
+            flex justify-end border-b border-dashed border-tech-main/30 pb-2
+          ">
+            <span className="
+              font-mono text-[9px] tracking-widest text-tech-main/50
+              sm:text-[10px]
+            ">
               SEC_1_IDENTITY
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
-            <div className="space-y-3 sm:space-y-4">
-              <label className="text-tech-main-dark border-tech-main tracking-tech-wide block border-l-2 pl-2.5 font-mono text-[10px] font-bold uppercase sm:text-xs">
+          <div className="
+            grid grid-cols-1 gap-4
+            sm:gap-6
+            md:gap-8
+          ">
+            <div className="
+              space-y-3
+              sm:space-y-4
+            ">
+              <label className="
+                block border-l-2 border-tech-main pl-2.5 font-mono text-[10px]
+                font-bold tracking-tech-wide text-tech-main-dark uppercase
+                sm:text-xs
+              ">
                 USERNAME
               </label>
               <BrutalInput
                 name="name"
                 defaultValue={user.name || ""}
                 required
-                className="border-tech-main/30 focus:border-tech-main w-full rounded-none border bg-white font-mono text-xs shadow-none transition-colors sm:text-sm"
+                className="
+                  w-full rounded-none border border-tech-main/30 bg-white
+                  font-mono text-xs shadow-none transition-colors
+                  focus:border-tech-main
+                  sm:text-sm
+                "
               />
             </div>
-            <div className="space-y-3 sm:space-y-4">
-              <label className="text-tech-main/60 border-tech-main/40 tracking-tech-wide flex items-center gap-2 border-l-2 pl-2.5 font-mono text-[10px] font-bold uppercase sm:text-xs">
+            <div className="
+              space-y-3
+              sm:space-y-4
+            ">
+              <label className="
+                flex items-center gap-2 border-l-2 border-tech-main/40 pl-2.5
+                font-mono text-[10px] font-bold tracking-tech-wide
+                text-tech-main/60 uppercase
+                sm:text-xs
+              ">
                 EMAIL{" "}
-                <span className="border-tech-main/30 bg-tech-main/5 text-tech-main/60 border px-1 text-[8px] sm:text-[9px]">
+                <span className="
+                  border border-tech-main/30 bg-tech-main/5 px-1 text-[8px]
+                  text-tech-main/60
+                  sm:text-[9px]
+                ">
                   RO
                 </span>
                 {emailVisibility === "private" && (
-                  <span className="border border-amber-400/60 bg-amber-50 px-1 text-[8px] text-amber-600 sm:text-[9px]">
+                  <span className="
+                    border border-amber-400/60 bg-amber-50 px-1 text-[8px]
+                    text-amber-600
+                    sm:text-[9px]
+                  ">
                     PRIVATE
                   </span>
                 )}
@@ -136,10 +250,19 @@ export default async function ProfilePage() {
               <BrutalInput
                 defaultValue={user.email || ""}
                 disabled
-                className="border-tech-main/20 bg-tech-main/5 text-tech-main/60 w-full cursor-not-allowed rounded-none border font-mono text-xs tracking-wide shadow-none sm:text-sm"
+                className="
+                  w-full cursor-not-allowed rounded-none border
+                  border-tech-main/20 bg-tech-main/5 font-mono text-xs
+                  tracking-wide text-tech-main/60 shadow-none
+                  sm:text-sm
+                "
               />
               {emailVisibility === "private" && (
-                <p className="border-l border-amber-400/40 pl-2 font-mono text-[9px] tracking-widest text-amber-600/70 uppercase sm:text-[10px]">
+                <p className="
+                  border-l border-amber-400/40 pl-2 font-mono text-[9px]
+                  tracking-widest text-amber-600/70 uppercase
+                  sm:text-[10px]
+                ">
                   {">"} YOUR GITHUB PRIMARY EMAIL VISIBILITY IS SET TO
                   PRIVATE
                 </p>
@@ -147,33 +270,76 @@ export default async function ProfilePage() {
             </div>
           </div>
 
-          <div className="bg-tech-main/5 border-tech-main/30 relative mt-6 flex flex-col items-start justify-between gap-3 border p-3 sm:mt-8 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
-            <div className="bg-tech-main/20 absolute top-0 right-0 h-2 w-2"></div>
-            <div className="flex items-center gap-3 sm:gap-4">
-              <span className="text-tech-main/60 font-mono text-[9px] tracking-widest uppercase sm:text-[10px]">
+          <div className="
+            relative mt-6 flex flex-col items-start justify-between gap-3 border
+            border-tech-main/30 bg-tech-main/5 p-3
+            sm:mt-8 sm:flex-row sm:items-center sm:gap-4 sm:p-4
+          ">
+            <div className="absolute top-0 right-0 size-2 bg-tech-main/20"></div>
+            <div className="
+              flex items-center gap-3
+              sm:gap-4
+            ">
+              <span className="
+                font-mono text-[9px] tracking-widest text-tech-main/60 uppercase
+                sm:text-[10px]
+              ">
                 ASSIGNED ROLE:
               </span>
-              <span className="text-tech-main-dark font-mono text-xs font-bold tracking-widest uppercase sm:text-sm">
+              <span className="
+                font-mono text-xs font-bold tracking-widest text-tech-main-dark
+                uppercase
+                sm:text-sm
+              ">
                 [{user.role}]
               </span>
             </div>
           </div>
 
-          <div className="border-tech-main/30 flex justify-start border-b border-dashed pt-4 pb-2">
-            <span className="text-tech-main/50 font-mono text-[9px] tracking-widest sm:text-[10px]">
+          <div className="
+            flex justify-start border-b border-dashed border-tech-main/30 pt-4
+            pb-2
+          ">
+            <span className="
+              font-mono text-[9px] tracking-widest text-tech-main/50
+              sm:text-[10px]
+            ">
               SEC_2_CREDENTIALS
             </span>
           </div>
 
           
 
-          <div className="bg-tech-main/30 my-6 h-px w-full sm:my-8"></div>
+          <div className="
+            my-6 h-px w-full bg-tech-main/30
+            sm:my-8
+          "></div>
 
-          <div className="flex flex-col items-stretch justify-end gap-3 sm:gap-4 md:flex-row md:items-center md:gap-6">
-            <SignOutButton className="bg-tech-main/10 hover:bg-tech-main text-tech-main border-tech-main/40 relative flex min-h-11 w-full items-center justify-center border px-4 py-2.5 font-mono text-xs font-bold tracking-widest uppercase transition-colors hover:text-white sm:px-6 sm:py-3 md:px-8" />
+          <div className="
+            flex flex-col items-stretch justify-end gap-3
+            sm:gap-4
+            md:flex-row md:items-center md:gap-6
+          ">
+            <SignOutButton className="
+              relative flex min-h-11 w-full items-center justify-center border
+              border-tech-main/40 bg-tech-main/10 px-4 py-2.5 font-mono text-xs
+              font-bold tracking-widest text-tech-main uppercase
+              transition-colors
+              hover:bg-tech-main hover:text-white
+              sm:px-6 sm:py-3
+              md:px-8
+            " />
             <button
               type="submit"
-              className="bg-tech-main/10 hover:bg-tech-main text-tech-main border-tech-main/40 relative flex min-h-11 w-full cursor-pointer items-center justify-center border px-4 py-2.5 font-mono text-xs font-bold tracking-widest uppercase transition-colors hover:text-white sm:px-6 sm:py-3 md:px-8">
+              className="
+                relative flex min-h-11 w-full cursor-pointer items-center
+                justify-center border border-tech-main/40 bg-tech-main/10 px-4
+                py-2.5 font-mono text-xs font-bold tracking-widest
+                text-tech-main uppercase transition-colors
+                hover:bg-tech-main hover:text-white
+                sm:px-6 sm:py-3
+                md:px-8
+              ">
               SAVE_CONFIG
             </button>
           </div>

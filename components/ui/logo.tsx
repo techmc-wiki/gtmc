@@ -30,14 +30,22 @@ export function Logo({
   return (
     <Link
       href="/"
-      className={`inline-flex items-center font-sans tracking-widest transition-opacity hover:opacity-80 ${sizeClasses[size]} ${className}`}>
+      className={`
+        inline-flex items-center font-sans tracking-widest transition-opacity
+        hover:opacity-80
+        ${sizeClasses[size]}
+        ${className}
+      `}>
       {showSlash && (
         <span
-          className={`text-tech-main mr-1 font-light opacity-40 ${slashClasses[size]}`}>
+          className={`
+            mr-1 font-light text-tech-main opacity-40
+            ${slashClasses[size]}
+          `}>
           {"//"}
         </span>
       )}
-      <span className="text-tech-main-dark font-bold">GTMC</span>
+      <span className="font-bold text-tech-main-dark">GTMC</span>
     </Link>
   )
 }

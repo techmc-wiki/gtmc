@@ -26,9 +26,7 @@ export default async function ReviewHubPage() {
   }
 
   // Fetch PRs from GitHub using admin's PAT or default SERVER TOKEN
-  const token =
-    (session.user as { githubPat?: string }).githubPat ||
-    process.env.GITHUB_TOKEN
+  const token = process.env.GITHUB_ARTICLES_WRITE_PAT
   let openPRs: Array<{
     id: number
     number: number

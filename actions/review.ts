@@ -17,9 +17,7 @@ export async function mergePRAction(prNumber: number) {
     throw new Error("Unauthorized")
   }
 
-  const token =
-    (session.user as { githubPat?: string }).githubPat ||
-    process.env.GITHUB_TOKEN
+  const token = process.env.GITHUB_ARTICLES_WRITE_PAT
   const octokit = getOctokit(token)
 
   try {
@@ -46,9 +44,7 @@ export async function resolveConflictAction(
     throw new Error("Unauthorized")
   }
 
-  const token =
-    (session.user as { githubPat?: string }).githubPat ||
-    process.env.GITHUB_TOKEN
+  const token = process.env.GITHUB_ARTICLES_WRITE_PAT
   const octokit = getOctokit(token)
 
   const filePath = formData.get("filePath") as string
@@ -103,9 +99,7 @@ export async function closePRAction(prNumber: number) {
     throw new Error("Unauthorized")
   }
 
-  const token =
-    (session.user as { githubPat?: string }).githubPat ||
-    process.env.GITHUB_TOKEN
+  const token = process.env.GITHUB_ARTICLES_WRITE_PAT
   const octokit = getOctokit(token)
 
   try {

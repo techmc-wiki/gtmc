@@ -165,43 +165,7 @@ export default async function ProfilePage() {
             </span>
           </div>
 
-          {user.role === "ADMIN" && (
-            <div className="relative mt-6 space-y-4 border border-red-300 bg-red-50/50 p-4 sm:mt-8 sm:space-y-6 sm:p-6 md:p-8">
-              <div className="absolute top-0 right-0 flex items-center gap-2 border-b border-l border-red-300 bg-red-500/10 px-2 py-1 font-mono text-[9px] text-red-600/80 sm:px-3 sm:text-[10px]">
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>
-                ADMIN.SECURE.ZONE
-              </div>
-
-              <div className="pt-2">
-                <h3 className="mb-2 border-l-2 border-red-400 pl-2.5 text-xs font-bold tracking-widest text-red-600/80 uppercase sm:text-sm">
-                  GITHUB PAT TOKEN
-                </h3>
-                <p className="text-tech-main-dark mt-2 font-mono text-[10px] tracking-wide sm:text-[11px]">
-                  Store your GitHub Personal Access Token to enable PR
-                  automation.
-                </p>
-                <p className="mt-1 font-mono text-[9px] tracking-widest text-red-500/60 uppercase sm:text-[10px]">
-                  {"//"} REQUIRED SCOPES: &apos;repo&apos;,
-                  &apos;workflow&apos;
-                </p>
-              </div>
-              <BrutalInput
-                name="githubPat"
-                type="password"
-                placeholder="********-********-********"
-                defaultValue={user.githubPat || ""}
-                className="w-full rounded-none border border-red-200 bg-white text-center font-mono text-xs tracking-[0.3em] text-red-600/80 shadow-none focus:border-red-400 sm:text-sm"
-              />
-            </div>
-          )}
+          
 
           <div className="bg-tech-main/30 my-6 h-px w-full sm:my-8"></div>
 

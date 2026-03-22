@@ -99,7 +99,7 @@ export async function submitForReviewAction(revisionId: string) {
     )
   }
 
-  const token = existing.author.githubPat || process.env.GITHUB_TOKEN
+  const token = process.env.GITHUB_ARTICLES_WRITE_PAT
   const authorName = session.user.name || "GTMC Author"
   const authorEmail = session.user.email || "author@gtmc.dev"
 

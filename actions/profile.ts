@@ -13,7 +13,6 @@ export async function updateProfileAction(formData: FormData) {
 
   const name = formData.get("name") as string
   const image = formData.get("image") as string
-  const githubPat = formData.get("githubPat") as string
 
   if (!name || name.trim() === "") {
     throw new Error("Name is required")
@@ -29,9 +28,6 @@ export async function updateProfileAction(formData: FormData) {
     data: {
       name,
       ...(image ? { image } : {}),
-      ...(user?.role === "ADMIN" && typeof githubPat === "string"
-        ? { githubPat: githubPat || null }
-        : {}),
     },
   })
 

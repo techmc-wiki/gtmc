@@ -37,9 +37,7 @@ export default async function ReviewDetailPage({
     notFound()
   }
 
-  const token =
-    (session.user as { githubPat?: string }).githubPat ||
-    process.env.GITHUB_TOKEN
+  const token = process.env.GITHUB_ARTICLES_WRITE_PAT
   const octokit = getOctokit(token)
 
   let pr

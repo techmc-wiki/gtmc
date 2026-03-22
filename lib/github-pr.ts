@@ -8,7 +8,7 @@ export const ARTICLES_REPO_NAME =
   process.env.GITHUB_ARTICLES_REPO_NAME || "Articles"
 
 export const getOctokit = (token?: string) => {
-  return new Octokit({ auth: token || process.env.GITHUB_TOKEN })
+  return new Octokit({ auth: token || process.env.GITHUB_ARTICLES_WRITE_PAT })
 }
 
 export async function createPR({
@@ -131,7 +131,7 @@ export interface RepoTreeNode {
 }
 
 export async function getRepoContentTree(): Promise<RepoTreeNode[]> {
-  const octokit = getOctokit(process.env.GITHUB_TOKEN)
+  const octokit = getOctokit(process.env.GITHUB_ARTICLES_WRITE_PAT)
 
   const { data: ref } = await octokit.git.getRef({
     owner: ARTICLES_REPO_OWNER,
@@ -225,7 +225,7 @@ export async function getRepoContentTree(): Promise<RepoTreeNode[]> {
 export async function getRepoFileContent(
   filePath: string,
 ): Promise<string | null> {
-  const octokit = getOctokit(process.env.GITHUB_TOKEN)
+  const octokit = getOctokit(process.env.GITHUB_ARTICLES_WRITE_PAT)
   try {
     const { data } = await octokit.repos.getContent({
       owner: ARTICLES_REPO_OWNER,
@@ -244,7 +244,7 @@ export async function getRepoFileContent(
 export async function getRepoFileBuffer(
   filePath: string,
 ): Promise<Buffer | null> {
-  const octokit = getOctokit(process.env.GITHUB_TOKEN)
+  const octokit = getOctokit(process.env.GITHUB_ARTICLES_WRITE_PAT)
   try {
     const { data } = await octokit.repos.getContent({
       owner: ARTICLES_REPO_OWNER,

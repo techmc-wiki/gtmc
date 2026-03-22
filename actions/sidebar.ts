@@ -1,7 +1,7 @@
 ﻿"use server"
 
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { requireAuth } from "@/lib/auth-helpers"
 import { unstable_cache } from "next/cache"
 import {
   getRepoContentTree,
@@ -130,10 +130,7 @@ export async function createDocument({
   isFolder?: boolean
   parentId?: string | null
 }) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    throw new Error("未授权，请先登录")
-  }
+  const session = await requireAuth("未授权，请先登录")
 
   // 1. Resolve parent directory path
   let parentPath = ""
@@ -143,7 +140,7 @@ export async function createDocument({
     } else {
       const parentDoc = await prisma.article.findUnique({
         where: { id: parentId },
-        select: { slug: true }
+        select: { slug: true },
       })
       if (parentDoc) {
         parentPath = parentDoc.slug
@@ -187,7 +184,9 @@ export async function createDocument({
       })
     } else {
       await createPR({
-        title: isFolder ? `[系统自动生成] Request to create folder ${title}` : `[系统自动生成] Request to create file ${title}`,
+        title: isFolder
+          ? `[系统自动生成] Request to create folder ${title}`
+          : `[系统自动生成] Request to create file ${title}`,
         content: initialContent,
         filePath,
         authorName,

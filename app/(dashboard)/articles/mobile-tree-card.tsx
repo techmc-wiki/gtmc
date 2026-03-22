@@ -16,7 +16,11 @@ export function MobileTreeCard({
   children,
   isFloating,
 }: MobileTreeCardProps) {
-  const canUseDOM = typeof document !== "undefined"
+  const [isMounted, setIsMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   React.useEffect(() => {
     if (!isOpen) return
@@ -36,7 +40,7 @@ export function MobileTreeCard({
     }
   }, [isOpen, onClose])
 
-  if (!canUseDOM || !isOpen || !isFloating) return null
+  if (!isMounted || !isOpen || !isFloating) return null
 
   return createPortal(
     <div

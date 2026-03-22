@@ -30,33 +30,80 @@ function TreeLoadingPlaceholder() {
   return (
     <div
       className="
-        relative overflow-hidden border guide-line bg-white/75 p-3 backdrop-blur-sm
+        relative h-full min-h-full min-h-[30rem] animate-tree-drop-in
+        overflow-hidden border guide-line bg-white/80 px-3 py-4
+        motion-reduce:animate-none md:min-h-[40rem] md:px-4 md:py-5
       "
+      style={{
+        animation: "tree-drop-in 1.05s cubic-bezier(0.16, 1, 0.3, 1) both",
+      }}
       aria-hidden="true">
-      <ScanConfirmOverlay className="opacity-45" />
+      <ScanConfirmOverlay className="opacity-40" />
       <SectionRail
         label="TREE_BOOTSTRAP"
-        className="mb-3 text-[10px] opacity-80"
+        className="mb-3 text-[10px] opacity-75"
       />
 
-      <div className="space-y-2">
-        <SegmentedBar opacity="high" className="h-4 w-11/12" />
-        <div className="space-y-2 border-l guide-line pl-3">
+      <div className="space-y-6 pr-3">
+        <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <span className="h-px w-2 bg-tech-main/40" />
-            <SegmentedBar opacity="medium" className="h-3.5 w-4/5" />
+            <span className="size-1 bg-tech-main/45" />
+            <SegmentedBar opacity="high" className="h-4 w-4/5" />
           </div>
-          <div className="flex items-center gap-2">
-            <span className="h-px w-2 bg-tech-main/40" />
-            <SegmentedBar opacity="medium" className="h-3.5 w-3/5" />
+
+          <div className="space-y-3 border-l guide-line pl-3">
+            <div className="flex items-center gap-2">
+              <span className="h-px w-2 bg-tech-main/40" />
+              <SegmentedBar opacity="medium" className="h-3.5 w-3/4" />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="h-px w-2 bg-tech-main/40" />
+              <SegmentedBar opacity="medium" className="h-3.5 w-2/3" />
+            </div>
+
+            <div className="ml-2 space-y-3 border-l border-tech-main/20 pl-3">
+              <div className="flex items-center gap-2">
+                <span className="size-1 rounded-full bg-tech-main/35" />
+                <SegmentedBar opacity="low" className="h-3 w-3/5" />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="size-1 rounded-full bg-tech-main/35" />
+                <SegmentedBar opacity="low" className="h-3 w-2/5" />
+              </div>
+            </div>
           </div>
         </div>
 
-        <SegmentedBar opacity="high" className="h-4 w-3/4" />
-        <div className="space-y-2 border-l guide-line pl-3">
+        <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <span className="h-px w-2 bg-tech-main/40" />
-            <SegmentedBar opacity="low" className="h-3.5 w-2/3" />
+            <span className="size-1 bg-tech-main/45" />
+            <SegmentedBar opacity="high" className="h-4 w-2/3" />
+          </div>
+
+          <div className="space-y-3 border-l guide-line pl-3">
+            <div className="flex items-center gap-2">
+              <span className="h-px w-2 bg-tech-main/40" />
+              <SegmentedBar opacity="medium" className="h-3.5 w-3/5" />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="h-px w-2 bg-tech-main/40" />
+              <SegmentedBar opacity="low" className="h-3.5 w-1/3" />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-3 border-l guide-line pl-3">
+          <div className="flex items-center gap-2">
+            <span className="h-px w-2 bg-tech-main/35" />
+            <SegmentedBar opacity="medium" className="h-3.5 w-1/2" />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="h-px w-2 bg-tech-main/35" />
+            <SegmentedBar opacity="low" className="h-3.5 w-2/5" />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="h-px w-2 bg-tech-main/35" />
+            <SegmentedBar opacity="low" className="h-3.5 w-1/3" />
           </div>
         </div>
       </div>
@@ -67,11 +114,15 @@ function TreeLoadingPlaceholder() {
 export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isFloating, setIsFloating] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
   const [treeData, setTreeData] = useState<TreeNode[]>(tree)
   const [isTreeLoading, setIsTreeLoading] = useState(tree.length === 0)
   const pathname = usePathname()
   const inlineShellRef = useRef<HTMLDivElement>(null)
-  const canUseDOM = typeof document !== "undefined"
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -146,7 +197,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
   const treeContent = (
     <div
-      className="
+      className={`
         prose prose-base w-full pb-4 font-mono text-[15px] wrap-break-word
         prose-tech
         [&_li]:mt-1.5
@@ -154,10 +205,13 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l [&_ul_ul]:guide-line
         [&_ul_ul]:pl-3
         [&>ul]:pl-0
-      "
+        ${showTreePlaceholder ? "h-full min-h-full pb-0" : "pb-4"}
+      `}
       aria-busy={showTreePlaceholder}>
       {showTreePlaceholder ? (
-        <TreeLoadingPlaceholder />
+        <div className="h-full min-h-full pr-4">
+          <TreeLoadingPlaceholder />
+        </div>
       ) : (
         <SidebarClient tree={treeData} onNavigate={() => setIsOpen(false)} />
       )}
@@ -220,7 +274,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       </div>
 
       {/* Mobile floating trigger (appears after scroll) */}
-      {canUseDOM && isFloating
+      {isMounted && isFloating
         ? createPortal(
             <div
               className="
@@ -305,7 +359,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 overflow-y-auto pl-6
               ">
               <div
-                className="
+                className={`
                   prose prose-base w-full overflow-hidden pt-2 pb-8 font-mono
                   text-base wrap-break-word prose-tech
                   [&_li]:mt-1.5
@@ -313,9 +367,12 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                   [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l
                   [&_ul_ul]:guide-line [&_ul_ul]:pl-3
                   [&>ul]:pl-0
-                ">
+                  ${showTreePlaceholder ? "h-full min-h-full pb-2" : "pb-8"}
+                `}>
                 {showTreePlaceholder ? (
-                  <TreeLoadingPlaceholder />
+                  <div className="h-full min-h-full pr-4">
+                    <TreeLoadingPlaceholder />
+                  </div>
                 ) : (
                   <SidebarClient tree={treeData} />
                 )}

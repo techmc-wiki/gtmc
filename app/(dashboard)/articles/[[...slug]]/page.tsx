@@ -7,7 +7,7 @@ import {
   calculateReadingMetrics,
   getMarkdownComponents,
   getPluginsForContent,
-} from "../markdown-helpers"
+} from "@/lib/markdown"
 import { getRepoFileContent } from "@/lib/github-pr"
 
 interface ArticlePageProps {
@@ -45,13 +45,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     editPath = `db:${dbArticle.id}`
   } else {
     const normalizedPath = rawPath.replace(/^\/+/, "")
+    const folderCandidate = normalizedPath.endsWith(".md")
+      ? normalizedPath.replace(/\.md$/, "")
+      : normalizedPath
+
     const pathsToTry = normalizedPath.endsWith(".md")
-      ? [
-          normalizedPath,
-          normalizedPath.replace(/\.md$/, ""),
-          `${normalizedPath.replace(/\.md$/, "")}/Preface.md`,
+      ? [normalizedPath, `${folderCandidate}/Preface.md`]
+      : [
+          `${normalizedPath}.md`,
+          ...(normalizedPath.includes("/")
+            ? [`${normalizedPath}/Preface.md`]
+            : []),
         ]
-      : [normalizedPath, `${normalizedPath}.md`, `${normalizedPath}/Preface.md`]
 
     for (const tryPath of pathsToTry) {
       const githubContent = await getRepoFileContent(tryPath)
@@ -64,7 +69,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     }
 
     if (!content) {
-      if (rawPath.includes("404")) {
+      const lowerPath = normalizedPath.toLowerCase()
+      const isPrefaceEntry =
+        lowerPath === "preface" ||
+        lowerPath === "preface.md" ||
+        lowerPath === "preface/preface.md"
+
+      if (isPrefaceEntry) {
+        content =
+          "# Preface\n\nContent is temporarily unavailable from the repository. Please refresh in a moment."
+        rawPath = "Preface.md"
+        editPath = "Preface"
+      } else if (rawPath.includes("404")) {
         content =
           "# 404 Not Found\n\nThe requested article is not available yet."
       } else {

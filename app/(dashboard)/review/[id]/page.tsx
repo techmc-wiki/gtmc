@@ -9,7 +9,7 @@ import rehypeKatex from "rehype-katex"
 import "katex/dist/katex.min.css"
 import Link from "next/link"
 import { BrutalButton } from "@/components/ui/brutal-button"
-import { getMarkdownComponents } from "@/app/(dashboard)/articles/markdown-helpers"
+import { getMarkdownComponents } from "@/lib/markdown"
 import {
   getOctokit,
   ARTICLES_REPO_OWNER,

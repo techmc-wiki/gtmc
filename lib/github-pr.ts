@@ -7,8 +7,51 @@ export const ARTICLES_REPO_OWNER =
 export const ARTICLES_REPO_NAME =
   process.env.GITHUB_ARTICLES_REPO_NAME || "Articles"
 
+const getGitHubReadToken = () =>
+  process.env.GITHUB_ARTICLES_READ_PAT ||
+  process.env.GITHUB_ARTICLES_WRITE_PAT ||
+  process.env.GITHUB_TOKEN ||
+  process.env.GITHUB_FEATURES_ISSUES_PAT ||
+  process.env.GITHUB_FEATURES_WRITE_PAT
+
 export const getOctokit = (token?: string) => {
-  return new Octokit({ auth: token || process.env.GITHUB_ARTICLES_WRITE_PAT })
+  return new Octokit({ auth: token || getGitHubReadToken() })
+}
+
+let rateLimitedUntilMs = 0
+
+function isRateLimited() {
+  return Date.now() < rateLimitedUntilMs
+}
+
+function getRateLimitResetMs(error: unknown): number | null {
+  const resetHeader = (
+    error as { response?: { headers?: { [key: string]: string | number } } }
+  )?.response?.headers?.["x-ratelimit-reset"]
+
+  if (typeof resetHeader === "number") {
+    return resetHeader * 1000
+  }
+
+  if (typeof resetHeader === "string") {
+    const parsed = Number(resetHeader)
+    if (Number.isFinite(parsed)) {
+      return parsed * 1000
+    }
+  }
+
+  return null
+}
+
+function rememberRateLimit(error: unknown) {
+  const status =
+    (error as { status?: number })?.status ||
+    (error as { response?: { status?: number } })?.response?.status
+
+  if (status !== 403) return
+
+  const resetMs = getRateLimitResetMs(error)
+  rateLimitedUntilMs = resetMs ?? Date.now() + 60_000
 }
 
 export async function createPR({
@@ -131,20 +174,31 @@ export interface RepoTreeNode {
 }
 
 export async function getRepoContentTree(): Promise<RepoTreeNode[]> {
+  if (isRateLimited()) {
+    return []
+  }
+
   const octokit = getOctokit(process.env.GITHUB_ARTICLES_WRITE_PAT)
 
-  const { data: ref } = await octokit.git.getRef({
-    owner: ARTICLES_REPO_OWNER,
-    repo: ARTICLES_REPO_NAME,
-    ref: "heads/main",
-  })
+  let treeData: Awaited<ReturnType<typeof octokit.git.getTree>>["data"]
+  try {
+    const { data: ref } = await octokit.git.getRef({
+      owner: ARTICLES_REPO_OWNER,
+      repo: ARTICLES_REPO_NAME,
+      ref: "heads/main",
+    })
 
-  const { data: treeData } = await octokit.git.getTree({
-    owner: ARTICLES_REPO_OWNER,
-    repo: ARTICLES_REPO_NAME,
-    tree_sha: ref.object.sha,
-    recursive: "1",
-  })
+    const treeResponse = await octokit.git.getTree({
+      owner: ARTICLES_REPO_OWNER,
+      repo: ARTICLES_REPO_NAME,
+      tree_sha: ref.object.sha,
+      recursive: "1",
+    })
+    treeData = treeResponse.data
+  } catch (error) {
+    rememberRateLimit(error)
+    return []
+  }
 
   const nodeMap = new Map<string, RepoTreeNode>()
 
@@ -219,6 +273,10 @@ export async function getRepoContentTree(): Promise<RepoTreeNode[]> {
 export async function getRepoFileContent(
   filePath: string
 ): Promise<string | null> {
+  if (isRateLimited()) {
+    return null
+  }
+
   const octokit = getOctokit(process.env.GITHUB_ARTICLES_WRITE_PAT)
   try {
     const { data } = await octokit.repos.getContent({
@@ -230,7 +288,8 @@ export async function getRepoFileContent(
       return Buffer.from(data.content, "base64").toString("utf-8")
     }
     return null
-  } catch {
+  } catch (error) {
+    rememberRateLimit(error)
     return null
   }
 }
@@ -238,6 +297,10 @@ export async function getRepoFileContent(
 export async function getRepoFileBuffer(
   filePath: string
 ): Promise<Buffer | null> {
+  if (isRateLimited()) {
+    return null
+  }
+
   const octokit = getOctokit(process.env.GITHUB_ARTICLES_WRITE_PAT)
   try {
     const { data } = await octokit.repos.getContent({
@@ -249,7 +312,8 @@ export async function getRepoFileBuffer(
       return Buffer.from(data.content, "base64")
     }
     return null
-  } catch {
+  } catch (error) {
+    rememberRateLimit(error)
     return null
   }
 }
@@ -273,15 +337,19 @@ export async function getPRFiles(prNumber: number, token?: string) {
   return data
 }
 
-export async function determineMergeMethod(prNumber: number, token?: string): Promise<"squash" | "rebase"> {
+export async function determineMergeMethod(
+  prNumber: number,
+  token?: string
+): Promise<"squash" | "rebase"> {
   const pr = await getPR(prNumber, token)
-  
+
   // 按照规范自动判断是否符合 rebase 的特殊情况：
   // 1. 分支包含较长且有价值的提交历史（如 5 个以上 commits）
   // 2. 分支包含大量修改，难以合理压缩为单个提交（如 修改了 10 个以上文件，或增删代码超过 500 行）
   const isLongHistory = pr.commits >= 5
-  const isLargeModification = pr.changed_files >= 10 || (pr.additions + pr.deletions) >= 500
-  
+  const isLargeModification =
+    pr.changed_files >= 10 || pr.additions + pr.deletions >= 500
+
   if (isLongHistory || isLargeModification) {
     return "rebase"
   }
@@ -297,7 +365,8 @@ export async function resolveConflictAndMerge(
 ) {
   const octokit = getOctokit(token)
   const pr = await getPR(prNumber, token)
-  const actualMergeMethod = mergeMethod || await determineMergeMethod(prNumber, token)
+  const actualMergeMethod =
+    mergeMethod || (await determineMergeMethod(prNumber, token))
   const branchName = pr.head.ref
   const prHeadSha = pr.head.sha
 
@@ -405,10 +474,15 @@ export async function resolveConflictAndMerge(
   return data
 }
 
-export async function mergePR(prNumber: number, token?: string, mergeMethod?: "squash" | "rebase") {
+export async function mergePR(
+  prNumber: number,
+  token?: string,
+  mergeMethod?: "squash" | "rebase"
+) {
   const octokit = getOctokit(token)
-  const actualMergeMethod = mergeMethod || await determineMergeMethod(prNumber, token)
-  
+  const actualMergeMethod =
+    mergeMethod || (await determineMergeMethod(prNumber, token))
+
   const { data } = await octokit.pulls.merge({
     owner: ARTICLES_REPO_OWNER,
     repo: ARTICLES_REPO_NAME,

@@ -34,7 +34,7 @@ export default function ArticlesLoading() {
 
           <SectionFrame
             className="
-              relative mb-8 flex flex-col gap-4 border guide-line bg-white/80 p-4
+              relative mb-8 flex animate-tech-slide-in flex-col gap-4 border guide-line bg-white/80 p-4
               backdrop-blur-sm
               sm:p-6
             ">
@@ -48,7 +48,9 @@ export default function ArticlesLoading() {
             <SegmentedBar opacity="high" className="h-10 w-44" />
           </SectionFrame>
 
-          <SectionFrame className="relative min-h-[50vh]">
+          <SectionFrame
+            className="relative min-h-[50vh] animate-tech-slide-in"
+            style={{ animationDelay: "100ms" }}>
             <ScanConfirmOverlay className="opacity-50" />
             <SectionRail label="ARTICLE_BUFFER" className="mb-4" />
             <SegmentedBar opacity="high" className="mb-3 h-7 w-2/3" />

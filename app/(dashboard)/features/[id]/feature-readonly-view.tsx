@@ -1,8 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import ReactMarkdown from "react-markdown"
 import { BrutalCard } from "@/components/ui/brutal-card"
-import { MarkdownContent } from "@/components/markdown/markdown-content"
+import { getMarkdownComponents, getPluginsForContent } from "@/lib/markdown"
+import "katex/dist/katex.min.css"
 
 interface FeatureReadonlyViewProps {
   title: string
@@ -16,6 +18,8 @@ export function FeatureReadonlyView({
   tags,
 }: FeatureReadonlyViewProps) {
   const [activeTab, setActiveTab] = useState<"rendered" | "source">("rendered")
+  const { remarkPlugins, rehypePlugins } = getPluginsForContent(content)
+  const markdownComponents = getMarkdownComponents("")
 
   return (
     <BrutalCard>
@@ -102,7 +106,20 @@ export function FeatureReadonlyView({
                 id="feature-rendered-panel"
                 role="tabpanel"
                 aria-labelledby="tab-rendered">
-                <MarkdownContent content={content} />
+                {content?.trim() ? (
+                  <div className="prose prose-tech w-full max-w-none overflow-hidden wrap-break-word p-6 sm:p-8 selection:bg-tech-main/20 selection:text-slate-900">
+                    <ReactMarkdown
+                      remarkPlugins={remarkPlugins}
+                      rehypePlugins={rehypePlugins}
+                      components={markdownComponents}>
+                      {content}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <p className="p-6 font-mono text-xs text-tech-main/40">
+                    NOTHING_TO_PREVIEW_
+                  </p>
+                )}
               </div>
             ) : (
               <div

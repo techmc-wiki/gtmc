@@ -29,6 +29,8 @@
     backwards;
   --animate-tech-slide-in: tech-slide-in 0.8s cubic-bezier(0.16, 1, 0.3, 1)
     backwards;
+  --animate-tree-drop-in: tree-drop-in 1.05s cubic-bezier(0.16, 1, 0.3, 1)
+    backwards;
   --animate-tech-glitch: tech-glitch 2s infinite;
   --animate-target-blink: target-blink 1.2s ease-out forwards;
   --animate-blueprint-sweep: shimmer 2s ease-out infinite;
@@ -86,6 +88,19 @@
     100% {
       opacity: 1;
       transform: translateX(0);
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @keyframes tree-drop-in {
+    0% {
+      opacity: 0;
+      transform: translateY(-34px);
+      clip-path: inset(0 0 100% 0);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
       clip-path: inset(0 0 0 0);
     }
   }

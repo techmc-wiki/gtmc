@@ -11,7 +11,9 @@ import {
   LoadingIndicator,
   PENDING_LABELS,
 } from "@/app/(dashboard)/features/loading-indicator"
-import { MarkdownContent } from "@/components/markdown/markdown-content"
+import ReactMarkdown from "react-markdown"
+import { getMarkdownComponents, getPluginsForContent } from "@/lib/markdown"
+import "katex/dist/katex.min.css"
 import {
   classifyFile,
   isImageMime,
@@ -651,7 +653,20 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           role="tabpanel"
           hidden={activeTab !== "preview"}
           className="flex min-h-125 grow flex-col">
-          <MarkdownContent content={content} />
+          {content?.trim() ? (
+            <div className="prose prose-tech w-full max-w-none overflow-hidden wrap-break-word p-6 sm:p-8 selection:bg-tech-main/20 selection:text-slate-900">
+              <ReactMarkdown
+                remarkPlugins={getPluginsForContent(content).remarkPlugins}
+                rehypePlugins={getPluginsForContent(content).rehypePlugins}
+                components={getMarkdownComponents("")}>
+                {content}
+              </ReactMarkdown>
+            </div>
+          ) : (
+            <p className="p-6 font-mono text-xs text-tech-main/40">
+              NOTHING_TO_PREVIEW_
+            </p>
+          )}
         </div>
       </div>
 

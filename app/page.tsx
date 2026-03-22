@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { useRef, useCallback } from "react"
+import { useRef, useCallback, useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { BrutalButton } from "@/components/ui/brutal-button"
 import { Logo } from "@/components/ui/logo"
 import { useHomepageMotion } from "@/lib/motion/use-homepage-motion"
@@ -79,7 +80,14 @@ function DecorElement({
 }
 
 export default function Home() {
+  const router = useRouter()
   const motionDriver = useHomepageMotion()
+  const [isAccessingDatabase, setIsAccessingDatabase] = useState(false)
+
+  useEffect(() => {
+    router.prefetch("/articles")
+  }, [router])
+
   const {
     background: bgTransform,
     midground: mgTransform,
@@ -535,8 +543,7 @@ export default function Home() {
             flex-col items-center bg-tech-main/10
             md:flex
           ">
-          <div
-            className="mt-[50vh] size-2 border border-tech-main/50 bg-tech-bg"></div>
+          <div className="mt-[50vh] size-2 border border-tech-main/50 bg-tech-bg"></div>
         </div>
 
         {/* 技术图纸刻度尺 */}
@@ -751,21 +758,39 @@ export default function Home() {
           ">
           <Link
             href="/articles"
+            prefetch
+            onClick={(event) => {
+              if (isAccessingDatabase) {
+                event.preventDefault()
+                return
+              }
+
+              setIsAccessingDatabase(true)
+            }}
             className="
               w-full
               sm:w-auto
             ">
             <BrutalButton
               variant="primary"
+              disabled={isAccessingDatabase}
               className="
                 flex h-12 w-full items-center justify-center px-8 py-3 text-sm
                 tracking-widest uppercase shadow-md transition-transform
                 duration-300
                 hover:scale-105
                 active:scale-95
+                disabled:cursor-wait disabled:opacity-90
                 sm:w-auto
               ">
-              ACCESS DATABASE →
+              {isAccessingDatabase ? (
+                <>
+                  <span className="inline-block size-2 animate-pulse bg-white" />
+                  INITIALIZING DATABASE...
+                </>
+              ) : (
+                "ACCESS DATABASE →"
+              )}
             </BrutalButton>
           </Link>
           <Link
@@ -794,8 +819,7 @@ export default function Home() {
           className="
             pointer-events-none relative mt-12 flex space-x-1 opacity-40
           ">
-          <div
-            className="absolute -top-4 font-mono text-[8px] text-tech-main/60">
+          <div className="absolute -top-4 font-mono text-[8px] text-tech-main/60">
             INVENTORY_SLOTS_
           </div>
           {[...Array(9)].map((_, i) => (
@@ -803,12 +827,13 @@ export default function Home() {
               key={i}
               className={`
                 flex size-8 items-center justify-center
-                ${i === 3
-                  ? `
+                ${
+                  i === 3
+                    ? `
                     border-2 border-tech-main-dark bg-tech-main/10
                     shadow-[0_0_8px_rgba(96,112,143,0.3)]
                   `
-                  : `border border-tech-main/40`
+                    : `border border-tech-main/40`
                 }
               `}>
               {i === 3 && (

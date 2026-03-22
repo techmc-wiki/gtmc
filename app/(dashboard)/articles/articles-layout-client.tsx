@@ -6,6 +6,11 @@ import { createPortal } from "react-dom"
 import { usePathname } from "next/navigation"
 import { SidebarClient } from "./sidebar-client"
 import { MobileTreeCard } from "./mobile-tree-card"
+import {
+  ScanConfirmOverlay,
+  SectionRail,
+  SegmentedBar,
+} from "../features/loading-shell-primitives"
 
 interface TreeNode {
   id: string
@@ -21,9 +26,49 @@ interface ArticlesLayoutProps {
   tree: TreeNode[]
 }
 
+function TreeLoadingPlaceholder() {
+  return (
+    <div
+      className="
+        relative overflow-hidden border guide-line bg-white/75 p-3 backdrop-blur-sm
+      "
+      aria-hidden="true">
+      <ScanConfirmOverlay className="opacity-45" />
+      <SectionRail
+        label="TREE_BOOTSTRAP"
+        className="mb-3 text-[10px] opacity-80"
+      />
+
+      <div className="space-y-2">
+        <SegmentedBar opacity="high" className="h-4 w-11/12" />
+        <div className="space-y-2 border-l guide-line pl-3">
+          <div className="flex items-center gap-2">
+            <span className="h-px w-2 bg-tech-main/40" />
+            <SegmentedBar opacity="medium" className="h-3.5 w-4/5" />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="h-px w-2 bg-tech-main/40" />
+            <SegmentedBar opacity="medium" className="h-3.5 w-3/5" />
+          </div>
+        </div>
+
+        <SegmentedBar opacity="high" className="h-4 w-3/4" />
+        <div className="space-y-2 border-l guide-line pl-3">
+          <div className="flex items-center gap-2">
+            <span className="h-px w-2 bg-tech-main/40" />
+            <SegmentedBar opacity="low" className="h-3.5 w-2/3" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isFloating, setIsFloating] = useState(false)
+  const [treeData, setTreeData] = useState<TreeNode[]>(tree)
+  const [isTreeLoading, setIsTreeLoading] = useState(tree.length === 0)
   const pathname = usePathname()
   const inlineShellRef = useRef<HTMLDivElement>(null)
   const canUseDOM = typeof document !== "undefined"
@@ -51,6 +96,54 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
     return () => observer.disconnect()
   }, [])
 
+  useEffect(() => {
+    if (tree.length > 0) {
+      setTreeData(tree)
+      setIsTreeLoading(false)
+      return
+    }
+
+    const controller = new AbortController()
+    let active = true
+
+    const loadTree = async () => {
+      try {
+        setIsTreeLoading(true)
+        const response = await fetch("/api/articles/tree", {
+          method: "GET",
+          cache: "no-store",
+          signal: controller.signal,
+        })
+
+        if (!response.ok) {
+          return
+        }
+
+        const payload = (await response.json()) as TreeNode[]
+        if (active && Array.isArray(payload)) {
+          setTreeData(payload)
+        }
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return
+        }
+      } finally {
+        if (active) {
+          setIsTreeLoading(false)
+        }
+      }
+    }
+
+    void loadTree()
+
+    return () => {
+      active = false
+      controller.abort()
+    }
+  }, [tree.length])
+
+  const showTreePlaceholder = isTreeLoading && treeData.length === 0
+
   const treeContent = (
     <div
       className="
@@ -61,8 +154,13 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l [&_ul_ul]:guide-line
         [&_ul_ul]:pl-3
         [&>ul]:pl-0
-      ">
-      <SidebarClient tree={tree} onNavigate={() => setIsOpen(false)} />
+      "
+      aria-busy={showTreePlaceholder}>
+      {showTreePlaceholder ? (
+        <TreeLoadingPlaceholder />
+      ) : (
+        <SidebarClient tree={treeData} onNavigate={() => setIsOpen(false)} />
+      )}
     </div>
   )
 
@@ -90,8 +188,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           aria-label="Toggle article tree"
           aria-expanded={isOpen}
           data-testid="mobile-tree-toggle">
-          <span
-            className="font-mono text-xs font-bold tracking-[0.15em] uppercase">
+          <span className="font-mono text-xs font-bold tracking-[0.15em] uppercase">
             TREE
           </span>
           <span className="font-mono text-sm font-bold">
@@ -217,7 +314,11 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                   [&_ul_ul]:guide-line [&_ul_ul]:pl-3
                   [&>ul]:pl-0
                 ">
-                <SidebarClient tree={tree} />
+                {showTreePlaceholder ? (
+                  <TreeLoadingPlaceholder />
+                ) : (
+                  <SidebarClient tree={treeData} />
+                )}
               </div>
             </div>
           </div>

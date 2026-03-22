@@ -26,7 +26,15 @@ if (process.env.HTTPS_PROXY || process.env.http_proxy) {
   }
 }
 
+const authSecret =
+  process.env.AUTH_SECRET ||
+  process.env.NEXTAUTH_SECRET ||
+  (process.env.NODE_ENV === "development"
+    ? "gtmc-local-dev-auth-secret"
+    : undefined)
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: authSecret,
   adapter: PrismaAdapter(prisma),
   providers: [
     GitHub({

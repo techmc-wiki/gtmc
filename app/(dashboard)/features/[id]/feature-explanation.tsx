@@ -119,9 +119,8 @@ export function FeatureExplanation({
             </button>
           )}
         </div>
-        <div className="
-          pl-4 font-mono text-sm whitespace-pre-wrap text-zinc-800
-        ">
+        <div
+          className="pl-4 font-mono text-sm whitespace-pre-wrap text-zinc-800">
           {initialExplanation}
         </div>
       </BrutalCard>

@@ -562,9 +562,9 @@ export default function Home() {
             flex-col items-center bg-tech-main/10
             md:flex
           ">
-          <div className="
-            mt-[50vh] size-2 border border-tech-main/50 bg-tech-bg
-          " />
+          <div
+            className="mt-[50vh] size-2 border border-tech-main/50 bg-tech-bg"
+          />
         </div>
 
         {/* 技术图纸刻度尺 */}
@@ -849,9 +849,8 @@ export default function Home() {
           className="
             pointer-events-none relative mt-12 flex space-x-1 opacity-40
           ">
-          <div className="
-            absolute -top-4 font-mono text-[8px] text-tech-main/60
-          ">
+          <div
+            className="absolute -top-4 font-mono text-[8px] text-tech-main/60">
             INVENTORY_SLOTS_
           </div>
           {[...Array(9)].map((_, i) => (

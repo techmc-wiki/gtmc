@@ -4,6 +4,7 @@ import Link from "next/link"
 import { ProfileButton } from "@/components/ui/profile-button"
 import { Logo } from "@/components/ui/logo"
 import { MobileNav } from "./mobile-nav"
+import { SearchCommand } from "@/components/search/search-command"
 
 export default function DashboardLayout({
   children,
@@ -67,6 +68,7 @@ export default function DashboardLayout({
             </div>
 
             <div className="flex items-center gap-4">
+              <SearchCommand />
               <MobileNav navLinks={navLinks} />
               <React.Suspense
                 fallback={

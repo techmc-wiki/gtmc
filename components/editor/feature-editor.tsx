@@ -515,7 +515,9 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
                 role="status"
                 aria-live="polite">
                 {badge.type === "progress" && (
-                  <span className="inline-block size-2 animate-pulse bg-tech-accent" />
+                  <span
+                    className="inline-block size-2 animate-pulse bg-tech-accent"
+                  />
                 )}
                 {badge.type === "error" && (
                   <span className="inline-block size-2 bg-red-400" />
@@ -571,7 +573,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             relative mt-6 flex justify-end gap-4 border-t border-tech-main/10
             pt-4
           ">
-          <div className="absolute top-0 right-0 h-px w-8 bg-tech-main"></div>
+          <div className="absolute top-0 right-0 h-px w-8 bg-tech-main" />
 
           <BrutalButton
             type="button"

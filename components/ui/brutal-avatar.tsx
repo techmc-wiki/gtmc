@@ -35,60 +35,68 @@ export function BrutalAvatar({
         <div
           className="
             absolute top-1/2 left-1/2 h-px w-4 -translate-1/2 bg-tech-main/40
-          "></div>
+          "
+        />
         <div
           className="
             absolute top-1/2 left-1/2 h-4 w-px -translate-1/2 bg-tech-main/40
-          "></div>
+          "
+        />
 
         {/* 动态扫描线 */}
-        <div className="absolute inset-x-0 top-1/4 h-px bg-tech-main/40"></div>
-        <div className="absolute inset-x-0 bottom-1/4 h-px bg-tech-main/40"></div>
+        <div className="absolute inset-x-0 top-1/4 h-px bg-tech-main/40" />
+        <div className="absolute inset-x-0 bottom-1/4 h-px bg-tech-main/40" />
 
         {/* 边角装饰 - 左上 */}
         <div
           className="
             absolute top-0 left-0 size-3 border-t-2 border-l-2
             border-tech-main/40
-          "></div>
+          "
+        />
         {/* 边角装饰 - 右上 */}
         <div
           className="
             absolute top-0 right-0 size-3 border-t-2 border-r-2
             border-tech-main/40
-          "></div>
+          "
+        />
         {/* 边角装饰 - 左下 */}
         <div
           className="
             absolute bottom-0 left-0 size-3 border-b-2 border-l-2
             border-tech-main/40
-          "></div>
+          "
+        />
         {/* 边角装饰 - 右下 */}
         <div
           className="
             absolute right-0 bottom-0 size-3 border-r-2 border-b-2
             border-tech-main/40
-          "></div>
+          "
+        />
 
         {/* 额外的数据点 */}
-        <div className="absolute top-1 left-4 size-1 bg-tech-main/60"></div>
-        <div className="absolute right-4 bottom-1 size-1 bg-tech-main/60"></div>
+        <div className="absolute top-1 left-4 size-1 bg-tech-main/60" />
+        <div className="absolute right-4 bottom-1 size-1 bg-tech-main/60" />
 
         {/* 边框缺口效果 */}
         <div
           className="
             absolute top-0 left-1/2 h-[2px] w-4 -translate-x-1/2 bg-white
-          "></div>
+          "
+        />
         <div
           className="
             absolute bottom-0 left-1/2 h-[2px] w-4 -translate-x-1/2 bg-white
-          "></div>
+          "
+        />
       </div>
 
       {/* 内层框架 */}
       <div className="
         pointer-events-none absolute inset-1 z-5 border guide-line
-      "></div>
+      " />
 
       {src ? (
         <Image

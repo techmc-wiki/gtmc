@@ -106,7 +106,7 @@ export default function FeatureDetailLoading() {
             bg-tech-accent/5 backdrop-blur-sm
           "
           style={{ animationDelay: "200ms" }}>
-          <div className="absolute top-0 left-0 h-full w-2 bg-tech-accent/60"></div>
+          <div className="absolute top-0 left-0 h-full w-2 bg-tech-accent/60" />
           <div
             className="
               mb-4 flex items-start justify-between border-b
@@ -134,23 +134,27 @@ export default function FeatureDetailLoading() {
             className="
               pointer-events-none absolute top-0 left-0 size-2 -translate-px
               border-t-2 border-l-2 border-tech-main/40
-            "></div>
+            "
+          />
           <div
             className="
               pointer-events-none absolute top-0 right-0 size-2 translate-x-px
               -translate-y-px border-t-2 border-r-2 border-tech-main/40
-            "></div>
+            "
+          />
           <div
             className="
               pointer-events-none absolute bottom-0 left-0 size-2
               -translate-x-px translate-y-px border-b-2 border-l-2
               border-tech-main/40
-            "></div>
+            "
+          />
           <div
             className="
               pointer-events-none absolute right-0 bottom-0 size-2 translate-px
               border-r-2 border-b-2 border-tech-main/40
-            "></div>
+            "
+          />
 
           <div className="flex flex-col space-y-4">
             <div className="flex flex-col space-y-2">
@@ -196,7 +200,7 @@ export default function FeatureDetailLoading() {
               relative mt-6 flex justify-end gap-4 border-t border-tech-main/10
               pt-4
             ">
-            <div className="absolute top-0 right-0 h-px w-8 bg-tech-main"></div>
+            <div className="absolute top-0 right-0 h-px w-8 bg-tech-main" />
             <SegmentedBar opacity="high" className="h-10 w-24" />
           </div>
         </div>

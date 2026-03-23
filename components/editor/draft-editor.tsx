@@ -281,7 +281,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             relative mt-6 flex justify-end gap-4 border-t border-tech-main/10
             pt-4
           ">
-          <div className="absolute top-0 right-0 h-px w-8 bg-tech-main"></div>
+          <div className="absolute top-0 right-0 h-px w-8 bg-tech-main" />
 
           <BrutalButton
             type="submit"

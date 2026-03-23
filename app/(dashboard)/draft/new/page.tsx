@@ -51,7 +51,8 @@ export default async function NewDraftPage({
           className="
             absolute -bottom-[5px] left-0 size-2 border border-tech-main/40
             bg-tech-main/10
-          "></div>
+          "
+        />
         <Link href="/draft">
           <BrutalButton variant="ghost" size="sm">
             {"<"} BACK
@@ -74,12 +75,14 @@ export default async function NewDraftPage({
         <div
           className="
             absolute top-0 left-0 size-2 border-t border-l border-tech-main/40
-          "></div>
+          "
+        />
         <div
           className="
             absolute right-0 bottom-0 size-2 border-r border-b
             border-tech-main/40
-          "></div>
+          "
+        />
         <DraftEditor
           initialData={{
             title: initialTitle,

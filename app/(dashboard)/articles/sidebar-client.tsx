@@ -47,14 +47,31 @@ export function SidebarClient({
 
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
   const [mounted, setMounted] = useState(false)
+  const [highlightActive, setHighlightActive] = useState(false)
   const activeItemRef = useRef<HTMLLIElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const [highlightActive, setHighlightActive] = useState(false)
+  const folderGridRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+  const locatePendingRef = useRef(false)
+  const pendingExpandIdsRef = useRef<string[]>([])
+  const expandedFoldersRef = useRef(expandedFolders)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    expandedFoldersRef.current = expandedFolders
+    if (mounted) {
+      localStorage.setItem(
+        "gtmc_sidebar_expanded",
+        JSON.stringify(Array.from(expandedFolders))
+      )
+    }
+  }, [expandedFolders, mounted])
 
   useEffect(() => {
     let frameCount = 0
     const maxFrames = 10
-
     const scanHeadings = () => {
       const headings = document.querySelectorAll("main h2")
       if (headings.length > 0) {
@@ -72,7 +89,6 @@ export function SidebarClient({
       }
       return false
     }
-
     const retryWithRAF = () => {
       if (scanHeadings()) return
       if (frameCount < maxFrames) {
@@ -80,7 +96,6 @@ export function SidebarClient({
         requestAnimationFrame(retryWithRAF)
       }
     }
-
     retryWithRAF()
   }, [pathname])
 
@@ -92,103 +107,6 @@ export function SidebarClient({
     e.preventDefault()
     setIsFileExpanded((prev) => !prev)
   }
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("gtmc_sidebar_expanded")
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        if (Array.isArray(parsed)) {
-          setExpandedFolders(new Set(parsed))
-        }
-      }
-    } catch (e) {
-      console.error("Failed to load sidebar state", e)
-    }
-    setMounted(true)
-  }, [])
-
-  useEffect(() => {
-    if (mounted) {
-      localStorage.setItem(
-        "gtmc_sidebar_expanded",
-        JSON.stringify(Array.from(expandedFolders))
-      )
-    }
-  }, [expandedFolders, mounted])
-
-  const getEffectivePathname = useCallback(() => {
-    if (pathname === "/articles" || pathname === "/articles/") {
-      return "/articles/Preface"
-    }
-    return pathname
-  }, [pathname])
-
-  const findItemAndParents = useCallback(
-    (
-      items: TreeNode[],
-      targetSlug: string,
-      parents: string[] = []
-    ): { item: TreeNode | null; parentIds: string[] } => {
-      for (const item of items) {
-        const itemSlug = `/articles/${item.slug}`
-        if (itemSlug === targetSlug || `${itemSlug}/` === targetSlug) {
-          return { item, parentIds: parents }
-        }
-        if (item.children && item.children.length > 0) {
-          const result = findItemAndParents(item.children, targetSlug, [
-            ...parents,
-            item.id,
-          ])
-          if (result.item) return result
-        }
-      }
-      return { item: null, parentIds: [] }
-    },
-    []
-  )
-
-  const scrollActiveItemIntoContainer = useCallback(() => {
-    const item = activeItemRef.current
-    const container = scrollContainerRef.current
-    if (!item) return
-    if (container) {
-      const itemRect = item.getBoundingClientRect()
-      const containerRect = container.getBoundingClientRect()
-      const relativeTop = itemRect.top - containerRect.top + container.scrollTop
-      const scrollTarget = relativeTop - containerRect.height / 4
-      container.scrollTo({ top: Math.max(0, scrollTarget), behavior: "smooth" })
-    } else {
-      item.scrollIntoView({ block: "start", behavior: "smooth" })
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!mounted || tree.length === 0) return
-    const effectivePath = getEffectivePathname()
-    const { parentIds } = findItemAndParents(tree, effectivePath)
-    if (parentIds.length > 0) {
-      setExpandedFolders((prev) => {
-        const next = new Set(prev)
-        parentIds.forEach((id) => next.add(id))
-        return next
-      })
-    }
-    const delay = parentIds.length > 0 ? 400 : 50
-    const timer = setTimeout(() => {
-      scrollActiveItemIntoContainer()
-      setHighlightActive(true)
-      setTimeout(() => setHighlightActive(false), 2000)
-    }, delay)
-    return () => clearTimeout(timer)
-  }, [
-    pathname,
-    mounted,
-    tree,
-    getEffectivePathname,
-    findItemAndParents,
-    scrollActiveItemIntoContainer,
-  ])
 
   const isFolderExpanded = useCallback(
     (id: string) => {
@@ -217,35 +135,140 @@ export function SidebarClient({
     setIsFileExpanded(false)
   }, [])
 
-  const scrollToCurrent = useCallback(() => {
-    const effectivePath = getEffectivePathname()
-    const { parentIds } = findItemAndParents(tree, effectivePath)
-    const alreadyExpanded = parentIds.every((id) => expandedFolders.has(id))
-    if (!alreadyExpanded) {
+  const getEffectivePathname = useCallback(() => {
+    if (
+      pathname === "/articles" ||
+      pathname === "/articles/" ||
+      pathname === "/"
+    )
+      return "/articles/Preface"
+    return pathname
+  }, [pathname])
+
+  const findItemAndParents = useCallback(
+    (
+      items: TreeNode[],
+      target: string,
+      parents: string[] = []
+    ): { item: TreeNode | null; parentIds: string[] } => {
+      const decodedTarget = decodeURIComponent(target)
+      for (const item of items) {
+        const slug = `/articles/${item.slug}`
+        const decodedSlug = decodeURIComponent(slug)
+        if (
+          decodedSlug === decodedTarget ||
+          `${decodedSlug}/` === decodedTarget
+        )
+          return { item, parentIds: parents }
+        if (item.children?.length > 0) {
+          const r = findItemAndParents(item.children, target, [
+            ...parents,
+            item.id,
+          ])
+          if (r.item) return r
+        }
+      }
+      return { item: null, parentIds: [] }
+    },
+    []
+  )
+
+  const scrollActiveItem = useCallback(() => {
+    const item = activeItemRef.current
+    const container = scrollContainerRef.current
+    if (!item) return
+    if (container) {
+      const ir = item.getBoundingClientRect()
+      const cr = container.getBoundingClientRect()
+      const top = ir.top - cr.top + container.scrollTop - cr.height / 4
+      container.scrollTo({ top: Math.max(0, top), behavior: "smooth" })
+    } else {
+      item.scrollIntoView({ block: "start", behavior: "smooth" })
+    }
+    setHighlightActive(true)
+    setTimeout(() => setHighlightActive(false), 2000)
+  }, [])
+
+  const expandAndScroll = useCallback(
+    (parentIds: string[]) => {
+      const needExpand = parentIds.filter(
+        (id) => !expandedFoldersRef.current.has(id)
+      )
+      if (needExpand.length === 0) {
+        scrollActiveItem()
+        return
+      }
       setExpandedFolders((prev) => {
         const next = new Set(prev)
-        parentIds.forEach((id) => next.add(id))
+        needExpand.forEach((id) => next.add(id))
         return next
       })
+      pendingExpandIdsRef.current = needExpand
+      locatePendingRef.current = true
+    },
+    [scrollActiveItem]
+  )
+
+  useEffect(() => {
+    if (!locatePendingRef.current) return
+    const ids = pendingExpandIdsRef.current
+    const allGrids = folderGridRefs.current
+    const watchGrids = ids
+      .map((id) => allGrids.get(id))
+      .filter((el): el is HTMLDivElement => !!el)
+    if (watchGrids.length === 0) {
+      locatePendingRef.current = false
+      scrollActiveItem()
+      return
     }
-    const userScrolledHalfScreen =
-      typeof window !== "undefined" && window.scrollY >= window.innerHeight / 2
-    if (userScrolledHalfScreen) {
+    let remaining = watchGrids.length
+    const onEnd = (e: TransitionEvent) => {
+      if (e.propertyName !== "grid-template-rows") return
+      remaining--
+      if (remaining <= 0) {
+        locatePendingRef.current = false
+        pendingExpandIdsRef.current = []
+        scrollActiveItem()
+        watchGrids.forEach((el) =>
+          el.removeEventListener("transitionend", onEnd)
+        )
+      }
+    }
+    watchGrids.forEach((el) => el.addEventListener("transitionend", onEnd))
+    return () => {
+      watchGrids.forEach((el) => el.removeEventListener("transitionend", onEnd))
+    }
+  }, [expandedFolders, scrollActiveItem])
+
+  useEffect(() => {
+    if (!mounted || tree.length === 0) return
+    const { parentIds } = findItemAndParents(tree, getEffectivePathname())
+    expandAndScroll(parentIds)
+  }, [
+    pathname,
+    mounted,
+    tree,
+    findItemAndParents,
+    getEffectivePathname,
+    expandAndScroll,
+  ])
+
+  const scrollToCurrent = useCallback(() => {
+    console.log("[LOCATE] scrollToCurrent called")
+    console.log("[LOCATE] window.scrollY:", window.scrollY)
+    console.log("[LOCATE] window.innerHeight:", window.innerHeight)
+    console.log("[LOCATE] window.innerHeight / 2:", window.innerHeight / 2)
+    console.log(
+      "[LOCATE] Should expand TOC?",
+      window.scrollY >= window.innerHeight / 2
+    )
+    const { parentIds } = findItemAndParents(tree, getEffectivePathname())
+    if (window.scrollY >= window.innerHeight / 2) {
+      console.log("[LOCATE] Expanding TOC (setIsFileExpanded(true))")
       setIsFileExpanded(true)
     }
-    const delay = alreadyExpanded ? 50 : 400
-    setTimeout(() => {
-      scrollActiveItemIntoContainer()
-      setHighlightActive(true)
-      setTimeout(() => setHighlightActive(false), 2000)
-    }, delay)
-  }, [
-    tree,
-    expandedFolders,
-    getEffectivePathname,
-    findItemAndParents,
-    scrollActiveItemIntoContainer,
-  ])
+    expandAndScroll(parentIds)
+  }, [tree, findItemAndParents, getEffectivePathname, expandAndScroll])
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -267,11 +290,11 @@ export function SidebarClient({
 
   const renderTree = (items: TreeNode[], level = 0) => {
     const effectivePath = getEffectivePathname()
+    const decodedPathname = decodeURIComponent(effectivePath)
     return (
-      <ul className="my-1 border-l guide-line pl-4">
+      <ul className="my-1 border-l guide-line pl-6">
         {items.map((item) => {
           const fileRoute = `/articles/${item.slug}`
-          const decodedPathname = decodeURIComponent(effectivePath)
           const decodedRoute = decodeURIComponent(fileRoute)
           const isActive =
             !item.isFolder &&
@@ -287,15 +310,45 @@ export function SidebarClient({
               key={item.id}
               ref={!item.isFolder && isActive ? activeItemRef : undefined}
               className={`
-                my-1.5 list-none font-mono text-[15px] transition-all
+                relative my-1.5 list-none font-mono text-[15px] transition-all
                 duration-300
                 md:text-base
                 ${
                   !item.isFolder && isActive && highlightActive
-                    ? "-ml-1 bg-tech-main/10 pl-1"
+                    ? `bg-tech-main/10 px-1 py-0.5`
                     : ""
                 }
               `}>
+              {!item.isFolder && isActive && highlightActive && (
+                <div>
+                  <div
+                    className="
+                      pointer-events-none absolute top-0 left-0 size-2
+                      -translate-px border-t-2 border-l-2 border-tech-main/40
+                    "
+                  />
+                  <div
+                    className="
+                      pointer-events-none absolute top-0 right-0.5 size-2
+                      translate-x-px -translate-y-px border-t-2 border-r-2
+                      border-tech-main/40
+                    "
+                  />
+                  <div
+                    className="
+                      pointer-events-none absolute bottom-0 left-0 size-2
+                      -translate-x-px translate-y-px border-b-2 border-l-2
+                      border-tech-main/40
+                    "
+                  />
+                  <div
+                    className="
+                      pointer-events-none absolute right-0.5 bottom-0 size-2
+                      translate-px border-r-2 border-b-2 border-tech-main/40
+                    "
+                  />
+                </div>
+              )}
               {item.isFolder ? (
                 <button
                   onClick={(e) => toggleFolder(item.id, e)}
@@ -426,6 +479,10 @@ export function SidebarClient({
               )}
               {item.children && item.children.length > 0 && (
                 <div
+                  ref={(el) => {
+                    if (el) folderGridRefs.current.set(item.id, el)
+                    else folderGridRefs.current.delete(item.id)
+                  }}
                   className={`
                     grid transition-all duration-300 ease-out
                     ${

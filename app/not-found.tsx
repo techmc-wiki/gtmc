@@ -43,7 +43,7 @@ export default function NotFound() {
           </p>
           <p>MEM.DUMP :: ACTIVE</p>
           <p>TRACE :: FAILED</p>
-          <div className="my-2 h-px w-full bg-tech-main/30"></div>
+          <div className="my-2 h-px w-full bg-tech-main/30" />
           <p>TARGET : UNKNOWN</p>
         </div>
 
@@ -105,14 +105,15 @@ export default function NotFound() {
             items-center justify-center bg-tech-main/10
             md:flex
           ">
-          <div className="size-2 border border-tech-main/50 bg-tech-bg"></div>
+          <div className="size-2 border border-tech-main/50 bg-tech-bg" />
         </div>
         <div
           className="
             absolute top-0 left-[50%] decor-desktop-only hidden w-pxfull
             bg-tech-main/10
             md:block
-          "></div>
+          "
+        />
 
         {/* Crosshairs */}
         <div
@@ -153,7 +154,8 @@ export default function NotFound() {
               group-hover:translate-3
               md:translate-3
               md:group-hover:translate-4
-            "></div>
+            "
+          />
 
           {/* Main Card */}
           <div
@@ -169,29 +171,34 @@ export default function NotFound() {
                 pointer-events-none absolute inset-0 translate-x-[-200%]
                 -skew-x-12 animate-[shimmer_3s_infinite_2s] bg-linear-to-r
                 from-transparent via-white/40 to-transparent
-              "></div>
+              "
+            />
 
             {/* Corner Brackets */}
             <div
               className="
                 absolute top-0 left-0 size-3 -translate-0.5 border-t-2
                 border-l-2 border-tech-main
-              "></div>
+              "
+            />
             <div
               className="
                 absolute top-0 right-0 size-3 translate-x-0.5 -translate-y-0.5
                 border-t-2 border-r-2 border-tech-main
-              "></div>
+              "
+            />
             <div
               className="
                 absolute bottom-0 left-0 size-3 -translate-x-0.5 translate-y-0.5
                 border-b-2 border-l-2 border-tech-main
-              "></div>
+              "
+            />
             <div
               className="
                 absolute right-0 bottom-0 size-3 translate-0.5 border-r-2
                 border-b-2 border-tech-main
-              "></div>
+              "
+            />
 
             <div className="mb-8 flex flex-col items-center">
               <div

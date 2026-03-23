@@ -28,7 +28,7 @@ export default function DashboardLayout({
           sticky top-0 z-50 border-b border-tech-main/40 bg-white/60
           backdrop-blur-md
         ">
-        <div className="absolute top-0 left-0 h-px w-full bg-tech-main/20"></div>
+        <div className="absolute top-0 left-0 h-px w-full bg-tech-main/20" />
         <div
           className="
             mx-auto max-w-[1800px] px-4
@@ -95,12 +95,14 @@ export default function DashboardLayout({
           className="
             absolute top-0 left-0 hidden w-pxfull bg-tech-main/20
             lg:block
-          "></div>
+          "
+        />
         <div
           className="
             absolute top-0 right-0 hidden w-pxfull bg-tech-main/20
             lg:block
-          "></div>
+          "
+        />
         {children}
       </main>
     </div>

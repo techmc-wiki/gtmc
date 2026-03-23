@@ -241,8 +241,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           aria-label="Toggle article tree"
           aria-expanded={isOpen}
           data-testid="mobile-tree-toggle">
-          <span
-            className="
+          <span className="
             font-mono text-xs font-bold tracking-[0.15em] uppercase
           ">
             TREE
@@ -335,7 +334,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 absolute top-0 left-0 h-0 w-px bg-tech-main opacity-20
                 transition-all duration-500 ease-out
                 group-hover:h-full
-              "></div>
+              "
+            />
 
             <div
               className="

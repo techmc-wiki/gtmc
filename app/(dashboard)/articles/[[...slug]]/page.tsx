@@ -103,12 +103,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <div
         className="
           absolute top-0 left-0 size-4 border-t-2 border-l-2 border-tech-main/40
-        "></div>
+        "
+      />
       <div
         className="
           absolute right-0 bottom-0 size-4 border-r-2 border-b-2
           border-tech-main/40
-        "></div>
+        "
+      />
 
       {/* Article Header Region - Mobile-first in-flow card */}
       <div
@@ -122,22 +124,26 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           className="
             pointer-events-none absolute top-0 left-0 size-2 -translate-px
             border-t-2 border-l-2 border-tech-main/40
-          "></div>
+          "
+        />
         <div
           className="
             pointer-events-none absolute top-0 right-0 size-2 translate-x-px
             -translate-y-px border-t-2 border-r-2 border-tech-main/40
-          "></div>
+          "
+        />
         <div
           className="
             pointer-events-none absolute bottom-0 left-0 size-2 -translate-x-px
             translate-y-px border-b-2 border-l-2 border-tech-main/40
-          "></div>
+          "
+        />
         <div
           className="
             pointer-events-none absolute right-0 bottom-0 size-2 translate-px
             border-r-2 border-b-2 border-tech-main/40
-          "></div>
+          "
+        />
 
         {/* Region 1: System/Read Label */}
         <div className="flex items-center font-mono text-xs text-tech-main/50">
@@ -193,9 +199,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
       <div
         className="
-            w-full max-w-none overflow-hidden wrap-break-word text-slate-800
-            selection:bg-tech-main/20 selection:text-slate-900
-          ">
+          w-full max-w-none overflow-hidden wrap-break-word text-slate-800
+          selection:bg-tech-main/20 selection:text-slate-900
+        ">
         <ReactMarkdown
           remarkPlugins={remarkPlugins}
           rehypePlugins={rehypePlugins}

@@ -118,14 +118,16 @@ export function FeatureList({ features }: { features: Feature[] }) {
                       border-l-2 border-tech-main/40 opacity-0
                       transition-opacity
                       group-hover:opacity-100
-                    "></div>
+                    "
+                  />
                   <div
                     className="
                       absolute right-0 bottom-0 size-2 translate-px border-r-2
                       border-b-2 border-tech-main/40 opacity-0
                       transition-opacity
                       group-hover:opacity-100
-                    "></div>
+                    "
+                  />
 
                   <div className="relative z-10 flex h-full flex-col">
                     <div className="mb-4 flex items-start justify-between gap-2">

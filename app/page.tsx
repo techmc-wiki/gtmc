@@ -450,7 +450,7 @@ export default function Home() {
           <p>SYS.MSPT :: 12.4ms</p>
           <p>ENTITIES :: 342 / 1024</p>
           <p>BLOCK.ENT :: 1,204</p>
-          <div className="my-2 h-px w-full bg-tech-main/30"></div>
+          <div className="my-2 h-px w-full bg-tech-main/30" />
           <p>COORD : X:1024 Y:64 Z:-512</p>
           <p className="mt-2 text-[8px] opacity-70">
             Light: 15 (15 sky, 0 block) <br /> Biome: minecraft:plains
@@ -564,7 +564,7 @@ export default function Home() {
           ">
           <div className="
             mt-[50vh] size-2 border border-tech-main/50 bg-tech-bg
-          "></div>
+          " />
         </div>
 
         {/* 技术图纸刻度尺 */}
@@ -599,7 +599,8 @@ export default function Home() {
               key={i}
               className="
                 relative h-8 w-full flex-none border-t border-tech-main/40
-              "></div>
+              "
+            />
           ))}
         </div>
       </motion.div>
@@ -631,7 +632,8 @@ export default function Home() {
               absolute inset-0 -z-10 translate-3 border guide-line
               bg-transparent transition-transform duration-500 ease-out
               group-hover:translate-4
-            "></div>
+            "
+          />
 
           {/* 尺寸标注装饰 */}
           <div
@@ -660,31 +662,36 @@ export default function Home() {
                 pointer-events-none absolute inset-0 translate-x-[-200%]
                 -skew-x-12 animate-[shimmer_3s_infinite_2s] bg-linear-to-r
                 from-transparent via-white/40 to-transparent
-              "></div>
+              "
+            />
 
             {/* 工业感/图纸感的定位刻度 */}
             <div
               className="
                 absolute top-0 left-0 size-3 -translate-0.5 border-t-2
                 border-l-2 border-tech-main
-              "></div>
+              "
+            />
             <div
               className="
                 absolute right-0 bottom-0 size-3 translate-0.5 border-r-2
                 border-b-2 border-tech-main
-              "></div>
+              "
+            />
 
             {/* 钉子/打孔装饰 */}
             <div
               className="
                 absolute top-4 right-4 size-1.5 rounded-full border
                 border-tech-main/50 bg-tech-bg/50
-              "></div>
+              "
+            />
             <div
               className="
                 absolute bottom-4 left-4 size-1.5 rounded-full border
                 border-tech-main/50 bg-tech-bg/50
-              "></div>
+              "
+            />
 
             <div
               className="
@@ -702,7 +709,8 @@ export default function Home() {
                   className="
                     size-4 bg-tech-main/30 transition-colors
                     group-hover:bg-tech-main/60
-                  "></div>
+                  "
+                />
               </div>
               <h2
                 className="
@@ -861,7 +869,7 @@ export default function Home() {
                 }
               `}>
               {i === 3 && (
-                <div className="size-4 rotate-45 bg-tech-main-dark/80"></div>
+                <div className="size-4 rotate-45 bg-tech-main-dark/80" />
               )}
             </div>
           ))}

@@ -45,7 +45,8 @@ export default async function EditDraftPage({
           className="
             absolute -bottom-[5px] left-0 size-2 border border-tech-main/50
             bg-tech-main/20
-          "></div>
+          "
+        />
         <div
           className="
             flex items-center space-x-4
@@ -81,12 +82,14 @@ export default async function EditDraftPage({
         <div
           className="
             absolute top-0 left-0 size-2 border-t border-l border-tech-main/50
-          "></div>
+          "
+        />
         <div
           className="
             absolute right-0 bottom-0 size-2 border-r border-b
             border-tech-main/50
-          "></div>
+          "
+        />
 
         {draft.status === "SUBMITTED" ? (
           <div

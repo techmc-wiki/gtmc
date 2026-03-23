@@ -143,23 +143,27 @@ export default async function FeatureDetailPage({
             className="
               pointer-events-none absolute top-0 left-0 size-2 -translate-px
               border-t-2 border-l-2 border-red-500/50
-            "></div>
+            "
+          />
           <div
             className="
               pointer-events-none absolute top-0 right-0 size-2 translate-x-px
               -translate-y-px border-t-2 border-r-2 border-red-500/50
-            "></div>
+            "
+          />
           <div
             className="
               pointer-events-none absolute bottom-0 left-0 size-2
               -translate-x-px translate-y-px border-b-2 border-l-2
               border-red-500/50
-            "></div>
+            "
+          />
           <div
             className="
               pointer-events-none absolute right-0 bottom-0 size-2 translate-px
               border-r-2 border-b-2 border-red-500/50
-            "></div>
+            "
+          />
 
           <span className="flex items-center gap-2 font-bold">
             <span className="text-red-500">⚠</span> FEATURE DELETED (READ-ONLY)

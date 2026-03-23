@@ -121,12 +121,14 @@ export default async function ProfilePage() {
           className="
             absolute top-0 left-0 size-2 -translate-0.5 border-t-2 border-l-2
             border-tech-main
-          "></div>
+          "
+        />
         <div
           className="
             absolute right-0 bottom-0 size-2 translate-0.5 border-r-2 border-b-2
             border-tech-main
-          "></div>
+          "
+        />
 
         <form
           action={updateProfileAction}
@@ -149,8 +151,8 @@ export default async function ProfilePage() {
                 sm:size-32
                 md:size-40
               ">
-              <div className="absolute -top-1 -left-1 size-2 bg-tech-main"></div>
-              <div className="absolute -right-1 -bottom-1 size-2 bg-tech-main"></div>
+              <div className="absolute -top-1 -left-1 size-2 bg-tech-main" />
+              <div className="absolute -right-1 -bottom-1 size-2 bg-tech-main" />
               <BrutalAvatar
                 src={user.image}
                 alt={user.name}
@@ -299,7 +301,7 @@ export default async function ProfilePage() {
               border border-tech-main/30 bg-tech-main/5 p-3
               sm:mt-8 sm:flex-row sm:items-center sm:gap-4 sm:p-4
             ">
-            <div className="absolute top-0 right-0 size-2 bg-tech-main/20"></div>
+            <div className="absolute top-0 right-0 size-2 bg-tech-main/20" />
             <div
               className="
                 flex items-center gap-3
@@ -342,7 +344,8 @@ export default async function ProfilePage() {
             className="
               my-6 h-px w-full bg-tech-main/30
               sm:my-8
-            "></div>
+            "
+          />
 
           <div
             className="

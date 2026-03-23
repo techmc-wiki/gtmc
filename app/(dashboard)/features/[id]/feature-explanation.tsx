@@ -96,7 +96,7 @@ export function FeatureExplanation({
           group relative overflow-hidden border-tech-accent/40 bg-tech-accent/5
           backdrop-blur-sm
         ">
-        <div className="absolute top-0 left-0 h-full w-2 bg-tech-accent/60"></div>
+        <div className="absolute top-0 left-0 h-full w-2 bg-tech-accent/60" />
         <div
           className="
             mb-4 flex items-start justify-between border-b border-tech-accent/40

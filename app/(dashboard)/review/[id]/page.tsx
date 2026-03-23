@@ -182,7 +182,8 @@ export default async function ReviewDetailPage({
           className="
             absolute -bottom-1.25 left-0 size-2 border border-tech-main/50
             bg-tech-main/20
-          "></div>
+          "
+        />
         <div>
           <h1
             className="
@@ -286,12 +287,14 @@ export default async function ReviewDetailPage({
               className="
                 absolute top-0 left-0 size-2 border-t border-l
                 border-tech-main/50
-              "></div>
+              "
+            />
             <div
               className="
                 absolute right-0 bottom-0 size-2 border-r border-b
                 border-tech-main/50
-              "></div>
+              "
+            />
             <div
               className="
                 w-full max-w-none overflow-hidden wrap-break-word

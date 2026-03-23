@@ -338,13 +338,21 @@ body {
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: color-mix(in oklab, var(--color-tech-main) 30%, transparent);
+    background-color: color-mix(
+      in oklab,
+      var(--color-tech-main) 30%,
+      transparent
+    );
     border-radius: 0;
     opacity: 0.5;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: color-mix(in oklab, var(--color-tech-main-dark) 70%, transparent);
+    background-color: color-mix(
+      in oklab,
+      var(--color-tech-main-dark) 70%,
+      transparent
+    );
   }
 }
 

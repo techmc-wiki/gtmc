@@ -242,8 +242,9 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           aria-label="Toggle article tree"
           aria-expanded={isOpen}
           data-testid="mobile-tree-toggle">
-          <span
-            className="font-mono text-xs font-bold tracking-[0.15em] uppercase">
+          <span className="
+            font-mono text-xs font-bold tracking-[0.15em] uppercase
+          ">
             TREE
           </span>
           <span className="font-mono text-sm font-bold">
@@ -338,7 +339,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
             <div
               className="
-                group/title mb-6 flex shrink-0 items-center justify-between
+                group/title mb-4 flex shrink-0 items-center justify-between
                 border-b guide-line pt-8 pb-2 pl-6
               ">
               <div
@@ -354,31 +355,23 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
               </div>
             </div>
 
-            <div
-              className="
-                -mt-2 custom-left-scrollbar h-full min-h-0 flex-1
-                overflow-y-auto pl-6
-              ">
+            {showTreePlaceholder ? (
               <div
-                className={`
-                  prose prose-base w-full overflow-hidden pt-2 pb-8 font-mono
-                  text-base wrap-break-word prose-tech
-                  [&_li]:mt-1.5
-                  [&_ul]:list-none
-                  [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l
-                  [&_ul_ul]:guide-line [&_ul_ul]:pl-3
-                  [&>ul]:pl-0
-                  ${showTreePlaceholder ? "h-full min-h-full pb-2" : ""}
-                `}>
-                {showTreePlaceholder ? (
-                  <div className="h-full min-h-full pr-4">
-                    <TreeLoadingPlaceholder />
-                  </div>
-                ) : (
-                  <SidebarClient tree={treeData} />
-                )}
+                className="
+                  custom-left-scrollbar h-full min-h-0 flex-1 overflow-y-auto
+                  pl-6
+                ">
+                <div className="h-full min-h-full pr-4">
+                  <TreeLoadingPlaceholder />
+                </div>
               </div>
-            </div>
+            ) : (
+              <SidebarClient
+                tree={treeData}
+                internalScroll
+                scrollClass="pr-4"
+              />
+            )}
           </div>
         </div>
       </aside>

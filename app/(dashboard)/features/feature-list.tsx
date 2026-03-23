@@ -154,7 +154,9 @@ export function FeatureList({ features }: { features: Feature[] }) {
                           flex items-center font-mono text-xs tracking-widest
                           text-tech-main opacity-80
                         ">
-                        <span className="mr-2 inline-block size-1.5 bg-tech-main"></span>
+                        <span className="
+                          mr-2 inline-block size-1.5 bg-tech-main
+                        "></span>
                         AUTHOR: {feature.author?.name || "UNKNOWN_USER"}
                       </p>
                       {feature.assignee && (
@@ -163,7 +165,9 @@ export function FeatureList({ features }: { features: Feature[] }) {
                             flex items-center font-mono text-xs tracking-widest
                             text-blue-600 opacity-80
                           ">
-                          <span className="mr-2 inline-block size-1.5 bg-blue-600"></span>
+                          <span className="
+                            mr-2 inline-block size-1.5 bg-blue-600
+                          "></span>
                           ASSIGNEE: {feature.assignee.name || "UNKNOWN_USER"}
                         </p>
                       )}
@@ -197,7 +201,9 @@ export function FeatureList({ features }: { features: Feature[] }) {
     <div className="space-y-6">
       {/* 过滤器 */}
       <RevealSection delay={0}>
-        <BrutalCard className="border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm">
+        <BrutalCard className="
+          border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
+        ">
           <div className="space-y-4">
             <div>
               <h4

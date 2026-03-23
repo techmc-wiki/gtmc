@@ -152,10 +152,20 @@ export default async function DraftDashboardPage() {
         title="Ops Center"
         subtitle="YOUR DIGITAL WORKSHOP / DRAFTS & REVISIONS"
         action={
-          <Link href="/draft/new" className="w-full md:w-auto">
+          <Link
+            href="/draft/new"
+            className="
+              w-full
+              md:w-auto
+            ">
             <BrutalButton
               variant="primary"
-              className="flex min-h-11 w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
+              className="
+                flex min-h-11 w-full items-center justify-center px-6 text-xs
+                tracking-widest uppercase transition-transform
+                hover:scale-[1.02]
+                md:w-auto
+              ">
               + INITIALIZE SUBMISSION
             </BrutalButton>
           </Link>

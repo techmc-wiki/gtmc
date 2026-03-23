@@ -9,8 +9,8 @@ export function EmptyState({ message, colSpanFull = false }: EmptyStateProps) {
   return (
     <div
       className={`
-        group relative border border-dashed border-tech-main/40
-        bg-white/30 py-16 text-center backdrop-blur-sm
+        group relative border border-dashed border-tech-main/40 bg-white/30
+        py-16 text-center backdrop-blur-sm
         ${colSpanFull ? `col-span-full` : ``}
       `}>
       <div
@@ -21,8 +21,8 @@ export function EmptyState({ message, colSpanFull = false }: EmptyStateProps) {
       />
       <h2
         className="
-          relative z-10 font-mono text-lg tracking-widest
-          text-tech-main/50 uppercase
+          relative z-10 font-mono text-lg tracking-widest text-tech-main/50
+          uppercase
         ">
         {message}
       </h2>

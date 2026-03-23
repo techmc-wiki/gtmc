@@ -7,7 +7,6 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { createDocument } from "@/actions/sidebar"
 
-// 定义 H2 标题的数据结构
 interface TocItem {
   id: string
   text: string
@@ -25,9 +24,13 @@ interface TreeNode {
 export function SidebarClient({
   tree,
   onNavigate,
+  internalScroll = false,
+  scrollClass = "",
 }: {
   tree: TreeNode[]
   onNavigate?: () => void
+  internalScroll?: boolean
+  scrollClass?: string
 }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -45,6 +48,8 @@ export function SidebarClient({
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
   const [mounted, setMounted] = useState(false)
   const activeItemRef = useRef<HTMLLIElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [highlightActive, setHighlightActive] = useState(false)
 
   useEffect(() => {
     let frameCount = 0
@@ -112,16 +117,78 @@ export function SidebarClient({
     }
   }, [expandedFolders, mounted])
 
+  const getEffectivePathname = useCallback(() => {
+    if (pathname === "/articles" || pathname === "/articles/") {
+      return "/articles/Preface"
+    }
+    return pathname
+  }, [pathname])
+
+  const findItemAndParents = useCallback(
+    (
+      items: TreeNode[],
+      targetSlug: string,
+      parents: string[] = []
+    ): { item: TreeNode | null; parentIds: string[] } => {
+      for (const item of items) {
+        const itemSlug = `/articles/${item.slug}`
+        if (itemSlug === targetSlug || `${itemSlug}/` === targetSlug) {
+          return { item, parentIds: parents }
+        }
+        if (item.children && item.children.length > 0) {
+          const result = findItemAndParents(item.children, targetSlug, [
+            ...parents,
+            item.id,
+          ])
+          if (result.item) return result
+        }
+      }
+      return { item: null, parentIds: [] }
+    },
+    []
+  )
+
+  const scrollActiveItemIntoContainer = useCallback(() => {
+    const item = activeItemRef.current
+    const container = scrollContainerRef.current
+    if (!item) return
+    if (container) {
+      const itemRect = item.getBoundingClientRect()
+      const containerRect = container.getBoundingClientRect()
+      const relativeTop = itemRect.top - containerRect.top + container.scrollTop
+      const scrollTarget = relativeTop - containerRect.height / 4
+      container.scrollTo({ top: Math.max(0, scrollTarget), behavior: "smooth" })
+    } else {
+      item.scrollIntoView({ block: "start", behavior: "smooth" })
+    }
+  }, [])
+
   useEffect(() => {
-    if (!mounted) return
-    const timer = setTimeout(() => {
-      activeItemRef.current?.scrollIntoView({
-        block: "nearest",
-        behavior: "smooth",
+    if (!mounted || tree.length === 0) return
+    const effectivePath = getEffectivePathname()
+    const { parentIds } = findItemAndParents(tree, effectivePath)
+    if (parentIds.length > 0) {
+      setExpandedFolders((prev) => {
+        const next = new Set(prev)
+        parentIds.forEach((id) => next.add(id))
+        return next
       })
-    }, 150)
+    }
+    const delay = parentIds.length > 0 ? 400 : 50
+    const timer = setTimeout(() => {
+      scrollActiveItemIntoContainer()
+      setHighlightActive(true)
+      setTimeout(() => setHighlightActive(false), 2000)
+    }, delay)
     return () => clearTimeout(timer)
-  }, [pathname, mounted])
+  }, [
+    pathname,
+    mounted,
+    tree,
+    getEffectivePathname,
+    findItemAndParents,
+    scrollActiveItemIntoContainer,
+  ])
 
   const isFolderExpanded = useCallback(
     (id: string) => {
@@ -147,14 +214,38 @@ export function SidebarClient({
   const collapseAll = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     setExpandedFolders(new Set())
+    setIsFileExpanded(false)
   }, [])
 
   const scrollToCurrent = useCallback(() => {
-    activeItemRef.current?.scrollIntoView({
-      block: "nearest",
-      behavior: "smooth",
-    })
-  }, [])
+    const effectivePath = getEffectivePathname()
+    const { parentIds } = findItemAndParents(tree, effectivePath)
+    const alreadyExpanded = parentIds.every((id) => expandedFolders.has(id))
+    if (!alreadyExpanded) {
+      setExpandedFolders((prev) => {
+        const next = new Set(prev)
+        parentIds.forEach((id) => next.add(id))
+        return next
+      })
+    }
+    const userScrolledHalfScreen =
+      typeof window !== "undefined" && window.scrollY >= window.innerHeight / 2
+    if (userScrolledHalfScreen) {
+      setIsFileExpanded(true)
+    }
+    const delay = alreadyExpanded ? 50 : 400
+    setTimeout(() => {
+      scrollActiveItemIntoContainer()
+      setHighlightActive(true)
+      setTimeout(() => setHighlightActive(false), 2000)
+    }, delay)
+  }, [
+    tree,
+    expandedFolders,
+    getEffectivePathname,
+    findItemAndParents,
+    scrollActiveItemIntoContainer,
+  ])
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -175,11 +266,12 @@ export function SidebarClient({
   }
 
   const renderTree = (items: TreeNode[], level = 0) => {
+    const effectivePath = getEffectivePathname()
     return (
       <ul className="my-1 border-l guide-line pl-4">
         {items.map((item) => {
           const fileRoute = `/articles/${item.slug}`
-          const decodedPathname = decodeURIComponent(pathname)
+          const decodedPathname = decodeURIComponent(effectivePath)
           const decodedRoute = decodeURIComponent(fileRoute)
           const isActive =
             !item.isFolder &&
@@ -194,10 +286,16 @@ export function SidebarClient({
             <li
               key={item.id}
               ref={!item.isFolder && isActive ? activeItemRef : undefined}
-              className="
-                my-1.5 list-none font-mono text-[15px]
+              className={`
+                my-1.5 list-none font-mono text-[15px] transition-all
+                duration-300
                 md:text-base
-              ">
+                ${
+                  !item.isFolder && isActive && highlightActive
+                    ? "-ml-1 bg-tech-main/10 pl-1"
+                    : ""
+                }
+              `}>
               {item.isFolder ? (
                 <button
                   onClick={(e) => toggleFolder(item.id, e)}
@@ -365,9 +463,12 @@ export function SidebarClient({
     [tree, flattenFolders]
   )
 
-  return (
-    <div>
-      <div className="mb-4 flex flex-wrap gap-2">
+  const buttonsPanel = (
+    <div
+      className="
+        shrink-0 border-b guide-line bg-white/95 px-6 py-3 backdrop-blur-sm
+      ">
+      <div className="flex flex-wrap gap-2">
         <button
           onClick={() => setIsModalOpen(true)}
           className="
@@ -396,13 +497,71 @@ export function SidebarClient({
           ◎ LOCATE
         </button>
       </div>
+    </div>
+  )
 
-      {tree.length === 0 ? (
-        <div className="mt-4 font-mono text-sm text-tech-main/40">
-          SYS.DIR_TREE_EMPTY
+  const treePanel =
+    tree.length === 0 ? (
+      <div className="mt-4 font-mono text-sm text-tech-main/40">
+        SYS.DIR_TREE_EMPTY
+      </div>
+    ) : (
+      <div className="-ml-4">{renderTree(tree)}</div>
+    )
+
+  return (
+    <>
+      {internalScroll ? (
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="pl-3">{buttonsPanel}</div>
+          <div
+            ref={scrollContainerRef}
+            className={`
+              custom-left-scrollbar min-h-0 flex-1 overflow-y-auto pl-6
+              ${scrollClass}
+            `}>
+            {treePanel}
+          </div>
         </div>
       ) : (
-        <div className="-ml-4">{renderTree(tree)}</div>
+        <div>
+          <div
+            className="
+              sticky top-0 z-10 mb-4 border-b guide-line bg-white/95 px-6 py-3
+              backdrop-blur-sm
+            ">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="
+                  cursor-pointer border border-tech-main/40 px-3 py-1.5
+                  font-mono text-[11px] transition-colors
+                  hover:bg-tech-main hover:text-white
+                ">
+                + NEW DIR / FILE
+              </button>
+              <button
+                onClick={collapseAll}
+                className="
+                  cursor-pointer border border-tech-main/40 px-3 py-1.5
+                  font-mono text-[11px] transition-colors
+                  hover:bg-tech-main hover:text-white
+                ">
+                ⊟ COLLAPSE ALL
+              </button>
+              <button
+                onClick={scrollToCurrent}
+                className="
+                  cursor-pointer border border-tech-main/40 px-3 py-1.5
+                  font-mono text-[11px] transition-colors
+                  hover:bg-tech-main hover:text-white
+                ">
+                ◎ LOCATE
+              </button>
+            </div>
+          </div>
+          {treePanel}
+        </div>
       )}
 
       {mounted &&
@@ -410,20 +569,20 @@ export function SidebarClient({
         createPortal(
           <div
             className="
-              fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4
-              duration-300 animate-in fade-in
+              fixed inset-0 z-9999 flex items-center justify-center bg-black/80
+              p-4 duration-300 animate-in fade-in
             ">
             <div
               className="
-              w-full max-w-md rounded-sm border-2 border-tech-main bg-white p-6
-              shadow-[8px_8px_0_0_rgba(var(--tech-main),1)]
-              dark:bg-black
-            ">
+                w-full max-w-md rounded-sm border-2 border-tech-main bg-white
+                p-6 shadow-[8px_8px_0_0_rgba(var(--tech-main),1)]
+                dark:bg-black
+              ">
               <h3
                 className="
-                mb-6 border-b guide-line pb-2 font-mono text-lg font-bold
-                tracking-widest text-tech-main uppercase
-              ">
+                  mb-6 border-b guide-line pb-2 font-mono text-lg font-bold
+                  tracking-widest text-tech-main uppercase
+                ">
                 CREATE_SYS_OBJECT
               </h3>
 
@@ -431,9 +590,9 @@ export function SidebarClient({
                 <div>
                   <label
                     className="
-                    mb-1 block text-[11px] tracking-wider text-tech-main/80
-                    uppercase
-                  ">
+                      mb-1 block text-[11px] tracking-wider text-tech-main/80
+                      uppercase
+                    ">
                     Title
                   </label>
                   <input
@@ -447,10 +606,10 @@ export function SidebarClient({
                       })
                     }
                     className="
-                    w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2
-                    text-sm text-tech-main outline-none
-                    focus:border-tech-main
-                  "
+                      w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2
+                      text-sm text-tech-main outline-none
+                      focus:border-tech-main
+                    "
                     placeholder="e.g. Overview"
                   />
                 </div>
@@ -458,9 +617,9 @@ export function SidebarClient({
                 <div>
                   <label
                     className="
-                    mb-1 block text-[11px] tracking-wider text-tech-main/80
-                    uppercase
-                  ">
+                      mb-1 block text-[11px] tracking-wider text-tech-main/80
+                      uppercase
+                    ">
                     Slug (URL path)
                   </label>
                   <input
@@ -470,19 +629,19 @@ export function SidebarClient({
                       setFormData({ ...formData, slug: e.target.value })
                     }
                     className="
-                    w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2
-                    text-sm text-tech-main outline-none
-                    focus:border-tech-main
-                  "
+                      w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2
+                      text-sm text-tech-main outline-none
+                      focus:border-tech-main
+                    "
                     placeholder="Leave empty to auto-generate"
                   />
                 </div>
 
                 <div
                   className="
-                  flex items-center gap-3 border guide-line bg-tech-main/5 px-3
-                  py-2
-                ">
+                    flex items-center gap-3 border guide-line bg-tech-main/5
+                    px-3 py-2
+                  ">
                   <input
                     type="checkbox"
                     id="isFolder"
@@ -498,8 +657,8 @@ export function SidebarClient({
                   <label
                     htmlFor="isFolder"
                     className="
-                    cursor-pointer text-sm text-tech-main/80 select-none
-                  ">
+                      cursor-pointer text-sm text-tech-main/80 select-none
+                    ">
                     Create as Directory (Folder)
                   </label>
                 </div>
@@ -507,9 +666,9 @@ export function SidebarClient({
                 <div>
                   <label
                     className="
-                    mb-1 block text-[11px] tracking-wider text-tech-main/80
-                    uppercase
-                  ">
+                      mb-1 block text-[11px] tracking-wider text-tech-main/80
+                      uppercase
+                    ">
                     Parent Directory
                   </label>
                   <select
@@ -521,9 +680,9 @@ export function SidebarClient({
                       })
                     }
                     className="
-                    w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2
-                    text-sm text-tech-main outline-none
-                  ">
+                      w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2
+                      text-sm text-tech-main outline-none
+                    ">
                     <option value="">[ ROOT_DIRECTORY ]</option>
                     {availableFolders.map((f) => (
                       <option key={f.id} value={f.id}>
@@ -533,27 +692,30 @@ export function SidebarClient({
                   </select>
                 </div>
 
-                <div className="mt-6 flex justify-end gap-2 border-t guide-line pt-4">
+                <div
+                  className="
+                    mt-6 flex justify-end gap-2 border-t guide-line pt-4
+                  ">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
                     className="
-                    cursor-pointer border border-tech-main/40 px-4 py-2
-                    text-[11px] font-bold tracking-widest text-tech-main
-                    uppercase transition-colors
-                    hover:bg-tech-main/10
-                  ">
+                      cursor-pointer border border-tech-main/40 px-4 py-2
+                      text-[11px] font-bold tracking-widest text-tech-main
+                      uppercase transition-colors
+                      hover:bg-tech-main/10
+                    ">
                     ABORT
                   </button>
                   <button
                     type="submit"
                     className="
-                    cursor-pointer bg-tech-main px-4 py-2 text-[11px] font-bold
-                    tracking-widest text-white uppercase
-                    shadow-[2px_2px_0_0_rgba(var(--tech-main),0.4)]
-                    transition-opacity
-                    hover:opacity-90
-                  ">
+                      cursor-pointer bg-tech-main px-4 py-2 text-[11px]
+                      font-bold tracking-widest text-white uppercase
+                      shadow-[2px_2px_0_0_rgba(var(--tech-main),0.4)]
+                      transition-opacity
+                      hover:opacity-90
+                    ">
                     EXECUTE
                   </button>
                 </div>
@@ -562,6 +724,6 @@ export function SidebarClient({
           </div>,
           document.body
         )}
-    </div>
+    </>
   )
 }

@@ -70,8 +70,8 @@ export function getMarkdownComponents(rawPath: string) {
     table: ({ ...props }: MarkdownComponentProps) => (
       <div
         className="
-          custom-bottom-scrollbar my-6 w-full overflow-x-auto border border-tech-main/30
-          bg-tech-bg/50 backdrop-blur-sm
+          my-6 custom-bottom-scrollbar w-full overflow-x-auto border
+          border-tech-main/30 bg-tech-bg/50 backdrop-blur-sm
         ">
         <table
           className="

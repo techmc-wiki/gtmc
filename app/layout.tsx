@@ -5,9 +5,20 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import Footer from "@/components/layout/footer"
 
 export const metadata: Metadata = {
-  title: "Graduate Texts in MC",
+  metadataBase: new URL("https://beta.techmc.wiki"),
+  title: "Graduate Texts in Minecraft",
   description:
-    "Graduate Texts in Technical Minceraft - colaboratively written comprehensive textbook for technical Minecraft.",
+    "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+  openGraph: {
+    type: "website",
+    siteName: "Graduate Texts in Minecraft",
+    title: "Graduate Texts in Minecraft",
+    description:
+      "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 }
 
 export default function RootLayout({

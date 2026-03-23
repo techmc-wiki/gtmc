@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { auth } from "@/lib/auth"
 import {
   EXPLANATION_MARKER,
@@ -20,6 +21,45 @@ import { FeatureStatusBadge } from "@/components/ui/status-badge"
 import { RevealSection } from "@/app/(dashboard)/features/reveal-helpers"
 
 export const revalidate = 60
+
+function stripMarkdown(md: string): string {
+  return md
+    .replace(/#{1,6}\s+/g, "")
+    .replace(/\*\*?([^*]+)\*\*?/g, "$1")
+    .replace(/__?([^_]+)__?/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/`+[^`]*`+/g, "")
+    .replace(/^>\s+/gm, "")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id } = await params
+  const issueNumber = parseInt(id)
+  if (isNaN(issueNumber)) return { title: "Feature Not Found" }
+
+  const issue = await getIssue(issueNumber)
+  if (!issue) return { title: "Feature Not Found" }
+
+  const description = stripMarkdown(issue.body ?? "")
+    .slice(0, 155)
+    .trim()
+
+  return {
+    title: issue.title,
+    description,
+    openGraph: {
+      title: `${issue.title} — Feature Request`,
+      description,
+      type: "article",
+    },
+  }
+}
 
 export default async function FeatureDetailPage({
   params,

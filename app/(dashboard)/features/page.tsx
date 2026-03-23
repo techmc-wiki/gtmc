@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { auth } from "@/lib/auth"
 import {
   labelsToStatus,
@@ -13,6 +14,17 @@ import { PendingCreationBanner } from "./pending-creation-banner"
 import { RevealSection } from "./reveal-helpers"
 
 export const revalidate = 60
+
+export const metadata: Metadata = {
+  title: "Feature Requests",
+  description:
+    "Browse and track feature requests for Technical Minecraft. Vote on ideas, report bugs, and suggest improvements.",
+  openGraph: {
+    title: "Feature Requests — Technical Minecraft",
+    description: "Browse and track feature requests for Technical Minecraft.",
+    type: "website",
+  },
+}
 
 export default async function FeaturesPage({
   searchParams,

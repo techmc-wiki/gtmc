@@ -6,6 +6,7 @@ interface SearchResult {
   slug: string
   snippet: string | null
   matchType: "title" | "content"
+  exactMatch: boolean
 }
 
 type SearchMatchMap = Record<string, string[]>
@@ -37,34 +38,18 @@ function extractSnippet(
   }
 
   const loweredContent = content.toLowerCase()
-  const candidates = [query, ...terms]
-    .map((term) => term.trim())
-    .filter((term) => term.length > 0)
-    .sort((a, b) => b.length - a.length)
+  const loweredQuery = query.toLowerCase()
+  const index = loweredContent.indexOf(loweredQuery)
 
-  let bestIndex = -1
-  let bestLength = query.length
-
-  for (const candidate of candidates) {
-    const index = loweredContent.indexOf(candidate.toLowerCase())
-    if (index === -1) {
-      continue
-    }
-    if (bestIndex === -1 || index < bestIndex) {
-      bestIndex = index
-      bestLength = candidate.length
-    }
-  }
-
-  if (bestIndex === -1) {
+  if (index === -1) {
     const fallback = content.slice(0, 120).trim()
     return fallback.length > 0 && fallback.length < content.length
       ? `${fallback}...`
       : fallback || null
   }
 
-  const start = Math.max(0, bestIndex - 50)
-  const end = Math.min(content.length, bestIndex + bestLength + 70)
+  const start = Math.max(0, index - 50)
+  const end = Math.min(content.length, index + query.length + 70)
   let snippet = content.slice(start, end).trim()
 
   if (start > 0) {
@@ -102,7 +87,7 @@ export async function GET(req: NextRequest) {
     const loweredQuery = query.toLowerCase()
     const results: SearchResult[] = []
 
-    for (const result of rawResults.slice(0, 20)) {
+    for (const result of rawResults) {
       const title = typeof result.title === "string" ? result.title : ""
       const slug = typeof result.slug === "string" ? result.slug : ""
       const content = typeof result.content === "string" ? result.content : ""
@@ -116,23 +101,32 @@ export async function GET(req: NextRequest) {
         matchMap[term]?.includes("title")
       )
 
+      const titleExact = title.toLowerCase().includes(loweredQuery)
+      const contentExact = content.toLowerCase().includes(loweredQuery)
       const matchType: "title" | "content" =
-        title.toLowerCase().includes(loweredQuery) || titleMatchedByTerm
-          ? "title"
-          : "content"
+        titleExact || titleMatchedByTerm ? "title" : "content"
 
       results.push({
         title,
         slug,
-        snippet:
-          matchType === "content"
-            ? extractSnippet(content, query, matchedTerms)
-            : null,
+        snippet: contentExact
+          ? extractSnippet(content, query, matchedTerms)
+          : null,
         matchType,
+        exactMatch: titleExact || contentExact,
       })
     }
 
-    return jsonResponse(results)
+    // Sort by phrase match priority: exact phrase matches first
+    results.sort((a, b) => {
+      if (a.exactMatch && !b.exactMatch) return -1
+      if (!a.exactMatch && b.exactMatch) return 1
+      if (a.matchType === "title" && b.matchType === "content") return -1
+      if (a.matchType === "content" && b.matchType === "title") return 1
+      return 0
+    })
+
+    return jsonResponse(results.slice(0, 20))
   } catch (error) {
     console.error("MiniSearch query failed:", error)
     return jsonResponse([])

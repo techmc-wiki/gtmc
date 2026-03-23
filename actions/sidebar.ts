@@ -54,28 +54,6 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
     orderBy: [{ isFolder: "desc" }, { title: "asc" }],
   })
 
-  const itemMap = new Map<string, TreeNode>()
-  const dbRootItems: TreeNode[] = []
-
-  allItems.forEach((item) => {
-    itemMap.set(item.id, { ...item, children: [] })
-  })
-
-  allItems.forEach((item) => {
-    if (item.parentId) {
-      const parent = itemMap.get(item.parentId)
-      const child = itemMap.get(item.id)
-      if (parent && child) {
-        parent.children.push(child)
-      } else if (child) {
-        dbRootItems.push(child)
-      }
-    } else {
-      const child = itemMap.get(item.id)
-      if (child) dbRootItems.push(child)
-    }
-  })
-
   // 2. Get GitHub repo tree (cached)
   let githubTree: RepoTreeNode[] = []
   let translations: Record<string, string> = {}
@@ -103,8 +81,66 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
     )
   }
 
-  // 4. Merge: GitHub tree first, then DB articles
-  const mergedTree: TreeNode[] = [...(githubTree as TreeNode[]), ...dbRootItems]
+  // 3. Build unified map keyed by slug
+  const unifiedMap = new Map<string, TreeNode>()
+  const mergedTree: TreeNode[] = []
+
+  // Add GitHub tree
+  function addGithubNodes(nodes: RepoTreeNode[], parentArray: TreeNode[]) {
+    for (const node of nodes) {
+      const clone: TreeNode = {
+        ...node,
+        children: [],
+      }
+      unifiedMap.set(clone.slug.toLowerCase(), clone)
+      parentArray.push(clone)
+      if (node.children && node.children.length > 0) {
+        addGithubNodes(node.children, clone.children)
+      }
+    }
+  }
+
+  addGithubNodes(githubTree, mergedTree)
+
+  // 4. Add DB articles, deduplicating by slug
+  const dbItemsPending = [...allItems]
+  
+  // First pass: add missing nodes
+  for (const dbItem of dbItemsPending) {
+    const slugKey = dbItem.slug.toLowerCase()
+    if (!unifiedMap.has(slugKey)) {
+      const newNode: TreeNode = {
+        id: dbItem.id, // Keep DB ID so the client can interact with it
+        title: dbItem.title,
+        slug: dbItem.slug,
+        isFolder: dbItem.isFolder, // Make sure it defaults to false if missing
+        parentId: dbItem.parentId,
+        children: []
+      }
+      unifiedMap.set(slugKey, newNode)
+    }
+  }
+
+  // Second pass: link DB-exclusive items into the tree structure
+  for (const dbItem of dbItemsPending) {
+    const slugKey = dbItem.slug.toLowerCase()
+    const node = unifiedMap.get(slugKey)
+
+    // If node ID matches the DB item ID, it is a DB-exclusive node we just added.
+    if (node && node.id === dbItem.id) {
+      const parts = node.slug.split("/")
+      const parentSlug = parts.slice(0, -1).join("/").toLowerCase()
+
+      if (parentSlug && unifiedMap.has(parentSlug)) {
+        const parentNode = unifiedMap.get(parentSlug)
+        if (parentNode) {
+          parentNode.children.push(node)
+        }
+      } else {
+        mergedTree.push(node)
+      }
+    }
+  }
 
   // 5. Apply translations to top-level titles
   mergedTree.forEach((node) => {
@@ -112,6 +148,22 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
       node.title = translations[node.title]
     }
   })
+
+  // 6. Sort mergedTree (folders first, then alphabetically)
+  function sortTree(nodes: TreeNode[]) {
+    nodes.sort((a, b) => {
+      if (a.isFolder === b.isFolder) {
+        return a.title.localeCompare(b.title)
+      }
+      return a.isFolder ? -1 : 1
+    })
+    for (const node of nodes) {
+      if (node.children && node.children.length > 0) {
+        sortTree(node.children)
+      }
+    }
+  }
+  sortTree(mergedTree)
 
   return mergedTree
 }

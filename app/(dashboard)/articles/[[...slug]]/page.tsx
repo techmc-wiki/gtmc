@@ -9,6 +9,8 @@ import {
   getPluginsForContent,
 } from "@/lib/markdown"
 import { getRepoFileContent } from "@/lib/github-pr"
+import { ArticleHighlight } from "@/components/articles/article-highlight"
+import { Suspense } from "react"
 
 interface ArticlePageProps {
   params: Promise<{
@@ -198,6 +200,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       </div>
 
       <div
+        data-article-content
         className="
           w-full max-w-none overflow-hidden wrap-break-word text-slate-800
           selection:bg-tech-main/20 selection:text-slate-900
@@ -209,6 +212,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           {content}
         </ReactMarkdown>
       </div>
+
+      <Suspense>
+        <ArticleHighlight />
+      </Suspense>
     </div>
   )
 }

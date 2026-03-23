@@ -7,8 +7,13 @@ import ReactMarkdown from "react-markdown"
 import { saveDraftAction, submitForReviewAction } from "@/actions/article"
 import { getMarkdownComponents, getPluginsForContent } from "@/lib/markdown"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
+import {
+  LoadingIndicator,
+  PENDING_LABELS,
+} from "@/components/ui/loading-indicator"
 import { BrutalButton } from "../ui/brutal-button"
 import { BrutalInput } from "../ui/brutal-input"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
 import "katex/dist/katex.min.css"
 
 interface DraftEditorProps {
@@ -110,26 +115,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         bg-white/80 p-4 backdrop-blur-sm
         sm:p-6
       ">
-      <div
-        className="
-          pointer-events-none absolute top-0 left-0 size-2 -translate-px
-          border-t-2 border-l-2 border-tech-main/40
-        "></div>
-      <div
-        className="
-          pointer-events-none absolute top-0 right-0 size-2 translate-x-px
-          -translate-y-px border-t-2 border-r-2 border-tech-main/40
-        "></div>
-      <div
-        className="
-          pointer-events-none absolute bottom-0 left-0 size-2 -translate-x-px
-          translate-y-px border-b-2 border-l-2 border-tech-main/40
-        "></div>
-      <div
-        className="
-          pointer-events-none absolute right-0 bottom-0 size-2 translate-px
-          border-r-2 border-b-2 border-tech-main/40
-        "></div>
+      <CornerBrackets />
 
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
@@ -303,7 +289,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             variant="primary"
             disabled={isSaving}
             aria-busy={isSaving}>
-            {isSaving ? "SAVING..." : "SAVE DRAFT"}
+            {isSaving ? (
+              <LoadingIndicator label={PENDING_LABELS.SAVING_DRAFT} />
+            ) : (
+              "SAVE DRAFT"
+            )}
           </BrutalButton>
 
           <BrutalButton
@@ -312,7 +302,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             onClick={handleSubmitReview}
             disabled={isSubmittingReview || isSaving}
             aria-busy={isSubmittingReview}>
-            {isSubmittingReview ? "SUBMITTING..." : "SUBMIT FOR REVIEW"}
+            {isSubmittingReview ? (
+              <LoadingIndicator label={PENDING_LABELS.SUBMITTING_REVIEW} />
+            ) : (
+              "SUBMIT FOR REVIEW"
+            )}
           </BrutalButton>
         </div>
       )}

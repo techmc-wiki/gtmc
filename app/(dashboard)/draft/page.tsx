@@ -6,6 +6,10 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { deleteDraftAction } from "@/actions/article"
 import { getPR } from "@/lib/github-pr"
+import { PageHeader } from "@/components/ui/page-header"
+import { EmptyState } from "@/components/ui/empty-state"
+import { DraftStatusBadge } from "@/components/ui/status-badge"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 export default async function DraftDashboardPage() {
   const session = await auth()
@@ -68,40 +72,11 @@ export default async function DraftDashboardPage() {
         sm:h-64
       ">
       {/* Corner brackets */}
-      <div
-        className="
-          absolute top-0 left-0 size-2 -translate-px border-t-2 border-l-2
-          border-tech-main/40 opacity-0 transition-opacity
-          group-hover:opacity-100
-        "></div>
-      <div
-        className="
-          absolute right-0 bottom-0 size-2 translate-px border-r-2 border-b-2
-          border-tech-main/40 opacity-0 transition-opacity
-          group-hover:opacity-100
-        "></div>
+      <CornerBrackets variant="hover" />
 
       <div className="relative z-10">
         <div className="mb-4 flex items-start justify-between gap-2">
-          <span
-            className={`
-              shrink-0 border px-2 py-0.5 font-mono text-xs tracking-wider
-              ${
-                draft.displayStatus === "DRAFT"
-                  ? "border-tech-main/40 bg-tech-main/5 text-tech-main"
-                  : draft.displayStatus === "PENDING" ||
-                      draft.displayStatus === "SUBMITTED"
-                    ? "border-blue-500/40 bg-blue-500/10 text-blue-600"
-                    : draft.displayStatus === "REJECTED" ||
-                        draft.displayStatus === "CLOSED"
-                      ? "border-red-500/40 bg-red-500/10 text-red-600"
-                      : draft.displayStatus === "ARCHIVED"
-                        ? "border-gray-500/40 bg-gray-500/10 text-gray-600"
-                        : "border-green-500/40 bg-green-500/10 text-green-600"
-              }
-            `}>
-            [{draft.displayStatus}]
-          </span>
+          <DraftStatusBadge status={draft.displayStatus} />
           <div className="flex flex-col items-end gap-1">
             <span className="font-mono text-xs text-tech-main/50">
               {draft.updatedAt.toLocaleDateString()}
@@ -173,68 +148,19 @@ export default async function DraftDashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-6">
-      <div
-        className="
-          relative flex flex-col items-start justify-between gap-4 border-b
-          border-tech-main/40 pb-6
-          md:flex-row md:items-end
-        ">
-        <div
-          className="
-            absolute top-0 right-0 size-8 translate-x-px -translate-y-px
-            border-t border-r guide-line
-          "></div>
-        <div
-          className="
-            mb-0 w-full
-            md:w-auto
-          ">
-          <h1
-            className="
-              flex items-center gap-2 text-2xl font-bold tracking-tight
-              text-tech-main-dark uppercase
-              md:text-4xl
-            ">
-            <span
-              className="
-                size-3 shrink-0 border border-tech-main/40 bg-tech-main/20
-              "></span>
-            <span className="wrap-break-word">Ops Center</span>
-          </h1>
-          <p
-            className="
-              mt-3 flex items-center gap-2 font-mono text-xs tracking-widest
-              text-tech-main/80
-              sm:text-sm
-            ">
-            <span
-              className="
-                size-1.5 shrink-0 animate-pulse rounded-full bg-tech-main
-              "></span>
-            <span className="wrap-break-word">
-              YOUR DIGITAL WORKSHOP / DRAFTS & REVISIONS
-            </span>
-          </p>
-        </div>
-
-        <Link
-          href="/draft/new"
-          className="
-            w-full
-            md:w-auto
-          ">
-          <BrutalButton
-            variant="primary"
-            className="
-              flex min-h-11 w-full items-center justify-center px-6 text-xs
-              tracking-widest uppercase transition-transform
-              hover:scale-[1.02]
-              md:w-auto
-            ">
-            + INITIALIZE SUBMISSION
-          </BrutalButton>
-        </Link>
-      </div>
+      <PageHeader
+        title="Ops Center"
+        subtitle="YOUR DIGITAL WORKSHOP / DRAFTS & REVISIONS"
+        action={
+          <Link href="/draft/new" className="w-full md:w-auto">
+            <BrutalButton
+              variant="primary"
+              className="flex min-h-11 w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
+              + INITIALIZE SUBMISSION
+            </BrutalButton>
+          </Link>
+        }
+      />
 
       <div className="space-y-8">
         <div>
@@ -253,25 +179,7 @@ export default async function DraftDashboardPage() {
               lg:grid-cols-3
             ">
             {activeDrafts.length === 0 ? (
-              <div
-                className="
-                  group relative col-span-full border border-dashed
-                  border-tech-main/40 bg-white/30 py-16 text-center
-                  backdrop-blur-sm
-                ">
-                <div
-                  className="
-                    absolute inset-0
-                    bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(96,112,143,0.05)_10px,rgba(96,112,143,0.05)_20px)]
-                  "></div>
-                <h2
-                  className="
-                    relative z-10 font-mono text-lg tracking-widest
-                    text-tech-main/50 uppercase
-                  ">
-                  NO ACTIVE RECORDS FOUND.
-                </h2>
-              </div>
+              <EmptyState message="NO ACTIVE RECORDS FOUND." colSpanFull />
             ) : (
               activeDrafts.map(renderDraftCard)
             )}

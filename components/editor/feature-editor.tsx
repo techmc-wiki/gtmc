@@ -10,11 +10,12 @@ import { compressImageForUpload } from "@/lib/image-compression"
 import {
   LoadingIndicator,
   PENDING_LABELS,
-} from "@/app/(dashboard)/features/loading-indicator"
+} from "@/components/ui/loading-indicator"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
 import ReactMarkdown from "react-markdown"
 import { getMarkdownComponents, getPluginsForContent } from "@/lib/markdown"
 import "katex/dist/katex.min.css"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
 import {
   classifyFile,
   isImageMime,
@@ -319,26 +320,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         bg-white/80 p-4 backdrop-blur-sm
         sm:p-6
       ">
-      <div
-        className="
-          pointer-events-none absolute top-0 left-0 size-2 -translate-px
-          border-t-2 border-l-2 border-tech-main/40
-        "></div>
-      <div
-        className="
-          pointer-events-none absolute top-0 right-0 size-2 translate-x-px
-          -translate-y-px border-t-2 border-r-2 border-tech-main/40
-        "></div>
-      <div
-        className="
-          pointer-events-none absolute bottom-0 left-0 size-2 -translate-x-px
-          translate-y-px border-b-2 border-l-2 border-tech-main/40
-        "></div>
-      <div
-        className="
-          pointer-events-none absolute right-0 bottom-0 size-2 translate-px
-          border-r-2 border-b-2 border-tech-main/40
-        "></div>
+      <CornerBrackets />
 
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
@@ -533,9 +515,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
                 role="status"
                 aria-live="polite">
                 {badge.type === "progress" && (
-                  <span className="
+                  <span
+                    className="
                     inline-block size-2 animate-pulse bg-tech-accent
-                  " />
+                  "
+                  />
                 )}
                 {badge.type === "error" && (
                   <span className="inline-block size-2 bg-red-400" />

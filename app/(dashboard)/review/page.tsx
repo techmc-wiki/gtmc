@@ -10,6 +10,9 @@ import {
   ARTICLES_REPO_NAME,
 } from "@/lib/github-pr"
 import { auth } from "@/lib/auth"
+import { PageHeader } from "@/components/ui/page-header"
+import { EmptyState } from "@/components/ui/empty-state"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -123,18 +126,7 @@ export default async function ReviewHubPage() {
         p-6 backdrop-blur-sm
         md:flex-row md:items-center md:space-y-0
       `}>
-      <div
-        className="
-          absolute top-0 left-0 size-2 -translate-px border-t-2 border-l-2
-          border-tech-main/40 opacity-0 transition-opacity
-          group-hover:opacity-100
-        "></div>
-      <div
-        className="
-          absolute right-0 bottom-0 size-2 translate-px border-r-2 border-b-2
-          border-tech-main/40 opacity-0 transition-opacity
-          group-hover:opacity-100
-        "></div>
+      <CornerBrackets variant="hover" />
 
       <div className="relative z-10 flex-1">
         <div className="mb-3 flex items-center gap-3">
@@ -215,53 +207,14 @@ export default async function ReviewHubPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-6">
-      <div className="relative border-b border-tech-main/40 pb-6">
-        <div
-          className="
-            absolute top-0 right-0 size-8 translate-x-px -translate-y-px
-            border-t border-r guide-line
-          "></div>
-        <h1
-          className="
-            flex items-center text-2xl font-bold tracking-tight
-            text-tech-main-dark uppercase
-            md:text-4xl
-          ">
-          <span
-            className="mr-4 size-4 border border-tech-main/40 bg-tech-main/20"></span>
-          REVIEW HUB
-        </h1>
-        <p
-          className="
-            mt-3 flex items-center font-mono text-xs tracking-widest
-            text-tech-main/80
-            sm:text-sm
-          ">
-          <span className="mr-2 size-2 animate-pulse rounded-full bg-tech-main"></span>
-          APPROVE CONTENT. MERGE REBELLION.
-        </p>
-      </div>
+      <PageHeader
+        title="REVIEW HUB"
+        subtitle="APPROVE CONTENT. MERGE REBELLION."
+      />
 
       <div className="grid grid-cols-1 gap-6">
         {openPRs.length === 0 ? (
-          <div
-            className="
-              group relative border border-dashed border-tech-main/40
-              bg-white/30 py-16 text-center backdrop-blur-sm
-            ">
-            <div
-              className="
-                absolute inset-0
-                bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(96,112,143,0.05)_10px,rgba(96,112,143,0.05)_20px)]
-              "></div>
-            <h2
-              className="
-                relative z-10 font-mono text-lg tracking-widest
-                text-tech-main/50 uppercase
-              ">
-              NO PENDING REVIEWS. SILENCE IN THE COMM.
-            </h2>
-          </div>
+          <EmptyState message="NO PENDING REVIEWS. SILENCE IN THE COMM." />
         ) : (
           <div className="flex flex-col gap-10">
             {groupedPRs.conflicts.length > 0 && (

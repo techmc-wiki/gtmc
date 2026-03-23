@@ -4,30 +4,7 @@ import { useState, useMemo } from "react"
 import Link from "next/link"
 import { BrutalCard } from "@/components/ui/brutal-card"
 import { RevealSection } from "./reveal-helpers"
-
-export function StatusBadge({ status }: { status: string }) {
-  let styles = "shrink-0 border px-2 py-0.5 font-mono text-xs tracking-wider"
-  let label = status
-
-  switch (status) {
-    case "PENDING":
-      styles += " border-yellow-500/40 text-yellow-600 bg-yellow-500/10"
-      label = "UNRESOLVED"
-      break
-    case "IN_PROGRESS":
-      styles += " border-blue-500/40 text-blue-600 bg-blue-500/10"
-      label = "IN_PROGRESS"
-      break
-    case "RESOLVED":
-      styles += " border-green-500/40 text-green-600 bg-green-500/10"
-      label = "RESOLVED"
-      break
-    default:
-      styles += " border-gray-500/40 text-gray-600 bg-gray-500/10"
-  }
-
-  return <span className={styles}>[{label}]</span>
-}
+import { FeatureStatusBadge } from "@/components/ui/status-badge"
 
 interface Feature {
   id: string
@@ -152,7 +129,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
 
                   <div className="relative z-10 flex h-full flex-col">
                     <div className="mb-4 flex items-start justify-between gap-2">
-                      <StatusBadge status={feature.status} />
+                      <FeatureStatusBadge status={feature.status} />
                       <div className="flex flex-col items-end gap-1">
                         <span
                           className="font-mono text-xs text-tech-main/50"
@@ -177,8 +154,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                           flex items-center font-mono text-xs tracking-widest
                           text-tech-main opacity-80
                         ">
-                        <span
-                          className="mr-2 inline-block size-1.5 bg-tech-main"></span>
+                        <span className="mr-2 inline-block size-1.5 bg-tech-main"></span>
                         AUTHOR: {feature.author?.name || "UNKNOWN_USER"}
                       </p>
                       {feature.assignee && (
@@ -187,8 +163,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                             flex items-center font-mono text-xs tracking-widest
                             text-blue-600 opacity-80
                           ">
-                          <span
-                            className="mr-2 inline-block size-1.5 bg-blue-600"></span>
+                          <span className="mr-2 inline-block size-1.5 bg-blue-600"></span>
                           ASSIGNEE: {feature.assignee.name || "UNKNOWN_USER"}
                         </p>
                       )}
@@ -222,8 +197,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
     <div className="space-y-6">
       {/* 过滤器 */}
       <RevealSection delay={0}>
-        <BrutalCard
-          className="border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm">
+        <BrutalCard className="border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm">
           <div className="space-y-4">
             <div>
               <h4

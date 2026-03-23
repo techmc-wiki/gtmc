@@ -1,7 +1,7 @@
-﻿"use client"
+"use client"
 
 import * as React from "react"
-import { useEffect, useState, useMemo, useCallback } from "react"
+import { useEffect, useState, useMemo, useCallback, useRef } from "react"
 import { createPortal } from "react-dom"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -42,6 +42,10 @@ export function SidebarClient({
   const [toc, setToc] = useState<TocItem[]>([])
   const [isFileExpanded, setIsFileExpanded] = useState(false)
 
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
+  const [mounted, setMounted] = useState(false)
+  const activeItemRef = useRef<HTMLLIElement>(null)
+
   useEffect(() => {
     let frameCount = 0
     const maxFrames = 10
@@ -75,7 +79,6 @@ export function SidebarClient({
     retryWithRAF()
   }, [pathname])
 
-  // 当路径改变时，默认展开当前文章的目录
   useEffect(() => {
     setIsFileExpanded(true)
   }, [pathname])
@@ -84,9 +87,6 @@ export function SidebarClient({
     e.preventDefault()
     setIsFileExpanded((prev) => !prev)
   }
-
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     try {
@@ -112,9 +112,20 @@ export function SidebarClient({
     }
   }, [expandedFolders, mounted])
 
+  useEffect(() => {
+    if (!mounted) return
+    const timer = setTimeout(() => {
+      activeItemRef.current?.scrollIntoView({
+        block: "nearest",
+        behavior: "smooth",
+      })
+    }, 150)
+    return () => clearTimeout(timer)
+  }, [pathname, mounted])
+
   const isFolderExpanded = useCallback(
     (id: string) => {
-      if (!mounted) return false // 服务器渲染和初次加载时默认全部闭合
+      if (!mounted) return false
       return expandedFolders.has(id)
     },
     [expandedFolders, mounted]
@@ -132,6 +143,18 @@ export function SidebarClient({
       return next
     })
   }
+
+  const collapseAll = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    setExpandedFolders(new Set())
+  }, [])
+
+  const scrollToCurrent = useCallback(() => {
+    activeItemRef.current?.scrollIntoView({
+      block: "nearest",
+      behavior: "smooth",
+    })
+  }, [])
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -170,6 +193,7 @@ export function SidebarClient({
           return (
             <li
               key={item.id}
+              ref={!item.isFolder && isActive ? activeItemRef : undefined}
               className="
                 my-1.5 list-none font-mono text-[15px]
                 md:text-base
@@ -343,7 +367,7 @@ export function SidebarClient({
 
   return (
     <div>
-      <div className="mb-4">
+      <div className="mb-4 flex flex-wrap gap-2">
         <button
           onClick={() => setIsModalOpen(true)}
           className="
@@ -352,6 +376,24 @@ export function SidebarClient({
             hover:bg-tech-main hover:text-white
           ">
           + NEW DIR / FILE
+        </button>
+        <button
+          onClick={collapseAll}
+          className="
+            cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
+            text-[11px] transition-colors
+            hover:bg-tech-main hover:text-white
+          ">
+          ⊟ COLLAPSE ALL
+        </button>
+        <button
+          onClick={scrollToCurrent}
+          className="
+            cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
+            text-[11px] transition-colors
+            hover:bg-tech-main hover:text-white
+          ">
+          ◎ LOCATE
         </button>
       </div>
 
@@ -372,155 +414,154 @@ export function SidebarClient({
               duration-300 animate-in fade-in
             ">
             <div
-            className="
+              className="
               w-full max-w-md rounded-sm border-2 border-tech-main bg-white p-6
               shadow-[8px_8px_0_0_rgba(var(--tech-main),1)]
               dark:bg-black
             ">
-            <h3
-              className="
+              <h3
+                className="
                 mb-6 border-b guide-line pb-2 font-mono text-lg font-bold
                 tracking-widest text-tech-main uppercase
               ">
-              CREATE_SYS_OBJECT
-            </h3>
+                CREATE_SYS_OBJECT
+              </h3>
 
-            <form onSubmit={handleCreate} className="space-y-4 font-mono">
-              <div>
-                <label
-                  className="
+              <form onSubmit={handleCreate} className="space-y-4 font-mono">
+                <div>
+                  <label
+                    className="
                     mb-1 block text-[11px] tracking-wider text-tech-main/80
                     uppercase
                   ">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      title: e.target.value,
-                    })
-                  }
-                  className="
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        title: e.target.value,
+                      })
+                    }
+                    className="
                     w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2
                     text-sm text-tech-main outline-none
                     focus:border-tech-main
                   "
-                  placeholder="e.g. Overview"
-                />
-              </div>
+                    placeholder="e.g. Overview"
+                  />
+                </div>
 
-              <div>
-                <label
-                  className="
+                <div>
+                  <label
+                    className="
                     mb-1 block text-[11px] tracking-wider text-tech-main/80
                     uppercase
                   ">
-                  Slug (URL path)
-                </label>
-                <input
-                  type="text"
-                  value={formData.slug}
-                  onChange={(e) =>
-                    setFormData({ ...formData, slug: e.target.value })
-                  }
-                  className="
+                    Slug (URL path)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.slug}
+                    onChange={(e) =>
+                      setFormData({ ...formData, slug: e.target.value })
+                    }
+                    className="
                     w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2
                     text-sm text-tech-main outline-none
                     focus:border-tech-main
                   "
-                  placeholder="Leave empty to auto-generate"
-                />
-              </div>
+                    placeholder="Leave empty to auto-generate"
+                  />
+                </div>
 
-              <div
-                className="
+                <div
+                  className="
                   flex items-center gap-3 border guide-line bg-tech-main/5 px-3
                   py-2
                 ">
-                <input
-                  type="checkbox"
-                  id="isFolder"
-                  checked={formData.isFolder}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      isFolder: e.target.checked,
-                    })
-                  }
-                  className="size-4 accent-tech-main"
-                />
-                <label
-                  htmlFor="isFolder"
-                  className="
+                  <input
+                    type="checkbox"
+                    id="isFolder"
+                    checked={formData.isFolder}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        isFolder: e.target.checked,
+                      })
+                    }
+                    className="size-4 accent-tech-main"
+                  />
+                  <label
+                    htmlFor="isFolder"
+                    className="
                     cursor-pointer text-sm text-tech-main/80 select-none
                   ">
-                  Create as Directory (Folder)
-                </label>
-              </div>
+                    Create as Directory (Folder)
+                  </label>
+                </div>
 
-              <div>
-                <label
-                  className="
+                <div>
+                  <label
+                    className="
                     mb-1 block text-[11px] tracking-wider text-tech-main/80
                     uppercase
                   ">
-                  Parent Directory
-                </label>
-                <select
-                  value={formData.parentId}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      parentId: e.target.value,
-                    })
-                  }
-                  className="
+                    Parent Directory
+                  </label>
+                  <select
+                    value={formData.parentId}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        parentId: e.target.value,
+                      })
+                    }
+                    className="
                     w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2
                     text-sm text-tech-main outline-none
                   ">
-                  <option value="">[ ROOT_DIRECTORY ]</option>
-                  {availableFolders.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                    <option value="">[ ROOT_DIRECTORY ]</option>
+                    {availableFolders.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {f.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              <div
-                className="mt-6 flex justify-end gap-2 border-t guide-line pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="
+                <div className="mt-6 flex justify-end gap-2 border-t guide-line pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="
                     cursor-pointer border border-tech-main/40 px-4 py-2
                     text-[11px] font-bold tracking-widest text-tech-main
                     uppercase transition-colors
                     hover:bg-tech-main/10
                   ">
-                  ABORT
-                </button>
-                <button
-                  type="submit"
-                  className="
+                    ABORT
+                  </button>
+                  <button
+                    type="submit"
+                    className="
                     cursor-pointer bg-tech-main px-4 py-2 text-[11px] font-bold
                     tracking-widest text-white uppercase
                     shadow-[2px_2px_0_0_rgba(var(--tech-main),0.4)]
                     transition-opacity
                     hover:opacity-90
                   ">
-                  EXECUTE
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>,
-        document.body
-      )}
+                    EXECUTE
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   )
 }

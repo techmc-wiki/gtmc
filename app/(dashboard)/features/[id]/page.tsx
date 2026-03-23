@@ -16,7 +16,7 @@ import { FeatureActions } from "./feature-actions"
 import { FeatureComments } from "./feature-comments"
 import { FeatureExplanation } from "./feature-explanation"
 import { FeatureReadonlyView } from "./feature-readonly-view"
-import { StatusBadge } from "@/app/(dashboard)/features/feature-list"
+import { FeatureStatusBadge } from "@/components/ui/status-badge"
 import { RevealSection } from "@/app/(dashboard)/features/reveal-helpers"
 
 export const revalidate = 60
@@ -198,7 +198,7 @@ export default async function FeatureDetailPage({
                 ">
                 STATUS:
               </span>
-              <StatusBadge status={feature.status} />
+              <FeatureStatusBadge status={feature.status} />
             </div>
             <div
               className="

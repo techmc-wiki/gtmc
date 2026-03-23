@@ -10,7 +10,7 @@ import {
   useSyncExternalStore,
 } from "react"
 import { createPortal } from "react-dom"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 interface SearchResult {
@@ -36,6 +36,7 @@ export function SearchCommand() {
   const inputRef = useRef<HTMLInputElement>(null)
   const abortRef = useRef<AbortController | null>(null)
   const router = useRouter()
+  const pathname = usePathname()
 
   const closeModal = useCallback(() => {
     setIsOpen(false)
@@ -125,18 +126,35 @@ export function SearchCommand() {
 
   const navigateToResult = useCallback(
     (result: SearchResult) => {
+      const currentSlug = pathname.replace(/^\/articles\//, "")
+      const decodedCurrentSlug = currentSlug
+        .split("/")
+        .map(decodeURIComponent)
+        .join("/")
+
+      if (decodedCurrentSlug === result.slug) {
+        closeModal()
+        if (result.snippet && query.trim().length >= 2) {
+          const event = new CustomEvent("highlight-search", {
+            detail: { query: query.trim() },
+          })
+          window.dispatchEvent(event)
+        }
+        return
+      }
+
       closeModal()
       const encodedSlug = result.slug
         .split("/")
         .map(encodeURIComponent)
         .join("/")
       const highlightParam =
-        result.matchType === "content" && query.trim().length >= 2
+        result.snippet && query.trim().length >= 2
           ? `?highlight=${encodeURIComponent(query.trim())}`
           : ""
       router.push(`/articles/${encodedSlug}${highlightParam}`)
     },
-    [router, closeModal, query]
+    [router, closeModal, query, pathname]
   )
 
   // Keyboard navigation inside modal
@@ -256,7 +274,7 @@ export function SearchCommand() {
         onClick={() => setIsOpen(true)}
         className="
           flex min-h-11 min-w-11 cursor-pointer items-center justify-center p-2
-          font-mono text-sm text-tech-main transition-colors
+          font-mono text-[2.5rem] text-tech-main transition-colors
           hover:bg-tech-main/10
           md:hidden
         "

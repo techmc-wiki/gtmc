@@ -26,25 +26,29 @@ import {
   type IssueMetadata,
 } from "@/lib/github-features"
 
-const QQ_BOT_WEBHOOK = process.env.QQ_BOT_WEBHOOK || ""
-
 async function sendQQBotNotification(payload: {
   type?: string
   text: string
   data?: Record<string, unknown>
 }) {
+  const QQ_BOT_WEBHOOK = process.env.QQ_BOT_WEBHOOK || ""
+
   if (!QQ_BOT_WEBHOOK) {
     console.log("[Mock QQ Bot] Would send payload to webhook: ", payload.text)
     return
   }
 
   try {
-    await fetch(QQ_BOT_WEBHOOK, {
+    const res = await fetch(QQ_BOT_WEBHOOK, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       // Send a structured payload that AstrBot can easily parse in a custom plugin
       body: JSON.stringify(payload),
     })
+    
+    if (!res.ok) {
+        console.error("QQ Bot Webhook returned error HTTP status:", res.status)
+    }
   } catch (error) {
     console.error("Failed to send QQ Bot Notification:", error)
   }

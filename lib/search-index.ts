@@ -1,6 +1,11 @@
 import MiniSearch from "minisearch"
 import { getSidebarTree } from "@/actions/sidebar"
-import { getRepoFileContent } from "@/lib/github-pr"
+import {
+  getRepoFileContent,
+  getOctokit,
+  ARTICLES_REPO_OWNER,
+  ARTICLES_REPO_NAME,
+} from "@/lib/github-pr"
 import { prisma } from "@/lib/prisma"
 
 interface IndexedArticle {
@@ -54,10 +59,26 @@ function flattenTree(nodes: TreeNode[]): { title: string; slug: string }[] {
 
 let cachedIndex: MiniSearch<IndexedArticle> | null = null
 let cacheTimestamp = 0
+let cachedCommitSha: string | null = null
 let buildPromise: Promise<MiniSearch<IndexedArticle>> | null = null
 
-const CACHE_TTL = 300_000
+const CACHE_TTL = 1800_000
 const FETCH_CONCURRENCY = 5
+
+async function getLatestCommitSha(): Promise<string | null> {
+  try {
+    const octokit = getOctokit()
+    const { data: ref } = await octokit.git.getRef({
+      owner: ARTICLES_REPO_OWNER,
+      repo: ARTICLES_REPO_NAME,
+      ref: "heads/main",
+    })
+    return ref.object.sha
+  } catch (error) {
+    console.error("Failed to get latest commit SHA:", error)
+    return null
+  }
+}
 
 function createMiniSearchIndex(
   documents: IndexedArticle[]
@@ -137,7 +158,14 @@ async function buildIndex(): Promise<MiniSearch<IndexedArticle>> {
 }
 
 export async function getSearchIndex(): Promise<MiniSearch<IndexedArticle>> {
-  if (cachedIndex && Date.now() - cacheTimestamp < CACHE_TTL) {
+  const currentSha = await getLatestCommitSha()
+
+  if (
+    cachedIndex &&
+    Date.now() - cacheTimestamp < CACHE_TTL &&
+    currentSha &&
+    currentSha === cachedCommitSha
+  ) {
     return cachedIndex
   }
 
@@ -146,6 +174,7 @@ export async function getSearchIndex(): Promise<MiniSearch<IndexedArticle>> {
       const index = await buildIndex()
       cachedIndex = index
       cacheTimestamp = Date.now()
+      cachedCommitSha = currentSha
       return index
     })().finally(() => {
       buildPromise = null

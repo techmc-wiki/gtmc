@@ -83,6 +83,8 @@ export default function Home() {
   const router = useRouter()
   const motionDriver = useHomepageMotion()
   const [isAccessingDatabase, setIsAccessingDatabase] = useState(false)
+  const [cardWidth, setCardWidth] = useState(900)
+  const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") {
@@ -91,6 +93,19 @@ export default function Home() {
 
     router.prefetch("/articles")
   }, [router])
+
+  useEffect(() => {
+    if (!cardRef.current) return
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setCardWidth(Math.round(entry.contentRect.width))
+      }
+    })
+
+    observer.observe(cardRef.current)
+    return () => observer.disconnect()
+  }, [])
 
   const {
     background: bgTransform,
@@ -547,8 +562,7 @@ export default function Home() {
             flex-col items-center bg-tech-main/10
             md:flex
           ">
-          <div
-            className="mt-[50vh] size-2 border border-tech-main/50 bg-tech-bg"></div>
+          <div className="mt-[50vh] size-2 border border-tech-main/50 bg-tech-bg"></div>
         </div>
 
         {/* 技术图纸刻度尺 */}
@@ -596,6 +610,7 @@ export default function Home() {
         ">
         {/* Foreground Layer - Card chrome and nearby accents */}
         <motion.div
+          ref={cardRef}
           className="
             group relative mb-8 w-full max-w-3xl animate-tech-pop-in opacity-0
             homepage-decor-foreground [animation-delay:0.2s]
@@ -625,7 +640,7 @@ export default function Home() {
             ">
             <span>|&lt;</span>
             <span className="mx-2 grow border-t border-tech-main/30"></span>
-            <span>900px</span>
+            <span>{cardWidth}px</span>
             <span className="mx-2 grow border-t border-tech-main/30"></span>
             <span>&gt;|</span>
           </div>
@@ -824,8 +839,7 @@ export default function Home() {
           className="
             pointer-events-none relative mt-12 flex space-x-1 opacity-40
           ">
-          <div
-            className="absolute -top-4 font-mono text-[8px] text-tech-main/60">
+          <div className="absolute -top-4 font-mono text-[8px] text-tech-main/60">
             INVENTORY_SLOTS_
           </div>
           {[...Array(9)].map((_, i) => (

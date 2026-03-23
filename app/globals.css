@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
 @plugin "tailwindcss-animate";
 
 :root {
@@ -218,25 +217,6 @@ body {
 @utility w-pxfull {
   width: 1px;
   height: 100%;
-}
-
-@utility prose-tech {
-  --tw-prose-body: var(--color-tech-main);
-  --tw-prose-headings: var(--color-tech-main-dark);
-  --tw-prose-lead: var(--color-tech-main);
-  --tw-prose-links: var(--color-tech-main-dark);
-  --tw-prose-bold: var(--color-tech-main-dark);
-  --tw-prose-counters: var(--color-tech-main);
-  --tw-prose-bullets: var(--color-tech-accent);
-  --tw-prose-hr: var(--color-tech-line);
-  --tw-prose-quotes: var(--color-tech-main);
-  --tw-prose-quote-borders: var(--color-tech-accent);
-  --tw-prose-captions: var(--color-tech-main);
-  --tw-prose-code: var(--color-tech-main-dark);
-  --tw-prose-pre-code: var(--color-tech-main);
-  --tw-prose-pre-bg: var(--color-tech-accent);
-  --tw-prose-th-borders: var(--color-tech-line);
-  --tw-prose-td-borders: var(--color-tech-line);
 }
 
 @utility section-label {

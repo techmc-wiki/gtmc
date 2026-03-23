@@ -291,7 +291,7 @@ export function getMarkdownComponents(rawPath: string) {
       return (
         <div
           className="
-            not-prose relative my-6 w-full border border-tech-main/30 bg-tech-bg
+            relative my-6 w-full border border-tech-main/30 bg-tech-bg
             font-mono text-sm
           ">
           {/* Corner brackets */}

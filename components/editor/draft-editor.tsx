@@ -256,8 +256,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           {content?.trim() ? (
             <div
               className="
-                prose w-full max-w-none overflow-hidden p-6 wrap-break-word
-                prose-tech
+                w-full max-w-none overflow-hidden p-6 wrap-break-word
                 selection:bg-tech-main/20 selection:text-slate-900
                 sm:p-8
               ">

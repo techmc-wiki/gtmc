@@ -198,8 +198,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const treeContent = (
     <div
       className={`
-        prose prose-base w-full pb-4 font-mono text-[15px] wrap-break-word
-        prose-tech
+        w-full pb-4 font-mono text-[15px] wrap-break-word
         [&_li]:mt-1.5
         [&_ul]:list-none
         [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l [&_ul_ul]:guide-line
@@ -242,7 +241,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           aria-label="Toggle article tree"
           aria-expanded={isOpen}
           data-testid="mobile-tree-toggle">
-          <span className="
+          <span
+            className="
             font-mono text-xs font-bold tracking-[0.15em] uppercase
           ">
             TREE

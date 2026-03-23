@@ -515,9 +515,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
                 role="status"
                 aria-live="polite">
                 {badge.type === "progress" && (
-                  <span
-                    className="inline-block size-2 animate-pulse bg-tech-accent"
-                  />
+                  <span className="inline-block size-2 animate-pulse bg-tech-accent" />
                 )}
                 {badge.type === "error" && (
                   <span className="inline-block size-2 bg-red-400" />
@@ -548,8 +546,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           {content?.trim() ? (
             <div
               className="
-                prose w-full max-w-none overflow-hidden p-6 wrap-break-word
-                prose-tech
+                w-full max-w-none overflow-hidden p-6 wrap-break-word
                 selection:bg-tech-main/20 selection:text-slate-900
                 sm:p-8
               ">

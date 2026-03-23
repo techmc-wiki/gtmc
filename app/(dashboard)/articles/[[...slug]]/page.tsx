@@ -193,10 +193,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
       <div
         className="
-          prose w-full max-w-none overflow-hidden wrap-break-word text-slate-800
-          prose-tech
-          selection:bg-tech-main/20 selection:text-slate-900
-        ">
+            w-full max-w-none overflow-hidden wrap-break-word text-slate-800
+            selection:bg-tech-main/20 selection:text-slate-900
+          ">
         <ReactMarkdown
           remarkPlugins={remarkPlugins}
           rehypePlugins={rehypePlugins}

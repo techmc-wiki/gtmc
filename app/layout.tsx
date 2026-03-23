@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import "./globals.css"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import Footer from "@/components/layout/footer"
 
 export const metadata: Metadata = {
   title: "Graduate Texts in MC",
@@ -24,8 +25,9 @@ export default function RootLayout({
       </head>
       <Analytics />
       <SpeedInsights />
-      <body className="w-full overflow-x-hidden bg-tech-bg/50 antialiased">
-        {children}
+      <body className="flex min-h-screen w-full flex-col overflow-x-hidden bg-tech-bg/50 antialiased">
+        <main className="flex-1 w-full">{children}</main>
+        <Footer />
       </body>
     </html>
   )

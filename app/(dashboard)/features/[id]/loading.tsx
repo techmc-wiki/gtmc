@@ -1,3 +1,6 @@
+"use client"
+
+import { useEffect } from "react"
 import {
   SectionFrame,
   SegmentedBar,
@@ -7,6 +10,9 @@ import {
 import { BrutalCard } from "@/components/ui/brutal-card"
 
 export default function FeatureDetailLoading() {
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
   return (
     <SkeletonExitWrapper>
       <div

@@ -1,3 +1,6 @@
+"use client"
+
+import { useEffect } from "react"
 import {
   ScanConfirmOverlay,
   SectionFrame,
@@ -7,6 +10,9 @@ import {
 } from "../features/loading-shell-primitives"
 
 export default function ArticlesLoading() {
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
   return (
     <SkeletonExitWrapper>
       <div

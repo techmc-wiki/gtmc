@@ -10,7 +10,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string[] }> }
 ) {
   const { slug } = await params
-  const rawPath = slug.join("/")
+  const rawPath = slug.map((s) => decodeURIComponent(s)).join("/")
 
   let title = "Graduate Texts in Minecraft"
 

@@ -21,18 +21,18 @@ export default function DashboardLayout({
   return (
     <div
       className="
-        relative flex min-h-screen w-full flex-col font-sans text-tech-main
+        relative flex min-h-screen w-screen flex-col font-sans text-tech-main
         selection:bg-tech-main/20 selection:text-tech-main-dark
       ">
       <nav
         className="
-          sticky top-0 z-50 border-b border-tech-main/40 bg-white/60
+          sticky top-0 z-50 w-full border-b border-tech-main/40 bg-white/60
           backdrop-blur-md
         ">
         <div className="absolute top-0 left-0 h-px w-full bg-tech-main/20" />
         <div
           className="
-            mx-auto max-w-[1800px] px-4
+            mx-auto max-w-450 px-4
             sm:px-6
             lg:px-8
           ">
@@ -89,22 +89,10 @@ export default function DashboardLayout({
 
       <main
         className="
-          relative z-10 mx-auto w-full max-w-[1800px] flex-1 p-4
+          relative z-10 mx-auto w-full max-w-450 flex-1 animate-page-transit p-4
           sm:p-6
           lg:p-8
         ">
-        <div
-          className="
-            absolute top-0 left-0 hidden w-pxfull bg-tech-main/20
-            lg:block
-          "
-        />
-        <div
-          className="
-            absolute top-0 right-0 hidden w-pxfull bg-tech-main/20
-            lg:block
-          "
-        />
         {children}
       </main>
     </div>

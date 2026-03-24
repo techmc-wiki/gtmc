@@ -515,9 +515,9 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
                 role="status"
                 aria-live="polite">
                 {badge.type === "progress" && (
-                  <span className="
-                    inline-block size-2 animate-pulse bg-tech-accent
-                  " />
+                  <span
+                    className="inline-block size-2 animate-pulse bg-tech-accent"
+                  />
                 )}
                 {badge.type === "error" && (
                   <span className="inline-block size-2 bg-red-400" />

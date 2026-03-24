@@ -45,9 +45,9 @@ async function sendQQBotNotification(payload: {
       // Send a structured payload that AstrBot can easily parse in a custom plugin
       body: JSON.stringify(payload),
     })
-    
+
     if (!res.ok) {
-        console.error("QQ Bot Webhook returned error HTTP status:", res.status)
+      console.error("QQ Bot Webhook returned error HTTP status:", res.status)
     }
   } catch (error) {
     console.error("Failed to send QQ Bot Notification:", error)

@@ -6,14 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "lint": "prettier --write .; eslint --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
     "postinstall": "prisma generate && node scripts/fix-prisma.js",
     "analyze": "ANALYZE=true pnpm build",
     "lighthouse": "lhci autorun"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
+    "@fontsource/space-mono": "^5.2.9",
     "@octokit/rest": "^22.0.1",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "7.5.0",
@@ -24,6 +23,7 @@
     "cos-nodejs-sdk-v5": "^2.15.4",
     "diff": "^8.0.3",
     "dotenv": "^17.3.1",
+    "geist": "^1.7.0",
     "katex": "^0.16.40",
     "mime-types": "^3.0.2",
     "minisearch": "^7.2.0",

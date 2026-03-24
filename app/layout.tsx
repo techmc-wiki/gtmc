@@ -1,4 +1,6 @@
 import type { Metadata } from "next"
+import { GeistSans } from "geist/font/sans"
+import { GeistMono } from "geist/font/mono"
 import "./globals.css"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
@@ -27,7 +29,14 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
+    <html
+      lang="en"
+      className={`
+        ${GeistSans.variable}
+        ${GeistMono.variable}
+        scroll-smooth
+      `}
+      data-scroll-behavior="smooth">
       <head>
         <meta
           name="viewport"

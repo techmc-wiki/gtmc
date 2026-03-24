@@ -5,11 +5,11 @@ export default function NotFound() {
   return (
     <div
       className="
-        relative flex h-screen w-full overflow-hidden font-sans text-tech-main
+        relative flex h-screen w-full font-mono text-tech-main
         selection:bg-tech-main/20 selection:text-tech-main-dark
       ">
       {/* Background Layer - Decorations */}
-      <div className="pointer-events-none absolute inset-0 z-0">
+      <div className="pointer-events-none absolute z-0 size-full">
         {/* Top Left System Label */}
         <div
           className="
@@ -208,8 +208,7 @@ export default function NotFound() {
                 ">
                 <h1
                   className="
-                    font-mono text-6xl font-black tracking-tighter
-                    text-tech-main-dark
+                    font-mono text-6xl font-black text-tech-main-dark
                     sm:text-8xl
                     md:text-9xl
                   ">
@@ -231,8 +230,7 @@ export default function NotFound() {
 
             <p
               className="
-                mx-auto mb-10 max-w-md animate-fade-in border-l-2
-                border-tech-main/40 pl-4 text-left text-base
+                mx-auto mb-10 max-w-md animate-fade-in text-center text-base
                 text-tech-main-dark/80 opacity-0 [animation-delay:1.0s]
                 fill-mode-forwards
               ">

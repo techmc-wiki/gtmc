@@ -104,7 +104,7 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
 
   // 4. Add DB articles, deduplicating by slug
   const dbItemsPending = [...allItems]
-  
+
   // First pass: add missing nodes
   for (const dbItem of dbItemsPending) {
     const slugKey = dbItem.slug.toLowerCase()
@@ -115,7 +115,7 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
         slug: dbItem.slug,
         isFolder: dbItem.isFolder, // Make sure it defaults to false if missing
         parentId: dbItem.parentId,
-        children: []
+        children: [],
       }
       unifiedMap.set(slugKey, newNode)
     }

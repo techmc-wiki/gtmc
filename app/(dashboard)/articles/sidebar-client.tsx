@@ -294,7 +294,7 @@ export function SidebarClient({
     return (
       <ul className="my-1 border-l guide-line pl-6">
         {items.map((item) => {
-          const fileRoute = `/articles/${item.slug}`
+          const fileRoute = `/articles/${item.slug.split("/").map(encodeURIComponent).join("/")}`
           const decodedRoute = decodeURIComponent(fileRoute)
           const isActive =
             !item.isFolder &&

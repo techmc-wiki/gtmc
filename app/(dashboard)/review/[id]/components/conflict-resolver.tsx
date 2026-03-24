@@ -391,8 +391,9 @@ export default function ConflictResolver({
                     </div>
 
                     {/* Current Change */}
-                    <div
-                      className="border-l-4 border-blue-500 bg-blue-500/10 p-2">
+                    <div className="
+                      border-l-4 border-blue-500 bg-blue-500/10 p-2
+                    ">
                       <div
                         className="
                           mb-1 text-xs font-bold text-blue-600/80 opacity-70

@@ -14,6 +14,14 @@ const getGitHubReadToken = () =>
   process.env.GITHUB_FEATURES_ISSUES_PAT ||
   process.env.GITHUB_FEATURES_WRITE_PAT
 
+export const getGitHubWriteToken = (fallbackToken?: string | null) =>
+  process.env.GITHUB_ARTICLES_WRITE_PAT ||
+  process.env.GITHUB_TOKEN ||
+  fallbackToken ||
+  process.env.GITHUB_FEATURES_WRITE_PAT ||
+  process.env.GITHUB_ARTICLES_READ_PAT ||
+  process.env.GITHUB_FEATURES_ISSUES_PAT
+
 export const getOctokit = (token?: string) => {
   return new Octokit({ auth: token || getGitHubReadToken() })
 }

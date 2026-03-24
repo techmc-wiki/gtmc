@@ -50,6 +50,7 @@ export function SidebarClient({
   const [highlightActive, setHighlightActive] = useState(false)
   const activeItemRef = useRef<HTMLLIElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const blurFrameRef = useRef<number | null>(null)
   const folderGridRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const locatePendingRef = useRef(false)
   const pendingExpandIdsRef = useRef<string[]>([])
@@ -253,6 +254,94 @@ export function SidebarClient({
     expandAndScroll,
   ])
 
+  const syncBottomRowBlur = useCallback(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+    const rows = container.querySelectorAll<HTMLElement>(
+      'li[data-sidebar-row="1"]'
+    )
+    const containerRect = container.getBoundingClientRect()
+    const blurZoneHeight = 80
+    const blurZoneTop = containerRect.bottom - blurZoneHeight
+
+    rows.forEach((row) => {
+      const rowRect = row.getBoundingClientRect()
+      const overlapTop = Math.max(rowRect.top, blurZoneTop)
+      const overlapBottom = Math.min(rowRect.bottom, containerRect.bottom)
+      const overlap = overlapBottom - overlapTop
+
+      if (overlap <= 0) {
+        row.style.filter = ""
+        row.style.opacity = ""
+        return
+      }
+
+      const ratio = Math.min(1, overlap / Math.max(1, rowRect.height))
+      const blur = 0.6 + ratio * 2.4
+      row.style.filter = `blur(${blur.toFixed(2)}px)`
+      row.style.opacity = `${(1 - ratio * 0.12).toFixed(3)}`
+    })
+  }, [])
+
+  const scheduleBottomRowBlurSync = useCallback(() => {
+    if (blurFrameRef.current !== null) return
+    blurFrameRef.current = window.requestAnimationFrame(() => {
+      blurFrameRef.current = null
+      syncBottomRowBlur()
+    })
+  }, [syncBottomRowBlur])
+
+  useEffect(() => {
+    if (!internalScroll) return
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const onScroll = () => scheduleBottomRowBlurSync()
+    const onResize = () => scheduleBottomRowBlurSync()
+
+    container.addEventListener("scroll", onScroll, { passive: true })
+    window.addEventListener("resize", onResize)
+
+    const resizeObserver = new ResizeObserver(() => {
+      scheduleBottomRowBlurSync()
+    })
+    resizeObserver.observe(container)
+    scheduleBottomRowBlurSync()
+
+    return () => {
+      container.removeEventListener("scroll", onScroll)
+      window.removeEventListener("resize", onResize)
+      resizeObserver.disconnect()
+
+      if (blurFrameRef.current !== null) {
+        window.cancelAnimationFrame(blurFrameRef.current)
+        blurFrameRef.current = null
+      }
+
+      const rows = container.querySelectorAll<HTMLElement>(
+        'li[data-sidebar-row="1"]'
+      )
+      rows.forEach((row) => {
+        row.style.filter = ""
+        row.style.opacity = ""
+      })
+    }
+  }, [internalScroll, scheduleBottomRowBlurSync])
+
+  useEffect(() => {
+    if (!internalScroll) return
+    scheduleBottomRowBlurSync()
+  }, [
+    internalScroll,
+    pathname,
+    tree,
+    expandedFolders,
+    toc,
+    isFileExpanded,
+    highlightActive,
+    scheduleBottomRowBlurSync,
+  ])
+
   const scrollToCurrent = useCallback(() => {
     console.log("[LOCATE] scrollToCurrent called")
     console.log("[LOCATE] window.scrollY:", window.scrollY)
@@ -292,7 +381,7 @@ export function SidebarClient({
     const effectivePath = getEffectivePathname()
     const decodedPathname = decodeURIComponent(effectivePath)
     return (
-      <ul className="my-1 border-l guide-line pl-6">
+      <ul className="my-1 pl-6">
         {items.map((item) => {
           const fileRoute = `/articles/${item.slug.split("/").map(encodeURIComponent).join("/")}`
           const decodedRoute = decodeURIComponent(fileRoute)
@@ -308,10 +397,11 @@ export function SidebarClient({
           return (
             <li
               key={item.id}
+              data-sidebar-row="1"
               ref={!item.isFolder && isActive ? activeItemRef : undefined}
               className={`
-                relative my-1.5 list-none font-mono text-[15px] transition-all
-                duration-300
+                relative my-1.5 w-fit list-none font-mono text-[16px]
+                transition-all duration-300
                 md:text-base
                 ${
                   !item.isFolder && isActive && highlightActive
@@ -353,7 +443,7 @@ export function SidebarClient({
                 <button
                   onClick={(e) => toggleFolder(item.id, e)}
                   className="
-                    mt-3 mb-1 flex w-full cursor-pointer items-center text-left
+                    mt-3 mb-1 flex w-fit cursor-pointer items-center text-left
                     font-bold text-tech-main/80 uppercase opacity-80
                     transition-colors
                     hover:text-tech-main
@@ -374,9 +464,9 @@ export function SidebarClient({
                         isActive
                           ? `font-bold text-tech-main`
                           : `
-                            text-slate-700
-                            hover:text-tech-main
-                          `
+                          text-slate-700
+                          hover:text-tech-main
+                        `
                       }
                     `}>
                     {isActive && toc.length > 0 ? (
@@ -403,9 +493,9 @@ export function SidebarClient({
                             isActive
                               ? `text-tech-main opacity-100`
                               : `
-                                text-tech-main opacity-0
-                                group-hover:opacity-100
-                              `
+                              text-tech-main opacity-0
+                              group-hover:opacity-100
+                            `
                           }
                         `}>
                         &gt;
@@ -427,9 +517,9 @@ export function SidebarClient({
                           isActive
                             ? `cursor-pointer border-tech-main/50`
                             : `
-                              border-transparent
-                              group-hover:border-tech-main/30
-                            `
+                            border-transparent
+                            group-hover:border-tech-main/30
+                          `
                         }
                       `}>
                       {item.title}
@@ -523,36 +613,39 @@ export function SidebarClient({
   const buttonsPanel = (
     <div
       className="
-        shrink-0 border-b guide-line bg-white/95 px-6 py-3 backdrop-blur-sm
+        ml-0.5 shrink-0 border-b guide-line bg-white/95 px-6 py-3
+        backdrop-blur-sm
       ">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-2">
         <button
           onClick={() => setIsModalOpen(true)}
           className="
-            cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
+            cursor-pointer border border-tech-main/40 px-3 py-1.5 pl-2 font-mono
             text-[11px] transition-colors
             hover:bg-tech-main hover:text-white
           ">
           + NEW DIR / FILE
         </button>
-        <button
-          onClick={collapseAll}
-          className="
-            cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
-            text-[11px] transition-colors
-            hover:bg-tech-main hover:text-white
-          ">
-          ⊟ COLLAPSE ALL
-        </button>
-        <button
-          onClick={scrollToCurrent}
-          className="
-            cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
-            text-[11px] transition-colors
-            hover:bg-tech-main hover:text-white
-          ">
-          ◎ LOCATE
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={collapseAll}
+            className="
+              flex-3 cursor-pointer border border-tech-main/40 px-3 py-1.5 pl-2
+              font-mono text-[11px] transition-colors
+              hover:bg-tech-main hover:text-white
+            ">
+            ⊟ COLLAPSE ALL
+          </button>
+          <button
+            onClick={scrollToCurrent}
+            className="
+              flex-2 cursor-pointer border border-tech-main/40 px-3 py-1.5 pl-2
+              font-mono text-[11px] transition-colors
+              hover:bg-tech-main hover:text-white
+            ">
+            ◎ LOCATE
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -563,21 +656,36 @@ export function SidebarClient({
         SYS.DIR_TREE_EMPTY
       </div>
     ) : (
-      <div className="-ml-4">{renderTree(tree)}</div>
+      renderTree(tree)
     )
 
   return (
     <>
       {internalScroll ? (
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="pl-3">{buttonsPanel}</div>
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          {buttonsPanel}
           <div
             ref={scrollContainerRef}
             className={`
-              custom-left-scrollbar min-h-0 flex-1 overflow-y-auto pl-6
+              custom-left-scrollbar min-h-0 flex-1 overflow-y-auto
               ${scrollClass}
             `}>
             {treePanel}
+          </div>
+          <div
+            className="
+              pointer-events-none absolute right-0 bottom-0 left-0 z-20 h-20
+              border-t border-white/40
+            ">
+            <div
+              className="absolute inset-0"
+              style={{
+                WebkitBackdropFilter: "blur(32px)",
+                backdropFilter: "blur(32px)",
+                background:
+                  "repeating-linear-gradient(45deg, rgba(0,0,0,0.02) 0px, rgba(0,0,0,0.02) 1px, transparent 1px, transparent 4px), linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.4) 100%)",
+              }}
+            />
           </div>
         </div>
       ) : (

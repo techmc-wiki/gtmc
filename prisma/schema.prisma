@@ -93,10 +93,15 @@ model Revision {
   content     String
   coverImage  String?
   
-  status      String         @default("DRAFT") // DRAFT, SUBMITTED
+   status      String         @default("DRAFT") // DRAFT, SYNC_CONFLICT, IN_REVIEW
   githubPrUrl String?
   githubPrNum Int?
+   prBranchName String?
   filePath    String?
+   baseMainSha String?
+   syncedMainSha String?
+   conflictContent String?
+   submittedAt DateTime?
 
   articleId   String?
   article     Article?       @relation(fields: [articleId], references: [id], onDelete: SetNull)

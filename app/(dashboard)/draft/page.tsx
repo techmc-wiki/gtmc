@@ -32,7 +32,7 @@ export default async function DraftDashboardPage() {
       let isClosed = false
       let isMerged = false
 
-      if (d.status === "SUBMITTED" && d.githubPrNum) {
+      if (d.githubPrNum) {
         try {
           const pr = await getPR(d.githubPrNum)
           if (pr.state === "closed") {
@@ -83,7 +83,8 @@ export default async function DraftDashboardPage() {
             </span>
             {draft.displayStatus !== "PENDING" &&
               draft.displayStatus !== "APPROVED" &&
-              draft.displayStatus !== "SUBMITTED" &&
+              draft.displayStatus !== "IN_REVIEW" &&
+              draft.displayStatus !== "SYNC_CONFLICT" &&
               draft.displayStatus !== "MERGED" &&
               draft.displayStatus !== "CLOSED" && (
                 <form
@@ -137,7 +138,6 @@ export default async function DraftDashboardPage() {
             hover:border-tech-main/60 hover:bg-white/80
           ">
           {draft.displayStatus === "DRAFT" ||
-          draft.displayStatus === "REJECTED" ||
           draft.displayStatus === "CLOSED"
             ? "> EDIT_RECORD"
             : "> VIEW_STREAM"}

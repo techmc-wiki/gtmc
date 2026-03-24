@@ -33,9 +33,11 @@ export function DraftStatusBadge({ status }: StatusBadgeProps) {
     case "DRAFT":
       styles += " border-tech-main/40 bg-tech-main/5 text-tech-main"
       break
-    case "PENDING":
-    case "SUBMITTED":
+    case "IN_REVIEW":
       styles += " border-blue-500/40 bg-blue-500/10 text-blue-600"
+      break
+    case "SYNC_CONFLICT":
+      styles += " border-amber-500/40 bg-amber-500/10 text-amber-700"
       break
     case "REJECTED":
     case "CLOSED":

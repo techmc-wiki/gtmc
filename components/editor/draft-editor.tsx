@@ -18,9 +18,11 @@ import "katex/dist/katex.min.css"
 
 interface DraftEditorProps {
   initialData?: {
+    conflictContent?: string
     id?: string
     articleId?: string
     filePath?: string
+    githubPrUrl?: string
     title: string
     content: string
     status?: string
@@ -29,8 +31,15 @@ interface DraftEditorProps {
 
 export function DraftEditor({ initialData }: DraftEditorProps) {
   const router = useRouter()
+  const initialStatus = initialData?.status || "DRAFT"
+  const initialEditorContent =
+    initialStatus === "SYNC_CONFLICT"
+      ? initialData?.conflictContent || initialData?.content || ""
+      : initialData?.content || ""
+
+  const [draftStatus, setDraftStatus] = React.useState(initialStatus)
   const [title, setTitle] = React.useState(initialData?.title || "")
-  const [content, setContent] = React.useState(initialData?.content || "")
+  const [content, setContent] = React.useState(initialEditorContent)
   const [filePath, setFilePath] = React.useState(initialData?.filePath || "")
   const [revisionId, setRevisionId] = React.useState<string | undefined>(
     initialData?.id
@@ -42,7 +51,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 
   const articleId = initialData?.articleId
-  const isReadOnly = initialData?.status === "SUBMITTED"
+  const githubPrUrl = initialData?.githubPrUrl
+  const isSyncConflict = draftStatus === "SYNC_CONFLICT"
+  const isReadOnly = draftStatus === "IN_REVIEW" || draftStatus === "SYNC_CONFLICT"
 
   const insertSyntax = (prefix: string, suffix: string = "") => {
     if (isReadOnly || !textareaRef.current) return
@@ -96,9 +107,15 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
     setIsSubmittingReview(true)
     try {
-      await submitForReviewAction(revisionId)
-      alert("已提交审核 / Submitted for Review!")
-      router.push("/draft")
+      const result = await submitForReviewAction(revisionId)
+      setDraftStatus(result.status)
+      alert(
+        result.status === "SYNC_CONFLICT"
+          ? "检测到与最新 main 的冲突，请继续解决 / Sync conflict detected. Please resolve it."
+          : "已开启 PR 并进入审核 / PR opened successfully."
+      )
+      router.push(`/draft/${revisionId}`)
+      router.refresh()
     } catch (error) {
       console.error(error)
       alert("提交审核失败 / Submit Failed")
@@ -159,6 +176,22 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           />
         </div>
       </div>
+
+      {githubPrUrl ? (
+        <div className="border-tech-main/20 flex items-center justify-between gap-3 border bg-tech-main/5 px-4 py-3 font-mono text-xs text-tech-main">
+          <span>PR_STREAM_ACTIVE</span>
+          <a href={githubPrUrl} target="_blank" rel="noreferrer" className="underline underline-offset-4">
+            OPEN_GITHUB_PR
+          </a>
+        </div>
+      ) : null}
+
+      {isSyncConflict ? (
+        <div className="border-l-4 border-amber-500 bg-amber-500/10 p-4 text-amber-700">
+          <p className="font-bold uppercase tracking-widest">Admin Resolution Pending</p>
+          <p className="text-sm">This PR is blocked by a sync conflict. Only an admin can resolve it from the review page.</p>
+        </div>
+      ) : null}
 
       <div
         className="
@@ -304,7 +337,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             {isSubmittingReview ? (
               <LoadingIndicator label={PENDING_LABELS.SUBMITTING_REVIEW} />
             ) : (
-              "SUBMIT FOR REVIEW"
+              "OPEN PR & SYNC MAIN"
             )}
           </BrutalButton>
         </div>

@@ -9,6 +9,7 @@ export const PENDING_LABELS = {
   SAVING_FEATURE: "SAVING_FEATURE...",
   SAVING_DRAFT: "SAVING...",
   SUBMITTING_REVIEW: "SUBMITTING...",
+  UPDATING_PR: "UPDATING_PR...",
 } as const
 
 export type PendingLabel = (typeof PENDING_LABELS)[keyof typeof PENDING_LABELS]

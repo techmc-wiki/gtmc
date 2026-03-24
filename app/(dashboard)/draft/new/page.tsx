@@ -1,96 +1,74 @@
-import { DraftEditor } from "@/components/editor/draft-editor"
-import Link from "next/link"
-import { BrutalButton } from "@/components/ui/brutal-button"
-import { getRepoFileContent } from "@/lib/github-pr"
+import { auth } from "@/lib/auth";
+import { getMainBranchHeadSha } from "@/lib/article-submission";
+import { getRepoFileContent } from "@/lib/github-pr";
+import { prisma } from "@/lib/prisma";
+import { notFound, redirect } from "next/navigation";
 
 export default async function NewDraftPage({
   searchParams,
 }: {
-  searchParams: Promise<{
-    [key: string]: string | string[] | undefined
-  }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const { file: fileParam } = await searchParams
-  const filePath = typeof fileParam === "string" ? fileParam : undefined
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
 
-  let initialTitle = "UNTITLED"
-  let initialContent = ""
+  const { articleId: articleIdParam, file: fileParam } = await searchParams;
+  const articleId = typeof articleIdParam === "string" ? articleIdParam : undefined;
+  const filePath = typeof fileParam === "string" ? fileParam : undefined;
 
-  if (filePath) {
-    initialTitle = filePath
-    // Read initial content from Articles repo instead of local assets filesystem.
-    const normalizedPath = filePath.replace(/^\/+/, "")
+  let initialTitle = "UNTITLED";
+  let initialContent = "";
+  let normalizedFilePath = filePath;
+
+  if (articleId) {
+    const article = await prisma.article.findUnique({
+      where: { id: articleId },
+    });
+
+    if (!article) {
+      notFound();
+    }
+
+    initialTitle = article.title;
+    initialContent = article.content;
+    normalizedFilePath = filePath || article.slug;
+  } else if (filePath) {
+    initialTitle = filePath;
+    const normalizedPath = filePath.replace(/^\/+/, "");
     const candidates = normalizedPath.endsWith(".md")
       ? [normalizedPath]
-      : [normalizedPath, `${normalizedPath}.md`]
+      : [normalizedPath, `${normalizedPath}.md`];
 
     for (const candidate of candidates) {
-      const content = await getRepoFileContent(candidate)
+      const content = await getRepoFileContent(candidate);
       if (content !== null) {
-        initialContent = content
-        break
+        initialContent = content;
+        break;
       }
     }
 
     if (!initialContent) {
-      initialContent = `Failed to load file at ${filePath}.`
+      initialContent = "";
     }
   }
 
-  return (
-    <div
-      className="
-        mx-auto max-w-6xl space-y-8 p-4
-        md:p-8
-      ">
-      <div
-        className="
-          relative flex items-center space-x-6 border-b border-tech-main/40 pb-4
-        ">
-        <div
-          className="
-            absolute -bottom-[5px] left-0 size-2 border border-tech-main/40
-            bg-tech-main/10
-          "
-        />
-        <Link href="/draft">
-          <BrutalButton variant="ghost" size="sm">
-            {"<"} BACK
-          </BrutalButton>
-        </Link>
-        <h1
-          className="
-            font-mono text-xl tracking-tech-wide text-tech-main uppercase
-            md:text-3xl
-          ">
-          NEW_SUBMISSION
-        </h1>
-      </div>
+  const token = (session.user as { githubPat?: string }).githubPat || process.env.GITHUB_TOKEN;
+  const baseMainSha = await getMainBranchHeadSha(token);
+  const createData = {
+    author: { connect: { id: session.user.id } },
+    baseMainSha,
+    content: initialContent,
+    filePath: normalizedFilePath,
+    status: "DRAFT",
+    syncedMainSha: baseMainSha,
+    title: initialTitle,
+    ...(articleId ? { article: { connect: { id: articleId } } } : {}),
+  };
+  const draft = await prisma.revision.create({
+    data: createData,
+  });
 
-      <div
-        className="
-          relative mx-auto border border-tech-main/40 bg-tech-main/5 p-6
-          backdrop-blur-sm
-        ">
-        <div
-          className="
-            absolute top-0 left-0 size-2 border-t border-l border-tech-main/40
-          "
-        />
-        <div
-          className="
-            absolute right-0 bottom-0 size-2 border-r border-b
-            border-tech-main/40
-          "
-        />
-        <DraftEditor
-          initialData={{
-            title: initialTitle,
-            content: initialContent,
-            filePath,
-          }}
-        />
-      </div>
-    </div>
-  )
+  redirect(`/draft/${draft.id}`);
 }

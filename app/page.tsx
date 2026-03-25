@@ -4,7 +4,6 @@ import Link from "next/link"
 import { useRef, useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { BrutalButton } from "@/components/ui/brutal-button"
-import { Logo } from "@/components/ui/logo"
 import { useHomepageMotion } from "@/lib/motion/use-homepage-motion"
 import { HOMEPAGE_MOTION } from "@/lib/motion/homepage-constants"
 import { motion, useTransform, MotionValue } from "motion/react"
@@ -722,59 +721,58 @@ export default function Home() {
 
             <h1
               className="
-                relative mb-6 flex items-center overflow-hidden text-3xl
-                font-bold tracking-tight text-tech-main-dark
-                sm:text-4xl
-                md:text-6xl
-                lg:text-7xl
+                relative mb-6 flex flex-col items-start gap-2 text-3xl font-bold
+                tracking-tight text-tech-main-dark
+                sm:text-3xl
+                md:text-5xl
+                lg:text-6xl
               ">
               <span
                 className="
-                  mr-6 inline-block animate-tech-slide-in opacity-0
-                  [animation-delay:0.5s] fill-mode-forwards
-                ">
-                <Logo
-                  size="2xl"
-                  showSlash={false}
-                  className="pointer-events-none"
-                />
-              </span>
-              <span
-                className="
-                  inline-block animate-tech-slide-in font-light text-tech-main
-                  opacity-0 mix-blend-multiply [animation-delay:0.7s]
+                  mr-6 -ml-0.5 inline-block animate-tech-slide-in font-light
+                  text-tech-main-dark opacity-0 [animation-delay:0.5s]
                   fill-mode-forwards
                 ">
-                Wiki
+                Gradutate Texts in
               </span>
-              <span
-                className="
-                  ml-4 inline-block h-[1em] w-6 animate-pulse bg-tech-main
-                  align-middle opacity-0 [animation-delay:1s] fill-mode-forwards
-                "></span>
+              <div className="flex flex-row">
+                <span
+                  className="
+                    inline-block animate-tech-slide-in font-bold text-tech-main
+                    opacity-0 mix-blend-multiply [animation-delay:0.7s]
+                    fill-mode-forwards
+                  ">
+                  Technical Minecraft
+                </span>
+                <span
+                  className="
+                    ml-4 inline-block h-[1em] w-6 animate-pulse bg-tech-main
+                    align-middle opacity-0 [animation-delay:1s]
+                    fill-mode-forwards
+                  "/>
+              </div>
             </h1>
 
-            <p
+            <div
               className="
-                max-w-xl animate-fade-in border-l-[3px] border-tech-main/40 pl-5
-                text-base/relaxed tracking-wide text-tech-main-dark/80 opacity-0
-                [animation-delay:1.2s] [animation-duration:1s]
+                ml-2 max-w-xl animate-fade-in border-l-[3px] border-tech-main/40
+                pl-5 text-base/relaxed tracking-wide text-tech-main-dark/80
+                opacity-0 [animation-delay:1.2s] [animation-duration:1s]
                 [animation-translate-y:20px] fill-mode-forwards
-                md:text-lg
               ">
               支持多人协作、内容审核与 Git 自动备份的 MC 资源与知识整合站点。
               <span
                 className="
-                  mt-4 flex items-center font-mono text-[11px]
+                  mt-2 flex items-center font-mono text-[11px]
                   tracking-tech-wide opacity-60
                 ">
                 <span
                   className="
-                    mr-2 size-2 animate-pulse rounded-full bg-tech-main
-                  "></span>
+                    mr-3 ml-0.5 size-2 animate-pulse rounded-full bg-tech-main
+                  " />
                 &gt;&gt; MODPACKS | MECHANICS | TUTORIALS
               </span>
-            </p>
+            </div>
           </div>
         </motion.div>
 
@@ -858,13 +856,12 @@ export default function Home() {
               key={i}
               className={`
                 flex size-8 items-center justify-center
-                ${
-                  i === 3
-                    ? `
-                      border-2 border-tech-main-dark bg-tech-main/10
-                      shadow-[0_0_8px_rgba(96,112,143,0.3)]
-                    `
-                    : `border border-tech-main/40`
+                ${i === 3
+                  ? `
+                    border-2 border-tech-main-dark bg-tech-main/10
+                    shadow-[0_0_8px_rgba(96,112,143,0.3)]
+                  `
+                  : `border border-tech-main/40`
                 }
               `}>
               {i === 3 && (

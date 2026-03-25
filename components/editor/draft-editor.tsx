@@ -53,7 +53,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   const articleId = initialData?.articleId
   const githubPrUrl = initialData?.githubPrUrl
   const isSyncConflict = draftStatus === "SYNC_CONFLICT"
-  const isReadOnly = draftStatus === "IN_REVIEW" || draftStatus === "SYNC_CONFLICT"
+  const isReadOnly =
+    draftStatus === "IN_REVIEW" || draftStatus === "SYNC_CONFLICT"
 
   const insertSyntax = (prefix: string, suffix: string = "") => {
     if (isReadOnly || !textareaRef.current) return
@@ -178,18 +179,34 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       </div>
 
       {githubPrUrl ? (
-        <div className="border-tech-main/20 flex items-center justify-between gap-3 border bg-tech-main/5 px-4 py-3 font-mono text-xs text-tech-main">
+        <div
+          className="
+            flex items-center justify-between gap-3 border guide-line
+            bg-tech-main/5 px-4 py-3 font-mono text-xs text-tech-main
+          ">
           <span>PR_STREAM_ACTIVE</span>
-          <a href={githubPrUrl} target="_blank" rel="noreferrer" className="underline underline-offset-4">
+          <a
+            href={githubPrUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-4">
             OPEN_GITHUB_PR
           </a>
         </div>
       ) : null}
 
       {isSyncConflict ? (
-        <div className="border-l-4 border-amber-500 bg-amber-500/10 p-4 text-amber-700">
-          <p className="font-bold uppercase tracking-widest">Admin Resolution Pending</p>
-          <p className="text-sm">This PR is blocked by a sync conflict. Only an admin can resolve it from the review page.</p>
+        <div
+          className="
+            border-l-4 border-amber-500 bg-amber-500/10 p-4 text-amber-700
+          ">
+          <p className="font-bold tracking-widest uppercase">
+            Admin Resolution Pending
+          </p>
+          <p className="text-sm">
+            This PR is blocked by a sync conflict. Only an admin can resolve it
+            from the review page.
+          </p>
         </div>
       ) : null}
 

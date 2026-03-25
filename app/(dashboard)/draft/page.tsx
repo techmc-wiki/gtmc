@@ -137,8 +137,7 @@ export default async function DraftDashboardPage() {
             text-xs tracking-widest transition-all
             hover:border-tech-main/60 hover:bg-white/80
           ">
-          {draft.displayStatus === "DRAFT" ||
-          draft.displayStatus === "CLOSED"
+          {draft.displayStatus === "DRAFT" || draft.displayStatus === "CLOSED"
             ? "> EDIT_RECORD"
             : "> VIEW_STREAM"}
         </BrutalButton>

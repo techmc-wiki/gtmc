@@ -42,6 +42,7 @@ export default function RootLayout({
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
+        <meta name="google-site-verification" content="QE8InawtRuO1F7YrvI1JN56__AFPCAFo6Gn-Vi1QJI8" />
       </head>
       <Analytics />
       <SpeedInsights />

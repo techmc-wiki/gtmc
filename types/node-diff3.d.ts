@@ -1,17 +1,17 @@
 declare module "node-diff3" {
   export interface MergeDiff3Result {
-    conflict: boolean;
-    result: string[];
+    conflict: boolean
+    result: string[]
   }
 
   export interface MergeDiff3Options {
     label?: {
-      a?: string;
-      o?: string;
-      b?: string;
-    };
-    stringSeparator?: string | RegExp;
-    excludeFalseConflicts?: boolean;
+      a?: string
+      o?: string
+      b?: string
+    }
+    stringSeparator?: string | RegExp
+    excludeFalseConflicts?: boolean
   }
 
   export function mergeDiff3(
@@ -19,5 +19,5 @@ declare module "node-diff3" {
     o: string[] | string,
     b: string[] | string,
     options?: MergeDiff3Options
-  ): MergeDiff3Result;
+  ): MergeDiff3Result
 }

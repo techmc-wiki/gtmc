@@ -260,26 +260,39 @@ export function SidebarClient({
     const rows = container.querySelectorAll<HTMLElement>(
       'li[data-sidebar-row="1"]'
     )
-    const containerRect = container.getBoundingClientRect()
-    const blurZoneHeight = 80
-    const blurZoneTop = containerRect.bottom - blurZoneHeight
+    const blurZoneRect = container.getBoundingClientRect()
+    const blurZoneHeight = 32
+    const blurZoneTop = blurZoneRect.bottom - blurZoneHeight
 
     rows.forEach((row) => {
       const rowRect = row.getBoundingClientRect()
       const overlapTop = Math.max(rowRect.top, blurZoneTop)
-      const overlapBottom = Math.min(rowRect.bottom, containerRect.bottom)
-      const overlap = overlapBottom - overlapTop
+      const overlapBottom = Math.min(rowRect.bottom, blurZoneRect.bottom)
+      const overlapHeight = overlapBottom - overlapTop
+      const distBottomLine = blurZoneRect.bottom - rowRect.top
 
-      if (overlap <= 0) {
+      if (rowRect.y > blurZoneRect.bottom) {
+        row.style.filter = `blur(3px)`
+        row.style.opacity = `0.15`
+        return
+      }
+
+      if (overlapHeight <= 0) {
         row.style.filter = ""
         row.style.opacity = ""
         return
       }
 
-      const ratio = Math.min(1, overlap / Math.max(1, rowRect.height))
-      const blur = 0.6 + ratio * 2.4
-      row.style.filter = `blur(${blur.toFixed(2)}px)`
-      row.style.opacity = `${(1 - ratio * 0.12).toFixed(3)}`
+      const ratio = Math.min(
+        1,
+        rowRect.top > blurZoneTop - blurZoneHeight * 0.8 ?
+          overlapHeight / blurZoneHeight :
+          (1 - distBottomLine / rowRect.height) * 0.4,
+      )
+      const blur = 0.2 + ratio * 2.8
+      const opacity = 1 - ratio * 0.85
+      row.style.filter = `blur(${blur.toFixed(3)}px)`
+      row.style.opacity = `${(opacity).toFixed(3)}`
     })
   }, [])
 
@@ -403,10 +416,9 @@ export function SidebarClient({
                 relative my-1.5 w-fit list-none font-mono text-[16px]
                 transition-all duration-300
                 md:text-base
-                ${
-                  !item.isFolder && isActive && highlightActive
-                    ? `bg-tech-main/10 px-1 py-0.5`
-                    : ""
+                ${!item.isFolder && isActive && highlightActive
+                  ? `bg-tech-main/10 px-1 py-0.5`
+                  : ""
                 }
               `}>
               {!item.isFolder && isActive && highlightActive && (
@@ -460,10 +472,9 @@ export function SidebarClient({
                     className={`
                       group relative -ml-4 flex items-center py-1.5 pl-4
                       transition-colors
-                      ${
-                        isActive
-                          ? `font-bold text-tech-main`
-                          : `
+                      ${isActive
+                        ? `font-bold text-tech-main`
+                        : `
                           text-slate-700
                           hover:text-tech-main
                         `
@@ -489,10 +500,9 @@ export function SidebarClient({
                           absolute top-1/2 left-0 -translate-y-1/2 text-xs
                           transition-opacity
                           md:text-sm
-                          ${
-                            isActive
-                              ? `text-tech-main opacity-100`
-                              : `
+                          ${isActive
+                            ? `text-tech-main opacity-100`
+                            : `
                               text-tech-main opacity-0
                               group-hover:opacity-100
                             `
@@ -513,10 +523,9 @@ export function SidebarClient({
                       }}
                       className={`
                         block w-full border-b pb-px pl-1
-                        ${
-                          isActive
-                            ? `cursor-pointer border-tech-main/50`
-                            : `
+                        ${isActive
+                          ? `cursor-pointer border-tech-main/50`
+                          : `
                             border-transparent
                             group-hover:border-tech-main/30
                           `
@@ -530,10 +539,9 @@ export function SidebarClient({
                     <div
                       className={`
                         grid transition-all duration-300 ease-out
-                        ${
-                          isFileExpanded
-                            ? "grid-rows-[1fr] opacity-100"
-                            : "grid-rows-[0fr] opacity-0"
+                        ${isFileExpanded
+                          ? "grid-rows-[1fr] opacity-100"
+                          : "grid-rows-[0fr] opacity-0"
                         }
                       `}>
                       <div className="overflow-hidden">
@@ -575,10 +583,9 @@ export function SidebarClient({
                   }}
                   className={`
                     grid transition-all duration-300 ease-out
-                    ${
-                      !item.isFolder || folderExpanded
-                        ? "grid-rows-[1fr] opacity-100"
-                        : "grid-rows-[0fr] opacity-0"
+                    ${!item.isFolder || folderExpanded
+                      ? "grid-rows-[1fr] opacity-100"
+                      : "grid-rows-[0fr] opacity-0"
                     }
                   `}>
                   <div className="overflow-hidden">
@@ -674,18 +681,13 @@ export function SidebarClient({
           </div>
           <div
             className="
-              pointer-events-none absolute right-0 bottom-0 left-0 z-20 h-20
-              border-t border-white/40
-            ">
-            <div
-              className="absolute inset-0"
-              style={{
-                WebkitBackdropFilter: "blur(32px)",
-                backdropFilter: "blur(32px)",
-                background:
-                  "repeating-linear-gradient(45deg, rgba(0,0,0,0.02) 0px, rgba(0,0,0,0.02) 1px, transparent 1px, transparent 4px), linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.4) 100%)",
-              }}
-            />
+              pointer-events-none absolute inset-x-0 bottom-0 z-20 -mr-4 -mb-2
+              h-12 mask-[linear-gradient(to_bottom,transparent,black)]
+              [-webkit-mask-image:linear-gradient(to_bottom,transparent,black)]
+            "style={{
+              background:
+                "repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 4px), linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.4) 100%)",
+            }}>
           </div>
         </div>
       ) : (

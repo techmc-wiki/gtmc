@@ -255,9 +255,10 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           <div
             className={`
               grid transition-all duration-300 ease-out
-              ${isOpen
-                ? "grid-rows-[1fr] opacity-100"
-                : "grid-rows-[0fr] opacity-0"
+              ${
+                isOpen
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0"
               }
             `}>
             <div className="overflow-hidden">
@@ -276,28 +277,28 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       {/* Mobile floating trigger (appears after scroll) */}
       {isMounted && isFloating
         ? createPortal(
-          <div
-            className="
-              fixed top-20 right-4 z-58 flex animate-tech-pop-in items-center
-              md:hidden
-            "
-            data-testid="mobile-tree-floating-trigger">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
+            <div
               className="
-                min-h-11 cursor-pointer border border-tech-main/40 bg-white/95
-                px-4 py-2 font-mono text-xs font-bold tracking-[0.15em]
-                text-tech-main uppercase backdrop-blur-md transition-all
-                duration-300
-                hover:bg-tech-main/5
+                fixed top-20 right-4 z-58 flex animate-tech-pop-in items-center
+                md:hidden
               "
-              aria-label="Toggle article tree"
-              aria-expanded={isOpen}>
-              TREE
-            </button>
-          </div>,
-          document.body
-        )
+              data-testid="mobile-tree-floating-trigger">
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="
+                  min-h-11 cursor-pointer border border-tech-main/40 bg-white/95
+                  px-4 py-2 font-mono text-xs font-bold tracking-[0.15em]
+                  text-tech-main uppercase backdrop-blur-md transition-all
+                  duration-300
+                  hover:bg-tech-main/5
+                "
+                aria-label="Toggle article tree"
+                aria-expanded={isOpen}>
+                TREE
+              </button>
+            </div>,
+            document.body
+          )
         : null}
 
       {/* Mobile floating tree card */}

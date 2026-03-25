@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { BrutalButton } from "@/components/ui/brutal-button"
+import { HideFooter } from "@/components/layout/footer-context"
 
 export default function NotFound() {
   return (
@@ -8,6 +9,7 @@ export default function NotFound() {
         relative flex h-screen w-full font-mono text-tech-main
         selection:bg-tech-main/20 selection:text-tech-main-dark
       ">
+      <HideFooter />
       {/* Background Layer - Decorations */}
       <div className="pointer-events-none absolute z-0 size-full">
         {/* Top Left System Label */}

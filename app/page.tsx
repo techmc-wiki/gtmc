@@ -7,6 +7,7 @@ import { BrutalButton } from "@/components/ui/brutal-button"
 import { useHomepageMotion } from "@/lib/motion/use-homepage-motion"
 import { HOMEPAGE_MOTION } from "@/lib/motion/homepage-constants"
 import { motion, useTransform, MotionValue } from "motion/react"
+import { HideFooter } from "@/components/layout/footer-context"
 
 const HEX_VALUES = [
   "a1b2",
@@ -124,6 +125,7 @@ export default function Home() {
         relative flex h-screen w-full overflow-hidden font-sans text-tech-main
         selection:bg-tech-main/20 selection:text-tech-main-dark
       ">
+      <HideFooter />
       {/* Background Layer - Furthest depth, slowest motion */}
       <motion.div
         className="absolute inset-0 z-0 homepage-decor-background"

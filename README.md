@@ -1,3 +1,5 @@
+![Screenshot](./images/homepage.jpeg)
+
 # Graduate Texts in Minecraft
 
 A Technical Minecraft online textbook, written collaboratively and community-driven.

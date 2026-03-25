@@ -216,5 +216,15 @@ export function parseCommentBody(body: string): {
     ""
   )
 
-  return { content: contentWithoutAttribution, metadata }
+   return { content: contentWithoutAttribution, metadata }
+}
+
+export function createMetadataFromSession(session: {
+  user: { id: string; name?: string | null; email?: string | null }
+}): IssueMetadata {
+  return {
+    appUserId: session.user.id,
+    authorName: session.user.name ?? null,
+    authorEmail: session.user.email ?? null,
+  }
 }

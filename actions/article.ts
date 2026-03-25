@@ -3,22 +3,20 @@
 import type { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
-import { auth } from "@/lib/auth"
+import { revalidatePaths } from "@/lib/revalidation"
 import {
   getMainBranchHeadSha,
   openDraftPullRequest,
 } from "@/lib/article-submission"
+import { requireAuth } from "@/lib/auth-helpers"
+import { formatErrorMessage } from "@/lib/error-handling"
 import { getGitHubWriteToken } from "@/lib/github-pr"
 import { prisma } from "@/lib/prisma"
 
 const EDITABLE_STATUSES = new Set(["DRAFT"])
 
 export async function saveDraftAction(formData: FormData) {
-  const session = await auth()
-
-  if (!session || !session.user) {
-    throw new Error("Unauthorized")
-  }
+  const session = await requireAuth()
 
   const userId = session.user.id
 
@@ -94,10 +92,7 @@ export async function saveDraftAction(formData: FormData) {
 }
 
 export async function submitForReviewAction(revisionId: string) {
-  const session = await auth()
-  if (!session || !session.user) {
-    throw new Error("Unauthorized")
-  }
+  const session = await requireAuth()
 
   if (!revisionId) {
     throw new Error("Revision ID is required")
@@ -166,8 +161,7 @@ export async function submitForReviewAction(revisionId: string) {
       },
     })
 
-    revalidatePath("/draft")
-    revalidatePath("/review")
+    revalidatePaths(["/draft", "/review"])
     return { success: true, status: result.status }
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error"
@@ -176,16 +170,12 @@ export async function submitForReviewAction(revisionId: string) {
         "Failed to create PR: the configured GitHub token cannot create branches in the Articles repo. Set GITHUB_ARTICLES_WRITE_PAT with repo write access on Vercel."
       )
     }
-    throw new Error(`Failed to create PR: ${message}`)
+    throw new Error(formatErrorMessage("Failed to create PR", error))
   }
 }
 
 export async function deleteDraftAction(revisionId: string) {
-  const session = await auth()
-
-  if (!session || !session.user) {
-    throw new Error("Unauthorized")
-  }
+  const session = await requireAuth()
 
   const userId = session.user.id
   const existing = await prisma.revision.findUnique({

@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth"
+import { getGitHubWriteToken } from "@/lib/github-pr"
 import type { Session } from "next-auth"
 
 type AuthenticatedSession = Session & {
@@ -18,4 +19,12 @@ export async function requireAuth(
     throw new Error(message)
   }
   return session as AuthenticatedSession
+}
+
+export function getTokenFromSession(session: {
+  user: { githubPat?: string } & Record<string, unknown>
+}): string | undefined {
+  return getGitHubWriteToken(
+    (session.user as { githubPat?: string }).githubPat
+  )
 }

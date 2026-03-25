@@ -42,6 +42,25 @@ function extractSnippet(
   const index = loweredContent.indexOf(loweredQuery)
 
   if (index === -1) {
+    let termIndex = -1
+    let matchedTerm = ""
+    for (const term of terms) {
+      const i = loweredContent.indexOf(term.toLowerCase())
+      if (i !== -1 && (termIndex === -1 || i < termIndex)) {
+        termIndex = i
+        matchedTerm = term
+      }
+    }
+
+    if (termIndex !== -1) {
+      const start = Math.max(0, termIndex - 50)
+      const end = Math.min(content.length, termIndex + matchedTerm.length + 70)
+      let snippet = content.slice(start, end).trim()
+      if (start > 0) snippet = `...${snippet}`
+      if (end < content.length) snippet = `${snippet}...`
+      return snippet
+    }
+
     const fallback = content.slice(0, 120).trim()
     return fallback.length > 0 && fallback.length < content.length
       ? `${fallback}...`

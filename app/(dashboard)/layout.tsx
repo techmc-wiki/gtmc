@@ -91,7 +91,7 @@ export default function DashboardLayout({
         className="
           relative z-10 mx-auto w-full max-w-450 flex-1 animate-page-transit p-4
           sm:p-6
-          lg:p-8
+          lg:px-24 lg:py-8
         ">
         {children}
       </main>

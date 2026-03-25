@@ -255,10 +255,9 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           <div
             className={`
               grid transition-all duration-300 ease-out
-              ${
-                isOpen
-                  ? "grid-rows-[1fr] opacity-100"
-                  : "grid-rows-[0fr] opacity-0"
+              ${isOpen
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0"
               }
             `}>
             <div className="overflow-hidden">
@@ -277,28 +276,28 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       {/* Mobile floating trigger (appears after scroll) */}
       {isMounted && isFloating
         ? createPortal(
-            <div
-              className="
+          <div
+            className="
                 fixed top-20 right-4 z-58 flex animate-tech-pop-in items-center
                 md:hidden
               "
-              data-testid="mobile-tree-floating-trigger">
-              <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="
+            data-testid="mobile-tree-floating-trigger">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="
                   min-h-11 cursor-pointer border border-tech-main/40 bg-white/95
                   px-4 py-2 font-mono text-xs font-bold tracking-[0.15em]
                   text-tech-main uppercase backdrop-blur-md transition-all
                   duration-300
                   hover:bg-tech-main/5
                 "
-                aria-label="Toggle article tree"
-                aria-expanded={isOpen}>
-                TREE
-              </button>
-            </div>,
-            document.body
-          )
+              aria-label="Toggle article tree"
+              aria-expanded={isOpen}>
+              TREE
+            </button>
+          </div>,
+          document.body
+        )
         : null}
 
       {/* Mobile floating tree card */}
@@ -370,8 +369,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         className="
           relative min-w-0 flex-1 overflow-x-hidden border-l border-transparent
           py-6
-          md:max-w-2xl md:pl-14
-          lg:max-w-3xl lg:pl-24
+          md:max-w-2xl md:pl-10
+          lg:max-w-3xl lg:pl-10
         ">
         {children}
       </main>

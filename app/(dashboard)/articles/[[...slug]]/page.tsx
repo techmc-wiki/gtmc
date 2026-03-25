@@ -19,7 +19,7 @@ interface ArticlePageProps {
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params
 
-  const filePathArray = slug || ["README.md"]
+  const filePathArray = slug || ["Preface.md"]
 
   let rawPath = filePathArray.map(decodeURIComponent).join("/")
 

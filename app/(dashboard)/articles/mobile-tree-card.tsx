@@ -38,6 +38,7 @@ export function MobileTreeCard({
       document.removeEventListener("keydown", handleEscape)
       document.body.style.overflow = previousOverflow
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, onClose])
 
   if (!isMounted || !isOpen || !isFloating) return null

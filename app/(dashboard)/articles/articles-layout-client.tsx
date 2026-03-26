@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { useState, useRef, useEffect } from "react"
-import { createPortal } from "react-dom"
 import { usePathname } from "next/navigation"
 import { SidebarClient } from "./sidebar-client"
 import { MobileTreeCard } from "./mobile-tree-card"
@@ -114,31 +113,26 @@ function TreeLoadingPlaceholder() {
 
 export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [isFloating, setIsFloating] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
+  const [isStuck, setIsStuck] = useState(false)
   const [treeData, setTreeData] = useState<TreeNode[]>(tree)
   const [isTreeLoading, setIsTreeLoading] = useState(tree.length === 0)
   const pathname = usePathname()
-  const inlineShellRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
+  const sentinelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setIsOpen(false)
   }, [pathname])
 
   useEffect(() => {
-    if (isFloating && isOpen) {
+    if (isStuck) {
       setIsOpen(false)
     }
-  }, [isFloating])
+  }, [isStuck])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsFloating(!entry.isIntersecting)
+        setIsStuck(!entry.isIntersecting)
       },
       {
         threshold: 0,
@@ -146,8 +140,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       }
     )
 
-    if (inlineShellRef.current) {
-      observer.observe(inlineShellRef.current)
+    if (sentinelRef.current) {
+      observer.observe(sentinelRef.current)
     }
 
     return () => observer.disconnect()
@@ -229,46 +223,70 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         relative mx-auto flex min-h-[calc(100vh-8rem)] max-w-full flex-col
         md:flex-row
       ">
-      {/* Mobile inline tree shell (default state) */}
       <div
-        ref={inlineShellRef}
-        className="
-          border-b border-tech-main/40 bg-white/95 backdrop-blur-md
+        ref={sentinelRef}
+        className="h-0 w-full md:hidden"
+        aria-hidden="true"
+      />
+      <div
+        className={`
+          sticky top-16 z-30
           md:hidden
-        "
-        data-testid="mobile-tree-inline-shell">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="
-            flex min-h-11 w-full cursor-pointer items-center justify-between
-            px-4 text-tech-main transition-colors
-            hover:bg-tech-main/5
-          "
-          aria-label="Toggle article tree"
-          aria-expanded={isOpen}
-          data-testid="mobile-tree-toggle">
-          <span
-            className="font-mono text-xs font-bold tracking-[0.15em] uppercase">
-            Table of Contents
-          </span>
-          <span className="font-mono text-sm font-bold">
-            {isOpen ? "▼" : "▶"}
-          </span>
-        </button>
+          ${isStuck ? "pointer-events-none" : ""}
+        `}>
+        <div className="flex justify-end">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className={`
+              pointer-events-auto cursor-pointer overflow-hidden font-mono
+              text-xs font-bold tracking-[0.15em] text-tech-main uppercase
+              bg-white/95 backdrop-blur-md
+              transition-all duration-500 ease-out
+              hover:bg-tech-main/5
+              ${
+                isStuck
+                  ? "mt-2 mr-4 min-h-11 w-20 border border-tech-main/40 px-4 py-2 shadow-sm"
+                  : "min-h-11 w-full border-b border-tech-main/40 px-4"
+              }
+            `}
+            aria-label="Toggle article tree"
+            aria-expanded={isOpen}
+            data-testid="mobile-tree-toggle">
+            <span className="relative flex h-6 w-full items-center">
+              <span
+                className={`
+                  absolute inset-0 flex items-center justify-between
+                  transition-opacity duration-300
+                  ${isStuck ? "opacity-0" : "opacity-100"}
+                `}>
+                <span>Table of Contents</span>
+                <span className="text-sm font-bold">{isOpen ? "▼" : "▶"}</span>
+              </span>
+              <span
+                className={`
+                  transition-opacity duration-300
+                  ${isStuck ? "opacity-100" : "opacity-0"}
+                `}>
+                ToC
+              </span>
+            </span>
+          </button>
+        </div>
 
         <div
           className={`
             grid transition-all duration-300 ease-out
-            ${isOpen && !isFloating
-              ? "grid-rows-[1fr] opacity-100"
-              : "grid-rows-[0fr] opacity-0"
+            ${
+              isOpen && !isStuck
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0"
             }
           `}>
           <div className="overflow-hidden">
             <div
               className="
                 max-h-[calc(100vh-12rem)] overflow-y-auto overscroll-contain
-                border-t guide-line px-4 pt-3 pb-4
+                border-t guide-line bg-white/95 px-4 pt-3 pb-4
               ">
               {treeContent}
             </div>
@@ -276,39 +294,11 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         </div>
       </div>
 
-      {/* Mobile floating trigger (appears after scroll) */}
-      {isMounted
-        ? createPortal(
-          <div
-            className={`
-              fixed top-20 right-8 z-30 flex items-center
-              floating-button-transition
-              md:hidden
-              ${isFloating ? "floating-button-enter" : "floating-button-exit"}
-            `}
-            data-testid="mobile-tree-floating-trigger">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="
-                min-h-11 cursor-pointer border border-tech-main/40 bg-white/95
-                px-4 py-2 font-mono text-xs font-bold tracking-[0.15em]
-                text-tech-main backdrop-blur-md transition-all duration-300
-                hover:bg-tech-main/5
-              "
-              aria-label="Toggle article tree"
-              aria-expanded={isOpen}>
-              ToC
-            </button>
-          </div>,
-          document.body
-        )
-        : null}
-
       {/* Mobile floating tree card */}
       <MobileTreeCard
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        isFloating={isFloating}>
+        isFloating={isStuck}>
         {treeContent}
       </MobileTreeCard>
 

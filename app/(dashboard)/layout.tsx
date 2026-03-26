@@ -27,7 +27,7 @@ export default function DashboardLayout({
       <nav
         className="
           sticky top-0 z-50 w-full border-b border-tech-main/40 bg-white/60
-          backdrop-blur-md
+          backdrop-blur-sm
         ">
         <div className="absolute top-0 left-0 h-px w-full bg-tech-main/20" />
         <div

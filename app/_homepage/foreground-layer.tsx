@@ -75,10 +75,10 @@ export function ForegroundLayer({
             {isAccessingDatabase ? (
               <>
                 <span className="inline-block size-2 animate-pulse bg-white" />
-                INITIALIZING DATABASE...
+                INITIALIZING...
               </>
             ) : (
-              "ACCESS DATABASE →"
+              "START READING →"
             )}
           </BrutalButton>
         </Link>
@@ -98,7 +98,7 @@ export function ForegroundLayer({
               hover:scale-105 hover:border-tech-main hover:bg-white
               sm:w-auto
             ">
-            /{"/"} INITIALIZE LOGIN
+            /{"/"} LOGIN
           </BrutalButton>
         </Link>
       </div>
@@ -115,13 +115,12 @@ export function ForegroundLayer({
             key={i}
             className={`
               flex size-8 items-center justify-center
-              ${
-                i === 3
-                  ? `
+              ${i === 3
+                ? `
                     border-2 border-tech-main-dark bg-tech-main/10
                     shadow-[0_0_8px_rgba(96,112,143,0.3)]
                   `
-                  : `border border-tech-main/40`
+                : `border border-tech-main/40`
               }
             `}>
             {i === 3 && (

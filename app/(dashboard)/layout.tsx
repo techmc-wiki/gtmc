@@ -12,7 +12,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const navLinks = [
-    { href: "/articles", label: "DATABASE" },
+    { href: "/articles", label: "ARTICLES" },
     { href: "/draft", label: "MY DRAFTS" },
     { href: "/review", label: "REVIEW HUB" },
     { href: "/features", label: "FEATURES" },

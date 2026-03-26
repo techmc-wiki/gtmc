@@ -1,5 +1,4 @@
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
-import { solarizedlight } from "react-syntax-highlighter/dist/cjs/styles/prism"
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import path from "path"
 import remarkGfm from "remark-gfm"
@@ -12,6 +11,11 @@ import type { ReactNode } from "react"
 import React from "react"
 import type { Element, Nodes, Root, Text } from "hast"
 import { visit } from "unist-util-visit"
+import { solarizedlight } from "react-syntax-highlighter/dist/cjs/styles/prism"
+
+const SyntaxHighlighter = dynamic(() =>
+  import("react-syntax-highlighter").then((mod) => ({ default: mod.Prism }))
+)
 
 const CJK_REGEX =
   /[\u4e00-\u9fff\u3400-\u4dbf\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/
@@ -25,12 +29,16 @@ function isLatin(char: string): boolean {
   return LATIN_REGEX.test(char)
 }
 
-function isShortUppercase(text: string): boolean {
+function isAcronym(text: string): boolean {
   return text.length >= 1 && text.length <= 6 && /^[A-Z]+$/.test(text)
 }
 
 function isPureNumeric(text: string): boolean {
   return /^\d+$/.test(text)
+}
+
+function isShortLatinWord(text: string): boolean {
+  return text.length >= 1 && text.length <= 2 && /^[a-zA-Z0-9]+$/.test(text)
 }
 
 function needsSpaceBetween(char1: string, char2: string): boolean {
@@ -65,7 +73,7 @@ function addSpaceBetweenCJKAndLatin(text: string): string {
           }
         }
 
-        if (!isShortUppercase(latinWord) && !isPureNumeric(latinWord)) {
+        if (!isAcronym(latinWord) && !isPureNumeric(latinWord)) {
           parts.push(" ")
         }
       }
@@ -204,10 +212,12 @@ export function rehypeCJKSpacing() {
           const leadingWord = getLeadingLatinWord(next)
 
           if (
-            isShortUppercase(trailingWord) ||
-            isShortUppercase(leadingWord) ||
+            isAcronym(trailingWord) ||
+            isAcronym(leadingWord) ||
             isPureNumeric(trailingWord) ||
-            isPureNumeric(leadingWord)
+            isPureNumeric(leadingWord) ||
+            isShortLatinWord(trailingWord) ||
+            isShortLatinWord(leadingWord)
           ) {
             continue
           }
@@ -681,10 +691,11 @@ export function getMarkdownComponents(rawPath: string) {
         <img
           src={src}
           alt={(alt as string) || ""}
+          loading="lazy"
           className="
-            my-8 h-auto max-w-full border border-tech-main/30 bg-tech-main/5 p-1
-            shadow-sm
-          "
+             my-8 h-auto max-w-full border border-tech-main/30 bg-tech-main/5 p-1
+             shadow-sm
+           "
         />
       )
     },

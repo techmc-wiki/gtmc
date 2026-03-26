@@ -204,6 +204,17 @@
       opacity: 0;
     }
   }
+
+  @keyframes page-transit {
+    0% {
+      opacity: 0;
+      transform: translateX(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
 }
 
 @theme inline {
@@ -217,7 +228,7 @@ body {
     var(--color-tech-line) 1px,
     transparent 1px
   );
-  background-size: clamp(20px, 5vw, 20px) clamp(20px, 5vw, 20px);
+  background-size: clamp(20px, 5vw, 40px) clamp(20px, 5vw, 40px);
   color: var(--foreground);
   font-family: var(--font-sans);
   font-feature-settings:
@@ -336,17 +347,8 @@ body {
   perspective: 1000px;
 }
 
-@keyframes page-transit {
-  0% {
-    opacity: 0;
-    transform: translateX(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
+/* Note: ::-webkit-scrollbar is WebKit-only (Chrome, Safari, Edge).
+   Firefox uses scrollbar-width/scrollbar-color instead (standard). */
 @utility custom-bottom-scrollbar {
   &::-webkit-scrollbar {
     width: 4px;
@@ -358,6 +360,7 @@ body {
   }
 
   &::-webkit-scrollbar-thumb {
+    background-color: rgba(96, 112, 143, 0.3);
     background-color: color-mix(
       in oklab,
       var(--color-tech-main) 30%,
@@ -368,6 +371,7 @@ body {
   }
 
   &::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(74, 90, 120, 0.7);
     background-color: color-mix(
       in oklab,
       var(--color-tech-main-dark) 70%,

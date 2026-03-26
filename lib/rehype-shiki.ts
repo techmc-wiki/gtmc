@@ -48,7 +48,9 @@ export async function createRehypeShiki() {
           )
           if (!highlightedCode) return
 
-          codeNode.children = highlightedCode.children
+          codeNode.children = highlightedCode.children.filter(
+            (child) => !(child.type === "text" && child.value.trim() === "")
+          )
 
           node.properties = node.properties ?? {}
           node.properties["data-raw-code"] = rawCode

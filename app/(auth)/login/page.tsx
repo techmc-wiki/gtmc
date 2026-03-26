@@ -1,13 +1,22 @@
 // 后现代技术风登录页
 "use client"
 
-import { signIn } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
 import { BrutalButton } from "@/components/ui/brutal-button"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
+  const session = useSession()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (session?.status === "authenticated") {
+      router.push("/profile")
+    }
+  }, [session?.status, router])
 
   const handleLogin = async () => {
     setIsLoading(true)

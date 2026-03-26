@@ -22,8 +22,18 @@ export const getGitHubWriteToken = (fallbackToken?: string | null) =>
   process.env.GITHUB_ARTICLES_READ_PAT ||
   process.env.GITHUB_FEATURES_ISSUES_PAT
 
-export const getOctokit = (token?: string) => {
-  return new Octokit({ auth: token || getGitHubReadToken() })
+export const getOctokit = (token?: string, silent404 = false) => {
+  return new Octokit({
+    auth: token || getGitHubReadToken(),
+    log: silent404
+      ? {
+          debug: () => {},
+          info: () => {},
+          warn: () => {},
+          error: () => {},
+        }
+      : undefined,
+  })
 }
 
 let rateLimitedUntilMs = 0
@@ -323,51 +333,85 @@ export async function getRepoContentTree(): Promise<RepoTreeNode[]> {
 }
 
 export async function getRepoFileContent(
-  filePath: string
+  filePath: string,
+  retries = 3
 ): Promise<string | null> {
   if (isRateLimited()) {
     return null
   }
 
-  const octokit = getOctokit(process.env.GITHUB_ARTICLES_WRITE_PAT)
-  try {
-    const { data } = await octokit.repos.getContent({
-      owner: ARTICLES_REPO_OWNER,
-      repo: ARTICLES_REPO_NAME,
-      path: filePath,
-    })
-    if (!Array.isArray(data) && data.type === "file") {
-      return Buffer.from(data.content, "base64").toString("utf-8")
+  const octokit = getOctokit(process.env.GITHUB_ARTICLES_WRITE_PAT, true)
+
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const { data } = await octokit.repos.getContent({
+        owner: ARTICLES_REPO_OWNER,
+        repo: ARTICLES_REPO_NAME,
+        path: filePath,
+      })
+      if (!Array.isArray(data) && data.type === "file") {
+        return Buffer.from(data.content, "base64").toString("utf-8")
+      }
+      return null
+    } catch (error) {
+      const status = (error as { status?: number })?.status
+      rememberRateLimit(error)
+
+      if (status === 404) {
+        return null
+      }
+
+      if (attempt === retries - 1) {
+        console.error(
+          `[github-pr] Failed to fetch ${filePath} after ${retries} attempts:`,
+          error
+        )
+      }
     }
-    return null
-  } catch (error) {
-    rememberRateLimit(error)
-    return null
   }
+
+  return null
 }
 
 export async function getRepoFileBuffer(
-  filePath: string
+  filePath: string,
+  retries = 3
 ): Promise<Buffer | null> {
   if (isRateLimited()) {
     return null
   }
 
-  const octokit = getOctokit(process.env.GITHUB_ARTICLES_WRITE_PAT)
-  try {
-    const { data } = await octokit.repos.getContent({
-      owner: ARTICLES_REPO_OWNER,
-      repo: ARTICLES_REPO_NAME,
-      path: filePath,
-    })
-    if (!Array.isArray(data) && data.type === "file") {
-      return Buffer.from(data.content, "base64")
+  const octokit = getOctokit(process.env.GITHUB_ARTICLES_WRITE_PAT, true)
+
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const { data } = await octokit.repos.getContent({
+        owner: ARTICLES_REPO_OWNER,
+        repo: ARTICLES_REPO_NAME,
+        path: filePath,
+      })
+      if (!Array.isArray(data) && data.type === "file") {
+        return Buffer.from(data.content, "base64")
+      }
+      return null
+    } catch (error) {
+      const status = (error as { status?: number })?.status
+      rememberRateLimit(error)
+
+      if (status === 404) {
+        return null
+      }
+
+      if (attempt === retries - 1) {
+        console.error(
+          `[github-pr] Failed to fetch buffer ${filePath} after ${retries} attempts:`,
+          error
+        )
+      }
     }
-    return null
-  } catch (error) {
-    rememberRateLimit(error)
-    return null
   }
+
+  return null
 }
 
 export async function getRepoTranslations(): Promise<Record<string, string>> {

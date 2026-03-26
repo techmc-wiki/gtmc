@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { FooterProvider } from "@/components/layout/footer-context"
 import { FooterWrapper } from "@/components/layout/footer-wrapper"
+import { AuthSessionProvider } from "@/components/providers/session-provider"
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://beta.techmc.wiki"),
@@ -55,10 +56,12 @@ export default function RootLayout({
           flex min-h-screen w-full flex-col overflow-x-hidden bg-tech-bg/50
           antialiased
         ">
-        <FooterProvider>
-          <main className="w-full flex-1">{children}</main>
-          <FooterWrapper />
-        </FooterProvider>
+        <AuthSessionProvider>
+          <FooterProvider>
+            <main className="w-full flex-1">{children}</main>
+            <FooterWrapper />
+          </FooterProvider>
+        </AuthSessionProvider>
       </body>
     </html>
   )

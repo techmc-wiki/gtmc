@@ -40,9 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# agent
+# agent generated files
 AGENTS.md
 .sisyphus
+docs/superpowers
 
 # lighthouse
 .lighthouseci

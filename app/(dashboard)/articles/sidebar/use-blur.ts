@@ -55,12 +55,11 @@ export function useBlur({
         return
       }
 
-      const ratio = Math.min(
-        1,
+      const ratio = Math.max(0, Math.min(1,
         rowRect.top > blurZoneTop - blurZoneHeight * 0.8
           ? overlapHeight / blurZoneHeight
-          : (1 - distBottomLine / rowRect.height) * 0.4
-      )
+          : (0.5 - distBottomLine / rowRect.height) * 2
+      ))
       const blur = 0.2 + ratio * 2.8
       const opacity = 1 - ratio * 0.85
       row.style.filter = `blur(${blur.toFixed(3)}px)`

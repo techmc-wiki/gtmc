@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useMemo } from "react"
+import { useMemo, useImperativeHandle } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { SidebarActions } from "./sidebar/actions"
 import { CreateDocModal } from "./sidebar/create-doc-modal"
@@ -10,6 +10,12 @@ import { useBlur } from "./sidebar/use-blur"
 import { useExpandedFolders } from "./sidebar/use-expanded-folders"
 import { useScrollToActive } from "./sidebar/use-scroll-to-active"
 import { useToc } from "./sidebar/use-toc"
+
+export interface SidebarClientHandle {
+  openCreateModal: () => void
+  collapseAll: (e: React.MouseEvent) => void
+  scrollToCurrent: () => void
+}
 
 function flattenFolders(items: TreeNode[]): TreeNode[] {
   let folders: TreeNode[] = []
@@ -23,17 +29,25 @@ function flattenFolders(items: TreeNode[]): TreeNode[] {
   return folders
 }
 
-export function SidebarClient({
-  tree,
-  onNavigate,
-  internalScroll = false,
-  scrollClass = "",
-}: {
-  tree: TreeNode[]
-  onNavigate?: () => void
-  internalScroll?: boolean
-  scrollClass?: string
-}) {
+export const SidebarClient = React.forwardRef<
+  SidebarClientHandle,
+  {
+    tree: TreeNode[]
+    onNavigate?: () => void
+    internalScroll?: boolean
+    scrollClass?: string
+    hideActions?: boolean
+  }
+>(function SidebarClient(
+  {
+    tree,
+    onNavigate,
+    internalScroll = false,
+    scrollClass = "",
+    hideActions = false,
+  },
+  ref
+) {
   const pathname = usePathname()
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = React.useState(false)
@@ -105,6 +119,12 @@ export function SidebarClient({
     highlightActive,
   })
 
+  useImperativeHandle(ref, () => ({
+    openCreateModal: () => setIsModalOpen(true),
+    collapseAll,
+    scrollToCurrent,
+  }))
+
   const availableFolders = useMemo(() => flattenFolders(tree), [tree])
   const effectivePath = getEffectivePathname()
 
@@ -112,12 +132,14 @@ export function SidebarClient({
     <>
       {internalScroll ? (
         <div className="relative flex min-h-0 flex-1 flex-col">
-          <SidebarActions
-            internalScroll={internalScroll}
-            onCreate={() => setIsModalOpen(true)}
-            onCollapseAll={collapseAll}
-            onLocate={scrollToCurrent}
-          />
+          {!hideActions && (
+            <SidebarActions
+              internalScroll={internalScroll}
+              onCreate={() => setIsModalOpen(true)}
+              onCollapseAll={collapseAll}
+              onLocate={scrollToCurrent}
+            />
+          )}
           <div
             ref={scrollContainerRef}
             className={`
@@ -159,12 +181,14 @@ export function SidebarClient({
         </div>
       ) : (
         <>
-          <SidebarActions
-            internalScroll={internalScroll}
-            onCreate={() => setIsModalOpen(true)}
-            onCollapseAll={collapseAll}
-            onLocate={scrollToCurrent}
-          />
+          {!hideActions && (
+            <SidebarActions
+              internalScroll={internalScroll}
+              onCreate={() => setIsModalOpen(true)}
+              onCollapseAll={collapseAll}
+              onLocate={scrollToCurrent}
+            />
+          )}
           {tree.length === 0 ? (
             <div className="mt-4 font-mono text-sm text-tech-main/40">
               SYS.DIR_TREE_EMPTY
@@ -197,4 +221,4 @@ export function SidebarClient({
       />
     </>
   )
-}
+})

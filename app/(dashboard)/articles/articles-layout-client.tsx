@@ -3,7 +3,8 @@
 import * as React from "react"
 import { useState, useRef, useEffect } from "react"
 import { usePathname } from "next/navigation"
-import { SidebarClient } from "./sidebar-client"
+import { SidebarClient, type SidebarClientHandle } from "./sidebar-client"
+import { SidebarActions } from "./sidebar/actions"
 import { MobileTreeCard } from "./mobile-tree-card"
 import {
   ScanConfirmOverlay,
@@ -118,6 +119,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const [isTreeLoading, setIsTreeLoading] = useState(tree.length === 0)
   const pathname = usePathname()
   const sentinelRef = useRef<HTMLDivElement>(null)
+  const desktopSidebarRef = useRef<SidebarClientHandle>(null)
 
   useEffect(() => {
     setIsOpen(false)
@@ -327,23 +329,32 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
               overflow-visible border-b guide-line text-tech-main
               md:px-4 md:py-2
             ">
-            <div
-              className="
-                group/title flex shrink-0 items-center justify-between border-b
-                guide-line px-4 pb-2
-              ">
+            <div className="flex shrink-0 flex-col">
               <div
                 className="
-                  flex items-center font-mono text-xs font-bold
-                  tracking-tech-wide text-tech-main/60 uppercase
+                  group/title flex shrink-0 items-center justify-between border-b
+                  guide-line px-4 pb-2
                 ">
-                <span
+                <div
                   className="
-                    mr-2 inline-block size-1.5 animate-pulse bg-tech-main/60
-                  "
-                />
-                SYS.DIR_TREE
+                    flex items-center font-mono text-xs font-bold
+                    tracking-tech-wide text-tech-main/60 uppercase
+                  ">
+                  <span
+                    className="
+                      mr-2 inline-block size-1.5 animate-pulse bg-tech-main/60
+                    "
+                  />
+                  SYS.DIR_TREE
+                </div>
               </div>
+
+              <SidebarActions
+                internalScroll
+                onCreate={() => desktopSidebarRef.current?.openCreateModal()}
+                onCollapseAll={(e) => desktopSidebarRef.current?.collapseAll(e)}
+                onLocate={() => desktopSidebarRef.current?.scrollToCurrent()}
+              />
             </div>
 
             {showTreePlaceholder ? (
@@ -355,9 +366,11 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
               </div>
             ) : (
               <SidebarClient
+                ref={desktopSidebarRef}
                 tree={treeData}
                 internalScroll
                 scrollClass="pr-4"
+                hideActions
               />
             )}
           </div>

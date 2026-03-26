@@ -382,7 +382,6 @@ body {
 
 @utility custom-left-scrollbar {
   direction: rtl;
-
   & > * {
     direction: ltr;
   }
@@ -405,6 +404,14 @@ body {
   &::-webkit-scrollbar-thumb:hover {
     background-color: rgba(96, 112, 143, 0.8);
   }
+}
+
+code .line {
+  display: block;
+}
+
+code[class^="language-"] {
+  white-space: pre;
 }
 
 @media (max-width: 767px) {

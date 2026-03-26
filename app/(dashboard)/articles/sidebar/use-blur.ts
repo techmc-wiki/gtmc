@@ -22,7 +22,7 @@ export function useBlur({
   toc: TocItem[]
   isFileExpanded: boolean
   highlightActive: boolean
-}) {
+}): { scheduleBottomRowBlurSync: () => void } {
   const blurFrameRef = useRef<number | null>(null)
 
   const syncBottomRowBlur = useCallback(() => {
@@ -129,4 +129,6 @@ export function useBlur({
     highlightActive,
     scheduleBottomRowBlurSync,
   ])
+
+  return { scheduleBottomRowBlurSync }
 }

@@ -12,6 +12,8 @@ import type { Element, Root, Text } from "hast"
 import { visit } from "unist-util-visit"
 import { pangu } from "pangu"
 import { CodeCopyButton } from "@/components/code-copy-button"
+import { LazyImage } from "@/components/lazy-image"
+import { LazyCodeBlock } from "@/components/lazy-code-block"
 import type { createRehypeShiki } from "@/lib/rehype-shiki"
 
 export function rehypeLinkedCode() {
@@ -215,35 +217,7 @@ export function getMarkdownComponents(rawPath: string) {
     const lineCount = (props["data-line-count"] as string) || "0"
 
     return (
-      <div
-        className="
-          relative my-6 w-full border border-tech-main/30 bg-tech-bg font-mono
-          text-sm
-        ">
-        <div
-          className="
-            pointer-events-none absolute top-0 left-0 size-3 -translate-px
-            border-t-2 border-l-2 border-tech-main/30
-          "
-        />
-        <div
-          className="
-            pointer-events-none absolute top-0 right-0 size-3 translate-x-px
-            -translate-y-px border-t-2 border-r-2 border-tech-main/30
-          "
-        />
-        <div
-          className="
-            pointer-events-none absolute bottom-0 left-0 size-3 -translate-x-px
-            translate-y-px border-b-2 border-l-2 border-tech-main/30
-          "
-        />
-        <div
-          className="
-            pointer-events-none absolute right-0 bottom-0 size-3 translate-px
-            border-r-2 border-b-2 border-tech-main/30
-          "
-        />
+      <LazyCodeBlock lang={lang} lineCount={lineCount}>
         <div
           className="
             flex items-center justify-between border-b guide-line
@@ -303,7 +277,7 @@ export function getMarkdownComponents(rawPath: string) {
             {"//"} SYNTAX_HIGHLIGHT
           </span>
         </div>
-      </div>
+      </LazyCodeBlock>
     )
   }
 
@@ -498,7 +472,6 @@ export function getMarkdownComponents(rawPath: string) {
         const resolved = path.join(currentDir, src).replace(/\\/g, "/")
         src = `/api/assets?path=${encodeURIComponent(resolved)}`
       }
-      const { LazyImage } = require("@/components/lazy-image")
       return <LazyImage src={src} alt={(alt as string) || ""} />
     },
     pre: preComponent,

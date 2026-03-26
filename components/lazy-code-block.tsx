@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 
 interface LazyCodeBlockProps {
   lang: string
   lineCount: string
-  children: React.ReactNode
+  children: ReactNode
 }
 
 export function LazyCodeBlock({
@@ -18,9 +18,12 @@ export function LazyCodeBlock({
   const [isSkeletonRemoved, setIsSkeletonRemoved] = useState(false)
 
   useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
+      ([entry]) => {
+        if (entry.isIntersecting) {
           setIsVisible(true)
           observer.disconnect()
         }
@@ -28,16 +31,12 @@ export function LazyCodeBlock({
       { rootMargin: "200px", threshold: 0 }
     )
 
-    if (containerRef.current) {
-      observer.observe(containerRef.current)
-    }
-
+    observer.observe(el)
     return () => observer.disconnect()
   }, [])
 
-  const linesToRender = Math.min(parseInt(lineCount) || 8, 8)
-
-  const lineStyles = [
+  const numLines = Math.min(parseInt(lineCount) || 8, 8)
+  const lineWidths = [
     "w-3/4 bg-tech-accent/20",
     "w-1/2 bg-tech-accent/15",
     "w-5/6 bg-tech-accent/20",
@@ -51,65 +50,97 @@ export function LazyCodeBlock({
   return (
     <div
       ref={containerRef}
-      className="relative my-6 w-full border border-tech-main/30 bg-tech-bg font-mono text-sm"
+      className="
+        relative my-6 w-full border border-tech-main/30 bg-tech-bg font-mono
+        text-sm
+      "
       style={{ contentVisibility: "auto" }}>
-      {/* 4 corner brackets */}
-      <div className="absolute top-[-1px] left-[-1px] size-3 border-t-2 border-l-2 border-tech-main/30" />
-      <div className="absolute top-[-1px] right-[-1px] size-3 border-t-2 border-r-2 border-tech-main/30" />
-      <div className="absolute bottom-[-1px] left-[-1px] size-3 border-b-2 border-l-2 border-tech-main/30" />
-      <div className="absolute bottom-[-1px] right-[-1px] size-3 border-b-2 border-r-2 border-tech-main/30" />
-
-      {/* Actual Content - Hidden until visible */}
       <div
-        className={`transition-opacity duration-800 ${
-          isVisible ? "opacity-100 animate-fade-in" : "opacity-0"
-        }`}>
+        className="
+          pointer-events-none absolute top-0 left-0 z-20 size-3 -translate-px
+          border-t-2 border-l-2 border-tech-main/30
+        "
+      />
+      <div
+        className="
+          pointer-events-none absolute top-0 right-0 z-20 size-3 translate-x-px
+          -translate-y-px border-t-2 border-r-2 border-tech-main/30
+        "
+      />
+      <div
+        className="
+          pointer-events-none absolute bottom-0 left-0 z-20 size-3
+          -translate-x-px translate-y-px border-b-2 border-l-2
+          border-tech-main/30
+        "
+      />
+      <div
+        className="
+          pointer-events-none absolute right-0 bottom-0 z-20 size-3
+          translate-px border-r-2 border-b-2 border-tech-main/30
+        "
+      />
+
+      <div
+        className={
+          isVisible ? "animate-fade-in motion-reduce:animate-none" : "opacity-0"
+        }>
         {children}
       </div>
 
-      {/* Skeleton Overlay */}
       {!isSkeletonRemoved && (
         <div
-          className={`absolute inset-0 bg-tech-bg flex flex-col z-10 motion-reduce:transition-opacity motion-reduce:duration-250 ${
+          className={`absolute inset-0 z-10 flex flex-col bg-tech-bg motion-reduce:transition-opacity motion-reduce:duration-250 ${
             isVisible
               ? "animate-skeleton-exit motion-reduce:opacity-0 motion-reduce:animate-none"
               : ""
           }`}
-          onAnimationEnd={(e) => {
-            // Only trigger on the main skeleton exit animation
-            if (e.animationName.includes("skeleton-exit") || isVisible) {
-              setIsSkeletonRemoved(true)
-            }
+          onAnimationEnd={() => {
+            if (isVisible) setIsSkeletonRemoved(true)
           }}
-          // Fallback for motion-reduce
           onTransitionEnd={() => {
-            if (isVisible) {
-              setIsSkeletonRemoved(true)
-            }
+            if (isVisible) setIsSkeletonRemoved(true)
           }}>
-          <div className="flex items-center justify-between border-b border-tech-main/30 bg-tech-main/10 px-4 py-1.5">
+          <div
+            className="
+              flex items-center justify-between border-b border-tech-main/30
+              bg-tech-main/10 px-4 py-1.5
+            ">
             <div className="flex items-center gap-2">
               <span className="size-1.5 animate-pulse bg-tech-main/40" />
-              <span className="w-12 h-2.5 bg-tech-accent/20" />
+              <span className="h-2.5 w-12 bg-tech-accent/20" />
             </div>
             <div className="flex items-center gap-3">
-              <span className="w-16 h-2.5 bg-tech-accent/15" />
+              <span className="h-2.5 w-16 bg-tech-accent/15" />
             </div>
           </div>
 
-          <div className="relative flex-1 px-4 sm:px-6 py-3 overflow-hidden">
-            <div className="absolute inset-0 animate-blueprint-sweep bg-linear-to-r from-transparent via-tech-accent/30 to-transparent motion-reduce:animate-none pointer-events-none" />
-
-            {Array.from({ length: linesToRender }).map((_, index) => (
+          <div className="relative flex-1 overflow-hidden px-4 py-3 sm:px-6">
+            <div
+              className="
+                pointer-events-none absolute inset-0 animate-blueprint-sweep
+                bg-linear-to-r from-transparent via-tech-accent/30
+                to-transparent motion-reduce:animate-none
+              "
+            />
+            {Array.from({ length: numLines }).map((_, i) => (
               <div
-                key={String(index)}
-                className={`h-2 my-1.5 ${lineStyles[index % lineStyles.length]}`}
+                key={String(i)}
+                className={`my-1.5 h-2 ${lineWidths[i % lineWidths.length]}`}
               />
             ))}
           </div>
 
-          <div className="flex items-center justify-end border-t border-tech-main/10 px-4 py-1">
-            <span className="font-mono text-[9px] tracking-widest text-tech-main/50 uppercase select-none">
+          <div
+            className="
+              flex items-center justify-end border-t border-tech-main/10 px-4
+              py-1
+            ">
+            <span
+              className="
+                select-none font-mono text-[9px] uppercase tracking-widest
+                text-tech-main/50
+              ">
               {"//"} SYNTAX_HIGHLIGHT
             </span>
           </div>

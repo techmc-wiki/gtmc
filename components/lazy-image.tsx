@@ -1,36 +1,35 @@
-"use client";
+"use client"
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from "react"
 
 interface LazyImageProps {
-  src: string;
-  alt: string;
+  src: string
+  alt: string
 }
 
 export function LazyImage({ src, alt }: LazyImageProps) {
-  const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">(
+    "loading"
+  )
 
   const handleLoad = useCallback(() => {
-    setStatus("loaded");
-  }, []);
+    setStatus("loaded")
+  }, [])
 
   const handleError = useCallback(() => {
-    setStatus("error");
-  }, []);
+    setStatus("error")
+  }, [])
 
   return (
     <div className="my-8 relative grid max-w-full">
-      {/* Skeleton */}
       <div
         className={`col-start-1 row-start-1 flex min-h-[200px] w-full flex-col border border-tech-main/30 bg-tech-main/5 p-1 shadow-sm z-10 ${
           status === "loaded"
             ? "animate-skeleton-exit pointer-events-none opacity-0 motion-reduce:animate-fade-out"
             : ""
         }`}
-        aria-hidden="true"
-      >
+        aria-hidden="true">
         <div className="relative flex h-full w-full flex-1 items-center justify-center overflow-hidden bg-tech-accent/10">
-          {/* Corner brackets */}
           <div className="absolute left-0 top-0 size-2 border-l-2 border-t-2 border-tech-main/30" />
           <div className="absolute right-0 top-0 size-2 border-r-2 border-t-2 border-tech-main/30" />
           <div className="absolute bottom-0 left-0 size-2 border-b-2 border-l-2 border-tech-main/30" />
@@ -54,9 +53,11 @@ export function LazyImage({ src, alt }: LazyImageProps) {
         onLoad={handleLoad}
         onError={handleError}
         className={`col-start-1 row-start-1 h-auto max-w-full border border-tech-main/30 bg-tech-main/5 p-1 shadow-sm z-0 ${
-          status === "loaded" ? "animate-fade-in motion-reduce:animate-none" : "opacity-0"
+          status === "loaded"
+            ? "animate-fade-in motion-reduce:animate-none"
+            : "opacity-0"
         }`}
       />
     </div>
-  );
+  )
 }

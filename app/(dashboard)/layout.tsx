@@ -5,16 +5,20 @@ import { ProfileButton } from "@/components/ui/profile-button"
 import { Logo } from "@/components/ui/logo"
 import { MobileNav } from "./mobile-nav"
 import { SearchCommand } from "@/components/search/search-command"
+import { auth } from "@/lib/auth"
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await auth()
+  const isAdmin = session?.user?.role === "ADMIN"
+
   const navLinks = [
     { href: "/articles", label: "ARTICLES" },
     { href: "/draft", label: "MY DRAFTS" },
-    { href: "/review", label: "REVIEW HUB" },
+    ...(isAdmin ? [{ href: "/review", label: "REVIEW HUB" }] : []),
     { href: "/features", label: "FEATURES" },
   ]
 

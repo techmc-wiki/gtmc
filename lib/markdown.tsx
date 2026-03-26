@@ -498,18 +498,8 @@ export function getMarkdownComponents(rawPath: string) {
         const resolved = path.join(currentDir, src).replace(/\\/g, "/")
         src = `/api/assets?path=${encodeURIComponent(resolved)}`
       }
-      return (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={src}
-          alt={(alt as string) || ""}
-          loading="lazy"
-          className="
-            my-8 h-auto max-w-full border border-tech-main/30 bg-tech-main/5 p-1
-            shadow-sm
-          "
-        />
-      )
+      const { LazyImage } = require("@/components/lazy-image")
+      return <LazyImage src={src} alt={(alt as string) || ""} />
     },
     pre: preComponent,
     code: codeComponent,

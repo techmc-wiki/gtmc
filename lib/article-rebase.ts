@@ -50,6 +50,12 @@ export type RebaseOutcome =
       appliedCommits: RebaseCommitInfo[]
       remainingCommitShas: string[]
     }
+  | {
+      status: "FILE_DELETED_CONFLICT"
+      draftContent: string
+      deletedAtCommit: RebaseCommitInfo
+      appliedCommits: RebaseCommitInfo[]
+    }
   | { status: "NO_CHANGE"; message: string }
 
 export interface AbortRebaseInput {
@@ -80,6 +86,12 @@ export type ResumeRebaseOutcome =
       conflictCommit: RebaseCommitInfo
       appliedCommits: RebaseCommitInfo[]
       remainingCommitShas: string[]
+    }
+  | {
+      status: "FILE_DELETED_CONFLICT"
+      draftContent: string
+      deletedAtCommit: RebaseCommitInfo
+      appliedCommits: RebaseCommitInfo[]
     }
   | { status: "ERROR"; message: string }
 
@@ -123,7 +135,7 @@ async function applyRebaseCommits(input: {
 }): Promise<
   Extract<
     RebaseOutcome | ResumeRebaseOutcome,
-    { status: "SUCCESS" | "CONFLICT" }
+    { status: "SUCCESS" | "CONFLICT" | "FILE_DELETED_CONFLICT" }
   >
 > {
   const {
@@ -146,8 +158,29 @@ async function applyRebaseCommits(input: {
     const baseSnapshot = await getFileSnapshot(filePath, previousSha, token)
     const latestSnapshot = await getFileSnapshot(filePath, commit.sha, token)
 
-    if (!baseSnapshot || !latestSnapshot) {
+    if (!baseSnapshot) {
+      // Missing base is unexpected — skip this commit
       continue
+    }
+
+    if (!latestSnapshot) {
+      // File was deleted in this commit but draft has content — deletion conflict
+      const deletedState: RebaseState = {
+        ...rebaseState,
+        status: "CONFLICT",
+        currentCommitIndex: i,
+        conflictedCommitSha: commit.sha,
+      }
+      await (prisma.revision as any).update({
+        where: { id: draftId },
+        data: { rebaseState: deletedState } as any,
+      })
+      return {
+        status: "FILE_DELETED_CONFLICT",
+        draftContent: currentContent,
+        deletedAtCommit: commit,
+        appliedCommits,
+      }
     }
 
     const mergeResult = getMergeLibrary().merge({

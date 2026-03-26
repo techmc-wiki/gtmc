@@ -266,6 +266,54 @@ describe("rebaseArticleContent", () => {
       expect(result.appliedCommits[0].sha).toBe("c2")
     }
   })
+
+  it("FILE_DELETED_CONFLICT: file deleted in latest main", async () => {
+    mockCompareCommits.mockImplementation(async () => ({
+      data: {
+        commits: [
+          {
+            sha: "c1",
+            commit: {
+              message: "Delete article",
+              author: { name: "Maintainer", date: "2024-02-01" },
+            },
+          },
+        ],
+      },
+    }))
+
+    mockGetCommit.mockImplementation(async () => ({
+      data: { files: [{ filename: "test.md" }] },
+    }))
+
+    mockGetContent.mockImplementation(async ({ ref }: any) => {
+      if (ref === "abc") {
+        return {
+          data: {
+            type: "file",
+            content: Buffer.from("original content").toString("base64"),
+            sha: "sabc",
+          },
+        }
+      }
+      throw new Error("404 Not Found")
+    })
+
+    const result = await rebaseArticleContent({
+      draftId: "draft-del",
+      filePath: "test.md",
+      baseMainSha: "abc",
+      latestMainSha: "def",
+      draftContent: "my draft content",
+    })
+
+    expect(result.status).toBe("FILE_DELETED_CONFLICT")
+    if (result.status === "FILE_DELETED_CONFLICT") {
+      expect(result.draftContent).toBe("my draft content")
+      expect(result.deletedAtCommit.sha).toBe("c1")
+      expect(result.appliedCommits).toHaveLength(0)
+    }
+  })
 })
 
 describe("analyzeRebaseNeed", () => {

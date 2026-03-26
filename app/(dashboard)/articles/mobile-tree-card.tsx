@@ -92,7 +92,7 @@ export function MobileTreeCard({
 
         <div
           className="
-            flex h-10/12 shrink-0 items-center justify-between border-b
+            z-20 flex h-10/12 shrink-0 items-center justify-between border-b
             border-tech-main/40 px-4
           "
           data-testid="mobile-tree-card-header">

@@ -253,6 +253,12 @@ export default async function ReviewDetailPage({
           initialContent={linkedDraft?.conflictContent || rawContent}
           rebaseState={linkedDraft?.rebaseState as RebaseState | null}
           revisionId={linkedDraft?.id}
+          conflictType={
+            linkedDraft?.status === "SYNC_CONFLICT" &&
+            linkedDraft?.conflictContent === null
+              ? "FILE_DELETED"
+              : "CONFLICT"
+          }
         />
       ) : (
         <>

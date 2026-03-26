@@ -158,7 +158,7 @@ export function SidebarClient({
           />
         </div>
       ) : (
-        <div>
+        <>
           <SidebarActions
             internalScroll={internalScroll}
             onCreate={() => setIsModalOpen(true)}
@@ -185,7 +185,7 @@ export function SidebarClient({
               folderGridRefs={folderGridRefs}
             />
           )}
-        </div>
+        </>
       )}
 
       <CreateDocModal

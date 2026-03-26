@@ -3,7 +3,11 @@
 import { useState, useMemo } from "react"
 import type { RebaseState } from "@/types/rebase"
 
-import { resolveConflictAction, abortRebaseAction } from "@/actions/review"
+import {
+  resolveConflictAction,
+  abortRebaseAction,
+  keepFileAction,
+} from "@/actions/review"
 import { BrutalButton } from "@/components/ui/brutal-button"
 
 export default function ConflictResolver({
@@ -12,16 +16,19 @@ export default function ConflictResolver({
   prNumber,
   rebaseState,
   revisionId,
+  conflictType = "CONFLICT",
 }: {
   filePath: string
   initialContent: string
   prNumber: number
   rebaseState?: RebaseState | null
   revisionId?: string
+  conflictType?: "CONFLICT" | "FILE_DELETED"
 }) {
   const [content, setContent] = useState(initialContent)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isAborting, setIsAborting] = useState(false)
+  const [isKeeping, setIsKeeping] = useState(false)
 
   type ConflictBlock =
     | { type: "ok"; content: string; id: string }
@@ -110,6 +117,70 @@ export default function ConflictResolver({
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  async function handleKeepFile() {
+    if (!revisionId) return
+    setIsKeeping(true)
+    try {
+      await keepFileAction(revisionId)
+      window.location.reload()
+    } catch (error) {
+      alert(
+        `Failed to keep file: ${error instanceof Error ? error.message : String(error)}`
+      )
+      setIsKeeping(false)
+    }
+  }
+
+  if (conflictType === "FILE_DELETED") {
+    return (
+      <div className="space-y-4">
+        <div className="border-l-4 border-red-600 bg-red-600/10 p-4 text-red-700 flex flex-col gap-2">
+          <p className="font-bold tracking-widest uppercase">
+            File Deletion Conflict
+          </p>
+          <p className="text-sm">
+            The main branch deleted this file, but your draft has modifications.
+            Choose how to proceed.
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4">
+          <BrutalButton
+            type="button"
+            variant="primary"
+            onClick={handleKeepFile}
+            disabled={isKeeping}
+            className="flex-1">
+            {isKeeping ? "APPLYING..." : "KEEP MY CHANGES"}
+          </BrutalButton>
+          <BrutalButton
+            type="button"
+            variant="secondary"
+            onClick={async () => {
+              if (
+                !confirm(
+                  "This will close the PR and discard your draft. Are you sure?"
+                )
+              )
+                return
+              try {
+                const { closePRAction } = await import("@/actions/review")
+                await closePRAction(prNumber)
+                window.location.href = "/review"
+              } catch (error) {
+                alert(
+                  `Failed: ${error instanceof Error ? error.message : String(error)}`
+                )
+              }
+            }}
+            className="flex-1 border-red-600 text-red-600 hover:bg-red-600 hover:text-white">
+            ACCEPT DELETION
+          </BrutalButton>
+        </div>
+      </div>
+    )
   }
 
   return (

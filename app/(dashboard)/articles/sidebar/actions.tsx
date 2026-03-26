@@ -56,8 +56,8 @@ export function SidebarActions({
   return (
     <div
       className="
-        sticky top-0 z-10 mb-4 border-b guide-line bg-white/95 px-6 py-3
-        backdrop-blur-sm
+        absolute top-12 left-0 z-10 -mt-4 border-b guide-line bg-white/70 px-6
+        py-3 backdrop-blur-sm
       ">
       <div className="flex flex-wrap gap-2">
         <button

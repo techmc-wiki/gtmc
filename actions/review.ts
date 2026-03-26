@@ -250,6 +250,14 @@ export async function submitWithRebaseAction(revisionId: string) {
         conflictContent: result.conflictContent,
       },
     })
+  } else if (result.status === "FILE_DELETED_CONFLICT") {
+    await prisma.revision.update({
+      where: { id: revisionId },
+      data: {
+        status: "SYNC_CONFLICT",
+        conflictContent: null,
+      },
+    })
   }
 
   revalidatePaths(
@@ -299,4 +307,57 @@ export async function abortRebaseAction(revisionId: string) {
   } catch (error) {
     throw new Error(formatErrorMessage("Abort rebase failed", error))
   }
+}
+
+export async function keepFileAction(revisionId: string) {
+  const session = await requireAuth()
+  if (session.user.role !== "ADMIN") {
+    throw new Error("Unauthorized")
+  }
+
+  const token = getTokenFromSession(session)
+  const authorName = session.user.name || "GTMC Admin"
+  const authorEmail = session.user.email || "admin@gtmc.dev"
+
+  const revision = await prisma.revision.findUnique({
+    where: { id: revisionId },
+  })
+
+  if (!revision) {
+    throw new Error("Revision not found")
+  }
+
+  if (!revision.filePath || !revision.prBranchName) {
+    throw new Error("The revision is missing PR metadata")
+  }
+
+  await upsertFileOnBranch({
+    authorEmail,
+    authorName,
+    branchName: revision.prBranchName,
+    content: revision.content,
+    filePath: revision.filePath,
+    message: `docs: keep file despite deletion in main for ${revision.title}`,
+    token,
+  })
+
+  await (prisma.revision as any).update({
+    where: { id: revisionId },
+    data: {
+      status: "IN_REVIEW",
+      conflictContent: null,
+      rebaseState: null,
+    } as any,
+  })
+
+  revalidatePaths(
+    [
+      "/draft",
+      `/draft/${revisionId}`,
+      "/review",
+      revision.githubPrNum ? `/review/${revision.githubPrNum}` : "",
+    ].filter(Boolean)
+  )
+
+  return { success: true }
 }

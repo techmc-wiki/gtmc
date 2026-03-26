@@ -9,6 +9,228 @@ import rehypeRaw from "rehype-raw"
 import rehypeKatex from "rehype-katex"
 import rehypeSlug from "rehype-slug"
 import type { ReactNode } from "react"
+import React from "react"
+import type { Element, Nodes, Root, Text } from "hast"
+import { visit } from "unist-util-visit"
+
+const CJK_REGEX =
+  /[\u4e00-\u9fff\u3400-\u4dbf\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/
+const LATIN_REGEX = /[a-zA-Z0-9]/
+
+function isCJK(char: string): boolean {
+  return CJK_REGEX.test(char)
+}
+
+function isLatin(char: string): boolean {
+  return LATIN_REGEX.test(char)
+}
+
+function isShortUppercase(text: string): boolean {
+  return text.length >= 1 && text.length <= 6 && /^[A-Z]+$/.test(text)
+}
+
+function needsSpaceBetween(char1: string, char2: string): boolean {
+  return (isCJK(char1) && isLatin(char2)) || (isLatin(char1) && isCJK(char2))
+}
+
+function addSpaceBetweenCJKAndLatin(text: string): string {
+  const parts: string[] = []
+  let i = 0
+
+  while (i < text.length) {
+    const char = text[i]
+    parts.push(char)
+
+    if (i < text.length - 1) {
+      const nextChar = text[i + 1]
+
+      if (needsSpaceBetween(char, nextChar)) {
+        let latinWord = ""
+        let j = i + 1
+
+        if (isLatin(nextChar)) {
+          while (j < text.length && isLatin(text[j])) {
+            latinWord += text[j]
+            j++
+          }
+        } else if (isLatin(char)) {
+          let k = i
+          while (k >= 0 && isLatin(text[k])) {
+            latinWord = text[k] + latinWord
+            k--
+          }
+        }
+
+        if (!isShortUppercase(latinWord)) {
+          parts.push(" ")
+        }
+      }
+    }
+
+    i++
+  }
+
+  return parts.join("")
+}
+
+function getTrailingLatinWord(node: Nodes): string {
+  const text = getTextContent(node)
+  let word = ""
+  for (let i = text.length - 1; i >= 0; i--) {
+    if (isLatin(text[i])) {
+      word = text[i] + word
+    } else {
+      break
+    }
+  }
+  return word
+}
+
+function getLeadingLatinWord(node: Nodes): string {
+  const text = getTextContent(node)
+  let word = ""
+  for (let i = 0; i < text.length; i++) {
+    if (isLatin(text[i])) {
+      word += text[i]
+    } else {
+      break
+    }
+  }
+  return word
+}
+
+function getTextContent(node: Nodes): string {
+  if (node.type === "text") return node.value
+  if ("children" in node && node.children.length > 0) {
+    return node.children.map(getTextContent).join("")
+  }
+  return ""
+}
+
+function getLastChar(node: Nodes): string {
+  if (node.type === "text") return node.value.slice(-1)
+  if ("children" in node && node.children.length > 0) {
+    return getLastChar(node.children[node.children.length - 1])
+  }
+  return ""
+}
+
+function getFirstChar(node: Nodes): string {
+  if (node.type === "text") return node.value[0] || ""
+  if ("children" in node && node.children.length > 0) {
+    return getFirstChar(node.children[0])
+  }
+  return ""
+}
+
+function appendSpace(node: Nodes): void {
+  if (node.type === "text") {
+    node.value = node.value + " "
+    return
+  }
+  if ("children" in node && node.children.length > 0) {
+    appendSpace(node.children[node.children.length - 1])
+  }
+}
+
+function prependSpace(node: Nodes): void {
+  if (node.type === "text") {
+    node.value = " " + node.value
+    return
+  }
+  if ("children" in node && node.children.length > 0) {
+    prependSpace(node.children[0])
+  }
+}
+
+export function rehypeCJKSpacing() {
+  return (tree: Root) => {
+    visit(tree, (node: Nodes) => {
+      if (node.type !== "element") return
+      const element = node as Element
+      if (element.tagName === "code" || element.tagName === "pre") return
+      if (!element.children || element.children.length === 0) return
+
+      for (let i = 0; i < element.children.length - 1; i++) {
+        const current = element.children[i]
+        const next = element.children[i + 1]
+
+        const lastChar = getLastChar(current)
+        const firstChar = getFirstChar(next)
+
+        if (lastChar && firstChar && needsSpaceBetween(lastChar, firstChar)) {
+          const trailingWord = getTrailingLatinWord(current)
+          const leadingWord = getLeadingLatinWord(next)
+
+          if (isShortUppercase(trailingWord) || isShortUppercase(leadingWord)) {
+            continue
+          }
+
+          const nextIsInline =
+            next.type === "element" && (next as Element).tagName !== "br"
+
+          if (nextIsInline) {
+            appendSpace(current)
+          } else {
+            prependSpace(next)
+          }
+        }
+      }
+    })
+
+    visit(tree, (node: Nodes) => {
+      if (node.type !== "text") return
+      const textNode = node as Text
+      textNode.value = addSpaceBetweenCJKAndLatin(textNode.value)
+    })
+  }
+}
+
+const hasCodeChild = (children: React.ReactNode): boolean => {
+  return React.Children.toArray(children).some(
+    (child) => React.isValidElement(child) && child.type === "code"
+  )
+}
+
+const hasLinkChild = (children: React.ReactNode): boolean => {
+  return React.Children.toArray(children).some(
+    (child) => React.isValidElement(child) && child.type === "a"
+  )
+}
+
+const transformLinkChildren = (children: React.ReactNode): React.ReactNode => {
+  return React.Children.map(children, (child) => {
+    if (
+      React.isValidElement<{ className?: string }>(child) &&
+      child.type === "a"
+    ) {
+      const { ...rest } = child.props
+      return React.cloneElement(child, {
+        className:
+          "mx-1 inline-block border border-tech-main/30 border-b-2 bg-tech-main/10 px-1 py-[0.05rem] font-mono text-[0.8em] text-tech-main transition-colors hover:border-tech-main/80 hover:bg-tech-main/80 hover:text-white",
+        ...rest,
+      })
+    }
+    return child
+  })
+}
+
+const transformCodeChildrenForLink = (
+  children: React.ReactNode
+): React.ReactNode => {
+  return React.Children.map(children, (child) => {
+    if (
+      React.isValidElement<{ className?: string }>(child) &&
+      child.type === "code"
+    ) {
+      return React.cloneElement(child, {
+        className:
+          "mx-1 border border-tech-main/30 border-b-2 bg-tech-main/10 px-1 py-[0.05rem] font-mono text-[0.8em] text-tech-main not-italic transition-colors group-hover:border-tech-main/80 group-hover:bg-tech-main/80 group-hover:text-white",
+      })
+    }
+    return child
+  })
+}
 
 type MarkdownComponentProps = {
   children?: ReactNode
@@ -181,7 +403,7 @@ export function getMarkdownComponents(rawPath: string) {
         {...props}
       />
     ),
-    a: ({ href: initialHref, ...props }: MarkdownComponentProps) => {
+    a: ({ href: initialHref, children, ...props }: MarkdownComponentProps) => {
       let href = (initialHref as string) || ""
       if (href.startsWith("./") || href.startsWith("../")) {
         const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
@@ -200,16 +422,22 @@ export function getMarkdownComponents(rawPath: string) {
         const resolved = path.join(currentDir, href).replace(/\\/g, "/")
         href = `/articles/${resolved}`
       }
+      const hasCode = hasCodeChild(children)
       return (
         <Link
           href={href}
-          className="
-            border-b border-tech-main/50 font-mono text-tech-main
-            transition-colors
-            hover:bg-tech-main/80 hover:text-white
-          "
-          {...props}
-        />
+          className={
+            hasCode
+              ? "group font-mono text-tech-main"
+              : `
+                border-b border-tech-main/50 font-mono text-tech-main
+                transition-colors
+                hover:bg-tech-main/80 hover:text-white
+              `
+          }
+          {...props}>
+          {hasCode ? transformCodeChildrenForLink(children) : children}
+        </Link>
       )
     },
     ul: ({ ...props }: MarkdownComponentProps) => (
@@ -273,6 +501,14 @@ export function getMarkdownComponents(rawPath: string) {
     code: ({ className, children, ...props }: MarkdownComponentProps) => {
       const match = /language-(\w+)/.exec((className as string) || "")
       if (!match) {
+        const hasLink = hasLinkChild(children)
+        if (hasLink) {
+          return (
+            <code className="font-mono text-[0.8em] not-italic" {...props}>
+              {transformLinkChildren(children)}
+            </code>
+          )
+        }
         return (
           <code
             className="
@@ -423,8 +659,11 @@ export function getPluginsForContent(content: string) {
     typeof remarkGfm | typeof remarkMath | typeof remarkBreaks
   > = [remarkGfm, remarkBreaks]
   const rehypePlugins: Array<
-    typeof rehypeRaw | typeof rehypeKatex | typeof rehypeSlug
-  > = [rehypeRaw, rehypeSlug]
+    | typeof rehypeRaw
+    | typeof rehypeKatex
+    | typeof rehypeSlug
+    | typeof rehypeCJKSpacing
+  > = [rehypeRaw, rehypeCJKSpacing, rehypeSlug]
 
   if (
     content.includes("$") ||
@@ -432,8 +671,10 @@ export function getPluginsForContent(content: string) {
     content.includes("\\[")
   ) {
     remarkPlugins.push(remarkMath)
-    rehypePlugins.push(rehypeKatex)
+    rehypePlugins.splice(2, 0, rehypeKatex)
   }
+
+  rehypePlugins.push(rehypeCJKSpacing)
 
   return { remarkPlugins, rehypePlugins }
 }

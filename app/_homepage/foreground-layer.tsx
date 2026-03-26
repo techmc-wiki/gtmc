@@ -27,8 +27,8 @@ export function ForegroundLayer({
   return (
     <main
       className="
-        relative z-10 mx-auto mt-[7vh] flex min-h-max w-full max-w-7xl
-        flex-col items-center justify-center px-4 py-24
+        relative z-10 mx-auto mt-[7vh] flex min-h-max w-full max-w-7xl flex-col
+        items-center justify-center px-4 py-24
       ">
       {/* Foreground Layer - Card chrome and nearby accents */}
       <HeroCard
@@ -40,8 +40,8 @@ export function ForegroundLayer({
       {/* 操作入口 */}
       <div
         className="
-          relative z-20 flex w-full animate-slide-up-fade flex-col
-          items-stretch justify-center gap-5 opacity-0 [animation-delay:1.4s]
+          relative z-20 flex w-full animate-slide-up-fade flex-col items-stretch
+          justify-center gap-5 opacity-0 [animation-delay:1.4s]
           fill-mode-forwards
           sm:w-auto sm:flex-row sm:items-center
         ">
@@ -104,12 +104,10 @@ export function ForegroundLayer({
       </div>
 
       {/* 底部隐喻：MC典型的格子/合成槽堆叠图形列阵 */}
-      <div
-        className="
-          pointer-events-none relative mt-12 flex space-x-1 opacity-40
-        ">
-        <div
-          className="absolute -top-4 font-mono text-[8px] text-tech-main/60">
+      <div className="
+        pointer-events-none relative mt-12 flex space-x-1 opacity-40
+      ">
+        <div className="absolute -top-4 font-mono text-[8px] text-tech-main/60">
           INVENTORY_SLOTS_
         </div>
         {[...Array(9)].map((_, i) => (

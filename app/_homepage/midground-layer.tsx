@@ -95,9 +95,8 @@ export function MidgroundLayer({
       {/* 堆栈跟踪装饰 */}
       <DecorElement
         className="
-          pointer-events-none absolute bottom-8 left-8 decor-desktop-only
-          hidden font-mono text-[10px] text-red-500/40 mix-blend-multiply
-          select-none
+          pointer-events-none absolute bottom-8 left-8 decor-desktop-only hidden
+          font-mono text-[10px] text-red-500/40 mix-blend-multiply select-none
           lg:block
         "
         smoothMouseX={smoothMouseX}
@@ -152,22 +151,19 @@ export function MidgroundLayer({
           bg-tech-main/20
           md:block
         ">
-        <span
-          className="
-            absolute -top-4 right-10 font-mono text-[10px] opacity-50
-          ">
+        <span className="
+          absolute -top-4 right-10 font-mono text-[10px] opacity-50
+        ">
           L-AXIS
         </span>
       </div>
       <div
         className="
-          absolute top-0 left-[25%] decor-desktop-only hidden w-pxfull
-          flex-col items-center bg-tech-main/10
+          absolute top-0 left-[25%] decor-desktop-only hidden w-pxfull flex-col
+          items-center bg-tech-main/10
           md:flex
         ">
-        <div
-          className="mt-[50vh] size-2 border border-tech-main/50 bg-tech-bg"
-        />
+        <div className="mt-[50vh] size-2 border border-tech-main/50 bg-tech-bg" />
       </div>
 
       {/* 技术图纸刻度尺 */}

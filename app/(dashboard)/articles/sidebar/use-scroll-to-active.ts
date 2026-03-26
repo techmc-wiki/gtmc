@@ -38,7 +38,11 @@ export function useScrollToActive({
   }, [])
 
   const getEffectivePathname = useCallback(() => {
-    if (pathname === "/articles" || pathname === "/articles/" || pathname === "/") {
+    if (
+      pathname === "/articles" ||
+      pathname === "/articles/" ||
+      pathname === "/"
+    ) {
       return "/articles/Preface"
     }
     return pathname
@@ -54,11 +58,17 @@ export function useScrollToActive({
       for (const item of items) {
         const slug = `/articles/${item.slug}`
         const decodedSlug = decodeURIComponent(slug)
-        if (decodedSlug === decodedTarget || `${decodedSlug}/` === decodedTarget) {
+        if (
+          decodedSlug === decodedTarget ||
+          `${decodedSlug}/` === decodedTarget
+        ) {
           return { item, parentIds: parents }
         }
         if (item.children?.length > 0) {
-          const result = findItemAndParents(item.children, target, [...parents, item.id])
+          const result = findItemAndParents(item.children, target, [
+            ...parents,
+            item.id,
+          ])
           if (result.item) return result
         }
       }
@@ -91,7 +101,9 @@ export function useScrollToActive({
 
   const expandAndScroll = useCallback(
     (parentIds: string[]) => {
-      const needExpand = parentIds.filter((id) => !expandedFoldersRef.current.has(id))
+      const needExpand = parentIds.filter(
+        (id) => !expandedFoldersRef.current.has(id)
+      )
       if (needExpand.length === 0) {
         scrollActiveItem()
         return
@@ -131,7 +143,9 @@ export function useScrollToActive({
         locatePendingRef.current = false
         pendingExpandIdsRef.current = []
         scrollActiveItem()
-        watchGrids.forEach((el) => el.removeEventListener("transitionend", onEnd))
+        watchGrids.forEach((el) =>
+          el.removeEventListener("transitionend", onEnd)
+        )
       }
     }
 
@@ -160,7 +174,13 @@ export function useScrollToActive({
       setIsFileExpanded(true)
     }
     expandAndScroll(parentIds)
-  }, [tree, findItemAndParents, getEffectivePathname, setIsFileExpanded, expandAndScroll])
+  }, [
+    tree,
+    findItemAndParents,
+    getEffectivePathname,
+    setIsFileExpanded,
+    expandAndScroll,
+  ])
 
   return {
     activeItemRef,

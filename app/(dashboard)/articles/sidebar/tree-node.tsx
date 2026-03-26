@@ -48,7 +48,8 @@ export function SidebarTree({
         const decodedRoute = decodeURIComponent(fileRoute)
         const isActive =
           !item.isFolder &&
-          (decodedPathname === decodedRoute || decodedPathname === `${decodedRoute}/`)
+          (decodedPathname === decodedRoute ||
+            decodedPathname === `${decodedRoute}/`)
         const folderExpanded = item.isFolder ? isFolderExpanded(item.id) : false
 
         return (
@@ -60,21 +61,53 @@ export function SidebarTree({
               relative my-1.5 w-fit list-none font-mono text-[16px]
               transition-all duration-300
               md:text-base
-              ${!item.isFolder && isActive && highlightActive ? `bg-tech-main/10 px-1 py-0.5` : ""}
+              ${
+                !item.isFolder && isActive && highlightActive
+                  ? `bg-tech-main/10 px-1 py-0.5`
+                  : ""
+              }
             `}>
             {!item.isFolder && isActive && highlightActive && (
               <div>
-                <div className="pointer-events-none absolute top-0 left-0 size-2 -translate-px border-t-2 border-l-2 border-tech-main/40" />
-                <div className="pointer-events-none absolute top-0 right-0.5 size-2 translate-x-px -translate-y-px border-t-2 border-r-2 border-tech-main/40" />
-                <div className="pointer-events-none absolute bottom-0 left-0 size-2 -translate-x-px translate-y-px border-b-2 border-l-2 border-tech-main/40" />
-                <div className="pointer-events-none absolute right-0.5 bottom-0 size-2 translate-px border-r-2 border-b-2 border-tech-main/40" />
+                <div
+                  className="
+                    pointer-events-none absolute top-0 left-0 size-2
+                    -translate-px border-t-2 border-l-2 border-tech-main/40
+                  "
+                />
+                <div
+                  className="
+                    pointer-events-none absolute top-0 right-0.5 size-2
+                    translate-x-px -translate-y-px border-t-2 border-r-2
+                    border-tech-main/40
+                  "
+                />
+                <div
+                  className="
+                    pointer-events-none absolute bottom-0 left-0 size-2
+                    -translate-x-px translate-y-px border-b-2 border-l-2
+                    border-tech-main/40
+                  "
+                />
+                <div
+                  className="
+                    pointer-events-none absolute right-0.5 bottom-0 size-2
+                    translate-px border-r-2 border-b-2 border-tech-main/40
+                  "
+                />
               </div>
             )}
 
             {item.isFolder ? (
               <button
                 onClick={(e) => toggleFolder(item.id, e)}
-                className="mt-3 mb-1 flex w-fit cursor-pointer items-center text-left font-bold text-tech-main/80 uppercase opacity-80 transition-colors hover:text-tech-main focus:outline-none">
+                className="
+                  mt-3 mb-1 flex w-fit cursor-pointer items-center text-left
+                  font-bold text-tech-main/80 uppercase opacity-80
+                  transition-colors
+                  hover:text-tech-main
+                  focus:outline-none
+                ">
                 <span className="inline-block w-4 text-xs text-tech-main/50">
                   {folderExpanded ? "▼" : "▶"}
                 </span>
@@ -86,12 +119,26 @@ export function SidebarTree({
                   className={`
                     group relative -ml-4 flex items-center py-1.5 pl-4
                     transition-colors
-                    ${isActive ? `font-bold text-tech-main` : `text-slate-700 hover:text-tech-main`}
+                    ${
+                      isActive
+                        ? `font-bold text-tech-main`
+                        : `
+                          text-slate-700
+                          hover:text-tech-main
+                        `
+                    }
                   `}>
                   {isActive && toc.length > 0 ? (
                     <button
                       onClick={toggleFileExp}
-                      className="absolute top-1/2 left-0 z-10 -translate-y-1/2 cursor-pointer text-[10px] text-tech-main transition-opacity hover:text-tech-main/80 focus:outline-none md:text-xs"
+                      className="
+                        absolute top-1/2 left-0 z-10 -translate-y-1/2
+                        cursor-pointer text-[10px] text-tech-main
+                        transition-opacity
+                        hover:text-tech-main/80
+                        focus:outline-none
+                        md:text-xs
+                      "
                       title={isFileExpanded ? "收起目录" : "展开目录"}>
                       {isFileExpanded ? "▼" : "▶"}
                     </button>
@@ -99,8 +146,16 @@ export function SidebarTree({
                     <span
                       className={`
                         absolute top-1/2 left-0 -translate-y-1/2 text-xs
-                        transition-opacity md:text-sm
-                        ${isActive ? `text-tech-main opacity-100` : `text-tech-main opacity-0 group-hover:opacity-100`}
+                        transition-opacity
+                        md:text-sm
+                        ${
+                          isActive
+                            ? `text-tech-main opacity-100`
+                            : `
+                              text-tech-main opacity-0
+                              group-hover:opacity-100
+                            `
+                        }
                       `}>
                       &gt;
                     </span>
@@ -118,7 +173,14 @@ export function SidebarTree({
                     }}
                     className={`
                       block w-full border-b pb-px pl-1
-                      ${isActive ? `cursor-pointer border-tech-main/50` : `border-transparent group-hover:border-tech-main/30`}
+                      ${
+                        isActive
+                          ? `cursor-pointer border-tech-main/50`
+                          : `
+                            border-transparent
+                            group-hover:border-tech-main/30
+                          `
+                      }
                     `}>
                     {item.title}
                   </Link>
@@ -128,14 +190,29 @@ export function SidebarTree({
                   <div
                     className={`
                       grid transition-all duration-300 ease-out
-                      ${isFileExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}
+                      ${
+                        isFileExpanded
+                          ? "grid-rows-[1fr] opacity-100"
+                          : `grid-rows-[0fr] opacity-0`
+                      }
                     `}>
                     <div className="overflow-hidden">
-                      <ul className="mt-1 mb-2 ml-1 space-y-2 border-l guide-line pl-4">
+                      <ul
+                        className="
+                          mt-1 mb-2 ml-1 space-y-2 border-l guide-line pl-4
+                        ">
                         {toc.map((h2) => (
                           <li
                             key={h2.id}
-                            className="relative text-[13px] text-tech-main/70 transition-colors before:absolute before:top-1/2 before:-left-4 before:h-px before:w-2 before:-translate-y-1/2 before:bg-tech-main/30 before:content-[''] hover:text-tech-main md:text-sm">
+                            className="
+                              relative text-[13px] text-tech-main/70
+                              transition-colors
+                              before:absolute before:top-1/2 before:-left-4
+                              before:h-px before:w-2 before:-translate-y-1/2
+                              before:bg-tech-main/30 before:content-['']
+                              hover:text-tech-main
+                              md:text-sm
+                            ">
                             <Link
                               href={`#${h2.id}`}
                               onClick={() => onNavigate?.()}
@@ -159,7 +236,11 @@ export function SidebarTree({
                 }}
                 className={`
                   grid transition-all duration-300 ease-out
-                  ${!item.isFolder || folderExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}
+                  ${
+                    !item.isFolder || folderExpanded
+                      ? `grid-rows-[1fr] opacity-100`
+                      : `grid-rows-[0fr] opacity-0`
+                  }
                 `}>
                 <div className="overflow-hidden">
                   <SidebarTree

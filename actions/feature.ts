@@ -442,7 +442,10 @@ export async function resolveFeature(id: string, resolutionComment?: string) {
   if (resolutionComment) {
     await addIssueComment(
       issue.number,
-      serializeCommentBody(`[Resolution]: ${resolutionComment}`, createMetadataFromSession(session))
+      serializeCommentBody(
+        `[Resolution]: ${resolutionComment}`,
+        createMetadataFromSession(session)
+      )
     )
   }
 

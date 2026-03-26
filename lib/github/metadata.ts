@@ -216,7 +216,7 @@ export function parseCommentBody(body: string): {
     ""
   )
 
-   return { content: contentWithoutAttribution, metadata }
+  return { content: contentWithoutAttribution, metadata }
 }
 
 export function createMetadataFromSession(session: {

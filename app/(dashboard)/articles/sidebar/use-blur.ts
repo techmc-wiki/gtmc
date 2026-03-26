@@ -29,7 +29,9 @@ export function useBlur({
     const container = scrollContainerRef.current
     if (!container) return
 
-    const rows = container.querySelectorAll<HTMLElement>('li[data-sidebar-row="1"]')
+    const rows = container.querySelectorAll<HTMLElement>(
+      'li[data-sidebar-row="1"]'
+    )
     const blurZoneRect = container.getBoundingClientRect()
     const blurZoneHeight = 32
     const blurZoneTop = blurZoneRect.bottom - blurZoneHeight
@@ -101,7 +103,9 @@ export function useBlur({
         blurFrameRef.current = null
       }
 
-      const rows = container.querySelectorAll<HTMLElement>('li[data-sidebar-row="1"]')
+      const rows = container.querySelectorAll<HTMLElement>(
+        'li[data-sidebar-row="1"]'
+      )
       rows.forEach((row) => {
         row.style.filter = ""
         row.style.opacity = ""

@@ -30,7 +30,8 @@ export function CreateDocModal({
     try {
       await createDocument({
         title: formData.title,
-        slug: formData.slug || formData.title.toLowerCase().replace(/\s+/g, "-"),
+        slug:
+          formData.slug || formData.title.toLowerCase().replace(/\s+/g, "-"),
         isFolder: formData.isFolder,
         parentId: formData.parentId || null,
       })
@@ -45,15 +46,32 @@ export function CreateDocModal({
   if (!mounted || !open) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/80 p-4 duration-300 animate-in fade-in">
-      <div className="w-full max-w-md rounded-sm border-2 border-tech-main bg-white p-6 shadow-[8px_8px_0_0_rgba(var(--tech-main),1)] dark:bg-black">
-        <h3 className="mb-6 border-b guide-line pb-2 font-mono text-lg font-bold tracking-widest text-tech-main uppercase">
+    <div
+      className="
+        fixed inset-0 z-9999 flex items-center justify-center bg-black/80 p-4
+        duration-300 animate-in fade-in
+      ">
+      <div
+        className="
+          w-full max-w-md rounded-sm border-2 border-tech-main bg-white p-6
+          shadow-[8px_8px_0_0_rgba(var(--tech-main),1)]
+          dark:bg-black
+        ">
+        <h3
+          className="
+            mb-6 border-b guide-line pb-2 font-mono text-lg font-bold
+            tracking-widest text-tech-main uppercase
+          ">
           CREATE_SYS_OBJECT
         </h3>
 
         <form onSubmit={handleCreate} className="space-y-4 font-mono">
           <div>
-            <label className="mb-1 block text-[11px] tracking-wider text-tech-main/80 uppercase">
+            <label
+              className="
+                mb-1 block text-[11px] tracking-wider text-tech-main/80
+                uppercase
+              ">
               Title
             </label>
             <input
@@ -66,25 +84,42 @@ export function CreateDocModal({
                   title: e.target.value,
                 })
               }
-              className="w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2 text-sm text-tech-main outline-none focus:border-tech-main"
+              className="
+                w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2
+                text-sm text-tech-main outline-none
+                focus:border-tech-main
+              "
               placeholder="e.g. Overview"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-[11px] tracking-wider text-tech-main/80 uppercase">
+            <label
+              className="
+                mb-1 block text-[11px] tracking-wider text-tech-main/80
+                uppercase
+              ">
               Slug (URL path)
             </label>
             <input
               type="text"
               value={formData.slug}
-              onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-              className="w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2 text-sm text-tech-main outline-none focus:border-tech-main"
+              onChange={(e) =>
+                setFormData({ ...formData, slug: e.target.value })
+              }
+              className="
+                w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2
+                text-sm text-tech-main outline-none
+                focus:border-tech-main
+              "
               placeholder="Leave empty to auto-generate"
             />
           </div>
 
-          <div className="flex items-center gap-3 border guide-line bg-tech-main/5 px-3 py-2">
+          <div
+            className="
+              flex items-center gap-3 border guide-line bg-tech-main/5 px-3 py-2
+            ">
             <input
               type="checkbox"
               id="isFolder"
@@ -105,7 +140,11 @@ export function CreateDocModal({
           </div>
 
           <div>
-            <label className="mb-1 block text-[11px] tracking-wider text-tech-main/80 uppercase">
+            <label
+              className="
+                mb-1 block text-[11px] tracking-wider text-tech-main/80
+                uppercase
+              ">
               Parent Directory
             </label>
             <select
@@ -116,7 +155,10 @@ export function CreateDocModal({
                   parentId: e.target.value,
                 })
               }
-              className="w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2 text-sm text-tech-main outline-none">
+              className="
+                w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2
+                text-sm text-tech-main outline-none
+              ">
               <option value="">[ ROOT_DIRECTORY ]</option>
               {availableFolders.map((f) => (
                 <option key={f.id} value={f.id}>
@@ -130,12 +172,23 @@ export function CreateDocModal({
             <button
               type="button"
               onClick={onClose}
-              className="cursor-pointer border border-tech-main/40 px-4 py-2 text-[11px] font-bold tracking-widest text-tech-main uppercase transition-colors hover:bg-tech-main/10">
+              className="
+                cursor-pointer border border-tech-main/40 px-4 py-2 text-[11px]
+                font-bold tracking-widest text-tech-main uppercase
+                transition-colors
+                hover:bg-tech-main/10
+              ">
               ABORT
             </button>
             <button
               type="submit"
-              className="cursor-pointer bg-tech-main px-4 py-2 text-[11px] font-bold tracking-widest text-white uppercase shadow-[2px_2px_0_0_rgba(var(--tech-main),0.4)] transition-opacity hover:opacity-90">
+              className="
+                cursor-pointer bg-tech-main px-4 py-2 text-[11px] font-bold
+                tracking-widest text-white uppercase
+                shadow-[2px_2px_0_0_rgba(var(--tech-main),0.4)]
+                transition-opacity
+                hover:opacity-90
+              ">
               EXECUTE
             </button>
           </div>

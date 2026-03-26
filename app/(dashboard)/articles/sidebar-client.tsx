@@ -11,6 +11,18 @@ import { useExpandedFolders } from "./sidebar/use-expanded-folders"
 import { useScrollToActive } from "./sidebar/use-scroll-to-active"
 import { useToc } from "./sidebar/use-toc"
 
+function flattenFolders(items: TreeNode[]): TreeNode[] {
+  let folders: TreeNode[] = []
+  items.forEach((item) => {
+    if (item.isFolder) {
+      folders.push(item)
+      if (item.children)
+        folders = [...folders, ...flattenFolders(item.children)]
+    }
+  })
+  return folders
+}
+
 export function SidebarClient({
   tree,
   onNavigate,
@@ -28,8 +40,13 @@ export function SidebarClient({
   const [isFileExpanded, setIsFileExpanded] = React.useState(false)
   const scrollContainerRef = React.useRef<HTMLDivElement>(null)
 
-  const { expandedFolders, setExpandedFolders, expandedFoldersRef, mounted, isFolderExpanded } =
-    useExpandedFolders()
+  const {
+    expandedFolders,
+    setExpandedFolders,
+    expandedFoldersRef,
+    mounted,
+    isFolderExpanded,
+  } = useExpandedFolders()
   const toc = useToc(pathname)
 
   React.useEffect(() => {
@@ -51,11 +68,14 @@ export function SidebarClient({
     })
   }
 
-  const collapseAll = React.useCallback((e: React.MouseEvent) => {
-    e.preventDefault()
-    setExpandedFolders(new Set())
-    setIsFileExpanded(false)
-  }, [setExpandedFolders, setIsFileExpanded])
+  const collapseAll = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      setExpandedFolders(new Set())
+      setIsFileExpanded(false)
+    },
+    [setExpandedFolders, setIsFileExpanded]
+  )
 
   const {
     activeItemRef,
@@ -85,18 +105,7 @@ export function SidebarClient({
     highlightActive,
   })
 
-  const flattenFolders = React.useCallback((items: TreeNode[]): TreeNode[] => {
-    let folders: TreeNode[] = []
-    items.forEach((item) => {
-      if (item.isFolder) {
-        folders.push(item)
-        if (item.children) folders = [...folders, ...flattenFolders(item.children)]
-      }
-    })
-    return folders
-  }, [])
-
-  const availableFolders = useMemo(() => flattenFolders(tree), [tree, flattenFolders])
+  const availableFolders = useMemo(() => flattenFolders(tree), [tree])
   const effectivePath = getEffectivePathname()
 
   return (
@@ -111,9 +120,14 @@ export function SidebarClient({
           />
           <div
             ref={scrollContainerRef}
-            className={`custom-left-scrollbar min-h-0 flex-1 overflow-y-auto ${scrollClass}`}>
+            className={`
+              custom-left-scrollbar min-h-0 flex-1 overflow-y-auto
+              ${scrollClass}
+            `}>
             {tree.length === 0 ? (
-              <div className="mt-4 font-mono text-sm text-tech-main/40">SYS.DIR_TREE_EMPTY</div>
+              <div className="mt-4 font-mono text-sm text-tech-main/40">
+                SYS.DIR_TREE_EMPTY
+              </div>
             ) : (
               <SidebarTree
                 items={tree}
@@ -132,7 +146,11 @@ export function SidebarClient({
             )}
           </div>
           <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 z-20 -mr-4 -mb-2 h-12 mask-[linear-gradient(to_bottom,transparent,black)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,black)]"
+            className="
+              pointer-events-none absolute inset-x-0 bottom-0 z-20 -mr-4 -mb-2
+              h-12 mask-[linear-gradient(to_bottom,transparent,black)]
+              [-webkit-mask-image:linear-gradient(to_bottom,transparent,black)]
+            "
             style={{
               background:
                 "repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 4px), linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.4) 100%)",
@@ -148,7 +166,9 @@ export function SidebarClient({
             onLocate={scrollToCurrent}
           />
           {tree.length === 0 ? (
-            <div className="mt-4 font-mono text-sm text-tech-main/40">SYS.DIR_TREE_EMPTY</div>
+            <div className="mt-4 font-mono text-sm text-tech-main/40">
+              SYS.DIR_TREE_EMPTY
+            </div>
           ) : (
             <SidebarTree
               items={tree}

@@ -1,4 +1,8 @@
-import { GITHUB_API_BASE, GithubFeaturesError, requestGithub } from "./api-client"
+import {
+  GITHUB_API_BASE,
+  GithubFeaturesError,
+  requestGithub,
+} from "./api-client"
 
 export type AppFeatureStatus = "PENDING" | "IN_PROGRESS" | "RESOLVED"
 

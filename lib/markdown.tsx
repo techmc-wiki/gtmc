@@ -143,6 +143,43 @@ function prependSpace(node: Nodes): void {
   }
 }
 
+export function rehypeLinkedCode() {
+  return (tree: Root) => {
+    visit(tree, "element", (node: Element) => {
+      if (node.tagName === "a") {
+        const codeChild = node.children?.some(
+          (c) => c.type === "element" && (c as Element).tagName === "code"
+        )
+        if (codeChild) {
+          node.properties = node.properties || {}
+          node.properties["data-has-code"] = "true"
+          node.children?.forEach((c) => {
+            if (c.type === "element" && (c as Element).tagName === "code") {
+              ;(c as Element).properties = (c as Element).properties || {}
+              ;(c as Element).properties["data-linked-code"] = "true"
+            }
+          })
+        }
+      }
+      if (node.tagName === "code") {
+        const linkChild = node.children?.some(
+          (c) => c.type === "element" && (c as Element).tagName === "a"
+        )
+        if (linkChild) {
+          node.properties = node.properties || {}
+          node.properties["data-has-link"] = "true"
+          node.children?.forEach((c) => {
+            if (c.type === "element" && (c as Element).tagName === "a") {
+              ;(c as Element).properties = (c as Element).properties || {}
+              ;(c as Element).properties["data-in-code"] = "true"
+            }
+          })
+        }
+      }
+    })
+  }
+}
+
 export function rehypeCJKSpacing() {
   return (tree: Root) => {
     visit(tree, (node: Nodes) => {
@@ -186,52 +223,6 @@ export function rehypeCJKSpacing() {
   }
 }
 
-const hasCodeChild = (children: React.ReactNode): boolean => {
-  return React.Children.toArray(children).some(
-    (child) => React.isValidElement(child) && child.type === "code"
-  )
-}
-
-const hasLinkChild = (children: React.ReactNode): boolean => {
-  return React.Children.toArray(children).some(
-    (child) => React.isValidElement(child) && child.type === "a"
-  )
-}
-
-const transformLinkChildren = (children: React.ReactNode): React.ReactNode => {
-  return React.Children.map(children, (child) => {
-    if (
-      React.isValidElement<{ className?: string }>(child) &&
-      child.type === "a"
-    ) {
-      const { ...rest } = child.props
-      return React.cloneElement(child, {
-        className:
-          "mx-1 inline-block border border-tech-main/30 border-b-2 bg-tech-main/10 px-1 py-[0.05rem] font-mono text-[0.8em] text-tech-main transition-colors hover:border-tech-main/80 hover:bg-tech-main/80 hover:text-white",
-        ...rest,
-      })
-    }
-    return child
-  })
-}
-
-const transformCodeChildrenForLink = (
-  children: React.ReactNode
-): React.ReactNode => {
-  return React.Children.map(children, (child) => {
-    if (
-      React.isValidElement<{ className?: string }>(child) &&
-      child.type === "code"
-    ) {
-      return React.cloneElement(child, {
-        className:
-          "mx-1 border border-tech-main/30 border-b-2 bg-tech-main/10 px-1 py-[0.05rem] font-mono text-[0.8em] text-tech-main not-italic transition-colors group-hover:border-tech-main/80 group-hover:bg-tech-main/80 group-hover:text-white",
-      })
-    }
-    return child
-  })
-}
-
 type MarkdownComponentProps = {
   children?: ReactNode
   id?: string
@@ -253,6 +244,233 @@ export function calculateReadingMetrics(content: string) {
 }
 
 export function getMarkdownComponents(rawPath: string) {
+  function resolveHref(initialHref: string): string {
+    let href = initialHref
+    if (href.startsWith("./") || href.startsWith("../")) {
+      const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
+      try {
+        const resolved = path.join(currentDir, href).replace(/\\/g, "/")
+        href = `/articles/${resolved}`
+      } catch {
+        href = href
+      }
+    } else if (
+      !href.startsWith("http") &&
+      !href.startsWith("#") &&
+      !href.startsWith("/")
+    ) {
+      const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
+      const resolved = path.join(currentDir, href).replace(/\\/g, "/")
+      href = `/articles/${resolved}`
+    }
+    return href
+  }
+
+  function aComponent({
+    href: initialHref,
+    children,
+    ...props
+  }: MarkdownComponentProps) {
+    const href = resolveHref((initialHref as string) || "")
+    const hasCode = props["data-has-code"] === "true"
+    const inCode = props["data-in-code"] === "true"
+    if (inCode) {
+      const { "data-in-code": _inCode, ...rest } = props
+      return (
+        <Link
+          href={href}
+          className="
+            mx-1 inline-block border border-b-2 border-tech-main/30
+            bg-tech-main/10 px-1 py-[0.05rem] font-mono text-[0.8em]
+            text-tech-main transition-colors
+            hover:border-tech-main hover:bg-tech-main/80 hover:text-white
+          "
+          {...rest}>
+          {children}
+        </Link>
+      )
+    }
+    if (hasCode) {
+      const { "data-has-code": _hasCode, ...rest } = props
+      return (
+        <Link
+          href={href}
+          className="group/lc font-mono text-tech-main"
+          {...rest}>
+          {children}
+        </Link>
+      )
+    }
+    return (
+      <Link
+        href={href}
+        className="
+          border-b border-tech-main/50 font-mono text-tech-main
+          transition-colors
+          hover:bg-tech-main/80 hover:text-white
+        "
+        {...props}>
+        {children}
+      </Link>
+    )
+  }
+
+  function codeComponent({
+    className,
+    children,
+    ...props
+  }: MarkdownComponentProps) {
+    const match = /language-(\w+)/.exec((className as string) || "")
+    if (!match) {
+      const isLinked = props["data-linked-code"] === "true"
+      const hasLink = props["data-has-link"] === "true"
+      if (isLinked) {
+        const { "data-linked-code": _linkedCode, ...rest } = props
+        return (
+          <code
+            className="
+              mx-1 border border-b-2 border-tech-main/30 bg-tech-main/10 px-1
+              py-[0.05rem] font-mono text-[0.8em] text-tech-main not-italic
+              transition-colors
+              group-hover/lc:border-tech-main group-hover/lc:bg-tech-main/80
+              group-hover/lc:text-white
+            "
+            {...rest}>
+            {children}
+          </code>
+        )
+      }
+      if (hasLink) {
+        const { "data-has-link": _hasLink, ...rest } = props
+        return (
+          <code className="font-mono text-[0.8em] not-italic" {...rest}>
+            {children}
+          </code>
+        )
+      }
+      return (
+        <code
+          className="
+            mx-1 border border-tech-main/30 bg-tech-main/10 px-1 py-[0.05rem]
+            font-mono text-[0.8em] text-tech-main not-italic
+          "
+          {...props}>
+          {children}
+        </code>
+      )
+    }
+
+    const lang = match[1]
+    const lineCount = String(children).split("\n").filter(Boolean).length
+
+    return (
+      <div
+        className="
+          relative my-6 w-full border border-tech-main/30 bg-tech-bg font-mono
+          text-sm
+        ">
+        <div
+          className="
+            pointer-events-none absolute top-0 left-0 size-3 -translate-px
+            border-t-2 border-l-2 border-tech-main/30
+          "
+        />
+        <div
+          className="
+            pointer-events-none absolute top-0 right-0 size-3 translate-x-px
+            -translate-y-px border-t-2 border-r-2 border-tech-main/30
+          "
+        />
+        <div
+          className="
+            pointer-events-none absolute bottom-0 left-0 size-3 -translate-x-px
+            translate-y-px border-b-2 border-l-2 border-tech-main/30
+          "
+        />
+        <div
+          className="
+            pointer-events-none absolute right-0 bottom-0 size-3 translate-px
+            border-r-2 border-b-2 border-tech-main/30
+          "
+        />
+        <div
+          className="
+            flex items-center justify-between border-b guide-line
+            bg-tech-main/10 px-4 py-1.5
+          ">
+          <div className="flex items-center gap-2">
+            <span className="size-1.5 animate-pulse bg-tech-main/40" />
+            <span className="text-xs tracking-widest text-tech-main uppercase">
+              {lang}
+            </span>
+          </div>
+          <div
+            className="
+              flex items-center gap-3 font-mono text-[10px] tracking-widest
+              text-tech-main
+            ">
+            <span>{lineCount} LINES</span>
+            <span className="text-tech-main/50">|</span>
+            <span>SYS.CODE_BLOCK</span>
+          </div>
+        </div>
+        <div className="relative">
+          <div
+            className="
+              pointer-events-none absolute inset-0 border border-tech-main/10
+            "
+          />
+          <div
+            className="
+              pointer-events-none absolute inset-x-0 top-1/4 h-px bg-tech-main/3
+            "
+          />
+          <div
+            className="
+              pointer-events-none absolute inset-x-0 top-3/4 h-px bg-tech-main/3
+            "
+          />
+          <div
+            className="
+              custom-bottom-scrollbar overflow-x-auto px-4
+              sm:px-6
+            ">
+            <div className="px-0" dir="ltr">
+              <SyntaxHighlighter
+                style={solarizedlight as Record<string, Record<string, string>>}
+                language={lang}
+                PreTag="div"
+                customStyle={{
+                  margin: 0,
+                  padding: "1rem 0",
+                  background: "transparent",
+                  overflow: "visible",
+                }}
+                codeTagProps={{
+                  style: { background: "transparent" },
+                }}
+                {...props}>
+                {String(children).replace(/\n$/, "")}
+              </SyntaxHighlighter>
+            </div>
+          </div>
+        </div>
+        <div
+          className="
+            flex items-center justify-end border-t border-tech-main/10 px-4 py-1
+          ">
+          <span
+            className="
+              font-mono text-[9px] tracking-widest text-tech-main/50 uppercase
+              select-none
+            ">
+            {"//"} SYNTAX_HIGHLIGHT
+          </span>
+        </div>
+      </div>
+    )
+  }
+
   return {
     wtucolor: ({ ...props }: MarkdownComponentProps) => (
       <span style={{ color: "red" }} {...props} />
@@ -403,43 +621,7 @@ export function getMarkdownComponents(rawPath: string) {
         {...props}
       />
     ),
-    a: ({ href: initialHref, children, ...props }: MarkdownComponentProps) => {
-      let href = (initialHref as string) || ""
-      if (href.startsWith("./") || href.startsWith("../")) {
-        const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
-        try {
-          const resolved = path.join(currentDir, href).replace(/\\/g, "/")
-          href = `/articles/${resolved}`
-        } catch {
-          // ignore path resolution errors
-        }
-      } else if (
-        !href.startsWith("http") &&
-        !href.startsWith("#") &&
-        !href.startsWith("/")
-      ) {
-        const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
-        const resolved = path.join(currentDir, href).replace(/\\/g, "/")
-        href = `/articles/${resolved}`
-      }
-      const hasCode = hasCodeChild(children)
-      return (
-        <Link
-          href={href}
-          className={
-            hasCode
-              ? "group font-mono text-tech-main"
-              : `
-                border-b border-tech-main/50 font-mono text-tech-main
-                transition-colors
-                hover:bg-tech-main/80 hover:text-white
-              `
-          }
-          {...props}>
-          {hasCode ? transformCodeChildrenForLink(children) : children}
-        </Link>
-      )
-    },
+    a: aComponent,
     ul: ({ ...props }: MarkdownComponentProps) => (
       <ul
         className="
@@ -498,159 +680,7 @@ export function getMarkdownComponents(rawPath: string) {
       )
     },
     pre: ({ children }: MarkdownComponentProps) => <>{children}</>,
-    code: ({ className, children, ...props }: MarkdownComponentProps) => {
-      const match = /language-(\w+)/.exec((className as string) || "")
-      if (!match) {
-        const hasLink = hasLinkChild(children)
-        if (hasLink) {
-          return (
-            <code className="font-mono text-[0.8em] not-italic" {...props}>
-              {transformLinkChildren(children)}
-            </code>
-          )
-        }
-        return (
-          <code
-            className="
-              mx-1 rounded-none border border-tech-main/30 bg-tech-main/10 px-1
-              py-[0.05rem] font-mono text-[0.8em] text-tech-main not-italic
-            "
-            {...props}>
-            {children}
-          </code>
-        )
-      }
-
-      const lang = match[1]
-      const lineCount = String(children).split("\n").filter(Boolean).length
-
-      return (
-        <div
-          className="
-            relative my-6 w-full border border-tech-main/30 bg-tech-bg font-mono
-            text-sm
-          ">
-          {/* Corner brackets */}
-          <div
-            className="
-              pointer-events-none absolute top-0 left-0 size-3 -translate-px
-              border-t-2 border-l-2 border-tech-main/30
-            "
-          />
-          <div
-            className="
-              pointer-events-none absolute top-0 right-0 size-3 translate-x-px
-              -translate-y-px border-t-2 border-r-2 border-tech-main/30
-            "
-          />
-          <div
-            className="
-              pointer-events-none absolute bottom-0 left-0 size-3
-              -translate-x-px translate-y-px border-b-2 border-l-2
-              border-tech-main/30
-            "
-          />
-          <div
-            className="
-              pointer-events-none absolute right-0 bottom-0 size-3 translate-px
-              border-r-2 border-b-2 border-tech-main/30
-            "
-          />
-
-          {/* Header bar */}
-          <div
-            className="
-              flex items-center justify-between border-b guide-line
-              bg-tech-main/10 px-4 py-1.5
-            ">
-            {/* Left: status dot + language */}
-            <div className="flex items-center gap-2">
-              <span className="size-1.5 animate-pulse bg-tech-main/40" />
-              <span className="text-xs tracking-widest text-tech-main uppercase">
-                {lang}
-              </span>
-            </div>
-            {/* Right: line count + system label */}
-            <div
-              className="
-                flex items-center gap-3 font-mono text-[10px] tracking-widest
-                text-tech-main
-              ">
-              <span>{lineCount} LINES</span>
-              <span className="text-tech-main/50">|</span>
-              <span>SYS.CODE_BLOCK</span>
-            </div>
-          </div>
-
-          {/* Code area with inner frame */}
-          <div className="relative">
-            {/* Inner frame line */}
-            <div
-              className="
-                pointer-events-none absolute inset-0 border border-tech-main/10
-              "
-            />
-
-            {/* Scan line decorations */}
-            <div
-              className="
-                pointer-events-none absolute inset-x-0 top-1/4 h-px
-                bg-tech-main/3
-              "
-            />
-            <div
-              className="
-                pointer-events-none absolute inset-x-0 top-3/4 h-px
-                bg-tech-main/3
-              "
-            />
-
-            {/* Scroll container */}
-            <div
-              className="
-                custom-bottom-scrollbar overflow-x-auto px-4
-                sm:px-6
-              ">
-              <div className="px-0" dir="ltr">
-                <SyntaxHighlighter
-                  style={
-                    solarizedlight as Record<string, Record<string, string>>
-                  }
-                  language={lang}
-                  PreTag="div"
-                  customStyle={{
-                    margin: 0,
-                    padding: "1rem 0",
-                    background: "transparent",
-                    overflow: "visible",
-                  }}
-                  codeTagProps={{
-                    style: { background: "transparent" },
-                  }}
-                  {...props}>
-                  {String(children).replace(/\n$/, "")}
-                </SyntaxHighlighter>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom HUD strip */}
-          <div
-            className="
-              flex items-center justify-end border-t border-tech-main/10 px-4
-              py-1
-            ">
-            <span
-              className="
-                font-mono text-[9px] tracking-widest text-tech-main/50 uppercase
-                select-none
-              ">
-              {"//"} SYNTAX_HIGHLIGHT
-            </span>
-          </div>
-        </div>
-      )
-    },
+    code: codeComponent,
   } as Record<string, MarkdownComponent>
 }
 
@@ -663,7 +693,8 @@ export function getPluginsForContent(content: string) {
     | typeof rehypeKatex
     | typeof rehypeSlug
     | typeof rehypeCJKSpacing
-  > = [rehypeRaw, rehypeCJKSpacing, rehypeSlug]
+    | typeof rehypeLinkedCode
+  > = [rehypeRaw, rehypeLinkedCode, rehypeSlug]
 
   if (
     content.includes("$") ||

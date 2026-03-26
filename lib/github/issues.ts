@@ -37,15 +37,21 @@ async function _listAllIssuesUncached(
   return allIssues
 }
 
-export const listAllIssues = unstable_cache(_listAllIssuesUncached, ["github-issues"], {
-  revalidate: 300,
-})
+export const listAllIssues = unstable_cache(
+  _listAllIssuesUncached,
+  ["github-issues"],
+  {
+    revalidate: 300,
+  }
+)
 
 export const listIssues = listAllIssues
 
 const ISSUE_TTL = 60
 
-async function _getIssueUncached(issueNumber: number): Promise<GithubIssue | null> {
+async function _getIssueUncached(
+  issueNumber: number
+): Promise<GithubIssue | null> {
   const config = getGithubRepoConfig()
   const url = `${getRepoIssuesBaseUrl(config)}/${issueNumber}`
 

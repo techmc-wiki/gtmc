@@ -214,8 +214,8 @@ export function BackgroundLayer({
         </div>
         <div
           className="
-            grid grid-cols-4 gap-2 border-x-2 border-tech-main/60
-            bg-tech-main/5 px-3 py-1 text-center
+            grid grid-cols-4 gap-2 border-x-2 border-tech-main/60 bg-tech-main/5
+            px-3 py-1 text-center
           ">
           <span>1.0</span>
           <span>0.0</span>
@@ -275,9 +275,8 @@ export function BackgroundLayer({
       {/* 力学/机械引擎图纸 */}
       <DecorElement
         className="
-          pointer-events-none absolute top-[15%] right-[15%]
-          decor-desktop-only hidden opacity-[0.25] mix-blend-multiply
-          select-none
+          pointer-events-none absolute top-[15%] right-[15%] decor-desktop-only
+          hidden opacity-[0.25] mix-blend-multiply select-none
           xl:block
         "
         smoothMouseX={smoothMouseX}
@@ -310,10 +309,7 @@ export function BackgroundLayer({
           />
           <line x1="60" y1="20" x2="60" y2="0" strokeDasharray="3 3" />
           <line x1="45" y1="0" x2="75" y2="0" />
-          <path
-            d="M60 90 L60 110 M55 105 L60 110 L65 105"
-            strokeWidth="1.5"
-          />
+          <path d="M60 90 L60 110 M55 105 L60 110 L65 105" strokeWidth="1.5" />
           <text
             x="70"
             y="110"

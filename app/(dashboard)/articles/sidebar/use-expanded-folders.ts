@@ -15,6 +15,7 @@ export function useExpandedFolders() {
   const expandedFoldersRef = useRef(expandedFolders)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
   }, [])
 

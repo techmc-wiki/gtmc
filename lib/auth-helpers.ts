@@ -24,7 +24,5 @@ export async function requireAuth(
 export function getTokenFromSession(session: {
   user: { githubPat?: string } & Record<string, unknown>
 }): string | undefined {
-  return getGitHubWriteToken(
-    (session.user as { githubPat?: string }).githubPat
-  )
+  return getGitHubWriteToken((session.user as { githubPat?: string }).githubPat)
 }

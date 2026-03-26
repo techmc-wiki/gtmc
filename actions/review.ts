@@ -115,7 +115,12 @@ export async function resolveConflictAction(
     },
   })
 
-  revalidatePaths(["/draft", `/draft/${linkedDraft.id}`, "/review", `/review/${prNumber}`])
+  revalidatePaths([
+    "/draft",
+    `/draft/${linkedDraft.id}`,
+    "/review",
+    `/review/${prNumber}`,
+  ])
 
   return { success: true, status: result.status }
 }

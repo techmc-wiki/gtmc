@@ -56,7 +56,7 @@ export default function Home() {
         selection:bg-tech-main/20 selection:text-tech-main-dark
       ">
       <HideFooter />
-      
+
       <BackgroundLayer
         bgTransform={bgTransform}
         smoothMouseX={smoothMouseX}

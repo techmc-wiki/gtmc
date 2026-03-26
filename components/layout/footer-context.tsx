@@ -18,9 +18,7 @@ export function FooterProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(() => ({ hidden, setHidden }), [hidden])
 
   return (
-    <FooterContext.Provider value={value}>
-      {children}
-    </FooterContext.Provider>
+    <FooterContext.Provider value={value}>{children}</FooterContext.Provider>
   )
 }
 

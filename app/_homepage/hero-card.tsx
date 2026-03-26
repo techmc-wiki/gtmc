@@ -35,8 +35,8 @@ export function HeroCard({
       {/* 下层错位阴影框 */}
       <div
         className="
-          absolute inset-0 -z-10 translate-3 border guide-line
-          bg-transparent transition-transform duration-500 ease-out
+          absolute inset-0 -z-10 translate-3 border guide-line bg-transparent
+          transition-transform duration-500 ease-out
           group-hover:translate-4
         "
       />
@@ -57,31 +57,31 @@ export function HeroCard({
 
       <div
         className="
-          relative overflow-hidden border border-tech-main/40 bg-white/60
-          p-6 shadow-sm backdrop-blur-md
+          relative overflow-hidden border border-tech-main/40 bg-white/60 p-6
+          shadow-sm backdrop-blur-md
           sm:p-10
           md:p-14
         ">
         {/* 闪光扫过效果 */}
         <div
           className="
-            pointer-events-none absolute inset-0 translate-x-[-200%]
-            -skew-x-12 animate-[shimmer_3s_infinite_2s] bg-linear-to-r
-            from-transparent via-white/40 to-transparent
+            pointer-events-none absolute inset-0 translate-x-[-200%] -skew-x-12
+            animate-[shimmer_3s_infinite_2s] bg-linear-to-r from-transparent
+            via-white/40 to-transparent
           "
         />
 
         {/* 工业感/图纸感的定位刻度 */}
         <div
           className="
-            absolute top-0 left-0 size-3 -translate-0.5 border-t-2
-            border-l-2 border-tech-main
+            absolute top-0 left-0 size-3 -translate-0.5 border-t-2 border-l-2
+            border-tech-main
           "
         />
         <div
           className="
-            absolute right-0 bottom-0 size-3 translate-0.5 border-r-2
-            border-b-2 border-tech-main
+            absolute right-0 bottom-0 size-3 translate-0.5 border-r-2 border-b-2
+            border-tech-main
           "
         />
 
@@ -154,8 +154,7 @@ export function HeroCard({
             <span
               className="
                 ml-4 inline-block h-[1em] w-6 animate-pulse bg-tech-main
-                align-middle opacity-0 [animation-delay:1s]
-                fill-mode-forwards
+                align-middle opacity-0 [animation-delay:1s] fill-mode-forwards
               "
             />
           </div>
@@ -171,8 +170,8 @@ export function HeroCard({
           支持多人协作、内容审核与 Git 自动备份的 MC 资源与知识整合站点。
           <span
             className="
-              mt-2 flex items-center font-mono text-[11px]
-              tracking-tech-wide opacity-60
+              mt-2 flex items-center font-mono text-[11px] tracking-tech-wide
+              opacity-60
             ">
             <span
               className="

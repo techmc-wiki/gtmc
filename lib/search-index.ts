@@ -1,11 +1,11 @@
 import MiniSearch from "minisearch"
 import { getSidebarTree } from "@/actions/sidebar"
 import {
-  getRepoFileContent,
   getOctokit,
   ARTICLES_REPO_OWNER,
   ARTICLES_REPO_NAME,
 } from "@/lib/github-pr"
+import { getArticleContent } from "@/lib/article-loader"
 import { prisma } from "@/lib/prisma"
 
 interface IndexedArticle {
@@ -133,7 +133,7 @@ async function buildIndex(): Promise<MiniSearch<IndexedArticle>> {
       nextIndex += 1
 
       const node = githubNodes[currentIndex]
-      const markdown = await getRepoFileContent(`${node.slug}.md`)
+      const markdown = await getArticleContent(`${node.slug}.md`)
       if (!markdown) {
         continue
       }

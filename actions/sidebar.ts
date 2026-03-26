@@ -4,12 +4,12 @@ import { prisma } from "@/lib/prisma"
 import { requireAuth } from "@/lib/auth-helpers"
 import { unstable_cache } from "next/cache"
 import {
-  getRepoContentTree,
   getRepoTranslations,
   createPR,
   createDirectFile,
   type RepoTreeNode,
 } from "@/lib/github-pr"
+import { getArticleTree } from "@/lib/article-loader"
 
 interface TreeNode {
   id: string
@@ -22,7 +22,7 @@ interface TreeNode {
 
 const getCachedRepoTree = unstable_cache(
   async () => {
-    return getRepoContentTree()
+    return getArticleTree()
   },
   ["github-repo-tree"],
   { revalidate: 60, tags: ["github-repo-tree"] }

@@ -9,7 +9,7 @@ import {
   getPluginsForContent,
 } from "@/lib/markdown"
 import { createRehypeShiki } from "@/lib/rehype-shiki"
-import { getRepoFileContent } from "@/lib/github-pr"
+import { getArticleContent } from "@/lib/article-loader"
 
 interface ArticlePageProps {
   params: Promise<{
@@ -55,7 +55,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       : [normalizedPath, `${normalizedPath}.md`, `${normalizedPath}/README.md`]
 
     for (const tryPath of pathsToTry) {
-      const githubContent = await getRepoFileContent(tryPath)
+      const githubContent = await getArticleContent(tryPath)
       if (githubContent !== null) {
         content = githubContent
         rawPath = tryPath

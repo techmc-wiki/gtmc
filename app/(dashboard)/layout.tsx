@@ -1,9 +1,9 @@
 import * as React from "react"
-import Link from "next/link"
 
 import { ProfileButton } from "@/components/ui/profile-button"
 import { Logo } from "@/components/ui/logo"
 import { MobileNav } from "./mobile-nav"
+import { DesktopNav } from "./desktop-nav"
 import { SearchCommand } from "@/components/search/search-command"
 import { auth } from "@/lib/auth"
 
@@ -51,24 +51,7 @@ export default async function DashboardLayout({
                 md:space-x-8
               ">
               <Logo size="md" />
-              <div
-                className="
-                  hidden space-x-6 pt-1
-                  md:flex
-                ">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="
-                      border-b-2 border-transparent pb-1 font-mono text-xs
-                      tracking-[0.15em] text-tech-main-dark transition-colors
-                      hover:border-tech-main hover:text-tech-main
-                    ">
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
+              <DesktopNav navLinks={navLinks} />
             </div>
 
             <div className="flex items-center gap-4">

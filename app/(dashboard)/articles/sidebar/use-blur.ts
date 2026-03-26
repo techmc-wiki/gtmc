@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react"
 import type { TocItem } from "./use-toc"
 import type { TreeNode } from "./tree-node"
 
@@ -79,7 +79,29 @@ export function useBlur({
     })
   }, [syncBottomRowBlur])
 
-  useEffect(() => {
+  const animLoopRef = useRef<number | null>(null)
+  const animLoopEndRef = useRef<number>(0)
+
+  const syncForDuration = useCallback(
+    (ms: number) => {
+      if (animLoopRef.current !== null) {
+        window.cancelAnimationFrame(animLoopRef.current)
+      }
+      animLoopEndRef.current = performance.now() + ms
+      const loop = () => {
+        syncBottomRowBlur()
+        if (performance.now() < animLoopEndRef.current) {
+          animLoopRef.current = window.requestAnimationFrame(loop)
+        } else {
+          animLoopRef.current = null
+        }
+      }
+      animLoopRef.current = window.requestAnimationFrame(loop)
+    },
+    [syncBottomRowBlur]
+  )
+
+  useLayoutEffect(() => {
     if (!internalScroll) return
     const container = scrollContainerRef.current
     if (!container) return
@@ -106,6 +128,11 @@ export function useBlur({
         blurFrameRef.current = null
       }
 
+      if (animLoopRef.current !== null) {
+        window.cancelAnimationFrame(animLoopRef.current)
+        animLoopRef.current = null
+      }
+
       const rows = container.querySelectorAll<HTMLElement>(
         'li[data-sidebar-row="1"]'
       )
@@ -118,7 +145,8 @@ export function useBlur({
 
   useEffect(() => {
     if (!internalScroll) return
-    scheduleBottomRowBlurSync()
+    syncForDuration(300)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     internalScroll,
     pathname,
@@ -127,7 +155,7 @@ export function useBlur({
     toc,
     isFileExpanded,
     highlightActive,
-    scheduleBottomRowBlurSync,
+    syncForDuration,
   ])
 
   return { scheduleBottomRowBlurSync }

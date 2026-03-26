@@ -38,7 +38,7 @@ export function SidebarActions({
               }}
               className="
                 flex-3 cursor-pointer border border-tech-main/40 px-3 py-1.5
-                pl-2 font-mono text-[11px]
+                pl-2 font-mono text-[11px] transition-colors
                 hover:bg-tech-main hover:text-white
               ">
               ⊟ COLLAPSE ALL
@@ -51,7 +51,7 @@ export function SidebarActions({
               }}
               className="
                 flex-2 cursor-pointer border border-tech-main/40 px-3 py-1.5
-                pl-2 font-mono text-[11px]
+                pl-2 font-mono text-[11px] transition-colors
                 hover:bg-tech-main hover:text-white
               ">
               ◎ LOCATE
@@ -81,26 +81,20 @@ export function SidebarActions({
         </button>
         <button
           type="button"
-          onClick={(e) => {
-            onCollapseAll(e)
-            e.currentTarget.blur()
-          }}
+          onClick={onCollapseAll}
           className="
             cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
-            text-[11px]
+            text-[11px] transition-colors
             hover:bg-tech-main hover:text-white
           ">
           ⊟ COLLAPSE ALL
         </button>
         <button
           type="button"
-          onClick={(e) => {
-            onLocate()
-            e.currentTarget.blur()
-          }}
+          onClick={onLocate}
           className="
             cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
-            text-[11px]
+            text-[11px] transition-colors
             hover:bg-tech-main hover:text-white
           ">
           ◎ LOCATE

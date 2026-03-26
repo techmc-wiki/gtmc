@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 
 import { revalidatePaths } from "@/lib/revalidation"
 import { resolveDraftSyncConflict } from "@/lib/article-submission"
+import { abortRebase } from "@/lib/article-rebase"
 import { getTokenFromSession, requireAuth } from "@/lib/auth-helpers"
 import { formatErrorMessage } from "@/lib/error-handling"
 import {
@@ -123,4 +124,41 @@ export async function resolveConflictAction(
   ])
 
   return { success: true, status: result.status }
+}
+
+export async function abortRebaseAction(revisionId: string) {
+  const session = await requireAuth()
+  if (session.user.role !== "ADMIN") {
+    throw new Error("Unauthorized")
+  }
+
+  const token = getTokenFromSession(session)
+
+  try {
+    const revision = await prisma.revision.findUnique({
+      where: { id: revisionId },
+    })
+
+    if (!revision) {
+      throw new Error("Revision not found")
+    }
+
+    await abortRebase({
+      draftId: revisionId,
+      token,
+    })
+
+    revalidatePaths(
+      [
+        "/draft",
+        `/draft/${revisionId}`,
+        "/review",
+        revision.githubPrNum ? `/review/${revision.githubPrNum}` : "",
+      ].filter(Boolean)
+    )
+
+    return { success: true }
+  } catch (error) {
+    throw new Error(formatErrorMessage("Abort rebase failed", error))
+  }
 }

@@ -9,9 +9,7 @@ export async function createRehypeShiki() {
   })
 
   return function rehypeShiki() {
-    return async function (tree: Root): Promise<void> {
-      const tasks: Array<() => Promise<void>> = []
-
+    return function (tree: Root): void {
       visit(tree, "element", (node: Element) => {
         if (node.tagName !== "pre") return
 
@@ -30,40 +28,34 @@ export async function createRehypeShiki() {
         const lang = langClass.replace("language-", "")
         const rawCode = getTextContent(codeNode)
 
-        tasks.push(async () => {
-          try {
-            const highlighted = highlighter.codeToHast(rawCode, {
-              lang,
-              theme: "solarized-light",
-            })
+        try {
+          const highlighted = highlighter.codeToHast(rawCode, {
+            lang,
+            theme: "solarized-light",
+          })
 
-            const highlightedPre = highlighted.children.find(
-              (c): c is Element =>
-                c.type === "element" && c.tagName === "pre"
-            )
-            if (!highlightedPre) return
+          const highlightedPre = highlighted.children.find(
+            (c): c is Element => c.type === "element" && c.tagName === "pre"
+          )
+          if (!highlightedPre) return
 
-            const highlightedCode = highlightedPre.children.find(
-              (c): c is Element =>
-                c.type === "element" && c.tagName === "code"
-            )
-            if (!highlightedCode) return
+          const highlightedCode = highlightedPre.children.find(
+            (c): c is Element => c.type === "element" && c.tagName === "code"
+          )
+          if (!highlightedCode) return
 
-            codeNode.children = highlightedCode.children
+          codeNode.children = highlightedCode.children
 
-            node.properties = node.properties ?? {}
-            node.properties["data-raw-code"] = rawCode
-            node.properties["data-lang"] = lang
-            node.properties["data-line-count"] = String(
-              rawCode.split("\n").filter(Boolean).length
-            )
-          } catch {
-            /* unsupported language or highlighting error — leave node untouched */
-          }
-        })
+          node.properties = node.properties ?? {}
+          node.properties["data-raw-code"] = rawCode
+          node.properties["data-lang"] = lang
+          node.properties["data-line-count"] = String(
+            rawCode.split("\n").filter(Boolean).length
+          )
+        } catch {
+          /* unsupported language or highlighting error — leave node untouched */
+        }
       })
-
-      await Promise.all(tasks.map((t) => t()))
     }
   }
 }

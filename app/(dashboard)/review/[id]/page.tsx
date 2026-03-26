@@ -14,6 +14,7 @@ import {
 } from "@/lib/github-pr"
 import { mergePRAction, closePRAction } from "@/actions/review"
 import { prisma } from "@/lib/prisma"
+import type { RebaseState } from "@/types/rebase"
 import ConflictResolver from "./components/conflict-resolver"
 
 const owner = ARTICLES_REPO_OWNER
@@ -188,6 +189,8 @@ export default async function ReviewDetailPage({
           prNumber={prNumber}
           filePath={mainFile?.filename || linkedDraft?.filePath || ""}
           initialContent={linkedDraft?.conflictContent || rawContent}
+          rebaseState={linkedDraft?.rebaseState as RebaseState | null}
+          revisionId={linkedDraft?.id}
         />
       ) : (
         <>

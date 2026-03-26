@@ -363,7 +363,9 @@ export async function getRepoFileContent(
 
       if (attempt === retries - 1) {
         console.error(
-          `[github-pr] Failed to fetch ${filePath} after ${retries} attempts:`,
+          "[github-pr] Failed to fetch %s after %d attempts:",
+          filePath,
+          retries,
           error
         )
       }
@@ -404,7 +406,9 @@ export async function getRepoFileBuffer(
 
       if (attempt === retries - 1) {
         console.error(
-          `[github-pr] Failed to fetch buffer ${filePath} after ${retries} attempts:`,
+          "[github-pr] Failed to fetch buffer %s after %d attempts:",
+          filePath,
+          retries,
           error
         )
       }

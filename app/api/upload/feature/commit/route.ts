@@ -53,7 +53,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid blob URL" }, { status: 400 })
     }
 
-    const safeBlobUrl = parsedUrl.toString()
+    // Rebuild a safe URL from validated components to avoid using
+    // any unvalidated parts of the original user input.
+    const safeBlobUrlObj = new URL(
+      parsedUrl.pathname + parsedUrl.search,
+      `https://${blobHostname}`
+    )
+    const safeBlobUrl = safeBlobUrlObj.toString()
 
     const blobResponse = await fetch(safeBlobUrl, { redirect: "error" })
     if (!blobResponse.ok) {

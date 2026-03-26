@@ -20,6 +20,10 @@ const SyntaxHighlighter = dynamic(() =>
 const CJK_REGEX =
   /[\u4e00-\u9fff\u3400-\u4dbf\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/
 const LATIN_REGEX = /[a-zA-Z0-9]/
+const PUNCTUATION_REGEX = /[.,;:!?，。；：！？]/
+const BRACKET_REGEX = /[\(\)\[\]\{\}（）【】]/
+const QUOTE_REGEX = /[""'「」『』]/
+const SPECIAL_REGEX = /[@#$%&*+=\-_\\|\/<>~^]/
 
 function isCJK(char: string): boolean {
   return CJK_REGEX.test(char)
@@ -27,6 +31,22 @@ function isCJK(char: string): boolean {
 
 function isLatin(char: string): boolean {
   return LATIN_REGEX.test(char)
+}
+
+function isPunctuation(char: string): boolean {
+  return PUNCTUATION_REGEX.test(char)
+}
+
+function isBracket(char: string): boolean {
+  return BRACKET_REGEX.test(char)
+}
+
+function isQuote(char: string): boolean {
+  return QUOTE_REGEX.test(char)
+}
+
+function isSpecial(char: string): boolean {
+  return SPECIAL_REGEX.test(char)
 }
 
 function isAcronym(text: string): boolean {
@@ -45,44 +65,81 @@ function needsSpaceBetween(char1: string, char2: string): boolean {
   return (isCJK(char1) && isLatin(char2)) || (isLatin(char1) && isCJK(char2))
 }
 
+function shouldSkipSpacingContext(prevChar: string, nextChar: string): boolean {
+  return (
+    isPunctuation(prevChar) ||
+    isPunctuation(nextChar) ||
+    isBracket(prevChar) ||
+    isBracket(nextChar) ||
+    isQuote(prevChar) ||
+    isQuote(nextChar) ||
+    isSpecial(prevChar) ||
+    isSpecial(nextChar)
+  )
+}
+
 function addSpaceBetweenCJKAndLatin(text: string): string {
-  const parts: string[] = []
+  const result: string[] = []
   let i = 0
 
   while (i < text.length) {
-    const char = text[i]
-    parts.push(char)
+    if (isCJK(text[i])) {
+      result.push(text[i])
+      i++
 
-    if (i < text.length - 1) {
-      const nextChar = text[i + 1]
-
-      if (needsSpaceBetween(char, nextChar)) {
+      if (i < text.length && isLatin(text[i])) {
         let latinWord = ""
-        let j = i + 1
-
-        if (isLatin(nextChar)) {
-          while (j < text.length && isLatin(text[j])) {
-            latinWord += text[j]
-            j++
-          }
-        } else if (isLatin(char)) {
-          let k = i
-          while (k >= 0 && isLatin(text[k])) {
-            latinWord = text[k] + latinWord
-            k--
-          }
+        let j = i
+        while (j < text.length && isLatin(text[j])) {
+          latinWord += text[j]
+          j++
         }
 
-        if (!isAcronym(latinWord) && !isPureNumeric(latinWord)) {
-          parts.push(" ")
+        const prevChar = i > 0 ? text[i - 1] : ""
+        const nextChar = j < text.length ? text[j] : ""
+
+        if (
+          !isAcronym(latinWord) &&
+          !isPureNumeric(latinWord) &&
+          !isShortLatinWord(latinWord) &&
+          !shouldSkipSpacingContext(prevChar, nextChar)
+        ) {
+          result.push(" ")
+        }
+        result.push(latinWord)
+        i = j
+      }
+    } else if (isLatin(text[i])) {
+      let latinWord = ""
+      let j = i
+      while (j < text.length && isLatin(text[j])) {
+        latinWord += text[j]
+        j++
+      }
+      result.push(latinWord)
+      i = j
+
+      if (i < text.length && isCJK(text[i])) {
+        const prevChar =
+          i - latinWord.length - 1 >= 0 ? text[i - latinWord.length - 1] : ""
+        const nextChar = i < text.length ? text[i] : ""
+
+        if (
+          !isAcronym(latinWord) &&
+          !isPureNumeric(latinWord) &&
+          !isShortLatinWord(latinWord) &&
+          !shouldSkipSpacingContext(prevChar, nextChar)
+        ) {
+          result.push(" ")
         }
       }
+    } else {
+      result.push(text[i])
+      i++
     }
-
-    i++
   }
 
-  return parts.join("")
+  return result.join("")
 }
 
 function getTrailingLatinWord(node: Nodes): string {
@@ -167,8 +224,8 @@ export function rehypeLinkedCode() {
           node.properties["data-has-code"] = "true"
           node.children?.forEach((c) => {
             if (c.type === "element" && (c as Element).tagName === "code") {
-              ;(c as Element).properties = (c as Element).properties || {}
-              ;(c as Element).properties["data-linked-code"] = "true"
+              ; (c as Element).properties = (c as Element).properties || {}
+                ; (c as Element).properties["data-linked-code"] = "true"
             }
           })
         }
@@ -182,8 +239,8 @@ export function rehypeLinkedCode() {
           node.properties["data-has-link"] = "true"
           node.children?.forEach((c) => {
             if (c.type === "element" && (c as Element).tagName === "a") {
-              ;(c as Element).properties = (c as Element).properties || {}
-              ;(c as Element).properties["data-in-code"] = "true"
+              ; (c as Element).properties = (c as Element).properties || {}
+                ; (c as Element).properties["data-in-code"] = "true"
             }
           })
         }
@@ -644,25 +701,23 @@ export function getMarkdownComponents(rawPath: string) {
     ul: ({ ...props }: MarkdownComponentProps) => (
       <ul
         className="
-          mb-6 list-none space-y-2 border-l-[1.5] border-tech-main/30 pl-8
-          font-mono text-[0.9em] text-slate-800
+          mb-6 list-disc space-y-2 border-l border-tech-main/30 pl-8 font-mono
+          text-[14px] text-slate-800
         "
         {...props}
       />
     ),
     ol: ({ ...props }: MarkdownComponentProps) => (
       <ol
-        className="mb-6 list-decimal space-y-2 pl-6 font-mono text-slate-800"
+        className="
+          mb-6 list-decimal space-y-2 pl-8 font-mono text-[14px] text-slate-800
+        "
         {...props}
       />
     ),
     li: ({ ...props }: MarkdownComponentProps) => (
       <li
-        className="
-          relative text-slate-800
-          before:absolute before:-left-4 before:text-tech-main/50
-          before:content-['>']
-        "
+        className="relative text-slate-800"
         {...props}
       />
     ),
@@ -693,9 +748,9 @@ export function getMarkdownComponents(rawPath: string) {
           alt={(alt as string) || ""}
           loading="lazy"
           className="
-             my-8 h-auto max-w-full border border-tech-main/30 bg-tech-main/5 p-1
-             shadow-sm
-           "
+            my-8 h-auto max-w-full border border-tech-main/30 bg-tech-main/5 p-1
+            shadow-sm
+          "
         />
       )
     },

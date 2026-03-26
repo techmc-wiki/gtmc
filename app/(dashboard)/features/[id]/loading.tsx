@@ -32,9 +32,7 @@ export default function FeatureDetailLoading() {
         </div>
 
         {/* ISSUE_METADATA_ */}
-        <BrutalCard
-          className="animate-tech-slide-in"
-          style={{ animationDelay: "100ms" }}>
+        <BrutalCard className="animate-tech-slide-in [animation-delay:100ms]">
           <div
             className="
               flex flex-col gap-2 font-mono text-xs
@@ -103,9 +101,8 @@ export default function FeatureDetailLoading() {
         <BrutalCard
           className="
             relative animate-tech-slide-in overflow-hidden border-tech-accent/40
-            bg-tech-accent/5 backdrop-blur-sm
-          "
-          style={{ animationDelay: "200ms" }}>
+            bg-tech-accent/5 backdrop-blur-sm [animation-delay:200ms]
+          ">
           <div className="absolute top-0 left-0 h-full w-2 bg-tech-accent/60" />
           <div
             className="
@@ -127,9 +124,8 @@ export default function FeatureDetailLoading() {
           className="
             group relative flex w-full animate-tech-slide-in flex-col space-y-6
             border border-tech-main bg-white/80 p-4 backdrop-blur-sm
-            sm:p-6
-          "
-          style={{ animationDelay: "300ms" }}>
+            sm:p-6 [animation-delay:300ms]
+          ">
           <div
             className="
               pointer-events-none absolute top-0 left-0 size-2 -translate-px
@@ -206,9 +202,7 @@ export default function FeatureDetailLoading() {
         </div>
 
         {/* DISCUSSION_LOG_ */}
-        <div
-          className="animate-tech-slide-in space-y-6"
-          style={{ animationDelay: "400ms" }}>
+        <div className="animate-tech-slide-in space-y-6 [animation-delay:400ms]">
           <h3
             className="
               inline-block border-b-2 border-tech-main pb-2 text-2xl font-bold

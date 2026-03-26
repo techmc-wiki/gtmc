@@ -57,9 +57,8 @@ export default function FeaturesLoading() {
           <BrutalCard
             className="
               animate-tech-slide-in border-tech-main/40 bg-white/80 p-6
-              backdrop-blur-sm
-            "
-            style={{ animationDelay: "100ms" }}>
+              backdrop-blur-sm [animation-delay:100ms]
+            ">
             <div className="space-y-4">
               <div>
                 <h4
@@ -133,8 +132,7 @@ export default function FeaturesLoading() {
                         sm:h-64
                       ">
                       {/* Status badge + date row */}
-                      <div
-                        className="mb-4 flex items-start justify-between gap-2">
+                      <div className="mb-4 flex items-start justify-between gap-2">
                         <SegmentedBar
                           opacity="high"
                           className="

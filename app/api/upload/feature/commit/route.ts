@@ -42,9 +42,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid blob URL" }, { status: 400 })
     }
 
+    // Ensure the URL points to the expected HTTPS blob host only,
+    // with no custom port or path traversal.
     if (
       parsedUrl.protocol !== "https:" ||
-      parsedUrl.hostname !== blobHostname
+      parsedUrl.hostname !== blobHostname ||
+      parsedUrl.port !== "" ||
+      parsedUrl.pathname.includes("..")
     ) {
       return NextResponse.json({ error: "Invalid blob URL" }, { status: 400 })
     }

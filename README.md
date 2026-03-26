@@ -1,4 +1,4 @@
-![Screenshot](./images/homepage.jpeg)
+![Screenshot](images/homepage.jpeg)
 
 # Graduate Texts in Minecraft
 

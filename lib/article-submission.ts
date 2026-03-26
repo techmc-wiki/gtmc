@@ -209,59 +209,78 @@ export async function resolveDraftSyncConflict({
   authorEmail,
   token,
 }: DraftResolutionInput) {
-  const latestMainSha = await getMainBranchHeadSha(token)
-  const resolvedFilePath = await resolveArticleFilePath(
-    filePath,
-    [latestMainSha],
-    token
-  )
-  let nextContent = content
-  let nextConflictContent: string | null = null
-  let nextStatus: DraftSyncStatus = "IN_REVIEW"
+  const MAX_RETRIES = 3
 
-  if (syncedMainSha && syncedMainSha !== latestMainSha) {
-    const previousMainSnapshot = await getFileSnapshot(
-      resolvedFilePath,
-      syncedMainSha,
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    const latestMainSha = await getMainBranchHeadSha(token)
+    const resolvedFilePath = await resolveArticleFilePath(
+      filePath,
+      [latestMainSha],
       token
     )
-    const latestMainSnapshot = await getFileSnapshot(
-      resolvedFilePath,
-      latestMainSha,
-      token
-    )
-    const mergeResult = mergeArticleContent({
-      baseContent: previousMainSnapshot?.content ?? "",
-      draftContent: content,
-      latestMainContent: latestMainSnapshot?.content ?? "",
-    })
+    let nextContent = content
+    let nextConflictContent: string | null = null
+    let nextStatus: DraftSyncStatus = "IN_REVIEW"
 
-    nextContent = mergeResult.content
-    if (mergeResult.conflict) {
-      nextConflictContent = mergeResult.content
-      nextStatus = "SYNC_CONFLICT"
+    if (syncedMainSha && syncedMainSha !== latestMainSha) {
+      const previousMainSnapshot = await getFileSnapshot(
+        resolvedFilePath,
+        syncedMainSha,
+        token
+      )
+      const latestMainSnapshot = await getFileSnapshot(
+        resolvedFilePath,
+        latestMainSha,
+        token
+      )
+      const mergeResult = mergeArticleContent({
+        baseContent: previousMainSnapshot?.content ?? "",
+        draftContent: content,
+        latestMainContent: latestMainSnapshot?.content ?? "",
+      })
+
+      nextContent = mergeResult.content
+      if (mergeResult.conflict) {
+        nextConflictContent = mergeResult.content
+        nextStatus = "SYNC_CONFLICT"
+      }
+    }
+
+    if (nextStatus === "IN_REVIEW") {
+      await upsertFileOnBranch({
+        authorEmail,
+        authorName,
+        branchName,
+        content: nextContent,
+        filePath: resolvedFilePath,
+        message: `docs: resolve sync conflict for ${title}`,
+        token,
+      })
+    }
+
+    const verifiedMainSha = await getMainBranchHeadSha(token)
+    if (verifiedMainSha === latestMainSha) {
+      return {
+        content: nextContent,
+        conflictContent: nextConflictContent,
+        filePath: resolvedFilePath,
+        status: nextStatus,
+        syncedMainSha: latestMainSha,
+      }
+    }
+
+    if (attempt < MAX_RETRIES - 1) {
+      await sleep(2 ** attempt * 100)
     }
   }
 
-  if (nextStatus === "IN_REVIEW") {
-    await upsertFileOnBranch({
-      authorEmail,
-      authorName,
-      branchName,
-      content: nextContent,
-      filePath: resolvedFilePath,
-      message: `docs: resolve sync conflict for ${title}`,
-      token,
-    })
-  }
+  throw new Error("Max retries exceeded: main branch is too active")
+}
 
-  return {
-    content: nextContent,
-    conflictContent: nextConflictContent,
-    filePath: resolvedFilePath,
-    status: nextStatus,
-    syncedMainSha: latestMainSha,
-  }
+function sleep(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms)
+  })
 }
 
 function buildBranchName(draftId: string) {

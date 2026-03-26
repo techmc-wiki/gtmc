@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "lint": "prettier --write .; eslint --fix",
-    "postinstall": "prisma generate && node scripts/fix-prisma.js",
+    "postinstall": "prisma generate && node scripts/fix-prisma.js && pnpm articles:init",
+    "articles:init": "git submodule update --init --recursive",
+    "articles:update": "git submodule update --remote articles",
+    "articles:status": "git submodule status articles",
     "analyze": "ANALYZE=true pnpm build",
     "lighthouse": "lhci autorun"
   },
@@ -66,7 +69,8 @@
     "tailwindcss": "^4.2.2",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.1"
+    "typescript-eslint": "^8.57.1",
+    "vitest": "^4.1.2"
   },
   "resolutions": {
     "form-data": "4.0.5"

@@ -109,11 +109,13 @@ model Revision {
   authorId    String
   author      User           @relation("RevisionAuthor", fields: [authorId], references: [id])
 
-  reviewerId  String?
-  reviewer    User?          @relation("RevisionReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+   reviewerId  String?
+   reviewer    User?          @relation("RevisionReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
 
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+   rebaseState Json?
+
+   createdAt   DateTime       @default(now())
+   updatedAt   DateTime       @updatedAt
 }
 
 // ==========================================

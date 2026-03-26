@@ -75,7 +75,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   const { wordCount, readingTime } = calculateReadingMetrics(content)
-  const shikiPlugin = await getCachedRehypeShiki()
+  const shikiPlugin = await getCachedRehypeShiki(content)
   const { remarkPlugins, rehypePlugins } = getPluginsForContent(
     content,
     shikiPlugin

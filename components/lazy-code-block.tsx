@@ -28,7 +28,7 @@ export function LazyCodeBlock({
           observer.disconnect()
         }
       },
-      { rootMargin: "200px", threshold: 0 }
+      { rootMargin: "400px", threshold: 0 }
     )
 
     observer.observe(el)

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 
 interface LazyImageProps {
   src: string
@@ -8,9 +8,29 @@ interface LazyImageProps {
 }
 
 export function LazyImage({ src, alt }: LazyImageProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [shouldLoad, setShouldLoad] = useState(false)
   const [status, setStatus] = useState<"loading" | "loaded" | "error">(
     "loading"
   )
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoad(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: "400px", threshold: 0 }
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   const handleLoad = useCallback(() => {
     setStatus("loaded")
@@ -21,7 +41,7 @@ export function LazyImage({ src, alt }: LazyImageProps) {
   }, [])
 
   return (
-    <div className="relative my-8 grid max-w-full">
+    <div ref={containerRef} className="relative my-8 grid max-w-full">
       <div
         className={`
           z-10 col-start-1 row-start-1 flex min-h-[200px] w-full flex-col border
@@ -88,9 +108,8 @@ export function LazyImage({ src, alt }: LazyImageProps) {
 
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={src}
+        src={shouldLoad ? src : undefined}
         alt={alt}
-        loading="lazy"
         onLoad={handleLoad}
         onError={handleError}
         className={`

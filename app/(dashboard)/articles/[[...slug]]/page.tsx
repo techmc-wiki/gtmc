@@ -8,6 +8,7 @@ import {
   getMarkdownComponents,
   getPluginsForContent,
 } from "@/lib/markdown"
+import { createRehypeShiki } from "@/lib/rehype-shiki"
 import { getRepoFileContent } from "@/lib/github-pr"
 
 interface ArticlePageProps {
@@ -37,7 +38,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       })
       content = `# ${dbArticle.title}\n\n[SYS.DIR_CONTENTS]\n\n`
       children.forEach((child: typeof dbArticle) => {
-        content += `- [${child.title}](/articles/${child.slug})\n`
+        content += `- [${child.title}](/articles/${child.slug.split("/").map(encodeURIComponent).join("/")})\n`
       })
     } else {
       content = dbArticle.content
@@ -74,7 +75,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   const { wordCount, readingTime } = calculateReadingMetrics(content)
-  const { remarkPlugins, rehypePlugins } = getPluginsForContent(content)
+  const shikiPlugin = await createRehypeShiki()
+  const { remarkPlugins, rehypePlugins } = getPluginsForContent(
+    content,
+    shikiPlugin
+  )
   const markdownComponents = getMarkdownComponents(rawPath)
 
   return (

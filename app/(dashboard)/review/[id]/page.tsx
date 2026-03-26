@@ -1,15 +1,11 @@
 import { auth } from "@/lib/auth"
 import { redirect, notFound } from "next/navigation"
 import ReactMarkdown from "react-markdown"
-import remarkGfm from "remark-gfm"
-import remarkMath from "remark-math"
-import remarkBreaks from "remark-breaks"
-import rehypeRaw from "rehype-raw"
-import rehypeKatex from "rehype-katex"
 import "katex/dist/katex.min.css"
 import Link from "next/link"
 import { BrutalButton } from "@/components/ui/brutal-button"
-import { getMarkdownComponents } from "@/lib/markdown"
+import { getMarkdownComponents, getPluginsForContent } from "@/lib/markdown"
+import { createRehypeShiki } from "@/lib/rehype-shiki"
 import {
   getGitHubWriteToken,
   getOctokit,
@@ -81,6 +77,11 @@ export default async function ReviewDetailPage({
   }
 
   const isMergeable = pr.mergeable === true
+  const shikiPlugin = await createRehypeShiki()
+  const { remarkPlugins, rehypePlugins } = getPluginsForContent(
+    rawContent,
+    shikiPlugin
+  )
   const hasConflict = pr.mergeable === false
 
   return (
@@ -223,8 +224,8 @@ export default async function ReviewDetailPage({
               ">
               {rawContent ? (
                 <ReactMarkdown
-                  remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-                  rehypePlugins={[rehypeRaw, rehypeKatex]}
+                  remarkPlugins={remarkPlugins}
+                  rehypePlugins={rehypePlugins}
                   components={getMarkdownComponents(mainFile?.filename || "")}>
                   {rawContent}
                 </ReactMarkdown>

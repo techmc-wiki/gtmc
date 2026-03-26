@@ -1,4 +1,3 @@
-import dynamic from "next/dynamic"
 import Link from "next/link"
 import path from "path"
 import remarkGfm from "remark-gfm"
@@ -9,208 +8,11 @@ import rehypeKatex from "rehype-katex"
 import rehypeSlug from "rehype-slug"
 import type { ReactNode } from "react"
 import React from "react"
-import type { Element, Nodes, Root, Text } from "hast"
+import type { Element, Root, Text } from "hast"
 import { visit } from "unist-util-visit"
-import { solarizedlight } from "react-syntax-highlighter/dist/cjs/styles/prism"
-
-const SyntaxHighlighter = dynamic(() =>
-  import("react-syntax-highlighter").then((mod) => ({ default: mod.Prism }))
-)
-
-const CJK_REGEX =
-  /[\u4e00-\u9fff\u3400-\u4dbf\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/
-const LATIN_REGEX = /[a-zA-Z0-9]/
-const PUNCTUATION_REGEX = /[.,;:!?，。；：！？]/
-const BRACKET_REGEX = /[\(\)\[\]\{\}（）【】]/
-const QUOTE_REGEX = /[""'「」『』]/
-const SPECIAL_REGEX = /[@#$%&*+=\-_\\|\/<>~^]/
-
-function isCJK(char: string): boolean {
-  return CJK_REGEX.test(char)
-}
-
-function isLatin(char: string): boolean {
-  return LATIN_REGEX.test(char)
-}
-
-function isPunctuation(char: string): boolean {
-  return PUNCTUATION_REGEX.test(char)
-}
-
-function isBracket(char: string): boolean {
-  return BRACKET_REGEX.test(char)
-}
-
-function isQuote(char: string): boolean {
-  return QUOTE_REGEX.test(char)
-}
-
-function isSpecial(char: string): boolean {
-  return SPECIAL_REGEX.test(char)
-}
-
-function isAcronym(text: string): boolean {
-  return text.length >= 1 && text.length <= 6 && /^[A-Z]+$/.test(text)
-}
-
-function isPureNumeric(text: string): boolean {
-  return /^\d+$/.test(text)
-}
-
-function isShortLatinWord(text: string): boolean {
-  return text.length >= 1 && text.length <= 2 && /^[a-zA-Z0-9]+$/.test(text)
-}
-
-function needsSpaceBetween(char1: string, char2: string): boolean {
-  return (isCJK(char1) && isLatin(char2)) || (isLatin(char1) && isCJK(char2))
-}
-
-function shouldSkipSpacingContext(prevChar: string, nextChar: string): boolean {
-  return (
-    isPunctuation(prevChar) ||
-    isPunctuation(nextChar) ||
-    isBracket(prevChar) ||
-    isBracket(nextChar) ||
-    isQuote(prevChar) ||
-    isQuote(nextChar) ||
-    isSpecial(prevChar) ||
-    isSpecial(nextChar)
-  )
-}
-
-function addSpaceBetweenCJKAndLatin(text: string): string {
-  const result: string[] = []
-  let i = 0
-
-  while (i < text.length) {
-    if (isCJK(text[i])) {
-      result.push(text[i])
-      i++
-
-      if (i < text.length && isLatin(text[i])) {
-        let latinWord = ""
-        let j = i
-        while (j < text.length && isLatin(text[j])) {
-          latinWord += text[j]
-          j++
-        }
-
-        const prevChar = i > 0 ? text[i - 1] : ""
-        const nextChar = j < text.length ? text[j] : ""
-
-        if (
-          !isAcronym(latinWord) &&
-          !isPureNumeric(latinWord) &&
-          !isShortLatinWord(latinWord) &&
-          !shouldSkipSpacingContext(prevChar, nextChar)
-        ) {
-          result.push(" ")
-        }
-        result.push(latinWord)
-        i = j
-      }
-    } else if (isLatin(text[i])) {
-      let latinWord = ""
-      let j = i
-      while (j < text.length && isLatin(text[j])) {
-        latinWord += text[j]
-        j++
-      }
-      result.push(latinWord)
-      i = j
-
-      if (i < text.length && isCJK(text[i])) {
-        const prevChar =
-          i - latinWord.length - 1 >= 0 ? text[i - latinWord.length - 1] : ""
-        const nextChar = i < text.length ? text[i] : ""
-
-        if (
-          !isAcronym(latinWord) &&
-          !isPureNumeric(latinWord) &&
-          !isShortLatinWord(latinWord) &&
-          !shouldSkipSpacingContext(prevChar, nextChar)
-        ) {
-          result.push(" ")
-        }
-      }
-    } else {
-      result.push(text[i])
-      i++
-    }
-  }
-
-  return result.join("")
-}
-
-function getTrailingLatinWord(node: Nodes): string {
-  const text = getTextContent(node)
-  let word = ""
-  for (let i = text.length - 1; i >= 0; i--) {
-    if (isLatin(text[i])) {
-      word = text[i] + word
-    } else {
-      break
-    }
-  }
-  return word
-}
-
-function getLeadingLatinWord(node: Nodes): string {
-  const text = getTextContent(node)
-  let word = ""
-  for (let i = 0; i < text.length; i++) {
-    if (isLatin(text[i])) {
-      word += text[i]
-    } else {
-      break
-    }
-  }
-  return word
-}
-
-function getTextContent(node: Nodes): string {
-  if (node.type === "text") return node.value
-  if ("children" in node && node.children.length > 0) {
-    return node.children.map(getTextContent).join("")
-  }
-  return ""
-}
-
-function getLastChar(node: Nodes): string {
-  if (node.type === "text") return node.value.slice(-1)
-  if ("children" in node && node.children.length > 0) {
-    return getLastChar(node.children[node.children.length - 1])
-  }
-  return ""
-}
-
-function getFirstChar(node: Nodes): string {
-  if (node.type === "text") return node.value[0] || ""
-  if ("children" in node && node.children.length > 0) {
-    return getFirstChar(node.children[0])
-  }
-  return ""
-}
-
-function appendSpace(node: Nodes): void {
-  if (node.type === "text") {
-    node.value = node.value + " "
-    return
-  }
-  if ("children" in node && node.children.length > 0) {
-    appendSpace(node.children[node.children.length - 1])
-  }
-}
-
-function prependSpace(node: Nodes): void {
-  if (node.type === "text") {
-    node.value = " " + node.value
-    return
-  }
-  if ("children" in node && node.children.length > 0) {
-    prependSpace(node.children[0])
-  }
-}
+import { pangu } from "pangu"
+import { CodeCopyButton } from "@/components/code-copy-button"
+import type { createRehypeShiki } from "@/lib/rehype-shiki"
 
 export function rehypeLinkedCode() {
   return (tree: Root) => {
@@ -224,8 +26,8 @@ export function rehypeLinkedCode() {
           node.properties["data-has-code"] = "true"
           node.children?.forEach((c) => {
             if (c.type === "element" && (c as Element).tagName === "code") {
-              ; (c as Element).properties = (c as Element).properties || {}
-                ; (c as Element).properties["data-linked-code"] = "true"
+              ;(c as Element).properties = (c as Element).properties || {}
+              ;(c as Element).properties["data-linked-code"] = "true"
             }
           })
         }
@@ -239,8 +41,8 @@ export function rehypeLinkedCode() {
           node.properties["data-has-link"] = "true"
           node.children?.forEach((c) => {
             if (c.type === "element" && (c as Element).tagName === "a") {
-              ; (c as Element).properties = (c as Element).properties || {}
-                ; (c as Element).properties["data-in-code"] = "true"
+              ;(c as Element).properties = (c as Element).properties || {}
+              ;(c as Element).properties["data-in-code"] = "true"
             }
           })
         }
@@ -251,50 +53,14 @@ export function rehypeLinkedCode() {
 
 export function rehypeCJKSpacing() {
   return (tree: Root) => {
-    visit(tree, (node: Nodes) => {
-      if (node.type !== "element") return
-      const element = node as Element
-      if (element.tagName === "code" || element.tagName === "pre") return
-      if (!element.children || element.children.length === 0) return
-
-      for (let i = 0; i < element.children.length - 1; i++) {
-        const current = element.children[i]
-        const next = element.children[i + 1]
-
-        const lastChar = getLastChar(current)
-        const firstChar = getFirstChar(next)
-
-        if (lastChar && firstChar && needsSpaceBetween(lastChar, firstChar)) {
-          const trailingWord = getTrailingLatinWord(current)
-          const leadingWord = getLeadingLatinWord(next)
-
-          if (
-            isAcronym(trailingWord) ||
-            isAcronym(leadingWord) ||
-            isPureNumeric(trailingWord) ||
-            isPureNumeric(leadingWord) ||
-            isShortLatinWord(trailingWord) ||
-            isShortLatinWord(leadingWord)
-          ) {
-            continue
-          }
-
-          const nextIsInline =
-            next.type === "element" && (next as Element).tagName !== "br"
-
-          if (nextIsInline) {
-            appendSpace(current)
-          } else {
-            prependSpace(next)
-          }
-        }
-      }
-    })
-
-    visit(tree, (node: Nodes) => {
+    visit(tree, (node, _, parent) => {
       if (node.type !== "text") return
+      if (parent?.type === "element") {
+        const parentTag = (parent as Element).tagName
+        if (parentTag === "code" || parentTag === "pre") return
+      }
       const textNode = node as Text
-      textNode.value = addSpaceBetweenCJKAndLatin(textNode.value)
+      textNode.value = pangu.spacingText(textNode.value)
     })
   }
 }
@@ -326,9 +92,9 @@ export function getMarkdownComponents(rawPath: string) {
       const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
       try {
         const resolved = path.join(currentDir, href).replace(/\\/g, "/")
-        href = `/articles/${resolved}`
+        href = `/articles/${resolved.split("/").map(encodeURIComponent).join("/")}`
       } catch {
-        href = href
+        return href
       }
     } else if (
       !href.startsWith("http") &&
@@ -337,7 +103,7 @@ export function getMarkdownComponents(rawPath: string) {
     ) {
       const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
       const resolved = path.join(currentDir, href).replace(/\\/g, "/")
-      href = `/articles/${resolved}`
+      href = `/articles/${resolved.split("/").map(encodeURIComponent).join("/")}`
     }
     return href
   }
@@ -396,48 +162,57 @@ export function getMarkdownComponents(rawPath: string) {
     children,
     ...props
   }: MarkdownComponentProps) {
-    const match = /language-(\w+)/.exec((className as string) || "")
-    if (!match) {
-      const isLinked = props["data-linked-code"] === "true"
-      const hasLink = props["data-has-link"] === "true"
-      if (isLinked) {
-        const { "data-linked-code": _linkedCode, ...rest } = props
-        return (
-          <code
-            className="
-              mx-1 border border-b-2 border-tech-main/30 bg-tech-main/10 px-1
-              py-[0.05rem] font-mono text-[0.8em] text-tech-main not-italic
-              transition-colors
-              group-hover/lc:border-tech-main group-hover/lc:bg-tech-main/80
-              group-hover/lc:text-white
-            "
-            {...rest}>
-            {children}
-          </code>
-        )
-      }
-      if (hasLink) {
-        const { "data-has-link": _hasLink, ...rest } = props
-        return (
-          <code className="font-mono text-[0.8em] not-italic" {...rest}>
-            {children}
-          </code>
-        )
-      }
+    const isLinked = props["data-linked-code"] === "true"
+    const hasLink = props["data-has-link"] === "true"
+    if (isLinked) {
+      const { "data-linked-code": _linkedCode, ...rest } = props
       return (
         <code
           className="
-            mx-1 border border-tech-main/30 bg-tech-main/10 px-1 py-[0.05rem]
-            font-mono text-[0.8em] text-tech-main not-italic
+            mx-1 border border-b-2 border-tech-main/30 bg-tech-main/10 px-1
+            py-[0.05rem] font-mono text-[0.8em] text-tech-main not-italic
+            transition-colors
+            group-hover/lc:border-tech-main group-hover/lc:bg-tech-main/80
+            group-hover/lc:text-white
           "
-          {...props}>
+          {...rest}>
           {children}
         </code>
       )
     }
+    if (hasLink) {
+      const { "data-has-link": _hasLink, ...rest } = props
+      return (
+        <code className="font-mono text-[0.8em] not-italic" {...rest}>
+          {children}
+        </code>
+      )
+    }
+    if ((className as string)?.startsWith("language-")) {
+      return (
+        <code className={className as string} {...props}>
+          {children}
+        </code>
+      )
+    }
+    return (
+      <code
+        className="
+          mx-1 border border-tech-main/30 bg-tech-main/10 px-1 py-[0.05rem]
+          font-mono text-[0.8em] text-tech-main not-italic
+        "
+        {...props}>
+        {children}
+      </code>
+    )
+  }
 
-    const lang = match[1]
-    const lineCount = String(children).split("\n").filter(Boolean).length
+  function preComponent({ children, ...props }: MarkdownComponentProps) {
+    const rawCode = props["data-raw-code"] as string | undefined
+    if (!rawCode) return <>{children}</>
+
+    const lang = (props["data-lang"] as string) || ""
+    const lineCount = (props["data-line-count"] as string) || "0"
 
     return (
       <div
@@ -487,7 +262,7 @@ export function getMarkdownComponents(rawPath: string) {
             ">
             <span>{lineCount} LINES</span>
             <span className="text-tech-main/50">|</span>
-            <span>SYS.CODE_BLOCK</span>
+            <CodeCopyButton code={rawCode} />
           </div>
         </div>
         <div className="relative">
@@ -512,22 +287,7 @@ export function getMarkdownComponents(rawPath: string) {
               sm:px-6
             ">
             <div className="px-0" dir="ltr">
-              <SyntaxHighlighter
-                style={solarizedlight as Record<string, Record<string, string>>}
-                language={lang}
-                PreTag="div"
-                customStyle={{
-                  margin: 0,
-                  padding: "1rem 0",
-                  background: "transparent",
-                  overflow: "visible",
-                }}
-                codeTagProps={{
-                  style: { background: "transparent" },
-                }}
-                {...props}>
-                {String(children).replace(/\n$/, "")}
-              </SyntaxHighlighter>
+              {children}
             </div>
           </div>
         </div>
@@ -716,10 +476,7 @@ export function getMarkdownComponents(rawPath: string) {
       />
     ),
     li: ({ ...props }: MarkdownComponentProps) => (
-      <li
-        className="relative text-slate-800"
-        {...props}
-      />
+      <li className="relative text-slate-800" {...props} />
     ),
     blockquote: ({ ...props }: MarkdownComponentProps) => (
       <blockquote
@@ -754,12 +511,15 @@ export function getMarkdownComponents(rawPath: string) {
         />
       )
     },
-    pre: ({ children }: MarkdownComponentProps) => <>{children}</>,
+    pre: preComponent,
     code: codeComponent,
   } as Record<string, MarkdownComponent>
 }
 
-export function getPluginsForContent(content: string) {
+export function getPluginsForContent(
+  content: string,
+  rehypeShikiPlugin?: Awaited<ReturnType<typeof createRehypeShiki>>
+) {
   const remarkPlugins: Array<
     typeof remarkGfm | typeof remarkMath | typeof remarkBreaks
   > = [remarkGfm, remarkBreaks]
@@ -769,6 +529,7 @@ export function getPluginsForContent(content: string) {
     | typeof rehypeSlug
     | typeof rehypeCJKSpacing
     | typeof rehypeLinkedCode
+    | Awaited<ReturnType<typeof createRehypeShiki>>
   > = [rehypeRaw, rehypeLinkedCode, rehypeSlug]
 
   if (
@@ -778,6 +539,10 @@ export function getPluginsForContent(content: string) {
   ) {
     remarkPlugins.push(remarkMath)
     rehypePlugins.splice(2, 0, rehypeKatex)
+  }
+
+  if (rehypeShikiPlugin) {
+    rehypePlugins.push(rehypeShikiPlugin)
   }
 
   rehypePlugins.push(rehypeCJKSpacing)

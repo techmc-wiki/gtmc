@@ -3,8 +3,15 @@
 import { revalidatePath } from "next/cache"
 
 import { revalidatePaths } from "@/lib/revalidation"
-import { resolveDraftSyncConflict } from "@/lib/article-submission"
-import { abortRebase } from "@/lib/article-rebase"
+import {
+  resolveDraftSyncConflict,
+  upsertFileOnBranch,
+} from "@/lib/article-submission"
+import {
+  abortRebase,
+  rebaseArticleContent,
+  resumeRebase,
+} from "@/lib/article-rebase"
 import { getTokenFromSession, requireAuth } from "@/lib/auth-helpers"
 import { formatErrorMessage } from "@/lib/error-handling"
 import {
@@ -13,6 +20,7 @@ import {
   getOctokit,
 } from "@/lib/github-pr"
 import { prisma } from "@/lib/prisma"
+import type { RebaseState } from "@/types/rebase"
 
 const owner = ARTICLES_REPO_OWNER
 const repo = ARTICLES_REPO_NAME
@@ -77,9 +85,11 @@ export async function resolveConflictAction(
     throw new Error("Resolved content is required")
   }
 
-  const linkedDraft = await prisma.revision.findFirst({
+  const linkedDraft = (await (prisma.revision as any).findFirst({
     where: { githubPrNum: prNumber },
-  })
+  })) as Awaited<ReturnType<typeof prisma.revision.findFirst>> & {
+    rebaseState?: unknown
+  }
 
   if (!linkedDraft) {
     throw new Error("Linked draft not found")
@@ -92,6 +102,59 @@ export async function resolveConflictAction(
   const token = getTokenFromSession(session)
   const authorName = session.user.name || "GTMC Admin"
   const authorEmail = session.user.email || "admin@gtmc.dev"
+
+  const rebaseState = linkedDraft.rebaseState as RebaseState | null
+
+  if (rebaseState?.status === "CONFLICT") {
+    const result = await resumeRebase({
+      draftId: linkedDraft.id,
+      resolvedContent: content,
+      token,
+    })
+
+    if (result.status === "SUCCESS") {
+      await upsertFileOnBranch({
+        authorEmail,
+        authorName,
+        branchName: linkedDraft.prBranchName,
+        content: result.finalContent,
+        filePath: linkedDraft.filePath,
+        message: `docs: apply rebase for ${linkedDraft.title}`,
+        token,
+      })
+      await (prisma.revision as any).update({
+        where: { id: linkedDraft.id },
+        data: {
+          status: "IN_REVIEW",
+          conflictContent: null,
+          content: result.finalContent,
+          rebaseState: {
+            ...rebaseState,
+            status: "COMPLETED",
+            resolvedContent: result.finalContent,
+          },
+        },
+      })
+    } else if (result.status === "CONFLICT") {
+      await prisma.revision.update({
+        where: { id: linkedDraft.id },
+        data: {
+          conflictContent: result.conflictContent,
+        },
+      })
+    } else {
+      throw new Error(formatErrorMessage("Resume rebase failed", result))
+    }
+
+    revalidatePaths([
+      "/draft",
+      `/draft/${linkedDraft.id}`,
+      "/review",
+      `/review/${prNumber}`,
+    ])
+
+    return { success: true, status: result.status }
+  }
 
   const result = await resolveDraftSyncConflict({
     authorEmail,
@@ -122,6 +185,81 @@ export async function resolveConflictAction(
     "/review",
     `/review/${prNumber}`,
   ])
+
+  return { success: true, status: result.status }
+}
+
+export async function submitWithRebaseAction(revisionId: string) {
+  const session = await requireAuth()
+  if (session.user.role !== "ADMIN") {
+    throw new Error("Unauthorized")
+  }
+
+  const token = getTokenFromSession(session)
+  const authorName = session.user.name || "GTMC Admin"
+  const authorEmail = session.user.email || "admin@gtmc.dev"
+
+  const revision = await prisma.revision.findUnique({
+    where: { id: revisionId },
+  })
+
+  if (!revision) {
+    throw new Error("Revision not found")
+  }
+
+  if (!revision.filePath || !revision.prBranchName) {
+    throw new Error("The revision is missing PR metadata")
+  }
+
+  if (!revision.baseMainSha || !revision.syncedMainSha) {
+    throw new Error("The revision is missing main SHA metadata")
+  }
+
+  const result = await rebaseArticleContent({
+    draftId: revisionId,
+    filePath: revision.filePath,
+    baseMainSha: revision.baseMainSha,
+    latestMainSha: revision.syncedMainSha,
+    draftContent: revision.content,
+    token,
+  })
+
+  if (result.status === "SUCCESS") {
+    await upsertFileOnBranch({
+      authorEmail,
+      authorName,
+      branchName: revision.prBranchName,
+      content: result.finalContent,
+      filePath: revision.filePath,
+      message: `docs: apply fine-grained rebase for ${revision.title}`,
+      token,
+    })
+    await prisma.revision.update({
+      where: { id: revisionId },
+      data: {
+        status: "IN_REVIEW",
+        conflictContent: null,
+        content: result.finalContent,
+      },
+    })
+  } else if (result.status === "CONFLICT") {
+    await prisma.revision.update({
+      where: { id: revisionId },
+      data: {
+        status: "SYNC_CONFLICT",
+        conflictContent: result.conflictContent,
+      },
+    })
+  }
+
+  revalidatePaths(
+    [
+      "/draft",
+      `/draft/${revisionId}`,
+      "/review",
+      revision.githubPrNum ? `/review/${revision.githubPrNum}` : "",
+    ].filter(Boolean)
+  )
 
   return { success: true, status: result.status }
 }

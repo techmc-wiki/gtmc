@@ -5,6 +5,8 @@ import {
   ARTICLES_REPO_OWNER,
   getOctokit,
 } from "@/lib/github-pr"
+import { analyzeRebaseNeed } from "@/lib/article-rebase"
+import type { RebaseAnalysis } from "@/lib/article-rebase"
 
 const MAIN_BRANCH = "main"
 
@@ -46,6 +48,7 @@ export interface DraftSyncResult {
   prUrl: string
   status: DraftSyncStatus
   syncedMainSha: string
+  rebaseAnalysis?: RebaseAnalysis
 }
 
 export async function getMainBranchHeadSha(token?: string) {
@@ -146,6 +149,13 @@ export async function openDraftPullRequest({
     }
   }
 
+  const rebaseAnalysis = await analyzeRebaseNeed({
+    filePath: resolvedFilePath,
+    baseMainSha,
+    latestMainSha,
+    token,
+  })
+
   const baseSnapshot = await getFileSnapshot(
     resolvedFilePath,
     baseMainSha,
@@ -172,6 +182,7 @@ export async function openDraftPullRequest({
       prUrl: pr.html_url,
       status: "SYNC_CONFLICT",
       syncedMainSha: latestMainSha,
+      rebaseAnalysis,
     }
   }
 
@@ -196,6 +207,7 @@ export async function openDraftPullRequest({
     prUrl: pr.html_url,
     status: "IN_REVIEW",
     syncedMainSha: latestMainSha,
+    rebaseAnalysis,
   }
 }
 
@@ -351,7 +363,7 @@ async function getFileSnapshot(filePath: string, ref: string, token?: string) {
   }
 }
 
-async function upsertFileOnBranch({
+export async function upsertFileOnBranch({
   authorEmail,
   authorName,
   branchName,

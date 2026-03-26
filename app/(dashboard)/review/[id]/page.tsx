@@ -12,9 +12,14 @@ import {
   ARTICLES_REPO_OWNER,
   ARTICLES_REPO_NAME,
 } from "@/lib/github-pr"
-import { mergePRAction, closePRAction } from "@/actions/review"
+import {
+  mergePRAction,
+  closePRAction,
+  submitWithRebaseAction,
+} from "@/actions/review"
 import { prisma } from "@/lib/prisma"
 import type { RebaseState } from "@/types/rebase"
+import type { RebaseAnalysis } from "@/lib/article-rebase"
 import ConflictResolver from "./components/conflict-resolver"
 
 const owner = ARTICLES_REPO_OWNER
@@ -41,7 +46,7 @@ export default async function ReviewDetailPage({
   )
   const octokit = getOctokit(token)
 
-  let pr
+  let pr: Awaited<ReturnType<typeof octokit.pulls.get>>["data"]
   try {
     pr = (await octokit.pulls.get({ owner, repo, pull_number: prNumber })).data
   } catch {
@@ -55,9 +60,11 @@ export default async function ReviewDetailPage({
     pull_number: prNumber,
   })
   const mainFile = files.find((f) => f.filename.endsWith(".md")) || files[0]
-  const linkedDraft = await prisma.revision.findFirst({
+  const linkedDraft = (await (prisma.revision as any).findFirst({
     where: { githubPrNum: prNumber },
-  })
+  })) as Awaited<ReturnType<typeof prisma.revision.findFirst>> & {
+    rebaseState?: unknown
+  }
 
   let rawContent = ""
   if (mainFile) {
@@ -84,6 +91,25 @@ export default async function ReviewDetailPage({
     shikiPlugin
   )
   const hasConflict = pr.mergeable === false
+
+  let rebaseAnalysis: RebaseAnalysis | null = null
+  const rebaseState = linkedDraft?.rebaseState as RebaseState | null
+  const isInReview =
+    linkedDraft?.status === "IN_REVIEW" && !hasConflict && !rebaseState
+  if (
+    isInReview &&
+    linkedDraft?.baseMainSha &&
+    linkedDraft?.syncedMainSha &&
+    linkedDraft.baseMainSha !== linkedDraft.syncedMainSha
+  ) {
+    const { analyzeRebaseNeed } = await import("@/lib/article-rebase")
+    rebaseAnalysis = await analyzeRebaseNeed({
+      filePath: linkedDraft.filePath || mainFile?.filename || "",
+      baseMainSha: linkedDraft.baseMainSha,
+      latestMainSha: linkedDraft.syncedMainSha,
+      token,
+    })
+  }
 
   return (
     <div
@@ -183,6 +209,42 @@ export default async function ReviewDetailPage({
           </div>
         )}
       </div>
+
+      {rebaseAnalysis?.recommendation === "REBASE_RECOMMENDED" &&
+        linkedDraft?.id && (
+          <div
+            className="
+              flex flex-col gap-4 border border-yellow-500/50 bg-yellow-500/10
+              p-4 font-mono text-sm text-tech-main-dark
+            ">
+            <div className="flex items-start gap-2">
+              <span className="font-bold text-yellow-600">
+                REBASE_ADVISORY:
+              </span>
+              <span>{rebaseAnalysis.adminMessage}</span>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <form
+                action={async () => {
+                  "use server"
+                  await submitWithRebaseAction(linkedDraft.id)
+                }}>
+                <BrutalButton type="submit" variant="primary" size="sm">
+                  FINE-GRAINED_REBASE
+                </BrutalButton>
+              </form>
+              <form
+                action={async () => {
+                  "use server"
+                  await mergePRAction(prNumber)
+                }}>
+                <BrutalButton type="submit" variant="secondary" size="sm">
+                  QUICK_MERGE
+                </BrutalButton>
+              </form>
+            </div>
+          </div>
+        )}
 
       {hasConflict || linkedDraft?.status === "SYNC_CONFLICT" ? (
         <ConflictResolver

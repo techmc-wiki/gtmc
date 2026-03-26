@@ -68,6 +68,9 @@ importers:
       next-auth:
         specifier: 5.0.0-beta.30
         version: 5.0.0-beta.30(next@16.2.1(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+      node-diff3:
+        specifier: ^3.2.0
+        version: 3.2.0
       pangu:
         specifier: ^7.2.1
         version: 7.2.1
@@ -3455,6 +3458,10 @@ packages:
         optional: true
       sass:
         optional: true
+
+  node-diff3@3.2.0:
+    resolution: {integrity: sha512-vLh2xJFSyniBLYDEDbXKqD32fQ5vAxmYT4hco8t0EHQ4CQ4BDHhshi7kdvDc6Y1MwGSi1Mhl4unUukPbCayZdw==}
+    engines: {bun: '>=1.3.0', node: '>=18'}
 
   node-exports-info@1.6.0:
     resolution: {integrity: sha512-pyFS63ptit/P5WqUkt+UUfe+4oevH+bFeIiPPdfb0pFeYEu/1ELnJu5l+5EcTKYL5M7zaAa7S8ddywgXypqKCw==}
@@ -8502,6 +8509,8 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
+
+  node-diff3@3.2.0: {}
 
   node-exports-info@1.6.0:
     dependencies:

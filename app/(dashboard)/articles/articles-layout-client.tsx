@@ -241,7 +241,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           aria-label="Toggle article tree"
           aria-expanded={isOpen}
           data-testid="mobile-tree-toggle">
-          <span className="
+          <span
+            className="
             font-mono text-xs font-bold tracking-[0.15em] uppercase
           ">
             TREE
@@ -251,27 +252,25 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           </span>
         </button>
 
-        {!isFloating && (
-          <div
-            className={`
-              grid transition-all duration-300 ease-out
-              ${
-                isOpen
-                  ? "grid-rows-[1fr] opacity-100"
-                  : "grid-rows-[0fr] opacity-0"
-              }
-            `}>
-            <div className="overflow-hidden">
-              <div
-                className="
-                  max-h-[calc(100vh-12rem)] overflow-y-auto overscroll-contain
-                  border-t guide-line px-4 pt-3 pb-4
-                ">
-                {treeContent}
-              </div>
+        <div
+          className={`
+            grid transition-all duration-300 ease-out
+            ${
+              isOpen && !isFloating
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0"
+            }
+          `}>
+          <div className="overflow-hidden">
+            <div
+              className="
+                max-h-[calc(100vh-12rem)] overflow-y-auto overscroll-contain
+                border-t guide-line px-4 pt-3 pb-4
+              ">
+              {treeContent}
             </div>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Mobile floating trigger (appears after scroll) */}

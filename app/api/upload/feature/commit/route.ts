@@ -49,7 +49,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid blob URL" }, { status: 400 })
     }
 
-    const blobResponse = await fetch(blobUrl, { redirect: "error" })
+    const safeBlobUrl = parsedUrl.toString()
+
+    const blobResponse = await fetch(safeBlobUrl, { redirect: "error" })
     if (!blobResponse.ok) {
       return NextResponse.json(
         { error: "Failed to fetch uploaded file" },

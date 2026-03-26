@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { Prisma } from "@prisma/client"
 
 import { revalidatePaths } from "@/lib/revalidation"
 import {
@@ -85,11 +86,9 @@ export async function resolveConflictAction(
     throw new Error("Resolved content is required")
   }
 
-  const linkedDraft = (await (prisma.revision as any).findFirst({
+  const linkedDraft = await prisma.revision.findFirst({
     where: { githubPrNum: prNumber },
-  })) as Awaited<ReturnType<typeof prisma.revision.findFirst>> & {
-    rebaseState?: unknown
-  }
+  })
 
   if (!linkedDraft) {
     throw new Error("Linked draft not found")
@@ -122,7 +121,7 @@ export async function resolveConflictAction(
         message: `docs: apply rebase for ${linkedDraft.title}`,
         token,
       })
-      await (prisma.revision as any).update({
+      await prisma.revision.update({
         where: { id: linkedDraft.id },
         data: {
           status: "IN_REVIEW",
@@ -132,7 +131,7 @@ export async function resolveConflictAction(
             ...rebaseState,
             status: "COMPLETED",
             resolvedContent: result.finalContent,
-          },
+          } as unknown as Prisma.InputJsonValue,
         },
       })
     } else if (result.status === "CONFLICT") {
@@ -341,13 +340,13 @@ export async function keepFileAction(revisionId: string) {
     token,
   })
 
-  await (prisma.revision as any).update({
+  await prisma.revision.update({
     where: { id: revisionId },
     data: {
       status: "IN_REVIEW",
       conflictContent: null,
-      rebaseState: null,
-    } as any,
+      rebaseState: Prisma.DbNull,
+    },
   })
 
   revalidatePaths(

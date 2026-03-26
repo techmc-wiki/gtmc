@@ -1,4 +1,4 @@
-// @ts-ignore Bun provides this module in test runtime.
+// @ts-expect-error Bun provides this module in test runtime.
 import { describe, expect, it, beforeEach, mock } from "bun:test"
 
 const mockCompareCommits = mock()
@@ -127,7 +127,7 @@ describe("rebaseArticleContent", () => {
       c1: "line1\nline2",
       c2: "line1\nline2\nline3",
     }
-    mockGetContent.mockImplementation(async ({ ref }: any) => ({
+    mockGetContent.mockImplementation(async ({ ref }: { ref: string }) => ({
       data: {
         type: "file",
         content: Buffer.from(contentMap[ref] || "").toString("base64"),
@@ -180,7 +180,7 @@ describe("rebaseArticleContent", () => {
       c1: "line1\nline2",
       c2: "line1\nline2\nline3",
     }
-    mockGetContent.mockImplementation(async ({ ref }: any) => ({
+    mockGetContent.mockImplementation(async ({ ref }: { ref: string }) => ({
       data: {
         type: "file",
         content: Buffer.from(contentMap[ref] || "").toString("base64"),
@@ -231,12 +231,15 @@ describe("rebaseArticleContent", () => {
       },
     }))
 
-    const commitMap: Record<string, any> = {
+    const commitMap: Record<
+      string,
+      { data: { files: { filename: string }[] } }
+    > = {
       c1: { data: { files: [{ filename: "other.md" }] } },
       c2: { data: { files: [{ filename: "test.md" }] } },
       c3: { data: { files: [{ filename: "another.md" }] } },
     }
-    mockGetCommit.mockImplementation(async ({ ref }: any) => {
+    mockGetCommit.mockImplementation(async ({ ref }: { ref: string }) => {
       return commitMap[ref] || { data: { files: [] } }
     })
 
@@ -244,7 +247,7 @@ describe("rebaseArticleContent", () => {
       abc: "base",
       c2: "base\nupdated",
     }
-    mockGetContent.mockImplementation(async ({ ref }: any) => ({
+    mockGetContent.mockImplementation(async ({ ref }: { ref: string }) => ({
       data: {
         type: "file",
         content: Buffer.from(contentMap[ref] || "").toString("base64"),
@@ -286,7 +289,7 @@ describe("rebaseArticleContent", () => {
       data: { files: [{ filename: "test.md" }] },
     }))
 
-    mockGetContent.mockImplementation(async ({ ref }: any) => {
+    mockGetContent.mockImplementation(async ({ ref }: { ref: string }) => {
       if (ref === "abc") {
         return {
           data: {
@@ -398,7 +401,7 @@ describe("analyzeRebaseNeed", () => {
       c4: ["other.md"],
       c5: ["another.md"],
     }
-    mockGetCommit.mockImplementation(async ({ ref }: any) => ({
+    mockGetCommit.mockImplementation(async ({ ref }: { ref: string }) => ({
       data: {
         files: (commitFileMap[ref] || []).map((filename) => ({ filename })),
       },
@@ -461,7 +464,7 @@ describe("analyzeRebaseNeed", () => {
       c1: ["test.md"],
       c2: ["other.md"],
     }
-    mockGetCommit.mockImplementation(async ({ ref }: any) => ({
+    mockGetCommit.mockImplementation(async ({ ref }: { ref: string }) => ({
       data: {
         files: (commitFileMap[ref] || []).map((filename) => ({ filename })),
       },
@@ -585,7 +588,7 @@ describe("resumeRebase", () => {
       },
     }))
 
-    mockGetContent.mockImplementation(async ({ ref }: any) => {
+    mockGetContent.mockImplementation(async ({ ref }: { ref: string }) => {
       const contentMap: Record<string, string> = {
         c1: "resolved",
         c2: "resolved\nnext",

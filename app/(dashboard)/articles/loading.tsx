@@ -59,7 +59,11 @@ export default function ArticlesLoading() {
             <SegmentedBar opacity="high" className="h-10 w-44" />
           </SectionFrame>
 
-          <SectionFrame className="relative min-h-[50vh] animate-tech-slide-in [animation-delay:100ms]">
+          <SectionFrame
+            className="
+              relative min-h-[50vh] animate-tech-slide-in
+              [animation-delay:100ms]
+            ">
             <ScanConfirmOverlay className="opacity-50" />
             <SectionRail label="ARTICLE_BUFFER" className="mb-4" />
             <SegmentedBar opacity="high" className="mb-3 h-7 w-2/3" />

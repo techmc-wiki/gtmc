@@ -136,7 +136,11 @@ export default function ConflictResolver({
   if (conflictType === "FILE_DELETED") {
     return (
       <div className="space-y-4">
-        <div className="border-l-4 border-red-600 bg-red-600/10 p-4 text-red-700 flex flex-col gap-2">
+        <div
+          className="
+            flex flex-col gap-2 border-l-4 border-red-600 bg-red-600/10 p-4
+            text-red-700
+          ">
           <p className="font-bold tracking-widest uppercase">
             File Deletion Conflict
           </p>
@@ -146,7 +150,11 @@ export default function ConflictResolver({
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div
+          className="
+            flex flex-col gap-4
+            sm:flex-row
+          ">
           <BrutalButton
             type="button"
             variant="primary"
@@ -175,7 +183,10 @@ export default function ConflictResolver({
                 )
               }
             }}
-            className="flex-1 border-red-600 text-red-600 hover:bg-red-600 hover:text-white">
+            className="
+              flex-1 border-red-600 text-red-600
+              hover:bg-red-600 hover:text-white
+            ">
             ACCEPT DELETION
           </BrutalButton>
         </div>
@@ -187,7 +198,9 @@ export default function ConflictResolver({
     <div className="space-y-4">
       <div
         className="
-          border-l-4 border-amber-500 bg-amber-500/10 p-4 text-amber-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4
+          flex flex-col justify-between gap-4 border-l-4 border-amber-500
+          bg-amber-500/10 p-4 text-amber-700
+          sm:flex-row sm:items-center
         ">
         <div>
           <p className="font-bold tracking-widest uppercase">
@@ -200,7 +213,7 @@ export default function ConflictResolver({
           </p>
           {rebaseState?.status === "CONFLICT" &&
             rebaseState.commitInfos[rebaseState.currentCommitIndex] && (
-              <p className="text-xs mt-1 opacity-80">
+              <p className="mt-1 text-xs opacity-80">
                 Conflict in:{" "}
                 <span className="font-mono">
                   {
@@ -222,56 +235,100 @@ export default function ConflictResolver({
               size="sm"
               onClick={handleAbort}
               disabled={isAborting}
-              className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white flex-shrink-0">
+              className="
+                shrink-0 border-red-600 text-red-600
+                hover:bg-red-600 hover:text-white
+              ">
               {isAborting ? "ABORTING..." : "ABORT REBASE"}
             </BrutalButton>
           )}
       </div>
 
-      <div className="space-y-2 mb-8 border border-tech-main/30 bg-tech-main/5 p-2">
+      <div
+        className="mb-8 space-y-2 border border-tech-main/30 bg-tech-main/5 p-2">
         {blocks.map((block) => (
           <div key={block.id}>
             {block.type === "ok" ? (
-              <pre className="p-4 font-mono text-sm whitespace-pre-wrap text-tech-main-dark opacity-70">
+              <pre
+                className="
+                  p-4 font-mono text-sm whitespace-pre-wrap text-tech-main-dark
+                  opacity-70
+                ">
                 {block.content}
               </pre>
             ) : (
-              <div className="border border-red-500/50 my-4 flex flex-col">
-                <div className="bg-red-500/10 p-2 text-xs font-bold text-red-700 text-center tracking-widest uppercase border-b border-red-500/30">
+              <div className="my-4 flex flex-col border border-red-500/50">
+                <div
+                  className="
+                    border-b border-red-500/30 bg-red-500/10 p-2 text-center
+                    text-xs font-bold tracking-widest text-red-700 uppercase
+                  ">
                   Conflict Block
                 </div>
-                <div className="flex flex-col md:flex-row md:divide-x divide-red-500/30">
-                  <div className="flex-1 flex flex-col bg-amber-500/5">
-                    <div className="p-2 text-xs font-bold text-amber-700 bg-amber-500/10 border-b border-amber-500/20">
+                <div
+                  className="
+                    flex flex-col divide-red-500/30
+                    md:flex-row md:divide-x
+                  ">
+                  <div className="flex flex-1 flex-col bg-amber-500/5">
+                    <div
+                      className="
+                        border-b border-amber-500/20 bg-amber-500/10 p-2 text-xs
+                        font-bold text-amber-700
+                      ">
                       YOUR CHANGES (draft)
                     </div>
-                    <pre className="p-4 font-mono text-sm whitespace-pre-wrap overflow-x-auto">
+                    <pre
+                      className="
+                        overflow-x-auto p-4 font-mono text-sm
+                        whitespace-pre-wrap
+                      ">
                       {block.ours}
                     </pre>
-                    <div className="p-2 mt-auto border-t border-amber-500/20 bg-amber-500/5">
+                    <div
+                      className="
+                        mt-auto border-t border-amber-500/20 bg-amber-500/5 p-2
+                      ">
                       <BrutalButton
                         type="button"
                         variant="secondary"
                         size="sm"
-                        className="w-full text-amber-700 border-amber-500 hover:bg-amber-500 hover:text-amber-900"
+                        className="
+                          w-full border-amber-500 text-amber-700
+                          hover:bg-amber-500 hover:text-amber-900
+                        "
                         onClick={() => handleAcceptBlock(block.id, block.ours)}>
                         ACCEPT OURS
                       </BrutalButton>
                     </div>
                   </div>
-                  <div className="flex-1 flex flex-col bg-blue-500/5">
-                    <div className="p-2 text-xs font-bold text-blue-700 bg-blue-500/10 border-b border-blue-500/20">
+                  <div className="flex flex-1 flex-col bg-blue-500/5">
+                    <div
+                      className="
+                        border-b border-blue-500/20 bg-blue-500/10 p-2 text-xs
+                        font-bold text-blue-700
+                      ">
                       MAIN CHANGES
                     </div>
-                    <pre className="p-4 font-mono text-sm whitespace-pre-wrap overflow-x-auto">
+                    <pre
+                      className="
+                        overflow-x-auto p-4 font-mono text-sm
+                        whitespace-pre-wrap
+                      ">
                       {block.theirs}
                     </pre>
-                    <div className="p-2 mt-auto border-t border-blue-500/20 bg-blue-500/5">
+                    <div
+                      className="
+                        mt-auto border-t border-blue-500/20 bg-blue-500/5 p-2
+                      ">
                       <BrutalButton
                         type="button"
                         variant="secondary"
                         size="sm"
-                        className="w-full text-blue-700 border-blue-500 hover:bg-blue-500 hover:text-blue-900"
+                        className="
+                          w-full border-blue-500 text-blue-700
+                          hover:bg-blue-500 hover:text-blue-900
+                        "
                         onClick={() =>
                           handleAcceptBlock(block.id, block.theirs)
                         }>
@@ -290,7 +347,10 @@ export default function ConflictResolver({
         <input type="hidden" name="filePath" value={filePath} />
 
         <div className="mt-8 border-t border-tech-main/30 pt-4">
-          <h3 className="font-mono text-sm font-bold tracking-widest uppercase mb-2">
+          <h3
+            className="
+              mb-2 font-mono text-sm font-bold tracking-widest uppercase
+            ">
             Raw Editor Fallback
           </h3>
           <div
@@ -303,8 +363,8 @@ export default function ConflictResolver({
               value={content}
               onChange={(event) => setContent(event.target.value)}
               className="
-                min-h-[300px] w-full resize-y bg-transparent p-4 font-mono text-sm
-                text-tech-main-dark outline-none
+                min-h-[300px] w-full resize-y bg-transparent p-4 font-mono
+                text-sm text-tech-main-dark outline-none
               "
             />
           </div>

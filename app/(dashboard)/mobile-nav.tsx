@@ -62,10 +62,12 @@ export function MobileNav({ navLinks }: MobileNavProps) {
             {isDrawerOpen && (
               <div
                 className="
-                   fixed top-16 left-0 z-40 h-[calc(100vh-4rem)] supports-[height:100dvh]:h-[calc(100dvh-4rem)] w-screen supports-[width:100dvw]:w-dvw
-                   bg-tech-main-dark/20 backdrop-blur-xs
-                   md:hidden
-                 "
+                  fixed top-16 left-0 z-40 h-[calc(100vh-4rem)] w-screen
+                  bg-tech-main-dark/20 backdrop-blur-xs
+                  supports-[height:100dvh]:h-[calc(100dvh-4rem)]
+                  supports-[width:100dvw]:w-dvw
+                  md:hidden
+                "
                 onClick={() => setIsDrawerOpen(false)}
                 aria-hidden="true"
               />

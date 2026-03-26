@@ -21,7 +21,7 @@ export async function getArticleContent(
     const localPath = path.join(ARTICLES_DIR, filePath)
     try {
       return fs.readFileSync(localPath, "utf-8")
-    } catch (error) {
+    } catch {
       if (process.env.NODE_ENV === "development") {
         console.warn(
           `[article-loader] File not in submodule: ${filePath}, falling back to API`
@@ -39,7 +39,7 @@ export async function getArticleTree(): Promise<RepoTreeNode[]> {
   if (isSubmoduleAvailable()) {
     try {
       return buildLocalTree(ARTICLES_DIR)
-    } catch (error) {
+    } catch {
       if (process.env.NODE_ENV === "development") {
         console.warn(
           "[article-loader] Failed to build local tree, falling back to API"
@@ -121,7 +121,7 @@ export async function getArticleBuffer(
     const localPath = path.join(ARTICLES_DIR, filePath)
     try {
       return fs.readFileSync(localPath)
-    } catch (error) {
+    } catch {
       if (process.env.NODE_ENV === "development") {
         console.warn(
           `[article-loader] Buffer not in submodule: ${filePath}, falling back to API`

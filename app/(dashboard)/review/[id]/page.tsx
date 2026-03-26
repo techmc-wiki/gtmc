@@ -5,7 +5,7 @@ import "katex/dist/katex.min.css"
 import Link from "next/link"
 import { BrutalButton } from "@/components/ui/brutal-button"
 import { getMarkdownComponents, getPluginsForContent } from "@/lib/markdown"
-import { createRehypeShiki } from "@/lib/rehype-shiki"
+import { getCachedRehypeShiki } from "@/lib/rehype-shiki"
 import {
   getGitHubWriteToken,
   getOctokit,
@@ -60,11 +60,9 @@ export default async function ReviewDetailPage({
     pull_number: prNumber,
   })
   const mainFile = files.find((f) => f.filename.endsWith(".md")) || files[0]
-  const linkedDraft = (await (prisma.revision as any).findFirst({
+  const linkedDraft = await prisma.revision.findFirst({
     where: { githubPrNum: prNumber },
-  })) as Awaited<ReturnType<typeof prisma.revision.findFirst>> & {
-    rebaseState?: unknown
-  }
+  })
 
   let rawContent = ""
   if (mainFile) {
@@ -85,7 +83,7 @@ export default async function ReviewDetailPage({
   }
 
   const isMergeable = pr.mergeable === true
-  const shikiPlugin = await createRehypeShiki()
+  const shikiPlugin = await getCachedRehypeShiki()
   const { remarkPlugins, rehypePlugins } = getPluginsForContent(
     rawContent,
     shikiPlugin

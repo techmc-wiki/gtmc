@@ -63,7 +63,7 @@ export function useHomepageMotion(): HomepageMotionValues {
 
     window.addEventListener("mousemove", handleMouseMove)
     return () => window.removeEventListener("mousemove", handleMouseMove)
-  }, [isMobile, reducedMotionQuery])
+  }, [isMobile, reducedMotionQuery, pointerX, pointerY, rawMouseX, rawMouseY])
 
   const smoothX = useSpring(pointerX, { damping: 20, stiffness: 300 })
   const smoothY = useSpring(pointerY, { damping: 20, stiffness: 300 })

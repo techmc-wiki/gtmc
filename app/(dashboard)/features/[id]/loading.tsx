@@ -124,7 +124,8 @@ export default function FeatureDetailLoading() {
           className="
             group relative flex w-full animate-tech-slide-in flex-col space-y-6
             border border-tech-main bg-white/80 p-4 backdrop-blur-sm
-            sm:p-6 [animation-delay:300ms]
+            [animation-delay:300ms]
+            sm:p-6
           ">
           <div
             className="

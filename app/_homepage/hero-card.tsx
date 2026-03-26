@@ -21,9 +21,12 @@ export function HeroCard({
     <motion.div
       ref={cardRef}
       className="
-        group relative mb-8 w-full max-w-3xl animate-tech-pop-in opacity-0
+        group relative mb-8 w-full max-w-sm animate-tech-pop-in opacity-0
         homepage-decor-foreground [animation-delay:0.2s]
         [animation-duration:0.8s] fill-mode-forwards
+        sm:max-w-xl
+        md:max-w-2xl
+        lg:max-w-4xl
       "
       style={{
         x: fgTransform.x,
@@ -106,10 +109,11 @@ export function HeroCard({
           ">
           <div
             className="
-              relative flex size-10 items-center justify-center border
+              relative flex size-6 items-center justify-center border
               border-tech-main/40 bg-tech-main/5 transition-transform
               duration-500
               group-hover:rotate-90
+              sm:size-10
             ">
             <div
               className="
@@ -120,7 +124,8 @@ export function HeroCard({
           </div>
           <h2
             className="
-              font-mono text-sm tracking-[0.3em] text-tech-main/80 uppercase
+              font-mono text-xs tracking-[0.3em] text-tech-main/80 uppercase
+              sm:text-sm
             ">
             Knowledge Base_
           </h2>
@@ -128,11 +133,10 @@ export function HeroCard({
 
         <h1
           className="
-            relative mb-6 flex flex-col items-start gap-2 text-3xl font-bold
+            relative mb-6 flex flex-col items-start gap-0 text-2xl font-bold
             tracking-tight text-tech-main-dark
-            sm:text-3xl
-            md:text-5xl
-            lg:text-6xl
+            sm:gap-2 sm:text-5xl
+            lg:text-7xl
           ">
           <span
             className="
@@ -145,7 +149,7 @@ export function HeroCard({
           <div className="flex flex-row">
             <span
               className="
-                inline-block animate-tech-slide-in font-bold text-tech-main
+                inline-block animate-tech-slide-in font-semibold text-tech-main
                 opacity-0 mix-blend-multiply [animation-delay:0.7s]
                 fill-mode-forwards
               ">
@@ -162,23 +166,52 @@ export function HeroCard({
 
         <div
           className="
-            ml-2 max-w-xl animate-fade-in border-l-[3px] border-tech-main/40
-            pl-5 text-base/relaxed tracking-wide text-tech-main-dark/80
-            opacity-0 [animation-delay:1.2s] [animation-duration:1s]
-            [animation-translate-y:20px] fill-mode-forwards
+            ml-2 flex max-w-xl animate-fade-in flex-col gap-2 border-l-[3px]
+            border-tech-main/40 pl-5 opacity-0 [animation-delay:1.2s]
+            [animation-duration:1s] [animation-translate-y:20px]
+            fill-mode-forwards
+            sm:gap-4
           ">
-          支持多人协作、内容审核与 Git 自动备份的 MC 资源与知识整合站点。
           <span
             className="
-              mt-2 flex items-center font-mono text-[11px] tracking-tech-wide
-              opacity-60
+              text-xs text-tech-main-dark/80
+              sm:text-base
+            ">
+            支持多人协作、内容审核与 Git 自动备份的 MC 资源与知识整合站点。
+          </span>
+
+          <span
+            className="
+              flex flex-row items-center gap-2
+              sm:gap-4
             ">
             <span
               className="
-                mr-3 ml-0.5 size-2 animate-pulse rounded-full bg-tech-main
+                hidden min-h-1.5 min-w-1.5 animate-pulse rounded-full
+                bg-tech-main
+                sm:min-h-2 sm:min-w-2
               "
             />
-            &gt;&gt; MODPACKS | MECHANICS | TUTORIALS
+            <span
+              className="
+                font-mono text-[8px] tracking-tech-wide opacity-60
+                sm:text-[12px]
+              ">
+              <span className="sm:hidden">
+                -&gt; TUTORIALS
+                <br />
+                -&gt; EXPLANATIONS
+                <br />
+                -&gt; CODE ANALYSIS
+              </span>
+              <span
+                className="
+                  hidden
+                  sm:inline
+                ">
+                &gt;&gt; TUTORIALS | EXPLANATIONS | CODE ANALYSIS
+              </span>
+            </span>
           </span>
         </div>
       </div>

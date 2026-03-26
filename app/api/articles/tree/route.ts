@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server"
 import { getSidebarTree } from "@/actions/sidebar"
-import { revalidateTag } from "next/cache"
 
 export async function GET() {
   try {
-    revalidateTag("github-repo-tree", {})
     const tree = await getSidebarTree()
     return NextResponse.json(tree, {
       headers: {

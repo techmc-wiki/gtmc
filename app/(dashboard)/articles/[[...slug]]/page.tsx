@@ -8,7 +8,7 @@ import {
   getMarkdownComponents,
   getPluginsForContent,
 } from "@/lib/markdown"
-import { createRehypeShiki } from "@/lib/rehype-shiki"
+import { getCachedRehypeShiki } from "@/lib/rehype-shiki"
 import { getArticleContent } from "@/lib/article-loader"
 
 interface ArticlePageProps {
@@ -75,7 +75,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   const { wordCount, readingTime } = calculateReadingMetrics(content)
-  const shikiPlugin = await createRehypeShiki()
+  const shikiPlugin = await getCachedRehypeShiki()
   const { remarkPlugins, rehypePlugins } = getPluginsForContent(
     content,
     shikiPlugin

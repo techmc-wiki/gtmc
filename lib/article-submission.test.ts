@@ -1,4 +1,4 @@
-// @ts-ignore Bun provides this module in test runtime.
+// @ts-expect-error Bun provides this module in test runtime.
 import { beforeEach, describe, expect, it, mock } from "bun:test"
 
 const mockGetRef = mock()

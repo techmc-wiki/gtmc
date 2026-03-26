@@ -1,7 +1,7 @@
 import ReactMarkdown from "react-markdown"
 import { BrutalCard } from "@/components/ui/brutal-card"
 import { getMarkdownComponents, getPluginsForContent } from "@/lib/markdown"
-import { createRehypeShiki } from "@/lib/rehype-shiki"
+import { getCachedRehypeShiki } from "@/lib/rehype-shiki"
 import "katex/dist/katex.min.css"
 
 interface FeatureReadonlyViewProps {
@@ -15,7 +15,7 @@ export async function FeatureReadonlyView({
   content,
   tags,
 }: FeatureReadonlyViewProps) {
-  const shikiPlugin = await createRehypeShiki()
+  const shikiPlugin = await getCachedRehypeShiki()
   const { remarkPlugins, rehypePlugins } = getPluginsForContent(
     content,
     shikiPlugin

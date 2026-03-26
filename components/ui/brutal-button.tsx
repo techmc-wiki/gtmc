@@ -5,7 +5,6 @@ export interface BrutalButtonProps extends React.ButtonHTMLAttributes<HTMLButton
   size?: "sm" | "md" | "lg"
 }
 
-// 注意: 文件名保留了 brutal-button 以防止到处修改引用，但视觉已完全重构为"科研网格/技术图纸"风格
 export const BrutalButton = React.forwardRef<
   HTMLButtonElement,
   BrutalButtonProps
@@ -27,13 +26,13 @@ export const BrutalButton = React.forwardRef<
 
   // Sizes: responsive touch targets (min 44px on mobile)
   if (size === "sm")
-    baseStyles += " px-3 py-2 sm:px-4 sm:py-1.5 text-xs sm:text-sm"
+    baseStyles += " px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm"
   else if (size === "md")
     baseStyles +=
-      " px-4 py-2.5 sm:px-6 sm:py-2 text-sm min-h-[44px] sm:min-h-auto"
+      " px-4 py-2.5 sm:px-6 sm:py-3 text-sm min-h-[44px] sm:min-h-auto"
   else if (size === "lg")
     baseStyles +=
-      " px-6 py-3 sm:px-8 sm:py-3 text-base min-h-[44px] sm:min-h-auto"
+      " px-6 py-3 sm:px-8 sm:py-4 text-base min-h-[44px] sm:min-h-auto"
 
   return (
     <button

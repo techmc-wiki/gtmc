@@ -37,6 +37,12 @@ const eslintConfig = defineConfig([
         project: true,
       },
     },
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { ignoreRestSiblings: true },
+      ],
+    },
   },
   {
     files: ["**/*.{jsx,tsx}"],

@@ -3,6 +3,7 @@ import {
   ARTICLES_REPO_OWNER,
   getOctokit,
 } from "@/lib/github-pr"
+import { Prisma } from "@prisma/client"
 import {
   getMergeLibrary,
   type MergeConflictBlock,
@@ -171,9 +172,9 @@ async function applyRebaseCommits(input: {
         currentCommitIndex: i,
         conflictedCommitSha: commit.sha,
       }
-      await (prisma.revision as any).update({
+      await prisma.revision.update({
         where: { id: draftId },
-        data: { rebaseState: deletedState } as any,
+        data: { rebaseState: deletedState as unknown as Prisma.InputJsonValue },
       })
       return {
         status: "FILE_DELETED_CONFLICT",
@@ -209,8 +210,8 @@ async function applyRebaseCommits(input: {
       await prisma.revision.update({
         where: { id: draftId },
         data: {
-          rebaseState: conflictState,
-        } as any,
+          rebaseState: conflictState as unknown as Prisma.InputJsonValue,
+        },
       })
 
       return {
@@ -239,8 +240,8 @@ async function applyRebaseCommits(input: {
   await prisma.revision.update({
     where: { id: draftId },
     data: {
-      rebaseState: completedState,
-    } as any,
+      rebaseState: completedState as unknown as Prisma.InputJsonValue,
+    },
   })
 
   return {
@@ -303,8 +304,8 @@ export async function rebaseArticleContent(
   await prisma.revision.update({
     where: { id: draftId },
     data: {
-      rebaseState: initialState,
-    } as any,
+      rebaseState: initialState as unknown as Prisma.InputJsonValue,
+    },
   })
 
   return applyRebaseCommits({
@@ -322,7 +323,7 @@ export async function rebaseArticleContent(
 export async function abortRebase(
   input: AbortRebaseInput
 ): Promise<AbortRebaseOutcome> {
-  const revision = await (prisma.revision as any).findUnique({
+  const revision = await prisma.revision.findUnique({
     where: { id: input.draftId },
   })
 
@@ -337,15 +338,15 @@ export async function abortRebase(
 
   const originalContent = rebaseState.originalContent
 
-  await (prisma.revision as any).update({
+  await prisma.revision.update({
     where: { id: input.draftId },
     data: {
       content: originalContent,
       rebaseState: {
         ...rebaseState,
         status: "ABORTED",
-      },
-    } as any,
+      } as unknown as Prisma.InputJsonValue,
+    },
   })
 
   return { status: "ABORTED", originalContent }
@@ -354,7 +355,7 @@ export async function abortRebase(
 export async function resumeRebase(
   input: ResumeRebaseInput
 ): Promise<ResumeRebaseOutcome> {
-  const revision = await (prisma.revision as any).findUnique({
+  const revision = await prisma.revision.findUnique({
     where: { id: input.draftId },
   })
 

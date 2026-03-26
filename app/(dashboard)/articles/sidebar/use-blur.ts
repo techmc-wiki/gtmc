@@ -146,7 +146,6 @@ export function useBlur({
   useEffect(() => {
     if (!internalScroll) return
     syncForDuration(300)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     internalScroll,
     pathname,

@@ -76,25 +76,37 @@ export function LazyCodeBlock({
       />
       <div
         className="
-          pointer-events-none absolute right-0 bottom-0 z-20 size-3
-          translate-px border-r-2 border-b-2 border-tech-main/30
+          pointer-events-none absolute right-0 bottom-0 z-20 size-3 translate-px
+          border-r-2 border-b-2 border-tech-main/30
         "
       />
 
       <div
         className={
-          isVisible ? "animate-fade-in motion-reduce:animate-none" : "opacity-0"
+          isVisible
+            ? `
+              animate-fade-in
+              motion-reduce:animate-none
+            `
+            : "opacity-0"
         }>
         {children}
       </div>
 
       {!isSkeletonRemoved && (
         <div
-          className={`absolute inset-0 z-10 flex flex-col bg-tech-bg motion-reduce:transition-opacity motion-reduce:duration-250 ${
-            isVisible
-              ? "animate-skeleton-exit motion-reduce:opacity-0 motion-reduce:animate-none"
-              : ""
-          }`}
+          className={`
+            absolute inset-0 z-10 flex flex-col bg-tech-bg
+            motion-reduce:transition-opacity motion-reduce:duration-250
+            ${
+              isVisible
+                ? `
+                  animate-skeleton-exit
+                  motion-reduce:animate-none motion-reduce:opacity-0
+                `
+                : ""
+            }
+          `}
           onAnimationEnd={() => {
             if (isVisible) setIsSkeletonRemoved(true)
           }}
@@ -115,18 +127,26 @@ export function LazyCodeBlock({
             </div>
           </div>
 
-          <div className="relative flex-1 overflow-hidden px-4 py-3 sm:px-6">
+          <div
+            className="
+              relative flex-1 overflow-hidden px-4 py-3
+              sm:px-6
+            ">
             <div
               className="
                 pointer-events-none absolute inset-0 animate-blueprint-sweep
                 bg-linear-to-r from-transparent via-tech-accent/30
-                to-transparent motion-reduce:animate-none
+                to-transparent
+                motion-reduce:animate-none
               "
             />
             {Array.from({ length: numLines }).map((_, i) => (
               <div
                 key={String(i)}
-                className={`my-1.5 h-2 ${lineWidths[i % lineWidths.length]}`}
+                className={`
+                  my-1.5 h-2
+                  ${lineWidths[i % lineWidths.length]}
+                `}
               />
             ))}
           </div>
@@ -138,8 +158,8 @@ export function LazyCodeBlock({
             ">
             <span
               className="
-                select-none font-mono text-[9px] uppercase tracking-widest
-                text-tech-main/50
+                font-mono text-[9px] tracking-widest text-tech-main/50 uppercase
+                select-none
               ">
               {"//"} SYNTAX_HIGHLIGHT
             </span>

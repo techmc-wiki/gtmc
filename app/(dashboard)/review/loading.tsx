@@ -39,8 +39,7 @@ export default function ReviewLoading() {
         {/* PENDING_REVIEWS_ */}
         <div
           className="
-            flex animate-tech-slide-in flex-col gap-10
-            [animation-delay:100ms]
+            flex animate-tech-slide-in flex-col gap-10 [animation-delay:100ms]
           ">
           <div className="space-y-4">
             <h2
@@ -92,9 +91,7 @@ export default function ReviewLoading() {
                     <div className="ml-3">
                       <SegmentedBar
                         opacity="low"
-                        className="
-                          h-6 w-48 border guide-line bg-tech-main/5
-                        "
+                        className="h-6 w-48 border guide-line bg-tech-main/5"
                       />
                     </div>
                   </div>

@@ -332,8 +332,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
             <div className="flex shrink-0 flex-col">
               <div
                 className="
-                  group/title flex shrink-0 items-center justify-between border-b
-                  guide-line px-4 pb-2
+                  group/title flex shrink-0 items-center justify-between
+                  border-b guide-line px-4 pb-2
                 ">
                 <div
                   className="

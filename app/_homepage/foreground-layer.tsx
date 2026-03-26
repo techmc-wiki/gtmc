@@ -103,9 +103,8 @@ export function ForegroundLayer({
       </div>
 
       {/* 底部隐喻：MC典型的格子/合成槽堆叠图形列阵 */}
-      <div className="
-        pointer-events-none relative mt-12 flex space-x-1 opacity-40
-      ">
+      <div
+        className="pointer-events-none relative mt-12 flex space-x-1 opacity-40">
         <div className="absolute -top-4 font-mono text-[8px] text-tech-main/60">
           INVENTORY_SLOTS_
         </div>
@@ -114,12 +113,13 @@ export function ForegroundLayer({
             key={i}
             className={`
               flex size-8 items-center justify-center
-              ${i === 3
-                ? `
-                  border-2 border-tech-main-dark bg-tech-main/10
-                  shadow-[0_0_8px_rgba(96,112,143,0.3)]
-                `
-                : `border border-tech-main/40`
+              ${
+                i === 3
+                  ? `
+                    border-2 border-tech-main-dark bg-tech-main/10
+                    shadow-[0_0_8px_rgba(96,112,143,0.3)]
+                  `
+                  : `border border-tech-main/40`
               }
             `}>
             {i === 3 && (

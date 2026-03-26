@@ -34,7 +34,10 @@ export function DesktopNav({ navLinks }: DesktopNavProps) {
               ${
                 isActive
                   ? "border-tech-main text-tech-main"
-                  : "border-transparent text-tech-main-dark hover:border-tech-main hover:text-tech-main"
+                  : `
+                    border-transparent text-tech-main-dark
+                    hover:border-tech-main hover:text-tech-main
+                  `
               }
             `}>
             {link.label}

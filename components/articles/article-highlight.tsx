@@ -3,7 +3,10 @@
 import { useEffect, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 
-function performHighlight(query: string, containerSelector: string) {
+function performHighlight(
+  query: string,
+  containerSelector: string
+): (() => void) | undefined {
   const container = document.querySelector(containerSelector)
   if (!container) return
 
@@ -51,19 +54,24 @@ function performHighlight(query: string, containerSelector: string) {
 
   mark.scrollIntoView({ behavior: "smooth", block: "center" })
 
-  setTimeout(() => {
+  const t1 = setTimeout(() => {
     mark.style.backgroundColor = "transparent"
     mark.style.color = ""
     mark.style.padding = "0"
   }, 3600)
 
-  setTimeout(() => {
+  const t2 = setTimeout(() => {
     if (mark.parentNode) {
       const text = document.createTextNode(mark.textContent ?? "")
       mark.parentNode.replaceChild(text, mark)
       mark.parentNode?.normalize?.()
     }
   }, 6000)
+
+  return () => {
+    clearTimeout(t1)
+    clearTimeout(t2)
+  }
 }
 
 export function ArticleHighlight({
@@ -74,6 +82,7 @@ export function ArticleHighlight({
   const searchParams = useSearchParams()
   const highlightQuery = searchParams.get("highlight")
   const didHighlightRef = useRef(false)
+  const highlightCleanupRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     if (!highlightQuery || highlightQuery.trim().length < 2) return
@@ -82,7 +91,8 @@ export function ArticleHighlight({
     const timeout = setTimeout(() => {
       if (didHighlightRef.current) return
       didHighlightRef.current = true
-      performHighlight(highlightQuery.trim(), containerSelector)
+      highlightCleanupRef.current =
+        performHighlight(highlightQuery.trim(), containerSelector) ?? null
 
       const url = new URL(window.location.href)
       url.searchParams.delete("highlight")
@@ -91,6 +101,8 @@ export function ArticleHighlight({
 
     return () => {
       clearTimeout(timeout)
+      highlightCleanupRef.current?.()
+      highlightCleanupRef.current = null
     }
   }, [highlightQuery, containerSelector])
 

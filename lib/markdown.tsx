@@ -29,6 +29,10 @@ function isShortUppercase(text: string): boolean {
   return text.length >= 1 && text.length <= 6 && /^[A-Z]+$/.test(text)
 }
 
+function isPureNumeric(text: string): boolean {
+  return /^\d+$/.test(text)
+}
+
 function needsSpaceBetween(char1: string, char2: string): boolean {
   return (isCJK(char1) && isLatin(char2)) || (isLatin(char1) && isCJK(char2))
 }
@@ -61,7 +65,7 @@ function addSpaceBetweenCJKAndLatin(text: string): string {
           }
         }
 
-        if (!isShortUppercase(latinWord)) {
+        if (!isShortUppercase(latinWord) && !isPureNumeric(latinWord)) {
           parts.push(" ")
         }
       }
@@ -199,7 +203,12 @@ export function rehypeCJKSpacing() {
           const trailingWord = getTrailingLatinWord(current)
           const leadingWord = getLeadingLatinWord(next)
 
-          if (isShortUppercase(trailingWord) || isShortUppercase(leadingWord)) {
+          if (
+            isShortUppercase(trailingWord) ||
+            isShortUppercase(leadingWord) ||
+            isPureNumeric(trailingWord) ||
+            isPureNumeric(leadingWord)
+          ) {
             continue
           }
 

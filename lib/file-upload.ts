@@ -186,14 +186,6 @@ export function sanitizeFilename(
   return `${Date.now()}-${basename}.${ext}`
 }
 
-export function clipboardFilename(mimeType: string): string {
-  const ext = MIME_TO_EXT[mimeType] || "bin"
-  if (isImageMime(mimeType)) {
-    return `pasted-image-${Date.now()}.${ext}`
-  }
-  return `pasted-file-${Date.now()}.${ext}`
-}
-
 // ---------------------------------------------------------------------------
 // Markdown block generation
 // ---------------------------------------------------------------------------

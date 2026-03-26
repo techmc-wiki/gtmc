@@ -27,6 +27,15 @@ export function useScrollToActive({
   const folderGridRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const locatePendingRef = useRef(false)
   const pendingExpandIdsRef = useRef<string[]>([])
+  const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (highlightTimerRef.current !== null) {
+        clearTimeout(highlightTimerRef.current)
+      }
+    }
+  }, [])
 
   const getEffectivePathname = useCallback(() => {
     if (pathname === "/articles" || pathname === "/articles/" || pathname === "/") {
@@ -71,7 +80,13 @@ export function useScrollToActive({
       item.scrollIntoView({ block: "start", behavior: "smooth" })
     }
     setHighlightActive(true)
-    setTimeout(() => setHighlightActive(false), 2000)
+    if (highlightTimerRef.current !== null) {
+      clearTimeout(highlightTimerRef.current)
+    }
+    highlightTimerRef.current = setTimeout(() => {
+      setHighlightActive(false)
+      highlightTimerRef.current = null
+    }, 2000)
   }, [scrollContainerRef])
 
   const expandAndScroll = useCallback(

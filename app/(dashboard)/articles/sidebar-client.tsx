@@ -55,7 +55,7 @@ export function SidebarClient({
     e.preventDefault()
     setExpandedFolders(new Set())
     setIsFileExpanded(false)
-  }, [setExpandedFolders])
+  }, [setExpandedFolders, setIsFileExpanded])
 
   const {
     activeItemRef,

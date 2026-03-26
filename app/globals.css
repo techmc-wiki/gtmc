@@ -407,12 +407,12 @@ body {
   .absolute.hidden.lg\:block,
   .absolute.hidden.md\:block,
   .absolute.hidden.xl\:block {
-    display: none !important;
+    display: none;
   }
 
   .opacity-\[0\.03\],
   .opacity-\[0\.25\],
   .opacity-40 {
-    opacity: 0 !important;
+    opacity: 0;
   }
 }

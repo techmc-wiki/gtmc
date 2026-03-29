@@ -15,14 +15,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: "/cos-assets/:path*",
-        destination: `https://${process.env.COS_BUCKET}.cos.${process.env.COS_REGION}.myqcloud.com/:path*`,
-      },
-    ]
-  },
 }
 
 const config =

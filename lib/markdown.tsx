@@ -427,7 +427,7 @@ export function getMarkdownComponents(rawPath: string) {
     ),
     p: ({ ...props }: MarkdownComponentProps) => (
       <p
-        className="mb-4 font-mono text-base/relaxed text-slate-800"
+        className="mb-4 font-sans text-base/relaxed text-slate-800"
         {...props}
       />
     ),
@@ -435,7 +435,7 @@ export function getMarkdownComponents(rawPath: string) {
     ul: ({ ...props }: MarkdownComponentProps) => (
       <ul
         className="
-          mb-6 list-disc space-y-2 border-l border-tech-main/30 pl-8 font-mono
+          mb-6 list-disc space-y-2 border-l border-tech-main/30 pl-8 font-sans
           text-[14px] text-slate-800
         "
         {...props}
@@ -444,7 +444,7 @@ export function getMarkdownComponents(rawPath: string) {
     ol: ({ ...props }: MarkdownComponentProps) => (
       <ol
         className="
-          mb-6 list-decimal space-y-2 pl-8 font-mono text-[14px] text-slate-800
+          mb-6 list-decimal space-y-2 pl-8 font-sans text-[14px] text-slate-800
         "
         {...props}
       />
@@ -456,7 +456,7 @@ export function getMarkdownComponents(rawPath: string) {
       <blockquote
         className="
           mb-6 border-l-2 border-tech-main bg-tech-main/5 p-4 pb-[0.01]
-          font-mono text-slate-700 italic
+          font-sans text-slate-700 italic
         "
         {...props}
       />

@@ -1,41 +1,108 @@
 # Agents
 
-This document is for coding agents to follow when contributing to this repo.
+This document defines repository-specific conventions for coding agents.
 
-## Sisyphus
+## Sisyphus Agents
 
-If you are an Oh-my-Opencode agent (Sisyphus, Prometheus, Atlas, Hephaestus), please follow the following rules:
+If you are an Oh-my-Opencode agent (Sisyphus, Prometheus, Atlas, Hephaestus):
 
-1. Do not commit anything in the .sisyphus directory.
-2. .sisyphus is already added to .gitignore.
+1. Do not commit anything inside `.sisyphus/`.
+2. `.sisyphus/` is already in `.gitignore`.
+
+## Aesthetic Style
+
+The frontend follows a **technical blueprint / scientific drafting** aesthetic. Core characteristics:
+
+1. **Tech Flat visual language**: thin borders, low-saturation blue-gray tones, square primary controls, low-noise motion.
+   - References: `app/globals.css`, `components/ui/brutal-card.tsx`, `components/ui/brutal-button.tsx`
+2. **Unified theme variables**: prefer reusing `--color-tech-*` and `--font-*`; avoid ad-hoc hardcoded styles.
+   - Reference: `app/globals.css`
+3. **Technical decoration conventions**: corner brackets, grid backgrounds, monospace labels, subtle hover feedback.
+   - References: `components/ui/corner-brackets.tsx`, `components/ui/status-badge.tsx`
+4. **Responsive and touch-first**: mobile-first layouts with sufficient touch targets (e.g., 44px).
+   - References: `touch-target` in `app/globals.css`, `components/ui/brutal-button.tsx`
+
+## Code Standards
+
+1. **TypeScript strict mode**: follow `"strict": true` in `tsconfig.json`.
+2. **Formatting and static checks**: follow Prettier + ESLint (Next.js + TS + better-tailwindcss).
+   - `pnpm lint` runs `prettier --write .` and `eslint --fix` (it will rewrite files).
+3. **Naming conventions**:
+   - File names use kebab-case (e.g., `brutal-button.tsx`, `api-client.ts`)
+   - Types/interfaces/components use PascalCase (e.g., `BrutalButtonProps`)
+4. **Import conventions**: prefer the `@/*` path alias; use `import type` for type-only imports.
+5. **Error handling and type narrowing**: prefer explicit error types, type guards, and defensive checks.
+   - References: `lib/github/api-client.ts`, `app/api/articles/search/route.ts`
+6. **Frontend component conventions**: reusable UI components should prefer the `forwardRef` + `displayName` pattern.
+
+## Commit Labeling
+
+### 1) Format
+
+Use Conventional Commits style for commit titles:
+
+`<type>(<scope>): <subject>`
+
+- `<scope>` is optional (when scope is too broad or unclear)
+- `<subject>` should be imperative and start with a capital letter
+- Keep titles within 72 characters when possible
+
+### 2) Allowed `type` values
+
+- `feat`: new feature
+- `fix`: bug fix
+- `refactor`: code restructure (no new feature, no bug fix)
+- `docs`: documentation only
+- `style`: formatting/style-only changes (no semantic changes)
+- `chore`: build/scripts/dependency/general maintenance
+- `test`: test-related work
+- `perf`: performance optimization
+
+### 3) Align with repository history
+
+Recent history frequently uses `fix(scope): ...`, `feat(scope): ...`, and `chore(scope): ...`.
+Prefer including a scope (e.g., `sidebar`, `build`, `deps`, `api/*`) for traceability.
+
+### 4) Splitting principles
+
+1. Split large changes into multiple medium-sized commits.
+2. Each commit should be single-purpose and easily reversible.
+3. **Do not** mix articles submodule updates into feature/fix commits (see `CONTRIBUTING.md`).
+
+## Workflow
+
+1. **Initialization**
+   - `pnpm install`
+   - Triggers `postinstall`: `prisma generate`, articles submodule init/update, and slug-map generation.
+2. **Daily development**
+   - `pnpm dev` for local development
+   - `pnpm lint` for formatting/rules
+   - `pnpm build` for build validation
+3. **Articles submodule collaboration**
+   - Manage with `pnpm articles:init|update|status`
+   - Avoid updates unless needed; if updated, commit submodule changes separately
+4. **CI baseline (PR/Push)**
+   - Workflow runs install + lint + build
+   - Target branches: `main/master/develop`
 
 ## Git Rules
 
-1. If not otherwise specified, you are allowed to make commits.
-2. You are always **NOT** allowed to perform `git push` or `git pull`.
-3. Do not to create new branches or worktrees if not explicitly asked.
-4. Commit messages (titles) should follow the format of `<type>(<scope>): <subject>`. <scope> can be omitted if its too large or ambiguous. <subject> must be a full sentence, starts with a capital letter, and must begin with a verb. <type> should be one of the following:
-   - feat: a new feature for the user.
-   - fix: a bug fix for the user.
-   - refactor: a code change that neither fixes a bug nor adds a feature, but makes the code better in some way.
-   - docs: changes to documentation only.
-   - style: changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc.).
-   - chore: changes to the build process or auxiliary tools and libraries such as documentation generation.
-   - test: adding missing tests or correcting existing tests.
-   - perf: a code change that improves performance.
-   The whole commit message should not exceed 72 characters, since this triggers a new line in the commit message.
-5. If your edit / patch is very lengthy, split them to multiple commits.
-6. Commits should be splitted as a medium-sized meaningful unit. Therefore, you should not be overly fine-grained. Maximum revertability should be ensured.
-7. Do not worry if you found files or git commit hashes have changet while your are working. This might be caused by rebases. Do not attempt to revert these unexpected changes.
+1. If not otherwise specified, you may create commits.
+2. You must **NOT** run `git push` or `git pull`.
+3. Do not create new branches or worktrees unless explicitly asked.
+4. If your patch is very large, split it into multiple meaningful commits.
+5. Keep commits medium-sized and maximally reversible.
+6. If files/commit hashes changed unexpectedly (e.g., rebase), do not force-revert unrelated changes.
 
 ## Testing
 
-1. Do not add, propose, or even waste time on thinking about tests if not explicitly asked.
-2. Tests will always be prompted as isolated tasks.
-3. You are always allowed to use `go test` to audit.
+1. Do not add/propose tests unless explicitly requested.
+2. Tests are handled as isolated tasks when requested.
+3. You may use `go test` for auditing when needed.
 
-## Other Rules
+## Other Notes
 
-1. Ensure using the latest version of newly added packages as long as there's no major stability issue.
-2. If you believe the initial demand is fully satisfied and all current context will not be helpful for future tasks, you can remind me to open a new session.
-3. You must NOT delete any file unless the task explicitly requires pruning/refactoring/simplifying the codebase.
+1. Prefer latest stable versions for newly added dependencies unless there is a clear stability risk.
+2. Do **not** delete files unless the task explicitly requires pruning/refactoring/simplification.
+3. `AGENTS.md`, `docs/superpowers/`, and `.sisyphus/` are agent-support assets; be mindful of their `.gitignore` status.
+4. If the current objective is fully done and conversation context no longer helps, you may suggest opening a new session.

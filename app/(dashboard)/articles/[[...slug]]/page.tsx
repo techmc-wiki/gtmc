@@ -2,6 +2,7 @@ import ReactMarkdown from "react-markdown"
 import "katex/dist/katex.min.css"
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import matter from "gray-matter"
 import {
   calculateReadingMetrics,
   getMarkdownComponents,
@@ -20,8 +21,12 @@ interface ArticlePageProps {
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params
 
-  const slugPath = (slug ?? []).map(decodeURIComponent).join("/")
-  const filePath = resolveSlug(slugPath)
+  const slugPath = (slug ?? []).map(decodeURIComponent).join("/") || "preface"
+  let filePath = resolveSlug(slugPath)
+
+  if (filePath === null && /\.md$/i.test(slugPath)) {
+    filePath = resolveSlug(slugPath.replace(/\.md$/i, ""))
+  }
 
   if (filePath === null) {
     notFound()
@@ -32,6 +37,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   if (content === null) {
     notFound()
   }
+
+  const renderedContent = matter(content).content
 
   const editPath = normalizeDraftTargetPath(filePath)
 
@@ -151,7 +158,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           remarkPlugins={remarkPlugins}
           rehypePlugins={rehypePlugins}
           components={markdownComponents}>
-          {content}
+          {renderedContent}
         </ReactMarkdown>
       </div>
     </div>

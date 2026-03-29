@@ -144,7 +144,7 @@ export function HeroCard({
               text-tech-main-dark opacity-0 [animation-delay:0.5s]
               fill-mode-forwards
             ">
-            Gradutate Texts in
+            Graduate Texts
           </span>
           <div className="flex flex-row">
             <span
@@ -153,7 +153,7 @@ export function HeroCard({
                 opacity-0 mix-blend-multiply [animation-delay:0.7s]
                 fill-mode-forwards
               ">
-              Technical Minecraft
+              in Minecraft
             </span>
             <span
               className="

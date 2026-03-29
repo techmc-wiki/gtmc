@@ -1,3 +1,4 @@
 [submodule "articles"]
 	path = articles
 	url = https://github.com/gtmc-dev/Articles.git
+	branch = main

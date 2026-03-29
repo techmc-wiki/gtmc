@@ -45,6 +45,15 @@ export async function GET(req: NextRequest) {
   const safeCategory = match[1]
   const safeFilename = match[2]
 
+  // Enforce a conservative allow-list for filenames to harden against SSRF
+  // Only allow alphanumerics, dot, underscore, and hyphen, and disallow leading dots.
+  if (
+    !/^[A-Za-z0-9._-]+$/.test(safeFilename) ||
+    safeFilename.startsWith(".")
+  ) {
+    return NextResponse.json({ error: "Invalid path" }, { status: 400 })
+  }
+
   // Derive MIME from extension — GitHub's CDN returns application/octet-stream
   const pathExt = safeFilename.split(".").pop()?.toLowerCase() || ""
   const derivedMime = EXT_TO_INLINE_MIME[pathExt]

@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
     }
 
     const blobHostname = process.env.BLOB_STORE_HOSTNAME
+    const blobPathPrefix = process.env.BLOB_STORE_PATH_PREFIX || "/"
     if (!blobHostname) {
       console.error("BLOB_STORE_HOSTNAME not configured")
       return NextResponse.json(
@@ -43,12 +44,16 @@ export async function POST(req: NextRequest) {
     }
 
     // Ensure the URL points to the expected HTTPS blob host only,
-    // with no custom port or path traversal.
+    // with no custom port or path traversal, and under an allowed path prefix.
+    const pathSegments = parsedUrl.pathname.split("/")
+    const hasPathTraversal = pathSegments.some((segment) => segment === "..")
+
     if (
       parsedUrl.protocol !== "https:" ||
       parsedUrl.hostname !== blobHostname ||
       parsedUrl.port !== "" ||
-      parsedUrl.pathname.includes("..")
+      hasPathTraversal ||
+      !parsedUrl.pathname.startsWith(blobPathPrefix)
     ) {
       return NextResponse.json({ error: "Invalid blob URL" }, { status: 400 })
     }

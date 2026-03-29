@@ -9,6 +9,21 @@ import {
 
 const ARTICLES_DIR = path.join(process.cwd(), "articles")
 const SUBMODULE_GIT = path.join(ARTICLES_DIR, ".git")
+const SLUG_MAP_PATH = path.join(process.cwd(), "lib/slug-map.json")
+
+const fileToSlugKey: Record<string, string> = (() => {
+  try {
+    const raw = fs.readFileSync(SLUG_MAP_PATH, "utf-8")
+    const slugMap = JSON.parse(raw) as Record<string, string>
+    const inverted: Record<string, string> = {}
+    for (const [slugKey, filePath] of Object.entries(slugMap)) {
+      inverted[filePath.replace(/\.md$/i, "")] = slugKey
+    }
+    return inverted
+  } catch {
+    return {}
+  }
+})()
 
 export function isSubmoduleAvailable(): boolean {
   return fs.existsSync(SUBMODULE_GIT)
@@ -98,7 +113,7 @@ function buildLocalTree(dir: string, parentPath = ""): RepoTreeNode[] {
       nodes.push({
         id: `local-${slugWithoutExt}`,
         title: titleName,
-        slug: slugWithoutExt,
+        slug: fileToSlugKey[slugWithoutExt] ?? slugWithoutExt,
         isFolder: false,
         parentId: parentPath ? `local-${parentPath}` : null,
         children: [],

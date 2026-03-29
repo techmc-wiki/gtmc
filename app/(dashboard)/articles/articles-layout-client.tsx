@@ -3,7 +3,6 @@
 import * as React from "react"
 import { useState, useRef, useEffect } from "react"
 import { usePathname } from "next/navigation"
-import { createPortal } from "react-dom"
 import { SidebarClient, type SidebarClientHandle } from "./sidebar-client"
 import { SidebarActions } from "./sidebar/actions"
 import { MobileTreeCard } from "./mobile-tree-card"
@@ -115,14 +114,21 @@ function TreeLoadingPlaceholder() {
 
 export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [isStuck, setIsStuck] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
+  const [isStuck, setIsStuck] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.scrollY > 64
+    }
+    return false
+  })
+  const [showFullText, setShowFullText] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.scrollY <= 64
+    }
+    return true
+  })
   const [treeData, setTreeData] = useState<TreeNode[]>(tree)
   const [isTreeLoading, setIsTreeLoading] = useState(tree.length === 0)
-  const [buttonTop, setButtonTop] = useState(64)
   const pathname = usePathname()
-  const sentinelRef = useRef<HTMLDivElement>(null)
-  const buttonContainerRef = useRef<HTMLDivElement>(null)
   const desktopSidebarRef = useRef<SidebarClientHandle>(null)
 
   useEffect(() => {
@@ -132,52 +138,28 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   }, [pathname])
 
   useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  useEffect(() => {
-    if (isStuck) {
-      setIsOpen(false)
-    }
+    const timer = setTimeout(
+      () => {
+        setShowFullText(!isStuck)
+      },
+      isStuck ? 0 : 250
+    )
+    return () => clearTimeout(timer)
   }, [isStuck])
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsStuck(!entry.isIntersecting)
-      },
-      {
-        threshold: 0,
-        rootMargin: "-64px 0px 0px 0px",
-      }
-    )
+    const NAVBAR_HEIGHT = 64
 
-    if (sentinelRef.current) {
-      observer.observe(sentinelRef.current)
+    const handleScroll = () => {
+      setIsStuck(window.scrollY > NAVBAR_HEIGHT)
     }
 
-    return () => observer.disconnect()
+    // Sync immediately on mount in case page is already scrolled
+    handleScroll()
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
-
-  useEffect(() => {
-    if (!isMounted) return
-
-    const updatePosition = () => {
-      if (buttonContainerRef.current) {
-        const rect = buttonContainerRef.current.getBoundingClientRect()
-        setButtonTop(Math.max(64, rect.top))
-      }
-    }
-
-    updatePosition()
-    window.addEventListener("scroll", updatePosition, { passive: true })
-    window.addEventListener("resize", updatePosition, { passive: true })
-
-    return () => {
-      window.removeEventListener("scroll", updatePosition)
-      window.removeEventListener("resize", updatePosition)
-    }
-  }, [isMounted])
 
   useEffect(() => {
     if (tree.length > 0) {
@@ -256,68 +238,85 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         isolate
         md:flex-row
       ">
-      <div
-        ref={sentinelRef}
-        className="
-          h-0 w-full
-          md:hidden
-        "
-        aria-hidden="true"
-      />
-      <div
-        ref={buttonContainerRef}
-        className="h-0 w-full md:hidden"
-        aria-hidden="true"
-      />
-
-      {isMounted &&
-        createPortal(
-          <div
-            className="fixed left-0 right-0 z-30 md:hidden"
-            style={{ top: `${buttonTop}px` }}>
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => setIsOpen(!isOpen)}
-                className={`
-                  cursor-pointer overflow-hidden bg-white/70
-                  font-mono text-xs font-bold tracking-[0.15em] text-tech-main
-                  backdrop-blur-sm transition-all duration-500 ease-out
-                  hover:bg-tech-main/5
-                  ${
-                    isStuck
-                      ? "mt-4 mr-4 min-h-10 w-20 border border-tech-main/40 px-4 py-2 shadow-sm"
-                      : "min-h-12 w-full border-b border-tech-main/40 px-4"
-                  }
-                `}
-                aria-label="Toggle article tree"
-                aria-expanded={isOpen}
-                data-testid="mobile-tree-toggle">
-                <span className="relative flex w-full items-center justify-center">
-                  <span
-                    className={`
-                      absolute inset-0 flex items-center justify-between
-                      transition-opacity duration-300
-                      ${isStuck ? "opacity-0" : "opacity-100"}
-                    `}>
-                    <span>Table of Contents</span>
-                    <span className="text-sm font-bold">
-                      {isOpen ? "▼" : "▶"}
-                    </span>
-                  </span>
-                  <span
-                    className={`
-                      transition-opacity duration-300
-                      ${isStuck ? "opacity-100" : "opacity-0"}
-                    `}>
-                    ToC
-                  </span>
-                </span>
-              </button>
+      <div className="sticky top-16 z-30 md:hidden">
+        <div
+          className="flex transition-all duration-500 ease-out"
+          style={{
+            padding: isStuck ? "1rem 1rem 0 1rem" : "0",
+            justifyContent: isStuck ? "flex-end" : "stretch",
+          }}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              setIsOpen(!isOpen)
+            }}
+            className="
+              cursor-pointer overflow-hidden bg-white/70
+              font-mono text-xs font-bold tracking-[0.15em] text-tech-main
+              backdrop-blur-sm transition-all duration-500 ease-out
+              hover:bg-tech-main/5
+              border border-tech-main/40
+            "
+            style={
+              {
+                width: isStuck ? "5rem" : "100%",
+                minHeight: isStuck ? "2.5rem" : "3rem",
+                padding: isStuck ? "0.5rem 1rem" : "1rem",
+                borderBottom: isStuck ? undefined : "1px solid",
+                boxShadow: isStuck ? "0 1px 2px 0 rgba(0, 0, 0, 0.05)" : "none",
+              } as React.CSSProperties
+            }
+            aria-label="Toggle article tree"
+            aria-expanded={isOpen}
+            data-testid="mobile-tree-toggle">
+            <div className="relative flex w-full items-center justify-between">
+              <span
+                className="transition-opacity duration-300"
+                style={{
+                  opacity: showFullText ? 1 : 0,
+                }}>
+                Table of Contents
+              </span>
+              <span
+                className="absolute left-1/2 -translate-x-1/2 transition-opacity duration-300"
+                style={{
+                  opacity: showFullText ? 0 : 1,
+                }}>
+                ToC
+              </span>
+              <span
+                className="text-sm font-bold transition-opacity duration-300"
+                style={{
+                  opacity: showFullText ? 1 : 0,
+                }}>
+                {isOpen ? "▼" : "▶"}
+              </span>
             </div>
-          </div>,
-          document.body
-        )}
+          </button>
+        </div>
+
+        <div
+          className={`
+            grid transition-all duration-300 ease-out
+            ${
+              isOpen && !isStuck
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0"
+            }
+          `}>
+          <div className="overflow-hidden">
+            <div
+              className="
+                max-h-[calc(100vh-12rem)] overflow-y-auto overscroll-contain
+                border-t guide-line bg-white/95 px-4 pt-3 pb-4
+              ">
+              {treeContent}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Mobile floating tree card */}
       <MobileTreeCard

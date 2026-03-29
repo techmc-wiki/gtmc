@@ -275,7 +275,7 @@ body {
 }
 
 @utility animate-page-transit {
-  animation: page-transit 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: page-transit 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @utility animate-skeleton-exit {

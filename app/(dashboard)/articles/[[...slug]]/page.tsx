@@ -1,4 +1,3 @@
-import { prisma } from "@/lib/prisma"
 import ReactMarkdown from "react-markdown"
 import "katex/dist/katex.min.css"
 import { notFound } from "next/navigation"
@@ -10,6 +9,7 @@ import {
 } from "@/lib/markdown"
 import { getCachedRehypeShiki } from "@/lib/rehype-shiki"
 import { getArticleContent } from "@/lib/article-loader"
+import { resolveSlug } from "@/lib/slug-resolver"
 
 interface ArticlePageProps {
   params: Promise<{
@@ -20,59 +20,20 @@ interface ArticlePageProps {
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params
 
-  const filePathArray = slug || ["Preface.md"]
+  const slugPath = (slug ?? []).map(decodeURIComponent).join("/")
+  const filePath = resolveSlug(slugPath)
 
-  let rawPath = filePathArray.map(decodeURIComponent).join("/")
-
-  let content = ""
-  let editPath = rawPath
-
-  const dbArticle = await prisma.article.findUnique({
-    where: { slug: rawPath },
-  })
-
-  if (dbArticle) {
-    if (dbArticle.isFolder) {
-      const children = await prisma.article.findMany({
-        where: { parentId: dbArticle.id },
-      })
-      content = `# ${dbArticle.title}\n\n[SYS.DIR_CONTENTS]\n\n`
-      children.forEach((child: typeof dbArticle) => {
-        content += `- [${child.title}](/articles/${child.slug.split("/").map(encodeURIComponent).join("/")})\n`
-      })
-    } else {
-      content = dbArticle.content
-    }
-    editPath = `db:${dbArticle.id}`
-  } else {
-    const normalizedPath = rawPath.replace(/^\/+/, "")
-    const pathsToTry = normalizedPath.endsWith(".md")
-      ? [
-          normalizedPath,
-          normalizedPath.replace(/\.md$/, ""),
-          `${normalizedPath.replace(/\.md$/, "")}/README.md`,
-        ]
-      : [normalizedPath, `${normalizedPath}.md`, `${normalizedPath}/README.md`]
-
-    for (const tryPath of pathsToTry) {
-      const githubContent = await getArticleContent(tryPath)
-      if (githubContent !== null) {
-        content = githubContent
-        rawPath = tryPath
-        editPath = normalizeDraftTargetPath(tryPath)
-        break
-      }
-    }
-
-    if (!content) {
-      if (rawPath.includes("404")) {
-        content =
-          "# 404 Not Found\n\nThe requested article is not available yet."
-      } else {
-        notFound()
-      }
-    }
+  if (filePath === null) {
+    notFound()
   }
+
+  const content = await getArticleContent(filePath)
+
+  if (content === null) {
+    notFound()
+  }
+
+  const editPath = normalizeDraftTargetPath(filePath)
 
   const { wordCount, readingTime } = calculateReadingMetrics(content)
   const shikiPlugin = await getCachedRehypeShiki(content)
@@ -80,7 +41,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     content,
     shikiPlugin
   )
-  const markdownComponents = getMarkdownComponents(rawPath)
+  const markdownComponents = getMarkdownComponents(filePath)
 
   return (
     <div
@@ -136,7 +97,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
         {/* Region 2: Path Line */}
         <div className="font-mono text-xs break-all text-slate-500">
-          PATH: {rawPath}
+          PATH: {filePath}
         </div>
 
         {/* Region 3: Reading Stats Row */}
@@ -165,13 +126,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </div>
 
         {/* Region 4: Edit Action Row */}
-        <Link
-          href={
-            dbArticle
-              ? `/draft/new?articleId=${encodeURIComponent(dbArticle.id)}&file=${encodeURIComponent(rawPath)}`
-              : `/draft/new?file=${encodeURIComponent(editPath)}`
-          }>
+        <Link href={`/draft/new?file=${encodeURIComponent(editPath)}`}>
           <button
+            type="button"
             className="
               relative flex min-h-[44px] w-full cursor-pointer items-center
               gap-2 overflow-hidden border border-tech-main/40 bg-tech-main/10

@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown"
 
 import { saveDraftAction, submitForReviewAction } from "@/actions/article"
 import { getMarkdownComponents, getPluginsForContent } from "@/lib/markdown"
+import { validateSlug } from "@/lib/slug-validator"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
 import {
   LoadingIndicator,
@@ -41,6 +42,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   const [title, setTitle] = React.useState(initialData?.title || "")
   const [content, setContent] = React.useState(initialEditorContent)
   const [filePath, setFilePath] = React.useState(initialData?.filePath || "")
+  const [slug, setSlug] = React.useState("")
   const [revisionId, setRevisionId] = React.useState<string | undefined>(
     initialData?.id
   )
@@ -84,6 +86,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       formData.append("title", title)
       formData.append("content", content)
       formData.append("filePath", filePath)
+      if (slug) formData.append("slug", slug)
       if (revisionId) formData.append("revisionId", revisionId)
       if (articleId) formData.append("articleId", articleId)
 
@@ -176,6 +179,39 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             aria-busy={isSaving}
           />
         </div>
+
+        {!articleId && (
+          <div className="flex flex-col space-y-2">
+            <label className="section-label">SLUG_</label>
+            <BrutalInput
+              required
+              placeholder="e.g. slime-tech/molforte/04-new-machine"
+              className={`
+                border-tech-main/40 py-2 font-mono text-sm backdrop-blur-sm
+                focus:border-tech-main/60
+                ${
+                  isReadOnly
+                    ? `cursor-not-allowed bg-gray-100 opacity-70`
+                    : `bg-white/80`
+                }
+                ${
+                  slug && !validateSlug(slug)
+                    ? `border-red-500/50 focus:border-red-500`
+                    : ``
+                }
+              `}
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              readOnly={isReadOnly}
+              aria-busy={isSaving}
+            />
+            {slug && !validateSlug(slug) && (
+              <p className="font-mono text-xs text-red-500">
+                Slug must match format: lowercase letters, numbers, hyphens only
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {githubPrUrl ? (
@@ -336,7 +372,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           <BrutalButton
             type="submit"
             variant="primary"
-            disabled={isSaving}
+            disabled={
+              isSaving || (!articleId && (!slug || !validateSlug(slug)))
+            }
             aria-busy={isSaving}>
             {isSaving ? (
               <LoadingIndicator label={PENDING_LABELS.SAVING_DRAFT} />
@@ -349,7 +387,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             type="button"
             variant="ghost"
             onClick={handleSubmitReview}
-            disabled={isSubmittingReview || isSaving}
+            disabled={
+              isSubmittingReview ||
+              isSaving ||
+              (!articleId && (!slug || !validateSlug(slug)))
+            }
             aria-busy={isSubmittingReview}>
             {isSubmittingReview ? (
               <LoadingIndicator label={PENDING_LABELS.SUBMITTING_REVIEW} />

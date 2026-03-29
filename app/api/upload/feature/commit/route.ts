@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     }
 
     const blobHostname = process.env.BLOB_STORE_HOSTNAME
-    const blobPathPrefix = process.env.BLOB_STORE_PATH_PREFIX || "/"
+    const rawBlobPathPrefix = process.env.BLOB_STORE_PATH_PREFIX || "/"
     if (!blobHostname) {
       console.error("BLOB_STORE_HOSTNAME not configured")
       return NextResponse.json(
@@ -35,6 +35,9 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       )
     }
+    // Normalize the configured path prefix to always start with a single "/"
+    const blobPathPrefix =
+      rawBlobPathPrefix.startsWith("/") ? rawBlobPathPrefix : `/${rawBlobPathPrefix}`
 
     let parsedUrl: URL
     try {
@@ -52,18 +55,42 @@ export async function POST(req: NextRequest) {
       parsedUrl.protocol !== "https:" ||
       parsedUrl.hostname !== blobHostname ||
       parsedUrl.port !== "" ||
-      hasPathTraversal ||
-      !parsedUrl.pathname.startsWith(blobPathPrefix)
+      hasPathTraversal
     ) {
       return NextResponse.json({ error: "Invalid blob URL" }, { status: 400 })
     }
 
-    // Rebuild a safe URL from validated components to avoid using
-    // any unvalidated parts of the original user input.
-    const safeBlobUrlObj = new URL(
-      parsedUrl.pathname + parsedUrl.search,
-      `https://${blobHostname}`
-    )
+    // Normalize the path to eliminate any implicit traversal (e.g. "/a/../b")
+    // and ensure it stays within the allowed prefix.
+    const normalizedPath = new URL(parsedUrl.pathname, "https://blob.invalid").pathname
+    if (!normalizedPath.startsWith(blobPathPrefix)) {
+      return NextResponse.json({ error: "Invalid blob URL" }, { status: 400 })
+    }
+
+    // Derive the blob path relative to the configured prefix and validate it.
+    const relativePath = normalizedPath.slice(blobPathPrefix.length)
+    if (!relativePath || relativePath.startsWith("/")) {
+      return NextResponse.json({ error: "Invalid blob URL" }, { status: 400 })
+    }
+
+    const relativeSegments = relativePath.split("/")
+    const hasInvalidSegment = relativeSegments.some((segment) => {
+      return (
+        !segment ||
+        segment === "." ||
+        segment === ".." ||
+        // Only allow safe path characters in each segment
+        !/^[A-Za-z0-9._-]+$/.test(segment)
+      )
+    })
+    if (hasInvalidSegment) {
+      return NextResponse.json({ error: "Invalid blob URL" }, { status: 400 })
+    }
+
+    // Rebuild a safe URL from validated components, dropping any user-controlled
+    // query string to avoid influencing the blob backend via arbitrary parameters.
+    const safePath = blobPathPrefix + relativePath
+    const safeBlobUrlObj = new URL(safePath, `https://${blobHostname}`)
     const safeBlobUrl = safeBlobUrlObj.toString()
 
     const blobResponse = await fetch(safeBlobUrl, { redirect: "error" })

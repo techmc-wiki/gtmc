@@ -65,26 +65,16 @@ export function SidebarActions({
   return (
     <div
       className="
-        absolute top-12 left-0 z-10 -mt-4 border-b guide-line bg-white/70 px-6
-        py-3 backdrop-blur-sm
+        sticky inset-x-0 -top-4 z-10 border-b guide-line bg-white/70 py-3
+        backdrop-blur-sm
       ">
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={onCreate}
-          className="
-            cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
-            text-[11px] transition-colors
-            hover:bg-tech-main hover:text-white
-          ">
-          + NEW DIR / FILE
-        </button>
+      <div className="flex flex-wrap justify-center gap-2">
         <button
           type="button"
           onClick={onCollapseAll}
           className="
             cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
-            text-[11px] transition-colors
+            text-[10px] transition-colors
             hover:bg-tech-main hover:text-white
           ">
           ⊟ COLLAPSE ALL
@@ -94,10 +84,20 @@ export function SidebarActions({
           onClick={onLocate}
           className="
             cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
-            text-[11px] transition-colors
+            text-[10px] transition-colors
             hover:bg-tech-main hover:text-white
           ">
           ◎ LOCATE
+        </button>
+        <button
+          type="button"
+          onClick={onCreate}
+          className="
+            cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
+            text-[10px] transition-colors
+            hover:bg-tech-main hover:text-white
+          ">
+          + NEW DIR / FILE
         </button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
+import { articleUrl } from "@/lib/article-url"
 import type { TreeNode } from "./tree-node"
 
 export function useScrollToActive({
@@ -56,7 +57,7 @@ export function useScrollToActive({
     ): { item: TreeNode | null; parentIds: string[] } => {
       const decodedTarget = decodeURIComponent(target)
       for (const item of items) {
-        const slug = `/articles/${item.slug}`
+        const slug = articleUrl(item.slug)
         const decodedSlug = decodeURIComponent(slug)
         if (
           decodedSlug === decodedTarget ||

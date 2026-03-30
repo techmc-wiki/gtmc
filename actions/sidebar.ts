@@ -10,6 +10,8 @@ import {
   type RepoTreeNode,
 } from "@/lib/github-pr"
 import { getArticleTree } from "@/lib/article-loader"
+import { statSync } from "fs"
+import { join } from "path"
 
 interface TreeNode {
   id: string
@@ -20,11 +22,16 @@ interface TreeNode {
   children: TreeNode[]
 }
 
+function getSlugMapMtime(): string {
+  const slugMapPath = join(process.cwd(), "lib", "slug-map.json")
+  return statSync(slugMapPath).mtime.getTime().toString()
+}
+
 const getCachedRepoTree = unstable_cache(
   async () => {
     return getArticleTree()
   },
-  ["github-repo-tree"],
+  ["github-repo-tree", getSlugMapMtime()],
   { revalidate: 60, tags: ["github-repo-tree"] }
 )
 

@@ -17,6 +17,7 @@ import {
   getSlugForFilePath,
   resolveSlug,
 } from "@/lib/slug-resolver"
+import { getSiteUrl } from "@/lib/site-url"
 
 interface ArticlePageProps {
   params: Promise<{
@@ -55,13 +56,23 @@ export async function generateMetadata({
     const title = data.title || slugPath.split("/").pop() || "Article"
     const description = generateDescription(content)
 
+    const siteUrl = getSiteUrl()
+    const canonicalSlug = getSlugForFilePath(filePath)
+    const canonicalUrl = canonicalSlug
+      ? `${siteUrl}/articles/${canonicalSlug.split("/").map(encodeURIComponent).join("/")}`
+      : `${siteUrl}/articles/${slugPath}`
+
     return {
       title,
       description,
+      alternates: {
+        canonical: canonicalUrl,
+      },
       openGraph: {
         title,
         description,
         type: "article",
+        url: canonicalUrl,
       },
     }
   } catch {

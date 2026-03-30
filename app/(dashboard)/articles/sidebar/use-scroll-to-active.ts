@@ -60,8 +60,8 @@ export function useScrollToActive({
         const slug = articleUrl(item.slug)
         const decodedSlug = decodeURIComponent(slug)
         if (
-          decodedSlug === decodedTarget ||
-          `${decodedSlug}/` === decodedTarget
+          decodedSlug.toLowerCase() === decodedTarget.toLowerCase() ||
+          `${decodedSlug}/`.toLowerCase() === decodedTarget.toLowerCase()
         ) {
           return { item, parentIds: parents }
         }

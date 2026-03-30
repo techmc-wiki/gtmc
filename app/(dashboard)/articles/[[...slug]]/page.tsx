@@ -1,5 +1,6 @@
 import ReactMarkdown from "react-markdown"
 import "katex/dist/katex.min.css"
+import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import matter from "gray-matter"
@@ -11,11 +12,107 @@ import {
 import { getCachedRehypeShiki } from "@/lib/rehype-shiki"
 import { getArticleContent } from "@/lib/article-loader"
 import { resolveSlug } from "@/lib/slug-resolver"
+import { toAbsoluteUrl } from "@/lib/site-url"
 
 interface ArticlePageProps {
   params: Promise<{
     slug?: string[]
   }>
+}
+
+function stripMarkdown(md: string): string {
+  return md
+    .replace(/^---[\s\S]*?---\s*/m, "")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`+[^`]*`+/g, " ")
+    .replace(/#{1,6}\s+/g, "")
+    .replace(/\*\*?([^*]+)\*\*?/g, "$1")
+    .replace(/__?([^_]+)__?/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/^>\s+/gm, "")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
+function getArticleDescription(content: string): string {
+  return stripMarkdown(content).slice(0, 155).trim()
+}
+
+function getArticleTitle(content: string, slugPath: string): string {
+  const { data, content: markdown } = matter(content)
+  const frontmatterTitle =
+    typeof data.title === "string" ? data.title.trim() : undefined
+  if (frontmatterTitle) {
+    return frontmatterTitle
+  }
+
+  const headingMatch = markdown.match(/^#\s+(.+)$/m)
+  if (headingMatch?.[1]) {
+    return headingMatch[1].trim()
+  }
+
+  return slugPath
+}
+
+export async function generateMetadata({
+  params,
+}: ArticlePageProps): Promise<Metadata> {
+  const { slug } = await params
+  const slugPath = (slug ?? []).map(decodeURIComponent).join("/") || "preface"
+  let filePath = resolveSlug(slugPath)
+
+  if (filePath === null && /\.md$/i.test(slugPath)) {
+    filePath = resolveSlug(slugPath.replace(/\.md$/i, ""))
+  }
+
+  if (filePath === null) {
+    return {
+      title: "Article Not Found",
+    }
+  }
+
+  const content = await getArticleContent(filePath)
+  if (content === null) {
+    return {
+      title: "Article Not Found",
+    }
+  }
+
+  const title = getArticleTitle(content, slugPath)
+  const description = getArticleDescription(content)
+  const articlePath =
+    slug && slug.length > 0
+      ? `/articles/${slug.map(encodeURIComponent).join("/")}`
+      : "/articles"
+  const canonical = toAbsoluteUrl(articlePath)
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical,
+    },
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      url: canonical,
+      images: [
+        {
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/opengraph-image"],
+    },
+  }
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {

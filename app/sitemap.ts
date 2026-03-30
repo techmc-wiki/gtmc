@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next"
 import fs from "fs"
 import path from "path"
+import { execSync } from "child_process"
 import { prisma } from "@/lib/prisma"
 import { getRepoContentTree, type RepoTreeNode } from "@/lib/github-pr"
 import { listAllIssues } from "@/lib/github-features"
+import { getSiteUrl } from "@/lib/site-url"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 3600
@@ -33,8 +35,21 @@ function encodeSlug(slug: string): string {
   return slug.split("/").map(encodeURIComponent).join("/")
 }
 
+function getArticleLastModified(filePath: string): Date {
+  try {
+    const articlesDir = path.join(process.cwd(), "articles")
+    const result = execSync(`git log -1 --format="%ai" -- "${filePath}"`, {
+      cwd: articlesDir,
+      encoding: "utf-8",
+    })
+    return result.trim() ? new Date(result.trim()) : new Date()
+  } catch {
+    return new Date()
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const BASE = "https://beta.techmc.wiki"
+  const BASE = getSiteUrl()
   const seenSlugs = new Set<string>()
 
   const staticUrls: MetadataRoute.Sitemap = [
@@ -71,13 +86,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const tree = await getRepoContentTree()
     const leafSlugs = flattenLeafSlugs(tree)
     repoUrls = leafSlugs
-      .map((filePath) => filePathToSlug[filePath])
-      .filter(
-        (slug): slug is string => slug !== undefined && !seenSlugs.has(slug)
-      )
-      .map((slug) => ({
-        url: `${BASE}/articles/${encodeSlug(slug)}`,
-        lastModified: new Date(),
+      .filter((filePath) => {
+        const slug = filePathToSlug[filePath]
+        return slug !== undefined && !seenSlugs.has(slug)
+      })
+      .map((filePath) => ({
+        url: `${BASE}/articles/${encodeSlug(filePathToSlug[filePath])}`,
+        lastModified: getArticleLastModified(filePath + ".md"),
         changeFrequency: "weekly" as const,
         priority: 0.8,
       }))

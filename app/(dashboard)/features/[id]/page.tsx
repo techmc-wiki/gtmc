@@ -19,6 +19,7 @@ import { FeatureExplanation } from "./feature-explanation"
 import { FeatureReadonlyView } from "./feature-readonly-view"
 import { FeatureStatusBadge } from "@/components/ui/status-badge"
 import { RevealSection } from "@/app/(dashboard)/features/reveal-helpers"
+import { toAbsoluteUrl } from "@/lib/site-url"
 
 export const revalidate = 60
 
@@ -40,7 +41,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id } = await params
-  const issueNumber = parseInt(id)
+  const issueNumber = Number.parseInt(id, 10)
   if (isNaN(issueNumber)) return { title: "Feature Not Found" }
 
   const issue = await getIssue(issueNumber)
@@ -49,14 +50,33 @@ export async function generateMetadata({
   const description = stripMarkdown(issue.body ?? "")
     .slice(0, 155)
     .trim()
+  const canonical = toAbsoluteUrl(`/features/${issue.number}`)
 
   return {
     title: issue.title,
     description,
+    alternates: {
+      canonical,
+    },
     openGraph: {
       title: `${issue.title} — Feature Request`,
       description,
       type: "article",
+      url: canonical,
+      images: [
+        {
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: issue.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${issue.title} — Feature Request`,
+      description,
+      images: ["/opengraph-image"],
     },
   }
 }

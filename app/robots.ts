@@ -1,12 +1,16 @@
 import type { MetadataRoute } from "next"
+import { getSiteUrl, toAbsoluteUrl } from "@/lib/site-url"
 
 export default function robots(): MetadataRoute.Robots {
+  const siteUrl = getSiteUrl()
+
   return {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/draft/", "/review/", "/profile", "/admin", "/login"],
+      disallow: ["/draft", "/review", "/profile", "/admin", "/login"],
     },
-    sitemap: "https://beta.techmc.wiki/sitemap.xml",
+    host: siteUrl,
+    sitemap: toAbsoluteUrl("/sitemap.xml"),
   }
 }

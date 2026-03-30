@@ -7,21 +7,40 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { FooterProvider } from "@/components/layout/footer-context"
 import { FooterWrapper } from "@/components/layout/footer-wrapper"
 import { AuthSessionProvider } from "@/components/providers/session-provider"
+import { getSiteUrl } from "@/lib/site-url"
+
+const siteUrl = getSiteUrl()
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://beta.techmc.wiki"),
+  metadataBase: new URL(siteUrl),
   title: "Graduate Texts in Minecraft",
   description:
     "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     siteName: "Graduate Texts in Minecraft",
+    url: "/",
     title: "Graduate Texts in Minecraft",
     description:
       "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Graduate Texts in Minecraft",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
+    title: "Graduate Texts in Minecraft",
+    description:
+      "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+    images: ["/opengraph-image"],
   },
 }
 

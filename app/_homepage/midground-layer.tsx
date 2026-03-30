@@ -147,7 +147,7 @@ export function MidgroundLayer({
       {/* 贯穿全图的低调主辅助线 */}
       <div
         className="
-          absolute top-[35%] right-0 decor-desktop-only hidden h-px w-[40%]
+          absolute top-1/2 right-0 decor-desktop-only hidden h-px w-[40%]
           bg-tech-main/20
           md:block
         ">
@@ -166,27 +166,6 @@ export function MidgroundLayer({
         <div className="mt-[50vh] size-2 border border-tech-main/50 bg-tech-bg" />
       </div>
 
-      {/* 技术图纸刻度尺 */}
-      <div
-        className="
-          absolute top-0 left-0 decor-desktop-only hidden h-2 w-full
-          overflow-hidden border-b border-tech-main/10 opacity-30
-          md:flex
-        ">
-        {Array.from({ length: 100 }).map((_, i) => (
-          <div
-            key={i}
-            className="
-              relative h-full w-8 flex-none border-l border-tech-main/40
-            ">
-            {i % 4 === 0 && (
-              <span className="absolute top-2 left-1 font-mono text-[8px]">
-                {i * 10}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
       <div
         className="
           absolute top-0 left-0 decor-desktop-only hidden h-full w-2 flex-col

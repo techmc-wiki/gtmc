@@ -86,25 +86,25 @@ export function useHomepageMotion(): HomepageMotionValues {
     x: useTransform(
       smoothX,
       (v) =>
-        v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.foreground * 20
+        v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.foreground * 25
     ),
     y: useTransform(
       smoothY,
       (v) =>
-        v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.foreground * 20
+        v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.foreground * 25
     ),
-    rotateX: useTransform(smoothY, (v) => v * -2),
-    rotateY: useTransform(smoothX, (v) => v * 2),
+    rotateX: useTransform(smoothY, (v) => v * -3.5),
+    rotateY: useTransform(smoothX, (v) => v * 3.5),
   }
 
   const midground: LayerTransform = {
     x: useTransform(
       smoothX,
-      (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.midground * 20
+      (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.midground * 25
     ),
     y: useTransform(
       smoothY,
-      (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.midground * 20
+      (v) => v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.midground * 25
     ),
   }
 
@@ -112,12 +112,12 @@ export function useHomepageMotion(): HomepageMotionValues {
     x: useTransform(
       smoothX,
       (v) =>
-        v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.background * 20
+        v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.background * 25
     ),
     y: useTransform(
       smoothY,
       (v) =>
-        v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.background * 20
+        v * config.pointerAmplitude * HOMEPAGE_MOTION.layers.background * 25
     ),
   }
 

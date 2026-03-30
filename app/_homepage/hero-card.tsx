@@ -109,23 +109,25 @@ export function HeroCard({
           ">
           <div
             className="
-              relative flex size-6 items-center justify-center border
+              relative flex size-4 items-center justify-center border
               border-tech-main/40 bg-tech-main/5 transition-transform
               duration-500
               group-hover:rotate-90
-              sm:size-10
+              sm:size-6
             ">
             <div
               className="
-                size-4 bg-tech-main/30 transition-colors
+                size-1.5 bg-tech-main/30 transition-colors
                 group-hover:bg-tech-main/60
+                sm:size-2
               "
             />
           </div>
           <h2
             className="
-              font-mono text-xs tracking-[0.3em] text-tech-main/80 uppercase
-              sm:text-sm
+              font-mono text-[0.5rem] tracking-[0.3em] text-tech-main/80
+              uppercase
+              sm:text-xs
             ">
             Knowledge Base_
           </h2>
@@ -133,9 +135,9 @@ export function HeroCard({
 
         <h1
           className="
-            relative mb-6 flex flex-col items-start gap-0 text-2xl font-bold
+            relative mb-6 flex flex-col items-start gap-0 text-4xl font-bold
             tracking-tight text-tech-main-dark
-            sm:gap-2 sm:text-5xl
+            sm:gap-2 sm:text-6xl
             lg:text-7xl
           ">
           <span
@@ -157,8 +159,10 @@ export function HeroCard({
             </span>
             <span
               className="
-                ml-4 inline-block h-[1em] w-6 animate-pulse bg-tech-main
-                align-middle opacity-0 [animation-delay:1s] fill-mode-forwards
+                ml-4 inline-block h-[0.85em] w-[0.5ch] animate-pulse self-center
+                bg-tech-main opacity-0 [animation-delay:0.667s]
+                fill-mode-forwards
+                sm:ml-6
               "
             />
           </div>
@@ -166,18 +170,18 @@ export function HeroCard({
 
         <div
           className="
-            ml-2 flex max-w-xl animate-fade-in flex-col gap-2 border-l-[3px]
-            border-tech-main/40 pl-5 opacity-0 [animation-delay:1.2s]
+            ml-1 flex max-w-xl animate-fade-in flex-col gap-1.5 border-l-[3px]
+            border-tech-main/40 pl-3 opacity-0 [animation-delay:1.2s]
             [animation-duration:1s] [animation-translate-y:20px]
             fill-mode-forwards
-            sm:gap-4
+            sm:ml-1.5 sm:gap-4 sm:pl-5
           ">
           <span
             className="
-              text-xs text-tech-main-dark/80
+              text-xs/normal text-tech-main-dark/80
               sm:text-base
             ">
-            支持多人协作、内容审核与 Git 自动备份的 MC 资源与知识整合站点。
+            社区驱动的 Minecraft 红石和技术在线教科书。<br className="sm:hidden" />提供入门教程、机制阐述和源码阅读，助你在方块世界中攻克学术难题。
           </span>
 
           <span
@@ -189,12 +193,12 @@ export function HeroCard({
               className="
                 hidden min-h-1.5 min-w-1.5 animate-pulse rounded-full
                 bg-tech-main
-                sm:min-h-2 sm:min-w-2
+                sm:block sm:min-h-2 sm:min-w-2
               "
             />
             <span
               className="
-                font-mono text-[8px] tracking-tech-wide opacity-60
+                font-mono text-[8px] opacity-60
                 sm:text-[12px]
               ">
               <span className="sm:hidden">

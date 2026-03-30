@@ -12,20 +12,41 @@ try {
   // File doesn't exist yet — that's ok
 }
 
+const filePathToSlugKey: Record<string, string> = (() => {
+  const inverted: Record<string, string> = {}
+  for (const [slugKey, filePath] of Object.entries(slugMap)) {
+    inverted[filePath.replace(/\.md$/i, "")] = slugKey
+  }
+  return inverted
+})()
+
+export interface ResolveResult {
+  filePath: string | null
+  isRawPath: boolean
+}
+
 /**
  * Resolves a slug path to its corresponding file path.
  * @param slugPath - The slug path to resolve (e.g., "tree-farm/basics")
  * @returns The file path if found, null otherwise
  */
 export function resolveSlug(slugPath: string): string | null {
+  const result = resolveSlugWithIndicator(slugPath)
+  return result.filePath
+}
+
+/**
+ * Resolves a slug path with indicator for raw file path fallback.
+ */
+export function resolveSlugWithIndicator(slugPath: string): ResolveResult {
   // 1. Direct slug lookup
   if (slugMap[slugPath] !== undefined) {
-    return slugMap[slugPath]
+    return { filePath: slugMap[slugPath], isRawPath: false }
   }
 
   // 2. Try with .md extension in slug map
   if (slugMap[`${slugPath}.md`] !== undefined) {
-    return slugMap[`${slugPath}.md`]
+    return { filePath: slugMap[`${slugPath}.md`], isRawPath: false }
   }
 
   // 3. Raw file path fallback - URL decode first
@@ -33,14 +54,21 @@ export function resolveSlug(slugPath: string): string | null {
 
   // 3a. Try as-is
   if (fs.existsSync(path.join(ARTICLES_DIR, normalizedPath))) {
-    return normalizedPath
+    return { filePath: normalizedPath, isRawPath: true }
   }
 
   // 3b. Try with .md extension
   const withExt = `${normalizedPath}.md`
   if (fs.existsSync(path.join(ARTICLES_DIR, withExt))) {
-    return withExt
+    return { filePath: withExt, isRawPath: true }
   }
 
-  return null
+  return { filePath: null, isRawPath: false }
+}
+
+/**
+ * Gets the slug for a given file path if it exists in the slug map.
+ */
+export function getSlugForFilePath(filePath: string): string | null {
+  return filePathToSlugKey[filePath.replace(/\.md$/i, "")] ?? null
 }

@@ -1,7 +1,7 @@
 import ReactMarkdown from "react-markdown"
 import "katex/dist/katex.min.css"
 import type { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import matter from "gray-matter"
 import {
@@ -11,7 +11,10 @@ import {
 } from "@/lib/markdown"
 import { getCachedRehypeShiki } from "@/lib/rehype-shiki"
 import { getArticleContent } from "@/lib/article-loader"
-import { resolveSlug } from "@/lib/slug-resolver"
+import {
+  resolveSlugWithIndicator,
+  getSlugForFilePath,
+} from "@/lib/slug-resolver"
 import { toAbsoluteUrl } from "@/lib/site-url"
 
 interface ArticlePageProps {
@@ -59,19 +62,27 @@ export async function generateMetadata({
 }: ArticlePageProps): Promise<Metadata> {
   const { slug } = await params
   const slugPath = (slug ?? []).map(decodeURIComponent).join("/") || "preface"
-  let filePath = resolveSlug(slugPath)
+  let result = resolveSlugWithIndicator(slugPath)
 
-  if (filePath === null && /\.md$/i.test(slugPath)) {
-    filePath = resolveSlug(slugPath.replace(/\.md$/i, ""))
+  if (result.filePath === null && /\.md$/i.test(slugPath)) {
+    result = resolveSlugWithIndicator(slugPath.replace(/\.md$/i, ""))
   }
 
-  if (filePath === null) {
+  if (result.filePath === null) {
     return {
       title: "Article Not Found",
     }
   }
 
-  const content = await getArticleContent(filePath)
+  if (result.isRawPath) {
+    const targetSlug = getSlugForFilePath(result.filePath)
+    if (targetSlug) {
+      redirect(`/articles/${targetSlug}`)
+    }
+  }
+
+  const content = await getArticleContent(result.filePath)
+
   if (content === null) {
     return {
       title: "Article Not Found",
@@ -119,17 +130,24 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params
 
   const slugPath = (slug ?? []).map(decodeURIComponent).join("/") || "preface"
-  let filePath = resolveSlug(slugPath)
+  let result = resolveSlugWithIndicator(slugPath)
 
-  if (filePath === null && /\.md$/i.test(slugPath)) {
-    filePath = resolveSlug(slugPath.replace(/\.md$/i, ""))
+  if (result.filePath === null && /\.md$/i.test(slugPath)) {
+    result = resolveSlugWithIndicator(slugPath.replace(/\.md$/i, ""))
   }
 
-  if (filePath === null) {
+  if (result.filePath === null) {
     notFound()
   }
 
-  const content = await getArticleContent(filePath)
+  if (result.isRawPath) {
+    const targetSlug = getSlugForFilePath(result.filePath)
+    if (targetSlug) {
+      redirect(`/articles/${targetSlug}`)
+    }
+  }
+
+  const content = await getArticleContent(result.filePath)
 
   if (content === null) {
     notFound()
@@ -137,7 +155,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const renderedContent = matter(content).content
 
-  const editPath = normalizeDraftTargetPath(filePath)
+  const editPath = normalizeDraftTargetPath(result.filePath)
 
   const { wordCount, readingTime } = calculateReadingMetrics(content)
   const shikiPlugin = await getCachedRehypeShiki(content)
@@ -145,7 +163,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     content,
     shikiPlugin
   )
-  const markdownComponents = getMarkdownComponents(filePath)
+  const markdownComponents = getMarkdownComponents(result.filePath)
 
   return (
     <div
@@ -201,7 +219,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
         {/* Region 2: Path Line */}
         <div className="font-mono text-xs break-all text-slate-500">
-          PATH: {filePath}
+          PATH: {result.filePath}
         </div>
 
         {/* Region 3: Reading Stats Row */}

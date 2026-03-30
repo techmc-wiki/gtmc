@@ -155,7 +155,7 @@ function main(): void {
   const topLevelFolders = fs
     .readdirSync(ARTICLES_DIR, { withFileTypes: true })
     .filter(
-      (e) => e.isDirectory() && !e.name.startsWith("_") && e.name !== "img"
+      (e) => e.isDirectory() && !e.name.startsWith("_") && e.name !== ".github" && e.name !== "img"
     )
     .map((e) => e.name)
 

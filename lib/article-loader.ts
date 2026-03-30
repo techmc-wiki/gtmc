@@ -82,6 +82,7 @@ function buildLocalTree(dir: string, parentPath = ""): RepoTreeNode[] {
     "exampleworld",
     "desynchronized",
     ".git",
+    ".github",
   ])
   const IGNORED_ROOT_FILES = new Set([
     "readme.md",

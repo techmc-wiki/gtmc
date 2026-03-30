@@ -1,10 +1,27 @@
 import type { MetadataRoute } from "next"
+import fs from "fs"
+import path from "path"
 import { prisma } from "@/lib/prisma"
 import { getRepoContentTree, type RepoTreeNode } from "@/lib/github-pr"
 import { listAllIssues } from "@/lib/github-features"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 3600
+
+const filePathToSlug: Record<string, string> = (() => {
+  try {
+    const slugMapPath = path.join(process.cwd(), "lib/slug-map.json")
+    const raw = fs.readFileSync(slugMapPath, "utf-8")
+    const slugMap = JSON.parse(raw) as Record<string, string>
+    const inverted: Record<string, string> = {}
+    for (const [slugKey, filePath] of Object.entries(slugMap)) {
+      inverted[filePath.replace(/\.md$/i, "")] = slugKey
+    }
+    return inverted
+  } catch {
+    return {}
+  }
+})()
 
 function flattenLeafSlugs(nodes: RepoTreeNode[]): string[] {
   return nodes.flatMap((n) =>
@@ -54,7 +71,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const tree = await getRepoContentTree()
     const leafSlugs = flattenLeafSlugs(tree)
     repoUrls = leafSlugs
-      .filter((slug) => !seenSlugs.has(slug))
+      .map((filePath) => filePathToSlug[filePath])
+      .filter(
+        (slug): slug is string => slug !== undefined && !seenSlugs.has(slug)
+      )
       .map((slug) => ({
         url: `${BASE}/articles/${encodeSlug(slug)}`,
         lastModified: new Date(),

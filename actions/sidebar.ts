@@ -10,6 +10,7 @@ import {
   type RepoTreeNode,
 } from "@/lib/github-pr"
 import { getArticleTree } from "@/lib/article-loader"
+import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
 import { statSync } from "fs"
 import { join } from "path"
 
@@ -172,7 +173,34 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
   }
   sortTree(mergedTree)
 
-  return mergedTree
+  // 7. Filter out ignored articles using centralized ignore logic
+  function filterIgnoredNodes(nodes: TreeNode[], isRoot: boolean): TreeNode[] {
+    const result: TreeNode[] = []
+    for (const node of nodes) {
+      // Check if this node should be ignored
+      if (node.isFolder) {
+        if (shouldIgnoreDirectory(node.title)) {
+          continue
+        }
+      } else {
+        if (shouldIgnoreFile(node.title, isRoot)) {
+          continue
+        }
+      }
+
+      // Recursively filter children
+      if (node.children && node.children.length > 0) {
+        node.children = filterIgnoredNodes(node.children, false)
+      }
+
+      result.push(node)
+    }
+    return result
+  }
+
+  const filteredTree = filterIgnoredNodes(mergedTree, true)
+
+  return filteredTree
 }
 
 /**

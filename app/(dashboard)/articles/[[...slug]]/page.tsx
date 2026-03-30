@@ -6,6 +6,7 @@ import Link from "next/link"
 import matter from "gray-matter"
 import {
   calculateReadingMetrics,
+  generateDescription,
   getMarkdownComponents,
   getPluginsForContent,
 } from "@/lib/markdown"
@@ -14,8 +15,8 @@ import { getArticleContent } from "@/lib/article-loader"
 import {
   resolveSlugWithIndicator,
   getSlugForFilePath,
+  resolveSlug,
 } from "@/lib/slug-resolver"
-import { toAbsoluteUrl } from "@/lib/site-url"
 
 interface ArticlePageProps {
   params: Promise<{
@@ -23,106 +24,51 @@ interface ArticlePageProps {
   }>
 }
 
-function stripMarkdown(md: string): string {
-  return md
-    .replace(/^---[\s\S]*?---\s*/m, "")
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/`+[^`]*`+/g, " ")
-    .replace(/#{1,6}\s+/g, "")
-    .replace(/\*\*?([^*]+)\*\*?/g, "$1")
-    .replace(/__?([^_]+)__?/g, "$1")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/^>\s+/gm, "")
-    .replace(/\s+/g, " ")
-    .trim()
-}
-
-function getArticleDescription(content: string): string {
-  return stripMarkdown(content).slice(0, 155).trim()
-}
-
-function getArticleTitle(content: string, slugPath: string): string {
-  const { data, content: markdown } = matter(content)
-  const frontmatterTitle =
-    typeof data.title === "string" ? data.title.trim() : undefined
-  if (frontmatterTitle) {
-    return frontmatterTitle
-  }
-
-  const headingMatch = markdown.match(/^#\s+(.+)$/m)
-  if (headingMatch?.[1]) {
-    return headingMatch[1].trim()
-  }
-
-  return slugPath
-}
-
 export async function generateMetadata({
   params,
 }: ArticlePageProps): Promise<Metadata> {
   const { slug } = await params
   const slugPath = (slug ?? []).map(decodeURIComponent).join("/") || "preface"
-  let result = resolveSlugWithIndicator(slugPath)
+  let filePath = resolveSlug(slugPath)
 
-  if (result.filePath === null && /\.md$/i.test(slugPath)) {
-    result = resolveSlugWithIndicator(slugPath.replace(/\.md$/i, ""))
+  if (filePath === null && /\.md$/i.test(slugPath)) {
+    filePath = resolveSlug(slugPath.replace(/\.md$/i, ""))
   }
 
-  if (result.filePath === null) {
+  if (filePath === null) {
     return {
       title: "Article Not Found",
+      description: "The requested article could not be found.",
     }
   }
 
-  if (result.isRawPath) {
-    const targetSlug = getSlugForFilePath(result.filePath)
-    if (targetSlug) {
-      redirect(`/articles/${targetSlug}`)
+  try {
+    const content = await getArticleContent(filePath)
+    if (content === null) {
+      return {
+        title: "Article Not Found",
+        description: "The requested article could not be found.",
+      }
     }
-  }
 
-  const content = await getArticleContent(result.filePath)
+    const { data } = matter(content)
+    const title = data.title || slugPath.split("/").pop() || "Article"
+    const description = generateDescription(content)
 
-  if (content === null) {
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: "article",
+      },
+    }
+  } catch {
     return {
       title: "Article Not Found",
+      description: "The requested article could not be found.",
     }
-  }
-
-  const title = getArticleTitle(content, slugPath)
-  const description = getArticleDescription(content)
-  const articlePath =
-    slug && slug.length > 0
-      ? `/articles/${slug.map(encodeURIComponent).join("/")}`
-      : "/articles"
-  const canonical = toAbsoluteUrl(articlePath)
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical,
-    },
-    openGraph: {
-      title,
-      description,
-      type: "article",
-      url: canonical,
-      images: [
-        {
-          url: "/opengraph-image",
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: ["/opengraph-image"],
-    },
   }
 }
 

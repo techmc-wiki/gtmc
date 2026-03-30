@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma"
 import { getRepoContentTree, type RepoTreeNode } from "@/lib/github-pr"
 import { listAllIssues } from "@/lib/github-features"
 import { getSiteUrl } from "@/lib/site-url"
+import { shouldIgnoreFile } from "@/lib/article-ignore"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 3600
@@ -71,7 +72,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     where: { isFolder: false },
     select: { slug: true, updatedAt: true },
   })
-  const dbUrls: MetadataRoute.Sitemap = dbArticles.map((a) => {
+
+  // Filter out ignored articles from DB
+  const filteredDbArticles = dbArticles.filter((article) => {
+    const fileName = article.slug.split("/").pop() || article.slug
+    return !shouldIgnoreFile(fileName, !article.slug.includes("/"))
+  })
+
+  const dbUrls: MetadataRoute.Sitemap = filteredDbArticles.map((a) => {
     seenSlugs.add(a.slug)
     return {
       url: `${BASE}/articles/${encodeSlug(a.slug)}`,

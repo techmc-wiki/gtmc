@@ -2,6 +2,7 @@ import fs from "fs"
 import path from "path"
 import matter from "gray-matter"
 import { SLUG_REGEX } from "../lib/slug-validator"
+import { shouldIgnoreDirectory, shouldIgnoreFile } from "../lib/article-ignore"
 
 const ARTICLES_DIR = path.join(process.cwd(), "articles")
 const OUTPUT_FILE = path.join(process.cwd(), "lib", "slug-map.json")
@@ -44,7 +45,7 @@ function processDirectory(
         e.isFile() &&
         e.name.endsWith(".md") &&
         e.name !== "README.md" &&
-        !e.name.startsWith("_")
+        !shouldIgnoreFile(e.name, false)
     )
     .map((e) => e.name)
 
@@ -86,7 +87,7 @@ function processDirectory(
   }
 
   const subDirs = entries.filter(
-    (e) => e.isDirectory() && !e.name.startsWith("_") && e.name !== "img"
+    (e) => e.isDirectory() && !shouldIgnoreDirectory(e.name)
   )
 
   for (const subDirEntry of subDirs) {
@@ -154,9 +155,7 @@ function main(): void {
 
   const topLevelFolders = fs
     .readdirSync(ARTICLES_DIR, { withFileTypes: true })
-    .filter(
-      (e) => e.isDirectory() && !e.name.startsWith("_") && e.name !== ".github" && e.name !== "img"
-    )
+    .filter((e) => e.isDirectory() && !shouldIgnoreDirectory(e.name))
     .map((e) => e.name)
 
   for (const folderName of topLevelFolders) {
@@ -208,7 +207,7 @@ function main(): void {
         e.isFile() &&
         e.name.endsWith(".md") &&
         e.name !== "README.md" &&
-        !e.name.startsWith("_")
+        !shouldIgnoreFile(e.name, true)
     )
     .map((e) => e.name)
 

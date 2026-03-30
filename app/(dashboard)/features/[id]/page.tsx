@@ -10,6 +10,7 @@ import {
   parseCommentBody,
   parseIssueBody,
 } from "@/lib/github-features"
+import { generateDescription } from "@/lib/markdown"
 import { FeatureEditor } from "@/components/editor/feature-editor"
 import { notFound } from "next/navigation"
 import { BrutalCard } from "@/components/ui/brutal-card"
@@ -23,18 +24,6 @@ import { toAbsoluteUrl } from "@/lib/site-url"
 
 export const revalidate = 60
 
-function stripMarkdown(md: string): string {
-  return md
-    .replace(/#{1,6}\s+/g, "")
-    .replace(/\*\*?([^*]+)\*\*?/g, "$1")
-    .replace(/__?([^_]+)__?/g, "$1")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/`+[^`]*`+/g, "")
-    .replace(/^>\s+/gm, "")
-    .replace(/\s+/g, " ")
-    .trim()
-}
-
 export async function generateMetadata({
   params,
 }: {
@@ -47,10 +36,8 @@ export async function generateMetadata({
   const issue = await getIssue(issueNumber)
   if (!issue) return { title: "Feature Not Found" }
 
-  const description = stripMarkdown(issue.body ?? "")
-    .slice(0, 155)
-    .trim()
   const canonical = toAbsoluteUrl(`/features/${issue.number}`)
+  const description = generateDescription(issue.body ?? "", 155)
 
   return {
     title: issue.title,
@@ -144,10 +131,10 @@ export default async function FeatureDetailPage({
     },
     assignee: parsedIssue.metadata?.assigneeId
       ? {
-          name: parsedIssue.metadata?.assigneeName ?? null,
-          email: parsedIssue.metadata?.assigneeEmail ?? null,
-          image: null,
-        }
+        name: parsedIssue.metadata?.assigneeName ?? null,
+        email: parsedIssue.metadata?.assigneeEmail ?? null,
+        image: null,
+      }
       : null,
     comments,
   }

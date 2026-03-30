@@ -1,4 +1,6 @@
 import MiniSearch from "minisearch"
+import { remark } from "remark"
+import stripMarkdownPlugin from "strip-markdown"
 import { getSidebarTree } from "@/actions/sidebar"
 import {
   getOctokit,
@@ -7,6 +9,7 @@ import {
 } from "@/lib/github-pr"
 import { getArticleContent } from "@/lib/article-loader"
 import { prisma } from "@/lib/prisma"
+import { shouldIgnoreFile } from "@/lib/article-ignore"
 
 interface IndexedArticle {
   id: string
@@ -27,17 +30,10 @@ export const CJK_TOKENIZER = (text: string): string[] =>
   text.match(/[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]|[a-zA-Z0-9]+/g) || []
 
 function stripMarkdown(text: string): string {
-  return text
-    .replace(/^#{1,6}\s+/gm, "")
-    .replace(/\*\*(.+?)\*\*/g, "$1")
-    .replace(/\*(.+?)\*/g, "$1")
-    .replace(/__(.+?)__/g, "$1")
-    .replace(/_(.+?)_/g, "$1")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/`{1,3}[^`]*`{1,3}/g, "")
-    .replace(/^\s*[-*+]\s+/gm, "")
-    .replace(/^\s*>\s+/gm, "")
-    .replace(/\n{2,}/g, " ")
+  return remark()
+    .use(stripMarkdownPlugin)
+    .processSync(text)
+    .toString()
     .replace(/\s+/g, " ")
     .trim()
 }
@@ -108,7 +104,13 @@ async function buildIndex(): Promise<MiniSearch<IndexedArticle>> {
     getSidebarTree(),
   ])
 
-  const articles: IndexedArticle[] = dbArticles.map((article) => ({
+  // Filter out ignored articles from DB articles
+  const filteredDbArticles = dbArticles.filter((article) => {
+    const fileName = article.slug.split("/").pop() || article.slug
+    return !shouldIgnoreFile(fileName, !article.slug.includes("/"))
+  })
+
+  const articles: IndexedArticle[] = filteredDbArticles.map((article) => ({
     id: article.slug,
     title: article.title,
     slug: article.slug,

@@ -6,6 +6,7 @@ import {
   getRepoContentTree,
   type RepoTreeNode,
 } from "./github-pr"
+import { shouldIgnoreDirectory, shouldIgnoreFile } from "./article-ignore"
 
 const ARTICLES_DIR = path.join(process.cwd(), "articles")
 const SUBMODULE_GIT = path.join(ARTICLES_DIR, ".git")
@@ -72,29 +73,9 @@ function buildLocalTree(dir: string, parentPath = ""): RepoTreeNode[] {
   const entries = fs.readdirSync(dir, { withFileTypes: true })
   const nodes: RepoTreeNode[] = []
 
-  const IGNORED_DIRS = new Set([
-    "img",
-    "oldimg",
-    "image",
-    "images",
-    "source",
-    "asset",
-    "exampleworld",
-    "desynchronized",
-    ".git",
-    ".github",
-  ])
-  const IGNORED_ROOT_FILES = new Set([
-    "readme.md",
-    "contributors.md",
-    "_sidebar.md",
-    "desynchronized.md",
-  ])
-
   for (const entry of entries) {
-    if (IGNORED_DIRS.has(entry.name.toLowerCase())) continue
-    if (!parentPath && IGNORED_ROOT_FILES.has(entry.name.toLowerCase()))
-      continue
+    if (shouldIgnoreDirectory(entry.name)) continue
+    if (!parentPath && shouldIgnoreFile(entry.name, true)) continue
 
     const slug = parentPath ? `${parentPath}/${entry.name}` : entry.name
 

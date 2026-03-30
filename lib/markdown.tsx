@@ -11,6 +11,8 @@ import React from "react"
 import type { Element, Root, Text } from "hast"
 import { visit } from "unist-util-visit"
 import { pangu } from "pangu"
+import { remark } from "remark"
+import stripMarkdown from "strip-markdown"
 import { CodeCopyButton } from "@/components/code-copy-button"
 import { LazyImage } from "@/components/lazy-image"
 import { LazyCodeBlock } from "@/components/lazy-code-block"
@@ -85,6 +87,27 @@ export function calculateReadingMetrics(content: string) {
   const wordCount = cjkCount + westernWordCount
   const readingTime = Math.max(1, Math.ceil(wordCount / 300))
   return { wordCount, readingTime }
+}
+
+export function generateDescription(
+  markdown: string,
+  maxLength: number = 155
+): string {
+  const plainText = remark()
+    .use(stripMarkdown)
+    .processSync(markdown)
+    .toString()
+    .replace(/\s+/g, " ")
+    .trim()
+
+  if (plainText.length <= maxLength) {
+    return plainText
+  }
+
+  const truncated = plainText.slice(0, maxLength)
+  const lastSpace = truncated.lastIndexOf(" ")
+
+  return lastSpace > 0 ? truncated.slice(0, lastSpace) + "…" : truncated + "…"
 }
 
 export function getMarkdownComponents(rawPath: string) {

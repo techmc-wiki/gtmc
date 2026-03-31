@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth"
-import { getGitHubWriteToken } from "@/lib/github-pr"
+import { getGitHubWriteToken } from "@/lib/github/articles-repo"
 import type { Session } from "next-auth"
 
 type AuthenticatedSession = Session & {

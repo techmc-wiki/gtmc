@@ -26,7 +26,7 @@ import {
   createMetadataFromSession,
   parseIssueNumber,
   type IssueMetadata,
-} from "@/lib/github-features"
+} from "@/lib/github"
 
 async function sendQQBotNotification(payload: {
   type?: string

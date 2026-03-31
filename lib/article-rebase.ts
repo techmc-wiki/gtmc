@@ -2,12 +2,9 @@ import {
   ARTICLES_REPO_NAME,
   ARTICLES_REPO_OWNER,
   getOctokit,
-} from "@/lib/github-pr"
+} from "@/lib/github/articles-repo"
 import { Prisma } from "@prisma/client"
-import {
-  getMergeLibrary,
-  type MergeConflictBlock,
-} from "./article-merge-library"
+import { getMergeLibrary, type MergeConflictBlock } from "./merge-strategy"
 import type { RebaseCommitInfo, RebaseState } from "../types/rebase"
 import { prisma } from "@/lib/prisma"
 

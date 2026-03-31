@@ -3,11 +3,7 @@
 import { useState, useMemo } from "react"
 import type { RebaseState } from "@/types/rebase"
 
-import {
-  resolveConflictAction,
-  abortRebaseAction,
-  keepFileAction,
-} from "@/actions/review"
+import { resolveConflictAction, abortRebaseAction } from "@/actions/review"
 import { BrutalButton } from "@/components/ui/brutal-button"
 
 export default function ConflictResolver({
@@ -25,10 +21,11 @@ export default function ConflictResolver({
   revisionId?: string
   conflictType?: "CONFLICT" | "FILE_DELETED"
 }) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _conflictType = conflictType
   const [content, setContent] = useState(initialContent)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isAborting, setIsAborting] = useState(false)
-  const [isKeeping, setIsKeeping] = useState(false)
 
   type ConflictBlock =
     | { type: "ok"; content: string; id: string }
@@ -169,8 +166,9 @@ export default function ConflictResolver({
           )}
       </div>
 
-      <div
-        className="mb-8 space-y-2 border border-tech-main/30 bg-tech-main/5 p-2">
+      <div className="
+        mb-8 space-y-2 border border-tech-main/30 bg-tech-main/5 p-2
+      ">
         {blocks.map((block) => (
           <div key={block.id}>
             {block.type === "ok" ? (

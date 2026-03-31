@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { getMainBranchHeadSha } from "@/lib/article-submission"
-import { getRepoFileContent } from "@/lib/github-pr"
+import { getRepoFileContent } from "@/lib/github/sync"
 import { prisma } from "@/lib/prisma"
 import { notFound, redirect } from "next/navigation"
 

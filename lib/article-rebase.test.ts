@@ -7,7 +7,7 @@ const mockGetContent = mock()
 const mockRevisionUpdate = mock(async () => ({}))
 const mockRevisionFindUnique = mock(async () => null)
 
-mock.module("@/lib/github-pr", () => ({
+mock.module("@/lib/github/articles-repo", () => ({
   getOctokit: mock(() => ({
     repos: {
       compareCommits: mockCompareCommits,
@@ -17,6 +17,7 @@ mock.module("@/lib/github-pr", () => ({
   })),
   ARTICLES_REPO_OWNER: "gtmc-dev",
   ARTICLES_REPO_NAME: "Articles",
+  getGitHubWriteToken: mock(() => "token"),
 }))
 
 mock.module("@/lib/prisma", () => ({

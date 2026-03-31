@@ -4,7 +4,7 @@ import {
   ARTICLES_REPO_NAME,
   ARTICLES_REPO_OWNER,
   getOctokit,
-} from "@/lib/github-pr"
+} from "@/lib/github/articles-repo"
 import { analyzeRebaseNeed } from "@/lib/article-rebase"
 import type { RebaseAnalysis } from "@/lib/article-rebase"
 

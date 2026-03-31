@@ -19,7 +19,7 @@ import {
   ARTICLES_REPO_NAME,
   ARTICLES_REPO_OWNER,
   getOctokit,
-} from "@/lib/github-pr"
+} from "@/lib/github/articles-repo"
 import { prisma } from "@/lib/prisma"
 import type { RebaseState } from "@/types/rebase"
 

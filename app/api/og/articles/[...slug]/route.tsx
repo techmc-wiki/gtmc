@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og"
 import { type NextRequest } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { getRepoFileContent } from "@/lib/github-pr"
+import { getRepoFileContent } from "@/lib/github/sync"
 
 export const runtime = "nodejs"
 

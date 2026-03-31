@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { uploadFileToGithub, GithubFeaturesError } from "@/lib/github-features"
+import { uploadFileToGithub, GithubFeaturesError } from "@/lib/github"
 import { classifyFile, sanitizeFilename } from "@/lib/file-upload"
 
 export async function POST(req: NextRequest) {

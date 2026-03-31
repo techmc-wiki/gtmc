@@ -9,7 +9,7 @@ import {
   listIssueComments,
   parseCommentBody,
   parseIssueBody,
-} from "@/lib/github-features"
+} from "@/lib/github"
 import { generateDescription } from "@/lib/markdown"
 import { FeatureEditor } from "@/components/editor/feature-editor"
 import { notFound } from "next/navigation"
@@ -131,10 +131,10 @@ export default async function FeatureDetailPage({
     },
     assignee: parsedIssue.metadata?.assigneeId
       ? {
-        name: parsedIssue.metadata?.assigneeName ?? null,
-        email: parsedIssue.metadata?.assigneeEmail ?? null,
-        image: null,
-      }
+          name: parsedIssue.metadata?.assigneeName ?? null,
+          email: parsedIssue.metadata?.assigneeEmail ?? null,
+          image: null,
+        }
       : null,
     comments,
   }

@@ -6,7 +6,7 @@ import {
   getOctokit,
   ARTICLES_REPO_OWNER,
   ARTICLES_REPO_NAME,
-} from "@/lib/github-pr"
+} from "@/lib/github/articles-repo"
 import { getArticleContent } from "@/lib/article-loader"
 import { prisma } from "@/lib/prisma"
 import { shouldIgnoreFile } from "@/lib/article-ignore"

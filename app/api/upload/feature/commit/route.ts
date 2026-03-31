@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { del } from "@vercel/blob"
 import { auth } from "@/lib/auth"
-import { uploadFileToGithub, GithubFeaturesError } from "@/lib/github-features"
+import { uploadFileToGithub, GithubFeaturesError } from "@/lib/github"
 import { classifyFile, isImageMime, sanitizeFilename } from "@/lib/file-upload"
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024
@@ -36,8 +36,9 @@ export async function POST(req: NextRequest) {
       )
     }
     // Normalize the configured path prefix to always start with a single "/"
-    const blobPathPrefix =
-      rawBlobPathPrefix.startsWith("/") ? rawBlobPathPrefix : `/${rawBlobPathPrefix}`
+    const blobPathPrefix = rawBlobPathPrefix.startsWith("/")
+      ? rawBlobPathPrefix
+      : `/${rawBlobPathPrefix}`
 
     let parsedUrl: URL
     try {
@@ -62,7 +63,8 @@ export async function POST(req: NextRequest) {
 
     // Normalize the path to eliminate any implicit traversal (e.g. "/a/../b")
     // and ensure it stays within the allowed prefix.
-    const normalizedPath = new URL(parsedUrl.pathname, "https://blob.invalid").pathname
+    const normalizedPath = new URL(parsedUrl.pathname, "https://blob.invalid")
+      .pathname
     if (!normalizedPath.startsWith(blobPathPrefix)) {
       return NextResponse.json({ error: "Invalid blob URL" }, { status: 400 })
     }

@@ -3,12 +3,8 @@
 import { prisma } from "@/lib/prisma"
 import { requireAuth } from "@/lib/auth-helpers"
 import { unstable_cache } from "next/cache"
-import {
-  getRepoTranslations,
-  createPR,
-  createDirectFile,
-  type RepoTreeNode,
-} from "@/lib/github-pr"
+import { createDirectFile, createPR } from "@/lib/github/pr-manager"
+import { getRepoTranslations, type RepoTreeNode } from "@/lib/github/sync"
 import { getArticleTree } from "@/lib/article-loader"
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
 import { statSync } from "fs"

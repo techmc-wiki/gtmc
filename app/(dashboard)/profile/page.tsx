@@ -5,7 +5,7 @@ import { BrutalInput } from "@/components/ui/brutal-input"
 import { BrutalAvatar } from "@/components/ui/brutal-avatar"
 import { updateProfileAction } from "@/actions/profile"
 import { SignOutButton } from "@/components/ui/sign-out-button"
-import { getGithubEmailVisibility } from "@/lib/github-features"
+import { getGithubEmailVisibility } from "@/lib/github"
 
 export default async function ProfilePage() {
   const session = await auth()

@@ -5,9 +5,10 @@ const mockGetRef = mock()
 const mockGetContent = mock()
 const mockCreateOrUpdateFileContents = mock()
 
-mock.module("@/lib/github-pr", () => ({
+mock.module("@/lib/github/articles-repo", () => ({
   ARTICLES_REPO_NAME: "Articles",
   ARTICLES_REPO_OWNER: "gtmc-dev",
+  getGitHubWriteToken: mock(() => "token"),
   getOctokit: mock(() => ({
     git: {
       getRef: mockGetRef,

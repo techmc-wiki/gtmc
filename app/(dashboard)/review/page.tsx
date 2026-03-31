@@ -2,13 +2,12 @@
 import { BrutalCard } from "@/components/ui/brutal-card"
 import { BrutalButton } from "@/components/ui/brutal-button"
 import Link from "next/link"
+import { getOpenPRs, getPR } from "@/lib/github/pr-manager"
 import {
-  getOpenPRs,
-  getPR,
   getOctokit,
   ARTICLES_REPO_OWNER,
   ARTICLES_REPO_NAME,
-} from "@/lib/github-pr"
+} from "@/lib/github/articles-repo"
 import { auth } from "@/lib/auth"
 import { PageHeader } from "@/components/ui/page-header"
 import { EmptyState } from "@/components/ui/empty-state"

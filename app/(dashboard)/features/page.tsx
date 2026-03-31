@@ -5,7 +5,7 @@ import {
   labelsToTags,
   listAllIssues,
   parseIssueBody,
-} from "@/lib/github-features"
+} from "@/lib/github"
 import Link from "next/link"
 import { BrutalButton } from "@/components/ui/brutal-button"
 import { PageHeader } from "@/components/ui/page-header"

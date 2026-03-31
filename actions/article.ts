@@ -10,7 +10,7 @@ import {
 } from "@/lib/article-submission"
 import { requireAuth } from "@/lib/auth-helpers"
 import { formatErrorMessage } from "@/lib/error-handling"
-import { getGitHubWriteToken } from "@/lib/github-pr"
+import { getGitHubWriteToken } from "@/lib/github/articles-repo"
 import { prisma } from "@/lib/prisma"
 
 const EDITABLE_STATUSES = new Set(["DRAFT"])

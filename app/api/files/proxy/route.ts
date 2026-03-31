@@ -58,10 +58,7 @@ export async function GET(req: NextRequest) {
 
   // Enforce a conservative allow-list for filenames to harden against SSRF
   // Only allow alphanumerics, dot, underscore, and hyphen, and disallow leading dots.
-  if (
-    !/^[A-Za-z0-9._-]+$/.test(safeFilename) ||
-    safeFilename.startsWith(".")
-  ) {
+  if (!/^[A-Za-z0-9._-]+$/.test(safeFilename) || safeFilename.startsWith(".")) {
     return NextResponse.json({ error: "Invalid path" }, { status: 400 })
   }
 

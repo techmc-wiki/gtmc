@@ -317,7 +317,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
             <div className="relative flex w-full items-center justify-between">
               <span
                 className="transition-opacity duration-150"
-                style={{ opacity: showFullText ? 1 : 0, }}>
+                style={{ opacity: showFullText ? 1 : 0 }}>
                 Table of Contents
               </span>
               <span
@@ -325,12 +325,12 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                   absolute left-1/2 -translate-x-1/2 transition-opacity
                   duration-200
                 "
-                style={{ opacity: showFullText ? 0 : 1, }}>
+                style={{ opacity: showFullText ? 0 : 1 }}>
                 ToC
               </span>
               <span
                 className="text-sm font-bold transition-opacity duration-200"
-                style={{ opacity: showFullText ? 1 : 0, }}>
+                style={{ opacity: showFullText ? 1 : 0 }}>
                 {isOpen ? "▼" : "▶"}
               </span>
             </div>
@@ -340,12 +340,12 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         <div
           className={`
             grid transition-all duration-300 ease-out
-            ${isOpen && !isStuck
-              ? "grid-rows-[1fr] opacity-100"
-              : "grid-rows-[0fr] opacity-0"
+            ${
+              isOpen && !isStuck
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0"
             }
-          `}
-        >
+          `}>
           <div className="overflow-hidden">
             <div
               className="

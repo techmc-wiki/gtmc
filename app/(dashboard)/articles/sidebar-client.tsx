@@ -82,13 +82,10 @@ export const SidebarClient = React.forwardRef<
     })
   }
 
-  const collapseAll = React.useCallback(
-    (e: React.MouseEvent) => {
-      setExpandedFolders(new Set())
-      setIsFileExpanded(false)
-    },
-    [setExpandedFolders, setIsFileExpanded]
-  )
+  const collapseAll = React.useCallback(() => {
+    setExpandedFolders(new Set())
+    setIsFileExpanded(false)
+  }, [setExpandedFolders, setIsFileExpanded])
 
   const {
     activeItemRef,

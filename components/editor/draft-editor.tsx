@@ -196,7 +196,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                 }
                 ${
                   slug && !validateSlug(slug)
-                    ? `border-red-500/50 focus:border-red-500`
+                    ? `
+                      border-red-500/50
+                      focus:border-red-500
+                    `
                     : ``
                 }
               `}

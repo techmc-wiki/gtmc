@@ -22,7 +22,7 @@ const filePathToSlugKey: Record<string, string> = (() => {
 
 export interface ResolveResult {
   filePath: string | null
-  isRawPath: boolean
+  isDirectFilePath: boolean
 }
 
 /**
@@ -41,12 +41,12 @@ export function resolveSlug(slugPath: string): string | null {
 export function resolveSlugWithIndicator(slugPath: string): ResolveResult {
   // 1. Direct slug lookup
   if (slugMap[slugPath] !== undefined) {
-    return { filePath: slugMap[slugPath], isRawPath: false }
+    return { filePath: slugMap[slugPath], isDirectFilePath: false }
   }
 
   // 2. Try with .md extension in slug map
   if (slugMap[`${slugPath}.md`] !== undefined) {
-    return { filePath: slugMap[`${slugPath}.md`], isRawPath: false }
+    return { filePath: slugMap[`${slugPath}.md`], isDirectFilePath: false }
   }
 
   // 3. Raw file path fallback - URL decode first
@@ -54,16 +54,16 @@ export function resolveSlugWithIndicator(slugPath: string): ResolveResult {
 
   // 3a. Try as-is
   if (fs.existsSync(path.join(ARTICLES_DIR, normalizedPath))) {
-    return { filePath: normalizedPath, isRawPath: true }
+    return { filePath: normalizedPath, isDirectFilePath: true }
   }
 
   // 3b. Try with .md extension
   const withExt = `${normalizedPath}.md`
   if (fs.existsSync(path.join(ARTICLES_DIR, withExt))) {
-    return { filePath: withExt, isRawPath: true }
+    return { filePath: withExt, isDirectFilePath: true }
   }
 
-  return { filePath: null, isRawPath: false }
+  return { filePath: null, isDirectFilePath: false }
 }
 
 /**

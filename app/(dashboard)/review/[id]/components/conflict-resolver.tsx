@@ -166,9 +166,8 @@ export default function ConflictResolver({
           )}
       </div>
 
-      <div className="
-        mb-8 space-y-2 border border-tech-main/30 bg-tech-main/5 p-2
-      ">
+      <div
+        className="mb-8 space-y-2 border border-tech-main/30 bg-tech-main/5 p-2">
         {blocks.map((block) => (
           <div key={block.id}>
             {block.type === "ok" ? (

@@ -5,15 +5,16 @@ import {
   getRepoFileBuffer,
   getRepoContentTree,
   type RepoTreeNode,
-} from "./github-pr"
+} from "./github-repo-client"
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "./article-ignore"
 import { parseFrontMatter } from "./frontmatter-parser"
 
 const ARTICLES_DIR = path.join(process.cwd(), "articles")
 const SUBMODULE_GIT = path.join(ARTICLES_DIR, ".git")
 const SLUG_MAP_PATH = path.join(process.cwd(), "lib/slug-map.json")
+const REPO_FETCH_RETRIES = 3
 
-const fileToSlugKey: Record<string, string> = (() => {
+const filePathToSlugKey: Record<string, string> = (() => {
   try {
     const raw = fs.readFileSync(SLUG_MAP_PATH, "utf-8")
     const slugMap = JSON.parse(raw) as Record<string, string>
@@ -49,7 +50,7 @@ export async function getArticleContent(
   if (process.env.NODE_ENV === "development" && !isSubmoduleAvailable()) {
     console.warn("[article-loader] Submodule not available, using API")
   }
-  return await getRepoFileContent(filePath)
+  return await getRepoFileContent(filePath, REPO_FETCH_RETRIES)
 }
 
 export async function getArticleTree(): Promise<RepoTreeNode[]> {
@@ -95,7 +96,7 @@ function buildLocalTree(dir: string, parentPath = ""): RepoTreeNode[] {
       const slugWithoutExt = entryPath.replace(/\.md$/, "")
       const content = fs.readFileSync(path.join(dir, entry.name), "utf-8")
       const fm = parseFrontMatter(content)
-      const nodeSlug = fileToSlugKey[slugWithoutExt] ?? slugWithoutExt
+      const nodeSlug = filePathToSlugKey[slugWithoutExt] ?? slugWithoutExt
       const isReadme = entry.name.toLowerCase() === "readme.md"
       const mdNode: RepoTreeNode & {
         index: number
@@ -150,5 +151,5 @@ export async function getArticleBuffer(
       }
     }
   }
-  return await getRepoFileBuffer(filePath)
+  return await getRepoFileBuffer(filePath, REPO_FETCH_RETRIES)
 }

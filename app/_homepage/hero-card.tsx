@@ -181,7 +181,9 @@ export function HeroCard({
               text-xs/normal text-tech-main-dark/80
               sm:text-base
             ">
-            社区驱动的 Minecraft 红石和技术在线教科书。<br className="sm:hidden" />提供入门教程、机制阐述和源码阅读，助你在方块世界中攻克学术难题。
+            社区驱动的 Minecraft 红石和技术在线教科书。
+            <br className="sm:hidden" />
+            提供入门教程、机制阐述和源码阅读，助你在方块世界中攻克学术难题。
           </span>
 
           <span

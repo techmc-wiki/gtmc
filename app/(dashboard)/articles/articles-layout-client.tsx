@@ -183,7 +183,6 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         setIsTreeLoading(true)
         const response = await fetch("/api/articles/tree", {
           method: "GET",
-          cache: "no-store",
           signal: controller.signal,
         })
 

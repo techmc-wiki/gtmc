@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { CJK_TOKENIZER, getSearchIndex } from "@/lib/search-index"
 
+const SEARCH_CACHE_CONTROL = "private, max-age=30, stale-while-revalidate=120"
+
 interface SearchResult {
   title: string
   slug: string
@@ -84,7 +86,7 @@ function extractSnippet(
 function jsonResponse(results: SearchResult[]) {
   return NextResponse.json(
     { results },
-    { headers: { "Cache-Control": "private, no-store" } }
+    { headers: { "Cache-Control": SEARCH_CACHE_CONTROL } }
   )
 }
 

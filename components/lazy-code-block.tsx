@@ -8,11 +8,7 @@ interface LazyCodeBlockProps {
   children: ReactNode
 }
 
-export function LazyCodeBlock({
-  lang,
-  lineCount,
-  children,
-}: LazyCodeBlockProps) {
+export function LazyCodeBlock({ lineCount, children }: LazyCodeBlockProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
   const [isSkeletonRemoved, setIsSkeletonRemoved] = useState(false)

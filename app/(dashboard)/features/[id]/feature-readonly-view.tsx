@@ -1,7 +1,7 @@
 import ReactMarkdown from "react-markdown"
 import { BrutalCard } from "@/components/ui/brutal-card"
 import { getMarkdownComponents, getPluginsForContent } from "@/lib/markdown"
-import { getCachedRehypeShiki } from "@/lib/rehype-shiki"
+import { getCachedRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
 import "katex/dist/katex.min.css"
 
 interface FeatureReadonlyViewProps {

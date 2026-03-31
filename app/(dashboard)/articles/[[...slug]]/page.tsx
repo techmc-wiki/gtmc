@@ -10,7 +10,7 @@ import {
   getMarkdownComponents,
   getPluginsForContent,
 } from "@/lib/markdown"
-import { getCachedRehypeShiki } from "@/lib/rehype-shiki"
+import { getCachedRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
 import { getArticleContent } from "@/lib/article-loader"
 import {
   resolveSlugWithIndicator,
@@ -97,7 +97,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     notFound()
   }
 
-  if (result.isRawPath) {
+  if (result.isDirectFilePath) {
     const targetSlug = getSlugForFilePath(result.filePath)
     if (targetSlug) {
       redirect(`/articles/${targetSlug}`)

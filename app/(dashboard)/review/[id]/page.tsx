@@ -5,13 +5,13 @@ import "katex/dist/katex.min.css"
 import Link from "next/link"
 import { BrutalButton } from "@/components/ui/brutal-button"
 import { getMarkdownComponents, getPluginsForContent } from "@/lib/markdown"
-import { getCachedRehypeShiki } from "@/lib/rehype-shiki"
+import { getCachedRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
 import {
   getGitHubWriteToken,
   getOctokit,
   ARTICLES_REPO_OWNER,
   ARTICLES_REPO_NAME,
-} from "@/lib/github-pr"
+} from "@/lib/github/articles-repo"
 import {
   mergePRAction,
   closePRAction,

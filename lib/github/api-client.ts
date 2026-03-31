@@ -1,3 +1,13 @@
+import {
+  isGithubRateLimitedResponse,
+  parseGithubErrorMessage,
+} from "@/lib/github/rate-limit"
+import {
+  resolveGithubFeaturesIssuesToken,
+  resolveGithubFeaturesWriteToken,
+} from "@/lib/github/tokens"
+import { executeWithRetry } from "@/lib/github/retry-fetch"
+
 const GITHUB_API_BASE = "https://api.github.com"
 const GITHUB_ACCEPT_HEADER = "application/vnd.github.v3+json"
 
@@ -68,7 +78,7 @@ interface GithubEmailRecord {
 export function getGithubRepoConfig(): GithubRepoConfig {
   const owner = process.env.GITHUB_REPO_OWNER
   const repo = process.env.GITHUB_REPO_NAME
-  const token = process.env.GITHUB_FEATURES_ISSUES_PAT
+  const token = resolveGithubFeaturesIssuesToken()
 
   if (!owner || !repo || !token) {
     throw new GithubFeaturesError({
@@ -82,7 +92,7 @@ export function getGithubRepoConfig(): GithubRepoConfig {
 }
 
 export function getGithubWriteToken(): string {
-  const token = process.env.GITHUB_FEATURES_WRITE_PAT
+  const token = resolveGithubFeaturesWriteToken()
   if (!token) {
     throw new GithubFeaturesError({
       code: "CONFIG_MISSING",
@@ -110,37 +120,11 @@ export function parseJsonSafely(text: string): unknown {
 }
 
 export function parseErrorMessage(details: unknown): string | undefined {
-  if (!details || typeof details !== "object") {
-    return undefined
-  }
-
-  const candidate = details as { message?: unknown; error?: unknown }
-  if (typeof candidate.message === "string") {
-    return candidate.message
-  }
-
-  if (typeof candidate.error === "string") {
-    return candidate.error
-  }
-
-  return undefined
+  return parseGithubErrorMessage(details)
 }
 
 export function isRateLimited(response: Response, details: unknown): boolean {
-  if (response.status === 429) {
-    return true
-  }
-
-  if (response.status !== 403) {
-    return false
-  }
-
-  if (response.headers.get("x-ratelimit-remaining") === "0") {
-    return true
-  }
-
-  const message = parseErrorMessage(details)
-  return typeof message === "string" && /rate limit/i.test(message)
+  return isGithubRateLimitedResponse(response, details)
 }
 
 export function parseNextLink(linkHeader: string | null): string | null {
@@ -168,24 +152,30 @@ export async function requestGithub<T>(
 ): Promise<{ data: T | null; response: Response }> {
   const config = getGithubRepoConfig()
 
-  let response: Response
-  try {
-    response = await fetch(url, {
-      ...init,
-      headers: {
-        Accept: GITHUB_ACCEPT_HEADER,
-        Authorization: `token ${tokenOverride ?? config.token}`,
-        "Content-Type": "application/json",
-        ...(init.headers ?? {}),
-      },
-    })
-  } catch (error) {
-    throw new GithubFeaturesError({
-      code: "NETWORK_ERROR",
-      message: "GitHub API request failed due to a network error.",
-      details: error,
-    })
-  }
+  const response = await executeWithRetry<Response>({
+    retries: 1,
+    operation: async () => {
+      return await fetch(url, {
+        ...init,
+        headers: {
+          Accept: GITHUB_ACCEPT_HEADER,
+          Authorization: `token ${tokenOverride ?? config.token}`,
+          "Content-Type": "application/json",
+          ...(init.headers ?? {}),
+        },
+      })
+    },
+    onError: (error) => {
+      return {
+        type: "throw",
+        error: new GithubFeaturesError({
+          code: "NETWORK_ERROR",
+          message: "GitHub API request failed due to a network error.",
+          details: error,
+        }),
+      }
+    },
+  })
 
   const text = await response.text()
   const parsed = parseJsonSafely(text)

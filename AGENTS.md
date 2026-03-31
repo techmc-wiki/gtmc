@@ -8,6 +8,7 @@ If you are an Oh-my-Opencode agent (Sisyphus, Prometheus, Atlas, Hephaestus):
 
 1. Do not commit anything inside `.sisyphus/`.
 2. `.sisyphus/` is already in `.gitignore`.
+3. Simplify the QA stage if the task is not complex or critical
 
 ## Aesthetic Style
 
@@ -21,19 +22,6 @@ The frontend follows a **technical blueprint / scientific drafting** aesthetic. 
    - References: `components/ui/corner-brackets.tsx`, `components/ui/status-badge.tsx`
 4. **Responsive and touch-first**: mobile-first layouts with sufficient touch targets (e.g., 44px).
    - References: `touch-target` in `app/globals.css`, `components/ui/brutal-button.tsx`
-
-## Code Standards
-
-1. **TypeScript strict mode**: follow `"strict": true` in `tsconfig.json`.
-2. **Formatting and static checks**: follow Prettier + ESLint (Next.js + TS + better-tailwindcss).
-   - `pnpm lint` runs `prettier --write .` and `eslint --fix` (it will rewrite files).
-3. **Naming conventions**:
-   - File names use kebab-case (e.g., `brutal-button.tsx`, `api-client.ts`)
-   - Types/interfaces/components use PascalCase (e.g., `BrutalButtonProps`)
-4. **Import conventions**: prefer the `@/*` path alias; use `import type` for type-only imports.
-5. **Error handling and type narrowing**: prefer explicit error types, type guards, and defensive checks.
-   - References: `lib/github/api-client.ts`, `app/api/articles/search/route.ts`
-6. **Frontend component conventions**: reusable UI components should prefer the `forwardRef` + `displayName` pattern.
 
 ## Commit Labeling
 
@@ -68,22 +56,6 @@ Prefer including a scope (e.g., `sidebar`, `build`, `deps`, `api/*`) for traceab
 1. Split large changes into multiple medium-sized commits.
 2. Each commit should be single-purpose and easily reversible.
 3. **Do not** mix articles submodule updates into feature/fix commits (see `CONTRIBUTING.md`).
-
-## Workflow
-
-1. **Initialization**
-   - `pnpm install`
-   - Triggers `postinstall`: `prisma generate`, articles submodule init/update, and slug-map generation.
-2. **Daily development**
-   - `pnpm dev` for local development
-   - `pnpm lint` for formatting/rules
-   - `pnpm build` for build validation
-3. **Articles submodule collaboration**
-   - Manage with `pnpm articles:init|update|status`
-   - Avoid updates unless needed; if updated, commit submodule changes separately
-4. **CI baseline (PR/Push)**
-   - Workflow runs install + lint + build
-   - Target branches: `main/master/develop`
 
 ## Git Rules
 

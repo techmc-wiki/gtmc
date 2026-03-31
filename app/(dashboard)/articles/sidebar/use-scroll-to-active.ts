@@ -44,7 +44,7 @@ export function useScrollToActive({
       pathname === "/articles/" ||
       pathname === "/"
     ) {
-      return "/articles/Preface"
+      return "/articles/preface"
     }
     return pathname
   }, [pathname])

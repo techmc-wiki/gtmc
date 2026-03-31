@@ -10,6 +10,7 @@ import {
 import { getArticleContent } from "@/lib/article-loader"
 import { prisma } from "@/lib/prisma"
 import { shouldIgnoreFile } from "@/lib/article-ignore"
+import { parseFrontMatter } from "@/lib/frontmatter-parser"
 
 interface IndexedArticle {
   id: string
@@ -140,9 +141,12 @@ async function buildIndex(): Promise<MiniSearch<IndexedArticle>> {
         continue
       }
 
+      const frontMatter = parseFrontMatter(markdown)
+      const title = frontMatter.title || node.title
+
       articles.push({
         id: node.slug,
-        title: node.title,
+        title: title,
         slug: node.slug,
         content: stripMarkdown(markdown),
       })

@@ -7,6 +7,7 @@ import {
   type RepoTreeNode,
 } from "./github-pr"
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "./article-ignore"
+import { parseFrontMatter } from "./frontmatter-parser"
 
 const ARTICLES_DIR = path.join(process.cwd(), "articles")
 const SUBMODULE_GIT = path.join(ARTICLES_DIR, ".git")
@@ -77,29 +78,43 @@ function buildLocalTree(dir: string, parentPath = ""): RepoTreeNode[] {
     if (shouldIgnoreDirectory(entry.name)) continue
     if (!parentPath && shouldIgnoreFile(entry.name, true)) continue
 
-    const slug = parentPath ? `${parentPath}/${entry.name}` : entry.name
+    const entryPath = parentPath ? `${parentPath}/${entry.name}` : entry.name
 
     if (entry.isDirectory()) {
-      const children = buildLocalTree(path.join(dir, entry.name), slug)
+      const children = buildLocalTree(path.join(dir, entry.name), entryPath)
       nodes.push({
-        id: `local-${slug}`,
+        id: `local-${entryPath}`,
         title: entry.name,
-        slug,
+        slug: entryPath,
         isFolder: true,
         parentId: parentPath ? `local-${parentPath}` : null,
         children,
       })
     } else if (entry.name.endsWith(".md")) {
       const titleName = entry.name.replace(/\.md$/, "")
-      const slugWithoutExt = slug.replace(/\.md$/, "")
-      nodes.push({
+      const slugWithoutExt = entryPath.replace(/\.md$/, "")
+      const content = fs.readFileSync(path.join(dir, entry.name), "utf-8")
+      const fm = parseFrontMatter(content)
+      const nodeSlug = fileToSlugKey[slugWithoutExt] ?? slugWithoutExt
+      const isReadme = entry.name.toLowerCase() === "readme.md"
+      const mdNode: RepoTreeNode & {
+        index: number
+        isAppendix: boolean
+        isPreface: boolean
+      } = {
         id: `local-${slugWithoutExt}`,
-        title: titleName,
-        slug: fileToSlugKey[slugWithoutExt] ?? slugWithoutExt,
+        title: isReadme
+          ? fm.introTitle || fm.title || titleName
+          : fm.title || titleName,
+        slug: nodeSlug,
         isFolder: false,
+        index: fm.index,
+        isAppendix: isAppendixPath(slugWithoutExt),
+        isPreface: nodeSlug === "preface",
         parentId: parentPath ? `local-${parentPath}` : null,
         children: [],
-      })
+      }
+      nodes.push(mdNode)
     }
   }
 
@@ -109,6 +124,15 @@ function buildLocalTree(dir: string, parentPath = ""): RepoTreeNode[] {
   })
 
   return nodes
+}
+
+function isAppendixPath(relativePath: string): boolean {
+  const normalizedPath = relativePath.replace(/\\/g, "/")
+  const pathSegments = normalizedPath.split("/")
+  return pathSegments.some(
+    (segment) =>
+      segment.toLowerCase().includes("appendix") || segment.includes("附录")
+  )
 }
 
 export async function getArticleBuffer(

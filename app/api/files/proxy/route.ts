@@ -45,6 +45,17 @@ export async function GET(req: NextRequest) {
   const safeCategory = match[1]
   const safeFilename = match[2]
 
+  // Map category through an explicit allow-list to avoid using tainted input directly
+  const allowedCategories: Record<string, string> = {
+    images: "images",
+    videos: "videos",
+    files: "files",
+  }
+  const normalizedCategory = allowedCategories[safeCategory]
+  if (!normalizedCategory) {
+    return NextResponse.json({ error: "Invalid path" }, { status: 400 })
+  }
+
   // Enforce a conservative allow-list for filenames to harden against SSRF
   // Only allow alphanumerics, dot, underscore, and hyphen, and disallow leading dots.
   if (
@@ -70,7 +81,7 @@ export async function GET(req: NextRequest) {
   const repo = encodeURIComponent(repoStr)
   // Safely construct the URL to prevent SSRF
   const githubUrl = new URL(
-    `/${owner}/${repo}/main/data/${safeCategory}/${encodeURIComponent(safeFilename)}`,
+    `/${owner}/${repo}/main/data/${normalizedCategory}/${encodeURIComponent(safeFilename)}`,
     "https://raw.githubusercontent.com"
   ).toString()
 

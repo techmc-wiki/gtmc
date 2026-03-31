@@ -18,9 +18,29 @@ interface TreeNode {
   id: string
   title: string
   slug: string
+  index: number
+  isAppendix: boolean
+  isPreface: boolean
   isFolder: boolean
   parentId: string | null
   children: TreeNode[]
+}
+
+function isAppendixDirectoryName(name: string): boolean {
+  const normalized = name.trim().toLowerCase()
+  return normalized.includes("appendix") || normalized.includes("附录")
+}
+
+function isReadmeArticle(node: TreeNode): boolean {
+  if (node.isFolder) {
+    return false
+  }
+
+  const normalize = (value: string) =>
+    value.trim().toLowerCase().replace(/\.md$/, "")
+  const slugTail = node.slug.split("/").pop() ?? ""
+
+  return normalize(node.title) === "readme" || normalize(slugTail) === "readme"
 }
 
 function getSlugMapMtime(): string {
@@ -96,8 +116,12 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
   // Add GitHub tree
   function addGithubNodes(nodes: RepoTreeNode[], parentArray: TreeNode[]) {
     for (const node of nodes) {
+      const nodeWithMeta = node as RepoTreeNode & Partial<TreeNode>
       const clone: TreeNode = {
         ...node,
+        index: nodeWithMeta.index ?? -1,
+        isAppendix: nodeWithMeta.isAppendix ?? false,
+        isPreface: nodeWithMeta.isPreface ?? false,
         children: [],
       }
       unifiedMap.set(clone.slug.toLowerCase(), clone)
@@ -121,6 +145,9 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
         id: dbItem.id, // Keep DB ID so the client can interact with it
         title: dbItem.title,
         slug: dbItem.slug,
+        index: -1,
+        isAppendix: false,
+        isPreface: false,
         isFolder: dbItem.isFolder, // Make sure it defaults to false if missing
         parentId: dbItem.parentId,
         children: [],
@@ -157,13 +184,51 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
     }
   })
 
-  // 6. Sort mergedTree (folders first, then alphabetically)
   function sortTree(nodes: TreeNode[]) {
-    nodes.sort((a, b) => {
-      if (a.isFolder === b.isFolder) {
-        return a.title.localeCompare(b.title)
+    const compareIndex = (a: number, b: number) => {
+      const aNoIndex = a === -1
+      const bNoIndex = b === -1
+
+      if (aNoIndex !== bNoIndex) {
+        return aNoIndex ? 1 : -1
       }
-      return a.isFolder ? -1 : 1
+
+      if (aNoIndex && bNoIndex) {
+        return 0
+      }
+
+      return a - b
+    }
+
+    nodes.sort((a, b) => {
+      if (a.isPreface !== b.isPreface) {
+        return a.isPreface ? -1 : 1
+      }
+
+      if (a.isFolder !== b.isFolder) {
+        return a.isFolder ? -1 : 1
+      }
+
+      if (!a.isFolder && !b.isFolder) {
+        if (a.isAppendix !== b.isAppendix) {
+          return a.isAppendix ? 1 : -1
+        }
+
+        const aIsReadme =
+          a.title === "<EMPTY>" || a.slug.toLowerCase().endsWith("/readme")
+        const bIsReadme =
+          b.title === "<EMPTY>" || b.slug.toLowerCase().endsWith("/readme")
+        if (aIsReadme !== bIsReadme) {
+          return aIsReadme ? -1 : 1
+        }
+
+        const indexComparison = compareIndex(a.index, b.index)
+        if (indexComparison !== 0) {
+          return indexComparison
+        }
+      }
+
+      return a.title.localeCompare(b.title)
     })
     for (const node of nodes) {
       if (node.children && node.children.length > 0) {
@@ -171,8 +236,6 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
       }
     }
   }
-  sortTree(mergedTree)
-
   // 7. Filter out ignored articles using centralized ignore logic
   function filterIgnoredNodes(nodes: TreeNode[], isRoot: boolean): TreeNode[] {
     const result: TreeNode[] = []
@@ -193,12 +256,27 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
         node.children = filterIgnoredNodes(node.children, false)
       }
 
+      if (node.isFolder && isAppendixDirectoryName(node.title)) {
+        const promotedChildren = node.children.filter(
+          (child) => child.isFolder || !isReadmeArticle(child)
+        )
+        const promotedParentId = node.parentId
+
+        for (const child of promotedChildren) {
+          child.parentId = promotedParentId
+        }
+
+        result.push(...promotedChildren)
+        continue
+      }
+
       result.push(node)
     }
     return result
   }
 
   const filteredTree = filterIgnoredNodes(mergedTree, true)
+  sortTree(filteredTree)
 
   return filteredTree
 }

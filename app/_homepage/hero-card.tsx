@@ -134,17 +134,20 @@ export function HeroCard({
             sm:gap-2 sm:text-6xl
             lg:text-7xl
           ">
-          <span className="
-            animate-tech-slide-in font-light text-tech-main-dark opacity-0
-            [animation-delay:0.5s] fill-mode-forwards
-          ">
-            Graduate Texts</span>
-          <div className="flex flex-row">
-            <span className="
-              animate-tech-slide-in pl-[0.08ch] font-semibold text-tech-main
-              opacity-0 mix-blend-multiply [animation-delay:0.7s]
-              fill-mode-forwards
+          <span
+            className="
+              animate-tech-slide-in font-light text-tech-main-dark opacity-0
+              [animation-delay:0.5s] fill-mode-forwards
             ">
+            Graduate Texts
+          </span>
+          <div className="flex flex-row">
+            <span
+              className="
+                animate-tech-slide-in pl-[0.08ch] font-semibold text-tech-main
+                opacity-0 mix-blend-multiply [animation-delay:0.7s]
+                fill-mode-forwards
+              ">
               in Minecraft
             </span>
             <span

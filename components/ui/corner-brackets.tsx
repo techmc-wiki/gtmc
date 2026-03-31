@@ -26,10 +26,24 @@ export const CornerBrackets = React.forwardRef<
       return (
         <div ref={ref} className={className}>
           <div
-            className={`absolute top-0 left-0 ${size} -translate-px border-t-2 border-l-2 ${color} opacity-0 transition-opacity group-hover:opacity-100`}
+            className={`
+              absolute top-0 left-0
+              ${size}
+              -translate-px border-t-2 border-l-2
+              ${color}
+              opacity-0 transition-opacity
+              group-hover:opacity-100
+            `}
           />
           <div
-            className={`absolute right-0 bottom-0 ${size} translate-px border-r-2 border-b-2 ${color} opacity-0 transition-opacity group-hover:opacity-100`}
+            className={`
+              absolute right-0 bottom-0
+              ${size}
+              translate-px border-r-2 border-b-2
+              ${color}
+              opacity-0 transition-opacity
+              group-hover:opacity-100
+            `}
           />
         </div>
       )
@@ -44,22 +58,42 @@ export const CornerBrackets = React.forwardRef<
       <div ref={ref} className={className}>
         {showTopLeft && (
           <div
-            className={`pointer-events-none absolute top-0 left-0 ${size} -translate-px border-t-2 border-l-2 ${color}`}
+            className={`
+              pointer-events-none absolute top-0 left-0
+              ${size}
+              -translate-px border-t-2 border-l-2
+              ${color}
+            `}
           />
         )}
         {showTopRight && (
           <div
-            className={`pointer-events-none absolute top-0 right-0 ${size} translate-x-px -translate-y-px border-t-2 border-r-2 ${color}`}
+            className={`
+              pointer-events-none absolute top-0 right-0
+              ${size}
+              translate-x-px -translate-y-px border-t-2 border-r-2
+              ${color}
+            `}
           />
         )}
         {showBottomLeft && (
           <div
-            className={`pointer-events-none absolute bottom-0 left-0 ${size} -translate-x-px translate-y-px border-b-2 border-l-2 ${color}`}
+            className={`
+              pointer-events-none absolute bottom-0 left-0
+              ${size}
+              -translate-x-px translate-y-px border-b-2 border-l-2
+              ${color}
+            `}
           />
         )}
         {showBottomRight && (
           <div
-            className={`pointer-events-none absolute right-0 bottom-0 ${size} translate-px border-r-2 border-b-2 ${color}`}
+            className={`
+              pointer-events-none absolute right-0 bottom-0
+              ${size}
+              translate-px border-r-2 border-b-2
+              ${color}
+            `}
           />
         )}
       </div>

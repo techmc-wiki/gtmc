@@ -23,18 +23,81 @@ type MarkdownComponentProps = {
 }
 type MarkdownComponent = (props: MarkdownComponentProps) => ReactNode
 
+/**
+ * Filter children to exclude whitespace-only text nodes.
+ */
+function getMeaningfulChildren(
+  children?: MarkdownAstNode[]
+): MarkdownAstNode[] {
+  if (!children) return []
+  return children.filter(
+    (child) => !(child.type === "text" && child.value?.trim() === "")
+  )
+}
+
+/**
+ * Check if a node is an image element.
+ */
+function isImageElement(node: MarkdownAstNode): boolean {
+  return node.type === "element" && node.tagName === "img"
+}
+
+function containsImageDescendant(node: MarkdownAstNode): boolean {
+  if (isImageElement(node)) return true
+
+  for (const child of getMeaningfulChildren(node.children ?? [])) {
+    if (containsImageDescendant(child)) return true
+  }
+
+  return false
+}
+
+/**
+ * Check if a node is a single "image unit":
+ * - Direct <img> element
+ * - <a> containing exactly one image element
+ * - Formatting wrapper (strong/em/del) containing exactly one image element
+ */
+function isImageUnit(node: MarkdownAstNode): boolean {
+  if (node.type !== "element") return false
+
+  // Direct image
+  if (node.tagName === "img") return true
+
+  // Allowable wrapper tags that can contain image-only content
+  const allowedWrappers = ["a", "strong", "em", "del"]
+  if (allowedWrappers.includes(node.tagName ?? "")) {
+    const meaningful = getMeaningfulChildren(node.children ?? [])
+    return meaningful.length === 1 && isImageElement(meaningful[0])
+  }
+
+  return false
+}
+
+/**
+ * Check if a paragraph contains only image-like content.
+ * This prevents invalid HTML nesting like <p><div>...</div></p>
+ * when LazyImage (which returns a div) is used inside a paragraph.
+ */
 function isImageOnlyParagraph(node: unknown) {
   const paragraphNode = node as MarkdownAstNode | undefined
   if (paragraphNode?.tagName !== "p" || !paragraphNode.children) return false
 
-  const meaningfulChildren = paragraphNode.children.filter(
-    (child) => !(child.type === "text" && child.value?.trim() === "")
-  )
+  const meaningfulChildren = getMeaningfulChildren(paragraphNode.children)
 
   return (
     meaningfulChildren.length === 1 &&
     meaningfulChildren[0]?.type === "element" &&
-    meaningfulChildren[0]?.tagName === "img"
+    isImageUnit(meaningfulChildren[0])
+  )
+}
+
+function paragraphContainsImage(node: unknown): boolean {
+  const paragraphNode = node as MarkdownAstNode | undefined
+  if (paragraphNode?.tagName !== "p" || !paragraphNode.children) return false
+
+  return getMeaningfulChildren(paragraphNode.children).some((child) =>
+    containsImageDescendant(child)
   )
 }
 
@@ -80,10 +143,9 @@ export function getMarkdownComponents(rawPath: string) {
         <Link
           href={href}
           className="
-            mx-1 inline-block border border-b-2 border-tech-main/30
-            bg-tech-main/10 px-1 py-[0.05rem] font-mono text-[0.8em]
-            text-tech-main transition-colors
-            hover:border-tech-main hover:bg-tech-main/80 hover:text-white
+            inline-block cursor-pointer bg-tech-main/10 px-1 py-[0.05rem]
+            font-mono text-[0.8em] text-tech-main underline transition-colors
+            hover:bg-tech-main/80 hover:text-white hover:no-underline
           "
           {...rest}>
           {children}
@@ -105,9 +167,9 @@ export function getMarkdownComponents(rawPath: string) {
       <Link
         href={href}
         className="
-          border-b border-tech-main/50 font-mono text-tech-main
-          transition-colors
-          hover:bg-tech-main/80 hover:text-white
+          cursor-pointer px-0.5 font-sans text-tech-main underline
+          underline-offset-4 transition-colors
+          hover:bg-tech-main/80 hover:text-white hover:no-underline
         "
         {...props}>
         {children}
@@ -357,6 +419,14 @@ export function getMarkdownComponents(rawPath: string) {
     p: ({ node, children, ...props }: MarkdownComponentProps) => {
       if (isImageOnlyParagraph(node)) return <>{children}</>
 
+      if (paragraphContainsImage(node)) {
+        return (
+          <div className="mb-4 font-sans text-base/relaxed text-slate-800">
+            {children}
+          </div>
+        )
+      }
+
       return (
         <p
           className="mb-4 font-sans text-base/relaxed text-slate-800"
@@ -411,6 +481,16 @@ export function getMarkdownComponents(rawPath: string) {
     hr: ({ ...props }: MarkdownComponentProps) => (
       <hr
         className="mx-auto my-8 w-4/5 border-t border-tech-main/30"
+        {...props}
+      />
+    ),
+    sup: ({ ...props }: MarkdownComponentProps) => (
+      <sup
+        className="
+          mx-0.5 cursor-pointer font-mono not-italic
+          before:text-tech-main/60 before:content-['{']
+          after:text-tech-main/60 after:content-['}']
+        "
         {...props}
       />
     ),

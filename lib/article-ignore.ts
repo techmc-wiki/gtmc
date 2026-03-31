@@ -13,7 +13,9 @@ export const IGNORED_DIRECTORIES: readonly string[] = [
 
 export const IGNORED_ROOT_FILES: readonly string[] = [
   "readme.md",
-  "contributors.md",
+  "readme_cn.md",
+  "contributing.md",
+  "contributing_cn.md",
   "_sidebar.md",
   "desynchronized.md",
 ]

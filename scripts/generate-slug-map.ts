@@ -83,6 +83,17 @@ function processDirectory(
     slugsSeen.set(articleSlug, articleFile)
 
     const compositeSlug = `${slugPrefix}/${articleSlug}`
+
+    if (slugMap[compositeSlug] !== undefined) {
+      const existingPath = slugMap[compositeSlug]
+      process.stderr.write(
+        `Error: Duplicate composite slug "${compositeSlug}": articles/${relPath} ` +
+          `(conflicts with articles/${existingPath} after slug flattening)\n`
+      )
+      hasError = true
+      continue
+    }
+
     slugMap[compositeSlug] = `${relFromArticles}/${articleFile}`
   }
 
@@ -117,6 +128,27 @@ function processDirectory(
         `Error: Missing slug in folder README: articles/${subRelPath}/README.md\n`
       )
       hasError = true
+      continue
+    }
+
+    // Allow empty string slug in subdirectories (depth >= 1) to flatten the slug path
+    if (subSlug === "") {
+      if (depth < 1) {
+        process.stderr.write(
+          `Error: Empty slug not allowed in top-level folder: articles/${subRelPath}/README.md\n`
+        )
+        hasError = true
+        continue
+      }
+      // Use current slugPrefix as-is (skip this directory segment)
+      const subError = processDirectory(
+        subDirPath,
+        subRelPath,
+        slugPrefix,
+        depth + 1,
+        slugMap
+      )
+      if (subError) hasError = true
       continue
     }
 
@@ -172,7 +204,7 @@ function main(): void {
 
     const folderSlug = getSlugFromFile(readmePath)
 
-    if (folderSlug === null) {
+    if (folderSlug === null || folderSlug === "") {
       process.stderr.write(
         `Error: Missing slug in folder README: articles/${folderName}/README.md\n`
       )

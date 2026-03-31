@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "lint": "prettier --write .; eslint --fix",
+    "lint": "pnpm lint:fix",
+    "lint:fix": "prettier --write . && eslint --fix",
+    "lint:check": "prettier --check . && eslint",
     "postinstall": "prisma generate && node scripts/fix-prisma.js && pnpm articles:init && pnpm articles:update && pnpm generate-slug-map",
     "generate-slug-map": "tsx scripts/generate-slug-map.ts",
     "articles:init": "git submodule update --init --recursive",

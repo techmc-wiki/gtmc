@@ -5,6 +5,13 @@ import { CodeCopyButton } from "@/components/code-copy-button"
 import { LazyCodeBlock } from "@/components/lazy-code-block"
 import { LazyImage } from "@/components/lazy-image"
 
+type MarkdownAstNode = {
+  type?: string
+  tagName?: string
+  value?: string
+  children?: MarkdownAstNode[]
+}
+
 type MarkdownComponentProps = {
   children?: ReactNode
   id?: string
@@ -15,6 +22,21 @@ type MarkdownComponentProps = {
   [key: string]: unknown
 }
 type MarkdownComponent = (props: MarkdownComponentProps) => ReactNode
+
+function isImageOnlyParagraph(node: unknown) {
+  const paragraphNode = node as MarkdownAstNode | undefined
+  if (paragraphNode?.tagName !== "p" || !paragraphNode.children) return false
+
+  const meaningfulChildren = paragraphNode.children.filter(
+    (child) => !(child.type === "text" && child.value?.trim() === "")
+  )
+
+  return (
+    meaningfulChildren.length === 1 &&
+    meaningfulChildren[0]?.type === "element" &&
+    meaningfulChildren[0]?.tagName === "img"
+  )
+}
 
 export function getMarkdownComponents(rawPath: string) {
   const makeSpan = (style: Record<string, string>) => {
@@ -332,12 +354,17 @@ export function getMarkdownComponents(rawPath: string) {
         {children}
       </h3>
     ),
-    p: ({ ...props }: MarkdownComponentProps) => (
-      <p
-        className="mb-4 font-sans text-base/relaxed text-slate-800"
-        {...props}
-      />
-    ),
+    p: ({ node, children, ...props }: MarkdownComponentProps) => {
+      if (isImageOnlyParagraph(node)) return <>{children}</>
+
+      return (
+        <p
+          className="mb-4 font-sans text-base/relaxed text-slate-800"
+          {...props}>
+          {children}
+        </p>
+      )
+    },
     a: aComponent,
     ul: ({ ...props }: MarkdownComponentProps) => (
       <ul

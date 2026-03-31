@@ -5,6 +5,15 @@ import { getSingletonHighlighter } from "shiki"
 export type RehypeShikiPlugin = Awaited<ReturnType<typeof createRehypeShiki>>
 
 const highlightCache = new Map<string, Element | null>()
+const pluginCache = new Map<string, Promise<RehypeShikiPlugin>>()
+
+function createNoopRehypeShiki(): RehypeShikiPlugin {
+  return function rehypeShiki() {
+    return function () {
+      return
+    }
+  }
+}
 
 function extractLangsFromMarkdown(content: string): string[] {
   const matches = content.matchAll(/^```(\w+)/gm)
@@ -103,8 +112,20 @@ export async function createRehypeShiki(langs?: string[]) {
 export function getCachedRehypeShiki(
   content?: string
 ): Promise<RehypeShikiPlugin> {
-  const langs = content ? extractLangsFromMarkdown(content) : undefined
-  return createRehypeShiki(langs)
+  const langs = content ? extractLangsFromMarkdown(content) : []
+  if (langs.length === 0) {
+    return Promise.resolve(createNoopRehypeShiki())
+  }
+
+  const langKey = [...new Set(langs)].sort().join(",")
+  const cachedPlugin = pluginCache.get(langKey)
+  if (cachedPlugin) {
+    return cachedPlugin
+  }
+
+  const createdPlugin = createRehypeShiki(langs)
+  pluginCache.set(langKey, createdPlugin)
+  return createdPlugin
 }
 
 function getTextContent(node: Element | Text): string {

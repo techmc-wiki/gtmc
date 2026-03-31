@@ -1,4 +1,5 @@
-﻿import { auth } from "@/lib/auth"
+import type { Metadata } from "next"
+import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { BrutalInput } from "@/components/ui/brutal-input"
@@ -6,6 +7,12 @@ import { BrutalAvatar } from "@/components/ui/brutal-avatar"
 import { updateProfileAction } from "@/actions/profile"
 import { SignOutButton } from "@/components/ui/sign-out-button"
 import { getGithubEmailVisibility } from "@/lib/github"
+
+export const metadata: Metadata = {
+  title: "User Profile",
+  description: "Your GTMC account settings and profile management.",
+  robots: { index: false, follow: false },
+}
 
 export default async function ProfilePage() {
   const session = await auth()

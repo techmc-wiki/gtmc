@@ -1,9 +1,14 @@
+import type { Metadata } from "next"
 import { DraftEditor } from "@/components/editor/draft-editor"
 import Link from "next/link"
 import { BrutalButton } from "@/components/ui/brutal-button"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { notFound, redirect } from "next/navigation"
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 export default async function EditDraftPage({
   params,

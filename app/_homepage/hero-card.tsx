@@ -2,6 +2,7 @@
 
 import { motion, MotionValue } from "motion/react"
 import { ForwardedRef } from "react"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 export function HeroCard({
   cardRef,
@@ -75,17 +76,10 @@ export function HeroCard({
         />
 
         {/* 工业感/图纸感的定位刻度 */}
-        <div
-          className="
-            absolute top-0 left-0 size-3 -translate-0.5 border-t-2 border-l-2
-            border-tech-main
-          "
-        />
-        <div
-          className="
-            absolute right-0 bottom-0 size-3 translate-0.5 border-r-2 border-b-2
-            border-tech-main
-          "
+        <CornerBrackets
+          size="size-3"
+          color="border-tech-main"
+          corners="top-bottom"
         />
 
         {/* 钉子/打孔装饰 */}

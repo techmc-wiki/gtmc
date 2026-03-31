@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Metadata } from "next"
 import { BrutalCard } from "@/components/ui/brutal-card"
 import { BrutalButton } from "@/components/ui/brutal-button"
 import Link from "next/link"
@@ -12,6 +13,12 @@ import { auth } from "@/lib/auth"
 import { PageHeader } from "@/components/ui/page-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+
+export const metadata: Metadata = {
+  title: "Review Hub",
+  description: "Admin content review and approval dashboard.",
+  robots: { index: false, follow: false },
+}
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0

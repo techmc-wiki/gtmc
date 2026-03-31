@@ -18,6 +18,7 @@ import {
   resolveSlug,
 } from "@/lib/slug-resolver"
 import { getSiteUrl } from "@/lib/site-url"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 interface ArticlePageProps {
   params: Promise<{
@@ -129,15 +130,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         pb-32 backdrop-blur-sm
         sm:p-8
       ">
-      <div
-        className="
-          absolute top-0 left-0 size-4 border-t-2 border-l-2 border-tech-main/40
-        "></div>
-      <div
-        className="
-          absolute right-0 bottom-0 size-4 border-r-2 border-b-2
-          border-tech-main/40
-        "></div>
+      <CornerBrackets size="size-4" />
 
       {/* Article Header Region - Mobile-first in-flow card */}
       <div
@@ -147,26 +140,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           sm:p-6
         ">
         {/* Corner markers matching BrutalCard pattern */}
-        <div
-          className="
-            pointer-events-none absolute top-0 left-0 size-2 -translate-px
-            border-t-2 border-l-2 border-tech-main/40
-          "></div>
-        <div
-          className="
-            pointer-events-none absolute top-0 right-0 size-2 translate-x-px
-            -translate-y-px border-t-2 border-r-2 border-tech-main/40
-          "></div>
-        <div
-          className="
-            pointer-events-none absolute bottom-0 left-0 size-2 -translate-x-px
-            translate-y-px border-b-2 border-l-2 border-tech-main/40
-          "></div>
-        <div
-          className="
-            pointer-events-none absolute right-0 bottom-0 size-2 translate-px
-            border-r-2 border-b-2 border-tech-main/40
-          "></div>
+        <CornerBrackets />
 
         {/* Region 1: System/Read Label */}
         <div className="flex items-center font-mono text-xs text-tech-main/50">

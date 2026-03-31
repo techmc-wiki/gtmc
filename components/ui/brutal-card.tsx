@@ -1,4 +1,5 @@
 import * as React from "react"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 export interface BrutalCardProps extends React.HTMLAttributes<HTMLDivElement> {
   color?:
@@ -28,30 +29,7 @@ export const BrutalCard = React.forwardRef<HTMLDivElement, BrutalCardProps>(
         `}
         {...props}>
         {/* 卡片的十字定位角标 */}
-        <div
-          className="
-            pointer-events-none absolute top-0 left-0 size-2 -translate-px
-            border-t-2 border-l-2 border-tech-main/40
-          "
-        />
-        <div
-          className="
-            pointer-events-none absolute top-0 right-0 size-2 translate-x-px
-            -translate-y-px border-t-2 border-r-2 border-tech-main/40
-          "
-        />
-        <div
-          className="
-            pointer-events-none absolute bottom-0 left-0 size-2 -translate-x-px
-            translate-y-px border-b-2 border-l-2 border-tech-main/40
-          "
-        />
-        <div
-          className="
-            pointer-events-none absolute right-0 bottom-0 size-2 translate-px
-            border-r-2 border-b-2 border-tech-main/40
-          "
-        />
+        <CornerBrackets />
 
         {children}
       </div>

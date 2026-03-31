@@ -73,7 +73,7 @@ export default function Footer() {
               flex flex-col gap-8
               md:col-span-5 md:flex-row md:justify-around
             ">
-            <div className="flex flex-col space-y-4">
+            <nav aria-label="Documentation" className="flex flex-col space-y-4">
               <h3 className="section-label">Documentation</h3>
               <ul className="flex flex-col space-y-3 text-sm text-tech-main">
                 <li>
@@ -97,9 +97,9 @@ export default function Footer() {
                   </Link>
                 </li>
               </ul>
-            </div>
+            </nav>
 
-            <div className="flex flex-col space-y-4">
+            <nav aria-label="Community" className="flex flex-col space-y-4">
               <h3 className="section-label">Community</h3>
               <ul className="flex flex-col space-y-3 text-sm text-tech-main">
                 <li>
@@ -139,10 +139,11 @@ export default function Footer() {
                   </Link>
                 </li>
               </ul>
-            </div>
+            </nav>
           </div>
 
-          <div
+          <aside
+            aria-label="Legal"
             className="
               flex flex-col space-y-4
               md:col-span-3 md:items-end md:text-right
@@ -167,7 +168,7 @@ export default function Footer() {
                 Not an official Minecraft product.
               </p>
             </div>
-          </div>
+          </aside>
         </div>
 
         <div

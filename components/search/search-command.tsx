@@ -307,7 +307,7 @@ export function SearchCommand() {
               <CornerBrackets variant="static" />
 
               {/* Header */}
-              <div
+              <header
                 className="
                   flex items-center justify-between border-b guide-line px-4
                   py-3
@@ -327,13 +327,13 @@ export function SearchCommand() {
                 <button
                   onClick={closeModal}
                   className="
-                    cursor-pointer border border-tech-main/30 px-2 py-0.5
-                    font-mono text-[10px] text-tech-main/50 transition-colors
-                    hover:bg-tech-main hover:text-white
-                  ">
+                     cursor-pointer border border-tech-main/30 px-2 py-0.5
+                     font-mono text-[10px] text-tech-main/50 transition-colors
+                     hover:bg-tech-main hover:text-white
+                   ">
                   ESC
                 </button>
-              </div>
+              </header>
 
               {/* Search input */}
               <div className="border-b guide-line px-4 py-3">
@@ -356,7 +356,8 @@ export function SearchCommand() {
               </div>
 
               {/* Results area */}
-              <div className="
+              <div
+                className="
                 custom-left-scrollbar max-h-[50vh] overflow-y-auto
               ">
                 {/* Status line */}
@@ -380,12 +381,8 @@ export function SearchCommand() {
                     <div className="space-y-3">
                       {[1, 2, 3].map((i) => (
                         <div key={i} className="space-y-1.5">
-                          <div
-                            className="h-4 w-3/5 animate-pulse bg-tech-main/10"
-                          />
-                          <div
-                            className="h-3 w-2/5 animate-pulse bg-tech-main/5"
-                          />
+                          <div className="h-4 w-3/5 animate-pulse bg-tech-main/10" />
+                          <div className="h-3 w-2/5 animate-pulse bg-tech-main/5" />
                         </div>
                       ))}
                     </div>
@@ -437,8 +434,7 @@ export function SearchCommand() {
 
                           {/* Content snippet */}
                           {result.snippet && (
-                            <div
-                              className="mt-1 text-xs/relaxed text-tech-main/60">
+                            <div className="mt-1 text-xs/relaxed text-tech-main/60">
                               {highlightMatch(result.snippet)}
                             </div>
                           )}
@@ -467,8 +463,7 @@ export function SearchCommand() {
                       ">
                       NO_MATCH_FOUND
                     </div>
-                    <div
-                      className="mt-1 font-mono text-[10px] text-tech-main/30">
+                    <div className="mt-1 font-mono text-[10px] text-tech-main/30">
                       Try different keywords
                     </div>
                   </div>
@@ -484,8 +479,7 @@ export function SearchCommand() {
                       ">
                       AWAITING_INPUT
                     </div>
-                    <div
-                      className="mt-1 font-mono text-[10px] text-tech-main/25">
+                    <div className="mt-1 font-mono text-[10px] text-tech-main/25">
                       Type at least 2 characters
                     </div>
                   </div>
@@ -493,7 +487,7 @@ export function SearchCommand() {
               </div>
 
               {/* Footer hints */}
-              <div
+              <footer
                 className="
                   flex items-center gap-4 border-t guide-line px-4 py-2
                   font-mono text-[10px] text-tech-main/40
@@ -508,7 +502,7 @@ export function SearchCommand() {
                 <span>
                   <kbd className="border guide-line px-1">ESC</kbd> DISMISS
                 </span>
-              </div>
+              </footer>
             </div>
           </div>,
           document.body

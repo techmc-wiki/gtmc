@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { createPortal } from "react-dom"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 interface MobileTreeCardProps {
   isOpen: boolean
@@ -65,30 +66,7 @@ export function MobileTreeCard({
           flex-col border border-tech-main/40 bg-white/95 backdrop-blur-md
         "
         data-testid="mobile-tree-card">
-        <div
-          className="
-            pointer-events-none absolute top-0 left-0 size-2 -translate-px
-            border-t-2 border-l-2 border-tech-main/40
-          "
-        />
-        <div
-          className="
-            pointer-events-none absolute top-0 right-0 size-2 translate-x-px
-            -translate-y-px border-t-2 border-r-2 border-tech-main/40
-          "
-        />
-        <div
-          className="
-            pointer-events-none absolute bottom-0 left-0 size-2 -translate-x-px
-            translate-y-px border-b-2 border-l-2 border-tech-main/40
-          "
-        />
-        <div
-          className="
-            pointer-events-none absolute right-0 bottom-0 size-2 translate-px
-            border-r-2 border-b-2 border-tech-main/40
-          "
-        />
+        <CornerBrackets />
 
         <div
           className="

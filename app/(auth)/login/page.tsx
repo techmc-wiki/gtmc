@@ -51,7 +51,7 @@ export default function LoginPage() {
           className="
             font-mono text-[10px] tracking-widest text-tech-main opacity-30
           ">
-          SECURE.CONN // PORT-443
+          {"SECURE.CONN // PORT-443"}
         </div>
       </div>
 
@@ -215,6 +215,7 @@ export default function LoginPage() {
                   opacity-0 [animation-delay:0.6s] fill-mode-forwards
                 ">
                 <svg
+                  aria-hidden="true"
                   width="24"
                   height="24"
                   viewBox="0 0 24 24"

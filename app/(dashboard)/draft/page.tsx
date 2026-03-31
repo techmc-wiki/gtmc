@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { BrutalCard } from "@/components/ui/brutal-card"
 import { BrutalButton } from "@/components/ui/brutal-button"
 import Link from "next/link"
@@ -10,6 +11,10 @@ import { PageHeader } from "@/components/ui/page-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { DraftStatusBadge } from "@/components/ui/status-badge"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 export default async function DraftDashboardPage() {
   const session = await auth()

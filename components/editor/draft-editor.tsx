@@ -333,7 +333,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           <EditorToolbar onInsert={insertSyntax} disabled={isReadOnly} />
         )}
 
-        <div
+        <section
           id="draft-editor-write-panel"
           role="tabpanel"
           className="flex min-h-125 grow flex-col"
@@ -357,9 +357,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               aria-busy={isSaving}
             />
           </div>
-        </div>
+        </section>
 
-        <div
+        <section
           id="draft-editor-preview-panel"
           role="tabpanel"
           hidden={activeTab !== "preview"}
@@ -378,7 +378,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               NOTHING_TO_PREVIEW_
             </p>
           )}
-        </div>
+        </section>
       </div>
 
       {!isReadOnly && (

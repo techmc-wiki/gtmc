@@ -1,4 +1,12 @@
+import type { Metadata } from "next"
 import { FeatureEditor } from "@/components/editor/feature-editor"
+
+export const metadata: Metadata = {
+  title: "Report New Feature",
+  description:
+    "Submit bug reports, feature requests, and enhancement suggestions for GTMC Wiki.",
+  robots: { index: false, follow: false },
+}
 
 export default function NewFeaturePage() {
   return (

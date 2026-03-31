@@ -3,6 +3,7 @@ import path from "path"
 import remarkGfm from "remark-gfm"
 import remarkMath from "remark-math"
 import remarkBreaks from "remark-breaks"
+import { remarkNumberedHeadingsDot } from "@/lib/remark-numbered-headings"
 import rehypeRaw from "rehype-raw"
 import rehypeKatex from "rehype-katex"
 import rehypeSlug from "rehype-slug"
@@ -497,6 +498,12 @@ export function getMarkdownComponents(rawPath: string) {
       }
       return <LazyImage src={src} alt={(alt as string) || ""} />
     },
+    hr: ({ ...props }: MarkdownComponentProps) => (
+      <hr
+        className="mx-auto my-8 w-4/5 border-t border-tech-main/30"
+        {...props}
+      />
+    ),
     pre: preComponent,
     code: codeComponent,
   } as Record<string, MarkdownComponent>
@@ -507,8 +514,11 @@ export function getPluginsForContent(
   rehypeShikiPlugin?: Awaited<ReturnType<typeof createRehypeShiki>>
 ) {
   const remarkPlugins: Array<
-    typeof remarkGfm | typeof remarkMath | typeof remarkBreaks
-  > = [remarkGfm, remarkBreaks]
+    | typeof remarkGfm
+    | typeof remarkMath
+    | typeof remarkBreaks
+    | [typeof remarkNumberedHeadingsDot, { startDepth: number }]
+  > = [remarkGfm, remarkBreaks, [remarkNumberedHeadingsDot, { startDepth: 2 }]]
   const rehypePlugins: Array<
     | typeof rehypeRaw
     | typeof rehypeKatex

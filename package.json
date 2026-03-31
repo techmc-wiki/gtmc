@@ -59,6 +59,7 @@
     "@tailwindcss/postcss": "^4.2.2",
     "@types/diff": "^8.0.0",
     "@types/hast": "^3.0.4",
+    "@types/mdast": "^4.0.4",
     "@types/mime-types": "^3.0.1",
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",

@@ -1,13 +1,26 @@
 "use client"
 
 import { useRef, useEffect, useState } from "react"
+import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { useHomepageMotion } from "@/lib/motion/use-homepage-motion"
 import { HOMEPAGE_MOTION } from "@/lib/motion/homepage-constants"
 import { HideFooter } from "@/components/layout/footer-context"
-import { BackgroundLayer } from "./_homepage/background-layer"
-import { MidgroundLayer } from "./_homepage/midground-layer"
-import { ForegroundLayer } from "./_homepage/foreground-layer"
+
+const BackgroundLayer = dynamic(
+  () =>
+    import("./_homepage/background-layer").then((mod) => mod.BackgroundLayer),
+  { ssr: false }
+)
+const MidgroundLayer = dynamic(
+  () => import("./_homepage/midground-layer").then((mod) => mod.MidgroundLayer),
+  { ssr: false }
+)
+const ForegroundLayer = dynamic(
+  () =>
+    import("./_homepage/foreground-layer").then((mod) => mod.ForegroundLayer),
+  { ssr: false }
+)
 
 export default function Home() {
   const router = useRouter()

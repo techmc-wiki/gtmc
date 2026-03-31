@@ -1,11 +1,10 @@
 "use client"
 
 import * as React from "react"
+import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import ReactMarkdown from "react-markdown"
 
 import { saveDraftAction, submitForReviewAction } from "@/actions/article"
-import { getMarkdownComponents, getPluginsForContent } from "@/lib/markdown"
 import { validateSlug } from "@/lib/slug-validator"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
 import {
@@ -15,7 +14,21 @@ import {
 import { BrutalButton } from "../ui/brutal-button"
 import { BrutalInput } from "../ui/brutal-input"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
-import "katex/dist/katex.min.css"
+
+const MarkdownPreview = dynamic(
+  () =>
+    import("@/components/editor/markdown-preview").then(
+      (mod) => mod.MarkdownPreview
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <p className="p-6 font-mono text-xs text-tech-main/40">
+        LOADING_PREVIEW_
+      </p>
+    ),
+  }
+)
 
 interface DraftEditorProps {
   initialData?: {
@@ -140,8 +153,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
-          <label className="section-label">TITLE_</label>
+          <label htmlFor="draft-title" className="section-label">
+            TITLE_
+          </label>
           <BrutalInput
+            id="draft-title"
             required
             placeholder="ENTER TITLE..."
             className={`
@@ -161,8 +177,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="section-label">FILE_PATH_</label>
+          <label htmlFor="draft-file-path" className="section-label">
+            FILE_PATH_
+          </label>
           <BrutalInput
+            id="draft-file-path"
             placeholder="e.g. SlimeTech/Molforte/04-新机器.md"
             className={`
               border-tech-main/40 py-2 font-mono text-sm backdrop-blur-sm
@@ -182,8 +201,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
         {!articleId && (
           <div className="flex flex-col space-y-2">
-            <label className="section-label">SLUG_</label>
+            <label htmlFor="draft-slug" className="section-label">
+              SLUG_
+            </label>
             <BrutalInput
+              id="draft-slug"
               required
               placeholder="e.g. slime-tech/molforte/04-new-machine"
               className={`
@@ -349,12 +371,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                 selection:bg-tech-main/20 selection:text-slate-900
                 sm:p-8
               ">
-              <ReactMarkdown
-                remarkPlugins={getPluginsForContent(content).remarkPlugins}
-                rehypePlugins={getPluginsForContent(content).rehypePlugins}
-                components={getMarkdownComponents("")}>
-                {content}
-              </ReactMarkdown>
+              <MarkdownPreview content={content} />
             </div>
           ) : (
             <p className="p-6 font-mono text-xs text-tech-main/40">

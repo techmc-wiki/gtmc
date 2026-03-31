@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import dynamic from "next/dynamic"
 import { BrutalButton } from "../ui/brutal-button"
 import { BrutalInput } from "../ui/brutal-input"
 import { useRouter } from "next/navigation"
@@ -12,9 +13,6 @@ import {
   PENDING_LABELS,
 } from "@/components/ui/loading-indicator"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
-import ReactMarkdown from "react-markdown"
-import { getMarkdownComponents, getPluginsForContent } from "@/lib/markdown"
-import "katex/dist/katex.min.css"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import {
   classifyFile,
@@ -23,6 +21,21 @@ import {
   generateMarkdownBlock,
   VERCEL_BODY_LIMIT_BYTES,
 } from "@/lib/file-upload"
+
+const MarkdownPreview = dynamic(
+  () =>
+    import("@/components/editor/markdown-preview").then(
+      (mod) => mod.MarkdownPreview
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <p className="p-6 font-mono text-xs text-tech-main/40">
+        LOADING_PREVIEW_
+      </p>
+    ),
+  }
+)
 
 interface FeatureEditorProps {
   initialData?: {
@@ -324,8 +337,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
 
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
-          <label className="section-label">TITLE_</label>
+          <label htmlFor="feature-title" className="section-label">
+            TITLE_
+          </label>
           <BrutalInput
+            id="feature-title"
             required
             placeholder="ENTER TITLE..."
             className={`
@@ -345,8 +361,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="section-label">TAGS_ (comma separated)</label>
+          <label htmlFor="feature-tags" className="section-label">
+            TAGS_ (comma separated)
+          </label>
           <BrutalInput
+            id="feature-tags"
             placeholder="e.g. bug, enhancement, UI"
             className={`
               border-tech-main/40 py-2 font-mono text-sm backdrop-blur-sm
@@ -515,9 +534,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
                 role="status"
                 aria-live="polite">
                 {badge.type === "progress" && (
-                  <span
-                    className="inline-block size-2 animate-pulse bg-tech-accent"
-                  />
+                  <span className="inline-block size-2 animate-pulse bg-tech-accent" />
                 )}
                 {badge.type === "error" && (
                   <span className="inline-block size-2 bg-red-400" />
@@ -552,12 +569,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
                 selection:bg-tech-main/20 selection:text-slate-900
                 sm:p-8
               ">
-              <ReactMarkdown
-                remarkPlugins={getPluginsForContent(content).remarkPlugins}
-                rehypePlugins={getPluginsForContent(content).rehypePlugins}
-                components={getMarkdownComponents("")}>
-                {content}
-              </ReactMarkdown>
+              <MarkdownPreview content={content} />
             </div>
           ) : (
             <p className="p-6 font-mono text-xs text-tech-main/40">

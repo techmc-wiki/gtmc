@@ -2,7 +2,6 @@ import ReactMarkdown from "react-markdown"
 import "katex/dist/katex.min.css"
 import type { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
-import Link from "next/link"
 import matter from "gray-matter"
 import {
   calculateReadingMetrics,
@@ -19,6 +18,13 @@ import {
 } from "@/lib/slug-resolver"
 import { getSiteUrl } from "@/lib/site-url"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { ArticleMetadata } from "@/components/articles/article-metadata"
+import { ArticleNavigation } from "@/components/article-navigation"
+import {
+  flattenArticleTree,
+  getArticleNavigation,
+} from "@/lib/article-navigation"
+import { getSidebarTree } from "@/actions/sidebar"
 
 interface ArticlePageProps {
   params: Promise<{
@@ -54,7 +60,7 @@ export async function generateMetadata({
     }
 
     const { data } = matter(content)
-    const title = data.title || slugPath.split("/").pop() || "Article"
+    const title = resolveArticleTitle(data.title, filePath)
     const description = generateDescription(content)
 
     const siteUrl = getSiteUrl()
@@ -111,7 +117,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     notFound()
   }
 
-  const renderedContent = matter(content).content
+  const { data, content: renderedContent } = matter(content)
+  const articleTitle = resolveArticleTitle(data.title, result.filePath)
+  const embeddedArticleContent = embedTitleInMarkdown(
+    renderedContent,
+    articleTitle
+  )
 
   const editPath = normalizeDraftTargetPath(result.filePath)
 
@@ -123,79 +134,51 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   )
   const markdownComponents = getMarkdownComponents(result.filePath)
 
+  const siteUrl = getSiteUrl()
+  const canonicalSlug = getSlugForFilePath(result.filePath)
+  const canonicalUrl = canonicalSlug
+    ? `${siteUrl}/articles/${canonicalSlug.split("/").map(encodeURIComponent).join("/")}`
+    : `${siteUrl}/articles/${slugPath}`
+
+  const author = data.author as string | undefined
+  const coAuthors = (data["co-authors"] as string[] | undefined) || []
+  const createdAt = data.date as string | undefined
+  const lastModified = data.lastmod as string | undefined
+
+  // Get navigation data
+  const tree = await getSidebarTree()
+  const flattenedArticles = flattenArticleTree(tree)
+  const currentSlug = canonicalSlug || slugPath
+  const navigation = getArticleNavigation(currentSlug, flattenedArticles)
+
   return (
     <div
       className="
-        relative min-h-screen border border-tech-main/40 bg-transparent p-6
-        pb-32 backdrop-blur-sm
+        relative m-auto min-h-screen border border-tech-main/40 bg-transparent
+        p-6 backdrop-blur-sm
         sm:p-8
       ">
+
       <CornerBrackets size="size-4" />
 
-      {/* Article Header Region - Mobile-first in-flow card */}
-      <div
-        className="
-          relative mb-8 flex flex-col gap-4 border guide-line bg-white/80 p-4
-          backdrop-blur-sm
-          sm:p-6
-        ">
-        {/* Corner markers matching BrutalCard pattern */}
-        <CornerBrackets />
+      {/* Article Header */}
+      {author && createdAt && lastModified && (
+        <ArticleMetadata
+          title={articleTitle}
+          author={author}
+          coAuthors={coAuthors}
+          createdAt={createdAt}
+          lastModified={lastModified}
+          canonicalUrl={canonicalUrl}
+          filePath={result.filePath}
+          wordCount={wordCount}
+          readingTime={readingTime}
+          editPath={editPath}
+        />
+      )}
 
-        {/* Region 1: System/Read Label */}
-        <div className="flex items-center font-mono text-xs text-tech-main/50">
-          <span className="mr-2 size-2 animate-pulse bg-tech-main/50"></span>
-          SYS.READ_STREAM | UTF-8
-        </div>
 
-        {/* Region 2: Path Line */}
-        <div className="font-mono text-xs break-all text-slate-500">
-          PATH: {result.filePath}
-        </div>
-
-        {/* Region 3: Reading Stats Row */}
-        <div
-          className="
-            flex flex-col gap-2 font-mono text-xs text-tech-main opacity-80
-            transition-opacity
-            hover:opacity-100
-            sm:flex-row sm:items-center
-          ">
-          <div className="flex items-center gap-1">
-            <span className="opacity-50">WORDS:</span>
-            <span className="font-bold">{wordCount.toLocaleString()}</span>
-          </div>
-          <span
-            className="
-              hidden opacity-30
-              sm:inline
-            ">
-            |
-          </span>
-          <div className="flex items-center gap-1">
-            <span className="opacity-50">EST_TIME:</span>
-            <span className="font-bold">{readingTime} MIN</span>
-          </div>
-        </div>
-
-        {/* Region 4: Edit Action Row */}
-        <Link href={`/draft/new?file=${encodeURIComponent(editPath)}`}>
-          <button
-            type="button"
-            className="
-              relative flex min-h-[44px] w-full cursor-pointer items-center
-              gap-2 overflow-hidden border border-tech-main/40 bg-tech-main/10
-              px-4 py-2 font-mono text-xs tracking-widest text-tech-main
-              uppercase transition-all duration-300
-              hover:bg-tech-main hover:text-white
-              sm:w-auto
-            ">
-            <span className="relative z-10 font-bold">[EDIT_TARGET]</span>
-          </button>
-        </Link>
-      </div>
-
-      <div
+      <article
         className="
           w-full max-w-none overflow-hidden wrap-break-word text-slate-800
           selection:bg-tech-main/20 selection:text-slate-900
@@ -204,9 +187,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           remarkPlugins={remarkPlugins}
           rehypePlugins={rehypePlugins}
           components={markdownComponents}>
-          {renderedContent}
+          {embeddedArticleContent}
         </ReactMarkdown>
-      </div>
+      </article>
+
+      {(navigation.prev || navigation.next) && (
+        <ArticleNavigation prev={navigation.prev} next={navigation.next} />
+      )}
     </div>
   )
 }
@@ -217,4 +204,30 @@ function normalizeDraftTargetPath(filePath: string) {
   }
 
   return filePath.replace(/\.md$/, "")
+}
+
+function resolveArticleTitle(rawTitle: unknown, fallbackPath: string): string {
+  if (typeof rawTitle === "string" && rawTitle.trim()) {
+    return rawTitle.trim()
+  }
+
+  const fallback =
+    fallbackPath.split("/").filter(Boolean).pop()?.replace(/\.md$/i, "") ||
+    "Article"
+
+  return fallback
+}
+
+function embedTitleInMarkdown(content: string, title: string): string {
+  const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  const normalizedContent = content.trimStart()
+  const sameTitleHeadingPattern = new RegExp(
+    `^#\\s+${escapedTitle}\\s*(?:\\r?\\n|$)`
+  )
+
+  if (sameTitleHeadingPattern.test(normalizedContent)) {
+    return content
+  }
+
+  return `# ${title}\n\n${content}`
 }

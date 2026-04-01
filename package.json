@@ -83,6 +83,13 @@
     "form-data": "4.0.5"
   },
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "prisma",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ],
     "overrides": {
       "form-data": "4.0.5"
     }

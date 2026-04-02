@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { articleUrl } from "@/lib/article-url"
 
 export default function Footer() {
   return (
@@ -78,7 +79,7 @@ export default function Footer() {
               <ul className="flex flex-col space-y-3 text-sm text-tech-main">
                 <li>
                   <Link
-                    href="/articles/Preface"
+                    href={articleUrl("Preface")}
                     className="
                       transition-colors
                       hover:text-tech-main-dark

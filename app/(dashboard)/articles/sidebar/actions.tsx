@@ -1,5 +1,7 @@
 "use client"
 
+import { useState } from "react"
+
 export function SidebarActions({
   internalScroll,
   onCreate,
@@ -11,6 +13,16 @@ export function SidebarActions({
   onCollapseAll: (e: React.MouseEvent) => void
   onLocate: () => void
 }) {
+  const [locateDisabled, setLocateDisabled] = useState(false)
+
+  const handleLocate = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (locateDisabled) return
+    setLocateDisabled(true)
+    onLocate()
+    e.currentTarget.blur()
+    setTimeout(() => setLocateDisabled(false), 500)
+  }
+
   if (internalScroll) {
     return (
       <div
@@ -45,14 +57,13 @@ export function SidebarActions({
             </button>
             <button
               type="button"
-              onClick={(e) => {
-                onLocate()
-                e.currentTarget.blur()
-              }}
+              disabled={locateDisabled}
+              onClick={handleLocate}
               className="
                 flex-2 cursor-pointer border border-tech-main/40 px-3 py-1.5
                 pl-2 font-mono text-[11px] transition-colors
                 hover:bg-tech-main hover:text-white
+                disabled:opacity-50 disabled:cursor-not-allowed
               ">
               ◎ LOCATE
             </button>
@@ -81,11 +92,13 @@ export function SidebarActions({
         </button>
         <button
           type="button"
-          onClick={onLocate}
+          disabled={locateDisabled}
+          onClick={handleLocate}
           className="
             cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
             text-[10px] transition-colors
             hover:bg-tech-main hover:text-white
+            disabled:opacity-50 disabled:cursor-not-allowed
           ">
           ◎ LOCATE
         </button>

@@ -11,6 +11,7 @@ import {
 } from "react"
 import { createPortal } from "react-dom"
 import { useRouter, usePathname } from "next/navigation"
+import { articleUrl } from "@/lib/article-url"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 interface SearchResult {
@@ -144,15 +145,11 @@ export function SearchCommand() {
       }
 
       closeModal()
-      const encodedSlug = result.slug
-        .split("/")
-        .map(encodeURIComponent)
-        .join("/")
       const highlightParam =
         result.snippet && query.trim().length >= 2
           ? `?highlight=${encodeURIComponent(query.trim())}`
           : ""
-      router.push(`/articles/${encodedSlug}${highlightParam}`)
+      router.push(`${articleUrl(result.slug)}${highlightParam}`)
     },
     [router, closeModal, query, pathname]
   )

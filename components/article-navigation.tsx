@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { articleUrl } from "@/lib/article-url"
 import { CornerBrackets } from "./ui/corner-brackets"
 
 interface ArticleInfo {
@@ -21,7 +22,7 @@ export function ArticleNavigation({ prev, next }: ArticleNavigationProps) {
         <div className="flex">
           {prev ? (
             <Link
-              href={`/articles/${prev.slug}`}
+              href={articleUrl(prev.slug)}
               className="group relative flex w-full flex-col gap-2 border border-tech-main/40 bg-tech-bg p-4 transition-colors hover:border-tech-main hover:bg-tech-accent/10 min-h-[44px]">
               <div className="flex items-center gap-2 font-mono text-xs text-tech-main/60">
                 <span>←</span>
@@ -52,7 +53,7 @@ export function ArticleNavigation({ prev, next }: ArticleNavigationProps) {
         <div className="flex">
           {next ? (
             <Link
-              href={`/articles/${next.slug}`}
+              href={articleUrl(next.slug)}
               className="group relative flex w-full flex-col gap-2 border border-tech-main/40 bg-tech-bg p-4 transition-colors hover:border-tech-main hover:bg-tech-accent/10 min-h-[44px] md:items-end md:text-right">
               <div className="flex items-center gap-2 font-mono text-xs text-tech-main/60">
                 {next.isCrossFolder && (

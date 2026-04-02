@@ -45,7 +45,6 @@ const filePathToSlugKey: Record<string, string> = (() => {
 
 export interface ResolveResult {
   filePath: string | null
-  isDirectFilePath: boolean
 }
 
 /**
@@ -64,14 +63,13 @@ export function resolveSlug(slugPath: string): string | null {
 export function resolveSlugWithIndicator(slugPath: string): ResolveResult {
   // 1. Direct slug lookup
   if (slugMap[slugPath] !== undefined) {
-    return { filePath: slugMap[slugPath].filePath, isDirectFilePath: false }
+    return { filePath: slugMap[slugPath].filePath }
   }
 
   // 2. Try with .md extension in slug map
   if (slugMap[`${slugPath}.md`] !== undefined) {
     return {
       filePath: slugMap[`${slugPath}.md`].filePath,
-      isDirectFilePath: false,
     }
   }
 
@@ -80,16 +78,16 @@ export function resolveSlugWithIndicator(slugPath: string): ResolveResult {
 
   // 3a. Try as-is
   if (fs.existsSync(path.join(ARTICLES_DIR, normalizedPath))) {
-    return { filePath: normalizedPath, isDirectFilePath: true }
+    return { filePath: normalizedPath }
   }
 
   // 3b. Try with .md extension
   const withExt = `${normalizedPath}.md`
   if (fs.existsSync(path.join(ARTICLES_DIR, withExt))) {
-    return { filePath: withExt, isDirectFilePath: true }
+    return { filePath: withExt }
   }
 
-  return { filePath: null, isDirectFilePath: false }
+  return { filePath: null }
 }
 
 /**

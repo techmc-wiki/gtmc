@@ -11,10 +11,15 @@ import {
 } from "@/lib/markdown"
 import { getCachedRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
 import { getArticleContent, getArticleTree } from "@/lib/article-loader"
-import { getSlugMapEntry, resolveSlug } from "@/lib/slug-resolver"
+import {
+  getSlugMapEntry,
+  resolveSlug,
+  getSlugForFilePath,
+} from "@/lib/slug-resolver"
 import { decodeSlugPath, encodeSlug } from "@/lib/slug-utils"
 import { formatIndexPrefix } from "@/lib/index-formatter"
 import { getSiteUrl } from "@/lib/site-url"
+import { articleAbsoluteUrl } from "@/lib/article-url"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { ArticleMetadata } from "@/components/articles/article-metadata"
 import { ArticleMetadataSimple } from "@/components/articles/article-metadata-simple"
@@ -99,10 +104,9 @@ export async function generateMetadata({
     const description = generateDescription(content)
 
     const siteUrl = getSiteUrl()
-    const canonicalSlug = target.canonicalSlug
-    const canonicalUrl = canonicalSlug
-      ? `${siteUrl}/articles/${encodeSlug(canonicalSlug)}`
-      : `${siteUrl}/articles/${slugPath}`
+    const effectiveSlug =
+      target.canonicalSlug ?? getSlugForFilePath(target.filePath) ?? slugPath
+    const canonicalUrl = articleAbsoluteUrl(effectiveSlug)
 
     return {
       title,
@@ -190,10 +194,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const markdownComponents = getMarkdownComponents(target.filePath)
 
   const siteUrl = getSiteUrl()
-  const canonicalSlug = target.canonicalSlug
-  const canonicalUrl = canonicalSlug
-    ? `${siteUrl}/articles/${encodeSlug(canonicalSlug)}`
-    : `${siteUrl}/articles/${slugPath}`
+  const effectiveSlug =
+    target.canonicalSlug ?? getSlugForFilePath(target.filePath) ?? slugPath
+  const canonicalUrl = articleAbsoluteUrl(effectiveSlug)
   const description = generateDescription(content)
 
   const author = data.author as string | undefined
@@ -268,7 +271,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   // Get navigation data
   const tree = await getSidebarTree()
   const flattenedArticles = flattenArticleTree(tree)
-  const currentSlug = canonicalSlug || slugPath
+  const currentSlug = target.canonicalSlug || slugPath
   const navigation = getArticleNavigation(currentSlug, flattenedArticles)
 
   return (

@@ -1,5 +1,6 @@
 import Link from "next/link"
 import path from "path"
+import { articleUrl } from "@/lib/article-url"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
 
 function resolveHref(initialHref: string, rawPath: string): string {
@@ -8,7 +9,7 @@ function resolveHref(initialHref: string, rawPath: string): string {
     const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
     try {
       const resolved = path.join(currentDir, href).replace(/\\/g, "/")
-      href = `/articles/${resolved.split("/").map(encodeURIComponent).join("/")}`
+      href = articleUrl(resolved)
     } catch {
       return href
     }
@@ -19,7 +20,7 @@ function resolveHref(initialHref: string, rawPath: string): string {
   ) {
     const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
     const resolved = path.join(currentDir, href).replace(/\\/g, "/")
-    href = `/articles/${resolved.split("/").map(encodeURIComponent).join("/")}`
+    href = articleUrl(resolved)
   }
   return href
 }

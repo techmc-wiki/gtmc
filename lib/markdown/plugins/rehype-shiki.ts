@@ -63,7 +63,9 @@ export async function createRehypeShiki(langs?: string[]) {
               node.properties["data-raw-code"] = rawCode
               node.properties["data-lang"] = lang
               node.properties["data-line-count"] = String(
-                rawCode.split("\n").filter(Boolean).length
+                rawCode.endsWith("\n")
+                  ? rawCode.split("\n").length - 1
+                  : rawCode.split("\n").length
               )
             }
             return
@@ -99,7 +101,9 @@ export async function createRehypeShiki(langs?: string[]) {
           node.properties["data-raw-code"] = rawCode
           node.properties["data-lang"] = lang
           node.properties["data-line-count"] = String(
-            rawCode.split("\n").filter(Boolean).length
+            rawCode.endsWith("\n")
+              ? rawCode.split("\n").length - 1
+              : rawCode.split("\n").length
           )
         } catch {
           /* unsupported language or highlighting error — leave node untouched */

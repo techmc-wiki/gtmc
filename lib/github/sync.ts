@@ -40,16 +40,17 @@ function recordRateLimitError(error: unknown) {
   rateLimitedUntilMs = resetMs ?? Date.now() + 60_000
 }
 
-export interface RepoTreeNode {
+export interface ArticleTreeNode {
   id: string
   title: string
   slug: string
   isFolder: boolean
+  introTitle?: string
   parentId: string | null
-  children: RepoTreeNode[]
+  children: ArticleTreeNode[]
 }
 
-export async function getRepoContentTree(): Promise<RepoTreeNode[]> {
+export async function getRepoContentTree(): Promise<ArticleTreeNode[]> {
   if (isCurrentlyRateLimited()) {
     return []
   }
@@ -76,7 +77,7 @@ export async function getRepoContentTree(): Promise<RepoTreeNode[]> {
     return []
   }
 
-  const nodeMap = new Map<string, RepoTreeNode>()
+  const nodeMap = new Map<string, ArticleTreeNode>()
 
   for (const item of treeData.tree) {
     if (!item.path) continue
@@ -118,7 +119,7 @@ export async function getRepoContentTree(): Promise<RepoTreeNode[]> {
     }
   }
 
-  const roots: RepoTreeNode[] = []
+  const roots: ArticleTreeNode[] = []
 
   for (const [, node] of nodeMap.entries()) {
     if (node.parentId) {
@@ -134,7 +135,7 @@ export async function getRepoContentTree(): Promise<RepoTreeNode[]> {
     }
   }
 
-  function sortNodes(nodes: RepoTreeNode[]) {
+  function sortNodes(nodes: ArticleTreeNode[]) {
     nodes.sort((a, b) => {
       if (a.isFolder === b.isFolder) return a.title.localeCompare(b.title)
       return a.isFolder ? -1 : 1

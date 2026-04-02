@@ -410,6 +410,11 @@ code .line {
   display: block;
 }
 
+.code-block-pre code,
+.code-block-pre .line-numbers-col > div {
+  line-height: 1.625;
+}
+
 code[class^="language-"] {
   white-space: pre;
 }

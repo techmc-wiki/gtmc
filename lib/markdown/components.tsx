@@ -1,8 +1,7 @@
 import Link from "next/link"
 import path from "path"
 import type { ReactNode } from "react"
-import { CodeCopyButton } from "@/components/code-copy-button"
-import { LazyCodeBlock } from "@/components/lazy-code-block"
+import { CodeBlockPre } from "@/components/code-block-pre"
 import { LazyImage } from "@/components/lazy-image"
 
 type MarkdownAstNode = {
@@ -225,73 +224,7 @@ export function getMarkdownComponents(rawPath: string) {
   }
 
   function preComponent({ children, ...props }: MarkdownComponentProps) {
-    const rawCode = props["data-raw-code"] as string | undefined
-    if (!rawCode) return <>{children}</>
-    const lang = (props["data-lang"] as string) || ""
-    const lineCount = (props["data-line-count"] as string) || "0"
-    return (
-      <LazyCodeBlock lang={lang} lineCount={lineCount}>
-        <div
-          className="
-            flex items-center justify-between border-b guide-line
-            bg-tech-main/10 px-4 py-1.5
-          ">
-          <div className="flex items-center gap-2">
-            <span className="size-1.5 animate-pulse bg-tech-main/40" />
-            <span className="text-xs tracking-widest text-tech-main uppercase">
-              {lang}
-            </span>
-          </div>
-          <div
-            className="
-              flex items-center gap-3 font-mono text-[10px] tracking-widest
-              text-tech-main
-            ">
-            <span>{lineCount} LINES</span>
-            <span className="text-tech-main/50">|</span>
-            <CodeCopyButton code={rawCode} />
-          </div>
-        </div>
-        <div className="relative">
-          <div
-            className="
-              pointer-events-none absolute inset-0 border border-tech-main/10
-            "
-          />
-          <div
-            className="
-              pointer-events-none absolute inset-x-0 top-1/4 h-px bg-tech-main/3
-            "
-          />
-          <div
-            className="
-              pointer-events-none absolute inset-x-0 top-3/4 h-px bg-tech-main/3
-            "
-          />
-          <div
-            className="
-              custom-bottom-scrollbar overflow-x-auto px-4
-              sm:px-6
-            ">
-            <div className="px-0" dir="ltr">
-              {children}
-            </div>
-          </div>
-        </div>
-        <div
-          className="
-            flex items-center justify-end border-t border-tech-main/10 px-4 py-1
-          ">
-          <span
-            className="
-              font-mono text-[9px] tracking-widest text-tech-main/50 uppercase
-              select-none
-            ">
-            {"//"} SYNTAX_HIGHLIGHT
-          </span>
-        </div>
-      </LazyCodeBlock>
-    )
+    return <CodeBlockPre {...props}>{children}</CodeBlockPre>
   }
 
   return {

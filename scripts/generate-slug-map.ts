@@ -1,6 +1,8 @@
 import fs from "fs"
 import path from "path"
 import matter from "gray-matter"
+import { parseFrontMatter } from "../lib/frontmatter-parser"
+import type { SlugMapEntry } from "../lib/slug-resolver"
 import { SLUG_REGEX } from "../lib/slug-validator"
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "../lib/article-ignore"
 
@@ -8,8 +10,62 @@ const ARTICLES_DIR = path.join(process.cwd(), "articles")
 const OUTPUT_FILE = path.join(process.cwd(), "lib", "slug-map.json")
 const MAX_DEPTH = 3
 
-interface SlugMap {
-  [compositeSlug: string]: string
+type SlugMap = Record<string, SlugMapEntry>
+
+function getFrontMatterEntry(
+  filePath: string,
+  slug: string,
+  relativePath: string,
+  isFolder: boolean,
+  parentSlug?: string
+): SlugMapEntry {
+  const content = fs.readFileSync(filePath, "utf-8")
+  const fm = parseFrontMatter(content)
+  const title = fm.title ?? ""
+  const chapterTitle = fm.chapterTitle ?? ""
+  const chapterTitleEn = fm.chapterTitleEn ?? ""
+  const introTitle = fm.introTitle ?? ""
+  const introTitleEn = fm.introTitleEn ?? ""
+  const author = fm.author ?? ""
+  const coAuthors =
+    fm.coAuthors && fm.coAuthors !== ""
+      ? fm.coAuthors
+          .split(",")
+          .map((name) => name.trim())
+          .filter((name) => name.length > 0)
+      : undefined
+
+  return {
+    filePath: relativePath,
+    slug,
+    title: title === "" ? undefined : title,
+    chapterTitle,
+    chapterTitleEn,
+    introTitle,
+    introTitleEn,
+    hasIntro: introTitle !== "" || introTitleEn !== "",
+    index: fm.index,
+    isFolder,
+    isAppendix:
+      /(^|\/)appendix(\/|$)/i.test(slug) ||
+      /(^|\/)appendix(\/|$)/i.test(relativePath),
+    isPreface:
+      /(^|\/)preface(\/|$)/i.test(slug) || /^preface\.md$/i.test(relativePath),
+    children: undefined,
+    parentSlug,
+    author: author === "" ? undefined : author,
+    coAuthors,
+    date: fm.date ?? undefined,
+    lastmod: fm.lastmod ?? undefined,
+  }
+}
+
+function getParentSlug(slug: string): string | undefined {
+  const parts = slug.split("/")
+  if (parts.length <= 1) {
+    return undefined
+  }
+  return parts.slice(0, -1).join("/")
 }
 
 function getSlugFromFile(filePath: string): string | null {
@@ -38,6 +94,31 @@ function processDirectory(
   let hasError = false
 
   const entries = fs.readdirSync(dirPath, { withFileTypes: true })
+  const readmePath = path.join(dirPath, "README.md")
+
+  if (fs.existsSync(readmePath)) {
+    const readmeSlug = getSlugFromFile(readmePath) ?? ""
+
+    if (readmeSlug !== "") {
+      if (slugMap[slugPrefix] !== undefined) {
+        const existingPath = slugMap[slugPrefix].filePath
+        process.stderr.write(
+          `Error: Duplicate composite slug "${slugPrefix}": articles/${relFromArticles}/README.md ` +
+            `(conflicts with articles/${existingPath} after slug flattening)\n`
+        )
+        hasError = true
+      } else {
+        const parentSlug = getParentSlug(slugPrefix)
+        slugMap[slugPrefix] = getFrontMatterEntry(
+          readmePath,
+          slugPrefix,
+          `${relFromArticles}/README.md`,
+          true,
+          parentSlug
+        )
+      }
+    }
+  }
 
   const articleFiles = entries
     .filter(
@@ -85,7 +166,7 @@ function processDirectory(
     const compositeSlug = `${slugPrefix}/${articleSlug}`
 
     if (slugMap[compositeSlug] !== undefined) {
-      const existingPath = slugMap[compositeSlug]
+      const existingPath = slugMap[compositeSlug].filePath
       process.stderr.write(
         `Error: Duplicate composite slug "${compositeSlug}": articles/${relPath} ` +
           `(conflicts with articles/${existingPath} after slug flattening)\n`
@@ -94,7 +175,14 @@ function processDirectory(
       continue
     }
 
-    slugMap[compositeSlug] = `${relFromArticles}/${articleFile}`
+    const parentSlug = getParentSlug(compositeSlug)
+    slugMap[compositeSlug] = getFrontMatterEntry(
+      articlePath,
+      compositeSlug,
+      `${relFromArticles}/${articleFile}`,
+      false,
+      parentSlug
+    )
   }
 
   const subDirs = entries.filter(
@@ -121,18 +209,10 @@ function processDirectory(
       continue
     }
 
-    const subSlug = getSlugFromFile(subReadmePath)
-
-    if (subSlug === null) {
-      process.stderr.write(
-        `Error: Missing slug in folder README: articles/${subRelPath}/README.md\n`
-      )
-      hasError = true
-      continue
-    }
+    const subSlug = getSlugFromFile(subReadmePath) ?? ""
 
     // Allow empty string slug in subdirectories (depth >= 1) to flatten the slug path
-    if (subSlug === "") {
+    if (subSlug === "" || subSlug === null) {
       if (depth < 1) {
         process.stderr.write(
           `Error: Empty slug not allowed in top-level folder: articles/${subRelPath}/README.md\n`
@@ -283,7 +363,28 @@ function main(): void {
     }
 
     rootSlugsSeen.set(key, rootFile)
-    slugMap[key] = rootFile
+    slugMap[key] = getFrontMatterEntry(
+      rootFilePath,
+      key,
+      rootFile,
+      false,
+      undefined
+    )
+  }
+
+  for (const entry of Object.values(slugMap)) {
+    entry.children = undefined
+  }
+
+  for (const [slug, entry] of Object.entries(slugMap)) {
+    const parent = entry.parentSlug
+    if (!parent || slugMap[parent] === undefined) {
+      continue
+    }
+    if (!slugMap[parent].children) {
+      slugMap[parent].children = []
+    }
+    slugMap[parent].children!.push(slugMap[slug])
   }
 
   if (hasError) {

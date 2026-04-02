@@ -142,7 +142,7 @@ async function buildIndex(): Promise<MiniSearch<IndexedArticle>> {
       }
 
       const frontMatter = parseFrontMatter(markdown)
-      const title = frontMatter.title || node.title
+      const title = frontMatter.chapterTitle || node.title
 
       articles.push({
         id: node.slug,

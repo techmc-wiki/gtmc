@@ -54,3 +54,4 @@ lib/slug-map.json
 
 # prevent anyone accidently not using pnpm
 package-lock.json
+lib/slug-map.json

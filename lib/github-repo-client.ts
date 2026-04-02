@@ -20,7 +20,7 @@ export {
   getRepoFileBuffer,
   getRepoFileContent,
   getRepoTranslations,
-  type RepoTreeNode,
+  type ArticleTreeNode,
 } from "@/lib/github/sync"
 
 export { resolveConflictAndMerge } from "@/lib/github/conflict-resolution"

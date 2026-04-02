@@ -271,9 +271,9 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   return (
     <div
       className="
-        relative isolate mx-auto flex min-h-[calc(100vh-8rem)] max-w-full
+        relative isolate mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-full
         flex-col
-        md:flex-row
+        md:w-4/5 md:flex-row
       ">
       <div
         className="
@@ -436,8 +436,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         className="
           relative min-w-0 flex-1 overflow-x-hidden border-l border-transparent
           py-6
-          md:max-w-2xl md:pl-10
-          lg:max-w-3xl lg:pl-10
+          md:pl-10
         ">
         {children}
       </main>

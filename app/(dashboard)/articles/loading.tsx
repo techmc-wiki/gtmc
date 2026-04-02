@@ -17,7 +17,7 @@ export default function ArticlesLoading() {
     <SkeletonExitWrapper>
       <div
         className="
-          relative min-h-screen max-w-3xl border border-tech-main/40
+          relative min-h-screen w-full border border-tech-main/40
           bg-transparent p-6 pb-32 backdrop-blur-sm
           sm:p-8
         "

@@ -139,7 +139,7 @@ export const SidebarClient = React.forwardRef<
           <div
             ref={scrollContainerRef}
             className={`
-              custom-left-scrollbar min-h-0 flex-1 overflow-y-auto
+              custom-left-scrollbar min-h-0 flex-1 overflow-y-auto pb-12
               ${scrollClass}
             `}>
             {tree.length === 0 ? (

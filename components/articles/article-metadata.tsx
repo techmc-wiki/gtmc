@@ -167,7 +167,7 @@ export function ArticleMetadata({
                 </Link>
               </span>
 
-              <span className="text-tech-accent">&&</span>
+              <span className="text-tech-main/60">&&</span>
 
               {/* Co-Authors */}
               {coAuthors.length > 0 && (
@@ -202,7 +202,7 @@ export function ArticleMetadata({
                       </span>
                     ))}
                     {remainingCount > 0 && (
-                      <span className="ml-1 text-tech-accent">
+                      <span className="ml-1 text-tech-main/60">
                         +{remainingCount}
                       </span>
                     )}
@@ -236,7 +236,7 @@ export function ArticleMetadata({
             {title}
           </h1>
 
-          <div className="text-tech-accent">
+          <div className="text-tech-main/60">
             {/* Edit History */}
             <p>
               {"CREATED: "}
@@ -286,7 +286,7 @@ export function ArticleMetadata({
           </div>
 
           <div className="flex flex-row items-center gap-2">
-            <span className="text-tech-accent">URL:</span>
+            <span className="text-tech-main/60">URL:</span>
             <code
               className="
                 truncate border guide-line bg-tech-accent/10 px-1.5 py-0.5

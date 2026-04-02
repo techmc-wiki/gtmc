@@ -47,7 +47,7 @@ export function ArticleMetadataSimple({
             {title}
           </h1>
 
-          <div className="text-tech-accent">
+          <div className="text-tech-main/60">
             <p>
               {"WORD_COUNT: "}
               <span className="text-tech-main">

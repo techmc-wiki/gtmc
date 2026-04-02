@@ -1,26 +1,11 @@
-import Link from "next/link"
-import path from "path"
-import type { ReactNode } from "react"
 import { CodeBlockPre } from "@/components/code-block-pre"
-import { LazyImage } from "@/components/lazy-image"
-
-type MarkdownAstNode = {
-  type?: string
-  tagName?: string
-  value?: string
-  children?: MarkdownAstNode[]
-}
-
-type MarkdownComponentProps = {
-  children?: ReactNode
-  id?: string
-  href?: string
-  src?: string
-  alt?: string
-  className?: string
-  [key: string]: unknown
-}
-type MarkdownComponent = (props: MarkdownComponentProps) => ReactNode
+import { createAComponent } from "@/lib/markdown/a-component"
+import type {
+  MarkdownAstNode,
+  MarkdownComponent,
+  MarkdownComponentProps,
+} from "@/lib/markdown/component-types"
+import { createImageComponent } from "@/lib/markdown/image-component"
 
 /**
  * Filter children to exclude whitespace-only text nodes.
@@ -101,6 +86,9 @@ function paragraphContainsImage(node: unknown): boolean {
 }
 
 export function getMarkdownComponents(rawPath: string) {
+  const aComponent = createAComponent(rawPath)
+  const imageComponent = createImageComponent(rawPath)
+
   const makeSpan = (style: Record<string, string>) => {
     function SpanComponent({ ...props }: MarkdownComponentProps) {
       return <span style={style} {...props} />
@@ -108,74 +96,6 @@ export function getMarkdownComponents(rawPath: string) {
     SpanComponent.displayName = "makeSpan"
     return SpanComponent
   }
-  function resolveHref(initialHref: string): string {
-    let href = initialHref
-    if (href.startsWith("./") || href.startsWith("../")) {
-      const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
-      try {
-        const resolved = path.join(currentDir, href).replace(/\\/g, "/")
-        href = `/articles/${resolved.split("/").map(encodeURIComponent).join("/")}`
-      } catch {
-        return href
-      }
-    } else if (
-      !href.startsWith("http") &&
-      !href.startsWith("#") &&
-      !href.startsWith("/")
-    ) {
-      const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
-      const resolved = path.join(currentDir, href).replace(/\\/g, "/")
-      href = `/articles/${resolved.split("/").map(encodeURIComponent).join("/")}`
-    }
-    return href
-  }
-
-  function aComponent({
-    href: initialHref,
-    children,
-    ...props
-  }: MarkdownComponentProps) {
-    const href = resolveHref((initialHref as string) || "")
-    if (props["data-in-code"] === "true") {
-      const { "data-in-code": _inCode, ...rest } = props
-      return (
-        <Link
-          href={href}
-          className="
-            inline-block cursor-pointer bg-tech-main/10 px-1 py-[0.05rem]
-            font-mono text-[0.8em] text-tech-main underline transition-colors
-            hover:bg-tech-main/80 hover:text-white hover:no-underline
-          "
-          {...rest}>
-          {children}
-        </Link>
-      )
-    }
-    if (props["data-has-code"] === "true") {
-      const { "data-has-code": _hasCode, ...rest } = props
-      return (
-        <Link
-          href={href}
-          className="group/lc font-mono text-tech-main"
-          {...rest}>
-          {children}
-        </Link>
-      )
-    }
-    return (
-      <Link
-        href={href}
-        className="
-          cursor-pointer px-0.5 font-sans text-tech-main underline
-          underline-offset-4 transition-colors
-          hover:bg-tech-main/80 hover:text-white hover:no-underline
-        "
-        {...props}>
-        {children}
-      </Link>
-    )
-  }
-
   function codeComponent({
     className,
     children,
@@ -398,19 +318,7 @@ export function getMarkdownComponents(rawPath: string) {
         {...props}
       />
     ),
-    img: ({ src: initialSrc, alt }: MarkdownComponentProps) => {
-      let src = (initialSrc as string) || ""
-      if (
-        src.startsWith("./") ||
-        src.startsWith("../") ||
-        (!src.startsWith("http") && !src.startsWith("/"))
-      ) {
-        const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
-        const resolved = path.join(currentDir, src).replace(/\\/g, "/")
-        src = `/api/assets?path=${encodeURIComponent(resolved)}`
-      }
-      return <LazyImage src={src} alt={(alt as string) || ""} />
-    },
+    img: imageComponent,
     hr: ({ ...props }: MarkdownComponentProps) => (
       <hr
         className="mx-auto my-8 w-4/5 border-t border-tech-main/30"

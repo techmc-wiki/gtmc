@@ -101,7 +101,8 @@ export function ArticleMetadata({
             <span className="size-2 animate-pulse bg-tech-main/50" />
             SYS.READ_STREAM | UTF-8
           </span>
-          <span className="
+          <span
+            className="
             hidden items-center gap-3
             sm:inline-flex
           ">
@@ -115,9 +116,7 @@ export function ArticleMetadata({
               transition-colors
               hover:bg-tech-accent/10
             "
-            aria-label={
-              isCollapsed ? "Expand metadata" : "Collapse metadata"
-            }>
+            aria-label={isCollapsed ? "Expand metadata" : "Collapse metadata"}>
             {isCollapsed ? "[+]" : "[-]"}
           </button>
         </div>
@@ -125,9 +124,13 @@ export function ArticleMetadata({
         <div
           className={`
             flex flex-col gap-4 transition-all duration-500 ease-in-out
-            ${isCollapsed ? 'max-h-0 overflow-hidden opacity-0' : `
+            ${
+              isCollapsed
+                ? "max-h-0 overflow-hidden opacity-0"
+                : `
               mt-4 max-h-screen opacity-100
-            `}
+            `
+            }
           `}>
           <div
             className="
@@ -148,6 +151,7 @@ export function ArticleMetadata({
                       alt={author}
                       className="border guide-line"
                       fill
+                      sizes="(max-width: 640px) 24px, 40px"
                     />
                   </Link>
                 </span>
@@ -184,7 +188,7 @@ export function ArticleMetadata({
                             alt={contributor}
                             fill
                             title={contributor}
-                            className="absolute top-0 left-0"
+                            sizes="(max-width: 640px) 16px, 24px"
                           />
                         </Link>
                       </span>
@@ -286,9 +290,10 @@ export function ArticleMetadata({
               onClick={handleCopy}
               className={`
                 border guide-line px-2 py-0.5 transition-colors
-                ${copied
-                  ? `bg-tech-main text-tech-bg`
-                  : `
+                ${
+                  copied
+                    ? `bg-tech-main text-tech-bg`
+                    : `
                     bg-white
                     hover:bg-tech-accent/10
                   `

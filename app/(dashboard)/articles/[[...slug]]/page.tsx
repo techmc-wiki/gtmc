@@ -12,6 +12,8 @@ import {
 import { getCachedRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
 import { getArticleContent, getArticleTree } from "@/lib/article-loader"
 import { getSlugMapEntry, resolveSlug } from "@/lib/slug-resolver"
+import { decodeSlugPath, encodeSlug } from "@/lib/slug-utils"
+import { formatIndexPrefix } from "@/lib/index-formatter"
 import { getSiteUrl } from "@/lib/site-url"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { ArticleMetadata } from "@/components/articles/article-metadata"
@@ -35,7 +37,7 @@ export async function generateMetadata({
   params,
 }: ArticlePageProps): Promise<Metadata> {
   const { slug } = await params
-  const slugPath = (slug ?? []).map(decodeURIComponent).join("/") || "preface"
+  const slugPath = decodeSlugPath(slug ?? []) || "preface"
   const target = await resolveArticleTarget(slugPath)
 
   if (target === null) {
@@ -55,17 +57,25 @@ export async function generateMetadata({
     }
 
     const { data } = matter(content)
-    const title = resolveDisplayedArticleTitle(
+    const resolvedTitle = resolveDisplayedArticleTitle(
       data["chapter-title"],
       target.filePath,
-      target.canonicalSlug
+      target.canonicalSlug,
+      target.isReadmeIntro
+    )
+    const title = formatArticleTitle(
+      resolvedTitle,
+      target.index,
+      target.isAppendix,
+      target.isPreface,
+      target.isReadmeIntro
     )
     const description = generateDescription(content)
 
     const siteUrl = getSiteUrl()
     const canonicalSlug = target.canonicalSlug
     const canonicalUrl = canonicalSlug
-      ? `${siteUrl}/articles/${canonicalSlug.split("/").map(encodeURIComponent).join("/")}`
+      ? `${siteUrl}/articles/${encodeSlug(canonicalSlug)}`
       : `${siteUrl}/articles/${slugPath}`
 
     return {
@@ -79,6 +89,20 @@ export async function generateMetadata({
         description,
         type: "article",
         url: canonicalUrl,
+        images: [
+          {
+            url: `${siteUrl}/og-image.png`,
+            width: 1200,
+            height: 630,
+            alt: title,
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: [`${siteUrl}/og-image.png`],
       },
     }
   } catch {
@@ -92,7 +116,7 @@ export async function generateMetadata({
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params
 
-  const slugPath = (slug ?? []).map(decodeURIComponent).join("/") || "preface"
+  const slugPath = decodeSlugPath(slug ?? []) || "preface"
   const target = await resolveArticleTarget(slugPath)
 
   if (target === null) {
@@ -100,10 +124,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   if (target.redirectToSlug) {
-    const redirectPath = target.redirectToSlug
-      .split("/")
-      .map(encodeURIComponent)
-      .join("/")
+    const redirectPath = encodeSlug(target.redirectToSlug)
     redirect(`/articles/${redirectPath}`)
   }
 
@@ -114,10 +135,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   const { data, content: renderedContent } = matter(content)
-  const articleTitle = resolveDisplayedArticleTitle(
+  const resolvedTitle = resolveDisplayedArticleTitle(
     data["chapter-title"],
     target.filePath,
-    target.canonicalSlug
+    target.canonicalSlug,
+    target.isReadmeIntro
+  )
+  const articleTitle = formatArticleTitle(
+    resolvedTitle,
+    target.index,
+    target.isAppendix,
+    target.isPreface,
+    target.isReadmeIntro
   )
   const embeddedArticleContent = embedTitleInMarkdown(
     renderedContent,
@@ -137,13 +166,78 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const siteUrl = getSiteUrl()
   const canonicalSlug = target.canonicalSlug
   const canonicalUrl = canonicalSlug
-    ? `${siteUrl}/articles/${canonicalSlug.split("/").map(encodeURIComponent).join("/")}`
+    ? `${siteUrl}/articles/${encodeSlug(canonicalSlug)}`
     : `${siteUrl}/articles/${slugPath}`
+  const description = generateDescription(content)
 
   const author = data.author as string | undefined
   const coAuthors = (data["co-authors"] as string[] | undefined) || []
   const createdAt = data.date as string | undefined
   const lastModified = data.lastmod as string | undefined
+
+  const blogPostingJsonLd: {
+    "@context": "https://schema.org"
+    "@type": "BlogPosting"
+    headline: string
+    url: string
+    datePublished?: string
+    dateModified?: string
+    author?: {
+      "@type": "Person"
+      name: string
+    }
+    description: string
+  } = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: articleTitle,
+    url: canonicalUrl,
+    ...(createdAt ? { datePublished: createdAt } : {}),
+    ...(lastModified ? { dateModified: lastModified } : {}),
+    ...(author
+      ? {
+          author: {
+            "@type": "Person",
+            name: author,
+          },
+        }
+      : {}),
+    description,
+  }
+
+  const breadcrumbJsonLd: {
+    "@context": "https://schema.org"
+    "@type": "BreadcrumbList"
+    itemListElement: Array<{
+      "@type": "ListItem"
+      position: number
+      name: string
+      item: string
+    }>
+  } = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Articles",
+        item: `${siteUrl}/articles`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: articleTitle,
+        item: canonicalUrl,
+      },
+    ],
+  }
 
   // Get navigation data
   const tree = await getSidebarTree()
@@ -199,6 +293,15 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       {(navigation.prev || navigation.next) && (
         <ArticleNavigation prev={navigation.prev} next={navigation.next} />
       )}
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
     </div>
   )
 }
@@ -216,6 +319,10 @@ type ArticleTreeNode = BaseArticleTreeNode & { index?: number }
 interface ResolvedArticleTarget {
   filePath: string
   canonicalSlug: string
+  index: number
+  isAppendix: boolean
+  isPreface: boolean
+  isReadmeIntro: boolean
   redirectToSlug?: string
 }
 
@@ -243,12 +350,22 @@ async function resolveArticleTarget(
     return null
   }
 
+  const slugEntry = getSlugMapEntry(canonicalSlug)
+
   const redirectToSlug =
     targetNode.isFolder && canonicalSlug !== normalizedSlug
       ? canonicalSlug
       : undefined
 
-  return { filePath, canonicalSlug, redirectToSlug }
+  return {
+    filePath,
+    canonicalSlug,
+    index: slugEntry?.index ?? -1,
+    isAppendix: slugEntry?.isAppendix ?? false,
+    isPreface: slugEntry?.isPreface ?? false,
+    isReadmeIntro: Boolean(slugEntry?.isFolder && slugEntry?.hasIntro),
+    redirectToSlug,
+  }
 }
 
 function resolveCanonicalSlugForFolder(
@@ -324,27 +441,52 @@ function resolveArticleTitle(rawTitle: unknown, fallbackPath: string): string {
 function resolveDisplayedArticleTitle(
   rawTitle: unknown,
   fallbackPath: string,
-  canonicalSlug: string
+  canonicalSlug: string,
+  isReadmeIntro: boolean
 ): string {
   const slugEntry = getSlugMapEntry(canonicalSlug)
   const introTitle = slugEntry?.introTitle?.trim()
 
-  if (slugEntry?.isFolder && slugEntry.hasIntro && introTitle) {
+  if (isReadmeIntro && introTitle) {
     return introTitle
   }
 
   return resolveArticleTitle(rawTitle, fallbackPath)
 }
 
+function formatArticleTitle(
+  title: string,
+  index: number,
+  isAppendix: boolean,
+  isPreface: boolean,
+  isReadmeIntro: boolean
+): string {
+  const prefix = isReadmeIntro
+    ? formatIndexPrefix(0, false, false)
+    : formatIndexPrefix(index, isAppendix, isPreface)
+
+  return `${prefix}${title}`
+}
+
 function embedTitleInMarkdown(content: string, title: string): string {
+  const leadingWhitespace = content.match(/^\s*/)?.[0] ?? ""
+  const trimmedStartContent = content.slice(leadingWhitespace.length)
   const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-  const normalizedContent = content.trimStart()
   const sameTitleHeadingPattern = new RegExp(
     `^#\\s+${escapedTitle}\\s*(?:\\r?\\n|$)`
   )
+  const topLevelHeadingPattern = /^#\s+.+\s*(?:\r?\n|$)/
 
-  if (sameTitleHeadingPattern.test(normalizedContent)) {
+  if (sameTitleHeadingPattern.test(trimmedStartContent)) {
     return content
+  }
+
+  if (topLevelHeadingPattern.test(trimmedStartContent)) {
+    const replacedContent = trimmedStartContent.replace(
+      topLevelHeadingPattern,
+      `# ${title}\n`
+    )
+    return `${leadingWhitespace}${replacedContent}`
   }
 
   return `# ${title}\n\n${content}`

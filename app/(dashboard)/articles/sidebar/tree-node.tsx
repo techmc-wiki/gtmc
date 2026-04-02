@@ -3,19 +3,11 @@
 import Link from "next/link"
 import type { TocItem } from "./use-toc"
 import { formatIndexPrefix } from "@/lib/index-formatter"
+import { encodeSlug } from "@/lib/slug-utils"
+import type { TreeNode } from "@/types/sidebar-tree"
 import React from "react"
 
-export interface TreeNode {
-  id: string
-  title: string
-  slug: string
-  isFolder: boolean
-  parentId: string | null
-  children: TreeNode[]
-  index?: number
-  isAppendix?: boolean
-  isPreface?: boolean
-}
+export type { TreeNode } from "@/types/sidebar-tree"
 
 export function SidebarTree({
   items,
@@ -57,7 +49,7 @@ export function SidebarTree({
   return (
     <ul className="my-1 pl-6">
       {items.map((item, index) => {
-        const fileRoute = `/articles/${item.slug.split("/").map(encodeURIComponent).join("/")}`
+        const fileRoute = `/articles/${encodeSlug(item.slug)}`
         const decodedRoute = decodeURIComponent(fileRoute)
         const isActive =
           !item.isFolder &&
@@ -214,9 +206,11 @@ export function SidebarTree({
                             `
                         }
                       `}>
-                      {!item.isFolder && item.index !== undefined
-                        ? `${formatIndexPrefix(item.index, item.isAppendix ?? false, item.isPreface ?? false)}${item.title}`
-                        : item.title}
+                      {item.isReadmeIntro
+                        ? `00 ${item.title}`
+                        : !item.isFolder && item.index !== undefined
+                          ? `${formatIndexPrefix(item.index, item.isAppendix ?? false, item.isPreface ?? false)}${item.title}`
+                          : item.title}
                     </Link>
                   </div>
 

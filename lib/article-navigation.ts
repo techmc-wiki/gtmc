@@ -1,16 +1,5 @@
 import { getSlugMapEntry } from "@/lib/slug-resolver"
-
-interface TreeNode {
-  id: string
-  title: string
-  slug: string
-  index: number
-  isAppendix: boolean
-  isPreface: boolean
-  isFolder: boolean
-  parentId: string | null
-  children: TreeNode[]
-}
+import type { TreeNode } from "@/types/sidebar-tree"
 
 interface FlatArticle {
   slug: string

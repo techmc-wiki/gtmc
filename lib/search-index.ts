@@ -11,20 +11,13 @@ import { getArticleContent } from "@/lib/article-loader"
 import { prisma } from "@/lib/prisma"
 import { shouldIgnoreFile } from "@/lib/article-ignore"
 import { parseFrontMatter } from "@/lib/frontmatter-parser"
+import type { TreeNode } from "@/types/sidebar-tree"
 
 interface IndexedArticle {
   id: string
   title: string
   slug: string
   content: string
-}
-
-interface TreeNode {
-  id: string
-  title: string
-  slug: string
-  isFolder: boolean
-  children: TreeNode[]
 }
 
 export const CJK_TOKENIZER = (text: string): string[] =>

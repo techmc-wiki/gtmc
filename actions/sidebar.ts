@@ -7,22 +7,9 @@ import { createDirectFile, createPR } from "@/lib/github/pr-manager"
 import { getRepoTranslations, type ArticleTreeNode } from "@/lib/github/sync"
 import { getArticleTree } from "@/lib/article-loader"
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
+import type { TreeNode } from "@/types/sidebar-tree"
 import { statSync } from "fs"
 import { join } from "path"
-
-interface TreeNode {
-  id: string
-  title: string
-  slug: string
-  index: number
-  isAppendix: boolean
-  isPreface: boolean
-  isFolder: boolean
-  isReadmeIntro?: boolean
-  introTitle?: string
-  parentId: string | null
-  children: TreeNode[]
-}
 
 function isAppendixDirectoryName(name: string): boolean {
   const normalized = name.trim().toLowerCase()
@@ -225,7 +212,7 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
           return aIsReadme ? -1 : 1
         }
 
-        const indexComparison = compareIndex(a.index, b.index)
+        const indexComparison = compareIndex(a.index ?? -1, b.index ?? -1)
         if (indexComparison !== 0) {
           return indexComparison
         }

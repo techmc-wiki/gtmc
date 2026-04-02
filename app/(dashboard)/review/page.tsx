@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Metadata } from "next"
 import { BrutalCard } from "@/components/ui/brutal-card"
 import { BrutalButton } from "@/components/ui/brutal-button"
@@ -22,6 +21,8 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
+
+type PR = Awaited<ReturnType<typeof getOpenPRs>>[number]
 
 async function analyzePRConflictStatus(prNumber: number, token?: string) {
   const prDetail = await getPR(prNumber, token)
@@ -95,14 +96,14 @@ export default async function ReviewHubPage() {
   }
 
   const token = process.env.GITHUB_ARTICLES_WRITE_PAT
-  let openPRs: Array<any> = []
+  let openPRs: PR[] = []
   const groupedPRs = {
-    conflicts: [] as any[],
-    pending: [] as any[],
+    conflicts: [] as PR[],
+    pending: [] as PR[],
   }
 
   try {
-    openPRs = (await getOpenPRs(token)) as any[]
+    openPRs = await getOpenPRs(token)
 
     const analysisResults = await Promise.all(
       openPRs.map(async (pr) => {
@@ -122,7 +123,7 @@ export default async function ReviewHubPage() {
     console.error("Failed to fetch PRs:", error)
   }
 
-  const renderPRCard = (pr: any, isConflict: boolean) => (
+  const renderPRCard = (pr: PR, isConflict: boolean) => (
     <BrutalCard
       key={pr.id}
       className={`

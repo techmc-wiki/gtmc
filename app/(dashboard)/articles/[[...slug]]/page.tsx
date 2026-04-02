@@ -27,6 +27,32 @@ import {
 import { getSidebarTree } from "@/actions/sidebar"
 import type { ArticleTreeNode as BaseArticleTreeNode } from "@/lib/github/sync"
 
+export const revalidate = 3600
+
+export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
+  const tree = await getArticleTree()
+
+  const collectArticleSlugs = (nodes: ArticleTreeNode[]): string[] => {
+    const slugs: string[] = []
+
+    for (const node of nodes) {
+      if (!node.isFolder) {
+        slugs.push(node.slug)
+      }
+
+      if (node.children && node.children.length > 0) {
+        slugs.push(...collectArticleSlugs(node.children))
+      }
+    }
+
+    return slugs
+  }
+
+  return collectArticleSlugs(tree).map((slug) => ({
+    slug: slug.split("/").filter(Boolean),
+  }))
+}
+
 interface ArticlePageProps {
   params: Promise<{
     slug?: string[]

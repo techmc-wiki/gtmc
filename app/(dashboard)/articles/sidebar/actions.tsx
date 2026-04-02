@@ -63,7 +63,7 @@ export function SidebarActions({
                 flex-2 cursor-pointer border border-tech-main/40 px-3 py-1.5
                 pl-2 font-mono text-[11px] transition-colors
                 hover:bg-tech-main hover:text-white
-                disabled:opacity-50 disabled:cursor-not-allowed
+                disabled:cursor-not-allowed disabled:opacity-50
               ">
               ◎ LOCATE
             </button>
@@ -98,7 +98,7 @@ export function SidebarActions({
             cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
             text-[10px] transition-colors
             hover:bg-tech-main hover:text-white
-            disabled:opacity-50 disabled:cursor-not-allowed
+            disabled:cursor-not-allowed disabled:opacity-50
           ">
           ◎ LOCATE
         </button>

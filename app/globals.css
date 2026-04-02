@@ -410,8 +410,43 @@ code .line {
   display: block;
 }
 
-.code-block-pre code,
-.code-block-pre .line-numbers-col > div {
+.code-block-pre code {
+  line-height: 1.625;
+  counter-reset: line-counter;
+  display: block;
+}
+
+.code-block-pre .line {
+  display: block;
+  position: relative;
+  counter-increment: line-counter;
+  padding-left: calc(var(--line-num-width, 2.75rem) + 1rem);
+}
+
+.code-block-pre[data-wrapped="true"] .line {
+  padding-left: calc(
+    var(--line-num-width, 2.75rem) + 1rem + var(--line-indent, 0ch)
+  );
+  text-indent: calc(-1 * var(--line-indent, 0ch));
+}
+
+.code-block-pre .line::before {
+  content: counter(line-counter);
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: var(--line-num-width, 2.75rem);
+  text-align: right;
+  padding-right: 0.5rem;
+  border-right: 1px solid
+    color-mix(in srgb, var(--color-tech-main) 20%, transparent);
+  color: var(--color-tech-main);
+  opacity: 0.4;
+  user-select: none;
+  pointer-events: none;
+  font-family: var(--font-mono, monospace);
+  font-size: inherit;
   line-height: 1.625;
 }
 
@@ -430,5 +465,15 @@ code[class^="language-"] {
   .opacity-\[0\.25\],
   .opacity-40 {
     opacity: 0;
+  }
+}
+
+@layer components {
+  .code-block-pre {
+    @apply relative;
+  }
+
+  .code-block-pre code {
+    @apply block;
   }
 }

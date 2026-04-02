@@ -99,6 +99,7 @@ export function getMarkdownComponents(rawPath: string) {
   function codeComponent({
     className,
     children,
+    node,
     ...props
   }: MarkdownComponentProps) {
     if (props["data-linked-code"] === "true") {

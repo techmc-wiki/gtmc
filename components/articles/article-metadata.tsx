@@ -103,9 +103,9 @@ export function ArticleMetadata({
           </span>
           <span
             className="
-            hidden items-center gap-3
-            sm:inline-flex
-          ">
+              hidden items-center gap-3
+              sm:inline-flex
+            ">
             PATH: {filePath}
           </span>
           <button
@@ -127,9 +127,7 @@ export function ArticleMetadata({
             ${
               isCollapsed
                 ? "max-h-0 overflow-hidden opacity-0"
-                : `
-              mt-4 max-h-screen opacity-100
-            `
+                : `mt-4 max-h-screen opacity-100`
             }
           `}>
           <div
@@ -148,7 +146,10 @@ export function ArticleMetadata({
                   <Link
                     href={`https://github.com/${author}`}
                     target="_blank"
-                    className="relative inline-block size-6 sm:size-10">
+                    className="
+                      relative inline-block size-6
+                      sm:size-10
+                    ">
                     <Image
                       src={getAvatarUrl(author)}
                       alt={author}
@@ -186,7 +187,10 @@ export function ArticleMetadata({
                         <Link
                           href={`https://github.com/${contributor}`}
                           target="_blank"
-                          className="relative inline-block size-4 sm:size-6">
+                          className="
+                            relative inline-block size-4
+                            sm:size-6
+                          ">
                           <Image
                             src={getAvatarUrl(contributor)}
                             alt={contributor}
@@ -298,9 +302,9 @@ export function ArticleMetadata({
                   copied
                     ? `bg-tech-main text-tech-bg`
                     : `
-                    bg-white
-                    hover:bg-tech-accent/10
-                  `
+                      bg-white
+                      hover:bg-tech-accent/10
+                    `
                 }
               `}
               aria-label="Copy URL">

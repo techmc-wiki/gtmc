@@ -64,10 +64,7 @@ export function FeatureComments({
                 mb-2 flex items-center gap-2 border-b border-dashed
                 border-tech-main/30 pb-2 font-mono text-sm
               ">
-              <span
-                className="
-                font-bold tracking-wider text-tech-main uppercase
-              ">
+              <span className="font-bold tracking-wider text-tech-main uppercase">
                 {comment.author.name ||
                   (comment.emailRedacted
                     ? "email redacted for privacy"

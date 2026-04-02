@@ -226,8 +226,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           w-full pb-4 font-mono text-[15px] wrap-break-word
           [&_li]:mt-1.5
           [&_ul]:list-none
-          [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l [&_ul_ul]:guide-line
-          [&_ul_ul]:pl-3
+          [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l
+          [&_ul_ul]:guide-line [&_ul_ul]:pl-3
           [&>ul]:pl-0
           ${showPlaceholder ? "h-full min-h-full pb-0" : ""}
         `}

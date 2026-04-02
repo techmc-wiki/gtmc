@@ -29,13 +29,21 @@ export function ArticleMetadataSimple({
             <span className="size-2 animate-pulse bg-tech-main/50" />
             SYS.READ_STREAM | UTF-8
           </span>
-          <span className="hidden items-center gap-3 sm:inline-flex">
+          <span
+            className="
+              hidden items-center gap-3
+              sm:inline-flex
+            ">
             PATH: {filePath}
           </span>
         </div>
 
         <div className="mt-4 flex flex-col gap-4">
-          <h1 className="font-mono text-xl font-bold tracking-tight text-tech-main-dark sm:text-2xl">
+          <h1
+            className="
+              font-mono text-xl font-bold tracking-tight text-tech-main-dark
+              sm:text-2xl
+            ">
             {title}
           </h1>
 
@@ -45,8 +53,20 @@ export function ArticleMetadataSimple({
               <span className="text-tech-main">
                 {wordCount.toLocaleString()}
               </span>
-              <span className="hidden sm:inline"> | </span>
-              <br className="block sm:hidden" />
+              <span
+                className="
+                  hidden
+                  sm:inline
+                ">
+                {" "}
+                |{" "}
+              </span>
+              <br
+                className="
+                  block
+                  sm:hidden
+                "
+              />
               {"EST_READ_TIME: "}
               <span className="text-tech-main">{readingTime} MIN</span>
             </p>

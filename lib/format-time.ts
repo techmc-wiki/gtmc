@@ -1,7 +1,10 @@
 /**
  * Formats a date string to absolute time format "YYYY-MM-DD HH:mm"
  */
-export function formatAbsoluteTime(dateString: string, displayTime = true): string {
+export function formatAbsoluteTime(
+  dateString: string,
+  displayTime = true
+): string {
   try {
     const date = new Date(dateString)
     if (isNaN(date.getTime())) {
@@ -27,7 +30,10 @@ export function formatAbsoluteTime(dateString: string, displayTime = true): stri
 /**
  * Formats a date string to relative time within a month, absolute time beyond
  */
-export function formatRelativeTime(dateString: string, displayTime = true): string {
+export function formatRelativeTime(
+  dateString: string,
+  displayTime = true
+): string {
   try {
     const date = new Date(dateString)
     if (isNaN(date.getTime())) {

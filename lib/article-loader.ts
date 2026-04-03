@@ -185,6 +185,17 @@ function getNodeTitle(entry: SlugMapEntry): string {
     return entry.chapterTitle || entry.slug.split("/").pop() || entry.slug
   }
 
+  if (entry.isAppendix) {
+    return (
+      entry.chapterTitle ||
+      entry.chapterTitleEn ||
+      entry.title ||
+      entry.filePath.split("/").pop()?.replace(/\.md$/i, "") ||
+      entry.slug.split("/").pop() ||
+      entry.slug
+    )
+  }
+
   return (
     entry.chapterTitle ||
     entry.filePath.split("/").pop()?.replace(/\.md$/i, "") ||

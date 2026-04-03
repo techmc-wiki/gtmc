@@ -242,8 +242,8 @@ export function ArticleMetadata({
               {title}
             </h1>
             {isAdvanced && (
-              <span className="shrink-0 border border-tech-main/30 bg-tech-main/5 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-tech-main">
-                ADVANCED
+              <span className="shrink-0 bg-violet-600 text-white px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest rounded-sm">
+                ◈ ADV
               </span>
             )}
           </div>

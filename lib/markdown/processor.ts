@@ -9,6 +9,7 @@ import { visit } from "unist-util-visit"
 import { pangu } from "pangu"
 import { remarkAdvancedSections } from "@/lib/markdown/plugins/remark-advanced-sections"
 import { remarkNumberedHeadingsDot } from "@/lib/markdown/plugins/remark-heading-numbering"
+import { rehypeAdvancedSections } from "@/lib/markdown/plugins/rehype-advanced-sections"
 import type { createRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
 
 export function rehypeLinkedCode() {
@@ -81,12 +82,13 @@ export function getPluginsForContent(
 
   const rehypePlugins: Array<
     | typeof rehypeRaw
+    | typeof rehypeAdvancedSections
     | typeof rehypeKatex
     | typeof rehypeSlug
     | typeof rehypeCJKSpacing
     | typeof rehypeLinkedCode
     | Awaited<ReturnType<typeof createRehypeShiki>>
-  > = [rehypeRaw, rehypeLinkedCode, rehypeSlug]
+  > = [rehypeRaw, rehypeAdvancedSections, rehypeLinkedCode, rehypeSlug]
 
   if (
     content.includes("$") ||

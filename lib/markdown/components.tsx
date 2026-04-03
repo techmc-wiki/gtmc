@@ -239,8 +239,10 @@ export function getMarkdownComponents(rawPath: string) {
         {id && <HeadingAnchor id={id} level={1} />}
         {children}
         {dataAdvanced === "true" && (
-          <span className="shrink-0 border border-tech-main/30 bg-tech-main/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-tech-main ml-2">
-            ADVANCED
+          <span
+            aria-hidden="true"
+            className="shrink-0 bg-violet-600 text-white px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest rounded-sm ml-2">
+            ◈ ADV
           </span>
         )}
       </h1>
@@ -261,8 +263,10 @@ export function getMarkdownComponents(rawPath: string) {
         {id && <HeadingAnchor id={id} level={2} />}
         {children}
         {dataAdvanced === "true" && (
-          <span className="shrink-0 border border-tech-main/30 bg-tech-main/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-tech-main ml-2">
-            ADVANCED
+          <span
+            aria-hidden="true"
+            className="shrink-0 bg-violet-600 text-white px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest rounded-sm ml-2">
+            ◈ ADV
           </span>
         )}
       </h2>
@@ -282,8 +286,10 @@ export function getMarkdownComponents(rawPath: string) {
         {id && <HeadingAnchor id={id} level={3} />}
         {children}
         {dataAdvanced === "true" && (
-          <span className="shrink-0 border border-tech-main/30 bg-tech-main/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-tech-main ml-2">
-            ADVANCED
+          <span
+            aria-hidden="true"
+            className="shrink-0 bg-violet-600 text-white px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest rounded-sm ml-2">
+            ◈ ADV
           </span>
         )}
       </h3>
@@ -386,9 +392,16 @@ export function getMarkdownComponents(rawPath: string) {
       if (dataAdvancedSection === "true") {
         return (
           <div
-            className="border-l-2 border-tech-main bg-tech-main/5 pl-4 my-4"
+            className="my-6 rounded-sm overflow-hidden border border-violet-200"
             {...rest}>
-            {children}
+            <div className="bg-violet-600 px-4 py-1.5 flex items-center gap-2">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-white">
+                ◈ Advanced Content
+              </span>
+            </div>
+            <div className="bg-gradient-to-b from-violet-50 to-white px-4 pt-3 pb-4">
+              {children}
+            </div>
           </div>
         )
       }

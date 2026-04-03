@@ -213,8 +213,8 @@ export function SidebarTree({
                           : item.title}
                     </Link>
                     {item.isAdvanced && (
-                      <span className="shrink-0 border border-tech-main/30 bg-tech-main/10 px-1 py-0.5 font-mono text-[10px] uppercase tracking-widest text-tech-main">
-                        ADVANCED
+                      <span className="shrink-0 bg-violet-600 text-white px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest rounded-sm">
+                        ◈ ADV
                       </span>
                     )}
                   </div>
@@ -250,6 +250,11 @@ export function SidebarTree({
                                 href={`#${h2.id}`}
                                 onClick={() => onNavigate?.()}
                                 className="block wrap-break-word">
+                                {item.isAdvanced && (
+                                  <span className="text-violet-500 mr-1 text-[8px]">
+                                    ●
+                                  </span>
+                                )}
                                 {h2.text}
                               </Link>
                             </li>

@@ -201,6 +201,7 @@ function getNodeTitle(entry: SlugMapEntry): string {
 
   return (
     entry.chapterTitle ||
+    entry.title ||
     entry.filePath.split("/").pop()?.replace(/\.md$/i, "") ||
     entry.slug.split("/").pop() ||
     entry.slug

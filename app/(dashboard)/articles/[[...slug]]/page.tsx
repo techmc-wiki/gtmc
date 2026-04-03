@@ -373,7 +373,19 @@ async function resolveArticleTarget(
   const targetNode = findNodeBySlug(tree, normalizedSlug)
 
   if (!targetNode) {
-    return null
+    const filePath = resolveSlug(normalizedSlug)
+    if (!filePath) {
+      return null
+    }
+    return {
+      filePath,
+      canonicalSlug: normalizedSlug,
+      index: -1,
+      isAppendix: false,
+      isPreface: false,
+      isReadmeIntro: false,
+      redirectToSlug: undefined,
+    }
   }
 
   const canonicalSlug = targetNode.isFolder

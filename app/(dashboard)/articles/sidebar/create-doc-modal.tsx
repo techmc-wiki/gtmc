@@ -68,6 +68,7 @@ export function CreateDocModal({
         <form onSubmit={handleCreate} className="space-y-4 font-mono">
           <div>
             <label
+              htmlFor="modal-title"
               className="
                 mb-1 block text-[11px] tracking-wider text-tech-main/80
                 uppercase
@@ -75,6 +76,7 @@ export function CreateDocModal({
               Title
             </label>
             <input
+              id="modal-title"
               type="text"
               required
               value={formData.title}
@@ -95,6 +97,7 @@ export function CreateDocModal({
 
           <div>
             <label
+              htmlFor="modal-slug"
               className="
                 mb-1 block text-[11px] tracking-wider text-tech-main/80
                 uppercase
@@ -102,6 +105,7 @@ export function CreateDocModal({
               Slug (URL path)
             </label>
             <input
+              id="modal-slug"
               type="text"
               value={formData.slug}
               onChange={(e) =>
@@ -141,6 +145,7 @@ export function CreateDocModal({
 
           <div>
             <label
+              htmlFor="modal-parent"
               className="
                 mb-1 block text-[11px] tracking-wider text-tech-main/80
                 uppercase
@@ -148,6 +153,7 @@ export function CreateDocModal({
               Parent Directory
             </label>
             <select
+              id="modal-parent"
               value={formData.parentId}
               onChange={(e) =>
                 setFormData({

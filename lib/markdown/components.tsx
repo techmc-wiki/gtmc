@@ -90,6 +90,18 @@ export function getMarkdownComponents(rawPath: string) {
   const aComponent = createAComponent(rawPath)
   const imageComponent = createImageComponent(rawPath)
 
+  const advancedBadge = (
+    <span
+      aria-hidden="true"
+      className="
+        mx-1 inline-block shrink-0 border border-violet-400/30 bg-violet-600/5
+        px-1.5 py-0.5 align-middle font-mono text-[10px] tracking-tight
+        text-violet-400 uppercase
+      ">
+      ◈ ADV
+    </span>
+  )
+
   const makeSpan = (style: Record<string, string>) => {
     function SpanComponent({ ...props }: MarkdownComponentProps) {
       return <span style={style} {...props} />
@@ -106,7 +118,7 @@ export function getMarkdownComponents(rawPath: string) {
     return (
       <span
         className={[
-          "inline-block rounded-[2px] border border-tech-main/20 bg-tech-main/8 px-1.5 py-px text-tech-main/80 transition-[filter,text-shadow,color,background-color,border-color] duration-200 [filter:blur(0.18rem)] [text-shadow:0_0_0.35rem_rgba(96,112,143,0.45)] hover:border-tech-main/35 hover:bg-white/85 hover:text-slate-800 hover:[filter:none] hover:[text-shadow:none]",
+          "inline-block rounded-xs border guide-line bg-tech-main/8 px-1.5 py-px text-tech-main/80 transition-[filter,text-shadow,color,background-color,border-color] duration-200 filter-[blur(0.18rem)] [text-shadow:0_0_0.35rem_rgba(96,112,143,0.45)] hover:border-tech-main/35 hover:bg-white/85 hover:text-slate-800 hover:filter-none hover:text-shadow-none",
           className,
         ]
           .filter(Boolean)
@@ -238,13 +250,7 @@ export function getMarkdownComponents(rawPath: string) {
         ">
         {id && <HeadingAnchor id={id} level={1} />}
         {children}
-        {dataAdvanced === "true" && (
-          <span
-            aria-hidden="true"
-            className="shrink-0 bg-violet-600 text-white px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest rounded-sm ml-2">
-            ◈ ADV
-          </span>
-        )}
+        {dataAdvanced === "true" && advancedBadge}
       </h1>
     ),
     h2: ({
@@ -262,13 +268,7 @@ export function getMarkdownComponents(rawPath: string) {
         ">
         {id && <HeadingAnchor id={id} level={2} />}
         {children}
-        {dataAdvanced === "true" && (
-          <span
-            aria-hidden="true"
-            className="shrink-0 bg-violet-600 text-white px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest rounded-sm ml-2">
-            ◈ ADV
-          </span>
-        )}
+        {dataAdvanced === "true" && advancedBadge}
       </h2>
     ),
     h3: ({
@@ -285,13 +285,7 @@ export function getMarkdownComponents(rawPath: string) {
         ">
         {id && <HeadingAnchor id={id} level={3} />}
         {children}
-        {dataAdvanced === "true" && (
-          <span
-            aria-hidden="true"
-            className="shrink-0 bg-violet-600 text-white px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest rounded-sm ml-2">
-            ◈ ADV
-          </span>
-        )}
+        {dataAdvanced === "true" && advancedBadge}
       </h3>
     ),
     p: ({ node, children, ...props }: MarkdownComponentProps) => {
@@ -392,14 +386,18 @@ export function getMarkdownComponents(rawPath: string) {
       if (dataAdvancedSection === "true") {
         return (
           <div
-            className="my-6 rounded-sm overflow-hidden border border-violet-200"
+            className="my-6 overflow-hidden rounded-sm border border-violet-200"
             {...rest}>
-            <div className="bg-violet-600 px-4 py-1.5 flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-white">
+            <div className="
+              flex items-center gap-2 bg-violet-600/50 px-4 py-1.5
+            ">
+              <span className="
+                font-mono text-[10px] tracking-widest text-white uppercase
+              ">
                 ◈ Advanced Content
               </span>
             </div>
-            <div className="bg-gradient-to-b from-violet-50 to-white px-4 pt-3 pb-4">
+            <div className="bg-linear-to-b from-violet-50 to-white px-4 pb-2">
               {children}
             </div>
           </div>

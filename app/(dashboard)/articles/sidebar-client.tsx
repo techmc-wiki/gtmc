@@ -10,6 +10,7 @@ import { useBlur } from "./sidebar/use-blur"
 import { useExpandedFolders } from "./sidebar/use-expanded-folders"
 import { useScrollToActive } from "./sidebar/use-scroll-to-active"
 import { useToc } from "./sidebar/use-toc"
+import { useActiveHeading } from "./sidebar/use-active-heading"
 
 export interface SidebarClientHandle {
   openCreateModal: () => void
@@ -62,9 +63,11 @@ export const SidebarClient = React.forwardRef<
     isFolderExpanded,
   } = useExpandedFolders()
   const toc = useToc(pathname)
+  const activeHeadingId = useActiveHeading(toc, pathname)
 
   React.useEffect(() => {
     setIsFileExpanded(true)
+     
   }, [pathname])
 
   const toggleFileExp = (e: React.MouseEvent) => {
@@ -85,7 +88,7 @@ export const SidebarClient = React.forwardRef<
   const collapseAll = React.useCallback(() => {
     setExpandedFolders(new Set())
     setIsFileExpanded(false)
-  }, [setExpandedFolders, setIsFileExpanded])
+  }, [setExpandedFolders])
 
   const {
     activeItemRef,
@@ -152,6 +155,7 @@ export const SidebarClient = React.forwardRef<
                 effectivePath={effectivePath}
                 isFileExpanded={isFileExpanded}
                 toc={toc}
+                activeHeadingId={activeHeadingId}
                 isFolderExpanded={isFolderExpanded}
                 toggleFolder={toggleFolder}
                 toggleFileExp={toggleFileExp}
@@ -195,6 +199,7 @@ export const SidebarClient = React.forwardRef<
               effectivePath={effectivePath}
               isFileExpanded={isFileExpanded}
               toc={toc}
+              activeHeadingId={activeHeadingId}
               isFolderExpanded={isFolderExpanded}
               toggleFolder={toggleFolder}
               toggleFileExp={toggleFileExp}

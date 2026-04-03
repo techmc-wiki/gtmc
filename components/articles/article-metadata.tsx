@@ -128,10 +128,9 @@ export function ArticleMetadata({
         <div
           className={`
             flex flex-col gap-4 transition-all duration-500 ease-in-out
-            ${
-              isCollapsed
-                ? "max-h-0 overflow-hidden opacity-0"
-                : `mt-4 max-h-screen opacity-100`
+            ${isCollapsed
+              ? "max-h-0 overflow-hidden opacity-0"
+              : `mt-4 max-h-screen opacity-100`
             }
           `}>
           <div
@@ -194,9 +193,9 @@ export function ArticleMetadata({
                           target="_blank"
                           aria-label={contributor}
                           className="
-                             relative inline-block size-4
-                             sm:size-6
-                           ">
+                            relative inline-block size-4
+                            sm:size-6
+                          ">
                           <Image
                             src={getAvatarUrl(contributor)}
                             alt={contributor}
@@ -242,7 +241,11 @@ export function ArticleMetadata({
               {title}
             </h1>
             {isAdvanced && (
-              <span className="shrink-0 bg-violet-600 text-white px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest rounded-sm">
+              <span className="
+                mx-1 shrink-0 border border-violet-400/30 bg-violet-600/5 px-1.5
+                py-0.5 font-mono text-[10px] tracking-tight text-violet-400
+                uppercase
+              ">
                 ◈ ADV
               </span>
             )}
@@ -314,13 +317,12 @@ export function ArticleMetadata({
               onClick={handleCopy}
               className={`
                 border guide-line px-2 py-0.5 transition-colors
-                ${
-                  copied
-                    ? `bg-tech-main text-tech-bg`
-                    : `
-                      bg-white
-                      hover:bg-tech-accent/10
-                    `
+                ${copied
+                  ? `bg-tech-main text-tech-bg`
+                  : `
+                    bg-white
+                    hover:bg-tech-accent/10
+                  `
                 }
               `}
               aria-label="Copy URL">

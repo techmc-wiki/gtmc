@@ -49,11 +49,6 @@ export function ArticleMetadataSimple({
               ">
               {title}
             </h1>
-            {isAdvanced && (
-              <span className="shrink-0 bg-violet-600 text-white px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest rounded-sm">
-                ◈ ADV
-              </span>
-            )}
           </div>
 
           <div className="text-tech-main/60">

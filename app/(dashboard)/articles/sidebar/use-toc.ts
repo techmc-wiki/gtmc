@@ -20,9 +20,14 @@ export function useToc(pathname: string): TocItem[] {
         const tocItems: TocItem[] = []
         headings.forEach((heading) => {
           if (heading.id && heading.textContent) {
+            const clone = heading.cloneNode(true) as Element
+            clone
+              .querySelectorAll('[aria-hidden="true"]')
+              .forEach((el) => el.remove())
+            const text = clone.textContent?.replace(/^#\s*/, "") ?? ""
             tocItems.push({
               id: heading.id,
-              text: heading.textContent.replace(/^#\s*/, ""),
+              text,
             })
           }
         })
@@ -41,6 +46,7 @@ export function useToc(pathname: string): TocItem[] {
     }
 
     retryWithRAF()
+     
   }, [pathname])
 
   return toc

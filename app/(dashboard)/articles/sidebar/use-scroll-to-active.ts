@@ -112,7 +112,9 @@ export function useScrollToActive({
 
       setExpandedFolders((prev) => {
         const next = new Set(prev)
-        needExpand.forEach((id) => next.add(id))
+        needExpand.forEach((id) => {
+          next.add(id)
+        })
         return next
       })
       pendingExpandIdsRef.current = needExpand
@@ -144,16 +146,21 @@ export function useScrollToActive({
         locatePendingRef.current = false
         pendingExpandIdsRef.current = []
         scrollActiveItem()
-        watchGrids.forEach((el) =>
+        watchGrids.forEach((el) => {
           el.removeEventListener("transitionend", onEnd)
-        )
+        })
       }
     }
 
-    watchGrids.forEach((el) => el.addEventListener("transitionend", onEnd))
+    watchGrids.forEach((el) => {
+      el.addEventListener("transitionend", onEnd)
+    })
     return () => {
-      watchGrids.forEach((el) => el.removeEventListener("transitionend", onEnd))
+      watchGrids.forEach((el) => {
+        el.removeEventListener("transitionend", onEnd)
+      })
     }
+     
   }, [expandedFolders, scrollActiveItem])
 
   useEffect(() => {

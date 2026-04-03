@@ -14,6 +14,7 @@ export function SidebarTree({
   effectivePath,
   isFileExpanded,
   toc,
+  activeHeadingId,
   isFolderExpanded,
   toggleFolder,
   toggleFileExp,
@@ -27,6 +28,7 @@ export function SidebarTree({
   effectivePath: string
   isFileExpanded: boolean
   toc: TocItem[]
+  activeHeadingId: string | null
   isFolderExpanded: (id: string) => boolean
   toggleFolder: (id: string, e: React.MouseEvent) => void
   toggleFileExp: (e: React.MouseEvent) => void
@@ -146,9 +148,9 @@ export function SidebarTree({
                         isActive
                           ? `font-bold text-tech-main`
                           : `
-                            text-slate-700
-                            hover:text-tech-main
-                          `
+                          text-slate-700
+                          hover:text-tech-main
+                        `
                       }
                     `}>
                     {isActive && toc.length > 0 ? (
@@ -176,9 +178,9 @@ export function SidebarTree({
                             isActive
                               ? `text-tech-main opacity-100`
                               : `
-                                text-tech-main opacity-0
-                                group-hover:opacity-100
-                              `
+                              text-tech-main opacity-0
+                              group-hover:opacity-100
+                            `
                           }
                         `}>
                         &gt;
@@ -201,9 +203,9 @@ export function SidebarTree({
                           isActive
                             ? `cursor-pointer border-tech-main/50`
                             : `
-                              border-transparent
-                              group-hover:border-tech-main/30
-                            `
+                            border-transparent
+                            group-hover:border-tech-main/30
+                          `
                         }
                       `}>
                       {item.isReadmeIntro
@@ -211,12 +213,18 @@ export function SidebarTree({
                         : !item.isFolder && item.index !== undefined
                           ? `${formatIndexPrefix(item.index, item.isAppendix ?? false, item.isPreface ?? false)}${item.title}`
                           : item.title}
+                      {item.isAdvanced && (
+                        <span
+                          className="
+                            mx-1 inline-block shrink-0 border
+                            border-violet-400/30 bg-violet-600/5 px-1
+                            align-middle font-mono text-[10px] tracking-tight
+                            text-violet-400 uppercase
+                          ">
+                          ◈ ADV
+                        </span>
+                      )}
                     </Link>
-                    {item.isAdvanced && (
-                      <span className="shrink-0 bg-violet-600 text-white px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest rounded-sm">
-                        ◈ ADV
-                      </span>
-                    )}
                   </div>
 
                   {isActive && toc.length > 0 && (
@@ -237,21 +245,34 @@ export function SidebarTree({
                           {toc.map((h2) => (
                             <li
                               key={h2.id}
-                              className="
-                                relative text-[13px] text-tech-main/70
-                                transition-colors
+                              className={`
+                                relative text-[13px] transition-colors
                                 before:absolute before:top-1/2 before:-left-4
                                 before:h-px before:w-2 before:-translate-y-1/2
-                                before:bg-tech-main/30 before:content-['']
+                                before:content-['']
                                 hover:text-tech-main
                                 md:text-sm
-                              ">
+                                ${
+                                  h2.id === activeHeadingId
+                                    ? `
+                                    font-semibold text-tech-main
+                                    before:bg-tech-main
+                                  `
+                                    : `
+                                    text-tech-main/70
+                                    before:bg-tech-main/30
+                                  `
+                                }
+                              `}>
                               <Link
                                 href={`#${h2.id}`}
                                 onClick={() => onNavigate?.()}
                                 className="block wrap-break-word">
                                 {item.isAdvanced && (
-                                  <span className="text-violet-500 mr-1 text-[8px]">
+                                  <span
+                                    className="
+                                    mr-1 text-[8px] text-violet-500
+                                  ">
                                     ●
                                   </span>
                                 )}
@@ -286,6 +307,7 @@ export function SidebarTree({
                       effectivePath={effectivePath}
                       isFileExpanded={isFileExpanded}
                       toc={toc}
+                      activeHeadingId={activeHeadingId}
                       isFolderExpanded={isFolderExpanded}
                       toggleFolder={toggleFolder}
                       toggleFileExp={toggleFileExp}

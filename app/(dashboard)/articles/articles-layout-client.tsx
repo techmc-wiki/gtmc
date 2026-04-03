@@ -432,10 +432,10 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
       <main
         className="
-          relative my-6 w-full flex-1 overflow-x-hidden
-          md:w-2xl
-          xl:w-3xl
-          2xl:w-4xl
+          relative my-6 w-full flex-1
+          md:max-w-2xl
+          xl:max-w-3xl
+          [1920px]:w-5xl
         ">
         {children}
       </main>

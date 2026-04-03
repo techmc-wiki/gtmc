@@ -146,6 +146,7 @@ export function useBlur({
   useEffect(() => {
     if (!internalScroll) return
     syncForDuration(300)
+     
   }, [
     internalScroll,
     pathname,

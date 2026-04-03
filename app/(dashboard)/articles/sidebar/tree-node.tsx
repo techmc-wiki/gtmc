@@ -1,43 +1,35 @@
 "use client"
 
 import Link from "next/link"
-import type { TocItem } from "./use-toc"
 import { formatIndexPrefix } from "@/lib/index-formatter"
 import { encodeSlug } from "@/lib/slug-utils"
 import type { TreeNode } from "@/types/sidebar-tree"
 import React from "react"
+import { useSidebarContext } from "./sidebar-context"
 
 export type { TreeNode } from "@/types/sidebar-tree"
 
 export function SidebarTree({
   items,
-  effectivePath,
-  isFileExpanded,
-  toc,
-  activeHeadingId,
-  isFolderExpanded,
-  toggleFolder,
-  toggleFileExp,
   onNavigate,
-  setIsFileExpanded,
-  highlightActive,
-  activeItemRef,
-  folderGridRefs,
 }: {
   items: TreeNode[]
-  effectivePath: string
-  isFileExpanded: boolean
-  toc: TocItem[]
-  activeHeadingId: string | null
-  isFolderExpanded: (id: string) => boolean
-  toggleFolder: (id: string, e: React.MouseEvent) => void
-  toggleFileExp: (e: React.MouseEvent) => void
   onNavigate?: () => void
-  setIsFileExpanded: React.Dispatch<React.SetStateAction<boolean>>
-  highlightActive: boolean
-  activeItemRef: React.RefObject<HTMLLIElement | null>
-  folderGridRefs: React.RefObject<Map<string, HTMLDivElement>>
 }) {
+  const {
+    effectivePath,
+    isFileExpanded,
+    toc,
+    activeHeadingId,
+    isFolderExpanded,
+    toggleFolder,
+    toggleFileExpanded,
+    setIsFileExpanded,
+    highlightActive,
+    activeItemRef,
+    folderGridRefs,
+  } = useSidebarContext()
+
   const decodedPathname = decodeURIComponent(effectivePath)
   const firstAppendixArticleIndex = items.findIndex(
     (item) => !item.isFolder && (item.isAppendix ?? false)
@@ -82,49 +74,30 @@ export function SidebarTree({
               data-sidebar-row="1"
               ref={!item.isFolder && isActive ? activeItemRef : undefined}
               className={`
-                relative my-1.5 w-fit list-none font-mono text-[16px]
-                transition-all duration-300
+                relative my-1.5 list-none font-mono text-[16px] transition-all
+                duration-300
+                before:absolute before:top-0 before:left-0 before:h-full
+                before:w-0.5 before:transition-all before:duration-200
+                before:content-['']
                 md:text-base
+                ${!item.isFolder && isActive
+                  ? `before:w-[3px] before:bg-tech-main`
+                  : `
+                    before:bg-transparent
+                    hover:before:w-[2px] hover:before:bg-tech-main/40
+                  `
+                }
                 ${!item.isFolder && isActive && highlightActive
-                  ? `bg-tech-main/10 px-1 py-0.5`
-                  : ""
+                  ? `bg-tech-main/8`
+                  : !item.isFolder && isActive
+                    ? `bg-tech-main/5`
+                    : `hover:bg-tech-main/5`
                 }
               `}>
-              {!item.isFolder && isActive && highlightActive && (
-                <div>
-                  <div
-                    className="
-                      pointer-events-none absolute top-0 left-0 size-2
-                      -translate-px border-t-2 border-l-2 border-tech-main/40
-                    "
-                  />
-                  <div
-                    className="
-                      pointer-events-none absolute top-0 right-0.5 size-2
-                      translate-x-px -translate-y-px border-t-2 border-r-2
-                      border-tech-main/40
-                    "
-                  />
-                  <div
-                    className="
-                      pointer-events-none absolute bottom-0 left-0 size-2
-                      -translate-x-px translate-y-px border-b-2 border-l-2
-                      border-tech-main/40
-                    "
-                  />
-                  <div
-                    className="
-                      pointer-events-none absolute right-0.5 bottom-0 size-2
-                      translate-px border-r-2 border-b-2 border-tech-main/40
-                    "
-                  />
-                </div>
-              )}
-
               {item.isFolder ? (
                 <button
                   type="button"
-                  onClick={(e) => toggleFolder(item.id, e)}
+                  onClick={() => toggleFolder(item.id)}
                   className="
                     mt-3 mb-1 flex w-fit cursor-pointer items-center text-left
                     font-bold text-tech-main/80 uppercase opacity-80
@@ -151,10 +124,10 @@ export function SidebarTree({
                         `
                       }
                     `}>
-                    {isActive && toc.length > 0 ? (
+                    {isActive && toc.length > 0 && (
                       <button
                         type="button"
-                        onClick={toggleFileExp}
+                        onClick={toggleFileExpanded}
                         className="
                           absolute top-1/2 left-0 z-10 -translate-y-1/2
                           cursor-pointer text-[10px] text-tech-main
@@ -166,22 +139,6 @@ export function SidebarTree({
                         title={isFileExpanded ? "收起目录" : "展开目录"}>
                         {isFileExpanded ? "▼" : "▶"}
                       </button>
-                    ) : (
-                      <span
-                        className={`
-                          absolute top-1/2 left-0 -translate-y-1/2 text-xs
-                          transition-opacity
-                          md:text-sm
-                          ${isActive
-                            ? `text-tech-main opacity-100`
-                            : `
-                              text-tech-main opacity-0
-                              group-hover:opacity-100
-                            `
-                          }
-                        `}>
-                        &gt;
-                      </span>
                     )}
 
                     <Link
@@ -194,16 +151,7 @@ export function SidebarTree({
                           onNavigate?.()
                         }
                       }}
-                      className={`
-                        block w-full border-b pb-px pl-1
-                        ${isActive
-                          ? `cursor-pointer border-tech-main/50`
-                          : `
-                            border-transparent
-                            group-hover:border-tech-main/30
-                          `
-                        }
-                      `}>
+                      className="block w-full pb-px pl-1">
                       {item.isReadmeIntro
                         ? `00 ${item.title}`
                         : !item.isFolder && item.index !== undefined
@@ -295,18 +243,7 @@ export function SidebarTree({
                   <div className="overflow-hidden">
                     <SidebarTree
                       items={item.children}
-                      effectivePath={effectivePath}
-                      isFileExpanded={isFileExpanded}
-                      toc={toc}
-                      activeHeadingId={activeHeadingId}
-                      isFolderExpanded={isFolderExpanded}
-                      toggleFolder={toggleFolder}
-                      toggleFileExp={toggleFileExp}
                       onNavigate={onNavigate}
-                      setIsFileExpanded={setIsFileExpanded}
-                      highlightActive={highlightActive}
-                      activeItemRef={activeItemRef}
-                      folderGridRefs={folderGridRefs}
                     />
                   </div>
                 </div>

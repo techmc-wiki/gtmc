@@ -5,6 +5,11 @@ import Link from "next/link"
 import { BrutalCard } from "@/components/ui/brutal-card"
 import { RevealSection } from "./reveal-helpers"
 import { FeatureStatusBadge } from "@/components/ui/status-badge"
+import { CardHeaderRow } from "@/components/ui/card-header-row"
+import { SectionTitle } from "@/components/ui/section-title"
+import { TagList } from "@/components/ui/tag-list"
+import { FilterButtonGroup } from "./filter-button-group"
+import { StatusDot } from "@/components/ui/status-dot"
 
 interface Feature {
   id: string
@@ -84,14 +89,9 @@ export function FeatureList({ features }: { features: Feature[] }) {
     return (
       <RevealSection delay={delay}>
         <div className="mb-8">
-          <h2
-            className="
-              mb-6 border-b guide-line pb-2 text-lg font-bold tracking-widest
-              text-tech-main-dark uppercase
-              md:text-xl
-            ">
+          <SectionTitle>
             {title} ({groupFeatures.length})
-          </h2>
+          </SectionTitle>
           <div
             className="
               grid grid-cols-1 gap-6
@@ -130,16 +130,10 @@ export function FeatureList({ features }: { features: Feature[] }) {
                   />
 
                   <div className="relative z-10 flex h-full flex-col">
-                    <div className="mb-4 flex items-start justify-between gap-2">
-                      <FeatureStatusBadge status={feature.status} />
-                      <div className="flex flex-col items-end gap-1">
-                        <span
-                          className="font-mono text-xs text-tech-main/50"
-                          suppressHydrationWarning>
-                          {new Date(feature.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
+                    <CardHeaderRow
+                      badge={<FeatureStatusBadge status={feature.status} />}
+                      date={new Date(feature.createdAt).toLocaleDateString()}
+                    />
 
                     <h3
                       className="
@@ -156,9 +150,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                           flex items-center font-mono text-xs tracking-widest
                           text-tech-main opacity-80
                         ">
-                        <span className="
-                          mr-2 inline-block size-1.5 bg-tech-main
-                        "></span>
+                        <StatusDot size="sm" variant="main" className="mr-2" />
                         AUTHOR: {feature.author?.name || "UNKNOWN_USER"}
                       </p>
                       {feature.assignee && (
@@ -167,27 +159,18 @@ export function FeatureList({ features }: { features: Feature[] }) {
                             flex items-center font-mono text-xs tracking-widest
                             text-blue-600 opacity-80
                           ">
-                          <span className="
-                            mr-2 inline-block size-1.5 bg-blue-600
-                          "></span>
+                          <StatusDot
+                            size="sm"
+                            variant="accent"
+                            className="mr-2"
+                          />
                           ASSIGNEE: {feature.assignee.name || "UNKNOWN_USER"}
                         </p>
                       )}
                     </div>
 
                     {feature.tags && feature.tags.length > 0 && (
-                      <div className="mt-auto flex flex-wrap gap-1 pt-4">
-                        {feature.tags.map((tag: string) => (
-                          <span
-                            key={tag}
-                            className="
-                              border guide-line bg-tech-main/5 px-1.5 py-0.5
-                              font-mono text-[10px] text-tech-main/70 uppercase
-                            ">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
+                      <TagList tags={feature.tags} className="mt-auto pt-4" />
                     )}
                   </div>
                 </BrutalCard>
@@ -203,7 +186,8 @@ export function FeatureList({ features }: { features: Feature[] }) {
     <div className="space-y-6">
       {/* 过滤器 */}
       <RevealSection delay={0}>
-        <BrutalCard className="
+        <BrutalCard
+          className="
           border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
         ">
           <div className="space-y-4">
@@ -215,33 +199,17 @@ export function FeatureList({ features }: { features: Feature[] }) {
                 ">
                 FILTER_BY_STATUS_
               </h4>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  "ALL",
-                  "UNRESOLVED",
-                  "PENDING",
-                  "IN_PROGRESS",
-                  "RESOLVED",
-                ].map((status) => (
-                  <button
-                    key={status}
-                    onClick={() => setStatusFilter(status)}
-                    className={`
-                      flex min-h-8 cursor-pointer items-center justify-center
-                      border px-3 py-2 font-mono text-xs transition-all
-                      ${
-                        statusFilter === status
-                          ? "border-tech-main bg-tech-main text-white"
-                          : `
-                            border-tech-main/40 bg-transparent text-tech-main
-                            hover:border-tech-main/60
-                          `
-                      }
-                    `}>
-                    {status}
-                  </button>
-                ))}
-              </div>
+              <FilterButtonGroup
+                options={[
+                  { label: "ALL", value: "ALL" },
+                  { label: "UNRESOLVED", value: "UNRESOLVED" },
+                  { label: "PENDING", value: "PENDING" },
+                  { label: "IN_PROGRESS", value: "IN_PROGRESS" },
+                  { label: "RESOLVED", value: "RESOLVED" },
+                ]}
+                value={statusFilter}
+                onChange={setStatusFilter}
+              />
             </div>
 
             {allTags.length > 0 && (
@@ -257,6 +225,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                   {allTags.map((tag) => (
                     <button
                       key={tag}
+                      type="button"
                       onClick={() => toggleTag(tag)}
                       className={`
                         flex min-h-8 cursor-pointer items-center justify-center

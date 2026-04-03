@@ -11,42 +11,45 @@ export function useToc(pathname: string): TocItem[] {
   const [toc, setToc] = useState<TocItem[]>([])
 
   useEffect(() => {
-    let frameCount = 0
-    const maxFrames = 10
+    setToc([])
 
-    const scanHeadings = () => {
+    const scanHeadings = (): boolean => {
       const headings = document.querySelectorAll("main h2")
-      if (headings.length > 0) {
-        const tocItems: TocItem[] = []
-        headings.forEach((heading) => {
-          if (heading.id && heading.textContent) {
-            const clone = heading.cloneNode(true) as Element
-            clone
-              .querySelectorAll('[aria-hidden="true"]')
-              .forEach((el) => el.remove())
-            const text = clone.textContent?.replace(/^#\s*/, "") ?? ""
-            tocItems.push({
-              id: heading.id,
-              text,
-            })
-          }
-        })
-        setToc(tocItems)
-        return true
-      }
-      return false
+      if (headings.length === 0) return false
+
+      const tocItems: TocItem[] = []
+      headings.forEach((heading) => {
+        if (heading.id && heading.textContent) {
+          const clone = heading.cloneNode(true) as Element
+          clone.querySelectorAll('[aria-hidden="true"]').forEach((el) => {
+            el.remove()
+          })
+          const text = clone.textContent?.replace(/^#\s*/, "") ?? ""
+          tocItems.push({ id: heading.id, text })
+        }
+      })
+      setToc(tocItems)
+      return true
     }
 
-    const retryWithRAF = () => {
-      if (scanHeadings()) return
-      if (frameCount < maxFrames) {
-        frameCount++
-        requestAnimationFrame(retryWithRAF)
-      }
+    if (scanHeadings()) return
+
+    const observer = new MutationObserver(() => {
+      if (scanHeadings()) observer.disconnect()
+    })
+
+    const main = document.querySelector("main")
+    if (main) {
+      observer.observe(main, { childList: true, subtree: true })
     }
 
-    retryWithRAF()
-     
+    const timeout = setTimeout(() => observer.disconnect(), 5000)
+
+    return () => {
+      observer.disconnect()
+      clearTimeout(timeout)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])
 
   return toc

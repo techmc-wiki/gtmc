@@ -7,15 +7,21 @@ import { SidebarActions } from "./sidebar/actions"
 import { CreateDocModal } from "./sidebar/create-doc-modal"
 import { SidebarTree, type TreeNode } from "./sidebar/tree-node"
 import { useBlur } from "./sidebar/use-blur"
-import { useExpandedFolders } from "./sidebar/use-expanded-folders"
+import { useSidebarContext } from "./sidebar/sidebar-context"
 import { useScrollToActive } from "./sidebar/use-scroll-to-active"
-import { useToc } from "./sidebar/use-toc"
-import { useActiveHeading } from "./sidebar/use-active-heading"
 
 export interface SidebarClientHandle {
   openCreateModal: () => void
-  collapseAll: (e: React.MouseEvent) => void
+  collapseAll: () => void
   scrollToCurrent: () => void
+}
+
+interface SidebarClientProps {
+  tree: TreeNode[]
+  onNavigate?: () => void
+  internalScroll?: boolean
+  scrollClass?: string
+  hideActions?: boolean
 }
 
 function flattenFolders(items: TreeNode[]): TreeNode[] {
@@ -32,16 +38,10 @@ function flattenFolders(items: TreeNode[]): TreeNode[] {
 
 export const SidebarClient = React.forwardRef<
   SidebarClientHandle,
-  {
-    tree: TreeNode[]
-    onNavigate?: () => void
-    internalScroll?: boolean
-    scrollClass?: string
-    hideActions?: boolean
-  }
+  SidebarClientProps
 >(function SidebarClient(
   {
-    tree,
+    tree: _tree,
     onNavigate,
     internalScroll = false,
     scrollClass = "",
@@ -49,53 +49,52 @@ export const SidebarClient = React.forwardRef<
   },
   ref
 ) {
-  const pathname = usePathname()
+  void _tree
+
+  return (
+    <SidebarClientInner
+      onNavigate={onNavigate}
+      internalScroll={internalScroll}
+      scrollClass={scrollClass}
+      hideActions={hideActions}
+      ref={ref}
+    />
+  )
+})
+
+const SidebarClientInner = React.forwardRef<
+  SidebarClientHandle,
+  Omit<SidebarClientProps, "tree">
+>(function SidebarClientInner(
+  { onNavigate, internalScroll = false, scrollClass = "", hideActions = false },
+  ref
+) {
   const router = useRouter()
+  const pathname = usePathname()
   const [isModalOpen, setIsModalOpen] = React.useState(false)
-  const [isFileExpanded, setIsFileExpanded] = React.useState(false)
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null)
 
   const {
+    tree,
     expandedFolders,
     setExpandedFolders,
     expandedFoldersRef,
     mounted,
-    isFolderExpanded,
-  } = useExpandedFolders()
-  const toc = useToc(pathname)
-  const activeHeadingId = useActiveHeading(toc, pathname)
-
-  React.useEffect(() => {
-    setIsFileExpanded(true)
-     
-  }, [pathname])
-
-  const toggleFileExp = (e: React.MouseEvent) => {
-    e.preventDefault()
-    setIsFileExpanded((prev) => !prev)
-  }
-
-  const toggleFolder = (id: string, e: React.MouseEvent) => {
-    e.preventDefault()
-    setExpandedFolders((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
-
-  const collapseAll = React.useCallback(() => {
-    setExpandedFolders(new Set())
-    setIsFileExpanded(false)
-  }, [setExpandedFolders])
-
-  const {
+    isFileExpanded,
+    setIsFileExpanded,
+    toc,
+    highlightActive,
+    setHighlightActive,
+    scrollContainerRef,
+    collapseAll,
+    scrollToCurrent,
+    setScrollToCurrent,
     activeItemRef,
     folderGridRefs,
-    highlightActive,
-    getEffectivePathname,
-    scrollToCurrent,
+  } = useSidebarContext()
+
+  const {
+    scrollToCurrent: scrollToCurrentFn,
+    highlightActive: highlightActiveFromScroll,
   } = useScrollToActive({
     tree,
     pathname,
@@ -105,7 +104,17 @@ export const SidebarClient = React.forwardRef<
     setExpandedFolders,
     scrollContainerRef,
     setIsFileExpanded,
+    activeItemRef,
+    folderGridRefs,
   })
+
+  React.useEffect(() => {
+    setScrollToCurrent(scrollToCurrentFn)
+  }, [scrollToCurrentFn, setScrollToCurrent])
+
+  React.useEffect(() => {
+    setHighlightActive(highlightActiveFromScroll)
+  }, [highlightActiveFromScroll, setHighlightActive])
 
   useBlur({
     internalScroll,
@@ -125,7 +134,15 @@ export const SidebarClient = React.forwardRef<
   }))
 
   const availableFolders = useMemo(() => flattenFolders(tree), [tree])
-  const effectivePath = getEffectivePathname()
+
+  const treeContent =
+    tree.length === 0 ? (
+      <div className="mt-4 font-mono text-sm text-tech-main/40">
+        SYS.DIR_TREE_EMPTY
+      </div>
+    ) : (
+      <SidebarTree onNavigate={onNavigate} items={tree} />
+    )
 
   return (
     <>
@@ -135,7 +152,10 @@ export const SidebarClient = React.forwardRef<
             <SidebarActions
               internalScroll={internalScroll}
               onCreate={() => setIsModalOpen(true)}
-              onCollapseAll={collapseAll}
+              onCollapseAll={(e) => {
+                e.preventDefault()
+                collapseAll()
+              }}
               onLocate={scrollToCurrent}
             />
           )}
@@ -145,33 +165,14 @@ export const SidebarClient = React.forwardRef<
               custom-left-scrollbar min-h-0 flex-1 overflow-y-auto pb-12
               ${scrollClass}
             `}>
-            {tree.length === 0 ? (
-              <div className="mt-4 font-mono text-sm text-tech-main/40">
-                SYS.DIR_TREE_EMPTY
-              </div>
-            ) : (
-              <SidebarTree
-                items={tree}
-                effectivePath={effectivePath}
-                isFileExpanded={isFileExpanded}
-                toc={toc}
-                activeHeadingId={activeHeadingId}
-                isFolderExpanded={isFolderExpanded}
-                toggleFolder={toggleFolder}
-                toggleFileExp={toggleFileExp}
-                onNavigate={onNavigate}
-                setIsFileExpanded={setIsFileExpanded}
-                highlightActive={highlightActive}
-                activeItemRef={activeItemRef}
-                folderGridRefs={folderGridRefs}
-              />
-            )}
+            {treeContent}
           </div>
           <div
             className="
               pointer-events-none absolute inset-x-0 bottom-0 z-20 -mr-4 -mb-2
-              h-12 mask-[linear-gradient(to_bottom,transparent,black)]
+              hidden h-12 mask-[linear-gradient(to_bottom,transparent,black)]
               [-webkit-mask-image:linear-gradient(to_bottom,transparent,black)]
+              sm:block
             "
             style={{
               background:
@@ -185,31 +186,14 @@ export const SidebarClient = React.forwardRef<
             <SidebarActions
               internalScroll={internalScroll}
               onCreate={() => setIsModalOpen(true)}
-              onCollapseAll={collapseAll}
+              onCollapseAll={(e) => {
+                e.preventDefault()
+                collapseAll()
+              }}
               onLocate={scrollToCurrent}
             />
           )}
-          {tree.length === 0 ? (
-            <div className="mt-4 font-mono text-sm text-tech-main/40">
-              SYS.DIR_TREE_EMPTY
-            </div>
-          ) : (
-            <SidebarTree
-              items={tree}
-              effectivePath={effectivePath}
-              isFileExpanded={isFileExpanded}
-              toc={toc}
-              activeHeadingId={activeHeadingId}
-              isFolderExpanded={isFolderExpanded}
-              toggleFolder={toggleFolder}
-              toggleFileExp={toggleFileExp}
-              onNavigate={onNavigate}
-              setIsFileExpanded={setIsFileExpanded}
-              highlightActive={highlightActive}
-              activeItemRef={activeItemRef}
-              folderGridRefs={folderGridRefs}
-            />
-          )}
+          {treeContent}
         </>
       )}
 

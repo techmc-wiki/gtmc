@@ -16,7 +16,7 @@ export default function FeaturesLoading() {
   return (
     <SkeletonExitWrapper>
       <div
-        className="mx-auto max-w-6xl space-y-8 px-6 pb-12"
+        className="page-container-pb"
         aria-busy="true"
         aria-label="Loading features list">
         <div
@@ -132,8 +132,7 @@ export default function FeaturesLoading() {
                         sm:h-64
                       ">
                       {/* Status badge + date row */}
-                      <div
-                        className="mb-4 flex items-start justify-between gap-2">
+                      <div className="mb-4 flex items-start justify-between gap-2">
                         <SegmentedBar
                           opacity="high"
                           className="

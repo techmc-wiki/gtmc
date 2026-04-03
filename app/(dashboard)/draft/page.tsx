@@ -11,6 +11,8 @@ import { PageHeader } from "@/components/ui/page-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { DraftStatusBadge } from "@/components/ui/status-badge"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { SectionTitle } from "@/components/ui/section-title"
+import { CardHeaderRow } from "@/components/ui/card-header-row"
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -151,7 +153,7 @@ export default async function DraftDashboardPage() {
   )
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-6">
+    <div className="page-container">
       <PageHeader
         title="Ops Center"
         subtitle="YOUR DIGITAL WORKSHOP / DRAFTS & REVISIONS"
@@ -178,14 +180,7 @@ export default async function DraftDashboardPage() {
 
       <div className="space-y-8">
         <div>
-          <h2
-            className="
-              mb-6 border-b guide-line pb-2 text-lg font-bold tracking-widest
-              text-tech-main-dark uppercase
-              md:text-xl
-            ">
-            Active Records
-          </h2>
+          <SectionTitle>Active Records</SectionTitle>
           <div
             className="
               grid grid-cols-1 gap-6
@@ -202,14 +197,7 @@ export default async function DraftDashboardPage() {
 
         {archivedDrafts.length > 0 && (
           <div>
-            <h2
-              className="
-                mb-6 border-b guide-line pb-2 text-lg font-bold tracking-widest
-                text-tech-main-dark uppercase
-                md:text-xl
-              ">
-              Archived / Approved Records
-            </h2>
+            <SectionTitle>Archived / Approved Records</SectionTitle>
             <div
               className="
                 grid grid-cols-1 gap-6

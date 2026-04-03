@@ -68,7 +68,7 @@ export default async function FeaturesPage({
   })
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-6 pb-12">
+    <div className="page-container-pb">
       <RevealSection delay={0}>
         <PageHeader
           title="Feature Reports"

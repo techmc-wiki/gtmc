@@ -406,6 +406,50 @@ body {
   }
 }
 
+@utility page-container {
+  @apply mx-auto max-w-6xl space-y-8 px-6;
+}
+
+@utility page-container-pb {
+  @apply mx-auto max-w-6xl space-y-8 px-6 pb-12;
+}
+
+@utility card-header-row {
+  @apply mb-4 flex items-start justify-between gap-2;
+}
+
+@utility editor-panel {
+  @apply p-6 font-mono text-xs text-tech-main/40;
+}
+
+@utility editor-grow {
+  @apply flex min-h-125 grow flex-col;
+}
+
+@utility editor-surface {
+  @apply relative flex grow flex-col bg-white;
+}
+
+@utility corner-tick {
+  @apply absolute top-0 right-0 h-px w-8 bg-tech-main;
+}
+
+@utility mono-label {
+  @apply font-mono text-xs text-tech-main/50;
+}
+
+@utility kbd-badge {
+  @apply border guide-line px-1;
+}
+
+@utility nested-list {
+  @apply space-y-3 border-l guide-line pl-3;
+}
+
+@utility section-divider {
+  @apply my-2 h-px w-full bg-tech-main/30;
+}
+
 code .line {
   display: block;
 }

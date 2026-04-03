@@ -21,6 +21,8 @@ import { FeatureReadonlyView } from "./feature-readonly-view"
 import { FeatureStatusBadge } from "@/components/ui/status-badge"
 import { RevealSection } from "@/app/(dashboard)/features/reveal-helpers"
 import { toAbsoluteUrl } from "@/lib/site-url"
+import { MetadataRow } from "./metadata-row"
+import { StatusDot } from "@/components/ui/status-dot"
 
 export const revalidate = 60
 
@@ -229,106 +231,64 @@ export default async function FeatureDetailPage({
       <RevealSection delay={100}>
         <BrutalCard
           className="
-            mb-8 p-4
-            sm:p-6
-          ">
+             mb-8 p-4
+             sm:p-6
+           ">
           <div
             className="
-              flex flex-col gap-2 font-mono text-xs
-              sm:text-sm
-            ">
-            <div
-              className="
-                flex flex-col gap-2
-                sm:flex-row sm:items-center
-              ">
-              <span
-                className="
-                  font-bold text-zinc-500
-                  sm:w-24
-                ">
-                STATUS:
-              </span>
-              <FeatureStatusBadge status={feature.status} />
-            </div>
-            <div
-              className="
-                flex flex-col gap-2
-                sm:flex-row sm:items-center
-              ">
-              <span
-                className="
-                  font-bold text-zinc-500
-                  sm:w-24
-                ">
-                AUTHOR:
-              </span>
-              <span className="wrap-break-word">
-                {feature.author.name || feature.author.email || "Unknown"}
-              </span>
-            </div>
-            <div
-              className="
-                flex flex-col gap-2
-                sm:flex-row sm:items-center
-              ">
-              <span
-                className="
-                  font-bold text-zinc-500
-                  sm:w-24
-                ">
-                ASSIGNEE:
-              </span>
-              <span className="wrap-break-word">
-                {feature.assignee
-                  ? feature.assignee.name || feature.assignee.email
-                  : "Unassigned"}
-              </span>
-            </div>
-            <div
-              className="
-                flex flex-col gap-2
-                sm:flex-row sm:items-center
-              ">
-              <span
-                className="
-                  font-bold text-zinc-500
-                  sm:w-24
-                ">
-                CREATED:
-              </span>
-              <span suppressHydrationWarning>
-                {new Date(feature.createdAt).toLocaleString()}
-              </span>
-            </div>
-            {feature.issueNumber && feature.htmlUrl && (
-              <div
-                className="
-                  flex flex-col gap-2
-                  sm:flex-row sm:items-center
-                ">
-                <span
-                  className="
-                    font-bold text-zinc-500
-                    sm:w-24
-                  ">
-                  GITHUB:
+               flex flex-col gap-2 font-mono text-xs
+               sm:text-sm
+             ">
+            <MetadataRow
+              label="STATUS:"
+              value={<FeatureStatusBadge status={feature.status} />}
+            />
+            <MetadataRow
+              label="AUTHOR:"
+              value={
+                <span className="wrap-break-word">
+                  {feature.author.name || feature.author.email || "Unknown"}
                 </span>
-                <div className="flex flex-wrap items-center gap-1">
-                  Linked to
-                  <a
-                    href={feature.htmlUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="
-                      border-b border-tech-main/50 font-mono wrap-break-word
-                      text-tech-main transition-colors
-                      hover:bg-tech-main/80 hover:text-white
-                    ">
-                    Issue #{feature.issueNumber}
-                  </a>
-                </div>
-              </div>
+              }
+            />
+            <MetadataRow
+              label="ASSIGNEE:"
+              value={
+                <span className="wrap-break-word">
+                  {feature.assignee
+                    ? feature.assignee.name || feature.assignee.email
+                    : "Unassigned"}
+                </span>
+              }
+            />
+            <MetadataRow
+              label="CREATED:"
+              value={
+                <span suppressHydrationWarning>
+                  {new Date(feature.createdAt).toLocaleString()}
+                </span>
+              }
+            />
+            {feature.issueNumber && feature.htmlUrl && (
+              <MetadataRow
+                label="GITHUB:"
+                value={
+                  <div className="flex flex-wrap items-center gap-1">
+                    Linked to
+                    <a
+                      href={feature.htmlUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="
+                         border-b border-tech-main/50 font-mono wrap-break-word
+                         text-tech-main transition-colors
+                         hover:bg-tech-main/80 hover:text-white
+                       ">
+                      Issue #{feature.issueNumber}
+                    </a>
+                  </div>
+                }
+              />
             )}
           </div>
         </BrutalCard>

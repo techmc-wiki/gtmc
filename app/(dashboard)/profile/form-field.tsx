@@ -1,0 +1,30 @@
+import { cn } from "@/lib/cn"
+
+interface FormFieldProps {
+  label: React.ReactNode
+  htmlFor?: string
+  children: React.ReactNode
+  className?: string
+}
+
+export function FormField({
+  label,
+  htmlFor,
+  children,
+  className,
+}: FormFieldProps) {
+  return (
+    <div className={cn("space-y-3 sm:space-y-4", className)}>
+      <label
+        htmlFor={htmlFor}
+        className="
+          block border-l-2 border-tech-main pl-2.5 font-mono text-[10px]
+          font-bold tracking-tech-wide text-tech-main-dark uppercase
+          sm:text-xs
+        ">
+        {label}
+      </label>
+      {children}
+    </div>
+  )
+}

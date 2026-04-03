@@ -386,9 +386,9 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
 
       <div
         className="
-          relative flex min-h-125 grow flex-col border border-tech-main/40
-          bg-white/80 backdrop-blur-sm
-        ">
+           relative flex min-h-125 grow flex-col border border-tech-main/40
+           bg-white/80 backdrop-blur-sm editor-grow
+         ">
         {/* Tab strip */}
         <div
           role="tablist"
@@ -488,9 +488,9 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         <div
           id="editor-write-panel"
           role="tabpanel"
-          className="flex min-h-125 grow flex-col"
+          className="editor-grow"
           hidden={activeTab !== "write"}>
-          <div className="relative flex grow flex-col bg-white">
+          <div className="editor-surface">
             <textarea
               ref={textareaRef}
               className={`
@@ -534,9 +534,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
                 role="status"
                 aria-live="polite">
                 {badge.type === "progress" && (
-                  <span
-                    className="inline-block size-2 animate-pulse bg-tech-accent"
-                  />
+                  <span className="inline-block size-2 animate-pulse bg-tech-accent" />
                 )}
                 {badge.type === "error" && (
                   <span className="inline-block size-2 bg-red-400" />
@@ -563,20 +561,18 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           id="editor-preview-panel"
           role="tabpanel"
           hidden={activeTab !== "preview"}
-          className="flex min-h-125 grow flex-col">
+          className="editor-grow">
           {content?.trim() ? (
             <div
               className="
-                w-full max-w-none overflow-hidden p-6 wrap-break-word
-                selection:bg-tech-main/20 selection:text-slate-900
-                sm:p-8
-              ">
+                 w-full max-w-none overflow-hidden p-6 wrap-break-word
+                 selection:bg-tech-main/20 selection:text-slate-900
+                 sm:p-8
+               ">
               <MarkdownPreview content={content} />
             </div>
           ) : (
-            <p className="p-6 font-mono text-xs text-tech-main/40">
-              NOTHING_TO_PREVIEW_
-            </p>
+            <p className="editor-panel">NOTHING_TO_PREVIEW_</p>
           )}
         </div>
       </div>
@@ -584,10 +580,10 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
       {!isReadOnly && (
         <div
           className="
-            relative mt-6 flex justify-end gap-4 border-t border-tech-main/10
-            pt-4
-          ">
-          <div className="absolute top-0 right-0 h-px w-8 bg-tech-main" />
+             relative mt-6 flex justify-end gap-4 border-t border-tech-main/10
+             pt-4
+           ">
+          <div className="corner-tick" />
 
           <BrutalButton
             type="button"

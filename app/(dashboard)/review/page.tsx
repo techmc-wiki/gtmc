@@ -213,7 +213,7 @@ export default async function ReviewHubPage() {
   )
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-6">
+    <div className="page-container">
       <PageHeader
         title="REVIEW HUB"
         subtitle="APPROVE CONTENT. MERGE REBELLION."

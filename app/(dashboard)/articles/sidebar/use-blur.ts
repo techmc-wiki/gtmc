@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react"
 import type { TocItem } from "./use-toc"
 import type { TreeNode } from "./tree-node"
+import { BLUR_ZONE_PX, BLUR_MIN, BLUR_RANGE, OPACITY_FADE } from "./constants"
 
 export function useBlur({
   internalScroll,
@@ -33,7 +34,7 @@ export function useBlur({
       'li[data-sidebar-row="1"]'
     )
     const blurZoneRect = container.getBoundingClientRect()
-    const blurZoneHeight = 32
+    const blurZoneHeight = BLUR_ZONE_PX
     const blurZoneTop = blurZoneRect.bottom - blurZoneHeight
 
     rows.forEach((row) => {
@@ -64,8 +65,8 @@ export function useBlur({
             : (0.5 - distBottomLine / rowRect.height) * 2
         )
       )
-      const blur = 0.2 + ratio * 2.8
-      const opacity = 1 - ratio * 0.85
+      const blur = BLUR_MIN + ratio * BLUR_RANGE
+      const opacity = 1 - ratio * OPACITY_FADE
       row.style.filter = `blur(${blur.toFixed(3)}px)`
       row.style.opacity = `${opacity.toFixed(3)}`
     })
@@ -146,7 +147,6 @@ export function useBlur({
   useEffect(() => {
     if (!internalScroll) return
     syncForDuration(300)
-     
   }, [
     internalScroll,
     pathname,

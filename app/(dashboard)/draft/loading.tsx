@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { BrutalCard } from "@/components/ui/brutal-card"
+import { SectionTitle } from "@/components/ui/section-title"
 import {
   SectionRail,
   SegmentedBar,
@@ -16,7 +17,7 @@ export default function DraftLoading() {
   return (
     <SkeletonExitWrapper>
       <div
-        className="mx-auto max-w-6xl space-y-8 px-6"
+        className="page-container"
         aria-busy="true"
         aria-label="Loading drafts">
         {/* PAGE_HEADER_ */}
@@ -56,14 +57,7 @@ export default function DraftLoading() {
 
         {/* ACTIVE_RECORDS_ */}
         <div className="animate-tech-slide-in [animation-delay:100ms]">
-          <h2
-            className="
-              mb-6 border-b guide-line pb-2 text-lg font-bold tracking-widest
-              text-tech-main-dark uppercase
-              md:text-xl
-            ">
-            Active Records
-          </h2>
+          <SectionTitle>Active Records</SectionTitle>
           <div
             className="
               grid grid-cols-1 gap-6
@@ -114,14 +108,7 @@ export default function DraftLoading() {
 
         {/* ARCHIVED_RECORDS_ */}
         <div className="animate-tech-slide-in [animation-delay:200ms]">
-          <h2
-            className="
-              mb-6 border-b guide-line pb-2 text-lg font-bold tracking-widest
-              text-tech-main-dark uppercase
-              md:text-xl
-            ">
-            Archived / Approved Records
-          </h2>
+          <SectionTitle>Archived / Approved Records</SectionTitle>
           <div
             className="
               grid grid-cols-1 gap-6

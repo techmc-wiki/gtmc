@@ -4,7 +4,7 @@ import * as React from "react"
 import { useState, useRef, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { SidebarClient, type SidebarClientHandle } from "./sidebar-client"
-import { SidebarActions } from "./sidebar/actions"
+import { SidebarProvider } from "./sidebar/sidebar-context"
 import { MobileTreeCard } from "./mobile-tree-card"
 import {
   ScanConfirmOverlay,
@@ -16,6 +16,15 @@ import type { TreeNode } from "@/types/sidebar-tree"
 interface ArticlesLayoutProps {
   children: React.ReactNode
   tree: TreeNode[]
+}
+
+interface SidebarTreeWrapperProps {
+  sidebarRef: React.Ref<SidebarClientHandle>
+  showPlaceholder: boolean
+  onNavigate: () => void
+  internalScroll?: boolean
+  scrollClass?: string
+  hideActions?: boolean
 }
 
 function TreeLoadingPlaceholder() {
@@ -104,20 +113,48 @@ function TreeLoadingPlaceholder() {
   )
 }
 
+function SidebarTreeWrapper({
+  sidebarRef,
+  showPlaceholder,
+  onNavigate,
+  internalScroll = false,
+  scrollClass = "",
+  hideActions = false,
+}: SidebarTreeWrapperProps) {
+  return (
+    <div
+      className={`
+        w-full pb-4 font-mono text-[15px] wrap-break-word
+        [&_li]:mt-1.5
+        [&_ul]:list-none
+        [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l
+        [&_ul_ul]:guide-line [&_ul_ul]:pl-3
+        [&>ul]:pl-0
+        ${showPlaceholder ? "h-full min-h-full pb-0" : ""}
+      `}
+      aria-busy={showPlaceholder}>
+      {showPlaceholder ? (
+        <div className="h-full min-h-full pr-4">
+          <TreeLoadingPlaceholder />
+        </div>
+      ) : (
+        <SidebarClient
+          tree={[]}
+          onNavigate={onNavigate}
+          ref={sidebarRef}
+          internalScroll={internalScroll}
+          scrollClass={scrollClass}
+          hideActions={hideActions}
+        />
+      )}
+    </div>
+  )
+}
+
 export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [isStuck, setIsStuck] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.scrollY > 64
-    }
-    return false
-  })
-  const [showFullText, setShowFullText] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.scrollY <= 64
-    }
-    return true
-  })
+  const [isStuck, setIsStuck] = useState(false)
+  const [showFullText, setShowFullText] = useState(true)
   const [treeData, setTreeData] = useState<TreeNode[]>(tree)
   const [isTreeLoading, setIsTreeLoading] = useState(tree.length === 0)
   const pathname = usePathname()
@@ -207,55 +244,15 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
   const showTreePlaceholder = isTreeLoading && treeData.length === 0
 
-  interface SidebarTreeWrapperProps {
-    sidebarRef: React.Ref<SidebarClientHandle>
-    showPlaceholder: boolean
-    tree: TreeNode[]
-    onNavigate: () => void
-  }
-
-  function SidebarTreeWrapper({
-    sidebarRef,
-    showPlaceholder,
-    tree,
-    onNavigate,
-  }: SidebarTreeWrapperProps) {
-    return (
-      <div
-        className={`
-          w-full pb-4 font-mono text-[15px] wrap-break-word
-          [&_li]:mt-1.5
-          [&_ul]:list-none
-          [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l
-          [&_ul_ul]:guide-line [&_ul_ul]:pl-3
-          [&>ul]:pl-0
-          ${showPlaceholder ? "h-full min-h-full pb-0" : ""}
-        `}
-        aria-busy={showPlaceholder}>
-        {showPlaceholder ? (
-          <div className="h-full min-h-full pr-4">
-            <TreeLoadingPlaceholder />
-          </div>
-        ) : (
-          <SidebarClient
-            tree={tree}
-            onNavigate={onNavigate}
-            ref={sidebarRef}
-            internalScroll
-          />
-        )}
-      </div>
-    )
-  }
-
   const onNavigate = () => setIsOpen(false)
 
   const fixedTreeContent = (
     <SidebarTreeWrapper
       sidebarRef={desktopSidebarRef}
       showPlaceholder={showTreePlaceholder}
-      tree={treeData}
       onNavigate={onNavigate}
+      internalScroll
+      scrollClass="pr-4"
     />
   )
 
@@ -263,182 +260,182 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
     <SidebarTreeWrapper
       sidebarRef={floatingCardSidebarRef}
       showPlaceholder={showTreePlaceholder}
-      tree={treeData}
       onNavigate={onNavigate}
+      internalScroll
     />
   )
 
   return (
-    <div
-      className="
-        relative isolate mx-auto flex min-h-[calc(100vh-8rem)] flex-col
-        md:flex-row md:justify-center md:gap-8
-      ">
+    <SidebarProvider tree={treeData}>
       <div
         className="
-          sticky top-16 z-30
-          md:hidden
-        ">
-        <div
-          className="relative transition-all duration-500 ease-out"
-          style={{
-            padding: isStuck ? "1rem 1rem 0 1rem" : "0",
-            justifyContent: isStuck ? "flex-end" : "stretch",
-          }}>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              setIsOpen(!isOpen)
-            }}
-            className="
-              cursor-pointer overflow-hidden border border-tech-main/40
-              bg-white/70 font-mono text-xs font-bold tracking-[0.15em]
-              text-tech-main backdrop-blur-sm transition-all duration-400
-              ease-out
-              hover:bg-tech-main/5
-            "
-            style={
-              {
-                width: isStuck ? "5rem" : "100%",
-                minHeight: isStuck ? "2rem" : "3rem",
-                padding: isStuck ? "0.25rem 1rem" : "1rem",
-                borderBottom: isStuck ? undefined : "1px solid",
-                boxShadow: isStuck ? "0 1px 2px 0 rgba(0, 0, 0, 0.05)" : "none",
-              } as React.CSSProperties
-            }
-            aria-label="Toggle article tree"
-            aria-expanded={isOpen}
-            data-testid="mobile-tree-toggle">
-            <div className="relative flex w-full items-center justify-between">
-              <span
-                className="transition-opacity duration-150"
-                style={{ opacity: showFullText ? 1 : 0 }}>
-                Table of Contents
-              </span>
-              <span
-                className="
-                  absolute left-1/2 -translate-x-1/2 transition-opacity
-                  duration-200
-                "
-                style={{ opacity: showFullText ? 0 : 1 }}>
-                ToC
-              </span>
-              <span
-                className="text-sm font-bold transition-opacity duration-200"
-                style={{ opacity: showFullText ? 1 : 0 }}>
-                {isOpen ? "▼" : "▶"}
-              </span>
-            </div>
-          </button>
-        </div>
-
-        <div
-          className={`
-            grid transition-all duration-300 ease-out
-            ${isOpen && !isStuck
-              ? "grid-rows-[1fr] opacity-100"
-              : "grid-rows-[0fr] opacity-0"
-            }
-          `}>
-          <div className="overflow-hidden">
-            <div
-              className="
-                max-h-[calc(100vh-12rem)] overflow-y-auto overscroll-contain
-                border-t guide-line bg-white/95 px-4 pt-3 pb-4
-              ">
-              {fixedTreeContent}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile floating tree card */}
-      <MobileTreeCard
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        isFloating={isStuck}>
-        {floatingTreeContent}
-      </MobileTreeCard>
-
-      {/* Desktop sidebar */}
-      <aside
-        className="
-          hidden w-64 shrink-0 border-r guide-line
-          md:block
-          lg:w-80
+          relative isolate mx-auto flex min-h-[calc(100vh-8rem)] flex-col
+          md:flex-row md:justify-center md:gap-8
         ">
         <div
           className="
-            sticky top-20 flex flex-col justify-center
-            hover:z-20
-            sm:top-26 sm:h-[calc(100vh-128px)]
-            lg:top-28 lg:h-[calc(100vh-144px)]
+            sticky top-16 z-30
+            md:hidden
           ">
           <div
             className="
-              group relative flex max-h-4/5 min-h-0 flex-1 flex-col
-              overflow-visible border-b guide-line text-tech-main
-              md:px-4 md:py-2
-            ">
-            <div className="flex shrink-0 flex-col">
+              relative transition-all duration-500 ease-out"
+            style={
+              {
+                padding: isStuck ? "1rem 1rem 0 1rem" : "0",
+                justifyContent: isStuck ? "flex-end" : "stretch",
+              } as React.CSSProperties
+            }>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                setIsOpen(!isOpen)
+              }}
+              className="
+                cursor-pointer overflow-hidden border border-tech-main/40
+                bg-white/70 font-mono text-xs font-bold tracking-[0.15em]
+                text-tech-main backdrop-blur-sm transition-all duration-400
+                ease-out
+                hover:bg-tech-main/5
+              "
+              style={
+                {
+                  width: isStuck ? "5rem" : "100%",
+                  minHeight: isStuck ? "2rem" : "3rem",
+                  padding: isStuck ? "0.25rem 1rem" : "1rem",
+                  borderBottom: isStuck ? undefined : "1px solid",
+                  boxShadow: isStuck
+                    ? "0 1px 2px 0 rgba(0, 0, 0, 0.05)"
+                    : "none",
+                } as React.CSSProperties
+              }
+              aria-label="Toggle article tree"
+              aria-expanded={isOpen}
+              data-testid="mobile-tree-toggle">
+              <div className="relative flex w-full items-center justify-between">
+                <span
+                  className="transition-opacity duration-150"
+                  style={{ opacity: showFullText ? 1 : 0 }}>
+                  Table of Contents
+                </span>
+                <span
+                  className="
+                    absolute left-1/2 -translate-x-1/2 transition-opacity
+                    duration-200
+                  "
+                  style={{ opacity: showFullText ? 0 : 1 }}>
+                  ToC
+                </span>
+                <span
+                  className="text-sm font-bold transition-opacity duration-200"
+                  style={{ opacity: showFullText ? 1 : 0 }}>
+                  {isOpen ? "▼" : "▶"}
+                </span>
+              </div>
+            </button>
+          </div>
+
+          <div
+            className={`
+              grid transition-all duration-300 ease-out
+              ${
+                isOpen && !isStuck
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0"
+              }
+            `}>
+            <div className="overflow-hidden">
               <div
                 className="
-                  group/title flex shrink-0 items-center justify-between
-                  border-b guide-line px-4 pb-2
+                  max-h-[calc(100vh-12rem)] overflow-y-auto overscroll-contain
+                  border-t guide-line bg-white/95 px-4 pt-3 pb-4
                 ">
+                {fixedTreeContent}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile floating tree card */}
+        <MobileTreeCard
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          isFloating={isStuck}>
+          {floatingTreeContent}
+        </MobileTreeCard>
+
+        {/* Desktop sidebar */}
+        <aside
+          className="
+            hidden w-64 shrink-0 border-r guide-line
+            md:block
+            lg:w-80
+          ">
+          <div
+            className="
+              sticky top-20 flex flex-col justify-center
+              hover:z-20
+              sm:top-26 sm:h-[calc(100vh-128px)]
+              lg:top-28 lg:h-[calc(100vh-144px)]
+            ">
+            <div
+              className="
+                group relative flex max-h-4/5 min-h-0 flex-1 flex-col
+                overflow-visible border-b guide-line text-tech-main
+                md:px-4 md:py-2
+              ">
+              <div className="flex shrink-0 flex-col">
                 <div
                   className="
-                    flex items-center font-mono text-xs font-bold
-                    tracking-tech-wide text-tech-main/60 uppercase
+                    group/title flex shrink-0 items-center justify-between
+                    border-b guide-line px-4 pb-2
                   ">
-                  <span
+                  <div
                     className="
-                      mr-2 inline-block size-1.5 animate-pulse bg-tech-main/60
-                    "
-                  />
-                  SYS.DIR_TREE
+                      flex items-center font-mono text-xs font-bold
+                      tracking-tech-wide text-tech-main/60 uppercase
+                    ">
+                    <span
+                      className="
+                        mr-2 inline-block size-1.5 animate-pulse bg-tech-main/60
+                      "
+                    />
+                    SYS.DIR_TREE
+                  </div>
                 </div>
               </div>
 
-              <SidebarActions
-                internalScroll
-                onCreate={() => desktopSidebarRef.current?.openCreateModal()}
-                onCollapseAll={(e) => desktopSidebarRef.current?.collapseAll(e)}
-                onLocate={() => desktopSidebarRef.current?.scrollToCurrent()}
-              />
+              {showTreePlaceholder ? (
+                <div
+                  className="
+                    custom-left-scrollbar h-full min-h-0 flex-1 overflow-y-auto
+                  ">
+                  <TreeLoadingPlaceholder />
+                </div>
+              ) : (
+                <SidebarClient
+                  ref={desktopSidebarRef}
+                  tree={treeData}
+                  internalScroll
+                  scrollClass="pr-4"
+                />
+              )}
             </div>
-
-            {showTreePlaceholder ? (
-              <div
-                className="
-                  custom-left-scrollbar h-full min-h-0 flex-1 overflow-y-auto
-                ">
-                <TreeLoadingPlaceholder />
-              </div>
-            ) : (
-              <SidebarClient
-                ref={desktopSidebarRef}
-                tree={treeData}
-                internalScroll
-                scrollClass="pr-4"
-                hideActions
-              />
-            )}
           </div>
-        </div>
-      </aside>
+        </aside>
 
-      <main
-        className="
-          relative my-6 w-full flex-1
-          md:max-w-2xl
-          xl:max-w-3xl
-          [1920px]:w-5xl
-        ">
-        {children}
-      </main>
-    </div>
+        <main
+          className="
+            relative my-6 w-full flex-1
+            md:max-w-2xl
+            xl:max-w-3xl
+            [1920px]:w-5xl
+          ">
+          {children}
+        </main>
+      </div>
+    </SidebarProvider>
   )
 }

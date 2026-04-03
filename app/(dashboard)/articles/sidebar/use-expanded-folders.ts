@@ -3,18 +3,19 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
 export function useExpandedFolders() {
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(() => {
-    try {
-      const stored = localStorage.getItem("gtmc_sidebar_expanded")
-      return stored ? new Set<string>(JSON.parse(stored)) : new Set<string>()
-    } catch {
-      return new Set<string>()
-    }
-  })
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
+    () => new Set<string>()
+  )
   const [mounted, setMounted] = useState(false)
   const expandedFoldersRef = useRef(expandedFolders)
 
   useEffect(() => {
+    try {
+      const stored = localStorage.getItem("gtmc_sidebar_expanded")
+      if (stored) {
+        setExpandedFolders(new Set<string>(JSON.parse(stored)))
+      }
+    } catch {}
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
   }, [])

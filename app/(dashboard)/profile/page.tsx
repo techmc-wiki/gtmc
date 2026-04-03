@@ -7,6 +7,9 @@ import { BrutalAvatar } from "@/components/ui/brutal-avatar"
 import { updateProfileAction } from "@/actions/profile"
 import { SignOutButton } from "@/components/ui/sign-out-button"
 import { getGithubEmailVisibility } from "@/lib/github"
+import { FormField } from "./form-field"
+import { MetadataRow } from "@/app/(dashboard)/features/[id]/metadata-row"
+import { StatusDot } from "@/components/ui/status-dot"
 
 export const metadata: Metadata = {
   title: "User Profile",
@@ -36,11 +39,7 @@ export default async function ProfilePage() {
   )
 
   return (
-    <div
-      className="
-        mx-auto mt-4 max-w-4xl animate-fade-in space-y-8 px-4 pb-20
-        sm:mt-8 sm:space-y-12 sm:px-0
-      ">
+    <div className="page-container mt-4 animate-fade-in sm:mt-8">
       <div
         className="
           flex flex-col items-start justify-between border-b-2
@@ -86,15 +85,11 @@ export default async function ProfilePage() {
           </h1>
           <p
             className="
-              mt-2 flex items-center gap-2 font-mono text-[10px]
-              tracking-tech-wide text-tech-main/70
-              sm:mt-3 sm:text-sm
-            ">
-            <span
-              className="
-                size-1 animate-pulse bg-tech-main
-                sm:size-1.5
-              "></span>
+               mt-2 flex items-center gap-2 font-mono text-[10px]
+               tracking-tech-wide text-tech-main/70
+               sm:mt-3 sm:text-sm
+             ">
+            <StatusDot size="sm" />
             CONFIG // IDENTITY // TOKENS
           </p>
         </div>
@@ -168,19 +163,7 @@ export default async function ProfilePage() {
               />
             </div>
 
-            <div
-              className="
-                w-full flex-1 space-y-3
-                sm:space-y-4
-              ">
-              <label
-                className="
-                  block border-l-2 border-tech-main pl-2.5 font-mono text-[10px]
-                  font-bold tracking-tech-wide text-tech-main-dark uppercase
-                  sm:text-xs
-                ">
-                AVATAR URL
-              </label>
+            <FormField label="AVATAR URL" className="w-full flex-1">
               <BrutalInput
                 name="image"
                 defaultValue={user.image || ""}
@@ -200,7 +183,7 @@ export default async function ProfilePage() {
                 ">
                 {">"} REQUIRED: DIRECT IMAGE LINK (.PNG/.JPG/.GIF)
               </p>
-            </div>
+            </FormField>
           </div>
 
           <div
@@ -222,19 +205,7 @@ export default async function ProfilePage() {
               sm:gap-6
               md:gap-8
             ">
-            <div
-              className="
-                space-y-3
-                sm:space-y-4
-              ">
-              <label
-                className="
-                  block border-l-2 border-tech-main pl-2.5 font-mono text-[10px]
-                  font-bold tracking-tech-wide text-tech-main-dark uppercase
-                  sm:text-xs
-                ">
-                USERNAME
-              </label>
+            <FormField label="USERNAME">
               <BrutalInput
                 name="name"
                 defaultValue={user.name || ""}
@@ -246,39 +217,31 @@ export default async function ProfilePage() {
                   sm:text-sm
                 "
               />
-            </div>
-            <div
-              className="
-                space-y-3
-                sm:space-y-4
-              ">
-              <label
-                className="
-                  flex items-center gap-2 border-l-2 border-tech-main/40 pl-2.5
-                  font-mono text-[10px] font-bold tracking-tech-wide
-                  text-tech-main/60 uppercase
-                  sm:text-xs
-                ">
-                EMAIL{" "}
-                <span
-                  className="
-                    border border-tech-main/30 bg-tech-main/5 px-1 text-[8px]
-                    text-tech-main/60
-                    sm:text-[9px]
-                  ">
-                  RO
-                </span>
-                {emailVisibility === "private" && (
+            </FormField>
+            <FormField
+              label={
+                <span className="flex items-center gap-2">
+                  EMAIL{" "}
                   <span
                     className="
-                      border border-amber-400/60 bg-amber-50 px-1 text-[8px]
-                      text-amber-600
+                      border border-tech-main/30 bg-tech-main/5 px-1 text-[8px]
+                      text-tech-main/60
                       sm:text-[9px]
                     ">
-                    PRIVATE
+                    RO
                   </span>
-                )}
-              </label>
+                  {emailVisibility === "private" && (
+                    <span
+                      className="
+                        border border-amber-400/60 bg-amber-50 px-1 text-[8px]
+                        text-amber-600
+                        sm:text-[9px]
+                      ">
+                      PRIVATE
+                    </span>
+                  )}
+                </span>
+              }>
               <BrutalInput
                 defaultValue={user.email || ""}
                 disabled
@@ -299,7 +262,7 @@ export default async function ProfilePage() {
                   {">"} YOUR GITHUB PRIMARY EMAIL VISIBILITY IS SET TO PRIVATE
                 </p>
               )}
-            </div>
+            </FormField>
           </div>
 
           <div
@@ -309,28 +272,14 @@ export default async function ProfilePage() {
               sm:mt-8 sm:flex-row sm:items-center sm:gap-4 sm:p-4
             ">
             <div className="absolute top-0 right-0 size-2 bg-tech-main/20" />
-            <div
-              className="
-                flex items-center gap-3
-                sm:gap-4
-              ">
-              <span
-                className="
-                  font-mono text-[9px] tracking-widest text-tech-main/60
-                  uppercase
-                  sm:text-[10px]
-                ">
-                ASSIGNED ROLE:
-              </span>
-              <span
-                className="
-                  font-mono text-xs font-bold tracking-widest
-                  text-tech-main-dark uppercase
-                  sm:text-sm
-                ">
-                [{user.role}]
-              </span>
-            </div>
+            <MetadataRow
+              label="ASSIGNED ROLE:"
+              value={
+                <span className="font-mono text-xs font-bold tracking-widest text-tech-main-dark uppercase sm:text-sm">
+                  [{user.role}]
+                </span>
+              }
+            />
           </div>
 
           <div

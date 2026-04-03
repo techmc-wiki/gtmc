@@ -55,8 +55,8 @@ function performHighlight(
   mark.scrollIntoView({ behavior: "smooth", block: "center" })
 
   const t1 = setTimeout(() => {
-    mark.style.backgroundColor = "transparent"
-    mark.style.color = ""
+    mark.style.backgroundColor = "rgba(96, 112, 143, 0)"
+    mark.style.color = "inherit"
     mark.style.padding = "0"
   }, 3600)
 

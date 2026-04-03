@@ -271,9 +271,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   return (
     <div
       className="
-        relative isolate mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-full
-        flex-col
-        md:w-4/5 md:flex-row
+        relative isolate mx-auto flex min-h-[calc(100vh-8rem)] flex-col
+        md:flex-row md:justify-center md:gap-8
       ">
       <div
         className="
@@ -338,10 +337,9 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         <div
           className={`
             grid transition-all duration-300 ease-out
-            ${
-              isOpen && !isStuck
-                ? "grid-rows-[1fr] opacity-100"
-                : "grid-rows-[0fr] opacity-0"
+            ${isOpen && !isStuck
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0"
             }
           `}>
           <div className="overflow-hidden">
@@ -434,9 +432,10 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
       <main
         className="
-          relative min-w-0 flex-1 overflow-x-hidden border-l border-transparent
-          py-6
-          md:pl-10
+          relative my-6 w-full flex-1 overflow-x-hidden
+          md:w-2xl
+          xl:w-3xl
+          2xl:w-4xl
         ">
         {children}
       </main>

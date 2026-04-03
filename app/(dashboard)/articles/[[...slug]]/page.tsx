@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown"
+import { Suspense } from "react"
 import "katex/dist/katex.min.css"
 import type { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
@@ -21,6 +22,7 @@ import { formatIndexPrefix } from "@/lib/index-formatter"
 import { getSiteUrl } from "@/lib/site-url"
 import { articleAbsoluteUrl } from "@/lib/article-url"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { ArticleHighlight } from "@/components/articles/article-highlight"
 import { ArticleMetadata } from "@/components/articles/article-metadata"
 import { ArticleMetadataSimple } from "@/components/articles/article-metadata-simple"
 import { ArticleNavigation } from "@/components/article-navigation"
@@ -307,6 +309,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       )}
 
       <article
+        data-article-content
         className="
           w-full max-w-none overflow-hidden wrap-break-word text-slate-800
           selection:bg-tech-main/20 selection:text-slate-900
@@ -322,6 +325,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       {(navigation.prev || navigation.next) && (
         <ArticleNavigation prev={navigation.prev} next={navigation.next} />
       )}
+
+      <Suspense>
+        <ArticleHighlight />
+      </Suspense>
 
       <script
         type="application/ld+json"

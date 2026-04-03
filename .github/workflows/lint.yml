@@ -47,13 +47,13 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
             ${{ runner.os }}-nextjs-
 
-      - name: Run lint
-        run: pnpm lint:check
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
         env:
           DATABASE_URL: "postgresql://localhost:5432/placeholder"
+
+      - name: Run lint
+        run: pnpm lint:check
 
       - name: Run build
         run: pnpm build

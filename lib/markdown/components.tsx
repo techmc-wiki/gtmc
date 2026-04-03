@@ -96,6 +96,26 @@ export function getMarkdownComponents(rawPath: string) {
     SpanComponent.displayName = "makeSpan"
     return SpanComponent
   }
+
+  function hiddenComponent({
+    className,
+    children,
+    ...props
+  }: MarkdownComponentProps) {
+    return (
+      <span
+        className={[
+          "inline-block rounded-[2px] border border-tech-main/20 bg-tech-main/8 px-1.5 py-px text-tech-main/80 transition-[filter,text-shadow,color,background-color,border-color] duration-200 [filter:blur(0.18rem)] [text-shadow:0_0_0.35rem_rgba(96,112,143,0.45)] hover:border-tech-main/35 hover:bg-white/85 hover:text-slate-800 hover:[filter:none] hover:[text-shadow:none]",
+          className,
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        {...props}>
+        {children}
+      </span>
+    )
+  }
+
   function codeComponent({
     className,
     children,
@@ -159,7 +179,7 @@ export function getMarkdownComponents(rawPath: string) {
     heightlightnormal: makeSpan({ color: "chartreuse" }),
     nc: ({ ...props }: MarkdownComponentProps) => <span {...props} />,
     pp: ({ ...props }: MarkdownComponentProps) => <span {...props} />,
-    hidden: makeSpan({ display: "none" }),
+    hidden: hiddenComponent,
     heightlightwarning: makeSpan({ color: "crimson" }),
     heightlightadvanced: makeSpan({ color: "darkseagreen" }),
     table: ({ ...props }: MarkdownComponentProps) => (

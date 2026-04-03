@@ -3,6 +3,7 @@
 import { formatAbsoluteTime, formatRelativeTime } from "@/lib/format-time"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 
@@ -60,6 +61,7 @@ export function ArticleMetadata({
   readingTime,
   editPath,
 }: ArticleMetadataProps) {
+  const router = useRouter()
   const [copied, setCopied] = useState(false)
 
   const storageKey = "article-metadata-collapsed"
@@ -146,6 +148,7 @@ export function ArticleMetadata({
                   <Link
                     href={`https://github.com/${author}`}
                     target="_blank"
+                    aria-label={author}
                     className="
                       relative inline-block size-6
                       sm:size-10
@@ -187,10 +190,11 @@ export function ArticleMetadata({
                         <Link
                           href={`https://github.com/${contributor}`}
                           target="_blank"
+                          aria-label={contributor}
                           className="
-                            relative inline-block size-4
-                            sm:size-6
-                          ">
+                             relative inline-block size-4
+                             sm:size-6
+                           ">
                           <Image
                             src={getAvatarUrl(contributor)}
                             alt={contributor}
@@ -210,20 +214,19 @@ export function ArticleMetadata({
                 </span>
               )}
             </div>
-            <Link
-              href={`/draft/new?file=${encodeURIComponent(editPath)}`}
-              className="block">
-              <button
-                type="button"
-                className="
-                  size-full cursor-pointer items-center overflow-hidden border
-                  border-tech-main/40 bg-tech-main/5 px-3 py-2 text-tech-main
-                  uppercase transition-all duration-300
-                  hover:bg-tech-main hover:text-white
-                ">
-                [EDIT_ARTICLE]
-              </button>
-            </Link>
+            <button
+              type="button"
+              onClick={() =>
+                router.push(`/draft/new?file=${encodeURIComponent(editPath)}`)
+              }
+              className="
+                cursor-pointer items-center overflow-hidden border
+                border-tech-main/40 bg-tech-main/5 px-3 py-2 text-tech-main
+                uppercase transition-all duration-300
+                hover:bg-tech-main hover:text-white
+              ">
+              [EDIT_ARTICLE]
+            </button>
           </div>
 
           <hr className="my-2 border-tech-main/40" />
@@ -241,7 +244,9 @@ export function ArticleMetadata({
             <p>
               {"CREATED: "}
               <span className="text-tech-main">
-                {formatAbsoluteTime(createdAt, false)}
+                <time dateTime={createdAt}>
+                  {formatAbsoluteTime(createdAt, false)}
+                </time>
               </span>
               <br
                 className="
@@ -258,7 +263,9 @@ export function ArticleMetadata({
               </span>
               {"LAST_EDITED: "}
               <span className="text-tech-main">
-                {formatRelativeTime(lastModified)}
+                <time dateTime={lastModified}>
+                  {formatRelativeTime(lastModified)}
+                </time>
               </span>
               <br />
 

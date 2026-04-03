@@ -51,7 +51,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="zh-Hans"
       className={`
         ${GeistSans.variable}
         ${GeistMono.variable}
@@ -77,7 +77,7 @@ export default function RootLayout({
         ">
         <AuthSessionProvider>
           <FooterProvider>
-            <main className="w-full flex-1">{children}</main>
+            <div className="w-full flex-1">{children}</div>
             <FooterWrapper />
           </FooterProvider>
         </AuthSessionProvider>

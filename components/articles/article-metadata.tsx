@@ -47,6 +47,7 @@ interface ArticleMetadataProps {
   wordCount: number
   readingTime: number
   editPath: string
+  isAdvanced?: boolean
 }
 
 export function ArticleMetadata({
@@ -60,6 +61,7 @@ export function ArticleMetadata({
   wordCount,
   readingTime,
   editPath,
+  isAdvanced,
 }: ArticleMetadataProps) {
   const router = useRouter()
   const [copied, setCopied] = useState(false)
@@ -231,13 +233,20 @@ export function ArticleMetadata({
 
           <hr className="my-2 border-tech-main/40" />
 
-          <h1
-            className="
-              font-mono text-xl font-bold tracking-tight text-tech-main-dark
-              sm:text-2xl
-            ">
-            {title}
-          </h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1
+              className="
+                font-mono text-xl font-bold tracking-tight text-tech-main-dark
+                sm:text-2xl
+              ">
+              {title}
+            </h1>
+            {isAdvanced && (
+              <span className="shrink-0 border border-tech-main/30 bg-tech-main/5 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-tech-main">
+                ADVANCED
+              </span>
+            )}
+          </div>
 
           <div className="text-tech-main/60">
             {/* Edit History */}

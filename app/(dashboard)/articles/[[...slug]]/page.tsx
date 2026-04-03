@@ -205,6 +205,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const coAuthors = (data["co-authors"] as string[] | undefined) || []
   const createdAt = data.date as string | undefined
   const lastModified = data.lastmod as string | undefined
+  const isAdvanced = data["is-advanced"] === true
 
   const blogPostingJsonLd: {
     "@context": "https://schema.org"
@@ -298,6 +299,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           wordCount={wordCount}
           readingTime={readingTime}
           editPath={editPath}
+          isAdvanced={isAdvanced}
         />
       ) : (
         <ArticleMetadataSimple
@@ -305,6 +307,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           filePath={target.filePath}
           wordCount={wordCount}
           readingTime={readingTime}
+          isAdvanced={isAdvanced}
         />
       )}
 

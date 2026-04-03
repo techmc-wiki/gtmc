@@ -5,6 +5,7 @@ import type {
   MarkdownComponent,
   MarkdownComponentProps,
 } from "@/lib/markdown/component-types"
+import { HeadingAnchor } from "@/lib/markdown/heading-anchor"
 import { createImageComponent } from "@/lib/markdown/image-component"
 
 /**
@@ -221,7 +222,11 @@ export function getMarkdownComponents(rawPath: string) {
         {...props}
       />
     ),
-    h1: ({ id, children }: MarkdownComponentProps) => (
+    h1: ({
+      id,
+      children,
+      "data-advanced": dataAdvanced,
+    }: MarkdownComponentProps) => (
       <h1
         id={id}
         className="
@@ -231,21 +236,20 @@ export function getMarkdownComponents(rawPath: string) {
           sm:text-3xl
           lg:text-4xl
         ">
-        {id && (
-          <a
-            href={`#${id}`}
-            className="
-              absolute top-1/2 -left-6 -translate-y-1/2 text-xl font-normal
-              text-tech-main no-underline opacity-0 transition-opacity
-              group-hover:opacity-100
-            ">
-            #
-          </a>
-        )}
+        {id && <HeadingAnchor id={id} level={1} />}
         {children}
+        {dataAdvanced === "true" && (
+          <span className="shrink-0 border border-tech-main/30 bg-tech-main/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-tech-main ml-2">
+            ADVANCED
+          </span>
+        )}
       </h1>
     ),
-    h2: ({ id, children }: MarkdownComponentProps) => (
+    h2: ({
+      id,
+      children,
+      "data-advanced": dataAdvanced,
+    }: MarkdownComponentProps) => (
       <h2
         id={id}
         className="
@@ -254,21 +258,20 @@ export function getMarkdownComponents(rawPath: string) {
           text-slate-800 uppercase
           target:animate-target-blink target:border-tech-main
         ">
-        {id && (
-          <a
-            href={`#${id}`}
-            className="
-              absolute top-1/2 -left-5 -translate-y-1/2 text-lg font-normal
-              text-tech-main no-underline opacity-0 transition-opacity
-              group-hover:opacity-100
-            ">
-            #
-          </a>
-        )}
+        {id && <HeadingAnchor id={id} level={2} />}
         {children}
+        {dataAdvanced === "true" && (
+          <span className="shrink-0 border border-tech-main/30 bg-tech-main/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-tech-main ml-2">
+            ADVANCED
+          </span>
+        )}
       </h2>
     ),
-    h3: ({ id, children }: MarkdownComponentProps) => (
+    h3: ({
+      id,
+      children,
+      "data-advanced": dataAdvanced,
+    }: MarkdownComponentProps) => (
       <h3
         id={id}
         className="
@@ -276,18 +279,13 @@ export function getMarkdownComponents(rawPath: string) {
           text-slate-700 uppercase
           target:animate-target-blink
         ">
-        {id && (
-          <a
-            href={`#${id}`}
-            className="
-              absolute top-1/2 -left-4 -translate-y-1/2 text-base font-normal
-              text-tech-main no-underline opacity-0 transition-opacity
-              group-hover:opacity-100
-            ">
-            #
-          </a>
-        )}
+        {id && <HeadingAnchor id={id} level={3} />}
         {children}
+        {dataAdvanced === "true" && (
+          <span className="shrink-0 border border-tech-main/30 bg-tech-main/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-tech-main ml-2">
+            ADVANCED
+          </span>
+        )}
       </h3>
     ),
     p: ({ node, children, ...props }: MarkdownComponentProps) => {
@@ -356,6 +354,46 @@ export function getMarkdownComponents(rawPath: string) {
         {...props}
       />
     ),
+    section: ({ id, children, ...props }: MarkdownComponentProps) => {
+      // Wrap footnote sections in <aside> for semantic HTML
+      if (id === "footnotes") {
+        return (
+          <aside
+            className="
+              mt-12 border-t border-tech-main/30 pt-6 font-sans text-sm
+              text-slate-700
+            "
+            {...props}>
+            <section id={id} {...props}>
+              {children}
+            </section>
+          </aside>
+        )
+      }
+
+      // Regular sections render normally
+      return (
+        <section id={id} {...props}>
+          {children}
+        </section>
+      )
+    },
+    div: ({
+      children,
+      "data-advanced-section": dataAdvancedSection,
+      ...rest
+    }: MarkdownComponentProps) => {
+      if (dataAdvancedSection === "true") {
+        return (
+          <div
+            className="border-l-2 border-tech-main bg-tech-main/5 pl-4 my-4"
+            {...rest}>
+            {children}
+          </div>
+        )
+      }
+      return <div {...rest}>{children}</div>
+    },
     pre: preComponent,
     code: codeComponent,
   } as Record<string, MarkdownComponent>

@@ -7,6 +7,7 @@ interface ArticleMetadataSimpleProps {
   filePath: string
   wordCount: number
   readingTime: number
+  isAdvanced?: boolean
 }
 
 export function ArticleMetadataSimple({
@@ -14,6 +15,7 @@ export function ArticleMetadataSimple({
   filePath,
   wordCount,
   readingTime,
+  isAdvanced,
 }: ArticleMetadataSimpleProps) {
   return (
     <header>
@@ -39,13 +41,20 @@ export function ArticleMetadataSimple({
         </div>
 
         <div className="mt-4 flex flex-col gap-4">
-          <h1
-            className="
-              font-mono text-xl font-bold tracking-tight text-tech-main-dark
-              sm:text-2xl
-            ">
-            {title}
-          </h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1
+              className="
+                font-mono text-xl font-bold tracking-tight text-tech-main-dark
+                sm:text-2xl
+              ">
+              {title}
+            </h1>
+            {isAdvanced && (
+              <span className="shrink-0 border border-tech-main/30 bg-tech-main/5 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-tech-main">
+                ADVANCED
+              </span>
+            )}
+          </div>
 
           <div className="text-tech-main/60">
             <p>

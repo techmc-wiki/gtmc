@@ -11,6 +11,7 @@ export interface FrontMatterData {
   date?: string
   lastmod?: string
   index: number
+  isAdvanced?: boolean
 }
 
 export function parseFrontMatter(content: string): FrontMatterData {
@@ -64,6 +65,8 @@ export function parseFrontMatter(content: string): FrontMatterData {
       }
     }
 
+    const isAdvanced = data["is-advanced"] === true
+
     return {
       title,
       chapterTitle,
@@ -75,6 +78,7 @@ export function parseFrontMatter(content: string): FrontMatterData {
       date,
       lastmod,
       index,
+      isAdvanced,
     }
   } catch {
     return { index: -1 }

@@ -28,7 +28,7 @@ export function MobileNav({ navLinks }: MobileNavProps) {
   }, [pathname])
 
   return (
-    <div>
+    <>
       <button
         onClick={() => setIsDrawerOpen(!isDrawerOpen)}
         className="
@@ -104,6 +104,6 @@ export function MobileNav({ navLinks }: MobileNavProps) {
           </div>,
           document.body
         )}
-    </div>
+    </>
   )
 }

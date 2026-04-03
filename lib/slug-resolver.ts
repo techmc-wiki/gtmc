@@ -23,6 +23,7 @@ export interface SlugMapEntry {
   coAuthors?: string[]
   date?: string
   lastmod?: string
+  isAdvanced?: boolean
 }
 
 // Load at module initialization

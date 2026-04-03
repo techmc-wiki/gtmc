@@ -10,4 +10,5 @@ export interface TreeNode {
   isPreface?: boolean
   isReadmeIntro?: boolean
   introTitle?: string
+  isAdvanced?: boolean
 }

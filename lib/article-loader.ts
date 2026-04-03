@@ -51,6 +51,7 @@ const slugMap: Record<string, SlugMapEntry> = (() => {
         coAuthors: Array.isArray(entry.coAuthors) ? entry.coAuthors : undefined,
         date: typeof entry.date === "string" ? entry.date : undefined,
         lastmod: typeof entry.lastmod === "string" ? entry.lastmod : undefined,
+        isAdvanced: entry.isAdvanced === true,
       }
     }
 
@@ -148,6 +149,7 @@ function buildTreeNode(
     isAppendix: boolean
     isPreface: boolean
     introTitle?: string
+    isAdvanced?: boolean
   } = {
     id: entry.isFolder ? entry.slug : entry.filePath.replace(/\.md$/i, ""),
     title: getNodeTitle(entry),
@@ -157,6 +159,7 @@ function buildTreeNode(
     isAppendix: entry.isAppendix,
     isPreface: entry.isPreface,
     introTitle: entry.introTitle,
+    isAdvanced: entry.isAdvanced,
     parentId: entry.parentSlug ?? null,
     children,
   }

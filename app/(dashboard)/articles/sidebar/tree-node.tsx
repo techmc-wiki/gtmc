@@ -212,6 +212,11 @@ export function SidebarTree({
                           ? `${formatIndexPrefix(item.index, item.isAppendix ?? false, item.isPreface ?? false)}${item.title}`
                           : item.title}
                     </Link>
+                    {item.isAdvanced && (
+                      <span className="shrink-0 border border-tech-main/30 bg-tech-main/10 px-1 py-0.5 font-mono text-[10px] uppercase tracking-widest text-tech-main">
+                        ADVANCED
+                      </span>
+                    )}
                   </div>
 
                   {isActive && toc.length > 0 && (

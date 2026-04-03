@@ -57,6 +57,7 @@ function getFrontMatterEntry(
     coAuthors,
     date: fm.date ?? undefined,
     lastmod: fm.lastmod ?? undefined,
+    isAdvanced: fm.isAdvanced ?? undefined,
   }
 }
 

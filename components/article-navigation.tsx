@@ -54,8 +54,8 @@ export function ArticleNavigation({ prev, next }: ArticleNavigationProps) {
         ) : (
           <div
             className="
-              pointer-events-none flex min-h-[44px] w-full flex-col gap-2
-              border guide-line bg-tech-bg p-4 opacity-50
+              pointer-events-none flex min-h-[44px] w-full flex-col gap-2 border
+              guide-line bg-tech-bg p-4 opacity-50
             ">
             <div
               className="
@@ -102,8 +102,8 @@ export function ArticleNavigation({ prev, next }: ArticleNavigationProps) {
         ) : (
           <div
             className="
-              pointer-events-none flex min-h-[44px] w-full flex-col gap-2
-              border guide-line bg-tech-bg p-4 opacity-50
+              pointer-events-none flex min-h-[44px] w-full flex-col gap-2 border
+              guide-line bg-tech-bg p-4 opacity-50
               md:items-end md:text-right
             ">
             <div

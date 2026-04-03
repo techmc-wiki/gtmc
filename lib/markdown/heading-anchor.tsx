@@ -34,9 +34,10 @@ export function HeadingAnchor({ id, level }: HeadingAnchorProps) {
       onClick={handleClick}
       className={`
         ${positionClass[level]}
-        opacity-0 transition-opacity group-hover:opacity-100
+        opacity-0 transition-opacity
+        group-hover:opacity-100
         ${copied ? "text-tech-main" : "text-tech-main"}
-        no-underline cursor-pointer bg-transparent border-none p-0
+        cursor-pointer border-none bg-transparent p-0 no-underline
       `}>
       {copied ? "✓" : "#"}
     </button>

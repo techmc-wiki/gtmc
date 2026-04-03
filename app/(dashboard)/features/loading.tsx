@@ -133,9 +133,7 @@ export default function FeaturesLoading() {
                       ">
                       {/* Status badge + date row */}
                       <div
-                        className="
-                        mb-4 flex items-start justify-between gap-2
-                      ">
+                        className="mb-4 flex items-start justify-between gap-2">
                         <SegmentedBar
                           opacity="high"
                           className="

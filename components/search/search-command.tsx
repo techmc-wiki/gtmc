@@ -395,14 +395,10 @@ export function SearchCommand() {
                       {[1, 2, 3].map((i) => (
                         <div key={i} className="space-y-1.5">
                           <div
-                            className="
-                            h-4 w-3/5 animate-pulse bg-tech-main/10
-                          "
+                            className="h-4 w-3/5 animate-pulse bg-tech-main/10"
                           />
                           <div
-                            className="
-                            h-3 w-2/5 animate-pulse bg-tech-main/5
-                          "
+                            className="h-3 w-2/5 animate-pulse bg-tech-main/5"
                           />
                         </div>
                       ))}
@@ -457,9 +453,7 @@ export function SearchCommand() {
                           {/* Content snippet */}
                           {result.snippet && (
                             <div
-                              className="
-                              mt-1 text-xs/relaxed text-tech-main/70
-                            ">
+                              className="mt-1 text-xs/relaxed text-tech-main/70">
                               {highlightMatch(result.snippet)}
                             </div>
                           )}
@@ -489,9 +483,7 @@ export function SearchCommand() {
                       NO_MATCH_FOUND
                     </div>
                     <div
-                      className="
-                      mt-1 font-mono text-[10px] text-tech-main/40
-                    ">
+                      className="mt-1 font-mono text-[10px] text-tech-main/40">
                       Try different keywords
                     </div>
                   </div>
@@ -508,9 +500,7 @@ export function SearchCommand() {
                       AWAITING_INPUT
                     </div>
                     <div
-                      className="
-                      mt-1 font-mono text-[10px] text-tech-main/40
-                    ">
+                      className="mt-1 font-mono text-[10px] text-tech-main/40">
                       Type at least 2 characters
                     </div>
                   </div>

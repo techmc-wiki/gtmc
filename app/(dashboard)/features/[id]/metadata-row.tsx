@@ -16,10 +16,11 @@ export function MetadataRow({ label, value, className }: MetadataRowProps) {
         `,
         className
       )}>
-      <span className="
-        mono-label font-bold text-zinc-500
-        sm:w-24
-      ">
+      <span
+        className="
+          mono-label font-bold text-zinc-500
+          sm:w-24
+        ">
         {label}
       </span>
       <span className="wrap-break-word">{value}</span>

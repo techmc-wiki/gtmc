@@ -78,9 +78,7 @@ export async function FeatureReadonlyView({
                 </ReactMarkdown>
               </div>
             ) : (
-              <p className="editor-panel">
-                NOTHING_TO_PREVIEW_
-              </p>
+              <p className="editor-panel">NOTHING_TO_PREVIEW_</p>
             )}
           </div>
 
@@ -97,9 +95,7 @@ export async function FeatureReadonlyView({
                 {content}
               </pre>
             ) : (
-              <p className="editor-panel">
-                NOTHING_TO_PREVIEW_
-              </p>
+              <p className="editor-panel">NOTHING_TO_PREVIEW_</p>
             )}
           </details>
         </div>

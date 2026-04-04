@@ -12,7 +12,8 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { DraftStatusBadge } from "@/components/ui/status-badge"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { SectionTitle } from "@/components/ui/section-title"
-import { CardHeaderRow } from "@/components/ui/card-header-row"
+import { decodeStoredDraftFiles } from "@/lib/draft-files"
+import { countCleanupFailedByRevision } from "@/lib/draft-asset-db"
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -33,11 +34,26 @@ export default async function DraftDashboardPage() {
     },
   })
 
+  const cleanupFailedByRevisionId = new Map<string, number>()
+  if (allDraftsRaw.length > 0) {
+    const counts = await countCleanupFailedByRevision(
+      allDraftsRaw.map((draft) => draft.id)
+    )
+    for (const [revisionId, count] of counts) {
+      cleanupFailedByRevisionId.set(revisionId, count)
+    }
+  }
+
   const allDrafts = await Promise.all(
     allDraftsRaw.map(async (d) => {
       let displayStatus = d.status
       let isClosed = false
       let isMerged = false
+      const decodedDraft = decodeStoredDraftFiles({
+        content: d.content,
+        conflictContent: d.conflictContent,
+        filePath: d.filePath,
+      })
 
       if (d.githubPrNum) {
         try {
@@ -51,7 +67,14 @@ export default async function DraftDashboardPage() {
           console.error(`Failed to fetch PR #${d.githubPrNum}:`, e)
         }
       }
-      return { ...d, displayStatus, isClosed, isMerged }
+      return {
+        ...d,
+        cleanupFailedCount: cleanupFailedByRevisionId.get(d.id) ?? 0,
+        displayStatus,
+        fileCount: decodedDraft.files.length,
+        isClosed,
+        isMerged,
+      }
     })
   )
 
@@ -83,7 +106,14 @@ export default async function DraftDashboardPage() {
 
       <div className="relative z-10">
         <div className="card-header-row">
-          <DraftStatusBadge status={draft.displayStatus} />
+          <div className="flex items-center gap-2">
+            <DraftStatusBadge status={draft.displayStatus} />
+            {draft.cleanupFailedCount > 0 ? (
+              <span className="font-mono text-xs text-red-500 uppercase">
+                CLEANUP_FAILED_
+              </span>
+            ) : null}
+          </div>
           <div className="flex flex-col items-end gap-1">
             <span className="mono-label">
               {draft.updatedAt.toLocaleDateString()}
@@ -129,6 +159,14 @@ export default async function DraftDashboardPage() {
             MOD_LIVE_DB
           </p>
         )}
+        {draft.fileCount > 1 ? (
+          <p
+            className="
+              mt-3 font-mono text-xs tracking-widest text-tech-main/70 uppercase
+            ">
+            FILE_SET: {draft.fileCount}
+          </p>
+        ) : null}
       </div>
 
       <Link

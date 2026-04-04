@@ -1,41 +1,51 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 export interface TocItem {
   id: string
   text: string
 }
 
+function scanHeadings(): TocItem[] {
+  if (typeof document === "undefined") return []
+  const headings = document.querySelectorAll("main h2")
+  if (headings.length === 0) return []
+
+  const tocItems: TocItem[] = []
+  headings.forEach((heading) => {
+    if (heading.id && heading.textContent) {
+      const clone = heading.cloneNode(true) as Element
+      clone.querySelectorAll('[aria-hidden="true"]').forEach((el) => {
+        el.remove()
+      })
+      const text = clone.textContent?.replace(/^#\s*/, "") ?? ""
+      tocItems.push({ id: heading.id, text })
+    }
+  })
+  return tocItems
+}
+
+function getInitialToc(): TocItem[] {
+  return typeof document !== "undefined" ? scanHeadings() : []
+}
+
 export function useToc(pathname: string): TocItem[] {
-  const [toc, setToc] = useState<TocItem[]>([])
+  const [toc, setToc] = useState<TocItem[]>(getInitialToc)
+  const prevPathnameRef = useRef(pathname)
 
   useEffect(() => {
-    setToc([])
+    if (prevPathnameRef.current === pathname) return
+    prevPathnameRef.current = pathname
 
-    const scanHeadings = (): boolean => {
-      const headings = document.querySelectorAll("main h2")
-      if (headings.length === 0) return false
-
-      const tocItems: TocItem[] = []
-      headings.forEach((heading) => {
-        if (heading.id && heading.textContent) {
-          const clone = heading.cloneNode(true) as Element
-          clone.querySelectorAll('[aria-hidden="true"]').forEach((el) => {
-            el.remove()
-          })
-          const text = clone.textContent?.replace(/^#\s*/, "") ?? ""
-          tocItems.push({ id: heading.id, text })
-        }
-      })
-      setToc(tocItems)
-      return true
-    }
-
-    if (scanHeadings()) return
+    if (typeof document === "undefined") return
 
     const observer = new MutationObserver(() => {
-      if (scanHeadings()) observer.disconnect()
+      const newItems = scanHeadings()
+      if (newItems.length > 0) {
+        setToc(newItems)
+        observer.disconnect()
+      }
     })
 
     const main = document.querySelector("main")
@@ -49,7 +59,6 @@ export function useToc(pathname: string): TocItem[] {
       observer.disconnect()
       clearTimeout(timeout)
     }
-     
   }, [pathname])
 
   return toc

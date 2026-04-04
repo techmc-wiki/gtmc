@@ -24,7 +24,10 @@ function getMeaningfulChildren(
  * Check if a node is an image or iframe element.
  */
 function isImageOrIframeElement(node: MarkdownAstNode): boolean {
-  return node.type === "element" && (node.tagName === "img" || node.tagName === "iframe")
+  return (
+    node.type === "element" &&
+    (node.tagName === "img" || node.tagName === "iframe")
+  )
 }
 
 function containsImageOrIframeDescendant(node: MarkdownAstNode): boolean {
@@ -388,12 +391,11 @@ export function getMarkdownComponents(rawPath: string) {
           <div
             className="my-6 overflow-hidden rounded-sm border border-violet-200"
             {...rest}>
-            <div className="
-              flex items-center gap-2 bg-violet-600/50 px-4 py-1.5
-            ">
-              <span className="
-                font-mono text-[10px] tracking-widest text-white uppercase
-              ">
+            <div className="flex items-center gap-2 bg-violet-600/50 px-4 py-1.5">
+              <span
+                className="
+                  font-mono text-[10px] tracking-widest text-white uppercase
+                ">
                 ◈ Advanced Content
               </span>
             </div>
@@ -407,7 +409,13 @@ export function getMarkdownComponents(rawPath: string) {
     },
     pre: preComponent,
     code: codeComponent,
-    iframe: ({ src, className, title, allowFullScreen, ...props }: MarkdownComponentProps) => {
+    iframe: ({
+      src,
+      className,
+      title,
+      allowFullScreen,
+      ...props
+    }: MarkdownComponentProps) => {
       // Remove deprecated or non-standard DOM attributes
       const {
         frameborder,
@@ -417,20 +425,21 @@ export function getMarkdownComponents(rawPath: string) {
         marginheight,
         marginwidth,
         allowfullscreen,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
         node,
         ...rest
       } = props as Record<string, unknown>
 
       return (
-        <div className="
-          my-6 aspect-video w-full overflow-hidden rounded-xs border
-          border-tech-main/20 bg-tech-main/5
-        ">
+        <div
+          className="
+            my-6 aspect-video w-full overflow-hidden rounded-xs border
+            guide-line bg-tech-main/5
+          ">
           <iframe
             src={src as string}
             title={(title as string) || "Embedded Video"}
-            className="h-full w-full"
+            className="size-full"
             loading="lazy"
             allowFullScreen={allowFullScreen !== false}
             {...rest}

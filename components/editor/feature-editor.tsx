@@ -6,21 +6,13 @@ import { BrutalButton } from "../ui/brutal-button"
 import { BrutalInput } from "../ui/brutal-input"
 import { useRouter } from "next/navigation"
 import { updateFeature } from "@/actions/feature"
-import { upload } from "@vercel/blob/client"
-import { compressImageForUpload } from "@/lib/image-compression"
 import {
   LoadingIndicator,
   PENDING_LABELS,
 } from "@/components/ui/loading-indicator"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
-import {
-  classifyFile,
-  isImageMime,
-  sanitizeFilename,
-  generateMarkdownBlock,
-  VERCEL_BODY_LIMIT_BYTES,
-} from "@/lib/file-upload"
+import { useEditorUpload } from "@/hooks/use-editor-upload"
 
 const MarkdownPreview = dynamic(
   () =>
@@ -29,11 +21,7 @@ const MarkdownPreview = dynamic(
     ),
   {
     ssr: false,
-    loading: () => (
-      <p className="editor-panel">
-        LOADING_PREVIEW_
-      </p>
-    ),
+    loading: () => <p className="editor-panel">LOADING_PREVIEW_</p>,
   }
 )
 
@@ -53,8 +41,6 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
   const [content, setContent] = React.useState(initialData?.content || "")
   const [tags, setTags] = React.useState(initialData?.tags?.join(", ") || "")
   const [isSaving, setIsSaving] = React.useState(false)
-  const [isUploading, setIsUploading] = React.useState(false)
-  const [isCompressing, setIsCompressing] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState<"write" | "preview">("write")
 
   type BadgeType = "info" | "error" | "progress"
@@ -105,149 +91,50 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
     }, 0)
   }
 
-  const uploadFile = async (file: File) => {
-    if (isUploading) return
+  const featureUploadAdapter = React.useCallback(async (file: File) => {
+    const formData = new FormData()
+    formData.append("file", file)
 
-    const classification = classifyFile(file.type)
-    if (!classification) {
-      showBadge("FILE TYPE NOT ALLOWED_", "error", 4000)
-      return
+    const res = await fetch("/api/upload/feature", {
+      method: "POST",
+      body: formData,
+    })
+
+    if (res.status === 413) {
+      throw new Error("File too large for upload.")
     }
 
-    if (file.size > classification.maxBytes) {
-      const maxMB = Math.round(classification.maxBytes / (1024 * 1024))
-      showBadge(`FILE TOO LARGE_ (max ${maxMB}MB)`, "error", 4000)
-      return
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || "Upload failed")
+
+    return {
+      url: data.url,
+      filename: data.filename,
+      mimeType: data.mimeType,
+      fileSize: data.fileSize,
     }
+  }, [])
 
-    setIsUploading(true)
-
-    const uploadId = crypto.randomUUID()
-    const placeholder = `<!-- UPLOAD_PENDING_${uploadId} -->`
-    insertTextAtCursor(placeholder + "\n")
-
-    try {
-      let resultUrl: string
-      let resultFilename: string
-      let resultMimeType: string
-      let resultFileSize: number
-
-      if (isImageMime(file.type)) {
-        setIsCompressing(true)
-        showBadge("COMPRESSING_IMAGE...", "progress")
-
-        const compressed = await compressImageForUpload(file)
-        setIsCompressing(false)
-
-        if (compressed.error) {
-          showBadge(`UPLOAD FAILED_ ${compressed.error}`, "error", 5000)
-          setContent((prev) => prev.replace(placeholder + "\n", ""))
-          setIsUploading(false)
-          return
-        }
-
-        showBadge("UPLOADING_IMAGE...", "progress")
-
-        const formData = new FormData()
-        formData.append("file", compressed.file)
-
-        const res = await fetch("/api/upload/feature", {
-          method: "POST",
-          body: formData,
-        })
-
-        if (res.status === 413) {
-          throw new Error("Image too large to upload.")
-        }
-
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error || "Upload failed")
-
-        resultUrl = data.url
-        resultFilename = data.filename
-        resultMimeType = data.mimeType
-        resultFileSize = data.fileSize
-      } else if (file.size < VERCEL_BODY_LIMIT_BYTES) {
-        showBadge("UPLOADING_FILE...", "progress")
-
-        const formData = new FormData()
-        formData.append("file", file)
-
-        const res = await fetch("/api/upload/feature", {
-          method: "POST",
-          body: formData,
-        })
-
-        if (res.status === 413) {
-          throw new Error("File too large for direct upload.")
-        }
-
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error || "Upload failed")
-
-        resultUrl = data.url
-        resultFilename = data.filename
-        resultMimeType = data.mimeType
-        resultFileSize = data.fileSize
-      } else {
-        showBadge("UPLOADING_ 0%", "progress")
-
-        const blobResult = await upload(
-          sanitizeFilename(file.name, file.type),
-          file,
-          {
-            access: "public",
-            handleUploadUrl: "/api/upload/feature/token",
-            clientPayload: JSON.stringify({
-              mimeType: file.type,
-              originalSize: file.size,
-            }),
-            onUploadProgress: ({ percentage }) => {
-              showBadge(`UPLOADING_ ${Math.round(percentage)}%`, "progress")
-            },
-          }
+  const { uploadFile, isUploading, isCompressing } = useEditorUpload({
+    adapter: featureUploadAdapter,
+    onInsertContent: (text: string) => {
+      if (text === "") {
+        setContent((prev) =>
+          prev.replace(/<!-- UPLOAD_PENDING_[a-f0-9-]+ -->\n?/g, "")
         )
-
-        showBadge("COMMITTING_TO_GITHUB...", "progress")
-
-        const commitRes = await fetch("/api/upload/feature/commit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            blobUrl: blobResult.url,
-            filename: file.name,
-            mimeType: file.type,
-            size: file.size,
-          }),
-        })
-
-        const commitData = await commitRes.json()
-        if (!commitRes.ok) throw new Error(commitData.error || "Commit failed")
-
-        resultUrl = commitData.url
-        resultFilename = commitData.filename
-        resultMimeType = commitData.mimeType
-        resultFileSize = commitData.fileSize
+      } else if (text.startsWith("<!--")) {
+        insertTextAtCursor(text)
+      } else {
+        setContent((prev) =>
+          prev.replace(/<!-- UPLOAD_PENDING_[a-f0-9-]+ -->/, text)
+        )
       }
-
-      const markdownBlock = generateMarkdownBlock(
-        resultFilename,
-        resultUrl,
-        resultMimeType,
-        resultFileSize
-      )
-      setContent((prev) => prev.replace(placeholder, markdownBlock))
-      clearBadge()
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Upload error"
-      showBadge(`UPLOAD FAILED_ ${message}`, "error", 5000)
-      setContent((prev) => prev.replace(placeholder + "\n", ""))
-      console.error("File upload error:", error)
-    } finally {
-      setIsUploading(false)
-      setIsCompressing(false)
-    }
-  }
+    },
+    onShowBadge: (message: string, type: "info" | "error" | "progress") => {
+      showBadge(message, type)
+    },
+    onClearBadge: clearBadge,
+  })
 
   const handlePaste = (e: React.ClipboardEvent) => {
     if (isReadOnly || isUploading) return
@@ -534,9 +421,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
                 role="status"
                 aria-live="polite">
                 {badge.type === "progress" && (
-                  <span className="
+                  <span
+                    className="
                     inline-block size-2 animate-pulse bg-tech-accent
-                  " />
+                  "
+                  />
                 )}
                 {badge.type === "error" && (
                   <span className="inline-block size-2 bg-red-400" />

@@ -22,7 +22,6 @@ import { FeatureStatusBadge } from "@/components/ui/status-badge"
 import { RevealSection } from "@/app/(dashboard)/features/reveal-helpers"
 import { toAbsoluteUrl } from "@/lib/site-url"
 import { MetadataRow } from "./metadata-row"
-import { StatusDot } from "@/components/ui/status-dot"
 
 export const revalidate = 60
 

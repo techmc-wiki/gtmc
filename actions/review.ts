@@ -14,12 +14,20 @@ import {
   resumeRebase,
 } from "@/lib/article-rebase"
 import { getTokenFromSession, requireAuth } from "@/lib/auth-helpers"
+import {
+  decodeStoredDraftFiles,
+  deserializeDraftFilesPayload,
+  getActiveDraftFile,
+  normalizeDraftFileCollection,
+  serializeDraftFilesForStorage,
+} from "@/lib/draft-files"
 import { formatErrorMessage } from "@/lib/error-handling"
 import {
   ARTICLES_REPO_NAME,
   ARTICLES_REPO_OWNER,
   getOctokit,
 } from "@/lib/github/articles-repo"
+import { reconcileDraftAssetsForPRCompletion } from "@/lib/draft-asset-reconciler"
 import { prisma } from "@/lib/prisma"
 import type { RebaseState } from "@/types/rebase"
 
@@ -41,6 +49,18 @@ export async function mergePRAction(prNumber: number) {
       repo,
       pull_number: prNumber,
     })
+    try {
+      await reconcileDraftAssetsForPRCompletion({
+        prNumber,
+        outcome: "PR-merged",
+      })
+    } catch (reconcileError) {
+      console.error("Failed to reconcile draft assets after PR merge", {
+        prNumber,
+        reconcileError,
+      })
+    }
+    revalidatePath("/draft")
     revalidatePath("/review")
     return { success: true }
   } catch (error) {
@@ -64,6 +84,18 @@ export async function closePRAction(prNumber: number) {
       pull_number: prNumber,
       state: "closed",
     })
+    try {
+      await reconcileDraftAssetsForPRCompletion({
+        prNumber,
+        outcome: "PR-closed",
+      })
+    } catch (reconcileError) {
+      console.error("Failed to reconcile draft assets after PR close", {
+        prNumber,
+        reconcileError,
+      })
+    }
+    revalidatePath("/draft")
     revalidatePath("/review")
     return { success: true }
   } catch (error) {
@@ -80,11 +112,8 @@ export async function resolveConflictAction(
     throw new Error("Unauthorized")
   }
 
-  const content = formData.get("content") as string
-
-  if (!content) {
-    throw new Error("Resolved content is required")
-  }
+  const content = formData.get("content") as string | null
+  const draftFilesPayload = formData.get("draftFiles") as string | null
 
   const linkedDraft = await prisma.revision.findFirst({
     where: { githubPrNum: prNumber },
@@ -98,6 +127,31 @@ export async function resolveConflictAction(
     throw new Error("The linked draft is missing PR metadata")
   }
 
+  const storedDraftFiles = decodeStoredDraftFiles({
+    content: linkedDraft.content,
+    conflictContent: linkedDraft.conflictContent,
+    filePath: linkedDraft.filePath,
+  })
+  const submittedDraftFiles = deserializeDraftFilesPayload(draftFilesPayload)
+  const resolvedDraftFiles =
+    submittedDraftFiles ||
+    (content
+      ? normalizeDraftFileCollection({
+          activeFileId: storedDraftFiles.activeFileId,
+          files: storedDraftFiles.files.map((file) => ({
+            ...file,
+            content:
+              file.id === storedDraftFiles.activeFileId
+                ? content
+                : file.content,
+          })),
+        })
+      : null)
+
+  if (!resolvedDraftFiles) {
+    throw new Error("Resolved content is required")
+  }
+
   const token = getTokenFromSession(session)
   const authorName = session.user.name || "GTMC Admin"
   const authorEmail = session.user.email || "admin@gtmc.dev"
@@ -105,9 +159,15 @@ export async function resolveConflictAction(
   const rebaseState = linkedDraft.rebaseState as RebaseState | null
 
   if (rebaseState?.status === "CONFLICT") {
+    if (resolvedDraftFiles.files.length !== 1) {
+      throw new Error("Fine-grained rebase only supports single-file drafts")
+    }
+
+    const resolvedFile = getActiveDraftFile(resolvedDraftFiles)
+    const storedFile = getActiveDraftFile(storedDraftFiles)
     const result = await resumeRebase({
       draftId: linkedDraft.id,
-      resolvedContent: content,
+      resolvedContent: resolvedFile.content,
       token,
     })
 
@@ -117,16 +177,27 @@ export async function resolveConflictAction(
         authorName,
         branchName: linkedDraft.prBranchName,
         content: result.finalContent,
-        filePath: linkedDraft.filePath,
+        filePath: storedFile.filePath,
         message: `docs: apply rebase for ${linkedDraft.title}`,
         token,
+      })
+      const rebasedDraftStorage = serializeDraftFilesForStorage({
+        activeFileId: storedDraftFiles.activeFileId,
+        files: [
+          {
+            ...storedFile,
+            content: result.finalContent,
+            conflictContent: undefined,
+          },
+        ],
       })
       await prisma.revision.update({
         where: { id: linkedDraft.id },
         data: {
           status: "IN_REVIEW",
-          conflictContent: null,
-          content: result.finalContent,
+          conflictContent: rebasedDraftStorage.conflictContent,
+          content: rebasedDraftStorage.content,
+          filePath: rebasedDraftStorage.filePath,
           rebaseState: {
             ...rebaseState,
             status: "COMPLETED",
@@ -135,10 +206,19 @@ export async function resolveConflictAction(
         },
       })
     } else if (result.status === "CONFLICT") {
+      const conflictDraftStorage = serializeDraftFilesForStorage({
+        activeFileId: storedDraftFiles.activeFileId,
+        files: [
+          {
+            ...storedFile,
+            conflictContent: result.conflictContent,
+          },
+        ],
+      })
       await prisma.revision.update({
         where: { id: linkedDraft.id },
         data: {
-          conflictContent: result.conflictContent,
+          conflictContent: conflictDraftStorage.conflictContent,
         },
       })
     } else {
@@ -156,23 +236,30 @@ export async function resolveConflictAction(
   }
 
   const result = await resolveDraftSyncConflict({
+    activeFileId: resolvedDraftFiles.activeFileId,
     authorEmail,
     authorName,
     branchName: linkedDraft.prBranchName,
-    content,
-    filePath: linkedDraft.filePath,
+    files: resolvedDraftFiles.files.map((file) => ({
+      ...file,
+      conflictContent: undefined,
+    })),
     syncedMainSha: linkedDraft.syncedMainSha,
     title: linkedDraft.title,
     token,
   })
 
+  const syncedDraftStorage = serializeDraftFilesForStorage({
+    activeFileId: result.activeFileId,
+    files: result.files,
+  })
+
   await prisma.revision.update({
     where: { id: linkedDraft.id },
     data: {
-      conflictContent: result.conflictContent,
-      content:
-        result.status === "IN_REVIEW" ? result.content : linkedDraft.content,
-      filePath: result.filePath,
+      conflictContent: syncedDraftStorage.conflictContent,
+      content: syncedDraftStorage.content,
+      filePath: syncedDraftStorage.filePath,
       status: result.status,
       syncedMainSha: result.syncedMainSha,
     },
@@ -206,7 +293,21 @@ export async function submitWithRebaseAction(revisionId: string) {
     throw new Error("Revision not found")
   }
 
-  if (!revision.filePath || !revision.prBranchName) {
+  const storedDraftFiles = decodeStoredDraftFiles({
+    content: revision.content,
+    conflictContent: revision.conflictContent,
+    filePath: revision.filePath,
+  })
+
+  if (storedDraftFiles.files.length !== 1) {
+    throw new Error(
+      "Fine-grained rebase is only available for single-file drafts"
+    )
+  }
+
+  const draftFile = getActiveDraftFile(storedDraftFiles)
+
+  if (!draftFile.filePath || !revision.prBranchName) {
     throw new Error("The revision is missing PR metadata")
   }
 
@@ -216,10 +317,10 @@ export async function submitWithRebaseAction(revisionId: string) {
 
   const result = await rebaseArticleContent({
     draftId: revisionId,
-    filePath: revision.filePath,
+    filePath: draftFile.filePath,
     baseMainSha: revision.baseMainSha,
     latestMainSha: revision.syncedMainSha,
-    draftContent: revision.content,
+    draftContent: draftFile.content,
     token,
   })
 
@@ -229,24 +330,44 @@ export async function submitWithRebaseAction(revisionId: string) {
       authorName,
       branchName: revision.prBranchName,
       content: result.finalContent,
-      filePath: revision.filePath,
+      filePath: draftFile.filePath,
       message: `docs: apply fine-grained rebase for ${revision.title}`,
       token,
+    })
+    const rebasedDraftStorage = serializeDraftFilesForStorage({
+      activeFileId: storedDraftFiles.activeFileId,
+      files: [
+        {
+          ...draftFile,
+          content: result.finalContent,
+          conflictContent: undefined,
+        },
+      ],
     })
     await prisma.revision.update({
       where: { id: revisionId },
       data: {
         status: "IN_REVIEW",
-        conflictContent: null,
-        content: result.finalContent,
+        conflictContent: rebasedDraftStorage.conflictContent,
+        content: rebasedDraftStorage.content,
+        filePath: rebasedDraftStorage.filePath,
       },
     })
   } else if (result.status === "CONFLICT") {
+    const conflictDraftStorage = serializeDraftFilesForStorage({
+      activeFileId: storedDraftFiles.activeFileId,
+      files: [
+        {
+          ...draftFile,
+          conflictContent: result.conflictContent,
+        },
+      ],
+    })
     await prisma.revision.update({
       where: { id: revisionId },
       data: {
         status: "SYNC_CONFLICT",
-        conflictContent: result.conflictContent,
+        conflictContent: conflictDraftStorage.conflictContent,
       },
     })
   } else if (result.status === "FILE_DELETED_CONFLICT") {
@@ -326,7 +447,19 @@ export async function keepFileAction(revisionId: string) {
     throw new Error("Revision not found")
   }
 
-  if (!revision.filePath || !revision.prBranchName) {
+  const storedDraftFiles = decodeStoredDraftFiles({
+    content: revision.content,
+    conflictContent: revision.conflictContent,
+    filePath: revision.filePath,
+  })
+
+  if (storedDraftFiles.files.length !== 1) {
+    throw new Error("Keep file only supports single-file drafts")
+  }
+
+  const draftFile = getActiveDraftFile(storedDraftFiles)
+
+  if (!draftFile.filePath || !revision.prBranchName) {
     throw new Error("The revision is missing PR metadata")
   }
 
@@ -334,17 +467,29 @@ export async function keepFileAction(revisionId: string) {
     authorEmail,
     authorName,
     branchName: revision.prBranchName,
-    content: revision.content,
-    filePath: revision.filePath,
+    content: draftFile.content,
+    filePath: draftFile.filePath,
     message: `docs: keep file despite deletion in main for ${revision.title}`,
     token,
+  })
+
+  const keptDraftStorage = serializeDraftFilesForStorage({
+    activeFileId: storedDraftFiles.activeFileId,
+    files: [
+      {
+        ...draftFile,
+        conflictContent: undefined,
+      },
+    ],
   })
 
   await prisma.revision.update({
     where: { id: revisionId },
     data: {
       status: "IN_REVIEW",
-      conflictContent: null,
+      conflictContent: keptDraftStorage.conflictContent,
+      content: keptDraftStorage.content,
+      filePath: keptDraftStorage.filePath,
       rebaseState: Prisma.DbNull,
     },
   })

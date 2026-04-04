@@ -88,34 +88,37 @@ model Article {
 }
 
 model Revision {
-  id          String         @id @default(cuid())
-  title       String
-  content     String
-  coverImage  String?
-  
-   status      String         @default("DRAFT") // DRAFT, SYNC_CONFLICT, IN_REVIEW
-  githubPrUrl String?
-  githubPrNum Int?
-   prBranchName String?
-  filePath    String?
-   baseMainSha String?
-   syncedMainSha String?
-   conflictContent String?
-   submittedAt DateTime?
+   id          String         @id @default(cuid())
+   title       String
+   content     String
+   coverImage  String?
+   
+    status      String         @default("DRAFT") // DRAFT, SYNC_CONFLICT, IN_REVIEW
+   githubPrUrl String?
+   githubPrNum Int?
+    prBranchName String?
+   filePath    String?
+    baseMainSha String?
+    syncedMainSha String?
+    conflictContent String?
+    submittedAt DateTime?
 
-  articleId   String?
-  article     Article?       @relation(fields: [articleId], references: [id], onDelete: SetNull)
+   articleId   String?
+   article     Article?       @relation(fields: [articleId], references: [id], onDelete: SetNull)
 
-  authorId    String
-  author      User           @relation("RevisionAuthor", fields: [authorId], references: [id])
+   authorId    String
+   author      User           @relation("RevisionAuthor", fields: [authorId], references: [id])
 
-   reviewerId  String?
-   reviewer    User?          @relation("RevisionReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+    reviewerId  String?
+    reviewer    User?          @relation("RevisionReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
 
-   rebaseState Json?
+    rebaseState Json?
+    
+    // Draft asset lifecycle relation
+    draftAssets DraftAsset[]
 
-   createdAt   DateTime       @default(now())
-   updatedAt   DateTime       @updatedAt
+    createdAt   DateTime       @default(now())
+    updatedAt   DateTime       @updatedAt
 }
 
 // ==========================================
@@ -143,16 +146,62 @@ model Feature {
 }
 
 model FeatureComment {
-  id          String   @id @default(cuid())
-  content     String
-  
-  featureId   String
-  feature     Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
-  
-  authorId    String
-  author      User     @relation("CommentAuthor", fields: [authorId], references: [id])
-  
-  createdAt   DateTime @default(now())
+   id          String   @id @default(cuid())
+   content     String
+   
+   featureId   String
+   feature     Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
+   
+   authorId    String
+   author      User     @relation("CommentAuthor", fields: [authorId], references: [id])
+   
+   createdAt   DateTime @default(now())
 }
+
+// ==========================================
+// 5. Draft Asset Lifecycle
+// ==========================================
+
+model DraftAsset {
+   id                String   @id @default(cuid())
+   
+   // Link to revision (draft owner)
+   revisionId        String
+   revision          Revision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+   
+   // Storage metadata
+   storagePath       String   // Supabase object path (e.g., "draft-temp/rev-{id}/filename.png")
+   mimeType          String   // e.g., "image/png"
+   fileSize          Int      // bytes
+   filename          String   // original filename for reference
+   contentHash       String?  // SHA256 or similar for dedup/integrity
+   
+   // Lifecycle status: uploaded, referenced, orphaned, migrated-to-repo, PR-merged, PR-closed, deleted, cleanup-failed
+   status            String   @default("uploaded") // tracks asset state through lifecycle
+   
+   // PR linkage (populated after submit)
+   githubPrNum       Int?     // PR number if this asset was migrated during submit
+   
+   // Migrated repo path (populated after successful migration)
+   migratedRepoPath  String?  // e.g., "chapters/chapter-name/img/filename-hash.png"
+   
+   // Cleanup tracking
+   cleanupAttempts   Int      @default(0)
+   cleanupFailedAt   DateTime?
+   cleanupFailureReason String?
+   
+   // Timestamps
+   uploadedAt        DateTime @default(now())
+   migratedAt        DateTime?
+   deletedAt         DateTime?
+   updatedAt         DateTime @updatedAt
+   
+   // Indexes for efficient reconciliation queries
+   @@unique([revisionId, storagePath])
+   @@index([status])
+   @@index([githubPrNum])
+   @@index([revisionId, status])
+}
+
 
 

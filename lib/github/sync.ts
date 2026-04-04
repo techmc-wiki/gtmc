@@ -18,6 +18,8 @@ const IGNORED_DIRS = new Set([
   "asset",
   "exampleworld",
   "desynchronized",
+  ".github",
+  "_scripts",
 ])
 
 const IGNORED_ROOT_FILES = new Set([

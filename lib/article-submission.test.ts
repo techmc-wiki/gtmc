@@ -64,11 +64,17 @@ function configureOctokitMocks({
 }
 
 const baseInput = {
+  activeFileId: "draft-file-1",
   authorEmail: "author@example.com",
   authorName: "Author",
   branchName: "submission-branch",
-  content: "draft-content",
-  filePath: "docs/topic.md",
+  files: [
+    {
+      id: "draft-file-1",
+      content: "draft-content",
+      filePath: "docs/topic.md",
+    },
+  ],
   title: "Topic",
   token: "token",
 }
@@ -193,7 +199,13 @@ describe("resolveDraftSyncConflict TOCTOU protections", () => {
 
     const result = await resolveDraftSyncConflict({
       ...baseInput,
-      content: "line1\nline2-draft",
+      files: [
+        {
+          id: "draft-file-1",
+          content: "line1\nline2-draft",
+          filePath: "docs/topic.md",
+        },
+      ],
       syncedMainSha: "sha-old",
     })
 

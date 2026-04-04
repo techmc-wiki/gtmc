@@ -4,6 +4,7 @@ import Link from "next/link"
 import { BrutalButton } from "@/components/ui/brutal-button"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { decodeStoredDraftFiles } from "@/lib/draft-files"
 import { notFound, redirect } from "next/navigation"
 
 export const metadata: Metadata = {
@@ -29,6 +30,12 @@ export default async function EditDraftPage({
   if (!draft || draft.authorId !== session.user.id) {
     notFound()
   }
+
+  const draftFiles = decodeStoredDraftFiles({
+    content: draft.content,
+    conflictContent: draft.conflictContent,
+    filePath: draft.filePath,
+  })
 
   return (
     <div
@@ -111,11 +118,10 @@ export default async function EditDraftPage({
 
         <DraftEditor
           initialData={{
-            conflictContent: draft.conflictContent || undefined,
+            activeFileId: draftFiles.activeFileId,
             id: draft.id,
+            files: draftFiles.files,
             title: draft.title,
-            content: draft.content,
-            filePath: draft.filePath || undefined,
             githubPrUrl: draft.githubPrUrl || undefined,
             articleId: draft.articleId || undefined,
             status: draft.status,

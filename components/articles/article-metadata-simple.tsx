@@ -7,7 +7,6 @@ interface ArticleMetadataSimpleProps {
   filePath: string
   wordCount: number
   readingTime: number
-  isAdvanced?: boolean
 }
 
 export function ArticleMetadataSimple({
@@ -15,7 +14,6 @@ export function ArticleMetadataSimple({
   filePath,
   wordCount,
   readingTime,
-  isAdvanced,
 }: ArticleMetadataSimpleProps) {
   return (
     <header>

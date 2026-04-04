@@ -74,8 +74,8 @@ export function resolveSlugWithIndicator(slugPath: string): ResolveResult {
     }
   }
 
-   // 3. Raw file path fallback - URL decode first
-   const normalizedPath = decodeURIComponent(slugPath)
+  // 3. Raw file path fallback - URL decode first
+  const normalizedPath = decodeURIComponent(slugPath)
 
   // 3a. Try as-is
   if (fs.existsSync(path.join(ARTICLES_DIR, normalizedPath))) {

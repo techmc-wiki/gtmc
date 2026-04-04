@@ -80,18 +80,20 @@ export function SidebarTree({
                 before:w-0.5 before:transition-all before:duration-200
                 before:content-['']
                 md:text-base
-                ${!item.isFolder && isActive
-                  ? `before:w-[3px] before:bg-tech-main`
-                  : `
-                    before:bg-transparent
-                    hover:before:w-[2px] hover:before:bg-tech-main/40
-                  `
+                ${
+                  !item.isFolder && isActive
+                    ? `before:w-[3px] before:bg-tech-main`
+                    : `
+                      before:bg-transparent
+                      hover:before:w-[2px] hover:before:bg-tech-main/40
+                    `
                 }
-                ${!item.isFolder && isActive && highlightActive
-                  ? `bg-tech-main/8`
-                  : !item.isFolder && isActive
-                    ? `bg-tech-main/5`
-                    : `hover:bg-tech-main/5`
+                ${
+                  !item.isFolder && isActive && highlightActive
+                    ? `bg-tech-main/8`
+                    : !item.isFolder && isActive
+                      ? `bg-tech-main/5`
+                      : `hover:bg-tech-main/5`
                 }
               `}>
               {item.isFolder ? (
@@ -116,12 +118,13 @@ export function SidebarTree({
                     className={`
                       group relative -ml-4 flex items-center py-1.5 pl-4
                       transition-colors
-                      ${isActive
-                        ? `font-bold text-tech-main`
-                        : `
-                          text-slate-700
-                          hover:text-tech-main
-                        `
+                      ${
+                        isActive
+                          ? `font-bold text-tech-main`
+                          : `
+                            text-slate-700
+                            hover:text-tech-main
+                          `
                       }
                     `}>
                     {isActive && toc.length > 0 && (
@@ -175,9 +178,10 @@ export function SidebarTree({
                     <div
                       className={`
                         grid transition-all duration-300 ease-out
-                        ${isFileExpanded
-                          ? "grid-rows-[1fr] opacity-100"
-                          : `grid-rows-[0fr] opacity-0`
+                        ${
+                          isFileExpanded
+                            ? "grid-rows-[1fr] opacity-100"
+                            : `grid-rows-[0fr] opacity-0`
                         }
                       `}>
                       <div className="overflow-hidden">
@@ -195,15 +199,16 @@ export function SidebarTree({
                                 before:content-['']
                                 hover:text-tech-main
                                 md:text-sm
-                                ${h2.id === activeHeadingId
-                                  ? `
-                                    font-semibold text-tech-main
-                                    before:bg-tech-main
-                                  `
-                                  : `
-                                    text-tech-main/70
-                                    before:bg-tech-main/30
-                                  `
+                                ${
+                                  h2.id === activeHeadingId
+                                    ? `
+                                      font-semibold text-tech-main
+                                      before:bg-tech-main
+                                    `
+                                    : `
+                                      text-tech-main/70
+                                      before:bg-tech-main/30
+                                    `
                                 }
                               `}>
                               <Link
@@ -212,7 +217,9 @@ export function SidebarTree({
                                 className="block wrap-break-word">
                                 {item.isAdvanced && (
                                   <span
-                                    className="mr-1 text-[8px] text-violet-500">
+                                    className="
+                                    mr-1 text-[8px] text-violet-500
+                                  ">
                                     ●
                                   </span>
                                 )}
@@ -235,9 +242,10 @@ export function SidebarTree({
                   }}
                   className={`
                     grid transition-all duration-300 ease-out
-                    ${!item.isFolder || folderExpanded
-                      ? `grid-rows-[1fr] opacity-100`
-                      : `grid-rows-[0fr] opacity-0`
+                    ${
+                      !item.isFolder || folderExpanded
+                        ? `grid-rows-[1fr] opacity-100`
+                        : `grid-rows-[0fr] opacity-0`
                     }
                   `}>
                   <div className="overflow-hidden">

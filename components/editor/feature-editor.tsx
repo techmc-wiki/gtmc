@@ -1,29 +1,23 @@
 "use client"
 
 import * as React from "react"
-import dynamic from "next/dynamic"
 import { BrutalButton } from "../ui/brutal-button"
 import { BrutalInput } from "../ui/brutal-input"
 import { useRouter } from "next/navigation"
 import { updateFeature } from "@/actions/feature"
+import { useBadge } from "@/hooks/use-badge"
 import {
   LoadingIndicator,
   PENDING_LABELS,
 } from "@/components/ui/loading-indicator"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
+import { EditorBadge } from "@/components/editor/editor-badge"
+import { EditorTabStrip } from "@/components/editor/editor-tab-strip"
+import { EditorTextarea } from "@/components/editor/editor-textarea"
+import { EditorFileUploadInput } from "@/components/editor/editor-file-upload-input"
+import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { useEditorUpload } from "@/hooks/use-editor-upload"
-
-const MarkdownPreview = dynamic(
-  () =>
-    import("@/components/editor/markdown-preview").then(
-      (mod) => mod.MarkdownPreview
-    ),
-  {
-    ssr: false,
-    loading: () => <p className="editor-panel">LOADING_PREVIEW_</p>,
-  }
-)
 
 interface FeatureEditorProps {
   initialData?: {
@@ -42,32 +36,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
   const [tags, setTags] = React.useState(initialData?.tags?.join(", ") || "")
   const [isSaving, setIsSaving] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState<"write" | "preview">("write")
-
-  type BadgeType = "info" | "error" | "progress"
-  const [badge, setBadge] = React.useState<{
-    message: string
-    type: BadgeType
-  } | null>(null)
-  const badgeTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  )
-
-  const showBadge = (
-    message: string,
-    type: BadgeType,
-    autoClearMs?: number
-  ) => {
-    if (badgeTimeoutRef.current) clearTimeout(badgeTimeoutRef.current)
-    setBadge({ message, type })
-    if (autoClearMs) {
-      badgeTimeoutRef.current = setTimeout(() => setBadge(null), autoClearMs)
-    }
-  }
-
-  const clearBadge = () => {
-    if (badgeTimeoutRef.current) clearTimeout(badgeTimeoutRef.current)
-    setBadge(null)
-  }
+  const { badge, showBadge, clearBadge } = useBadge()
 
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
@@ -136,7 +105,15 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
     onClearBadge: clearBadge,
   })
 
-  const handlePaste = (e: React.ClipboardEvent) => {
+  const handleUploadWithCheck = (file: File) => {
+    if (!initialData?.id) {
+      showBadge("CANNOT_UPLOAD_BEFORE_SAVING_", "error", 4000)
+      return
+    }
+    uploadFile(file)
+  }
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     if (isReadOnly || isUploading) return
     const items = e.clipboardData.items
     for (const item of Array.from(items)) {
@@ -144,19 +121,19 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         e.preventDefault()
         const file = item.getAsFile()
         if (file) {
-          uploadFile(file)
+          handleUploadWithCheck(file)
         }
         break
       }
     }
   }
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
     if (isReadOnly || isUploading) return
     e.preventDefault()
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0]
-      uploadFile(file)
+      handleUploadWithCheck(file)
     }
   }
 
@@ -203,10 +180,13 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         content,
         tags: tagArray,
       })
-      alert("Feature updated!")
+      showBadge("FEATURE_UPDATED_", "info", 3000)
     } catch (error: unknown) {
       console.error(error)
-      alert(error instanceof Error ? error.message : "Save Failed")
+      showBadge(
+        error instanceof Error ? error.message : "SAVE_FAILED_",
+        "error"
+      )
     } finally {
       setIsSaving(false)
     }
@@ -277,62 +257,14 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           border-tech-main/40 bg-white/80 backdrop-blur-sm
         ">
         {/* Tab strip */}
-        <div
-          role="tablist"
-          aria-label="Editor mode"
-          className="
-            flex items-center border-b border-tech-main/40 bg-tech-main/10
-            font-mono text-xs
-          ">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "write"}
-            aria-controls="editor-write-panel"
-            onClick={() => setActiveTab("write")}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowRight") {
-                setActiveTab("preview")
-              }
-            }}
-            className={`
-              px-4 py-2 transition-colors select-none
-              ${
-                activeTab === "write"
-                  ? `bg-tech-main text-white`
-                  : `
-                    cursor-pointer text-tech-main/60
-                    hover:bg-tech-main/10
-                  `
-              }
-            `}>
-            WRITE_
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "preview"}
-            aria-controls="editor-preview-panel"
-            onClick={() => setActiveTab("preview")}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowLeft") {
-                setActiveTab("write")
-              }
-            }}
-            className={`
-              px-4 py-2 transition-colors select-none
-              ${
-                activeTab === "preview"
-                  ? `bg-tech-main text-white`
-                  : `
-                    cursor-pointer text-tech-main/60
-                    hover:bg-tech-main/10
-                  `
-              }
-            `}>
-            PREVIEW_
-          </button>
-        </div>
+        <EditorTabStrip
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          writeId="editor-write-panel"
+          previewId="editor-preview-panel"
+        />
+
+        <EditorBadge badge={badge} onDismiss={clearBadge} />
 
         {activeTab === "write" && (
           <>
@@ -340,34 +272,14 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
               onInsert={insertSyntax}
               disabled={isReadOnly || isUploading}
               fileUploadSlot={
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isReadOnly || isUploading}
-                  className={`
-                    h-11 min-w-[44px] flex-1 border border-transparent px-3
-                    transition-colors select-none
-                    hover:border-white/20 hover:bg-tech-accent/20
-                    sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5
-                    ${isReadOnly || isUploading ? "" : `cursor-pointer`}
-                  `}
-                  aria-busy={isUploading}>
-                  {isCompressing ? "CMP" : isUploading ? "UPL" : "FILES"}
-                </button>
+                <EditorFileUploadInput
+                  fileInputRef={fileInputRef}
+                  onFileSelect={handleUploadWithCheck}
+                  isUploading={isUploading}
+                  isCompressing={isCompressing}
+                  disabled={isReadOnly}
+                />
               }
-            />
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,text/plain,text/csv"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (file) {
-                  uploadFile(file)
-                  e.target.value = ""
-                }
-              }}
             />
           </>
         )}
@@ -378,73 +290,24 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           className="editor-grow"
           hidden={activeTab !== "write"}>
           <div className="editor-surface">
-            <textarea
+            <EditorTextarea
               ref={textareaRef}
-              className={`
-                w-full grow resize-none border-none p-6 font-mono
-                text-sm/relaxed text-black placeholder-zinc-500 outline-none
-                ${
-                  isReadOnly
-                    ? `cursor-not-allowed bg-gray-50`
-                    : `bg-transparent`
-                }
-              `}
-              placeholder="ENTER FEATURE DESCRIPTION... (Use Markdown)"
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                setContent(e.target.value)
+              }
               onPaste={handlePaste}
               onDrop={handleDrop}
-              onDragOver={(e) => {
+              onDragOver={(e: React.DragEvent<HTMLTextAreaElement>) => {
                 if (!isReadOnly) e.preventDefault()
               }}
-              onDragEnter={(e) => {
+              onDragEnter={(e: React.DragEvent<HTMLTextAreaElement>) => {
                 if (!isReadOnly) e.preventDefault()
               }}
-              readOnly={isReadOnly}
-              aria-busy={isSaving}
+              isReadOnly={isReadOnly}
+              isSaving={isSaving}
+              placeholder="ENTER FEATURE DESCRIPTION... (Use Markdown)"
             />
-
-            {badge && (
-              <div
-                className={`
-                  absolute top-4 right-4 z-20 flex items-center gap-2 border
-                  px-3 py-1.5 font-mono text-xs shadow-sm backdrop-blur-sm
-                  ${
-                    badge.type === "error"
-                      ? "border-red-400 bg-red-900 text-red-200"
-                      : `
-                        border-tech-accent bg-tech-main text-tech-accent
-                        shadow-tech-accent/20
-                      `
-                  }
-                `}
-                role="status"
-                aria-live="polite">
-                {badge.type === "progress" && (
-                  <span
-                    className="
-                    inline-block size-2 animate-pulse bg-tech-accent
-                  "
-                  />
-                )}
-                {badge.type === "error" && (
-                  <span className="inline-block size-2 bg-red-400" />
-                )}
-                {badge.message}
-                {badge.type === "error" && (
-                  <button
-                    type="button"
-                    onClick={clearBadge}
-                    className="
-                      ml-2 text-red-300
-                      hover:text-white
-                    "
-                    aria-label="Dismiss">
-                    ✕
-                  </button>
-                )}
-              </div>
-            )}
           </div>
         </div>
 
@@ -460,7 +323,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
                 selection:bg-tech-main/20 selection:text-slate-900
                 sm:p-8
               ">
-              <MarkdownPreview content={content} />
+              <LazyMarkdownPreview content={content} />
             </div>
           ) : (
             <p className="editor-panel">NOTHING_TO_PREVIEW_</p>

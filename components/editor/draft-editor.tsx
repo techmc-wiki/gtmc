@@ -1,11 +1,16 @@
 "use client"
 
 import * as React from "react"
-import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 
 import { saveDraftAction, submitForReviewAction } from "@/actions/article"
 import { DraftFileSourceDialog } from "@/components/editor/draft-file-source-dialog"
+import { DraftFileList } from "@/components/editor/draft-file-list"
+import { EditorBadge } from "@/components/editor/editor-badge"
+import { EditorFileUploadInput } from "@/components/editor/editor-file-upload-input"
+import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
+import { EditorTabStrip } from "@/components/editor/editor-tab-strip"
+import { EditorTextarea } from "@/components/editor/editor-textarea"
 import {
   createDraftFile,
   getActiveDraftFile,
@@ -23,18 +28,8 @@ import {
 import { BrutalButton } from "../ui/brutal-button"
 import { BrutalInput } from "../ui/brutal-input"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { useBadge } from "@/hooks/use-badge"
 import { useEditorUpload } from "@/hooks/use-editor-upload"
-
-const MarkdownPreview = dynamic(
-  () =>
-    import("@/components/editor/markdown-preview").then(
-      (mod) => mod.MarkdownPreview
-    ),
-  {
-    ssr: false,
-    loading: () => <p className="editor-panel">LOADING_PREVIEW_</p>,
-  }
-)
 
 interface DraftEditorProps {
   initialData?: {
@@ -47,8 +42,6 @@ interface DraftEditorProps {
     status?: string
   }
 }
-
-type BadgeType = "info" | "error" | "progress"
 
 export function DraftEditor({ initialData }: DraftEditorProps) {
   const router = useRouter()
@@ -72,16 +65,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   const [isSaving, setIsSaving] = React.useState(false)
   const [isSubmittingReview, setIsSubmittingReview] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState<"write" | "preview">("write")
-  const [badge, setBadge] = React.useState<{
-    message: string
-    type: BadgeType
-  } | null>(null)
 
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
-  const badgeTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  )
+  const { badge, showBadge, clearBadge } = useBadge()
 
   const articleId = initialData?.articleId
   const githubPrUrl = initialData?.githubPrUrl
@@ -104,40 +91,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   )
   const activeFileIndex =
     draftCollection.files.findIndex((file) => file.id === activeFile.id) + 1
-
-  const showBadge = (
-    message: string,
-    type: BadgeType,
-    autoClearMs?: number
-  ) => {
-    if (badgeTimeoutRef.current) {
-      clearTimeout(badgeTimeoutRef.current)
-    }
-
-    setBadge({ message, type })
-
-    if (autoClearMs) {
-      badgeTimeoutRef.current = setTimeout(() => {
-        setBadge(null)
-      }, autoClearMs)
-    }
-  }
-
-  const clearBadge = () => {
-    if (badgeTimeoutRef.current) {
-      clearTimeout(badgeTimeoutRef.current)
-    }
-
-    setBadge(null)
-  }
-
-  React.useEffect(() => {
-    return () => {
-      if (badgeTimeoutRef.current) {
-        clearTimeout(badgeTimeoutRef.current)
-      }
-    }
-  }, [])
 
   const updateDraftCollection = (
     updater: (current: DraftFileCollection) => DraftFileCollection
@@ -377,11 +330,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       if (result.success && result.revisionId) {
         setDraftCollection(normalizedDraftCollection)
         setRevisionId(result.revisionId)
-        alert("草稿已保存 / Draft Saved!")
+        showBadge("DRAFT_SAVED_", "info", 3000)
       }
     } catch (error) {
       console.error(error)
-      alert("保存失败 / Save Failed")
+      showBadge("SAVE_FAILED_", "error")
     } finally {
       setIsSaving(false)
     }
@@ -389,18 +342,20 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
   const handleSubmitReview = async () => {
     if (!revisionId) {
-      alert("请先保存草稿 / Please save draft first")
+      showBadge("SAVE_DRAFT_FIRST_", "error", 3000)
       return
     }
 
     if (hasMissingFilePath) {
-      alert("请先为所有文件填写路径 / Every file needs a path before review")
+      showBadge("ALL_FILES_NEED_PATH_", "error", 4000)
       return
     }
 
     if (duplicateFilePaths.length > 0) {
-      alert(
-        `存在重复文件路径 / Duplicate file paths: ${duplicateFilePaths.join(", ")}`
+      showBadge(
+        `DUPLICATE_PATHS_: ${duplicateFilePaths.join(", ")}`,
+        "error",
+        4000
       )
       return
     }
@@ -409,16 +364,18 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     try {
       const result = await submitForReviewAction(revisionId)
       setDraftStatus(result.status)
-      alert(
+      showBadge(
         result.status === "SYNC_CONFLICT"
-          ? "检测到与最新 main 的冲突，请继续解决 / Sync conflict detected. Please resolve it."
-          : "已开启 PR 并进入审核 / PR opened successfully."
+          ? "SYNC_CONFLICT_DETECTED_"
+          : "PR_OPENED_",
+        "info",
+        4000
       )
       router.push(`/draft/${revisionId}`)
       router.refresh()
     } catch (error) {
       console.error(error)
-      alert("提交审核失败 / Submit Failed")
+      showBadge("SUBMIT_FAILED_", "error")
     } finally {
       setIsSubmittingReview(false)
     }
@@ -476,7 +433,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     )
 
     if (hasDuplicate) {
-      alert("该文件已在当前草稿中存在 / File already exists in this draft")
+      showBadge("FILE_ALREADY_EXISTS_", "error", 3000)
       return false
     }
 
@@ -577,128 +534,19 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           grid gap-4
           lg:grid-cols-[18rem_minmax(0,1fr)]
         ">
-        <aside
-          className="
-          border border-tech-main/40 bg-tech-main/5 backdrop-blur-sm
-        ">
-          <div
-            className="
-              flex items-center justify-between gap-3 border-b
-              border-tech-main/30 px-4 py-3
-            ">
-            <div className="min-w-0 flex-1">
-              <p
-                className="
-                  font-mono text-xs tracking-widest text-tech-main uppercase
-                ">
-                FILES_[{draftCollection.files.length}]
-              </p>
-              <p
-                className="
-                  truncate font-mono text-[11px] text-tech-main/60 uppercase
-                "
-                title="SAVE_AND_REVIEW_APPLY_TO_ALL_FILES">
-                SAVE_AND_REVIEW_APPLY_TO_ALL_FILES
-              </p>
-            </div>
-            {!isReadOnly ? (
-              <BrutalButton
-                type="button"
-                variant="secondary"
-                size="sm"
-                className="shrink-0"
-                onClick={handleAddFile}>
-                + ADD
-              </BrutalButton>
-            ) : null}
-          </div>
-
-          <div className="space-y-2 p-2">
-            {draftCollection.files.map((file, index) => {
-              const fileLabel =
-                file.filePath.split("/").filter(Boolean).at(-1) ||
-                `UNTITLED_FILE_${index + 1}`
-              const isActive = file.id === draftCollection.activeFileId
-
-              return (
-                <div key={file.id} className="relative flex items-stretch">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setDraftCollection((current) => ({
-                        ...current,
-                        activeFileId: file.id,
-                      }))
-                    }
-                    className={`
-                      flex min-h-11 min-w-0 flex-1 flex-col items-start gap-1
-                      border px-3 py-2 text-left transition-colors
-                      ${
-                        isActive
-                          ? `border-tech-main bg-tech-main/10`
-                          : `
-                            guide-line bg-white/70
-                            hover:border-tech-main/50 hover:bg-white/90
-                          `
-                      }
-                    `}>
-                    <span
-                      className="
-                        w-full truncate font-mono text-xs tracking-widest
-                        text-tech-main uppercase
-                      ">
-                      {fileLabel}
-                    </span>
-                    <span
-                      className="
-                        w-full truncate font-mono text-[11px] text-tech-main/60
-                      ">
-                      {file.filePath || "PATH_NOT_SET"}
-                    </span>
-                  </button>
-
-                  {!isReadOnly && draftCollection.files.length > 1 ? (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveFile(file.id)}
-                      title="Remove file"
-                      className={`
-                        flex min-w-8 shrink-0 items-center justify-center
-                        border-y border-r transition-colors
-                        ${
-                          isActive
-                            ? `
-                              border-tech-main bg-tech-main/5 text-tech-main/60
-                              hover:border-red-500/30 hover:bg-red-500/10
-                              hover:text-red-500
-                            `
-                            : `
-                              guide-line bg-white/50 text-tech-main/40
-                              hover:border-red-500/30 hover:bg-red-500/10
-                              hover:text-red-500
-                            `
-                        }
-                      `}>
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="square"
-                        strokeLinejoin="miter"
-                        aria-label="Remove file">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                      </svg>
-                    </button>
-                  ) : null}
-                </div>
-              )
-            })}
-          </div>
-        </aside>
+        <DraftFileList
+          files={draftCollection.files}
+          activeFileId={draftCollection.activeFileId}
+          onSelectFile={(fileId) =>
+            setDraftCollection((current) => ({
+              ...current,
+              activeFileId: fileId,
+            }))
+          }
+          onAddFile={handleAddFile}
+          onRemoveFile={handleRemoveFile}
+          isReadOnly={isReadOnly}
+        />
 
         <div className="space-y-4">
           <div
@@ -774,64 +622,15 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               relative editor-grow flex min-h-125 grow flex-col border
               border-tech-main/40 bg-white/80 backdrop-blur-sm
             ">
-            <div
-              role="tablist"
-              aria-label="Editor mode"
-              className="
-                flex items-center justify-between gap-3 border-b
-                border-tech-main/40 bg-tech-main/10 font-mono text-xs
-              ">
-              <div className="flex items-center">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === "write"}
-                  aria-controls="draft-editor-write-panel"
-                  onClick={() => setActiveTab("write")}
-                  onKeyDown={(e) => {
-                    if (e.key === "ArrowRight") setActiveTab("preview")
-                  }}
-                  className={`
-                    px-4 py-2 transition-colors select-none
-                    ${
-                      activeTab === "write"
-                        ? `bg-tech-main text-white`
-                        : `
-                          cursor-pointer text-tech-main/60
-                          hover:bg-tech-main/10
-                        `
-                    }
-                  `}>
-                  WRITE_
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === "preview"}
-                  aria-controls="draft-editor-preview-panel"
-                  onClick={() => setActiveTab("preview")}
-                  onKeyDown={(e) => {
-                    if (e.key === "ArrowLeft") setActiveTab("write")
-                  }}
-                  className={`
-                    px-4 py-2 transition-colors select-none
-                    ${
-                      activeTab === "preview"
-                        ? `bg-tech-main text-white`
-                        : `
-                          cursor-pointer text-tech-main/60
-                          hover:bg-tech-main/10
-                        `
-                    }
-                  `}>
-                  PREVIEW_
-                </button>
-              </div>
-
-              <div className="pr-4 text-tech-main/60 uppercase">
-                {activeFile.filePath || `UNTITLED_FILE_${activeFileIndex}`}
-              </div>
-            </div>
+            <EditorTabStrip
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              writeId="draft-editor-write-panel"
+              previewId="draft-editor-preview-panel"
+              rightSlot={
+                activeFile.filePath || `UNTITLED_FILE_${activeFileIndex}`
+              }
+            />
 
             {activeTab === "write" && (
               <>
@@ -840,76 +639,19 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   disabled={isReadOnly || isUploading}
                   fileUploadSlot={
                     !isReadOnly ? (
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                        className={`
-                          h-11 min-w-11 flex-1 border border-transparent px-3
-                          transition-colors select-none
-                          hover:border-white/20 hover:bg-tech-accent/20
-                          sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5
-                          ${isUploading ? "" : "cursor-pointer"}
-                        `}
-                        aria-busy={isUploading}>
-                        {isCompressing ? "CMP" : isUploading ? "UPL" : "FILES"}
-                      </button>
+                      <EditorFileUploadInput
+                        fileInputRef={fileInputRef}
+                        onFileSelect={handleUploadWithAutoSave}
+                        isUploading={isUploading}
+                        isCompressing={isCompressing}
+                      />
                     ) : undefined
                   }
-                />
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,text/plain,text/csv"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) {
-                      handleUploadWithAutoSave(file)
-                      e.target.value = ""
-                    }
-                  }}
                 />
               </>
             )}
 
-            {badge ? (
-              <div
-                className={`
-                  absolute top-4 right-4 z-20 flex items-center gap-2 border
-                  px-3 py-1.5 font-mono text-xs shadow-sm backdrop-blur-sm
-                  ${
-                    badge.type === "error"
-                      ? "border-red-400 bg-red-900 text-red-200"
-                      : `
-                        border-tech-accent bg-tech-main text-tech-accent
-                        shadow-tech-accent/20
-                      `
-                  }
-                `}
-                role="status"
-                aria-live="polite">
-                {badge.type === "progress" ? (
-                  <span className="inline-block size-2 animate-pulse bg-tech-accent" />
-                ) : null}
-                {badge.type === "error" ? (
-                  <span className="inline-block size-2 bg-red-400" />
-                ) : null}
-                {badge.message}
-                {badge.type !== "progress" ? (
-                  <button
-                    type="button"
-                    onClick={clearBadge}
-                    className="
-                      ml-2 text-current/80
-                      hover:text-current
-                    "
-                    aria-label="Dismiss">
-                    X
-                  </button>
-                ) : null}
-              </div>
-            ) : null}
+            <EditorBadge badge={badge} onDismiss={clearBadge} />
 
             <section
               id="draft-editor-write-panel"
@@ -917,18 +659,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               className="editor-grow"
               hidden={activeTab !== "write"}>
               <div className="editor-surface">
-                <textarea
+                <EditorTextarea
                   ref={textareaRef}
-                  className={`
-                    w-full grow resize-none border-none p-6 font-mono
-                    text-sm/relaxed text-black placeholder-zinc-500 outline-none
-                    ${
-                      isReadOnly
-                        ? `cursor-not-allowed bg-gray-50`
-                        : `bg-transparent`
-                    }
-                  `}
-                  placeholder="ENTER CONTENT... (Use Markdown)"
                   value={activeFileContent}
                   onChange={(e) =>
                     updateActiveFile({ content: e.target.value })
@@ -941,50 +673,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   onDragEnter={(e) => {
                     if (!isReadOnly) e.preventDefault()
                   }}
-                  readOnly={isReadOnly}
-                  aria-busy={isSaving}
+                  isReadOnly={isReadOnly}
+                  isSaving={isSaving}
+                  placeholder="ENTER CONTENT... (Use Markdown)"
                 />
-
-                {badge && (
-                  <div
-                    className={`
-                      absolute top-4 right-4 z-20 flex items-center gap-2 border
-                      px-3 py-1.5 font-mono text-xs shadow-sm backdrop-blur-sm
-                      ${
-                        badge.type === "error"
-                          ? "border-red-400 bg-red-900 text-red-200"
-                          : `
-                            border-tech-accent bg-tech-main text-tech-accent
-                            shadow-tech-accent/20
-                          `
-                      }
-                    `}
-                    role="status"
-                    aria-live="polite">
-                    {badge.type === "progress" && (
-                      <span
-                        className="
-                          inline-block size-2 animate-pulse bg-tech-accent
-                        "
-                      />
-                    )}
-                    {badge.type === "error" && (
-                      <span className="inline-block size-2 bg-red-400" />
-                    )}
-                    {badge.message}
-                    {badge.type === "error" && (
-                      <button
-                        type="button"
-                        onClick={clearBadge}
-                        className="
-                          ml-2 text-red-300
-                          hover:text-red-100
-                        ">
-                        ✕
-                      </button>
-                    )}
-                  </div>
-                )}
               </div>
             </section>
 
@@ -1000,7 +692,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                     selection:bg-tech-main/20 selection:text-slate-900
                     sm:p-8
                   ">
-                  <MarkdownPreview content={activeFileContent} />
+                  <LazyMarkdownPreview content={activeFileContent} />
                 </div>
               ) : (
                 <p className="editor-panel">NOTHING_TO_PREVIEW_</p>

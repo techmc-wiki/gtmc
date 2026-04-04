@@ -3,7 +3,7 @@
 import * as React from "react"
 
 interface EditorFileUploadInputProps {
-  fileInputRef: React.RefObject<HTMLInputElement>
+  fileInputRef: React.RefObject<HTMLInputElement | null>
   onFileSelect: (file: File) => void
   isUploading: boolean
   isCompressing: boolean
@@ -24,8 +24,8 @@ export function EditorFileUploadInput({
         onClick={() => fileInputRef.current?.click()}
         disabled={disabled || isUploading}
         className={`
-          h-11 min-w-11 flex-1 border border-transparent px-3
-          transition-colors select-none
+          h-11 min-w-11 flex-1 border border-transparent px-3 transition-colors
+          select-none
           hover:border-white/20 hover:bg-tech-accent/20
           sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5
           ${disabled || isUploading ? "" : "cursor-pointer"}

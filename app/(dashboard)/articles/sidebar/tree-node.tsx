@@ -216,10 +216,7 @@ export function SidebarTree({
                                 onClick={() => onNavigate?.()}
                                 className="block wrap-break-word">
                                 {item.isAdvanced && (
-                                  <span
-                                    className="
-                                    mr-1 text-[8px] text-violet-500
-                                  ">
+                                  <span className="mr-1 text-[8px] text-violet-500">
                                     ●
                                   </span>
                                 )}

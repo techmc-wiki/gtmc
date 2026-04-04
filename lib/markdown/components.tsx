@@ -391,7 +391,10 @@ export function getMarkdownComponents(rawPath: string) {
           <div
             className="my-6 overflow-hidden rounded-sm border border-violet-200"
             {...rest}>
-            <div className="flex items-center gap-2 bg-violet-600/50 px-4 py-1.5">
+            <div
+              className="
+              flex items-center gap-2 bg-violet-600/50 px-4 py-1.5
+            ">
               <span
                 className="
                   font-mono text-[10px] tracking-widest text-white uppercase

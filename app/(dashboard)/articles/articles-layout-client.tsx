@@ -407,10 +407,19 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         {/* Desktop sidebar */}
         <div
           ref={wrapperRef}
-          className="sidebar-wrapper relative hidden shrink-0 self-stretch md:block"
+          className="
+            relative hidden shrink-0 self-stretch
+            md:block
+          "
+          data-sidebar-wrapper
           data-sidebar-hidden={sidebarHidden ? "" : undefined}>
           <aside
-            className="h-full w-64 overflow-hidden border-r guide-line transition-[width,opacity,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:w-80"
+            className="
+              h-full w-64 overflow-hidden border-r guide-line
+              transition-[width,opacity,border-color] duration-300
+              ease-[cubic-bezier(0.16,1,0.3,1)]
+              lg:w-80
+            "
             style={{
               width: sidebarHidden ? 0 : undefined,
               opacity: sidebarHidden ? 0 : 1,
@@ -442,7 +451,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                       ">
                       <span
                         className="
-                          mr-2 inline-block size-1.5 animate-pulse bg-tech-main/60
+                          mr-2 inline-block size-1.5 animate-pulse
+                          bg-tech-main/60
                         "
                       />
                       SYS.DIR_TREE
@@ -453,7 +463,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 {showTreePlaceholder ? (
                   <div
                     className="
-                      custom-left-scrollbar h-full min-h-0 flex-1 overflow-y-auto
+                      custom-left-scrollbar h-full min-h-0 flex-1
+                      overflow-y-auto
                     ">
                     <TreeLoadingPlaceholder />
                   </div>
@@ -475,11 +486,17 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
             aria-label={sidebarHidden ? "Show sidebar" : "Hide sidebar"}
             aria-expanded={!sidebarHidden}
             data-sidebar-toggle=""
-            className="fixed top-1/2 z-40 flex h-8 w-3 -translate-y-1/2 cursor-pointer items-center justify-center border guide-line bg-tech-bg text-tech-main/40 transition-[left,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-tech-main/5 hover:text-tech-main"
+            className="
+              fixed top-1/2 z-40 flex h-8 w-3 -translate-y-1/2 cursor-pointer
+              items-center justify-center border guide-line bg-tech-bg
+              text-tech-main/40 transition-[left,opacity] duration-300
+              ease-[cubic-bezier(0.16,1,0.3,1)]
+              hover:bg-tech-main/5 hover:text-tech-main
+            "
             style={{
               left: btnLeft !== undefined ? `${btnLeft - 6}px` : undefined,
             }}>
-            <span className="text-[8px] font-bold leading-none">
+            <span className="text-[8px] leading-none font-bold">
               {sidebarHidden ? "▶" : "◀"}
             </span>
           </button>

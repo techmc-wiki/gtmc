@@ -263,7 +263,10 @@ export function DraftFileSourceDialog({
             grid min-h-0 flex-1 gap-0
             lg:grid-cols-[20rem_minmax(0,1fr)]
           ">
-          <aside className="flex min-h-0 flex-col border-r guide-line bg-tech-main/5">
+          <aside
+            className="
+            flex min-h-0 flex-col border-r guide-line bg-tech-main/5
+          ">
             <div
               className="
                 shrink-0 border-b guide-line px-4 py-3 font-mono text-xs

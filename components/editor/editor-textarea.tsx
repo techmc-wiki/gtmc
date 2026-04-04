@@ -37,10 +37,10 @@ export const EditorTextarea = React.forwardRef<
     <textarea
       ref={ref}
       className={`
-          w-full grow resize-none border-none p-6 font-mono
-          text-sm/relaxed text-black placeholder-zinc-500 outline-none
-          ${isReadOnly ? `cursor-not-allowed bg-gray-50` : `bg-transparent`}
-        `}
+        w-full grow resize-none border-none p-6 font-mono text-sm/relaxed
+        text-black placeholder-zinc-500 outline-none
+        ${isReadOnly ? `cursor-not-allowed bg-gray-50` : `bg-transparent`}
+      `}
       placeholder={placeholder ?? "ENTER CONTENT... (Use Markdown)"}
       value={value}
       onChange={onChange}

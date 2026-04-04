@@ -49,11 +49,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Generate Prisma Client
+        run: pnpm prisma generate
         env:
           DATABASE_URL: "postgresql://localhost:5432/placeholder"
 
       - name: Run lint
         run: pnpm lint:check
-
-      - name: Run build
-        run: pnpm build

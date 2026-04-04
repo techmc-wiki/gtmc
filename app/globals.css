@@ -521,13 +521,13 @@ code[class^="language-"] {
     @apply block;
   }
 
-  .sidebar-wrapper [data-sidebar-toggle] {
+  [data-sidebar-wrapper] [data-sidebar-toggle] {
     opacity: 0;
     transition: opacity 0.2s ease;
   }
 
-  .sidebar-wrapper:hover [data-sidebar-toggle],
-  .sidebar-wrapper[data-sidebar-hidden] [data-sidebar-toggle] {
+  [data-sidebar-wrapper]:hover [data-sidebar-toggle],
+  [data-sidebar-wrapper][data-sidebar-hidden] [data-sidebar-toggle] {
     opacity: 1;
   }
 }

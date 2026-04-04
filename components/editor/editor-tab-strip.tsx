@@ -22,8 +22,8 @@ export function EditorTabStrip({
       role="tablist"
       aria-label="Editor mode"
       className="
-        flex items-center justify-between gap-3 border-b
-        border-tech-main/40 bg-tech-main/10 font-mono text-xs
+        flex items-center justify-between gap-3 border-b border-tech-main/40
+        bg-tech-main/10 font-mono text-xs
       ">
       <div className="flex items-center">
         <button

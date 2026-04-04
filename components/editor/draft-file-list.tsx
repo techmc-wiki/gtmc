@@ -23,14 +23,11 @@ export function DraftFileList({
   isReadOnly,
 }: DraftFileListProps) {
   return (
-    <aside
-      className="
-      border border-tech-main/40 bg-tech-main/5 backdrop-blur-sm
-    ">
+    <aside className="border border-tech-main/40 bg-tech-main/5 backdrop-blur-sm">
       <div
         className="
-          flex items-center justify-between gap-3 border-b
-          border-tech-main/30 px-4 py-3
+          flex items-center justify-between gap-3 border-b border-tech-main/30
+          px-4 py-3
         ">
         <div className="min-w-0 flex-1">
           <p
@@ -72,8 +69,8 @@ export function DraftFileList({
                 type="button"
                 onClick={() => onSelectFile(file.id)}
                 className={`
-                  flex min-h-11 min-w-0 flex-1 flex-col items-start gap-1
-                  border px-3 py-2 text-left transition-colors
+                  flex min-h-11 min-w-0 flex-1 flex-col items-start gap-1 border
+                  px-3 py-2 text-left transition-colors
                   ${
                     isActive
                       ? `border-tech-main bg-tech-main/10`
@@ -104,8 +101,8 @@ export function DraftFileList({
                   onClick={() => onRemoveFile(file.id)}
                   title="Remove file"
                   className={`
-                    flex min-w-8 shrink-0 items-center justify-center
-                    border-y border-r transition-colors
+                    flex min-w-8 shrink-0 items-center justify-center border-y
+                    border-r transition-colors
                     ${
                       isActive
                         ? `

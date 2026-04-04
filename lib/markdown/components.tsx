@@ -97,11 +97,11 @@ export function getMarkdownComponents(rawPath: string) {
     <span
       aria-hidden="true"
       className="
-        mx-1 inline-block shrink-0 border border-violet-400/30 bg-violet-600/5
-        px-1.5 py-0.5 align-middle font-mono text-[10px] tracking-tight
-        text-violet-400 uppercase
+        mx-2 inline-block shrink-0 bg-[#4c5b96]
+        px-1.5 py-0.5 align-middle font-mono text-[10px] font-bold tracking-widest
+        text-white select-none
       ">
-      ◈ ADV
+      ADVANCED
     </span>
   )
 
@@ -389,20 +389,22 @@ export function getMarkdownComponents(rawPath: string) {
       if (dataAdvancedSection === "true") {
         return (
           <div
-            className="my-6 overflow-hidden rounded-sm border border-violet-200"
+            className="my-8 relative"
             {...rest}>
             <div
               className="
-              flex items-center gap-2 bg-violet-600/50 px-4 py-1.5
-            ">
+                absolute top-0 right-0 h-full w-8 bg-[#4c5b96]
+                flex items-start justify-center pt-6
+              ">
               <span
                 className="
-                  font-mono text-[10px] tracking-widest text-white uppercase
+                  font-mono text-[13px] tracking-[0.3em] font-bold text-white
+                  [writing-mode:vertical-rl] select-none
                 ">
-                ◈ Advanced Content
+                ADVANCED
               </span>
             </div>
-            <div className="bg-linear-to-b from-violet-50 to-white px-4 pb-2">
+            <div className="pr-12">
               {children}
             </div>
           </div>

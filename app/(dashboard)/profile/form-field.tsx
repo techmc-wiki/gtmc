@@ -14,7 +14,10 @@ export function FormField({
   className,
 }: FormFieldProps) {
   return (
-    <div className={cn("space-y-3 sm:space-y-4", className)}>
+    <div className={cn(`
+      space-y-3
+      sm:space-y-4
+    `, className)}>
       <label
         htmlFor={htmlFor}
         className="

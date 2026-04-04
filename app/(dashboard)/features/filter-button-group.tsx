@@ -23,10 +23,16 @@ export function FilterButtonGroup({
           type="button"
           onClick={() => onChange(option.value)}
           className={cn(
-            "flex min-h-8 cursor-pointer items-center justify-center border px-3 py-2 font-mono text-xs transition-all uppercase",
+            `
+              flex min-h-8 cursor-pointer items-center justify-center border
+              px-3 py-2 font-mono text-xs uppercase transition-all
+            `,
             value === option.value
               ? "border-tech-main bg-tech-main text-white"
-              : "border-tech-main/40 bg-transparent text-tech-main hover:border-tech-main/60"
+              : `
+                border-tech-main/40 bg-transparent text-tech-main
+                hover:border-tech-main/60
+              `
           )}>
           {option.label}
         </button>

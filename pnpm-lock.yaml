@@ -38,9 +38,15 @@ importers:
       browser-image-compression:
         specifier: ^2.0.2
         version: 2.0.2
+      ccount:
+        specifier: ^2.0.1
+        version: 2.0.1
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      devlop:
+        specifier: ^1.1.0
+        version: 1.1.0
       diff:
         specifier: ^8.0.4
         version: 8.0.4
@@ -56,6 +62,12 @@ importers:
       katex:
         specifier: ^0.16.44
         version: 0.16.44
+      mdast-util-find-and-replace:
+        specifier: ^3.0.2
+        version: 3.0.2
+      micromark-util-character:
+        specifier: ^2.1.1
+        version: 2.1.1
       mime-types:
         specifier: ^3.0.2
         version: 3.0.2

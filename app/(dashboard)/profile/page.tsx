@@ -39,7 +39,10 @@ export default async function ProfilePage() {
   )
 
   return (
-    <div className="page-container mt-4 animate-fade-in sm:mt-8">
+    <div className="
+      page-container mt-4 animate-fade-in
+      sm:mt-8
+    ">
       <div
         className="
           flex flex-col items-start justify-between border-b-2
@@ -85,10 +88,10 @@ export default async function ProfilePage() {
           </h1>
           <p
             className="
-               mt-2 flex items-center gap-2 font-mono text-[10px]
-               tracking-tech-wide text-tech-main/70
-               sm:mt-3 sm:text-sm
-             ">
+              mt-2 flex items-center gap-2 font-mono text-[10px]
+              tracking-tech-wide text-tech-main/70
+              sm:mt-3 sm:text-sm
+            ">
             <StatusDot size="sm" />
             CONFIG // IDENTITY // TOKENS
           </p>
@@ -275,7 +278,11 @@ export default async function ProfilePage() {
             <MetadataRow
               label="ASSIGNED ROLE:"
               value={
-                <span className="font-mono text-xs font-bold tracking-widest text-tech-main-dark uppercase sm:text-sm">
+                <span className="
+                  font-mono text-xs font-bold tracking-widest
+                  text-tech-main-dark uppercase
+                  sm:text-sm
+                ">
                   [{user.role}]
                 </span>
               }

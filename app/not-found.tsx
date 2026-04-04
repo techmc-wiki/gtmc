@@ -45,7 +45,7 @@ export default function NotFound() {
           </p>
           <p>MEM.DUMP :: ACTIVE</p>
           <p>TRACE :: FAILED</p>
-          <div className="my-2 h-px w-full bg-tech-main/30" />
+          <div className="section-divider" />
           <p>TARGET : UNKNOWN</p>
         </div>
 

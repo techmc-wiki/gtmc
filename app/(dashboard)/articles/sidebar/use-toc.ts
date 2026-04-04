@@ -49,7 +49,7 @@ export function useToc(pathname: string): TocItem[] {
       observer.disconnect()
       clearTimeout(timeout)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [pathname])
 
   return toc

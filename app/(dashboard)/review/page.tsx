@@ -148,7 +148,7 @@ export default async function ReviewHubPage() {
             `}>
             [PR #{pr.number}]
           </span>
-          <span className="font-mono text-xs text-tech-main/50">
+          <span className="mono-label">
             {new Date(pr.created_at).toLocaleString()}
           </span>
           {isConflict && (

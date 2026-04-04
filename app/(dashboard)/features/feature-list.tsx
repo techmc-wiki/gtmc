@@ -187,9 +187,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
       {/* 过滤器 */}
       <RevealSection delay={0}>
         <BrutalCard
-          className="
-          border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
-        ">
+          className="border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm">
           <div className="space-y-4">
             <div>
               <h4

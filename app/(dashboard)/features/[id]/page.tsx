@@ -231,14 +231,14 @@ export default async function FeatureDetailPage({
       <RevealSection delay={100}>
         <BrutalCard
           className="
-             mb-8 p-4
-             sm:p-6
-           ">
+            mb-8 p-4
+            sm:p-6
+          ">
           <div
             className="
-               flex flex-col gap-2 font-mono text-xs
-               sm:text-sm
-             ">
+              flex flex-col gap-2 font-mono text-xs
+              sm:text-sm
+            ">
             <MetadataRow
               label="STATUS:"
               value={<FeatureStatusBadge status={feature.status} />}
@@ -280,10 +280,10 @@ export default async function FeatureDetailPage({
                       target="_blank"
                       rel="noopener noreferrer"
                       className="
-                         border-b border-tech-main/50 font-mono wrap-break-word
-                         text-tech-main transition-colors
-                         hover:bg-tech-main/80 hover:text-white
-                       ">
+                        border-b border-tech-main/50 font-mono wrap-break-word
+                        text-tech-main transition-colors
+                        hover:bg-tech-main/80 hover:text-white
+                      ">
                       Issue #{feature.issueNumber}
                     </a>
                   </div>

@@ -73,7 +73,7 @@ export default function DraftLoading() {
                   sm:h-64
                 ">
                 {/* Status badge + date row */}
-                <div className="mb-4 flex items-start justify-between gap-2">
+                <div className="card-header-row">
                   <SegmentedBar
                     opacity="high"
                     className="
@@ -124,7 +124,7 @@ export default function DraftLoading() {
                   sm:h-64
                 ">
                 {/* Status badge + date row */}
-                <div className="mb-4 flex items-start justify-between gap-2">
+                <div className="card-header-row">
                   <SegmentedBar
                     opacity="high"
                     className="

@@ -78,7 +78,7 @@ export async function FeatureReadonlyView({
                 </ReactMarkdown>
               </div>
             ) : (
-              <p className="p-6 font-mono text-xs text-tech-main/40">
+              <p className="editor-panel">
                 NOTHING_TO_PREVIEW_
               </p>
             )}
@@ -97,7 +97,7 @@ export async function FeatureReadonlyView({
                 {content}
               </pre>
             ) : (
-              <p className="p-6 font-mono text-xs text-tech-main/40">
+              <p className="editor-panel">
                 NOTHING_TO_PREVIEW_
               </p>
             )}

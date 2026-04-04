@@ -18,7 +18,7 @@ export function CardHeaderRow({
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
           {badge}
-          <span className="font-mono text-xs text-tech-main/50">{date}</span>
+          <span className="mono-label">{date}</span>
         </div>
         {actions && (
           <div className="flex flex-col items-end gap-1">{actions}</div>

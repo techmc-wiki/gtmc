@@ -67,7 +67,7 @@ export default function LoginPage() {
         </p>
         <p>ENCRYPTION:: AES-256-GCM</p>
         <p>HANDSHAKE :: WAITING...</p>
-        <div className="my-2 h-px w-full bg-tech-main/30" />
+        <div className="section-divider" />
         <p>SESSION : NULL</p>
       </div>
 

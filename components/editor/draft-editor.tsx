@@ -23,7 +23,7 @@ const MarkdownPreview = dynamic(
   {
     ssr: false,
     loading: () => (
-      <p className="p-6 font-mono text-xs text-tech-main/40">
+      <p className="editor-panel">
         LOADING_PREVIEW_
       </p>
     ),
@@ -273,9 +273,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
       <div
         className="
-           relative flex min-h-125 grow flex-col border border-tech-main/40
-           bg-white/80 backdrop-blur-sm editor-grow
-         ">
+          relative editor-grow flex min-h-125 grow flex-col border
+          border-tech-main/40 bg-white/80 backdrop-blur-sm
+        ">
         <div
           role="tablist"
           aria-label="Editor mode"
@@ -367,10 +367,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           {content?.trim() ? (
             <div
               className="
-                 w-full max-w-none overflow-hidden p-6 wrap-break-word
-                 selection:bg-tech-main/20 selection:text-slate-900
-                 sm:p-8
-               ">
+                w-full max-w-none overflow-hidden p-6 wrap-break-word
+                selection:bg-tech-main/20 selection:text-slate-900
+                sm:p-8
+              ">
               <MarkdownPreview content={content} />
             </div>
           ) : (
@@ -382,9 +382,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       {!isReadOnly && (
         <div
           className="
-             relative mt-6 flex justify-end gap-4 border-t border-tech-main/10
-             pt-4
-           ">
+            relative mt-6 flex justify-end gap-4 border-t border-tech-main/10
+            pt-4
+          ">
           <div className="corner-tick" />
 
           <BrutalButton

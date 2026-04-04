@@ -514,14 +514,14 @@ export function SearchCommand() {
                   font-mono text-[10px] text-tech-main/60
                 ">
                 <span>
-                  <kbd className="border guide-line px-1">&#x2191;&#x2193;</kbd>{" "}
+                  <kbd className="kbd-badge">&#x2191;&#x2193;</kbd>{" "}
                   NAVIGATE
                 </span>
                 <span>
-                  <kbd className="border guide-line px-1">&#x23CE;</kbd> OPEN
+                  <kbd className="kbd-badge">&#x23CE;</kbd> OPEN
                 </span>
                 <span>
-                  <kbd className="border guide-line px-1">ESC</kbd> DISMISS
+                  <kbd className="kbd-badge">ESC</kbd> DISMISS
                 </span>
               </footer>
             </div>

@@ -82,10 +82,10 @@ export default async function DraftDashboardPage() {
       <CornerBrackets variant="hover" />
 
       <div className="relative z-10">
-        <div className="mb-4 flex items-start justify-between gap-2">
+        <div className="card-header-row">
           <DraftStatusBadge status={draft.displayStatus} />
           <div className="flex flex-col items-end gap-1">
-            <span className="font-mono text-xs text-tech-main/50">
+            <span className="mono-label">
               {draft.updatedAt.toLocaleDateString()}
             </span>
             {draft.displayStatus !== "PENDING" &&

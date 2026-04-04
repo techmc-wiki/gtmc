@@ -167,8 +167,8 @@ export default function FeatureDetailLoading() {
 
           <div
             className="
-              relative flex min-h-125 grow flex-col border border-tech-main/40
-              bg-white/80 backdrop-blur-sm
+              relative editor-grow border border-tech-main/40 bg-white/80
+              backdrop-blur-sm
             ">
             <div
               className="
@@ -197,7 +197,7 @@ export default function FeatureDetailLoading() {
               relative mt-6 flex justify-end gap-4 border-t border-tech-main/10
               pt-4
             ">
-            <div className="absolute top-0 right-0 h-px w-8 bg-tech-main" />
+            <div className="corner-tick" />
             <SegmentedBar opacity="high" className="h-10 w-24" />
           </div>
         </div>

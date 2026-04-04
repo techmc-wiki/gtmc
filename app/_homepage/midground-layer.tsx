@@ -53,7 +53,7 @@ export function MidgroundLayer({
         <p>SYS.MSPT :: 12.4ms</p>
         <p>ENTITIES :: 342 / 1024</p>
         <p>BLOCK.ENT :: 1,204</p>
-        <div className="my-2 h-px w-full bg-tech-main/30" />
+        <div className="section-divider" />
         <p>COORD : X:1024 Y:64 Z:-512</p>
         <p className="mt-2 text-[8px] opacity-70">
           Light: 15 (15 sky, 0 block) <br /> Biome: minecraft:plains

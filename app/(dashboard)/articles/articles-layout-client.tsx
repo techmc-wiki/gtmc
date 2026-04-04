@@ -53,7 +53,7 @@ function TreeLoadingPlaceholder() {
             <SegmentedBar opacity="high" className="h-4 w-4/5" />
           </div>
 
-          <div className="space-y-3 border-l guide-line pl-3">
+          <div className="nested-list">
             <div className="flex items-center gap-2">
               <span className="h-px w-2 bg-tech-main/40" />
               <SegmentedBar opacity="medium" className="h-3.5 w-3/4" />
@@ -63,7 +63,7 @@ function TreeLoadingPlaceholder() {
               <SegmentedBar opacity="medium" className="h-3.5 w-2/3" />
             </div>
 
-            <div className="ml-2 space-y-3 border-l guide-line pl-3">
+            <div className="ml-2 nested-list">
               <div className="flex items-center gap-2">
                 <span className="size-1 rounded-full bg-tech-main/35" />
                 <SegmentedBar opacity="low" className="h-3 w-3/5" />
@@ -82,7 +82,7 @@ function TreeLoadingPlaceholder() {
             <SegmentedBar opacity="high" className="h-4 w-2/3" />
           </div>
 
-          <div className="space-y-3 border-l guide-line pl-3">
+          <div className="nested-list">
             <div className="flex items-center gap-2">
               <span className="h-px w-2 bg-tech-main/40" />
               <SegmentedBar opacity="medium" className="h-3.5 w-3/5" />
@@ -94,7 +94,7 @@ function TreeLoadingPlaceholder() {
           </div>
         </div>
 
-        <div className="space-y-3 border-l guide-line pl-3">
+        <div className="nested-list">
           <div className="flex items-center gap-2">
             <span className="h-px w-2 bg-tech-main/35" />
             <SegmentedBar opacity="medium" className="h-3.5 w-1/2" />
@@ -127,8 +127,8 @@ function SidebarTreeWrapper({
         w-full pb-4 font-mono text-[15px] wrap-break-word
         [&_li]:mt-1.5
         [&_ul]:list-none
-        [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l
-        [&_ul_ul]:guide-line [&_ul_ul]:pl-3
+        [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l [&_ul_ul]:guide-line
+        [&_ul_ul]:pl-3
         [&>ul]:pl-0
         ${showPlaceholder ? "h-full min-h-full pb-0" : ""}
       `}
@@ -278,8 +278,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
             md:hidden
           ">
           <div
-            className="
-              relative transition-all duration-500 ease-out"
+            className="relative transition-all duration-500 ease-out"
             style={
               {
                 padding: isStuck ? "1rem 1rem 0 1rem" : "0",

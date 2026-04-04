@@ -16,7 +16,7 @@ export function useExpandedFolders() {
         setExpandedFolders(new Set<string>(JSON.parse(stored)))
       }
     } catch {}
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setMounted(true)
   }, [])
 

@@ -1,6 +1,5 @@
 ﻿"use server"
 
-import { prisma } from "@/lib/prisma"
 import { requireAuth } from "@/lib/auth-helpers"
 import { unstable_cache } from "next/cache"
 import { createDirectFile, createPR } from "@/lib/github/pr-manager"

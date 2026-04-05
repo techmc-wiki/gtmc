@@ -2,8 +2,8 @@
 
 import * as React from "react"
 
-import { BrutalButton } from "@/components/ui/brutal-button"
-import { BrutalInput } from "@/components/ui/brutal-input"
+import { TechButton } from "@/components/ui/tech-button"
+import { InputBox } from "@/components/ui/input-box"
 import { normalizeDraftFilePath } from "@/lib/draft-files"
 
 interface DraftRepoTreeNode {
@@ -249,13 +249,13 @@ export function DraftFileSourceDialog({
               Pick from repo, import local text, or create a new file.
             </p>
           </div>
-          <BrutalButton
+          <TechButton
             type="button"
             variant="ghost"
             size="sm"
             onClick={onClose}>
             CLOSE
-          </BrutalButton>
+          </TechButton>
         </div>
 
         <div
@@ -335,13 +335,13 @@ export function DraftFileSourceDialog({
                 <p className="font-mono text-xs text-tech-main/60 uppercase">
                   Selected: {selectedRepoFilePath || "NONE"}
                 </p>
-                <BrutalButton
+                <TechButton
                   type="button"
                   variant="primary"
                   onClick={handleAddRepoFile}
                   disabled={!canSubmitRepo}>
                   {isSubmitting ? "ADDING..." : "ADD EXISTING FILE"}
-                </BrutalButton>
+                </TechButton>
               </div>
             ) : null}
 
@@ -365,7 +365,7 @@ export function DraftFileSourceDialog({
                   <label className="section-label" htmlFor="draft-import-name">
                     FILE_NAME_
                   </label>
-                  <BrutalInput
+                  <InputBox
                     id="draft-import-name"
                     placeholder="e.g. chapter-notes.md"
                     value={customUploadName}
@@ -374,13 +374,13 @@ export function DraftFileSourceDialog({
                     }
                   />
                 </div>
-                <BrutalButton
+                <TechButton
                   type="button"
                   variant="primary"
                   onClick={handleImportLocalFile}
                   disabled={!canSubmitUpload}>
                   {isSubmitting ? "IMPORTING..." : "IMPORT LOCAL FILE"}
-                </BrutalButton>
+                </TechButton>
               </div>
             ) : null}
 
@@ -396,7 +396,7 @@ export function DraftFileSourceDialog({
                     htmlFor="draft-new-file-name">
                     FILE_NAME_
                   </label>
-                  <BrutalInput
+                  <InputBox
                     id="draft-new-file-name"
                     placeholder="e.g. new-section.md"
                     value={newFileName}
@@ -408,13 +408,13 @@ export function DraftFileSourceDialog({
                   {buildDraftFilePath(selectedFolderPath, newFileName) ||
                     "PENDING"}
                 </div>
-                <BrutalButton
+                <TechButton
                   type="button"
                   variant="primary"
                   onClick={handleCreateNewFile}
                   disabled={!canSubmitNew}>
                   CREATE EMPTY FILE
-                </BrutalButton>
+                </TechButton>
               </div>
             ) : null}
           </div>
@@ -442,10 +442,9 @@ function ModeButton({
       className={`
         border px-3 py-2 font-mono text-xs tracking-widest uppercase
         transition-colors
-        ${
-          value === mode
-            ? `border-tech-main bg-tech-main text-white`
-            : `
+        ${value === mode
+          ? `border-tech-main bg-tech-main text-white`
+          : `
               border-tech-main/30 bg-tech-main/5 text-tech-main
               hover:bg-tech-main/10
             `
@@ -528,20 +527,18 @@ function TreeNode({
           className={`
             flex min-h-8 flex-1 items-center px-1 text-left font-mono
             text-[0.875rem] tracking-wide transition-colors
-            ${
-              node.isFolder
-                ? isFolderSelected
-                  ? `bg-tech-main/10 font-bold text-tech-main`
-                  : `font-bold text-tech-main/80`
-                : isFileSelected
-                  ? `bg-tech-main/10 font-bold text-tech-main`
-                  : `text-tech-main/70`
+            ${node.isFolder
+              ? isFolderSelected
+                ? `bg-tech-main/10 font-bold text-tech-main`
+                : `font-bold text-tech-main/80`
+              : isFileSelected
+                ? `bg-tech-main/10 font-bold text-tech-main`
+                : `text-tech-main/70`
             }
-            ${
-              (node.isFolder && isSelectableFolder) ||
+            ${(node.isFolder && isSelectableFolder) ||
               (!node.isFolder && isSelectableFile)
-                ? `hover:bg-tech-main/5 hover:text-tech-main`
-                : `cursor-default opacity-60`
+              ? `hover:bg-tech-main/5 hover:text-tech-main`
+              : `cursor-default opacity-60`
             }
           `}>
           <span className="truncate">{node.title}</span>

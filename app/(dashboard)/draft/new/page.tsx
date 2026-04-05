@@ -19,7 +19,7 @@ export default async function NewDraftPage({
 
   let initialTitle = "UNTITLED"
   let initialContent = ""
-  let normalizedFilePath = filePath
+  const normalizedFilePath = filePath
 
   if (filePath) {
     initialTitle = filePath

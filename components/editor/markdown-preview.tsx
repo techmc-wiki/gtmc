@@ -9,7 +9,5 @@ interface MarkdownPreviewProps {
 }
 
 export function MarkdownPreview({ content, rawPath }: MarkdownPreviewProps) {
-  return (
-    <MarkdownRenderer content={content} rawPath={rawPath} />
-  )
+  return <MarkdownRenderer content={content} rawPath={rawPath} />
 }

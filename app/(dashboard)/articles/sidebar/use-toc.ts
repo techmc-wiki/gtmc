@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 
 export interface TocItem {
   id: string
@@ -36,10 +36,11 @@ export function useToc(pathname: string): TocItem[] {
   useEffect(() => {
     if (typeof document === "undefined") return
 
-    // Initially clear or set to whatever is in DOM right now
-    // (If Next.js hasn't updated DOM yet, this might be old headings,
-    // but the observer will catch the new ones).
-    setToc(scanHeadings())
+    void pathname
+
+    const frame = requestAnimationFrame(() => {
+      setToc(scanHeadings())
+    })
 
     const observer = new MutationObserver(() => {
       setToc(scanHeadings())
@@ -48,12 +49,12 @@ export function useToc(pathname: string): TocItem[] {
     const main = document.querySelector("main") || document.body
     observer.observe(main, { childList: true, subtree: true })
 
-    // Observe for a generous amount of time to catch all suspense rendering
     const timeout = setTimeout(() => observer.disconnect(), 10000)
 
     return () => {
       observer.disconnect()
       clearTimeout(timeout)
+      cancelAnimationFrame(frame)
     }
   }, [pathname])
 

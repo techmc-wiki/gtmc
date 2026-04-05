@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { BrutalButton } from "../ui/brutal-button"
-import { BrutalInput } from "../ui/brutal-input"
+import { TechButton } from "../ui/tech-button"
+import { InputBox } from "../ui/input-box"
 import { useRouter } from "next/navigation"
 import { updateFeature } from "@/actions/feature"
 import { useBadge } from "@/hooks/use-badge"
@@ -207,17 +207,16 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           <label htmlFor="feature-title" className="section-label">
             TITLE_
           </label>
-          <BrutalInput
+          <InputBox
             id="feature-title"
             required
             placeholder="ENTER TITLE..."
             className={`
               border-tech-main/40 py-3 font-mono text-lg backdrop-blur-sm
               focus:border-tech-main/60
-              ${
-                isReadOnly
-                  ? `cursor-not-allowed bg-gray-100 opacity-70`
-                  : `bg-white/80`
+              ${isReadOnly
+                ? `cursor-not-allowed bg-gray-100 opacity-70`
+                : `bg-white/80`
               }
             `}
             value={title}
@@ -231,16 +230,15 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           <label htmlFor="feature-tags" className="section-label">
             TAGS_ (comma separated)
           </label>
-          <BrutalInput
+          <InputBox
             id="feature-tags"
             placeholder="e.g. bug, enhancement, UI"
             className={`
               border-tech-main/40 py-2 font-mono text-sm backdrop-blur-sm
               focus:border-tech-main/60
-              ${
-                isReadOnly
-                  ? `cursor-not-allowed bg-gray-100 opacity-70`
-                  : `bg-white/80`
+              ${isReadOnly
+                ? `cursor-not-allowed bg-gray-100 opacity-70`
+                : `bg-white/80`
               }
             `}
             value={tags}
@@ -339,14 +337,14 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           ">
           <div className="corner-tick" />
 
-          <BrutalButton
+          <TechButton
             type="button"
             variant="ghost"
             onClick={() => router.back()}>
             CANCEL_
-          </BrutalButton>
+          </TechButton>
 
-          <BrutalButton
+          <TechButton
             type="submit"
             variant="primary"
             disabled={isSaving}
@@ -358,7 +356,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             ) : (
               "SAVE_FEATURE_"
             )}
-          </BrutalButton>
+          </TechButton>
         </div>
       )}
     </form>

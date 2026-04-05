@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import Link from "next/link"
-import { BrutalCard } from "@/components/ui/brutal-card"
+import { TechCard } from "@/components/ui/tech-card"
 import { RevealSection } from "./reveal-helpers"
 import { FeatureStatusBadge } from "@/components/ui/status-badge"
 import { CardHeaderRow } from "@/components/ui/card-header-row"
@@ -103,7 +103,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                 key={feature.id}
                 href={`/features/${feature.id}`}
                 className="block">
-                <BrutalCard
+                <TechCard
                   className="
                     group relative flex h-auto flex-col justify-between border
                     border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
@@ -173,7 +173,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                       <TagList tags={feature.tags} className="mt-auto pt-4" />
                     )}
                   </div>
-                </BrutalCard>
+                </TechCard>
               </Link>
             ))}
           </div>
@@ -186,7 +186,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
     <div className="space-y-6">
       {/* 过滤器 */}
       <RevealSection delay={0}>
-        <BrutalCard
+        <TechCard
           className="
           border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
         ">
@@ -231,10 +231,9 @@ export function FeatureList({ features }: { features: Feature[] }) {
                         flex min-h-8 cursor-pointer items-center justify-center
                         border px-3 py-2 font-mono text-xs uppercase
                         transition-all
-                        ${
-                          selectedTags.includes(tag)
-                            ? "border-tech-accent bg-tech-accent text-white"
-                            : `
+                        ${selectedTags.includes(tag)
+                          ? "border-tech-accent bg-tech-accent text-white"
+                          : `
                               border-tech-main/40 bg-tech-accent/5
                               text-tech-main
                               hover:border-tech-main/60
@@ -248,7 +247,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
               </div>
             )}
           </div>
-        </BrutalCard>
+        </TechCard>
       </RevealSection>
 
       {/* List grouping display */}

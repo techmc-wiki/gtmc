@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { BrutalButton } from "@/components/ui/brutal-button"
+import { TechButton } from "@/components/ui/tech-button"
 import { HideFooter } from "@/components/layout/footer-context"
 
 export default function NotFound() {
@@ -246,7 +246,7 @@ export default function NotFound() {
                 fill-mode-forwards
               ">
               <Link href="/" className="inline-block">
-                <BrutalButton
+                <TechButton
                   variant="primary"
                   className="
                     flex h-12 items-center justify-center px-8 text-sm
@@ -255,7 +255,7 @@ export default function NotFound() {
                     active:scale-95
                   ">
                   RETURN TO HOME →
-                </BrutalButton>
+                </TechButton>
               </Link>
             </div>
 

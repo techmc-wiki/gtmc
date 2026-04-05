@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import type { RebaseState } from "@/types/rebase"
 
 import { resolveConflictAction, abortRebaseAction } from "@/actions/review"
-import { BrutalButton } from "@/components/ui/brutal-button"
+import { TechButton } from "@/components/ui/tech-button"
 import {
   getActiveDraftFile,
   normalizeDraftFileCollection,
@@ -183,7 +183,7 @@ export default function ConflictResolver({
         {rebaseState &&
           (rebaseState.status === "CONFLICT" ||
             rebaseState.status === "IN_PROGRESS") && (
-            <BrutalButton
+            <TechButton
               variant="secondary"
               size="sm"
               onClick={handleAbort}
@@ -193,7 +193,7 @@ export default function ConflictResolver({
                 hover:bg-red-600 hover:text-white
               ">
               {isAborting ? "ABORTING..." : "ABORT REBASE"}
-            </BrutalButton>
+            </TechButton>
           )}
       </div>
 
@@ -230,10 +230,9 @@ export default function ConflictResolver({
                     className={`
                       flex min-h-11 w-full flex-col items-start gap-1 border
                       px-3 py-2 text-left transition-colors
-                      ${
-                        isActive
-                          ? `border-tech-main bg-tech-main/10`
-                          : `
+                      ${isActive
+                        ? `border-tech-main bg-tech-main/10`
+                        : `
                             guide-line bg-white/70
                             hover:border-tech-main/50 hover:bg-white/90
                           `
@@ -320,7 +319,7 @@ export default function ConflictResolver({
                             mt-auto border-t border-amber-500/20 bg-amber-500/5
                             p-2
                           ">
-                          <BrutalButton
+                          <TechButton
                             type="button"
                             variant="secondary"
                             size="sm"
@@ -332,7 +331,7 @@ export default function ConflictResolver({
                               handleAcceptBlock(block.id, block.ours)
                             }>
                             ACCEPT OURS
-                          </BrutalButton>
+                          </TechButton>
                         </div>
                       </div>
                       <div className="flex flex-1 flex-col bg-blue-500/5">
@@ -355,7 +354,7 @@ export default function ConflictResolver({
                             mt-auto border-t border-blue-500/20 bg-blue-500/5
                             p-2
                           ">
-                          <BrutalButton
+                          <TechButton
                             type="button"
                             variant="secondary"
                             size="sm"
@@ -367,7 +366,7 @@ export default function ConflictResolver({
                               handleAcceptBlock(block.id, block.theirs)
                             }>
                             ACCEPT THEIRS
-                          </BrutalButton>
+                          </TechButton>
                         </div>
                       </div>
                     </div>
@@ -411,12 +410,12 @@ export default function ConflictResolver({
               </div>
             </div>
 
-            <BrutalButton
+            <TechButton
               type="submit"
               variant="primary"
               disabled={isSubmitting}>
               {isSubmitting ? "RESOLVING..." : "RESOLVE & UPDATE PR"}
-            </BrutalButton>
+            </TechButton>
           </form>
         </div>
       </div>

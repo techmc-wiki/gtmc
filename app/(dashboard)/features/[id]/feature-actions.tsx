@@ -1,7 +1,7 @@
 "use client"
 
 import { useTransition, useState } from "react"
-import { BrutalButton } from "@/components/ui/brutal-button"
+import { TechButton } from "@/components/ui/tech-button"
 import {
   assignFeature,
   unassignFeature,
@@ -62,7 +62,7 @@ export function FeatureActions({
         <>
           {!hasAssignee && (
             <div>
-              <BrutalButton
+              <TechButton
                 onClick={handleAssign}
                 disabled={isPending}
                 variant="secondary"
@@ -73,13 +73,13 @@ export function FeatureActions({
                 ) : (
                   "CLAIM ISSUE"
                 )}
-              </BrutalButton>
+              </TechButton>
             </div>
           )}
 
           {isAssignee && (
             <div>
-              <BrutalButton
+              <TechButton
                 onClick={handleUnassign}
                 disabled={isPending}
                 variant="secondary"
@@ -90,13 +90,13 @@ export function FeatureActions({
                 ) : (
                   "DROP ISSUE"
                 )}
-              </BrutalButton>
+              </TechButton>
             </div>
           )}
 
           {isAdmin && (
             <div>
-              <BrutalButton
+              <TechButton
                 onClick={handleResolve}
                 disabled={isPending}
                 variant="primary"
@@ -111,7 +111,7 @@ export function FeatureActions({
                 ) : (
                   "MARK AS RESOLVED"
                 )}
-              </BrutalButton>
+              </TechButton>
             </div>
           )}
         </>

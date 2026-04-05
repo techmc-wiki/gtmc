@@ -25,8 +25,8 @@ import {
   LoadingIndicator,
   PENDING_LABELS,
 } from "@/components/ui/loading-indicator"
-import { BrutalButton } from "../ui/brutal-button"
-import { BrutalInput } from "../ui/brutal-input"
+import { TechButton } from "../ui/tech-button"
+import { InputBox } from "../ui/input-box"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { useBadge } from "@/hooks/use-badge"
 import { useEditorUpload } from "@/hooks/use-editor-upload"
@@ -111,17 +111,17 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       files: current.files.map((file) =>
         file.id === fileId
           ? {
-              ...file,
-              ...(updates.content !== undefined
-                ? { content: updates.content }
-                : {}),
-              ...(updates.filePath !== undefined
-                ? { filePath: normalizeDraftFilePath(updates.filePath) }
-                : {}),
-              ...(updates.conflictContent !== undefined
-                ? { conflictContent: updates.conflictContent }
-                : {}),
-            }
+            ...file,
+            ...(updates.content !== undefined
+              ? { content: updates.content }
+              : {}),
+            ...(updates.filePath !== undefined
+              ? { filePath: normalizeDraftFilePath(updates.filePath) }
+              : {}),
+            ...(updates.conflictContent !== undefined
+              ? { conflictContent: updates.conflictContent }
+              : {}),
+          }
           : file
       ),
     }))
@@ -406,7 +406,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       const nextActiveFile =
         current.activeFileId === fileId
           ? remainingFiles[Math.max(0, currentIndex - 1)]?.id ||
-            remainingFiles[0]?.id
+          remainingFiles[0]?.id
           : current.activeFileId
 
       return {
@@ -472,17 +472,16 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           <label htmlFor="draft-title" className="section-label">
             TITLE_
           </label>
-          <BrutalInput
+          <InputBox
             id="draft-title"
             required
             placeholder="ENTER TITLE..."
             className={`
               border-tech-main/40 py-3 font-mono text-lg backdrop-blur-sm
               focus:border-tech-main/60
-              ${
-                isReadOnly
-                  ? `cursor-not-allowed bg-gray-100 opacity-70`
-                  : `bg-white/80`
+              ${isReadOnly
+                ? `cursor-not-allowed bg-gray-100 opacity-70`
+                : `bg-white/80`
               }
             `}
             value={title}
@@ -573,16 +572,15 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               <label htmlFor="draft-file-path" className="section-label">
                 FILE_PATH_
               </label>
-              <BrutalInput
+              <InputBox
                 id="draft-file-path"
                 placeholder="e.g. SlimeTech/Molforte/04-new-machine.md"
                 className={`
                   border-tech-main/40 py-2 font-mono text-sm backdrop-blur-sm
                   focus:border-tech-main/60
-                  ${
-                    isReadOnly
-                      ? `cursor-not-allowed bg-gray-100 opacity-70`
-                      : `bg-white/80`
+                  ${isReadOnly
+                    ? `cursor-not-allowed bg-gray-100 opacity-70`
+                    : `bg-white/80`
                   }
                   ${activeFileHasDuplicatePath ? `border-red-500/60` : ``}
                 `}
@@ -709,7 +707,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           ">
           <div className="corner-tick" />
 
-          <BrutalButton
+          <TechButton
             type="submit"
             variant="primary"
             disabled={saveDisabled}
@@ -719,9 +717,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             ) : (
               "SAVE DRAFT"
             )}
-          </BrutalButton>
+          </TechButton>
 
-          <BrutalButton
+          <TechButton
             type="button"
             variant="ghost"
             onClick={handleSubmitReview}
@@ -732,7 +730,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             ) : (
               "OPEN PR & SYNC MAIN"
             )}
-          </BrutalButton>
+          </TechButton>
         </div>
       )}
 

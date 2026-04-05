@@ -9,7 +9,6 @@ import {
 } from "@/lib/github/articles-repo"
 import { getArticleContent } from "@/lib/article-loader"
 import { resolveSlug } from "@/lib/slug-resolver"
-import { shouldIgnoreFile } from "@/lib/article-ignore"
 import { parseFrontMatter } from "@/lib/frontmatter-parser"
 import type { TreeNode } from "@/types/sidebar-tree"
 

@@ -371,8 +371,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <ArticleHighlight />
       </Suspense>
 
-      <script type="application/ld+json">{JSON.stringify(techArticleJsonLd)}</script>
-      <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd)}</script>
+      <script type="application/ld+json">
+        {JSON.stringify(techArticleJsonLd)}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify(breadcrumbJsonLd)}
+      </script>
     </div>
   )
 }

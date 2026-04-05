@@ -1,10 +1,10 @@
 import * as React from "react"
 
-export interface BrutalInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: boolean
 }
 
-export const BrutalInput = React.forwardRef<HTMLInputElement, BrutalInputProps>(
+export const InputBox = React.forwardRef<HTMLInputElement, InputBoxProps>(
   ({ className = "", error, ...props }, ref) => {
     let baseStyles =
       "w-full border border-tech-main/30 px-3 py-2.5 sm:px-4 sm:py-3 font-mono outline-none transition-colors focus:border-tech-main bg-white/50 text-tech-main-dark min-h-[44px] sm:min-h-auto"
@@ -25,4 +25,4 @@ export const BrutalInput = React.forwardRef<HTMLInputElement, BrutalInputProps>(
     )
   }
 )
-BrutalInput.displayName = "BrutalInput"
+InputBox.displayName = "InputBox"

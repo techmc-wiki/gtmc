@@ -73,9 +73,11 @@ export async function GET(request: Request) {
         "Cache-Control": "public, max-age=86400",
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Internal Server Error"
     console.error("Error fetching litematica file:", error)
-    return new NextResponse(error.message || "Internal Server Error", {
+    return new NextResponse(message, {
       status: 500,
     })
   }

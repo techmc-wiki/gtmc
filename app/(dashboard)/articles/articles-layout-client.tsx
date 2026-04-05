@@ -168,7 +168,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       if (localStorage.getItem(SIDEBAR_HIDDEN_KEY) === "true") {
         setSidebarHidden(true)
       }
-    } catch { }
+    } catch {}
   }, [])
 
   const toggleSidebarHidden = () => {
@@ -176,7 +176,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       const next = !prev
       try {
         localStorage.setItem(SIDEBAR_HIDDEN_KEY, String(next))
-      } catch { }
+      } catch {}
       return next
     })
   }
@@ -359,9 +359,10 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           <div
             className={`
               grid transition-all duration-300 ease-out
-              ${isOpen && !isStuck
-                ? "grid-rows-[1fr] opacity-100"
-                : "grid-rows-[0fr] opacity-0"
+              ${
+                isOpen && !isStuck
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0"
               }
             `}>
             <div className="overflow-hidden">
@@ -483,7 +484,10 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                     {sidebarHidden ? "▶" : "◀"}
                   </span>
                 </button>
-                <span className="absolute top-4 -right-3 inline-block text-right font-mono text-[0.625rem] font-bold text-tech-main/60">  {sidebarHidden ? "expand sidebar" : ""}</span>
+                <span className="absolute top-4 -right-3 inline-block text-right font-mono text-[0.625rem] font-bold text-tech-main/60">
+                  {" "}
+                  {sidebarHidden ? "expand sidebar" : ""}
+                </span>
               </div>
             </div>
           </div>
@@ -493,13 +497,14 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           className={`
             relative my-6 w-full flex-1 transition-all duration-300
             ease-[cubic-bezier(0.16,1,0.3,1)]
-            ${sidebarHidden
-              ? `
+            ${
+              sidebarHidden
+                ? `
                   md:max-w-3xl
                   xl:max-w-3xl
                   [1920px]:max-w-4xl
                 `
-              : `
+                : `
                   md:max-w-2xl
                   xl:max-w-3xl
                   [1920px]:max-w-4xl

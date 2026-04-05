@@ -85,7 +85,7 @@ export function generateDescription(
 
   // Walk through lines to find first real paragraph
   let inCodeFence = false
-  let paragraphLines: string[] = []
+  const paragraphLines: string[] = []
 
   while (lineIndex < lines.length) {
     const line = lines[lineIndex]

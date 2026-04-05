@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
-import { BrutalCard } from "@/components/ui/brutal-card"
-import { BrutalButton } from "@/components/ui/brutal-button"
+import { TechCard } from "@/components/ui/tech-card"
+import { TechButton } from "@/components/ui/tech-button"
 import Link from "next/link"
 import { getOpenPRs, getPR } from "@/lib/github/pr-manager"
 import {
@@ -71,7 +71,7 @@ async function analyzePRConflictStatus(prNumber: number, token?: string) {
           }
         }
       }
-    } catch {}
+    } catch { }
   }
   return isConflict
 }
@@ -87,9 +87,9 @@ export default async function ReviewHubPage() {
         </h1>
         <p className="mt-4 text-xl font-bold">ADMIN CLEARANCE REQUIRED.</p>
         <Link href="/">
-          <BrutalButton variant="primary" className="mt-8">
+          <TechButton variant="primary" className="mt-8">
             RETURN TO BASE
-          </BrutalButton>
+          </TechButton>
         </Link>
       </div>
     )
@@ -124,7 +124,7 @@ export default async function ReviewHubPage() {
   }
 
   const renderPRCard = (pr: PR, isConflict: boolean) => (
-    <BrutalCard
+    <TechCard
       key={pr.id}
       className={`
         group relative flex flex-col items-start justify-between space-y-4
@@ -140,10 +140,9 @@ export default async function ReviewHubPage() {
           <span
             className={`
               border px-2 py-0.5 font-mono text-xs tracking-wider
-              ${
-                isConflict
-                  ? `border-red-500/40 bg-red-500/20 text-red-600`
-                  : `border-blue-500/40 bg-blue-500/10 text-blue-600`
+              ${isConflict
+                ? `border-red-500/40 bg-red-500/20 text-red-600`
+                : `border-blue-500/40 bg-blue-500/10 text-blue-600`
               }
             `}>
             [PR #{pr.number}]
@@ -197,7 +196,7 @@ export default async function ReviewHubPage() {
             w-full
             md:w-auto
           ">
-          <BrutalButton
+          <TechButton
             variant={isConflict ? "danger" : "primary"}
             className="
               flex min-h-11 w-full items-center justify-center px-6 text-xs
@@ -206,10 +205,10 @@ export default async function ReviewHubPage() {
               md:w-auto
             ">
             {isConflict ? "RESOLVE CONFLICT \u2192" : "REVIEW CONTENT \u2192"}
-          </BrutalButton>
+          </TechButton>
         </Link>
       </div>
-    </BrutalCard>
+    </TechCard>
   )
 
   return (

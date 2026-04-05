@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { DraftEditor } from "@/components/editor/draft-editor"
 import Link from "next/link"
-import { BrutalButton } from "@/components/ui/brutal-button"
+import { TechButton } from "@/components/ui/tech-button"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { decodeStoredDraftFiles } from "@/lib/draft-files"
@@ -60,9 +60,9 @@ export default async function EditDraftPage({
             md:space-x-6
           ">
           <Link href="/draft">
-            <BrutalButton variant="ghost" size="sm">
+            <TechButton variant="ghost" size="sm">
               {"<"} BACK
-            </BrutalButton>
+            </TechButton>
           </Link>
           <h1
             className="

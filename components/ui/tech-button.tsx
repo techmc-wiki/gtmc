@@ -1,13 +1,13 @@
 import * as React from "react"
 
-export interface BrutalButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface TechButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "danger" | "ghost"
   size?: "sm" | "md" | "lg"
 }
 
-export const BrutalButton = React.forwardRef<
+export const TechButton = React.forwardRef<
   HTMLButtonElement,
-  BrutalButtonProps
+  TechButtonProps
 >(({ className = "", variant = "primary", size = "md", ...props }, ref) => {
   let baseStyles =
     "relative inline-flex items-center justify-center font-bold tracking-widest transition-all duration-300 focus:outline-none overflow-hidden group border border-tech-main cursor-pointer"
@@ -58,4 +58,4 @@ export const BrutalButton = React.forwardRef<
     </button>
   )
 })
-BrutalButton.displayName = "BrutalButton"
+TechButton.displayName = "TechButton"

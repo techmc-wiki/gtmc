@@ -1,7 +1,7 @@
 import React from "react"
 import Image from "next/image"
 
-interface BrutalAvatarProps {
+interface UserAvatarProps {
   src?: string | null
   alt?: string | null
   size?: string
@@ -9,12 +9,12 @@ interface BrutalAvatarProps {
   className?: string
 }
 
-export function BrutalAvatar({
+export function UesrAvatar({
   src,
   alt,
   fallback,
   className = "",
-}: BrutalAvatarProps) {
+}: UserAvatarProps) {
   return (
     <div
       className={`
@@ -83,12 +83,12 @@ export function BrutalAvatar({
         {/* 边框缺口效果 */}
         <div
           className="
-            absolute top-0 left-1/2 h-[2px] w-4 -translate-x-1/2 bg-white
+            absolute top-0 left-1/2 h-0.5 w-4 -translate-x-1/2 bg-white
           "
         />
         <div
           className="
-            absolute bottom-0 left-1/2 h-[2px] w-4 -translate-x-1/2 bg-white
+            absolute bottom-0 left-1/2 h-0.5 w-4 -translate-x-1/2 bg-white
           "
         />
       </div>

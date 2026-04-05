@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { BrutalCard } from "@/components/ui/brutal-card"
-import { BrutalButton } from "@/components/ui/brutal-button"
+import { TechCard } from "@/components/ui/tech-card"
+import { TechButton } from "@/components/ui/tech-button"
 import { updateFeatureExplanation } from "@/actions/feature"
 import { LoadingIndicator, PENDING_LABELS } from "../loading-indicator"
 
@@ -39,7 +39,7 @@ export function FeatureExplanation({
 
   if (isEditing) {
     return (
-      <BrutalCard className="border-tech-accent/40 bg-white/80 backdrop-blur-sm">
+      <TechCard className="border-tech-accent/40 bg-white/80 backdrop-blur-sm">
         <h3
           className="
             mb-2 border-b border-tech-accent/40 pb-2 text-lg font-bold
@@ -61,14 +61,14 @@ export function FeatureExplanation({
           aria-busy={isPending}
         />
         <div className="flex justify-end gap-2">
-          <BrutalButton
+          <TechButton
             variant="ghost"
             size="sm"
             onClick={() => setIsEditing(false)}
             disabled={isPending}>
             CANCEL
-          </BrutalButton>
-          <BrutalButton
+          </TechButton>
+          <TechButton
             variant="primary"
             size="sm"
             className="
@@ -83,15 +83,15 @@ export function FeatureExplanation({
             ) : (
               "SAVE_EXPLANATION"
             )}
-          </BrutalButton>
+          </TechButton>
         </div>
-      </BrutalCard>
+      </TechCard>
     )
   }
 
   if (initialExplanation) {
     return (
-      <BrutalCard
+      <TechCard
         className="
           group relative overflow-hidden border-tech-accent/40 bg-tech-accent/5
           backdrop-blur-sm
@@ -122,13 +122,13 @@ export function FeatureExplanation({
         <div className="pl-4 font-mono text-sm whitespace-pre-wrap text-zinc-800">
           {initialExplanation}
         </div>
-      </BrutalCard>
+      </TechCard>
     )
   }
 
   // NO explanation yet, but user CAN edit
   return (
-    <BrutalCard
+    <TechCard
       className="
         border-dashed border-tech-accent/40 bg-white/40 py-6 text-center
       ">
@@ -136,7 +136,7 @@ export function FeatureExplanation({
         <span className="font-mono text-sm tracking-wider uppercase">
           AWAITING_OFFICIAL_RESOLUTION_
         </span>
-        <BrutalButton
+        <TechButton
           variant="ghost"
           size="sm"
           onClick={() => setIsEditing(true)}
@@ -145,8 +145,8 @@ export function FeatureExplanation({
             hover:bg-tech-accent/10
           ">
           PROVIDE EXPLANATION
-        </BrutalButton>
+        </TechButton>
       </div>
-    </BrutalCard>
+    </TechCard>
   )
 }

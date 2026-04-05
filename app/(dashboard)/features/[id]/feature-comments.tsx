@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react"
 import { addFeatureComment } from "@/actions/feature"
-import { BrutalButton } from "@/components/ui/brutal-button"
-import { BrutalCard } from "@/components/ui/brutal-card"
+import { TechButton } from "@/components/ui/tech-button"
+import { TechCard } from "@/components/ui/tech-card"
 import { LoadingIndicator, PENDING_LABELS } from "../loading-indicator"
 
 interface Comment {
@@ -54,7 +54,7 @@ export function FeatureComments({
 
       <div className="space-y-4">
         {initialComments.map((comment) => (
-          <BrutalCard
+          <TechCard
             key={comment.id}
             className="
               border border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
@@ -78,7 +78,7 @@ export function FeatureComments({
             <div className="font-mono text-sm whitespace-pre-wrap">
               {comment.content}
             </div>
-          </BrutalCard>
+          </TechCard>
         ))}
         {initialComments.length === 0 && (
           <div
@@ -94,7 +94,7 @@ export function FeatureComments({
       {!isClosed &&
         (userId ? (
           <form onSubmit={handleSubmit} className="mt-8">
-            <BrutalCard
+            <TechCard
               className="
                 border border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
               ">
@@ -118,7 +118,7 @@ export function FeatureComments({
                 disabled={isPending}
               />
               <div className="mt-4 flex justify-end">
-                <BrutalButton
+                <TechButton
                   type="submit"
                   disabled={isPending || !content.trim()}
                   variant="primary"
@@ -128,9 +128,9 @@ export function FeatureComments({
                   ) : (
                     "POST_COMMENT"
                   )}
-                </BrutalButton>
+                </TechButton>
               </div>
-            </BrutalCard>
+            </TechCard>
           </form>
         ) : (
           <div

@@ -19,6 +19,15 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     ".worktrees/**",
     ".sisyphus/**",
+    "articles/**",
+    "check.js",
+    "check-api.js",
+    "fix.js",
+    "fix-defaults.js",
+    "fix-renderer.js",
+    "patch.js",
+    "replace-get-geom.js",
+    "test-props.js",
   ]),
 
   {

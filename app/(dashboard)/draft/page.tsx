@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
-import { BrutalCard } from "@/components/ui/brutal-card"
-import { BrutalButton } from "@/components/ui/brutal-button"
+import { TechCard } from "@/components/ui/tech-card"
+import { TechButton } from "@/components/ui/tech-button"
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
@@ -94,7 +94,7 @@ export default async function DraftDashboardPage() {
   )
 
   const renderDraftCard = (draft: (typeof allDrafts)[0]) => (
-    <BrutalCard
+    <TechCard
       key={draft.id}
       className="
         group relative flex h-auto flex-col justify-between border
@@ -165,7 +165,7 @@ export default async function DraftDashboardPage() {
           relative z-10 mt-4
           sm:mt-auto
         ">
-        <BrutalButton
+        <TechButton
           variant="ghost"
           className="
             min-h-11 w-full border border-tech-main/40 bg-white/50 font-mono
@@ -175,9 +175,9 @@ export default async function DraftDashboardPage() {
           {draft.displayStatus === "DRAFT" || draft.displayStatus === "CLOSED"
             ? "> EDIT_RECORD"
             : "> VIEW_STREAM"}
-        </BrutalButton>
+        </TechButton>
       </Link>
-    </BrutalCard>
+    </TechCard>
   )
 
   return (
@@ -192,7 +192,7 @@ export default async function DraftDashboardPage() {
               w-full
               md:w-auto
             ">
-            <BrutalButton
+            <TechButton
               variant="primary"
               className="
                 flex min-h-11 w-full items-center justify-center px-6 text-xs
@@ -201,7 +201,7 @@ export default async function DraftDashboardPage() {
                 md:w-auto
               ">
               + INITIALIZE SUBMISSION
-            </BrutalButton>
+            </TechButton>
           </Link>
         }
       />

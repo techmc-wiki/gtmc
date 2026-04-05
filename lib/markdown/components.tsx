@@ -234,7 +234,9 @@ export function getMarkdownComponents(rawPath: string) {
       <span {...props} />
     ),
     hidden: hiddenComponent,
-    litematicaviewer: (props: any) => <LitematicaViewer {...props} />,
+    litematicaviewer: ({ url, ...rest }: MarkdownComponentProps) => (
+      <LitematicaViewer url={url as string} {...rest} />
+    ),
     table: ({ ...props }: MarkdownComponentProps) => (
       <div
         className="

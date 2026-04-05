@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import { BrutalCard } from "@/components/ui/brutal-card"
+import { TechCard } from "@/components/ui/tech-card"
 import { SectionTitle } from "@/components/ui/section-title"
 import {
   SectionRail,
@@ -65,7 +65,7 @@ export default function DraftLoading() {
               lg:grid-cols-3
             ">
             {[1, 2, 3].map((i) => (
-              <BrutalCard
+              <TechCard
                 key={i}
                 className="
                   flex h-auto flex-col justify-between border
@@ -101,7 +101,7 @@ export default function DraftLoading() {
                     className="h-11 w-full border border-tech-main/40"
                   />
                 </div>
-              </BrutalCard>
+              </TechCard>
             ))}
           </div>
         </div>
@@ -116,7 +116,7 @@ export default function DraftLoading() {
               lg:grid-cols-3
             ">
             {[1, 2].map((i) => (
-              <BrutalCard
+              <TechCard
                 key={i}
                 className="
                   flex h-auto flex-col justify-between border
@@ -147,7 +147,7 @@ export default function DraftLoading() {
                     className="h-11 w-full border border-tech-main/40"
                   />
                 </div>
-              </BrutalCard>
+              </TechCard>
             ))}
           </div>
         </div>

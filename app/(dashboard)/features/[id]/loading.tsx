@@ -7,7 +7,7 @@ import {
   ScanConfirmOverlay,
   SkeletonExitWrapper,
 } from "../loading-shell-primitives"
-import { BrutalCard } from "@/components/ui/brutal-card"
+import { TechCard } from "@/components/ui/tech-card"
 
 export default function FeatureDetailLoading() {
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function FeatureDetailLoading() {
         </div>
 
         {/* ISSUE_METADATA_ */}
-        <BrutalCard className="animate-tech-slide-in [animation-delay:100ms]">
+        <TechCard className="animate-tech-slide-in [animation-delay:100ms]">
           <div
             className="
               flex flex-col gap-2 font-mono text-xs
@@ -95,10 +95,10 @@ export default function FeatureDetailLoading() {
               <SegmentedBar opacity="low" className="h-4 w-36" />
             </div>
           </div>
-        </BrutalCard>
+        </TechCard>
 
         {/* RESOLUTION_BLOCK_ */}
-        <BrutalCard
+        <TechCard
           className="
             relative animate-tech-slide-in overflow-hidden border-tech-accent/40
             bg-tech-accent/5 backdrop-blur-sm [animation-delay:200ms]
@@ -117,7 +117,7 @@ export default function FeatureDetailLoading() {
             <SegmentedBar opacity="medium" className="h-3 w-full" />
             <SegmentedBar opacity="low" className="h-3 w-5/6" />
           </div>
-        </BrutalCard>
+        </TechCard>
 
         {/* EDITOR_BUFFER_ */}
         <div

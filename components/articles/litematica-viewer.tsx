@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 
-interface LitematicaViewerProps {
+export interface LitematicaViewerProps {
   url: string
   height?: string | number
 }
@@ -13,13 +13,13 @@ export default function LitematicaViewer({
   height = 400,
 }: LitematicaViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const rendererRef = useRef<any>(null)
+  const rendererRef = useRef<{ dispose?: () => void } | null>(null)
 
   useEffect(() => {
     if (!canvasRef.current) return
 
     const cleanUrl = url.replace(/\r?\n/g, "")
-    let renderer: any = null
+    let renderer: { dispose?: () => void } | null = null
 
     const proxyUrl =
       "/api/litematica-download?url=" + encodeURIComponent(cleanUrl)
@@ -44,7 +44,15 @@ export default function LitematicaViewer({
             backgroundColor: 0xf8f9fc,
             cameraOptions: { position: [10, 10, 10] },
             callbacks: {
-              onRendererInitialized: async (r: any) => {
+              onRendererInitialized: async (r: {
+                schematicManager: {
+                  loadSchematic: (
+                    name: string,
+                    buffer: ArrayBuffer
+                  ) => Promise<void>
+                }
+                cameraManager: { focusOnSchematics: () => void }
+              }) => {
                 try {
                   // Fetch the file buffer ourselves
                   const res = await fetch(proxyUrl)
@@ -63,7 +71,7 @@ export default function LitematicaViewer({
                   console.error("Error loading schematic:", err)
                 }
               },
-              onSchematicFileLoadFailure: (err: any) => {
+              onSchematicFileLoadFailure: (err: unknown) => {
                 console.error("Failed to load schematic file:", err)
               },
             },

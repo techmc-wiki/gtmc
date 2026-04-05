@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { BrutalButton } from "@/components/ui/brutal-button"
+import { TechButton } from "@/components/ui/tech-button"
 import { HeroCard } from "./hero-card"
 import { ForwardedRef } from "react"
 import { MotionValue } from "motion/react"
@@ -60,7 +60,7 @@ export function ForegroundLayer({
             w-full
             sm:w-auto
           ">
-          <BrutalButton
+          <TechButton
             variant="primary"
             disabled={isAccessingDatabase}
             className="
@@ -80,7 +80,7 @@ export function ForegroundLayer({
             ) : (
               "START READING →"
             )}
-          </BrutalButton>
+          </TechButton>
         </Link>
         <Link
           href="/login"
@@ -88,7 +88,7 @@ export function ForegroundLayer({
             w-full
             sm:w-auto
           ">
-          <BrutalButton
+          <TechButton
             variant="ghost"
             className="
               flex h-12 w-full items-center justify-center bg-white text-xs
@@ -98,7 +98,7 @@ export function ForegroundLayer({
               sm:w-auto sm:text-sm
             ">
             {"//"} LOGIN (GITHUB)
-          </BrutalButton>
+          </TechButton>
         </Link>
       </div>
 
@@ -115,13 +115,12 @@ export function ForegroundLayer({
             key={i}
             className={`
               flex size-8 items-center justify-center
-              ${
-                i === 3
-                  ? `
+              ${i === 3
+                ? `
                     border-2 border-tech-main-dark bg-tech-main/10
                     shadow-[0_0_8px_rgba(96,112,143,0.3)]
                   `
-                  : `border border-tech-main/40`
+                : `border border-tech-main/40`
               }
             `}>
             {i === 3 && (

@@ -1,4 +1,4 @@
-import { BrutalCard } from "@/components/ui/brutal-card"
+import { TechCard } from "@/components/ui/tech-card"
 import { MarkdownRenderer } from "@/lib/markdown"
 import { getCachedRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
 import "katex/dist/katex.min.css"
@@ -17,7 +17,7 @@ export async function FeatureReadonlyView({
   const shikiPlugin = await getCachedRehypeShiki(content)
 
   return (
-    <BrutalCard>
+    <TechCard>
       <h2
         className="
           mb-4 text-sm font-bold
@@ -89,6 +89,6 @@ export async function FeatureReadonlyView({
           </details>
         </div>
       </div>
-    </BrutalCard>
+    </TechCard>
   )
 }

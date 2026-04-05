@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import { BrutalCard } from "@/components/ui/brutal-card"
+import { TechCard } from "@/components/ui/tech-card"
 import {
   SectionRail,
   SegmentedBar,
@@ -54,7 +54,7 @@ export default function FeaturesLoading() {
         </div>
 
         <div className="space-y-6">
-          <BrutalCard
+          <TechCard
             className="
               animate-tech-slide-in border-tech-main/40 bg-white/80 p-6
               backdrop-blur-sm [animation-delay:100ms]
@@ -97,7 +97,7 @@ export default function FeaturesLoading() {
                 </div>
               </div>
             </div>
-          </BrutalCard>
+          </TechCard>
 
           {[
             { label: "PENDING", delay: "200ms", cards: [1, 2] },
@@ -124,7 +124,7 @@ export default function FeaturesLoading() {
                     lg:grid-cols-3
                   ">
                   {group.cards.map((cardNum) => (
-                    <BrutalCard
+                    <TechCard
                       key={cardNum}
                       className="
                         flex h-auto flex-col justify-between border
@@ -179,7 +179,7 @@ export default function FeaturesLoading() {
                           className="h-5 w-24 border guide-line"
                         />
                       </div>
-                    </BrutalCard>
+                    </TechCard>
                   ))}
                 </div>
               </div>

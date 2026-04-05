@@ -21,7 +21,7 @@ interface SearchResult {
   matchType: "title" | "content"
 }
 
-const emptySubscribe = () => () => { }
+const emptySubscribe = () => () => {}
 
 export function SearchCommand() {
   const [isOpen, setIsOpen] = useState(false)
@@ -272,7 +272,10 @@ export function SearchCommand() {
           md:flex
         ">
         <div className="flex w-full items-center justify-between">
-          <span className="flex items-center gap-1 text-lg leading-none">&#x2315;{/* icon */}<span className="mt-0.5 text-[0.625rem]">SEARCH</span></span>
+          <span className="flex items-center gap-1 text-lg leading-none">
+            &#x2315;{/* icon */}
+            <span className="mt-0.5 text-[0.625rem]">SEARCH</span>
+          </span>
           <span
             className="
              border border-tech-main/30 px-1 text-[0.625rem]
@@ -422,9 +425,10 @@ export function SearchCommand() {
                           className={`
                             group relative w-full cursor-pointer px-4 py-3
                             text-left transition-colors
-                            ${index === selectedIndex
-                              ? "bg-tech-main/10"
-                              : "hover:bg-tech-accent/10"
+                            ${
+                              index === selectedIndex
+                                ? "bg-tech-main/10"
+                                : "hover:bg-tech-accent/10"
                             }
                           `}
                           aria-label={`Select ${result.title}`}

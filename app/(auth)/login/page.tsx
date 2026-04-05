@@ -2,7 +2,7 @@
 "use client"
 
 import { signIn, useSession } from "next-auth/react"
-import { BrutalButton } from "@/components/ui/brutal-button"
+import { TechButton } from "@/components/ui/tech-button"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -271,7 +271,7 @@ export default function LoginPage() {
                 w-full animate-slide-up-fade opacity-0 [animation-delay:1.3s]
                 fill-mode-forwards
               ">
-              <BrutalButton
+              <TechButton
                 onClick={handleLogin}
                 disabled={isLoading}
                 variant="primary"
@@ -292,7 +292,7 @@ export default function LoginPage() {
                 ) : (
                   "INITIATE GITHUB OAUTH →"
                 )}
-              </BrutalButton>
+              </TechButton>
             </div>
 
             <div

@@ -1,7 +1,7 @@
 ﻿import * as React from "react"
 import Link from "next/link"
 import { auth } from "@/lib/auth"
-import { BrutalAvatar } from "./brutal-avatar"
+import { UesrAvatar } from "./user-avatar"
 
 export async function ProfileButton() {
   const session = await auth()
@@ -29,7 +29,7 @@ export async function ProfileButton() {
         hover:scale-110
         md:size-10
       ">
-      <BrutalAvatar src={session.user.image} alt={session.user.name} />
+      <UesrAvatar src={session.user.image} alt={session.user.name} />
     </Link>
   )
 }

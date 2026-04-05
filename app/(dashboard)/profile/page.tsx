@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
-import { BrutalInput } from "@/components/ui/brutal-input"
-import { BrutalAvatar } from "@/components/ui/brutal-avatar"
+import { InputBox } from "@/components/ui/input-box"
+import { UesrAvatar } from "@/components/ui/user-avatar"
 import { updateProfileAction } from "@/actions/profile"
 import { SignOutButton } from "@/components/ui/sign-out-button"
 import { getGithubEmailVisibility } from "@/lib/github"
@@ -159,7 +159,7 @@ export default async function ProfilePage() {
               ">
               <div className="absolute -top-1 -left-1 size-2 bg-tech-main" />
               <div className="absolute -right-1 -bottom-1 size-2 bg-tech-main" />
-              <BrutalAvatar
+              <UesrAvatar
                 src={user.image}
                 alt={user.name}
                 size="lg"
@@ -168,7 +168,7 @@ export default async function ProfilePage() {
             </div>
 
             <FormField label="AVATAR URL" className="w-full flex-1">
-              <BrutalInput
+              <InputBox
                 name="image"
                 defaultValue={user.image || ""}
                 placeholder="https://..."
@@ -210,7 +210,7 @@ export default async function ProfilePage() {
               md:gap-8
             ">
             <FormField label="USERNAME">
-              <BrutalInput
+              <InputBox
                 name="name"
                 defaultValue={user.name || ""}
                 required
@@ -246,7 +246,7 @@ export default async function ProfilePage() {
                   )}
                 </span>
               }>
-              <BrutalInput
+              <InputBox
                 defaultValue={user.email || ""}
                 disabled
                 className="

@@ -13,7 +13,7 @@ import {
 import { generateDescription } from "@/lib/markdown"
 import { FeatureEditor } from "@/components/editor/feature-editor"
 import { notFound } from "next/navigation"
-import { BrutalCard } from "@/components/ui/brutal-card"
+import { TechCard } from "@/components/ui/tech-card"
 import { FeatureActions } from "./feature-actions"
 import { FeatureComments } from "./feature-comments"
 import { FeatureExplanation } from "./feature-explanation"
@@ -132,10 +132,10 @@ export default async function FeatureDetailPage({
     },
     assignee: parsedIssue.metadata?.assigneeId
       ? {
-          name: parsedIssue.metadata?.assigneeName ?? null,
-          email: parsedIssue.metadata?.assigneeEmail ?? null,
-          image: null,
-        }
+        name: parsedIssue.metadata?.assigneeName ?? null,
+        email: parsedIssue.metadata?.assigneeEmail ?? null,
+        image: null,
+      }
       : null,
     comments,
   }
@@ -228,7 +228,7 @@ export default async function FeatureDetailPage({
       )}
 
       <RevealSection delay={100}>
-        <BrutalCard
+        <TechCard
           className="
             mb-8 p-4
             sm:p-6
@@ -290,7 +290,7 @@ export default async function FeatureDetailPage({
               />
             )}
           </div>
-        </BrutalCard>
+        </TechCard>
       </RevealSection>
 
       <RevealSection delay={200}>

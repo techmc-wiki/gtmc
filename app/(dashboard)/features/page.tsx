@@ -7,7 +7,7 @@ import {
   parseIssueBody,
 } from "@/lib/github"
 import Link from "next/link"
-import { BrutalButton } from "@/components/ui/brutal-button"
+import { TechButton } from "@/components/ui/tech-button"
 import { PageHeader } from "@/components/ui/page-header"
 import { FeatureList } from "./feature-list"
 import { PendingCreationBanner } from "./pending-creation-banner"
@@ -59,10 +59,10 @@ export default async function FeaturesPage({
       },
       assignee: assigneeId
         ? {
-            name: parsed.metadata?.assigneeName || undefined,
-            email: parsed.metadata?.assigneeEmail || undefined,
-            image: undefined,
-          }
+          name: parsed.metadata?.assigneeName || undefined,
+          email: parsed.metadata?.assigneeEmail || undefined,
+          image: undefined,
+        }
         : undefined,
     }
   })
@@ -82,7 +82,7 @@ export default async function FeaturesPage({
                   w-full
                   md:w-auto
                 ">
-                <BrutalButton
+                <TechButton
                   variant="primary"
                   className="
                     flex min-h-[44px] w-full items-center justify-center px-6
@@ -91,7 +91,7 @@ export default async function FeaturesPage({
                     md:w-auto
                   ">
                   + REPORT NEW FEATURE
-                </BrutalButton>
+                </TechButton>
               </Link>
             ) : undefined
           }

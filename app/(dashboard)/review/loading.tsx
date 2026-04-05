@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import { BrutalCard } from "@/components/ui/brutal-card"
+import { TechCard } from "@/components/ui/tech-card"
 import {
   SectionRail,
   SegmentedBar,
@@ -51,7 +51,7 @@ export default function ReviewLoading() {
             </h2>
             <div className="grid grid-cols-1 gap-6">
               {[1, 2, 3].map((i) => (
-                <BrutalCard
+                <TechCard
                   key={i}
                   className={`
                     flex flex-col items-start justify-between space-y-4 border
@@ -110,7 +110,7 @@ export default function ReviewLoading() {
                       "
                     />
                   </div>
-                </BrutalCard>
+                </TechCard>
               ))}
             </div>
           </div>

@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth"
 import { redirect, notFound } from "next/navigation"
 import "katex/dist/katex.min.css"
 import Link from "next/link"
-import { BrutalButton } from "@/components/ui/brutal-button"
+import { TechButton } from "@/components/ui/tech-button"
 import { MarkdownRenderer } from "@/lib/markdown"
 import { getCachedRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
 import {
@@ -65,10 +65,10 @@ export default async function ReviewDetailPage({
   })
   const linkedDraftFiles = linkedDraft
     ? decodeStoredDraftFiles({
-        content: linkedDraft.content,
-        conflictContent: linkedDraft.conflictContent,
-        filePath: linkedDraft.filePath,
-      })
+      content: linkedDraft.content,
+      conflictContent: linkedDraft.conflictContent,
+      filePath: linkedDraft.filePath,
+    })
     : null
 
   let rawContent = ""
@@ -130,9 +130,9 @@ export default async function ReviewDetailPage({
         md:p-8
       ">
       <Link href="/review">
-        <BrutalButton variant="ghost" size="sm">
+        <TechButton variant="ghost" size="sm">
           {"<"} BACK_TO_HUB
-        </BrutalButton>
+        </TechButton>
       </Link>
 
       <div
@@ -212,7 +212,7 @@ export default async function ReviewDetailPage({
                 "use server"
                 await closePRAction(prNumber)
               }}>
-              <BrutalButton
+              <TechButton
                 type="submit"
                 variant="secondary"
                 className="
@@ -220,7 +220,7 @@ export default async function ReviewDetailPage({
                   hover:bg-red-600 hover:text-white
                 ">
                 CLOSE
-              </BrutalButton>
+              </TechButton>
             </form>
             {isMergeable && linkedDraft?.status !== "SYNC_CONFLICT" && (
               <form
@@ -228,12 +228,12 @@ export default async function ReviewDetailPage({
                   "use server"
                   await mergePRAction(prNumber)
                 }}>
-                <BrutalButton
+                <TechButton
                   type="submit"
                   variant="primary"
                   className="w-full">
                   APPROVE_&_MERGE
-                </BrutalButton>
+                </TechButton>
               </form>
             )}
           </div>
@@ -259,18 +259,18 @@ export default async function ReviewDetailPage({
                   "use server"
                   await submitWithRebaseAction(linkedDraft.id)
                 }}>
-                <BrutalButton type="submit" variant="primary" size="sm">
+                <TechButton type="submit" variant="primary" size="sm">
                   FINE-GRAINED_REBASE
-                </BrutalButton>
+                </TechButton>
               </form>
               <form
                 action={async () => {
                   "use server"
                   await mergePRAction(prNumber)
                 }}>
-                <BrutalButton type="submit" variant="secondary" size="sm">
+                <TechButton type="submit" variant="secondary" size="sm">
                   QUICK_MERGE
-                </BrutalButton>
+                </TechButton>
               </form>
             </div>
           </div>
@@ -285,7 +285,7 @@ export default async function ReviewDetailPage({
           revisionId={linkedDraft?.id}
           conflictType={
             linkedDraft?.status === "SYNC_CONFLICT" &&
-            linkedDraft?.conflictContent === null
+              linkedDraft?.conflictContent === null
               ? "FILE_DELETED"
               : "CONFLICT"
           }

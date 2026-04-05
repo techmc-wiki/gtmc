@@ -1,5 +1,5 @@
 const fs = require("fs")
-const stateJson = JSON.parse(
+const _stateJson = JSON.parse(
   fs.readFileSync(
     "litematica-renderer/assets/minecraft/blockstates/redstone_wire.json",
     "utf8"

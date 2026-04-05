@@ -18,7 +18,7 @@ export function DesktopNav({ navLinks }: DesktopNavProps) {
   return (
     <ul
       className="
-        hidden space-x-6 pt-1
+        mb-1.5 hidden space-x-6
         md:flex
       ">
       {navLinks.map((link) => {
@@ -31,10 +31,9 @@ export function DesktopNav({ navLinks }: DesktopNavProps) {
               className={`
                 border-b-2 pb-1 font-mono text-xs tracking-[0.15em]
                 transition-colors
-                ${
-                  isActive
-                    ? "border-tech-main text-tech-main"
-                    : `
+                ${isActive
+                  ? "border-tech-main text-tech-main"
+                  : `
                       border-transparent text-tech-main-dark
                       hover:border-tech-main hover:text-tech-main
                     `

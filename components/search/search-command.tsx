@@ -21,7 +21,7 @@ interface SearchResult {
   matchType: "title" | "content"
 }
 
-const emptySubscribe = () => () => {}
+const emptySubscribe = () => () => { }
 
 export function SearchCommand() {
   const [isOpen, setIsOpen] = useState(false)
@@ -266,21 +266,21 @@ export function SearchCommand() {
       <button
         onClick={() => setIsOpen(true)}
         className="
-          hidden cursor-pointer items-center gap-2 border border-tech-main/40
-          px-3 py-1.5 font-mono text-[0.6875rem] text-tech-main/60 transition-colors
+          hidden h-8 w-40 cursor-pointer items-center
+          gap-2 border border-tech-main/40 px-3 py-1.5 font-mono text-[0.6875rem] text-tech-main/60 transition-colors
           hover:bg-tech-main hover:text-white
           md:flex
         ">
-        <span className="text-sm leading-none">&#x2315;</span>
-        SEARCH
-        <div className="w-4" />
-        <span
-          className="
-            ml-1 border border-tech-main/30 px-1 py-0.5 text-[0.5625rem]
-            text-tech-main/40
-          ">
-          {shortcutLabel}
-        </span>
+        <div className="flex w-full items-center justify-between">
+          <span className="flex items-center gap-1 text-lg leading-none">&#x2315;{/* icon */}<span className="mt-0.5 text-[0.625rem]">SEARCH</span></span>
+          <span
+            className="
+             border border-tech-main/30 px-1 text-[0.625rem]
+              text-tech-main/40
+            ">
+            {shortcutLabel}
+          </span>
+        </div>
       </button>
 
       {/* Mobile trigger */}
@@ -422,10 +422,9 @@ export function SearchCommand() {
                           className={`
                             group relative w-full cursor-pointer px-4 py-3
                             text-left transition-colors
-                            ${
-                              index === selectedIndex
-                                ? "bg-tech-main/10"
-                                : "hover:bg-tech-accent/10"
+                            ${index === selectedIndex
+                              ? "bg-tech-main/10"
+                              : "hover:bg-tech-accent/10"
                             }
                           `}
                           aria-label={`Select ${result.title}`}

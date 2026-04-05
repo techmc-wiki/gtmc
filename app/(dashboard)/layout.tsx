@@ -47,7 +47,7 @@ export default async function DashboardLayout({
             ">
             <div
               className="
-                flex items-center space-x-4
+                flex space-x-4
                 md:space-x-8
               ">
               <Logo size="md" />

@@ -11,13 +11,12 @@ export async function ProfileButton() {
       <Link
         href="/login"
         className="
-          relative flex items-center gap-2 overflow-hidden border
-          border-tech-main/40 bg-tech-main/10 px-4 py-1.5 font-mono text-[0.625rem]
-          tracking-widest text-tech-main uppercase transition-all duration-300
-          hover:bg-tech-main hover:text-white
+          flex h-8 items-center justify-center border border-tech-main/40 bg-tech-main/10 px-3 font-mono text-[0.625rem]
+          font-bold tracking-widest text-tech-main uppercase transition-all
+          duration-300 hover:bg-tech-main hover:text-white
           md:text-xs
         ">
-        <span className="relative z-10 font-bold">LOGIN</span>
+        LOGIN
       </Link>
     )
   }

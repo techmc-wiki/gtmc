@@ -34,6 +34,23 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
     return () => window.removeEventListener("mousemove", onMouseMove)
   }, [locked])
 
+  useEffect(() => {
+    function checkScrollLock() {
+      if (locked) return
+      if (window.matchMedia("(pointer: coarse)").matches) {
+        const rect = bannerRef.current?.getBoundingClientRect()
+        if (!rect) return
+        if (rect.bottom < window.innerHeight * 0.4) {
+          setLocked(true)
+          setFlashing(true)
+          setTimeout(() => setFlashing(false), 400)
+        }
+      }
+    }
+    window.addEventListener("scroll", checkScrollLock, { passive: true })
+    return () => window.removeEventListener("scroll", checkScrollLock)
+  }, [locked])
+
   function handleFirstHover() {
     if (locked) return
     setLocked(true)

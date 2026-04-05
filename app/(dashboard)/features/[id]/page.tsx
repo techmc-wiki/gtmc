@@ -38,7 +38,7 @@ export async function generateMetadata({
   if (!issue) return { title: "Feature Not Found" }
 
   const canonical = toAbsoluteUrl(`/features/${issue.number}`)
-  const description = generateDescription(issue.body ?? "", 155)
+  const description = generateDescription(issue.body ?? "", undefined, 155)
 
   return {
     title: issue.title,

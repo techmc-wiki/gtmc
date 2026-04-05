@@ -1,3 +1,4 @@
+import path from "path"
 import ReactMarkdown from "react-markdown"
 import { Suspense } from "react"
 import "katex/dist/katex.min.css"
@@ -90,51 +91,67 @@ export async function generateMetadata({
     }
 
     const { data } = matter(content)
+    const siteUrl = getSiteUrl()
+    const effectiveSlug =
+      target.canonicalSlug ?? getSlugForFilePath(target.filePath) ?? slugPath
+    const canonicalUrl = articleAbsoluteUrl(effectiveSlug)
+
     const resolvedTitle = resolveDisplayedArticleTitle(
       data["chapter-title"],
       target.filePath,
       target.canonicalSlug,
       target.isReadmeIntro
     )
-    const title = formatArticleTitle(
+    const articleTitle = formatArticleTitle(
       resolvedTitle,
       target.index,
       target.isAppendix,
       target.isPreface,
       target.isReadmeIntro
     )
-    const description = generateDescription(content)
 
-    const siteUrl = getSiteUrl()
-    const effectiveSlug =
-      target.canonicalSlug ?? getSlugForFilePath(target.filePath) ?? slugPath
-    const canonicalUrl = articleAbsoluteUrl(effectiveSlug)
+    // Build page title with chapter prefix if available
+    const slugMapEntry = getSlugMapEntry(effectiveSlug)
+    const chapterTitle = slugMapEntry?.chapterTitle
+    const pageTitle = chapterTitle
+      ? `${chapterTitle} › ${articleTitle} — Graduate Texts in Minecraft`
+      : `${articleTitle} — Graduate Texts in Minecraft`
+
+    const description = generateDescription(
+      content,
+      data.description as string | undefined
+    )
+
+    const bannerSrc = (data.banner as { src?: string } | undefined)?.src
+    const bannerUrl = resolveBannerUrl(bannerSrc, target.filePath, siteUrl)
+    const bannerAlt =
+      (data.banner as { alt?: string } | undefined)?.alt || pageTitle
 
     return {
-      title,
+      title: pageTitle,
       description,
       alternates: {
         canonical: canonicalUrl,
       },
       openGraph: {
-        title,
+        title: pageTitle,
         description,
         type: "article",
         url: canonicalUrl,
         images: [
           {
-            url: `${siteUrl}/og-image.png`,
+            url: bannerUrl ?? `${siteUrl}/og-image.png`,
             width: 1200,
             height: 630,
-            alt: title,
+            alt: bannerUrl ? bannerAlt : pageTitle,
           },
         ],
       },
       twitter: {
         card: "summary_large_image",
-        title,
+        title: pageTitle,
         description,
-        images: [`${siteUrl}/og-image.png`],
+        images: [bannerUrl ?? `${siteUrl}/og-image.png`],
       },
     }
   } catch {
@@ -199,7 +216,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const effectiveSlug =
     target.canonicalSlug ?? getSlugForFilePath(target.filePath) ?? slugPath
   const canonicalUrl = articleAbsoluteUrl(effectiveSlug)
-  const description = generateDescription(content)
+  const description = generateDescription(
+    content,
+    data.description as string | undefined
+  )
 
   const author = data.author as string | undefined
   const coAuthors = (data["co-authors"] as string[] | undefined) || []
@@ -207,34 +227,56 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const lastModified = data.lastmod as string | undefined
   const isAdvanced = data["is-advanced"] === true
 
-  const blogPostingJsonLd: {
+  const allAuthors = [
+    ...new Set([author, ...coAuthors].filter(Boolean) as string[]),
+  ]
+  const authorArray = allAuthors.map((name) => ({
+    "@type": "Person" as const,
+    name,
+    url: `https://github.com/${name}`,
+  }))
+
+  const slugMapEntry = getSlugMapEntry(effectiveSlug)
+  const chapterTitle = slugMapEntry?.chapterTitle
+
+  const bannerSrc = (data.banner as { src?: string } | undefined)?.src
+  const bannerUrl = resolveBannerUrl(bannerSrc, target.filePath, siteUrl)
+  const bannerPath = resolveBannerPath(bannerSrc, target.filePath)
+  const bannerAlt =
+    (data.banner as { alt?: string } | undefined)?.alt || articleTitle
+
+  const techArticleJsonLd: {
     "@context": "https://schema.org"
-    "@type": "BlogPosting"
+    "@type": "TechArticle"
     headline: string
     url: string
     datePublished?: string
     dateModified?: string
-    author?: {
+    author?: Array<{
       "@type": "Person"
       name: string
-    }
+      url: string
+    }>
     description: string
+    wordCount: number
+    timeRequired: string
+    articleSection?: string
+    proficiencyLevel: string
+    image?: string
   } = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
+    "@type": "TechArticle",
     headline: articleTitle,
     url: canonicalUrl,
     ...(createdAt ? { datePublished: createdAt } : {}),
     ...(lastModified ? { dateModified: lastModified } : {}),
-    ...(author
-      ? {
-          author: {
-            "@type": "Person",
-            name: author,
-          },
-        }
-      : {}),
+    ...(authorArray.length > 0 ? { author: authorArray } : {}),
     description,
+    wordCount,
+    timeRequired: `PT${readingTime}M`,
+    ...(chapterTitle ? { articleSection: chapterTitle } : {}),
+    proficiencyLevel: isAdvanced ? "Expert" : "Beginner",
+    ...(bannerUrl ? { image: bannerUrl } : {}),
   }
 
   const breadcrumbJsonLd: {
@@ -259,7 +301,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       {
         "@type": "ListItem",
         position: 2,
-        name: "Articles",
+        name: chapterTitle || "Articles",
         item: `${siteUrl}/articles`,
       },
       {
@@ -300,6 +342,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           readingTime={readingTime}
           editPath={editPath}
           isAdvanced={isAdvanced}
+          bannerPath={bannerPath}
+          bannerAlt={bannerAlt}
         />
       ) : (
         <ArticleMetadataSimple
@@ -308,6 +352,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           wordCount={wordCount}
           readingTime={readingTime}
           isAdvanced={isAdvanced}
+          bannerPath={bannerPath}
+          bannerAlt={bannerAlt}
         />
       )}
 
@@ -335,7 +381,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(techArticleJsonLd) }}
       />
       <script
         type="application/ld+json"
@@ -541,4 +587,28 @@ function embedTitleInMarkdown(content: string, title: string): string {
   }
 
   return `# ${title}\n\n${content}`
+}
+
+function resolveBannerUrl(
+  bannerSrc: string | undefined,
+  filePath: string,
+  siteUrl: string
+): string | null {
+  if (!bannerSrc || typeof bannerSrc !== "string" || !bannerSrc.trim()) {
+    return null
+  }
+  const currentDir = path.dirname("/" + filePath).replace(/^\/+/, "")
+  const resolved = path.join(currentDir, bannerSrc).replace(/\\/g, "/")
+  return `${siteUrl}/api/assets?path=${encodeURIComponent(resolved)}`
+}
+
+function resolveBannerPath(
+  bannerSrc: string | undefined,
+  filePath: string
+): string | null {
+  if (!bannerSrc || typeof bannerSrc !== "string" || !bannerSrc.trim()) {
+    return null
+  }
+  const currentDir = path.dirname("/" + filePath).replace(/^\/+/, "")
+  return path.join(currentDir, bannerSrc).replace(/\\/g, "/")
 }

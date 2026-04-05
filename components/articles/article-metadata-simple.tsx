@@ -1,6 +1,7 @@
 "use client"
 
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { ArticleBanner } from "@/components/articles/article-banner"
 
 interface ArticleMetadataSimpleProps {
   title: string
@@ -8,6 +9,8 @@ interface ArticleMetadataSimpleProps {
   wordCount: number
   readingTime: number
   isAdvanced?: boolean
+  bannerPath?: string | null
+  bannerAlt?: string
 }
 
 export function ArticleMetadataSimple({
@@ -16,6 +19,8 @@ export function ArticleMetadataSimple({
   wordCount,
   readingTime,
   isAdvanced,
+  bannerPath,
+  bannerAlt,
 }: ArticleMetadataSimpleProps) {
   return (
     <header>
@@ -86,6 +91,13 @@ export function ArticleMetadataSimple({
           </div>
         </div>
       </div>
+
+      {bannerPath && (
+        <ArticleBanner
+          src={`/api/assets/banner/${bannerPath}`}
+          alt={bannerAlt || title}
+        />
+      )}
     </header>
   )
 }

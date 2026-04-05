@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { ArticleBanner } from "@/components/articles/article-banner"
 
 function useLocalStorage<T>(
   key: string,
@@ -48,6 +49,8 @@ interface ArticleMetadataProps {
   readingTime: number
   editPath: string
   isAdvanced?: boolean
+  bannerPath?: string | null
+  bannerAlt?: string
 }
 
 export function ArticleMetadata({
@@ -62,6 +65,8 @@ export function ArticleMetadata({
   readingTime,
   editPath,
   isAdvanced,
+  bannerPath,
+  bannerAlt,
 }: ArticleMetadataProps) {
   const router = useRouter()
   const [copied, setCopied] = useState(false)
@@ -333,6 +338,13 @@ export function ArticleMetadata({
           </div>
         </div>
       </div>
+
+      {bannerPath && (
+        <ArticleBanner
+          src={`/api/assets/banner/${bannerPath}`}
+          alt={bannerAlt || title}
+        />
+      )}
     </header>
   )
 }

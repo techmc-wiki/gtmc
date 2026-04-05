@@ -27,10 +27,8 @@ export default function LitematicaViewer({
     const initRenderer = async () => {
       try {
         const mod = await import("schematic-renderer")
-        const SR =
-          mod.SchematicRenderer ||
-          (mod as any).default?.SchematicRenderer ||
-          (mod as any).default
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const SR = (mod as any).default || mod
 
         renderer = new SR(
           canvasRef.current!,

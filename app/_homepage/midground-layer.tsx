@@ -98,25 +98,25 @@ export function MidgroundLayer({
            pointer-events-none absolute bottom-8 left-8 decor-desktop-only hidden
            font-mono text-[0.625rem] text-red-500/40 mix-blend-multiply select-none
            lg:block
-         ">
-        +
-      </div>
-      <div
-        className="
-          absolute bottom-1/3 left-[8%] decor-desktop-only hidden text-xl
-          font-light opacity-30 select-none
-          md:block
-        ">
-        +
-      </div>
-      <div
-        className="
-          absolute top-[15%] left-[45%] decor-desktop-only hidden text-sm
-          font-light opacity-30 select-none
-          md:block
-        ">
-        +
-      </div>
+         "
+        smoothMouseX={smoothMouseX}
+        smoothMouseY={smoothMouseY}
+        blurMax={blurMax}>
+        <span className="font-bold">
+          at net.minecraft.world.level.block.piston.PistonBaseBlock.moveBlocks
+        </span>
+        (PistonBaseBlock.java:492) {"\n"}
+        <br />
+        <span className="font-bold">
+          at net.minecraft.world.level.Level.tickBlockEntities
+        </span>
+        (Level.java:833) {"\n"}
+        <br />
+        <span className="font-bold text-red-600/60">
+          Caused by: java.util.ConcurrentModificationException: Ticking block
+          entity
+        </span>
+      </DecorElement>
 
       {/* 贯穿全图的低调主辅助线 */}
       <div
@@ -126,8 +126,8 @@ export function MidgroundLayer({
           md:block
         ">
         <span className="absolute -top-4 right-10 font-mono text-[0.625rem] opacity-50">
-           L-AXIS
-         </span>
+          L-AXIS
+        </span>
       </div>
       <div
         className="

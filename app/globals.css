@@ -71,7 +71,8 @@ html {
     var(--font-geist-sans), "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
     "微软雅黑", sans-serif;
   --font-mono:
-    var(--font-geist-mono), "Space Mono", "SF Mono", "Consolas", monospace;
+    var(--font-geist-mono), "Space Mono", "SF Mono", "Consolas",
+    "Noto Sans Mono SC", "PingFang Mono", "Microsoft YaHei Mono", monospace;
   --color-tech-bg: #f8f9fc;
   --color-tech-main: #60708f;
   --color-tech-main-dark: #4a5a78;

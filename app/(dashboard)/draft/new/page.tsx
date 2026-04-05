@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth"
 import { getMainBranchHeadSha } from "@/lib/article-submission"
 import { getRepoFileContent } from "@/lib/github/sync"
 import { prisma } from "@/lib/prisma"
-import { notFound, redirect } from "next/navigation"
+import { redirect } from "next/navigation"
 
 export default async function NewDraftPage({
   searchParams,
@@ -14,28 +14,14 @@ export default async function NewDraftPage({
     redirect("/login")
   }
 
-  const { articleId: articleIdParam, file: fileParam } = await searchParams
-  const articleId =
-    typeof articleIdParam === "string" ? articleIdParam : undefined
+  const { file: fileParam } = await searchParams
   const filePath = typeof fileParam === "string" ? fileParam : undefined
 
   let initialTitle = "UNTITLED"
   let initialContent = ""
   let normalizedFilePath = filePath
 
-  if (articleId) {
-    const article = await prisma.article.findUnique({
-      where: { id: articleId },
-    })
-
-    if (!article) {
-      notFound()
-    }
-
-    initialTitle = article.title
-    initialContent = article.content
-    normalizedFilePath = filePath || article.slug
-  } else if (filePath) {
+  if (filePath) {
     initialTitle = filePath
     const normalizedPath = filePath.replace(/^\/+/, "")
     const candidates = normalizedPath.endsWith(".md")
@@ -67,7 +53,6 @@ export default async function NewDraftPage({
     status: "DRAFT",
     syncedMainSha: baseMainSha,
     title: initialTitle,
-    ...(articleId ? { article: { connect: { id: articleId } } } : {}),
   }
   const draft = await prisma.revision.create({
     data: createData,

@@ -23,7 +23,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
-  articles      Article[]  @relation("ArticleAuthor")
+
   revisions     Revision[] @relation("RevisionAuthor")
   reviews       Revision[] @relation("RevisionReviewer")
   features         Feature[] @relation("FeatureAuthor")
@@ -61,31 +61,7 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// ==========================================
-// 3. 鏍稿績涓氬姟锛氭枃绔犱笌鐗堟湰鍗忓悓鎺у埗浣撶郴
-// ==========================================
 
-model Article {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  content     String
-  coverImage  String?
-  
-  // 树状结构支持 (用于文件夹与文件)
-  isFolder    Boolean  @default(false)
-  parentId    String?
-  parent      Article?  @relation("ArticleTree", fields: [parentId], references: [id])
-  children    Article[] @relation("ArticleTree")
-
-  authorId    String
-  author      User     @relation("ArticleAuthor", fields: [authorId], references: [id])
-
-  revisions   Revision[]
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
 
 model Revision {
    id          String         @id @default(cuid())
@@ -99,12 +75,9 @@ model Revision {
     prBranchName String?
    filePath    String?
     baseMainSha String?
-    syncedMainSha String?
-    conflictContent String?
-    submittedAt DateTime?
-
-   articleId   String?
-   article     Article?       @relation(fields: [articleId], references: [id], onDelete: SetNull)
+   syncedMainSha String?
+   conflictContent String?
+   submittedAt DateTime?
 
    authorId    String
    author      User           @relation("RevisionAuthor", fields: [authorId], references: [id])
@@ -117,8 +90,8 @@ model Revision {
     // Draft asset lifecycle relation
     draftAssets DraftAsset[]
 
-    createdAt   DateTime       @default(now())
-    updatedAt   DateTime       @updatedAt
+   createdAt   DateTime       @default(now())
+   updatedAt   DateTime       @updatedAt
 }
 
 // ==========================================

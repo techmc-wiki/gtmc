@@ -9,7 +9,6 @@ import {
 } from "@/lib/github/articles-repo"
 import { getArticleContent } from "@/lib/article-loader"
 import { resolveSlug } from "@/lib/slug-resolver"
-import { prisma } from "@/lib/prisma"
 import { shouldIgnoreFile } from "@/lib/article-ignore"
 import { parseFrontMatter } from "@/lib/frontmatter-parser"
 import type { TreeNode } from "@/types/sidebar-tree"
@@ -91,32 +90,14 @@ function createMiniSearchIndex(
 }
 
 async function buildIndex(): Promise<MiniSearch<IndexedArticle>> {
-  const [dbArticles, tree] = await Promise.all([
-    prisma.article.findMany({
-      where: { isFolder: false },
-      select: { id: true, title: true, slug: true, content: true },
-    }),
-    getSidebarTree(),
-  ])
+  const tree = await getSidebarTree()
 
-  // Filter out ignored articles from DB articles
-  const filteredDbArticles = dbArticles.filter((article) => {
-    const fileName = article.slug.split("/").pop() || article.slug
-    return !shouldIgnoreFile(fileName, !article.slug.includes("/"))
-  })
+  const articles: IndexedArticle[] = []
 
-  const articles: IndexedArticle[] = filteredDbArticles.map((article) => ({
-    id: article.slug,
-    title: article.title,
-    slug: article.slug,
-    content: stripMarkdown(article.content),
-  }))
-
-  const dbSlugs = new Set(dbArticles.map((article) => article.slug))
   const uniqueGithubNodes = new Map<string, { title: string; slug: string }>()
 
   for (const node of flattenTree(tree)) {
-    if (!dbSlugs.has(node.slug) && !uniqueGithubNodes.has(node.slug)) {
+    if (!uniqueGithubNodes.has(node.slug)) {
       uniqueGithubNodes.set(node.slug, node)
     }
   }

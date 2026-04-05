@@ -1,9 +1,10 @@
-const fs = require('fs');
-let code = fs.readFileSync('litematica-renderer/src/renderer.ts', 'utf8');
+const fs = require("fs")
+let code = fs.readFileSync("litematica-renderer/src/renderer.ts", "utf8")
 
-const regex = /private async _getGeometryAndMaterialsForBlock[\s\S]+?return { geometry, material };\s+\}/;
+const regex =
+  /private async _getGeometryAndMaterialsForBlock[\s\S]+?return { geometry, material };\s+\}/
 
-const replacement = private async _getGeometryAndMaterialsForBlock(blockStateName: string): Promise<{ geometry: THREE.BufferGeometry, material: THREE.Material | THREE.Material[] }> {
+const replacement = `private async _getGeometryAndMaterialsForBlock(blockStateName: string): Promise<{ geometry: THREE.BufferGeometry, material: THREE.Material | THREE.Material[] }> {
     const parsedBlock = blockStateName.match(/minecraft:([^\[]+)(?:\\[(.*)\\])?/);
     const cleanName = parsedBlock ? parsedBlock[1] : blockStateName.replace('minecraft:', '').split('[')[0];
     const propertiesStr = parsedBlock && parsedBlock[2] ? parsedBlock[2] : '';
@@ -116,13 +117,13 @@ const replacement = private async _getGeometryAndMaterialsForBlock(blockStateNam
     // For now, if we gathered multiple parts, return the combined elements properly if we upgrade resolveGeometry.
     
     return { geometry: finalGeometry, material: materialResult || this.boxGeometry }; // We'll improve this merging in resolving
-  };
+  }`
 
-code = code.replace(regex, replacement);
+code = code.replace(regex, replacement)
 
-if (code.includes('private async _getGeometryAndMaterialsForBlock')) {
-    fs.writeFileSync('litematica-renderer/src/renderer.ts', code);
-    console.log('Part 1 updated.');
+if (code.includes("private async _getGeometryAndMaterialsForBlock")) {
+  fs.writeFileSync("litematica-renderer/src/renderer.ts", code)
+  console.log("Part 1 updated.")
 } else {
-    console.log('Regex fail');
+  console.log("Regex fail")
 }

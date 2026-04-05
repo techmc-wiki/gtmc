@@ -149,16 +149,6 @@ export default async function DraftDashboardPage() {
           ">
           {draft.title || "UNTITLED_DOCUMENT"}
         </h3>
-        {draft.articleId && (
-          <p
-            className="
-              mt-4 flex items-center font-mono text-xs tracking-widest
-              text-tech-main opacity-80
-            ">
-            <span className="mr-2 inline-block size-1.5 bg-tech-main"></span>{" "}
-            MOD_LIVE_DB
-          </p>
-        )}
         {draft.fileCount > 1 ? (
           <p
             className="

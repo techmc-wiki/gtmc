@@ -51,23 +51,10 @@ const getCachedTranslations = unstable_cache(
 
 /**
  * 获取树状结构的目录树 (Sidebar)
- * Tree is built from the GitHub repository, merged with DB articles.
+ * Tree is built from the GitHub repository only.
  */
 export async function getSidebarTree(): Promise<TreeNode[]> {
-  // 1. Get DB article entries (always fresh)
-  const allItems = await prisma.article.findMany({
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      isFolder: true,
-      parentId: true,
-      updatedAt: true,
-    },
-    orderBy: [{ isFolder: "desc" }, { title: "asc" }],
-  })
-
-  // 2. Get GitHub repo tree (cached)
+  // 1. Get GitHub repo tree (cached)
   let githubTree: ArticleTreeNode[] = []
   let translations: Record<string, string> = {}
 
@@ -121,51 +108,7 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
 
   addGithubNodes(githubTree, mergedTree)
 
-  // 4. Add DB articles, deduplicating by slug
-  const dbItemsPending = [...allItems]
-
-  // First pass: add missing nodes
-  for (const dbItem of dbItemsPending) {
-    const slugKey = dbItem.slug.toLowerCase()
-    if (!unifiedMap.has(slugKey)) {
-      const newNode: TreeNode = {
-        id: dbItem.id, // Keep DB ID so the client can interact with it
-        title: dbItem.title,
-        slug: dbItem.slug,
-        index: -1,
-        isAppendix: false,
-        isPreface: false,
-        isAdvanced: false,
-        isFolder: dbItem.isFolder, // Make sure it defaults to false if missing
-        parentId: dbItem.parentId,
-        children: [],
-      }
-      unifiedMap.set(slugKey, newNode)
-    }
-  }
-
-  // Second pass: link DB-exclusive items into the tree structure
-  for (const dbItem of dbItemsPending) {
-    const slugKey = dbItem.slug.toLowerCase()
-    const node = unifiedMap.get(slugKey)
-
-    // If node ID matches the DB item ID, it is a DB-exclusive node we just added.
-    if (node && node.id === dbItem.id) {
-      const parts = node.slug.split("/")
-      const parentSlug = parts.slice(0, -1).join("/").toLowerCase()
-
-      if (parentSlug && unifiedMap.has(parentSlug)) {
-        const parentNode = unifiedMap.get(parentSlug)
-        if (parentNode) {
-          parentNode.children.push(node)
-        }
-      } else {
-        mergedTree.push(node)
-      }
-    }
-  }
-
-  // 5. Apply translations to top-level titles
+  // 4. Apply translations to top-level titles
   mergedTree.forEach((node) => {
     if (translations[node.title]) {
       node.title = translations[node.title]
@@ -309,9 +252,6 @@ export async function getSidebarTree(): Promise<TreeNode[]> {
   return filteredTree
 }
 
-/**
- * 新建文件或文件夹（DB 侧边栏条目）
- */
 export async function createDocument({
   title,
   slug,
@@ -325,23 +265,11 @@ export async function createDocument({
 }) {
   const session = await requireAuth("未授权，请先登录")
 
-  // 1. Resolve parent directory path
   let parentPath = ""
-  if (parentId) {
-    if (parentId.startsWith("gh-")) {
-      parentPath = parentId.replace(/^gh-/, "")
-    } else {
-      const parentDoc = await prisma.article.findUnique({
-        where: { id: parentId },
-        select: { slug: true },
-      })
-      if (parentDoc) {
-        parentPath = parentDoc.slug
-      }
-    }
+  if (parentId && parentId.startsWith("gh-")) {
+    parentPath = parentId.replace(/^gh-/, "")
   }
 
-  // Determine full path/slug
   let finalSlug = slug
   if (parentPath) {
     if (!slug.includes("/")) {
@@ -352,55 +280,29 @@ export async function createDocument({
   }
   finalSlug = finalSlug.replace(/^\/+/, "")
 
-  const existing = await prisma.article.findUnique({
-    where: { slug: finalSlug },
-  })
-  if (existing) {
-    throw new Error("该路径已存在")
-  }
-
   const initialContent = isFolder ? "" : "# " + title
   const filePath = isFolder ? `${finalSlug}/.gitkeep` : `${finalSlug}.md`
 
   const authorName = session.user.name || "Unknown"
   const authorEmail = session.user.email || "unknown@gtmc.dev"
 
-  // 2. Sync to GitHub
-  try {
-    if (session.user.role === "ADMIN") {
-      await createDirectFile({
-        title: isFolder ? `Create folder ${title}` : `Create file ${title}`,
-        content: initialContent,
-        filePath,
-        authorName,
-        authorEmail,
-      })
-    } else {
-      await createPR({
-        title: isFolder
-          ? `[系统自动生成] Request to create folder ${title}`
-          : `[系统自动生成] Request to create file ${title}`,
-        content: initialContent,
-        filePath,
-        authorName,
-        authorEmail,
-      })
-    }
-  } catch (error) {
-    console.error("Failed to sync to GitHub:", error)
-  }
-
-  // 3. Create local DB entry
-  const newDoc = await prisma.article.create({
-    data: {
-      title,
-      slug: finalSlug,
+  if (session.user.role === "ADMIN") {
+    await createDirectFile({
+      title: isFolder ? `Create folder ${title}` : `Create file ${title}`,
       content: initialContent,
-      isFolder,
-      parentId,
-      authorId: session.user.id,
-    },
-  })
-
-  return newDoc
+      filePath,
+      authorName,
+      authorEmail,
+    })
+  } else {
+    await createPR({
+      title: isFolder
+        ? `[系统自动生成] Request to create folder ${title}`
+        : `[系统自动生成] Request to create file ${title}`,
+      content: initialContent,
+      filePath,
+      authorName,
+      authorEmail,
+    })
+  }
 }

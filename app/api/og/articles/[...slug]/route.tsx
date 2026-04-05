@@ -1,6 +1,5 @@
 import { ImageResponse } from "next/og"
 import { type NextRequest } from "next/server"
-import { prisma } from "@/lib/prisma"
 import { getRepoFileContent } from "@/lib/github/sync"
 
 export const runtime = "nodejs"
@@ -14,33 +13,15 @@ export async function GET(
 
   let title = "Graduate Texts in Minecraft"
 
-  try {
-    const dbArticle = await prisma.article.findUnique({
-      where: { slug: rawPath },
-      select: { title: true, isFolder: true },
-    })
-    if (dbArticle && !dbArticle.isFolder) {
-      title = dbArticle.title
-    }
-  } catch {
-    /* ignore */
-  }
-
-  if (title === "Graduate Texts in Minecraft") {
-    try {
-      const paths = [rawPath, `${rawPath}.md`, `${rawPath}/Preface.md`]
-      for (const p of paths) {
-        const content = await getRepoFileContent(p)
-        if (content) {
-          const match = content.match(/^#\s+(.+)$/m)
-          title = match
-            ? match[1].trim()
-            : (rawPath.split("/").pop()?.replace(/-/g, " ") ?? title)
-          break
-        }
-      }
-    } catch {
-      /* ignore */
+  const paths = [rawPath, `${rawPath}.md`, `${rawPath}/Preface.md`]
+  for (const p of paths) {
+    const content = await getRepoFileContent(p)
+    if (content) {
+      const match = content.match(/^#\s+(.+)$/m)
+      title = match
+        ? match[1].trim()
+        : (rawPath.split("/").pop()?.replace(/-/g, " ") ?? title)
+      break
     }
   }
 

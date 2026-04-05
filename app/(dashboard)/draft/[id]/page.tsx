@@ -123,7 +123,6 @@ export default async function EditDraftPage({
             files: draftFiles.files,
             title: draft.title,
             githubPrUrl: draft.githubPrUrl || undefined,
-            articleId: draft.articleId || undefined,
             status: draft.status,
           }}
         />

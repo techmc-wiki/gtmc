@@ -35,7 +35,6 @@ interface DraftEditorProps {
   initialData?: {
     activeFileId?: string
     id?: string
-    articleId?: string
     githubPrUrl?: string
     files: DraftFileCollection["files"]
     title: string
@@ -70,7 +69,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null)
   const { badge, showBadge, clearBadge } = useBadge()
 
-  const articleId = initialData?.articleId
   const githubPrUrl = initialData?.githubPrUrl
   const isSyncConflict = draftStatus === "SYNC_CONFLICT"
   const isReadOnly =
@@ -261,7 +259,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           serializeDraftFilesPayload(normalizedDraftCollection)
         )
         formData.append("filePath", primaryFile.filePath)
-        if (articleId) formData.append("articleId", articleId)
 
         const result = await saveDraftAction(formData)
         if (result.success && result.revisionId) {
@@ -324,7 +321,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       )
       formData.append("filePath", primaryFile.filePath)
       if (revisionId) formData.append("revisionId", revisionId)
-      if (articleId) formData.append("articleId", articleId)
 
       const result = await saveDraftAction(formData)
       if (result.success && result.revisionId) {
@@ -569,7 +565,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                 </p>
               </div>
               <p className="font-mono text-[11px] text-tech-main/60 uppercase">
-                {articleId ? "LIVE_ARTICLE_CONTEXT" : "DIRECT_REPO_EDIT"}
+                DIRECT_REPO_EDIT
               </p>
             </div>
 

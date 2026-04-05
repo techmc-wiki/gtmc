@@ -1,17 +1,31 @@
 import type { MetadataRoute } from "next"
-import { prisma } from "@/lib/prisma"
 
 import { listAllIssues } from "@/lib/github"
 import { getSiteUrl } from "@/lib/site-url"
 import { shouldIgnoreFile } from "@/lib/article-ignore"
 import { encodeSlug } from "@/lib/slug-utils"
+import { getSidebarTree } from "@/actions/sidebar"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 3600
 
+function flattenTree(
+  nodes: Awaited<ReturnType<typeof getSidebarTree>>
+): string[] {
+  const slugs: string[] = []
+  for (const node of nodes) {
+    if (!node.isFolder) {
+      slugs.push(node.slug)
+    }
+    if (node.children.length > 0) {
+      slugs.push(...flattenTree(node.children))
+    }
+  }
+  return slugs
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const BASE = getSiteUrl()
-  const seenSlugs = new Set<string>()
 
   const staticUrls: MetadataRoute.Sitemap = [
     {
@@ -34,26 +48,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  const dbArticles = await prisma.article.findMany({
-    where: { isFolder: false },
-    select: { slug: true, updatedAt: true },
-  })
-
-  // Filter out ignored articles from DB
-  const filteredDbArticles = dbArticles.filter((article) => {
-    const fileName = article.slug.split("/").pop() || article.slug
-    return !shouldIgnoreFile(fileName, !article.slug.includes("/"))
-  })
-
-  const dbUrls: MetadataRoute.Sitemap = filteredDbArticles.map((a) => {
-    seenSlugs.add(a.slug)
-    return {
-      url: `${BASE}/articles/${encodeSlug(a.slug)}`,
-      lastModified: a.updatedAt,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    }
-  })
+  let articleUrls: MetadataRoute.Sitemap = []
+  try {
+    const tree = await getSidebarTree()
+    const slugs = flattenTree(tree)
+    articleUrls = slugs
+      .filter((slug) => {
+        const fileName = slug.split("/").pop() || slug
+        return !shouldIgnoreFile(fileName, !slug.includes("/"))
+      })
+      .map((slug) => ({
+        url: `${BASE}/articles/${encodeSlug(slug)}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+      }))
+  } catch {
+    /* Sidebar tree unavailable — skip articles */
+  }
 
   let featureUrls: MetadataRoute.Sitemap = []
   try {
@@ -68,5 +80,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     /* GitHub API unavailable — skip */
   }
 
-  return [...staticUrls, ...dbUrls, ...featureUrls]
+  return [...staticUrls, ...articleUrls, ...featureUrls]
 }

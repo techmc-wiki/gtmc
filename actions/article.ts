@@ -67,7 +67,6 @@ export async function saveDraftAction(formData: FormData) {
   const title = formData.get("title") as string
   const content = formData.get("content") as string
   const revisionId = formData.get("revisionId") as string | null
-  const articleId = formData.get("articleId") as string | null
   const filePath = formData.get("filePath") as string | null
   const activeFileId = formData.get("activeFileId") as string | null
   const draftFilesPayload = formData.get("draftFiles") as string | null
@@ -115,7 +114,6 @@ export async function saveDraftAction(formData: FormData) {
     savedRevision = await prisma.revision.update({
       where: { id: revisionId },
       data: {
-        articleId: articleId || existing.articleId,
         conflictContent: nextDraftStorage.conflictContent,
         content: nextDraftStorage.content,
         filePath: nextDraftStorage.filePath,
@@ -137,10 +135,6 @@ export async function saveDraftAction(formData: FormData) {
       syncedMainSha: baseMainSha,
       title,
       author: { connect: { id: userId } },
-    }
-
-    if (articleId) {
-      createData.article = { connect: { id: articleId } }
     }
 
     savedRevision = await prisma.revision.create({

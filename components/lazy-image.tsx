@@ -88,7 +88,7 @@ export function LazyImage({ src, alt }: LazyImageProps) {
 
           <span
             className="
-              relative z-10 text-[9px] tracking-widest text-tech-main/40
+              relative z-10 text-[0.5625rem] tracking-widest text-tech-main/40
               uppercase select-none
             ">
             {status === "error" ? "// LOAD_FAIL" : "// IMG_LOAD"}

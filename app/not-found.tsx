@@ -27,7 +27,7 @@ export default function NotFound() {
           </div>
           <div
             className="
-              font-mono text-[10px] tracking-widest text-tech-main opacity-30
+              font-mono text-[0.625rem] tracking-widest text-tech-main opacity-30
             ">
             STATUS: 404 // NOT_FOUND
           </div>
@@ -37,7 +37,7 @@ export default function NotFound() {
         <div
           className="
             absolute top-8 right-12 hidden space-y-1 text-right font-mono
-            text-[10px] text-tech-main opacity-40 select-none
+            text-[0.625rem] text-tech-main opacity-40 select-none
             sm:block
           ">
           <p>
@@ -53,7 +53,7 @@ export default function NotFound() {
         <div
           className="
             absolute bottom-8 left-8 decor-desktop-only hidden font-mono
-            text-[10px] text-red-500/40 mix-blend-multiply select-none
+            text-[0.625rem] text-red-500/40 mix-blend-multiply select-none
             lg:block
           ">
           <span className="font-bold">
@@ -77,7 +77,7 @@ export default function NotFound() {
         <div
           className="
             absolute top-[20%] left-[5%] decor-desktop-only hidden font-mono
-            text-[10px] leading-tight whitespace-pre text-tech-main
+            text-[0.625rem] leading-tight whitespace-pre text-tech-main
             opacity-[0.25] mix-blend-multiply select-none
             xl:block
           ">
@@ -262,7 +262,7 @@ export default function NotFound() {
             <div
               className="
                 mt-8 flex animate-fade-in flex-col items-center space-y-1
-                border-t guide-line pt-4 font-mono text-[10px] opacity-50
+                border-t guide-line pt-4 font-mono text-[0.625rem] opacity-50
                 [animation-delay:1.4s] fill-mode-forwards
               ">
               <p>ERROR_CODE: 0x194 // TIMESTAMP: {new Date().toISOString()}</p>

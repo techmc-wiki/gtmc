@@ -41,7 +41,7 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
         </div>
         <div
           className="
-            flex items-center gap-3 font-mono text-[10px] tracking-widest
+            flex items-center gap-3 font-mono text-[0.625rem] tracking-widest
             text-tech-main
           ">
           <span>{lineCount} LINES</span>
@@ -52,7 +52,7 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
             title="Toggle line wrap"
             onClick={() => setIsWrapped((v) => !v)}
             className={`
-              font-mono text-[10px] tracking-widest transition-colors
+              font-mono text-[0.625rem] tracking-widest transition-colors
               ${
                 isWrapped
                   ? "text-tech-main"

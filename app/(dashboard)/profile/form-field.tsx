@@ -25,7 +25,7 @@ export function FormField({
       <label
         htmlFor={htmlFor}
         className="
-          block border-l-2 border-tech-main pl-2.5 font-mono text-[10px]
+          block border-l-2 border-tech-main pl-2.5 font-mono text-[0.625rem]
           font-bold tracking-tech-wide text-tech-main-dark uppercase
           sm:text-xs
         ">

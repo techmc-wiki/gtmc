@@ -53,7 +53,7 @@ export default async function ProfilePage() {
         <div>
           <p
             className="
-              mb-2 font-mono text-[10px] tracking-tech-wide text-tech-main/60
+              mb-2 font-mono text-[0.625rem] tracking-tech-wide text-tech-main/60
               uppercase
               sm:text-xs
             ">
@@ -89,7 +89,7 @@ export default async function ProfilePage() {
           </h1>
           <p
             className="
-              mt-2 flex items-center gap-2 font-mono text-[10px]
+              mt-2 flex items-center gap-2 font-mono text-[0.625rem]
               tracking-tech-wide text-tech-main/70
               sm:mt-3 sm:text-sm
             ">
@@ -99,7 +99,7 @@ export default async function ProfilePage() {
         </div>
         <div
           className="
-            mt-4 font-mono text-[9px] tracking-tech-wide text-tech-main/50
+            mt-4 font-mono text-[0.5625rem] tracking-tech-wide text-tech-main/50
             uppercase
             sm:text-xs
             md:mt-0
@@ -117,8 +117,8 @@ export default async function ProfilePage() {
         <div
           className="
             absolute top-0 right-0 border-b border-l guide-line bg-tech-main/5
-            px-2 py-1 font-mono text-[9px] tracking-widest text-tech-main/60
-            sm:text-[10px]
+            px-2 py-1 font-mono text-[0.5625rem] tracking-widest text-tech-main/60
+            sm:text-[0.625rem]
           ">
           CONFIG.PANEL_V2
         </div>
@@ -181,9 +181,9 @@ export default async function ProfilePage() {
               />
               <p
                 className="
-                  border-l border-tech-main/30 pl-2 font-mono text-[9px]
+                  border-l border-tech-main/30 pl-2 font-mono text-[0.5625rem]
                   tracking-widest text-tech-main/60 uppercase
-                  sm:text-[10px]
+                  sm:text-[0.625rem]
                 ">
                 {">"} REQUIRED: DIRECT IMAGE LINK (.PNG/.JPG/.GIF)
               </p>
@@ -196,8 +196,8 @@ export default async function ProfilePage() {
             ">
             <span
               className="
-                font-mono text-[9px] tracking-widest text-tech-main/50
-                sm:text-[10px]
+                font-mono text-[0.5625rem] tracking-widest text-tech-main/50
+                sm:text-[0.625rem]
               ">
               SEC_1_IDENTITY
             </span>
@@ -228,18 +228,18 @@ export default async function ProfilePage() {
                   EMAIL{" "}
                   <span
                     className="
-                      border border-tech-main/30 bg-tech-main/5 px-1 text-[8px]
+                      border border-tech-main/30 bg-tech-main/5 px-1 text-[0.5rem]
                       text-tech-main/60
-                      sm:text-[9px]
+                      sm:text-[0.5625rem]
                     ">
                     RO
                   </span>
                   {emailVisibility === "private" && (
                     <span
                       className="
-                        border border-amber-400/60 bg-amber-50 px-1 text-[8px]
+                        border border-amber-400/60 bg-amber-50 px-1 text-[0.5rem]
                         text-amber-600
-                        sm:text-[9px]
+                        sm:text-[0.5625rem]
                       ">
                       PRIVATE
                     </span>
@@ -259,9 +259,9 @@ export default async function ProfilePage() {
               {emailVisibility === "private" && (
                 <p
                   className="
-                    border-l border-amber-400/40 pl-2 font-mono text-[9px]
+                    border-l border-amber-400/40 pl-2 font-mono text-[0.5625rem]
                     tracking-widest text-amber-600/70 uppercase
-                    sm:text-[10px]
+                    sm:text-[0.625rem]
                   ">
                   {">"} YOUR GITHUB PRIMARY EMAIL VISIBILITY IS SET TO PRIVATE
                 </p>
@@ -298,8 +298,8 @@ export default async function ProfilePage() {
             ">
             <span
               className="
-                font-mono text-[9px] tracking-widest text-tech-main/50
-                sm:text-[10px]
+                font-mono text-[0.5625rem] tracking-widest text-tech-main/50
+                sm:text-[0.625rem]
               ">
               SEC_2_CREDENTIALS
             </span>

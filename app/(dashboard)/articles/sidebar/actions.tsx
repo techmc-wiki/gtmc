@@ -36,7 +36,7 @@ export function SidebarActions({
             onClick={onCreate}
             className="
               cursor-pointer border border-tech-main/40 px-3 py-1.5 pl-2
-              font-mono text-[11px] transition-colors
+              font-mono text-[0.6875rem] transition-colors
               hover:bg-tech-main hover:text-white
             ">
             + NEW DIR / FILE
@@ -50,7 +50,7 @@ export function SidebarActions({
               }}
               className="
                 flex-3 cursor-pointer border border-tech-main/40 px-3 py-1.5
-                pl-2 font-mono text-[11px] transition-colors
+                pl-2 font-mono text-[0.6875rem] transition-colors
                 hover:bg-tech-main hover:text-white
               ">
               ⊟ COLLAPSE ALL
@@ -61,7 +61,7 @@ export function SidebarActions({
               onClick={handleLocate}
               className="
                 flex-2 cursor-pointer border border-tech-main/40 px-3 py-1.5
-                pl-2 font-mono text-[11px] transition-colors
+                pl-2 font-mono text-[0.6875rem] transition-colors
                 hover:bg-tech-main hover:text-white
                 disabled:cursor-not-allowed disabled:opacity-50
               ">
@@ -85,7 +85,7 @@ export function SidebarActions({
           onClick={onCollapseAll}
           className="
             cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
-            text-[10px] transition-colors
+            text-[0.625rem] transition-colors
             hover:bg-tech-main hover:text-white
           ">
           ⊟ COLLAPSE ALL
@@ -96,7 +96,7 @@ export function SidebarActions({
           onClick={handleLocate}
           className="
             cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
-            text-[10px] transition-colors
+            text-[0.625rem] transition-colors
             hover:bg-tech-main hover:text-white
             disabled:cursor-not-allowed disabled:opacity-50
           ">
@@ -107,7 +107,7 @@ export function SidebarActions({
           onClick={onCreate}
           className="
             cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
-            text-[10px] transition-colors
+            text-[0.625rem] transition-colors
             hover:bg-tech-main hover:text-white
           ">
           + NEW DIR / FILE

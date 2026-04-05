@@ -41,7 +41,7 @@ export function ArticleNavigation({ prev, next }: ArticleNavigationProps) {
                 <span
                   className="
                     rounded-sm border border-tech-main/40 px-1.5 py-0.5
-                    text-[10px]
+                    text-[0.625rem]
                   ">
                   ↗
                 </span>
@@ -87,7 +87,7 @@ export function ArticleNavigation({ prev, next }: ArticleNavigationProps) {
                 <span
                   className="
                     rounded-sm border border-tech-main/40 px-1.5 py-0.5
-                    text-[10px]
+                    text-[0.625rem]
                   ">
                   ↗
                 </span>

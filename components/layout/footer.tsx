@@ -175,7 +175,7 @@ export default function Footer() {
         <div
           className="
             mt-16 flex flex-wrap items-center justify-center gap-4 border-t
-            border-tech-main/10 pt-6 font-mono text-[10px] tracking-wider
+            border-tech-main/10 pt-6 font-mono text-[0.625rem] tracking-wider
             text-tech-main/50 uppercase
             md:justify-between
           ">

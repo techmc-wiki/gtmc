@@ -33,8 +33,8 @@ export function MidgroundLayer({
         </div>
         <div
           className="
-            font-mono text-[10px] tracking-widest text-tech-main opacity-30
-          ">
+             font-mono text-[0.625rem] tracking-widest text-tech-main opacity-30
+           ">
           BUILD.2026.03 // SECTOR-7G
         </div>
       </div>
@@ -42,10 +42,10 @@ export function MidgroundLayer({
       {/* 右上角HUD */}
       <div
         className="
-          absolute top-8 right-12 hidden space-y-1 text-right font-mono
-          text-[10px] text-tech-main opacity-40 select-none
-          sm:block
-        ">
+           absolute top-8 right-12 hidden space-y-1 text-right font-mono
+           text-[0.625rem] text-tech-main opacity-40 select-none
+           sm:block
+         ">
         <p>
           SYS.TPS ::{" "}
           <span className="font-bold text-tech-main-dark">20.0 *</span>
@@ -55,7 +55,7 @@ export function MidgroundLayer({
         <p>BLOCK.ENT :: 1,204</p>
         <div className="section-divider" />
         <p>COORD : X:1024 Y:64 Z:-512</p>
-        <p className="mt-2 text-[8px] opacity-70">
+        <p className="mt-2 text-[0.5rem] opacity-70">
           Light: 15 (15 sky, 0 block) <br /> Biome: minecraft:plains
         </p>
       </div>
@@ -73,9 +73,9 @@ export function MidgroundLayer({
         blurMax={blurMax}>
         <div
           className="
-            border-l-4 border-tech-main/40 bg-tech-main/5 py-2 pl-4 font-mono
-            text-[11px] leading-relaxed whitespace-pre text-tech-main
-          ">
+             border-l-4 border-tech-main/40 bg-tech-main/5 py-2 pl-4 font-mono
+             text-[0.6875rem] leading-relaxed whitespace-pre text-tech-main
+           ">
           {`{
   "Id": "minecraft:chest",
   "x": 1024, "y": 64, "z": -512,
@@ -95,36 +95,10 @@ export function MidgroundLayer({
       {/* 堆栈跟踪装饰 */}
       <DecorElement
         className="
-          pointer-events-none absolute bottom-8 left-8 decor-desktop-only hidden
-          font-mono text-[10px] text-red-500/40 mix-blend-multiply select-none
-          lg:block
-        "
-        smoothMouseX={smoothMouseX}
-        smoothMouseY={smoothMouseY}
-        blurMax={blurMax}>
-        <span className="font-bold">
-          at net.minecraft.world.level.block.piston.PistonBaseBlock.moveBlocks
-        </span>
-        (PistonBaseBlock.java:492) {"\n"}
-        <br />
-        <span className="font-bold">
-          at net.minecraft.world.level.Level.tickBlockEntities
-        </span>
-        (Level.java:833) {"\n"}
-        <br />
-        <span className="font-bold text-red-600/60">
-          Caused by: java.util.ConcurrentModificationException: Ticking block
-          entity
-        </span>
-      </DecorElement>
-
-      {/* 分散的瞄准/坐标十字 */}
-      <div
-        className="
-          absolute top-1/4 right-[25%] decor-desktop-only hidden text-xl
-          font-light opacity-30 select-none
-          md:block
-        ">
+           pointer-events-none absolute bottom-8 left-8 decor-desktop-only hidden
+           font-mono text-[0.625rem] text-red-500/40 mix-blend-multiply select-none
+           lg:block
+         ">
         +
       </div>
       <div
@@ -151,9 +125,9 @@ export function MidgroundLayer({
           bg-tech-main/20
           md:block
         ">
-        <span className="absolute -top-4 right-10 font-mono text-[10px] opacity-50">
-          L-AXIS
-        </span>
+        <span className="absolute -top-4 right-10 font-mono text-[0.625rem] opacity-50">
+           L-AXIS
+         </span>
       </div>
       <div
         className="

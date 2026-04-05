@@ -70,7 +70,7 @@ export function CreateDocModal({
             <label
               htmlFor="modal-title"
               className="
-                mb-1 block text-[11px] tracking-wider text-tech-main/80
+                mb-1 block text-[0.6875rem] tracking-wider text-tech-main/80
                 uppercase
               ">
               Title
@@ -99,7 +99,7 @@ export function CreateDocModal({
             <label
               htmlFor="modal-slug"
               className="
-                mb-1 block text-[11px] tracking-wider text-tech-main/80
+                mb-1 block text-[0.6875rem] tracking-wider text-tech-main/80
                 uppercase
               ">
               Slug (URL path)
@@ -147,7 +147,7 @@ export function CreateDocModal({
             <label
               htmlFor="modal-parent"
               className="
-                mb-1 block text-[11px] tracking-wider text-tech-main/80
+                mb-1 block text-[0.6875rem] tracking-wider text-tech-main/80
                 uppercase
               ">
               Parent Directory
@@ -179,7 +179,7 @@ export function CreateDocModal({
               type="button"
               onClick={onClose}
               className="
-                cursor-pointer border border-tech-main/40 px-4 py-2 text-[11px]
+                cursor-pointer border border-tech-main/40 px-4 py-2 text-[0.6875rem]
                 font-bold tracking-widest text-tech-main uppercase
                 transition-colors
                 hover:bg-tech-main/10
@@ -189,7 +189,7 @@ export function CreateDocModal({
             <button
               type="submit"
               className="
-                cursor-pointer bg-tech-main px-4 py-2 text-[11px] font-bold
+                cursor-pointer bg-tech-main px-4 py-2 text-[0.6875rem] font-bold
                 tracking-widest text-white uppercase
                 shadow-[2px_2px_0_0_rgba(var(--tech-main),0.4)]
                 transition-opacity

@@ -119,7 +119,7 @@ export default function LitematicaViewer({
         </span>
         <span
           className="
-          hidden text-[10px] tracking-widest text-tech-main/80 uppercase
+          hidden text-[0.625rem] tracking-widest text-tech-main/80 uppercase
           md:inline-block
         ">
           INTERACTIVE BLUEPRINT
@@ -143,7 +143,7 @@ export default function LitematicaViewer({
             <kbd
               className="
               rounded-[2px] border border-tech-main/30 bg-white px-1.5 py-0.5
-              font-sans text-[10px] font-semibold text-tech-main shadow-sm
+              font-sans text-[0.625rem] font-semibold text-tech-main shadow-sm
             ">
               左键
             </kbd>{" "}
@@ -154,7 +154,7 @@ export default function LitematicaViewer({
             <kbd
               className="
               rounded-[2px] border border-tech-main/30 bg-white px-1.5 py-0.5
-              font-sans text-[10px] font-semibold text-tech-main shadow-sm
+              font-sans text-[0.625rem] font-semibold text-tech-main shadow-sm
             ">
               右键
             </kbd>{" "}
@@ -165,7 +165,7 @@ export default function LitematicaViewer({
             <kbd
               className="
               rounded-[2px] border border-tech-main/30 bg-white px-1.5 py-0.5
-              font-sans text-[10px] font-semibold text-tech-main shadow-sm
+              font-sans text-[0.625rem] font-semibold text-tech-main shadow-sm
             ">
               滚轮
             </kbd>{" "}

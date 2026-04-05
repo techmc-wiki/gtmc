@@ -60,8 +60,8 @@ export function SidebarTree({
                 key={`appendix-separator-before-${item.id}`}
                 className="
                   mt-3 mb-1.5 flex list-none items-center gap-2 pl-1 font-mono
-                  text-[10px] tracking-[0.12em] text-tech-main/50 uppercase
-                  md:text-[11px]
+                  text-[0.625rem] tracking-[0.12em] text-tech-main/50 uppercase
+                  md:text-[0.6875rem]
                 ">
                 <span className="h-px flex-1 bg-tech-main/25" />
                 <span>Appendix</span>
@@ -74,12 +74,12 @@ export function SidebarTree({
               data-sidebar-row="1"
               ref={!item.isFolder && isActive ? activeItemRef : undefined}
               className={`
-                relative my-1.5 list-none font-mono text-[16px] transition-all
-                duration-300
-                before:absolute before:top-0 before:left-0 before:h-full
-                before:w-0.5 before:transition-all before:duration-200
-                before:content-['']
-                md:text-base
+                 relative my-1.5 list-none font-mono text-[1rem] transition-all
+                 duration-300
+                 before:absolute before:top-0 before:left-0 before:h-full
+                 before:w-0.5 before:transition-all before:duration-200
+                 before:content-['']
+                 md:text-base
                 ${
                   !item.isFolder && isActive
                     ? `before:w-[3px] before:bg-tech-main`
@@ -133,7 +133,7 @@ export function SidebarTree({
                         onClick={toggleFileExpanded}
                         className="
                           absolute top-1/2 left-0 z-10 -translate-y-1/2
-                          cursor-pointer text-[10px] text-tech-main
+                          cursor-pointer text-[0.625rem] text-tech-main
                           transition-opacity
                           hover:text-tech-main/80
                           focus:outline-none
@@ -164,7 +164,7 @@ export function SidebarTree({
                         <span
                           className="
                             mx-1 inline-block shrink-0 bg-[#4c5b96] px-[3px]
-                            align-middle font-mono text-[9px] font-bold
+                            align-middle font-mono text-[0.5625rem] font-bold
                             tracking-widest text-white select-none
                           ">
                           ADVANCED
@@ -192,9 +192,9 @@ export function SidebarTree({
                             <li
                               key={h2.id}
                               className={`
-                                -ml-px border-l py-1.5 pl-4 text-[13px]
+                                -ml-px border-l py-1.5 pl-4 text-[0.8125rem]
                                 transition-all duration-200
-                                md:text-[13px]
+                                md:text-[0.8125rem]
                                 ${
                                   h2.id === activeHeadingId
                                     ? `
@@ -215,9 +215,9 @@ export function SidebarTree({
                                 {item.isAdvanced && (
                                   <span
                                     className="
-                                    mr-1.5 align-middle text-[6px]
-                                    text-[#4c5b96]
-                                  ">
+                                     mr-1.5 align-middle text-[0.375rem]
+                                     text-[#4c5b96]
+                                   ">
                                     ■
                                   </span>
                                 )}

@@ -41,8 +41,8 @@ export function DraftFileList({
           </p>
           <p
             className="
-              truncate font-mono text-[11px] text-tech-main/60 uppercase
-            "
+               truncate font-mono text-[0.6875rem] text-tech-main/60 uppercase
+             "
             title="SAVE_AND_REVIEW_APPLY_TO_ALL_FILES">
             SAVE_AND_REVIEW_APPLY_TO_ALL_FILES
           </p>
@@ -92,8 +92,8 @@ export function DraftFileList({
                 </span>
                 <span
                   className="
-                    w-full truncate font-mono text-[11px] text-tech-main/60
-                  ">
+                     w-full truncate font-mono text-[0.6875rem] text-tech-main/60
+                   ">
                   {file.filePath || "PATH_NOT_SET"}
                 </span>
               </button>

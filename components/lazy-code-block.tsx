@@ -154,7 +154,7 @@ export function LazyCodeBlock({ lineCount, children }: LazyCodeBlockProps) {
             ">
             <span
               className="
-                font-mono text-[9px] tracking-widest text-tech-main/50 uppercase
+                font-mono text-[0.5625rem] tracking-widest text-tech-main/50 uppercase
                 select-none
               ">
               {"//"} SYNTAX_HIGHLIGHT

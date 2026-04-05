@@ -63,11 +63,11 @@ export function BackgroundLayer({
       {/* NBT二进制/Hex Dump 背景层 */}
       <DecorElement
         className="
-          pointer-events-none absolute top-[20%] left-[5%] decor-desktop-only
-          hidden font-mono text-[10px] leading-tight whitespace-pre
-          text-tech-main opacity-[0.25] mix-blend-multiply select-none
-          xl:block
-        "
+           pointer-events-none absolute top-[20%] left-[5%] decor-desktop-only
+           hidden font-mono text-[0.625rem] leading-tight whitespace-pre
+           text-tech-main opacity-[0.25] mix-blend-multiply select-none
+           xl:block
+         "
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}>
@@ -131,8 +131,8 @@ export function BackgroundLayer({
         </svg>
         <span
           className="
-            absolute -right-12 bottom-4 font-mono text-[10px] opacity-80
-          ">
+             absolute -right-12 bottom-4 font-mono text-[0.625rem] opacity-80
+           ">
           FIG 1. ISOMETRIC_BLOCK
         </span>
         <svg
@@ -174,12 +174,12 @@ export function BackgroundLayer({
       {/* 2XL 专属：红石逻辑代数 */}
       <DecorElement
         className="
-          pointer-events-none absolute top-[40%] right-[6%] decor-desktop-only
-          hidden border-l border-tech-main/40 pl-4 font-mono text-[11px]
-          leading-relaxed text-tech-main opacity-[0.35] mix-blend-multiply
-          select-none
-          2xl:block
-        "
+           pointer-events-none absolute top-[40%] right-[6%] decor-desktop-only
+           hidden border-l border-tech-main/40 pl-4 font-mono text-[0.6875rem]
+           leading-relaxed text-tech-main opacity-[0.35] mix-blend-multiply
+           select-none
+           2xl:block
+         "
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}>
@@ -192,7 +192,7 @@ export function BackgroundLayer({
         <br />
         <span>C_out = MUX(S, A, B)</span>
         <br />
-        <div className="mt-2 text-[9px] opacity-80">
+        <div className="mt-2 text-[0.5625rem] opacity-80">
           * VALIDATING SIGNAL STRENGTH (0-15)
           <br />* QUASI_CONNECTIVITY = TRUE
         </div>
@@ -201,11 +201,11 @@ export function BackgroundLayer({
       {/* 2XL 专属：空间坐标变换矩阵 */}
       <DecorElement
         className="
-          pointer-events-none absolute right-[25%] bottom-[30%]
-          decor-desktop-only hidden font-mono text-[11px] opacity-[0.35]
-          mix-blend-multiply select-none
-          2xl:block
-        "
+           pointer-events-none absolute right-[25%] bottom-[30%]
+           decor-desktop-only hidden font-mono text-[0.6875rem] opacity-[0.35]
+           mix-blend-multiply select-none
+           2xl:block
+         "
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}>
@@ -239,11 +239,11 @@ export function BackgroundLayer({
       {/* 2XL 专属：内存簇/寄存器网格 */}
       <DecorElement
         className="
-          pointer-events-none absolute top-[60%] left-[3%] decor-desktop-only
-          hidden font-mono text-[10px] opacity-[0.35] mix-blend-multiply
-          select-none
-          2xl:block
-        "
+           pointer-events-none absolute top-[60%] left-[3%] decor-desktop-only
+           hidden font-mono text-[0.625rem] opacity-[0.35] mix-blend-multiply
+           select-none
+           2xl:block
+         "
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}>

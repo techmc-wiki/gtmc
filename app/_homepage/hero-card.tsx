@@ -48,10 +48,10 @@ export function HeroCard({
       {/* 尺寸标注装饰 */}
       <div
         className="
-          absolute -top-6 left-0 flex w-full animate-fade-in items-center
-          font-mono text-[10px] opacity-0 [animation-delay:1.5s]
-          fill-mode-forwards
-        ">
+           absolute -top-6 left-0 flex w-full animate-fade-in items-center
+           font-mono text-[0.625rem] opacity-0 [animation-delay:1.5s]
+           fill-mode-forwards
+         ">
         <span>|&lt;</span>
         <span className="mx-2 grow border-t border-tech-main/30"></span>
         <span>{cardWidth}px</span>
@@ -192,9 +192,9 @@ export function HeroCard({
             />
             <span
               className="
-                font-mono text-[8px] opacity-60
-                sm:text-[12px]
-              ">
+                 font-mono text-[0.5rem] opacity-60
+                 sm:text-[0.75rem]
+               ">
               <span className="sm:hidden">
                 -&gt; TUTORIALS
                 <br />

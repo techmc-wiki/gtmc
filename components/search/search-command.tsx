@@ -241,7 +241,7 @@ export function SearchCommand() {
       <button
         className="
           hidden cursor-pointer items-center gap-2 border border-tech-main/40
-          px-3 py-1.5 font-mono text-[11px] text-tech-main/60 transition-colors
+          px-3 py-1.5 font-mono text-[0.6875rem] text-tech-main/60 transition-colors
           hover:bg-tech-main hover:text-white
           md:flex
         ">
@@ -249,7 +249,7 @@ export function SearchCommand() {
         SEARCH
         <span
           className="
-            ml-1 border border-tech-main/30 px-1 py-0.5 text-[9px]
+            ml-1 border border-tech-main/30 px-1 py-0.5 text-[0.5625rem]
             text-tech-main/40
           ">
           <span className="flex flex-row items-center gap-0.5 leading-none">
@@ -267,7 +267,7 @@ export function SearchCommand() {
         onClick={() => setIsOpen(true)}
         className="
           hidden cursor-pointer items-center gap-2 border border-tech-main/40
-          px-3 py-1.5 font-mono text-[11px] text-tech-main/60 transition-colors
+          px-3 py-1.5 font-mono text-[0.6875rem] text-tech-main/60 transition-colors
           hover:bg-tech-main hover:text-white
           md:flex
         ">
@@ -276,7 +276,7 @@ export function SearchCommand() {
         <div className="w-4" />
         <span
           className="
-            ml-1 border border-tech-main/30 px-1 py-0.5 text-[9px]
+            ml-1 border border-tech-main/30 px-1 py-0.5 text-[0.5625rem]
             text-tech-main/40
           ">
           {shortcutLabel}
@@ -342,7 +342,7 @@ export function SearchCommand() {
                   onClick={closeModal}
                   className="
                     cursor-pointer border border-tech-main/40 px-2 py-0.5
-                    font-mono text-[10px] text-tech-main/70 transition-colors
+                    font-mono text-[0.625rem] text-tech-main/70 transition-colors
                     hover:bg-tech-main hover:text-white
                   ">
                   ESC
@@ -377,7 +377,7 @@ export function SearchCommand() {
                 {query.length >= 2 && (
                   <div
                     className="
-                      border-b guide-line px-4 py-2 font-mono text-[10px]
+                      border-b guide-line px-4 py-2 font-mono text-[0.625rem]
                       tracking-wider text-tech-main/70 uppercase
                     ">
                     {isLoading
@@ -448,7 +448,7 @@ export function SearchCommand() {
                           {/* Path */}
                           <div
                             className="
-                              mt-0.5 font-mono text-[10px] tracking-wider
+                              mt-0.5 font-mono text-[0.625rem] tracking-wider
                               text-tech-main/60 uppercase
                             ">
                             PATH: {slugToPath(result.slug)}
@@ -467,7 +467,7 @@ export function SearchCommand() {
                           {/* Match type badge */}
                           <div
                             className="
-                              absolute top-3 right-4 font-mono text-[9px]
+                              absolute top-3 right-4 font-mono text-[0.5625rem]
                               tracking-wider text-tech-main/50 uppercase
                             ">
                             {result.matchType === "content" ? "BODY" : "TITLE"}
@@ -490,7 +490,7 @@ export function SearchCommand() {
                     </div>
                     <div
                       className="
-                      mt-1 font-mono text-[10px] text-tech-main/40
+                      mt-1 font-mono text-[0.625rem] text-tech-main/40
                     ">
                       Try different keywords
                     </div>
@@ -509,7 +509,7 @@ export function SearchCommand() {
                     </div>
                     <div
                       className="
-                      mt-1 font-mono text-[10px] text-tech-main/40
+                      mt-1 font-mono text-[0.625rem] text-tech-main/40
                     ">
                       Type at least 2 characters
                     </div>
@@ -521,7 +521,7 @@ export function SearchCommand() {
               <footer
                 className="
                   flex items-center gap-4 border-t guide-line px-4 py-2
-                  font-mono text-[10px] text-tech-main/60
+                  font-mono text-[0.625rem] text-tech-main/60
                 ">
                 <span>
                   <kbd className="kbd-badge">&#x2191;&#x2193;</kbd> NAVIGATE

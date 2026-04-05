@@ -498,7 +498,7 @@ function TreeNode({
             onClick={() => onTogglePath(node.path)}
             className="
               flex h-8 w-6 shrink-0 items-center justify-center font-mono
-              text-[10px] text-tech-main/50 transition-colors
+              text-[0.625rem] text-tech-main/50 transition-colors
               hover:text-tech-main
             ">
             {isExpanded ? "▼" : "▶"}
@@ -507,7 +507,7 @@ function TreeNode({
           <span
             className="
               inline-flex h-8 w-6 shrink-0 items-center justify-center font-mono
-              text-[10px] text-tech-main/20
+              text-[0.625rem] text-tech-main/20
             ">
             ·
           </span>
@@ -527,7 +527,7 @@ function TreeNode({
           }}
           className={`
             flex min-h-8 flex-1 items-center px-1 text-left font-mono
-            text-[14px] tracking-wide transition-colors
+            text-[0.875rem] tracking-wide transition-colors
             ${
               node.isFolder
                 ? isFolderSelected

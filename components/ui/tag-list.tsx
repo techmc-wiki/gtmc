@@ -12,7 +12,7 @@ export function TagList({ tags, className }: TagListProps) {
         <span
           key={tag}
           className="
-            border guide-line bg-tech-main/5 px-1.5 py-0.5 font-mono text-[10px]
+            border guide-line bg-tech-main/5 px-1.5 py-0.5 font-mono text-[0.625rem]
             text-tech-main/70 uppercase
           ">
           {tag}

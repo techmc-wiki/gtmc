@@ -196,7 +196,7 @@ export default async function ReviewDetailPage({
           <div
             className="
               mt-4 flex flex-wrap gap-2 border guide-line bg-white/60 p-3
-              font-mono text-[11px] text-tech-main/70 uppercase
+              font-mono text-[0.6875rem] text-tech-main/70 uppercase
             ">
             {linkedDraftFiles.files.map((file) => (
               <span key={file.id} className="border guide-line px-2 py-1">

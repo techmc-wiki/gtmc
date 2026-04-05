@@ -12,7 +12,7 @@ export async function ProfileButton() {
         href="/login"
         className="
           relative flex items-center gap-2 overflow-hidden border
-          border-tech-main/40 bg-tech-main/10 px-4 py-1.5 font-mono text-[10px]
+          border-tech-main/40 bg-tech-main/10 px-4 py-1.5 font-mono text-[0.625rem]
           tracking-widest text-tech-main uppercase transition-all duration-300
           hover:bg-tech-main hover:text-white
           md:text-xs

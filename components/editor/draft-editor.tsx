@@ -564,7 +564,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   SLOT_{activeFileIndex}/{draftCollection.files.length}
                 </p>
               </div>
-              <p className="font-mono text-[11px] text-tech-main/60 uppercase">
+              <p className="font-mono text-[0.6875rem] text-tech-main/60 uppercase">
                 DIRECT_REPO_EDIT
               </p>
             </div>

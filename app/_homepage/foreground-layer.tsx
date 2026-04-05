@@ -107,7 +107,7 @@ export function ForegroundLayer({
         className="
         pointer-events-none relative mt-12 flex space-x-1 opacity-40
       ">
-        <div className="absolute -top-4 font-mono text-[8px] text-tech-main/60">
+        <div className="absolute -top-4 font-mono text-[0.5rem] text-tech-main/60">
           INVENTORY_SLOTS_
         </div>
         {[...Array(9)].map((_, i) => (

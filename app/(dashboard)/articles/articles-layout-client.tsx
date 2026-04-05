@@ -43,7 +43,7 @@ function TreeLoadingPlaceholder() {
       <ScanConfirmOverlay className="opacity-40" />
       <SectionRail
         label="TREE_BOOTSTRAP"
-        className="mb-3 text-[10px] opacity-75"
+        className="mb-3 text-[0.625rem] opacity-75"
       />
 
       <div className="space-y-6 pr-3">
@@ -124,14 +124,14 @@ function SidebarTreeWrapper({
   return (
     <div
       className={`
-        w-full pb-4 font-mono text-[15px] wrap-break-word
-        [&_li]:mt-1.5
-        [&_ul]:list-none
-        [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l [&_ul_ul]:guide-line
-        [&_ul_ul]:pl-3
-        [&>ul]:pl-0
-        ${showPlaceholder ? "h-full min-h-full pb-0" : ""}
-      `}
+         w-full pb-4 font-mono text-[0.9375rem] wrap-break-word
+         [&_li]:mt-1.5
+         [&_ul]:list-none
+         [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l [&_ul_ul]:guide-line
+         [&_ul_ul]:pl-3
+         [&>ul]:pl-0
+         ${showPlaceholder ? "h-full min-h-full pb-0" : ""}
+       `}
       aria-busy={showPlaceholder}>
       {showPlaceholder ? (
         <div className="h-full min-h-full pr-4">
@@ -159,7 +159,6 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const [treeData, setTreeData] = useState<TreeNode[]>(tree)
   const [isTreeLoading, setIsTreeLoading] = useState(tree.length === 0)
   const [sidebarHidden, setSidebarHidden] = useState(false)
-  const wrapperRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
   const desktopSidebarRef = useRef<SidebarClientHandle>(null)
   const floatingCardSidebarRef = useRef<SidebarClientHandle>(null)
@@ -471,7 +470,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                   aria-expanded={!sidebarHidden}
                   data-sidebar-toggle=""
                   className="
-                    absolute top-0 -left-[6px] z-40 flex h-8 w-[12px]
+                    absolute top-0 -left-1.5 z-40 flex h-8 w-3
                     -translate-y-1/2 cursor-pointer items-center justify-center
                     border guide-line bg-tech-bg text-tech-main/40
                     transition-[opacity,color,background-color] duration-300
@@ -480,7 +479,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                   ">
                   <span
                     className="
-                    text-[8px] leading-none font-bold select-none
+                    text-[0.5rem] leading-none font-bold select-none
                   ">
                     {sidebarHidden ? "▶" : "◀"}
                   </span>
@@ -497,14 +496,14 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
             ${
               sidebarHidden
                 ? `
-                  md:max-w-4xl
-                  xl:max-w-5xl
-                  [1920px]:max-w-7xl
+                  md:max-w-3xl
+                  xl:max-w-3xl
+                  [1920px]:max-w-4xl
                 `
                 : `
                   md:max-w-2xl
                   xl:max-w-3xl
-                  [1920px]:max-w-5xl
+                  [1920px]:max-w-4xl
                 `
             }
           `}>

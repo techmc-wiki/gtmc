@@ -102,7 +102,7 @@ export function getMarkdownComponents(rawPath: string) {
       aria-hidden="true"
       className="
         mx-2 inline-block shrink-0 bg-[#4c5b96] px-1.5 py-0.5 align-middle
-        font-mono text-[10px] font-bold tracking-widest text-white select-none
+        font-mono text-[0.625rem] font-bold tracking-widest text-white select-none
       ">
       ADVANCED
     </span>
@@ -319,7 +319,7 @@ export function getMarkdownComponents(rawPath: string) {
       <ul
         className="
           mb-6 list-disc space-y-2 border-l border-tech-main/30 pl-8 font-sans
-          text-[14px] text-slate-800
+          text-[0.875rem] text-slate-800
         "
         {...props}
       />
@@ -327,7 +327,7 @@ export function getMarkdownComponents(rawPath: string) {
     ol: ({ ...props }: MarkdownComponentProps) => (
       <ol
         className="
-          mb-6 list-decimal space-y-2 pl-8 font-sans text-[14px] text-slate-800
+          mb-6 list-decimal space-y-2 pl-8 font-sans text-[0.875rem] text-slate-800
         "
         {...props}
       />
@@ -402,7 +402,7 @@ export function getMarkdownComponents(rawPath: string) {
               ">
               <span
                 className="
-                  font-mono text-[10px] leading-none font-bold tracking-[0.3em]
+                  font-mono text-[0.625rem] leading-none font-bold tracking-[0.3em]
                   text-white select-none [writing-mode:vertical-rl]
                 ">
                 ADVANCED

@@ -49,8 +49,8 @@ export default function LoginPage() {
         </div>
         <div
           className="
-            font-mono text-[10px] tracking-widest text-tech-main opacity-30
-          ">
+             font-mono text-[0.625rem] tracking-widest text-tech-main opacity-30
+           ">
           {"SECURE.CONN // PORT-443"}
         </div>
       </div>
@@ -58,10 +58,10 @@ export default function LoginPage() {
       {/* 右上角HUD：模拟服务器/图纸数据 */}
       <div
         className="
-          absolute top-8 right-12 z-0 hidden space-y-1 text-right font-mono
-          text-[10px] text-tech-main opacity-40 select-none
-          sm:block
-        ">
+             absolute top-8 right-12 z-0 hidden space-y-1 text-right font-mono
+             text-[0.625rem] text-tech-main opacity-40 select-none
+             sm:block
+           ">
         <p>
           STATUS :: <span className="font-bold text-red-500">LOCKED *</span>
         </p>
@@ -81,9 +81,9 @@ export default function LoginPage() {
         ">
         <div
           className="
-            border-r-2 guide-line pr-4 text-right font-mono text-[10px]
-            leading-relaxed whitespace-pre text-tech-main
-          ">
+             border-r-2 guide-line pr-4 text-right font-mono text-[0.625rem]
+             leading-relaxed whitespace-pre text-tech-main
+           ">
           <span className="font-bold text-tech-main-dark">@PostMapping</span>(
           <span className="text-tech-main-dark">&quot;/login&quot;</span>){"\n"}
           <span className="text-tech-main-dark">public</span>{" "}
@@ -154,11 +154,11 @@ export default function LoginPage() {
           {/* 尺寸标注 decoration */}
           <div
             className="
-              absolute top-1/2 -right-6 hidden h-full -translate-y-1/2
-              animate-fade-in flex-col items-center font-mono text-[10px]
-              opacity-0 [animation-delay:1.5s] fill-mode-forwards
-              sm:flex
-            ">
+               absolute top-1/2 -right-6 hidden h-full -translate-y-1/2
+               animate-fade-in flex-col items-center font-mono text-[0.625rem]
+               opacity-0 [animation-delay:1.5s] fill-mode-forwards
+               sm:flex
+             ">
             <span className="block h-10 w-px border-l border-tech-main/30"></span>
             <span className="rotate-90 py-2 whitespace-nowrap">
               SECURE FORM
@@ -297,9 +297,9 @@ export default function LoginPage() {
 
             <div
               className="
-                mt-6 animate-fade-in font-mono text-[10px] opacity-40
-                [animation-delay:1.6s] fill-mode-forwards
-              ">
+                 mt-6 animate-fade-in font-mono text-[0.625rem] opacity-40
+                 [animation-delay:1.6s] fill-mode-forwards
+               ">
               <p>PROTECTED BY GTMC_SECURE_GATEWAY v2.0</p>
               <Link
                 href="/"

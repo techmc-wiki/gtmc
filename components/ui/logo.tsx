@@ -20,7 +20,7 @@ export function Logo({
   }
 
   const slashClasses = {
-    sm: "text-[10px]",
+    sm: "text-[0.625rem]",
     md: "text-sm",
     lg: "text-lg",
     xl: "text-sm sm:text-base md:text-2xl lg:text-3xl",

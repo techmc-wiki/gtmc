@@ -248,7 +248,7 @@ export default function ConflictResolver({
                     </span>
                     <span
                       className="
-                        truncate font-mono text-[11px] text-tech-main/60
+                        truncate font-mono text-[0.6875rem] text-tech-main/60
                       ">
                       {file.filePath || "PATH_NOT_SET"}
                     </span>

@@ -1,6 +1,5 @@
-import ReactMarkdown from "react-markdown"
 import { BrutalCard } from "@/components/ui/brutal-card"
-import { getMarkdownComponents, getPluginsForContent } from "@/lib/markdown"
+import { MarkdownRenderer } from "@/lib/markdown"
 import { getCachedRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
 import "katex/dist/katex.min.css"
 
@@ -15,12 +14,7 @@ export async function FeatureReadonlyView({
   content,
   tags,
 }: FeatureReadonlyViewProps) {
-  const shikiPlugin = await getCachedRehypeShiki()
-  const { remarkPlugins, rehypePlugins } = getPluginsForContent(
-    content,
-    shikiPlugin
-  )
-  const markdownComponents = getMarkdownComponents("")
+  const shikiPlugin = await getCachedRehypeShiki(content)
 
   return (
     <BrutalCard>
@@ -70,12 +64,7 @@ export async function FeatureReadonlyView({
                   selection:bg-tech-main/20 selection:text-slate-900
                   sm:p-8
                 ">
-                <ReactMarkdown
-                  remarkPlugins={remarkPlugins}
-                  rehypePlugins={rehypePlugins}
-                  components={markdownComponents}>
-                  {content}
-                </ReactMarkdown>
+                <MarkdownRenderer content={content} shikiPlugin={shikiPlugin} />
               </div>
             ) : (
               <p className="editor-panel">NOTHING_TO_PREVIEW_</p>

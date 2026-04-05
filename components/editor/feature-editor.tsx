@@ -323,7 +323,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
                 selection:bg-tech-main/20 selection:text-slate-900
                 sm:p-8
               ">
-              <LazyMarkdownPreview content={content} />
+              <LazyMarkdownPreview content={content} rawPath="" />
             </div>
           ) : (
             <p className="editor-panel">NOTHING_TO_PREVIEW_</p>

@@ -1,5 +1,10 @@
 import { CodeBlockPre } from "@/components/code-block-pre"
 import { createAComponent } from "@/lib/markdown/a-component"
+import {
+  ANSI_COLOR_NAMES,
+  createAnsiColorTagName,
+  type AnsiColorName,
+} from "@/lib/markdown/ansi-colors"
 import type {
   MarkdownAstNode,
   MarkdownComponent,
@@ -96,6 +101,24 @@ import LitematicaViewer from "@/components/articles/litematica-viewer"
 export function getMarkdownComponents(rawPath: string) {
   const aComponent = createAComponent(rawPath)
   const imageComponent = createImageComponent(rawPath)
+  const ansiColorStyles: Record<AnsiColorName, Record<string, string>> = {
+    black: { color: "#334155" },
+    red: { color: "#b91c1c" },
+    green: { color: "#047857" },
+    yellow: { color: "#a16207" },
+    blue: { color: "#2563eb" },
+    magenta: { color: "#a21caf" },
+    cyan: { color: "#0f766e" },
+    white: { color: "#64748b" },
+    "bright-black": { color: "#0f172a" },
+    "bright-red": { color: "#dc2626" },
+    "bright-green": { color: "#059669" },
+    "bright-yellow": { color: "#ca8a04" },
+    "bright-blue": { color: "#1d4ed8" },
+    "bright-magenta": { color: "#c026d3" },
+    "bright-cyan": { color: "#0891b2" },
+    "bright-white": { color: "#475569" },
+  }
 
   const advancedBadge = (
     <span
@@ -109,7 +132,7 @@ export function getMarkdownComponents(rawPath: string) {
   )
 
   const makeSpan = (style: Record<string, string>) => {
-    function SpanComponent({ ...props }: MarkdownComponentProps) {
+    function SpanComponent({ node: _node, ...props }: MarkdownComponentProps) {
       return <span style={style} {...props} />
     }
     SpanComponent.displayName = "makeSpan"
@@ -119,6 +142,7 @@ export function getMarkdownComponents(rawPath: string) {
   function hiddenComponent({
     className,
     children,
+    node: _node,
     ...props
   }: MarkdownComponentProps) {
     return (
@@ -187,7 +211,15 @@ export function getMarkdownComponents(rawPath: string) {
     return <CodeBlockPre {...props}>{children}</CodeBlockPre>
   }
 
+  const ansiColorComponents = Object.fromEntries(
+    ANSI_COLOR_NAMES.map((color) => [
+      createAnsiColorTagName(color),
+      makeSpan(ansiColorStyles[color]),
+    ])
+  ) as Record<string, MarkdownComponent>
+
   return {
+    ...ansiColorComponents,
     wtucolor: makeSpan({ color: "red" }),
     ttcolor: makeSpan({ color: "#ff7300" }),
     ctcolor: makeSpan({ color: "#ffae00" }),
@@ -195,12 +227,13 @@ export function getMarkdownComponents(rawPath: string) {
     eucolor: makeSpan({ color: "blue" }),
     tecolor: makeSpan({ color: "blueviolet" }),
     atcolor: makeSpan({ color: "purple" }),
-    heightlightnormal: makeSpan({ color: "chartreuse" }),
-    nc: ({ ...props }: MarkdownComponentProps) => <span {...props} />,
-    pp: ({ ...props }: MarkdownComponentProps) => <span {...props} />,
+    nc: ({ node: _node, ...props }: MarkdownComponentProps) => (
+      <span {...props} />
+    ),
+    pp: ({ node: _node, ...props }: MarkdownComponentProps) => (
+      <span {...props} />
+    ),
     hidden: hiddenComponent,
-    heightlightwarning: makeSpan({ color: "crimson" }),
-    heightlightadvanced: makeSpan({ color: "darkseagreen" }),
     litematicaviewer: (props: any) => <LitematicaViewer {...props} />,
     table: ({ ...props }: MarkdownComponentProps) => (
       <div

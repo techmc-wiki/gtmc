@@ -688,7 +688,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                     selection:bg-tech-main/20 selection:text-slate-900
                     sm:p-8
                   ">
-                  <LazyMarkdownPreview content={activeFileContent} />
+                  <LazyMarkdownPreview
+                    content={activeFileContent}
+                    rawPath={activeFile.filePath || ""}
+                  />
                 </div>
               ) : (
                 <p className="editor-panel">NOTHING_TO_PREVIEW_</p>

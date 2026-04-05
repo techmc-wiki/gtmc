@@ -1,5 +1,4 @@
 import path from "path"
-import ReactMarkdown from "react-markdown"
 import { Suspense } from "react"
 import "katex/dist/katex.min.css"
 import type { Metadata } from "next"
@@ -8,8 +7,7 @@ import matter from "gray-matter"
 import {
   calculateReadingMetrics,
   generateDescription,
-  getMarkdownComponents,
-  getPluginsForContent,
+  MarkdownRenderer,
 } from "@/lib/markdown"
 import { getCachedRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
 import { getArticleContent, getArticleTree } from "@/lib/article-loader"
@@ -206,11 +204,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const { wordCount, readingTime } = calculateReadingMetrics(content)
   const shikiPlugin = await getCachedRehypeShiki(content)
-  const { remarkPlugins, rehypePlugins } = getPluginsForContent(
-    content,
-    shikiPlugin
-  )
-  const markdownComponents = getMarkdownComponents(target.filePath)
 
   const siteUrl = getSiteUrl()
   const effectiveSlug =
@@ -363,12 +356,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           w-full max-w-none wrap-break-word text-slate-800
           selection:bg-tech-main/20 selection:text-slate-900
         ">
-        <ReactMarkdown
-          remarkPlugins={remarkPlugins}
-          rehypePlugins={rehypePlugins}
-          components={markdownComponents}>
-          {embeddedArticleContent}
-        </ReactMarkdown>
+        <MarkdownRenderer
+          content={embeddedArticleContent}
+          rawPath={target.filePath}
+          shikiPlugin={shikiPlugin}
+        />
       </article>
 
       {(navigation.prev || navigation.next) && (
@@ -379,14 +371,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <ArticleHighlight />
       </Suspense>
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(techArticleJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
+      <script type="application/ld+json">{JSON.stringify(techArticleJsonLd)}</script>
+      <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd)}</script>
     </div>
   )
 }

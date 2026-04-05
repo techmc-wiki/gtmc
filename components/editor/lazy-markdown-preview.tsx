@@ -1,6 +1,11 @@
 import dynamic from "next/dynamic"
 
-export const LazyMarkdownPreview = dynamic(
+interface LazyMarkdownPreviewProps {
+  content: string
+  rawPath?: string
+}
+
+export const LazyMarkdownPreview = dynamic<LazyMarkdownPreviewProps>(
   () =>
     import("@/components/editor/markdown-preview").then(
       (mod) => mod.MarkdownPreview

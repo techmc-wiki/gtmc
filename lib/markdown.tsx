@@ -1,7 +1,9 @@
 import { remark } from "remark"
 import stripMarkdown from "strip-markdown"
+import { stripAnsiColorMarkup } from "@/lib/markdown/ansi-colors"
 
 export * from "@/lib/markdown/components"
+export * from "@/lib/markdown/markdown-renderer"
 export * from "@/lib/markdown/processor"
 
 /**
@@ -11,14 +13,16 @@ export * from "@/lib/markdown/processor"
  * - Code: 100 lines/minute (slower, careful reading)
  */
 export function calculateReadingMetrics(content: string) {
+  const normalizedContent = stripAnsiColorMarkup(content)
+
   // Extract code blocks (```...``` or indented code)
   const codeBlockRegex = /```[\s\S]*?```|`[^`]+`/g
-  const codeBlocks = content.match(codeBlockRegex) || []
+  const codeBlocks = normalizedContent.match(codeBlockRegex) || []
   const codeContent = codeBlocks.join(" ")
   const codeCount = codeContent.length
 
   // Get non-code content for text analysis
-  const nonCodeContent = content.replace(codeBlockRegex, " ")
+  const nonCodeContent = normalizedContent.replace(codeBlockRegex, " ")
 
   // Count Chinese characters (CJK)
   const cjkCount = (nonCodeContent.match(/[\u4e00-\u9fa5]/g) || []).length
@@ -54,6 +58,8 @@ export function generateDescription(
   frontmatterDescription?: string,
   maxLength: number = 155
 ): string {
+  const normalizedMarkdown = stripAnsiColorMarkup(markdown)
+
   // If frontmatter description is provided and non-empty, use it
   if (frontmatterDescription?.trim()) {
     const trimmed = frontmatterDescription.trim()
@@ -65,7 +71,7 @@ export function generateDescription(
   }
 
   // Extract first real paragraph from markdown
-  const lines = markdown.split("\n")
+  const lines = normalizedMarkdown.split("\n")
   let lineIndex = 0
 
   // Skip leading YAML frontmatter block

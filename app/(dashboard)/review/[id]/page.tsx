@@ -1,10 +1,9 @@
 import { auth } from "@/lib/auth"
 import { redirect, notFound } from "next/navigation"
-import ReactMarkdown from "react-markdown"
 import "katex/dist/katex.min.css"
 import Link from "next/link"
 import { BrutalButton } from "@/components/ui/brutal-button"
-import { getMarkdownComponents, getPluginsForContent } from "@/lib/markdown"
+import { MarkdownRenderer } from "@/lib/markdown"
 import { getCachedRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
 import {
   getGitHubWriteToken,
@@ -91,11 +90,7 @@ export default async function ReviewDetailPage({
   }
 
   const isMergeable = pr.mergeable === true
-  const shikiPlugin = await getCachedRehypeShiki()
-  const { remarkPlugins, rehypePlugins } = getPluginsForContent(
-    rawContent,
-    shikiPlugin
-  )
+  const shikiPlugin = await getCachedRehypeShiki(rawContent)
   const hasConflict = pr.mergeable === false
 
   let rebaseAnalysis: RebaseAnalysis | null = null
@@ -334,12 +329,11 @@ export default async function ReviewDetailPage({
                 selection:bg-tech-main/20 selection:text-tech-main-dark
               ">
               {rawContent ? (
-                <ReactMarkdown
-                  remarkPlugins={remarkPlugins}
-                  rehypePlugins={rehypePlugins}
-                  components={getMarkdownComponents(mainFile?.filename || "")}>
-                  {rawContent}
-                </ReactMarkdown>
+                <MarkdownRenderer
+                  content={rawContent}
+                  rawPath={mainFile?.filename || ""}
+                  shikiPlugin={shikiPlugin}
+                />
               ) : (
                 <div className="py-10 text-center font-mono opacity-50">
                   NO PREVIEW AVAILABLE

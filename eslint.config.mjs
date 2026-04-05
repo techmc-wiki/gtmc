@@ -35,6 +35,8 @@ const eslintConfig = defineConfig([
           ignore: ["^code-block-pre$"],
         },
       ],
+      // Disable line wrapping rule to avoid conflict with Prettier
+      "better-tailwindcss/enforce-consistent-line-wrapping": "off",
     },
   },
   {

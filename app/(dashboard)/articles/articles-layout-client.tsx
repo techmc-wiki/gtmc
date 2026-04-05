@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useState, useRef, useEffect, useLayoutEffect } from "react"
+import { useState, useRef, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { SidebarClient, type SidebarClientHandle } from "./sidebar-client"
 import { SidebarProvider } from "./sidebar/sidebar-context"
@@ -159,7 +159,6 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const [treeData, setTreeData] = useState<TreeNode[]>(tree)
   const [isTreeLoading, setIsTreeLoading] = useState(tree.length === 0)
   const [sidebarHidden, setSidebarHidden] = useState(false)
-  const [btnLeft, setBtnLeft] = useState<number | undefined>(undefined)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
   const desktopSidebarRef = useRef<SidebarClientHandle>(null)
@@ -182,23 +181,6 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       return next
     })
   }
-
-  useLayoutEffect(() => {
-    const wrapper = wrapperRef.current
-    if (!wrapper) return
-    const update = () => {
-      const rect = wrapper.getBoundingClientRect()
-      setBtnLeft(rect.right)
-    }
-    update()
-    const ro = new ResizeObserver(update)
-    ro.observe(wrapper)
-    window.addEventListener("resize", update)
-    return () => {
-      ro.disconnect()
-      window.removeEventListener("resize", update)
-    }
-  }, [])
 
   useEffect(() => {
     if (pathname) {
@@ -406,109 +388,126 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
         {/* Desktop sidebar */}
         <div
-          ref={wrapperRef}
           className="
             relative hidden shrink-0 self-stretch
             md:block
           "
           data-sidebar-wrapper
           data-sidebar-hidden={sidebarHidden ? "" : undefined}>
-          <aside
-            className="
-              h-full w-64 overflow-hidden border-r guide-line
-              transition-[width,opacity,border-color] duration-300
-              ease-[cubic-bezier(0.16,1,0.3,1)]
-              lg:w-80
-            "
-            style={{
-              width: sidebarHidden ? 0 : undefined,
-              opacity: sidebarHidden ? 0 : 1,
-              borderRightWidth: sidebarHidden ? 0 : undefined,
-            }}>
-            <div
+          <div className="flex h-full">
+            <aside
               className="
-                sticky top-20 flex w-64 flex-col justify-center
-                hover:z-20
-                sm:top-26 sm:h-[calc(100vh-128px)]
-                lg:top-28 lg:h-[calc(100vh-144px)] lg:w-80
-              ">
+                h-full w-64 overflow-clip border-r guide-line
+                transition-[width,opacity,border-color] duration-300
+                ease-[cubic-bezier(0.16,1,0.3,1)]
+                lg:w-80
+              "
+              style={{
+                width: sidebarHidden ? 0 : undefined,
+                opacity: sidebarHidden ? 0 : 1,
+                borderRightWidth: sidebarHidden ? 0 : undefined,
+              }}>
               <div
                 className="
-                  group relative flex max-h-4/5 min-h-0 flex-1 flex-col
-                  overflow-visible border-b guide-line text-tech-main
-                  md:px-4 md:py-2
+                  sticky top-20 flex w-64 flex-col justify-center
+                  hover:z-20
+                  sm:top-26 sm:h-[calc(100vh-128px)]
+                  lg:top-28 lg:h-[calc(100vh-144px)] lg:w-80
                 ">
-                <div className="flex shrink-0 flex-col">
-                  <div
-                    className="
-                      group/title flex shrink-0 items-center justify-between
-                      border-b guide-line px-4 pb-2
-                    ">
+                <div
+                  className="
+                    group relative flex max-h-4/5 min-h-0 flex-1 flex-col
+                    overflow-visible border-b guide-line text-tech-main
+                    md:px-4 md:py-2
+                  ">
+                  <div className="flex shrink-0 flex-col">
                     <div
                       className="
-                        flex items-center font-mono text-xs font-bold
-                        tracking-tech-wide text-tech-main/60 uppercase
+                        group/title flex shrink-0 items-center justify-between
+                        border-b guide-line px-4 pb-2
                       ">
-                      <span
+                      <div
                         className="
-                          mr-2 inline-block size-1.5 animate-pulse
-                          bg-tech-main/60
-                        "
-                      />
-                      SYS.DIR_TREE
+                          flex items-center font-mono text-xs font-bold
+                          tracking-tech-wide text-tech-main/60 uppercase
+                        ">
+                        <span
+                          className="
+                            mr-2 inline-block size-1.5 animate-pulse
+                            bg-tech-main/60
+                          "
+                        />
+                        SYS.DIR_TREE
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {showTreePlaceholder ? (
-                  <div
+                  {showTreePlaceholder ? (
+                    <div
+                      className="
+                        custom-left-scrollbar h-full min-h-0 flex-1
+                        overflow-y-auto
+                      ">
+                      <TreeLoadingPlaceholder />
+                    </div>
+                  ) : (
+                    <SidebarClient
+                      ref={desktopSidebarRef}
+                      tree={treeData}
+                      internalScroll
+                      scrollClass="pr-4"
+                    />
+                  )}
+                </div>
+              </div>
+            </aside>
+
+            <div className="relative h-full w-0">
+              <div className="sticky top-[50vh] overflow-visible">
+                <button
+                  type="button"
+                  onClick={toggleSidebarHidden}
+                  aria-label={sidebarHidden ? "Show sidebar" : "Hide sidebar"}
+                  aria-expanded={!sidebarHidden}
+                  data-sidebar-toggle=""
+                  className="
+                    absolute top-0 -left-[6px] z-40 flex h-8 w-[12px]
+                    -translate-y-1/2 cursor-pointer items-center justify-center
+                    border guide-line bg-tech-bg text-tech-main/40
+                    transition-[opacity,color,background-color] duration-300
+                    ease-[cubic-bezier(0.16,1,0.3,1)]
+                    hover:bg-tech-main/5 hover:text-tech-main
+                  ">
+                  <span
                     className="
-                      custom-left-scrollbar h-full min-h-0 flex-1
-                      overflow-y-auto
-                    ">
-                    <TreeLoadingPlaceholder />
-                  </div>
-                ) : (
-                  <SidebarClient
-                    ref={desktopSidebarRef}
-                    tree={treeData}
-                    internalScroll
-                    scrollClass="pr-4"
-                  />
-                )}
+                    text-[8px] leading-none font-bold select-none
+                  ">
+                    {sidebarHidden ? "▶" : "◀"}
+                  </span>
+                </button>
               </div>
             </div>
-          </aside>
-
-          <button
-            type="button"
-            onClick={toggleSidebarHidden}
-            aria-label={sidebarHidden ? "Show sidebar" : "Hide sidebar"}
-            aria-expanded={!sidebarHidden}
-            data-sidebar-toggle=""
-            className="
-              fixed top-1/2 z-40 flex h-8 w-3 -translate-y-1/2 cursor-pointer
-              items-center justify-center border guide-line bg-tech-bg
-              text-tech-main/40 transition-[left,opacity] duration-300
-              ease-[cubic-bezier(0.16,1,0.3,1)]
-              hover:bg-tech-main/5 hover:text-tech-main
-            "
-            style={{
-              left: btnLeft !== undefined ? `${btnLeft - 6}px` : undefined,
-            }}>
-            <span className="text-[8px] leading-none font-bold">
-              {sidebarHidden ? "▶" : "◀"}
-            </span>
-          </button>
+          </div>
         </div>
 
         <main
-          className="
-            relative my-6 w-full flex-1
-            md:max-w-2xl
-            xl:max-w-3xl
-            [1920px]:w-5xl
-          ">
+          className={`
+            relative my-6 w-full flex-1 transition-all duration-300
+            ease-[cubic-bezier(0.16,1,0.3,1)]
+            ${
+              sidebarHidden
+                ? `
+                  md:max-w-4xl
+                  xl:max-w-5xl
+                  [1920px]:max-w-7xl
+                `
+                : `
+                  md:max-w-2xl
+                  xl:max-w-3xl
+                  [1920px]:max-w-5xl
+                `
+            }
+          `}>
           {children}
         </main>
       </div>

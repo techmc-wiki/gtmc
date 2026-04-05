@@ -32,28 +32,24 @@ function getInitialToc(): TocItem[] {
 
 export function useToc(pathname: string): TocItem[] {
   const [toc, setToc] = useState<TocItem[]>(getInitialToc)
-  const prevPathnameRef = useRef(pathname)
 
   useEffect(() => {
-    if (prevPathnameRef.current === pathname) return
-    prevPathnameRef.current = pathname
-
     if (typeof document === "undefined") return
 
+    // Initially clear or set to whatever is in DOM right now
+    // (If Next.js hasn't updated DOM yet, this might be old headings,
+    // but the observer will catch the new ones).
+    setToc(scanHeadings())
+
     const observer = new MutationObserver(() => {
-      const newItems = scanHeadings()
-      if (newItems.length > 0) {
-        setToc(newItems)
-        observer.disconnect()
-      }
+      setToc(scanHeadings())
     })
 
-    const main = document.querySelector("main")
-    if (main) {
-      observer.observe(main, { childList: true, subtree: true })
-    }
+    const main = document.querySelector("main") || document.body
+    observer.observe(main, { childList: true, subtree: true })
 
-    const timeout = setTimeout(() => observer.disconnect(), 5000)
+    // Observe for a generous amount of time to catch all suspense rendering
+    const timeout = setTimeout(() => observer.disconnect(), 10000)
 
     return () => {
       observer.disconnect()

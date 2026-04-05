@@ -539,7 +539,6 @@ code[class^="language-"] {
 
   [data-sidebar-wrapper] [data-sidebar-toggle] {
     opacity: 0;
-    transition: opacity 0.2s ease;
   }
 
   [data-sidebar-wrapper]:hover [data-sidebar-toggle],

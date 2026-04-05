@@ -52,9 +52,8 @@ export function ArticleMetadataSimple({
             {isAdvanced && (
               <span
                 className="
-                  mx-2 shrink-0 bg-[#4c5b96] px-1.5 py-0.5 
-                  font-mono text-[10px] font-bold tracking-widest
-                  text-white select-none
+                  mx-2 shrink-0 bg-[#4c5b96] px-1.5 py-0.5 font-mono text-[10px]
+                  font-bold tracking-widest text-white select-none
                 ">
                 ADVANCED
               </span>

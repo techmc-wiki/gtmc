@@ -26,7 +26,9 @@ function getMeaningfulChildren(
 function isImageOrIframeElement(node: MarkdownAstNode): boolean {
   return (
     node.type === "element" &&
-    (node.tagName === "img" || node.tagName === "iframe")
+    (node.tagName === "img" ||
+      node.tagName === "iframe" ||
+      node.tagName === "litematicaviewer")
   )
 }
 
@@ -89,6 +91,8 @@ function paragraphContainsMedia(node: unknown): boolean {
   )
 }
 
+import LitematicaViewer from "@/components/articles/litematica-viewer"
+
 export function getMarkdownComponents(rawPath: string) {
   const aComponent = createAComponent(rawPath)
   const imageComponent = createImageComponent(rawPath)
@@ -97,9 +101,8 @@ export function getMarkdownComponents(rawPath: string) {
     <span
       aria-hidden="true"
       className="
-        mx-2 inline-block shrink-0 bg-[#4c5b96]
-        px-1.5 py-0.5 align-middle font-mono text-[10px] font-bold tracking-widest
-        text-white select-none
+        mx-2 inline-block shrink-0 bg-[#4c5b96] px-1.5 py-0.5 align-middle
+        font-mono text-[10px] font-bold tracking-widest text-white select-none
       ">
       ADVANCED
     </span>
@@ -198,6 +201,7 @@ export function getMarkdownComponents(rawPath: string) {
     hidden: hiddenComponent,
     heightlightwarning: makeSpan({ color: "crimson" }),
     heightlightadvanced: makeSpan({ color: "darkseagreen" }),
+    litematicaviewer: (props: any) => <LitematicaViewer {...props} />,
     table: ({ ...props }: MarkdownComponentProps) => (
       <div
         className="
@@ -388,25 +392,23 @@ export function getMarkdownComponents(rawPath: string) {
     }: MarkdownComponentProps) => {
       if (dataAdvancedSection === "true") {
         return (
-          <div
-            className="my-8 relative"
-            {...rest}>
+          <div className="group relative my-8" {...rest}>
             <div
               className="
-                absolute top-0 right-0 h-full w-8 bg-[#4c5b96]
-                flex items-start justify-center pt-6
+                absolute top-0 left-[calc(100%+1.5rem)] z-10 flex h-full
+                w-[14px] -translate-x-1/2 items-start justify-center rounded-sm
+                bg-[#8b9ac8] pt-6
+                sm:left-[calc(100%+2rem)]
               ">
               <span
                 className="
-                  font-mono text-[13px] tracking-[0.3em] font-bold text-white
-                  [writing-mode:vertical-rl] select-none
+                  font-mono text-[10px] leading-none font-bold tracking-[0.3em]
+                  text-white select-none [writing-mode:vertical-rl]
                 ">
                 ADVANCED
               </span>
             </div>
-            <div className="pr-12">
-              {children}
-            </div>
+            <div className="relative z-0 w-full">{children}</div>
           </div>
         )
       }

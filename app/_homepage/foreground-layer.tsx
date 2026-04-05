@@ -103,7 +103,10 @@ export function ForegroundLayer({
       </div>
 
       {/* 底部隐喻：MC典型的格子/合成槽堆叠图形列阵 */}
-      <div className="pointer-events-none relative mt-12 flex space-x-1 opacity-40">
+      <div
+        className="
+        pointer-events-none relative mt-12 flex space-x-1 opacity-40
+      ">
         <div className="absolute -top-4 font-mono text-[8px] text-tech-main/60">
           INVENTORY_SLOTS_
         </div>

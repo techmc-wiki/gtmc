@@ -23,7 +23,10 @@ export function DraftFileList({
   isReadOnly,
 }: DraftFileListProps) {
   return (
-    <aside className="border border-tech-main/40 bg-tech-main/5 backdrop-blur-sm">
+    <aside
+      className="
+      border border-tech-main/40 bg-tech-main/5 backdrop-blur-sm
+    ">
       <div
         className="
           flex items-center justify-between gap-3 border-b border-tech-main/30

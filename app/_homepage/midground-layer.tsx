@@ -151,10 +151,7 @@ export function MidgroundLayer({
           bg-tech-main/20
           md:block
         ">
-        <span
-          className="
-          absolute -top-4 right-10 font-mono text-[10px] opacity-50
-        ">
+        <span className="absolute -top-4 right-10 font-mono text-[10px] opacity-50">
           L-AXIS
         </span>
       </div>

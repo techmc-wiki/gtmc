@@ -1,11 +1,12 @@
 ﻿import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
+import { getSiteUrl } from "@/lib/site-url"
 
 // Allow-list of hostnames that this API is permitted to proxy requests to.
 // Adjust this list as needed for your application.
 const ALLOWED_REMOTE_HOSTNAMES = new Set<string>([
-  // Example: "example.com",
+  getSiteUrl()
 ])
 
 function isAllowedRemoteUrl(urlString: string): boolean {

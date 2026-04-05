@@ -2,6 +2,28 @@
 import fs from "fs"
 import path from "path"
 
+// Allow-list of hostnames that this API is permitted to proxy requests to.
+// Adjust this list as needed for your application.
+const ALLOWED_REMOTE_HOSTNAMES = new Set<string>([
+  // Example: "example.com",
+])
+
+function isAllowedRemoteUrl(urlString: string): boolean {
+  try {
+    const parsed = new URL(urlString)
+
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return false
+    }
+
+    // Only allow explicitly allow-listed hostnames
+    return ALLOWED_REMOTE_HOSTNAMES.has(parsed.hostname)
+  } catch {
+    // Malformed URL
+    return false
+  }
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const urlParam = searchParams.get("url")
@@ -11,8 +33,12 @@ export async function GET(request: Request) {
   }
 
   try {
-    // If it's a remote URL, just proxy it
+    // If it's a remote URL, just proxy it (with SSRF protection)
     if (urlParam.startsWith("http://") || urlParam.startsWith("https://")) {
+      if (!isAllowedRemoteUrl(urlParam)) {
+        return new NextResponse("Remote URL is not allowed", { status: 403 })
+      }
+
       const response = await fetch(urlParam)
       if (!response.ok)
         throw new Error("Failed to fetch file: " + response.statusText)

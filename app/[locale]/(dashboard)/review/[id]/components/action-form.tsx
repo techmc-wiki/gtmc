@@ -1,7 +1,7 @@
 "use client"
 
 import { ReauthRequiredError } from "@/lib/admin-reauth"
-import { ReactNode } from "react"
+import { ReactNode, useState } from "react"
 
 export function ActionForm({
   action,
@@ -9,11 +9,15 @@ export function ActionForm({
   className,
 }: {
   action: () => Promise<void>
-  children: ReactNode
+  children: ReactNode | ((isPending: boolean) => ReactNode)
   className?: string
 }) {
+  const [isPending, setIsPending] = useState(false)
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (isPending) return
+    setIsPending(true)
     try {
       await action()
     } catch (error) {
@@ -22,12 +26,14 @@ export function ActionForm({
         return
       }
       throw error
+    } finally {
+      setIsPending(false)
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className={className}>
-      {children}
+      {typeof children === "function" ? children(isPending) : children}
     </form>
   )
 }

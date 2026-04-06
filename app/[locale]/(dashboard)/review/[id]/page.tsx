@@ -4,28 +4,71 @@ import { redirect, notFound } from "next/navigation"
 import "katex/dist/katex.min.css"
 import { Link } from "@/i18n/navigation"
 import { TechButton } from "@/components/ui/tech-button"
-import { MarkdownRenderer } from "@/lib/markdown"
-import { getCachedRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
 import {
   getGitHubWriteToken,
   getOctokit,
   ARTICLES_REPO_OWNER,
   ARTICLES_REPO_NAME,
 } from "@/lib/github/articles-repo"
-import {
-  mergePRAction,
-  closePRAction,
-  submitWithRebaseAction,
-} from "@/actions/review"
-import { createDraftFile, decodeStoredDraftFiles } from "@/lib/draft-files"
+import { mergePRAction, closePRAction } from "@/actions/review"
+import { decodeStoredDraftFiles } from "@/lib/draft-files"
 import { prisma } from "@/lib/prisma"
-import type { RebaseState } from "@/types/rebase"
-import type { RebaseAnalysis } from "@/lib/article-rebase"
-import ConflictResolver from "./components/conflict-resolver"
+import { ReviewEditor } from "@/components/review/review-editor"
+import type { ModeAnalysis, ReviewFile } from "@/types/review"
 import { ActionForm } from "./components/action-form"
 
 const owner = ARTICLES_REPO_OWNER
 const repo = ARTICLES_REPO_NAME
+
+function getPrimaryAnalysisPath(filePaths: string[], fallbackPath?: string) {
+  return (
+    filePaths.find((filePath) => filePath.endsWith(".md")) ||
+    filePaths[0] ||
+    fallbackPath ||
+    ""
+  )
+}
+
+async function getPRFileContents({
+  octokit,
+  prRef,
+  filePaths,
+}: {
+  octokit: ReturnType<typeof getOctokit>
+  prRef: string
+  filePaths: string[]
+}) {
+  const entries = await Promise.all(
+    filePaths.map(async (filePath) => {
+      try {
+        const { data } = await octokit.repos.getContent({
+          owner,
+          repo,
+          path: filePath,
+          ref: prRef,
+        })
+
+        if (Array.isArray(data) || data.type !== "file") {
+          return [filePath, null] as const
+        }
+
+        return [
+          filePath,
+          Buffer.from(data.content, "base64").toString("utf8"),
+        ] as const
+      } catch (error) {
+        console.error(
+          "[review/page] getPRFileContents failed for",
+          filePath,
+          error
+        )
+        return [filePath, null] as const
+      }
+    })
+  )
+
+  return Object.fromEntries(entries)
+}
 
 export default async function ReviewDetailPage({
   params,
@@ -40,7 +83,8 @@ export default async function ReviewDetailPage({
   let authContext: Awaited<ReturnType<typeof getCurrentUserAuthContext>>
   try {
     authContext = await getCurrentUserAuthContext(session.user.id)
-  } catch {
+  } catch (error) {
+    console.error("[review/page] auth context failed:", error)
     redirect("/")
   }
 
@@ -60,20 +104,33 @@ export default async function ReviewDetailPage({
   let pr: Awaited<ReturnType<typeof octokit.pulls.get>>["data"]
   try {
     pr = (await octokit.pulls.get({ owner, repo, pull_number: prNumber })).data
-  } catch {
+  } catch (error) {
+    console.error("[review/page] PR fetch failed:", prNumber, error)
     notFound()
   }
 
-  // Get PR files
-  const { data: files } = await octokit.pulls.listFiles({
+  const { data: prFiles } = await octokit.pulls.listFiles({
     owner,
     repo,
     pull_number: prNumber,
   })
-  const mainFile = files.find((f) => f.filename.endsWith(".md")) || files[0]
+  const primaryPrFile =
+    prFiles.find((file) => file.filename.endsWith(".md")) || prFiles[0]
+
   const linkedDraft = await prisma.revision.findFirst({
     where: { githubPrNum: prNumber },
   })
+  const linkedDraftConflictMode =
+    (
+      linkedDraft as
+        | (typeof linkedDraft & { conflictMode?: string | null })
+        | null
+    )?.conflictMode ?? null
+  const effectiveConflictMode =
+    linkedDraft?.status === "SYNC_CONFLICT" && !linkedDraftConflictMode
+      ? "SIMPLE"
+      : linkedDraftConflictMode
+
   const linkedDraftFiles = linkedDraft
     ? decodeStoredDraftFiles({
         content: linkedDraft.content,
@@ -82,57 +139,80 @@ export default async function ReviewDetailPage({
       })
     : null
 
-  let rawContent = ""
-  if (mainFile) {
-    try {
-      const { data: fileData } = await octokit.repos.getContent({
-        owner,
-        repo,
-        path: mainFile.filename,
-        ref: pr.head.ref,
+  const draftFilePaths =
+    linkedDraftFiles?.files.map((file) => file.filePath) ?? []
+  const prFileContents = linkedDraftFiles
+    ? await getPRFileContents({
+        octokit,
+        prRef: pr.head.ref,
+        filePaths: draftFilePaths,
       })
-      if (!Array.isArray(fileData) && fileData.type === "file") {
-        rawContent = Buffer.from(fileData.content, "base64").toString("utf8")
-      }
-    } catch (e) {
-      console.error(e)
-      // maybe file was deleted or something
-    }
+    : {}
+
+  let modeAnalysis: ModeAnalysis = {
+    recommendation: "SIMPLE",
+    commitCount: 0,
+    filesAffected: 0,
+    adminMessage: "No analysis available.",
   }
 
-  const isMergeable = pr.mergeable === true
-  const shikiPlugin = await getCachedRehypeShiki(rawContent)
   const hasConflict = pr.mergeable === false
+  const isMergeable = pr.mergeable === true
+  const isInReview = linkedDraft?.status === "IN_REVIEW" && !hasConflict
+  const analysisFilePath = getPrimaryAnalysisPath(
+    draftFilePaths,
+    primaryPrFile?.filename
+  )
 
-  let rebaseAnalysis: RebaseAnalysis | null = null
-  const rebaseState = linkedDraft?.rebaseState as RebaseState | null
-  const isInReview =
-    linkedDraft?.status === "IN_REVIEW" && !hasConflict && !rebaseState
   if (
     isInReview &&
-    linkedDraftFiles?.files.length === 1 &&
     linkedDraft?.baseMainSha &&
     linkedDraft?.syncedMainSha &&
-    linkedDraft.baseMainSha !== linkedDraft.syncedMainSha
+    linkedDraft.baseMainSha !== linkedDraft.syncedMainSha &&
+    analysisFilePath
   ) {
     const { analyzeRebaseNeed } = await import("@/lib/article-rebase")
-    rebaseAnalysis = await analyzeRebaseNeed({
-      filePath: linkedDraftFiles.files[0].filePath,
+    const rebaseAnalysis = await analyzeRebaseNeed({
+      filePath: analysisFilePath,
       baseMainSha: linkedDraft.baseMainSha,
       latestMainSha: linkedDraft.syncedMainSha,
       token,
     })
+
+    modeAnalysis = {
+      recommendation:
+        rebaseAnalysis?.recommendation === "REBASE_RECOMMENDED"
+          ? "FINE_GRAINED"
+          : "SIMPLE",
+      commitCount: rebaseAnalysis?.totalCommits ?? 0,
+      filesAffected: rebaseAnalysis?.fileEditCount ?? 0,
+      adminMessage: rebaseAnalysis?.adminMessage ?? "No analysis available.",
+    }
   }
 
-  const fallbackConflictFile = createDraftFile({
-    content: linkedDraft?.conflictContent || rawContent,
-    filePath: mainFile?.filename || linkedDraft?.filePath || "",
-  })
-  const conflictDraftFiles = linkedDraftFiles || {
-    activeFileId: fallbackConflictFile.id,
-    files: [fallbackConflictFile],
-  }
-  const draftFileCount = linkedDraftFiles?.files.length || 1
+  const reviewFiles: ReviewFile[] = linkedDraftFiles
+    ? linkedDraftFiles.files.map((file) => ({
+        id: file.id,
+        filePath: file.filePath,
+        content: prFileContents[file.filePath] ?? file.content,
+        originalContent: file.content,
+        conflictContent: file.conflictContent ?? undefined,
+        status: file.conflictContent
+          ? ("conflict" as const)
+          : ("clean" as const),
+      }))
+    : []
+
+  const targetFileLabel =
+    linkedDraftFiles?.files.length && linkedDraftFiles.files.length > 1
+      ? `${linkedDraftFiles.files.length} FILES`
+      : primaryPrFile?.filename || linkedDraft?.filePath || "UNKNOWN"
+
+  const defaultCommitTitle = `${pr.title} (#${pr.number})`
+  const defaultCommitBody = pr.body || ""
+  const coauthorLines = defaultCommitBody
+    .split("\n")
+    .filter((line) => /^Co-authored-by: .+$/.test(line))
 
   return (
     <div
@@ -178,11 +258,7 @@ export default async function ReviewDetailPage({
             </span>
             <span className="px-2 text-tech-main/50">{"//"}</span>
             <span className="text-tech-main">TARGET_FILE:</span>
-            <span>
-              {draftFileCount > 1
-                ? `${draftFileCount} FILES`
-                : mainFile?.filename || "UNKNOWN"}
-            </span>
+            <span>{targetFileLabel}</span>
             <span className="px-2 text-tech-main/50">{"//"}</span>
             <span className="text-tech-main">STATUS:</span>
             <span
@@ -198,20 +274,6 @@ export default async function ReviewDetailPage({
           </div>
         </div>
 
-        {linkedDraftFiles?.files.length && linkedDraftFiles.files.length > 1 ? (
-          <div
-            className="
-              mt-4 flex flex-wrap gap-2 border guide-line bg-white/60 p-3
-              font-mono text-[0.6875rem] text-tech-main/70 uppercase
-            ">
-            {linkedDraftFiles.files.map((file) => (
-              <span key={file.id} className="border guide-line px-2 py-1">
-                {file.filePath || "PATH_NOT_SET"}
-              </span>
-            ))}
-          </div>
-        ) : null}
-
         {pr.state === "open" && (
           <div
             className="
@@ -223,15 +285,18 @@ export default async function ReviewDetailPage({
                 "use server"
                 await closePRAction(prNumber)
               }}>
-              <TechButton
-                type="submit"
-                variant="secondary"
-                className="
-                  w-full border-red-600 text-red-600
-                  hover:bg-red-600 hover:text-white
-                ">
-                CLOSE
-              </TechButton>
+              {(isPending) => (
+                <TechButton
+                  type="submit"
+                  variant="secondary"
+                  disabled={isPending}
+                  className="
+                    w-full border-red-600 text-red-600
+                    hover:bg-red-600 hover:text-white
+                  ">
+                  {isPending ? "CLOSING..." : "CLOSE"}
+                </TechButton>
+              )}
             </ActionForm>
             {isMergeable && linkedDraft?.status !== "SYNC_CONFLICT" && (
               <ActionForm
@@ -239,117 +304,45 @@ export default async function ReviewDetailPage({
                   "use server"
                   await mergePRAction(prNumber)
                 }}>
-                <TechButton type="submit" variant="primary" className="w-full">
-                  APPROVE_&_MERGE
-                </TechButton>
+                {(isPending) => (
+                  <TechButton
+                    type="submit"
+                    variant="primary"
+                    disabled={isPending}
+                    className="w-full">
+                    {isPending ? "MERGING..." : "APPROVE_&_MERGE"}
+                  </TechButton>
+                )}
               </ActionForm>
             )}
           </div>
         )}
       </div>
 
-      {rebaseAnalysis?.recommendation === "REBASE_RECOMMENDED" &&
-        linkedDraft?.id && (
-          <div
-            className="
-              flex flex-col gap-4 border border-yellow-500/50 bg-yellow-500/10
-              p-4 font-mono text-sm text-tech-main-dark
-            ">
-            <div className="flex items-start gap-2">
-              <span className="font-bold text-yellow-600">
-                REBASE_ADVISORY:
-              </span>
-              <span>{rebaseAnalysis.adminMessage}</span>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <ActionForm
-                action={async () => {
-                  "use server"
-                  await submitWithRebaseAction(linkedDraft.id)
-                }}>
-                <TechButton type="submit" variant="primary" size="sm">
-                  FINE-GRAINED_REBASE
-                </TechButton>
-              </ActionForm>
-              <ActionForm
-                action={async () => {
-                  "use server"
-                  await mergePRAction(prNumber)
-                }}>
-                <TechButton type="submit" variant="secondary" size="sm">
-                  QUICK_MERGE
-                </TechButton>
-              </ActionForm>
-            </div>
-          </div>
-        )}
-
-      {hasConflict || linkedDraft?.status === "SYNC_CONFLICT" ? (
-        <ConflictResolver
-          activeFileId={conflictDraftFiles.activeFileId}
-          files={conflictDraftFiles.files}
-          prNumber={prNumber}
-          rebaseState={linkedDraft?.rebaseState as RebaseState | null}
-          revisionId={linkedDraft?.id}
-          conflictType={
-            linkedDraft?.status === "SYNC_CONFLICT" &&
-            linkedDraft?.conflictContent === null
-              ? "FILE_DELETED"
-              : "CONFLICT"
-          }
+      {linkedDraft ? (
+        <ReviewEditor
+          pr={{ number: pr.number, title: pr.title, htmlUrl: pr.html_url }}
+          files={reviewFiles}
+          modeAnalysis={modeAnalysis}
+          revision={{
+            id: linkedDraft.id,
+            conflictMode: effectiveConflictMode,
+            rebaseState: linkedDraft.rebaseState,
+          }}
+          squashCommitDefaults={{
+            title: defaultCommitTitle,
+            body: defaultCommitBody,
+            coauthorLines,
+          }}
         />
       ) : (
-        <>
-          <div>
-            <h2
-              className="
-                mb-4 inline-block border-b border-tech-main/50 font-mono text-xl
-                tracking-widest text-tech-main uppercase
-              ">
-              CONTENT_PREVIEW
-            </h2>
-          </div>
-          {draftFileCount > 1 ? (
-            <p className="mt-2 font-mono text-xs text-tech-main/60 uppercase">
-              Previewing the primary markdown file from a multi-file draft.
-            </p>
-          ) : null}
-
-          <div
-            className="
-              relative mx-auto border border-tech-main/30 bg-tech-main/5 p-8
-              backdrop-blur-sm
-            ">
-            <div
-              className="
-                absolute top-0 left-0 size-2 border-t border-l
-                border-tech-main/50
-              "></div>
-            <div
-              className="
-                absolute right-0 bottom-0 size-2 border-r border-b
-                border-tech-main/50
-              "></div>
-            <div
-              className="
-                w-full max-w-none overflow-hidden wrap-break-word
-                text-tech-main-dark
-                selection:bg-tech-main/20 selection:text-tech-main-dark
-              ">
-              {rawContent ? (
-                <MarkdownRenderer
-                  content={rawContent}
-                  rawPath={mainFile?.filename || ""}
-                  shikiPlugin={shikiPlugin}
-                />
-              ) : (
-                <div className="py-10 text-center font-mono opacity-50">
-                  NO PREVIEW AVAILABLE
-                </div>
-              )}
-            </div>
-          </div>
-        </>
+        <div
+          className="
+            border border-tech-main/30 bg-tech-main/5 px-6 py-10 font-mono
+            text-sm tracking-widest text-tech-main/70 uppercase
+          ">
+          NO_DRAFT_LINKED_
+        </div>
       )}
     </div>
   )

@@ -93,12 +93,18 @@ export async function getArticleContent(
   return null
 }
 
+const localTreeCache = new Map<ArticleLocale, ArticleTreeNode[]>()
+
 export async function getArticleTree(
   locale: ArticleLocale = "zh"
 ): Promise<ArticleTreeNode[]> {
   if (isSubmoduleAvailable()) {
+    const cached = localTreeCache.get(locale)
+    if (cached) return cached
     try {
-      return buildLocalTree(locale)
+      const tree = buildLocalTree(locale)
+      localTreeCache.set(locale, tree)
+      return tree
     } catch {
       if (process.env.NODE_ENV === "development") {
         console.warn(

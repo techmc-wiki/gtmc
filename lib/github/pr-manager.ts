@@ -162,18 +162,24 @@ export async function determineMergeMethod(
 
 export async function mergePR(
   prNumber: number,
-  token?: string,
-  mergeMethod?: "squash" | "rebase"
+  options?: {
+    commitBody?: string
+    commitTitle?: string
+    mergeMethod?: "squash" | "rebase"
+  },
+  token?: string
 ) {
   const octokit = getOctokit(token)
   const actualMergeMethod =
-    mergeMethod || (await determineMergeMethod(prNumber, token))
+    options?.mergeMethod || (await determineMergeMethod(prNumber, token))
 
   const { data } = await octokit.pulls.merge({
     owner: ARTICLES_REPO_OWNER,
     repo: ARTICLES_REPO_NAME,
     pull_number: prNumber,
     merge_method: actualMergeMethod,
+    ...(options?.commitTitle ? { commit_title: options.commitTitle } : {}),
+    ...(options?.commitBody ? { commit_message: options.commitBody } : {}),
   })
 
   return data

@@ -13,6 +13,7 @@ import { getCurrentUserAuthContext } from "@/lib/auth-context"
 import { PageHeader } from "@/components/ui/page-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { prisma } from "@/lib/prisma"
 
 export const metadata: Metadata = {
   title: "Review Hub",
@@ -24,6 +25,10 @@ export const dynamic = "force-dynamic"
 export const revalidate = 0
 
 type PR = Awaited<ReturnType<typeof getOpenPRs>>[number]
+
+type PRWithConflictMode = PR & {
+  conflictMode?: string | null
+}
 
 async function analyzePRConflictStatus(prNumber: number, token?: string) {
   const prDetail = await getPR(prNumber, token)
@@ -72,7 +77,9 @@ async function analyzePRConflictStatus(prNumber: number, token?: string) {
           }
         }
       }
-    } catch {}
+    } catch (error) {
+      console.error("[review/page] PR conflict analysis failed:", error)
+    }
   }
   return isConflict
 }
@@ -85,7 +92,8 @@ export default async function ReviewHubPage() {
     try {
       const ctx = await getCurrentUserAuthContext(session.user.id)
       isAdmin = ctx.role === "ADMIN"
-    } catch {
+    } catch (error) {
+      console.error("[review/hub] admin context failed:", error)
       isAdmin = false
     }
   }
@@ -109,17 +117,29 @@ export default async function ReviewHubPage() {
   const token = process.env.GITHUB_ARTICLES_WRITE_PAT
   let openPRs: PR[] = []
   const groupedPRs = {
-    conflicts: [] as PR[],
-    pending: [] as PR[],
+    conflicts: [] as PRWithConflictMode[],
+    pending: [] as PRWithConflictMode[],
   }
 
   try {
     openPRs = await getOpenPRs(token)
 
+    // Fetch conflictMode for each PR from Revisions
+    const prNumbers = openPRs.map((pr) => pr.number)
+    const revisions = await prisma.revision.findMany({
+      where: { githubPrNum: { in: prNumbers } },
+      select: { githubPrNum: true, conflictMode: true },
+    })
+
+    const conflictModeMap = new Map(
+      revisions.map((r) => [r.githubPrNum, r.conflictMode])
+    )
+
     const analysisResults = await Promise.all(
       openPRs.map(async (pr) => {
         const isConflict = await analyzePRConflictStatus(pr.number, token)
-        return { pr, isConflict }
+        const conflictMode = conflictModeMap.get(pr.number)
+        return { pr: { ...pr, conflictMode } as PRWithConflictMode, isConflict }
       })
     )
 
@@ -134,7 +154,7 @@ export default async function ReviewHubPage() {
     console.error("Failed to fetch PRs:", error)
   }
 
-  const renderPRCard = (pr: PR, isConflict: boolean) => (
+  const renderPRCard = (pr: PRWithConflictMode, isConflict: boolean) => (
     <TechCard
       key={pr.id}
       className={`
@@ -169,6 +189,21 @@ export default async function ReviewHubPage() {
                 text-white
               ">
               UNRESOLVED CONFLICTS
+            </span>
+          )}
+          {pr.conflictMode && (
+            <span
+              className={`
+                border font-mono text-[0.6875rem] tracking-widest uppercase px-2 py-0.5
+                ${
+                  pr.conflictMode === "FINE_GRAINED"
+                    ? `bg-blue-500/10 border-blue-500/30 text-blue-700`
+                    : `bg-tech-main/10 border-tech-main/30 text-tech-main`
+                }
+              `}>
+              {pr.conflictMode === "FINE_GRAINED"
+                ? "FINE-GRAINED"
+                : pr.conflictMode}
             </span>
           )}
         </div>

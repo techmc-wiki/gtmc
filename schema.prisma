@@ -86,9 +86,10 @@ model Revision {
     reviewer    User?          @relation("RevisionReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
 
     rebaseState Json?
-    
-    // Draft asset lifecycle relation
-    draftAssets DraftAsset[]
+    conflictMode String?
+     
+     // Draft asset lifecycle relation
+     draftAssets DraftAsset[]
 
    createdAt   DateTime       @default(now())
    updatedAt   DateTime       @updatedAt
@@ -170,11 +171,23 @@ model DraftAsset {
    updatedAt         DateTime @updatedAt
    
    // Indexes for efficient reconciliation queries
-   @@unique([revisionId, storagePath])
-   @@index([status])
-   @@index([githubPrNum])
-   @@index([revisionId, status])
+    @@unique([revisionId, storagePath])
+    @@index([status])
+    @@index([githubPrNum])
+    @@index([revisionId, status])
 }
 
+// ==========================================
+// 6. Conflict Resolution Cache
+// ==========================================
+
+model ConflictResolution {
+  id            String   @id @default(cuid())
+  conflictHash  String   @unique
+  filePath      String
+  resolution    String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
 
 

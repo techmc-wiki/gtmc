@@ -5,7 +5,10 @@ import {
   ARTICLES_REPO_OWNER,
   getOctokit,
 } from "@/lib/github/articles-repo"
-import { analyzeRebaseNeed } from "@/lib/article-rebase"
+import {
+  analyzeRebaseNeed,
+  analyzeRebaseNeedMultiFile,
+} from "@/lib/article-rebase"
 import type { RebaseAnalysis } from "@/lib/article-rebase"
 import {
   getActiveDraftFile,
@@ -13,6 +16,13 @@ import {
   normalizeDraftFileCollection,
   type DraftFileRecord,
 } from "@/lib/draft-files"
+import {
+  applyAutoAppliedResolutions,
+  autoApplyRerere,
+  parseConflictBlocks,
+  type ConflictBlock,
+} from "@/lib/rerere"
+import { getMergeLibrary } from "@/lib/merge-strategy"
 
 const MAIN_BRANCH = "main"
 
@@ -66,6 +76,36 @@ export interface DraftSyncResult {
   rebaseAnalysis?: RebaseAnalysis
 }
 
+export interface SimpleResolutionInput {
+  files: Array<{
+    filePath: string
+    baseContent: string
+    draftContent: string
+    latestMainContent: string
+  }>
+  prBranchName: string
+  latestMainSha: string
+  token?: string
+}
+
+export interface SimpleResolutionResult {
+  fileResults: Array<{
+    filePath: string
+    status: "clean" | "conflict"
+    content: string
+    rerereApplied?: ConflictBlock[]
+  }>
+  hasConflicts: boolean
+}
+
+export interface ForcePushInput {
+  resolvedFiles: Array<{ filePath: string; content: string }>
+  prBranchName: string
+  latestMainSha: string
+  commitMessage?: string
+  token?: string
+}
+
 export async function getMainBranchHeadSha(token?: string) {
   const octokit = getOctokit(token)
   const { data } = await octokit.git.getRef({
@@ -75,6 +115,119 @@ export async function getMainBranchHeadSha(token?: string) {
   })
 
   return data.object.sha
+}
+
+export async function getArticleFileContent(
+  filePath: string,
+  ref: string,
+  token?: string
+) {
+  return (await getFileSnapshot(filePath, ref, token))?.content ?? ""
+}
+
+export async function resolveSimpleConflicts(
+  input: SimpleResolutionInput
+): Promise<SimpleResolutionResult> {
+  const mergeLibrary = getMergeLibrary()
+  const fileResults = await Promise.all(
+    input.files.map(async (file) => {
+      const result = mergeLibrary.merge({
+        baseContent: file.baseContent,
+        draftContent: file.draftContent,
+        latestMainContent: file.latestMainContent,
+      })
+
+      if (!result.conflict) {
+        return {
+          filePath: file.filePath,
+          status: "clean" as const,
+          content: result.content,
+        }
+      }
+
+      const blocks = parseConflictBlocks(
+        result.content,
+        file.filePath,
+        file.baseContent
+      )
+      const { applied, remaining } = await autoApplyRerere(blocks)
+      const resolvedContent = applyAutoAppliedResolutions(
+        result.content,
+        applied
+      )
+
+      return {
+        filePath: file.filePath,
+        status:
+          remaining.length === 0 ? ("clean" as const) : ("conflict" as const),
+        content: resolvedContent,
+        ...(applied.length > 0 ? { rerereApplied: applied } : {}),
+      }
+    })
+  )
+
+  return {
+    fileResults,
+    hasConflicts: fileResults.some((result) => result.status === "conflict"),
+  }
+}
+
+export async function forcePushResolvedToPRBranch({
+  resolvedFiles,
+  prBranchName,
+  latestMainSha,
+  commitMessage,
+  token,
+}: ForcePushInput): Promise<{ newSha: string }> {
+  const octokit = getOctokit(token)
+  const { data: latestMainCommit } = await octokit.git.getCommit({
+    owner: ARTICLES_REPO_OWNER,
+    repo: ARTICLES_REPO_NAME,
+    commit_sha: latestMainSha,
+  })
+
+  const tree = await Promise.all(
+    resolvedFiles.map(async (file) => {
+      const { data: blob } = await octokit.git.createBlob({
+        owner: ARTICLES_REPO_OWNER,
+        repo: ARTICLES_REPO_NAME,
+        content: file.content,
+        encoding: "utf-8",
+      })
+
+      return {
+        path: file.filePath,
+        mode: "100644" as const,
+        type: "blob" as const,
+        sha: blob.sha,
+      }
+    })
+  )
+
+  const { data: createdTree } = await octokit.git.createTree({
+    owner: ARTICLES_REPO_OWNER,
+    repo: ARTICLES_REPO_NAME,
+    base_tree: latestMainCommit.tree.sha,
+    tree,
+  })
+
+  const { data: newCommit } = await octokit.git.createCommit({
+    owner: ARTICLES_REPO_OWNER,
+    repo: ARTICLES_REPO_NAME,
+    message: commitMessage || "docs: apply resolved review files",
+    tree: createdTree.sha,
+    parents: [latestMainSha],
+  })
+
+  await octokit.git.updateRef({
+    owner: ARTICLES_REPO_OWNER,
+    repo: ARTICLES_REPO_NAME,
+    ref: `heads/${prBranchName}`,
+    sha: newCommit.sha,
+    force: true,
+  })
+
+  return { newSha: newCommit.sha }
 }
 
 export async function resolveArticleFilePath(
@@ -200,7 +353,14 @@ export async function openDraftPullRequest({
           latestMainSha,
           token,
         })
-      : undefined
+      : await analyzeRebaseNeedMultiFile({
+          files: normalizedFiles.files.map((file) => ({
+            filePath: file.filePath,
+          })),
+          baseMainSha,
+          latestMainSha,
+          token,
+        })
 
   let hasConflict = false
   const mergedFiles: DraftFileRecord[] = []
@@ -457,7 +617,8 @@ async function getFileSnapshot(filePath: string, ref: string, token?: string) {
       content: Buffer.from(data.content, "base64").toString("utf-8"),
       sha: data.sha,
     } satisfies FileSnapshot
-  } catch {
+  } catch (error) {
+    console.error("[article-submission] file snapshot failed:", error)
     return null
   }
 }

@@ -1,5 +1,7 @@
 ﻿"use server"
 
+import { getCurrentUserAuthContext, requireAdmin } from "@/lib/auth-context"
+import { requireRecentAuth } from "@/lib/admin-reauth"
 import { requireAuth } from "@/lib/auth-helpers"
 import { unstable_cache } from "next/cache"
 import { createDirectFile, createPR } from "@/lib/github/pr-manager"
@@ -284,8 +286,11 @@ export async function createDocument({
 
   const authorName = session.user.name || "Unknown"
   const authorEmail = session.user.email || "unknown@gtmc.dev"
+  const authContext = await getCurrentUserAuthContext(session.user.id)
 
-  if (session.user.role === "ADMIN") {
+  if (authContext.role === "ADMIN") {
+    await requireAdmin(session.user.id)
+    requireRecentAuth(session)
     await createDirectFile({
       title: isFolder ? `Create folder ${title}` : `Create file ${title}`,
       content: initialContent,

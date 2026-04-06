@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth"
+import { getCurrentUserAuthContext } from "@/lib/auth-context"
 import { redirect, notFound } from "next/navigation"
 import "katex/dist/katex.min.css"
 import Link from "next/link"
@@ -31,7 +32,18 @@ export default async function ReviewDetailPage({
   params: Promise<{ id: string }>
 }) {
   const session = await auth()
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (!session?.user?.id) {
+    redirect("/")
+  }
+
+  let authContext: Awaited<ReturnType<typeof getCurrentUserAuthContext>>
+  try {
+    authContext = await getCurrentUserAuthContext(session.user.id)
+  } catch {
+    redirect("/")
+  }
+
+  if (authContext.role !== "ADMIN") {
     redirect("/")
   }
 
@@ -41,9 +53,7 @@ export default async function ReviewDetailPage({
     notFound()
   }
 
-  const token = getGitHubWriteToken(
-    (session.user as { githubPat?: string }).githubPat
-  )
+  const token = getGitHubWriteToken(authContext.githubPat ?? undefined)
   const octokit = getOctokit(token)
 
   let pr: Awaited<ReturnType<typeof octokit.pulls.get>>["data"]
@@ -65,10 +75,10 @@ export default async function ReviewDetailPage({
   })
   const linkedDraftFiles = linkedDraft
     ? decodeStoredDraftFiles({
-      content: linkedDraft.content,
-      conflictContent: linkedDraft.conflictContent,
-      filePath: linkedDraft.filePath,
-    })
+        content: linkedDraft.content,
+        conflictContent: linkedDraft.conflictContent,
+        filePath: linkedDraft.filePath,
+      })
     : null
 
   let rawContent = ""
@@ -228,10 +238,7 @@ export default async function ReviewDetailPage({
                   "use server"
                   await mergePRAction(prNumber)
                 }}>
-                <TechButton
-                  type="submit"
-                  variant="primary"
-                  className="w-full">
+                <TechButton type="submit" variant="primary" className="w-full">
                   APPROVE_&_MERGE
                 </TechButton>
               </form>
@@ -285,7 +292,7 @@ export default async function ReviewDetailPage({
           revisionId={linkedDraft?.id}
           conflictType={
             linkedDraft?.status === "SYNC_CONFLICT" &&
-              linkedDraft?.conflictContent === null
+            linkedDraft?.conflictContent === null
               ? "FILE_DELETED"
               : "CONFLICT"
           }

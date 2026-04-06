@@ -6,6 +6,7 @@ import { MobileNav } from "./mobile-nav"
 import { DesktopNav } from "./desktop-nav"
 import { SearchCommand } from "@/components/search/search-command"
 import { auth } from "@/lib/auth"
+import { getCurrentUserAuthContext } from "@/lib/auth-context"
 
 export default async function DashboardLayout({
   children,
@@ -13,7 +14,15 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const session = await auth()
-  const isAdmin = session?.user?.role === "ADMIN"
+  let isAdmin = false
+  if (session?.user?.id) {
+    try {
+      const ctx = await getCurrentUserAuthContext(session.user.id)
+      isAdmin = ctx.role === "ADMIN"
+    } catch {
+      isAdmin = false
+    }
+  }
 
   const navLinks = [
     { href: "/articles", label: "ARTICLES" },

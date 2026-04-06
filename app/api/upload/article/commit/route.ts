@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { del } from "@vercel/blob"
 
 import { auth } from "@/lib/auth"
+import { getGithubPatForUser } from "@/lib/auth-context"
 import { classifyFile, sanitizeFilename } from "@/lib/file-upload"
 import {
   uploadArticleAssetToGithub,
@@ -123,11 +124,12 @@ export async function POST(req: NextRequest) {
     }
 
     const sanitized = sanitizeFilename(filename, mimeType)
+    const token = (await getGithubPatForUser(session.user.id)) ?? null
     const url = await uploadArticleAssetToGithub({
       buffer,
       category: classification.category,
       filename: sanitized,
-      token: (session.user as { githubPat?: string }).githubPat || null,
+      token,
     })
 
     del(blobUrl).catch(() => {})

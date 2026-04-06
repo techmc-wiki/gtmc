@@ -9,6 +9,7 @@ import {
   ARTICLES_REPO_NAME,
 } from "@/lib/github/articles-repo"
 import { auth } from "@/lib/auth"
+import { getCurrentUserAuthContext } from "@/lib/auth-context"
 import { PageHeader } from "@/components/ui/page-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
@@ -71,15 +72,25 @@ async function analyzePRConflictStatus(prNumber: number, token?: string) {
           }
         }
       }
-    } catch { }
+    } catch {}
   }
   return isConflict
 }
 
 export default async function ReviewHubPage() {
   const session = await auth()
+  let isAdmin = false
 
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (session?.user?.id) {
+    try {
+      const ctx = await getCurrentUserAuthContext(session.user.id)
+      isAdmin = ctx.role === "ADMIN"
+    } catch {
+      isAdmin = false
+    }
+  }
+
+  if (!session?.user || !isAdmin) {
     return (
       <div className="mx-auto mt-20 max-w-6xl p-8 text-center">
         <h1 className="text-6xl font-black text-red-500 uppercase">
@@ -140,9 +151,10 @@ export default async function ReviewHubPage() {
           <span
             className={`
               border px-2 py-0.5 font-mono text-xs tracking-wider
-              ${isConflict
-                ? `border-red-500/40 bg-red-500/20 text-red-600`
-                : `border-blue-500/40 bg-blue-500/10 text-blue-600`
+              ${
+                isConflict
+                  ? `border-red-500/40 bg-red-500/20 text-red-600`
+                  : `border-blue-500/40 bg-blue-500/10 text-blue-600`
               }
             `}>
             [PR #{pr.number}]

@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { auth } from "@/lib/auth"
+import { getCurrentUserAuthContext } from "@/lib/auth-context"
 import {
   EXPLANATION_MARKER,
   SYSTEM_COMMENT_MARKER,
@@ -81,6 +82,16 @@ export default async function FeatureDetailPage({
   }
 
   const session = await auth()
+  let isAdmin = false
+
+  if (session?.user?.id) {
+    try {
+      const ctx = await getCurrentUserAuthContext(session.user.id)
+      isAdmin = ctx.role === "ADMIN"
+    } catch {
+      isAdmin = false
+    }
+  }
 
   const issue = await getIssue(issueNumber)
   if (!issue) {
@@ -132,16 +143,15 @@ export default async function FeatureDetailPage({
     },
     assignee: parsedIssue.metadata?.assigneeId
       ? {
-        name: parsedIssue.metadata?.assigneeName ?? null,
-        email: parsedIssue.metadata?.assigneeEmail ?? null,
-        image: null,
-      }
+          name: parsedIssue.metadata?.assigneeName ?? null,
+          email: parsedIssue.metadata?.assigneeEmail ?? null,
+          image: null,
+        }
       : null,
     comments,
   }
 
   const isAuthor = session?.user?.id === feature.authorId
-  const isAdmin = session?.user?.role === "ADMIN"
   const isAssignee = session?.user?.id === feature.assigneeId
 
   const canEdit = isAuthor || isAdmin

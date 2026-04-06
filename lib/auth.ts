@@ -4,18 +4,6 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import { ProxyAgent, setGlobalDispatcher } from "undici"
 
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id?: string
-      role?: string
-      email?: string | null
-      name?: string | null
-      image?: string | null
-    }
-  }
-}
-
 // Allow NextAuth to proxy requests when running in local development (useful in mainland China)
 if (process.env.HTTPS_PROXY || process.env.http_proxy) {
   const proxyUrl = process.env.HTTPS_PROXY || process.env.http_proxy
@@ -43,11 +31,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
-      if (session?.user && user) {
-        session.user.id = user.id
-        session.user.role = (user as { role?: string }).role || "USER"
-        session.user.githubPat = (user as { githubPat?: string }).githubPat
+    async jwt({ token, user, trigger }) {
+      if (user?.id) {
+        token.sub = user.id
+      }
+
+      if (trigger === "signIn") {
+        token.lastAuthAt = Date.now()
+      }
+
+      return token
+    },
+    async session({ session, token }) {
+      if (session?.user) {
+        session.user.id = token.sub ?? ""
+        session.lastAuthAt = token.lastAuthAt
       }
       return session
     },
@@ -64,7 +62,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/login",
   },
   session: {
-    strategy: "database",
+    strategy: "jwt",
   },
   trustHost: true,
   debug: process.env.NODE_ENV === "development",

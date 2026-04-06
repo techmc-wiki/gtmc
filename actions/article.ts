@@ -24,6 +24,7 @@ import {
   type DraftFileRecord,
 } from "@/lib/draft-files"
 import { deleteDraftAsset, downloadDraftAsset } from "@/lib/draft-storage"
+import { getGithubPatForUser } from "@/lib/auth-context"
 import { requireAuth } from "@/lib/auth-helpers"
 import { getGitHubWriteToken } from "@/lib/github/articles-repo"
 import { prisma } from "@/lib/prisma"
@@ -70,9 +71,7 @@ export async function saveDraftAction(formData: FormData) {
   const filePath = formData.get("filePath") as string | null
   const activeFileId = formData.get("activeFileId") as string | null
   const draftFilesPayload = formData.get("draftFiles") as string | null
-  const token =
-    (session.user as { githubPat?: string }).githubPat ||
-    process.env.GITHUB_TOKEN
+  const token = await getGithubPatForUser(session.user.id)
 
   const draftFiles =
     deserializeDraftFilesPayload(draftFilesPayload) ||

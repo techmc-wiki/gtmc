@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
-import { getGitHubWriteToken } from "@/lib/github/articles-repo"
 import type { Session } from "next-auth"
+import { requireAdmin } from "@/lib/auth-context"
+import type { AuthContext } from "@/lib/auth-context"
 
 type AuthenticatedSession = Session & {
   user: NonNullable<Session["user"]> & { id: string }
@@ -21,8 +22,14 @@ export async function requireAuth(
   return session as AuthenticatedSession
 }
 
-export function getTokenFromSession(session: {
-  user: { githubPat?: string } & Record<string, unknown>
-}): string | undefined {
-  return getGitHubWriteToken((session.user as { githubPat?: string }).githubPat)
+/**
+ * Requires the caller to be authenticated AND have admin role (verified from DB).
+ * Returns both the session and the fresh auth context.
+ */
+export async function requireAuthWithRole(
+  message = "Unauthorized"
+): Promise<{ session: AuthenticatedSession; ctx: AuthContext }> {
+  const session = await requireAuth(message)
+  const ctx = await requireAdmin(session.user.id)
+  return { session, ctx }
 }

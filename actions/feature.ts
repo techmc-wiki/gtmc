@@ -1,6 +1,11 @@
 "use server"
 
 import { requireAuth } from "@/lib/auth-helpers"
+import {
+  getCurrentUserAuthContext,
+  getGithubPatForUser,
+  requireAdmin,
+} from "@/lib/auth-context"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { PATHS } from "@/lib/cache-config"
@@ -184,10 +189,11 @@ export async function updateFeature(
   }
 
   const { issue, parsed } = feature
+  const authContext = await getCurrentUserAuthContext(session.user.id)
 
   if (
     parsed.metadata?.appUserId !== session.user.id &&
-    session.user.role !== "ADMIN"
+    authContext.role !== "ADMIN"
   ) {
     throw new Error("Forbidden")
   }
@@ -249,7 +255,8 @@ export async function updateFeatureExplanation(
 
   const { issue, parsed } = feature
 
-  const isAdmin = session.user.role === "ADMIN"
+  const authContext = await getCurrentUserAuthContext(session.user.id)
+  const isAdmin = authContext.role === "ADMIN"
   const isAssignee = parsed.metadata?.assigneeId === session.user.id
   if (!isAssignee && !isAdmin) throw new Error("Forbidden")
 
@@ -316,16 +323,8 @@ export async function assignFeature(id: string) {
     )
 
     // Query GitHub Account and check email visibility
-    const account = await prisma.account.findFirst({
-      where: {
-        provider: "github",
-        userId: session.user.id,
-      },
-    })
-
-    const visibility = await getGithubEmailVisibility(
-      account?.access_token || ""
-    )
+    const token = await getGithubPatForUser(session.user.id)
+    const visibility = await getGithubEmailVisibility(token || "")
     const assigneeEmail =
       visibility === "private"
         ? "REDACTED FOR PRIVACY"
@@ -361,7 +360,8 @@ export async function unassignFeature(id: string) {
   }
 
   const { issue, parsed } = feature
-  const isAdmin = session.user.role === "ADMIN"
+  const authContext = await getCurrentUserAuthContext(session.user.id)
+  const isAdmin = authContext.role === "ADMIN"
   const isAssignee = parsed.metadata?.assigneeId === session.user.id
   if (!isAssignee && !isAdmin) throw new Error("Forbidden")
 
@@ -422,7 +422,7 @@ export async function resolveFeature(id: string, resolutionComment?: string) {
 
   const issueNumber = parseIssueNumber(id)
 
-  if (session.user.role !== "ADMIN") throw new Error("Admin only")
+  await requireAdmin(session.user.id)
 
   const feature = await getFeatureByIssueNumber(issueNumber)
   if (!feature) throw new Error("Not found")
@@ -474,7 +474,8 @@ export async function addFeatureComment(id: string, content: string) {
     },
   })
 
-  const visibility = await getGithubEmailVisibility(account?.access_token || "")
+  const token = await getGithubPatForUser(session.user.id)
+  const visibility = await getGithubEmailVisibility(token || "")
   const isPrivate = visibility === "private"
 
   const githubLogin = await resolveGithubLoginFromAccount(account)

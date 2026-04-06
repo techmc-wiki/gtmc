@@ -1,4 +1,4 @@
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/article-url"
 import { CornerBrackets } from "./ui/corner-brackets"
 

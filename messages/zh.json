@@ -1,0 +1,23 @@
+{
+  "Nav": {
+    "articles": "文章",
+    "drafts": "我的草稿",
+    "reviewHub": "审核中心",
+    "features": "功能"
+  },
+  "Homepage": {
+    "startReading": "开始阅读 →",
+    "loginGithub": "登录 (GITHUB)",
+    "initializing": "初始化中..."
+  },
+  "Footer": {
+    "documentation": "文档",
+    "community": "社区",
+    "legalInfo": "法律与信息",
+    "preface": "前言",
+    "articles": "文章"
+  },
+  "Article": {
+    "notFound": "文章未找到"
+  }
+}

@@ -26,7 +26,7 @@ export default function LitematicaViewer({
   const [isFlyMode, setIsFlyMode] = useState(false)
   const [isFlyEnabled, setIsFlyEnabled] = useState(false)
 
-  const POINTER_LOCK_COOLDOWN_MS = 1200
+  const POINTER_LOCK_COOLDOWN_MS = 350
 
   const resolveLoadedSchematicId = (renderer: any) => {
     const loadedSchematics = renderer?.getLoadedSchematics?.()
@@ -109,15 +109,13 @@ export default function LitematicaViewer({
       typeof flyControls.lock === "function" ? flyControls.lock.bind(flyControls) : null
     if (!originalLock) return
 
+    const pointerLockControls = flyControls.getPointerLockControls?.()
+    const pointerLockElement = pointerLockControls?.domElement || canvasRef.current
+
     flyControls.lock = () => {
       if (!flyControls.enabled || flyControls.isLocked) return
 
       if (document.pointerLockElement === canvasRef.current) return
-
-      const userActivation = (navigator as any)?.userActivation
-      if (userActivation && !userActivation.isActive) {
-        return
-      }
 
       const elapsedSinceUnlock = performance.now() - lastPointerUnlockAtRef.current
       if (elapsedSinceUnlock < POINTER_LOCK_COOLDOWN_MS) {
@@ -125,13 +123,22 @@ export default function LitematicaViewer({
       }
 
       try {
-        const lockResult = originalLock()
+        if (
+          pointerLockElement &&
+          typeof pointerLockElement.requestPointerLock === "function"
+        ) {
+          const lockResult = pointerLockElement.requestPointerLock()
 
-        if (lockResult && typeof lockResult.catch === "function") {
-          lockResult.catch(() => {
-            // Swallow rejected pointer lock promises; state is handled by events.
-          })
+          if (lockResult && typeof lockResult.catch === "function") {
+            lockResult.catch(() => {
+              // Swallow rejected pointer lock promises; state is handled by events.
+            })
+          }
+
+          return
         }
+
+        originalLock()
       } catch {
         // Ignore lock failures; pointerlockerror handler updates UI state.
       }
@@ -140,8 +147,64 @@ export default function LitematicaViewer({
     flyControls.__gtmcSafeLockPatched = true
   }
 
+  const patchCanvasPointerCapture = (canvas: HTMLCanvasElement) => {
+    const canvasAny = canvas as any
+    if (canvasAny.__gtmcPointerCapturePatched) return
+
+    const originalSetPointerCapture =
+      typeof canvas.setPointerCapture === "function"
+        ? canvas.setPointerCapture.bind(canvas)
+        : null
+    const originalReleasePointerCapture =
+      typeof canvas.releasePointerCapture === "function"
+        ? canvas.releasePointerCapture.bind(canvas)
+        : null
+
+    if (originalSetPointerCapture) {
+      canvasAny.setPointerCapture = (pointerId: number) => {
+        try {
+          originalSetPointerCapture(pointerId)
+        } catch {
+          // Ignore invalid pointer capture states from transient pointer lifecycle races.
+        }
+      }
+    }
+
+    if (originalReleasePointerCapture) {
+      canvasAny.releasePointerCapture = (pointerId: number) => {
+        try {
+          originalReleasePointerCapture(pointerId)
+        } catch {
+          // Ignore invalid pointer release states for symmetry with setPointerCapture.
+        }
+      }
+    }
+
+    canvasAny.__gtmcOriginalSetPointerCapture = originalSetPointerCapture
+    canvasAny.__gtmcOriginalReleasePointerCapture = originalReleasePointerCapture
+    canvasAny.__gtmcPointerCapturePatched = true
+  }
+
+  const restoreCanvasPointerCapture = (canvas: HTMLCanvasElement | null) => {
+    if (!canvas) return
+    const canvasAny = canvas as any
+    if (!canvasAny.__gtmcPointerCapturePatched) return
+
+    if (canvasAny.__gtmcOriginalSetPointerCapture) {
+      canvasAny.setPointerCapture = canvasAny.__gtmcOriginalSetPointerCapture
+    }
+    if (canvasAny.__gtmcOriginalReleasePointerCapture) {
+      canvasAny.releasePointerCapture = canvasAny.__gtmcOriginalReleasePointerCapture
+    }
+
+    delete canvasAny.__gtmcOriginalSetPointerCapture
+    delete canvasAny.__gtmcOriginalReleasePointerCapture
+    delete canvasAny.__gtmcPointerCapturePatched
+  }
+
   useEffect(() => {
     if (!canvasRef.current) return
+    patchCanvasPointerCapture(canvasRef.current)
 
     const loadToken = ++loadTokenRef.current
     let isActive = true
@@ -188,6 +251,9 @@ export default function LitematicaViewer({
           {
             showGrid: true,
             backgroundColor: 0xf8f9fc,
+            enableInteraction: false,
+            enableDragAndDrop: false,
+            enableGizmos: false,
             meshBuildingMode: "incremental",
             targetFPS: 120,
             idleFPS: 120,
@@ -293,26 +359,27 @@ export default function LitematicaViewer({
 
       if (!locked) {
         lastPointerUnlockAtRef.current = performance.now()
-        if (cm && typeof cm.disableFlyControls === "function" && flyEnabled) {
-          cm.disableFlyControls()
-        }
       }
 
       setIsFlyEnabled(flyEnabled)
       setIsFlyMode(Boolean(locked && flyEnabled))
     }
 
-    const handlePointerLockError = () => {
-      lastPointerUnlockAtRef.current = performance.now()
+    const handlePointerLockError = (event: Event) => {
       const current = rendererRef.current
       const cm = current?.cameraManager
-
-      if (cm?.isFlyControlsEnabled?.()) {
-        cm.disableFlyControls?.()
+      if (!cm?.isFlyControlsEnabled?.()) {
+        return
       }
 
+      lastPointerUnlockAtRef.current = performance.now()
+
+      cm.disableFlyControls?.()
       setIsFlyMode(false)
       setIsFlyEnabled(false)
+
+      // Prevent PointerLockControls' internal error listener from logging noisy errors.
+      event.stopImmediatePropagation()
     }
 
     const handleEscapeKeyDown = (event: KeyboardEvent) => {
@@ -320,21 +387,24 @@ export default function LitematicaViewer({
 
       const current = rendererRef.current
       const cm = current?.cameraManager
-      if (cm?.isFlyControlsLocked?.()) {
-        // Mark cooldown immediately to avoid re-lock race before pointerlockchange arrives.
+      if (cm?.isFlyControlsEnabled?.()) {
+        // ESC acts as explicit exit from first-person mode.
         lastPointerUnlockAtRef.current = performance.now()
+        cm.disableFlyControls?.()
+        setIsFlyMode(false)
+        setIsFlyEnabled(false)
       }
     }
 
     document.addEventListener("pointerlockchange", handlePointerLockChange)
-    document.addEventListener("pointerlockerror", handlePointerLockError)
+    document.addEventListener("pointerlockerror", handlePointerLockError, true)
     document.addEventListener("keydown", handleEscapeKeyDown, true)
     initRenderer()
 
     return () => {
       isActive = false
       document.removeEventListener("pointerlockchange", handlePointerLockChange)
-      document.removeEventListener("pointerlockerror", handlePointerLockError)
+      document.removeEventListener("pointerlockerror", handlePointerLockError, true)
       document.removeEventListener("keydown", handleEscapeKeyDown, true)
       setSchematicReady(false)
       schematicIdRef.current = null
@@ -351,6 +421,8 @@ export default function LitematicaViewer({
       if (rendererRef.current && typeof rendererRef.current.dispose === "function") {
         rendererRef.current.dispose()
       }
+
+      restoreCanvasPointerCapture(canvasRef.current)
 
       rendererRef.current = null
     }
@@ -426,7 +498,9 @@ export default function LitematicaViewer({
     cm.setAutoOrbitAfterZoom?.(false)
     cm.setZoomInOnLoad?.(false)
 
-    if (cm.isFlyControlsEnabled?.()) {
+    const flyEnabled = Boolean(cm.isFlyControlsEnabled?.())
+
+    if (flyEnabled) {
       lastPointerUnlockAtRef.current = performance.now()
       cm.disableFlyControls?.()
       setIsFlyMode(false)
@@ -435,7 +509,6 @@ export default function LitematicaViewer({
     }
 
     cm.enableFlyControls?.()
-    patchFlyLockWithCooldown(cm)
     cm.setFlyControlsSettings?.({
       moveSpeed: 16,
       sprintMultiplier: 2.4,
@@ -445,14 +518,12 @@ export default function LitematicaViewer({
         sprint: "ShiftLeft",
       },
     })
-    const elapsedSinceUnlock = performance.now() - lastPointerUnlockAtRef.current
-    if (elapsedSinceUnlock >= POINTER_LOCK_COOLDOWN_MS) {
-      // Try locking immediately from the button click gesture.
-      cm.flyControls?.lock?.()
-    }
+
+    patchFlyLockWithCooldown(cm)
+    // If already enabled but unlocked, this acts as a reliable re-lock action.
+    cm.flyControls?.lock?.()
 
     setIsFlyEnabled(true)
-
     setIsFlyMode(Boolean(cm.isFlyControlsLocked?.()))
   }
 
@@ -512,7 +583,7 @@ export default function LitematicaViewer({
       {maxLayer > 0 && (
         <div
           className={`absolute right-4 bottom-16 z-10 w-[250px] border border-tech-main/60 bg-white/90 p-3 text-tech-main shadow-sm backdrop-blur-md transition-all ${
-            isFlyMode ? "pointer-events-none opacity-0 translate-x-2" : "opacity-100"
+            isFlyEnabled ? "pointer-events-none opacity-0 translate-x-2" : "opacity-100"
           }`}
         >
           <div className="mb-2 flex items-center justify-between border-b border-tech-main/20 pb-1">

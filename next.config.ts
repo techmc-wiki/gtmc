@@ -1,5 +1,8 @@
 import type { NextConfig } from "next"
 import withBundleAnalyzer from "@next/bundle-analyzer"
+import createNextIntlPlugin from "next-intl/plugin"
+
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts")
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["@prisma/client", "prisma"],
@@ -22,4 +25,4 @@ const config =
     ? withBundleAnalyzer({ enabled: true })(nextConfig)
     : nextConfig
 
-export default config
+export default withNextIntl(config)

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { TechButton } from "../ui/tech-button"
 import { InputBox } from "../ui/input-box"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { updateFeature } from "@/actions/feature"
 import { useBadge } from "@/hooks/use-badge"
 import {

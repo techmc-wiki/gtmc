@@ -3,6 +3,13 @@ import path from "path"
 import { type ArticleTreeNode } from "./github-repo-client"
 import { type SlugMapEntry } from "./slug-resolver"
 
+export type ArticleLocale = "en" | "zh"
+
+export interface LocalizedArticleMetadata {
+  chapterTitle: string
+  introTitle: string
+}
+
 const ARTICLES_DIR = path.join(process.cwd(), "articles")
 const SUBMODULE_GIT = path.join(ARTICLES_DIR, ".git")
 const SLUG_MAP_PATH = path.join(process.cwd(), "lib/slug-map.json")
@@ -86,10 +93,12 @@ export async function getArticleContent(
   return null
 }
 
-export async function getArticleTree(): Promise<ArticleTreeNode[]> {
+export async function getArticleTree(
+  locale: ArticleLocale = "zh"
+): Promise<ArticleTreeNode[]> {
   if (isSubmoduleAvailable()) {
     try {
-      return buildLocalTree()
+      return buildLocalTree(locale)
     } catch {
       if (process.env.NODE_ENV === "development") {
         console.warn(
@@ -104,7 +113,49 @@ export async function getArticleTree(): Promise<ArticleTreeNode[]> {
   return []
 }
 
-function buildLocalTree(): ArticleTreeNode[] {
+export function getLocalizedArticleMetadata(
+  entry: SlugMapEntry | null | undefined,
+  locale: ArticleLocale = "zh"
+): LocalizedArticleMetadata {
+  if (!entry) {
+    return {
+      chapterTitle: "",
+      introTitle: "",
+    }
+  }
+
+  const chapterTitle =
+    locale === "en"
+      ? entry.chapterTitleEn.trim() || entry.chapterTitle.trim()
+      : entry.chapterTitle.trim()
+
+  const introTitle =
+    locale === "en"
+      ? entry.introTitleEn.trim() || entry.introTitle.trim()
+      : entry.introTitle.trim()
+
+  return {
+    chapterTitle,
+    introTitle,
+  }
+}
+
+export function getLocalizedSlugMapEntry(
+  slugPath: string,
+  locale: ArticleLocale = "zh"
+): (SlugMapEntry & LocalizedArticleMetadata) | null {
+  const entry = slugMap[slugPath]
+  if (!entry) {
+    return null
+  }
+
+  return {
+    ...entry,
+    ...getLocalizedArticleMetadata(entry, locale),
+  }
+}
+
+function buildLocalTree(locale: ArticleLocale): ArticleTreeNode[] {
   const entries = Object.values(slugMap)
   if (entries.length === 0) {
     return []
@@ -120,14 +171,15 @@ function buildLocalTree(): ArticleTreeNode[] {
 
   const roots = entries
     .filter((entry) => !entry.parentSlug || !slugMap[entry.parentSlug])
-    .sort(compareEntries)
+    .sort((a, b) => compareEntries(a, b, locale))
 
-  return roots.map((entry) => buildTreeNode(entry, parentIndex))
+  return roots.map((entry) => buildTreeNode(entry, parentIndex, locale))
 }
 
 function buildTreeNode(
   entry: SlugMapEntry,
-  parentIndex: Map<string, SlugMapEntry[]>
+  parentIndex: Map<string, SlugMapEntry[]>,
+  locale: ArticleLocale
 ): ArticleTreeNode {
   const childrenFromSlug = entry.children ?? []
   const childrenFromParent = parentIndex.get(entry.slug) ?? []
@@ -141,8 +193,10 @@ function buildTreeNode(
   }
 
   const children = Array.from(mergedChildrenBySlug.values())
-    .sort(compareEntries)
-    .map((child) => buildTreeNode(child, parentIndex))
+    .sort((a, b) => compareEntries(a, b, locale))
+    .map((child) => buildTreeNode(child, parentIndex, locale))
+
+  const localizedMetadata = getLocalizedArticleMetadata(entry, locale)
 
   const node: ArticleTreeNode & {
     index: number
@@ -152,13 +206,13 @@ function buildTreeNode(
     isAdvanced?: boolean
   } = {
     id: entry.isFolder ? entry.slug : entry.filePath.replace(/\.md$/i, ""),
-    title: getNodeTitle(entry),
+    title: getNodeTitle(entry, locale),
     slug: entry.slug,
     isFolder: entry.isFolder,
     index: entry.index,
     isAppendix: entry.isAppendix,
     isPreface: entry.isPreface,
-    introTitle: entry.introTitle,
+    introTitle: localizedMetadata.introTitle,
     isAdvanced: entry.isAdvanced,
     parentId: entry.parentSlug ?? null,
     children,
@@ -167,31 +221,33 @@ function buildTreeNode(
   return node
 }
 
-function compareEntries(a: SlugMapEntry, b: SlugMapEntry): number {
+function compareEntries(
+  a: SlugMapEntry,
+  b: SlugMapEntry,
+  locale: ArticleLocale
+): number {
   if (a.isFolder === b.isFolder) {
-    return getNodeTitle(a).localeCompare(getNodeTitle(b))
+    return getNodeTitle(a, locale).localeCompare(getNodeTitle(b, locale))
   }
   return a.isFolder ? -1 : 1
 }
 
-function getNodeTitle(entry: SlugMapEntry): string {
+function getNodeTitle(entry: SlugMapEntry, locale: ArticleLocale): string {
+  const { chapterTitle } = getLocalizedArticleMetadata(entry, locale)
+
   if (entry.isPreface) {
     return (
-      entry.title ||
-      entry.chapterTitle ||
-      entry.slug.split("/").pop() ||
-      entry.slug
+      entry.title || chapterTitle || entry.slug.split("/").pop() || entry.slug
     )
   }
 
   if (entry.isFolder) {
-    return entry.chapterTitle || entry.slug.split("/").pop() || entry.slug
+    return chapterTitle || entry.slug.split("/").pop() || entry.slug
   }
 
   if (entry.isAppendix) {
     return (
-      entry.chapterTitle ||
-      entry.chapterTitleEn ||
+      chapterTitle ||
       entry.title ||
       entry.filePath.split("/").pop()?.replace(/\.md$/i, "") ||
       entry.slug.split("/").pop() ||
@@ -200,7 +256,7 @@ function getNodeTitle(entry: SlugMapEntry): string {
   }
 
   return (
-    entry.chapterTitle ||
+    chapterTitle ||
     entry.title ||
     entry.filePath.split("/").pop()?.replace(/\.md$/i, "") ||
     entry.slug.split("/").pop() ||

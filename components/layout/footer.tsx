@@ -1,7 +1,10 @@
-import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { Link } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/article-url"
 
 export default function Footer() {
+  const t = useTranslations("Footer")
+
   return (
     <footer
       className="
@@ -75,7 +78,7 @@ export default function Footer() {
               md:col-span-5 md:flex-row md:justify-around
             ">
             <nav aria-label="Documentation" className="flex flex-col space-y-4">
-              <h3 className="section-label">Documentation</h3>
+              <h3 className="section-label">{t("documentation")}</h3>
               <ul className="flex flex-col space-y-3 text-sm text-tech-main">
                 <li>
                   <Link
@@ -84,7 +87,7 @@ export default function Footer() {
                       transition-colors
                       hover:text-tech-main-dark
                     ">
-                    Preface
+                    {t("preface")}
                   </Link>
                 </li>
                 <li>
@@ -94,14 +97,14 @@ export default function Footer() {
                       transition-colors
                       hover:text-tech-main-dark
                     ">
-                    Articles
+                    {t("articles")}
                   </Link>
                 </li>
               </ul>
             </nav>
 
             <nav aria-label="Community" className="flex flex-col space-y-4">
-              <h3 className="section-label">Community</h3>
+              <h3 className="section-label">{t("community")}</h3>
               <ul className="flex flex-col space-y-3 text-sm text-tech-main">
                 <li>
                   <Link
@@ -149,7 +152,7 @@ export default function Footer() {
               flex flex-col space-y-4
               md:col-span-3 md:items-end md:text-right
             ">
-            <h3 className="section-label">Legal & Info</h3>
+            <h3 className="section-label">{t("legalInfo")}</h3>
             <div className="flex flex-col space-y-2 text-sm text-tech-main">
               <p>&copy; 2024-{new Date().getFullYear()} GTMC Wiki</p>
               <p>

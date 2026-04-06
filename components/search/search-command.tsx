@@ -10,7 +10,7 @@ import {
   useSyncExternalStore,
 } from "react"
 import { createPortal } from "react-dom"
-import { useRouter, usePathname } from "next/navigation"
+import { useRouter, usePathname } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/article-url"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 

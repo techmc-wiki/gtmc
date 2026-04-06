@@ -1,0 +1,23 @@
+{
+  "Nav": {
+    "articles": "ARTICLES",
+    "drafts": "MY DRAFTS",
+    "reviewHub": "REVIEW HUB",
+    "features": "FEATURES"
+  },
+  "Homepage": {
+    "startReading": "START READING →",
+    "loginGithub": "LOGIN (GITHUB)",
+    "initializing": "INITIALIZING..."
+  },
+  "Footer": {
+    "documentation": "Documentation",
+    "community": "Community",
+    "legalInfo": "Legal & Info",
+    "preface": "Preface",
+    "articles": "Articles"
+  },
+  "Article": {
+    "notFound": "Article Not Found"
+  }
+}

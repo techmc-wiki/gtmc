@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 
 import { saveDraftAction, submitForReviewAction } from "@/actions/article"
 import { DraftFileSourceDialog } from "@/components/editor/draft-file-source-dialog"

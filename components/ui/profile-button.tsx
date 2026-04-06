@@ -1,5 +1,5 @@
 ﻿import * as React from "react"
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { auth } from "@/lib/auth"
 import { UesrAvatar } from "./user-avatar"
 

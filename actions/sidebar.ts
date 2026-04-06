@@ -6,7 +6,7 @@ import { requireAuth } from "@/lib/auth-helpers"
 import { unstable_cache } from "next/cache"
 import { createDirectFile, createPR } from "@/lib/github/pr-manager"
 import { getRepoTranslations, type ArticleTreeNode } from "@/lib/github/sync"
-import { getArticleTree } from "@/lib/article-loader"
+import { getArticleTree, type ArticleLocale } from "@/lib/article-loader"
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
 import type { TreeNode } from "@/types/sidebar-tree"
 import { statSync } from "fs"
@@ -35,8 +35,8 @@ function getSlugMapMtime(): string {
 }
 
 const getCachedArticleTree = unstable_cache(
-  async () => {
-    return getArticleTree()
+  async (locale: ArticleLocale) => {
+    return getArticleTree(locale)
   },
   ["github-repo-tree", getSlugMapMtime()],
   { revalidate: 60, tags: ["github-repo-tree"] }
@@ -54,12 +54,14 @@ const getCachedTranslations = unstable_cache(
  * 获取树状结构的目录树 (Sidebar)
  * Tree is built from the GitHub repository only.
  */
-export async function getSidebarTree(): Promise<TreeNode[]> {
+export async function getSidebarTree(
+  locale: ArticleLocale = "zh"
+): Promise<TreeNode[]> {
   // 1. Get GitHub repo tree (cached)
   let githubTree: ArticleTreeNode[] = []
   let translations: Record<string, string> = {}
 
-  const githubTreePromise = getCachedArticleTree()
+  const githubTreePromise = getCachedArticleTree(locale)
   const translationsPromise = getCachedTranslations()
 
   const [treeResult, translationsResult] = await Promise.allSettled([

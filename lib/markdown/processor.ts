@@ -8,6 +8,7 @@ import type { Element, Root, Text } from "hast"
 import { visit } from "unist-util-visit"
 import { pangu } from "pangu"
 import { remarkAnsiColors } from "@/lib/markdown/plugins/remark-ansi-colors"
+import { remarkCallouts } from "@/lib/markdown/plugins/remark-callouts"
 import { remarkAdvancedSections } from "@/lib/markdown/plugins/remark-advanced-sections"
 import { remarkNumberedHeadingsDot } from "@/lib/markdown/plugins/remark-heading-numbering"
 import { rehypeAdvancedSections } from "@/lib/markdown/plugins/rehype-advanced-sections"
@@ -73,12 +74,14 @@ export function getPluginsForContent(
     | typeof remarkMath
     | typeof remarkBreaks
     | typeof remarkAnsiColors
+    | typeof remarkCallouts
     | typeof remarkAdvancedSections
     | [typeof remarkNumberedHeadingsDot, { startDepth: number }]
   > = [
     remarkGfm,
     remarkBreaks,
     remarkAnsiColors,
+    remarkCallouts,
     remarkAdvancedSections,
     [remarkNumberedHeadingsDot, { startDepth: 2 }],
   ]

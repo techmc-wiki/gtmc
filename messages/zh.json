@@ -23,6 +23,15 @@
   "Article": {
     "notFound": "文章未找到"
   },
+  "callouts": {
+    "warning_label": "警告",
+    "tip_label": "提示",
+    "important_label": "重要",
+    "crash_label": "崩溃风险",
+    "corruption_label": "存档损坏风险",
+    "crash_default": "此操作可能导致游戏崩溃，请谨慎操作。",
+    "corruption_default": "此操作可能损坏游戏存档，操作前请务必备份存档。"
+  },
   "Sidebar": {
     "title": "文章目录",
     "titleShort": "目录",

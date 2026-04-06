@@ -23,6 +23,15 @@
   "Article": {
     "notFound": "Article Not Found"
   },
+  "callouts": {
+    "warning_label": "Warning",
+    "tip_label": "Tip",
+    "important_label": "Important",
+    "crash_label": "Crash Risk",
+    "corruption_label": "Save Corruption Risk",
+    "crash_default": "This action may cause the game to crash. Proceed with caution.",
+    "corruption_default": "This action may corrupt your save file. Back up your saves before proceeding."
+  },
   "Sidebar": {
     "title": "Table of Contents",
     "titleShort": "ToC",

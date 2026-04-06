@@ -341,6 +341,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       ) : (
         <ArticleMetadataSimple
           title={articleTitle}
+          canonicalUrl={canonicalUrl}
+          attributionDate={lastModified || createdAt}
           filePath={target.filePath}
           wordCount={wordCount}
           readingTime={readingTime}

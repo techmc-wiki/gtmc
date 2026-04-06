@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { ArticleBanner } from "@/components/articles/article-banner"
+import { ArticleLicenseNotice } from "@/components/articles/article-license-notice"
 
 function useLocalStorage<T>(
   key: string,
@@ -336,6 +337,13 @@ export function ArticleMetadata({
               {copied ? "✓" : "Copy"}
             </button>
           </div>
+
+          <ArticleLicenseNotice
+            title={title}
+            canonicalUrl={canonicalUrl}
+            attributionDate={lastModified || createdAt}
+            authors={[author, ...coAuthors]}
+          />
         </div>
       </div>
 

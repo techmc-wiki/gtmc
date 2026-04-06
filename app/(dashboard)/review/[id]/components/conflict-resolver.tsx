@@ -4,6 +4,7 @@ import { useState, useMemo } from "react"
 import type { RebaseState } from "@/types/rebase"
 
 import { resolveConflictAction, abortRebaseAction } from "@/actions/review"
+import { ReauthRequiredError } from "@/lib/admin-reauth"
 import { TechButton } from "@/components/ui/tech-button"
 import {
   getActiveDraftFile,
@@ -126,6 +127,10 @@ export default function ConflictResolver({
       await abortRebaseAction(revisionId)
       window.location.reload()
     } catch (error) {
+      if (error instanceof ReauthRequiredError) {
+        window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
+        return
+      }
       alert(
         `Failed to abort rebase: ${error instanceof Error ? error.message : String(error)}`
       )
@@ -139,6 +144,10 @@ export default function ConflictResolver({
       await resolveConflictAction(prNumber, formData)
       window.location.reload()
     } catch (error) {
+      if (error instanceof ReauthRequiredError) {
+        window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
+        return
+      }
       alert(
         `Failed to resolve conflict: ${error instanceof Error ? error.message : String(error)}`
       )
@@ -230,9 +239,10 @@ export default function ConflictResolver({
                     className={`
                       flex min-h-11 w-full flex-col items-start gap-1 border
                       px-3 py-2 text-left transition-colors
-                      ${isActive
-                        ? `border-tech-main bg-tech-main/10`
-                        : `
+                      ${
+                        isActive
+                          ? `border-tech-main bg-tech-main/10`
+                          : `
                             guide-line bg-white/70
                             hover:border-tech-main/50 hover:bg-white/90
                           `
@@ -410,10 +420,7 @@ export default function ConflictResolver({
               </div>
             </div>
 
-            <TechButton
-              type="submit"
-              variant="primary"
-              disabled={isSubmitting}>
+            <TechButton type="submit" variant="primary" disabled={isSubmitting}>
               {isSubmitting ? "RESOLVING..." : "RESOLVE & UPDATE PR"}
             </TechButton>
           </form>

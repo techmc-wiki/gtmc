@@ -125,7 +125,10 @@ export async function GET(request: Request) {
     }
 
     const resolvedRelative = path.relative(absoluteRoot, resolvedPath)
-    if (resolvedRelative.startsWith("..") || path.isAbsolute(resolvedRelative)) {
+    if (
+      resolvedRelative.startsWith("..") ||
+      path.isAbsolute(resolvedRelative)
+    ) {
       return errorResponse("Invalid path", 403)
     }
 

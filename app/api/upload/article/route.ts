@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 import { auth } from "@/lib/auth"
+import { getGithubPatForUser } from "@/lib/auth-context"
 import { classifyFile, sanitizeFilename } from "@/lib/file-upload"
 import {
   uploadArticleAssetToGithub,
@@ -10,7 +11,7 @@ import {
 export async function POST(req: NextRequest) {
   const session = await auth()
 
-  if (!session?.user) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest) {
       buffer,
       category: classification.category,
       filename,
-      token: (session.user as { githubPat?: string }).githubPat || null,
+      token: (await getGithubPatForUser(session.user.id)) ?? null,
     })
 
     return NextResponse.json({

@@ -59,10 +59,10 @@ export default async function FeaturesPage({
       },
       assignee: assigneeId
         ? {
-          name: parsed.metadata?.assigneeName || undefined,
-          email: parsed.metadata?.assigneeEmail || undefined,
-          image: undefined,
-        }
+            name: parsed.metadata?.assigneeName || undefined,
+            email: parsed.metadata?.assigneeEmail || undefined,
+            image: undefined,
+          }
         : undefined,
     }
   })

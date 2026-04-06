@@ -3,12 +3,12 @@ import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 export interface TechCardProps extends React.HTMLAttributes<HTMLDivElement> {
   color?:
-  | "white"
-  | "electric-blue"
-  | "neon-green"
-  | "hot-pink"
-  | "black"
-  | "sun-yellow"
+    | "white"
+    | "electric-blue"
+    | "neon-green"
+    | "hot-pink"
+    | "black"
+    | "sun-yellow"
   pattern?: "none" | "dots" | "grid"
 }
 

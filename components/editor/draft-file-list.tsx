@@ -74,9 +74,10 @@ export function DraftFileList({
                 className={`
                   flex min-h-11 min-w-0 flex-1 flex-col items-start gap-1 border
                   px-3 py-2 text-left transition-colors
-                  ${isActive
-                    ? `border-tech-main bg-tech-main/10`
-                    : `
+                  ${
+                    isActive
+                      ? `border-tech-main bg-tech-main/10`
+                      : `
                         guide-line bg-white/70
                         hover:border-tech-main/50 hover:bg-white/90
                       `
@@ -105,13 +106,14 @@ export function DraftFileList({
                   className={`
                     flex min-w-8 shrink-0 items-center justify-center border-y
                     border-r transition-colors
-                    ${isActive
-                      ? `
+                    ${
+                      isActive
+                        ? `
                           border-tech-main bg-tech-main/5 text-tech-main/60
                           hover:border-red-500/30 hover:bg-red-500/10
                           hover:text-red-500
                         `
-                      : `
+                        : `
                           guide-line bg-white/50 text-tech-main/40
                           hover:border-red-500/30 hover:bg-red-500/10
                           hover:text-red-500

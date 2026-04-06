@@ -489,6 +489,32 @@ code .line {
   display: block;
 }
 
+[data-litematica-layer-slider] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 2px;
+  background: rgba(71, 85, 105, 0.28);
+  outline: none;
+}
+
+[data-litematica-layer-slider]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 8px;
+  height: 16px;
+  background: var(--color-tech-main);
+  cursor: ew-resize;
+  border-radius: 0;
+}
+
+[data-litematica-layer-slider]::-moz-range-thumb {
+  width: 8px;
+  height: 16px;
+  background: var(--color-tech-main);
+  cursor: ew-resize;
+  border-radius: 0;
+  border: none;
+}
+
 .code-block-pre .line {
   display: block;
   position: relative;

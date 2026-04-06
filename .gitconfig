@@ -3,6 +3,7 @@
 
 [pull]
 	rebase = true
+	ff = false
 
 [rebase]
 	autoStash = true

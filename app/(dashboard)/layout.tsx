@@ -19,7 +19,8 @@ export default async function DashboardLayout({
     try {
       const ctx = await getCurrentUserAuthContext(session.user.id)
       isAdmin = ctx.role === "ADMIN"
-    } catch {
+    } catch (err) {
+      console.error("[layout] Failed to resolve auth context:", err)
       isAdmin = false
     }
   }

@@ -35,8 +35,7 @@ export function ArticleLicenseNotice({
       ? [orderedAuthors[0], orderedAuthors.at(-1), "et al."]
       : sortedAuthors
   const attributionLabel = [
-    `“${title}”`,
-    `Graduate Texts in Minecraft (${canonicalUrl})`,
+    `“${title}” - Graduate Texts in Minecraft (${canonicalUrl})`,
     attributionAuthors.length > 0 ? attributionAuthors.join(", ") : null,
     attributionDateLabel,
     "CC BY-NC-SA 4.0",

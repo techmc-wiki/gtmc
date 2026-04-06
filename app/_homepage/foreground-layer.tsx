@@ -115,12 +115,13 @@ export function ForegroundLayer({
             key={i}
             className={`
               flex size-8 items-center justify-center
-              ${i === 3
-                ? `
+              ${
+                i === 3
+                  ? `
                     border-2 border-tech-main-dark bg-tech-main/10
                     shadow-[0_0_8px_rgba(96,112,143,0.3)]
                   `
-                : `border border-tech-main/40`
+                  : `border border-tech-main/40`
               }
             `}>
             {i === 3 && (

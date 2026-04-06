@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth"
+import { getGithubPatForUser } from "@/lib/auth-context"
 import { getMainBranchHeadSha } from "@/lib/article-submission"
 import { getRepoFileContent } from "@/lib/github/sync"
 import { prisma } from "@/lib/prisma"
@@ -42,8 +43,7 @@ export default async function NewDraftPage({
   }
 
   const token =
-    (session.user as { githubPat?: string }).githubPat ||
-    process.env.GITHUB_TOKEN
+    (await getGithubPatForUser(session.user.id)) ?? process.env.GITHUB_TOKEN
   const baseMainSha = await getMainBranchHeadSha(token)
   const createData = {
     author: { connect: { id: session.user.id } },

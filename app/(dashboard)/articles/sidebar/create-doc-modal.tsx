@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { createPortal } from "react-dom"
 import { createDocument } from "@/actions/sidebar"
+import { ReauthRequiredError } from "@/lib/admin-reauth"
 import type { TreeNode } from "./tree-node"
 
 export function CreateDocModal({
@@ -38,6 +39,10 @@ export function CreateDocModal({
       onClose()
       onCreated()
     } catch (error) {
+      if (error instanceof ReauthRequiredError) {
+        window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
+        return
+      }
       const message = error instanceof Error ? error.message : "Unknown error"
       alert(message)
     }

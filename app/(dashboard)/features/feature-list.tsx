@@ -231,9 +231,10 @@ export function FeatureList({ features }: { features: Feature[] }) {
                         flex min-h-8 cursor-pointer items-center justify-center
                         border px-3 py-2 font-mono text-xs uppercase
                         transition-all
-                        ${selectedTags.includes(tag)
-                          ? "border-tech-accent bg-tech-accent text-white"
-                          : `
+                        ${
+                          selectedTags.includes(tag)
+                            ? "border-tech-accent bg-tech-accent text-white"
+                            : `
                               border-tech-main/40 bg-tech-accent/5
                               text-tech-main
                               hover:border-tech-main/60

@@ -22,6 +22,7 @@ import { prisma } from "@/lib/prisma"
 import type { RebaseState } from "@/types/rebase"
 import type { RebaseAnalysis } from "@/lib/article-rebase"
 import ConflictResolver from "./components/conflict-resolver"
+import { ActionForm } from "./components/action-form"
 
 const owner = ARTICLES_REPO_OWNER
 const repo = ARTICLES_REPO_NAME
@@ -217,7 +218,7 @@ export default async function ReviewDetailPage({
               flex w-full gap-4
               md:w-auto
             ">
-            <form
+            <ActionForm
               action={async () => {
                 "use server"
                 await closePRAction(prNumber)
@@ -231,9 +232,9 @@ export default async function ReviewDetailPage({
                 ">
                 CLOSE
               </TechButton>
-            </form>
+            </ActionForm>
             {isMergeable && linkedDraft?.status !== "SYNC_CONFLICT" && (
-              <form
+              <ActionForm
                 action={async () => {
                   "use server"
                   await mergePRAction(prNumber)
@@ -241,7 +242,7 @@ export default async function ReviewDetailPage({
                 <TechButton type="submit" variant="primary" className="w-full">
                   APPROVE_&_MERGE
                 </TechButton>
-              </form>
+              </ActionForm>
             )}
           </div>
         )}
@@ -261,7 +262,7 @@ export default async function ReviewDetailPage({
               <span>{rebaseAnalysis.adminMessage}</span>
             </div>
             <div className="flex flex-wrap gap-3">
-              <form
+              <ActionForm
                 action={async () => {
                   "use server"
                   await submitWithRebaseAction(linkedDraft.id)
@@ -269,8 +270,8 @@ export default async function ReviewDetailPage({
                 <TechButton type="submit" variant="primary" size="sm">
                   FINE-GRAINED_REBASE
                 </TechButton>
-              </form>
-              <form
+              </ActionForm>
+              <ActionForm
                 action={async () => {
                   "use server"
                   await mergePRAction(prNumber)
@@ -278,7 +279,7 @@ export default async function ReviewDetailPage({
                 <TechButton type="submit" variant="secondary" size="sm">
                   QUICK_MERGE
                 </TechButton>
-              </form>
+              </ActionForm>
             </div>
           </div>
         )}

@@ -8,6 +8,7 @@ import { DesktopNav } from "./desktop-nav"
 import { SearchCommand } from "@/components/search/search-command"
 import { auth } from "@/lib/auth"
 import { getCurrentUserAuthContext } from "@/lib/auth-context"
+import { LanguageSwitcher } from "@/components/layout/language-switcher"
 
 export default async function DashboardLayout({
   children,
@@ -70,6 +71,7 @@ export default async function DashboardLayout({
             <div className="flex items-center gap-4">
               <SearchCommand />
               <MobileNav navLinks={navLinks} />
+              <LanguageSwitcher />
               <React.Suspense
                 fallback={
                   <div

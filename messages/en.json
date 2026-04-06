@@ -12,8 +12,11 @@
   },
   "Footer": {
     "documentation": "Documentation",
+    "documentationNav": "Documentation",
     "community": "Community",
+    "communityNav": "Community",
     "legalInfo": "Legal & Info",
+    "legalNav": "Legal",
     "preface": "Preface",
     "articles": "Articles"
   },

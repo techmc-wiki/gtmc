@@ -3,17 +3,20 @@
     "articles": "文章",
     "drafts": "我的草稿",
     "reviewHub": "审核中心",
-    "features": "功能"
+    "features": "报告特性"
   },
   "Homepage": {
     "startReading": "开始阅读 →",
-    "loginGithub": "登录 (GITHUB)",
+    "loginGithub": "登录 (GitHub)",
     "initializing": "初始化中..."
   },
   "Footer": {
     "documentation": "文档",
+    "documentationNav": "文档导航",
     "community": "社区",
-    "legalInfo": "法律与信息",
+    "communityNav": "社区导航",
+    "legalInfo": "法律信息",
+    "legalNav": "法律",
     "preface": "前言",
     "articles": "文章"
   },

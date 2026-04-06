@@ -4,6 +4,7 @@ import * as React from "react"
 import { createPortal } from "react-dom"
 import { Link } from "@/i18n/navigation"
 import { usePathname } from "@/i18n/navigation"
+import { LanguageSwitcher } from "@/components/layout/language-switcher"
 
 interface NavLink {
   href: string
@@ -99,6 +100,9 @@ export function MobileNav({ navLinks }: MobileNavProps) {
                     {link.label}
                   </Link>
                 ))}
+                <div className="pt-1">
+                  <LanguageSwitcher />
+                </div>
               </div>
             </div>
           </div>,

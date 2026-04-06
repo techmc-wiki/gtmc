@@ -77,7 +77,9 @@ export default function Footer() {
               flex flex-col gap-8
               md:col-span-5 md:flex-row md:justify-around
             ">
-            <nav aria-label="Documentation" className="flex flex-col space-y-4">
+            <nav
+              aria-label={t("documentationNav")}
+              className="flex flex-col space-y-4">
               <h3 className="section-label">{t("documentation")}</h3>
               <ul className="flex flex-col space-y-3 text-sm text-tech-main">
                 <li>
@@ -103,7 +105,9 @@ export default function Footer() {
               </ul>
             </nav>
 
-            <nav aria-label="Community" className="flex flex-col space-y-4">
+            <nav
+              aria-label={t("communityNav")}
+              className="flex flex-col space-y-4">
               <h3 className="section-label">{t("community")}</h3>
               <ul className="flex flex-col space-y-3 text-sm text-tech-main">
                 <li>
@@ -147,7 +151,7 @@ export default function Footer() {
           </div>
 
           <aside
-            aria-label="Legal"
+            aria-label={t("legalNav")}
             className="
               flex flex-col space-y-4
               md:col-span-3 md:items-end md:text-right

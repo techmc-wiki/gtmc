@@ -36,7 +36,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.sub = user.id
       }
 
-      if (trigger === "signIn") {
+      if (trigger === "signIn" || !token.lastAuthAt) {
         token.lastAuthAt = Date.now()
       }
 

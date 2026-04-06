@@ -49,6 +49,7 @@ export async function mergePRAction(prNumber: number) {
       owner,
       repo,
       pull_number: prNumber,
+      merge_method: "squash", //TODO: Add a UI to allow selecting between rebase and squash.
     })
     try {
       await reconcileDraftAssetsForPRCompletion({

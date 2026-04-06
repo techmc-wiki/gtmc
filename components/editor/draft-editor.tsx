@@ -111,17 +111,17 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       files: current.files.map((file) =>
         file.id === fileId
           ? {
-            ...file,
-            ...(updates.content !== undefined
-              ? { content: updates.content }
-              : {}),
-            ...(updates.filePath !== undefined
-              ? { filePath: normalizeDraftFilePath(updates.filePath) }
-              : {}),
-            ...(updates.conflictContent !== undefined
-              ? { conflictContent: updates.conflictContent }
-              : {}),
-          }
+              ...file,
+              ...(updates.content !== undefined
+                ? { content: updates.content }
+                : {}),
+              ...(updates.filePath !== undefined
+                ? { filePath: normalizeDraftFilePath(updates.filePath) }
+                : {}),
+              ...(updates.conflictContent !== undefined
+                ? { conflictContent: updates.conflictContent }
+                : {}),
+            }
           : file
       ),
     }))
@@ -406,7 +406,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       const nextActiveFile =
         current.activeFileId === fileId
           ? remainingFiles[Math.max(0, currentIndex - 1)]?.id ||
-          remainingFiles[0]?.id
+            remainingFiles[0]?.id
           : current.activeFileId
 
       return {
@@ -479,9 +479,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             className={`
               border-tech-main/40 py-3 font-mono text-lg backdrop-blur-sm
               focus:border-tech-main/60
-              ${isReadOnly
-                ? `cursor-not-allowed bg-gray-100 opacity-70`
-                : `bg-white/80`
+              ${
+                isReadOnly
+                  ? `cursor-not-allowed bg-gray-100 opacity-70`
+                  : `bg-white/80`
               }
             `}
             value={title}
@@ -578,9 +579,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                 className={`
                   border-tech-main/40 py-2 font-mono text-sm backdrop-blur-sm
                   focus:border-tech-main/60
-                  ${isReadOnly
-                    ? `cursor-not-allowed bg-gray-100 opacity-70`
-                    : `bg-white/80`
+                  ${
+                    isReadOnly
+                      ? `cursor-not-allowed bg-gray-100 opacity-70`
+                      : `bg-white/80`
                   }
                   ${activeFileHasDuplicatePath ? `border-red-500/60` : ``}
                 `}
@@ -700,38 +702,70 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       </div>
 
       {!isReadOnly && (
-        <div
-          className="
-            relative mt-6 flex justify-end gap-4 border-t border-tech-main/10
-            pt-4
-          ">
-          <div className="corner-tick" />
+        <>
+          <div
+            className="
+              relative mt-6 flex justify-end gap-4 border-t border-tech-main/10
+              pt-4
+            ">
+            <div className="corner-tick" />
 
-          <TechButton
-            type="submit"
-            variant="primary"
-            disabled={saveDisabled}
-            aria-busy={isSaving}>
-            {isSaving ? (
-              <LoadingIndicator label={PENDING_LABELS.SAVING_DRAFT} />
-            ) : (
-              "SAVE DRAFT"
-            )}
-          </TechButton>
+            <TechButton
+              type="submit"
+              variant="primary"
+              disabled={saveDisabled}
+              aria-busy={isSaving}>
+              {isSaving ? (
+                <LoadingIndicator label={PENDING_LABELS.SAVING_DRAFT} />
+              ) : (
+                "SAVE DRAFT"
+              )}
+            </TechButton>
 
-          <TechButton
-            type="button"
-            variant="ghost"
-            onClick={handleSubmitReview}
-            disabled={submitDisabled}
-            aria-busy={isSubmittingReview}>
-            {isSubmittingReview ? (
-              <LoadingIndicator label={PENDING_LABELS.SUBMITTING_REVIEW} />
-            ) : (
-              "OPEN PR & SYNC MAIN"
-            )}
-          </TechButton>
-        </div>
+            <TechButton
+              type="button"
+              variant="ghost"
+              onClick={handleSubmitReview}
+              disabled={submitDisabled}
+              aria-busy={isSubmittingReview}>
+              {isSubmittingReview ? (
+                <LoadingIndicator label={PENDING_LABELS.SUBMITTING_REVIEW} />
+              ) : (
+                "OPEN PR & SYNC MAIN"
+              )}
+            </TechButton>
+          </div>
+
+          <section
+            aria-label="Submission license"
+            className="mt-4 border guide-line bg-tech-main/5 p-4 font-mono text-[0.6875rem] leading-relaxed text-tech-main/80">
+            <p className="section-label">Submission License</p>
+            <div className="mt-2 space-y-2">
+              <p>
+                By opening a submission PR, you confirm that this draft is your
+                own work or that you have permission to submit it.
+              </p>
+              <p>
+                You keep your copyright, but accepted article content is
+                published under{" "}
+                <a
+                  href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline decoration-tech-main/30 underline-offset-4 transition-colors hover:text-tech-main-dark hover:decoration-tech-main-dark">
+                  CC BY-NC-SA 4.0
+                </a>
+                . Others may reuse it non-commercially with attribution and the
+                same license.
+              </p>
+              <p>
+                Attribution is preserved through article metadata, PR records,
+                and repository history. Do not submit text or media you cannot
+                license on those terms.
+              </p>
+            </div>
+          </section>
+        </>
       )}
 
       <DraftFileSourceDialog

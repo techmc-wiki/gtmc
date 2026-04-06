@@ -153,6 +153,7 @@ export default function Footer() {
             <div className="flex flex-col space-y-2 text-sm text-tech-main">
               <p>&copy; 2024-{new Date().getFullYear()} GTMC Wiki</p>
               <p>
+                Articles are released under{" "}
                 <Link
                   href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
                   target="_blank"
@@ -164,6 +165,24 @@ export default function Footer() {
                   ">
                   CC BY-NC-SA 4.0
                 </Link>
+                .
+              </p>
+              <p>
+                Site code remains available under{" "}
+                <Link
+                  href="https://github.com/gtmc-dev/gtmc-web/blob/main/LICENSE"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline decoration-tech-main/30 underline-offset-4 transition-colors hover:text-tech-main-dark hover:decoration-tech-main-dark">
+                  Apache-2.0
+                </Link>
+                .
+              </p>
+              <p className="text-xs opacity-80">
+                Contributors keep copyright to their submissions, while accepted
+                article content is published under CC BY-NC-SA 4.0 with
+                attribution preserved through article metadata and source
+                history.
               </p>
               <p className="mt-2 text-xs opacity-80">
                 Not an official Minecraft product.

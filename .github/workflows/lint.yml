@@ -1,4 +1,4 @@
-name: Lint and Build
+name: Lint
 permissions:
   contents: read
 
@@ -9,7 +9,7 @@ on:
     branches: [main, master, develop]
 
 jobs:
-  lint-and-build:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,15 +37,6 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-
-      - name: Restore Next.js cache
-        uses: actions/cache@v4
-        with:
-          path: .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml', 'next.config.ts') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
-            ${{ runner.os }}-nextjs-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts

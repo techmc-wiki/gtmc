@@ -22,5 +22,12 @@
   },
   "Article": {
     "notFound": "Article Not Found"
+  },
+  "Sidebar": {
+    "title": "Table of Contents",
+    "titleShort": "ToC",
+    "buttonNewArticle": "+ New File / Dir",
+    "buttonCollapseAll": "⊟ Collapse All",
+    "buttonLocate": "◎ Locate"
   }
 }

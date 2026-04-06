@@ -22,5 +22,12 @@
   },
   "Article": {
     "notFound": "文章未找到"
+  },
+  "Sidebar": {
+    "title": "文章目录",
+    "titleShort": "目录",
+    "buttonNewArticle": "+ 新建文章 / 目录",
+    "buttonCollapseAll": "⊟ 折叠全部",
+    "buttonLocate": "◎ 定位文章"
   }
 }

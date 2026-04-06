@@ -2,7 +2,6 @@
 
 import { Link } from "@/i18n/navigation"
 import { usePathname } from "@/i18n/navigation"
-import { LanguageSwitcher } from "@/components/layout/language-switcher"
 
 interface NavLink {
   href: string

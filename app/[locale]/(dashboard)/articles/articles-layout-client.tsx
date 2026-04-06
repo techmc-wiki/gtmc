@@ -12,6 +12,7 @@ import {
   SegmentedBar,
 } from "../features/loading-shell-primitives"
 import type { TreeNode } from "@/types/sidebar-tree"
+import { useTranslations } from "next-intl"
 
 interface ArticlesLayoutProps {
   children: React.ReactNode
@@ -162,13 +163,14 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const pathname = usePathname()
   const desktopSidebarRef = useRef<SidebarClientHandle>(null)
   const floatingCardSidebarRef = useRef<SidebarClientHandle>(null)
+  const t = useTranslations("Sidebar")
 
   useEffect(() => {
     try {
       if (localStorage.getItem(SIDEBAR_HIDDEN_KEY) === "true") {
         setSidebarHidden(true)
       }
-    } catch {}
+    } catch { }
   }, [])
 
   const toggleSidebarHidden = () => {
@@ -176,7 +178,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       const next = !prev
       try {
         localStorage.setItem(SIDEBAR_HIDDEN_KEY, String(next))
-      } catch {}
+      } catch { }
       return next
     })
   }
@@ -337,15 +339,15 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 <span
                   className="transition-opacity duration-150"
                   style={{ opacity: showFullText ? 1 : 0 }}>
-                  Table of Contents
+                  {t("title")}
                 </span>
                 <span
                   className="
-                    absolute left-1/2 -translate-x-1/2 transition-opacity
-                    duration-200
+                    absolute left-1/2 line-clamp-none w-full
+                    -translate-x-1/2 transition-opacity
                   "
                   style={{ opacity: showFullText ? 0 : 1 }}>
-                  ToC
+                  {t("titleShort")}
                 </span>
                 <span
                   className="text-sm font-bold transition-opacity duration-200"
@@ -359,10 +361,9 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           <div
             className={`
               grid transition-all duration-300 ease-out
-              ${
-                isOpen && !isStuck
-                  ? "grid-rows-[1fr] opacity-100"
-                  : "grid-rows-[0fr] opacity-0"
+              ${isOpen && !isStuck
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0"
               }
             `}>
             <div className="overflow-hidden">
@@ -497,14 +498,13 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           className={`
             relative my-6 w-full flex-1 transition-all duration-300
             ease-[cubic-bezier(0.16,1,0.3,1)]
-            ${
-              sidebarHidden
-                ? `
+            ${sidebarHidden
+              ? `
                   md:max-w-3xl
                   xl:max-w-3xl
                   [1920px]:max-w-4xl
                 `
-                : `
+              : `
                   md:max-w-2xl
                   xl:max-w-3xl
                   [1920px]:max-w-4xl

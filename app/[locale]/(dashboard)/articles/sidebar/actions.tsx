@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useState } from "react"
 
 export function SidebarActions({
@@ -14,6 +15,7 @@ export function SidebarActions({
   onLocate: () => void
 }) {
   const [locateDisabled, setLocateDisabled] = useState(false)
+  const t = useTranslations("Sidebar")
 
   const handleLocate = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (locateDisabled) return
@@ -39,7 +41,7 @@ export function SidebarActions({
               font-mono text-[0.6875rem] transition-colors
               hover:bg-tech-main hover:text-white
             ">
-            + NEW DIR / FILE
+            {t("buttonNewArticle")}
           </button>
           <div className="flex gap-2">
             <button
@@ -53,7 +55,7 @@ export function SidebarActions({
                 pl-2 font-mono text-[0.6875rem] transition-colors
                 hover:bg-tech-main hover:text-white
               ">
-              ⊟ COLLAPSE ALL
+              {t("buttonCollapseAll")}
             </button>
             <button
               type="button"
@@ -65,7 +67,7 @@ export function SidebarActions({
                 hover:bg-tech-main hover:text-white
                 disabled:cursor-not-allowed disabled:opacity-50
               ">
-              ◎ LOCATE
+              {t("buttonLocate")}
             </button>
           </div>
         </div>
@@ -88,7 +90,7 @@ export function SidebarActions({
             text-[0.625rem] transition-colors
             hover:bg-tech-main hover:text-white
           ">
-          ⊟ COLLAPSE ALL
+          {t("buttonCollapseAll")}
         </button>
         <button
           type="button"
@@ -100,7 +102,7 @@ export function SidebarActions({
             hover:bg-tech-main hover:text-white
             disabled:cursor-not-allowed disabled:opacity-50
           ">
-          ◎ LOCATE
+          {t("buttonLocate")}
         </button>
         <button
           type="button"
@@ -110,7 +112,7 @@ export function SidebarActions({
             text-[0.625rem] transition-colors
             hover:bg-tech-main hover:text-white
           ">
-          + NEW DIR / FILE
+          {t("buttonNewArticle")}
         </button>
       </div>
     </div>

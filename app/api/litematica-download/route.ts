@@ -77,11 +77,15 @@ export async function GET(request: Request) {
         throw new Error("Failed to fetch file: " + response.statusText)
       }
 
-      const arrayBuffer = await response.arrayBuffer()
-      const buffer = Buffer.from(arrayBuffer)
-      return new NextResponse(buffer, {
+      if (!response.body) {
+        throw new Error("Remote file response did not include a body")
+      }
+
+      return new NextResponse(response.body, {
+        status: response.status,
         headers: {
-          "Content-Type": "application/octet-stream",
+          "Content-Type":
+            response.headers.get("Content-Type") || "application/octet-stream",
           "Cache-Control": "public, max-age=86400",
         },
       })

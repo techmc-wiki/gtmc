@@ -48,6 +48,8 @@ interface EditorTextareaProps {
   placeholder?: string
   "aria-busy"?: boolean
   fileId?: string // to preserve state per file
+  lineWrap?: boolean
+  onWrapToggle?: () => void
 }
 
 export const EditorTextarea = React.forwardRef<
@@ -65,17 +67,18 @@ export const EditorTextarea = React.forwardRef<
     isSaving,
     placeholder,
     fileId,
+    lineWrap = false,
+    onWrapToggle,
     ...rest
   },
   ref
 ) {
   const t = useTranslations("Editor")
-  const [lineWrap, setLineWrap] = React.useState(false)
 
   return (
     <div
       className={`
-        flex w-full grow flex-col
+        custom-left-scrollbar flex w-full grow flex-col
         ${isReadOnly ? `cursor-not-allowed bg-gray-50` : `bg-transparent`}
       `}
       onPaste={onPaste}
@@ -85,24 +88,11 @@ export const EditorTextarea = React.forwardRef<
       aria-busy={isSaving}
       role="application"
       {...rest}>
-      <div className="flex items-center justify-end px-6 pt-4">
-        <button
-          type="button"
-          onClick={() => setLineWrap(!lineWrap)}
-          className={`font-mono text-[0.625rem] tracking-widest uppercase px-2 py-1 border transition-colors ${
-            lineWrap
-              ? "border-tech-main bg-tech-main/10 text-tech-main"
-              : "border-tech-main/30 text-tech-main/40"
-          }`}
-          aria-pressed={lineWrap}>
-          WRAP
-        </button>
-      </div>
       <CodeMirror
         ref={ref}
         value={value}
         height="100%"
-        className="grow [&>.cm-editor]:h-full"
+        className="grow [&>.cm-editor]:h-full custom-left-scrollbar"
         placeholder={placeholder ?? t("bodyPlaceholder")}
         extensions={[
           markdown({ base: markdownLanguage, codeLanguages: languages }),

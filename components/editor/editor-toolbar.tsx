@@ -6,12 +6,16 @@ interface EditorToolbarProps {
   onInsert: (prefix: string, suffix?: string) => void
   disabled?: boolean
   fileUploadSlot?: React.ReactNode
+  lineWrap?: boolean
+  onWrapToggle?: () => void
 }
 
 export function EditorToolbar({
   onInsert,
   disabled = false,
   fileUploadSlot,
+  lineWrap,
+  onWrapToggle,
 }: EditorToolbarProps) {
   const btnClass = `h-11 min-w-[44px] flex-1 border border-transparent px-3 transition-colors select-none hover:border-white/20 hover:bg-tech-accent/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${!disabled ? "cursor-pointer" : ""}`
   const smBtnClass = `hidden border border-transparent px-3 py-1.5 transition-colors select-none hover:border-white/20 hover:bg-tech-accent/20 sm:block ${!disabled ? "cursor-pointer" : ""}`
@@ -81,6 +85,22 @@ export function EditorToolbar({
         ">
         MARKDOWN_SUPPORTED_
       </span>
+      {onWrapToggle !== undefined && (
+        <>
+          <div className="mx-1 hidden h-4 w-px bg-white/30 sm:block" />
+          <button
+            type="button"
+            onClick={onWrapToggle}
+            className={`hidden border px-3 py-1.5 font-mono text-xs tracking-widest uppercase transition-colors select-none sm:block ${
+              lineWrap
+                ? "border-white/40 bg-white/20 text-white"
+                : "border-transparent text-white/70 hover:border-white/20 hover:bg-tech-accent/20"
+            }`}
+            aria-pressed={lineWrap}>
+            WRAP
+          </button>
+        </>
+      )}
     </div>
   )
 }

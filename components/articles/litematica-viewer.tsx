@@ -205,11 +205,13 @@ export default function LitematicaViewer({
   }
 
   useEffect(() => {
-    if (!canvasRef.current) return
-    patchCanvasPointerCapture(canvasRef.current)
+    const canvas = canvasRef.current
+    if (!canvas) return
+    patchCanvasPointerCapture(canvas)
 
     const loadToken = ++loadTokenRef.current
     let isActive = true
+    const schematicRequestController = new AbortController()
 
     setSchematicReady(false)
     schematicIdRef.current = null
@@ -242,7 +244,7 @@ export default function LitematicaViewer({
         }
 
         renderer = new SR(
-          canvasRef.current!,
+          canvas,
           {},
           {
             default: async () => {
@@ -282,7 +284,10 @@ export default function LitematicaViewer({
                 try {
                   suppressNativeFpOverlays(r)
 
-                  const res = await fetch(proxyUrl, { cache: "no-store" })
+                  const res = await fetch(proxyUrl, {
+                    cache: "no-store",
+                    signal: schematicRequestController.signal,
+                  })
                   if (!res.ok) {
                     throw new Error("Failed to fetch proxy: " + res.status)
                   }
@@ -328,6 +333,10 @@ export default function LitematicaViewer({
 
                   setSchematicReady(true)
                 } catch (err) {
+                  if (err instanceof Error && err.name === "AbortError") {
+                    return
+                  }
+
                   console.error("Error loading schematic:", err)
                 }
               },
@@ -356,8 +365,7 @@ export default function LitematicaViewer({
       suppressNativeFpOverlays(current)
 
       const cm = current.cameraManager
-      const locked =
-        cm?.isFlyControlsLocked?.() ?? document.pointerLockElement === canvasRef.current
+      const locked = cm?.isFlyControlsLocked?.() ?? document.pointerLockElement === canvas
       const flyEnabled = Boolean(cm?.isFlyControlsEnabled?.())
 
       if (!locked) {
@@ -406,6 +414,7 @@ export default function LitematicaViewer({
 
     return () => {
       isActive = false
+      schematicRequestController.abort()
       document.removeEventListener("pointerlockchange", handlePointerLockChange)
       document.removeEventListener("pointerlockerror", handlePointerLockError, true)
       document.removeEventListener("keydown", handleEscapeKeyDown, true)
@@ -425,7 +434,7 @@ export default function LitematicaViewer({
         rendererRef.current.dispose()
       }
 
-      restoreCanvasPointerCapture(canvasRef.current)
+      restoreCanvasPointerCapture(canvas)
 
       rendererRef.current = null
     }

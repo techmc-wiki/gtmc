@@ -128,6 +128,13 @@ export default async function ReviewDetailPage({
       },
     },
   })
+  console.log("[review/page] linkedDraft", {
+    id: linkedDraft?.id,
+    status: linkedDraft?.status,
+    conflictMode: linkedDraft?.conflictMode,
+    conflictContentLength: linkedDraft?.conflictContent?.length ?? null,
+    conflictContentPreview: linkedDraft?.conflictContent?.slice(0, 100) ?? null,
+  })
   const linkedDraftConflictMode =
     (
       linkedDraft as
@@ -143,6 +150,16 @@ export default async function ReviewDetailPage({
         filePath: linkedDraft.filePath,
       })
     : null
+  console.log("[review/page] linkedDraftFiles", {
+    fileCount: linkedDraftFiles?.files.length ?? null,
+    files:
+      linkedDraftFiles?.files.map((f) => ({
+        filePath: f.filePath,
+        hasConflictContent: Boolean(f.conflictContent),
+        conflictContentLength: f.conflictContent?.length ?? null,
+        conflictContentPreview: f.conflictContent?.slice(0, 80) ?? null,
+      })) ?? null,
+  })
 
   const draftFilePaths =
     linkedDraftFiles?.files.map((file) => file.filePath) ?? []
@@ -164,6 +181,14 @@ export default async function ReviewDetailPage({
   const hasConflict = pr.mergeable === false
   const isMergeable = pr.mergeable === true
   const isInReview = linkedDraft?.status === "IN_REVIEW" && !hasConflict
+  console.log("[review/page] pr.mergeable", {
+    prNumber,
+    mergeable: pr.mergeable,
+    hasConflict,
+    isMergeable,
+    isInReview,
+    effectiveConflictMode,
+  })
   const analysisFilePath = getPrimaryAnalysisPath(
     draftFilePaths,
     primaryPrFile?.filename
@@ -207,6 +232,16 @@ export default async function ReviewDetailPage({
           : ("clean" as const),
       }))
     : []
+  console.log(
+    "[review/page] reviewFiles",
+    reviewFiles.map((f) => ({
+      filePath: f.filePath,
+      status: f.status,
+      hasConflictContent: Boolean(f.conflictContent),
+      conflictContentPreview: f.conflictContent?.slice(0, 80) ?? null,
+      contentPreview: f.content?.slice(0, 80),
+    }))
+  )
 
   const targetFileLabel =
     linkedDraftFiles?.files.length && linkedDraftFiles.files.length > 1

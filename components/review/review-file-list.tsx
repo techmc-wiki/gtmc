@@ -66,7 +66,7 @@ export function ReviewFileList({
   const allClean = conflictCount === 0
 
   return (
-    <aside className="sticky top-4 self-start border border-tech-main/40 bg-tech-main/5 backdrop-blur-sm">
+    <aside className="sticky top-16 md:top-20 self-start max-h-[calc(100vh-4rem)] md:max-h-[calc(100vh-5rem)] overflow-y-auto border border-tech-main/40 bg-tech-main/5 backdrop-blur-sm">
       <div className="flex items-center justify-between gap-3 border-b border-tech-main/30 px-4 py-3">
         <div className="min-w-0 flex-1">
           <p className="font-mono text-xs tracking-widest text-tech-main uppercase">

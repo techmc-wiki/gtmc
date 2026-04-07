@@ -1382,8 +1382,7 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
       throw new Error("The revision is missing main SHA metadata")
     }
 
-    const latestMainSha =
-      revision.syncedMainSha || (await getMainBranchHeadSha(token))
+    const latestMainSha = await getMainBranchHeadSha(token)
     const fileInputs = await Promise.all(
       storedDraftFiles.files.map(async (file) => ({
         filePath: file.filePath,
@@ -1400,6 +1399,15 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
         ),
       }))
     )
+    reviewLog("selectModeAction", {
+      revisionId,
+      prNumber: revision.githubPrNum,
+      status: "simple-sha-debug",
+      baseMainSha: summarizeSha(revision.baseMainSha as string),
+      syncedMainSha: summarizeSha(revision.syncedMainSha as string),
+      latestMainSha: summarizeSha(latestMainSha),
+      shaMatch: revision.baseMainSha === latestMainSha,
+    })
     const result = await resolveSimpleConflicts({
       files: fileInputs,
       prBranchName: revision.prBranchName,
@@ -1411,9 +1419,11 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
       prNumber: revision.githubPrNum,
       status: "simple-merge-result",
       hasConflicts: result.hasConflicts,
-      conflictFileCount: result.fileResults.filter(
-        (file) => file.status === "conflict"
-      ).length,
+      fileResults: result.fileResults.map((file) => ({
+        filePath: file.filePath,
+        status: file.status,
+        contentLength: file.content?.length,
+      })),
     })
 
     reviewLog("selectModeAction", {

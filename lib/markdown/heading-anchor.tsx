@@ -18,12 +18,13 @@ export function HeadingAnchor({ id, level }: HeadingAnchorProps) {
   const t = useTranslations("ArticleMeta")
   const [copied, setCopied] = useState(false)
 
-  function handleClick() {
+  function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault()
+    e.stopPropagation()
+
     const url = window.location.origin + window.location.pathname + "#" + id
 
     navigator.clipboard.writeText(url).catch(() => {})
-
-    window.location.hash = id
 
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)

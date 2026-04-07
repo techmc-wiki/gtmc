@@ -12,6 +12,8 @@ export default function LitematicaViewer({
   url,
   height = 400,
 }: LitematicaViewerProps) {
+  const ACTIVE_TARGET_FPS = 60
+  const IDLE_TARGET_FPS = 24
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rendererRef = useRef<any>(null)
   const schematicIdRef = useRef<string | null>(null)
@@ -284,10 +286,11 @@ export default function LitematicaViewer({
                   if (!res.ok) {
                     throw new Error("Failed to fetch proxy: " + res.status)
                   }
-                  const arrayBuffer = await res.arrayBuffer()
+                  let arrayBuffer = await res.arrayBuffer()
 
                   const fileName = cleanUrl.split("/").pop() || "schem.litematic"
                   await r.schematicManager.loadSchematic(fileName, arrayBuffer)
+                  arrayBuffer = new ArrayBuffer(0)
 
                   if (!isCurrentLoad()) {
                     r.dispose?.()
@@ -319,9 +322,9 @@ export default function LitematicaViewer({
                   suppressNativeFpOverlays(r)
                   if (!isCurrentLoad()) return
 
-                  r.targetFPS = 120
-                  r.idleFPS = 120
-                  r.enableAdaptiveFPS = false
+                  r.targetFPS = ACTIVE_TARGET_FPS
+                  r.idleFPS = IDLE_TARGET_FPS
+                  r.enableAdaptiveFPS = true
 
                   setSchematicReady(true)
                 } catch (err) {

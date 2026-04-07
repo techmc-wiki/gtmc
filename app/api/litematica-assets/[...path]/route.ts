@@ -2,8 +2,32 @@ import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
 
-// 全局缓存以加速递归查找
-const fileCache: Record<string, string> = {}
+const FILE_CACHE_LIMIT = 512
+const fileCache = new Map<string, string>()
+
+function getCachedFilePath(targetName: string) {
+  const cached = fileCache.get(targetName)
+  if (!cached) return null
+
+  fileCache.delete(targetName)
+  fileCache.set(targetName, cached)
+  return cached
+}
+
+function setCachedFilePath(targetName: string, fullPath: string) {
+  if (fileCache.has(targetName)) {
+    fileCache.delete(targetName)
+  }
+
+  fileCache.set(targetName, fullPath)
+
+  if (fileCache.size > FILE_CACHE_LIMIT) {
+    const oldestKey = fileCache.keys().next().value
+    if (oldestKey) {
+      fileCache.delete(oldestKey)
+    }
+  }
+}
 
 export async function GET(
   request: Request,
@@ -35,8 +59,9 @@ export async function GET(
     dir: string,
     targetName: string
   ): Promise<string | null> => {
-    if (fileCache[targetName]) {
-      return fileCache[targetName] // 若有缓存则直接返回
+    const cachedPath = getCachedFilePath(targetName)
+    if (cachedPath) {
+      return cachedPath
     }
     const entries = await fs.promises.readdir(dir, { withFileTypes: true })
     for (const entry of entries) {
@@ -45,7 +70,7 @@ export async function GET(
         const found = await findFile(fullPath, targetName)
         if (found) return found
       } else if (entry.name === targetName) {
-        fileCache[targetName] = fullPath // 计入缓存
+        setCachedFilePath(targetName, fullPath)
         return fullPath
       }
     }

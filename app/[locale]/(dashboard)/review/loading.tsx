@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import { useTranslations } from "next-intl"
 import { TechCard } from "@/components/ui/tech-card"
 import {
   SectionRail,
@@ -10,6 +11,8 @@ import {
 } from "../features/loading-shell-primitives"
 
 export default function ReviewLoading() {
+  const t = useTranslations("CommonA11y")
+
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
@@ -18,7 +21,7 @@ export default function ReviewLoading() {
       <div
         className="page-container"
         aria-busy="true"
-        aria-label="Loading review hub">
+        aria-label={t("loadingReviewHub")}>
         {/* PAGE_HEADER_ */}
         <div
           className="

@@ -31,15 +31,15 @@ export function ConflictBlock({
 
   return (
     <div
-      className="border border-red-500/50 my-4 flex flex-col"
+      className="my-4 flex flex-col border border-red-500/50"
       data-conflict-id={id}>
-      <div className="bg-red-500/10 border-b border-red-500/30 text-red-700 text-xs font-bold tracking-widest uppercase text-center p-2">
+      <div className="border-b border-red-500/30 bg-red-500/10 p-2 text-center text-xs font-bold tracking-widest text-red-700 uppercase">
         CONFLICT BLOCK
       </div>
 
       {autoApplied && (
-        <div className="flex items-center gap-3 px-3 py-2 border-b border-red-500/20">
-          <span className="bg-green-500/10 border border-green-500/30 text-green-700 font-mono text-xs tracking-widest uppercase px-3 py-1">
+        <div className="flex items-center gap-3 border-b border-red-500/20 px-3 py-2">
+          <span className="border border-green-500/30 bg-green-500/10 px-3 py-1 font-mono text-xs tracking-widest text-green-700 uppercase">
             AUTO-RESOLVED (rerere)
           </span>
           {!overrideAuto && (
@@ -55,7 +55,7 @@ export function ConflictBlock({
 
       {showAutoResolved ? (
         <div className="p-3">
-          <pre className="font-mono text-sm/relaxed whitespace-pre-wrap bg-green-500/5 border border-green-500/20 p-3 text-green-900">
+          <pre className="border border-green-500/20 bg-green-500/5 p-3 font-mono text-sm/relaxed whitespace-pre-wrap text-green-900">
             {autoApplied.resolution}
           </pre>
         </div>
@@ -63,20 +63,20 @@ export function ConflictBlock({
         <>
           {!isManualEdit && (
             <div className="flex flex-col md:flex-row">
-              <div className="flex flex-1 flex-col bg-amber-500/5 border-b md:border-b-0 md:border-r border-amber-500/20">
-                <div className="px-3 py-1.5 border-b border-amber-500/20">
-                  <span className="text-amber-700 text-xs font-mono font-bold tracking-widest uppercase">
+              <div className="flex flex-1 flex-col border-b border-amber-500/20 bg-amber-500/5 md:border-r md:border-b-0">
+                <div className="border-b border-amber-500/20 px-3 py-1.5">
+                  <span className="font-mono text-xs font-bold tracking-widest text-amber-700 uppercase">
                     YOUR CHANGES (draft)
                   </span>
                 </div>
-                <div className="p-3 flex-1 overflow-auto">
+                <div className="flex-1 overflow-auto p-3">
                   <InlineDiff
                     currentText={ours}
                     incomingText={theirs}
                     mode="current"
                   />
                 </div>
-                <div className="p-2 border-t border-amber-500/20">
+                <div className="border-t border-amber-500/20 p-2">
                   <TechButton
                     variant="secondary"
                     size="sm"
@@ -88,19 +88,19 @@ export function ConflictBlock({
               </div>
 
               <div className="flex flex-1 flex-col bg-blue-500/5">
-                <div className="px-3 py-1.5 border-b border-blue-500/20">
-                  <span className="text-blue-700 text-xs font-mono font-bold tracking-widest uppercase">
+                <div className="border-b border-blue-500/20 px-3 py-1.5">
+                  <span className="font-mono text-xs font-bold tracking-widest text-blue-700 uppercase">
                     MAIN CHANGES
                   </span>
                 </div>
-                <div className="p-3 flex-1 overflow-auto">
+                <div className="flex-1 overflow-auto p-3">
                   <InlineDiff
                     currentText={ours}
                     incomingText={theirs}
                     mode="incoming"
                   />
                 </div>
-                <div className="p-2 border-t border-blue-500/20">
+                <div className="border-t border-blue-500/20 p-2">
                   <TechButton
                     variant="secondary"
                     size="sm"
@@ -115,11 +115,11 @@ export function ConflictBlock({
 
           {isManualEdit && (
             <div className="flex flex-col gap-2 p-3">
-              <span className="text-xs font-mono font-bold tracking-widest uppercase text-tech-main">
+              <span className="font-mono text-xs font-bold tracking-widest text-tech-main uppercase">
                 MANUAL EDIT
               </span>
               <textarea
-                className="w-full min-h-[160px] font-mono text-sm p-2 border border-tech-main/40 bg-tech-bg text-tech-main focus:outline-none focus:border-tech-main resize-y"
+                className="min-h-[160px] w-full resize-y border border-tech-main/40 bg-tech-bg p-2 font-mono text-sm text-tech-main focus:border-tech-main focus:outline-none"
                 value={manualContent}
                 onChange={(e) => setManualContent(e.target.value)}
               />
@@ -147,7 +147,7 @@ export function ConflictBlock({
           )}
 
           {!isManualEdit && (
-            <div className="border-t border-red-500/20 p-2 flex justify-center">
+            <div className="flex justify-center border-t border-red-500/20 p-2">
               <TechButton
                 variant="ghost"
                 size="sm"

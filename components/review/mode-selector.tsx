@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { ConflictMode, ModeAnalysis } from "@/types/review"
 import { TechButton } from "@/components/ui/tech-button"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
@@ -41,6 +42,7 @@ export function ModeSelector({
   hasConflicts,
   isSelecting,
 }: ModeSelectorProps) {
+  const t = useTranslations("Review")
   const [selectedMode, setSelectedMode] = useState<ConflictMode>(
     modeAnalysis.recommendation
   )
@@ -56,11 +58,11 @@ export function ModeSelector({
               role="img"
               title="No conflicts"
             />
-            <span className="font-mono text-xs tracking-widest uppercase text-tech-main">
+            <span className="font-mono text-xs tracking-widest text-tech-main uppercase">
               STATUS
             </span>
           </div>
-          <p className="font-mono text-sm tracking-widest uppercase text-tech-main">
+          <p className="font-mono text-sm tracking-widest text-tech-main uppercase">
             NO_CONFLICTS_DETECTED_
           </p>
           <p className="mt-2 font-mono text-xs text-tech-main/60">
@@ -74,32 +76,30 @@ export function ModeSelector({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <p className="font-mono text-xs tracking-widest uppercase text-tech-main/60">
+        <p className="font-mono text-xs tracking-widest text-tech-main/60 uppercase">
           CONFLICT_RESOLUTION
         </p>
-        <h2 className="mt-1 font-mono text-sm tracking-widest uppercase text-tech-main">
+        <h2 className="mt-1 font-mono text-sm tracking-widest text-tech-main uppercase">
           SELECT_MODE_
         </h2>
       </div>
 
       <div className="border border-tech-main/30 bg-tech-main/5 px-4 py-3">
-        <p className="font-mono text-xs tracking-widest uppercase text-tech-main/50 mb-1">
-          ANALYSIS
-        </p>
-        <p className="font-mono text-xs text-tech-main/80 leading-relaxed">
+        <p className="mb-1 mono-label tracking-widest uppercase">ANALYSIS</p>
+        <p className="font-mono text-xs/relaxed text-tech-main/80">
           {modeAnalysis.adminMessage}
         </p>
         <div className="mt-2 flex gap-4">
-          <span className="font-mono text-[0.6875rem] tracking-widest uppercase text-tech-main/50">
+          <span className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
             COMMITS_{modeAnalysis.commitCount}
           </span>
-          <span className="font-mono text-[0.6875rem] tracking-widest uppercase text-tech-main/50">
+          <span className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
             FILES_{modeAnalysis.filesAffected}
           </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {MODE_CARDS.map(({ mode, title, subtitle, detail }) => {
           const isSelected = selectedMode === mode
           const isRecommended = modeAnalysis.recommendation === mode
@@ -110,7 +110,7 @@ export function ModeSelector({
               type="button"
               onClick={() => setSelectedMode(mode)}
               className={`
-                relative group text-left p-4 sm:p-5 transition-all duration-200 cursor-pointer
+                group relative cursor-pointer p-4 text-left transition-all duration-200 sm:p-5
                 ${
                   isSelected
                     ? "border border-tech-main bg-tech-main/10"
@@ -124,28 +124,28 @@ export function ModeSelector({
               />
 
               {isRecommended && (
-                <span className="inline-block mb-2 bg-tech-main text-white font-mono text-[0.6875rem] tracking-widest uppercase px-2 py-0.5">
+                <span className="mb-2 inline-block bg-tech-main px-2 py-0.5 font-mono text-[0.6875rem] tracking-widest text-white uppercase">
                   RECOMMENDED
                 </span>
               )}
 
               <p
-                className={`font-mono text-sm tracking-widest uppercase font-bold ${isSelected ? "text-tech-main" : "text-tech-main/80"}`}>
+                className={`font-mono text-sm font-bold tracking-widest uppercase ${isSelected ? "text-tech-main" : "text-tech-main/80"}`}>
                 {title}
               </p>
 
-              <p className="mt-1.5 font-mono text-xs text-tech-main/60 leading-relaxed">
+              <p className="mt-1.5 font-mono text-xs/relaxed text-tech-main/60">
                 {subtitle}
               </p>
 
-              <p className="mt-2 font-mono text-[0.6875rem] text-tech-main/40 leading-relaxed">
+              <p className="mt-2 font-mono text-[0.6875rem] leading-relaxed text-tech-main/40">
                 {detail}
               </p>
 
               {isSelected && (
                 <div className="mt-3 flex items-center gap-1.5">
                   <span className="inline-block size-1.5 bg-tech-main" />
-                  <span className="font-mono text-[0.6875rem] tracking-widest uppercase text-tech-main">
+                  <span className="font-mono text-[0.6875rem] tracking-widest text-tech-main uppercase">
                     SELECTED
                   </span>
                 </div>
@@ -161,7 +161,7 @@ export function ModeSelector({
           size="md"
           disabled={isSelecting}
           onClick={() => onSelectMode(selectedMode)}>
-          {isSelecting ? "INITIALIZING..." : "START RESOLUTION"}
+          {isSelecting ? "INITIALIZING..." : t("resolveButton")}
         </TechButton>
       </div>
     </div>

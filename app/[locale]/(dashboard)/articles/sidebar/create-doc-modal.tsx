@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { createPortal } from "react-dom"
+import { useTranslations } from "next-intl"
 import { createDocument } from "@/actions/sidebar"
 import { ReauthRequiredError } from "@/lib/admin-reauth"
 import type { TreeNode } from "./tree-node"
@@ -19,6 +20,7 @@ export function CreateDocModal({
   onClose: () => void
   onCreated: () => void
 }) {
+  const t = useTranslations("Sidebar")
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -78,7 +80,7 @@ export function CreateDocModal({
                 mb-1 block text-[0.6875rem] tracking-wider text-tech-main/80
                 uppercase
               ">
-              Title
+              {t("createDocTitleLabel")}
             </label>
             <input
               id="modal-title"
@@ -107,7 +109,7 @@ export function CreateDocModal({
                 mb-1 block text-[0.6875rem] tracking-wider text-tech-main/80
                 uppercase
               ">
-              Slug (URL path)
+              {t("createDocSlugLabel")}
             </label>
             <input
               id="modal-slug"
@@ -121,7 +123,7 @@ export function CreateDocModal({
                 text-sm text-tech-main outline-none
                 focus:border-tech-main
               "
-              placeholder="Leave empty to auto-generate"
+              placeholder={t("createDocSlugPlaceholder")}
             />
           </div>
 
@@ -144,7 +146,7 @@ export function CreateDocModal({
             <label
               htmlFor="isFolder"
               className="cursor-pointer text-sm text-tech-main/80 select-none">
-              Create as Directory (Folder)
+              {t("createDocAsDirectory")}
             </label>
           </div>
 
@@ -155,7 +157,7 @@ export function CreateDocModal({
                 mb-1 block text-[0.6875rem] tracking-wider text-tech-main/80
                 uppercase
               ">
-              Parent Directory
+              {t("createDocParentDirectory")}
             </label>
             <select
               id="modal-parent"
@@ -170,7 +172,7 @@ export function CreateDocModal({
                 w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2
                 text-sm text-tech-main outline-none
               ">
-              <option value="">[ ROOT_DIRECTORY ]</option>
+              <option value="">{t("createDocRootDirectory")}</option>
               {availableFolders.map((f) => (
                 <option key={f.id} value={f.id}>
                   {f.title}
@@ -189,7 +191,7 @@ export function CreateDocModal({
                 transition-colors
                 hover:bg-tech-main/10
               ">
-              ABORT
+              {t("createDocAbortButton")}
             </button>
             <button
               type="submit"
@@ -200,7 +202,7 @@ export function CreateDocModal({
                 transition-opacity
                 hover:opacity-90
               ">
-              EXECUTE
+              {t("createDocExecuteButton")}
             </button>
           </div>
         </form>

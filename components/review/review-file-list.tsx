@@ -1,5 +1,7 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
 interface ReviewFileListProps {
   files: Array<{
     id: string
@@ -20,7 +22,7 @@ function StatusIndicator({
       <span
         role="img"
         title="Conflict"
-        className="w-2 h-2 rounded-full bg-red-500 shrink-0"
+        className="size-2 shrink-0 rounded-full bg-red-500"
       />
     )
   }
@@ -29,7 +31,7 @@ function StatusIndicator({
       <span
         role="img"
         title="Resolved"
-        className="w-2 h-2 rounded-full bg-green-500 shrink-0"
+        className="size-2 shrink-0 rounded-full bg-green-500"
       />
     )
   }
@@ -37,7 +39,7 @@ function StatusIndicator({
     <span
       role="img"
       title="Clean"
-      className="w-2 h-2 rounded-full bg-tech-main/20 shrink-0"
+      className="size-2 shrink-0 rounded-full bg-tech-main/20"
     />
   )
 }
@@ -47,12 +49,14 @@ export function ReviewFileList({
   activeFileId,
   onSelectFile,
 }: ReviewFileListProps) {
+  const t = useTranslations("Review")
+
   return (
     <aside className="border border-tech-main/40 bg-tech-main/5 backdrop-blur-sm">
       <div className="flex items-center justify-between gap-3 border-b border-tech-main/30 px-4 py-3">
         <div className="min-w-0 flex-1">
           <p className="font-mono text-xs tracking-widest text-tech-main uppercase">
-            REVIEW_FILES_[{files.length}]
+            {t("fileListLabel")} [{files.length}]
           </p>
           <p
             className="truncate font-mono text-[0.6875rem] text-tech-main/60 uppercase"
@@ -64,8 +68,9 @@ export function ReviewFileList({
 
       <div className="space-y-2 p-2">
         {files.map((file, index) => {
+          const pathSegments = file.filePath.split("/").filter(Boolean)
           const fileLabel =
-            file.filePath.split("/").filter(Boolean).at(-1) ||
+            pathSegments[pathSegments.length - 1] ||
             `UNTITLED_FILE_${index + 1}`
           const isActive = file.id === activeFileId
 

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 
 import { TechButton } from "@/components/ui/tech-button"
 import { InputBox } from "@/components/ui/input-box"
@@ -40,6 +41,7 @@ export function DraftFileSourceDialog({
   onClose,
   onCreate,
 }: DraftFileSourceDialogProps) {
+  const t = useTranslations("DraftFiles")
   const [mode, setMode] = React.useState<SourceMode>("new")
   const [tree, setTree] = React.useState<DraftRepoTreeNode[]>([])
   const [isLoadingTree, setIsLoadingTree] = React.useState(false)
@@ -77,7 +79,7 @@ export function DraftFileSourceDialog({
         }
 
         if (!response.ok) {
-          throw new Error(data.error || "Failed to load repo tree")
+          throw new Error(data.error || t("repoError"))
         }
 
         if (!disposed) {
@@ -85,9 +87,7 @@ export function DraftFileSourceDialog({
         }
       } catch (error) {
         if (!disposed) {
-          setTreeError(
-            error instanceof Error ? error.message : "Failed to load repo tree"
-          )
+          setTreeError(error instanceof Error ? error.message : t("repoError"))
         }
       } finally {
         if (!disposed) {
@@ -101,7 +101,7 @@ export function DraftFileSourceDialog({
     return () => {
       disposed = true
     }
-  }, [isOpen])
+  }, [isOpen, t])
 
   React.useEffect(() => {
     if (!isOpen) {
@@ -153,7 +153,7 @@ export function DraftFileSourceDialog({
       }
 
       if (!response.ok || typeof data.content !== "string") {
-        throw new Error(data.error || "Failed to load file content")
+        throw new Error(data.error || t("repoError"))
       }
 
       const created = await onCreate({
@@ -164,9 +164,7 @@ export function DraftFileSourceDialog({
         onClose()
       }
     } catch (error) {
-      setTreeError(
-        error instanceof Error ? error.message : "Failed to load file content"
-      )
+      setTreeError(error instanceof Error ? error.message : t("repoError"))
     } finally {
       setIsSubmitting(false)
     }
@@ -175,7 +173,7 @@ export function DraftFileSourceDialog({
   const handleCreateNewFile = () => {
     const filePath = buildDraftFilePath(selectedFolderPath, newFileName)
     if (!filePath) {
-      setTreeError("A file name is required")
+      setTreeError(t("fileNameValidationError"))
       return
     }
 
@@ -188,7 +186,7 @@ export function DraftFileSourceDialog({
 
   const handleImportLocalFile = async () => {
     if (!localFile) {
-      setTreeError("Choose a local file first")
+      setTreeError(t("fileNameValidationError"))
       return
     }
 
@@ -200,7 +198,7 @@ export function DraftFileSourceDialog({
       const filePath = buildDraftFilePath(selectedFolderPath, fallbackName)
 
       if (!filePath) {
-        throw new Error("A destination file name is required")
+        throw new Error(t("fileNameValidationError"))
       }
 
       const created = await onCreate({ content, filePath })
@@ -208,9 +206,7 @@ export function DraftFileSourceDialog({
         onClose()
       }
     } catch (error) {
-      setTreeError(
-        error instanceof Error ? error.message : "Failed to import local file"
-      )
+      setTreeError(error instanceof Error ? error.message : t("repoError"))
     } finally {
       setIsSubmitting(false)
     }
@@ -250,7 +246,7 @@ export function DraftFileSourceDialog({
             </p>
           </div>
           <TechButton type="button" variant="ghost" size="sm" onClick={onClose}>
-            CLOSE
+            {t("closeButton")}
           </TechButton>
         </div>
 
@@ -271,7 +267,7 @@ export function DraftFileSourceDialog({
             <div className="flex-1 overflow-y-auto p-3">
               {isLoadingTree ? (
                 <p className="font-mono text-xs text-tech-main/60">
-                  LOADING_TREE_
+                  {t("loadingRepo")}
                 </p>
               ) : (
                 <div className="space-y-1">
@@ -296,19 +292,19 @@ export function DraftFileSourceDialog({
           <div className="min-h-0 overflow-y-auto p-5">
             <div className="mb-5 flex flex-wrap gap-2">
               <ModeButton
-                label="REPO_FILE"
+                label={t("repoModeLabel")}
                 mode="repo"
                 value={mode}
                 onChange={setMode}
               />
               <ModeButton
-                label="LOCAL_FILE"
+                label={t("uploadModeLabel")}
                 mode="upload"
                 value={mode}
                 onChange={setMode}
               />
               <ModeButton
-                label="NEW_FILE"
+                label={t("newFileModeLabel")}
                 mode="new"
                 value={mode}
                 onChange={setMode}
@@ -336,7 +332,7 @@ export function DraftFileSourceDialog({
                   variant="primary"
                   onClick={handleAddRepoFile}
                   disabled={!canSubmitRepo}>
-                  {isSubmitting ? "ADDING..." : "ADD EXISTING FILE"}
+                  {t("addButton")}
                 </TechButton>
               </div>
             ) : null}
@@ -351,7 +347,7 @@ export function DraftFileSourceDialog({
                   type="file"
                   accept=".md,.mdx,.txt,.csv,.json,.yml,.yaml"
                   className="block w-full font-mono text-xs text-tech-main"
-                  onChange={(event) => {
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     const file = event.target.files?.[0] || null
                     setLocalFile(file)
                     setCustomUploadName(file?.name || "")
@@ -365,7 +361,7 @@ export function DraftFileSourceDialog({
                     id="draft-import-name"
                     placeholder="e.g. chapter-notes.md"
                     value={customUploadName}
-                    onChange={(event) =>
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                       setCustomUploadName(event.target.value)
                     }
                   />
@@ -375,7 +371,7 @@ export function DraftFileSourceDialog({
                   variant="primary"
                   onClick={handleImportLocalFile}
                   disabled={!canSubmitUpload}>
-                  {isSubmitting ? "IMPORTING..." : "IMPORT LOCAL FILE"}
+                  {t("importButton")}
                 </TechButton>
               </div>
             ) : null}
@@ -396,7 +392,9 @@ export function DraftFileSourceDialog({
                     id="draft-new-file-name"
                     placeholder="e.g. new-section.md"
                     value={newFileName}
-                    onChange={(event) => setNewFileName(event.target.value)}
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                      setNewFileName(event.target.value)
+                    }
                   />
                 </div>
                 <div className="font-mono text-xs text-tech-main/60 uppercase">
@@ -409,7 +407,7 @@ export function DraftFileSourceDialog({
                   variant="primary"
                   onClick={handleCreateNewFile}
                   disabled={!canSubmitNew}>
-                  CREATE EMPTY FILE
+                  {t("createButton")}
                 </TechButton>
               </div>
             ) : null}

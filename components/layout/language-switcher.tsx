@@ -1,6 +1,6 @@
 "use client"
 
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useRouter, usePathname } from "@/i18n/navigation"
 
 const LOCALES = ["zh", "en"] as const
@@ -8,6 +8,7 @@ type Locale = (typeof LOCALES)[number]
 
 export function LanguageSwitcher() {
   const locale = useLocale() as Locale
+  const t = useTranslations("CommonA11y")
   const router = useRouter()
   const pathname = usePathname()
 
@@ -27,15 +28,16 @@ export function LanguageSwitcher() {
           key={loc}
           type="button"
           onClick={() => switchLocale(loc)}
-          aria-label={`Switch to ${loc === "zh" ? "Chinese" : "English"}`}
+          aria-label={t("languageSwitcher")}
           aria-pressed={locale === loc}
           className={`
             flex touch-target min-h-8 min-w-7 items-center
             justify-center px-2 py-1 uppercase transition-colors duration-200
             ${i > 0 ? "border-l border-tech-main/40" : ""}
-            ${locale === loc
-              ? "bg-tech-main text-white"
-              : "bg-transparent text-tech-main hover:bg-tech-accent/30"
+            ${
+              locale === loc
+                ? "bg-tech-main text-white"
+                : "bg-transparent text-tech-main hover:bg-tech-accent/30"
             }
           `}>
           {`${loc === "en" ? "Eng" : "中文"}`}

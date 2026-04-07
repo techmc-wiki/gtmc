@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import { useTranslations } from "next-intl"
 import {
   SectionFrame,
   SegmentedBar,
@@ -10,6 +11,8 @@ import {
 import { TechCard } from "@/components/ui/tech-card"
 
 export default function FeatureDetailLoading() {
+  const t = useTranslations("CommonA11y")
+
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
@@ -22,7 +25,7 @@ export default function FeatureDetailLoading() {
           md:p-8
         "
         aria-busy="true"
-        aria-label="Loading feature details">
+        aria-label={t("loadingFeatureDetails")}>
         {/* FEATURE_HEADER_ */}
         <div className="relative flex animate-tech-slide-in flex-col gap-4">
           <ScanConfirmOverlay />

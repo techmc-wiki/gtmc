@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { createPortal } from "react-dom"
+import { useTranslations } from "next-intl"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 interface MobileTreeCardProps {
@@ -17,6 +18,7 @@ export function MobileTreeCard({
   children,
   isFloating,
 }: MobileTreeCardProps) {
+  const t = useTranslations("CommonA11y")
   const [isMounted, setIsMounted] = React.useState(false)
 
   React.useEffect(() => {
@@ -90,7 +92,7 @@ export function MobileTreeCard({
               hover:bg-tech-main/10
             "
             data-testid="mobile-tree-card-close"
-            aria-label="Close tree">
+            aria-label={t("closeTree")}>
             CLOSE
           </button>
         </div>

@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useTransition, useState } from "react"
 import { TechButton } from "@/components/ui/tech-button"
 import {
@@ -24,6 +25,7 @@ export function FeatureActions({
   isAdmin,
   hasAssignee,
 }: Props) {
+  const t = useTranslations("Feature")
   const [isPending, startTransition] = useTransition()
   const [pendingAction, setPendingAction] = useState<
     "assign" | "unassign" | "resolve" | null
@@ -46,7 +48,7 @@ export function FeatureActions({
   }
 
   const handleResolve = () => {
-    const comment = window.prompt("Resolution comment (optional):")
+    const comment = window.prompt(`${t("statusLabel")} update (optional):`)
     if (comment === null) return // cancelled
 
     setPendingAction("resolve")

@@ -164,6 +164,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const desktopSidebarRef = useRef<SidebarClientHandle>(null)
   const floatingCardSidebarRef = useRef<SidebarClientHandle>(null)
   const t = useTranslations("Sidebar")
+  const tA11y = useTranslations("CommonA11y")
 
   useEffect(() => {
     try {
@@ -332,7 +333,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                     : "none",
                 } as React.CSSProperties
               }
-              aria-label="Toggle article tree"
+              aria-label={tA11y("toggleArticleTree")}
               aria-expanded={isOpen}
               data-testid="mobile-tree-toggle">
               <div className="relative flex w-full items-center justify-between">
@@ -467,7 +468,11 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 <button
                   type="button"
                   onClick={toggleSidebarHidden}
-                  aria-label={sidebarHidden ? "Show sidebar" : "Hide sidebar"}
+                  aria-label={
+                    sidebarHidden
+                      ? tA11y("showSidebar")
+                      : tA11y("hideSidebar")
+                  }
                   aria-expanded={!sidebarHidden}
                   data-sidebar-toggle=""
                   className="

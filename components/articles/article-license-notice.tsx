@@ -2,6 +2,7 @@
 
 import { Link } from "@/i18n/navigation"
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { formatAbsoluteTime } from "@/lib/format-time"
 
 interface ArticleLicenseNoticeProps {
@@ -17,6 +18,7 @@ export function ArticleLicenseNotice({
   attributionDate,
   authors = [],
 }: ArticleLicenseNoticeProps) {
+  const t = useTranslations("ArticleMeta")
   const [isExpanded, setIsExpanded] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
   const orderedAuthors = [...new Set(authors)]
@@ -44,8 +46,8 @@ export function ArticleLicenseNotice({
     .join(", ")
   const attributionPrompt =
     orderedAuthors.length > 7
-      ? "Suggested attribution (truncated to initial author and latest editor):"
-      : "Suggested attribution (authors listed in alphabetical order):"
+      ? t("attributionPromptTruncated")
+      : t("attributionPromptAlphabetical")
 
   const handleCopyAttribution = async () => {
     try {
@@ -59,23 +61,23 @@ export function ArticleLicenseNotice({
 
   return (
     <section
-      aria-label="Article license"
+      aria-label={t("articleLicenseAria")}
       className="border-t guide-line pt-3 text-[0.6875rem] text-tech-main/70">
       <button
         type="button"
         onClick={() => setIsExpanded((current) => !current)}
         className="flex w-full items-center justify-between gap-3 text-left transition-colors hover:text-tech-main"
         aria-expanded={isExpanded}>
-        <span className="mono-label">Reuse & License</span>
+        <span className="mono-label">{t("reuseLicenseTitle")}</span>
         <span className="font-mono text-[0.625rem] text-tech-main/55 uppercase">
-          {isExpanded ? "[-] Hide" : "[+] Show"}
+          {isExpanded ? t("hideDetails") : t("showDetails")}
         </span>
       </button>
 
       {isExpanded && (
         <div className="mt-2 space-y-2 font-mono leading-relaxed">
           <p>
-            This article is distributed under{" "}
+            {t("licenseDescriptionPrefix")}{" "}
             <Link
               href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
               target="_blank"
@@ -83,8 +85,7 @@ export function ArticleLicenseNotice({
               className="underline decoration-tech-main/30 underline-offset-4 transition-colors hover:text-tech-main-dark hover:decoration-tech-main-dark">
               CC BY-NC-SA 4.0
             </Link>
-            . You may share and adapt it for non-commercial use with
-            attribution and the same license.
+            {t("licenseDescriptionSuffix")}
           </p>
           <p>
             <button
@@ -93,8 +94,8 @@ export function ArticleLicenseNotice({
               className={
                 "bg-transparent p-0 text-left leading-tight"
               }
-              aria-label="Copy suggested attribution"
-              title="Click to copy suggested attribution">
+              aria-label={t("copySuggestedAttributionAria")}
+              title={t("copySuggestedAttributionTitle")}>
               {attributionPrompt}{" "}
               <span
                 className={`relative font-bold text-tech-main`}>
@@ -104,15 +105,13 @@ export function ArticleLicenseNotice({
                   className={
                     `pointer-events-none absolute top-0 left-0 transition-opacity ${isCopied ? "opacity-100" : "opacity-0"}`
                   }>
-                  Copied!
+                  {t("copiedButton")}
                 </span>
               </span>
             </button>
           </p>
           <p>
-            Primary authors are shown above. Additional contribution history may
-            also be reflected in the linked source records and repository
-            history.
+            {t("attributionHistoryNote")}
           </p>
         </div>
       )}

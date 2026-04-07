@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 
 interface HeadingAnchorProps {
   id: string
@@ -14,6 +15,7 @@ const positionClass: Record<1 | 2 | 3, string> = {
 }
 
 export function HeadingAnchor({ id, level }: HeadingAnchorProps) {
+  const t = useTranslations("ArticleMeta")
   const [copied, setCopied] = useState(false)
 
   function handleClick() {
@@ -30,7 +32,7 @@ export function HeadingAnchor({ id, level }: HeadingAnchorProps) {
   return (
     <button
       type="button"
-      aria-label="Copy link to section"
+      aria-label={t("copyHeadingLink")}
       onClick={handleClick}
       className={`
         ${positionClass[level]}

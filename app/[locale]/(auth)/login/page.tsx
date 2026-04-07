@@ -2,12 +2,14 @@
 "use client"
 
 import { signIn } from "next-auth/react"
+import { useTranslations } from "next-intl"
 import { TechButton } from "@/components/ui/tech-button"
 import { useState } from "react"
 import { Link } from "@/i18n/navigation"
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
+  const t = useTranslations("Auth")
 
   const handleLogin = async () => {
     setIsLoading(true)
@@ -226,24 +228,10 @@ export default function LoginPage() {
               </div>
               <h1
                 className="
-                  relative overflow-hidden text-3xl font-bold tracking-tight
-                  text-tech-main-dark
+                  relative inline-block animate-tech-slide-in overflow-hidden text-3xl
+                  font-bold tracking-tight text-tech-main-dark opacity-0 [animation-delay:0.7s] fill-mode-forwards
                 ">
-                <span
-                  className="
-                    inline-block animate-tech-slide-in opacity-0
-                    [animation-delay:0.7s] fill-mode-forwards
-                  ">
-                  IDENTITY
-                </span>
-                <span
-                  className="
-                    ml-2 inline-block animate-tech-slide-in font-light
-                    text-tech-main opacity-0 [animation-delay:0.9s]
-                    fill-mode-forwards
-                  ">
-                  VERIFICATION
-                </span>
+                {t("heading")}
               </h1>
             </div>
 
@@ -253,8 +241,7 @@ export default function LoginPage() {
                 text-tech-main-dark/70 opacity-0 [animation-delay:1.1s]
                 fill-mode-forwards
               ">
-              Please authenticate with your GitHub account to access the
-              restricted database.
+              {t("description")}
             </p>
 
             <div
@@ -278,10 +265,10 @@ export default function LoginPage() {
                       className="
                         mr-2 size-2 animate-ping rounded-full bg-white/50
                       "></span>
-                    CONNECTING...
+                    {t("connectingLabel")}
                   </span>
                 ) : (
-                  "INITIATE GITHUB OAUTH →"
+                  t("loginCta")
                 )}
               </TechButton>
             </div>
@@ -295,11 +282,11 @@ export default function LoginPage() {
               <Link
                 href="/"
                 className="
-                  mt-2 inline-block underline decoration-dashed
-                  underline-offset-4 transition-colors
-                  hover:text-tech-main-dark
-                ">
-                &lt; RETURN TO PUBLIC ACCESS
+                    mt-2 inline-block underline decoration-dashed
+                    underline-offset-4 transition-colors
+                    hover:text-tech-main-dark
+                  ">
+                {t("returnLink")}
               </Link>
             </div>
           </div>

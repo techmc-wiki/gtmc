@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useState, useMemo } from "react"
 import { Link } from "@/i18n/navigation"
 import { TechCard } from "@/components/ui/tech-card"
@@ -22,6 +23,8 @@ interface Feature {
 }
 
 export function FeatureList({ features }: { features: Feature[] }) {
+  const t = useTranslations("Feature")
+  const tStatus = useTranslations("Status")
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [statusFilter, setStatusFilter] = useState<string>("ALL")
 
@@ -29,7 +32,9 @@ export function FeatureList({ features }: { features: Feature[] }) {
   const allTags = useMemo(() => {
     const tags = new Set<string>()
     features.forEach((f) => {
-      f.tags?.forEach((t: string) => tags.add(t))
+      f.tags?.forEach((tag: string) => {
+        tags.add(tag)
+      })
     })
     return Array.from(tags)
   }, [features])
@@ -151,7 +156,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                           text-tech-main opacity-80
                         ">
                         <StatusDot size="sm" variant="main" className="mr-2" />
-                        AUTHOR: {feature.author?.name || "UNKNOWN_USER"}
+                        AUTHOR: {feature.author?.name || t("unknownUser")}
                       </p>
                       {feature.assignee && (
                         <p
@@ -164,7 +169,8 @@ export function FeatureList({ features }: { features: Feature[] }) {
                             variant="accent"
                             className="mr-2"
                           />
-                          ASSIGNEE: {feature.assignee.name || "UNKNOWN_USER"}
+                          {t("assigneeLabel")}:{" "}
+                          {feature.assignee.name || t("unknownUser")}
                         </p>
                       )}
                     </div>
@@ -201,11 +207,11 @@ export function FeatureList({ features }: { features: Feature[] }) {
               </h4>
               <FilterButtonGroup
                 options={[
-                  { label: "ALL", value: "ALL" },
-                  { label: "UNRESOLVED", value: "UNRESOLVED" },
-                  { label: "PENDING", value: "PENDING" },
-                  { label: "IN_PROGRESS", value: "IN_PROGRESS" },
-                  { label: "RESOLVED", value: "RESOLVED" },
+                  { label: t("filterAll"), value: "ALL" },
+                  { label: tStatus("pending"), value: "UNRESOLVED" },
+                  { label: tStatus("pending"), value: "PENDING" },
+                  { label: tStatus("inProgress"), value: "IN_PROGRESS" },
+                  { label: tStatus("resolved"), value: "RESOLVED" },
                 ]}
                 value={statusFilter}
                 onChange={setStatusFilter}
@@ -259,24 +265,24 @@ export function FeatureList({ features }: { features: Feature[] }) {
               border border-dashed border-tech-main/40 bg-white/30 py-16
               text-center font-mono text-tech-main/50
             ">
-            NO_FEATURES_FOUND_
+            {t("listEmpty")}
           </div>
         ) : (
           <>
             {renderFeatureGroup(
-              "待解决 / PENDING",
+              tStatus("pending"),
               pendingFeatures,
               "No pending features",
               200
             )}
             {renderFeatureGroup(
-              "解决中 / IN PROGRESS",
+              tStatus("inProgress"),
               inProgressFeatures,
               "No features in progress",
               300
             )}
             {renderFeatureGroup(
-              "已解决 / RESOLVED",
+              tStatus("resolved"),
               resolvedFeatures,
               "No resolved features",
               400

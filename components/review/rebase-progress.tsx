@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 import { TechButton } from "@/components/ui/tech-button"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import type { RebaseState } from "@/types/rebase"
@@ -47,7 +48,7 @@ function AbortButton({
   if (confirming) {
     return (
       <div className="flex items-center gap-2">
-        <span className="font-mono text-[0.6875rem] tracking-widest uppercase text-red-400">
+        <span className="font-mono text-[0.6875rem] tracking-widest text-red-400 uppercase">
           CONFIRM_ABORT?
         </span>
         <TechButton
@@ -93,6 +94,7 @@ export function RebaseProgress({
   defaultCommitBody = "",
   coauthorLines = [],
 }: RebaseProgressProps) {
+  const t = useTranslations("Review")
   const [showCommitEditor, setShowCommitEditor] = React.useState(false)
   const [commitTitle, setCommitTitle] = React.useState(defaultCommitTitle)
   const [commitBody, setCommitBody] = React.useState(defaultCommitBody)
@@ -115,19 +117,19 @@ export function RebaseProgress({
       : []
 
     return (
-      <div className="border border-tech-main/40 bg-tech-main/5 p-4 space-y-4">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
+      <div className="space-y-4 border border-tech-main/40 bg-tech-main/5 p-4">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-1">
-            <p className="font-mono text-[0.6875rem] tracking-widest uppercase text-tech-main/50">
+            <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
               PROGRESS
             </p>
-            <p className="font-mono text-sm tracking-widest uppercase text-tech-main font-bold">
+            <p className="font-mono text-sm font-bold tracking-widest text-tech-main uppercase">
               RESOLVING_COMMIT_{current}_OF_{total}_
             </p>
           </div>
 
-          <div className="flex items-center gap-2 min-w-[8rem]">
-            <div className="h-1 flex-1 bg-tech-main/20 relative">
+          <div className="flex min-w-32 items-center gap-2">
+            <div className="relative h-1 flex-1 bg-tech-main/20">
               <div
                 className="absolute inset-y-0 left-0 bg-tech-main transition-all duration-500"
                 style={{ width: `${total > 0 ? (current / total) * 100 : 0}%` }}
@@ -140,12 +142,12 @@ export function RebaseProgress({
         </div>
 
         {currentInfo && (
-          <div className="relative border border-tech-main/20 bg-white/60 px-3 py-2.5">
+          <div className="relative border guide-line bg-white/60 px-3 py-2.5">
             <CornerBrackets color="border-tech-main/20" />
-            <p className="font-mono text-xs text-tech-main/80 leading-relaxed truncate">
+            <p className="truncate font-mono text-xs/relaxed text-tech-main/80">
               {currentInfo.message}
             </p>
-            <p className="mt-1 font-mono text-[0.6875rem] text-tech-main/40 tracking-widest uppercase">
+            <p className="mt-1 font-mono text-[0.6875rem] tracking-widest text-tech-main/40 uppercase">
               {currentInfo.author}
             </p>
           </div>
@@ -153,7 +155,7 @@ export function RebaseProgress({
 
         {fileStates.length > 0 && (
           <div className="space-y-1">
-            <p className="font-mono text-[0.6875rem] tracking-widest uppercase text-tech-main/50">
+            <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
               FILES
             </p>
             <ul className="space-y-1">
@@ -163,7 +165,7 @@ export function RebaseProgress({
                   className="flex items-center gap-2 font-mono text-[0.6875rem] text-tech-main/70">
                   <StatusDot status={fs.status} />
                   <span className="truncate">{fs.filePath}</span>
-                  <span className="ml-auto shrink-0 tracking-widest uppercase text-tech-main/40">
+                  <span className="ml-auto shrink-0 tracking-widest text-tech-main/40 uppercase">
                     {fs.status.toUpperCase()}
                   </span>
                 </li>
@@ -172,14 +174,14 @@ export function RebaseProgress({
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-3 flex-wrap pt-1">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
           <AbortButton onAbort={onAbort} isAborting={isAborting} />
           {isCompleted && (
             <TechButton
               variant="primary"
               size="sm"
               disabled={isFinalizing}
-              className="!bg-green-700 !border-green-700 hover:!bg-green-800"
+              className="border-green-700! bg-green-700! hover:bg-green-800!"
               onClick={() => onFinalize()}>
               {isFinalizing ? "FINALIZING..." : "FINALIZE & MERGE"}
             </TechButton>
@@ -194,12 +196,12 @@ export function RebaseProgress({
   const totalFiles = files?.length ?? 0
 
   return (
-    <div className="border border-tech-main/40 bg-tech-main/5 p-4 space-y-4">
+    <div className="space-y-4 border border-tech-main/40 bg-tech-main/5 p-4">
       <div className="space-y-1">
-        <p className="font-mono text-[0.6875rem] tracking-widest uppercase text-tech-main/50">
+        <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
           PROGRESS
         </p>
-        <p className="font-mono text-sm tracking-widest uppercase text-tech-main font-bold">
+        <p className="font-mono text-sm font-bold tracking-widest text-tech-main uppercase">
           RESOLVING_CONFLICTS_IN_{conflictFiles.length}_FILES_
         </p>
       </div>
@@ -212,7 +214,7 @@ export function RebaseProgress({
               className="flex items-center gap-2 font-mono text-[0.6875rem] text-tech-main/70">
               <StatusDot status={f.status} />
               <span className="truncate">{f.filePath}</span>
-              <span className="ml-auto shrink-0 tracking-widest uppercase text-tech-main/40">
+              <span className="ml-auto shrink-0 tracking-widest text-tech-main/40 uppercase">
                 {f.status.toUpperCase()}
               </span>
             </li>
@@ -221,17 +223,17 @@ export function RebaseProgress({
       )}
 
       {showCommitEditor && (
-        <div className="relative border border-tech-main/30 bg-white/80 p-4 space-y-3">
+        <div className="relative space-y-3 border border-tech-main/30 bg-white/80 p-4">
           <CornerBrackets color="border-tech-main/30" />
-          <p className="font-mono text-[0.6875rem] tracking-widest uppercase text-tech-main/60">
-            SQUASH_COMMIT_MESSAGE
+          <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/60 uppercase">
+            {t("squashCommitMessage")}
           </p>
 
           <div className="space-y-1">
             <label
               htmlFor="commit-title"
-              className="font-mono text-[0.6875rem] tracking-widest uppercase text-tech-main/50">
-              TITLE
+              className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+              {t("commitTitleLabel")}
             </label>
             <input
               id="commit-title"
@@ -243,15 +245,15 @@ export function RebaseProgress({
                 font-mono text-xs text-tech-main placeholder:text-tech-main/30
                 focus:border-tech-main focus:outline-none
               "
-              placeholder="Commit title..."
+              placeholder={t("commitTitlePlaceholder")}
             />
           </div>
 
           <div className="space-y-1">
             <label
               htmlFor="commit-body"
-              className="font-mono text-[0.6875rem] tracking-widest uppercase text-tech-main/50">
-              BODY
+              className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+              {t("commitBodyLabel")}
             </label>
             <textarea
               id="commit-body"
@@ -259,20 +261,20 @@ export function RebaseProgress({
               onChange={(e) => setCommitBody(e.target.value)}
               rows={4}
               className="
-                w-full border border-tech-main/30 bg-white px-3 py-2
-                font-mono text-xs text-tech-main placeholder:text-tech-main/30
-                focus:border-tech-main focus:outline-none resize-y
+                w-full resize-y border border-tech-main/30 bg-white px-3
+                py-2 font-mono text-xs text-tech-main
+                placeholder:text-tech-main/30 focus:border-tech-main focus:outline-none
               "
-              placeholder="Commit body (optional)..."
+              placeholder={t("commitBodyPlaceholder")}
             />
           </div>
 
           {coauthorLines.length > 0 && (
             <div className="space-y-1">
-              <p className="font-mono text-[0.6875rem] tracking-widest uppercase text-tech-main/50">
-                CO-AUTHORS (READ-ONLY)
+              <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+                {t("coauthorsReadonly")}
               </p>
-              <pre className="bg-tech-main/5 border border-tech-main/20 px-3 py-2 font-mono text-[0.6875rem] text-tech-main/60 overflow-x-auto">
+              <pre className="overflow-x-auto border guide-line bg-tech-main/5 px-3 py-2 font-mono text-[0.6875rem] text-tech-main/60">
                 {coauthorLines.join("\n")}
               </pre>
             </div>
@@ -289,7 +291,7 @@ export function RebaseProgress({
               variant="primary"
               size="sm"
               disabled={isFinalizing}
-              className="!bg-green-700 !border-green-700 hover:!bg-green-800"
+              className="border-green-700! bg-green-700! hover:bg-green-800!"
               onClick={() => onFinalize({ commitTitle, commitBody })}>
               {isFinalizing ? "MERGING..." : "CONFIRM MERGE"}
             </TechButton>
@@ -297,14 +299,14 @@ export function RebaseProgress({
         </div>
       )}
 
-      <div className="flex items-center justify-between gap-3 flex-wrap pt-1">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
         <AbortButton onAbort={onAbort} isAborting={isAborting} />
         {allResolved && !showCommitEditor && (
           <TechButton
             variant="primary"
             size="sm"
             disabled={isFinalizing}
-            className="!bg-green-700 !border-green-700 hover:!bg-green-800"
+            className="border-green-700! bg-green-700! hover:bg-green-800!"
             onClick={() => setShowCommitEditor(true)}>
             {isFinalizing ? "FINALIZING..." : "FINALIZE & MERGE"}
           </TechButton>

@@ -1,8 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 
 export function CodeCopyButton({ code }: { code: string }) {
+  const t = useTranslations("ArticleMeta")
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
@@ -20,7 +22,7 @@ export function CodeCopyButton({ code }: { code: string }) {
         transition-colors
         hover:text-tech-main/80
       ">
-      {copied ? "COPIED" : "COPY"}
+      {copied ? t("copiedButton") : t("copyButton")}
     </button>
   )
 }

@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { createPortal } from "react-dom"
+import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { usePathname } from "@/i18n/navigation"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
@@ -16,6 +17,7 @@ interface MobileNavProps {
 }
 
 export function MobileNav({ navLinks }: MobileNavProps) {
+  const t = useTranslations("CommonA11y")
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
   const [isMounted, setIsMounted] = React.useState(false)
   const pathname = usePathname()
@@ -38,7 +40,7 @@ export function MobileNav({ navLinks }: MobileNavProps) {
           hover:bg-tech-main/10
           md:hidden
         "
-        aria-label="Toggle navigation menu"
+        aria-label={t("toggleNavigationMenu")}
         aria-expanded={isDrawerOpen}>
         <span
           className={`

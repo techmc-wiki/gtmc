@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useTranslations } from "next-intl"
 import { TechCard } from "@/components/ui/tech-card"
 import { TechButton } from "@/components/ui/tech-button"
 import { updateFeatureExplanation } from "@/actions/feature"
@@ -21,6 +22,7 @@ export function FeatureExplanation({
   isAdmin,
   isClosed,
 }: FeatureExplanationProps) {
+  const t = useTranslations("Feature")
   const [isEditing, setIsEditing] = useState(false)
   const [explanation, setExplanation] = useState(initialExplanation || "")
   const [isPending, startTransition] = useTransition()
@@ -45,7 +47,7 @@ export function FeatureExplanation({
             mb-2 border-b border-tech-accent/40 pb-2 text-lg font-bold
             tracking-widest text-tech-main uppercase
           ">
-          EDIT_RESOLUTION_EXPLANATION_
+          {t("editResolutionExplanation")}
         </h3>
         <textarea
           className="
@@ -56,7 +58,7 @@ export function FeatureExplanation({
           "
           value={explanation}
           onChange={(e) => setExplanation(e.target.value)}
-          placeholder="PROVIDE OFFICIAL EXPLANATION / RESOLUTION..."
+          placeholder={t("explanationPlaceholder")}
           disabled={isPending}
           aria-busy={isPending}
         />
@@ -66,7 +68,7 @@ export function FeatureExplanation({
             size="sm"
             onClick={() => setIsEditing(false)}
             disabled={isPending}>
-            CANCEL
+            {t("cancelButton")}
           </TechButton>
           <TechButton
             variant="primary"
@@ -81,7 +83,7 @@ export function FeatureExplanation({
             {isPending ? (
               <LoadingIndicator label={PENDING_LABELS.SAVING_EXPLANATION} />
             ) : (
-              "SAVE_EXPLANATION"
+              t("saveExplanationButton")
             )}
           </TechButton>
         </div>
@@ -106,7 +108,7 @@ export function FeatureExplanation({
             className="
               text-lg font-bold tracking-widest text-tech-main uppercase
             ">
-            OFFICIAL_RESOLUTION_
+            {t("officialResolution")}
           </h3>
           {effectiveCanEdit && (
             <button

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import { useTranslations } from "next-intl"
 import {
   ScanConfirmOverlay,
   SectionFrame,
@@ -10,6 +11,8 @@ import {
 } from "../features/loading-shell-primitives"
 
 export default function ArticlesLoading() {
+  const t = useTranslations("CommonA11y")
+
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
@@ -23,8 +26,8 @@ export default function ArticlesLoading() {
         "
         aria-busy="true"
         aria-live="polite"
-        aria-label="Loading article content">
-        <span className="sr-only">Loading article content</span>
+        aria-label={t("loadingArticleContent")}>
+        <span className="sr-only">{t("loadingArticleContent")}</span>
         <div aria-hidden="true">
           <div
             className="

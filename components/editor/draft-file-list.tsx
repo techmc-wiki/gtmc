@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 
 import { TechButton } from "@/components/ui/tech-button"
 import { type DraftFileCollection } from "@/lib/draft-files"
@@ -22,6 +23,8 @@ export function DraftFileList({
   onRemoveFile,
   isReadOnly,
 }: DraftFileListProps) {
+  const t = useTranslations("DraftFiles")
+
   return (
     <aside
       className="
@@ -54,15 +57,15 @@ export function DraftFileList({
             size="sm"
             className="shrink-0"
             onClick={onAddFile}>
-            + ADD
+            {t("addButton")}
           </TechButton>
         ) : null}
       </div>
 
       <div className="space-y-2 p-2">
-        {files.map((file, index) => {
+        {files.map((file: { id: string; filePath: string }, index: number) => {
           const fileLabel =
-            file.filePath.split("/").filter(Boolean).at(-1) ||
+            file.filePath.split("/").filter(Boolean).slice(-1)[0] ||
             `UNTITLED_FILE_${index + 1}`
           const isActive = file.id === activeFileId
 
@@ -102,7 +105,7 @@ export function DraftFileList({
                 <button
                   type="button"
                   onClick={() => onRemoveFile(file.id)}
-                  title="Remove file"
+                  title={t("removeFileButton")}
                   className={`
                     flex min-w-8 shrink-0 items-center justify-center border-y
                     border-r transition-colors
@@ -129,7 +132,7 @@ export function DraftFileList({
                     strokeWidth="1.5"
                     strokeLinecap="square"
                     strokeLinejoin="miter"
-                    aria-label="Remove file">
+                    aria-label={t("removeFileButton")}>
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                   </svg>

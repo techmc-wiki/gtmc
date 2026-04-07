@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 
 interface MobileTreeSheetProps {
   isOpen: boolean
@@ -13,6 +14,8 @@ export function MobileTreeSheet({
   onClose,
   children,
 }: MobileTreeSheetProps) {
+  const t = useTranslations("CommonA11y")
+
   React.useEffect(() => {
     if (!isOpen) return
 
@@ -80,7 +83,7 @@ export function MobileTreeSheet({
               hover:bg-tech-main/10
             "
             data-testid="mobile-tree-close"
-            aria-label="Close tree">
+            aria-label={t("closeTree")}>
             CLOSE
           </button>
         </div>

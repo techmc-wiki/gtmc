@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 
 interface EditorTextareaProps {
   value: string
@@ -33,6 +34,8 @@ export const EditorTextarea = React.forwardRef<
   },
   ref
 ) {
+  const t = useTranslations("Editor")
+
   return (
     <textarea
       ref={ref}
@@ -41,7 +44,7 @@ export const EditorTextarea = React.forwardRef<
         text-black placeholder-zinc-500 outline-none
         ${isReadOnly ? `cursor-not-allowed bg-gray-50` : `bg-transparent`}
       `}
-      placeholder={placeholder ?? "ENTER CONTENT... (Use Markdown)"}
+      placeholder={placeholder ?? t("bodyPlaceholder")}
       value={value}
       onChange={onChange}
       onPaste={onPaste}

@@ -1,6 +1,7 @@
 "use client"
 
 import { BadgeState } from "@/hooks/use-badge"
+import { useTranslations } from "next-intl"
 
 interface EditorBadgeProps {
   badge: BadgeState | null
@@ -8,6 +9,8 @@ interface EditorBadgeProps {
 }
 
 export function EditorBadge({ badge, onDismiss }: EditorBadgeProps) {
+  const t = useTranslations("Editor")
+
   if (!badge) return null
 
   return (
@@ -41,7 +44,7 @@ export function EditorBadge({ badge, onDismiss }: EditorBadgeProps) {
             ml-2 text-current/80
             hover:text-current
           "
-          aria-label="Dismiss">
+          aria-label={t("cancelButton")}>
           X
         </button>
       ) : null}

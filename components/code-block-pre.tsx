@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, type ReactNode } from "react"
+import { useTranslations } from "next-intl"
 import { CodeCopyButton } from "@/components/code-copy-button"
 import { LazyCodeBlock } from "@/components/lazy-code-block"
 
@@ -13,6 +14,7 @@ type CodeBlockPreProps = {
 }
 
 export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
+  const t = useTranslations("CommonA11y")
   const rawCode = props["data-raw-code"] as string | undefined
   const lang = (props["data-lang"] as string) || ""
   const lineCount = (props["data-line-count"] as string) || "0"
@@ -48,8 +50,8 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
           <span className="text-tech-main/50">|</span>
           <button
             type="button"
-            aria-label="Toggle line wrap"
-            title="Toggle line wrap"
+            aria-label={t("toggleLineWrap")}
+            title={t("toggleLineWrap")}
             onClick={() => setIsWrapped((v) => !v)}
             className={`
               font-mono text-[0.625rem] tracking-widest transition-colors

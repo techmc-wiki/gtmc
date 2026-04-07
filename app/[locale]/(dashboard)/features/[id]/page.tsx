@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import { auth } from "@/lib/auth"
 import { getCurrentUserAuthContext } from "@/lib/auth-context"
 import {
@@ -75,6 +76,7 @@ export default async function FeatureDetailPage({
 }: {
   params: Promise<{ id: string }>
 }) {
+  const t = await getTranslations("Feature")
   const { id } = await params
   const issueNumber = Number.parseInt(id, 10)
   if (Number.isNaN(issueNumber) || issueNumber <= 0) {
@@ -173,7 +175,7 @@ export default async function FeatureDetailPage({
                 sm:text-2xl
                 md:text-3xl
               ">
-              {canEdit ? "Edit Feature" : "View Feature"}
+              {t("detailTitle")}
             </h1>
           </div>
 
@@ -249,7 +251,7 @@ export default async function FeatureDetailPage({
               sm:text-sm
             ">
             <MetadataRow
-              label="STATUS:"
+              label={`${t("detailStatus")}:`}
               value={<FeatureStatusBadge status={feature.status} />}
             />
             <MetadataRow
@@ -261,12 +263,12 @@ export default async function FeatureDetailPage({
               }
             />
             <MetadataRow
-              label="ASSIGNEE:"
+              label={`${t("detailAssignee")}:`}
               value={
                 <span className="wrap-break-word">
                   {feature.assignee
                     ? feature.assignee.name || feature.assignee.email
-                    : "Unassigned"}
+                    : t("unknownUser")}
                 </span>
               }
             />

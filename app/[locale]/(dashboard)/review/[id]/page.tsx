@@ -15,7 +15,7 @@ import { decodeStoredDraftFiles } from "@/lib/draft-files"
 import { prisma } from "@/lib/prisma"
 import { ReviewEditor } from "@/components/review/review-editor"
 import type { ModeAnalysis, ReviewFile } from "@/types/review"
-import { ActionForm } from "./components/action-form"
+import { PRActionButtons } from "./components/pr-action-buttons"
 
 const owner = ARTICLES_REPO_OWNER
 const repo = ARTICLES_REPO_NAME
@@ -275,47 +275,22 @@ export default async function ReviewDetailPage({
         </div>
 
         {pr.state === "open" && (
-          <div
-            className="
-              flex w-full gap-4
-              md:w-auto
-            ">
-            <ActionForm
-              action={async () => {
-                "use server"
-                await closePRAction(prNumber)
-              }}>
-              {(isPending) => (
-                <TechButton
-                  type="submit"
-                  variant="secondary"
-                  disabled={isPending}
-                  className="
-                    w-full border-red-600 text-red-600
-                    hover:bg-red-600 hover:text-white
-                  ">
-                  {isPending ? "CLOSING..." : "CLOSE"}
-                </TechButton>
-              )}
-            </ActionForm>
-            {isMergeable && linkedDraft?.status !== "SYNC_CONFLICT" && (
-              <ActionForm
-                action={async () => {
-                  "use server"
-                  await mergePRAction(prNumber)
-                }}>
-                {(isPending) => (
-                  <TechButton
-                    type="submit"
-                    variant="primary"
-                    disabled={isPending}
-                    className="w-full">
-                    {isPending ? "MERGING..." : "APPROVE_&_MERGE"}
-                  </TechButton>
-                )}
-              </ActionForm>
-            )}
-          </div>
+          <PRActionButtons
+            closePRAction={async () => {
+              "use server"
+              await closePRAction(prNumber)
+            }}
+            mergePRAction={
+              isMergeable &&
+              linkedDraft?.status !== "SYNC_CONFLICT" &&
+              !effectiveConflictMode
+                ? async () => {
+                    "use server"
+                    await mergePRAction(prNumber)
+                  }
+                : null
+            }
+          />
         )}
       </div>
 

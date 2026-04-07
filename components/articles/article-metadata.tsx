@@ -2,6 +2,7 @@
 
 import { formatAbsoluteTime, formatRelativeTime } from "@/lib/format-time"
 import Image from "next/image"
+import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { useRouter } from "@/i18n/navigation"
 import { useState } from "react"
@@ -69,6 +70,7 @@ export function ArticleMetadata({
   bannerPath,
   bannerAlt,
 }: ArticleMetadataProps) {
+  const t = useTranslations("ArticleMeta")
   const router = useRouter()
   const [copied, setCopied] = useState(false)
 
@@ -126,7 +128,9 @@ export function ArticleMetadata({
               transition-colors
               hover:bg-tech-accent/10
             "
-            aria-label={isCollapsed ? "Expand metadata" : "Collapse metadata"}>
+            aria-label={
+              isCollapsed ? t("expandMetadata") : t("collapseMetadata")
+            }>
             {isCollapsed ? "[+]" : "[-]"}
           </button>
         </div>
@@ -333,8 +337,8 @@ export function ArticleMetadata({
                     `
                 }
               `}
-              aria-label="Copy URL">
-              {copied ? "✓" : "Copy"}
+              aria-label={t("copyButton")}>
+              {copied ? "✓" : t("copyButton")}
             </button>
           </div>
 

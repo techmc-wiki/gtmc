@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import { auth } from "@/lib/auth"
 import {
   labelsToStatus,
@@ -34,6 +35,7 @@ export default async function FeaturesPage({
   }>
 }) {
   const session = await auth()
+  const t = await getTranslations("Feature")
   const params = await searchParams
   const isCreated = params?.created === "true"
 
@@ -71,7 +73,7 @@ export default async function FeaturesPage({
     <div className="page-container-pb">
       <RevealSection delay={0}>
         <PageHeader
-          title="Feature Reports"
+          title={t("pageTitle")}
           subtitle="BUG REPORTS, FEATURE REQUESTS, AND ISSUE TRACKING"
           topMargin
           action={
@@ -90,7 +92,7 @@ export default async function FeaturesPage({
                     hover:scale-[1.02]
                     md:w-auto
                   ">
-                  + REPORT NEW FEATURE
+                  + {t("createButton")}
                 </TechButton>
               </Link>
             ) : undefined

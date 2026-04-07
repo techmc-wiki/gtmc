@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import { useTranslations } from "next-intl"
 import { TechCard } from "@/components/ui/tech-card"
 import { SectionTitle } from "@/components/ui/section-title"
 import {
@@ -11,6 +12,8 @@ import {
 } from "../features/loading-shell-primitives"
 
 export default function DraftLoading() {
+  const t = useTranslations("CommonA11y")
+
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
@@ -19,7 +22,7 @@ export default function DraftLoading() {
       <div
         className="page-container"
         aria-busy="true"
-        aria-label="Loading drafts">
+        aria-label={t("loadingDrafts")}>
         {/* PAGE_HEADER_ */}
         <div
           className="

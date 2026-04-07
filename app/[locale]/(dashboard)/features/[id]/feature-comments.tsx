@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useTranslations } from "next-intl"
 import { addFeatureComment } from "@/actions/feature"
 import { TechButton } from "@/components/ui/tech-button"
 import { TechCard } from "@/components/ui/tech-card"
@@ -29,6 +30,7 @@ export function FeatureComments({
   userId: string | undefined
   isClosed?: boolean
 }) {
+  const t = useTranslations("Feature")
   const [content, setContent] = useState("")
   const [isPending, startTransition] = useTransition()
 
@@ -49,7 +51,7 @@ export function FeatureComments({
           inline-block border-b-2 border-tech-main pb-2 text-2xl font-bold
           tracking-tighter uppercase
         ">
-        Discussions
+        {t("discussionsHeading")}
       </h3>
 
       <div className="space-y-4">
@@ -67,9 +69,9 @@ export function FeatureComments({
               <span className="font-bold tracking-wider text-tech-main uppercase">
                 {comment.author.name ||
                   (comment.emailRedacted
-                    ? "email redacted for privacy"
+                    ? t("emailRedacted")
                     : comment.author.email) ||
-                  "Unknown"}
+                  t("unknownCommentAuthor")}
               </span>
               <span className="text-zinc-500" suppressHydrationWarning>
                 {new Date(comment.createdAt).toLocaleString()}
@@ -86,7 +88,7 @@ export function FeatureComments({
               border border-dashed border-tech-main/40 bg-white/40 py-8
               text-center font-mono text-tech-main/50
             ">
-            NO_COMMENTS_YET_
+            {t("noCommentsYet")}
           </div>
         )}
       </div>
@@ -103,7 +105,7 @@ export function FeatureComments({
                   mb-4 inline-block border-b border-tech-main/40 pb-1 font-mono
                   text-sm tracking-tech-wide text-tech-main uppercase
                 ">
-                LEAVE_A_REPLY_
+                {t("leaveReplyLabel")}
               </label>
               <textarea
                 value={content}
@@ -114,7 +116,7 @@ export function FeatureComments({
                   placeholder-zinc-500 backdrop-blur-sm
                   focus:border-tech-main/60 focus:ring-0 focus:outline-none
                 "
-                placeholder="ENTER COMMENT..."
+                placeholder={t("commentPlaceholder")}
                 disabled={isPending}
               />
               <div className="mt-4 flex justify-end">
@@ -126,7 +128,7 @@ export function FeatureComments({
                   {isPending ? (
                     <LoadingIndicator label={PENDING_LABELS.POSTING_COMMENT} />
                   ) : (
-                    "POST_COMMENT"
+                    t("postCommentButton")
                   )}
                 </TechButton>
               </div>

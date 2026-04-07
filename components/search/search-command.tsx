@@ -10,6 +10,7 @@ import {
   useSyncExternalStore,
 } from "react"
 import { createPortal } from "react-dom"
+import { useTranslations } from "next-intl"
 import { useRouter, usePathname } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/article-url"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
@@ -24,6 +25,7 @@ interface SearchResult {
 const emptySubscribe = () => () => {}
 
 export function SearchCommand() {
+  const t = useTranslations("Search")
   const [isOpen, setIsOpen] = useState(false)
   const isMounted = useSyncExternalStore(
     emptySubscribe,
@@ -295,7 +297,7 @@ export function SearchCommand() {
           hover:bg-tech-main/10
           md:hidden
         "
-        aria-label="Search articles">
+        aria-label={t("searchAriaLabel")}>
         &#x2315;
       </button>
 
@@ -313,7 +315,7 @@ export function SearchCommand() {
             }}
             role="dialog"
             aria-modal="true"
-            aria-label="Search articles">
+            aria-label={t("searchAriaLabel")}>
             <div
               className="
                 relative w-full max-w-xl border border-tech-main bg-white/95
@@ -359,7 +361,7 @@ export function SearchCommand() {
                   type="text"
                   value={query}
                   onChange={handleQueryChange}
-                  placeholder="Search articles by title or content..."
+                  placeholder={t("placeholder")}
                   className="
                     w-full border border-tech-main/40 bg-white/60 px-3 py-2.5
                     font-mono text-sm text-tech-main-dark transition-colors
@@ -431,7 +433,9 @@ export function SearchCommand() {
                                 : "hover:bg-tech-accent/10"
                             }
                           `}
-                          aria-label={`Select ${result.title}`}
+                          aria-label={t("selectResult", {
+                            title: result.title,
+                          })}
                           tabIndex={-1}>
                           {index === selectedIndex && (
                             <CornerBrackets

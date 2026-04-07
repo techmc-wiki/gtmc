@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 import { TechButton } from "../ui/tech-button"
 import { InputBox } from "../ui/input-box"
 import { useRouter } from "@/i18n/navigation"
@@ -31,6 +32,7 @@ interface FeatureEditorProps {
 
 export function FeatureEditor({ initialData }: FeatureEditorProps) {
   const router = useRouter()
+  const t = useTranslations("Editor")
   const [title, setTitle] = React.useState(initialData?.title || "")
   const [content, setContent] = React.useState(initialData?.content || "")
   const [tags, setTags] = React.useState(initialData?.tags?.join(", ") || "")
@@ -205,12 +207,12 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
           <label htmlFor="feature-title" className="section-label">
-            TITLE_
+            {t("titleLabel")}
           </label>
           <InputBox
             id="feature-title"
             required
-            placeholder="ENTER TITLE..."
+            placeholder={t("titlePlaceholder")}
             className={`
               border-tech-main/40 py-3 font-mono text-lg backdrop-blur-sm
               focus:border-tech-main/60
@@ -306,7 +308,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
               }}
               isReadOnly={isReadOnly}
               isSaving={isSaving}
-              placeholder="ENTER FEATURE DESCRIPTION... (Use Markdown)"
+              placeholder={t("bodyPlaceholder")}
             />
           </div>
         </div>
@@ -343,7 +345,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="button"
             variant="ghost"
             onClick={() => router.back()}>
-            CANCEL_
+            {t("cancelButton")}
           </TechButton>
 
           <TechButton
@@ -356,7 +358,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             ) : isSaving ? (
               "SAVING..."
             ) : (
-              "SAVE_FEATURE_"
+              t("saveButton")
             )}
           </TechButton>
         </div>

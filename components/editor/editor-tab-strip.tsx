@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 
 interface EditorTabStripProps {
   activeTab: "write" | "preview"
@@ -17,10 +18,12 @@ export function EditorTabStrip({
   previewId,
   rightSlot,
 }: EditorTabStripProps) {
+  const t = useTranslations("Editor")
+
   return (
     <div
       role="tablist"
-      aria-label="Editor mode"
+      aria-label={t("editorModeAria")}
       className="
         flex items-center justify-between gap-3 border-b border-tech-main/40
         bg-tech-main/10 font-mono text-xs
@@ -46,7 +49,7 @@ export function EditorTabStrip({
                 `
             }
           `}>
-          WRITE_
+          {t("writeTab")}
         </button>
         <button
           type="button"
@@ -68,7 +71,7 @@ export function EditorTabStrip({
                 `
             }
           `}>
-          PREVIEW_
+          {t("previewTab")}
         </button>
       </div>
 

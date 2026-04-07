@@ -1,15 +1,17 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
 export const PENDING_LABELS = {
-  CLAIMING_ISSUE: "CLAIMING_ISSUE...",
-  DROPPING_ISSUE: "DROPPING_ISSUE...",
-  RESOLVING_ISSUE: "RESOLVING_ISSUE...",
-  POSTING_COMMENT: "POSTING_COMMENT...",
-  SAVING_EXPLANATION: "SAVING_EXPLANATION...",
-  SAVING_FEATURE: "SAVING_FEATURE...",
-  SAVING_DRAFT: "SAVING...",
-  SUBMITTING_REVIEW: "SUBMITTING...",
-  UPDATING_PR: "UPDATING_PR...",
+  CLAIMING_ISSUE: "claimingIssue",
+  DROPPING_ISSUE: "loading",
+  RESOLVING_ISSUE: "loading",
+  POSTING_COMMENT: "loading",
+  SAVING_EXPLANATION: "saving",
+  SAVING_FEATURE: "saving",
+  SAVING_DRAFT: "saving",
+  SUBMITTING_REVIEW: "submitting",
+  UPDATING_PR: "loading",
 } as const
 
 export type PendingLabel = (typeof PENDING_LABELS)[keyof typeof PENDING_LABELS]
@@ -25,13 +27,15 @@ export function LoadingIndicator({
   ariaHidden = false,
   screenReaderText,
 }: LoadingIndicatorProps) {
+  const t = useTranslations("Loading")
+
   return (
     <div
       className="flex items-center gap-3 font-mono text-sm"
       role={ariaHidden ? "presentation" : undefined}
       aria-hidden={ariaHidden}>
       <span className="inline-block size-2 animate-pulse bg-current opacity-60" />
-      <span className="tracking-widest uppercase">{label}</span>
+      <span className="tracking-widest uppercase">{t(label)}</span>
       {screenReaderText && <span className="sr-only">{screenReaderText}</span>}
     </div>
   )

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 
 import { EditorTabStrip } from "@/components/editor/editor-tab-strip"
 import { EditorTextarea } from "@/components/editor/editor-textarea"
@@ -148,6 +149,7 @@ export function ReviewEditor({
   revision,
   squashCommitDefaults,
 }: ReviewEditorProps) {
+  const t = useTranslations("Review")
   const [reviewSession, setReviewSession] = React.useState<ReviewSessionState>(
     () => ({
       mode: inferMode(revision),
@@ -166,6 +168,7 @@ export function ReviewEditor({
   const [isSelectingMode, setIsSelectingMode] = React.useState(false)
   const [isAborting, setIsAborting] = React.useState(false)
   const [isFinalizing, setIsFinalizing] = React.useState(false)
+  const abortedRef = React.useRef(false)
 
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 
@@ -206,7 +209,7 @@ export function ReviewEditor({
   const rebaseState = revision.rebaseState as RebaseState | null
 
   React.useEffect(() => {
-    if (reviewSession.mode !== null || hasConflicts) {
+    if (reviewSession.mode !== null || hasConflicts || abortedRef.current) {
       return
     }
 
@@ -332,6 +335,7 @@ export function ReviewEditor({
     setIsAborting(true)
     try {
       await abortResolutionAction(revision.id)
+      abortedRef.current = true
       setReviewSession((prev) => ({ ...prev, mode: null }))
     } finally {
       setIsAborting(false)
@@ -365,14 +369,14 @@ export function ReviewEditor({
 
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-3 border border-tech-main/40 bg-tech-main/5 px-4 py-3 font-mono text-xs text-tech-main">
-          <span className="truncate uppercase tracking-widest">
+          <span className="truncate tracking-widest uppercase">
             PR_{pr.number}_ {pr.title}
           </span>
           <a
             href={pr.htmlUrl}
             target="_blank"
             rel="noreferrer"
-            className="shrink-0 underline underline-offset-4 uppercase tracking-widest hover:text-tech-main-dark">
+            className="shrink-0 tracking-widest uppercase underline underline-offset-4 hover:text-tech-main-dark">
             OPEN_PR_
           </a>
         </div>
@@ -403,7 +407,7 @@ export function ReviewEditor({
 
             <div
               className="
-                relative flex min-h-[31.25rem] grow flex-col border
+                relative editor-grow border
                 border-tech-main/40 bg-white/80 backdrop-blur-sm
               ">
               <EditorTabStrip
@@ -450,8 +454,8 @@ export function ReviewEditor({
                             onChange={(e) =>
                               updateTextSegment(segment.id, e.target.value)
                             }
-                            className="min-h-[7.5rem] w-full resize-y border border-tech-main/20 bg-white px-4 py-3 font-mono text-sm/relaxed text-black outline-none focus:border-tech-main"
-                            placeholder="UNCHANGED CONTENT"
+                            className="min-h-30 w-full resize-y border guide-line bg-white px-4 py-3 font-mono text-sm/relaxed text-black outline-none focus:border-tech-main"
+                            placeholder={t("unchangedContentPlaceholder")}
                           />
                         )
                       )}
@@ -461,7 +465,7 @@ export function ReviewEditor({
                       ref={textareaRef}
                       value={activeContent}
                       onChange={handleContentChange}
-                      placeholder="ENTER REVIEW CONTENT... (Use Markdown)"
+                      placeholder={t("reviewContentPlaceholder")}
                     />
                   )}
                 </div>

@@ -548,7 +548,7 @@ export default function LitematicaViewer({
       <button
         type="button"
         onClick={toggleFlyMode}
-        className={`absolute right-4 top-4 z-20 border px-3 py-1 text-[11px] font-bold tracking-widest uppercase transition-colors ${
+        className={`absolute top-4 right-4 z-20 border px-3 py-1 text-[11px] font-bold tracking-widest uppercase transition-colors ${
           isFlyEnabled
             ? "border-tech-main bg-tech-main text-white"
             : "border-tech-main/60 bg-white/90 text-tech-main hover:bg-tech-main hover:text-white"
@@ -583,10 +583,10 @@ export default function LitematicaViewer({
       {maxLayer > 0 && (
         <div
           className={`absolute right-4 bottom-16 z-10 w-[250px] border border-tech-main/60 bg-white/90 p-3 text-tech-main shadow-sm backdrop-blur-md transition-all ${
-            isFlyEnabled ? "pointer-events-none opacity-0 translate-x-2" : "opacity-100"
+            isFlyEnabled ? "pointer-events-none translate-x-2 opacity-0" : "opacity-100"
           }`}
         >
-          <div className="mb-2 flex items-center justify-between border-b border-tech-main/20 pb-1">
+          <div className="mb-2 flex items-center justify-between border-b guide-line pb-1">
             <span className="text-[10px] font-bold tracking-widest uppercase">
               SYS.LAYER_FILTER
             </span>

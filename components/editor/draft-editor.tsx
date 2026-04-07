@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "@/i18n/navigation"
+import { useTranslations } from "next-intl"
 
 import { saveDraftAction, submitForReviewAction } from "@/actions/article"
 import { DraftFileSourceDialog } from "@/components/editor/draft-file-source-dialog"
@@ -44,6 +45,7 @@ interface DraftEditorProps {
 
 export function DraftEditor({ initialData }: DraftEditorProps) {
   const router = useRouter()
+  const t = useTranslations("Editor")
   const initialStatus = initialData?.status || "DRAFT"
 
   const [draftStatus, setDraftStatus] = React.useState(initialStatus)
@@ -470,12 +472,12 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
           <label htmlFor="draft-title" className="section-label">
-            TITLE_
+            {t("titleLabel")}
           </label>
           <InputBox
             id="draft-title"
             required
-            placeholder="ENTER TITLE..."
+            placeholder={t("titlePlaceholder")}
             className={`
               border-tech-main/40 py-3 font-mono text-lg backdrop-blur-sm
               focus:border-tech-main/60
@@ -516,12 +518,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             border-l-4 border-amber-500 bg-amber-500/10 p-4 text-amber-700
           ">
           <p className="font-bold tracking-widest uppercase">
-            Admin Resolution Pending
+            {t("conflictTitle")}
           </p>
-          <p className="text-sm">
-            This PR is blocked by a sync conflict. Only an admin can resolve it
-            from the review page.
-          </p>
+          <p className="text-sm">{t("conflictMessage")}</p>
         </div>
       ) : null}
 
@@ -595,7 +594,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
             {activeFileHasDuplicatePath ? (
               <p className="mt-3 font-mono text-xs text-red-500">
-                Duplicate file path detected in this draft.
+                {t("duplicatePathError")}
               </p>
             ) : null}
 
@@ -671,7 +670,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   }}
                   isReadOnly={isReadOnly}
                   isSaving={isSaving}
-                  placeholder="ENTER CONTENT... (Use Markdown)"
+                  placeholder={t("bodyPlaceholder")}
                 />
               </div>
             </section>
@@ -718,7 +717,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               {isSaving ? (
                 <LoadingIndicator label={PENDING_LABELS.SAVING_DRAFT} />
               ) : (
-                "SAVE DRAFT"
+                t("saveButton")
               )}
             </TechButton>
 
@@ -731,23 +730,19 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               {isSubmittingReview ? (
                 <LoadingIndicator label={PENDING_LABELS.SUBMITTING_REVIEW} />
               ) : (
-                "OPEN PR & SYNC MAIN"
+                t("submitButton")
               )}
             </TechButton>
           </div>
 
           <section
-            aria-label="Submission license"
+            aria-label={t("submissionLicenseAria")}
             className="mt-4 border guide-line bg-tech-main/5 p-4 font-mono text-[0.6875rem] leading-relaxed text-tech-main/80">
-            <p className="section-label">Submission License</p>
+            <p className="section-label">{t("submissionLicenseTitle")}</p>
             <div className="mt-2 space-y-2">
+              <p>{t("submissionLicenseIntro")}</p>
               <p>
-                By opening a submission PR, you confirm that this draft is your
-                own work or that you have permission to submit it.
-              </p>
-              <p>
-                You keep your copyright, but accepted article content is
-                published under{" "}
+                {t("submissionLicenseReusePrefix")}{" "}
                 <a
                   href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
                   target="_blank"
@@ -755,14 +750,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   className="underline decoration-tech-main/30 underline-offset-4 transition-colors hover:text-tech-main-dark hover:decoration-tech-main-dark">
                   CC BY-NC-SA 4.0
                 </a>
-                . Others may reuse it non-commercially with attribution and the
-                same license.
+                {t("submissionLicenseReuseSuffix")}
               </p>
-              <p>
-                Attribution is preserved through article metadata, PR records,
-                and repository history. Do not submit text or media you cannot
-                license on those terms.
-              </p>
+              <p>{t("submissionLicenseAttribution")}</p>
             </div>
           </section>
         </>

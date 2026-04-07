@@ -50,7 +50,7 @@ function FileExtBadge({ filePath }: { filePath: string }) {
     : null
   if (!ext) return null
   return (
-    <span className="shrink-0 border border-tech-main/20 bg-tech-main/5 px-1 font-mono text-[0.5625rem] tracking-widest text-tech-main/50 uppercase">
+    <span className="shrink-0 kbd-badge bg-tech-main/5 font-mono text-[0.5625rem] tracking-widest text-tech-main/50 uppercase">
       {ext}
     </span>
   )

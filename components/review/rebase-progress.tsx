@@ -59,7 +59,7 @@ function CommitStepDots({
                   : isDone
                     ? "border-tech-main bg-tech-main"
                     : isInProgress
-                      ? "border-tech-main/70 bg-tech-main/70 animate-pulse"
+                      ? "animate-pulse border-tech-main/70 bg-tech-main/70"
                       : "border-tech-main/30 bg-transparent"
               }`}
             />
@@ -106,7 +106,7 @@ function CurrentCommitPanel({
   }
 
   return (
-    <div className="relative space-y-3 border border-tech-main/30 bg-white/70 px-3 py-3">
+    <div className="relative space-y-3 border border-tech-main/30 bg-white/70 p-3">
       <CornerBrackets color="border-tech-main/20" />
       <div className="space-y-1">
         <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
@@ -287,7 +287,7 @@ export function RebaseProgress({
         </div>
 
         {rebaseState?.status === "CONFLICT" && currentCommitSha ? (
-          <div className="border border-red-500 bg-red-500/5 px-3 py-3">
+          <div className="border border-red-500 bg-red-500/5 p-3">
             <p className="font-mono text-[0.6875rem] font-bold tracking-widest text-red-600 uppercase">
               CONFLICT_DETECTED_IN_COMMIT_{currentCommitSha.slice(0, 7)}_
             </p>

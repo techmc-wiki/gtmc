@@ -53,6 +53,32 @@ const SIMPLE_CONFLICT_MARKER_RE = new RegExp(
   "g"
 )
 
+function reviewLog(action: string, details: Record<string, unknown>) {
+  console.log(`[review:${action}]`, details)
+}
+
+function reviewError(
+  action: string,
+  error: unknown,
+  details: Record<string, unknown>
+) {
+  console.error(`[review:${action}]`, {
+    ...details,
+    error:
+      error instanceof Error
+        ? {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          }
+        : error,
+  })
+}
+
+function summarizeSha(sha?: string | null) {
+  return sha ? sha.slice(0, 7) : null
+}
+
 function hasSimpleConflictMarkers(content: string) {
   SIMPLE_CONFLICT_MARKER_RE.lastIndex = 0
   return SIMPLE_CONFLICT_MARKER_RE.test(content)
@@ -309,27 +335,53 @@ export async function mergePRAction(prNumber: number) {
   const octokit = getOctokit(token)
 
   try {
+    reviewLog("mergePRAction", { prNumber, status: "start" })
+    reviewLog("mergePRAction", {
+      prNumber,
+      status: "github-api-before",
+      operation: "pulls.merge",
+      mergeMethod: "squash",
+    })
     await octokit.pulls.merge({
       owner,
       repo,
       pull_number: prNumber,
       merge_method: "squash",
     })
+    reviewLog("mergePRAction", {
+      prNumber,
+      status: "github-api-after",
+      operation: "pulls.merge",
+      result: "merged",
+    })
     try {
+      reviewLog("mergePRAction", {
+        prNumber,
+        status: "reconcile-start",
+        outcome: "PR-merged",
+      })
       await reconcileDraftAssetsForPRCompletion({
         prNumber,
         outcome: "PR-merged",
       })
-    } catch (reconcileError) {
-      console.error("Failed to reconcile draft assets after PR merge", {
+      reviewLog("mergePRAction", {
         prNumber,
-        reconcileError,
+        status: "reconcile-complete",
+        outcome: "PR-merged",
+      })
+    } catch (reconcileError) {
+      reviewError("mergePRAction", reconcileError, {
+        prNumber,
+        status: "reconcile-error",
+        outcome: "PR-merged",
       })
     }
     revalidatePath("/draft")
     revalidatePath("/review")
+    reviewLog("mergePRAction", { prNumber, status: "complete" })
     return { success: true }
   } catch (error) {
+    reviewError("mergePRAction", error, { prNumber, status: "error" })
     throw new Error(formatErrorMessage("Merge failed", error))
   }
 }
@@ -342,27 +394,53 @@ export async function closePRAction(prNumber: number) {
   const octokit = getOctokit(token)
 
   try {
+    reviewLog("closePRAction", { prNumber, status: "start" })
+    reviewLog("closePRAction", {
+      prNumber,
+      status: "github-api-before",
+      operation: "pulls.update",
+      nextState: "closed",
+    })
     await octokit.pulls.update({
       owner,
       repo,
       pull_number: prNumber,
       state: "closed",
     })
+    reviewLog("closePRAction", {
+      prNumber,
+      status: "github-api-after",
+      operation: "pulls.update",
+      result: "closed",
+    })
     try {
+      reviewLog("closePRAction", {
+        prNumber,
+        status: "reconcile-start",
+        outcome: "PR-closed",
+      })
       await reconcileDraftAssetsForPRCompletion({
         prNumber,
         outcome: "PR-closed",
       })
-    } catch (reconcileError) {
-      console.error("Failed to reconcile draft assets after PR close", {
+      reviewLog("closePRAction", {
         prNumber,
-        reconcileError,
+        status: "reconcile-complete",
+        outcome: "PR-closed",
+      })
+    } catch (reconcileError) {
+      reviewError("closePRAction", reconcileError, {
+        prNumber,
+        status: "reconcile-error",
+        outcome: "PR-closed",
       })
     }
     revalidatePath("/draft")
     revalidatePath("/review")
+    reviewLog("closePRAction", { prNumber, status: "complete" })
     return { success: true }
   } catch (error) {
+    reviewError("closePRAction", error, { prNumber, status: "error" })
     throw new Error(formatErrorMessage("Close failed", error))
   }
 }
@@ -371,219 +449,422 @@ export async function resolveConflictAction(
   prNumber: number,
   formData: FormData
 ) {
-  const { session, token, authorName, authorEmail } =
-    await requireReviewAdminContext()
+  reviewLog("resolveConflictAction", {
+    prNumber,
+    status: "start",
+    contentProvided: Boolean(formData.get("content")),
+    draftFilesProvided: Boolean(formData.get("draftFiles")),
+  })
 
-  const content = formData.get("content") as string | null
-  const draftFilesPayload = formData.get("draftFiles") as string | null
+  try {
+    const { session, token, authorName, authorEmail } =
+      await requireReviewAdminContext()
 
-  const linkedDraft = await prisma.revision.findFirst({
-    where: { githubPrNum: prNumber },
-    include: {
-      author: {
-        select: {
-          name: true,
-          email: true,
+    const content = formData.get("content") as string | null
+    const draftFilesPayload = formData.get("draftFiles") as string | null
+
+    const linkedDraft = await prisma.revision.findFirst({
+      where: { githubPrNum: prNumber },
+      include: {
+        author: {
+          select: {
+            name: true,
+            email: true,
+          },
         },
       },
-    },
-  })
-
-  if (!linkedDraft) {
-    throw new Error("Linked draft not found")
-  }
-
-  if (!linkedDraft.filePath || !linkedDraft.prBranchName) {
-    throw new Error("The linked draft is missing PR metadata")
-  }
-
-  const submitterName = linkedDraft.author?.name || authorName
-  const submitterEmail = linkedDraft.author?.email || authorEmail
-
-  const storedDraftFiles = decodeStoredDraftFiles({
-    content: linkedDraft.content,
-    conflictContent: linkedDraft.conflictContent,
-    filePath: linkedDraft.filePath,
-  })
-  const submittedDraftFiles = deserializeDraftFilesPayload(draftFilesPayload)
-  const resolvedDraftFiles =
-    submittedDraftFiles ||
-    (content
-      ? normalizeDraftFileCollection({
-          activeFileId: storedDraftFiles.activeFileId,
-          files: storedDraftFiles.files.map((file) => ({
-            ...file,
-            content:
-              file.id === storedDraftFiles.activeFileId
-                ? content
-                : file.content,
-          })),
-        })
-      : null)
-
-  if (!resolvedDraftFiles) {
-    throw new Error("Resolved content is required")
-  }
-
-  const conflictMode = (linkedDraft as { conflictMode?: ConflictMode | null })
-    .conflictMode
-
-  if (conflictMode === "SIMPLE") {
-    const storedFileMap = new Map(
-      storedDraftFiles.files.map((file) => [file.id, file])
-    )
-    const nextDraftFiles = normalizeDraftFileCollection({
-      activeFileId: resolvedDraftFiles.activeFileId,
-      files: resolvedDraftFiles.files.map((file) => {
-        const previousFile = storedFileMap.get(file.id)
-        const stillHasConflict = hasSimpleConflictMarkers(file.content)
-
-        return {
-          ...file,
-          content: stillHasConflict
-            ? (previousFile?.content ?? file.content)
-            : file.content,
-          ...(stillHasConflict ? { conflictContent: file.content } : {}),
-        }
-      }),
-    })
-    const nextStorage = serializeDraftFilesForStorage(nextDraftFiles)
-    const nextStatus = nextDraftFiles.files.some(
-      (file) =>
-        file.conflictContent !== undefined && file.conflictContent !== null
-    )
-      ? "SYNC_CONFLICT"
-      : "IN_REVIEW"
-
-    await recordResolvedRerereEntries({
-      token,
-      storedFiles: storedDraftFiles.files,
-      resolvedFiles: nextDraftFiles.files,
-      baseRef: linkedDraft.baseMainSha,
     })
 
-    await prisma.revision.update({
-      where: { id: linkedDraft.id },
-      data: {
-        conflictContent: nextStorage.conflictContent,
-        content: nextStorage.content,
-        filePath: nextStorage.filePath,
-        status: nextStatus,
-      },
+    if (!linkedDraft) {
+      throw new Error("Linked draft not found")
+    }
+
+    if (!linkedDraft.filePath || !linkedDraft.prBranchName) {
+      throw new Error("The linked draft is missing PR metadata")
+    }
+
+    const submitterName = linkedDraft.author?.name || authorName
+    const submitterEmail = linkedDraft.author?.email || authorEmail
+
+    const storedDraftFiles = decodeStoredDraftFiles({
+      content: linkedDraft.content,
+      conflictContent: linkedDraft.conflictContent,
+      filePath: linkedDraft.filePath,
+    })
+    const submittedDraftFiles = deserializeDraftFilesPayload(draftFilesPayload)
+    const resolvedDraftFiles =
+      submittedDraftFiles ||
+      (content
+        ? normalizeDraftFileCollection({
+            activeFileId: storedDraftFiles.activeFileId,
+            files: storedDraftFiles.files.map((file) => ({
+              ...file,
+              content:
+                file.id === storedDraftFiles.activeFileId
+                  ? content
+                  : file.content,
+            })),
+          })
+        : null)
+
+    if (!resolvedDraftFiles) {
+      throw new Error("Resolved content is required")
+    }
+
+    const conflictMode = (linkedDraft as { conflictMode?: ConflictMode | null })
+      .conflictMode
+
+    reviewLog("resolveConflictAction", {
+      prNumber,
+      revisionId: linkedDraft.id,
+      status: "loaded",
+      conflictMode,
+      fileCount: storedDraftFiles.files.length,
+      actorUserId: session.user.id,
     })
 
-    const latestMainSha = await getMainBranchHeadSha(token)
-
-    await forcePushResolvedToPRBranch({
-      resolvedFiles: nextDraftFiles.files.map((file) => ({
-        filePath: file.filePath,
-        content: file.content,
-      })),
-      prBranchName: linkedDraft.prBranchName,
-      latestMainSha,
-      commitMessage: "chore(review): apply conflict resolution",
-      authorName: submitterName,
-      authorEmail: submitterEmail,
-      token,
-    })
-
-    revalidatePaths(getReviewRevalidatePaths(linkedDraft.id, prNumber))
-
-    return { success: true, status: nextStatus }
-  }
-
-  const rebaseState = linkedDraft.rebaseState as RebaseState | null
-
-  if (rebaseState?.status === "CONFLICT") {
-    const resolvedFile = getActiveDraftFile(resolvedDraftFiles)
-    const storedFile = getActiveDraftFile(storedDraftFiles)
-    const rebaseConflictBaseRef =
-      rebaseState.currentCommitIndex > 0
-        ? rebaseState.commitInfos[rebaseState.currentCommitIndex - 1]?.sha
-        : linkedDraft.baseMainSha
-
-    await recordResolvedRerereEntries({
-      token,
-      storedFiles: storedDraftFiles.files,
-      resolvedFiles: resolvedDraftFiles.files,
-      baseRef: rebaseConflictBaseRef,
-    })
-
-    const result = await resumeRebase({
-      draftId: linkedDraft.id,
-      resolvedContent: resolvedFile.content,
-      resolvedFiles: resolvedDraftFiles.files.map((file) => ({
-        filePath: file.filePath,
-        content: file.content,
-      })),
-      token,
-    })
-
-    if (result.status === "SUCCESS") {
-      const rebasedDraftFiles = applyRebasedFilesToDraft(
-        storedDraftFiles,
-        result.files,
-        { filePath: storedFile.filePath, content: result.finalContent }
+    if (conflictMode === "SIMPLE") {
+      reviewLog("resolveConflictAction", {
+        prNumber,
+        status: "branch",
+        branch: "SIMPLE",
+        fileCount: resolvedDraftFiles.files.length,
+      })
+      const storedFileMap = new Map(
+        storedDraftFiles.files.map((file) => [file.id, file])
       )
-      await persistRebasedBranchFiles({
-        authorEmail: submitterEmail,
-        authorName: submitterName,
-        branchName: linkedDraft.prBranchName,
-        files: rebasedDraftFiles.files.map((file) => ({
+      const nextDraftFiles = normalizeDraftFileCollection({
+        activeFileId: resolvedDraftFiles.activeFileId,
+        files: resolvedDraftFiles.files.map((file) => {
+          const previousFile = storedFileMap.get(file.id)
+          const stillHasConflict = hasSimpleConflictMarkers(file.content)
+
+          return {
+            ...file,
+            content: stillHasConflict
+              ? (previousFile?.content ?? file.content)
+              : file.content,
+            ...(stillHasConflict ? { conflictContent: file.content } : {}),
+          }
+        }),
+      })
+      const nextStorage = serializeDraftFilesForStorage(nextDraftFiles)
+      const nextStatus = nextDraftFiles.files.some(
+        (file) =>
+          file.conflictContent !== undefined && file.conflictContent !== null
+      )
+        ? "SYNC_CONFLICT"
+        : "IN_REVIEW"
+
+      await recordResolvedRerereEntries({
+        token,
+        storedFiles: storedDraftFiles.files,
+        resolvedFiles: nextDraftFiles.files,
+        baseRef: linkedDraft.baseMainSha,
+      })
+
+      reviewLog("resolveConflictAction", {
+        prNumber,
+        status: "db-write-before",
+        fields: ["conflictContent", "content", "filePath", "status"],
+        nextStatus,
+      })
+      await prisma.revision.update({
+        where: { id: linkedDraft.id },
+        data: {
+          conflictContent: nextStorage.conflictContent,
+          content: nextStorage.content,
+          filePath: nextStorage.filePath,
+          status: nextStatus,
+        },
+      })
+      reviewLog("resolveConflictAction", {
+        prNumber,
+        status: "db-write-after",
+        fields: ["conflictContent", "content", "filePath", "status"],
+        nextStatus,
+      })
+
+      const latestMainSha = await getMainBranchHeadSha(token)
+      reviewLog("resolveConflictAction", {
+        prNumber,
+        status: "force-push-start",
+        prBranchName: linkedDraft.prBranchName,
+        fileCount: nextDraftFiles.files.length,
+        latestMainSha: summarizeSha(latestMainSha),
+      })
+      await forcePushResolvedToPRBranch({
+        resolvedFiles: nextDraftFiles.files.map((file) => ({
           filePath: file.filePath,
           content: file.content,
         })),
-        message: `docs: apply rebase for ${linkedDraft.title}`,
+        prBranchName: linkedDraft.prBranchName,
+        latestMainSha,
+        commitMessage: "chore(review): apply conflict resolution",
+        authorName: submitterName,
+        authorEmail: submitterEmail,
         token,
       })
-      const rebasedDraftStorage =
-        serializeDraftFilesForStorage(rebasedDraftFiles)
-      await prisma.revision.update({
-        where: { id: linkedDraft.id },
-        data: {
-          status: "IN_REVIEW",
-          conflictContent: rebasedDraftStorage.conflictContent,
-          content: rebasedDraftStorage.content,
-          filePath: rebasedDraftStorage.filePath,
-          rebaseState: {
-            ...rebaseState,
-            status: "COMPLETED",
-            resolvedContent: result.finalContent,
-          } as unknown as Prisma.InputJsonValue,
-        },
+      reviewLog("resolveConflictAction", {
+        prNumber,
+        status: "force-push-complete",
+        prBranchName: linkedDraft.prBranchName,
       })
-    } else if (result.status === "CONFLICT") {
-      const conflictDraftStorage = serializeDraftFilesForStorage(
-        applyRebasedFilesToDraft(storedDraftFiles, result.files, undefined, {
-          filePath: result.conflictFilePath ?? storedFile.filePath,
-          content: result.conflictContent,
-        })
-      )
-      await prisma.revision.update({
-        where: { id: linkedDraft.id },
-        data: {
-          status: "SYNC_CONFLICT",
-          conflictContent: conflictDraftStorage.conflictContent,
-          content: conflictDraftStorage.content,
-          filePath: conflictDraftStorage.filePath,
-        },
+
+      revalidatePaths(getReviewRevalidatePaths(linkedDraft.id, prNumber))
+      reviewLog("resolveConflictAction", {
+        prNumber,
+        status: "complete",
+        conflictMode,
+        resultStatus: nextStatus,
       })
-    } else if (result.status === "FILE_DELETED_CONFLICT") {
-      const deletedConflictDraftStorage = serializeDraftFilesForStorage(
-        applyRebasedFilesToDraft(storedDraftFiles, result.files)
-      )
-      await prisma.revision.update({
-        where: { id: linkedDraft.id },
-        data: {
-          status: "SYNC_CONFLICT",
-          content: deletedConflictDraftStorage.content,
-          filePath: deletedConflictDraftStorage.filePath,
-          conflictContent: deletedConflictDraftStorage.conflictContent,
-        },
-      })
-    } else {
-      throw new Error(formatErrorMessage("Resume rebase failed", result))
+      return { success: true, status: nextStatus }
     }
+
+    const rebaseState = linkedDraft.rebaseState as RebaseState | null
+
+    if (rebaseState?.status === "CONFLICT") {
+      reviewLog("resolveConflictAction", {
+        prNumber,
+        status: "branch",
+        branch: "FINE_GRAINED",
+        currentCommitIndex: rebaseState.currentCommitIndex,
+      })
+      const resolvedFile = getActiveDraftFile(resolvedDraftFiles)
+      const storedFile = getActiveDraftFile(storedDraftFiles)
+      const rebaseConflictBaseRef =
+        rebaseState.currentCommitIndex > 0
+          ? rebaseState.commitInfos[rebaseState.currentCommitIndex - 1]?.sha
+          : linkedDraft.baseMainSha
+
+      await recordResolvedRerereEntries({
+        token,
+        storedFiles: storedDraftFiles.files,
+        resolvedFiles: resolvedDraftFiles.files,
+        baseRef: rebaseConflictBaseRef,
+      })
+
+      const result = await resumeRebase({
+        draftId: linkedDraft.id,
+        resolvedContent: resolvedFile.content,
+        resolvedFiles: resolvedDraftFiles.files.map((file) => ({
+          filePath: file.filePath,
+          content: file.content,
+        })),
+        token,
+      })
+      reviewLog("resolveConflictAction", {
+        prNumber,
+        status: "resume-rebase-result",
+        resultStatus: result.status,
+      })
+
+      if (result.status === "SUCCESS") {
+        const rebasedDraftFiles = applyRebasedFilesToDraft(
+          storedDraftFiles,
+          result.files,
+          { filePath: storedFile.filePath, content: result.finalContent }
+        )
+        reviewLog("resolveConflictAction", {
+          prNumber,
+          status: "force-push-start",
+          prBranchName: linkedDraft.prBranchName,
+          fileCount: rebasedDraftFiles.files.length,
+        })
+        await persistRebasedBranchFiles({
+          authorEmail: submitterEmail,
+          authorName: submitterName,
+          branchName: linkedDraft.prBranchName,
+          files: rebasedDraftFiles.files.map((file) => ({
+            filePath: file.filePath,
+            content: file.content,
+          })),
+          message: `docs: apply rebase for ${linkedDraft.title}`,
+          token,
+        })
+        reviewLog("resolveConflictAction", {
+          prNumber,
+          status: "force-push-complete",
+          prBranchName: linkedDraft.prBranchName,
+        })
+        const rebasedDraftStorage =
+          serializeDraftFilesForStorage(rebasedDraftFiles)
+        reviewLog("resolveConflictAction", {
+          prNumber,
+          status: "db-write-before",
+          fields: [
+            "status",
+            "conflictContent",
+            "content",
+            "filePath",
+            "rebaseState",
+          ],
+          nextStatus: "IN_REVIEW",
+        })
+        await prisma.revision.update({
+          where: { id: linkedDraft.id },
+          data: {
+            status: "IN_REVIEW",
+            conflictContent: rebasedDraftStorage.conflictContent,
+            content: rebasedDraftStorage.content,
+            filePath: rebasedDraftStorage.filePath,
+            rebaseState: {
+              ...rebaseState,
+              status: "COMPLETED",
+              resolvedContent: result.finalContent,
+            } as unknown as Prisma.InputJsonValue,
+          },
+        })
+        reviewLog("resolveConflictAction", {
+          prNumber,
+          status: "db-write-after",
+          fields: [
+            "status",
+            "conflictContent",
+            "content",
+            "filePath",
+            "rebaseState",
+          ],
+          nextStatus: "IN_REVIEW",
+        })
+      } else if (result.status === "CONFLICT") {
+        const conflictDraftStorage = serializeDraftFilesForStorage(
+          applyRebasedFilesToDraft(storedDraftFiles, result.files, undefined, {
+            filePath: result.conflictFilePath ?? storedFile.filePath,
+            content: result.conflictContent,
+          })
+        )
+        reviewLog("resolveConflictAction", {
+          prNumber,
+          status: "branch-decision",
+          branch: "CONFLICT",
+          conflictFilePath: result.conflictFilePath ?? storedFile.filePath,
+        })
+        reviewLog("resolveConflictAction", {
+          prNumber,
+          status: "db-write-before",
+          fields: ["status", "conflictContent", "content", "filePath"],
+          nextStatus: "SYNC_CONFLICT",
+        })
+        await prisma.revision.update({
+          where: { id: linkedDraft.id },
+          data: {
+            status: "SYNC_CONFLICT",
+            conflictContent: conflictDraftStorage.conflictContent,
+            content: conflictDraftStorage.content,
+            filePath: conflictDraftStorage.filePath,
+          },
+        })
+        reviewLog("resolveConflictAction", {
+          prNumber,
+          status: "db-write-after",
+          fields: ["status", "conflictContent", "content", "filePath"],
+          nextStatus: "SYNC_CONFLICT",
+        })
+      } else if (result.status === "FILE_DELETED_CONFLICT") {
+        const deletedConflictDraftStorage = serializeDraftFilesForStorage(
+          applyRebasedFilesToDraft(storedDraftFiles, result.files)
+        )
+        reviewLog("resolveConflictAction", {
+          prNumber,
+          status: "branch-decision",
+          branch: "FILE_DELETED_CONFLICT",
+        })
+        reviewLog("resolveConflictAction", {
+          prNumber,
+          status: "db-write-before",
+          fields: ["status", "content", "filePath", "conflictContent"],
+          nextStatus: "SYNC_CONFLICT",
+        })
+        await prisma.revision.update({
+          where: { id: linkedDraft.id },
+          data: {
+            status: "SYNC_CONFLICT",
+            content: deletedConflictDraftStorage.content,
+            filePath: deletedConflictDraftStorage.filePath,
+            conflictContent: deletedConflictDraftStorage.conflictContent,
+          },
+        })
+        reviewLog("resolveConflictAction", {
+          prNumber,
+          status: "db-write-after",
+          fields: ["status", "content", "filePath", "conflictContent"],
+          nextStatus: "SYNC_CONFLICT",
+        })
+      } else {
+        throw new Error(formatErrorMessage("Resume rebase failed", result))
+      }
+
+      revalidatePaths([
+        "/draft",
+        `/draft/${linkedDraft.id}`,
+        "/review",
+        `/review/${prNumber}`,
+      ])
+      reviewLog("resolveConflictAction", {
+        prNumber,
+        status: "complete",
+        conflictMode,
+        resultStatus: result.status,
+      })
+      return { success: true, status: result.status }
+    }
+
+    const result = await resolveDraftSyncConflict({
+      activeFileId: resolvedDraftFiles.activeFileId,
+      authorEmail,
+      authorName,
+      branchName: linkedDraft.prBranchName,
+      files: resolvedDraftFiles.files.map((file) => ({
+        ...file,
+        conflictContent: undefined,
+      })),
+      syncedMainSha: linkedDraft.syncedMainSha,
+      title: linkedDraft.title,
+      token,
+    })
+
+    const syncedDraftStorage = serializeDraftFilesForStorage({
+      activeFileId: result.activeFileId,
+      files: result.files,
+    })
+
+    reviewLog("resolveConflictAction", {
+      prNumber,
+      status: "db-write-before",
+      fields: [
+        "conflictContent",
+        "content",
+        "filePath",
+        "status",
+        "syncedMainSha",
+      ],
+      nextStatus: result.status,
+      syncedMainSha: summarizeSha(result.syncedMainSha),
+    })
+    await prisma.revision.update({
+      where: { id: linkedDraft.id },
+      data: {
+        conflictContent: syncedDraftStorage.conflictContent,
+        content: syncedDraftStorage.content,
+        filePath: syncedDraftStorage.filePath,
+        status: result.status,
+        syncedMainSha: result.syncedMainSha,
+      },
+    })
+    reviewLog("resolveConflictAction", {
+      prNumber,
+      status: "db-write-after",
+      fields: [
+        "conflictContent",
+        "content",
+        "filePath",
+        "status",
+        "syncedMainSha",
+      ],
+      nextStatus: result.status,
+      syncedMainSha: summarizeSha(result.syncedMainSha),
+    })
 
     revalidatePaths([
       "/draft",
@@ -592,47 +873,17 @@ export async function resolveConflictAction(
       `/review/${prNumber}`,
     ])
 
+    reviewLog("resolveConflictAction", {
+      prNumber,
+      status: "complete",
+      conflictMode,
+      resultStatus: result.status,
+    })
     return { success: true, status: result.status }
+  } catch (error) {
+    reviewError("resolveConflictAction", error, { prNumber, status: "error" })
+    throw error
   }
-
-  const result = await resolveDraftSyncConflict({
-    activeFileId: resolvedDraftFiles.activeFileId,
-    authorEmail,
-    authorName,
-    branchName: linkedDraft.prBranchName,
-    files: resolvedDraftFiles.files.map((file) => ({
-      ...file,
-      conflictContent: undefined,
-    })),
-    syncedMainSha: linkedDraft.syncedMainSha,
-    title: linkedDraft.title,
-    token,
-  })
-
-  const syncedDraftStorage = serializeDraftFilesForStorage({
-    activeFileId: result.activeFileId,
-    files: result.files,
-  })
-
-  await prisma.revision.update({
-    where: { id: linkedDraft.id },
-    data: {
-      conflictContent: syncedDraftStorage.conflictContent,
-      content: syncedDraftStorage.content,
-      filePath: syncedDraftStorage.filePath,
-      status: result.status,
-      syncedMainSha: result.syncedMainSha,
-    },
-  })
-
-  revalidatePaths([
-    "/draft",
-    `/draft/${linkedDraft.id}`,
-    "/review",
-    `/review/${prNumber}`,
-  ])
-
-  return { success: true, status: result.status }
 }
 
 export async function submitWithRebaseAction(revisionId: string) {
@@ -856,221 +1107,429 @@ export async function keepFileAction(revisionId: string) {
 }
 
 export async function selectModeAction(revisionId: string, mode: ConflictMode) {
-  const { token, authorName, authorEmail } = await requireReviewAdminContext()
+  reviewLog("selectModeAction", { revisionId, status: "start", mode })
 
-  const revision = await prisma.revision.findUnique({
-    where: { id: revisionId },
-    include: {
-      author: {
-        select: {
-          name: true,
-          email: true,
+  try {
+    const { token, authorName, authorEmail } = await requireReviewAdminContext()
+
+    const revision = await prisma.revision.findUnique({
+      where: { id: revisionId },
+      include: {
+        author: {
+          select: {
+            name: true,
+            email: true,
+          },
         },
       },
-    },
-  })
+    })
 
-  if (!revision) {
-    throw new Error("Revision not found")
-  }
+    if (!revision) {
+      throw new Error("Revision not found")
+    }
 
-  if (!revision.prBranchName) {
-    throw new Error("The revision is missing PR metadata")
-  }
+    if (!revision.prBranchName) {
+      throw new Error("The revision is missing PR metadata")
+    }
 
-  const submitterName = revision.author?.name || authorName
-  const submitterEmail = revision.author?.email || authorEmail
+    const submitterName = revision.author?.name || authorName
+    const submitterEmail = revision.author?.email || authorEmail
 
-  const storedDraftFiles = decodeStoredDraftFiles({
-    content: revision.content,
-    conflictContent: revision.conflictContent,
-    filePath: revision.filePath,
-  })
-  const draftFile = getActiveDraftFile(storedDraftFiles)
+    const storedDraftFiles = decodeStoredDraftFiles({
+      content: revision.content,
+      conflictContent: revision.conflictContent,
+      filePath: revision.filePath,
+    })
+    const draftFile = getActiveDraftFile(storedDraftFiles)
 
-  if (mode === "FINE_GRAINED") {
+    reviewLog("selectModeAction", {
+      revisionId,
+      prNumber: revision.githubPrNum,
+      status: "loaded",
+      mode,
+      fileCount: storedDraftFiles.files.length,
+    })
+
+    if (mode === "FINE_GRAINED") {
+      reviewLog("selectModeAction", {
+        revisionId,
+        prNumber: revision.githubPrNum,
+        status: "branch",
+        branch: "FINE_GRAINED",
+      })
+      if (!revision.baseMainSha || !revision.syncedMainSha) {
+        throw new Error("The revision is missing main SHA metadata")
+      }
+
+      const result =
+        storedDraftFiles.files.length === 1
+          ? await rebaseArticleContent({
+              draftId: revisionId,
+              filePath: draftFile.filePath,
+              baseMainSha: revision.baseMainSha,
+              latestMainSha: revision.syncedMainSha,
+              draftContent: draftFile.content,
+              token,
+            })
+          : await rebaseArticleContentMultiFile({
+              draftId: revisionId,
+              files: storedDraftFiles.files.map((file) => ({
+                filePath: file.filePath,
+                content: file.content,
+              })),
+              baseMainSha: revision.baseMainSha,
+              latestMainSha: revision.syncedMainSha,
+              token,
+            })
+
+      reviewLog("selectModeAction", {
+        revisionId,
+        prNumber: revision.githubPrNum,
+        status: "rebase-result",
+        mode,
+        resultStatus: result.status,
+      })
+
+      if (result.status === "SUCCESS") {
+        const rebasedDraftFiles = applyRebasedFilesToDraft(
+          storedDraftFiles,
+          result.files,
+          { filePath: draftFile.filePath, content: result.finalContent }
+        )
+        reviewLog("selectModeAction", {
+          revisionId,
+          prNumber: revision.githubPrNum,
+          status: "force-push-start",
+          prBranchName: revision.prBranchName,
+          fileCount: rebasedDraftFiles.files.length,
+        })
+        await persistRebasedBranchFiles({
+          authorEmail: submitterEmail,
+          authorName: submitterName,
+          branchName: revision.prBranchName,
+          files: rebasedDraftFiles.files.map((file) => ({
+            filePath: file.filePath,
+            content: file.content,
+          })),
+          message: `docs: apply fine-grained rebase for ${revision.title}`,
+          token,
+        })
+        reviewLog("selectModeAction", {
+          revisionId,
+          prNumber: revision.githubPrNum,
+          status: "force-push-complete",
+          prBranchName: revision.prBranchName,
+        })
+        const rebasedDraftStorage =
+          serializeDraftFilesForStorage(rebasedDraftFiles)
+        reviewLog("selectModeAction", {
+          revisionId,
+          prNumber: revision.githubPrNum,
+          status: "db-write-before",
+          fields: [
+            "status",
+            "conflictMode",
+            "conflictContent",
+            "content",
+            "filePath",
+          ],
+          nextStatus: "IN_REVIEW",
+        })
+        await prisma.revision.update({
+          where: { id: revisionId },
+          data: {
+            status: "IN_REVIEW",
+            conflictMode: mode,
+            conflictContent: rebasedDraftStorage.conflictContent,
+            content: rebasedDraftStorage.content,
+            filePath: rebasedDraftStorage.filePath,
+          },
+        })
+        reviewLog("selectModeAction", {
+          revisionId,
+          prNumber: revision.githubPrNum,
+          status: "db-write-after",
+          fields: [
+            "status",
+            "conflictMode",
+            "conflictContent",
+            "content",
+            "filePath",
+          ],
+          nextStatus: "IN_REVIEW",
+        })
+      } else if (result.status === "CONFLICT") {
+        const conflictDraftStorage = serializeDraftFilesForStorage(
+          applyRebasedFilesToDraft(storedDraftFiles, result.files, undefined, {
+            filePath: result.conflictFilePath ?? draftFile.filePath,
+            content: result.conflictContent,
+          })
+        )
+        reviewLog("selectModeAction", {
+          revisionId,
+          prNumber: revision.githubPrNum,
+          status: "branch-decision",
+          branch: "CONFLICT",
+        })
+        reviewLog("selectModeAction", {
+          revisionId,
+          prNumber: revision.githubPrNum,
+          status: "db-write-before",
+          fields: ["status", "conflictContent", "content", "filePath"],
+          nextStatus: "SYNC_CONFLICT",
+        })
+        await prisma.revision.update({
+          where: { id: revisionId },
+          data: {
+            status: "SYNC_CONFLICT",
+            conflictContent: conflictDraftStorage.conflictContent,
+            content: conflictDraftStorage.content,
+            filePath: conflictDraftStorage.filePath,
+          },
+        })
+        reviewLog("selectModeAction", {
+          revisionId,
+          prNumber: revision.githubPrNum,
+          status: "db-write-after",
+          fields: ["status", "conflictContent", "content", "filePath"],
+          nextStatus: "SYNC_CONFLICT",
+        })
+      } else if (result.status === "FILE_DELETED_CONFLICT") {
+        const deletedConflictDraftStorage = serializeDraftFilesForStorage(
+          applyRebasedFilesToDraft(storedDraftFiles, result.files)
+        )
+        reviewLog("selectModeAction", {
+          revisionId,
+          prNumber: revision.githubPrNum,
+          status: "branch-decision",
+          branch: "FILE_DELETED_CONFLICT",
+        })
+        reviewLog("selectModeAction", {
+          revisionId,
+          prNumber: revision.githubPrNum,
+          status: "db-write-before",
+          fields: ["status", "content", "filePath", "conflictContent"],
+          nextStatus: "SYNC_CONFLICT",
+        })
+        await prisma.revision.update({
+          where: { id: revisionId },
+          data: {
+            status: "SYNC_CONFLICT",
+            content: deletedConflictDraftStorage.content,
+            filePath: deletedConflictDraftStorage.filePath,
+            conflictContent: deletedConflictDraftStorage.conflictContent,
+          },
+        })
+        reviewLog("selectModeAction", {
+          revisionId,
+          prNumber: revision.githubPrNum,
+          status: "db-write-after",
+          fields: ["status", "content", "filePath", "conflictContent"],
+          nextStatus: "SYNC_CONFLICT",
+        })
+      } else if (result.status === "NO_CHANGE") {
+        reviewLog("selectModeAction", {
+          revisionId,
+          prNumber: revision.githubPrNum,
+          status: "branch-decision",
+          branch: "NO_CHANGE",
+        })
+        reviewLog("selectModeAction", {
+          revisionId,
+          prNumber: revision.githubPrNum,
+          status: "db-write-before",
+          fields: ["status", "conflictMode", "conflictContent"],
+          nextStatus: "IN_REVIEW",
+        })
+        await prisma.revision.update({
+          where: { id: revisionId },
+          data: {
+            status: "IN_REVIEW",
+            conflictMode: mode,
+            conflictContent: null,
+          },
+        })
+        reviewLog("selectModeAction", {
+          revisionId,
+          prNumber: revision.githubPrNum,
+          status: "db-write-after",
+          fields: ["status", "conflictMode", "conflictContent"],
+          nextStatus: "IN_REVIEW",
+        })
+      }
+
+      revalidatePaths(
+        getReviewRevalidatePaths(revisionId, revision.githubPrNum)
+      )
+      reviewLog("selectModeAction", {
+        revisionId,
+        prNumber: revision.githubPrNum,
+        status: "complete",
+        mode,
+        resultStatus: result.status,
+        conflictMode: mode,
+      })
+      return { success: true, status: result.status, conflictMode: mode }
+    }
+
+    reviewLog("selectModeAction", {
+      revisionId,
+      prNumber: revision.githubPrNum,
+      status: "branch",
+      branch: "SIMPLE",
+    })
     if (!revision.baseMainSha || !revision.syncedMainSha) {
       throw new Error("The revision is missing main SHA metadata")
     }
 
-    const result =
-      storedDraftFiles.files.length === 1
-        ? await rebaseArticleContent({
-            draftId: revisionId,
-            filePath: draftFile.filePath,
-            baseMainSha: revision.baseMainSha,
-            latestMainSha: revision.syncedMainSha,
-            draftContent: draftFile.content,
-            token,
-          })
-        : await rebaseArticleContentMultiFile({
-            draftId: revisionId,
-            files: storedDraftFiles.files.map((file) => ({
-              filePath: file.filePath,
-              content: file.content,
-            })),
-            baseMainSha: revision.baseMainSha,
-            latestMainSha: revision.syncedMainSha,
-            token,
-          })
+    const latestMainSha =
+      revision.syncedMainSha || (await getMainBranchHeadSha(token))
+    const fileInputs = await Promise.all(
+      storedDraftFiles.files.map(async (file) => ({
+        filePath: file.filePath,
+        baseContent: await getArticleFileContent(
+          file.filePath,
+          revision.baseMainSha as string,
+          token
+        ),
+        draftContent: file.content,
+        latestMainContent: await getArticleFileContent(
+          file.filePath,
+          latestMainSha,
+          token
+        ),
+      }))
+    )
+    const result = await resolveSimpleConflicts({
+      files: fileInputs,
+      prBranchName: revision.prBranchName,
+      latestMainSha,
+      token,
+    })
+    reviewLog("selectModeAction", {
+      revisionId,
+      prNumber: revision.githubPrNum,
+      status: "simple-merge-result",
+      hasConflicts: result.hasConflicts,
+      conflictFileCount: result.fileResults.filter(
+        (file) => file.status === "conflict"
+      ).length,
+    })
 
-    if (result.status === "SUCCESS") {
-      const rebasedDraftFiles = applyRebasedFilesToDraft(
-        storedDraftFiles,
-        result.files,
-        { filePath: draftFile.filePath, content: result.finalContent }
-      )
-      await persistRebasedBranchFiles({
-        authorEmail: submitterEmail,
-        authorName: submitterName,
-        branchName: revision.prBranchName,
-        files: rebasedDraftFiles.files.map((file) => ({
-          filePath: file.filePath,
-          content: file.content,
-        })),
-        message: `docs: apply fine-grained rebase for ${revision.title}`,
-        token,
-      })
-      const rebasedDraftStorage =
-        serializeDraftFilesForStorage(rebasedDraftFiles)
-      await prisma.revision.update({
-        where: { id: revisionId },
-        data: {
-          status: "IN_REVIEW",
-          conflictMode: mode,
-          conflictContent: rebasedDraftStorage.conflictContent,
-          content: rebasedDraftStorage.content,
-          filePath: rebasedDraftStorage.filePath,
-        },
-      })
-    } else if (result.status === "CONFLICT") {
-      const conflictDraftStorage = serializeDraftFilesForStorage(
-        applyRebasedFilesToDraft(storedDraftFiles, result.files, undefined, {
-          filePath: result.conflictFilePath ?? draftFile.filePath,
-          content: result.conflictContent,
-        })
-      )
-      await prisma.revision.update({
-        where: { id: revisionId },
-        data: {
-          status: "SYNC_CONFLICT",
-          conflictContent: conflictDraftStorage.conflictContent,
-          content: conflictDraftStorage.content,
-          filePath: conflictDraftStorage.filePath,
-        },
-      })
-    } else if (result.status === "FILE_DELETED_CONFLICT") {
-      const deletedConflictDraftStorage = serializeDraftFilesForStorage(
-        applyRebasedFilesToDraft(storedDraftFiles, result.files)
-      )
-      await prisma.revision.update({
-        where: { id: revisionId },
-        data: {
-          status: "SYNC_CONFLICT",
-          content: deletedConflictDraftStorage.content,
-          filePath: deletedConflictDraftStorage.filePath,
-          conflictContent: deletedConflictDraftStorage.conflictContent,
-        },
-      })
-    } else if (result.status === "NO_CHANGE") {
-      await prisma.revision.update({
-        where: { id: revisionId },
-        data: {
-          status: "IN_REVIEW",
-          conflictMode: mode,
-          conflictContent: null,
-        },
-      })
-    }
+    reviewLog("selectModeAction", {
+      revisionId,
+      prNumber: revision.githubPrNum,
+      status: "force-push-start",
+      prBranchName: revision.prBranchName,
+      fileCount: storedDraftFiles.files.length,
+      latestMainSha: summarizeSha(latestMainSha),
+    })
+    await forcePushResolvedToPRBranch({
+      resolvedFiles: storedDraftFiles.files.map((file) => ({
+        filePath: file.filePath,
+        content: file.content,
+      })),
+      prBranchName: revision.prBranchName,
+      latestMainSha,
+      commitMessage: "chore(review): sync draft to PR branch for review",
+      authorName: submitterName,
+      authorEmail: submitterEmail,
+      token,
+    })
+    reviewLog("selectModeAction", {
+      revisionId,
+      prNumber: revision.githubPrNum,
+      status: "force-push-complete",
+      prBranchName: revision.prBranchName,
+    })
+
+    const mergedDraftFiles = normalizeDraftFileCollection({
+      activeFileId: storedDraftFiles.activeFileId,
+      files: storedDraftFiles.files.map((file) => {
+        const mergedFile = result.fileResults.find(
+          (candidate) => candidate.filePath === file.filePath
+        )
+
+        if (!mergedFile) {
+          return file
+        }
+
+        return {
+          ...file,
+          content:
+            mergedFile.status === "clean" ? mergedFile.content : file.content,
+          ...(mergedFile.status === "conflict"
+            ? { conflictContent: mergedFile.content }
+            : { conflictContent: undefined }),
+        }
+      }),
+    })
+    const mergedDraftStorage = serializeDraftFilesForStorage(mergedDraftFiles)
+
+    reviewLog("selectModeAction", {
+      revisionId,
+      prNumber: revision.githubPrNum,
+      status: "db-write-before",
+      fields: [
+        "conflictContent",
+        "content",
+        "filePath",
+        "status",
+        "syncedMainSha",
+        "conflictMode",
+      ],
+      nextStatus: result.hasConflicts ? "SYNC_CONFLICT" : "IN_REVIEW",
+      syncedMainSha: summarizeSha(latestMainSha),
+    })
+    await prisma.revision.update({
+      where: { id: revisionId },
+      data: {
+        conflictContent: mergedDraftStorage.conflictContent,
+        content: mergedDraftStorage.content,
+        filePath: mergedDraftStorage.filePath,
+        status: result.hasConflicts ? "SYNC_CONFLICT" : "IN_REVIEW",
+        syncedMainSha: latestMainSha,
+        conflictMode: mode,
+      },
+    })
+    reviewLog("selectModeAction", {
+      revisionId,
+      prNumber: revision.githubPrNum,
+      status: "db-write-after",
+      fields: [
+        "conflictContent",
+        "content",
+        "filePath",
+        "status",
+        "syncedMainSha",
+        "conflictMode",
+      ],
+      nextStatus: result.hasConflicts ? "SYNC_CONFLICT" : "IN_REVIEW",
+      syncedMainSha: summarizeSha(latestMainSha),
+    })
 
     revalidatePaths(getReviewRevalidatePaths(revisionId, revision.githubPrNum))
 
-    return { success: true, status: result.status, conflictMode: mode }
-  }
-
-  if (!revision.baseMainSha || !revision.syncedMainSha) {
-    throw new Error("The revision is missing main SHA metadata")
-  }
-
-  const latestMainSha =
-    revision.syncedMainSha || (await getMainBranchHeadSha(token))
-  const fileInputs = await Promise.all(
-    storedDraftFiles.files.map(async (file) => ({
-      filePath: file.filePath,
-      baseContent: await getArticleFileContent(
-        file.filePath,
-        revision.baseMainSha as string,
-        token
-      ),
-      draftContent: file.content,
-      latestMainContent: await getArticleFileContent(
-        file.filePath,
-        latestMainSha,
-        token
-      ),
-    }))
-  )
-  const result = await resolveSimpleConflicts({
-    files: fileInputs,
-    prBranchName: revision.prBranchName,
-    latestMainSha,
-    token,
-  })
-
-  await forcePushResolvedToPRBranch({
-    resolvedFiles: storedDraftFiles.files.map((file) => ({
-      filePath: file.filePath,
-      content: file.content,
-    })),
-    prBranchName: revision.prBranchName,
-    latestMainSha,
-    commitMessage: "chore(review): sync draft to PR branch for review",
-    authorName: submitterName,
-    authorEmail: submitterEmail,
-    token,
-  })
-
-  const mergedDraftFiles = normalizeDraftFileCollection({
-    activeFileId: storedDraftFiles.activeFileId,
-    files: storedDraftFiles.files.map((file) => {
-      const mergedFile = result.fileResults.find(
-        (candidate) => candidate.filePath === file.filePath
-      )
-
-      if (!mergedFile) {
-        return file
-      }
-
-      return {
-        ...file,
-        content:
-          mergedFile.status === "clean" ? mergedFile.content : file.content,
-        ...(mergedFile.status === "conflict"
-          ? { conflictContent: mergedFile.content }
-          : { conflictContent: undefined }),
-      }
-    }),
-  })
-  const mergedDraftStorage = serializeDraftFilesForStorage(mergedDraftFiles)
-
-  await prisma.revision.update({
-    where: { id: revisionId },
-    data: {
-      conflictContent: mergedDraftStorage.conflictContent,
-      content: mergedDraftStorage.content,
-      filePath: mergedDraftStorage.filePath,
-      status: result.hasConflicts ? "SYNC_CONFLICT" : "IN_REVIEW",
-      syncedMainSha: latestMainSha,
+    reviewLog("selectModeAction", {
+      revisionId,
+      prNumber: revision.githubPrNum,
+      status: "complete",
+      mode,
+      resultStatus: result.hasConflicts ? "CONFLICT" : "CLEAN",
       conflictMode: mode,
-    },
-  })
-
-  revalidatePaths(getReviewRevalidatePaths(revisionId, revision.githubPrNum))
-
-  return {
-    success: true,
-    status: result.hasConflicts ? "CONFLICT" : "CLEAN",
-    conflictMode: mode,
+    })
+    return {
+      success: true,
+      status: result.hasConflicts ? "CONFLICT" : "CLEAN",
+      conflictMode: mode,
+    }
+  } catch (error) {
+    reviewError("selectModeAction", error, {
+      revisionId,
+      mode,
+      status: "error",
+    })
+    throw error
   }
 }
 
@@ -1078,143 +1537,268 @@ export async function finalizeReviewAction(
   prNumber: number,
   options?: { commitTitle?: string; commitBody?: string }
 ) {
-  const { token, authorName, authorEmail } = await requireReviewAdminContext()
-
-  const revision = await prisma.revision.findFirst({
-    where: { githubPrNum: prNumber },
-    include: {
-      author: {
-        select: {
-          name: true,
-          email: true,
-        },
-      },
-    },
+  reviewLog("finalizeReviewAction", {
+    prNumber,
+    status: "start",
+    commitTitleProvided: Boolean(options?.commitTitle),
+    commitBodyProvided: Boolean(options?.commitBody),
   })
-
-  if (!revision) {
-    throw new Error("Linked draft not found")
-  }
-
-  const submitterName = revision.author?.name || authorName
-  const submitterEmail = revision.author?.email || authorEmail
-
-  const conflictMode = (revision as { conflictMode?: ConflictMode | null })
-    .conflictMode
-  const rebaseState = revision.rebaseState as RebaseState | null
-  const storedDraftFiles = decodeStoredDraftFiles({
-    content: revision.content,
-    conflictContent: revision.conflictContent,
-    filePath: revision.filePath,
-  })
-
-  if (conflictMode === "SIMPLE") {
-    if (!revision.prBranchName || !revision.syncedMainSha) {
-      throw new Error("The linked draft is missing PR metadata")
-    }
-
-    if (
-      storedDraftFiles.files.some((file) =>
-        hasSimpleConflictMarkers(file.content)
-      )
-    ) {
-      throw new Error("Resolve all simple conflicts before finalizing review")
-    }
-
-    await mergePR(
-      prNumber,
-      {
-        mergeMethod: "squash",
-        commitTitle: options?.commitTitle,
-        commitBody: options?.commitBody,
-      },
-      token
-    )
-  } else {
-    if (!revision.prBranchName) {
-      throw new Error("The linked draft is missing PR metadata")
-    }
-
-    const latestMainSha = await getMainBranchHeadSha(token)
-    const resolvedFiles =
-      rebaseState?.fileStates && Object.keys(rebaseState.fileStates).length > 0
-        ? Object.values(rebaseState.fileStates).map((fileState) => ({
-            filePath: fileState.filePath,
-            content: fileState.currentContent,
-          }))
-        : storedDraftFiles.files.map((file) => ({
-            filePath: file.filePath,
-            content: file.content,
-          }))
-
-    await forcePushResolvedToPRBranch({
-      resolvedFiles,
-      prBranchName: revision.prBranchName,
-      latestMainSha,
-      authorName: submitterName,
-      authorEmail: submitterEmail,
-      token,
-    })
-
-    await mergePR(
-      prNumber,
-      {
-        mergeMethod: "squash",
-        commitTitle: options?.commitTitle,
-        commitBody: options?.commitBody,
-      },
-      token
-    )
-  }
 
   try {
-    await reconcileDraftAssetsForPRCompletion({
-      prNumber,
-      outcome: "PR-merged",
+    const { token, authorName, authorEmail } = await requireReviewAdminContext()
+
+    const revision = await prisma.revision.findFirst({
+      where: { githubPrNum: prNumber },
+      include: {
+        author: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
     })
-  } catch (reconcileError) {
-    console.error("Failed to reconcile draft assets after PR merge", {
-      prNumber,
-      reconcileError,
+
+    if (!revision) {
+      throw new Error("Linked draft not found")
+    }
+
+    const submitterName = revision.author?.name || authorName
+    const submitterEmail = revision.author?.email || authorEmail
+
+    const conflictMode = (revision as { conflictMode?: ConflictMode | null })
+      .conflictMode
+    const rebaseState = revision.rebaseState as RebaseState | null
+    const storedDraftFiles = decodeStoredDraftFiles({
+      content: revision.content,
+      conflictContent: revision.conflictContent,
+      filePath: revision.filePath,
     })
+
+    reviewLog("finalizeReviewAction", {
+      prNumber,
+      revisionId: revision.id,
+      status: "loaded",
+      conflictMode,
+      fileCount: storedDraftFiles.files.length,
+    })
+
+    if (conflictMode === "SIMPLE") {
+      if (!revision.prBranchName || !revision.syncedMainSha) {
+        throw new Error("The linked draft is missing PR metadata")
+      }
+
+      if (
+        storedDraftFiles.files.some((file) =>
+          hasSimpleConflictMarkers(file.content)
+        )
+      ) {
+        throw new Error("Resolve all simple conflicts before finalizing review")
+      }
+
+      reviewLog("finalizeReviewAction", {
+        prNumber,
+        status: "merge-pr-start",
+        mode: conflictMode,
+        mergeMethod: "squash",
+      })
+      await mergePR(
+        prNumber,
+        {
+          mergeMethod: "squash",
+          commitTitle: options?.commitTitle,
+          commitBody: options?.commitBody,
+        },
+        token
+      )
+      reviewLog("finalizeReviewAction", {
+        prNumber,
+        status: "merge-pr-complete",
+        mode: conflictMode,
+      })
+    } else {
+      if (!revision.prBranchName) {
+        throw new Error("The linked draft is missing PR metadata")
+      }
+
+      const latestMainSha = await getMainBranchHeadSha(token)
+      const resolvedFiles =
+        rebaseState?.fileStates &&
+        Object.keys(rebaseState.fileStates).length > 0
+          ? Object.values(rebaseState.fileStates).map((fileState) => ({
+              filePath: fileState.filePath,
+              content: fileState.currentContent,
+            }))
+          : storedDraftFiles.files.map((file) => ({
+              filePath: file.filePath,
+              content: file.content,
+            }))
+
+      reviewLog("finalizeReviewAction", {
+        prNumber,
+        status: "force-push-start",
+        mode: conflictMode,
+        prBranchName: revision.prBranchName,
+        fileCount: resolvedFiles.length,
+        latestMainSha: summarizeSha(latestMainSha),
+      })
+      await forcePushResolvedToPRBranch({
+        resolvedFiles,
+        prBranchName: revision.prBranchName,
+        latestMainSha,
+        authorName: submitterName,
+        authorEmail: submitterEmail,
+        token,
+      })
+      reviewLog("finalizeReviewAction", {
+        prNumber,
+        status: "force-push-complete",
+        mode: conflictMode,
+        prBranchName: revision.prBranchName,
+      })
+
+      reviewLog("finalizeReviewAction", {
+        prNumber,
+        status: "merge-pr-start",
+        mode: conflictMode,
+        mergeMethod: "squash",
+      })
+      await mergePR(
+        prNumber,
+        {
+          mergeMethod: "squash",
+          commitTitle: options?.commitTitle,
+          commitBody: options?.commitBody,
+        },
+        token
+      )
+      reviewLog("finalizeReviewAction", {
+        prNumber,
+        status: "merge-pr-complete",
+        mode: conflictMode,
+      })
+    }
+
+    try {
+      reviewLog("finalizeReviewAction", {
+        prNumber,
+        status: "db-cleanup-start",
+        operation: "reconcileDraftAssetsForPRCompletion",
+      })
+      await reconcileDraftAssetsForPRCompletion({
+        prNumber,
+        outcome: "PR-merged",
+      })
+      reviewLog("finalizeReviewAction", {
+        prNumber,
+        status: "db-cleanup-complete",
+        operation: "reconcileDraftAssetsForPRCompletion",
+      })
+    } catch (reconcileError) {
+      reviewError("finalizeReviewAction", reconcileError, {
+        prNumber,
+        status: "db-cleanup-error",
+        operation: "reconcileDraftAssetsForPRCompletion",
+      })
+    }
+
+    revalidatePaths(getReviewRevalidatePaths(revision.id, prNumber))
+    reviewLog("finalizeReviewAction", {
+      prNumber,
+      status: "complete",
+      conflictMode,
+    })
+    return { success: true }
+  } catch (error) {
+    reviewError("finalizeReviewAction", error, { prNumber, status: "error" })
+    throw error
   }
-
-  revalidatePaths(getReviewRevalidatePaths(revision.id, prNumber))
-
-  return { success: true }
 }
 
 export async function abortResolutionAction(revisionId: string) {
-  const { token } = await requireReviewAdminContext()
+  reviewLog("abortResolutionAction", { revisionId, status: "start" })
 
-  const revision = await prisma.revision.findUnique({
-    where: { id: revisionId },
-  })
+  try {
+    const { token } = await requireReviewAdminContext()
 
-  if (!revision) {
-    throw new Error("Revision not found")
-  }
-
-  const conflictMode = (revision as { conflictMode?: ConflictMode | null })
-    .conflictMode
-
-  if (conflictMode === "FINE_GRAINED") {
-    await abortRebase({
-      draftId: revisionId,
-      token,
+    const revision = await prisma.revision.findUnique({
+      where: { id: revisionId },
     })
+
+    if (!revision) {
+      throw new Error("Revision not found")
+    }
+
+    const conflictMode = (revision as { conflictMode?: ConflictMode | null })
+      .conflictMode
+
+    reviewLog("abortResolutionAction", {
+      revisionId,
+      prNumber: revision.githubPrNum,
+      status: "loaded",
+      conflictMode,
+    })
+
+    if (conflictMode === "FINE_GRAINED") {
+      reviewLog("abortResolutionAction", {
+        revisionId,
+        prNumber: revision.githubPrNum,
+        status: "abort-rebase-start",
+        mode: conflictMode,
+      })
+      await abortRebase({
+        draftId: revisionId,
+        token,
+      })
+      reviewLog("abortResolutionAction", {
+        revisionId,
+        prNumber: revision.githubPrNum,
+        status: "abort-rebase-complete",
+        mode: conflictMode,
+      })
+    }
+
+    reviewLog("abortResolutionAction", {
+      revisionId,
+      prNumber: revision.githubPrNum,
+      status: "db-write-before",
+      fields:
+        conflictMode === "SIMPLE"
+          ? ["conflictContent", "status", "conflictMode"]
+          : ["status", "conflictMode"],
+      nextStatus: "IN_REVIEW",
+      nextConflictMode: null,
+    })
+    await prisma.revision.update({
+      where: { id: revisionId },
+      data: {
+        ...(conflictMode === "SIMPLE" ? { conflictContent: null } : {}),
+        status: "IN_REVIEW",
+        conflictMode: null,
+      } as Prisma.RevisionUpdateInput,
+    })
+    reviewLog("abortResolutionAction", {
+      revisionId,
+      prNumber: revision.githubPrNum,
+      status: "db-write-after",
+      fields:
+        conflictMode === "SIMPLE"
+          ? ["conflictContent", "status", "conflictMode"]
+          : ["status", "conflictMode"],
+      nextStatus: "IN_REVIEW",
+      nextConflictMode: null,
+    })
+
+    revalidatePaths(getReviewRevalidatePaths(revisionId, revision.githubPrNum))
+    reviewLog("abortResolutionAction", {
+      revisionId,
+      prNumber: revision.githubPrNum,
+      status: "complete",
+      conflictMode,
+    })
+    return { success: true }
+  } catch (error) {
+    reviewError("abortResolutionAction", error, { revisionId, status: "error" })
+    throw error
   }
-
-  await prisma.revision.update({
-    where: { id: revisionId },
-    data: {
-      ...(conflictMode === "SIMPLE" ? { conflictContent: null } : {}),
-      status: "IN_REVIEW",
-      conflictMode: null,
-    } as Prisma.RevisionUpdateInput,
-  })
-
-  revalidatePaths(getReviewRevalidatePaths(revisionId, revision.githubPrNum))
-
-  return { success: true }
 }

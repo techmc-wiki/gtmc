@@ -19,17 +19,17 @@ function ClosedPRSkeletonRows() {
       {skeletonKeys.map((key) => (
         <TechCard
           key={`closed-pr-skeleton-${key}`}
-          className="relative border border-[var(--color-tech-line)] bg-white/80 p-6 backdrop-blur-sm">
+          className="relative border border-tech-line bg-white/80 p-6 backdrop-blur-sm">
           <CornerBrackets variant="hover" />
           <div className="relative z-10 animate-pulse space-y-4">
             <div className="flex flex-wrap items-center gap-3">
-              <div className="h-5 w-20 border border-[var(--color-tech-line)] bg-[var(--color-tech-bg)]" />
-              <div className="h-4 w-28 bg-[var(--color-tech-accent)]/40" />
-              <div className="h-5 w-24 border border-[var(--color-tech-line)] bg-[var(--color-tech-bg)]" />
+              <div className="h-5 w-20 border border-tech-line bg-tech-bg" />
+              <div className="h-4 w-28 bg-tech-accent/40" />
+              <div className="h-5 w-24 border border-tech-line bg-tech-bg" />
             </div>
-            <div className="h-6 w-3/4 border-l-2 border-[var(--color-tech-line)] bg-[var(--color-tech-accent)]/35 pl-3" />
-            <div className="h-4 w-40 bg-[var(--color-tech-accent)]/30" />
-            <div className="h-6 w-36 border border-[var(--color-tech-line)] bg-[var(--color-tech-bg)]" />
+            <div className="h-6 w-3/4 border-l-2 border-tech-line bg-tech-accent/35 pl-3" />
+            <div className="h-4 w-40 bg-tech-accent/30" />
+            <div className="h-6 w-36 border border-tech-line bg-tech-bg" />
           </div>
         </TechCard>
       ))}
@@ -43,7 +43,7 @@ function ClosedPRCard({ pr }: { pr: ClosedPRListItem }) {
     : "border-[var(--color-tech-line)] bg-[var(--color-tech-bg)] text-[var(--color-tech-main)]"
 
   return (
-    <TechCard className="group relative border border-[var(--color-tech-line)] bg-white/80 p-6 backdrop-blur-sm">
+    <TechCard className="group relative border border-tech-line bg-white/80 p-6 backdrop-blur-sm">
       <CornerBrackets variant="hover" />
 
       <div className="relative z-10 space-y-3">

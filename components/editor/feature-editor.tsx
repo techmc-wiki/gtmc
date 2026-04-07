@@ -13,7 +13,10 @@ import {
 } from "@/components/ui/loading-indicator"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
 import { EditorBadge } from "@/components/editor/editor-badge"
-import { EditorTabStrip } from "@/components/editor/editor-tab-strip"
+import {
+  EditorTabStrip,
+  type TabType,
+} from "@/components/editor/editor-tab-strip"
 import { EditorTextarea } from "@/components/editor/editor-textarea"
 import { EditorFileUploadInput } from "@/components/editor/editor-file-upload-input"
 import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
@@ -37,29 +40,34 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
   const [content, setContent] = React.useState(initialData?.content || "")
   const [tags, setTags] = React.useState(initialData?.tags?.join(", ") || "")
   const [isSaving, setIsSaving] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState<"write" | "preview">("write")
+  const [activeTab, setActiveTab] = React.useState<TabType>("write")
   const { badge, showBadge, clearBadge } = useBadge()
 
-  const textareaRef = React.useRef<HTMLTextAreaElement>(null)
+  const textareaRef = React.useRef<any>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   const isReadOnly = false
 
   const insertTextAtCursor = (text: string) => {
     if (!textareaRef.current) return
-    const start = textareaRef.current.selectionStart
-    const end = textareaRef.current.selectionEnd
-    const newContent =
-      content.substring(0, start) + text + content.substring(end)
-    setContent(newContent)
+    const view = textareaRef.current.view
+    if (!view) return
 
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.selectionStart = textareaRef.current.selectionEnd =
-          start + text.length
-        textareaRef.current.focus()
-      }
-    }, 0)
+    const selection = view.state.selection.main
+
+    view.dispatch({
+      changes: {
+        from: selection.from,
+        to: selection.to,
+        insert: text,
+      },
+      selection: {
+        anchor: selection.from + text.length,
+        head: selection.from + text.length,
+      },
+    })
+
+    view.focus()
   }
 
   const featureUploadAdapter = React.useCallback(async (file: File) => {
@@ -115,7 +123,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
     uploadFile(file)
   }
 
-  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
     if (isReadOnly || isUploading) return
     const items = e.clipboardData.items
     for (const item of Array.from(items)) {
@@ -130,7 +138,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
     }
   }
 
-  const handleDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     if (isReadOnly || isUploading) return
     e.preventDefault()
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
@@ -141,21 +149,26 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
 
   const insertSyntax = (prefix: string, suffix: string = "") => {
     if (isReadOnly || !textareaRef.current) return
-    const start = textareaRef.current.selectionStart
-    const end = textareaRef.current.selectionEnd
-    const selectedText = content.substring(start, end)
+    const view = textareaRef.current.view
+    if (!view) return
+
+    const selection = view.state.selection.main
+    const selectedText = view.state.sliceDoc(selection.from, selection.to)
     const newText = prefix + selectedText + suffix
 
-    setContent(content.substring(0, start) + newText + content.substring(end))
+    view.dispatch({
+      changes: {
+        from: selection.from,
+        to: selection.to,
+        insert: newText,
+      },
+      selection: {
+        anchor: selection.from + prefix.length,
+        head: selection.from + prefix.length + selectedText.length,
+      },
+    })
 
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus()
-        textareaRef.current.selectionStart = start + prefix.length
-        textareaRef.current.selectionEnd =
-          start + prefix.length + selectedText.length
-      }
-    }, 0)
+    view.focus()
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -295,15 +308,13 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             <EditorTextarea
               ref={textareaRef}
               value={content}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                setContent(e.target.value)
-              }
+              onChange={(value: string) => setContent(value)}
               onPaste={handlePaste}
               onDrop={handleDrop}
-              onDragOver={(e: React.DragEvent<HTMLTextAreaElement>) => {
+              onDragOver={(e: React.DragEvent<HTMLDivElement>) => {
                 if (!isReadOnly) e.preventDefault()
               }}
-              onDragEnter={(e: React.DragEvent<HTMLTextAreaElement>) => {
+              onDragEnter={(e: React.DragEvent<HTMLDivElement>) => {
                 if (!isReadOnly) e.preventDefault()
               }}
               isReadOnly={isReadOnly}

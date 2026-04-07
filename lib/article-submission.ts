@@ -26,6 +26,28 @@ import { getMergeLibrary } from "@/lib/merge-strategy"
 
 const MAIN_BRANCH = "main"
 
+function reviewLog(action: string, details: Record<string, unknown>) {
+  console.log(`[review:${action}]`, details)
+}
+
+function reviewError(
+  action: string,
+  error: unknown,
+  details: Record<string, unknown>
+) {
+  console.error(`[review:${action}]`, {
+    ...details,
+    error:
+      error instanceof Error
+        ? { name: error.name, message: error.message, stack: error.stack }
+        : error,
+  })
+}
+
+function summarizeSha(sha?: string | null) {
+  return sha ? sha.slice(0, 7) : null
+}
+
 type DraftSyncStatus = "IN_REVIEW" | "SYNC_CONFLICT"
 
 interface FileSnapshot {
@@ -109,11 +131,22 @@ export interface ForcePushInput {
 }
 
 export async function getMainBranchHeadSha(token?: string) {
+  reviewLog("getMainBranchHeadSha", { status: "start" })
   const octokit = getOctokit(token)
+  reviewLog("getMainBranchHeadSha", {
+    status: "github-api-before",
+    operation: "git.getRef",
+    ref: `heads/${MAIN_BRANCH}`,
+  })
   const { data } = await octokit.git.getRef({
     owner: ARTICLES_REPO_OWNER,
     repo: ARTICLES_REPO_NAME,
     ref: `heads/${MAIN_BRANCH}`,
+  })
+
+  reviewLog("getMainBranchHeadSha", {
+    status: "complete",
+    sha: summarizeSha(data.object.sha),
   })
 
   return data.object.sha
@@ -183,11 +216,28 @@ export async function forcePushResolvedToPRBranch({
   authorEmail,
   token,
 }: ForcePushInput): Promise<{ newSha: string }> {
+  reviewLog("forcePushResolvedToPRBranch", {
+    status: "start",
+    prBranchName,
+    fileCount: resolvedFiles.length,
+    latestMainSha: summarizeSha(latestMainSha),
+  })
   const octokit = getOctokit(token)
+  reviewLog("forcePushResolvedToPRBranch", {
+    status: "github-api-before",
+    operation: "git.getCommit",
+    prBranchName,
+    commitSha: summarizeSha(latestMainSha),
+  })
   const { data: latestMainCommit } = await octokit.git.getCommit({
     owner: ARTICLES_REPO_OWNER,
     repo: ARTICLES_REPO_NAME,
     commit_sha: latestMainSha,
+  })
+  reviewLog("forcePushResolvedToPRBranch", {
+    status: "github-api-after",
+    operation: "git.getCommit",
+    treeSha: summarizeSha(latestMainCommit.tree.sha),
   })
 
   const tree = await Promise.all(
@@ -208,13 +258,31 @@ export async function forcePushResolvedToPRBranch({
     })
   )
 
+  reviewLog("forcePushResolvedToPRBranch", {
+    status: "github-api-before",
+    operation: "git.createTree",
+    prBranchName,
+    entryCount: tree.length,
+  })
   const { data: createdTree } = await octokit.git.createTree({
     owner: ARTICLES_REPO_OWNER,
     repo: ARTICLES_REPO_NAME,
     base_tree: latestMainCommit.tree.sha,
     tree,
   })
+  reviewLog("forcePushResolvedToPRBranch", {
+    status: "github-api-after",
+    operation: "git.createTree",
+    treeSha: summarizeSha(createdTree.sha),
+  })
 
+  reviewLog("forcePushResolvedToPRBranch", {
+    status: "github-api-before",
+    operation: "git.createCommit",
+    prBranchName,
+    parentSha: summarizeSha(latestMainSha),
+    commitMessage: commitMessage || "docs: apply resolved review files",
+  })
   const { data: newCommit } = await octokit.git.createCommit({
     owner: ARTICLES_REPO_OWNER,
     repo: ARTICLES_REPO_NAME,
@@ -225,13 +293,36 @@ export async function forcePushResolvedToPRBranch({
       ? { author: { name: authorName, email: authorEmail } }
       : {}),
   })
+  reviewLog("forcePushResolvedToPRBranch", {
+    status: "github-api-after",
+    operation: "git.createCommit",
+    newCommitSha: summarizeSha(newCommit.sha),
+  })
 
+  reviewLog("forcePushResolvedToPRBranch", {
+    status: "github-api-before",
+    operation: "git.updateRef",
+    prBranchName,
+    newCommitSha: summarizeSha(newCommit.sha),
+  })
   await octokit.git.updateRef({
     owner: ARTICLES_REPO_OWNER,
     repo: ARTICLES_REPO_NAME,
     ref: `heads/${prBranchName}`,
     sha: newCommit.sha,
     force: true,
+  })
+  reviewLog("forcePushResolvedToPRBranch", {
+    status: "github-api-after",
+    operation: "git.updateRef",
+    prBranchName,
+    newCommitSha: summarizeSha(newCommit.sha),
+  })
+
+  reviewLog("forcePushResolvedToPRBranch", {
+    status: "complete",
+    prBranchName,
+    newSha: summarizeSha(newCommit.sha),
   })
 
   return { newSha: newCommit.sha }
@@ -625,7 +716,12 @@ async function getFileSnapshot(filePath: string, ref: string, token?: string) {
       sha: data.sha,
     } satisfies FileSnapshot
   } catch (error) {
-    console.error("[article-submission] file snapshot failed:", error)
+    reviewError("getFileSnapshot", error, {
+      filePath,
+      ref: summarizeSha(ref),
+      status: "github-api-error",
+      operation: "repos.getContent",
+    })
     return null
   }
 }

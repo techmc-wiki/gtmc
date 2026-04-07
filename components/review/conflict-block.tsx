@@ -1,8 +1,41 @@
 "use client"
 
+import * as React from "react"
 import { useState, useEffect } from "react"
 import { InlineDiff } from "@/app/[locale]/(dashboard)/review/[id]/components/InlineDiff"
 import { TechButton } from "@/components/ui/tech-button"
+import { MergeView } from "@codemirror/merge"
+import { EditorView } from "@codemirror/view"
+import { markdown, markdownLanguage } from "@codemirror/lang-markdown"
+import { languages } from "@codemirror/language-data"
+
+const mergeTheme = EditorView.theme({
+  "&": {
+    fontFamily: "var(--font-mono)",
+    fontSize: "0.875rem",
+    lineHeight: "1.625",
+  },
+  ".cm-mergeView": {
+    border: "none",
+  },
+  ".cm-mergeViewEditors": {
+    minHeight: "100px",
+  },
+  ".cm-scroller": {
+    overflow: "auto",
+  },
+  ".cm-merge-revert": {
+    cursor: "pointer",
+    background: "rgba(0, 0, 0, 0.1)",
+    border: "none",
+    padding: "2px 6px",
+    borderRadius: "0",
+    fontWeight: "bold",
+    "&:hover": {
+      background: "rgba(0, 0, 0, 0.2)",
+    },
+  },
+})
 
 export interface ConflictBlockProps {
   id: string
@@ -31,6 +64,7 @@ export function ConflictBlock({
   const [manualContent, setManualContent] = useState(ours)
   const [overrideAuto, setOverrideAuto] = useState(false)
   const [justResolved, setJustResolved] = useState(false)
+  const mergeViewContainer = React.useRef<HTMLDivElement>(null)
 
   const showAutoResolved = autoApplied && !overrideAuto
 
@@ -49,6 +83,34 @@ export function ConflictBlock({
     onAcceptTheirs()
   }
 
+  React.useEffect(() => {
+    if (!mergeViewContainer.current || isManualEdit || showAutoResolved) return
+
+    const view = new MergeView({
+      a: {
+        doc: ours,
+        extensions: [
+          EditorView.editable.of(false),
+          markdown({ base: markdownLanguage, codeLanguages: languages }),
+          mergeTheme,
+        ],
+      },
+      b: {
+        doc: theirs,
+        extensions: [
+          EditorView.editable.of(false),
+          markdown({ base: markdownLanguage, codeLanguages: languages }),
+          mergeTheme,
+        ],
+      },
+      parent: mergeViewContainer.current,
+      orientation: "a-b",
+      revertControls: "a-to-b",
+    })
+
+    return () => view.destroy()
+  }, [ours, theirs, isManualEdit, showAutoResolved])
+
   const counterLabel =
     index !== undefined && total !== undefined
       ? `CONFLICT_${index}_OF_${total}_`
@@ -56,7 +118,7 @@ export function ConflictBlock({
 
   return (
     <div
-      className={`my-4 flex flex-col border-l-4 border border-red-500/50 transition-colors duration-200 ${
+      className={`my-4 flex flex-col border border-l-4 border-red-500/50 transition-colors duration-200 ${
         justResolved
           ? "border-l-green-500 bg-green-500/5"
           : showAutoResolved
@@ -93,49 +155,38 @@ export function ConflictBlock({
       ) : (
         <>
           {!isManualEdit && (
-            <div className="flex flex-col md:flex-row">
-              <div className="flex flex-1 flex-col border-b border-amber-500/20 bg-amber-500/5 md:border-r md:border-b-0">
-                <div className="border-b border-amber-500/20 px-3 py-1.5">
+            <div className="flex flex-col">
+              <div className="flex">
+                <div className="flex-1 border-b border-amber-500/20 bg-amber-500/5 px-3 py-1.5">
                   <span className="font-mono text-xs font-bold tracking-widest text-amber-700 uppercase">
                     YOUR CHANGES (draft)
                   </span>
                 </div>
-                <div className="flex-1 overflow-auto p-3">
-                  <InlineDiff
-                    currentText={ours}
-                    incomingText={theirs}
-                    mode="current"
-                  />
-                </div>
-                <div className="border-t border-amber-500/20 p-2">
-                  <TechButton
-                    variant="secondary"
-                    size="sm"
-                    className="w-full min-h-11 border-amber-500/50 text-amber-700 hover:bg-amber-500/20 hover:border-amber-500"
-                    onClick={handleAcceptOurs}>
-                    ACCEPT DRAFT
-                  </TechButton>
-                </div>
-              </div>
-
-              <div className="flex flex-1 flex-col bg-blue-500/5">
-                <div className="border-b border-blue-500/20 px-3 py-1.5">
+                <div className="w-px bg-red-500/20" />
+                <div className="flex-1 border-b border-blue-500/20 bg-blue-500/5 px-3 py-1.5">
                   <span className="font-mono text-xs font-bold tracking-widest text-blue-700 uppercase">
                     MAIN CHANGES
                   </span>
                 </div>
-                <div className="flex-1 overflow-auto p-3">
-                  <InlineDiff
-                    currentText={ours}
-                    incomingText={theirs}
-                    mode="incoming"
-                  />
-                </div>
-                <div className="border-t border-blue-500/20 p-2">
+              </div>
+
+              <div className="flex-1" ref={mergeViewContainer} />
+
+              <div className="flex border-t border-red-500/20">
+                <div className="flex-1 border-r border-red-500/20 bg-amber-500/5 p-2">
                   <TechButton
                     variant="secondary"
                     size="sm"
-                    className="w-full min-h-11 border-blue-500/50 text-blue-700 hover:bg-blue-500/20 hover:border-blue-500"
+                    className="min-h-11 w-full border-amber-500/50 text-amber-700 hover:border-amber-500 hover:bg-amber-500/20"
+                    onClick={handleAcceptOurs}>
+                    ACCEPT DRAFT
+                  </TechButton>
+                </div>
+                <div className="flex-1 bg-blue-500/5 p-2">
+                  <TechButton
+                    variant="secondary"
+                    size="sm"
+                    className="min-h-11 w-full border-blue-500/50 text-blue-700 hover:border-blue-500 hover:bg-blue-500/20"
                     onClick={handleAcceptTheirs}>
                     ACCEPT MAIN
                   </TechButton>

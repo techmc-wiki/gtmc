@@ -10,7 +10,10 @@ import { DraftFileList } from "@/components/editor/draft-file-list"
 import { EditorBadge } from "@/components/editor/editor-badge"
 import { EditorFileUploadInput } from "@/components/editor/editor-file-upload-input"
 import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
-import { EditorTabStrip } from "@/components/editor/editor-tab-strip"
+import {
+  EditorTabStrip,
+  type TabType,
+} from "@/components/editor/editor-tab-strip"
 import { EditorTextarea } from "@/components/editor/editor-textarea"
 import {
   createDraftFile,
@@ -65,9 +68,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   const [isAddFileDialogOpen, setIsAddFileDialogOpen] = React.useState(false)
   const [isSaving, setIsSaving] = React.useState(false)
   const [isSubmittingReview, setIsSubmittingReview] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState<"write" | "preview">("write")
+  const [activeTab, setActiveTab] = React.useState<TabType>("write")
 
-  const textareaRef = React.useRef<HTMLTextAreaElement>(null)
+  const textareaRef = React.useRef<any>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
   const { badge, showBadge, clearBadge } = useBadge()
 
@@ -137,52 +140,49 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   }
 
   const insertTextAtCursor = (text: string) => {
-    if (!textareaRef.current) {
-      return
-    }
+    if (!textareaRef.current) return
+    const view = textareaRef.current.view
+    if (!view) return
 
-    const start = textareaRef.current.selectionStart
-    const end = textareaRef.current.selectionEnd
+    const selection = view.state.selection.main
 
-    updateActiveFile({
-      content:
-        activeFileContent.substring(0, start) +
-        text +
-        activeFileContent.substring(end),
+    view.dispatch({
+      changes: {
+        from: selection.from,
+        to: selection.to,
+        insert: text,
+      },
+      selection: {
+        anchor: selection.from + text.length,
+        head: selection.from + text.length,
+      },
     })
 
-    setTimeout(() => {
-      if (textareaRef.current) {
-        const cursor = start + text.length
-        textareaRef.current.focus()
-        textareaRef.current.selectionStart = cursor
-        textareaRef.current.selectionEnd = cursor
-      }
-    }, 0)
+    view.focus()
   }
 
   const insertSyntax = (prefix: string, suffix: string = "") => {
     if (isReadOnly || !textareaRef.current) return
-    const start = textareaRef.current.selectionStart
-    const end = textareaRef.current.selectionEnd
-    const selectedText = activeFileContent.substring(start, end)
+    const view = textareaRef.current.view
+    if (!view) return
+
+    const selection = view.state.selection.main
+    const selectedText = view.state.sliceDoc(selection.from, selection.to)
     const newText = prefix + selectedText + suffix
 
-    updateActiveFile({
-      content:
-        activeFileContent.substring(0, start) +
-        newText +
-        activeFileContent.substring(end),
+    view.dispatch({
+      changes: {
+        from: selection.from,
+        to: selection.to,
+        insert: newText,
+      },
+      selection: {
+        anchor: selection.from + prefix.length,
+        head: selection.from + prefix.length + selectedText.length,
+      },
     })
 
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus()
-        textareaRef.current.selectionStart = start + prefix.length
-        textareaRef.current.selectionEnd =
-          start + prefix.length + selectedText.length
-      }
-    }, 0)
+    view.focus()
   }
 
   const draftUploadAdapter = React.useCallback(
@@ -657,9 +657,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                 <EditorTextarea
                   ref={textareaRef}
                   value={activeFileContent}
-                  onChange={(e) =>
-                    updateActiveFile({ content: e.target.value })
-                  }
+                  onChange={(value) => updateActiveFile({ content: value })}
                   onPaste={handlePaste}
                   onDrop={handleDrop}
                   onDragOver={(e) => {

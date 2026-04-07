@@ -4,7 +4,10 @@ import * as React from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 
-import { EditorTabStrip } from "@/components/editor/editor-tab-strip"
+import {
+  EditorTabStrip,
+  type TabType,
+} from "@/components/editor/editor-tab-strip"
 import { EditorTextarea } from "@/components/editor/editor-textarea"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
 import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
@@ -168,7 +171,7 @@ export function ReviewEditor({
     })
   )
 
-  const [activeTab, setActiveTab] = React.useState<"write" | "preview">("write")
+  const [activeTab, setActiveTab] = React.useState<TabType>("write")
 
   const [fileContents, setFileContents] = React.useState<
     Record<string, string>
@@ -186,7 +189,7 @@ export function ReviewEditor({
     null
   )
 
-  const textareaRef = React.useRef<HTMLTextAreaElement>(null)
+  const textareaRef = React.useRef<any>(null)
 
   React.useEffect(() => {
     setReviewSession((prev) => ({ ...prev, files, modeAnalysis }))
@@ -407,26 +410,26 @@ export function ReviewEditor({
 
   const insertSyntax = (prefix: string, suffix: string = "") => {
     if (!textareaRef.current) return
-    const start = textareaRef.current.selectionStart
-    const end = textareaRef.current.selectionEnd
-    const selected = activeContent.substring(start, end)
+    const view = textareaRef.current.view
+    if (!view) return
+
+    const selection = view.state.selection.main
+    const selected = view.state.sliceDoc(selection.from, selection.to)
     const newText = prefix + selected + suffix
-    const next =
-      activeContent.substring(0, start) + newText + activeContent.substring(end)
 
-    setFileContents((prev) => ({
-      ...prev,
-      [reviewSession.activeFileId]: next,
-    }))
+    view.dispatch({
+      changes: {
+        from: selection.from,
+        to: selection.to,
+        insert: newText,
+      },
+      selection: {
+        anchor: selection.from + prefix.length,
+        head: selection.from + prefix.length + selected.length,
+      },
+    })
 
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus()
-        textareaRef.current.selectionStart = start + prefix.length
-        textareaRef.current.selectionEnd =
-          start + prefix.length + selected.length
-      }
-    }, 0)
+    view.focus()
   }
 
   const handleSelectMode = async (mode: ConflictMode) => {
@@ -670,7 +673,7 @@ export function ReviewEditor({
                     <EditorTextarea
                       ref={textareaRef}
                       value={activeContent}
-                      onChange={handleContentChange}
+                      onChange={updateActiveFileContent}
                       placeholder={t("reviewContentPlaceholder")}
                     />
                   )}

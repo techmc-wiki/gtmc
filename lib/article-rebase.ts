@@ -19,6 +19,28 @@ import type {
 } from "../types/rebase"
 import { prisma } from "@/lib/prisma"
 
+function reviewLog(action: string, details: Record<string, unknown>) {
+  console.log(`[review:${action}]`, details)
+}
+
+function reviewError(
+  action: string,
+  error: unknown,
+  details: Record<string, unknown>
+) {
+  console.error(`[review:${action}]`, {
+    ...details,
+    error:
+      error instanceof Error
+        ? { name: error.name, message: error.message, stack: error.stack }
+        : error,
+  })
+}
+
+function summarizeSha(sha?: string | null) {
+  return sha ? sha.slice(0, 7) : null
+}
+
 export type RebaseRecommendation = "REBASE_RECOMMENDED" | "QUICK_MERGE_OK"
 
 export interface RebaseAnalysis {
@@ -174,12 +196,12 @@ async function getFileSnapshot(
       sha: data.sha,
     }
   } catch (error) {
-    console.error(
-      "[article-rebase] getFileSnapshot failed:",
+    reviewError("getFileSnapshot", error, {
       filePath,
-      ref,
-      error
-    )
+      ref: summarizeSha(ref),
+      status: "github-api-error",
+      operation: "repos.getContent",
+    })
     return null
   }
 }
@@ -224,11 +246,30 @@ async function autoResolveConflictContent(input: {
     input.baseContent
   )
 
+  reviewLog("applyRerere", {
+    filePath: input.filePath,
+    status: "start",
+    blockCount: blocks.length,
+  })
+
   if (blocks.length === 0) {
+    reviewLog("applyRerere", {
+      filePath: input.filePath,
+      status: "complete",
+      matchesFound: 0,
+      remainingCount: 0,
+    })
     return { content: input.content, applied: [], remaining: [] }
   }
 
   const { applied, remaining } = await autoApplyRerere(blocks)
+
+  reviewLog("applyRerere", {
+    filePath: input.filePath,
+    status: "complete",
+    matchesFound: applied.length,
+    remainingCount: remaining.length,
+  })
 
   return {
     content: applyAutoAppliedResolutions(input.content, applied),
@@ -412,6 +453,13 @@ async function applyRebaseCommits(input: {
 
   for (let i = startIndex; i < rebaseState.commitInfos.length; i++) {
     const commit = rebaseState.commitInfos[i]
+    reviewLog("rebaseArticleContent", {
+      draftId,
+      filePath,
+      status: "process-commit",
+      commitIndex: i,
+      commitSha: summarizeSha(commit.sha),
+    })
     const baseSnapshot = await getFileSnapshot(filePath, previousSha, token)
     const latestSnapshot = await getFileSnapshot(filePath, commit.sha, token)
 
@@ -428,9 +476,23 @@ async function applyRebaseCommits(input: {
         currentCommitIndex: i,
         conflictedCommitSha: commit.sha,
       }
+      reviewLog("rebaseArticleContent", {
+        draftId,
+        filePath,
+        status: "db-write-before",
+        branch: "FILE_DELETED_CONFLICT",
+        commitSha: summarizeSha(commit.sha),
+      })
       await prisma.revision.update({
         where: { id: draftId },
         data: { rebaseState: deletedState as unknown as Prisma.InputJsonValue },
+      })
+      reviewLog("rebaseArticleContent", {
+        draftId,
+        filePath,
+        status: "db-write-after",
+        branch: "FILE_DELETED_CONFLICT",
+        commitSha: summarizeSha(commit.sha),
       })
       return {
         status: "FILE_DELETED_CONFLICT",
@@ -460,6 +522,13 @@ async function applyRebaseCommits(input: {
         rerereResult.remaining.length === 0 &&
         rerereResult.applied.length > 0
       ) {
+        reviewLog("rebaseArticleContent", {
+          draftId,
+          filePath,
+          status: "commit-auto-resolved",
+          commitSha: summarizeSha(commit.sha),
+          matchesFound: rerereResult.applied.length,
+        })
         currentContent = rerereResult.content
         appliedCommits.push(commit)
         previousSha = commit.sha
@@ -479,11 +548,33 @@ async function applyRebaseCommits(input: {
         rerereApplied: rerereResult.applied,
       }
 
+      reviewLog("rebaseArticleContent", {
+        draftId,
+        filePath,
+        status: "db-write-before",
+        branch: "CONFLICT",
+        commitSha: summarizeSha(commit.sha),
+      })
       await prisma.revision.update({
         where: { id: draftId },
         data: {
           rebaseState: conflictState as unknown as Prisma.InputJsonValue,
         },
+      })
+      reviewLog("rebaseArticleContent", {
+        draftId,
+        filePath,
+        status: "db-write-after",
+        branch: "CONFLICT",
+        commitSha: summarizeSha(commit.sha),
+      })
+
+      reviewLog("rebaseArticleContent", {
+        draftId,
+        filePath,
+        status: "conflict-detected",
+        commitSha: summarizeSha(commit.sha),
+        rerereAppliedCount: rerereResult.applied.length,
       })
 
       return {
@@ -513,11 +604,33 @@ async function applyRebaseCommits(input: {
     resolvedContent: currentContent,
   }
 
+  reviewLog("rebaseArticleContent", {
+    draftId,
+    filePath,
+    status: "db-write-before",
+    branch: "COMPLETED",
+    commitCount: rebaseState.commitInfos.length,
+  })
   await prisma.revision.update({
     where: { id: draftId },
     data: {
       rebaseState: completedState as unknown as Prisma.InputJsonValue,
     },
+  })
+  reviewLog("rebaseArticleContent", {
+    draftId,
+    filePath,
+    status: "db-write-after",
+    branch: "COMPLETED",
+    commitCount: rebaseState.commitInfos.length,
+  })
+
+  reviewLog("rebaseArticleContent", {
+    draftId,
+    filePath,
+    status: "complete",
+    resultStatus: "SUCCESS",
+    appliedCommitCount: appliedCommits.length,
   })
 
   return {
@@ -735,7 +848,23 @@ export async function rebaseArticleContent(
   const { draftId, filePath, baseMainSha, latestMainSha, draftContent, token } =
     input
 
+  reviewLog("rebaseArticleContent", {
+    draftId,
+    filePath,
+    status: "start",
+    fileCount: 1,
+    baseMainSha: summarizeSha(baseMainSha),
+    latestMainSha: summarizeSha(latestMainSha),
+  })
+
   if (baseMainSha === latestMainSha) {
+    reviewLog("rebaseArticleContent", {
+      draftId,
+      filePath,
+      status: "branch-decision",
+      branch: "NO_CHANGE",
+      reason: "same-main-sha",
+    })
     return { status: "NO_CHANGE", message: "No commits to rebase" }
   }
 
@@ -768,6 +897,14 @@ export async function rebaseArticleContent(
   }
 
   if (relevantCommits.length === 0) {
+    reviewLog("rebaseArticleContent", {
+      draftId,
+      filePath,
+      status: "branch-decision",
+      branch: "NO_CHANGE",
+      reason: "no-relevant-commits",
+      commitCount: compareData.commits.length,
+    })
     return { status: "NO_CHANGE", message: "No commits modified this file" }
   }
 
@@ -779,11 +916,25 @@ export async function rebaseArticleContent(
     commitInfos: relevantCommits,
   }
 
+  reviewLog("rebaseArticleContent", {
+    draftId,
+    filePath,
+    status: "db-write-before",
+    branch: "IN_PROGRESS",
+    commitCount: relevantCommits.length,
+  })
   await prisma.revision.update({
     where: { id: draftId },
     data: {
       rebaseState: initialState as unknown as Prisma.InputJsonValue,
     },
+  })
+  reviewLog("rebaseArticleContent", {
+    draftId,
+    filePath,
+    status: "db-write-after",
+    branch: "IN_PROGRESS",
+    commitCount: relevantCommits.length,
   })
 
   return applyRebaseCommits({
@@ -803,7 +954,21 @@ export async function rebaseArticleContentMultiFile(
 ): Promise<RebaseOutcome> {
   const { draftId, files, baseMainSha, latestMainSha, token } = input
 
+  reviewLog("rebaseArticleContentMultiFile", {
+    draftId,
+    status: "start",
+    fileCount: files.length,
+    baseMainSha: summarizeSha(baseMainSha),
+    latestMainSha: summarizeSha(latestMainSha),
+  })
+
   if (baseMainSha === latestMainSha) {
+    reviewLog("rebaseArticleContentMultiFile", {
+      draftId,
+      status: "branch-decision",
+      branch: "NO_CHANGE",
+      reason: "same-main-sha",
+    })
     return { status: "NO_CHANGE", message: "No commits to rebase" }
   }
 
@@ -816,6 +981,13 @@ export async function rebaseArticleContentMultiFile(
   })
 
   if (commitFileInfos.length === 0) {
+    reviewLog("rebaseArticleContentMultiFile", {
+      draftId,
+      status: "branch-decision",
+      branch: "NO_CHANGE",
+      reason: "no-relevant-commits",
+      fileCount: normalizedFiles.length,
+    })
     return { status: "NO_CHANGE", message: "No commits modified these files" }
   }
 
@@ -837,11 +1009,25 @@ export async function rebaseArticleContentMultiFile(
     fileStates: buildFileStates(normalizedFiles),
   }
 
+  reviewLog("rebaseArticleContentMultiFile", {
+    draftId,
+    status: "db-write-before",
+    branch: "IN_PROGRESS",
+    commitCount: commitFileInfos.length,
+    fileCount: normalizedFiles.length,
+  })
   await prisma.revision.update({
     where: { id: draftId },
     data: {
       rebaseState: initialState as unknown as Prisma.InputJsonValue,
     },
+  })
+  reviewLog("rebaseArticleContentMultiFile", {
+    draftId,
+    status: "db-write-after",
+    branch: "IN_PROGRESS",
+    commitCount: commitFileInfos.length,
+    fileCount: normalizedFiles.length,
   })
 
   return applyRebaseCommitsMultiFile({
@@ -857,6 +1043,7 @@ export async function rebaseArticleContentMultiFile(
 export async function abortRebase(
   input: AbortRebaseInput
 ): Promise<AbortRebaseOutcome> {
+  reviewLog("abortRebase", { draftId: input.draftId, status: "start" })
   const revision = await prisma.revision.findUnique({
     where: { id: input.draftId },
   })
@@ -867,11 +1054,22 @@ export async function abortRebase(
     !rebaseState ||
     (rebaseState.status !== "IN_PROGRESS" && rebaseState.status !== "CONFLICT")
   ) {
+    reviewLog("abortRebase", {
+      draftId: input.draftId,
+      status: "branch-decision",
+      branch: "NO_ACTIVE_REBASE",
+    })
     return { status: "ERROR", message: "No active rebase to abort" }
   }
 
   const originalContent = rebaseState.originalContent
 
+  reviewLog("abortRebase", {
+    draftId: input.draftId,
+    status: "db-write-before",
+    fields: ["content", "conflictContent", "status", "rebaseState"],
+    nextStatus: "IN_REVIEW",
+  })
   await prisma.revision.update({
     where: { id: input.draftId },
     data: {
@@ -883,6 +1081,19 @@ export async function abortRebase(
         status: "ABORTED",
       } as unknown as Prisma.InputJsonValue,
     } as Prisma.RevisionUpdateInput,
+  })
+
+  reviewLog("abortRebase", {
+    draftId: input.draftId,
+    status: "db-write-after",
+    fields: ["content", "conflictContent", "status", "rebaseState"],
+    nextStatus: "IN_REVIEW",
+    restoredContentLength: originalContent.length,
+  })
+
+  reviewLog("abortRebase", {
+    draftId: input.draftId,
+    status: "complete",
   })
 
   return { status: "ABORTED", originalContent }

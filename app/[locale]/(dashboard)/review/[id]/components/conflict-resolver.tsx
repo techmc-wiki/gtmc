@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import type { RebaseState } from "@/types/rebase"
 
 import { resolveConflictAction, abortRebaseAction } from "@/actions/review"
-import { ReauthRequiredError } from "@/lib/admin-reauth"
+import { getReauthLoginUrl, isReauthRequiredError } from "@/lib/admin-reauth"
 import { TechButton } from "@/components/ui/tech-button"
 import {
   getActiveDraftFile,
@@ -127,8 +127,10 @@ export default function ConflictResolver({
       await abortRebaseAction(revisionId)
       window.location.reload()
     } catch (error) {
-      if (error instanceof ReauthRequiredError) {
-        window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
+      if (isReauthRequiredError(error)) {
+        window.location.href = getReauthLoginUrl(
+          `${window.location.pathname}${window.location.search}`
+        )
         return
       }
       alert(
@@ -144,8 +146,10 @@ export default function ConflictResolver({
       await resolveConflictAction(prNumber, formData)
       window.location.reload()
     } catch (error) {
-      if (error instanceof ReauthRequiredError) {
-        window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
+      if (isReauthRequiredError(error)) {
+        window.location.href = getReauthLoginUrl(
+          `${window.location.pathname}${window.location.search}`
+        )
         return
       }
       alert(

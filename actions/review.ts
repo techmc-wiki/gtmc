@@ -20,7 +20,6 @@ import {
   resumeRebase,
 } from "@/lib/article-rebase"
 import { requireAuth } from "@/lib/auth-helpers"
-import { requireRecentAuth } from "@/lib/admin-reauth"
 import { getGithubPatForUser, requireAdmin } from "@/lib/auth-context"
 import {
   decodeStoredDraftFiles,
@@ -226,7 +225,6 @@ function getReviewRevalidatePaths(
 async function requireReviewAdminContext() {
   const session = await requireAuth()
   await requireAdmin(session.user.id)
-  requireRecentAuth(session)
 
   return {
     session,
@@ -306,7 +304,6 @@ async function persistRebasedBranchFiles(input: {
 export async function mergePRAction(prNumber: number) {
   const session = await requireAuth()
   await requireAdmin(session.user.id)
-  requireRecentAuth(session)
 
   const token = await getGithubPatForUser(session.user.id)
   const octokit = getOctokit(token)
@@ -340,7 +337,6 @@ export async function mergePRAction(prNumber: number) {
 export async function closePRAction(prNumber: number) {
   const session = await requireAuth()
   await requireAdmin(session.user.id)
-  requireRecentAuth(session)
 
   const token = await getGithubPatForUser(session.user.id)
   const octokit = getOctokit(token)

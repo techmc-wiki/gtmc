@@ -13,7 +13,10 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     setIsLoading(true)
-    await signIn("github", { callbackUrl: "/draft" })
+    const callbackUrl =
+      new URLSearchParams(window.location.search).get("callbackUrl") ||
+      "/draft"
+    await signIn("github", { callbackUrl })
   }
 
   return (

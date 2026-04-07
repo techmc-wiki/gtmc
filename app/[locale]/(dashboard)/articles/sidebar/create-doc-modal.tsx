@@ -4,7 +4,7 @@ import { useState } from "react"
 import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { createDocument } from "@/actions/sidebar"
-import { ReauthRequiredError } from "@/lib/admin-reauth"
+import { getReauthLoginUrl, isReauthRequiredError } from "@/lib/admin-reauth"
 import type { TreeNode } from "./tree-node"
 
 export function CreateDocModal({
@@ -41,8 +41,10 @@ export function CreateDocModal({
       onClose()
       onCreated()
     } catch (error) {
-      if (error instanceof ReauthRequiredError) {
-        window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
+      if (isReauthRequiredError(error)) {
+        window.location.href = getReauthLoginUrl(
+          `${window.location.pathname}${window.location.search}`
+        )
         return
       }
       const message = error instanceof Error ? error.message : "Unknown error"

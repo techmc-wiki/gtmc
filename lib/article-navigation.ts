@@ -1,5 +1,5 @@
-import { getSlugMapEntry } from "@/lib/slug-resolver"
 import type { TreeNode } from "@/types/sidebar-tree"
+import { getLocalizedSlugMapEntry } from "./article-loader"
 
 interface FlatArticle {
   slug: string
@@ -11,6 +11,7 @@ interface ArticleInfo {
   slug: string
   title: string
   isCrossFolder: boolean
+  chapterTitle?: string
 }
 
 interface NavigationResult {
@@ -23,10 +24,10 @@ export function flattenArticleTree(tree: TreeNode[]): FlatArticle[] {
 
   function dfs(nodes: TreeNode[]): void {
     for (const node of nodes) {
-      const hasIntroFolder =
-        node.isFolder && Boolean(getSlugMapEntry(node.slug)?.hasIntro)
-      if (!node.isFolder || hasIntroFolder) {
-        const parentPath = node.slug.split("/").slice(0, -1).join("/")
+      if (!node.isFolder) {
+        const parentPath = node.isReadmeIntro
+          ? node.slug
+          : node.slug.split("/").slice(0, -1).join("/")
         result.push({
           slug: node.slug,
           title: node.title,
@@ -89,12 +90,23 @@ export function getFirstArticleInChapter(
 
 export function getArticleNavigation(
   currentSlug: string,
-  articles: FlatArticle[]
+  articles: FlatArticle[],
+  locale: "en" | "zh" = "zh"
 ): NavigationResult {
   const currentIndex = articles.findIndex((a) => a.slug === currentSlug)
 
   if (currentIndex === -1) {
     return { prev: null, next: null }
+  }
+
+  const getChapterTitle = (slug: string): string | undefined => {
+    const entry = getLocalizedSlugMapEntry(slug, locale)
+    const chapterTitle = entry?.chapterTitle
+    if (chapterTitle) {
+      return chapterTitle
+    }
+    const parts = slug.split("/")
+    return parts.length > 1 ? parts[parts.length - 2] : undefined
   }
 
   const prev =
@@ -105,6 +117,7 @@ export function getArticleNavigation(
           isCrossFolder:
             articles[currentIndex - 1].parentPath !==
             articles[currentIndex].parentPath,
+          chapterTitle: getChapterTitle(articles[currentIndex - 1].slug),
         }
       : null
 
@@ -116,6 +129,7 @@ export function getArticleNavigation(
           isCrossFolder:
             articles[currentIndex + 1].parentPath !==
             articles[currentIndex].parentPath,
+          chapterTitle: getChapterTitle(articles[currentIndex + 1].slug),
         }
       : null
 

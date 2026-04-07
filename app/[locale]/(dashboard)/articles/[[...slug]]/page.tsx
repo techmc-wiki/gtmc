@@ -321,7 +321,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const tree = await getSidebarTree(locale)
   const flattenedArticles = flattenArticleTree(tree)
   const currentSlug = target.canonicalSlug || slugPath
-  const navigation = getArticleNavigation(currentSlug, flattenedArticles)
+  const navigation = getArticleNavigation(currentSlug, flattenedArticles, locale)
 
   return (
     <div

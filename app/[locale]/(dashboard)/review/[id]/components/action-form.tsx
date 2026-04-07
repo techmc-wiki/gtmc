@@ -1,6 +1,6 @@
 "use client"
 
-import { ReauthRequiredError } from "@/lib/admin-reauth"
+import { getReauthLoginUrl, isReauthRequiredError } from "@/lib/admin-reauth"
 import { ReactNode, useState } from "react"
 
 export function ActionForm({
@@ -21,8 +21,10 @@ export function ActionForm({
     try {
       await action()
     } catch (error) {
-      if (error instanceof ReauthRequiredError) {
-        window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`
+      if (isReauthRequiredError(error)) {
+        window.location.href = getReauthLoginUrl(
+          `${window.location.pathname}${window.location.search}`
+        )
         return
       }
       throw error

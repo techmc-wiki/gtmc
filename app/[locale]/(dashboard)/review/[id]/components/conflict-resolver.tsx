@@ -390,7 +390,12 @@ export default function ConflictResolver({
             ))}
           </div>
 
-          <form action={handleResolve} className="space-y-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              void handleResolve(new FormData(e.currentTarget))
+            }}
+            className="space-y-4">
             <input
               type="hidden"
               name="draftFiles"

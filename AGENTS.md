@@ -33,7 +33,7 @@ Use Conventional Commits style for commit titles:
 
 - `<scope>` is optional (when scope is too broad or unclear)
 - `<subject>` should be imperative and start with a capital letter
-- Keep titles within 72 characters when possible
+- Strictly keep the message within 72 characters
 
 ### 2) Allowed `type` values
 
@@ -53,9 +53,8 @@ Prefer including a scope (e.g., `sidebar`, `build`, `deps`, `api/*`) for traceab
 
 ### 4) Splitting principles
 
-1. Split large changes into multiple medium-sized commits.
-2. Each commit should be single-purpose and easily reversible.
-3. **Do not** mix articles submodule updates into feature/fix commits (see `CONTRIBUTING.md`).
+1. Each commit should be single-purpose, easily reversible, and purely atomic.
+2. **Do not** mix articles submodule updates into feature/fix commits (see `CONTRIBUTING.md`).
 
 ## Git Rules
 

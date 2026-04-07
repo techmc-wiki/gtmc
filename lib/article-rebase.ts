@@ -876,11 +876,13 @@ export async function abortRebase(
     where: { id: input.draftId },
     data: {
       content: originalContent,
+      conflictContent: null,
+      status: "IN_REVIEW",
       rebaseState: {
         ...rebaseState,
         status: "ABORTED",
       } as unknown as Prisma.InputJsonValue,
-    },
+    } as Prisma.RevisionUpdateInput,
   })
 
   return { status: "ABORTED", originalContent }

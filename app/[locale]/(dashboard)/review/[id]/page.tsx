@@ -119,6 +119,14 @@ export default async function ReviewDetailPage({
 
   const linkedDraft = await prisma.revision.findFirst({
     where: { githubPrNum: prNumber },
+    include: {
+      author: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
   })
   const linkedDraftConflictMode =
     (
@@ -126,10 +134,7 @@ export default async function ReviewDetailPage({
         | (typeof linkedDraft & { conflictMode?: string | null })
         | null
     )?.conflictMode ?? null
-  const effectiveConflictMode =
-    linkedDraft?.status === "SYNC_CONFLICT" && !linkedDraftConflictMode
-      ? "SIMPLE"
-      : linkedDraftConflictMode
+  const effectiveConflictMode = linkedDraftConflictMode ?? null
 
   const linkedDraftFiles = linkedDraft
     ? decodeStoredDraftFiles({
@@ -254,7 +259,7 @@ export default async function ReviewDetailPage({
             ">
             <span className="text-tech-main">AUTHOR:</span>
             <span className="uppercase">
-              {pr.user?.login || "UNKNOWN_USER"}
+              {linkedDraft?.author?.name || pr.user?.login || "UNKNOWN_USER"}
             </span>
             <span className="px-2 text-tech-main/50">{"//"}</span>
             <span className="text-tech-main">TARGET_FILE:</span>

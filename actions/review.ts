@@ -379,6 +379,14 @@ export async function resolveConflictAction(
 
   const linkedDraft = await prisma.revision.findFirst({
     where: { githubPrNum: prNumber },
+    include: {
+      author: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
   })
 
   if (!linkedDraft) {
@@ -388,6 +396,9 @@ export async function resolveConflictAction(
   if (!linkedDraft.filePath || !linkedDraft.prBranchName) {
     throw new Error("The linked draft is missing PR metadata")
   }
+
+  const submitterName = linkedDraft.author?.name || authorName
+  const submitterEmail = linkedDraft.author?.email || authorEmail
 
   const storedDraftFiles = decodeStoredDraftFiles({
     content: linkedDraft.content,
@@ -461,6 +472,21 @@ export async function resolveConflictAction(
       },
     })
 
+    const latestMainSha = await getMainBranchHeadSha(token)
+
+    await forcePushResolvedToPRBranch({
+      resolvedFiles: nextDraftFiles.files.map((file) => ({
+        filePath: file.filePath,
+        content: file.content,
+      })),
+      prBranchName: linkedDraft.prBranchName,
+      latestMainSha,
+      commitMessage: "chore(review): apply conflict resolution",
+      authorName: submitterName,
+      authorEmail: submitterEmail,
+      token,
+    })
+
     revalidatePaths(getReviewRevalidatePaths(linkedDraft.id, prNumber))
 
     return { success: true, status: nextStatus }
@@ -500,8 +526,8 @@ export async function resolveConflictAction(
         { filePath: storedFile.filePath, content: result.finalContent }
       )
       await persistRebasedBranchFiles({
-        authorEmail,
-        authorName,
+        authorEmail: submitterEmail,
+        authorName: submitterName,
         branchName: linkedDraft.prBranchName,
         files: rebasedDraftFiles.files.map((file) => ({
           filePath: file.filePath,
@@ -834,6 +860,14 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
 
   const revision = await prisma.revision.findUnique({
     where: { id: revisionId },
+    include: {
+      author: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
   })
 
   if (!revision) {
@@ -844,19 +878,15 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
     throw new Error("The revision is missing PR metadata")
   }
 
+  const submitterName = revision.author?.name || authorName
+  const submitterEmail = revision.author?.email || authorEmail
+
   const storedDraftFiles = decodeStoredDraftFiles({
     content: revision.content,
     conflictContent: revision.conflictContent,
     filePath: revision.filePath,
   })
   const draftFile = getActiveDraftFile(storedDraftFiles)
-
-  await prisma.revision.update({
-    where: { id: revisionId },
-    data: {
-      conflictMode: mode,
-    } as Prisma.RevisionUpdateInput,
-  })
 
   if (mode === "FINE_GRAINED") {
     if (!revision.baseMainSha || !revision.syncedMainSha) {
@@ -891,8 +921,8 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
         { filePath: draftFile.filePath, content: result.finalContent }
       )
       await persistRebasedBranchFiles({
-        authorEmail,
-        authorName,
+        authorEmail: submitterEmail,
+        authorName: submitterName,
         branchName: revision.prBranchName,
         files: rebasedDraftFiles.files.map((file) => ({
           filePath: file.filePath,
@@ -907,6 +937,7 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
         where: { id: revisionId },
         data: {
           status: "IN_REVIEW",
+          conflictMode: mode,
           conflictContent: rebasedDraftStorage.conflictContent,
           content: rebasedDraftStorage.content,
           filePath: rebasedDraftStorage.filePath,
@@ -939,6 +970,15 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
           content: deletedConflictDraftStorage.content,
           filePath: deletedConflictDraftStorage.filePath,
           conflictContent: deletedConflictDraftStorage.conflictContent,
+        },
+      })
+    } else if (result.status === "NO_CHANGE") {
+      await prisma.revision.update({
+        where: { id: revisionId },
+        data: {
+          status: "IN_REVIEW",
+          conflictMode: mode,
+          conflictContent: null,
         },
       })
     }
@@ -976,6 +1016,20 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
     latestMainSha,
     token,
   })
+
+  await forcePushResolvedToPRBranch({
+    resolvedFiles: storedDraftFiles.files.map((file) => ({
+      filePath: file.filePath,
+      content: file.content,
+    })),
+    prBranchName: revision.prBranchName,
+    latestMainSha,
+    commitMessage: "chore(review): sync draft to PR branch for review",
+    authorName: submitterName,
+    authorEmail: submitterEmail,
+    token,
+  })
+
   const mergedDraftFiles = normalizeDraftFileCollection({
     activeFileId: storedDraftFiles.activeFileId,
     files: storedDraftFiles.files.map((file) => {
@@ -1007,6 +1061,7 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
       filePath: mergedDraftStorage.filePath,
       status: result.hasConflicts ? "SYNC_CONFLICT" : "IN_REVIEW",
       syncedMainSha: latestMainSha,
+      conflictMode: mode,
     },
   })
 
@@ -1023,18 +1078,30 @@ export async function finalizeReviewAction(
   prNumber: number,
   options?: { commitTitle?: string; commitBody?: string }
 ) {
-  const { token } = await requireReviewAdminContext()
+  const { token, authorName, authorEmail } = await requireReviewAdminContext()
 
   const revision = await prisma.revision.findFirst({
     where: { githubPrNum: prNumber },
+    include: {
+      author: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
   })
 
   if (!revision) {
     throw new Error("Linked draft not found")
   }
 
+  const submitterName = revision.author?.name || authorName
+  const submitterEmail = revision.author?.email || authorEmail
+
   const conflictMode = (revision as { conflictMode?: ConflictMode | null })
     .conflictMode
+  const rebaseState = revision.rebaseState as RebaseState | null
   const storedDraftFiles = decodeStoredDraftFiles({
     content: revision.content,
     conflictContent: revision.conflictContent,
@@ -1047,24 +1114,12 @@ export async function finalizeReviewAction(
     }
 
     if (
-      storedDraftFiles.files.some(
-        (file) =>
-          file.conflictContent !== undefined && file.conflictContent !== null
+      storedDraftFiles.files.some((file) =>
+        hasSimpleConflictMarkers(file.content)
       )
     ) {
       throw new Error("Resolve all simple conflicts before finalizing review")
     }
-
-    await forcePushResolvedToPRBranch({
-      resolvedFiles: storedDraftFiles.files.map((file) => ({
-        filePath: file.filePath,
-        content: file.content,
-      })),
-      prBranchName: revision.prBranchName,
-      latestMainSha: revision.syncedMainSha,
-      commitMessage: options?.commitTitle,
-      token,
-    })
 
     await mergePR(
       prNumber,
@@ -1076,10 +1131,37 @@ export async function finalizeReviewAction(
       token
     )
   } else {
+    if (!revision.prBranchName) {
+      throw new Error("The linked draft is missing PR metadata")
+    }
+
+    const latestMainSha = await getMainBranchHeadSha(token)
+    const resolvedFiles =
+      rebaseState?.fileStates && Object.keys(rebaseState.fileStates).length > 0
+        ? Object.values(rebaseState.fileStates).map((fileState) => ({
+            filePath: fileState.filePath,
+            content: fileState.currentContent,
+          }))
+        : storedDraftFiles.files.map((file) => ({
+            filePath: file.filePath,
+            content: file.content,
+          }))
+
+    await forcePushResolvedToPRBranch({
+      resolvedFiles,
+      prBranchName: revision.prBranchName,
+      latestMainSha,
+      authorName: submitterName,
+      authorEmail: submitterEmail,
+      token,
+    })
+
     await mergePR(
       prNumber,
       {
-        mergeMethod: "rebase",
+        mergeMethod: "squash",
+        commitTitle: options?.commitTitle,
+        commitBody: options?.commitBody,
       },
       token
     )
@@ -1127,6 +1209,7 @@ export async function abortResolutionAction(revisionId: string) {
     where: { id: revisionId },
     data: {
       ...(conflictMode === "SIMPLE" ? { conflictContent: null } : {}),
+      status: "IN_REVIEW",
       conflictMode: null,
     } as Prisma.RevisionUpdateInput,
   })

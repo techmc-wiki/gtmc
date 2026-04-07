@@ -1,9 +1,10 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
+import { ClosedPRList } from "./closed-pr-list"
 import { TechCard } from "@/components/ui/tech-card"
 import { TechButton } from "@/components/ui/tech-button"
 import { Link } from "@/i18n/navigation"
-import { getOpenPRs, getPR } from "@/lib/github/pr-manager"
+import { getClosedPRs, getOpenPRs, getPR } from "@/lib/github/pr-manager"
 import {
   getOctokit,
   ARTICLES_REPO_OWNER,
@@ -29,6 +30,41 @@ type PR = Awaited<ReturnType<typeof getOpenPRs>>[number]
 
 type PRWithConflictMode = PR & {
   conflictMode?: string | null
+}
+
+export type ClosedPRListItem = {
+  id: number
+  number: number
+  title: string | null
+  createdAt: string
+  userLogin: string | null
+  headRef: string
+  isMerged: boolean
+}
+
+export async function getClosedPRsAction(
+  page: number
+): Promise<ClosedPRListItem[]> {
+  "use server"
+
+  const token = process.env.GITHUB_ARTICLES_WRITE_PAT
+
+  try {
+    const closedPRs = await getClosedPRs(token, page, 10)
+
+    return closedPRs.map((pr) => ({
+      id: pr.id,
+      number: pr.number,
+      title: pr.title,
+      createdAt: pr.created_at,
+      userLogin: pr.user?.login ?? null,
+      headRef: pr.head.ref,
+      isMerged: Boolean(pr.merged_at),
+    }))
+  } catch (error) {
+    console.error("Failed to fetch closed PRs:", error)
+    throw new Error("Unable to load closed and merged pull requests.")
+  }
 }
 
 async function analyzePRConflictStatus(prNumber: number, token?: string) {
@@ -303,6 +339,8 @@ export default async function ReviewHubPage() {
             )}
           </div>
         )}
+
+        <ClosedPRList getClosedPRsAction={getClosedPRsAction} />
       </div>
     </div>
   )

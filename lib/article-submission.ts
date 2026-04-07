@@ -103,6 +103,8 @@ export interface ForcePushInput {
   prBranchName: string
   latestMainSha: string
   commitMessage?: string
+  authorName?: string
+  authorEmail?: string
   token?: string
 }
 
@@ -177,6 +179,8 @@ export async function forcePushResolvedToPRBranch({
   prBranchName,
   latestMainSha,
   commitMessage,
+  authorName,
+  authorEmail,
   token,
 }: ForcePushInput): Promise<{ newSha: string }> {
   const octokit = getOctokit(token)
@@ -217,6 +221,9 @@ export async function forcePushResolvedToPRBranch({
     message: commitMessage || "docs: apply resolved review files",
     tree: createdTree.sha,
     parents: [latestMainSha],
+    ...(authorName && authorEmail
+      ? { author: { name: authorName, email: authorEmail } }
+      : {}),
   })
 
   await octokit.git.updateRef({

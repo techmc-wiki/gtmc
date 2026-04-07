@@ -47,34 +47,27 @@ export function ModeSelector({
     modeAnalysis.recommendation
   )
 
-  if (!hasConflicts) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-4 py-12">
-        <div className="relative border border-tech-main/30 bg-tech-main/5 px-8 py-6 text-center">
-          <CornerBrackets color="border-tech-main/30" />
-          <div className="mb-2 flex items-center justify-center gap-2">
+  return (
+    <div className="flex flex-col gap-6">
+      {!hasConflicts && (
+        <div className="relative border border-green-500/30 bg-green-500/5 px-4 py-3">
+          <CornerBrackets color="border-green-500/30" />
+          <div className="flex items-center gap-2">
             <span
-              className="inline-block size-2 rounded-full bg-green-500"
+              className="inline-block size-2 bg-green-500"
               role="img"
               title="No conflicts"
             />
-            <span className="font-mono text-xs tracking-widest text-tech-main uppercase">
-              STATUS
+            <span className="font-mono text-xs tracking-widest text-green-700 uppercase">
+              NO_CONFLICTS_DETECTED_
             </span>
           </div>
-          <p className="font-mono text-sm tracking-widest text-tech-main uppercase">
-            NO_CONFLICTS_DETECTED_
-          </p>
-          <p className="mt-2 font-mono text-xs text-tech-main/60">
-            All files are clean. No resolution required.
+          <p className="mt-1 font-mono text-xs text-green-700/70">
+            All files are clean. Select a mode to proceed.
           </p>
         </div>
-      </div>
-    )
-  }
+      )}
 
-  return (
-    <div className="flex flex-col gap-6">
       <div>
         <p className="font-mono text-xs tracking-widest text-tech-main/60 uppercase">
           CONFLICT_RESOLUTION
@@ -85,16 +78,16 @@ export function ModeSelector({
       </div>
 
       <div className="border border-tech-main/30 bg-tech-main/5 px-4 py-3">
-        <p className="mb-1 mono-label tracking-widest uppercase">ANALYSIS</p>
+        <p className="mb-2 mono-label tracking-widest uppercase">ANALYSIS</p>
         <p className="font-mono text-xs/relaxed text-tech-main/80">
           {modeAnalysis.adminMessage}
         </p>
-        <div className="mt-2 flex gap-4">
-          <span className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
-            COMMITS_{modeAnalysis.commitCount}
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="border border-tech-main/30 bg-tech-main/10 px-2 py-0.5 font-mono text-[0.6875rem] tracking-widest text-tech-main uppercase">
+            COMMITS_{modeAnalysis.commitCount}_
           </span>
-          <span className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
-            FILES_{modeAnalysis.filesAffected}
+          <span className="border border-tech-main/30 bg-tech-main/10 px-2 py-0.5 font-mono text-[0.6875rem] tracking-widest text-tech-main uppercase">
+            FILES_{modeAnalysis.filesAffected}_
           </span>
         </div>
       </div>
@@ -124,7 +117,7 @@ export function ModeSelector({
               />
 
               {isRecommended && (
-                <span className="mb-2 inline-block bg-tech-main px-2 py-0.5 font-mono text-[0.6875rem] tracking-widest text-white uppercase">
+                <span className="mb-3 inline-block border border-tech-main bg-tech-main px-3 py-1 font-mono text-[0.6875rem] font-bold tracking-widest text-white uppercase">
                   RECOMMENDED
                 </span>
               )}
@@ -160,8 +153,11 @@ export function ModeSelector({
           variant="primary"
           size="md"
           disabled={isSelecting}
+          className="w-full"
           onClick={() => onSelectMode(selectedMode)}>
-          {isSelecting ? "INITIALIZING..." : t("resolveButton")}
+          {isSelecting
+            ? "INITIALIZING..."
+            : `${t("resolveButton")} [${selectedMode}]`}
         </TechButton>
       </div>
     </div>

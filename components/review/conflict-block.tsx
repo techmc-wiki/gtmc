@@ -1,11 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { InlineDiff } from "@/app/[locale]/(dashboard)/review/[id]/components/InlineDiff"
 import { TechButton } from "@/components/ui/tech-button"
 
 export interface ConflictBlockProps {
   id: string
+  index?: number
+  total?: number
   ours: string
   theirs: string
   onAcceptOurs: () => void
@@ -16,6 +18,8 @@ export interface ConflictBlockProps {
 
 export function ConflictBlock({
   id,
+  index,
+  total,
   ours,
   theirs,
   onAcceptOurs,
@@ -26,15 +30,42 @@ export function ConflictBlock({
   const [isManualEdit, setIsManualEdit] = useState(false)
   const [manualContent, setManualContent] = useState(ours)
   const [overrideAuto, setOverrideAuto] = useState(false)
+  const [justResolved, setJustResolved] = useState(false)
 
   const showAutoResolved = autoApplied && !overrideAuto
 
+  const flashResolved = () => {
+    setJustResolved(true)
+    setTimeout(() => setJustResolved(false), 200)
+  }
+
+  const handleAcceptOurs = () => {
+    flashResolved()
+    onAcceptOurs()
+  }
+
+  const handleAcceptTheirs = () => {
+    flashResolved()
+    onAcceptTheirs()
+  }
+
+  const counterLabel =
+    index !== undefined && total !== undefined
+      ? `CONFLICT_${index}_OF_${total}_`
+      : "CONFLICT_BLOCK_"
+
   return (
     <div
-      className="my-4 flex flex-col border border-red-500/50"
+      className={`my-4 flex flex-col border-l-4 border border-red-500/50 transition-colors duration-200 ${
+        justResolved
+          ? "border-l-green-500 bg-green-500/5"
+          : showAutoResolved
+            ? "border-l-green-500"
+            : "border-l-red-500"
+      }`}
       data-conflict-id={id}>
       <div className="border-b border-red-500/30 bg-red-500/10 p-2 text-center text-xs font-bold tracking-widest text-red-700 uppercase">
-        CONFLICT BLOCK
+        {counterLabel}
       </div>
 
       {autoApplied && (
@@ -80,8 +111,8 @@ export function ConflictBlock({
                   <TechButton
                     variant="secondary"
                     size="sm"
-                    className="w-full border-amber-500/50 text-amber-700 hover:bg-amber-500/10"
-                    onClick={onAcceptOurs}>
+                    className="w-full min-h-11 border-amber-500/50 text-amber-700 hover:bg-amber-500/20 hover:border-amber-500"
+                    onClick={handleAcceptOurs}>
                     ACCEPT DRAFT
                   </TechButton>
                 </div>
@@ -104,8 +135,8 @@ export function ConflictBlock({
                   <TechButton
                     variant="secondary"
                     size="sm"
-                    className="w-full border-blue-500/50 text-blue-700 hover:bg-blue-500/10"
-                    onClick={onAcceptTheirs}>
+                    className="w-full min-h-11 border-blue-500/50 text-blue-700 hover:bg-blue-500/20 hover:border-blue-500"
+                    onClick={handleAcceptTheirs}>
                     ACCEPT MAIN
                   </TechButton>
                 </div>

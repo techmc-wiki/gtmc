@@ -66,7 +66,7 @@ export async function createPR({
     title,
     head: branchName,
     base: "main",
-    body: `由 ${authorName} 提交审核。`,
+    body: `由 ${authorName} 提交审核。\n\nCo-authored-by: ${authorName} <${authorEmail}>`,
   })
 
   return pr.number
@@ -120,6 +120,24 @@ export async function getOpenPRs(token?: string) {
     owner: ARTICLES_REPO_OWNER,
     repo: ARTICLES_REPO_NAME,
     state: "open",
+  })
+  return data
+}
+
+export async function getClosedPRs(
+  token: string | undefined,
+  page: number,
+  perPage = 10
+) {
+  const octokit = getOctokit(token)
+  const { data } = await octokit.pulls.list({
+    owner: ARTICLES_REPO_OWNER,
+    repo: ARTICLES_REPO_NAME,
+    state: "closed",
+    per_page: perPage,
+    page,
+    sort: "updated",
+    direction: "desc",
   })
   return data
 }

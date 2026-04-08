@@ -140,12 +140,12 @@ export default async function ReviewHubPage() {
     return (
       <div className="mx-auto mt-20 max-w-6xl p-8 text-center">
         <h1 className="text-6xl font-black text-red-500 uppercase">
-          ACCESS DENIED
+          {t("accessDenied")}
         </h1>
-        <p className="mt-4 text-xl font-bold">ADMIN CLEARANCE REQUIRED.</p>
+        <p className="mt-4 text-xl font-bold">{t("adminRequired")}</p>
         <Link href="/">
           <TechButton variant="primary" className="mt-8">
-            RETURN TO BASE
+            {t("returnToBase")}
           </TechButton>
         </Link>
       </div>
@@ -226,7 +226,7 @@ export default async function ReviewHubPage() {
                 animate-pulse bg-red-500 px-2 py-0.5 text-xs font-bold
                 text-white
               ">
-              UNRESOLVED CONFLICTS
+              {t("unresolvedConflicts")}
             </span>
           )}
           {pr.conflictMode && (
@@ -240,7 +240,7 @@ export default async function ReviewHubPage() {
                 }
               `}>
               {pr.conflictMode === "FINE_GRAINED"
-                ? "FINE-GRAINED"
+                ? t("modeFineGrained")
                 : pr.conflictMode}
             </span>
           )}
@@ -252,12 +252,12 @@ export default async function ReviewHubPage() {
             md:text-xl
             ${isConflict ? `text-red-700` : `text-tech-main-dark`}
           `}>
-          {pr.title || "UNTITLED"}
+          {pr.title || t("untitled")}
         </h3>
         <p className="mb-3 pl-3 font-mono text-xs text-tech-main/80">
-          Submitted by:{" "}
+          {t("submittedBy")}{" "}
           <span className="font-bold text-tech-main-dark">
-            {pr.user?.login || "UNKNOWN"}
+            {pr.user?.login || t("unknown")}
           </span>
         </p>
         <p
@@ -265,7 +265,7 @@ export default async function ReviewHubPage() {
             ml-3 inline-flex items-center border guide-line bg-tech-main/5 px-2
             py-1 font-mono text-xs text-tech-main
           ">
-          <span className="mr-2 size-1.5 bg-tech-main"></span> TARGET:{" "}
+          <span className="mr-2 size-1.5 bg-tech-main"></span> {t("target")}{" "}
           {pr.head.ref}
         </p>
       </div>
@@ -298,10 +298,7 @@ export default async function ReviewHubPage() {
 
   return (
     <div className="page-container">
-      <PageHeader
-        title={t("pageTitle")}
-        subtitle="APPROVE CONTENT. MERGE REBELLION."
-      />
+      <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
 
       <div className="grid grid-cols-1 gap-6">
         {openPRs.length === 0 ? (
@@ -315,7 +312,7 @@ export default async function ReviewHubPage() {
                     border-b-2 border-red-500/50 pb-2 font-bold tracking-widest
                     text-red-600 uppercase
                   ">
-                  PRIORITY: RESOLVE CONFLICTS
+                  {t("priorityConflicts")}
                 </h2>
                 <div className="grid grid-cols-1 gap-6">
                   {groupedPRs.conflicts.map((pr) => renderPRCard(pr, true))}
@@ -330,7 +327,7 @@ export default async function ReviewHubPage() {
                     border-b-2 border-tech-main/50 pb-2 font-bold
                     tracking-widest text-tech-main uppercase
                   ">
-                  PENDING REVIEWS
+                  {t("pendingReviews")}
                 </h2>
                 <div className="grid grid-cols-1 gap-6">
                   {groupedPRs.pending.map((pr) => renderPRCard(pr, false))}

@@ -48,7 +48,7 @@ export function FeatureActions({
   }
 
   const handleResolve = () => {
-    const comment = window.prompt(`${t("statusLabel")} update (optional):`)
+    const comment = window.prompt(t("statusUpdatePrompt"))
     if (comment === null) return // cancelled
 
     setPendingAction("resolve")
@@ -73,7 +73,7 @@ export function FeatureActions({
                 {pendingAction === "assign" ? (
                   <LoadingIndicator label={PENDING_LABELS.CLAIMING_ISSUE} />
                 ) : (
-                  "CLAIM ISSUE"
+                  t("claimIssue")
                 )}
               </TechButton>
             </div>
@@ -90,7 +90,7 @@ export function FeatureActions({
                 {pendingAction === "unassign" ? (
                   <LoadingIndicator label={PENDING_LABELS.DROPPING_ISSUE} />
                 ) : (
-                  "DROP ISSUE"
+                  t("dropIssue")
                 )}
               </TechButton>
             </div>
@@ -111,7 +111,7 @@ export function FeatureActions({
                 {pendingAction === "resolve" ? (
                   <LoadingIndicator label={PENDING_LABELS.RESOLVING_ISSUE} />
                 ) : (
-                  "MARK AS RESOLVED"
+                  t("markResolved")
                 )}
               </TechButton>
             </div>

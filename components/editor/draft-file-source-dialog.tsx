@@ -239,14 +239,14 @@ export function DraftFileSourceDialog({
               className="
                 font-mono text-sm tracking-widest text-tech-main uppercase
               ">
-              ADD_FILE_SOURCE_
+              {t("dialogTitle")}
             </p>
             <p className="mt-1 font-mono text-xs text-tech-main/60 uppercase">
-              Pick from repo, import local text, or create a new file.
+              {t("dialogSubtitle")}
             </p>
           </div>
           <TechButton type="button" variant="ghost" size="sm" onClick={onClose}>
-            {t("closeButton")}
+            {t("close")}
           </TechButton>
         </div>
 
@@ -261,7 +261,7 @@ export function DraftFileSourceDialog({
                 shrink-0 border-b guide-line px-4 py-3 font-mono text-xs
                 tracking-widest text-tech-main uppercase
               ">
-              DESTINATION_TREE_
+              {t("destinationTree")}
             </div>
 
             <div className="flex-1 overflow-y-auto p-3">
@@ -292,19 +292,19 @@ export function DraftFileSourceDialog({
           <div className="min-h-0 overflow-y-auto p-5">
             <div className="mb-5 flex flex-wrap gap-2">
               <ModeButton
-                label={t("repoModeLabel")}
+                label={t("modeRepo")}
                 mode="repo"
                 value={mode}
                 onChange={setMode}
               />
               <ModeButton
-                label={t("uploadModeLabel")}
+                label={t("modeLocal")}
                 mode="upload"
                 value={mode}
                 onChange={setMode}
               />
               <ModeButton
-                label={t("newFileModeLabel")}
+                label={t("modeNew")}
                 mode="new"
                 value={mode}
                 onChange={setMode}
@@ -323,25 +323,25 @@ export function DraftFileSourceDialog({
 
             {mode === "repo" ? (
               <div className="space-y-4">
-                <SectionLabel>SELECT EXISTING FILE</SectionLabel>
+                <SectionLabel>{t("selectExistingFile")}</SectionLabel>
                 <p className="font-mono text-xs text-tech-main/60 uppercase">
-                  Selected: {selectedRepoFilePath || "NONE"}
+                  {t("selected")}: {selectedRepoFilePath || "NONE"}
                 </p>
                 <TechButton
                   type="button"
                   variant="primary"
                   onClick={handleAddRepoFile}
                   disabled={!canSubmitRepo}>
-                  {t("addButton")}
+                  {isSubmitting ? t("adding") : t("addExistingFile")}
                 </TechButton>
               </div>
             ) : null}
 
             {mode === "upload" ? (
               <div className="space-y-4">
-                <SectionLabel>IMPORT LOCAL TEXT FILE</SectionLabel>
+                <SectionLabel>{t("importLocalText")}</SectionLabel>
                 <p className="font-mono text-xs text-tech-main/60 uppercase">
-                  Destination folder: {selectedFolderPath || "ROOT"}
+                  {t("destinationFolder")}: {selectedFolderPath || "ROOT"}
                 </p>
                 <input
                   type="file"
@@ -355,11 +355,11 @@ export function DraftFileSourceDialog({
                 />
                 <div className="space-y-2">
                   <label className="section-label" htmlFor="draft-import-name">
-                    FILE_NAME_
+                    {t("fileNameLabel")}
                   </label>
                   <InputBox
                     id="draft-import-name"
-                    placeholder="e.g. chapter-notes.md"
+                    placeholder={t("repoFileNamePlaceholder")}
                     value={customUploadName}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                       setCustomUploadName(event.target.value)
@@ -371,26 +371,26 @@ export function DraftFileSourceDialog({
                   variant="primary"
                   onClick={handleImportLocalFile}
                   disabled={!canSubmitUpload}>
-                  {t("importButton")}
+                  {isSubmitting ? t("importing") : t("importLocalFile")}
                 </TechButton>
               </div>
             ) : null}
 
             {mode === "new" ? (
               <div className="space-y-4">
-                <SectionLabel>CREATE NEW FILE</SectionLabel>
+                <SectionLabel>{t("createNewFile")}</SectionLabel>
                 <p className="font-mono text-xs text-tech-main/60 uppercase">
-                  Destination folder: {selectedFolderPath || "ROOT"}
+                  {t("destinationFolder")}: {selectedFolderPath || "ROOT"}
                 </p>
                 <div className="space-y-2">
                   <label
                     className="section-label"
                     htmlFor="draft-new-file-name">
-                    FILE_NAME_
+                    {t("fileNameLabel")}
                   </label>
                   <InputBox
                     id="draft-new-file-name"
-                    placeholder="e.g. new-section.md"
+                    placeholder={t("newFileNamePlaceholder")}
                     value={newFileName}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                       setNewFileName(event.target.value)
@@ -398,16 +398,16 @@ export function DraftFileSourceDialog({
                   />
                 </div>
                 <div className="font-mono text-xs text-tech-main/60 uppercase">
-                  Result:{" "}
+                  {t("result")}:{" "}
                   {buildDraftFilePath(selectedFolderPath, newFileName) ||
-                    "PENDING"}
+                    t("pending")}
                 </div>
                 <TechButton
                   type="button"
                   variant="primary"
                   onClick={handleCreateNewFile}
                   disabled={!canSubmitNew}>
-                  {t("createButton")}
+                  {t("createEmptyFile")}
                 </TechButton>
               </div>
             ) : null}

@@ -17,11 +17,12 @@ function StatusIndicator({
 }: {
   status: "clean" | "conflict" | "resolved"
 }) {
+  const t = useTranslations("Review")
   if (status === "conflict") {
     return (
       <span
         role="img"
-        title="Conflict"
+        title={t("conflict")}
         className="size-2 shrink-0 bg-red-500"
       />
     )
@@ -30,7 +31,7 @@ function StatusIndicator({
     return (
       <span
         role="img"
-        title="Resolved"
+        title={t("resolved")}
         className="size-2 shrink-0 bg-green-500"
       />
     )
@@ -38,7 +39,7 @@ function StatusIndicator({
   return (
     <span
       role="img"
-      title="Clean"
+      title={t("clean")}
       className="size-2 shrink-0 bg-tech-main/20"
     />
   )
@@ -74,8 +75,8 @@ export function ReviewFileList({
           </p>
           <p
             className="truncate font-mono text-[0.6875rem] text-tech-main/60 uppercase"
-            title="SELECT_FILE_TO_REVIEW">
-            SELECT_FILE_TO_REVIEW
+            title={t("selectFileToReview")}>
+            {t("selectFileToReview")}
           </p>
         </div>
       </div>
@@ -90,7 +91,9 @@ export function ReviewFileList({
           className={`font-mono text-[0.6875rem] tracking-widest uppercase ${
             allClean ? "text-green-700" : "text-red-600"
           }`}>
-          {allClean ? "ALL_CLEAN_" : `CONFLICTS_${conflictCount}_`}
+          {allClean
+            ? t("allClean")
+            : t("conflictsCount", { count: conflictCount })}
         </span>
       </div>
 

@@ -328,11 +328,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       })
 
       if (res.status === 413) {
-        throw new Error("File too large for upload.")
+        throw new Error(t("errorFileTooLarge"))
       }
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || "Upload failed")
+      if (!res.ok) throw new Error(data.error || t("errorUploadFailed"))
 
       return {
         url: data.url,
@@ -341,7 +341,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         fileSize: data.fileSize,
       }
     },
-    [revisionId]
+    [revisionId, t]
   )
 
   const { uploadFile, isUploading, isCompressing } = useEditorUpload({
@@ -373,7 +373,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
   const handleUploadWithAutoSave = async (file: File) => {
     if (!revisionId) {
-      showBadge("SAVING_DRAFT_BEFORE_UPLOAD...", "progress")
+      showBadge(t("badgeSavingBeforeUpload"), "progress")
       setIsSaving(true)
       updateSaveProgressState("running")
       try {
@@ -398,12 +398,12 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           clearBadge()
         } else {
           updateSaveProgressState("error")
-          showBadge("SAVE_FAILED_ Cannot upload without saved draft.", "error")
+          showBadge(t("badgeSaveFailedUpload"), "error")
           return
         }
       } catch {
         updateSaveProgressState("error")
-        showBadge("SAVE_FAILED_ Cannot upload without saved draft.", "error")
+        showBadge(t("badgeSaveFailedUpload"), "error")
         return
       } finally {
         setIsSaving(false)
@@ -461,12 +461,12 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         setDraftCollection(normalizedDraftCollection)
         setRevisionId(result.revisionId)
         updateSaveProgressState("success")
-        showBadge("DRAFT_SAVED_", "info", 3000)
+        showBadge(t("badgeDraftSaved"), "info", 3000)
       }
     } catch (error) {
       console.error(error)
       updateSaveProgressState("error")
-      showBadge("SAVE_FAILED_", "error")
+      showBadge(t("badgeSaveFailed"), "error")
     } finally {
       setIsSaving(false)
     }
@@ -474,18 +474,18 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
   const handleSubmitReview = async () => {
     if (!revisionId) {
-      showBadge("SAVE_DRAFT_FIRST_", "error", 3000)
+      showBadge(t("badgeSaveDraftFirst"), "error", 3000)
       return
     }
 
     if (hasMissingFilePath) {
-      showBadge("ALL_FILES_NEED_PATH_", "error", 4000)
+      showBadge(t("badgeAllFilesNeedPath"), "error", 4000)
       return
     }
 
     if (duplicateFilePaths.length > 0) {
       showBadge(
-        `DUPLICATE_PATHS_: ${duplicateFilePaths.join(", ")}`,
+        t("duplicatePathsError", { paths: duplicateFilePaths.join(", ") }),
         "error",
         4000
       )
@@ -500,8 +500,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       updateSubmitProgressState("success")
       showBadge(
         result.status === "SYNC_CONFLICT"
-          ? "SYNC_CONFLICT_DETECTED_"
-          : "PR_OPENED_",
+          ? t("badgeSyncConflict")
+          : t("badgePrOpened"),
         "info",
         4000
       )
@@ -510,7 +510,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     } catch (error) {
       console.error(error)
       updateSubmitProgressState("error")
-      showBadge("SUBMIT_FAILED_", "error")
+      showBadge(t("badgeSubmitFailed"), "error")
     } finally {
       setIsSubmittingReview(false)
     }
@@ -568,7 +568,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     )
 
     if (hasDuplicate) {
-      showBadge("FILE_ALREADY_EXISTS_", "error", 3000)
+      showBadge(t("badgeFileAlreadyExists"), "error", 3000)
       return false
     }
 
@@ -638,13 +638,13 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             flex items-center justify-between gap-3 border guide-line
             bg-tech-main/5 px-4 py-3 font-mono text-xs text-tech-main
           ">
-          <span>PR_STREAM_ACTIVE</span>
+          <span>{t("prStreamActive")}</span>
           <a
             href={githubPrUrl}
             target="_blank"
             rel="noreferrer"
             className="underline underline-offset-4">
-            OPEN_GITHUB_PR
+            {t("openGithubPr")}
           </a>
         </div>
       ) : null}
@@ -691,27 +691,27 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                 sm:flex-row sm:items-end sm:justify-between
               ">
               <div>
-                <p className="section-label">ACTIVE_FILE_</p>
+                <p className="section-label">{t("activeFileLabel")}</p>
                 <p
                   className="
                     font-mono text-xs tracking-widest text-tech-main/70
                     uppercase
                   ">
-                  SLOT_{activeFileIndex}/{draftCollection.files.length}
+                  {`${t("slotLabel")}_${activeFileIndex}/${draftCollection.files.length}`}
                 </p>
               </div>
               <p className="font-mono text-[0.6875rem] text-tech-main/60 uppercase">
-                DIRECT_REPO_EDIT
+                {t("directRepoEdit")}
               </p>
             </div>
 
             <div className="flex flex-col space-y-2">
               <label htmlFor="draft-file-path" className="section-label">
-                FILE_PATH_
+                {t("filePathLabel")}
               </label>
               <InputBox
                 id="draft-file-path"
-                placeholder="e.g. SlimeTech/Molforte/04-new-machine.md"
+                placeholder={t("filePathPlaceholder")}
                 className={`
                   border-tech-main/40 py-2 font-mono text-sm backdrop-blur-sm
                   focus:border-tech-main/60
@@ -737,14 +737,15 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
             {!activeFile.filePath && !isReadOnly ? (
               <p className="mt-3 font-mono text-xs text-amber-700">
-                File path can be left blank while drafting, but every file needs
-                a path before opening a PR.
+                {t("filePathBlankHint")}
               </p>
             ) : null}
 
             {duplicateFilePaths.length > 0 ? (
               <p className="mt-2 font-mono text-xs text-red-500">
-                Duplicate paths: {duplicateFilePaths.join(", ")}
+                {t("duplicatePathsError", {
+                  paths: duplicateFilePaths.join(", "),
+                })}
               </p>
             ) : null}
           </div>
@@ -807,7 +808,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   }}
                   isReadOnly={isReadOnly}
                   isSaving={isSaving}
-                  placeholder={t("bodyPlaceholder")}
+                  placeholder={t("contentPlaceholder")}
                   lineWrap={lineWrap}
                 />
               </div>
@@ -868,7 +869,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               variant="primary"
               disabled={saveDisabled}
               aria-busy={isSaving}>
-              {isSaving ? t("savingLabel") : t("saveButton")}
+              {isSaving ? t("savingLabel") : t("saveDraft")}
             </TechButton>
 
             <TechButton
@@ -877,7 +878,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               onClick={handleSubmitReview}
               disabled={submitDisabled}
               aria-busy={isSubmittingReview}>
-              {isSubmittingReview ? progressT("submitBusy") : t("submitButton")}
+              {isSubmittingReview ? progressT("submitBusy") : t("openPr")}
             </TechButton>
           </div>
 

@@ -36,6 +36,7 @@ interface FeatureEditorProps {
 export function FeatureEditor({ initialData }: FeatureEditorProps) {
   const router = useRouter()
   const t = useTranslations("Editor")
+  const tLoading = useTranslations("Loading")
   const [title, setTitle] = React.useState(initialData?.title || "")
   const [content, setContent] = React.useState(initialData?.content || "")
   const [tags, setTags] = React.useState(initialData?.tags?.join(", ") || "")
@@ -71,29 +72,32 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
     view.focus()
   }
 
-  const featureUploadAdapter = React.useCallback(async (file: File) => {
-    const formData = new FormData()
-    formData.append("file", file)
+  const featureUploadAdapter = React.useCallback(
+    async (file: File) => {
+      const formData = new FormData()
+      formData.append("file", file)
 
-    const res = await fetch("/api/upload/feature", {
-      method: "POST",
-      body: formData,
-    })
+      const res = await fetch("/api/upload/feature", {
+        method: "POST",
+        body: formData,
+      })
 
-    if (res.status === 413) {
-      throw new Error("File too large for upload.")
-    }
+      if (res.status === 413) {
+        throw new Error(t("errorFileTooLarge"))
+      }
 
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.error || "Upload failed")
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || t("errorUploadFailed"))
 
-    return {
-      url: data.url,
-      filename: data.filename,
-      mimeType: data.mimeType,
-      fileSize: data.fileSize,
-    }
-  }, [])
+      return {
+        url: data.url,
+        filename: data.filename,
+        mimeType: data.mimeType,
+        fileSize: data.fileSize,
+      }
+    },
+    [t]
+  )
 
   const { uploadFile, isUploading, isCompressing } = useEditorUpload({
     adapter: featureUploadAdapter,
@@ -118,7 +122,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
 
   const handleUploadWithCheck = (file: File) => {
     if (!initialData?.id) {
-      showBadge("CANNOT_UPLOAD_BEFORE_SAVING_", "error", 4000)
+      showBadge(t("badgeCannotUploadBeforeSaving"), "error", 4000)
       return
     }
     uploadFile(file)
@@ -196,11 +200,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         content,
         tags: tagArray,
       })
-      showBadge("FEATURE_UPDATED_", "info", 3000)
+      showBadge(t("badgeFeatureUpdated"), "info", 3000)
     } catch (error: unknown) {
       console.error(error)
       showBadge(
-        error instanceof Error ? error.message : "SAVE_FAILED_",
+        error instanceof Error ? error.message : t("badgeSaveFailed"),
         "error"
       )
     } finally {
@@ -245,11 +249,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
 
         <div className="flex flex-col space-y-2">
           <label htmlFor="feature-tags" className="section-label">
-            TAGS_ (comma separated)
+            {t("tagsLabel")}
           </label>
           <InputBox
             id="feature-tags"
-            placeholder="e.g. bug, enhancement, UI"
+            placeholder={t("tagsPlaceholder")}
             className={`
               border-tech-main/40 py-2 font-mono text-sm backdrop-blur-sm
               focus:border-tech-main/60
@@ -371,7 +375,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             {isSaving && initialData?.id ? (
               <LoadingIndicator label={PENDING_LABELS.SAVING_FEATURE} />
             ) : isSaving ? (
-              "SAVING..."
+              tLoading("saving")
             ) : (
               t("saveButton")
             )}

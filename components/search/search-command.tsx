@@ -207,15 +207,22 @@ export function SearchCommand() {
       const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
       const regex = new RegExp(`(${escapedQuery})`, "gi")
       const parts = text.split(regex)
-      return parts.map((part, i) =>
-        i % 2 === 1 ? (
-          <mark key={i} className="bg-tech-main/20 px-0.5 text-tech-main-dark">
+      let position = 0
+
+      return parts.map((part, i) => {
+        const start = position
+        position += part.length
+
+        return i % 2 === 1 ? (
+          <mark
+            key={`${part}-${start}`}
+            className="bg-tech-main/20 px-0.5 text-tech-main-dark">
             {part}
           </mark>
         ) : (
           part
         )
-      )
+      })
     },
     [query]
   )
@@ -241,6 +248,7 @@ export function SearchCommand() {
   if (!isMounted) {
     return (
       <button
+        type="button"
         className="
           hidden cursor-pointer items-center gap-2 border border-tech-main/40
           px-3 py-1.5 font-mono text-[0.6875rem] text-tech-main/60 transition-colors
@@ -248,7 +256,7 @@ export function SearchCommand() {
           md:flex
         ">
         <span className="text-xs">&#x2315;</span>
-        SEARCH
+        {t("heading")}
         <span
           className="
             ml-1 border border-tech-main/30 px-1 py-0.5 text-[0.5625rem]
@@ -266,6 +274,7 @@ export function SearchCommand() {
     <>
       {/* Trigger button — desktop only */}
       <button
+        type="button"
         onClick={() => setIsOpen(true)}
         className="
           hidden h-8 w-40 cursor-pointer items-center
@@ -276,7 +285,7 @@ export function SearchCommand() {
         <div className="flex w-full items-center justify-between">
           <span className="flex items-center gap-1 text-lg leading-none">
             &#x2315;{/* icon */}
-            <span className="mt-0.5 text-[0.625rem]">SEARCH</span>
+            <span className="mt-0.5 text-[0.625rem]">{t("heading")}</span>
           </span>
           <span
             className="
@@ -290,6 +299,7 @@ export function SearchCommand() {
 
       {/* Mobile trigger */}
       <button
+        type="button"
         onClick={() => setIsOpen(true)}
         className="
           flex min-h-11 min-w-11 cursor-pointer items-center justify-center p-2
@@ -313,16 +323,24 @@ export function SearchCommand() {
             onClick={(e) => {
               if (e.target === e.currentTarget) closeModal()
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                closeModal()
+                return
+              }
+
+              handleKeyDown(e)
+            }}
             role="dialog"
             aria-modal="true"
-            aria-label={t("searchAriaLabel")}>
+            aria-label={t("searchAriaLabel")}
+            tabIndex={-1}>
             <div
               className="
                 relative w-full max-w-xl border border-tech-main bg-white/95
                 shadow-xl backdrop-blur-md duration-200 animate-in
                 slide-in-from-top-4
-              "
-              onKeyDown={handleKeyDown}>
+              ">
               <CornerBrackets variant="static" />
 
               {/* Header */}
@@ -344,6 +362,7 @@ export function SearchCommand() {
                   SYS.QUERY_ENGINE
                 </div>
                 <button
+                  type="button"
                   onClick={closeModal}
                   className="
                     cursor-pointer border border-tech-main/40 px-2 py-0.5
@@ -386,7 +405,7 @@ export function SearchCommand() {
                       tracking-wider text-tech-main/70 uppercase
                     ">
                     {isLoading
-                      ? "SCANNING\u2026"
+                      ? t("scanning")
                       : results.length === 20
                         ? `SCAN_RESULTS (${results.length} - TOP MATCHES)`
                         : `SCAN_RESULTS (${results.length})`}
@@ -421,6 +440,7 @@ export function SearchCommand() {
                     {results.map((result, index) => (
                       <li key={result.slug}>
                         <button
+                          type="button"
                           onClick={() => navigateToResult(result)}
                           onMouseEnter={() => setSelectedIndex(index)}
                           data-search-result-index={index}
@@ -458,7 +478,7 @@ export function SearchCommand() {
                               mt-0.5 font-mono text-[0.625rem] tracking-wider
                               text-tech-main/60 uppercase
                             ">
-                            PATH: {slugToPath(result.slug)}
+                            {t("pathLabel")} {slugToPath(result.slug)}
                           </div>
 
                           {/* Content snippet */}
@@ -477,7 +497,9 @@ export function SearchCommand() {
                               absolute top-3 right-4 font-mono text-[0.5625rem]
                               tracking-wider text-tech-main/50 uppercase
                             ">
-                            {result.matchType === "content" ? "BODY" : "TITLE"}
+                            {result.matchType === "content"
+                              ? t("matchBody")
+                              : t("matchTitle")}
                           </div>
                         </button>
                       </li>
@@ -493,13 +515,13 @@ export function SearchCommand() {
                         font-mono text-xs tracking-wider text-tech-main/60
                         uppercase
                       ">
-                      NO_MATCH_FOUND
+                      {t("noMatch")}
                     </div>
                     <div
                       className="
                       mt-1 font-mono text-[0.625rem] text-tech-main/40
                     ">
-                      Try different keywords
+                      {t("tryDifferentKeywords")}
                     </div>
                   </div>
                 )}
@@ -512,13 +534,13 @@ export function SearchCommand() {
                         font-mono text-xs tracking-wider text-tech-main/60
                         uppercase
                       ">
-                      AWAITING_INPUT
+                      {t("awaitingInput")}
                     </div>
                     <div
                       className="
                       mt-1 font-mono text-[0.625rem] text-tech-main/40
                     ">
-                      Type at least 2 characters
+                      {t("minCharsHint")}
                     </div>
                   </div>
                 )}
@@ -531,13 +553,14 @@ export function SearchCommand() {
                   font-mono text-[0.625rem] text-tech-main/60
                 ">
                 <span>
-                  <kbd className="kbd-badge">&#x2191;&#x2193;</kbd> NAVIGATE
+                  <kbd className="kbd-badge">&#x2191;&#x2193;</kbd>{" "}
+                  {t("navigateHint")}
                 </span>
                 <span>
-                  <kbd className="kbd-badge">&#x23CE;</kbd> OPEN
+                  <kbd className="kbd-badge">&#x23CE;</kbd> {t("openHint")}
                 </span>
                 <span>
-                  <kbd className="kbd-badge">ESC</kbd> DISMISS
+                  <kbd className="kbd-badge">ESC</kbd> {t("dismissHint")}
                 </span>
               </footer>
             </div>

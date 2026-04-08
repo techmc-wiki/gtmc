@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 
 interface EditorToolbarProps {
   onInsert: (prefix: string, suffix?: string) => void
@@ -17,6 +18,7 @@ export function EditorToolbar({
   lineWrap,
   onWrapToggle,
 }: EditorToolbarProps) {
+  const t = useTranslations("Editor")
   const btnClass = `h-11 min-w-[44px] flex-1 border border-transparent px-3 transition-colors select-none hover:border-white/20 hover:bg-tech-accent/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${!disabled ? "cursor-pointer" : ""}`
   const smBtnClass = `hidden border border-transparent px-3 py-1.5 transition-colors select-none hover:border-white/20 hover:bg-tech-accent/20 sm:block ${!disabled ? "cursor-pointer" : ""}`
 
@@ -47,7 +49,7 @@ export function EditorToolbar({
         onClick={() => onInsert("[", "](url)")}
         disabled={disabled}
         className={btnClass}>
-        Link
+        {t("toolbarLink")}
       </button>
       {fileUploadSlot}
       <div
@@ -68,14 +70,14 @@ export function EditorToolbar({
         onClick={() => onInsert("`", "`")}
         disabled={disabled}
         className={smBtnClass}>
-        Code
+        {t("toolbarCode")}
       </button>
       <button
         type="button"
         onClick={() => onInsert("```\n", "\n```")}
         disabled={disabled}
         className={smBtnClass}>
-        Block
+        {t("toolbarBlock")}
       </button>
       <span
         className="
@@ -83,7 +85,7 @@ export function EditorToolbar({
           opacity-60
           sm:flex
         ">
-        MARKDOWN_SUPPORTED_
+        {t("markdownSupported")}
       </span>
       {onWrapToggle !== undefined && (
         <>
@@ -97,7 +99,7 @@ export function EditorToolbar({
                 : "border-transparent text-white/70 hover:border-white/20 hover:bg-tech-accent/20"
             }`}
             aria-pressed={lineWrap}>
-            WRAP
+            {t("toolbarWrap")}
           </button>
         </>
       )}

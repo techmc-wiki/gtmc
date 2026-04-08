@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/article-url"
 import { CornerBrackets } from "./ui/corner-brackets"
@@ -14,7 +15,12 @@ interface ArticleNavigationProps {
   next: ArticleInfo | null
 }
 
-export function ArticleNavigation({ prev, next }: ArticleNavigationProps) {
+export async function ArticleNavigation({
+  prev,
+  next,
+}: ArticleNavigationProps) {
+  const t = await getTranslations("ArticleMeta")
+
   return (
     <nav className="relative mt-12 border-t guide-line pt-8">
       <CornerBrackets size="size-3" color="border-tech-main/30" />
@@ -37,7 +43,7 @@ export function ArticleNavigation({ prev, next }: ArticleNavigationProps) {
                 flex items-center gap-2 font-mono text-xs text-tech-main/60
               ">
               <span>←</span>
-              <span>PREV</span>
+              <span>{t("prev")}</span>
               {prev.isCrossFolder && (
                 <span
                   className="
@@ -66,10 +72,10 @@ export function ArticleNavigation({ prev, next }: ArticleNavigationProps) {
                 flex items-center gap-2 font-mono text-xs text-tech-main/40
               ">
               <span>←</span>
-              <span>PREV</span>
+              <span>{t("prev")}</span>
             </div>
             <div className="font-mono text-sm text-tech-main/40">
-              No previous article
+              {t("noPrevArticle")}
             </div>
           </div>
         )}
@@ -96,7 +102,7 @@ export function ArticleNavigation({ prev, next }: ArticleNavigationProps) {
                   ↗
                 </span>
               )}
-              <span>NEXT</span>
+              <span>{t("next")}</span>
               <span>→</span>
               {next.isCrossFolder && next.chapterTitle && (
                 <span className="text-tech-main/40">{next.chapterTitle}</span>
@@ -117,11 +123,11 @@ export function ArticleNavigation({ prev, next }: ArticleNavigationProps) {
               className="
                 flex items-center gap-2 font-mono text-xs text-tech-main/40
               ">
-              <span>NEXT</span>
+              <span>{t("next")}</span>
               <span>→</span>
             </div>
             <div className="font-mono text-sm text-tech-main/40">
-              No next article
+              {t("noNextArticle")}
             </div>
           </div>
         )}

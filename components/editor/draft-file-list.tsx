@@ -105,7 +105,7 @@ export function DraftFileList({
                 <button
                   type="button"
                   onClick={() => onRemoveFile(file.id)}
-                  title={t("removeFileButton")}
+                  title={t("removeFile")}
                   className={`
                     flex min-w-8 shrink-0 items-center justify-center border-y
                     border-r transition-colors
@@ -132,7 +132,7 @@ export function DraftFileList({
                     strokeWidth="1.5"
                     strokeLinecap="square"
                     strokeLinejoin="miter"
-                    aria-label={t("removeFileButton")}>
+                    aria-label={t("removeFile")}>
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                   </svg>

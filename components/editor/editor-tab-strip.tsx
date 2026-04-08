@@ -11,7 +11,6 @@ interface EditorTabStripProps {
   writeId: string
   previewId: string
   rightSlot?: React.ReactNode
-  showReviewTabs?: boolean
 }
 
 export function EditorTabStrip({
@@ -20,20 +19,13 @@ export function EditorTabStrip({
   writeId,
   previewId,
   rightSlot,
-  showReviewTabs = false,
 }: EditorTabStripProps) {
   const t = useTranslations("Editor")
 
   const tabs: { id: TabType; label: string; ariaControls?: string }[] = [
     { id: "write", label: t("writeTab"), ariaControls: writeId },
+    { id: "preview", label: t("previewTab"), ariaControls: previewId },
   ]
-
-  if (showReviewTabs) {
-    tabs.push({ id: "diff", label: "DIFF" })
-    tabs.push({ id: "3-way", label: "3-WAY" })
-  }
-
-  tabs.push({ id: "preview", label: t("previewTab"), ariaControls: previewId })
 
   return (
     <div

@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useState, useEffect } from "react"
+import { useTranslations } from "next-intl"
 import { InlineDiff } from "@/app/[locale]/(dashboard)/review/[id]/components/InlineDiff"
 import { TechButton } from "@/components/ui/tech-button"
 import { MergeView } from "@codemirror/merge"
@@ -60,6 +61,8 @@ export function ConflictBlock({
   onManualEdit,
   autoApplied,
 }: ConflictBlockProps) {
+  const t = useTranslations("Review")
+  const editorT = useTranslations("Editor")
   const [isManualEdit, setIsManualEdit] = useState(false)
   const [manualContent, setManualContent] = useState(ours)
   const [overrideAuto, setOverrideAuto] = useState(false)
@@ -113,7 +116,7 @@ export function ConflictBlock({
 
   const counterLabel =
     index !== undefined && total !== undefined
-      ? `CONFLICT_${index}_OF_${total}_`
+      ? t("conflictNofN", { current: index, total })
       : "CONFLICT_BLOCK_"
 
   return (
@@ -133,14 +136,14 @@ export function ConflictBlock({
       {autoApplied && (
         <div className="flex items-center gap-3 border-b border-red-500/20 px-3 py-2">
           <span className="border border-green-500/30 bg-green-500/10 px-3 py-1 font-mono text-xs tracking-widest text-green-700 uppercase">
-            AUTO-RESOLVED (rerere)
+            {t("autoResolved")}
           </span>
           {!overrideAuto && (
             <TechButton
               variant="ghost"
               size="sm"
               onClick={() => setOverrideAuto(true)}>
-              OVERRIDE
+              {t("override")}
             </TechButton>
           )}
         </div>
@@ -159,13 +162,13 @@ export function ConflictBlock({
               <div className="flex">
                 <div className="flex-1 border-b border-amber-500/20 bg-amber-500/5 px-3 py-1.5">
                   <span className="font-mono text-xs font-bold tracking-widest text-amber-700 uppercase">
-                    YOUR CHANGES (draft)
+                    {t("ourChanges")}
                   </span>
                 </div>
                 <div className="w-px bg-red-500/20" />
                 <div className="flex-1 border-b border-blue-500/20 bg-blue-500/5 px-3 py-1.5">
                   <span className="font-mono text-xs font-bold tracking-widest text-blue-700 uppercase">
-                    MAIN CHANGES
+                    {t("theirChanges")}
                   </span>
                 </div>
               </div>
@@ -179,7 +182,7 @@ export function ConflictBlock({
                     size="sm"
                     className="min-h-11 w-full border-amber-500/50 text-amber-700 hover:border-amber-500 hover:bg-amber-500/20"
                     onClick={handleAcceptOurs}>
-                    ACCEPT DRAFT
+                    {t("acceptDraft")}
                   </TechButton>
                 </div>
                 <div className="flex-1 bg-blue-500/5 p-2">
@@ -188,7 +191,7 @@ export function ConflictBlock({
                     size="sm"
                     className="min-h-11 w-full border-blue-500/50 text-blue-700 hover:border-blue-500 hover:bg-blue-500/20"
                     onClick={handleAcceptTheirs}>
-                    ACCEPT MAIN
+                    {t("acceptMain")}
                   </TechButton>
                 </div>
               </div>
@@ -198,7 +201,7 @@ export function ConflictBlock({
           {isManualEdit && (
             <div className="flex flex-col gap-2 p-3">
               <span className="font-mono text-xs font-bold tracking-widest text-tech-main uppercase">
-                MANUAL EDIT
+                {t("manualEdit")}
               </span>
               <textarea
                 className="min-h-[160px] w-full resize-y border border-tech-main/40 bg-tech-bg p-2 font-mono text-sm text-tech-main focus:border-tech-main focus:outline-none"
@@ -213,7 +216,7 @@ export function ConflictBlock({
                     onManualEdit(manualContent)
                     setIsManualEdit(false)
                   }}>
-                  APPLY MANUAL EDIT
+                  {t("applyManualEdit")}
                 </TechButton>
                 <TechButton
                   variant="ghost"
@@ -222,7 +225,7 @@ export function ConflictBlock({
                     setManualContent(ours)
                     setIsManualEdit(false)
                   }}>
-                  CANCEL
+                  {editorT("cancelButton")}
                 </TechButton>
               </div>
             </div>
@@ -237,7 +240,7 @@ export function ConflictBlock({
                   setManualContent(ours)
                   setIsManualEdit(true)
                 }}>
-                MANUAL EDIT
+                {t("manualEdit")}
               </TechButton>
             </div>
           )}

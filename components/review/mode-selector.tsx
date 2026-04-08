@@ -13,29 +13,6 @@ interface ModeSelectorProps {
   isSelecting?: boolean
 }
 
-interface ModeCardConfig {
-  mode: ConflictMode
-  title: string
-  subtitle: string
-  detail: string
-}
-
-const MODE_CARDS: ModeCardConfig[] = [
-  {
-    mode: "FINE_GRAINED",
-    title: "FINE-GRAINED",
-    subtitle: "Rebase simulation. Resolve conflicts commit-by-commit.",
-    detail: "Higher precision. Preserves commit history context.",
-  },
-  {
-    mode: "SIMPLE",
-    title: "SIMPLE",
-    subtitle:
-      "Direct comparison. Single merge between your draft and current main.",
-    detail: "Faster resolution. Best for small or isolated changes.",
-  },
-]
-
 export function ModeSelector({
   modeAnalysis,
   onSelectMode,
@@ -43,9 +20,24 @@ export function ModeSelector({
   isSelecting,
 }: ModeSelectorProps) {
   const t = useTranslations("Review")
+  const homepageT = useTranslations("Homepage")
   const [selectedMode, setSelectedMode] = useState<ConflictMode>(
     modeAnalysis.recommendation
   )
+  const modeCards = [
+    {
+      mode: "FINE_GRAINED" as ConflictMode,
+      title: t("modeFineGrained"),
+      subtitle: t("modeFineGrainedDesc"),
+      detail: t("modeFineGrainedDetail"),
+    },
+    {
+      mode: "SIMPLE" as ConflictMode,
+      title: t("modeSimple"),
+      subtitle: t("modeSimpleDesc"),
+      detail: t("modeSimpleDetail"),
+    },
+  ]
 
   return (
     <div className="flex flex-col gap-6">
@@ -59,41 +51,43 @@ export function ModeSelector({
               title="No conflicts"
             />
             <span className="font-mono text-xs tracking-widest text-green-700 uppercase">
-              NO_CONFLICTS_DETECTED_
+              {t("noConflicts")}
             </span>
           </div>
           <p className="mt-1 font-mono text-xs text-green-700/70">
-            All files are clean. Select a mode to proceed.
+            {t("allFilesClean")}
           </p>
         </div>
       )}
 
       <div>
         <p className="font-mono text-xs tracking-widest text-tech-main/60 uppercase">
-          CONFLICT_RESOLUTION
+          {t("conflictResolution")}
         </p>
         <h2 className="mt-1 font-mono text-sm tracking-widest text-tech-main uppercase">
-          SELECT_MODE_
+          {t("selectMode")}
         </h2>
       </div>
 
       <div className="border border-tech-main/30 bg-tech-main/5 px-4 py-3">
-        <p className="mb-2 mono-label tracking-widest uppercase">ANALYSIS</p>
+        <p className="mb-2 mono-label tracking-widest uppercase">
+          {t("analysis")}
+        </p>
         <p className="font-mono text-xs/relaxed text-tech-main/80">
           {modeAnalysis.adminMessage}
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <span className="border border-tech-main/30 bg-tech-main/10 px-2 py-0.5 font-mono text-[0.6875rem] tracking-widest text-tech-main uppercase">
-            COMMITS_{modeAnalysis.commitCount}_
+            {t("commitsCount", { count: modeAnalysis.commitCount })}
           </span>
           <span className="border border-tech-main/30 bg-tech-main/10 px-2 py-0.5 font-mono text-[0.6875rem] tracking-widest text-tech-main uppercase">
-            FILES_{modeAnalysis.filesAffected}_
+            {t("filesCount", { count: modeAnalysis.filesAffected })}
           </span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {MODE_CARDS.map(({ mode, title, subtitle, detail }) => {
+        {modeCards.map(({ mode, title, subtitle, detail }) => {
           const isSelected = selectedMode === mode
           const isRecommended = modeAnalysis.recommendation === mode
 
@@ -118,7 +112,7 @@ export function ModeSelector({
 
               {isRecommended && (
                 <span className="mb-3 inline-block border border-tech-main bg-tech-main px-3 py-1 font-mono text-[0.6875rem] font-bold tracking-widest text-white uppercase">
-                  RECOMMENDED
+                  {t("recommended")}
                 </span>
               )}
 
@@ -139,7 +133,7 @@ export function ModeSelector({
                 <div className="mt-3 flex items-center gap-1.5">
                   <span className="inline-block size-1.5 bg-tech-main" />
                   <span className="font-mono text-[0.6875rem] tracking-widest text-tech-main uppercase">
-                    SELECTED
+                    {t("selected")}
                   </span>
                 </div>
               )}
@@ -156,7 +150,7 @@ export function ModeSelector({
           className="w-full"
           onClick={() => onSelectMode(selectedMode)}>
           {isSelecting
-            ? "INITIALIZING..."
+            ? homepageT("initializing")
             : `${t("resolveButton")} [${selectedMode}]`}
         </TechButton>
       </div>

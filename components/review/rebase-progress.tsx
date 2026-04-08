@@ -166,13 +166,15 @@ function AbortButton({
   onAbort: () => void
   isAborting?: boolean
 }) {
+  const t = useTranslations("Review")
+  const editorT = useTranslations("Editor")
   const [confirming, setConfirming] = React.useState(false)
 
   if (confirming) {
     return (
       <div className="flex items-center gap-2">
         <span className="font-mono text-[0.6875rem] tracking-widest text-red-400 uppercase">
-          CONFIRM_ABORT?
+          {t("confirmAbort")}
         </span>
         <TechButton
           variant="danger"
@@ -182,13 +184,13 @@ function AbortButton({
             setConfirming(false)
             onAbort()
           }}>
-          {isAborting ? "ABORTING..." : "YES, ABORT"}
+          {isAborting ? t("aborting") : t("yesAbort")}
         </TechButton>
         <TechButton
           variant="secondary"
           size="sm"
           onClick={() => setConfirming(false)}>
-          CANCEL
+          {editorT("cancelButton")}
         </TechButton>
       </div>
     )
@@ -200,7 +202,7 @@ function AbortButton({
       size="sm"
       disabled={isAborting}
       onClick={() => setConfirming(true)}>
-      ABORT RESOLUTION
+      {t("abortResolution")}
     </TechButton>
   )
 }
@@ -220,6 +222,7 @@ export function RebaseProgress({
   coauthorLines = [],
 }: RebaseProgressProps) {
   const t = useTranslations("Review")
+  const editorT = useTranslations("Editor")
   const progressT = useTranslations("OperationProgress")
   const [showCommitEditor, setShowCommitEditor] = React.useState(false)
   const [commitTitle, setCommitTitle] = React.useState(defaultCommitTitle)
@@ -386,7 +389,7 @@ export function RebaseProgress({
               disabled={isFinalizing}
               className="border-green-700! bg-green-700! hover:bg-green-800!"
               onClick={() => onFinalize()}>
-              {isFinalizing ? "FINALIZING..." : "FINALIZE & MERGE"}
+              {isFinalizing ? t("finalizing") : t("finalizeAndMerge")}
             </TechButton>
           )}
         </div>
@@ -499,7 +502,7 @@ export function RebaseProgress({
               variant="secondary"
               size="sm"
               onClick={() => setShowCommitEditor(false)}>
-              CANCEL
+              {editorT("cancelButton")}
             </TechButton>
             <TechButton
               variant="primary"
@@ -514,7 +517,7 @@ export function RebaseProgress({
                     : commitBody
                 onFinalize({ commitTitle, commitBody: finalBody })
               }}>
-              {isFinalizing ? "MERGING..." : "CONFIRM MERGE"}
+              {isFinalizing ? t("merging") : t("confirmMerge")}
             </TechButton>
           </div>
         </div>
@@ -529,7 +532,7 @@ export function RebaseProgress({
             disabled={isFinalizing}
             className="border-green-700! bg-green-700! hover:bg-green-800!"
             onClick={() => setShowCommitEditor(true)}>
-            {isFinalizing ? "FINALIZING..." : "FINALIZE & MERGE"}
+            {isFinalizing ? t("finalizing") : t("finalizeAndMerge")}
           </TechButton>
         )}
       </div>

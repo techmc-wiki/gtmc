@@ -289,6 +289,18 @@ function getFirstConflictedFilePath(files: DraftFileCollection["files"]) {
   )
 }
 
+function buildDraftSnapshot(draftFiles: DraftFileCollection) {
+  return {
+    activeFileId: draftFiles.activeFileId,
+    files: draftFiles.files.map((file) => ({
+      id: file.id,
+      filePath: file.filePath,
+      content: file.content,
+      conflictContent: file.conflictContent ?? null,
+    })),
+  }
+}
+
 function applyRebasedFilesToDraft(
   draftFiles: DraftFileCollection,
   rebasedFiles?: Array<{ filePath: string; content: string }>,
@@ -657,6 +669,7 @@ export async function resolveConflictAction(
         status: nextStatus,
         hasConflicts: nextStatus === "SYNC_CONFLICT",
         focusFilePath,
+        draftSnapshot: buildDraftSnapshot(focusedNextDraftFiles),
       }
     }
 
@@ -942,6 +955,7 @@ export async function resolveConflictAction(
       status: result.status,
       hasConflicts: focusFilePath !== null,
       focusFilePath,
+      draftSnapshot: buildDraftSnapshot(syncedDraftFiles),
     }
   } catch (error) {
     reviewError("resolveConflictAction", error, { prNumber, status: "error" })
@@ -1614,6 +1628,7 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
       conflictMode: mode,
       hasConflicts: result.hasConflicts,
       focusFilePath: firstConflictFilePath,
+      draftSnapshot: buildDraftSnapshot(mergedDraftFiles),
     }
   } catch (error) {
     reviewError("selectModeAction", error, {

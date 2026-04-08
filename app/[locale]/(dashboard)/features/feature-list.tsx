@@ -24,6 +24,7 @@ interface Feature {
 
 export function FeatureList({ features }: { features: Feature[] }) {
   const t = useTranslations("Feature")
+  const tArticle = useTranslations("ArticleMeta")
   const tStatus = useTranslations("Status")
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [statusFilter, setStatusFilter] = useState<string>("ALL")
@@ -156,7 +157,8 @@ export function FeatureList({ features }: { features: Feature[] }) {
                           text-tech-main opacity-80
                         ">
                         <StatusDot size="sm" variant="main" className="mr-2" />
-                        AUTHOR: {feature.author?.name || t("unknownUser")}
+                        {tArticle("authorLabel")}:{" "}
+                        {feature.author?.name || t("unknownUser")}
                       </p>
                       {feature.assignee && (
                         <p
@@ -203,7 +205,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                   mb-3 font-mono text-sm tracking-widest text-tech-main
                   uppercase
                 ">
-                FILTER_BY_STATUS_
+                {t("filterByStatus")}
               </h4>
               <FilterButtonGroup
                 options={[
@@ -225,7 +227,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                     mb-3 font-mono text-sm tracking-widest text-tech-main
                     uppercase
                   ">
-                  FILTER_BY_TAGS_
+                  {t("filterByTags")}
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {allTags.map((tag) => (

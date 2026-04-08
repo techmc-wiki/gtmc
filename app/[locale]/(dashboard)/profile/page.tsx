@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
@@ -30,6 +31,8 @@ export default async function ProfilePage() {
   if (!user) {
     redirect("/login")
   }
+
+  const t = await getTranslations("Profile")
 
   const account = await prisma.account.findFirst({
     where: { provider: "github", userId: user.id },
@@ -74,6 +77,8 @@ export default async function ProfilePage() {
                 sm:size-10
               ">
               <svg
+                aria-hidden="true"
+                focusable="false"
                 width="16"
                 height="16"
                 viewBox="0 0 24 24"
@@ -94,7 +99,7 @@ export default async function ProfilePage() {
               sm:mt-3 sm:text-sm
             ">
             <StatusDot size="sm" />
-            CONFIG // IDENTITY // TOKENS
+            {"CONFIG // IDENTITY // TOKENS"}
           </p>
         </div>
         <div
@@ -167,7 +172,7 @@ export default async function ProfilePage() {
               />
             </div>
 
-            <FormField label="AVATAR URL" className="w-full flex-1">
+            <FormField label={t("avatarUrlLabel")} className="w-full flex-1">
               <InputBox
                 name="image"
                 defaultValue={user.image || ""}
@@ -185,7 +190,7 @@ export default async function ProfilePage() {
                   tracking-widest text-tech-main/60 uppercase
                   sm:text-[0.625rem]
                 ">
-                {">"} REQUIRED: DIRECT IMAGE LINK (.PNG/.JPG/.GIF)
+                {">"} {t("avatarUrlHint")}
               </p>
             </FormField>
           </div>
@@ -209,7 +214,7 @@ export default async function ProfilePage() {
               sm:gap-6
               md:gap-8
             ">
-            <FormField label="USERNAME">
+            <FormField label={t("usernameLabel")}>
               <InputBox
                 name="name"
                 defaultValue={user.name || ""}
@@ -225,14 +230,14 @@ export default async function ProfilePage() {
             <FormField
               label={
                 <span className="flex items-center gap-2">
-                  EMAIL{" "}
+                  {t("emailLabel")}{" "}
                   <span
                     className="
                       border border-tech-main/30 bg-tech-main/5 px-1 text-[0.5rem]
                       text-tech-main/60
                       sm:text-[0.5625rem]
                     ">
-                    RO
+                    {t("readOnlyBadge")}
                   </span>
                   {emailVisibility === "private" && (
                     <span
@@ -241,7 +246,7 @@ export default async function ProfilePage() {
                         text-amber-600
                         sm:text-[0.5625rem]
                       ">
-                      PRIVATE
+                      {t("privateBadge")}
                     </span>
                   )}
                 </span>
@@ -263,7 +268,7 @@ export default async function ProfilePage() {
                     tracking-widest text-amber-600/70 uppercase
                     sm:text-[0.625rem]
                   ">
-                  {">"} YOUR GITHUB PRIMARY EMAIL VISIBILITY IS SET TO PRIVATE
+                  {">"} {t("emailPrivateNotice")}
                 </p>
               )}
             </FormField>
@@ -277,7 +282,7 @@ export default async function ProfilePage() {
             ">
             <div className="absolute top-0 right-0 size-2 bg-tech-main/20" />
             <MetadataRow
-              label="ASSIGNED ROLE:"
+              label={t("assignedRole")}
               value={
                 <span
                   className="
@@ -340,7 +345,7 @@ export default async function ProfilePage() {
                 sm:px-6 sm:py-3
                 md:px-8
               ">
-              SAVE_CONFIG
+              {t("saveButton")}
             </button>
           </div>
         </form>

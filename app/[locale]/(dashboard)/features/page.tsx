@@ -74,7 +74,7 @@ export default async function FeaturesPage({
       <RevealSection delay={0}>
         <PageHeader
           title={t("pageTitle")}
-          subtitle="BUG REPORTS, FEATURE REQUESTS, AND ISSUE TRACKING"
+          subtitle={t("pageSubtitle")}
           topMargin
           action={
             session?.user ? (

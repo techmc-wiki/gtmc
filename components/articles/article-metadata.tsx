@@ -118,7 +118,7 @@ export function ArticleMetadata({
               hidden items-center gap-3
               sm:inline-flex
             ">
-            PATH: {filePath}
+            {t("pathLabel")} {filePath}
           </span>
           <button
             type="button"
@@ -237,7 +237,7 @@ export function ArticleMetadata({
                 uppercase transition-all duration-300
                 hover:bg-tech-main hover:text-white
               ">
-              [EDIT_ARTICLE]
+              {t("editArticle")}
             </button>
           </div>
 
@@ -265,7 +265,7 @@ export function ArticleMetadata({
           <div className="text-tech-main/60">
             {/* Edit History */}
             <p>
-              {"CREATED: "}
+              {t("created")} 
               <span className="text-tech-main">
                 <time dateTime={createdAt}>
                   {formatAbsoluteTime(createdAt, false)}
@@ -284,7 +284,7 @@ export function ArticleMetadata({
                 ">
                 {" | "}
               </span>
-              {"LAST_EDITED: "}
+              {t("lastEdited")} 
               <span className="text-tech-main">
                 <time dateTime={lastModified}>
                   {formatRelativeTime(lastModified)}
@@ -293,7 +293,7 @@ export function ArticleMetadata({
               <br />
 
               {/* Reading Stats */}
-              {"WORD_COUNT: "}
+              {t("wordCount")} 
               <span className="text-tech-main">
                 {wordCount.toLocaleString()}
               </span>
@@ -310,13 +310,15 @@ export function ArticleMetadata({
                 ">
                 {" | "}
               </span>
-              {"EST_READ_TIME: "}
-              <span className="text-tech-main">{readingTime} MIN</span>
+              {t("estReadTime")} 
+              <span className="text-tech-main">
+                {readingTime} {t("minuteUnit")}
+              </span>
             </p>
           </div>
 
           <div className="flex flex-row items-center gap-2">
-            <span className="text-tech-main/60">URL:</span>
+            <span className="text-tech-main/60">{t("urlLabel")}</span>
             <code
               className="
                 truncate border guide-line bg-tech-accent/10 px-1.5 py-0.5

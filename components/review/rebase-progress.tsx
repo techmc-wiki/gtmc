@@ -4,6 +4,11 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 import { TechButton } from "@/components/ui/tech-button"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import {
+  OperationProgress,
+  type OperationProgressStage,
+  type OperationProgressState,
+} from "@/components/ui/operation-progress"
 import type { FileRebaseState, RebaseState } from "@/types/rebase"
 
 interface SimpleFileStatus {
@@ -20,6 +25,7 @@ interface RebaseProgressProps {
   onFinalize: (options?: { commitTitle?: string; commitBody?: string }) => void
   isAborting?: boolean
   isFinalizing?: boolean
+  finalizeProgressState?: OperationProgressState
   defaultCommitTitle?: string
   defaultCommitBody?: string
   coauthorLines?: string[]
@@ -208,14 +214,71 @@ export function RebaseProgress({
   onFinalize,
   isAborting,
   isFinalizing,
+  finalizeProgressState = "idle",
   defaultCommitTitle = "",
   defaultCommitBody = "",
   coauthorLines = [],
 }: RebaseProgressProps) {
   const t = useTranslations("Review")
+  const progressT = useTranslations("OperationProgress")
   const [showCommitEditor, setShowCommitEditor] = React.useState(false)
   const [commitTitle, setCommitTitle] = React.useState(defaultCommitTitle)
   const [commitBody, setCommitBody] = React.useState(defaultCommitBody)
+
+  const finalizeStages = React.useMemo<OperationProgressStage[]>(
+    () =>
+      mode === "FINE_GRAINED"
+        ? [
+            {
+              id: "validate",
+              label: progressT("finalizeStageValidate"),
+              durationMs: 240,
+            },
+            {
+              id: "push-branch",
+              label: progressT("finalizeStagePush"),
+              durationMs: 920,
+            },
+            {
+              id: "merge-pr",
+              label: progressT("finalizeStageMerge"),
+              durationMs: 720,
+            },
+            {
+              id: "assets",
+              label: progressT("finalizeStageAssets"),
+              durationMs: 520,
+            },
+            {
+              id: "refresh",
+              label: progressT("finalizeStageRefresh"),
+              durationMs: 300,
+            },
+          ]
+        : [
+            {
+              id: "validate",
+              label: progressT("finalizeStageValidate"),
+              durationMs: 240,
+            },
+            {
+              id: "merge-pr",
+              label: progressT("finalizeStageMerge"),
+              durationMs: 920,
+            },
+            {
+              id: "assets",
+              label: progressT("finalizeStageAssets"),
+              durationMs: 520,
+            },
+            {
+              id: "refresh",
+              label: progressT("finalizeStageRefresh"),
+              durationMs: 300,
+            },
+          ],
+    [mode, progressT]
+  )
 
   React.useEffect(() => {
     setCommitTitle(defaultCommitTitle)
@@ -256,6 +319,14 @@ export function RebaseProgress({
 
     return (
       <div className="space-y-4 border border-tech-main/40 bg-tech-main/5 p-4">
+        <OperationProgress
+          state={finalizeProgressState}
+          title={progressT("finalizeTitle")}
+          stages={finalizeStages}
+          successLabel={progressT("finalizeSuccess")}
+          errorLabel={progressT("finalizeError")}
+        />
+
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-2">
             <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
@@ -329,6 +400,14 @@ export function RebaseProgress({
 
   return (
     <div className="space-y-4 border border-tech-main/40 bg-tech-main/5 p-4">
+      <OperationProgress
+        state={finalizeProgressState}
+        title={progressT("finalizeTitle")}
+        stages={finalizeStages}
+        successLabel={progressT("finalizeSuccess")}
+        errorLabel={progressT("finalizeError")}
+      />
+
       <div className="space-y-1">
         <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
           PROGRESS

@@ -260,6 +260,35 @@ async function requireReviewAdminContext() {
   }
 }
 
+function focusDraftFileByPath(
+  draftFiles: DraftFileCollection,
+  filePath?: string | null
+) {
+  if (!filePath) {
+    return draftFiles
+  }
+
+  const targetFile = draftFiles.files.find((file) => file.filePath === filePath)
+
+  if (!targetFile) {
+    return draftFiles
+  }
+
+  return normalizeDraftFileCollection({
+    activeFileId: targetFile.id,
+    files: draftFiles.files,
+  })
+}
+
+function getFirstConflictedFilePath(files: DraftFileCollection["files"]) {
+  return (
+    files.find(
+      (file) =>
+        file.conflictContent !== undefined && file.conflictContent !== null
+    )?.filePath ?? null
+  )
+}
+
 function applyRebasedFilesToDraft(
   draftFiles: DraftFileCollection,
   rebasedFiles?: Array<{ filePath: string; content: string }>,
@@ -548,18 +577,23 @@ export async function resolveConflictAction(
           }
         }),
       })
-      const nextStorage = serializeDraftFilesForStorage(nextDraftFiles)
-      const nextStatus = nextDraftFiles.files.some(
+      const focusedNextDraftFiles = focusDraftFileByPath(
+        nextDraftFiles,
+        getFirstConflictedFilePath(nextDraftFiles.files)
+      )
+      const nextStorage = serializeDraftFilesForStorage(focusedNextDraftFiles)
+      const nextStatus = focusedNextDraftFiles.files.some(
         (file) =>
           file.conflictContent !== undefined && file.conflictContent !== null
       )
         ? "SYNC_CONFLICT"
         : "IN_REVIEW"
+      const focusFilePath = getFirstConflictedFilePath(focusedNextDraftFiles.files)
 
       await recordResolvedRerereEntries({
         token,
         storedFiles: storedDraftFiles.files,
-        resolvedFiles: nextDraftFiles.files,
+        resolvedFiles: focusedNextDraftFiles.files,
         baseRef: linkedDraft.baseMainSha,
       })
 
@@ -590,11 +624,11 @@ export async function resolveConflictAction(
         prNumber,
         status: "force-push-start",
         prBranchName: linkedDraft.prBranchName,
-        fileCount: nextDraftFiles.files.length,
+        fileCount: focusedNextDraftFiles.files.length,
         latestMainSha: summarizeSha(latestMainSha),
       })
       await forcePushResolvedToPRBranch({
-        resolvedFiles: nextDraftFiles.files.map((file) => ({
+        resolvedFiles: focusedNextDraftFiles.files.map((file) => ({
           filePath: file.filePath,
           content: file.content,
         })),
@@ -618,7 +652,12 @@ export async function resolveConflictAction(
         conflictMode,
         resultStatus: nextStatus,
       })
-      return { success: true, status: nextStatus }
+      return {
+        success: true,
+        status: nextStatus,
+        hasConflicts: nextStatus === "SYNC_CONFLICT",
+        focusFilePath,
+      }
     }
 
     const rebaseState = linkedDraft.rebaseState as RebaseState | null
@@ -728,17 +767,21 @@ export async function resolveConflictAction(
           nextStatus: "IN_REVIEW",
         })
       } else if (result.status === "CONFLICT") {
-        const conflictDraftStorage = serializeDraftFilesForStorage(
+        const focusFilePath = result.conflictFilePath ?? storedFile.filePath
+        const conflictDraftFiles = focusDraftFileByPath(
           applyRebasedFilesToDraft(storedDraftFiles, result.files, undefined, {
-            filePath: result.conflictFilePath ?? storedFile.filePath,
+            filePath: focusFilePath,
             content: result.conflictContent,
-          })
+          }),
+          focusFilePath
         )
+        const conflictDraftStorage =
+          serializeDraftFilesForStorage(conflictDraftFiles)
         reviewLog("resolveConflictAction", {
           prNumber,
           status: "branch-decision",
           branch: "CONFLICT",
-          conflictFilePath: result.conflictFilePath ?? storedFile.filePath,
+          conflictFilePath: focusFilePath,
         })
         reviewLog("resolveConflictAction", {
           prNumber,
@@ -807,7 +850,17 @@ export async function resolveConflictAction(
         conflictMode,
         resultStatus: result.status,
       })
-      return { success: true, status: result.status }
+      return {
+        success: true,
+        status: result.status,
+        hasConflicts:
+          result.status === "CONFLICT" ||
+          result.status === "FILE_DELETED_CONFLICT",
+        focusFilePath:
+          result.status === "CONFLICT"
+            ? result.conflictFilePath ?? storedFile.filePath
+            : null,
+      }
     }
 
     const result = await resolveDraftSyncConflict({
@@ -824,10 +877,15 @@ export async function resolveConflictAction(
       token,
     })
 
-    const syncedDraftStorage = serializeDraftFilesForStorage({
-      activeFileId: result.activeFileId,
-      files: result.files,
-    })
+    const syncedDraftFiles = focusDraftFileByPath(
+      {
+        activeFileId: result.activeFileId,
+        files: result.files,
+      },
+      getFirstConflictedFilePath(result.files)
+    )
+    const syncedDraftStorage = serializeDraftFilesForStorage(syncedDraftFiles)
+    const focusFilePath = getFirstConflictedFilePath(syncedDraftFiles.files)
 
     reviewLog("resolveConflictAction", {
       prNumber,
@@ -879,7 +937,12 @@ export async function resolveConflictAction(
       conflictMode,
       resultStatus: result.status,
     })
-    return { success: true, status: result.status }
+    return {
+      success: true,
+      status: result.status,
+      hasConflicts: focusFilePath !== null,
+      focusFilePath,
+    }
   } catch (error) {
     reviewError("resolveConflictAction", error, { prNumber, status: "error" })
     throw error
@@ -1369,7 +1432,18 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
         resultStatus: result.status,
         conflictMode: mode,
       })
-      return { success: true, status: result.status, conflictMode: mode }
+      return {
+        success: true,
+        status: result.status,
+        conflictMode: mode,
+        hasConflicts:
+          result.status === "CONFLICT" ||
+          result.status === "FILE_DELETED_CONFLICT",
+        focusFilePath:
+          result.status === "CONFLICT"
+            ? result.conflictFilePath ?? draftFile.filePath
+            : null,
+      }
     }
 
     reviewLog("selectModeAction", {
@@ -1453,27 +1527,33 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
       prBranchName: revision.prBranchName,
     })
 
-    const mergedDraftFiles = normalizeDraftFileCollection({
-      activeFileId: storedDraftFiles.activeFileId,
-      files: storedDraftFiles.files.map((file) => {
-        const mergedFile = result.fileResults.find(
-          (candidate) => candidate.filePath === file.filePath
-        )
+    const firstConflictFilePath =
+      result.fileResults.find((file) => file.status === "conflict")?.filePath ??
+      null
+    const mergedDraftFiles = focusDraftFileByPath(
+      normalizeDraftFileCollection({
+        activeFileId: storedDraftFiles.activeFileId,
+        files: storedDraftFiles.files.map((file) => {
+          const mergedFile = result.fileResults.find(
+            (candidate) => candidate.filePath === file.filePath
+          )
 
-        if (!mergedFile) {
-          return file
-        }
+          if (!mergedFile) {
+            return file
+          }
 
-        return {
-          ...file,
-          content:
-            mergedFile.status === "clean" ? mergedFile.content : file.content,
-          ...(mergedFile.status === "conflict"
-            ? { conflictContent: mergedFile.content }
-            : { conflictContent: undefined }),
-        }
+          return {
+            ...file,
+            content:
+              mergedFile.status === "clean" ? mergedFile.content : file.content,
+            ...(mergedFile.status === "conflict"
+              ? { conflictContent: mergedFile.content }
+              : { conflictContent: undefined }),
+          }
+        }),
       }),
-    })
+      firstConflictFilePath
+    )
     const mergedDraftStorage = serializeDraftFilesForStorage(mergedDraftFiles)
 
     reviewLog("selectModeAction", {
@@ -1532,6 +1612,8 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
       success: true,
       status: result.hasConflicts ? "CONFLICT" : "CLEAN",
       conflictMode: mode,
+      hasConflicts: result.hasConflicts,
+      focusFilePath: firstConflictFilePath,
     }
   } catch (error) {
     reviewError("selectModeAction", error, {
@@ -1798,6 +1880,52 @@ export async function abortResolutionAction(revisionId: string) {
       nextStatus: "IN_REVIEW",
       nextConflictMode: null,
     })
+
+    // Decode original draft files and force-push back to PR branch
+    reviewLog("abortResolutionAction", {
+      revisionId,
+      prNumber: revision.githubPrNum,
+      status: "force-push-start",
+    })
+
+    const storedDraftFiles = decodeStoredDraftFiles({
+      content: revision.content,
+      conflictContent: null,
+      filePath: revision.filePath,
+    })
+
+    const revisionWithAuthor = await prisma.revision.findFirst({
+      where: { id: revisionId },
+      include: { author: { select: { name: true, email: true } } },
+    })
+    const submitterName = revisionWithAuthor?.author?.name ?? "gtmc-bot"
+    const submitterEmail =
+      revisionWithAuthor?.author?.email ?? "gtmc-bot@gtmc.dev"
+
+    const latestMainSha = await getMainBranchHeadSha(token)
+
+    if (revision.prBranchName) {
+      await forcePushResolvedToPRBranch({
+        resolvedFiles: storedDraftFiles.files.map((f) => ({
+          filePath: f.filePath,
+          content: f.content,
+        })),
+        prBranchName: revision.prBranchName,
+        latestMainSha,
+        commitMessage:
+          "chore(review): restore draft branch after resolution abort",
+        authorName: submitterName,
+        authorEmail: submitterEmail,
+        token,
+      })
+
+      reviewLog("abortResolutionAction", {
+        revisionId,
+        prNumber: revision.githubPrNum,
+        status: "force-push-complete",
+        prBranchName: revision.prBranchName,
+      })
+    }
 
     revalidatePaths(getReviewRevalidatePaths(revisionId, revision.githubPrNum))
     reviewLog("abortResolutionAction", {

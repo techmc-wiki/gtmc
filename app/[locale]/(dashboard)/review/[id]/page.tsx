@@ -128,19 +128,19 @@ export default async function ReviewDetailPage({
       },
     },
   })
-  console.log("[review/page] linkedDraft", {
-    id: linkedDraft?.id,
-    status: linkedDraft?.status,
-    conflictMode: linkedDraft?.conflictMode,
-    conflictContentLength: linkedDraft?.conflictContent?.length ?? null,
-    conflictContentPreview: linkedDraft?.conflictContent?.slice(0, 100) ?? null,
-  })
   const linkedDraftConflictMode =
     (
       linkedDraft as
         | (typeof linkedDraft & { conflictMode?: string | null })
         | null
     )?.conflictMode ?? null
+  console.log("[review/page] linkedDraft", {
+    id: linkedDraft?.id,
+    status: linkedDraft?.status,
+    conflictMode: linkedDraftConflictMode,
+    conflictContentLength: linkedDraft?.conflictContent?.length ?? null,
+    conflictContentPreview: linkedDraft?.conflictContent?.slice(0, 100) ?? null,
+  })
   const effectiveConflictMode = linkedDraftConflictMode ?? null
 
   const linkedDraftFiles = linkedDraft
@@ -338,6 +338,7 @@ export default async function ReviewDetailPage({
         <ReviewEditor
           pr={{ number: pr.number, title: pr.title, htmlUrl: pr.html_url }}
           files={reviewFiles}
+          initialActiveFileId={linkedDraftFiles?.activeFileId}
           modeAnalysis={modeAnalysis}
           revision={{
             id: linkedDraft.id,

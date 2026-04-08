@@ -75,6 +75,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   const [submitProgressState, setSubmitProgressState] =
     React.useState<OperationProgressState>("idle")
   const [activeTab, setActiveTab] = React.useState<TabType>("write")
+  const [lineWrap, setLineWrap] = React.useState(false)
 
   const textareaRef = React.useRef<any>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
@@ -170,9 +171,12 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       return
     }
 
-    saveProgressResetRef.current = window.setTimeout(() => {
-      setSaveProgressState("idle")
-    }, nextState === "success" ? 1400 : 3200)
+    saveProgressResetRef.current = window.setTimeout(
+      () => {
+        setSaveProgressState("idle")
+      },
+      nextState === "success" ? 1400 : 3200
+    )
   }
 
   const updateSubmitProgressState = (
@@ -189,9 +193,12 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       return
     }
 
-    submitProgressResetRef.current = window.setTimeout(() => {
-      setSubmitProgressState("idle")
-    }, nextState === "success" ? 1400 : 3200)
+    submitProgressResetRef.current = window.setTimeout(
+      () => {
+        setSubmitProgressState("idle")
+      },
+      nextState === "success" ? 1400 : 3200
+    )
   }
 
   const githubPrUrl = initialData?.githubPrUrl
@@ -762,6 +769,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                 <EditorToolbar
                   onInsert={insertSyntax}
                   disabled={isReadOnly || isUploading}
+                  lineWrap={lineWrap}
+                  onWrapToggle={() => setLineWrap((v) => !v)}
                   fileUploadSlot={
                     !isReadOnly ? (
                       <EditorFileUploadInput
@@ -799,6 +808,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   isReadOnly={isReadOnly}
                   isSaving={isSaving}
                   placeholder={t("bodyPlaceholder")}
+                  lineWrap={lineWrap}
                 />
               </div>
             </section>
@@ -858,11 +868,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               variant="primary"
               disabled={saveDisabled}
               aria-busy={isSaving}>
-              {isSaving ? (
-                t("savingLabel")
-              ) : (
-                t("saveButton")
-              )}
+              {isSaving ? t("savingLabel") : t("saveButton")}
             </TechButton>
 
             <TechButton
@@ -871,11 +877,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               onClick={handleSubmitReview}
               disabled={submitDisabled}
               aria-busy={isSubmittingReview}>
-              {isSubmittingReview ? (
-                progressT("submitBusy")
-              ) : (
-                t("submitButton")
-              )}
+              {isSubmittingReview ? progressT("submitBusy") : t("submitButton")}
             </TechButton>
           </div>
 

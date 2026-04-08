@@ -41,6 +41,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
   const [tags, setTags] = React.useState(initialData?.tags?.join(", ") || "")
   const [isSaving, setIsSaving] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState<TabType>("write")
+  const [lineWrap, setLineWrap] = React.useState(false)
   const { badge, showBadge, clearBadge } = useBadge()
 
   const textareaRef = React.useRef<any>(null)
@@ -286,6 +287,8 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             <EditorToolbar
               onInsert={insertSyntax}
               disabled={isReadOnly || isUploading}
+              lineWrap={lineWrap}
+              onWrapToggle={() => setLineWrap((v) => !v)}
               fileUploadSlot={
                 <EditorFileUploadInput
                   fileInputRef={fileInputRef}
@@ -320,6 +323,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
               isReadOnly={isReadOnly}
               isSaving={isSaving}
               placeholder={t("bodyPlaceholder")}
+              lineWrap={lineWrap}
             />
           </div>
         </div>

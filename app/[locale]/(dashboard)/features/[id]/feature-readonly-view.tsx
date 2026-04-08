@@ -77,7 +77,7 @@ export async function FeatureReadonlyView({
                 cursor-pointer list-none border-b guide-line bg-tech-main/5 px-4
                 py-2 font-mono text-xs text-tech-main/70
               ">
-              SOURCE_
+              SOURCE_ (Click to expand)
             </summary>
             {content?.trim() ? (
               <pre className="p-6 font-mono text-sm/relaxed whitespace-pre-wrap">

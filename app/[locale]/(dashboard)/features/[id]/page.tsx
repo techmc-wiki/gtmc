@@ -145,10 +145,10 @@ export default async function FeatureDetailPage({
     },
     assignee: parsedIssue.metadata?.assigneeId
       ? {
-          name: parsedIssue.metadata?.assigneeName ?? null,
-          email: parsedIssue.metadata?.assigneeEmail ?? null,
-          image: null,
-        }
+        name: parsedIssue.metadata?.assigneeName ?? null,
+        email: parsedIssue.metadata?.assigneeEmail ?? null,
+        image: null,
+      }
       : null,
     comments,
   }
@@ -255,7 +255,7 @@ export default async function FeatureDetailPage({
               value={<FeatureStatusBadge status={feature.status} />}
             />
             <MetadataRow
-              label="AUTHOR:"
+              label="Author:"
               value={
                 <span className="wrap-break-word">
                   {feature.author.name || feature.author.email || "Unknown"}
@@ -273,7 +273,7 @@ export default async function FeatureDetailPage({
               }
             />
             <MetadataRow
-              label="CREATED:"
+              label="Created:"
               value={
                 <span suppressHydrationWarning>
                   {new Date(feature.createdAt).toLocaleString()}
@@ -282,7 +282,7 @@ export default async function FeatureDetailPage({
             />
             {feature.issueNumber && feature.htmlUrl && (
               <MetadataRow
-                label="GITHUB:"
+                label="GitHub:"
                 value={
                   <div className="flex flex-wrap items-center gap-1">
                     Linked to

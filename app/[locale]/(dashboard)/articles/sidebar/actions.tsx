@@ -5,12 +5,10 @@ import { useState } from "react"
 
 export function SidebarActions({
   internalScroll,
-  onCreate,
   onCollapseAll,
   onLocate,
 }: {
   internalScroll: boolean
-  onCreate: () => void
   onCollapseAll: (e: React.MouseEvent) => void
   onLocate: () => void
 }) {
@@ -33,16 +31,6 @@ export function SidebarActions({
           backdrop-blur-sm
         ">
         <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={onCreate}
-            className="
-              cursor-pointer border border-tech-main/40 px-3 py-1.5 pl-2
-              font-mono text-[0.6875rem] transition-colors
-              hover:bg-tech-main hover:text-white
-            ">
-            {t("buttonNewArticle")}
-          </button>
           <div className="flex gap-2">
             <button
               type="button"
@@ -103,16 +91,6 @@ export function SidebarActions({
             disabled:cursor-not-allowed disabled:opacity-50
           ">
           {t("buttonLocate")}
-        </button>
-        <button
-          type="button"
-          onClick={onCreate}
-          className="
-            cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
-            text-[0.625rem] transition-colors
-            hover:bg-tech-main hover:text-white
-          ">
-          {t("buttonNewArticle")}
         </button>
       </div>
     </div>

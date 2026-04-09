@@ -14,6 +14,9 @@ importers:
       '@auth/prisma-adapter':
         specifier: ^2.11.1
         version: 2.11.1(@prisma/client@7.6.0(prisma@7.6.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@6.0.2))(typescript@6.0.2))
+      '@codemirror/autocomplete':
+        specifier: ^6.20.1
+        version: 6.20.1
       '@codemirror/lang-markdown':
         specifier: ^6.5.0
         version: 6.5.0

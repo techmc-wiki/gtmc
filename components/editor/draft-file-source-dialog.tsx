@@ -18,6 +18,7 @@ interface DraftRepoTreeNode {
 interface DraftFileSourceDialogProps {
   isOpen: boolean
   initialFolderPath?: string
+  initialMode?: SourceMode
   onClose: () => void
   onCreate: (input: {
     content: string
@@ -25,7 +26,7 @@ interface DraftFileSourceDialogProps {
   }) => boolean | Promise<boolean>
 }
 
-type SourceMode = "repo" | "upload" | "new"
+export type SourceMode = "repo" | "upload" | "new"
 
 const ROOT_NODE: DraftRepoTreeNode = {
   id: "root",
@@ -38,11 +39,12 @@ const ROOT_NODE: DraftRepoTreeNode = {
 export function DraftFileSourceDialog({
   isOpen,
   initialFolderPath,
+  initialMode = "new",
   onClose,
   onCreate,
 }: DraftFileSourceDialogProps) {
   const t = useTranslations("DraftFiles")
-  const [mode, setMode] = React.useState<SourceMode>("new")
+  const [mode, setMode] = React.useState<SourceMode>(initialMode)
   const [tree, setTree] = React.useState<DraftRepoTreeNode[]>([])
   const [isLoadingTree, setIsLoadingTree] = React.useState(false)
   const [treeError, setTreeError] = React.useState<string | null>(null)
@@ -105,7 +107,7 @@ export function DraftFileSourceDialog({
 
   React.useEffect(() => {
     if (!isOpen) {
-      setMode("new")
+      setMode(initialMode)
       setSelectedRepoFilePath("")
       setSelectedFolderPath(initialFolderPath || "")
       setNewFileName("")
@@ -115,7 +117,7 @@ export function DraftFileSourceDialog({
       setIsSubmitting(false)
       setExpandedPaths(new Set(["", initialFolderPath || ""]))
     }
-  }, [initialFolderPath, isOpen])
+  }, [initialFolderPath, initialMode, isOpen])
 
   if (!isOpen) {
     return null

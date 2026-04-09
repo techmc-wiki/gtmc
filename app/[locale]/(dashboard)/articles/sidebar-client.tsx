@@ -151,7 +151,6 @@ const SidebarClientInner = React.forwardRef<
           {!hideActions && (
             <SidebarActions
               internalScroll={internalScroll}
-              onCreate={() => setIsModalOpen(true)}
               onCollapseAll={(e) => {
                 e.preventDefault()
                 collapseAll()
@@ -185,7 +184,6 @@ const SidebarClientInner = React.forwardRef<
           {!hideActions && (
             <SidebarActions
               internalScroll={internalScroll}
-              onCreate={() => setIsModalOpen(true)}
               onCollapseAll={(e) => {
                 e.preventDefault()
                 collapseAll()

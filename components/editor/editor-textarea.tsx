@@ -3,6 +3,11 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import CodeMirror, { ReactCodeMirrorRef } from "@uiw/react-codemirror"
+import {
+  autocompletion,
+  type CompletionContext,
+  snippetCompletion,
+} from "@codemirror/autocomplete"
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown"
 import { languages } from "@codemirror/language-data"
 import { EditorView } from "@codemirror/view"
@@ -54,6 +59,84 @@ interface EditorTextareaProps {
   onWrapToggle?: () => void
   canUndo?: boolean
   canRedo?: boolean
+  enableSyntaxHints?: boolean
+}
+
+const markdownSyntaxHints = [
+  snippetCompletion("# ${Title}", {
+    label: "heading-1",
+    detail: "Markdown H1",
+    info: "Insert a top-level heading",
+  }),
+  snippetCompletion("## ${Section}", {
+    label: "heading-2",
+    detail: "Markdown H2",
+    info: "Insert a section heading",
+  }),
+  snippetCompletion("- ${item}", {
+    label: "bullet-list",
+    detail: "List",
+    info: "Insert a bullet list item",
+  }),
+  snippetCompletion("- [ ] ${task}", {
+    label: "task-list",
+    detail: "Checklist",
+    info: "Insert a markdown task item",
+  }),
+  snippetCompletion("> ${quote}", {
+    label: "blockquote",
+    detail: "Quote",
+    info: "Insert a blockquote",
+  }),
+  snippetCompletion("[${label}](${url})", {
+    label: "link",
+    detail: "Link",
+    info: "Insert a markdown link",
+  }),
+  snippetCompletion("![${alt}](${url})", {
+    label: "image",
+    detail: "Image",
+    info: "Insert a markdown image",
+  }),
+  snippetCompletion("```md\n${content}\n```", {
+    label: "code-fence",
+    detail: "Code block",
+    info: "Insert a fenced code block",
+  }),
+  snippetCompletion("| Column | Value |\n| --- | --- |\n| ${left} | ${right} |", {
+    label: "table",
+    detail: "Table",
+    info: "Insert a markdown table",
+  }),
+  snippetCompletion("$$\n${formula}\n$$", {
+    label: "math-block",
+    detail: "KaTeX",
+    info: "Insert a math block",
+  }),
+] as const
+
+function markdownSyntaxHintSource(context: CompletionContext) {
+  const word = context.matchBefore(/[\w-]*/)
+
+  if (!context.explicit) {
+    const line = context.state.doc.lineAt(context.pos)
+    const prefix = line.text.slice(0, context.pos - line.from)
+    const trigger = prefix.slice(-1)
+    const onlyWhitespace = prefix.trim().length === 0
+
+    if (
+      !onlyWhitespace &&
+      !["#", "-", ">", "[", "!", "`", "|"].includes(trigger)
+    ) {
+      return null
+    }
+  }
+
+  return {
+    from: word ? word.from : context.pos,
+    options: [...markdownSyntaxHints],
+    validFor: /[\w-]*/,
+  }
 }
 
 export const EditorTextarea = React.forwardRef<
@@ -77,6 +160,7 @@ export const EditorTextarea = React.forwardRef<
     onWrapToggle,
     canUndo = false,
     canRedo = false,
+    enableSyntaxHints = false,
     ...rest
   },
   ref
@@ -141,6 +225,9 @@ export const EditorTextarea = React.forwardRef<
         extensions={[
           markdown({ base: markdownLanguage, codeLanguages: languages }),
           techTheme,
+          ...(enableSyntaxHints
+            ? [autocompletion({ override: [markdownSyntaxHintSource] })]
+            : []),
           ...(lineWrap ? [EditorView.lineWrapping] : []),
         ]}
         onChange={onChange}

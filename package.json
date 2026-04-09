@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
+    "@codemirror/autocomplete": "^6.20.1",
     "@codemirror/lang-markdown": "^6.5.0",
     "@codemirror/language-data": "^6.5.2",
     "@codemirror/merge": "^6.12.1",

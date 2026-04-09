@@ -86,6 +86,15 @@
     "filePathPlaceholder": "e.g. SlimeTech/Molforte/04-new-machine.md",
     "activeFileLabel": "ACTIVE FILE",
     "directRepoEdit": "DIRECT REPO EDIT",
+    "targetFileLabel": "TARGET FILE",
+    "targetFileUnset": "TARGET_NOT_SELECTED",
+    "targetFileDescription": "Choose an existing repository file, create a new target, or import a local text file without manually typing the path.",
+    "chooseExistingFile": "CHOOSE EXISTING",
+    "createTargetFile": "CREATE TARGET",
+    "importTargetFile": "IMPORT TEXT FILE",
+    "syntaxHintsTitle": "SYNTAX HINTS",
+    "syntaxHintsDescription": "The draft editor can surface Markdown snippets for headings, links, checklists, tables, code fences, and math blocks.",
+    "syntaxHintsShortcut": "Press Ctrl+Space to open hints manually, or type markdown triggers like #, -, >, [, !, or |.",
     "slotLabel": "SLOT",
     "filePathBlankHint": "File path can be left blank while drafting, but every file needs a path before opening a PR.",
     "duplicatePathsError": "Duplicate paths: {paths}",
@@ -278,7 +287,11 @@
     "clean": "Clean",
     "selectFileToReview": "SELECT FILE TO REVIEW",
     "allClean": "ALL CLEAN",
-    "conflictsCount": "CONFLICTS: {count}"
+    "conflictsCount": "CONFLICTS: {count}",
+    "reviewNoChanges": "NO DIFF DETECTED",
+    "unchangedLinesHidden": "{count} UNCHANGED LINES HIDDEN",
+    "addedChangesLabel": "ADDED LINES",
+    "removedChangesLabel": "REMOVED LINES"
   },
   "Status": {
     "draft": "DRAFT",

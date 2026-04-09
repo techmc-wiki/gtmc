@@ -86,6 +86,15 @@
     "filePathPlaceholder": "例如：SlimeTech/Molforte/04-new-machine.md",
     "activeFileLabel": "当前文件",
     "directRepoEdit": "直接编辑仓库",
+    "targetFileLabel": "目标文件",
+    "targetFileUnset": "尚未选择目标",
+    "targetFileDescription": "通过可视化方式选择已有仓库文件、新建目标文件或导入本地文本文件，无需手动填写路径。",
+    "chooseExistingFile": "选择已有文件",
+    "createTargetFile": "新建目标文件",
+    "importTargetFile": "导入文本文件",
+    "syntaxHintsTitle": "语法提示",
+    "syntaxHintsDescription": "草稿编辑器会提供 Markdown 片段提示，包含标题、链接、任务列表、表格、代码块和数学公式。",
+    "syntaxHintsShortcut": "按 Ctrl+Space 可手动打开提示，也可以直接输入 #、-、>、[、!、| 等触发字符。",
     "slotLabel": "文件",
     "filePathBlankHint": "草稿阶段可以暂不填写文件路径，但提交 PR 前每个文件都需要路径。",
     "duplicatePathsError": "重复路径：{paths}",
@@ -278,7 +287,11 @@
     "clean": "无问题",
     "selectFileToReview": "选择要审核的文件",
     "allClean": "全部无问题",
-    "conflictsCount": "冲突数：{count}"
+    "conflictsCount": "冲突数：{count}",
+    "reviewNoChanges": "没有检测到差异",
+    "unchangedLinesHidden": "已折叠 {count} 行未修改内容",
+    "addedChangesLabel": "新增行",
+    "removedChangesLabel": "删除行"
   },
   "Status": {
     "draft": "草稿",

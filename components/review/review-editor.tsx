@@ -12,8 +12,8 @@ import {
 import { EditorTextarea } from "@/components/editor/editor-textarea"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
 import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
-import { InlineDiff } from "@/app/[locale]/(dashboard)/review/[id]/components/InlineDiff"
 import { ConflictBlock } from "@/components/review/conflict-block"
+import { ReviewDiffPanel } from "@/components/review/review-diff-panel"
 import { ReviewFileList } from "@/components/review/review-file-list"
 import { ModeSelector } from "@/components/review/mode-selector"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
@@ -223,7 +223,7 @@ export function ReviewEditor({
   )
 
   const [activeTab, setActiveTab] = React.useState<TabType>(() =>
-    files.some((file) => Boolean(file.conflictContent)) ? "3-way" : "write"
+    files.some((file) => Boolean(file.conflictContent)) ? "3-way" : "diff"
   )
   const [lineWrap, setLineWrap] = React.useState(false)
 
@@ -465,7 +465,7 @@ export function ReviewEditor({
 
   React.useEffect(() => {
     if (activeTab === "3-way" && !hasInlineConflicts) {
-      setActiveTab("write")
+      setActiveTab("diff")
     }
   }, [activeTab, hasInlineConflicts])
 
@@ -1213,49 +1213,10 @@ export function ReviewEditor({
                 role="tabpanel"
                 hidden={activeTab !== "diff"}
                 className="editor-grow">
-                <div className="grid gap-px bg-tech-main/15 lg:grid-cols-2">
-                  <div className="bg-white/85">
-                    <div className="border-b border-tech-main/15 bg-red-500/5 px-4 py-2">
-                      <p className="font-mono text-[0.6875rem] tracking-widest text-red-700 uppercase">
-                        REMOVED_FROM_BASE_
-                      </p>
-                    </div>
-                    <div className="max-h-[70vh] overflow-auto p-4 sm:p-6">
-                      {hasDiffChanges ? (
-                        <InlineDiff
-                          currentText={activeContent}
-                          incomingText={diffBaseContent}
-                          mode="incoming"
-                        />
-                      ) : (
-                        <p className="font-mono text-xs text-tech-main/50 uppercase">
-                          NO_REMOVALS_
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="bg-white/85">
-                    <div className="border-b border-tech-main/15 bg-green-500/5 px-4 py-2">
-                      <p className="font-mono text-[0.6875rem] tracking-widest text-green-700 uppercase">
-                        ADDED_IN_CURRENT_
-                      </p>
-                    </div>
-                    <div className="max-h-[70vh] overflow-auto p-4 sm:p-6">
-                      {hasDiffChanges ? (
-                        <InlineDiff
-                          currentText={activeContent}
-                          incomingText={diffBaseContent}
-                          mode="current"
-                        />
-                      ) : (
-                        <p className="font-mono text-xs text-tech-main/50 uppercase">
-                          NO_CHANGES_
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <ReviewDiffPanel
+                  baseContent={diffBaseContent}
+                  currentContent={activeContent}
+                />
               </section>
 
               <section

@@ -35,6 +35,7 @@ import { InputBox } from "../ui/input-box"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { useBadge } from "@/hooks/use-badge"
 import { useEditorUpload } from "@/hooks/use-editor-upload"
+import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
 
 interface DraftEditorProps {
   initialData?: {
@@ -52,6 +53,11 @@ const MAX_DRAFT_HISTORY_ENTRIES = 100
 interface DraftContentHistory {
   undoStack: string[]
   redoStack: string[]
+}
+
+interface DraftFileDialogIntent {
+  kind: "add" | "replace"
+  initialMode: SourceMode
 }
 
 export function DraftEditor({ initialData }: DraftEditorProps) {
@@ -84,7 +90,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   const [revisionId, setRevisionId] = React.useState<string | undefined>(
     initialData?.id
   )
-  const [isAddFileDialogOpen, setIsAddFileDialogOpen] = React.useState(false)
+  const [fileDialogIntent, setFileDialogIntent] =
+    React.useState<DraftFileDialogIntent | null>(null)
   const [isSaving, setIsSaving] = React.useState(false)
   const [isSubmittingReview, setIsSubmittingReview] = React.useState(false)
   const [saveProgressState, setSaveProgressState] =
@@ -747,22 +754,19 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     }
   }
 
+  const openFileDialog = React.useCallback(
+    (kind: DraftFileDialogIntent["kind"], initialMode: SourceMode) => {
+      if (isReadOnly) {
+        return
+      }
+
+      setFileDialogIntent({ kind, initialMode })
+    },
+    [isReadOnly]
+  )
+
   const handleAddFile = () => {
-    if (isReadOnly) {
-      return
-    }
-
-    const lastSlashIndex = activeFile.filePath.lastIndexOf("/")
-    const suggestedPath =
-      lastSlashIndex >= 0
-        ? activeFile.filePath.slice(0, lastSlashIndex + 1)
-        : ""
-    const nextFile = createDraftFile({ filePath: suggestedPath })
-
-    updateDraftCollection((current) => ({
-      activeFileId: nextFile.id,
-      files: [...current.files, nextFile],
-    }))
+    openFileDialog("add", "repo")
   }
 
   const handleRemoveFile = (fileId: string) => {
@@ -786,7 +790,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     })
   }
 
-  const handleCreateDraftFile = ({
+  const handleApplyDraftFileSource = ({
     content,
     filePath,
   }: {
@@ -795,12 +799,32 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   }) => {
     const normalizedPath = normalizeDraftFilePath(filePath)
     const hasDuplicate = draftCollection.files.some(
-      (file) => normalizeDraftFilePath(file.filePath) === normalizedPath
+      (file) =>
+        normalizeDraftFilePath(file.filePath) === normalizedPath &&
+        (fileDialogIntent?.kind !== "replace" || file.id !== activeFile.id)
     )
 
     if (hasDuplicate) {
       showBadge(t("badgeFileAlreadyExists"), "error", 3000)
       return false
+    }
+
+    if (fileDialogIntent?.kind === "replace") {
+      updateDraftCollection((current) => ({
+        ...current,
+        files: current.files.map((file) =>
+          file.id === current.activeFileId
+            ? {
+                ...file,
+                content,
+                filePath: normalizedPath,
+              }
+            : file
+        ),
+      }))
+      setActiveTab("write")
+      setFileDialogIntent(null)
+      return true
     }
 
     const nextFile = createDraftFile({
@@ -813,7 +837,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       files: [...current.files, nextFile],
     }))
     setActiveTab("write")
-    setIsAddFileDialogOpen(false)
+    setFileDialogIntent(null)
     return true
   }
 
@@ -932,33 +956,46 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   {`${t("slotLabel")}_${activeFileIndex}/${draftCollection.files.length}`}
                 </p>
               </div>
-              <p className="font-mono text-[0.6875rem] text-tech-main/60 uppercase">
-                {t("directRepoEdit")}
-              </p>
+              <div className="flex flex-wrap gap-2">
+                <TechButton
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  disabled={isReadOnly}
+                  onClick={() => openFileDialog("replace", "repo")}>
+                  {t("chooseExistingFile")}
+                </TechButton>
+                <TechButton
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  disabled={isReadOnly}
+                  onClick={() => openFileDialog("replace", "new")}>
+                  {t("createTargetFile")}
+                </TechButton>
+                <TechButton
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  disabled={isReadOnly}
+                  onClick={() => openFileDialog("replace", "upload")}>
+                  {t("importTargetFile")}
+                </TechButton>
+              </div>
             </div>
 
-            <div className="flex flex-col space-y-2">
-              <label htmlFor="draft-file-path" className="section-label">
-                {t("filePathLabel")}
-              </label>
-              <InputBox
-                id="draft-file-path"
-                placeholder={t("filePathPlaceholder")}
-                className={`
-                  border-tech-main/40 py-2 font-mono text-sm backdrop-blur-sm
-                  focus:border-tech-main/60
-                  ${
-                    isReadOnly
-                      ? `cursor-not-allowed bg-gray-100 opacity-70`
-                      : `bg-white/80`
-                  }
-                  ${activeFileHasDuplicatePath ? `border-red-500/60` : ``}
-                `}
-                value={activeFile.filePath}
-                onChange={(e) => updateActiveFile({ filePath: e.target.value })}
-                readOnly={isReadOnly}
-                aria-busy={isSaving}
-              />
+            <div className="space-y-3 border border-tech-main/20 bg-tech-main/5 px-4 py-4">
+              <div>
+                <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/45 uppercase">
+                  {t("targetFileLabel")}
+                </p>
+                <p className="mt-1 break-all font-mono text-sm tracking-widest text-tech-main uppercase">
+                  {activeFile.filePath || t("targetFileUnset")}
+                </p>
+              </div>
+              <p className="font-mono text-xs leading-relaxed text-tech-main/65">
+                {t("targetFileDescription")}
+              </p>
             </div>
 
             {activeFileHasDuplicatePath ? (
@@ -1046,6 +1083,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   lineWrap={lineWrap}
                   canUndo={Boolean(activeFileHistory?.undoStack.length)}
                   canRedo={Boolean(activeFileHistory?.redoStack.length)}
+                  enableSyntaxHints
                 />
               </div>
             </section>
@@ -1125,6 +1163,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           <section
             aria-label={t("submissionLicenseAria")}
             className="mt-4 border guide-line bg-tech-main/5 p-4 font-mono text-[0.6875rem] leading-relaxed text-tech-main/80">
+            <div className="mb-3 border-b border-tech-main/15 pb-3">
+              <p className="section-label">{t("syntaxHintsTitle")}</p>
+              <p className="mt-2 text-tech-main/70">{t("syntaxHintsDescription")}</p>
+              <p className="mt-1 text-tech-main/55">{t("syntaxHintsShortcut")}</p>
+            </div>
             <p className="section-label">{t("submissionLicenseTitle")}</p>
             <div className="mt-2 space-y-2">
               <p>{t("submissionLicenseIntro")}</p>
@@ -1146,10 +1189,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       )}
 
       <DraftFileSourceDialog
-        isOpen={isAddFileDialogOpen}
+        isOpen={fileDialogIntent !== null}
         initialFolderPath={getParentFolderPath(activeFile.filePath)}
-        onClose={() => setIsAddFileDialogOpen(false)}
-        onCreate={handleCreateDraftFile}
+        initialMode={fileDialogIntent?.initialMode}
+        onClose={() => setFileDialogIntent(null)}
+        onCreate={handleApplyDraftFileSource}
       />
     </form>
   )

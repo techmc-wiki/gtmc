@@ -268,12 +268,27 @@ export default async function ReviewDetailPage({
     .split("\n")
     .filter((line) => /^Co-authored-by: .+$/.test(line))
   const mergeStrategyAnalysis = analyzeReviewMergeStrategy(pr)
+  const rebaseStatus =
+    (
+      linkedDraft?.rebaseState as
+        | {
+            status?: string | null
+          }
+        | null
+    )?.status ?? null
+  const hasPendingReviewResolution =
+    linkedDraft?.status === "SYNC_CONFLICT" ||
+    (effectiveConflictMode === "FINE_GRAINED" &&
+      rebaseStatus !== null &&
+      rebaseStatus !== "COMPLETED" &&
+      rebaseStatus !== "ABORTED" &&
+      rebaseStatus !== "IDLE")
   const mergeBlockedReason =
     pr.state !== "open"
       ? "Pull request is already closed."
       : linkedDraft?.status === "SYNC_CONFLICT"
         ? "Resolve sync conflicts before landing this pull request."
-        : effectiveConflictMode
+        : hasPendingReviewResolution
           ? "Finish the current review resolution before landing this pull request."
           : !isMergeable
             ? "GitHub still reports this pull request as not mergeable."
@@ -401,27 +416,56 @@ export default async function ReviewDetailPage({
         </div>
 
         <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
-          <PRActionButtons
-            closePRAction={async () => {
-              "use server"
-              await closePRAction(prNumber)
-            }}
-            mergePRAction={
-              !mergeBlockedReason
-                ? async (options) => {
-                    "use server"
-                    await mergePRAction(prNumber, options)
-                  }
-                : null
-            }
-            mergeStrategyAnalysis={mergeStrategyAnalysis}
-            mergeBlockedReason={mergeBlockedReason}
-            squashCommitDefaults={{
-              title: defaultCommitTitle,
-              body: defaultCommitBody,
-              coauthorLines,
-            }}
-          />
+          {linkedDraft ? (
+            <div className="space-y-4 border border-tech-main/35 bg-white/80 p-4 backdrop-blur-sm">
+              <div className="space-y-1 border-b border-tech-main/15 pb-3">
+                <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+                  PR_CONTROLS
+                </p>
+                <p className="font-mono text-sm font-bold tracking-widest text-tech-main uppercase">
+                  REVIEW_WORKFLOW_ACTIVE
+                </p>
+                <p className="font-mono text-[0.6875rem] leading-relaxed text-tech-main/60">
+                  Merge is handled from the in-editor review flow to avoid duplicate actions.
+                </p>
+              </div>
+
+              <form
+                action={async () => {
+                  "use server"
+                  await closePRAction(prNumber)
+                }}>
+                <TechButton
+                  type="submit"
+                  variant="secondary"
+                  className="w-full border-red-600 text-red-600 hover:bg-red-600 hover:text-white">
+                  CLOSE_PR
+                </TechButton>
+              </form>
+            </div>
+          ) : (
+            <PRActionButtons
+              closePRAction={async () => {
+                "use server"
+                await closePRAction(prNumber)
+              }}
+              mergePRAction={
+                !mergeBlockedReason
+                  ? async (options) => {
+                      "use server"
+                      await mergePRAction(prNumber, options)
+                    }
+                  : null
+              }
+              mergeStrategyAnalysis={mergeStrategyAnalysis}
+              mergeBlockedReason={mergeBlockedReason}
+              squashCommitDefaults={{
+                title: defaultCommitTitle,
+                body: defaultCommitBody,
+                coauthorLines,
+              }}
+            />
+          )}
 
           <div className="border border-tech-main/25 bg-tech-main/5 p-4">
             <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">

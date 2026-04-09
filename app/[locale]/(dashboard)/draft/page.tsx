@@ -15,6 +15,22 @@ import { SectionTitle } from "@/components/ui/section-title"
 import { decodeStoredDraftFiles } from "@/lib/draft-files"
 import { countCleanupFailedByRevision } from "@/lib/draft-asset-db"
 
+const ARCHIVED_DRAFT_STATUSES = new Set([
+  "APPROVED",
+  "ARCHIVED",
+  "MERGED",
+  "CLOSED",
+])
+
+const NON_DELETABLE_DRAFT_STATUSES = new Set([
+  "PENDING",
+  "APPROVED",
+  "IN_REVIEW",
+  "SYNC_CONFLICT",
+  "MERGED",
+  "CLOSED",
+])
+
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
@@ -47,8 +63,6 @@ export default async function DraftDashboardPage() {
   const allDrafts = await Promise.all(
     allDraftsRaw.map(async (d) => {
       let displayStatus = d.status
-      let isClosed = false
-      let isMerged = false
       const decodedDraft = decodeStoredDraftFiles({
         content: d.content,
         conflictContent: d.conflictContent,
@@ -59,9 +73,7 @@ export default async function DraftDashboardPage() {
         try {
           const pr = await getPR(d.githubPrNum)
           if (pr.state === "closed") {
-            isClosed = true
-            isMerged = !!pr.merged
-            displayStatus = isMerged ? "MERGED" : "CLOSED"
+            displayStatus = pr.merged ? "MERGED" : "CLOSED"
           }
         } catch (e) {
           console.error(`Failed to fetch PR #${d.githubPrNum}:`, e)
@@ -72,25 +84,15 @@ export default async function DraftDashboardPage() {
         cleanupFailedCount: cleanupFailedByRevisionId.get(d.id) ?? 0,
         displayStatus,
         fileCount: decodedDraft.files.length,
-        isClosed,
-        isMerged,
       }
     })
   )
 
   const activeDrafts = allDrafts.filter(
-    (d) =>
-      d.displayStatus !== "APPROVED" &&
-      d.displayStatus !== "ARCHIVED" &&
-      d.displayStatus !== "MERGED" &&
-      d.displayStatus !== "CLOSED"
+    (d) => !ARCHIVED_DRAFT_STATUSES.has(d.displayStatus)
   )
-  const archivedDrafts = allDrafts.filter(
-    (d) =>
-      d.displayStatus === "APPROVED" ||
-      d.displayStatus === "ARCHIVED" ||
-      d.displayStatus === "MERGED" ||
-      d.displayStatus === "CLOSED"
+  const archivedDrafts = allDrafts.filter((d) =>
+    ARCHIVED_DRAFT_STATUSES.has(d.displayStatus)
   )
 
   const renderDraftCard = (draft: (typeof allDrafts)[0]) => (
@@ -118,12 +120,7 @@ export default async function DraftDashboardPage() {
             <span className="mono-label">
               {draft.updatedAt.toLocaleDateString()}
             </span>
-            {draft.displayStatus !== "PENDING" &&
-              draft.displayStatus !== "APPROVED" &&
-              draft.displayStatus !== "IN_REVIEW" &&
-              draft.displayStatus !== "SYNC_CONFLICT" &&
-              draft.displayStatus !== "MERGED" &&
-              draft.displayStatus !== "CLOSED" && (
+            {!NON_DELETABLE_DRAFT_STATUSES.has(draft.displayStatus) && (
                 <form
                   action={async () => {
                     "use server"

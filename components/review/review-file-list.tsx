@@ -7,6 +7,9 @@ interface ReviewFileListProps {
     id: string
     filePath: string
     status: "clean" | "conflict" | "resolved"
+    changeType?: "added" | "modified" | "removed" | "renamed"
+    additions?: number
+    deletions?: number
   }>
   activeFileId: string
   onSelectFile: (fileId: string) => void
@@ -131,6 +134,11 @@ export function ReviewFileList({
                 <span className="w-full truncate font-mono text-[0.6875rem] text-tech-main/60">
                   {file.filePath || "PATH_NOT_SET"}
                 </span>
+                  <span className="flex w-full flex-wrap items-center gap-2 font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
+                    <span>{file.changeType ?? "modified"}</span>
+                    <span>+{file.additions ?? 0}</span>
+                    <span>-{file.deletions ?? 0}</span>
+                  </span>
               </button>
             </div>
           )

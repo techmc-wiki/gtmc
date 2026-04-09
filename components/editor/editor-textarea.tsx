@@ -39,6 +39,8 @@ const techTheme = EditorView.theme({
 interface EditorTextareaProps {
   value: string
   onChange: (value: string) => void
+  onUndo?: () => void
+  onRedo?: () => void
   onPaste?: (e: React.ClipboardEvent<HTMLDivElement>) => void
   onDrop?: (e: React.DragEvent<HTMLDivElement>) => void
   onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void
@@ -50,6 +52,8 @@ interface EditorTextareaProps {
   fileId?: string // to preserve state per file
   lineWrap?: boolean
   onWrapToggle?: () => void
+  canUndo?: boolean
+  canRedo?: boolean
 }
 
 export const EditorTextarea = React.forwardRef<
@@ -59,6 +63,8 @@ export const EditorTextarea = React.forwardRef<
   {
     value,
     onChange,
+    onUndo,
+    onRedo,
     onPaste,
     onDrop,
     onDragOver,
@@ -69,11 +75,48 @@ export const EditorTextarea = React.forwardRef<
     fileId,
     lineWrap = false,
     onWrapToggle,
+    canUndo = false,
+    canRedo = false,
     ...rest
   },
   ref
 ) {
   const t = useTranslations("Editor")
+
+  const handleKeyDownCapture = React.useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (isReadOnly) {
+        return
+      }
+
+      const key = event.key.toLowerCase()
+      const isModifierPressed = event.ctrlKey || event.metaKey
+      const isUndo = isModifierPressed && !event.shiftKey && key === "z"
+      const isRedo =
+        isModifierPressed &&
+        ((event.shiftKey && key === "z") || (!event.shiftKey && key === "y"))
+
+      if (isUndo && onUndo) {
+        event.preventDefault()
+        event.stopPropagation()
+
+        if (canUndo) {
+          onUndo()
+        }
+        return
+      }
+
+      if (isRedo && onRedo) {
+        event.preventDefault()
+        event.stopPropagation()
+
+        if (canRedo) {
+          onRedo()
+        }
+      }
+    },
+    [canRedo, canUndo, isReadOnly, onRedo, onUndo]
+  )
 
   return (
     <div
@@ -85,6 +128,7 @@ export const EditorTextarea = React.forwardRef<
       onDrop={onDrop}
       onDragOver={onDragOver}
       onDragEnter={onDragEnter}
+      onKeyDownCapture={handleKeyDownCapture}
       aria-busy={isSaving}
       role="application"
       {...rest}>

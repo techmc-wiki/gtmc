@@ -1,5 +1,13 @@
 export type ConflictMode = "FINE_GRAINED" | "SIMPLE"
 
+export type ReviewMergeMethod = "squash" | "rebase" | "direct"
+
+export interface ReviewMergeStrategyAnalysis {
+  recommendation: ReviewMergeMethod
+  availableMethods: ReviewMergeMethod[]
+  rationale: string
+}
+
 export interface ReviewFile {
   id: string
   filePath: string
@@ -7,6 +15,9 @@ export interface ReviewFile {
   originalContent: string
   conflictContent?: string
   status: "clean" | "conflict" | "resolved"
+  changeType?: "added" | "modified" | "removed" | "renamed"
+  additions?: number
+  deletions?: number
 }
 
 export interface ModeAnalysis {

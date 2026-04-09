@@ -44,7 +44,7 @@ import {
   storeRerere,
 } from "@/lib/rerere"
 import type { RebaseState } from "@/types/rebase"
-import type { ConflictMode } from "@/types/review"
+import type { ConflictMode, ReviewMergeMethod } from "@/types/review"
 
 const owner = ARTICLES_REPO_OWNER
 const repo = ARTICLES_REPO_NAME
@@ -368,32 +368,36 @@ async function persistRebasedBranchFiles(input: {
   )
 }
 
-export async function mergePRAction(prNumber: number) {
+export async function mergePRAction(
+  prNumber: number,
+  options?: {
+    commitBody?: string
+    commitTitle?: string
+    mergeMethod?: ReviewMergeMethod
+  }
+) {
   const session = await requireAuth()
   await requireAdmin(session.user.id)
 
   const token = await getGithubPatForUser(session.user.id)
-  const octokit = getOctokit(token)
 
   try {
-    reviewLog("mergePRAction", { prNumber, status: "start" })
     reviewLog("mergePRAction", {
       prNumber,
-      status: "github-api-before",
-      operation: "pulls.merge",
-      mergeMethod: "squash",
+      status: "start",
+      mergeMethod: options?.mergeMethod ?? "auto",
     })
-    await octokit.pulls.merge({
-      owner,
-      repo,
-      pull_number: prNumber,
-      merge_method: "squash",
+    reviewLog("mergePRAction", {
+      prNumber,
+      status: "merge-dispatch",
+      mergeMethod: options?.mergeMethod ?? "auto",
     })
+    await mergePR(prNumber, options, token)
     reviewLog("mergePRAction", {
       prNumber,
       status: "github-api-after",
-      operation: "pulls.merge",
-      result: "merged",
+      operation: "mergePR",
+      result: "completed",
     })
     try {
       reviewLog("mergePRAction", {
@@ -1642,13 +1646,18 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
 
 export async function finalizeReviewAction(
   prNumber: number,
-  options?: { commitTitle?: string; commitBody?: string }
+  options?: {
+    commitTitle?: string
+    commitBody?: string
+    mergeMethod?: ReviewMergeMethod
+  }
 ) {
   reviewLog("finalizeReviewAction", {
     prNumber,
     status: "start",
     commitTitleProvided: Boolean(options?.commitTitle),
     commitBodyProvided: Boolean(options?.commitBody),
+    mergeMethod: options?.mergeMethod ?? "auto",
   })
 
   try {
@@ -1707,12 +1716,12 @@ export async function finalizeReviewAction(
         prNumber,
         status: "merge-pr-start",
         mode: conflictMode,
-        mergeMethod: "squash",
+        mergeMethod: options?.mergeMethod ?? "auto",
       })
       await mergePR(
         prNumber,
         {
-          mergeMethod: "squash",
+          mergeMethod: options?.mergeMethod,
           commitTitle: options?.commitTitle,
           commitBody: options?.commitBody,
         },
@@ -1768,12 +1777,12 @@ export async function finalizeReviewAction(
         prNumber,
         status: "merge-pr-start",
         mode: conflictMode,
-        mergeMethod: "squash",
+        mergeMethod: options?.mergeMethod ?? "auto",
       })
       await mergePR(
         prNumber,
         {
-          mergeMethod: "squash",
+          mergeMethod: options?.mergeMethod,
           commitTitle: options?.commitTitle,
           commitBody: options?.commitBody,
         },

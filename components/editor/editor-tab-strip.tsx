@@ -10,6 +10,10 @@ interface EditorTabStripProps {
   onTabChange: (tab: TabType) => void
   writeId: string
   previewId: string
+  threeWayId?: string
+  diffId?: string
+  showThreeWayTab?: boolean
+  showDiffTab?: boolean
   rightSlot?: React.ReactNode
 }
 
@@ -18,12 +22,22 @@ export function EditorTabStrip({
   onTabChange,
   writeId,
   previewId,
+  threeWayId,
+  diffId,
+  showThreeWayTab = false,
+  showDiffTab = false,
   rightSlot,
 }: EditorTabStripProps) {
   const t = useTranslations("Editor")
 
   const tabs: { id: TabType; label: string; ariaControls?: string }[] = [
+    ...(showThreeWayTab
+      ? [{ id: "3-way" as const, label: t("tabThreeWay"), ariaControls: threeWayId }]
+      : []),
     { id: "write", label: t("writeTab"), ariaControls: writeId },
+    ...(showDiffTab
+      ? [{ id: "diff" as const, label: t("tabDiff"), ariaControls: diffId }]
+      : []),
     { id: "preview", label: t("previewTab"), ariaControls: previewId },
   ]
 

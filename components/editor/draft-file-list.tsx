@@ -9,6 +9,7 @@ import { type DraftFileCollection } from "@/lib/draft-files"
 interface DraftFileListProps {
   files: DraftFileCollection["files"]
   activeFileId: string
+  unsavedFileIds?: Set<string>
   onSelectFile: (fileId: string) => void
   onAddFile: () => void
   onRemoveFile: (fileId: string) => void
@@ -18,6 +19,7 @@ interface DraftFileListProps {
 export function DraftFileList({
   files,
   activeFileId,
+  unsavedFileIds,
   onSelectFile,
   onAddFile,
   onRemoveFile,
@@ -68,6 +70,7 @@ export function DraftFileList({
             file.filePath.split("/").filter(Boolean).slice(-1)[0] ||
             `UNTITLED_FILE_${index + 1}`
           const isActive = file.id === activeFileId
+          const isUnsaved = unsavedFileIds?.has(file.id) ?? false
 
           return (
             <div key={file.id} className="relative flex items-stretch">
@@ -86,12 +89,21 @@ export function DraftFileList({
                       `
                   }
                 `}>
-                <span
-                  className="
-                    w-full truncate font-mono text-xs tracking-widest
-                    text-tech-main uppercase
-                  ">
-                  {fileLabel}
+                <span className="flex w-full items-center gap-2">
+                  <span
+                    className="
+                      truncate font-mono text-xs tracking-widest text-tech-main
+                      uppercase
+                    ">
+                    {fileLabel}
+                  </span>
+                  {isUnsaved ? (
+                    <span
+                      className="size-2 shrink-0 rounded-full bg-amber-500"
+                      title="UNSAVED_CHANGES"
+                      aria-label="Unsaved changes"
+                    />
+                  ) : null}
                 </span>
                 <span
                   className="

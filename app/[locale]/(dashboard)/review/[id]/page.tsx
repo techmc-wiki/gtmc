@@ -10,6 +10,7 @@ import {
   ARTICLES_REPO_OWNER,
   ARTICLES_REPO_NAME,
 } from "@/lib/github/articles-repo"
+import { analyzeReviewMergeStrategy } from "@/lib/github/pr-manager"
 import { mergePRAction, closePRAction } from "@/actions/review"
 import { decodeStoredDraftFiles } from "@/lib/draft-files"
 import { prisma } from "@/lib/prisma"
@@ -114,6 +115,7 @@ export default async function ReviewDetailPage({
     repo,
     pull_number: prNumber,
   })
+  const prFileMap = new Map(prFiles.map((file) => [file.filename, file]))
   const primaryPrFile =
     prFiles.find((file) => file.filename.endsWith(".md")) || prFiles[0]
 
@@ -222,6 +224,18 @@ export default async function ReviewDetailPage({
 
   const reviewFiles: ReviewFile[] = linkedDraftFiles
     ? linkedDraftFiles.files.map((file) => ({
+        ...(prFileMap.get(file.filePath)
+          ? {
+              additions: prFileMap.get(file.filePath)?.additions,
+              changeType: prFileMap.get(file.filePath)?.status as
+                | "added"
+                | "modified"
+                | "removed"
+                | "renamed"
+                | undefined,
+              deletions: prFileMap.get(file.filePath)?.deletions,
+            }
+          : {}),
         id: file.id,
         filePath: file.filePath,
         content: prFileContents[file.filePath] ?? file.content,
@@ -253,113 +267,176 @@ export default async function ReviewDetailPage({
   const coauthorLines = defaultCommitBody
     .split("\n")
     .filter((line) => /^Co-authored-by: .+$/.test(line))
+  const mergeStrategyAnalysis = analyzeReviewMergeStrategy(pr)
+  const mergeBlockedReason =
+    pr.state !== "open"
+      ? "Pull request is already closed."
+      : linkedDraft?.status === "SYNC_CONFLICT"
+        ? "Resolve sync conflicts before landing this pull request."
+        : effectiveConflictMode
+          ? "Finish the current review resolution before landing this pull request."
+          : !isMergeable
+            ? "GitHub still reports this pull request as not mergeable."
+            : null
 
   return (
-    <div
-      className="
-        mx-auto max-w-6xl space-y-8 p-4 pb-32
-        md:p-8
-      ">
+    <div className="mx-auto max-w-[88rem] space-y-8 p-4 pb-32 md:p-8">
       <Link href="/review">
         <TechButton variant="ghost" size="sm">
           {"<"} BACK_TO_HUB
         </TechButton>
       </Link>
 
-      <div
-        className="
-          relative flex flex-col items-end justify-between gap-4 border-b
-          border-tech-main/30 pb-8
-          md:flex-row
-        ">
-        <div
-          className="
-            absolute -bottom-1.25 left-0 size-2 border border-tech-main/50
-            bg-tech-main/20
-          "></div>
-        <div>
-          <h1
-            className="
-              mb-4 font-mono text-3xl/tight tracking-widest wrap-break-word
-              text-tech-main-dark uppercase
-              lg:text-4xl
-            ">
-            {pr.title} <span className="text-tech-main/50">#{pr.number}</span>
-          </h1>
-          <div
-            className="
-              inline-flex flex-wrap items-center gap-4 border
-              border-tech-main/30 bg-tech-main/10 p-3 font-mono text-xs
-              text-tech-main-dark
-            ">
-            <span className="text-tech-main">AUTHOR:</span>
-            <span className="uppercase">
-              {linkedDraft?.author?.name || pr.user?.login || "UNKNOWN_USER"}
-            </span>
-            <span className="px-2 text-tech-main/50">{"//"}</span>
-            <span className="text-tech-main">TARGET_FILE:</span>
-            <span>{targetFileLabel}</span>
-            <span className="px-2 text-tech-main/50">{"//"}</span>
-            <span className="text-tech-main">STATUS:</span>
-            <span
-              className={
-                hasConflict
-                  ? "font-bold text-red-600"
-                  : isMergeable
-                    ? "font-bold text-green-600"
-                    : "text-yellow-600"
-              }>
-              {pr.state.toUpperCase()} {hasConflict && "(CONFLICT)"}
-            </span>
+      <section className="relative border-b border-tech-main/30 pb-8">
+        <div className="absolute -bottom-1.25 left-0 size-2 border border-tech-main/50 bg-tech-main/20"></div>
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-3 font-mono text-[0.6875rem] tracking-widest uppercase">
+              <span
+                className={`border px-2 py-1 ${
+                  hasConflict
+                    ? "border-red-500/50 bg-red-500/10 text-red-600"
+                    : isMergeable
+                      ? "border-green-600/40 bg-green-500/10 text-green-700"
+                      : "border-amber-500/40 bg-amber-500/10 text-amber-700"
+                }`}>
+                {pr.state.toUpperCase()} {hasConflict ? "CONFLICT" : "READY"}
+              </span>
+              <span className="border border-tech-main/25 bg-white/70 px-2 py-1 text-tech-main/70">
+                PR #{pr.number}
+              </span>
+              <span className="border border-tech-main/25 bg-white/70 px-2 py-1 text-tech-main/70">
+                {pr.base.ref} ← {pr.head.ref}
+              </span>
+            </div>
+
+            <h1 className="font-mono text-3xl/tight tracking-widest text-tech-main-dark uppercase lg:text-4xl">
+              {pr.title}
+            </h1>
+
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <div className="border border-tech-main/20 bg-tech-main/5 px-4 py-3">
+                <p className="font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
+                  AUTHOR
+                </p>
+                <p className="mt-1 font-mono text-sm tracking-widest text-tech-main uppercase">
+                  {linkedDraft?.author?.name || pr.user?.login || "UNKNOWN_USER"}
+                </p>
+              </div>
+              <div className="border border-tech-main/20 bg-tech-main/5 px-4 py-3">
+                <p className="font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
+                  TARGET
+                </p>
+                <p className="mt-1 font-mono text-sm tracking-widest text-tech-main uppercase">
+                  {targetFileLabel}
+                </p>
+              </div>
+              <div className="border border-tech-main/20 bg-tech-main/5 px-4 py-3">
+                <p className="font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
+                  STATS
+                </p>
+                <p className="mt-1 font-mono text-sm tracking-widest text-tech-main uppercase">
+                  {pr.commits} COMMITS / {pr.changed_files} FILES
+                </p>
+              </div>
+              <div className="border border-tech-main/20 bg-tech-main/5 px-4 py-3">
+                <p className="font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
+                  DIFF
+                </p>
+                <p className="mt-1 font-mono text-sm tracking-widest uppercase">
+                  <span className="text-green-700">+{pr.additions}</span>
+                  <span className="px-2 text-tech-main/30">/</span>
+                  <span className="text-red-600">-{pr.deletions}</span>
+                </p>
+              </div>
+            </div>
           </div>
+
+          <a
+            href={pr.html_url}
+            target="_blank"
+            rel="noreferrer"
+            className="font-mono text-xs tracking-widest text-tech-main uppercase underline underline-offset-4 hover:text-tech-main-dark">
+            OPEN_ON_GITHUB_
+          </a>
+        </div>
+      </section>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_23rem]">
+        <div className="space-y-6">
+          {linkedDraft ? (
+            <ReviewEditor
+              pr={{
+                number: pr.number,
+                title: pr.title,
+                htmlUrl: pr.html_url,
+                baseRef: pr.base.ref,
+                headRef: pr.head.ref,
+                commits: pr.commits,
+                changedFiles: pr.changed_files,
+                additions: pr.additions,
+                deletions: pr.deletions,
+                authorLogin: pr.user?.login || "UNKNOWN",
+              }}
+              files={reviewFiles}
+              initialActiveFileId={linkedDraftFiles?.activeFileId}
+              modeAnalysis={modeAnalysis}
+              mergeStrategyAnalysis={mergeStrategyAnalysis}
+              revision={{
+                id: linkedDraft.id,
+                conflictMode: effectiveConflictMode,
+                rebaseState: linkedDraft.rebaseState,
+              }}
+              squashCommitDefaults={{
+                title: defaultCommitTitle,
+                body: defaultCommitBody,
+                coauthorLines,
+              }}
+            />
+          ) : (
+            <div className="border border-tech-main/30 bg-tech-main/5 px-6 py-10 font-mono text-sm tracking-widest text-tech-main/70 uppercase">
+              NO_DRAFT_LINKED_
+            </div>
+          )}
         </div>
 
-        {pr.state === "open" && (
+        <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
           <PRActionButtons
             closePRAction={async () => {
               "use server"
               await closePRAction(prNumber)
             }}
             mergePRAction={
-              isMergeable &&
-              linkedDraft?.status !== "SYNC_CONFLICT" &&
-              !effectiveConflictMode
-                ? async () => {
+              !mergeBlockedReason
+                ? async (options) => {
                     "use server"
-                    await mergePRAction(prNumber)
+                    await mergePRAction(prNumber, options)
                   }
                 : null
             }
+            mergeStrategyAnalysis={mergeStrategyAnalysis}
+            mergeBlockedReason={mergeBlockedReason}
+            squashCommitDefaults={{
+              title: defaultCommitTitle,
+              body: defaultCommitBody,
+              coauthorLines,
+            }}
           />
-        )}
-      </div>
 
-      {linkedDraft ? (
-        <ReviewEditor
-          pr={{ number: pr.number, title: pr.title, htmlUrl: pr.html_url }}
-          files={reviewFiles}
-          initialActiveFileId={linkedDraftFiles?.activeFileId}
-          modeAnalysis={modeAnalysis}
-          revision={{
-            id: linkedDraft.id,
-            conflictMode: effectiveConflictMode,
-            rebaseState: linkedDraft.rebaseState,
-          }}
-          squashCommitDefaults={{
-            title: defaultCommitTitle,
-            body: defaultCommitBody,
-            coauthorLines,
-          }}
-        />
-      ) : (
-        <div
-          className="
-            border border-tech-main/30 bg-tech-main/5 px-6 py-10 font-mono
-            text-sm tracking-widest text-tech-main/70 uppercase
-          ">
-          NO_DRAFT_LINKED_
-        </div>
-      )}
+          <div className="border border-tech-main/25 bg-tech-main/5 p-4">
+            <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+              REVIEW_FLOW
+            </p>
+            <div className="mt-3 space-y-3 font-mono text-[0.6875rem] leading-relaxed text-tech-main/70">
+              <p>Author: {linkedDraft?.author?.name || pr.user?.login || "UNKNOWN_USER"}</p>
+              <p>Head branch: {pr.head.ref}</p>
+              <p>Base branch: {pr.base.ref}</p>
+              <p>Auto recommendation: {mergeStrategyAnalysis.recommendation.toUpperCase()}</p>
+              <p>{mergeStrategyAnalysis.rationale}</p>
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   )
 }

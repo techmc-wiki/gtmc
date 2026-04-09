@@ -12,6 +12,7 @@ import {
 import { EditorTextarea } from "@/components/editor/editor-textarea"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
 import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
+import { InlineDiff } from "@/app/[locale]/(dashboard)/review/[id]/components/InlineDiff"
 import { ConflictBlock } from "@/components/review/conflict-block"
 import { ReviewFileList } from "@/components/review/review-file-list"
 import { ModeSelector } from "@/components/review/mode-selector"
@@ -32,7 +33,9 @@ import { getReauthLoginUrl, isReauthRequiredError } from "@/lib/admin-reauth"
 import type {
   ConflictMode,
   ModeAnalysis,
+  ReviewMergeStrategyAnalysis,
   ReviewFile,
+  ReviewMergeMethod,
   ReviewSessionState,
 } from "@/types/review"
 import type { RebaseState } from "@/types/rebase"
@@ -165,10 +168,22 @@ function inferMode(revision: {
 }
 
 interface ReviewEditorProps {
-  pr: { number: number; title: string; htmlUrl: string }
+  pr: {
+    number: number
+    title: string
+    htmlUrl: string
+    baseRef: string
+    headRef: string
+    commits: number
+    changedFiles: number
+    additions: number
+    deletions: number
+    authorLogin: string
+  }
   files: ReviewFile[]
   initialActiveFileId?: string
   modeAnalysis: ModeAnalysis
+  mergeStrategyAnalysis: ReviewMergeStrategyAnalysis
   revision: { id: string; conflictMode: string | null; rebaseState: unknown }
   squashCommitDefaults?: {
     title: string
@@ -192,6 +207,7 @@ export function ReviewEditor({
   files,
   initialActiveFileId,
   modeAnalysis,
+  mergeStrategyAnalysis,
   revision,
   squashCommitDefaults,
 }: ReviewEditorProps) {
@@ -446,6 +462,12 @@ export function ReviewEditor({
 
     return () => window.cancelAnimationFrame(frame)
   }, [activeTab, activeFile?.id, hasInlineConflicts, parsedSegments])
+
+  React.useEffect(() => {
+    if (activeTab === "3-way" && !hasInlineConflicts) {
+      setActiveTab("write")
+    }
+  }, [activeTab, hasInlineConflicts])
 
   const updateFinalizeProgressState = React.useCallback(
     (nextState: Exclude<OperationProgressState, "idle">) => {
@@ -871,6 +893,7 @@ export function ReviewEditor({
   const handleFinalize = async (options?: {
     commitTitle?: string
     commitBody?: string
+    mergeMethod?: ReviewMergeMethod
   }) => {
     setActionError(null)
     setActionNotice(null)
@@ -899,6 +922,8 @@ export function ReviewEditor({
     filePath: f.filePath,
     status: f.status,
   }))
+  const diffBaseContent = activeFile?.originalContent ?? ""
+  const hasDiffChanges = diffBaseContent !== activeContent
 
   return (
     <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
@@ -910,9 +935,9 @@ export function ReviewEditor({
 
       <div className="space-y-4">
         <div className="sticky top-0 z-40 flex flex-wrap items-center justify-between gap-2 border border-tech-main/40 bg-tech-bg/95 px-4 py-3 font-mono text-xs text-tech-main backdrop-blur-sm">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
             <span className="shrink-0 border border-tech-main/40 bg-tech-main/10 px-2 py-0.5 tracking-widest uppercase">
-              PR_{pr.number}_
+              FILES_CHANGED_#{pr.number}
             </span>
             <span className="truncate tracking-widest uppercase">
               {pr.title}
@@ -922,15 +947,22 @@ export function ReviewEditor({
                 {effectiveMode}
               </span>
             )}
+            <span className="shrink-0 border border-tech-main/20 bg-white/70 px-2 py-0.5 tracking-widest text-tech-main/60 uppercase">
+              {pr.baseRef} ← {pr.headRef}
+            </span>
           </div>
-          <div className="flex shrink-0 items-center gap-3">
+          <div className="flex shrink-0 flex-wrap items-center gap-3">
             <span className="font-mono text-[0.6875rem] tracking-widest text-tech-main/60 uppercase">
-              {
-                sessionFiles.filter(
-                  (f) => f.status === "resolved" || f.status === "clean"
-                ).length
-              }
-              /{sessionFiles.length}_FILES_
+              {pr.commits}_COMMITS
+            </span>
+            <span className="font-mono text-[0.6875rem] tracking-widest text-tech-main/60 uppercase">
+              {pr.changedFiles}_FILES
+            </span>
+            <span className="font-mono text-[0.6875rem] tracking-widest text-green-700 uppercase">
+              +{pr.additions}
+            </span>
+            <span className="font-mono text-[0.6875rem] tracking-widest text-red-600 uppercase">
+              -{pr.deletions}
             </span>
             <a
               href={pr.htmlUrl}
@@ -1004,6 +1036,7 @@ export function ReviewEditor({
               defaultCommitTitle={squashCommitDefaults?.title}
               defaultCommitBody={squashCommitDefaults?.body}
               coauthorLines={squashCommitDefaults?.coauthorLines}
+              mergeStrategyAnalysis={mergeStrategyAnalysis}
             />
 
             <div
@@ -1014,12 +1047,16 @@ export function ReviewEditor({
               <EditorTabStrip
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
+                threeWayId="review-editor-three-way-panel"
                 writeId="review-editor-write-panel"
+                diffId="review-editor-diff-panel"
                 previewId="review-editor-preview-panel"
+                showThreeWayTab={hasInlineConflicts}
+                showDiffTab
                 rightSlot={activeFile?.filePath || "UNTITLED_FILE_"}
               />
 
-              {hasInlineConflicts && (
+              {activeTab === "3-way" && hasInlineConflicts && (
                 <div className="flex items-center border-b border-tech-main/20 bg-tech-main/3 px-3 py-1">
                   <button
                     type="button"
@@ -1042,10 +1079,10 @@ export function ReviewEditor({
               )}
 
               <section
-                id="review-editor-write-panel"
+                id="review-editor-three-way-panel"
                 role="tabpanel"
                 className="editor-grow"
-                hidden={activeTab !== "write"}>
+                hidden={activeTab !== "3-way"}>
                 <div className="editor-surface">
                   {hasInlineConflicts ? (
                     <div className="custom-left-scrollbar overflow-auto">
@@ -1145,15 +1182,79 @@ export function ReviewEditor({
                       </pre>
                     </div>
                   ) : (
-                    <EditorTextarea
-                      ref={textareaRef}
-                      value={activeContent}
-                      onChange={updateActiveFileContent}
-                      placeholder={t("reviewContentPlaceholder")}
-                      lineWrap={lineWrap}
-                      onWrapToggle={() => setLineWrap((v) => !v)}
-                    />
+                    <div className="p-6 space-y-3">
+                      <p className="font-mono text-xs tracking-widest text-tech-main/60 uppercase">
+                        NO_CONFLICTS_LEFT_
+                      </p>
+                    </div>
                   )}
+                </div>
+              </section>
+
+              <section
+                id="review-editor-write-panel"
+                role="tabpanel"
+                className="editor-grow"
+                hidden={activeTab !== "write"}>
+                <div className="editor-surface">
+                  <EditorTextarea
+                    ref={textareaRef}
+                    value={activeContent}
+                    onChange={updateActiveFileContent}
+                    placeholder={t("reviewContentPlaceholder")}
+                    lineWrap={lineWrap}
+                    onWrapToggle={() => setLineWrap((v) => !v)}
+                  />
+                </div>
+              </section>
+
+              <section
+                id="review-editor-diff-panel"
+                role="tabpanel"
+                hidden={activeTab !== "diff"}
+                className="editor-grow">
+                <div className="grid gap-px bg-tech-main/15 lg:grid-cols-2">
+                  <div className="bg-white/85">
+                    <div className="border-b border-tech-main/15 bg-red-500/5 px-4 py-2">
+                      <p className="font-mono text-[0.6875rem] tracking-widest text-red-700 uppercase">
+                        REMOVED_FROM_BASE_
+                      </p>
+                    </div>
+                    <div className="max-h-[70vh] overflow-auto p-4 sm:p-6">
+                      {hasDiffChanges ? (
+                        <InlineDiff
+                          currentText={activeContent}
+                          incomingText={diffBaseContent}
+                          mode="incoming"
+                        />
+                      ) : (
+                        <p className="font-mono text-xs text-tech-main/50 uppercase">
+                          NO_REMOVALS_
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="bg-white/85">
+                    <div className="border-b border-tech-main/15 bg-green-500/5 px-4 py-2">
+                      <p className="font-mono text-[0.6875rem] tracking-widest text-green-700 uppercase">
+                        ADDED_IN_CURRENT_
+                      </p>
+                    </div>
+                    <div className="max-h-[70vh] overflow-auto p-4 sm:p-6">
+                      {hasDiffChanges ? (
+                        <InlineDiff
+                          currentText={activeContent}
+                          incomingText={diffBaseContent}
+                          mode="current"
+                        />
+                      ) : (
+                        <p className="font-mono text-xs text-tech-main/50 uppercase">
+                          NO_CHANGES_
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </section>
 

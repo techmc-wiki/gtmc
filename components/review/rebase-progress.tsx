@@ -4,12 +4,17 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 import { TechButton } from "@/components/ui/tech-button"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { MergeMethodPicker } from "@/components/review/merge-method-picker"
 import {
   OperationProgress,
   type OperationProgressStage,
   type OperationProgressState,
 } from "@/components/ui/operation-progress"
 import type { FileRebaseState, RebaseState } from "@/types/rebase"
+import type {
+  ReviewMergeMethod,
+  ReviewMergeStrategyAnalysis,
+} from "@/types/review"
 
 interface SimpleFileStatus {
   filePath: string
@@ -22,13 +27,18 @@ interface RebaseProgressProps {
   files?: SimpleFileStatus[]
   isBranchSyncing?: boolean
   onAbort: () => void
-  onFinalize: (options?: { commitTitle?: string; commitBody?: string }) => void
+  onFinalize: (options?: {
+    commitTitle?: string
+    commitBody?: string
+    mergeMethod?: ReviewMergeMethod
+  }) => void
   isAborting?: boolean
   isFinalizing?: boolean
   finalizeProgressState?: OperationProgressState
   defaultCommitTitle?: string
   defaultCommitBody?: string
   coauthorLines?: string[]
+  mergeStrategyAnalysis: ReviewMergeStrategyAnalysis
 }
 
 function CommitStepDots({
@@ -220,13 +230,15 @@ export function RebaseProgress({
   defaultCommitTitle = "",
   defaultCommitBody = "",
   coauthorLines = [],
+  mergeStrategyAnalysis,
 }: RebaseProgressProps) {
   const t = useTranslations("Review")
-  const editorT = useTranslations("Editor")
   const progressT = useTranslations("OperationProgress")
-  const [showCommitEditor, setShowCommitEditor] = React.useState(false)
   const [commitTitle, setCommitTitle] = React.useState(defaultCommitTitle)
   const [commitBody, setCommitBody] = React.useState(defaultCommitBody)
+  const [selectedMethod, setSelectedMethod] = React.useState<ReviewMergeMethod>(
+    mergeStrategyAnalysis.recommendation
+  )
 
   const finalizeStages = React.useMemo<OperationProgressStage[]>(
     () =>
@@ -292,10 +304,27 @@ export function RebaseProgress({
   }, [defaultCommitBody])
 
   React.useEffect(() => {
-    if (isBranchSyncing) {
-      setShowCommitEditor(false)
+    setSelectedMethod(mergeStrategyAnalysis.recommendation)
+  }, [mergeStrategyAnalysis])
+
+  const buildFinalizeOptions = React.useCallback(() => {
+    const finalBody =
+      selectedMethod === "squash" &&
+      coauthorLines.length > 0 &&
+      !coauthorLines.some((line) => commitBody.includes(line))
+        ? `${commitBody.trimEnd()}${commitBody.trim() ? "\n\n" : ""}${coauthorLines.join("\n")}`
+        : commitBody
+
+    return {
+      mergeMethod: selectedMethod,
+      ...(selectedMethod === "squash"
+        ? {
+            commitTitle,
+            commitBody: finalBody,
+          }
+        : {}),
     }
-  }, [isBranchSyncing])
+  }, [coauthorLines, commitBody, commitTitle, selectedMethod])
 
   if (mode === "FINE_GRAINED") {
     const total = rebaseState?.commitShas.length ?? 0
@@ -388,11 +417,26 @@ export function RebaseProgress({
               size="md"
               disabled={isFinalizing}
               className="border-green-700! bg-green-700! hover:bg-green-800!"
-              onClick={() => onFinalize()}>
+              onClick={() => onFinalize(buildFinalizeOptions())}>
               {isFinalizing ? t("finalizing") : t("finalizeAndMerge")}
             </TechButton>
           )}
         </div>
+
+        {isCompleted ? (
+          <MergeMethodPicker
+            analysis={mergeStrategyAnalysis}
+            selectedMethod={selectedMethod}
+            onSelectMethod={setSelectedMethod}
+            commitTitle={commitTitle}
+            commitBody={commitBody}
+            onCommitTitleChange={setCommitTitle}
+            onCommitBodyChange={setCommitBody}
+            coauthorLines={coauthorLines}
+            disabled={isFinalizing}
+            compact
+          />
+        ) : null}
       </div>
     )
   }
@@ -439,99 +483,30 @@ export function RebaseProgress({
         </ul>
       )}
 
-      {showCommitEditor && (
-        <div className="relative space-y-3 border border-tech-main/30 bg-white/80 p-4">
-          <CornerBrackets color="border-tech-main/30" />
-          <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/60 uppercase">
-            {t("squashCommitMessage")}
-          </p>
-
-          <div className="space-y-1">
-            <label
-              htmlFor="commit-title"
-              className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
-              {t("commitTitleLabel")}
-            </label>
-            <input
-              id="commit-title"
-              type="text"
-              value={commitTitle}
-              onChange={(e) => setCommitTitle(e.target.value)}
-              className="
-                w-full border border-tech-main/30 bg-white px-3 py-2
-                font-mono text-xs text-tech-main placeholder:text-tech-main/30
-                focus:border-tech-main focus:outline-none
-              "
-              placeholder={t("commitTitlePlaceholder")}
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label
-              htmlFor="commit-body"
-              className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
-              {t("commitBodyLabel")}
-            </label>
-            <textarea
-              id="commit-body"
-              value={commitBody}
-              onChange={(e) => setCommitBody(e.target.value)}
-              rows={4}
-              className="
-                w-full resize-y border border-tech-main/30 bg-white px-3
-                py-2 font-mono text-xs text-tech-main
-                placeholder:text-tech-main/30 focus:border-tech-main focus:outline-none
-              "
-              placeholder={t("commitBodyPlaceholder")}
-            />
-          </div>
-
-          {coauthorLines.length > 0 && (
-            <div className="space-y-1">
-              <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
-                {t("coauthorsReadonly")}
-              </p>
-              <pre className="overflow-x-auto border guide-line bg-tech-main/5 px-3 py-2 font-mono text-[0.6875rem] text-tech-main/60">
-                {coauthorLines.join("\n")}
-              </pre>
-            </div>
-          )}
-
-          <div className="flex items-center justify-end gap-2 pt-1">
-            <TechButton
-              variant="secondary"
-              size="sm"
-              onClick={() => setShowCommitEditor(false)}>
-              {editorT("cancelButton")}
-            </TechButton>
-            <TechButton
-              variant="primary"
-              size="sm"
-              disabled={isBranchSyncing || isFinalizing}
-              className="border-green-700! bg-green-700! hover:bg-green-800!"
-              onClick={() => {
-                const finalBody =
-                  coauthorLines.length > 0 &&
-                  !coauthorLines.some((line) => commitBody.includes(line))
-                    ? commitBody.trimEnd() + "\n\n" + coauthorLines.join("\n")
-                    : commitBody
-                onFinalize({ commitTitle, commitBody: finalBody })
-              }}>
-              {isFinalizing ? t("merging") : t("confirmMerge")}
-            </TechButton>
-          </div>
-        </div>
-      )}
+      {allResolved && !isBranchSyncing ? (
+        <MergeMethodPicker
+          analysis={mergeStrategyAnalysis}
+          selectedMethod={selectedMethod}
+          onSelectMethod={setSelectedMethod}
+          commitTitle={commitTitle}
+          commitBody={commitBody}
+          onCommitTitleChange={setCommitTitle}
+          onCommitBodyChange={setCommitBody}
+          coauthorLines={coauthorLines}
+          disabled={isFinalizing}
+          compact
+        />
+      ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
         <AbortButton onAbort={onAbort} isAborting={isAborting} />
-        {allResolved && !isBranchSyncing && !showCommitEditor && (
+        {allResolved && !isBranchSyncing && (
           <TechButton
             variant="primary"
             size="sm"
             disabled={isFinalizing}
             className="border-green-700! bg-green-700! hover:bg-green-800!"
-            onClick={() => setShowCommitEditor(true)}>
+            onClick={() => onFinalize(buildFinalizeOptions())}>
             {isFinalizing ? t("finalizing") : t("finalizeAndMerge")}
           </TechButton>
         )}

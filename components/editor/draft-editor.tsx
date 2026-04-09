@@ -47,22 +47,39 @@ interface DraftEditorProps {
   }
 }
 
+const MAX_DRAFT_HISTORY_ENTRIES = 100
+
+interface DraftContentHistory {
+  undoStack: string[]
+  redoStack: string[]
+}
+
 export function DraftEditor({ initialData }: DraftEditorProps) {
   const router = useRouter()
   const t = useTranslations("Editor")
   const progressT = useTranslations("OperationProgress")
   const initialStatus = initialData?.status || "DRAFT"
+  const initialDraftCollection = React.useMemo(
+    () =>
+      normalizeDraftFileCollection({
+        activeFileId: initialData?.activeFileId,
+        files:
+          initialData?.files && initialData.files.length > 0
+            ? initialData.files
+            : [createDraftFile()],
+      }),
+    [initialData?.activeFileId, initialData?.files]
+  )
 
   const [draftStatus, setDraftStatus] = React.useState(initialStatus)
   const [title, setTitle] = React.useState(initialData?.title || "")
-  const [draftCollection, setDraftCollection] = React.useState(() =>
-    normalizeDraftFileCollection({
-      activeFileId: initialData?.activeFileId,
-      files:
-        initialData?.files && initialData.files.length > 0
-          ? initialData.files
-          : [createDraftFile()],
-    })
+  const [draftCollection, setDraftCollection] = React.useState(
+    initialDraftCollection
+  )
+  const [lastSavedDraftCollection, setLastSavedDraftCollection] =
+    React.useState(initialDraftCollection)
+  const [lastSavedTitle, setLastSavedTitle] = React.useState(
+    initialData?.title || ""
   )
   const [revisionId, setRevisionId] = React.useState<string | undefined>(
     initialData?.id
@@ -79,8 +96,12 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
   const textareaRef = React.useRef<any>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
+  const autoSaveTimeoutRef = React.useRef<number | null>(null)
   const saveProgressResetRef = React.useRef<number | null>(null)
   const submitProgressResetRef = React.useRef<number | null>(null)
+  const contentHistoryRef = React.useRef<
+    Record<string, DraftContentHistory>
+  >({})
   const { badge, showBadge, clearBadge } = useBadge()
 
   const saveProgressStages = React.useMemo<OperationProgressStage[]>(
@@ -147,6 +168,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
   React.useEffect(() => {
     return () => {
+      if (autoSaveTimeoutRef.current !== null) {
+        window.clearTimeout(autoSaveTimeoutRef.current)
+      }
+
       if (saveProgressResetRef.current !== null) {
         window.clearTimeout(saveProgressResetRef.current)
       }
@@ -221,6 +246,31 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   )
   const activeFileIndex =
     draftCollection.files.findIndex((file) => file.id === activeFile.id) + 1
+  const unsavedFileIds = React.useMemo(() => {
+    const savedFilesById = new Map(
+      lastSavedDraftCollection.files.map((file) => [file.id, file])
+    )
+    const nextUnsavedFileIds = new Set<string>()
+
+    for (const file of draftCollection.files) {
+      const savedFile = savedFilesById.get(file.id)
+
+      if (
+        !savedFile ||
+        savedFile.content !== file.content ||
+        normalizeDraftFilePath(savedFile.filePath) !==
+          normalizeDraftFilePath(file.filePath)
+      ) {
+        nextUnsavedFileIds.add(file.id)
+      }
+    }
+
+    return nextUnsavedFileIds
+  }, [draftCollection.files, lastSavedDraftCollection.files])
+  const hasUnsavedChanges =
+    title !== lastSavedTitle ||
+    draftCollection.files.length !== lastSavedDraftCollection.files.length ||
+    unsavedFileIds.size > 0
 
   const updateDraftCollection = (
     updater: (current: DraftFileCollection) => DraftFileCollection
@@ -229,6 +279,33 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       normalizeDraftFileCollection(updater(current))
     )
   }
+
+  const getDraftContentHistory = React.useCallback((fileId: string) => {
+    const existingHistory = contentHistoryRef.current[fileId]
+
+    if (existingHistory) {
+      return existingHistory
+    }
+
+    const nextHistory: DraftContentHistory = {
+      undoStack: [],
+      redoStack: [],
+    }
+    contentHistoryRef.current[fileId] = nextHistory
+    return nextHistory
+  }, [])
+
+  const pushHistoryEntry = React.useCallback((stack: string[], value: string) => {
+    if (stack[stack.length - 1] === value) {
+      return
+    }
+
+    stack.push(value)
+
+    if (stack.length > MAX_DRAFT_HISTORY_ENTRIES) {
+      stack.splice(0, stack.length - MAX_DRAFT_HISTORY_ENTRIES)
+    }
+  }, [])
 
   const updateFileById = (
     fileId: string,
@@ -259,12 +336,153 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     }))
   }
 
+  const updateFileContent = React.useCallback(
+    (fileId: string, nextContent: string, mode: "record" | "undo" | "redo" = "record") => {
+      updateDraftCollection((current) => {
+        const targetFile = current.files.find((file) => file.id === fileId)
+
+        if (!targetFile || targetFile.content === nextContent) {
+          return current
+        }
+
+        const history = getDraftContentHistory(fileId)
+
+        if (mode === "record") {
+          pushHistoryEntry(history.undoStack, targetFile.content)
+          history.redoStack = []
+        } else if (mode === "undo") {
+          pushHistoryEntry(history.redoStack, targetFile.content)
+        } else {
+          pushHistoryEntry(history.undoStack, targetFile.content)
+        }
+
+        return {
+          ...current,
+          files: current.files.map((file) =>
+            file.id === fileId ? { ...file, content: nextContent } : file
+          ),
+        }
+      })
+    },
+    [getDraftContentHistory, pushHistoryEntry]
+  )
+
   const updateActiveFile = (updates: {
     content?: string
     filePath?: string
   }) => {
-    updateFileById(draftCollection.activeFileId, updates)
+    if (updates.content !== undefined) {
+      updateFileContent(draftCollection.activeFileId, updates.content)
+    }
+
+    if (updates.filePath !== undefined) {
+      updateFileById(draftCollection.activeFileId, {
+        filePath: updates.filePath,
+      })
+    }
   }
+
+  const persistDraft = React.useCallback(async () => {
+    const normalizedDraftCollection = normalizeDraftFileCollection(draftCollection)
+    const primaryFile = getActiveDraftFile(normalizedDraftCollection)
+    const formData = new FormData()
+    formData.append("title", title)
+    formData.append("activeFileId", normalizedDraftCollection.activeFileId)
+    formData.append("content", primaryFile.content)
+    formData.append(
+      "draftFiles",
+      serializeDraftFilesPayload(normalizedDraftCollection)
+    )
+    formData.append("filePath", primaryFile.filePath)
+    if (revisionId) {
+      formData.append("revisionId", revisionId)
+    }
+
+    const result = await saveDraftAction(formData)
+
+    if (!result.success || !result.revisionId) {
+      throw new Error("Failed to save draft")
+    }
+
+    setDraftCollection(normalizedDraftCollection)
+    setLastSavedDraftCollection(normalizedDraftCollection)
+    setLastSavedTitle(title)
+    setRevisionId(result.revisionId)
+
+    return {
+      normalizedDraftCollection,
+      revisionId: result.revisionId,
+    }
+  }, [draftCollection, revisionId, title])
+
+  const saveDraftWithFeedback = React.useCallback(async (mode: "manual" | "auto" = "manual") => {
+    if (isSaving || !title.trim()) {
+      return
+    }
+
+    if (autoSaveTimeoutRef.current !== null) {
+      window.clearTimeout(autoSaveTimeoutRef.current)
+      autoSaveTimeoutRef.current = null
+    }
+
+    setIsSaving(true)
+
+    if (mode === "manual") {
+      updateSaveProgressState("running")
+    }
+
+    try {
+      await persistDraft()
+
+      if (mode === "manual") {
+        updateSaveProgressState("success")
+        showBadge("DRAFT_SAVED_", "info", 3000)
+      } else {
+        showBadge("AUTOSAVED_", "info", 1800)
+      }
+    } catch (error) {
+      console.error(error)
+
+      if (mode === "manual") {
+        updateSaveProgressState("error")
+        showBadge("SAVE_FAILED_", "error")
+      } else {
+        showBadge("AUTOSAVE_FAILED_", "error")
+      }
+    } finally {
+      setIsSaving(false)
+    }
+  }, [isSaving, persistDraft, showBadge, title])
+
+  const handleUndoDraftEdit = React.useCallback(() => {
+    if (isReadOnly) {
+      return
+    }
+
+    const history = contentHistoryRef.current[draftCollection.activeFileId]
+    const previousContent = history?.undoStack.pop()
+
+    if (previousContent === undefined) {
+      return
+    }
+
+    updateFileContent(draftCollection.activeFileId, previousContent, "undo")
+  }, [draftCollection.activeFileId, isReadOnly, updateFileContent])
+
+  const handleRedoDraftEdit = React.useCallback(() => {
+    if (isReadOnly) {
+      return
+    }
+
+    const history = contentHistoryRef.current[draftCollection.activeFileId]
+    const nextContent = history?.redoStack.pop()
+
+    if (nextContent === undefined) {
+      return
+    }
+
+    updateFileContent(draftCollection.activeFileId, nextContent, "redo")
+  }, [draftCollection.activeFileId, isReadOnly, updateFileContent])
 
   const insertTextAtCursor = (text: string) => {
     if (!textareaRef.current) return
@@ -371,29 +589,77 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     onClearBadge: clearBadge,
   })
 
+  React.useEffect(() => {
+    if (isReadOnly || !title.trim() || !hasUnsavedChanges) {
+      if (autoSaveTimeoutRef.current !== null) {
+        window.clearTimeout(autoSaveTimeoutRef.current)
+        autoSaveTimeoutRef.current = null
+      }
+      return
+    }
+
+    if (isSaving || isSubmittingReview || isUploading) {
+      return
+    }
+
+    if (autoSaveTimeoutRef.current !== null) {
+      window.clearTimeout(autoSaveTimeoutRef.current)
+    }
+
+    autoSaveTimeoutRef.current = window.setTimeout(() => {
+      autoSaveTimeoutRef.current = null
+      void saveDraftWithFeedback("auto")
+    }, 1500)
+
+    return () => {
+      if (autoSaveTimeoutRef.current !== null) {
+        window.clearTimeout(autoSaveTimeoutRef.current)
+        autoSaveTimeoutRef.current = null
+      }
+    }
+  }, [
+    draftCollection,
+    hasUnsavedChanges,
+    isReadOnly,
+    isSaving,
+    isSubmittingReview,
+    isUploading,
+    saveDraftWithFeedback,
+    title,
+  ])
+
+  React.useEffect(() => {
+    if (isReadOnly) {
+      return
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== "s") {
+        return
+      }
+
+      event.preventDefault()
+
+      if (isSubmittingReview || isUploading || !title.trim()) {
+        return
+      }
+
+      void saveDraftWithFeedback("manual")
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [isReadOnly, isSubmittingReview, isUploading, saveDraftWithFeedback, title])
+
   const handleUploadWithAutoSave = async (file: File) => {
     if (!revisionId) {
       showBadge(t("badgeSavingBeforeUpload"), "progress")
       setIsSaving(true)
       updateSaveProgressState("running")
       try {
-        const normalizedDraftCollection =
-          normalizeDraftFileCollection(draftCollection)
-        const primaryFile = getActiveDraftFile(normalizedDraftCollection)
-        const formData = new FormData()
-        formData.append("title", title)
-        formData.append("activeFileId", normalizedDraftCollection.activeFileId)
-        formData.append("content", primaryFile.content)
-        formData.append(
-          "draftFiles",
-          serializeDraftFilesPayload(normalizedDraftCollection)
-        )
-        formData.append("filePath", primaryFile.filePath)
-
-        const result = await saveDraftAction(formData)
-        if (result.success && result.revisionId) {
-          setDraftCollection(normalizedDraftCollection)
-          setRevisionId(result.revisionId)
+        const result = await persistDraft()
+        if (result.revisionId) {
           updateSaveProgressState("success")
           clearBadge()
         } else {
@@ -438,46 +704,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
   const handleSaveDraft = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSaving(true)
-    updateSaveProgressState("running")
-
-    try {
-      const normalizedDraftCollection =
-        normalizeDraftFileCollection(draftCollection)
-      const primaryFile = getActiveDraftFile(normalizedDraftCollection)
-      const formData = new FormData()
-      formData.append("title", title)
-      formData.append("activeFileId", normalizedDraftCollection.activeFileId)
-      formData.append("content", primaryFile.content)
-      formData.append(
-        "draftFiles",
-        serializeDraftFilesPayload(normalizedDraftCollection)
-      )
-      formData.append("filePath", primaryFile.filePath)
-      if (revisionId) formData.append("revisionId", revisionId)
-
-      const result = await saveDraftAction(formData)
-      if (result.success && result.revisionId) {
-        setDraftCollection(normalizedDraftCollection)
-        setRevisionId(result.revisionId)
-        updateSaveProgressState("success")
-        showBadge(t("badgeDraftSaved"), "info", 3000)
-      }
-    } catch (error) {
-      console.error(error)
-      updateSaveProgressState("error")
-      showBadge(t("badgeSaveFailed"), "error")
-    } finally {
-      setIsSaving(false)
-    }
+    await saveDraftWithFeedback("manual")
   }
 
   const handleSubmitReview = async () => {
-    if (!revisionId) {
-      showBadge(t("badgeSaveDraftFirst"), "error", 3000)
-      return
-    }
-
     if (hasMissingFilePath) {
       showBadge(t("badgeAllFilesNeedPath"), "error", 4000)
       return
@@ -495,7 +725,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     setIsSubmittingReview(true)
     updateSubmitProgressState("running")
     try {
-      const result = await submitForReviewAction(revisionId)
+      const persistedDraft = await persistDraft()
+      const result = await submitForReviewAction(persistedDraft.revisionId)
       setDraftStatus(result.status)
       updateSubmitProgressState("success")
       showBadge(
@@ -505,7 +736,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         "info",
         4000
       )
-      router.push(`/draft/${revisionId}`)
+      router.push(`/draft/${persistedDraft.revisionId}`)
       router.refresh()
     } catch (error) {
       console.error(error)
@@ -587,12 +818,12 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   }
 
   const saveDisabled = isSaving || !title.trim()
+  const activeFileHistory = contentHistoryRef.current[draftCollection.activeFileId]
   const submitDisabled =
     isSubmittingReview ||
     isSaving ||
     isUploading ||
     !title.trim() ||
-    !revisionId ||
     hasMissingFilePath ||
     duplicateFilePaths.length > 0
 
@@ -669,6 +900,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         <DraftFileList
           files={draftCollection.files}
           activeFileId={draftCollection.activeFileId}
+          unsavedFileIds={unsavedFileIds}
           onSelectFile={(fileId) =>
             setDraftCollection((current) => ({
               ...current,
@@ -798,6 +1030,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   ref={textareaRef}
                   value={activeFileContent}
                   onChange={(value) => updateActiveFile({ content: value })}
+                  onUndo={handleUndoDraftEdit}
+                  onRedo={handleRedoDraftEdit}
                   onPaste={handlePaste}
                   onDrop={handleDrop}
                   onDragOver={(e) => {
@@ -810,6 +1044,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   isSaving={isSaving}
                   placeholder={t("contentPlaceholder")}
                   lineWrap={lineWrap}
+                  canUndo={Boolean(activeFileHistory?.undoStack.length)}
+                  canRedo={Boolean(activeFileHistory?.redoStack.length)}
                 />
               </div>
             </section>
@@ -869,7 +1105,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               variant="primary"
               disabled={saveDisabled}
               aria-busy={isSaving}>
-              {isSaving ? t("savingLabel") : t("saveDraft")}
+              {isSaving
+                ? t("savingLabel")
+                : hasUnsavedChanges
+                  ? `${t("saveButton")}_*`
+                  : t("saveButton")}
             </TechButton>
 
             <TechButton

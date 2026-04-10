@@ -193,9 +193,7 @@ export function OperationProgress({
       }
 
       velocityRef.current +=
-        (targetProgress - progressRef.current) *
-        SPRING_STIFFNESS *
-        deltaSeconds
+        (targetProgress - progressRef.current) * SPRING_STIFFNESS * deltaSeconds
       velocityRef.current *= Math.exp(-SPRING_DAMPING * deltaSeconds)
 
       const nextProgress = clamp(
@@ -232,7 +230,8 @@ export function OperationProgress({
   }
 
   const percent = Math.round(displayProgress * 100)
-  const activeStage = stages[Math.min(stageIndex, Math.max(stages.length - 1, 0))]
+  const activeStage =
+    stages[Math.min(stageIndex, Math.max(stages.length - 1, 0))]
   const statusLabel =
     state === "success"
       ? successLabel
@@ -250,7 +249,9 @@ export function OperationProgress({
       )}
       role="status"
       aria-live="polite">
-      <CornerBrackets color={state === "error" ? "border-red-500/20" : "border-tech-main/20"} />
+      <CornerBrackets
+        color={state === "error" ? "border-red-500/20" : "border-tech-main/20"}
+      />
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
@@ -258,7 +259,9 @@ export function OperationProgress({
             "absolute inset-y-0 left-0 bg-linear-to-r from-tech-main/10 via-tech-accent/25 to-transparent transition-[width] duration-300",
             state === "running" ? "animate-blueprint-sweep" : "",
             state === "success" ? "animate-scan-confirm" : "",
-            state === "error" ? "from-red-500/10 via-red-400/15 to-transparent" : ""
+            state === "error"
+              ? "from-red-500/10 via-red-400/15 to-transparent"
+              : ""
           )}
           style={{ width: `${Math.max(percent, 8)}%` }}
         />

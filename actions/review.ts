@@ -604,7 +604,9 @@ export async function resolveConflictAction(
       )
         ? "SYNC_CONFLICT"
         : "IN_REVIEW"
-      const focusFilePath = getFirstConflictedFilePath(focusedNextDraftFiles.files)
+      const focusFilePath = getFirstConflictedFilePath(
+        focusedNextDraftFiles.files
+      )
 
       await recordResolvedRerereEntries({
         token,
@@ -875,7 +877,7 @@ export async function resolveConflictAction(
           result.status === "FILE_DELETED_CONFLICT",
         focusFilePath:
           result.status === "CONFLICT"
-            ? result.conflictFilePath ?? storedFile.filePath
+            ? (result.conflictFilePath ?? storedFile.filePath)
             : null,
       }
     }
@@ -1459,7 +1461,7 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
           result.status === "FILE_DELETED_CONFLICT",
         focusFilePath:
           result.status === "CONFLICT"
-            ? result.conflictFilePath ?? draftFile.filePath
+            ? (result.conflictFilePath ?? draftFile.filePath)
             : null,
       }
     }

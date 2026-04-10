@@ -43,6 +43,7 @@ next-env.d.ts
 # agent generated files
 .sisyphus
 docs/superpowers
+.superpowers
 
 # compile-time generated file
 lib/slug-map.json
@@ -63,4 +64,3 @@ skills.local
 
 # prevent anyone accidently not using pnpm
 package-lock.json
-

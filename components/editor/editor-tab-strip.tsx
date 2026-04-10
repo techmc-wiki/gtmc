@@ -32,7 +32,13 @@ export function EditorTabStrip({
 
   const tabs: { id: TabType; label: string; ariaControls?: string }[] = [
     ...(showThreeWayTab
-      ? [{ id: "3-way" as const, label: t("tabThreeWay"), ariaControls: threeWayId }]
+      ? [
+          {
+            id: "3-way" as const,
+            label: t("tabThreeWay"),
+            ariaControls: threeWayId,
+          },
+        ]
       : []),
     { id: "write", label: t("writeTab"), ariaControls: writeId },
     ...(showDiffTab

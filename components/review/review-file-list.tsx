@@ -70,7 +70,7 @@ export function ReviewFileList({
   const allClean = conflictCount === 0
 
   return (
-    <aside className="sticky top-16 md:top-20 self-start max-h-[calc(100vh-4rem)] md:max-h-[calc(100vh-5rem)] overflow-y-auto border border-tech-main/40 bg-tech-main/5 backdrop-blur-sm">
+    <aside className="sticky top-16 max-h-[calc(100vh-4rem)] self-start overflow-y-auto border border-tech-main/40 bg-tech-main/5 backdrop-blur-sm md:top-20 md:max-h-[calc(100vh-5rem)]">
       <div className="flex items-center justify-between gap-3 border-b border-tech-main/30 px-4 py-3">
         <div className="min-w-0 flex-1">
           <p className="font-mono text-xs tracking-widest text-tech-main uppercase">
@@ -134,11 +134,11 @@ export function ReviewFileList({
                 <span className="w-full truncate font-mono text-[0.6875rem] text-tech-main/60">
                   {file.filePath || "PATH_NOT_SET"}
                 </span>
-                  <span className="flex w-full flex-wrap items-center gap-2 font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
-                    <span>{file.changeType ?? "modified"}</span>
-                    <span>+{file.additions ?? 0}</span>
-                    <span>-{file.deletions ?? 0}</span>
-                  </span>
+                <span className="flex w-full flex-wrap items-center gap-2 font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
+                  <span>{file.changeType ?? "modified"}</span>
+                  <span>+{file.additions ?? 0}</span>
+                  <span>-{file.deletions ?? 0}</span>
+                </span>
               </button>
             </div>
           )

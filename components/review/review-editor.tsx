@@ -46,12 +46,12 @@ const CONFLICT_BLOCK_REGEX =
 type EditorSegment =
   | { type: "text"; id: string; content: string }
   | {
-    type: "conflict"
-    id: string
-    marker: string
-    ours: string
-    theirs: string
-  }
+      type: "conflict"
+      id: string
+      marker: string
+      ours: string
+      theirs: string
+    }
 
 function parseEditorSegments(content: string): EditorSegment[] {
   const segments: EditorSegment[] = []
@@ -349,7 +349,8 @@ export function ReviewEditor({
     fileHasConflicts(activeFile, activeContent) &&
     parsedSegments.some((segment) => segment.type === "conflict")
   const firstConflictSegmentId = React.useMemo(
-    () => parsedSegments.find((segment) => segment.type === "conflict")?.id ?? null,
+    () =>
+      parsedSegments.find((segment) => segment.type === "conflict")?.id ?? null,
     [parsedSegments]
   )
   const effectiveMode = reviewSession.mode ?? null
@@ -407,7 +408,8 @@ export function ReviewEditor({
 
     const requestedPath = conflictFocusPathRef.current
     const shouldFocus =
-      Boolean(requestedPath) || lastConflictSignatureRef.current !== conflictSignature
+      Boolean(requestedPath) ||
+      lastConflictSignatureRef.current !== conflictSignature
 
     if (!shouldFocus) {
       return
@@ -416,10 +418,10 @@ export function ReviewEditor({
     const targetFile =
       (requestedPath
         ? sessionFiles.find(
-          (file) =>
-            file.filePath === requestedPath &&
-            fileHasConflicts(file, file.content)
-        )
+            (file) =>
+              file.filePath === requestedPath &&
+              fileHasConflicts(file, file.content)
+          )
         : null) ?? firstConflictedFile
 
     if (!targetFile) {
@@ -615,7 +617,7 @@ export function ReviewEditor({
               </div>
               {preview ? (
                 <div
-                  className={`mt-1 truncate font-mono text-[0.625rem] normal-case tracking-normal ${palette.text}`}>
+                  className={`mt-1 truncate font-mono text-[0.625rem] tracking-normal normal-case ${palette.text}`}>
                   {preview}
                   {segment.content.length > preview.length ? "..." : ""}
                 </div>
@@ -624,7 +626,7 @@ export function ReviewEditor({
             <button
               type="button"
               onClick={() => toggleThreeWaySegment(segment.id)}
-              className={`min-h-[1.75rem] shrink-0 self-start border px-2 py-0.5 font-mono text-[0.6rem] tracking-widest uppercase transition ${palette.button}`}>
+              className={`min-h-7 shrink-0 self-start border px-2 py-0.5 font-mono text-[0.6rem] tracking-widest uppercase transition ${palette.button}`}>
               {isExpanded ? "COLLAPSE" : "EXPAND"}
             </button>
           </div>
@@ -638,7 +640,11 @@ export function ReviewEditor({
         </div>
       )
     },
-    [expandedThreeWaySegments, reviewSession.activeFileId, toggleThreeWaySegment]
+    [
+      expandedThreeWaySegments,
+      reviewSession.activeFileId,
+      toggleThreeWaySegment,
+    ]
   )
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -745,12 +751,12 @@ export function ReviewEditor({
           parsedSegments.flatMap((segment) =>
             segment.type === "conflict" && segment.id === segmentId
               ? [
-                {
-                  type: "text" as const,
-                  id: `${segment.id}-resolved`,
-                  content: resolution,
-                },
-              ]
+                  {
+                    type: "text" as const,
+                    id: `${segment.id}-resolved`,
+                    content: resolution,
+                  },
+                ]
               : [segment]
           )
         )
@@ -947,7 +953,7 @@ export function ReviewEditor({
                 {effectiveMode}
               </span>
             )}
-            <span className="shrink-0 border border-tech-main/20 bg-white/70 px-2 py-0.5 tracking-widest text-tech-main/60 uppercase">
+            <span className="shrink-0 border guide-line bg-white/70 px-2 py-0.5 tracking-widest text-tech-main/60 uppercase">
               {pr.baseRef} ← {pr.headRef}
             </span>
           </div>
@@ -977,22 +983,22 @@ export function ReviewEditor({
 
         {effectiveMode === null && mounted
           ? ReactDOM.createPortal(
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-              <div className="relative w-full max-w-2xl border border-tech-main/40 bg-white p-6 shadow-xl">
-                <CornerBrackets color="border-tech-main/40" />
-                <p className="mb-4 font-mono text-xs tracking-widest text-tech-main/60 uppercase">
-                  RESOLUTION_METHOD_
-                </p>
-                <ModeSelector
-                  modeAnalysis={reviewSession.modeAnalysis}
-                  onSelectMode={handleSelectMode}
-                  hasConflicts={hasConflicts}
-                  isSelecting={isSelectingMode}
-                />
-              </div>
-            </div>,
-            document.body
-          )
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                <div className="relative w-full max-w-2xl border border-tech-main/40 bg-white p-6 shadow-xl">
+                  <CornerBrackets color="border-tech-main/40" />
+                  <p className="mb-4 font-mono text-xs tracking-widest text-tech-main/60 uppercase">
+                    RESOLUTION_METHOD_
+                  </p>
+                  <ModeSelector
+                    modeAnalysis={reviewSession.modeAnalysis}
+                    onSelectMode={handleSelectMode}
+                    hasConflicts={hasConflicts}
+                    isSelecting={isSelectingMode}
+                  />
+                </div>
+              </div>,
+              document.body
+            )
           : null}
 
         {effectiveMode !== null ? (
@@ -1057,11 +1063,11 @@ export function ReviewEditor({
               />
 
               {activeTab === "3-way" && hasInlineConflicts && (
-                <div className="flex items-center border-b border-tech-main/20 bg-tech-main/3 px-3 py-1">
+                <div className="flex items-center border-b guide-line bg-tech-main/3 px-3 py-1">
                   <button
                     type="button"
                     onClick={handleJumpToNextConflict}
-                    className="font-mono text-[0.625rem] tracking-widest uppercase px-2 py-1 border border-tech-main/30 text-tech-main/60 hover:border-tech-main hover:text-tech-main">
+                    className="border border-tech-main/30 px-2 py-1 font-mono text-[0.625rem] tracking-widest text-tech-main/60 uppercase hover:border-tech-main hover:text-tech-main">
                     NEXT_CONFLICT_ ↓
                   </button>
                   <span className="ml-2 font-mono text-[0.625rem] tracking-widest text-tech-main/40 uppercase">
@@ -1182,7 +1188,7 @@ export function ReviewEditor({
                       </pre>
                     </div>
                   ) : (
-                    <div className="p-6 space-y-3">
+                    <div className="space-y-3 p-6">
                       <p className="font-mono text-xs tracking-widest text-tech-main/60 uppercase">
                         NO_CONFLICTS_LEFT_
                       </p>
@@ -1225,11 +1231,11 @@ export function ReviewEditor({
                 hidden={activeTab !== "preview"}
                 className="editor-grow">
                 {hasInlineConflicts ? (
-                  <div className="p-6 space-y-3">
+                  <div className="space-y-3 p-6">
                     <p className="font-mono text-xs tracking-widest text-red-600 uppercase">
                       CONFLICTS_UNRESOLVED_
                     </p>
-                    <p className="font-mono text-xs text-tech-main/50">
+                    <p className="mono-label">
                       Resolve all conflicts before previewing.
                     </p>
                   </div>

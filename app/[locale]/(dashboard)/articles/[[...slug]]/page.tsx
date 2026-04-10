@@ -133,6 +133,7 @@ export async function generateMetadata({
     const bannerUrl = resolveBannerUrl(bannerSrc, target.filePath, siteUrl)
     const bannerAlt =
       (data.banner as { alt?: string } | undefined)?.alt || pageTitle
+    const ogImageUrl = `${siteUrl}/api/og/articles/${effectiveSlug}`
 
     return {
       title: pageTitle,
@@ -145,20 +146,13 @@ export async function generateMetadata({
         description,
         type: "article",
         url: canonicalUrl,
-        images: [
-          {
-            url: bannerUrl ?? `${siteUrl}/og-image.png`,
-            width: 1200,
-            height: 630,
-            alt: bannerUrl ? bannerAlt : pageTitle,
-          },
-        ],
+        images: [{ url: ogImageUrl, width: 1200, height: 630, alt: pageTitle }],
       },
       twitter: {
         card: "summary_large_image",
         title: pageTitle,
         description,
-        images: [bannerUrl ?? `${siteUrl}/og-image.png`],
+        images: [ogImageUrl],
       },
     }
   } catch {

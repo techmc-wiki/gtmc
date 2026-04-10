@@ -322,7 +322,9 @@ async function landPullRequestDirectly(
   const pr = await getPR(prNumber, token)
 
   if (pr.base.ref !== "main") {
-    throw new Error("Direct landing is only supported for pull requests targeting main")
+    throw new Error(
+      "Direct landing is only supported for pull requests targeting main"
+    )
   }
 
   reviewLog("landPullRequestDirectly", {

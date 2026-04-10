@@ -58,7 +58,8 @@ export function MergeMethodPicker({
             {t("mergeStrategyLabel")}
           </p>
           <span className="border border-tech-main/30 bg-tech-main/5 px-2 py-0.5 font-mono text-[0.625rem] tracking-widest text-tech-main uppercase">
-            {t("autoDecisionPrefix")} {t(`mergeMethod${capitalize(analysis.recommendation)}`)}
+            {t("autoDecisionPrefix")}{" "}
+            {t(`mergeMethod${capitalize(analysis.recommendation)}`)}
           </span>
         </div>
         <p className="font-mono text-xs/relaxed text-tech-main/70">
@@ -66,7 +67,8 @@ export function MergeMethodPicker({
         </p>
       </div>
 
-      <div className={`mt-4 grid gap-3 ${compact ? "grid-cols-1" : "grid-cols-1 xl:grid-cols-3"}`}>
+      <div
+        className={`mt-4 grid gap-3 ${compact ? "grid-cols-1" : "grid-cols-1 xl:grid-cols-3"}`}>
         {methods.map(({ method, title, description, detail }) => {
           const isSelected = selectedMethod === method
           const isRecommended = analysis.recommendation === method
@@ -77,13 +79,11 @@ export function MergeMethodPicker({
               type="button"
               disabled={disabled}
               onClick={() => onSelectMethod(method)}
-              className={
-                `relative border p-3 text-left transition ${
-                  isSelected
-                    ? "border-tech-main bg-tech-main/10"
-                    : "guide-line bg-white/70 hover:border-tech-main/40 hover:bg-white"
-                } ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`
-              }>
+              className={`relative border p-3 text-left transition ${
+                isSelected
+                  ? "border-tech-main bg-tech-main/10"
+                  : "guide-line bg-white/70 hover:border-tech-main/40 hover:bg-white"
+              } ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}>
               <div className="flex items-center justify-between gap-3">
                 <span className="font-mono text-xs font-bold tracking-widest text-tech-main uppercase">
                   {title}

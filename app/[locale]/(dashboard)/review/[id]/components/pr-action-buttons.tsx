@@ -148,7 +148,9 @@ export function PRActionButtons({
         </ActionForm>
 
         <ActionForm
-          action={() => mergePRAction?.(buildMergeOptions()) ?? Promise.resolve()}
+          action={() =>
+            mergePRAction?.(buildMergeOptions()) ?? Promise.resolve()
+          }
           className="flex-1">
           {({ isPending, state }) => (
             <div className="space-y-3">

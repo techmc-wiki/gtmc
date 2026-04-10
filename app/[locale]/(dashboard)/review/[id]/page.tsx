@@ -270,11 +270,9 @@ export default async function ReviewDetailPage({
   const mergeStrategyAnalysis = analyzeReviewMergeStrategy(pr)
   const rebaseStatus =
     (
-      linkedDraft?.rebaseState as
-        | {
-            status?: string | null
-          }
-        | null
+      linkedDraft?.rebaseState as {
+        status?: string | null
+      } | null
     )?.status ?? null
   const hasPendingReviewResolution =
     linkedDraft?.status === "SYNC_CONFLICT" ||
@@ -295,7 +293,7 @@ export default async function ReviewDetailPage({
             : null
 
   return (
-    <div className="mx-auto max-w-[88rem] space-y-8 p-4 pb-32 md:p-8">
+    <div className="mx-auto max-w-352 space-y-8 p-4 pb-32 md:p-8">
       <Link href="/review">
         <TechButton variant="ghost" size="sm">
           {"<"} BACK_TO_HUB
@@ -330,15 +328,17 @@ export default async function ReviewDetailPage({
             </h1>
 
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              <div className="border border-tech-main/20 bg-tech-main/5 px-4 py-3">
+              <div className="border guide-line bg-tech-main/5 px-4 py-3">
                 <p className="font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
                   AUTHOR
                 </p>
                 <p className="mt-1 font-mono text-sm tracking-widest text-tech-main uppercase">
-                  {linkedDraft?.author?.name || pr.user?.login || "UNKNOWN_USER"}
+                  {linkedDraft?.author?.name ||
+                    pr.user?.login ||
+                    "UNKNOWN_USER"}
                 </p>
               </div>
-              <div className="border border-tech-main/20 bg-tech-main/5 px-4 py-3">
+              <div className="border guide-line bg-tech-main/5 px-4 py-3">
                 <p className="font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
                   TARGET
                 </p>
@@ -346,7 +346,7 @@ export default async function ReviewDetailPage({
                   {targetFileLabel}
                 </p>
               </div>
-              <div className="border border-tech-main/20 bg-tech-main/5 px-4 py-3">
+              <div className="border guide-line bg-tech-main/5 px-4 py-3">
                 <p className="font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
                   STATS
                 </p>
@@ -354,7 +354,7 @@ export default async function ReviewDetailPage({
                   {pr.commits} COMMITS / {pr.changed_files} FILES
                 </p>
               </div>
-              <div className="border border-tech-main/20 bg-tech-main/5 px-4 py-3">
+              <div className="border guide-line bg-tech-main/5 px-4 py-3">
                 <p className="font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
                   DIFF
                 </p>
@@ -426,7 +426,8 @@ export default async function ReviewDetailPage({
                   REVIEW_WORKFLOW_ACTIVE
                 </p>
                 <p className="font-mono text-[0.6875rem] leading-relaxed text-tech-main/60">
-                  Merge is handled from the in-editor review flow to avoid duplicate actions.
+                  Merge is handled from the in-editor review flow to avoid
+                  duplicate actions.
                 </p>
               </div>
 
@@ -472,10 +473,16 @@ export default async function ReviewDetailPage({
               REVIEW_FLOW
             </p>
             <div className="mt-3 space-y-3 font-mono text-[0.6875rem] leading-relaxed text-tech-main/70">
-              <p>Author: {linkedDraft?.author?.name || pr.user?.login || "UNKNOWN_USER"}</p>
+              <p>
+                Author:{" "}
+                {linkedDraft?.author?.name || pr.user?.login || "UNKNOWN_USER"}
+              </p>
               <p>Head branch: {pr.head.ref}</p>
               <p>Base branch: {pr.base.ref}</p>
-              <p>Auto recommendation: {mergeStrategyAnalysis.recommendation.toUpperCase()}</p>
+              <p>
+                Auto recommendation:{" "}
+                {mergeStrategyAnalysis.recommendation.toUpperCase()}
+              </p>
               <p>{mergeStrategyAnalysis.rationale}</p>
             </div>
           </div>

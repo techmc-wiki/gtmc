@@ -31,7 +31,7 @@ export function ReviewDiffPanel({
   if (segments.length === 0) {
     return (
       <div className="p-6">
-        <p className="font-mono text-xs tracking-widest text-tech-main/50 uppercase">
+        <p className="mono-label tracking-widest uppercase">
           {t("reviewNoChanges")}
         </p>
       </div>
@@ -44,19 +44,21 @@ export function ReviewDiffPanel({
         {segments.map((segment) => {
           if (segment.type === "context") {
             const isExpanded = Boolean(expandedSegments[segment.id])
-            const hiddenCount = segment.lines.length - CONTEXT_HEAD_LINES - CONTEXT_TAIL_LINES
+            const hiddenCount =
+              segment.lines.length - CONTEXT_HEAD_LINES - CONTEXT_TAIL_LINES
             const canCollapse = hiddenCount > 0
-            const visibleLines = canCollapse && !isExpanded
-              ? [
-                  ...segment.lines.slice(0, CONTEXT_HEAD_LINES),
-                  ...segment.lines.slice(-CONTEXT_TAIL_LINES),
-                ]
-              : segment.lines
+            const visibleLines =
+              canCollapse && !isExpanded
+                ? [
+                    ...segment.lines.slice(0, CONTEXT_HEAD_LINES),
+                    ...segment.lines.slice(-CONTEXT_TAIL_LINES),
+                  ]
+                : segment.lines
 
             return (
               <div
                 key={segment.id}
-                className="border border-dashed border-tech-main/20 bg-tech-main/[0.03]">
+                className="border border-dashed guide-line bg-tech-main/3">
                 <pre className="px-4 py-3 font-mono text-xs/relaxed whitespace-pre-wrap text-tech-main/70">
                   {visibleLines.join("\n") || "\u00a0"}
                 </pre>
@@ -69,7 +71,7 @@ export function ReviewDiffPanel({
                         [segment.id]: true,
                       }))
                     }
-                    className="mx-4 mb-3 block border border-tech-main/20 bg-tech-main/10 px-3 py-1 font-mono text-[0.625rem] tracking-widest text-tech-main/70 uppercase transition hover:border-tech-main/30 hover:bg-tech-main/15">
+                    className="mx-4 mb-3 block border guide-line bg-tech-main/10 px-3 py-1 font-mono text-[0.625rem] tracking-widest text-tech-main/70 uppercase transition hover:border-tech-main/30 hover:bg-tech-main/15">
                     {t("unchangedLinesHidden", { count: hiddenCount })}
                   </button>
                 ) : null}
@@ -101,7 +103,8 @@ export function ReviewDiffPanel({
               key={segment.id}
               className={`border ${palette.border} ${palette.bg}`}>
               <div className="border-b border-inherit px-4 py-2">
-                <p className={`font-mono text-[0.625rem] tracking-widest uppercase ${palette.badge}`}>
+                <p
+                  className={`font-mono text-[0.625rem] tracking-widest uppercase ${palette.badge}`}>
                   {palette.label}
                 </p>
               </div>
@@ -113,7 +116,8 @@ export function ReviewDiffPanel({
                     <span className={`${palette.badge} select-none`}>
                       {palette.marker}
                     </span>
-                    <pre className={`min-w-0 whitespace-pre-wrap break-words ${palette.text}`}>
+                    <pre
+                      className={`min-w-0 wrap-break-word whitespace-pre-wrap ${palette.text}`}>
                       {line || "\u00a0"}
                     </pre>
                   </div>
@@ -127,8 +131,14 @@ export function ReviewDiffPanel({
   )
 }
 
-function buildDiffSegments(baseContent: string, currentContent: string): DiffSegment[] {
-  const parts = diffLines(normalizeLineEndings(baseContent), normalizeLineEndings(currentContent))
+function buildDiffSegments(
+  baseContent: string,
+  currentContent: string
+): DiffSegment[] {
+  const parts = diffLines(
+    normalizeLineEndings(baseContent),
+    normalizeLineEndings(currentContent)
+  )
 
   return parts.reduce<DiffSegment[]>((segments, part, index) => {
     const lines = splitDiffLines(part.value)
@@ -162,7 +172,9 @@ function splitDiffLines(value: string) {
   }
 
   const normalized = normalizeLineEndings(value)
-  const trimmed = normalized.endsWith("\n") ? normalized.slice(0, -1) : normalized
+  const trimmed = normalized.endsWith("\n")
+    ? normalized.slice(0, -1)
+    : normalized
 
   if (trimmed.length === 0) {
     return [""]

@@ -106,9 +106,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   const autoSaveTimeoutRef = React.useRef<number | null>(null)
   const saveProgressResetRef = React.useRef<number | null>(null)
   const submitProgressResetRef = React.useRef<number | null>(null)
-  const contentHistoryRef = React.useRef<
-    Record<string, DraftContentHistory>
-  >({})
+  const contentHistoryRef = React.useRef<Record<string, DraftContentHistory>>(
+    {}
+  )
   const { badge, showBadge, clearBadge } = useBadge()
 
   const saveProgressStages = React.useMemo<OperationProgressStage[]>(
@@ -302,17 +302,20 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     return nextHistory
   }, [])
 
-  const pushHistoryEntry = React.useCallback((stack: string[], value: string) => {
-    if (stack[stack.length - 1] === value) {
-      return
-    }
+  const pushHistoryEntry = React.useCallback(
+    (stack: string[], value: string) => {
+      if (stack[stack.length - 1] === value) {
+        return
+      }
 
-    stack.push(value)
+      stack.push(value)
 
-    if (stack.length > MAX_DRAFT_HISTORY_ENTRIES) {
-      stack.splice(0, stack.length - MAX_DRAFT_HISTORY_ENTRIES)
-    }
-  }, [])
+      if (stack.length > MAX_DRAFT_HISTORY_ENTRIES) {
+        stack.splice(0, stack.length - MAX_DRAFT_HISTORY_ENTRIES)
+      }
+    },
+    []
+  )
 
   const updateFileById = (
     fileId: string,
@@ -344,7 +347,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   }
 
   const updateFileContent = React.useCallback(
-    (fileId: string, nextContent: string, mode: "record" | "undo" | "redo" = "record") => {
+    (
+      fileId: string,
+      nextContent: string,
+      mode: "record" | "undo" | "redo" = "record"
+    ) => {
       updateDraftCollection((current) => {
         const targetFile = current.files.find((file) => file.id === fileId)
 
@@ -390,7 +397,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   }
 
   const persistDraft = React.useCallback(async () => {
-    const normalizedDraftCollection = normalizeDraftFileCollection(draftCollection)
+    const normalizedDraftCollection =
+      normalizeDraftFileCollection(draftCollection)
     const primaryFile = getActiveDraftFile(normalizedDraftCollection)
     const formData = new FormData()
     formData.append("title", title)
@@ -422,44 +430,47 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     }
   }, [draftCollection, revisionId, title])
 
-  const saveDraftWithFeedback = React.useCallback(async (mode: "manual" | "auto" = "manual") => {
-    if (isSaving || !title.trim()) {
-      return
-    }
+  const saveDraftWithFeedback = React.useCallback(
+    async (mode: "manual" | "auto" = "manual") => {
+      if (isSaving || !title.trim()) {
+        return
+      }
 
-    if (autoSaveTimeoutRef.current !== null) {
-      window.clearTimeout(autoSaveTimeoutRef.current)
-      autoSaveTimeoutRef.current = null
-    }
+      if (autoSaveTimeoutRef.current !== null) {
+        window.clearTimeout(autoSaveTimeoutRef.current)
+        autoSaveTimeoutRef.current = null
+      }
 
-    setIsSaving(true)
-
-    if (mode === "manual") {
-      updateSaveProgressState("running")
-    }
-
-    try {
-      await persistDraft()
+      setIsSaving(true)
 
       if (mode === "manual") {
-        updateSaveProgressState("success")
-        showBadge("DRAFT_SAVED_", "info", 3000)
-      } else {
-        showBadge("AUTOSAVED_", "info", 1800)
+        updateSaveProgressState("running")
       }
-    } catch (error) {
-      console.error(error)
 
-      if (mode === "manual") {
-        updateSaveProgressState("error")
-        showBadge("SAVE_FAILED_", "error")
-      } else {
-        showBadge("AUTOSAVE_FAILED_", "error")
+      try {
+        await persistDraft()
+
+        if (mode === "manual") {
+          updateSaveProgressState("success")
+          showBadge("DRAFT_SAVED_", "info", 3000)
+        } else {
+          showBadge("AUTOSAVED_", "info", 1800)
+        }
+      } catch (error) {
+        console.error(error)
+
+        if (mode === "manual") {
+          updateSaveProgressState("error")
+          showBadge("SAVE_FAILED_", "error")
+        } else {
+          showBadge("AUTOSAVE_FAILED_", "error")
+        }
+      } finally {
+        setIsSaving(false)
       }
-    } finally {
-      setIsSaving(false)
-    }
-  }, [isSaving, persistDraft, showBadge, title])
+    },
+    [isSaving, persistDraft, showBadge, title]
+  )
 
   const handleUndoDraftEdit = React.useCallback(() => {
     if (isReadOnly) {
@@ -641,7 +652,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== "s") {
+      if (
+        !(event.ctrlKey || event.metaKey) ||
+        event.key.toLowerCase() !== "s"
+      ) {
         return
       }
 
@@ -657,7 +671,13 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     window.addEventListener("keydown", handleKeyDown)
 
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isReadOnly, isSubmittingReview, isUploading, saveDraftWithFeedback, title])
+  }, [
+    isReadOnly,
+    isSubmittingReview,
+    isUploading,
+    saveDraftWithFeedback,
+    title,
+  ])
 
   const handleUploadWithAutoSave = async (file: File) => {
     if (!revisionId) {
@@ -842,7 +862,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   }
 
   const saveDisabled = isSaving || !title.trim()
-  const activeFileHistory = contentHistoryRef.current[draftCollection.activeFileId]
+  const activeFileHistory =
+    contentHistoryRef.current[draftCollection.activeFileId]
   const submitDisabled =
     isSubmittingReview ||
     isSaving ||
@@ -984,16 +1005,16 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               </div>
             </div>
 
-            <div className="space-y-3 border border-tech-main/20 bg-tech-main/5 px-4 py-4">
+            <div className="space-y-3 border guide-line bg-tech-main/5 p-4">
               <div>
                 <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/45 uppercase">
                   {t("targetFileLabel")}
                 </p>
-                <p className="mt-1 break-all font-mono text-sm tracking-widest text-tech-main uppercase">
+                <p className="mt-1 font-mono text-sm tracking-widest break-all text-tech-main uppercase">
                   {activeFile.filePath || t("targetFileUnset")}
                 </p>
               </div>
-              <p className="font-mono text-xs leading-relaxed text-tech-main/65">
+              <p className="font-mono text-xs/relaxed text-tech-main/65">
                 {t("targetFileDescription")}
               </p>
             </div>
@@ -1165,8 +1186,12 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             className="mt-4 border guide-line bg-tech-main/5 p-4 font-mono text-[0.6875rem] leading-relaxed text-tech-main/80">
             <div className="mb-3 border-b border-tech-main/15 pb-3">
               <p className="section-label">{t("syntaxHintsTitle")}</p>
-              <p className="mt-2 text-tech-main/70">{t("syntaxHintsDescription")}</p>
-              <p className="mt-1 text-tech-main/55">{t("syntaxHintsShortcut")}</p>
+              <p className="mt-2 text-tech-main/70">
+                {t("syntaxHintsDescription")}
+              </p>
+              <p className="mt-1 text-tech-main/55">
+                {t("syntaxHintsShortcut")}
+              </p>
             </div>
             <p className="section-label">{t("submissionLicenseTitle")}</p>
             <div className="mt-2 space-y-2">

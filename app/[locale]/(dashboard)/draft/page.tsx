@@ -121,22 +121,22 @@ export default async function DraftDashboardPage() {
               {draft.updatedAt.toLocaleDateString()}
             </span>
             {!NON_DELETABLE_DRAFT_STATUSES.has(draft.displayStatus) && (
-                <form
-                  action={async () => {
-                    "use server"
-                    await deleteDraftAction(draft.id)
-                  }}>
-                  <button
-                    type="submit"
-                    className="
+              <form
+                action={async () => {
+                  "use server"
+                  await deleteDraftAction(draft.id)
+                }}>
+                <button
+                  type="submit"
+                  className="
                       flex min-h-11 cursor-pointer items-center font-mono
                       text-xs text-red-500 uppercase
                       hover:text-red-700 hover:underline
                     ">
-                    [DELETE]
-                  </button>
-                </form>
-              )}
+                  [DELETE]
+                </button>
+              </form>
+            )}
           </div>
         </div>
         <h3

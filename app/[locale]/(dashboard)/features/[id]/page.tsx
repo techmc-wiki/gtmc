@@ -145,10 +145,10 @@ export default async function FeatureDetailPage({
     },
     assignee: parsedIssue.metadata?.assigneeId
       ? {
-        name: parsedIssue.metadata?.assigneeName ?? null,
-        email: parsedIssue.metadata?.assigneeEmail ?? null,
-        image: null,
-      }
+          name: parsedIssue.metadata?.assigneeName ?? null,
+          email: parsedIssue.metadata?.assigneeEmail ?? null,
+          image: null,
+        }
       : null,
     comments,
   }

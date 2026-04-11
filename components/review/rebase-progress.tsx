@@ -443,7 +443,6 @@ export function RebaseProgress({
 
   const conflictFiles = (files ?? []).filter((f) => f.status === "conflict")
   const allResolved = conflictFiles.length === 0
-  const totalFiles = files?.length ?? 0
 
   return (
     <div className="space-y-4 border border-tech-main/40 bg-tech-main/5 p-4">

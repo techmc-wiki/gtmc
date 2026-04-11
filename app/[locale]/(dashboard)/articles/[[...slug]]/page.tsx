@@ -129,10 +129,6 @@ export async function generateMetadata({
       data.description as string | undefined
     )
 
-    const bannerSrc = (data.banner as { src?: string } | undefined)?.src
-    const bannerUrl = resolveBannerUrl(bannerSrc, target.filePath, siteUrl)
-    const bannerAlt =
-      (data.banner as { alt?: string } | undefined)?.alt || pageTitle
     const ogImageUrl = `${siteUrl}/api/og/articles/${effectiveSlug}`
 
     return {

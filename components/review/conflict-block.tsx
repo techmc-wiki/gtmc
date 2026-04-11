@@ -1,9 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useTranslations } from "next-intl"
-import { InlineDiff } from "@/app/[locale]/(dashboard)/review/[id]/components/InlineDiff"
 import { TechButton } from "@/components/ui/tech-button"
 import { MergeView } from "@codemirror/merge"
 import { EditorView } from "@codemirror/view"

@@ -5,22 +5,53 @@ import { getSiteUrl } from "@/lib/site-url"
 
 const ALLOWED_REMOTE_HOSTNAMES = new Set<string>()
 
-try {
-  ALLOWED_REMOTE_HOSTNAMES.add(new URL(getSiteUrl()).hostname)
-} catch {
-  // Ignore malformed site URL and continue with explicit localhost allow-list.
-}
+let SITE_ORIGIN: URL | null = null
 
-ALLOWED_REMOTE_HOSTNAMES.add("localhost")
-ALLOWED_REMOTE_HOSTNAMES.add("127.0.0.1")
+try {
+  const siteUrl = new URL(getSiteUrl())
+  SITE_ORIGIN = siteUrl
+  ALLOWED_REMOTE_HOSTNAMES.add(siteUrl.hostname)
+} catch {
+  // Ignore malformed site URL and continue with explicit hostname allow-list.
+}
 
 function isAllowedRemoteUrl(urlString: string) {
   try {
     const parsed = new URL(urlString)
+
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
       return false
     }
 
+    // Require same-origin with the configured site URL when available.
+    if (SITE_ORIGIN) {
+      if (parsed.hostname !== SITE_ORIGIN.hostname) {
+        return false
+      }
+
+      const parsedPort =
+        parsed.port ||
+        (parsed.protocol === "https:"
+          ? "443"
+          : parsed.protocol === "http:"
+            ? "80"
+            : "")
+      const sitePort =
+        SITE_ORIGIN.port ||
+        (SITE_ORIGIN.protocol === "https:"
+          ? "443"
+          : SITE_ORIGIN.protocol === "http:"
+            ? "80"
+            : "")
+
+      if (parsedPort !== sitePort) {
+        return false
+      }
+
+      return true
+    }
+
+    // Fallback: allow only explicitly configured hostnames.
     return ALLOWED_REMOTE_HOSTNAMES.has(parsed.hostname)
   } catch {
     return false

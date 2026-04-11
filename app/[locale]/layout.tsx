@@ -109,7 +109,6 @@ export default async function RootLayout({
             </FooterProvider>
           </AuthSessionProvider>
         </NextIntlClientProvider>
-        {/* eslint-disable-next-line react/no-danger-with-markup */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

@@ -140,6 +140,11 @@ export async function generateMetadata({
       description,
       alternates: {
         canonical: canonicalUrl,
+        languages: {
+          "zh": `${getSiteUrl()}/zh/articles/${encodeSlug(effectiveSlug)}`,
+          "en": `${getSiteUrl()}/en/articles/${encodeSlug(effectiveSlug)}`,
+          "x-default": `${getSiteUrl()}/zh/articles/${encodeSlug(effectiveSlug)}`,
+        },
       },
       openGraph: {
         title: pageTitle,

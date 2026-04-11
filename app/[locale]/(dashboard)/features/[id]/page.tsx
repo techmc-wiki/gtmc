@@ -47,6 +47,11 @@ export async function generateMetadata({
     description,
     alternates: {
       canonical,
+      languages: {
+        zh: toAbsoluteUrl(`/zh/features/${issue.number}`),
+        en: toAbsoluteUrl(`/en/features/${issue.number}`),
+        "x-default": toAbsoluteUrl(`/zh/features/${issue.number}`),
+      },
     },
     openGraph: {
       title: `${issue.title} — Feature Request`,
@@ -99,6 +104,9 @@ export default async function FeatureDetailPage({
   if (!issue) {
     notFound()
   }
+
+  const canonical = toAbsoluteUrl(`/features/${issue.number}`)
+  const description = generateDescription(issue.body ?? "", undefined, 155)
 
   const isClosed = issue.state === "closed"
 
@@ -345,6 +353,22 @@ export default async function FeatureDetailPage({
           isClosed={isClosed}
         />
       </RevealSection>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            name: issue.title,
+            description,
+            url: canonical,
+            datePublished: new Date(issue.createdAt).toISOString(),
+            dateModified: new Date(issue.updatedAt).toISOString(),
+            inLanguage: ["zh", "en"],
+          }),
+        }}
+      />
     </div>
   )
 }

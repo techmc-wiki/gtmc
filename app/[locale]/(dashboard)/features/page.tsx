@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { auth } from "@/lib/auth"
+import { toAbsoluteUrl } from "@/lib/site-url"
 import {
   labelsToStatus,
   labelsToTags,
@@ -16,15 +17,31 @@ import { RevealSection } from "./reveal-helpers"
 
 export const revalidate = 60
 
-export const metadata: Metadata = {
-  title: "Feature Requests",
-  description:
-    "Browse and track feature requests for Technical Minecraft. Vote on ideas, report bugs, and suggest improvements.",
-  openGraph: {
-    title: "Feature Requests — Technical Minecraft",
-    description: "Browse and track feature requests for Technical Minecraft.",
-    type: "website",
-  },
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const canonical = toAbsoluteUrl(`/${locale}/features`)
+  return {
+    title: "Feature Requests",
+    description:
+      "Browse and track feature requests for Technical Minecraft. Vote on ideas, report bugs, and suggest improvements.",
+    alternates: {
+      canonical,
+      languages: {
+        zh: toAbsoluteUrl("/zh/features"),
+        en: toAbsoluteUrl("/en/features"),
+        "x-default": toAbsoluteUrl("/zh/features"),
+      },
+    },
+    openGraph: {
+      title: "Feature Requests — Technical Minecraft",
+      description: "Browse and track feature requests for Technical Minecraft.",
+      type: "website",
+    },
+  }
 }
 
 export default async function FeaturesPage({

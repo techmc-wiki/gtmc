@@ -21,8 +21,16 @@ export const metadata: Metadata = {
   title: "Graduate Texts in Minecraft",
   description:
     "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+  verification: {
+    google: "QE8InawtRuO1F7YrvI1JN56__AFPCAFo6Gn-Vi1QJI8",
+  },
   alternates: {
-    canonical: "/",
+    canonical: "/zh",
+    languages: {
+      zh: "/zh",
+      en: "/en",
+      "x-default": "/zh",
+    },
   },
   openGraph: {
     type: "website",
@@ -85,10 +93,6 @@ export default async function RootLayout({
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
-        <meta
-          name="google-site-verification"
-          content="QE8InawtRuO1F7YrvI1JN56__AFPCAFo6Gn-Vi1QJI8"
-        />
       </head>
       <Analytics />
       <SpeedInsights />
@@ -105,6 +109,30 @@ export default async function RootLayout({
             </FooterProvider>
           </AuthSessionProvider>
         </NextIntlClientProvider>
+        {/* eslint-disable-next-line react/no-danger-with-markup */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                name: "Graduate Texts in Minecraft",
+                url: siteUrl,
+                logo: `${siteUrl}/opengraph-image`,
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                name: "Graduate Texts in Minecraft",
+                url: siteUrl,
+                description:
+                  "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+                inLanguage: ["zh", "en"],
+              },
+            ]),
+          }}
+        />
       </body>
     </html>
   )

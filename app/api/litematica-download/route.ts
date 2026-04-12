@@ -15,27 +15,30 @@ try {
   // Ignore malformed site URL and continue with explicit hostname allow-list.
 }
 
-function isAllowedRemoteUrl(urlString: string) {
+function getAllowedRemoteUrl(urlString: string): URL | null {
   try {
     const parsed = new URL(urlString)
 
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-      return false
+      return null
     }
 
-    // Require same-origin with the configured site URL when available.
-    if (SITE_ORIGIN) {
-      if (parsed.hostname !== SITE_ORIGIN.hostname) {
-        return false
-      }
+    // Reject traversal-style path segments, including encoded forms.
+    const decodedPath = decodeURIComponent(parsed.pathname)
+    if (decodedPath.split("/").some((segment) => segment === "..")) {
+      return null
+    }
 
-      const parsedPort =
-        parsed.port ||
-        (parsed.protocol === "https:"
-          ? "443"
-          : parsed.protocol === "http:"
-            ? "80"
-            : "")
+    const parsedPort =
+      parsed.port ||
+      (parsed.protocol === "https:"
+        ? "443"
+        : parsed.protocol === "http:"
+          ? "80"
+          : "")
+
+    // Require strict same-origin with the configured site URL when available.
+    if (SITE_ORIGIN) {
       const sitePort =
         SITE_ORIGIN.port ||
         (SITE_ORIGIN.protocol === "https:"
@@ -44,17 +47,25 @@ function isAllowedRemoteUrl(urlString: string) {
             ? "80"
             : "")
 
-      if (parsedPort !== sitePort) {
-        return false
+      if (
+        parsed.protocol !== SITE_ORIGIN.protocol ||
+        parsed.hostname !== SITE_ORIGIN.hostname ||
+        parsedPort !== sitePort
+      ) {
+        return null
       }
 
-      return true
+      return parsed
     }
 
     // Fallback: allow only explicitly configured hostnames.
-    return ALLOWED_REMOTE_HOSTNAMES.has(parsed.hostname)
+    if (!ALLOWED_REMOTE_HOSTNAMES.has(parsed.hostname)) {
+      return null
+    }
+
+    return parsed
   } catch {
-    return false
+    return null
   }
 }
 
@@ -99,11 +110,14 @@ export async function GET(request: Request) {
 
   try {
     if (urlParam.startsWith("http://") || urlParam.startsWith("https://")) {
-      if (!isAllowedRemoteUrl(urlParam)) {
+      const allowedRemoteUrl = getAllowedRemoteUrl(urlParam)
+      if (!allowedRemoteUrl) {
         return errorResponse("Remote URL is not allowed", 403)
       }
 
-      const response = await fetch(urlParam)
+      const response = await fetch(allowedRemoteUrl.toString(), {
+        redirect: "error",
+      })
       if (!response.ok) {
         throw new Error("Failed to fetch file: " + response.statusText)
       }

@@ -28,11 +28,11 @@ export function EditorToolbar({
         sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b
         border-tech-main-dark bg-tech-main-dark p-2 px-2 font-mono
         text-white/70 shadow-[0_2px_10px_rgba(74,90,120,0.2)]
-        before:absolute before:inset-0 before:bg-[url('/bg-grid.svg')] before:bg-[length:24px_24px] before:opacity-[0.05] before:pointer-events-none
+        before:pointer-events-none before:absolute before:inset-0 before:bg-[url('/bg-grid.svg')] before:bg-size-[24px_24px] before:opacity-[0.05]
         sm:gap-1 sm:px-4
       ">
-      <div className="absolute top-0 w-full h-[1px] bg-gradient-to-r from-transparent via-tech-accent/20 to-transparent left-0" />
-      
+      <div className="absolute top-0 left-0 h-px w-full bg-linear-to-r from-transparent via-tech-accent/20 to-transparent" />
+
       <button
         type="button"
         onClick={() => onInsert("**", "**")}
@@ -91,7 +91,7 @@ export function EditorToolbar({
           ml-auto hidden items-center gap-2 text-[9px] tracking-widest text-tech-accent/40 uppercase
           sm:flex
         ">
-        <span className="h-1.5 w-1.5 rounded-full bg-tech-accent/40 animate-pulse" />
+        <span className="size-1.5 animate-pulse rounded-full bg-tech-accent/40" />
         MD_SYNTAX_READY
       </span>
       {onWrapToggle !== undefined && (
@@ -106,7 +106,7 @@ export function EditorToolbar({
                 : "border-transparent text-white/50 hover:border-tech-accent/30 hover:bg-tech-accent/10 hover:text-white"
             }`}
             aria-pressed={lineWrap}>
-            {t("toolbarWrap")} {lineWrap ? '[ON]' : '[OFF]'}
+            {t("toolbarWrap")} {lineWrap ? "[ON]" : "[OFF]"}
           </button>
         </>
       )}

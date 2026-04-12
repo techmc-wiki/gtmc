@@ -106,25 +106,25 @@ export default async function DraftDashboardPage() {
       ">
       {/* Corner brackets */}
       <CornerBrackets variant="hover" />
-      
+
       {/* Blueprint Grid Background Pattern on Hover */}
-      <div className="absolute inset-0 z-0 bg-[url('/bg-grid.svg')] bg-[length:24px_24px] opacity-0 transition-opacity duration-500 group-hover:opacity-[0.03]" />
+      <div className="absolute inset-0 z-0 bg-[url('/bg-grid.svg')] bg-size-[24px_24px] opacity-0 transition-opacity duration-500 group-hover:opacity-[0.03]" />
 
       <div className="relative z-10">
         <div className="card-header-row border-b border-tech-main/10 pb-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-2 w-2 items-center justify-center bg-tech-main/20">
-              <div className="h-1 w-1 bg-tech-main group-hover:animate-target-blink" />
+            <div className="flex size-2 items-center justify-center bg-tech-main/20">
+              <div className="size-1 bg-tech-main group-hover:animate-target-blink" />
             </div>
             <DraftStatusBadge status={draft.displayStatus} />
             {draft.cleanupFailedCount > 0 ? (
-              <span className="font-mono text-xs text-red-500 uppercase animate-pulse">
+              <span className="animate-pulse font-mono text-xs text-red-500 uppercase">
                 ! CLEANUP_FAILED
               </span>
             ) : null}
           </div>
           <div className="flex flex-col items-end gap-1">
-            <span className="font-mono text-[10px] text-tech-main/50 uppercase tracking-widest">
+            <span className="font-mono text-[10px] tracking-widest text-tech-main/50 uppercase">
               LAST_SYNC // {draft.updatedAt.toLocaleDateString()}
             </span>
             {!NON_DELETABLE_DRAFT_STATUSES.has(draft.displayStatus) && (
@@ -152,19 +152,27 @@ export default async function DraftDashboardPage() {
             className="
               line-clamp-2 border-l-2 border-tech-main/40 pl-3 text-lg
               font-bold tracking-tight text-tech-main-dark uppercase
-              group-hover:border-tech-main transition-colors
+              transition-colors group-hover:border-tech-main
             ">
             {draft.title || "UNTITLED_DOCUMENT"}
           </h3>
-          
+
           <div className="mt-2 grid grid-cols-2 gap-2 border-t border-tech-main/10 pt-3">
             <div className="flex flex-col">
-              <span className="font-mono text-[9px] text-tech-main/40 tracking-widest uppercase">SYS_REF</span>
-              <span className="font-mono text-xs text-tech-main/80 truncate">{draft.id.split('-')[0]}</span>
+              <span className="font-mono text-[9px] tracking-widest text-tech-main/40 uppercase">
+                SYS_REF
+              </span>
+              <span className="truncate font-mono text-xs text-tech-main/80">
+                {draft.id.split("-")[0]}
+              </span>
             </div>
             <div className="flex flex-col">
-              <span className="font-mono text-[9px] text-tech-main/40 tracking-widest uppercase">FILE_METRICS</span>
-              <span className="font-mono text-xs text-tech-main/80">{draft.fileCount} NODE(S)</span>
+              <span className="font-mono text-[9px] tracking-widest text-tech-main/40 uppercase">
+                FILE_METRICS
+              </span>
+              <span className="font-mono text-xs text-tech-main/80">
+                {draft.fileCount} NODE(S)
+              </span>
             </div>
           </div>
         </div>
@@ -179,14 +187,15 @@ export default async function DraftDashboardPage() {
         <TechButton
           variant="ghost"
           className="
-            min-h-11 w-full border border-tech-main/20 bg-tech-main/5 font-mono
+            min-h-11 w-full border guide-line bg-tech-main/5 font-mono
             text-xs tracking-widest transition-all
             group-hover:border-tech-main/60 group-hover:bg-tech-main/10
             group-hover:text-tech-main-dark
           ">
           <span className="flex w-full items-center justify-between px-2">
             <span>
-              {draft.displayStatus === "DRAFT" || draft.displayStatus === "CLOSED"
+              {draft.displayStatus === "DRAFT" ||
+              draft.displayStatus === "CLOSED"
                 ? "INIT_EDIT_SEQUENCE"
                 : "ENGAGE_VIEWER"}
             </span>

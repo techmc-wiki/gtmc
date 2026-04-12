@@ -48,21 +48,30 @@ export default async function EditDraftPage({
   return (
     <div
       className="
-        mx-auto max-w-[1400px] space-y-6 p-4
-        md:p-8 relative
+        relative mx-auto max-w-[1400px] space-y-6
+        p-4 md:p-8
       ">
-      <div className="absolute top-0 right-10 w-24 h-[1px] bg-gradient-to-r from-tech-main/0 via-tech-main to-tech-main/0" />
-      <div className="absolute top-10 right-0 h-24 w-[1px] bg-gradient-to-b from-tech-main/0 via-tech-main/50 to-tech-main/0" />
-      
+      <div className="absolute top-0 right-10 h-px w-24 bg-linear-to-r from-tech-main/0 via-tech-main to-tech-main/0" />
+      <div className="absolute top-10 right-0 h-24 w-px bg-linear-to-b from-tech-main/0 via-tech-main/50 to-tech-main/0" />
+
       <div
         className="
-          flex flex-col gap-3 border-b border-tech-main/20 pb-6
-          md:flex-row md:items-end md:justify-between relative
+          relative flex flex-col gap-3 border-b guide-line
+          pb-6 md:flex-row md:items-end md:justify-between
         ">
         <div className="flex items-center gap-4">
           <Link href="/draft">
-            <TechButton variant="ghost" className="h-9 px-3 gap-2 tracking-widest text-[10px] text-tech-main/70 hover:text-tech-main hover:bg-tech-main/5">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square">
+            <TechButton
+              variant="ghost"
+              className="h-9 gap-2 px-3 text-[10px] tracking-widest text-tech-main/70 hover:bg-tech-main/5 hover:text-tech-main">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="square">
                 <path d="M19 12H5M12 19l-7-7 7-7" />
               </svg>
               ABORT_EDIT_SEQUENCE
@@ -74,24 +83,24 @@ export default async function EditDraftPage({
             <span className="h-[2px] w-4 bg-tech-main/40" />
             <p
               className="
-                font-mono text-xl tracking-tighter text-tech-main-dark font-bold uppercase
+                font-mono text-xl font-bold tracking-tighter text-tech-main-dark uppercase
               ">
               WORKSPACE_TERMINAL
             </p>
           </div>
-          <p className="font-mono text-[9px] tracking-[0.2em] text-tech-main/50 uppercase">
+          <p className="font-mono text-[9px] tracking-tech-wide text-tech-main/50 uppercase">
             TARGET_NODE // {draftWorkspaceLabel}
           </p>
         </div>
       </div>
 
-      <div className="mx-auto w-full relative">
+      <div className="relative mx-auto w-full">
         {/* Subtle decorative scanline behind the editor */}
-        <div className="absolute inset-0 pointer-events-none z-[-1] overflow-hidden">
-          <div className="w-full h-full bg-[linear-gradient(to_bottom,transparent_50%,rgba(96,112,143,0.02)_50%)] bg-[length:100%_4px]" />
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-tech-main/10 shadow-[0_0_10px_rgba(96,112,143,0.2)] animate-[tree-drop-in_10s_ease-in-out_infinite]" />
+        <div className="pointer-events-none absolute inset-0 z-[-1] overflow-hidden">
+          <div className="size-full bg-[linear-gradient(to_bottom,transparent_50%,rgba(96,112,143,0.02)_50%)] bg-size-[100%_4px]" />
+          <div className="absolute inset-x-0 top-0 h-[2px] animate-[tree-drop-in_10s_ease-in-out_infinite] bg-tech-main/10 shadow-[0_0_10px_rgba(96,112,143,0.2)]" />
         </div>
-        
+
         <DraftEditor
           initialData={{
             activeFileId: draftFiles.activeFileId,

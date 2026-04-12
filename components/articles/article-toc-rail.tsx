@@ -32,7 +32,7 @@ export function ArticleTocRail() {
       aria-label="Paragraph Outline"
       className="
         group sticky top-48
-        ml-4 hidden h-[calc(100vh-24rem)] w-16
+        ml-4 hidden h-[calc(100dvh-24rem)] w-16
         shrink-0 self-start
         overflow-hidden border-l
         guide-line backdrop-blur-xs

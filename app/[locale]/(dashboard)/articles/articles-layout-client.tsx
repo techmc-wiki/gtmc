@@ -295,7 +295,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       <MobileTocBar />
       <div
         className="
-          relative isolate flex min-h-[calc(100vh-8rem)] flex-col
+          relative isolate flex min-h-[calc(100dvh-8rem)] flex-col
           md:flex-row md:justify-center md:gap-8
         ">
         <div
@@ -375,7 +375,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
             <div className="overflow-hidden">
               <div
                 className="
-                  max-h-[calc(100vh-12rem)] overflow-y-auto overscroll-contain
+                  max-h-[calc(100dvh-12rem)] overflow-y-auto overscroll-contain
                   border-t guide-line bg-white/95 px-4 pt-3 pb-4
                 ">
                 {fixedTreeContent}
@@ -417,8 +417,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 className="
                   sticky top-20 flex w-64 flex-col justify-center
                   hover:z-20
-                  sm:top-26 sm:h-[calc(100vh-128px)]
-                  lg:top-28 lg:h-[calc(100vh-144px)] lg:w-80
+                  sm:top-26 sm:h-[calc(100dvh-128px)]
+                  lg:top-28 lg:h-[calc(100dvh-144px)] lg:w-80
                 ">
                 <div
                   className="

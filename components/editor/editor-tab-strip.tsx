@@ -52,11 +52,11 @@ export function EditorTabStrip({
       role="tablist"
       aria-label={t("editorModeAria")}
       className="
-        flex items-center justify-between gap-3 border-b border-tech-main/40
-        bg-tech-main/[0.03] font-mono text-[11px] uppercase tracking-widest relative overflow-hidden
+        relative flex items-center justify-between gap-3 overflow-hidden
+        border-b border-tech-main/40 bg-tech-main/3 font-mono text-[11px] tracking-widest uppercase
       ">
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-tech-main/0 via-tech-main/30 to-tech-main/0" />
-      <div className="flex items-center h-[38px] pl-1">
+      <div className="absolute top-0 left-0 h-px w-full bg-linear-to-r from-tech-main/0 via-tech-main/30 to-tech-main/0" />
+      <div className="flex h-[38px] items-center pl-1">
         {tabs.map((tab, idx) => (
           <button
             key={tab.id}
@@ -72,24 +72,26 @@ export function EditorTabStrip({
                 onTabChange(tabs[(idx - 1 + tabs.length) % tabs.length].id)
             }}
             className={`
-              relative h-full px-5 transition-all select-none flex items-center justify-center min-w-[100px]
-              before:absolute before:inset-0 before:border-r before:border-tech-main/20
-              after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:transition-transform after:duration-300
+              relative flex h-full min-w-[100px] items-center justify-center px-5 transition-all select-none
+              before:absolute before:inset-0 before:border-r before:guide-line
+              after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:transition-transform after:duration-300
               ${
                 activeTab === tab.id
                   ? `
-                    text-tech-main font-bold bg-white/60 backdrop-blur-sm
-                    after:bg-tech-main after:scale-x-100
+                    bg-white/60 font-bold text-tech-main backdrop-blur-sm
+                    after:scale-x-100 after:bg-tech-main
                   `
                   : `
-                    cursor-pointer text-tech-main/50 bg-transparent
-                    hover:bg-tech-main/10 hover:text-tech-main/80
-                    after:bg-tech-main/30 after:scale-x-0 hover:after:scale-x-100
+                    cursor-pointer bg-transparent text-tech-main/50
+                    after:scale-x-0 after:bg-tech-main/30
+                    hover:bg-tech-main/10 hover:text-tech-main/80 hover:after:scale-x-100
                   `
               }
             `}>
             <span className="relative z-10 flex items-center gap-2">
-              {activeTab === tab.id && <span className="inline-block w-1.5 h-1.5 bg-tech-main animate-pulse" />}
+              {activeTab === tab.id && (
+                <span className="inline-block size-1.5 animate-pulse bg-tech-main" />
+              )}
               {tab.label}
             </span>
           </button>
@@ -97,8 +99,9 @@ export function EditorTabStrip({
       </div>
 
       {rightSlot ? (
-        <div className="pr-4 text-tech-main/50 uppercase text-[9px] flex items-center gap-2">
-          TARGET_BUFFER // <span className="font-bold text-tech-main-dark/80">{rightSlot}</span>
+        <div className="flex items-center gap-2 pr-4 text-[9px] text-tech-main/50 uppercase">
+          TARGET_BUFFER //{" "}
+          <span className="font-bold text-tech-main-dark/80">{rightSlot}</span>
         </div>
       ) : null}
     </div>

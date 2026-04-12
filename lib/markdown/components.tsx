@@ -430,8 +430,7 @@ export function getMarkdownComponents(rawPath: string) {
     ul: ({ ...props }: MarkdownComponentProps) => (
       <ul
         className="
-          mb-6 list-disc space-y-2 border-l border-tech-main/30 pl-8 font-sans
-          text-[0.875rem] text-slate-800
+          mb-6 list-disc space-y-2 border-l border-tech-main/30 pl-8 font-sans text-slate-800
         "
         {...props}
       />
@@ -439,7 +438,7 @@ export function getMarkdownComponents(rawPath: string) {
     ol: ({ ...props }: MarkdownComponentProps) => (
       <ol
         className="
-          mb-6 list-decimal space-y-2 pl-8 font-sans text-[0.875rem] text-slate-800
+          mb-6 list-decimal space-y-2 pl-8 font-sans text-slate-800
         "
         {...props}
       />
@@ -509,7 +508,7 @@ export function getMarkdownComponents(rawPath: string) {
             <div
               className="
                 absolute top-0 left-[calc(100%+1.5rem)] z-10 flex h-full
-                w-[14px] -translate-x-1/2 items-start justify-center rounded-sm
+                w-3.5 -translate-x-1/2 items-start justify-center rounded-sm
                 bg-[#8b9ac8] pt-6
                 sm:left-[calc(100%+2rem)]
               ">

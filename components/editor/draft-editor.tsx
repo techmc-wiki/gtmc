@@ -1,6 +1,8 @@
 "use client"
 
 import * as React from "react"
+import { diffLines } from "diff"
+import type { ReactCodeMirrorRef } from "@uiw/react-codemirror"
 import { useRouter } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 
@@ -21,6 +23,7 @@ import {
   getDuplicateDraftFilePaths,
   normalizeDraftFileCollection,
   normalizeDraftFilePath,
+  normalizeDraftFolderPath,
   serializeDraftFilesPayload,
   type DraftFileCollection,
 } from "@/lib/draft-files"
@@ -40,6 +43,12 @@ import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
 interface DraftEditorProps {
   initialData?: {
     activeFileId?: string
+    contributingGuides?: Array<{
+      id: string
+      title: string
+      content: string
+    }>
+    folders?: string[]
     id?: string
     githubPrUrl?: string
     files: DraftFileCollection["files"]
@@ -60,6 +69,19 @@ interface DraftFileDialogIntent {
   initialMode: SourceMode
 }
 
+interface RepoFileSnapshot {
+  content: string | null
+  filePath: string
+  status: "error" | "loaded" | "loading" | "missing"
+}
+
+interface DraftDiffRow {
+  newLine: number | null
+  oldLine: number | null
+  type: "add" | "context" | "remove" | "skipped"
+  value: string
+}
+
 export function DraftEditor({ initialData }: DraftEditorProps) {
   const router = useRouter()
   const t = useTranslations("Editor")
@@ -69,12 +91,13 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     () =>
       normalizeDraftFileCollection({
         activeFileId: initialData?.activeFileId,
+        folders: initialData?.folders,
         files:
           initialData?.files && initialData.files.length > 0
             ? initialData.files
             : [createDraftFile()],
       }),
-    [initialData?.activeFileId, initialData?.files]
+    [initialData?.activeFileId, initialData?.files, initialData?.folders]
   )
 
   const [draftStatus, setDraftStatus] = React.useState(initialStatus)
@@ -100,8 +123,18 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     React.useState<OperationProgressState>("idle")
   const [activeTab, setActiveTab] = React.useState<TabType>("write")
   const [lineWrap, setLineWrap] = React.useState(false)
+  const [activeInfoTab, setActiveInfoTab] = React.useState<
+    "changes" | "guide"
+  >("changes")
+  const [activeGuideId, setActiveGuideId] = React.useState(
+    initialData?.contributingGuides?.[0]?.id || ""
+  )
+  const [repoSnapshots, setRepoSnapshots] = React.useState<
+    Record<string, RepoFileSnapshot>
+  >({})
+  const [insertDialogIntent, setInsertDialogIntent] = React.useState(false)
 
-  const textareaRef = React.useRef<any>(null)
+  const textareaRef = React.useRef<ReactCodeMirrorRef | null>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
   const autoSaveTimeoutRef = React.useRef<number | null>(null)
   const saveProgressResetRef = React.useRef<number | null>(null)
@@ -253,6 +286,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   )
   const activeFileIndex =
     draftCollection.files.findIndex((file) => file.id === activeFile.id) + 1
+  const contributingGuides = initialData?.contributingGuides || []
   const unsavedFileIds = React.useMemo(() => {
     const savedFilesById = new Map(
       lastSavedDraftCollection.files.map((file) => [file.id, file])
@@ -277,6 +311,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   const hasUnsavedChanges =
     title !== lastSavedTitle ||
     draftCollection.files.length !== lastSavedDraftCollection.files.length ||
+    (draftCollection.folders || []).join("|") !==
+      (lastSavedDraftCollection.folders || []).join("|") ||
     unsavedFileIds.size > 0
 
   const updateDraftCollection = (
@@ -805,6 +841,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
       return {
         activeFileId: nextActiveFile,
+        folders: current.folders || [],
         files: remainingFiles,
       }
     })
@@ -854,9 +891,177 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
     updateDraftCollection((current) => ({
       activeFileId: nextFile.id,
+      folders: current.folders || [],
       files: [...current.files, nextFile],
     }))
     setActiveTab("write")
+    setFileDialogIntent(null)
+    return true
+  }
+
+  React.useEffect(() => {
+    const pendingFiles = draftCollection.files.filter((file) => {
+      const normalizedPath = normalizeDraftFilePath(file.filePath)
+      if (!normalizedPath) {
+        return false
+      }
+
+      const snapshot = repoSnapshots[file.id]
+      return !snapshot || snapshot.filePath !== normalizedPath
+    })
+
+    for (const file of pendingFiles) {
+      const normalizedPath = normalizeDraftFilePath(file.filePath)
+      if (!normalizedPath) {
+        continue
+      }
+
+      setRepoSnapshots((current) => ({
+        ...current,
+        [file.id]: {
+          content: null,
+          filePath: normalizedPath,
+          status: "loading",
+        },
+      }))
+
+      void fetch(`/api/draft/repo-file?path=${encodeURIComponent(normalizedPath)}`, {
+        cache: "no-store",
+      })
+        .then(async (response) => {
+          if (response.status === 404) {
+            setRepoSnapshots((current) => ({
+              ...current,
+              [file.id]: {
+                content: null,
+                filePath: normalizedPath,
+                status: "missing",
+              },
+            }))
+            return
+          }
+
+          const data = (await response.json()) as {
+            content?: string
+            error?: string
+          }
+
+          if (!response.ok || typeof data.content !== "string") {
+            throw new Error(data.error || "Failed to load repository file")
+          }
+
+          setRepoSnapshots((current) => ({
+            ...current,
+            [file.id]: {
+              content: data.content ?? "",
+              filePath: normalizedPath,
+              status: "loaded",
+            },
+          }))
+        })
+        .catch(() => {
+          setRepoSnapshots((current) => ({
+            ...current,
+            [file.id]: {
+              content: null,
+              filePath: normalizedPath,
+              status: "error",
+            },
+          }))
+        })
+    }
+  }, [draftCollection.files, repoSnapshots])
+
+  const changeEntries = React.useMemo(
+    () =>
+      draftCollection.files
+        .map((file) => {
+          const normalizedPath = normalizeDraftFilePath(file.filePath)
+          const snapshot = repoSnapshots[file.id]
+
+          if (!normalizedPath) {
+            return {
+              changeType: "pending" as const,
+              file,
+              rows: buildDiffRows("", file.content),
+            }
+          }
+
+          if (!snapshot || snapshot.status === "loading") {
+            return {
+              changeType: "pending" as const,
+              file,
+              rows: buildDiffRows("", file.content),
+            }
+          }
+
+          if (snapshot.status === "missing") {
+            return {
+              changeType: "new" as const,
+              file,
+              rows: buildDiffRows("", file.content),
+            }
+          }
+
+          if (snapshot.status === "error" || snapshot.content === null) {
+            return null
+          }
+
+          if (snapshot.content === file.content) {
+            return null
+          }
+
+          return {
+            changeType: "modified" as const,
+            file,
+            rows: buildDiffRows(snapshot.content, file.content),
+          }
+        })
+        .filter(Boolean),
+    [draftCollection.files, repoSnapshots]
+  )
+
+  const newFolderPaths = React.useMemo(
+    () => draftCollection.folders || [],
+    [draftCollection.folders]
+  )
+
+  const handleInsertSelectedFile = ({
+    filePath,
+  }: {
+    content: string
+    filePath: string
+  }) => {
+    const normalizedTargetPath = normalizeDraftFilePath(filePath)
+
+    if (!normalizedTargetPath) {
+      return false
+    }
+
+    const linkLabel = normalizedTargetPath
+      .split("/")
+      .filter(Boolean)
+      .slice(-1)[0]
+      ?.replace(/\.md$/i, "")
+
+    insertTextAtCursor(`[${linkLabel || "linked-file"}](${normalizedTargetPath})`)
+    setInsertDialogIntent(false)
+    return true
+  }
+
+  const handleCreateFolder = (folderPath: string) => {
+    const normalizedFolderPath = normalizeDraftFolderPath(folderPath)
+
+    if (!normalizedFolderPath) {
+      showBadge("INVALID_FOLDER_NAME_", "error", 2800)
+      return false
+    }
+
+    updateDraftCollection((current) => ({
+      ...current,
+      folders: [...(current.folders || []), normalizedFolderPath],
+    }))
+    showBadge("FOLDER_READY_", "info", 2000)
     setFileDialogIntent(null)
     return true
   }
@@ -876,28 +1081,37 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     <form
       onSubmit={handleSaveDraft}
       className="
-        group relative flex w-full flex-col space-y-6 border border-tech-main
-        bg-white/80 p-4 backdrop-blur-sm
+        group relative flex w-full flex-col space-y-6 border border-tech-main/60
+        bg-[#fbfbfd] p-4 shadow-[inset_0_0_100px_rgba(96,112,143,0.03)]
         sm:p-6
+        before:absolute before:inset-0 before:z-[-1] before:bg-[url('/bg-grid.svg')] 
+        before:bg-[length:24px_24px] before:opacity-[0.04]
       ">
-      <CornerBrackets />
+      <div className="absolute left-[-1px] top-[-1px] h-3 w-3 border-l-2 border-t-2 border-tech-main" />
+      <div className="absolute right-[-1px] top-[-1px] h-3 w-3 border-r-2 border-t-2 border-tech-main" />
+      <div className="absolute bottom-[-1px] left-[-1px] h-3 w-3 border-b-2 border-l-2 border-tech-main" />
+      <div className="absolute bottom-[-1px] right-[-1px] h-3 w-3 border-b-2 border-r-2 border-tech-main" />
 
-      <div className="flex flex-col space-y-4">
+      <div className="flex flex-col space-y-4 relative z-10">
         <div className="flex flex-col space-y-2">
-          <label htmlFor="draft-title" className="section-label">
-            {t("titleLabel")}
-          </label>
+          <div className="flex items-center justify-between">
+            <label htmlFor="draft-title" className="font-mono text-[10px] text-tech-main uppercase tracking-widest flex items-center gap-2">
+              <span className="inline-block h-2 w-2 bg-tech-main/40" />
+              {t("titleLabel")}
+            </label>
+          </div>
           <InputBox
             id="draft-title"
             required
             placeholder={t("titlePlaceholder")}
             className={`
-              border-tech-main/40 py-3 font-mono text-lg backdrop-blur-sm
-              focus:border-tech-main/60
+              border-tech-main/40 py-3 font-mono text-lg bg-white/50 backdrop-blur-sm
+              focus:border-tech-main focus:bg-white focus:ring-1 focus:ring-tech-main/20
+              transition-all duration-300
               ${
                 isReadOnly
-                  ? `cursor-not-allowed bg-gray-100 opacity-70`
-                  : `bg-white/80`
+                  ? `cursor-not-allowed bg-tech-main/5 opacity-70`
+                  : `hover:bg-white/80`
               }
             `}
             value={title}
@@ -1002,6 +1216,22 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   onClick={() => openFileDialog("replace", "upload")}>
                   {t("importTargetFile")}
                 </TechButton>
+                <TechButton
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  disabled={isReadOnly}
+                  onClick={() => openFileDialog("add", "folder")}>
+                  NEW FOLDER
+                </TechButton>
+                <TechButton
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  disabled={isReadOnly}
+                  onClick={() => setInsertDialogIntent(true)}>
+                  INSERT FILE LINK
+                </TechButton>
               </div>
             </div>
 
@@ -1073,6 +1303,79 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                     ) : undefined
                   }
                 />
+                <div
+                  className="
+                    flex items-center gap-2 border-b border-tech-main/20
+                    bg-tech-main/[0.04] px-4 h-12 shadow-[inset_0_1px_4px_rgba(96,112,143,0.05)]
+                    overflow-x-auto no-scrollbar scroll-smooth relative
+                  ">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-tech-main/30" />
+                  <span className="font-mono text-[9px] tracking-widest text-tech-main/50 uppercase mr-2 opacity-70">
+                    MACROS
+                  </span>
+                  
+                  <TechButton
+                    type="button"
+                    variant="ghost"
+                    className="h-7 px-3 text-[10px] tracking-widest text-tech-main hover:bg-white hover:text-tech-main border border-transparent hover:border-tech-main/20 hover:shadow-sm transition-all"
+                    disabled={isReadOnly}
+                    onClick={() => insertTextAtCursor("\n## Section Title\n\n")}>
+                    <span className="flex items-center gap-1.5"><span className="text-tech-main/40 font-bold">#</span> SECTION</span>
+                  </TechButton>
+                  <TechButton
+                    type="button"
+                    variant="ghost"
+                    className="h-7 px-3 text-[10px] tracking-widest text-tech-main hover:bg-white hover:text-tech-main border border-transparent hover:border-tech-main/20 hover:shadow-sm transition-all"
+                    disabled={isReadOnly}
+                    onClick={() =>
+                      insertTextAtCursor(
+                        "\n> [!TIP]\n> Add contributor guidance here.\n\n"
+                      )
+                    }>
+                    <span className="flex items-center gap-1.5"><span className="text-tech-main/40 font-bold">{">"}</span> CALLOUT</span>
+                  </TechButton>
+                  <TechButton
+                    type="button"
+                    variant="ghost"
+                    className="h-7 px-3 text-[10px] tracking-widest text-tech-main hover:bg-white hover:text-tech-main border border-transparent hover:border-tech-main/20 hover:shadow-sm transition-all"
+                    disabled={isReadOnly}
+                    onClick={() =>
+                      insertTextAtCursor(
+                        "\n| Parameter | Value | Notes |\n| --- | --- | --- |\n| Example | Value | Detail |\n\n"
+                      )
+                    }>
+                    <span className="flex items-center gap-1.5"><span className="text-tech-main/40 font-bold">||</span> TABLE</span>
+                  </TechButton>
+                  
+                  <div className="mx-2 h-4 w-[1px] bg-tech-main/20" />
+                  
+                  <TechButton
+                    type="button"
+                    variant="secondary"
+                    className="h-7 px-3 text-[10px] tracking-widest text-tech-main-dark/80 bg-white/50 border-tech-main/20 hover:bg-white hover:border-tech-main/50 transition-all font-bold group"
+                    disabled={isReadOnly || !activeFileHistory?.undoStack.length}
+                    onClick={handleUndoDraftEdit}>
+                    <span className="flex items-center gap-1">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square">
+                        <path d="M3 7v6h6M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3z"/>
+                      </svg>
+                      UNDO
+                    </span>
+                  </TechButton>
+                  <TechButton
+                    type="button"
+                    variant="secondary"
+                    className="h-7 px-3 text-[10px] tracking-widest text-tech-main-dark/80 bg-white/50 border-tech-main/20 hover:bg-white hover:border-tech-main/50 transition-all font-bold group"
+                    disabled={isReadOnly || !activeFileHistory?.redoStack.length}
+                    onClick={handleRedoDraftEdit}>
+                    <span className="flex items-center gap-1">
+                      REDO
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" className="scale-x-[-1]">
+                        <path d="M3 7v6h6M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3z"/>
+                      </svg>
+                    </span>
+                  </TechButton>
+                </div>
               </>
             )}
 
@@ -1133,6 +1436,155 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           </div>
         </div>
       </div>
+
+      <section
+        className="
+          grid gap-4
+          xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]
+        ">
+        <div className="border border-tech-main/35 bg-white/80 backdrop-blur-sm">
+          <div className="flex border-b guide-line">
+            <button
+              type="button"
+              onClick={() => setActiveInfoTab("changes")}
+              className={`flex-1 px-4 py-3 font-mono text-xs tracking-widest uppercase ${
+                activeInfoTab === "changes"
+                  ? "bg-tech-main text-white"
+                  : "text-tech-main hover:bg-tech-main/5"
+              }`}>
+              CHANGE MAP
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveInfoTab("guide")}
+              className={`flex-1 border-l guide-line px-4 py-3 font-mono text-xs tracking-widest uppercase ${
+                activeInfoTab === "guide"
+                  ? "bg-tech-main text-white"
+                  : "text-tech-main hover:bg-tech-main/5"
+              }`}>
+              CONTRIBUTING
+            </button>
+          </div>
+
+          {activeInfoTab === "changes" ? (
+            <div className="space-y-4 p-4">
+              <div
+                className="
+                  grid gap-3
+                  sm:grid-cols-3
+                ">
+                <InfoStat
+                  label="MODIFIED FILES"
+                  value={String(
+                    changeEntries.filter(
+                      (entry) =>
+                        entry && entry.changeType === "modified"
+                    ).length
+                  )}
+                />
+                <InfoStat
+                  label="NEW FILES"
+                  value={String(
+                    changeEntries.filter(
+                      (entry) => entry && entry.changeType === "new"
+                    ).length
+                  )}
+                />
+                <InfoStat
+                  label="NEW FOLDERS"
+                  value={String((draftCollection.folders || []).length)}
+                />
+              </div>
+
+              {changeEntries.length === 0 ? (
+                <p
+                  className="
+                    border guide-line bg-tech-main/5 p-4 font-mono text-xs
+                    text-tech-main/60 uppercase
+                  ">
+                  NO_LOCAL_DIFF_
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {changeEntries.map((entry) =>
+                    entry ? (
+                      <ChangePreviewCard
+                        key={entry.file.id}
+                        filePath={entry.file.filePath || "PATH_NOT_SET"}
+                        changeType={entry.changeType}
+                        rows={entry.rows}
+                      />
+                    ) : null
+                  )}
+                </div>
+              )}
+
+              {newFolderPaths.length > 0 ? (
+                <div className="border guide-line bg-tech-main/5 p-4">
+                  <p className="section-label">NEW FOLDERS</p>
+                  <div className="space-y-1 font-mono text-xs text-emerald-700">
+                    {newFolderPaths.map((folderPath) => (
+                      <p key={folderPath}>+ {folderPath}</p>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <div className="p-4">
+              {contributingGuides.length === 0 ? (
+                <p className="font-mono text-xs text-tech-main/60 uppercase">
+                  NO_GUIDE_AVAILABLE_
+                </p>
+              ) : (
+                <>
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    {contributingGuides.map((guide) => (
+                      <TechButton
+                        key={guide.id}
+                        type="button"
+                        variant={
+                          activeGuideId === guide.id ? "primary" : "secondary"
+                        }
+                        size="sm"
+                        onClick={() => setActiveGuideId(guide.id)}>
+                        {guide.title}
+                      </TechButton>
+                    ))}
+                  </div>
+                  <div className="max-h-136 overflow-y-auto pr-2">
+                    <LazyMarkdownPreview
+                      content={
+                        contributingGuides.find(
+                          (guide) => guide.id === activeGuideId
+                        )?.content || contributingGuides[0].content
+                      }
+                      rawPath="CONTRIBUTING.md"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="border border-tech-main/35 bg-white/80 p-4 backdrop-blur-sm">
+          <p className="section-label">WORKSPACE OVERVIEW</p>
+          <div className="space-y-3 font-mono text-xs uppercase">
+            <InfoLine label="OPEN FILES" value={String(draftCollection.files.length)} />
+            <InfoLine
+              label="FOLDERS"
+              value={String((draftCollection.folders || []).length)}
+            />
+            <InfoLine label="UNSAVED FILES" value={String(unsavedFileIds.size)} />
+            <InfoLine label="ACTIVE FILE" value={activeFile.filePath || "PATH_NOT_SET"} />
+            <InfoLine
+              label="GITHUB BASE"
+              value={describeSnapshotStatus(repoSnapshots[activeFile.id])}
+            />
+          </div>
+        </div>
+      </section>
 
       {!isReadOnly && (
         <>
@@ -1219,6 +1671,15 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         initialMode={fileDialogIntent?.initialMode}
         onClose={() => setFileDialogIntent(null)}
         onCreate={handleApplyDraftFileSource}
+        onCreateFolder={handleCreateFolder}
+      />
+
+      <DraftFileSourceDialog
+        isOpen={insertDialogIntent}
+        initialFolderPath={getParentFolderPath(activeFile.filePath)}
+        initialMode="repo"
+        onClose={() => setInsertDialogIntent(false)}
+        onCreate={handleInsertSelectedFile}
       />
     </form>
   )
@@ -1237,4 +1698,141 @@ function getParentFolderPath(filePath: string) {
   const normalized = normalizeDraftFilePath(filePath)
   const lastSlashIndex = normalized.lastIndexOf("/")
   return lastSlashIndex >= 0 ? normalized.slice(0, lastSlashIndex) : ""
+}
+
+function buildDiffRows(previousContent: string, nextContent: string) {
+  const rows: DraftDiffRow[] = []
+  let oldLine = 1
+  let newLine = 1
+
+  for (const part of diffLines(previousContent, nextContent)) {
+    const values = part.value.replace(/\n$/, "").split("\n")
+
+    if (!part.added && !part.removed && values.length > 6) {
+      for (const line of values.slice(0, 2)) {
+        rows.push({ newLine, oldLine, type: "context", value: line })
+        oldLine += 1
+        newLine += 1
+      }
+
+      rows.push({
+        newLine: null,
+        oldLine: null,
+        type: "skipped",
+        value: `${values.length - 4} unchanged lines`,
+      })
+
+      for (const line of values.slice(-2)) {
+        rows.push({ newLine, oldLine, type: "context", value: line })
+        oldLine += 1
+        newLine += 1
+      }
+      continue
+    }
+
+    for (const line of values) {
+      rows.push({
+        newLine: part.removed ? null : newLine,
+        oldLine: part.added ? null : oldLine,
+        type: part.added ? "add" : part.removed ? "remove" : "context",
+        value: line,
+      })
+
+      if (!part.added) {
+        oldLine += 1
+      }
+
+      if (!part.removed) {
+        newLine += 1
+      }
+    }
+  }
+
+  return rows
+}
+
+function describeSnapshotStatus(snapshot?: RepoFileSnapshot) {
+  if (!snapshot) return "CHECKING"
+  if (snapshot.status === "missing") return "NEW_FILE"
+  if (snapshot.status === "loading") return "LOADING"
+  if (snapshot.status === "error") return "UNKNOWN"
+  return "TRACKED"
+}
+
+function InfoStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="border guide-line bg-tech-main/5 p-3">
+      <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/55 uppercase">
+        {label}
+      </p>
+      <p className="mt-2 font-mono text-lg text-tech-main uppercase">{value}</p>
+    </div>
+  )
+}
+
+function InfoLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-3 border-b border-tech-main/10 pb-2">
+      <span className="text-tech-main/55">{label}</span>
+      <span className="text-right break-all text-tech-main">{value}</span>
+    </div>
+  )
+}
+
+function ChangePreviewCard({
+  filePath,
+  changeType,
+  rows,
+}: {
+  filePath: string
+  changeType: "modified" | "new" | "pending"
+  rows: DraftDiffRow[]
+}) {
+  return (
+    <section className="border guide-line bg-white/70">
+      <div className="flex items-center justify-between border-b guide-line bg-tech-main/5 px-4 py-3">
+        <p className="font-mono text-xs tracking-widest break-all text-tech-main uppercase">
+          {filePath}
+        </p>
+        <span
+          className={`
+            border px-2 py-1 font-mono text-[0.625rem] tracking-widest uppercase
+            ${
+              changeType === "new"
+                ? `border-emerald-500/30 text-emerald-700`
+                : changeType === "modified"
+                  ? `border-amber-500/30 text-amber-700`
+                  : `guide-line text-tech-main/55`
+            }
+          `}>
+          {changeType}
+        </span>
+      </div>
+
+      <div className="max-h-72 overflow-auto bg-slate-950/95 font-mono text-[0.6875rem] text-slate-100">
+        {rows.map((row, index) => (
+          <div
+            key={`${filePath}-${index}`}
+            className={`
+              grid grid-cols-[3rem_3rem_minmax(0,1fr)] px-2 py-1
+              ${
+                row.type === "add"
+                  ? `bg-emerald-500/10 text-emerald-200`
+                  : row.type === "remove"
+                    ? `bg-red-500/10 text-red-200`
+                    : row.type === "skipped"
+                      ? `bg-slate-800/70 text-slate-400`
+                      : `text-slate-300`
+              }
+            `}>
+            <span className="text-slate-500">{row.oldLine ?? ""}</span>
+            <span className="text-slate-500">{row.newLine ?? ""}</span>
+            <span className="break-all whitespace-pre-wrap">
+              {row.type === "skipped" ? `… ${row.value}` : row.value || " "}
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
 }

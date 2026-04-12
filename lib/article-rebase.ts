@@ -818,6 +818,7 @@ async function applyRebaseCommitsMultiFile(input: {
     conflictedCommitSha: undefined,
     resolvedContent: serializeDraftFilesForStorage({
       activeFileId: Object.values(fileStates)[0]?.filePath ?? "",
+      folders: [],
       files: fileStatesToFiles(fileStates).map((file) => ({
         id: file.filePath,
         filePath: file.filePath,
@@ -993,6 +994,7 @@ export async function rebaseArticleContentMultiFile(
 
   const draftStorage = serializeDraftFilesForStorage({
     activeFileId: normalizedFiles[0]?.filePath ?? "",
+    folders: [],
     files: normalizedFiles.map((file) => ({
       id: file.filePath,
       filePath: file.filePath,

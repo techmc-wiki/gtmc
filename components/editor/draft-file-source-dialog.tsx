@@ -20,13 +20,14 @@ interface DraftFileSourceDialogProps {
   initialFolderPath?: string
   initialMode?: SourceMode
   onClose: () => void
+  onCreateFolder?: (folderPath: string) => boolean | Promise<boolean>
   onCreate: (input: {
     content: string
     filePath: string
   }) => boolean | Promise<boolean>
 }
 
-export type SourceMode = "repo" | "upload" | "new"
+export type SourceMode = "folder" | "repo" | "upload" | "new"
 
 const ROOT_NODE: DraftRepoTreeNode = {
   id: "root",
@@ -41,6 +42,7 @@ export function DraftFileSourceDialog({
   initialFolderPath,
   initialMode = "new",
   onClose,
+  onCreateFolder,
   onCreate,
 }: DraftFileSourceDialogProps) {
   const t = useTranslations("DraftFiles")
@@ -56,6 +58,7 @@ export function DraftFileSourceDialog({
     initialFolderPath || ""
   )
   const [newFileName, setNewFileName] = React.useState("")
+  const [newFolderName, setNewFolderName] = React.useState("")
   const [localFile, setLocalFile] = React.useState<File | null>(null)
   const [customUploadName, setCustomUploadName] = React.useState("")
   const [isSubmitting, setIsSubmitting] = React.useState(false)
@@ -111,6 +114,7 @@ export function DraftFileSourceDialog({
       setSelectedRepoFilePath("")
       setSelectedFolderPath(initialFolderPath || "")
       setNewFileName("")
+      setNewFolderName("")
       setLocalFile(null)
       setCustomUploadName("")
       setTreeError(null)
@@ -180,6 +184,28 @@ export function DraftFileSourceDialog({
     }
 
     Promise.resolve(onCreate({ content: "", filePath })).then((created) => {
+      if (created !== false) {
+        onClose()
+      }
+    })
+  }
+
+  const handleCreateNewFolder = () => {
+    const normalizedFolderName = normalizeDraftFilePath(newFolderName)
+      .split("/")
+      .filter(Boolean)
+      .at(-1)
+
+    if (!normalizedFolderName || !onCreateFolder) {
+      setTreeError(t("fileNameValidationError"))
+      return
+    }
+
+    const folderPath = [selectedFolderPath, normalizedFolderName]
+      .filter(Boolean)
+      .join("/")
+
+    Promise.resolve(onCreateFolder(folderPath)).then((created) => {
       if (created !== false) {
         onClose()
       }
@@ -311,6 +337,12 @@ export function DraftFileSourceDialog({
                 value={mode}
                 onChange={setMode}
               />
+              <ModeButton
+                label="新建文件夹"
+                mode="folder"
+                value={mode}
+                onChange={setMode}
+              />
             </div>
 
             {treeError ? (
@@ -413,6 +445,43 @@ export function DraftFileSourceDialog({
                 </TechButton>
               </div>
             ) : null}
+
+            {mode === "folder" ? (
+              <div className="space-y-4">
+                <SectionLabel>新建文件夹</SectionLabel>
+                <p className="font-mono text-xs text-tech-main/60 uppercase">
+                  {t("destinationFolder")}: {selectedFolderPath || "ROOT"}
+                </p>
+                <div className="space-y-2">
+                  <label
+                    className="section-label"
+                    htmlFor="draft-new-folder-name">
+                    {t("fileNameLabel")}
+                  </label>
+                  <InputBox
+                    id="draft-new-folder-name"
+                    placeholder="例如：new-section"
+                    value={newFolderName}
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                      setNewFolderName(event.target.value)
+                    }
+                  />
+                </div>
+                <div className="font-mono text-xs text-tech-main/60 uppercase">
+                  {t("result")}:{" "}
+                  {[selectedFolderPath, newFolderName.trim()]
+                    .filter(Boolean)
+                    .join("/") || t("pending")}
+                </div>
+                <TechButton
+                  type="button"
+                  variant="primary"
+                  onClick={handleCreateNewFolder}
+                  disabled={!newFolderName.trim()}>
+                  创建文件夹
+                </TechButton>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
@@ -482,7 +551,8 @@ function TreeNode({
   const isExpanded = expandedPaths.has(node.path)
   const isFolderSelected = selectedFolderPath === node.path
   const isFileSelected = selectedFilePath === node.path
-  const isSelectableFolder = mode === "new" || mode === "upload"
+  const isSelectableFolder =
+    mode === "new" || mode === "upload" || mode === "folder"
   const isSelectableFile = mode === "repo"
 
   return (

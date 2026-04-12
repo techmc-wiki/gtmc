@@ -444,6 +444,7 @@ export async function submitForReviewAction(revisionId: string) {
 
     const syncedDraftStorage = serializeDraftFilesForStorage({
       activeFileId: result.activeFileId,
+      folders: [],
       files: result.files,
     })
 

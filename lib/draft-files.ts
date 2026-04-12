@@ -9,6 +9,7 @@ interface DraftBundleFileRecord {
 interface DraftBundleRecord {
   version: 1
   activeFileId?: string
+  folders?: string[]
   files: DraftBundleFileRecord[]
 }
 
@@ -21,11 +22,13 @@ export interface DraftFileRecord {
 
 export interface DraftFileCollection {
   activeFileId: string
+  folders: string[]
   files: DraftFileRecord[]
 }
 
 interface DraftFileCollectionInput {
   activeFileId?: string
+  folders?: string[]
   files?: Array<Partial<DraftFileRecord>>
 }
 
@@ -46,6 +49,10 @@ export function createDraftFile(
 
 export function normalizeDraftFilePath(filePath: string) {
   return filePath.trim().replace(/\\/g, "/").replace(/^\/+/, "")
+}
+
+export function normalizeDraftFolderPath(folderPath: string) {
+  return normalizeDraftFilePath(folderPath).replace(/\/+$/, "")
 }
 
 export function normalizeDraftFileCollection(
@@ -76,9 +83,11 @@ export function normalizeDraftFileCollection(
   }
 
   const activeFileId = resolveActiveFileId(input?.activeFileId, dedupedFiles)
+  const folders = dedupeNormalizedFolders(input?.folders || [], dedupedFiles)
 
   return {
     activeFileId,
+    folders,
     files: dedupedFiles,
   }
 }
@@ -135,12 +144,14 @@ export function decodeStoredDraftFiles({
 
     return {
       activeFileId: legacyFile.id,
+      folders: collectParentFolders([legacyFile.filePath]),
       files: [legacyFile],
     } satisfies DraftFileCollection
   }
 
   const contentFiles = normalizeDraftFileCollection({
     activeFileId: contentBundle.activeFileId,
+    folders: contentBundle.folders || [],
     files: contentBundle.files.map((storedFile) => ({
       id: storedFile.id,
       filePath: storedFile.filePath || "",
@@ -168,6 +179,7 @@ export function decodeStoredDraftFiles({
 
   return {
     activeFileId: contentFiles.activeFileId,
+    folders: contentFiles.folders,
     files: contentFiles.files.map((file) => {
       const conflictValue =
         conflictMap.get(`id:${file.id}`) ??
@@ -189,7 +201,7 @@ export function serializeDraftFilesForStorage(collection: DraftFileCollection) {
   const normalized = normalizeDraftFileCollection(collection)
   const activeFile = getActiveDraftFile(normalized)
 
-  if (normalized.files.length === 1) {
+  if (normalized.files.length === 1 && normalized.folders.length === 0) {
     return {
       content: activeFile.content,
       conflictContent: activeFile.conflictContent ?? null,
@@ -200,6 +212,7 @@ export function serializeDraftFilesForStorage(collection: DraftFileCollection) {
   const content = serializeStoredBundle({
     version: 1,
     activeFileId: normalized.activeFileId,
+    folders: normalized.folders,
     files: normalized.files.map((file) => ({
       id: file.id,
       filePath: file.filePath,
@@ -225,6 +238,7 @@ export function serializeDraftFilesForStorage(collection: DraftFileCollection) {
         ? serializeStoredBundle({
             version: 1,
             activeFileId: normalized.activeFileId,
+            folders: normalized.folders,
             files: conflictFiles,
           })
         : null,
@@ -237,6 +251,7 @@ export function serializeDraftFilesPayload(collection: DraftFileCollection) {
 
   return JSON.stringify({
     activeFileId: normalized.activeFileId,
+    folders: normalized.folders,
     files: normalized.files.map((file) => ({
       id: file.id,
       filePath: file.filePath,
@@ -256,6 +271,7 @@ export function deserializeDraftFilesPayload(raw: string | null | undefined) {
   try {
     const parsed = JSON.parse(raw) as {
       activeFileId?: string
+      folders?: string[]
       files?: Array<Partial<DraftFileRecord>>
     }
 
@@ -265,6 +281,7 @@ export function deserializeDraftFilesPayload(raw: string | null | undefined) {
 
     return normalizeDraftFileCollection({
       activeFileId: parsed.activeFileId,
+      folders: parsed.folders,
       files: parsed.files,
     })
   } catch {
@@ -290,6 +307,66 @@ function createDraftFileId(filePath?: string) {
 
 function normalizeComparablePath(filePath: string | undefined) {
   return normalizeDraftFilePath(filePath || "").toLowerCase()
+}
+
+function dedupeNormalizedFolders(
+  folders: string[],
+  files: DraftFileRecord[]
+): string[] {
+  const normalizedFolders = new Set<string>()
+
+  for (const folder of folders) {
+    const normalized = normalizeDraftFolderPath(folder)
+    if (!normalized) {
+      continue
+    }
+
+    for (const ancestor of listFolderAncestors(normalized)) {
+      normalizedFolders.add(ancestor)
+    }
+  }
+
+  for (const folder of collectParentFolders(files.map((file) => file.filePath))) {
+    normalizedFolders.add(folder)
+  }
+
+  return [...normalizedFolders].sort((left, right) =>
+    left.localeCompare(right, undefined, { sensitivity: "base" })
+  )
+}
+
+function collectParentFolders(filePaths: string[]) {
+  const folders = new Set<string>()
+
+  for (const filePath of filePaths) {
+    const normalizedPath = normalizeDraftFilePath(filePath)
+    if (!normalizedPath) {
+      continue
+    }
+
+    const segments = normalizedPath.split("/").slice(0, -1)
+    let cursor = ""
+
+    for (const segment of segments) {
+      cursor = cursor ? `${cursor}/${segment}` : segment
+      folders.add(cursor)
+    }
+  }
+
+  return [...folders]
+}
+
+function listFolderAncestors(folderPath: string) {
+  const ancestors: string[] = []
+  const segments = normalizeDraftFolderPath(folderPath).split("/").filter(Boolean)
+  let cursor = ""
+
+  for (const segment of segments) {
+    cursor = cursor ? `${cursor}/${segment}` : segment
+    ancestors.push(cursor)
+  }
+
+  return ancestors
 }
 
 function resolveActiveFileId(

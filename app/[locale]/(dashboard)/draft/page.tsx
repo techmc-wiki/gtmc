@@ -101,24 +101,31 @@ export default async function DraftDashboardPage() {
       className="
         group relative flex h-auto flex-col justify-between border
         border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
-        sm:h-64
+        transition-all duration-300 hover:border-tech-main hover:bg-white
+        hover:shadow-[0_0_20px_rgba(96,112,143,0.15)] sm:h-64
       ">
       {/* Corner brackets */}
       <CornerBrackets variant="hover" />
+      
+      {/* Blueprint Grid Background Pattern on Hover */}
+      <div className="absolute inset-0 z-0 bg-[url('/bg-grid.svg')] bg-[length:24px_24px] opacity-0 transition-opacity duration-500 group-hover:opacity-[0.03]" />
 
       <div className="relative z-10">
-        <div className="card-header-row">
-          <div className="flex items-center gap-2">
+        <div className="card-header-row border-b border-tech-main/10 pb-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-2 w-2 items-center justify-center bg-tech-main/20">
+              <div className="h-1 w-1 bg-tech-main group-hover:animate-target-blink" />
+            </div>
             <DraftStatusBadge status={draft.displayStatus} />
             {draft.cleanupFailedCount > 0 ? (
-              <span className="font-mono text-xs text-red-500 uppercase">
-                CLEANUP_FAILED_
+              <span className="font-mono text-xs text-red-500 uppercase animate-pulse">
+                ! CLEANUP_FAILED
               </span>
             ) : null}
           </div>
           <div className="flex flex-col items-end gap-1">
-            <span className="mono-label">
-              {draft.updatedAt.toLocaleDateString()}
+            <span className="font-mono text-[10px] text-tech-main/50 uppercase tracking-widest">
+              LAST_SYNC // {draft.updatedAt.toLocaleDateString()}
             </span>
             {!NON_DELETABLE_DRAFT_STATUSES.has(draft.displayStatus) && (
               <form
@@ -129,49 +136,64 @@ export default async function DraftDashboardPage() {
                 <button
                   type="submit"
                   className="
-                      flex min-h-11 cursor-pointer items-center font-mono
-                      text-xs text-red-500 uppercase
-                      hover:text-red-700 hover:underline
+                      flex cursor-pointer items-center font-mono
+                      text-[10px] text-red-500/70 uppercase transition-colors
+                      hover:text-red-600 hover:underline
                     ">
-                  [DELETE]
+                  [ TERMINATE ]
                 </button>
               </form>
             )}
           </div>
         </div>
-        <h3
-          className="
-            mt-2 line-clamp-2 border-l-2 border-tech-main/40 pl-3 text-lg
-            font-bold tracking-tight text-tech-main-dark uppercase
-          ">
-          {draft.title || "UNTITLED_DOCUMENT"}
-        </h3>
-        {draft.fileCount > 1 ? (
-          <p
+
+        <div className="mt-4 flex flex-col gap-2">
+          <h3
             className="
-              mt-3 font-mono text-xs tracking-widest text-tech-main/70 uppercase
+              line-clamp-2 border-l-2 border-tech-main/40 pl-3 text-lg
+              font-bold tracking-tight text-tech-main-dark uppercase
+              group-hover:border-tech-main transition-colors
             ">
-            FILE_SET: {draft.fileCount}
-          </p>
-        ) : null}
+            {draft.title || "UNTITLED_DOCUMENT"}
+          </h3>
+          
+          <div className="mt-2 grid grid-cols-2 gap-2 border-t border-tech-main/10 pt-3">
+            <div className="flex flex-col">
+              <span className="font-mono text-[9px] text-tech-main/40 tracking-widest uppercase">SYS_REF</span>
+              <span className="font-mono text-xs text-tech-main/80 truncate">{draft.id.split('-')[0]}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-mono text-[9px] text-tech-main/40 tracking-widest uppercase">FILE_METRICS</span>
+              <span className="font-mono text-xs text-tech-main/80">{draft.fileCount} NODE(S)</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <Link
         href={`/draft/${draft.id}`}
         className="
-          relative z-10 mt-4
+          relative z-10 mt-6
           sm:mt-auto
         ">
         <TechButton
           variant="ghost"
           className="
-            min-h-11 w-full border border-tech-main/40 bg-white/50 font-mono
+            min-h-11 w-full border border-tech-main/20 bg-tech-main/5 font-mono
             text-xs tracking-widest transition-all
-            hover:border-tech-main/60 hover:bg-white/80
+            group-hover:border-tech-main/60 group-hover:bg-tech-main/10
+            group-hover:text-tech-main-dark
           ">
-          {draft.displayStatus === "DRAFT" || draft.displayStatus === "CLOSED"
-            ? "> EDIT_RECORD"
-            : "> VIEW_STREAM"}
+          <span className="flex w-full items-center justify-between px-2">
+            <span>
+              {draft.displayStatus === "DRAFT" || draft.displayStatus === "CLOSED"
+                ? "INIT_EDIT_SEQUENCE"
+                : "ENGAGE_VIEWER"}
+            </span>
+            <span className="opacity-0 transition-opacity group-hover:animate-target-blink group-hover:opacity-100">
+              {">"}
+            </span>
+          </span>
         </TechButton>
       </Link>
     </TechCard>

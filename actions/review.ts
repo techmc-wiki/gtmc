@@ -276,6 +276,7 @@ function focusDraftFileByPath(
 
   return normalizeDraftFileCollection({
     activeFileId: targetFile.id,
+    folders: draftFiles.folders || [],
     files: draftFiles.files,
   })
 }
@@ -313,6 +314,7 @@ function applyRebasedFilesToDraft(
 
   return normalizeDraftFileCollection({
     activeFileId: draftFiles.activeFileId,
+    folders: draftFiles.folders || [],
     files: draftFiles.files.map((file) => ({
       ...file,
       content:
@@ -542,6 +544,7 @@ export async function resolveConflictAction(
       (content
         ? normalizeDraftFileCollection({
             activeFileId: storedDraftFiles.activeFileId,
+            folders: storedDraftFiles.folders || [],
             files: storedDraftFiles.files.map((file) => ({
               ...file,
               content:
@@ -580,6 +583,7 @@ export async function resolveConflictAction(
       )
       const nextDraftFiles = normalizeDraftFileCollection({
         activeFileId: resolvedDraftFiles.activeFileId,
+        folders: resolvedDraftFiles.folders || [],
         files: resolvedDraftFiles.files.map((file) => {
           const previousFile = storedFileMap.get(file.id)
           const stillHasConflict = hasSimpleConflictMarkers(file.content)
@@ -899,6 +903,7 @@ export async function resolveConflictAction(
     const syncedDraftFiles = focusDraftFileByPath(
       {
         activeFileId: result.activeFileId,
+        folders: storedDraftFiles.folders || [],
         files: result.files,
       },
       getFirstConflictedFilePath(result.files)
@@ -1158,6 +1163,7 @@ export async function keepFileAction(revisionId: string) {
 
   const keptDraftStorage = serializeDraftFilesForStorage({
     activeFileId: storedDraftFiles.activeFileId,
+    folders: storedDraftFiles.folders || [],
     files: [
       {
         ...draftFile,
@@ -1553,6 +1559,7 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
     const mergedDraftFiles = focusDraftFileByPath(
       normalizeDraftFileCollection({
         activeFileId: storedDraftFiles.activeFileId,
+        folders: storedDraftFiles.folders || [],
         files: storedDraftFiles.files.map((file) => {
           const mergedFile = result.fileResults.find(
             (candidate) => candidate.filePath === file.filePath

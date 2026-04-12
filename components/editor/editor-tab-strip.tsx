@@ -53,9 +53,10 @@ export function EditorTabStrip({
       aria-label={t("editorModeAria")}
       className="
         flex items-center justify-between gap-3 border-b border-tech-main/40
-        bg-tech-main/10 font-mono text-xs
+        bg-tech-main/[0.03] font-mono text-[11px] uppercase tracking-widest relative overflow-hidden
       ">
-      <div className="flex items-center">
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-tech-main/0 via-tech-main/30 to-tech-main/0" />
+      <div className="flex items-center h-[38px] pl-1">
         {tabs.map((tab, idx) => (
           <button
             key={tab.id}
@@ -71,23 +72,34 @@ export function EditorTabStrip({
                 onTabChange(tabs[(idx - 1 + tabs.length) % tabs.length].id)
             }}
             className={`
-              px-4 py-2 transition-colors select-none
+              relative h-full px-5 transition-all select-none flex items-center justify-center min-w-[100px]
+              before:absolute before:inset-0 before:border-r before:border-tech-main/20
+              after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:transition-transform after:duration-300
               ${
                 activeTab === tab.id
-                  ? `bg-tech-main text-white`
+                  ? `
+                    text-tech-main font-bold bg-white/60 backdrop-blur-sm
+                    after:bg-tech-main after:scale-x-100
+                  `
                   : `
-                    cursor-pointer text-tech-main/60
-                    hover:bg-tech-main/10
+                    cursor-pointer text-tech-main/50 bg-transparent
+                    hover:bg-tech-main/10 hover:text-tech-main/80
+                    after:bg-tech-main/30 after:scale-x-0 hover:after:scale-x-100
                   `
               }
             `}>
-            {tab.label}
+            <span className="relative z-10 flex items-center gap-2">
+              {activeTab === tab.id && <span className="inline-block w-1.5 h-1.5 bg-tech-main animate-pulse" />}
+              {tab.label}
+            </span>
           </button>
         ))}
       </div>
 
       {rightSlot ? (
-        <div className="pr-4 text-tech-main/60 uppercase">{rightSlot}</div>
+        <div className="pr-4 text-tech-main/50 uppercase text-[9px] flex items-center gap-2">
+          TARGET_BUFFER // <span className="font-bold text-tech-main-dark/80">{rightSlot}</span>
+        </div>
       ) : null}
     </div>
   )

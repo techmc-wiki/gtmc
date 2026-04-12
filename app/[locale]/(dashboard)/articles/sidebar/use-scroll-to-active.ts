@@ -22,7 +22,6 @@ export function useScrollToActive({
   expandedFoldersRef,
   setExpandedFolders,
   scrollContainerRef,
-  setIsFileExpanded: _setIsFileExpanded,
   activeItemRef,
   folderGridRefs,
 }: {
@@ -33,12 +32,9 @@ export function useScrollToActive({
   expandedFoldersRef: React.RefObject<Set<string>>
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>
   scrollContainerRef: React.RefObject<HTMLDivElement | null>
-  setIsFileExpanded: React.Dispatch<React.SetStateAction<boolean>>
   activeItemRef: React.RefObject<HTMLLIElement | null>
   folderGridRefs: React.RefObject<Map<string, HTMLDivElement>>
 }) {
-  void _setIsFileExpanded
-
   const [highlightActive, setHighlightActive] = useState(false)
   const locateStateRef = useRef<LocateState>({ phase: "idle" })
   const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)

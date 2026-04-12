@@ -71,7 +71,7 @@ export default async function DashboardLayout({
             <div className="flex items-center gap-4">
               <SearchCommand />
               <MobileNav navLinks={navLinks} />
-              <LanguageSwitcher />
+              <LanguageSwitcher className="hidden sm:flex" />
               <React.Suspense
                 fallback={
                   <div
@@ -91,7 +91,7 @@ export default async function DashboardLayout({
 
       <main
         className="
-          relative z-10 mx-auto w-full max-w-450 flex-1 animate-page-transit p-4
+          relative p-4
           sm:p-6
           lg:px-24 lg:py-8
         ">

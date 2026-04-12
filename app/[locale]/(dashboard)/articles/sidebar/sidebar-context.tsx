@@ -20,10 +20,6 @@ interface SidebarContextValue {
   isFolderExpanded: (id: string) => boolean
   toggleFolder: (id: string) => void
 
-  isFileExpanded: boolean
-  setIsFileExpanded: React.Dispatch<React.SetStateAction<boolean>>
-  toggleFileExpanded: () => void
-
   highlightActive: boolean
   setHighlightActive: React.Dispatch<React.SetStateAction<boolean>>
 
@@ -59,19 +55,12 @@ export function SidebarProvider({ tree, children }: SidebarProviderProps) {
   const toc = useToc(pathname)
   const activeHeadingId = useActiveHeading(toc, pathname)
 
-  const [isFileExpanded, setIsFileExpanded] = React.useState(false)
   const [highlightActive, setHighlightActive] = React.useState(false)
 
   const activeItemRef = React.useRef<HTMLLIElement | null>(null)
   const folderGridRefs = React.useRef<Map<string, HTMLDivElement>>(new Map())
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null)
   const scrollToCurrentRef = React.useRef<() => void>(() => {})
-
-  React.useEffect(() => {
-    if (pathname) {
-      setIsFileExpanded(true)
-    }
-  }, [pathname])
 
   const effectivePath =
     pathname === "/articles" || pathname === "/articles/" || pathname === "/"
@@ -93,13 +82,8 @@ export function SidebarProvider({ tree, children }: SidebarProviderProps) {
     [setExpandedFolders]
   )
 
-  const toggleFileExpanded = React.useCallback(() => {
-    setIsFileExpanded((prev) => !prev)
-  }, [])
-
   const collapseAll = React.useCallback(() => {
     setExpandedFolders(new Set())
-    setIsFileExpanded(false)
   }, [setExpandedFolders])
 
   const setScrollToCurrent = React.useCallback((fn: () => void) => {
@@ -118,9 +102,6 @@ export function SidebarProvider({ tree, children }: SidebarProviderProps) {
       mounted,
       isFolderExpanded,
       toggleFolder,
-      isFileExpanded,
-      setIsFileExpanded,
-      toggleFileExpanded,
       highlightActive,
       setHighlightActive,
       toc,
@@ -142,8 +123,6 @@ export function SidebarProvider({ tree, children }: SidebarProviderProps) {
       mounted,
       isFolderExpanded,
       toggleFolder,
-      isFileExpanded,
-      toggleFileExpanded,
       highlightActive,
       toc,
       activeHeadingId,

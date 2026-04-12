@@ -12,7 +12,6 @@ export function useBlur({
   tree,
   expandedFolders,
   toc,
-  isFileExpanded,
   highlightActive,
 }: {
   internalScroll: boolean
@@ -21,7 +20,6 @@ export function useBlur({
   tree: TreeNode[]
   expandedFolders: Set<string>
   toc: TocItem[]
-  isFileExpanded: boolean
   highlightActive: boolean
 }): { scheduleBottomRowBlurSync: () => void } {
   const blurFrameRef = useRef<number | null>(null)
@@ -145,6 +143,12 @@ export function useBlur({
   }, [internalScroll, scheduleBottomRowBlurSync, scrollContainerRef])
 
   useEffect(() => {
+    void pathname
+    void tree
+    void expandedFolders
+    void toc
+    void highlightActive
+
     if (!internalScroll) return
     syncForDuration(300)
   }, [
@@ -153,7 +157,6 @@ export function useBlur({
     tree,
     expandedFolders,
     toc,
-    isFileExpanded,
     highlightActive,
     syncForDuration,
   ])

@@ -79,8 +79,6 @@ const SidebarClientInner = React.forwardRef<
     setExpandedFolders,
     expandedFoldersRef,
     mounted,
-    isFileExpanded,
-    setIsFileExpanded,
     toc,
     highlightActive,
     setHighlightActive,
@@ -103,7 +101,6 @@ const SidebarClientInner = React.forwardRef<
     expandedFoldersRef,
     setExpandedFolders,
     scrollContainerRef,
-    setIsFileExpanded,
     activeItemRef,
     folderGridRefs,
   })
@@ -123,7 +120,6 @@ const SidebarClientInner = React.forwardRef<
     tree,
     expandedFolders,
     toc,
-    isFileExpanded,
     highlightActive,
   })
 

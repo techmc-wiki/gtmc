@@ -104,7 +104,7 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthSessionProvider>
             <FooterProvider>
-              <div className="w-full flex-1">{children}</div>
+              {children}
               <FooterWrapper />
             </FooterProvider>
           </AuthSessionProvider>

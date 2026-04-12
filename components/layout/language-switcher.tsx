@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "@/i18n/navigation"
 const LOCALES = ["zh", "en"] as const
 type Locale = (typeof LOCALES)[number]
 
-export function LanguageSwitcher() {
+export function LanguageSwitcher({ className = '' }: { className?: string }) {
   const locale = useLocale() as Locale
   const t = useTranslations("CommonA11y")
   const router = useRouter()
@@ -19,10 +19,11 @@ export function LanguageSwitcher() {
 
   return (
     <div
-      className="
+      className={`
         relative flex items-center border border-tech-main/40
         font-mono text-[0.625rem] tracking-[0.15em]
-      ">
+        ${className}
+      `}>
       {LOCALES.map((loc, i) => (
         <button
           key={loc}
@@ -34,10 +35,9 @@ export function LanguageSwitcher() {
             flex touch-target min-h-8 min-w-7 items-center
             justify-center px-2 py-1 uppercase transition-colors duration-200
             ${i > 0 ? "border-l border-tech-main/40" : ""}
-            ${
-              locale === loc
-                ? "bg-tech-main text-white"
-                : "bg-transparent text-tech-main hover:bg-tech-accent/30"
+            ${locale === loc
+              ? "bg-tech-main text-white"
+              : "bg-transparent text-tech-main hover:bg-tech-accent/30"
             }
           `}>
           {`${loc === "en" ? "Eng" : "中文"}`}

@@ -18,13 +18,8 @@ export function SidebarTree({
 }) {
   const {
     effectivePath,
-    isFileExpanded,
-    toc,
-    activeHeadingId,
     isFolderExpanded,
     toggleFolder,
-    toggleFileExpanded,
-    setIsFileExpanded,
     highlightActive,
     activeItemRef,
     folderGridRefs,
@@ -127,33 +122,9 @@ export function SidebarTree({
                           `
                       }
                     `}>
-                    {isActive && toc.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={toggleFileExpanded}
-                        className="
-                          absolute top-1/2 left-0 z-10 -translate-y-1/2
-                          cursor-pointer text-[0.625rem] text-tech-main
-                          transition-opacity
-                          hover:text-tech-main/80
-                          focus:outline-none
-                          md:text-xs
-                        "
-                        title={isFileExpanded ? "收起目录" : "展开目录"}>
-                        {isFileExpanded ? "▼" : "▶"}
-                      </button>
-                    )}
-
                     <Link
                       href={fileRoute}
-                      onClick={(e) => {
-                        if (isActive) {
-                          e.preventDefault()
-                          setIsFileExpanded((prev) => !prev)
-                        } else {
-                          onNavigate?.()
-                        }
-                      }}
+                      onClick={() => onNavigate?.()}
                       className="block w-full pb-px pl-1">
                       {item.isReadmeIntro
                         ? `00 ${item.title}`
@@ -172,72 +143,6 @@ export function SidebarTree({
                       )}
                     </Link>
                   </div>
-
-                  {isActive && toc.length > 0 && (
-                    <div
-                      className={`
-                        grid transition-all duration-300 ease-out
-                        ${
-                          isFileExpanded
-                            ? "grid-rows-[1fr] opacity-100"
-                            : `grid-rows-[0fr] opacity-0`
-                        }
-                      `}>
-                      <div className="overflow-hidden">
-                        <ul
-                          className="
-                            mt-2 mb-3 ml-3 flex flex-col border-l guide-line
-                          ">
-                          {toc.map((h2) => (
-                            <li
-                              key={h2.id}
-                              className={`
-                                -ml-px border-l py-1.5 pl-4 text-[0.8125rem]
-                                transition-all duration-200
-                                md:text-[0.8125rem]
-                                ${
-                                  h2.id === activeHeadingId
-                                    ? `
-                                      border-tech-main font-medium
-                                      text-tech-main
-                                    `
-                                    : `
-                                      border-transparent text-tech-main/60
-                                      hover:border-tech-main/30
-                                      hover:text-tech-main
-                                    `
-                                }
-                              `}>
-                              <Link
-                                href={`#${h2.id}`}
-                                onClick={() => onNavigate?.()}
-                                className="block leading-snug wrap-break-word">
-                                {item.isAdvanced && (
-                                  <span
-                                    className="
-                                     mr-1.5 align-middle text-[0.375rem]
-                                     text-[#4c5b96]
-                                   ">
-                                    ■
-                                  </span>
-                                )}
-                                <span
-                                  className={
-                                    h2.id === activeHeadingId
-                                      ? `
-                                  font-semibold
-                                `
-                                      : `opacity-90`
-                                  }>
-                                  {h2.text}
-                                </span>
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
 

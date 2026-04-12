@@ -13,6 +13,8 @@ import {
 } from "../features/loading-shell-primitives"
 import type { TreeNode } from "@/types/sidebar-tree"
 import { useTranslations } from "next-intl"
+import { ArticleTocRail } from "@/components/articles/article-toc-rail"
+import { MobileTocBar } from "@/components/articles/mobile-toc-bar"
 
 interface ArticlesLayoutProps {
   children: React.ReactNode
@@ -290,16 +292,17 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
   return (
     <SidebarProvider tree={treeData}>
+      <MobileTocBar />
       <div
         className="
-          relative isolate mx-auto flex min-h-[calc(100vh-8rem)] flex-col
+          relative isolate flex min-h-[calc(100vh-8rem)] flex-col
           md:flex-row md:justify-center md:gap-8
         ">
         <div
-          className="
-            sticky top-16 z-30
-            md:hidden
-          ">
+          className={`
+            sticky z-30
+            md:hidden ${window.scrollY > 64 ? "top-24" : "top-16"}
+          `}>
           <div
             className="relative transition-all duration-500 ease-out"
             style={
@@ -316,21 +319,22 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 setIsOpen(!isOpen)
               }}
               className="
-                cursor-pointer overflow-hidden border border-tech-main/40
-                bg-white/70 font-mono text-xs font-bold tracking-[0.15em]
-                text-tech-main backdrop-blur-sm transition-all duration-400
-                ease-out
+                absolute cursor-pointer overflow-hidden
+                border border-tech-main/40 bg-white/70 font-mono text-xs
+                font-bold tracking-[0.15em] text-tech-main backdrop-blur-sm
+                transition-all duration-400 ease-out
                 hover:bg-tech-main/5
               "
               style={
                 {
                   width: isStuck ? "5rem" : "100%",
-                  minHeight: isStuck ? "2rem" : "3rem",
-                  padding: isStuck ? "0.25rem 1rem" : "1rem",
+                  minHeight: isStuck ? "" : "3rem",
+                  padding: isStuck ? "0.125rem 0.5rem" : "1rem",
                   borderBottom: isStuck ? undefined : "1px solid",
                   boxShadow: isStuck
                     ? "0 1px 2px 0 rgba(0, 0, 0, 0.05)"
                     : "none",
+                  right: isStuck ? "1rem" : 0,
                 } as React.CSSProperties
               }
               aria-label={tA11y("toggleArticleTree")}
@@ -357,6 +361,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 </span>
               </div>
             </button>
+            <div className="h-12" />
           </div>
 
           <div
@@ -490,9 +495,9 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                     {sidebarHidden ? "▶" : "◀"}
                   </span>
                 </button>
-                <span className="absolute top-4 -right-3 inline-block text-right font-mono text-[0.625rem] font-bold text-tech-main/60">
+                <span className="absolute top-4 -right-3 inline-block text-right font-mono text-[0.625rem] font-bold text-tech-main/40">
                   {" "}
-                  {sidebarHidden ? "expand sidebar" : ""}
+                  {sidebarHidden ? "table of contents" : ""}
                 </span>
               </div>
             </div>
@@ -518,6 +523,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           `}>
           {children}
         </main>
+
+        <ArticleTocRail />
       </div>
     </SidebarProvider>
   )

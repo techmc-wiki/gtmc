@@ -102,9 +102,7 @@ export function MobileNav({ navLinks }: MobileNavProps) {
                     {link.label}
                   </Link>
                 ))}
-                <div className="pt-1">
-                  <LanguageSwitcher />
-                </div>
+                <LanguageSwitcher className="border-none" />
               </div>
             </div>
           </div>,

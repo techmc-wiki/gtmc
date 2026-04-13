@@ -35,7 +35,6 @@ import {
 } from "@/components/ui/operation-progress"
 import { TechButton } from "../ui/tech-button"
 import { InputBox } from "../ui/input-box"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { useBadge } from "@/hooks/use-badge"
 import { useEditorUpload } from "@/hooks/use-editor-upload"
 import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
@@ -1312,7 +1311,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                 />
                 <div
                   className="
-                    no-scrollbar relative flex h-12 items-center
+                    relative flex h-12 items-center
                     gap-2 overflow-x-auto scroll-smooth border-b
                     guide-line bg-tech-main/4 px-4 shadow-[inset_0_1px_4px_rgba(96,112,143,0.05)]
                   ">

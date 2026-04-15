@@ -2,6 +2,10 @@
 
 # Graduate Texts in Minecraft
 
+<a href="https://deepwiki.com/gtmc-dev/gtmc">
+  <img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki">
+</a>
+
 A Technical Minecraft online textbook, written collaboratively and community-driven.
 
 [Website](https://beta.techmc.wiki)

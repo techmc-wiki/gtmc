@@ -93,6 +93,11 @@ export function useScrollToActive({
         parents: string[] = []
       ): { item: TreeNode | null; parentIds: string[] } => {
         for (const item of nodes) {
+          if (item.children?.length) {
+            const result = walk(item.children, [...parents, item.id])
+            if (result.item) return result
+          }
+
           const slug = articleUrl(item.slug)
           const decodedSlug = decodeURIComponent(slug)
           if (
@@ -100,11 +105,6 @@ export function useScrollToActive({
             `${decodedSlug}/`.toLowerCase() === decodedTarget.toLowerCase()
           ) {
             return { item, parentIds: parents }
-          }
-
-          if (item.children?.length) {
-            const result = walk(item.children, [...parents, item.id])
-            if (result.item) return result
           }
         }
 

@@ -108,21 +108,6 @@ export function DraftFileSourceDialog({
     }
   }, [isOpen, t])
 
-  React.useEffect(() => {
-    if (!isOpen) {
-      setMode(initialMode)
-      setSelectedRepoFilePath("")
-      setSelectedFolderPath(initialFolderPath || "")
-      setNewFileName("")
-      setNewFolderName("")
-      setLocalFile(null)
-      setCustomUploadName("")
-      setTreeError(null)
-      setIsSubmitting(false)
-      setExpandedPaths(new Set(["", initialFolderPath || ""]))
-    }
-  }, [initialFolderPath, initialMode, isOpen])
-
   if (!isOpen) {
     return null
   }

@@ -125,7 +125,11 @@ export function ClosedPRList({ getClosedPRsAction }: ClosedPRListProps) {
   )
 
   useEffect(() => {
-    void loadPage(1)
+    const frame = window.requestAnimationFrame(() => {
+      void loadPage(1)
+    })
+
+    return () => window.cancelAnimationFrame(frame)
   }, [loadPage])
 
   useEffect(() => {

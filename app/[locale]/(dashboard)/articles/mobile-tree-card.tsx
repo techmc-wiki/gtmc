@@ -5,6 +5,8 @@ import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 
+const emptySubscribe = () => () => {}
+
 interface MobileTreeCardProps {
   isOpen: boolean
   onClose: () => void
@@ -19,11 +21,11 @@ export function MobileTreeCard({
   isFloating,
 }: MobileTreeCardProps) {
   const t = useTranslations("CommonA11y")
-  const [isMounted, setIsMounted] = React.useState(false)
-
-  React.useEffect(() => {
-    setIsMounted(true)
-  }, [])
+  const isMounted = React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  )
 
   React.useEffect(() => {
     if (!isOpen || !isFloating) return

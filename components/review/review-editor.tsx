@@ -43,6 +43,8 @@ import type { RebaseState } from "@/types/rebase"
 const CONFLICT_BLOCK_REGEX =
   /<<<<<<< draft\n([\s\S]*?)=======\n([\s\S]*?)>>>>>>> main\n?/g
 
+const emptySubscribe = () => () => {}
+
 type EditorSegment =
   | { type: "text"; id: string; content: string }
   | {
@@ -246,7 +248,6 @@ export function ReviewEditor({
   } | null>(null)
   const [expandedThreeWaySegments, setExpandedThreeWaySegments] =
     React.useState<Record<string, boolean>>({})
-  const [mounted, setMounted] = React.useState(false)
   const abortedRef = React.useRef(false)
   const autosaveTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
     null
@@ -257,11 +258,13 @@ export function ReviewEditor({
   const conflictAutoScrollRef = React.useRef(false)
   const firstConflictAnchorRef = React.useRef<HTMLDivElement | null>(null)
   const lastConflictSignatureRef = React.useRef<string | null>(null)
+  const isMounted = React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  )
 
   const textareaRef = React.useRef<any>(null)
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
 
   React.useEffect(() => {
     setReviewSession((prev) => {
@@ -465,11 +468,8 @@ export function ReviewEditor({
     return () => window.cancelAnimationFrame(frame)
   }, [activeTab, activeFile?.id, hasInlineConflicts, parsedSegments])
 
-  React.useEffect(() => {
-    if (activeTab === "3-way" && !hasInlineConflicts) {
-      setActiveTab("diff")
-    }
-  }, [activeTab, hasInlineConflicts])
+  const visibleActiveTab =
+    activeTab === "3-way" && !hasInlineConflicts ? "diff" : activeTab
 
   const updateFinalizeProgressState = React.useCallback(
     (nextState: Exclude<OperationProgressState, "idle">) => {
@@ -981,7 +981,7 @@ export function ReviewEditor({
         </div>
         <div className="h-px bg-tech-main/20" />
 
-        {effectiveMode === null && mounted
+        {effectiveMode === null && isMounted
           ? ReactDOM.createPortal(
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
                 <div className="relative w-full max-w-2xl border border-tech-main/40 bg-white p-6 shadow-xl">
@@ -1051,7 +1051,7 @@ export function ReviewEditor({
                 border-tech-main/40 bg-white/80 backdrop-blur-sm
               ">
               <EditorTabStrip
-                activeTab={activeTab}
+                activeTab={visibleActiveTab}
                 onTabChange={setActiveTab}
                 threeWayId="review-editor-three-way-panel"
                 writeId="review-editor-write-panel"
@@ -1062,7 +1062,7 @@ export function ReviewEditor({
                 rightSlot={activeFile?.filePath || "UNTITLED_FILE_"}
               />
 
-              {activeTab === "3-way" && hasInlineConflicts && (
+              {visibleActiveTab === "3-way" && hasInlineConflicts && (
                 <div className="flex items-center border-b guide-line bg-tech-main/3 px-3 py-1">
                   <button
                     type="button"
@@ -1076,7 +1076,7 @@ export function ReviewEditor({
                 </div>
               )}
 
-              {activeTab === "write" && !hasInlineConflicts && (
+              {visibleActiveTab === "write" && !hasInlineConflicts && (
                 <EditorToolbar
                   onInsert={insertSyntax}
                   lineWrap={lineWrap}
@@ -1088,7 +1088,7 @@ export function ReviewEditor({
                 id="review-editor-three-way-panel"
                 role="tabpanel"
                 className="editor-grow"
-                hidden={activeTab !== "3-way"}>
+                hidden={visibleActiveTab !== "3-way"}>
                 <div className="editor-surface">
                   {hasInlineConflicts ? (
                     <div className="custom-left-scrollbar overflow-auto">
@@ -1201,7 +1201,7 @@ export function ReviewEditor({
                 id="review-editor-write-panel"
                 role="tabpanel"
                 className="editor-grow"
-                hidden={activeTab !== "write"}>
+                hidden={visibleActiveTab !== "write"}>
                 <div className="editor-surface">
                   <EditorTextarea
                     ref={textareaRef}
@@ -1217,7 +1217,7 @@ export function ReviewEditor({
               <section
                 id="review-editor-diff-panel"
                 role="tabpanel"
-                hidden={activeTab !== "diff"}
+                hidden={visibleActiveTab !== "diff"}
                 className="editor-grow">
                 <ReviewDiffPanel
                   baseContent={diffBaseContent}
@@ -1228,7 +1228,7 @@ export function ReviewEditor({
               <section
                 id="review-editor-preview-panel"
                 role="tabpanel"
-                hidden={activeTab !== "preview"}
+                hidden={visibleActiveTab !== "preview"}
                 className="editor-grow">
                 {hasInlineConflicts ? (
                   <div className="space-y-3 p-6">

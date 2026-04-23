@@ -144,8 +144,6 @@ export function OperationProgress({
       velocityRef.current = 0
       startedAtRef.current = null
       lastFrameRef.current = null
-      setDisplayProgress(0)
-      setStageIndex(0)
       return stopAnimation
     }
 
@@ -153,7 +151,6 @@ export function OperationProgress({
       stopAnimation()
       velocityRef.current = 0
       lastFrameRef.current = null
-      setDisplayProgress(progressRef.current)
       return stopAnimation
     }
 
@@ -162,8 +159,6 @@ export function OperationProgress({
       velocityRef.current = 0
       startedAtRef.current = null
       lastFrameRef.current = null
-      setDisplayProgress(progressRef.current)
-      setStageIndex(0)
     }
 
     const step = (now: number) => {

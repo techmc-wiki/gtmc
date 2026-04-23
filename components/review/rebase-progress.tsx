@@ -232,6 +232,49 @@ export function RebaseProgress({
   coauthorLines = [],
   mergeStrategyAnalysis,
 }: RebaseProgressProps) {
+  const resetKey = [
+    mode,
+    defaultCommitTitle,
+    defaultCommitBody,
+    mergeStrategyAnalysis.recommendation,
+    coauthorLines.join("\n"),
+  ].join("::")
+
+  return (
+    <RebaseProgressContent
+      key={resetKey}
+      mode={mode}
+      rebaseState={rebaseState}
+      files={files}
+      isBranchSyncing={isBranchSyncing}
+      onAbort={onAbort}
+      onFinalize={onFinalize}
+      isAborting={isAborting}
+      isFinalizing={isFinalizing}
+      finalizeProgressState={finalizeProgressState}
+      defaultCommitTitle={defaultCommitTitle}
+      defaultCommitBody={defaultCommitBody}
+      coauthorLines={coauthorLines}
+      mergeStrategyAnalysis={mergeStrategyAnalysis}
+    />
+  )
+}
+
+function RebaseProgressContent({
+  mode,
+  rebaseState,
+  files,
+  isBranchSyncing = false,
+  onAbort,
+  onFinalize,
+  isAborting,
+  isFinalizing,
+  finalizeProgressState = "idle",
+  defaultCommitTitle = "",
+  defaultCommitBody = "",
+  coauthorLines = [],
+  mergeStrategyAnalysis,
+}: RebaseProgressProps) {
   const t = useTranslations("Review")
   const progressT = useTranslations("OperationProgress")
   const [commitTitle, setCommitTitle] = React.useState(defaultCommitTitle)
@@ -294,18 +337,6 @@ export function RebaseProgress({
           ],
     [mode, progressT]
   )
-
-  React.useEffect(() => {
-    setCommitTitle(defaultCommitTitle)
-  }, [defaultCommitTitle])
-
-  React.useEffect(() => {
-    setCommitBody(defaultCommitBody)
-  }, [defaultCommitBody])
-
-  React.useEffect(() => {
-    setSelectedMethod(mergeStrategyAnalysis.recommendation)
-  }, [mergeStrategyAnalysis])
 
   const buildFinalizeOptions = React.useCallback(() => {
     const finalBody =

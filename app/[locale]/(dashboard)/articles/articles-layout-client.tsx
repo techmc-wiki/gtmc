@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { useState, useRef, useEffect } from "react"
-import { usePathname } from "@/i18n/navigation"
 import { SidebarClient, type SidebarClientHandle } from "./sidebar-client"
 import { SidebarProvider } from "./sidebar/sidebar-context"
 import { MobileTreeCard } from "./mobile-tree-card"
@@ -15,6 +14,8 @@ import type { TreeNode } from "@/types/sidebar-tree"
 import { useTranslations } from "next-intl"
 import { ArticleTocRail } from "@/components/articles/article-toc-rail"
 import { MobileTocBar } from "@/components/articles/mobile-toc-bar"
+
+const emptySubscribe = () => () => {}
 
 interface ArticlesLayoutProps {
   children: React.ReactNode
@@ -156,25 +157,35 @@ function SidebarTreeWrapper({
 
 export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const SIDEBAR_HIDDEN_KEY = "gtmc_sidebar_hidden"
+  const isMounted = React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  )
   const [isOpen, setIsOpen] = useState(false)
   const [isStuck, setIsStuck] = useState(false)
   const [showFullText, setShowFullText] = useState(true)
-  const [treeData, setTreeData] = useState<TreeNode[]>(tree)
-  const [isTreeLoading, setIsTreeLoading] = useState(tree.length === 0)
-  const [sidebarHidden, setSidebarHidden] = useState(false)
-  const pathname = usePathname()
+  const [fetchedTreeData, setFetchedTreeData] = useState<TreeNode[]>([])
+  const [hasTreeFetchSettled, setHasTreeFetchSettled] = useState(
+    () => tree.length > 0
+  )
+  const [sidebarHidden, setSidebarHidden] = useState(() => {
+    if (typeof window === "undefined") {
+      return false
+    }
+
+    try {
+      return localStorage.getItem(SIDEBAR_HIDDEN_KEY) === "true"
+    } catch {
+      return false
+    }
+  })
   const desktopSidebarRef = useRef<SidebarClientHandle>(null)
   const floatingCardSidebarRef = useRef<SidebarClientHandle>(null)
   const t = useTranslations("Sidebar")
   const tA11y = useTranslations("CommonA11y")
-
-  useEffect(() => {
-    try {
-      if (localStorage.getItem(SIDEBAR_HIDDEN_KEY) === "true") {
-        setSidebarHidden(true)
-      }
-    } catch { }
-  }, [])
+  const treeData = tree.length > 0 ? tree : fetchedTreeData
+  const isTreeOpen = isOpen
 
   const toggleSidebarHidden = () => {
     setSidebarHidden((prev) => {
@@ -185,12 +196,6 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       return next
     })
   }
-
-  useEffect(() => {
-    if (pathname) {
-      setIsOpen(false)
-    }
-  }, [pathname])
 
   useEffect(() => {
     const timer = setTimeout(
@@ -207,12 +212,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
     const handleScroll = () => {
       const currentlyStuck = window.scrollY > NAVBAR_HEIGHT
-      setIsStuck((prev) => {
-        if (currentlyStuck && !prev) {
-          setIsOpen(false)
-        }
-        return currentlyStuck
-      })
+      setIsStuck(currentlyStuck)
     }
 
     // Sync immediately on mount in case page is already scrolled
@@ -224,8 +224,6 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
   useEffect(() => {
     if (tree.length > 0) {
-      setTreeData(tree)
-      setIsTreeLoading(false)
       return
     }
 
@@ -234,7 +232,6 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
     const loadTree = async () => {
       try {
-        setIsTreeLoading(true)
         const response = await fetch("/api/articles/tree", {
           method: "GET",
           signal: controller.signal,
@@ -246,7 +243,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
         const payload = (await response.json()) as TreeNode[]
         if (active && Array.isArray(payload)) {
-          setTreeData(payload)
+          setFetchedTreeData(payload)
         }
       } catch (error) {
         if (error instanceof Error && error.name === "AbortError") {
@@ -254,7 +251,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         }
       } finally {
         if (active) {
-          setIsTreeLoading(false)
+          setHasTreeFetchSettled(true)
         }
       }
     }
@@ -267,6 +264,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
     }
   }, [tree, tree.length])
 
+  const isTreeLoading = tree.length === 0 && !hasTreeFetchSettled
   const showTreePlaceholder = isTreeLoading && treeData.length === 0
 
   const onNavigate = () => setIsOpen(false)
@@ -301,7 +299,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         <div
           className={`
             sticky z-30
-            md:hidden ${window.scrollY > 64 ? "top-24" : "top-16"}
+            md:hidden ${isMounted && isStuck ? "top-24" : "top-16"}
           `}>
           <div
             className="relative transition-all duration-500 ease-out"
@@ -315,9 +313,9 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
               type="button"
               onClick={(e) => {
                 e.preventDefault()
-                e.stopPropagation()
-                setIsOpen(!isOpen)
-              }}
+                 e.stopPropagation()
+                 setIsOpen((current) => !current)
+               }}
               className="
                 absolute cursor-pointer overflow-hidden
                 border border-tech-main/40 bg-white/70 font-mono text-xs
@@ -338,8 +336,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 } as React.CSSProperties
               }
               aria-label={tA11y("toggleArticleTree")}
-              aria-expanded={isOpen}
-              data-testid="mobile-tree-toggle">
+               aria-expanded={isTreeOpen}
+               data-testid="mobile-tree-toggle">
               <div className="relative flex w-full items-center justify-between">
                 <span
                   className="transition-opacity duration-150"
@@ -357,7 +355,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 <span
                   className="text-sm font-bold transition-opacity duration-200"
                   style={{ opacity: showFullText ? 1 : 0 }}>
-                  {isOpen ? "▼" : "▶"}
+                   {isTreeOpen ? "▼" : "▶"}
                 </span>
               </div>
             </button>
@@ -367,10 +365,10 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           <div
             className={`
               grid transition-all duration-300 ease-out
-              ${isOpen && !isStuck
-                ? "grid-rows-[1fr] opacity-100"
-                : "grid-rows-[0fr] opacity-0"
-              }
+              ${isTreeOpen && !isStuck
+                 ? "grid-rows-[1fr] opacity-100"
+                 : "grid-rows-[0fr] opacity-0"
+               }
             `}>
             <div className="overflow-hidden">
               <div
@@ -386,7 +384,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
         {/* Mobile floating tree card */}
         <MobileTreeCard
-          isOpen={isOpen}
+          isOpen={isTreeOpen}
           onClose={() => setIsOpen(false)}
           isFloating={isStuck}>
           {floatingTreeContent}

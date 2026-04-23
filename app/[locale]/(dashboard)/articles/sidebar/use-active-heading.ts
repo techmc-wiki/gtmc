@@ -42,7 +42,6 @@ export function useActiveHeading(
   useEffect(() => {
     if (pathnameRef.current !== pathname) {
       pathnameRef.current = pathname
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveHeadingId(computeInitialActiveHeading(toc))
     }
   }, [pathname, toc])

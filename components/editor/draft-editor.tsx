@@ -63,6 +63,11 @@ interface DraftContentHistory {
   redoStack: string[]
 }
 
+interface DraftHistoryAvailability {
+  redoCount: number
+  undoCount: number
+}
+
 interface DraftFileDialogIntent {
   kind: "add" | "replace"
   initialMode: SourceMode
@@ -86,18 +91,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   const t = useTranslations("Editor")
   const progressT = useTranslations("OperationProgress")
   const initialStatus = initialData?.status || "DRAFT"
-  const initialDraftCollection = React.useMemo(
-    () =>
-      normalizeDraftFileCollection({
-        activeFileId: initialData?.activeFileId,
-        folders: initialData?.folders,
-        files:
-          initialData?.files && initialData.files.length > 0
-            ? initialData.files
-            : [createDraftFile()],
-      }),
-    [initialData?.activeFileId, initialData?.files, initialData?.folders]
-  )
+  const initialDraftCollection = createInitialDraftCollection(initialData)
 
   const [draftStatus, setDraftStatus] = React.useState(initialStatus)
   const [title, setTitle] = React.useState(initialData?.title || "")
@@ -131,6 +125,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   const [repoSnapshots, setRepoSnapshots] = React.useState<
     Record<string, RepoFileSnapshot>
   >({})
+  const [historyAvailability, setHistoryAvailability] = React.useState<
+    Record<string, DraftHistoryAvailability>
+  >({})
   const [insertDialogIntent, setInsertDialogIntent] = React.useState(false)
 
   const textareaRef = React.useRef<ReactCodeMirrorRef | null>(null)
@@ -141,6 +138,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   const contentHistoryRef = React.useRef<Record<string, DraftContentHistory>>(
     {}
   )
+  const repoSnapshotRequestsRef = React.useRef<Record<string, string>>({})
   const { badge, showBadge, clearBadge } = useBadge()
 
   const saveProgressStages = React.useMemo<OperationProgressStage[]>(
@@ -337,6 +335,30 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     return nextHistory
   }, [])
 
+  const syncHistoryAvailability = React.useCallback((fileId: string) => {
+    const history = contentHistoryRef.current[fileId]
+    const nextAvailability: DraftHistoryAvailability = {
+      undoCount: history?.undoStack.length ?? 0,
+      redoCount: history?.redoStack.length ?? 0,
+    }
+
+    setHistoryAvailability((current) => {
+      const previous = current[fileId]
+
+      if (
+        previous?.undoCount === nextAvailability.undoCount &&
+        previous?.redoCount === nextAvailability.redoCount
+      ) {
+        return current
+      }
+
+      return {
+        ...current,
+        [fileId]: nextAvailability,
+      }
+    })
+  }, [])
+
   const pushHistoryEntry = React.useCallback(
     (stack: string[], value: string) => {
       if (stack[stack.length - 1] === value) {
@@ -405,6 +427,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           pushHistoryEntry(history.undoStack, targetFile.content)
         }
 
+        syncHistoryAvailability(fileId)
+
         return {
           ...current,
           files: current.files.map((file) =>
@@ -413,7 +437,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         }
       })
     },
-    [getDraftContentHistory, pushHistoryEntry]
+    [getDraftContentHistory, pushHistoryEntry, syncHistoryAvailability]
   )
 
   const updateActiveFile = (updates: {
@@ -514,13 +538,19 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
     const history = contentHistoryRef.current[draftCollection.activeFileId]
     const previousContent = history?.undoStack.pop()
+    syncHistoryAvailability(draftCollection.activeFileId)
 
     if (previousContent === undefined) {
       return
     }
 
     updateFileContent(draftCollection.activeFileId, previousContent, "undo")
-  }, [draftCollection.activeFileId, isReadOnly, updateFileContent])
+  }, [
+    draftCollection.activeFileId,
+    isReadOnly,
+    syncHistoryAvailability,
+    updateFileContent,
+  ])
 
   const handleRedoDraftEdit = React.useCallback(() => {
     if (isReadOnly) {
@@ -529,13 +559,19 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
     const history = contentHistoryRef.current[draftCollection.activeFileId]
     const nextContent = history?.redoStack.pop()
+    syncHistoryAvailability(draftCollection.activeFileId)
 
     if (nextContent === undefined) {
       return
     }
 
     updateFileContent(draftCollection.activeFileId, nextContent, "redo")
-  }, [draftCollection.activeFileId, isReadOnly, updateFileContent])
+  }, [
+    draftCollection.activeFileId,
+    isReadOnly,
+    syncHistoryAvailability,
+    updateFileContent,
+  ])
 
   const insertTextAtCursor = (text: string) => {
     if (!textareaRef.current) return
@@ -906,7 +942,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       }
 
       const snapshot = repoSnapshots[file.id]
-      return !snapshot || snapshot.filePath !== normalizedPath
+      return (
+        (!snapshot || snapshot.filePath !== normalizedPath) &&
+        repoSnapshotRequestsRef.current[file.id] !== normalizedPath
+      )
     })
 
     for (const file of pendingFiles) {
@@ -915,14 +954,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         continue
       }
 
-      setRepoSnapshots((current) => ({
-        ...current,
-        [file.id]: {
-          content: null,
-          filePath: normalizedPath,
-          status: "loading",
-        },
-      }))
+      repoSnapshotRequestsRef.current[file.id] = normalizedPath
 
       void fetch(
         `/api/draft/repo-file?path=${encodeURIComponent(normalizedPath)}`,
@@ -1071,8 +1103,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   }
 
   const saveDisabled = isSaving || !title.trim()
-  const activeFileHistory =
-    contentHistoryRef.current[draftCollection.activeFileId]
+  const activeFileHistoryAvailability =
+    historyAvailability[draftCollection.activeFileId]
   const submitDisabled =
     isSubmittingReview ||
     isSaving ||
@@ -1371,7 +1403,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                     variant="secondary"
                     className="group h-7 guide-line bg-white/50 px-3 text-[10px] font-bold tracking-widest text-tech-main-dark/80 transition-all hover:border-tech-main/50 hover:bg-white"
                     disabled={
-                      isReadOnly || !activeFileHistory?.undoStack.length
+                      isReadOnly || !activeFileHistoryAvailability?.undoCount
                     }
                     onClick={handleUndoDraftEdit}>
                     <span className="flex items-center gap-1">
@@ -1393,7 +1425,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                     variant="secondary"
                     className="group h-7 guide-line bg-white/50 px-3 text-[10px] font-bold tracking-widest text-tech-main-dark/80 transition-all hover:border-tech-main/50 hover:bg-white"
                     disabled={
-                      isReadOnly || !activeFileHistory?.redoStack.length
+                      isReadOnly || !activeFileHistoryAvailability?.redoCount
                     }
                     onClick={handleRedoDraftEdit}>
                     <span className="flex items-center gap-1">
@@ -1441,8 +1473,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   isSaving={isSaving}
                   placeholder={t("contentPlaceholder")}
                   lineWrap={lineWrap}
-                  canUndo={Boolean(activeFileHistory?.undoStack.length)}
-                  canRedo={Boolean(activeFileHistory?.redoStack.length)}
+                  canUndo={Boolean(activeFileHistoryAvailability?.undoCount)}
+                  canRedo={Boolean(activeFileHistoryAvailability?.redoCount)}
                   enableSyntaxHints
                 />
               </div>
@@ -1710,6 +1742,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       )}
 
       <DraftFileSourceDialog
+        key={
+          fileDialogIntent
+            ? `${fileDialogIntent.kind}:${fileDialogIntent.initialMode}:${getParentFolderPath(activeFile.filePath)}`
+            : "closed:file-dialog"
+        }
         isOpen={fileDialogIntent !== null}
         initialFolderPath={getParentFolderPath(activeFile.filePath)}
         initialMode={fileDialogIntent?.initialMode}
@@ -1719,6 +1756,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       />
 
       <DraftFileSourceDialog
+        key={
+          insertDialogIntent
+            ? `insert:${getParentFolderPath(activeFile.filePath)}`
+            : "closed:insert-dialog"
+        }
         isOpen={insertDialogIntent}
         initialFolderPath={getParentFolderPath(activeFile.filePath)}
         initialMode="repo"
@@ -1742,6 +1784,16 @@ function getParentFolderPath(filePath: string) {
   const normalized = normalizeDraftFilePath(filePath)
   const lastSlashIndex = normalized.lastIndexOf("/")
   return lastSlashIndex >= 0 ? normalized.slice(0, lastSlashIndex) : ""
+}
+
+function createInitialDraftCollection(
+  initialData: DraftEditorProps["initialData"]
+) {
+  return normalizeDraftFileCollection({
+    activeFileId: initialData?.activeFileId,
+    folders: initialData?.folders || [],
+    files: initialData?.files || [],
+  })
 }
 
 function buildDiffRows(previousContent: string, nextContent: string) {

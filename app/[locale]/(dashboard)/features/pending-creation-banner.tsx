@@ -81,7 +81,12 @@ export function PendingCreationBanner() {
     // Only run if there's a payload
     const raw = sessionStorage.getItem(PENDING_FEATURE_CREATE_KEY)
     if (!raw) return
-    void runCreation()
+
+    const timer = window.setTimeout(() => {
+      void runCreation()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [runCreation])
 
   // If no payload ever, render nothing

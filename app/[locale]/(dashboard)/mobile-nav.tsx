@@ -4,8 +4,9 @@ import * as React from "react"
 import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
-import { usePathname } from "@/i18n/navigation"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
+
+const emptySubscribe = () => () => {}
 
 interface NavLink {
   href: string
@@ -19,16 +20,11 @@ interface MobileNavProps {
 export function MobileNav({ navLinks }: MobileNavProps) {
   const t = useTranslations("CommonA11y")
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
-  const [isMounted, setIsMounted] = React.useState(false)
-  const pathname = usePathname()
-
-  React.useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  React.useEffect(() => {
-    setIsDrawerOpen(false)
-  }, [pathname])
+  const isMounted = React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  )
 
   return (
     <>
@@ -93,6 +89,7 @@ export function MobileNav({ navLinks }: MobileNavProps) {
                   <Link
                     key={link.href}
                     href={link.href}
+                    onClick={() => setIsDrawerOpen(false)}
                     className="
                       flex min-h-11 items-center border border-tech-main/40
                       bg-white/60 p-3 font-mono text-xs tracking-[0.15em]

@@ -4,32 +4,36 @@ import * as React from "react"
 import { Link } from "@/i18n/navigation"
 import { useSidebarContext } from "@/app/[locale]/(dashboard)/articles/sidebar/sidebar-context"
 
+const emptySubscribe = () => () => {}
+
 function useScrollProgress() {
   const [progress, setProgress] = React.useState(0)
+  const [hasScrolledPastNavbar, setHasScrolledPastNavbar] = React.useState(false)
 
   React.useEffect(() => {
     const onScroll = () => {
       const scrollTop = window.scrollY
       const docHeight = document.body.scrollHeight - window.innerHeight
       setProgress(docHeight > 0 ? scrollTop / docHeight : 0)
+      setHasScrolledPastNavbar(scrollTop > 64)
     }
     onScroll()
     window.addEventListener("scroll", onScroll, { passive: true })
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  return progress
+  return { hasScrolledPastNavbar, progress }
 }
 
 export function MobileTocBar() {
   const { toc, activeHeadingId } = useSidebarContext()
-  const progress = useScrollProgress()
+  const { hasScrolledPastNavbar, progress } = useScrollProgress()
   const [isSheetOpen, setIsSheetOpen] = React.useState(false)
-  const [mounted, setMounted] = React.useState(false)
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  )
 
   React.useEffect(() => {
     if (!isSheetOpen) return
@@ -60,7 +64,7 @@ export function MobileTocBar() {
 
 
       {/* Progress strip — fixed just below sticky navbar */}
-      <div className={`fixed inset-x-0 top-16 z-49 h-20 transition-opacity duration-500 sm:hidden ${window.scrollY > 64 ? "opacity-100" : "pointer-events-none opacity-0"}`}>
+      <div className={`fixed inset-x-0 top-16 z-49 h-20 transition-opacity duration-500 sm:hidden ${hasScrolledPastNavbar ? "opacity-100" : "pointer-events-none opacity-0"}`}>
         {/* Section label — fixed right-aligned in navbar row */}
         {activeItem && (
           <button type="button" className="flex h-fit w-full items-center px-4 py-2 pr-4 backdrop-blur-xs sm:hidden" aria-label="Open table of contents" onClick={() => setIsSheetOpen(true)}>

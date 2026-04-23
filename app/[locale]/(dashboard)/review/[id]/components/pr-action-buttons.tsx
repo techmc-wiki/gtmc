@@ -38,6 +38,48 @@ export function PRActionButtons({
     coauthorLines: string[]
   }
 }) {
+  const resetKey = [
+    mergeStrategyAnalysis.recommendation,
+    squashCommitDefaults?.title ?? "",
+    squashCommitDefaults?.body ?? "",
+    squashCommitDefaults?.coauthorLines.join("\n") ?? "",
+  ].join("::")
+
+  return (
+    <PRActionButtonsContent
+      key={resetKey}
+      closePRAction={closePRAction}
+      mergePRAction={mergePRAction}
+      mergeStrategyAnalysis={mergeStrategyAnalysis}
+      mergeBlockedReason={mergeBlockedReason}
+      squashCommitDefaults={squashCommitDefaults}
+    />
+  )
+}
+
+function PRActionButtonsContent({
+  closePRAction,
+  mergePRAction,
+  mergeStrategyAnalysis,
+  mergeBlockedReason,
+  squashCommitDefaults,
+}: {
+  closePRAction: () => Promise<void>
+  mergePRAction:
+    | ((options: {
+        commitBody?: string
+        commitTitle?: string
+        mergeMethod?: ReviewMergeMethod
+      }) => Promise<void>)
+    | null
+  mergeStrategyAnalysis: ReviewMergeStrategyAnalysis
+  mergeBlockedReason?: string | null
+  squashCommitDefaults?: {
+    title: string
+    body: string
+    coauthorLines: string[]
+  }
+}) {
   const t = useTranslations("OperationProgress")
   const reviewT = useTranslations("Review")
   const [selectedMethod, setSelectedMethod] = React.useState<ReviewMergeMethod>(
@@ -49,18 +91,6 @@ export function PRActionButtons({
   const [commitBody, setCommitBody] = React.useState(
     squashCommitDefaults?.body ?? ""
   )
-
-  React.useEffect(() => {
-    setSelectedMethod(mergeStrategyAnalysis.recommendation)
-  }, [mergeStrategyAnalysis])
-
-  React.useEffect(() => {
-    setCommitTitle(squashCommitDefaults?.title ?? "")
-  }, [squashCommitDefaults?.title])
-
-  React.useEffect(() => {
-    setCommitBody(squashCommitDefaults?.body ?? "")
-  }, [squashCommitDefaults?.body])
 
   const mergeStages = React.useMemo<OperationProgressStage[]>(
     () => [

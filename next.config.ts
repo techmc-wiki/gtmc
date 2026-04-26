@@ -6,6 +6,11 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts")
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["@prisma/client", "prisma"],
+  turbopack: {
+    resolveAlias: {
+      "../extensions/extensions.json": "./lib/schematic-renderer/extensions.json",
+    },
+  },
   images: {
     remotePatterns: [
       {

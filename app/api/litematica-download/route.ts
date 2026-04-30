@@ -15,17 +15,15 @@ try {
   // Ignore malformed site URL and continue with explicit hostname allow-list.
 }
 
-function getAllowedRemoteUrl(urlString: string): URL | null {
+function getAllowedRemotePathAndQuery(urlString: string): string | null {
   try {
-    const parsed = new URL(urlString)
-
-    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    if (!SITE_ORIGIN) {
       return null
     }
 
-    // Reject traversal-style path segments, including encoded forms.
-    const decodedPath = decodeURIComponent(parsed.pathname)
-    if (decodedPath.split("/").some((segment) => segment === "..")) {
+    const parsed = new URL(urlString)
+
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
       return null
     }
 
@@ -37,33 +35,29 @@ function getAllowedRemoteUrl(urlString: string): URL | null {
           ? "80"
           : "")
 
-    // Require strict same-origin with the configured site URL when available.
-    if (SITE_ORIGIN) {
-      const sitePort =
-        SITE_ORIGIN.port ||
-        (SITE_ORIGIN.protocol === "https:"
-          ? "443"
-          : SITE_ORIGIN.protocol === "http:"
-            ? "80"
-            : "")
+    const sitePort =
+      SITE_ORIGIN.port ||
+      (SITE_ORIGIN.protocol === "https:"
+        ? "443"
+        : SITE_ORIGIN.protocol === "http:"
+          ? "80"
+          : "")
 
-      if (
-        parsed.protocol !== SITE_ORIGIN.protocol ||
-        parsed.hostname !== SITE_ORIGIN.hostname ||
-        parsedPort !== sitePort
-      ) {
-        return null
-      }
-
-      return parsed
-    }
-
-    // Fallback: allow only explicitly configured hostnames.
-    if (!ALLOWED_REMOTE_HOSTNAMES.has(parsed.hostname)) {
+    if (
+      parsed.protocol !== SITE_ORIGIN.protocol ||
+      parsed.hostname !== SITE_ORIGIN.hostname ||
+      parsedPort !== sitePort
+    ) {
       return null
     }
 
-    return parsed
+    // Reject traversal-style path segments, including encoded forms.
+    const decodedPath = decodeURIComponent(parsed.pathname)
+    if (decodedPath.split("/").some((segment) => segment === "..")) {
+      return null
+    }
+
+    return parsed.pathname + parsed.search
   } catch {
     return null
   }
@@ -110,12 +104,13 @@ export async function GET(request: Request) {
 
   try {
     if (urlParam.startsWith("http://") || urlParam.startsWith("https://")) {
-      const allowedRemoteUrl = getAllowedRemoteUrl(urlParam)
-      if (!allowedRemoteUrl) {
+      const allowedRemotePathAndQuery = getAllowedRemotePathAndQuery(urlParam)
+      if (!allowedRemotePathAndQuery || !SITE_ORIGIN) {
         return errorResponse("Remote URL is not allowed", 403)
       }
 
-      const response = await fetch(allowedRemoteUrl.toString(), {
+      const safeRemoteUrl = new URL(allowedRemotePathAndQuery, SITE_ORIGIN)
+      const response = await fetch(safeRemoteUrl.toString(), {
         redirect: "error",
       })
       if (!response.ok) {

@@ -138,7 +138,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                   <div className="relative z-10 flex h-full flex-col">
                     <CardHeaderRow
                       badge={<FeatureStatusBadge status={feature.status} />}
-                      date={new Date(feature.createdAt).toLocaleDateString()}
+                      date={formatFeatureDate(feature.createdAt)}
                     />
 
                     <h3
@@ -294,4 +294,19 @@ export function FeatureList({ features }: { features: Feature[] }) {
       </div>
     </div>
   )
+}
+
+function formatFeatureDate(date: string | Date) {
+  const parsedDate = date instanceof Date ? date : new Date(date)
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "—"
+  }
+
+  return new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "UTC",
+  }).format(parsedDate)
 }

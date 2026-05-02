@@ -321,7 +321,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   return (
     <div
       className="
-        relative min-h-screen border border-tech-main/40 bg-transparent
+        relative min-h-screen min-w-0 overflow-x-clip border border-tech-main/40 bg-transparent
         p-6 backdrop-blur-sm
         sm:p-8
       ">
@@ -358,7 +358,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         />
       )}
 
-      <article data-article-content>
+      <article className="min-w-0" data-article-content>
         <MarkdownRenderer
           content={embeddedArticleContent}
           rawPath={target.filePath}

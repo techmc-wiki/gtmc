@@ -293,7 +293,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       <MobileTocBar />
       <div
         className="
-          relative isolate flex min-h-[calc(100dvh-8rem)] flex-col
+          relative isolate flex min-h-[calc(100dvh-8rem)] min-w-0 flex-col
+          overflow-x-clip
           md:flex-row md:justify-center md:gap-8
         ">
         <div
@@ -504,7 +505,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
         <main
           className={`
-            relative my-6 w-full flex-1 transition-all duration-300
+            relative my-6 w-full min-w-0 flex-1 transition-all duration-300
             ease-[cubic-bezier(0.16,1,0.3,1)]
             ${sidebarHidden
               ? `

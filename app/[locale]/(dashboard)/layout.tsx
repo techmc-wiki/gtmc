@@ -39,7 +39,7 @@ export default async function DashboardLayout({
   return (
     <div
       className="
-        relative flex min-h-screen w-screen flex-col font-sans text-tech-main
+        relative flex min-h-screen w-full max-w-full flex-col overflow-x-clip font-sans text-tech-main
         selection:bg-tech-main/20 selection:text-tech-main-dark
       ">
       <nav
@@ -91,7 +91,7 @@ export default async function DashboardLayout({
 
       <main
         className="
-          relative p-4
+           relative w-full max-w-full min-w-0 p-4
           sm:p-6
           lg:px-24 lg:py-8
         ">

@@ -28,8 +28,10 @@ export function StatusDot({
   }
 
   return (
-    <div
+    <span
+      aria-hidden="true"
       className={cn(
+        "inline-block shrink-0",
         sizeClasses[size],
         variantClasses[variant][size],
         className

@@ -50,7 +50,8 @@ export function SearchCommand() {
     setIsLoading(false)
   }, [])
 
-  // Global Cmd+K / Ctrl+K handler
+  // Global Cmd+K / Ctrl+K handler. Register in the capture phase so dormant
+  // article dialogs do not intercept the shortcut before search can open.
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -67,8 +68,8 @@ export function SearchCommand() {
         })
       }
     }
-    document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
+    document.addEventListener("keydown", handleKeyDown, { capture: true })
+    return () => document.removeEventListener("keydown", handleKeyDown, true)
   }, [])
 
   // Auto-focus input when modal opens

@@ -4,6 +4,7 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { SelectableCard } from "@/components/ui/selectable-card"
 import type {
   ReviewMergeMethod,
   ReviewMergeStrategyAnalysis,
@@ -74,33 +75,19 @@ export function MergeMethodPicker({
           const isRecommended = analysis.recommendation === method
 
           return (
-            <button
+            <SelectableCard
               key={method}
-              type="button"
+              title={title}
+              subtitle={description}
+              detail={detail}
+              selected={isSelected}
+              recommended={isRecommended}
+              recommendedLabel={t("recommended")}
+              selectedLabel={t("selected")}
               disabled={disabled}
               onClick={() => onSelectMethod(method)}
-              className={`relative border p-3 text-left transition ${
-                isSelected
-                  ? "border-tech-main bg-tech-main/10"
-                  : "guide-line bg-white/70 hover:border-tech-main/40 hover:bg-white"
-              } ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}>
-              <div className="flex items-center justify-between gap-3">
-                <span className="font-mono text-xs font-bold tracking-widest text-tech-main uppercase">
-                  {title}
-                </span>
-                {isRecommended ? (
-                  <span className="border border-tech-main/30 bg-tech-main px-2 py-0.5 font-mono text-[0.5625rem] tracking-widest text-white uppercase">
-                    {t("recommended")}
-                  </span>
-                ) : null}
-              </div>
-              <p className="mt-2 font-mono text-[0.6875rem] leading-relaxed text-tech-main/65">
-                {description}
-              </p>
-              <p className="mt-2 font-mono text-[0.625rem] leading-relaxed text-tech-main/45">
-                {detail}
-              </p>
-            </button>
+              className="p-3"
+            />
           )
         })}
       </div>

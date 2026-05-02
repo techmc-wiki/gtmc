@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl"
 
 import { TechButton } from "@/components/ui/tech-button"
 import { InputBox } from "@/components/ui/input-box"
+import { SegmentedControl } from "@/components/ui/segmented-control"
 import { normalizeDraftFilePath } from "@/lib/draft-files"
 
 interface DraftRepoTreeNode {
@@ -303,30 +304,18 @@ export function DraftFileSourceDialog({
           </aside>
 
           <div className="min-h-0 overflow-y-auto p-5">
-            <div className="mb-5 flex flex-wrap gap-2">
-              <ModeButton
-                label={t("modeRepo")}
-                mode="repo"
+            <div className="mb-5">
+              <SegmentedControl<SourceMode>
+                options={[
+                  { value: "repo", label: t("modeRepo") },
+                  { value: "upload", label: t("modeLocal") },
+                  { value: "new", label: t("modeNew") },
+                  { value: "folder", label: "新建文件夹" },
+                ]}
                 value={mode}
-                onChange={setMode}
-              />
-              <ModeButton
-                label={t("modeLocal")}
-                mode="upload"
-                value={mode}
-                onChange={setMode}
-              />
-              <ModeButton
-                label={t("modeNew")}
-                mode="new"
-                value={mode}
-                onChange={setMode}
-              />
-              <ModeButton
-                label="新建文件夹"
-                mode="folder"
-                value={mode}
-                onChange={setMode}
+                onValueChange={setMode}
+                controlRole="group"
+                size="sm"
               />
             </div>
 
@@ -471,38 +460,6 @@ export function DraftFileSourceDialog({
         </div>
       </div>
     </div>
-  )
-}
-
-function ModeButton({
-  label,
-  mode,
-  onChange,
-  value,
-}: {
-  label: string
-  mode: SourceMode
-  onChange: (mode: SourceMode) => void
-  value: SourceMode
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(mode)}
-      className={`
-        border px-3 py-2 font-mono text-xs tracking-widest uppercase
-        transition-colors
-        ${
-          value === mode
-            ? `border-tech-main bg-tech-main text-white`
-            : `
-              border-tech-main/30 bg-tech-main/5 text-tech-main
-              hover:bg-tech-main/10
-            `
-        }
-      `}>
-      {label}
-    </button>
   )
 }
 

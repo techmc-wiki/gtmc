@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl"
 import { ConflictMode, ModeAnalysis } from "@/types/review"
 import { TechButton } from "@/components/ui/tech-button"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { SelectableCard } from "@/components/ui/selectable-card"
 
 interface ModeSelectorProps {
   modeAnalysis: ModeAnalysis
@@ -92,52 +93,17 @@ export function ModeSelector({
           const isRecommended = modeAnalysis.recommendation === mode
 
           return (
-            <button
+            <SelectableCard
               key={mode}
-              type="button"
+              title={title}
+              subtitle={subtitle}
+              detail={detail}
+              selected={isSelected}
+              recommended={isRecommended}
+              recommendedLabel={t("recommended")}
+              selectedLabel={t("selected")}
               onClick={() => setSelectedMode(mode)}
-              className={`
-                group relative cursor-pointer p-4 text-left transition-all duration-200 sm:p-5
-                ${
-                  isSelected
-                    ? "border border-tech-main bg-tech-main/10"
-                    : "guide-line bg-white/70 hover:border-tech-main/50 hover:bg-white/90"
-                }
-              `}>
-              <CornerBrackets
-                color={
-                  isSelected ? "border-tech-main/60" : "border-tech-main/30"
-                }
-              />
-
-              {isRecommended && (
-                <span className="mb-3 inline-block border border-tech-main bg-tech-main px-3 py-1 font-mono text-[0.6875rem] font-bold tracking-widest text-white uppercase">
-                  {t("recommended")}
-                </span>
-              )}
-
-              <p
-                className={`font-mono text-sm font-bold tracking-widest uppercase ${isSelected ? "text-tech-main" : "text-tech-main/80"}`}>
-                {title}
-              </p>
-
-              <p className="mt-1.5 font-mono text-xs/relaxed text-tech-main/60">
-                {subtitle}
-              </p>
-
-              <p className="mt-2 font-mono text-[0.6875rem] leading-relaxed text-tech-main/40">
-                {detail}
-              </p>
-
-              {isSelected && (
-                <div className="mt-3 flex items-center gap-1.5">
-                  <span className="inline-block size-1.5 bg-tech-main" />
-                  <span className="font-mono text-[0.6875rem] tracking-widest text-tech-main uppercase">
-                    {t("selected")}
-                  </span>
-                </div>
-              )}
-            </button>
+            />
           )
         })}
       </div>

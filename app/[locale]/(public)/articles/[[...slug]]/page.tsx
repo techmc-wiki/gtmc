@@ -35,33 +35,44 @@ import {
   getArticleNavigation,
   getFirstArticleInChapter,
 } from "@/lib/article-navigation"
-import { getSidebarTree } from "@/actions/sidebar"
+
 import type { ArticleTreeNode as BaseArticleTreeNode } from "@/lib/github/sync"
 
 export const revalidate = 3600
 
-export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
-  const tree = await getArticleTree()
+export async function generateStaticParams(): Promise<{ locale: string; slug: string[] }[]> {
+  const locales = ["zh", "en"]
+  const params: { locale: string; slug: string[] }[] = []
 
-  const collectArticleSlugs = (nodes: ArticleTreeNode[]): string[] => {
-    const slugs: string[] = []
+  for (const locale of locales) {
+    const tree = await getArticleTree(locale as ArticleLocale)
 
-    for (const node of nodes) {
-      if (!node.isFolder) {
-        slugs.push(node.slug)
+    const collectArticleSlugs = (nodes: ArticleTreeNode[]): string[] => {
+      const slugs: string[] = []
+
+      for (const node of nodes) {
+        if (!node.isFolder) {
+          slugs.push(node.slug)
+        }
+
+        if (node.children && node.children.length > 0) {
+          slugs.push(...collectArticleSlugs(node.children))
+        }
       }
 
-      if (node.children && node.children.length > 0) {
-        slugs.push(...collectArticleSlugs(node.children))
-      }
+      return slugs
     }
 
-    return slugs
+    const slugs = collectArticleSlugs(tree)
+    for (const slug of slugs) {
+      params.push({
+        locale,
+        slug: slug.split("/").filter(Boolean),
+      })
+    }
   }
 
-  return collectArticleSlugs(tree).map((slug) => ({
-    slug: slug.split("/").filter(Boolean),
-  }))
+  return params
 }
 
 interface ArticlePageProps {
@@ -313,7 +324,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   // Get navigation data
-  const tree = await getSidebarTree(locale)
+  const tree = await getArticleTree(locale)
   const flattenedArticles = flattenArticleTree(tree)
   const currentSlug = target.canonicalSlug || slugPath
   const navigation = getArticleNavigation(currentSlug, flattenedArticles, locale)

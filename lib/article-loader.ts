@@ -12,7 +12,7 @@ export interface LocalizedArticleMetadata {
 
 const ARTICLES_DIR = path.join(process.cwd(), "articles")
 const SUBMODULE_GIT = path.join(ARTICLES_DIR, ".git")
-const SLUG_MAP_PATH = path.join(process.cwd(), "lib/slug-map.json")
+const SLUG_MAP_PATH = path.join(__dirname, "slug-map.json")
 
 const slugMap: Record<string, SlugMapEntry> = (() => {
   try {

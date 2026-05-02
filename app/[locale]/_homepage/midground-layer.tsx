@@ -8,11 +8,13 @@ export function MidgroundLayer({
   smoothMouseX,
   smoothMouseY,
   blurMax,
+  isReducedMotion = false,
 }: {
   mgTransform: { x: MotionValue<number>; y: MotionValue<number> }
   smoothMouseX: MotionValue<number>
   smoothMouseY: MotionValue<number>
   blurMax: number
+  isReducedMotion?: boolean
 }) {
   return (
     <motion.div
@@ -70,7 +72,8 @@ export function MidgroundLayer({
         "
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
-        blurMax={blurMax}>
+        blurMax={blurMax}
+        isReducedMotion={isReducedMotion}>
         <div
           className="
              border-l-4 border-tech-main/40 bg-tech-main/5 py-2 pl-4 font-mono
@@ -101,7 +104,8 @@ export function MidgroundLayer({
          "
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
-        blurMax={blurMax}>
+        blurMax={blurMax}
+        isReducedMotion={isReducedMotion}>
         <span className="font-bold">
           at net.minecraft.world.level.block.piston.PistonBaseBlock.moveBlocks
         </span>

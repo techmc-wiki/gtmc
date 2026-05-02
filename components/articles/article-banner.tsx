@@ -18,7 +18,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
   const [locked, setLocked] = useState(false)
   const [flashing, setFlashing] = useState(false)
 
-  const offsetRef = useRef({ x: 0, y: 0 })
+  const [offset, setOffset] = useState({ x: 0, y: 0 })
   const rafIdRef = useRef<number | null>(null)
   const lastMouseEventRef = useRef<MouseEvent | null>(null)
   const rectRef = useRef<DOMRect | null>(null)
@@ -65,7 +65,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
       const dx = (e.clientX - cx) / (window.innerWidth / 2)
       const dy = (e.clientY - cy) / (window.innerHeight / 2)
 
-      offsetRef.current = { x: dx, y: dy }
+      setOffset({ x: dx, y: dy })
       banner.style.setProperty("--parallax-x", `${dx}`)
       banner.style.setProperty("--parallax-y", `${dy}`)
     }
@@ -78,7 +78,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
     }
 
     const onMouseLeave = () => {
-      offsetRef.current = { x: 0, y: 0 }
+      setOffset({ x: 0, y: 0 })
       banner.style.setProperty("--parallax-x", "0")
       banner.style.setProperty("--parallax-y", "0")
     }
@@ -121,8 +121,8 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
     setTimeout(() => setFlashing(false), 400)
   }, [locked])
 
-  const offsetX = offsetRef.current.x
-  const offsetY = offsetRef.current.y
+  const offsetX = offset.x
+  const offsetY = offset.y
 
   const crosshairX = locked
     ? 50

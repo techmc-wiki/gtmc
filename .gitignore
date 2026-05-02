@@ -47,6 +47,10 @@ docs/superpowers
 .codex
 .claude
 .agents
+.kiro
+.qwen
+.windsurf
+.pi
 
 # compile-time generated file
 lib/slug-map.json

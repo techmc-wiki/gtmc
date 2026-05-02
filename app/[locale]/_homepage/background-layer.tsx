@@ -35,11 +35,13 @@ export function BackgroundLayer({
   smoothMouseX,
   smoothMouseY,
   blurMax,
+  isReducedMotion = false,
 }: {
   bgTransform: { x: MotionValue<number>; y: MotionValue<number> }
   smoothMouseX: MotionValue<number>
   smoothMouseY: MotionValue<number>
   blurMax: number
+  isReducedMotion?: boolean
 }) {
   return (
     <motion.div
@@ -56,7 +58,8 @@ export function BackgroundLayer({
         "
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
-        blurMax={blurMax}>
+        blurMax={blurMax}
+        isReducedMotion={isReducedMotion}>
         SCHEMATIC_01
       </DecorElement>
 
@@ -70,7 +73,8 @@ export function BackgroundLayer({
          "
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
-        blurMax={blurMax}>
+        blurMax={blurMax}
+        isReducedMotion={isReducedMotion}>
         00000000: 1f8b 0800 0000 0000 0000 edc1 0b00 0000 .......4........
         {"\n"}
         00000010: 0010 0700 1101 0005 6c65 7665 6c00 0800 ........level...
@@ -92,7 +96,8 @@ export function BackgroundLayer({
         "
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
-        blurMax={blurMax}>
+        blurMax={blurMax}
+        isReducedMotion={isReducedMotion}>
         <svg
           width="200"
           height="200"
@@ -155,7 +160,8 @@ export function BackgroundLayer({
         "
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
-        blurMax={blurMax}>
+        blurMax={blurMax}
+        isReducedMotion={isReducedMotion}>
         <svg
           width="150"
           height="150"
@@ -182,7 +188,8 @@ export function BackgroundLayer({
          "
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
-        blurMax={blurMax}>
+        blurMax={blurMax}
+        isReducedMotion={isReducedMotion}>
         <div className="mb-2 font-bold text-tech-main-dark">
           {"//"} REDSTONE_BOOLEAN_LOGIC
         </div>
@@ -208,7 +215,8 @@ export function BackgroundLayer({
          "
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
-        blurMax={blurMax}>
+        blurMax={blurMax}
+        isReducedMotion={isReducedMotion}>
         <div className="mb-2 font-bold tracking-widest text-tech-main-dark">
           TRANSFORM_MATRIX_4x4
         </div>
@@ -246,7 +254,8 @@ export function BackgroundLayer({
          "
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
-        blurMax={blurMax}>
+        blurMax={blurMax}
+        isReducedMotion={isReducedMotion}>
         <div className="mb-2 font-bold tracking-widest text-tech-main-dark">
           TICK_PHASE_ALLOCATION
         </div>
@@ -281,7 +290,8 @@ export function BackgroundLayer({
         "
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
-        blurMax={blurMax}>
+        blurMax={blurMax}
+        isReducedMotion={isReducedMotion}>
         <svg
           width="140"
           height="160"

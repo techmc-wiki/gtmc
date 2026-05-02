@@ -44,7 +44,7 @@ function performHighlight(
   const mark = document.createElement("mark")
   mark.textContent = matched
   mark.style.cssText =
-    "background-color: rgb(96 112 143); color: white; padding: 2px 4px; transition: all 2.4s cubic-bezier(0.4, 0, 0.2, 1);"
+    `background-color: var(--color-tech-main); color: white; padding: 2px 4px; transition: all 2.4s cubic-bezier(0.4, 0, 0.2, 1);`
 
   const fragment = document.createDocumentFragment()
   if (before) fragment.appendChild(document.createTextNode(before))
@@ -55,7 +55,7 @@ function performHighlight(
   mark.scrollIntoView({ behavior: "smooth", block: "center" })
 
   const t1 = setTimeout(() => {
-    mark.style.backgroundColor = "rgba(96, 112, 143, 0)"
+    mark.style.backgroundColor = "rgb(var(--color-tech-main) / 0)"
     mark.style.color = "inherit"
     mark.style.padding = "0"
   }, 3600)

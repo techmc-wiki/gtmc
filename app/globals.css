@@ -50,8 +50,8 @@
 }
 
 :root {
-  --background: #f8f9fc;
-  --foreground: #60708f;
+  --background: var(--color-tech-bg);
+  --foreground: var(--color-tech-main);
 }
 
 html {
@@ -89,7 +89,6 @@ html {
     backwards;
   --animate-tree-drop-in: tree-drop-in 1.05s cubic-bezier(0.16, 1, 0.3, 1)
     backwards;
-  --animate-tech-glitch: tech-glitch 2s infinite;
   --animate-target-blink: target-blink 1.2s ease-out forwards;
   --animate-blueprint-sweep: shimmer 2s ease-out infinite;
   --animate-scan-confirm: scan-confirm 0.6s ease-out forwards;
@@ -163,17 +162,6 @@ html {
     }
   }
 
-  @keyframes resolved-handoff {
-    0% {
-      opacity: 0.72;
-      transform: translateY(6px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
   @keyframes skeleton-exit {
     0% {
       opacity: 1;
@@ -234,16 +222,6 @@ html {
     }
   }
 
-  @keyframes page-transit {
-    0% {
-      opacity: 0;
-      transform: translateX(10px);
-    }
-    100% {
-      opacity: 1;
-      transform: none;
-    }
-  }
 }
 
 @theme inline {
@@ -303,10 +281,6 @@ body {
   @apply border-tech-main/30 tracking-tech-wide text-tech-main mb-2 inline-block border-b pb-1 font-mono text-sm uppercase;
 }
 
-@utility animate-page-transit {
-  animation: page-transit 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
 @utility animate-skeleton-exit {
   animation: skeleton-exit 0.25s ease-out forwards;
 }
@@ -336,24 +310,12 @@ body {
   min-width: 44px;
 }
 
-@utility text-balance-mobile {
-  @apply text-xs sm:text-sm md:text-base;
-}
-
 @utility corner-bracket {
   @apply border-tech-main/40 border-2;
 }
 
 @utility guide-line {
   @apply border-tech-main/20;
-}
-
-@utility hud-block {
-  @apply hidden font-mono text-[0.625rem] opacity-40 sm:block;
-}
-
-@utility transition-standard {
-  @apply transition-colors duration-300;
 }
 
 @utility transition-transform {
@@ -389,7 +351,6 @@ body {
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(96, 112, 143, 0.3);
     background-color: color-mix(
       in oklab,
       var(--color-tech-main) 30%,
@@ -400,7 +361,6 @@ body {
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(74, 90, 120, 0.7);
     background-color: color-mix(
       in oklab,
       var(--color-tech-main-dark) 70%,
@@ -422,16 +382,16 @@ body {
 
   &::-webkit-scrollbar-track {
     background: transparent;
-    border-right: 1px dashed rgba(96, 112, 143, 0.2);
+    border-right: 1px dashed color-mix(in oklab, var(--color-tech-main) 20%, transparent);
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(96, 112, 143, 0.4);
+    background-color: color-mix(in oklab, var(--color-tech-main) 40%, transparent);
     border-radius: 0;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(96, 112, 143, 0.8);
+    background-color: color-mix(in oklab, var(--color-tech-main) 80%, transparent);
   }
 }
 

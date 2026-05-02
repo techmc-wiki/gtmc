@@ -1118,7 +1118,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       onSubmit={handleSaveDraft}
       className="
         group relative flex w-full flex-col space-y-6 border border-tech-main/60
-        bg-[#fbfbfd] p-4 shadow-[inset_0_0_100px_rgba(96,112,143,0.03)]
+        bg-[#fbfbfd] p-4 shadow-[inset_0_0_100px_rgb(var(--color-tech-main)/0.03)]
         before:absolute
         before:inset-0 before:z-[-1] before:bg-[url('/bg-grid.svg')] before:bg-size-[24px_24px]
         before:opacity-[0.04] sm:p-6
@@ -1345,7 +1345,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   className="
                     relative flex h-12 items-center
                     gap-2 overflow-x-auto scroll-smooth border-b
-                    guide-line bg-tech-main/4 px-4 shadow-[inset_0_1px_4px_rgba(96,112,143,0.05)]
+                    guide-line bg-tech-main/4 px-4 shadow-[inset_0_1px_4px_rgb(var(--color-tech-main)/0.05)]
                   ">
                   <div className="absolute inset-y-0 left-0 w-1 bg-tech-main/30" />
                   <span className="mr-2 font-mono text-[9px] tracking-widest text-tech-main/50 uppercase opacity-70">

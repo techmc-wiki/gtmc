@@ -19,15 +19,15 @@ export function EditorToolbar({
   onWrapToggle,
 }: EditorToolbarProps) {
   const t = useTranslations("Editor")
-  const btnClass = `relative h-8 min-w-[32px] flex items-center justify-center border border-transparent px-3 text-[10px] tracking-widest uppercase transition-all duration-200 select-none hover:border-tech-accent/40 hover:bg-tech-accent/10 hover:text-white hover:shadow-[0_0_10px_rgba(196,208,223,0.1)] sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${!disabled ? "cursor-pointer" : "opacity-50 cursor-not-allowed"}`
-  const smBtnClass = `relative hidden h-8 items-center justify-center border border-transparent px-3 py-1 text-[10px] tracking-widest uppercase transition-all duration-200 select-none hover:border-tech-accent/40 hover:bg-tech-accent/10 hover:text-white hover:shadow-[0_0_10px_rgba(196,208,223,0.1)] sm:flex ${!disabled ? "cursor-pointer" : "opacity-50 cursor-not-allowed"}`
+  const btnClass = `relative h-8 min-w-[32px] flex items-center justify-center border border-transparent px-3 text-[10px] tracking-widest uppercase transition-all duration-200 select-none hover:border-tech-accent/40 hover:bg-tech-accent/10 hover:text-white hover:shadow-[0_0_10px_rgb(var(--color-tech-accent)/0.1)] sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 ${!disabled ? "cursor-pointer" : "opacity-50 cursor-not-allowed"}`
+  const smBtnClass = `relative hidden h-8 items-center justify-center border border-transparent px-3 py-1 text-[10px] tracking-widest uppercase transition-all duration-200 select-none hover:border-tech-accent/40 hover:bg-tech-accent/10 hover:text-white hover:shadow-[0_0_10px_rgb(var(--color-tech-accent)/0.1)] sm:flex ${!disabled ? "cursor-pointer" : "opacity-50 cursor-not-allowed"}`
 
   return (
     <div
       className="
         sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b
         border-tech-main-dark bg-tech-main-dark p-2 px-2 font-mono
-        text-white/70 shadow-[0_2px_10px_rgba(74,90,120,0.2)]
+        text-white/70 shadow-[0_2px_10px_rgb(var(--color-tech-main-dark)/0.2)]
         before:pointer-events-none before:absolute before:inset-0 before:bg-[url('/bg-grid.svg')] before:bg-size-[24px_24px] before:opacity-[0.05]
         sm:gap-1 sm:px-4
       ">
@@ -102,7 +102,7 @@ export function EditorToolbar({
             onClick={onWrapToggle}
             className={`hidden border px-3 py-1 font-mono text-[9px] tracking-widest uppercase transition-all duration-200 select-none sm:block ${
               lineWrap
-                ? "border-tech-accent bg-tech-accent/20 text-white shadow-[0_0_8px_rgba(196,208,223,0.2)]"
+                ? "border-tech-accent bg-tech-accent/20 text-white shadow-[0_0_8px_rgb(var(--color-tech-accent)/0.2)]"
                 : "border-transparent text-white/50 hover:border-tech-accent/30 hover:bg-tech-accent/10 hover:text-white"
             }`}
             aria-pressed={lineWrap}>

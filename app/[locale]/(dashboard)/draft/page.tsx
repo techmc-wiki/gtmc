@@ -102,7 +102,7 @@ export default async function DraftDashboardPage() {
         group relative flex h-auto flex-col justify-between border
         border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
         transition-all duration-300 hover:border-tech-main hover:bg-white
-        hover:shadow-[0_0_20px_rgba(96,112,143,0.15)] sm:h-64
+        hover:shadow-[0_0_20px_rgb(var(--color-tech-main)/0.15)] sm:h-64
       ">
       {/* Corner brackets */}
       <CornerBrackets variant="hover" />

@@ -122,7 +122,7 @@ export function ForegroundLayer({
                 i === 3
                   ? `
                     border-2 border-tech-main-dark bg-tech-main/10
-                    shadow-[0_0_8px_rgba(96,112,143,0.3)]
+                    shadow-[0_0_8px_rgb(var(--color-tech-main)/0.3)]
                   `
                   : `border border-tech-main/40`
               }

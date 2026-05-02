@@ -30,7 +30,7 @@ export function DraftFileList({
   return (
     <aside
       className="
-      flex flex-col border border-tech-main/30 bg-white/40 shadow-[inset_0_0_40px_rgba(96,112,143,0.05)]
+      flex flex-col border border-tech-main/30 bg-white/40 shadow-[inset_0_0_40px_rgb(var(--color-tech-main)/0.05)]
       backdrop-blur-sm
     ">
       <div
@@ -102,7 +102,7 @@ export function DraftFileList({
                   border px-3 py-2 text-left transition-all duration-200
                   ${
                     isActive
-                      ? `z-10 scale-[1.01] border-tech-main bg-tech-main/8 shadow-[0_2px_10px_rgba(96,112,143,0.08)]`
+                      ? `z-10 scale-[1.01] border-tech-main bg-tech-main/8 shadow-[0_2px_10px_rgb(var(--color-tech-main)/0.08)]`
                       : `
                         border-transparent bg-transparent
                         hover:border-tech-main/30 hover:bg-tech-main/3

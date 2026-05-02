@@ -225,7 +225,7 @@ export function getMarkdownComponents(rawPath: string) {
     return (
       <span
         className={[
-          "inline-block rounded-xs border guide-line bg-tech-main/8 px-1.5 py-px text-tech-main/80 transition-[filter,text-shadow,color,background-color,border-color] duration-200 filter-[blur(0.18rem)] [text-shadow:0_0_0.35rem_rgba(96,112,143,0.45)] hover:border-tech-main/35 hover:bg-white/85 hover:text-slate-800 hover:filter-none hover:text-shadow-none",
+          "inline-block rounded-xs border guide-line bg-tech-main/8 px-1.5 py-px text-tech-main/80 transition-[filter,text-shadow,color,background-color,border-color] duration-200 filter-[blur(0.18rem)] [text-shadow:0_0_0.35rem_rgb(var(--color-tech-main)/0.45)] hover:border-tech-main/35 hover:bg-white/85 hover:text-slate-800 hover:filter-none hover:text-shadow-none",
           className,
         ]
           .filter(Boolean)

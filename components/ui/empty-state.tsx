@@ -16,7 +16,7 @@ export function EmptyState({ message, colSpanFull = false }: EmptyStateProps) {
       <div
         className="
           absolute inset-0
-          bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(96,112,143,0.05)_10px,rgba(96,112,143,0.05)_20px)]
+          bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgb(var(--color-tech-main)/0.05)_10px,rgb(var(--color-tech-main)/0.05)_20px)]
         "
       />
       <h2

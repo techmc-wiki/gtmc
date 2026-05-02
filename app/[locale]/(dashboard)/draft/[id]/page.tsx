@@ -97,8 +97,8 @@ export default async function EditDraftPage({
       <div className="relative mx-auto w-full">
         {/* Subtle decorative scanline behind the editor */}
         <div className="pointer-events-none absolute inset-0 z-[-1] overflow-hidden">
-          <div className="size-full bg-[linear-gradient(to_bottom,transparent_50%,rgba(96,112,143,0.02)_50%)] bg-size-[100%_4px]" />
-          <div className="absolute inset-x-0 top-0 h-[2px] animate-[tree-drop-in_10s_ease-in-out_infinite] bg-tech-main/10 shadow-[0_0_10px_rgba(96,112,143,0.2)]" />
+          <div className="size-full bg-[linear-gradient(to_bottom,transparent_50%,rgb(var(--color-tech-main)/0.02)_50%)] bg-size-[100%_4px]" />
+          <div className="absolute inset-x-0 top-0 h-[2px] animate-[tree-drop-in_10s_ease-in-out_infinite] bg-tech-main/10 shadow-[0_0_10px_rgb(var(--color-tech-main)/0.2)]" />
         </div>
 
         <DraftEditor

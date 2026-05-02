@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 
 interface ArticleBannerProps {
   src: string
@@ -14,32 +14,94 @@ const IMG_PARALLAX_STRENGTH = 8
 export function ArticleBanner({ src, alt }: ArticleBannerProps) {
   const bannerRef = useRef<HTMLDivElement>(null)
   const imgRef = useRef<HTMLDivElement>(null)
-  const [offset, setOffset] = useState({ x: 0, y: 0 })
   const [hovered, setHovered] = useState(false)
   const [locked, setLocked] = useState(false)
   const [flashing, setFlashing] = useState(false)
 
+  const offsetRef = useRef({ x: 0, y: 0 })
+  const rafIdRef = useRef<number | null>(null)
+  const lastMouseEventRef = useRef<MouseEvent | null>(null)
+  const rectRef = useRef<DOMRect | null>(null)
+  const isReducedMotionRef = useRef(false)
+
+  const updateRect = useCallback(() => {
+    if (bannerRef.current) {
+      rectRef.current = bannerRef.current.getBoundingClientRect()
+    }
+  }, [])
+
   useEffect(() => {
-    function onMouseMove(e: MouseEvent) {
-      if (locked) return
-      const rect = bannerRef.current?.getBoundingClientRect()
-      if (!rect) return
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
+    isReducedMotionRef.current = mediaQuery.matches
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      isReducedMotionRef.current = e.matches
+    }
+
+    mediaQuery.addEventListener("change", handleChange)
+    return () => mediaQuery.removeEventListener("change", handleChange)
+  }, [])
+
+  useEffect(() => {
+    updateRect()
+    window.addEventListener("resize", updateRect)
+    return () => window.removeEventListener("resize", updateRect)
+  }, [updateRect])
+
+  useEffect(() => {
+    if (locked || isReducedMotionRef.current) return
+
+    const banner = bannerRef.current
+    if (!banner) return
+
+    const processMouseMove = () => {
+      rafIdRef.current = null
+      const e = lastMouseEventRef.current
+      if (!e || !rectRef.current) return
+
+      const rect = rectRef.current
       const cx = rect.left + rect.width / 2
       const cy = rect.top + rect.height / 2
       const dx = (e.clientX - cx) / (window.innerWidth / 2)
       const dy = (e.clientY - cy) / (window.innerHeight / 2)
-      setOffset({ x: dx, y: dy })
+
+      offsetRef.current = { x: dx, y: dy }
+      banner.style.setProperty("--parallax-x", `${dx}`)
+      banner.style.setProperty("--parallax-y", `${dy}`)
     }
-    window.addEventListener("mousemove", onMouseMove)
-    return () => window.removeEventListener("mousemove", onMouseMove)
+
+    const onMouseMove = (e: MouseEvent) => {
+      lastMouseEventRef.current = e
+      if (rafIdRef.current === null) {
+        rafIdRef.current = requestAnimationFrame(processMouseMove)
+      }
+    }
+
+    const onMouseLeave = () => {
+      offsetRef.current = { x: 0, y: 0 }
+      banner.style.setProperty("--parallax-x", "0")
+      banner.style.setProperty("--parallax-y", "0")
+    }
+
+    banner.addEventListener("mousemove", onMouseMove)
+    banner.addEventListener("mouseleave", onMouseLeave)
+
+    return () => {
+      banner.removeEventListener("mousemove", onMouseMove)
+      banner.removeEventListener("mouseleave", onMouseLeave)
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current)
+      }
+    }
   }, [locked])
 
   useEffect(() => {
-    function checkScrollLock() {
-      if (locked) return
+    if (locked) return
+
+    const checkScrollLock = () => {
+      if (locked || !rectRef.current) return
       if (window.matchMedia("(pointer: coarse)").matches) {
-        const rect = bannerRef.current?.getBoundingClientRect()
-        if (!rect) return
+        const rect = rectRef.current
         if (rect.bottom < window.innerHeight * 0.4) {
           setLocked(true)
           setFlashing(true)
@@ -47,29 +109,33 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
         }
       }
     }
+
     window.addEventListener("scroll", checkScrollLock, { passive: true })
     return () => window.removeEventListener("scroll", checkScrollLock)
   }, [locked])
 
-  function handleFirstHover() {
+  const handleFirstHover = useCallback(() => {
     if (locked) return
     setLocked(true)
     setFlashing(true)
     setTimeout(() => setFlashing(false), 400)
-  }
+  }, [locked])
+
+  const offsetX = offsetRef.current.x
+  const offsetY = offsetRef.current.y
 
   const crosshairX = locked
     ? 50
     : hovered
       ? 50
-      : 50 + offset.x * PARALLAX_STRENGTH
+      : 50 + offsetX * PARALLAX_STRENGTH
   const crosshairY = locked
     ? 50
     : hovered
       ? 50
-      : 50 + offset.y * PARALLAX_STRENGTH
-  const imgX = locked ? 0 : hovered ? 0 : -offset.x * IMG_PARALLAX_STRENGTH
-  const imgY = locked ? 0 : hovered ? 0 : -offset.y * IMG_PARALLAX_STRENGTH
+      : 50 + offsetY * PARALLAX_STRENGTH
+  const imgX = locked ? 0 : hovered ? 0 : -offsetX * IMG_PARALLAX_STRENGTH
+  const imgY = locked ? 0 : hovered ? 0 : -offsetY * IMG_PARALLAX_STRENGTH
 
   return (
     <div
@@ -78,7 +144,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
         group/banner relative mb-8 animate-fade-in
         transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
         hover:-translate-y-1.5
-        hover:shadow-[0_16px_40px_rgba(74,90,120,0.16),0_4px_12px_rgba(74,90,120,0.10)]
+        hover:shadow-[0_16px_40px_rgb(var(--color-tech-main-dark)/0.16),0_4px_12px_rgb(var(--color-tech-main-dark)/0.10)]
       ">
       {/* Depth frame layers — expand outward on hover */}
       <div className="pointer-events-none absolute inset-0 border border-tech-main/15 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:-inset-2" />
@@ -154,8 +220,8 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
             className="pointer-events-none absolute inset-0 opacity-[0.1] mix-blend-multiply transition-transform duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:scale-105"
             style={{
               backgroundImage: `
-                linear-gradient(to right, #60708f 1px, transparent 1px),
-                linear-gradient(to bottom, #60708f 1px, transparent 1px)
+                linear-gradient(to right, var(--color-tech-main) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--color-tech-main) 1px, transparent 1px)
               `,
               backgroundSize: "40px 40px",
             }}
@@ -167,7 +233,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
               pointer-events-none absolute inset-0 z-10 opacity-60
               mix-blend-darken transition-opacity
               duration-500
-              [background:radial-gradient(ellipse_at_center,transparent_40%,rgba(74,90,120,0.45)_100%)] group-hover/banner:opacity-100
+              [background:radial-gradient(ellipse_at_center,transparent_40%,rgb(var(--color-tech-main-dark)/0.45)_100%)] group-hover/banner:opacity-100
             "
           />
 

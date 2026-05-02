@@ -38,6 +38,16 @@ import { InputBox } from "../ui/input-box"
 import { useBadge } from "@/hooks/use-badge"
 import { useEditorUpload } from "@/hooks/use-editor-upload"
 import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
+import {
+  EditorSurface,
+  EditorActions,
+} from "@/components/editor/editor-surface"
+import {
+  EditorContentArea,
+  EditorWritePanel,
+  EditorPreviewPanel,
+  EditorPreviewFrame,
+} from "@/components/editor/editor-preview-frame"
 
 interface DraftEditorProps {
   initialData?: {
@@ -1114,21 +1124,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     duplicateFilePaths.length > 0
 
   return (
-    <form
-      onSubmit={handleSaveDraft}
-      className="
-        group relative flex w-full flex-col space-y-6 border border-tech-main/60
-        bg-[#fbfbfd] p-4 shadow-[inset_0_0_100px_rgb(var(--color-tech-main)/0.03)]
-        before:absolute
-        before:inset-0 before:z-[-1] before:bg-[url('/bg-grid.svg')] before:bg-size-[24px_24px]
-        before:opacity-[0.04] sm:p-6
-      ">
-      <div className="absolute -top-px -left-px size-3 border-t-2 border-l-2 border-tech-main" />
-      <div className="absolute -top-px -right-px size-3 border-t-2 border-r-2 border-tech-main" />
-      <div className="absolute -bottom-px -left-px size-3 border-b-2 border-l-2 border-tech-main" />
-      <div className="absolute -right-px -bottom-px size-3 border-r-2 border-b-2 border-tech-main" />
-
-      <div className="relative z-10 flex flex-col space-y-4">
+    <EditorSurface variant="grid" as="form" onSubmit={handleSaveDraft}>
+      <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
           <div className="flex items-center justify-between">
             <label
@@ -1308,11 +1305,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             ) : null}
           </div>
 
-          <div
-            className="
-              relative editor-grow flex min-h-125 grow flex-col border
-              border-tech-main/40 bg-white/80 backdrop-blur-sm
-            ">
+          <EditorContentArea>
             <EditorTabStrip
               activeTab={activeTab}
               onTabChange={setActiveTab}
@@ -1449,59 +1442,44 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
             <EditorBadge badge={badge} onDismiss={clearBadge} />
 
-            <section
+            <EditorWritePanel
               id="draft-editor-write-panel"
-              role="tabpanel"
-              className="editor-grow"
               hidden={activeTab !== "write"}>
-              <div className="editor-surface">
-                <EditorTextarea
-                  ref={textareaRef}
-                  value={activeFileContent}
-                  onChange={(value) => updateActiveFile({ content: value })}
-                  onUndo={handleUndoDraftEdit}
-                  onRedo={handleRedoDraftEdit}
-                  onPaste={handlePaste}
-                  onDrop={handleDrop}
-                  onDragOver={(e) => {
-                    if (!isReadOnly) e.preventDefault()
-                  }}
-                  onDragEnter={(e) => {
-                    if (!isReadOnly) e.preventDefault()
-                  }}
-                  isReadOnly={isReadOnly}
-                  isSaving={isSaving}
-                  placeholder={t("contentPlaceholder")}
-                  lineWrap={lineWrap}
-                  canUndo={Boolean(activeFileHistoryAvailability?.undoCount)}
-                  canRedo={Boolean(activeFileHistoryAvailability?.redoCount)}
-                  enableSyntaxHints
-                />
-              </div>
-            </section>
+              <EditorTextarea
+                ref={textareaRef}
+                value={activeFileContent}
+                onChange={(value) => updateActiveFile({ content: value })}
+                onUndo={handleUndoDraftEdit}
+                onRedo={handleRedoDraftEdit}
+                onPaste={handlePaste}
+                onDrop={handleDrop}
+                onDragOver={(e) => {
+                  if (!isReadOnly) e.preventDefault()
+                }}
+                onDragEnter={(e) => {
+                  if (!isReadOnly) e.preventDefault()
+                }}
+                isReadOnly={isReadOnly}
+                isSaving={isSaving}
+                placeholder={t("contentPlaceholder")}
+                lineWrap={lineWrap}
+                canUndo={Boolean(activeFileHistoryAvailability?.undoCount)}
+                canRedo={Boolean(activeFileHistoryAvailability?.redoCount)}
+                enableSyntaxHints
+              />
+            </EditorWritePanel>
 
-            <section
+            <EditorPreviewPanel
               id="draft-editor-preview-panel"
-              role="tabpanel"
-              hidden={activeTab !== "preview"}
-              className="editor-grow">
-              {activeFileContent.trim() ? (
-                <div
-                  className="
-                    w-full max-w-none overflow-hidden p-6 wrap-break-word
-                    selection:bg-tech-main/20 selection:text-slate-900
-                    sm:p-8
-                  ">
-                  <LazyMarkdownPreview
-                    content={activeFileContent}
-                    rawPath={activeFile.filePath || ""}
-                  />
-                </div>
-              ) : (
-                <p className="editor-panel">NOTHING_TO_PREVIEW_</p>
-              )}
-            </section>
-          </div>
+              hidden={activeTab !== "preview"}>
+              <EditorPreviewFrame isEmpty={!activeFileContent.trim()}>
+                <LazyMarkdownPreview
+                  content={activeFileContent}
+                  rawPath={activeFile.filePath || ""}
+                />
+              </EditorPreviewFrame>
+            </EditorPreviewPanel>
+          </EditorContentArea>
         </div>
       </div>
 
@@ -1680,13 +1658,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             errorLabel={progressT("submitError")}
           />
 
-          <div
-            className="
-              relative mt-6 flex justify-end gap-4 border-t border-tech-main/10
-              pt-4
-            ">
-            <div className="corner-tick" />
-
+          <EditorActions>
             <TechButton
               type="submit"
               variant="primary"
@@ -1707,7 +1679,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               aria-busy={isSubmittingReview}>
               {isSubmittingReview ? progressT("submitBusy") : t("openPr")}
             </TechButton>
-          </div>
+          </EditorActions>
 
           <section
             aria-label={t("submissionLicenseAria")}
@@ -1767,7 +1739,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         onClose={() => setInsertDialogIntent(false)}
         onCreate={handleInsertSelectedFile}
       />
-    </form>
+    </EditorSurface>
   )
 }
 

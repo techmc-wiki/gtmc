@@ -23,7 +23,7 @@ import { FeatureReadonlyView } from "./feature-readonly-view"
 import { FeatureStatusBadge } from "@/components/ui/status-badge"
 import { RevealSection } from "../reveal-helpers"
 import { toAbsoluteUrl } from "@/lib/site-url"
-import { MetadataRow } from "./metadata-row"
+import { MetadataRow } from "@/components/ui/metadata-row"
 
 export const revalidate = 60
 

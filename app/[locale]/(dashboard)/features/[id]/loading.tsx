@@ -7,7 +7,7 @@ import {
   SegmentedBar,
   ScanConfirmOverlay,
   SkeletonExitWrapper,
-} from "../loading-shell-primitives"
+} from "@/components/ui/loading-shell-primitives"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { TechCard } from "@/components/ui/tech-card"
 

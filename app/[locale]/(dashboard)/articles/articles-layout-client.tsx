@@ -9,7 +9,7 @@ import {
   ScanConfirmOverlay,
   SectionRail,
   SegmentedBar,
-} from "../features/loading-shell-primitives"
+} from "@/components/ui/loading-shell-primitives"
 import type { TreeNode } from "@/types/sidebar-tree"
 import { useTranslations } from "next-intl"
 import { ArticleTocRail } from "@/components/articles/article-toc-rail"

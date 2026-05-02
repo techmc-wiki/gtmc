@@ -20,8 +20,14 @@ import {
 import { EditorTextarea } from "@/components/editor/editor-textarea"
 import { EditorFileUploadInput } from "@/components/editor/editor-file-upload-input"
 import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { useEditorUpload } from "@/hooks/use-editor-upload"
+import { EditorForm, EditorActions } from "@/components/editor/editor-surface"
+import {
+  EditorContentArea,
+  EditorWritePanel,
+  EditorPreviewPanel,
+  EditorPreviewFrame,
+} from "@/components/editor/editor-preview-frame"
 
 interface FeatureEditorProps {
   initialData?: {
@@ -213,15 +219,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
   }
 
   return (
-    <form
-      onSubmit={handleSave}
-      className="
-        group relative flex w-full flex-col space-y-6 border border-tech-main
-        bg-white/80 p-4 backdrop-blur-sm
-        sm:p-6
-      ">
-      <CornerBrackets />
-
+    <EditorForm onSubmit={handleSave}>
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
           <label htmlFor="feature-title" className="section-label">
@@ -271,11 +269,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         </div>
       </div>
 
-      <div
-        className="
-          relative editor-grow flex min-h-125 grow flex-col border
-          border-tech-main/40 bg-white/80 backdrop-blur-sm
-        ">
+      <EditorContentArea>
         {/* Tab strip */}
         <EditorTabStrip
           activeTab={activeTab}
@@ -306,60 +300,39 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           </>
         )}
 
-        <div
+        <EditorWritePanel
           id="editor-write-panel"
-          role="tabpanel"
-          className="editor-grow"
           hidden={activeTab !== "write"}>
-          <div className="editor-surface">
-            <EditorTextarea
-              ref={textareaRef}
-              value={content}
-              onChange={(value: string) => setContent(value)}
-              onPaste={handlePaste}
-              onDrop={handleDrop}
-              onDragOver={(e: React.DragEvent<HTMLDivElement>) => {
-                if (!isReadOnly) e.preventDefault()
-              }}
-              onDragEnter={(e: React.DragEvent<HTMLDivElement>) => {
-                if (!isReadOnly) e.preventDefault()
-              }}
-              isReadOnly={isReadOnly}
-              isSaving={isSaving}
-              placeholder={t("bodyPlaceholder")}
-              lineWrap={lineWrap}
-            />
-          </div>
-        </div>
+          <EditorTextarea
+            ref={textareaRef}
+            value={content}
+            onChange={(value: string) => setContent(value)}
+            onPaste={handlePaste}
+            onDrop={handleDrop}
+            onDragOver={(e: React.DragEvent<HTMLDivElement>) => {
+              if (!isReadOnly) e.preventDefault()
+            }}
+            onDragEnter={(e: React.DragEvent<HTMLDivElement>) => {
+              if (!isReadOnly) e.preventDefault()
+            }}
+            isReadOnly={isReadOnly}
+            isSaving={isSaving}
+            placeholder={t("bodyPlaceholder")}
+            lineWrap={lineWrap}
+          />
+        </EditorWritePanel>
 
-        <div
+        <EditorPreviewPanel
           id="editor-preview-panel"
-          role="tabpanel"
-          hidden={activeTab !== "preview"}
-          className="editor-grow">
-          {content?.trim() ? (
-            <div
-              className="
-                w-full max-w-none overflow-hidden p-6 wrap-break-word
-                selection:bg-tech-main/20 selection:text-slate-900
-                sm:p-8
-              ">
-              <LazyMarkdownPreview content={content} rawPath="" />
-            </div>
-          ) : (
-            <p className="editor-panel">NOTHING_TO_PREVIEW_</p>
-          )}
-        </div>
-      </div>
+          hidden={activeTab !== "preview"}>
+          <EditorPreviewFrame isEmpty={!content?.trim()}>
+            <LazyMarkdownPreview content={content} rawPath="" />
+          </EditorPreviewFrame>
+        </EditorPreviewPanel>
+      </EditorContentArea>
 
       {!isReadOnly && (
-        <div
-          className="
-            relative mt-6 flex justify-end gap-4 border-t border-tech-main/10
-            pt-4
-          ">
-          <div className="corner-tick" />
-
+        <EditorActions>
           <TechButton
             type="button"
             variant="ghost"
@@ -380,8 +353,8 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
               t("saveButton")
             )}
           </TechButton>
-        </div>
+        </EditorActions>
       )}
-    </form>
+    </EditorForm>
   )
 }

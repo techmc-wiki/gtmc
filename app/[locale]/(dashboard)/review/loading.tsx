@@ -8,7 +8,7 @@ import {
   SegmentedBar,
   ScanConfirmOverlay,
   SkeletonExitWrapper,
-} from "../features/loading-shell-primitives"
+} from "@/components/ui/loading-shell-primitives"
 
 export default function ReviewLoading() {
   const t = useTranslations("CommonA11y")

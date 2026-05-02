@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { EditorToolbarButton } from "@/components/editor/editor-toolbar-shell"
 
 interface EditorFileUploadInputProps {
   fileInputRef: React.RefObject<HTMLInputElement | null>
@@ -19,20 +20,14 @@ export function EditorFileUploadInput({
 }: EditorFileUploadInputProps) {
   return (
     <>
-      <button
+      <EditorToolbarButton
         type="button"
+        variant="upload"
         onClick={() => fileInputRef.current?.click()}
         disabled={disabled || isUploading}
-        className={`
-          h-11 min-w-11 flex-1 border border-transparent px-3 transition-colors
-          select-none
-          hover:border-white/20 hover:bg-tech-accent/20
-          sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5
-          ${disabled || isUploading ? "" : "cursor-pointer"}
-        `}
         aria-busy={isUploading}>
         {isCompressing ? "CMP" : isUploading ? "UPL" : "FILES"}
-      </button>
+      </EditorToolbarButton>
       <input
         ref={fileInputRef}
         type="file"

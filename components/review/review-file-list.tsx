@@ -2,6 +2,14 @@
 
 import { useTranslations } from "next-intl"
 import { StatusDot } from "@/components/ui/status-dot"
+import {
+  FileListSidebar,
+  FileListHeader,
+  FileListContainer,
+  FileListItem,
+  FileListStatusBar,
+  FileExtBadge,
+} from "@/components/ui/file-list"
 
 interface ReviewFileListProps {
   files: Array<{
@@ -35,18 +43,6 @@ function StatusIndicator({
   )
 }
 
-function FileExtBadge({ filePath }: { filePath: string }) {
-  const ext = filePath.includes(".")
-    ? filePath.slice(filePath.lastIndexOf("."))
-    : null
-  if (!ext) return null
-  return (
-    <span className="shrink-0 kbd-badge bg-tech-main/5 font-mono text-[0.5625rem] tracking-widest text-tech-main/50 uppercase">
-      {ext}
-    </span>
-  )
-}
-
 export function ReviewFileList({
   files,
   activeFileId,
@@ -57,80 +53,46 @@ export function ReviewFileList({
   const allClean = conflictCount === 0
 
   return (
-    <aside className="sticky top-16 max-h-[calc(100dvh-4rem)] self-start overflow-y-auto border border-tech-main/40 bg-tech-main/5 backdrop-blur-sm md:top-20 md:max-h-[calc(100dvh-5rem)]">
-      <div className="flex items-center justify-between gap-3 border-b border-tech-main/30 px-4 py-3">
-        <div className="min-w-0 flex-1">
-          <p className="font-mono text-xs tracking-widest text-tech-main uppercase">
-            {t("fileListLabel")} [{files.length}]
-          </p>
-          <p
-            className="truncate font-mono text-[0.6875rem] text-tech-main/60 uppercase"
-            title={t("selectFileToReview")}>
-            {t("selectFileToReview")}
-          </p>
-        </div>
-      </div>
+    <FileListSidebar sticky className="border-tech-main/40 bg-tech-main/5">
+      <FileListHeader
+        title={`${t("fileListLabel")} [${files.length}]`}
+        subtitle={t("selectFileToReview")}
+      />
 
-      <div
-        className={`border-b px-4 py-2 ${
-          allClean
-            ? "border-green-500/20 bg-green-500/5"
-            : "border-red-500/20 bg-red-500/5"
-        }`}>
-        <span
-          className={`font-mono text-[0.6875rem] tracking-widest uppercase ${
-            allClean ? "text-green-700" : "text-red-600"
-          }`}>
-          {allClean
-            ? t("allClean")
-            : t("conflictsCount", { count: conflictCount })}
-        </span>
-      </div>
+      <FileListStatusBar variant={allClean ? "success" : "error"}>
+        {allClean
+          ? t("allClean")
+          : t("conflictsCount", { count: conflictCount })}
+      </FileListStatusBar>
 
-      <div className="space-y-2 p-2">
+      <FileListContainer className="space-y-2">
         {files.map((file, index) => {
-          const pathSegments = file.filePath.split("/").filter(Boolean)
-          const fileLabel =
-            pathSegments[pathSegments.length - 1] ||
-            `UNTITLED_FILE_${index + 1}`
           const isActive = file.id === activeFileId
 
           return (
-            <div key={file.id} className="relative flex items-stretch">
-              <button
-                type="button"
-                onClick={() => onSelectFile(file.id)}
-                className={`
-                  flex min-h-11 min-w-0 flex-1 flex-col items-start gap-1 border
-                  px-3 py-2 text-left transition-colors
-                  ${
-                    isActive
-                      ? `border-tech-main bg-tech-main/10`
-                      : `guide-line bg-white/70 hover:border-tech-main/50 hover:bg-white/90`
-                  }
-                `}>
-                <span className="flex w-full items-center justify-between gap-2">
-                  <span className="truncate font-mono text-xs tracking-widest text-tech-main uppercase">
-                    {fileLabel}
-                  </span>
-                  <span className="flex shrink-0 items-center gap-1.5">
-                    <FileExtBadge filePath={file.filePath} />
-                    <StatusIndicator status={file.status} />
-                  </span>
+            <FileListItem
+              key={file.id}
+              fileId={file.id}
+              filePath={file.filePath}
+              index={index}
+              isActive={isActive}
+              onSelect={onSelectFile}
+              primaryAction={
+                <span className="flex shrink-0 items-center gap-1.5">
+                  <FileExtBadge filePath={file.filePath} />
+                  <StatusIndicator status={file.status} />
                 </span>
-                <span className="w-full truncate font-mono text-[0.6875rem] text-tech-main/60">
-                  {file.filePath || "PATH_NOT_SET"}
-                </span>
-                <span className="flex w-full flex-wrap items-center gap-2 font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
-                  <span>{file.changeType ?? "modified"}</span>
-                  <span>+{file.additions ?? 0}</span>
-                  <span>-{file.deletions ?? 0}</span>
-                </span>
-              </button>
-            </div>
+              }
+              className="ml-0">
+              <span className="flex w-full flex-wrap items-center gap-2 font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
+                <span>{file.changeType ?? "modified"}</span>
+                <span>+{file.additions ?? 0}</span>
+                <span>-{file.deletions ?? 0}</span>
+              </span>
+            </FileListItem>
           )
         })}
-      </div>
-    </aside>
+      </FileListContainer>
+    </FileListSidebar>
   )
 }

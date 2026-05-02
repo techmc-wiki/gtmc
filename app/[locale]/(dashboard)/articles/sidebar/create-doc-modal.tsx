@@ -5,6 +5,8 @@ import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { createDocument } from "@/actions/sidebar"
 import { getReauthLoginUrl, isReauthRequiredError } from "@/lib/admin-reauth"
+import { InputBox } from "@/components/ui/input-box"
+import { SegmentedControl } from "@/components/ui/segmented-control"
 import type { TreeNode } from "./tree-node"
 
 export function CreateDocModal({
@@ -84,7 +86,7 @@ export function CreateDocModal({
               ">
               {t("createDocTitleLabel")}
             </label>
-            <input
+            <InputBox
               id="modal-title"
               type="text"
               required
@@ -95,11 +97,6 @@ export function CreateDocModal({
                   title: e.target.value,
                 })
               }
-              className="
-                w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2
-                text-sm text-tech-main outline-none
-                focus:border-tech-main
-              "
               placeholder="e.g. Overview"
             />
           </div>
@@ -113,43 +110,35 @@ export function CreateDocModal({
               ">
               {t("createDocSlugLabel")}
             </label>
-            <input
+            <InputBox
               id="modal-slug"
               type="text"
               value={formData.slug}
               onChange={(e) =>
                 setFormData({ ...formData, slug: e.target.value })
               }
-              className="
-                w-full border border-tech-main/40 bg-tech-main/5 px-3 py-2
-                text-sm text-tech-main outline-none
-                focus:border-tech-main
-              "
               placeholder={t("createDocSlugPlaceholder")}
             />
           </div>
 
-          <div
-            className="
-              flex items-center gap-3 border guide-line bg-tech-main/5 px-3 py-2
-            ">
-            <input
-              type="checkbox"
-              id="isFolder"
-              checked={formData.isFolder}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  isFolder: e.target.checked,
-                })
-              }
-              className="size-4 accent-tech-main"
-            />
-            <label
-              htmlFor="isFolder"
-              className="cursor-pointer text-sm text-tech-main/80 select-none">
+          <div>
+            <label className="mb-1 block text-[0.6875rem] tracking-wider text-tech-main/80 uppercase">
               {t("createDocAsDirectory")}
             </label>
+            <SegmentedControl
+              options={[
+                { value: "doc", label: t("createDocTypeDocument") },
+                { value: "folder", label: t("createDocTypeFolder") },
+              ]}
+              value={formData.isFolder ? "folder" : "doc"}
+              onValueChange={(value) =>
+                setFormData({
+                  ...formData,
+                  isFolder: value === "folder",
+                })
+              }
+              size="sm"
+            />
           </div>
 
           <div>

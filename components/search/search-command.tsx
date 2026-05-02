@@ -1,19 +1,13 @@
 "use client"
 
 import * as React from "react"
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-  useSyncExternalStore,
-} from "react"
+import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { useRouter, usePathname } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/article-url"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { useMounted } from "@/hooks/use-mounted"
 
 interface SearchResult {
   title: string
@@ -22,16 +16,10 @@ interface SearchResult {
   matchType: "title" | "content"
 }
 
-const emptySubscribe = () => () => {}
-
 export function SearchCommand() {
   const t = useTranslations("Search")
   const [isOpen, setIsOpen] = useState(false)
-  const isMounted = useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false
-  )
+  const isMounted = useMounted()
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<SearchResult[]>([])
   const [isLoading, setIsLoading] = useState(false)

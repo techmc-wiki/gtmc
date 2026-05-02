@@ -14,8 +14,7 @@ import type { TreeNode } from "@/types/sidebar-tree"
 import { useTranslations } from "next-intl"
 import { ArticleTocRail } from "@/components/articles/article-toc-rail"
 import { MobileTocBar } from "@/components/articles/mobile-toc-bar"
-
-const emptySubscribe = () => () => {}
+import { useMounted } from "@/hooks/use-mounted"
 
 interface ArticlesLayoutProps {
   children: React.ReactNode
@@ -157,11 +156,7 @@ function SidebarTreeWrapper({
 
 export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const SIDEBAR_HIDDEN_KEY = "gtmc_sidebar_hidden"
-  const isMounted = React.useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false
-  )
+  const isMounted = useMounted()
   const [isOpen, setIsOpen] = useState(false)
   const [isStuck, setIsStuck] = useState(false)
   const [showFullText, setShowFullText] = useState(true)

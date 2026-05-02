@@ -39,11 +39,10 @@ import type {
   ReviewSessionState,
 } from "@/types/review"
 import type { RebaseState } from "@/types/rebase"
+import { useMounted } from "@/hooks/use-mounted"
 
 const CONFLICT_BLOCK_REGEX =
   /<<<<<<< draft\n([\s\S]*?)=======\n([\s\S]*?)>>>>>>> main\n?/g
-
-const emptySubscribe = () => () => {}
 
 type EditorSegment =
   | { type: "text"; id: string; content: string }
@@ -258,11 +257,7 @@ export function ReviewEditor({
   const conflictAutoScrollRef = React.useRef(false)
   const firstConflictAnchorRef = React.useRef<HTMLDivElement | null>(null)
   const lastConflictSignatureRef = React.useRef<string | null>(null)
-  const isMounted = React.useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false
-  )
+  const isMounted = useMounted()
 
   const textareaRef = React.useRef<any>(null)
 

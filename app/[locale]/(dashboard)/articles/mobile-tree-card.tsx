@@ -4,6 +4,7 @@ import * as React from "react"
 import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { useModalEffects } from "@/hooks/use-modal-effects"
 
 const emptySubscribe = () => () => {}
 
@@ -27,24 +28,7 @@ export function MobileTreeCard({
     () => false
   )
 
-  React.useEffect(() => {
-    if (!isOpen || !isFloating) return
-
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose()
-    }
-
-    document.addEventListener("keydown", handleEscape)
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape)
-      document.body.style.overflow = previousOverflow
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, onClose])
+  useModalEffects({ isOpen: isOpen && Boolean(isFloating), onClose })
 
   if (!isMounted || !isOpen || !isFloating) return null
 

@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
+import { useModalEffects } from "@/hooks/use-modal-effects"
 
 interface MobileTreeSheetProps {
   isOpen: boolean
@@ -16,23 +17,7 @@ export function MobileTreeSheet({
 }: MobileTreeSheetProps) {
   const t = useTranslations("CommonA11y")
 
-  React.useEffect(() => {
-    if (!isOpen) return
-
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose()
-    }
-
-    document.addEventListener("keydown", handleEscape)
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape)
-      document.body.style.overflow = previousOverflow
-    }
-  }, [isOpen, onClose])
+  useModalEffects({ isOpen, onClose })
 
   if (!isOpen) return null
 

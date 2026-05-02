@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Link } from "@/i18n/navigation"
 import { useSidebarContext } from "@/app/[locale]/(dashboard)/articles/sidebar/sidebar-context"
+import { useModalEffects } from "@/hooks/use-modal-effects"
 
 const emptySubscribe = () => () => {}
 
@@ -29,29 +30,14 @@ export function MobileTocBar() {
   const { toc, activeHeadingId } = useSidebarContext()
   const { hasScrolledPastNavbar, progress } = useScrollProgress()
   const [isSheetOpen, setIsSheetOpen] = React.useState(false)
+  const closeSheet = React.useCallback(() => setIsSheetOpen(false), [])
   const mounted = React.useSyncExternalStore(
     emptySubscribe,
     () => true,
     () => false
   )
 
-  React.useEffect(() => {
-    if (!isSheetOpen) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsSheetOpen(false)
-    }
-    document.addEventListener("keydown", onKey)
-    return () => document.removeEventListener("keydown", onKey)
-  }, [isSheetOpen])
-
-  React.useEffect(() => {
-    if (!isSheetOpen) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-    return () => {
-      document.body.style.overflow = prev
-    }
-  }, [isSheetOpen])
+  useModalEffects({ isOpen: isSheetOpen, onClose: closeSheet })
 
   if (!mounted || toc.length === 0) return null
 
@@ -92,7 +78,7 @@ export function MobileTocBar() {
           type="button"
           aria-label="Close table of contents"
           className={`absolute inset-0 w-full bg-black/20 backdrop-blur-xs transition-opacity duration-300 ${isSheetOpen ? "opacity-100" : "opacity-0"}`}
-          onClick={() => setIsSheetOpen(false)}
+          onClick={closeSheet}
         />
 
         {/* Sheet panel */}
@@ -121,7 +107,7 @@ export function MobileTocBar() {
 
             <button
               type="button"
-              onClick={() => setIsSheetOpen(false)}
+              onClick={closeSheet}
               className="cursor-pointer px-3 py-2 font-mono text-xs font-bold tracking-[0.15em] text-tech-main uppercase transition-colors hover:bg-tech-main/10"
               aria-label="Close table of contents"
             >
@@ -137,7 +123,7 @@ export function MobileTocBar() {
                 <li key={item.id}>
                   <Link
                     href={`#${item.id}`}
-                    onClick={() => setIsSheetOpen(false)}
+                    onClick={closeSheet}
                     className={`block border-l-[3px] py-2.5 pr-2 pl-4 text-sm/snug transition-all duration-200 ${isActive
                       ? "border-tech-main font-semibold text-tech-main"
                       : "border-transparent text-tech-main/60 hover:border-tech-main/30 hover:text-tech-main"

@@ -5,8 +5,7 @@ import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
-
-const emptySubscribe = () => () => {}
+import { useMounted } from "@/hooks/use-mounted"
 
 interface NavLink {
   href: string
@@ -20,11 +19,7 @@ interface MobileNavProps {
 export function MobileNav({ navLinks }: MobileNavProps) {
   const t = useTranslations("CommonA11y")
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
-  const isMounted = React.useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false
-  )
+  const isMounted = useMounted()
 
   return (
     <>

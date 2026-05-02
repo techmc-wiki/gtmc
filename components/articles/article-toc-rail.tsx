@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Link } from "@/i18n/navigation"
-import { useSidebarContext } from "@/app/[locale]/(dashboard)/articles/sidebar/sidebar-context"
+import { useSidebarContext } from "@/app/[locale]/(articles)/articles/sidebar/sidebar-context"
 
 function useScrollProgress() {
   const [progress, setProgress] = React.useState(0)

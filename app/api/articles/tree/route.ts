@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { getSidebarTree } from "@/actions/sidebar"
 
-const TREE_CACHE_CONTROL = "private, max-age=60, stale-while-revalidate=300"
+const TREE_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300"
 
 export async function GET() {
   try {

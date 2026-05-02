@@ -1,6 +1,5 @@
 import type { Root, Element, Text } from "hast"
 import { visit } from "unist-util-visit"
-import { getSingletonHighlighter } from "shiki"
 
 export type RehypeShikiPlugin = Awaited<ReturnType<typeof createRehypeShiki>>
 
@@ -28,6 +27,7 @@ function extractLangsFromMarkdown(content: string): string[] {
 
 export async function createRehypeShiki(langs?: string[]) {
   const langsToLoad = langs && langs.length > 0 ? langs : ["javascript"]
+  const { getSingletonHighlighter } = await import("shiki")
   const highlighter = await getSingletonHighlighter({
     themes: ["solarized-light"],
     langs: langsToLoad,

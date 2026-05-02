@@ -221,7 +221,6 @@ html {
       opacity: 0;
     }
   }
-
 }
 
 @theme inline {
@@ -382,16 +381,25 @@ body {
 
   &::-webkit-scrollbar-track {
     background: transparent;
-    border-right: 1px dashed color-mix(in oklab, var(--color-tech-main) 20%, transparent);
+    border-right: 1px dashed
+      color-mix(in oklab, var(--color-tech-main) 20%, transparent);
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: color-mix(in oklab, var(--color-tech-main) 40%, transparent);
+    background-color: color-mix(
+      in oklab,
+      var(--color-tech-main) 40%,
+      transparent
+    );
     border-radius: 0;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: color-mix(in oklab, var(--color-tech-main) 80%, transparent);
+    background-color: color-mix(
+      in oklab,
+      var(--color-tech-main) 80%,
+      transparent
+    );
   }
 }
 

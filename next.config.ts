@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["@prisma/client", "prisma"],
   turbopack: {
     resolveAlias: {
-      "../extensions/extensions.json": "./lib/schematic-renderer/extensions.json",
+      "../extensions/extensions.json":
+        "./lib/schematic-renderer/extensions.json",
     },
   },
   images: {

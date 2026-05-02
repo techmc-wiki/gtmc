@@ -26,12 +26,8 @@ function scanHeadings(): TocItem[] {
   return tocItems
 }
 
-function getInitialToc(): TocItem[] {
-  return typeof document !== "undefined" ? scanHeadings() : []
-}
-
 export function useToc(pathname: string): TocItem[] {
-  const [toc, setToc] = useState<TocItem[]>(getInitialToc)
+  const [toc, setToc] = useState<TocItem[]>([])
 
   useEffect(() => {
     if (typeof document === "undefined") return

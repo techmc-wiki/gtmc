@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback, useRef, useEffect } from "react"
+import Image from "next/image"
 
 interface LazyImageProps {
   src: string
@@ -41,11 +42,11 @@ export function LazyImage({ src, alt }: LazyImageProps) {
   }, [])
 
   return (
-    <div ref={containerRef} className="relative my-8 grid max-w-full">
+    <div ref={containerRef} className="relative my-8 aspect-video max-w-full">
       <div
         className={`
-          z-10 col-start-1 row-start-1 flex min-h-[200px] w-full flex-col border
-          border-tech-main/30 bg-tech-main/5 p-1 shadow-sm
+          absolute inset-0 z-10 flex flex-col border border-tech-main/30
+          bg-tech-main/5 p-1 shadow-sm
           ${
             status === "loaded"
               ? `
@@ -106,25 +107,29 @@ export function LazyImage({ src, alt }: LazyImageProps) {
         </div>
       </div>
 
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={shouldLoad ? src : undefined}
-        alt={alt}
-        onLoad={handleLoad}
-        onError={handleError}
-        className={`
-          z-0 col-start-1 row-start-1 h-auto max-w-full border
-          border-tech-main/30 bg-tech-main/5 p-1 shadow-sm
-          ${
-            status === "loaded"
-              ? `
-                animate-fade-in
-                motion-reduce:animate-none
-              `
-              : "opacity-0"
-          }
-        `}
-      />
+      {shouldLoad && (
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 900px"
+          onLoad={handleLoad}
+          onError={handleError}
+          className={`
+            border border-tech-main/30 bg-tech-main/5 object-contain p-1
+            shadow-sm
+            ${
+              status === "loaded"
+                ? `
+                  animate-fade-in
+                  motion-reduce:animate-none
+                `
+                : "opacity-0"
+            }
+          `}
+          unoptimized={src.includes("/api/assets")}
+        />
+      )}
     </div>
   )
 }

@@ -4,31 +4,35 @@ import { useCallback, useEffect, useRef, useState } from "react"
 
 const SIDEBAR_EXPANDED_KEY = "gtmc_sidebar_expanded"
 
+function getInitialExpandedFolders(): Set<string> {
+  if (typeof window === "undefined") return new Set<string>()
+  try {
+    const stored = localStorage.getItem(SIDEBAR_EXPANDED_KEY)
+    if (stored) {
+      return new Set<string>(JSON.parse(stored))
+    }
+  } catch {}
+  return new Set<string>()
+}
+
 export function useExpandedFolders() {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
-    () => new Set<string>()
+    getInitialExpandedFolders
   )
-  const [mounted, setMounted] = useState(false)
   const expandedFoldersRef = useRef(expandedFolders)
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(SIDEBAR_EXPANDED_KEY)
-      if (stored) {
-        setExpandedFolders(new Set<string>(JSON.parse(stored)))
-      }
-    } catch {}
-    setMounted(true)
-  }, [])
+  const isFirstRender = useRef(true)
 
   useEffect(() => {
     expandedFoldersRef.current = expandedFolders
-    if (!mounted) return
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
     localStorage.setItem(
       SIDEBAR_EXPANDED_KEY,
       JSON.stringify(Array.from(expandedFolders))
     )
-  }, [expandedFolders, mounted])
+  }, [expandedFolders])
 
   const isFolderExpanded = useCallback(
     (id: string) => {
@@ -41,7 +45,6 @@ export function useExpandedFolders() {
     expandedFolders,
     setExpandedFolders,
     expandedFoldersRef,
-    mounted,
     isFolderExpanded,
   }
 }

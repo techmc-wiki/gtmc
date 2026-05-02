@@ -14,6 +14,9 @@ import { getSiteUrl } from "@/lib/site-url"
 
 export const runtime = "nodejs"
 
+const OG_CACHE_CONTROL =
+  "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800"
+
 const W = 1200
 const H = 630
 const BANNER_H = Math.round(H * 0.4)
@@ -232,6 +235,11 @@ export async function GET(
         </div>
       </div>
     ),
-    { width: W, height: H, fonts }
+    {
+      width: W,
+      height: H,
+      fonts,
+      headers: { "Cache-Control": OG_CACHE_CONTROL },
+    }
   )
 }

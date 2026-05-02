@@ -6,7 +6,6 @@ import { shouldIgnoreFile } from "@/lib/article-ignore"
 import { encodeSlug } from "@/lib/slug-utils"
 import { getSidebarTree } from "@/actions/sidebar"
 
-export const dynamic = "force-dynamic"
 export const revalidate = 3600
 
 function flattenTree(

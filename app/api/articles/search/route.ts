@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { CJK_TOKENIZER, getSearchIndex } from "@/lib/search-index"
 
-const SEARCH_CACHE_CONTROL = "private, max-age=30, stale-while-revalidate=120"
+const SEARCH_CACHE_CONTROL = "public, max-age=30, stale-while-revalidate=120"
 
 interface SearchResult {
   title: string

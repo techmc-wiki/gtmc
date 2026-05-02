@@ -4,6 +4,7 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 import { TechButton } from "@/components/ui/tech-button"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { StatusDot } from "@/components/ui/status-dot"
 import { MergeMethodPicker } from "@/components/review/merge-method-picker"
 import {
   OperationProgress,
@@ -94,16 +95,18 @@ function CommitStepDots({
   )
 }
 
-function StatusDot({ status }: { status: string }) {
-  const color =
+function FileStatusDot({ status }: { status: string }) {
+  const variant =
     status === "conflict"
-      ? "bg-red-400"
-      : status === "resolved" || status === "completed"
-        ? "bg-green-500"
-        : status === "in_progress"
-          ? "bg-yellow-400"
-          : "bg-tech-main/30"
-  return <span className={`inline-block size-2 shrink-0 ${color}`} />
+      ? "conflict"
+      : status === "resolved"
+        ? "resolved"
+        : status === "completed"
+          ? "completed"
+          : status === "in_progress"
+            ? "in-progress"
+            : "clean"
+  return <StatusDot variant={variant} size="md" />
 }
 
 function CurrentCommitPanel({
@@ -155,7 +158,7 @@ function CurrentCommitPanel({
               <li
                 key={fs.filePath}
                 className="flex items-center gap-2 font-mono text-[0.6875rem] text-tech-main/70">
-                <StatusDot status={fs.status} />
+                <FileStatusDot status={fs.status} />
                 <span className="truncate">{fs.filePath}</span>
                 <span className="ml-auto shrink-0 tracking-widest text-tech-main/40 uppercase">
                   {fs.status.toUpperCase()}
@@ -503,7 +506,7 @@ function RebaseProgressContent({
             <li
               key={f.filePath}
               className="flex items-center gap-2 font-mono text-[0.6875rem] text-tech-main/70">
-              <StatusDot status={f.status} />
+              <FileStatusDot status={f.status} />
               <span className="truncate">{f.filePath}</span>
               <span className="ml-auto shrink-0 tracking-widest text-tech-main/40 uppercase">
                 {f.status.toUpperCase()}

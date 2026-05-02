@@ -8,6 +8,7 @@ import {
   ScanConfirmOverlay,
   SkeletonExitWrapper,
 } from "../loading-shell-primitives"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { TechCard } from "@/components/ui/tech-card"
 
 export default function FeatureDetailLoading() {
@@ -130,31 +131,7 @@ export default function FeatureDetailLoading() {
             [animation-delay:300ms]
             sm:p-6
           ">
-          <div
-            className="
-              pointer-events-none absolute top-0 left-0 size-2 -translate-px
-              border-t-2 border-l-2 border-tech-main/40
-            "
-          />
-          <div
-            className="
-              pointer-events-none absolute top-0 right-0 size-2 translate-x-px
-              -translate-y-px border-t-2 border-r-2 border-tech-main/40
-            "
-          />
-          <div
-            className="
-              pointer-events-none absolute bottom-0 left-0 size-2
-              -translate-x-px translate-y-px border-b-2 border-l-2
-              border-tech-main/40
-            "
-          />
-          <div
-            className="
-              pointer-events-none absolute right-0 bottom-0 size-2 translate-px
-              border-r-2 border-b-2 border-tech-main/40
-            "
-          />
+          <CornerBrackets size="size-2" color="border-tech-main/40" />
 
           <div className="flex flex-col space-y-4">
             <div className="flex flex-col space-y-2">

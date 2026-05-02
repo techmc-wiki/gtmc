@@ -1,6 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
+import { StatusDot } from "@/components/ui/status-dot"
 
 interface ReviewFileListProps {
   files: Array<{
@@ -21,30 +22,16 @@ function StatusIndicator({
   status: "clean" | "conflict" | "resolved"
 }) {
   const t = useTranslations("Review")
-  if (status === "conflict") {
-    return (
-      <span
-        role="img"
-        title={t("conflict")}
-        className="size-2 shrink-0 bg-red-500"
-      />
-    )
-  }
-  if (status === "resolved") {
-    return (
-      <span
-        role="img"
-        title={t("resolved")}
-        className="size-2 shrink-0 bg-green-500"
-      />
-    )
-  }
+  const variant =
+    status === "conflict"
+      ? "conflict"
+      : status === "resolved"
+        ? "resolved"
+        : "clean"
   return (
-    <span
-      role="img"
-      title={t("clean")}
-      className="size-2 shrink-0 bg-tech-main/20"
-    />
+    <span role="img" title={t(status)}>
+      <StatusDot variant={variant} size="md" />
+    </span>
   )
 }
 

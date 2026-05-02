@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server"
 import { ClosedPRList } from "./closed-pr-list"
 import { TechCard } from "@/components/ui/tech-card"
 import { TechButton } from "@/components/ui/tech-button"
+import { ReviewStatusBadge } from "@/components/ui/status-badge"
 import { Link } from "@/i18n/navigation"
 import { getClosedPRs, getOpenPRs, getPR } from "@/lib/github/pr-manager"
 import {
@@ -14,7 +15,6 @@ import { auth } from "@/lib/auth"
 import { getCurrentUserAuthContext } from "@/lib/auth-context"
 import { PageHeader } from "@/components/ui/page-header"
 import { EmptyState } from "@/components/ui/empty-state"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { prisma } from "@/lib/prisma"
 
 export const metadata: Metadata = {
@@ -195,54 +195,35 @@ export default async function ReviewHubPage() {
   const renderPRCard = (pr: PRWithConflictMode, isConflict: boolean) => (
     <TechCard
       key={pr.id}
-      className={`
+      tone={isConflict ? "danger" : "main"}
+      borderOpacity="muted"
+      background={isConflict ? "subtle" : "default"}
+      padding="default"
+      hover="elevated"
+      brackets="visible"
+      bracketVariant="hover"
+      className="
         group relative flex flex-col items-start justify-between space-y-4
-        border border-tech-main/40
-        ${isConflict ? `border-red-500/50 bg-red-500/10` : `bg-white/80`}
-        p-6 backdrop-blur-sm
         md:flex-row md:items-center md:space-y-0
-      `}>
-      <CornerBrackets variant="hover" />
-
+      ">
       <div className="relative z-10 flex-1">
         <div className="mb-3 flex items-center gap-3">
-          <span
-            className={`
-              border px-2 py-0.5 font-mono text-xs tracking-wider
-              ${
-                isConflict
-                  ? `border-red-500/40 bg-red-500/20 text-red-600`
-                  : `border-blue-500/40 bg-blue-500/10 text-blue-600`
-              }
-            `}>
-            [PR #{pr.number}]
-          </span>
+          <ReviewStatusBadge
+            variant={isConflict ? "pr" : "pr"}
+            prNumber={pr.number}
+          />
           <span className="mono-label">
             {new Date(pr.created_at).toLocaleString()}
           </span>
-          {isConflict && (
-            <span
-              className="
-                animate-pulse bg-red-500 px-2 py-0.5 text-xs font-bold
-                text-white
-              ">
-              {t("unresolvedConflicts")}
-            </span>
-          )}
+          {isConflict && <ReviewStatusBadge variant="conflict" />}
           {pr.conflictMode && (
-            <span
-              className={`
-                border px-2 py-0.5 font-mono text-[0.6875rem] tracking-widest uppercase
-                ${
-                  pr.conflictMode === "FINE_GRAINED"
-                    ? `border-blue-500/30 bg-blue-500/10 text-blue-700`
-                    : `border-tech-main/30 bg-tech-main/10 text-tech-main`
-                }
-              `}>
-              {pr.conflictMode === "FINE_GRAINED"
-                ? t("modeFineGrained")
-                : pr.conflictMode}
-            </span>
+            <ReviewStatusBadge
+              variant={
+                pr.conflictMode === "FINE_GRAINED"
+                  ? "conflict-mode-fine-grained"
+                  : "conflict-mode-simple"
+              }
+            />
           )}
         </div>
         <h3

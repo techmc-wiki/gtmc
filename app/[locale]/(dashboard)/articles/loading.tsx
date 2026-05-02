@@ -8,7 +8,8 @@ import {
   SectionRail,
   SegmentedBar,
   SkeletonExitWrapper,
-} from "../features/loading-shell-primitives"
+} from "@/components/ui/loading-shell-primitives"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 export default function ArticlesLoading() {
   const t = useTranslations("CommonA11y")
@@ -29,17 +30,10 @@ export default function ArticlesLoading() {
         aria-label={t("loadingArticleContent")}>
         <span className="sr-only">{t("loadingArticleContent")}</span>
         <div aria-hidden="true">
-          <div
-            className="
-              absolute top-0 left-0 size-4 border-t-2 border-l-2
-              border-tech-main/40
-            "
-          />
-          <div
-            className="
-              absolute right-0 bottom-0 size-4 border-r-2 border-b-2
-              border-tech-main/40
-            "
+          <CornerBrackets
+            size="size-4"
+            color="border-tech-main/40"
+            corners="diagonal-tlbr"
           />
 
           <SectionFrame

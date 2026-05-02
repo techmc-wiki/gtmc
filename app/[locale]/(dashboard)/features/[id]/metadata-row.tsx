@@ -1,3 +1,4 @@
+// @deprecated Use @/components/ui/metadata-row instead. Kept for feature detail page compatibility.
 import { cn } from "@/lib/cn"
 
 interface MetadataRowProps {

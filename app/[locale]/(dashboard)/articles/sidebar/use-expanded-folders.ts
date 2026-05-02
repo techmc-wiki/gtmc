@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 
+import { useMounted } from "@/hooks/use-mounted"
+
 const SIDEBAR_EXPANDED_KEY = "gtmc_sidebar_expanded"
 
 function getInitialExpandedFolders(): Set<string> {
@@ -16,6 +18,7 @@ function getInitialExpandedFolders(): Set<string> {
 }
 
 export function useExpandedFolders() {
+  const mounted = useMounted()
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     getInitialExpandedFolders
   )
@@ -42,6 +45,7 @@ export function useExpandedFolders() {
   )
 
   return {
+    mounted,
     expandedFolders,
     setExpandedFolders,
     expandedFoldersRef,

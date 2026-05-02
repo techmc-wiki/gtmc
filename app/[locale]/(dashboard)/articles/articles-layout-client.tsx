@@ -182,6 +182,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   })
   const desktopSidebarRef = useRef<SidebarClientHandle>(null)
   const floatingCardSidebarRef = useRef<SidebarClientHandle>(null)
+  const isStuckRef = useRef(false)
   const t = useTranslations("Sidebar")
   const tA11y = useTranslations("CommonA11y")
   const treeData = tree.length > 0 ? tree : fetchedTreeData
@@ -212,6 +213,11 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
     const handleScroll = () => {
       const currentlyStuck = window.scrollY > NAVBAR_HEIGHT
+      if (!isStuckRef.current && currentlyStuck) {
+        setIsOpen(false)
+      }
+
+      isStuckRef.current = currentlyStuck
       setIsStuck(currentlyStuck)
     }
 

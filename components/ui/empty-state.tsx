@@ -1,18 +1,31 @@
 import * as React from "react"
+import { TechCard } from "@/components/ui/tech-card"
+import { cn } from "@/lib/cn"
 
 interface EmptyStateProps {
   message: string
   colSpanFull?: boolean
+  className?: string
 }
 
-export function EmptyState({ message, colSpanFull = false }: EmptyStateProps) {
+export function EmptyState({
+  message,
+  colSpanFull = false,
+  className,
+}: EmptyStateProps) {
   return (
-    <div
-      className={`
-        group relative border border-dashed border-tech-main/40 bg-white/30
-        py-16 text-center backdrop-blur-sm
-        ${colSpanFull ? `col-span-full` : ``}
-      `}>
+    <TechCard
+      tone="main"
+      borderOpacity="muted"
+      background="ghost"
+      padding="spacious"
+      hover="none"
+      brackets="hidden"
+      className={cn(
+        "relative border-dashed py-16 text-center",
+        colSpanFull && "col-span-full",
+        className
+      )}>
       <div
         className="
           absolute inset-0
@@ -26,6 +39,6 @@ export function EmptyState({ message, colSpanFull = false }: EmptyStateProps) {
         ">
         {message}
       </h2>
-    </div>
+    </TechCard>
   )
 }

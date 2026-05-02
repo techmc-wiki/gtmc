@@ -9,8 +9,9 @@ import { FeatureStatusBadge } from "@/components/ui/status-badge"
 import { CardHeaderRow } from "@/components/ui/card-header-row"
 import { SectionTitle } from "@/components/ui/section-title"
 import { TagList } from "@/components/ui/tag-list"
-import { FilterButtonGroup } from "./filter-button-group"
+import { SegmentedControl } from "@/components/ui/segmented-control"
 import { StatusDot } from "@/components/ui/status-dot"
+import { EmptyState } from "@/components/ui/empty-state"
 
 interface Feature {
   id: string
@@ -110,31 +111,14 @@ export function FeatureList({ features }: { features: Feature[] }) {
                 href={`/features/${feature.id}`}
                 className="block">
                 <TechCard
-                  className="
-                    group relative flex h-auto flex-col justify-between border
-                    border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
-                    transition-colors
-                    hover:border-tech-main/60
-                    sm:h-64
-                  ">
-                  {/* Corner brackets */}
-                  <div
-                    className="
-                      absolute top-0 left-0 size-2 -translate-px border-t-2
-                      border-l-2 border-tech-main/40 opacity-0
-                      transition-opacity
-                      group-hover:opacity-100
-                    "
-                  />
-                  <div
-                    className="
-                      absolute right-0 bottom-0 size-2 translate-px border-r-2
-                      border-b-2 border-tech-main/40 opacity-0
-                      transition-opacity
-                      group-hover:opacity-100
-                    "
-                  />
-
+                  tone="main"
+                  borderOpacity="muted"
+                  background="default"
+                  padding="spacious"
+                  hover="border"
+                  brackets="visible"
+                  bracketVariant="hover-only"
+                  className="group relative flex h-auto flex-col justify-between sm:h-64">
                   <div className="relative z-10 flex h-full flex-col">
                     <CardHeaderRow
                       badge={<FeatureStatusBadge status={feature.status} />}
@@ -195,9 +179,10 @@ export function FeatureList({ features }: { features: Feature[] }) {
       {/* 过滤器 */}
       <RevealSection delay={0}>
         <TechCard
-          className="
-          border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
-        ">
+          tone="main"
+          borderOpacity="muted"
+          background="default"
+          padding="spacious">
           <div className="space-y-4">
             <div>
               <h4
@@ -207,7 +192,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                 ">
                 {t("filterByStatus")}
               </h4>
-              <FilterButtonGroup
+              <SegmentedControl
                 options={[
                   { label: t("filterAll"), value: "ALL" },
                   { label: tStatus("pending"), value: "UNRESOLVED" },
@@ -216,7 +201,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                   { label: tStatus("resolved"), value: "RESOLVED" },
                 ]}
                 value={statusFilter}
-                onChange={setStatusFilter}
+                onValueChange={setStatusFilter}
               />
             </div>
 
@@ -238,14 +223,14 @@ export function FeatureList({ features }: { features: Feature[] }) {
                       className={`
                         flex min-h-8 cursor-pointer items-center justify-center
                         border px-3 py-2 font-mono text-xs uppercase
-                        transition-all
+                        transition-all duration-200
                         ${
                           selectedTags.includes(tag)
                             ? "border-tech-accent bg-tech-accent text-white"
                             : `
                               border-tech-main/40 bg-tech-accent/5
                               text-tech-main
-                              hover:border-tech-main/60
+                              hover:border-tech-main/60 hover:bg-tech-accent/10
                             `
                         }
                       `}>
@@ -262,13 +247,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
       {/* List grouping display */}
       <div className="mt-8">
         {filteredFeatures.length === 0 ? (
-          <div
-            className="
-              border border-dashed border-tech-main/40 bg-white/30 py-16
-              text-center font-mono text-tech-main/50
-            ">
-            {t("listEmpty")}
-          </div>
+          <EmptyState message={t("listEmpty")} />
         ) : (
           <>
             {renderFeatureGroup(

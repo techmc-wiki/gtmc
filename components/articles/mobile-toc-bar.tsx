@@ -64,10 +64,10 @@ export function MobileTocBar() {
 
 
       {/* Progress strip — fixed just below sticky navbar */}
-      <div className={`fixed inset-x-0 top-16 z-49 h-20 transition-opacity duration-500 sm:hidden ${hasScrolledPastNavbar ? "opacity-100" : "pointer-events-none opacity-0"}`}>
+      <div className={`pointer-events-none fixed inset-x-0 top-16 z-20 h-20 transition-opacity duration-500 sm:hidden ${hasScrolledPastNavbar ? "opacity-100" : "opacity-0"}`}>
         {/* Section label — fixed right-aligned in navbar row */}
         {activeItem && (
-          <button type="button" className="flex h-fit w-full items-center px-4 py-2 pr-4 backdrop-blur-xs sm:hidden" aria-label="Open table of contents" onClick={() => setIsSheetOpen(true)}>
+          <button type="button" className="pointer-events-auto flex h-fit w-full items-center px-4 py-2 pr-4 backdrop-blur-xs sm:hidden" aria-label="Open table of contents" onClick={() => setIsSheetOpen(true)}>
             <div
               className="max-w-[40vw] truncate font-mono text-xs font-bold text-tech-main transition-colors duration-150 hover:text-tech-main"
             >

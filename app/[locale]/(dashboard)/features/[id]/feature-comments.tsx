@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl"
 import { addFeatureComment } from "@/actions/feature"
 import { TechButton } from "@/components/ui/tech-button"
 import { TechCard } from "@/components/ui/tech-card"
+import { TextAreaBox } from "@/components/ui/textarea-box"
 import { LoadingIndicator, PENDING_LABELS } from "../loading-indicator"
 
 interface Comment {
@@ -107,15 +108,9 @@ export function FeatureComments({
                 ">
                 {t("leaveReplyLabel")}
               </label>
-              <textarea
+              <TextAreaBox
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="
-                  min-h-25 w-full resize-y border border-tech-main/40
-                  bg-white/80 p-4 font-mono text-sm text-black
-                  placeholder-zinc-500 backdrop-blur-sm
-                  focus:border-tech-main/60 focus:ring-0 focus:outline-none
-                "
                 placeholder={t("commentPlaceholder")}
                 disabled={isPending}
               />

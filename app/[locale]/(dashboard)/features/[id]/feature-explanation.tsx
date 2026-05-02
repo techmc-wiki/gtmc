@@ -4,6 +4,7 @@ import { useState, useTransition } from "react"
 import { useTranslations } from "next-intl"
 import { TechCard } from "@/components/ui/tech-card"
 import { TechButton } from "@/components/ui/tech-button"
+import { TextAreaBox } from "@/components/ui/textarea-box"
 import { updateFeatureExplanation } from "@/actions/feature"
 import { LoadingIndicator, PENDING_LABELS } from "../loading-indicator"
 
@@ -41,7 +42,7 @@ export function FeatureExplanation({
 
   if (isEditing) {
     return (
-      <TechCard className="border-tech-accent/40 bg-white/80 backdrop-blur-sm">
+      <TechCard tone="accent" borderOpacity="muted" background="default">
         <h3
           className="
             mb-2 border-b border-tech-accent/40 pb-2 text-lg font-bold
@@ -49,13 +50,8 @@ export function FeatureExplanation({
           ">
           {t("editResolutionExplanation")}
         </h3>
-        <textarea
-          className="
-            mb-4 min-h-30 w-full resize-y border border-tech-accent/40
-            bg-white/80 p-4 font-mono text-sm text-black placeholder-zinc-500
-            backdrop-blur-sm
-            focus:border-tech-accent/60 focus:ring-0 focus:outline-none
-          "
+        <TextAreaBox
+          className="mb-4"
           value={explanation}
           onChange={(e) => setExplanation(e.target.value)}
           placeholder={t("explanationPlaceholder")}
@@ -94,10 +90,10 @@ export function FeatureExplanation({
   if (initialExplanation) {
     return (
       <TechCard
-        className="
-          group relative overflow-hidden border-tech-accent/40 bg-tech-accent/5
-          backdrop-blur-sm
-        ">
+        tone="accent"
+        borderOpacity="muted"
+        background="subtle"
+        className="group relative overflow-hidden">
         <div className="absolute top-0 left-0 h-full w-2 bg-tech-accent/60" />
         <div
           className="
@@ -131,9 +127,10 @@ export function FeatureExplanation({
   // NO explanation yet, but user CAN edit
   return (
     <TechCard
-      className="
-        border-dashed border-tech-accent/40 bg-white/40 py-6 text-center
-      ">
+      tone="accent"
+      borderOpacity="muted"
+      background="ghost"
+      className="border-dashed py-6 text-center">
       <div className="flex flex-col items-center gap-3 text-tech-accent/80">
         <span className="font-mono text-sm tracking-wider uppercase">
           AWAITING_OFFICIAL_RESOLUTION_

@@ -9,7 +9,7 @@ import { updateProfileAction } from "@/actions/profile"
 import { SignOutButton } from "@/components/ui/sign-out-button"
 import { getGithubEmailVisibility } from "@/lib/github"
 import { FormField } from "./form-field"
-import { MetadataRow } from "../features/[id]/metadata-row"
+import { MetadataRow } from "@/components/ui/metadata-row"
 import { StatusDot } from "@/components/ui/status-dot"
 
 export const metadata: Metadata = {

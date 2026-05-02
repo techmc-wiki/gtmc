@@ -10,7 +10,6 @@ import { getPR } from "@/lib/github/pr-manager"
 import { PageHeader } from "@/components/ui/page-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { DraftStatusBadge } from "@/components/ui/status-badge"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { SectionTitle } from "@/components/ui/section-title"
 import { decodeStoredDraftFiles } from "@/lib/draft-files"
 import { countCleanupFailedByRevision } from "@/lib/draft-asset-db"
@@ -98,18 +97,15 @@ export default async function DraftDashboardPage() {
   const renderDraftCard = (draft: (typeof allDrafts)[0]) => (
     <TechCard
       key={draft.id}
-      className="
-        group relative flex h-auto flex-col justify-between border
-        border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
-        transition-all duration-300 hover:border-tech-main hover:bg-white
-        hover:shadow-[0_0_20px_rgb(var(--color-tech-main)/0.15)] sm:h-64
-      ">
-      {/* Corner brackets */}
-      <CornerBrackets variant="hover" />
-
-      {/* Blueprint Grid Background Pattern on Hover */}
-      <div className="absolute inset-0 z-0 bg-[url('/bg-grid.svg')] bg-size-[24px_24px] opacity-0 transition-opacity duration-500 group-hover:opacity-[0.03]" />
-
+      tone="main"
+      borderOpacity="muted"
+      background="default"
+      padding="spacious"
+      hover="elevated"
+      brackets="visible"
+      bracketVariant="hover"
+      pattern="grid"
+      className="group relative flex h-auto flex-col justify-between sm:h-64">
       <div className="relative z-10">
         <div className="card-header-row border-b border-tech-main/10 pb-3">
           <div className="flex items-center gap-3">
@@ -124,7 +120,7 @@ export default async function DraftDashboardPage() {
             ) : null}
           </div>
           <div className="flex flex-col items-end gap-1">
-            <span className="font-mono text-[10px] tracking-widest text-tech-main/50 uppercase">
+            <span className="mono-label text-tech-main/50">
               LAST_SYNC // {draft.updatedAt.toLocaleDateString()}
             </span>
             {!NON_DELETABLE_DRAFT_STATUSES.has(draft.displayStatus) && (
@@ -136,10 +132,10 @@ export default async function DraftDashboardPage() {
                 <button
                   type="submit"
                   className="
-                      flex cursor-pointer items-center font-mono
-                      text-[10px] text-red-500/70 uppercase transition-colors
-                      hover:text-red-600 hover:underline
-                    ">
+                    flex cursor-pointer items-center font-mono
+                    text-[10px] text-red-500/70 uppercase transition-colors
+                    hover:text-red-600 hover:underline
+                  ">
                   [ TERMINATE ]
                 </button>
               </form>
@@ -159,17 +155,13 @@ export default async function DraftDashboardPage() {
 
           <div className="mt-2 grid grid-cols-2 gap-2 border-t border-tech-main/10 pt-3">
             <div className="flex flex-col">
-              <span className="font-mono text-[9px] tracking-widest text-tech-main/40 uppercase">
-                SYS_REF
-              </span>
+              <span className="mono-label text-tech-main/40">SYS_REF</span>
               <span className="truncate font-mono text-xs text-tech-main/80">
                 {draft.id.split("-")[0]}
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="font-mono text-[9px] tracking-widest text-tech-main/40 uppercase">
-                FILE_METRICS
-              </span>
+              <span className="mono-label text-tech-main/40">FILE_METRICS</span>
               <span className="font-mono text-xs text-tech-main/80">
                 {draft.fileCount} NODE(S)
               </span>

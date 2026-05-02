@@ -21,43 +21,61 @@ function getAllowedRemotePathAndQuery(urlString: string): string | null {
       return null
     }
 
-    const parsed = new URL(urlString)
+    // Only allow same-origin absolute URLs or root-relative paths.
+    let pathname = ""
+    let search = ""
 
-    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-      return null
-    }
+    if (urlString.startsWith("http://") || urlString.startsWith("https://")) {
+      const parsed = new URL(urlString)
 
-    const parsedPort =
-      parsed.port ||
-      (parsed.protocol === "https:"
-        ? "443"
-        : parsed.protocol === "http:"
-          ? "80"
-          : "")
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+        return null
+      }
 
-    const sitePort =
-      SITE_ORIGIN.port ||
-      (SITE_ORIGIN.protocol === "https:"
-        ? "443"
-        : SITE_ORIGIN.protocol === "http:"
-          ? "80"
-          : "")
+      const parsedPort =
+        parsed.port ||
+        (parsed.protocol === "https:"
+          ? "443"
+          : parsed.protocol === "http:"
+            ? "80"
+            : "")
 
-    if (
-      parsed.protocol !== SITE_ORIGIN.protocol ||
-      parsed.hostname !== SITE_ORIGIN.hostname ||
-      parsedPort !== sitePort
-    ) {
-      return null
+      const sitePort =
+        SITE_ORIGIN.port ||
+        (SITE_ORIGIN.protocol === "https:"
+          ? "443"
+          : SITE_ORIGIN.protocol === "http:"
+            ? "80"
+            : "")
+
+      if (
+        parsed.protocol !== SITE_ORIGIN.protocol ||
+        parsed.hostname !== SITE_ORIGIN.hostname ||
+        parsedPort !== sitePort
+      ) {
+        return null
+      }
+
+      pathname = parsed.pathname
+      search = parsed.search
+    } else {
+      // Disallow protocol-relative URLs and require root-relative path input.
+      if (urlString.startsWith("//") || !urlString.startsWith("/")) {
+        return null
+      }
+
+      const parsedRelative = new URL(urlString, SITE_ORIGIN)
+      pathname = parsedRelative.pathname
+      search = parsedRelative.search
     }
 
     // Reject traversal-style path segments, including encoded forms.
-    const decodedPath = decodeURIComponent(parsed.pathname)
+    const decodedPath = decodeURIComponent(pathname)
     if (decodedPath.split("/").some((segment) => segment === "..")) {
       return null
     }
 
-    return parsed.pathname + parsed.search
+    return pathname + search
   } catch {
     return null
   }

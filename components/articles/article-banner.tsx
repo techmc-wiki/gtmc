@@ -17,6 +17,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
   const [hovered, setHovered] = useState(false)
   const [locked, setLocked] = useState(false)
   const [flashing, setFlashing] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
   const [offset, setOffset] = useState({ x: 0, y: 0 })
   const rafIdRef = useRef<number | null>(null)
@@ -178,7 +179,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
           ref={imgRef}
           role="img"
           aria-label={alt}
-          className="relative aspect-21/9 w-full overflow-hidden"
+          className={`relative aspect-21/9 w-full overflow-hidden ${imageError ? "hidden" : ""}`}
           onMouseEnter={() => {
             setHovered(true)
             handleFirstHover()
@@ -213,6 +214,8 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
                   : "transform 200ms linear, filter 700ms cubic-bezier(0.16,1,0.3,1)",
             }}
             priority
+            unoptimized={src.includes("/api/assets")}
+            onError={() => setImageError(true)}
           />
 
           {/* Blueprint grid overlay */}

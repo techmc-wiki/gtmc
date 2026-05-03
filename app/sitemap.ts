@@ -88,7 +88,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           priority: 0.8,
         },
       ])
-  } catch {
+  } catch (error) {
+    console.warn("Sitemap: skipped article URLs due to tree error:", error)
     /* Sidebar tree unavailable — skip articles */
   }
 
@@ -109,7 +110,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.5,
       },
     ])
-  } catch {
+  } catch (error) {
+    console.warn("Sitemap: skipped feature URLs due to GitHub error:", error)
     /* GitHub API unavailable — skip */
   }
 

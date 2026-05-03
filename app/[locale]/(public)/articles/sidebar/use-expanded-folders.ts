@@ -6,25 +6,25 @@ import { useMounted } from "@/hooks/use-mounted"
 
 const SIDEBAR_EXPANDED_KEY = "gtmc_sidebar_expanded"
 
-function getInitialExpandedFolders(): Set<string> {
-  if (typeof window === "undefined") return new Set<string>()
-  try {
-    const stored = localStorage.getItem(SIDEBAR_EXPANDED_KEY)
-    if (stored) {
-      return new Set<string>(JSON.parse(stored))
-    }
-  } catch {}
-  return new Set<string>()
-}
-
 export function useExpandedFolders() {
   const mounted = useMounted()
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
-    getInitialExpandedFolders
+    () => new Set<string>()
   )
   const expandedFoldersRef = useRef(expandedFolders)
   const isFirstRender = useRef(true)
 
+  // Hydrate from localStorage after mount (avoids SSR/client mismatch)
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(SIDEBAR_EXPANDED_KEY)
+      if (stored) {
+        setExpandedFolders(new Set<string>(JSON.parse(stored)))
+      }
+    } catch {}
+  }, [])
+
+  // Persist to localStorage on subsequent state changes
   useEffect(() => {
     expandedFoldersRef.current = expandedFolders
     if (isFirstRender.current) {

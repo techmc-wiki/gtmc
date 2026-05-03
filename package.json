@@ -69,7 +69,7 @@
     "strip-markdown": "^6.0.0",
     "tailwind-merge": "^3.5.0",
     "three": "^0.184.0",
-    "undici": "^8.1.0",
+    "undici": "^8.2.0",
     "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {

@@ -32,8 +32,8 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { data: [], error: message, locale },
-      { status: 200, headers: { "Cache-Control": TREE_CACHE_CONTROL } }
+      { error: message, locale },
+      { status: 500, headers: { "Cache-Control": "no-store" } }
     )
   }
 }

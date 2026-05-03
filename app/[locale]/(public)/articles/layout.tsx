@@ -1,4 +1,5 @@
 import * as React from "react"
+import { getTranslations } from "next-intl/server"
 import { DesktopNav } from "@/components/layout/desktop-nav"
 import { MobileNav } from "@/components/layout/mobile-nav"
 import { SiteShell } from "@/components/layout/site-shell"
@@ -7,12 +8,6 @@ import { AuthIsland } from "@/components/layout/auth-island"
 import { ArticlesLayoutClient } from "./articles-layout-client"
 import { getPublicSidebarTree } from "@/lib/articles/public-tree"
 import type { ArticleLocale } from "@/lib/article-loader"
-
-const navLinks = [
-  { href: "/articles", label: "ARTICLES" },
-  { href: "/draft", label: "DRAFTS" },
-  { href: "/features", label: "FEATURES" },
-]
 
 function normalizeLocale(locale: string): ArticleLocale {
   return locale === "en" ? "en" : "zh"
@@ -26,6 +21,12 @@ export default async function ArticlesLayout({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const t = await getTranslations("Nav")
+  const navLinks = [
+    { href: "/articles", label: t("articles") },
+    { href: "/draft", label: t("drafts") },
+    { href: "/features", label: t("features") },
+  ]
   const normalizedLocale = normalizeLocale(locale)
   const tree = await getPublicSidebarTree(normalizedLocale)
 

@@ -1,7 +1,7 @@
 import fs from "fs"
 import path from "path"
 import { type ArticleTreeNode } from "./github-repo-client"
-import { type SlugMapEntry } from "./slug-resolver"
+import { slugMap, type SlugMapEntry } from "./slug-resolver"
 
 export type ArticleLocale = "en" | "zh"
 
@@ -12,61 +12,6 @@ export interface LocalizedArticleMetadata {
 
 const ARTICLES_DIR = path.join(process.cwd(), "articles")
 const SUBMODULE_GIT = path.join(ARTICLES_DIR, ".git")
-const SLUG_MAP_PATH = path.join(__dirname, "slug-map.json")
-
-const slugMap: Record<string, SlugMapEntry> = (() => {
-  try {
-    const raw = fs.readFileSync(SLUG_MAP_PATH, "utf-8")
-    const parsed = JSON.parse(raw) as Record<string, unknown>
-    const normalized: Record<string, SlugMapEntry> = {}
-
-    for (const [slugKey, value] of Object.entries(parsed)) {
-      if (typeof value !== "object" || value === null) continue
-
-      const entry = value as Partial<SlugMapEntry>
-      if (typeof entry.filePath !== "string") continue
-
-      normalized[slugKey] = {
-        filePath: entry.filePath,
-        slug: typeof entry.slug === "string" ? entry.slug : slugKey,
-        title: typeof entry.title === "string" ? entry.title : undefined,
-        chapterTitle:
-          typeof entry.chapterTitle === "string" ? entry.chapterTitle : "",
-        chapterTitleEn:
-          typeof entry.chapterTitleEn === "string" ? entry.chapterTitleEn : "",
-        introTitle:
-          typeof entry.introTitle === "string" ? entry.introTitle : "",
-        introTitleEn:
-          typeof entry.introTitleEn === "string" ? entry.introTitleEn : "",
-        hasIntro:
-          typeof entry.hasIntro === "boolean"
-            ? entry.hasIntro
-            : (typeof entry.introTitle === "string" &&
-                entry.introTitle !== "") ||
-              (typeof entry.introTitleEn === "string" &&
-                entry.introTitleEn !== ""),
-        index: typeof entry.index === "number" ? entry.index : 0,
-        isFolder: entry.isFolder === true,
-        isAppendix: entry.isAppendix === true,
-        isPreface: entry.isPreface === true,
-        parentSlug:
-          typeof entry.parentSlug === "string" ? entry.parentSlug : undefined,
-        children: Array.isArray(entry.children)
-          ? (entry.children as SlugMapEntry[])
-          : undefined,
-        author: typeof entry.author === "string" ? entry.author : undefined,
-        coAuthors: Array.isArray(entry.coAuthors) ? entry.coAuthors : undefined,
-        date: typeof entry.date === "string" ? entry.date : undefined,
-        lastmod: typeof entry.lastmod === "string" ? entry.lastmod : undefined,
-        isAdvanced: entry.isAdvanced === true,
-      }
-    }
-
-    return normalized
-  } catch {
-    return {}
-  }
-})()
 
 export function isSubmoduleAvailable(): boolean {
   return fs.existsSync(SUBMODULE_GIT)
@@ -98,24 +43,22 @@ const localTreeCache = new Map<ArticleLocale, ArticleTreeNode[]>()
 export async function getArticleTree(
   locale: ArticleLocale = "zh"
 ): Promise<ArticleTreeNode[]> {
-  if (isSubmoduleAvailable()) {
-    const cached = localTreeCache.get(locale)
-    if (cached) return cached
-    try {
-      const tree = buildLocalTree(locale)
-      localTreeCache.set(locale, tree)
-      return tree
-    } catch {
-      if (process.env.NODE_ENV === "development") {
-        console.warn(
-          "[article-loader] Failed to build local tree, falling back to API"
-        )
-      }
+  const cached = localTreeCache.get(locale)
+  if (cached) return cached
+
+  try {
+    const tree = buildLocalTree(locale)
+    localTreeCache.set(locale, tree)
+    return tree
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn(
+        "[article-loader] Failed to build local tree from slug map",
+        error
+      )
     }
   }
-  if (process.env.NODE_ENV === "development" && !isSubmoduleAvailable()) {
-    console.warn("[article-loader] Submodule not available, using API for tree")
-  }
+
   return []
 }
 

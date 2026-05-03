@@ -1,7 +1,12 @@
 import fs from "fs"
 import path from "path"
 
-const SLUG_MAP_PATH = path.join(process.cwd(), "lib", "slug-map.json")
+// Keep this path module-relative so Next.js production bundles and server code
+// resolve the generated JSON next to the compiled resolver instead of cwd.
+export const SLUG_MAP_PATH = path.join(__dirname, "slug-map.json")
+// Turbopack can rewrite __dirname to /ROOT inside server chunks during build;
+// fall back to the generated source file path used by page-data collection.
+const SLUG_MAP_FALLBACK_PATH = path.join(process.cwd(), "lib", "slug-map.json")
 const ARTICLES_DIR = path.join(process.cwd(), "articles")
 
 export interface SlugMapEntry {
@@ -26,13 +31,105 @@ export interface SlugMapEntry {
   isAdvanced?: boolean
 }
 
-// Load at module initialization
-let slugMap: Record<string, SlugMapEntry> = {}
-try {
-  slugMap = JSON.parse(fs.readFileSync(SLUG_MAP_PATH, "utf-8"))
-} catch {
-  // File doesn't exist yet — that's ok
+export function loadSlugMap(): Record<string, SlugMapEntry> {
+  const paths = [SLUG_MAP_PATH, SLUG_MAP_FALLBACK_PATH]
+  let lastMissingError: unknown = null
+
+  for (const slugMapPath of paths) {
+    let raw: string
+
+    try {
+      raw = fs.readFileSync(slugMapPath, "utf-8")
+    } catch (error) {
+      if (isNodeMissingFileError(error)) {
+        lastMissingError = error
+        continue
+      }
+
+      throw new Error(`[slug-resolver] Failed to read slug map: ${slugMapPath}`, {
+        cause: error,
+      })
+    }
+
+    return parseSlugMap(raw, slugMapPath)
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    console.warn(`[slug-resolver] Missing slug map: ${paths.join(" or ")}`)
+    return {}
+  }
+
+  throw new Error(`[slug-resolver] Failed to load slug map: ${paths.join(" or ")}`, {
+    cause: lastMissingError,
+  })
 }
+
+function parseSlugMap(
+  raw: string,
+  slugMapPath: string
+): Record<string, SlugMapEntry> {
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>
+    const normalized: Record<string, SlugMapEntry> = {}
+
+    for (const [slugKey, value] of Object.entries(parsed)) {
+      if (typeof value !== "object" || value === null) continue
+
+      const entry = value as Partial<SlugMapEntry>
+      if (typeof entry.filePath !== "string") continue
+
+      normalized[slugKey] = {
+        filePath: entry.filePath,
+        slug: typeof entry.slug === "string" ? entry.slug : slugKey,
+        title: typeof entry.title === "string" ? entry.title : undefined,
+        chapterTitle:
+          typeof entry.chapterTitle === "string" ? entry.chapterTitle : "",
+        chapterTitleEn:
+          typeof entry.chapterTitleEn === "string" ? entry.chapterTitleEn : "",
+        introTitle: typeof entry.introTitle === "string" ? entry.introTitle : "",
+        introTitleEn:
+          typeof entry.introTitleEn === "string" ? entry.introTitleEn : "",
+        hasIntro:
+          typeof entry.hasIntro === "boolean"
+            ? entry.hasIntro
+            : (typeof entry.introTitle === "string" && entry.introTitle !== "") ||
+              (typeof entry.introTitleEn === "string" &&
+                entry.introTitleEn !== ""),
+        index: typeof entry.index === "number" ? entry.index : 0,
+        isFolder: entry.isFolder === true,
+        isAppendix: entry.isAppendix === true,
+        isPreface: entry.isPreface === true,
+        children: Array.isArray(entry.children)
+          ? (entry.children as SlugMapEntry[])
+          : undefined,
+        parentSlug:
+          typeof entry.parentSlug === "string" ? entry.parentSlug : undefined,
+        author: typeof entry.author === "string" ? entry.author : undefined,
+        coAuthors: Array.isArray(entry.coAuthors) ? entry.coAuthors : undefined,
+        date: typeof entry.date === "string" ? entry.date : undefined,
+        lastmod: typeof entry.lastmod === "string" ? entry.lastmod : undefined,
+        isAdvanced: entry.isAdvanced === true,
+      }
+    }
+
+    return normalized
+  } catch (error) {
+    throw new Error(`[slug-resolver] Failed to parse slug map: ${slugMapPath}`, {
+      cause: error,
+    })
+  }
+}
+
+function isNodeMissingFileError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "ENOENT"
+  )
+}
+
+export const slugMap: Record<string, SlugMapEntry> = loadSlugMap()
 
 const filePathToSlugKey: Record<string, string> = (() => {
   const inverted: Record<string, string> = {}

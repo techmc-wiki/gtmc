@@ -5,6 +5,8 @@ import { SiteShell } from "@/components/layout/site-shell"
 import { Logo } from "@/components/ui/logo"
 import { AuthIsland } from "@/components/layout/auth-island"
 import { ArticlesLayoutClient } from "./articles-layout-client"
+import { getPublicSidebarTree } from "@/lib/articles/public-tree"
+import type { ArticleLocale } from "@/lib/article-loader"
 
 const navLinks = [
   { href: "/articles", label: "ARTICLES" },
@@ -12,11 +14,21 @@ const navLinks = [
   { href: "/features", label: "FEATURES" },
 ]
 
-export default function ArticlesLayout({
+function normalizeLocale(locale: string): ArticleLocale {
+  return locale === "en" ? "en" : "zh"
+}
+
+export default async function ArticlesLayout({
   children,
+  params,
 }: {
   children: React.ReactNode
+  params: Promise<{ locale: string }>
 }) {
+  const { locale } = await params
+  const normalizedLocale = normalizeLocale(locale)
+  const tree = await getPublicSidebarTree(normalizedLocale)
+
   return (
     <SiteShell
       leftSlot={
@@ -27,7 +39,7 @@ export default function ArticlesLayout({
         </>
       }
       rightSlot={<AuthIsland />}>
-      <ArticlesLayoutClient tree={[]}>{children}</ArticlesLayoutClient>
+      <ArticlesLayoutClient tree={tree}>{children}</ArticlesLayoutClient>
     </SiteShell>
   )
 }

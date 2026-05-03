@@ -1,10 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { useMemo, useImperativeHandle } from "react"
-import { usePathname, useRouter } from "@/i18n/navigation"
+import { useImperativeHandle } from "react"
+import { usePathname } from "@/i18n/navigation"
 import { SidebarActions } from "./sidebar/actions"
-import { CreateDocModal } from "./sidebar/create-doc-modal"
 import { SidebarTree, type TreeNode } from "./sidebar/tree-node"
 import { useBlur } from "./sidebar/use-blur"
 import { useSidebarContext } from "./sidebar/sidebar-context"
@@ -22,18 +21,6 @@ interface SidebarClientProps {
   internalScroll?: boolean
   scrollClass?: string
   hideActions?: boolean
-}
-
-function flattenFolders(items: TreeNode[]): TreeNode[] {
-  let folders: TreeNode[] = []
-  items.forEach((item) => {
-    if (item.isFolder) {
-      folders.push(item)
-      if (item.children)
-        folders = [...folders, ...flattenFolders(item.children)]
-    }
-  })
-  return folders
 }
 
 export const SidebarClient = React.forwardRef<
@@ -69,9 +56,7 @@ const SidebarClientInner = React.forwardRef<
   { onNavigate, internalScroll = false, scrollClass = "", hideActions = false },
   ref
 ) {
-  const router = useRouter()
   const pathname = usePathname()
-  const [isModalOpen, setIsModalOpen] = React.useState(false)
 
   const {
     tree,
@@ -124,12 +109,10 @@ const SidebarClientInner = React.forwardRef<
   })
 
   useImperativeHandle(ref, () => ({
-    openCreateModal: () => setIsModalOpen(true),
+    openCreateModal: () => {},
     collapseAll,
     scrollToCurrent,
   }))
-
-  const availableFolders = useMemo(() => flattenFolders(tree), [tree])
 
   const treeContent =
     tree.length === 0 ? (
@@ -190,14 +173,6 @@ const SidebarClientInner = React.forwardRef<
           {treeContent}
         </>
       )}
-
-      <CreateDocModal
-        open={isModalOpen}
-        mounted={mounted}
-        availableFolders={availableFolders}
-        onClose={() => setIsModalOpen(false)}
-        onCreated={() => router.refresh()}
-      />
     </>
   )
 })

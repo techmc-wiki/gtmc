@@ -4,12 +4,12 @@ import { listAllIssues } from "@/lib/github"
 import { getSiteUrl } from "@/lib/site-url"
 import { shouldIgnoreFile } from "@/lib/article-ignore"
 import { encodeSlug } from "@/lib/slug-utils"
-import { getSidebarTree } from "@/actions/sidebar"
+import { getPublicSidebarTree } from "@/lib/articles/public-tree"
 
 export const revalidate = 3600
 
 function flattenTree(
-  nodes: Awaited<ReturnType<typeof getSidebarTree>>
+  nodes: Awaited<ReturnType<typeof getPublicSidebarTree>>
 ): string[] {
   const slugs: string[] = []
   for (const node of nodes) {
@@ -67,7 +67,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let articleUrls: MetadataRoute.Sitemap = []
   try {
-    const tree = await getSidebarTree()
+    const tree = await getPublicSidebarTree()
     const slugs = flattenTree(tree)
     articleUrls = slugs
       .filter((slug) => {

@@ -1,7 +1,7 @@
 import MiniSearch from "minisearch"
 import { remark } from "remark"
 import stripMarkdownPlugin from "strip-markdown"
-import { getSidebarTree } from "@/actions/sidebar"
+import { getPublicSidebarTree } from "@/lib/articles/public-tree"
 import {
   getOctokit,
   ARTICLES_REPO_OWNER,
@@ -89,7 +89,7 @@ function createMiniSearchIndex(
 }
 
 async function buildIndex(): Promise<MiniSearch<IndexedArticle>> {
-  const tree = await getSidebarTree()
+  const tree = await getPublicSidebarTree()
 
   const articles: IndexedArticle[] = []
 

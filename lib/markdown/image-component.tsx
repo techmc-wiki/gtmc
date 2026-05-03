@@ -1,14 +1,16 @@
 import path from "path"
 import { LazyImage } from "@/components/lazy-image"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
+import { hasExplicitUrlScheme } from "./url-utils"
 
 export function createImageComponent(rawPath: string) {
   function ImageComponent({ src: initialSrc, alt }: MarkdownComponentProps) {
     let src = (initialSrc as string) || ""
     if (
-      src.startsWith("./") ||
-      src.startsWith("../") ||
-      (!src.startsWith("http") && !src.startsWith("/"))
+      !hasExplicitUrlScheme(src) &&
+      (src.startsWith("./") ||
+       src.startsWith("../") ||
+       (!src.startsWith("http") && !src.startsWith("/")))
     ) {
       const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
       const resolved = path.join(currentDir, src).replace(/\\/g, "/")

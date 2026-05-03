@@ -2,6 +2,7 @@ import { Link } from "@/i18n/navigation"
 import path from "path"
 import { articleUrl } from "@/lib/article-url"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
+import { hasExplicitUrlScheme } from "./url-utils"
 
 function resolveHref(initialHref: string, rawPath: string): string {
   let href = initialHref
@@ -13,6 +14,8 @@ function resolveHref(initialHref: string, rawPath: string): string {
     } catch {
       return href
     }
+  } else if (hasExplicitUrlScheme(href)) {
+    return href
   } else if (
     !href.startsWith("http") &&
     !href.startsWith("#") &&

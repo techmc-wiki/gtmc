@@ -46,9 +46,12 @@ export function loadSlugMap(): Record<string, SlugMapEntry> {
         continue
       }
 
-      throw new Error(`[slug-resolver] Failed to read slug map: ${slugMapPath}`, {
-        cause: error,
-      })
+      throw new Error(
+        `[slug-resolver] Failed to read slug map: ${slugMapPath}`,
+        {
+          cause: error,
+        }
+      )
     }
 
     return parseSlugMap(raw, slugMapPath)
@@ -59,9 +62,12 @@ export function loadSlugMap(): Record<string, SlugMapEntry> {
     return {}
   }
 
-  throw new Error(`[slug-resolver] Failed to load slug map: ${paths.join(" or ")}`, {
-    cause: lastMissingError,
-  })
+  throw new Error(
+    `[slug-resolver] Failed to load slug map: ${paths.join(" or ")}`,
+    {
+      cause: lastMissingError,
+    }
+  )
 }
 
 function parseSlugMap(
@@ -86,13 +92,15 @@ function parseSlugMap(
           typeof entry.chapterTitle === "string" ? entry.chapterTitle : "",
         chapterTitleEn:
           typeof entry.chapterTitleEn === "string" ? entry.chapterTitleEn : "",
-        introTitle: typeof entry.introTitle === "string" ? entry.introTitle : "",
+        introTitle:
+          typeof entry.introTitle === "string" ? entry.introTitle : "",
         introTitleEn:
           typeof entry.introTitleEn === "string" ? entry.introTitleEn : "",
         hasIntro:
           typeof entry.hasIntro === "boolean"
             ? entry.hasIntro
-            : (typeof entry.introTitle === "string" && entry.introTitle !== "") ||
+            : (typeof entry.introTitle === "string" &&
+                entry.introTitle !== "") ||
               (typeof entry.introTitleEn === "string" &&
                 entry.introTitleEn !== ""),
         index: typeof entry.index === "number" ? entry.index : 0,
@@ -114,9 +122,12 @@ function parseSlugMap(
 
     return normalized
   } catch (error) {
-    throw new Error(`[slug-resolver] Failed to parse slug map: ${slugMapPath}`, {
-      cause: error,
-    })
+    throw new Error(
+      `[slug-resolver] Failed to parse slug map: ${slugMapPath}`,
+      {
+        cause: error,
+      }
+    )
   }
 }
 

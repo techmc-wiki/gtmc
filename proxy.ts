@@ -13,10 +13,12 @@ export default auth((req) => {
   const pathWithoutLocale = pathname.replace(localePattern, "") || "/"
 
   const isPrivateRoute = privateRoutes.some(
-    (route) => pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`)
+    (route) =>
+      pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`)
   )
   const isProtectedFeatureRoute = protectedFeatureRoutes.some(
-    (route) => pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`)
+    (route) =>
+      pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`)
   )
 
   if (isPrivateRoute || isProtectedFeatureRoute) {

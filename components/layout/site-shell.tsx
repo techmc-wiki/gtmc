@@ -38,9 +38,7 @@ export function SiteShell({ leftSlot, rightSlot, children }: SiteShellProps) {
               {leftSlot}
             </div>
 
-            <div className="flex items-center gap-4">
-              {rightSlot}
-            </div>
+            <div className="flex items-center gap-4">{rightSlot}</div>
           </div>
         </div>
       </nav>

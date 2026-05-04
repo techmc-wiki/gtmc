@@ -15,7 +15,9 @@ export default async function AdminPage({
   const session = await auth()
 
   if (!session?.user) {
-    redirect(`/${locale}/login?callbackUrl=${encodeURIComponent("/" + locale + "/admin")}`)
+    redirect(
+      `/${locale}/login?callbackUrl=${encodeURIComponent("/" + locale + "/admin")}`
+    )
   }
 
   let isAdmin = false

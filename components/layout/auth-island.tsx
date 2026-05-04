@@ -15,7 +15,7 @@ function AuthIslandContent() {
       <div
         className="
           flex h-8 w-20 animate-pulse items-center justify-center
-          border border-tech-main/20 bg-tech-main/5
+          border guide-line bg-tech-main/5
           md:h-10 md:w-24
         ">
         <div className="h-2 w-12 bg-tech-main/20" />
@@ -55,16 +55,16 @@ function AuthIslandContent() {
       {/* Dropdown menu */}
       <div
         className="
-          absolute top-full right-0 z-50 mt-2 w-48 origin-top-right
-          border border-tech-main/30 bg-white/95 p-2 opacity-0 shadow-lg backdrop-blur-sm
-          transition-all duration-200 pointer-events-none
-          group-hover:opacity-100 group-hover:pointer-events-auto
+          pointer-events-none absolute top-full right-0 z-50 mt-2 w-48
+          origin-top-right border border-tech-main/30 bg-white/95 p-2 opacity-0 shadow-lg
+          backdrop-blur-sm transition-all duration-200
+          group-hover:pointer-events-auto group-hover:opacity-100
         ">
-        <div className="border-b border-tech-main/20 pb-2 mb-2">
-          <p className="font-mono text-xs font-bold text-tech-main-dark truncate">
+        <div className="mb-2 border-b guide-line pb-2">
+          <p className="truncate font-mono text-xs font-bold text-tech-main-dark">
             {session.user.name}
           </p>
-          <p className="font-mono text-[0.625rem] text-tech-main/70 truncate">
+          <p className="truncate font-mono text-[0.625rem] text-tech-main/70">
             {session.user.email}
           </p>
         </div>

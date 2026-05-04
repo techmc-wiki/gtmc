@@ -9,8 +9,8 @@ export function createImageComponent(rawPath: string) {
     if (
       !hasExplicitUrlScheme(src) &&
       (src.startsWith("./") ||
-       src.startsWith("../") ||
-       (!src.startsWith("http") && !src.startsWith("/")))
+        src.startsWith("../") ||
+        (!src.startsWith("http") && !src.startsWith("/")))
     ) {
       const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
       const resolved = path.join(currentDir, src).replace(/\\/g, "/")

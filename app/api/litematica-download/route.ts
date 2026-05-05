@@ -4,6 +4,7 @@ import path from "path"
 import { getSiteUrl } from "@/lib/site-url"
 
 const ALLOWED_REMOTE_HOSTNAMES = new Set<string>()
+const ALLOWED_REMOTE_PATH_PREFIXES = ["/api/litematica-download/"] as const
 
 let SITE_ORIGIN: URL | null = null
 
@@ -13,6 +14,12 @@ try {
   ALLOWED_REMOTE_HOSTNAMES.add(siteUrl.hostname)
 } catch {
   // Ignore malformed site URL and continue with explicit hostname allow-list.
+}
+
+function isAllowedRemotePath(pathname: string): boolean {
+  return ALLOWED_REMOTE_PATH_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(prefix),
+  )
 }
 
 function getAllowedRemotePathAndQuery(urlString: string): string | null {
@@ -69,9 +76,27 @@ function getAllowedRemotePathAndQuery(urlString: string): string | null {
       search = parsedRelative.search
     }
 
+    // Ensure canonical root-relative path and block suspicious URL characters.
+    if (!pathname.startsWith("/") || pathname.includes("\\") || /[\u0000-\u001F\u007F]/.test(pathname)) {
+      return null
+    }
+
+    if (search.includes("#") || /[\u0000-\u001F\u007F]/.test(search)) {
+      return null
+    }
+
+    const lowerPath = pathname.toLowerCase()
+    if (lowerPath.includes("%2f") || lowerPath.includes("%5c")) {
+      return null
+    }
+
     // Reject traversal-style path segments, including encoded forms.
     const decodedPath = decodeURIComponent(pathname)
     if (decodedPath.split("/").some((segment) => segment === "..")) {
+      return null
+    }
+
+    if (!isAllowedRemotePath(pathname)) {
       return null
     }
 
@@ -127,8 +152,15 @@ export async function GET(request: Request) {
         return errorResponse("Remote URL is not allowed", 403)
       }
 
-      const safeRemoteUrl = new URL(allowedRemotePathAndQuery, SITE_ORIGIN)
-      const response = await fetch(safeRemoteUrl.toString(), {
+      const trustedRemoteUrl = new URL(SITE_ORIGIN.origin)
+      const validatedPathAndQuery = new URL(
+        allowedRemotePathAndQuery,
+        SITE_ORIGIN,
+      )
+      trustedRemoteUrl.pathname = validatedPathAndQuery.pathname
+      trustedRemoteUrl.search = validatedPathAndQuery.search
+
+      const response = await fetch(trustedRemoteUrl, {
         redirect: "error",
       })
       if (!response.ok) {

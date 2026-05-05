@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const message = error instanceof Error ? error.message : "Unknown error"
 
     if (isDev) {
-      console.error(`[articles/tree] Failed to load tree for locale="${locale}":`, error)
+      console.error('[articles/tree] Failed to load tree for locale="%s":', locale, error)
       return NextResponse.json(
         { error: message, locale },
         { status: 500, headers: { "Cache-Control": "no-store" } }

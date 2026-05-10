@@ -3,5 +3,7 @@ node_modules
 out
 build
 coverage
-pnpm-lock.yaml
+pnpm-lock.yml
+pnpm-workspace.yml
 articles
+*.md

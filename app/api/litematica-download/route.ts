@@ -18,7 +18,7 @@ try {
 
 function isAllowedRemotePath(pathname: string): boolean {
   return ALLOWED_REMOTE_PATH_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(prefix),
+    (prefix) => pathname === prefix || pathname.startsWith(prefix)
   )
 }
 
@@ -77,7 +77,11 @@ function getAllowedRemotePathAndQuery(urlString: string): string | null {
     }
 
     // Ensure canonical root-relative path and block suspicious URL characters.
-    if (!pathname.startsWith("/") || pathname.includes("\\") || /[\u0000-\u001F\u007F]/.test(pathname)) {
+    if (
+      !pathname.startsWith("/") ||
+      pathname.includes("\\") ||
+      /[\u0000-\u001F\u007F]/.test(pathname)
+    ) {
       return null
     }
 
@@ -155,7 +159,7 @@ export async function GET(request: Request) {
       const trustedRemoteUrl = new URL(SITE_ORIGIN.origin)
       const validatedPathAndQuery = new URL(
         allowedRemotePathAndQuery,
-        SITE_ORIGIN,
+        SITE_ORIGIN
       )
       trustedRemoteUrl.pathname = validatedPathAndQuery.pathname
       trustedRemoteUrl.search = validatedPathAndQuery.search

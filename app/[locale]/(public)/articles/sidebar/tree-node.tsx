@@ -1,5 +1,3 @@
-"use client"
-
 import { Link } from "@/i18n/navigation"
 import { formatIndexPrefix } from "@/lib/index-formatter"
 import { encodeSlug } from "@/lib/slug-utils"

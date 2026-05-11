@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { useImperativeHandle } from "react"
 import { usePathname } from "@/i18n/navigation"

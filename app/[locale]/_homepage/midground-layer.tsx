@@ -1,5 +1,3 @@
-"use client"
-
 import { motion, MotionValue } from "motion/react"
 import { DecorElement } from "./decor-element"
 

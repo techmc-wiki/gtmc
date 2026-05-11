@@ -14,11 +14,10 @@ function AuthIslandContent() {
     return (
       <div
         className="
-          flex h-8 w-20 animate-pulse items-center justify-center
-          border guide-line bg-tech-main/5
-          md:h-10 md:w-24
+          flex size-full animate-pulse items-center justify-center border guide-line
+          bg-tech-main/5
         ">
-        <div className="h-2 w-12 bg-tech-main/20" />
+        <div className="size-2 bg-tech-main/20" />
       </div>
     )
   }
@@ -28,13 +27,15 @@ function AuthIslandContent() {
     return (
       <Link
         href="/login"
+        aria-label="LOGIN"
         className="
-          flex h-8 items-center justify-center border border-tech-main/40 bg-tech-main/10 px-3 font-mono text-[0.625rem]
-          font-bold tracking-widest text-tech-main uppercase transition-all
-          duration-300 hover:bg-tech-main hover:text-white
+          flex size-full items-center justify-center border
+          border-tech-main/40 bg-tech-main/10 font-mono text-[0.625rem]
+          font-bold tracking-widest text-tech-main uppercase transition-all duration-300
+          hover:bg-tech-main hover:text-white
           md:text-xs
         ">
-        LOGIN
+        IN
       </Link>
     )
   }
@@ -91,8 +92,10 @@ function AuthIslandContent() {
 
 export function AuthIsland() {
   return (
-    <SessionProvider>
-      <AuthIslandContent />
-    </SessionProvider>
+    <div className="relative size-8 shrink-0 md:size-10">
+      <SessionProvider>
+        <AuthIslandContent />
+      </SessionProvider>
+    </div>
   )
 }

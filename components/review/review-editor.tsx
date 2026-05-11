@@ -12,7 +12,6 @@ import {
 import { EditorTextarea } from "@/components/editor/editor-textarea"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
 import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
-import { ConflictBlock } from "@/components/review/conflict-block"
 import { ReviewDiffPanel } from "@/components/review/review-diff-panel"
 import { ReviewFileList } from "@/components/review/review-file-list"
 import { ModeSelector } from "@/components/review/mode-selector"

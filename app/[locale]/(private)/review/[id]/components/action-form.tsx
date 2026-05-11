@@ -1,7 +1,7 @@
 "use client"
 
 import { getReauthLoginUrl, isReauthRequiredError } from "@/lib/admin-reauth"
-import { ReactNode, useEffect, useRef, useState } from "react"
+import React, { ReactNode, useEffect, useRef, useState } from "react"
 
 type ActionFeedbackState = "idle" | "running" | "success" | "error"
 

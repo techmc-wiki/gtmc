@@ -1,7 +1,7 @@
 import fs from "fs"
 import path from "path"
-import { type ArticleTreeNode } from "./github-repo-client"
-import { slugMap, type SlugMapEntry } from "./slug-resolver"
+import { type ArticleTreeNode } from "@/lib/github"
+import { ArticleManifest, type ArticleEntry } from "./slug-resolver"
 
 export type ArticleLocale = "en" | "zh"
 
@@ -53,7 +53,7 @@ export async function getArticleTree(
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       console.warn(
-        "[article-loader] Failed to build local tree from slug map",
+        "[article-loader] Failed to build local tree from article manifest",
         error
       )
     }
@@ -63,7 +63,7 @@ export async function getArticleTree(
 }
 
 export function getLocalizedArticleMetadata(
-  entry: SlugMapEntry | null | undefined,
+  entry: ArticleEntry | null | undefined,
   locale: ArticleLocale = "zh"
 ): LocalizedArticleMetadata {
   if (!entry) {
@@ -89,11 +89,11 @@ export function getLocalizedArticleMetadata(
   }
 }
 
-export function getLocalizedSlugMapEntry(
+export function getLocalizedArticleEntry(
   slugPath: string,
   locale: ArticleLocale = "zh"
-): (SlugMapEntry & LocalizedArticleMetadata) | null {
-  const entry = slugMap[slugPath]
+): (ArticleEntry & LocalizedArticleMetadata) | null {
+  const entry = ArticleManifest[slugPath]
   if (!entry) {
     return null
   }
@@ -105,12 +105,12 @@ export function getLocalizedSlugMapEntry(
 }
 
 function buildLocalTree(locale: ArticleLocale): ArticleTreeNode[] {
-  const entries = Object.values(slugMap)
+  const entries = Object.values(ArticleManifest)
   if (entries.length === 0) {
     return []
   }
 
-  const parentIndex = new Map<string, SlugMapEntry[]>()
+  const parentIndex = new Map<string, ArticleEntry[]>()
   for (const entry of entries) {
     if (!entry.parentSlug) continue
     const siblings = parentIndex.get(entry.parentSlug) ?? []
@@ -119,23 +119,23 @@ function buildLocalTree(locale: ArticleLocale): ArticleTreeNode[] {
   }
 
   const roots = entries
-    .filter((entry) => !entry.parentSlug || !slugMap[entry.parentSlug])
+    .filter((entry) => !entry.parentSlug || !ArticleManifest[entry.parentSlug])
     .sort((a, b) => compareEntries(a, b, locale))
 
   return roots.map((entry) => buildTreeNode(entry, parentIndex, locale))
 }
 
 function buildTreeNode(
-  entry: SlugMapEntry,
-  parentIndex: Map<string, SlugMapEntry[]>,
+  entry: ArticleEntry,
+  parentIndex: Map<string, ArticleEntry[]>,
   locale: ArticleLocale
 ): ArticleTreeNode {
   const childrenFromSlug = entry.children ?? []
   const childrenFromParent = parentIndex.get(entry.slug) ?? []
 
-  const mergedChildrenBySlug = new Map<string, SlugMapEntry>()
+  const mergedChildrenBySlug = new Map<string, ArticleEntry>()
   for (const child of childrenFromSlug) {
-    mergedChildrenBySlug.set(child.slug, slugMap[child.slug] ?? child)
+    mergedChildrenBySlug.set(child.slug, ArticleManifest[child.slug] ?? child)
   }
   for (const child of childrenFromParent) {
     mergedChildrenBySlug.set(child.slug, child)
@@ -171,8 +171,8 @@ function buildTreeNode(
 }
 
 function compareEntries(
-  a: SlugMapEntry,
-  b: SlugMapEntry,
+  a: ArticleEntry,
+  b: ArticleEntry,
   locale: ArticleLocale
 ): number {
   if (a.isFolder === b.isFolder) {
@@ -181,7 +181,7 @@ function compareEntries(
   return a.isFolder ? -1 : 1
 }
 
-function getNodeTitle(entry: SlugMapEntry, locale: ArticleLocale): string {
+function getNodeTitle(entry: ArticleEntry, locale: ArticleLocale): string {
   const { chapterTitle } = getLocalizedArticleMetadata(entry, locale)
 
   if (entry.isPreface) {

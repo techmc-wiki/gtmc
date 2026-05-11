@@ -12,6 +12,7 @@ import { hasLocale } from "next-intl"
 import { getMessages, setRequestLocale } from "next-intl/server"
 import { notFound } from "next/navigation"
 import { routing } from "@/i18n/routing"
+import React from "react"
 
 const siteUrl = getSiteUrl()
 
@@ -92,6 +93,7 @@ export default async function RootLayout({
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
+        <title></title>
       </head>
       <Analytics />
       <SpeedInsights />

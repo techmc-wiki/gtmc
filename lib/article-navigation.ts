@@ -1,5 +1,5 @@
 import type { TreeNode } from "@/types/sidebar-tree"
-import { getLocalizedSlugMapEntry } from "./article-loader"
+import { getLocalizedArticleEntry } from "./article-loader"
 
 interface FlatArticle {
   slug: string
@@ -44,12 +44,12 @@ export function flattenArticleTree(tree: TreeNode[]): FlatArticle[] {
   return result
 }
 
-export interface SlugMapEntry {
+export interface ArticleEntry {
   filePath: string
   slug: string
   index: number
   isFolder: boolean
-  children?: SlugMapEntry[]
+  children?: ArticleEntry[]
 }
 
 function compareIndex(a: number, b: number): number {
@@ -68,8 +68,8 @@ function compareIndex(a: number, b: number): number {
 }
 
 export function getFirstArticleInChapter(
-  articles: SlugMapEntry[]
-): SlugMapEntry | null {
+  articles: ArticleEntry[]
+): ArticleEntry | null {
   if (!articles || articles.length === 0) {
     return null
   }
@@ -100,7 +100,7 @@ export function getArticleNavigation(
   }
 
   const getChapterTitle = (slug: string): string | undefined => {
-    const entry = getLocalizedSlugMapEntry(slug, locale)
+    const entry = getLocalizedArticleEntry(slug, locale)
     const chapterTitle = entry?.chapterTitle
     if (chapterTitle) {
       return chapterTitle

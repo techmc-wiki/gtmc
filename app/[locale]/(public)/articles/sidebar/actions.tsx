@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useState } from "react"
+import React, { useState } from "react"
 
 export function SidebarActions({
   internalScroll,

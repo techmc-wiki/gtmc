@@ -20,7 +20,7 @@
 @font-face {
   font-family: "Space Mono";
   src: url("/fonts/space-mono/SpaceMono-Regular.woff2") format("woff2");
-  font-weight: 400;
+  font-weight: 400
   font-style: normal;
   font-display: swap;
 }
@@ -236,7 +236,7 @@ body {
   );
   background-size: clamp(20px, 5vw, 40px) clamp(20px, 5vw, 40px);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: var(--font-sans), sans-serif;
   font-feature-settings:
     "liga" 1,
     "calt" 1;
@@ -512,7 +512,7 @@ code .line {
   opacity: 0.4;
   user-select: none;
   pointer-events: none;
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-mono, monospace), monospace;
   font-size: inherit;
   line-height: 1.625;
 }

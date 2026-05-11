@@ -52,8 +52,8 @@ docs/superpowers
 .windsurf
 .pi
 
-# compile-time generated file
-lib/slug-map.json
+# generated manifest file
+lib/manifest.json
 
 # lighthouse and playwright
 .lighthouseci
@@ -72,3 +72,7 @@ skills.local
 # prevent anyone accidently not using pnpm
 package-lock.json
 .gitnexus
+
+# ide
+.vscode
+.idea

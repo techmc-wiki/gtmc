@@ -7,7 +7,7 @@ import { resolveSlug } from "@/lib/slug-resolver"
 import {
   getArticleContent,
   getArticleBuffer,
-  getLocalizedSlugMapEntry,
+  getLocalizedArticleEntry,
 } from "@/lib/article-loader"
 import { calculateReadingMetrics } from "@/lib/markdown"
 import { getSiteUrl } from "@/lib/site-url"
@@ -66,12 +66,12 @@ export async function GET(
     "Untitled"
   const title = rawTitle.length > 60 ? rawTitle.slice(0, 60) + "…" : rawTitle
 
-  const slugMapEntry = getLocalizedSlugMapEntry(slugPath, "en")
-  const parentEntry = slugMapEntry?.parentSlug
-    ? getLocalizedSlugMapEntry(slugMapEntry.parentSlug, "en")
+  const manifestEntry = getLocalizedArticleEntry(slugPath, "en")
+  const parentEntry = manifestEntry?.parentSlug
+    ? getLocalizedArticleEntry(manifestEntry.parentSlug, "en")
     : null
   const chapterTitle =
-    slugMapEntry?.chapterTitle.trim() ||
+    manifestEntry?.chapterTitle.trim() ||
     parentEntry?.chapterTitle.trim() ||
     (data["chapter-title"] as string | undefined) ||
     null

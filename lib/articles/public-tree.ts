@@ -6,6 +6,7 @@ import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
 import { getArticleTree, type ArticleLocale } from "@/lib/article-loader"
 import { getRepoTranslations, type ArticleTreeNode } from "@/lib/github/sync"
 import type { TreeNode } from "@/types/sidebar-tree"
+import { MANIFEST_FILE_NAME } from "@/lib/article-manifest-constants"
 
 function isAppendixDirectoryName(name: string): boolean {
   const normalized = name.trim().toLowerCase()
@@ -24,16 +25,16 @@ function isReadmeArticle(node: TreeNode): boolean {
   return normalize(node.title) === "readme" || normalize(slugTail) === "readme"
 }
 
-function getSlugMapMtime(): string {
-  const slugMapPath = join(process.cwd(), "lib", "slug-map.json")
-  return statSync(slugMapPath).mtime.getTime().toString()
+function getArticleManifestMtime(): string {
+  const manifestPath = join(process.cwd(), "lib", MANIFEST_FILE_NAME)
+  return statSync(manifestPath).mtime.getTime().toString()
 }
 
 const getCachedArticleTree = unstable_cache(
   async (locale: ArticleLocale) => {
     return getArticleTree(locale)
   },
-  ["github-repo-tree", getSlugMapMtime()],
+  ["github-repo-tree", getArticleManifestMtime()],
   { revalidate: 60, tags: ["github-repo-tree"] }
 )
 
@@ -114,6 +115,13 @@ export async function getPublicSidebarTree(
 
       if (a.isReadmeIntro !== b.isReadmeIntro) {
         return a.isReadmeIntro ? -1 : 1
+      }
+
+      if (a.isFolder && b.isFolder) {
+        const indexComparison = compareIndex(a.index ?? -1, b.index ?? -1)
+        if (indexComparison !== 0) {
+          return indexComparison
+        }
       }
 
       if (a.isFolder !== b.isFolder) {

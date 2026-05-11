@@ -14,7 +14,7 @@ import { getCachedRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
 import {
   getArticleContent,
   getArticleTree,
-  getLocalizedSlugMapEntry,
+  getLocalizedArticleEntry,
   type ArticleLocale,
 } from "@/lib/article-loader"
 import {
@@ -129,8 +129,8 @@ export async function generateMetadata({
     )
 
     // Build page title with chapter prefix if available
-    const slugMapEntry = getLocalizedSlugMapEntry(effectiveSlug, locale)
-    const chapterTitle = slugMapEntry?.chapterTitle
+    const manifestEntry = getLocalizedArticleEntry(effectiveSlug, locale)
+    const chapterTitle = manifestEntry?.chapterTitle
     const pageTitle = chapterTitle
       ? `${chapterTitle} › ${articleTitle} — Graduate Texts in Minecraft`
       : `${articleTitle} — Graduate Texts in Minecraft`
@@ -246,8 +246,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     url: `https://github.com/${name}`,
   }))
 
-  const slugMapEntry = getLocalizedSlugMapEntry(effectiveSlug, locale)
-  const chapterTitle = slugMapEntry?.chapterTitle
+  const manifestEntry = getLocalizedArticleEntry(effectiveSlug, locale)
+  const chapterTitle = manifestEntry?.chapterTitle
 
   const bannerSrc = (data.banner as { src?: string } | undefined)?.src
   const bannerUrl = resolveBannerUrl(bannerSrc, target.filePath, siteUrl)
@@ -452,7 +452,7 @@ async function resolveArticleTarget(
     return null
   }
 
-  const slugEntry = getLocalizedSlugMapEntry(canonicalSlug, locale)
+  const slugEntry = getLocalizedArticleEntry(canonicalSlug, locale)
 
   const redirectToSlug =
     targetNode.isFolder && canonicalSlug !== normalizedSlug
@@ -473,7 +473,7 @@ async function resolveArticleTarget(
 function resolveCanonicalSlugForFolder(
   targetNode: ArticleTreeNode
 ): string | null {
-  const mapEntry = getLocalizedSlugMapEntry(targetNode.slug)
+  const mapEntry = getLocalizedArticleEntry(targetNode.slug)
   if (mapEntry?.hasIntro) {
     return targetNode.slug
   }
@@ -547,7 +547,7 @@ function resolveDisplayedArticleTitle(
   isReadmeIntro: boolean,
   locale: ArticleLocale
 ): string {
-  const slugEntry = getLocalizedSlugMapEntry(canonicalSlug, locale)
+  const slugEntry = getLocalizedArticleEntry(canonicalSlug, locale)
   const introTitle = slugEntry?.introTitle?.trim()
 
   if (isReadmeIntro && introTitle) {

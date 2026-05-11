@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useLayoutEffect, useRef } from "react"
+import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react"
 import type { TocItem } from "./use-toc"
 import type { TreeNode } from "./tree-node"
 import { BLUR_ZONE_PX, BLUR_MIN, BLUR_RANGE, OPACITY_FADE } from "./constants"

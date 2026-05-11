@@ -152,7 +152,7 @@ export function DraftFileSourceDialog({
         content: data.content,
         filePath: data.filePath || selectedRepoFilePath,
       })
-      if (created !== false) {
+      if (created) {
         onClose()
       }
     } catch (error) {
@@ -170,7 +170,7 @@ export function DraftFileSourceDialog({
     }
 
     Promise.resolve(onCreate({ content: "", filePath })).then((created) => {
-      if (created !== false) {
+      if (created) {
         onClose()
       }
     })
@@ -192,7 +192,7 @@ export function DraftFileSourceDialog({
       .join("/")
 
     Promise.resolve(onCreateFolder(folderPath)).then((created) => {
-      if (created !== false) {
+      if (created) {
         onClose()
       }
     })
@@ -216,7 +216,7 @@ export function DraftFileSourceDialog({
       }
 
       const created = await onCreate({ content, filePath })
-      if (created !== false) {
+      if (created) {
         onClose()
       }
     } catch (error) {

@@ -35,9 +35,10 @@ export function useExpandedFolders() {
 
   const isFolderExpanded = useCallback(
     (id: string) => {
+      if (!mounted) return false
       return expandedFolders.has(id)
     },
-    [expandedFolders]
+    [expandedFolders, mounted]
   )
 
   return {

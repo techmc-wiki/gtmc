@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/cn"
+import React from "react"
 
 interface TechBadgeProps {
   children: React.ReactNode

@@ -1,16 +1,19 @@
 import fs from "fs"
 import path from "path"
 import matter from "gray-matter"
-import { parseFrontMatter } from "../lib/frontmatter-parser"
-import type { SlugMapEntry } from "../lib/slug-resolver"
-import { SLUG_REGEX } from "../lib/slug-validator"
-import { shouldIgnoreDirectory, shouldIgnoreFile } from "../lib/article-ignore"
+import { parseFrontMatter } from "@/lib/frontmatter-parser"
+import { MANIFEST_FILE_NAME } from "@/lib/article-manifest-constants"
+import type { ArticleEntry } from "@/lib/slug-resolver"
+import { SLUG_REGEX } from "@/lib/slug-validator"
+import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
 
 const ARTICLES_DIR = path.join(process.cwd(), "articles")
-const OUTPUT_FILE = path.join(process.cwd(), "lib", "slug-map.json")
+const OUTPUT_FILE = path.join(process.cwd(), "lib", MANIFEST_FILE_NAME)
 const MAX_DEPTH = 3
+const TREE_PREVIEW_DEPTH = 3
+const TREE_PREVIEW_CHILD_LIMIT = 12
 
-type SlugMap = Record<string, SlugMapEntry>
+type ArticleManifest = Record<string, ArticleEntry>
 
 function getFrontMatterEntry(
   filePath: string,
@@ -18,7 +21,7 @@ function getFrontMatterEntry(
   relativePath: string,
   isFolder: boolean,
   parentSlug?: string
-): SlugMapEntry {
+): ArticleEntry {
   const content = fs.readFileSync(filePath, "utf-8")
   const fm = parseFrontMatter(content)
   const title = fm.title ?? ""
@@ -76,13 +79,13 @@ function getSlugFromFile(filePath: string): string | null {
 }
 
 /**
- * Recursively processes a content directory and adds article slugs to slugMap.
+ * Recursively processes a content directory and adds article entries to the manifest.
  *
  * @param dirPath          - Absolute path to the directory
  * @param relFromArticles  - Relative path from articles/ root (e.g. "SlimeTech/Molforte")
  * @param slugPrefix       - Accumulated slug path prefix (e.g. "slime-tech/molforte")
  * @param depth            - Current depth (1 = top-level folder inside articles/)
- * @param slugMap          - Output map to populate
+ * @param manifest          - Output manifest to populate
  * @returns true if any validation errors occurred
  */
 function processDirectory(
@@ -90,7 +93,7 @@ function processDirectory(
   relFromArticles: string,
   slugPrefix: string,
   depth: number,
-  slugMap: SlugMap
+  manifest: ArticleManifest
 ): boolean {
   let hasError = false
 
@@ -101,8 +104,8 @@ function processDirectory(
     const readmeSlug = getSlugFromFile(readmePath) ?? ""
 
     if (readmeSlug !== "") {
-      if (slugMap[slugPrefix] !== undefined) {
-        const existingPath = slugMap[slugPrefix].filePath
+      if (manifest[slugPrefix] !== undefined) {
+        const existingPath = manifest[slugPrefix].filePath
         process.stderr.write(
           `Error: Duplicate composite slug "${slugPrefix}": articles/${relFromArticles}/README.md ` +
             `(conflicts with articles/${existingPath} after slug flattening)\n`
@@ -110,7 +113,7 @@ function processDirectory(
         hasError = true
       } else {
         const parentSlug = getParentSlug(slugPrefix)
-        slugMap[slugPrefix] = getFrontMatterEntry(
+        manifest[slugPrefix] = getFrontMatterEntry(
           readmePath,
           slugPrefix,
           `${relFromArticles}/README.md`,
@@ -166,8 +169,8 @@ function processDirectory(
 
     const compositeSlug = `${slugPrefix}/${articleSlug}`
 
-    if (slugMap[compositeSlug] !== undefined) {
-      const existingPath = slugMap[compositeSlug].filePath
+    if (manifest[compositeSlug] !== undefined) {
+      const existingPath = manifest[compositeSlug].filePath
       process.stderr.write(
         `Error: Duplicate composite slug "${compositeSlug}": articles/${relPath} ` +
           `(conflicts with articles/${existingPath} after slug flattening)\n`
@@ -177,7 +180,7 @@ function processDirectory(
     }
 
     const parentSlug = getParentSlug(compositeSlug)
-    slugMap[compositeSlug] = getFrontMatterEntry(
+    manifest[compositeSlug] = getFrontMatterEntry(
       articlePath,
       compositeSlug,
       `${relFromArticles}/${articleFile}`,
@@ -227,7 +230,7 @@ function processDirectory(
         subRelPath,
         slugPrefix,
         depth + 1,
-        slugMap
+        manifest
       )
       if (subError) hasError = true
       continue
@@ -247,7 +250,7 @@ function processDirectory(
       subRelPath,
       subSlugPrefix,
       depth + 1,
-      slugMap
+      manifest
     )
     if (subError) hasError = true
   }
@@ -255,8 +258,139 @@ function processDirectory(
   return hasError
 }
 
+function buildGenerationSummary(manifest: ArticleManifest): string {
+  const entries = Object.values(manifest)
+  const folders = entries.filter((entry) => entry.isFolder)
+  const articles = entries.filter((entry) => !entry.isFolder)
+  const roots = entries
+    .filter(
+      (entry) => !entry.parentSlug || manifest[entry.parentSlug] === undefined
+    )
+    .sort(comparePreviewEntries)
+  const maxSlugDepth = entries.reduce(
+    (max, entry) => Math.max(max, entry.slug.split("/").length),
+    0
+  )
+
+  const summaryLines = [
+    "[manifest] Article structure indexed",
+    `Source: ${path.relative(process.cwd(), ARTICLES_DIR) || "."}`,
+    `Output: ${path.relative(process.cwd(), OUTPUT_FILE) || OUTPUT_FILE}`,
+    `Entries: ${entries.length} total (${folders.length} folders, ${articles.length} articles)`,
+    `Roots: ${roots.length} | max slug depth: ${maxSlugDepth} | max directory depth: ${MAX_DEPTH}`,
+    `Flags: ${countFlagged(entries, "isPreface")} preface, ${countFlagged(entries, "isAppendix")} appendix, ${countFlagged(entries, "isAdvanced")} advanced, ${countFlagged(entries, "hasIntro")} with intro`,
+    "Legend: [dir] folder README, [doc] article, * advanced, + intro, ! preface/appendix",
+    "",
+    "Structure preview:",
+  ]
+
+  const previewLines = formatPreviewEntries(roots, 0)
+  if (previewLines.length === 0) {
+    previewLines.push("  (no routable articles found)")
+  }
+
+  return [...summaryLines, ...previewLines, ""].join("\n")
+}
+
+function countFlagged(
+  entries: ArticleEntry[],
+  field: "isPreface" | "isAppendix" | "isAdvanced" | "hasIntro"
+): number {
+  return entries.filter((entry) => entry[field]).length
+}
+
+function formatPreviewEntries(
+  entries: ArticleEntry[],
+  depth: number
+): string[] {
+  const visibleEntries = entries.slice(0, TREE_PREVIEW_CHILD_LIMIT)
+  const lines: string[] = []
+  const nextDepth = depth + 1
+
+  for (const entry of visibleEntries) {
+    lines.push(formatPreviewEntry(entry, depth))
+
+    const children = [...(entry.children ?? [])].sort(comparePreviewEntries)
+    if (children.length > 0) {
+      if (nextDepth < TREE_PREVIEW_DEPTH) {
+        lines.push(...formatPreviewEntries(children, nextDepth))
+      } else {
+        lines.push(
+          `${indent(nextDepth)}... ${children.length} nested entries hidden`
+        )
+      }
+    }
+  }
+
+  const hiddenCount = entries.length - visibleEntries.length
+  if (hiddenCount > 0) {
+    lines.push(`${indent(depth)}... ${hiddenCount} more entries`)
+  }
+
+  return lines
+}
+
+function formatPreviewEntry(entry: ArticleEntry, depth: number): string {
+  const kind = entry.isFolder ? "dir" : "doc"
+  const markers = [
+    entry.isAdvanced ? "*" : "",
+    entry.hasIntro ? "+" : "",
+    entry.isPreface || entry.isAppendix ? "!" : "",
+  ]
+    .filter(Boolean)
+    .join("")
+  const markerSuffix = markers === "" ? "" : ` ${markers}`
+  const indexSuffix = entry.index >= 0 ? ` #${entry.index}` : ""
+  const childCount = entry.children?.length ?? 0
+  const childSuffix = childCount > 0 ? `, ${childCount} children` : ""
+  const title = truncate(getPreviewTitle(entry), 72)
+
+  return `${indent(depth)}- [${kind}] ${title} <${entry.slug}>${indexSuffix}${markerSuffix}${childSuffix} @ articles/${entry.filePath}`
+}
+
+function comparePreviewEntries(a: ArticleEntry, b: ArticleEntry): number {
+  if (a.isFolder !== b.isFolder) {
+    return a.isFolder ? -1 : 1
+  }
+
+  const indexA = a.index >= 0 ? a.index : Number.MAX_SAFE_INTEGER
+  const indexB = b.index >= 0 ? b.index : Number.MAX_SAFE_INTEGER
+  if (indexA !== indexB) {
+    return indexA - indexB
+  }
+
+  return getPreviewTitle(a).localeCompare(getPreviewTitle(b), undefined, {
+    numeric: true,
+    sensitivity: "base",
+  })
+}
+
+function getPreviewTitle(entry: ArticleEntry): string {
+  return (
+    entry.chapterTitle ||
+    entry.title ||
+    entry.chapterTitleEn ||
+    entry.introTitle ||
+    entry.introTitleEn ||
+    entry.filePath.split("/").pop()?.replace(/\.md$/i, "") ||
+    entry.slug
+  )
+}
+
+function truncate(value: string, maxLength: number): string {
+  if (value.length <= maxLength) {
+    return value
+  }
+
+  return `${value.slice(0, maxLength - 1)}...`
+}
+
+function indent(depth: number): string {
+  return "  ".repeat(depth)
+}
+
 function main(): void {
-  const slugMap: SlugMap = {}
+  const manifest: ArticleManifest = {}
   let hasError = false
 
   if (!fs.existsSync(ARTICLES_DIR)) {
@@ -306,12 +440,12 @@ function main(): void {
       folderName,
       folderSlug,
       1,
-      slugMap
+      manifest
     )
     if (folderError) hasError = true
   }
 
-  const folderSlugKeys = new Set(Object.keys(slugMap))
+  const folderSlugKeys = new Set(Object.keys(manifest))
 
   const rootFiles = fs
     .readdirSync(ARTICLES_DIR, { withFileTypes: true })
@@ -364,7 +498,7 @@ function main(): void {
     }
 
     rootSlugsSeen.set(key, rootFile)
-    slugMap[key] = getFrontMatterEntry(
+    manifest[key] = getFrontMatterEntry(
       rootFilePath,
       key,
       rootFile,
@@ -373,24 +507,24 @@ function main(): void {
     )
   }
 
-  for (const entry of Object.values(slugMap)) {
+  for (const entry of Object.values(manifest)) {
     entry.children = undefined
   }
 
-  for (const [slug, entry] of Object.entries(slugMap)) {
+  for (const [slug, entry] of Object.entries(manifest)) {
     const parent = entry.parentSlug
-    if (!parent || slugMap[parent] === undefined) {
+    if (!parent || manifest[parent] === undefined) {
       continue
     }
-    if (!slugMap[parent].children) {
-      slugMap[parent].children = []
+    if (!manifest[parent].children) {
+      manifest[parent].children = []
     }
-    slugMap[parent].children!.push(slugMap[slug])
+    manifest[parent].children!.push(manifest[slug])
   }
 
   if (hasError) {
     process.stderr.write(
-      "\nSlug map generation failed due to validation errors above.\n"
+      "\nArticle manifest generation failed due to validation errors above.\n"
     )
     process.exit(1)
   }
@@ -400,10 +534,13 @@ function main(): void {
     fs.mkdirSync(outputDir, { recursive: true })
   }
 
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(slugMap, null, 2) + "\n")
+  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(manifest, null, 2) + "\n")
 
-  const entryCount = Object.keys(slugMap).length
-  process.stdout.write(`Generated slug-map.json with ${entryCount} entries\n`)
+  const entryCount = Object.keys(manifest).length
+  process.stdout.write(buildGenerationSummary(manifest))
+  process.stdout.write(
+    `Generated ${MANIFEST_FILE_NAME} with ${entryCount} entries\n`
+  )
 }
 
 main()

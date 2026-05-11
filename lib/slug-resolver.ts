@@ -1,15 +1,22 @@
 import fs from "fs"
 import path from "path"
 
+import { MANIFEST_FILE_NAME } from "./article-manifest-constants"
+
+export { MANIFEST_FILE_NAME }
 // Keep this path module-relative so Next.js production bundles and server code
 // resolve the generated JSON next to the compiled resolver instead of cwd.
-export const SLUG_MAP_PATH = path.join(__dirname, "slug-map.json")
+export const MANIFEST_PATH = path.join(__dirname, MANIFEST_FILE_NAME)
 // Turbopack can rewrite __dirname to /ROOT inside server chunks during build;
 // fall back to the generated source file path used by page-data collection.
-const SLUG_MAP_FALLBACK_PATH = path.join(process.cwd(), "lib", "slug-map.json")
-const ARTICLES_DIR = path.join(process.cwd(), "articles")
+const MANIFEST_FALLBACK_PATH = path.join(
+  process.cwd(),
+  "lib",
+  MANIFEST_FILE_NAME
+)
+const ARTICLES_PATH = path.join(process.cwd(), "articles")
 
-export interface SlugMapEntry {
+export interface ArticleEntry {
   filePath: string
   slug: string
   title?: string
@@ -22,7 +29,7 @@ export interface SlugMapEntry {
   isFolder: boolean
   isAppendix: boolean
   isPreface: boolean
-  children?: SlugMapEntry[]
+  children?: ArticleEntry[]
   parentSlug?: string
   author?: string
   coAuthors?: string[]
@@ -31,15 +38,15 @@ export interface SlugMapEntry {
   isAdvanced?: boolean
 }
 
-export function loadSlugMap(): Record<string, SlugMapEntry> {
-  const paths = [SLUG_MAP_PATH, SLUG_MAP_FALLBACK_PATH]
+export function loadArticleManifest(): Record<string, ArticleEntry> {
+  const paths = [MANIFEST_PATH, MANIFEST_FALLBACK_PATH]
   let lastMissingError: unknown = null
 
-  for (const slugMapPath of paths) {
+  for (const manifestPath of paths) {
     let raw: string
 
     try {
-      raw = fs.readFileSync(slugMapPath, "utf-8")
+      raw = fs.readFileSync(manifestPath, "utf-8")
     } catch (error) {
       if (isNodeMissingFileError(error)) {
         lastMissingError = error
@@ -47,41 +54,43 @@ export function loadSlugMap(): Record<string, SlugMapEntry> {
       }
 
       throw new Error(
-        `[slug-resolver] Failed to read slug map: ${slugMapPath}`,
+        `[slug-resolver] Failed to read article manifest: ${manifestPath}`,
         {
           cause: error,
         }
       )
     }
 
-    return parseSlugMap(raw, slugMapPath)
+    return parseArticleManifest(raw, manifestPath)
   }
 
   if (process.env.NODE_ENV === "development") {
-    console.warn(`[slug-resolver] Missing slug map: ${paths.join(" or ")}`)
+    console.warn(
+      `[slug-resolver] Missing article manifest: ${paths.join(" or ")}`
+    )
     return {}
   }
 
   throw new Error(
-    `[slug-resolver] Failed to load slug map: ${paths.join(" or ")}`,
+    `[slug-resolver] Failed to load article manifest: ${paths.join(" or ")}`,
     {
       cause: lastMissingError,
     }
   )
 }
 
-function parseSlugMap(
+function parseArticleManifest(
   raw: string,
-  slugMapPath: string
-): Record<string, SlugMapEntry> {
+  manifestPath: string
+): Record<string, ArticleEntry> {
   try {
     const parsed = JSON.parse(raw) as Record<string, unknown>
-    const normalized: Record<string, SlugMapEntry> = {}
+    const normalized: Record<string, ArticleEntry> = {}
 
     for (const [slugKey, value] of Object.entries(parsed)) {
       if (typeof value !== "object" || value === null) continue
 
-      const entry = value as Partial<SlugMapEntry>
+      const entry = value as Partial<ArticleEntry>
       if (typeof entry.filePath !== "string") continue
 
       normalized[slugKey] = {
@@ -108,7 +117,7 @@ function parseSlugMap(
         isAppendix: entry.isAppendix === true,
         isPreface: entry.isPreface === true,
         children: Array.isArray(entry.children)
-          ? (entry.children as SlugMapEntry[])
+          ? (entry.children as ArticleEntry[])
           : undefined,
         parentSlug:
           typeof entry.parentSlug === "string" ? entry.parentSlug : undefined,
@@ -123,7 +132,7 @@ function parseSlugMap(
     return normalized
   } catch (error) {
     throw new Error(
-      `[slug-resolver] Failed to parse slug map: ${slugMapPath}`,
+      `[slug-resolver] Failed to parse article manifest: ${manifestPath}`,
       {
         cause: error,
       }
@@ -140,11 +149,12 @@ function isNodeMissingFileError(error: unknown): boolean {
   )
 }
 
-export const slugMap: Record<string, SlugMapEntry> = loadSlugMap()
+export const ArticleManifest: Record<string, ArticleEntry> =
+  loadArticleManifest()
 
 const filePathToSlugKey: Record<string, string> = (() => {
   const inverted: Record<string, string> = {}
-  for (const [slugKey, entry] of Object.entries(slugMap)) {
+  for (const [slugKey, entry] of Object.entries(ArticleManifest)) {
     if (entry?.filePath) {
       inverted[entry.filePath.replace(/\.md$/i, "")] = slugKey
     }
@@ -171,14 +181,14 @@ export function resolveSlug(slugPath: string): string | null {
  */
 export function resolveSlugWithIndicator(slugPath: string): ResolveResult {
   // 1. Direct slug lookup
-  if (slugMap[slugPath] !== undefined) {
-    return { filePath: slugMap[slugPath].filePath }
+  if (ArticleManifest[slugPath] !== undefined) {
+    return { filePath: ArticleManifest[slugPath].filePath }
   }
 
-  // 2. Try with .md extension in slug map
-  if (slugMap[`${slugPath}.md`] !== undefined) {
+  // 2. Try with .md extension in article manifest
+  if (ArticleManifest[`${slugPath}.md`] !== undefined) {
     return {
-      filePath: slugMap[`${slugPath}.md`].filePath,
+      filePath: ArticleManifest[`${slugPath}.md`].filePath,
     }
   }
 
@@ -186,13 +196,13 @@ export function resolveSlugWithIndicator(slugPath: string): ResolveResult {
   const normalizedPath = decodeURIComponent(slugPath)
 
   // 3a. Try as-is
-  if (fs.existsSync(path.join(ARTICLES_DIR, normalizedPath))) {
+  if (fs.existsSync(path.join(ARTICLES_PATH, normalizedPath))) {
     return { filePath: normalizedPath }
   }
 
   // 3b. Try with .md extension
   const withExt = `${normalizedPath}.md`
-  if (fs.existsSync(path.join(ARTICLES_DIR, withExt))) {
+  if (fs.existsSync(path.join(ARTICLES_PATH, withExt))) {
     return { filePath: withExt }
   }
 
@@ -200,15 +210,15 @@ export function resolveSlugWithIndicator(slugPath: string): ResolveResult {
 }
 
 /**
- * Gets the slug for a given file path if it exists in the slug map.
+ * Gets the slug for a given file path if it exists in the article manifest.
  */
 export function getSlugForFilePath(filePath: string): string | null {
   return filePathToSlugKey[filePath.replace(/\.md$/i, "")] ?? null
 }
 
 /**
- * Gets the slug map entry for a given slug path.
+ * Gets the article manifest entry for a given slug path.
  */
-export function getSlugMapEntry(slugPath: string): SlugMapEntry | null {
-  return slugMap[slugPath] ?? null
+export function getArticleEntry(slugPath: string): ArticleEntry | null {
+  return ArticleManifest[slugPath] ?? null
 }

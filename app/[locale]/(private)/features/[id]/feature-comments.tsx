@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import React, { useState, useTransition } from "react"
 import { useTranslations } from "next-intl"
 import { addFeatureComment } from "@/actions/feature"
 import { TechButton } from "@/components/ui/tech-button"

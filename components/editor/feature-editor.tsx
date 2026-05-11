@@ -344,7 +344,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             type="submit"
             variant="primary"
             disabled={isSaving}
-            aria-busy={isSaving && initialData?.id ? true : false}>
+            aria-busy={!!(isSaving && initialData?.id)}>
             {isSaving && initialData?.id ? (
               <LoadingIndicator label={PENDING_LABELS.SAVING_FEATURE} />
             ) : isSaving ? (

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type ReactNode } from "react"
+import React, { useState, type ReactNode } from "react"
 import { useTranslations } from "next-intl"
 import { CodeCopyButton } from "@/components/code-copy-button"
 import { LazyCodeBlock } from "@/components/lazy-code-block"

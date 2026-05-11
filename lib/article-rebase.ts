@@ -16,7 +16,7 @@ import type {
   FileRebaseState,
   RebaseCommitInfo,
   RebaseState,
-} from "../types/rebase"
+} from "@/types/rebase"
 import { prisma } from "@/lib/prisma"
 
 function reviewLog(action: string, details: Record<string, unknown>) {

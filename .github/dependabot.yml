@@ -11,7 +11,7 @@ updates:
       interval: "cron"
       cronjob: "0 7 * * 0,3"
     groups:
-      dev-deps:
+      dev:
         dependency-type: "development"
-      prod-deps:
+      prod:
         dependency-type: "production"

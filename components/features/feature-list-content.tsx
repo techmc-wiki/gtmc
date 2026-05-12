@@ -1,62 +1,33 @@
-import type { Metadata } from "next"
+import type { Session } from "next-auth"
 import { getTranslations } from "next-intl/server"
-import { auth } from "@/lib/auth"
-import { toAbsoluteUrl } from "@/lib/site-url"
+import { Link } from "@/i18n/navigation"
 import {
   labelsToStatus,
   labelsToTags,
-  listAllIssues,
   parseIssueBody,
+  type GithubIssue,
 } from "@/lib/github"
-import { Link } from "@/i18n/navigation"
-import { TechButton } from "@/components/ui/tech-button"
 import { PageHeader } from "@/components/ui/page-header"
-import { FeatureList } from "./feature-list"
-import { PendingCreationBanner } from "./pending-creation-banner"
-import { RevealSection } from "./reveal-helpers"
+import { TechButton } from "@/components/ui/tech-button"
+import { FeatureList } from "@/app/[locale]/(private)/features/feature-list"
+import { PendingCreationBanner } from "@/app/[locale]/(private)/features/pending-creation-banner"
+import { RevealSection } from "@/app/[locale]/(private)/features/reveal-helpers"
 
-export const revalidate = 60
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}): Promise<Metadata> {
-  const { locale } = await params
-  const canonical = toAbsoluteUrl(`/${locale}/features`)
-  return {
-    title: "Feature Requests",
-    description:
-      "Browse and track feature requests for Technical Minecraft. Vote on ideas, report bugs, and suggest improvements.",
-    alternates: {
-      canonical,
-      languages: {
-        zh: toAbsoluteUrl("/zh/features"),
-        en: toAbsoluteUrl("/en/features"),
-        "x-default": toAbsoluteUrl("/zh/features"),
-      },
-    },
-    openGraph: {
-      title: "Feature Requests — Technical Minecraft",
-      description: "Browse and track feature requests for Technical Minecraft.",
-      type: "website",
-    },
-  }
+interface FeatureListContentProps {
+  issues: GithubIssue[]
+  session: Session | null
+  created?: string | string[] | undefined
 }
 
-export default async function FeaturesPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{
-    [key: string]: string | string[] | undefined
-  }>
-}) {
-  const session = await auth()
+export async function FeatureListContent({
+  issues,
+  session,
+  created,
+}: FeatureListContentProps) {
   const t = await getTranslations("Feature")
-  const params = await searchParams
-  const isCreated = params?.created === "true"
+  const isCreated = created === "true"
 
-  const allIssues = await listAllIssues()
+  const allIssues = [...issues]
   allIssues.sort(
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
   )

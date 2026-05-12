@@ -1,8 +1,12 @@
 import * as React from "react"
 import { getTranslations } from "next-intl/server"
-import { DesktopNav } from "@/components/layout/desktop-nav"
-import { MobileNav } from "@/components/layout/mobile-nav"
+import {
+  AuthAwareDesktopNav,
+  AuthAwareMobileNav,
+} from "@/components/layout/auth-aware-nav"
+import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { SiteShell } from "@/components/layout/site-shell"
+import { SearchCommand } from "@/components/search/search-command"
 import { Logo } from "@/components/ui/logo"
 import { AuthIsland } from "@/components/layout/auth-island"
 import { ArticlesLayoutClient } from "./articles-layout-client"
@@ -27,6 +31,7 @@ export default async function ArticlesLayout({
     { href: "/draft", label: t("drafts") },
     { href: "/features", label: t("features") },
   ]
+  const adminLink = { href: "/review", label: t("reviewHub") }
   const normalizedLocale = normalizeLocale(locale)
   const tree = await getPublicSidebarTree(normalizedLocale)
 
@@ -35,11 +40,17 @@ export default async function ArticlesLayout({
       leftSlot={
         <>
           <Logo size="md" />
-          <DesktopNav navLinks={navLinks} />
-          <MobileNav navLinks={navLinks} />
+          <AuthAwareDesktopNav navLinks={navLinks} adminLink={adminLink} />
         </>
       }
-      rightSlot={<AuthIsland />}>
+      rightSlot={
+        <>
+          <SearchCommand />
+          <AuthAwareMobileNav navLinks={navLinks} adminLink={adminLink} />
+          <LanguageSwitcher className="hidden sm:flex" />
+          <AuthIsland />
+        </>
+      }>
       <ArticlesLayoutClient tree={tree}>{children}</ArticlesLayoutClient>
     </SiteShell>
   )

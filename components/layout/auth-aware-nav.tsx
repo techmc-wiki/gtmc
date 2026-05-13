@@ -63,13 +63,9 @@ function useAdminAwareLinks(navLinks: NavLink[], adminLink: NavLink) {
   const [isAdmin, setIsAdmin] = React.useState(false)
 
   React.useEffect(() => {
+    if (status !== "authenticated") return
+
     let ignore = false
-
-    if (status !== "authenticated") {
-      setIsAdmin(false)
-      return
-    }
-
     fetchNavAuth().then((result) => {
       if (!ignore) {
         setIsAdmin(result.isAdmin)
@@ -81,8 +77,10 @@ function useAdminAwareLinks(navLinks: NavLink[], adminLink: NavLink) {
     }
   }, [status])
 
+  const effectiveIsAdmin = status === "authenticated" && isAdmin
+
   return React.useMemo(() => {
-    if (!isAdmin) {
+    if (!effectiveIsAdmin) {
       return navLinks
     }
 
@@ -90,7 +88,9 @@ function useAdminAwareLinks(navLinks: NavLink[], adminLink: NavLink) {
       return navLinks
     }
 
-    const featuresIndex = navLinks.findIndex((link) => link.href === "/features")
+    const featuresIndex = navLinks.findIndex(
+      (link) => link.href === "/features"
+    )
 
     if (featuresIndex === -1) {
       return [...navLinks, adminLink]
@@ -101,10 +101,13 @@ function useAdminAwareLinks(navLinks: NavLink[], adminLink: NavLink) {
       adminLink,
       ...navLinks.slice(featuresIndex),
     ]
-  }, [adminLink, isAdmin, navLinks])
+  }, [adminLink, effectiveIsAdmin, navLinks])
 }
 
-function AuthAwareDesktopNavContent({ navLinks, adminLink }: AuthAwareNavProps) {
+function AuthAwareDesktopNavContent({
+  navLinks,
+  adminLink,
+}: AuthAwareNavProps) {
   const links = useAdminAwareLinks(navLinks, adminLink)
 
   return <DesktopNav navLinks={links} />

@@ -53,5 +53,8 @@ jobs:
         env:
           DATABASE_URL: "postgresql://localhost:5432/placeholder"
 
+      - name: TypeScript Check
+        run: pnpm typecheck
+
       - name: Build
         run: pnpm build

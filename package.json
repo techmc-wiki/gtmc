@@ -18,7 +18,8 @@
     "postinstall": "git config --local include.path .gitconfig; pnpm articles:init && pnpm articles:update; prisma generate; pnpm articles:generate-manifest; pnpm exec playwright install chromium",
     "style:check": "prettier --check .",
     "style:fix": "prettier --write .",
-    "style": "pnpm style:check"
+    "style": "pnpm style:check",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",

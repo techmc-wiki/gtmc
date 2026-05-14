@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import fs from "fs"
 import path from "path"
+import { getArticleRemoteBuffer } from "@/lib/article-remote-assets"
 import { getSiteUrl } from "@/lib/site-url"
 
 const ALLOWED_REMOTE_HOSTNAMES = new Set<string>()
@@ -139,6 +139,31 @@ function normalizeUrlParam(input: string) {
   return value
 }
 
+function normalizeArticleRepoPath(input: string) {
+  const withoutQuery = input.split("?")[0]?.split("#")[0] ?? ""
+  const normalized = path.posix.normalize(withoutQuery.replace(/\\/g, "/"))
+  const safePath = normalized.replace(/^\.\.\/+/, "").replace(/^\/+/, "")
+
+  if (!safePath || safePath.startsWith("../")) {
+    return null
+  }
+
+  return safePath.startsWith("articles/")
+    ? safePath.slice("articles/".length)
+    : safePath
+}
+
+async function getRemoteLitematicaBuffer(filePath: string) {
+  const direct = await getArticleRemoteBuffer(filePath)
+  if (direct || !filePath.toLowerCase().endsWith(".zip")) {
+    return { buffer: direct, resolvedFromZip: false }
+  }
+
+  const siblingLitematicPath = filePath.replace(/\.zip$/i, ".litematic")
+  const sibling = await getArticleRemoteBuffer(siblingLitematicPath)
+  return { buffer: sibling, resolvedFromZip: Boolean(sibling) }
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const rawUrlParam = searchParams.get("url")
@@ -185,56 +210,18 @@ export async function GET(request: Request) {
       })
     }
 
-    const absoluteRoot = path.resolve(process.cwd())
-    const localPath = path.resolve(absoluteRoot, urlParam)
-    const relative = path.relative(absoluteRoot, localPath)
-
-    if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    const articlePath = normalizeArticleRepoPath(urlParam)
+    if (!articlePath) {
       return errorResponse("Invalid path", 403)
     }
 
-    let resolvedPath = localPath
-    let resolvedFromZip = false
+    const { buffer, resolvedFromZip } =
+      await getRemoteLitematicaBuffer(articlePath)
 
-    // Compatibility fallback for stale cached article content:
-    // if an old .zip path is requested and a sibling .litematic exists,
-    // serve the .litematic file instead.
-    if (localPath.toLowerCase().endsWith(".zip")) {
-      const dirPath = path.dirname(localPath)
-      const sameBaseLitematic = localPath.replace(/\.zip$/i, ".litematic")
-
-      if (fs.existsSync(sameBaseLitematic)) {
-        resolvedPath = sameBaseLitematic
-        resolvedFromZip = true
-      } else if (fs.existsSync(dirPath)) {
-        const entries = await fs.promises.readdir(dirPath, {
-          withFileTypes: true,
-        })
-
-        const litematicFiles = entries
-          .filter((entry) => entry.isFile() && /\.litematic$/i.test(entry.name))
-          .map((entry) => path.join(dirPath, entry.name))
-
-        if (litematicFiles.length === 1) {
-          resolvedPath = litematicFiles[0]
-          resolvedFromZip = true
-        }
-      }
-    }
-
-    const resolvedRelative = path.relative(absoluteRoot, resolvedPath)
-    if (
-      resolvedRelative.startsWith("..") ||
-      path.isAbsolute(resolvedRelative)
-    ) {
-      return errorResponse("Invalid path", 403)
-    }
-
-    if (!fs.existsSync(resolvedPath)) {
+    if (!buffer) {
       return errorResponse("File not found: " + urlParam, 404)
     }
 
-    const buffer = await fs.promises.readFile(resolvedPath)
     const headers: Record<string, string> = {
       "Content-Type": "application/octet-stream",
       "Cache-Control": "public, max-age=86400",
@@ -244,7 +231,7 @@ export async function GET(request: Request) {
       headers["X-Litematica-Resolved-From-Zip"] = "1"
     }
 
-    return new NextResponse(buffer, { headers })
+    return new NextResponse(new Uint8Array(buffer), { headers })
   } catch (error: unknown) {
     const message =
       error instanceof Error ? error.message : "Internal Server Error"

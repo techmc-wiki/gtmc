@@ -4,11 +4,9 @@ import { type NextRequest } from "next/server"
 import matter from "gray-matter"
 import mime from "mime-types"
 import { resolveSlug } from "@/lib/slug-resolver"
-import {
-  getArticleContent,
-  getArticleBuffer,
-  getLocalizedArticleEntry,
-} from "@/lib/article-loader"
+import { getLocalizedArticleEntry } from "@/lib/article-manifest"
+import { getRepoFileContent } from "@/lib/github/sync"
+import { getArticleRemoteBuffer } from "@/lib/article-remote-assets"
 import { calculateReadingMetrics } from "@/lib/markdown"
 import { getSiteUrl } from "@/lib/site-url"
 
@@ -53,7 +51,7 @@ export async function GET(
   const filePath = resolveSlug(slugPath)
   if (!filePath) return new Response("Not Found", { status: 404 })
 
-  const content = await getArticleContent(filePath)
+  const content = await getRepoFileContent(filePath)
   if (!content) return new Response("Not Found", { status: 404 })
 
   const { data } = matter(content)
@@ -105,7 +103,7 @@ export async function GET(
       const resolvedBannerPath = path
         .join(articleDir, bannerSrc)
         .replace(/\\/g, "/")
-      const buf = await getArticleBuffer(resolvedBannerPath)
+      const buf = await getArticleRemoteBuffer(resolvedBannerPath)
       if (buf) {
         const mt = mime.lookup(bannerSrc) || "image/png"
         bannerDataUri = `data:${mt};base64,${Buffer.from(buf).toString("base64")}`

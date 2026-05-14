@@ -4,7 +4,7 @@ import { getCurrentUserAuthContext, requireAdmin } from "@/lib/auth-context"
 import { requireAuth } from "@/lib/auth-helpers"
 import { createDirectFile, createPR } from "@/lib/github/pr-manager"
 import { getPublicSidebarTree } from "@/lib/articles/public-tree"
-import type { ArticleLocale } from "@/lib/article-loader"
+import type { ArticleLocale } from "@/lib/article-manifest"
 
 export async function getSidebarTree(
   locale: ArticleLocale = "zh"

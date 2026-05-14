@@ -19,7 +19,7 @@ import fs from "node:fs"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
 
-import { getArticleTree } from "@/lib/article-loader"
+import { getArticleTree } from "@/lib/article-manifest"
 import {
   linearizeArticles,
   getArticleContentForPdf,

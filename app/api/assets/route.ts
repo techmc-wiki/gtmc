@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import path from "path"
 import mime from "mime-types"
-import { getArticleBuffer } from "@/lib/article-loader"
+import { getArticleRemoteBuffer } from "@/lib/article-remote-assets"
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     : [safePath, `${safePath}.md`]
 
   for (const candidate of pathsToTry) {
-    const fileBuffer = await getArticleBuffer(candidate)
+    const fileBuffer = await getArticleRemoteBuffer(candidate)
     if (fileBuffer) {
       const mimeType = mime.lookup(candidate) || "application/octet-stream"
       return new NextResponse(new Uint8Array(fileBuffer), {

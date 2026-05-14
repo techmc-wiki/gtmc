@@ -13,7 +13,7 @@ import path from "node:path"
 import type { LinearizedArticle } from "@/lib/articles/linearize"
 import { getArticleContentForPdf } from "@/lib/articles/linearize"
 import { renderMarkdownToHtml } from "@/lib/pdf/markdown-pipeline"
-import { ARTICLES_PATH } from "@/lib/slug-resolver"
+import { ARTICLES_PATH } from "@/lib/article-fs-constants"
 import { resolveImageUrl } from "@/lib/pdf/image-resolver"
 
 // ---------------------------------------------------------------------------

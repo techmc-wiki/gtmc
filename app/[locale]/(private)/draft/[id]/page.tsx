@@ -8,7 +8,7 @@ import { decodeStoredDraftFiles } from "@/lib/draft-files"
 import { notFound, redirect } from "next/navigation"
 import { readFile } from "fs/promises"
 import path from "path"
-import { ARTICLES_PATH } from "@/lib/ssg-constants"
+import { ARTICLES_PATH } from "@/lib/article-fs-constants"
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },

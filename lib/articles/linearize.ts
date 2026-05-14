@@ -1,5 +1,5 @@
 import type { TreeNode } from "@/types/sidebar-tree"
-import { resolveSlug } from "@/lib/slug-resolver"
+import { resolveLocalArticlePath } from "@/lib/article-fs-resolver"
 import { getArticleContent } from "@/lib/article-loader"
 
 /**
@@ -61,7 +61,7 @@ export function linearizeArticles(tree: TreeNode[]): LinearizedArticle[] {
         dfs(node.children, node.slug, node.title)
       } else {
         // Resolve file path; may be null if slug is missing from the manifest
-        const filePath = resolveSlug(node.slug)
+        const filePath = resolveLocalArticlePath(node.slug)
 
         result.push({
           slug: node.slug,
@@ -96,7 +96,7 @@ export function linearizeArticles(tree: TreeNode[]): LinearizedArticle[] {
 export async function getArticleContentForPdf(
   slug: string,
 ): Promise<string | null> {
-  const filePath = resolveSlug(slug)
+  const filePath = resolveLocalArticlePath(slug)
   if (!filePath) {
     return null
   }

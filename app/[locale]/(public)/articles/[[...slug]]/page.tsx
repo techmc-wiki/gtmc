@@ -13,14 +13,14 @@ import {
 import { getCachedRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
 import {
   getArticleContent,
+} from "@/lib/article-loader"
+import {
   getArticleTree,
   getLocalizedArticleEntry,
   type ArticleLocale,
-} from "@/lib/article-loader"
-import {
-  resolveSlug,
-  getSlugForFilePath,
-} from "@/lib/slug-resolver"
+} from "@/lib/article-manifest"
+import { getSlugForFilePath } from "@/lib/slug-resolver"
+import { resolveLocalArticlePath } from "@/lib/article-fs-resolver"
 import { decodeSlugPath, encodeSlug } from "@/lib/slug-utils"
 import { formatIndexPrefix } from "@/lib/index-formatter"
 import { getSiteUrl } from "@/lib/site-url"
@@ -424,7 +424,7 @@ async function resolveArticleTarget(
   const targetNode = findNodeBySlug(tree, normalizedSlug)
 
   if (!targetNode) {
-    const filePath = resolveSlug(normalizedSlug)
+    const filePath = resolveLocalArticlePath(normalizedSlug)
     if (!filePath) {
       return null
     }
@@ -447,7 +447,7 @@ async function resolveArticleTarget(
     return null
   }
 
-  const filePath = resolveSlug(canonicalSlug)
+  const filePath = resolveLocalArticlePath(canonicalSlug)
   if (!filePath) {
     return null
   }
@@ -505,7 +505,7 @@ function resolveFirstArticleSlug(children: ArticleTreeNode[]): string | null {
   }
 
   const chapterEntries = children.map((child) => ({
-    filePath: resolveSlug(child.slug) ?? `${child.slug}.md`,
+      filePath: resolveLocalArticlePath(child.slug) ?? `${child.slug}.md`,
     slug: child.slug,
     index: child.index ?? -1,
     isFolder: child.isFolder,

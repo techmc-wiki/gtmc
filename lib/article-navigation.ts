@@ -1,5 +1,5 @@
 import type { TreeNode } from "@/types/sidebar-tree"
-import { getLocalizedArticleEntry } from "./article-loader"
+import { getLocalizedArticleEntry } from "./article-manifest"
 
 interface FlatArticle {
   slug: string

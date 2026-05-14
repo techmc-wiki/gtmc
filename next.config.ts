@@ -15,6 +15,16 @@ const nextConfig: NextConfig = {
       "./.git/**",
       "./public/gtmc.pdf",
     ],
+    "/api/litematica-assets/[...path]": [
+      "./articles/**",
+      "./.git/**",
+      "./public/gtmc.pdf",
+    ],
+    "/api/litematica-assets/*": [
+      "./articles/**",
+      "./.git/**",
+      "./public/gtmc.pdf",
+    ],
   },
   turbopack: {
     resolveAlias: {

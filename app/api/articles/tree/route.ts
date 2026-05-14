@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getPublicSidebarTree } from "@/lib/articles/public-tree"
-import type { ArticleLocale } from "@/lib/article-loader"
+import type { ArticleLocale } from "@/lib/article-manifest"
 
 const TREE_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300"
 const VALID_LOCALES: ArticleLocale[] = ["zh", "en"]

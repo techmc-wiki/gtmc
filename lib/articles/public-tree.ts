@@ -1,10 +1,10 @@
 import { unstable_cache } from "next/cache"
 import { statSync } from "fs"
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
-import { getArticleTree, type ArticleLocale } from "@/lib/article-loader"
+import { getArticleTree, type ArticleLocale } from "@/lib/article-manifest"
 import { getRepoTranslations, type ArticleTreeNode } from "@/lib/github/sync"
 import type { TreeNode } from "@/types/sidebar-tree"
-import { MANIFEST_PATH } from "@/lib/slug-resolver"
+import { MANIFEST_PATH } from "@/lib/article-manifest-store"
 
 function isAppendixDirectoryName(name: string): boolean {
   const normalized = name.trim().toLowerCase()

@@ -2,6 +2,14 @@ import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
 
+const BASE_MINECRAFT_DIR = path.join(
+  /* turbopackIgnore: true */ process.cwd(),
+  "litematica-renderer",
+  "assets",
+  "minecraft"
+)
+const BASE_TEXTURES_DIR = path.join(BASE_MINECRAFT_DIR, "textures")
+
 const FILE_CACHE_LIMIT = 512
 const fileCache = new Map<string, string>()
 
@@ -44,16 +52,6 @@ export async function GET(
   const assetPath = pathArray.join("/")
   const fileName = pathArray[pathArray.length - 1]
 
-  // 基础资产目录
-  const baseMinecraftDir = path.join(
-    process.cwd(),
-    "litematica-renderer",
-    "assets",
-    "minecraft"
-  )
-
-  const baseAssetsDir = path.join(baseMinecraftDir, "textures")
-
   // 递归查找文件函数
   const findFile = async (
     dir: string,
@@ -80,17 +78,17 @@ export async function GET(
   let localTarget: string | null = null
 
   // 允许直接以 models/block/xxx.json 或者 textures/block/xxx.png 访问
-  const explicitTarget = path.join(baseMinecraftDir, assetPath)
+  const explicitTarget = path.join(BASE_MINECRAFT_DIR, assetPath)
   if (fs.existsSync(explicitTarget)) {
     localTarget = explicitTarget
   } else {
     // 后备：旧逻辑直接查找 block/xxx 目录
-    const directTarget = path.join(baseAssetsDir, "block", assetPath)
+    const directTarget = path.join(BASE_TEXTURES_DIR, "block", assetPath)
     if (fs.existsSync(directTarget)) {
       localTarget = directTarget
     } else {
       // 否则我们在整个 textures 目录中进行全局搜索
-      localTarget = await findFile(baseAssetsDir, fileName)
+      localTarget = await findFile(BASE_TEXTURES_DIR, fileName)
     }
   }
 
@@ -99,7 +97,7 @@ export async function GET(
   }
 
   // 安全检查：防止路径穿越攻击
-  if (!localTarget.startsWith(baseMinecraftDir)) {
+  if (!localTarget.startsWith(BASE_MINECRAFT_DIR)) {
     return new NextResponse("Forbidden", { status: 403 })
   }
 
@@ -110,7 +108,7 @@ export async function GET(
     if (localTarget.endsWith(".json")) contentType = "application/json"
     if (localTarget.endsWith(".mcmeta")) contentType = "application/json"
 
-    return new NextResponse(fileBuffer, {
+    return new NextResponse(new Uint8Array(fileBuffer), {
       headers: {
         "Content-Type": contentType,
         // 设置超长缓存，优化连续请求以及 Three.js Texture 加载速度

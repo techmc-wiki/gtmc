@@ -20,15 +20,11 @@ export default function FeatureDetailLoading() {
   return (
     <SkeletonExitWrapper>
       <div
-        className="
-          container mx-auto max-w-4xl space-y-6 p-4
-          sm:p-6
-          md:p-8
-        "
+        className="container mx-auto max-w-4xl space-y-6 p-4 sm:p-6 md:p-8"
         aria-busy="true"
         aria-label={t("loadingFeatureDetails")}>
         {/* FEATURE_HEADER_ */}
-        <div className="relative flex animate-tech-slide-in flex-col gap-4">
+        <div className="animate-tech-slide-in relative flex flex-col gap-4">
           <ScanConfirmOverlay />
           <div>
             <SegmentedBar opacity="high" className="h-8 w-64" />
@@ -37,82 +33,30 @@ export default function FeatureDetailLoading() {
 
         {/* ISSUE_METADATA_ */}
         <TechCard className="animate-tech-slide-in [animation-delay:100ms]">
-          <div
-            className="
-              flex flex-col gap-2 font-mono text-xs
-              sm:text-sm
-            ">
-            <div
-              className="
-                flex flex-col gap-2
-                sm:flex-row sm:items-center
-              ">
-              <span
-                className="
-                  font-bold text-zinc-500
-                  sm:w-24
-                ">
-                STATUS:
-              </span>
+          <div className="flex flex-col gap-2 font-mono text-xs sm:text-sm">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <span className="font-bold text-zinc-500 sm:w-24">STATUS:</span>
               <SegmentedBar opacity="high" className="h-4 w-32" />
             </div>
-            <div
-              className="
-                flex flex-col gap-2
-                sm:flex-row sm:items-center
-              ">
-              <span
-                className="
-                  font-bold text-zinc-500
-                  sm:w-24
-                ">
-                AUTHOR:
-              </span>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <span className="font-bold text-zinc-500 sm:w-24">AUTHOR:</span>
               <SegmentedBar opacity="medium" className="h-4 w-40" />
             </div>
-            <div
-              className="
-                flex flex-col gap-2
-                sm:flex-row sm:items-center
-              ">
-              <span
-                className="
-                  font-bold text-zinc-500
-                  sm:w-24
-                ">
-                ASSIGNEE:
-              </span>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <span className="font-bold text-zinc-500 sm:w-24">ASSIGNEE:</span>
               <SegmentedBar opacity="medium" className="h-4 w-40" />
             </div>
-            <div
-              className="
-                flex flex-col gap-2
-                sm:flex-row sm:items-center
-              ">
-              <span
-                className="
-                  font-bold text-zinc-500
-                  sm:w-24
-                ">
-                CREATED:
-              </span>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <span className="font-bold text-zinc-500 sm:w-24">CREATED:</span>
               <SegmentedBar opacity="low" className="h-4 w-36" />
             </div>
           </div>
         </TechCard>
 
         {/* RESOLUTION_BLOCK_ */}
-        <TechCard
-          className="
-            relative animate-tech-slide-in overflow-hidden border-tech-accent/40
-            bg-tech-accent/5 backdrop-blur-sm [animation-delay:200ms]
-          ">
-          <div className="absolute top-0 left-0 h-full w-2 bg-tech-accent/60" />
-          <div
-            className="
-              mb-4 flex items-start justify-between border-b
-              border-tech-accent/40 pb-2 pl-4
-            ">
+        <TechCard className="animate-tech-slide-in border-tech-accent/40 bg-tech-accent/5 relative overflow-hidden backdrop-blur-sm [animation-delay:200ms]">
+          <div className="bg-tech-accent/60 absolute top-0 left-0 h-full w-2" />
+          <div className="border-tech-accent/40 mb-4 flex items-start justify-between border-b pb-2 pl-4">
             <div className="h-5 w-40">
               <SegmentedBar opacity="high" className="size-full" />
             </div>
@@ -124,13 +68,7 @@ export default function FeatureDetailLoading() {
         </TechCard>
 
         {/* EDITOR_BUFFER_ */}
-        <div
-          className="
-            group relative flex w-full animate-tech-slide-in flex-col space-y-6
-            border border-tech-main bg-white/80 p-4 backdrop-blur-sm
-            [animation-delay:300ms]
-            sm:p-6
-          ">
+        <div className="group animate-tech-slide-in border-tech-main relative flex w-full flex-col space-y-6 border bg-white/80 p-4 backdrop-blur-sm [animation-delay:300ms] sm:p-6">
           <CornerBrackets size="size-2" color="border-tech-main/40" />
 
           <div className="flex flex-col space-y-4">
@@ -145,18 +83,8 @@ export default function FeatureDetailLoading() {
             </div>
           </div>
 
-          <div
-            className="
-              relative editor-grow border border-tech-main/40 bg-white/80
-              backdrop-blur-sm
-            ">
-            <div
-              className="
-                sticky top-0 z-10 flex h-10 flex-wrap items-center gap-1
-                border-b border-tech-main/40 bg-tech-main p-2 px-2 font-mono
-                text-xs text-white/90
-                sm:gap-2 sm:px-4
-              ">
+          <div className="editor-grow border-tech-main/40 relative border bg-white/80 backdrop-blur-sm">
+            <div className="border-tech-main/40 bg-tech-main sticky top-0 z-10 flex h-10 flex-wrap items-center gap-1 border-b p-2 px-2 font-mono text-xs text-white/90 sm:gap-2 sm:px-4">
               <SegmentedBar opacity="high" className="h-6 w-8" />
               <div className="h-6 w-px bg-white/30" />
               <SegmentedBar opacity="medium" className="h-6 w-8" />
@@ -172,11 +100,7 @@ export default function FeatureDetailLoading() {
             </div>
           </div>
 
-          <div
-            className="
-              relative mt-6 flex justify-end gap-4 border-t border-tech-main/10
-              pt-4
-            ">
+          <div className="border-tech-main/10 relative mt-6 flex justify-end gap-4 border-t pt-4">
             <div className="corner-tick" />
             <SegmentedBar opacity="high" className="h-10 w-24" />
           </div>
@@ -184,11 +108,7 @@ export default function FeatureDetailLoading() {
 
         {/* DISCUSSION_LOG_ */}
         <div className="animate-tech-slide-in space-y-6 [animation-delay:400ms]">
-          <h3
-            className="
-              inline-block border-b-2 border-tech-main pb-2 text-2xl font-bold
-              tracking-tighter uppercase
-            ">
+          <h3 className="border-tech-main inline-block border-b-2 pb-2 text-2xl font-bold tracking-tighter uppercase">
             Discussions
           </h3>
 
@@ -196,11 +116,7 @@ export default function FeatureDetailLoading() {
           <div className="space-y-4">
             {[1, 2].map((i) => (
               <SectionFrame key={i} className="p-6">
-                <div
-                  className="
-                    mb-2 flex items-center gap-2 border-b border-dashed
-                    border-tech-main/30 pb-2 font-mono text-sm
-                  ">
+                <div className="border-tech-main/30 mb-2 flex items-center gap-2 border-b border-dashed pb-2 font-mono text-sm">
                   <SegmentedBar opacity="high" className="h-4 w-32" />
                   <SegmentedBar opacity="medium" className="h-4 w-40" />
                 </div>
@@ -214,11 +130,7 @@ export default function FeatureDetailLoading() {
 
           {/* Comment form */}
           <SectionFrame className="p-6">
-            <label
-              className="
-                mb-4 inline-block border-b border-tech-main/40 pb-1 font-mono
-                text-sm tracking-tech-wide text-tech-main uppercase
-              ">
+            <label className="border-tech-main/40 tracking-tech-wide text-tech-main mb-4 inline-block border-b pb-1 font-mono text-sm uppercase">
               LEAVE_A_REPLY_
             </label>
             <SegmentedBar opacity="medium" className="mb-4 h-24 w-full" />

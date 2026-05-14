@@ -66,20 +66,10 @@ export async function FeatureListContent({
           topMargin
           action={
             session?.user ? (
-              <Link
-                href="/features/new"
-                className="
-                  w-full
-                  md:w-auto
-                ">
+              <Link href="/features/new" className="w-full md:w-auto">
                 <TechButton
                   variant="primary"
-                  className="
-                    flex min-h-[44px] w-full items-center justify-center px-6
-                    text-xs tracking-widest uppercase transition-transform
-                    hover:scale-[1.02]
-                    md:w-auto
-                  ">
+                  className="flex min-h-[44px] w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
                   + {t("createButton")}
                 </TechButton>
               </Link>

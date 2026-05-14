@@ -207,10 +207,7 @@ export const EditorTextarea = React.forwardRef<
 
   return (
     <div
-      className={`
-        flex custom-left-scrollbar w-full grow flex-col
-        ${isReadOnly ? `cursor-not-allowed bg-gray-50` : `bg-transparent`}
-      `}
+      className={`custom-left-scrollbar flex w-full grow flex-col ${isReadOnly ? `cursor-not-allowed bg-gray-50` : `bg-transparent`} `}
       onPaste={onPaste}
       onDrop={onDrop}
       onDragOver={onDragOver}

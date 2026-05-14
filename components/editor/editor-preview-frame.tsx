@@ -28,12 +28,7 @@ export function EditorPreviewFrame({
 
   return (
     <div
-      className={`
-        w-full max-w-none overflow-hidden p-6 wrap-break-word
-        selection:bg-tech-main/20 selection:text-slate-900
-        sm:p-8
-        ${className}
-      `}>
+      className={`selection:bg-tech-main/20 w-full max-w-none overflow-hidden p-6 wrap-break-word selection:text-slate-900 sm:p-8 ${className} `}>
       {children}
     </div>
   )
@@ -57,10 +52,7 @@ export function EditorPreviewPanel({
       id={id}
       role="tabpanel"
       hidden={hidden}
-      className={`
-        editor-grow
-        ${className}
-      `}>
+      className={`editor-grow ${className} `}>
       {children}
     </div>
   )
@@ -84,10 +76,7 @@ export function EditorWritePanel({
       id={id}
       role="tabpanel"
       hidden={hidden}
-      className={`
-        editor-grow
-        ${className}
-      `}>
+      className={`editor-grow ${className} `}>
       <div className="editor-surface">{children}</div>
     </div>
   )
@@ -104,11 +93,7 @@ export function EditorContentArea({
 }: EditorContentAreaProps) {
   return (
     <div
-      className={`
-        relative editor-grow flex min-h-125 grow flex-col border
-        border-tech-main/40 bg-white/80 backdrop-blur-sm
-        ${className}
-      `}>
+      className={`editor-grow border-tech-main/40 relative flex min-h-125 grow flex-col border bg-white/80 backdrop-blur-sm ${className} `}>
       {children}
     </div>
   )

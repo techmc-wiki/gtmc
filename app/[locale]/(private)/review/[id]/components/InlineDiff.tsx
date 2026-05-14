@@ -24,10 +24,7 @@ export function InlineDiff({
             return (
               <span
                 key={index}
-                className="
-                  rounded-xs border-b border-blue-400 bg-blue-300/80 px-0.5
-                  font-bold text-blue-950
-                ">
+                className="rounded-xs border-b border-blue-400 bg-blue-300/80 px-0.5 font-bold text-blue-950">
                 {part.value}
               </span>
             )
@@ -43,10 +40,7 @@ export function InlineDiff({
             return (
               <span
                 key={index}
-                className="
-                  rounded-xs border-b border-green-500 bg-green-400/80 px-0.5
-                  font-bold text-green-950
-                ">
+                className="rounded-xs border-b border-green-500 bg-green-400/80 px-0.5 font-bold text-green-950">
                 {part.value}
               </span>
             )

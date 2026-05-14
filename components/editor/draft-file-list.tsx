@@ -46,7 +46,7 @@ export function DraftFileList({
               type="button"
               variant="secondary"
               size="sm"
-              className="shrink-0 transition-colors hover:bg-tech-main/10"
+              className="hover:bg-tech-main/10 shrink-0 transition-colors"
               onClick={onAddFile}>
               <span className="mr-1">+</span> {t("addButton")}
             </TechButton>
@@ -77,24 +77,11 @@ export function DraftFileList({
                     type="button"
                     onClick={() => onRemoveFile(file.id)}
                     title={t("removeFile")}
-                    className={`
-                      ml-px flex min-w-[32px] shrink-0 items-center
-                      justify-center border-y border-r transition-all duration-200
-                      ${
-                        isActive
-                          ? `
-                            border-tech-main bg-tech-main/4 text-tech-main/60
-                            hover:border-red-500/50 hover:bg-red-500/10
-                            hover:text-red-600 hover:shadow-[inset_0_0_10px_rgba(239,68,68,0.1)]
-                          `
-                          : `
-                            border-transparent bg-transparent text-tech-main/20
-                            opacity-0 group-hover:guide-line
-                            group-hover:bg-white/30 group-hover:opacity-100
-                            hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-500
-                          `
-                      }
-                    `}>
+                    className={`ml-px flex min-w-[32px] shrink-0 items-center justify-center border-y border-r transition-all duration-200 ${
+                      isActive
+                        ? `border-tech-main bg-tech-main/4 text-tech-main/60 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-600 hover:shadow-[inset_0_0_10px_rgba(239,68,68,0.1)]`
+                        : `text-tech-main/20 group-hover:guide-line border-transparent bg-transparent opacity-0 group-hover:bg-white/30 group-hover:opacity-100 hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-500`
+                    } `}>
                     <svg
                       width="12"
                       height="12"

@@ -205,7 +205,7 @@ export function SearchCommand() {
         return i % 2 === 1 ? (
           <mark
             key={`${part}-${start}`}
-            className="bg-tech-main/20 px-0.5 text-tech-main-dark">
+            className="bg-tech-main/20 text-tech-main-dark px-0.5">
             {part}
           </mark>
         ) : (
@@ -238,19 +238,10 @@ export function SearchCommand() {
     return (
       <button
         type="button"
-        className="
-          hidden cursor-pointer items-center gap-2 border border-tech-main/40
-          px-3 py-1.5 font-mono text-[0.6875rem] text-tech-main/60 transition-colors
-          hover:bg-tech-main hover:text-white
-          md:flex
-        ">
+        className="border-tech-main/40 text-tech-main/60 hover:bg-tech-main hidden cursor-pointer items-center gap-2 border px-3 py-1.5 font-mono text-[0.6875rem] transition-colors hover:text-white md:flex">
         <span className="text-xs">&#x2315;</span>
         {t("heading")}
-        <span
-          className="
-            ml-1 border border-tech-main/30 px-1 py-0.5 text-[0.5625rem]
-            text-tech-main/40
-          ">
+        <span className="border-tech-main/30 text-tech-main/40 ml-1 border px-1 py-0.5 text-[0.5625rem]">
           <span className="flex flex-row items-center gap-0.5 leading-none">
             <span className="text-xs">{"\u2318"}</span>K
           </span>
@@ -265,22 +256,13 @@ export function SearchCommand() {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="
-          hidden h-8 w-40 cursor-pointer items-center
-          gap-2 border border-tech-main/40 px-3 py-1.5 font-mono text-[0.6875rem] text-tech-main/60 transition-colors
-          hover:bg-tech-main hover:text-white
-          md:flex
-        ">
+        className="border-tech-main/40 text-tech-main/60 hover:bg-tech-main hidden h-8 w-40 cursor-pointer items-center gap-2 border px-3 py-1.5 font-mono text-[0.6875rem] transition-colors hover:text-white md:flex">
         <div className="flex w-full items-center justify-between">
           <span className="flex items-center gap-1 text-lg leading-none">
             &#x2315;{/* icon */}
             <span className="mt-0.5 text-[0.625rem]">{t("heading")}</span>
           </span>
-          <span
-            className="
-             border border-tech-main/30 px-1 text-[0.625rem]
-              text-tech-main/40
-            ">
+          <span className="border-tech-main/30 text-tech-main/40 border px-1 text-[0.625rem]">
             {shortcutLabel}
           </span>
         </div>
@@ -290,12 +272,7 @@ export function SearchCommand() {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="
-          flex min-h-11 min-w-11 cursor-pointer items-center justify-center p-2
-          font-mono text-[2.5rem] text-tech-main transition-colors
-          hover:bg-tech-main/10
-          md:hidden
-        "
+        className="text-tech-main hover:bg-tech-main/10 flex min-h-11 min-w-11 cursor-pointer items-center justify-center p-2 font-mono text-[2.5rem] transition-colors md:hidden"
         aria-label={t("searchAriaLabel")}>
         &#x2315;
       </button>
@@ -304,11 +281,7 @@ export function SearchCommand() {
       {isOpen &&
         createPortal(
           <div
-            className="
-              fixed inset-0 z-9999 flex items-start justify-center bg-black/80
-              p-4 pt-[10vh] duration-200 animate-in fade-in
-              sm:pt-[15vh]
-            "
+            className="animate-in fade-in fixed inset-0 z-9999 flex items-start justify-center bg-black/80 p-4 pt-[10vh] duration-200 sm:pt-[15vh]"
             onClick={(e) => {
               if (e.target === e.currentTarget) closeModal()
             }}
@@ -324,59 +297,32 @@ export function SearchCommand() {
             aria-modal="true"
             aria-label={t("searchAriaLabel")}
             tabIndex={-1}>
-            <div
-              className="
-                relative w-full max-w-xl border border-tech-main bg-white/95
-                shadow-xl backdrop-blur-md duration-200 animate-in
-                slide-in-from-top-4
-              ">
+            <div className="border-tech-main animate-in slide-in-from-top-4 relative w-full max-w-xl border bg-white/95 shadow-xl backdrop-blur-md duration-200">
               <CornerBrackets variant="static" />
 
               {/* Header */}
-              <header
-                className="
-                  flex items-center justify-between border-b guide-line px-4
-                  py-3
-                ">
-                <div
-                  className="
-                    flex items-center gap-2 font-mono text-xs font-bold
-                    tracking-tech-wide text-tech-main/80 uppercase
-                  ">
-                  <span
-                    className="
-                      inline-block size-1.5 animate-pulse bg-tech-main/80
-                    "
-                  />
+              <header className="guide-line flex items-center justify-between border-b px-4 py-3">
+                <div className="tracking-tech-wide text-tech-main/80 flex items-center gap-2 font-mono text-xs font-bold uppercase">
+                  <span className="bg-tech-main/80 inline-block size-1.5 animate-pulse" />
                   SYS.QUERY_ENGINE
                 </div>
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="
-                    cursor-pointer border border-tech-main/40 px-2 py-0.5
-                    font-mono text-[0.625rem] text-tech-main/70 transition-colors
-                    hover:bg-tech-main hover:text-white
-                  ">
+                  className="border-tech-main/40 text-tech-main/70 hover:bg-tech-main cursor-pointer border px-2 py-0.5 font-mono text-[0.625rem] transition-colors hover:text-white">
                   ESC
                 </button>
               </header>
 
               {/* Search input */}
-              <div className="border-b guide-line px-4 py-3">
+              <div className="guide-line border-b px-4 py-3">
                 <input
                   ref={inputRef}
                   type="text"
                   value={query}
                   onChange={handleQueryChange}
                   placeholder={t("placeholder")}
-                  className="
-                    w-full border border-tech-main/40 bg-white/60 px-3 py-2.5
-                    font-mono text-sm text-tech-main-dark transition-colors
-                    outline-none
-                    placeholder:text-tech-main/50
-                    focus:border-tech-main/70 focus:bg-white/80
-                  "
+                  className="border-tech-main/40 text-tech-main-dark placeholder:text-tech-main/50 focus:border-tech-main/70 w-full border bg-white/60 px-3 py-2.5 font-mono text-sm transition-colors outline-none focus:bg-white/80"
                   autoComplete="off"
                   spellCheck={false}
                 />
@@ -388,11 +334,7 @@ export function SearchCommand() {
                 className="custom-left-scrollbar max-h-[50vh] overflow-y-auto">
                 {/* Status line */}
                 {query.length >= 2 && (
-                  <div
-                    className="
-                      border-b guide-line px-4 py-2 font-mono text-[0.625rem]
-                      tracking-wider text-tech-main/70 uppercase
-                    ">
+                  <div className="guide-line text-tech-main/70 border-b px-4 py-2 font-mono text-[0.625rem] tracking-wider uppercase">
                     {isLoading
                       ? t("scanning")
                       : results.length === 20
@@ -407,16 +349,8 @@ export function SearchCommand() {
                     <div className="space-y-3">
                       {[1, 2, 3].map((i) => (
                         <div key={i} className="space-y-1.5">
-                          <div
-                            className="
-                            h-4 w-3/5 animate-pulse bg-tech-main/10
-                          "
-                          />
-                          <div
-                            className="
-                            h-3 w-2/5 animate-pulse bg-tech-main/5
-                          "
-                          />
+                          <div className="bg-tech-main/10 h-4 w-3/5 animate-pulse" />
+                          <div className="bg-tech-main/5 h-3 w-2/5 animate-pulse" />
                         </div>
                       ))}
                     </div>
@@ -433,15 +367,11 @@ export function SearchCommand() {
                           onClick={() => navigateToResult(result)}
                           onMouseEnter={() => setSelectedIndex(index)}
                           data-search-result-index={index}
-                          className={`
-                            group relative w-full cursor-pointer px-4 py-3
-                            text-left transition-colors
-                            ${
-                              index === selectedIndex
-                                ? "bg-tech-main/10"
-                                : "hover:bg-tech-accent/10"
-                            }
-                          `}
+                          className={`group relative w-full cursor-pointer px-4 py-3 text-left transition-colors ${
+                            index === selectedIndex
+                              ? "bg-tech-main/10"
+                              : "hover:bg-tech-accent/10"
+                          } `}
                           aria-label={t("selectResult", {
                             title: result.title,
                           })}
@@ -454,38 +384,24 @@ export function SearchCommand() {
                           )}
 
                           {/* Title */}
-                          <div
-                            className="
-                              font-mono text-sm font-medium text-tech-main-dark
-                            ">
+                          <div className="text-tech-main-dark font-mono text-sm font-medium">
                             {highlightMatch(result.title)}
                           </div>
 
                           {/* Path */}
-                          <div
-                            className="
-                              mt-0.5 font-mono text-[0.625rem] tracking-wider
-                              text-tech-main/60 uppercase
-                            ">
+                          <div className="text-tech-main/60 mt-0.5 font-mono text-[0.625rem] tracking-wider uppercase">
                             {t("pathLabel")} {slugToPath(result.slug)}
                           </div>
 
                           {/* Content snippet */}
                           {result.snippet && (
-                            <div
-                              className="
-                              mt-1 text-xs/relaxed text-tech-main/70
-                            ">
+                            <div className="text-tech-main/70 mt-1 text-xs/relaxed">
                               {highlightMatch(result.snippet)}
                             </div>
                           )}
 
                           {/* Match type badge */}
-                          <div
-                            className="
-                              absolute top-3 right-4 font-mono text-[0.5625rem]
-                              tracking-wider text-tech-main/50 uppercase
-                            ">
+                          <div className="text-tech-main/50 absolute top-3 right-4 font-mono text-[0.5625rem] tracking-wider uppercase">
                             {result.matchType === "content"
                               ? t("matchBody")
                               : t("matchTitle")}
@@ -499,17 +415,10 @@ export function SearchCommand() {
                 {/* Empty state */}
                 {!isLoading && query.length >= 2 && results.length === 0 && (
                   <div className="px-4 py-8 text-center">
-                    <div
-                      className="
-                        font-mono text-xs tracking-wider text-tech-main/60
-                        uppercase
-                      ">
+                    <div className="text-tech-main/60 font-mono text-xs tracking-wider uppercase">
                       {t("noMatch")}
                     </div>
-                    <div
-                      className="
-                      mt-1 font-mono text-[0.625rem] text-tech-main/40
-                    ">
+                    <div className="text-tech-main/40 mt-1 font-mono text-[0.625rem]">
                       {t("tryDifferentKeywords")}
                     </div>
                   </div>
@@ -518,17 +427,10 @@ export function SearchCommand() {
                 {/* Initial state */}
                 {query.length < 2 && (
                   <div className="px-4 py-8 text-center">
-                    <div
-                      className="
-                        font-mono text-xs tracking-wider text-tech-main/60
-                        uppercase
-                      ">
+                    <div className="text-tech-main/60 font-mono text-xs tracking-wider uppercase">
                       {t("awaitingInput")}
                     </div>
-                    <div
-                      className="
-                      mt-1 font-mono text-[0.625rem] text-tech-main/40
-                    ">
+                    <div className="text-tech-main/40 mt-1 font-mono text-[0.625rem]">
                       {t("minCharsHint")}
                     </div>
                   </div>
@@ -536,11 +438,7 @@ export function SearchCommand() {
               </div>
 
               {/* Footer hints */}
-              <footer
-                className="
-                  flex items-center gap-4 border-t guide-line px-4 py-2
-                  font-mono text-[0.625rem] text-tech-main/60
-                ">
+              <footer className="guide-line text-tech-main/60 flex items-center gap-4 border-t px-4 py-2 font-mono text-[0.625rem]">
                 <span>
                   <kbd className="kbd-badge">&#x2191;&#x2193;</kbd>{" "}
                   {t("navigateHint")}

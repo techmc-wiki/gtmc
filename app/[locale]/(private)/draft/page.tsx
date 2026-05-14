@@ -107,10 +107,10 @@ export default async function DraftDashboardPage() {
       pattern="grid"
       className="group relative flex h-auto flex-col justify-between sm:h-64">
       <div className="relative z-10">
-        <div className="card-header-row border-b border-tech-main/10 pb-3">
+        <div className="card-header-row border-tech-main/10 border-b pb-3">
           <div className="flex items-center gap-3">
-            <div className="flex size-2 items-center justify-center bg-tech-main/20">
-              <div className="size-1 bg-tech-main group-hover:animate-target-blink" />
+            <div className="bg-tech-main/20 flex size-2 items-center justify-center">
+              <div className="bg-tech-main group-hover:animate-target-blink size-1" />
             </div>
             <DraftStatusBadge status={draft.displayStatus} />
             {draft.cleanupFailedCount > 0 ? (
@@ -131,11 +131,7 @@ export default async function DraftDashboardPage() {
                 }}>
                 <button
                   type="submit"
-                  className="
-                    flex cursor-pointer items-center font-mono
-                    text-[10px] text-red-500/70 uppercase transition-colors
-                    hover:text-red-600 hover:underline
-                  ">
+                  className="flex cursor-pointer items-center font-mono text-[10px] text-red-500/70 uppercase transition-colors hover:text-red-600 hover:underline">
                   [ TERMINATE ]
                 </button>
               </form>
@@ -144,25 +140,20 @@ export default async function DraftDashboardPage() {
         </div>
 
         <div className="mt-4 flex flex-col gap-2">
-          <h3
-            className="
-              line-clamp-2 border-l-2 border-tech-main/40 pl-3 text-lg
-              font-bold tracking-tight text-tech-main-dark uppercase
-              transition-colors group-hover:border-tech-main
-            ">
+          <h3 className="border-tech-main/40 text-tech-main-dark group-hover:border-tech-main line-clamp-2 border-l-2 pl-3 text-lg font-bold tracking-tight uppercase transition-colors">
             {draft.title || "UNTITLED_DOCUMENT"}
           </h3>
 
-          <div className="mt-2 grid grid-cols-2 gap-2 border-t border-tech-main/10 pt-3">
+          <div className="border-tech-main/10 mt-2 grid grid-cols-2 gap-2 border-t pt-3">
             <div className="flex flex-col">
               <span className="mono-label text-tech-main/40">SYS_REF</span>
-              <span className="truncate font-mono text-xs text-tech-main/80">
+              <span className="text-tech-main/80 truncate font-mono text-xs">
                 {draft.id.split("-")[0]}
               </span>
             </div>
             <div className="flex flex-col">
               <span className="mono-label text-tech-main/40">FILE_METRICS</span>
-              <span className="font-mono text-xs text-tech-main/80">
+              <span className="text-tech-main/80 font-mono text-xs">
                 {draft.fileCount} NODE(S)
               </span>
             </div>
@@ -172,18 +163,10 @@ export default async function DraftDashboardPage() {
 
       <Link
         href={`/draft/${draft.id}`}
-        className="
-          relative z-10 mt-6
-          sm:mt-auto
-        ">
+        className="relative z-10 mt-6 sm:mt-auto">
         <TechButton
           variant="ghost"
-          className="
-            min-h-11 w-full border guide-line bg-tech-main/5 font-mono
-            text-xs tracking-widest transition-all
-            group-hover:border-tech-main/60 group-hover:bg-tech-main/10
-            group-hover:text-tech-main-dark
-          ">
+          className="guide-line bg-tech-main/5 group-hover:border-tech-main/60 group-hover:bg-tech-main/10 group-hover:text-tech-main-dark min-h-11 w-full border font-mono text-xs tracking-widest transition-all">
           <span className="flex w-full items-center justify-between px-2">
             <span>
               {draft.displayStatus === "DRAFT" ||
@@ -191,7 +174,7 @@ export default async function DraftDashboardPage() {
                 ? "INIT_EDIT_SEQUENCE"
                 : "ENGAGE_VIEWER"}
             </span>
-            <span className="opacity-0 transition-opacity group-hover:animate-target-blink group-hover:opacity-100">
+            <span className="group-hover:animate-target-blink opacity-0 transition-opacity group-hover:opacity-100">
               {">"}
             </span>
           </span>
@@ -206,20 +189,10 @@ export default async function DraftDashboardPage() {
         title="Ops Center"
         subtitle="YOUR DIGITAL WORKSHOP / DRAFTS & REVISIONS"
         action={
-          <Link
-            href="/draft/new"
-            className="
-              w-full
-              md:w-auto
-            ">
+          <Link href="/draft/new" className="w-full md:w-auto">
             <TechButton
               variant="primary"
-              className="
-                flex min-h-11 w-full items-center justify-center px-6 text-xs
-                tracking-widest uppercase transition-transform
-                hover:scale-[1.02]
-                md:w-auto
-              ">
+              className="flex min-h-11 w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
               + INITIALIZE SUBMISSION
             </TechButton>
           </Link>
@@ -229,12 +202,7 @@ export default async function DraftDashboardPage() {
       <div className="space-y-8">
         <div>
           <SectionTitle>Active Records</SectionTitle>
-          <div
-            className="
-              grid grid-cols-1 gap-6
-              md:grid-cols-2
-              lg:grid-cols-3
-            ">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {activeDrafts.length === 0 ? (
               <EmptyState message="NO ACTIVE RECORDS FOUND." colSpanFull />
             ) : (
@@ -246,12 +214,7 @@ export default async function DraftDashboardPage() {
         {archivedDrafts.length > 0 && (
           <div>
             <SectionTitle>Archived / Approved Records</SectionTitle>
-            <div
-              className="
-                grid grid-cols-1 gap-6
-                md:grid-cols-2
-                lg:grid-cols-3
-              ">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {archivedDrafts.map(renderDraftCard)}
             </div>
           </div>

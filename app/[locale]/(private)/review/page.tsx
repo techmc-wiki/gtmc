@@ -202,10 +202,7 @@ export default async function ReviewHubPage() {
       hover="elevated"
       brackets="visible"
       bracketVariant="hover"
-      className="
-        group relative flex flex-col items-start justify-between space-y-4
-        md:flex-row md:items-center md:space-y-0
-      ">
+      className="group relative flex flex-col items-start justify-between space-y-4 md:flex-row md:items-center md:space-y-0">
       <div className="relative z-10 flex-1">
         <div className="mb-3 flex items-center gap-3">
           <ReviewStatusBadge
@@ -227,49 +224,26 @@ export default async function ReviewHubPage() {
           )}
         </div>
         <h3
-          className={`
-            mb-2 border-l-2 border-tech-main/40 pl-3 text-lg font-bold
-            tracking-tight uppercase
-            md:text-xl
-            ${isConflict ? `text-red-700` : `text-tech-main-dark`}
-          `}>
+          className={`border-tech-main/40 mb-2 border-l-2 pl-3 text-lg font-bold tracking-tight uppercase md:text-xl ${isConflict ? `text-red-700` : `text-tech-main-dark`} `}>
           {pr.title || t("untitled")}
         </h3>
-        <p className="mb-3 pl-3 font-mono text-xs text-tech-main/80">
+        <p className="text-tech-main/80 mb-3 pl-3 font-mono text-xs">
           {t("submittedBy")}{" "}
-          <span className="font-bold text-tech-main-dark">
+          <span className="text-tech-main-dark font-bold">
             {pr.user?.login || t("unknown")}
           </span>
         </p>
-        <p
-          className="
-            ml-3 inline-flex items-center border guide-line bg-tech-main/5 px-2
-            py-1 font-mono text-xs text-tech-main
-          ">
-          <span className="mr-2 size-1.5 bg-tech-main"></span> {t("target")}{" "}
+        <p className="guide-line bg-tech-main/5 text-tech-main ml-3 inline-flex items-center border px-2 py-1 font-mono text-xs">
+          <span className="bg-tech-main mr-2 size-1.5"></span> {t("target")}{" "}
           {pr.head.ref}
         </p>
       </div>
 
-      <div
-        className="
-          relative z-10 flex w-full flex-col gap-4
-          md:w-auto md:flex-row
-        ">
-        <Link
-          href={`/review/${pr.number}`}
-          className="
-            w-full
-            md:w-auto
-          ">
+      <div className="relative z-10 flex w-full flex-col gap-4 md:w-auto md:flex-row">
+        <Link href={`/review/${pr.number}`} className="w-full md:w-auto">
           <TechButton
             variant={isConflict ? "danger" : "primary"}
-            className="
-              flex min-h-11 w-full items-center justify-center px-6 text-xs
-              tracking-widest uppercase transition-transform
-              hover:scale-[1.02]
-              md:w-auto
-            ">
+            className="flex min-h-11 w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
             {t("resolveButton")} →
           </TechButton>
         </Link>
@@ -288,11 +262,7 @@ export default async function ReviewHubPage() {
           <div className="flex flex-col gap-10">
             {groupedPRs.conflicts.length > 0 && (
               <div className="space-y-4">
-                <h2
-                  className="
-                    border-b-2 border-red-500/50 pb-2 font-bold tracking-widest
-                    text-red-600 uppercase
-                  ">
+                <h2 className="border-b-2 border-red-500/50 pb-2 font-bold tracking-widest text-red-600 uppercase">
                   {t("priorityConflicts")}
                 </h2>
                 <div className="grid grid-cols-1 gap-6">
@@ -303,11 +273,7 @@ export default async function ReviewHubPage() {
 
             {groupedPRs.pending.length > 0 && (
               <div className="space-y-4">
-                <h2
-                  className="
-                    border-b-2 border-tech-main/50 pb-2 font-bold
-                    tracking-widest text-tech-main uppercase
-                  ">
+                <h2 className="border-tech-main/50 text-tech-main border-b-2 pb-2 font-bold tracking-widest uppercase">
                   {t("pendingReviews")}
                 </h2>
                 <div className="grid grid-cols-1 gap-6">

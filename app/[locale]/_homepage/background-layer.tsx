@@ -43,17 +43,11 @@ export function BackgroundLayer({
 }) {
   return (
     <motion.div
-      className="absolute inset-0 z-0 homepage-decor-background"
+      className="homepage-decor-background absolute inset-0 z-0"
       style={{ x: bgTransform.x, y: bgTransform.y }}>
       {/* 巨型背景水印 */}
       <DecorElement
-        className="
-          pointer-events-none absolute top-1/3 -right-20 decor-desktop-only
-          hidden rotate-90 text-[10rem] font-black tracking-tighter
-          whitespace-nowrap text-tech-main opacity-[0.05] mix-blend-multiply
-          select-none
-          lg:block
-        "
+        className="decor-desktop-only text-tech-main pointer-events-none absolute top-1/3 -right-20 hidden rotate-90 text-[10rem] font-black tracking-tighter whitespace-nowrap opacity-[0.05] mix-blend-multiply select-none lg:block"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
@@ -63,12 +57,7 @@ export function BackgroundLayer({
 
       {/* NBT二进制/Hex Dump 背景层 */}
       <DecorElement
-        className="
-           pointer-events-none absolute top-[20%] left-[5%] decor-desktop-only
-           hidden font-mono text-[0.625rem] leading-tight whitespace-pre
-           text-tech-main opacity-[0.25] mix-blend-multiply select-none
-           xl:block
-         "
+        className="decor-desktop-only text-tech-main pointer-events-none absolute top-[20%] left-[5%] hidden font-mono text-[0.625rem] leading-tight whitespace-pre opacity-[0.25] mix-blend-multiply select-none xl:block"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
@@ -87,11 +76,7 @@ export function BackgroundLayer({
 
       {/* MC 方块视角的几何线条叠加 */}
       <DecorElement
-        className="
-          pointer-events-none absolute right-[10%] bottom-[20%]
-          decor-desktop-only hidden opacity-20
-          lg:block
-        "
+        className="decor-desktop-only pointer-events-none absolute right-[10%] bottom-[20%] hidden opacity-20 lg:block"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
@@ -132,10 +117,7 @@ export function BackgroundLayer({
             className="opacity-50"
           />
         </svg>
-        <span
-          className="
-             absolute -right-12 bottom-4 font-mono text-[0.625rem] opacity-80
-           ">
+        <span className="absolute -right-12 bottom-4 font-mono text-[0.625rem] opacity-80">
           FIG 1. ISOMETRIC_BLOCK
         </span>
         <svg
@@ -151,11 +133,7 @@ export function BackgroundLayer({
 
       {/* 圆形/雷达阵列结构 */}
       <DecorElement
-        className="
-          pointer-events-none absolute bottom-16 left-[20%] decor-desktop-only
-          hidden opacity-10
-          lg:block
-        "
+        className="decor-desktop-only pointer-events-none absolute bottom-16 left-[20%] hidden opacity-10 lg:block"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
@@ -177,18 +155,12 @@ export function BackgroundLayer({
 
       {/* 2XL 专属：红石逻辑代数 */}
       <DecorElement
-        className="
-           pointer-events-none absolute top-[40%] right-[6%] decor-desktop-only
-           hidden border-l border-tech-main/40 pl-4 font-mono text-[0.6875rem]
-           leading-relaxed text-tech-main opacity-[0.35] mix-blend-multiply
-           select-none
-           2xl:block
-         "
+        className="decor-desktop-only border-tech-main/40 text-tech-main pointer-events-none absolute top-[40%] right-[6%] hidden border-l pl-4 font-mono text-[0.6875rem] leading-relaxed opacity-[0.35] mix-blend-multiply select-none 2xl:block"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
         isReducedMotion={isReducedMotion}>
-        <div className="mb-2 font-bold text-tech-main-dark">
+        <div className="text-tech-main-dark mb-2 font-bold">
           {"//"} REDSTONE_BOOLEAN_LOGIC
         </div>
         <span>Y = (A ∧ B) ∨ (¬C)</span>
@@ -205,24 +177,15 @@ export function BackgroundLayer({
 
       {/* 2XL 专属：空间坐标变换矩阵 */}
       <DecorElement
-        className="
-           pointer-events-none absolute right-[25%] bottom-[30%]
-           decor-desktop-only hidden font-mono text-[0.6875rem] opacity-[0.35]
-           mix-blend-multiply select-none
-           2xl:block
-         "
+        className="decor-desktop-only pointer-events-none absolute right-[25%] bottom-[30%] hidden font-mono text-[0.6875rem] opacity-[0.35] mix-blend-multiply select-none 2xl:block"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
         isReducedMotion={isReducedMotion}>
-        <div className="mb-2 font-bold tracking-widest text-tech-main-dark">
+        <div className="text-tech-main-dark mb-2 font-bold tracking-widest">
           TRANSFORM_MATRIX_4x4
         </div>
-        <div
-          className="
-            grid grid-cols-4 gap-2 border-x-2 border-tech-main/60 bg-tech-main/5
-            px-3 py-1 text-center
-          ">
+        <div className="border-tech-main/60 bg-tech-main/5 grid grid-cols-4 gap-2 border-x-2 px-3 py-1 text-center">
           <span>1.0</span>
           <span>0.0</span>
           <span>0.0</span>
@@ -244,33 +207,21 @@ export function BackgroundLayer({
 
       {/* 2XL 专属：内存簇/寄存器网格 */}
       <DecorElement
-        className="
-           pointer-events-none absolute top-[60%] left-[3%] decor-desktop-only
-           hidden font-mono text-[0.625rem] opacity-[0.35] mix-blend-multiply
-           select-none
-           2xl:block
-         "
+        className="decor-desktop-only pointer-events-none absolute top-[60%] left-[3%] hidden font-mono text-[0.625rem] opacity-[0.35] mix-blend-multiply select-none 2xl:block"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
         isReducedMotion={isReducedMotion}>
-        <div className="mb-2 font-bold tracking-widest text-tech-main-dark">
+        <div className="text-tech-main-dark mb-2 font-bold tracking-widest">
           TICK_PHASE_ALLOCATION
         </div>
-        <div
-          className="
-            grid grid-cols-6 gap-x-4 gap-y-2 border guide-line bg-tech-main/5
-            p-2
-          ">
+        <div className="guide-line bg-tech-main/5 grid grid-cols-6 gap-x-4 gap-y-2 border p-2">
           {HEX_VALUES.map((hexValue, i) => (
             <span
               key={i}
               className={
                 i % 7 === 0
-                  ? `
-                    relative font-bold text-tech-main-dark
-                    before:absolute before:-left-3 before:content-['>']
-                  `
+                  ? `text-tech-main-dark relative font-bold before:absolute before:-left-3 before:content-['>']`
                   : ""
               }>
               {hexValue}
@@ -281,11 +232,7 @@ export function BackgroundLayer({
 
       {/* 力学/机械引擎图纸 */}
       <DecorElement
-        className="
-          pointer-events-none absolute top-[15%] right-[15%] decor-desktop-only
-          hidden opacity-[0.25] mix-blend-multiply select-none
-          xl:block
-        "
+        className="decor-desktop-only pointer-events-none absolute top-[15%] right-[15%] hidden opacity-[0.25] mix-blend-multiply select-none xl:block"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}

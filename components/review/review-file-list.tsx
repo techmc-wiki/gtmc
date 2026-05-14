@@ -84,7 +84,7 @@ export function ReviewFileList({
                 </span>
               }
               className="ml-0">
-              <span className="flex w-full flex-wrap items-center gap-2 font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
+              <span className="text-tech-main/45 flex w-full flex-wrap items-center gap-2 font-mono text-[0.625rem] tracking-widest uppercase">
                 <span>{file.changeType ?? "modified"}</span>
                 <span>+{file.additions ?? 0}</span>
                 <span>-{file.deletions ?? 0}</span>

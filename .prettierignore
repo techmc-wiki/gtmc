@@ -1,7 +1,7 @@
 node_modules
 .next
 build
-pnpm-lock.yml
-pnpm-workspace.yml
+pnpm-lock.yaml
+pnpm-workspace.yaml
 articles
 *.md

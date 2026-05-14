@@ -416,7 +416,7 @@ body {
 }
 
 @utility editor-panel {
-  @apply p-6 font-mono text-xs text-tech-main/40;
+  @apply text-tech-main/40 p-6 font-mono text-xs;
 }
 
 @utility editor-grow {
@@ -428,23 +428,23 @@ body {
 }
 
 @utility corner-tick {
-  @apply absolute top-0 right-0 h-px w-8 bg-tech-main;
+  @apply bg-tech-main absolute top-0 right-0 h-px w-8;
 }
 
 @utility mono-label {
-  @apply font-mono text-xs text-tech-main/50;
+  @apply text-tech-main/50 font-mono text-xs;
 }
 
 @utility kbd-badge {
-  @apply border guide-line px-1;
+  @apply guide-line border px-1;
 }
 
 @utility nested-list {
-  @apply space-y-3 border-l guide-line pl-3;
+  @apply guide-line space-y-3 border-l pl-3;
 }
 
 @utility section-divider {
-  @apply my-2 h-px w-full bg-tech-main/30;
+  @apply bg-tech-main/30 my-2 h-px w-full;
 }
 
 code .line {

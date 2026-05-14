@@ -24,36 +24,20 @@ export default function DraftLoading() {
         aria-busy="true"
         aria-label={t("loadingDrafts")}>
         {/* PAGE_HEADER_ */}
-        <div
-          className="
-            relative flex animate-tech-slide-in flex-col items-start
-            justify-between gap-4 border-b border-tech-main/40 pb-6
-            md:flex-row md:items-end
-          ">
+        <div className="animate-tech-slide-in border-tech-main/40 relative flex flex-col items-start justify-between gap-4 border-b pb-6 md:flex-row md:items-end">
           <ScanConfirmOverlay />
-          <div
-            className="
-              w-full
-              md:w-auto
-            ">
+          <div className="w-full md:w-auto">
             <SectionRail label="OPS_CENTER" />
             <SegmentedBar
               opacity="high"
-              className="mt-2 h-10 w-64 border-b border-tech-main/40"
+              className="border-tech-main/40 mt-2 h-10 w-64 border-b"
             />
             <SegmentedBar opacity="low" className="mt-2 h-4 w-80" />
           </div>
-          <div
-            className="
-              w-full
-              md:w-auto
-            ">
+          <div className="w-full md:w-auto">
             <SegmentedBar
               opacity="high"
-              className="
-                h-10 w-full border border-tech-main/40
-                md:w-48
-              "
+              className="border-tech-main/40 h-10 w-full border md:w-48"
             />
           </div>
         </div>
@@ -61,33 +45,22 @@ export default function DraftLoading() {
         {/* ACTIVE_RECORDS_ */}
         <div className="animate-tech-slide-in [animation-delay:100ms]">
           <SectionTitle>Active Records</SectionTitle>
-          <div
-            className="
-              grid grid-cols-1 gap-6
-              md:grid-cols-2
-              lg:grid-cols-3
-            ">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
               <TechCard
                 key={i}
-                className="
-                  flex h-auto flex-col justify-between border
-                  border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
-                  sm:h-64
-                ">
+                className="border-tech-main/40 flex h-auto flex-col justify-between border bg-white/80 p-6 backdrop-blur-sm sm:h-64">
                 {/* Status badge + date row */}
                 <div className="card-header-row">
                   <SegmentedBar
                     opacity="high"
-                    className="
-                      h-6 w-20 border border-yellow-200/50 bg-yellow-100/50
-                    "
+                    className="h-6 w-20 border border-yellow-200/50 bg-yellow-100/50"
                   />
                   <SegmentedBar opacity="medium" className="h-5 w-24" />
                 </div>
 
                 {/* Title block */}
-                <div className="mb-4 border-l-2 border-tech-main/40 pl-3">
+                <div className="border-tech-main/40 mb-4 border-l-2 pl-3">
                   <SegmentedBar opacity="high" className="mb-2 h-6 w-full" />
                   <SegmentedBar opacity="high" className="h-6 w-3/4" />
                 </div>
@@ -101,7 +74,7 @@ export default function DraftLoading() {
                 <div className="mt-auto pt-4">
                   <SegmentedBar
                     opacity="medium"
-                    className="h-11 w-full border border-tech-main/40"
+                    className="border-tech-main/40 h-11 w-full border"
                   />
                 </div>
               </TechCard>
@@ -112,33 +85,22 @@ export default function DraftLoading() {
         {/* ARCHIVED_RECORDS_ */}
         <div className="animate-tech-slide-in [animation-delay:200ms]">
           <SectionTitle>Archived / Approved Records</SectionTitle>
-          <div
-            className="
-              grid grid-cols-1 gap-6
-              md:grid-cols-2
-              lg:grid-cols-3
-            ">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2].map((i) => (
               <TechCard
                 key={i}
-                className="
-                  flex h-auto flex-col justify-between border
-                  border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
-                  sm:h-64
-                ">
+                className="border-tech-main/40 flex h-auto flex-col justify-between border bg-white/80 p-6 backdrop-blur-sm sm:h-64">
                 {/* Status badge + date row */}
                 <div className="card-header-row">
                   <SegmentedBar
                     opacity="high"
-                    className="
-                      h-6 w-24 border border-green-200/50 bg-green-100/50
-                    "
+                    className="h-6 w-24 border border-green-200/50 bg-green-100/50"
                   />
                   <SegmentedBar opacity="medium" className="h-5 w-24" />
                 </div>
 
                 {/* Title block */}
-                <div className="mb-4 border-l-2 border-tech-main/40 pl-3">
+                <div className="border-tech-main/40 mb-4 border-l-2 pl-3">
                   <SegmentedBar opacity="high" className="mb-2 h-6 w-full" />
                   <SegmentedBar opacity="medium" className="h-6 w-2/3" />
                 </div>
@@ -147,7 +109,7 @@ export default function DraftLoading() {
                 <div className="mt-auto pt-4">
                   <SegmentedBar
                     opacity="low"
-                    className="h-11 w-full border border-tech-main/40"
+                    className="border-tech-main/40 h-11 w-full border"
                   />
                 </div>
               </TechCard>

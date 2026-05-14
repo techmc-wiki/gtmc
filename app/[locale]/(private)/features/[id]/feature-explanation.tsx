@@ -43,11 +43,7 @@ export function FeatureExplanation({
   if (isEditing) {
     return (
       <TechCard tone="accent" borderOpacity="muted" background="default">
-        <h3
-          className="
-            mb-2 border-b border-tech-accent/40 pb-2 text-lg font-bold
-            tracking-widest text-tech-main uppercase
-          ">
+        <h3 className="border-tech-accent/40 text-tech-main mb-2 border-b pb-2 text-lg font-bold tracking-widest uppercase">
           {t("editResolutionExplanation")}
         </h3>
         <TextAreaBox
@@ -69,10 +65,7 @@ export function FeatureExplanation({
           <TechButton
             variant="primary"
             size="sm"
-            className="
-              border-tech-accent bg-tech-accent text-white
-              hover:bg-tech-accent/90
-            "
+            className="border-tech-accent bg-tech-accent hover:bg-tech-accent/90 text-white"
             onClick={handleSave}
             disabled={isPending}
             aria-busy={isPending}>
@@ -94,25 +87,15 @@ export function FeatureExplanation({
         borderOpacity="muted"
         background="subtle"
         className="group relative overflow-hidden">
-        <div className="absolute top-0 left-0 h-full w-2 bg-tech-accent/60" />
-        <div
-          className="
-            mb-4 flex items-start justify-between border-b border-tech-accent/40
-            pb-2 pl-4
-          ">
-          <h3
-            className="
-              text-lg font-bold tracking-widest text-tech-main uppercase
-            ">
+        <div className="bg-tech-accent/60 absolute top-0 left-0 h-full w-2" />
+        <div className="border-tech-accent/40 mb-4 flex items-start justify-between border-b pb-2 pl-4">
+          <h3 className="text-tech-main text-lg font-bold tracking-widest uppercase">
             {t("officialResolution")}
           </h3>
           {effectiveCanEdit && (
             <button
               onClick={() => setIsEditing(true)}
-              className="
-                cursor-pointer px-2 font-mono text-xs text-tech-main
-                hover:underline
-              ">
+              className="text-tech-main cursor-pointer px-2 font-mono text-xs hover:underline">
               [EDIT]
             </button>
           )}
@@ -131,7 +114,7 @@ export function FeatureExplanation({
       borderOpacity="muted"
       background="ghost"
       className="border-dashed py-6 text-center">
-      <div className="flex flex-col items-center gap-3 text-tech-accent/80">
+      <div className="text-tech-accent/80 flex flex-col items-center gap-3">
         <span className="font-mono text-sm tracking-wider uppercase">
           AWAITING_OFFICIAL_RESOLUTION_
         </span>
@@ -139,10 +122,7 @@ export function FeatureExplanation({
           variant="ghost"
           size="sm"
           onClick={() => setIsEditing(true)}
-          className="
-            border border-tech-accent/40 text-tech-accent
-            hover:bg-tech-accent/10
-          ">
+          className="border-tech-accent/40 text-tech-accent hover:bg-tech-accent/10 border">
           PROVIDE EXPLANATION
         </TechButton>
       </div>

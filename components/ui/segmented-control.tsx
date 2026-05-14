@@ -102,19 +102,11 @@ export function SegmentedControl<TValue extends string>({
             onClick={() => onValueChange(option.value)}
             onKeyDown={(event) => handleKeyDown(event, option, index)}
             className={cn(
-              `
-                flex cursor-pointer items-center justify-center border font-mono
-                tracking-widest uppercase transition-all duration-200 select-none
-                focus-visible:outline-2 focus-visible:outline-offset-2
-                focus-visible:outline-tech-main
-              `,
+              `focus-visible:outline-tech-main flex cursor-pointer items-center justify-center border font-mono tracking-widest uppercase transition-all duration-200 select-none focus-visible:outline-2 focus-visible:outline-offset-2`,
               sizeClasses[size],
               isSelected
                 ? "border-tech-main bg-tech-main font-bold text-white"
-                : `
-                  border-tech-main/40 bg-tech-main/5 text-tech-main
-                  hover:border-tech-main/60 hover:bg-tech-main/10
-                `,
+                : `border-tech-main/40 bg-tech-main/5 text-tech-main hover:border-tech-main/60 hover:bg-tech-main/10`,
               option.disabled && "cursor-not-allowed opacity-50"
             )}>
             {option.label}

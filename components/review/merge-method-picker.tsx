@@ -50,20 +50,20 @@ export function MergeMethodPicker({
 
   return (
     <div
-      className={`relative border border-tech-main/30 bg-white/80 ${compact ? "p-3" : "p-4"}`}>
+      className={`border-tech-main/30 relative border bg-white/80 ${compact ? "p-3" : "p-4"}`}>
       <CornerBrackets color="border-tech-main/20" />
 
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/60 uppercase">
+          <p className="text-tech-main/60 font-mono text-[0.6875rem] tracking-widest uppercase">
             {t("mergeStrategyLabel")}
           </p>
-          <span className="border border-tech-main/30 bg-tech-main/5 px-2 py-0.5 font-mono text-[0.625rem] tracking-widest text-tech-main uppercase">
+          <span className="border-tech-main/30 bg-tech-main/5 text-tech-main border px-2 py-0.5 font-mono text-[0.625rem] tracking-widest uppercase">
             {t("autoDecisionPrefix")}{" "}
             {t(`mergeMethod${capitalize(analysis.recommendation)}`)}
           </span>
         </div>
-        <p className="font-mono text-xs/relaxed text-tech-main/70">
+        <p className="text-tech-main/70 font-mono text-xs/relaxed">
           {analysis.rationale}
         </p>
       </div>
@@ -93,11 +93,11 @@ export function MergeMethodPicker({
       </div>
 
       {selectedMethod === "squash" ? (
-        <div className="mt-4 space-y-3 border-t border-tech-main/15 pt-4">
+        <div className="border-tech-main/15 mt-4 space-y-3 border-t pt-4">
           <div className="space-y-1">
             <label
               htmlFor="merge-commit-title"
-              className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+              className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
               {t("commitTitleLabel")}
             </label>
             <input
@@ -106,7 +106,7 @@ export function MergeMethodPicker({
               value={commitTitle}
               disabled={disabled}
               onChange={(event) => onCommitTitleChange(event.target.value)}
-              className="w-full border border-tech-main/30 bg-white px-3 py-2 font-mono text-xs text-tech-main placeholder:text-tech-main/30 focus:border-tech-main focus:outline-none"
+              className="border-tech-main/30 text-tech-main placeholder:text-tech-main/30 focus:border-tech-main w-full border bg-white px-3 py-2 font-mono text-xs focus:outline-none"
               placeholder={t("commitTitlePlaceholder")}
             />
           </div>
@@ -114,7 +114,7 @@ export function MergeMethodPicker({
           <div className="space-y-1">
             <label
               htmlFor="merge-commit-body"
-              className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+              className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
               {t("commitBodyLabel")}
             </label>
             <textarea
@@ -123,24 +123,24 @@ export function MergeMethodPicker({
               disabled={disabled}
               onChange={(event) => onCommitBodyChange(event.target.value)}
               rows={compact ? 3 : 5}
-              className="w-full resize-y border border-tech-main/30 bg-white px-3 py-2 font-mono text-xs text-tech-main placeholder:text-tech-main/30 focus:border-tech-main focus:outline-none"
+              className="border-tech-main/30 text-tech-main placeholder:text-tech-main/30 focus:border-tech-main w-full resize-y border bg-white px-3 py-2 font-mono text-xs focus:outline-none"
               placeholder={t("commitBodyPlaceholder")}
             />
           </div>
 
           {coauthorLines.length > 0 ? (
             <div className="space-y-1">
-              <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+              <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
                 {t("coauthorsReadonly")}
               </p>
-              <pre className="overflow-x-auto border guide-line bg-tech-main/5 px-3 py-2 font-mono text-[0.6875rem] text-tech-main/60">
+              <pre className="guide-line bg-tech-main/5 text-tech-main/60 overflow-x-auto border px-3 py-2 font-mono text-[0.6875rem]">
                 {coauthorLines.join("\n")}
               </pre>
             </div>
           ) : null}
         </div>
       ) : (
-        <div className="mt-4 border-t border-tech-main/15 pt-4 font-mono text-[0.6875rem] leading-relaxed text-tech-main/55">
+        <div className="border-tech-main/15 text-tech-main/55 mt-4 border-t pt-4 font-mono text-[0.6875rem] leading-relaxed">
           {selectedMethod === "direct"
             ? t("mergeMethodDirectNote")
             : t("mergeMethodRebaseNote")}

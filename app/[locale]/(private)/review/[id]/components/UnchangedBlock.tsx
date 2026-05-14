@@ -15,11 +15,7 @@ export function UnchangedBlock({
   if (lines.length <= 12 || expanded) {
     return (
       <textarea
-        className="
-          w-full resize-y bg-transparent p-2 font-mono text-sm
-          text-tech-main-dark/70 outline-none
-          focus:bg-tech-main/5
-        "
+        className="text-tech-main-dark/70 focus:bg-tech-main/5 w-full resize-y bg-transparent p-2 font-mono text-sm outline-none"
         rows={Math.max(2, lines.length + 1)}
         value={content}
         onChange={(e) => onChange(e.target.value)}
@@ -32,21 +28,12 @@ export function UnchangedBlock({
   const hiddenCount = lines.length - 6
 
   return (
-    <div
-      className="
-        flex flex-col border-y border-dashed guide-line bg-tech-main/5 font-mono
-        text-sm text-tech-main-dark/60
-      ">
+    <div className="guide-line bg-tech-main/5 text-tech-main-dark/60 flex flex-col border-y border-dashed font-mono text-sm">
       <pre className="bg-transparent p-2 whitespace-pre-wrap">
         {headLines.join("\n")}
       </pre>
       <div
-        className="
-          mx-4 my-1 cursor-pointer rounded-sm bg-tech-main/10 px-4 py-2
-          text-center text-xs font-bold tracking-widest text-tech-main uppercase
-          transition-colors
-          hover:bg-tech-main/20
-        "
+        className="bg-tech-main/10 text-tech-main hover:bg-tech-main/20 mx-4 my-1 cursor-pointer rounded-sm px-4 py-2 text-center text-xs font-bold tracking-widest uppercase transition-colors"
         onClick={() => setExpanded(true)}>
         <span className="mr-2">?</span>
         {hiddenCount} UNCHANGED LINES HIDDEN. CLICK TO EXPAND & EDIT

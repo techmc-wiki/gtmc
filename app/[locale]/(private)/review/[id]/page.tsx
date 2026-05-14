@@ -300,8 +300,8 @@ export default async function ReviewDetailPage({
         </TechButton>
       </Link>
 
-      <section className="relative border-b border-tech-main/30 pb-8">
-        <div className="absolute -bottom-1.25 left-0 size-2 border border-tech-main/50 bg-tech-main/20"></div>
+      <section className="border-tech-main/30 relative border-b pb-8">
+        <div className="border-tech-main/50 bg-tech-main/20 absolute -bottom-1.25 left-0 size-2 border"></div>
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-3 font-mono text-[0.6875rem] tracking-widest uppercase">
@@ -315,52 +315,52 @@ export default async function ReviewDetailPage({
                 }`}>
                 {pr.state.toUpperCase()} {hasConflict ? "CONFLICT" : "READY"}
               </span>
-              <span className="border border-tech-main/25 bg-white/70 px-2 py-1 text-tech-main/70">
+              <span className="border-tech-main/25 text-tech-main/70 border bg-white/70 px-2 py-1">
                 PR #{pr.number}
               </span>
-              <span className="border border-tech-main/25 bg-white/70 px-2 py-1 text-tech-main/70">
+              <span className="border-tech-main/25 text-tech-main/70 border bg-white/70 px-2 py-1">
                 {pr.base.ref} ← {pr.head.ref}
               </span>
             </div>
 
-            <h1 className="font-mono text-3xl/tight tracking-widest text-tech-main-dark uppercase lg:text-4xl">
+            <h1 className="text-tech-main-dark font-mono text-3xl/tight tracking-widest uppercase lg:text-4xl">
               {pr.title}
             </h1>
 
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              <div className="border guide-line bg-tech-main/5 px-4 py-3">
-                <p className="font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
+              <div className="guide-line bg-tech-main/5 border px-4 py-3">
+                <p className="text-tech-main/45 font-mono text-[0.625rem] tracking-widest uppercase">
                   AUTHOR
                 </p>
-                <p className="mt-1 font-mono text-sm tracking-widest text-tech-main uppercase">
+                <p className="text-tech-main mt-1 font-mono text-sm tracking-widest uppercase">
                   {linkedDraft?.author?.name ||
                     pr.user?.login ||
                     "UNKNOWN_USER"}
                 </p>
               </div>
-              <div className="border guide-line bg-tech-main/5 px-4 py-3">
-                <p className="font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
+              <div className="guide-line bg-tech-main/5 border px-4 py-3">
+                <p className="text-tech-main/45 font-mono text-[0.625rem] tracking-widest uppercase">
                   TARGET
                 </p>
-                <p className="mt-1 font-mono text-sm tracking-widest text-tech-main uppercase">
+                <p className="text-tech-main mt-1 font-mono text-sm tracking-widest uppercase">
                   {targetFileLabel}
                 </p>
               </div>
-              <div className="border guide-line bg-tech-main/5 px-4 py-3">
-                <p className="font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
+              <div className="guide-line bg-tech-main/5 border px-4 py-3">
+                <p className="text-tech-main/45 font-mono text-[0.625rem] tracking-widest uppercase">
                   STATS
                 </p>
-                <p className="mt-1 font-mono text-sm tracking-widest text-tech-main uppercase">
+                <p className="text-tech-main mt-1 font-mono text-sm tracking-widest uppercase">
                   {pr.commits} COMMITS / {pr.changed_files} FILES
                 </p>
               </div>
-              <div className="border guide-line bg-tech-main/5 px-4 py-3">
-                <p className="font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
+              <div className="guide-line bg-tech-main/5 border px-4 py-3">
+                <p className="text-tech-main/45 font-mono text-[0.625rem] tracking-widest uppercase">
                   DIFF
                 </p>
                 <p className="mt-1 font-mono text-sm tracking-widest uppercase">
                   <span className="text-green-700">+{pr.additions}</span>
-                  <span className="px-2 text-tech-main/30">/</span>
+                  <span className="text-tech-main/30 px-2">/</span>
                   <span className="text-red-600">-{pr.deletions}</span>
                 </p>
               </div>
@@ -371,7 +371,7 @@ export default async function ReviewDetailPage({
             href={pr.html_url}
             target="_blank"
             rel="noreferrer"
-            className="font-mono text-xs tracking-widest text-tech-main uppercase underline underline-offset-4 hover:text-tech-main-dark">
+            className="text-tech-main hover:text-tech-main-dark font-mono text-xs tracking-widest uppercase underline underline-offset-4">
             OPEN_ON_GITHUB_
           </a>
         </div>
@@ -409,7 +409,7 @@ export default async function ReviewDetailPage({
               }}
             />
           ) : (
-            <div className="border border-tech-main/30 bg-tech-main/5 px-6 py-10 font-mono text-sm tracking-widest text-tech-main/70 uppercase">
+            <div className="border-tech-main/30 bg-tech-main/5 text-tech-main/70 border px-6 py-10 font-mono text-sm tracking-widest uppercase">
               NO_DRAFT_LINKED_
             </div>
           )}
@@ -417,15 +417,15 @@ export default async function ReviewDetailPage({
 
         <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
           {linkedDraft ? (
-            <div className="space-y-4 border border-tech-main/35 bg-white/80 p-4 backdrop-blur-sm">
-              <div className="space-y-1 border-b border-tech-main/15 pb-3">
-                <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+            <div className="border-tech-main/35 space-y-4 border bg-white/80 p-4 backdrop-blur-sm">
+              <div className="border-tech-main/15 space-y-1 border-b pb-3">
+                <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
                   PR_CONTROLS
                 </p>
-                <p className="font-mono text-sm font-bold tracking-widest text-tech-main uppercase">
+                <p className="text-tech-main font-mono text-sm font-bold tracking-widest uppercase">
                   REVIEW_WORKFLOW_ACTIVE
                 </p>
-                <p className="font-mono text-[0.6875rem] leading-relaxed text-tech-main/60">
+                <p className="text-tech-main/60 font-mono text-[0.6875rem] leading-relaxed">
                   Merge is handled from the in-editor review flow to avoid
                   duplicate actions.
                 </p>
@@ -468,11 +468,11 @@ export default async function ReviewDetailPage({
             />
           )}
 
-          <div className="border border-tech-main/25 bg-tech-main/5 p-4">
-            <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+          <div className="border-tech-main/25 bg-tech-main/5 border p-4">
+            <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
               REVIEW_FLOW
             </p>
-            <div className="mt-3 space-y-3 font-mono text-[0.6875rem] leading-relaxed text-tech-main/70">
+            <div className="text-tech-main/70 mt-3 space-y-3 font-mono text-[0.6875rem] leading-relaxed">
               <p>
                 Author:{" "}
                 {linkedDraft?.author?.name || pr.user?.login || "UNKNOWN_USER"}

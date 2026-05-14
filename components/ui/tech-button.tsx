@@ -35,11 +35,7 @@ export const TechButton = React.forwardRef<HTMLButtonElement, TechButtonProps>(
     return (
       <button
         ref={ref}
-        className={`
-        ${baseStyles}
-        ${className}
-        flex items-center justify-center
-      `} // 强制确保 button 是 flex 且居中
+        className={` ${baseStyles} ${className} flex items-center justify-center`} // 强制确保 button 是 flex 且居中
         {...props}>
         <span className="relative z-10 flex items-center justify-center gap-2">
           {props.children}
@@ -47,11 +43,7 @@ export const TechButton = React.forwardRef<HTMLButtonElement, TechButtonProps>(
 
         {/* 装饰性的小方块点缀 */}
         {variant !== "ghost" && (
-          <span
-            className="
-            absolute right-0 bottom-0 size-2 border-t border-l border-tech-main
-            bg-tech-bg opacity-50 mix-blend-overlay
-          "></span>
+          <span className="border-tech-main bg-tech-bg absolute right-0 bottom-0 size-2 border-t border-l opacity-50 mix-blend-overlay"></span>
         )}
       </button>
     )

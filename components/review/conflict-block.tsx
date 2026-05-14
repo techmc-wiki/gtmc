@@ -199,11 +199,11 @@ export function ConflictBlock({
 
           {isManualEdit && (
             <div className="flex flex-col gap-2 p-3">
-              <span className="font-mono text-xs font-bold tracking-widest text-tech-main uppercase">
+              <span className="text-tech-main font-mono text-xs font-bold tracking-widest uppercase">
                 {t("manualEdit")}
               </span>
               <textarea
-                className="min-h-[160px] w-full resize-y border border-tech-main/40 bg-tech-bg p-2 font-mono text-sm text-tech-main focus:border-tech-main focus:outline-none"
+                className="border-tech-main/40 bg-tech-bg text-tech-main focus:border-tech-main min-h-[160px] w-full resize-y border p-2 font-mono text-sm focus:outline-none"
                 value={manualContent}
                 onChange={(e) => setManualContent(e.target.value)}
               />

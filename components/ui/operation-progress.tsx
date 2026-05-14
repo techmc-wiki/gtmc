@@ -237,7 +237,7 @@ export function OperationProgress({
   return (
     <section
       className={cn(
-        "relative overflow-hidden border guide-line bg-white/85 backdrop-blur-sm",
+        "guide-line relative overflow-hidden border bg-white/85 backdrop-blur-sm",
         compact ? "p-3" : "p-4",
         state === "error" ? "border-red-500/30 bg-red-500/5" : "",
         className
@@ -251,7 +251,7 @@ export function OperationProgress({
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
           className={cn(
-            "absolute inset-y-0 left-0 bg-linear-to-r from-tech-main/10 via-tech-accent/25 to-transparent transition-[width] duration-300",
+            "from-tech-main/10 via-tech-accent/25 absolute inset-y-0 left-0 bg-linear-to-r to-transparent transition-[width] duration-300",
             state === "running" ? "animate-blueprint-sweep" : "",
             state === "success" ? "animate-scan-confirm" : "",
             state === "error"
@@ -264,7 +264,7 @@ export function OperationProgress({
 
       <div className="relative flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
-          <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+          <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
             {title}
           </p>
           <p
@@ -280,13 +280,13 @@ export function OperationProgress({
           </p>
         </div>
 
-        <div className="shrink-0 border guide-line bg-white/70 px-2 py-1 font-mono text-[0.6875rem] tracking-widest text-tech-main/70 uppercase">
+        <div className="guide-line text-tech-main/70 shrink-0 border bg-white/70 px-2 py-1 font-mono text-[0.6875rem] tracking-widest uppercase">
           {percent.toString().padStart(2, "0")}%
         </div>
       </div>
 
       <div
-        className="relative mt-3 h-2 overflow-hidden border guide-line bg-tech-main/5"
+        className="guide-line bg-tech-main/5 relative mt-3 h-2 overflow-hidden border"
         role="progressbar"
         aria-label={title}
         aria-valuemin={0}
@@ -294,14 +294,14 @@ export function OperationProgress({
         aria-valuenow={percent}>
         <div
           className={cn(
-            "absolute inset-y-0 left-0 bg-tech-main transition-[width] duration-300",
+            "bg-tech-main absolute inset-y-0 left-0 transition-[width] duration-300",
             state === "success" ? "bg-green-600" : "",
             state === "error" ? "bg-red-500" : ""
           )}
           style={{ width: `${percent}%` }}
         />
         {state === "running" ? (
-          <div className="pointer-events-none absolute inset-0 animate-blueprint-sweep bg-linear-to-r from-transparent via-white/70 to-transparent" />
+          <div className="animate-blueprint-sweep pointer-events-none absolute inset-0 bg-linear-to-r from-transparent via-white/70 to-transparent" />
         ) : null}
       </div>
 
@@ -333,7 +333,7 @@ export function OperationProgress({
                       : isCompleted
                         ? "border-tech-main bg-tech-main"
                         : isCurrent
-                          ? "animate-pulse border-tech-main/70 bg-tech-main/50"
+                          ? "border-tech-main/70 bg-tech-main/50 animate-pulse"
                           : "border-tech-main/25 bg-transparent"
                   )}
                 />

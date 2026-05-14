@@ -229,15 +229,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             id="feature-title"
             required
             placeholder={t("titlePlaceholder")}
-            className={`
-              border-tech-main/40 py-3 font-mono text-lg backdrop-blur-sm
-              focus:border-tech-main/60
-              ${
-                isReadOnly
-                  ? `cursor-not-allowed bg-gray-100 opacity-70`
-                  : `bg-white/80`
-              }
-            `}
+            className={`border-tech-main/40 focus:border-tech-main/60 py-3 font-mono text-lg backdrop-blur-sm ${
+              isReadOnly
+                ? `cursor-not-allowed bg-gray-100 opacity-70`
+                : `bg-white/80`
+            } `}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             readOnly={isReadOnly}
@@ -252,15 +248,11 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
           <InputBox
             id="feature-tags"
             placeholder={t("tagsPlaceholder")}
-            className={`
-              border-tech-main/40 py-2 font-mono text-sm backdrop-blur-sm
-              focus:border-tech-main/60
-              ${
-                isReadOnly
-                  ? `cursor-not-allowed bg-gray-100 opacity-70`
-                  : `bg-white/80`
-              }
-            `}
+            className={`border-tech-main/40 focus:border-tech-main/60 py-2 font-mono text-sm backdrop-blur-sm ${
+              isReadOnly
+                ? `cursor-not-allowed bg-gray-100 opacity-70`
+                : `bg-white/80`
+            } `}
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             readOnly={isReadOnly}

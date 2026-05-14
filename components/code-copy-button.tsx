@@ -17,11 +17,7 @@ export function CodeCopyButton({ code }: { code: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="
-        font-mono text-[0.625rem] tracking-widest text-tech-main uppercase
-        transition-colors
-        hover:text-tech-main/80
-      ">
+      className="text-tech-main hover:text-tech-main/80 font-mono text-[0.625rem] tracking-widest uppercase transition-colors">
       {copied ? t("copiedButton") : t("copyButton")}
     </button>
   )

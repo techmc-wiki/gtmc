@@ -136,12 +136,12 @@ function PRActionButtonsContent({
   }, [commitBody, commitTitle, selectedMethod, squashCommitDefaults])
 
   return (
-    <div className="space-y-4 border border-tech-main/35 bg-white/80 p-4 backdrop-blur-sm">
-      <div className="space-y-1 border-b border-tech-main/15 pb-3">
-        <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+    <div className="border-tech-main/35 space-y-4 border bg-white/80 p-4 backdrop-blur-sm">
+      <div className="border-tech-main/15 space-y-1 border-b pb-3">
+        <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
           {reviewT("mergeBoxLabel")}
         </p>
-        <p className="font-mono text-sm font-bold tracking-widest text-tech-main uppercase">
+        <p className="text-tech-main font-mono text-sm font-bold tracking-widest uppercase">
           {mergePRAction ? reviewT("readyToLand") : reviewT("mergeBlocked")}
         </p>
         {mergeBlockedReason ? (

@@ -1,0 +1,492 @@
+/* ==========================================================================
+   GTMC PDF Print Stylesheet
+   Technical Blueprint / Scientific Drafting Aesthetic
+   Target: Chromium 130+ via Playwright page.pdf()
+   ========================================================================== */
+
+/* --- Font Imports (resolved from node_modules via Playwright base URL) --- */
+@import "@fontsource/space-mono/400.css";
+@import "@fontsource/space-mono/700.css";
+@import "@fontsource/noto-sans-sc/400.css";
+@import "@fontsource/noto-sans-sc/700.css";
+
+/* --- Page Rules --- */
+@page {
+  size: A4;
+  margin: 2.5cm 2cm;
+}
+
+@page :first {
+  margin-top: 4cm;
+}
+
+@page :left {
+  margin-left: 2.5cm;
+  margin-right: 1.8cm;
+}
+
+@page :right {
+  margin-left: 1.8cm;
+  margin-right: 2.5cm;
+}
+
+@page chapter {
+  margin-top: 2.5cm;
+}
+
+/* --- Base --- */
+html {
+  font-size: 10.5pt;
+  line-height: 1.7;
+  color: #1e293b;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+body {
+  font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Headings (monospace, technical) --- */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Space Mono", monospace;
+  color: #3b4a6b;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1 {
+  font-size: 22pt;
+  font-weight: 700;
+  border-bottom: 2px solid #cbd5e1;
+  padding-bottom: 0.3em;
+  page-break-before: always;
+}
+
+h2 {
+  font-size: 16pt;
+  font-weight: 700;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 0.2em;
+  page-break-before: always;
+}
+
+h3 {
+  font-size: 13pt;
+  font-weight: 700;
+  page-break-after: avoid;
+}
+
+h4 {
+  font-size: 11pt;
+  font-weight: 700;
+  page-break-after: avoid;
+}
+
+h5 {
+  font-size: 10.5pt;
+  font-weight: 700;
+}
+
+h6 {
+  font-size: 10pt;
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* --- Body Text --- */
+p {
+  margin: 0.6em 0;
+  orphans: 3;
+  widows: 3;
+}
+
+ul,
+ol {
+  margin: 0.5em 0;
+  padding-left: 1.8em;
+}
+
+li {
+  margin-bottom: 0.25em;
+}
+
+li > p {
+  margin: 0.2em 0;
+}
+
+/* --- Links --- */
+a {
+  color: #4a5a78;
+  text-decoration: none;
+}
+
+/* --- Code --- */
+code {
+  font-family: "Space Mono", monospace;
+  font-size: 9pt;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 2px;
+  padding: 0.1em 0.3em;
+}
+
+pre {
+  font-family: "Space Mono", monospace;
+  font-size: 8.5pt;
+  line-height: 1.5;
+  background: #f8f9fc;
+  border: 1px solid #cbd5e1;
+  border-radius: 3px;
+  padding: 0.8em 1em;
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  page-break-inside: avoid;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* --- Tables --- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 9.5pt;
+  page-break-inside: avoid;
+}
+
+th {
+  font-family: "Space Mono", monospace;
+  font-size: 8.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 0.5em 0.7em;
+  text-align: left;
+  color: #3b4a6b;
+}
+
+td {
+  border: 1px solid #cbd5e1;
+  padding: 0.4em 0.7em;
+  vertical-align: top;
+}
+
+tr {
+  page-break-inside: avoid;
+}
+
+/* --- Images --- */
+img {
+  max-width: 100%;
+  height: auto;
+  page-break-inside: avoid;
+  display: block;
+  margin: 1em auto;
+}
+
+figure {
+  margin: 1.2em 0;
+  page-break-inside: avoid;
+  text-align: center;
+}
+
+figcaption {
+  font-family: "Space Mono", monospace;
+  font-size: 8.5pt;
+  color: #60708f;
+  margin-top: 0.4em;
+  text-align: center;
+}
+
+/* --- Blockquote --- */
+blockquote {
+  margin: 1em 0;
+  padding: 0.6em 1em;
+  border-left: 3px solid #c4d0df;
+  background: #f8f9fc;
+  color: #4a5a78;
+  font-style: italic;
+}
+
+blockquote p {
+  margin: 0.3em 0;
+}
+
+/* --- Callouts / Admonitions --- */
+aside[data-callout] {
+  margin: 1em 0;
+  padding: 0.8em 1em;
+  border: 1px solid #cbd5e1;
+  border-left: 4px solid #60708f;
+  border-radius: 3px;
+  background: #f8f9fc;
+  page-break-inside: avoid;
+}
+
+aside[data-callout]::before {
+  font-family: "Space Mono", monospace;
+  font-size: 8pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: block;
+  margin-bottom: 0.4em;
+  color: #60708f;
+}
+
+aside[data-callout="WARNING"] {
+  border-left-color: #d97706;
+}
+
+aside[data-callout="WARNING"]::before {
+  content: "⚠ WARNING";
+  color: #d97706;
+}
+
+aside[data-callout="TIP"] {
+  border-left-color: #059669;
+}
+
+aside[data-callout="TIP"]::before {
+  content: "▸ TIP";
+  color: #059669;
+}
+
+aside[data-callout="IMPORTANT"] {
+  border-left-color: #3b4a6b;
+}
+
+aside[data-callout="IMPORTANT"]::before {
+  content: "● IMPORTANT";
+  color: #3b4a6b;
+}
+
+aside[data-callout="CRASH"] {
+  border-left-color: #dc2626;
+  background: #fef2f2;
+}
+
+aside[data-callout="CRASH"]::before {
+  content: "✕ CRASH";
+  color: #dc2626;
+}
+
+aside[data-callout="CORRUPTION"] {
+  border-left-color: #7c3aed;
+  background: #faf5ff;
+}
+
+aside[data-callout="CORRUPTION"]::before {
+  content: "◆ CORRUPTION";
+  color: #7c3aed;
+}
+
+/* --- KaTeX Math --- */
+.katex {
+  font-size: 1em;
+}
+
+.katex-display {
+  margin: 0.8em 0;
+  page-break-inside: avoid;
+}
+
+/* --- Cover Page --- */
+.cover-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  text-align: center;
+  page: unset;
+}
+
+.cover-page h1 {
+  font-size: 28pt;
+  border-bottom: none;
+  page-break-before: avoid;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.cover-page .subtitle {
+  font-family: "Space Mono", monospace;
+  font-size: 11pt;
+  color: #60708f;
+  margin-top: 0.5em;
+}
+
+.cover-page .meta {
+  font-family: "Space Mono", monospace;
+  font-size: 9pt;
+  color: #64748b;
+  margin-top: 2em;
+}
+
+/* --- Table of Contents --- */
+.toc-page {
+  page-break-before: always;
+}
+
+.toc-page h2 {
+  page-break-before: avoid;
+}
+
+.toc-page ul {
+  list-style: none;
+  padding: 0;
+}
+
+.toc-page li {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 0.4em;
+  font-size: 10pt;
+}
+
+.toc-page li::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px dotted #cbd5e1;
+  margin: 0 0.5em;
+}
+
+.toc-page li .page-num {
+  font-family: "Space Mono", monospace;
+  font-size: 9pt;
+  color: #64748b;
+}
+
+.toc-page li a {
+  color: #1e293b;
+}
+
+.toc-page li.toc-h1 {
+  font-weight: 700;
+  font-size: 11pt;
+  margin-top: 0.6em;
+}
+
+.toc-page li.toc-h2 {
+  padding-left: 1.2em;
+}
+
+.toc-page li.toc-h3 {
+  padding-left: 2.4em;
+  font-size: 9.5pt;
+  color: #4a5a78;
+}
+
+/* --- Chapter Title Page --- */
+.chapter-title-page {
+  page-break-before: always;
+  page: chapter;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.chapter-title-page h1 {
+  border-bottom: none;
+  page-break-before: avoid;
+}
+
+.chapter-title-page .chapter-number {
+  font-family: "Space Mono", monospace;
+  font-size: 9pt;
+  color: #60708f;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 0.5em;
+}
+
+/* --- Advanced Sections --- */
+div[data-advanced-section] {
+  border-left: 3px solid #60708f;
+  padding-left: 1em;
+  margin: 1em 0;
+}
+
+span[data-advanced] {
+  font-family: "Space Mono", monospace;
+  font-size: 7.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #f8f9fc;
+  background: #60708f;
+  padding: 0.15em 0.5em;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-right: 0.4em;
+}
+
+/* --- Page Break Rules --- */
+h1,
+h2,
+.chapter-title {
+  page-break-before: always;
+}
+
+h3,
+h4 {
+  page-break-after: avoid;
+}
+
+pre,
+table,
+img,
+figure {
+  page-break-inside: avoid;
+}
+
+tr {
+  page-break-inside: avoid;
+}
+
+/* --- Horizontal Rule --- */
+hr {
+  border: none;
+  border-top: 1px solid #cbd5e1;
+  margin: 2em 0;
+}
+
+/* --- Footnotes --- */
+.footnotes {
+  margin-top: 2em;
+  padding-top: 1em;
+  border-top: 1px solid #cbd5e1;
+  font-size: 9pt;
+}
+
+.footnotes ol {
+  padding-left: 1.5em;
+}
+
+/* --- Utility: suppress first h1 page break (cover already breaks) --- */
+.cover-page + * h1:first-of-type,
+body > h1:first-of-type {
+  page-break-before: avoid;
+}

@@ -447,5 +447,11 @@
     "twitterLabel": "twitter",
     "websiteLabel": "网站",
     "customLinkLabel": "链接"
+  },
+  "Pdf": {
+    "label": "离线版 (PDF)",
+    "title": "GTMC",
+    "subtitle": "下载完整的 GTMC 文章。",
+    "download": "下载 PDF"
   }
 }

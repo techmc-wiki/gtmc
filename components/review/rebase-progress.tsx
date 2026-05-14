@@ -76,18 +76,18 @@ function CommitStepDots({
                   : isDone
                     ? "border-tech-main bg-tech-main"
                     : isInProgress
-                      ? "animate-pulse border-tech-main/70 bg-tech-main/70"
+                      ? "border-tech-main/70 bg-tech-main/70 animate-pulse"
                       : "border-tech-main/30 bg-transparent"
               }`}
             />
             {index < visibleCommits.length - 1 ? (
-              <span className="h-px w-3 bg-tech-main/20" aria-hidden="true" />
+              <span className="bg-tech-main/20 h-px w-3" aria-hidden="true" />
             ) : null}
           </React.Fragment>
         )
       })}
       {overflowCount > 0 ? (
-        <span className="ml-1 font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+        <span className="text-tech-main/50 ml-1 font-mono text-[0.6875rem] tracking-widest uppercase">
           +{overflowCount}
         </span>
       ) : null}
@@ -125,24 +125,24 @@ function CurrentCommitPanel({
   }
 
   return (
-    <div className="relative space-y-3 border border-tech-main/30 bg-white/70 p-3">
+    <div className="border-tech-main/30 relative space-y-3 border bg-white/70 p-3">
       <CornerBrackets color="border-tech-main/20" />
       <div className="space-y-1">
-        <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+        <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
           CURRENT_COMMIT
         </p>
         {commitSha ? (
-          <p className="font-mono text-sm font-bold tracking-widest text-tech-main uppercase">
+          <p className="text-tech-main font-mono text-sm font-bold tracking-widest uppercase">
             SHA_{commitSha.slice(0, 7)}_
           </p>
         ) : null}
         {commitMessage ? (
-          <p className="font-mono text-xs/relaxed text-tech-main/80">
+          <p className="text-tech-main/80 font-mono text-xs/relaxed">
             {commitMessage}
           </p>
         ) : null}
         {commitAuthor ? (
-          <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/40 uppercase">
+          <p className="text-tech-main/40 font-mono text-[0.6875rem] tracking-widest uppercase">
             {commitAuthor}
           </p>
         ) : null}
@@ -150,17 +150,17 @@ function CurrentCommitPanel({
 
       {fileStates.length > 0 ? (
         <div className="space-y-1">
-          <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+          <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
             FILE_STATES
           </p>
           <ul className="space-y-1">
             {fileStates.map((fs) => (
               <li
                 key={fs.filePath}
-                className="flex items-center gap-2 font-mono text-[0.6875rem] text-tech-main/70">
+                className="text-tech-main/70 flex items-center gap-2 font-mono text-[0.6875rem]">
                 <FileStatusDot status={fs.status} />
                 <span className="truncate">{fs.filePath}</span>
-                <span className="ml-auto shrink-0 tracking-widest text-tech-main/40 uppercase">
+                <span className="text-tech-main/40 ml-auto shrink-0 tracking-widest uppercase">
                   {fs.status.toUpperCase()}
                 </span>
               </li>
@@ -384,7 +384,7 @@ function RebaseProgressContent({
       rebaseState?.commitShas[currentCommitIndex]
 
     return (
-      <div className="space-y-4 border border-tech-main/40 bg-tech-main/5 p-4">
+      <div className="border-tech-main/40 bg-tech-main/5 space-y-4 border p-4">
         <OperationProgress
           state={finalizeProgressState}
           title={progressT("finalizeTitle")}
@@ -395,10 +395,10 @@ function RebaseProgressContent({
 
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-2">
-            <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+            <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
               PROGRESS
             </p>
-            <p className="font-mono text-sm font-bold tracking-widest text-tech-main uppercase">
+            <p className="text-tech-main font-mono text-sm font-bold tracking-widest uppercase">
               RESOLVING_COMMIT_{current}_OF_{total}_
             </p>
             <CommitStepDots
@@ -409,15 +409,15 @@ function RebaseProgressContent({
           </div>
 
           <div className="flex min-w-32 items-center gap-2">
-            <div className="relative h-1 flex-1 bg-tech-main/20">
+            <div className="bg-tech-main/20 relative h-1 flex-1">
               <div
-                className="absolute inset-y-0 left-0 bg-tech-main transition-all duration-500"
+                className="bg-tech-main absolute inset-y-0 left-0 transition-all duration-500"
                 style={{
                   width: `${total > 0 ? Math.min((current / total) * 100, 100) : 0}%`,
                 }}
               />
             </div>
-            <span className="font-mono text-[0.6875rem] text-tech-main/60 tabular-nums">
+            <span className="text-tech-main/60 font-mono text-[0.6875rem] tabular-nums">
               {current}/{total}
             </span>
           </div>
@@ -479,7 +479,7 @@ function RebaseProgressContent({
   const allResolved = conflictFiles.length === 0
 
   return (
-    <div className="space-y-4 border border-tech-main/40 bg-tech-main/5 p-4">
+    <div className="border-tech-main/40 bg-tech-main/5 space-y-4 border p-4">
       <OperationProgress
         state={finalizeProgressState}
         title={progressT("finalizeTitle")}
@@ -489,13 +489,13 @@ function RebaseProgressContent({
       />
 
       <div className="space-y-1">
-        <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/50 uppercase">
+        <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
           PROGRESS
         </p>
-        <p className="font-mono text-sm font-bold tracking-widest text-tech-main uppercase">
+        <p className="text-tech-main font-mono text-sm font-bold tracking-widest uppercase">
           RESOLVING_CONFLICTS_IN_{conflictFiles.length}_FILES_
         </p>
-        <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/60 uppercase">
+        <p className="text-tech-main/60 font-mono text-[0.6875rem] tracking-widest uppercase">
           {isBranchSyncing ? "PR_BRANCH_UPDATING_" : "PR_BRANCH_SYNCED_"}
         </p>
       </div>
@@ -505,10 +505,10 @@ function RebaseProgressContent({
           {(files ?? []).map((f) => (
             <li
               key={f.filePath}
-              className="flex items-center gap-2 font-mono text-[0.6875rem] text-tech-main/70">
+              className="text-tech-main/70 flex items-center gap-2 font-mono text-[0.6875rem]">
               <FileStatusDot status={f.status} />
               <span className="truncate">{f.filePath}</span>
-              <span className="ml-auto shrink-0 tracking-widest text-tech-main/40 uppercase">
+              <span className="text-tech-main/40 ml-auto shrink-0 tracking-widest uppercase">
                 {f.status.toUpperCase()}
               </span>
             </li>

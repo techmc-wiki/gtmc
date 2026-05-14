@@ -16,14 +16,7 @@ export const TextAreaBox = React.forwardRef<
   }
 
   return (
-    <textarea
-      ref={ref}
-      className={`
-          ${baseStyles}
-          ${className}
-        `}
-      {...props}
-    />
+    <textarea ref={ref} className={` ${baseStyles} ${className} `} {...props} />
   )
 })
 TextAreaBox.displayName = "TextAreaBox"

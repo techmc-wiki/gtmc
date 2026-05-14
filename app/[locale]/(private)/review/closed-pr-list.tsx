@@ -19,17 +19,17 @@ function ClosedPRSkeletonRows() {
       {skeletonKeys.map((key) => (
         <TechCard
           key={`closed-pr-skeleton-${key}`}
-          className="relative border border-tech-line bg-white/80 p-6 backdrop-blur-sm">
+          className="border-tech-line relative border bg-white/80 p-6 backdrop-blur-sm">
           <CornerBrackets variant="hover" />
           <div className="relative z-10 animate-pulse space-y-4">
             <div className="flex flex-wrap items-center gap-3">
-              <div className="h-5 w-20 border border-tech-line bg-tech-bg" />
-              <div className="h-4 w-28 bg-tech-accent/40" />
-              <div className="h-5 w-24 border border-tech-line bg-tech-bg" />
+              <div className="border-tech-line bg-tech-bg h-5 w-20 border" />
+              <div className="bg-tech-accent/40 h-4 w-28" />
+              <div className="border-tech-line bg-tech-bg h-5 w-24 border" />
             </div>
-            <div className="h-6 w-3/4 border-l-2 border-tech-line bg-tech-accent/35 pl-3" />
-            <div className="h-4 w-40 bg-tech-accent/30" />
-            <div className="h-6 w-36 border border-tech-line bg-tech-bg" />
+            <div className="border-tech-line bg-tech-accent/35 h-6 w-3/4 border-l-2 pl-3" />
+            <div className="bg-tech-accent/30 h-4 w-40" />
+            <div className="border-tech-line bg-tech-bg h-6 w-36 border" />
           </div>
         </TechCard>
       ))}
@@ -43,7 +43,7 @@ function ClosedPRCard({ pr }: { pr: ClosedPRListItem }) {
     : "border-[var(--color-tech-line)] bg-[var(--color-tech-bg)] text-[var(--color-tech-main)]"
 
   return (
-    <TechCard className="group relative border border-tech-line bg-white/80 p-6 backdrop-blur-sm">
+    <TechCard className="group border-tech-line relative border bg-white/80 p-6 backdrop-blur-sm">
       <CornerBrackets variant="hover" />
 
       <div className="relative z-10 space-y-3">
@@ -60,19 +60,19 @@ function ClosedPRCard({ pr }: { pr: ClosedPRListItem }) {
           </span>
         </div>
 
-        <h3 className="border-l-2 border-tech-main/40 pl-3 text-lg font-bold tracking-tight text-tech-main-dark uppercase md:text-xl">
+        <h3 className="border-tech-main/40 text-tech-main-dark border-l-2 pl-3 text-lg font-bold tracking-tight uppercase md:text-xl">
           {pr.title || "UNTITLED"}
         </h3>
 
-        <p className="pl-3 font-mono text-xs text-tech-main/80">
+        <p className="text-tech-main/80 pl-3 font-mono text-xs">
           Submitted by:{" "}
-          <span className="font-bold text-tech-main-dark">
+          <span className="text-tech-main-dark font-bold">
             {pr.userLogin || "UNKNOWN"}
           </span>
         </p>
 
-        <p className="ml-3 inline-flex items-center border guide-line bg-tech-main/5 px-2 py-1 font-mono text-xs text-tech-main">
-          <span className="mr-2 size-1.5 bg-tech-main"></span> TARGET:{" "}
+        <p className="guide-line bg-tech-main/5 text-tech-main ml-3 inline-flex items-center border px-2 py-1 font-mono text-xs">
+          <span className="bg-tech-main mr-2 size-1.5"></span> TARGET:{" "}
           {pr.headRef}
         </p>
       </div>
@@ -158,7 +158,7 @@ export function ClosedPRList({ getClosedPRsAction }: ClosedPRListProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="border-b-2 border-tech-main/50 pb-2 font-bold tracking-widest text-tech-main uppercase">
+      <h2 className="border-tech-main/50 text-tech-main border-b-2 pb-2 font-bold tracking-widest uppercase">
         CLOSED_&amp;_MERGED_
       </h2>
 
@@ -173,7 +173,7 @@ export function ClosedPRList({ getClosedPRsAction }: ClosedPRListProps) {
       {(isInitialLoading || isFetchingMore) && <ClosedPRSkeletonRows />}
 
       {!isInitialLoading && closedPRs.length === 0 && !error && (
-        <p className="font-mono text-xs tracking-widest text-tech-main/60 uppercase">
+        <p className="text-tech-main/60 font-mono text-xs tracking-widest uppercase">
           No closed pull requests found.
         </p>
       )}

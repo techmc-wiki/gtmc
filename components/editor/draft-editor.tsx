@@ -1130,8 +1130,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           <div className="flex items-center justify-between">
             <label
               htmlFor="draft-title"
-              className="flex items-center gap-2 font-mono text-[10px] tracking-widest text-tech-main uppercase">
-              <span className="inline-block size-2 bg-tech-main/40" />
+              className="text-tech-main flex items-center gap-2 font-mono text-[10px] tracking-widest uppercase">
+              <span className="bg-tech-main/40 inline-block size-2" />
               {t("titleLabel")}
             </label>
           </div>
@@ -1139,16 +1139,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             id="draft-title"
             required
             placeholder={t("titlePlaceholder")}
-            className={`
-              border-tech-main/40 bg-white/50 py-3 font-mono text-lg backdrop-blur-sm
-              transition-all duration-300 focus:border-tech-main focus:bg-white
-              focus:ring-1 focus:ring-tech-main/20
-              ${
-                isReadOnly
-                  ? `cursor-not-allowed bg-tech-main/5 opacity-70`
-                  : `hover:bg-white/80`
-              }
-            `}
+            className={`border-tech-main/40 focus:border-tech-main focus:ring-tech-main/20 bg-white/50 py-3 font-mono text-lg backdrop-blur-sm transition-all duration-300 focus:bg-white focus:ring-1 ${
+              isReadOnly
+                ? `bg-tech-main/5 cursor-not-allowed opacity-70`
+                : `hover:bg-white/80`
+            } `}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             readOnly={isReadOnly}
@@ -1158,11 +1153,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       </div>
 
       {githubPrUrl ? (
-        <div
-          className="
-            flex items-center justify-between gap-3 border guide-line
-            bg-tech-main/5 px-4 py-3 font-mono text-xs text-tech-main
-          ">
+        <div className="guide-line bg-tech-main/5 text-tech-main flex items-center justify-between gap-3 border px-4 py-3 font-mono text-xs">
           <span>{t("prStreamActive")}</span>
           <a
             href={githubPrUrl}
@@ -1175,10 +1166,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       ) : null}
 
       {isSyncConflict ? (
-        <div
-          className="
-            border-l-4 border-amber-500 bg-amber-500/10 p-4 text-amber-700
-          ">
+        <div className="border-l-4 border-amber-500 bg-amber-500/10 p-4 text-amber-700">
           <p className="font-bold tracking-widest uppercase">
             {t("conflictTitle")}
           </p>
@@ -1186,11 +1174,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         </div>
       ) : null}
 
-      <div
-        className="
-          grid gap-4
-          lg:grid-cols-[18rem_minmax(0,1fr)]
-        ">
+      <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
         <DraftFileList
           files={draftCollection.files}
           activeFileId={draftCollection.activeFileId}
@@ -1207,22 +1191,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         />
 
         <div className="space-y-4">
-          <div
-            className="
-              border border-tech-main/40 bg-white/80 p-4 backdrop-blur-sm
-            ">
-            <div
-              className="
-                mb-4 flex flex-col gap-2
-                sm:flex-row sm:items-end sm:justify-between
-              ">
+          <div className="border-tech-main/40 border bg-white/80 p-4 backdrop-blur-sm">
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="section-label">{t("activeFileLabel")}</p>
-                <p
-                  className="
-                    font-mono text-xs tracking-widest text-tech-main/70
-                    uppercase
-                  ">
+                <p className="text-tech-main/70 font-mono text-xs tracking-widest uppercase">
                   {`${t("slotLabel")}_${activeFileIndex}/${draftCollection.files.length}`}
                 </p>
               </div>
@@ -1270,16 +1243,16 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               </div>
             </div>
 
-            <div className="space-y-3 border guide-line bg-tech-main/5 p-4">
+            <div className="guide-line bg-tech-main/5 space-y-3 border p-4">
               <div>
-                <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/45 uppercase">
+                <p className="text-tech-main/45 font-mono text-[0.6875rem] tracking-widest uppercase">
                   {t("targetFileLabel")}
                 </p>
-                <p className="mt-1 font-mono text-sm tracking-widest break-all text-tech-main uppercase">
+                <p className="text-tech-main mt-1 font-mono text-sm tracking-widest break-all uppercase">
                   {activeFile.filePath || t("targetFileUnset")}
                 </p>
               </div>
-              <p className="font-mono text-xs/relaxed text-tech-main/65">
+              <p className="text-tech-main/65 font-mono text-xs/relaxed">
                 {t("targetFileDescription")}
               </p>
             </div>
@@ -1334,34 +1307,29 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                     ) : undefined
                   }
                 />
-                <div
-                  className="
-                    relative flex h-12 items-center
-                    gap-2 overflow-x-auto scroll-smooth border-b
-                    guide-line bg-tech-main/4 px-4 shadow-[inset_0_1px_4px_rgb(var(--color-tech-main)/0.05)]
-                  ">
-                  <div className="absolute inset-y-0 left-0 w-1 bg-tech-main/30" />
-                  <span className="mr-2 font-mono text-[9px] tracking-widest text-tech-main/50 uppercase opacity-70">
+                <div className="guide-line bg-tech-main/4 relative flex h-12 items-center gap-2 overflow-x-auto scroll-smooth border-b px-4 shadow-[inset_0_1px_4px_rgb(var(--color-tech-main)/0.05)]">
+                  <div className="bg-tech-main/30 absolute inset-y-0 left-0 w-1" />
+                  <span className="text-tech-main/50 mr-2 font-mono text-[9px] tracking-widest uppercase opacity-70">
                     MACROS
                   </span>
 
                   <TechButton
                     type="button"
                     variant="ghost"
-                    className="h-7 border border-transparent px-3 text-[10px] tracking-widest text-tech-main transition-all hover:guide-line hover:bg-white hover:text-tech-main hover:shadow-sm"
+                    className="text-tech-main hover:guide-line hover:text-tech-main h-7 border border-transparent px-3 text-[10px] tracking-widest transition-all hover:bg-white hover:shadow-sm"
                     disabled={isReadOnly}
                     onClick={() =>
                       insertTextAtCursor("\n## Section Title\n\n")
                     }>
                     <span className="flex items-center gap-1.5">
-                      <span className="font-bold text-tech-main/40">#</span>{" "}
+                      <span className="text-tech-main/40 font-bold">#</span>{" "}
                       SECTION
                     </span>
                   </TechButton>
                   <TechButton
                     type="button"
                     variant="ghost"
-                    className="h-7 border border-transparent px-3 text-[10px] tracking-widest text-tech-main transition-all hover:guide-line hover:bg-white hover:text-tech-main hover:shadow-sm"
+                    className="text-tech-main hover:guide-line hover:text-tech-main h-7 border border-transparent px-3 text-[10px] tracking-widest transition-all hover:bg-white hover:shadow-sm"
                     disabled={isReadOnly}
                     onClick={() =>
                       insertTextAtCursor(
@@ -1369,14 +1337,14 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                       )
                     }>
                     <span className="flex items-center gap-1.5">
-                      <span className="font-bold text-tech-main/40">{">"}</span>{" "}
+                      <span className="text-tech-main/40 font-bold">{">"}</span>{" "}
                       CALLOUT
                     </span>
                   </TechButton>
                   <TechButton
                     type="button"
                     variant="ghost"
-                    className="h-7 border border-transparent px-3 text-[10px] tracking-widest text-tech-main transition-all hover:guide-line hover:bg-white hover:text-tech-main hover:shadow-sm"
+                    className="text-tech-main hover:guide-line hover:text-tech-main h-7 border border-transparent px-3 text-[10px] tracking-widest transition-all hover:bg-white hover:shadow-sm"
                     disabled={isReadOnly}
                     onClick={() =>
                       insertTextAtCursor(
@@ -1384,17 +1352,17 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                       )
                     }>
                     <span className="flex items-center gap-1.5">
-                      <span className="font-bold text-tech-main/40">||</span>{" "}
+                      <span className="text-tech-main/40 font-bold">||</span>{" "}
                       TABLE
                     </span>
                   </TechButton>
 
-                  <div className="mx-2 h-4 w-px bg-tech-main/20" />
+                  <div className="bg-tech-main/20 mx-2 h-4 w-px" />
 
                   <TechButton
                     type="button"
                     variant="secondary"
-                    className="group h-7 guide-line bg-white/50 px-3 text-[10px] font-bold tracking-widest text-tech-main-dark/80 transition-all hover:border-tech-main/50 hover:bg-white"
+                    className="group guide-line text-tech-main-dark/80 hover:border-tech-main/50 h-7 bg-white/50 px-3 text-[10px] font-bold tracking-widest transition-all hover:bg-white"
                     disabled={
                       isReadOnly || !activeFileHistoryAvailability?.undoCount
                     }
@@ -1416,7 +1384,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   <TechButton
                     type="button"
                     variant="secondary"
-                    className="group h-7 guide-line bg-white/50 px-3 text-[10px] font-bold tracking-widest text-tech-main-dark/80 transition-all hover:border-tech-main/50 hover:bg-white"
+                    className="group guide-line text-tech-main-dark/80 hover:border-tech-main/50 h-7 bg-white/50 px-3 text-[10px] font-bold tracking-widest transition-all hover:bg-white"
                     disabled={
                       isReadOnly || !activeFileHistoryAvailability?.redoCount
                     }
@@ -1483,13 +1451,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         </div>
       </div>
 
-      <section
-        className="
-          grid gap-4
-          xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]
-        ">
-        <div className="border border-tech-main/35 bg-white/80 backdrop-blur-sm">
-          <div className="flex border-b guide-line">
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+        <div className="border-tech-main/35 border bg-white/80 backdrop-blur-sm">
+          <div className="guide-line flex border-b">
             <button
               type="button"
               onClick={() => setActiveInfoTab("changes")}
@@ -1503,7 +1467,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             <button
               type="button"
               onClick={() => setActiveInfoTab("guide")}
-              className={`flex-1 border-l guide-line px-4 py-3 font-mono text-xs tracking-widest uppercase ${
+              className={`guide-line flex-1 border-l px-4 py-3 font-mono text-xs tracking-widest uppercase ${
                 activeInfoTab === "guide"
                   ? "bg-tech-main text-white"
                   : "text-tech-main hover:bg-tech-main/5"
@@ -1514,11 +1478,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
           {activeInfoTab === "changes" ? (
             <div className="space-y-4 p-4">
-              <div
-                className="
-                  grid gap-3
-                  sm:grid-cols-3
-                ">
+              <div className="grid gap-3 sm:grid-cols-3">
                 <InfoStat
                   label="MODIFIED FILES"
                   value={String(
@@ -1542,11 +1502,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               </div>
 
               {changeEntries.length === 0 ? (
-                <p
-                  className="
-                    border guide-line bg-tech-main/5 p-4 font-mono text-xs
-                    text-tech-main/60 uppercase
-                  ">
+                <p className="guide-line bg-tech-main/5 text-tech-main/60 border p-4 font-mono text-xs uppercase">
                   NO_LOCAL_DIFF_
                 </p>
               ) : (
@@ -1565,7 +1521,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               )}
 
               {newFolderPaths.length > 0 ? (
-                <div className="border guide-line bg-tech-main/5 p-4">
+                <div className="guide-line bg-tech-main/5 border p-4">
                   <p className="section-label">NEW FOLDERS</p>
                   <div className="space-y-1 font-mono text-xs text-emerald-700">
                     {newFolderPaths.map((folderPath) => (
@@ -1578,7 +1534,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           ) : (
             <div className="p-4">
               {contributingGuides.length === 0 ? (
-                <p className="font-mono text-xs text-tech-main/60 uppercase">
+                <p className="text-tech-main/60 font-mono text-xs uppercase">
                   NO_GUIDE_AVAILABLE_
                 </p>
               ) : (
@@ -1613,7 +1569,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           )}
         </div>
 
-        <div className="border border-tech-main/35 bg-white/80 p-4 backdrop-blur-sm">
+        <div className="border-tech-main/35 border bg-white/80 p-4 backdrop-blur-sm">
           <p className="section-label">WORKSPACE OVERVIEW</p>
           <div className="space-y-3 font-mono text-xs uppercase">
             <InfoLine
@@ -1683,13 +1639,13 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
           <section
             aria-label={t("submissionLicenseAria")}
-            className="mt-4 border guide-line bg-tech-main/5 p-4 font-mono text-[0.6875rem] leading-relaxed text-tech-main/80">
-            <div className="mb-3 border-b border-tech-main/15 pb-3">
+            className="guide-line bg-tech-main/5 text-tech-main/80 mt-4 border p-4 font-mono text-[0.6875rem] leading-relaxed">
+            <div className="border-tech-main/15 mb-3 border-b pb-3">
               <p className="section-label">{t("syntaxHintsTitle")}</p>
-              <p className="mt-2 text-tech-main/70">
+              <p className="text-tech-main/70 mt-2">
                 {t("syntaxHintsDescription")}
               </p>
-              <p className="mt-1 text-tech-main/55">
+              <p className="text-tech-main/55 mt-1">
                 {t("syntaxHintsShortcut")}
               </p>
             </div>
@@ -1702,7 +1658,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="underline decoration-tech-main/30 underline-offset-4 transition-colors hover:text-tech-main-dark hover:decoration-tech-main-dark">
+                  className="decoration-tech-main/30 hover:text-tech-main-dark hover:decoration-tech-main-dark underline underline-offset-4 transition-colors">
                   CC BY-NC-SA 4.0
                 </a>
                 {t("submissionLicenseReuseSuffix")}
@@ -1829,20 +1785,20 @@ function describeSnapshotStatus(snapshot?: RepoFileSnapshot) {
 
 function InfoStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border guide-line bg-tech-main/5 p-3">
-      <p className="font-mono text-[0.6875rem] tracking-widest text-tech-main/55 uppercase">
+    <div className="guide-line bg-tech-main/5 border p-3">
+      <p className="text-tech-main/55 font-mono text-[0.6875rem] tracking-widest uppercase">
         {label}
       </p>
-      <p className="mt-2 font-mono text-lg text-tech-main uppercase">{value}</p>
+      <p className="text-tech-main mt-2 font-mono text-lg uppercase">{value}</p>
     </div>
   )
 }
 
 function InfoLine({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-3 border-b border-tech-main/10 pb-2">
+    <div className="border-tech-main/10 flex items-start justify-between gap-3 border-b pb-2">
       <span className="text-tech-main/55">{label}</span>
-      <span className="text-right break-all text-tech-main">{value}</span>
+      <span className="text-tech-main text-right break-all">{value}</span>
     </div>
   )
 }
@@ -1857,22 +1813,19 @@ function ChangePreviewCard({
   rows: DraftDiffRow[]
 }) {
   return (
-    <section className="border guide-line bg-white/70">
-      <div className="flex items-center justify-between border-b guide-line bg-tech-main/5 px-4 py-3">
-        <p className="font-mono text-xs tracking-widest break-all text-tech-main uppercase">
+    <section className="guide-line border bg-white/70">
+      <div className="guide-line bg-tech-main/5 flex items-center justify-between border-b px-4 py-3">
+        <p className="text-tech-main font-mono text-xs tracking-widest break-all uppercase">
           {filePath}
         </p>
         <span
-          className={`
-            border px-2 py-1 font-mono text-[0.625rem] tracking-widest uppercase
-            ${
-              changeType === "new"
-                ? `border-emerald-500/30 text-emerald-700`
-                : changeType === "modified"
-                  ? `border-amber-500/30 text-amber-700`
-                  : `guide-line text-tech-main/55`
-            }
-          `}>
+          className={`border px-2 py-1 font-mono text-[0.625rem] tracking-widest uppercase ${
+            changeType === "new"
+              ? `border-emerald-500/30 text-emerald-700`
+              : changeType === "modified"
+                ? `border-amber-500/30 text-amber-700`
+                : `guide-line text-tech-main/55`
+          } `}>
           {changeType}
         </span>
       </div>
@@ -1881,18 +1834,15 @@ function ChangePreviewCard({
         {rows.map((row, index) => (
           <div
             key={`${filePath}-${index}`}
-            className={`
-              grid grid-cols-[3rem_3rem_minmax(0,1fr)] px-2 py-1
-              ${
-                row.type === "add"
-                  ? `bg-emerald-500/10 text-emerald-200`
-                  : row.type === "remove"
-                    ? `bg-red-500/10 text-red-200`
-                    : row.type === "skipped"
-                      ? `bg-slate-800/70 text-slate-400`
-                      : `text-slate-300`
-              }
-            `}>
+            className={`grid grid-cols-[3rem_3rem_minmax(0,1fr)] px-2 py-1 ${
+              row.type === "add"
+                ? `bg-emerald-500/10 text-emerald-200`
+                : row.type === "remove"
+                  ? `bg-red-500/10 text-red-200`
+                  : row.type === "skipped"
+                    ? `bg-slate-800/70 text-slate-400`
+                    : `text-slate-300`
+            } `}>
             <span className="text-slate-500">{row.oldLine ?? ""}</span>
             <span className="text-slate-500">{row.newLine ?? ""}</span>
             <span className="break-all whitespace-pre-wrap">

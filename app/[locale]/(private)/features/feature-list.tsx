@@ -99,12 +99,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
           <SectionTitle>
             {title} ({groupFeatures.length})
           </SectionTitle>
-          <div
-            className="
-              grid grid-cols-1 gap-6
-              md:grid-cols-2
-              lg:grid-cols-3
-            ">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {groupFeatures.map((feature) => (
               <Link
                 key={feature.id}
@@ -125,31 +120,18 @@ export function FeatureList({ features }: { features: Feature[] }) {
                       date={formatFeatureDate(feature.createdAt)}
                     />
 
-                    <h3
-                      className="
-                        mt-2 line-clamp-2 border-l-2 border-tech-main/40 pl-3
-                        text-lg font-bold tracking-tight text-tech-main-dark
-                        uppercase
-                      ">
+                    <h3 className="border-tech-main/40 text-tech-main-dark mt-2 line-clamp-2 border-l-2 pl-3 text-lg font-bold tracking-tight uppercase">
                       {feature.title}
                     </h3>
 
                     <div className="mt-4 flex flex-col gap-2">
-                      <p
-                        className="
-                          flex items-center font-mono text-xs tracking-widest
-                          text-tech-main opacity-80
-                        ">
+                      <p className="text-tech-main flex items-center font-mono text-xs tracking-widest opacity-80">
                         <StatusDot size="sm" variant="main" className="mr-2" />
                         {tArticle("authorLabel")}:{" "}
                         {feature.author?.name || t("unknownUser")}
                       </p>
                       {feature.assignee && (
-                        <p
-                          className="
-                            flex items-center font-mono text-xs tracking-widest
-                            text-blue-600 opacity-80
-                          ">
+                        <p className="flex items-center font-mono text-xs tracking-widest text-blue-600 opacity-80">
                           <StatusDot
                             size="sm"
                             variant="accent"
@@ -185,11 +167,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
           padding="spacious">
           <div className="space-y-4">
             <div>
-              <h4
-                className="
-                  mb-3 font-mono text-sm tracking-widest text-tech-main
-                  uppercase
-                ">
+              <h4 className="text-tech-main mb-3 font-mono text-sm tracking-widest uppercase">
                 {t("filterByStatus")}
               </h4>
               <SegmentedControl
@@ -207,11 +185,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
 
             {allTags.length > 0 && (
               <div>
-                <h4
-                  className="
-                    mb-3 font-mono text-sm tracking-widest text-tech-main
-                    uppercase
-                  ">
+                <h4 className="text-tech-main mb-3 font-mono text-sm tracking-widest uppercase">
                   {t("filterByTags")}
                 </h4>
                 <div className="flex flex-wrap gap-2">
@@ -220,20 +194,11 @@ export function FeatureList({ features }: { features: Feature[] }) {
                       key={tag}
                       type="button"
                       onClick={() => toggleTag(tag)}
-                      className={`
-                        flex min-h-8 cursor-pointer items-center justify-center
-                        border px-3 py-2 font-mono text-xs uppercase
-                        transition-all duration-200
-                        ${
-                          selectedTags.includes(tag)
-                            ? "border-tech-accent bg-tech-accent text-white"
-                            : `
-                              border-tech-main/40 bg-tech-accent/5
-                              text-tech-main
-                              hover:border-tech-main/60 hover:bg-tech-accent/10
-                            `
-                        }
-                      `}>
+                      className={`flex min-h-8 cursor-pointer items-center justify-center border px-3 py-2 font-mono text-xs uppercase transition-all duration-200 ${
+                        selectedTags.includes(tag)
+                          ? "border-tech-accent bg-tech-accent text-white"
+                          : `border-tech-main/40 bg-tech-accent/5 text-tech-main hover:border-tech-main/60 hover:bg-tech-accent/10`
+                      } `}>
                       {tag}
                     </button>
                   ))}

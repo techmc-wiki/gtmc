@@ -22,53 +22,29 @@ export default function FeaturesLoading() {
         className="page-container-pb"
         aria-busy="true"
         aria-label={t("loadingFeaturesList")}>
-        <div
-          className="
-            relative mt-8 flex animate-tech-slide-in flex-col items-start
-            justify-between gap-4 border-b border-tech-main/40 pb-6
-            md:flex-row md:items-end
-          ">
+        <div className="animate-tech-slide-in border-tech-main/40 relative mt-8 flex flex-col items-start justify-between gap-4 border-b pb-6 md:flex-row md:items-end">
           <ScanConfirmOverlay />
-          <div
-            className="
-              w-full
-              md:w-auto
-            ">
+          <div className="w-full md:w-auto">
             <SectionRail label="FEATURE_HEADER" />
             <SegmentedBar
               opacity="high"
-              className="mt-2 h-10 w-64 border-b border-tech-main/40"
+              className="border-tech-main/40 mt-2 h-10 w-64 border-b"
             />
             <SegmentedBar opacity="low" className="mt-2 h-4 w-80" />
           </div>
-          <div
-            className="
-              w-full
-              md:w-auto
-            ">
+          <div className="w-full md:w-auto">
             <SegmentedBar
               opacity="high"
-              className="
-                h-10 w-full border border-tech-main/40
-                md:w-48
-              "
+              className="border-tech-main/40 h-10 w-full border md:w-48"
             />
           </div>
         </div>
 
         <div className="space-y-6">
-          <TechCard
-            className="
-              animate-tech-slide-in border-tech-main/40 bg-white/80 p-6
-              backdrop-blur-sm [animation-delay:100ms]
-            ">
+          <TechCard className="animate-tech-slide-in border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm [animation-delay:100ms]">
             <div className="space-y-4">
               <div>
-                <h4
-                  className="
-                    mb-3 font-mono text-sm tracking-widest text-tech-main
-                    uppercase
-                  ">
+                <h4 className="text-tech-main mb-3 font-mono text-sm tracking-widest uppercase">
                   FILTER_BY_STATUS_
                 </h4>
                 <div className="flex flex-wrap gap-2">
@@ -76,17 +52,13 @@ export default function FeaturesLoading() {
                     <SegmentedBar
                       key={i}
                       opacity="low"
-                      className="h-8 w-24 border guide-line"
+                      className="guide-line h-8 w-24 border"
                     />
                   ))}
                 </div>
               </div>
               <div>
-                <h4
-                  className="
-                    mb-3 font-mono text-sm tracking-widest text-tech-main
-                    uppercase
-                  ">
+                <h4 className="text-tech-main mb-3 font-mono text-sm tracking-widest uppercase">
                   FILTER_BY_TAGS_
                 </h4>
                 <div className="flex flex-wrap gap-2">
@@ -94,7 +66,7 @@ export default function FeaturesLoading() {
                     <SegmentedBar
                       key={i}
                       opacity="low"
-                      className="h-8 w-20 border guide-line"
+                      className="guide-line h-8 w-20 border"
                     />
                   ))}
                 </div>
@@ -112,36 +84,19 @@ export default function FeaturesLoading() {
               className="animate-tech-slide-in"
               style={{ animationDelay: group.delay }}>
               <div className="mb-8">
-                <h2
-                  className="
-                    mb-6 border-b guide-line pb-2 text-lg font-bold
-                    tracking-widest text-tech-main-dark uppercase
-                    md:text-xl
-                  ">
+                <h2 className="guide-line text-tech-main-dark mb-6 border-b pb-2 text-lg font-bold tracking-widest uppercase md:text-xl">
                   {group.label} ({group.cards.length})
                 </h2>
-                <div
-                  className="
-                    grid grid-cols-1 gap-6
-                    md:grid-cols-2
-                    lg:grid-cols-3
-                  ">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {group.cards.map((cardNum) => (
                     <TechCard
                       key={cardNum}
-                      className="
-                        flex h-auto flex-col justify-between border
-                        border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
-                        sm:h-64
-                      ">
+                      className="border-tech-main/40 flex h-auto flex-col justify-between border bg-white/80 p-6 backdrop-blur-sm sm:h-64">
                       {/* Status badge + date row */}
                       <div className="card-header-row">
                         <SegmentedBar
                           opacity="high"
-                          className="
-                            h-6 w-24 border border-yellow-200/50
-                            bg-yellow-100/50
-                          "
+                          className="h-6 w-24 border border-yellow-200/50 bg-yellow-100/50"
                         />
                         <SegmentedBar opacity="high" className="h-5 w-20" />
                       </div>
@@ -159,15 +114,11 @@ export default function FeaturesLoading() {
                       <div className="my-4 flex flex-col gap-2">
                         <SegmentedBar
                           opacity="medium"
-                          className="
-                            h-5 w-40 border border-zinc-200/50 bg-zinc-100/50
-                          "
+                          className="h-5 w-40 border border-zinc-200/50 bg-zinc-100/50"
                         />
                         <SegmentedBar
                           opacity="medium"
-                          className="
-                            h-5 w-32 border border-zinc-200/50 bg-zinc-100/50
-                          "
+                          className="h-5 w-32 border border-zinc-200/50 bg-zinc-100/50"
                         />
                       </div>
 
@@ -175,11 +126,11 @@ export default function FeaturesLoading() {
                       <div className="mt-auto flex flex-wrap gap-1 pt-4">
                         <SegmentedBar
                           opacity="low"
-                          className="h-5 w-20 border guide-line"
+                          className="guide-line h-5 w-20 border"
                         />
                         <SegmentedBar
                           opacity="low"
-                          className="h-5 w-24 border guide-line"
+                          className="guide-line h-5 w-24 border"
                         />
                       </div>
                     </TechCard>

@@ -27,7 +27,7 @@ export function FileListSidebar({
   return (
     <aside
       className={cn(
-        "flex flex-col border border-tech-main/30 bg-white/40 shadow-[inset_0_0_40px_rgb(var(--color-tech-main)/0.05)] backdrop-blur-sm",
+        "border-tech-main/30 flex flex-col border bg-white/40 shadow-[inset_0_0_40px_rgb(var(--color-tech-main)/0.05)] backdrop-blur-sm",
         sticky &&
           "sticky top-16 max-h-[calc(100dvh-4rem)] self-start overflow-y-auto md:top-20 md:max-h-[calc(100dvh-5rem)]",
         className
@@ -55,25 +55,25 @@ export function FileListHeader({
   return (
     <div
       className={cn(
-        "flex items-center justify-between gap-3 border-b border-tech-main/30 bg-tech-main/3 px-4 py-3",
+        "border-tech-main/30 bg-tech-main/3 flex items-center justify-between gap-3 border-b px-4 py-3",
         className
       )}>
-      <div className="flex min-w-0 flex-1 flex-col gap-1 pt-1 text-tech-main/80">
+      <div className="text-tech-main/80 flex min-w-0 flex-1 flex-col gap-1 pt-1">
         <div className="flex h-4 items-center justify-start gap-2">
-          <span className="font-mono text-xs font-bold tracking-widest whitespace-nowrap text-tech-main-dark uppercase">
+          <span className="text-tech-main-dark font-mono text-xs font-bold tracking-widest whitespace-nowrap uppercase">
             {title}
           </span>
           {count !== undefined && (
-            <span className="rounded-sm border border-tech-main/30 bg-tech-main/10 px-1 font-mono text-[9px]">
+            <span className="border-tech-main/30 bg-tech-main/10 rounded-sm border px-1 font-mono text-[9px]">
               {count}
             </span>
           )}
         </div>
         {subtitle && (
           <p
-            className="flex items-center gap-1 truncate font-mono text-[9px] tracking-wide text-tech-main/50 uppercase"
+            className="text-tech-main/50 flex items-center gap-1 truncate font-mono text-[9px] tracking-wide uppercase"
             title={typeof subtitle === "string" ? subtitle : undefined}>
-            <span className="size-1 rounded-full bg-tech-main/30" />
+            <span className="bg-tech-main/30 size-1 rounded-full" />
             {subtitle}
           </p>
         )}
@@ -146,10 +146,10 @@ export function FileListItem({
         className
       )}>
       {!isActive && (
-        <div className="absolute top-1/2 left-[-6px] h-px w-1.5 bg-tech-main/20" />
+        <div className="bg-tech-main/20 absolute top-1/2 left-[-6px] h-px w-1.5" />
       )}
       {isActive && (
-        <div className="absolute inset-y-0 left-[-2px] w-0.5 bg-tech-main group-hover:animate-target-blink" />
+        <div className="bg-tech-main group-hover:animate-target-blink absolute inset-y-0 left-[-2px] w-0.5" />
       )}
 
       <button
@@ -158,16 +158,16 @@ export function FileListItem({
         className={cn(
           "ml-1 flex min-h-[46px] min-w-0 flex-1 flex-col items-start gap-[2px] border px-3 py-2 text-left transition-all duration-200",
           isActive
-            ? "z-10 scale-[1.01] border-tech-main bg-tech-main/8 shadow-[0_2px_10px_rgb(var(--color-tech-main)/0.08)]"
-            : "border-transparent bg-transparent hover:border-tech-main/30 hover:bg-tech-main/3"
+            ? "border-tech-main bg-tech-main/8 z-10 scale-[1.01] shadow-[0_2px_10px_rgb(var(--color-tech-main)/0.08)]"
+            : "hover:border-tech-main/30 hover:bg-tech-main/3 border-transparent bg-transparent"
         )}>
         <span className="flex w-full items-center justify-between">
           <span
             className={cn(
               "flex items-center gap-2 truncate font-mono tracking-widest uppercase transition-colors",
               isActive
-                ? "text-xs font-bold text-tech-main"
-                : "text-[11px] font-medium text-tech-main/70"
+                ? "text-tech-main text-xs font-bold"
+                : "text-tech-main/70 text-[11px] font-medium"
             )}>
             <svg
               width="12"
@@ -210,7 +210,7 @@ export function FileExtBadge({ filePath, className }: FileExtBadgeProps) {
   return (
     <span
       className={cn(
-        "shrink-0 kbd-badge bg-tech-main/5 font-mono text-[0.5625rem] tracking-widest text-tech-main/50 uppercase",
+        "kbd-badge bg-tech-main/5 text-tech-main/50 shrink-0 font-mono text-[0.5625rem] tracking-widest uppercase",
         className
       )}>
       {ext}

@@ -1,4 +1,4 @@
-name: Lint
+name: Style and Lint
 permissions:
   contents: read
 
@@ -42,5 +42,8 @@ jobs:
         env:
           DATABASE_URL: "postgresql://localhost:5432/placeholder"
 
-      - name: Run lint
+      - name: Run linter
         run: pnpm lint:check
+
+      - name: Run style check
+        run: pnpm style:check

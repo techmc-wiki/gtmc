@@ -49,7 +49,7 @@ export function EditorTabStrip({
         label: (
           <span className="flex items-center gap-2">
             {activeTab === "3-way" && (
-              <span className="inline-block size-1.5 animate-pulse bg-tech-main" />
+              <span className="bg-tech-main inline-block size-1.5 animate-pulse" />
             )}
             {t("tabThreeWay")}
           </span>
@@ -63,7 +63,7 @@ export function EditorTabStrip({
       label: (
         <span className="flex items-center gap-2">
           {activeTab === "write" && (
-            <span className="inline-block size-1.5 animate-pulse bg-tech-main" />
+            <span className="bg-tech-main inline-block size-1.5 animate-pulse" />
           )}
           {t("writeTab")}
         </span>
@@ -77,7 +77,7 @@ export function EditorTabStrip({
         label: (
           <span className="flex items-center gap-2">
             {activeTab === "diff" && (
-              <span className="inline-block size-1.5 animate-pulse bg-tech-main" />
+              <span className="bg-tech-main inline-block size-1.5 animate-pulse" />
             )}
             {t("tabDiff")}
           </span>
@@ -91,7 +91,7 @@ export function EditorTabStrip({
       label: (
         <span className="flex items-center gap-2">
           {activeTab === "preview" && (
-            <span className="inline-block size-1.5 animate-pulse bg-tech-main" />
+            <span className="bg-tech-main inline-block size-1.5 animate-pulse" />
           )}
           {t("previewTab")}
         </span>
@@ -112,12 +112,8 @@ export function EditorTabStrip({
   ])
 
   return (
-    <div
-      className="
-        relative flex items-center justify-between gap-3 overflow-hidden
-        border-b border-tech-main/40 bg-tech-main/3 font-mono text-[11px] tracking-widest uppercase
-      ">
-      <div className="absolute top-0 left-0 h-px w-full bg-linear-to-r from-tech-main/0 via-tech-main/30 to-tech-main/0" />
+    <div className="border-tech-main/40 bg-tech-main/3 relative flex items-center justify-between gap-3 overflow-hidden border-b font-mono text-[11px] tracking-widest uppercase">
+      <div className="from-tech-main/0 via-tech-main/30 to-tech-main/0 absolute top-0 left-0 h-px w-full bg-linear-to-r" />
       <div className="flex h-[38px] items-center pl-1">
         <SegmentedControl<TabType>
           options={options}
@@ -131,9 +127,9 @@ export function EditorTabStrip({
       </div>
 
       {rightSlot ? (
-        <div className="flex items-center gap-2 pr-4 text-[9px] text-tech-main/50 uppercase">
+        <div className="text-tech-main/50 flex items-center gap-2 pr-4 text-[9px] uppercase">
           TARGET_BUFFER //{" "}
-          <span className="font-bold text-tech-main-dark/80">{rightSlot}</span>
+          <span className="text-tech-main-dark/80 font-bold">{rightSlot}</span>
         </div>
       ) : null}
     </div>

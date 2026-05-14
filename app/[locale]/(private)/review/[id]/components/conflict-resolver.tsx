@@ -162,12 +162,7 @@ export default function ConflictResolver({
 
   return (
     <div className="space-y-4">
-      <div
-        className="
-          flex flex-col justify-between gap-4 border-l-4 border-amber-500
-          bg-amber-500/10 p-4 text-amber-700
-          sm:flex-row sm:items-center
-        ">
+      <div className="flex flex-col justify-between gap-4 border-l-4 border-amber-500 bg-amber-500/10 p-4 text-amber-700 sm:flex-row sm:items-center">
         <div>
           <p className="font-bold tracking-widest uppercase">
             Admin Resolution Required
@@ -201,26 +196,16 @@ export default function ConflictResolver({
               size="sm"
               onClick={handleAbort}
               disabled={isAborting}
-              className="
-                shrink-0 border-red-600 text-red-600
-                hover:bg-red-600 hover:text-white
-              ">
+              className="shrink-0 border-red-600 text-red-600 hover:bg-red-600 hover:text-white">
               {isAborting ? "ABORTING..." : "ABORT REBASE"}
             </TechButton>
           )}
       </div>
 
-      <div
-        className="
-          grid gap-4
-          lg:grid-cols-[18rem_minmax(0,1fr)]
-        ">
+      <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
         {draftCollection.files.length > 1 ? (
-          <aside className="border border-tech-main/30 bg-tech-main/5 p-2">
-            <div
-              className="
-                p-2 font-mono text-xs tracking-widest text-tech-main uppercase
-              ">
+          <aside className="border-tech-main/30 bg-tech-main/5 border p-2">
+            <div className="text-tech-main p-2 font-mono text-xs tracking-widest uppercase">
               CONFLICT_FILES_[{draftCollection.files.length}]
             </div>
             <div className="space-y-2">
@@ -240,29 +225,15 @@ export default function ConflictResolver({
                         activeFileId: file.id,
                       }))
                     }
-                    className={`
-                      flex min-h-11 w-full flex-col items-start gap-1 border
-                      px-3 py-2 text-left transition-colors
-                      ${
-                        isActive
-                          ? `border-tech-main bg-tech-main/10`
-                          : `
-                            guide-line bg-white/70
-                            hover:border-tech-main/50 hover:bg-white/90
-                          `
-                      }
-                    `}>
-                    <span
-                      className="
-                        truncate font-mono text-xs tracking-widest
-                        text-tech-main uppercase
-                      ">
+                    className={`flex min-h-11 w-full flex-col items-start gap-1 border px-3 py-2 text-left transition-colors ${
+                      isActive
+                        ? `border-tech-main bg-tech-main/10`
+                        : `guide-line hover:border-tech-main/50 bg-white/70 hover:bg-white/90`
+                    } `}>
+                    <span className="text-tech-main truncate font-mono text-xs tracking-widest uppercase">
                       {fileLabel}
                     </span>
-                    <span
-                      className="
-                        truncate font-mono text-[0.6875rem] text-tech-main/60
-                      ">
+                    <span className="text-tech-main/60 truncate font-mono text-[0.6875rem]">
                       {file.filePath || "PATH_NOT_SET"}
                     </span>
                   </button>
@@ -273,74 +244,41 @@ export default function ConflictResolver({
         ) : null}
 
         <div className="space-y-4">
-          <div className="border border-tech-main/30 bg-white/70 px-4 py-3">
-            <p
-              className="
-                font-mono text-xs tracking-widest text-tech-main uppercase
-              ">
+          <div className="border-tech-main/30 border bg-white/70 px-4 py-3">
+            <p className="text-tech-main font-mono text-xs tracking-widest uppercase">
               ACTIVE_FILE_
             </p>
-            <p className="mt-1 font-mono text-sm text-tech-main-dark">
+            <p className="text-tech-main-dark mt-1 font-mono text-sm">
               {activeFile.filePath || "PATH_NOT_SET"}
             </p>
           </div>
 
-          <div
-            className="
-              mb-8 space-y-2 border border-tech-main/30 bg-tech-main/5 p-2
-            ">
+          <div className="border-tech-main/30 bg-tech-main/5 mb-8 space-y-2 border p-2">
             {blocks.map((block) => (
               <div key={block.id}>
                 {block.type === "ok" ? (
-                  <pre
-                    className="
-                      p-4 font-mono text-sm whitespace-pre-wrap
-                      text-tech-main-dark opacity-70
-                    ">
+                  <pre className="text-tech-main-dark p-4 font-mono text-sm whitespace-pre-wrap opacity-70">
                     {block.content}
                   </pre>
                 ) : (
                   <div className="my-4 flex flex-col border border-red-500/50">
-                    <div
-                      className="
-                        border-b border-red-500/30 bg-red-500/10 p-2 text-center
-                        text-xs font-bold tracking-widest text-red-700 uppercase
-                      ">
+                    <div className="border-b border-red-500/30 bg-red-500/10 p-2 text-center text-xs font-bold tracking-widest text-red-700 uppercase">
                       Conflict Block
                     </div>
-                    <div
-                      className="
-                        flex flex-col divide-red-500/30
-                        md:flex-row md:divide-x
-                      ">
+                    <div className="flex flex-col divide-red-500/30 md:flex-row md:divide-x">
                       <div className="flex flex-1 flex-col bg-amber-500/5">
-                        <div
-                          className="
-                            border-b border-amber-500/20 bg-amber-500/10 p-2
-                            text-xs font-bold text-amber-700
-                          ">
+                        <div className="border-b border-amber-500/20 bg-amber-500/10 p-2 text-xs font-bold text-amber-700">
                           YOUR CHANGES (draft)
                         </div>
-                        <pre
-                          className="
-                            overflow-x-auto p-4 font-mono text-sm
-                            whitespace-pre-wrap
-                          ">
+                        <pre className="overflow-x-auto p-4 font-mono text-sm whitespace-pre-wrap">
                           {block.ours}
                         </pre>
-                        <div
-                          className="
-                            mt-auto border-t border-amber-500/20 bg-amber-500/5
-                            p-2
-                          ">
+                        <div className="mt-auto border-t border-amber-500/20 bg-amber-500/5 p-2">
                           <TechButton
                             type="button"
                             variant="secondary"
                             size="sm"
-                            className="
-                              w-full border-amber-500 text-amber-700
-                              hover:bg-amber-500 hover:text-amber-900
-                            "
+                            className="w-full border-amber-500 text-amber-700 hover:bg-amber-500 hover:text-amber-900"
                             onClick={() =>
                               handleAcceptBlock(block.id, block.ours)
                             }>
@@ -349,33 +287,18 @@ export default function ConflictResolver({
                         </div>
                       </div>
                       <div className="flex flex-1 flex-col bg-blue-500/5">
-                        <div
-                          className="
-                            border-b border-blue-500/20 bg-blue-500/10 p-2
-                            text-xs font-bold text-blue-700
-                          ">
+                        <div className="border-b border-blue-500/20 bg-blue-500/10 p-2 text-xs font-bold text-blue-700">
                           MAIN CHANGES
                         </div>
-                        <pre
-                          className="
-                            overflow-x-auto p-4 font-mono text-sm
-                            whitespace-pre-wrap
-                          ">
+                        <pre className="overflow-x-auto p-4 font-mono text-sm whitespace-pre-wrap">
                           {block.theirs}
                         </pre>
-                        <div
-                          className="
-                            mt-auto border-t border-blue-500/20 bg-blue-500/5
-                            p-2
-                          ">
+                        <div className="mt-auto border-t border-blue-500/20 bg-blue-500/5 p-2">
                           <TechButton
                             type="button"
                             variant="secondary"
                             size="sm"
-                            className="
-                              w-full border-blue-500 text-blue-700
-                              hover:bg-blue-500 hover:text-blue-900
-                            "
+                            className="w-full border-blue-500 text-blue-700 hover:bg-blue-500 hover:text-blue-900"
                             onClick={() =>
                               handleAcceptBlock(block.id, block.theirs)
                             }>
@@ -403,28 +326,18 @@ export default function ConflictResolver({
             />
             <input type="hidden" name="content" value={content} />
 
-            <div className="mt-8 border-t border-tech-main/30 pt-4">
-              <h3
-                className="
-                  mb-2 font-mono text-sm font-bold tracking-widest uppercase
-                ">
+            <div className="border-tech-main/30 mt-8 border-t pt-4">
+              <h3 className="mb-2 font-mono text-sm font-bold tracking-widest uppercase">
                 Raw Editor Fallback
               </h3>
-              <div
-                className="
-                  relative border border-tech-main/30 bg-tech-main/5 p-1
-                  focus-within:border-tech-main
-                ">
+              <div className="border-tech-main/30 bg-tech-main/5 focus-within:border-tech-main relative border p-1">
                 <textarea
                   name="content"
                   value={content}
                   onChange={(event) =>
                     updateActiveFileContent(event.target.value)
                   }
-                  className="
-                    min-h-[300px] w-full resize-y bg-transparent p-4 font-mono
-                    text-sm text-tech-main-dark outline-none
-                  "
+                  className="text-tech-main-dark min-h-[300px] w-full resize-y bg-transparent p-4 font-mono text-sm outline-none"
                 />
               </div>
             </div>

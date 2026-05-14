@@ -1,5 +1,4 @@
 import { defineConfig, globalIgnores } from "eslint/config"
-import eslintPluginBetterTailwindcss from "eslint-plugin-better-tailwindcss"
 import { parser as tsParser } from "typescript-eslint"
 import nextVitals from "eslint-config-next/core-web-vitals"
 import nextTs from "eslint-config-next/typescript"
@@ -24,24 +23,6 @@ const eslintConfig = defineConfig([
     "**/*.cjs",
   ]),
 
-  {
-    extends: [eslintPluginBetterTailwindcss.configs.recommended],
-    settings: {
-      "better-tailwindcss": {
-        entryPoint: "app/globals.css",
-      },
-    },
-    rules: {
-      "better-tailwindcss/no-unknown-classes": [
-        "error",
-        {
-          ignore: ["^code-block-pre$"],
-        },
-      ],
-      // Disable line wrapping rule to avoid conflict with Prettier
-      "better-tailwindcss/enforce-consistent-line-wrapping": "off",
-    },
-  },
   {
     files: ["**/*.{ts,tsx,cts,mts}"],
     languageOptions: {

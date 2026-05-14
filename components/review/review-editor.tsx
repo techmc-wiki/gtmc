@@ -934,28 +934,28 @@ export function ReviewEditor({
       />
 
       <div className="space-y-4">
-        <div className="sticky top-0 z-40 flex flex-wrap items-center justify-between gap-2 border border-tech-main/40 bg-tech-bg/95 px-4 py-3 font-mono text-xs text-tech-main backdrop-blur-sm">
+        <div className="border-tech-main/40 bg-tech-bg/95 text-tech-main sticky top-0 z-40 flex flex-wrap items-center justify-between gap-2 border px-4 py-3 font-mono text-xs backdrop-blur-sm">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
-            <span className="shrink-0 border border-tech-main/40 bg-tech-main/10 px-2 py-0.5 tracking-widest uppercase">
+            <span className="border-tech-main/40 bg-tech-main/10 shrink-0 border px-2 py-0.5 tracking-widest uppercase">
               FILES_CHANGED_#{pr.number}
             </span>
             <span className="truncate tracking-widest uppercase">
               {pr.title}
             </span>
             {effectiveMode && (
-              <span className="shrink-0 border border-tech-main/30 bg-tech-main/5 px-2 py-0.5 tracking-widest text-tech-main/70 uppercase">
+              <span className="border-tech-main/30 bg-tech-main/5 text-tech-main/70 shrink-0 border px-2 py-0.5 tracking-widest uppercase">
                 {effectiveMode}
               </span>
             )}
-            <span className="shrink-0 border guide-line bg-white/70 px-2 py-0.5 tracking-widest text-tech-main/60 uppercase">
+            <span className="guide-line text-tech-main/60 shrink-0 border bg-white/70 px-2 py-0.5 tracking-widest uppercase">
               {pr.baseRef} ← {pr.headRef}
             </span>
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-3">
-            <span className="font-mono text-[0.6875rem] tracking-widest text-tech-main/60 uppercase">
+            <span className="text-tech-main/60 font-mono text-[0.6875rem] tracking-widest uppercase">
               {pr.commits}_COMMITS
             </span>
-            <span className="font-mono text-[0.6875rem] tracking-widest text-tech-main/60 uppercase">
+            <span className="text-tech-main/60 font-mono text-[0.6875rem] tracking-widest uppercase">
               {pr.changedFiles}_FILES
             </span>
             <span className="font-mono text-[0.6875rem] tracking-widest text-green-700 uppercase">
@@ -968,19 +968,19 @@ export function ReviewEditor({
               href={pr.htmlUrl}
               target="_blank"
               rel="noreferrer"
-              className="shrink-0 tracking-widest uppercase underline underline-offset-4 hover:text-tech-main-dark">
+              className="hover:text-tech-main-dark shrink-0 tracking-widest uppercase underline underline-offset-4">
               OPEN_PR_
             </a>
           </div>
         </div>
-        <div className="h-px bg-tech-main/20" />
+        <div className="bg-tech-main/20 h-px" />
 
         {effectiveMode === null && isMounted
           ? ReactDOM.createPortal(
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                <div className="relative w-full max-w-2xl border border-tech-main/40 bg-white p-6 shadow-xl">
+                <div className="border-tech-main/40 relative w-full max-w-2xl border bg-white p-6 shadow-xl">
                   <CornerBrackets color="border-tech-main/40" />
-                  <p className="mb-4 font-mono text-xs tracking-widest text-tech-main/60 uppercase">
+                  <p className="text-tech-main/60 mb-4 font-mono text-xs tracking-widest uppercase">
                     RESOLUTION_METHOD_
                   </p>
                   <ModeSelector
@@ -1039,11 +1039,7 @@ export function ReviewEditor({
               mergeStrategyAnalysis={mergeStrategyAnalysis}
             />
 
-            <div
-              className="
-                relative editor-grow border
-                border-tech-main/40 bg-white/80 backdrop-blur-sm
-              ">
+            <div className="editor-grow border-tech-main/40 relative border bg-white/80 backdrop-blur-sm">
               <EditorTabStrip
                 activeTab={visibleActiveTab}
                 onTabChange={setActiveTab}
@@ -1057,14 +1053,14 @@ export function ReviewEditor({
               />
 
               {visibleActiveTab === "3-way" && hasInlineConflicts && (
-                <div className="flex items-center border-b guide-line bg-tech-main/3 px-3 py-1">
+                <div className="guide-line bg-tech-main/3 flex items-center border-b px-3 py-1">
                   <button
                     type="button"
                     onClick={handleJumpToNextConflict}
-                    className="border border-tech-main/30 px-2 py-1 font-mono text-[0.625rem] tracking-widest text-tech-main/60 uppercase hover:border-tech-main hover:text-tech-main">
+                    className="border-tech-main/30 text-tech-main/60 hover:border-tech-main hover:text-tech-main border px-2 py-1 font-mono text-[0.625rem] tracking-widest uppercase">
                     NEXT_CONFLICT_ ↓
                   </button>
-                  <span className="ml-2 font-mono text-[0.625rem] tracking-widest text-tech-main/40 uppercase">
+                  <span className="text-tech-main/40 ml-2 font-mono text-[0.625rem] tracking-widest uppercase">
                     {conflictSegments.length} UNRESOLVED
                   </span>
                 </div>
@@ -1092,7 +1088,7 @@ export function ReviewEditor({
                             return (
                               <span
                                 key={segment.id}
-                                className="block text-tech-main/80">
+                                className="text-tech-main/80 block">
                                 {segment.content || "\u00a0"}
                               </span>
                             )
@@ -1183,7 +1179,7 @@ export function ReviewEditor({
                     </div>
                   ) : (
                     <div className="space-y-3 p-6">
-                      <p className="font-mono text-xs tracking-widest text-tech-main/60 uppercase">
+                      <p className="text-tech-main/60 font-mono text-xs tracking-widest uppercase">
                         NO_CONFLICTS_LEFT_
                       </p>
                     </div>
@@ -1234,12 +1230,7 @@ export function ReviewEditor({
                     </p>
                   </div>
                 ) : activeContent.trim() ? (
-                  <div
-                    className="
-                      w-full max-w-none overflow-hidden p-6 wrap-break-word
-                      selection:bg-tech-main/20 selection:text-slate-900
-                      sm:p-8
-                    ">
+                  <div className="selection:bg-tech-main/20 w-full max-w-none overflow-hidden p-6 wrap-break-word selection:text-slate-900 sm:p-8">
                     <LazyMarkdownPreview
                       content={activeContent}
                       rawPath={activeFile?.filePath ?? ""}

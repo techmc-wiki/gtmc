@@ -201,10 +201,7 @@ export function getMarkdownComponents(rawPath: string) {
   const advancedBadge = (
     <span
       aria-hidden="true"
-      className="
-        mx-2 inline-block shrink-0 bg-[#4c5b96] px-1.5 py-0.5 align-middle
-        font-mono text-[0.625rem] font-bold tracking-widest text-white select-none
-      ">
+      className="mx-2 inline-block shrink-0 bg-[#4c5b96] px-1.5 py-0.5 align-middle font-mono text-[0.625rem] font-bold tracking-widest text-white select-none">
       ADVANCED
     </span>
   )
@@ -226,7 +223,7 @@ export function getMarkdownComponents(rawPath: string) {
     return (
       <span
         className={[
-          "inline-block rounded-xs border guide-line bg-tech-main/8 px-1.5 py-px text-tech-main/80 transition-[filter,text-shadow,color,background-color,border-color] duration-200 filter-[blur(0.18rem)] [text-shadow:0_0_0.35rem_rgb(var(--color-tech-main)/0.45)] hover:border-tech-main/35 hover:bg-white/85 hover:text-slate-800 hover:filter-none hover:text-shadow-none",
+          "guide-line bg-tech-main/8 text-tech-main/80 hover:border-tech-main/35 inline-block rounded-xs border px-1.5 py-px filter-[blur(0.18rem)] transition-[filter,text-shadow,color,background-color,border-color] duration-200 [text-shadow:0_0_0.35rem_rgb(var(--color-tech-main)/0.45)] hover:bg-white/85 hover:text-slate-800 hover:filter-none hover:text-shadow-none",
           className,
         ]
           .filter(Boolean)
@@ -247,13 +244,7 @@ export function getMarkdownComponents(rawPath: string) {
       const { "data-linked-code": _linkedCode, ...rest } = props
       return (
         <code
-          className="
-            mx-1 border border-b-2 border-tech-main/30 bg-tech-main/10 px-1
-            py-[0.05rem] font-mono text-[0.8em] text-tech-main not-italic
-            transition-colors
-            group-hover/lc:border-tech-main group-hover/lc:bg-tech-main/80
-            group-hover/lc:text-white
-          "
+          className="border-tech-main/30 bg-tech-main/10 text-tech-main group-hover/lc:border-tech-main group-hover/lc:bg-tech-main/80 mx-1 border border-b-2 px-1 py-[0.05rem] font-mono text-[0.8em] not-italic transition-colors group-hover/lc:text-white"
           {...rest}>
           {children}
         </code>
@@ -275,10 +266,7 @@ export function getMarkdownComponents(rawPath: string) {
       )
     return (
       <code
-        className="
-          mx-1 border border-tech-main/30 bg-tech-main/10 px-1 py-[0.05rem]
-          font-mono text-[0.8em] text-tech-main not-italic
-        "
+        className="border-tech-main/30 bg-tech-main/10 text-tech-main mx-1 border px-1 py-[0.05rem] font-mono text-[0.8em] not-italic"
         {...props}>
         {children}
       </code>
@@ -316,41 +304,28 @@ export function getMarkdownComponents(rawPath: string) {
       <LitematicaViewer url={url as string} {...rest} />
     ),
     table: ({ ...props }: MarkdownComponentProps) => (
-      <div
-        className="
-          my-6 custom-bottom-scrollbar w-full overflow-x-auto border
-          border-tech-main/30 bg-tech-bg/50 backdrop-blur-sm
-        ">
+      <div className="custom-bottom-scrollbar border-tech-main/30 bg-tech-bg/50 my-6 w-full overflow-x-auto border backdrop-blur-sm">
         <table
-          className="
-            w-full min-w-150 border-collapse text-left font-mono text-sm
-          "
+          className="w-full min-w-150 border-collapse text-left font-mono text-sm"
           {...props}
         />
       </div>
     ),
     thead: ({ ...props }: MarkdownComponentProps) => (
       <thead
-        className="border-b border-tech-main/30 bg-tech-main/10"
+        className="border-tech-main/30 bg-tech-main/10 border-b"
         {...props}
       />
     ),
     th: ({ ...props }: MarkdownComponentProps) => (
       <th
-        className="
-          border-r border-tech-main/10 p-3 font-semibold whitespace-nowrap
-          text-tech-main
-          last:border-r-0
-        "
+        className="border-tech-main/10 text-tech-main border-r p-3 font-semibold whitespace-nowrap last:border-r-0"
         {...props}
       />
     ),
     td: ({ ...props }: MarkdownComponentProps) => (
       <td
-        className="
-          border-t border-r border-tech-main/10 p-3 text-slate-700
-          last:border-r-0
-        "
+        className="border-tech-main/10 border-t border-r p-3 text-slate-700 last:border-r-0"
         {...props}
       />
     ),
@@ -361,13 +336,7 @@ export function getMarkdownComponents(rawPath: string) {
     }: MarkdownComponentProps) => (
       <h1
         id={id}
-        className="
-          group relative mt-8 mb-6 scroll-m-20 border-b border-tech-main/30 pb-4
-          font-mono text-2xl tracking-widest text-slate-900 uppercase
-          target:animate-target-blink target:border-tech-main
-          sm:text-3xl
-          lg:text-4xl
-        ">
+        className="group border-tech-main/30 target:animate-target-blink target:border-tech-main relative mt-8 mb-6 scroll-m-20 border-b pb-4 font-mono text-2xl tracking-widest text-slate-900 uppercase sm:text-3xl lg:text-4xl">
         {id && <HeadingAnchor id={id} level={1} />}
         {children}
         {dataAdvanced === "true" && advancedBadge}
@@ -380,12 +349,7 @@ export function getMarkdownComponents(rawPath: string) {
     }: MarkdownComponentProps) => (
       <h2
         id={id}
-        className="
-          group relative mt-12 mb-6 inline-block scroll-m-20 border-b
-          border-tech-main/30 pr-8 font-mono text-2xl tracking-widest
-          text-slate-800 uppercase
-          target:animate-target-blink target:border-tech-main
-        ">
+        className="group border-tech-main/30 target:animate-target-blink target:border-tech-main relative mt-12 mb-6 inline-block scroll-m-20 border-b pr-8 font-mono text-2xl tracking-widest text-slate-800 uppercase">
         {id && <HeadingAnchor id={id} level={2} />}
         {children}
         {dataAdvanced === "true" && advancedBadge}
@@ -398,11 +362,7 @@ export function getMarkdownComponents(rawPath: string) {
     }: MarkdownComponentProps) => (
       <h3
         id={id}
-        className="
-          group relative mt-8 mb-4 scroll-m-20 font-mono text-xl tracking-widest
-          text-slate-700 uppercase
-          target:animate-target-blink
-        ">
+        className="group target:animate-target-blink relative mt-8 mb-4 scroll-m-20 font-mono text-xl tracking-widest text-slate-700 uppercase">
         {id && <HeadingAnchor id={id} level={3} />}
         {children}
         {dataAdvanced === "true" && advancedBadge}
@@ -430,17 +390,13 @@ export function getMarkdownComponents(rawPath: string) {
     a: aComponent,
     ul: ({ ...props }: MarkdownComponentProps) => (
       <ul
-        className="
-          mb-6 list-disc space-y-2 border-l border-tech-main/30 pl-8 font-sans text-slate-800
-        "
+        className="border-tech-main/30 mb-6 list-disc space-y-2 border-l pl-8 font-sans text-slate-800"
         {...props}
       />
     ),
     ol: ({ ...props }: MarkdownComponentProps) => (
       <ol
-        className="
-          mb-6 list-decimal space-y-2 pl-8 font-sans text-slate-800
-        "
+        className="mb-6 list-decimal space-y-2 pl-8 font-sans text-slate-800"
         {...props}
       />
     ),
@@ -449,10 +405,7 @@ export function getMarkdownComponents(rawPath: string) {
     ),
     blockquote: ({ ...props }: MarkdownComponentProps) => (
       <blockquote
-        className="
-          mb-6 border-l-2 border-tech-main bg-tech-main/5 p-4 pb-[0.01]
-          font-sans text-slate-700 italic
-        "
+        className="border-tech-main bg-tech-main/5 mb-6 border-l-2 p-4 pb-[0.01] font-sans text-slate-700 italic"
         {...props}
       />
     ),
@@ -460,17 +413,13 @@ export function getMarkdownComponents(rawPath: string) {
     img: imageComponent,
     hr: ({ ...props }: MarkdownComponentProps) => (
       <hr
-        className="mx-auto my-8 w-4/5 border-t border-tech-main/30"
+        className="border-tech-main/30 mx-auto my-8 w-4/5 border-t"
         {...props}
       />
     ),
     sup: ({ ...props }: MarkdownComponentProps) => (
       <sup
-        className="
-          mx-0.5 cursor-pointer font-mono not-italic
-          before:text-tech-main/60 before:content-['{']
-          after:text-tech-main/60 after:content-['}']
-        "
+        className="before:text-tech-main/60 after:text-tech-main/60 mx-0.5 cursor-pointer font-mono not-italic before:content-['{'] after:content-['}']"
         {...props}
       />
     ),
@@ -479,10 +428,7 @@ export function getMarkdownComponents(rawPath: string) {
       if (id === "footnotes") {
         return (
           <aside
-            className="
-              mt-12 border-t border-tech-main/30 pt-6 font-sans text-sm
-              text-slate-700
-            "
+            className="border-tech-main/30 mt-12 border-t pt-6 font-sans text-sm text-slate-700"
             {...props}>
             <section id={id} {...props}>
               {children}
@@ -506,18 +452,8 @@ export function getMarkdownComponents(rawPath: string) {
       if (dataAdvancedSection === "true") {
         return (
           <div className="group relative my-8" {...rest}>
-            <div
-              className="
-                absolute top-0 left-[calc(100%+1.5rem)] z-10 flex h-full
-                w-3.5 -translate-x-1/2 items-start justify-center rounded-sm
-                bg-[#8b9ac8] pt-6
-                sm:left-[calc(100%+2rem)]
-              ">
-              <span
-                className="
-                  font-mono text-[0.625rem] leading-none font-bold tracking-[0.3em]
-                  text-white select-none [writing-mode:vertical-rl]
-                ">
+            <div className="absolute top-0 left-[calc(100%+1.5rem)] z-10 flex h-full w-3.5 -translate-x-1/2 items-start justify-center rounded-sm bg-[#8b9ac8] pt-6 sm:left-[calc(100%+2rem)]">
+              <span className="font-mono text-[0.625rem] leading-none font-bold tracking-[0.3em] text-white select-none [writing-mode:vertical-rl]">
                 ADVANCED
               </span>
             </div>
@@ -552,11 +488,7 @@ export function getMarkdownComponents(rawPath: string) {
       } = props as Record<string, unknown>
 
       return (
-        <div
-          className="
-            my-6 aspect-video w-full overflow-hidden rounded-xs border
-            guide-line bg-tech-main/5
-          ">
+        <div className="guide-line bg-tech-main/5 my-6 aspect-video w-full overflow-hidden rounded-xs border">
           <iframe
             src={src as string}
             title={(title as string) || "Embedded Video"}

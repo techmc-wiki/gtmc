@@ -49,14 +49,10 @@ export const SelectableCard = React.forwardRef<
         aria-pressed={selected}
         disabled={disabled}
         className={cn(
-          `
-            group relative border p-4 text-left transition-all duration-200
-            focus-visible:outline-2 focus-visible:outline-offset-2
-            focus-visible:outline-tech-main sm:p-5
-          `,
+          `group focus-visible:outline-tech-main relative border p-4 text-left transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 sm:p-5`,
           selected
             ? "border-tech-main bg-tech-main/10"
-            : "guide-line bg-white/70 hover:border-tech-main/50 hover:bg-white/90",
+            : "guide-line hover:border-tech-main/50 bg-white/70 hover:bg-white/90",
           disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
           className
         )}
@@ -68,11 +64,7 @@ export const SelectableCard = React.forwardRef<
         {visibleBadge ? (
           <span
             className={cn(
-              `
-                mb-3 inline-block border border-tech-main bg-tech-main px-3
-                py-1 font-mono text-[0.6875rem] font-bold tracking-widest
-                text-white uppercase
-              `,
+              `border-tech-main bg-tech-main mb-3 inline-block border px-3 py-1 font-mono text-[0.6875rem] font-bold tracking-widest text-white uppercase`,
               disabled && "opacity-70"
             )}>
             {visibleBadge}
@@ -90,7 +82,7 @@ export const SelectableCard = React.forwardRef<
             </p>
 
             {subtitle ? (
-              <p className="mt-1.5 font-mono text-xs/relaxed text-tech-main/60">
+              <p className="text-tech-main/60 mt-1.5 font-mono text-xs/relaxed">
                 {subtitle}
               </p>
             ) : null}
@@ -99,13 +91,13 @@ export const SelectableCard = React.forwardRef<
           {selected ? (
             <span
               aria-hidden="true"
-              className="mt-1 inline-block size-1.5 shrink-0 bg-tech-main"
+              className="bg-tech-main mt-1 inline-block size-1.5 shrink-0"
             />
           ) : null}
         </div>
 
         {detail ? (
-          <p className="mt-2 font-mono text-[0.6875rem] leading-relaxed text-tech-main/40">
+          <p className="text-tech-main/40 mt-2 font-mono text-[0.6875rem] leading-relaxed">
             {detail}
           </p>
         ) : null}
@@ -116,9 +108,9 @@ export const SelectableCard = React.forwardRef<
           <div className="mt-3 flex items-center gap-1.5">
             <span
               aria-hidden="true"
-              className="inline-block size-1.5 bg-tech-main"
+              className="bg-tech-main inline-block size-1.5"
             />
-            <span className="font-mono text-[0.6875rem] tracking-widest text-tech-main uppercase">
+            <span className="text-tech-main font-mono text-[0.6875rem] tracking-widest uppercase">
               {selectedLabel}
             </span>
           </div>

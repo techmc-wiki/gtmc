@@ -233,15 +233,11 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
       id={popupId}
       role="dialog"
       style={portalStyle}
-      className={`
-        w-72 max-w-[calc(100vw-2rem)]
-        border border-tech-main/40 bg-white/70 p-4 backdrop-blur-sm sm:w-80
-        ${
-          isOpen
-            ? "animate-tech-pop-in"
-            : "scale-95 opacity-0 transition-all duration-150 ease-out"
-        }
-      `}
+      className={`border-tech-main/40 w-72 max-w-[calc(100vw-2rem)] border bg-white/70 p-4 backdrop-blur-sm sm:w-80 ${
+        isOpen
+          ? "animate-tech-pop-in"
+          : "scale-95 opacity-0 transition-all duration-150 ease-out"
+      } `}
       onMouseEnter={cancelClose}
       onMouseLeave={closeDelayed}>
       <CornerBrackets
@@ -250,7 +246,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
         size="size-3"
       />
 
-      <p className="mb-3 font-mono text-[10px] tracking-wide text-tech-main/60">
+      <p className="text-tech-main/60 mb-3 font-mono text-[10px] tracking-wide">
         {t("panelLabel")}
       </p>
 
@@ -271,10 +267,10 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
         <>
           {person.description && (
             <div className="mt-3">
-              <p className="mb-0.5 font-mono text-[10px] tracking-widest text-tech-main/40">
+              <p className="text-tech-main/40 mb-0.5 font-mono text-[10px] tracking-widest">
                 {t("descriptionLabel")}
               </p>
-              <p className="text-xs/relaxed whitespace-pre-wrap text-tech-main/60">
+              <p className="text-tech-main/60 text-xs/relaxed whitespace-pre-wrap">
                 {person.description}
               </p>
             </div>
@@ -282,12 +278,12 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
 
           {person.email && (
             <div className="mt-2">
-              <p className="mb-0.5 font-mono text-[10px] tracking-widest text-tech-main/40">
+              <p className="text-tech-main/40 mb-0.5 font-mono text-[10px] tracking-widest">
                 {t("emailLabel")}
               </p>
               <a
                 href={`mailto:${person.email}`}
-                className="font-mono text-xs text-tech-main underline-offset-2 hover:underline">
+                className="text-tech-main font-mono text-xs underline-offset-2 hover:underline">
                 {person.email}
               </a>
             </div>
@@ -295,7 +291,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
 
           {hasSocial && (
             <div className="mt-2">
-              <p className="mb-1 font-mono text-[10px] tracking-widest text-tech-main/40">
+              <p className="text-tech-main/40 mb-1 font-mono text-[10px] tracking-widest">
                 {t("socialLabel")}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -304,7 +300,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
                     href={person.social.github}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 font-mono text-xs text-tech-main underline-offset-2 hover:underline">
+                    className="text-tech-main inline-flex items-center gap-1 font-mono text-xs underline-offset-2 hover:underline">
                     <GithubIcon />
                     {t("githubLabel")}
                   </a>
@@ -314,7 +310,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
                     href={person.social.bilibili}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 font-mono text-xs text-tech-main underline-offset-2 hover:underline">
+                    className="text-tech-main inline-flex items-center gap-1 font-mono text-xs underline-offset-2 hover:underline">
                     <BilibiliIcon />
                     {t("bilibiliLabel")}
                   </a>
@@ -324,7 +320,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
                     href={person.social.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 font-mono text-xs text-tech-main underline-offset-2 hover:underline">
+                    className="text-tech-main inline-flex items-center gap-1 font-mono text-xs underline-offset-2 hover:underline">
                     <TwitterIcon />
                     {t("twitterLabel")}
                   </a>
@@ -334,7 +330,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
                     href={person.social.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 font-mono text-xs text-tech-main underline-offset-2 hover:underline">
+                    className="text-tech-main inline-flex items-center gap-1 font-mono text-xs underline-offset-2 hover:underline">
                     <GlobeIcon />
                     {t("websiteLabel")}
                   </a>
@@ -345,7 +341,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 font-mono text-xs text-tech-main underline-offset-2 hover:underline">
+                    className="text-tech-main inline-flex items-center gap-1 font-mono text-xs underline-offset-2 hover:underline">
                     <GlobeIcon />
                     {link.label}
                   </a>
@@ -357,7 +353,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
       )}
 
       {person.isFallback && (
-        <p className="mt-3 font-mono text-xs text-tech-main/40">
+        <p className="text-tech-main/40 mt-3 font-mono text-xs">
           {t("fallbackLabel")}
         </p>
       )}
@@ -383,13 +379,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
             setIsOpen(true)
           }
         }}
-        className="
-          mx-1 inline-flex items-center gap-0.5 border
-          border-tech-main/30 bg-tech-main/5 px-1 font-mono text-[0.8em] tracking-wide
-          text-tech-main no-underline transition-colors
-          group-hover:bg-tech-main/80 group-hover:text-white
-          focus-visible:ring-2 focus-visible:ring-tech-main/50 focus-visible:outline-none
-        ">
+        className="border-tech-main/30 bg-tech-main/5 text-tech-main group-hover:bg-tech-main/80 focus-visible:ring-tech-main/50 mx-1 inline-flex items-center gap-0.5 border px-1 font-mono text-[0.8em] tracking-wide no-underline transition-colors group-hover:text-white focus-visible:ring-2 focus-visible:outline-none">
         <span className="text-tech-main/40 group-hover:text-white/60">@</span>
         {children}
       </button>

@@ -13,15 +13,8 @@ export function EditorToolbarShell({
 }: EditorToolbarShellProps) {
   return (
     <div
-      className={`
-        sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b
-        border-tech-main-dark bg-tech-main-dark p-2 px-2 font-mono
-        text-white/70 shadow-[0_2px_10px_rgb(var(--color-tech-main-dark)/0.2)]
-        before:pointer-events-none before:absolute before:inset-0 before:bg-[url('/bg-grid.svg')] before:bg-size-[24px_24px] before:opacity-[0.05]
-        sm:gap-1 sm:px-4
-        ${className}
-      `}>
-      <div className="absolute top-0 left-0 h-px w-full bg-linear-to-r from-transparent via-tech-accent/20 to-transparent" />
+      className={`border-tech-main-dark bg-tech-main-dark sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b p-2 px-2 font-mono text-white/70 shadow-[0_2px_10px_rgb(var(--color-tech-main-dark)/0.2)] before:pointer-events-none before:absolute before:inset-0 before:bg-[url('/bg-grid.svg')] before:bg-size-[24px_24px] before:opacity-[0.05] sm:gap-1 sm:px-4 ${className} `}>
+      <div className="via-tech-accent/20 absolute top-0 left-0 h-px w-full bg-linear-to-r from-transparent to-transparent" />
       {children}
     </div>
   )
@@ -64,13 +57,7 @@ export function EditorToolbarButton({
     <button
       {...props}
       disabled={disabled}
-      className={`
-        ${baseClasses}
-        ${variantClasses}
-        ${stateClasses}
-        ${activeClasses}
-        ${className}
-      `}>
+      className={` ${baseClasses} ${variantClasses} ${stateClasses} ${activeClasses} ${className} `}>
       {children}
     </button>
   )
@@ -83,14 +70,7 @@ interface EditorToolbarDividerProps {
 export function EditorToolbarDivider({
   className = "",
 }: EditorToolbarDividerProps) {
-  return (
-    <div
-      className={`
-        mx-1 h-4 w-px bg-white/10
-        ${className}
-      `}
-    />
-  )
+  return <div className={`mx-1 h-4 w-px bg-white/10 ${className} `} />
 }
 
 interface EditorToolbarStatusProps {
@@ -104,12 +84,8 @@ export function EditorToolbarStatus({
 }: EditorToolbarStatusProps) {
   return (
     <span
-      className={`
-        ml-auto hidden items-center gap-2 text-[9px] tracking-widest text-tech-accent/40 uppercase
-        sm:flex
-        ${className}
-      `}>
-      <span className="size-1.5 animate-pulse rounded-full bg-tech-accent/40" />
+      className={`text-tech-accent/40 ml-auto hidden items-center gap-2 text-[9px] tracking-widest uppercase sm:flex ${className} `}>
+      <span className="bg-tech-accent/40 size-1.5 animate-pulse rounded-full" />
       {children}
     </span>
   )
@@ -126,12 +102,8 @@ export function EditorMacroBar({
 }: EditorMacroBarProps) {
   return (
     <div
-      className={`
-        relative flex h-12 items-center gap-2 overflow-x-auto scroll-smooth border-b
-        guide-line bg-tech-main/4 px-4 shadow-[inset_0_1px_4px_rgb(var(--color-tech-main)/0.05)]
-        ${className}
-      `}>
-      <div className="absolute inset-y-0 left-0 w-1 bg-tech-main/30" />
+      className={`guide-line bg-tech-main/4 relative flex h-12 items-center gap-2 overflow-x-auto scroll-smooth border-b px-4 shadow-[inset_0_1px_4px_rgb(var(--color-tech-main)/0.05)] ${className} `}>
+      <div className="bg-tech-main/30 absolute inset-y-0 left-0 w-1" />
       {children}
     </div>
   )
@@ -148,10 +120,7 @@ export function EditorMacroLabel({
 }: EditorMacroLabelProps) {
   return (
     <span
-      className={`
-        mr-2 font-mono text-[9px] tracking-widest text-tech-main/50 uppercase opacity-70
-        ${className}
-      `}>
+      className={`text-tech-main/50 mr-2 font-mono text-[9px] tracking-widest uppercase opacity-70 ${className} `}>
       {children}
     </span>
   )

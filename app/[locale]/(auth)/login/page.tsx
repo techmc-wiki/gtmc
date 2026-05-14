@@ -19,44 +19,23 @@ export default function LoginPage() {
   }
 
   return (
-    <div
-      className="
-        relative flex min-h-screen w-full overflow-hidden font-sans
-        text-tech-main
-        selection:bg-tech-main/20 selection:text-tech-main-dark
-      ">
+    <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative flex min-h-screen w-full overflow-hidden font-sans">
       {/* ======================================================== */}
       {/* 结构层：背景图纸修饰、HUD、辅助线、标记、透视几何 */}
       {/* ======================================================== */}
 
       {/* 左上角系统序列号 */}
-      <div
-        className="
-          absolute top-8 left-8 z-0 hidden flex-col space-y-1
-          md:flex
-        ">
-        <div
-          className="
-            font-mono text-xs tracking-widest text-tech-main-dark uppercase
-            opacity-50
-          ">
+      <div className="absolute top-8 left-8 z-0 hidden flex-col space-y-1 md:flex">
+        <div className="text-tech-main-dark font-mono text-xs tracking-widest uppercase opacity-50">
           [ GTMC_AUTH_GATEWAY ]
         </div>
-        <div
-          className="
-             font-mono text-[0.625rem] tracking-widest text-tech-main opacity-30
-           ">
+        <div className="text-tech-main font-mono text-[0.625rem] tracking-widest opacity-30">
           {"SECURE.CONN // PORT-443"}
         </div>
       </div>
 
       {/* 右上角HUD：模拟服务器/图纸数据 */}
-      <div
-        className="
-             absolute top-8 right-12 z-0 hidden space-y-1 text-right font-mono
-             text-[0.625rem] text-tech-main opacity-40 select-none
-             sm:block
-           ">
+      <div className="text-tech-main absolute top-8 right-12 z-0 hidden space-y-1 text-right font-mono text-[0.625rem] opacity-40 select-none sm:block">
         <p>
           STATUS :: <span className="font-bold text-red-500">LOCKED *</span>
         </p>
@@ -67,19 +46,9 @@ export default function LoginPage() {
       </div>
 
       {/* Java 代码片段漂浮层 (Decompiled Source Code) */}
-      <div
-        className="
-          pointer-events-none absolute right-10 bottom-[20%] decor-desktop-only
-          hidden rotate-2 opacity-20 select-none
-          md:right-20
-          lg:block
-        ">
-        <div
-          className="
-             border-r-2 guide-line pr-4 text-right font-mono text-[0.625rem]
-             leading-relaxed whitespace-pre text-tech-main
-           ">
-          <span className="font-bold text-tech-main-dark">@PostMapping</span>(
+      <div className="decor-desktop-only pointer-events-none absolute right-10 bottom-[20%] hidden rotate-2 opacity-20 select-none md:right-20 lg:block">
+        <div className="guide-line text-tech-main border-r-2 pr-4 text-right font-mono text-[0.625rem] leading-relaxed whitespace-pre">
+          <span className="text-tech-main-dark font-bold">@PostMapping</span>(
           <span className="text-tech-main-dark">&quot;/login&quot;</span>){"\n"}
           <span className="text-tech-main-dark">public</span>{" "}
           ResponseEntity&lt;?&gt; authenticate(Request req) {"{"}
@@ -93,122 +62,46 @@ export default function LoginPage() {
       </div>
 
       {/* 贯穿全图的低调主辅助线 */}
-      <div
-        className="
-          absolute top-[50%] left-0 decor-desktop-only hidden h-px w-full
-          items-center justify-center bg-tech-main/10
-          md:flex
-        ">
-        <div className="size-2 border border-tech-main/50 bg-tech-bg" />
+      <div className="decor-desktop-only bg-tech-main/10 absolute top-[50%] left-0 hidden h-px w-full items-center justify-center md:flex">
+        <div className="border-tech-main/50 bg-tech-bg size-2 border" />
       </div>
-      <div
-        className="
-          absolute top-0 left-[50%] decor-desktop-only hidden w-pxfull
-          bg-tech-main/10
-          md:block
-        "
-      />
+      <div className="decor-desktop-only w-pxfull bg-tech-main/10 absolute top-0 left-[50%] hidden md:block" />
 
       {/* 巨型背景水印 */}
-      <div
-        className="
-          pointer-events-none absolute bottom-0 -left-20 decor-desktop-only
-          hidden text-[8rem] font-black tracking-tighter whitespace-nowrap
-          text-tech-main opacity-[0.03] select-none
-          lg:block
-        ">
+      <div className="decor-desktop-only text-tech-main pointer-events-none absolute bottom-0 -left-20 hidden text-[8rem] font-black tracking-tighter whitespace-nowrap opacity-[0.03] select-none lg:block">
         ACCESS_CONTROL
       </div>
 
       {/* ======================================================== */}
       {/* 核心交互区 */}
       {/* ======================================================== */}
-      <main
-        className="
-          relative z-10 mx-auto flex w-full max-w-lg flex-col items-center
-          justify-center px-4
-          md:px-0
-        ">
+      <main className="relative z-10 mx-auto flex w-full max-w-lg flex-col items-center justify-center px-4 md:px-0">
         {/* 信息卡片主体 */}
-        <div
-          className="
-            group relative mb-8 w-full animate-tech-pop-in opacity-0
-            [animation-delay:0.2s] [animation-duration:0.8s] fill-mode-forwards
-          ">
+        <div className="group animate-tech-pop-in fill-mode-forwards relative mb-8 w-full opacity-0 [animation-delay:0.2s] [animation-duration:0.8s]">
           {/* 下层错位阴影框 */}
-          <div
-            className="
-              absolute inset-0 -z-10 translate-2 border guide-line
-              bg-transparent transition-transform duration-500 ease-out
-              group-hover:translate-3
-              md:translate-3
-              md:group-hover:translate-4
-            "
-          />
+          <div className="guide-line absolute inset-0 -z-10 translate-2 border bg-transparent transition-transform duration-500 ease-out group-hover:translate-3 md:translate-3 md:group-hover:translate-4" />
 
           {/* 尺寸标注 decoration */}
-          <div
-            className="
-               absolute top-1/2 -right-6 hidden h-full -translate-y-1/2
-               animate-fade-in flex-col items-center font-mono text-[0.625rem]
-               opacity-0 [animation-delay:1.5s] fill-mode-forwards
-               sm:flex
-             ">
-            <span className="block h-10 w-px border-l border-tech-main/30"></span>
+          <div className="animate-fade-in fill-mode-forwards absolute top-1/2 -right-6 hidden h-full -translate-y-1/2 flex-col items-center font-mono text-[0.625rem] opacity-0 [animation-delay:1.5s] sm:flex">
+            <span className="border-tech-main/30 block h-10 w-px border-l"></span>
             <span className="rotate-90 py-2 whitespace-nowrap">
               SECURE FORM
             </span>
-            <span className="block h-10 w-px border-l border-tech-main/30"></span>
+            <span className="border-tech-main/30 block h-10 w-px border-l"></span>
           </div>
 
-          <div
-            className="
-              relative overflow-hidden border border-tech-main/40 bg-white/60
-              p-6 text-center shadow-sm backdrop-blur-md
-              md:p-10
-            ">
+          <div className="border-tech-main/40 relative overflow-hidden border bg-white/60 p-6 text-center shadow-sm backdrop-blur-md md:p-10">
             {/* 闪光扫过效果 */}
-            <div
-              className="
-                pointer-events-none absolute inset-0 translate-x-[-200%]
-                -skew-x-12 animate-[shimmer_3s_infinite_2s] bg-linear-to-r
-                from-transparent via-white/40 to-transparent
-              "
-            />
+            <div className="pointer-events-none absolute inset-0 translate-x-[-200%] -skew-x-12 animate-[shimmer_3s_infinite_2s] bg-linear-to-r from-transparent via-white/40 to-transparent" />
 
             {/* 角落刻度 */}
-            <div
-              className="
-                absolute top-0 left-0 size-3 -translate-0.5 border-t-2
-                border-l-2 border-tech-main
-              "
-            />
-            <div
-              className="
-                absolute top-0 right-0 size-3 translate-x-0.5 -translate-y-0.5
-                border-t-2 border-r-2 border-tech-main
-              "
-            />
-            <div
-              className="
-                absolute bottom-0 left-0 size-3 -translate-x-0.5 translate-y-0.5
-                border-b-2 border-l-2 border-tech-main
-              "
-            />
-            <div
-              className="
-                absolute right-0 bottom-0 size-3 translate-0.5 border-r-2
-                border-b-2 border-tech-main
-              "
-            />
+            <div className="border-tech-main absolute top-0 left-0 size-3 -translate-0.5 border-t-2 border-l-2" />
+            <div className="border-tech-main absolute top-0 right-0 size-3 translate-x-0.5 -translate-y-0.5 border-t-2 border-r-2" />
+            <div className="border-tech-main absolute bottom-0 left-0 size-3 -translate-x-0.5 translate-y-0.5 border-b-2 border-l-2" />
+            <div className="border-tech-main absolute right-0 bottom-0 size-3 translate-0.5 border-r-2 border-b-2" />
 
             <div className="mb-8 flex flex-col items-center">
-              <div
-                className="
-                  mb-4 flex size-12 animate-tech-pop-in items-center
-                  justify-center border border-tech-main/40 bg-tech-main/5
-                  opacity-0 [animation-delay:0.6s] fill-mode-forwards
-                ">
+              <div className="animate-tech-pop-in border-tech-main/40 bg-tech-main/5 fill-mode-forwards mb-4 flex size-12 items-center justify-center border opacity-0 [animation-delay:0.6s]">
                 <svg
                   aria-hidden="true"
                   width="24"
@@ -228,45 +121,24 @@ export default function LoginPage() {
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
               </div>
-              <h1
-                className="
-                  relative inline-block animate-tech-slide-in overflow-hidden text-3xl
-                  font-bold tracking-tight text-tech-main-dark opacity-0 [animation-delay:0.7s] fill-mode-forwards
-                ">
+              <h1 className="animate-tech-slide-in text-tech-main-dark fill-mode-forwards relative inline-block overflow-hidden text-3xl font-bold tracking-tight opacity-0 [animation-delay:0.7s]">
                 {t("heading")}
               </h1>
             </div>
 
-            <p
-              className="
-                mx-auto mb-8 max-w-xs animate-fade-in text-sm
-                text-tech-main-dark/70 opacity-0 [animation-delay:1.1s]
-                fill-mode-forwards
-              ">
+            <p className="animate-fade-in text-tech-main-dark/70 fill-mode-forwards mx-auto mb-8 max-w-xs text-sm opacity-0 [animation-delay:1.1s]">
               {t("description")}
             </p>
 
-            <div
-              className="
-                w-full animate-slide-up-fade opacity-0 [animation-delay:1.3s]
-                fill-mode-forwards
-              ">
+            <div className="animate-slide-up-fade fill-mode-forwards w-full opacity-0 [animation-delay:1.3s]">
               <TechButton
                 onClick={handleLogin}
                 disabled={isLoading}
                 variant="primary"
-                className="
-                  flex h-12 w-full items-center justify-center text-sm
-                  tracking-widest uppercase transition-transform duration-300
-                  hover:scale-[1.02]
-                  active:scale-[0.98]
-                ">
+                className="flex h-12 w-full items-center justify-center text-sm tracking-widest uppercase transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98]">
                 {isLoading ? (
                   <span className="flex items-center">
-                    <span
-                      className="
-                        mr-2 size-2 animate-ping rounded-full bg-white/50
-                      "></span>
+                    <span className="mr-2 size-2 animate-ping rounded-full bg-white/50"></span>
                     {t("connectingLabel")}
                   </span>
                 ) : (
@@ -275,19 +147,11 @@ export default function LoginPage() {
               </TechButton>
             </div>
 
-            <div
-              className="
-                 mt-6 animate-fade-in font-mono text-[0.625rem] opacity-40
-                 [animation-delay:1.6s] fill-mode-forwards
-               ">
+            <div className="animate-fade-in fill-mode-forwards mt-6 font-mono text-[0.625rem] opacity-40 [animation-delay:1.6s]">
               <p>PROTECTED BY GTMC_SECURE_GATEWAY v2.0</p>
               <Link
                 href="/"
-                className="
-                    mt-2 inline-block underline decoration-dashed
-                    underline-offset-4 transition-colors
-                    hover:text-tech-main-dark
-                  ">
+                className="hover:text-tech-main-dark mt-2 inline-block underline decoration-dashed underline-offset-4 transition-colors">
                 {t("returnLink")}
               </Link>
             </div>

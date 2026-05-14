@@ -447,5 +447,11 @@
     "twitterLabel": "twitter",
     "websiteLabel": "website",
     "customLinkLabel": "link"
+  },
+  "Pdf": {
+    "label": "Offline Version (PDF)",
+    "title": "GTMC",
+    "subtitle": "Download the full GTMC articles as a PDF document.",
+    "download": "DOWNLOAD PDF"
   }
 }

@@ -233,29 +233,14 @@ export function DraftFileSourceDialog({
   const canSubmitUpload = Boolean(localFile) && !isSubmitting
 
   return (
-    <div
-      className="
-        fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4
-        backdrop-blur-sm
-      ">
-      <div
-        className="
-          flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden border
-          border-tech-main bg-white shadow-2xl
-        ">
-        <div
-          className="
-            flex items-center justify-between border-b guide-line bg-tech-main/5
-            px-5 py-4
-          ">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+      <div className="border-tech-main flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden border bg-white shadow-2xl">
+        <div className="guide-line bg-tech-main/5 flex items-center justify-between border-b px-5 py-4">
           <div>
-            <p
-              className="
-                font-mono text-sm tracking-widest text-tech-main uppercase
-              ">
+            <p className="text-tech-main font-mono text-sm tracking-widest uppercase">
               {t("dialogTitle")}
             </p>
-            <p className="mt-1 font-mono text-xs text-tech-main/60 uppercase">
+            <p className="text-tech-main/60 mt-1 font-mono text-xs uppercase">
               {t("dialogSubtitle")}
             </p>
           </div>
@@ -264,23 +249,15 @@ export function DraftFileSourceDialog({
           </TechButton>
         </div>
 
-        <div
-          className="
-            grid min-h-0 flex-1 gap-0
-            lg:grid-cols-[20rem_minmax(0,1fr)]
-          ">
-          <aside className="flex min-h-0 flex-col border-r guide-line bg-tech-main/5">
-            <div
-              className="
-                shrink-0 border-b guide-line px-4 py-3 font-mono text-xs
-                tracking-widest text-tech-main uppercase
-              ">
+        <div className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[20rem_minmax(0,1fr)]">
+          <aside className="guide-line bg-tech-main/5 flex min-h-0 flex-col border-r">
+            <div className="guide-line text-tech-main shrink-0 border-b px-4 py-3 font-mono text-xs tracking-widest uppercase">
               {t("destinationTree")}
             </div>
 
             <div className="flex-1 overflow-y-auto p-3">
               {isLoadingTree ? (
-                <p className="font-mono text-xs text-tech-main/60">
+                <p className="text-tech-main/60 font-mono text-xs">
                   {t("loadingRepo")}
                 </p>
               ) : (
@@ -320,11 +297,7 @@ export function DraftFileSourceDialog({
             </div>
 
             {treeError ? (
-              <div
-                className="
-                  mb-4 border border-red-500/30 bg-red-500/10 px-4 py-3
-                  font-mono text-xs text-red-700
-                ">
+              <div className="mb-4 border border-red-500/30 bg-red-500/10 px-4 py-3 font-mono text-xs text-red-700">
                 {treeError}
               </div>
             ) : null}
@@ -332,7 +305,7 @@ export function DraftFileSourceDialog({
             {mode === "repo" ? (
               <div className="space-y-4">
                 <SectionLabel>{t("selectExistingFile")}</SectionLabel>
-                <p className="font-mono text-xs text-tech-main/60 uppercase">
+                <p className="text-tech-main/60 font-mono text-xs uppercase">
                   {t("selected")}: {selectedRepoFilePath || "NONE"}
                 </p>
                 <TechButton
@@ -348,13 +321,13 @@ export function DraftFileSourceDialog({
             {mode === "upload" ? (
               <div className="space-y-4">
                 <SectionLabel>{t("importLocalText")}</SectionLabel>
-                <p className="font-mono text-xs text-tech-main/60 uppercase">
+                <p className="text-tech-main/60 font-mono text-xs uppercase">
                   {t("destinationFolder")}: {selectedFolderPath || "ROOT"}
                 </p>
                 <input
                   type="file"
                   accept=".md,.mdx,.txt,.csv,.json,.yml,.yaml"
-                  className="block w-full font-mono text-xs text-tech-main"
+                  className="text-tech-main block w-full font-mono text-xs"
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     const file = event.target.files?.[0] || null
                     setLocalFile(file)
@@ -387,7 +360,7 @@ export function DraftFileSourceDialog({
             {mode === "new" ? (
               <div className="space-y-4">
                 <SectionLabel>{t("createNewFile")}</SectionLabel>
-                <p className="font-mono text-xs text-tech-main/60 uppercase">
+                <p className="text-tech-main/60 font-mono text-xs uppercase">
                   {t("destinationFolder")}: {selectedFolderPath || "ROOT"}
                 </p>
                 <div className="space-y-2">
@@ -405,7 +378,7 @@ export function DraftFileSourceDialog({
                     }
                   />
                 </div>
-                <div className="font-mono text-xs text-tech-main/60 uppercase">
+                <div className="text-tech-main/60 font-mono text-xs uppercase">
                   {t("result")}:{" "}
                   {buildDraftFilePath(selectedFolderPath, newFileName) ||
                     t("pending")}
@@ -423,7 +396,7 @@ export function DraftFileSourceDialog({
             {mode === "folder" ? (
               <div className="space-y-4">
                 <SectionLabel>新建文件夹</SectionLabel>
-                <p className="font-mono text-xs text-tech-main/60 uppercase">
+                <p className="text-tech-main/60 font-mono text-xs uppercase">
                   {t("destinationFolder")}: {selectedFolderPath || "ROOT"}
                 </p>
                 <div className="space-y-2">
@@ -441,7 +414,7 @@ export function DraftFileSourceDialog({
                     }
                   />
                 </div>
-                <div className="font-mono text-xs text-tech-main/60 uppercase">
+                <div className="text-tech-main/60 font-mono text-xs uppercase">
                   {t("result")}:{" "}
                   {[selectedFolderPath, newFolderName.trim()]
                     .filter(Boolean)
@@ -465,7 +438,7 @@ export function DraftFileSourceDialog({
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="font-mono text-sm tracking-widest text-tech-main uppercase">
+    <p className="text-tech-main font-mono text-sm tracking-widest uppercase">
       {children}
     </p>
   )
@@ -504,19 +477,11 @@ function TreeNode({
           <button
             type="button"
             onClick={() => onTogglePath(node.path)}
-            className="
-              flex h-8 w-6 shrink-0 items-center justify-center font-mono
-              text-[0.625rem] text-tech-main/50 transition-colors
-              hover:text-tech-main
-            ">
+            className="text-tech-main/50 hover:text-tech-main flex h-8 w-6 shrink-0 items-center justify-center font-mono text-[0.625rem] transition-colors">
             {isExpanded ? "▼" : "▶"}
           </button>
         ) : (
-          <span
-            className="
-              inline-flex h-8 w-6 shrink-0 items-center justify-center font-mono
-              text-[0.625rem] text-tech-main/20
-            ">
+          <span className="text-tech-main/20 inline-flex h-8 w-6 shrink-0 items-center justify-center font-mono text-[0.625rem]">
             ·
           </span>
         )}
@@ -533,31 +498,26 @@ function TreeNode({
               onSelectFile(node.path)
             }
           }}
-          className={`
-            flex min-h-8 flex-1 items-center px-1 text-left font-mono
-            text-[0.875rem] tracking-wide transition-colors
-            ${
-              node.isFolder
-                ? isFolderSelected
-                  ? `bg-tech-main/10 font-bold text-tech-main`
-                  : `font-bold text-tech-main/80`
-                : isFileSelected
-                  ? `bg-tech-main/10 font-bold text-tech-main`
-                  : `text-tech-main/70`
-            }
-            ${
-              (node.isFolder && isSelectableFolder) ||
-              (!node.isFolder && isSelectableFile)
-                ? `hover:bg-tech-main/5 hover:text-tech-main`
-                : `cursor-default opacity-60`
-            }
-          `}>
+          className={`flex min-h-8 flex-1 items-center px-1 text-left font-mono text-[0.875rem] tracking-wide transition-colors ${
+            node.isFolder
+              ? isFolderSelected
+                ? `bg-tech-main/10 text-tech-main font-bold`
+                : `text-tech-main/80 font-bold`
+              : isFileSelected
+                ? `bg-tech-main/10 text-tech-main font-bold`
+                : `text-tech-main/70`
+          } ${
+            (node.isFolder && isSelectableFolder) ||
+            (!node.isFolder && isSelectableFile)
+              ? `hover:bg-tech-main/5 hover:text-tech-main`
+              : `cursor-default opacity-60`
+          } `}>
           <span className="truncate">{node.title}</span>
         </button>
       </div>
 
       {node.children.length > 0 && isExpanded ? (
-        <div className="ml-3 border-l border-tech-main/10 pl-2">
+        <div className="border-tech-main/10 ml-3 border-l pl-2">
           {node.children.map((child) => (
             <TreeNode
               key={child.id}

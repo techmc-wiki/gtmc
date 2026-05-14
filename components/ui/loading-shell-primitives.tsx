@@ -13,11 +13,7 @@ export const SectionFrame = React.forwardRef<
 >(({ className = "", showBrackets = true, children, ...props }, ref) => (
   <div
     ref={ref}
-    className={`
-      relative border border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm
-      sm:p-8
-      ${className}
-    `}
+    className={`border-tech-main/40 relative border bg-white/80 p-6 backdrop-blur-sm sm:p-8 ${className} `}
     {...props}>
     {showBrackets && (
       <CornerBrackets size="size-2" color="border-tech-main/60" />
@@ -37,10 +33,7 @@ export const SectionRail = React.forwardRef<
 >(({ label, className = "", ...props }, ref) => (
   <div
     ref={ref}
-    className={`
-      font-mono text-xs tracking-tech-wide text-tech-main uppercase
-      ${className}
-    `}
+    className={`tracking-tech-wide text-tech-main font-mono text-xs uppercase ${className} `}
     {...props}>
     {label}_
   </div>
@@ -71,12 +64,7 @@ export const SegmentedBar = React.forwardRef<
     return (
       <div
         ref={ref}
-        className={`
-          h-2
-          ${opacityMap[opacity]}
-          ${showBorder ? `border border-tech-line` : ""}
-          ${className}
-        `}
+        className={`h-2 ${opacityMap[opacity]} ${showBorder ? `border-tech-line border` : ""} ${className} `}
         {...props}
       />
     )
@@ -95,17 +83,9 @@ export const SkeletonExitWrapper = React.forwardRef<
 >(({ isExiting = false, className = "", ...props }, ref) => (
   <div
     ref={ref}
-    className={`
-      ${
-        isExiting
-          ? `
-            animate-skeleton-exit
-            motion-reduce:animate-fade-out
-          `
-          : ""
-      }
-      ${className}
-    `}
+    className={` ${
+      isExiting ? `animate-skeleton-exit motion-reduce:animate-fade-out` : ""
+    } ${className} `}
     {...props}
   />
 ))
@@ -121,12 +101,7 @@ export const SweepOverlay = React.forwardRef<
 >(({ className = "", ...props }, ref) => (
   <div
     ref={ref}
-    className={`
-      absolute inset-0 animate-blueprint-sweep bg-linear-to-r from-transparent
-      via-tech-accent/30 to-transparent
-      motion-reduce:animate-none
-      ${className}
-    `}
+    className={`animate-blueprint-sweep via-tech-accent/30 absolute inset-0 bg-linear-to-r from-transparent to-transparent motion-reduce:animate-none ${className} `}
     {...props}
   />
 ))
@@ -142,12 +117,7 @@ export const ScanConfirmOverlay = React.forwardRef<
 >(({ className = "", ...props }, ref) => (
   <div
     ref={ref}
-    className={`
-      absolute inset-0 animate-scan-confirm bg-linear-to-r from-transparent
-      via-tech-accent/30 to-transparent
-      motion-reduce:animate-none
-      ${className}
-    `}
+    className={`animate-scan-confirm via-tech-accent/30 absolute inset-0 bg-linear-to-r from-transparent to-transparent motion-reduce:animate-none ${className} `}
     {...props}
   />
 ))

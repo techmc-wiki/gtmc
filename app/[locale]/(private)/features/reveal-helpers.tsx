@@ -13,10 +13,7 @@ export const RevealSection = React.forwardRef<
 >(({ delay = 0, className = "", ...props }, ref) => (
   <div
     ref={ref}
-    className={`
-      animate-fade-in
-      ${className}
-    `}
+    className={`animate-fade-in ${className} `}
     style={{ animationDelay: `${delay}ms` }}
     {...props}
   />
@@ -35,10 +32,7 @@ export const RevealContent = React.forwardRef<
 >(({ delay = 0, className = "", ...props }, ref) => (
   <div
     ref={ref}
-    className={`
-      animate-fade-in
-      ${className}
-    `}
+    className={`animate-fade-in ${className} `}
     style={{ animationDelay: `${delay}ms` }}
     {...props}
   />

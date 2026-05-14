@@ -30,22 +30,14 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
 
   return (
     <LazyCodeBlock lang={lang} lineCount={lineCount}>
-      <div
-        className="
-          flex items-center justify-between border-b guide-line bg-tech-main/10
-          px-4 py-1.5
-        ">
+      <div className="guide-line bg-tech-main/10 flex items-center justify-between border-b px-4 py-1.5">
         <div className="flex items-center gap-2">
-          <span className="size-1.5 animate-pulse bg-tech-main/40" />
-          <span className="text-xs tracking-widest text-tech-main uppercase">
+          <span className="bg-tech-main/40 size-1.5 animate-pulse" />
+          <span className="text-tech-main text-xs tracking-widest uppercase">
             {lang}
           </span>
         </div>
-        <div
-          className="
-            flex items-center gap-3 font-mono text-[0.625rem] tracking-widest
-            text-tech-main
-          ">
+        <div className="text-tech-main flex items-center gap-3 font-mono text-[0.625rem] tracking-widest">
           <span>{lineCount} LINES</span>
           <span className="text-tech-main/50">|</span>
           <button
@@ -53,17 +45,11 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
             aria-label={t("toggleLineWrap")}
             title={t("toggleLineWrap")}
             onClick={() => setIsWrapped((v) => !v)}
-            className={`
-              font-mono text-[0.625rem] tracking-widest transition-colors
-              ${
-                isWrapped
-                  ? "text-tech-main"
-                  : `
-                    text-tech-main/40
-                    hover:text-tech-main/70
-                  `
-              }
-            `}>
+            className={`font-mono text-[0.625rem] tracking-widest transition-colors ${
+              isWrapped
+                ? "text-tech-main"
+                : `text-tech-main/40 hover:text-tech-main/70`
+            } `}>
             ↩
           </button>
           <span className="text-tech-main/50">|</span>
@@ -71,21 +57,9 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
         </div>
       </div>
       <div className="relative">
-        <div
-          className="
-            pointer-events-none absolute inset-0 border border-tech-main/10
-          "
-        />
-        <div
-          className="
-            pointer-events-none absolute inset-x-0 top-1/4 h-px bg-tech-main/3
-          "
-        />
-        <div
-          className="
-            pointer-events-none absolute inset-x-0 top-3/4 h-px bg-tech-main/3
-          "
-        />
+        <div className="border-tech-main/10 pointer-events-none absolute inset-0 border" />
+        <div className="bg-tech-main/3 pointer-events-none absolute inset-x-0 top-1/4 h-px" />
+        <div className="bg-tech-main/3 pointer-events-none absolute inset-x-0 top-3/4 h-px" />
         <div
           className="code-block-pre relative"
           data-wrapped={isWrapped}
@@ -99,15 +73,8 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
               dir="ltr"
               className={
                 isWrapped
-                  ? `
-                    p-4 whitespace-pre-wrap
-                    [&_.line]:whitespace-pre-wrap!
-                    [&_code]:whitespace-pre-wrap!
-                  `
-                  : `
-                    p-4 whitespace-pre
-                    [&_code]:whitespace-pre!
-                  `
+                  ? `p-4 whitespace-pre-wrap [&_.line]:whitespace-pre-wrap! [&_code]:whitespace-pre-wrap!`
+                  : `p-4 whitespace-pre [&_code]:whitespace-pre!`
               }>
               {children}
             </div>

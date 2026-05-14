@@ -35,13 +35,7 @@ export function HeadingAnchor({ id, level }: HeadingAnchorProps) {
       type="button"
       aria-label={t("copyHeadingLink")}
       onClick={handleClick}
-      className={`
-        ${positionClass[level]}
-        opacity-0 transition-opacity
-        group-hover:opacity-100
-        ${copied ? "text-tech-main" : "text-tech-main"}
-        cursor-pointer border-none bg-transparent p-0 no-underline
-      `}>
+      className={` ${positionClass[level]} opacity-0 transition-opacity group-hover:opacity-100 ${copied ? "text-tech-main" : "text-tech-main"} cursor-pointer border-none bg-transparent p-0 no-underline`}>
       {copied ? "✓" : "#"}
     </button>
   )

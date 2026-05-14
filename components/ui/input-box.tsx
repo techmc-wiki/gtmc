@@ -14,14 +14,7 @@ export const InputBox = React.forwardRef<HTMLInputElement, InputBoxProps>(
     }
 
     return (
-      <input
-        ref={ref}
-        className={`
-          ${baseStyles}
-          ${className}
-        `}
-        {...props}
-      />
+      <input ref={ref} className={` ${baseStyles} ${className} `} {...props} />
     )
   }
 )

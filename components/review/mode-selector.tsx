@@ -62,26 +62,26 @@ export function ModeSelector({
       )}
 
       <div>
-        <p className="font-mono text-xs tracking-widest text-tech-main/60 uppercase">
+        <p className="text-tech-main/60 font-mono text-xs tracking-widest uppercase">
           {t("conflictResolution")}
         </p>
-        <h2 className="mt-1 font-mono text-sm tracking-widest text-tech-main uppercase">
+        <h2 className="text-tech-main mt-1 font-mono text-sm tracking-widest uppercase">
           {t("selectMode")}
         </h2>
       </div>
 
-      <div className="border border-tech-main/30 bg-tech-main/5 px-4 py-3">
-        <p className="mb-2 mono-label tracking-widest uppercase">
+      <div className="border-tech-main/30 bg-tech-main/5 border px-4 py-3">
+        <p className="mono-label mb-2 tracking-widest uppercase">
           {t("analysis")}
         </p>
-        <p className="font-mono text-xs/relaxed text-tech-main/80">
+        <p className="text-tech-main/80 font-mono text-xs/relaxed">
           {modeAnalysis.adminMessage}
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
-          <span className="border border-tech-main/30 bg-tech-main/10 px-2 py-0.5 font-mono text-[0.6875rem] tracking-widest text-tech-main uppercase">
+          <span className="border-tech-main/30 bg-tech-main/10 text-tech-main border px-2 py-0.5 font-mono text-[0.6875rem] tracking-widest uppercase">
             {t("commitsCount", { count: modeAnalysis.commitCount })}
           </span>
-          <span className="border border-tech-main/30 bg-tech-main/10 px-2 py-0.5 font-mono text-[0.6875rem] tracking-widest text-tech-main uppercase">
+          <span className="border-tech-main/30 bg-tech-main/10 text-tech-main border px-2 py-0.5 font-mono text-[0.6875rem] tracking-widest uppercase">
             {t("filesCount", { count: modeAnalysis.filesAffected })}
           </span>
         </div>

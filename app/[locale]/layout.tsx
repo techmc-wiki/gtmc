@@ -82,11 +82,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`
-        ${GeistSans.variable}
-        ${GeistMono.variable}
-        scroll-smooth
-      `}
+      className={` ${GeistSans.variable} ${GeistMono.variable} scroll-smooth`}
       data-scroll-behavior="smooth">
       <head>
         <meta
@@ -97,11 +93,7 @@ export default async function RootLayout({
       </head>
       <Analytics />
       <SpeedInsights />
-      <body
-        className="
-          flex min-h-screen w-full flex-col overflow-x-hidden bg-tech-bg/50
-          antialiased
-        ">
+      <body className="bg-tech-bg/50 flex min-h-screen w-full flex-col overflow-x-hidden antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <FooterProvider>
             {children}

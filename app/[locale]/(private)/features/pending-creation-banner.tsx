@@ -98,21 +98,14 @@ export function PendingCreationBanner() {
 
   if (state.status === "success") {
     return (
-      <div
-        className="
-          flex items-center gap-3 border border-tech-main/40 bg-white/60 px-4
-          py-3 font-mono text-sm backdrop-blur-sm
-        ">
-        <span className="inline-block size-2 bg-tech-main" />
-        <span className="tracking-widest text-tech-main uppercase">
+      <div className="border-tech-main/40 flex items-center gap-3 border bg-white/60 px-4 py-3 font-mono text-sm backdrop-blur-sm">
+        <span className="bg-tech-main inline-block size-2" />
+        <span className="text-tech-main tracking-widest uppercase">
           FEATURE_CREATED_
         </span>
         <Link
           href={`/features/${state.featureId}`}
-          className="
-            ml-2 text-tech-accent underline
-            hover:text-tech-main
-          ">
+          className="text-tech-accent hover:text-tech-main ml-2 underline">
           VIEW_ISSUE_#{state.featureId}_
         </Link>
       </div>
@@ -121,11 +114,7 @@ export function PendingCreationBanner() {
 
   if (state.status === "error") {
     return (
-      <div
-        className="
-          flex items-center gap-3 border border-red-400/60 bg-red-50/60 px-4
-          py-3 font-mono text-sm backdrop-blur-sm
-        ">
+      <div className="flex items-center gap-3 border border-red-400/60 bg-red-50/60 px-4 py-3 font-mono text-sm backdrop-blur-sm">
         <span className="inline-block size-2 bg-red-500" />
         <span className="tracking-widest text-red-700 uppercase">
           CREATION_FAILED_
@@ -139,11 +128,7 @@ export function PendingCreationBanner() {
             })
           }
           disabled={isRetrying}
-          className="
-            ml-auto cursor-pointer border border-red-400 px-2 py-0.5 text-xs
-            text-red-600 uppercase
-            hover:bg-red-100
-          ">
+          className="ml-auto cursor-pointer border border-red-400 px-2 py-0.5 text-xs text-red-600 uppercase hover:bg-red-100">
           {isRetrying ? "RETRYING..." : "RETRY_"}
         </button>
       </div>
@@ -152,13 +137,9 @@ export function PendingCreationBanner() {
 
   // pending
   return (
-    <div
-      className="
-        flex items-center gap-3 border border-tech-main/40 bg-white/60 px-4 py-3
-        font-mono text-sm backdrop-blur-sm
-      ">
-      <span className="inline-block size-2 animate-pulse bg-tech-accent" />
-      <span className="tracking-widest text-tech-main uppercase">
+    <div className="border-tech-main/40 flex items-center gap-3 border bg-white/60 px-4 py-3 font-mono text-sm backdrop-blur-sm">
+      <span className="bg-tech-accent inline-block size-2 animate-pulse" />
+      <span className="text-tech-main tracking-widest uppercase">
         CREATING_FEATURE_...
       </span>
     </div>

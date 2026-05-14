@@ -34,10 +34,10 @@ export function EditorSurface({
     if (as === "form") {
       return (
         <form onSubmit={onSubmit} className={gridClasses} {...props}>
-          <div className="absolute -top-px -left-px size-3 border-t-2 border-l-2 border-tech-main" />
-          <div className="absolute -top-px -right-px size-3 border-t-2 border-r-2 border-tech-main" />
-          <div className="absolute -bottom-px -left-px size-3 border-b-2 border-l-2 border-tech-main" />
-          <div className="absolute -right-px -bottom-px size-3 border-r-2 border-b-2 border-tech-main" />
+          <div className="border-tech-main absolute -top-px -left-px size-3 border-t-2 border-l-2" />
+          <div className="border-tech-main absolute -top-px -right-px size-3 border-t-2 border-r-2" />
+          <div className="border-tech-main absolute -bottom-px -left-px size-3 border-b-2 border-l-2" />
+          <div className="border-tech-main absolute -right-px -bottom-px size-3 border-r-2 border-b-2" />
           {content}
         </form>
       )
@@ -45,10 +45,10 @@ export function EditorSurface({
 
     return (
       <div className={gridClasses} {...props}>
-        <div className="absolute -top-px -left-px size-3 border-t-2 border-l-2 border-tech-main" />
-        <div className="absolute -top-px -right-px size-3 border-t-2 border-r-2 border-tech-main" />
-        <div className="absolute -bottom-px -left-px size-3 border-b-2 border-l-2 border-tech-main" />
-        <div className="absolute -right-px -bottom-px size-3 border-r-2 border-b-2 border-tech-main" />
+        <div className="border-tech-main absolute -top-px -left-px size-3 border-t-2 border-l-2" />
+        <div className="border-tech-main absolute -top-px -right-px size-3 border-t-2 border-r-2" />
+        <div className="border-tech-main absolute -bottom-px -left-px size-3 border-b-2 border-l-2" />
+        <div className="border-tech-main absolute -right-px -bottom-px size-3 border-r-2 border-b-2" />
         {content}
       </div>
     )
@@ -90,12 +90,7 @@ export function EditorForm({
   return (
     <form
       {...props}
-      className={`
-        group relative flex w-full flex-col space-y-6 border border-tech-main
-        bg-white/80 p-4 backdrop-blur-sm
-        sm:p-6
-        ${className}
-      `}>
+      className={`group border-tech-main relative flex w-full flex-col space-y-6 border bg-white/80 p-4 backdrop-blur-sm sm:p-6 ${className} `}>
       <CornerBrackets />
       {children}
     </form>
@@ -110,10 +105,7 @@ interface EditorPanelProps {
 export function EditorPanel({ children, className = "" }: EditorPanelProps) {
   return (
     <div
-      className={`
-        border border-tech-main/40 bg-white/80 p-4 backdrop-blur-sm
-        ${className}
-      `}>
+      className={`border-tech-main/40 border bg-white/80 p-4 backdrop-blur-sm ${className} `}>
       {children}
     </div>
   )
@@ -130,11 +122,7 @@ export function EditorActions({
 }: EditorActionsProps) {
   return (
     <div
-      className={`
-        relative mt-6 flex justify-end gap-4 border-t border-tech-main/10
-        pt-4
-        ${className}
-      `}>
+      className={`border-tech-main/10 relative mt-6 flex justify-end gap-4 border-t pt-4 ${className} `}>
       <div className="corner-tick" />
       {children}
     </div>

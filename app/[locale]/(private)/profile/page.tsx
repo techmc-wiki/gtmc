@@ -42,40 +42,14 @@ export default async function ProfilePage() {
   )
 
   return (
-    <div
-      className="
-        page-container mt-4 animate-fade-in
-        sm:mt-8
-      ">
-      <div
-        className="
-          flex flex-col items-start justify-between border-b-2
-          border-tech-main/40 pb-4
-          md:flex-row md:items-end
-        ">
+    <div className="page-container animate-fade-in mt-4 sm:mt-8">
+      <div className="border-tech-main/40 flex flex-col items-start justify-between border-b-2 pb-4 md:flex-row md:items-end">
         <div>
-          <p
-            className="
-              mb-2 font-mono text-[0.625rem] tracking-tech-wide text-tech-main/60
-              uppercase
-              sm:text-xs
-            ">
+          <p className="tracking-tech-wide text-tech-main/60 mb-2 font-mono text-[0.625rem] uppercase sm:text-xs">
             [ USER_PROFILE_SYS ]
           </p>
-          <h1
-            className="
-              flex items-center gap-2 text-xl font-bold tracking-widest
-              text-tech-main-dark uppercase
-              sm:gap-4 sm:text-2xl
-              md:text-4xl
-              lg:text-5xl
-            ">
-            <span
-              className="
-                flex size-8 shrink-0 items-center justify-center border
-                border-tech-main/40 bg-tech-main/5 text-tech-main
-                sm:size-10
-              ">
+          <h1 className="text-tech-main-dark flex items-center gap-2 text-xl font-bold tracking-widest uppercase sm:gap-4 sm:text-2xl md:text-4xl lg:text-5xl">
+            <span className="border-tech-main/40 bg-tech-main/5 text-tech-main flex size-8 shrink-0 items-center justify-center border sm:size-10">
               <svg
                 aria-hidden="true"
                 focusable="false"
@@ -92,78 +66,32 @@ export default async function ProfilePage() {
             </span>
             USER_PROFILE
           </h1>
-          <p
-            className="
-              mt-2 flex items-center gap-2 font-mono text-[0.625rem]
-              tracking-tech-wide text-tech-main/70
-              sm:mt-3 sm:text-sm
-            ">
+          <p className="tracking-tech-wide text-tech-main/70 mt-2 flex items-center gap-2 font-mono text-[0.625rem] sm:mt-3 sm:text-sm">
             <StatusDot size="sm" />
             {"CONFIG // IDENTITY // TOKENS"}
           </p>
         </div>
-        <div
-          className="
-            mt-4 font-mono text-[0.5625rem] tracking-tech-wide text-tech-main/50
-            uppercase
-            sm:text-xs
-            md:mt-0
-          ">
+        <div className="tracking-tech-wide text-tech-main/50 mt-4 font-mono text-[0.5625rem] uppercase sm:text-xs md:mt-0">
           SYS.STATE ::{" "}
-          <span className="font-bold text-tech-main-dark">ACTIVE *</span>
+          <span className="text-tech-main-dark font-bold">ACTIVE *</span>
         </div>
       </div>
 
-      <div
-        className="
-          relative w-full border border-tech-main/40 bg-white/60 shadow-sm
-          backdrop-blur-md
-        ">
-        <div
-          className="
-            absolute top-0 right-0 border-b border-l guide-line bg-tech-main/5
-            px-2 py-1 font-mono text-[0.5625rem] tracking-widest text-tech-main/60
-            sm:text-[0.625rem]
-          ">
+      <div className="border-tech-main/40 relative w-full border bg-white/60 shadow-sm backdrop-blur-md">
+        <div className="guide-line bg-tech-main/5 text-tech-main/60 absolute top-0 right-0 border-b border-l px-2 py-1 font-mono text-[0.5625rem] tracking-widest sm:text-[0.625rem]">
           CONFIG.PANEL_V2
         </div>
         {/* 角落刻度 */}
-        <div
-          className="
-            absolute top-0 left-0 size-2 -translate-0.5 border-t-2 border-l-2
-            border-tech-main
-          "
-        />
-        <div
-          className="
-            absolute right-0 bottom-0 size-2 translate-0.5 border-r-2 border-b-2
-            border-tech-main
-          "
-        />
+        <div className="border-tech-main absolute top-0 left-0 size-2 -translate-0.5 border-t-2 border-l-2" />
+        <div className="border-tech-main absolute right-0 bottom-0 size-2 translate-0.5 border-r-2 border-b-2" />
 
         <form
           action={updateProfileAction}
-          className="
-            relative z-10 space-y-6 p-4
-            sm:space-y-8 sm:p-6
-            md:space-y-10 md:p-8
-            lg:p-12
-          ">
-          <div
-            className="
-              flex flex-col items-start gap-4
-              sm:gap-6
-              md:gap-8
-            ">
-            <div
-              className="
-                relative size-24 shrink-0 border border-tech-main/30
-                bg-tech-main/5 p-1
-                sm:size-32
-                md:size-40
-              ">
-              <div className="absolute -top-1 -left-1 size-2 bg-tech-main" />
-              <div className="absolute -right-1 -bottom-1 size-2 bg-tech-main" />
+          className="relative z-10 space-y-6 p-4 sm:space-y-8 sm:p-6 md:space-y-10 md:p-8 lg:p-12">
+          <div className="flex flex-col items-start gap-4 sm:gap-6 md:gap-8">
+            <div className="border-tech-main/30 bg-tech-main/5 relative size-24 shrink-0 border p-1 sm:size-32 md:size-40">
+              <div className="bg-tech-main absolute -top-1 -left-1 size-2" />
+              <div className="bg-tech-main absolute -right-1 -bottom-1 size-2" />
               <UesrAvatar
                 src={user.image}
                 alt={user.name}
@@ -177,75 +105,38 @@ export default async function ProfilePage() {
                 name="image"
                 defaultValue={user.image || ""}
                 placeholder="https://..."
-                className="
-                  w-full rounded-none border border-tech-main/30 bg-white
-                  font-mono text-xs shadow-none transition-colors
-                  focus:border-tech-main
-                  sm:text-sm
-                "
+                className="border-tech-main/30 focus:border-tech-main w-full rounded-none border bg-white font-mono text-xs shadow-none transition-colors sm:text-sm"
               />
-              <p
-                className="
-                  border-l border-tech-main/30 pl-2 font-mono text-[0.5625rem]
-                  tracking-widest text-tech-main/60 uppercase
-                  sm:text-[0.625rem]
-                ">
+              <p className="border-tech-main/30 text-tech-main/60 border-l pl-2 font-mono text-[0.5625rem] tracking-widest uppercase sm:text-[0.625rem]">
                 {">"} {t("avatarUrlHint")}
               </p>
             </FormField>
           </div>
 
-          <div
-            className="
-              flex justify-end border-b border-dashed border-tech-main/30 pb-2
-            ">
-            <span
-              className="
-                font-mono text-[0.5625rem] tracking-widest text-tech-main/50
-                sm:text-[0.625rem]
-              ">
+          <div className="border-tech-main/30 flex justify-end border-b border-dashed pb-2">
+            <span className="text-tech-main/50 font-mono text-[0.5625rem] tracking-widest sm:text-[0.625rem]">
               SEC_1_IDENTITY
             </span>
           </div>
 
-          <div
-            className="
-              grid grid-cols-1 gap-4
-              sm:gap-6
-              md:gap-8
-            ">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
             <FormField label={t("usernameLabel")}>
               <InputBox
                 name="name"
                 defaultValue={user.name || ""}
                 required
-                className="
-                  w-full rounded-none border border-tech-main/30 bg-white
-                  font-mono text-xs shadow-none transition-colors
-                  focus:border-tech-main
-                  sm:text-sm
-                "
+                className="border-tech-main/30 focus:border-tech-main w-full rounded-none border bg-white font-mono text-xs shadow-none transition-colors sm:text-sm"
               />
             </FormField>
             <FormField
               label={
                 <span className="flex items-center gap-2">
                   {t("emailLabel")}{" "}
-                  <span
-                    className="
-                      border border-tech-main/30 bg-tech-main/5 px-1 text-[0.5rem]
-                      text-tech-main/60
-                      sm:text-[0.5625rem]
-                    ">
+                  <span className="border-tech-main/30 bg-tech-main/5 text-tech-main/60 border px-1 text-[0.5rem] sm:text-[0.5625rem]">
                     {t("readOnlyBadge")}
                   </span>
                   {emailVisibility === "private" && (
-                    <span
-                      className="
-                        border border-amber-400/60 bg-amber-50 px-1 text-[0.5rem]
-                        text-amber-600
-                        sm:text-[0.5625rem]
-                      ">
+                    <span className="border border-amber-400/60 bg-amber-50 px-1 text-[0.5rem] text-amber-600 sm:text-[0.5625rem]">
                       {t("privateBadge")}
                     </span>
                   )}
@@ -254,97 +145,41 @@ export default async function ProfilePage() {
               <InputBox
                 defaultValue={user.email || ""}
                 disabled
-                className="
-                  w-full cursor-not-allowed rounded-none border guide-line
-                  bg-tech-main/5 font-mono text-xs tracking-wide
-                  text-tech-main/60 shadow-none
-                  sm:text-sm
-                "
+                className="guide-line bg-tech-main/5 text-tech-main/60 w-full cursor-not-allowed rounded-none border font-mono text-xs tracking-wide shadow-none sm:text-sm"
               />
               {emailVisibility === "private" && (
-                <p
-                  className="
-                    border-l border-amber-400/40 pl-2 font-mono text-[0.5625rem]
-                    tracking-widest text-amber-600/70 uppercase
-                    sm:text-[0.625rem]
-                  ">
+                <p className="border-l border-amber-400/40 pl-2 font-mono text-[0.5625rem] tracking-widest text-amber-600/70 uppercase sm:text-[0.625rem]">
                   {">"} {t("emailPrivateNotice")}
                 </p>
               )}
             </FormField>
           </div>
 
-          <div
-            className="
-              relative mt-6 flex flex-col items-start justify-between gap-3
-              border border-tech-main/30 bg-tech-main/5 p-3
-              sm:mt-8 sm:flex-row sm:items-center sm:gap-4 sm:p-4
-            ">
-            <div className="absolute top-0 right-0 size-2 bg-tech-main/20" />
+          <div className="border-tech-main/30 bg-tech-main/5 relative mt-6 flex flex-col items-start justify-between gap-3 border p-3 sm:mt-8 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
+            <div className="bg-tech-main/20 absolute top-0 right-0 size-2" />
             <MetadataRow
               label={t("assignedRole")}
               value={
-                <span
-                  className="
-                    font-mono text-xs font-bold tracking-widest
-                    text-tech-main-dark uppercase
-                    sm:text-sm
-                  ">
+                <span className="text-tech-main-dark font-mono text-xs font-bold tracking-widest uppercase sm:text-sm">
                   [{user.role}]
                 </span>
               }
             />
           </div>
 
-          <div
-            className="
-              flex justify-start border-b border-dashed border-tech-main/30 pt-4
-              pb-2
-            ">
-            <span
-              className="
-                font-mono text-[0.5625rem] tracking-widest text-tech-main/50
-                sm:text-[0.625rem]
-              ">
+          <div className="border-tech-main/30 flex justify-start border-b border-dashed pt-4 pb-2">
+            <span className="text-tech-main/50 font-mono text-[0.5625rem] tracking-widest sm:text-[0.625rem]">
               SEC_2_CREDENTIALS
             </span>
           </div>
 
-          <div
-            className="
-              my-6 h-px w-full bg-tech-main/30
-              sm:my-8
-            "
-          />
+          <div className="bg-tech-main/30 my-6 h-px w-full sm:my-8" />
 
-          <div
-            className="
-              flex flex-col items-stretch justify-end gap-3
-              sm:gap-4
-              md:flex-row md:items-center md:gap-6
-            ">
-            <SignOutButton
-              className="
-                relative flex min-h-11 w-full items-center justify-center border
-                border-tech-main/40 bg-tech-main/10 px-4 py-2.5 font-mono
-                text-xs font-bold tracking-widest text-tech-main uppercase
-                transition-colors
-                hover:bg-tech-main hover:text-white
-                sm:px-6 sm:py-3
-                md:px-8
-              "
-            />
+          <div className="flex flex-col items-stretch justify-end gap-3 sm:gap-4 md:flex-row md:items-center md:gap-6">
+            <SignOutButton className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main relative flex min-h-11 w-full items-center justify-center border px-4 py-2.5 font-mono text-xs font-bold tracking-widest uppercase transition-colors hover:text-white sm:px-6 sm:py-3 md:px-8" />
             <button
               type="submit"
-              className="
-                relative flex min-h-11 w-full cursor-pointer items-center
-                justify-center border border-tech-main/40 bg-tech-main/10 px-4
-                py-2.5 font-mono text-xs font-bold tracking-widest
-                text-tech-main uppercase transition-colors
-                hover:bg-tech-main hover:text-white
-                sm:px-6 sm:py-3
-                md:px-8
-              ">
+              className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main relative flex min-h-11 w-full cursor-pointer items-center justify-center border px-4 py-2.5 font-mono text-xs font-bold tracking-widest uppercase transition-colors hover:text-white sm:px-6 sm:py-3 md:px-8">
               {t("saveButton")}
             </button>
           </div>

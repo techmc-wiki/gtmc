@@ -10,11 +10,11 @@ interface MetadataTileProps {
 export function MetadataTile({ label, value, className }: MetadataTileProps) {
   return (
     <div
-      className={cn("border guide-line bg-tech-main/5 px-4 py-3", className)}>
-      <p className="font-mono text-[0.625rem] tracking-widest text-tech-main/45 uppercase">
+      className={cn("guide-line bg-tech-main/5 border px-4 py-3", className)}>
+      <p className="text-tech-main/45 font-mono text-[0.625rem] tracking-widest uppercase">
         {label}
       </p>
-      <p className="mt-1 font-mono text-sm tracking-widest text-tech-main uppercase">
+      <p className="text-tech-main mt-1 font-mono text-sm tracking-widest uppercase">
         {value}
       </p>
     </div>

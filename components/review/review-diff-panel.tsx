@@ -58,8 +58,8 @@ export function ReviewDiffPanel({
             return (
               <div
                 key={segment.id}
-                className="border border-dashed guide-line bg-tech-main/3">
-                <pre className="px-4 py-3 font-mono text-xs/relaxed whitespace-pre-wrap text-tech-main/70">
+                className="guide-line bg-tech-main/3 border border-dashed">
+                <pre className="text-tech-main/70 px-4 py-3 font-mono text-xs/relaxed whitespace-pre-wrap">
                   {visibleLines.join("\n") || "\u00a0"}
                 </pre>
                 {canCollapse && !isExpanded ? (
@@ -71,7 +71,7 @@ export function ReviewDiffPanel({
                         [segment.id]: true,
                       }))
                     }
-                    className="mx-4 mb-3 block border guide-line bg-tech-main/10 px-3 py-1 font-mono text-[0.625rem] tracking-widest text-tech-main/70 uppercase transition hover:border-tech-main/30 hover:bg-tech-main/15">
+                    className="guide-line bg-tech-main/10 text-tech-main/70 hover:border-tech-main/30 hover:bg-tech-main/15 mx-4 mb-3 block border px-3 py-1 font-mono text-[0.625rem] tracking-widest uppercase transition">
                     {t("unchangedLinesHidden", { count: hiddenCount })}
                   </button>
                 ) : null}

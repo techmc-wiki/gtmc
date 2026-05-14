@@ -15,7 +15,7 @@
     "lint:check": "eslint",
     "lint:fix": "eslint --fix",
     "lint": "pnpm lint:check",
-    "postinstall": "git config --local include.path .gitconfig; pnpm articles:init && pnpm articles:update; prisma generate; pnpm articles:generate-manifest; pnpm exec playwright install --with-deps chromium",
+    "postinstall": "git config --local include.path .gitconfig; pnpm articles:init && pnpm articles:update; prisma generate; pnpm articles:generate-manifest; pnpm exec playwright install chromium",
     "style:check": "prettier --check .",
     "style:fix": "prettier --write .",
     "style": "pnpm style:check"

@@ -9,6 +9,13 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/*": ["data/manifest.json"],
   },
+  outputFileTracingExcludes: {
+    "/api/articles/search": [
+      "./articles/**/*.{png,gif,jpg,jpeg,webp,svg,mp4,webm,zip,litematic,nbt,schem,schematic,bmp,ico}",
+      "./.git/**",
+      "./public/gtmc.pdf",
+    ],
+  },
   turbopack: {
     resolveAlias: {
       "../extensions/extensions.json":

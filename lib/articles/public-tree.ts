@@ -1,12 +1,10 @@
 import { unstable_cache } from "next/cache"
 import { statSync } from "fs"
-import { join } from "path"
-
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
 import { getArticleTree, type ArticleLocale } from "@/lib/article-loader"
 import { getRepoTranslations, type ArticleTreeNode } from "@/lib/github/sync"
 import type { TreeNode } from "@/types/sidebar-tree"
-import { MANIFEST_FILE_NAME } from "@/lib/article-manifest-constants"
+import { MANIFEST_PATH } from "@/lib/slug-resolver"
 
 function isAppendixDirectoryName(name: string): boolean {
   const normalized = name.trim().toLowerCase()
@@ -26,7 +24,7 @@ function isReadmeArticle(node: TreeNode): boolean {
 }
 
 function getArticleManifestMtime(): string {
-  const manifestPath = join(process.cwd(), "lib", MANIFEST_FILE_NAME)
+  const manifestPath = MANIFEST_PATH
   return statSync(manifestPath).mtime.getTime().toString()
 }
 

@@ -1,20 +1,18 @@
 import fs from "fs"
 import path from "path"
 
-import { MANIFEST_FILE_NAME } from "./article-manifest-constants"
+import { MANIFEST_FILE_NAME } from "./ssg-constants"
 
 export { MANIFEST_FILE_NAME }
 // Keep this path module-relative so Next.js production bundles and server code
 // resolve the generated JSON next to the compiled resolver instead of cwd.
-export const MANIFEST_PATH = path.join(__dirname, MANIFEST_FILE_NAME)
-// Turbopack can rewrite __dirname to /ROOT inside server chunks during build;
-// fall back to the generated source file path used by page-data collection.
-const MANIFEST_FALLBACK_PATH = path.join(
+export const MANIFEST_PATH = path.join(
   process.cwd(),
-  "lib",
+  "data",
   MANIFEST_FILE_NAME
 )
-const ARTICLES_PATH = path.join(process.cwd(), "articles")
+
+export const ARTICLES_PATH = path.join(process.cwd(), "articles")
 
 export interface ArticleEntry {
   filePath: string
@@ -39,44 +37,25 @@ export interface ArticleEntry {
 }
 
 export function loadArticleManifest(): Record<string, ArticleEntry> {
-  const paths = [MANIFEST_PATH, MANIFEST_FALLBACK_PATH]
-  let lastMissingError: unknown = null
+  let raw: string
 
-  for (const manifestPath of paths) {
-    let raw: string
+  try {
+    raw = fs.readFileSync(MANIFEST_PATH, "utf-8")
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn(`[slug-resolver] Missing article manifest: ${MANIFEST_PATH}`)
+      return {}
+    }
 
-    try {
-      raw = fs.readFileSync(manifestPath, "utf-8")
-    } catch (error) {
-      if (isNodeMissingFileError(error)) {
-        lastMissingError = error
-        continue
+    throw new Error(
+      `[slug-resolver] Failed to load article manifest: ${MANIFEST_PATH}`,
+      {
+        cause: error,
       }
-
-      throw new Error(
-        `[slug-resolver] Failed to read article manifest: ${manifestPath}`,
-        {
-          cause: error,
-        }
-      )
-    }
-
-    return parseArticleManifest(raw, manifestPath)
-  }
-
-  if (process.env.NODE_ENV === "development") {
-    console.warn(
-      `[slug-resolver] Missing article manifest: ${paths.join(" or ")}`
     )
-    return {}
   }
 
-  throw new Error(
-    `[slug-resolver] Failed to load article manifest: ${paths.join(" or ")}`,
-    {
-      cause: lastMissingError,
-    }
-  )
+  return parseArticleManifest(raw, MANIFEST_PATH)
 }
 
 function parseArticleManifest(
@@ -138,15 +117,6 @@ function parseArticleManifest(
       }
     )
   }
-}
-
-function isNodeMissingFileError(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    error.code === "ENOENT"
-  )
 }
 
 export const ArticleManifest: Record<string, ArticleEntry> =

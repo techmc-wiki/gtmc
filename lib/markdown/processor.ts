@@ -11,6 +11,7 @@ import { remarkAnsiColors } from "@/lib/markdown/plugins/remark-ansi-colors"
 import { remarkCallouts } from "@/lib/markdown/plugins/remark-callouts"
 import { remarkAdvancedSections } from "@/lib/markdown/plugins/remark-advanced-sections"
 import { remarkNumberedHeadingsDot } from "@/lib/markdown/plugins/remark-heading-numbering"
+import { remarkPeopleMentions } from "@/lib/markdown/plugins/remark-people-mentions"
 import { rehypeAdvancedSections } from "@/lib/markdown/plugins/rehype-advanced-sections"
 import type { createRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
 
@@ -73,6 +74,7 @@ export function getPluginsForContent(
     | typeof remarkGfm
     | typeof remarkMath
     | typeof remarkBreaks
+    | typeof remarkPeopleMentions
     | typeof remarkAnsiColors
     | typeof remarkCallouts
     | typeof remarkAdvancedSections
@@ -80,6 +82,7 @@ export function getPluginsForContent(
   > = [
     remarkGfm,
     remarkBreaks,
+    remarkPeopleMentions,
     remarkAnsiColors,
     remarkCallouts,
     remarkAdvancedSections,

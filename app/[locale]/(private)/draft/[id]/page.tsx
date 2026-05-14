@@ -8,6 +8,7 @@ import { decodeStoredDraftFiles } from "@/lib/draft-files"
 import { notFound, redirect } from "next/navigation"
 import { readFile } from "fs/promises"
 import path from "path"
+import { ARTICLES_PATH } from "@/lib/ssg-constants"
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -128,7 +129,7 @@ async function loadContributingGuides() {
     {
       id: "articles",
       title: "Articles",
-      filePath: path.join(process.cwd(), "articles", "CONTRIBUTING.md"),
+      filePath: path.join(ARTICLES_PATH, "CONTRIBUTING.md"),
     },
   ]
 

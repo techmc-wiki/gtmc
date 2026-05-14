@@ -13,6 +13,7 @@ import type {
 } from "@/lib/markdown/component-types"
 import { HeadingAnchor } from "@/lib/markdown/heading-anchor"
 import { createImageComponent } from "@/lib/markdown/image-component"
+import { PeopleMention } from "@/components/markdown/people-mention"
 
 /**
  * Filter children to exclude whitespace-only text nodes.
@@ -528,6 +529,7 @@ export function getMarkdownComponents(rawPath: string) {
     },
     pre: preComponent,
     code: codeComponent,
+    "people-mention": PeopleMention,
     iframe: ({
       src,
       className,

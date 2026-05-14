@@ -434,5 +434,18 @@
     "hideSidebar": "隐藏侧边栏",
     "closeTree": "关闭目录树",
     "toggleLineWrap": "切换自动换行"
+  },
+  "PeopleMention": {
+    "panelLabel": "SYS.PEOPLE_LOOKUP",
+    "descriptionLabel": "描述",
+    "profileLabel": "档案",
+    "emailLabel": "邮箱",
+    "socialLabel": "链接",
+    "fallbackLabel": "未知实体",
+    "githubLabel": "github",
+    "bilibiliLabel": "bilibili",
+    "twitterLabel": "twitter",
+    "websiteLabel": "网站",
+    "customLinkLabel": "链接"
   }
 }

@@ -1,7 +1,11 @@
 import fs from "fs"
 import path from "path"
 import { type ArticleTreeNode } from "@/lib/github"
-import { ArticleManifest, type ArticleEntry } from "./slug-resolver"
+import {
+  ArticleManifest,
+  ARTICLES_PATH,
+  type ArticleEntry,
+} from "./slug-resolver"
 
 export type ArticleLocale = "en" | "zh"
 
@@ -10,8 +14,7 @@ export interface LocalizedArticleMetadata {
   introTitle: string
 }
 
-const ARTICLES_DIR = path.join(process.cwd(), "articles")
-const SUBMODULE_GIT = path.join(ARTICLES_DIR, ".git")
+const SUBMODULE_GIT = path.join(ARTICLES_PATH, ".git")
 
 export function isSubmoduleAvailable(): boolean {
   return fs.existsSync(SUBMODULE_GIT)
@@ -21,7 +24,7 @@ export async function getArticleContent(
   filePath: string
 ): Promise<string | null> {
   if (isSubmoduleAvailable()) {
-    const localPath = path.join(ARTICLES_DIR, filePath)
+    const localPath = path.join(ARTICLES_PATH, filePath)
     try {
       return fs.readFileSync(localPath, "utf-8")
     } catch {
@@ -217,7 +220,7 @@ export async function getArticleBuffer(
   filePath: string
 ): Promise<Buffer | null> {
   if (isSubmoduleAvailable()) {
-    const localPath = path.join(ARTICLES_DIR, filePath)
+    const localPath = path.join(ARTICLES_PATH, filePath)
     try {
       return fs.readFileSync(localPath)
     } catch {

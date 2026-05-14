@@ -2,13 +2,12 @@ import fs from "fs"
 import path from "path"
 import matter from "gray-matter"
 import { parseFrontMatter } from "@/lib/frontmatter-parser"
-import { MANIFEST_FILE_NAME } from "@/lib/article-manifest-constants"
+import { MANIFEST_FILE_NAME, ARTICLES_PATH } from "@/lib/ssg-constants"
 import type { ArticleEntry } from "@/lib/slug-resolver"
 import { SLUG_REGEX } from "@/lib/slug-validator"
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
 
-const ARTICLES_DIR = path.join(process.cwd(), "articles")
-const OUTPUT_FILE = path.join(process.cwd(), "lib", MANIFEST_FILE_NAME)
+const OUTPUT_FILE = path.join(process.cwd(), "data", MANIFEST_FILE_NAME)
 const MAX_DEPTH = 3
 const TREE_PREVIEW_DEPTH = 3
 const TREE_PREVIEW_CHILD_LIMIT = 12
@@ -274,7 +273,7 @@ function buildGenerationSummary(manifest: ArticleManifest): string {
 
   const summaryLines = [
     "[manifest] Article structure indexed",
-    `Source: ${path.relative(process.cwd(), ARTICLES_DIR) || "."}`,
+    `Source: ${path.relative(process.cwd(), ARTICLES_PATH) || "."}`,
     `Output: ${path.relative(process.cwd(), OUTPUT_FILE) || OUTPUT_FILE}`,
     `Entries: ${entries.length} total (${folders.length} folders, ${articles.length} articles)`,
     `Roots: ${roots.length} | max slug depth: ${maxSlugDepth} | max directory depth: ${MAX_DEPTH}`,
@@ -393,20 +392,20 @@ function main(): void {
   const manifest: ArticleManifest = {}
   let hasError = false
 
-  if (!fs.existsSync(ARTICLES_DIR)) {
+  if (!fs.existsSync(ARTICLES_PATH)) {
     process.stderr.write(
-      `Error: articles/ directory not found at ${ARTICLES_DIR}\n`
+      `Error: articles/ directory not found at ${ARTICLES_PATH}\n`
     )
     process.exit(1)
   }
 
   const topLevelFolders = fs
-    .readdirSync(ARTICLES_DIR, { withFileTypes: true })
+    .readdirSync(ARTICLES_PATH, { withFileTypes: true })
     .filter((e) => e.isDirectory() && !shouldIgnoreDirectory(e.name))
     .map((e) => e.name)
 
   for (const folderName of topLevelFolders) {
-    const folderPath = path.join(ARTICLES_DIR, folderName)
+    const folderPath = path.join(ARTICLES_PATH, folderName)
     const readmePath = path.join(folderPath, "README.md")
 
     if (!fs.existsSync(readmePath)) {
@@ -448,7 +447,7 @@ function main(): void {
   const folderSlugKeys = new Set(Object.keys(manifest))
 
   const rootFiles = fs
-    .readdirSync(ARTICLES_DIR, { withFileTypes: true })
+    .readdirSync(ARTICLES_PATH, { withFileTypes: true })
     .filter(
       (e) =>
         e.isFile() &&
@@ -461,7 +460,7 @@ function main(): void {
   const rootSlugsSeen = new Map<string, string>()
 
   for (const rootFile of rootFiles) {
-    const rootFilePath = path.join(ARTICLES_DIR, rootFile)
+    const rootFilePath = path.join(ARTICLES_PATH, rootFile)
     const rawSlug = getSlugFromFile(rootFilePath)
 
     let key: string

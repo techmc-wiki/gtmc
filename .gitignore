@@ -53,7 +53,7 @@ docs/superpowers
 .pi
 
 # generated manifest file
-lib/manifest.json
+data/manifest.json
 
 # lighthouse and playwright
 .lighthouseci

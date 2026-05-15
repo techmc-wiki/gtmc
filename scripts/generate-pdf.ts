@@ -132,6 +132,7 @@ function createRenderArticle(shikiPlugin: RehypeShikiPlugin | undefined) {
 
       const html = await renderMarkdownToHtml(content, {
         articlePath: article.filePath ?? undefined,
+        articleSlug: article.slug,
         shikiPlugin,
       })
 
@@ -483,27 +484,31 @@ async function main(): Promise<void> {
       waitUntil: "networkidle",
     })
 
-    // Extra wait for KaTeX font loading and font-display swap
-    await page.waitForTimeout(3000)
+    // Wait for KaTeX font loading and PDF-specific font loading
+    await page.waitForFunction(
+      () =>
+        document.fonts.ready.then(() =>
+          document.fonts.check('16px "Geist Sans"') &&
+          document.fonts.check('16px "Geist Mono"') &&
+          document.fonts.check('16px "Noto Sans SC"')
+        ),
+      { timeout: 30000 }
+    )
+    console.log("[pdf]   → PDF fonts verified (Geist Sans + Geist Mono + Noto Sans SC)")
 
     // ── Generate PDF ───────────────────────────────────────────────────────
     console.log("[pdf]   → Rendering PDF pages...")
     await page.pdf({
       path: tempPdfPath,
       format: "A4",
-      margin: {
-        top: "0px",
-        right: "0px",
-        bottom: "0px",
-        left: "0px",
-      },
+      preferCSSPageSize: true,
       printBackground: true,
       tagged: true,
       displayHeaderFooter: true,
       headerTemplate:
-        '<div style="font-size:8pt; font-family:Space Mono,monospace; color:#64748b; width:100%; text-align:center; padding-top:5px;">GTMC Technical Reference</div>',
+        '<div style="font-size:8pt; font-family:Geist Mono,monospace; color:#64748b; width:100%; text-align:center; padding-top:5px; letter-spacing:0.15em; text-transform:uppercase;">Graduate Texts in Minecraft</div>',
       footerTemplate:
-        '<div style="font-size:8pt; font-family:Space Mono,monospace; color:#64748b; width:100%; text-align:center; padding-top:5px;"><span class="pageNumber"></span> / <span class="totalPages"></span></div>',
+        '<div style="font-size:8pt; font-family:Geist Mono,monospace; color:#64748b; width:100%; text-align:center; padding-top:5px;"><span class="pageNumber"></span> / <span class="totalPages"></span></div>',
     })
 
     console.log("[pdf]   → PDF written to temp file")
@@ -521,12 +526,7 @@ async function main(): Promise<void> {
 
   await browser.close()
 
-  // Clean up temp HTML file
-  try {
-    if (fs.existsSync(tempHtmlPath)) fs.unlinkSync(tempHtmlPath)
-  } catch {
-    /* ignore */
-  }
+  // Keep temp HTML file at public/.gtmc-pdf-temp.html for debugging/inspection
 
   // ── Add PDF bookmarks (outlines) ────────────────────────────────────────
   console.log("[pdf]   → Adding PDF bookmarks...")

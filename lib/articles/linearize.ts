@@ -33,6 +33,8 @@ export interface LinearizedArticle {
   isReadmeIntro: boolean
   /** Sort index from the manifest (-1 when unset). */
   index: number
+  /** Nesting depth in the article tree (0 = root-level). */
+  depth: number
 }
 
 /**
@@ -54,11 +56,12 @@ export function linearizeArticles(tree: TreeNode[]): LinearizedArticle[] {
     nodes: TreeNode[],
     chapterSlug: string,
     chapterTitle: string,
+    depth: number,
   ): void {
     for (const node of nodes) {
       if (node.isFolder) {
         // Descend into the folder, which becomes the active chapter
-        dfs(node.children, node.slug, node.title)
+        dfs(node.children, node.slug, node.title, depth + 1)
       } else {
         // Resolve file path; may be null if slug is missing from the manifest
         const filePath = resolveLocalArticlePath(node.slug)
@@ -74,12 +77,13 @@ export function linearizeArticles(tree: TreeNode[]): LinearizedArticle[] {
           isAdvanced: node.isAdvanced ?? false,
           isReadmeIntro: node.isReadmeIntro ?? false,
           index: node.index ?? -1,
+          depth,
         })
       }
     }
   }
 
-  dfs(tree, /* chapterSlug */ "", /* chapterTitle */ "")
+  dfs(tree, /* chapterSlug */ "", /* chapterTitle */ "", /* depth */ 0)
 
   return result
 }

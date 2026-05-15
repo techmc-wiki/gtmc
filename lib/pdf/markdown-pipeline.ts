@@ -18,12 +18,14 @@ import rehypeRaw from "rehype-raw"
 import rehypeKatex from "rehype-katex"
 import rehypeSlug from "rehype-slug"
 import rehypeStringify from "rehype-stringify"
+import matter from "gray-matter"
 import type { PluggableList } from "unified"
 
 import { remarkAnsiColors } from "@/lib/markdown/plugins/remark-ansi-colors"
 import { remarkWikilinks } from "@/lib/markdown/plugins/remark-wikilinks"
 import { remarkCallouts } from "@/lib/markdown/plugins/remark-callouts"
 import { remarkAdvancedSections } from "@/lib/markdown/plugins/remark-advanced-sections"
+import { remarkPeopleMentions } from "@/lib/markdown/plugins/remark-people-mentions"
 import { remarkNumberedHeadingsDot } from "@/lib/markdown/plugins/remark-heading-numbering"
 import { rehypeAdvancedSections } from "@/lib/markdown/plugins/rehype-advanced-sections"
 import type { RehypeShikiPlugin } from "@/lib/markdown/plugins/rehype-shiki"
@@ -44,6 +46,11 @@ export interface PdfPipelineOptions {
    * Article path used for resolving relative image URLs in the PDF context.
    */
   articlePath?: string
+
+  /**
+   * Article slug used for generating source links (e.g. for GIF captions).
+   */
+  articleSlug?: string
 }
 
 /**
@@ -69,6 +76,9 @@ export async function renderMarkdownToHtml(
   content: string,
   options?: PdfPipelineOptions
 ): Promise<string> {
+  // ── Strip YAML frontmatter ────────────────────────────────────
+  const { content: cleanContent } = matter(content)
+
   // ── Build remark (markdown AST) plugin list ───────────────────────
   const remarkPlugins: PluggableList = [
     remarkGfm,
@@ -76,6 +86,7 @@ export async function renderMarkdownToHtml(
     remarkAnsiColors,
     remarkWikilinks,
     remarkCallouts,
+    remarkPeopleMentions,
     remarkAdvancedSections,
     [remarkNumberedHeadingsDot, { startDepth: 2 }],
   ]
@@ -89,7 +100,7 @@ export async function renderMarkdownToHtml(
   ]
 
   // Conditionally include math support (KaTeX)
-  if (hasMathContent(content)) {
+  if (hasMathContent(cleanContent)) {
     remarkPlugins.push(remarkMath)
     // Insert rehypeKatex after rehypeAdvancedSections (index 2)
     rehypePlugins.splice(2, 0, rehypeKatex)
@@ -110,7 +121,29 @@ export async function renderMarkdownToHtml(
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypePlugins)
     .use(rehypeStringify, { allowDangerousHtml: true })
-    .process(content)
+    .process(cleanContent)
 
-  return String(file)
+  let html = String(file)
+
+  // ── Strip href from wikilinks (produces dead relative links in PDF) ──
+  // Wikilinks generate: <a href="../slug" class="wikilink">text</a>
+  // Convert to: <span class="wikilink">text</span>
+  html = html.replace(
+    /<a\s+href="[^"]*"([^>]*class="[^"]*wikilink[^"]*"[^>]*)>(.*?)<\/a>/gi,
+    '<span$1>$2</span>'
+  )
+
+  // ── Inject animated notice for GIF images ────────────────────────
+  const baseUrl = options?.articleSlug
+    ? `https://gtmc.wiki/en/articles/${options.articleSlug}`
+    : ""
+  const sourceLink = baseUrl
+    ? ` <a href="${baseUrl}" class="gif-source-link">View original</a>`
+    : ""
+  html = html.replace(
+    /(<img[^>]*src="(?!data:)[^"]*\.gif[^"]*"[^>]*\/?>)/gi,
+    `$1<p class="gif-caption">▶ This figure is animated.${sourceLink}</p>`
+  )
+
+  return html
 }

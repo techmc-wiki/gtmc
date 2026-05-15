@@ -4,11 +4,56 @@
    Target: Chromium 130+ via Playwright page.pdf()
    ========================================================================== */
 
-/* --- Font Imports (resolved from node_modules via Playwright base URL) --- */
-@import "@fontsource/space-mono/400.css";
-@import "@fontsource/space-mono/700.css";
-@import "@fontsource/noto-sans-sc/400.css";
-@import "@fontsource/noto-sans-sc/700.css";
+/* --- Font Declarations (self-hosted woff2 for file:// PDF context) --- */
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('fonts/geist/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('fonts/geist/Geist-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('fonts/geist/Geist-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('fonts/geist/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('fonts/geist/GeistMono-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noto Sans SC';
+  src: url('https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5/files/noto-sans-sc-all-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noto Sans SC';
+  src: url('https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5/files/noto-sans-sc-all-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* --- Page Rules --- */
 @page {
@@ -30,10 +75,6 @@
   margin-right: 2.5cm;
 }
 
-@page chapter {
-  margin-top: 2.5cm;
-}
-
 /* --- Base --- */
 html {
   font-size: 10.5pt;
@@ -44,9 +85,13 @@ html {
 }
 
 body {
-  font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  font-family: 'Geist Sans', 'Noto Sans SC', 'PingFang SC', sans-serif;
   margin: 0;
   padding: 0;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 /* --- Headings (monospace, technical) --- */
@@ -56,13 +101,14 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Space Mono", monospace;
+  font-family: 'Geist Mono', monospace;
   color: #3b4a6b;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
   line-height: 1.3;
+  break-after: avoid;
 }
 
 h1 {
@@ -70,7 +116,6 @@ h1 {
   font-weight: 700;
   border-bottom: 2px solid #cbd5e1;
   padding-bottom: 0.3em;
-  page-break-before: always;
 }
 
 h2 {
@@ -78,18 +123,19 @@ h2 {
   font-weight: 700;
   border-bottom: 1px solid #cbd5e1;
   padding-bottom: 0.2em;
-  page-break-before: always;
 }
 
 h3 {
   font-size: 13pt;
   font-weight: 700;
+  break-before: avoid;
   page-break-after: avoid;
 }
 
 h4 {
   font-size: 11pt;
   font-weight: 700;
+  break-before: avoid;
   page-break-after: avoid;
 }
 
@@ -119,6 +165,8 @@ ol {
 
 li {
   margin-bottom: 0.25em;
+  orphans: 3;
+  widows: 3;
 }
 
 li > p {
@@ -133,7 +181,7 @@ a {
 
 /* --- Code --- */
 code {
-  font-family: "Space Mono", monospace;
+  font-family: 'Geist Mono', monospace;
   font-size: 9pt;
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
@@ -142,7 +190,7 @@ code {
 }
 
 pre {
-  font-family: "Space Mono", monospace;
+  font-family: 'Geist Mono', monospace;
   font-size: 8.5pt;
   line-height: 1.5;
   background: #f8f9fc;
@@ -162,21 +210,31 @@ pre code {
   font-size: inherit;
 }
 
+code .line {
+  display: block;
+}
+
 /* --- Tables --- */
 table {
   width: 100%;
   border-collapse: collapse;
   margin: 1em 0;
+  font-family: 'Geist Sans', sans-serif;
   font-size: 9.5pt;
-  page-break-inside: avoid;
+  break-inside: auto;
+  page-break-inside: auto;
+}
+
+thead {
+  display: table-header-group;
 }
 
 th {
-  font-family: "Space Mono", monospace;
+  font-family: 'Geist Mono', monospace;
   font-size: 8.5pt;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: #f1f5f9;
+  background: #f0f2f5;
   border: 1px solid #cbd5e1;
   padding: 0.5em 0.7em;
   text-align: left;
@@ -187,6 +245,8 @@ td {
   border: 1px solid #cbd5e1;
   padding: 0.4em 0.7em;
   vertical-align: top;
+  orphans: 3;
+  widows: 3;
 }
 
 tr {
@@ -195,11 +255,11 @@ tr {
 
 /* --- Images --- */
 img {
-  max-width: 100%;
+  max-width: 85%;
   height: auto;
   page-break-inside: avoid;
   display: block;
-  margin: 1em auto;
+  margin: 1.5em auto;
 }
 
 figure {
@@ -209,11 +269,13 @@ figure {
 }
 
 figcaption {
-  font-family: "Space Mono", monospace;
+  font-family: 'Geist Mono', monospace;
   font-size: 8.5pt;
   color: #60708f;
   margin-top: 0.4em;
   text-align: center;
+  orphans: 3;
+  widows: 3;
 }
 
 /* --- Blockquote --- */
@@ -224,10 +286,23 @@ blockquote {
   background: #f8f9fc;
   color: #4a5a78;
   font-style: italic;
+  break-inside: avoid;
 }
 
 blockquote p {
   margin: 0.3em 0;
+  orphans: 3;
+  widows: 3;
+}
+
+dd {
+  orphans: 3;
+  widows: 3;
+}
+
+/* --- Article Measure --- */
+.chapter-content {
+  max-width: none;
 }
 
 /* --- Callouts / Admonitions --- */
@@ -242,7 +317,7 @@ aside[data-callout] {
 }
 
 aside[data-callout]::before {
-  font-family: "Space Mono", monospace;
+  font-family: 'Geist Mono', monospace;
   font-size: 8pt;
   font-weight: 700;
   text-transform: uppercase;
@@ -317,26 +392,65 @@ aside[data-callout="CORRUPTION"]::before {
   justify-content: center;
   min-height: 80vh;
   text-align: center;
-  page: unset;
 }
 
-.cover-page h1 {
+.cover-frame {
+  position: relative;
+  padding: 3cm 2cm;
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.cover-frame::before,
+.cover-frame::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: #60708f;
+  border-style: solid;
+}
+.cover-frame::before {
+  top: 2cm;
+  left: 1.5cm;
+  border-width: 2px 0 0 2px;
+}
+.cover-frame::after {
+  bottom: 2cm;
+  right: 1.5cm;
+  border-width: 0 2px 2px 0;
+}
+
+.cover-title {
+  font-family: 'Geist Mono', monospace;
   font-size: 28pt;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #3b4a6b;
+  text-align: center;
+  margin-bottom: 0.5em;
   border-bottom: none;
   page-break-before: avoid;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
 }
 
-.cover-page .subtitle {
-  font-family: "Space Mono", monospace;
-  font-size: 11pt;
+.cover-subtitle {
+  font-family: 'Geist Sans', sans-serif;
+  font-size: 13pt;
   color: #60708f;
-  margin-top: 0.5em;
+  text-align: center;
+}
+
+.cover-rule {
+  width: 60%;
+  border: none;
+  border-top: 1px solid #cbd5e1;
+  margin: 2em auto;
 }
 
 .cover-page .meta {
-  font-family: "Space Mono", monospace;
+  font-family: 'Geist Mono', monospace;
   font-size: 9pt;
   color: #64748b;
   margin-top: 2em;
@@ -354,52 +468,35 @@ aside[data-callout="CORRUPTION"]::before {
 .toc-page ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
-.toc-page li {
-  display: flex;
-  align-items: baseline;
-  margin-bottom: 0.4em;
-  font-size: 10pt;
+.toc-chapter {
+  margin-bottom: 1.5em;
 }
 
-.toc-page li::after {
-  content: "";
-  flex: 1;
-  border-bottom: 1px dotted #cbd5e1;
-  margin: 0 0.5em;
-}
-
-.toc-page li .page-num {
-  font-family: "Space Mono", monospace;
-  font-size: 9pt;
-  color: #64748b;
-}
-
-.toc-page li a {
-  color: #1e293b;
-}
-
-.toc-page li.toc-h1 {
-  font-weight: 700;
+.toc-chapter h3 {
+  font-family: 'Geist Mono', monospace;
   font-size: 11pt;
-  margin-top: 0.6em;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #3b4a6b;
+  margin-bottom: 0.3em;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 0.2em;
 }
 
-.toc-page li.toc-h2 {
-  padding-left: 1.2em;
-}
-
-.toc-page li.toc-h3 {
-  padding-left: 2.4em;
+.toc-entry {
   font-size: 9.5pt;
-  color: #4a5a78;
+  line-height: 1.8;
+  color: #1e293b;
+  list-style: none;
+  padding-left: 0;
 }
 
 /* --- Chapter Title Page --- */
 .chapter-title-page {
   page-break-before: always;
-  page: chapter;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -414,12 +511,50 @@ aside[data-callout="CORRUPTION"]::before {
 }
 
 .chapter-title-page .chapter-number {
-  font-family: "Space Mono", monospace;
+  font-family: 'Geist Mono', monospace;
   font-size: 9pt;
   color: #60708f;
   text-transform: uppercase;
   letter-spacing: 0.15em;
   margin-bottom: 0.5em;
+}
+
+.chapter-frame {
+  position: relative;
+  padding: 2cm 2cm;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.chapter-frame::before,
+.chapter-frame::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: #60708f;
+  border-style: solid;
+}
+.chapter-frame::before {
+  top: 2cm;
+  left: 1.5cm;
+  border-width: 2px 0 0 2px;
+}
+.chapter-frame::after {
+  bottom: 2cm;
+  right: 1.5cm;
+  border-width: 0 2px 2px 0;
+}
+
+.chapter-meta {
+  font-family: 'Geist Mono', monospace;
+  font-size: 9pt;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #60708f;
+  margin-top: 1em;
 }
 
 /* --- Advanced Sections --- */
@@ -430,7 +565,7 @@ div[data-advanced-section] {
 }
 
 span[data-advanced] {
-  font-family: "Space Mono", monospace;
+  font-family: 'Geist Mono', monospace;
   font-size: 7.5pt;
   font-weight: 700;
   text-transform: uppercase;
@@ -443,34 +578,22 @@ span[data-advanced] {
   margin-right: 0.4em;
 }
 
-/* --- Page Break Rules --- */
-h1,
-h2,
-.chapter-title {
-  page-break-before: always;
-}
-
-h3,
-h4 {
-  page-break-after: avoid;
-}
-
-pre,
-table,
-img,
-figure {
-  page-break-inside: avoid;
-}
-
-tr {
-  page-break-inside: avoid;
-}
-
 /* --- Horizontal Rule --- */
 hr {
   border: none;
   border-top: 1px solid #cbd5e1;
   margin: 2em 0;
+}
+
+/* --- GIF Caption --- */
+.gif-caption {
+  font-family: 'Geist Mono', monospace;
+  font-size: 8pt;
+  color: #60708f;
+  text-align: center;
+  margin-top: 0.3em;
+  margin-bottom: 1em;
+  letter-spacing: 0.05em;
 }
 
 /* --- Footnotes --- */
@@ -489,4 +612,40 @@ hr {
 .cover-page + * h1:first-of-type,
 body > h1:first-of-type {
   page-break-before: avoid;
+}
+
+/* --- TOC Depth Indentation --- */
+.toc-depth-1 { padding-left: 0; }
+.toc-depth-2 { padding-left: 1.5em; }
+.toc-depth-3 { padding-left: 3em; }
+
+/* --- People Mentions --- */
+people-mention {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.8em;
+  border: 1px solid rgba(96, 112, 143, 0.3);
+  background: rgba(96, 112, 143, 0.05);
+  color: #60708f;
+  padding: 0.05em 0.4em;
+  border-radius: 2px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+people-mention::before {
+  content: "@";
+  color: rgba(96, 112, 143, 0.4);
+  margin-right: 0.1em;
+}
+
+/* --- GIF Source Link --- */
+.gif-source-link {
+  color: #60708f;
+  text-decoration: underline;
+  font-size: inherit;
+}
+
+/* --- Wikilink --- */
+.wikilink {
+  color: #4a5a78;
+  border-bottom: 1px dotted #c4d0df;
 }

@@ -18,6 +18,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     ".worktrees/**",
     ".sisyphus/**",
+    ".agents/**",
+    ".claude/**",
     "articles/**",
     // CommonJS scripts using require()
     "**/*.cjs",

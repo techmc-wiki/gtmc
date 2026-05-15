@@ -37,7 +37,7 @@ function main(): void {
     let fileContent: string
     try {
       fileContent = fs.readFileSync(sourcePath, "utf-8")
-    } catch (error) {
+    } catch {
       process.stderr.write(
         `Error: Cannot read source file for "${entry.slug}": ${sourcePath}\n`
       )

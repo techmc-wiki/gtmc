@@ -52,11 +52,10 @@ docs/superpowers
 .windsurf
 .pi
 
-# generated manifest file
+# generated files
 data/manifest.json
-
-# generated article content artifacts
-data/articles/
+data/articles
+public/gtmc.pdf
 
 # lighthouse and playwright
 .lighthouseci

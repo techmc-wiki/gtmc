@@ -21,6 +21,7 @@ import { EditorTextarea } from "@/components/editor/editor-textarea"
 import { EditorFileUploadInput } from "@/components/editor/editor-file-upload-input"
 import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
 import { useEditorUpload } from "@/hooks/use-editor-upload"
+import type { ReactCodeMirrorRef } from "@uiw/react-codemirror"
 import { EditorForm, EditorActions } from "@/components/editor/editor-surface"
 import {
   EditorContentArea,
@@ -51,7 +52,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
   const [lineWrap, setLineWrap] = React.useState(false)
   const { badge, showBadge, clearBadge } = useBadge()
 
-  const textareaRef = React.useRef<any>(null)
+  const textareaRef = React.useRef<ReactCodeMirrorRef>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   const isReadOnly = false

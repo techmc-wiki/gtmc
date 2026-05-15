@@ -3,6 +3,14 @@ import {
   GithubFeaturesError,
   requestGithub,
 } from "./api-client"
+import {
+  EXPLANATION_MARKER,
+  METADATA_MARKER,
+  SYSTEM_COMMENT_MARKER,
+} from "./constants"
+
+// Re-export for barrel compatibility (@/lib/github)
+export { EXPLANATION_MARKER, METADATA_MARKER, SYSTEM_COMMENT_MARKER }
 
 export type AppFeatureStatus = "PENDING" | "IN_PROGRESS" | "RESOLVED"
 
@@ -19,10 +27,6 @@ export const STATUS_LABEL_COLORS = {
 } as const
 
 const STATUS_LABEL_PREFIX = "status:"
-
-export const EXPLANATION_MARKER = "<!-- GTMC_EXPLANATION"
-export const METADATA_MARKER = "<!-- GTMC_METADATA"
-export const SYSTEM_COMMENT_MARKER = "<!-- GTMC_SYSTEM_ASSIGNMENT -->"
 
 export function serializeSystemComment(content: string): string {
   return `${SYSTEM_COMMENT_MARKER}\n\n${content}`

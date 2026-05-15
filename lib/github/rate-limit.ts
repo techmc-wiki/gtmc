@@ -1,18 +1,11 @@
+import {
+  getGithubErrorMessage,
+  getGithubErrorResponseHeader,
+  getGithubErrorStatus,
+} from "@/lib/github/errors"
+
 export function parseGithubErrorMessage(details: unknown): string | undefined {
-  if (!details || typeof details !== "object") {
-    return undefined
-  }
-
-  const candidate = details as { message?: unknown; error?: unknown }
-  if (typeof candidate.message === "string") {
-    return candidate.message
-  }
-
-  if (typeof candidate.error === "string") {
-    return candidate.error
-  }
-
-  return undefined
+  return getGithubErrorMessage(details)
 }
 
 export function isGithubRateLimitedResponse(
@@ -36,9 +29,7 @@ export function isGithubRateLimitedResponse(
 }
 
 export function getGithubRateLimitResetMs(error: unknown): number | null {
-  const resetHeader = (
-    error as { response?: { headers?: { [key: string]: string | number } } }
-  )?.response?.headers?.["x-ratelimit-reset"]
+  const resetHeader = getGithubErrorResponseHeader(error, "x-ratelimit-reset")
 
   if (typeof resetHeader === "number") {
     return resetHeader * 1000
@@ -55,9 +46,5 @@ export function getGithubRateLimitResetMs(error: unknown): number | null {
 }
 
 export function isGithubRateLimitErrorForCache(error: unknown): boolean {
-  const status =
-    (error as { status?: number })?.status ||
-    (error as { response?: { status?: number } })?.response?.status
-
-  return status === 403
+  return getGithubErrorStatus(error) === 403
 }

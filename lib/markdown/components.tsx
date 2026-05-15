@@ -1,5 +1,7 @@
 import { useTranslations } from "next-intl"
 import { CodeBlockPre } from "@/components/code-block-pre"
+import LitematicaViewer from "@/components/articles/litematica-viewer"
+import { PeopleMention } from "@/components/markdown/people-mention"
 import { createAComponent } from "@/lib/markdown/a-component"
 import {
   ANSI_COLOR_NAMES,
@@ -13,7 +15,6 @@ import type {
 } from "@/lib/markdown/component-types"
 import { HeadingAnchor } from "@/lib/markdown/heading-anchor"
 import { createImageComponent } from "@/lib/markdown/image-component"
-import { PeopleMention } from "@/components/markdown/people-mention"
 
 /**
  * Filter children to exclude whitespace-only text nodes.
@@ -98,12 +99,14 @@ function paragraphContainsMedia(node: unknown): boolean {
   )
 }
 
-import LitematicaViewer from "@/components/articles/litematica-viewer"
+type CalloutStyle = {
+  border: string
+  bg: string
+  title: string
+  text: string
+}
 
-const CALLOUT_STYLES: Record<
-  string,
-  { border: string; bg: string; title: string; text: string }
-> = {
+const CALLOUT_STYLES = {
   warning: {
     border: "border-amber-500",
     bg: "bg-amber-50",
@@ -134,9 +137,18 @@ const CALLOUT_STYLES: Record<
     title: "text-orange-700",
     text: "text-orange-900",
   },
-}
+} as const satisfies Record<string, CalloutStyle>
 
-const CALLOUT_TYPES_WITH_DEFAULT = ["crash", "corruption"] as const
+type CalloutType = keyof typeof CALLOUT_STYLES
+
+const CALLOUT_TYPES_WITH_DEFAULT = [
+  "crash",
+  "corruption",
+] as const satisfies readonly CalloutType[]
+
+function isCalloutType(type: string): type is CalloutType {
+  return type in CALLOUT_STYLES
+}
 
 function CalloutAside({
   "data-callout": dataCallout,
@@ -151,11 +163,13 @@ function CalloutAside({
   }
 
   const type = String(dataCallout)
-  const styles = CALLOUT_STYLES[type] ?? CALLOUT_STYLES.important
+  const styles = isCalloutType(type)
+    ? CALLOUT_STYLES[type]
+    : CALLOUT_STYLES.important
   const labelKey = `${type}_label` as Parameters<typeof t>[0]
   const isEmpty = dataCalloutEmpty === "true"
-  const hasDefault = (CALLOUT_TYPES_WITH_DEFAULT as readonly string[]).includes(
-    type
+  const hasDefault = CALLOUT_TYPES_WITH_DEFAULT.some(
+    (defaultType) => defaultType === type
   )
 
   return (
@@ -176,7 +190,9 @@ function CalloutAside({
   )
 }
 
-export function getMarkdownComponents(rawPath: string) {
+export function getMarkdownComponents(
+  rawPath: string
+): Record<string, MarkdownComponent> {
   const aComponent = createAComponent(rawPath)
   const imageComponent = createImageComponent(rawPath)
   const ansiColorStyles: Record<AnsiColorName, Record<string, string>> = {
@@ -282,7 +298,7 @@ export function getMarkdownComponents(rawPath: string) {
       createAnsiColorTagName(color),
       makeSpan(ansiColorStyles[color]),
     ])
-  ) as Record<string, MarkdownComponent>
+  ) satisfies Record<string, MarkdownComponent>
 
   return {
     ...ansiColorComponents,
@@ -500,5 +516,5 @@ export function getMarkdownComponents(rawPath: string) {
         </div>
       )
     },
-  } as Record<string, MarkdownComponent>
+  } satisfies Record<string, MarkdownComponent>
 }

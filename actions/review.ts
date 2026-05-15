@@ -45,6 +45,7 @@ import {
 } from "@/lib/rerere"
 import type { RebaseState } from "@/types/rebase"
 import type { ConflictMode, ReviewMergeMethod } from "@/types/review"
+import { reviewLog, reviewError, summarizeSha } from "@/lib/review/logging"
 
 const owner = ARTICLES_REPO_OWNER
 const repo = ARTICLES_REPO_NAME
@@ -52,32 +53,6 @@ const SIMPLE_CONFLICT_MARKER_RE = new RegExp(
   SIMPLE_CONFLICT_BLOCK_RE.source,
   "g"
 )
-
-function reviewLog(action: string, details: Record<string, unknown>) {
-  console.log(`[review:${action}]`, details)
-}
-
-function reviewError(
-  action: string,
-  error: unknown,
-  details: Record<string, unknown>
-) {
-  console.error(`[review:${action}]`, {
-    ...details,
-    error:
-      error instanceof Error
-        ? {
-            name: error.name,
-            message: error.message,
-            stack: error.stack,
-          }
-        : error,
-  })
-}
-
-function summarizeSha(sha?: string | null) {
-  return sha ? sha.slice(0, 7) : null
-}
 
 function hasSimpleConflictMarkers(content: string) {
   SIMPLE_CONFLICT_MARKER_RE.lastIndex = 0

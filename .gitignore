@@ -55,6 +55,9 @@ docs/superpowers
 # generated manifest file
 data/manifest.json
 
+# generated article content artifacts
+data/articles/
+
 # lighthouse and playwright
 .lighthouseci
 .playwright-mcp

@@ -1,3 +1,10 @@
+import {
+  EXPLANATION_END,
+  EXPLANATION_START,
+  METADATA_END,
+  METADATA_START,
+} from "./constants"
+
 export interface IssueMetadata {
   appUserId: string
   authorName: string | null
@@ -14,10 +21,6 @@ export interface CommentMetadata {
   emailRedacted?: boolean
 }
 
-const METADATA_START = "<!-- GTMC_METADATA"
-const METADATA_END = "-->"
-const EXPLANATION_START = "<!-- GTMC_EXPLANATION"
-const EXPLANATION_END = "-->"
 const COMMENT_META_PREFIX = "<!-- GTMC_COMMENT_META "
 const COMMENT_META_SUFFIX = " -->"
 

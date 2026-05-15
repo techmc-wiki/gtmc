@@ -14,7 +14,7 @@
  */
 
 import { chromium } from "playwright"
-import { PDFDocument, PDFName } from "pdf-lib"
+import { PDFDict, PDFDocument, PDFName } from "pdf-lib"
 import fs from "node:fs"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
@@ -242,12 +242,9 @@ async function writePdfOutlines(
   // ── Phase 1: Build refs, create all dicts ───────────────────────────────
   // We structure the data so we can link siblings after creation.
 
-  /** Structural type for PDF dict objects (returned by context.obj({...})). */
-  type OutlineDict = { set(key: PDFName, value: unknown): void }
-
   interface ItemData {
     ref: ReturnType<typeof context.nextRef>
-    dict: OutlineDict
+    dict: PDFDict
     children: ItemData[]
   }
 
@@ -304,7 +301,7 @@ async function writePdfOutlines(
 
   // ── Phase 2: Assign refs to their dicts ───────────────────────────────
   function assignItem(item: ItemData): void {
-    context.assign(item.ref, item.dict as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+    context.assign(item.ref, item.dict)
     for (const child of item.children) assignItem(child)
   }
   for (const item of topLevelItems) assignItem(item)

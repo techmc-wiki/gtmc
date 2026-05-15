@@ -4,6 +4,7 @@ import * as React from "react"
 import ReactDOM from "react-dom"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
+import type { ReactCodeMirrorRef } from "@uiw/react-codemirror"
 
 import {
   EditorTabStrip,
@@ -136,16 +137,6 @@ function getFirstConflictedFile(
   )
 }
 
-function summarizeTextSegment(content: string) {
-  const lineCount = content.length === 0 ? 0 : content.split("\n").length
-  const preview = content.replace(/\s+/g, " ").trim().slice(0, 72)
-
-  return {
-    lineCount,
-    preview,
-  }
-}
-
 function inferMode(revision: {
   conflictMode: string | null
   rebaseState: unknown
@@ -244,8 +235,6 @@ export function ReviewEditor({
     tone: "info" | "success" | "warning"
     message: string
   } | null>(null)
-  const [expandedThreeWaySegments, setExpandedThreeWaySegments] =
-    React.useState<Record<string, boolean>>({})
   const abortedRef = React.useRef(false)
   const autosaveTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
     null
@@ -258,7 +247,7 @@ export function ReviewEditor({
   const lastConflictSignatureRef = React.useRef<string | null>(null)
   const isMounted = useMounted()
 
-  const textareaRef = React.useRef<any>(null)
+  const textareaRef = React.useRef<ReactCodeMirrorRef>(null)
 
   React.useEffect(() => {
     setReviewSession((prev) => {
@@ -345,11 +334,6 @@ export function ReviewEditor({
     activeFile !== undefined &&
     fileHasConflicts(activeFile, activeContent) &&
     parsedSegments.some((segment) => segment.type === "conflict")
-  const firstConflictSegmentId = React.useMemo(
-    () =>
-      parsedSegments.find((segment) => segment.type === "conflict")?.id ?? null,
-    [parsedSegments]
-  )
   const effectiveMode = reviewSession.mode ?? null
   const conflictSignature = React.useMemo(
     () =>
@@ -501,19 +485,6 @@ export function ReviewEditor({
     return () => window.clearInterval(interval)
   }, [effectiveMode, rebaseState?.status, router])
 
-  const rerereResolutionMap = React.useMemo(() => {
-    const map = new Map<string, string>()
-    if (rebaseState?.rerereApplied) {
-      for (const block of rebaseState.rerereApplied) {
-        const key = `${block.ours}|||${block.theirs}`
-        if (block.autoApplied?.resolution) {
-          map.set(key, block.autoApplied.resolution)
-        }
-      }
-    }
-    return map
-  }, [rebaseState?.rerereApplied])
-
   const applyDraftSnapshot = React.useCallback(
     (snapshot: ReviewActionDraftSnapshot) => {
       setReviewSession((prev) => {
@@ -553,101 +524,6 @@ export function ReviewEditor({
     setReviewSession((prev) => ({ ...prev, activeFileId: fileId }))
   }
 
-  const toggleThreeWaySegment = React.useCallback(
-    (segmentId: string) => {
-      const fileId = reviewSession.activeFileId
-      const key = `${fileId}:${segmentId}`
-
-      setExpandedThreeWaySegments((prev) => ({
-        ...prev,
-        [key]: !prev[key],
-      }))
-    },
-    [reviewSession.activeFileId]
-  )
-
-  const renderCollapsedThreeWaySegment = React.useCallback(
-    (
-      segment: Extract<EditorSegment, { type: "text" }>,
-      tone: "neutral" | "draft" | "main"
-    ) => {
-      const key = `${reviewSession.activeFileId}:${segment.id}`
-      const isExpanded = Boolean(expandedThreeWaySegments[key])
-      const { lineCount, preview } = summarizeTextSegment(segment.content)
-      const palette =
-        tone === "draft"
-          ? {
-              border: "border-red-300/70",
-              bg: "bg-red-500/[0.03]",
-              text: "text-red-700/80",
-              button:
-                "border-red-300/80 text-red-700 hover:bg-red-500/10 hover:border-red-400",
-            }
-          : tone === "main"
-            ? {
-                border: "border-blue-300/70",
-                bg: "bg-blue-500/[0.03]",
-                text: "text-blue-700/80",
-                button:
-                  "border-blue-300/80 text-blue-700 hover:bg-blue-500/10 hover:border-blue-400",
-              }
-            : {
-                border: "border-tech-main/20",
-                bg: "bg-tech-main/[0.03]",
-                text: "text-tech-main/60",
-                button:
-                  "border-tech-main/20 text-tech-main/70 hover:bg-tech-main/10 hover:border-tech-main/30",
-              }
-
-      return (
-        <div
-          key={segment.id}
-          className={`my-1 border border-dashed ${palette.border} ${palette.bg}`}>
-          <div className="flex flex-col gap-2 px-3 py-2 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0 flex-1">
-              <div
-                className={`font-mono text-[0.625rem] tracking-widest uppercase ${palette.text}`}>
-                <span>{lineCount}_UNCHANGED_LINES_</span>
-              </div>
-              {preview ? (
-                <div
-                  className={`mt-1 truncate font-mono text-[0.625rem] tracking-normal normal-case ${palette.text}`}>
-                  {preview}
-                  {segment.content.length > preview.length ? "..." : ""}
-                </div>
-              ) : null}
-            </div>
-            <button
-              type="button"
-              onClick={() => toggleThreeWaySegment(segment.id)}
-              className={`min-h-7 shrink-0 self-start border px-2 py-0.5 font-mono text-[0.6rem] tracking-widest uppercase transition ${palette.button}`}>
-              {isExpanded ? "COLLAPSE" : "EXPAND"}
-            </button>
-          </div>
-
-          {isExpanded ? (
-            <pre
-              className={`border-t ${palette.border} px-3 py-2 font-mono text-xs/relaxed whitespace-pre-wrap ${palette.text}`}>
-              {segment.content}
-            </pre>
-          ) : null}
-        </div>
-      )
-    },
-    [
-      expandedThreeWaySegments,
-      reviewSession.activeFileId,
-      toggleThreeWaySegment,
-    ]
-  )
-
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setFileContents((prev) => ({
-      ...prev,
-      [reviewSession.activeFileId]: e.target.value,
-    }))
-  }
-
   const updateActiveFileContent = React.useCallback(
     (nextContent: string) => {
       setFileContents((prev) => ({
@@ -656,21 +532,6 @@ export function ReviewEditor({
       }))
     },
     [reviewSession.activeFileId]
-  )
-
-  const updateTextSegment = React.useCallback(
-    (segmentId: string, nextText: string) => {
-      updateActiveFileContent(
-        serializeEditorSegments(
-          parsedSegments.map((segment) =>
-            segment.type === "text" && segment.id === segmentId
-              ? { ...segment, content: nextText }
-              : segment
-          )
-        )
-      )
-    },
-    [parsedSegments, updateActiveFileContent]
   )
 
   const persistSimpleResolution = React.useCallback(
@@ -923,7 +784,6 @@ export function ReviewEditor({
     status: f.status,
   }))
   const diffBaseContent = activeFile?.originalContent ?? ""
-  const hasDiffChanges = diffBaseContent !== activeContent
 
   return (
     <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">

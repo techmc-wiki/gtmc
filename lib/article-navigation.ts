@@ -44,12 +44,12 @@ export function flattenArticleTree(tree: TreeNode[]): FlatArticle[] {
   return result
 }
 
-export interface ArticleEntry {
+export interface ArticleNavigationEntry {
   filePath: string
   slug: string
   index: number
   isFolder: boolean
-  children?: ArticleEntry[]
+  children?: ArticleNavigationEntry[]
 }
 
 function compareIndex(a: number, b: number): number {
@@ -68,8 +68,8 @@ function compareIndex(a: number, b: number): number {
 }
 
 export function getFirstArticleInChapter(
-  articles: ArticleEntry[]
-): ArticleEntry | null {
+  articles: ArticleNavigationEntry[]
+): ArticleNavigationEntry | null {
   if (!articles || articles.length === 0) {
     return null
   }

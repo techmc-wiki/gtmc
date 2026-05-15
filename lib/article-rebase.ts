@@ -8,38 +8,17 @@ import {
   applyAutoAppliedResolutions,
   autoApplyRerere,
   parseConflictBlocks,
-  type ConflictBlock,
 } from "@/lib/rerere"
+import type { ConflictBlock, MergeConflictBlock } from "@/types/rebase"
 import { Prisma } from "@prisma/client"
-import { getMergeLibrary, type MergeConflictBlock } from "./merge-strategy"
+import { getMergeLibrary } from "./merge-strategy"
 import type {
   FileRebaseState,
   RebaseCommitInfo,
   RebaseState,
 } from "@/types/rebase"
 import { prisma } from "@/lib/prisma"
-
-function reviewLog(action: string, details: Record<string, unknown>) {
-  console.log(`[review:${action}]`, details)
-}
-
-function reviewError(
-  action: string,
-  error: unknown,
-  details: Record<string, unknown>
-) {
-  console.error(`[review:${action}]`, {
-    ...details,
-    error:
-      error instanceof Error
-        ? { name: error.name, message: error.message, stack: error.stack }
-        : error,
-  })
-}
-
-function summarizeSha(sha?: string | null) {
-  return sha ? sha.slice(0, 7) : null
-}
+import { reviewLog, reviewError, summarizeSha } from "@/lib/review/logging"
 
 export type RebaseRecommendation = "REBASE_RECOMMENDED" | "QUICK_MERGE_OK"
 

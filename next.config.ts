@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["@prisma/client", "prisma"],
   outputFileTracingIncludes: {
     "/*": ["data/manifest.json"],
+    "/[locale]/articles/[[...slug]]": ["data/articles/**"],
   },
   outputFileTracingExcludes: {
     "/api/articles/search": [

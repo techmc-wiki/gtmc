@@ -1,5 +1,12 @@
 // lib/file-upload.ts
 
+import {
+  FILE_MAX_BYTES,
+  IMAGE_MAX_BYTES,
+  VERCEL_BODY_LIMIT_BYTES,
+} from "./upload-constants"
+export { VERCEL_BODY_LIMIT_BYTES }
+
 // ---------------------------------------------------------------------------
 // MIME allowlist and category classification
 // ---------------------------------------------------------------------------
@@ -16,85 +23,82 @@ const MIME_ALLOWLIST: Record<string, MimeConfig> = {
   // Images — 15 MB
   "image/jpeg": {
     category: "images",
-    maxBytes: 15 * 1024 * 1024,
+    maxBytes: IMAGE_MAX_BYTES,
     proxyable: false,
   },
   "image/png": {
     category: "images",
-    maxBytes: 15 * 1024 * 1024,
+    maxBytes: IMAGE_MAX_BYTES,
     proxyable: false,
   },
   "image/gif": {
     category: "images",
-    maxBytes: 15 * 1024 * 1024,
+    maxBytes: IMAGE_MAX_BYTES,
     proxyable: false,
   },
   "image/webp": {
     category: "images",
-    maxBytes: 15 * 1024 * 1024,
+    maxBytes: IMAGE_MAX_BYTES,
     proxyable: false,
   },
   // Videos — 50 MB
   "video/mp4": {
     category: "videos",
-    maxBytes: 50 * 1024 * 1024,
+    maxBytes: FILE_MAX_BYTES,
     proxyable: true,
   },
   "video/webm": {
     category: "videos",
-    maxBytes: 50 * 1024 * 1024,
+    maxBytes: FILE_MAX_BYTES,
     proxyable: true,
   },
   "video/quicktime": {
     category: "videos",
-    maxBytes: 50 * 1024 * 1024,
+    maxBytes: FILE_MAX_BYTES,
     proxyable: false,
   },
   // Files — 50 MB
   "application/pdf": {
     category: "files",
-    maxBytes: 50 * 1024 * 1024,
+    maxBytes: FILE_MAX_BYTES,
     proxyable: true,
   },
   "application/msword": {
     category: "files",
-    maxBytes: 50 * 1024 * 1024,
+    maxBytes: FILE_MAX_BYTES,
     proxyable: false,
   },
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
     category: "files",
-    maxBytes: 50 * 1024 * 1024,
+    maxBytes: FILE_MAX_BYTES,
     proxyable: false,
   },
   "application/vnd.ms-excel": {
     category: "files",
-    maxBytes: 50 * 1024 * 1024,
+    maxBytes: FILE_MAX_BYTES,
     proxyable: false,
   },
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
     category: "files",
-    maxBytes: 50 * 1024 * 1024,
+    maxBytes: FILE_MAX_BYTES,
     proxyable: false,
   },
   "application/zip": {
     category: "files",
-    maxBytes: 50 * 1024 * 1024,
+    maxBytes: FILE_MAX_BYTES,
     proxyable: false,
   },
   "text/plain": {
     category: "files",
-    maxBytes: 50 * 1024 * 1024,
+    maxBytes: FILE_MAX_BYTES,
     proxyable: false,
   },
   "text/csv": {
     category: "files",
-    maxBytes: 50 * 1024 * 1024,
+    maxBytes: FILE_MAX_BYTES,
     proxyable: false,
   },
 }
-
-// Vercel serverless body limit — files at or above this use Blob intermediary
-export const VERCEL_BODY_LIMIT_BYTES = 4.5 * 1024 * 1024
 
 // MIME types that the proxy route can serve inline
 export const PROXY_INLINE_MIMES = new Set([

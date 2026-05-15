@@ -1,11 +1,7 @@
+import type { MergeConflictBlock } from "@/types/rebase"
 import { diff3Merge } from "node-diff3"
 
-export interface MergeConflictBlock {
-  type: "conflict"
-  ours: string[]
-  base: string[]
-  theirs: string[]
-}
+// MergeConflictBlock type defined in types/rebase.ts (canonical location)
 
 export interface MergeOkBlock {
   type: "ok"

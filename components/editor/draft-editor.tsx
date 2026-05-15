@@ -1699,15 +1699,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface UploadResponse {
-  error?: string
-  fileSize?: number
-  filename?: string
-  mimeType?: string
-  url?: string
-}
-
 function getParentFolderPath(filePath: string) {
   const normalized = normalizeDraftFilePath(filePath)
   const lastSlashIndex = normalized.lastIndexOf("/")

@@ -1,15 +1,9 @@
 import { createHash } from "node:crypto"
 
+import type { ConflictBlock } from "@/types/rebase"
 import { prisma } from "@/lib/prisma"
 
-export interface ConflictBlock {
-  id: string
-  filePath: string
-  base: string
-  ours: string
-  theirs: string
-  autoApplied?: { resolution: string; source: "rerere" }
-}
+// ConflictBlock type defined in types/rebase.ts (canonical location)
 
 export const SIMPLE_CONFLICT_BLOCK_RE =
   /<<<<<<< draft\n([\s\S]*?)=======\n([\s\S]*?)>>>>>>> main\n?/g

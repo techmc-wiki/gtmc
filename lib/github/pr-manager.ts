@@ -3,18 +3,11 @@ import {
   ARTICLES_REPO_OWNER,
   getOctokit,
 } from "@/lib/github/articles-repo"
+import { reviewLog, summarizeSha } from "@/lib/review/logging"
 import type {
   ReviewMergeMethod,
   ReviewMergeStrategyAnalysis,
 } from "@/types/review"
-
-function reviewLog(action: string, details: Record<string, unknown>) {
-  console.log(`[review:${action}]`, details)
-}
-
-function summarizeSha(sha?: string | null) {
-  return sha ? sha.slice(0, 7) : null
-}
 
 export async function createPR({
   title,

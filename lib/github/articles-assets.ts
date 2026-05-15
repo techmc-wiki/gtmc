@@ -4,6 +4,7 @@ import {
   getGitHubWriteToken,
   getOctokit,
 } from "@/lib/github/articles-repo"
+import { getGithubErrorStatusNumber } from "@/lib/github/errors"
 import type { FileCategory } from "@/lib/file-upload"
 
 type ArticleAssetUploadErrorCode =
@@ -65,10 +66,7 @@ export async function uploadArticleAssetToGithub({
 
     return buildArticleAssetUrl(filePath)
   } catch (error) {
-    const status =
-      typeof error === "object" && error !== null && "status" in error
-        ? Number((error as { status?: number }).status)
-        : undefined
+    const status = getGithubErrorStatusNumber(error)
 
     if (status === 401 || status === 403) {
       throw new ArticleAssetUploadError(

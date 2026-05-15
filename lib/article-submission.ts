@@ -16,37 +16,17 @@ import {
   normalizeDraftFileCollection,
   type DraftFileRecord,
 } from "@/lib/draft-files"
+import type { ConflictBlock } from "@/types/rebase"
 import {
   applyAutoAppliedResolutions,
   autoApplyRerere,
   parseConflictBlocks,
-  type ConflictBlock,
 } from "@/lib/rerere"
+import { GIT_BLOB_MODE } from "@/lib/github/constants"
 import { getMergeLibrary } from "@/lib/merge-strategy"
+import { reviewLog, reviewError, summarizeSha } from "@/lib/review/logging"
 
 const MAIN_BRANCH = "main"
-
-function reviewLog(action: string, details: Record<string, unknown>) {
-  console.log(`[review:${action}]`, details)
-}
-
-function reviewError(
-  action: string,
-  error: unknown,
-  details: Record<string, unknown>
-) {
-  console.error(`[review:${action}]`, {
-    ...details,
-    error:
-      error instanceof Error
-        ? { name: error.name, message: error.message, stack: error.stack }
-        : error,
-  })
-}
-
-function summarizeSha(sha?: string | null) {
-  return sha ? sha.slice(0, 7) : null
-}
 
 type DraftSyncStatus = "IN_REVIEW" | "SYNC_CONFLICT"
 
@@ -251,7 +231,7 @@ export async function forcePushResolvedToPRBranch({
 
       return {
         path: file.filePath,
-        mode: "100644" as const,
+        mode: GIT_BLOB_MODE,
         type: "blob" as const,
         sha: blob.sha,
       }
@@ -800,7 +780,7 @@ export async function upsertFilesOnBranch(
 
       return {
         path: entry.path,
-        mode: "100644" as const,
+        mode: GIT_BLOB_MODE,
         type: "blob" as const,
         sha: blobData.sha,
       }

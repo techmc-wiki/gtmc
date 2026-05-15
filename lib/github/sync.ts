@@ -2,6 +2,7 @@ import {
   getGithubRateLimitResetMs,
   isGithubRateLimitErrorForCache,
 } from "@/lib/github/rate-limit"
+import { getGithubErrorStatus } from "@/lib/github/errors"
 import { executeWithRetry } from "@/lib/github/retry-fetch"
 import {
   ARTICLES_REPO_NAME,
@@ -177,7 +178,7 @@ export async function getRepoFileContent(
       return null
     },
     onError: (error, attempt, totalRetries) => {
-      const status = (error as { status?: number })?.status
+      const status = getGithubErrorStatus(error)
       recordRateLimitError(error)
 
       if (status === 404) {
@@ -225,7 +226,7 @@ export async function getRepoFileBuffer(
       return null
     },
     onError: (error, attempt, totalRetries) => {
-      const status = (error as { status?: number })?.status
+      const status = getGithubErrorStatus(error)
       recordRateLimitError(error)
 
       if (status === 404) {

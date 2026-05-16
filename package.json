@@ -85,7 +85,6 @@
     "@lhci/cli": "^0.15.1",
     "@next/bundle-analyzer": "^16.2.6",
     "@tailwindcss/postcss": "^4.3.0",
-    "@types/diff": "^8.0.0",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/mime-types": "^3.0.1",

@@ -1,4 +1,4 @@
 {
-  "installCommand": "dnf install -y nspr nss atk at-spi2-atk cups-libs libdrm libxkbcommon mesa-libgbm pango cairo alsa-lib gtk3 libX11 libXcomposite libXdamage libXext libXfixes libXrandr libxcb dbus-libs expat glib2 && pnpm install",
+  "installCommand": "if command -v dnf >/dev/null 2>&1; then dnf install -y nspr nss atk at-spi2-atk cups-libs libdrm libxkbcommon mesa-libgbm pango cairo alsa-lib gtk3 libX11 libXcomposite libXdamage libXext libXfixes libXrandr libxcb dbus-libs expat glib2; fi; pnpm install",
   "buildCommand": "pnpm build"
 }

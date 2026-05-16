@@ -6,50 +6,52 @@
 
 /* --- Font Declarations (self-hosted woff2 for file:// PDF context) --- */
 @font-face {
-  font-family: 'Geist Sans';
-  src: url('fonts/geist/Geist-Regular.woff2') format('woff2');
+  font-family: "Geist Sans";
+  src: url("fonts/geist/Geist-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: 'Geist Sans';
-  src: url('fonts/geist/Geist-SemiBold.woff2') format('woff2');
+  font-family: "Geist Sans";
+  src: url("fonts/geist/Geist-SemiBold.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: 'Geist Sans';
-  src: url('fonts/geist/Geist-Bold.woff2') format('woff2');
+  font-family: "Geist Sans";
+  src: url("fonts/geist/Geist-Bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: 'Geist Mono';
-  src: url('fonts/geist/GeistMono-Regular.woff2') format('woff2');
+  font-family: "Geist Mono";
+  src: url("fonts/geist/GeistMono-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: 'Geist Mono';
-  src: url('fonts/geist/GeistMono-Bold.woff2') format('woff2');
+  font-family: "Geist Mono";
+  src: url("fonts/geist/GeistMono-Bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: 'Noto Sans SC';
-  src: url('https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5/files/noto-sans-sc-all-400-normal.woff2') format('woff2');
+  font-family: "Noto Sans SC";
+  src: url("https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5/files/noto-sans-sc-all-400-normal.woff2")
+    format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: 'Noto Sans SC';
-  src: url('https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5/files/noto-sans-sc-all-700-normal.woff2') format('woff2');
+  font-family: "Noto Sans SC";
+  src: url("https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5/files/noto-sans-sc-all-700-normal.woff2")
+    format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -85,7 +87,7 @@ html {
 }
 
 body {
-  font-family: 'Geist Sans', 'Noto Sans SC', 'PingFang SC', sans-serif;
+  font-family: "Geist Sans", "Noto Sans SC", "PingFang SC", sans-serif;
   margin: 0;
   padding: 0;
   hyphens: auto;
@@ -101,7 +103,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Geist Mono', monospace;
+  font-family: "Geist Mono", monospace;
   color: #3b4a6b;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -181,7 +183,7 @@ a {
 
 /* --- Code --- */
 code {
-  font-family: 'Geist Mono', monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 9pt;
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
@@ -190,7 +192,7 @@ code {
 }
 
 pre {
-  font-family: 'Geist Mono', monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 8.5pt;
   line-height: 1.5;
   background: #f8f9fc;
@@ -219,7 +221,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin: 1em 0;
-  font-family: 'Geist Sans', sans-serif;
+  font-family: "Geist Sans", sans-serif;
   font-size: 9.5pt;
   break-inside: auto;
   page-break-inside: auto;
@@ -230,7 +232,7 @@ thead {
 }
 
 th {
-  font-family: 'Geist Mono', monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 8.5pt;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -269,7 +271,7 @@ figure {
 }
 
 figcaption {
-  font-family: 'Geist Mono', monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 8.5pt;
   color: #60708f;
   margin-top: 0.4em;
@@ -317,7 +319,7 @@ aside[data-callout] {
 }
 
 aside[data-callout]::before {
-  font-family: 'Geist Mono', monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 8pt;
   font-weight: 700;
   text-transform: uppercase;
@@ -405,7 +407,7 @@ aside[data-callout="CORRUPTION"]::before {
 }
 .cover-frame::before,
 .cover-frame::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 12px;
   height: 12px;
@@ -424,7 +426,7 @@ aside[data-callout="CORRUPTION"]::before {
 }
 
 .cover-title {
-  font-family: 'Geist Mono', monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 28pt;
   text-transform: uppercase;
   letter-spacing: 0.2em;
@@ -436,7 +438,7 @@ aside[data-callout="CORRUPTION"]::before {
 }
 
 .cover-subtitle {
-  font-family: 'Geist Sans', sans-serif;
+  font-family: "Geist Sans", sans-serif;
   font-size: 13pt;
   color: #60708f;
   text-align: center;
@@ -450,7 +452,7 @@ aside[data-callout="CORRUPTION"]::before {
 }
 
 .cover-page .meta {
-  font-family: 'Geist Mono', monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 9pt;
   color: #64748b;
   margin-top: 2em;
@@ -476,7 +478,7 @@ aside[data-callout="CORRUPTION"]::before {
 }
 
 .toc-chapter h3 {
-  font-family: 'Geist Mono', monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 11pt;
   text-transform: uppercase;
   letter-spacing: 0.15em;
@@ -511,7 +513,7 @@ aside[data-callout="CORRUPTION"]::before {
 }
 
 .chapter-title-page .chapter-number {
-  font-family: 'Geist Mono', monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 9pt;
   color: #60708f;
   text-transform: uppercase;
@@ -530,7 +532,7 @@ aside[data-callout="CORRUPTION"]::before {
 }
 .chapter-frame::before,
 .chapter-frame::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 12px;
   height: 12px;
@@ -549,7 +551,7 @@ aside[data-callout="CORRUPTION"]::before {
 }
 
 .chapter-meta {
-  font-family: 'Geist Mono', monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 9pt;
   text-transform: uppercase;
   letter-spacing: 0.15em;
@@ -565,7 +567,7 @@ div[data-advanced-section] {
 }
 
 span[data-advanced] {
-  font-family: 'Geist Mono', monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 7.5pt;
   font-weight: 700;
   text-transform: uppercase;
@@ -587,7 +589,7 @@ hr {
 
 /* --- GIF Caption --- */
 .gif-caption {
-  font-family: 'Geist Mono', monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 8pt;
   color: #60708f;
   text-align: center;
@@ -615,13 +617,19 @@ body > h1:first-of-type {
 }
 
 /* --- TOC Depth Indentation --- */
-.toc-depth-1 { padding-left: 0; }
-.toc-depth-2 { padding-left: 1.5em; }
-.toc-depth-3 { padding-left: 3em; }
+.toc-depth-1 {
+  padding-left: 0;
+}
+.toc-depth-2 {
+  padding-left: 1.5em;
+}
+.toc-depth-3 {
+  padding-left: 3em;
+}
 
 /* --- People Mentions --- */
 people-mention {
-  font-family: 'Geist Mono', monospace;
+  font-family: "Geist Mono", monospace;
   font-size: 0.8em;
   border: 1px solid rgba(96, 112, 143, 0.3);
   background: rgba(96, 112, 143, 0.05);

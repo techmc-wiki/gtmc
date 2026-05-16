@@ -13,25 +13,24 @@ import {
 } from "@/lib/github"
 import { generateDescription } from "@/lib/markdown"
 import { notFound } from "next/navigation"
-import { getSiteUrl, toAbsoluteUrl } from "@/lib/site-url"
+import { toAbsoluteUrl } from "@/lib/site-url"
 import { FeatureDetailContent } from "@/components/features/feature-detail-content"
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ locale: string; id: string }>
 }): Promise<Metadata> {
-  const { id } = await params
+  const { locale, id } = await params
   const issueNumber = Number.parseInt(id, 10)
   if (isNaN(issueNumber)) return { title: "Feature Not Found" }
 
   const issue = await getIssue(issueNumber)
   if (!issue) return { title: "Feature Not Found" }
 
-  const canonical = toAbsoluteUrl(`/features/${issue.number}`)
+  const canonical = toAbsoluteUrl(`/${locale}/features/${issue.number}`)
   const description = generateDescription(issue.body ?? "", undefined, 155)
 
   return {
-    metadataBase: new URL(getSiteUrl()),
     title: issue.title,
     description,
     alternates: {
@@ -68,9 +67,9 @@ export async function generateMetadata({
 export default async function FeatureDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ locale: string; id: string }>
 }) {
-  const { id } = await params
+  const { locale, id } = await params
   const issueNumber = Number.parseInt(id, 10)
   if (Number.isNaN(issueNumber) || issueNumber <= 0) {
     notFound()
@@ -93,7 +92,7 @@ export default async function FeatureDetailPage({
     notFound()
   }
 
-  const canonical = toAbsoluteUrl(`/features/${issue.number}`)
+  const canonical = toAbsoluteUrl(`/${locale}/features/${issue.number}`)
   const description = generateDescription(issue.body ?? "", undefined, 155)
 
   const isClosed = issue.state === "closed"

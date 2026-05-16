@@ -28,7 +28,10 @@ function main(): void {
   for (const entry of entries) {
     // Only process entries with .md filePath; skip folder README entries
     // (but keep folder entries with hasIntro: true — their README intro is an article page)
-    if (!entry.filePath.endsWith(".md") || (entry.isFolder && !entry.hasIntro)) {
+    if (
+      !entry.filePath.endsWith(".md") ||
+      (entry.isFolder && !entry.hasIntro)
+    ) {
       continue
     }
 
@@ -70,7 +73,9 @@ function main(): void {
   }
   fs.renameSync(TEMP_DIR, OUTPUT_DIR)
 
-  process.stdout.write(`Generated ${generatedCount} article content artifacts\n`)
+  process.stdout.write(
+    `Generated ${generatedCount} article content artifacts\n`
+  )
 
   if (errorCount > 0) {
     process.exit(1)

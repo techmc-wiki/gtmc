@@ -99,12 +99,16 @@ function escapeHtml(text: string): string {
 }
 
 function renderCoverHtml(options: EbookOptions): string {
-  const parts: string[] = ['<section class="cover-page"><div class="cover-frame">']
+  const parts: string[] = [
+    '<section class="cover-page"><div class="cover-frame">',
+  ]
 
   parts.push(`  <h1 class="cover-title">${escapeHtml(options.title)}</h1>`)
 
   if (options.subtitle) {
-    parts.push(`  <p class="cover-subtitle">${escapeHtml(options.subtitle)}</p>`)
+    parts.push(
+      `  <p class="cover-subtitle">${escapeHtml(options.subtitle)}</p>`
+    )
   }
 
   parts.push('  <hr class="cover-rule">')

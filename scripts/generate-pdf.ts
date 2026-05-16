@@ -487,14 +487,17 @@ async function main(): Promise<void> {
     // Wait for KaTeX font loading and PDF-specific font loading
     await page.waitForFunction(
       () =>
-        document.fonts.ready.then(() =>
-          document.fonts.check('16px "Geist Sans"') &&
-          document.fonts.check('16px "Geist Mono"') &&
-          document.fonts.check('16px "Noto Sans SC"')
+        document.fonts.ready.then(
+          () =>
+            document.fonts.check('16px "Geist Sans"') &&
+            document.fonts.check('16px "Geist Mono"') &&
+            document.fonts.check('16px "Noto Sans SC"')
         ),
       { timeout: 30000 }
     )
-    console.log("[pdf]   → PDF fonts verified (Geist Sans + Geist Mono + Noto Sans SC)")
+    console.log(
+      "[pdf]   → PDF fonts verified (Geist Sans + Geist Mono + Noto Sans SC)"
+    )
 
     // ── Generate PDF ───────────────────────────────────────────────────────
     console.log("[pdf]   → Rendering PDF pages...")

@@ -130,7 +130,7 @@ export async function renderMarkdownToHtml(
   // Convert to: <span class="wikilink">text</span>
   html = html.replace(
     /<a\s+href="[^"]*"([^>]*class="[^"]*wikilink[^"]*"[^>]*)>(.*?)<\/a>/gi,
-    '<span$1>$2</span>'
+    "<span$1>$2</span>"
   )
 
   // ── Inject animated notice for GIF images ────────────────────────

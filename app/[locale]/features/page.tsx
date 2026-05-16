@@ -29,6 +29,7 @@ export async function generateMetadata({
       title: "Feature Requests — Technical Minecraft",
       description: "Browse and track feature requests for Technical Minecraft.",
       type: "website",
+      url: canonical,
     },
   }
 }

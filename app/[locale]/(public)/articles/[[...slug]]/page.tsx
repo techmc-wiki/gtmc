@@ -20,7 +20,7 @@ import { getSlugForFilePath } from "@/lib/slug-resolver"
 import { decodeSlugPath, encodeSlug } from "@/lib/slug-utils"
 import { formatIndexPrefix } from "@/lib/index-formatter"
 import { getSiteUrl } from "@/lib/site-url"
-import { articleAbsoluteUrl } from "@/lib/article-url"
+
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { ArticleHighlight } from "@/components/articles/article-highlight"
 import { ArticleMetadata } from "@/components/articles/article-metadata"
@@ -107,7 +107,7 @@ export async function generateMetadata({
     const siteUrl = getSiteUrl()
     const effectiveSlug =
       target.canonicalSlug ?? getSlugForFilePath(target.filePath) ?? slugPath
-    const canonicalUrl = articleAbsoluteUrl(effectiveSlug)
+    const canonicalUrl = `${getSiteUrl()}/${locale}/articles/${encodeSlug(effectiveSlug)}`
 
     const resolvedTitle = resolveDisplayedArticleTitle(
       data["chapter-title"],
@@ -221,7 +221,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const siteUrl = getSiteUrl()
   const effectiveSlug =
     target.canonicalSlug ?? getSlugForFilePath(target.filePath) ?? slugPath
-  const canonicalUrl = articleAbsoluteUrl(effectiveSlug)
+  const canonicalUrl = `${getSiteUrl()}/${locale}/articles/${encodeSlug(effectiveSlug)}`
   const description = generateDescription(
     renderedContent,
     data.description as string | undefined

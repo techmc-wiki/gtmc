@@ -5,6 +5,11 @@ import type { ArticleLocale } from "@/lib/article-manifest"
 const TREE_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300"
 const VALID_LOCALES: ArticleLocale[] = ["zh", "en"]
 
+/**
+ * Returns the public article tree for the requested `?locale=zh|en`.
+ * Invalid or missing locale values intentionally fall back to zh to preserve
+ * legacy callers while locale-aware clients should always pass it explicitly.
+ */
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
   const rawLocale = searchParams.get("locale") ?? "zh"

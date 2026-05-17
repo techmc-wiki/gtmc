@@ -1,5 +1,8 @@
+import type { ArticleLocale } from "./article-manifest"
+
 export interface ArticleContentArtifact {
   slug: string
+  locale: ArticleLocale
   filePath: string
   content: string
   frontmatter: Record<string, unknown>

@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { CJK_TOKENIZER, getSearchIndex } from "@/lib/search-index"
+import type { ArticleLocale } from "@/lib/article-manifest"
 
 const SEARCH_CACHE_CONTROL = "public, max-age=30, stale-while-revalidate=120"
+
+function isValidLocale(locale: string | null): locale is ArticleLocale {
+  return locale === "zh" || locale === "en"
+}
 
 interface SearchResult {
   title: string
@@ -96,8 +101,19 @@ export async function GET(req: NextRequest) {
     return jsonResponse([])
   }
 
+  const localeParam = req.nextUrl.searchParams.get("locale")
+  if (localeParam && !isValidLocale(localeParam)) {
+    return NextResponse.json(
+      { error: "Invalid locale. Must be 'zh' or 'en'." },
+      { status: 400 }
+    )
+  }
+
+  // en default is intentional: if no locale is specified, default to English since zh navigation already provides full Chinese coverage
+  const locale: ArticleLocale = (localeParam as ArticleLocale) || "en"
+
   try {
-    const index = await getSearchIndex()
+    const index = await getSearchIndex(locale)
     const rawResults = index.search(query, {
       tokenize: CJK_TOKENIZER,
       boost: { title: 2 },

@@ -14,11 +14,75 @@ const TREE_PREVIEW_DEPTH = 3
 const TREE_PREVIEW_CHILD_LIMIT = 12
 
 type ArticleManifest = Record<string, ArticleEntry>
+type ArticleLocale = "zh" | "en"
+
+const ARTICLE_LOCALE_ORDER: ArticleLocale[] = ["zh", "en"]
+
+function detectLocale(filename: string): ArticleLocale {
+  if (filename.endsWith(".en.md")) return "en"
+  if (filename.endsWith(".zh.md")) return "zh"
+  return "zh"
+}
+
+function stripLocaleSuffix(filename: string): string {
+  return filename.replace(/\.(en|zh)\.md$/i, ".md")
+}
+
+function isReadmeLocaleFile(filename: string): boolean {
+  return /^README(?:\.(?:en|zh))?\.md$/i.test(filename)
+}
+
+function getEntryLocale(entry: ArticleEntry): ArticleLocale {
+  return entry.availableLocales[0] ?? "zh"
+}
+
+function getManifestConflictPath(
+  manifest: ArticleManifest,
+  slug: string,
+  locale: ArticleLocale
+): string | undefined {
+  return Object.values(manifest).find(
+    (entry) => entry.slug === slug && entry.availableLocales.includes(locale)
+  )?.filePath
+}
+
+function addManifestEntry(manifest: ArticleManifest, entry: ArticleEntry): void {
+  if (manifest[entry.slug] === undefined) {
+    manifest[entry.slug] = entry
+    return
+  }
+
+  const locale = getEntryLocale(entry)
+  let index = 1
+  let storageKey = `${entry.slug}::${locale}`
+  while (manifest[storageKey] !== undefined) {
+    index += 1
+    storageKey = `${entry.slug}::${locale}:${index}`
+  }
+
+  manifest[storageKey] = entry
+}
+
+function markSlugSeen(
+  slugsSeen: Map<string, Map<ArticleLocale, string>>,
+  slug: string,
+  locale: ArticleLocale,
+  filename: string
+): string | undefined {
+  const localeFiles = slugsSeen.get(slug) ?? new Map<ArticleLocale, string>()
+  const conflictFile = localeFiles.get(locale)
+  if (conflictFile !== undefined) return conflictFile
+
+  localeFiles.set(locale, filename)
+  slugsSeen.set(slug, localeFiles)
+  return undefined
+}
 
 function getFrontMatterEntry(
   filePath: string,
   slug: string,
   relativePath: string,
+  locale: ArticleLocale,
   isFolder: boolean,
   parentSlug?: string
 ): ArticleEntry {
@@ -42,6 +106,9 @@ function getFrontMatterEntry(
     filePath: relativePath,
     slug,
     title: title === "" ? undefined : title,
+    titleEn: fm.titleEn,
+    availableLocales: [locale],
+    localizedFilePaths: { [locale]: relativePath },
     chapterTitle,
     chapterTitleEn,
     introTitle,
@@ -98,27 +165,41 @@ function processDirectory(
   let hasError = false
 
   const entries = fs.readdirSync(dirPath, { withFileTypes: true })
-  const readmePath = path.join(dirPath, "README.md")
+  const readmeFiles = entries
+    .filter((entry) => entry.isFile() && isReadmeLocaleFile(entry.name))
+    .map((entry) => entry.name)
+    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
 
-  if (fs.existsSync(readmePath)) {
+  for (const readmeFile of readmeFiles) {
+    const readmePath = path.join(dirPath, readmeFile)
+    const readmeLocale = detectLocale(readmeFile)
     const readmeSlug = getSlugFromFile(readmePath) ?? ""
 
     if (readmeSlug !== "") {
-      if (manifest[slugPrefix] !== undefined) {
-        const existingPath = manifest[slugPrefix].filePath
+      const existingPath = getManifestConflictPath(
+        manifest,
+        slugPrefix,
+        readmeLocale
+      )
+      if (existingPath !== undefined) {
         process.stderr.write(
-          `Error: Duplicate composite slug "${slugPrefix}": articles/${relFromArticles}/README.md ` +
+          `Error: Duplicate composite slug "${slugPrefix}" for locale "${readmeLocale}": ` +
+            `articles/${relFromArticles}/${readmeFile} ` +
             `(conflicts with articles/${existingPath} after slug flattening)\n`
         )
         hasError = true
       } else {
         const parentSlug = getParentSlug(slugPrefix)
-        manifest[slugPrefix] = getFrontMatterEntry(
-          readmePath,
-          slugPrefix,
-          `${relFromArticles}/README.md`,
-          true,
-          parentSlug
+        addManifestEntry(
+          manifest,
+          getFrontMatterEntry(
+            readmePath,
+            slugPrefix,
+            `${relFromArticles}/${readmeFile}`,
+            readmeLocale,
+            true,
+            parentSlug
+          )
         )
       }
     }
@@ -129,16 +210,17 @@ function processDirectory(
       (e) =>
         e.isFile() &&
         e.name.endsWith(".md") &&
-        e.name !== "README.md" &&
+        !isReadmeLocaleFile(e.name) &&
         !shouldIgnoreFile(e.name, false)
     )
     .map((e) => e.name)
 
-  const slugsSeen = new Map<string, string>()
+  const slugsSeen = new Map<string, Map<ArticleLocale, string>>()
 
   for (const articleFile of articleFiles) {
     const articlePath = path.join(dirPath, articleFile)
     const relPath = `${relFromArticles}/${articleFile}`
+    const articleLocale = detectLocale(articleFile)
 
     const articleSlug = getSlugFromFile(articlePath)
 
@@ -155,24 +237,33 @@ function processDirectory(
       continue
     }
 
-    if (slugsSeen.has(articleSlug)) {
-      const conflictFile = slugsSeen.get(articleSlug)!
+    const conflictFile = markSlugSeen(
+      slugsSeen,
+      articleSlug,
+      articleLocale,
+      articleFile
+    )
+    if (conflictFile !== undefined) {
       process.stderr.write(
-        `Error: Duplicate slug "${articleSlug}" in ${slugPrefix}: articles/${relPath} ` +
+        `Error: Duplicate slug "${articleSlug}" for locale "${articleLocale}" in ${slugPrefix}: ` +
+          `articles/${relPath} ` +
           `(conflicts with articles/${relFromArticles}/${conflictFile})\n`
       )
       hasError = true
       continue
     }
 
-    slugsSeen.set(articleSlug, articleFile)
-
     const compositeSlug = `${slugPrefix}/${articleSlug}`
 
-    if (manifest[compositeSlug] !== undefined) {
-      const existingPath = manifest[compositeSlug].filePath
+    const existingPath = getManifestConflictPath(
+      manifest,
+      compositeSlug,
+      articleLocale
+    )
+    if (existingPath !== undefined) {
       process.stderr.write(
-        `Error: Duplicate composite slug "${compositeSlug}": articles/${relPath} ` +
+        `Error: Duplicate composite slug "${compositeSlug}" for locale "${articleLocale}": ` +
+          `articles/${relPath} ` +
           `(conflicts with articles/${existingPath} after slug flattening)\n`
       )
       hasError = true
@@ -180,12 +271,16 @@ function processDirectory(
     }
 
     const parentSlug = getParentSlug(compositeSlug)
-    manifest[compositeSlug] = getFrontMatterEntry(
-      articlePath,
-      compositeSlug,
-      `${relFromArticles}/${articleFile}`,
-      false,
-      parentSlug
+    addManifestEntry(
+      manifest,
+      getFrontMatterEntry(
+        articlePath,
+        compositeSlug,
+        `${relFromArticles}/${articleFile}`,
+        articleLocale,
+        false,
+        parentSlug
+      )
     )
   }
 
@@ -292,6 +387,69 @@ function buildGenerationSummary(manifest: ArticleManifest): string {
   return [...summaryLines, ...previewLines, ""].join("\n")
 }
 
+function mergeLocalizedManifestEntries(manifest: ArticleManifest): ArticleManifest {
+  const entriesBySlug = new Map<string, ArticleEntry[]>()
+
+  for (const entry of Object.values(manifest)) {
+    const entries = entriesBySlug.get(entry.slug) ?? []
+    entries.push(entry)
+    entriesBySlug.set(entry.slug, entries)
+  }
+
+  const mergedManifest: ArticleManifest = {}
+  for (const [slug, entries] of entriesBySlug) {
+    mergedManifest[slug] = mergeLocalizedEntries(slug, entries)
+  }
+
+  return mergedManifest
+}
+
+function mergeLocalizedEntries(slug: string, entries: ArticleEntry[]): ArticleEntry {
+  const zhEntry = entries.find((entry) => entry.availableLocales.includes("zh"))
+  const enEntry = entries.find((entry) => entry.availableLocales.includes("en"))
+  const baseEntry = zhEntry ?? entries[0]
+  const localizedFilePaths: Partial<Record<ArticleLocale, string>> = {}
+
+  for (const locale of ARTICLE_LOCALE_ORDER) {
+    const localizedEntry = entries.find((entry) => entry.availableLocales.includes(locale))
+    const localizedPath = localizedEntry?.localizedFilePaths[locale]
+    if (localizedPath !== undefined) {
+      localizedFilePaths[locale] = localizedPath
+    } else if (localizedEntry !== undefined) {
+      localizedFilePaths[locale] = localizedEntry.filePath
+    }
+  }
+
+  const availableLocales = ARTICLE_LOCALE_ORDER.filter(
+    (locale) => localizedFilePaths[locale] !== undefined
+  )
+
+  return {
+    ...baseEntry,
+    filePath: localizedFilePaths.zh ?? baseEntry.filePath,
+    slug,
+    title: zhEntry?.title ?? baseEntry.title,
+    titleEn: enEntry?.titleEn ?? baseEntry.titleEn,
+    availableLocales,
+    localizedFilePaths,
+    children: mergeChildren(entries),
+  }
+}
+
+function mergeChildren(entries: ArticleEntry[]): ArticleEntry[] | undefined {
+  const childrenBySlug = new Map<string, ArticleEntry>()
+  for (const entry of entries) {
+    for (const child of entry.children ?? []) {
+      if (!childrenBySlug.has(child.slug)) {
+        childrenBySlug.set(child.slug, child)
+      }
+    }
+  }
+
+  const children = Array.from(childrenBySlug.values())
+  return children.length > 0 ? children : undefined
+}
+
 function countFlagged(
   entries: ArticleEntry[],
   field: "isPreface" | "isAppendix" | "isAdvanced" | "hasIntro"
@@ -390,7 +548,7 @@ function indent(depth: number): string {
 }
 
 function main(): void {
-  const manifest: ArticleManifest = {}
+  let manifest: ArticleManifest = {}
   let hasError = false
 
   if (!fs.existsSync(ARTICLES_PATH)) {
@@ -453,15 +611,16 @@ function main(): void {
       (e) =>
         e.isFile() &&
         e.name.endsWith(".md") &&
-        e.name !== "README.md" &&
+        !isReadmeLocaleFile(e.name) &&
         !shouldIgnoreFile(e.name, true)
     )
     .map((e) => e.name)
 
-  const rootSlugsSeen = new Map<string, string>()
+  const rootSlugsSeen = new Map<string, Map<ArticleLocale, string>>()
 
   for (const rootFile of rootFiles) {
     const rootFilePath = path.join(ARTICLES_PATH, rootFile)
+    const rootLocale = detectLocale(rootFile)
     const rawSlug = getSlugFromFile(rootFilePath)
 
     let key: string
@@ -475,37 +634,44 @@ function main(): void {
       }
       key = rawSlug
     } else {
-      key = rootFile.replace(/\.md$/, "")
+      key = stripLocaleSuffix(rootFile).replace(/\.md$/, "")
     }
 
-    if (rootSlugsSeen.has(key)) {
-      const conflictFile = rootSlugsSeen.get(key)!
+    const conflictFile = markSlugSeen(rootSlugsSeen, key, rootLocale, rootFile)
+    if (conflictFile !== undefined) {
       process.stderr.write(
-        `Error: Duplicate root article key "${key}": articles/${rootFile} ` +
+        `Error: Duplicate root article key "${key}" for locale "${rootLocale}": articles/${rootFile} ` +
           `(conflicts with articles/${conflictFile})\n`
       )
       hasError = true
       continue
     }
 
-    if (folderSlugKeys.has(key)) {
+    const folderConflictPath = getManifestConflictPath(manifest, key, rootLocale)
+    if (folderSlugKeys.has(key) && folderConflictPath !== undefined) {
       process.stderr.write(
-        `Error: Root article key "${key}" (articles/${rootFile}) conflicts with ` +
-          `an existing folder article slug\n`
+        `Error: Root article key "${key}" for locale "${rootLocale}" ` +
+          `(articles/${rootFile}) conflicts with an existing folder article slug at ` +
+          `articles/${folderConflictPath}\n`
       )
       hasError = true
       continue
     }
 
-    rootSlugsSeen.set(key, rootFile)
-    manifest[key] = getFrontMatterEntry(
-      rootFilePath,
-      key,
-      rootFile,
-      false,
-      undefined
+    addManifestEntry(
+      manifest,
+      getFrontMatterEntry(
+        rootFilePath,
+        key,
+        rootFile,
+        rootLocale,
+        false,
+        undefined
+      )
     )
   }
+
+  manifest = mergeLocalizedManifestEntries(manifest)
 
   for (const entry of Object.values(manifest)) {
     entry.children = undefined

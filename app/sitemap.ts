@@ -5,6 +5,7 @@ import { getSiteUrl } from "@/lib/site-url"
 import { shouldIgnoreFile } from "@/lib/article-ignore"
 import { encodeSlug } from "@/lib/slug-utils"
 import { getPublicSidebarTree } from "@/lib/articles/public-tree"
+import type { ArticleLocale } from "@/lib/article-manifest"
 
 export const revalidate = 3600
 
@@ -67,27 +68,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let articleUrls: MetadataRoute.Sitemap = []
   try {
-    const tree = await getPublicSidebarTree()
-    const slugs = flattenTree(tree)
-    articleUrls = slugs
-      .filter((slug) => {
-        const fileName = slug.split("/").pop() || slug
-        return !shouldIgnoreFile(fileName, !slug.includes("/"))
+    const locales: ArticleLocale[] = ["zh", "en"]
+    const localizedArticleUrls = await Promise.all(
+      locales.map(async (locale) => {
+        const tree = await getPublicSidebarTree(locale)
+        const slugs = flattenTree(tree)
+        return slugs
+          .filter((slug) => {
+            const fileName = slug.split("/").pop() || slug
+            return !shouldIgnoreFile(fileName, !slug.includes("/"))
+          })
+          .map((slug) => ({
+            url: `${BASE}/${locale}/articles/${encodeSlug(slug)}`,
+            lastModified: new Date(),
+            changeFrequency: "weekly" as const,
+            priority: 0.8,
+          }))
       })
-      .flatMap((slug) => [
-        {
-          url: `${BASE}/zh/articles/${encodeSlug(slug)}`,
-          lastModified: new Date(),
-          changeFrequency: "weekly" as const,
-          priority: 0.8,
-        },
-        {
-          url: `${BASE}/en/articles/${encodeSlug(slug)}`,
-          lastModified: new Date(),
-          changeFrequency: "weekly" as const,
-          priority: 0.8,
-        },
-      ])
+    )
+    articleUrls = localizedArticleUrls.flat()
   } catch (error) {
     console.warn("Sitemap: skipped article URLs due to tree error:", error)
     /* Sidebar tree unavailable — skip articles */

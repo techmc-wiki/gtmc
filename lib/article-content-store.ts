@@ -5,6 +5,7 @@ import {
   type ArticleContentArtifact,
   artifactFilename,
 } from "./article-content-artifact"
+import type { ArticleLocale } from "./article-manifest"
 
 /**
  * Parses and validates a raw JSON string as an ArticleContentArtifact.
@@ -78,7 +79,7 @@ function parseArticleContentArtifact(
 }
 
 /**
- * Loads an article content artifact by slug from `data/articles/`.
+ * Loads an article content artifact by slug and locale from `data/articles/{locale}/`.
  *
  * Reads the JSON artifact file produced by `scripts/generate-article-content.ts`.
  * In development, returns `null` (with a warning) if the file is missing or
@@ -86,12 +87,26 @@ function parseArticleContentArtifact(
  * `notFound()`.
  */
 export function getArticleContentBySlug(
-  slug: string
+  slug: string,
+  locale: ArticleLocale
 ): ArticleContentArtifact | null {
+  if (locale !== "zh" && locale !== "en") {
+    if (process.env.NODE_ENV === "development") {
+      console.warn(
+        `[article-content-store] Invalid locale "${locale}" for slug "${slug}"`
+      )
+      return null
+    }
+    throw new Error(
+      `[article-content-store] Invalid locale "${locale}" for slug "${slug}"`
+    )
+  }
+
   const filePath = path.join(
     process.cwd(),
     "data",
     "articles",
+    locale,
     `${artifactFilename(slug)}.json`
   )
 

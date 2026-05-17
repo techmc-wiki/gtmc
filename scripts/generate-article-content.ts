@@ -4,6 +4,7 @@ import matter from "gray-matter"
 
 import { ARTICLES_PATH } from "@/lib/article-fs-constants"
 import { ArticleManifest } from "@/lib/article-manifest-store"
+import type { ArticleLocale } from "@/lib/article-manifest"
 import {
   artifactFilename,
   type ArticleContentArtifact,
@@ -17,7 +18,6 @@ function main(): void {
   let generatedCount = 0
   let errorCount = 0
 
-  // Clean any leftover temp directory from a previous run
   if (fs.existsSync(TEMP_DIR)) {
     fs.rmSync(TEMP_DIR, { recursive: true })
   }
@@ -26,8 +26,6 @@ function main(): void {
   const entries = Object.values(ArticleManifest)
 
   for (const entry of entries) {
-    // Only process entries with .md filePath; skip folder README entries
-    // (but keep folder entries with hasIntro: true — their README intro is an article page)
     if (
       !entry.filePath.endsWith(".md") ||
       (entry.isFolder && !entry.hasIntro)
@@ -35,39 +33,44 @@ function main(): void {
       continue
     }
 
-    const sourcePath = path.join(ARTICLES_PATH, entry.filePath)
+    for (const [locale, localizedPath] of Object.entries(entry.localizedFilePaths)) {
+      const sourcePath = path.join(ARTICLES_PATH, localizedPath)
 
-    let fileContent: string
-    try {
-      fileContent = fs.readFileSync(sourcePath, "utf-8")
-    } catch {
-      process.stderr.write(
-        `Error: Cannot read source file for "${entry.slug}": ${sourcePath}\n`
-      )
-      errorCount++
-      if (IS_PRODUCTION) {
-        process.exit(1)
+      let fileContent: string
+      try {
+        fileContent = fs.readFileSync(sourcePath, "utf-8")
+      } catch {
+        process.stderr.write(
+          `Error: Cannot read source file for "${entry.slug}" (${locale}): ${sourcePath}\n`
+        )
+        errorCount++
+        if (IS_PRODUCTION) {
+          process.exit(1)
+        }
+        continue
       }
-      continue
+
+      const { data, content } = matter(fileContent)
+
+      const artifact: ArticleContentArtifact = {
+        slug: entry.slug,
+        locale: locale as ArticleLocale,
+        filePath: localizedPath,
+        content,
+        frontmatter: data as Record<string, unknown>,
+      }
+
+      const localeDir = path.join(TEMP_DIR, locale)
+      fs.mkdirSync(localeDir, { recursive: true })
+
+      const filename = `${artifactFilename(entry.slug)}.json`
+      const outputPath = path.join(localeDir, filename)
+
+      fs.writeFileSync(outputPath, JSON.stringify(artifact, null, 2) + "\n")
+      generatedCount++
     }
-
-    const { data, content } = matter(fileContent)
-
-    const artifact: ArticleContentArtifact = {
-      slug: entry.slug,
-      filePath: entry.filePath,
-      content,
-      frontmatter: data as Record<string, unknown>,
-    }
-
-    const filename = `${artifactFilename(entry.slug)}.json`
-    const outputPath = path.join(TEMP_DIR, filename)
-
-    fs.writeFileSync(outputPath, JSON.stringify(artifact, null, 2) + "\n")
-    generatedCount++
   }
 
-  // Atomically replace output directory
   if (fs.existsSync(OUTPUT_DIR)) {
     fs.rmSync(OUTPUT_DIR, { recursive: true })
   }

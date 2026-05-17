@@ -2,6 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl"
 import { useRouter, usePathname } from "@/i18n/navigation"
+import { hasArticleLocale } from "@/lib/article-locale"
 
 const LOCALES = ["zh", "en"] as const
 type Locale = (typeof LOCALES)[number]
@@ -14,6 +15,16 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
 
   const switchLocale = (newLocale: Locale) => {
     if (newLocale === locale) return
+
+    const articleMatch = pathname.match(/^\/(zh|en)\/articles\/(.+)/)
+    if (articleMatch) {
+      const slug = articleMatch[2]
+      if (!hasArticleLocale(slug, newLocale)) {
+        router.replace(`/${newLocale}/articles`, { locale: newLocale })
+        return
+      }
+    }
+
     router.replace(pathname, { locale: newLocale })
   }
 

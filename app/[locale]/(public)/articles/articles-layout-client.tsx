@@ -11,7 +11,7 @@ import {
   SegmentedBar,
 } from "@/components/ui/loading-shell-primitives"
 import type { TreeNode } from "@/types/sidebar-tree"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { ArticleTocRail } from "@/components/articles/article-toc-rail"
 import { MobileTocBar } from "@/components/articles/mobile-toc-bar"
 import { useMounted } from "@/hooks/use-mounted"
@@ -178,6 +178,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const desktopSidebarRef = useRef<SidebarClientHandle>(null)
   const floatingCardSidebarRef = useRef<SidebarClientHandle>(null)
   const isStuckRef = useRef(false)
+  const locale = useLocale()
   const t = useTranslations("Sidebar")
   const tA11y = useTranslations("CommonA11y")
   const treeData = tree.length > 0 ? tree : fetchedTreeData
@@ -233,7 +234,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
     const loadTree = async () => {
       try {
-        const response = await fetch("/api/articles/tree", {
+        const response = await fetch(`/api/articles/tree?locale=${locale}`, {
           method: "GET",
           signal: controller.signal,
         })
@@ -263,7 +264,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       active = false
       controller.abort()
     }
-  }, [tree, tree.length])
+  }, [locale, tree, tree.length])
 
   const isTreeLoading = tree.length === 0 && !hasTreeFetchSettled
   const showTreePlaceholder = isTreeLoading && treeData.length === 0

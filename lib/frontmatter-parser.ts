@@ -2,6 +2,7 @@ import matter from "gray-matter"
 
 export interface FrontMatterData {
   title?: string
+  titleEn?: string
   chapterTitle?: string
   chapterTitleEn?: string
   introTitle?: string
@@ -21,6 +22,10 @@ export function parseFrontMatter(content: string): FrontMatterData {
     const title =
       data.title && typeof data.title === "string"
         ? data.title.trim() || ""
+        : undefined
+    const titleEn =
+      data["title-en"] && typeof data["title-en"] === "string"
+        ? data["title-en"].trim() || undefined
         : undefined
     const chapterTitle =
       data["chapter-title"] && typeof data["chapter-title"] === "string"
@@ -69,6 +74,7 @@ export function parseFrontMatter(content: string): FrontMatterData {
 
     return {
       title,
+      titleEn,
       chapterTitle,
       chapterTitleEn,
       introTitle,

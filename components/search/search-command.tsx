@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { createPortal } from "react-dom"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import { useRouter, usePathname } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/article-url"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
@@ -18,6 +18,7 @@ interface SearchResult {
 
 export function SearchCommand() {
   const t = useTranslations("Search")
+  const locale = useLocale()
   const [isOpen, setIsOpen] = useState(false)
   const isMounted = useMounted()
   const [query, setQuery] = useState("")
@@ -98,7 +99,7 @@ export function SearchCommand() {
 
       setIsLoading(true)
 
-      fetch(`/api/articles/search?q=${encodeURIComponent(query)}`, {
+      fetch(`/api/articles/search?q=${encodeURIComponent(query)}&locale=${locale}`, {
         signal: controller.signal,
       })
         .then((res) => res.json())
@@ -118,7 +119,7 @@ export function SearchCommand() {
     return () => {
       clearTimeout(timer)
     }
-  }, [query])
+  }, [query, locale])
 
   const handleQueryChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

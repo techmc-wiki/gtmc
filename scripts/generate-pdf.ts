@@ -26,6 +26,7 @@ import {
 } from "@/lib/articles/linearize"
 import type { LinearizedArticle } from "@/lib/articles/linearize"
 import type { TreeNode } from "@/types/sidebar-tree"
+import type { ArticleLocale } from "@/lib/article-manifest"
 import { buildEbookHtml, resolveImagesInHtml } from "@/lib/pdf/ebook-structure"
 import { renderMarkdownToHtml } from "@/lib/pdf/markdown-pipeline"
 import { createRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
@@ -72,13 +73,14 @@ function parseArgs(): CliOptions {
  * Scan all articles for fenced code blocks and collect distinct languages.
  */
 async function collectCodeLangs(
-  articles: LinearizedArticle[]
+  articles: LinearizedArticle[],
+  locale: ArticleLocale
 ): Promise<string[]> {
   const allLangs = new Set<string>()
 
   for (const article of articles) {
     try {
-      const content = await getArticleContentForPdf(article.slug)
+      const content = await getArticleContentForPdf(article.slug, locale)
       if (!content) continue
       const matches = content.matchAll(/^```(\w+)/gm)
       for (const m of matches) {
@@ -98,10 +100,13 @@ async function collectCodeLangs(
 /**
  * Check whether any article contains math expressions that require KaTeX.
  */
-async function checkHasMath(articles: LinearizedArticle[]): Promise<boolean> {
+async function checkHasMath(
+  articles: LinearizedArticle[],
+  locale: ArticleLocale
+): Promise<boolean> {
   for (const article of articles) {
     try {
-      const content = await getArticleContentForPdf(article.slug)
+      const content = await getArticleContentForPdf(article.slug, locale)
       if (!content) continue
       if (
         content.includes("$") ||
@@ -124,10 +129,13 @@ async function checkHasMath(articles: LinearizedArticle[]): Promise<boolean> {
  * Each article's markdown is rendered through the PDF pipeline with optional
  * Shiki syntax highlighting.
  */
-function createRenderArticle(shikiPlugin: RehypeShikiPlugin | undefined) {
+function createRenderArticle(
+  shikiPlugin: RehypeShikiPlugin | undefined,
+  locale: ArticleLocale
+) {
   return async (article: LinearizedArticle): Promise<string> => {
     try {
-      const content = await getArticleContentForPdf(article.slug)
+      const content = await getArticleContentForPdf(article.slug, locale)
       if (!content) return ""
 
       const html = await renderMarkdownToHtml(content, {
@@ -396,8 +404,8 @@ async function main(): Promise<void> {
   let hasMath: boolean
   try {
     ;[codeLangs, hasMath] = await Promise.all([
-      collectCodeLangs(articles),
-      checkHasMath(articles),
+      collectCodeLangs(articles, locale),
+      checkHasMath(articles, locale),
     ])
   } catch (err) {
     console.error("[pdf] Failed to scan articles:", err)
@@ -432,7 +440,7 @@ async function main(): Promise<void> {
   // ═══════════════════════════════════════════════════════════════════════
   console.log("[pdf] Phase 5/6: Building ebook HTML...")
 
-  const renderArticle = createRenderArticle(shikiPlugin)
+  const renderArticle = createRenderArticle(shikiPlugin, locale)
 
   let html: string
   try {

@@ -263,9 +263,10 @@ export function resolveImagesInHtml(
  * it through the PDF markdown pipeline.
  */
 export async function defaultRenderArticle(
-  article: LinearizedArticle
+  article: LinearizedArticle,
+  locale: string
 ): Promise<string> {
-  const content = await getArticleContentForPdf(article.slug)
+  const content = await getArticleContentForPdf(article.slug, locale as "en" | "zh")
   if (!content) return ""
 
   const html = await renderMarkdownToHtml(content, {
@@ -291,7 +292,10 @@ export async function defaultRenderArticle(
 export async function buildEbookHtml(options: EbookOptions): Promise<string> {
   const labels = LOCALE_LABELS[options.locale ?? "en"]
   const printCss = loadPrintCss()
-  const renderArticle = options.renderArticle ?? defaultRenderArticle
+  const renderArticle =
+    options.renderArticle ??
+    ((article: LinearizedArticle) =>
+      defaultRenderArticle(article, options.locale ?? "en"))
 
   const sections: EbookSection[] = []
 

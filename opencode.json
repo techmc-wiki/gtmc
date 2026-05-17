@@ -4,6 +4,17 @@
     "webstorm": {
       "type": "remote",
       "url": "http://127.0.0.1:64342/sse"
+    },
+    "next-devtools": {
+      "type": "local",
+      "command": [
+        "next-devtools-mcp"
+      ]
+    },
+    "vercel": {
+      "type": "remote",
+      "url": "https://mcp.vercel.com",
+      "oauth": {}
     }
   }
 }

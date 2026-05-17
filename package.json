@@ -16,7 +16,7 @@
     "lint:check": "eslint",
     "lint:fix": "eslint --fix",
     "lint": "pnpm lint:check",
-    "postinstall": "git config --local include.path .gitconfig; git submodule update --init --recursive && git submodule update --remote articles && DATABASE_URL=${DATABASE_URL:-postgresql://localhost:5432/placeholder} prisma generate && tsx scripts/generate-article-manifest.ts && playwright install chromium",
+    "postinstall": "node scripts/postinstall.mjs",
     "style:check": "prettier --check .",
     "style:fix": "prettier --write .",
     "style": "pnpm style:check",

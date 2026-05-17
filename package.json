@@ -47,7 +47,7 @@
     "dotenv": "^17.4.2",
     "geist": "^1.7.0",
     "gray-matter": "^4.0.3",
-    "katex": "^0.16.45",
+    "katex": "^0.16.47",
     "mdast-util-find-and-replace": "^3.0.2",
     "micromark-util-character": "^2.1.1",
     "mime-types": "^3.0.2",
@@ -103,7 +103,7 @@
     "remark-rehype": "^11.1.2",
     "tailwindcss": "^4.3.0",
     "tailwindcss-animate": "^1.0.7",
-    "tsx": "^4.21.0",
+    "tsx": "^4.22.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.3",
     "vitest": "^4.1.6"

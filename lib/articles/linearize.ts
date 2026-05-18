@@ -1,4 +1,4 @@
-import type { TreeNode } from "@/types/sidebar-tree"
+import type { ChapterNavNode } from "@/types/chapter-nav"
 import type { ArticleLocale } from "@/lib/article-manifest"
 import { getArticleContentBySlug } from "@/lib/article-content-store"
 import { resolveLocalArticlePath } from "@/lib/article-fs-resolver"
@@ -39,22 +39,22 @@ export interface LinearizedArticle {
 }
 
 /**
- * Flatten a sorted `TreeNode[]` into a display-order array of
+ * Flatten a sorted `ChapterNavNode[]` into a display-order array of
  * `LinearizedArticle` entries.
  *
  * The input tree is expected to already be sorted (e.g. the output of
- * `getPublicSidebarTree()`).  The DFS traversal preserves that order so the
+ * `getPublicChapterNav()`).  The DFS traversal preserves that order so the
  * result is ready for serial PDF generation — iterate once and create
  * section/page breaks each time `chapterSlug` changes.
  *
  * Folder nodes become the "chapter" context for their descendants; they are
  * not emitted as articles themselves.
  */
-export function linearizeArticles(tree: TreeNode[]): LinearizedArticle[] {
+export function linearizeArticles(tree: ChapterNavNode[]): LinearizedArticle[] {
   const result: LinearizedArticle[] = []
 
   function dfs(
-    nodes: TreeNode[],
+    nodes: ChapterNavNode[],
     chapterSlug: string,
     chapterTitle: string,
     depth: number,

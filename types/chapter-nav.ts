@@ -1,10 +1,10 @@
-export interface TreeNode {
+export interface ChapterNavNode {
   id: string
   title: string
   slug: string
   isFolder: boolean
   parentId: string | null
-  children: TreeNode[]
+  children: ChapterNavNode[]
   index?: number
   isAppendix?: boolean
   isPreface?: boolean

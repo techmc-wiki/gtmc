@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Link } from "@/i18n/navigation"
-import { useSidebarContext } from "@/app/[locale]/(public)/articles/sidebar/sidebar-context"
+import { useReaderNavigation } from "@/app/[locale]/(public)/articles/reader-navigation/context"
 import { useModalEffects } from "@/hooks/use-modal-effects"
 
 const emptySubscribe = () => () => {}
@@ -26,8 +26,8 @@ function useScrollProgress() {
   return { hasScrolledPastNavbar, progress }
 }
 
-export function MobileTocBar() {
-  const { toc, activeHeadingId } = useSidebarContext()
+export function MobileOutlineBar() {
+  const { outline, activeHeadingId } = useReaderNavigation()
   const { hasScrolledPastNavbar, progress } = useScrollProgress()
   const [isSheetOpen, setIsSheetOpen] = React.useState(false)
   const closeSheet = React.useCallback(() => setIsSheetOpen(false), [])
@@ -39,9 +39,9 @@ export function MobileTocBar() {
 
   useModalEffects({ isOpen: isSheetOpen, onClose: closeSheet })
 
-  if (!mounted || toc.length === 0) return null
+  if (!mounted || outline.length === 0) return null
 
-  const activeItem = toc.find((item) => item.id === activeHeadingId)
+  const activeItem = outline.find((item) => item.id === activeHeadingId)
   const pct = Math.round(progress * 100)
 
 
@@ -53,7 +53,7 @@ export function MobileTocBar() {
       <div className={`pointer-events-none fixed inset-x-0 top-16 z-20 h-20 transition-opacity duration-500 sm:hidden ${hasScrolledPastNavbar ? "opacity-100" : "opacity-0"}`}>
         {/* Section label — fixed right-aligned in navbar row */}
         {activeItem && (
-          <button type="button" className="pointer-events-auto flex h-fit w-full items-center px-4 py-2 pr-4 backdrop-blur-xs sm:hidden" aria-label="Open table of contents" onClick={() => setIsSheetOpen(true)}>
+          <button type="button" className="pointer-events-auto flex h-fit w-full items-center px-4 py-2 pr-4 backdrop-blur-xs sm:hidden" aria-label="Open article outline" onClick={() => setIsSheetOpen(true)}>
             <div
               className="max-w-[40vw] truncate font-mono text-xs font-bold text-tech-main transition-colors duration-150 hover:text-tech-main"
             >
@@ -76,7 +76,7 @@ export function MobileTocBar() {
         {/* Backdrop */}
         <button
           type="button"
-          aria-label="Close table of contents"
+          aria-label="Close article outline"
           className={`absolute inset-0 w-full bg-black/20 backdrop-blur-xs transition-opacity duration-300 ${isSheetOpen ? "opacity-100" : "opacity-0"}`}
           onClick={closeSheet}
         />
@@ -86,7 +86,7 @@ export function MobileTocBar() {
           className={`absolute inset-x-0 bottom-0 flex max-h-[70dvh] flex-col border-t border-tech-main/30 bg-white/95 backdrop-blur-md transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isSheetOpen ? "translate-y-0" : "translate-y-full"}`}
           role={isSheetOpen ? "dialog" : undefined}
           aria-modal={isSheetOpen ? "true" : undefined}
-          aria-label="Table of contents"
+          aria-label="Article outline"
         >
           {/* Header */}
           <div className="flex shrink-0 items-center justify-between border-b guide-line px-4 py-3">
@@ -109,15 +109,15 @@ export function MobileTocBar() {
               type="button"
               onClick={closeSheet}
               className="cursor-pointer px-3 py-2 font-mono text-xs font-bold tracking-[0.15em] text-tech-main uppercase transition-colors hover:bg-tech-main/10"
-              aria-label="Close table of contents"
+              aria-label="Close article outline"
             >
               CLOSE
             </button>
           </div>
 
-          {/* TOC list */}
+          {/* Outline list */}
           <ul className="flex-1 overflow-y-auto px-4 py-3">
-            {toc.map((item) => {
+            {outline.map((item) => {
               const isActive = item.id === activeHeadingId
               return (
                 <li key={item.id}>

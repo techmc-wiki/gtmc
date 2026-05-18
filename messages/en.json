@@ -32,7 +32,7 @@
     "crash_default": "This action may cause the game to crash. Proceed with caution.",
     "corruption_default": "This action may corrupt your save file. Back up your saves before proceeding."
   },
-  "Sidebar": {
+  "ChapterNav": {
     "title": "Table of Contents",
     "titleShort": "ToC",
     "buttonNewArticle": "+ New File / Dir",
@@ -430,8 +430,8 @@
     "loadingArticleContent": "Loading article content",
     "loadingDrafts": "Loading drafts",
     "toggleArticleTree": "Toggle article tree",
-    "showSidebar": "Show sidebar",
-    "hideSidebar": "Hide sidebar",
+    "showChapterNav": "Show chapter navigation",
+    "hideChapterNav": "Hide chapter navigation",
     "closeTree": "Close tree",
     "toggleLineWrap": "Toggle line wrap"
   },

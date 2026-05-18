@@ -1,17 +1,17 @@
 import { Link } from "@/i18n/navigation"
 import { formatIndexPrefix } from "@/lib/index-formatter"
 import { encodeSlug } from "@/lib/slug-utils"
-import type { TreeNode } from "@/types/sidebar-tree"
+import type { ChapterNavNode } from "@/types/chapter-nav"
 import React from "react"
-import { useSidebarContext } from "./sidebar-context"
+import { useReaderNavigation } from "../reader-navigation/context"
 
-export type { TreeNode } from "@/types/sidebar-tree"
+export type { ChapterNavNode } from "@/types/chapter-nav"
 
-export function SidebarTree({
+export function ChapterNavTree({
   items,
   onNavigate,
 }: {
-  items: TreeNode[]
+  items: ChapterNavNode[]
   onNavigate?: () => void
 }) {
   const {
@@ -21,7 +21,7 @@ export function SidebarTree({
     highlightActive,
     activeItemRef,
     folderGridRefs,
-  } = useSidebarContext()
+  } = useReaderNavigation()
 
   const decodedPathname = decodeURIComponent(effectivePath)
   const firstAppendixArticleIndex = items.findIndex(
@@ -64,7 +64,7 @@ export function SidebarTree({
 
             <li
               key={item.id}
-              data-sidebar-row="1"
+              data-chapter-nav-row="1"
               ref={!item.isFolder && isActive ? activeItemRef : undefined}
               className={`
                  relative my-1.5 list-none font-mono text-[1rem] transition-all
@@ -159,7 +159,7 @@ export function SidebarTree({
                     }
                   `}>
                   <div className="overflow-hidden">
-                    <SidebarTree
+                    <ChapterNavTree
                       items={item.children}
                       onNavigate={onNavigate}
                     />

@@ -1,14 +1,14 @@
 import MiniSearch from "minisearch"
 import { remark } from "remark"
 import stripMarkdownPlugin from "strip-markdown"
-import { getPublicSidebarTree } from "@/lib/articles/public-tree"
+import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import {
   getOctokit,
   ARTICLES_REPO_OWNER,
   ARTICLES_REPO_NAME,
 } from "@/lib/github/articles-repo"
 import { getArticleContentBySlug } from "@/lib/article-content-store"
-import type { TreeNode } from "@/types/sidebar-tree"
+import type { ChapterNavNode } from "@/types/chapter-nav"
 import type { ArticleLocale } from "@/lib/article-manifest"
 
 interface IndexedArticle {
@@ -30,7 +30,7 @@ function stripMarkdown(text: string): string {
     .trim()
 }
 
-function flattenTree(nodes: TreeNode[]): { title: string; slug: string }[] {
+function flattenTree(nodes: ChapterNavNode[]): { title: string; slug: string }[] {
   const result: { title: string; slug: string }[] = []
 
   for (const node of nodes) {
@@ -88,7 +88,7 @@ function createMiniSearchIndex(
 }
 
 async function buildIndex(locale: ArticleLocale): Promise<MiniSearch<IndexedArticle>> {
-  const tree = await getPublicSidebarTree(locale)
+  const tree = await getPublicChapterNav(locale)
 
   const articles: IndexedArticle[] = []
 

@@ -2,17 +2,17 @@
 
 import * as React from "react"
 import { usePathname } from "@/i18n/navigation"
-import { useActiveHeading } from "./use-active-heading"
-import { useExpandedFolders } from "./use-expanded-folders"
-import { useToc, type TocItem } from "./use-toc"
-import type { TreeNode } from "@/types/sidebar-tree"
+import { useExpandedFolders } from "../chapter-nav/use-expanded-folders"
+import { useActiveHeading } from "../outline/use-active-heading"
+import { useOutline, type OutlineItem } from "../outline/use-outline"
+import type { ChapterNavNode } from "@/types/chapter-nav"
 
-interface SidebarProviderProps {
-  tree: TreeNode[]
+interface ReaderNavigationProviderProps {
+  tree: ChapterNavNode[]
   children: React.ReactNode
 }
 
-interface SidebarContextValue {
+interface ReaderNavigationContextValue {
   expandedFolders: Set<string>
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>
   expandedFoldersRef: React.RefObject<Set<string>>
@@ -23,10 +23,10 @@ interface SidebarContextValue {
   highlightActive: boolean
   setHighlightActive: React.Dispatch<React.SetStateAction<boolean>>
 
-  toc: TocItem[]
+  outline: OutlineItem[]
   activeHeadingId: string | null
 
-  tree: TreeNode[]
+  tree: ChapterNavNode[]
   effectivePath: string
 
   activeItemRef: React.RefObject<HTMLLIElement | null>
@@ -39,9 +39,9 @@ interface SidebarContextValue {
   setScrollToCurrent: (fn: () => void) => void
 }
 
-const SidebarContext = React.createContext<SidebarContextValue | null>(null)
+const ReaderNavigationContext = React.createContext<ReaderNavigationContextValue | null>(null)
 
-export function SidebarProvider({ tree, children }: SidebarProviderProps) {
+export function ReaderNavigationProvider({ tree, children }: ReaderNavigationProviderProps) {
   const pathname = usePathname()
 
   const {
@@ -52,8 +52,8 @@ export function SidebarProvider({ tree, children }: SidebarProviderProps) {
     isFolderExpanded,
   } = useExpandedFolders()
 
-  const toc = useToc(pathname)
-  const activeHeadingId = useActiveHeading(toc, pathname)
+  const outline = useOutline(pathname)
+  const activeHeadingId = useActiveHeading(outline, pathname)
 
   const [highlightActive, setHighlightActive] = React.useState(false)
 
@@ -94,7 +94,7 @@ export function SidebarProvider({ tree, children }: SidebarProviderProps) {
     scrollToCurrentRef.current()
   }, [])
 
-  const value = React.useMemo<SidebarContextValue>(
+  const value = React.useMemo<ReaderNavigationContextValue>(
     () => ({
       expandedFolders,
       setExpandedFolders,
@@ -104,7 +104,7 @@ export function SidebarProvider({ tree, children }: SidebarProviderProps) {
       toggleFolder,
       highlightActive,
       setHighlightActive,
-      toc,
+      outline,
       activeHeadingId,
       tree,
       effectivePath,
@@ -124,7 +124,7 @@ export function SidebarProvider({ tree, children }: SidebarProviderProps) {
       isFolderExpanded,
       toggleFolder,
       highlightActive,
-      toc,
+      outline,
       activeHeadingId,
       tree,
       effectivePath,
@@ -135,14 +135,14 @@ export function SidebarProvider({ tree, children }: SidebarProviderProps) {
   )
 
   return (
-    <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>
+    <ReaderNavigationContext.Provider value={value}>{children}</ReaderNavigationContext.Provider>
   )
 }
 
-export function useSidebarContext(): SidebarContextValue {
-  const context = React.useContext(SidebarContext)
+export function useReaderNavigation(): ReaderNavigationContextValue {
+  const context = React.useContext(ReaderNavigationContext)
   if (!context) {
-    throw new Error("useSidebarContext must be used within SidebarProvider")
+    throw new Error("useReaderNavigation must be used within ReaderNavigationProvider")
   }
   return context
 }

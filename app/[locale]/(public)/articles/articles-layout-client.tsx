@@ -2,27 +2,28 @@
 
 import * as React from "react"
 import { useState, useRef, useEffect } from "react"
-import { SidebarClient, type SidebarClientHandle } from "./sidebar-client"
-import { SidebarProvider } from "./sidebar/sidebar-context"
-import { MobileTreeCard } from "./mobile-tree-card"
+import { ChapterNavPanel, type ChapterNavPanelHandle } from "./chapter-nav-panel"
+import { ReaderNavigationProvider } from "./reader-navigation/context"
+import { MobileChapterNavCard } from "./mobile-chapter-nav-card"
+import { useMobileChapterNavMachine } from "@/app/[locale]/(public)/articles/mobile-chapter-nav/use-mobile-chapter-nav-machine"
+import { LABEL_MORPH_DELAY_MS } from "@/app/[locale]/(public)/articles/mobile-chapter-nav/config"
 import {
   ScanConfirmOverlay,
   SectionRail,
   SegmentedBar,
 } from "@/components/ui/loading-shell-primitives"
-import type { TreeNode } from "@/types/sidebar-tree"
+import type { ChapterNavNode } from "@/types/chapter-nav"
 import { useLocale, useTranslations } from "next-intl"
-import { ArticleTocRail } from "@/components/articles/article-toc-rail"
-import { MobileTocBar } from "@/components/articles/mobile-toc-bar"
-import { useMounted } from "@/hooks/use-mounted"
+import { OutlineRail } from "@/components/articles/outline-rail"
+import { MobileOutlineBar } from "@/components/articles/mobile-outline-bar"
 
 interface ArticlesLayoutProps {
   children: React.ReactNode
-  tree: TreeNode[]
+  tree: ChapterNavNode[]
 }
 
-interface SidebarTreeWrapperProps {
-  sidebarRef: React.Ref<SidebarClientHandle>
+interface ChapterNavWrapperProps {
+  chapterNavRef: React.Ref<ChapterNavPanelHandle>
   showPlaceholder: boolean
   onNavigate: () => void
   internalScroll?: boolean
@@ -116,14 +117,14 @@ function TreeLoadingPlaceholder() {
   )
 }
 
-function SidebarTreeWrapper({
-  sidebarRef,
+function ChapterNavWrapper({
+  chapterNavRef,
   showPlaceholder,
   onNavigate,
   internalScroll = false,
   scrollClass = "",
   hideActions = false,
-}: SidebarTreeWrapperProps) {
+}: ChapterNavWrapperProps) {
   return (
     <div
       className={`
@@ -141,10 +142,10 @@ function SidebarTreeWrapper({
           <TreeLoadingPlaceholder />
         </div>
       ) : (
-        <SidebarClient
+        <ChapterNavPanel
           tree={[]}
           onNavigate={onNavigate}
-          ref={sidebarRef}
+          ref={chapterNavRef}
           internalScroll={internalScroll}
           scrollClass={scrollClass}
           hideActions={hideActions}
@@ -155,40 +156,38 @@ function SidebarTreeWrapper({
 }
 
 export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
-  const SIDEBAR_HIDDEN_KEY = "gtmc_sidebar_hidden"
-  const isMounted = useMounted()
-  const [isOpen, setIsOpen] = useState(false)
-  const [isStuck, setIsStuck] = useState(false)
+  const CHAPTER_NAV_HIDDEN_KEY = "gtmc_chapter_nav_hidden"
   const [showFullText, setShowFullText] = useState(true)
-  const [fetchedTreeData, setFetchedTreeData] = useState<TreeNode[]>([])
+  const [fetchedTreeData, setFetchedTreeData] = useState<ChapterNavNode[]>([])
   const [hasTreeFetchSettled, setHasTreeFetchSettled] = useState(
     () => tree.length > 0
   )
-  const [sidebarHidden, setSidebarHidden] = useState(() => {
+  const [chapterNavHidden, setChapterNavHidden] = useState(() => {
     if (typeof window === "undefined") {
       return false
     }
 
     try {
-      return localStorage.getItem(SIDEBAR_HIDDEN_KEY) === "true"
+      return localStorage.getItem(CHAPTER_NAV_HIDDEN_KEY) === "true"
     } catch {
       return false
     }
   })
-  const desktopSidebarRef = useRef<SidebarClientHandle>(null)
-  const floatingCardSidebarRef = useRef<SidebarClientHandle>(null)
-  const isStuckRef = useRef(false)
+  const desktopChapterNavRef = useRef<ChapterNavPanelHandle>(null)
+  const floatingCardChapterNavRef = useRef<ChapterNavPanelHandle>(null)
+  const machine = useMobileChapterNavMachine()
+  const { state, dispatch, isOpen: isChapterNavOpen, isFloating, isStuck } = machine
+  void state
   const locale = useLocale()
-  const t = useTranslations("Sidebar")
+  const t = useTranslations("ChapterNav")
   const tA11y = useTranslations("CommonA11y")
   const treeData = tree.length > 0 ? tree : fetchedTreeData
-  const isTreeOpen = isOpen
 
-  const toggleSidebarHidden = () => {
-    setSidebarHidden((prev) => {
+  const toggleChapterNavHidden = () => {
+    setChapterNavHidden((prev) => {
       const next = !prev
       try {
-        localStorage.setItem(SIDEBAR_HIDDEN_KEY, String(next))
+        localStorage.setItem(CHAPTER_NAV_HIDDEN_KEY, String(next))
       } catch { }
       return next
     })
@@ -199,30 +198,10 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       () => {
         setShowFullText(!isStuck)
       },
-      isStuck ? 0 : 250
+      isStuck ? 0 : LABEL_MORPH_DELAY_MS
     )
     return () => clearTimeout(timer)
   }, [isStuck])
-
-  useEffect(() => {
-    const NAVBAR_HEIGHT = 64
-
-    const handleScroll = () => {
-      const currentlyStuck = window.scrollY > NAVBAR_HEIGHT
-      if (!isStuckRef.current && currentlyStuck) {
-        setIsOpen(false)
-      }
-
-      isStuckRef.current = currentlyStuck
-      setIsStuck(currentlyStuck)
-    }
-
-    // Sync immediately on mount in case page is already scrolled
-    handleScroll()
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
 
   useEffect(() => {
     if (tree.length > 0) {
@@ -243,7 +222,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           return
         }
 
-        const payload = (await response.json()) as TreeNode[]
+        const payload = (await response.json()) as ChapterNavNode[]
         if (active && Array.isArray(payload)) {
           setFetchedTreeData(payload)
         }
@@ -266,33 +245,33 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
     }
   }, [locale, tree, tree.length])
 
-  const isTreeLoading = tree.length === 0 && !hasTreeFetchSettled
-  const showTreePlaceholder = isTreeLoading && treeData.length === 0
+  const isChapterNavLoading = tree.length === 0 && !hasTreeFetchSettled
+  const showChapterNavPlaceholder = isChapterNavLoading && treeData.length === 0
 
-  const onNavigate = () => setIsOpen(false)
+  const onNavigate = () => dispatch({ type: "NAVIGATE" })
 
-  const fixedTreeContent = (
-    <SidebarTreeWrapper
-      sidebarRef={desktopSidebarRef}
-      showPlaceholder={showTreePlaceholder}
+  const fixedChapterNavContent = (
+    <ChapterNavWrapper
+      chapterNavRef={desktopChapterNavRef}
+      showPlaceholder={showChapterNavPlaceholder}
       onNavigate={onNavigate}
       internalScroll
       scrollClass="pr-4"
     />
   )
 
-  const floatingTreeContent = (
-    <SidebarTreeWrapper
-      sidebarRef={floatingCardSidebarRef}
-      showPlaceholder={showTreePlaceholder}
+  const floatingChapterNavContent = (
+    <ChapterNavWrapper
+      chapterNavRef={floatingCardChapterNavRef}
+      showPlaceholder={showChapterNavPlaceholder}
       onNavigate={onNavigate}
       internalScroll
     />
   )
 
   return (
-    <SidebarProvider tree={treeData}>
-      <MobileTocBar />
+    <ReaderNavigationProvider tree={treeData}>
+      <MobileOutlineBar />
       <div
         className="
           relative isolate flex min-h-[calc(100dvh-8rem)] min-w-0 flex-col
@@ -301,11 +280,10 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         ">
         <div
           className={`
-            sticky z-30
-            md:hidden ${isMounted && isStuck ? "top-24" : "top-16"}
+            relative z-30 md:hidden
           `}>
           <div
-            className="relative transition-all duration-500 ease-out"
+            className="relative"
             style={
               {
                 padding: isStuck ? "1rem 1rem 0 1rem" : "0",
@@ -314,18 +292,19 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
             }>
             <button
               type="button"
-              onClick={(e) => {
-                e.preventDefault()
-                 e.stopPropagation()
-                 setIsOpen((current) => !current)
-               }}
-              className="
-                absolute cursor-pointer overflow-hidden
+               onClick={(e) => {
+                 e.preventDefault()
+                  e.stopPropagation()
+                  dispatch({ type: "TOGGLE" })
+                }}
+              className={`
+                cursor-pointer overflow-hidden
                 border border-tech-main/40 bg-white/70 font-mono text-xs
-                font-bold tracking-[0.15em] text-tech-main backdrop-blur-sm
-                transition-all duration-400 ease-out
+                font-bold tracking-[0.15em] text-tech-main
+                transition-[background-color,color] duration-150 ease-out
                 hover:bg-tech-main/5
-              "
+                ${isStuck ? "fixed top-20 right-4 z-50" : "absolute"}
+              `}
               style={
                 {
                   width: isStuck ? "5rem" : "100%",
@@ -335,11 +314,11 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                   boxShadow: isStuck
                     ? "0 1px 2px 0 rgba(0, 0, 0, 0.05)"
                     : "none",
-                  right: isStuck ? "1rem" : 0,
+                  right: isStuck ? undefined : 0,
                 } as React.CSSProperties
               }
               aria-label={tA11y("toggleArticleTree")}
-               aria-expanded={isTreeOpen}
+               aria-expanded={isChapterNavOpen}
                data-testid="mobile-tree-toggle">
               <div className="relative flex w-full items-center justify-between">
                 <span
@@ -358,7 +337,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 <span
                   className="text-sm font-bold transition-opacity duration-200"
                   style={{ opacity: showFullText ? 1 : 0 }}>
-                   {isTreeOpen ? "▼" : "▶"}
+                   {isChapterNavOpen ? "▼" : "▶"}
                 </span>
               </div>
             </button>
@@ -368,10 +347,10 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           <div
             className={`
               grid transition-all duration-300 ease-out
-              ${isTreeOpen && !isStuck
-                 ? "grid-rows-[1fr] opacity-100"
-                 : "grid-rows-[0fr] opacity-0"
-               }
+              ${isChapterNavOpen && !isFloating
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0"
+                }
             `}>
             <div className="overflow-hidden">
               <div
@@ -379,28 +358,28 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                   max-h-[calc(100dvh-12rem)] overflow-y-auto overscroll-contain
                   border-t guide-line bg-white/95 px-4 pt-3 pb-4
                 ">
-                {fixedTreeContent}
+                {fixedChapterNavContent}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Mobile floating tree card */}
-        <MobileTreeCard
-          isOpen={isTreeOpen}
-          onClose={() => setIsOpen(false)}
-          isFloating={isStuck}>
-          {floatingTreeContent}
-        </MobileTreeCard>
+        {/* Mobile floating chapter navigation card */}
+        <MobileChapterNavCard
+          isOpen={isChapterNavOpen}
+          onClose={() => dispatch({ type: "CLOSE" })}
+          isFloating={isFloating}>
+          {floatingChapterNavContent}
+        </MobileChapterNavCard>
 
-        {/* Desktop sidebar */}
+        {/* Desktop chapter navigation */}
         <div
           className="
             relative hidden shrink-0 self-stretch
             md:block
           "
-          data-sidebar-wrapper
-          data-sidebar-hidden={sidebarHidden ? "" : undefined}>
+          data-chapter-nav-region
+          data-chapter-nav-hidden={chapterNavHidden ? "" : undefined}>
           <div className="flex h-full">
             <aside
               className="
@@ -410,9 +389,9 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 lg:w-80
               "
               style={{
-                width: sidebarHidden ? 0 : undefined,
-                opacity: sidebarHidden ? 0 : 1,
-                borderRightWidth: sidebarHidden ? 0 : undefined,
+                width: chapterNavHidden ? 0 : undefined,
+                opacity: chapterNavHidden ? 0 : 1,
+                borderRightWidth: chapterNavHidden ? 0 : undefined,
               }}>
               <div
                 className="
@@ -449,7 +428,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                     </div>
                   </div>
 
-                  {showTreePlaceholder ? (
+                  {showChapterNavPlaceholder ? (
                     <div
                       className="
                         custom-left-scrollbar h-full min-h-0 flex-1
@@ -458,8 +437,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                       <TreeLoadingPlaceholder />
                     </div>
                   ) : (
-                    <SidebarClient
-                      ref={desktopSidebarRef}
+                    <ChapterNavPanel
+                      ref={desktopChapterNavRef}
                       tree={treeData}
                       internalScroll
                       scrollClass="pr-4"
@@ -473,14 +452,14 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
               <div className="sticky top-[50vh] -translate-y-1/2 justify-center overflow-visible">
                 <button
                   type="button"
-                  onClick={toggleSidebarHidden}
+                  onClick={toggleChapterNavHidden}
                   aria-label={
-                    sidebarHidden
-                      ? tA11y("showSidebar")
-                      : tA11y("hideSidebar")
+                    chapterNavHidden
+                      ? tA11y("showChapterNav")
+                      : tA11y("hideChapterNav")
                   }
-                  aria-expanded={!sidebarHidden}
-                  data-sidebar-toggle=""
+                  aria-expanded={!chapterNavHidden}
+                  data-chapter-nav-toggle=""
                   className="
                       absolute top-0 -left-3 z-40 flex size-6
                       -translate-y-1/2 cursor-pointer items-center justify-center
@@ -493,12 +472,12 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                     className="
                       text-[0.5rem] leading-none font-bold select-none
                     ">
-                    {sidebarHidden ? "▶" : "◀"}
+                    {chapterNavHidden ? "▶" : "◀"}
                   </span>
                 </button>
                 <span className="absolute top-4 -right-3 inline-block text-right font-mono text-[0.625rem] font-bold text-tech-main/40">
                   {" "}
-                  {sidebarHidden ? "table of contents" : ""}
+                  {chapterNavHidden ? "chapter navigation" : ""}
                 </span>
               </div>
             </div>
@@ -509,7 +488,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           className={`
             relative my-6 w-full min-w-0 flex-1 transition-all duration-300
             ease-[cubic-bezier(0.16,1,0.3,1)]
-            ${sidebarHidden
+            ${chapterNavHidden
               ? `
                   md:max-w-3xl
                   xl:max-w-3xl
@@ -525,8 +504,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           {children}
         </main>
 
-        <ArticleTocRail />
+        <OutlineRail />
       </div>
-    </SidebarProvider>
+    </ReaderNavigationProvider>
   )
 }

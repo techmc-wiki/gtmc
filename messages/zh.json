@@ -32,7 +32,7 @@
     "crash_default": "此操作可能导致游戏崩溃，请谨慎操作。",
     "corruption_default": "此操作可能损坏游戏存档，操作前请务必备份存档。"
   },
-  "Sidebar": {
+  "ChapterNav": {
     "title": "文章目录",
     "titleShort": "目录",
     "buttonNewArticle": "+ 新建文章 / 目录",
@@ -430,8 +430,8 @@
     "loadingArticleContent": "正在加载文章内容",
     "loadingDrafts": "正在加载草稿",
     "toggleArticleTree": "切换文章树",
-    "showSidebar": "显示侧边栏",
-    "hideSidebar": "隐藏侧边栏",
+    "showChapterNav": "显示章节导航",
+    "hideChapterNav": "隐藏章节导航",
     "closeTree": "关闭目录树",
     "toggleLineWrap": "切换自动换行"
   },

@@ -3,7 +3,7 @@ import { statSync } from "fs"
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
 import { getArticleTree, type ArticleLocale } from "@/lib/article-manifest"
 import { getRepoTranslations, type ArticleTreeNode } from "@/lib/github/sync"
-import type { TreeNode } from "@/types/sidebar-tree"
+import type { ChapterNavNode } from "@/types/chapter-nav"
 import { MANIFEST_PATH } from "@/lib/article-manifest-store"
 
 function isAppendixDirectoryName(name: string): boolean {
@@ -11,7 +11,7 @@ function isAppendixDirectoryName(name: string): boolean {
   return normalized.includes("appendix") || normalized.includes("附录")
 }
 
-function isReadmeArticle(node: TreeNode): boolean {
+function isReadmeArticle(node: ChapterNavNode): boolean {
   if (node.isFolder) {
     return false
   }
@@ -40,31 +40,31 @@ const getCachedTranslations = unstable_cache(
   async () => {
     return getRepoTranslations()
   },
-  ["github-sidebar-translations"],
+  ["github-chapter-nav-translations"],
   { revalidate: 3600, tags: ["github-repo-translations"] }
 )
 
 /**
- * 获取公开文章树状结构的目录树 (Sidebar).
- * Tree is built from the public article source only.
+ * 获取公开章节导航树。
+ * Chapter navigation is built from the public article source only.
  */
-export async function getPublicSidebarTree(
+export async function getPublicChapterNav(
   locale: ArticleLocale = "zh"
-): Promise<TreeNode[]> {
+): Promise<ChapterNavNode[]> {
   const [githubTree, translations] = await Promise.all([
     getCachedArticleTree(locale),
     getCachedTranslations(),
   ])
 
   // 3. Build unified map keyed by slug
-  const unifiedMap = new Map<string, TreeNode>()
-  const mergedTree: TreeNode[] = []
+  const unifiedMap = new Map<string, ChapterNavNode>()
+  const mergedTree: ChapterNavNode[] = []
 
   // Add GitHub tree
-  function addGithubNodes(nodes: ArticleTreeNode[], parentArray: TreeNode[]) {
+  function addGithubNodes(nodes: ArticleTreeNode[], parentArray: ChapterNavNode[]) {
     for (const node of nodes) {
-      const nodeWithMeta = node as ArticleTreeNode & Partial<TreeNode>
-      const clone: TreeNode = {
+      const nodeWithMeta = node as ArticleTreeNode & Partial<ChapterNavNode>
+      const clone: ChapterNavNode = {
         ...node,
         index: nodeWithMeta.index ?? -1,
         isAppendix: nodeWithMeta.isAppendix ?? false,
@@ -90,7 +90,7 @@ export async function getPublicSidebarTree(
     }
   })
 
-  function sortTree(nodes: TreeNode[]) {
+  function sortTree(nodes: ChapterNavNode[]) {
     const compareIndex = (a: number, b: number) => {
       const aNoIndex = a === -1
       const bNoIndex = b === -1
@@ -154,8 +154,8 @@ export async function getPublicSidebarTree(
     }
   }
   // 7. Filter out ignored articles using centralized ignore logic
-  function filterIgnoredNodes(nodes: TreeNode[], isRoot: boolean): TreeNode[] {
-    const result: TreeNode[] = []
+  function filterIgnoredNodes(nodes: ChapterNavNode[], isRoot: boolean): ChapterNavNode[] {
+    const result: ChapterNavNode[] = []
     for (const node of nodes) {
       // Check if this node should be ignored
       if (node.isFolder) {
@@ -194,7 +194,7 @@ export async function getPublicSidebarTree(
 
   const filteredTree = filterIgnoredNodes(mergedTree, true)
 
-  function injectReadmeIntroNodes(nodes: TreeNode[]) {
+  function injectReadmeIntroNodes(nodes: ChapterNavNode[]) {
     for (const node of nodes) {
       if (node.children && node.children.length > 0) {
         injectReadmeIntroNodes(node.children)

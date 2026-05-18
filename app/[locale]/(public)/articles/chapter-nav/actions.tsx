@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl"
 import React, { useState } from "react"
 
-export function SidebarActions({
+export function ChapterNavActions({
   internalScroll,
   onCollapseAll,
   onLocate,
@@ -11,7 +11,7 @@ export function SidebarActions({
   onLocate: () => void
 }) {
   const [locateDisabled, setLocateDisabled] = useState(false)
-  const t = useTranslations("Sidebar")
+  const t = useTranslations("ChapterNav")
 
   const handleLocate = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (locateDisabled) return

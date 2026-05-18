@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react"
-import type { TocItem } from "./use-toc"
-import type { TreeNode } from "./tree-node"
+import type { OutlineItem } from "../outline/use-outline"
+import type { ChapterNavNode } from "./tree"
 import { BLUR_ZONE_PX, BLUR_MIN, BLUR_RANGE, OPACITY_FADE } from "./constants"
 
 export function useBlur({
@@ -11,15 +11,15 @@ export function useBlur({
   pathname,
   tree,
   expandedFolders,
-  toc,
+  outline,
   highlightActive,
 }: {
   internalScroll: boolean
   scrollContainerRef: React.RefObject<HTMLDivElement | null>
   pathname: string
-  tree: TreeNode[]
+  tree: ChapterNavNode[]
   expandedFolders: Set<string>
-  toc: TocItem[]
+  outline: OutlineItem[]
   highlightActive: boolean
 }): { scheduleBottomRowBlurSync: () => void } {
   const blurFrameRef = useRef<number | null>(null)
@@ -29,7 +29,7 @@ export function useBlur({
     if (!container) return
 
     const rows = container.querySelectorAll<HTMLElement>(
-      'li[data-sidebar-row="1"]'
+      'li[data-chapter-nav-row="1"]'
     )
     const blurZoneRect = container.getBoundingClientRect()
     const blurZoneHeight = BLUR_ZONE_PX
@@ -133,7 +133,7 @@ export function useBlur({
       }
 
       const rows = container.querySelectorAll<HTMLElement>(
-        'li[data-sidebar-row="1"]'
+        'li[data-chapter-nav-row="1"]'
       )
       rows.forEach((row) => {
         row.style.filter = ""
@@ -146,7 +146,7 @@ export function useBlur({
     void pathname
     void tree
     void expandedFolders
-    void toc
+    void outline
     void highlightActive
 
     if (!internalScroll) return
@@ -156,7 +156,7 @@ export function useBlur({
     pathname,
     tree,
     expandedFolders,
-    toc,
+    outline,
     highlightActive,
     syncForDuration,
   ])

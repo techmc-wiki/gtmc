@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { articleUrl } from "@/lib/article-url"
 import { HIGHLIGHT_TIMEOUT_MS, LOCATE_FALLBACK_MS } from "./constants"
-import type { TreeNode } from "./tree-node"
+import type { ChapterNavNode } from "./tree"
 
 type LocateState =
   | { phase: "idle" }
@@ -23,7 +23,7 @@ export function useScrollToActive({
   activeItemRef,
   folderGridRefs,
 }: {
-  tree: TreeNode[]
+  tree: ChapterNavNode[]
   pathname: string
   mounted: boolean
   expandedFolders: Set<string>
@@ -81,15 +81,15 @@ export function useScrollToActive({
 
   const findItemAndParents = useCallback(
     (
-      items: TreeNode[],
+      items: ChapterNavNode[],
       target: string
-    ): { item: TreeNode | null; parentIds: string[] } => {
+    ): { item: ChapterNavNode | null; parentIds: string[] } => {
       const decodedTarget = decodeURIComponent(target)
 
       const walk = (
-        nodes: TreeNode[],
+        nodes: ChapterNavNode[],
         parents: string[] = []
-      ): { item: TreeNode | null; parentIds: string[] } => {
+      ): { item: ChapterNavNode | null; parentIds: string[] } => {
         for (const item of nodes) {
           if (item.children?.length) {
             const result = walk(item.children, [...parents, item.id])

@@ -2,17 +2,17 @@
 
 import { useEffect, useState } from "react"
 
-export interface TocItem {
+export interface OutlineItem {
   id: string
   text: string
 }
 
-function scanHeadings(): TocItem[] {
+function scanHeadings(): OutlineItem[] {
   if (typeof document === "undefined") return []
   const headings = document.querySelectorAll("main h2")
   if (headings.length === 0) return []
 
-  const tocItems: TocItem[] = []
+  const outlineItems: OutlineItem[] = []
   headings.forEach((heading) => {
     if (heading.id && heading.textContent) {
       const clone = heading.cloneNode(true) as Element
@@ -20,14 +20,14 @@ function scanHeadings(): TocItem[] {
         el.remove()
       })
       const text = clone.textContent?.replace(/^#\s*/, "") ?? ""
-      tocItems.push({ id: heading.id, text })
+      outlineItems.push({ id: heading.id, text })
     }
   })
-  return tocItems
+  return outlineItems
 }
 
-export function useToc(pathname: string): TocItem[] {
-  const [toc, setToc] = useState<TocItem[]>([])
+export function useOutline(pathname: string): OutlineItem[] {
+  const [outline, setOutline] = useState<OutlineItem[]>([])
 
   useEffect(() => {
     if (typeof document === "undefined") return
@@ -35,11 +35,11 @@ export function useToc(pathname: string): TocItem[] {
     void pathname
 
     const frame = requestAnimationFrame(() => {
-      setToc(scanHeadings())
+      setOutline(scanHeadings())
     })
 
     const observer = new MutationObserver(() => {
-      setToc(scanHeadings())
+      setOutline(scanHeadings())
     })
 
     const main = document.querySelector("main") || document.body
@@ -54,5 +54,5 @@ export function useToc(pathname: string): TocItem[] {
     }
   }, [pathname])
 
-  return toc
+  return outline
 }

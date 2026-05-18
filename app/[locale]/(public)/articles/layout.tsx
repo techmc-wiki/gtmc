@@ -10,7 +10,7 @@ import { SearchCommand } from "@/components/search/search-command"
 import { Logo } from "@/components/ui/logo"
 import { AuthIsland } from "@/components/layout/auth-island"
 import { ArticlesLayoutClient } from "./articles-layout-client"
-import { getPublicSidebarTree } from "@/lib/articles/public-tree"
+import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import type { ArticleLocale } from "@/lib/article-manifest"
 
 function normalizeLocale(locale: string): ArticleLocale {
@@ -33,7 +33,7 @@ export default async function ArticlesLayout({
   ]
   const adminLink = { href: "/review", label: t("reviewHub") }
   const normalizedLocale = normalizeLocale(locale)
-  const tree = await getPublicSidebarTree(normalizedLocale)
+  const tree = await getPublicChapterNav(normalizedLocale)
 
   return (
     <SiteShell

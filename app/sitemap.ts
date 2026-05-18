@@ -4,13 +4,13 @@ import { listAllIssues } from "@/lib/github"
 import { getSiteUrl } from "@/lib/site-url"
 import { shouldIgnoreFile } from "@/lib/article-ignore"
 import { encodeSlug } from "@/lib/slug-utils"
-import { getPublicSidebarTree } from "@/lib/articles/public-tree"
+import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import type { ArticleLocale } from "@/lib/article-manifest"
 
 export const revalidate = 3600
 
 function flattenTree(
-  nodes: Awaited<ReturnType<typeof getPublicSidebarTree>>
+  nodes: Awaited<ReturnType<typeof getPublicChapterNav>>
 ): string[] {
   const slugs: string[] = []
   for (const node of nodes) {
@@ -71,7 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const locales: ArticleLocale[] = ["zh", "en"]
     const localizedArticleUrls = await Promise.all(
       locales.map(async (locale) => {
-        const tree = await getPublicSidebarTree(locale)
+        const tree = await getPublicChapterNav(locale)
         const slugs = flattenTree(tree)
         return slugs
           .filter((slug) => {

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Link } from "@/i18n/navigation"
-import { useSidebarContext } from "@/app/[locale]/(public)/articles/sidebar/sidebar-context"
+import { useReaderNavigation } from "@/app/[locale]/(public)/articles/reader-navigation/context"
 
 function useScrollProgress() {
   const [progress, setProgress] = React.useState(0)
@@ -21,11 +21,11 @@ function useScrollProgress() {
   return progress
 }
 
-export function ArticleTocRail() {
-  const { toc, activeHeadingId } = useSidebarContext()
+export function OutlineRail() {
+  const { outline, activeHeadingId } = useReaderNavigation()
   const progress = useScrollProgress()
 
-  if (toc.length === 0) return null
+  if (outline.length === 0) return null
 
   return (
     <nav
@@ -70,7 +70,7 @@ export function ArticleTocRail() {
         </div>
 
         <ul className="flex flex-col gap-0">
-          {toc.map((item) => {
+          {outline.map((item) => {
             const isActive = item.id === activeHeadingId
             return (
               <li key={item.id}>

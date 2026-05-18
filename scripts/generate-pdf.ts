@@ -25,7 +25,7 @@ import {
   getArticleContentForPdf,
 } from "@/lib/articles/linearize"
 import type { LinearizedArticle } from "@/lib/articles/linearize"
-import type { TreeNode } from "@/types/sidebar-tree"
+import type { ChapterNavNode } from "@/types/chapter-nav"
 import type { ArticleLocale } from "@/lib/article-manifest"
 import { buildEbookHtml, resolveImagesInHtml } from "@/lib/pdf/ebook-structure"
 import { renderMarkdownToHtml } from "@/lib/pdf/markdown-pipeline"
@@ -355,9 +355,9 @@ async function main(): Promise<void> {
   // Phase 1: Load article tree
   // ═══════════════════════════════════════════════════════════════════════
   console.log("[pdf] Phase 1/6: Loading article tree...")
-  let tree: TreeNode[]
+  let tree: ChapterNavNode[]
   try {
-    tree = (await getArticleTree(locale)) as TreeNode[]
+    tree = (await getArticleTree(locale)) as ChapterNavNode[]
   } catch (err) {
     console.error("[pdf] Failed to load article tree:", err)
     process.exit(1)
@@ -370,8 +370,8 @@ async function main(): Promise<void> {
     process.exit(0)
   }
 
-  function sortTree(nodes: TreeNode[]) {
-    nodes.sort((a: TreeNode, b: TreeNode) => {
+  function sortTree(nodes: ChapterNavNode[]) {
+    nodes.sort((a: ChapterNavNode, b: ChapterNavNode) => {
       if (a.isPreface !== b.isPreface) return a.isPreface ? -1 : 1
       if (a.isFolder && b.isFolder && a.isAppendix !== b.isAppendix) {
         return a.isAppendix ? 1 : -1
@@ -537,7 +537,12 @@ async function main(): Promise<void> {
 
   await browser.close()
 
-  // Keep temp HTML file at public/.gtmc-pdf-temp.html for debugging/inspection
+  try {
+    // Comment this line to keep temp HTML file at public/.gtmc-pdf-temp.html for debugging/inspection
+    if (fs.existsSync(tempHtmlPath)) fs.unlinkSync(tempHtmlPath)
+  } catch {
+    // Ignore cleanup errors
+  }
 
   // ── Add PDF bookmarks (outlines) ────────────────────────────────────────
   console.log("[pdf]   → Adding PDF bookmarks...")

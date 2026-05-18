@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import type { TocItem } from "./use-toc"
+import type { OutlineItem } from "./use-outline"
 
-function computeInitialActiveHeading(toc: TocItem[]): string | null {
+function computeInitialActiveHeading(toc: OutlineItem[]): string | null {
   if (!toc || toc.length === 0) return null
 
   const headingIds = toc.map((item) => item.id)
@@ -31,7 +31,7 @@ function computeInitialActiveHeading(toc: TocItem[]): string | null {
 }
 
 export function useActiveHeading(
-  toc: TocItem[],
+  toc: OutlineItem[],
   pathname: string
 ): string | null {
   const [activeHeadingId, setActiveHeadingId] = useState<string | null>(() =>

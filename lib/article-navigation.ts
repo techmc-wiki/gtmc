@@ -1,4 +1,4 @@
-import type { TreeNode } from "@/types/sidebar-tree"
+import type { ChapterNavNode } from "@/types/chapter-nav"
 import { getLocalizedArticleEntry } from "./article-manifest"
 
 interface FlatArticle {
@@ -19,10 +19,10 @@ interface NavigationResult {
   next: ArticleInfo | null
 }
 
-export function flattenArticleTree(tree: TreeNode[]): FlatArticle[] {
+export function flattenArticleTree(tree: ChapterNavNode[]): FlatArticle[] {
   const result: FlatArticle[] = []
 
-  function dfs(nodes: TreeNode[]): void {
+  function dfs(nodes: ChapterNavNode[]): void {
     for (const node of nodes) {
       if (!node.isFolder) {
         const parentPath = node.isReadmeIntro

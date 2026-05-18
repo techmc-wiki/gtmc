@@ -342,7 +342,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   return (
     <div
       className="
-        relative min-h-screen min-w-0 overflow-x-clip border border-tech-main/40 bg-transparent
+        relative min-h-screen min-w-0 border border-tech-main/40 bg-transparent
         p-6 backdrop-blur-sm
         sm:p-8
       ">

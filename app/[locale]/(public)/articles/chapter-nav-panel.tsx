@@ -1,30 +1,30 @@
 import * as React from "react"
 import { useImperativeHandle } from "react"
 import { usePathname } from "@/i18n/navigation"
-import { SidebarActions } from "./sidebar/actions"
-import { SidebarTree, type TreeNode } from "./sidebar/tree-node"
-import { useBlur } from "./sidebar/use-blur"
-import { useSidebarContext } from "./sidebar/sidebar-context"
-import { useScrollToActive } from "./sidebar/use-scroll-to-active"
+import { ChapterNavActions } from "./chapter-nav/actions"
+import { ChapterNavTree, type ChapterNavNode } from "./chapter-nav/tree"
+import { useBlur } from "./chapter-nav/use-blur"
+import { useReaderNavigation } from "./reader-navigation/context"
+import { useScrollToActive } from "./chapter-nav/use-scroll-to-active"
 
-export interface SidebarClientHandle {
+export interface ChapterNavPanelHandle {
   openCreateModal: () => void
   collapseAll: () => void
   scrollToCurrent: () => void
 }
 
-interface SidebarClientProps {
-  tree: TreeNode[]
+interface ChapterNavPanelProps {
+  tree: ChapterNavNode[]
   onNavigate?: () => void
   internalScroll?: boolean
   scrollClass?: string
   hideActions?: boolean
 }
 
-export const SidebarClient = React.forwardRef<
-  SidebarClientHandle,
-  SidebarClientProps
->(function SidebarClient(
+export const ChapterNavPanel = React.forwardRef<
+  ChapterNavPanelHandle,
+  ChapterNavPanelProps
+>(function ChapterNavPanel(
   {
     tree: _tree,
     onNavigate,
@@ -37,7 +37,7 @@ export const SidebarClient = React.forwardRef<
   void _tree
 
   return (
-    <SidebarClientInner
+    <ChapterNavPanelInner
       onNavigate={onNavigate}
       internalScroll={internalScroll}
       scrollClass={scrollClass}
@@ -47,10 +47,10 @@ export const SidebarClient = React.forwardRef<
   )
 })
 
-const SidebarClientInner = React.forwardRef<
-  SidebarClientHandle,
-  Omit<SidebarClientProps, "tree">
->(function SidebarClientInner(
+const ChapterNavPanelInner = React.forwardRef<
+  ChapterNavPanelHandle,
+  Omit<ChapterNavPanelProps, "tree">
+>(function ChapterNavPanelInner(
   { onNavigate, internalScroll = false, scrollClass = "", hideActions = false },
   ref
 ) {
@@ -62,7 +62,7 @@ const SidebarClientInner = React.forwardRef<
     setExpandedFolders,
     expandedFoldersRef,
     mounted,
-    toc,
+    outline,
     highlightActive,
     setHighlightActive,
     scrollContainerRef,
@@ -71,7 +71,7 @@ const SidebarClientInner = React.forwardRef<
     setScrollToCurrent,
     activeItemRef,
     folderGridRefs,
-  } = useSidebarContext()
+  } = useReaderNavigation()
 
   const {
     scrollToCurrent: scrollToCurrentFn,
@@ -102,7 +102,7 @@ const SidebarClientInner = React.forwardRef<
     pathname,
     tree,
     expandedFolders,
-    toc,
+    outline,
     highlightActive,
   })
 
@@ -118,7 +118,7 @@ const SidebarClientInner = React.forwardRef<
         SYS.DIR_TREE_EMPTY
       </div>
     ) : (
-      <SidebarTree onNavigate={onNavigate} items={tree} />
+      <ChapterNavTree onNavigate={onNavigate} items={tree} />
     )
 
   return (
@@ -126,7 +126,7 @@ const SidebarClientInner = React.forwardRef<
       {internalScroll ? (
         <div className="relative flex min-h-0 flex-1 flex-col">
           {!hideActions && (
-            <SidebarActions
+            <ChapterNavActions
               internalScroll={internalScroll}
               onCollapseAll={(e) => {
                 e.preventDefault()
@@ -159,7 +159,7 @@ const SidebarClientInner = React.forwardRef<
       ) : (
         <>
           {!hideActions && (
-            <SidebarActions
+            <ChapterNavActions
               internalScroll={internalScroll}
               onCollapseAll={(e) => {
                 e.preventDefault()

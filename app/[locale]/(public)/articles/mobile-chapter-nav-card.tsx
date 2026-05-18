@@ -4,31 +4,28 @@ import * as React from "react"
 import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
-import { useModalEffects } from "@/hooks/use-modal-effects"
 
 const emptySubscribe = () => () => {}
 
-interface MobileTreeCardProps {
+interface MobileChapterNavCardProps {
   isOpen: boolean
   onClose: () => void
   children: React.ReactNode
   isFloating?: boolean
 }
 
-export function MobileTreeCard({
+export function MobileChapterNavCard({
   isOpen,
   onClose,
   children,
   isFloating,
-}: MobileTreeCardProps) {
+}: MobileChapterNavCardProps) {
   const t = useTranslations("CommonA11y")
   const isMounted = React.useSyncExternalStore(
     emptySubscribe,
     () => true,
     () => false
   )
-
-  useModalEffects({ isOpen: isOpen && Boolean(isFloating), onClose })
 
   if (!isMounted || !isOpen || !isFloating) return null
 

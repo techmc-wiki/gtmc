@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getPublicSidebarTree } from "@/lib/articles/public-tree"
+import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import type { ArticleLocale } from "@/lib/article-manifest"
 
 const TREE_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300"
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     : "zh"
 
   try {
-    const tree = await getPublicSidebarTree(locale)
+    const tree = await getPublicChapterNav(locale)
     return NextResponse.json(tree, {
       headers: {
         "Cache-Control": TREE_CACHE_CONTROL,

@@ -30,7 +30,9 @@ function stripMarkdown(text: string): string {
     .trim()
 }
 
-function flattenTree(nodes: ChapterNavNode[]): { title: string; slug: string }[] {
+function flattenTree(
+  nodes: ChapterNavNode[]
+): { title: string; slug: string }[] {
   const result: { title: string; slug: string }[] = []
 
   for (const node of nodes) {
@@ -48,7 +50,10 @@ function flattenTree(nodes: ChapterNavNode[]): { title: string; slug: string }[]
 const cachedIndexes = new Map<ArticleLocale, MiniSearch<IndexedArticle>>()
 const cacheTimestamps = new Map<ArticleLocale, number>()
 const cachedCommitShas = new Map<ArticleLocale, string | null>()
-const buildPromises = new Map<ArticleLocale, Promise<MiniSearch<IndexedArticle>>>()
+const buildPromises = new Map<
+  ArticleLocale,
+  Promise<MiniSearch<IndexedArticle>>
+>()
 
 const CACHE_TTL = 1800_000
 const FETCH_CONCURRENCY = 5
@@ -87,7 +92,9 @@ function createMiniSearchIndex(
   return miniSearch
 }
 
-async function buildIndex(locale: ArticleLocale): Promise<MiniSearch<IndexedArticle>> {
+async function buildIndex(
+  locale: ArticleLocale
+): Promise<MiniSearch<IndexedArticle>> {
   const tree = await getPublicChapterNav(locale)
 
   const articles: IndexedArticle[] = []
@@ -114,17 +121,18 @@ async function buildIndex(locale: ArticleLocale): Promise<MiniSearch<IndexedArti
         continue
       }
 
-      const title = 
-        (artifact.frontmatter['chapter-title'] as string) ||
-        (artifact.frontmatter['chapterTitle'] as string) ||
-        (locale === "en" && (artifact.frontmatter['title-en'] as string)) ||
-        (artifact.frontmatter['title'] as string) ||
+      const title =
+        (artifact.frontmatter["chapter-title"] as string) ||
+        (artifact.frontmatter["chapterTitle"] as string) ||
+        (locale === "en" && (artifact.frontmatter["title-en"] as string)) ||
+        (artifact.frontmatter["title"] as string) ||
         node.title
 
-      const enTitle = artifact.frontmatter['title-en']
-      const searchContent = typeof enTitle === 'string' && enTitle.trim()
-        ? stripMarkdown(artifact.content) + ' ' + enTitle.trim()
-        : stripMarkdown(artifact.content)
+      const enTitle = artifact.frontmatter["title-en"]
+      const searchContent =
+        typeof enTitle === "string" && enTitle.trim()
+          ? stripMarkdown(artifact.content) + " " + enTitle.trim()
+          : stripMarkdown(artifact.content)
 
       articles.push({
         id: node.slug,
@@ -145,7 +153,9 @@ async function buildIndex(locale: ArticleLocale): Promise<MiniSearch<IndexedArti
   return createMiniSearchIndex(articles)
 }
 
-export async function getSearchIndex(locale: ArticleLocale): Promise<MiniSearch<IndexedArticle>> {
+export async function getSearchIndex(
+  locale: ArticleLocale
+): Promise<MiniSearch<IndexedArticle>> {
   const currentSha = await getLatestCommitSha()
 
   const cachedIndex = cachedIndexes.get(locale)

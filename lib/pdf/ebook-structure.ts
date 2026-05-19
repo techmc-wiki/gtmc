@@ -266,7 +266,10 @@ export async function defaultRenderArticle(
   article: LinearizedArticle,
   locale: string
 ): Promise<string> {
-  const content = await getArticleContentForPdf(article.slug, locale as "en" | "zh")
+  const content = await getArticleContentForPdf(
+    article.slug,
+    locale as "en" | "zh"
+  )
   if (!content) return ""
 
   const html = await renderMarkdownToHtml(content, {

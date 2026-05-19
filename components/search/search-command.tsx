@@ -99,9 +99,12 @@ export function SearchCommand() {
 
       setIsLoading(true)
 
-      fetch(`/api/articles/search?q=${encodeURIComponent(query)}&locale=${locale}`, {
-        signal: controller.signal,
-      })
+      fetch(
+        `/api/articles/search?q=${encodeURIComponent(query)}&locale=${locale}`,
+        {
+          signal: controller.signal,
+        }
+      )
         .then((res) => res.json())
         .then((data) => {
           if (!controller.signal.aborted) {

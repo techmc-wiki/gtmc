@@ -192,10 +192,7 @@ function getNodeTitle(entry: ArticleEntry, locale: ArticleLocale): string {
 
   if (entry.isPreface) {
     return (
-      entry.title ||
-      chapterTitle ||
-      entry.slug.split("/").pop() ||
-      entry.slug
+      entry.title || chapterTitle || entry.slug.split("/").pop() || entry.slug
     )
   }
 

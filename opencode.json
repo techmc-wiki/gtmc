@@ -3,18 +3,24 @@
   "mcp": {
     "webstorm": {
       "type": "remote",
-      "url": "http://127.0.0.1:64342/sse"
+      "url": "http://127.0.0.1:64343/sse"
     },
     "next-devtools": {
       "type": "local",
-      "command": [
-        "next-devtools-mcp"
-      ]
+      "command": ["next-devtools-mcp"]
     },
     "vercel": {
       "type": "remote",
       "url": "https://mcp.vercel.com",
       "oauth": {}
+    },
+    "chrome": {
+      "type": "local",
+      "command": ["chrome-devtools-mcp"]
+    },
+    "mdn": {
+      "type": "remote",
+      "url": "https://mcp.mdn.mozilla.net"
     }
   }
 }

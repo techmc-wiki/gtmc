@@ -19,17 +19,13 @@ export default function ConflictResolver({
   prNumber,
   rebaseState,
   revisionId,
-  conflictType = "CONFLICT",
 }: {
   activeFileId: string
   files: DraftFileCollection["files"]
   prNumber: number
   rebaseState?: RebaseState | null
   revisionId?: string
-  conflictType?: "CONFLICT" | "FILE_DELETED"
 }) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _conflictType = conflictType
   const [draftCollection, setDraftCollection] = useState<DraftFileCollection>(
     () =>
       normalizeDraftFileCollection({

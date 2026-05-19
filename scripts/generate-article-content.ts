@@ -33,7 +33,9 @@ function main(): void {
       continue
     }
 
-    for (const [locale, localizedPath] of Object.entries(entry.localizedFilePaths)) {
+    for (const [locale, localizedPath] of Object.entries(
+      entry.localizedFilePaths
+    )) {
       const sourcePath = path.join(ARTICLES_PATH, localizedPath)
 
       let fileContent: string

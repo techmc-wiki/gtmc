@@ -1,0 +1,47 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "nextjs"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "off"
+  },
+  "env": {
+    "builtin": true,
+    "browser": true,
+    "node": true,
+    "es2024": true
+  },
+  "settings": {
+    "next": {
+      "rootDir": "."
+    },
+    "react": {
+      "version": "19.2.6"
+    }
+  },
+  "ignorePatterns": [
+    ".next/**",
+    ".vercel/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+    ".worktrees/**",
+    ".sisyphus/**",
+    ".agents/**",
+    ".claude/**",
+    "articles/**",
+    "**/*.cjs"
+  ],
+  "rules": {
+    "no-control-regex": "off",
+    "no-useless-escape": "off",
+    "nextjs/no-img-element": "off",
+    "react/react-in-jsx-scope": "off",
+    "typescript/no-unused-vars": [
+      "warn",
+      {
+        "ignoreRestSiblings": true
+      }
+    ]
+  }
+}

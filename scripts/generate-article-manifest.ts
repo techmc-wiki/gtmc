@@ -46,7 +46,10 @@ function getManifestConflictPath(
   )?.filePath
 }
 
-function addManifestEntry(manifest: ArticleManifest, entry: ArticleEntry): void {
+function addManifestEntry(
+  manifest: ArticleManifest,
+  entry: ArticleEntry
+): void {
   if (manifest[entry.slug] === undefined) {
     manifest[entry.slug] = entry
     return
@@ -387,7 +390,9 @@ function buildGenerationSummary(manifest: ArticleManifest): string {
   return [...summaryLines, ...previewLines, ""].join("\n")
 }
 
-function mergeLocalizedManifestEntries(manifest: ArticleManifest): ArticleManifest {
+function mergeLocalizedManifestEntries(
+  manifest: ArticleManifest
+): ArticleManifest {
   const entriesBySlug = new Map<string, ArticleEntry[]>()
 
   for (const entry of Object.values(manifest)) {
@@ -404,14 +409,19 @@ function mergeLocalizedManifestEntries(manifest: ArticleManifest): ArticleManife
   return mergedManifest
 }
 
-function mergeLocalizedEntries(slug: string, entries: ArticleEntry[]): ArticleEntry {
+function mergeLocalizedEntries(
+  slug: string,
+  entries: ArticleEntry[]
+): ArticleEntry {
   const zhEntry = entries.find((entry) => entry.availableLocales.includes("zh"))
   const enEntry = entries.find((entry) => entry.availableLocales.includes("en"))
   const baseEntry = zhEntry ?? entries[0]
   const localizedFilePaths: Partial<Record<ArticleLocale, string>> = {}
 
   for (const locale of ARTICLE_LOCALE_ORDER) {
-    const localizedEntry = entries.find((entry) => entry.availableLocales.includes(locale))
+    const localizedEntry = entries.find((entry) =>
+      entry.availableLocales.includes(locale)
+    )
     const localizedPath = localizedEntry?.localizedFilePaths[locale]
     if (localizedPath !== undefined) {
       localizedFilePaths[locale] = localizedPath
@@ -647,7 +657,11 @@ function main(): void {
       continue
     }
 
-    const folderConflictPath = getManifestConflictPath(manifest, key, rootLocale)
+    const folderConflictPath = getManifestConflictPath(
+      manifest,
+      key,
+      rootLocale
+    )
     if (folderSlugKeys.has(key) && folderConflictPath !== undefined) {
       process.stderr.write(
         `Error: Root article key "${key}" for locale "${rootLocale}" ` +

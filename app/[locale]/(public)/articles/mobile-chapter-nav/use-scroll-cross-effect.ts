@@ -48,6 +48,6 @@ export function useScrollCrossEffect(
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
     // isStuck intentionally excluded — only used during mount sync (one-shot)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react/exhaustive-deps
   }, [dispatch])
 }

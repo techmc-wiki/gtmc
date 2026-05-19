@@ -15,16 +15,11 @@ interface ArticleManifestEntry {
 
 const manifest = manifestData as Record<string, ArticleManifestEntry>
 
-export function hasArticleLocale(
-  slug: string,
-  locale: ArticleLocale
-): boolean {
+export function hasArticleLocale(slug: string, locale: ArticleLocale): boolean {
   return manifest[slug]?.availableLocales.includes(locale) ?? false
 }
 
-export function getArticleAvailableLocales(
-  slug: string
-): ArticleLocale[] {
+export function getArticleAvailableLocales(slug: string): ArticleLocale[] {
   return manifest[slug]?.availableLocales ?? []
 }
 

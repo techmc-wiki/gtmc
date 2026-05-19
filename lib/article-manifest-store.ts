@@ -64,7 +64,10 @@ export function loadArticleManifest(): Record<string, ArticleEntry> {
 const ARTICLE_LOCALES: ArticleLocale[] = ["zh", "en"]
 
 function isArticleLocale(value: unknown): value is ArticleLocale {
-  return typeof value === "string" && ARTICLE_LOCALES.includes(value as ArticleLocale)
+  return (
+    typeof value === "string" &&
+    ARTICLE_LOCALES.includes(value as ArticleLocale)
+  )
 }
 
 function normalizeAvailableLocales(value: unknown): ArticleLocale[] {
@@ -129,7 +132,8 @@ function normalizeArticleEntry(
           .map((child) => normalizeArticleEntry(slugKey, child))
           .filter((child): child is ArticleEntry => child !== null)
       : undefined,
-    parentSlug: typeof entry.parentSlug === "string" ? entry.parentSlug : undefined,
+    parentSlug:
+      typeof entry.parentSlug === "string" ? entry.parentSlug : undefined,
     author: typeof entry.author === "string" ? entry.author : undefined,
     coAuthors: Array.isArray(entry.coAuthors) ? entry.coAuthors : undefined,
     date: typeof entry.date === "string" ? entry.date : undefined,

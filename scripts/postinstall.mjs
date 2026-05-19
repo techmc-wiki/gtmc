@@ -31,7 +31,9 @@ if (isGitWorkTree()) {
   if (!existsSync("articles") || readdirSync("articles").length === 0) {
     run("git", ["submodule", "update", "--init", "--recursive"])
   } else {
-    process.stdout.write("Skipping article submodule checkout because articles/ already exists\n")
+    process.stdout.write(
+      "Skipping article submodule checkout because articles/ already exists\n"
+    )
   }
 } else {
   process.stdout.write("Skipping Git submodule setup outside a Git work tree\n")

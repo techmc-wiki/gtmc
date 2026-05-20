@@ -123,16 +123,10 @@ async function buildIndex(
 
       const title =
         (artifact.frontmatter["chapter-title"] as string) ||
-        (artifact.frontmatter["chapterTitle"] as string) ||
-        (locale === "en" && (artifact.frontmatter["title-en"] as string)) ||
         (artifact.frontmatter["title"] as string) ||
         node.title
 
-      const enTitle = artifact.frontmatter["title-en"]
-      const searchContent =
-        typeof enTitle === "string" && enTitle.trim()
-          ? stripMarkdown(artifact.content) + " " + enTitle.trim()
-          : stripMarkdown(artifact.content)
+      const searchContent = stripMarkdown(artifact.content)
 
       articles.push({
         id: node.slug,

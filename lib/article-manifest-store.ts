@@ -15,14 +15,12 @@ export const MANIFEST_PATH = path.join(
 export interface ArticleEntry {
   filePath: string
   slug: string
-  title?: string
-  titleEn?: string
+  titleByLocale: Partial<Record<ArticleLocale, string>>
   availableLocales: ArticleLocale[]
   localizedFilePaths: Partial<Record<ArticleLocale, string>>
-  chapterTitle: string
-  chapterTitleEn: string
-  introTitle: string
-  introTitleEn: string
+  chapterTitleByLocale: Partial<Record<ArticleLocale, string>>
+  introTitleByLocale: Partial<Record<ArticleLocale, string>>
+  descriptionByLocale: Partial<Record<ArticleLocale, string>>
   hasIntro: boolean
   index: number
   isFolder: boolean
@@ -30,10 +28,21 @@ export interface ArticleEntry {
   isPreface: boolean
   children?: ArticleEntry[]
   parentSlug?: string
+  /** generator-derived from git, never read from frontmatter */
   author?: string
+  /** generator-derived from git, never read from frontmatter */
   coAuthors?: string[]
-  date?: string
-  lastmod?: string
+  created?: string
+  lastmodByLocale: Partial<Record<ArticleLocale, string>>
+  translatedFromRevisionByLocale: Partial<
+    Record<Exclude<ArticleLocale, "zh">, string>
+  >
+  translationFreshnessByLocale: Partial<
+    Record<Exclude<ArticleLocale, "zh">, "fresh" | "stale" | "unknown">
+  >
+  bannerByLocale?: Partial<
+    Record<ArticleLocale, { src: string; alt?: string }>
+  >
   isAdvanced?: boolean
 }
 
@@ -95,49 +104,141 @@ function normalizeLocalizedFilePaths(
   return paths
 }
 
+function normalizeStringByLocale(
+  value: unknown
+): Partial<Record<ArticleLocale, string>> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return {}
+  }
+
+  const record: Partial<Record<ArticleLocale, string>> = {}
+  for (const locale of ARTICLE_LOCALES) {
+    const val = (value as Partial<Record<ArticleLocale, unknown>>)[locale]
+    if (typeof val === "string") {
+      record[locale] = val
+    }
+  }
+
+  return record
+}
+
+function normalizeFreshnessByLocale(
+  value: unknown
+): Partial<
+  Record<Exclude<ArticleLocale, "zh">, "fresh" | "stale" | "unknown">
+> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return {}
+  }
+
+  const valid = new Set(["fresh", "stale", "unknown"])
+  const record: Partial<
+    Record<Exclude<ArticleLocale, "zh">, "fresh" | "stale" | "unknown">
+  > = {}
+
+  for (const locale of ARTICLE_LOCALES) {
+    if (locale === "zh") continue
+    const val = (value as Partial<Record<ArticleLocale, unknown>>)[locale]
+    if (typeof val === "string" && valid.has(val)) {
+      record[locale as Exclude<ArticleLocale, "zh">] = val as
+        | "fresh"
+        | "stale"
+        | "unknown"
+    }
+  }
+
+  return record
+}
+
+interface LocaleBanner {
+  src: string
+  alt?: string
+}
+
+function normalizeBannerByLocale(
+  value: unknown
+): Partial<Record<ArticleLocale, LocaleBanner>> | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return undefined
+  }
+
+  const record: Partial<Record<ArticleLocale, LocaleBanner>> = {}
+  for (const locale of ARTICLE_LOCALES) {
+    const val = (value as Partial<Record<ArticleLocale, unknown>>)[locale]
+    if (typeof val === "object" && val !== null && !Array.isArray(val)) {
+      const banner = val as Record<string, unknown>
+      if (typeof banner.src === "string") {
+        record[locale] = {
+          src: banner.src,
+          alt: typeof banner.alt === "string" ? banner.alt : undefined,
+        }
+      }
+    }
+  }
+
+  return Object.keys(record).length > 0 ? record : undefined
+}
+
 function normalizeArticleEntry(
   slugKey: string,
   value: unknown
 ): ArticleEntry | null {
   if (typeof value !== "object" || value === null) return null
 
-  const entry = value as Partial<ArticleEntry>
+  const entry = value as Record<string, unknown>
   if (typeof entry.filePath !== "string") return null
 
+  // Reject legacy manifest entries with flat suffixed fields
+  if (
+    "titleEn" in entry ||
+    "chapterTitleEn" in entry ||
+    "introTitleEn" in entry
+  ) {
+    console.error(
+      `[article-manifest] Detected legacy manifest shape for "${slugKey}": ` +
+        "flat *En fields are no longer supported. " +
+        "Migrate to per-locale record fields (titleByLocale, chapterTitleByLocale, etc.)."
+    )
+    return null
+  }
+
+  const introByLocale = normalizeStringByLocale(entry.introTitleByLocale)
+
   return {
-    filePath: entry.filePath,
+    filePath: entry.filePath as string,
     slug: typeof entry.slug === "string" ? entry.slug : slugKey,
-    title: typeof entry.title === "string" ? entry.title : undefined,
-    titleEn: typeof entry.titleEn === "string" ? entry.titleEn : undefined,
+    titleByLocale: normalizeStringByLocale(entry.titleByLocale),
     availableLocales: normalizeAvailableLocales(entry.availableLocales),
     localizedFilePaths: normalizeLocalizedFilePaths(entry.localizedFilePaths),
-    chapterTitle:
-      typeof entry.chapterTitle === "string" ? entry.chapterTitle : "",
-    chapterTitleEn:
-      typeof entry.chapterTitleEn === "string" ? entry.chapterTitleEn : "",
-    introTitle: typeof entry.introTitle === "string" ? entry.introTitle : "",
-    introTitleEn:
-      typeof entry.introTitleEn === "string" ? entry.introTitleEn : "",
+    chapterTitleByLocale: normalizeStringByLocale(entry.chapterTitleByLocale),
+    introTitleByLocale: introByLocale,
+    descriptionByLocale: normalizeStringByLocale(entry.descriptionByLocale),
     hasIntro:
       typeof entry.hasIntro === "boolean"
         ? entry.hasIntro
-        : (typeof entry.introTitle === "string" && entry.introTitle !== "") ||
-          (typeof entry.introTitleEn === "string" && entry.introTitleEn !== ""),
+        : Object.values(introByLocale).some((t) => t !== ""),
     index: typeof entry.index === "number" ? entry.index : 0,
     isFolder: entry.isFolder === true,
     isAppendix: entry.isAppendix === true,
     isPreface: entry.isPreface === true,
     children: Array.isArray(entry.children)
       ? entry.children
-          .map((child) => normalizeArticleEntry(slugKey, child))
+          .map((child: unknown) => normalizeArticleEntry(slugKey, child))
           .filter((child): child is ArticleEntry => child !== null)
       : undefined,
     parentSlug:
       typeof entry.parentSlug === "string" ? entry.parentSlug : undefined,
     author: typeof entry.author === "string" ? entry.author : undefined,
     coAuthors: Array.isArray(entry.coAuthors) ? entry.coAuthors : undefined,
-    date: typeof entry.date === "string" ? entry.date : undefined,
-    lastmod: typeof entry.lastmod === "string" ? entry.lastmod : undefined,
+    created: typeof entry.created === "string" ? entry.created : undefined,
+    lastmodByLocale: normalizeStringByLocale(entry.lastmodByLocale),
+    translatedFromRevisionByLocale: normalizeStringByLocale(
+      entry.translatedFromRevisionByLocale
+    ) as Partial<Record<Exclude<ArticleLocale, "zh">, string>>,
+    translationFreshnessByLocale: normalizeFreshnessByLocale(
+      entry.translationFreshnessByLocale
+    ),
+    bannerByLocale: normalizeBannerByLocale(entry.bannerByLocale),
     isAdvanced: entry.isAdvanced === true,
   }
 }

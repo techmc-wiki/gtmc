@@ -1,6 +1,5 @@
 import fs from "fs"
 import path from "path"
-import matter from "gray-matter"
 
 import { ARTICLES_PATH } from "@/lib/article-fs-constants"
 import { ArticleManifest } from "@/lib/article-manifest-store"
@@ -9,10 +8,26 @@ import {
   artifactFilename,
   type ArticleContentArtifact,
 } from "@/lib/article-content-artifact"
+import {
+  parseSourceFrontMatter,
+  parseTranslationFrontMatter,
+} from "@/lib/frontmatter-parser"
+import type { SourceFrontMatter, TranslationFrontMatter } from "@/lib/frontmatter-parser"
 
 const OUTPUT_DIR = path.join(process.cwd(), "data", "articles")
 const TEMP_DIR = path.join(process.cwd(), "data", "articles.tmp")
 const IS_PRODUCTION = process.env.NODE_ENV !== "development"
+
+/**
+ * Strip YAML frontmatter delimited by `---` and return the body text.
+ */
+function stripFrontMatter(raw: string): string {
+  const idx = raw.indexOf("\n---\n")
+  if (raw.startsWith("---\n") && idx !== -1) {
+    return raw.slice(idx + 5)
+  }
+  return raw
+}
 
 function main(): void {
   let generatedCount = 0
@@ -52,14 +67,92 @@ function main(): void {
         continue
       }
 
-      const { data, content } = matter(fileContent)
+      let artifactContent: string
+      let frontmatter: Record<string, unknown>
+
+      if (locale === "zh") {
+        let fm: SourceFrontMatter
+        try {
+          fm = parseSourceFrontMatter(fileContent, {
+            allowTitlelessFolder: entry.isFolder,
+          })
+        } catch (e) {
+          process.stderr.write(
+            `Error: Failed to parse source frontmatter for "${entry.slug}" (${locale}): ${(e as Error).message}\n`
+          )
+          errorCount++
+          if (IS_PRODUCTION) {
+            process.exit(1)
+          }
+          continue
+        }
+
+        artifactContent = stripFrontMatter(fileContent)
+        frontmatter = {
+          title: fm.title,
+          ...(fm["chapter-title"] && {
+            "chapter-title": fm["chapter-title"],
+          }),
+          ...(fm["intro-title"] && { "intro-title": fm["intro-title"] }),
+          ...(fm.description && { description: fm.description }),
+          index: fm.index,
+          ...(fm["is-advanced"] !== undefined && {
+            "is-advanced": fm["is-advanced"],
+          }),
+          ...(fm.banner && { banner: fm.banner }),
+          author: entry.author || undefined,
+          coAuthors: entry.coAuthors || undefined,
+          created: entry.created || undefined,
+          lastmod: entry.lastmodByLocale?.zh || undefined,
+        }
+      } else if (locale === "en") {
+        let fm: TranslationFrontMatter
+        try {
+          fm = parseTranslationFrontMatter(fileContent)
+        } catch (e) {
+          process.stderr.write(
+            `Error: Failed to parse translation frontmatter for "${entry.slug}" (${locale}): ${(e as Error).message}\n`
+          )
+          errorCount++
+          if (IS_PRODUCTION) {
+            process.exit(1)
+          }
+          continue
+        }
+
+        artifactContent = stripFrontMatter(fileContent)
+        frontmatter = {
+          ...(fm.title && { title: fm.title }),
+          ...(fm["chapter-title"] && {
+            "chapter-title": fm["chapter-title"],
+          }),
+          ...(fm["intro-title"] && { "intro-title": fm["intro-title"] }),
+          ...(fm.description && { description: fm.description }),
+          ...(fm.banner && { banner: fm.banner }),
+          translatedFromRevision: fm["translated-from-revision"],
+          translationFreshness:
+            entry.translationFreshnessByLocale?.en || undefined,
+          created: entry.created || undefined,
+          lastmod: entry.lastmodByLocale?.en || undefined,
+          index: entry.index >= 0 ? entry.index : undefined,
+          ...(entry.isAdvanced !== undefined && {
+            isAdvanced: entry.isAdvanced,
+          }),
+          author: entry.author || undefined,
+          coAuthors: entry.coAuthors || undefined,
+          ...(!fm.banner &&
+            entry.bannerByLocale?.zh && { banner: entry.bannerByLocale.zh }),
+        }
+      } else {
+        continue
+      }
 
       const artifact: ArticleContentArtifact = {
         slug: entry.slug,
         locale: locale as ArticleLocale,
         filePath: localizedPath,
-        content,
-        frontmatter: data as Record<string, unknown>,
+        content: artifactContent,
+        frontmatter,
       }
 
       const localeDir = path.join(TEMP_DIR, locale)

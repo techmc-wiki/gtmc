@@ -1,9 +1,7 @@
 import path from "path"
 import { ImageResponse } from "next/og"
 import { type NextRequest } from "next/server"
-import matter from "gray-matter"
 import mime from "mime-types"
-import { resolveSlug } from "@/lib/slug-resolver"
 import {
   type ArticleLocale,
   getLocalizedArticleEntry,
@@ -82,33 +80,29 @@ export async function GET(
   })()
   if (!artifact) return new Response("Not Found", { status: 404 })
 
-  const filePath = artifact.filePath || resolveSlug(slugPath)
-  if (!filePath) return new Response("Not Found", { status: 404 })
-
+  const filePath = artifact.filePath
   const content = artifact.content
-
-  const { data } = matter(content)
   const siteUrl = getSiteUrl()
-
-  const rawTitle =
-    (data.title as string | undefined) ??
-    content.match(/^#\s+(.+)$/m)?.[1]?.trim() ??
-    slug[slug.length - 1]?.replace(/-/g, " ") ??
-    "Untitled"
-  const title = rawTitle.length > 60 ? rawTitle.slice(0, 60) + "…" : rawTitle
 
   const manifestEntry = getLocalizedArticleEntry(slugPath, locale)
   const parentEntry = manifestEntry?.parentSlug
     ? getLocalizedArticleEntry(manifestEntry.parentSlug, locale)
     : null
+
+  const rawTitle =
+    manifestEntry?.titleByLocale[locale] ??
+    manifestEntry?.titleByLocale["zh"] ??
+    slug[slug.length - 1]?.replace(/-/g, " ") ??
+    "Untitled"
+  const title = rawTitle.length > 60 ? rawTitle.slice(0, 60) + "…" : rawTitle
+
   const chapterTitle =
-    manifestEntry?.chapterTitle.trim() ||
-    parentEntry?.chapterTitle.trim() ||
-    (data["chapter-title"] as string | undefined) ||
+    manifestEntry?.chapterTitle?.trim() ||
+    parentEntry?.chapterTitle?.trim() ||
     null
 
-  const author = (data.author as string | undefined) ?? null
-  const isAdvanced = data["is-advanced"] === true
+  const author = manifestEntry?.author ?? null
+  const isAdvanced = manifestEntry?.isAdvanced === true
   const { readingTime } = calculateReadingMetrics(content)
   const bodyHook = extractBodyHook(content)
 
@@ -129,8 +123,9 @@ export async function GET(
     : []
 
   let bannerDataUri: string | null = null
-  const bannerSrc = (data.banner as { src?: string } | undefined)?.src
-  if (bannerSrc) {
+  const bannerEntry = manifestEntry?.bannerByLocale?.[locale] ?? manifestEntry?.bannerByLocale?.zh
+  const bannerSrc = bannerEntry?.src
+  if (filePath && bannerSrc) {
     try {
       const articleDir = path.dirname(filePath)
       const resolvedBannerPath = path

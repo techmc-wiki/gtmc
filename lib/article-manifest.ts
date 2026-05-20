@@ -50,15 +50,9 @@ export function getLocalizedArticleMetadata(
     }
   }
 
-  const chapterTitle =
-    locale === "en"
-      ? entry.chapterTitleEn.trim() || entry.chapterTitle.trim()
-      : entry.chapterTitle.trim()
+  const chapterTitle = entry.chapterTitleByLocale[locale]?.trim() || ""
 
-  const introTitle =
-    locale === "en"
-      ? entry.introTitleEn.trim() || entry.introTitle.trim()
-      : entry.introTitle.trim()
+  const introTitle = entry.introTitleByLocale[locale]?.trim() || ""
 
   return {
     chapterTitle,
@@ -181,9 +175,8 @@ function getNodeTitle(entry: ArticleEntry, locale: ArticleLocale): string {
 
   if (locale === routing.defaultLocale) {
     return (
-      entry.titleEn?.trim() ||
+      entry.titleByLocale[locale]?.trim() ||
       chapterTitle ||
-      entry.title ||
       fileTitle ||
       entry.slug.split("/").pop() ||
       entry.slug
@@ -192,7 +185,10 @@ function getNodeTitle(entry: ArticleEntry, locale: ArticleLocale): string {
 
   if (entry.isPreface) {
     return (
-      entry.title || chapterTitle || entry.slug.split("/").pop() || entry.slug
+      entry.titleByLocale[locale]?.trim() ||
+      chapterTitle ||
+      entry.slug.split("/").pop() ||
+      entry.slug
     )
   }
 
@@ -203,7 +199,7 @@ function getNodeTitle(entry: ArticleEntry, locale: ArticleLocale): string {
   if (entry.isAppendix) {
     return (
       chapterTitle ||
-      entry.title ||
+      entry.titleByLocale[locale]?.trim() ||
       fileTitle ||
       entry.slug.split("/").pop() ||
       entry.slug
@@ -212,7 +208,7 @@ function getNodeTitle(entry: ArticleEntry, locale: ArticleLocale): string {
 
   return (
     chapterTitle ||
-    entry.title ||
+    entry.titleByLocale[locale]?.trim() ||
     fileTitle ||
     entry.slug.split("/").pop() ||
     entry.slug

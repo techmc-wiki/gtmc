@@ -128,7 +128,7 @@ export async function generateMetadata({
 
     // Build page title with chapter prefix if available
     const manifestEntry = getLocalizedArticleEntry(effectiveSlug, locale)
-    const chapterTitle = manifestEntry?.chapterTitle
+    const chapterTitle = manifestEntry?.chapterTitleByLocale?.[locale]
     const pageTitle = chapterTitle
       ? `${chapterTitle} › ${articleTitle} — Graduate Texts in Minecraft`
       : `${articleTitle} — Graduate Texts in Minecraft`
@@ -242,8 +242,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   )
 
   const author = data.author as string | undefined
-  const coAuthors = (data["co-authors"] as string[] | undefined) || []
-  const createdAt = data.date as string | undefined
+  const coAuthors = (data.coAuthors as string[] | undefined) || []
+  const createdAt = data.created as string | undefined
   const lastModified = data.lastmod as string | undefined
   const isAdvanced = data["is-advanced"] === true
 
@@ -257,7 +257,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }))
 
   const manifestEntry = getLocalizedArticleEntry(effectiveSlug, locale)
-  const chapterTitle = manifestEntry?.chapterTitle
+  const chapterTitle = manifestEntry?.chapterTitleByLocale?.[locale]
 
   const bannerSrc = (data.banner as { src?: string } | undefined)?.src
   const bannerUrl = resolveBannerUrl(bannerSrc, target.filePath, siteUrl)
@@ -377,6 +377,24 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           bannerPath={bannerPath}
           bannerAlt={bannerAlt}
         />
+      )}
+
+      {/* Translation status badges */}
+      {manifestEntry?.titleByLocale && !manifestEntry.titleByLocale[locale] && (
+        <span
+          data-testid="translation-pending-badge"
+          className="inline-block text-tech-warning text-xs mt-2"
+        >
+          (translation pending)
+        </span>
+      )}
+      {(manifestEntry?.translationFreshnessByLocale as Record<string, string> | undefined)?.[locale] === "stale" && (
+        <span
+          data-testid="translation-stale-badge"
+          className="inline-block text-tech-warning text-xs mt-2 ml-2"
+        >
+          (translation may be out of date)
+        </span>
       )}
 
       <article className="min-w-0" data-article-content>
@@ -551,14 +569,20 @@ function resolveDisplayedArticleTitle(
   locale: ArticleLocale
 ): string {
   const slugEntry = getLocalizedArticleEntry(canonicalSlug, locale)
-  const introTitle = slugEntry?.introTitle?.trim()
+  const introTitle = slugEntry?.introTitleByLocale?.[locale]?.trim()
 
   if (isReadmeIntro && introTitle) {
     return introTitle
   }
 
-  if (locale === "en" && slugEntry?.titleEn?.trim()) {
-    return slugEntry.titleEn.trim()
+  const localizedTitle = slugEntry?.titleByLocale?.[locale]?.trim()
+  if (localizedTitle) {
+    return localizedTitle
+  }
+
+  // Cross-locale fallback: for English locale, use zh title if available
+  if (locale === "en" && slugEntry?.titleByLocale?.zh?.trim()) {
+    return slugEntry.titleByLocale.zh.trim()
   }
 
   return resolveArticleTitle(rawTitle, fallbackPath)

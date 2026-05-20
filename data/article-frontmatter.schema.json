@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ArticleFrontmatter",
+  "description": "Schema for article YAML frontmatter — validates both source (zh) and translation (en) branches. At runtime, kebab-case keys are mapped to camelCase (e.g. chapter-title → chapterTitle). Each branch uses additionalProperties: false to reject unknown keys.",
+  "oneOf": [
+    {
+      "title": "SourceFrontmatter",
+      "description": "Source article frontmatter (e.g. *.zh.md). Required: slug, title. Forbidden: author, co-authors, date, lastmod, title-en, chapter-title-en, intro-title-en, translates, translated-from-revision.",
+      "type": "object",
+      "properties": {
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "description": "URL slug, must match SLUG_REGEX in lib/slug-validator.ts"
+        },
+        "title": {
+          "type": "string",
+          "description": "Article title in source locale"
+        },
+        "chapter-title": {
+          "type": "string",
+          "description": "Chapter-level title for grouped articles"
+        },
+        "intro-title": {
+          "type": "string",
+          "description": "Introduction / subtitle for the article"
+        },
+        "description": {
+          "type": "string",
+          "description": "Short description or summary"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": -1,
+          "description": "Sort order index (-1 for floating/excluded)"
+        },
+        "is-advanced": {
+          "type": "boolean",
+          "description": "Flag for advanced-level content"
+        },
+        "banner": {
+          "type": "object",
+          "description": "Banner image for OG/twitter cards",
+          "properties": {
+            "src": {
+              "type": "string",
+              "description": "Banner image URL"
+            },
+            "alt": {
+              "type": "string",
+              "description": "Accessible alt text"
+            }
+          },
+          "required": ["src"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["slug", "title"],
+      "additionalProperties": false
+    },
+    {
+      "title": "TranslationFrontmatter",
+      "description": "Translation article frontmatter (e.g. *.en.md). Required: translates, translated-from-revision. Forbidden: slug, index, is-advanced, author, co-authors, date, lastmod, title-en, chapter-title-en, intro-title-en.",
+      "type": "object",
+      "properties": {
+        "translates": {
+          "type": "string",
+          "description": "Source slug that this article translates"
+        },
+        "translated-from-revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7,40}$",
+          "description": "Git commit SHA (short or full) of the translated source revision"
+        },
+        "title": {
+          "type": "string",
+          "description": "Translated article title (override)"
+        },
+        "chapter-title": {
+          "type": "string",
+          "description": "Translated chapter title (override)"
+        },
+        "intro-title": {
+          "type": "string",
+          "description": "Translated intro title (override)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Translated description (override)"
+        },
+        "banner": {
+          "type": "object",
+          "description": "Banner image override for translation",
+          "properties": {
+            "src": {
+              "type": "string",
+              "description": "Banner image URL"
+            },
+            "alt": {
+              "type": "string",
+              "description": "Accessible alt text"
+            }
+          },
+          "required": ["src"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["translates", "translated-from-revision"],
+      "additionalProperties": false
+    }
+  ]
+}

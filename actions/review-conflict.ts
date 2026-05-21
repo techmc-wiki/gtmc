@@ -5,12 +5,14 @@ import { Prisma } from "@prisma/client"
 import { revalidatePaths } from "@/lib/revalidate-paths"
 import {
   forcePushResolvedToPRBranch,
-  getArticleFileContent,
-  getMainBranchHeadSha,
   resolveDraftSyncConflict,
   resolveSimpleConflicts,
+} from "@/lib/article-conflict"
+import {
+  getArticleFileContent,
+  getMainBranchHeadSha,
   upsertFileOnBranch,
-} from "@/lib/article-submission"
+} from "@/lib/article-branch"
 import { abortRebase, resumeRebase } from "@/lib/article-rebase"
 import {
   decodeStoredDraftFiles,
@@ -309,7 +311,7 @@ async function persistRebasedBranchFiles(input: {
     throw new Error("GitHub token is required to update multiple files")
   }
 
-  const { upsertFilesOnBranch } = await import("@/lib/article-submission")
+  const { upsertFilesOnBranch } = await import("@/lib/article-branch")
   await upsertFilesOnBranch(
     input.token,
     input.files.map((file) => ({

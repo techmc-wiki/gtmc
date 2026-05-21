@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Link } from "@/i18n/navigation"
 import { useRouter } from "@/i18n/navigation"
-import { createFeature } from "@/actions/feature"
+import { createFeature } from "@/actions/feature-draft"
 
 const PENDING_FEATURE_CREATE_KEY = "pendingFeatureCreate.v1"
 

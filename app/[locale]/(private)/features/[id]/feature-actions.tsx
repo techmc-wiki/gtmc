@@ -7,7 +7,7 @@ import {
   assignFeature,
   unassignFeature,
   resolveFeature,
-} from "@/actions/feature"
+} from "@/actions/feature-review"
 import { LoadingIndicator, PENDING_LABELS } from "../loading-indicator"
 
 interface Props {

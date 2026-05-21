@@ -4,7 +4,8 @@ import * as React from "react"
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror"
 import { useRouter } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
-import { saveDraftAction, submitForReviewAction } from "@/actions/article"
+import { saveDraftAction } from "@/actions/article-draft"
+import { submitForReviewAction } from "@/actions/article-submit"
 import {
   getActiveDraftFile,
   getDuplicateDraftFilePaths,

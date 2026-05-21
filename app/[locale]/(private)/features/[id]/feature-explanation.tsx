@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { TechCard } from "@/components/ui/tech-card"
 import { TechButton } from "@/components/ui/tech-button"
 import { TextAreaBox } from "@/components/ui/textarea-box"
-import { updateFeatureExplanation } from "@/actions/feature"
+import { updateFeatureExplanation } from "@/actions/feature-review"
 import { LoadingIndicator, PENDING_LABELS } from "../loading-indicator"
 
 interface FeatureExplanationProps {

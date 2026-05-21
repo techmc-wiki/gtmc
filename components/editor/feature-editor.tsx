@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { TechButton } from "../ui/tech-button"
 import { InputBox } from "../ui/input-box"
 import { useRouter } from "@/i18n/navigation"
-import { updateFeature } from "@/actions/feature"
+import { updateFeature } from "@/actions/feature-draft"
 import { useStatusNotification } from "@/hooks/use-status-notification"
 import {
   LoadingIndicator,

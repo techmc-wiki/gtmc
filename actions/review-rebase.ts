@@ -13,7 +13,7 @@ import {
   serializeDraftFilesForStorage,
   type DraftFileCollection,
 } from "@/lib/draft-files"
-import { upsertFileOnBranch } from "@/lib/article-submission"
+import { upsertFileOnBranch } from "@/lib/article-branch"
 import { prisma } from "@/lib/prisma"
 import { requireReviewAdminContext } from "@/lib/review/admin-context"
 
@@ -82,7 +82,7 @@ async function persistRebasedBranchFiles(input: {
     throw new Error("GitHub token is required to update multiple files")
   }
 
-  const { upsertFilesOnBranch } = await import("@/lib/article-submission")
+  const { upsertFilesOnBranch } = await import("@/lib/article-branch")
   await upsertFilesOnBranch(
     input.token,
     input.files.map((file) => ({

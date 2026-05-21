@@ -11,51 +11,9 @@ import fs from "node:fs"
 import path from "node:path"
 
 import type { LinearizedArticle } from "@/lib/articles/linearize"
-import { getArticleContentForPdf } from "@/lib/articles/linearize"
-import { renderMarkdownToHtml } from "@/lib/pdf/markdown-pipeline"
-import { ARTICLES_PATH } from "@/lib/article-fs"
-import { resolveImageUrl } from "@/lib/pdf/image-resolver"
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export interface EbookOptions {
-  /** Display title of the ebook */
-  title: string
-  /** Optional subtitle */
-  subtitle?: string
-  /** Collection metadata (author, version, date) */
-  meta?: Record<string, string>
-  /** Linearized articles in display order */
-  articles: LinearizedArticle[]
-  /** Locale for UI chrome labels */
-  locale?: "en" | "zh"
-  /** Whether to include KaTeX CSS */
-  hasMath?: boolean
-  /** Callback to render each article's markdown content to HTML.
-   *  If not provided, a default handler reads from disk and renders via
-   *  renderMarkdownToHtml(). */
-  renderArticle?: (article: LinearizedArticle) => Promise<string>
-}
-
-export interface EbookSection {
-  type:
-    | "cover"
-    | "toc"
-    | "preface"
-    | "chapter-intro"
-    | "chapter-article"
-    | "appendix-intro"
-    | "appendix-article"
-  title: string
-  htmlContent: string
-  slug?: string
-}
-
-// ---------------------------------------------------------------------------
-// Locale labels
-// ---------------------------------------------------------------------------
+import { defaultRenderArticle } from "./renderers"
+import type { EbookOptions, EbookSection } from "./types"
 
 const LOCALE_LABELS: Record<"en" | "zh", Record<string, string>> = {
   en: {
@@ -72,10 +30,6 @@ const LOCALE_LABELS: Record<"en" | "zh", Record<string, string>> = {
   },
 }
 
-// ---------------------------------------------------------------------------
-// Print CSS loader
-// ---------------------------------------------------------------------------
-
 const CSS_PATH = path.join(process.cwd(), "lib", "pdf", "print.css")
 
 let cachedCss: string | null = null
@@ -85,10 +39,6 @@ function loadPrintCss(): string {
   cachedCss = fs.readFileSync(CSS_PATH, "utf-8")
   return cachedCss
 }
-
-// ---------------------------------------------------------------------------
-// HTML fragment builders
-// ---------------------------------------------------------------------------
 
 function escapeHtml(text: string): string {
   return text
@@ -211,79 +161,6 @@ function renderArticleHtml(
     "</article>",
   ].join("\n")
 }
-
-// ---------------------------------------------------------------------------
-// Image resolution helper (exported for use by generate-pdf.ts)
-// ---------------------------------------------------------------------------
-
-/**
- * Rewrite relative image `src` attributes in rendered HTML to absolute
- * `file://` URLs so that Playwright's `page.setContent()` can load them.
- *
- * @param html           Rendered HTML content
- * @param articleFilePath Relative article file path (used to resolve images)
- * @returns HTML with resolved image URLs
- */
-export function resolveImagesInHtml(
-  html: string,
-  articleFilePath: string | null
-): string {
-  if (!articleFilePath) return html
-
-  const fullArticlePath = path.join(ARTICLES_PATH, articleFilePath)
-
-  return html.replace(
-    /<img\s+([^>]*?)(?:src\s*=\s*"([^"]*?)")([^>]*?)\/?\s*>/gi,
-    (match, before, src, after) => {
-      // Skip data URIs, external URLs, and already-resolved file:// URLs
-      if (
-        src.startsWith("data:") ||
-        src.startsWith("http://") ||
-        src.startsWith("https://") ||
-        src.startsWith("file://")
-      ) {
-        return match
-      }
-
-      const resolved = resolveImageUrl(src, fullArticlePath)
-      if (resolved && resolved !== src) {
-        return `<img ${before}src="${resolved}"${after}>`
-      }
-      return match
-    }
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Default renderer
-// ---------------------------------------------------------------------------
-
-/**
- * Default render function that reads article markdown from disk and processes
- * it through the PDF markdown pipeline.
- */
-export async function defaultRenderArticle(
-  article: LinearizedArticle,
-  locale: string
-): Promise<string> {
-  const content = await getArticleContentForPdf(
-    article.slug,
-    locale as "en" | "zh"
-  )
-  if (!content) return ""
-
-  const html = await renderMarkdownToHtml(content, {
-    articlePath: article.filePath ?? undefined,
-    articleSlug: article.slug,
-  })
-
-  // Resolve relative image paths to file:// URLs for Playwright
-  return resolveImagesInHtml(html, article.filePath)
-}
-
-// ---------------------------------------------------------------------------
-// Main entry point
-// ---------------------------------------------------------------------------
 
 /**
  * Assemble a complete ebook HTML document from linearized articles.

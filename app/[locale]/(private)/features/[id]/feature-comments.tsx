@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition } from "react"
 import { useTranslations } from "next-intl"
-import { addFeatureComment } from "@/actions/feature"
+import { addFeatureComment } from "@/actions/feature-review"
 import { TechButton } from "@/components/ui/tech-button"
 import { TechCard } from "@/components/ui/tech-card"
 import { TextAreaBox } from "@/components/ui/textarea-box"

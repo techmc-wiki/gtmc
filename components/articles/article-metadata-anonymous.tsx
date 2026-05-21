@@ -1,9 +1,9 @@
 "use client"
 
-import { ArticleMetadataShell } from "@/components/articles/article-metadata-shell"
+import { ArticleMetadataLayout } from "@/components/articles/article-metadata-layout"
 import { ArticleLicenseNotice } from "@/components/articles/article-license-notice"
 
-interface ArticleMetadataSimpleProps {
+interface ArticleMetadataAnonymousProps {
   title: string
   canonicalUrl: string
   attributionDate?: string
@@ -15,7 +15,7 @@ interface ArticleMetadataSimpleProps {
   bannerAlt?: string
 }
 
-export function ArticleMetadataSimple({
+export function ArticleMetadataAnonymous({
   title,
   canonicalUrl,
   attributionDate,
@@ -25,9 +25,9 @@ export function ArticleMetadataSimple({
   isAdvanced,
   bannerPath,
   bannerAlt,
-}: ArticleMetadataSimpleProps) {
+}: ArticleMetadataAnonymousProps) {
   return (
-    <ArticleMetadataShell
+    <ArticleMetadataLayout
       title={title}
       filePath={filePath}
       isAdvanced={isAdvanced}
@@ -64,6 +64,6 @@ export function ArticleMetadataSimple({
         canonicalUrl={canonicalUrl}
         attributionDate={attributionDate}
       />
-    </ArticleMetadataShell>
+    </ArticleMetadataLayout>
   )
 }

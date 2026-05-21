@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { useRouter } from "@/i18n/navigation"
 import { useState } from "react"
-import { ArticleMetadataShell } from "@/components/articles/article-metadata-shell"
+import { ArticleMetadataLayout } from "@/components/articles/article-metadata-layout"
 import { ArticleLicenseNotice } from "@/components/articles/article-license-notice"
 
 function useLocalStorage<T>(
@@ -38,7 +38,7 @@ function useLocalStorage<T>(
   return [storedValue, setValue]
 }
 
-interface ArticleMetadataProps {
+interface ArticleMetadataFullProps {
   title: string
   author: string
   coAuthors?: string[]
@@ -54,7 +54,7 @@ interface ArticleMetadataProps {
   bannerAlt?: string
 }
 
-export function ArticleMetadata({
+export function ArticleMetadataFull({
   title,
   author,
   coAuthors = [],
@@ -68,7 +68,7 @@ export function ArticleMetadata({
   isAdvanced,
   bannerPath,
   bannerAlt,
-}: ArticleMetadataProps) {
+}: ArticleMetadataFullProps) {
   const t = useTranslations("ArticleMeta")
   const router = useRouter()
   const [copied, setCopied] = useState(false)
@@ -111,7 +111,7 @@ export function ArticleMetadata({
   )
 
   return (
-    <ArticleMetadataShell
+    <ArticleMetadataLayout
       title={title}
       filePath={filePath}
       isAdvanced={isAdvanced}
@@ -316,6 +316,6 @@ export function ArticleMetadata({
           authors={[author, ...coAuthors]}
         />
       </div>
-    </ArticleMetadataShell>
+    </ArticleMetadataLayout>
   )
 }

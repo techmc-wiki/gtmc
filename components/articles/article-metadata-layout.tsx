@@ -4,7 +4,7 @@ import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { ArticleBanner } from "@/components/articles/article-banner"
 import { ReactNode } from "react"
 
-interface ArticleMetadataShellProps {
+interface ArticleMetadataLayoutProps {
   title: string
   filePath: string
   isAdvanced?: boolean
@@ -15,7 +15,7 @@ interface ArticleMetadataShellProps {
   children: ReactNode
 }
 
-export function ArticleMetadataShell({
+export function ArticleMetadataLayout({
   title,
   filePath,
   isAdvanced,
@@ -24,7 +24,7 @@ export function ArticleMetadataShell({
   pathLabel = "PATH:",
   headerActions,
   children,
-}: ArticleMetadataShellProps) {
+}: ArticleMetadataLayoutProps) {
   return (
     <header>
       <CornerBrackets />

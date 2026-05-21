@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { Prisma } from "@prisma/client"
 
-import { revalidatePaths } from "@/lib/revalidation"
+import { revalidatePaths } from "@/lib/revalidate-paths"
 import {
   forcePushResolvedToPRBranch,
   getArticleFileContent,

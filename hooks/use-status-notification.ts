@@ -1,21 +1,21 @@
 import React from "react"
 
-export type BadgeType = "info" | "error" | "progress"
+export type StatusNotificationKind = "info" | "error" | "progress"
 
-export interface BadgeState {
+export interface StatusNotificationState {
   message: string
-  type: BadgeType
+  type: StatusNotificationKind
 }
 
-export function useBadge() {
-  const [badge, setBadge] = React.useState<BadgeState | null>(null)
+export function useStatusNotification() {
+  const [badge, setBadge] = React.useState<StatusNotificationState | null>(null)
   const badgeTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
     null
   )
 
   const showBadge = (
     message: string,
-    type: BadgeType,
+    type: StatusNotificationKind,
     autoClearMs?: number
   ) => {
     if (badgeTimeoutRef.current) {

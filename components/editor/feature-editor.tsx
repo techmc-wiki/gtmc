@@ -6,7 +6,7 @@ import { TechButton } from "../ui/tech-button"
 import { InputBox } from "../ui/input-box"
 import { useRouter } from "@/i18n/navigation"
 import { updateFeature } from "@/actions/feature"
-import { useBadge } from "@/hooks/use-badge"
+import { useStatusNotification } from "@/hooks/use-status-notification"
 import {
   LoadingIndicator,
   PENDING_LABELS,
@@ -50,7 +50,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
   const [isSaving, setIsSaving] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState<TabType>("write")
   const [lineWrap, setLineWrap] = React.useState(false)
-  const { badge, showBadge, clearBadge } = useBadge()
+  const { badge, showBadge, clearBadge } = useStatusNotification()
 
   const textareaRef = React.useRef<ReactCodeMirrorRef>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)

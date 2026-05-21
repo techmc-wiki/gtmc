@@ -4,7 +4,7 @@ import { requireAuth } from "@/lib/auth-helpers"
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { PATHS } from "@/lib/cache-config"
+import { PATHS } from "@/lib/revalidation-paths"
 
 export async function updateProfileAction(formData: FormData) {
   const session = await requireAuth()

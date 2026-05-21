@@ -1,10 +1,10 @@
 "use client"
 
-import { BadgeState } from "@/hooks/use-badge"
+import { StatusNotificationState } from "@/hooks/use-status-notification"
 import { useTranslations } from "next-intl"
 
 interface EditorBadgeProps {
-  badge: BadgeState | null
+  badge: StatusNotificationState | null
   onDismiss: () => void
 }
 

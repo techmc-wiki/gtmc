@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/operation-progress"
 import { TechButton } from "../ui/tech-button"
 import { InputBox } from "../ui/input-box"
-import { useBadge } from "@/hooks/use-badge"
+import { useStatusNotification } from "@/hooks/use-status-notification"
 import { useEditorUpload } from "@/hooks/use-editor-upload"
 import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
 import {
@@ -149,7 +149,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     {}
   )
   const repoSnapshotRequestsRef = React.useRef<Record<string, string>>({})
-  const { badge, showBadge, clearBadge } = useBadge()
+  const { badge, showBadge, clearBadge } = useStatusNotification()
 
   const saveProgressStages = React.useMemo<OperationProgressStage[]>(
     () => [

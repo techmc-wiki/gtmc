@@ -8,7 +8,7 @@ import {
 } from "@/lib/auth-context"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
-import { PATHS } from "@/lib/cache-config"
+import { PATHS } from "@/lib/revalidation-paths"
 import {
   addIssueComment,
   createIssue,

@@ -3,7 +3,8 @@
 import { useState, useMemo } from "react"
 import type { RebaseState } from "@/types/rebase"
 
-import { resolveConflictAction, abortRebaseAction } from "@/actions/review"
+import { resolveConflictAction } from "@/actions/review-conflict"
+import { abortRebaseAction } from "@/actions/review-rebase"
 import { getReauthLoginUrl, isReauthRequiredError } from "@/lib/admin-reauth"
 import { TechButton } from "@/components/ui/tech-button"
 import {

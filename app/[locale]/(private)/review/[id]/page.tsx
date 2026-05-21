@@ -11,7 +11,7 @@ import {
   ARTICLES_REPO_NAME,
 } from "@/lib/github/articles-repo"
 import { analyzeReviewMergeStrategy } from "@/lib/github/pr-manager"
-import { mergePRAction, closePRAction } from "@/actions/review"
+import { mergePRAction, closePRAction } from "@/actions/review-pr"
 import { decodeStoredDraftFiles } from "@/lib/draft-files"
 import { prisma } from "@/lib/prisma"
 import { ReviewEditor } from "@/components/review/review-editor"

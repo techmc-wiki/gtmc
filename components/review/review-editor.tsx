@@ -19,12 +19,8 @@ import { ModeSelector } from "@/components/review/mode-selector"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { type OperationProgressState } from "@/components/ui/operation-progress"
 import { RebaseProgress } from "@/components/review/rebase-progress"
-import {
-  selectModeAction,
-  abortResolutionAction,
-  finalizeReviewAction,
-  resolveConflictAction,
-} from "@/actions/review"
+import { selectModeAction, abortResolutionAction, resolveConflictAction } from "@/actions/review-conflict"
+import { finalizeReviewAction } from "@/actions/review-pr"
 import {
   normalizeDraftFileCollection,
   serializeDraftFilesPayload,

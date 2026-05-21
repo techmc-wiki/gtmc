@@ -55,14 +55,19 @@
 }
 
 html {
-  /* Segment 1: 1024px → 1536px — slow optical growth (16px → 16.8px) */
-  font-size: clamp(16px, 0.1563vw + 14.4px, 16.8px);
+  /* Fixed bump sizing: avoid continuous viewport-driven recalculation during resize. */
+  font-size: 16px;
 }
 
 @media (min-width: 1536px) {
   html {
-    /* Segment 2: 1536px → 2560px — faster optical growth (16.8px → 18px) */
-    font-size: clamp(16.8px, 0.1172vw + 15px, 18px);
+    font-size: 17px;
+  }
+}
+
+@media (min-width: 2560px) {
+  html {
+    font-size: 18px;
   }
 }
 

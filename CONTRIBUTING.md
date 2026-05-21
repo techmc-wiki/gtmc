@@ -12,13 +12,13 @@ The `articles/` directory is a Git submodule pointing to the Articles repository
 
 ### Scripts
 
-Install the submodule with the version (commit hash) specified by the upstream:
+Install the submodule at the commit recorded by this website repo:
 
 ```bash
 pnpm articles:init
 ```
 
-Update to latest according to the article repo:
+Update the submodule to the latest commit on the articles repo's tracked branch:
 
 ```bash
 pnpm articles:update
@@ -30,11 +30,18 @@ Check status:
 pnpm articles:status
 ```
 
-### How this works Vercel's CD Streamline
+Regenerate the article manifest and rendered content after article or frontmatter changes:
 
-During the deloyment articles will be pulled as a submodule, then they are updated to latest (main/HEAD of the [articles repo](https://github.com/gtmc-dev/articles)). Specifically, at the stage of `pnpm install`, as the above operation were written into the `postinstall` script in [package.json](package.json). There are also auto update mechanisms, manual build for each article update is not needed. In one line, you don't have to worry the production environment's article status, they are always up-to-date, although your local articles might be outdated.
+```bash
+pnpm generate:manifest
+pnpm generate:content
+```
 
-Note that running `pnpm install` on your local repo does the same. So usually you will have a rather up-to-date version locally even the upstream is outdated.
+### How this works in Vercel deployments
+
+During deployment, `pnpm install` runs [package.json](package.json)'s `postinstall` script. That script initializes `articles/` only when the submodule directory is missing or empty. It does not update an existing checkout to the latest articles repo commit.
+
+Fresh Vercel checkouts therefore use the submodule commit pinned by this website repo. To deploy newer article content, update the `articles` submodule pointer in this repo and commit that pointer change.
 
 ### When to Update
 

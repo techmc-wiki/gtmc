@@ -23,25 +23,29 @@ All other data (e.g., articles) can be found from other repos under the [orgrani
 ```bash
 git clone https://github.com/gtmc-dev/gtmc.git
 cd gtmc
-pnpm install  # Automatically initializes submodules
+pnpm install  # Initializes articles/ when the submodule is missing
 ```
 
-### Submodule Management
+### Article Content
 
-The Articles content is managed as a Git submodule. Use these commands:
+The Articles content is managed as a Git submodule pinned by this website repo. Use these commands:
 
 ```bash
 # Check submodule status
 pnpm articles:status
 
-# Update to latest articles
+# Reinitialize to the pinned commit if needed
+pnpm articles:init
+
+# Update to the latest articles repo commit
 pnpm articles:update
 
-# Reinitialize if needed
-pnpm articles:init
+# Regenerate article data after content or frontmatter changes
+pnpm generate:manifest
+pnpm generate:content
 ```
 
-**Note:** The submodule is version-locked. After pulling changes that update the submodule reference, run `pnpm articles:update`.
+**Note:** `pnpm install` does not update an existing `articles/` checkout. To deploy newer article content, commit the updated `articles` submodule pointer in this repo.
 
 ## License
 

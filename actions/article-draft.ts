@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 
 import { getMainBranchHeadSha } from "@/lib/articles/branch"
-import { parseDraftTempImageRefs } from "@/lib/draft-markdown"
+import { parseDraftTempImageRefs } from "@/lib/drafts/markdown"
 import {
   createDraftFile,
   decodeStoredDraftFiles,
@@ -11,8 +11,8 @@ import {
   normalizeDraftFileCollection,
   serializeDraftFilesForStorage,
   type DraftFileRecord,
-} from "@/lib/draft-files"
-import { deleteDraftAsset } from "@/lib/draft-storage"
+} from "@/lib/drafts/files"
+import { deleteDraftAsset } from "@/lib/drafts/storage"
 import { getGithubPatForUser, requireAuth } from "@/lib/auth-context"
 import { prisma } from "@/lib/prisma"
 import {
@@ -22,7 +22,7 @@ import {
   markDraftAssetDeleted,
   markDraftAssetOrphaned,
   markDraftAssetReferenced,
-} from "@/lib/draft-asset-db"
+} from "@/lib/drafts/asset-db"
 
 const EDITABLE_STATUSES = new Set(["DRAFT"])
 

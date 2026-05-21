@@ -11,13 +11,13 @@ import {
   type MigrationAssetInput,
   parseDraftTempImageRefs,
   rewriteDraftTempUrls,
-} from "@/lib/draft-markdown"
+} from "@/lib/drafts/markdown"
 import {
   decodeStoredDraftFiles,
   getDuplicateDraftFilePaths,
   serializeDraftFilesForStorage,
-} from "@/lib/draft-files"
-import { downloadDraftAsset } from "@/lib/draft-storage"
+} from "@/lib/drafts/files"
+import { downloadDraftAsset } from "@/lib/drafts/storage"
 import { requireAuth } from "@/lib/auth-context"
 import { getGitHubWriteToken } from "@/lib/github/articles-repo"
 import { prisma } from "@/lib/prisma"
@@ -26,7 +26,7 @@ import {
   markDraftAssetMigrated,
   markDraftAssetOrphaned,
   markDraftAssetReferenced,
-} from "@/lib/draft-asset-db"
+} from "@/lib/drafts/asset-db"
 
 const UPLOAD_PLACEHOLDER_RE = /<!--\s*UPLOAD_PENDING_[a-f0-9-]+\s*-->/i
 

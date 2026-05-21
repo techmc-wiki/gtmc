@@ -28,7 +28,7 @@ import { finalizeReviewAction } from "@/actions/review-pr"
 import {
   normalizeDraftFileCollection,
   serializeDraftFilesPayload,
-} from "@/lib/draft-files"
+} from "@/lib/drafts/files"
 import { getReauthLoginUrl, isReauthRequiredError } from "@/lib/admin-reauth"
 import type {
   ConflictMode,
@@ -37,8 +37,8 @@ import type {
   ReviewFile,
   ReviewMergeMethod,
   ReviewSessionState,
-} from "@/types/review"
-import type { RebaseState } from "@/types/rebase"
+} from "@/lib/review/review-types"
+import type { RebaseState } from "@/lib/review/rebase-types"
 import { useMounted } from "@/hooks/use-mounted"
 
 const CONFLICT_BLOCK_REGEX =

@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js"
-import { deleteDraftAsset } from "@/lib/draft-storage"
+import { deleteDraftAsset } from "@/lib/drafts/storage"
 import { prisma } from "@/lib/prisma"
 
 export interface DraftAsset {

@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import { TechButton } from "@/components/ui/tech-button"
 import { InputBox } from "@/components/ui/input-box"
 import { SegmentedControl } from "@/components/ui/segmented-control"
-import { normalizeDraftFilePath } from "@/lib/draft-files"
+import { normalizeDraftFilePath } from "@/lib/drafts/files"
 
 interface DraftRepoTreeNode {
   id: string

@@ -15,7 +15,7 @@ import {
   getDuplicateDraftFilePaths,
   normalizeDraftFileCollection,
   type DraftFileRecord,
-} from "@/lib/draft-files"
+} from "@/lib/drafts/files"
 import {
   getMainBranchHeadSha,
   resolveArticleFilePath,

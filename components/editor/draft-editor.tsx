@@ -14,7 +14,7 @@ import {
   normalizeDraftFilePath,
   normalizeDraftFolderPath,
   type DraftFileCollection,
-} from "@/lib/draft-files"
+} from "@/lib/drafts/files"
 import { OperationProgress } from "@/components/ui/operation-progress"
 import { TechButton } from "../ui/tech-button"
 import { InputBox } from "../ui/input-box"

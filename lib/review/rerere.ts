@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto"
 
-import type { ConflictBlock } from "@/types/rebase"
+import type { ConflictBlock } from "@/lib/review/rebase-types"
 import { prisma } from "@/lib/prisma"
 
 // ConflictBlock type defined in types/rebase.ts (canonical location)

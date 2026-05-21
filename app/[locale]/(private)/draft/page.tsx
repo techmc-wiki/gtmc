@@ -11,8 +11,8 @@ import { PageHeader } from "@/components/ui/page-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { DraftStatusBadge } from "@/components/ui/status-badge"
 import { SectionTitle } from "@/components/ui/section-title"
-import { decodeStoredDraftFiles } from "@/lib/draft-files"
-import { countCleanupFailedByRevision } from "@/lib/draft-asset-db"
+import { decodeStoredDraftFiles } from "@/lib/drafts/files"
+import { countCleanupFailedByRevision } from "@/lib/drafts/asset-db"
 
 const ARCHIVED_DRAFT_STATUSES = new Set([
   "APPROVED",

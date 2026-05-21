@@ -1,4 +1,4 @@
-import type { MergeConflictBlock } from "@/types/rebase"
+import type { MergeConflictBlock } from "@/lib/review/rebase-types"
 import { diff3Merge } from "node-diff3"
 
 // MergeConflictBlock type defined in types/rebase.ts (canonical location)

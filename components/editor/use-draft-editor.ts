@@ -13,7 +13,7 @@ import {
   normalizeDraftFilePath,
   serializeDraftFilesPayload,
   type DraftFileCollection,
-} from "@/lib/draft-files"
+} from "@/lib/drafts/files"
 import { useStatusNotification } from "@/hooks/use-status-notification"
 import { useEditorUpload } from "@/hooks/use-editor-upload"
 import type { OperationProgressState } from "@/components/ui/operation-progress"

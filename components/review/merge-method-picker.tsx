@@ -8,7 +8,7 @@ import { SelectableCard } from "@/components/ui/selectable-card"
 import type {
   ReviewMergeMethod,
   ReviewMergeStrategyAnalysis,
-} from "@/types/review"
+} from "@/lib/review/review-types"
 
 interface MergeMethodPickerProps {
   analysis: ReviewMergeStrategyAnalysis

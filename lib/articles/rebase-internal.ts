@@ -3,20 +3,20 @@ import {
   ARTICLES_REPO_OWNER,
   getOctokit,
 } from "@/lib/github/articles-repo"
-import { serializeDraftFilesForStorage } from "@/lib/draft-files"
+import { serializeDraftFilesForStorage } from "@/lib/drafts/files"
 import {
   applyAutoAppliedResolutions,
   autoApplyRerere,
   parseConflictBlocks,
-} from "@/lib/rerere"
-import type { ConflictBlock, MergeConflictBlock } from "@/types/rebase"
+} from "@/lib/review/rerere"
+import type { ConflictBlock, MergeConflictBlock } from "@/lib/review/rebase-types"
 import { Prisma } from "@prisma/client"
-import { getMergeLibrary } from "@/lib/merge-strategy"
+import { getMergeLibrary } from "@/lib/review/merge-strategy"
 import type {
   FileRebaseState,
   RebaseCommitInfo,
   RebaseState,
-} from "@/types/rebase"
+} from "@/lib/review/rebase-types"
 import { prisma } from "@/lib/prisma"
 import { reviewLog, reviewError, summarizeSha } from "@/lib/review/logging"
 import type {

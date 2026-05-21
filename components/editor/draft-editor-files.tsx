@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { DraftFileList } from "@/components/editor/draft-file-list"
 import { TechButton } from "../ui/tech-button"
 import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
-import type { DraftFileCollection } from "@/lib/draft-files"
+import type { DraftFileCollection } from "@/lib/drafts/files"
 
 interface DraftEditorFilesProps {
   files: DraftFileCollection["files"]

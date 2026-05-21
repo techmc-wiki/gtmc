@@ -12,10 +12,10 @@ import {
 } from "@/lib/github/articles-repo"
 import { analyzeReviewMergeStrategy } from "@/lib/github/pr-manager"
 import { mergePRAction, closePRAction } from "@/actions/review-pr"
-import { decodeStoredDraftFiles } from "@/lib/draft-files"
+import { decodeStoredDraftFiles } from "@/lib/drafts/files"
 import { prisma } from "@/lib/prisma"
 import { ReviewEditor } from "@/components/review/review-editor"
-import type { ModeAnalysis, ReviewFile } from "@/types/review"
+import type { ModeAnalysis, ReviewFile } from "@/lib/review/review-types"
 import { PRActionButtons } from "./components/pr-action-buttons"
 
 const owner = ARTICLES_REPO_OWNER

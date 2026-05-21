@@ -18,8 +18,8 @@ import {
   normalizeDraftFileCollection,
   decodeStoredDraftFiles,
   getActiveDraftFile,
-} from "@/lib/draft-files"
-import type { DraftFileCollection } from "@/lib/draft-files"
+} from "@/lib/drafts/files"
+import type { DraftFileCollection } from "@/lib/drafts/files"
 
 function formatErrorMessage(message: string, error: unknown): string {
   if (error instanceof Error) {

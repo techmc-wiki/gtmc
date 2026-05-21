@@ -9,13 +9,13 @@ import { getMainBranchHeadSha } from "@/lib/articles/branch"
 import {
   decodeStoredDraftFiles,
   serializeDraftFilesForStorage,
-} from "@/lib/draft-files"
+} from "@/lib/drafts/files"
 import { getOctokit } from "@/lib/github/articles-repo"
-import { reconcileDraftAssetsForPRCompletion } from "@/lib/draft-asset-db"
+import { reconcileDraftAssetsForPRCompletion } from "@/lib/drafts/asset-db"
 import { mergePR } from "@/lib/github/pr-manager"
 import { prisma } from "@/lib/prisma"
-import type { RebaseState } from "@/types/rebase"
-import type { ConflictMode, ReviewMergeMethod } from "@/types/review"
+import type { RebaseState } from "@/lib/review/rebase-types"
+import type { ConflictMode, ReviewMergeMethod } from "@/lib/review/review-types"
 import { reviewLog, reviewError, summarizeSha } from "@/lib/review/logging"
 import {
   requireReviewAdminContext,

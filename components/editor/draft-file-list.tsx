@@ -11,7 +11,7 @@ import {
   FileListItem,
   UnsavedIndicator,
 } from "@/components/ui/file-list"
-import { type DraftFileCollection } from "@/lib/draft-files"
+import { type DraftFileCollection } from "@/lib/drafts/files"
 
 interface DraftFileListProps {
   files: DraftFileCollection["files"]

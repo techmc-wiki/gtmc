@@ -7,7 +7,7 @@ import { reviewLog, summarizeSha } from "@/lib/review/logging"
 import type {
   ReviewMergeMethod,
   ReviewMergeStrategyAnalysis,
-} from "@/types/review"
+} from "@/lib/review/review-types"
 import { getPR } from "./pr-operations"
 
 export function analyzeReviewMergeStrategy(pr: {

@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from "crypto"
 import { NextRequest, NextResponse } from "next/server"
 
-import { reconcileDraftAssetsForPRCompletion } from "@/lib/draft-asset-db"
+import { reconcileDraftAssetsForPRCompletion } from "@/lib/drafts/asset-db"
 import {
   ARTICLES_REPO_NAME,
   ARTICLES_REPO_OWNER,

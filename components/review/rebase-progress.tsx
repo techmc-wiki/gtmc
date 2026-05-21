@@ -11,11 +11,11 @@ import {
   type OperationProgressStage,
   type OperationProgressState,
 } from "@/components/ui/operation-progress"
-import type { FileRebaseState, RebaseState } from "@/types/rebase"
+import type { FileRebaseState, RebaseState } from "@/lib/review/rebase-types"
 import type {
   ReviewMergeMethod,
   ReviewMergeStrategyAnalysis,
-} from "@/types/review"
+} from "@/lib/review/review-types"
 
 interface SimpleFileStatus {
   filePath: string

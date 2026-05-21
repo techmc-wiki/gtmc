@@ -13,7 +13,7 @@ import { ActionForm } from "./action-form"
 import type {
   ReviewMergeMethod,
   ReviewMergeStrategyAnalysis,
-} from "@/types/review"
+} from "@/lib/review/review-types"
 
 export function PRActionButtons({
   closePRAction,

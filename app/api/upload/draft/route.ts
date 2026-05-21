@@ -2,13 +2,13 @@ import { createHash } from "crypto"
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { createDraftAsset } from "@/lib/draft-asset-db"
+import { createDraftAsset } from "@/lib/drafts/asset-db"
 import {
   DraftStorageConfigError,
   computeDraftStoragePath,
   deleteDraftAsset,
   uploadDraftAsset,
-} from "@/lib/draft-storage"
+} from "@/lib/drafts/storage"
 import { classifyFile, isImageMime, sanitizeFilename } from "@/lib/file-upload"
 
 export async function POST(req: NextRequest) {

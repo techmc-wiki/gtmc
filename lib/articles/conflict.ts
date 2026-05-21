@@ -3,21 +3,21 @@ import {
   ARTICLES_REPO_OWNER,
   getOctokit,
 } from "@/lib/github/articles-repo"
-import type { ConflictBlock } from "@/types/rebase"
+import type { ConflictBlock } from "@/lib/review/rebase-types"
 import {
   applyAutoAppliedResolutions,
   autoApplyRerere,
   parseConflictBlocks,
-} from "@/lib/rerere"
+} from "@/lib/review/rerere"
 import { GIT_BLOB_MODE } from "@/lib/github/constants"
-import { getMergeLibrary } from "@/lib/merge-strategy"
+import { getMergeLibrary } from "@/lib/review/merge-strategy"
 import { reviewLog, summarizeSha } from "@/lib/review/logging"
 import {
   getActiveDraftFile,
   getDuplicateDraftFilePaths,
   normalizeDraftFileCollection,
   type DraftFileRecord,
-} from "@/lib/draft-files"
+} from "@/lib/drafts/files"
 import {
   getMainBranchHeadSha,
   resolveArticleFilePath,

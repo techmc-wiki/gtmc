@@ -32,3 +32,5 @@ allowBuilds:
   '@prisma/engines': true
   '@swc/core': true
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - geist@1.7.1

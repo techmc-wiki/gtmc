@@ -25,7 +25,7 @@ import {
   getArticleContentForPdf,
 } from "@/lib/articles/linearize"
 import type { LinearizedArticle } from "@/lib/articles/linearize"
-import type { ChapterNavNode } from "@/types/chapter-nav"
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import type { ArticleLocale } from "@/lib/articles/manifest"
 import { buildEbookHtml, resolveImagesInHtml } from "@/lib/pdf/ebook-structure"
 import { renderMarkdownToHtml } from "@/lib/pdf/markdown-pipeline"

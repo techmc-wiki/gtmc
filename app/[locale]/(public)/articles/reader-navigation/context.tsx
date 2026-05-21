@@ -5,7 +5,7 @@ import { usePathname } from "@/i18n/navigation"
 import { useExpandedFolders } from "../chapter-nav/use-expanded-folders"
 import { useActiveHeading } from "../outline/use-active-heading"
 import { useOutline, type OutlineItem } from "../outline/use-outline"
-import type { ChapterNavNode } from "@/types/chapter-nav"
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 
 interface ReaderNavigationProviderProps {
   tree: ChapterNavNode[]

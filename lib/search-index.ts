@@ -10,7 +10,7 @@ import {
 import { getArticleContentBySlug } from "@/lib/articles/content"
 
 import type { ArticleLocale } from "@/lib/articles/manifest"
-import type { ChapterNavNode } from "@/types/chapter-nav"
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 
 interface IndexedArticle {
   id: string

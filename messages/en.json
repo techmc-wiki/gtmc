@@ -23,6 +23,14 @@
   "Article": {
     "notFound": "Article Not Found"
   },
+  "forbidden": {
+    "title": "ACCESS_DENIED",
+    "description": "Your operator level is insufficient for this operation. Request elevated permissions and try again."
+  },
+  "unauthorized": {
+    "title": "AUTHENTICATION_REQUIRED",
+    "description": "You must authenticate with a valid session before accessing this resource. Please log in and try again."
+  },
   "callouts": {
     "warning_label": "Warning",
     "tip_label": "Tip",

@@ -12,7 +12,7 @@ import {
   SectionRail,
   SegmentedBar,
 } from "@/components/ui/loading-shell-primitives"
-import type { ChapterNavNode } from "@/types/chapter-nav"
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import { useLocale, useTranslations } from "next-intl"
 import { OutlineRail } from "@/components/articles/outline-rail"
 import { MobileOutlineBar } from "@/components/articles/mobile-outline-bar"

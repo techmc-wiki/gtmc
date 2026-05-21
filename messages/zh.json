@@ -23,6 +23,14 @@
   "Article": {
     "notFound": "文章未找到"
   },
+  "forbidden": {
+    "title": "访问被拒绝",
+    "description": "您的操作等级不足以执行此操作，请申请更高权限后重试。"
+  },
+  "unauthorized": {
+    "title": "需要身份验证",
+    "description": "您必须使用有效会话进行身份验证后才能访问此资源。请登录后重试。"
+  },
   "callouts": {
     "warning_label": "警告",
     "tip_label": "提示",

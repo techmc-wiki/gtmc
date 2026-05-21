@@ -1,4 +1,4 @@
-import type { ChapterNavNode } from "@/types/chapter-nav"
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import { getLocalizedArticleEntry } from "./manifest"
 
 interface FlatArticle {

@@ -1,4 +1,4 @@
-import type { ChapterNavNode } from "@/types/chapter-nav"
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import type { ArticleLocale } from "@/lib/articles/manifest"
 import { getArticleContentBySlug } from "@/lib/articles/content"
 import { resolveLocalArticlePath } from "@/lib/articles/fs"

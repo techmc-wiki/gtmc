@@ -9,7 +9,7 @@ import {
   type ArticleLocale,
 } from "@/lib/articles/manifest"
 import { getRepoTranslations, type ArticleTreeNode } from "@/lib/github/sync"
-import type { ChapterNavNode } from "@/types/chapter-nav"
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 
 function isAppendixDirectoryName(name: string): boolean {
   const normalized = name.trim().toLowerCase()

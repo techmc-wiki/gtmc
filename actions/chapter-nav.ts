@@ -3,14 +3,6 @@
 import { getCurrentUserAuthContext, requireAdmin } from "@/lib/auth-context"
 import { requireAuth } from "@/lib/auth-helpers"
 import { createDirectFile, createPR } from "@/lib/github/pr-manager"
-import { getPublicChapterNav } from "@/lib/articles/public-tree"
-import type { ArticleLocale } from "@/lib/article-manifest"
-
-export async function getChapterNavTree(
-  locale: ArticleLocale = "zh"
-): ReturnType<typeof getPublicChapterNav> {
-  return getPublicChapterNav(locale)
-}
 
 export async function createDocument({
   title,

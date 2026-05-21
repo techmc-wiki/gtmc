@@ -74,7 +74,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       const remainingFiles = current.files.filter((file) => file.id !== fileId)
       const nextActiveFile =
         current.activeFileId === fileId
-          ? remainingFiles[Math.max(0, currentIndex - 1)]?.id || remainingFiles[0]?.id
+          ? remainingFiles[Math.max(0, currentIndex - 1)]?.id ||
+            remainingFiles[0]?.id
           : current.activeFileId
       return {
         activeFileId: nextActiveFile,
@@ -84,12 +85,19 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     })
   }
 
-  const handleApplyDraftFileSource = ({ content, filePath }: { content: string; filePath: string }) => {
+  const handleApplyDraftFileSource = ({
+    content,
+    filePath,
+  }: {
+    content: string
+    filePath: string
+  }) => {
     const normalizedPath = normalizeDraftFilePath(filePath)
     const hasDuplicate = state.draftCollection.files.some(
       (file) =>
         normalizeDraftFilePath(file.filePath) === normalizedPath &&
-        (state.fileDialogIntent?.kind !== "replace" || file.id !== state.activeFile.id)
+        (state.fileDialogIntent?.kind !== "replace" ||
+          file.id !== state.activeFile.id)
     )
     if (hasDuplicate) {
       badge.showBadge(t("badgeFileAlreadyExists"), "error", 3000)
@@ -99,7 +107,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       actions.updateDraftCollection((current) => ({
         ...current,
         files: current.files.map((file) =>
-          file.id === current.activeFileId ? { ...file, content, filePath: normalizedPath } : file
+          file.id === current.activeFileId
+            ? { ...file, content, filePath: normalizedPath }
+            : file
         ),
       }))
       actions.setActiveTab("write")
@@ -124,13 +134,25 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           const normalizedPath = normalizeDraftFilePath(file.filePath)
           const snapshot = state.repoSnapshots[file.id]
           if (!normalizedPath) {
-            return { changeType: "pending" as const, file, rows: buildDiffRows("", file.content) }
+            return {
+              changeType: "pending" as const,
+              file,
+              rows: buildDiffRows("", file.content),
+            }
           }
           if (!snapshot || snapshot.status === "loading") {
-            return { changeType: "pending" as const, file, rows: buildDiffRows("", file.content) }
+            return {
+              changeType: "pending" as const,
+              file,
+              rows: buildDiffRows("", file.content),
+            }
           }
           if (snapshot.status === "missing") {
-            return { changeType: "new" as const, file, rows: buildDiffRows("", file.content) }
+            return {
+              changeType: "new" as const,
+              file,
+              rows: buildDiffRows("", file.content),
+            }
           }
           if (snapshot.status === "error" || snapshot.content === null) {
             return null
@@ -148,13 +170,27 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     [state.draftCollection.files, state.repoSnapshots]
   )
 
-  const newFolderPaths = React.useMemo(() => state.draftCollection.folders || [], [state.draftCollection.folders])
+  const newFolderPaths = React.useMemo(
+    () => state.draftCollection.folders || [],
+    [state.draftCollection.folders]
+  )
 
-  const handleInsertSelectedFile = ({ filePath }: { content: string; filePath: string }) => {
+  const handleInsertSelectedFile = ({
+    filePath,
+  }: {
+    content: string
+    filePath: string
+  }) => {
     const normalizedTargetPath = normalizeDraftFilePath(filePath)
     if (!normalizedTargetPath) return false
-    const linkLabel = normalizedTargetPath.split("/").filter(Boolean).slice(-1)[0]?.replace(/\.md$/i, "")
-    actions.insertTextAtCursor(`[${linkLabel || "linked-file"}](${normalizedTargetPath})`)
+    const linkLabel = normalizedTargetPath
+      .split("/")
+      .filter(Boolean)
+      .slice(-1)[0]
+      ?.replace(/\.md$/i, "")
+    actions.insertTextAtCursor(
+      `[${linkLabel || "linked-file"}](${normalizedTargetPath})`
+    )
     actions.setInsertDialogIntent(false)
     return true
   }
@@ -191,7 +227,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             required
             placeholder={t("titlePlaceholder")}
             className={`border-tech-main/40 focus:border-tech-main focus:ring-tech-main/20 bg-white/50 py-3 font-mono text-lg backdrop-blur-sm transition-all duration-300 focus:bg-white focus:ring-1 ${
-              state.isReadOnly ? `bg-tech-main/5 cursor-not-allowed opacity-70` : `hover:bg-white/80`
+              state.isReadOnly
+                ? `bg-tech-main/5 cursor-not-allowed opacity-70`
+                : `hover:bg-white/80`
             } `}
             value={state.title}
             onChange={(e) => actions.setTitle(e.target.value)}
@@ -204,7 +242,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       {state.githubPrUrl ? (
         <div className="guide-line bg-tech-main/5 text-tech-main flex items-center justify-between gap-3 border px-4 py-3 font-mono text-xs">
           <span>{t("prStreamActive")}</span>
-          <a href={state.githubPrUrl} target="_blank" rel="noreferrer" className="underline underline-offset-4">
+          <a
+            href={state.githubPrUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-4">
             {t("openGithubPr")}
           </a>
         </div>
@@ -212,7 +254,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
       {state.isSyncConflict ? (
         <div className="border-l-4 border-amber-500 bg-amber-500/10 p-4 text-amber-700">
-          <p className="font-bold tracking-widest uppercase">{t("conflictTitle")}</p>
+          <p className="font-bold tracking-widest uppercase">
+            {t("conflictTitle")}
+          </p>
           <p className="text-sm">{t("conflictMessage")}</p>
         </div>
       ) : null}
@@ -222,7 +266,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         activeFileId={state.draftCollection.activeFileId}
         unsavedFileIds={state.unsavedFileIds}
         onSelectFile={(fileId) =>
-          actions.setDraftCollection((current) => ({ ...current, activeFileId: fileId }))
+          actions.setDraftCollection((current) => ({
+            ...current,
+            activeFileId: fileId,
+          }))
         }
         onAddFile={handleAddFile}
         onRemoveFile={handleRemoveFile}
@@ -258,7 +305,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
         <EditorBadge badge={badge.badge} onDismiss={badge.clearBadge} />
 
-        <EditorWritePanel id="draft-editor-write-panel" hidden={state.activeTab !== "write"}>
+        <EditorWritePanel
+          id="draft-editor-write-panel"
+          hidden={state.activeTab !== "write"}>
           <EditorTextarea
             ref={refs.textareaRef}
             value={state.activeFileContent}
@@ -283,9 +332,14 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           />
         </EditorWritePanel>
 
-        <EditorPreviewPanel id="draft-editor-preview-panel" hidden={state.activeTab !== "preview"}>
+        <EditorPreviewPanel
+          id="draft-editor-preview-panel"
+          hidden={state.activeTab !== "preview"}>
           <EditorPreviewFrame isEmpty={!state.activeFileContent.trim()}>
-            <LazyMarkdownPreview content={state.activeFileContent} rawPath={state.activeFile.filePath || ""} />
+            <LazyMarkdownPreview
+              content={state.activeFileContent}
+              rawPath={state.activeFile.filePath || ""}
+            />
           </EditorPreviewFrame>
         </EditorPreviewPanel>
       </EditorContentArea>
@@ -320,13 +374,24 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               <div className="grid gap-3 sm:grid-cols-3">
                 <InfoStat
                   label="MODIFIED FILES"
-                  value={String(changeEntries.filter((entry) => entry && entry.changeType === "modified").length)}
+                  value={String(
+                    changeEntries.filter(
+                      (entry) => entry && entry.changeType === "modified"
+                    ).length
+                  )}
                 />
                 <InfoStat
                   label="NEW FILES"
-                  value={String(changeEntries.filter((entry) => entry && entry.changeType === "new").length)}
+                  value={String(
+                    changeEntries.filter(
+                      (entry) => entry && entry.changeType === "new"
+                    ).length
+                  )}
                 />
-                <InfoStat label="NEW FOLDERS" value={String((state.draftCollection.folders || []).length)} />
+                <InfoStat
+                  label="NEW FOLDERS"
+                  value={String((state.draftCollection.folders || []).length)}
+                />
               </div>
 
               {changeEntries.length === 0 ? (
@@ -362,7 +427,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           ) : (
             <div className="p-4">
               {state.contributingGuides.length === 0 ? (
-                <p className="text-tech-main/60 font-mono text-xs uppercase">NO_GUIDE_AVAILABLE_</p>
+                <p className="text-tech-main/60 font-mono text-xs uppercase">
+                  NO_GUIDE_AVAILABLE_
+                </p>
               ) : (
                 <>
                   <div className="mb-4 flex flex-wrap gap-2">
@@ -370,7 +437,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                       <TechButton
                         key={guide.id}
                         type="button"
-                        variant={state.activeGuideId === guide.id ? "primary" : "secondary"}
+                        variant={
+                          state.activeGuideId === guide.id
+                            ? "primary"
+                            : "secondary"
+                        }
                         size="sm"
                         onClick={() => actions.setActiveGuideId(guide.id)}>
                         {guide.title}
@@ -380,8 +451,9 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   <div className="max-h-136 overflow-y-auto pr-2">
                     <LazyMarkdownPreview
                       content={
-                        state.contributingGuides.find((guide) => guide.id === state.activeGuideId)?.content ||
-                        state.contributingGuides[0].content
+                        state.contributingGuides.find(
+                          (guide) => guide.id === state.activeGuideId
+                        )?.content || state.contributingGuides[0].content
                       }
                       rawPath="CONTRIBUTING.md"
                     />
@@ -395,13 +467,27 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         <div className="border-tech-main/35 border bg-white/80 p-4 backdrop-blur-sm">
           <p className="section-label">WORKSPACE OVERVIEW</p>
           <div className="space-y-3 font-mono text-xs uppercase">
-            <InfoLine label="OPEN FILES" value={String(state.draftCollection.files.length)} />
-            <InfoLine label="FOLDERS" value={String((state.draftCollection.folders || []).length)} />
-            <InfoLine label="UNSAVED FILES" value={String(state.unsavedFileIds.size)} />
-            <InfoLine label="ACTIVE FILE" value={state.activeFile.filePath || "PATH_NOT_SET"} />
+            <InfoLine
+              label="OPEN FILES"
+              value={String(state.draftCollection.files.length)}
+            />
+            <InfoLine
+              label="FOLDERS"
+              value={String((state.draftCollection.folders || []).length)}
+            />
+            <InfoLine
+              label="UNSAVED FILES"
+              value={String(state.unsavedFileIds.size)}
+            />
+            <InfoLine
+              label="ACTIVE FILE"
+              value={state.activeFile.filePath || "PATH_NOT_SET"}
+            />
             <InfoLine
               label="GITHUB BASE"
-              value={describeSnapshotStatus(state.repoSnapshots[state.activeFile.id])}
+              value={describeSnapshotStatus(
+                state.repoSnapshots[state.activeFile.id]
+              )}
             />
           </div>
         </div>
@@ -426,7 +512,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           />
 
           <EditorActions>
-            <TechButton type="submit" variant="primary" disabled={state.saveDisabled} aria-busy={state.isSaving}>
+            <TechButton
+              type="submit"
+              variant="primary"
+              disabled={state.saveDisabled}
+              aria-busy={state.isSaving}>
               {state.isSaving
                 ? t("savingLabel")
                 : state.hasUnsavedChanges
@@ -449,8 +539,12 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             className="guide-line bg-tech-main/5 text-tech-main/80 mt-4 border p-4 font-mono text-[0.6875rem] leading-relaxed">
             <div className="border-tech-main/15 mb-3 border-b pb-3">
               <p className="section-label">{t("syntaxHintsTitle")}</p>
-              <p className="text-tech-main/70 mt-2">{t("syntaxHintsDescription")}</p>
-              <p className="text-tech-main/55 mt-1">{t("syntaxHintsShortcut")}</p>
+              <p className="text-tech-main/70 mt-2">
+                {t("syntaxHintsDescription")}
+              </p>
+              <p className="text-tech-main/55 mt-1">
+                {t("syntaxHintsShortcut")}
+              </p>
             </div>
             <p className="section-label">{t("submissionLicenseTitle")}</p>
             <div className="mt-2 space-y-2">
@@ -520,7 +614,12 @@ function buildDiffRows(previousContent: string, nextContent: string) {
         oldLine += 1
         newLine += 1
       }
-      rows.push({ newLine: null, oldLine: null, type: "skipped", value: `${values.length - 4} unchanged lines` })
+      rows.push({
+        newLine: null,
+        oldLine: null,
+        type: "skipped",
+        value: `${values.length - 4} unchanged lines`,
+      })
       for (const line of values.slice(-2)) {
         rows.push({ newLine, oldLine, type: "context", value: line })
         oldLine += 1
@@ -553,7 +652,9 @@ function describeSnapshotStatus(snapshot?: RepoFileSnapshot) {
 function InfoStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="guide-line bg-tech-main/5 border p-3">
-      <p className="text-tech-main/55 font-mono text-[0.6875rem] tracking-widest uppercase">{label}</p>
+      <p className="text-tech-main/55 font-mono text-[0.6875rem] tracking-widest uppercase">
+        {label}
+      </p>
       <p className="text-tech-main mt-2 font-mono text-lg uppercase">{value}</p>
     </div>
   )
@@ -580,7 +681,9 @@ function ChangePreviewCard({
   return (
     <section className="guide-line border bg-white/70">
       <div className="guide-line bg-tech-main/5 flex items-center justify-between border-b px-4 py-3">
-        <p className="text-tech-main font-mono text-xs tracking-widest break-all uppercase">{filePath}</p>
+        <p className="text-tech-main font-mono text-xs tracking-widest break-all uppercase">
+          {filePath}
+        </p>
         <span
           className={`border px-2 py-1 font-mono text-[0.625rem] tracking-widest uppercase ${
             changeType === "new"

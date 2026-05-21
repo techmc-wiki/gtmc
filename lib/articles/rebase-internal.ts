@@ -11,7 +11,7 @@ import {
 } from "@/lib/rerere"
 import type { ConflictBlock, MergeConflictBlock } from "@/types/rebase"
 import { Prisma } from "@prisma/client"
-import { getMergeLibrary } from "./merge-strategy"
+import { getMergeLibrary } from "@/lib/merge-strategy"
 import type {
   FileRebaseState,
   RebaseCommitInfo,
@@ -23,7 +23,7 @@ import type {
   RebaseOutcome,
   ResumeRebaseOutcome,
   RebasedFileContent,
-} from "./article-rebase"
+} from "./rebase"
 
 interface CompareCommitFileInfo {
   sha: string

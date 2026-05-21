@@ -1,7 +1,7 @@
 import fs from "fs"
 import path from "path"
 
-import { resolveSlug, type ResolveResult } from "./slug-resolver"
+import { resolveSlug, type ResolveResult } from "@/lib/slug-resolver"
 
 export const ARTICLES_PATH = path.join(process.cwd(), "articles")
 

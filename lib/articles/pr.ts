@@ -8,8 +8,8 @@ import {
 import {
   analyzeRebaseNeed,
   analyzeRebaseNeedMultiFile,
-} from "@/lib/article-rebase"
-import type { RebaseAnalysis } from "@/lib/article-rebase"
+} from "@/lib/articles/rebase"
+import type { RebaseAnalysis } from "@/lib/articles/rebase"
 import {
   getActiveDraftFile,
   getDuplicateDraftFilePaths,
@@ -22,7 +22,7 @@ import {
   upsertFileOnBranch,
   upsertFilesOnBranch,
   type BranchFileEntry,
-} from "@/lib/article-branch"
+} from "@/lib/articles/branch"
 
 const MAIN_BRANCH = "main"
 

@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
-import { articleUrl } from "@/lib/article-url"
+import { articleUrl } from "@/lib/articles/url"
 import { CornerBrackets } from "../ui/corner-brackets"
 
 interface ArticleInfo {

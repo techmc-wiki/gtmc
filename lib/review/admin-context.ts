@@ -1,4 +1,8 @@
-import { getGithubPatForUser, requireAdmin, requireAuth } from "@/lib/auth-context"
+import {
+  getGithubPatForUser,
+  requireAdmin,
+  requireAuth,
+} from "@/lib/auth-context"
 
 export async function requireReviewAdminContext() {
   const session = await requireAuth()

@@ -1,7 +1,7 @@
 import path from "node:path"
 import { pathToFileURL } from "node:url"
 
-import { ARTICLES_PATH } from "@/lib/article-fs"
+import { ARTICLES_PATH } from "@/lib/articles/fs"
 import { hasExplicitUrlScheme } from "@/lib/markdown/url-utils"
 
 /**

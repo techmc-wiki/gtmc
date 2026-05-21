@@ -1,5 +1,5 @@
 import type { ChapterNavNode } from "@/types/chapter-nav"
-import { getLocalizedArticleEntry } from "./article-manifest"
+import { getLocalizedArticleEntry } from "./manifest"
 
 interface FlatArticle {
   slug: string

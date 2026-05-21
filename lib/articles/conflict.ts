@@ -22,7 +22,7 @@ import {
   getMainBranchHeadSha,
   resolveArticleFilePath,
   upsertFileOnBranch,
-} from "@/lib/article-branch"
+} from "@/lib/articles/branch"
 
 type DraftSyncStatus = "IN_REVIEW" | "SYNC_CONFLICT"
 

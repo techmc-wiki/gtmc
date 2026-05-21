@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { articleUrl } from "@/lib/article-url"
+import { articleUrl } from "@/lib/articles/url"
 import { HIGHLIGHT_TIMEOUT_MS, LOCATE_FALLBACK_MS } from "./constants"
 import type { ChapterNavNode } from "./tree"
 

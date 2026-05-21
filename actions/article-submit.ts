@@ -4,8 +4,8 @@ import { revalidatePaths } from "@/lib/revalidate-paths"
 import {
   getMainBranchHeadSha,
   type BranchFileEntry,
-} from "@/lib/article-branch"
-import { openDraftPullRequest } from "@/lib/article-pr"
+} from "@/lib/articles/branch"
+import { openDraftPullRequest } from "@/lib/articles/pr"
 import {
   buildMigrationTargets,
   type MigrationAssetInput,

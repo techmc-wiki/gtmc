@@ -1,6 +1,6 @@
 import path from "node:path"
 
-import { ARTICLES_PATH } from "@/lib/article-fs"
+import { ARTICLES_PATH } from "@/lib/articles/fs"
 import type { LinearizedArticle } from "@/lib/articles/linearize"
 import { getArticleContentForPdf } from "@/lib/articles/linearize"
 import { resolveImageUrl } from "@/lib/pdf/image-resolver"

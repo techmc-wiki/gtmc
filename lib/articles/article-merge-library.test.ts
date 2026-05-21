@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { getMergeLibrary } from "./merge-strategy"
+import { getMergeLibrary } from "@/lib/merge-strategy"
 
 describe("article-merge-library", () => {
   const mergeLib = getMergeLibrary()

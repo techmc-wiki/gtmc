@@ -1,7 +1,7 @@
 import type { ChapterNavNode } from "@/types/chapter-nav"
-import type { ArticleLocale } from "@/lib/article-manifest"
-import { getArticleContentBySlug } from "@/lib/article-content"
-import { resolveLocalArticlePath } from "@/lib/article-fs"
+import type { ArticleLocale } from "@/lib/articles/manifest"
+import { getArticleContentBySlug } from "@/lib/articles/content"
+import { resolveLocalArticlePath } from "@/lib/articles/fs"
 
 /**
  * A flattened, linearized article ready for PDF consumption.

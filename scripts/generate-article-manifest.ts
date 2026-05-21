@@ -5,10 +5,10 @@ import {
   MANIFEST_FILE_NAME,
   type ArticleLocale,
   type ArticleEntry,
-} from "@/lib/article-manifest"
-import { ARTICLES_PATH } from "@/lib/article-fs"
-import { SLUG_REGEX } from "@/lib/slug-resolver"
-import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
+} from "@/lib/articles/manifest"
+import { ARTICLES_PATH } from "@/lib/articles/fs"
+
+import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/articles/ignore"
 import {
   parseSourceFrontMatter,
   parseTranslationFrontMatter,
@@ -23,6 +23,7 @@ import {
   isAncestor,
   getHeadSha,
 } from "@/lib/git-metadata"
+import { SLUG_REGEX } from "@/lib/slug-resolver"
 
 const OUTPUT_FILE = path.join(process.cwd(), "data", MANIFEST_FILE_NAME)
 const MAX_DEPTH = 3
@@ -43,10 +44,12 @@ async function initAjv(): Promise<void> {
   const schemaPath = path.join(
     process.cwd(),
     "scripts",
-    "article-frontmatter.schema.json",
+    "article-frontmatter.schema.json"
   )
   const schemaContent = fs.readFileSync(schemaPath, "utf-8")
-  const schema = normalizeNullableOptionalFields(JSON.parse(schemaContent)) as AnySchema
+  const schema = normalizeNullableOptionalFields(
+    JSON.parse(schemaContent)
+  ) as AnySchema
   validateFrontmatter = ajv.compile(schema)
 }
 
@@ -73,9 +76,11 @@ function normalizeNullableOptionalFields(value: unknown): unknown {
   return output
 }
 
-function sanitizeForSchema<T extends object>(value: T): Record<string, unknown> {
+function sanitizeForSchema<T extends object>(
+  value: T
+): Record<string, unknown> {
   return Object.fromEntries(
-    Object.entries(value).filter(([, fieldValue]) => fieldValue !== undefined),
+    Object.entries(value).filter(([, fieldValue]) => fieldValue !== undefined)
   )
 }
 
@@ -87,7 +92,9 @@ function getParentSlug(slug: string): string | undefined {
 
 function resolveSourceSlug(slugPrefix: string, articleSlug: string): string {
   if (slugPrefix === "") return articleSlug
-  return slugPrefix === articleSlug ? articleSlug : `${slugPrefix}/${articleSlug}`
+  return slugPrefix === articleSlug
+    ? articleSlug
+    : `${slugPrefix}/${articleSlug}`
 }
 
 function getParentSlugFromRelPath(relPath: string): string {
@@ -95,8 +102,18 @@ function getParentSlugFromRelPath(relPath: string): string {
   const slugs: string[] = []
 
   for (const segment of segments) {
-    const readmeZhPath = path.join(ARTICLES_PATH, ...slugsToPath(segments, slugs.length), segment, "README.zh.md")
-    const readmePath = path.join(ARTICLES_PATH, ...slugsToPath(segments, slugs.length), segment, "README.md")
+    const readmeZhPath = path.join(
+      ARTICLES_PATH,
+      ...slugsToPath(segments, slugs.length),
+      segment,
+      "README.zh.md"
+    )
+    const readmePath = path.join(
+      ARTICLES_PATH,
+      ...slugsToPath(segments, slugs.length),
+      segment,
+      "README.md"
+    )
     const readmeSource = fs.existsSync(readmeZhPath)
       ? readmeZhPath
       : fs.existsSync(readmePath)
@@ -127,13 +144,15 @@ async function processSourceFile(
   aliases: Map<string, string>
 ): Promise<Partial<ArticleEntry>> {
   const content = fs.readFileSync(filePath, "utf-8")
-  
+
   let fm: SourceFrontMatter
   try {
     fm = parseSourceFrontMatter(content, { allowTitlelessFolder: isFolder })
     if (!validateFrontmatter(sanitizeForSchema(fm))) {
       const errors = validateFrontmatter.errors || []
-      const errorMsg = errors.map(e => `${e.instancePath} ${e.message}`).join(", ")
+      const errorMsg = errors
+        .map((e) => `${e.instancePath} ${e.message}`)
+        .join(", ")
       throw new Error(`${relPath}: validation failed: ${errorMsg}`)
     }
   } catch (err) {
@@ -144,8 +163,17 @@ async function processSourceFile(
     throw err
   }
 
-  const { author, coAuthors } = await getArticleAuthors(repoCwd, relPath, maintainers, aliases)
-  const { created, lastmod } = await getArticleDates(repoCwd, relPath, maintainers)
+  const { author, coAuthors } = await getArticleAuthors(
+    repoCwd,
+    relPath,
+    maintainers,
+    aliases
+  )
+  const { created, lastmod } = await getArticleDates(
+    repoCwd,
+    relPath,
+    maintainers
+  )
 
   const entry: Partial<ArticleEntry> = {
     filePath: relPath,
@@ -153,14 +181,19 @@ async function processSourceFile(
     titleByLocale: { zh: fm.title },
     availableLocales: ["zh"],
     localizedFilePaths: { zh: relPath },
-    chapterTitleByLocale: fm["chapter-title"] ? { zh: fm["chapter-title"] } : {},
+    chapterTitleByLocale: fm["chapter-title"]
+      ? { zh: fm["chapter-title"] }
+      : {},
     introTitleByLocale: fm["intro-title"] ? { zh: fm["intro-title"] } : {},
     descriptionByLocale: fm.description ? { zh: fm.description } : {},
     hasIntro: !!fm["intro-title"],
     index: fm.index,
     isFolder,
-    isAppendix: /(^|\/)appendix(\/|$)/i.test(slug) || /(^|\/)appendix(\/|$)/i.test(relPath),
-    isPreface: /(^|\/)preface(\/|$)/i.test(slug) || /^preface\.zh\.md$/i.test(relPath),
+    isAppendix:
+      /(^|\/)appendix(\/|$)/i.test(slug) ||
+      /(^|\/)appendix(\/|$)/i.test(relPath),
+    isPreface:
+      /(^|\/)preface(\/|$)/i.test(slug) || /^preface\.zh\.md$/i.test(relPath),
     parentSlug,
     author: author || undefined,
     coAuthors: coAuthors.length > 0 ? coAuthors : undefined,
@@ -190,15 +223,19 @@ async function processTranslationFile(
 
   if (!validateFrontmatter(sanitizeForSchema(fm))) {
     const errors = validateFrontmatter.errors || []
-    const errorMsg = errors.map(e => `${e.instancePath} ${e.message}`).join(", ")
+    const errorMsg = errors
+      .map((e) => `${e.instancePath} ${e.message}`)
+      .join(", ")
     throw new Error(`${relPath}: validation failed: ${errorMsg}`)
   }
 
   const dirPath = path.dirname(filePath)
   const translatesPath = path.join(dirPath, fm.translates)
-  
+
   if (!fs.existsSync(translatesPath)) {
-    throw new Error(`${relPath}: translates field points to non-existent file: ${fm.translates}`)
+    throw new Error(
+      `${relPath}: translates field points to non-existent file: ${fm.translates}`
+    )
   }
 
   const translatesRelPath = path.relative(ARTICLES_PATH, translatesPath)
@@ -209,12 +246,14 @@ async function processTranslationFile(
   const sourceSlug = sourceFm.slug
   const resolvedSourceSlug = resolveSourceSlug(
     getParentSlugFromRelPath(translatesRelPath),
-    sourceSlug,
+    sourceSlug
   )
 
   const entry = manifest[resolvedSourceSlug]
   if (!entry) {
-    throw new Error(`${relPath}: source slug "${resolvedSourceSlug}" not found in manifest`)
+    throw new Error(
+      `${relPath}: source slug "${resolvedSourceSlug}" not found in manifest`
+    )
   }
 
   const { lastmod } = await getArticleDates(repoCwd, relPath, maintainers)
@@ -243,11 +282,15 @@ async function processTranslationFile(
   try {
     const headSha = await getHeadSha(repoCwd)
     const sourceHeadSha = await getHeadSha(repoCwd)
-    
+
     if (fm["translated-from-revision"] === sourceHeadSha) {
       entry.translationFreshnessByLocale.en = "fresh"
     } else {
-      const isAnc = await isAncestor(repoCwd, fm["translated-from-revision"], headSha)
+      const isAnc = await isAncestor(
+        repoCwd,
+        fm["translated-from-revision"],
+        headSha
+      )
       entry.translationFreshnessByLocale.en = isAnc ? "stale" : "unknown"
     }
   } catch {
@@ -279,8 +322,10 @@ async function processDirectory(
 
   const entries = fs.readdirSync(dirPath, { withFileTypes: true })
 
-  const readmeZh = entries.find(e => e.isFile() && e.name === "README.zh.md")
-  const readmeFallback = entries.find(e => e.isFile() && e.name === "README.md")
+  const readmeZh = entries.find((e) => e.isFile() && e.name === "README.zh.md")
+  const readmeFallback = entries.find(
+    (e) => e.isFile() && e.name === "README.md"
+  )
   const readmeSource = readmeZh || readmeFallback
 
   if (readmeSource) {
@@ -302,14 +347,21 @@ async function processDirectory(
         )
         manifest[slugPrefix] = entry as ArticleEntry
       } catch (err) {
-        process.stderr.write(`Error: ${err instanceof Error ? err.message : String(err)}\n`)
+        process.stderr.write(
+          `Error: ${err instanceof Error ? err.message : String(err)}\n`
+        )
         hasError = true
       }
     }
   }
 
   const sourceFiles = entries.filter(
-    e => e.isFile() && (e.name.endsWith(".zh.md") || (e.name.endsWith(".md") && !e.name.endsWith(".en.md"))) && !isReadmeLocaleFile(e.name) && !shouldIgnoreFile(e.name, false)
+    (e) =>
+      e.isFile() &&
+      (e.name.endsWith(".zh.md") ||
+        (e.name.endsWith(".md") && !e.name.endsWith(".en.md"))) &&
+      !isReadmeLocaleFile(e.name) &&
+      !shouldIgnoreFile(e.name, false)
   )
 
   for (const sourceFile of sourceFiles) {
@@ -318,12 +370,16 @@ async function processDirectory(
 
     const articleSlug = getSlugFromFile(sourcePath)
     if (!articleSlug) {
-      process.stderr.write(`WARN: Skipping file without slug: articles/${relPath}\n`)
+      process.stderr.write(
+        `WARN: Skipping file without slug: articles/${relPath}\n`
+      )
       continue
     }
 
     if (!SLUG_REGEX.test(articleSlug)) {
-      process.stderr.write(`Error: Invalid slug format "${articleSlug}" in: articles/${relPath}\n`)
+      process.stderr.write(
+        `Error: Invalid slug format "${articleSlug}" in: articles/${relPath}\n`
+      )
       hasError = true
       continue
     }
@@ -344,12 +400,14 @@ async function processDirectory(
       )
       manifest[compositeSlug] = entry as ArticleEntry
     } catch (err) {
-      process.stderr.write(`Error: ${err instanceof Error ? err.message : String(err)}\n`)
+      process.stderr.write(
+        `Error: ${err instanceof Error ? err.message : String(err)}\n`
+      )
       hasError = true
     }
   }
 
-  const readmeEn = entries.find(e => e.isFile() && e.name === "README.en.md")
+  const readmeEn = entries.find((e) => e.isFile() && e.name === "README.en.md")
   if (readmeEn && manifest[slugPrefix]) {
     const readmePath = path.join(dirPath, readmeEn.name)
     try {
@@ -361,13 +419,19 @@ async function processDirectory(
         manifest
       )
     } catch (err) {
-      process.stderr.write(`Error: ${err instanceof Error ? err.message : String(err)}\n`)
+      process.stderr.write(
+        `Error: ${err instanceof Error ? err.message : String(err)}\n`
+      )
       hasError = true
     }
   }
 
   const enFiles = entries.filter(
-    e => e.isFile() && e.name.endsWith(".en.md") && !isReadmeLocaleFile(e.name) && !shouldIgnoreFile(e.name, false)
+    (e) =>
+      e.isFile() &&
+      e.name.endsWith(".en.md") &&
+      !isReadmeLocaleFile(e.name) &&
+      !shouldIgnoreFile(e.name, false)
   )
 
   for (const enFile of enFiles) {
@@ -375,51 +439,89 @@ async function processDirectory(
     const relPath = `${relFromArticles}/${enFile.name}`
 
     try {
-      await processTranslationFile(enPath, relPath, repoCwd, maintainers, manifest)
+      await processTranslationFile(
+        enPath,
+        relPath,
+        repoCwd,
+        maintainers,
+        manifest
+      )
     } catch (err) {
-      process.stderr.write(`Error: ${err instanceof Error ? err.message : String(err)}\n`)
+      process.stderr.write(
+        `Error: ${err instanceof Error ? err.message : String(err)}\n`
+      )
       hasError = true
     }
   }
 
-  const subDirs = entries.filter(e => e.isDirectory() && !shouldIgnoreDirectory(e.name))
+  const subDirs = entries.filter(
+    (e) => e.isDirectory() && !shouldIgnoreDirectory(e.name)
+  )
 
   for (const subDirEntry of subDirs) {
     const subDirPath = path.join(dirPath, subDirEntry.name)
     const subRelPath = `${relFromArticles}/${subDirEntry.name}`
 
     if (depth >= MAX_DEPTH) {
-      process.stderr.write(`Error: Directory nesting exceeds maximum depth of ${MAX_DEPTH}: articles/${subRelPath}\n`)
+      process.stderr.write(
+        `Error: Directory nesting exceeds maximum depth of ${MAX_DEPTH}: articles/${subRelPath}\n`
+      )
       hasError = true
       continue
     }
 
     const subReadmeZhPath = path.join(subDirPath, "README.zh.md")
     const subReadmePath = path.join(subDirPath, "README.md")
-    const subReadmeExists = fs.existsSync(subReadmeZhPath) ? subReadmeZhPath : (fs.existsSync(subReadmePath) ? subReadmePath : null)
-    
+    const subReadmeExists = fs.existsSync(subReadmeZhPath)
+      ? subReadmeZhPath
+      : fs.existsSync(subReadmePath)
+        ? subReadmePath
+        : null
+
     if (!subReadmeExists) continue
 
     const subSlug = getSlugFromFile(subReadmeExists)
     if (!subSlug) {
       if (depth < 1) {
-        process.stderr.write(`Error: Empty slug not allowed in top-level folder: articles/${subRelPath}/README.zh.md\n`)
+        process.stderr.write(
+          `Error: Empty slug not allowed in top-level folder: articles/${subRelPath}/README.zh.md\n`
+        )
         hasError = true
         continue
       }
-      const subError = await processDirectory(subDirPath, subRelPath, slugPrefix, depth + 1, manifest, repoCwd, maintainers, aliases)
+      const subError = await processDirectory(
+        subDirPath,
+        subRelPath,
+        slugPrefix,
+        depth + 1,
+        manifest,
+        repoCwd,
+        maintainers,
+        aliases
+      )
       if (subError) hasError = true
       continue
     }
 
     if (!SLUG_REGEX.test(subSlug)) {
-      process.stderr.write(`Error: Invalid slug format "${subSlug}" in: articles/${subRelPath}/README.zh.md\n`)
+      process.stderr.write(
+        `Error: Invalid slug format "${subSlug}" in: articles/${subRelPath}/README.zh.md\n`
+      )
       hasError = true
       continue
     }
 
     const subSlugPrefix = resolveSourceSlug(slugPrefix, subSlug)
-    const subError = await processDirectory(subDirPath, subRelPath, subSlugPrefix, depth + 1, manifest, repoCwd, maintainers, aliases)
+    const subError = await processDirectory(
+      subDirPath,
+      subRelPath,
+      subSlugPrefix,
+      depth + 1,
+      manifest,
+      repoCwd,
+      maintainers,
+      aliases
+    )
     if (subError) hasError = true
   }
 
@@ -428,10 +530,15 @@ async function processDirectory(
 
 function buildGenerationSummary(manifest: ArticleManifest): string {
   const entries = Object.values(manifest)
-  const folders = entries.filter(e => e.isFolder)
-  const articles = entries.filter(e => !e.isFolder)
-  const roots = entries.filter(e => !e.parentSlug || !manifest[e.parentSlug]).sort(comparePreviewEntries)
-  const maxSlugDepth = entries.reduce((max, e) => Math.max(max, e.slug.split("/").length), 0)
+  const folders = entries.filter((e) => e.isFolder)
+  const articles = entries.filter((e) => !e.isFolder)
+  const roots = entries
+    .filter((e) => !e.parentSlug || !manifest[e.parentSlug])
+    .sort(comparePreviewEntries)
+  const maxSlugDepth = entries.reduce(
+    (max, e) => Math.max(max, e.slug.split("/").length),
+    0
+  )
 
   const summaryLines = [
     "[manifest] Article structure indexed",
@@ -453,11 +560,17 @@ function buildGenerationSummary(manifest: ArticleManifest): string {
   return [...summaryLines, ...previewLines, ""].join("\n")
 }
 
-function countFlagged(entries: ArticleEntry[], field: "isPreface" | "isAppendix" | "isAdvanced" | "hasIntro"): number {
-  return entries.filter(e => e[field]).length
+function countFlagged(
+  entries: ArticleEntry[],
+  field: "isPreface" | "isAppendix" | "isAdvanced" | "hasIntro"
+): number {
+  return entries.filter((e) => e[field]).length
 }
 
-function formatPreviewEntries(entries: ArticleEntry[], depth: number): string[] {
+function formatPreviewEntries(
+  entries: ArticleEntry[],
+  depth: number
+): string[] {
   const visibleEntries = entries.slice(0, TREE_PREVIEW_CHILD_LIMIT)
   const lines: string[] = []
   const nextDepth = depth + 1
@@ -470,7 +583,9 @@ function formatPreviewEntries(entries: ArticleEntry[], depth: number): string[] 
       if (nextDepth < TREE_PREVIEW_DEPTH) {
         lines.push(...formatPreviewEntries(children, nextDepth))
       } else {
-        lines.push(`${indent(nextDepth)}... ${children.length} nested entries hidden`)
+        lines.push(
+          `${indent(nextDepth)}... ${children.length} nested entries hidden`
+        )
       }
     }
   }
@@ -489,7 +604,9 @@ function formatPreviewEntry(entry: ArticleEntry, depth: number): string {
     entry.isAdvanced ? "*" : "",
     entry.hasIntro ? "+" : "",
     entry.isPreface || entry.isAppendix ? "!" : "",
-  ].filter(Boolean).join("")
+  ]
+    .filter(Boolean)
+    .join("")
   const markerSuffix = markers === "" ? "" : ` ${markers}`
   const indexSuffix = entry.index >= 0 ? ` #${entry.index}` : ""
   const childCount = entry.children?.length ?? 0
@@ -506,7 +623,10 @@ function comparePreviewEntries(a: ArticleEntry, b: ArticleEntry): number {
   const indexB = b.index >= 0 ? b.index : Number.MAX_SAFE_INTEGER
   if (indexA !== indexB) return indexA - indexB
 
-  return getPreviewTitle(a).localeCompare(getPreviewTitle(b), undefined, { numeric: true, sensitivity: "base" })
+  return getPreviewTitle(a).localeCompare(getPreviewTitle(b), undefined, {
+    numeric: true,
+    sensitivity: "base",
+  })
 }
 
 function getPreviewTitle(entry: ArticleEntry): string {
@@ -537,25 +657,34 @@ async function main(): Promise<void> {
   let hasError = false
 
   if (!fs.existsSync(ARTICLES_PATH)) {
-    process.stderr.write(`Error: articles/ directory not found at ${ARTICLES_PATH}\n`)
+    process.stderr.write(
+      `Error: articles/ directory not found at ${ARTICLES_PATH}\n`
+    )
     process.exit(1)
   }
 
   const maintainers = await loadMaintainers(ARTICLES_PATH)
   const aliases = await loadAuthorAliases(ARTICLES_PATH)
 
-  const topLevelFolders = fs.readdirSync(ARTICLES_PATH, { withFileTypes: true })
-    .filter(e => e.isDirectory() && !shouldIgnoreDirectory(e.name))
-    .map(e => e.name)
+  const topLevelFolders = fs
+    .readdirSync(ARTICLES_PATH, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && !shouldIgnoreDirectory(e.name))
+    .map((e) => e.name)
 
   for (const folderName of topLevelFolders) {
     const folderPath = path.join(ARTICLES_PATH, folderName)
     const readmeZhPath = path.join(folderPath, "README.zh.md")
     const readmePath = path.join(folderPath, "README.md")
-    const readmeExists = fs.existsSync(readmeZhPath) ? readmeZhPath : (fs.existsSync(readmePath) ? readmePath : null)
+    const readmeExists = fs.existsSync(readmeZhPath)
+      ? readmeZhPath
+      : fs.existsSync(readmePath)
+        ? readmePath
+        : null
 
     if (!readmeExists) {
-      process.stderr.write(`Error: Missing README.zh.md or README.md in folder: articles/${folderName}/\n`)
+      process.stderr.write(
+        `Error: Missing README.zh.md or README.md in folder: articles/${folderName}/\n`
+      )
       hasError = true
       continue
     }
@@ -563,59 +692,110 @@ async function main(): Promise<void> {
     const folderSlug = getSlugFromFile(readmeExists)
 
     if (!folderSlug) {
-      process.stderr.write(`Error: Missing slug in folder README: articles/${folderName}/README.zh.md\n`)
+      process.stderr.write(
+        `Error: Missing slug in folder README: articles/${folderName}/README.zh.md\n`
+      )
       hasError = true
       continue
     }
 
     if (!SLUG_REGEX.test(folderSlug)) {
-      process.stderr.write(`Error: Invalid slug format "${folderSlug}" in: articles/${folderName}/README.zh.md\n`)
+      process.stderr.write(
+        `Error: Invalid slug format "${folderSlug}" in: articles/${folderName}/README.zh.md\n`
+      )
       hasError = true
       continue
     }
 
-    const folderError = await processDirectory(folderPath, folderName, folderSlug, 1, manifest, ARTICLES_PATH, maintainers, aliases)
+    const folderError = await processDirectory(
+      folderPath,
+      folderName,
+      folderSlug,
+      1,
+      manifest,
+      ARTICLES_PATH,
+      maintainers,
+      aliases
+    )
     if (folderError) hasError = true
   }
 
-  const rootFiles = fs.readdirSync(ARTICLES_PATH, { withFileTypes: true })
-    .filter(e => e.isFile() && (e.name.endsWith(".zh.md") || (e.name.endsWith(".md") && !e.name.endsWith(".en.md"))) && !isReadmeLocaleFile(e.name) && !shouldIgnoreFile(e.name, true))
-    .map(e => e.name)
+  const rootFiles = fs
+    .readdirSync(ARTICLES_PATH, { withFileTypes: true })
+    .filter(
+      (e) =>
+        e.isFile() &&
+        (e.name.endsWith(".zh.md") ||
+          (e.name.endsWith(".md") && !e.name.endsWith(".en.md"))) &&
+        !isReadmeLocaleFile(e.name) &&
+        !shouldIgnoreFile(e.name, true)
+    )
+    .map((e) => e.name)
 
   for (const rootFile of rootFiles) {
     const rootFilePath = path.join(ARTICLES_PATH, rootFile)
     const rawSlug = getSlugFromFile(rootFilePath)
 
     if (!rawSlug) {
-      process.stderr.write(`WARN: Skipping root file without slug: articles/${rootFile}\n`)
+      process.stderr.write(
+        `WARN: Skipping root file without slug: articles/${rootFile}\n`
+      )
       continue
     }
 
     if (!SLUG_REGEX.test(rawSlug)) {
-      process.stderr.write(`Error: Invalid slug format "${rawSlug}" in: articles/${rootFile}\n`)
+      process.stderr.write(
+        `Error: Invalid slug format "${rawSlug}" in: articles/${rootFile}\n`
+      )
       hasError = true
       continue
     }
 
     try {
-      const entry = await processSourceFile(rootFilePath, rootFile, rawSlug, false, undefined, ARTICLES_PATH, maintainers, aliases)
+      const entry = await processSourceFile(
+        rootFilePath,
+        rootFile,
+        rawSlug,
+        false,
+        undefined,
+        ARTICLES_PATH,
+        maintainers,
+        aliases
+      )
       manifest[rawSlug] = entry as ArticleEntry
     } catch (err) {
-      process.stderr.write(`Error: ${err instanceof Error ? err.message : String(err)}\n`)
+      process.stderr.write(
+        `Error: ${err instanceof Error ? err.message : String(err)}\n`
+      )
       hasError = true
     }
   }
 
-  const rootEnFiles = fs.readdirSync(ARTICLES_PATH, { withFileTypes: true })
-    .filter(e => e.isFile() && e.name.endsWith(".en.md") && !isReadmeLocaleFile(e.name) && !shouldIgnoreFile(e.name, true))
-    .map(e => e.name)
+  const rootEnFiles = fs
+    .readdirSync(ARTICLES_PATH, { withFileTypes: true })
+    .filter(
+      (e) =>
+        e.isFile() &&
+        e.name.endsWith(".en.md") &&
+        !isReadmeLocaleFile(e.name) &&
+        !shouldIgnoreFile(e.name, true)
+    )
+    .map((e) => e.name)
 
   for (const rootEnFile of rootEnFiles) {
     const rootEnPath = path.join(ARTICLES_PATH, rootEnFile)
     try {
-      await processTranslationFile(rootEnPath, rootEnFile, ARTICLES_PATH, maintainers, manifest)
+      await processTranslationFile(
+        rootEnPath,
+        rootEnFile,
+        ARTICLES_PATH,
+        maintainers,
+        manifest
+      )
     } catch (err) {
-      process.stderr.write(`Error: ${err instanceof Error ? err.message : String(err)}\n`)
+      process.stderr.write(
+        `Error: ${err instanceof Error ? err.message : String(err)}\n`
+      )
       hasError = true
     }
   }
@@ -634,7 +814,9 @@ async function main(): Promise<void> {
   }
 
   if (hasError) {
-    process.stderr.write("\nArticle manifest generation failed due to validation errors above.\n")
+    process.stderr.write(
+      "\nArticle manifest generation failed due to validation errors above.\n"
+    )
     process.exit(1)
   }
 
@@ -647,7 +829,9 @@ async function main(): Promise<void> {
 
   const entryCount = Object.keys(manifest).length
   process.stdout.write(buildGenerationSummary(manifest))
-  process.stdout.write(`Generated ${MANIFEST_FILE_NAME} with ${entryCount} entries\n`)
+  process.stdout.write(
+    `Generated ${MANIFEST_FILE_NAME} with ${entryCount} entries\n`
+  )
 }
 
 main()

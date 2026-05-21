@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
-import type { ArticleLocale } from "@/lib/article-manifest"
+import type { ArticleLocale } from "@/lib/articles/manifest"
 
 const TREE_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300"
 const VALID_LOCALES: ArticleLocale[] = ["zh", "en"]

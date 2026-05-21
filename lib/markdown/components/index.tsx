@@ -16,12 +16,21 @@ import { CalloutAside } from "./callout-aside"
 import { CodeComponent, PreComponent } from "./code-components"
 import { H1Component, H2Component, H3Component } from "./heading-components"
 import { IframeComponent } from "./iframe-component"
-import { BlockquoteComponent, HrComponent, SupComponent } from "./misc-components"
+import {
+  BlockquoteComponent,
+  HrComponent,
+  SupComponent,
+} from "./misc-components"
 import { OrderedListComponent, UnorderedListComponent } from "./list-components"
 import { ParagraphComponent } from "./paragraph-component"
 import { SectionComponent } from "./section-component"
 import { makeSpan } from "./span-components"
-import { TableComponent, TableDataCell, TableHead, TableHeaderCell } from "./table-components"
+import {
+  TableComponent,
+  TableDataCell,
+  TableHead,
+  TableHeaderCell,
+} from "./table-components"
 
 const ansiColorStyles: Record<AnsiColorName, Record<string, string>> = {
   black: { color: "#334155" },

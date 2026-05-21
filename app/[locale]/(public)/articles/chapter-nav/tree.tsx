@@ -1,5 +1,5 @@
 import { Link } from "@/i18n/navigation"
-import { formatIndexPrefix } from "@/lib/chapter-index-prefix"
+import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
 import { encodeSlug } from "@/lib/slug-resolver"
 import type { ChapterNavNode } from "@/types/chapter-nav"
 import React from "react"

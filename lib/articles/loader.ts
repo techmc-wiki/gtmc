@@ -1,14 +1,12 @@
 import fs from "fs"
 import path from "path"
-import { ARTICLES_PATH } from "./article-fs"
-
-export {
+import { ARTICLES_PATH } from "./fs"
+import {
+  getArticleManifest,
   getArticleTree,
   getLocalizedArticleEntry,
-  getLocalizedArticleMetadata,
   type ArticleLocale,
-  type LocalizedArticleMetadata,
-} from "./article-manifest"
+} from "./manifest"
 
 const SUBMODULE_GIT = path.join(ARTICLES_PATH, ".git")
 
@@ -54,3 +52,4 @@ export async function getArticleBuffer(
   }
   return null
 }
+export { getArticleTree } from "./manifest"

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import path from "path"
 import mime from "mime-types"
-import { getArticleRemoteBuffer } from "@/lib/article-remote-assets"
+import { getArticleRemoteBuffer } from "@/lib/articles/remote-assets"
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)

@@ -1,2 +1,2 @@
-export { ARTICLES_PATH } from "./article-fs"
-export { MANIFEST_FILE_NAME } from "./article-manifest"
+export { ARTICLES_PATH } from "@/lib/articles/fs"
+export { MANIFEST_FILE_NAME } from "@/lib/articles/manifest"

@@ -16,10 +16,10 @@ import {
   getLocalizedArticleEntry,
   hasArticleLocale,
   type ArticleLocale,
-} from "@/lib/article-manifest"
-import { getArticleContentBySlug } from "@/lib/article-content"
+} from "@/lib/articles/manifest"
+import { getArticleContentBySlug } from "@/lib/articles/content"
 import { decodeSlugPath, encodeSlug, getSlugForFilePath } from "@/lib/slug-resolver"
-import { formatIndexPrefix } from "@/lib/chapter-index-prefix"
+import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
 import { getSiteUrl } from "@/lib/site-url"
 
 import { CornerBrackets } from "@/components/ui/corner-brackets"
@@ -31,7 +31,7 @@ import {
   flattenArticleTree,
   getArticleNavigation,
   getFirstArticleInChapter,
-} from "@/lib/article-navigation"
+} from "@/lib/articles/navigation-data"
 
 import type { ArticleTreeNode as BaseArticleTreeNode } from "@/lib/github/sync"
 

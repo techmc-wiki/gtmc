@@ -2,12 +2,8 @@
 
 import { revalidatePath } from "next/cache"
 
-import {
-  getMainBranchHeadSha,
-} from "@/lib/article-branch"
-import {
-  parseDraftTempImageRefs,
-} from "@/lib/draft-markdown"
+import { getMainBranchHeadSha } from "@/lib/articles/branch"
+import { parseDraftTempImageRefs } from "@/lib/draft-markdown"
 import {
   createDraftFile,
   decodeStoredDraftFiles,

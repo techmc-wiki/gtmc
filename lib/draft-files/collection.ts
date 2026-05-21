@@ -1,6 +1,15 @@
-import type { DraftFileCollection, DraftFileCollectionInput, DraftFileRecord } from "./types"
+import type {
+  DraftFileCollection,
+  DraftFileCollectionInput,
+  DraftFileRecord,
+} from "./types"
 import { createDraftFile, createDraftFileId } from "./file-operations"
-import { normalizeDraftFilePath, normalizeDraftFolderPath, collectParentFolders, listFolderAncestors } from "./normalization"
+import {
+  normalizeDraftFilePath,
+  normalizeDraftFolderPath,
+  collectParentFolders,
+  listFolderAncestors,
+} from "./normalization"
 
 export function normalizeDraftFileCollection(
   input: DraftFileCollectionInput | null | undefined

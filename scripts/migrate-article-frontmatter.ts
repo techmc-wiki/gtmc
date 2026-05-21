@@ -4,7 +4,7 @@ import path from "path"
 import { fileURLToPath } from "url"
 import matter from "gray-matter"
 import yaml from "js-yaml"
-import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
+import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/articles/ignore"
 
 type ArticleLocale = "zh" | "en"
 
@@ -54,7 +54,12 @@ interface ZhSource {
 
 type Operation =
   | { type: "rename"; from: string; to: string }
-  | { type: "rewrite"; filePath: string; frontmatter: Record<string, unknown>; body: string }
+  | {
+      type: "rewrite"
+      filePath: string
+      frontmatter: Record<string, unknown>
+      body: string
+    }
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url))
 const DEFAULT_ARTICLES_REPO = path.resolve(SCRIPT_DIR, "..", "articles")
@@ -140,12 +145,17 @@ function hasString(data: Record<string, unknown>, key: string): boolean {
 
 function isInside(root: string, candidate: string): boolean {
   const relativePath = path.relative(root, candidate)
-  return relativePath === "" || (!relativePath.startsWith("..") && !path.isAbsolute(relativePath))
+  return (
+    relativePath === "" ||
+    (!relativePath.startsWith("..") && !path.isAbsolute(relativePath))
+  )
 }
 
 function assertInsideRepo(repoRoot: string, candidate: string): void {
   if (!isInside(repoRoot, candidate)) {
-    throw new Error(`Refusing to access path outside articles repo: ${candidate}`)
+    throw new Error(
+      `Refusing to access path outside articles repo: ${candidate}`
+    )
   }
 }
 
@@ -168,13 +178,17 @@ function shouldSkipMarkdownFile(name: string, isRoot: boolean): boolean {
 
 function isNewZhSchema(data: Record<string, unknown>): boolean {
   if (!hasString(data, "slug")) return false
-  return Object.keys(data).every((key) => ZH_ALLOWED_KEYS.has(key) && !ZH_FORBIDDEN_KEYS.has(key))
+  return Object.keys(data).every(
+    (key) => ZH_ALLOWED_KEYS.has(key) && !ZH_FORBIDDEN_KEYS.has(key)
+  )
 }
 
 function isNewEnSchema(data: Record<string, unknown>): boolean {
   if (!hasString(data, "translates")) return false
   if (!hasString(data, "translated-from-revision")) return false
-  return Object.keys(data).every((key) => EN_ALLOWED_KEYS.has(key) && !EN_FORBIDDEN_KEYS.has(key))
+  return Object.keys(data).every(
+    (key) => EN_ALLOWED_KEYS.has(key) && !EN_FORBIDDEN_KEYS.has(key)
+  )
 }
 
 function isAlreadyNewSchema(
@@ -188,7 +202,10 @@ function isAlreadyNewSchema(
   return filename.endsWith(".en.md") && isNewEnSchema(data)
 }
 
-function readMarkdownFile(repoRoot: string, absolutePath: string): MarkdownFile {
+function readMarkdownFile(
+  repoRoot: string,
+  absolutePath: string
+): MarkdownFile {
   assertInsideRepo(repoRoot, absolutePath)
   const rawContent = fs.readFileSync(absolutePath, "utf8")
   const parsed = matter(rawContent)
@@ -209,7 +226,9 @@ function readMarkdownFile(repoRoot: string, absolutePath: string): MarkdownFile 
     locale,
     isBareZh,
     normalizedPath,
-    normalizedRelativePath: toPosixPath(path.relative(repoRoot, normalizedPath)),
+    normalizedRelativePath: toPosixPath(
+      path.relative(repoRoot, normalizedPath)
+    ),
     frontmatter: parsed.data,
     body: parsed.content,
     hasSlug: hasString(parsed.data, "slug"),
@@ -218,7 +237,10 @@ function readMarkdownFile(repoRoot: string, absolutePath: string): MarkdownFile 
   }
 }
 
-function walkMarkdownFiles(repoRoot: string, directory = repoRoot): MarkdownFile[] {
+function walkMarkdownFiles(
+  repoRoot: string,
+  directory = repoRoot
+): MarkdownFile[] {
   assertInsideRepo(repoRoot, directory)
   const entries = fs
     .readdirSync(directory, { withFileTypes: true })
@@ -256,7 +278,9 @@ function orderedPick(
   return nextData
 }
 
-function rewriteZhFrontmatter(data: Record<string, unknown>): Record<string, unknown> {
+function rewriteZhFrontmatter(
+  data: Record<string, unknown>
+): Record<string, unknown> {
   return orderedPick(data, ZH_FRONTMATTER_ORDER)
 }
 
@@ -266,7 +290,11 @@ function copyLocalizedField(
   legacyKey: string,
   newKey: string
 ): void {
-  if (hasOwn(source, legacyKey) && source[legacyKey] !== null && source[legacyKey] !== undefined) {
+  if (
+    hasOwn(source, legacyKey) &&
+    source[legacyKey] !== null &&
+    source[legacyKey] !== undefined
+  ) {
     target[newKey] = source[legacyKey]
     return
   }
@@ -277,7 +305,9 @@ function copyLocalizedField(
 }
 
 function getRelativeTranslationPath(fromFile: string, toFile: string): string {
-  const relativePath = toPosixPath(path.relative(path.dirname(fromFile), toFile))
+  const relativePath = toPosixPath(
+    path.relative(path.dirname(fromFile), toFile)
+  )
   if (relativePath.startsWith(".")) return relativePath
   return `./${relativePath}`
 }
@@ -307,7 +337,10 @@ function rewriteEnFrontmatter(
   return orderedPick(nextData, EN_FRONTMATTER_ORDER)
 }
 
-function dumpMarkdown(frontmatter: Record<string, unknown>, body: string): string {
+function dumpMarkdown(
+  frontmatter: Record<string, unknown>,
+  body: string
+): string {
   const frontmatterYaml = yaml.dump(frontmatter, {
     sortKeys: false,
     lineWidth: -1,
@@ -324,7 +357,9 @@ function getLastRevision(repoRoot: string, filePath: string): string {
   ).trim()
 
   if (revision === "") {
-    throw new Error(`No git history found for ${toPosixPath(path.relative(repoRoot, filePath))}`)
+    throw new Error(
+      `No git history found for ${toPosixPath(path.relative(repoRoot, filePath))}`
+    )
   }
 
   return revision
@@ -350,7 +385,11 @@ function addSkip(result: MigrationResult, message: string): void {
   result.plannedActions.push(`INFO ${message}`)
 }
 
-function addOperation(result: MigrationResult, operations: Operation[], operation: Operation): void {
+function addOperation(
+  result: MigrationResult,
+  operations: Operation[],
+  operation: Operation
+): void {
   operations.push(operation)
   if (operation.type === "rename") {
     result.renamed += 1
@@ -359,11 +398,16 @@ function addOperation(result: MigrationResult, operations: Operation[], operatio
     )
   } else {
     result.rewritten += 1
-    result.plannedActions.push(`REWRITE ${toPosixPath(path.relative(result.repoPath, operation.filePath))}`)
+    result.plannedActions.push(
+      `REWRITE ${toPosixPath(path.relative(result.repoPath, operation.filePath))}`
+    )
   }
 }
 
-function collectZhSources(files: MarkdownFile[], result: MigrationResult): Map<string, ZhSource> {
+function collectZhSources(
+  files: MarkdownFile[],
+  result: MigrationResult
+): Map<string, ZhSource> {
   const sources = new Map<string, ZhSource>()
 
   for (const file of files) {
@@ -394,20 +438,29 @@ function collectZhSources(files: MarkdownFile[], result: MigrationResult): Map<s
   return sources
 }
 
-function planMigration(files: MarkdownFile[], result: MigrationResult): Operation[] {
+function planMigration(
+  files: MarkdownFile[],
+  result: MigrationResult
+): Operation[] {
   const operations: Operation[] = []
   const zhSourcesByDirectoryAndSlug = collectZhSources(files, result)
 
   for (const file of files) {
     if (file.alreadyNewSchema) {
-      addSkip(result, `${file.relativePath} already uses the new ${file.locale} schema`)
+      addSkip(
+        result,
+        `${file.relativePath} already uses the new ${file.locale} schema`
+      )
       continue
     }
 
     if (file.locale === "zh") {
       if (file.isBareZh) {
         if (fs.existsSync(file.normalizedPath)) {
-          addError(result, `Cannot rename ${file.relativePath}: target ${file.normalizedRelativePath} already exists`)
+          addError(
+            result,
+            `Cannot rename ${file.relativePath}: target ${file.normalizedRelativePath} already exists`
+          )
           continue
         }
         addOperation(result, operations, {
@@ -418,7 +471,10 @@ function planMigration(files: MarkdownFile[], result: MigrationResult): Operatio
       }
 
       if (!file.hasSlug) {
-        addWarning(result, `WARN ${file.relativePath}: missing slug; renamed only, frontmatter left unchanged`)
+        addWarning(
+          result,
+          `WARN ${file.relativePath}: missing slug; renamed only, frontmatter left unchanged`
+        )
         continue
       }
 
@@ -432,19 +488,30 @@ function planMigration(files: MarkdownFile[], result: MigrationResult): Operatio
     }
 
     if (!file.hasSlug) {
-      addError(result, `Orphan en translation without legacy slug: ${file.relativePath}`)
+      addError(
+        result,
+        `Orphan en translation without legacy slug: ${file.relativePath}`
+      )
       continue
     }
 
-    const zhSource = zhSourcesByDirectoryAndSlug.get(`${file.directory}\0${file.slug}`)
+    const zhSource = zhSourcesByDirectoryAndSlug.get(
+      `${file.directory}\0${file.slug}`
+    )
     if (zhSource === undefined) {
-      addError(result, `Orphan en translation: ${file.relativePath} has no zh sibling with slug "${file.slug}"`)
+      addError(
+        result,
+        `Orphan en translation: ${file.relativePath} has no zh sibling with slug "${file.slug}"`
+      )
       continue
     }
 
     let translatedFromRevision: string
     try {
-      translatedFromRevision = getLastRevision(result.repoPath, zhSource.sourcePath)
+      translatedFromRevision = getLastRevision(
+        result.repoPath,
+        zhSource.sourcePath
+      )
     } catch (error) {
       addError(result, error instanceof Error ? error.message : String(error))
       continue
@@ -467,10 +534,12 @@ function planMigration(files: MarkdownFile[], result: MigrationResult): Operatio
 
 function applyOperations(repoRoot: string, operations: Operation[]): void {
   const renameOperations = operations.filter(
-    (operation): operation is Extract<Operation, { type: "rename" }> => operation.type === "rename"
+    (operation): operation is Extract<Operation, { type: "rename" }> =>
+      operation.type === "rename"
   )
   const rewriteOperations = operations.filter(
-    (operation): operation is Extract<Operation, { type: "rewrite" }> => operation.type === "rewrite"
+    (operation): operation is Extract<Operation, { type: "rewrite" }> =>
+      operation.type === "rewrite"
   )
 
   for (const operation of renameOperations) {
@@ -481,23 +550,37 @@ function applyOperations(repoRoot: string, operations: Operation[]): void {
 
   for (const operation of rewriteOperations) {
     assertInsideRepo(repoRoot, operation.filePath)
-    fs.writeFileSync(operation.filePath, dumpMarkdown(operation.frontmatter, operation.body), "utf8")
+    fs.writeFileSync(
+      operation.filePath,
+      dumpMarkdown(operation.frontmatter, operation.body),
+      "utf8"
+    )
   }
 }
 
 export function formatMigrationReport(result: MigrationResult): string {
   const lines = [
-    result.dryRun ? "[migrate-frontmatter] dry run" : "[migrate-frontmatter] applied",
+    result.dryRun
+      ? "[migrate-frontmatter] dry run"
+      : "[migrate-frontmatter] applied",
     `Repo: ${result.repoPath}`,
     `Counts: ${result.renamed} renamed, ${result.rewritten} rewritten, ${result.skipped} skipped, ${result.warnings.length} warnings`,
   ]
 
   if (result.plannedActions.length > 0) {
-    lines.push("", "Actions:", ...result.plannedActions.map((action) => `- ${action}`))
+    lines.push(
+      "",
+      "Actions:",
+      ...result.plannedActions.map((action) => `- ${action}`)
+    )
   }
 
   if (result.warnings.length > 0) {
-    lines.push("", "Warnings:", ...result.warnings.map((warning) => `- ${warning}`))
+    lines.push(
+      "",
+      "Warnings:",
+      ...result.warnings.map((warning) => `- ${warning}`)
+    )
   }
 
   if (result.errors.length > 0) {
@@ -583,11 +666,16 @@ function main(): void {
   try {
     cliArgs = parseCliArgs(process.argv.slice(2))
   } catch (error) {
-    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`)
+    process.stderr.write(
+      `${error instanceof Error ? error.message : String(error)}\n`
+    )
     process.exit(1)
   }
 
-  const result = runMigration({ apply: cliArgs.apply, repoPath: cliArgs.repoPath })
+  const result = runMigration({
+    apply: cliArgs.apply,
+    repoPath: cliArgs.repoPath,
+  })
   const report = formatMigrationReport(result)
   if (result.errors.length > 0) {
     process.stderr.write(report)
@@ -597,6 +685,9 @@ function main(): void {
   process.stdout.write(report)
 }
 
-if (process.argv[1] !== undefined && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (
+  process.argv[1] !== undefined &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
   main()
 }

@@ -1,7 +1,7 @@
 import fs from "fs"
 import path from "path"
 
-import type { ArticleLocale } from "./article-manifest"
+import type { ArticleLocale } from "./manifest"
 
 export interface ArticleContentArtifact {
   slug: string

@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { getGithubPatForUser } from "@/lib/auth-context"
-import { getMainBranchHeadSha } from "@/lib/article-branch"
+import { getMainBranchHeadSha } from "@/lib/articles/branch"
 import { getRepoFileContent } from "@/lib/github/sync"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"

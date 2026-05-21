@@ -19,7 +19,7 @@ import {
   applyRebaseCommits,
   applyRebaseCommitsMultiFile,
   buildFileStates,
-} from "./article-rebase-internal"
+} from "./rebase-internal"
 
 export type RebaseRecommendation = "REBASE_RECOMMENDED" | "QUICK_MERGE_OK"
 

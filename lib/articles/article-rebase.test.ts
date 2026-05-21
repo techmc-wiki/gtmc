@@ -33,8 +33,8 @@ mock.module("@/lib/prisma", () => ({
 }))
 
 const { rebaseArticleContent, analyzeRebaseNeed, abortRebase, resumeRebase } =
-  await import("./article-rebase")
-import type { RebaseInput, AnalyzeRebaseInput } from "./article-rebase"
+  await import("./rebase")
+import type { RebaseInput, AnalyzeRebaseInput } from "./rebase"
 
 describe("rebaseArticleContent", () => {
   beforeEach(() => {

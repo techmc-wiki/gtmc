@@ -7,13 +7,13 @@ import {
   forcePushResolvedToPRBranch,
   resolveDraftSyncConflict,
   resolveSimpleConflicts,
-} from "@/lib/article-conflict"
+} from "@/lib/articles/conflict"
 import {
-  getArticleFileContent,
   getMainBranchHeadSha,
+  getArticleFileContent,
   upsertFileOnBranch,
-} from "@/lib/article-branch"
-import { abortRebase, resumeRebase } from "@/lib/article-rebase"
+} from "@/lib/articles/branch"
+import { abortRebase, resumeRebase } from "@/lib/articles/rebase"
 import {
   decodeStoredDraftFiles,
   deserializeDraftFilesPayload,
@@ -311,7 +311,7 @@ async function persistRebasedBranchFiles(input: {
     throw new Error("GitHub token is required to update multiple files")
   }
 
-  const { upsertFilesOnBranch } = await import("@/lib/article-branch")
+  const { upsertFilesOnBranch } = await import("@/lib/articles/branch")
   await upsertFilesOnBranch(
     input.token,
     input.files.map((file) => ({
@@ -930,7 +930,8 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
         throw new Error("The revision is missing main SHA metadata")
       }
 
-      const { rebaseArticleContent, rebaseArticleContentMultiFile } = await import("@/lib/article-rebase")
+      const { rebaseArticleContent, rebaseArticleContentMultiFile } =
+        await import("@/lib/articles/rebase")
       const result =
         storedDraftFiles.files.length === 1
           ? await rebaseArticleContent({

@@ -1,5 +1,8 @@
 import type { DraftFileRecord } from "./types"
-import { normalizeDraftFilePath, normalizeComparablePath } from "./normalization"
+import {
+  normalizeDraftFilePath,
+  normalizeComparablePath,
+} from "./normalization"
 
 export function createDraftFile(
   overrides: Partial<DraftFileRecord> = {}
@@ -32,7 +35,10 @@ export function createDraftFileId(filePath?: string) {
     : `draft-file-${randomSegment}`
 }
 
-export function getActiveDraftFile(collection: { activeFileId: string; files: DraftFileRecord[] }) {
+export function getActiveDraftFile(collection: {
+  activeFileId: string
+  files: DraftFileRecord[]
+}) {
   return (
     collection.files.find((file) => file.id === collection.activeFileId) ||
     collection.files[0]

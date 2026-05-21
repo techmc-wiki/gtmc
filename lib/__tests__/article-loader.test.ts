@@ -4,7 +4,7 @@ import {
   getArticleContent,
   getArticleTree,
   getArticleBuffer,
-} from "../article-loader"
+} from "../articles/loader"
 
 describe("article-loader", () => {
   test("detects submodule availability", () => {

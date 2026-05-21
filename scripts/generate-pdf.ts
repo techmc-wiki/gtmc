@@ -19,14 +19,14 @@ import fs from "node:fs"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
 
-import { getArticleTree } from "@/lib/article-manifest"
+import { getArticleTree } from "@/lib/articles/manifest"
 import {
   linearizeArticles,
   getArticleContentForPdf,
 } from "@/lib/articles/linearize"
 import type { LinearizedArticle } from "@/lib/articles/linearize"
 import type { ChapterNavNode } from "@/types/chapter-nav"
-import type { ArticleLocale } from "@/lib/article-manifest"
+import type { ArticleLocale } from "@/lib/articles/manifest"
 import { buildEbookHtml, resolveImagesInHtml } from "@/lib/pdf/ebook-structure"
 import { renderMarkdownToHtml } from "@/lib/pdf/markdown-pipeline"
 import { createRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"

@@ -203,7 +203,7 @@ export default async function ReviewDetailPage({
     linkedDraft.baseMainSha !== linkedDraft.syncedMainSha &&
     analysisFilePath
   ) {
-    const { analyzeRebaseNeed } = await import("@/lib/article-rebase")
+    const { analyzeRebaseNeed } = await import("@/lib/articles/rebase")
     const rebaseAnalysis = await analyzeRebaseNeed({
       filePath: analysisFilePath,
       baseMainSha: linkedDraft.baseMainSha,

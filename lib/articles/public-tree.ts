@@ -1,11 +1,13 @@
 import { unstable_cache } from "next/cache"
 import { statSync } from "fs"
-import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
+import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/articles/ignore"
 import {
+  getArticleManifest,
   getArticleTree,
   getManifestPath,
+  getLocalizedArticleEntry,
   type ArticleLocale,
-} from "@/lib/article-manifest"
+} from "@/lib/articles/manifest"
 import { getRepoTranslations, type ArticleTreeNode } from "@/lib/github/sync"
 import type { ChapterNavNode } from "@/types/chapter-nav"
 

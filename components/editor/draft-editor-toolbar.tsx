@@ -4,7 +4,10 @@ import * as React from "react"
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
 import { EditorFileUploadInput } from "@/components/editor/editor-file-upload-input"
-import { EditorTabStrip, type TabType } from "@/components/editor/editor-tab-strip"
+import {
+  EditorTabStrip,
+  type TabType,
+} from "@/components/editor/editor-tab-strip"
 import { TechButton } from "../ui/tech-button"
 
 interface DraftEditorToolbarProps {
@@ -95,9 +98,12 @@ export function DraftEditorToolbar({
               variant="ghost"
               className="text-tech-main hover:guide-line hover:text-tech-main h-7 border border-transparent px-3 text-[10px] tracking-widest transition-all hover:bg-white hover:shadow-sm"
               disabled={isReadOnly}
-              onClick={() => onInsertText("\n> [!TIP]\n> Add contributor guidance here.\n\n")}>
+              onClick={() =>
+                onInsertText("\n> [!TIP]\n> Add contributor guidance here.\n\n")
+              }>
               <span className="flex items-center gap-1.5">
-                <span className="text-tech-main/40 font-bold">{">"}</span> CALLOUT
+                <span className="text-tech-main/40 font-bold">{">"}</span>{" "}
+                CALLOUT
               </span>
             </TechButton>
             <TechButton
@@ -106,7 +112,9 @@ export function DraftEditorToolbar({
               className="text-tech-main hover:guide-line hover:text-tech-main h-7 border border-transparent px-3 text-[10px] tracking-widest transition-all hover:bg-white hover:shadow-sm"
               disabled={isReadOnly}
               onClick={() =>
-                onInsertText("\n| Parameter | Value | Notes |\n| --- | --- | --- |\n| Example | Value | Detail |\n\n")
+                onInsertText(
+                  "\n| Parameter | Value | Notes |\n| --- | --- | --- |\n| Example | Value | Detail |\n\n"
+                )
               }>
               <span className="flex items-center gap-1.5">
                 <span className="text-tech-main/40 font-bold">||</span> TABLE

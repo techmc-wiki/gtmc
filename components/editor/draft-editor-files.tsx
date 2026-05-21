@@ -114,20 +114,28 @@ export function DraftEditorFiles({
                 {activeFile.filePath || t("targetFileUnset")}
               </p>
             </div>
-            <p className="text-tech-main/65 font-mono text-xs/relaxed">{t("targetFileDescription")}</p>
+            <p className="text-tech-main/65 font-mono text-xs/relaxed">
+              {t("targetFileDescription")}
+            </p>
           </div>
 
           {activeFileHasDuplicatePath ? (
-            <p className="mt-3 font-mono text-xs text-red-500">{t("duplicatePathError")}</p>
+            <p className="mt-3 font-mono text-xs text-red-500">
+              {t("duplicatePathError")}
+            </p>
           ) : null}
 
           {!activeFile.filePath && !isReadOnly ? (
-            <p className="mt-3 font-mono text-xs text-amber-700">{t("filePathBlankHint")}</p>
+            <p className="mt-3 font-mono text-xs text-amber-700">
+              {t("filePathBlankHint")}
+            </p>
           ) : null}
 
           {duplicateFilePaths.length > 0 ? (
             <p className="mt-2 font-mono text-xs text-red-500">
-              {t("duplicatePathsError", { paths: duplicateFilePaths.join(", ") })}
+              {t("duplicatePathsError", {
+                paths: duplicateFilePaths.join(", "),
+              })}
             </p>
           ) : null}
         </div>

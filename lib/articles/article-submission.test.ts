@@ -20,7 +20,7 @@ mock.module("@/lib/github/articles-repo", () => ({
   })),
 }))
 
-const { resolveDraftSyncConflict } = await import("./article-conflict")
+const { resolveDraftSyncConflict } = await import("./conflict")
 
 type SnapshotMap = Record<
   string,

@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { createPortal } from "react-dom"
 import { useTranslations, useLocale } from "next-intl"
 import { useRouter, usePathname } from "@/i18n/navigation"
-import { articleUrl } from "@/lib/article-url"
+import { articleUrl } from "@/lib/articles/url"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { useMounted } from "@/hooks/use-mounted"
 

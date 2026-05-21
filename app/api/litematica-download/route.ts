@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import path from "path"
-import { getArticleRemoteBuffer } from "@/lib/article-remote-assets"
+import { getArticleRemoteBuffer } from "@/lib/articles/remote-assets"
 import { getSiteUrl } from "@/lib/site-url"
 
 const ALLOWED_REMOTE_HOSTNAMES = new Set<string>()

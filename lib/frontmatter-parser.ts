@@ -72,7 +72,7 @@ function checkLegacyKeys(data: Record<string, unknown>): void {
 
 function checkAdditionalProperties(
   data: Record<string, unknown>,
-  allowedKeys: Set<string>,
+  allowedKeys: Set<string>
 ): void {
   for (const key of Object.keys(data)) {
     if (!allowedKeys.has(key) && !LEGACY_KEYS.has(key)) {
@@ -95,7 +95,7 @@ function parseIndex(value: unknown): number {
 }
 
 function parseBanner(
-  value: unknown,
+  value: unknown
 ): { src: string; alt?: string } | undefined {
   if (typeof value !== "object" || value === null) return undefined
   const obj = value as Record<string, unknown>
@@ -110,7 +110,7 @@ function parseBanner(
 
 export function parseSourceFrontMatter(
   content: string,
-  options: ParseSourceFrontMatterOptions = {},
+  options: ParseSourceFrontMatterOptions = {}
 ): SourceFrontMatter {
   const { data } = matter(content)
   const raw = data as Record<string, unknown>
@@ -135,9 +135,7 @@ export function parseSourceFrontMatter(
         ? raw["chapter-title"]
         : undefined,
     "intro-title":
-      typeof raw["intro-title"] === "string"
-        ? raw["intro-title"]
-        : undefined,
+      typeof raw["intro-title"] === "string" ? raw["intro-title"] : undefined,
     description:
       typeof raw.description === "string" ? raw.description : undefined,
     index: parseIndex(raw.index),
@@ -147,7 +145,7 @@ export function parseSourceFrontMatter(
 }
 
 export function parseTranslationFrontMatter(
-  content: string,
+  content: string
 ): TranslationFrontMatter {
   const { data } = matter(content)
   const raw = data as Record<string, unknown>
@@ -174,9 +172,7 @@ export function parseTranslationFrontMatter(
         ? raw["chapter-title"]
         : undefined,
     "intro-title":
-      typeof raw["intro-title"] === "string"
-        ? raw["intro-title"]
-        : undefined,
+      typeof raw["intro-title"] === "string" ? raw["intro-title"] : undefined,
     description:
       typeof raw.description === "string" ? raw.description : undefined,
     banner: parseBanner(raw.banner),

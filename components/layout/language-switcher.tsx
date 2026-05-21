@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl"
 import { useRouter, usePathname } from "@/i18n/navigation"
-import { hasArticleLocale } from "@/lib/article-locale"
+import { hasArticleLocale } from "@/lib/articles/locale"
 
 const LOCALES = ["zh", "en"] as const
 type Locale = (typeof LOCALES)[number]

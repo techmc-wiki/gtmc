@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
-import { articleUrl } from "@/lib/article-url"
+import { articleUrl } from "@/lib/articles/url"
 
 export default function Footer() {
   const t = useTranslations("Footer")

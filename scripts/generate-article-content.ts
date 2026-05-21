@@ -1,17 +1,18 @@
 import fs from "fs"
 import path from "path"
 
-import { ARTICLES_PATH } from "@/lib/article-fs"
-import { getArticleManifest, type ArticleLocale } from "@/lib/article-manifest"
-import {
-  artifactFilename,
-  type ArticleContentArtifact,
-} from "@/lib/article-content"
+import { ARTICLES_PATH } from "@/lib/articles/fs"
+import { getArticleManifest, type ArticleLocale } from "@/lib/articles/manifest"
+import { artifactFilename } from "@/lib/articles/content"
+import type { ArticleContentArtifact } from "@/lib/articles/content"
 import {
   parseSourceFrontMatter,
   parseTranslationFrontMatter,
 } from "@/lib/frontmatter-parser"
-import type { SourceFrontMatter, TranslationFrontMatter } from "@/lib/frontmatter-parser"
+import type {
+  SourceFrontMatter,
+  TranslationFrontMatter,
+} from "@/lib/frontmatter-parser"
 
 const OUTPUT_DIR = path.join(process.cwd(), "data", "articles")
 const TEMP_DIR = path.join(process.cwd(), "data", "articles.tmp")

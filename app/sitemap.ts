@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next"
 
 import { listAllIssues } from "@/lib/github"
 import { getSiteUrl } from "@/lib/site-url"
-import { shouldIgnoreFile } from "@/lib/article-ignore"
+import { shouldIgnoreFile } from "@/lib/articles/ignore"
 import { encodeSlug } from "@/lib/slug-resolver"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
-import type { ArticleLocale } from "@/lib/article-manifest"
+import type { ArticleLocale } from "@/lib/articles/manifest"
 
 export const revalidate = 3600
 

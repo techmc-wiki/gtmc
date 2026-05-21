@@ -6,9 +6,9 @@ import {
   type ArticleLocale,
   getLocalizedArticleEntry,
   hasArticleLocale,
-} from "@/lib/article-manifest"
-import { getArticleContentBySlug } from "@/lib/article-content"
-import { getArticleRemoteBuffer } from "@/lib/article-remote-assets"
+} from "@/lib/articles/manifest"
+import { getArticleContentBySlug } from "@/lib/articles/content"
+import { getArticleRemoteBuffer } from "@/lib/articles/remote-assets"
 import { calculateReadingMetrics } from "@/lib/markdown"
 import { getSiteUrl } from "@/lib/site-url"
 

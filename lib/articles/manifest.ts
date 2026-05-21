@@ -498,4 +498,4 @@ export {
   hasArticleLocale,
   getArticleAvailableLocales,
   getArticleLocalizedFilePath,
-} from "./article-locale"
+} from "./locale"

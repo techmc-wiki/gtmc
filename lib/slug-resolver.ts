@@ -3,7 +3,7 @@ import {
   getManifestPath,
   MANIFEST_FILE_NAME,
   type ArticleEntry,
-} from "./article-manifest"
+} from "@/lib/articles/manifest"
 
 export { getArticleManifest, getManifestPath, MANIFEST_FILE_NAME }
 export type { ArticleEntry }

@@ -40,7 +40,7 @@ async function initAjv(): Promise<void> {
   ajv = new Ajv2020({ strict: false })
   const schemaPath = path.join(
     process.cwd(),
-    "data",
+    "scripts",
     "article-frontmatter.schema.json",
   )
   const schemaContent = fs.readFileSync(schemaPath, "utf-8")

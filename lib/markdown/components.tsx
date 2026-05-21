@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl"
-import { CodeBlockPre } from "@/components/code-block-pre"
+import { CodeBlockPre } from "@/components/markdown/code-block-pre"
 import LitematicaViewer from "@/components/articles/litematica-viewer"
 import { PeopleMention } from "@/components/markdown/people-mention"
 import { createAComponent } from "@/lib/markdown/a-component"

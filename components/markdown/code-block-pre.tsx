@@ -2,8 +2,8 @@
 
 import React, { useState, type ReactNode } from "react"
 import { useTranslations } from "next-intl"
-import { CodeCopyButton } from "@/components/code-copy-button"
-import { LazyCodeBlock } from "@/components/lazy-code-block"
+import { CodeCopyButton } from "./code-copy-button"
+import { LazyCodeBlock } from "./lazy-code-block"
 
 type CodeBlockPreProps = {
   children?: ReactNode

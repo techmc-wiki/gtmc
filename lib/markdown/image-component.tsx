@@ -1,5 +1,5 @@
 import path from "path"
-import { LazyImage } from "@/components/lazy-image"
+import { LazyImage } from "@/components/markdown/lazy-image"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
 import { hasExplicitUrlScheme } from "./url-utils"
 

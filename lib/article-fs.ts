@@ -1,8 +1,9 @@
 import fs from "fs"
 import path from "path"
 
-import { ARTICLES_PATH } from "./article-fs-constants"
 import { resolveSlug, type ResolveResult } from "./slug-resolver"
+
+export const ARTICLES_PATH = path.join(process.cwd(), "articles")
 
 export function resolveLocalArticlePath(slugPath: string): string | null {
   const manifestPath = resolveSlug(slugPath)

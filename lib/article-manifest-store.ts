@@ -2,9 +2,8 @@ import fs from "fs"
 import path from "path"
 
 import type { ArticleLocale } from "./article-manifest"
-import { MANIFEST_FILE_NAME } from "./article-manifest-constants"
 
-export { MANIFEST_FILE_NAME }
+export const MANIFEST_FILE_NAME = "manifest.json"
 
 export const MANIFEST_PATH = path.join(
   process.cwd(),

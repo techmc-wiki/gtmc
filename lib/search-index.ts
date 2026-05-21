@@ -7,7 +7,7 @@ import {
   ARTICLES_REPO_OWNER,
   ARTICLES_REPO_NAME,
 } from "@/lib/github/articles-repo"
-import { getArticleContentBySlug } from "@/lib/article-content-store"
+import { getArticleContentBySlug } from "@/lib/article-content"
 import type { ChapterNavNode } from "@/types/chapter-nav"
 import type { ArticleLocale } from "@/lib/article-manifest"
 

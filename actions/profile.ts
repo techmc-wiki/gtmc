@@ -1,6 +1,6 @@
 ﻿"use server"
 
-import { requireAuth } from "@/lib/auth-helpers"
+import { requireAuth } from "@/lib/auth-context"
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"

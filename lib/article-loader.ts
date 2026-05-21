@@ -1,6 +1,6 @@
 import fs from "fs"
 import path from "path"
-import { ARTICLES_PATH } from "./article-fs-constants"
+import { ARTICLES_PATH } from "./article-fs"
 
 export {
   getArticleTree,

@@ -19,8 +19,7 @@ import {
   rebaseArticleContent,
   resumeRebase,
 } from "@/lib/article-rebase"
-import { requireAuth } from "@/lib/auth-helpers"
-import { getGithubPatForUser, requireAdmin } from "@/lib/auth-context"
+import { getGithubPatForUser, requireAdmin, requireAuth } from "@/lib/auth-context"
 import {
   decodeStoredDraftFiles,
   deserializeDraftFilesPayload,
@@ -35,7 +34,7 @@ import {
   ARTICLES_REPO_OWNER,
   getOctokit,
 } from "@/lib/github/articles-repo"
-import { reconcileDraftAssetsForPRCompletion } from "@/lib/draft-asset-reconciler"
+import { reconcileDraftAssetsForPRCompletion } from "@/lib/draft-asset-db"
 import { mergePR } from "@/lib/github/pr-manager"
 import { prisma } from "@/lib/prisma"
 import {

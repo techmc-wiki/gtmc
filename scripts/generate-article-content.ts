@@ -1,13 +1,13 @@
 import fs from "fs"
 import path from "path"
 
-import { ARTICLES_PATH } from "@/lib/article-fs-constants"
+import { ARTICLES_PATH } from "@/lib/article-fs"
 import { ArticleManifest } from "@/lib/article-manifest-store"
 import type { ArticleLocale } from "@/lib/article-manifest"
 import {
   artifactFilename,
   type ArticleContentArtifact,
-} from "@/lib/article-content-artifact"
+} from "@/lib/article-content"
 import {
   parseSourceFrontMatter,
   parseTranslationFrontMatter,

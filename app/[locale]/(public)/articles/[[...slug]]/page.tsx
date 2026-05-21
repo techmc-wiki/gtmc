@@ -17,7 +17,7 @@ import {
   hasArticleLocale,
   type ArticleLocale,
 } from "@/lib/article-manifest"
-import { getArticleContentBySlug } from "@/lib/article-content-store"
+import { getArticleContentBySlug } from "@/lib/article-content"
 import { getSlugForFilePath } from "@/lib/slug-resolver"
 import { decodeSlugPath, encodeSlug } from "@/lib/slug-utils"
 import { formatIndexPrefix } from "@/lib/chapter-index-prefix"

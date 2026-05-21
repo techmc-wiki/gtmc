@@ -24,8 +24,7 @@ import {
   type DraftFileRecord,
 } from "@/lib/draft-files"
 import { deleteDraftAsset, downloadDraftAsset } from "@/lib/draft-storage"
-import { getGithubPatForUser } from "@/lib/auth-context"
-import { requireAuth } from "@/lib/auth-helpers"
+import { getGithubPatForUser, requireAuth } from "@/lib/auth-context"
 import { getGitHubWriteToken } from "@/lib/github/articles-repo"
 import { prisma } from "@/lib/prisma"
 import {

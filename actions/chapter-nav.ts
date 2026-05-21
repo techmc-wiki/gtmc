@@ -1,7 +1,10 @@
 ﻿"use server"
 
-import { getCurrentUserAuthContext, requireAdmin } from "@/lib/auth-context"
-import { requireAuth } from "@/lib/auth-helpers"
+import {
+  getCurrentUserAuthContext,
+  requireAdmin,
+  requireAuth,
+} from "@/lib/auth-context"
 import { createDirectFile, createPR } from "@/lib/github/pr-manager"
 
 export async function createDocument({

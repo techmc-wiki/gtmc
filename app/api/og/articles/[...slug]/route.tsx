@@ -7,7 +7,7 @@ import {
   getLocalizedArticleEntry,
   hasArticleLocale,
 } from "@/lib/article-manifest"
-import { getArticleContentBySlug } from "@/lib/article-content-store"
+import { getArticleContentBySlug } from "@/lib/article-content"
 import { getArticleRemoteBuffer } from "@/lib/article-remote-assets"
 import { calculateReadingMetrics } from "@/lib/markdown"
 import { getSiteUrl } from "@/lib/site-url"

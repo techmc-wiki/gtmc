@@ -2,6 +2,14 @@ import fs from "fs"
 import path from "path"
 import Ajv2020, { type AnySchema } from "ajv/dist/2020"
 import {
+  MANIFEST_FILE_NAME,
+  type ArticleEntry,
+} from "@/lib/article-manifest-store"
+import { ARTICLES_PATH } from "@/lib/article-fs"
+import type { ArticleLocale } from "@/lib/article-manifest"
+import { SLUG_REGEX } from "@/lib/slug-validator"
+import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
+import {
   parseSourceFrontMatter,
   parseTranslationFrontMatter,
   type SourceFrontMatter,
@@ -15,12 +23,6 @@ import {
   isAncestor,
   getHeadSha,
 } from "@/lib/git-metadata"
-import { ARTICLES_PATH } from "@/lib/article-fs-constants"
-import { MANIFEST_FILE_NAME } from "@/lib/article-manifest-constants"
-import type { ArticleEntry } from "@/lib/article-manifest-store"
-import type { ArticleLocale } from "@/lib/article-manifest"
-import { SLUG_REGEX } from "@/lib/slug-validator"
-import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
 
 const OUTPUT_FILE = path.join(process.cwd(), "data", MANIFEST_FILE_NAME)
 const MAX_DEPTH = 3

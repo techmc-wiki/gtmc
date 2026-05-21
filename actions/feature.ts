@@ -1,10 +1,10 @@
 "use server"
 
-import { requireAuth } from "@/lib/auth-helpers"
 import {
   getCurrentUserAuthContext,
   getGithubPatForUser,
   requireAdmin,
+  requireAuth,
 } from "@/lib/auth-context"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"

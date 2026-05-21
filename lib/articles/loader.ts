@@ -1,12 +1,6 @@
 import fs from "fs"
 import path from "path"
 import { ARTICLES_PATH } from "./fs"
-import {
-  getArticleManifest,
-  getArticleTree,
-  getLocalizedArticleEntry,
-  type ArticleLocale,
-} from "./manifest"
 
 const SUBMODULE_GIT = path.join(ARTICLES_PATH, ".git")
 

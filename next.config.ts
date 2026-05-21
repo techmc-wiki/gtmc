@@ -4,7 +4,26 @@ import createNextIntlPlugin from "next-intl/plugin"
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts")
 
+const buildSha: string = (() => {
+  if (process.env.VERCEL_GIT_COMMIT_SHA) {
+    return process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 7)
+  }
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { execSync } =
+      require("child_process") as typeof import("child_process")
+    return execSync("git rev-parse --short=7 HEAD", {
+      stdio: ["ignore", "pipe", "ignore"],
+    })
+      .toString()
+      .trim()
+  } catch {
+    return "unknown"
+  }
+})()
+
 const nextConfig: NextConfig = {
+  env: { NEXT_PUBLIC_BUILD_SHA: buildSha },
   serverExternalPackages: ["@prisma/client", "prisma"],
   outputFileTracingIncludes: {
     "/*": ["data/manifest.json"],

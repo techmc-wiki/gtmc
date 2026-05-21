@@ -1,19 +1,13 @@
 import fs from "fs"
 import path from "path"
 import Ajv2020, { type AnySchema } from "ajv/dist/2020"
-import {
-  MANIFEST_FILE_NAME,
-  type ArticleLocale,
-  type ArticleEntry,
-} from "@/lib/articles/manifest"
-import { ARTICLES_PATH } from "@/lib/articles/fs"
+import type { ArticleEntry } from "@/lib/articles/manifest"
 
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/articles/ignore"
 import {
   parseSourceFrontMatter,
   parseTranslationFrontMatter,
   type SourceFrontMatter,
-  type TranslationFrontMatter,
 } from "@/lib/frontmatter-parser"
 import {
   loadMaintainers,
@@ -23,9 +17,11 @@ import {
   isAncestor,
   getHeadSha,
 } from "@/lib/git-metadata"
-import { SLUG_REGEX } from "@/lib/slug-resolver"
 
+const MANIFEST_FILE_NAME = "manifest.json"
+const ARTICLES_PATH = path.join(process.cwd(), "articles")
 const OUTPUT_FILE = path.join(process.cwd(), "data", MANIFEST_FILE_NAME)
+const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const MAX_DEPTH = 3
 const TREE_PREVIEW_DEPTH = 3
 const TREE_PREVIEW_CHILD_LIMIT = 12

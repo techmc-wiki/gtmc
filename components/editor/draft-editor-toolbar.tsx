@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import type { ReactCodeMirrorRef } from "@uiw/react-codemirror"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
 import { EditorFileUploadInput } from "@/components/editor/editor-file-upload-input"
 import {

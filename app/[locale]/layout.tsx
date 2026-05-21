@@ -5,6 +5,7 @@ import "../globals.css"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { FooterProvider } from "@/components/layout/footer-context"
+import Footer from "@/components/layout/footer"
 import { FooterWrapper } from "@/components/layout/footer-wrapper"
 import { getSiteUrl } from "@/lib/site-url"
 import { NextIntlClientProvider } from "next-intl"
@@ -97,7 +98,9 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <FooterProvider>
             {children}
-            <FooterWrapper />
+            <FooterWrapper>
+              <Footer />
+            </FooterWrapper>
           </FooterProvider>
         </NextIntlClientProvider>
         <script

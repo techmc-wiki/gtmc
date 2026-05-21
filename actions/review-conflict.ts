@@ -22,10 +22,6 @@ import {
   serializeDraftFilesForStorage,
   type DraftFileCollection,
 } from "@/lib/drafts/files"
-import {
-  ARTICLES_REPO_NAME,
-  ARTICLES_REPO_OWNER,
-} from "@/lib/github/articles-repo"
 import { prisma } from "@/lib/prisma"
 import {
   parseConflictBlocks,
@@ -40,8 +36,6 @@ import {
   getReviewRevalidatePaths,
 } from "@/lib/review/admin-context"
 
-const owner = ARTICLES_REPO_OWNER
-const repo = ARTICLES_REPO_NAME
 const SIMPLE_CONFLICT_MARKER_RE = new RegExp(
   SIMPLE_CONFLICT_BLOCK_RE.source,
   "g"

@@ -6,11 +6,7 @@ import type {
 } from "./types"
 import { normalizeDraftFileCollection } from "./collection"
 import { createDraftFile, getActiveDraftFile } from "./file-operations"
-import {
-  normalizeComparablePath,
-  collectParentFolders,
-  normalizeDraftFilePath,
-} from "./normalization"
+import { normalizeComparablePath, collectParentFolders } from "./normalization"
 
 const BUNDLE_PREFIX: typeof DRAFT_BUNDLE_PREFIX = "GTMC_DRAFT_BUNDLE_V1:"
 

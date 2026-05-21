@@ -6,7 +6,6 @@ import { getMainBranchHeadSha } from "@/lib/articles/branch"
 import { parseDraftTempImageRefs } from "@/lib/drafts/markdown"
 import {
   createDraftFile,
-  decodeStoredDraftFiles,
   deserializeDraftFilesPayload,
   normalizeDraftFileCollection,
   serializeDraftFilesForStorage,

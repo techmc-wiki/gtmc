@@ -6,10 +6,6 @@ import {
   rebaseArticleContent,
   abortRebase,
 } from "@/lib/articles/rebase"
-import type {
-  RebaseAnalysis,
-  RebaseInput,
-} from "@/lib/articles/rebase"
 import { upsertFileOnBranch } from "@/lib/articles/branch"
 import { prisma } from "@/lib/prisma"
 import { requireReviewAdminContext } from "@/lib/review/admin-context"

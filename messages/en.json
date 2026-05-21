@@ -11,14 +11,16 @@
     "initializing": "INITIALIZING..."
   },
   "Footer": {
-    "documentation": "Documentation",
-    "documentationNav": "Documentation",
-    "community": "Community",
-    "communityNav": "Community",
-    "legalInfo": "Legal & Info",
-    "legalNav": "Legal",
-    "preface": "Preface",
-    "articles": "Articles"
+    "tagline": "A community-authored treatise on Technical Minecraft.",
+    "disclaimer": "Not an official Minecraft product. Not affiliated with Mojang Studios.",
+    "attribution": "Contributors retain copyright. Article content is released under CC BY-NC-SA 4.0 with attribution preserved through article metadata and source history.",
+    "copyright": "© {start}–{year} GTMC Collective",
+    "linkPreface": "Preface",
+    "linkArticles": "Articles",
+    "offlinePdf": "Offline (PDF)",
+    "linkRepository": "Repository",
+    "linkTeam": "Team",
+    "linkIssues": "Issues"
   },
   "Article": {
     "notFound": "Article Not Found"

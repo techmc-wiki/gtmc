@@ -95,6 +95,45 @@ export function loadArticleManifest(): Record<string, ArticleEntry> {
   return parseArticleManifest(raw, manifestPath)
 }
 
+export interface ManifestStats {
+  articleCount: number
+  authorCount: number
+  lastRevision: string | null
+}
+
+export function getManifestStats(locale: ArticleLocale): ManifestStats {
+  const manifest = loadArticleManifest()
+  const entries = Object.values(manifest)
+  
+  let articleCount = 0
+  const allAuthors = new Set<string>()
+  let maxLastmod: string | null = null
+
+  for (const entry of entries) {
+    if (entry.isFolder) continue
+    
+    articleCount++
+    
+    if (entry.author) allAuthors.add(entry.author)
+    if (entry.coAuthors) {
+      for (const coAuthor of entry.coAuthors) {
+        if (coAuthor) allAuthors.add(coAuthor)
+      }
+    }
+    
+    const localeLastmod = entry.lastmodByLocale[locale]
+    if (localeLastmod && (!maxLastmod || localeLastmod > maxLastmod)) {
+      maxLastmod = localeLastmod
+    }
+  }
+
+  return {
+    articleCount,
+    authorCount: allAuthors.size,
+    lastRevision: maxLastmod,
+  }
+}
+
 function isArticleLocale(value: unknown): value is ArticleLocale {
   return (
     typeof value === "string" &&

@@ -40,14 +40,13 @@ export default async function Forbidden() {
           {"\n"}
           <br />
           <span className="font-bold">
-            at
-            net.minecraft.server.network.ServerAccessHandler.checkPermission
+            at net.minecraft.server.network.ServerAccessHandler.checkPermission
           </span>
           (ServerAccessHandler.java:89) {"\n"}
           <br />
           <span className="font-bold text-red-600/60">
-            Caused by: AccessDeniedException: Operator level 4 required for
-            this operation
+            Caused by: AccessDeniedException: Operator level 4 required for this
+            operation
           </span>
         </div>
 
@@ -59,7 +58,7 @@ export default async function Forbidden() {
           {"\n"}
           00000020: 496e 7375 6666 6963 6965 6e74 2061 6363 Insufficient acc
           {"\n"}
-          00000030: 6573 7320 6c65 7665 6c2e 0a00           ess level...
+          00000030: 6573 7320 6c65 7665 6c2e 0a00 ess level...
           {"\n"}
         </div>
 

@@ -1,15 +1,10 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { Prisma } from "@prisma/client"
-
 import { revalidatePaths } from "@/lib/revalidate-paths"
 import { forcePushResolvedToPRBranch } from "@/lib/articles/conflict"
 import { getMainBranchHeadSha } from "@/lib/articles/branch"
-import {
-  decodeStoredDraftFiles,
-  serializeDraftFilesForStorage,
-} from "@/lib/drafts/files"
+import { decodeStoredDraftFiles } from "@/lib/drafts/files"
 import { getOctokit } from "@/lib/github/articles-repo"
 import { reconcileDraftAssetsForPRCompletion } from "@/lib/drafts/asset-db"
 import { mergePR } from "@/lib/github/pr-manager"

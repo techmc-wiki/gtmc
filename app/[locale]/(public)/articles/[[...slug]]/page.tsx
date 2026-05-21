@@ -27,7 +27,7 @@ import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { ArticleHighlight } from "@/components/articles/article-highlight"
 import { ArticleMetadataFull } from "@/components/articles/article-metadata-full"
 import { ArticleMetadataAnonymous } from "@/components/articles/article-metadata-anonymous"
-import { ArticleNavigation } from "@/components/article-navigation"
+import { ArticleNavigation } from "@/components/articles/article-navigation"
 import {
   flattenArticleTree,
   getArticleNavigation,

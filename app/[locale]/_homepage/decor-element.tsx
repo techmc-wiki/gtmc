@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useCallback } from "react"
 import { motion, useTransform, MotionValue } from "motion/react"
-import { HOMEPAGE_MOTION } from "@/lib/motion/homepage-constants"
+import { HOMEPAGE_MOTION } from "./homepage-constants"
 
 export function DecorElement({
   children,

@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/article-url"
-import { CornerBrackets } from "./ui/corner-brackets"
+import { CornerBrackets } from "../ui/corner-brackets"
 
 interface ArticleInfo {
   slug: string

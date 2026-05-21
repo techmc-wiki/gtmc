@@ -1,4 +1,4 @@
-import peopleData from "@/data/people.json"
+import peopleData from "@/lib/articles/people.json"
 
 /** A single entry in people.json */
 export type PeopleEntry = {

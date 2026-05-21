@@ -20,13 +20,13 @@ import {
 import { getArticleContentBySlug } from "@/lib/article-content-store"
 import { getSlugForFilePath } from "@/lib/slug-resolver"
 import { decodeSlugPath, encodeSlug } from "@/lib/slug-utils"
-import { formatIndexPrefix } from "@/lib/index-formatter"
+import { formatIndexPrefix } from "@/lib/chapter-index-prefix"
 import { getSiteUrl } from "@/lib/site-url"
 
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { ArticleHighlight } from "@/components/articles/article-highlight"
-import { ArticleMetadata } from "@/components/articles/article-metadata"
-import { ArticleMetadataSimple } from "@/components/articles/article-metadata-simple"
+import { ArticleMetadataFull } from "@/components/articles/article-metadata-full"
+import { ArticleMetadataAnonymous } from "@/components/articles/article-metadata-anonymous"
 import { ArticleNavigation } from "@/components/article-navigation"
 import {
   flattenArticleTree,
@@ -350,7 +350,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
       {/* Article Header */}
       {author && createdAt && lastModified ? (
-        <ArticleMetadata
+        <ArticleMetadataFull
           title={articleTitle}
           author={author}
           coAuthors={coAuthors}
@@ -366,7 +366,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           bannerAlt={bannerAlt}
         />
       ) : (
-        <ArticleMetadataSimple
+        <ArticleMetadataAnonymous
           title={articleTitle}
           canonicalUrl={canonicalUrl}
           attributionDate={lastModified || createdAt}

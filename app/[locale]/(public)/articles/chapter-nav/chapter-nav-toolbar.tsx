@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl"
 import React, { useState } from "react"
 
-export function ChapterNavActions({
+export function ChapterNavToolbar({
   internalScroll,
   onCollapseAll,
   onLocate,

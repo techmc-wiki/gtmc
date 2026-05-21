@@ -1,7 +1,7 @@
 import * as React from "react"
 import { useImperativeHandle } from "react"
 import { usePathname } from "@/i18n/navigation"
-import { ChapterNavActions } from "./chapter-nav/actions"
+import { ChapterNavToolbar } from "./chapter-nav/chapter-nav-toolbar"
 import { ChapterNavTree, type ChapterNavNode } from "./chapter-nav/tree"
 import { useBlur } from "./chapter-nav/use-blur"
 import { useReaderNavigation } from "./reader-navigation/context"
@@ -126,7 +126,7 @@ const ChapterNavPanelInner = React.forwardRef<
       {internalScroll ? (
         <div className="relative flex min-h-0 flex-1 flex-col">
           {!hideActions && (
-            <ChapterNavActions
+            <ChapterNavToolbar
               internalScroll={internalScroll}
               onCollapseAll={(e) => {
                 e.preventDefault()
@@ -159,7 +159,7 @@ const ChapterNavPanelInner = React.forwardRef<
       ) : (
         <>
           {!hideActions && (
-            <ChapterNavActions
+            <ChapterNavToolbar
               internalScroll={internalScroll}
               onCollapseAll={(e) => {
                 e.preventDefault()

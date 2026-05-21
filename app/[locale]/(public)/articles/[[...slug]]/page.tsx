@@ -18,8 +18,7 @@ import {
   type ArticleLocale,
 } from "@/lib/article-manifest"
 import { getArticleContentBySlug } from "@/lib/article-content"
-import { getSlugForFilePath } from "@/lib/slug-resolver"
-import { decodeSlugPath, encodeSlug } from "@/lib/slug-utils"
+import { decodeSlugPath, encodeSlug, getSlugForFilePath } from "@/lib/slug-resolver"
 import { formatIndexPrefix } from "@/lib/chapter-index-prefix"
 import { getSiteUrl } from "@/lib/site-url"
 

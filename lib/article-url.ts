@@ -1,4 +1,4 @@
-import { encodeSlug } from "@/lib/slug-utils"
+import { encodeSlug } from "@/lib/slug-resolver"
 import { toAbsoluteUrl } from "@/lib/site-url"
 
 /**

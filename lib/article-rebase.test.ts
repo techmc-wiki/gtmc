@@ -26,6 +26,9 @@ mock.module("@/lib/prisma", () => ({
       update: mockRevisionUpdate,
       findUnique: mockRevisionFindUnique,
     },
+    conflictResolution: {
+      findUnique: mock(async () => null),
+    },
   },
 }))
 

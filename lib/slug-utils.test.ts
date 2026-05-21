@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest"
 
-import { encodeSlug, decodeSlugPath, getSlugTail } from "./slug-utils"
+import { encodeSlug, decodeSlugPath, getSlugTail } from "./slug-resolver"
 
-describe("slug-utils", () => {
+describe("slug-resolver", () => {
   test("encodeSlug encodes each segment and preserves separators", () => {
     expect(encodeSlug("Chapter 1/Section 2")).toBe("Chapter%201/Section%202")
   })

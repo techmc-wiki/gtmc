@@ -1,6 +1,6 @@
 import { Link } from "@/i18n/navigation"
 import { formatIndexPrefix } from "@/lib/chapter-index-prefix"
-import { encodeSlug } from "@/lib/slug-utils"
+import { encodeSlug } from "@/lib/slug-resolver"
 import type { ChapterNavNode } from "@/types/chapter-nav"
 import React from "react"
 import { useReaderNavigation } from "../reader-navigation/context"

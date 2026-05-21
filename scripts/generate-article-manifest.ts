@@ -3,11 +3,11 @@ import path from "path"
 import Ajv2020, { type AnySchema } from "ajv/dist/2020"
 import {
   MANIFEST_FILE_NAME,
+  type ArticleLocale,
   type ArticleEntry,
-} from "@/lib/article-manifest-store"
+} from "@/lib/article-manifest"
 import { ARTICLES_PATH } from "@/lib/article-fs"
-import type { ArticleLocale } from "@/lib/article-manifest"
-import { SLUG_REGEX } from "@/lib/slug-validator"
+import { SLUG_REGEX } from "@/lib/slug-resolver"
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
 import {
   parseSourceFrontMatter,

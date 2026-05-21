@@ -1,10 +1,13 @@
 import { unstable_cache } from "next/cache"
 import { statSync } from "fs"
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/article-ignore"
-import { getArticleTree, type ArticleLocale } from "@/lib/article-manifest"
+import {
+  getArticleTree,
+  getManifestPath,
+  type ArticleLocale,
+} from "@/lib/article-manifest"
 import { getRepoTranslations, type ArticleTreeNode } from "@/lib/github/sync"
 import type { ChapterNavNode } from "@/types/chapter-nav"
-import { MANIFEST_PATH } from "@/lib/article-manifest-store"
 
 function isAppendixDirectoryName(name: string): boolean {
   const normalized = name.trim().toLowerCase()
@@ -24,7 +27,7 @@ function isReadmeArticle(node: ChapterNavNode): boolean {
 }
 
 function getArticleManifestMtime(): string {
-  const manifestPath = MANIFEST_PATH
+  const manifestPath = getManifestPath()
   return statSync(manifestPath).mtime.getTime().toString()
 }
 

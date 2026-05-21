@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next"
 import { listAllIssues } from "@/lib/github"
 import { getSiteUrl } from "@/lib/site-url"
 import { shouldIgnoreFile } from "@/lib/article-ignore"
-import { encodeSlug } from "@/lib/slug-utils"
+import { encodeSlug } from "@/lib/slug-resolver"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import type { ArticleLocale } from "@/lib/article-manifest"
 

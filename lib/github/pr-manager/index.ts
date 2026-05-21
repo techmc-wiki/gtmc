@@ -5,11 +5,11 @@ export {
   getClosedPRs,
   getPR,
   getPRFiles,
-} from "./pr-operations.js"
+} from "./pr-operations"
 
 export {
   analyzeReviewMergeStrategy,
   determineReviewMergeMethod,
   determineMergeMethod,
   mergePR,
-} from "./pr-merge.js"
+} from "./pr-merge"

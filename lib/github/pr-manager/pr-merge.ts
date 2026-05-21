@@ -8,7 +8,7 @@ import type {
   ReviewMergeMethod,
   ReviewMergeStrategyAnalysis,
 } from "@/types/review"
-import { getPR } from "./pr-operations.js"
+import { getPR } from "./pr-operations"
 
 export function analyzeReviewMergeStrategy(pr: {
   commits: number

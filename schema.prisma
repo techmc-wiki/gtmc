@@ -18,14 +18,16 @@ model User {
   image         String?
   role          String    @default("USER")
   githubPat     String?
+  githubLogin   String?
 
 
   accounts      Account[]
   sessions      Session[]
 
 
-  revisions     Revision[] @relation("RevisionAuthor")
-  reviews       Revision[] @relation("RevisionReviewer")
+  revisions          Revision[]          @relation("RevisionAuthor")
+  reviews            Revision[]          @relation("RevisionReviewer")
+  glossaryRevisions  GlossaryRevision[]  @relation("GlossaryRevisionAuthor")
   features         Feature[] @relation("FeatureAuthor")
   assignedFeatures Feature[] @relation("FeatureAssignee")
   featureComments  FeatureComment[] @relation("CommentAuthor")
@@ -96,7 +98,30 @@ model Revision {
 }
 
 // ==========================================
-// 4. Feature Report
+// 4. Glossary Revision (beta)
+// ==========================================
+
+model GlossaryRevision {
+  id              String     @id @default(cuid())
+  authorId        String
+  author          User       @relation("GlossaryRevisionAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  title           String?
+  status          String     @default("DRAFT")   // DRAFT | PENDING | SUBMITTED
+  operations      Json                             // array of { kind, slug, before?, after? }
+  baseSubmoduleSha String?
+  branchName      String?
+  githubPrUrl     String?
+  githubPrNum     Int?
+  submittedAt     DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@index([authorId, status])
+  @@index([updatedAt])
+}
+
+// ==========================================
+// 5. Feature Report
 // ==========================================
 
 model Feature {
@@ -133,7 +158,7 @@ model FeatureComment {
 }
 
 // ==========================================
-// 5. Draft Asset Lifecycle
+// 6. Draft Asset Lifecycle
 // ==========================================
 
 model DraftAsset {
@@ -178,7 +203,7 @@ model DraftAsset {
 }
 
 // ==========================================
-// 6. Conflict Resolution Cache
+// 7. Conflict Resolution Cache
 // ==========================================
 
 model ConflictResolution {

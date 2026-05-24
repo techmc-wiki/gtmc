@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { CJK_TOKENIZER, getSearchIndex } from "@/lib/search-index"
+import { CJK_TOKENIZER } from "@/lib/cjk-tokenizer"
+import { getSearchIndex } from "@/lib/search-index"
 import type { ArticleLocale } from "@/lib/articles/manifest"
 
 const SEARCH_CACHE_CONTROL = "public, max-age=30, stale-while-revalidate=120"

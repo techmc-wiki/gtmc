@@ -21,6 +21,7 @@ export default async function FeaturesLayout({
   const navLinks = [
     { href: "/articles", label: t("articles") },
     { href: "/draft", label: t("drafts") },
+    { href: "/glossary", label: t("glossary") },
     { href: "/features", label: t("features") },
   ]
   const adminLink = { href: "/review", label: t("reviewHub") }

@@ -3,7 +3,13 @@ import createMiddleware from "next-intl/middleware"
 import { routing } from "@/i18n/routing"
 
 const intlMiddleware = createMiddleware(routing)
-const privateRoutes = ["/admin", "/draft", "/profile", "/review"]
+const privateRoutes = [
+  "/admin",
+  "/draft",
+  "/glossary/edit",
+  "/profile",
+  "/review",
+]
 const protectedFeatureRoutes = ["/features/new"]
 const localePattern = /^\/(en|zh)(?=\/|$)/
 

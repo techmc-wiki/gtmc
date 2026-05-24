@@ -74,12 +74,21 @@ The dev server runs on <http://localhost:3000>.
 
 ```bash
 pnpm dev              # Start the dev server
-pnpm build            # Generate manifest + content + PDF, then `next build`
+pnpm build:content    # Generate content artifacts (manifest, glossary, articles, PDF)
+pnpm build:next       # Next.js production build
+pnpm build            # Both phases: content generation then Next build
+pnpm build:pdf        # Regenerate the offline PDF only
 pnpm typecheck        # tsc --noEmit
 pnpm lint             # oxlint
 pnpm style            # prettier --check
 pnpm lighthouse       # Run Lighthouse CI locally
 ```
+
+**Build phases:**
+
+- `build:content` — generates static content artifacts (manifest, glossary, rendered articles, PDF)
+- `build:next` — runs the Next.js build consuming those artifacts
+- `build` — runs both in order
 
 ### Layout
 

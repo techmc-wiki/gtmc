@@ -2,6 +2,7 @@ import NextAuth from "next-auth"
 import GitHub from "next-auth/providers/github"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
+import { getOctokit } from "@/lib/github/repos"
 import { ProxyAgent, setGlobalDispatcher } from "undici"
 
 // Allow NextAuth to proxy requests when running in local development (useful in mainland China)
@@ -31,9 +32,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user, account, trigger }) {
       if (user?.id) {
         token.sub = user.id
+      }
+
+      if (account?.provider === "github" && user?.id) {
+        try {
+          const octokit = getOctokit(account.access_token!)
+          const { data: githubUser } = await octokit.users.getAuthenticated()
+          token.githubLogin = githubUser.login
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { githubLogin: githubUser.login },
+          })
+        } catch {
+          token.githubLogin = null
+        }
       }
 
       if (trigger === "signIn" || !token.lastAuthAt) {
@@ -45,6 +60,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (session?.user) {
         session.user.id = token.sub ?? ""
+        session.user.githubLogin = (token.githubLogin as string) ?? null
         session.lastAuthAt = token.lastAuthAt
       }
       return session

@@ -33,6 +33,7 @@ export default async function DashboardLayout({
   const navLinks = [
     { href: "/articles", label: t("articles") },
     { href: "/draft", label: t("drafts") },
+    { href: "/glossary", label: t("glossary") },
     ...(isAdmin ? [{ href: "/review", label: t("reviewHub") }] : []),
     { href: "/features", label: t("features") },
   ]

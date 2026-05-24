@@ -75,6 +75,14 @@ export function DraftStatusBadge({ status }: StatusBadgeProps) {
       className = "border-gray-500/40 bg-gray-500/10 text-gray-600"
       label = t("archived")
       break
+    case "PENDING":
+      className = "border-yellow-500/40 bg-yellow-500/10 text-yellow-700"
+      label = t("draftPending")
+      break
+    case "SUBMITTED":
+      className = "border-blue-500/40 bg-blue-500/10 text-blue-700"
+      label = t("draftSubmitted")
+      break
   }
 
   return <TechBadge className={className}>[{label}]</TechBadge>

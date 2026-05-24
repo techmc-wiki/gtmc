@@ -28,6 +28,8 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/*": ["data/manifest.json"],
     "/[locale]/articles/[[...slug]]": ["data/articles/**"],
+    "/[locale]/glossary": ["data/glossary*.json"],
+    "/[locale]/glossary/[slug]": ["data/glossary*.json"],
   },
   outputFileTracingExcludes: {
     "/api/articles/search": [
@@ -45,6 +47,7 @@ const nextConfig: NextConfig = {
       "./.git/**",
       "./public/gtmc.pdf",
     ],
+    "/[locale]/glossary/**": ["./glossary/**"],
   },
   turbopack: {
     resolveAlias: {

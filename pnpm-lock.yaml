@@ -119,6 +119,9 @@ importers:
       pangu:
         specifier: ^7.2.1
         version: 7.2.1
+      papaparse:
+        specifier: ^5.5.3
+        version: 5.5.3
       prisma:
         specifier: 7.8.0
         version: 7.8.0(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@6.0.3)
@@ -207,6 +210,9 @@ importers:
       '@types/node':
         specifier: ^25.9.1
         version: 25.9.1
+      '@types/papaparse':
+        specifier: ^5.5.2
+        version: 5.5.2
       '@types/react':
         specifier: ^19.2.15
         version: 19.2.15
@@ -1764,6 +1770,9 @@ packages:
 
   '@types/node@25.9.1':
     resolution: {integrity: sha512-xfrlY7UD5rMJk3ZVJP8BNzS28J36YJg+xp+LPXV1TdWxr8uMH5A860QNxYDGQe/ylDSgjxE52Q9VnO7p75tJxg==}
+
+  '@types/papaparse@5.5.2':
+    resolution: {integrity: sha512-gFnFp/JMzLHCwRf7tQHrNnfhN4eYBVYYI897CGX4MY1tzY9l2aLkVyx2IlKZ/SAqDbB3I1AOZW5gTMGGsqWliA==}
 
   '@types/pg@8.20.0':
     resolution: {integrity: sha512-bEPFOaMAHTEP1EzpvHTbmwR8UsFyHSKsRisLIHVMXnpNefSbGA1bD6CVy+qKjGSqmZqNqBDV2azOBo8TgkcVow==}
@@ -3596,6 +3605,9 @@ packages:
     resolution: {integrity: sha512-HEWJHmYcJhGz5wGebMaKblzu709wUjzsnJzwdjaowAKQzHIHQDmWGpCbWWPx19Exnv/RaQ3UhUg4LkttWZsbCw==}
     engines: {node: '>=18.0.0'}
     hasBin: true
+
+  papaparse@5.5.3:
+    resolution: {integrity: sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A==}
 
   parse-cache-control@1.0.1:
     resolution: {integrity: sha512-60zvsJReQPX5/QP0Kzfd/VrpjScIQ7SHBW6bFCYfEP+fp0Eppr1SHhIO5nd1PjZtvclzSzES9D/p5nFJurwfWg==}
@@ -6165,6 +6177,10 @@ snapshots:
     dependencies:
       undici-types: 7.24.6
 
+  '@types/papaparse@5.5.2':
+    dependencies:
+      '@types/node': 25.9.1
+
   '@types/pg@8.20.0':
     dependencies:
       '@types/node': 25.9.1
@@ -8242,6 +8258,8 @@ snapshots:
   pako@2.1.0: {}
 
   pangu@7.2.1: {}
+
+  papaparse@5.5.3: {}
 
   parse-cache-control@1.0.1: {}
 

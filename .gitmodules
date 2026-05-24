@@ -2,3 +2,6 @@
 	path = articles
 	url = https://github.com/gtmc-dev/Articles.git
 	branch = main
+[submodule "glossary"]
+	path = glossary
+	url = https://github.com/TechMC-Glossary/TechMC-Glossary

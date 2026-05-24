@@ -44,7 +44,7 @@ export type TechCardLegacyColor =
   | "black"
   | "sun-yellow"
 
-export type TechCardPattern = "none" | "dots" | "grid"
+export type TechCardPattern = "none" | "grid"
 
 const toneClasses = {
   main: {
@@ -163,7 +163,6 @@ const legacyColorBackground = {
 
 const patternClasses = {
   none: "",
-  dots: "bg-[radial-gradient(circle_at_center,rgb(var(--color-tech-main)/0.12)_1px,transparent_1px)] bg-size-[16px_16px]",
   grid: "bg-[url('/bg-grid.svg')] bg-size-[24px_24px]",
 } as const satisfies Record<TechCardPattern, string>
 

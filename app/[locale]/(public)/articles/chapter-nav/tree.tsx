@@ -98,7 +98,7 @@ export function ChapterNavTree({
                     font-bold text-tech-main/80 uppercase opacity-80
                     transition-colors
                     hover:text-tech-main
-                    focus:outline-none
+                    focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 focus:outline-none
                   ">
                   <span className="inline-block w-4 text-xs text-tech-main/50">
                     {folderExpanded ? "▼" : "▶"}
@@ -132,7 +132,7 @@ export function ChapterNavTree({
                       {item.isAdvanced && (
                         <span
                           className="
-                            mx-1 inline-block shrink-0 bg-[#4c5b96] px-[3px]
+                            mx-1 inline-block shrink-0 bg-tech-advanced px-[3px]
                             align-middle font-mono text-[0.5625rem] font-bold
                             tracking-widest text-white select-none
                           ">

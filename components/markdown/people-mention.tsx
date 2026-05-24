@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useId } from "react"
 import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { resolvePerson } from "@/lib/markdown/people"
-import { UesrAvatar } from "@/components/ui/user-avatar"
+import { UserAvatar } from "@/components/ui/user-avatar"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import type { ResolvedPerson } from "@/lib/markdown/people"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
@@ -252,7 +252,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
 
       <div className="flex items-center gap-3">
         <div className="size-12">
-          <UesrAvatar
+          <UserAvatar
             src={person.profile}
             alt={person.name}
             fallback={person.isFallback ? "?" : person.name[0]}
@@ -379,7 +379,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
             setIsOpen(true)
           }
         }}
-        className="border-tech-main/30 bg-tech-main/5 text-tech-main group-hover:bg-tech-main/80 focus-visible:ring-tech-main/50 mx-1 inline-flex items-center gap-0.5 border px-1 font-mono text-[0.8em] tracking-wide no-underline transition-colors group-hover:text-white focus-visible:ring-2 focus-visible:outline-none">
+        className="border-tech-main/30 bg-tech-main/5 text-tech-main group-hover:bg-tech-main/80 focus-visible:outline-tech-main mx-1 inline-flex items-center gap-0.5 border px-1 font-mono text-[0.8em] tracking-wide no-underline transition-colors group-hover:text-white focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2">
         <span className="text-tech-main/40 group-hover:text-white/60">@</span>
         {children}
       </button>

@@ -35,7 +35,7 @@ export function ForegroundLayer({
       />
 
       {/* 操作入口 */}
-      <div className="animate-slide-up-fade fill-mode-forwards relative z-20 flex w-full max-w-48 flex-col items-stretch justify-center gap-5 opacity-0 [animation-delay:1.4s] sm:w-full sm:max-w-full sm:flex-row sm:items-center">
+      <div className="animate-slide-up-fade fill-mode-forwards relative z-20 flex w-full max-w-48 flex-col items-stretch justify-center gap-5 opacity-0 [animation-delay:1.4s] motion-reduce:animate-none motion-reduce:opacity-100 sm:w-full sm:max-w-full sm:flex-row sm:items-center">
         <Link
           href="/articles"
           prefetch
@@ -54,7 +54,7 @@ export function ForegroundLayer({
             className="flex h-12 w-full items-center justify-center text-xs tracking-widest uppercase shadow-md transition-transform duration-300 hover:scale-102 active:scale-95 disabled:cursor-wait disabled:opacity-90 sm:w-auto sm:text-sm">
             {isAccessingDatabase ? (
               <>
-                <span className="inline-block size-2 animate-pulse bg-white" />
+                <span className="inline-block size-2 animate-pulse bg-white motion-reduce:animate-none" />
                 {t("initializing")}
               </>
             ) : (

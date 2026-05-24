@@ -4,7 +4,7 @@ import { HeadingAnchor } from "@/lib/markdown/heading-anchor"
 const advancedBadge = (
   <span
     aria-hidden="true"
-    className="mx-2 inline-block shrink-0 bg-[#4c5b96] px-1.5 py-0.5 align-middle font-mono text-[0.625rem] font-bold tracking-widest text-white select-none">
+    className="bg-tech-advanced mx-2 inline-block shrink-0 px-1.5 py-0.5 align-middle font-mono text-[0.625rem] font-bold tracking-widest text-white select-none">
     ADVANCED
   </span>
 )

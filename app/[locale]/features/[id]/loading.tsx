@@ -24,7 +24,7 @@ export default function FeatureDetailLoading() {
         aria-busy="true"
         aria-label={t("loadingFeatureDetails")}>
         {/* FEATURE_HEADER_ */}
-        <div className="animate-tech-slide-in relative flex flex-col gap-4">
+        <div className="animate-tech-slide-in relative flex flex-col gap-4 motion-reduce:animate-none motion-reduce:opacity-100">
           <ScanConfirmOverlay />
           <div>
             <SegmentedBar opacity="high" className="h-8 w-64" />
@@ -32,7 +32,7 @@ export default function FeatureDetailLoading() {
         </div>
 
         {/* ISSUE_METADATA_ */}
-        <TechCard className="animate-tech-slide-in [animation-delay:100ms]">
+        <TechCard className="animate-tech-slide-in [animation-delay:100ms] motion-reduce:animate-none motion-reduce:opacity-100">
           <div className="flex flex-col gap-2 font-mono text-xs sm:text-sm">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <span className="font-bold text-zinc-500 sm:w-24">STATUS:</span>
@@ -54,7 +54,7 @@ export default function FeatureDetailLoading() {
         </TechCard>
 
         {/* RESOLUTION_BLOCK_ */}
-        <TechCard className="animate-tech-slide-in border-tech-accent/40 bg-tech-accent/5 relative overflow-hidden backdrop-blur-sm [animation-delay:200ms]">
+        <TechCard className="animate-tech-slide-in border-tech-accent/40 bg-tech-accent/5 relative overflow-hidden backdrop-blur-sm [animation-delay:200ms] motion-reduce:animate-none motion-reduce:opacity-100">
           <div className="bg-tech-accent/60 absolute top-0 left-0 h-full w-2" />
           <div className="border-tech-accent/40 mb-4 flex items-start justify-between border-b pb-2 pl-4">
             <div className="h-5 w-40">
@@ -68,7 +68,7 @@ export default function FeatureDetailLoading() {
         </TechCard>
 
         {/* EDITOR_BUFFER_ */}
-        <div className="group animate-tech-slide-in border-tech-main relative flex w-full flex-col space-y-6 border bg-white/80 p-4 backdrop-blur-sm [animation-delay:300ms] sm:p-6">
+        <div className="group animate-tech-slide-in border-tech-main relative flex w-full flex-col space-y-6 border bg-white/80 p-4 backdrop-blur-sm [animation-delay:300ms] motion-reduce:animate-none motion-reduce:opacity-100 sm:p-6">
           <CornerBrackets size="size-2" color="border-tech-main/40" />
 
           <div className="flex flex-col space-y-4">
@@ -107,7 +107,7 @@ export default function FeatureDetailLoading() {
         </div>
 
         {/* DISCUSSION_LOG_ */}
-        <div className="animate-tech-slide-in space-y-6 [animation-delay:400ms]">
+        <div className="animate-tech-slide-in space-y-6 [animation-delay:400ms] motion-reduce:animate-none motion-reduce:opacity-100">
           <h3 className="border-tech-main inline-block border-b-2 pb-2 text-2xl font-bold tracking-tighter uppercase">
             Discussions
           </h3>

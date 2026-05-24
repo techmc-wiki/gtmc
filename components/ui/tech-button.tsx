@@ -8,7 +8,7 @@ export interface TechButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
 export const TechButton = React.forwardRef<HTMLButtonElement, TechButtonProps>(
   ({ className = "", variant = "primary", size = "md", ...props }, ref) => {
     let baseStyles =
-      "relative inline-flex items-center justify-center font-bold tracking-widest transition-all duration-300 focus:outline-none overflow-hidden group border border-tech-main cursor-pointer"
+      "relative inline-flex items-center justify-center font-bold tracking-widest transition-all duration-300 focus:outline-none focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 overflow-hidden group border border-tech-main cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
 
     // Tech Flat style based on image reference
     if (variant === "primary") {
@@ -16,7 +16,7 @@ export const TechButton = React.forwardRef<HTMLButtonElement, TechButtonProps>(
     } else if (variant === "secondary") {
       baseStyles += " bg-transparent text-tech-main hover:bg-tech-accent/20"
     } else if (variant === "danger") {
-      baseStyles += " bg-[#8a5a68] text-white hover:bg-[#6c4852]" // muted red
+      baseStyles += " bg-red-500 border-red-500 text-white hover:bg-red-700" // muted red
     } else if (variant === "ghost") {
       baseStyles +=
         " bg-transparent border-transparent text-tech-main hover:underline decoration-1 underline-offset-4"

@@ -80,14 +80,14 @@ export default function NotFound() {
 
       {/* Main Content */}
       <main className="relative z-10 mx-auto flex w-full max-w-2xl flex-col items-center justify-center px-4 md:px-0">
-        <div className="group animate-tech-pop-in fill-mode-forwards relative mb-8 w-full opacity-0 [animation-delay:0.2s] [animation-duration:0.8s]">
+        <div className="group animate-tech-pop-in fill-mode-forwards relative mb-8 w-full opacity-0 [animation-delay:0.2s] [animation-duration:0.8s] motion-reduce:animate-none motion-reduce:opacity-100">
           {/* Offset shadow frame */}
           <div className="guide-line absolute inset-0 -z-10 translate-2 border bg-transparent transition-transform duration-500 ease-out group-hover:translate-3 md:translate-3 md:group-hover:translate-4" />
 
           {/* Main Card */}
           <div className="border-tech-main/40 relative overflow-hidden border bg-white/60 p-8 text-center shadow-sm backdrop-blur-md sm:p-12 md:p-16">
             {/* Shimmer Effect */}
-            <div className="pointer-events-none absolute inset-0 translate-x-[-200%] -skew-x-12 animate-[shimmer_3s_infinite_2s] bg-linear-to-r from-transparent via-white/40 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 translate-x-[-200%] -skew-x-12 animate-[shimmer_3s_infinite_2s] bg-linear-to-r from-transparent via-white/40 to-transparent motion-reduce:animate-none" />
 
             {/* Corner Brackets */}
             <div className="border-tech-main absolute top-0 left-0 size-3 -translate-0.5 border-t-2 border-l-2" />
@@ -96,24 +96,24 @@ export default function NotFound() {
             <div className="border-tech-main absolute right-0 bottom-0 size-3 translate-0.5 border-r-2 border-b-2" />
 
             <div className="mb-8 flex flex-col items-center">
-              <div className="animate-tech-slide-in fill-mode-forwards mb-4 flex items-center justify-center opacity-0 [animation-delay:0.6s]">
+              <div className="animate-tech-slide-in fill-mode-forwards mb-4 flex items-center justify-center opacity-0 [animation-delay:0.6s] motion-reduce:animate-none motion-reduce:opacity-100">
                 <h1 className="text-tech-main-dark font-mono text-6xl font-black sm:text-8xl md:text-9xl">
                   404
                 </h1>
               </div>
               <div className="relative overflow-hidden">
-                <h2 className="animate-tech-slide-in text-tech-main-dark fill-mode-forwards text-xl font-bold tracking-widest uppercase opacity-0 [animation-delay:0.8s] sm:text-2xl">
+                <h2 className="animate-tech-slide-in text-tech-main-dark fill-mode-forwards text-xl font-bold tracking-widest uppercase opacity-0 [animation-delay:0.8s] motion-reduce:animate-none motion-reduce:opacity-100 sm:text-2xl">
                   [ RESOURCE_NOT_FOUND ]
                 </h2>
               </div>
             </div>
 
-            <p className="animate-fade-in text-tech-main-dark/80 fill-mode-forwards mx-auto mb-10 max-w-md text-center text-base opacity-0 [animation-delay:1.0s]">
+            <p className="animate-fade-in text-tech-main-dark/80 fill-mode-forwards mx-auto mb-10 max-w-md text-center text-base opacity-0 [animation-delay:1.0s] motion-reduce:animate-none motion-reduce:opacity-100">
               The requested path does not exist in the database. Please verify
               the coordinates and try again.
             </p>
 
-            <div className="animate-slide-up-fade fill-mode-forwards w-full opacity-0 [animation-delay:1.2s]">
+            <div className="animate-slide-up-fade fill-mode-forwards w-full opacity-0 [animation-delay:1.2s] motion-reduce:animate-none motion-reduce:opacity-100">
               <Link href="/" className="inline-block">
                 <TechButton
                   variant="primary"
@@ -123,7 +123,7 @@ export default function NotFound() {
               </Link>
             </div>
 
-            <div className="animate-fade-in guide-line fill-mode-forwards mt-8 flex flex-col items-center space-y-1 border-t pt-4 font-mono text-[0.625rem] opacity-50 [animation-delay:1.4s]">
+            <div className="animate-fade-in guide-line fill-mode-forwards mt-8 flex flex-col items-center space-y-1 border-t pt-4 font-mono text-[0.625rem] opacity-50 [animation-delay:1.4s] motion-reduce:animate-none">
               <p>ERROR_CODE: 0x194 // TIMESTAMP: {new Date().toISOString()}</p>
               <p>END OF LINE.</p>
             </div>

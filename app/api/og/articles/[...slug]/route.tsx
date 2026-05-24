@@ -239,6 +239,7 @@ export async function GET(
               {isAdvanced && (
                 <>
                   <span style={{ color: "#cbd5e1", display: "flex" }}>|</span>
+                  {/* keeps in sync with --color-tech-advanced in app/globals.css */}
                   <span style={{ border: "1px solid rgba(76,91,150,0.4)", background: "rgba(76,91,150,0.08)", color: "#4c5b96", padding: "2px 8px", fontSize: 12, letterSpacing: 2, textTransform: "uppercase", display: "flex" }}>
                     ADVANCED CONTENT
                   </span>

@@ -4,12 +4,11 @@ import Image from "next/image"
 interface UserAvatarProps {
   src?: string | null
   alt?: string | null
-  size?: string
   fallback?: string
   className?: string
 }
 
-export function UesrAvatar({
+export function UserAvatar({
   src,
   alt,
   fallback,

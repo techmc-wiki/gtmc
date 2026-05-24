@@ -24,7 +24,7 @@ export function EditorSurface({
   if (variant === "grid") {
     const gridClasses = `
       group relative flex w-full flex-col space-y-6 border border-tech-main/60
-      bg-[#fbfbfd] p-4 shadow-[inset_0_0_100px_rgb(var(--color-tech-main)/0.03)]
+      bg-tech-bg p-4 shadow-[inset_0_0_100px_rgb(var(--color-tech-main)/0.03)]
       before:absolute before:inset-0 before:z-[-1] before:bg-[url('/bg-grid.svg')]
       before:bg-size-[24px_24px] before:opacity-[0.04]
       sm:p-6

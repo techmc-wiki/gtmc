@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { InputBox } from "@/components/ui/input-box"
-import { UesrAvatar } from "@/components/ui/user-avatar"
+import { UserAvatar } from "@/components/ui/user-avatar"
 import { updateProfileAction } from "@/actions/profile"
 import { SignOutButton } from "@/components/ui/sign-out-button"
 import { getGithubEmailVisibility } from "@/lib/github"
@@ -92,10 +92,9 @@ export default async function ProfilePage() {
             <div className="border-tech-main/30 bg-tech-main/5 relative size-24 shrink-0 border p-1 sm:size-32 md:size-40">
               <div className="bg-tech-main absolute -top-1 -left-1 size-2" />
               <div className="bg-tech-main absolute -right-1 -bottom-1 size-2" />
-              <UesrAvatar
+              <UserAvatar
                 src={user.image}
                 alt={user.name}
-                size="lg"
                 className="size-full rounded-none"
               />
             </div>

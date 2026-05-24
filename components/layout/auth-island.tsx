@@ -3,7 +3,7 @@
 import * as React from "react"
 import { SessionProvider, useSession } from "next-auth/react"
 import { Link } from "@/i18n/navigation"
-import { UesrAvatar } from "@/components/ui/user-avatar"
+import { UserAvatar } from "@/components/ui/user-avatar"
 import { SignOutButton } from "@/components/ui/sign-out-button"
 
 function AuthIslandContent() {
@@ -36,7 +36,7 @@ function AuthIslandContent() {
       <Link
         href="/profile"
         className="block size-8 transition-transform hover:scale-110 md:size-10">
-        <UesrAvatar src={session.user.image} alt={session.user.name} />
+        <UserAvatar src={session.user.image} alt={session.user.name} />
       </Link>
 
       {/* Dropdown menu */}

@@ -83,6 +83,7 @@ html {
   --color-tech-main-dark: #4a5a78;
   --color-tech-accent: #c4d0df;
   --color-tech-line: #cbd5e1;
+  --color-tech-advanced: #4c5b96;
 
   --animate-fade-in: fade-in 0.8s ease-out forwards;
   --animate-fade-out: fade-out 0.3s ease-out forwards;

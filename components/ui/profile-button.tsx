@@ -1,7 +1,7 @@
 ﻿import * as React from "react"
 import { Link } from "@/i18n/navigation"
 import { auth } from "@/lib/auth"
-import { UesrAvatar } from "./user-avatar"
+import { UserAvatar } from "./user-avatar"
 
 export async function ProfileButton() {
   const session = await auth()
@@ -20,7 +20,7 @@ export async function ProfileButton() {
     <Link
       href="/profile"
       className="block size-8 transition-transform hover:scale-110 md:size-10">
-      <UesrAvatar src={session.user.image} alt={session.user.name} />
+      <UserAvatar src={session.user.image} alt={session.user.name} />
     </Link>
   )
 }

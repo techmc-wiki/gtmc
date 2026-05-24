@@ -106,7 +106,7 @@ export function MergeMethodPicker({
               value={commitTitle}
               disabled={disabled}
               onChange={(event) => onCommitTitleChange(event.target.value)}
-              className="border-tech-main/30 text-tech-main placeholder:text-tech-main/30 focus:border-tech-main w-full border bg-white px-3 py-2 font-mono text-xs focus:outline-none"
+              className="border-tech-main/30 text-tech-main placeholder:text-tech-main/30 focus-visible:border-tech-main w-full border bg-white px-3 py-2 font-mono text-xs focus:outline-none"
               placeholder={t("commitTitlePlaceholder")}
             />
           </div>
@@ -123,7 +123,7 @@ export function MergeMethodPicker({
               disabled={disabled}
               onChange={(event) => onCommitBodyChange(event.target.value)}
               rows={compact ? 3 : 5}
-              className="border-tech-main/30 text-tech-main placeholder:text-tech-main/30 focus:border-tech-main w-full resize-y border bg-white px-3 py-2 font-mono text-xs focus:outline-none"
+              className="border-tech-main/30 text-tech-main placeholder:text-tech-main/30 focus-visible:border-tech-main w-full resize-y border bg-white px-3 py-2 font-mono text-xs focus:outline-none"
               placeholder={t("commitBodyPlaceholder")}
             />
           </div>

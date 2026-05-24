@@ -76,17 +76,21 @@ export function ChapterNavTree({
                 ${
                   !item.isFolder && isActive
                     ? `before:w-[3px] before:bg-tech-main`
-                    : `
-                      before:bg-transparent
-                      hover:before:w-[2px] hover:before:bg-tech-main/40
-                    `
+                    : !item.isFolder
+                      ? `
+                        before:bg-transparent
+                        hover:before:w-[2px] hover:before:bg-tech-main/40
+                      `
+                      : `before:bg-transparent`
                 }
                 ${
                   !item.isFolder && isActive && highlightActive
                     ? `bg-tech-main/8`
                     : !item.isFolder && isActive
                       ? `bg-tech-main/5`
-                      : `hover:bg-tech-main/5`
+                      : !item.isFolder
+                        ? `hover:bg-tech-main/5`
+                        : ``
                 }
               `}>
               {item.isFolder ? (
@@ -109,7 +113,7 @@ export function ChapterNavTree({
                 <div className="relative">
                   <div
                     className={`
-                      group relative -ml-4 flex items-center py-1.5 pl-4
+                      group relative flex items-center py-1.5 pl-4
                       transition-colors
                       ${
                         isActive

@@ -1,7 +1,5 @@
 "use server"
 
-import { execSync } from "child_process"
-
 import { revalidatePath } from "next/cache"
 import type { GlossaryRevision } from "@prisma/client"
 import { Prisma } from "@prisma/client"
@@ -9,27 +7,16 @@ import { Prisma } from "@prisma/client"
 import { requireAuth } from "@/lib/auth-context"
 import { prisma } from "@/lib/prisma"
 
-function getGlossarySubmoduleSha(): string | null {
-  try {
-    return execSync("git rev-parse HEAD:glossary/", {
-      encoding: "utf-8",
-    }).trim()
-  } catch {
-    return null
-  }
-}
-
 export async function createGlossaryDraftAction(): Promise<{ id: string }> {
   const session = await requireAuth()
   const userId = session.user.id
-  const baseSubmoduleSha = getGlossarySubmoduleSha()
 
   const revision = await prisma.glossaryRevision.create({
     data: {
       authorId: userId,
       status: "DRAFT",
       operations: [],
-      baseSubmoduleSha,
+      baseSubmoduleSha: null,
     },
   })
 

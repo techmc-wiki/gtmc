@@ -60,7 +60,7 @@
     "geist": "^1.7.1",
     "gray-matter": "^4.0.3",
     "js-yaml": "^4.1.1",
-    "katex": "^0.16.47",
+    "katex": "^0.17.0",
     "mdast-util-find-and-replace": "^3.0.2",
     "micromark-util-character": "^2.1.1",
     "mime-types": "^3.0.2",

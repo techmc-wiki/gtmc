@@ -66,7 +66,6 @@ function ChipsList({
   layout,
   ariaLabel,
 }: ChipsListProps) {
-  const t = useTranslations("Glossary")
   const noneSelected = selected.length === 0
   const scrollRef = React.useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = React.useState(false)
@@ -91,12 +90,6 @@ function ChipsList({
       ro.disconnect()
     }
   }, [layout, categories])
-
-  const nudge = React.useCallback((dir: -1 | 1) => {
-    const el = scrollRef.current
-    if (!el) return
-    el.scrollBy({ left: dir * 200, behavior: "smooth" })
-  }, [])
 
   const list = (
     <div
@@ -135,34 +128,32 @@ function ChipsList({
       <div
         aria-hidden="true"
         className={cn(
-          "pointer-events-none absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-white via-white/80 to-transparent transition-opacity duration-200",
+          "pointer-events-none absolute top-0 right-0 bottom-0 w-10 bg-gradient-to-l from-white/90 via-white/60 to-transparent transition-opacity duration-200",
           canScrollRight ? "opacity-100" : "opacity-0"
         )}
       />
-      <button
-        type="button"
-        aria-label={t("categoryScrollLeft")}
-        onClick={() => nudge(-1)}
-        tabIndex={canScrollLeft ? 0 : -1}
-        aria-hidden={!canScrollLeft}
+      <div
+        aria-hidden="true"
         className={cn(
-          "border-tech-main/40 text-tech-main hover:bg-tech-main/10 absolute top-1/2 left-0 z-10 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center border bg-white/80 text-xs transition-opacity duration-200",
-          canScrollLeft ? "opacity-100" : "pointer-events-none opacity-0"
-        )}>
-        [◂]
-      </button>
-      <button
-        type="button"
-        aria-label={t("categoryScrollRight")}
-        onClick={() => nudge(1)}
-        tabIndex={canScrollRight ? 0 : -1}
-        aria-hidden={!canScrollRight}
+          "pointer-events-none absolute top-0 bottom-0 left-0 w-8 bg-gradient-to-r from-white/80 to-transparent transition-opacity duration-200",
+          canScrollLeft ? "opacity-100" : "opacity-0"
+        )}></div>
+      <span
+        aria-hidden="true"
         className={cn(
-          "border-tech-main/40 text-tech-main hover:bg-tech-main/10 absolute top-1/2 right-0 z-10 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center border bg-white/80 text-xs transition-opacity duration-200",
-          canScrollRight ? "opacity-100" : "pointer-events-none opacity-0"
+          "text-tech-main/60 pointer-events-none absolute top-1/2 right-2 z-10 flex size-6 -translate-y-1/2 items-center justify-center transition-opacity duration-200",
+          canScrollRight ? "opacity-100" : "opacity-0"
         )}>
-        [▸]
-      </button>
+        <span className="size-2 rotate-45 border-t border-r border-current" />
+      </span>
+      <span
+        aria-hidden="true"
+        className={cn(
+          "text-tech-main/50 pointer-events-none absolute top-1/2 left-2 z-10 flex size-6 -translate-y-1/2 items-center justify-center transition-opacity duration-200",
+          canScrollLeft ? "opacity-100" : "opacity-0"
+        )}>
+        <span className="size-2 -rotate-[135deg] border-t border-r border-current" />
+      </span>
     </div>
   )
 }

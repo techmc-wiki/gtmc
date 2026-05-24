@@ -17,6 +17,7 @@ interface GlossaryTableProps {
   searchScope: "active" | "all"
   selectedCategories: string[]
   locale: string
+  onOpenDetail?: (entry: GlossaryEntry) => void
   className?: string
 }
 
@@ -51,6 +52,7 @@ export function GlossaryTable({
   searchScope,
   selectedCategories,
   locale,
+  onOpenDetail,
   className,
 }: GlossaryTableProps) {
   const t = useTranslations("Glossary")
@@ -177,6 +179,7 @@ export function GlossaryTable({
                     visibleColumns={visibleColumns}
                     density={density}
                     locale={locale}
+                    onOpenDetail={onOpenDetail}
                   />
                 ))}
               </tbody>
@@ -192,6 +195,8 @@ export function GlossaryTable({
                   entry={entry}
                   visibleColumns={visibleColumns}
                   locale={locale}
+                  density={density}
+                  onOpenDetail={onOpenDetail}
                 />
               ))}
             </div>

@@ -15,6 +15,7 @@ interface GlossaryTableRowProps {
   visibleColumns: string[]
   density: GlossaryDensity
   locale: string
+  onOpenDetail?: (entry: GlossaryEntry) => void
 }
 
 const densityRowPadding = {
@@ -23,13 +24,17 @@ const densityRowPadding = {
   comfortable: "py-3",
 } as const satisfies Record<GlossaryDensity, string>
 
-const cellBase = "px-3 align-top text-sm"
+const cellBase =
+  "px-3 align-top text-sm transition-[padding] duration-300 ease-out motion-reduce:transition-none"
+const termTriggerClass =
+  "text-tech-main-dark hover:text-tech-main focus-visible:outline-tech-main cursor-pointer text-left font-mono font-medium tracking-tight underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
 
 export function GlossaryTableRow({
   entry,
   visibleColumns,
   density,
   locale,
+  onOpenDetail,
 }: GlossaryTableRowProps) {
   const padding = densityRowPadding[density]
   const visible = React.useMemo(() => new Set(visibleColumns), [visibleColumns])
@@ -45,6 +50,25 @@ export function GlossaryTableRow({
     return entry.translations[code] ?? null
   }, [entry.translations, locale])
 
+  const handleOpenDetail = React.useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (!onOpenDetail) return
+      if (
+        event.defaultPrevented ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        event.button !== 0
+      ) {
+        return
+      }
+      event.preventDefault()
+      onOpenDetail(entry)
+    },
+    [entry, onOpenDetail]
+  )
+
   return (
     <tr
       data-density={density}
@@ -54,7 +78,8 @@ export function GlossaryTableRow({
           <Link
             href={`/glossary/${entry.slug}`}
             locale={locale as "en" | "zh"}
-            className="text-tech-main-dark hover:text-tech-main font-mono font-medium tracking-tight underline-offset-2 hover:underline">
+            onClick={handleOpenDetail}
+            className={termTriggerClass}>
             {entry.fullFormEn}
           </Link>
           {entry.isControversial && (

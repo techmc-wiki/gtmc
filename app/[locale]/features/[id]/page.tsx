@@ -11,7 +11,7 @@ import {
   parseCommentBody,
   parseIssueBody,
 } from "@/lib/github"
-import { generateDescription } from "@/lib/markdown"
+import { generateDescription } from "@/lib/markdown/description"
 import { notFound } from "next/navigation"
 import { toAbsoluteUrl } from "@/lib/site-url"
 import { FeatureDetailContent } from "@/components/features/feature-detail-content"

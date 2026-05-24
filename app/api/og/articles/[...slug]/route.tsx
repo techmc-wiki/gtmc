@@ -9,7 +9,7 @@ import {
 } from "@/lib/articles/manifest"
 import { getArticleContentBySlug } from "@/lib/articles/content"
 import { getArticleRemoteBuffer } from "@/lib/articles/remote-assets"
-import { calculateReadingMetrics } from "@/lib/markdown"
+import { calculateReadingMetrics } from "@/lib/markdown/reading-metrics"
 import { getSiteUrl } from "@/lib/site-url"
 
 export const runtime = "nodejs"

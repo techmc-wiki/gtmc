@@ -7,21 +7,33 @@ import { parseRelated } from "@/lib/glossary/related"
 import type { GlossaryEntry } from "@/lib/glossary/manifest"
 import { getActiveLocale, isGlossaryLocale } from "@/lib/glossary/locales"
 import { CrossRefChips } from "./cross-ref-chips"
+import type { GlossaryDensity } from "./glossary-table-row"
 
 interface GlossaryCardProps {
   entry: GlossaryEntry
   visibleColumns: string[]
   locale: string
+  density: GlossaryDensity
+  onOpenDetail?: (entry: GlossaryEntry) => void
   className?: string
 }
 
 const labelClass =
   "text-tech-main/40 font-mono text-[0.6875rem] tracking-widest uppercase"
+const termTriggerClass =
+  "text-tech-main-dark hover:text-tech-main focus-visible:outline-tech-main cursor-pointer text-left font-mono text-base leading-snug font-medium underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
+const densityCardClass = {
+  compact: "gap-1.5 p-2.5",
+  normal: "gap-2 p-3",
+  comfortable: "gap-3 p-4",
+} as const satisfies Record<GlossaryDensity, string>
 
 export function GlossaryCard({
   entry,
   visibleColumns,
   locale,
+  density,
+  onOpenDetail,
   className,
 }: GlossaryCardProps) {
   const visible = React.useMemo(() => new Set(visibleColumns), [visibleColumns])
@@ -37,17 +49,39 @@ export function GlossaryCard({
     return entry.translations[code] ?? null
   }, [entry.translations, locale])
 
+  const handleOpenDetail = React.useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (!onOpenDetail) return
+      if (
+        event.defaultPrevented ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        event.button !== 0
+      ) {
+        return
+      }
+      event.preventDefault()
+      onOpenDetail(entry)
+    },
+    [entry, onOpenDetail]
+  )
+
   return (
     <article
+      data-density={density}
       className={cn(
-        "border-tech-line/30 hover:border-tech-line/60 group flex flex-col gap-2 border bg-white/40 p-3 transition-colors duration-150",
+        "border-tech-line/30 hover:border-tech-line/60 group flex flex-col border bg-white/40 transition-[padding,gap,border-color,background-color] duration-300 ease-out motion-reduce:transition-none",
+        densityCardClass[density],
         className
       )}>
       <header className="flex items-baseline justify-between gap-3">
         <Link
           href={`/glossary/${entry.slug}`}
           locale={locale as "en" | "zh"}
-          className="text-tech-main-dark hover:text-tech-main font-mono text-base leading-snug font-medium underline-offset-2 hover:underline">
+          onClick={handleOpenDetail}
+          className={termTriggerClass}>
           {entry.fullFormEn}
           {entry.isControversial && (
             <span

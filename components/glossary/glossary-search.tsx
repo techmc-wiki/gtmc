@@ -102,7 +102,7 @@ export function GlossarySearch({
           aria-label="Search glossary terms"
           autoComplete="off"
           spellCheck={false}
-          className="text-tech-main-dark placeholder:text-tech-main/50 w-full bg-transparent py-2.5 pr-3 font-mono text-sm outline-none sm:py-3"
+          className="text-tech-main-dark placeholder:text-tech-main/50 min-h-9 w-full bg-transparent py-1.5 pr-3 font-mono text-sm outline-none sm:py-2"
         />
         <span className="text-tech-main/50 hidden items-center pr-3 font-mono text-xs whitespace-nowrap select-none sm:flex">
           {resultCount} of {totalCount}
@@ -114,7 +114,7 @@ export function GlossarySearch({
         onClick={toggleScope}
         aria-pressed={!isActiveScope}
         aria-label={scopeLabel}
-        className={`tracking-tech-wide flex min-h-9 cursor-pointer items-center justify-center border px-3 py-2 font-mono text-xs uppercase transition-colors sm:px-4 ${
+        className={`tracking-tech-wide flex min-h-9 cursor-pointer items-center justify-center self-start border px-3 py-2 font-mono text-xs uppercase transition-colors sm:px-4 ${
           isActiveScope
             ? "border-tech-main/60 bg-tech-main/10 text-tech-main-dark"
             : "border-tech-main/20 text-tech-main/70 hover:border-tech-main/40"

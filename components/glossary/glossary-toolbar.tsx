@@ -14,6 +14,7 @@ import {
   type CategoryChipsCategory,
 } from "@/components/glossary/category-chips"
 import { GlossaryTable } from "@/components/glossary/glossary-table"
+import { GlossaryDetailPanel } from "@/components/glossary/glossary-detail-panel"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { LOCALE_TO_COLUMN, isGlossaryLocale } from "@/lib/glossary/locales"
 import type { GlossaryEntry } from "@/lib/glossary/manifest"
@@ -94,6 +95,12 @@ export function GlossaryToolbar({
   const [visibleColumns, setVisibleColumns] =
     React.useState<string[]>(localeDefaults)
   const [density, setDensity] = React.useState<GlossaryDensity>("normal")
+  const [selectedEntry, setSelectedEntry] =
+    React.useState<GlossaryEntry | null>(null)
+
+  const closeDetailPanel = React.useCallback(() => {
+    setSelectedEntry(null)
+  }, [])
 
   const categories = React.useMemo<CategoryChipsCategory[]>(() => {
     const counts = new Map<string, number>()
@@ -136,7 +143,7 @@ export function GlossaryToolbar({
               totalCount={totalCount}
               className="flex-1"
             />
-            <div className="flex items-stretch gap-2 [&>[role=radiogroup]>button]:min-h-9">
+            <div className="flex items-stretch gap-2">
               <ColumnPicker
                 locale={locale}
                 visibleColumns={visibleColumns}
@@ -166,6 +173,13 @@ export function GlossaryToolbar({
         searchScope={searchScope}
         selectedCategories={selectedCategories}
         locale={locale}
+        onOpenDetail={setSelectedEntry}
+      />
+
+      <GlossaryDetailPanel
+        entry={selectedEntry}
+        locale={locale}
+        onClose={closeDetailPanel}
       />
 
       {children}

@@ -5,9 +5,38 @@ import { SessionProvider, useSession } from "next-auth/react"
 import { Link } from "@/i18n/navigation"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { SignOutButton } from "@/components/ui/sign-out-button"
+import { cn } from "@/lib/cn"
+
+const PROFILE_MENU_CLOSE_DELAY_MS = 180
 
 function AuthIslandContent() {
   const { data: session, status } = useSession()
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false)
+  const closeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearCloseTimer = React.useCallback(() => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+  }, [])
+
+  const openMenu = React.useCallback(() => {
+    clearCloseTimer()
+    setIsMenuOpen(true)
+  }, [clearCloseTimer])
+
+  const scheduleCloseMenu = React.useCallback(() => {
+    clearCloseTimer()
+    closeTimerRef.current = setTimeout(() => {
+      setIsMenuOpen(false)
+      closeTimerRef.current = null
+    }, PROFILE_MENU_CLOSE_DELAY_MS)
+  }, [clearCloseTimer])
+
+  React.useEffect(() => {
+    return clearCloseTimer
+  }, [clearCloseTimer])
 
   // Loading state: pulse skeleton matching dashboard style
   if (status === "loading") {
@@ -32,7 +61,16 @@ function AuthIslandContent() {
 
   // Authenticated state: Avatar + name dropdown (matching ProfileButton behavior)
   return (
-    <div className="group relative">
+    <div
+      className="relative"
+      onMouseEnter={openMenu}
+      onMouseLeave={scheduleCloseMenu}
+      onFocus={openMenu}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          scheduleCloseMenu()
+        }
+      }}>
       <Link
         href="/profile"
         className="block size-8 transition-transform hover:scale-110 md:size-10">
@@ -40,7 +78,11 @@ function AuthIslandContent() {
       </Link>
 
       {/* Dropdown menu */}
-      <div className="pointer-events-none absolute top-full right-0 z-50 w-48 origin-top-right pt-2 opacity-0 transition-all duration-200 group-focus-within:pointer-events-auto group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:opacity-100">
+      <div
+        className={cn(
+          "pointer-events-none absolute top-full right-0 z-50 w-48 origin-top-right pt-2 opacity-0 transition-all duration-200",
+          isMenuOpen && "pointer-events-auto opacity-100"
+        )}>
         <div className="border-tech-main/30 border bg-white/95 p-2 shadow-lg backdrop-blur-sm">
           <div className="guide-line mb-2 border-b pb-2">
             <p className="text-tech-main-dark truncate font-mono text-xs font-bold">

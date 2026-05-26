@@ -40,22 +40,24 @@ function AuthIslandContent() {
       </Link>
 
       {/* Dropdown menu */}
-      <div className="border-tech-main/30 pointer-events-none absolute top-full right-0 z-50 mt-2 w-48 origin-top-right border bg-white/95 p-2 opacity-0 shadow-lg backdrop-blur-sm transition-all duration-200 group-hover:pointer-events-auto group-hover:opacity-100">
-        <div className="guide-line mb-2 border-b pb-2">
-          <p className="text-tech-main-dark truncate font-mono text-xs font-bold">
-            {session.user.name}
-          </p>
-          <p className="text-tech-main/70 truncate font-mono text-[0.625rem]">
-            {session.user.email}
-          </p>
-        </div>
-        <div className="flex flex-col gap-1">
-          <Link
-            href="/profile"
-            className="text-tech-main-dark hover:bg-tech-main/10 px-2 py-1.5 font-mono text-[0.625rem] transition-colors">
-            PROFILE
-          </Link>
-          <SignOutButton className="text-tech-main-dark hover:bg-tech-main/10 w-full px-2 py-1.5 text-left font-mono text-[0.625rem] transition-colors" />
+      <div className="pointer-events-none absolute top-full right-0 z-50 w-48 origin-top-right pt-2 opacity-0 transition-all duration-200 group-focus-within:pointer-events-auto group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:opacity-100">
+        <div className="border-tech-main/30 border bg-white/95 p-2 shadow-lg backdrop-blur-sm">
+          <div className="guide-line mb-2 border-b pb-2">
+            <p className="text-tech-main-dark truncate font-mono text-xs font-bold">
+              {session.user.name}
+            </p>
+            <p className="text-tech-main/70 truncate font-mono text-[0.625rem]">
+              {session.user.email}
+            </p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <Link
+              href="/profile"
+              className="text-tech-main-dark hover:bg-tech-main/10 px-2 py-1.5 font-mono text-[0.625rem] transition-colors">
+              PROFILE
+            </Link>
+            <SignOutButton className="text-tech-main-dark hover:bg-tech-main/10 w-full px-2 py-1.5 text-left font-mono text-[0.625rem] transition-colors" />
+          </div>
         </div>
       </div>
     </div>

@@ -28,6 +28,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/*": ["data/manifest.json"],
     "/[locale]/articles/[[...slug]]": ["data/articles/**"],
+    "/api/og/articles/[...slug]": ["articles/**"],
     "/[locale]/glossary": ["data/glossary*.json"],
     "/[locale]/glossary/[slug]": ["data/glossary*.json"],
   },

@@ -6,6 +6,10 @@ import { getArticleManifest, type ArticleLocale } from "@/lib/articles/manifest"
 import { artifactFilename } from "@/lib/articles/content"
 import type { ArticleContentArtifact } from "@/lib/articles/content"
 import {
+  isLocalArticleAssetPath,
+  resolveArticleAssetPath,
+} from "@/lib/articles/banner-assets"
+import {
   parseSourceFrontMatter,
   parseTranslationFrontMatter,
 } from "@/lib/frontmatter-parser"
@@ -16,6 +20,11 @@ import type {
 
 const OUTPUT_DIR = path.join(process.cwd(), "data", "articles")
 const TEMP_DIR = path.join(process.cwd(), "data", "articles.tmp")
+const PUBLIC_ARTICLE_ASSET_DIR = path.join(
+  process.cwd(),
+  "public",
+  "article-assets"
+)
 const IS_PRODUCTION = process.env.NODE_ENV !== "development"
 
 /**
@@ -29,6 +38,37 @@ function stripFrontMatter(raw: string): string {
   return raw
 }
 
+function copyBannerAssetToPublic(
+  banner: { src: string } | undefined,
+  articleFilePath: string
+): void {
+  const resolvedBannerPath = resolveArticleAssetPath(
+    banner?.src,
+    articleFilePath
+  )
+  if (!resolvedBannerPath) return
+  if (!isLocalArticleAssetPath(resolvedBannerPath)) return
+
+  const sourcePath = path.join(ARTICLES_PATH, resolvedBannerPath)
+  const targetPath = path.join(PUBLIC_ARTICLE_ASSET_DIR, resolvedBannerPath)
+
+  const relativeTargetPath = path.relative(PUBLIC_ARTICLE_ASSET_DIR, targetPath)
+  if (
+    relativeTargetPath === ".." ||
+    relativeTargetPath.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relativeTargetPath)
+  ) {
+    return
+  }
+
+  try {
+    fs.mkdirSync(path.dirname(targetPath), { recursive: true })
+    fs.copyFileSync(sourcePath, targetPath)
+  } catch {
+    // Runtime banner routes can still fall back to the articles repository.
+  }
+}
+
 function main(): void {
   let generatedCount = 0
   let errorCount = 0
@@ -37,6 +77,10 @@ function main(): void {
     fs.rmSync(TEMP_DIR, { recursive: true })
   }
   fs.mkdirSync(TEMP_DIR, { recursive: true })
+
+  if (fs.existsSync(PUBLIC_ARTICLE_ASSET_DIR)) {
+    fs.rmSync(PUBLIC_ARTICLE_ASSET_DIR, { recursive: true })
+  }
 
   const entries = Object.values(getArticleManifest())
 
@@ -162,6 +206,10 @@ function main(): void {
       const outputPath = path.join(localeDir, filename)
 
       fs.writeFileSync(outputPath, JSON.stringify(artifact, null, 2) + "\n")
+      copyBannerAssetToPublic(
+        frontmatter.banner as { src: string } | undefined,
+        localizedPath
+      )
       generatedCount++
     }
   }

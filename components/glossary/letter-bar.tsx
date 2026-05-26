@@ -51,7 +51,10 @@ export interface LetterBarProps {
 
 export function LetterBar({ availableLetters, className }: LetterBarProps) {
   const t = useTranslations("Glossary")
+  const scrollRef = React.useRef<HTMLUListElement>(null)
   const [activeLetter, setActiveLetter] = React.useState<string | null>(null)
+  const [canScrollLeft, setCanScrollLeft] = React.useState(false)
+  const [canScrollRight, setCanScrollRight] = React.useState(false)
 
   const availableSet = React.useMemo(
     () =>
@@ -97,18 +100,39 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
     }
   }, [])
 
+  React.useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+
+    const update = () => {
+      setCanScrollLeft(el.scrollLeft > 0)
+      setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1)
+    }
+
+    update()
+    el.addEventListener("scroll", update, { passive: true })
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+
+    return () => {
+      el.removeEventListener("scroll", update)
+      ro.disconnect()
+    }
+  }, [availableLetters])
+
   return (
     <nav
       role="navigation"
       aria-label={t("letterBarLabel")}
       className={cn(
-        "border-tech-line/30 sticky top-0 z-10 border-b bg-white/85 backdrop-blur-sm",
+        "border-tech-line/30 sticky top-18 z-20 border-b bg-white/85 backdrop-blur-sm md:top-22",
         className
       )}>
       <div className="relative">
         <CornerBrackets color="border-tech-main/30" size="size-2" />
         <ul
-          className="flex items-stretch overflow-x-auto"
+          ref={scrollRef}
+          className="custom-bottom-scrollbar flex items-stretch overflow-x-auto [-webkit-overflow-scrolling:touch]"
           style={{ WebkitOverflowScrolling: "touch" }}>
           {ALL_LETTERS.map((letter) => {
             const isAvailable = availableSet.has(letter)
@@ -154,6 +178,36 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
             )
           })}
         </ul>
+        <div
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute top-0 right-0 bottom-0 w-10 bg-gradient-to-l from-white/90 via-white/60 to-transparent transition-opacity duration-200",
+            canScrollRight ? "opacity-100" : "opacity-0"
+          )}
+        />
+        <div
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute top-0 bottom-0 left-0 w-8 bg-gradient-to-r from-white/80 to-transparent transition-opacity duration-200",
+            canScrollLeft ? "opacity-100" : "opacity-0"
+          )}
+        />
+        <span
+          aria-hidden="true"
+          className={cn(
+            "text-tech-main/60 pointer-events-none absolute top-1/2 right-2 z-10 flex size-6 -translate-y-1/2 items-center justify-center transition-opacity duration-200",
+            canScrollRight ? "opacity-100" : "opacity-0"
+          )}>
+          <span className="size-2 rotate-45 border-t border-r border-current" />
+        </span>
+        <span
+          aria-hidden="true"
+          className={cn(
+            "text-tech-main/50 pointer-events-none absolute top-1/2 left-2 z-10 flex size-6 -translate-y-1/2 items-center justify-center transition-opacity duration-200",
+            canScrollLeft ? "opacity-100" : "opacity-0"
+          )}>
+          <span className="size-2 -rotate-[135deg] border-t border-r border-current" />
+        </span>
       </div>
     </nav>
   )

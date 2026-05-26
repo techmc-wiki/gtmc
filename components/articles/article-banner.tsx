@@ -214,7 +214,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
                   : "transform 200ms linear, filter 700ms cubic-bezier(0.16,1,0.3,1)",
             }}
             priority
-            unoptimized={src.includes("/api/assets")}
+            unoptimized={src.startsWith("/article-assets/")}
             onError={() => setImageError(true)}
           />
 

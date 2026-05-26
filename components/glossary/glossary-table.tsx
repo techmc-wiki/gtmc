@@ -136,7 +136,7 @@ export function GlossaryTable({
                 ? "search results"
                 : `letter ${group.letter}`
             }
-            className="scroll-mt-20">
+            className="scroll-mt-28 md:scroll-mt-32">
             {group.letter !== "_results" && (
               <div className="border-tech-line/30 mb-2 flex items-baseline gap-3 border-b pb-1">
                 <h2 className="text-tech-main-dark font-mono text-2xl font-bold tracking-widest uppercase">

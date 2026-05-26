@@ -1,4 +1,3 @@
-import path from "path"
 import { Suspense } from "react"
 import "katex/dist/katex.min.css"
 import type { Metadata } from "next"
@@ -18,6 +17,8 @@ import {
   type ArticleLocale,
 } from "@/lib/articles/manifest"
 import { getArticleContentBySlug } from "@/lib/articles/content"
+import { resolveArticleAssetPath } from "@/lib/articles/banner-assets"
+import { getArticleAssetPublicUrl } from "@/lib/articles/asset-url"
 import { decodeSlugPath, encodeSlug, getSlugForFilePath } from "@/lib/slug-resolver"
 import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
 import { getSiteUrl } from "@/lib/site-url"
@@ -634,30 +635,20 @@ function resolveBannerUrl(
   filePath: string,
   siteUrl: string
 ): string | null {
-  if (!bannerSrc || typeof bannerSrc !== "string" || !bannerSrc.trim()) {
-    return null
+  const resolved = resolveArticleAssetPath(bannerSrc, filePath)
+  if (!resolved) return null
+
+  const publicUrl = getArticleAssetPublicUrl(resolved)
+  if (publicUrl.startsWith("https://") || publicUrl.startsWith("http://")) {
+    return publicUrl
   }
-  const currentDir = path.dirname("/" + filePath).replace(/^\/+/, "")
-  const resolved = path.join(currentDir, bannerSrc).replace(/\\/g, "/")
-  const normalized = path.normalize(resolved)
-  if (normalized.includes("..")) {
-    return null
-  }
-  return `${siteUrl}/api/assets?path=${encodeURIComponent(resolved)}`
+
+  return `${siteUrl}${publicUrl}`
 }
 
 function resolveBannerPath(
   bannerSrc: string | undefined,
   filePath: string
 ): string | null {
-  if (!bannerSrc || typeof bannerSrc !== "string" || !bannerSrc.trim()) {
-    return null
-  }
-  const currentDir = path.dirname("/" + filePath).replace(/^\/+/, "")
-  const resolved = path.join(currentDir, bannerSrc).replace(/\\/g, "/")
-  const normalized = path.normalize(resolved)
-  if (normalized.includes("..")) {
-    return null
-  }
-  return resolved
+  return resolveArticleAssetPath(bannerSrc, filePath)
 }

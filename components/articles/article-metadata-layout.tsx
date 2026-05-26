@@ -2,6 +2,7 @@
 
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { ArticleBanner } from "@/components/articles/article-banner"
+import { getArticleAssetPublicUrl } from "@/lib/articles/asset-url"
 import { ReactNode } from "react"
 
 interface ArticleMetadataLayoutProps {
@@ -79,7 +80,7 @@ export function ArticleMetadataLayout({
 
       {bannerPath && (
         <ArticleBanner
-          src={`/api/assets/banner/${bannerPath}`}
+          src={getArticleAssetPublicUrl(bannerPath)}
           alt={bannerAlt || title}
         />
       )}

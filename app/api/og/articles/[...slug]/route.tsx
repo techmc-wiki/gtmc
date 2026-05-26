@@ -1,4 +1,3 @@
-import path from "path"
 import { ImageResponse } from "next/og"
 import { type NextRequest } from "next/server"
 import mime from "mime-types"
@@ -8,6 +7,10 @@ import {
   hasArticleLocale,
 } from "@/lib/articles/manifest"
 import { getArticleContentBySlug } from "@/lib/articles/content"
+import {
+  readLocalArticleAsset,
+  resolveArticleAssetPath,
+} from "@/lib/articles/banner-assets"
 import { getArticleRemoteBuffer } from "@/lib/articles/remote-assets"
 import { calculateReadingMetrics } from "@/lib/markdown/reading-metrics"
 import { getSiteUrl } from "@/lib/site-url"
@@ -127,15 +130,12 @@ export async function GET(
   const bannerSrc = bannerEntry?.src
   if (filePath && bannerSrc) {
     try {
-      const articleDir = path.dirname(filePath)
-      const resolvedBannerPath = path
-        .join(articleDir, bannerSrc)
-        .replace(/\\/g, "/")
-      const normalized = path.normalize(resolvedBannerPath)
-      if (normalized.includes("..") || !normalized.startsWith("articles/")) {
-        throw new Error("Invalid banner path")
-      }
-      const buf = await getArticleRemoteBuffer(resolvedBannerPath)
+      const resolvedBannerPath = resolveArticleAssetPath(bannerSrc, filePath)
+      if (!resolvedBannerPath) throw new Error("Invalid banner path")
+
+      const buf =
+        (await readLocalArticleAsset(resolvedBannerPath)) ??
+        (await getArticleRemoteBuffer(resolvedBannerPath))
       if (buf) {
         const mt = mime.lookup(bannerSrc) || "image/png"
         bannerDataUri = `data:${mt};base64,${Buffer.from(buf).toString("base64")}`

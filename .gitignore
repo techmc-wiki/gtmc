@@ -55,6 +55,7 @@ docs/superpowers
 # generated files
 data/manifest.json
 data/articles
+public/article-assets
 public/gtmc.pdf
 public/.gtmc-pdf-temp.html
 

@@ -68,7 +68,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
   const generatedId = useId()
   const popupId = `people-popup-${generatedId}`
   const containerRef = useRef<HTMLSpanElement>(null)
-  const popupRef = useRef<HTMLDivElement>(null)
+  const popupRef = useRef<HTMLDialogElement>(null)
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const animTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)

@@ -1,6 +1,7 @@
 "use server"
 
 import { Prisma } from "@prisma/client"
+import { z } from "zod"
 
 import { revalidatePaths } from "@/lib/revalidate-paths"
 import {
@@ -331,8 +332,21 @@ export async function resolveConflictAction(
     const { session, token, authorName, authorEmail } =
       await requireReviewAdminContext()
 
-    const content = formData.get("content") as string | null
-    const draftFilesPayload = formData.get("draftFiles") as string | null
+    const resolveConflictSchema = z.object({
+      content: z.string().nullable().default(null),
+      draftFiles: z.string().nullable().default(null),
+    })
+
+    const validated = resolveConflictSchema.safeParse(
+      Object.fromEntries(formData)
+    )
+
+    if (!validated.success) {
+      return { errors: validated.error.flatten().fieldErrors }
+    }
+
+    const content = validated.data.content
+    const draftFilesPayload = validated.data.draftFiles
 
     const linkedDraft = await prisma.revision.findFirst({
       where: { githubPrNum: prNumber },
@@ -380,7 +394,9 @@ export async function resolveConflictAction(
         : null)
 
     if (!resolvedDraftFiles) {
-      throw new Error("Resolved content is required")
+      return {
+        errors: { content: ["Resolved content is required"] },
+      }
     }
 
     const conflictMode = (linkedDraft as { conflictMode?: ConflictMode | null })

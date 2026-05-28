@@ -5,16 +5,24 @@ import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { PATHS } from "@/lib/revalidation-paths"
+import { z } from "zod"
+
+const updateProfileSchema = z.object({
+  name: z.string().min(1, "Name is required").trim(),
+  image: z.string().optional(),
+})
 
 export async function updateProfileAction(formData: FormData) {
   const session = await requireAuth()
 
-  const name = formData.get("name") as string
-  const image = formData.get("image") as string
+  const raw = Object.fromEntries(formData)
+  const validated = updateProfileSchema.safeParse(raw)
 
-  if (!name || name.trim() === "") {
-    throw new Error("Name is required")
+  if (!validated.success) {
+    return { errors: validated.error.flatten().fieldErrors }
   }
+
+  const { name, image } = validated.data
 
   await prisma.user.update({
     where: { id: session.user.id },

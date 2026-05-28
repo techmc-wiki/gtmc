@@ -3,9 +3,12 @@
 import { revalidatePath } from "next/cache"
 import type { GlossaryRevision } from "@prisma/client"
 import { Prisma } from "@prisma/client"
+import { z } from "zod"
 
 import { requireAuth } from "@/lib/auth-context"
 import { prisma } from "@/lib/prisma"
+
+const operationsSchema = z.array(z.record(z.string(), z.unknown()))
 
 export async function createGlossaryDraftAction(): Promise<{ id: string }> {
   const session = await requireAuth()
@@ -27,9 +30,16 @@ export async function createGlossaryDraftAction(): Promise<{ id: string }> {
 export async function updateGlossaryDraftAction(
   id: string,
   operations: unknown[]
-): Promise<void> {
+): Promise<{ errors?: { operations: string[] } } | void> {
   const session = await requireAuth()
   const userId = session.user.id
+
+  const validated = operationsSchema.safeParse(operations)
+  if (!validated.success) {
+    return {
+      errors: { operations: validated.error.issues.map((i) => i.message) },
+    }
+  }
 
   const existing = await prisma.glossaryRevision.findUnique({ where: { id } })
   if (!existing) throw new Error("Draft not found")
@@ -39,7 +49,7 @@ export async function updateGlossaryDraftAction(
 
   await prisma.glossaryRevision.update({
     where: { id },
-    data: { operations: operations as Prisma.InputJsonValue },
+    data: { operations: validated.data as Prisma.InputJsonValue },
   })
 
   revalidatePath("/draft")

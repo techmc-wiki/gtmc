@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { z } from "zod"
 
 import { getMainBranchHeadSha } from "@/lib/articles/branch"
 import { parseDraftTempImageRefs } from "@/lib/drafts/markdown"
@@ -22,6 +23,15 @@ import {
   markDraftAssetOrphaned,
   markDraftAssetReferenced,
 } from "@/lib/drafts/asset-db"
+
+const saveDraftSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  content: z.string().default(""),
+  revisionId: z.string().nullable().default(null),
+  filePath: z.string().nullable().default(null),
+  activeFileId: z.string().nullable().default(null),
+  draftFiles: z.string().nullable().default(null),
+})
 
 const EDITABLE_STATUSES = new Set(["DRAFT"])
 
@@ -56,6 +66,11 @@ export async function saveDraftAction(formData: FormData) {
   const draftFilesPayload = formData.get("draftFiles") as string | null
   const token = await getGithubPatForUser(session.user.id)
 
+  const validated = saveDraftSchema.safeParse(Object.fromEntries(formData))
+  if (!validated.success) {
+    return { errors: validated.error.flatten().fieldErrors }
+  }
+
   const draftFiles =
     deserializeDraftFilesPayload(draftFilesPayload) ||
     normalizeDraftFileCollection({
@@ -67,10 +82,6 @@ export async function saveDraftAction(formData: FormData) {
         }),
       ],
     })
-
-  if (!title) {
-    throw new Error("Title is required")
-  }
 
   const nextDraftStorage = serializeDraftFilesForStorage(draftFiles)
 

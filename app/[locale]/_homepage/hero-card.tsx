@@ -48,7 +48,7 @@ export function HeroCard({
 
       <div className="border-tech-main/40 bg-surface-overlay/60 relative overflow-hidden border p-6 shadow-sm backdrop-blur-md sm:p-10 md:p-14">
         {/* 闪光扫过效果 */}
-        <div className="pointer-events-none absolute inset-0 translate-x-[-200%] -skew-x-12 animate-[shimmer_3s_infinite_2s] bg-linear-to-r from-transparent via-white/40 to-transparent motion-reduce:animate-none" />
+        <div className="pointer-events-none absolute inset-0 translate-x-[-200%] -skew-x-12 animate-[shimmer_3s_infinite_2s] bg-linear-to-r from-transparent via-white/40 to-transparent motion-reduce:animate-none dark:via-white/10" />
 
         {/* 工业感/图纸感的定位刻度 */}
         <CornerBrackets

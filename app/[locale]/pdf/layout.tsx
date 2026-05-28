@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server"
 import { DesktopNav } from "@/components/layout/desktop-nav"
 import { MobileNav } from "@/components/layout/mobile-nav"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
+import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { SiteShell } from "@/components/layout/site-shell"
 import { Logo } from "@/components/ui/logo"
 
@@ -32,6 +33,7 @@ export default async function PdfLayout({
       rightSlot={
         <>
           <MobileNav navLinks={navLinks} />
+          <ThemeToggle className="hidden sm:flex" />
           <LanguageSwitcher className="hidden sm:flex" />
         </>
       }>

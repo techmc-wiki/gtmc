@@ -7,6 +7,7 @@ import {
 } from "@/components/layout/auth-aware-nav"
 import { AuthIsland } from "@/components/layout/auth-island"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
+import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { SiteShell } from "@/components/layout/site-shell"
 import { SearchCommand } from "@/components/search/search-command"
 import { Logo } from "@/components/ui/logo"
@@ -45,6 +46,7 @@ export default async function FeaturesLayout({
         <>
           <SearchCommand />
           <AuthAwareMobileNav navLinks={navLinks} adminLink={adminLink} />
+          <ThemeToggle className="hidden sm:flex" />
           <LanguageSwitcher className="hidden sm:flex" />
           <AuthIsland />
         </>

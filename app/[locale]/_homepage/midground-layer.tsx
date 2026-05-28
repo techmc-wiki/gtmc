@@ -28,16 +28,16 @@ export function MidgroundLayer({
       style={mgStyle}>
       {/* 左上角系统序列号 */}
       <div className="absolute top-8 left-8 hidden flex-col space-y-1 md:flex">
-        <div className="text-tech-main-dark font-mono text-xs tracking-widest uppercase opacity-50">
+        <div className="text-tech-main-dark font-mono text-xs tracking-widest uppercase opacity-50 dark:opacity-35">
           [ GTMC_WIKI_SYSTEM ]
         </div>
-        <div className="text-tech-main font-mono text-[0.625rem] tracking-widest opacity-30">
+        <div className="text-tech-main font-mono text-[0.625rem] tracking-widest opacity-30 dark:opacity-20">
           BUILD.2026.03 // SECTOR-7G
         </div>
       </div>
 
       {/* 右上角HUD */}
-      <div className="text-tech-main absolute top-8 right-12 hidden space-y-1 text-right font-mono text-[0.625rem] opacity-40 select-none sm:block">
+      <div className="text-tech-main absolute top-8 right-12 hidden space-y-1 text-right font-mono text-[0.625rem] opacity-40 select-none sm:block dark:opacity-25">
         <p>
           SYS.TPS ::{" "}
           <span className="text-tech-main-dark font-bold">20.0 *</span>
@@ -54,7 +54,7 @@ export function MidgroundLayer({
 
       {/* Java 代码片段漂浮层 */}
       <DecorElement
-        className="decor-desktop-only pointer-events-none absolute top-[18%] right-10 hidden opacity-40 mix-blend-multiply select-none lg:block xl:right-16"
+        className="decor-desktop-only pointer-events-none absolute top-[18%] right-10 hidden opacity-40 mix-blend-multiply select-none lg:block xl:right-16 dark:opacity-25 dark:mix-blend-screen"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
@@ -78,7 +78,7 @@ export function MidgroundLayer({
 
       {/* 堆栈跟踪装饰 */}
       <DecorElement
-        className="decor-desktop-only pointer-events-none absolute bottom-8 left-8 hidden font-mono text-[0.625rem] text-red-500/40 mix-blend-multiply select-none lg:block"
+        className="decor-desktop-only pointer-events-none absolute bottom-8 left-8 hidden font-mono text-[0.625rem] text-red-500/40 mix-blend-multiply select-none lg:block dark:text-red-400/30 dark:mix-blend-screen"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
@@ -109,7 +109,7 @@ export function MidgroundLayer({
         <div className="border-tech-main/50 bg-tech-bg mt-[50vh] size-2 border" />
       </div>
 
-      <div className="decor-desktop-only border-tech-main/10 absolute top-0 left-0 hidden h-full w-2 flex-col overflow-hidden border-r opacity-30 md:flex">
+      <div className="decor-desktop-only border-tech-main/10 absolute top-0 left-0 hidden h-full w-2 flex-col overflow-hidden border-r opacity-30 md:flex dark:opacity-20">
         {RULER_TICK_KEYS.map((tickKey) => (
           <div
             key={tickKey}

@@ -270,6 +270,23 @@ html {
   --color-surface-overlay: #1c2a4a;
   --color-surface-input: #0f1a2e;
   --color-surface-modal: #1a2540;
+
+  --color-ansi-black: #073642;
+  --color-ansi-red: #dc322f;
+  --color-ansi-green: #859900;
+  --color-ansi-yellow: #b58900;
+  --color-ansi-blue: #268bd2;
+  --color-ansi-magenta: #d33682;
+  --color-ansi-cyan: #2aa198;
+  --color-ansi-white: #eee8d5;
+  --color-ansi-bright-black: #586e75;
+  --color-ansi-bright-red: #cb4b16;
+  --color-ansi-bright-green: #586e75;
+  --color-ansi-bright-yellow: #657b83;
+  --color-ansi-bright-blue: #839496;
+  --color-ansi-bright-magenta: #6c71c4;
+  --color-ansi-bright-cyan: #93a1a1;
+  --color-ansi-bright-white: #fdf6e3;
 }
 
 /* KaTeX dark overrides. KaTeX outputs raw HTML, so Tailwind `dark:` variants

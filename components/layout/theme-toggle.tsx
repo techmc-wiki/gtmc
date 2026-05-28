@@ -10,17 +10,21 @@ type Mode = "light" | "dark" | "system"
 
 const CYCLE_ORDER: readonly Mode[] = ["system", "light", "dark"] as const
 
-const TOGGLE_LABEL_KEY: Record<Mode, "toggleLight" | "toggleDark" | "toggleSystem"> = {
+const TOGGLE_LABEL_KEY: Record<
+  Mode,
+  "toggleLight" | "toggleDark" | "toggleSystem"
+> = {
   light: "toggleLight",
   dark: "toggleDark",
   system: "toggleSystem",
 }
 
-const MENU_LABEL_KEY: Record<Mode, "labelLight" | "labelDark" | "labelSystem"> = {
-  light: "labelLight",
-  dark: "labelDark",
-  system: "labelSystem",
-}
+const MENU_LABEL_KEY: Record<Mode, "labelLight" | "labelDark" | "labelSystem"> =
+  {
+    light: "labelLight",
+    dark: "labelDark",
+    system: "labelSystem",
+  }
 
 const MENU_CLOSE_DELAY_MS = 180
 const LONG_PRESS_MS = 500
@@ -30,13 +34,6 @@ function readModeFromCookie(): Mode {
   const match = document.cookie.match(/(?:^|;\s*)theme=(light|dark)/)
   if (match) return match[1] as "light" | "dark"
   return "system"
-}
-
-function getSystemTheme(): "light" | "dark" {
-  if (typeof window === "undefined") return "light"
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light"
 }
 
 function clearThemeCookie() {
@@ -197,18 +194,15 @@ export function ThemeToggle({ className }: { className?: string }) {
     (next: Mode) => {
       setMode(next)
       if (next === "system") {
-        // No-op the hook's cookie write by clearing afterwards. The provider
-        // can't be instructed to re-follow system pref in this session, but
-        // the cookie state persists for next reload (when no-flash script
-        // falls back to prefers-color-scheme).
-        const systemTheme = getSystemTheme()
-        setTheme(systemTheme)
+        // Use the provider's resolvedTheme (which already tracks system pref)
+        // then clear the cookie so next reload falls back to prefers-color-scheme.
+        setTheme(resolvedTheme)
         clearThemeCookie()
       } else {
         setTheme(next)
       }
     },
-    [setTheme]
+    [setTheme, resolvedTheme]
   )
 
   const onClickToggle = React.useCallback(() => {

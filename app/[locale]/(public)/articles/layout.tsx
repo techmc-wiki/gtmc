@@ -9,6 +9,7 @@ import { SiteShell } from "@/components/layout/site-shell"
 import { SearchCommand } from "@/components/search/search-command"
 import { Logo } from "@/components/ui/logo"
 import { AuthIsland } from "@/components/layout/auth-island"
+import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { ArticlesLayoutClient } from "./articles-layout-client"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import type { ArticleLocale } from "@/lib/articles/manifest"
@@ -56,6 +57,7 @@ export default async function ArticlesLayout({
         <>
           <SearchCommand />
           <AuthAwareMobileNav navLinks={navLinks} adminLink={adminLink} />
+          <ThemeToggle className="hidden sm:flex" />
           <LanguageSwitcher className="hidden sm:flex" />
           <AuthIsland />
         </>

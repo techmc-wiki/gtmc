@@ -5,6 +5,7 @@ import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
+import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { useMounted } from "@/hooks/use-mounted"
 
 interface NavLink {
@@ -59,7 +60,10 @@ export function MobileNav({ navLinks }: MobileNavProps) {
                     {link.label}
                   </Link>
                 ))}
-                <LanguageSwitcher className="border-none" />
+                <div className="flex items-center gap-2">
+                  <ThemeToggle />
+                  <LanguageSwitcher className="border-none" />
+                </div>
               </div>
             </div>
           </div>,

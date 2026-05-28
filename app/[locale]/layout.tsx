@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono"
 import "../globals.css"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { ThemeProvider } from "@/lib/theme"
 import { FooterProvider } from "@/components/layout/footer-context"
 import Footer from "@/components/layout/footer"
 import { FooterWrapper } from "@/components/layout/footer-wrapper"
@@ -133,12 +134,14 @@ export default async function RootLayout({
       <SpeedInsights />
       <body className="bg-tech-bg/50 flex min-h-screen w-full flex-col overflow-x-hidden antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <FooterProvider>
-            {children}
-            <FooterWrapper>
-              <Footer />
-            </FooterWrapper>
-          </FooterProvider>
+          <ThemeProvider>
+            <FooterProvider>
+              {children}
+              <FooterWrapper>
+                <Footer />
+              </FooterWrapper>
+            </FooterProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
       </body>

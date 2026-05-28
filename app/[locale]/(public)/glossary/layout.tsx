@@ -10,6 +10,7 @@ import { SiteShell } from "@/components/layout/site-shell"
 import { SearchCommand } from "@/components/search/search-command"
 import { Logo } from "@/components/ui/logo"
 import { AuthIsland } from "@/components/layout/auth-island"
+import { ThemeToggle } from "@/components/layout/theme-toggle"
 
 function buildNavLinks(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
   return [
@@ -46,6 +47,7 @@ export default async function GlossaryLayout({
         <>
           <SearchCommand />
           <AuthAwareMobileNav navLinks={navLinks} adminLink={adminLink} />
+          <ThemeToggle className="hidden sm:flex" />
           <LanguageSwitcher className="hidden sm:flex" />
           <AuthIsland />
         </>

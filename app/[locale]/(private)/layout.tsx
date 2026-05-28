@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server"
 
 import { AuthIsland } from "@/components/layout/auth-island"
 import { DesktopNav } from "@/components/layout/desktop-nav"
+import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { MobileNav } from "@/components/layout/mobile-nav"
 import { SiteShell } from "@/components/layout/site-shell"
@@ -56,6 +57,7 @@ export default async function DashboardLayout({
         <>
           <SearchCommand />
           <MobileNav navLinks={navLinks} />
+          <ThemeToggle className="hidden sm:flex" />
           <LanguageSwitcher className="hidden sm:flex" />
           <AuthIsland />
         </>

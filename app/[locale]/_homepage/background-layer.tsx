@@ -55,7 +55,7 @@ export function BackgroundLayer({
       style={bgStyle}>
       {/* 巨型背景水印 */}
       <DecorElement
-        className="decor-desktop-only text-tech-main pointer-events-none absolute top-1/3 -right-20 hidden rotate-90 text-[10rem] font-black tracking-tighter whitespace-nowrap opacity-[0.05] mix-blend-multiply select-none lg:block"
+        className="decor-desktop-only text-tech-main pointer-events-none absolute top-1/3 -right-20 hidden rotate-90 text-[10rem] font-black tracking-tighter whitespace-nowrap opacity-[0.05] mix-blend-multiply select-none lg:block dark:opacity-[0.03] dark:mix-blend-screen"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
@@ -65,7 +65,7 @@ export function BackgroundLayer({
 
       {/* NBT二进制/Hex Dump 背景层 */}
       <DecorElement
-        className="decor-desktop-only text-tech-main pointer-events-none absolute top-[20%] left-[5%] hidden font-mono text-[0.625rem] leading-tight whitespace-pre opacity-[0.25] mix-blend-multiply select-none xl:block"
+        className="decor-desktop-only text-tech-main pointer-events-none absolute top-[20%] left-[5%] hidden font-mono text-[0.625rem] leading-tight whitespace-pre opacity-[0.25] mix-blend-multiply select-none xl:block dark:opacity-[0.15] dark:mix-blend-screen"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
@@ -84,7 +84,7 @@ export function BackgroundLayer({
 
       {/* MC 方块视角的几何线条叠加 */}
       <DecorElement
-        className="decor-desktop-only pointer-events-none absolute right-[10%] bottom-[20%] hidden opacity-20 lg:block"
+        className="decor-desktop-only pointer-events-none absolute right-[10%] bottom-[20%] hidden opacity-20 lg:block dark:opacity-15"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
@@ -141,7 +141,7 @@ export function BackgroundLayer({
 
       {/* 圆形/雷达阵列结构 */}
       <DecorElement
-        className="decor-desktop-only pointer-events-none absolute bottom-16 left-[20%] hidden opacity-10 lg:block"
+        className="decor-desktop-only pointer-events-none absolute bottom-16 left-[20%] hidden opacity-10 lg:block dark:opacity-5"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
@@ -163,7 +163,7 @@ export function BackgroundLayer({
 
       {/* 2XL 专属：红石逻辑代数 */}
       <DecorElement
-        className="decor-desktop-only border-tech-main/40 text-tech-main pointer-events-none absolute top-[40%] right-[6%] hidden border-l pl-4 font-mono text-[0.6875rem] leading-relaxed opacity-[0.35] mix-blend-multiply select-none 2xl:block"
+        className="decor-desktop-only border-tech-main/40 text-tech-main pointer-events-none absolute top-[40%] right-[6%] hidden border-l pl-4 font-mono text-[0.6875rem] leading-relaxed opacity-[0.35] mix-blend-multiply select-none 2xl:block dark:opacity-[0.2] dark:mix-blend-screen"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
@@ -185,7 +185,7 @@ export function BackgroundLayer({
 
       {/* 2XL 专属：空间坐标变换矩阵 */}
       <DecorElement
-        className="decor-desktop-only pointer-events-none absolute right-[25%] bottom-[30%] hidden font-mono text-[0.6875rem] opacity-[0.35] mix-blend-multiply select-none 2xl:block"
+        className="decor-desktop-only pointer-events-none absolute right-[25%] bottom-[30%] hidden font-mono text-[0.6875rem] opacity-[0.35] mix-blend-multiply select-none 2xl:block dark:opacity-[0.2] dark:mix-blend-screen"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
@@ -215,7 +215,7 @@ export function BackgroundLayer({
 
       {/* 2XL 专属：内存簇/寄存器网格 */}
       <DecorElement
-        className="decor-desktop-only pointer-events-none absolute top-[60%] left-[3%] hidden font-mono text-[0.625rem] opacity-[0.35] mix-blend-multiply select-none 2xl:block"
+        className="decor-desktop-only pointer-events-none absolute top-[60%] left-[3%] hidden font-mono text-[0.625rem] opacity-[0.35] mix-blend-multiply select-none 2xl:block dark:opacity-[0.2] dark:mix-blend-screen"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
@@ -240,7 +240,7 @@ export function BackgroundLayer({
 
       {/* 力学/机械引擎图纸 */}
       <DecorElement
-        className="decor-desktop-only pointer-events-none absolute top-[15%] right-[15%] hidden opacity-[0.25] mix-blend-multiply select-none xl:block"
+        className="decor-desktop-only pointer-events-none absolute top-[15%] right-[15%] hidden opacity-[0.25] mix-blend-multiply select-none xl:block dark:opacity-[0.15] dark:mix-blend-screen"
         smoothMouseX={smoothMouseX}
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}

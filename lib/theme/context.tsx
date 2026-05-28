@@ -1,10 +1,12 @@
 "use client"
 
+import { usePathname } from "next/navigation"
 import React, {
   createContext,
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   useTransition,
@@ -41,6 +43,7 @@ function readInitialResolvedTheme(): ResolvedTheme {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
   const [theme, setThemeState] = useState<Theme>(readInitialTheme)
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(
     readInitialResolvedTheme
@@ -51,6 +54,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     hasExplicitChoice.current = parseThemeCookie(document.cookie) !== null
   }, [])
+
+  useEffect(() => {
+    const resolved = theme === "system" ? getSystemTheme() : theme
+    setResolvedTheme(resolved)
+    document.documentElement.setAttribute("data-theme", resolved)
+  }, [pathname, theme])
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
@@ -83,8 +92,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  const contextValue = useMemo(
+    () => ({ theme, resolvedTheme, setTheme }),
+    [theme, resolvedTheme, setTheme]
+  )
+
   return (
-    <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme }}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   )

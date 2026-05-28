@@ -320,7 +320,7 @@ export function SearchCommand() {
             />
             <section
               aria-label={t("searchAriaLabel")}
-              className="border-tech-main animate-in slide-in-from-top-4 relative w-full max-w-xl border bg-white/95 shadow-xl backdrop-blur-md duration-200">
+              className="border-tech-main animate-in slide-in-from-top-4 bg-surface-modal/95 relative w-full max-w-xl border shadow-xl backdrop-blur-md duration-200">
               <CornerBrackets variant="static" />
 
               {/* Header */}
@@ -347,7 +347,7 @@ export function SearchCommand() {
                   onKeyDown={handleKeyDown}
                   placeholder={t("placeholder")}
                   aria-label={t("searchAriaLabel")}
-                  className="border-tech-main/40 text-tech-main-dark placeholder:text-tech-main/50 focus:border-tech-main/70 w-full border bg-white/60 px-3 py-2.5 font-mono text-sm transition-colors outline-none focus:bg-white/80"
+                  className="border-tech-main/40 text-tech-main-dark placeholder:text-tech-main/50 focus:border-tech-main/70 bg-surface-input/60 focus:bg-surface-input/80 w-full border px-3 py-2.5 font-mono text-sm transition-colors outline-none"
                   autoComplete="off"
                   spellCheck={false}
                 />

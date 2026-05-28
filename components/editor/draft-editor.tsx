@@ -226,10 +226,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             id="draft-title"
             required
             placeholder={t("titlePlaceholder")}
-            className={`border-tech-main/40 focus:border-tech-main focus:ring-tech-main/20 bg-white/50 py-3 font-mono text-lg backdrop-blur-sm transition-all duration-300 focus:bg-white focus:ring-1 ${
+            className={`border-tech-main/40 focus:border-tech-main focus:ring-tech-main/20 bg-surface-input/50 focus:bg-surface-input py-3 font-mono text-lg backdrop-blur-sm transition-all duration-300 focus:ring-1 ${
               state.isReadOnly
                 ? `bg-tech-main/5 cursor-not-allowed opacity-70`
-                : `hover:bg-white/80`
+                : `hover:bg-surface-input/80`
             } `}
             value={state.title}
             onChange={(e) => actions.setTitle(e.target.value)}
@@ -345,7 +345,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       </EditorContentArea>
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-        <div className="border-tech-main/35 border bg-white/80 backdrop-blur-sm">
+        <div className="border-tech-main/35 bg-surface-overlay/80 border backdrop-blur-sm">
           <div className="guide-line flex border-b">
             <button
               type="button"
@@ -464,7 +464,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           )}
         </div>
 
-        <div className="border-tech-main/35 border bg-white/80 p-4 backdrop-blur-sm">
+        <div className="border-tech-main/35 bg-surface-overlay/80 border p-4 backdrop-blur-sm">
           <p className="section-label">WORKSPACE OVERVIEW</p>
           <div className="space-y-3 font-mono text-xs uppercase">
             <InfoLine
@@ -679,7 +679,7 @@ function ChangePreviewCard({
   rows: DraftDiffRow[]
 }) {
   return (
-    <section className="guide-line border bg-white/70">
+    <section className="guide-line bg-surface-overlay/70 border">
       <div className="guide-line bg-tech-main/5 flex items-center justify-between border-b px-4 py-3">
         <p className="text-tech-main font-mono text-xs tracking-widest break-all uppercase">
           {filePath}

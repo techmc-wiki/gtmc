@@ -141,7 +141,7 @@ function PRActionButtonsContent({
   )
 
   return (
-    <div className="border-tech-main/35 space-y-4 border bg-white/80 p-4 backdrop-blur-sm">
+    <div className="border-tech-main/35 bg-surface-overlay/80 space-y-4 border p-4 backdrop-blur-sm">
       <div className="border-tech-main/15 space-y-1 border-b pb-3">
         <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
           {reviewT("mergeBoxLabel")}

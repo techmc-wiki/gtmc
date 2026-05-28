@@ -84,7 +84,7 @@ export function MobileOutlineBar() {
 
         {/* Sheet panel */}
         <div
-          className={`absolute inset-x-0 bottom-0 flex max-h-[70dvh] flex-col border-t border-tech-main/30 bg-white/95 backdrop-blur-md transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isSheetOpen ? "translate-y-0" : "translate-y-full"}`}
+          className={`absolute inset-x-0 bottom-0 flex max-h-[70dvh] flex-col border-t border-tech-main/30 bg-surface-overlay/95 backdrop-blur-md transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isSheetOpen ? "translate-y-0" : "translate-y-full"}`}
           role={isSheetOpen ? "dialog" : undefined}
           aria-modal={isSheetOpen ? "true" : undefined}
           aria-label="Article outline"

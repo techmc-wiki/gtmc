@@ -36,14 +36,14 @@ export async function FeatureReadonlyView({
       )}
 
       <div className="border-tech-main/30 mt-8 border-t border-dashed pt-6">
-        <div className="border-tech-main/40 flex flex-col overflow-hidden border bg-white/50 backdrop-blur-sm">
+        <div className="border-tech-main/40 bg-surface-overlay/50 flex flex-col overflow-hidden border backdrop-blur-sm">
           <div className="border-tech-main/40 bg-tech-main/10 text-tech-main/80 border-b px-4 py-2 font-mono text-xs">
             RENDERED_PREVIEW
           </div>
 
           <div className="min-h-[200px]">
             {content?.trim() ? (
-              <div className="selection:bg-tech-main/20 w-full max-w-none overflow-hidden p-6 wrap-break-word selection:text-slate-900 sm:p-8">
+              <div className="selection:bg-tech-main/20 selection:text-tech-main-dark w-full max-w-none overflow-hidden p-6 wrap-break-word sm:p-8">
                 <MarkdownRenderer content={content} shikiPlugin={shikiPlugin} />
               </div>
             ) : (

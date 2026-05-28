@@ -45,9 +45,9 @@ export function GlossaryDetailPanel({
         open
         aria-modal="true"
         aria-labelledby={titleId}
-        className="border-tech-main/40 animate-tech-pop-in fixed inset-x-3 inset-y-3 m-0 flex h-auto max-h-none w-auto max-w-none flex-col overflow-hidden border bg-white/95 backdrop-blur-md motion-reduce:animate-none sm:left-auto sm:w-[min(44rem,calc(100vw-2rem))]">
+        className="border-tech-main/40 animate-tech-pop-in bg-surface-modal/95 fixed inset-x-3 inset-y-3 m-0 flex h-auto max-h-none w-auto max-w-none flex-col overflow-hidden border backdrop-blur-md motion-reduce:animate-none sm:left-auto sm:w-[min(44rem,calc(100vw-2rem))]">
         <CornerBrackets size="size-3" color="border-tech-main/40" />
-        <div className="border-tech-main/20 flex shrink-0 items-center justify-between gap-3 border-b bg-white/85 px-4 py-3 backdrop-blur-sm">
+        <div className="border-tech-main/20 bg-surface-overlay/85 flex shrink-0 items-center justify-between gap-3 border-b px-4 py-3 backdrop-blur-sm">
           <p className="text-tech-main/50 truncate font-mono text-xs tracking-widest uppercase">
             {entry.category}
           </p>
@@ -56,7 +56,7 @@ export function GlossaryDetailPanel({
             type="button"
             onClick={onClose}
             aria-label={t("detailPanelClose")}
-            className="focus-visible:outline-tech-main text-tech-main hover:bg-tech-main/10 border-tech-main/30 relative flex size-9 shrink-0 cursor-pointer items-center justify-center border bg-white/60 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2">
+            className="focus-visible:outline-tech-main text-tech-main hover:bg-tech-main/10 border-tech-main/30 bg-surface-overlay/60 relative flex size-9 shrink-0 cursor-pointer items-center justify-center border transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2">
             <span
               aria-hidden="true"
               className="absolute h-px w-3.5 rotate-45 bg-current"

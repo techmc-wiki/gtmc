@@ -36,7 +36,7 @@ export default function GlossaryLoading() {
             corners="diagonal-tlbr"
           />
 
-          <SectionFrame className="animate-tech-slide-in guide-line relative mb-8 flex flex-col gap-4 border bg-white/80 p-4 backdrop-blur-sm sm:p-6">
+          <SectionFrame className="animate-tech-slide-in guide-line bg-surface-overlay/80 relative mb-8 flex flex-col gap-4 border p-4 backdrop-blur-sm sm:p-6">
             <ScanConfirmOverlay />
             <SectionRail label="GLOSSARY_INDEX" className="mb-2" />
             <SegmentedBar opacity="medium" className="h-3 w-1/3" />
@@ -54,7 +54,7 @@ export default function GlossaryLoading() {
             </div>
           </SectionFrame>
 
-          <div className="border-tech-line/30 relative mb-6 overflow-hidden border bg-white/60">
+          <div className="border-tech-line/30 bg-surface-overlay/60 relative mb-6 overflow-hidden border">
             <SweepOverlay />
             <div className="flex">
               {ALPHABET_NAV_KEYS.map((navKey, i) => (

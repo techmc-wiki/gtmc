@@ -33,22 +33,22 @@ import {
 } from "./table-components"
 
 const ansiColorStyles: Record<AnsiColorName, Record<string, string>> = {
-  black: { color: "#334155" },
-  red: { color: "#b91c1c" },
-  green: { color: "#047857" },
-  yellow: { color: "#a16207" },
-  blue: { color: "#2563eb" },
-  magenta: { color: "#a21caf" },
-  cyan: { color: "#0f766e" },
-  white: { color: "#64748b" },
-  "bright-black": { color: "#0f172a" },
-  "bright-red": { color: "#dc2626" },
-  "bright-green": { color: "#059669" },
-  "bright-yellow": { color: "#ca8a04" },
-  "bright-blue": { color: "#1d4ed8" },
-  "bright-magenta": { color: "#c026d3" },
-  "bright-cyan": { color: "#0891b2" },
-  "bright-white": { color: "#475569" },
+  black: { color: "var(--color-ansi-black)" },
+  red: { color: "var(--color-ansi-red)" },
+  green: { color: "var(--color-ansi-green)" },
+  yellow: { color: "var(--color-ansi-yellow)" },
+  blue: { color: "var(--color-ansi-blue)" },
+  magenta: { color: "var(--color-ansi-magenta)" },
+  cyan: { color: "var(--color-ansi-cyan)" },
+  white: { color: "var(--color-ansi-white)" },
+  "bright-black": { color: "var(--color-ansi-bright-black)" },
+  "bright-red": { color: "var(--color-ansi-bright-red)" },
+  "bright-green": { color: "var(--color-ansi-bright-green)" },
+  "bright-yellow": { color: "var(--color-ansi-bright-yellow)" },
+  "bright-blue": { color: "var(--color-ansi-bright-blue)" },
+  "bright-magenta": { color: "var(--color-ansi-bright-magenta)" },
+  "bright-cyan": { color: "var(--color-ansi-bright-cyan)" },
+  "bright-white": { color: "var(--color-ansi-bright-white)" },
 }
 
 export function getMarkdownComponents(
@@ -94,7 +94,7 @@ export function getMarkdownComponents(
     ul: UnorderedListComponent,
     ol: OrderedListComponent,
     li: ({ ...props }: MarkdownComponentProps) => (
-      <li className="relative text-slate-800" {...props} />
+      <li className="text-tech-main-dark relative" {...props} />
     ),
     blockquote: BlockquoteComponent,
     aside: CalloutAside,
@@ -119,7 +119,7 @@ function HiddenComponent({
   return (
     <span
       className={[
-        "guide-line bg-tech-main/8 text-tech-main/80 hover:border-tech-main/35 inline-block rounded-xs border px-1.5 py-px filter-[blur(0.18rem)] transition-[filter,text-shadow,color,background-color,border-color] duration-200 [text-shadow:0_0_0.35rem_rgb(var(--color-tech-main)/0.45)] hover:bg-white/85 hover:text-slate-800 hover:filter-none hover:text-shadow-none",
+        "guide-line bg-tech-main/8 text-tech-main/80 hover:border-tech-main/35 hover:bg-surface-overlay/85 hover:text-tech-main-dark inline-block rounded-xs border px-1.5 py-px filter-[blur(0.18rem)] transition-[filter,text-shadow,color,background-color,border-color] duration-200 [text-shadow:0_0_0.35rem_rgb(var(--color-tech-main)/0.45)] hover:filter-none hover:text-shadow-none",
         className,
       ]
         .filter(Boolean)

@@ -51,7 +51,7 @@ export default function ReviewLoading() {
               {[1, 2, 3].map((i) => (
                 <TechCard
                   key={i}
-                  className={`border-tech-main/40 flex flex-col items-start justify-between space-y-4 border bg-white/80 p-6 backdrop-blur-sm md:flex-row md:items-center md:space-y-0`}
+                  className={`border-tech-main/40 bg-surface-overlay/80 flex flex-col items-start justify-between space-y-4 border p-6 backdrop-blur-sm md:flex-row md:items-center md:space-y-0`}
                   style={CARD_STYLES[i - 1]}>
                   <div className="flex-1">
                     {/* PR badge + date row */}

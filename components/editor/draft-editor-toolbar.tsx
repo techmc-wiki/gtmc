@@ -85,7 +85,7 @@ export function DraftEditorToolbar({
             <TechButton
               type="button"
               variant="ghost"
-              className="text-tech-main hover:guide-line hover:text-tech-main h-7 border border-transparent px-3 text-[10px] tracking-widest transition-all hover:bg-white hover:shadow-sm"
+              className="text-tech-main hover:guide-line hover:text-tech-main hover:bg-surface-overlay h-7 border border-transparent px-3 text-[10px] tracking-widest transition-all hover:shadow-sm"
               disabled={isReadOnly}
               onClick={() => onInsertText("\n## Section Title\n\n")}>
               <span className="flex items-center gap-1.5">
@@ -95,7 +95,7 @@ export function DraftEditorToolbar({
             <TechButton
               type="button"
               variant="ghost"
-              className="text-tech-main hover:guide-line hover:text-tech-main h-7 border border-transparent px-3 text-[10px] tracking-widest transition-all hover:bg-white hover:shadow-sm"
+              className="text-tech-main hover:guide-line hover:text-tech-main hover:bg-surface-overlay h-7 border border-transparent px-3 text-[10px] tracking-widest transition-all hover:shadow-sm"
               disabled={isReadOnly}
               onClick={() =>
                 onInsertText("\n> [!TIP]\n> Add contributor guidance here.\n\n")
@@ -108,7 +108,7 @@ export function DraftEditorToolbar({
             <TechButton
               type="button"
               variant="ghost"
-              className="text-tech-main hover:guide-line hover:text-tech-main h-7 border border-transparent px-3 text-[10px] tracking-widest transition-all hover:bg-white hover:shadow-sm"
+              className="text-tech-main hover:guide-line hover:text-tech-main hover:bg-surface-overlay h-7 border border-transparent px-3 text-[10px] tracking-widest transition-all hover:shadow-sm"
               disabled={isReadOnly}
               onClick={() =>
                 onInsertText(
@@ -125,7 +125,7 @@ export function DraftEditorToolbar({
             <TechButton
               type="button"
               variant="secondary"
-              className="group guide-line text-tech-main-dark/80 hover:border-tech-main/50 h-7 bg-white/50 px-3 text-[10px] font-bold tracking-widest transition-all hover:bg-white"
+              className="group guide-line text-tech-main-dark/80 hover:border-tech-main/50 bg-surface-overlay/50 hover:bg-surface-overlay h-7 px-3 text-[10px] font-bold tracking-widest transition-all"
               disabled={isReadOnly || !canUndo}
               onClick={onUndo}>
               <span className="flex items-center gap-1">
@@ -145,7 +145,7 @@ export function DraftEditorToolbar({
             <TechButton
               type="button"
               variant="secondary"
-              className="group guide-line text-tech-main-dark/80 hover:border-tech-main/50 h-7 bg-white/50 px-3 text-[10px] font-bold tracking-widest transition-all hover:bg-white"
+              className="group guide-line text-tech-main-dark/80 hover:border-tech-main/50 bg-surface-overlay/50 hover:bg-surface-overlay h-7 px-3 text-[10px] font-bold tracking-widest transition-all"
               disabled={isReadOnly || !canRedo}
               onClick={onRedo}>
               <span className="flex items-center gap-1">

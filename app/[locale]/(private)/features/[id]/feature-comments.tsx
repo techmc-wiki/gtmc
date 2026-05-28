@@ -65,7 +65,7 @@ export function FeatureComments({
         {initialComments.map((comment) => (
           <TechCard
             key={comment.id}
-            className="border-tech-main/40 border bg-white/80 p-6 backdrop-blur-sm">
+            className="border-tech-main/40 bg-surface-overlay/80 border p-6 backdrop-blur-sm">
             <div className="border-tech-main/30 mb-2 flex items-center gap-2 border-b border-dashed pb-2 font-mono text-sm">
               <span className="text-tech-main font-bold tracking-wider uppercase">
                 {comment.author.name ||
@@ -84,7 +84,7 @@ export function FeatureComments({
           </TechCard>
         ))}
         {initialComments.length === 0 && (
-          <div className="border-tech-main/40 text-tech-main/50 border border-dashed bg-white/40 py-8 text-center font-mono">
+          <div className="border-tech-main/40 text-tech-main/50 bg-surface-overlay/40 border border-dashed py-8 text-center font-mono">
             {t("noCommentsYet")}
           </div>
         )}
@@ -93,7 +93,7 @@ export function FeatureComments({
       {!isClosed &&
         (userId ? (
           <form onSubmit={handleSubmit} className="mt-8">
-            <TechCard className="border-tech-main/40 border bg-white/80 p-6 backdrop-blur-sm">
+            <TechCard className="border-tech-main/40 bg-surface-overlay/80 border p-6 backdrop-blur-sm">
               <label className="border-tech-main/40 tracking-tech-wide text-tech-main mb-4 inline-block border-b pb-1 font-mono text-sm uppercase">
                 {t("leaveReplyLabel")}
               </label>
@@ -119,7 +119,7 @@ export function FeatureComments({
             </TechCard>
           </form>
         ) : (
-          <div className="border-tech-main/40 text-tech-main/70 mt-8 border bg-white/40 py-4 text-center font-mono text-sm">
+          <div className="border-tech-main/40 text-tech-main/70 bg-surface-overlay/40 mt-8 border py-4 text-center font-mono text-sm">
             PLEASE_LOG_IN_TO_LEAVE_A_REPLY_
           </div>
         ))}

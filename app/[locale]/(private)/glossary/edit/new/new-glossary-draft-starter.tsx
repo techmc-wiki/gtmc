@@ -59,7 +59,7 @@ export function NewGlossaryDraftStarter({
 
   return (
     <div className="page-container">
-      <div className="border-tech-main/40 bg-white/80 p-6 font-mono backdrop-blur-sm">
+      <div className="border-tech-main/40 bg-surface-overlay/80 p-6 font-mono backdrop-blur-sm">
         <p className="text-tech-main/60 text-[10px] tracking-widest uppercase">
           [GLOSSARY_DRAFT_INITIALIZATION]
         </p>

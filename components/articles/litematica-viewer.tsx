@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type MouseEvent } from "react"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { useTheme } from "@/lib/theme"
 
 // Interfaces for schematic-renderer library
 interface SchematicManager {
@@ -65,6 +66,7 @@ interface LitematicaRenderer {
   targetFPS?: number
   idleFPS?: number
   enableAdaptiveFPS?: boolean
+  setBackgroundColor?: (color: string | number) => void
 }
 
 export interface LitematicaViewerProps {
@@ -137,6 +139,11 @@ export default function LitematicaViewer({
   const schematicIdRef = useRef<string | null>(null)
   const loadTokenRef = useRef(0)
   const lastPointerUnlockAtRef = useRef(Number.NEGATIVE_INFINITY)
+
+  const { resolvedTheme } = useTheme()
+  const backgroundColor = resolvedTheme === "dark" ? 0x0e1525 : 0xf8f9fc
+  const backgroundColorRef = useRef(backgroundColor)
+  backgroundColorRef.current = backgroundColor
 
   const [maxLayer, setMaxLayer] = useState(0)
   const [sliderLayer, setSliderLayer] = useState(0)
@@ -322,7 +329,7 @@ export default function LitematicaViewer({
           },
           {
             showGrid: true,
-            backgroundColor: 0xf8f9fc,
+            backgroundColor: backgroundColorRef.current,
             enableInteraction: false,
             enableDragAndDrop: false,
             enableGizmos: false,
@@ -509,6 +516,17 @@ export default function LitematicaViewer({
   }, [url])
 
   useEffect(() => {
+    const renderer = rendererRef.current
+    if (!renderer) return
+    try {
+      renderer.setBackgroundColor?.(backgroundColor)
+      renderer.renderManager?.render?.()
+    } catch {
+      // setBackgroundColor is best-effort; failures are non-critical.
+    }
+  }, [backgroundColor])
+
+  useEffect(() => {
     if (!schematicReady || !rendererRef.current) {
       return
     }
@@ -634,7 +652,7 @@ export default function LitematicaViewer({
         className={`absolute top-4 right-4 z-20 border px-3 py-1 text-[11px] font-bold tracking-widest uppercase transition-colors ${
           isFlyEnabled
             ? "border-tech-main bg-tech-main text-white"
-            : "border-tech-main/60 bg-white/90 text-tech-main hover:bg-tech-main hover:text-white"
+            : "border-tech-main/60 bg-surface-overlay/90 text-tech-main hover:bg-tech-main hover:text-white"
         }`}
       >
         {isFlyEnabled ? "SYS.EXIT_FLY" : "SYS.FIRST_PERSON"}
@@ -647,7 +665,7 @@ export default function LitematicaViewer({
       >
         <span
           className="
-          shrink-0 border border-tech-main/40 bg-white/70 px-2 py-0.5 text-xs
+          shrink-0 border border-tech-main/40 bg-surface-overlay/70 px-2 py-0.5 text-xs
           font-bold tracking-wider text-tech-main shadow-sm backdrop-blur-sm
         "
         >
@@ -665,7 +683,7 @@ export default function LitematicaViewer({
 
       {maxLayer > 0 && (
         <div
-          className={`absolute right-4 bottom-16 z-10 w-[250px] border border-tech-main/60 bg-white/90 p-3 text-tech-main shadow-sm backdrop-blur-md transition-all ${
+          className={`absolute right-4 bottom-16 z-10 w-[250px] border border-tech-main/60 bg-surface-overlay/90 p-3 text-tech-main shadow-sm backdrop-blur-md transition-all ${
             isFlyEnabled ? "pointer-events-none translate-x-2 opacity-0" : "opacity-100"
           }`}
         >
@@ -700,7 +718,7 @@ export default function LitematicaViewer({
               className={`flex-1 py-1 transition-colors ${
                 layerMode === "single"
                   ? "bg-tech-main text-white"
-                  : "bg-white text-tech-main hover:bg-tech-main/10"
+                  : "bg-surface-overlay text-tech-main hover:bg-tech-main/10"
               }`}
             >
               SINGLE
@@ -712,7 +730,7 @@ export default function LitematicaViewer({
               className={`flex-1 border-l border-tech-main/40 py-1 transition-colors ${
                 layerMode === "below"
                   ? "bg-tech-main text-white"
-                  : "bg-white text-tech-main hover:bg-tech-main/10"
+                  : "bg-surface-overlay text-tech-main hover:bg-tech-main/10"
               }`}
             >
               BELOW
@@ -784,7 +802,7 @@ export default function LitematicaViewer({
       >
         <div
           className="
-          flex items-center gap-4 rounded-sm border guide-line bg-white/80 px-3
+          flex items-center gap-4 rounded-sm border guide-line bg-surface-overlay/80 px-3
           py-1.5 text-xs whitespace-nowrap text-tech-main/80 shadow-sm
           backdrop-blur-md
         "
@@ -792,28 +810,28 @@ export default function LitematicaViewer({
           {isFlyEnabled ? (
             <>
               <span className="flex items-center gap-1.5">
-                <kbd className="rounded-[2px] border border-tech-main/30 bg-white px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
+                <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
                   WASD
                 </kbd>{" "}
                 Move
               </span>
               <span className="flex items-center gap-1.5 opacity-60">|</span>
               <span className="flex items-center gap-1.5">
-                <kbd className="rounded-[2px] border border-tech-main/30 bg-white px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
+                <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
                   SPACE
                 </kbd>{" "}
                 Up
               </span>
               <span className="flex items-center gap-1.5 opacity-60">|</span>
               <span className="flex items-center gap-1.5">
-                <kbd className="rounded-[2px] border border-tech-main/30 bg-white px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
+                <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
                   C
                 </kbd>{" "}
                 Down
               </span>
               <span className="flex items-center gap-1.5 opacity-60">|</span>
               <span className="flex items-center gap-1.5">
-                <kbd className="rounded-[2px] border border-tech-main/30 bg-white px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
+                <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
                   ESC
                 </kbd>{" "}
                 Unlock
@@ -822,7 +840,7 @@ export default function LitematicaViewer({
                 <>
                   <span className="flex items-center gap-1.5 opacity-60">|</span>
                   <span className="flex items-center gap-1.5">
-                    <kbd className="rounded-[2px] border border-tech-main/30 bg-white px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
+                    <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
                       Click
                     </kbd>{" "}
                     Lock
@@ -833,21 +851,21 @@ export default function LitematicaViewer({
           ) : (
             <>
               <span className="flex items-center gap-1.5">
-                <kbd className="rounded-[2px] border border-tech-main/30 bg-white px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
+                <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
                   Left
                 </kbd>{" "}
                 Rotate
               </span>
               <span className="flex items-center gap-1.5 opacity-60">|</span>
               <span className="flex items-center gap-1.5">
-                <kbd className="rounded-[2px] border border-tech-main/30 bg-white px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
+                <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
                   Right
                 </kbd>{" "}
                 Pan
               </span>
               <span className="flex items-center gap-1.5 opacity-60">|</span>
               <span className="flex items-center gap-1.5">
-                <kbd className="rounded-[2px] border border-tech-main/30 bg-white px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
+                <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
                   Wheel
                 </kbd>{" "}
                 Zoom

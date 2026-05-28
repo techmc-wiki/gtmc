@@ -233,7 +233,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             className={`border-tech-main/40 focus:border-tech-main/60 py-3 font-mono text-lg backdrop-blur-sm ${
               isReadOnly
                 ? `cursor-not-allowed bg-gray-100 opacity-70`
-                : `bg-white/80`
+                : `bg-surface-input/80`
             } `}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -252,7 +252,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
             className={`border-tech-main/40 focus:border-tech-main/60 py-2 font-mono text-sm backdrop-blur-sm ${
               isReadOnly
                 ? `cursor-not-allowed bg-gray-100 opacity-70`
-                : `bg-white/80`
+                : `bg-surface-input/80`
             } `}
             value={tags}
             onChange={(e) => setTags(e.target.value)}

@@ -83,7 +83,7 @@ function AuthIslandContent() {
           "pointer-events-none absolute top-full right-0 z-50 w-48 origin-top-right pt-2 opacity-0 transition-all duration-200",
           isMenuOpen && "pointer-events-auto opacity-100"
         )}>
-        <div className="border-tech-main/30 border bg-white/95 p-2 shadow-lg backdrop-blur-sm">
+        <div className="border-tech-main/30 bg-surface-overlay/95 border p-2 shadow-lg backdrop-blur-sm">
           <div className="guide-line mb-2 border-b pb-2">
             <p className="text-tech-main-dark truncate font-mono text-xs font-bold">
               {session.user.name}

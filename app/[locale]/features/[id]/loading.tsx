@@ -68,7 +68,7 @@ export default function FeatureDetailLoading() {
         </TechCard>
 
         {/* EDITOR_BUFFER_ */}
-        <div className="group animate-tech-slide-in border-tech-main relative flex w-full flex-col space-y-6 border bg-white/80 p-4 backdrop-blur-sm [animation-delay:300ms] motion-reduce:animate-none motion-reduce:opacity-100 sm:p-6">
+        <div className="group animate-tech-slide-in border-tech-main bg-surface-overlay/80 relative flex w-full flex-col space-y-6 border p-4 backdrop-blur-sm [animation-delay:300ms] motion-reduce:animate-none motion-reduce:opacity-100 sm:p-6">
           <CornerBrackets size="size-2" color="border-tech-main/40" />
 
           <div className="flex flex-col space-y-4">
@@ -83,12 +83,12 @@ export default function FeatureDetailLoading() {
             </div>
           </div>
 
-          <div className="editor-grow border-tech-main/40 relative border bg-white/80 backdrop-blur-sm">
+          <div className="editor-grow border-tech-main/40 bg-surface-overlay/80 relative border backdrop-blur-sm">
             <div className="border-tech-main/40 bg-tech-main sticky top-0 z-10 flex h-10 flex-wrap items-center gap-1 border-b p-2 px-2 font-mono text-xs text-white/90 sm:gap-2 sm:px-4">
               <SegmentedBar opacity="high" className="h-6 w-8" />
-              <div className="h-6 w-px bg-white/30" />
+              <div className="bg-surface/30 h-6 w-px" />
               <SegmentedBar opacity="medium" className="h-6 w-8" />
-              <div className="h-6 w-px bg-white/30" />
+              <div className="bg-surface/30 h-6 w-px" />
               <SegmentedBar opacity="medium" className="h-6 w-8" />
             </div>
 

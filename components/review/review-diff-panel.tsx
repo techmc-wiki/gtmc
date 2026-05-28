@@ -39,7 +39,7 @@ export function ReviewDiffPanel({
   }
 
   return (
-    <div className="max-h-[70vh] overflow-auto bg-white/85">
+    <div className="bg-surface-overlay/85 max-h-[70vh] overflow-auto">
       <div className="space-y-2 p-4 sm:p-6">
         {segments.map((segment) => {
           if (segment.type === "context") {

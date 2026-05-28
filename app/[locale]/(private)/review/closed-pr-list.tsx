@@ -19,7 +19,7 @@ function ClosedPRSkeletonRows() {
       {skeletonKeys.map((key) => (
         <TechCard
           key={`closed-pr-skeleton-${key}`}
-          className="border-tech-line relative border bg-white/80 p-6 backdrop-blur-sm">
+          className="border-tech-line bg-surface-overlay/80 relative border p-6 backdrop-blur-sm">
           <CornerBrackets variant="hover" />
           <div className="relative z-10 animate-pulse space-y-4">
             <div className="flex flex-wrap items-center gap-3">
@@ -43,7 +43,7 @@ function ClosedPRCard({ pr }: { pr: ClosedPRListItem }) {
     : "border-[var(--color-tech-line)] bg-[var(--color-tech-bg)] text-[var(--color-tech-main)]"
 
   return (
-    <TechCard className="group border-tech-line relative border bg-white/80 p-6 backdrop-blur-sm">
+    <TechCard className="group border-tech-line bg-surface-overlay/80 relative border p-6 backdrop-blur-sm">
       <CornerBrackets variant="hover" />
 
       <div className="relative z-10 space-y-3">

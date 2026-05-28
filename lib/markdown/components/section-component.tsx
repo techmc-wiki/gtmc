@@ -9,7 +9,7 @@ export function SectionComponent({
   if (id === "footnotes") {
     return (
       <aside
-        className="border-tech-main/30 mt-12 border-t pt-6 font-sans text-sm text-slate-700"
+        className="border-tech-main/30 text-tech-main mt-12 border-t pt-6 font-sans text-sm"
         {...props}>
         <section id={id} {...props}>
           {children}

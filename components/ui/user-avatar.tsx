@@ -41,8 +41,8 @@ export function UserAvatar({
         <div className="bg-tech-main/60 absolute right-4 bottom-1 size-1" />
 
         {/* 边框缺口效果 */}
-        <div className="absolute top-0 left-1/2 h-0.5 w-4 -translate-x-1/2 bg-white" />
-        <div className="absolute bottom-0 left-1/2 h-0.5 w-4 -translate-x-1/2 bg-white" />
+        <div className="bg-surface absolute top-0 left-1/2 h-0.5 w-4 -translate-x-1/2" />
+        <div className="bg-surface absolute bottom-0 left-1/2 h-0.5 w-4 -translate-x-1/2" />
       </div>
 
       {/* 内层框架 */}

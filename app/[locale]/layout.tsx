@@ -14,9 +14,12 @@ import { hasLocale } from "next-intl"
 import { getMessages, setRequestLocale } from "next-intl/server"
 import { notFound } from "next/navigation"
 import { routing } from "@/i18n/routing"
+import { noFlashScript } from "@/lib/theme/no-flash-script"
 import React from "react"
 
 const siteUrl = getSiteUrl()
+
+const noFlashHtml = { __html: noFlashScript }
 
 const jsonLd = {
   __html: JSON.stringify([
@@ -106,11 +109,23 @@ export default async function RootLayout({
     <html
       lang={locale}
       className={` ${GeistSans.variable} ${GeistMono.variable} scroll-smooth`}
-      data-scroll-behavior="smooth">
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning>
       <head>
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+        <script dangerouslySetInnerHTML={noFlashHtml} />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: light)"
+          content="#f8f9fc"
+        />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: dark)"
+          content="#0e1525"
         />
         <title></title>
       </head>

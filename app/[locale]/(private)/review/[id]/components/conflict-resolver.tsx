@@ -245,7 +245,7 @@ export default function ConflictResolver({
                     className={`flex min-h-11 w-full flex-col items-start gap-1 border px-3 py-2 text-left transition-colors ${
                       isActive
                         ? `border-tech-main bg-tech-main/10`
-                        : `guide-line hover:border-tech-main/50 bg-white/70 hover:bg-white/90`
+                        : `guide-line hover:border-tech-main/50 bg-surface-overlay/70 hover:bg-surface-overlay/90`
                     } `}>
                     <span className="text-tech-main truncate font-mono text-xs tracking-widest uppercase">
                       {fileLabel}
@@ -261,7 +261,7 @@ export default function ConflictResolver({
         ) : null}
 
         <div className="space-y-4">
-          <div className="border-tech-main/30 border bg-white/70 px-4 py-3">
+          <div className="border-tech-main/30 bg-surface-overlay/70 border px-4 py-3">
             <p className="text-tech-main font-mono text-xs tracking-widest uppercase">
               ACTIVE_FILE_
             </p>

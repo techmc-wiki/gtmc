@@ -500,7 +500,8 @@ async function main(): Promise<void> {
     // Write HTML to a temp file so file:// images and CSS @import resolve
     fs.writeFileSync(tempHtmlPath, html, "utf-8")
 
-    const page = await browser.newPage()
+    const context = await browser.newContext({ colorScheme: "light" })
+    const page = await context.newPage()
 
     // Navigate to the temp HTML file so file:// URL images load properly
     await page.goto(pathToFileURL(tempHtmlPath).href, {
@@ -521,6 +522,11 @@ async function main(): Promise<void> {
     console.log(
       "[pdf]   → PDF fonts verified (Geist Sans + Geist Mono + Noto Sans SC)"
     )
+
+    // Force light theme for PDF rendering (scrollbars, form controls, etc.)
+    await page.evaluate(() => {
+      document.documentElement.setAttribute("data-theme", "light")
+    })
 
     // ── Generate PDF ───────────────────────────────────────────────────────
     console.log("[pdf]   → Rendering PDF pages...")

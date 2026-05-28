@@ -1,11 +1,6 @@
 import { unstable_cache } from "next/cache"
-import { statSync } from "fs"
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/articles/ignore"
-import {
-  getArticleTree,
-  getManifestPath,
-  type ArticleLocale,
-} from "@/lib/articles/manifest"
+import { type ArticleLocale, getArticleTree } from "@/lib/articles/manifest"
 import { getRepoTranslations, type ArticleTreeNode } from "@/lib/github/sync"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 
@@ -28,18 +23,9 @@ function isReadmeArticle(node: ChapterNavNode): boolean {
   return normalizeNodeValue(node.title) === "readme" || normalizeNodeValue(slugTail) === "readme"
 }
 
-function getArticleManifestMtime(): string {
-  const manifestPath = getManifestPath()
-  return statSync(manifestPath).mtime.getTime().toString()
+async function getCachedArticleTree(locale: ArticleLocale) {
+  return getArticleTree(locale)
 }
-
-const getCachedArticleTree = unstable_cache(
-  async (locale: ArticleLocale) => {
-    return getArticleTree(locale)
-  },
-  ["github-repo-tree", getArticleManifestMtime()],
-  { revalidate: 60, tags: ["github-repo-tree"] }
-)
 
 const getCachedTranslations = unstable_cache(
   async () => {

@@ -167,7 +167,7 @@ export function GlossaryEditCard({
   return (
     <article
       className={cn(
-        "border-tech-line/20 flex flex-col gap-3 border bg-white/80 p-4"
+        "border-tech-line/20 bg-surface-overlay/80 flex flex-col gap-3 border p-4"
       )}>
       <header className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
@@ -455,7 +455,7 @@ function OtherLanguagesFields({
   onChange: (column: GlossaryColumn, value: string) => void
 }) {
   return (
-    <details className="border-tech-line/10 border bg-white/40">
+    <details className="border-tech-line/10 bg-surface-overlay/40 border">
       <summary
         className={cn(
           "text-tech-main/60 hover:text-tech-main cursor-pointer px-3 py-2",

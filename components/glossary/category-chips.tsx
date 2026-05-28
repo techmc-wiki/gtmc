@@ -26,7 +26,7 @@ const CHIP_BASE =
 const CHIP_ACTIVE = "border-tech-main/60 bg-tech-main/10 text-tech-main-dark"
 
 const CHIP_INACTIVE =
-  "border-tech-main/30 bg-white/50 text-tech-main/70 hover:border-tech-main/60 hover:bg-tech-accent/10"
+  "border-tech-main/30 bg-surface-overlay/50 text-tech-main/70 hover:border-tech-main/60 hover:bg-tech-accent/10"
 
 interface ChipProps {
   label: string
@@ -262,7 +262,7 @@ export function CategoryChips({
               aria-modal={isSheetOpen ? "true" : undefined}
               aria-label={groupLabel}
               className={cn(
-                "border-tech-main/30 absolute inset-x-0 bottom-0 flex max-h-[70dvh] flex-col border-t bg-white/95 backdrop-blur-md transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                "border-tech-main/30 bg-surface-overlay/95 absolute inset-x-0 bottom-0 flex max-h-[70dvh] flex-col border-t backdrop-blur-md transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
                 isSheetOpen ? "translate-y-0" : "translate-y-full"
               )}>
               <div className="border-tech-main/20 flex shrink-0 items-center justify-between border-b px-4 py-3">

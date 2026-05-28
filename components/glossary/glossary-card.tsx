@@ -75,7 +75,7 @@ export function GlossaryCard({
     <article
       data-density={density}
       className={cn(
-        "border-tech-line/30 hover:border-tech-line/60 group flex flex-col border bg-white/40 transition-[padding,gap,border-color,background-color] duration-300 ease-out motion-reduce:transition-none",
+        "border-tech-line/30 hover:border-tech-line/60 group bg-surface-overlay/40 flex flex-col border transition-[padding,gap,border-color,background-color] duration-300 ease-out motion-reduce:transition-none",
         densityCardClass[density],
         className
       )}>

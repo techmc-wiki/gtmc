@@ -165,7 +165,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
       <div className="pointer-events-none absolute inset-0 border border-tech-main/8 transition-all delay-30 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:-inset-4" />
 
       {/* Outer frame */}
-      <div className="relative border border-tech-main/40 bg-white/60">
+      <div className="relative border border-tech-main/40 bg-surface-overlay/60">
         {/* Top bar — monospace label strip */}
         <div
           className="

@@ -50,7 +50,7 @@ const toneClasses = {
   main: {
     border: "border-tech-main",
     solidBorder: "border-tech-main",
-    background: "bg-white/80",
+    background: "bg-surface-overlay/80",
     subtleBackground: "bg-tech-main/5",
     text: "text-tech-main",
     bracket: "border-tech-main/40",
@@ -61,7 +61,7 @@ const toneClasses = {
   accent: {
     border: "border-tech-accent",
     solidBorder: "border-tech-accent",
-    background: "bg-white/80",
+    background: "bg-surface-overlay/80",
     subtleBackground: "bg-tech-accent/5",
     text: "text-tech-main",
     bracket: "border-tech-accent/40",
@@ -105,7 +105,7 @@ const toneClasses = {
   neutral: {
     border: "border-tech-line",
     solidBorder: "border-tech-line",
-    background: "bg-white/80",
+    background: "bg-surface-overlay/80",
     subtleBackground: "bg-tech-bg",
     text: "text-tech-main",
     bracket: "border-tech-main/30",
@@ -153,7 +153,7 @@ const legacyColorTone = {
 } as const satisfies Record<TechCardLegacyColor, TechCardTone>
 
 const legacyColorBackground = {
-  white: "bg-white/80",
+  white: "bg-surface-overlay/80",
   "electric-blue": "bg-blue-500/10",
   "neon-green": "bg-emerald-500/10",
   "hot-pink": "bg-pink-500/10",
@@ -195,7 +195,7 @@ function getBackgroundClass(
   }
 
   if (background === "ghost") {
-    return "bg-white/40"
+    return "bg-surface-overlay/40"
   }
 
   return "bg-transparent"

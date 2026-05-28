@@ -546,5 +546,13 @@
     "title": "GTMC",
     "subtitle": "Download the full GTMC articles as a PDF document.",
     "download": "DOWNLOAD PDF"
+  },
+  "Theme": {
+    "toggleLight": "Switch to dark theme",
+    "toggleDark": "Switch to system theme",
+    "toggleSystem": "Switch to light theme",
+    "labelLight": "Light theme",
+    "labelDark": "Dark theme",
+    "labelSystem": "System theme (follows OS)"
   }
 }

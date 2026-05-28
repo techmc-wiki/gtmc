@@ -11,6 +11,7 @@ import {
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown"
 import { languages } from "@codemirror/language-data"
 import { EditorView } from "@codemirror/view"
+import { useTheme } from "@/lib/theme"
 
 const techTheme = EditorView.theme({
   "&": {
@@ -32,11 +33,12 @@ const techTheme = EditorView.theme({
   },
   "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
     {
-      backgroundColor: "rgba(0,0,0,0.1)",
+      backgroundColor:
+        "color-mix(in oklab, var(--color-tech-main) 15%, transparent)",
     },
   ".cm-gutters": {
     backgroundColor: "transparent",
-    color: "rgba(0,0,0,0.5)",
+    color: "color-mix(in oklab, var(--color-tech-main) 50%, transparent)",
     border: "none",
   },
 })
@@ -169,6 +171,7 @@ export const EditorTextarea = React.forwardRef<
   ref
 ) {
   const t = useTranslations("Editor")
+  const { resolvedTheme } = useTheme()
 
   const handleKeyDownCapture = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -238,7 +241,7 @@ export const EditorTextarea = React.forwardRef<
           foldGutter: false,
           highlightActiveLine: false,
         }}
-        theme="light"
+        theme={resolvedTheme === "dark" ? "dark" : "light"}
       />
     </div>
   )

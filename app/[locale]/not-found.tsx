@@ -85,7 +85,7 @@ export default function NotFound() {
           <div className="guide-line absolute inset-0 -z-10 translate-2 border bg-transparent transition-transform duration-500 ease-out group-hover:translate-3 md:translate-3 md:group-hover:translate-4" />
 
           {/* Main Card */}
-          <div className="border-tech-main/40 relative overflow-hidden border bg-white/60 p-8 text-center shadow-sm backdrop-blur-md sm:p-12 md:p-16">
+          <div className="border-tech-main/40 bg-surface-overlay/60 relative overflow-hidden border p-8 text-center shadow-sm backdrop-blur-md sm:p-12 md:p-16">
             {/* Shimmer Effect */}
             <div className="pointer-events-none absolute inset-0 translate-x-[-200%] -skew-x-12 animate-[shimmer_3s_infinite_2s] bg-linear-to-r from-transparent via-white/40 to-transparent motion-reduce:animate-none" />
 

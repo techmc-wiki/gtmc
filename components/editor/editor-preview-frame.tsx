@@ -28,7 +28,7 @@ export function EditorPreviewFrame({
 
   return (
     <div
-      className={`selection:bg-tech-main/20 w-full max-w-none overflow-hidden p-6 wrap-break-word selection:text-slate-900 sm:p-8 ${className} `}>
+      className={`selection:bg-tech-main/20 selection:text-tech-main-dark w-full max-w-none overflow-hidden p-6 wrap-break-word sm:p-8 ${className} `}>
       {children}
     </div>
   )
@@ -93,7 +93,7 @@ export function EditorContentArea({
 }: EditorContentAreaProps) {
   return (
     <div
-      className={`editor-grow border-tech-main/40 relative flex min-h-125 grow flex-col border bg-white/80 backdrop-blur-sm ${className} `}>
+      className={`editor-grow border-tech-main/40 bg-surface-overlay/80 relative flex min-h-125 grow flex-col border backdrop-blur-sm ${className} `}>
       {children}
     </div>
   )

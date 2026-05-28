@@ -237,7 +237,7 @@ export function OperationProgress({
   return (
     <output
       className={cn(
-        "guide-line relative block overflow-hidden border bg-white/85 backdrop-blur-sm",
+        "guide-line bg-surface-overlay/85 relative block overflow-hidden border backdrop-blur-sm",
         compact ? "p-3" : "p-4",
         state === "error" ? "border-red-500/30 bg-red-500/5" : "",
         className
@@ -279,7 +279,7 @@ export function OperationProgress({
           </p>
         </div>
 
-        <div className="guide-line text-tech-main/70 shrink-0 border bg-white/70 px-2 py-1 font-mono text-[0.6875rem] tracking-widest uppercase">
+        <div className="guide-line text-tech-main/70 bg-surface-overlay/70 shrink-0 border px-2 py-1 font-mono text-[0.6875rem] tracking-widest uppercase">
           {percent.toString().padStart(2, "0")}%
         </div>
       </div>

@@ -48,14 +48,14 @@ export function MobileNav({ navLinks }: MobileNavProps) {
             )}
 
             <div
-              className={`border-tech-main/40 fixed inset-x-0 top-16 z-40 overflow-hidden border-b bg-white/95 backdrop-blur-md transition-all duration-300 md:hidden ${isDrawerOpen ? "max-h-screen" : "max-h-0"} `}>
+              className={`border-tech-main/40 bg-surface-overlay/95 fixed inset-x-0 top-16 z-40 overflow-hidden border-b backdrop-blur-md transition-all duration-300 md:hidden ${isDrawerOpen ? "max-h-screen" : "max-h-0"} `}>
               <div className="space-y-2 p-4 sm:p-6">
                 {navLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
                     onClick={() => setIsDrawerOpen(false)}
-                    className="border-tech-main/40 text-tech-main-dark hover:bg-tech-main flex min-h-11 items-center border bg-white/60 p-3 font-mono text-xs tracking-[0.15em] transition-colors hover:text-white">
+                    className="border-tech-main/40 text-tech-main-dark hover:bg-tech-main bg-surface-overlay/60 flex min-h-11 items-center border p-3 font-mono text-xs tracking-[0.15em] transition-colors hover:text-white">
                     {link.label}
                   </Link>
                 ))}

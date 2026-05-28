@@ -9,7 +9,7 @@ interface SiteShellProps {
 export function SiteShell({ leftSlot, rightSlot, children }: SiteShellProps) {
   return (
     <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative flex min-h-screen w-full max-w-full flex-col overflow-x-clip font-sans">
-      <nav className="border-tech-main/40 sticky top-0 z-50 w-full border-b bg-white/60 backdrop-blur-sm">
+      <nav className="border-tech-main/40 bg-surface-overlay/60 sticky top-0 z-50 w-full border-b backdrop-blur-sm">
         <div className="bg-tech-main/20 absolute top-0 left-0 h-px w-full" />
         <div className="mx-auto max-w-450 px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between md:h-20">

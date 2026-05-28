@@ -72,7 +72,7 @@ export function DraftFileList({
               className={`ml-px flex min-w-[32px] shrink-0 items-center justify-center border-y border-r transition-all duration-200 ${
                 isActive
                   ? `border-tech-main bg-tech-main/4 text-tech-main/60 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-600 hover:shadow-[inset_0_0_10px_rgba(239,68,68,0.1)]`
-                  : `text-tech-main/20 group-hover:guide-line border-transparent bg-transparent opacity-0 group-hover:bg-white/30 group-hover:opacity-100 hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-500`
+                  : `text-tech-main/20 group-hover:guide-line group-hover:bg-surface-overlay/30 border-transparent bg-transparent opacity-0 group-hover:opacity-100 hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-500`
               } `}>
               <svg
                 width="12"

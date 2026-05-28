@@ -138,7 +138,7 @@ export function GlossaryToolbar({
     <div className={cn("flex flex-col gap-6", className)}>
       <section aria-label={t("letterBarLabel")} className="relative z-30">
         <CornerBrackets size="size-2" color="border-tech-main/30" />
-        <div className="border-tech-main/30 relative flex flex-col gap-3 border bg-white/60 p-3 backdrop-blur-sm sm:p-4">
+        <div className="border-tech-main/30 bg-surface-overlay/60 relative flex flex-col gap-3 border p-3 backdrop-blur-sm sm:p-4">
           <div className="grid gap-3 sm:flex sm:flex-row sm:items-center">
             <GlossarySearch
               onQueryChange={setQuery}

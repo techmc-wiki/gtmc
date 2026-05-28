@@ -144,7 +144,7 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
     <nav
       aria-label={t("letterBarLabel")}
       className={cn(
-        "border-tech-line/30 sticky top-18 z-20 border-b bg-white/85 backdrop-blur-sm md:top-22",
+        "border-tech-line/30 bg-surface-overlay/85 sticky top-18 z-20 border-b backdrop-blur-sm md:top-22",
         className
       )}>
       <div className="relative">

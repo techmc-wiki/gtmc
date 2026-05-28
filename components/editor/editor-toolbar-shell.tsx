@@ -42,7 +42,7 @@ export function EditorToolbarButton({
     variant === "small"
       ? "hidden h-8 items-center justify-center py-1 text-[10px] tracking-widest uppercase sm:flex hover:border-tech-accent/40 hover:bg-tech-accent/10 hover:text-white hover:shadow-[0_0_10px_rgb(var(--color-tech-accent)/0.1)]"
       : variant === "upload"
-        ? "h-11 min-w-11 flex-1 text-white/70 hover:border-white/20 hover:bg-tech-accent/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5"
+        ? "h-11 min-w-11 flex-1 text-white/70 hover:border-tech-line hover:bg-tech-accent/20 sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5"
         : "h-8 min-w-[32px] text-[10px] tracking-widest uppercase sm:h-auto sm:min-w-0 sm:flex-none sm:py-1.5 hover:border-tech-accent/40 hover:bg-tech-accent/10 hover:text-white hover:shadow-[0_0_10px_rgb(var(--color-tech-accent)/0.1)]"
 
   const stateClasses = disabled
@@ -70,7 +70,7 @@ interface EditorToolbarDividerProps {
 export function EditorToolbarDivider({
   className = "",
 }: EditorToolbarDividerProps) {
-  return <div className={`mx-1 h-4 w-px bg-white/10 ${className} `} />
+  return <div className={`bg-surface/10 mx-1 h-4 w-px ${className} `} />
 }
 
 interface EditorToolbarStatusProps {

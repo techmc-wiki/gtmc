@@ -97,7 +97,7 @@ export default async function ProfilePage() {
         </div>
       </div>
 
-      <div className="border-tech-main/40 relative w-full border bg-white/60 shadow-sm backdrop-blur-md">
+      <div className="border-tech-main/40 bg-surface-overlay/60 relative w-full border shadow-sm backdrop-blur-md">
         <div className="guide-line bg-tech-main/5 text-tech-main/60 absolute top-0 right-0 border-b border-l px-2 py-1 font-mono text-[0.5625rem] tracking-widest sm:text-[0.625rem]">
           CONFIG.PANEL_V2
         </div>
@@ -126,7 +126,7 @@ export default async function ProfilePage() {
                 name="image"
                 defaultValue={user.image || ""}
                 placeholder="https://..."
-                className="border-tech-main/30 focus:border-tech-main w-full rounded-none border bg-white font-mono text-xs shadow-none transition-colors sm:text-sm"
+                className="border-tech-main/30 focus:border-tech-main bg-surface-input w-full rounded-none border font-mono text-xs shadow-none transition-colors sm:text-sm"
               />
               <p className="border-tech-main/30 text-tech-main/60 border-l pl-2 font-mono text-[0.5625rem] tracking-widest uppercase sm:text-[0.625rem]">
                 {">"} {t("avatarUrlHint")}
@@ -146,7 +146,7 @@ export default async function ProfilePage() {
                 name="name"
                 defaultValue={user.name || ""}
                 required
-                className="border-tech-main/30 focus:border-tech-main w-full rounded-none border bg-white font-mono text-xs shadow-none transition-colors sm:text-sm"
+                className="border-tech-main/30 focus:border-tech-main bg-surface-input w-full rounded-none border font-mono text-xs shadow-none transition-colors sm:text-sm"
               />
             </FormField>
             <FormField label={emailLabel}>

@@ -811,7 +811,7 @@ export function ReviewEditor({
                 {effectiveMode}
               </span>
             )}
-            <span className="guide-line text-tech-main/60 shrink-0 border bg-white/70 px-2 py-0.5 tracking-widest uppercase">
+            <span className="guide-line text-tech-main/60 bg-surface-overlay/70 shrink-0 border px-2 py-0.5 tracking-widest uppercase">
               {pr.baseRef} ← {pr.headRef}
             </span>
           </div>
@@ -842,7 +842,7 @@ export function ReviewEditor({
         {effectiveMode === null && isMounted
           ? ReactDOM.createPortal(
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                <div className="border-tech-main/40 relative w-full max-w-2xl border bg-white p-6 shadow-xl">
+                <div className="border-tech-main/40 bg-surface-modal relative w-full max-w-2xl border p-6 shadow-xl">
                   <CornerBrackets color="border-tech-main/40" />
                   <p className="text-tech-main/60 mb-4 font-mono text-xs tracking-widest uppercase">
                     RESOLUTION_METHOD_
@@ -903,7 +903,7 @@ export function ReviewEditor({
               mergeStrategyAnalysis={mergeStrategyAnalysis}
             />
 
-            <div className="editor-grow border-tech-main/40 relative border bg-white/80 backdrop-blur-sm">
+            <div className="editor-grow border-tech-main/40 bg-surface-overlay/80 relative border backdrop-blur-sm">
               <EditorTabStrip
                 activeTab={visibleActiveTab}
                 onTabChange={setActiveTab}
@@ -1094,7 +1094,7 @@ export function ReviewEditor({
                     </p>
                   </div>
                 ) : activeContent.trim() ? (
-                  <div className="selection:bg-tech-main/20 w-full max-w-none overflow-hidden p-6 wrap-break-word selection:text-slate-900 sm:p-8">
+                  <div className="selection:bg-tech-main/20 selection:text-tech-main-dark w-full max-w-none overflow-hidden p-6 wrap-break-word sm:p-8">
                     <LazyMarkdownPreview
                       content={activeContent}
                       rawPath={activeFile?.filePath ?? ""}

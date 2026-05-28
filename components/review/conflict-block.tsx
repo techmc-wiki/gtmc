@@ -26,13 +26,14 @@ const mergeTheme = EditorView.theme({
   },
   ".cm-merge-revert": {
     cursor: "pointer",
-    background: "rgba(0, 0, 0, 0.1)",
+    background: "color-mix(in oklab, var(--color-tech-main) 10%, transparent)",
     border: "none",
     padding: "2px 6px",
     borderRadius: "0",
     fontWeight: "bold",
     "&:hover": {
-      background: "rgba(0, 0, 0, 0.2)",
+      background:
+        "color-mix(in oklab, var(--color-tech-main) 20%, transparent)",
     },
   },
 })

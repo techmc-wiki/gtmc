@@ -49,7 +49,7 @@ export function BackToTop({ threshold = 400, className = "" }: BackToTopProps) {
       className={cn(
         "fixed right-6 bottom-6 z-30",
         "inline-flex min-h-[44px] min-w-[44px] items-center justify-center",
-        "border-tech-main/40 text-tech-main border bg-white/80 backdrop-blur-sm",
+        "border-tech-main/40 text-tech-main bg-surface-overlay/80 border backdrop-blur-sm",
         "px-3 py-2 font-mono text-xs tracking-widest uppercase",
         "transition-opacity duration-300 motion-reduce:transition-none",
         "hover:bg-tech-main/10",

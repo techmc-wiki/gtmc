@@ -86,7 +86,7 @@ export function GlossarySearch({
   return (
     <search
       className={`grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:flex sm:items-center ${className}`}>
-      <div className="border-tech-main/40 focus-within:border-tech-main/70 col-span-2 flex h-9 min-w-0 flex-1 items-stretch border bg-white/50 transition-colors sm:col-span-1">
+      <div className="border-tech-main/40 focus-within:border-tech-main/70 bg-surface-input/50 col-span-2 flex h-9 min-w-0 flex-1 items-stretch border transition-colors sm:col-span-1">
         <span
           aria-hidden="true"
           className="text-tech-main/60 flex items-center px-3 font-mono text-sm select-none">
@@ -121,7 +121,7 @@ export function GlossarySearch({
         [{scopeLabel}]
       </button>
 
-      <span className="border-tech-main/20 text-tech-main/50 flex h-9 items-center border bg-white/35 px-3 font-mono text-xs whitespace-nowrap select-none sm:hidden">
+      <span className="border-tech-main/20 text-tech-main/50 bg-surface-overlay/35 flex h-9 items-center border px-3 font-mono text-xs whitespace-nowrap select-none sm:hidden">
         {resultCount} of {totalCount}
       </span>
     </search>

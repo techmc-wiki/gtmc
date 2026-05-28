@@ -546,5 +546,13 @@
     "title": "GTMC",
     "subtitle": "下载完整的 GTMC 文章。",
     "download": "下载 PDF"
+  },
+  "Theme": {
+    "toggleLight": "切换到深色主题",
+    "toggleDark": "切换到跟随系统",
+    "toggleSystem": "切换到浅色主题",
+    "labelLight": "浅色主题",
+    "labelDark": "深色主题",
+    "labelSystem": "跟随系统"
   }
 }

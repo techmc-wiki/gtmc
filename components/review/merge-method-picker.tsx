@@ -75,7 +75,7 @@ export function MergeMethodPicker({
 
   return (
     <div
-      className={`border-tech-main/30 relative border bg-white/80 ${compact ? "p-3" : "p-4"}`}>
+      className={`border-tech-main/30 bg-surface-overlay/80 relative border ${compact ? "p-3" : "p-4"}`}>
       <CornerBrackets color="border-tech-main/20" />
 
       <div className="space-y-2">
@@ -131,7 +131,7 @@ export function MergeMethodPicker({
               value={commitTitle}
               disabled={disabled}
               onChange={handleCommitTitleChange}
-              className="border-tech-main/30 text-tech-main placeholder:text-tech-main/30 focus-visible:border-tech-main w-full border bg-white px-3 py-2 font-mono text-xs focus:outline-none"
+              className="border-tech-main/30 text-tech-main placeholder:text-tech-main/30 focus-visible:border-tech-main bg-surface-input w-full border px-3 py-2 font-mono text-xs focus:outline-none"
               placeholder={t("commitTitlePlaceholder")}
               aria-label={t("commitTitleLabel")}
             />
@@ -149,7 +149,7 @@ export function MergeMethodPicker({
               disabled={disabled}
               onChange={handleCommitBodyChange}
               rows={compact ? 3 : 5}
-              className="border-tech-main/30 text-tech-main placeholder:text-tech-main/30 focus-visible:border-tech-main w-full resize-y border bg-white px-3 py-2 font-mono text-xs focus:outline-none"
+              className="border-tech-main/30 text-tech-main placeholder:text-tech-main/30 focus-visible:border-tech-main bg-surface-input w-full resize-y border px-3 py-2 font-mono text-xs focus:outline-none"
               placeholder={t("commitBodyPlaceholder")}
               aria-label={t("commitBodyLabel")}
             />

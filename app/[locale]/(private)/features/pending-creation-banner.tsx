@@ -98,7 +98,7 @@ export function PendingCreationBanner() {
 
   if (state.status === "success") {
     return (
-      <div className="border-tech-main/40 flex items-center gap-3 border bg-white/60 px-4 py-3 font-mono text-sm backdrop-blur-sm">
+      <div className="border-tech-main/40 bg-surface-overlay/60 flex items-center gap-3 border px-4 py-3 font-mono text-sm backdrop-blur-sm">
         <span className="bg-tech-main inline-block size-2" />
         <span className="text-tech-main tracking-widest uppercase">
           FEATURE_CREATED_
@@ -139,7 +139,7 @@ export function PendingCreationBanner() {
 
   // pending
   return (
-    <div className="border-tech-main/40 flex items-center gap-3 border bg-white/60 px-4 py-3 font-mono text-sm backdrop-blur-sm">
+    <div className="border-tech-main/40 bg-surface-overlay/60 flex items-center gap-3 border px-4 py-3 font-mono text-sm backdrop-blur-sm">
       <span className="bg-tech-accent inline-block size-2 animate-pulse" />
       <span className="text-tech-main tracking-widest uppercase">
         CREATING_FEATURE_...

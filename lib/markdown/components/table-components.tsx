@@ -32,7 +32,7 @@ export function TableHeaderCell({ ...props }: MarkdownComponentProps) {
 export function TableDataCell({ ...props }: MarkdownComponentProps) {
   return (
     <td
-      className="border-tech-main/10 border-t border-r p-3 text-slate-700 last:border-r-0"
+      className="border-tech-main/10 text-tech-main border-t border-r p-3 last:border-r-0"
       {...props}
     />
   )

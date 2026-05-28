@@ -233,7 +233,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
       id={popupId}
       open
       style={portalStyle}
-      className={`border-tech-main/40 w-72 max-w-[calc(100vw-2rem)] border bg-white/70 p-4 backdrop-blur-sm sm:w-80 ${
+      className={`border-tech-main/40 bg-surface-overlay/70 w-72 max-w-[calc(100vw-2rem)] border p-4 backdrop-blur-sm sm:w-80 ${
         isOpen
           ? "animate-tech-pop-in"
           : "scale-95 opacity-0 transition-all duration-150 ease-out"

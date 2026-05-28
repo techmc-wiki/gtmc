@@ -27,7 +27,7 @@ export function FileListSidebar({
   return (
     <aside
       className={cn(
-        "border-tech-main/30 flex flex-col border bg-white/40 shadow-[inset_0_0_40px_rgb(var(--color-tech-main)/0.05)] backdrop-blur-sm",
+        "border-tech-main/30 bg-surface-overlay/40 flex flex-col border shadow-[inset_0_0_40px_rgb(var(--color-tech-main)/0.05)] backdrop-blur-sm",
         sticky &&
           "sticky top-16 max-h-[calc(100dvh-4rem)] self-start overflow-y-auto md:top-20 md:max-h-[calc(100dvh-5rem)]",
         className

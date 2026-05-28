@@ -13,7 +13,7 @@ export const SectionFrame = React.forwardRef<
 >(({ className = "", showBrackets = true, children, ...props }, ref) => (
   <div
     ref={ref}
-    className={`border-tech-main/40 relative border bg-white/80 p-6 backdrop-blur-sm sm:p-8 ${className} `}
+    className={`border-tech-main/40 bg-surface-overlay/80 relative border p-6 backdrop-blur-sm sm:p-8 ${className} `}
     {...props}>
     {showBrackets && (
       <CornerBrackets size="size-2" color="border-tech-main/60" />

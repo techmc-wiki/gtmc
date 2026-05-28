@@ -52,7 +52,7 @@ export const SelectableCard = React.forwardRef<
           `group focus-visible:outline-tech-main relative border p-4 text-left transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 sm:p-5`,
           selected
             ? "border-tech-main bg-tech-main/10"
-            : "guide-line hover:border-tech-main/50 bg-white/70 hover:bg-white/90",
+            : "guide-line hover:border-tech-main/50 bg-surface-overlay/70 hover:bg-surface-overlay/90",
           disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
           className
         )}

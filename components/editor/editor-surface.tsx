@@ -56,7 +56,7 @@ export function EditorSurface({
 
   const defaultClasses = `
     group relative flex w-full flex-col space-y-6 border border-tech-main
-    bg-white/80 p-4 backdrop-blur-sm
+    bg-surface-overlay/80 p-4 backdrop-blur-sm
     sm:p-6
     ${className}
   `
@@ -90,7 +90,7 @@ export function EditorForm({
   return (
     <form
       {...props}
-      className={`group border-tech-main relative flex w-full flex-col space-y-6 border bg-white/80 p-4 backdrop-blur-sm sm:p-6 ${className} `}>
+      className={`group border-tech-main bg-surface-overlay/80 relative flex w-full flex-col space-y-6 border p-4 backdrop-blur-sm sm:p-6 ${className} `}>
       <CornerBrackets />
       {children}
     </form>
@@ -105,7 +105,7 @@ interface EditorPanelProps {
 export function EditorPanel({ children, className = "" }: EditorPanelProps) {
   return (
     <div
-      className={`border-tech-main/40 border bg-white/80 p-4 backdrop-blur-sm ${className} `}>
+      className={`border-tech-main/40 bg-surface-overlay/80 border p-4 backdrop-blur-sm ${className} `}>
       {children}
     </div>
   )

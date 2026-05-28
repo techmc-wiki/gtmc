@@ -49,7 +49,7 @@ export function AttributionWarning({
   return (
     <div
       className={cn(
-        "border-tech-line/20 flex flex-col border bg-white/80 backdrop-blur-sm",
+        "border-tech-line/20 bg-surface-overlay/80 flex flex-col border backdrop-blur-sm",
         className
       )}>
       <section className="flex flex-col gap-2 px-4 py-3 sm:px-5 sm:py-4">
@@ -76,7 +76,7 @@ export function AttributionWarning({
               checked={useRealEmail}
               onChange={handleCheckboxChange}
               aria-label={t("editorRealEmailToggleLabel")}
-              className="border-tech-line accent-tech-accent mt-0.5 size-4 cursor-pointer border bg-white"
+              className="border-tech-line accent-tech-accent bg-surface-input mt-0.5 size-4 cursor-pointer border"
             />
             <span>{t("editorRealEmailToggleLabel")}</span>
           </label>

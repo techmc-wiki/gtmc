@@ -90,7 +90,7 @@ export default function LoginPage() {
             <span className="border-tech-main/30 block h-10 w-px border-l"></span>
           </div>
 
-          <div className="border-tech-main/40 relative overflow-hidden border bg-white/60 p-6 text-center shadow-sm backdrop-blur-md md:p-10">
+          <div className="border-tech-main/40 bg-surface-overlay/60 relative overflow-hidden border p-6 text-center shadow-sm backdrop-blur-md md:p-10">
             {/* 闪光扫过效果 */}
             <div className="pointer-events-none absolute inset-0 translate-x-[-200%] -skew-x-12 animate-[shimmer_3s_infinite_2s] bg-linear-to-r from-transparent via-white/40 to-transparent motion-reduce:animate-none" />
 
@@ -138,7 +138,7 @@ export default function LoginPage() {
                 className="flex h-12 w-full items-center justify-center text-sm tracking-widest uppercase transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98]">
                 {isLoading ? (
                   <span className="flex items-center">
-                    <span className="mr-2 size-2 animate-ping rounded-full bg-white/50 motion-reduce:animate-none"></span>
+                    <span className="bg-surface/50 mr-2 size-2 animate-ping rounded-full motion-reduce:animate-none"></span>
                     {t("connectingLabel")}
                   </span>
                 ) : (

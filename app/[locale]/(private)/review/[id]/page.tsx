@@ -342,10 +342,10 @@ export default async function ReviewDetailPage({
                 }`}>
                 {pr.state.toUpperCase()} {hasConflict ? "CONFLICT" : "READY"}
               </span>
-              <span className="border-tech-main/25 text-tech-main/70 border bg-white/70 px-2 py-1">
+              <span className="border-tech-main/25 text-tech-main/70 bg-surface-overlay/70 border px-2 py-1">
                 PR #{pr.number}
               </span>
-              <span className="border-tech-main/25 text-tech-main/70 border bg-white/70 px-2 py-1">
+              <span className="border-tech-main/25 text-tech-main/70 bg-surface-overlay/70 border px-2 py-1">
                 {pr.base.ref} ← {pr.head.ref}
               </span>
             </div>
@@ -425,7 +425,7 @@ export default async function ReviewDetailPage({
 
         <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
           {linkedDraft ? (
-            <div className="border-tech-main/35 space-y-4 border bg-white/80 p-4 backdrop-blur-sm">
+            <div className="border-tech-main/35 bg-surface-overlay/80 space-y-4 border p-4 backdrop-blur-sm">
               <div className="border-tech-main/15 space-y-1 border-b pb-3">
                 <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
                   PR_CONTROLS

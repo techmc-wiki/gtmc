@@ -204,7 +204,7 @@ export function GlossaryRowPicker({
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
-      <div className="border-tech-main/40 focus-within:border-tech-main/70 flex items-stretch border bg-white/50 transition-colors">
+      <div className="border-tech-main/40 focus-within:border-tech-main/70 bg-surface-input/50 flex items-stretch border transition-colors">
         <span
           aria-hidden="true"
           className="text-tech-main/60 flex items-center px-3 font-mono text-sm select-none">
@@ -232,7 +232,7 @@ export function GlossaryRowPicker({
       </div>
 
       {isOpen && (results.length > 0 || showNoMatch) && (
-        <div className="border-tech-main/40 absolute top-full right-0 left-0 z-50 mt-1 max-h-72 overflow-y-auto border bg-white/95 shadow-lg backdrop-blur-md">
+        <div className="border-tech-main/40 bg-surface-overlay/95 absolute top-full right-0 left-0 z-50 mt-1 max-h-72 overflow-y-auto border shadow-lg backdrop-blur-md">
           {results.length > 0 && (
             <ul
               id={listboxId}

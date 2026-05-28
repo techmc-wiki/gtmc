@@ -260,7 +260,7 @@ export function DraftFileSourceDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
-      <div className="border-tech-main flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden border bg-white shadow-2xl">
+      <div className="border-tech-main bg-surface-modal flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden border shadow-2xl">
         <div className="guide-line bg-tech-main/5 flex items-center justify-between border-b px-5 py-4">
           <div>
             <p className="text-tech-main font-mono text-sm tracking-widest uppercase">

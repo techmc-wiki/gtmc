@@ -39,7 +39,7 @@ export default function ArticlesLoading() {
           <SectionFrame
             className="
               relative mb-8 flex animate-tech-slide-in flex-col gap-4 border
-              guide-line bg-white/80 p-4 backdrop-blur-sm
+              guide-line bg-surface-overlay/80 p-4 backdrop-blur-sm
               sm:p-6
             ">
             <ScanConfirmOverlay />

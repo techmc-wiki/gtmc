@@ -76,7 +76,7 @@ function EditOperationCard({ operation }: OperationCardProps) {
   return (
     <article
       aria-label={`Edit ${operation.slug}`}
-      className="border-tech-line/40 border-l-tech-main border border-l-4 bg-white/70 p-4 backdrop-blur-sm">
+      className="border-tech-line/40 border-l-tech-main bg-surface-overlay/70 border border-l-4 p-4 backdrop-blur-sm">
       <header className="mb-3 flex items-baseline gap-2 font-mono text-xs">
         <span className="text-tech-main font-bold tracking-widest uppercase">
           [EDIT]
@@ -113,7 +113,7 @@ function AddOperationCard({ operation }: OperationCardProps) {
   return (
     <article
       aria-label={`Add ${operation.slug}`}
-      className="border-tech-line/40 border border-l-4 border-l-green-500/40 bg-white/70 p-4 backdrop-blur-sm">
+      className="border-tech-line/40 bg-surface-overlay/70 border border-l-4 border-l-green-500/40 p-4 backdrop-blur-sm">
       <header className="mb-3 flex items-baseline gap-2 font-mono text-xs">
         <span className="font-bold tracking-widest text-green-700 uppercase">
           [NEW TERM]
@@ -150,7 +150,7 @@ function DeleteOperationCard({ operation }: OperationCardProps) {
   return (
     <article
       aria-label={`Delete ${operation.slug}`}
-      className="border-tech-line/40 border border-l-4 border-l-red-700/40 bg-white/70 p-4 backdrop-blur-sm">
+      className="border-tech-line/40 bg-surface-overlay/70 border border-l-4 border-l-red-700/40 p-4 backdrop-blur-sm">
       <header className="mb-3 flex items-baseline gap-2 font-mono text-xs">
         <span className="font-bold tracking-widest text-red-700 uppercase">
           [TO BE DELETED]
@@ -222,12 +222,12 @@ export function GlossaryDiffPreview({
   return (
     <div
       className={cn(
-        "border-tech-main/40 flex flex-col border bg-white/95 backdrop-blur-sm",
+        "border-tech-main/40 bg-surface-overlay/95 flex flex-col border backdrop-blur-sm",
         className
       )}>
       <output
         aria-live="polite"
-        className="border-tech-line/30 sticky top-0 z-10 flex items-center justify-between gap-4 border-b bg-white/95 px-4 py-3 font-mono text-xs backdrop-blur-sm sm:px-6">
+        className="border-tech-line/30 bg-surface-overlay/95 sticky top-0 z-10 flex items-center justify-between gap-4 border-b px-4 py-3 font-mono text-xs backdrop-blur-sm sm:px-6">
         <span className="text-tech-main-dark tracking-widest uppercase">
           {`Edit: ${counts.edit} / Add: ${counts.add} / Delete: ${counts.delete}`}
         </span>

@@ -36,7 +36,7 @@ export function ChapterNavToolbar({
     return (
       <div
         className="
-          ml-0.5 shrink-0 border-b guide-line bg-white/95 px-6 py-3
+          ml-0.5 shrink-0 border-b guide-line bg-surface-overlay/95 px-6 py-3
           backdrop-blur-sm
         ">
         <div className="flex flex-col gap-2">
@@ -72,7 +72,7 @@ export function ChapterNavToolbar({
   return (
     <div
       className="
-        sticky inset-x-0 -top-4 z-10 border-b guide-line bg-white/70 py-3
+        sticky inset-x-0 -top-4 z-10 border-b guide-line bg-surface-overlay/70 py-3
         backdrop-blur-sm
       ">
       <div className="flex flex-wrap justify-center gap-2">

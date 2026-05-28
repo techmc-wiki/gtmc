@@ -95,14 +95,16 @@ export function ParagraphComponent({
 
   if (paragraphContainsMedia(node)) {
     return (
-      <div className="mb-4 font-sans text-base/relaxed text-slate-800">
+      <div className="text-tech-main-dark mb-4 font-sans text-base/relaxed">
         {children}
       </div>
     )
   }
 
   return (
-    <p className="mb-4 font-sans text-base/relaxed text-slate-800" {...props}>
+    <p
+      className="text-tech-main-dark mb-4 font-sans text-base/relaxed"
+      {...props}>
       {children}
     </p>
   )

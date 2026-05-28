@@ -411,7 +411,11 @@ function buildTreeNode(
     return null
   }
 
-  if (entry.isFolder && children.length === 0) {
+  if (
+    entry.isFolder &&
+    children.length === 0 &&
+    !entry.availableLocales.includes(locale)
+  ) {
     return null
   }
 
@@ -454,47 +458,27 @@ function compareEntries(
 function getNodeTitle(entry: ArticleEntry, locale: ArticleLocale): string {
   const { chapterTitle } = getLocalizedArticleMetadata(entry, locale)
   const fileTitle = entry.filePath.split("/").pop()?.replace(/\.md$/i, "")
+  const sourceChapterTitle = entry.chapterTitleByLocale.zh?.trim()
+  const sourceTitle = entry.titleByLocale.zh?.trim()
+  const slugTitle = entry.slug.split("/").pop() || entry.slug
+
+  if (entry.isFolder) {
+    return chapterTitle || sourceChapterTitle || sourceTitle || slugTitle
+  }
 
   if (locale === routing.defaultLocale) {
-    return (
-      entry.titleByLocale[locale]?.trim() ||
-      chapterTitle ||
-      fileTitle ||
-      entry.slug.split("/").pop() ||
-      entry.slug
-    )
+    return entry.titleByLocale[locale]?.trim() || chapterTitle || fileTitle || slugTitle
   }
 
   if (entry.isPreface) {
-    return (
-      entry.titleByLocale[locale]?.trim() ||
-      chapterTitle ||
-      entry.slug.split("/").pop() ||
-      entry.slug
-    )
-  }
-
-  if (entry.isFolder) {
-    return chapterTitle || entry.slug.split("/").pop() || entry.slug
+    return entry.titleByLocale[locale]?.trim() || chapterTitle || slugTitle
   }
 
   if (entry.isAppendix) {
-    return (
-      chapterTitle ||
-      entry.titleByLocale[locale]?.trim() ||
-      fileTitle ||
-      entry.slug.split("/").pop() ||
-      entry.slug
-    )
+    return chapterTitle || entry.titleByLocale[locale]?.trim() || fileTitle || slugTitle
   }
 
-  return (
-    chapterTitle ||
-    entry.titleByLocale[locale]?.trim() ||
-    fileTitle ||
-    entry.slug.split("/").pop() ||
-    entry.slug
-  )
+  return chapterTitle || entry.titleByLocale[locale]?.trim() || fileTitle || slugTitle
 }
 
 export function getLocalizedArticleMetadata(

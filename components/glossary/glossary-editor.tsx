@@ -402,13 +402,13 @@ export function GlossaryEditor({
         <button
           type="button"
           onClick={handleAddNewTerm}
-          className="border-tech-main/40 text-tech-main-dark hover:bg-tech-main tracking-tech-wide cursor-pointer border bg-white/50 px-4 py-2 font-mono text-xs uppercase transition-colors hover:text-white">
+          className="border-tech-main/40 text-tech-main-dark hover:bg-tech-main tracking-tech-wide bg-surface-overlay/50 cursor-pointer border px-4 py-2 font-mono text-xs uppercase transition-colors hover:text-white">
           [+ ADD NEW TERM]
         </button>
       </div>
 
       {operations.length === 0 ? (
-        <div className="border-tech-line/20 border bg-white/50 p-8 text-center">
+        <div className="border-tech-line/20 bg-surface-overlay/50 border p-8 text-center">
           <p className="text-tech-main/50 font-mono text-xs tracking-widest">
             Add terms using the search above or create new ones. Changes are
             saved automatically.
@@ -456,7 +456,7 @@ export function GlossaryEditor({
               className="fixed inset-0 z-50 m-0 flex h-screen max-h-none w-screen max-w-none items-start justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm supports-[height:100dvh]:h-dvh supports-[width:100dvw]:w-dvw sm:p-8">
               <div className="flex w-full max-w-4xl flex-col gap-4">
                 {submitState === "success" && submitResult ? (
-                  <div className="border-tech-main/40 flex flex-col gap-3 border bg-white/95 p-6 backdrop-blur-sm">
+                  <div className="border-tech-main/40 bg-surface-overlay/95 flex flex-col gap-3 border p-6 backdrop-blur-sm">
                     <p className="text-tech-main/60 font-mono text-[10px] tracking-widest uppercase">
                       [SUBMITTED]
                     </p>

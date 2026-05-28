@@ -154,7 +154,7 @@ export function ColumnPicker({
         aria-expanded={open}
         aria-label={t("columnPickerLabel")}
         onClick={toggleOpen}
-        className="border-tech-main/40 text-tech-main hover:bg-tech-main/10 focus-visible:outline-tech-main inline-flex h-9 w-full cursor-pointer items-center justify-center border bg-white/70 px-3 font-mono text-xs font-bold tracking-widest uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto">
+        className="border-tech-main/40 text-tech-main hover:bg-tech-main/10 focus-visible:outline-tech-main bg-surface-overlay/70 inline-flex h-9 w-full cursor-pointer items-center justify-center border px-3 font-mono text-xs font-bold tracking-widest uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto">
         [§ {t("columnPickerToggle")}]
       </button>
 
@@ -162,7 +162,7 @@ export function ColumnPicker({
         <dialog
           open
           aria-label={t("columnPickerLabel")}
-          className="border-tech-line/30 absolute top-full right-0 z-40 mt-2 w-72 border bg-white/95 backdrop-blur-md">
+          className="border-tech-line/30 bg-surface-overlay/95 absolute top-full right-0 z-40 mt-2 w-72 border backdrop-blur-md">
           <div className="custom-vertical-scrollbar max-h-[60vh] overflow-y-auto p-3">
             <ColumnGroup
               title="CORE"

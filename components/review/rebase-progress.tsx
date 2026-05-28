@@ -128,7 +128,7 @@ function CurrentCommitPanel({
   }
 
   return (
-    <div className="border-tech-main/30 relative space-y-3 border bg-white/70 p-3">
+    <div className="border-tech-main/30 bg-surface-overlay/70 relative space-y-3 border p-3">
       <CornerBrackets color="border-tech-main/20" />
       <div className="space-y-1">
         <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">

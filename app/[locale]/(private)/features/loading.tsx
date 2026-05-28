@@ -47,7 +47,7 @@ export default function FeaturesLoading() {
         </div>
 
         <div className="space-y-6">
-          <TechCard className="animate-tech-slide-in border-tech-main/40 bg-white/80 p-6 backdrop-blur-sm [animation-delay:100ms]">
+          <TechCard className="animate-tech-slide-in border-tech-main/40 bg-surface-overlay/80 p-6 backdrop-blur-sm [animation-delay:100ms]">
             <div className="space-y-4">
               <div>
                 <h4 className="text-tech-main mb-3 font-mono text-sm tracking-widest uppercase">
@@ -93,7 +93,7 @@ export default function FeaturesLoading() {
                   {group.cards.map((cardNum) => (
                     <TechCard
                       key={cardNum}
-                      className="border-tech-main/40 flex h-auto flex-col justify-between border bg-white/80 p-6 backdrop-blur-sm sm:h-64">
+                      className="border-tech-main/40 bg-surface-overlay/80 flex h-auto flex-col justify-between border p-6 backdrop-blur-sm sm:h-64">
                       {/* Status badge + date row */}
                       <div className="card-header-row">
                         <SegmentedBar

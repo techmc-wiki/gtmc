@@ -53,7 +53,7 @@ export function DraftEditorFiles({
       />
 
       <div className="space-y-4">
-        <div className="border-tech-main/40 border bg-white/80 p-4 backdrop-blur-sm">
+        <div className="border-tech-main/40 bg-surface-overlay/80 border p-4 backdrop-blur-sm">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="section-label">{t("activeFileLabel")}</p>

@@ -109,7 +109,7 @@ export function ArticleMetadataFull({
       type="button"
       onClick={toggleCollapsed}
       className="
-        cursor-pointer border guide-line bg-white px-2 py-0.5
+        cursor-pointer border guide-line bg-surface-overlay px-2 py-0.5
         transition-colors
         hover:bg-tech-accent/10
       "
@@ -307,7 +307,7 @@ export function ArticleMetadataFull({
                 copied
                   ? `bg-tech-main text-tech-bg`
                   : `
-                    bg-white
+                    bg-surface-overlay
                     hover:bg-tech-accent/10
                   `
               }

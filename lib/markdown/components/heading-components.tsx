@@ -17,7 +17,7 @@ export function H1Component({
   return (
     <h1
       id={id}
-      className="group border-tech-main/30 target:animate-target-blink target:border-tech-main relative mt-8 mb-6 scroll-m-20 border-b pb-4 font-mono text-2xl tracking-widest text-slate-900 uppercase sm:text-3xl lg:text-4xl">
+      className="group border-tech-main/30 target:animate-target-blink target:border-tech-main text-tech-main-dark relative mt-8 mb-6 scroll-m-20 border-b pb-4 font-mono text-2xl tracking-widest uppercase sm:text-3xl lg:text-4xl">
       {id && <HeadingAnchor id={id} level={1} />}
       {children}
       {dataAdvanced === "true" && advancedBadge}
@@ -33,7 +33,7 @@ export function H2Component({
   return (
     <h2
       id={id}
-      className="group border-tech-main/30 target:animate-target-blink target:border-tech-main relative mt-12 mb-6 inline-block scroll-m-20 border-b pr-8 font-mono text-2xl tracking-widest text-slate-800 uppercase">
+      className="group border-tech-main/30 target:animate-target-blink target:border-tech-main text-tech-main-dark relative mt-12 mb-6 inline-block scroll-m-20 border-b pr-8 font-mono text-2xl tracking-widest uppercase">
       {id && <HeadingAnchor id={id} level={2} />}
       {children}
       {dataAdvanced === "true" && advancedBadge}
@@ -49,7 +49,7 @@ export function H3Component({
   return (
     <h3
       id={id}
-      className="group target:animate-target-blink relative mt-8 mb-4 scroll-m-20 font-mono text-xl tracking-widest text-slate-700 uppercase">
+      className="group target:animate-target-blink text-tech-main relative mt-8 mb-4 scroll-m-20 font-mono text-xl tracking-widest uppercase">
       {id && <HeadingAnchor id={id} level={3} />}
       {children}
       {dataAdvanced === "true" && advancedBadge}

@@ -3,7 +3,7 @@ import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
 export function BlockquoteComponent({ ...props }: MarkdownComponentProps) {
   return (
     <blockquote
-      className="border-tech-main bg-tech-main/5 mb-6 border-l-2 p-4 pb-[0.01] font-sans text-slate-700 italic"
+      className="border-tech-main bg-tech-main/5 text-tech-main mb-6 border-l-2 p-4 pb-[0.01] font-sans italic"
       {...props}
     />
   )

@@ -32,7 +32,7 @@ export function ArticleMetadataLayout({
 
       <div
         className="
-          relative mb-8 animate-fade-in border guide-line bg-white/80 p-4
+          relative mb-8 animate-fade-in border guide-line bg-surface-overlay/80 p-4
           font-mono text-xs text-tech-main
           sm:p-6
         ">

@@ -29,7 +29,7 @@ export async function createRehypeShiki(langs?: string[]) {
   const langsToLoad = langs && langs.length > 0 ? langs : ["javascript"]
   const { getSingletonHighlighter } = await import("shiki")
   const highlighter = await getSingletonHighlighter({
-    themes: ["solarized-light"],
+    themes: ["solarized-light", "min-dark"],
     langs: langsToLoad,
   })
 
@@ -52,7 +52,7 @@ export async function createRehypeShiki(langs?: string[]) {
 
         const lang = langClass.replace("language-", "")
         const rawCode = getTextContent(codeNode)
-        const cacheKey = `v2:${lang}:${rawCode}`
+        const cacheKey = `v3-dual:${lang}:${rawCode}`
 
         try {
           if (highlightCache.has(cacheKey)) {
@@ -73,7 +73,11 @@ export async function createRehypeShiki(langs?: string[]) {
 
           const highlighted = highlighter.codeToHast(rawCode, {
             lang,
-            theme: "solarized-light",
+            themes: {
+              light: "solarized-light",
+              dark: "min-dark",
+            },
+            defaultColor: "light",
           })
 
           const highlightedPre = highlighted.children.find(

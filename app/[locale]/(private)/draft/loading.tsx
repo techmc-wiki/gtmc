@@ -49,7 +49,7 @@ export default function DraftLoading() {
             {[1, 2, 3].map((i) => (
               <TechCard
                 key={i}
-                className="border-tech-main/40 flex h-auto flex-col justify-between border bg-white/80 p-6 backdrop-blur-sm sm:h-64">
+                className="border-tech-main/40 bg-surface-overlay/80 flex h-auto flex-col justify-between border p-6 backdrop-blur-sm sm:h-64">
                 {/* Status badge + date row */}
                 <div className="card-header-row">
                   <SegmentedBar
@@ -89,7 +89,7 @@ export default function DraftLoading() {
             {[1, 2].map((i) => (
               <TechCard
                 key={i}
-                className="border-tech-main/40 flex h-auto flex-col justify-between border bg-white/80 p-6 backdrop-blur-sm sm:h-64">
+                className="border-tech-main/40 bg-surface-overlay/80 flex h-auto flex-col justify-between border p-6 backdrop-blur-sm sm:h-64">
                 {/* Status badge + date row */}
                 <div className="card-header-row">
                   <SegmentedBar

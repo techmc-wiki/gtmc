@@ -64,6 +64,44 @@ Usage rules
 - Semantic colors are translucent and bracketed: yellow/blue/green/red at `/10` fills with `/40` borders. Neutral states (loading, secondary metadata) may use gray/slate/zinc at low opacity.
 - `tech-line` is for borders only; it has no fill or text utility in practice.
 
+## Theming
+
+### Semantic surface tokens
+
+Map every background, border, and text color to a semantic Tailwind token so both themes resolve through CSS variables.
+
+| Tailwind class | Light | Dark |
+|---|---|---|
+| `bg-tech-bg` | #f8f9fc | #0e1525 |
+| `bg-surface` | #ffffff | #152038 |
+| `bg-surface-overlay` | #ffffff | #1c2a4a |
+| `bg-surface-input` | #ffffff | #0f1a2e |
+| `bg-surface-modal` | #ffffff | #1a2540 |
+| `text-tech-main` | #60708f | #a4b2cc |
+| `text-tech-main-dark` | #4a5a78 | #cfd8e6 |
+| `border-tech-line` | #cbd5e1 | #2a3349 |
+| `text-tech-advanced` | #4c5b96 | #7a89c4 |
+| `bg-tech-accent` | #c4d0df | #3a4866 |
+
+### Dark variant conventions
+
+- Use `dark:` Tailwind variant, scoped via `[data-theme="dark"]`.
+- Never use `@media (prefers-color-scheme: dark)` in application code — the runtime `data-theme` attribute is the single source of truth.
+- Replace hardcoded `bg-white` with `bg-surface` or `bg-surface-overlay`.
+- Replace `text-slate-700` with `text-tech-main`, `text-slate-800/900` with `text-tech-main-dark`.
+
+### Three.js background
+
+Schematic viewer passes theme-aware background color to Three.js `renderer.setClearColor()`. Light: `#f8f9fc`, dark: `#0e1525`.
+
+### Icon recoloring
+
+Icons use `currentColor` or `text-tech-main`. When contained in a `dark:` block that changes text color, icons follow automatically.
+
+### Color-scheme CSS property
+
+`color-scheme: light` is set on `:root`; `color-scheme: dark` is set on `[data-theme="dark"]`. This controls native browser elements (scrollbars, form controls, system dialogs).
+
 ## Typography
 
 Fonts are declared in `app/globals.css` and loaded via `app/[locale]/layout.tsx`.

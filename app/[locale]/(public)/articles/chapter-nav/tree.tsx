@@ -68,7 +68,7 @@ function ArticleLink({
             isActive
               ? `font-bold text-tech-main`
               : `
-                text-slate-700
+                text-tech-main
                 hover:text-tech-main
               `
           }

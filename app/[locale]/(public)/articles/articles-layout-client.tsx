@@ -36,7 +36,7 @@ function TreeLoadingPlaceholder() {
     <div
       className="
         relative h-full animate-tree-drop-in overflow-hidden border guide-line
-        bg-white/80 px-3 py-4
+        bg-surface-overlay/80 px-3 py-4
         motion-reduce:animate-none
         md:min-h-160 md:px-4 md:py-5
       "
@@ -309,7 +309,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                onClick={handleMobileToggle}
               className={`
                 cursor-pointer overflow-hidden
-                border border-tech-main/40 bg-white/70 font-mono text-xs
+                border border-tech-main/40 bg-surface-overlay/70 font-mono text-xs
                 font-bold tracking-[0.15em] text-tech-main
                 transition-[background-color,color] duration-150 ease-out
                 hover:bg-tech-main/5
@@ -366,7 +366,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
               <div
                 className="
                   max-h-[calc(100dvh-12rem)] overflow-y-auto overscroll-contain
-                  border-t guide-line bg-white/95 px-4 pt-3 pb-4
+                  border-t guide-line bg-surface-overlay/95 px-4 pt-3 pb-4
                 ">
                 {fixedChapterNavContent}
               </div>

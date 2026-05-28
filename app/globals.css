@@ -50,6 +50,7 @@
 }
 
 :root {
+  color-scheme: light;
   --background: var(--color-tech-bg);
   --foreground: var(--color-tech-main);
 }
@@ -84,6 +85,27 @@ html {
   --color-tech-accent: #c4d0df;
   --color-tech-line: #cbd5e1;
   --color-tech-advanced: #4c5b96;
+  --color-surface: #ffffff;
+  --color-surface-overlay: #ffffff;
+  --color-surface-input: #ffffff;
+  --color-surface-modal: #ffffff;
+
+  --color-ansi-black: #334155;
+  --color-ansi-red: #b91c1c;
+  --color-ansi-green: #047857;
+  --color-ansi-yellow: #a16207;
+  --color-ansi-blue: #2563eb;
+  --color-ansi-magenta: #a21caf;
+  --color-ansi-cyan: #0f766e;
+  --color-ansi-white: #64748b;
+  --color-ansi-bright-black: #0f172a;
+  --color-ansi-bright-red: #dc2626;
+  --color-ansi-bright-green: #059669;
+  --color-ansi-bright-yellow: #ca8a04;
+  --color-ansi-bright-blue: #1d4ed8;
+  --color-ansi-bright-magenta: #c026d3;
+  --color-ansi-bright-cyan: #0891b2;
+  --color-ansi-bright-white: #475569;
 
   --animate-fade-in: fade-in 0.8s ease-out forwards;
   --animate-fade-out: fade-out 0.3s ease-out forwards;
@@ -232,6 +254,67 @@ html {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+}
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-tech-bg: #0e1525;
+  --color-tech-main: #a4b2cc;
+  --color-tech-main-dark: #cfd8e6;
+  --color-tech-accent: #3a4866;
+  --color-tech-line: #2a3349;
+  --color-tech-advanced: #7a89c4;
+  --color-surface: #152038;
+  --color-surface-overlay: #1c2a4a;
+  --color-surface-input: #0f1a2e;
+  --color-surface-modal: #1a2540;
+}
+
+/* KaTeX dark overrides. KaTeX outputs raw HTML, so Tailwind `dark:` variants
+ * don't apply. Most KaTeX styling already uses `currentColor`; we only need
+ * to (a) set `.katex` color, (b) neutralize inline colors from `\textcolor`,
+ * and (c) drop light-tuned backgrounds from `\colorbox` / `\fcolorbox`. */
+[data-theme="dark"] .katex,
+[data-theme="dark"] .katex-display,
+[data-theme="dark"] .katex-html {
+  color: var(--color-tech-main-dark);
+}
+
+[data-theme="dark"] .katex .mord,
+[data-theme="dark"] .katex .mop,
+[data-theme="dark"] .katex .mbin,
+[data-theme="dark"] .katex .mrel,
+[data-theme="dark"] .katex .mopen,
+[data-theme="dark"] .katex .mclose,
+[data-theme="dark"] .katex .mpunct,
+[data-theme="dark"] .katex .minner,
+[data-theme="dark"] .katex .mathnormal,
+[data-theme="dark"] .katex .mathit,
+[data-theme="dark"] .katex .mathrm,
+[data-theme="dark"] .katex .mathbf,
+[data-theme="dark"] .katex .mathsf,
+[data-theme="dark"] .katex .mathtt,
+[data-theme="dark"] .katex .mathbb,
+[data-theme="dark"] .katex .mathcal,
+[data-theme="dark"] .katex .mathfrak,
+[data-theme="dark"] .katex .mathscr {
+  color: inherit;
+}
+
+[data-theme="dark"] .katex-display > .katex > .katex-html > .tag {
+  color: var(--color-tech-main);
+}
+
+/* `\colorbox`, `\fcolorbox`, and `\enclose` emit light-page backgrounds. */
+[data-theme="dark"] .katex .enclosing,
+[data-theme="dark"] .katex .boxed,
+[data-theme="dark"] .katex .fbox,
+[data-theme="dark"] .katex .fcolorbox,
+[data-theme="dark"] .katex .colorbox {
+  background-color: transparent !important;
+  border-color: currentColor !important;
 }
 
 body {
@@ -485,6 +568,18 @@ body {
   @apply bg-tech-main/30 my-2 h-px w-full;
 }
 
+/* Shiki dual-theme: light colors are inline, dark colors stored in
+ * --shiki-dark / --shiki-dark-bg CSS variables on each token span.
+ * Swap to dark variables when [data-theme="dark"] is active. */
+[data-theme="dark"] .shiki,
+[data-theme="dark"] .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
 code .line {
   display: block;
 }
@@ -499,7 +594,7 @@ code .line {
   -webkit-appearance: none;
   appearance: none;
   height: 2px;
-  background: rgba(71, 85, 105, 0.28);
+  background: color-mix(in oklab, var(--color-tech-main) 28%, transparent);
   outline: none;
 }
 

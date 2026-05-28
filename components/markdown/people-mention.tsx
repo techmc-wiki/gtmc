@@ -9,10 +9,10 @@ import { CornerBrackets } from "@/components/ui/corner-brackets"
 import type { ResolvedPerson } from "@/lib/markdown/people"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
 
-function GithubIcon() {
+export function GithubIcon({ className = "size-3" }: { className?: string }) {
   return (
     <svg
-      className="size-3"
+      className={className}
       viewBox="0 0 16 16"
       fill="currentColor"
       aria-hidden="true">

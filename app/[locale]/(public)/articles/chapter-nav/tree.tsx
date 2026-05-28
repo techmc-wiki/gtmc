@@ -62,7 +62,7 @@ function ArticleLink({
     <div className="relative">
       <div
         className={`
-          group relative flex items-center py-1.5 pl-4
+          group relative flex items-center py-1 pl-3.5
           transition-colors
           ${
             isActive
@@ -169,7 +169,7 @@ export function ChapterNavTree({
       .some((item) => !item.isFolder && !(item.isAppendix ?? false))
 
   return (
-    <ul className="my-1 pl-6">
+    <ul className="my-0.5 pl-5">
       {items.map((item, index) => {
         const fileRoute = `/articles/${encodeSlug(item.slug)}`
         const decodedRoute = decodeURIComponent(fileRoute)
@@ -187,9 +187,9 @@ export function ChapterNavTree({
               <li
                 key={`appendix-separator-before-${item.id}`}
                 className="
-                  mt-3 mb-1.5 flex list-none items-center gap-2 pl-1 font-mono
-                  text-[0.625rem] tracking-[0.12em] text-tech-main/50 uppercase
-                  md:text-[0.6875rem]
+                  mt-2.5 mb-1 flex list-none items-center gap-2 pl-1 font-mono
+                  text-[0.5625rem] tracking-[0.12em] text-tech-main/50 uppercase
+                  md:text-[0.625rem]
                 ">
                 <span className="h-px flex-1 bg-tech-main/25" />
                 <span>Appendix</span>
@@ -202,12 +202,12 @@ export function ChapterNavTree({
               data-chapter-nav-row="1"
               ref={!item.isFolder && isActive ? activeItemRef : undefined}
               className={`
-                 relative my-1.5 list-none font-mono text-[1rem] transition-all
+                 relative my-1 list-none font-mono text-[0.8125rem] transition-all
                  duration-300
                  before:absolute before:top-0 before:left-0 before:h-full
                  before:w-0.5 before:transition-all before:duration-200
                  before:content-['']
-                 md:text-base
+                 md:text-sm
                 ${
                   !item.isFolder && isActive
                     ? `before:w-[3px] before:bg-tech-main`

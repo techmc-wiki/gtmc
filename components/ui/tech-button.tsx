@@ -12,9 +12,11 @@ export const TechButton = React.forwardRef<HTMLButtonElement, TechButtonProps>(
 
     // Tech Flat style based on image reference
     if (variant === "primary") {
-      baseStyles += " bg-tech-main text-white hover:bg-tech-main-dark"
+      baseStyles +=
+        " bg-tech-main text-white hover:bg-tech-main-dark dark:bg-tech-accent dark:hover:bg-tech-accent/80"
     } else if (variant === "secondary") {
-      baseStyles += " bg-transparent text-tech-main hover:bg-tech-accent/20"
+      baseStyles +=
+        " bg-surface-overlay/80 text-tech-main hover:bg-tech-accent/20"
     } else if (variant === "danger") {
       baseStyles += " bg-red-500 border-red-500 text-white hover:bg-red-700" // muted red
     } else if (variant === "ghost") {

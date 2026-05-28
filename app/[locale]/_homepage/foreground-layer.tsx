@@ -1,3 +1,4 @@
+import { GithubIcon } from "@/components/markdown/people-mention"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { TechButton } from "@/components/ui/tech-button"
@@ -64,11 +65,11 @@ export function ForegroundLayer({
           href="/articles"
           prefetch
           onClick={handleArticlesClick}
-          className="w-full sm:w-auto">
+          className="w-full sm:w-72">
           <TechButton
             variant="primary"
             disabled={isAccessingDatabase}
-            className="flex h-12 w-full items-center justify-center text-xs tracking-widest uppercase shadow-md transition-transform duration-300 hover:scale-102 active:scale-95 disabled:cursor-wait disabled:opacity-90 sm:w-auto sm:text-sm">
+            className="flex h-12 w-full items-center justify-center text-xs tracking-widest uppercase shadow-md transition-transform duration-300 hover:scale-102 active:scale-95 disabled:cursor-wait disabled:opacity-90 sm:text-sm">
             {isAccessingDatabase ? (
               <>
                 <span className="bg-surface inline-block size-2 animate-pulse motion-reduce:animate-none" />
@@ -79,11 +80,11 @@ export function ForegroundLayer({
             )}
           </TechButton>
         </Link>
-        <Link href="/login" className="w-full sm:w-auto">
+        <Link href="/login" className="w-full sm:w-72">
           <TechButton
-            variant="ghost"
-            className="text-tech-main-dark hover:border-tech-main hover:bg-tech-main/10 bg-surface-overlay flex h-12 w-full items-center justify-center text-xs font-medium tracking-widest uppercase shadow-sm backdrop-blur-md transition-transform duration-300 hover:scale-102 sm:w-auto sm:text-sm">
-            {"//"} {t("loginGithub")}
+            variant="secondary"
+            className="flex h-12 w-full items-center justify-center text-xs font-medium tracking-widest uppercase shadow-sm backdrop-blur-md transition-transform duration-300 hover:scale-102 sm:text-sm">
+            {"//"} {t("loginGithub")} <GithubIcon className="size-4" />
           </TechButton>
         </Link>
       </div>

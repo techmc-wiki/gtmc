@@ -166,15 +166,16 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
                   aria-disabled={!isAvailable || undefined}
                   onClick={isAvailable ? handleLetterClick : undefined}
                   className={cn(
-                    "flex h-9 min-w-9 items-center justify-center border-l-2 px-2 font-mono text-xs tracking-[0.18em] transition-colors duration-200 select-none",
+                    "relative flex h-9 min-w-9 items-center justify-center px-2 font-mono text-xs tracking-[0.18em] transition-colors duration-200 select-none",
+                    "after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:transition-colors after:duration-200",
                     "focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2",
                     isActive &&
-                      "border-tech-main bg-tech-main/10 text-tech-main-dark font-bold",
+                      "after:bg-tech-main bg-tech-main/10 text-tech-main-dark font-bold",
                     !isActive &&
                       isAvailable &&
-                      "text-tech-main hover:bg-tech-main/5 cursor-pointer border-transparent",
+                      "text-tech-main hover:bg-tech-main/5 cursor-pointer after:bg-transparent",
                     !isAvailable &&
-                      "text-tech-main cursor-default border-transparent opacity-30"
+                      "text-tech-main cursor-default opacity-30 after:bg-transparent"
                   )}>
                   {letter}
                 </button>
@@ -185,14 +186,14 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
         <div
           aria-hidden="true"
           className={cn(
-            "pointer-events-none absolute top-0 right-0 bottom-0 w-10 bg-gradient-to-l from-white/90 via-white/60 to-transparent transition-opacity duration-200",
+            "from-surface-overlay/90 via-surface-overlay/60 pointer-events-none absolute top-0 right-0 bottom-0 w-10 bg-gradient-to-l to-transparent transition-opacity duration-200",
             canScrollRight ? "opacity-100" : "opacity-0"
           )}
         />
         <div
           aria-hidden="true"
           className={cn(
-            "pointer-events-none absolute top-0 bottom-0 left-0 w-8 bg-gradient-to-r from-white/80 to-transparent transition-opacity duration-200",
+            "from-surface-overlay/80 pointer-events-none absolute top-0 bottom-0 left-0 w-8 bg-gradient-to-r to-transparent transition-opacity duration-200",
             canScrollLeft ? "opacity-100" : "opacity-0"
           )}
         />

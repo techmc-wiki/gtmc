@@ -204,11 +204,19 @@ html {
   }
 
   @keyframes shimmer {
-    from {
+    0% {
       transform: translateX(-200%) skewX(-12deg);
+      opacity: 0;
     }
-    to {
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
       transform: translateX(200%) skewX(-12deg);
+      opacity: 0;
     }
   }
 

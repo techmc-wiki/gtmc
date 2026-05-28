@@ -2,10 +2,9 @@ import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { PageHeader } from "@/components/ui/page-header"
 import { GlossaryToolbar } from "@/components/glossary/glossary-toolbar"
-import { GlossaryEditFab } from "@/components/glossary/glossary-edit-fab"
+import { GlossaryFloatingActions } from "@/components/glossary/glossary-floating-actions"
 import { loadGlossaryManifest } from "@/lib/glossary/manifest"
 import { toAbsoluteUrl } from "@/lib/site-url"
-import { BackToTop } from "@/components/ui/back-to-top"
 
 const DEFAULT_COLUMNS: Record<string, string[]> = {
   en: ["Full Form (English)", "Short Form", "Description", "Related"],
@@ -75,8 +74,7 @@ export default async function GlossaryIndexPage({
         />
       </div>
 
-      <BackToTop className="bottom-20 w-28" />
-      <GlossaryEditFab locale={locale as "en" | "zh"} className="w-28" />
+      <GlossaryFloatingActions locale={locale as "en" | "zh"} />
     </div>
   )
 }

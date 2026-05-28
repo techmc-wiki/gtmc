@@ -285,7 +285,7 @@ If you are an Oh-my-Opencode agent (Sisyphus, Prometheus, Atlas, Hephaestus):
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **gtmc** (4689 symbols, 7789 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **gtmc** (7288 symbols, 12298 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

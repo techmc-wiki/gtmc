@@ -42,6 +42,7 @@
     "densityComfortable": "COMFORTABLE",
     "columnTerm": "TERM",
     "columnShortForm": "SHORT",
+    "columnCategory": "CATEGORY",
     "columnRegex": "REGEX",
     "columnDescription": "DESCRIPTION",
     "columnRelated": "RELATED",

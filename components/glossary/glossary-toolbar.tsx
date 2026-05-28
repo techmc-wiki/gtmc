@@ -16,7 +16,7 @@ import {
 import { GlossaryTable } from "@/components/glossary/glossary-table"
 import { GlossaryDetailPanel } from "@/components/glossary/glossary-detail-panel"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
-import { LOCALE_TO_COLUMN, isGlossaryLocale } from "@/lib/glossary/locales"
+import { LOCALE_TO_COLUMN } from "@/lib/glossary/locales"
 import type { GlossaryEntry } from "@/lib/glossary/manifest"
 import { cn } from "@/lib/cn"
 
@@ -29,16 +29,9 @@ function letterBucket(slug: string): string {
 
 /**
  * Map ColumnPicker CSV-style column names to GlossaryTable lowercase keys.
- * Translation columns (locale-specific) collapse into the generic "translation" key.
+ * Translation columns include their target locale and field in the table key.
  */
-function csvColumnsToTableColumns(
-  csvColumns: string[],
-  locale: string
-): string[] {
-  const localeTermColumn = isGlossaryLocale(locale)
-    ? LOCALE_TO_COLUMN[locale].termColumn
-    : null
-
+function csvColumnsToTableColumns(csvColumns: string[]): string[] {
   const result: string[] = []
   const seen = new Set<string>()
   const push = (key: string) => {
@@ -51,12 +44,22 @@ function csvColumnsToTableColumns(
   for (const col of csvColumns) {
     if (col === "Full Form (English)") push("term")
     else if (col === "Short Form") push("shortForm")
+    else if (col === "Category") push("category")
     else if (col === "Description") push("description")
     else if (col === "Related") push("related")
     else if (col === "Regex") push("regex")
-    else if (localeTermColumn && col === localeTermColumn) push("translation")
-    // "Category" and other-locale columns intentionally skipped — table has no
-    // dedicated cells for them.
+    else {
+      for (const [code, mapping] of Object.entries(LOCALE_TO_COLUMN)) {
+        if (col === mapping.termColumn) {
+          push(`translation:${code}:term`)
+          break
+        }
+        if (col === mapping.descColumn) {
+          push(`translation:${code}:description`)
+          break
+        }
+      }
+    }
   }
 
   return result
@@ -123,8 +126,8 @@ export function GlossaryToolbar({
   }, [entries])
 
   const tableColumns = React.useMemo(
-    () => csvColumnsToTableColumns(visibleColumns, locale),
-    [visibleColumns, locale]
+    () => csvColumnsToTableColumns(visibleColumns),
+    [visibleColumns]
   )
 
   const trimmedQuery = query.trim()
@@ -135,15 +138,15 @@ export function GlossaryToolbar({
       <section aria-label={t("letterBarLabel")} className="relative z-30">
         <CornerBrackets size="size-2" color="border-tech-main/30" />
         <div className="border-tech-main/30 relative flex flex-col gap-3 border bg-white/60 p-3 backdrop-blur-sm sm:p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+          <div className="grid gap-3 sm:flex sm:flex-row sm:items-stretch">
             <GlossarySearch
               onQueryChange={setQuery}
               onScopeChange={setSearchScope}
               resultCount={resultCount}
               totalCount={totalCount}
-              className="flex-1"
+              className="min-w-0 sm:flex-1"
             />
-            <div className="flex items-stretch gap-2">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-stretch gap-2 sm:flex">
               <ColumnPicker
                 locale={locale}
                 visibleColumns={visibleColumns}

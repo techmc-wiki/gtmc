@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn"
 import { EmptyState } from "@/components/ui/empty-state"
 import { buildGlossarySearchIndex } from "@/lib/glossary/search"
 import type { GlossaryEntry } from "@/lib/glossary/manifest"
+import { LANGUAGE_DISPLAY, isGlossaryLocale } from "@/lib/glossary/locales"
 import { GlossaryTableRow, type GlossaryDensity } from "./glossary-table-row"
 import { GlossaryCard } from "./glossary-card"
 
@@ -31,9 +32,9 @@ function letterBucket(slug: string): string {
 const COLUMN_LABEL_KEYS: Record<string, string> = {
   term: "columnTerm",
   shortForm: "columnShortForm",
+  category: "columnCategory",
   regex: "columnRegex",
   description: "columnDescription",
-  translation: "columnLanguageGroup",
   related: "columnRelated",
 }
 
@@ -42,6 +43,19 @@ const headerCellBase =
 
 function normalizeLocaleForIndex(locale: string): "en" | "zh" {
   return locale === "zh" ? "zh" : "en"
+}
+
+function getTranslationColumnLabel(
+  column: string,
+  descriptionLabel: string
+): string | null {
+  const [, locale, field] = column.split(":")
+  if (!isGlossaryLocale(locale)) return null
+  if (field === "term") return LANGUAGE_DISPLAY[locale]
+  if (field === "description") {
+    return `${descriptionLabel} (${LANGUAGE_DISPLAY[locale]})`
+  }
+  return null
 }
 
 export function GlossaryTable({
@@ -157,6 +171,10 @@ export function GlossaryTable({
                 <tr>
                   {visibleColumns.map((col) => {
                     const key = COLUMN_LABEL_KEYS[col]
+                    const translationLabel = getTranslationColumnLabel(
+                      col,
+                      t("columnDescription")
+                    )
                     return (
                       <th
                         key={col}
@@ -165,9 +183,10 @@ export function GlossaryTable({
                           headerCellBase,
                           col === "term" && "min-w-[10rem]",
                           col === "description" && "max-w-[36rem]",
-                          col === "translation" && "max-w-[24rem]"
+                          col.startsWith("translation:") && "max-w-[24rem]"
                         )}>
-                        {key ? t(key as Parameters<typeof t>[0]) : col}
+                        {translationLabel ??
+                          (key ? t(key as Parameters<typeof t>[0]) : col)}
                       </th>
                     )
                   })}

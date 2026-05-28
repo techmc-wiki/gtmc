@@ -94,6 +94,10 @@ export function ColumnPicker({
     [onChange]
   )
 
+  const toggleOpen = React.useCallback(() => {
+    setOpen((prev) => !prev)
+  }, [])
+
   const toggle = React.useCallback(
     (column: string) => {
       const next = visibleColumns.includes(column)

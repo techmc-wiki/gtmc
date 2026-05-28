@@ -85,8 +85,8 @@ export function GlossarySearch({
 
   return (
     <search
-      className={`grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:flex sm:items-stretch ${className}`}>
-      <div className="border-tech-main/40 focus-within:border-tech-main/70 col-span-2 flex min-w-0 flex-1 items-stretch border bg-white/50 transition-colors sm:col-span-1">
+      className={`grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:flex sm:items-center ${className}`}>
+      <div className="border-tech-main/40 focus-within:border-tech-main/70 col-span-2 flex h-9 min-w-0 flex-1 items-stretch border bg-white/50 transition-colors sm:col-span-1">
         <span
           aria-hidden="true"
           className="text-tech-main/60 flex items-center px-3 font-mono text-sm select-none">
@@ -101,7 +101,7 @@ export function GlossarySearch({
           aria-label="Search glossary terms"
           autoComplete="off"
           spellCheck={false}
-          className="text-tech-main-dark placeholder:text-tech-main/50 min-h-9 w-full bg-transparent py-1.5 pr-3 font-mono text-sm outline-none sm:py-2"
+          className="text-tech-main-dark placeholder:text-tech-main/50 w-full bg-transparent pr-3 font-mono text-sm outline-none"
         />
         <span className="text-tech-main/50 hidden items-center pr-3 font-mono text-xs whitespace-nowrap select-none sm:flex">
           {resultCount} of {totalCount}
@@ -113,7 +113,7 @@ export function GlossarySearch({
         onClick={toggleScope}
         aria-pressed={!isActiveScope}
         aria-label={scopeLabel}
-        className={`tracking-tech-wide flex min-h-9 cursor-pointer items-center justify-center border px-3 py-2 font-mono text-xs uppercase transition-colors sm:px-4 ${
+        className={`tracking-tech-wide flex h-9 cursor-pointer items-center justify-center border px-3 font-mono text-xs uppercase transition-colors sm:px-4 ${
           isActiveScope
             ? "border-tech-main/60 bg-tech-main/10 text-tech-main-dark"
             : "border-tech-main/20 text-tech-main/70 hover:border-tech-main/40"
@@ -121,7 +121,7 @@ export function GlossarySearch({
         [{scopeLabel}]
       </button>
 
-      <span className="border-tech-main/20 text-tech-main/50 flex min-h-9 items-center border bg-white/35 px-3 font-mono text-xs whitespace-nowrap select-none sm:hidden">
+      <span className="border-tech-main/20 text-tech-main/50 flex h-9 items-center border bg-white/35 px-3 font-mono text-xs whitespace-nowrap select-none sm:hidden">
         {resultCount} of {totalCount}
       </span>
     </search>

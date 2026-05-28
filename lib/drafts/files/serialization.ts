@@ -139,14 +139,18 @@ export function serializeDraftFilesPayload(collection: DraftFileCollection) {
   return JSON.stringify({
     activeFileId: normalized.activeFileId,
     folders: normalized.folders,
-    files: normalized.files.map((file) => ({
-      id: file.id,
-      filePath: file.filePath,
-      content: file.content,
-      ...(file.conflictContent !== undefined
-        ? { conflictContent: file.conflictContent }
-        : {}),
-    })),
+    files: normalized.files.map((file) =>
+      Object.assign(
+        {
+          id: file.id,
+          filePath: file.filePath,
+          content: file.content,
+        },
+        file.conflictContent !== undefined
+          ? { conflictContent: file.conflictContent }
+          : {}
+      )
+    ),
   })
 }
 

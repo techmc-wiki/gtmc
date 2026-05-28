@@ -106,7 +106,9 @@ export default async function ProfilePage() {
         <div className="border-tech-main absolute right-0 bottom-0 size-2 translate-0.5 border-r-2 border-b-2" />
 
         <form
-          action={updateProfileAction as unknown as (formData: FormData) => void}
+          action={
+            updateProfileAction as unknown as (formData: FormData) => void
+          }
           className="relative z-10 space-y-6 p-4 sm:space-y-8 sm:p-6 md:space-y-10 md:p-8 lg:p-12">
           <div className="flex flex-col items-start gap-4 sm:gap-6 md:gap-8">
             <div className="border-tech-main/30 bg-tech-main/5 relative size-24 shrink-0 border p-1 sm:size-32 md:size-40">

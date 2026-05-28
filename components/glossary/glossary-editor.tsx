@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 
 import { GlossaryEditToolbar } from "@/components/glossary/glossary-edit-toolbar"
@@ -19,6 +20,7 @@ import {
   deleteGlossaryDraftAction,
   updateGlossaryDraftAction,
 } from "@/actions/glossary-draft"
+import { useMounted } from "@/hooks/use-mounted"
 import { submitGlossaryDraftAction } from "@/actions/glossary-submit"
 import { GLOSSARY_COLUMNS, type GlossaryRow } from "@/lib/glossary/csv"
 import { generateSlug } from "@/lib/glossary/slug"
@@ -127,6 +129,7 @@ export function GlossaryEditor({
 }: GlossaryEditorProps) {
   const t = useTranslations("Glossary")
   const router = useRouter()
+  const isMounted = useMounted()
 
   const entriesBySlug = React.useMemo(() => {
     const map = new Map<string, GlossaryEntry>()
@@ -444,61 +447,64 @@ export function GlossaryEditor({
         onUseRealEmailChange={setUseRealEmail}
       />
 
-      {showPreview ? (
-        <dialog
-          open
-          aria-modal="true"
-          aria-label={t("editorPreviewDiff")}
-          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm sm:p-8">
-          <div className="flex w-full max-w-4xl flex-col gap-4">
-            {submitState === "success" && submitResult ? (
-              <div className="border-tech-main/40 flex flex-col gap-3 border bg-white/95 p-6 backdrop-blur-sm">
-                <p className="text-tech-main/60 font-mono text-[10px] tracking-widest uppercase">
-                  [SUBMITTED]
-                </p>
-                <p className="text-tech-main-dark font-mono text-base">
-                  PR #{submitResult.prNumber} opened.{" "}
-                  <a
-                    href={submitResult.prUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-tech-accent underline decoration-dotted underline-offset-4">
-                    View on GitHub ↗
-                  </a>
-                </p>
-                <p className="text-tech-main text-sm leading-relaxed">
-                  {t("editorPrOwnershipBody")}
-                </p>
-                <button
-                  type="button"
-                  onClick={handleDismissSuccess}
-                  className="border-tech-main bg-tech-main hover:bg-tech-main-dark mt-2 cursor-pointer self-end border px-6 py-2 font-mono text-xs font-bold tracking-widest text-white uppercase transition-colors">
-                  Return to drafts
-                </button>
-              </div>
-            ) : (
-              <GlossaryDiffPreview
-                operations={operations}
-                onClose={handleClosePreview}
-                onSubmit={handleSubmit}
-                isSubmitting={isSubmitting}
-                validationMessage={submitError ?? undefined}
-                canSubmit={!submitError}
-              />
-            )}
+      {showPreview && isMounted
+        ? createPortal(
+            <dialog
+              open
+              aria-modal="true"
+              aria-label={t("editorPreviewDiff")}
+              className="fixed inset-0 z-50 m-0 flex h-screen max-h-none w-screen max-w-none items-start justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm supports-[height:100dvh]:h-dvh supports-[width:100dvw]:w-dvw sm:p-8">
+              <div className="flex w-full max-w-4xl flex-col gap-4">
+                {submitState === "success" && submitResult ? (
+                  <div className="border-tech-main/40 flex flex-col gap-3 border bg-white/95 p-6 backdrop-blur-sm">
+                    <p className="text-tech-main/60 font-mono text-[10px] tracking-widest uppercase">
+                      [SUBMITTED]
+                    </p>
+                    <p className="text-tech-main-dark font-mono text-base">
+                      PR #{submitResult.prNumber} opened.{" "}
+                      <a
+                        href={submitResult.prUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-tech-accent underline decoration-dotted underline-offset-4">
+                        View on GitHub ↗
+                      </a>
+                    </p>
+                    <p className="text-tech-main text-sm leading-relaxed">
+                      {t("editorPrOwnershipBody")}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleDismissSuccess}
+                      className="border-tech-main bg-tech-main hover:bg-tech-main-dark mt-2 cursor-pointer self-end border px-6 py-2 font-mono text-xs font-bold tracking-widest text-white uppercase transition-colors">
+                      Return to drafts
+                    </button>
+                  </div>
+                ) : (
+                  <GlossaryDiffPreview
+                    operations={operations}
+                    onClose={handleClosePreview}
+                    onSubmit={handleSubmit}
+                    isSubmitting={isSubmitting}
+                    validationMessage={submitError ?? undefined}
+                    canSubmit={!submitError}
+                  />
+                )}
 
-            {submitState !== "idle" && submitState !== "success" ? (
-              <OperationProgress
-                state={submitState}
-                title="Submitting glossary changes"
-                stages={SUBMIT_STAGES}
-                successLabel="PR OPENED"
-                errorLabel={submitError ?? "Submission failed"}
-              />
-            ) : null}
-          </div>
-        </dialog>
-      ) : null}
+                {submitState !== "idle" && submitState !== "success" ? (
+                  <OperationProgress
+                    state={submitState}
+                    title="Submitting glossary changes"
+                    stages={SUBMIT_STAGES}
+                    successLabel="PR OPENED"
+                    errorLabel={submitError ?? "Submission failed"}
+                  />
+                ) : null}
+              </div>
+            </dialog>,
+            document.body
+          )
+        : null}
     </div>
   )
 }

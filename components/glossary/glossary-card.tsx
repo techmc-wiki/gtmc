@@ -101,54 +101,78 @@ export function GlossaryCard({
         )}
       </header>
 
-      {visible.has("category") && entry.category && (
-        <p className="text-tech-main/60 font-mono text-xs">
-          <span className={cn(labelClass, "mr-2")}>CAT</span>
-          {entry.category}
-        </p>
-      )}
-
-      {visible.has("description") && entry.description && (
-        <p className="text-tech-main/80 line-clamp-2 text-sm">
-          {entry.description}
-        </p>
-      )}
-
       {visibleColumns.map((column) => {
         const translationColumn = parseTranslationColumn(column)
-        if (!translationColumn) return null
-        const translation = entry.translations[translationColumn.locale]
-        const value =
-          translationColumn.field === "term"
-            ? translation?.value
-            : translation?.description
-        if (!value) return null
+        if (translationColumn) {
+          const translation = entry.translations[translationColumn.locale]
+          const value =
+            translationColumn.field === "term"
+              ? translation?.value
+              : translation?.description
+          if (!value) return null
 
-        return (
-          <p key={column} className="text-tech-main/70 line-clamp-2 text-sm">
-            <span className={cn(labelClass, "mr-2")}>
-              {translationColumn.field === "term"
-                ? LANGUAGE_DISPLAY[translationColumn.locale]
-                : `DESC ${LANGUAGE_DISPLAY[translationColumn.locale]}`}
-            </span>
-            {value}
-          </p>
-        )
+          return (
+            <p key={column} className="text-tech-main/70 line-clamp-2 text-sm">
+              <span className={cn(labelClass, "mr-2")}>
+                {translationColumn.field === "term"
+                  ? LANGUAGE_DISPLAY[translationColumn.locale]
+                  : `DESC ${LANGUAGE_DISPLAY[translationColumn.locale]}`}
+              </span>
+              {value}
+            </p>
+          )
+        }
+
+        switch (column) {
+          case "category":
+            if (!entry.category) return null
+            return (
+              <p key={column} className="text-tech-main/60 font-mono text-xs">
+                <span className={cn(labelClass, "mr-2")}>CAT</span>
+                {entry.category}
+              </p>
+            )
+
+          case "description":
+            if (!entry.description) return null
+            return (
+              <p
+                key={column}
+                className="text-tech-main/80 line-clamp-2 text-sm">
+                {entry.description}
+              </p>
+            )
+
+          case "regex":
+            if (!entry.regex) return null
+            return (
+              <p
+                key={column}
+                className="text-tech-main/60 truncate font-mono text-xs">
+                <span className={cn(labelClass, "mr-2")}>RX</span>
+                {entry.regex}
+              </p>
+            )
+
+          case "related":
+            if (relatedTokens.length === 0) return null
+            return (
+              <div
+                key={column}
+                className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span className={labelClass}>REL</span>
+                <CrossRefChips
+                  related={relatedTokens}
+                  mode="index"
+                  locale={locale}
+                />
+              </div>
+            )
+
+          default:
+            return null
+        }
       })}
-
-      {visible.has("regex") && entry.regex && (
-        <p className="text-tech-main/60 truncate font-mono text-xs">
-          <span className={cn(labelClass, "mr-2")}>RX</span>
-          {entry.regex}
-        </p>
-      )}
-
-      {visible.has("related") && relatedTokens.length > 0 && (
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span className={labelClass}>REL</span>
-          <CrossRefChips related={relatedTokens} mode="index" locale={locale} />
-        </div>
-      )}
     </article>
   )
 }

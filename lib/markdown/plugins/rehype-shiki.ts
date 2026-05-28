@@ -150,7 +150,7 @@ export function getCachedRehypeShiki(
     return Promise.resolve(createNoopRehypeShiki())
   }
 
-  const langKey = [...new Set(langs)].sort().join(",")
+  const langKey = [...new Set(langs)].toSorted().join(",")
   const cachedPlugin = pluginCache.get(langKey)
   if (cachedPlugin) {
     return cachedPlugin

@@ -55,5 +55,7 @@ export function resolveGithubGlossaryWriteToken(
   return resolveFirstDefinedToken([
     process.env.GITHUB_GLOSSARY_WRITE_PAT,
     fallbackToken,
+    process.env.GITHUB_TOKEN,
+    process.env.GITHUB_PERSONAL_ACCESS_TOKEN,
   ])
 }

@@ -129,7 +129,7 @@ export function DensityToggle({
       onClick={handleClick}
       data-density={value}
       className={cn(
-        "focus-visible:outline-tech-main border-tech-main/40 bg-tech-main/5 text-tech-main hover:border-tech-main/60 hover:bg-tech-main/10 relative inline-flex min-h-9 min-w-9 cursor-pointer items-center justify-center border px-2.5 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2",
+        "focus-visible:outline-tech-main border-tech-main/40 bg-tech-main/5 text-tech-main hover:border-tech-main/60 hover:bg-tech-main/10 relative inline-flex h-9 w-9 cursor-pointer items-center justify-center border px-2.5 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2",
         className
       )}>
       <DensityIcon variant={value} />

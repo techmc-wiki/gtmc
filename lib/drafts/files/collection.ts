@@ -78,7 +78,7 @@ function dedupeNormalizedFolders(
     normalizedFolders.add(folder)
   }
 
-  return [...normalizedFolders].sort((left, right) =>
+  return [...normalizedFolders].toSorted((left, right) =>
     left.localeCompare(right, undefined, { sensitivity: "base" })
   )
 }

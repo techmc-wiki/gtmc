@@ -74,7 +74,7 @@ export function getFirstArticleInChapter(
     return null
   }
 
-  const sorted = [...articles].sort((a, b) => {
+  const sorted = [...articles].toSorted((a, b) => {
     const indexCmp = compareIndex(a.index, b.index)
     if (indexCmp !== 0) {
       return indexCmp

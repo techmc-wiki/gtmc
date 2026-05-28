@@ -378,7 +378,7 @@ function buildLocalTree(locale: ArticleLocale): ArticleTreeNode[] {
 
   const roots = entries
     .filter((entry) => !entry.parentSlug || !manifest[entry.parentSlug])
-    .sort((a, b) => compareEntries(a, b, locale))
+    .toSorted((a, b) => compareEntries(a, b, locale))
 
   return roots
     .map((entry) => buildTreeNode(entry, parentIndex, locale))
@@ -403,7 +403,7 @@ function buildTreeNode(
   }
 
   const children = Array.from(mergedChildrenBySlug.values())
-    .sort((a, b) => compareEntries(a, b, locale))
+    .toSorted((a, b) => compareEntries(a, b, locale))
     .map((child) => buildTreeNode(child, parentIndex, locale))
     .filter((node): node is ArticleTreeNode => node !== null)
 

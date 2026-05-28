@@ -46,7 +46,6 @@ export function GlossaryTableRow({
   onOpenDetail,
 }: GlossaryTableRowProps) {
   const padding = densityRowPadding[density]
-  const visible = React.useMemo(() => new Set(visibleColumns), [visibleColumns])
 
   const relatedTokens = React.useMemo(
     () => parseRelated(entry.related),
@@ -76,105 +75,127 @@ export function GlossaryTableRow({
     <tr
       data-density={density}
       className="border-tech-line/10 hover:bg-tech-accent/5 border-b transition-colors duration-150">
-      {visible.has("term") && (
-        <td className={cn(cellBase, padding, "min-w-[10rem]")}>
-          <Link
-            href={`/glossary/${entry.slug}`}
-            locale={locale as "en" | "zh"}
-            onClick={handleOpenDetail}
-            className={termTriggerClass}>
-            {entry.fullFormEn}
-          </Link>
-          {entry.isControversial && (
-            <span
-              aria-label="controversial"
-              title="controversial"
-              className="text-tech-main/40 ml-1 font-mono text-xs select-none">
-              *
-            </span>
-          )}
-        </td>
-      )}
-
-      {visible.has("shortForm") && (
-        <td
-          className={cn(
-            cellBase,
-            padding,
-            "text-tech-main/70 font-mono text-xs"
-          )}>
-          {entry.shortForm || ""}
-        </td>
-      )}
-
-      {visible.has("category") && (
-        <td
-          className={cn(
-            cellBase,
-            padding,
-            "text-tech-main/60 font-mono text-xs"
-          )}>
-          {entry.category || ""}
-        </td>
-      )}
-
-      {visible.has("regex") && (
-        <td
-          className={cn(
-            cellBase,
-            padding,
-            "text-tech-main/60 font-mono text-xs"
-          )}>
-          {entry.regex || ""}
-        </td>
-      )}
-
-      {visible.has("description") && (
-        <td
-          className={cn(cellBase, padding, "text-tech-main/80 max-w-[36rem]")}>
-          <span className="line-clamp-2">{entry.description}</span>
-        </td>
-      )}
-
       {visibleColumns.map((column) => {
         const translationColumn = parseTranslationColumn(column)
-        if (!translationColumn) return null
-        const translation = entry.translations[translationColumn.locale]
-        const value =
-          translationColumn.field === "term"
-            ? translation?.value
-            : translation?.description
+        if (translationColumn) {
+          const translation = entry.translations[translationColumn.locale]
+          const value =
+            translationColumn.field === "term"
+              ? translation?.value
+              : translation?.description
 
-        return (
-          <td
-            key={column}
-            className={cn(
-              cellBase,
-              padding,
-              "text-tech-main/80 max-w-[24rem]"
-            )}>
-            {value ? (
-              <span className="line-clamp-2">{value}</span>
-            ) : (
-              <span className="text-tech-main/30 font-mono text-xs">—</span>
-            )}
-          </td>
-        )
+          return (
+            <td
+              key={column}
+              className={cn(
+                cellBase,
+                padding,
+                "text-tech-main/80 max-w-[24rem]"
+              )}>
+              {value ? (
+                <span className="line-clamp-2">{value}</span>
+              ) : (
+                <span className="text-tech-main/30 font-mono text-xs">—</span>
+              )}
+            </td>
+          )
+        }
+
+        switch (column) {
+          case "term":
+            return (
+              <td
+                key={column}
+                className={cn(cellBase, padding, "min-w-[10rem]")}>
+                <Link
+                  href={`/glossary/${entry.slug}`}
+                  locale={locale as "en" | "zh"}
+                  onClick={handleOpenDetail}
+                  className={termTriggerClass}>
+                  {entry.fullFormEn}
+                </Link>
+                {entry.isControversial && (
+                  <span
+                    aria-label="controversial"
+                    title="controversial"
+                    className="text-tech-main/40 ml-1 font-mono text-xs select-none">
+                    *
+                  </span>
+                )}
+              </td>
+            )
+
+          case "shortForm":
+            return (
+              <td
+                key={column}
+                className={cn(
+                  cellBase,
+                  padding,
+                  "text-tech-main/70 font-mono text-xs"
+                )}>
+                {entry.shortForm || ""}
+              </td>
+            )
+
+          case "category":
+            return (
+              <td
+                key={column}
+                className={cn(
+                  cellBase,
+                  padding,
+                  "text-tech-main/60 font-mono text-xs"
+                )}>
+                {entry.category || ""}
+              </td>
+            )
+
+          case "regex":
+            return (
+              <td
+                key={column}
+                className={cn(
+                  cellBase,
+                  padding,
+                  "text-tech-main/60 font-mono text-xs"
+                )}>
+                {entry.regex || ""}
+              </td>
+            )
+
+          case "description":
+            return (
+              <td
+                key={column}
+                className={cn(
+                  cellBase,
+                  padding,
+                  "text-tech-main/80 max-w-[36rem]"
+                )}>
+                <span className="line-clamp-2">{entry.description}</span>
+              </td>
+            )
+
+          case "related":
+            return (
+              <td key={column} className={cn(cellBase, padding)}>
+                {relatedTokens.length > 0 ? (
+                  <CrossRefChips
+                    related={relatedTokens}
+                    mode="index"
+                    locale={locale}
+                  />
+                ) : (
+                  <span className="text-tech-main/30 font-mono text-xs">—</span>
+                )}
+              </td>
+            )
+
+          default:
+            return null
+        }
       })}
-
-      {visible.has("related") && (
-        <td className={cn(cellBase, padding)}>
-          {relatedTokens.length > 0 ? (
-            <CrossRefChips
-              related={relatedTokens}
-              mode="index"
-              locale={locale}
-            />
-          ) : (
-            <span className="text-tech-main/30 font-mono text-xs">—</span>
-          )}
-        </td>
-      )}
     </tr>
   )
 }

@@ -1,5 +1,6 @@
 import * as React from "react"
 import { getTranslations } from "next-intl/server"
+import { SessionProvider } from "next-auth/react"
 import {
   AuthAwareDesktopNav,
   AuthAwareMobileNav,
@@ -49,7 +50,7 @@ export default async function GlossaryLayout({
           <AuthIsland />
         </>
       }>
-      {children}
+      <SessionProvider>{children}</SessionProvider>
     </SiteShell>
   )
 }

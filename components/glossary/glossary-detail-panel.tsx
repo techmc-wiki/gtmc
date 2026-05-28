@@ -45,7 +45,7 @@ export function GlossaryDetailPanel({
         open
         aria-modal="true"
         aria-labelledby={titleId}
-        className="border-tech-main/40 animate-tech-pop-in fixed inset-x-3 inset-y-3 flex flex-col overflow-hidden border bg-white/95 backdrop-blur-md motion-reduce:animate-none sm:left-auto sm:w-[min(44rem,calc(100vw-2rem))]">
+        className="border-tech-main/40 animate-tech-pop-in fixed inset-x-3 inset-y-3 m-0 flex h-auto max-h-none w-auto max-w-none flex-col overflow-hidden border bg-white/95 backdrop-blur-md motion-reduce:animate-none sm:left-auto sm:w-[min(44rem,calc(100vw-2rem))]">
         <CornerBrackets size="size-3" color="border-tech-main/40" />
         <div className="border-tech-main/20 flex shrink-0 items-center justify-between gap-3 border-b bg-white/85 px-4 py-3 backdrop-blur-sm">
           <p className="text-tech-main/50 truncate font-mono text-xs tracking-widest uppercase">

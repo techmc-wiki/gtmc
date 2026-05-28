@@ -3,7 +3,6 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import { useTheme } from "@/lib/theme"
-import { THEME_COOKIE } from "@/lib/theme/cookie"
 import { cn } from "@/lib/cn"
 
 type Mode = "light" | "dark" | "system"
@@ -34,11 +33,6 @@ function readModeFromCookie(): Mode {
   const match = document.cookie.match(/(?:^|;\s*)theme=(light|dark)/)
   if (match) return match[1] as "light" | "dark"
   return "system"
-}
-
-function clearThemeCookie() {
-  if (typeof document === "undefined") return
-  document.cookie = `${THEME_COOKIE}=; path=/; max-age=0; SameSite=Lax`
 }
 
 interface IconProps {
@@ -143,6 +137,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   const t = useTranslations("Theme")
   const { resolvedTheme, setTheme } = useTheme()
   const [mode, setMode] = React.useState<Mode>("system")
+  const [isMounted, setIsMounted] = React.useState(false)
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
 
   const closeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -153,6 +148,7 @@ export function ThemeToggle({ className }: { className?: string }) {
 
   React.useEffect(() => {
     setMode(readModeFromCookie())
+    setIsMounted(true)
   }, [])
 
   const clearCloseTimer = React.useCallback(() => {
@@ -193,16 +189,9 @@ export function ThemeToggle({ className }: { className?: string }) {
   const applyMode = React.useCallback(
     (next: Mode) => {
       setMode(next)
-      if (next === "system") {
-        // Use the provider's resolvedTheme (which already tracks system pref)
-        // then clear the cookie so next reload falls back to prefers-color-scheme.
-        setTheme(resolvedTheme)
-        clearThemeCookie()
-      } else {
-        setTheme(next)
-      }
+      setTheme(next)
     },
-    [setTheme, resolvedTheme]
+    [setTheme]
   )
 
   const onClickToggle = React.useCallback(() => {
@@ -259,7 +248,11 @@ export function ThemeToggle({ className }: { className?: string }) {
   )
 
   const displayedMode: Mode = mode === "system" ? "system" : mode
-  const displayedIcon: Mode = mode === "system" ? resolvedTheme : mode
+  const displayedIcon: Mode = isMounted
+    ? mode === "system"
+      ? resolvedTheme
+      : mode
+    : "system"
   const toggleAriaLabel = t(TOGGLE_LABEL_KEY[displayedMode])
 
   return (

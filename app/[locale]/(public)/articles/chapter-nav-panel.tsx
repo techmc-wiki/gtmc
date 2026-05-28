@@ -157,7 +157,7 @@ const ChapterNavPanelInner = React.forwardRef<
             "
             style={{
               background:
-                "repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 4px), linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.4) 100%)",
+                "repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 4px), linear-gradient(to bottom, color-mix(in oklab, var(--color-tech-bg) 0%, transparent) 0%, color-mix(in oklab, var(--color-tech-bg) 20%, transparent) 50%, color-mix(in oklab, var(--color-tech-bg) 40%, transparent) 100%)",
             }}
           />
         </div>

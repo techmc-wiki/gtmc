@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { PageHeader } from "@/components/ui/page-header"
 import { GlossaryToolbar } from "@/components/glossary/glossary-toolbar"
+import { GlossaryEditFab } from "@/components/glossary/glossary-edit-fab"
 import { loadGlossaryManifest } from "@/lib/glossary/manifest"
 import { toAbsoluteUrl } from "@/lib/site-url"
 import { BackToTop } from "@/components/ui/back-to-top"
@@ -74,7 +75,8 @@ export default async function GlossaryIndexPage({
         />
       </div>
 
-      <BackToTop />
+      <BackToTop className="bottom-20 w-28" />
+      <GlossaryEditFab locale={locale as "en" | "zh"} className="w-28" />
     </div>
   )
 }

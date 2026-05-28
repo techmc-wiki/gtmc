@@ -27,7 +27,13 @@ function getSystemTheme(): ResolvedTheme {
     : "light"
 }
 
-function readInitialTheme(): ResolvedTheme {
+function readInitialTheme(): Theme {
+  if (typeof document === "undefined") return "light"
+  const fromCookie = parseThemeCookie(document.cookie)
+  return fromCookie ?? "system"
+}
+
+function readInitialResolvedTheme(): ResolvedTheme {
   if (typeof document === "undefined") return "light"
   const attr = document.documentElement.getAttribute("data-theme")
   if (attr === "light" || attr === "dark") return attr
@@ -36,8 +42,9 @@ function readInitialTheme(): ResolvedTheme {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(readInitialTheme)
-  const [resolvedTheme, setResolvedTheme] =
-    useState<ResolvedTheme>(readInitialTheme)
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(
+    readInitialResolvedTheme
+  )
   const hasExplicitChoice = useRef(false)
   const [, startTransition] = useTransition()
 
@@ -50,7 +57,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const handler = () => {
       if (hasExplicitChoice.current) return
       const resolved: ResolvedTheme = mediaQuery.matches ? "dark" : "light"
-      setThemeState(resolved)
       setResolvedTheme(resolved)
       document.documentElement.setAttribute("data-theme", resolved)
     }
@@ -59,13 +65,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const setTheme = useCallback((newTheme: Theme) => {
-    hasExplicitChoice.current = true
-    setThemeState(newTheme)
-    startTransition(() => {
-      setResolvedTheme(newTheme)
-      document.documentElement.setAttribute("data-theme", newTheme)
-      document.cookie = serializeThemeCookie(newTheme)
-    })
+    if (newTheme === "system") {
+      hasExplicitChoice.current = false
+      setThemeState("system")
+      const systemTheme = getSystemTheme()
+      setResolvedTheme(systemTheme)
+      document.documentElement.setAttribute("data-theme", systemTheme)
+      document.cookie = serializeThemeCookie("system")
+    } else {
+      hasExplicitChoice.current = true
+      setThemeState(newTheme)
+      startTransition(() => {
+        setResolvedTheme(newTheme)
+        document.documentElement.setAttribute("data-theme", newTheme)
+        document.cookie = serializeThemeCookie(newTheme)
+      })
+    }
   }, [])
 
   return (

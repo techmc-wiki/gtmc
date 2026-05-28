@@ -10,9 +10,9 @@ import {
   type GlossaryDensity,
 } from "@/components/glossary/density-toggle"
 import {
-  CategoryChips,
-  type CategoryChipsCategory,
-} from "@/components/glossary/category-chips"
+  CategoryFilter,
+  type CategoryFilterCategory,
+} from "@/components/glossary/category-filter"
 import { GlossaryTable } from "@/components/glossary/glossary-table"
 import { GlossaryDetailPanel } from "@/components/glossary/glossary-detail-panel"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
@@ -106,7 +106,7 @@ export function GlossaryToolbar({
     setSelectedEntry(null)
   }, [])
 
-  const categories = React.useMemo<CategoryChipsCategory[]>(() => {
+  const categories = React.useMemo<CategoryFilterCategory[]>(() => {
     const counts = new Map<string, number>()
     for (const entry of entries) {
       const name = entry.category?.trim()
@@ -164,7 +164,7 @@ export function GlossaryToolbar({
             </div>
           </div>
 
-          <CategoryChips
+          <CategoryFilter
             categories={categories}
             selected={selectedCategories}
             onChange={setSelectedCategories}

@@ -48,6 +48,15 @@ export function DraftEditorToolbar({
   canUndo,
   canRedo,
 }: DraftEditorToolbarProps) {
+  const fileUploadSlot = !isReadOnly ? (
+    <EditorFileUploadInput
+      fileInputRef={fileInputRef}
+      onFileSelect={onFileSelect}
+      isUploading={isUploading}
+      isCompressing={isCompressing}
+    />
+  ) : undefined
+
   return (
     <>
       <EditorTabStrip
@@ -65,16 +74,7 @@ export function DraftEditorToolbar({
             disabled={isReadOnly || isUploading}
             lineWrap={lineWrap}
             onWrapToggle={onWrapToggle}
-            fileUploadSlot={
-              !isReadOnly ? (
-                <EditorFileUploadInput
-                  fileInputRef={fileInputRef}
-                  onFileSelect={onFileSelect}
-                  isUploading={isUploading}
-                  isCompressing={isCompressing}
-                />
-              ) : undefined
-            }
+            fileUploadSlot={fileUploadSlot}
           />
           <div className="guide-line bg-tech-main/4 relative flex h-12 items-center gap-2 overflow-x-auto scroll-smooth border-b px-4 shadow-[inset_0_1px_4px_rgb(var(--color-tech-main)/0.05)]">
             <div className="bg-tech-main/30 absolute inset-y-0 left-0 w-1" />

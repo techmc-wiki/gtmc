@@ -1,6 +1,7 @@
 import { TechCard } from "@/components/ui/tech-card"
 import { MarkdownRenderer } from "@/lib/markdown"
 import { getCachedRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
+// oxlint-disable-next-line import/no-unassigned-import
 import "katex/dist/katex.min.css"
 
 interface FeatureReadonlyViewProps {

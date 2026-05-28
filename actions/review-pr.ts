@@ -87,7 +87,7 @@ export async function mergePRAction(
     return { success: true }
   } catch (error) {
     reviewError("mergePRAction", error, { prNumber, status: "error" })
-    throw new Error(formatErrorMessage("Merge failed", error))
+    throw new Error(formatErrorMessage("Merge failed", error), { cause: error })
   }
 }
 
@@ -143,7 +143,7 @@ export async function closePRAction(prNumber: number) {
     return { success: true }
   } catch (error) {
     reviewError("closePRAction", error, { prNumber, status: "error" })
-    throw new Error(formatErrorMessage("Close failed", error))
+    throw new Error(formatErrorMessage("Close failed", error), { cause: error })
   }
 }
 
@@ -205,13 +205,6 @@ export async function finalizeReviewAction(
     if (conflictMode === "SIMPLE") {
       if (!revision.prBranchName || !revision.syncedMainSha) {
         throw new Error("The linked draft is missing PR metadata")
-      }
-
-      const hasSimpleConflictMarkers = (content: string) => {
-        const SIMPLE_CONFLICT_MARKER_RE =
-          /^<<<<<<< .*\n[\s\S]*?^=======\n[\s\S]*?^>>>>>>> .*$/gm
-        SIMPLE_CONFLICT_MARKER_RE.lastIndex = 0
-        return SIMPLE_CONFLICT_MARKER_RE.test(content)
       }
 
       if (
@@ -339,4 +332,12 @@ export async function finalizeReviewAction(
     reviewError("finalizeReviewAction", error, { prNumber, status: "error" })
     throw error
   }
+}
+
+const SIMPLE_CONFLICT_MARKER_RE =
+  /^<<<<<<< .*\n[\s\S]*?^=======\n[\s\S]*?^>>>>>>> .*$/gm
+
+function hasSimpleConflictMarkers(content: string): boolean {
+  SIMPLE_CONFLICT_MARKER_RE.lastIndex = 0
+  return SIMPLE_CONFLICT_MARKER_RE.test(content)
 }

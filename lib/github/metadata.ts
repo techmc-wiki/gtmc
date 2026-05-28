@@ -215,7 +215,7 @@ export function parseCommentBody(body: string): {
     ""
   )
   const contentWithoutAttribution = contentWithoutAuthorMarker.replace(
-    /^(?:\[By\]:|By:|\*\*By:\*\*|\> \*\*\[BY\]\*\*(?:\s*:)?)[^\n]*\n\n/,
+    /^(?:\[By\]:|By:|\*\*By:\*\*|> \*\*\[BY\]\*\*(?:\s*:)?)[^\n]*\n\n/,
     ""
   )
 

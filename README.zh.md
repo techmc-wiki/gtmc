@@ -11,7 +11,7 @@
 
 [![Website](https://img.shields.io/badge/site-beta.techmc.wiki-60708F?style=flat-square&labelColor=4A5A78)](https://beta.techmc.wiki) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/gtmc-dev/gtmc) [![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org) [![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org) [![License](https://img.shields.io/badge/Code-Apache--2.0-yellow?style=flat-square)](LICENSE) [![Articles](https://img.shields.io/badge/Articles-CC--BY--NC--SA%204.0-lightgrey?style=flat-square)](LICENSE)
 
-[访问网站](https://beta.techmc.wiki) · [浏览原始文章](https://beta.techmc.wiki/articles) · [更多 GTMC 项目](https://github.com/orgs/gtmc-dev/repositories)
+[访问网站](https://beta.techmc.wiki) · [浏览原始文章](https://github.com/gtmc-dev/articles) · [更多 GTMC 项目](https://github.com/orgs/gtmc-dev/repositories)
 
 <!-- README-I18N:START -->
 
@@ -120,7 +120,7 @@ pnpm articles:pdf                   # 重新生成离线 PDF
 
 ## 另见
 
-所有文章（含草稿与待审稿件）位于此仓库：[`gtmc-dev/articles`](https://github.com/orgs/gtmc-dev/repositories)
+所有文章（含草稿与待审稿件）位于此仓库：[`gtmc-dev/articles`](https://github.com/gtmc-dev/articles)
 
 ---
 

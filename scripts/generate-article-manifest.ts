@@ -154,7 +154,7 @@ async function processSourceFile(
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err)
     if (errMsg.includes("legacy key") || errMsg.includes("unknown key")) {
-      throw new Error(`${relPath}: ${errMsg}`)
+      throw new Error(`${relPath}: ${errMsg}`, { cause: err })
     }
     throw err
   }
@@ -360,6 +360,12 @@ async function processDirectory(
       !shouldIgnoreFile(e.name, false)
   )
 
+  const sourceFileJobs: Array<{
+    sourcePath: string
+    relPath: string
+    compositeSlug: string
+    parentSlug: string | undefined
+  }> = []
   for (const sourceFile of sourceFiles) {
     const sourcePath = path.join(dirPath, sourceFile.name)
     const relPath = `${relFromArticles}/${sourceFile.name}`
@@ -382,25 +388,38 @@ async function processDirectory(
 
     const compositeSlug = resolveSourceSlug(slugPrefix, articleSlug)
     const parentSlug = getParentSlug(compositeSlug)
+    sourceFileJobs.push({ sourcePath, relPath, compositeSlug, parentSlug })
+  }
 
-    try {
-      const entry = await processSourceFile(
-        sourcePath,
-        relPath,
-        compositeSlug,
-        false,
-        parentSlug,
-        repoCwd,
-        maintainers,
-        aliases
-      )
-      manifest[compositeSlug] = entry as ArticleEntry
-    } catch (err) {
-      process.stderr.write(
-        `Error: ${err instanceof Error ? err.message : String(err)}\n`
-      )
-      hasError = true
+  const sourceFileResults = await Promise.all(
+    sourceFileJobs.map(
+      async ({ sourcePath, relPath, compositeSlug, parentSlug }) => {
+        try {
+          const entry = await processSourceFile(
+            sourcePath,
+            relPath,
+            compositeSlug,
+            false,
+            parentSlug,
+            repoCwd,
+            maintainers,
+            aliases
+          )
+          return { compositeSlug, entry: entry as ArticleEntry, error: false }
+        } catch (err) {
+          process.stderr.write(
+            `Error: ${err instanceof Error ? err.message : String(err)}\n`
+          )
+          return { compositeSlug, entry: null, error: true }
+        }
+      }
+    )
+  )
+  for (const result of sourceFileResults) {
+    if (result.entry) {
+      manifest[result.compositeSlug] = result.entry
     }
+    if (result.error) hasError = true
   }
 
   const readmeEn = entries.find((e) => e.isFile() && e.name === "README.en.md")
@@ -430,30 +449,35 @@ async function processDirectory(
       !shouldIgnoreFile(e.name, false)
   )
 
-  for (const enFile of enFiles) {
-    const enPath = path.join(dirPath, enFile.name)
-    const relPath = `${relFromArticles}/${enFile.name}`
+  const enFileResults = await Promise.all(
+    enFiles.map(async (enFile) => {
+      const enPath = path.join(dirPath, enFile.name)
+      const relPath = `${relFromArticles}/${enFile.name}`
 
-    try {
-      await processTranslationFile(
-        enPath,
-        relPath,
-        repoCwd,
-        maintainers,
-        manifest
-      )
-    } catch (err) {
-      process.stderr.write(
-        `Error: ${err instanceof Error ? err.message : String(err)}\n`
-      )
-      hasError = true
-    }
-  }
+      try {
+        await processTranslationFile(
+          enPath,
+          relPath,
+          repoCwd,
+          maintainers,
+          manifest
+        )
+        return false
+      } catch (err) {
+        process.stderr.write(
+          `Error: ${err instanceof Error ? err.message : String(err)}\n`
+        )
+        return true
+      }
+    })
+  )
+  if (enFileResults.some(Boolean)) hasError = true
 
   const subDirs = entries.filter(
     (e) => e.isDirectory() && !shouldIgnoreDirectory(e.name)
   )
 
+  const subDirJobs: Array<() => Promise<boolean>> = []
   for (const subDirEntry of subDirs) {
     const subDirPath = path.join(dirPath, subDirEntry.name)
     const subRelPath = `${relFromArticles}/${subDirEntry.name}`
@@ -485,17 +509,18 @@ async function processDirectory(
         hasError = true
         continue
       }
-      const subError = await processDirectory(
-        subDirPath,
-        subRelPath,
-        slugPrefix,
-        depth + 1,
-        manifest,
-        repoCwd,
-        maintainers,
-        aliases
+      subDirJobs.push(() =>
+        processDirectory(
+          subDirPath,
+          subRelPath,
+          slugPrefix,
+          depth + 1,
+          manifest,
+          repoCwd,
+          maintainers,
+          aliases
+        )
       )
-      if (subError) hasError = true
       continue
     }
 
@@ -508,18 +533,22 @@ async function processDirectory(
     }
 
     const subSlugPrefix = resolveSourceSlug(slugPrefix, subSlug)
-    const subError = await processDirectory(
-      subDirPath,
-      subRelPath,
-      subSlugPrefix,
-      depth + 1,
-      manifest,
-      repoCwd,
-      maintainers,
-      aliases
+    subDirJobs.push(() =>
+      processDirectory(
+        subDirPath,
+        subRelPath,
+        subSlugPrefix,
+        depth + 1,
+        manifest,
+        repoCwd,
+        maintainers,
+        aliases
+      )
     )
-    if (subError) hasError = true
   }
+
+  const subDirResults = await Promise.all(subDirJobs.map((job) => job()))
+  if (subDirResults.some(Boolean)) hasError = true
 
   return hasError
 }
@@ -530,7 +559,7 @@ function buildGenerationSummary(manifest: ArticleManifest): string {
   const articles = entries.filter((e) => !e.isFolder)
   const roots = entries
     .filter((e) => !e.parentSlug || !manifest[e.parentSlug])
-    .sort(comparePreviewEntries)
+    .toSorted(comparePreviewEntries)
   const maxSlugDepth = entries.reduce(
     (max, e) => Math.max(max, e.slug.split("/").length),
     0
@@ -574,7 +603,7 @@ function formatPreviewEntries(
   for (const entry of visibleEntries) {
     lines.push(formatPreviewEntry(entry, depth))
 
-    const children = [...(entry.children ?? [])].sort(comparePreviewEntries)
+    const children = [...(entry.children ?? [])].toSorted(comparePreviewEntries)
     if (children.length > 0) {
       if (nextDepth < TREE_PREVIEW_DEPTH) {
         lines.push(...formatPreviewEntries(children, nextDepth))
@@ -667,6 +696,11 @@ async function main(): Promise<void> {
     .filter((e) => e.isDirectory() && !shouldIgnoreDirectory(e.name))
     .map((e) => e.name)
 
+  const folderJobs: Array<{
+    folderPath: string
+    folderName: string
+    folderSlug: string
+  }> = []
   for (const folderName of topLevelFolders) {
     const folderPath = path.join(ARTICLES_PATH, folderName)
     const readmeZhPath = path.join(folderPath, "README.zh.md")
@@ -703,18 +737,24 @@ async function main(): Promise<void> {
       continue
     }
 
-    const folderError = await processDirectory(
-      folderPath,
-      folderName,
-      folderSlug,
-      1,
-      manifest,
-      ARTICLES_PATH,
-      maintainers,
-      aliases
-    )
-    if (folderError) hasError = true
+    folderJobs.push({ folderPath, folderName, folderSlug })
   }
+
+  const folderResults = await Promise.all(
+    folderJobs.map(({ folderPath, folderName, folderSlug }) =>
+      processDirectory(
+        folderPath,
+        folderName,
+        folderSlug,
+        1,
+        manifest,
+        ARTICLES_PATH,
+        maintainers,
+        aliases
+      )
+    )
+  )
+  if (folderResults.some(Boolean)) hasError = true
 
   const rootFiles = fs
     .readdirSync(ARTICLES_PATH, { withFileTypes: true })
@@ -728,6 +768,11 @@ async function main(): Promise<void> {
     )
     .map((e) => e.name)
 
+  const rootFileJobs: Array<{
+    rootFilePath: string
+    rootFile: string
+    rawSlug: string
+  }> = []
   for (const rootFile of rootFiles) {
     const rootFilePath = path.join(ARTICLES_PATH, rootFile)
     const rawSlug = getSlugFromFile(rootFilePath)
@@ -747,24 +792,36 @@ async function main(): Promise<void> {
       continue
     }
 
-    try {
-      const entry = await processSourceFile(
-        rootFilePath,
-        rootFile,
-        rawSlug,
-        false,
-        undefined,
-        ARTICLES_PATH,
-        maintainers,
-        aliases
-      )
-      manifest[rawSlug] = entry as ArticleEntry
-    } catch (err) {
-      process.stderr.write(
-        `Error: ${err instanceof Error ? err.message : String(err)}\n`
-      )
-      hasError = true
+    rootFileJobs.push({ rootFilePath, rootFile, rawSlug })
+  }
+
+  const rootFileResults = await Promise.all(
+    rootFileJobs.map(async ({ rootFilePath, rootFile, rawSlug }) => {
+      try {
+        const entry = await processSourceFile(
+          rootFilePath,
+          rootFile,
+          rawSlug,
+          false,
+          undefined,
+          ARTICLES_PATH,
+          maintainers,
+          aliases
+        )
+        return { rawSlug, entry: entry as ArticleEntry, error: false }
+      } catch (err) {
+        process.stderr.write(
+          `Error: ${err instanceof Error ? err.message : String(err)}\n`
+        )
+        return { rawSlug, entry: null, error: true }
+      }
+    })
+  )
+  for (const result of rootFileResults) {
+    if (result.entry) {
+      manifest[result.rawSlug] = result.entry
     }
+    if (result.error) hasError = true
   }
 
   const rootEnFiles = fs
@@ -778,23 +835,27 @@ async function main(): Promise<void> {
     )
     .map((e) => e.name)
 
-  for (const rootEnFile of rootEnFiles) {
-    const rootEnPath = path.join(ARTICLES_PATH, rootEnFile)
-    try {
-      await processTranslationFile(
-        rootEnPath,
-        rootEnFile,
-        ARTICLES_PATH,
-        maintainers,
-        manifest
-      )
-    } catch (err) {
-      process.stderr.write(
-        `Error: ${err instanceof Error ? err.message : String(err)}\n`
-      )
-      hasError = true
-    }
-  }
+  const rootEnFileResults = await Promise.all(
+    rootEnFiles.map(async (rootEnFile) => {
+      const rootEnPath = path.join(ARTICLES_PATH, rootEnFile)
+      try {
+        await processTranslationFile(
+          rootEnPath,
+          rootEnFile,
+          ARTICLES_PATH,
+          maintainers,
+          manifest
+        )
+        return false
+      } catch (err) {
+        process.stderr.write(
+          `Error: ${err instanceof Error ? err.message : String(err)}\n`
+        )
+        return true
+      }
+    })
+  )
+  if (rootEnFileResults.some(Boolean)) hasError = true
 
   for (const entry of Object.values(manifest)) {
     entry.children = undefined

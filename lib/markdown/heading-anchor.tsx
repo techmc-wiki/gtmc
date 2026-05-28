@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useCallback } from "react"
 import { useTranslations } from "next-intl"
 
 interface HeadingAnchorProps {
@@ -18,17 +18,20 @@ export function HeadingAnchor({ id, level }: HeadingAnchorProps) {
   const t = useTranslations("ArticleMeta")
   const [copied, setCopied] = useState(false)
 
-  function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault()
-    e.stopPropagation()
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault()
+      e.stopPropagation()
 
-    const url = window.location.origin + window.location.pathname + "#" + id
+      const url = window.location.origin + window.location.pathname + "#" + id
 
-    navigator.clipboard.writeText(url).catch(() => {})
+      navigator.clipboard.writeText(url).catch(() => {})
 
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
-  }
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    },
+    [id]
+  )
 
   return (
     <button

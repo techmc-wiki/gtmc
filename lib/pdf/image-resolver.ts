@@ -107,44 +107,44 @@ export function resolveImageUrl(
 // ---------------------------------------------------------------------------
 // Self-test (run directly with tsx: npx tsx lib/pdf/image-resolver.ts)
 // ---------------------------------------------------------------------------
-function runTests(): void {
-  const assert = (condition: boolean, label: string): void => {
-    if (!condition) {
-      console.error(`  ✗ FAIL: ${label}`)
-      process.exitCode = 1
-    } else {
-      console.log(`  ✓ ${label}`)
-    }
+function testAssert(condition: boolean, label: string): void {
+  if (!condition) {
+    console.error(`  ✗ FAIL: ${label}`)
+    process.exitCode = 1
+  } else {
+    console.log(`  ✓ ${label}`)
   }
+}
 
+function runTests(): void {
   // --- classifyImagePath ---
   console.log("\nclassifyImagePath:")
 
-  assert(
+  testAssert(
     classifyImagePath("./img/test.png") === "relative",
     '"./img/test.png" → relative'
   )
-  assert(
+  testAssert(
     classifyImagePath("img/test.png") === "relative",
     '"img/test.png" → relative'
   )
-  assert(
+  testAssert(
     classifyImagePath("../img/test.png") === "relative",
     '"../img/test.png" → relative'
   )
-  assert(
+  testAssert(
     classifyImagePath("https://example.com/img.png") === "external",
     '"https://example.com/img.png" → external'
   )
-  assert(
+  testAssert(
     classifyImagePath("http://example.com/img.png") === "external",
     '"http://example.com/img.png" → external'
   )
-  assert(
+  testAssert(
     classifyImagePath("/img/foo.png") === "absolute",
     '"/img/foo.png" → absolute'
   )
-  assert(
+  testAssert(
     classifyImagePath("data:image/png;base64,abc") === "data-uri",
     '"data:image/png;base64,abc" → data-uri'
   )
@@ -157,7 +157,7 @@ function runTests(): void {
     "./img/test.png",
     "/project/articles/BlockUpdate/article.md"
   )
-  assert(
+  testAssert(
     r1 === "/project/articles/BlockUpdate/img/test.png",
     `"./img/test.png" from BlockUpdate/article.md → ${r1}`
   )
@@ -167,7 +167,7 @@ function runTests(): void {
     "img/test.png",
     "/project/articles/BlockUpdate/article.md"
   )
-  assert(
+  testAssert(
     r2 === "/project/articles/BlockUpdate/img/test.png",
     `"img/test.png" from BlockUpdate/article.md → ${r2}`
   )
@@ -177,7 +177,7 @@ function runTests(): void {
     "../img/test.png",
     "/project/articles/BlockUpdate/sub/article.md"
   )
-  assert(
+  testAssert(
     r3 === "/project/articles/BlockUpdate/img/test.png",
     `"../img/test.png" from BlockUpdate/sub/article.md → ${r3}`
   )
@@ -187,7 +187,7 @@ function runTests(): void {
     "https://example.com/img.png",
     "/project/articles/any/article.md"
   )
-  assert(
+  testAssert(
     r4 === "https://example.com/img.png",
     `external URL passthrough → ${r4}`
   )
@@ -197,18 +197,21 @@ function runTests(): void {
     "data:image/png;base64,abc123",
     "/project/articles/any/article.md"
   )
-  assert(r5 === "data:image/png;base64,abc123", `data URI passthrough → ${r5}`)
+  testAssert(
+    r5 === "data:image/png;base64,abc123",
+    `data URI passthrough → ${r5}`
+  )
 
   // Empty src
   const r6 = resolveImagePath("", "/project/articles/any/article.md")
-  assert(r6 === null, "empty src → null")
+  testAssert(r6 === null, "empty src → null")
 
   // Absolute path (leading /) — resolves to IMAGES_BASE_DIR + path
   const r7 = resolveImagePath(
     "/img/shared.png",
     "/project/articles/any/article.md"
   )
-  assert(
+  testAssert(
     r7 === `${IMAGES_BASE_DIR}/img/shared.png`,
     `"/img/shared.png" → ${r7}`
   )
@@ -218,7 +221,7 @@ function runTests(): void {
     "./img/4gt%20birch%20layout1.png",
     "/project/articles/TreeFarm/article.md"
   )
-  assert(
+  testAssert(
     r8 === "/project/articles/TreeFarm/img/4gt birch layout1.png",
     `URL-encoded %20 decoded → ${r8}`
   )
@@ -230,7 +233,7 @@ function runTests(): void {
     "./img/test.png",
     "/project/articles/BlockUpdate/article.md"
   )
-  assert(
+  testAssert(
     u1 === "file:///project/articles/BlockUpdate/img/test.png",
     `file:// URL for relative path → ${u1}`
   )
@@ -239,7 +242,7 @@ function runTests(): void {
     "https://example.com/img.png",
     "/project/articles/any/article.md"
   )
-  assert(
+  testAssert(
     u2 === "https://example.com/img.png",
     `external URL passthrough → ${u2}`
   )
@@ -248,19 +251,22 @@ function runTests(): void {
     "data:image/png;base64,abc123",
     "/project/articles/any/article.md"
   )
-  assert(u3 === "data:image/png;base64,abc123", `data URI passthrough → ${u3}`)
+  testAssert(
+    u3 === "data:image/png;base64,abc123",
+    `data URI passthrough → ${u3}`
+  )
 
   const u4 = resolveImageUrl(
     "./img/4gt%20birch%20layout1.png",
     "/project/articles/TreeFarm/article.md"
   )
-  assert(
+  testAssert(
     u4 === "file:///project/articles/TreeFarm/img/4gt%20birch%20layout1.png",
     `file:// URL with encoded space → ${u4}`
   )
 
   const u5 = resolveImageUrl("", "/project/articles/any/article.md")
-  assert(u5 === null, "empty src → null")
+  testAssert(u5 === null, "empty src → null")
 
   console.log("\nAll tests completed.\n")
 }

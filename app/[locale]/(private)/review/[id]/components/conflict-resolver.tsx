@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import type { RebaseState } from "@/lib/review/rebase-types"
 
 import { resolveConflictAction } from "@/actions/review-conflict"
@@ -110,7 +110,7 @@ export default function ConflictResolver({
     updateActiveFileContent(newContent)
   }
 
-  async function handleAbort() {
+  const handleAbort = useCallback(async () => {
     if (!revisionId) return
     if (
       !confirm(
@@ -135,27 +135,51 @@ export default function ConflictResolver({
       )
       setIsAborting(false)
     }
-  }
+  }, [revisionId])
 
-  async function handleResolve(formData: FormData) {
-    setIsSubmitting(true)
-    try {
-      await resolveConflictAction(prNumber, formData)
-      window.location.reload()
-    } catch (error) {
-      if (isReauthRequiredError(error)) {
-        window.location.href = getReauthLoginUrl(
-          `${window.location.pathname}${window.location.search}`
+  const handleResolve = useCallback(
+    async (formData: FormData) => {
+      setIsSubmitting(true)
+      try {
+        await resolveConflictAction(prNumber, formData)
+        window.location.reload()
+      } catch (error) {
+        if (isReauthRequiredError(error)) {
+          window.location.href = getReauthLoginUrl(
+            `${window.location.pathname}${window.location.search}`
+          )
+          return
+        }
+        alert(
+          `Failed to resolve conflict: ${error instanceof Error ? error.message : String(error)}`
         )
-        return
+      } finally {
+        setIsSubmitting(false)
       }
-      alert(
-        `Failed to resolve conflict: ${error instanceof Error ? error.message : String(error)}`
-      )
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+    },
+    [prNumber]
+  )
+
+  const handleContentChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) =>
+      updateActiveFileContent(event.target.value),
+    []
+  )
+
+  const handleSelectFile = useCallback((fileId: string) => {
+    setDraftCollection((current) => ({
+      ...current,
+      activeFileId: fileId,
+    }))
+  }, [])
+
+  const handleFormSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      void handleResolve(new FormData(e.currentTarget))
+    },
+    [handleResolve]
+  )
 
   return (
     <div className="space-y-4">
@@ -211,17 +235,13 @@ export default function ConflictResolver({
                 const fileLabel =
                   file.filePath.split("/").filter(Boolean).at(-1) ||
                   `UNTITLED_FILE_${index + 1}`
+                const selectFile = () => handleSelectFile(file.id)
 
                 return (
                   <button
                     key={file.id}
                     type="button"
-                    onClick={() =>
-                      setDraftCollection((current) => ({
-                        ...current,
-                        activeFileId: file.id,
-                      }))
-                    }
+                    onClick={selectFile}
                     className={`flex min-h-11 w-full flex-col items-start gap-1 border px-3 py-2 text-left transition-colors ${
                       isActive
                         ? `border-tech-main bg-tech-main/10`
@@ -251,71 +271,68 @@ export default function ConflictResolver({
           </div>
 
           <div className="border-tech-main/30 bg-tech-main/5 mb-8 space-y-2 border p-2">
-            {blocks.map((block) => (
-              <div key={block.id}>
-                {block.type === "ok" ? (
-                  <pre className="text-tech-main-dark p-4 font-mono text-sm whitespace-pre-wrap opacity-70">
-                    {block.content}
-                  </pre>
-                ) : (
-                  <div className="my-4 flex flex-col border border-red-500/50">
-                    <div className="border-b border-red-500/30 bg-red-500/10 p-2 text-center text-xs font-bold tracking-widest text-red-700 uppercase">
-                      Conflict Block
-                    </div>
-                    <div className="flex flex-col divide-red-500/30 md:flex-row md:divide-x">
-                      <div className="flex flex-1 flex-col bg-amber-500/5">
-                        <div className="border-b border-amber-500/20 bg-amber-500/10 p-2 text-xs font-bold text-amber-700">
-                          YOUR CHANGES (draft)
+            {blocks.map((block) => {
+              return (
+                <div key={block.id}>
+                  {block.type === "ok" ? (
+                    <pre className="text-tech-main-dark p-4 font-mono text-sm whitespace-pre-wrap opacity-70">
+                      {block.content}
+                    </pre>
+                  ) : (
+                    <div className="my-4 flex flex-col border border-red-500/50">
+                      <div className="border-b border-red-500/30 bg-red-500/10 p-2 text-center text-xs font-bold tracking-widest text-red-700 uppercase">
+                        Conflict Block
+                      </div>
+                      <div className="flex flex-col divide-red-500/30 md:flex-row md:divide-x">
+                        <div className="flex flex-1 flex-col bg-amber-500/5">
+                          <div className="border-b border-amber-500/20 bg-amber-500/10 p-2 text-xs font-bold text-amber-700">
+                            YOUR CHANGES (draft)
+                          </div>
+                          <pre className="overflow-x-auto p-4 font-mono text-sm whitespace-pre-wrap">
+                            {block.ours}
+                          </pre>
+                          <div className="mt-auto border-t border-amber-500/20 bg-amber-500/5 p-2">
+                            <TechButton
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              className="w-full border-amber-500 text-amber-700 hover:bg-amber-500 hover:text-amber-900"
+                              onClick={() =>
+                                handleAcceptBlock(block.id, block.ours)
+                              }>
+                              ACCEPT OURS
+                            </TechButton>
+                          </div>
                         </div>
-                        <pre className="overflow-x-auto p-4 font-mono text-sm whitespace-pre-wrap">
-                          {block.ours}
-                        </pre>
-                        <div className="mt-auto border-t border-amber-500/20 bg-amber-500/5 p-2">
-                          <TechButton
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            className="w-full border-amber-500 text-amber-700 hover:bg-amber-500 hover:text-amber-900"
-                            onClick={() =>
-                              handleAcceptBlock(block.id, block.ours)
-                            }>
-                            ACCEPT OURS
-                          </TechButton>
+                        <div className="flex flex-1 flex-col bg-blue-500/5">
+                          <div className="border-b border-blue-500/20 bg-blue-500/10 p-2 text-xs font-bold text-blue-700">
+                            MAIN CHANGES
+                          </div>
+                          <pre className="overflow-x-auto p-4 font-mono text-sm whitespace-pre-wrap">
+                            {block.theirs}
+                          </pre>
+                          <div className="mt-auto border-t border-blue-500/20 bg-blue-500/5 p-2">
+                            <TechButton
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              className="w-full border-blue-500 text-blue-700 hover:bg-blue-500 hover:text-blue-900"
+                              onClick={() =>
+                                handleAcceptBlock(block.id, block.theirs)
+                              }>
+                              ACCEPT THEIRS
+                            </TechButton>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex flex-1 flex-col bg-blue-500/5">
-                        <div className="border-b border-blue-500/20 bg-blue-500/10 p-2 text-xs font-bold text-blue-700">
-                          MAIN CHANGES
-                        </div>
-                        <pre className="overflow-x-auto p-4 font-mono text-sm whitespace-pre-wrap">
-                          {block.theirs}
-                        </pre>
-                        <div className="mt-auto border-t border-blue-500/20 bg-blue-500/5 p-2">
-                          <TechButton
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            className="w-full border-blue-500 text-blue-700 hover:bg-blue-500 hover:text-blue-900"
-                            onClick={() =>
-                              handleAcceptBlock(block.id, block.theirs)
-                            }>
-                            ACCEPT THEIRS
-                          </TechButton>
-                        </div>
-                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              )
+            })}
           </div>
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              void handleResolve(new FormData(e.currentTarget))
-            }}
-            className="space-y-4">
+          <form onSubmit={handleFormSubmit} className="space-y-4">
             <input
               type="hidden"
               name="draftFiles"
@@ -331,10 +348,9 @@ export default function ConflictResolver({
                 <textarea
                   name="content"
                   value={content}
-                  onChange={(event) =>
-                    updateActiveFileContent(event.target.value)
-                  }
+                  onChange={handleContentChange}
                   className="text-tech-main-dark min-h-[300px] w-full resize-y bg-transparent p-4 font-mono text-sm outline-none"
+                  aria-label="Raw editor fallback"
                 />
               </div>
             </div>

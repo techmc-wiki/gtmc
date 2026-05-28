@@ -22,7 +22,7 @@ export function remarkAdvancedSections() {
 
       node.data = node.data ?? {}
       node.data.hProperties = {
-        ...(node.data.hProperties ?? {}),
+        ...node.data.hProperties,
         "data-advanced": "true",
       }
     })

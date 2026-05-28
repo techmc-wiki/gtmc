@@ -1,5 +1,8 @@
 import { motion, MotionValue } from "motion/react"
+import { useMemo } from "react"
 import { DecorElement } from "./decor-element"
+
+const RULER_TICK_KEYS = Array.from({ length: 50 }, (_, i) => `tick-${i}`)
 
 export function MidgroundLayer({
   mgTransform,
@@ -14,10 +17,15 @@ export function MidgroundLayer({
   blurMax: number
   isReducedMotion?: boolean
 }) {
+  const mgStyle = useMemo(
+    () => ({ x: mgTransform.x, y: mgTransform.y }),
+    [mgTransform.x, mgTransform.y]
+  )
+
   return (
     <motion.div
       className="homepage-decor-midground absolute inset-0 z-1"
-      style={{ x: mgTransform.x, y: mgTransform.y }}>
+      style={mgStyle}>
       {/* 左上角系统序列号 */}
       <div className="absolute top-8 left-8 hidden flex-col space-y-1 md:flex">
         <div className="text-tech-main-dark font-mono text-xs tracking-widest uppercase opacity-50">
@@ -102,9 +110,9 @@ export function MidgroundLayer({
       </div>
 
       <div className="decor-desktop-only border-tech-main/10 absolute top-0 left-0 hidden h-full w-2 flex-col overflow-hidden border-r opacity-30 md:flex">
-        {Array.from({ length: 50 }).map((_, i) => (
+        {RULER_TICK_KEYS.map((tickKey) => (
           <div
-            key={i}
+            key={tickKey}
             className="border-tech-main/40 relative h-8 w-full flex-none border-t"
           />
         ))}

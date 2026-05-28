@@ -1,4 +1,5 @@
 import { motion, MotionValue } from "motion/react"
+import { useMemo } from "react"
 import { DecorElement } from "./decor-element"
 
 const HEX_VALUES = [
@@ -26,7 +27,9 @@ const HEX_VALUES = [
   "89ab",
   "cdef",
   "0123",
-]
+] as const
+
+const HEX_KEYS = HEX_VALUES.map((v, i) => `hex-${i}-${v}`)
 
 export function BackgroundLayer({
   bgTransform,
@@ -41,10 +44,15 @@ export function BackgroundLayer({
   blurMax: number
   isReducedMotion?: boolean
 }) {
+  const bgStyle = useMemo(
+    () => ({ x: bgTransform.x, y: bgTransform.y }),
+    [bgTransform.x, bgTransform.y]
+  )
+
   return (
     <motion.div
       className="homepage-decor-background absolute inset-0 z-0"
-      style={{ x: bgTransform.x, y: bgTransform.y }}>
+      style={bgStyle}>
       {/* 巨型背景水印 */}
       <DecorElement
         className="decor-desktop-only text-tech-main pointer-events-none absolute top-1/3 -right-20 hidden rotate-90 text-[10rem] font-black tracking-tighter whitespace-nowrap opacity-[0.05] mix-blend-multiply select-none lg:block"
@@ -218,7 +226,7 @@ export function BackgroundLayer({
         <div className="guide-line bg-tech-main/5 grid grid-cols-6 gap-x-4 gap-y-2 border p-2">
           {HEX_VALUES.map((hexValue, i) => (
             <span
-              key={i}
+              key={HEX_KEYS[i]}
               className={
                 i % 7 === 0
                   ? `text-tech-main-dark relative font-bold before:absolute before:-left-3 before:content-['>']`

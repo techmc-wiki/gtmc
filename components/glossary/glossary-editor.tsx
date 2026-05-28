@@ -100,14 +100,13 @@ function findDanglingRefsFor(
   for (const entry of entries) {
     if (entry.slug === slug) continue
     if (!entry.related) continue
-    const tokens = entry.related
-      .split(/\s+/)
-      .map((token) => token.trim().toLowerCase())
-      .filter(Boolean)
-    if (
-      tokens.includes(slug) ||
-      (fullFormLower && tokens.includes(fullFormLower))
-    ) {
+    const tokens = new Set(
+      entry.related
+        .split(/\s+/)
+        .map((token) => token.trim().toLowerCase())
+        .filter(Boolean)
+    )
+    if (tokens.has(slug) || (fullFormLower && tokens.has(fullFormLower))) {
       found.push({ slug: entry.slug, fullFormEn: entry.fullFormEn })
     }
   }
@@ -358,6 +357,17 @@ export function GlossaryEditor({
     router.push("/draft")
   }, [router])
 
+  const handleOpenPreview = React.useCallback(() => {
+    setShowPreview(true)
+  }, [])
+
+  const handleClosePreview = React.useCallback(() => {
+    if (isSubmitting) return
+    setShowPreview(false)
+    setSubmitState("idle")
+    setSubmitError(null)
+  }, [isSubmitting])
+
   const saveStateLabel = badge?.message ?? ""
 
   const canPreview = operations.length > 0
@@ -369,8 +379,8 @@ export function GlossaryEditor({
         title={title}
         onTitleChange={setTitle}
         onDiscard={handleDiscard}
-        onPreview={() => setShowPreview(true)}
-        onSubmit={() => setShowPreview(true)}
+        onPreview={handleOpenPreview}
+        onSubmit={handleOpenPreview}
         canPreview={canPreview}
         canSubmit={canSubmit}
         saveState={saveStateLabel}
@@ -411,7 +421,7 @@ export function GlossaryEditor({
             const danglingRefs =
               op.kind === "delete"
                 ? findDanglingRefsFor(op.slug, headerEnglish, manifestEntries)
-                : []
+                : undefined
             return (
               <GlossaryEditCard
                 key={op.slug}
@@ -435,8 +445,8 @@ export function GlossaryEditor({
       />
 
       {showPreview ? (
-        <div
-          role="dialog"
+        <dialog
+          open
           aria-modal="true"
           aria-label={t("editorPreviewDiff")}
           className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm sm:p-8">
@@ -469,12 +479,7 @@ export function GlossaryEditor({
             ) : (
               <GlossaryDiffPreview
                 operations={operations}
-                onClose={() => {
-                  if (isSubmitting) return
-                  setShowPreview(false)
-                  setSubmitState("idle")
-                  setSubmitError(null)
-                }}
+                onClose={handleClosePreview}
                 onSubmit={handleSubmit}
                 isSubmitting={isSubmitting}
                 validationMessage={submitError ?? undefined}
@@ -492,7 +497,7 @@ export function GlossaryEditor({
               />
             ) : null}
           </div>
-        </div>
+        </dialog>
       ) : null}
     </div>
   )

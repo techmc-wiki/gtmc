@@ -161,7 +161,7 @@ export async function requestGithub<T>(
           Accept: GITHUB_ACCEPT_HEADER,
           Authorization: `token ${tokenOverride ?? config.token}`,
           "Content-Type": "application/json",
-          ...(init.headers ?? {}),
+          ...init.headers,
         },
       })
     },

@@ -143,22 +143,32 @@ export const CornerBrackets = React.forwardRef<
       "--bracket-size": `${basePx}px`,
     } as React.CSSProperties
 
+    const handleMouseEnter = React.useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        ;(e.currentTarget as HTMLElement).style.setProperty(
+          "--bracket-size",
+          `${basePx * hoverScale}px`
+        )
+      },
+      [basePx, hoverScale]
+    )
+
+    const handleMouseLeave = React.useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        ;(e.currentTarget as HTMLElement).style.setProperty(
+          "--bracket-size",
+          `${basePx}px`
+        )
+      },
+      [basePx]
+    )
+
     return (
       <div
         ref={ref}
         className={className}
-        onMouseEnter={(e) => {
-          ;(e.currentTarget as HTMLElement).style.setProperty(
-            "--bracket-size",
-            `${basePx * hoverScale}px`
-          )
-        }}
-        onMouseLeave={(e) => {
-          ;(e.currentTarget as HTMLElement).style.setProperty(
-            "--bracket-size",
-            `${basePx}px`
-          )
-        }}>
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}>
         {showTopLeft && (
           <div
             className={`pointer-events-none absolute top-0 left-0 ${posTopLeft} ${color} transition-all`}

@@ -106,12 +106,12 @@ function mapRepoTreeNode(node: {
     children: unknown[]
   }>
 }): DraftRepoTreeNode {
-  const path = node.isFolder ? node.slug : `${node.slug}.md`
+  const nodePath = node.isFolder ? node.slug : `${node.slug}.md`
 
   return {
     id: node.id,
     title: node.title,
-    path,
+    path: nodePath,
     isFolder: node.isFolder,
     children: node.children.map((child) =>
       mapRepoTreeNode(

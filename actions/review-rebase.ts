@@ -239,6 +239,8 @@ export async function abortRebaseAction(revisionId: string) {
 
     return { success: true }
   } catch (error) {
-    throw new Error(formatErrorMessage("Abort rebase failed", error))
+    throw new Error(formatErrorMessage("Abort rebase failed", error), {
+      cause: error,
+    })
   }
 }

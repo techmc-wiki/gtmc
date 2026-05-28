@@ -156,17 +156,19 @@ export async function deleteDraftAction(revisionId: string) {
 
   const draftAssets = await findDraftAssetsByRevision(revisionId)
 
-  for (const asset of draftAssets) {
-    try {
-      await deleteDraftAsset(asset.storagePath)
-      await markDraftAssetDeleted(asset.id)
-    } catch (error) {
-      await markDraftAssetCleanupFailed(
-        asset.id,
-        error instanceof Error ? error.message : "Unknown error"
-      )
-    }
-  }
+  await Promise.all(
+    draftAssets.map(async (asset) => {
+      try {
+        await deleteDraftAsset(asset.storagePath)
+        await markDraftAssetDeleted(asset.id)
+      } catch (error) {
+        await markDraftAssetCleanupFailed(
+          asset.id,
+          error instanceof Error ? error.message : "Unknown error"
+        )
+      }
+    })
+  )
 
   await prisma.revision.delete({
     where: { id: revisionId },
@@ -201,16 +203,26 @@ export async function retryCleanupAction(revisionId: string) {
   let cleaned = 0
   let failed = 0
 
-  for (const asset of failedAssets) {
-    try {
-      await deleteDraftAsset(asset.storagePath)
-      await markDraftAssetDeleted(asset.id)
+  const results = await Promise.all(
+    failedAssets.map(async (asset) => {
+      try {
+        await deleteDraftAsset(asset.storagePath)
+        await markDraftAssetDeleted(asset.id)
+        return "cleaned" as const
+      } catch (error) {
+        await markDraftAssetCleanupFailed(
+          asset.id,
+          error instanceof Error ? error.message : "Unknown error"
+        )
+        return "failed" as const
+      }
+    })
+  )
+
+  for (const result of results) {
+    if (result === "cleaned") {
       cleaned += 1
-    } catch (error) {
-      await markDraftAssetCleanupFailed(
-        asset.id,
-        error instanceof Error ? error.message : "Unknown error"
-      )
+    } else {
       failed += 1
     }
   }

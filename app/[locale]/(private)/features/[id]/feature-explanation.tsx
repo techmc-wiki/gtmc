@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useCallback } from "react"
 import { useTranslations } from "next-intl"
 import { TechCard } from "@/components/ui/tech-card"
 import { TechButton } from "@/components/ui/tech-button"
@@ -31,12 +31,27 @@ export function FeatureExplanation({
   const canEdit = isAssignee || isAdmin
   const effectiveCanEdit = canEdit && !isClosed
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     startTransition(async () => {
       await updateFeatureExplanation(featureId, explanation)
       setIsEditing(false)
     })
-  }
+  }, [featureId, explanation])
+
+  const handleExplanationChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setExplanation(e.target.value)
+    },
+    []
+  )
+
+  const handleStartEditing = useCallback(() => {
+    setIsEditing(true)
+  }, [])
+
+  const handleCancelEditing = useCallback(() => {
+    setIsEditing(false)
+  }, [])
 
   if (!initialExplanation && !effectiveCanEdit) return null
 
@@ -49,7 +64,7 @@ export function FeatureExplanation({
         <TextAreaBox
           className="mb-4"
           value={explanation}
-          onChange={(e) => setExplanation(e.target.value)}
+          onChange={handleExplanationChange}
           placeholder={t("explanationPlaceholder")}
           disabled={isPending}
           aria-busy={isPending}
@@ -58,7 +73,7 @@ export function FeatureExplanation({
           <TechButton
             variant="ghost"
             size="sm"
-            onClick={() => setIsEditing(false)}
+            onClick={handleCancelEditing}
             disabled={isPending}>
             {t("cancelButton")}
           </TechButton>
@@ -94,7 +109,7 @@ export function FeatureExplanation({
           </h3>
           {effectiveCanEdit && (
             <button
-              onClick={() => setIsEditing(true)}
+              onClick={handleStartEditing}
               className="text-tech-main cursor-pointer px-2 font-mono text-xs hover:underline">
               [EDIT]
             </button>
@@ -121,7 +136,7 @@ export function FeatureExplanation({
         <TechButton
           variant="ghost"
           size="sm"
-          onClick={() => setIsEditing(true)}
+          onClick={handleStartEditing}
           className="border-tech-accent/40 text-tech-accent hover:bg-tech-accent/10 border">
           PROVIDE EXPLANATION
         </TechButton>

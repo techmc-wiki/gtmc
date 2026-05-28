@@ -228,10 +228,10 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
     : undefined
 
   const popupContent = (
-    <div
+    <dialog
       ref={popupRef}
       id={popupId}
-      role="dialog"
+      open
       style={portalStyle}
       className={`border-tech-main/40 w-72 max-w-[calc(100vw-2rem)] border bg-white/70 p-4 backdrop-blur-sm sm:w-80 ${
         isOpen
@@ -357,7 +357,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
           {t("fallbackLabel")}
         </p>
       )}
-    </div>
+    </dialog>
   )
 
   return (

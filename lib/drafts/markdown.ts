@@ -203,7 +203,7 @@ export function buildMigrationTargets(
       continue
     }
 
-    const sorted = [...group].sort((a, b) => {
+    const sorted = [...group].toSorted((a, b) => {
       const aKey = `${a.contentHash ?? ""}:${a.storagePath}:${a.id}`
       const bKey = `${b.contentHash ?? ""}:${b.storagePath}:${b.id}`
       return aKey.localeCompare(bKey)

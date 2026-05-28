@@ -2,7 +2,7 @@ import { execFile } from "node:child_process"
 import { promisify } from "node:util"
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
-import yaml from "js-yaml"
+import { load as yamlLoad } from "js-yaml"
 
 const execFileAsync = promisify(execFile)
 
@@ -31,7 +31,7 @@ export async function loadMaintainers(
   const maintainersPath = join(articlesRepoCwd, "_scripts", "maintainers.yml")
   try {
     const content = await readFile(maintainersPath, "utf-8")
-    const maintainers = (yaml.load(content) as string[]) || []
+    const maintainers = (yamlLoad(content) as string[]) || []
     const lowercased = maintainers.map((m) => m.toLowerCase())
     cache.set(cacheKey, lowercased)
     return lowercased
@@ -52,7 +52,7 @@ export async function loadAuthorAliases(
   const aliasesPath = join(articlesRepoCwd, "_scripts", "authors_alias.yml")
   try {
     const content = await readFile(aliasesPath, "utf-8")
-    const aliases = (yaml.load(content) as Record<string, string[]>) || {}
+    const aliases = (yamlLoad(content) as Record<string, string[]>) || {}
     const aliasMap = new Map<string, string>()
 
     for (const [canonical, aliasList] of Object.entries(aliases)) {

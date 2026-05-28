@@ -340,8 +340,8 @@ export async function addFeatureComment(id: string, content: string) {
     session.user.name ?? session.user.email ?? session.user.id
   const mentionToken = githubLogin ? `@${githubLogin}` : fallbackAuthorLabel
   const authorLine = githubLogin
-    ? `> **\[BY\]** ${mentionToken} (${fallbackAuthorLabel})`
-    : `> **\[BY\]** ${mentionToken}`
+    ? `> **[BY]** ${mentionToken} (${fallbackAuthorLabel})`
+    : `> **[BY]** ${mentionToken}`
 
   const authorEmail = isPrivate ? null : (session.user.email ?? null)
   const emailRedacted = isPrivate

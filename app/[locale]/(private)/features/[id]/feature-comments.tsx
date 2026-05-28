@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useTransition } from "react"
+import React, { useState, useTransition, useCallback } from "react"
 import { useTranslations } from "next-intl"
 import { addFeatureComment } from "@/actions/feature-review"
 import { TechButton } from "@/components/ui/tech-button"
@@ -35,15 +35,25 @@ export function FeatureComments({
   const [content, setContent] = useState("")
   const [isPending, startTransition] = useTransition()
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!content.trim()) return
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+      if (!content.trim()) return
 
-    startTransition(async () => {
-      await addFeatureComment(featureId, content)
-      setContent("")
-    })
-  }
+      startTransition(async () => {
+        await addFeatureComment(featureId, content)
+        setContent("")
+      })
+    },
+    [content, featureId]
+  )
+
+  const handleContentChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setContent(e.target.value)
+    },
+    []
+  )
 
   return (
     <div className="space-y-6">
@@ -89,7 +99,7 @@ export function FeatureComments({
               </label>
               <TextAreaBox
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={handleContentChange}
                 placeholder={t("commentPlaceholder")}
                 disabled={isPending}
               />

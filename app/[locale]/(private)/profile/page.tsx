@@ -41,6 +41,26 @@ export default async function ProfilePage() {
     account?.access_token || ""
   )
 
+  const emailLabel = (
+    <span className="flex items-center gap-2">
+      {t("emailLabel")}{" "}
+      <span className="border-tech-main/30 bg-tech-main/5 text-tech-main/60 border px-1 text-[0.5rem] sm:text-[0.5625rem]">
+        {t("readOnlyBadge")}
+      </span>
+      {emailVisibility === "private" && (
+        <span className="border border-amber-400/60 bg-amber-50 px-1 text-[0.5rem] text-amber-600 sm:text-[0.5625rem]">
+          {t("privateBadge")}
+        </span>
+      )}
+    </span>
+  )
+
+  const roleValue = (
+    <span className="text-tech-main-dark font-mono text-xs font-bold tracking-widest uppercase sm:text-sm">
+      [{user.role}]
+    </span>
+  )
+
   return (
     <div className="page-container animate-fade-in mt-4 sm:mt-8">
       <div className="border-tech-main/40 flex flex-col items-start justify-between border-b-2 pb-4 md:flex-row md:items-end">
@@ -127,20 +147,7 @@ export default async function ProfilePage() {
                 className="border-tech-main/30 focus:border-tech-main w-full rounded-none border bg-white font-mono text-xs shadow-none transition-colors sm:text-sm"
               />
             </FormField>
-            <FormField
-              label={
-                <span className="flex items-center gap-2">
-                  {t("emailLabel")}{" "}
-                  <span className="border-tech-main/30 bg-tech-main/5 text-tech-main/60 border px-1 text-[0.5rem] sm:text-[0.5625rem]">
-                    {t("readOnlyBadge")}
-                  </span>
-                  {emailVisibility === "private" && (
-                    <span className="border border-amber-400/60 bg-amber-50 px-1 text-[0.5rem] text-amber-600 sm:text-[0.5625rem]">
-                      {t("privateBadge")}
-                    </span>
-                  )}
-                </span>
-              }>
+            <FormField label={emailLabel}>
               <InputBox
                 defaultValue={user.email || ""}
                 disabled
@@ -156,14 +163,7 @@ export default async function ProfilePage() {
 
           <div className="border-tech-main/30 bg-tech-main/5 relative mt-6 flex flex-col items-start justify-between gap-3 border p-3 sm:mt-8 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
             <div className="bg-tech-main/20 absolute top-0 right-0 size-2" />
-            <MetadataRow
-              label={t("assignedRole")}
-              value={
-                <span className="text-tech-main-dark font-mono text-xs font-bold tracking-widest uppercase sm:text-sm">
-                  [{user.role}]
-                </span>
-              }
-            />
+            <MetadataRow label={t("assignedRole")} value={roleValue} />
           </div>
 
           <div className="border-tech-main/30 flex justify-start border-b border-dashed pt-4 pb-2">

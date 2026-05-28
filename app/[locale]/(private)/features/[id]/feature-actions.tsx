@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useTransition, useState } from "react"
+import { useTransition, useState, useCallback } from "react"
 import { TechButton } from "@/components/ui/tech-button"
 import {
   assignFeature,
@@ -31,23 +31,23 @@ export function FeatureActions({
     "assign" | "unassign" | "resolve" | null
   >(null)
 
-  const handleAssign = () => {
+  const handleAssign = useCallback(() => {
     setPendingAction("assign")
     startTransition(async () => {
       await assignFeature(featureId)
       setPendingAction(null)
     })
-  }
+  }, [featureId])
 
-  const handleUnassign = () => {
+  const handleUnassign = useCallback(() => {
     setPendingAction("unassign")
     startTransition(async () => {
       await unassignFeature(featureId)
       setPendingAction(null)
     })
-  }
+  }, [featureId])
 
-  const handleResolve = () => {
+  const handleResolve = useCallback(() => {
     const comment = window.prompt(t("statusUpdatePrompt"))
     if (comment === null) return // cancelled
 
@@ -56,7 +56,7 @@ export function FeatureActions({
       await resolveFeature(featureId, comment)
       setPendingAction(null)
     })
-  }
+  }, [featureId, t])
 
   return (
     <div className="flex flex-wrap gap-2">

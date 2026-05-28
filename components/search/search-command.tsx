@@ -16,6 +16,10 @@ interface SearchResult {
   matchType: "title" | "content"
 }
 
+function slugToPath(slug: string) {
+  return "/" + slug
+}
+
 export function SearchCommand() {
   const t = useTranslations("Search")
   const locale = useLocale()
@@ -37,6 +41,10 @@ export function SearchCommand() {
     setResults([])
     setSelectedIndex(0)
     setIsLoading(false)
+  }, [])
+
+  const openModal = useCallback(() => {
+    setIsOpen(true)
   }, [])
 
   // Global Cmd+K / Ctrl+K handler. Register in the capture phase so dormant
@@ -193,6 +201,24 @@ export function SearchCommand() {
     [results, selectedIndex, navigateToResult, closeModal]
   )
 
+  const handleResultClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      const index = Number(e.currentTarget.dataset.searchResultIndex)
+      if (results[index]) {
+        navigateToResult(results[index])
+      }
+    },
+    [results, navigateToResult]
+  )
+
+  const handleResultMouseEnter = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      const index = Number(e.currentTarget.dataset.searchResultIndex)
+      setSelectedIndex(index)
+    },
+    []
+  )
+
   // Highlight matched text in title/snippet
   const highlightMatch = useCallback(
     (text: string) => {
@@ -219,11 +245,6 @@ export function SearchCommand() {
     },
     [query]
   )
-
-  // Derive path breadcrumb from slug
-  const slugToPath = (slug: string) => {
-    return "/" + slug
-  }
 
   // Platform-aware shortcut label
   const shortcutLabel = useMemo(() => {
@@ -259,7 +280,8 @@ export function SearchCommand() {
       {/* Trigger button — desktop only */}
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={openModal}
+        aria-label={t("searchAriaLabel")}
         className="border-tech-main/40 text-tech-main/60 hover:bg-tech-main hidden h-8 w-40 cursor-pointer items-center gap-2 border px-3 py-1.5 font-mono text-[0.6875rem] transition-colors hover:text-white md:flex">
         <div className="flex w-full items-center justify-between">
           <span className="flex items-center gap-1 text-lg leading-none">
@@ -275,7 +297,7 @@ export function SearchCommand() {
       {/* Mobile trigger */}
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={openModal}
         className="text-tech-main hover:bg-tech-main/10 flex min-h-11 min-w-11 cursor-pointer items-center justify-center p-2 font-mono text-[2.5rem] transition-colors md:hidden"
         aria-label={t("searchAriaLabel")}>
         &#x2315;
@@ -284,24 +306,21 @@ export function SearchCommand() {
       {/* Search modal (portal) */}
       {isOpen &&
         createPortal(
-          <div
+          <dialog
+            open
             className="animate-in fade-in fixed inset-0 z-9999 flex items-start justify-center bg-black/80 p-4 pt-[10vh] duration-200 sm:pt-[15vh]"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) closeModal()
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") {
-                closeModal()
-                return
-              }
-
-              handleKeyDown(e)
-            }}
-            role="dialog"
             aria-modal="true"
-            aria-label={t("searchAriaLabel")}
-            tabIndex={-1}>
-            <div className="border-tech-main animate-in slide-in-from-top-4 relative w-full max-w-xl border bg-white/95 shadow-xl backdrop-blur-md duration-200">
+            aria-label={t("searchAriaLabel")}>
+            <button
+              type="button"
+              className="absolute inset-0 cursor-default"
+              aria-label={t("dismissHint")}
+              onClick={closeModal}
+              tabIndex={-1}
+            />
+            <section
+              aria-label={t("searchAriaLabel")}
+              className="border-tech-main animate-in slide-in-from-top-4 relative w-full max-w-xl border bg-white/95 shadow-xl backdrop-blur-md duration-200">
               <CornerBrackets variant="static" />
 
               {/* Header */}
@@ -325,7 +344,9 @@ export function SearchCommand() {
                   type="text"
                   value={query}
                   onChange={handleQueryChange}
+                  onKeyDown={handleKeyDown}
                   placeholder={t("placeholder")}
+                  aria-label={t("searchAriaLabel")}
                   className="border-tech-main/40 text-tech-main-dark placeholder:text-tech-main/50 focus:border-tech-main/70 w-full border bg-white/60 px-3 py-2.5 font-mono text-sm transition-colors outline-none focus:bg-white/80"
                   autoComplete="off"
                   spellCheck={false}
@@ -368,8 +389,8 @@ export function SearchCommand() {
                       <li key={result.slug}>
                         <button
                           type="button"
-                          onClick={() => navigateToResult(result)}
-                          onMouseEnter={() => setSelectedIndex(index)}
+                          onClick={handleResultClick}
+                          onMouseEnter={handleResultMouseEnter}
                           data-search-result-index={index}
                           className={`group relative w-full cursor-pointer px-4 py-3 text-left transition-colors ${
                             index === selectedIndex
@@ -454,8 +475,8 @@ export function SearchCommand() {
                   <kbd className="kbd-badge">ESC</kbd> {t("dismissHint")}
                 </span>
               </footer>
-            </div>
-          </div>,
+            </section>
+          </dialog>,
           document.body
         )}
     </>

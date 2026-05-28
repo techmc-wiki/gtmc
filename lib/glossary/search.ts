@@ -20,23 +20,25 @@ export function createGlossarySearch(): MiniSearch<IndexedGlossaryEntry> {
     },
   })
 
-  const documents: IndexedGlossaryEntry[] = glossarySummary.map((entry) => ({
-    ...entry,
-    id: entry.slug,
-  }))
+  const documents: IndexedGlossaryEntry[] = glossarySummary.map((entry) => {
+    const doc: IndexedGlossaryEntry = Object.assign({}, entry, {
+      id: entry.slug,
+    })
+    return doc
+  })
 
   miniSearch.addAll(documents)
   return miniSearch
 }
 
 // Singleton instance — built once per module load (server-side only)
-let _index: MiniSearch<IndexedGlossaryEntry> | null = null
+let glossaryIndex: MiniSearch<IndexedGlossaryEntry> | null = null
 
 function getGlossaryIndex(): MiniSearch<IndexedGlossaryEntry> {
-  if (!_index) {
-    _index = createGlossarySearch()
+  if (!glossaryIndex) {
+    glossaryIndex = createGlossarySearch()
   }
-  return _index
+  return glossaryIndex
 }
 
 export function searchGlossary(query: string): GlossarySummaryEntry[] {

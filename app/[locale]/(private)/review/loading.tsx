@@ -10,6 +10,12 @@ import {
   SkeletonExitWrapper,
 } from "@/components/ui/loading-shell-primitives"
 
+const CARD_STYLES = [
+  { animationDelay: "150ms" },
+  { animationDelay: "200ms" },
+  { animationDelay: "250ms" },
+] as const
+
 export default function ReviewLoading() {
   const t = useTranslations("CommonA11y")
 
@@ -46,7 +52,7 @@ export default function ReviewLoading() {
                 <TechCard
                   key={i}
                   className={`border-tech-main/40 flex flex-col items-start justify-between space-y-4 border bg-white/80 p-6 backdrop-blur-sm md:flex-row md:items-center md:space-y-0`}
-                  style={{ animationDelay: `${100 + i * 50}ms` }}>
+                  style={CARD_STYLES[i - 1]}>
                   <div className="flex-1">
                     {/* PR badge + date row */}
                     <div className="mb-3 flex items-center gap-3">

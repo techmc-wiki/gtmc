@@ -39,6 +39,33 @@ interface CliOptions {
   output: string
 }
 
+interface TreeNode {
+  children: TreeNode[]
+}
+
+function countTreeItems(items: TreeNode[]): number {
+  let c = items.length
+  for (const item of items) c += countTreeItems(item.children)
+  return c
+}
+
+function sortChapterTree(nodes: ChapterNavNode[]) {
+  nodes.sort((a: ChapterNavNode, b: ChapterNavNode) => {
+    if (a.isPreface !== b.isPreface) return a.isPreface ? -1 : 1
+    if (a.isFolder && b.isFolder && a.isAppendix !== b.isAppendix) {
+      return a.isAppendix ? 1 : -1
+    }
+    if (a.isFolder !== b.isFolder) return a.isFolder ? -1 : 1
+    if (!a.isFolder && a.isAppendix !== b.isAppendix) {
+      return a.isAppendix ? 1 : -1
+    }
+    return a.title.localeCompare(b.title)
+  })
+  for (const node of nodes) {
+    if (node.children?.length) sortChapterTree(node.children)
+  }
+}
+
 interface OutlineNode {
   title: string
   pageIndex: number
@@ -78,20 +105,28 @@ async function collectCodeLangs(
 ): Promise<string[]> {
   const allLangs = new Set<string>()
 
-  for (const article of articles) {
-    try {
-      const content = await getArticleContentForPdf(article.slug, locale)
-      if (!content) continue
-      const matches = content.matchAll(/^```(\w+)/gm)
-      for (const m of matches) {
-        const lang = m[1].toLowerCase()
-        if (lang !== "" && lang !== "text" && lang !== "plain") {
-          allLangs.add(lang)
+  const results = await Promise.all(
+    articles.map(async (article) => {
+      try {
+        const content = await getArticleContentForPdf(article.slug, locale)
+        if (!content) return []
+        const langs: string[] = []
+        const matches = content.matchAll(/^```(\w+)/gm)
+        for (const m of matches) {
+          const lang = m[1].toLowerCase()
+          if (lang !== "" && lang !== "text" && lang !== "plain") {
+            langs.push(lang)
+          }
         }
+        return langs
+      } catch {
+        // Skip articles that fail to load during scanning
+        return []
       }
-    } catch {
-      // Skip articles that fail to load during scanning
-    }
+    })
+  )
+  for (const langs of results) {
+    for (const lang of langs) allLangs.add(lang)
   }
 
   return [...allLangs]
@@ -104,6 +139,7 @@ async function checkHasMath(
   articles: LinearizedArticle[],
   locale: ArticleLocale
 ): Promise<boolean> {
+  /* oxlint-disable eslint/no-await-in-loop -- early-return on first match requires sequential iteration */
   for (const article of articles) {
     try {
       const content = await getArticleContentForPdf(article.slug, locale)
@@ -119,6 +155,7 @@ async function checkHasMath(
       // Skip articles that fail to load
     }
   }
+  /* oxlint-enable eslint/no-await-in-loop */
   return false
 }
 
@@ -317,13 +354,7 @@ async function writePdfOutlines(
 
   // ── Phase 3: Create root Outlines dict ─────────────────────────────────
   // Total count = top-level items + all children
-  let totalCount = 0
-  const countItems = (items: ItemData[]): number => {
-    let c = items.length
-    for (const item of items) c += countItems(item.children)
-    return c
-  }
-  totalCount = countItems(topLevelItems)
+  const totalCount = countTreeItems(topLevelItems)
 
   const rootDict = context.obj({
     Type: PDFName.of("Outlines"),
@@ -370,23 +401,7 @@ async function main(): Promise<void> {
     process.exit(0)
   }
 
-  function sortTree(nodes: ChapterNavNode[]) {
-    nodes.sort((a: ChapterNavNode, b: ChapterNavNode) => {
-      if (a.isPreface !== b.isPreface) return a.isPreface ? -1 : 1
-      if (a.isFolder && b.isFolder && a.isAppendix !== b.isAppendix) {
-        return a.isAppendix ? 1 : -1
-      }
-      if (a.isFolder !== b.isFolder) return a.isFolder ? -1 : 1
-      if (!a.isFolder && a.isAppendix !== b.isAppendix) {
-        return a.isAppendix ? 1 : -1
-      }
-      return a.title.localeCompare(b.title)
-    })
-    for (const node of nodes) {
-      if (node.children?.length) sortTree(node.children)
-    }
-  }
-  sortTree(tree)
+  sortChapterTree(tree)
 
   // ═══════════════════════════════════════════════════════════════════════
   // Phase 2: Linearize

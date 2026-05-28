@@ -1,3 +1,4 @@
+/* oxlint-disable react-perf/jsx-no-new-object-as-prop -- server component: renders once, no re-render concern */
 import type { Metadata } from "next"
 import { auth } from "@/lib/auth"
 import { getCurrentUserAuthContext } from "@/lib/auth-context"
@@ -151,6 +152,14 @@ export default async function FeatureDetailPage({
   const isAuthor = session?.user?.id === feature.authorId
   const isAssignee = session?.user?.id === feature.assigneeId
 
+  const structuredData = {
+    name: issue.title,
+    description,
+    url: canonical,
+    datePublished: new Date(issue.createdAt).toISOString(),
+    dateModified: new Date(issue.updatedAt).toISOString(),
+  }
+
   return (
     <FeatureDetailContent
       feature={feature}
@@ -159,13 +168,7 @@ export default async function FeatureDetailPage({
       isAssignee={isAssignee}
       isAdmin={isAdmin}
       isClosed={isClosed}
-      structuredData={{
-        name: issue.title,
-        description,
-        url: canonical,
-        datePublished: new Date(issue.createdAt).toISOString(),
-        dateModified: new Date(issue.updatedAt).toISOString(),
-      }}
+      structuredData={structuredData}
     />
   )
 }

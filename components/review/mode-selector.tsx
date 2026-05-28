@@ -48,8 +48,7 @@ export function ModeSelector({
           <div className="flex items-center gap-2">
             <span
               className="inline-block size-2 bg-green-500"
-              role="img"
-              title="No conflicts"
+              aria-hidden="true"
             />
             <span className="font-mono text-xs tracking-widest text-green-700 uppercase">
               {t("noConflicts")}

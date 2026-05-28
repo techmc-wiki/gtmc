@@ -119,6 +119,7 @@ export async function POST(req: NextRequest) {
     const chunks: Uint8Array[] = []
     let totalBytes = 0
 
+    /* oxlint-disable eslint/no-await-in-loop -- streaming read: each chunk depends on previous read position */
     while (true) {
       const { done, value } = await reader.read()
       if (done) break
@@ -129,6 +130,7 @@ export async function POST(req: NextRequest) {
       }
       chunks.push(value)
     }
+    /* oxlint-enable eslint/no-await-in-loop */
 
     const arrayBuffer = new Uint8Array(totalBytes)
     let offset = 0

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { ChapterNavPanel, type ChapterNavPanelHandle } from "./chapter-nav-panel"
 import { ReaderNavigationProvider } from "./reader-navigation/context"
 import { MobileChapterNavCard } from "./mobile-chapter-nav-card"
@@ -183,7 +183,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const tA11y = useTranslations("CommonA11y")
   const treeData = tree.length > 0 ? tree : fetchedTreeData
 
-  const toggleChapterNavHidden = () => {
+  const toggleChapterNavHidden = useCallback(() => {
     setChapterNavHidden((prev) => {
       const next = !prev
       try {
@@ -191,7 +191,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       } catch { }
       return next
     })
-  }
+  }, [])
 
   useEffect(() => {
     const timer = setTimeout(
@@ -248,7 +248,21 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const isChapterNavLoading = tree.length === 0 && !hasTreeFetchSettled
   const showChapterNavPlaceholder = isChapterNavLoading && treeData.length === 0
 
-  const onNavigate = () => dispatch({ type: "NAVIGATE" })
+  const onNavigate = useCallback(() => dispatch({ type: "NAVIGATE" }), [dispatch])
+
+  const handleMobileToggle = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      dispatch({ type: "TOGGLE" })
+    },
+    [dispatch]
+  )
+
+  const handleMobileClose = useCallback(
+    () => dispatch({ type: "CLOSE" }),
+    [dispatch]
+  )
 
   const fixedChapterNavContent = (
     <ChapterNavWrapper
@@ -292,11 +306,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
             }>
             <button
               type="button"
-               onClick={(e) => {
-                 e.preventDefault()
-                  e.stopPropagation()
-                  dispatch({ type: "TOGGLE" })
-                }}
+               onClick={handleMobileToggle}
               className={`
                 cursor-pointer overflow-hidden
                 border border-tech-main/40 bg-white/70 font-mono text-xs
@@ -367,7 +377,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         {/* Mobile floating chapter navigation card */}
         <MobileChapterNavCard
           isOpen={isChapterNavOpen}
-          onClose={() => dispatch({ type: "CLOSE" })}
+          onClose={handleMobileClose}
           isFloating={isFloating}>
           {floatingChapterNavContent}
         </MobileChapterNavCard>

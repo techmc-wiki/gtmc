@@ -111,7 +111,7 @@ export function GlossaryToolbar({
     }
     return [...counts.entries()]
       .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => a.name.localeCompare(b.name))
+      .toSorted((a, b) => a.name.localeCompare(b.name))
   }, [entries])
 
   const availableLetters = React.useMemo(() => {

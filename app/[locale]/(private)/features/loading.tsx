@@ -10,6 +10,12 @@ import {
   SkeletonExitWrapper,
 } from "@/components/ui/loading-shell-primitives"
 
+const SKELETON_GROUPS = [
+  { label: "PENDING", style: { animationDelay: "200ms" }, cards: [1, 2] },
+  { label: "IN_PROGRESS", style: { animationDelay: "300ms" }, cards: [3, 4] },
+  { label: "RESOLVED", style: { animationDelay: "400ms" }, cards: [5, 6] },
+] as const
+
 export default function FeaturesLoading() {
   const t = useTranslations("CommonA11y")
 
@@ -74,15 +80,11 @@ export default function FeaturesLoading() {
             </div>
           </TechCard>
 
-          {[
-            { label: "PENDING", delay: "200ms", cards: [1, 2] },
-            { label: "IN_PROGRESS", delay: "300ms", cards: [3, 4] },
-            { label: "RESOLVED", delay: "400ms", cards: [5, 6] },
-          ].map((group) => (
+          {SKELETON_GROUPS.map((group) => (
             <div
               key={group.label}
               className="animate-tech-slide-in"
-              style={{ animationDelay: group.delay }}>
+              style={group.style}>
               <div className="mb-8">
                 <h2 className="guide-line text-tech-main-dark mb-6 border-b pb-2 text-lg font-bold tracking-widest uppercase md:text-xl">
                   {group.label} ({group.cards.length})

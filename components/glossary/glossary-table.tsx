@@ -83,7 +83,9 @@ export function GlossaryTable({
 
     return categoryFiltered
       .filter((e) => hitOrder.has(e.slug))
-      .sort((a, b) => (hitOrder.get(a.slug) ?? 0) - (hitOrder.get(b.slug) ?? 0))
+      .toSorted(
+        (a, b) => (hitOrder.get(a.slug) ?? 0) - (hitOrder.get(b.slug) ?? 0)
+      )
   }, [categoryFiltered, trimmedQuery, searchScope, indexLocale])
 
   const grouped = React.useMemo(() => {
@@ -101,7 +103,7 @@ export function GlossaryTable({
       bucket.push(entry)
     }
     return [...byLetter.entries()]
-      .sort(([a], [b]) => {
+      .toSorted(([a], [b]) => {
         if (a === "#") return 1
         if (b === "#") return -1
         return a.localeCompare(b)

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useImperativeHandle } from "react"
+import { useImperativeHandle, useCallback } from "react"
 import { usePathname } from "@/i18n/navigation"
 import { ChapterNavToolbar } from "./chapter-nav/chapter-nav-toolbar"
 import { ChapterNavTree, type ChapterNavNode } from "./chapter-nav/tree"
@@ -112,6 +112,14 @@ const ChapterNavPanelInner = React.forwardRef<
     scrollToCurrent,
   }))
 
+  const handleCollapseAll = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      collapseAll()
+    },
+    [collapseAll]
+  )
+
   const treeContent =
     tree.length === 0 ? (
       <div className="mt-4 font-mono text-sm text-tech-main/40">
@@ -128,10 +136,7 @@ const ChapterNavPanelInner = React.forwardRef<
           {!hideActions && (
             <ChapterNavToolbar
               internalScroll={internalScroll}
-              onCollapseAll={(e) => {
-                e.preventDefault()
-                collapseAll()
-              }}
+              onCollapseAll={handleCollapseAll}
               onLocate={scrollToCurrent}
             />
           )}
@@ -161,10 +166,7 @@ const ChapterNavPanelInner = React.forwardRef<
           {!hideActions && (
             <ChapterNavToolbar
               internalScroll={internalScroll}
-              onCollapseAll={(e) => {
-                e.preventDefault()
-                collapseAll()
-              }}
+              onCollapseAll={handleCollapseAll}
               onLocate={scrollToCurrent}
             />
           )}

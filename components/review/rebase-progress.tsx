@@ -42,6 +42,9 @@ interface RebaseProgressProps {
   mergeStrategyAnalysis: ReviewMergeStrategyAnalysis
 }
 
+const EMPTY_COAUTHOR_LINES: string[] = []
+const EMPTY_COMMIT_INFOS: RebaseState["commitInfos"] = []
+
 function CommitStepDots({
   commitInfos,
   currentCommitIndex,
@@ -232,7 +235,7 @@ export function RebaseProgress({
   finalizeProgressState = "idle",
   defaultCommitTitle = "",
   defaultCommitBody = "",
-  coauthorLines = [],
+  coauthorLines = EMPTY_COAUTHOR_LINES,
   mergeStrategyAnalysis,
 }: RebaseProgressProps) {
   const resetKey = [
@@ -275,7 +278,7 @@ function RebaseProgressContent({
   finalizeProgressState = "idle",
   defaultCommitTitle = "",
   defaultCommitBody = "",
-  coauthorLines = [],
+  coauthorLines = EMPTY_COAUTHOR_LINES,
   mergeStrategyAnalysis,
 }: RebaseProgressProps) {
   const t = useTranslations("Review")
@@ -382,6 +385,9 @@ function RebaseProgressContent({
       rebaseState?.conflictedCommitSha ??
       currentInfo?.sha ??
       rebaseState?.commitShas[currentCommitIndex]
+    const progressBarStyle = {
+      width: `${total > 0 ? Math.min((current / total) * 100, 100) : 0}%`,
+    }
 
     return (
       <div className="border-tech-main/40 bg-tech-main/5 space-y-4 border p-4">
@@ -402,7 +408,7 @@ function RebaseProgressContent({
               RESOLVING_COMMIT_{current}_OF_{total}_
             </p>
             <CommitStepDots
-              commitInfos={rebaseState?.commitInfos ?? []}
+              commitInfos={rebaseState?.commitInfos ?? EMPTY_COMMIT_INFOS}
               currentCommitIndex={currentCommitIndex}
               status={rebaseState?.status}
             />
@@ -412,9 +418,7 @@ function RebaseProgressContent({
             <div className="bg-tech-main/20 relative h-1 flex-1">
               <div
                 className="bg-tech-main absolute inset-y-0 left-0 transition-all duration-500"
-                style={{
-                  width: `${total > 0 ? Math.min((current / total) * 100, 100) : 0}%`,
-                }}
+                style={progressBarStyle}
               />
             </div>
             <span className="text-tech-main/60 font-mono text-[0.6875rem] tabular-nums">

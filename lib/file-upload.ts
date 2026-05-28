@@ -228,9 +228,9 @@ export function generateMarkdownBlock(
   if (classification.proxyable && storagePath) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || ""
     const proxyUrl = `${appUrl}/api/files/proxy?path=${encodeURIComponent(storagePath)}`
-    return `${emoji} **${displayName}** (${sizeStr})\n[\[▶ View / Download\]](${proxyUrl})`
+    return `${emoji} **${displayName}** (${sizeStr})\n[[▶ View / Download]](${proxyUrl})`
   }
 
   // Non-proxyable: direct download link
-  return `${emoji} **${displayName}** (${sizeStr})\n[\[↓ Download\]](${rawGithubUrl})`
+  return `${emoji} **${displayName}** (${sizeStr})\n[[↓ Download]](${rawGithubUrl})`
 }

@@ -3,7 +3,7 @@ import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import type { ArticleLocale } from "@/lib/articles/manifest"
 
 const TREE_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300"
-const VALID_LOCALES: ArticleLocale[] = ["zh", "en"]
+const VALID_LOCALES = new Set<ArticleLocale>(["zh", "en"])
 
 /**
  * Returns the public article tree for the requested `?locale=zh|en`.
@@ -13,7 +13,7 @@ const VALID_LOCALES: ArticleLocale[] = ["zh", "en"]
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
   const rawLocale = searchParams.get("locale") ?? "zh"
-  const locale = VALID_LOCALES.includes(rawLocale as ArticleLocale)
+  const locale = VALID_LOCALES.has(rawLocale as ArticleLocale)
     ? (rawLocale as ArticleLocale)
     : "zh"
 

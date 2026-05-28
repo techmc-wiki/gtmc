@@ -98,8 +98,9 @@ export async function openDraftPullRequest({
     sha: baseMainSha,
   })
 
+  // Each commit depends on the previous branch state — must be sequential
   for (const [index, file] of normalizedFiles.files.entries()) {
-    await upsertFileOnBranch({
+    await upsertFileOnBranch({ // eslint-disable-line no-await-in-loop
       authorEmail,
       authorName,
       branchName,
@@ -160,17 +161,17 @@ export async function openDraftPullRequest({
   let hasConflict = false
   const mergedFiles: DraftFileRecord[] = []
 
-  for (const file of normalizedFiles.files) {
-    const baseSnapshot = await getFileSnapshot(
-      file.filePath,
-      baseMainSha,
-      token
-    )
-    const latestSnapshot = await getFileSnapshot(
-      file.filePath,
-      latestMainSha,
-      token
-    )
+  const fileSnapshots = await Promise.all(
+    normalizedFiles.files.map(async (file) => {
+      const [baseSnapshot, latestSnapshot] = await Promise.all([
+        getFileSnapshot(file.filePath, baseMainSha, token),
+        getFileSnapshot(file.filePath, latestMainSha, token),
+      ])
+      return { file, baseSnapshot, latestSnapshot }
+    })
+  )
+
+  for (const { file, baseSnapshot, latestSnapshot } of fileSnapshots) {
     const mergeResult = mergeArticleContent({
       baseContent: baseSnapshot?.content ?? "",
       draftContent: file.content,
@@ -187,7 +188,7 @@ export async function openDraftPullRequest({
     }
 
     if (mergeResult.content !== file.content) {
-      await upsertFileOnBranch({
+      await upsertFileOnBranch({ // eslint-disable-line no-await-in-loop
         authorEmail,
         authorName,
         branchName,

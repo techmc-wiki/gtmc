@@ -72,6 +72,60 @@ export interface LitematicaViewerProps {
   height?: string | number
 }
 
+function suppressNativeFpOverlays(instance: LitematicaRenderer) {
+  const ui = instance?.uiManager
+  const cm = instance?.cameraManager
+
+  try {
+    if (ui) {
+      ui.showFPVOverlay = () => {}
+      if (ui.fpvOverlay) {
+        ui.fpvOverlay.style.setProperty("display", "none", "important")
+        ui.fpvOverlay.style.setProperty("pointer-events", "none", "important")
+        ui.fpvOverlay.style.setProperty("opacity", "0", "important")
+      }
+    }
+
+    if (cm?.flyControls) {
+      cm.flyControls.setOverlayVisible = () => {}
+      if (cm.flyControls.overlayElement) {
+        cm.flyControls.overlayElement.style.setProperty(
+          "display",
+          "none",
+          "important"
+        )
+        cm.flyControls.overlayElement.style.setProperty(
+          "pointer-events",
+          "none",
+          "important"
+        )
+        cm.flyControls.overlayElement.style.setProperty("opacity", "0", "important")
+      }
+    }
+  } catch {
+    // Keep rendering resilient even if internals change.
+  }
+}
+
+function normalizeUrlInput(input: string) {
+  let value = input
+    .replace(/\r?\n/g, "")
+    .trim()
+    .replace(/^['"]|['"]$/g, "")
+
+  for (let i = 0; i < 2; i++) {
+    try {
+      const decoded = decodeURIComponent(value)
+      if (decoded === value) break
+      value = decoded
+    } catch {
+      break
+    }
+  }
+
+  return value
+}
+
 export default function LitematicaViewer({
   url,
   height = 400,
@@ -109,61 +163,6 @@ export default function LitematicaViewer({
     }
 
     return renderer?.schematicManager?.getFirstSchematic?.()?.id ?? null
-  }
-
-  const normalizeUrlInput = (input: string) => {
-    let value = input
-      .replace(/\r?\n/g, "")
-      .trim()
-      .replace(/^['"]|['"]$/g, "")
-
-    // Some markdown pipelines may hand us pre-encoded strings.
-    for (let i = 0; i < 2; i++) {
-      try {
-        const decoded = decodeURIComponent(value)
-        if (decoded === value) break
-        value = decoded
-      } catch {
-        break
-      }
-    }
-
-    return value
-  }
-
-  const suppressNativeFpOverlays = (instance: LitematicaRenderer) => {
-    const ui = instance?.uiManager
-    const cm = instance?.cameraManager
-
-    try {
-      if (ui) {
-        ui.showFPVOverlay = () => {}
-        if (ui.fpvOverlay) {
-          ui.fpvOverlay.style.setProperty("display", "none", "important")
-          ui.fpvOverlay.style.setProperty("pointer-events", "none", "important")
-          ui.fpvOverlay.style.setProperty("opacity", "0", "important")
-        }
-      }
-
-      if (cm?.flyControls) {
-        cm.flyControls.setOverlayVisible = () => {}
-        if (cm.flyControls.overlayElement) {
-          cm.flyControls.overlayElement.style.setProperty(
-            "display",
-            "none",
-            "important"
-          )
-          cm.flyControls.overlayElement.style.setProperty(
-            "pointer-events",
-            "none",
-            "important"
-          )
-          cm.flyControls.overlayElement.style.setProperty("opacity", "0", "important")
-        }
-      }
-    } catch {
-      // Keep rendering resilient even if internals change.
-    }
   }
 
   const patchFlyLockWithCooldown = (cameraManager: CameraManager) => {
@@ -621,6 +620,7 @@ export default function LitematicaViewer({
 
       <canvas
         ref={canvasRef}
+        aria-label="Litematica schematic 3D viewer"
         className="block w-full outline-none"
         style={{
           cursor: isFlyMode ? "crosshair" : "pointer",
@@ -724,6 +724,7 @@ export default function LitematicaViewer({
             min={0}
             max={maxLayer}
             value={sliderLayer}
+            aria-label="Layer selection"
             onChange={(e) => setSliderLayer(Number(e.target.value))}
             onPointerUp={commitLayerSelection}
             onMouseUp={commitLayerSelection}

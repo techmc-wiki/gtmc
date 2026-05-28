@@ -10,6 +10,8 @@ import type {
   ReviewMergeStrategyAnalysis,
 } from "@/lib/review/review-types"
 
+const EMPTY_COAUTHOR_LINES: string[] = []
+
 interface MergeMethodPickerProps {
   analysis: ReviewMergeStrategyAnalysis
   selectedMethod: ReviewMergeMethod
@@ -31,11 +33,34 @@ export function MergeMethodPicker({
   commitBody,
   onCommitTitleChange,
   onCommitBodyChange,
-  coauthorLines = [],
+  coauthorLines = EMPTY_COAUTHOR_LINES,
   disabled = false,
   compact = false,
 }: MergeMethodPickerProps) {
   const t = useTranslations("Review")
+
+  const handleCommitTitleChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) =>
+      onCommitTitleChange(event.target.value),
+    [onCommitTitleChange]
+  )
+
+  const handleCommitBodyChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) =>
+      onCommitBodyChange(event.target.value),
+    [onCommitBodyChange]
+  )
+
+  const methodClickHandlers = React.useMemo(
+    () =>
+      new Map(
+        analysis.availableMethods.map((method) => [
+          method,
+          () => onSelectMethod(method),
+        ])
+      ),
+    [analysis.availableMethods, onSelectMethod]
+  )
 
   const methods = React.useMemo(
     () =>
@@ -85,7 +110,7 @@ export function MergeMethodPicker({
               recommendedLabel={t("recommended")}
               selectedLabel={t("selected")}
               disabled={disabled}
-              onClick={() => onSelectMethod(method)}
+              onClick={methodClickHandlers.get(method)}
               className="p-3"
             />
           )
@@ -105,9 +130,10 @@ export function MergeMethodPicker({
               type="text"
               value={commitTitle}
               disabled={disabled}
-              onChange={(event) => onCommitTitleChange(event.target.value)}
+              onChange={handleCommitTitleChange}
               className="border-tech-main/30 text-tech-main placeholder:text-tech-main/30 focus-visible:border-tech-main w-full border bg-white px-3 py-2 font-mono text-xs focus:outline-none"
               placeholder={t("commitTitlePlaceholder")}
+              aria-label={t("commitTitleLabel")}
             />
           </div>
 
@@ -121,10 +147,11 @@ export function MergeMethodPicker({
               id="merge-commit-body"
               value={commitBody}
               disabled={disabled}
-              onChange={(event) => onCommitBodyChange(event.target.value)}
+              onChange={handleCommitBodyChange}
               rows={compact ? 3 : 5}
               className="border-tech-main/30 text-tech-main placeholder:text-tech-main/30 focus-visible:border-tech-main w-full resize-y border bg-white px-3 py-2 font-mono text-xs focus:outline-none"
               placeholder={t("commitBodyPlaceholder")}
+              aria-label={t("commitBodyLabel")}
             />
           </div>
 

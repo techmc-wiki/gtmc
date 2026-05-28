@@ -390,7 +390,8 @@ export async function submitForReviewAction(revisionId: string) {
     const message = error instanceof Error ? error.message : "Unknown error"
     if (message.includes("Resource not accessible by personal access token")) {
       throw new Error(
-        "Failed to create PR: the configured GitHub token cannot create branches in the Articles repo. Set GITHUB_ARTICLES_WRITE_PAT with repo write access on Vercel."
+        "Failed to create PR: the configured GitHub token cannot create branches in the Articles repo. Set GITHUB_ARTICLES_WRITE_PAT with repo write access on Vercel.",
+        { cause: error }
       )
     }
     throw error

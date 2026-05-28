@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useCallback, useState } from "react"
 
 export function UnchangedBlock({
   content,
@@ -8,9 +8,15 @@ export function UnchangedBlock({
   onChange: (val: string) => void
 }) {
   const [expanded, setExpanded] = useState(false)
-  // Split properly, handling both \r\n, \n, and old mac \r
   const contentFixed = content.replace(/\r\n/g, "\n").replace(/\r/g, "\n")
   const lines = contentFixed.split("\n")
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value),
+    [onChange]
+  )
+
+  const handleExpand = useCallback(() => setExpanded(true), [])
 
   if (lines.length <= 12 || expanded) {
     return (
@@ -18,7 +24,8 @@ export function UnchangedBlock({
         className="text-tech-main-dark/70 focus:bg-tech-main/5 w-full resize-y bg-transparent p-2 font-mono text-sm outline-none"
         rows={Math.max(2, lines.length + 1)}
         value={content}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={handleChange}
+        aria-label="Unchanged content block"
       />
     )
   }
@@ -32,13 +39,14 @@ export function UnchangedBlock({
       <pre className="bg-transparent p-2 whitespace-pre-wrap">
         {headLines.join("\n")}
       </pre>
-      <div
+      <button
+        type="button"
         className="bg-tech-main/10 text-tech-main hover:bg-tech-main/20 mx-4 my-1 cursor-pointer rounded-sm px-4 py-2 text-center text-xs font-bold tracking-widest uppercase transition-colors"
-        onClick={() => setExpanded(true)}>
+        onClick={handleExpand}>
         <span className="mr-2">?</span>
         {hiddenCount} UNCHANGED LINES HIDDEN. CLICK TO EXPAND & EDIT
         <span className="ml-2">?</span>
-      </div>
+      </button>
       <pre className="bg-transparent p-2 whitespace-pre-wrap">
         {tailLines.join("\n")}
       </pre>

@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { getCurrentUserAuthContext } from "@/lib/auth-context"
 import { redirect, notFound } from "next/navigation"
+// oxlint-disable-next-line import/no-unassigned-import
 import "katex/dist/katex.min.css"
 import { Link } from "@/i18n/navigation"
 import { TechButton } from "@/components/ui/tech-button"
@@ -20,6 +21,7 @@ import { PRActionButtons } from "./components/pr-action-buttons"
 
 const owner = ARTICLES_REPO_OWNER
 const repo = ARTICLES_REPO_NAME
+const EMPTY_REVIEW_FILES: ReviewFile[] = []
 
 function getPrimaryAnalysisPath(filePaths: string[], fallbackPath?: string) {
   return (
@@ -178,7 +180,7 @@ export default async function ReviewDetailPage({
     commitCount: 0,
     filesAffected: 0,
     adminMessage: "No analysis available.",
-  }
+  } as const
 
   const hasConflict = pr.mergeable === false
   const isMergeable = pr.mergeable === true
@@ -245,7 +247,7 @@ export default async function ReviewDetailPage({
           ? ("conflict" as const)
           : ("clean" as const),
       }))
-    : []
+    : EMPTY_REVIEW_FILES
   console.log(
     "[review/page] reviewFiles",
     reviewFiles.map((f) => ({
@@ -291,6 +293,31 @@ export default async function ReviewDetailPage({
           : !isMergeable
             ? "GitHub still reports this pull request as not mergeable."
             : null
+
+  const prProps = {
+    number: pr.number,
+    title: pr.title,
+    htmlUrl: pr.html_url,
+    baseRef: pr.base.ref,
+    headRef: pr.head.ref,
+    commits: pr.commits,
+    changedFiles: pr.changed_files,
+    additions: pr.additions,
+    deletions: pr.deletions,
+    authorLogin: pr.user?.login || "UNKNOWN",
+  }
+
+  const revisionProps = {
+    id: linkedDraft?.id ?? "",
+    conflictMode: effectiveConflictMode,
+    rebaseState: linkedDraft?.rebaseState,
+  }
+
+  const squashCommitDefaults = {
+    title: defaultCommitTitle,
+    body: defaultCommitBody,
+    coauthorLines,
+  }
 
   return (
     <div className="mx-auto max-w-352 space-y-8 p-4 pb-32 md:p-8">
@@ -381,32 +408,13 @@ export default async function ReviewDetailPage({
         <div className="space-y-6">
           {linkedDraft ? (
             <ReviewEditor
-              pr={{
-                number: pr.number,
-                title: pr.title,
-                htmlUrl: pr.html_url,
-                baseRef: pr.base.ref,
-                headRef: pr.head.ref,
-                commits: pr.commits,
-                changedFiles: pr.changed_files,
-                additions: pr.additions,
-                deletions: pr.deletions,
-                authorLogin: pr.user?.login || "UNKNOWN",
-              }}
+              pr={prProps}
               files={reviewFiles}
               initialActiveFileId={linkedDraftFiles?.activeFileId}
               modeAnalysis={modeAnalysis}
               mergeStrategyAnalysis={mergeStrategyAnalysis}
-              revision={{
-                id: linkedDraft.id,
-                conflictMode: effectiveConflictMode,
-                rebaseState: linkedDraft.rebaseState,
-              }}
-              squashCommitDefaults={{
-                title: defaultCommitTitle,
-                body: defaultCommitBody,
-                coauthorLines,
-              }}
+              revision={revisionProps}
+              squashCommitDefaults={squashCommitDefaults}
             />
           ) : (
             <div className="border-tech-main/30 bg-tech-main/5 text-tech-main/70 border px-6 py-10 font-mono text-sm tracking-widest uppercase">
@@ -460,11 +468,7 @@ export default async function ReviewDetailPage({
               }
               mergeStrategyAnalysis={mergeStrategyAnalysis}
               mergeBlockedReason={mergeBlockedReason}
-              squashCommitDefaults={{
-                title: defaultCommitTitle,
-                body: defaultCommitBody,
-                coauthorLines,
-              }}
+              squashCommitDefaults={squashCommitDefaults}
             />
           )}
 

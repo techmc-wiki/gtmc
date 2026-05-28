@@ -2,10 +2,145 @@ import { Link } from "@/i18n/navigation"
 import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
 import { encodeSlug } from "@/lib/slug-resolver"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
-import React from "react"
+import React, { useCallback } from "react"
 import { useReaderNavigation } from "../reader-navigation/context"
 
 export type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
+
+function FolderButton({
+  itemId,
+  title,
+  folderExpanded,
+  toggleFolder,
+}: {
+  itemId: string
+  title: string
+  folderExpanded: boolean
+  toggleFolder: (id: string) => void
+}) {
+  const handleClick = useCallback(
+    () => toggleFolder(itemId),
+    [toggleFolder, itemId]
+  )
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      className="
+        mt-3 mb-1 flex w-fit cursor-pointer items-center text-left
+        font-bold text-tech-main/80 uppercase opacity-80
+        transition-colors
+        hover:text-tech-main
+        focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 focus:outline-none
+      ">
+      <span className="inline-block w-4 text-xs text-tech-main/50">
+        {folderExpanded ? "▼" : "▶"}
+      </span>
+      <span>{title}</span>
+    </button>
+  )
+}
+
+function ArticleLink({
+  item,
+  fileRoute,
+  isActive,
+  onNavigate,
+}: {
+  item: ChapterNavNode
+  fileRoute: string
+  isActive: boolean
+  onNavigate?: () => void
+}) {
+  const handleClick = useCallback(
+    () => onNavigate?.(),
+    [onNavigate]
+  )
+
+  return (
+    <div className="relative">
+      <div
+        className={`
+          group relative flex items-center py-1.5 pl-4
+          transition-colors
+          ${
+            isActive
+              ? `font-bold text-tech-main`
+              : `
+                text-slate-700
+                hover:text-tech-main
+              `
+          }
+        `}>
+        <Link
+          href={fileRoute}
+          onClick={handleClick}
+          className="block w-full pb-px pl-1">
+          {item.isReadmeIntro
+            ? `00 ${item.title}`
+            : !item.isFolder && item.index !== undefined
+              ? `${formatIndexPrefix(item.index, item.isAppendix ?? false, item.isPreface ?? false)}${item.title}`
+              : item.title}
+          {item.isAdvanced && (
+            <span
+              className="
+                mx-1 inline-block shrink-0 bg-tech-advanced px-[3px]
+                align-middle font-mono text-[0.5625rem] font-bold
+                tracking-widest text-white select-none
+              ">
+              ADVANCED
+            </span>
+          )}
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+function FolderGrid({
+  itemId,
+  isFolder,
+  folderExpanded,
+  items,
+  folderGridRefs,
+  onNavigate,
+}: {
+  itemId: string
+  isFolder: boolean
+  folderExpanded: boolean
+  items: ChapterNavNode[]
+  folderGridRefs: React.RefObject<Map<string, HTMLDivElement>>
+  onNavigate?: () => void
+}) {
+  const refCallback = useCallback(
+    (el: HTMLDivElement | null) => {
+      if (el) folderGridRefs.current.set(itemId, el)
+      else folderGridRefs.current.delete(itemId)
+    },
+    [folderGridRefs, itemId]
+  )
+
+  return (
+    <div
+      ref={refCallback}
+      className={`
+        grid transition-all duration-300 ease-out
+        ${
+          !isFolder || folderExpanded
+            ? `grid-rows-[1fr] opacity-100`
+            : `grid-rows-[0fr] opacity-0`
+        }
+      `}>
+      <div className="overflow-hidden">
+        <ChapterNavTree
+          items={items}
+          onNavigate={onNavigate}
+        />
+      </div>
+    </div>
+  )
+}
 
 export function ChapterNavTree({
   items,
@@ -94,81 +229,30 @@ export function ChapterNavTree({
                 }
               `}>
               {item.isFolder ? (
-                <button
-                  type="button"
-                  onClick={() => toggleFolder(item.id)}
-                  className="
-                    mt-3 mb-1 flex w-fit cursor-pointer items-center text-left
-                    font-bold text-tech-main/80 uppercase opacity-80
-                    transition-colors
-                    hover:text-tech-main
-                    focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 focus:outline-none
-                  ">
-                  <span className="inline-block w-4 text-xs text-tech-main/50">
-                    {folderExpanded ? "▼" : "▶"}
-                  </span>
-                  <span>{item.title}</span>
-                </button>
+                <FolderButton
+                  itemId={item.id}
+                  title={item.title}
+                  folderExpanded={folderExpanded}
+                  toggleFolder={toggleFolder}
+                />
               ) : (
-                <div className="relative">
-                  <div
-                    className={`
-                      group relative flex items-center py-1.5 pl-4
-                      transition-colors
-                      ${
-                        isActive
-                          ? `font-bold text-tech-main`
-                          : `
-                            text-slate-700
-                            hover:text-tech-main
-                          `
-                      }
-                    `}>
-                    <Link
-                      href={fileRoute}
-                      onClick={() => onNavigate?.()}
-                      className="block w-full pb-px pl-1">
-                      {item.isReadmeIntro
-                        ? `00 ${item.title}`
-                        : !item.isFolder && item.index !== undefined
-                          ? `${formatIndexPrefix(item.index, item.isAppendix ?? false, item.isPreface ?? false)}${item.title}`
-                          : item.title}
-                      {item.isAdvanced && (
-                        <span
-                          className="
-                            mx-1 inline-block shrink-0 bg-tech-advanced px-[3px]
-                            align-middle font-mono text-[0.5625rem] font-bold
-                            tracking-widest text-white select-none
-                          ">
-                          ADVANCED
-                        </span>
-                      )}
-                    </Link>
-                  </div>
-                </div>
+                <ArticleLink
+                  item={item}
+                  fileRoute={fileRoute}
+                  isActive={isActive}
+                  onNavigate={onNavigate}
+                />
               )}
 
               {item.children && item.children.length > 0 && (
-                <div
-                  ref={(el) => {
-                    if (el) folderGridRefs.current.set(item.id, el)
-                    else folderGridRefs.current.delete(item.id)
-                  }}
-                  className={`
-                    grid transition-all duration-300 ease-out
-                    ${
-                      !item.isFolder || folderExpanded
-                        ? `grid-rows-[1fr] opacity-100`
-                        : `grid-rows-[0fr] opacity-0`
-                    }
-                  `}>
-                  <div className="overflow-hidden">
-                    <ChapterNavTree
-                      items={item.children}
-                      onNavigate={onNavigate}
-                    />
-                  </div>
-                </div>
+                <FolderGrid
+                  itemId={item.id}
+                  isFolder={item.isFolder}
+                  folderExpanded={folderExpanded}
+                  items={item.children}
+                  folderGridRefs={folderGridRefs}
+                  onNavigate={onNavigate}
+                />
               )}
             </li>
           </React.Fragment>

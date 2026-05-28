@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl"
-import React, { useState } from "react"
+import React, { useState, useCallback } from "react"
 
 export function ChapterNavToolbar({
   internalScroll,
@@ -13,13 +13,24 @@ export function ChapterNavToolbar({
   const [locateDisabled, setLocateDisabled] = useState(false)
   const t = useTranslations("ChapterNav")
 
-  const handleLocate = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (locateDisabled) return
-    setLocateDisabled(true)
-    onLocate()
-    e.currentTarget.blur()
-    setTimeout(() => setLocateDisabled(false), 500)
-  }
+  const handleLocate = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (locateDisabled) return
+      setLocateDisabled(true)
+      onLocate()
+      e.currentTarget.blur()
+      setTimeout(() => setLocateDisabled(false), 500)
+    },
+    [locateDisabled, onLocate]
+  )
+
+  const handleCollapseAllWithBlur = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      onCollapseAll(e)
+      e.currentTarget.blur()
+    },
+    [onCollapseAll]
+  )
 
   if (internalScroll) {
     return (
@@ -32,10 +43,7 @@ export function ChapterNavToolbar({
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={(e) => {
-                onCollapseAll(e)
-                e.currentTarget.blur()
-              }}
+              onClick={handleCollapseAllWithBlur}
               className="
                 flex-3 cursor-pointer border border-tech-main/40 px-3 py-1.5
                 pl-2 font-mono text-[0.6875rem] transition-colors

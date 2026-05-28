@@ -54,7 +54,9 @@ export function TranslationsList({
         return (
           <li key={code} className="border-tech-line/30 border">
             <details className="group" open={isActive}>
-              <summary className="hover:bg-tech-main/5 flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 transition-colors [&::-webkit-details-marker]:hidden">
+              <summary
+                aria-label={`${displayName} translation`}
+                className="hover:bg-tech-main/5 flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 transition-colors [&::-webkit-details-marker]:hidden">
                 <span className="flex items-center gap-2">
                   <span className="text-tech-main/50 font-mono text-[0.625rem] tracking-widest uppercase">
                     {code.toUpperCase()}

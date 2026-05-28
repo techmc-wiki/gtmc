@@ -18,12 +18,28 @@ export function EditorFileUploadInput({
   isCompressing,
   disabled = false,
 }: EditorFileUploadInputProps) {
+  const handleClick = React.useCallback(
+    () => fileInputRef.current?.click(),
+    [fileInputRef]
+  )
+
+  const handleChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (file) {
+        onFileSelect(file)
+        e.target.value = ""
+      }
+    },
+    [onFileSelect]
+  )
+
   return (
     <>
       <EditorToolbarButton
         type="button"
         variant="upload"
-        onClick={() => fileInputRef.current?.click()}
+        onClick={handleClick}
         disabled={disabled || isUploading}
         aria-busy={isUploading}>
         {isCompressing ? "CMP" : isUploading ? "UPL" : "FILES"}
@@ -33,13 +49,8 @@ export function EditorFileUploadInput({
         type="file"
         accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,text/plain,text/csv"
         className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0]
-          if (file) {
-            onFileSelect(file)
-            e.target.value = ""
-          }
-        }}
+        onChange={handleChange}
+        aria-label="Upload file"
       />
     </>
   )

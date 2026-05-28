@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, useCallback, type ReactNode } from "react"
 
 interface LazyCodeBlockProps {
   lang: string
@@ -32,6 +32,10 @@ export function LazyCodeBlock({ lineCount, children }: LazyCodeBlockProps) {
   }, [])
 
   const numLines = Math.min(parseInt(lineCount) || 8, 8)
+
+  const handleSkeletonEnd = useCallback(() => {
+    if (isVisible) setIsSkeletonRemoved(true)
+  }, [isVisible])
   const lineWidths = [
     "w-3/4 bg-tech-accent/20",
     "w-1/2 bg-tech-accent/15",
@@ -67,12 +71,8 @@ export function LazyCodeBlock({ lineCount, children }: LazyCodeBlockProps) {
               ? `animate-skeleton-exit motion-reduce:animate-none motion-reduce:opacity-0`
               : ""
           } `}
-          onAnimationEnd={() => {
-            if (isVisible) setIsSkeletonRemoved(true)
-          }}
-          onTransitionEnd={() => {
-            if (isVisible) setIsSkeletonRemoved(true)
-          }}>
+          onAnimationEnd={handleSkeletonEnd}
+          onTransitionEnd={handleSkeletonEnd}>
           <div className="border-tech-main/30 bg-tech-main/10 flex items-center justify-between border-b px-4 py-1.5">
             <div className="flex items-center gap-2">
               <span className="bg-tech-main/40 size-1.5 animate-pulse" />

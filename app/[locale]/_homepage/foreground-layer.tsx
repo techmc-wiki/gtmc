@@ -2,8 +2,20 @@ import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { TechButton } from "@/components/ui/tech-button"
 import { HeroCard } from "./hero-card"
-import { ForwardedRef } from "react"
+import { ForwardedRef, useCallback } from "react"
 import { MotionValue } from "motion/react"
+
+const INVENTORY_SLOT_KEYS = [
+  "slot-0",
+  "slot-1",
+  "slot-2",
+  "slot-3",
+  "slot-4",
+  "slot-5",
+  "slot-6",
+  "slot-7",
+  "slot-8",
+] as const
 
 export function ForegroundLayer({
   cardRef,
@@ -25,6 +37,18 @@ export function ForegroundLayer({
 }) {
   const t = useTranslations("Homepage")
 
+  const handleArticlesClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (isAccessingDatabase) {
+        event.preventDefault()
+        return
+      }
+
+      setIsAccessingDatabase(true)
+    },
+    [isAccessingDatabase, setIsAccessingDatabase]
+  )
+
   return (
     <main className="relative z-10 mx-auto mt-[7vh] flex min-h-max w-full max-w-7xl flex-col items-center justify-center px-4 py-24">
       {/* Foreground Layer - Card chrome and nearby accents */}
@@ -39,14 +63,7 @@ export function ForegroundLayer({
         <Link
           href="/articles"
           prefetch
-          onClick={(event) => {
-            if (isAccessingDatabase) {
-              event.preventDefault()
-              return
-            }
-
-            setIsAccessingDatabase(true)
-          }}
+          onClick={handleArticlesClick}
           className="w-full sm:w-auto">
           <TechButton
             variant="primary"
@@ -76,9 +93,9 @@ export function ForegroundLayer({
         <div className="text-tech-main/60 absolute -top-4 font-mono text-[0.5rem]">
           INVENTORY_SLOTS_
         </div>
-        {[...Array(9)].map((_, i) => (
+        {INVENTORY_SLOT_KEYS.map((slotKey, i) => (
           <div
-            key={i}
+            key={slotKey}
             className={`flex size-8 items-center justify-center ${
               i === 3
                 ? `border-tech-main-dark bg-tech-main/10 border-2 shadow-[0_0_8px_rgb(var(--color-tech-main)/0.3)]`

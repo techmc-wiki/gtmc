@@ -11,7 +11,7 @@ Tutorials, explanations on game mechanics, and source-code reading. Collaborativ
 
 [![Website](https://img.shields.io/badge/site-beta.techmc.wiki-60708F?style=flat-square&labelColor=4A5A78)](https://beta.techmc.wiki) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/gtmc-dev/gtmc) [![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org) [![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org) [![License](https://img.shields.io/badge/Code-Apache--2.0-yellow?style=flat-square)](LICENSE) [![Articles](https://img.shields.io/badge/Articles-CC--BY--NC--SA%204.0-lightgrey?style=flat-square)](LICENSE)
 
-[Visit the Site](https://beta.techmc.wiki) · [Browse Raw Articles](https://beta.techmc.wiki/articles) · [More GTMC Projects](https://github.com/orgs/gtmc-dev/repositories)
+[Visit the Site](https://beta.techmc.wiki) · [Browse Raw Articles](https://github.com/gtmc-dev/articles) · [More GTMC Projects](https://github.com/orgs/gtmc-dev/repositories)
 
 
 <!-- README-I18N:START -->
@@ -130,7 +130,7 @@ For details and contribution guidance, see [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## See also
 
-All articles (including drafts and pending submissions) are located in this repo: [`gtmc-dev/articles`](https://github.com/orgs/gtmc-dev/repositories)
+All articles (including drafts and pending submissions) are located in this repo: [`gtmc-dev/articles`](https://github.com/gtmc-dev/articles)
 
 ---
 

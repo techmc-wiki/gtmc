@@ -779,10 +779,14 @@ export function ReviewEditor({
     }
   }
 
-  const simpleFileStatuses = sessionFiles.map((f) => ({
-    filePath: f.filePath,
-    status: f.status,
-  }))
+  const simpleFileStatuses = React.useMemo(
+    () =>
+      sessionFiles.map((f) => ({
+        filePath: f.filePath,
+        status: f.status,
+      })),
+    [sessionFiles]
+  )
   const diffBaseContent = activeFile?.originalContent ?? ""
 
   return (

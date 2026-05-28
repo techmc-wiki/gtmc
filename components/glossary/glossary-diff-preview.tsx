@@ -24,11 +24,13 @@ export interface GlossaryDiffPreviewProps {
 
 function renderInlineDiff(oldText: string, newText: string): React.ReactNode {
   const changes = diffWords(oldText ?? "", newText ?? "")
-  return changes.map((part, index) => {
+  let keyCounter = 0
+  return changes.map((part) => {
+    const key = `${part.added ? "a" : part.removed ? "r" : "s"}-${keyCounter++}`
     if (part.added) {
       return (
         <ins
-          key={index}
+          key={key}
           className="bg-green-100/50 px-0.5 text-green-800 no-underline">
           {part.value}
         </ins>
@@ -37,13 +39,13 @@ function renderInlineDiff(oldText: string, newText: string): React.ReactNode {
     if (part.removed) {
       return (
         <del
-          key={index}
+          key={key}
           className="bg-red-100/50 px-0.5 text-red-700 line-through">
           {part.value}
         </del>
       )
     }
-    return <span key={index}>{part.value}</span>
+    return <span key={key}>{part.value}</span>
   })
 }
 
@@ -191,6 +193,13 @@ export function GlossaryDiffPreview({
 }: GlossaryDiffPreviewProps) {
   const [useRealEmail, setUseRealEmail] = React.useState(false)
 
+  const handleUseRealEmailChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setUseRealEmail(event.target.checked)
+    },
+    []
+  )
+
   const counts = React.useMemo(() => {
     let edit = 0
     let add = 0
@@ -216,8 +225,7 @@ export function GlossaryDiffPreview({
         "border-tech-main/40 flex flex-col border bg-white/95 backdrop-blur-sm",
         className
       )}>
-      <div
-        role="status"
+      <output
         aria-live="polite"
         className="border-tech-line/30 sticky top-0 z-10 flex items-center justify-between gap-4 border-b bg-white/95 px-4 py-3 font-mono text-xs backdrop-blur-sm sm:px-6">
         <span className="text-tech-main-dark tracking-widest uppercase">
@@ -226,7 +234,7 @@ export function GlossaryDiffPreview({
         <span className="text-tech-main/60 tracking-widest uppercase">
           {`${operations.length} OP${operations.length === 1 ? "" : "S"}`}
         </span>
-      </div>
+      </output>
 
       <div className="flex flex-col gap-3 px-4 py-4 sm:px-6">
         {operations.length === 0 ? (
@@ -252,8 +260,9 @@ export function GlossaryDiffPreview({
           <input
             type="checkbox"
             checked={useRealEmail}
-            onChange={(event) => setUseRealEmail(event.target.checked)}
+            onChange={handleUseRealEmailChange}
             disabled={isSubmitting}
+            aria-label="Use real email"
             className="border-tech-main/60 accent-tech-main size-4 cursor-pointer disabled:cursor-not-allowed"
           />
           <span className="text-tech-main tracking-widest uppercase">

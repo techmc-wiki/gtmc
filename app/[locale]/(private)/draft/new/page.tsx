@@ -29,6 +29,7 @@ export default async function NewDraftPage({
       ? [normalizedPath]
       : [normalizedPath, `${normalizedPath}.md`]
 
+    /* oxlint-disable eslint/no-await-in-loop -- sequential: returns on first match to avoid unnecessary fetches */
     for (const candidate of candidates) {
       const content = await getRepoFileContent(candidate)
       if (content !== null) {
@@ -36,6 +37,7 @@ export default async function NewDraftPage({
         break
       }
     }
+    /* oxlint-enable eslint/no-await-in-loop */
 
     if (!initialContent) {
       initialContent = ""

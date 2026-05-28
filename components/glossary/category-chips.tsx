@@ -30,14 +30,21 @@ interface ChipProps {
   label: string
   count: number
   active: boolean
-  onClick: () => void
+  name?: string
+  onClick?: () => void
+  onToggle?: (name: string) => void
 }
 
-function Chip({ label, count, active, onClick }: ChipProps) {
+function Chip({ label, count, active, name, onClick, onToggle }: ChipProps) {
+  const handleClick = React.useCallback(() => {
+    if (onClick) onClick()
+    else if (onToggle && name) onToggle(name)
+  }, [onClick, onToggle, name])
+
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={handleClick}
       aria-pressed={active}
       className={cn(CHIP_BASE, active ? CHIP_ACTIVE : CHIP_INACTIVE)}>
       [{label} {count}]
@@ -94,6 +101,7 @@ function ChipsList({
   const list = (
     <div
       ref={scrollRef}
+      // eslint-disable-next-line jsx-a11y/prefer-tag-over-role -- no semantic HTML element for a group of toggle buttons
       role="group"
       aria-label={ariaLabel}
       className={cn(
@@ -112,9 +120,10 @@ function ChipsList({
         <Chip
           key={c.name}
           label={c.name}
+          name={c.name}
           count={c.count}
           active={selected.includes(c.name)}
-          onClick={() => onToggle(c.name)}
+          onToggle={onToggle}
         />
       ))}
     </div>
@@ -172,6 +181,8 @@ export function CategoryChips({
   const [isSheetOpen, setIsSheetOpen] = React.useState(false)
   const closeSheet = React.useCallback(() => setIsSheetOpen(false), [])
 
+  const openSheet = React.useCallback(() => setIsSheetOpen(true), [])
+
   useModalEffects({ isOpen: isSheetOpen, onClose: closeSheet })
 
   const handleToggle = React.useCallback(
@@ -212,7 +223,7 @@ export function CategoryChips({
       <div className={cn("md:hidden", className)}>
         <button
           type="button"
-          onClick={() => setIsSheetOpen(true)}
+          onClick={openSheet}
           aria-haspopup="dialog"
           aria-expanded={isSheetOpen}
           className={cn(

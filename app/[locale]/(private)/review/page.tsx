@@ -63,7 +63,9 @@ export async function getClosedPRsAction(
     }))
   } catch (error) {
     console.error("Failed to fetch closed PRs:", error)
-    throw new Error("Unable to load closed and merged pull requests.")
+    throw new Error("Unable to load closed and merged pull requests.", {
+      cause: error,
+    })
   }
 }
 

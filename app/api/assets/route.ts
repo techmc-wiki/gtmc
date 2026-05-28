@@ -12,12 +12,13 @@ export async function GET(request: Request) {
   }
 
   // Prevent directory traversal attacks
-  const normalizedPath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, "")
+  const normalizedPath = path.normalize(filePath).replace(/^(\.\.[/\\])+/, "")
   const safePath = normalizedPath.replace(/^\/+/, "")
   const pathsToTry = safePath.endsWith(".md")
     ? [safePath]
     : [safePath, `${safePath}.md`]
 
+  /* oxlint-disable eslint/no-await-in-loop -- sequential: returns on first match, avoids unnecessary fetches */
   for (const candidate of pathsToTry) {
     const fileBuffer = await getArticleRemoteBuffer(candidate)
     if (fileBuffer) {
@@ -30,6 +31,7 @@ export async function GET(request: Request) {
       })
     }
   }
+  /* oxlint-enable eslint/no-await-in-loop */
 
   return new NextResponse("Not Found", { status: 404 })
 }

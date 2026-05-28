@@ -62,6 +62,7 @@ export async function GET(
       return cachedPath
     }
     const entries = await fs.promises.readdir(dir, { withFileTypes: true })
+    /* oxlint-disable eslint/no-await-in-loop -- recursive directory search: returns on first match */
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name)
       if (entry.isDirectory()) {
@@ -72,6 +73,7 @@ export async function GET(
         return fullPath
       }
     }
+    /* oxlint-enable eslint/no-await-in-loop */
     return null
   }
 

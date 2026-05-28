@@ -1,5 +1,15 @@
 import * as React from "react"
 
+type RevealDelay = 0 | 100 | 200 | 300 | 400
+
+const DELAY_STYLES: Record<RevealDelay, React.CSSProperties> = {
+  0: { animationDelay: "0ms" },
+  100: { animationDelay: "100ms" },
+  200: { animationDelay: "200ms" },
+  300: { animationDelay: "300ms" },
+  400: { animationDelay: "400ms" },
+}
+
 /**
  * Server-safe reveal wrapper for resolved content sections.
  * Applies staged animation delays matching loading shell timing (0ms, 100ms, 200ms, 300ms, 400ms).
@@ -8,13 +18,13 @@ import * as React from "react"
 export const RevealSection = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & {
-    delay?: 0 | 100 | 200 | 300 | 400
+    delay?: RevealDelay
   }
 >(({ delay = 0, className = "", ...props }, ref) => (
   <div
     ref={ref}
     className={`animate-fade-in ${className} `}
-    style={{ animationDelay: `${delay}ms` }}
+    style={DELAY_STYLES[delay]}
     {...props}
   />
 ))
@@ -27,13 +37,13 @@ RevealSection.displayName = "RevealSection"
 export const RevealContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & {
-    delay?: 0 | 100 | 200 | 300 | 400
+    delay?: RevealDelay
   }
 >(({ delay = 0, className = "", ...props }, ref) => (
   <div
     ref={ref}
     className={`animate-fade-in ${className} `}
-    style={{ animationDelay: `${delay}ms` }}
+    style={DELAY_STYLES[delay]}
     {...props}
   />
 ))

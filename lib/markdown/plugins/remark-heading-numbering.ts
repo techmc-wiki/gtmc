@@ -29,7 +29,7 @@ export function remarkNumberedHeadingsDot(options?: Options) {
       }
 
       const text = (textNode as { value: string }).value.replace(
-        /^([0-9.\-])+ /,
+        /^([0-9.-])+ /,
         ""
       )
 

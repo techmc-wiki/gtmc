@@ -135,6 +135,11 @@ function PRActionButtonsContent({
     }
   }, [commitBody, commitTitle, selectedMethod, squashCommitDefaults])
 
+  const handleMerge = React.useCallback(
+    () => mergePRAction?.(buildMergeOptions()) ?? Promise.resolve(),
+    [mergePRAction, buildMergeOptions]
+  )
+
   return (
     <div className="border-tech-main/35 space-y-4 border bg-white/80 p-4 backdrop-blur-sm">
       <div className="border-tech-main/15 space-y-1 border-b pb-3">
@@ -177,11 +182,7 @@ function PRActionButtonsContent({
           )}
         </ActionForm>
 
-        <ActionForm
-          action={() =>
-            mergePRAction?.(buildMergeOptions()) ?? Promise.resolve()
-          }
-          className="flex-1">
+        <ActionForm action={handleMerge} className="flex-1">
           {({ isPending, state }) => (
             <div className="space-y-3">
               <TechButton

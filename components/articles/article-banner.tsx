@@ -13,7 +13,7 @@ const IMG_PARALLAX_STRENGTH = 8
 
 export function ArticleBanner({ src, alt }: ArticleBannerProps) {
   const bannerRef = useRef<HTMLDivElement>(null)
-  const imgRef = useRef<HTMLDivElement>(null)
+  const imgRef = useRef<HTMLElement>(null)
   const [hovered, setHovered] = useState(false)
   const [locked, setLocked] = useState(false)
   const [flashing, setFlashing] = useState(false)
@@ -122,6 +122,19 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
     setTimeout(() => setFlashing(false), 400)
   }, [locked])
 
+  const handleMouseEnter = useCallback(() => {
+    setHovered(true)
+    handleFirstHover()
+  }, [handleFirstHover])
+
+  const handleMouseLeave = useCallback(() => {
+    setHovered(false)
+  }, [])
+
+  const handleImageError = useCallback(() => {
+    setImageError(true)
+  }, [])
+
   const offsetX = offset.x
   const offsetY = offset.y
 
@@ -175,16 +188,12 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
         </div>
 
         {/* Image container */}
-        <div
+        <figure
           ref={imgRef}
-          role="img"
           aria-label={alt}
           className={`relative aspect-21/9 w-full overflow-hidden ${imageError ? "hidden" : ""}`}
-          onMouseEnter={() => {
-            setHovered(true)
-            handleFirstHover()
-          }}
-          onMouseLeave={() => setHovered(false)}>
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}>
           {/* Shutter flash overlay */}
           <div
             className="pointer-events-none absolute inset-0 z-20 bg-black"
@@ -215,7 +224,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
             }}
             priority
             unoptimized={src.startsWith("/article-assets/")}
-            onError={() => setImageError(true)}
+            onError={handleImageError}
           />
 
           {/* Blueprint grid overlay */}
@@ -262,7 +271,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
             <div className="absolute top-1/2 left-1/2 h-10 w-px -translate-1/2 bg-tech-main" />
             <div className="size-5 rounded-full border border-tech-main" />
           </div>
-        </div>
+        </figure>
 
         {/* Bottom bar — alt text as caption */}
         <div

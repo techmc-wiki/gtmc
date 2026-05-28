@@ -6,6 +6,60 @@ import type { GlossarySummaryEntry } from "@/lib/glossary/manifest"
 
 const MAX_RESULTS = 10
 
+interface PickerOptionProps {
+  entry: GlossarySummaryEntry
+  index: number
+  optionIdPrefix: string
+  isActive: boolean
+  onPick: (slug: string) => void
+  onHighlight: (index: number) => void
+}
+
+function PickerOption({
+  entry,
+  index,
+  optionIdPrefix,
+  isActive,
+  onPick,
+  onHighlight,
+}: PickerOptionProps) {
+  const handleClick = useCallback(() => {
+    onPick(entry.slug)
+  }, [onPick, entry.slug])
+
+  const handleMouseEnter = useCallback(() => {
+    onHighlight(index)
+  }, [onHighlight, index])
+
+  return (
+    <li
+      key={entry.slug}
+      id={`${optionIdPrefix}-${index}`}
+      // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role, jsx-a11y/no-noninteractive-element-to-interactive-role
+      role="option"
+      aria-selected={isActive}>
+      <button
+        type="button"
+        onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
+        tabIndex={-1}
+        aria-label={entry.fullFormEn}
+        className={`block w-full cursor-pointer px-4 py-2 text-left transition-colors ${
+          isActive ? "bg-tech-main/10" : "hover:bg-tech-accent/10"
+        }`}>
+        <div className="text-tech-main-dark font-mono text-sm">
+          {entry.fullFormEn}
+        </div>
+        <div className="text-tech-main/50 mt-0.5 font-mono text-xs">
+          {entry.shortForm}
+          {entry.shortForm && entry.category ? " · " : ""}
+          {entry.category}
+        </div>
+      </button>
+    </li>
+  )
+}
+
 export interface GlossaryRowPickerProps {
   entries: GlossarySummaryEntry[]
   onPick: (slug: string) => void
@@ -159,11 +213,13 @@ export function GlossaryRowPicker({
         <input
           ref={inputRef}
           type="text"
+          // oxlint-disable-next-line jsx-a11y/no-redundant-roles
           role="combobox"
           aria-expanded={isOpen}
           aria-controls={listboxId}
           aria-autocomplete="list"
           aria-activedescendant={activeOptionId}
+          aria-label="Search glossary terms"
           value={query}
           onChange={handleQueryChange}
           onFocus={handleFocus}
@@ -180,43 +236,28 @@ export function GlossaryRowPicker({
           {results.length > 0 && (
             <ul
               id={listboxId}
+              // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role, jsx-a11y/no-noninteractive-element-to-interactive-role
               role="listbox"
               aria-label="Matching glossary terms"
               className="py-1">
-              {results.map((entry, index) => {
-                const isActive = index === highlightedIndex
-                return (
-                  <li
-                    key={entry.slug}
-                    id={`${optionIdPrefix}-${index}`}
-                    role="option"
-                    aria-selected={isActive}>
-                    <button
-                      type="button"
-                      onClick={() => handlePick(entry.slug)}
-                      onMouseEnter={() => setHighlightedIndex(index)}
-                      tabIndex={-1}
-                      className={`block w-full cursor-pointer px-4 py-2 text-left transition-colors ${
-                        isActive ? "bg-tech-main/10" : "hover:bg-tech-accent/10"
-                      }`}>
-                      <div className="text-tech-main-dark font-mono text-sm">
-                        {entry.fullFormEn}
-                      </div>
-                      <div className="text-tech-main/50 mt-0.5 font-mono text-xs">
-                        {entry.shortForm}
-                        {entry.shortForm && entry.category ? " · " : ""}
-                        {entry.category}
-                      </div>
-                    </button>
-                  </li>
-                )
-              })}
+              {results.map((entry, index) => (
+                <PickerOption
+                  key={entry.slug}
+                  entry={entry}
+                  index={index}
+                  optionIdPrefix={optionIdPrefix}
+                  isActive={index === highlightedIndex}
+                  onPick={handlePick}
+                  onHighlight={setHighlightedIndex}
+                />
+              ))}
             </ul>
           )}
 
           {showNoMatch && (
             <div
               id={listboxId}
+              // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
               role="listbox"
               aria-label="No matching glossary terms"
               className="px-4 py-3">

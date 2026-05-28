@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
+// oxlint-disable-next-line import/no-unassigned-import
 import "../globals.css"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
@@ -16,6 +17,27 @@ import { routing } from "@/i18n/routing"
 import React from "react"
 
 const siteUrl = getSiteUrl()
+
+const jsonLd = {
+  __html: JSON.stringify([
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "Graduate Texts in Minecraft",
+      url: siteUrl,
+      logo: `${siteUrl}/opengraph-image`,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "Graduate Texts in Minecraft",
+      url: siteUrl,
+      description:
+        "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+      inLanguage: ["zh", "en"],
+    },
+  ]),
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -103,29 +125,7 @@ export default async function RootLayout({
             </FooterWrapper>
           </FooterProvider>
         </NextIntlClientProvider>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify([
-              {
-                "@context": "https://schema.org",
-                "@type": "Organization",
-                name: "Graduate Texts in Minecraft",
-                url: siteUrl,
-                logo: `${siteUrl}/opengraph-image`,
-              },
-              {
-                "@context": "https://schema.org",
-                "@type": "WebSite",
-                name: "Graduate Texts in Minecraft",
-                url: siteUrl,
-                description:
-                  "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
-                inLanguage: ["zh", "en"],
-              },
-            ]),
-          }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
       </body>
     </html>
   )

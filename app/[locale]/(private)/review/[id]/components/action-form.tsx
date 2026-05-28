@@ -1,7 +1,13 @@
 "use client"
 
 import { getReauthLoginUrl, isReauthRequiredError } from "@/lib/admin-reauth"
-import React, { ReactNode, useEffect, useRef, useState } from "react"
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 
 type ActionFeedbackState = "idle" | "running" | "success" | "error"
 
@@ -33,41 +39,44 @@ export function ActionForm({
     }
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (isPending) return
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      if (isPending) return
 
-    if (resetTimerRef.current !== null) {
-      window.clearTimeout(resetTimerRef.current)
-      resetTimerRef.current = null
-    }
-
-    setError(null)
-    setIsPending(true)
-    setState("running")
-
-    try {
-      await action()
-      setState("success")
-      resetTimerRef.current = window.setTimeout(() => {
-        setState("idle")
-      }, 1400)
-    } catch (err) {
-      if (isReauthRequiredError(err)) {
-        window.location.href = getReauthLoginUrl(
-          `${window.location.pathname}${window.location.search}`
-        )
-        return
+      if (resetTimerRef.current !== null) {
+        window.clearTimeout(resetTimerRef.current)
+        resetTimerRef.current = null
       }
-      setError(err instanceof Error ? err.message : String(err))
-      setState("error")
-      resetTimerRef.current = window.setTimeout(() => {
-        setState("idle")
-      }, 3200)
-    } finally {
-      setIsPending(false)
-    }
-  }
+
+      setError(null)
+      setIsPending(true)
+      setState("running")
+
+      try {
+        await action()
+        setState("success")
+        resetTimerRef.current = window.setTimeout(() => {
+          setState("idle")
+        }, 1400)
+      } catch (err) {
+        if (isReauthRequiredError(err)) {
+          window.location.href = getReauthLoginUrl(
+            `${window.location.pathname}${window.location.search}`
+          )
+          return
+        }
+        setError(err instanceof Error ? err.message : String(err))
+        setState("error")
+        resetTimerRef.current = window.setTimeout(() => {
+          setState("idle")
+        }, 3200)
+      } finally {
+        setIsPending(false)
+      }
+    },
+    [action, isPending]
+  )
 
   return (
     <>

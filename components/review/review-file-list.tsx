@@ -37,7 +37,7 @@ function StatusIndicator({
         ? "resolved"
         : "clean"
   return (
-    <span role="img" title={t(status)}>
+    <span aria-label={t(status)}>
       <StatusDot variant={variant} size="md" />
     </span>
   )
@@ -68,6 +68,12 @@ export function ReviewFileList({
       <FileListContainer className="space-y-2">
         {files.map((file, index) => {
           const isActive = file.id === activeFileId
+          const primaryAction = (
+            <span className="flex shrink-0 items-center gap-1.5">
+              <FileExtBadge filePath={file.filePath} />
+              <StatusIndicator status={file.status} />
+            </span>
+          )
 
           return (
             <FileListItem
@@ -77,12 +83,7 @@ export function ReviewFileList({
               index={index}
               isActive={isActive}
               onSelect={onSelectFile}
-              primaryAction={
-                <span className="flex shrink-0 items-center gap-1.5">
-                  <FileExtBadge filePath={file.filePath} />
-                  <StatusIndicator status={file.status} />
-                </span>
-              }
+              primaryAction={primaryAction}
               className="ml-0">
               <span className="text-tech-main/45 flex w-full flex-wrap items-center gap-2 font-mono text-[0.625rem] tracking-widest uppercase">
                 <span>{file.changeType ?? "modified"}</span>

@@ -84,8 +84,7 @@ export function GlossarySearch({
     : t("searchScopeAll")
 
   return (
-    <div
-      role="search"
+    <search
       className={`flex flex-col gap-2 sm:flex-row sm:items-stretch ${className}`}>
       <div className="border-tech-main/40 focus-within:border-tech-main/70 flex flex-1 items-stretch border bg-white/50 transition-colors">
         <span
@@ -125,6 +124,6 @@ export function GlossarySearch({
       <span className="text-tech-main/50 font-mono text-xs select-none sm:hidden">
         {resultCount} of {totalCount}
       </span>
-    </div>
+    </search>
   )
 }

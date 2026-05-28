@@ -6,16 +6,20 @@ import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { SiteShell } from "@/components/layout/site-shell"
 import { Logo } from "@/components/ui/logo"
 
+function buildNavLinks(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
+  return [
+    { href: "/articles", label: t("articles") },
+    { href: "/pdf", label: "PDF" },
+  ]
+}
+
 export default async function PdfLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   const t = await getTranslations("Nav")
-  const navLinks = [
-    { href: "/articles", label: t("articles") },
-    { href: "/pdf", label: "PDF" },
-  ]
+  const navLinks = buildNavLinks(t)
 
   return (
     <SiteShell

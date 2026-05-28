@@ -115,7 +115,7 @@ async function buildIndex(
       nextIndex += 1
 
       const node = githubNodes[currentIndex]
-      const artifact = await getArticleContentBySlug(node.slug, locale)
+      const artifact = await getArticleContentBySlug(node.slug, locale) // eslint-disable-line no-await-in-loop
       if (!artifact) {
         continue
       }

@@ -235,14 +235,13 @@ export function OperationProgress({
         : activeStage?.label || title
 
   return (
-    <section
+    <output
       className={cn(
-        "guide-line relative overflow-hidden border bg-white/85 backdrop-blur-sm",
+        "guide-line relative block overflow-hidden border bg-white/85 backdrop-blur-sm",
         compact ? "p-3" : "p-4",
         state === "error" ? "border-red-500/30 bg-red-500/5" : "",
         className
       )}
-      role="status"
       aria-live="polite">
       <CornerBrackets
         color={state === "error" ? "border-red-500/20" : "border-tech-main/20"}
@@ -285,13 +284,11 @@ export function OperationProgress({
         </div>
       </div>
 
-      <div
-        className="guide-line bg-tech-main/5 relative mt-3 h-2 overflow-hidden border"
-        role="progressbar"
+      <progress
+        className="guide-line bg-tech-main/5 relative mt-3 block h-2 w-full appearance-none overflow-hidden border [&::-moz-progress-bar]:bg-transparent [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:bg-transparent"
         aria-label={title}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={percent}>
+        max={100}
+        value={percent}>
         <div
           className={cn(
             "bg-tech-main absolute inset-y-0 left-0 transition-[width] duration-300",
@@ -303,7 +300,7 @@ export function OperationProgress({
         {state === "running" ? (
           <div className="animate-blueprint-sweep pointer-events-none absolute inset-0 bg-linear-to-r from-transparent via-white/70 to-transparent" />
         ) : null}
-      </div>
+      </progress>
 
       <ol
         className={cn(
@@ -353,6 +350,6 @@ export function OperationProgress({
           )
         })}
       </ol>
-    </section>
+    </output>
   )
 }

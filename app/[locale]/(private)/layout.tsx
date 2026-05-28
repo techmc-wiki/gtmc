@@ -11,6 +11,19 @@ import { Logo } from "@/components/ui/logo"
 import { auth } from "@/lib/auth"
 import { getCurrentUserAuthContext } from "@/lib/auth-context"
 
+function buildNavLinks(
+  t: Awaited<ReturnType<typeof getTranslations<"Nav">>>,
+  isAdmin: boolean
+) {
+  return [
+    { href: "/articles", label: t("articles") },
+    { href: "/draft", label: t("drafts") },
+    { href: "/glossary", label: t("glossary") },
+    ...(isAdmin ? [{ href: "/review", label: t("reviewHub") }] : []),
+    { href: "/features", label: t("features") },
+  ]
+}
+
 export default async function DashboardLayout({
   children,
 }: {
@@ -29,14 +42,7 @@ export default async function DashboardLayout({
   }
 
   const t = await getTranslations("Nav")
-
-  const navLinks = [
-    { href: "/articles", label: t("articles") },
-    { href: "/draft", label: t("drafts") },
-    { href: "/glossary", label: t("glossary") },
-    ...(isAdmin ? [{ href: "/review", label: t("reviewHub") }] : []),
-    { href: "/features", label: t("features") },
-  ]
+  const navLinks = buildNavLinks(t, isAdmin)
 
   return (
     <SiteShell

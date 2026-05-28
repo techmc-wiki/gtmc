@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, MotionValue } from "motion/react"
-import { ForwardedRef } from "react"
+import { ForwardedRef, useMemo } from "react"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 export function HeroCard({
@@ -18,17 +18,22 @@ export function HeroCard({
     rotateY: MotionValue<number>
   }
 }) {
+  const cardStyle = useMemo(
+    () => ({
+      x: fgTransform.x,
+      y: fgTransform.y,
+      rotateX: fgTransform.rotateX,
+      rotateY: fgTransform.rotateY,
+      transformStyle: "preserve-3d" as const,
+    }),
+    [fgTransform.x, fgTransform.y, fgTransform.rotateX, fgTransform.rotateY]
+  )
+
   return (
     <motion.div
       ref={cardRef}
       className="group animate-tech-pop-in homepage-decor-foreground fill-mode-forwards relative mb-8 w-full max-w-sm opacity-0 [animation-delay:0.2s] [animation-duration:0.8s] motion-reduce:animate-none motion-reduce:opacity-100 sm:max-w-xl md:max-w-2xl lg:max-w-4xl"
-      style={{
-        x: fgTransform.x,
-        y: fgTransform.y,
-        rotateX: fgTransform.rotateX,
-        rotateY: fgTransform.rotateY,
-        transformStyle: "preserve-3d",
-      }}>
+      style={cardStyle}>
       {/* 下层错位阴影框 */}
       <div className="guide-line absolute inset-0 -z-10 translate-3 border bg-transparent transition-transform duration-500 ease-out group-hover:translate-4" />
 

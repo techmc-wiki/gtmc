@@ -57,17 +57,21 @@ function TermDetailContent({ entry, locale, slug }: TermDetailProps) {
   const hasRelated = parsedRelated.length > 0
   const hasShortForm = entry.shortForm.trim().length > 0
 
+  const headerAction = React.useMemo(
+    () =>
+      entry.isControversial ? (
+        <ControversyBadge label={t("controversialBadge")} />
+      ) : undefined,
+    [entry.isControversial, t]
+  )
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
         <PageHeader
           title={entry.fullFormEn}
           subtitle={entry.category}
-          action={
-            entry.isControversial ? (
-              <ControversyBadge label={t("controversialBadge")} />
-            ) : undefined
-          }
+          action={headerAction}
         />
         {hasShortForm && (
           <p className="text-tech-main/50 font-mono text-sm">

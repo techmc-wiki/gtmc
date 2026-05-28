@@ -41,8 +41,8 @@ export function GlossaryDetailPanel({
         onClick={onClose}
         className="bg-tech-main-dark/15 absolute inset-0 w-full cursor-default backdrop-blur-[2px]"
       />
-      <aside
-        role="dialog"
+      <dialog
+        open
         aria-modal="true"
         aria-labelledby={titleId}
         className="border-tech-main/40 animate-tech-pop-in fixed inset-x-3 inset-y-3 flex flex-col overflow-hidden border bg-white/95 backdrop-blur-md motion-reduce:animate-none sm:left-auto sm:w-[min(44rem,calc(100vw-2rem))]">
@@ -73,7 +73,7 @@ export function GlossaryDetailPanel({
           </h2>
           <TermDetail entry={entry} locale={locale} slug={entry.slug} />
         </div>
-      </aside>
+      </dialog>
     </div>
   )
 }

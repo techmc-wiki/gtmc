@@ -206,6 +206,7 @@ export function ConflictBlock({
                 className="border-tech-main/40 bg-tech-bg text-tech-main focus-visible:border-tech-main min-h-[160px] w-full resize-y border p-2 font-mono text-sm focus:outline-none"
                 value={manualContent}
                 onChange={(e) => setManualContent(e.target.value)}
+                aria-label={t("manualEdit")}
               />
               <div className="flex gap-2">
                 <TechButton

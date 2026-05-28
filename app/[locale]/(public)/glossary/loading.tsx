@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/loading-shell-primitives"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 
+const ALPHABET_NAV_KEYS = Array.from({ length: 14 }, (_, i) => `alpha-nav-${i}`)
+
 export default function GlossaryLoading() {
   const t = useTranslations("Glossary")
 
@@ -55,9 +57,9 @@ export default function GlossaryLoading() {
           <div className="border-tech-line/30 relative mb-6 overflow-hidden border bg-white/60">
             <SweepOverlay />
             <div className="flex">
-              {Array.from({ length: 14 }).map((_, i) => (
+              {ALPHABET_NAV_KEYS.map((navKey, i) => (
                 <SegmentedBar
-                  key={i}
+                  key={navKey}
                   opacity={i % 3 === 0 ? "high" : "low"}
                   className="border-tech-line/20 h-9 flex-1 border-r"
                 />

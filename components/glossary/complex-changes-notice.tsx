@@ -17,6 +17,19 @@ export function ComplexChangesNotice({
 }: ComplexChangesNoticeProps) {
   const t = useTranslations("Glossary")
 
+  const repoLinkTag = React.useCallback(
+    (chunks: React.ReactNode) => (
+      <a
+        href={repoUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-tech-accent hover:text-tech-accent/80 underline decoration-dotted underline-offset-4 transition-colors">
+        {chunks}
+      </a>
+    ),
+    [repoUrl]
+  )
+
   return (
     <TechCard
       tone="main"
@@ -34,15 +47,7 @@ export function ComplexChangesNotice({
         </span>
         <p className="text-tech-main text-sm leading-relaxed">
           {t.rich("editorComplexChangesBody", {
-            repoLink: (chunks) => (
-              <a
-                href={repoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-tech-accent hover:text-tech-accent/80 underline decoration-dotted underline-offset-4 transition-colors">
-                {chunks}
-              </a>
-            ),
+            repoLink: repoLinkTag,
           })}
         </p>
       </div>

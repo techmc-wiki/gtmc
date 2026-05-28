@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from "react"
+import React, { useRef, useEffect, useCallback, useMemo } from "react"
 import { motion, useTransform, MotionValue } from "motion/react"
 import { HOMEPAGE_MOTION } from "./homepage-constants"
 
@@ -69,8 +69,10 @@ export function DecorElement({
     }
   )
 
+  const motionStyle = useMemo(() => ({ filter }), [filter])
+
   return (
-    <motion.div ref={ref} className={className} style={{ filter }}>
+    <motion.div ref={ref} className={className} style={motionStyle}>
       {children}
     </motion.div>
   )

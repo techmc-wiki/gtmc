@@ -46,6 +46,17 @@ export default async function EditDraftPage({
       : draftFiles.files[0]?.filePath || "DRAFT_WORKSPACE"
   const contributingGuides = await loadContributingGuides()
 
+  const draftEditorInitialData = {
+    activeFileId: draftFiles.activeFileId,
+    id: draft.id,
+    files: draftFiles.files,
+    folders: draftFiles.folders,
+    title: draft.title,
+    githubPrUrl: draft.githubPrUrl || undefined,
+    status: draft.status,
+    contributingGuides,
+  }
+
   return (
     <div className="relative mx-auto max-w-[1400px] space-y-6 p-4 md:p-8">
       <div className="from-tech-main/0 via-tech-main to-tech-main/0 absolute top-0 right-10 h-px w-24 bg-linear-to-r" />
@@ -91,18 +102,7 @@ export default async function EditDraftPage({
           <div className="bg-tech-main/10 absolute inset-x-0 top-0 h-[2px] animate-[tree-drop-in_10s_ease-in-out_infinite] shadow-[0_0_10px_rgb(var(--color-tech-main)/0.2)]" />
         </div>
 
-        <DraftEditor
-          initialData={{
-            activeFileId: draftFiles.activeFileId,
-            id: draft.id,
-            files: draftFiles.files,
-            folders: draftFiles.folders,
-            title: draft.title,
-            githubPrUrl: draft.githubPrUrl || undefined,
-            status: draft.status,
-            contributingGuides,
-          }}
-        />
+        <DraftEditor initialData={draftEditorInitialData} />
       </div>
     </div>
   )

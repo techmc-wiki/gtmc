@@ -13,6 +13,14 @@ export interface AttributionWarningProps {
   className?: string
 }
 
+const AuthorNameTag = (chunks: React.ReactNode) => (
+  <strong className="text-tech-main-dark font-semibold">{chunks}</strong>
+)
+
+const AuthorEmailTag = (chunks: React.ReactNode) => (
+  <span className="text-tech-main/70 font-mono text-xs">&lt;{chunks}&gt;</span>
+)
+
 export function AttributionWarning({
   authorName,
   githubNoreplyEmail,
@@ -22,6 +30,13 @@ export function AttributionWarning({
   className,
 }: AttributionWarningProps) {
   const t = useTranslations("Glossary")
+
+  const handleCheckboxChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onUseRealEmailChange(event.target.checked)
+    },
+    [onUseRealEmailChange]
+  )
 
   const canToggleRealEmail =
     realEmail !== null && realEmail !== githubNoreplyEmail
@@ -47,16 +62,8 @@ export function AttributionWarning({
           {t.rich("editorAttributionBody", {
             name: authorName,
             email: displayedEmail,
-            authorName: (chunks) => (
-              <strong className="text-tech-main-dark font-semibold">
-                {chunks}
-              </strong>
-            ),
-            authorEmail: (chunks) => (
-              <span className="text-tech-main/70 font-mono text-xs">
-                &lt;{chunks}&gt;
-              </span>
-            ),
+            authorName: AuthorNameTag,
+            authorEmail: AuthorEmailTag,
           })}
         </p>
       </section>
@@ -67,7 +74,8 @@ export function AttributionWarning({
             <input
               type="checkbox"
               checked={useRealEmail}
-              onChange={(event) => onUseRealEmailChange(event.target.checked)}
+              onChange={handleCheckboxChange}
+              aria-label={t("editorRealEmailToggleLabel")}
               className="border-tech-line accent-tech-accent mt-0.5 size-4 cursor-pointer border bg-white"
             />
             <span>{t("editorRealEmailToggleLabel")}</span>

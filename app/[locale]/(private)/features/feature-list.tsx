@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { Link } from "@/i18n/navigation"
 import { TechCard } from "@/components/ui/tech-card"
 import { RevealSection } from "./reveal-helpers"
@@ -30,6 +30,17 @@ export function FeatureList({ features }: { features: Feature[] }) {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [statusFilter, setStatusFilter] = useState<string>("ALL")
 
+  const statusOptions = useMemo(
+    () => [
+      { label: t("filterAll"), value: "ALL" },
+      { label: tStatus("pending"), value: "UNRESOLVED" },
+      { label: tStatus("pending"), value: "PENDING" },
+      { label: tStatus("inProgress"), value: "IN_PROGRESS" },
+      { label: tStatus("resolved"), value: "RESOLVED" },
+    ],
+    [t, tStatus]
+  )
+
   // Extract all unique tags
   const allTags = useMemo(() => {
     const tags = new Set<string>()
@@ -41,18 +52,24 @@ export function FeatureList({ features }: { features: Feature[] }) {
     return Array.from(tags)
   }, [features])
 
-  const toggleTag = (tag: string) => {
+  const toggleTag = useCallback((tag: string) => {
     setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag]
     )
-  }
+  }, [])
+
+  const handleTagClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      const tag = e.currentTarget.dataset.tag
+      if (tag) toggleTag(tag)
+    },
+    [toggleTag]
+  )
 
   // Filter and group features in a single pass
   const { filteredFeatures, groupedFeatures } = useMemo(() => {
     const filtered = features.filter((f) => {
-      const matchTags =
-        selectedTags.length === 0 ||
-        selectedTags.every((tag) => f.tags?.includes(tag))
+      const matchTags = selectedTags.every((tag) => f.tags?.includes(tag))
       const matchStatus =
         statusFilter === "ALL" ||
         (statusFilter === "UNRESOLVED" && f.status !== "RESOLVED") ||
@@ -83,6 +100,8 @@ export function FeatureList({ features }: { features: Feature[] }) {
   const inProgressFeatures = groupedFeatures.IN_PROGRESS
   const resolvedFeatures = groupedFeatures.RESOLVED
 
+  /* oxlint-disable react-perf/jsx-no-jsx-as-prop */
+  // oxlint-disable-next-line react-perf/jsx-no-jsx-as-prop
   const renderFeatureGroup = (
     title: string,
     groupFeatures: Feature[],
@@ -171,13 +190,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                 {t("filterByStatus")}
               </h4>
               <SegmentedControl
-                options={[
-                  { label: t("filterAll"), value: "ALL" },
-                  { label: tStatus("pending"), value: "UNRESOLVED" },
-                  { label: tStatus("pending"), value: "PENDING" },
-                  { label: tStatus("inProgress"), value: "IN_PROGRESS" },
-                  { label: tStatus("resolved"), value: "RESOLVED" },
-                ]}
+                options={statusOptions}
                 value={statusFilter}
                 onValueChange={setStatusFilter}
               />
@@ -193,7 +206,8 @@ export function FeatureList({ features }: { features: Feature[] }) {
                     <button
                       key={tag}
                       type="button"
-                      onClick={() => toggleTag(tag)}
+                      data-tag={tag}
+                      onClick={handleTagClick}
                       className={`flex min-h-8 cursor-pointer items-center justify-center border px-3 py-2 font-mono text-xs uppercase transition-all duration-200 ${
                         selectedTags.includes(tag)
                           ? "border-tech-accent bg-tech-accent text-white"

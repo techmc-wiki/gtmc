@@ -112,6 +112,13 @@ export function PendingCreationBanner() {
     )
   }
 
+  const handleRetry = React.useCallback(() => {
+    startRetry(() => {
+      inFlightRef.current = false
+      void runCreation()
+    })
+  }, [runCreation])
+
   if (state.status === "error") {
     return (
       <div className="flex items-center gap-3 border border-red-400/60 bg-red-50/60 px-4 py-3 font-mono text-sm backdrop-blur-sm">
@@ -121,12 +128,7 @@ export function PendingCreationBanner() {
         </span>
         <span className="ml-2 text-xs text-red-600">{state.message}</span>
         <button
-          onClick={() =>
-            startRetry(() => {
-              inFlightRef.current = false
-              void runCreation()
-            })
-          }
+          onClick={handleRetry}
           disabled={isRetrying}
           className="ml-auto cursor-pointer border border-red-400 px-2 py-0.5 text-xs text-red-600 uppercase hover:bg-red-100">
           {isRetrying ? "RETRYING..." : "RETRY_"}

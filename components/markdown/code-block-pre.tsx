@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, type ReactNode } from "react"
+import React, { useState, useCallback, type ReactNode } from "react"
 import { useTranslations } from "next-intl"
 import { CodeCopyButton } from "./code-copy-button"
 import { LazyCodeBlock } from "./lazy-code-block"
@@ -19,6 +19,10 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
   const lang = (props["data-lang"] as string) || ""
   const lineCount = (props["data-line-count"] as string) || "0"
   const [isWrapped, setIsWrapped] = useState(false)
+
+  const toggleWrap = useCallback(() => {
+    setIsWrapped((v) => !v)
+  }, [])
 
   // Calculate line number width based on digit count
   const lineCountNum = parseInt(lineCount, 10)
@@ -44,7 +48,7 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
             type="button"
             aria-label={t("toggleLineWrap")}
             title={t("toggleLineWrap")}
-            onClick={() => setIsWrapped((v) => !v)}
+            onClick={toggleWrap}
             className={`font-mono text-[0.625rem] tracking-widest transition-colors ${
               isWrapped
                 ? "text-tech-main"

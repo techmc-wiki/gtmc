@@ -14,7 +14,7 @@ interface RawFile {
  * The negative character class `[^\[\]]+` allows CJK, spaces, underscores,
  * hyphens, periods, and mixed case — any character that isn't `[` or `]`.
  */
-const MENTION_PATTERN = /\[@([^\[\]]+)\]/g
+const MENTION_PATTERN = /\[@([^[\]]+)\]/g
 
 /**
  * Parent node types whose text children MUST NOT be transformed.

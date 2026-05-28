@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect, useState, useCallback } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "@/i18n/navigation"
 import { useHomepageMotion } from "./use-homepage-motion"
@@ -9,6 +9,18 @@ import { HeroCard } from "./hero-card"
 import { TechButton } from "@/components/ui/tech-button"
 import { Link } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
+
+const INVENTORY_SLOT_KEYS = [
+  "slot-0",
+  "slot-1",
+  "slot-2",
+  "slot-3",
+  "slot-4",
+  "slot-5",
+  "slot-6",
+  "slot-7",
+  "slot-8",
+] as const
 
 const BackgroundLayer = dynamic(
   () => import("./background-layer").then((mod) => mod.BackgroundLayer),
@@ -26,6 +38,17 @@ export function HomepageClient() {
   const [isAccessingDatabase, setIsAccessingDatabase] = useState(false)
   const [cardWidth, setCardWidth] = useState(900)
   const cardRef = useRef<HTMLDivElement>(null)
+
+  const handleArticlesClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (isAccessingDatabase) {
+        event.preventDefault()
+        return
+      }
+      setIsAccessingDatabase(true)
+    },
+    [isAccessingDatabase]
+  )
 
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") {
@@ -88,13 +111,7 @@ export function HomepageClient() {
           <Link
             href="/articles"
             prefetch
-            onClick={(event) => {
-              if (isAccessingDatabase) {
-                event.preventDefault()
-                return
-              }
-              setIsAccessingDatabase(true)
-            }}
+            onClick={handleArticlesClick}
             className="w-full sm:w-auto">
             <TechButton
               variant="primary"
@@ -123,9 +140,9 @@ export function HomepageClient() {
           <div className="text-tech-main/60 absolute -top-4 font-mono text-[0.5rem]">
             INVENTORY_SLOTS_
           </div>
-          {[...Array(9)].map((_, i) => (
+          {INVENTORY_SLOT_KEYS.map((slotKey, i) => (
             <div
-              key={i}
+              key={slotKey}
               className={`flex size-8 items-center justify-center ${
                 i === 3
                   ? `border-tech-main-dark bg-tech-main/10 border-2 shadow-[0_0_8px_rgba(96,112,143,0.3)]`

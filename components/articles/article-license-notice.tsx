@@ -1,7 +1,7 @@
 "use client"
 
 import { Link } from "@/i18n/navigation"
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { useTranslations } from "next-intl"
 import { formatAbsoluteTime } from "@/lib/format-time"
 
@@ -12,17 +12,19 @@ interface ArticleLicenseNoticeProps {
   authors?: string[]
 }
 
+const DEFAULT_AUTHORS: string[] = []
+
 export function ArticleLicenseNotice({
   title,
   canonicalUrl,
   attributionDate,
-  authors = [],
+  authors = DEFAULT_AUTHORS,
 }: ArticleLicenseNoticeProps) {
   const t = useTranslations("ArticleMeta")
   const [isExpanded, setIsExpanded] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
   const orderedAuthors = [...new Set(authors)]
-  const sortedAuthors = [...orderedAuthors].sort((left, right) =>
+  const sortedAuthors = [...orderedAuthors].toSorted((left, right) =>
     left.localeCompare(right, undefined, { sensitivity: "base" })
   )
   const formattedAttributionDate = attributionDate
@@ -49,7 +51,7 @@ export function ArticleLicenseNotice({
       ? t("attributionPromptTruncated")
       : t("attributionPromptAlphabetical")
 
-  const handleCopyAttribution = async () => {
+  const handleCopyAttribution = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(attributionLabel)
       setIsCopied(true)
@@ -57,7 +59,11 @@ export function ArticleLicenseNotice({
     } catch (error) {
       console.error("Failed to copy attribution:", error)
     }
-  }
+  }, [attributionLabel])
+
+  const toggleExpanded = useCallback(() => {
+    setIsExpanded((current) => !current)
+  }, [])
 
   return (
     <section
@@ -65,7 +71,7 @@ export function ArticleLicenseNotice({
       className="border-t guide-line pt-3 text-[0.6875rem] text-tech-main/70">
       <button
         type="button"
-        onClick={() => setIsExpanded((current) => !current)}
+        onClick={toggleExpanded}
         className="flex w-full items-center justify-between gap-3 text-left transition-colors hover:text-tech-main"
         aria-expanded={isExpanded}>
         <span className="mono-label">{t("reuseLicenseTitle")}</span>

@@ -109,13 +109,7 @@ export function DraftFileSourceDialog({
     }
   }, [isOpen, t])
 
-  if (!isOpen) {
-    return null
-  }
-
-  const treeRoots = [{ ...ROOT_NODE, children: tree }]
-
-  const handleTogglePath = (path: string) => {
+  const handleTogglePath = React.useCallback((path: string) => {
     setExpandedPaths((current) => {
       const next = new Set(current)
       if (next.has(path)) {
@@ -125,9 +119,9 @@ export function DraftFileSourceDialog({
       }
       return next
     })
-  }
+  }, [])
 
-  const handleAddRepoFile = async () => {
+  const handleAddRepoFile = React.useCallback(async () => {
     if (!selectedRepoFilePath) {
       return
     }
@@ -160,9 +154,9 @@ export function DraftFileSourceDialog({
     } finally {
       setIsSubmitting(false)
     }
-  }
+  }, [selectedRepoFilePath, onCreate, onClose, t])
 
-  const handleCreateNewFile = () => {
+  const handleCreateNewFile = React.useCallback(() => {
     const filePath = buildDraftFilePath(selectedFolderPath, newFileName)
     if (!filePath) {
       setTreeError(t("fileNameValidationError"))
@@ -174,9 +168,9 @@ export function DraftFileSourceDialog({
         onClose()
       }
     })
-  }
+  }, [selectedFolderPath, newFileName, onCreate, onClose, t])
 
-  const handleCreateNewFolder = () => {
+  const handleCreateNewFolder = React.useCallback(() => {
     const normalizedFolderName = normalizeDraftFilePath(newFolderName)
       .split("/")
       .filter(Boolean)
@@ -196,9 +190,9 @@ export function DraftFileSourceDialog({
         onClose()
       }
     })
-  }
+  }, [newFolderName, selectedFolderPath, onCreateFolder, onClose, t])
 
-  const handleImportLocalFile = async () => {
+  const handleImportLocalFile = React.useCallback(async () => {
     if (!localFile) {
       setTreeError(t("fileNameValidationError"))
       return
@@ -224,8 +218,40 @@ export function DraftFileSourceDialog({
     } finally {
       setIsSubmitting(false)
     }
+  }, [localFile, customUploadName, selectedFolderPath, onCreate, onClose, t])
+
+  const handleFileInputChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0] || null
+      setLocalFile(file)
+      setCustomUploadName(file?.name || "")
+    },
+    []
+  )
+
+  const handleNewFileNameChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) =>
+      setNewFileName(event.target.value),
+    []
+  )
+
+  const handleNewFolderNameChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) =>
+      setNewFolderName(event.target.value),
+    []
+  )
+
+  const handleCustomUploadNameChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) =>
+      setCustomUploadName(event.target.value),
+    []
+  )
+
+  if (!isOpen) {
+    return null
   }
 
+  const treeRoots = [{ ...ROOT_NODE, children: tree }]
   const canSubmitRepo = Boolean(selectedRepoFilePath) && !isSubmitting
   const canSubmitNew = Boolean(
     buildDraftFilePath(selectedFolderPath, newFileName)
@@ -328,11 +354,8 @@ export function DraftFileSourceDialog({
                   type="file"
                   accept=".md,.mdx,.txt,.csv,.json,.yml,.yaml"
                   className="text-tech-main block w-full font-mono text-xs"
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    const file = event.target.files?.[0] || null
-                    setLocalFile(file)
-                    setCustomUploadName(file?.name || "")
-                  }}
+                  aria-label={t("importLocalText")}
+                  onChange={handleFileInputChange}
                 />
                 <div className="space-y-2">
                   <label className="section-label" htmlFor="draft-import-name">
@@ -342,9 +365,7 @@ export function DraftFileSourceDialog({
                     id="draft-import-name"
                     placeholder={t("repoFileNamePlaceholder")}
                     value={customUploadName}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                      setCustomUploadName(event.target.value)
-                    }
+                    onChange={handleCustomUploadNameChange}
                   />
                 </div>
                 <TechButton
@@ -373,9 +394,7 @@ export function DraftFileSourceDialog({
                     id="draft-new-file-name"
                     placeholder={t("newFileNamePlaceholder")}
                     value={newFileName}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                      setNewFileName(event.target.value)
-                    }
+                    onChange={handleNewFileNameChange}
                   />
                 </div>
                 <div className="text-tech-main/60 font-mono text-xs uppercase">
@@ -409,9 +428,7 @@ export function DraftFileSourceDialog({
                     id="draft-new-folder-name"
                     placeholder="例如：new-section"
                     value={newFolderName}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                      setNewFolderName(event.target.value)
-                    }
+                    onChange={handleNewFolderNameChange}
                   />
                 </div>
                 <div className="text-tech-main/60 font-mono text-xs uppercase">
@@ -470,13 +487,36 @@ function TreeNode({
     mode === "new" || mode === "upload" || mode === "folder"
   const isSelectableFile = mode === "repo"
 
+  const handleToggle = React.useCallback(
+    () => onTogglePath(node.path),
+    [onTogglePath, node.path]
+  )
+
+  const handleSelect = React.useCallback(() => {
+    if (node.isFolder && isSelectableFolder) {
+      onSelectFolder(node.path)
+      return
+    }
+
+    if (!node.isFolder && isSelectableFile) {
+      onSelectFile(node.path)
+    }
+  }, [
+    node.isFolder,
+    node.path,
+    isSelectableFolder,
+    isSelectableFile,
+    onSelectFolder,
+    onSelectFile,
+  ])
+
   return (
     <div className="space-y-0.5">
       <div className="group relative flex items-center">
         {node.isFolder ? (
           <button
             type="button"
-            onClick={() => onTogglePath(node.path)}
+            onClick={handleToggle}
             className="text-tech-main/50 hover:text-tech-main flex h-8 w-6 shrink-0 items-center justify-center font-mono text-[0.625rem] transition-colors">
             {isExpanded ? "▼" : "▶"}
           </button>
@@ -488,16 +528,7 @@ function TreeNode({
 
         <button
           type="button"
-          onClick={() => {
-            if (node.isFolder && isSelectableFolder) {
-              onSelectFolder(node.path)
-              return
-            }
-
-            if (!node.isFolder && isSelectableFile) {
-              onSelectFile(node.path)
-            }
-          }}
+          onClick={handleSelect}
           className={`flex min-h-8 flex-1 items-center px-1 text-left font-mono text-[0.875rem] tracking-wide transition-colors ${
             node.isFolder
               ? isFolderSelected

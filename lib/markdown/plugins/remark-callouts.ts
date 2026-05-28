@@ -76,7 +76,7 @@ export function remarkCallouts() {
       node.data = node.data ?? {}
       node.data.hName = "aside"
       node.data.hProperties = {
-        ...(node.data.hProperties ?? {}),
+        ...node.data.hProperties,
         "data-callout": calloutType,
       }
 

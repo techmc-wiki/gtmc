@@ -149,14 +149,14 @@ export function ColumnPicker({
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label={t("columnPickerLabel")}
-        onClick={() => setOpen((value) => !value)}
+        onClick={toggleOpen}
         className="border-tech-main/40 text-tech-main hover:bg-tech-main/10 focus-visible:outline-tech-main inline-flex min-h-9 cursor-pointer items-center border bg-white/70 px-3 py-1.5 font-mono text-xs font-bold tracking-widest uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2">
         [§ COLUMNS]
       </button>
 
       {mounted && open ? (
-        <div
-          role="dialog"
+        <dialog
+          open
           aria-label={t("columnPickerLabel")}
           className="border-tech-line/30 absolute right-0 z-40 mt-2 w-72 border bg-white/95 backdrop-blur-md">
           <div className="custom-vertical-scrollbar max-h-[60vh] overflow-y-auto p-3">
@@ -196,7 +196,7 @@ export function ColumnPicker({
               </div>
             </details>
           </div>
-        </div>
+        </dialog>
       ) : null}
     </div>
   )
@@ -227,6 +227,45 @@ interface ColumnGroupProps {
   onToggle: (column: string) => void
 }
 
+interface ColumnCheckboxProps {
+  column: string
+  label: string
+  checked: boolean
+  onToggle: (column: string) => void
+}
+
+function ColumnCheckbox({
+  column,
+  label,
+  checked,
+  onToggle,
+}: ColumnCheckboxProps) {
+  const handleChange = React.useCallback(() => {
+    onToggle(column)
+  }, [onToggle, column])
+
+  return (
+    <li>
+      <label
+        className={cn(
+          "hover:bg-tech-main/5 flex cursor-pointer items-center gap-2.5 px-1.5 py-1.5 transition-colors",
+          checked && "bg-tech-main/10"
+        )}>
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={handleChange}
+          aria-label={label}
+          className="accent-tech-main size-3.5 cursor-pointer"
+        />
+        <span className="text-tech-main font-mono text-xs tracking-widest uppercase">
+          {label}
+        </span>
+      </label>
+    </li>
+  )
+}
+
 function ColumnGroup({
   title,
   entries,
@@ -239,28 +278,15 @@ function ColumnGroup({
         {title}
       </p>
       <ul className="mt-1.5 flex flex-col">
-        {entries.map(({ column, label }) => {
-          const checked = visibleColumns.includes(column)
-          return (
-            <li key={column}>
-              <label
-                className={cn(
-                  "hover:bg-tech-main/5 flex cursor-pointer items-center gap-2.5 px-1.5 py-1.5 transition-colors",
-                  checked && "bg-tech-main/10"
-                )}>
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => onToggle(column)}
-                  className="accent-tech-main size-3.5 cursor-pointer"
-                />
-                <span className="text-tech-main font-mono text-xs tracking-widest uppercase">
-                  {label}
-                </span>
-              </label>
-            </li>
-          )
-        })}
+        {entries.map(({ column, label }) => (
+          <ColumnCheckbox
+            key={column}
+            column={column}
+            label={label}
+            checked={visibleColumns.includes(column)}
+            onToggle={onToggle}
+          />
+        ))}
       </ul>
     </div>
   )

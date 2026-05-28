@@ -3,7 +3,7 @@ import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
 import matter from "gray-matter"
-import yaml from "js-yaml"
+import { dump as yamlDump } from "js-yaml"
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/articles/ignore"
 
 type ArticleLocale = "zh" | "en"
@@ -244,7 +244,9 @@ function walkMarkdownFiles(
   assertInsideRepo(repoRoot, directory)
   const entries = fs
     .readdirSync(directory, { withFileTypes: true })
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+    .toSorted((a, b) =>
+      a.name.localeCompare(b.name, undefined, { numeric: true })
+    )
   const isRoot = directory === repoRoot
   const files: MarkdownFile[] = []
 
@@ -341,7 +343,7 @@ function dumpMarkdown(
   frontmatter: Record<string, unknown>,
   body: string
 ): string {
-  const frontmatterYaml = yaml.dump(frontmatter, {
+  const frontmatterYaml = yamlDump(frontmatter, {
     sortKeys: false,
     lineWidth: -1,
     noRefs: true,

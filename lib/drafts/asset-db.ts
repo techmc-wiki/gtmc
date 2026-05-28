@@ -164,14 +164,14 @@ export async function reconcileDraftAssetsForPRCompletion({
   const assets = await findTempDraftAssetsForRevision(revision.id, tempPrefix)
 
   for (const asset of assets) {
-    await markDraftAssetOutcome(asset.id, outcome)
+    await markDraftAssetOutcome(asset.id, outcome) // eslint-disable-line no-await-in-loop
 
     try {
-      await deleteDraftAsset(asset.storagePath)
-      await markDraftAssetDeleted(asset.id)
+      await deleteDraftAsset(asset.storagePath) // eslint-disable-line no-await-in-loop
+      await markDraftAssetDeleted(asset.id) // eslint-disable-line no-await-in-loop
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error)
-      await markDraftAssetCleanupFailed(asset.id, `[${outcome}] ${reason}`)
+      await markDraftAssetCleanupFailed(asset.id, `[${outcome}] ${reason}`) // eslint-disable-line no-await-in-loop
     }
   }
 }

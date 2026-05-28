@@ -5,7 +5,7 @@ import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { useRouter } from "@/i18n/navigation"
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { ArticleMetadataLayout } from "@/components/articles/article-metadata-layout"
 import { ArticleLicenseNotice } from "@/components/articles/article-license-notice"
 
@@ -54,10 +54,16 @@ interface ArticleMetadataFullProps {
   bannerAlt?: string
 }
 
+function getAvatarUrl(username: string) {
+  return `https://github.com/${username}.png`
+}
+
+const DEFAULT_CO_AUTHORS: string[] = []
+
 export function ArticleMetadataFull({
   title,
   author,
-  coAuthors = [],
+  coAuthors = DEFAULT_CO_AUTHORS,
   createdAt,
   lastModified,
   canonicalUrl,
@@ -76,15 +82,11 @@ export function ArticleMetadataFull({
   const storageKey = "article-metadata-collapsed"
   const [isCollapsed, setIsCollapsed] = useLocalStorage(storageKey, false)
 
-  const getAvatarUrl = (username: string) => {
-    return `https://github.com/${username}.png`
-  }
-
   const allContributors = [author, ...coAuthors]
   const displayContributors = allContributors.slice(0, 5)
   const remainingCount = allContributors.length - 5
 
-  const handleCopy = async () => {
+  const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(canonicalUrl)
       setCopied(true)
@@ -92,12 +94,20 @@ export function ArticleMetadataFull({
     } catch (err) {
       console.error("Failed to copy:", err)
     }
-  }
+  }, [canonicalUrl])
+
+  const handleEditClick = useCallback(() => {
+    router.push(`/draft/new?file=${encodeURIComponent(editPath)}`)
+  }, [router, editPath])
+
+  const toggleCollapsed = useCallback(() => {
+    setIsCollapsed(!isCollapsed)
+  }, [isCollapsed, setIsCollapsed])
 
   const collapseButton = (
     <button
       type="button"
-      onClick={() => setIsCollapsed(!isCollapsed)}
+      onClick={toggleCollapsed}
       className="
         cursor-pointer border guide-line bg-white px-2 py-0.5
         transition-colors
@@ -212,9 +222,7 @@ export function ArticleMetadataFull({
           </div>
           <button
             type="button"
-            onClick={() =>
-              router.push(`/draft/new?file=${encodeURIComponent(editPath)}`)
-            }
+            onClick={handleEditClick}
             className="
               cursor-pointer items-center overflow-hidden border
               border-tech-main/40 bg-tech-main/5 px-3 py-2 text-tech-main

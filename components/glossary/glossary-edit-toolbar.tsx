@@ -35,12 +35,19 @@ export function GlossaryEditToolbar({
 }: GlossaryEditToolbarProps) {
   const t = useTranslations("Glossary")
 
+  const handleTitleChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onTitleChange(event.target.value)
+    },
+    [onTitleChange]
+  )
+
   return (
     <EditorToolbarShell className={cn(className)}>
       <input
         type="text"
         value={title}
-        onChange={(event) => onTitleChange(event.target.value)}
+        onChange={handleTitleChange}
         placeholder={t("editorTitlePlaceholder")}
         aria-label={t("editorTitlePlaceholder")}
         className="text-tech-main-dark relative z-10 w-48 border-none bg-transparent font-mono text-sm text-white outline-none placeholder:text-white/30 focus:ring-0 sm:w-64"

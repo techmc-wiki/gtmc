@@ -80,12 +80,14 @@ type TabValue = "active" | "english" | "other"
 
 const DEBOUNCE_MS = 200
 
+const EMPTY_DANGLING_REFS: ReadonlyArray<GlossaryEditCardDanglingRef> = []
+
 export function GlossaryEditCard({
   operation,
   locale,
   onChange,
   onRemove,
-  danglingRefs = [],
+  danglingRefs = EMPTY_DANGLING_REFS,
 }: GlossaryEditCardProps) {
   const isDelete = operation.kind === "delete"
   const isAdd = operation.kind === "add"
@@ -129,6 +131,10 @@ export function GlossaryEditCard({
     },
     [onChange, operation.slug]
   )
+
+  const handleRemove = React.useCallback(() => {
+    onRemove(operation.slug)
+  }, [onRemove, operation.slug])
 
   const headerTerm = isDelete
     ? (operation.before?.["Full Form (English)"] ?? operation.slug)
@@ -181,7 +187,7 @@ export function GlossaryEditCard({
         </div>
         <button
           type="button"
-          onClick={() => onRemove(operation.slug)}
+          onClick={handleRemove}
           aria-label="Remove operation"
           className={cn(
             "text-tech-main/60 border-tech-main/20 cursor-pointer border",
@@ -289,6 +295,45 @@ function DeleteSummary({
   )
 }
 
+interface EnglishFieldItemProps {
+  field: EnglishFieldDef
+  row: GlossaryRow
+  onChange: (column: GlossaryColumn, value: string) => void
+  showRequired: boolean
+  missing: boolean
+}
+
+function EnglishFieldItem({
+  field,
+  row,
+  onChange,
+  showRequired,
+  missing,
+}: EnglishFieldItemProps) {
+  const isEnglishTerm = field.column === "Full Form (English)"
+  const fieldError = isEnglishTerm && missing
+
+  const handleValueChange = React.useCallback(
+    (value: string) => {
+      onChange(field.column, value)
+    },
+    [onChange, field.column]
+  )
+
+  return (
+    <Field
+      column={field.column}
+      label={field.label}
+      required={showRequired && isEnglishTerm}
+      value={row[field.column] ?? ""}
+      multiline={field.multiline}
+      error={fieldError}
+      onValueChange={handleValueChange}
+      errorMessage={fieldError ? "English term is required." : undefined}
+    />
+  )
+}
+
 function EnglishFields({
   row,
   onChange,
@@ -302,23 +347,16 @@ function EnglishFields({
 }) {
   return (
     <div className="flex flex-col gap-3">
-      {ENGLISH_FIELDS.map((field) => {
-        const isEnglishTerm = field.column === "Full Form (English)"
-        const fieldError = isEnglishTerm && missing
-        return (
-          <Field
-            key={field.column}
-            column={field.column}
-            label={field.label}
-            required={showRequired && isEnglishTerm}
-            value={row[field.column] ?? ""}
-            multiline={field.multiline}
-            error={fieldError}
-            onValueChange={(value) => onChange(field.column, value)}
-            errorMessage={fieldError ? "English term is required." : undefined}
-          />
-        )
-      })}
+      {ENGLISH_FIELDS.map((field) => (
+        <EnglishFieldItem
+          key={field.column}
+          field={field}
+          row={row}
+          onChange={onChange}
+          showRequired={showRequired}
+          missing={missing}
+        />
+      ))}
     </div>
   )
 }
@@ -336,20 +374,72 @@ function ActiveLocaleFields({
   const display = LANGUAGE_DISPLAY[code]
   const termCol = termColumn as GlossaryColumn
   const descCol = descColumn as GlossaryColumn
+
+  const handleTermChange = React.useCallback(
+    (value: string) => onChange(termCol, value),
+    [onChange, termCol]
+  )
+
+  const handleDescChange = React.useCallback(
+    (value: string) => onChange(descCol, value),
+    [onChange, descCol]
+  )
+
   return (
     <div className="flex flex-col gap-3">
       <Field
         column={termCol}
         label={display}
         value={row[termCol] ?? ""}
-        onValueChange={(value) => onChange(termCol, value)}
+        onValueChange={handleTermChange}
       />
       <Field
         column={descCol}
         label={`Description (${display})`}
         value={row[descCol] ?? ""}
         multiline
-        onValueChange={(value) => onChange(descCol, value)}
+        onValueChange={handleDescChange}
+      />
+    </div>
+  )
+}
+
+interface LanguagePairFieldsProps {
+  row: GlossaryRow
+  code: GlossaryLocale
+  onChange: (column: GlossaryColumn, value: string) => void
+}
+
+function LanguagePairFields({ row, code, onChange }: LanguagePairFieldsProps) {
+  const { termColumn, descColumn } = LOCALE_TO_COLUMN[code]
+  const display = LANGUAGE_DISPLAY[code]
+  const termCol = termColumn as GlossaryColumn
+  const descCol = descColumn as GlossaryColumn
+
+  const handleTermChange = React.useCallback(
+    (value: string) => onChange(termCol, value),
+    [onChange, termCol]
+  )
+
+  const handleDescChange = React.useCallback(
+    (value: string) => onChange(descCol, value),
+    [onChange, descCol]
+  )
+
+  return (
+    <div className="border-tech-line/10 ml-1 flex flex-col gap-2 border-l-2 pl-3">
+      <Field
+        column={termCol}
+        label={display}
+        value={row[termCol] ?? ""}
+        onValueChange={handleTermChange}
+      />
+      <Field
+        column={descCol}
+        label={`Description (${display})`}
+        value={row[descCol] ?? ""}
+        multiline
+        onValueChange={handleDescChange}
       />
     </div>
   )
@@ -374,31 +464,14 @@ function OtherLanguagesFields({
         Show {codes.length} language pair{codes.length === 1 ? "" : "s"}
       </summary>
       <div className="flex flex-col gap-4 p-3">
-        {codes.map((code) => {
-          const { termColumn, descColumn } = LOCALE_TO_COLUMN[code]
-          const display = LANGUAGE_DISPLAY[code]
-          const termCol = termColumn as GlossaryColumn
-          const descCol = descColumn as GlossaryColumn
-          return (
-            <div
-              key={code}
-              className="border-tech-line/10 ml-1 flex flex-col gap-2 border-l-2 pl-3">
-              <Field
-                column={termCol}
-                label={display}
-                value={row[termCol] ?? ""}
-                onValueChange={(value) => onChange(termCol, value)}
-              />
-              <Field
-                column={descCol}
-                label={`Description (${display})`}
-                value={row[descCol] ?? ""}
-                multiline
-                onValueChange={(value) => onChange(descCol, value)}
-              />
-            </div>
-          )
-        })}
+        {codes.map((code) => (
+          <LanguagePairFields
+            key={code}
+            row={row}
+            code={code}
+            onChange={onChange}
+          />
+        ))}
       </div>
     </details>
   )
@@ -427,6 +500,14 @@ function Field({
 }: FieldProps) {
   const id = React.useId()
   const fieldId = `glossary-field-${column.replace(/[^a-z0-9]/gi, "-").toLowerCase()}-${id}`
+
+  const handleChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      onValueChange(event.target.value)
+    },
+    [onValueChange]
+  )
+
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={fieldId} className={LABEL_CLASS}>
@@ -438,7 +519,7 @@ function Field({
           id={fieldId}
           value={value}
           error={error}
-          onChange={(event) => onValueChange(event.target.value)}
+          onChange={handleChange}
           rows={3}
         />
       ) : (
@@ -446,7 +527,7 @@ function Field({
           id={fieldId}
           value={value}
           error={error}
-          onChange={(event) => onValueChange(event.target.value)}
+          onChange={handleChange}
         />
       )}
       {error && errorMessage && <p className={ERROR_CLASS}>{errorMessage}</p>}

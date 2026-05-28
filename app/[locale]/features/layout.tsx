@@ -11,20 +11,27 @@ import { SiteShell } from "@/components/layout/site-shell"
 import { SearchCommand } from "@/components/search/search-command"
 import { Logo } from "@/components/ui/logo"
 
+function buildNavLinks(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
+  return [
+    { href: "/articles", label: t("articles") },
+    { href: "/draft", label: t("drafts") },
+    { href: "/glossary", label: t("glossary") },
+    { href: "/features", label: t("features") },
+  ]
+}
+
+function buildAdminLink(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
+  return { href: "/review", label: t("reviewHub") }
+}
+
 export default async function FeaturesLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   const t = await getTranslations("Nav")
-
-  const navLinks = [
-    { href: "/articles", label: t("articles") },
-    { href: "/draft", label: t("drafts") },
-    { href: "/glossary", label: t("glossary") },
-    { href: "/features", label: t("features") },
-  ]
-  const adminLink = { href: "/review", label: t("reviewHub") }
+  const navLinks = buildNavLinks(t)
+  const adminLink = buildAdminLink(t)
 
   return (
     <SiteShell

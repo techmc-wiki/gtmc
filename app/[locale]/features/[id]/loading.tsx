@@ -73,12 +73,12 @@ export default function FeatureDetailLoading() {
 
           <div className="flex flex-col space-y-4">
             <div className="flex flex-col space-y-2">
-              <label className="section-label">TITLE_</label>
+              <span className="section-label">TITLE_</span>
               <SegmentedBar opacity="high" className="h-10 w-full" />
             </div>
 
             <div className="flex flex-col space-y-2">
-              <label className="section-label">TAGS_ (comma separated)</label>
+              <span className="section-label">TAGS_ (comma separated)</span>
               <SegmentedBar opacity="medium" className="h-10 w-full" />
             </div>
           </div>
@@ -130,9 +130,9 @@ export default function FeatureDetailLoading() {
 
           {/* Comment form */}
           <SectionFrame className="p-6">
-            <label className="border-tech-main/40 tracking-tech-wide text-tech-main mb-4 inline-block border-b pb-1 font-mono text-sm uppercase">
+            <span className="border-tech-main/40 tracking-tech-wide text-tech-main mb-4 inline-block border-b pb-1 font-mono text-sm uppercase">
               LEAVE_A_REPLY_
-            </label>
+            </span>
             <SegmentedBar opacity="medium" className="mb-4 h-24 w-full" />
             <div className="flex justify-end">
               <SegmentedBar opacity="high" className="h-10 w-24" />

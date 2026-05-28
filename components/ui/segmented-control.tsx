@@ -46,34 +46,58 @@ export function SegmentedControl<TValue extends string>({
 }: SegmentedControlProps<TValue>) {
   const enabledOptions = options.filter((option) => !option.disabled)
 
-  const handleKeyDown = (
-    event: React.KeyboardEvent<HTMLButtonElement>,
-    option: SegmentedControlOption<TValue>,
-    index: number
-  ) => {
-    if (option.disabled) {
-      return
-    }
+  const handleKeyDown = React.useCallback(
+    (
+      event: React.KeyboardEvent<HTMLButtonElement>,
+      option: SegmentedControlOption<TValue>,
+      index: number
+    ) => {
+      if (option.disabled) {
+        return
+      }
 
-    const direction = getKeyboardDirection(event.key)
-    if (direction === 0 || enabledOptions.length === 0) {
-      return
-    }
+      const direction = getKeyboardDirection(event.key)
+      if (direction === 0 || enabledOptions.length === 0) {
+        return
+      }
 
-    event.preventDefault()
+      event.preventDefault()
 
-    const enabledIndex = enabledOptions.findIndex(
-      (enabledOption) => enabledOption.value === option.value
-    )
-    const currentIndex = enabledIndex >= 0 ? enabledIndex : index
-    const nextOption = enabledOptions.at(
-      (currentIndex + direction + enabledOptions.length) % enabledOptions.length
-    )
+      const enabledIndex = enabledOptions.findIndex(
+        (enabledOption) => enabledOption.value === option.value
+      )
+      const currentIndex = enabledIndex >= 0 ? enabledIndex : index
+      const nextOption = enabledOptions.at(
+        (currentIndex + direction + enabledOptions.length) %
+          enabledOptions.length
+      )
 
-    if (nextOption) {
-      onValueChange(nextOption.value)
-    }
-  }
+      if (nextOption) {
+        onValueChange(nextOption.value)
+      }
+    },
+    [enabledOptions, onValueChange]
+  )
+
+  const handleClick = React.useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      const optionValue = event.currentTarget.dataset.value as TValue
+      onValueChange(optionValue)
+    },
+    [onValueChange]
+  )
+
+  const handleButtonKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>) => {
+      const optionValue = event.currentTarget.dataset.value as TValue
+      const index = Number(event.currentTarget.dataset.index)
+      const option = options.find((o) => o.value === optionValue)
+      if (option) {
+        handleKeyDown(event, option, index)
+      }
+    },
+    [options, handleKeyDown]
+  )
 
   return (
     <div
@@ -99,8 +123,10 @@ export function SegmentedControl<TValue extends string>({
               controlRole === "tablist" ? option.ariaControls : undefined
             }
             disabled={option.disabled}
-            onClick={() => onValueChange(option.value)}
-            onKeyDown={(event) => handleKeyDown(event, option, index)}
+            data-value={option.value}
+            data-index={index}
+            onClick={handleClick}
+            onKeyDown={handleButtonKeyDown}
             className={cn(
               `focus-visible:outline-tech-main flex cursor-pointer items-center justify-center border font-mono tracking-widest uppercase transition-all duration-200 select-none focus-visible:outline-2 focus-visible:outline-offset-2`,
               sizeClasses[size],

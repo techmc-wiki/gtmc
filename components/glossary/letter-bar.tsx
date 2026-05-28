@@ -7,6 +7,8 @@ import { useTranslations } from "next-intl"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { cn } from "@/lib/cn"
 
+const TOUCH_SCROLL_STYLE = { WebkitOverflowScrolling: "touch" } as const
+
 const ALL_LETTERS = [
   "A",
   "B",
@@ -76,7 +78,9 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
         // The section closest to the top trigger band is the active one.
         const visible = entries
           .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+          .toSorted(
+            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top
+          )
         const topEntry = visible[0]
         if (!topEntry) return
         const id = topEntry.target.id
@@ -120,9 +124,24 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
     }
   }, [availableLetters])
 
+  const handleLetterClick = React.useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      const letter = event.currentTarget.dataset.letter
+      if (!letter) return
+      const target = document.getElementById(`${LETTER_ID_PREFIX}${letter}`)
+      if (target) {
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        })
+        setActiveLetter(letter)
+      }
+    },
+    []
+  )
+
   return (
     <nav
-      role="navigation"
       aria-label={t("letterBarLabel")}
       className={cn(
         "border-tech-line/30 sticky top-18 z-20 border-b bg-white/85 backdrop-blur-sm md:top-22",
@@ -133,7 +152,7 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
         <ul
           ref={scrollRef}
           className="custom-bottom-scrollbar flex items-stretch overflow-x-auto [-webkit-overflow-scrolling:touch]"
-          style={{ WebkitOverflowScrolling: "touch" }}>
+          style={TOUCH_SCROLL_STYLE}>
           {ALL_LETTERS.map((letter) => {
             const isAvailable = availableSet.has(letter)
             const isActive = activeLetter === letter
@@ -145,22 +164,7 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
                   data-letter={letter}
                   aria-current={isActive ? "true" : undefined}
                   aria-disabled={!isAvailable || undefined}
-                  onClick={(event) => {
-                    if (!isAvailable) {
-                      event.preventDefault()
-                      return
-                    }
-                    const target = document.getElementById(
-                      `${LETTER_ID_PREFIX}${letter}`
-                    )
-                    if (target) {
-                      target.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start",
-                      })
-                      setActiveLetter(letter)
-                    }
-                  }}
+                  onClick={isAvailable ? handleLetterClick : undefined}
                   className={cn(
                     "flex h-9 min-w-9 items-center justify-center border-l-2 px-2 font-mono text-xs tracking-[0.18em] transition-colors duration-200 select-none",
                     "focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2",

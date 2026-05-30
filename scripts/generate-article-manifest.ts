@@ -16,6 +16,7 @@ import {
   getArticleDates,
   isAncestor,
   getHeadSha,
+  hasPathChangedSince,
 } from "@/lib/git-metadata"
 
 const MANIFEST_FILE_NAME = "manifest.json"
@@ -277,17 +278,28 @@ async function processTranslationFile(
 
   try {
     const headSha = await getHeadSha(repoCwd)
-    const sourceHeadSha = await getHeadSha(repoCwd)
 
-    if (fm["translated-from-revision"] === sourceHeadSha) {
+    if (fm["translated-from-revision"] === headSha) {
       entry.translationFreshnessByLocale.en = "fresh"
     } else {
-      const isAnc = await isAncestor(
+      const sourceRevisionIsAncestor = await isAncestor(
         repoCwd,
         fm["translated-from-revision"],
         headSha
       )
-      entry.translationFreshnessByLocale.en = isAnc ? "stale" : "unknown"
+      if (!sourceRevisionIsAncestor) {
+        entry.translationFreshnessByLocale.en = "unknown"
+      } else {
+        const sourceChanged = await hasPathChangedSince(
+          repoCwd,
+          fm["translated-from-revision"],
+          headSha,
+          translatesRelPath
+        )
+        entry.translationFreshnessByLocale.en = sourceChanged
+          ? "stale"
+          : "fresh"
+      }
     }
   } catch {
     entry.translationFreshnessByLocale.en = "unknown"

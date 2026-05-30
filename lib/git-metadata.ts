@@ -320,6 +320,28 @@ export async function isAncestor(
   }
 }
 
+export async function hasPathChangedSince(
+  repoCwd: string,
+  ancestorSha: string,
+  descendantRef: string,
+  relPath: string
+): Promise<boolean> {
+  const { stdout } = await execFileAsync(
+    "git",
+    [
+      "log",
+      "--format=%H",
+      "-n",
+      "1",
+      `${ancestorSha}..${descendantRef}`,
+      "--",
+      relPath,
+    ],
+    { cwd: repoCwd, encoding: "utf-8" }
+  )
+  return stdout.trim().length > 0
+}
+
 export async function getHeadSha(repoCwd: string): Promise<string> {
   const cacheKey = `${repoCwd}:head`
   if (cache.has(cacheKey)) {

@@ -8,6 +8,7 @@ import { useRouter, usePathname } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/articles/url"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { useMounted } from "@/hooks/use-mounted"
+import { useModalEffects } from "@/hooks/use-modal-effects"
 
 interface SearchResult {
   title: string
@@ -46,6 +47,8 @@ export function SearchCommand() {
   const openModal = useCallback(() => {
     setIsOpen(true)
   }, [])
+
+  useModalEffects({ isOpen, onClose: closeModal })
 
   // Global Cmd+K / Ctrl+K handler. Register in the capture phase so dormant
   // article dialogs do not intercept the shortcut before search can open.
@@ -308,7 +311,7 @@ export function SearchCommand() {
         createPortal(
           <dialog
             open
-            className="animate-in fade-in fixed inset-0 z-9999 flex items-start justify-center bg-black/80 p-4 pt-[10vh] duration-200 sm:pt-[15vh]"
+            className="animate-in fade-in fixed inset-0 z-[9999] m-0 flex h-screen max-h-none w-screen max-w-none items-start justify-center overflow-y-auto bg-black/80 p-4 pt-[10vh] duration-200 supports-[height:100dvh]:h-dvh supports-[width:100dvw]:w-dvw sm:pt-[15vh]"
             aria-modal="true"
             aria-label={t("searchAriaLabel")}>
             <button

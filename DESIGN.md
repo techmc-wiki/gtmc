@@ -117,7 +117,7 @@ Scale
 - HUD and metadata labels: `font-mono text-xs tracking-widest uppercase text-tech-main/50`.
 - Body copy: `text-sm/relaxed` to `text-base/relaxed`.
 - Article paragraphs: `font-sans text-base/relaxed text-slate-800`.
-- Article headings (H1–H3): `font-mono`, `tracking-widest`, uppercase, with bottom or right guide lines.
+- Article headings (H1–H3): `markdown-title`, regular capitalization, with bottom or right guide lines. The title font currently resolves to Geist Sans via `--font-markdown-title` and can be adjusted independently from body and mono text.
 
 Tracking
 - House default: `tracking-widest` (broadly used on labels, badges, nav).

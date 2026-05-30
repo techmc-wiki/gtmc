@@ -260,6 +260,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const manifestEntry = getLocalizedArticleEntry(effectiveSlug, locale)
   const chapterTitle = manifestEntry?.chapterTitleByLocale?.[locale]
+  const translationFreshnessByLocale =
+    manifestEntry?.translationFreshnessByLocale as
+      | Record<string, string>
+      | undefined
+  const isTranslationPending =
+    !!manifestEntry?.titleByLocale && !manifestEntry.titleByLocale[locale]
+  const isTranslationStale = translationFreshnessByLocale?.[locale] === "stale"
 
   const bannerSrc = (data.banner as { src?: string } | undefined)?.src
   const bannerUrl = resolveBannerUrl(bannerSrc, target.filePath, siteUrl)
@@ -381,25 +388,26 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         />
       )}
 
-      {/* Translation status badges */}
-      {manifestEntry?.titleByLocale && !manifestEntry.titleByLocale[locale] && (
-        <span
-          data-testid="translation-pending-badge"
-          className="inline-block text-tech-warning text-xs mt-2"
-        >
-          (translation pending)
-        </span>
-      )}
-      {(manifestEntry?.translationFreshnessByLocale as Record<string, string> | undefined)?.[locale] === "stale" && (
-        <span
-          data-testid="translation-stale-badge"
-          className="inline-block text-tech-warning text-xs mt-2 ml-2"
-        >
-          (translation may be out of date)
-        </span>
-      )}
+      {isTranslationPending || isTranslationStale ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {isTranslationPending && (
+            <span
+              data-testid="translation-pending-badge"
+              className="inline-flex border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 font-mono text-[0.625rem] tracking-wider text-amber-700 uppercase dark:text-amber-300">
+              Translation pending
+            </span>
+          )}
+          {isTranslationStale && (
+            <span
+              data-testid="translation-stale-badge"
+              className="inline-flex border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 font-mono text-[0.625rem] tracking-wider text-amber-700 uppercase dark:text-amber-300">
+              Translation may be out of date
+            </span>
+          )}
+        </div>
+      ) : null}
 
-      <article className="min-w-0" data-article-content>
+      <article className="article-prose min-w-0" data-article-content>
         <MarkdownRenderer
           content={embeddedArticleContent}
           rawPath={target.filePath}

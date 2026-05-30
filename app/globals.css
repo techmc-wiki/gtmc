@@ -5,6 +5,9 @@
   color-scheme: light;
   --background: var(--color-tech-bg);
   --foreground: var(--color-tech-main);
+  --font-markdown-title:
+    var(--font-geist-sans), var(--font-noto-sans-sc), "PingFang SC",
+    "Microsoft YaHei", "微软雅黑", sans-serif;
 }
 
 html {
@@ -346,6 +349,12 @@ body {
   @apply border-tech-main/30 tracking-tech-wide text-tech-main mb-2 inline-block border-b pb-1 font-mono text-sm uppercase;
 }
 
+@utility markdown-title {
+  font-family: var(--font-markdown-title);
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+
 @utility animate-skeleton-exit {
   animation: skeleton-exit 0.25s ease-out forwards;
 }
@@ -646,6 +655,49 @@ code[class^="language-"] {
 }
 
 @layer components {
+  .article-prose {
+    text-wrap: pretty;
+  }
+
+  .article-prose > :first-child {
+    margin-top: 0;
+  }
+
+  .article-prose h1,
+  .article-prose h2,
+  .article-prose h3 {
+    text-wrap: balance;
+  }
+
+  .article-prose h1 + p,
+  .article-prose h1 + ul,
+  .article-prose h1 + ol,
+  .article-prose h1 + blockquote,
+  .article-prose h1 + aside,
+  .article-prose h1 + div,
+  .article-prose h2 + p,
+  .article-prose h2 + ul,
+  .article-prose h2 + ol,
+  .article-prose h2 + blockquote,
+  .article-prose h2 + aside,
+  .article-prose h2 + div,
+  .article-prose h3 + p,
+  .article-prose h3 + ul,
+  .article-prose h3 + ol,
+  .article-prose h3 + blockquote,
+  .article-prose h3 + aside,
+  .article-prose h3 + div {
+    margin-top: 0;
+  }
+
+  .article-prose h2 + h3 {
+    margin-top: 1rem;
+  }
+
+  .article-prose li > p:last-child {
+    margin-bottom: 0;
+  }
+
   .code-block-pre {
     @apply relative;
   }

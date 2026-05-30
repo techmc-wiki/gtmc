@@ -76,14 +76,14 @@ export function CalloutAside({
 
   return (
     <aside
-      className={`mb-4 border-l-2 px-6 py-4 ${styles.border} ${styles.bg}`}
+      className={`my-6 border-l-2 px-6 py-4 ${styles.border} ${styles.bg}`}
       {...rest}>
       <div
         className={`mb-1.5 font-mono text-xs font-bold tracking-widest uppercase ${styles.title}`}>
         {t(labelKey)}
       </div>
       <div
-        className={`font-sans text-sm [&_p]:mb-0 [&_p]:text-sm [&_p]:text-inherit ${styles.text}`}>
+        className={`font-sans text-sm [&_ol]:mb-0 [&_p]:mb-0 [&_p]:text-sm [&_p]:text-inherit [&_ul]:mb-0 ${styles.text}`}>
         {isEmpty && hasDefault
           ? t(`${type}_default` as Parameters<typeof t>[0])
           : children}

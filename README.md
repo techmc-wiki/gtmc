@@ -5,9 +5,9 @@
 
 # Graduate Texts in Minecraft
 
-**Community-driven online textbook on Technical Minecraft.**
+**A community-written online textbook on Technical Minecraft.**
 
-Tutorials, explanations on game mechanics, and source-code reading. Collaboratively written and openly reviewed.
+Read tutorials, mechanics deep-dives, and source-code walkthroughs. All openly written and reviewed.
 
 [![Website](https://img.shields.io/badge/site-beta.techmc.wiki-60708F?style=flat-square&labelColor=4A5A78)](https://beta.techmc.wiki) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/gtmc-dev/gtmc) [![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org) [![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org) [![License](https://img.shields.io/badge/Code-Apache--2.0-yellow?style=flat-square)](LICENSE) [![Articles](https://img.shields.io/badge/Articles-CC--BY--NC--SA%204.0-lightgrey?style=flat-square)](LICENSE)
 
@@ -25,111 +25,47 @@ Tutorials, explanations on game mechanics, and source-code reading. Collaborativ
 
 ## About
 
-Graduate Texts in Minecraft (*GTMC*) is an open, community-driven knowledge base for the technical side of Minecraft — redstone, game mechanics, and engine internals. It serves three kinds of writing:
+**Graduate Texts in Minecraft** (*GTMC*) is an open knowledge base for the technical side of Minecraft — redstone, game mechanics, and engine internals. Anyone can read it, and the community writes and reviews it together.
 
-- `>> TUTORIALS` — step-by-step walkthroughs for builders.
-- `>> EXPLANATIONS` — first-principles writeups of in-game mechanics.
-- `>> CODE ANALYSIS` — annotated readings of the game's source.
+You'll find three kinds of articles:
 
-The site is built around a **blueprint / scientific drafting** visual language: thin blue-gray rules, square geometry, monospace HUD labels, corner brackets, and motion that feels like UI instrumentation rather than ornament. See [`DESIGN.md`](DESIGN.md) for the full system.
+- **Tutorials** — step-by-step walkthroughs for builders.
+- **Explanations** — how in-game mechanics actually work, from first principles.
+- **Code Analysis** — annotated readings of the game's source.
+
+They span the whole stack of technical play: production builds like tree farms, mechanical redstone and component behavior, slime-tech flying machines, and the timing and wiring that hold them together. On the engine side, articles dig into micro-timing, block updates and update order, chunk loading and loading tickets, and entity AI and movement — backed by source reading where it matters. Tooling chapters cover the staples of a technical setup (Carpet, Litematica, and the masa suite), so newcomers and veterans both have a way in.
+
+The fastest way to start is to **[visit the site](https://beta.techmc.wiki)**. Want to contribute? You can draft and submit articles right from the site, or open a feature request to suggest a topic.
 
 > [!NOTE]
-> This repository hosts the **website** only. Articles live in a separate repository and are pulled in as a Git submodule. All other org repos are at [github.com/orgs/gtmc-dev](https://github.com/orgs/gtmc-dev/repositories).
+> This repo is the **website**. Articles live in [their own repo](https://github.com/gtmc-dev/articles) and are pulled in as a submodule. Other GTMC projects are at [github.com/orgs/gtmc-dev](https://github.com/orgs/gtmc-dev/repositories).
 
-## Development
+## Running it locally
 
-### Tech stack
+<a href="https://skillicons.dev"><img src="https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,prisma,supabase,vercel" alt="Next.js, React, TypeScript, Tailwind CSS, Prisma, Supabase, Vercel" /></a>
 
-| Layer         | Choice                                                        |
-| ------------- | ------------------------------------------------------------- |
-| Framework     | Next.js 16 (App Router, Cache Components) on React 19         |
-| Language      | TypeScript 6                                                  |
-| Styling       | Tailwind CSS v4, custom `tech-*` blueprint tokens             |
-| Motion        | `motion` (Framer Motion successor)                            |
-| Auth          | NextAuth v5 (GitHub provider) + Prisma adapter                |
-| Data          | Prisma 7 against Supabase Postgres                            |
-| Content       | Markdown + remark/rehype, KaTeX math, Shiki code, gray-matter |
-| Editor        | CodeMirror 6 (markdown, autocomplete, merge view)             |
-| Schematics    | `schematic-renderer` + Three.js                               |
-| Search        | MiniSearch                                                    |
-| i18n          | `next-intl` (`en`, `zh`)                                      |
-| Hosting       | Vercel (Speed Insights, Analytics, Blob)                      |
-| Lint / Format | oxlint, Prettier (with Tailwind plugin)                       |
-| Tests         | Vitest, Playwright, Lighthouse CI                             |
-
-### Setup
+See [`DESIGN.md`](DESIGN.md) for the visual system and [`AGENTS.md`](AGENTS.md) for the full stack breakdown.
 
 ```bash
 git clone https://github.com/gtmc-dev/gtmc.git
 cd gtmc
-pnpm install   # also initializes articles/ when the submodule is missing
-cp .env.example .env   # fill in GitHub OAuth, database URL, etc.
-pnpm dev
+pnpm install            # initializes the articles/ submodule if missing
+cp .env.example .env    # add GitHub OAuth, database URL, etc.
+pnpm dev                # http://localhost:3000
 ```
 
-The dev server runs on <http://localhost:3000>.
-
-### Scripts
+Common scripts:
 
 ```bash
-pnpm dev              # Start the dev server
-pnpm build:content    # Generate content artifacts (manifest, glossary, articles, PDF)
-pnpm build:next       # Next.js production build
-pnpm build            # Both phases: content generation then Next build
-pnpm build:pdf        # Regenerate the offline PDF only
-pnpm typecheck        # tsc --noEmit
-pnpm lint             # oxlint
-pnpm style            # prettier --check
-pnpm lighthouse       # Run Lighthouse CI locally
+pnpm dev          # Start the dev server
+pnpm build        # Full production build (content + Next.js)
+pnpm typecheck    # tsc --noEmit
+pnpm lint         # oxlint
+pnpm style        # prettier --check
 ```
 
-**Build phases:**
-
-- `build:content` — generates static content artifacts (manifest, glossary, rendered articles, PDF)
-- `build:next` — runs the Next.js build consuming those artifacts
-- `build` — runs both in order
-
-### Layout
-
-```text
-.
-├── app/                    Next.js App Router (locale-scoped routes)
-│   └── [locale]/
-│       ├── (public)/       Articles, public pages
-│       ├── (private)/      Drafts, review hub, profile, admin
-│       ├── (auth)/         GitHub sign-in flow
-│       └── _homepage/      Hero card, foreground/background layers
-├── components/ui/          TechCard, TechButton, CornerBrackets, …
-├── lib/                    Article pipeline, auth, db, search, GitHub helpers
-├── articles/               Article content (Git submodule, see below)
-├── scripts/                Manifest, content, and PDF generators
-├── messages/               i18n catalogs (en.json, zh.json)
-├── schema.prisma           Database schema
-└── DESIGN.md               Visual system reference
-```
-
-### Submodule
-
-The `articles/` directory is a Git submodule pinned to a specific commit of the [articles repo](https://github.com/orgs/gtmc-dev/repositories). It is **not** auto-updated by `pnpm install` once it exists.
-
-```bash
-pnpm articles:status                # Show submodule status
-pnpm articles:init                  # Reinitialize at the pinned commit
-pnpm articles:update                # Pull the latest articles commit
-
-pnpm generate:manifest              # Rebuild the article manifest
-pnpm generate:content               # Re-render rendered content
-pnpm articles:pdf                   # Re-render the offline PDF
-```
-
-> [!IMPORTANT]
-> To deploy newer article content, **commit the updated submodule pointer** in this repo. Vercel checkouts use whatever commit is pinned here.
-
-For details and contribution guidance, see [`CONTRIBUTING.md`](CONTRIBUTING.md).
-
-## See also
-
-All articles (including drafts and pending submissions) are located in this repo: [`gtmc-dev/articles`](https://github.com/gtmc-dev/articles)
+> [!TIP]
+> `pnpm build` runs in two phases: `build:content` generates static artifacts (article manifest, glossary, rendered content, offline PDF), then `build:next` builds the site from them. Run them separately when you only need one.
 
 ---
 

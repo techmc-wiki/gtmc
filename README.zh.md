@@ -5,9 +5,9 @@
 
 # Graduate Texts in Minecraft
 
-**社区共建的 Minecraft 技术在线教科书。**
+**社区共建的技术 Minecraft 在线教科书。**
 
-从入门教程到机制讲解，再到源码解读。协作编写，公开评审。
+阅读入门教程、机制深析与源码解读，内容皆由社区公开编写与评审。
 
 [![Website](https://img.shields.io/badge/site-beta.techmc.wiki-60708F?style=flat-square&labelColor=4A5A78)](https://beta.techmc.wiki) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/gtmc-dev/gtmc) [![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org) [![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org) [![License](https://img.shields.io/badge/Code-Apache--2.0-yellow?style=flat-square)](LICENSE) [![Articles](https://img.shields.io/badge/Articles-CC--BY--NC--SA%204.0-lightgrey?style=flat-square)](LICENSE)
 
@@ -25,111 +25,47 @@
 
 ## 关于
 
-Graduate Texts in Minecraft（*GTMC*）是一个开放、社区驱动的知识库，专注于 Minecraft 的技术层面——红石、游戏机制以及引擎内部原理。内容涵盖三种形式：
+**Graduate Texts in Minecraft**（*GTMC*）是一个开放的 Minecraft 技术知识库——涵盖红石、游戏机制与引擎内部原理。任何人都能阅读，并由社区共同编写、评审。
 
-- `>> TUTORIALS` —— 面向建造者的分步教程。
-- `>> EXPLANATIONS` —— 从基本原理出发的机制讲解。
-- `>> CODE ANALYSIS` —— 带注释的游戏源码解读。
+这里有三类文章：
 
-网站采用 **蓝图 / 科学制图** 视觉语言：细蓝灰分割线、方形几何、等宽字 HUD 标签、角括号装饰，动效更像是仪表读数而非装饰。详见 [`DESIGN.md`](DESIGN.md)。
+- **教程（Tutorials）** —— 面向建造者的分步讲解。
+- **机制讲解（Explanations）** —— 从基本原理出发，剖析机制的真正运作方式。
+- **源码解读（Code Analysis）** —— 带注释的游戏源码阅读。
+
+内容覆盖技术玩法的方方面面：树场等量产装置、械电与元件特性、绿萌科技，以及把它们串联起来的时序与电路。在引擎层面，文章深入微时序、方块更新与更新顺序、区块加载与加载票（loading ticket）、实体 AI 与实体移动——必要之处佐以源码分析。工具章节则讲解技术存档的常用利器（Carpet、Litematica 与 masa 套件），让新手与老手都能找到入口。
+
+最快的上手方式就是**[访问网站](https://beta.techmc.wiki)**。想参与贡献？你可以直接在站内起草并提交文章，也可以提交一个 feature request 来建议选题。
 
 > [!NOTE]
-> 本仓库仅包含**网站**代码。文章内容存放在独立仓库中，以 Git 子模块形式引入。其他相关仓库见 [github.com/orgs/gtmc-dev](https://github.com/orgs/gtmc-dev/repositories)。
+> 本仓库是**网站**本体。文章存放在[独立仓库](https://github.com/gtmc-dev/articles)中，以子模块形式引入。其他 GTMC 项目见 [github.com/orgs/gtmc-dev](https://github.com/orgs/gtmc-dev/repositories)。
 
-## 开发
+## 本地运行
 
-### 技术栈
+<a href="https://skillicons.dev"><img src="https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,prisma,supabase,vercel" alt="Next.js, React, TypeScript, Tailwind CSS, Prisma, Supabase, Vercel" /></a>
 
-| 层级          | 选型                                                          |
-| ------------- | ------------------------------------------------------------- |
-| 框架          | Next.js 16（App Router、Cache Components）+ React 19          |
-| 语言          | TypeScript 6                                                  |
-| 样式          | Tailwind CSS v4，自定义 `tech-*` 蓝图主题变量                 |
-| 动效          | `motion`（Framer Motion 的继任者）                            |
-| 鉴权          | NextAuth v5（GitHub provider）+ Prisma adapter                |
-| 数据          | Prisma 7，对接 Supabase Postgres                              |
-| 内容          | Markdown + remark/rehype，KaTeX 数学，Shiki 代码，gray-matter |
-| 编辑器        | CodeMirror 6（markdown、自动补全、合并视图）                  |
-| 结构方块渲染  | `schematic-renderer` + Three.js                               |
-| 搜索          | MiniSearch                                                    |
-| i18n          | `next-intl`（`en`、`zh`）                                     |
-| 部署          | Vercel（Speed Insights、Analytics、Blob）                     |
-| Lint / 格式化 | oxlint、Prettier（含 Tailwind 插件）                          |
-| 测试          | Vitest、Playwright、Lighthouse CI                             |
-
-### 初始化
+视觉系统详见 [`DESIGN.md`](DESIGN.md)，完整技术栈详见 [`AGENTS.md`](AGENTS.md)。
 
 ```bash
 git clone https://github.com/gtmc-dev/gtmc.git
 cd gtmc
-pnpm install   # 如果 articles/ 子模块不存在，会自动初始化
-cp .env.example .env   # 填写 GitHub OAuth、数据库 URL 等
-pnpm dev
+pnpm install            # 若 articles/ 子模块缺失则自动初始化
+cp .env.example .env    # 填写 GitHub OAuth、数据库 URL 等
+pnpm dev                # http://localhost:3000
 ```
 
-开发服务器运行在 <http://localhost:3000>。
-
-### 脚本
+常用脚本：
 
 ```bash
-pnpm dev              # 启动开发服务器
-pnpm build:content    # 生成内容文件（manifest、glossary、文章、PDF）
-pnpm build:next       # Next.js 生产构建
-pnpm build            # 两阶段：先生成内容，再执行 Next 构建
-pnpm build:pdf        # 仅重新生成离线 PDF
-pnpm typecheck        # tsc --noEmit
-pnpm lint             # oxlint
-pnpm style            # prettier --check
-pnpm lighthouse       # 本地运行 Lighthouse CI
+pnpm dev          # 启动开发服务器
+pnpm build        # 完整生产构建（内容 + Next.js）
+pnpm typecheck    # tsc --noEmit
+pnpm lint         # oxlint
+pnpm style        # prettier --check
 ```
 
-**构建阶段：**
-
-- `build:content` —— 生成静态内容文件（manifest、glossary、渲染后的文章、PDF）
-- `build:next` —— 基于上述文件执行 Next.js 构建
-- `build` —— 按顺序依次执行以上两阶段
-
-### 目录结构
-
-```text
-.
-├── app/                    Next.js App Router（按 locale 划分路由）
-│   └── [locale]/
-│       ├── (public)/       文章、公开页面
-│       ├── (private)/      草稿、评审中心、个人主页、管理后台
-│       ├── (auth)/         GitHub 登录流程
-│       └── _homepage/      首页主卡片、前后景图层
-├── components/ui/          TechCard、TechButton、CornerBrackets …
-├── lib/                    文章处理、鉴权、数据库、搜索、GitHub 辅助
-├── articles/               文章内容（Git 子模块，详见下文）
-├── scripts/                Manifest、内容、PDF 生成脚本
-├── messages/               i18n 文案（en.json、zh.json）
-├── schema.prisma           数据库 Schema
-└── DESIGN.md               视觉系统参考
-```
-
-### 子模块
-
-`articles/` 是一个 Git 子模块，锁定在文章[仓库](https://github.com/orgs/gtmc-dev/repositories)的某个提交上。本地已有内容时，`pnpm install` 不会自动更新它。
-
-```bash
-pnpm articles:status                # 查看子模块状态
-pnpm articles:init                  # 重新初始化到锁定的提交
-pnpm articles:update                # 拉取最新的文章提交
-
-pnpm generate:manifest              # 重新生成文章 manifest
-pnpm generate:content               # 重新渲染内容
-pnpm articles:pdf                   # 重新生成离线 PDF
-```
-
-> [!IMPORTANT]
-> 要部署最新文章，需在本仓库中**提交更新后的子模块指针**。Vercel 构建时使用的是此处锁定的提交。
-
-更多细节与贡献指引请参阅 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
-
-## 另见
-
-所有文章（含草稿与待审稿件）见 [`gtmc-dev/articles`](https://github.com/gtmc-dev/articles)
+> [!TIP]
+> `pnpm build` 分两个阶段执行：`build:content` 生成静态产物（文章 manifest、术语表、渲染后的内容、离线 PDF），随后 `build:next` 基于这些产物构建站点。只需其中一个阶段时可单独运行。
 
 ---
 

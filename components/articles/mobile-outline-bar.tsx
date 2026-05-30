@@ -40,15 +40,15 @@ export function MobileOutlineBar() {
 
   useModalEffects({ isOpen: isSheetOpen, onClose: closeSheet })
 
-  if (!mounted || outline.length === 0) return null
-
-  const activeItem = outline.find((item) => item.id === activeHeadingId)
   const pct = Math.round(progress * 100)
-
   const progressWidthStyle = React.useMemo(
     (): React.CSSProperties => ({ width: `${pct}%` }),
     [pct]
   )
+
+  if (!mounted || outline.length === 0) return null
+
+  const activeItem = outline.find((item) => item.id === activeHeadingId)
 
 
   return (

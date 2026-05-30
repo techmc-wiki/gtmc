@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
-import { GeistSans } from "geist/font/sans"
-import { GeistMono } from "geist/font/mono"
+import { Geist, Geist_Mono, Noto_Sans_SC } from "next/font/google"
 // oxlint-disable-next-line import/no-unassigned-import
 import "../globals.css"
 import { Analytics } from "@vercel/analytics/next"
@@ -19,6 +18,25 @@ import { routing } from "@/i18n/routing"
 import React from "react"
 
 const siteUrl = getSiteUrl()
+
+const geistSans = Geist({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-geist-sans",
+})
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-geist-mono",
+})
+
+const notoSansSc = Noto_Sans_SC({
+  weight: ["400", "700"],
+  display: "swap",
+  preload: false,
+  variable: "--font-noto-sans-sc",
+})
 
 const jsonLd = {
   __html: JSON.stringify([
@@ -107,7 +125,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={` ${GeistSans.variable} ${GeistMono.variable} scroll-smooth`}
+      className={`${geistSans.variable} ${geistMono.variable} ${notoSansSc.variable} scroll-smooth`}
       data-scroll-behavior="smooth"
       suppressHydrationWarning>
       <head>

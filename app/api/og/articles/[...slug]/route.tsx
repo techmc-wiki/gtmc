@@ -27,6 +27,12 @@ const BANNER_H = Math.round(H * 0.4)
 const CARD_H = H - BANNER_H
 const META_BAR_H = 36
 const BOTTOM_BAR_H = 24
+const GOOGLE_SPACE_MONO_700_CSS =
+  "https://fonts.googleapis.com/css2?family=Space+Mono:wght@700&display=swap"
+const GOOGLE_FONTS_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
+
+let spaceMonoFontDataPromise: Promise<ArrayBuffer | null> | null = null
 
 // ── OG Style Constants ──────────────────────────────────────────────────────
 
@@ -123,6 +129,29 @@ function extractBodyHook(raw: string): string {
   return firstPara.length > 120 ? firstPara.slice(0, 120) + "…" : firstPara
 }
 
+async function getSpaceMonoFontData(): Promise<ArrayBuffer | null> {
+  spaceMonoFontDataPromise ??= fetch(GOOGLE_SPACE_MONO_700_CSS, {
+    headers: { "User-Agent": GOOGLE_FONTS_USER_AGENT },
+  })
+    .then(async (cssRes) => {
+      if (!cssRes.ok) return null
+
+      const css = await cssRes.text()
+      const fontUrl = /src: url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)/.exec(
+        css
+      )?.[1]
+      if (!fontUrl) return null
+
+      const fontRes = await fetch(fontUrl, {
+        headers: { "User-Agent": GOOGLE_FONTS_USER_AGENT },
+      })
+      return fontRes.ok ? fontRes.arrayBuffer() : null
+    })
+    .catch(() => null)
+
+  return spaceMonoFontDataPromise
+}
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ slug: string[] }> }
@@ -182,15 +211,7 @@ export async function GET(
   const host = siteUrl.replace(/^https?:\/\//, "")
   const urlLabel = `${host}/articles/${slugPath}`
 
-  let fontData: ArrayBuffer | null = null
-  try {
-    const res = await fetch(
-      new URL("/fonts/space-mono/SpaceMono-Bold.ttf", siteUrl)
-    )
-    if (res.ok) fontData = await res.arrayBuffer()
-  } catch {
-    // fall back to system monospace
-  }
+  const fontData = await getSpaceMonoFontData()
   const fonts = fontData
     ? [{ name: "SpaceMono", data: fontData, weight: 400 as const, style: "normal" as const }]
     : []

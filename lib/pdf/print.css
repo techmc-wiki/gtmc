@@ -4,58 +4,7 @@
    Target: Chromium 130+ via Playwright page.pdf()
    ========================================================================== */
 
-/* --- Font Declarations (self-hosted woff2 for file:// PDF context) --- */
-@font-face {
-  font-family: "Geist Sans";
-  src: url("fonts/geist/Geist-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Geist Sans";
-  src: url("fonts/geist/Geist-SemiBold.woff2") format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Geist Sans";
-  src: url("fonts/geist/Geist-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Geist Mono";
-  src: url("fonts/geist/GeistMono-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Geist Mono";
-  src: url("fonts/geist/GeistMono-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Noto Sans SC";
-  src: url("https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5/files/noto-sans-sc-all-400-normal.woff2")
-    format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Noto Sans SC";
-  src: url("https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5/files/noto-sans-sc-all-700-normal.woff2")
-    format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=Geist+Mono:wght@400;700&family=Noto+Sans+SC:wght@400;700&display=swap");
 
 /* --- Page Rules --- */
 @page {
@@ -87,7 +36,7 @@ html {
 }
 
 body {
-  font-family: "Geist Sans", "Noto Sans SC", "PingFang SC", sans-serif;
+  font-family: "Geist", "Noto Sans SC", "PingFang SC", sans-serif;
   margin: 0;
   padding: 0;
   hyphens: auto;
@@ -221,7 +170,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin: 1em 0;
-  font-family: "Geist Sans", sans-serif;
+  font-family: "Geist", sans-serif;
   font-size: 9.5pt;
   break-inside: auto;
   page-break-inside: auto;
@@ -438,7 +387,7 @@ aside[data-callout="CORRUPTION"]::before {
 }
 
 .cover-subtitle {
-  font-family: "Geist Sans", sans-serif;
+  font-family: "Geist", sans-serif;
   font-size: 13pt;
   color: #60708f;
   text-align: center;

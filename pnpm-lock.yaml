@@ -26,12 +26,6 @@ importers:
       '@codemirror/view':
         specifier: ^6.42.1
         version: 6.43.0
-      '@fontsource/noto-sans-sc':
-        specifier: ^5.2.9
-        version: 5.2.9
-      '@fontsource/space-mono':
-        specifier: ^5.2.9
-        version: 5.2.9
       '@octokit/rest':
         specifier: ^22.0.1
         version: 22.0.1
@@ -77,9 +71,6 @@ importers:
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
-      geist:
-        specifier: ^1.7.1
-        version: 1.7.1(next@16.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6))
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
@@ -581,12 +572,6 @@ packages:
   '@ffmpeg/util@0.12.2':
     resolution: {integrity: sha512-ouyoW+4JB7WxjeZ2y6KpRvB+dLp7Cp4ro8z0HIVpZVCM7AwFlHa0c4R8Y/a4M3wMqATpYKhC7lSFHQ0T11MEDw==}
     engines: {node: '>=18.x'}
-
-  '@fontsource/noto-sans-sc@5.2.9':
-    resolution: {integrity: sha512-bTUIWGBgJDpwi5qAr+x0/lcgv80IHTB9vl6s2f6EymZEa7qYV99yNRBZuKFT+SYDKVunZrjCEhWtpxqmbXWl5Q==}
-
-  '@fontsource/space-mono@5.2.9':
-    resolution: {integrity: sha512-b61faFOHEISQ/pD25G+cfGY9o/WW6lRv6hBQQfpWvEJ4y1V+S4gmth95EVyBE2VL3qDYHeVQ8nBzrplzdXTDDg==}
 
   '@formatjs/ecma402-abstract@2.3.6':
     resolution: {integrity: sha512-HJnTFeRM2kVFVr5gr5kH1XP6K0JcJtE7Lzvtr3FS/so5f1kpsqqqxy5JF+FRaO6H2qmcMfAUIox7AJteieRtVw==}
@@ -2784,11 +2769,6 @@ packages:
 
   function-bind@1.1.2:
     resolution: {integrity: sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==}
-
-  geist@1.7.1:
-    resolution: {integrity: sha512-XF8DM30ODhDu0Ng5S2kOS8j4ZkG/6z2fKWAiFJA7wG0Hc92ZXgjYLrwbD9bVU4nGVzwboPtG+QtaPGsfgnXLaA==}
-    peerDependencies:
-      next: '>=13.2.0'
 
   generate-function@2.3.1:
     resolution: {integrity: sha512-eeB5GfMNeevm/GRYq20ShmsaGcmI81kIX2K9XQx5miC8KdHaC6Jm0qQ8ZNeGOi7wYB8OsdxKs+Y2oVuTFuVwKQ==}
@@ -5212,10 +5192,6 @@ snapshots:
 
   '@ffmpeg/util@0.12.2': {}
 
-  '@fontsource/noto-sans-sc@5.2.9': {}
-
-  '@fontsource/space-mono@5.2.9': {}
-
   '@formatjs/ecma402-abstract@2.3.6':
     dependencies:
       '@formatjs/fast-memoize': 2.2.7
@@ -7172,10 +7148,6 @@ snapshots:
     optional: true
 
   function-bind@1.1.2: {}
-
-  geist@1.7.1(next@16.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)):
-    dependencies:
-      next: 16.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
 
   generate-function@2.3.1:
     dependencies:

@@ -516,14 +516,14 @@ async function main(): Promise<void> {
       () =>
         document.fonts.ready.then(
           () =>
-            document.fonts.check('16px "Geist Sans"') &&
+            document.fonts.check('16px "Geist"') &&
             document.fonts.check('16px "Geist Mono"') &&
             document.fonts.check('16px "Noto Sans SC"')
         ),
       { timeout: 30000 }
     )
     console.log(
-      "[pdf]   → PDF fonts verified (Geist Sans + Geist Mono + Noto Sans SC)"
+      "[pdf]   → PDF fonts verified (Geist + Geist Mono + Noto Sans SC)"
     )
 
     // Force light theme for PDF rendering (scrollbars, form controls, etc.)

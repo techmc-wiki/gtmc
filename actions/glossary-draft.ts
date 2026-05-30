@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import type { GlossaryRevision } from "@prisma/client"
-import { Prisma } from "@prisma/client"
+import type { Prisma } from "@prisma/client"
 import { z } from "zod"
 
 import { requireAuth } from "@/lib/auth-context"
@@ -44,8 +44,9 @@ export async function updateGlossaryDraftAction(
   const existing = await prisma.glossaryRevision.findUnique({ where: { id } })
   if (!existing) throw new Error("Draft not found")
   if (existing.authorId !== userId) throw new Error("Unauthorized")
-  if (existing.status !== "DRAFT")
+  if (existing.status !== "DRAFT") {
     throw new Error("Cannot edit a draft that is already in review")
+  }
 
   await prisma.glossaryRevision.update({
     where: { id },
@@ -62,8 +63,9 @@ export async function deleteGlossaryDraftAction(id: string): Promise<void> {
   const existing = await prisma.glossaryRevision.findUnique({ where: { id } })
   if (!existing) throw new Error("Draft not found")
   if (existing.authorId !== userId) throw new Error("Unauthorized")
-  if (existing.status !== "DRAFT")
+  if (existing.status !== "DRAFT") {
     throw new Error("Cannot delete a draft that is already in review")
+  }
 
   await prisma.glossaryRevision.delete({ where: { id } })
 

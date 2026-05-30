@@ -42,12 +42,13 @@ export function NewGlossaryDraftStarter({
         }
         clearPendingDraftCreation = null
       }, 5000)
-    } catch (caught) {
+      // eslint-disable-next-line no-shadow, unicorn/catch-error-name -- catch param must match outer state name
+    } catch (error) {
       inFlightRef.current = false
       pendingDraftCreation = null
       setError(
-        caught instanceof Error
-          ? caught.message
+        error instanceof Error
+          ? error.message
           : "Failed to create glossary draft"
       )
     }

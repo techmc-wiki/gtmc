@@ -107,13 +107,14 @@ export function GlossaryEditCard({
 
   const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  React.useEffect(() => {
-    return () => {
+  React.useEffect(
+    () => () => {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current)
       }
-    }
-  }, [])
+    },
+    []
+  )
 
   const updateField = React.useCallback(
     (column: GlossaryColumn, value: string) => {
@@ -499,7 +500,7 @@ function Field({
   onValueChange,
 }: FieldProps) {
   const id = React.useId()
-  const fieldId = `glossary-field-${column.replace(/[^a-z0-9]/gi, "-").toLowerCase()}-${id}`
+  const fieldId = `glossary-field-${column.replaceAll(/[^a-z0-9]/gi, "-").toLowerCase()}-${id}`
 
   const handleChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

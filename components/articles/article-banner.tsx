@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useEffect, useRef, useState, useCallback } from "react"
+import { useEffect, useRef, useState, useCallback, useMemo } from "react"
 
 interface ArticleBannerProps {
   src: string
@@ -10,6 +10,14 @@ interface ArticleBannerProps {
 
 const PARALLAX_STRENGTH = 3
 const IMG_PARALLAX_STRENGTH = 8
+
+const blueprintGridStyle: React.CSSProperties = {
+  backgroundImage: `
+    linear-gradient(to right, var(--color-tech-main) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-tech-main) 1px, transparent 1px)
+  `,
+  backgroundSize: "40px 40px",
+}
 
 export function ArticleBanner({ src, alt }: ArticleBannerProps) {
   const bannerRef = useRef<HTMLDivElement>(null)
@@ -151,6 +159,44 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
   const imgX = locked ? 0 : hovered ? 0 : -offsetX * IMG_PARALLAX_STRENGTH
   const imgY = locked ? 0 : hovered ? 0 : -offsetY * IMG_PARALLAX_STRENGTH
 
+  const flashOverlayStyle = useMemo(
+    (): React.CSSProperties => ({
+      opacity: flashing ? 0.3 : 0,
+      transition: flashing
+        ? "opacity 120ms ease-in"
+        : "opacity 80ms ease-out",
+    }),
+    [flashing]
+  )
+
+  const imageTransformStyle = useMemo(
+    (): React.CSSProperties => ({
+      transform: `translate(${imgX}px, ${imgY}px) scale(${hovered ? 1.1 : locked ? 1 : 1.06})`,
+      filter: locked
+        ? "blur(0px) saturate(1)"
+        : "blur(1.5px) saturate(0.88)",
+      transition: locked
+        ? "transform 600ms cubic-bezier(0.16,1,0.3,1), filter 500ms ease-out"
+        : hovered
+          ? "transform 600ms cubic-bezier(0.16,1,0.3,1), filter 700ms cubic-bezier(0.16,1,0.3,1)"
+          : "transform 200ms linear, filter 700ms cubic-bezier(0.16,1,0.3,1)",
+    }),
+    [imgX, imgY, hovered, locked]
+  )
+
+  const crosshairStyle = useMemo(
+    (): React.CSSProperties => ({
+      left: `${crosshairX}%`,
+      top: `${crosshairY}%`,
+      transform: "translate(-50%, -50%)",
+      transition:
+        locked || hovered
+          ? "left 600ms cubic-bezier(0.16,1,0.3,1), top 600ms cubic-bezier(0.16,1,0.3,1)"
+          : "none",
+    }),
+    [crosshairX, crosshairY, locked, hovered]
+  )
+
   return (
     <div
       ref={bannerRef}
@@ -197,12 +243,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
           {/* Shutter flash overlay */}
           <div
             className="pointer-events-none absolute inset-0 z-20 bg-black"
-            style={{
-              opacity: flashing ? 0.3 : 0,
-              transition: flashing
-                ? "opacity 120ms ease-in"
-                : "opacity 80ms ease-out",
-            }}
+            style={flashOverlayStyle}
           />
 
           <Image
@@ -211,17 +252,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
             className="object-cover"
-            style={{
-              transform: `translate(${imgX}px, ${imgY}px) scale(${hovered ? 1.1 : locked ? 1 : 1.06})`,
-              filter: locked
-                ? "blur(0px) saturate(1)"
-                : "blur(1.5px) saturate(0.88)",
-              transition: locked
-                ? "transform 600ms cubic-bezier(0.16,1,0.3,1), filter 500ms ease-out"
-                : hovered
-                  ? "transform 600ms cubic-bezier(0.16,1,0.3,1), filter 700ms cubic-bezier(0.16,1,0.3,1)"
-                  : "transform 200ms linear, filter 700ms cubic-bezier(0.16,1,0.3,1)",
-            }}
+            style={imageTransformStyle}
             priority
             unoptimized={src.startsWith("/article-assets/")}
             onError={handleImageError}
@@ -230,13 +261,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
           {/* Blueprint grid overlay */}
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.1] mix-blend-multiply transition-transform duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:scale-105"
-            style={{
-              backgroundImage: `
-                linear-gradient(to right, var(--color-tech-main) 1px, transparent 1px),
-                linear-gradient(to bottom, var(--color-tech-main) 1px, transparent 1px)
-              `,
-              backgroundSize: "40px 40px",
-            }}
+            style={blueprintGridStyle}
           />
 
           {/* Vignette — deepens on hover */}
@@ -258,15 +283,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
           {/* Crosshair — parallax until locked, then stays centered */}
           <div
             className="pointer-events-none absolute opacity-20 mix-blend-multiply group-hover/banner:opacity-40"
-            style={{
-              left: `${crosshairX}%`,
-              top: `${crosshairY}%`,
-              transform: "translate(-50%, -50%)",
-              transition:
-                locked || hovered
-                  ? "left 600ms cubic-bezier(0.16,1,0.3,1), top 600ms cubic-bezier(0.16,1,0.3,1)"
-                  : "none",
-            }}>
+            style={crosshairStyle}>
             <div className="absolute top-1/2 left-1/2 h-px w-10 -translate-1/2 bg-tech-main" />
             <div className="absolute top-1/2 left-1/2 h-10 w-px -translate-1/2 bg-tech-main" />
             <div className="size-5 rounded-full border border-tech-main" />

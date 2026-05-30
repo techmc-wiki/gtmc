@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useCallback, type ReactNode } from "react"
+import React, { useState, useCallback, useMemo, type ReactNode } from "react"
 import { useTranslations } from "next-intl"
 import { CodeCopyButton } from "./code-copy-button"
 import { LazyCodeBlock } from "./lazy-code-block"
@@ -29,6 +29,14 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
   const digitCount = String(lineCountNum).length
   const lineNumWidth =
     digitCount === 1 ? "2.5rem" : digitCount === 2 ? "3rem" : "3.5rem"
+
+  const codeBlockStyle = useMemo(
+    (): React.CSSProperties =>
+      ({
+        "--line-num-width": lineNumWidth,
+      }) as React.CSSProperties,
+    [lineNumWidth]
+  )
 
   if (!rawCode) return <>{children}</>
 
@@ -67,11 +75,7 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
         <div
           className="code-block-pre relative"
           data-wrapped={isWrapped}
-          style={
-            {
-              "--line-num-width": lineNumWidth,
-            } as React.CSSProperties
-          }>
+          style={codeBlockStyle}>
           <div className="custom-bottom-scrollbar overflow-x-auto">
             <div
               dir="ltr"

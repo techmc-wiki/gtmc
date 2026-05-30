@@ -696,9 +696,9 @@ function ChangePreviewCard({
         </span>
       </div>
       <div className="max-h-72 overflow-auto bg-slate-950/95 font-mono text-[0.6875rem] text-slate-100">
-        {rows.map((row, index) => (
+        {rows.map((row) => (
           <div
-            key={`${filePath}-${row.type}-${row.oldLine ?? ""}-${row.newLine ?? ""}-${index}`}
+            key={`${filePath}:${row.oldLine ?? "x"}:${row.newLine ?? "x"}:${row.type}`}
             className={`grid grid-cols-[3rem_3rem_minmax(0,1fr)] px-2 py-1 ${
               row.type === "add"
                 ? `bg-emerald-500/10 text-emerald-200`

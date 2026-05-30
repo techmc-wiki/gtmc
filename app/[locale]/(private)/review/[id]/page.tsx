@@ -23,6 +23,96 @@ const owner = ARTICLES_REPO_OWNER
 const repo = ARTICLES_REPO_NAME
 const EMPTY_REVIEW_FILES: ReviewFile[] = []
 
+const DEFAULT_MODE_ANALYSIS: ModeAnalysis = {
+  recommendation: "SIMPLE",
+  commitCount: 0,
+  filesAffected: 0,
+  adminMessage: "No analysis available.",
+} as const
+
+function buildReviewFiles(
+  linkedDraftFiles: {
+    files: Array<{
+      id: string
+      filePath: string
+      content: string
+      conflictContent?: string | null
+    }>
+  } | null,
+  prFileMap: Map<
+    string,
+    { additions?: number; deletions?: number; status?: string }
+  >,
+  prFileContents: Record<string, string | null>
+): ReviewFile[] {
+  if (!linkedDraftFiles) return EMPTY_REVIEW_FILES
+  return linkedDraftFiles.files.map((file) => ({
+    ...(prFileMap.get(file.filePath)
+      ? {
+          additions: prFileMap.get(file.filePath)?.additions,
+          changeType: prFileMap.get(file.filePath)?.status as
+            | "added"
+            | "modified"
+            | "removed"
+            | "renamed"
+            | undefined,
+          deletions: prFileMap.get(file.filePath)?.deletions,
+        }
+      : {}),
+    id: file.id,
+    filePath: file.filePath,
+    content: prFileContents[file.filePath] ?? file.content,
+    originalContent: file.content,
+    conflictContent: file.conflictContent ?? undefined,
+    status: file.conflictContent ? ("conflict" as const) : ("clean" as const),
+  }))
+}
+
+function buildPrProps(pr: {
+  number: number
+  title: string
+  html_url: string
+  base: { ref: string }
+  head: { ref: string }
+  commits: number
+  changed_files: number
+  additions: number
+  deletions: number
+  user?: { login: string } | null
+}) {
+  return {
+    number: pr.number,
+    title: pr.title,
+    htmlUrl: pr.html_url,
+    baseRef: pr.base.ref,
+    headRef: pr.head.ref,
+    commits: pr.commits,
+    changedFiles: pr.changed_files,
+    additions: pr.additions,
+    deletions: pr.deletions,
+    authorLogin: pr.user?.login || "UNKNOWN",
+  }
+}
+
+function buildRevisionProps(
+  linkedDraft: { id: string; rebaseState: unknown } | null,
+  effectiveConflictMode: string | null
+) {
+  return {
+    id: linkedDraft?.id ?? "",
+    conflictMode: effectiveConflictMode,
+    rebaseState: linkedDraft?.rebaseState,
+  }
+}
+
+function buildSquashCommitDefaults(
+  title: string,
+  body: string,
+  coauthorLines: string[]
+) {
+  return { title, body, coauthorLines }
+}
+
 function getPrimaryAnalysisPath(filePaths: string[], fallbackPath?: string) {
   return (
     filePaths.find((filePath) => filePath.endsWith(".md")) ||
@@ -175,12 +265,7 @@ export default async function ReviewDetailPage({
       })
     : {}
 
-  let modeAnalysis: ModeAnalysis = {
-    recommendation: "SIMPLE",
-    commitCount: 0,
-    filesAffected: 0,
-    adminMessage: "No analysis available.",
-  } as const
+  let modeAnalysis: ModeAnalysis = DEFAULT_MODE_ANALYSIS
 
   const hasConflict = pr.mergeable === false
   const isMergeable = pr.mergeable === true
@@ -224,30 +309,11 @@ export default async function ReviewDetailPage({
     }
   }
 
-  const reviewFiles: ReviewFile[] = linkedDraftFiles
-    ? linkedDraftFiles.files.map((file) => ({
-        ...(prFileMap.get(file.filePath)
-          ? {
-              additions: prFileMap.get(file.filePath)?.additions,
-              changeType: prFileMap.get(file.filePath)?.status as
-                | "added"
-                | "modified"
-                | "removed"
-                | "renamed"
-                | undefined,
-              deletions: prFileMap.get(file.filePath)?.deletions,
-            }
-          : {}),
-        id: file.id,
-        filePath: file.filePath,
-        content: prFileContents[file.filePath] ?? file.content,
-        originalContent: file.content,
-        conflictContent: file.conflictContent ?? undefined,
-        status: file.conflictContent
-          ? ("conflict" as const)
-          : ("clean" as const),
-      }))
-    : EMPTY_REVIEW_FILES
+  const reviewFiles = buildReviewFiles(
+    linkedDraftFiles,
+    prFileMap,
+    prFileContents
+  )
   console.log(
     "[review/page] reviewFiles",
     reviewFiles.map((f) => ({
@@ -294,30 +360,15 @@ export default async function ReviewDetailPage({
             ? "GitHub still reports this pull request as not mergeable."
             : null
 
-  const prProps = {
-    number: pr.number,
-    title: pr.title,
-    htmlUrl: pr.html_url,
-    baseRef: pr.base.ref,
-    headRef: pr.head.ref,
-    commits: pr.commits,
-    changedFiles: pr.changed_files,
-    additions: pr.additions,
-    deletions: pr.deletions,
-    authorLogin: pr.user?.login || "UNKNOWN",
-  }
+  const prProps = buildPrProps(pr)
 
-  const revisionProps = {
-    id: linkedDraft?.id ?? "",
-    conflictMode: effectiveConflictMode,
-    rebaseState: linkedDraft?.rebaseState,
-  }
+  const revisionProps = buildRevisionProps(linkedDraft, effectiveConflictMode)
 
-  const squashCommitDefaults = {
-    title: defaultCommitTitle,
-    body: defaultCommitBody,
-    coauthorLines,
-  }
+  const squashCommitDefaults = buildSquashCommitDefaults(
+    defaultCommitTitle,
+    defaultCommitBody,
+    coauthorLines
+  )
 
   return (
     <div className="mx-auto max-w-352 space-y-8 p-4 pb-32 md:p-8">

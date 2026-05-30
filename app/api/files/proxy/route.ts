@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
+import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 
 const EXT_TO_INLINE_MIME: Record<string, string> = {
@@ -31,7 +32,7 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  decodedPath = decodedPath.replace(/\/+/g, "/")
+  decodedPath = decodedPath.replaceAll(/\/+/g, "/")
 
   if (decodedPath.includes("..") || decodedPath.includes("\\")) {
     return NextResponse.json({ error: "Invalid path" }, { status: 400 })

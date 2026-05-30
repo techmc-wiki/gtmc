@@ -25,7 +25,7 @@ function stripMarkdown(text: string): string {
     .use(stripMarkdownPlugin)
     .processSync(text)
     .toString()
-    .replace(/\s+/g, " ")
+    .replaceAll(/\s+/g, " ")
     .trim()
 }
 
@@ -106,7 +106,7 @@ async function buildIndex(
     }
   }
 
-  const githubNodes = Array.from(uniqueGithubNodes.values())
+  const githubNodes = [...uniqueGithubNodes.values()]
   let nextIndex = 0
 
   async function worker(): Promise<void> {

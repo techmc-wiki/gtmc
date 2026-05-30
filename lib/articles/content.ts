@@ -29,7 +29,7 @@ export interface ArticleContentArtifact {
  *   artifactFilename("Components&Features/活塞")      // => "Components~26Features~2F~E6~B4~BB~E5~A1~9E"
  */
 export function artifactFilename(slug: string): string {
-  return encodeURIComponent(slug).replace(/%/g, "~")
+  return encodeURIComponent(slug).replaceAll('%', "~")
 }
 
 /**

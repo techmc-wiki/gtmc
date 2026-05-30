@@ -1,7 +1,9 @@
 "use client"
 
-import { motion, MotionValue } from "motion/react"
-import { ForwardedRef, useMemo } from "react"
+import type { MotionValue } from "motion/react"
+import { motion } from "motion/react"
+import type { ForwardedRef } from "react"
+import { useMemo } from "react"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 export function HeroCard({

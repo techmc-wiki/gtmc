@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unassigned-import
 import "dotenv/config"
 import { defineConfig } from "prisma/config"
 

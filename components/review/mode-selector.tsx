@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
-import { ConflictMode, ModeAnalysis } from "@/lib/review/review-types"
+import type { ConflictMode, ModeAnalysis } from "@/lib/review/review-types"
 import { TechButton } from "@/components/ui/tech-button"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { SelectableCard } from "@/components/ui/selectable-card"

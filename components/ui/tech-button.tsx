@@ -25,14 +25,15 @@ export const TechButton = React.forwardRef<HTMLButtonElement, TechButtonProps>(
     }
 
     // Sizes: responsive touch targets (min 44px on mobile)
-    if (size === "sm")
+    if (size === "sm") {
       baseStyles += " px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm"
-    else if (size === "md")
+    } else if (size === "md") {
       baseStyles +=
         " px-4 py-2.5 sm:px-6 sm:py-3 text-sm min-h-[44px] sm:min-h-auto"
-    else if (size === "lg")
+    } else if (size === "lg") {
       baseStyles +=
         " px-6 py-3 sm:px-8 sm:py-4 text-base min-h-[44px] sm:min-h-auto"
+    }
 
     return (
       <button

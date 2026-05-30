@@ -1,4 +1,5 @@
-import { GithubComment, GithubFeaturesError, GithubIssue } from "./api-client"
+import type { GithubComment, GithubIssue } from "./api-client"
+import { GithubFeaturesError } from "./api-client"
 
 interface GithubLabel {
   name?: string

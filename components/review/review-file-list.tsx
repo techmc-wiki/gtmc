@@ -1,6 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
+import * as React from "react"
 import { StatusDot } from "@/components/ui/status-dot"
 import {
   FileListSidebar,
@@ -66,34 +67,55 @@ export function ReviewFileList({
       </FileListStatusBar>
 
       <FileListContainer className="space-y-2">
-        {files.map((file, index) => {
-          const isActive = file.id === activeFileId
-          const primaryAction = (
-            <span className="flex shrink-0 items-center gap-1.5">
-              <FileExtBadge filePath={file.filePath} />
-              <StatusIndicator status={file.status} />
-            </span>
-          )
-
-          return (
-            <FileListItem
-              key={file.id}
-              fileId={file.id}
-              filePath={file.filePath}
-              index={index}
-              isActive={isActive}
-              onSelect={onSelectFile}
-              primaryAction={primaryAction}
-              className="ml-0">
-              <span className="text-tech-main/45 flex w-full flex-wrap items-center gap-2 font-mono text-[0.625rem] tracking-widest uppercase">
-                <span>{file.changeType ?? "modified"}</span>
-                <span>+{file.additions ?? 0}</span>
-                <span>-{file.deletions ?? 0}</span>
-              </span>
-            </FileListItem>
-          )
-        })}
+        {files.map((file, index) => (
+          <ReviewFileListItem
+            key={file.id}
+            file={file}
+            index={index}
+            isActive={file.id === activeFileId}
+            onSelectFile={onSelectFile}
+          />
+        ))}
       </FileListContainer>
     </FileListSidebar>
+  )
+}
+
+function ReviewFileListItem({
+  file,
+  index,
+  isActive,
+  onSelectFile,
+}: {
+  file: ReviewFileListProps["files"][number]
+  index: number
+  isActive: boolean
+  onSelectFile: (fileId: string) => void
+}) {
+  const primaryAction = React.useMemo(
+    () => (
+      <span className="flex shrink-0 items-center gap-1.5">
+        <FileExtBadge filePath={file.filePath} />
+        <StatusIndicator status={file.status} />
+      </span>
+    ),
+    [file.filePath, file.status]
+  )
+
+  return (
+    <FileListItem
+      fileId={file.id}
+      filePath={file.filePath}
+      index={index}
+      isActive={isActive}
+      onSelect={onSelectFile}
+      primaryAction={primaryAction}
+      className="ml-0">
+      <span className="text-tech-main/45 flex w-full flex-wrap items-center gap-2 font-mono text-[0.625rem] tracking-widest uppercase">
+        <span>{file.changeType ?? "modified"}</span>
+        <span>+{file.additions ?? 0}</span>
+        <span>-{file.deletions ?? 0}</span>
+      </span>
+    </FileListItem>
   )
 }

@@ -12,6 +12,8 @@ import {
   type OperationProgressState,
 } from "@/components/ui/operation-progress"
 import type { FileRebaseState, RebaseState } from "@/lib/review/rebase-types"
+
+const EMPTY_FILE_STATES: FileRebaseState[] = []
 import type {
   ReviewMergeMethod,
   ReviewMergeStrategyAnalysis,
@@ -363,12 +365,33 @@ function RebaseProgressContent({
     }
   }, [coauthorLines, commitBody, commitTitle, selectedMethod])
 
-  if (mode === "FINE_GRAINED") {
-    const total = rebaseState?.commitShas.length ?? 0
+  const fineGrainedFileStates = React.useMemo(
+    () =>
+      rebaseState?.fileStates
+        ? Object.values(rebaseState.fileStates)
+        : EMPTY_FILE_STATES,
+    [rebaseState?.fileStates]
+  )
+
+  const fineGrainedTotal = rebaseState?.commitShas.length ?? 0
+  const fineGrainedCurrent = React.useMemo(() => {
     const isCompleted = rebaseState?.status === "COMPLETED"
-    const current = isCompleted
-      ? total
-      : Math.min((rebaseState?.currentCommitIndex ?? 0) + 1, total)
+    return isCompleted
+      ? fineGrainedTotal
+      : Math.min((rebaseState?.currentCommitIndex ?? 0) + 1, fineGrainedTotal)
+  }, [rebaseState?.status, rebaseState?.currentCommitIndex, fineGrainedTotal])
+
+  const fineGrainedProgressStyle = React.useMemo(
+    (): React.CSSProperties => ({
+      width: `${fineGrainedTotal > 0 ? Math.min((fineGrainedCurrent / fineGrainedTotal) * 100, 100) : 0}%`,
+    }),
+    [fineGrainedCurrent, fineGrainedTotal]
+  )
+
+  if (mode === "FINE_GRAINED") {
+    const total = fineGrainedTotal
+    const current = fineGrainedCurrent
+    const isCompleted = rebaseState?.status === "COMPLETED"
     const currentCommitIndex = rebaseState?.currentCommitIndex ?? 0
     const currentInfo =
       rebaseState?.commitInfos[
@@ -377,17 +400,12 @@ function RebaseProgressContent({
           Math.max((rebaseState?.commitInfos.length ?? 1) - 1, 0)
         )
       ]
-    const fileStates = rebaseState?.fileStates
-      ? Object.values(rebaseState.fileStates)
-      : []
+    const fileStates = fineGrainedFileStates
     const conflictFile = fileStates.find((fs) => fs.status === "conflict")
     const currentCommitSha =
       rebaseState?.conflictedCommitSha ??
       currentInfo?.sha ??
       rebaseState?.commitShas[currentCommitIndex]
-    const progressBarStyle = {
-      width: `${total > 0 ? Math.min((current / total) * 100, 100) : 0}%`,
-    }
 
     return (
       <div className="border-tech-main/40 bg-tech-main/5 space-y-4 border p-4">
@@ -418,7 +436,7 @@ function RebaseProgressContent({
             <div className="bg-tech-main/20 relative h-1 flex-1">
               <div
                 className="bg-tech-main absolute inset-y-0 left-0 transition-all duration-500"
-                style={progressBarStyle}
+                style={fineGrainedProgressStyle}
               />
             </div>
             <span className="text-tech-main/60 font-mono text-[0.6875rem] tabular-nums">

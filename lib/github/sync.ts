@@ -139,17 +139,17 @@ export async function getRepoContentTree(): Promise<ArticleTreeNode[]> {
     }
   }
 
-  function sortNodes(nodes: ArticleTreeNode[]) {
-    nodes.sort((a, b) => {
-      if (a.isFolder === b.isFolder) return a.title.localeCompare(b.title)
-      return a.isFolder ? -1 : 1
-    })
-
-    for (const node of nodes) sortNodes(node.children)
-  }
-
   sortNodes(roots)
   return roots
+}
+
+function sortNodes(nodes: ArticleTreeNode[]) {
+  nodes.sort((a, b) => {
+    if (a.isFolder === b.isFolder) return a.title.localeCompare(b.title)
+    return a.isFolder ? -1 : 1
+  })
+
+  for (const node of nodes) sortNodes(node.children)
 }
 
 export async function getRepoFileContent(

@@ -22,7 +22,7 @@ export function resolveImagesInHtml(
 
   const fullArticlePath = path.join(ARTICLES_PATH, articleFilePath)
 
-  return html.replace(
+  return html.replaceAll(
     /<img\s+([^>]*?)(?:src\s*=\s*"([^"]*?)")([^>]*?)\/?\s*>/gi,
     (match, before, src, after) => {
       // Skip data URIs, external URLs, and already-resolved file:// URLs

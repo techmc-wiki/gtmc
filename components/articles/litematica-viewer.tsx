@@ -1,8 +1,36 @@
 "use client"
 
-import { useEffect, useRef, useState, type MouseEvent } from "react"
+import { useEffect, useRef, useState, useMemo, type MouseEvent } from "react"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { useTheme } from "@/lib/theme"
+
+const layerSliderStyleHtml = {
+  __html: `
+  .style-litematica-layer-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 2px;
+    background: rgba(71, 85, 105, 0.28);
+    outline: none;
+  }
+  .style-litematica-layer-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 8px;
+    height: 16px;
+    background: var(--color-tech-main);
+    cursor: ew-resize;
+    border-radius: 0;
+  }
+  .style-litematica-layer-slider::-moz-range-thumb {
+    width: 8px;
+    height: 16px;
+    background: var(--color-tech-main);
+    cursor: ew-resize;
+    border-radius: 0;
+    border: none;
+  }
+  `,
+}
 
 // Interfaces for schematic-renderer library
 interface SchematicManager {
@@ -111,9 +139,9 @@ function suppressNativeFpOverlays(instance: LitematicaRenderer) {
 
 function normalizeUrlInput(input: string) {
   let value = input
-    .replace(/\r?\n/g, "")
+    .replaceAll(/\r?\n/g, "")
     .trim()
-    .replace(/^['"]|['"]$/g, "")
+    .replaceAll(/^['"]|['"]$/g, "")
 
   for (let i = 0; i < 2; i++) {
     try {
@@ -175,6 +203,7 @@ export default function LitematicaViewer({
   const patchFlyLockWithCooldown = (cameraManager: CameraManager) => {
     const flyControls = cameraManager?.flyControls
     if (!flyControls) return
+    // eslint-disable-next-line no-underscore-dangle
     if (flyControls.__gtmcSafeLockPatched) return
 
     const originalLock =
@@ -216,9 +245,11 @@ export default function LitematicaViewer({
       }
     }
 
+    // eslint-disable-next-line no-underscore-dangle
     flyControls.__gtmcSafeLockPatched = true
   }
 
+  /* eslint-disable no-underscore-dangle */
   const patchCanvasPointerCapture = (canvas: CanvasWithPatch) => {
     if (canvas.__gtmcPointerCapturePatched) return
 
@@ -275,6 +306,7 @@ export default function LitematicaViewer({
     delete canvasAny.__gtmcOriginalReleasePointerCapture
     delete canvasAny.__gtmcPointerCapturePatched
   }
+  /* eslint-enable no-underscore-dangle */
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -407,12 +439,12 @@ export default function LitematicaViewer({
                   r.enableAdaptiveFPS = true
 
                   setSchematicReady(true)
-                } catch (err) {
-                  if (err instanceof Error && err.name === "AbortError") {
+                } catch (error) {
+                  if (error instanceof Error && error.name === "AbortError") {
                     return
                   }
 
-                  console.error("Error loading schematic:", err)
+                  console.error("Error loading schematic:", error)
                 }
               },
               onSchematicFileLoadFailure: (err: Error) => {
@@ -428,8 +460,8 @@ export default function LitematicaViewer({
         }
 
         rendererRef.current = renderer
-      } catch (e) {
-        console.error("Error setting up schematic-renderer:", e)
+      } catch (error) {
+        console.error("Error setting up schematic-renderer:", error)
       }
     }
 
@@ -627,6 +659,14 @@ export default function LitematicaViewer({
     setIsFlyMode(Boolean(cm.isFlyControlsLocked?.()))
   }
 
+  const canvasStyle = useMemo(
+    (): React.CSSProperties => ({
+      cursor: isFlyMode ? "crosshair" : "pointer",
+      height: typeof height === "number" ? height + "px" : height,
+    }),
+    [isFlyMode, height]
+  )
+
   return (
     <div
       className="
@@ -640,10 +680,7 @@ export default function LitematicaViewer({
         ref={canvasRef}
         aria-label="Litematica schematic 3D viewer"
         className="block w-full outline-none"
-        style={{
-          cursor: isFlyMode ? "crosshair" : "pointer",
-          height: typeof height === "number" ? height + "px" : height,
-        }}
+        style={canvasStyle}
       />
 
       <button
@@ -762,33 +799,7 @@ export default function LitematicaViewer({
           </div>
 
           <style
-            dangerouslySetInnerHTML={{
-              __html: `
-              .style-litematica-layer-slider {
-                -webkit-appearance: none;
-                appearance: none;
-                height: 2px;
-                background: rgba(71, 85, 105, 0.28);
-                outline: none;
-              }
-              .style-litematica-layer-slider::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                width: 8px;
-                height: 16px;
-                background: var(--color-tech-main);
-                cursor: ew-resize;
-                border-radius: 0;
-              }
-              .style-litematica-layer-slider::-moz-range-thumb {
-                width: 8px;
-                height: 16px;
-                background: var(--color-tech-main);
-                cursor: ew-resize;
-                border-radius: 0;
-                border: none;
-              }
-            `,
-            }}
+            dangerouslySetInnerHTML={layerSliderStyleHtml}
           />
         </div>
       )}

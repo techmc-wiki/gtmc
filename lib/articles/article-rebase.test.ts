@@ -122,9 +122,7 @@ describe("rebaseArticleContent", () => {
       },
     }))
 
-    mockGetCommit.mockImplementation(async () => {
-      return { data: { files: [{ filename: "test.md" }] } }
-    })
+    mockGetCommit.mockImplementation(async () => ({ data: { files: [{ filename: "test.md" }] } }))
 
     const contentMap: Record<string, string> = {
       abc: "line1",
@@ -175,9 +173,7 @@ describe("rebaseArticleContent", () => {
       },
     }))
 
-    mockGetCommit.mockImplementation(async () => {
-      return { data: { files: [{ filename: "test.md" }] } }
-    })
+    mockGetCommit.mockImplementation(async () => ({ data: { files: [{ filename: "test.md" }] } }))
 
     const contentMap: Record<string, string> = {
       abc: "line1",
@@ -243,9 +239,7 @@ describe("rebaseArticleContent", () => {
       c2: { data: { files: [{ filename: "test.md" }] } },
       c3: { data: { files: [{ filename: "another.md" }] } },
     }
-    mockGetCommit.mockImplementation(async ({ ref }: { ref: string }) => {
-      return commitMap[ref] || { data: { files: [] } }
-    })
+    mockGetCommit.mockImplementation(async ({ ref }: { ref: string }) => commitMap[ref] || { data: { files: [] } })
 
     const contentMap: Record<string, string> = {
       abc: "base",

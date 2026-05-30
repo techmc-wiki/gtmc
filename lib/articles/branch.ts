@@ -38,6 +38,7 @@ export async function resolveArticleFilePath(
 
   for (const ref of refs) {
     for (const candidate of candidates) {
+      // eslint-disable-next-line no-await-in-loop -- sequential: returns on first match found
       const snapshot = await getFileSnapshotShared(candidate, ref, token, ARTICLES_REPO)
       if (snapshot) {
         return candidate

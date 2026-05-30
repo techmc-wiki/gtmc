@@ -89,8 +89,8 @@ async function main(): Promise<void> {
   let stats: fs.Stats
   try {
     stats = fs.statSync(pdfPath)
-  } catch (err) {
-    console.error(`[verify] ✗ Failed to read file: ${err}`)
+  } catch (error) {
+    console.error(`[verify] ✗ Failed to read file: ${error}`)
     process.exit(1)
   }
 
@@ -101,8 +101,8 @@ async function main(): Promise<void> {
   let pdfDoc: PDFDocument
   try {
     pdfDoc = await PDFDocument.load(fs.readFileSync(pdfPath))
-  } catch (err) {
-    console.error(`[verify] ✗ Failed to load PDF: ${err}`)
+  } catch (error) {
+    console.error(`[verify] ✗ Failed to load PDF: ${error}`)
     process.exit(1)
   }
 
@@ -149,7 +149,7 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((err) => {
-  console.error(`[verify] Fatal error: ${err}`)
+main().catch((error) => {
+  console.error(`[verify] Fatal error: ${error}`)
   process.exit(1)
 })

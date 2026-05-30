@@ -227,7 +227,7 @@ export async function openDraftPullRequest({
 }
 
 function buildBranchName(draftId: string) {
-  return `submission-${draftId}-${Date.now()}`.replace(/[^a-zA-Z0-9/_-]/g, "-")
+  return `submission-${draftId}-${Date.now()}`.replaceAll(/[^a-zA-Z0-9/_-]/g, "-")
 }
 
 function mergeArticleContent({
@@ -263,7 +263,7 @@ function splitLines(content: string) {
     return [] as string[]
   }
 
-  return content.replace(/\r\n/g, "\n").split("\n")
+  return content.replaceAll('\r\n', "\n").split("\n")
 }
 
 function joinLines(lines: string[]) {

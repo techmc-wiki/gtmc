@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useState, useCallback, type ReactNode } from "react"
 
+const contentVisibilityStyle: React.CSSProperties = {
+  contentVisibility: "auto",
+}
+
 interface LazyCodeBlockProps {
   lang: string
   lineCount: string
@@ -51,7 +55,7 @@ export function LazyCodeBlock({ lineCount, children }: LazyCodeBlockProps) {
     <div
       ref={containerRef}
       className="border-tech-main/30 bg-tech-bg relative my-6 w-full border font-mono text-sm"
-      style={{ contentVisibility: "auto" }}>
+      style={contentVisibilityStyle}>
       <div className="border-tech-main/30 pointer-events-none absolute top-0 left-0 z-20 size-3 -translate-px border-t-2 border-l-2" />
       <div className="border-tech-main/30 pointer-events-none absolute top-0 right-0 z-20 size-3 translate-x-px -translate-y-px border-t-2 border-r-2" />
       <div className="border-tech-main/30 pointer-events-none absolute bottom-0 left-0 z-20 size-3 -translate-x-px translate-y-px border-b-2 border-l-2" />
@@ -87,17 +91,20 @@ export function LazyCodeBlock({ lineCount, children }: LazyCodeBlockProps) {
             <div className="animate-blueprint-sweep via-tech-accent/30 pointer-events-none absolute inset-0 bg-linear-to-r from-transparent to-transparent motion-reduce:animate-none" />
             {Array.from({ length: numLines }).map((_, i) => (
               <div
+                // oxlint-disable-next-line react/no-array-index-key
                 key={String(i)}
                 className={`my-1.5 h-2 ${lineWidths[i % lineWidths.length]} `}
               />
             ))}
           </div>
 
+          {/* eslint-disable react/jsx-no-comment-textnodes, react/jsx-curly-brace-presence */}
           <div className="border-tech-main/10 flex items-center justify-end border-t px-4 py-1">
             <span className="text-tech-main/50 font-mono text-[0.5625rem] tracking-widest uppercase select-none">
-              {"//"} SYNTAX_HIGHLIGHT
+              {"// SYNTAX_HIGHLIGHT"}
             </span>
           </div>
+          {/* eslint-enable react/jsx-no-comment-textnodes, react/jsx-curly-brace-presence */}
         </div>
       )}
     </div>

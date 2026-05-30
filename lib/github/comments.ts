@@ -1,14 +1,15 @@
 import { unstable_cache } from "next/cache"
 
+import type { GithubComment } from "./api-client"
 import {
   getGithubRepoConfig,
   getRepoIssuesBaseUrl,
-  GithubComment,
   GithubFeaturesError,
   parseNextLink,
   requestGithub,
 } from "./api-client"
-import { GithubCommentResponse, normalizeComment } from "./normalize"
+import type { GithubCommentResponse } from "./normalize"
+import { normalizeComment } from "./normalize"
 
 export async function addIssueComment(
   issueNumber: number,
@@ -32,6 +33,7 @@ export async function addIssueComment(
   return normalizeComment(data)
 }
 
+// eslint-disable-next-line no-underscore-dangle
 async function _listIssueCommentsUncached(
   issueNumber: number
 ): Promise<GithubComment[]> {
@@ -42,6 +44,7 @@ async function _listIssueCommentsUncached(
   let nextUrl: string | null = `${baseUrl}?per_page=100&page=1`
 
   while (nextUrl) {
+    // eslint-disable-next-line no-await-in-loop -- sequential pagination: nextUrl depends on previous response
     const { data, response } = await requestGithub<GithubCommentResponse[]>(
       nextUrl,
       {

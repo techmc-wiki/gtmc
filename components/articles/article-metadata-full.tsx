@@ -5,7 +5,7 @@ import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { useRouter } from "@/i18n/navigation"
-import { useState, useCallback } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { ArticleMetadataLayout } from "@/components/articles/article-metadata-layout"
 import { ArticleLicenseNotice } from "@/components/articles/article-license-notice"
 
@@ -91,8 +91,8 @@ export function ArticleMetadataFull({
       await navigator.clipboard.writeText(canonicalUrl)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error("Failed to copy:", err)
+    } catch (error) {
+      console.error("Failed to copy:", error)
     }
   }, [canonicalUrl])
 
@@ -104,20 +104,28 @@ export function ArticleMetadataFull({
     setIsCollapsed(!isCollapsed)
   }, [isCollapsed, setIsCollapsed])
 
-  const collapseButton = (
-    <button
-      type="button"
-      onClick={toggleCollapsed}
-      className="
-        cursor-pointer border guide-line bg-surface-overlay px-2 py-0.5
-        transition-colors
-        hover:bg-tech-accent/10
-      "
-      aria-label={
-        isCollapsed ? t("expandMetadata") : t("collapseMetadata")
-      }>
-      {isCollapsed ? "[+]" : "[-]"}
-    </button>
+  const allAuthors = useMemo(
+    () => [author, ...coAuthors],
+    [author, coAuthors]
+  )
+
+  const collapseButton = useMemo(
+    () => (
+      <button
+        type="button"
+        onClick={toggleCollapsed}
+        className="
+          cursor-pointer border guide-line bg-surface-overlay px-2 py-0.5
+          transition-colors
+          hover:bg-tech-accent/10
+        "
+        aria-label={
+          isCollapsed ? t("expandMetadata") : t("collapseMetadata")
+        }>
+        {isCollapsed ? "[+]" : "[-]"}
+      </button>
+    ),
+    [toggleCollapsed, isCollapsed, t]
   )
 
   return (
@@ -321,7 +329,7 @@ export function ArticleMetadataFull({
           title={title}
           canonicalUrl={canonicalUrl}
           attributionDate={lastModified || createdAt}
-          authors={[author, ...coAuthors]}
+          authors={allAuthors}
         />
       </div>
     </ArticleMetadataLayout>

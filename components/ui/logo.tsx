@@ -31,12 +31,14 @@ export function Logo({
     <Link
       href="/"
       className={`inline-flex items-center font-sans tracking-widest transition-opacity hover:opacity-80 ${sizeClasses[size]} ${className} `}>
+      {/* eslint-disable react/jsx-no-comment-textnodes, react/jsx-curly-brace-presence */}
       {showSlash && (
         <span
           className={`text-tech-main mr-1 font-light opacity-40 ${slashClasses[size]} `}>
           {"//"}
         </span>
       )}
+      {/* eslint-enable react/jsx-no-comment-textnodes, react/jsx-curly-brace-presence */}
       <span className="text-tech-main-dark font-bold">GTMC</span>
     </Link>
   )

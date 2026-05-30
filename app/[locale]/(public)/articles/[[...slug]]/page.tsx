@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+// eslint-disable-next-line import/no-unassigned-import
 import "katex/dist/katex.min.css"
 import type { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
@@ -36,32 +37,32 @@ import {
 
 import type { ArticleTreeNode as BaseArticleTreeNode } from "@/lib/github/sync"
 
+const EMPTY_STRING_ARRAY: string[] = []
+
 export const revalidate = 3600
 
 export async function generateStaticParams(): Promise<{ locale: string; slug: string[] }[]> {
   const locales: ArticleLocale[] = ["zh", "en"]
   const params: { locale: string; slug: string[] }[] = []
 
-  for (const locale of locales) {
-    const tree = await getArticleTree(locale)
+  const trees = await Promise.all(locales.map((locale) => getArticleTree(locale)))
 
-    const collectArticleSlugs = (nodes: ArticleTreeNode[]): string[] => {
+  for (const [index, tree] of trees.entries()) {
+    const locale = locales[index]
+    const collectSlugs = (nodes: ArticleTreeNode[]): string[] => {
       const slugs: string[] = []
-
       for (const node of nodes) {
         if (!node.isFolder && hasArticleLocale(node.slug, locale)) {
           slugs.push(node.slug)
         }
-
         if (node.children && node.children.length > 0) {
-          slugs.push(...collectArticleSlugs(node.children))
+          slugs.push(...collectSlugs(node.children))
         }
       }
-
       return slugs
     }
 
-    const slugs = collectArticleSlugs(tree)
+    const slugs = collectSlugs(tree)
     for (const slug of slugs) {
       params.push({
         locale,
@@ -242,7 +243,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   )
 
   const author = data.author as string | undefined
-  const coAuthors = (data.coAuthors as string[] | undefined) || []
+  const coAuthors: string[] =
+    (data.coAuthors as string[] | undefined) ?? EMPTY_STRING_ARRAY
   const createdAt = data.created as string | undefined
   const lastModified = data.lastmod as string | undefined
   const isAdvanced = data["is-advanced"] === true
@@ -555,7 +557,7 @@ function resolveArticleTitle(rawTitle: unknown, fallbackPath: string): string {
   }
 
   const fallback =
-    fallbackPath.split("/").filter(Boolean).pop()?.replace(/\.md$/i, "") ||
+    fallbackPath.replace(/\/$/, "").split("/").pop()?.replace(/\.md$/i, "") ||
     "Article"
 
   return fallback
@@ -609,7 +611,7 @@ function formatArticleTitle(
 function embedTitleInMarkdown(content: string, title: string): string {
   const leadingWhitespace = content.match(/^\s*/)?.[0] ?? ""
   const trimmedStartContent = content.slice(leadingWhitespace.length)
-  const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  const escapedTitle = title.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&")
   const sameTitleHeadingPattern = new RegExp(
     `^#\\s+${escapedTitle}\\s*(?:\\r?\\n|$)`
   )

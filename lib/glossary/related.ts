@@ -18,7 +18,7 @@ function resolveTermToken(token: string): GlossaryEntry | undefined {
   const normalized = stripped.trim()
   if (!normalized) return undefined
 
-  const slugCandidate = normalized.toLowerCase().replace(/\s+/g, "-")
+  const slugCandidate = normalized.toLowerCase().replaceAll(/\s+/g, "-")
   const bySlug = glossaryEntries.find((e) => e.slug === slugCandidate)
   if (bySlug) return bySlug
 

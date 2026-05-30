@@ -132,7 +132,8 @@ export function HomepageClient() {
             <TechButton
               variant="secondary"
               className="flex h-12 w-full items-center justify-center text-xs font-medium tracking-widest uppercase shadow-sm backdrop-blur-md transition-transform duration-300 hover:scale-102 sm:text-sm">
-              {"//"} {t("loginGithub")} <GithubIcon className="size-4" />
+              {"// "}
+              {t("loginGithub")} <GithubIcon className="size-4" />
             </TechButton>
           </Link>
         </div>

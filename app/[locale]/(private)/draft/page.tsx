@@ -202,8 +202,8 @@ export default async function DraftDashboardPage() {
           if (pr.state === "closed") {
             displayStatus = pr.merged ? "MERGED" : "CLOSED"
           }
-        } catch (e) {
-          console.error(`Failed to fetch PR #${d.githubPrNum}:`, e)
+        } catch (error) {
+          console.error(`Failed to fetch PR #${d.githubPrNum}:`, error)
         }
       }
       return Object.assign({}, d, {
@@ -336,31 +336,15 @@ export default async function DraftDashboardPage() {
     return renderGlossaryCard(item)
   }
 
-  const pageHeaderAction = (
-    <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row">
-      <Link href="/draft/new" className="w-full md:w-auto">
-        <TechButton
-          variant="primary"
-          className="flex min-h-11 w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
-          + INITIALIZE SUBMISSION
-        </TechButton>
-      </Link>
-      <Link href="/glossary/edit/new" className="w-full md:w-auto">
-        <TechButton
-          variant="secondary"
-          className="flex min-h-11 w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
-          + NEW GLOSSARY DRAFT
-        </TechButton>
-      </Link>
-    </div>
-  )
+  // oxlint-disable-next-line react-perf/jsx-no-jsx-as-prop
+  const pageAction = <DraftPageActions />
 
   return (
     <div className="page-container">
       <PageHeader
         title="Ops Center"
         subtitle="YOUR DIGITAL WORKSHOP / DRAFTS & REVISIONS"
-        action={pageHeaderAction}
+        action={pageAction}
       />
 
       <div className="space-y-8">
@@ -384,6 +368,27 @@ export default async function DraftDashboardPage() {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+function DraftPageActions() {
+  return (
+    <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row">
+      <Link href="/draft/new" className="w-full md:w-auto">
+        <TechButton
+          variant="primary"
+          className="flex min-h-11 w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
+          + INITIALIZE SUBMISSION
+        </TechButton>
+      </Link>
+      <Link href="/glossary/edit/new" className="w-full md:w-auto">
+        <TechButton
+          variant="secondary"
+          className="flex min-h-11 w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
+          + NEW GLOSSARY DRAFT
+        </TechButton>
+      </Link>
     </div>
   )
 }

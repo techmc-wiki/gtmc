@@ -120,9 +120,9 @@ function main(): void {
           fm = parseSourceFrontMatter(fileContent, {
             allowTitlelessFolder: entry.isFolder,
           })
-        } catch (e) {
+        } catch (error) {
           process.stderr.write(
-            `Error: Failed to parse source frontmatter for "${entry.slug}" (${locale}): ${(e as Error).message}\n`
+            `Error: Failed to parse source frontmatter for "${entry.slug}" (${locale}): ${(error as Error).message}\n`
           )
           errorCount++
           if (IS_PRODUCTION) {
@@ -153,9 +153,9 @@ function main(): void {
         let fm: TranslationFrontMatter
         try {
           fm = parseTranslationFrontMatter(fileContent)
-        } catch (e) {
+        } catch (error) {
           process.stderr.write(
-            `Error: Failed to parse translation frontmatter for "${entry.slug}" (${locale}): ${(e as Error).message}\n`
+            `Error: Failed to parse translation frontmatter for "${entry.slug}" (${locale}): ${(error as Error).message}\n`
           )
           errorCount++
           if (IS_PRODUCTION) {

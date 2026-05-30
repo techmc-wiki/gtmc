@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
-import CodeMirror, { ReactCodeMirrorRef } from "@uiw/react-codemirror"
+import type { ReactCodeMirrorRef } from "@uiw/react-codemirror"
+import CodeMirror from "@uiw/react-codemirror"
 import {
   autocompletion,
   type CompletionContext,
@@ -173,6 +174,27 @@ export const EditorTextarea = React.forwardRef<
   const t = useTranslations("Editor")
   const { resolvedTheme } = useTheme()
 
+  const editorExtensions = React.useMemo(
+    () => [
+      markdown({ base: markdownLanguage, codeLanguages: languages }),
+      techTheme,
+      ...(enableSyntaxHints
+        ? [autocompletion({ override: [markdownSyntaxHintSource] })]
+        : []),
+      ...(lineWrap ? [EditorView.lineWrapping] : []),
+    ],
+    [enableSyntaxHints, lineWrap]
+  )
+
+  const editorBasicSetup = React.useMemo(
+    () => ({
+      lineNumbers: true,
+      foldGutter: false,
+      highlightActiveLine: false,
+    }),
+    []
+  )
+
   const handleKeyDownCapture = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (isReadOnly) {
@@ -225,22 +247,11 @@ export const EditorTextarea = React.forwardRef<
         height="100%"
         className="custom-left-scrollbar grow [&>.cm-editor]:h-full"
         placeholder={placeholder ?? t("bodyPlaceholder")}
-        extensions={[
-          markdown({ base: markdownLanguage, codeLanguages: languages }),
-          techTheme,
-          ...(enableSyntaxHints
-            ? [autocompletion({ override: [markdownSyntaxHintSource] })]
-            : []),
-          ...(lineWrap ? [EditorView.lineWrapping] : []),
-        ]}
+        extensions={editorExtensions}
         onChange={onChange}
         readOnly={isReadOnly}
         editable={!isReadOnly}
-        basicSetup={{
-          lineNumbers: true,
-          foldGutter: false,
-          highlightActiveLine: false,
-        }}
+        basicSetup={editorBasicSetup}
         theme={resolvedTheme === "dark" ? "dark" : "light"}
       />
     </div>

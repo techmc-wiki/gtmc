@@ -27,7 +27,7 @@ export interface IMergeLibrary {
 
 function splitLines(content: string): string[] {
   if (!content) return []
-  return content.replace(/\r\n/g, "\n").split("\n")
+  return content.replaceAll("\r\n", "\n").split("\n")
 }
 
 function joinLines(lines: string[]): string {

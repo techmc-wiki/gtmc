@@ -128,7 +128,7 @@ export async function renderMarkdownToHtml(
   // ── Strip href from wikilinks (produces dead relative links in PDF) ──
   // Wikilinks generate: <a href="../slug" class="wikilink">text</a>
   // Convert to: <span class="wikilink">text</span>
-  html = html.replace(
+  html = html.replaceAll(
     /<a\s+href="[^"]*"([^>]*class="[^"]*wikilink[^"]*"[^>]*)>(.*?)<\/a>/gi,
     "<span$1>$2</span>"
   )
@@ -140,7 +140,7 @@ export async function renderMarkdownToHtml(
   const sourceLink = baseUrl
     ? ` <a href="${baseUrl}" class="gif-source-link">View original</a>`
     : ""
-  html = html.replace(
+  html = html.replaceAll(
     /(<img[^>]*src="(?!data:)[^"]*\.gif[^"]*"[^>]*\/?>)/gi,
     `$1<p class="gif-caption">▶ This figure is animated.${sourceLink}</p>`
   )

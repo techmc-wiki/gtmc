@@ -20,7 +20,7 @@ const WIKILINK_REGEX = /(!?)\[\[([^\]]+)\]\]/g
  * path separators and other valid URL characters.
  */
 function urlEncode(str: string): string {
-  return encodeURI(str).replace(/#/g, "%23").replace(/\?/g, "%3F")
+  return encodeURI(str).replaceAll("#", "%23").replaceAll("?", "%3F")
 }
 
 /**

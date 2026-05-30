@@ -45,6 +45,11 @@ export function MobileOutlineBar() {
   const activeItem = outline.find((item) => item.id === activeHeadingId)
   const pct = Math.round(progress * 100)
 
+  const progressWidthStyle = React.useMemo(
+    (): React.CSSProperties => ({ width: `${pct}%` }),
+    [pct]
+  )
+
 
   return (
     <>
@@ -64,7 +69,7 @@ export function MobileOutlineBar() {
         )}
         <div
           className="h-0.5 bg-tech-main transition-[width] duration-150"
-          style={{ width: `${pct}%` }}
+          style={progressWidthStyle}
         />
       </div>
 
@@ -102,7 +107,7 @@ export function MobileOutlineBar() {
             <div className="mx-4 h-0.5 flex-1 bg-tech-main/15">
               <div
                 className="h-full bg-tech-main transition-[width] duration-150"
-                style={{ width: `${pct}%` }}
+                style={progressWidthStyle}
               />
             </div>
 

@@ -111,7 +111,7 @@ export function parseDraftTempImageRefs(
   markdown: string,
   storageTempPrefix: string
 ): ParsedImageRef[] {
-  const normalizedPrefix = storageTempPrefix.replace(/^\/+|\/+$/g, "")
+  const normalizedPrefix = storageTempPrefix.replaceAll(/^\/+|\/+$/g, "")
   if (!normalizedPrefix) return []
 
   const refs: ParsedImageRef[] = []

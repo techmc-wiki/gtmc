@@ -48,14 +48,18 @@ export function DraftEditorToolbar({
   canUndo,
   canRedo,
 }: DraftEditorToolbarProps) {
-  const fileUploadSlot = !isReadOnly ? (
-    <EditorFileUploadInput
-      fileInputRef={fileInputRef}
-      onFileSelect={onFileSelect}
-      isUploading={isUploading}
-      isCompressing={isCompressing}
-    />
-  ) : undefined
+  const fileUploadSlot = React.useMemo(
+    () =>
+      !isReadOnly ? (
+        <EditorFileUploadInput
+          fileInputRef={fileInputRef}
+          onFileSelect={onFileSelect}
+          isUploading={isUploading}
+          isCompressing={isCompressing}
+        />
+      ) : undefined,
+    [isReadOnly, fileInputRef, onFileSelect, isUploading, isCompressing]
+  )
 
   return (
     <>

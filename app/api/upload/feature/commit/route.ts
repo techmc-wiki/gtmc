@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
+import { NextResponse } from "next/server"
 import { del } from "@vercel/blob"
 import { auth } from "@/lib/auth"
 import { uploadFileToGithub, GithubFeaturesError } from "@/lib/github"
@@ -76,15 +77,14 @@ export async function POST(req: NextRequest) {
     }
 
     const relativeSegments = relativePath.split("/")
-    const hasInvalidSegment = relativeSegments.some((segment) => {
-      return (
+    const hasInvalidSegment = relativeSegments.some(
+      (segment) =>
         !segment ||
         segment === "." ||
         segment === ".." ||
         // Only allow safe path characters in each segment
         !/^[A-Za-z0-9._-]+$/.test(segment)
-      )
-    })
+    )
     if (hasInvalidSegment) {
       return NextResponse.json({ error: "Invalid blob URL" }, { status: 400 })
     }
@@ -182,8 +182,8 @@ export async function POST(req: NextRequest) {
       classification.category
     )
 
-    del(blobUrl).catch((err) => {
-      console.error("Failed to delete blob:", err)
+    del(blobUrl).catch((error) => {
+      console.error("Failed to delete blob:", error)
     })
 
     return NextResponse.json({

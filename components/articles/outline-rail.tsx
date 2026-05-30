@@ -25,6 +25,11 @@ export function OutlineRail() {
   const { outline, activeHeadingId } = useReaderNavigation()
   const progress = useScrollProgress()
 
+  const progressWidthStyle = React.useMemo(
+    (): React.CSSProperties => ({ width: `${progress * 100}%` }),
+    [progress]
+  )
+
   if (outline.length === 0) return null
 
   return (
@@ -44,7 +49,7 @@ export function OutlineRail() {
       <div className="absolute top-0 left-0 h-0.5 w-full bg-tech-main/15">
         <div
           className="h-full bg-tech-main transition-[width] duration-100"
-          style={{ width: `${progress * 100}%` }}
+          style={progressWidthStyle}
         />
       </div>
 

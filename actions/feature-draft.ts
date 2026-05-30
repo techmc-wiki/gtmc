@@ -64,10 +64,8 @@ export async function createFeature(data: {
 
   const body = serializeIssueBody(data.content, metadata, undefined)
 
-  // Ensure all tag labels exist on the repo
-  for (const tag of data.tags) {
-    await ensureLabel(tag)
-  }
+  // Ensure all tag labels exist on the repo (independent idempotent operations)
+  await Promise.all(data.tags.map((tag) => ensureLabel(tag)))
 
   const labels = [...tagsToLabels(data.tags), ...statusToLabels("PENDING")]
 
@@ -124,9 +122,7 @@ export async function updateFeature(
     throw new Error("Forbidden")
   }
 
-  for (const tag of data.tags) {
-    await ensureLabel(tag)
-  }
+  await Promise.all(data.tags.map((tag) => ensureLabel(tag)))
 
   const currentStatus = labelsToStatus(issue.labels)
   const newLabels = [

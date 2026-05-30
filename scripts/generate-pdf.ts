@@ -14,7 +14,8 @@
  */
 
 import { chromium } from "playwright"
-import { PDFDict, PDFDocument, PDFName } from "pdf-lib"
+import type { PDFDict } from "pdf-lib"
+import { PDFDocument, PDFName } from "pdf-lib"
 import fs from "node:fs"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
@@ -183,10 +184,10 @@ function createRenderArticle(
 
       // Resolve relative image paths to file:// URLs for Playwright
       return resolveImagesInHtml(html, article.filePath)
-    } catch (err) {
+    } catch (error) {
       console.warn(
         `[pdf] Warning: failed to render article "${article.slug}":`,
-        err
+        error
       )
       return ""
     }
@@ -331,8 +332,9 @@ async function writePdfOutlines(
   for (let i = 0; i < topLevelItems.length; i++) {
     const dict = topLevelItems[i].dict
     if (i > 0) dict.set(PDFName.of("Prev"), topLevelItems[i - 1].ref)
-    if (i < topLevelItems.length - 1)
+    if (i < topLevelItems.length - 1) {
       dict.set(PDFName.of("Next"), topLevelItems[i + 1].ref)
+    }
   }
 
   // Link children within each parent
@@ -340,8 +342,9 @@ async function writePdfOutlines(
     for (let i = 0; i < top.children.length; i++) {
       const dict = top.children[i].dict
       if (i > 0) dict.set(PDFName.of("Prev"), top.children[i - 1].ref)
-      if (i < top.children.length - 1)
+      if (i < top.children.length - 1) {
         dict.set(PDFName.of("Next"), top.children[i + 1].ref)
+      }
     }
   }
 
@@ -389,8 +392,8 @@ async function main(): Promise<void> {
   let tree: ChapterNavNode[]
   try {
     tree = (await getArticleTree(locale)) as ChapterNavNode[]
-  } catch (err) {
-    console.error("[pdf] Failed to load article tree:", err)
+  } catch (error) {
+    console.error("[pdf] Failed to load article tree:", error)
     process.exit(1)
   }
 
@@ -422,8 +425,8 @@ async function main(): Promise<void> {
       collectCodeLangs(articles, locale),
       checkHasMath(articles, locale),
     ])
-  } catch (err) {
-    console.error("[pdf] Failed to scan articles:", err)
+  } catch (error) {
+    console.error("[pdf] Failed to scan articles:", error)
     process.exit(1)
   }
 
@@ -442,10 +445,10 @@ async function main(): Promise<void> {
   if (codeLangs.length > 0) {
     try {
       shikiPlugin = await createRehypeShiki(codeLangs)
-    } catch (err) {
+    } catch (error) {
       console.warn(
         "[pdf]   ⚠ Failed to initialize Shiki, continuing without highlighting:",
-        err
+        error
       )
     }
   }
@@ -471,8 +474,8 @@ async function main(): Promise<void> {
       hasMath,
       renderArticle,
     })
-  } catch (err) {
-    console.error("[pdf] Failed to build ebook HTML:", err)
+  } catch (error) {
+    console.error("[pdf] Failed to build ebook HTML:", error)
     process.exit(1)
   }
 
@@ -488,10 +491,10 @@ async function main(): Promise<void> {
 
   console.log("[pdf] Phase 6/6: Generating PDF via Playwright...")
 
-  const browser = await chromium.launch().catch((err) => {
+  const browser = await chromium.launch().catch((error) => {
     console.warn(
       "[pdf] Failed to launch Playwright, skipping PDF generation:",
-      err
+      error
     )
     process.exit(0)
   })
@@ -544,8 +547,8 @@ async function main(): Promise<void> {
     })
 
     console.log("[pdf]   → PDF written to temp file")
-  } catch (err) {
-    console.error("[pdf] PDF generation failed:", err)
+  } catch (error) {
+    console.error("[pdf] PDF generation failed:", error)
     await browser.close()
     // Clean up temp HTML file on error
     try {
@@ -576,11 +579,11 @@ async function main(): Promise<void> {
 
     fs.writeFileSync(output, await pdfDoc.save())
     console.log("[pdf]   → Bookmarks added successfully")
-  } catch (err) {
+  } catch (error) {
     // If pdf-lib post-processing fails, save the Playwright-generated PDF as-is
     console.warn(
       "[pdf]   ⚠ Failed to add bookmarks, saving without outlines:",
-      err
+      error
     )
     fs.copyFileSync(tempPdfPath, output)
   } finally {
@@ -600,7 +603,7 @@ async function main(): Promise<void> {
 
 // ── Execute ─────────────────────────────────────────────────────────────────
 
-main().catch((err) => {
-  console.error("[pdf] Fatal error:", err)
+main().catch((error) => {
+  console.error("[pdf] Fatal error:", error)
   process.exit(1)
 })

@@ -10,6 +10,28 @@ import { readFile } from "fs/promises"
 import path from "path"
 import { ARTICLES_PATH } from "@/lib/articles/fs"
 
+function buildDraftEditorData(
+  draft: {
+    id: string
+    title: string
+    status: string
+    githubPrUrl: string | null
+  },
+  draftFiles: ReturnType<typeof decodeStoredDraftFiles>,
+  contributingGuides: Awaited<ReturnType<typeof loadContributingGuides>>
+) {
+  return {
+    activeFileId: draftFiles.activeFileId,
+    id: draft.id,
+    files: draftFiles.files,
+    folders: draftFiles.folders,
+    title: draft.title,
+    githubPrUrl: draft.githubPrUrl || undefined,
+    status: draft.status,
+    contributingGuides,
+  }
+}
+
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
@@ -46,16 +68,11 @@ export default async function EditDraftPage({
       : draftFiles.files[0]?.filePath || "DRAFT_WORKSPACE"
   const contributingGuides = await loadContributingGuides()
 
-  const draftEditorInitialData = {
-    activeFileId: draftFiles.activeFileId,
-    id: draft.id,
-    files: draftFiles.files,
-    folders: draftFiles.folders,
-    title: draft.title,
-    githubPrUrl: draft.githubPrUrl || undefined,
-    status: draft.status,
-    contributingGuides,
-  }
+  const draftEditorInitialData = buildDraftEditorData(
+    draft,
+    draftFiles,
+    contributingGuides
+  )
 
   return (
     <div className="relative mx-auto max-w-[1400px] space-y-6 p-4 md:p-8">

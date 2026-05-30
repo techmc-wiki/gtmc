@@ -68,9 +68,9 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
     if (typeof window === "undefined") return
     if (typeof IntersectionObserver === "undefined") return
 
-    const sections = Array.from(
-      document.querySelectorAll<HTMLElement>(`[id^="${LETTER_ID_PREFIX}"]`)
-    )
+    const sections = [
+      ...document.querySelectorAll<HTMLElement>(`[id^="${LETTER_ID_PREFIX}"]`),
+    ]
     if (sections.length === 0) return
 
     const observer = new IntersectionObserver(

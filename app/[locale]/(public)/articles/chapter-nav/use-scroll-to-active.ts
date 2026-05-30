@@ -61,12 +61,10 @@ export function useScrollToActive({
     locateStateRef.current = { phase: "idle" }
   }, [clearTransitionListeners])
 
-  useEffect(() => {
-    return () => {
+  useEffect(() => () => {
       clearHighlightTimer()
       resetLocateState()
-    }
-  }, [clearHighlightTimer, resetLocateState])
+    }, [clearHighlightTimer, resetLocateState])
 
   const getEffectivePathname = useCallback(() => {
     if (

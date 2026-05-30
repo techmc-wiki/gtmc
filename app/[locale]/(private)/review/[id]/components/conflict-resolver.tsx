@@ -116,8 +116,9 @@ export default function ConflictResolver({
       !confirm(
         "Are you sure you want to abort this rebase? All progress will be lost."
       )
-    )
+    ) {
       return
+    }
 
     setIsAborting(true)
     try {
@@ -233,6 +234,7 @@ export default function ConflictResolver({
               {draftCollection.files.map((file, index) => {
                 const isActive = file.id === draftCollection.activeFileId
                 const fileLabel =
+                  // eslint-disable-next-line unicorn/prefer-array-find -- .at(-1) semantics differ from .find()
                   file.filePath.split("/").filter(Boolean).at(-1) ||
                   `UNTITLED_FILE_${index + 1}`
                 const selectFile = () => handleSelectFile(file.id)
@@ -271,65 +273,63 @@ export default function ConflictResolver({
           </div>
 
           <div className="border-tech-main/30 bg-tech-main/5 mb-8 space-y-2 border p-2">
-            {blocks.map((block) => {
-              return (
-                <div key={block.id}>
-                  {block.type === "ok" ? (
-                    <pre className="text-tech-main-dark p-4 font-mono text-sm whitespace-pre-wrap opacity-70">
-                      {block.content}
-                    </pre>
-                  ) : (
-                    <div className="my-4 flex flex-col border border-red-500/50">
-                      <div className="border-b border-red-500/30 bg-red-500/10 p-2 text-center text-xs font-bold tracking-widest text-red-700 uppercase">
-                        Conflict Block
-                      </div>
-                      <div className="flex flex-col divide-red-500/30 md:flex-row md:divide-x">
-                        <div className="flex flex-1 flex-col bg-amber-500/5">
-                          <div className="border-b border-amber-500/20 bg-amber-500/10 p-2 text-xs font-bold text-amber-700">
-                            YOUR CHANGES (draft)
-                          </div>
-                          <pre className="overflow-x-auto p-4 font-mono text-sm whitespace-pre-wrap">
-                            {block.ours}
-                          </pre>
-                          <div className="mt-auto border-t border-amber-500/20 bg-amber-500/5 p-2">
-                            <TechButton
-                              type="button"
-                              variant="secondary"
-                              size="sm"
-                              className="w-full border-amber-500 text-amber-700 hover:bg-amber-500 hover:text-amber-900"
-                              onClick={() =>
-                                handleAcceptBlock(block.id, block.ours)
-                              }>
-                              ACCEPT OURS
-                            </TechButton>
-                          </div>
+            {blocks.map((block) => (
+              <div key={block.id}>
+                {block.type === "ok" ? (
+                  <pre className="text-tech-main-dark p-4 font-mono text-sm whitespace-pre-wrap opacity-70">
+                    {block.content}
+                  </pre>
+                ) : (
+                  <div className="my-4 flex flex-col border border-red-500/50">
+                    <div className="border-b border-red-500/30 bg-red-500/10 p-2 text-center text-xs font-bold tracking-widest text-red-700 uppercase">
+                      Conflict Block
+                    </div>
+                    <div className="flex flex-col divide-red-500/30 md:flex-row md:divide-x">
+                      <div className="flex flex-1 flex-col bg-amber-500/5">
+                        <div className="border-b border-amber-500/20 bg-amber-500/10 p-2 text-xs font-bold text-amber-700">
+                          YOUR CHANGES (draft)
                         </div>
-                        <div className="flex flex-1 flex-col bg-blue-500/5">
-                          <div className="border-b border-blue-500/20 bg-blue-500/10 p-2 text-xs font-bold text-blue-700">
-                            MAIN CHANGES
-                          </div>
-                          <pre className="overflow-x-auto p-4 font-mono text-sm whitespace-pre-wrap">
-                            {block.theirs}
-                          </pre>
-                          <div className="mt-auto border-t border-blue-500/20 bg-blue-500/5 p-2">
-                            <TechButton
-                              type="button"
-                              variant="secondary"
-                              size="sm"
-                              className="w-full border-blue-500 text-blue-700 hover:bg-blue-500 hover:text-blue-900"
-                              onClick={() =>
-                                handleAcceptBlock(block.id, block.theirs)
-                              }>
-                              ACCEPT THEIRS
-                            </TechButton>
-                          </div>
+                        <pre className="overflow-x-auto p-4 font-mono text-sm whitespace-pre-wrap">
+                          {block.ours}
+                        </pre>
+                        <div className="mt-auto border-t border-amber-500/20 bg-amber-500/5 p-2">
+                          <TechButton
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            className="w-full border-amber-500 text-amber-700 hover:bg-amber-500 hover:text-amber-900"
+                            onClick={() =>
+                              handleAcceptBlock(block.id, block.ours)
+                            }>
+                            ACCEPT OURS
+                          </TechButton>
+                        </div>
+                      </div>
+                      <div className="flex flex-1 flex-col bg-blue-500/5">
+                        <div className="border-b border-blue-500/20 bg-blue-500/10 p-2 text-xs font-bold text-blue-700">
+                          MAIN CHANGES
+                        </div>
+                        <pre className="overflow-x-auto p-4 font-mono text-sm whitespace-pre-wrap">
+                          {block.theirs}
+                        </pre>
+                        <div className="mt-auto border-t border-blue-500/20 bg-blue-500/5 p-2">
+                          <TechButton
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            className="w-full border-blue-500 text-blue-700 hover:bg-blue-500 hover:text-blue-900"
+                            onClick={() =>
+                              handleAcceptBlock(block.id, block.theirs)
+                            }>
+                            ACCEPT THEIRS
+                          </TechButton>
                         </div>
                       </div>
                     </div>
-                  )}
-                </div>
-              )
-            })}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
 
           <form onSubmit={handleFormSubmit} className="space-y-4">

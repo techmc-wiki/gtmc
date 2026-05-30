@@ -39,13 +39,14 @@ export function useStatusNotification() {
     setBadge(null)
   }
 
-  React.useEffect(() => {
-    return () => {
+  React.useEffect(
+    () => () => {
       if (badgeTimeoutRef.current) {
         clearTimeout(badgeTimeoutRef.current)
       }
-    }
-  }, [])
+    },
+    []
+  )
 
   return { badge, showBadge, clearBadge }
 }

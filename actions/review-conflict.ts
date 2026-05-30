@@ -180,6 +180,7 @@ async function recordResolvedRerereEntries(input: {
       continue
     }
 
+    // eslint-disable-next-line no-await-in-loop -- sequential: GitHub API rate limiting, each file processed independently with early-skip
     const baseContent = await getArticleFileContent(
       storedFile.filePath,
       input.baseRef,
@@ -192,6 +193,7 @@ async function recordResolvedRerereEntries(input: {
       baseContent,
     })
 
+    // eslint-disable-next-line no-await-in-loop -- sequential: DB writes per file must complete before next file's conflict resolution
     await Promise.all(
       resolutions.map(({ block, resolution }) =>
         storeRerere(
@@ -731,6 +733,7 @@ export async function resolveConflictAction(
       authorEmail,
       authorName,
       branchName: linkedDraft.prBranchName,
+      // oxlint-disable-next-line no-map-spread
       files: resolvedDraftFiles.files.map((file) => ({
         ...file,
         conflictContent: undefined,
@@ -1252,6 +1255,7 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
       normalizeDraftFileCollection({
         activeFileId: storedDraftFiles.activeFileId,
         folders: storedDraftFiles.folders || [],
+        // oxlint-disable-next-line no-map-spread
         files: storedDraftFiles.files.map((file) => {
           const mergedFile = result.fileResults.find(
             (candidate) => candidate.filePath === file.filePath

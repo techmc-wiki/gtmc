@@ -4,7 +4,6 @@
     "name": "BFladderbean",
     "description": "不写在纸上也没有关系，书于手掌之上亦无妨，因为故事所需要的，仅仅只有悲剧和泪水而已。",
     "profile": "/avatars/bfladderbean.png",
-    "email": "bfladderbean@example.com",
     "social": {
       "github": "https://github.com/BFladderbean",
       "bilibili": "https://space.bilibili.com/499560971",
@@ -15,6 +14,7 @@
     "name": "4rcadia",
     "description": "网站开发/运维\n\nA man who thinks he is a king is mad, a king who thinks he is a king is no less so.",
     "profile": "https://avatars.githubusercontent.com/u/97033226",
+    "email": "4rcadia.0@gmail.com",
     "social": {
       "github": "https://github.com/4rcadia",
       "twitter": "https://x.com/_4rcadia",
@@ -75,9 +75,25 @@
   },
   "void": {
     "name": "Void0",
+    "description": "GTMC's founding father",
     "profile": "https://i0.hdslb.com/bfs/face/c253cbf9bd1538523faabe0d153479a9d0e88bc2.jpg",
     "social": {
       "bilibili": "https://space.bilibili.com/500260506"
+    }
+  },
+  "XJH_Jorhai": {
+    "name": "XJH_Jorhai",
+    "description": "GTMC contributor",
+    "profile": "https://i1.hdslb.com/bfs/face/c92b12b8e605b4af068947180ded6ba7bba5b8ad.jpg@128w_128h_1c_1s.webp",
+    "social": {
+      "bilibili": "https://space.bilibili.com/62062732"
+    }
+  },
+  "Petris": {
+    "name": "Petris5256",
+    "profile": "/avatars/petris.png",
+    "social": {
+      "bilibili": "https://space.bilibili.com/397472062"
     }
   }
 }

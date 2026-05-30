@@ -18,7 +18,7 @@ export async function GET(
     return new NextResponse("Not Found", { status: 404 })
   }
 
-  const normalizedPath = path.normalize(filePath).replace(/\\/g, "/")
+  const normalizedPath = path.normalize(filePath).replaceAll("\\", "/")
   if (
     normalizedPath === ".." ||
     normalizedPath.startsWith("../") ||

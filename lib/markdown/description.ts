@@ -113,7 +113,7 @@ export function generateDescription(
     .use(stripMarkdown)
     .processSync(paragraphText)
     .toString()
-    .replace(/\s+/g, " ")
+    .replaceAll(/\s+/g, " ")
     .trim()
 
   if (plainText.length <= maxLength) return plainText

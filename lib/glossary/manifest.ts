@@ -42,7 +42,9 @@ export interface GlossarySummaryEntry {
 import fullData from "@/data/glossary.json" with { type: "json" }
 import summaryData from "@/data/glossary-summary.json" with { type: "json" }
 
+// eslint-disable-next-line no-underscore-dangle
 let _manifest: { entries: GlossaryEntry[] } | null = null
+// eslint-disable-next-line no-underscore-dangle
 let _summary: GlossarySummaryEntry[] | null = null
 
 export function loadGlossaryManifest(): { entries: GlossaryEntry[] } {

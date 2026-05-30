@@ -220,11 +220,29 @@ export function OperationProgress({
     return stopAnimation
   }, [state, stages.length, timeline])
 
+  const percent = Math.round(displayProgress * 100)
+
+  const sweepWidthStyle = React.useMemo(
+    (): React.CSSProperties => ({
+      width: `${Math.max(percent, 8)}%`,
+    }),
+    [percent]
+  )
+  const barWidthStyle = React.useMemo(
+    (): React.CSSProperties => ({ width: `${percent}%` }),
+    [percent]
+  )
+  const stageGridStyle = React.useMemo(
+    (): React.CSSProperties => ({
+      gridTemplateColumns: `repeat(auto-fit, minmax(${compact ? "7rem" : "8rem"}, 1fr))`,
+    }),
+    [compact]
+  )
+
   if (state === "idle" || stages.length === 0) {
     return null
   }
 
-  const percent = Math.round(displayProgress * 100)
   const activeStage =
     stages[Math.min(stageIndex, Math.max(stages.length - 1, 0))]
   const statusLabel =
@@ -257,7 +275,7 @@ export function OperationProgress({
               ? "from-red-500/10 via-red-400/15 to-transparent"
               : ""
           )}
-          style={{ width: `${Math.max(percent, 8)}%` }}
+          style={sweepWidthStyle}
         />
       </div>
 
@@ -295,7 +313,7 @@ export function OperationProgress({
             state === "success" ? "bg-green-600" : "",
             state === "error" ? "bg-red-500" : ""
           )}
-          style={{ width: `${percent}%` }}
+          style={barWidthStyle}
         />
         {state === "running" ? (
           <div className="animate-blueprint-sweep pointer-events-none absolute inset-0 bg-linear-to-r from-transparent via-white/70 to-transparent" />
@@ -307,9 +325,7 @@ export function OperationProgress({
           "relative mt-4 grid gap-2 sm:gap-3",
           compact ? "text-[0.625rem]" : "text-[0.6875rem]"
         )}
-        style={{
-          gridTemplateColumns: `repeat(auto-fit, minmax(${compact ? "7rem" : "8rem"}, 1fr))`,
-        }}>
+        style={stageGridStyle}>
         {stages.map((stage, index) => {
           const entry = timeline[index]
           const isCompleted =

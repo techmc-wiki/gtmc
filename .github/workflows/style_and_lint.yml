@@ -15,7 +15,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: "26"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -45,5 +45,5 @@ jobs:
       - name: Run linter
         run: pnpm lint:check
 
-      - name: Run style check
-        run: pnpm style:check
+      - name: Check code formatting
+        run: pnpm fmt:check

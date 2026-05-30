@@ -14,7 +14,7 @@ export function useExpandedFolders() {
       if (stored) {
         return new Set<string>(JSON.parse(stored))
       }
-    } catch { }
+    } catch {}
     return new Set<string>()
   })
   const expandedFoldersRef = useRef(expandedFolders)
@@ -29,7 +29,7 @@ export function useExpandedFolders() {
     }
     localStorage.setItem(
       SIDEBAR_EXPANDED_KEY,
-      JSON.stringify(Array.from(expandedFolders))
+      JSON.stringify([...expandedFolders])
     )
   }, [expandedFolders])
 

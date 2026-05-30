@@ -34,9 +34,7 @@ function AuthIslandContent() {
     }, PROFILE_MENU_CLOSE_DELAY_MS)
   }, [clearCloseTimer])
 
-  React.useEffect(() => {
-    return clearCloseTimer
-  }, [clearCloseTimer])
+  React.useEffect(() => clearCloseTimer, [clearCloseTimer])
 
   // Loading state: pulse skeleton matching dashboard style
   if (status === "loading") {

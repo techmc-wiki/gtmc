@@ -76,10 +76,7 @@ export function decodeStoredDraftFiles({
         return file
       }
 
-      return {
-        ...file,
-        conflictContent: conflictValue,
-      }
+      return Object.assign({}, file, { conflictContent: conflictValue })
     }),
   } satisfies DraftFileCollection
 }

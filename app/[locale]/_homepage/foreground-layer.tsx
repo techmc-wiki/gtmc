@@ -3,8 +3,9 @@ import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { TechButton } from "@/components/ui/tech-button"
 import { HeroCard } from "./hero-card"
-import { ForwardedRef, useCallback } from "react"
-import { MotionValue } from "motion/react"
+import type { ForwardedRef } from "react"
+import { useCallback } from "react"
+import type { MotionValue } from "motion/react"
 
 const INVENTORY_SLOT_KEYS = [
   "slot-0",
@@ -84,7 +85,8 @@ export function ForegroundLayer({
           <TechButton
             variant="secondary"
             className="flex h-12 w-full items-center justify-center text-xs font-medium tracking-widest uppercase shadow-sm backdrop-blur-md transition-transform duration-300 hover:scale-102 sm:text-sm">
-            {"//"} {t("loginGithub")} <GithubIcon className="size-4" />
+            {"// "}
+            {t("loginGithub")} <GithubIcon className="size-4" />
           </TechButton>
         </Link>
       </div>

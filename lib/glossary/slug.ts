@@ -21,10 +21,10 @@ export function generateSlug(englishTerm: string): string {
     .replace(/\*+$/, "")
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-{2,}/g, "-")
-    .replace(/^-+|-+$/g, "")
+    .replaceAll(/[^a-z0-9\s-]/g, "")
+    .replaceAll(/\s+/g, "-")
+    .replaceAll(/-{2,}/g, "-")
+    .replaceAll(/^-+|-+$/g, "")
   return slug || "term"
 }
 

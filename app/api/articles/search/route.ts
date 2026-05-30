@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server"
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server"
 import { CJK_TOKENIZER } from "@/lib/cjk-tokenizer"
 import { getSearchIndex } from "@/lib/search-index"
 import type { ArticleLocale } from "@/lib/articles/manifest"

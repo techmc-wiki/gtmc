@@ -5,7 +5,7 @@ import {
 } from "@/lib/github/articles-repo"
 import { serializeDraftFilesForStorage } from "@/lib/drafts/files"
 import type { ConflictBlock, MergeConflictBlock } from "@/lib/review/rebase-types"
-import { Prisma } from "@prisma/client"
+import type { Prisma } from "@prisma/client"
 import type {
   FileRebaseState,
   RebaseCommitInfo,
@@ -183,6 +183,7 @@ export async function rebaseArticleContent(
 
   const relevantCommits: RebaseCommitInfo[] = []
   for (const commit of compareData.commits) {
+    // eslint-disable-next-line no-await-in-loop -- sequential: GitHub API rate limiting for potentially many commits
     const { data: commitData } = await octokit.repos.getCommit({
       owner: ARTICLES_REPO_OWNER,
       repo: ARTICLES_REPO_NAME,

@@ -21,9 +21,9 @@ export function createDraftFile(
 
 export function createDraftFileId(filePath?: string) {
   const pathSegment = normalizeDraftFilePath(filePath || "")
-    .replace(/[^a-zA-Z0-9/_-]+/g, "-")
-    .replace(/\/+/g, "-")
-    .replace(/^-+|-+$/g, "")
+    .replaceAll(/[^a-zA-Z0-9/_-]+/g, "-")
+    .replaceAll(/\/+/g, "-")
+    .replaceAll(/^-+|-+$/g, "")
     .toLowerCase()
   const randomSegment =
     typeof globalThis.crypto?.randomUUID === "function"

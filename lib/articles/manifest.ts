@@ -21,6 +21,7 @@ function getNodeBuiltin<T>(name: string): T {
 }
 
 export function getManifestPath(): string {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   const path = getNodeBuiltin<typeof import("path")>("path")
   return path.join(process.cwd(), "data", MANIFEST_FILE_NAME)
 }
@@ -72,6 +73,7 @@ interface LocaleBanner {
 export function loadArticleManifest(): Record<string, ArticleEntry> {
   let raw: string
   const manifestPath = getManifestPath()
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   const fs = getNodeBuiltin<typeof import("fs")>("fs")
 
   try {
@@ -402,7 +404,7 @@ function buildTreeNode(
     mergedChildrenBySlug.set(child.slug, child)
   }
 
-  const children = Array.from(mergedChildrenBySlug.values())
+  const children = [...mergedChildrenBySlug.values()]
     .toSorted((a, b) => compareEntries(a, b, locale))
     .map((child) => buildTreeNode(child, parentIndex, locale))
     .filter((node): node is ArticleTreeNode => node !== null)

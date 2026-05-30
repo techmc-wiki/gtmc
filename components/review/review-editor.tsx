@@ -365,8 +365,8 @@ export function ReviewEditor({
 
   const rebaseState = revision.rebaseState as RebaseState | null
 
-  React.useEffect(() => {
-    return () => {
+  React.useEffect(
+    () => () => {
       if (autosaveTimeoutRef.current) {
         clearTimeout(autosaveTimeoutRef.current)
       }
@@ -374,8 +374,9 @@ export function ReviewEditor({
       if (finalizeProgressResetRef.current !== null) {
         window.clearTimeout(finalizeProgressResetRef.current)
       }
-    }
-  }, [])
+    },
+    []
+  )
 
   React.useEffect(() => {
     if (!conflictSignature) {
@@ -1012,7 +1013,7 @@ export function ReviewEditor({
                                 ).nodes
                               }
                               <span className="block border-l-2 border-gray-400 bg-gray-100 pl-2 text-gray-500">
-                                {"======="}
+                                =======
                               </span>
                               {
                                 segment.theirs.split("\n").reduce<{

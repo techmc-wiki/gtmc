@@ -64,6 +64,16 @@ export function DraftFileSourceDialog({
   const [customUploadName, setCustomUploadName] = React.useState("")
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
+  const sourceModeOptions = React.useMemo(
+    () => [
+      { value: "repo" as const, label: t("modeRepo") },
+      { value: "upload" as const, label: t("modeLocal") },
+      { value: "new" as const, label: t("modeNew") },
+      { value: "folder" as const, label: "新建文件夹" },
+    ],
+    [t]
+  )
+
   React.useEffect(() => {
     if (!isOpen) {
       return
@@ -172,9 +182,9 @@ export function DraftFileSourceDialog({
 
   const handleCreateNewFolder = React.useCallback(() => {
     const normalizedFolderName = normalizeDraftFilePath(newFolderName)
+      .replace(/\/$/, "")
       .split("/")
-      .filter(Boolean)
-      .at(-1)
+      .pop()
 
     if (!normalizedFolderName || !onCreateFolder) {
       setTreeError(t("fileNameValidationError"))
@@ -309,12 +319,7 @@ export function DraftFileSourceDialog({
           <div className="min-h-0 overflow-y-auto p-5">
             <div className="mb-5">
               <SegmentedControl<SourceMode>
-                options={[
-                  { value: "repo", label: t("modeRepo") },
-                  { value: "upload", label: t("modeLocal") },
-                  { value: "new", label: t("modeNew") },
-                  { value: "folder", label: "新建文件夹" },
-                ]}
+                options={sourceModeOptions}
                 value={mode}
                 onValueChange={setMode}
                 controlRole="group"
@@ -571,9 +576,9 @@ function TreeNode({
 function buildDraftFilePath(folderPath: string, rawFileName: string) {
   const normalizedFolder = normalizeDraftFilePath(folderPath)
   const sanitizedName = normalizeDraftFilePath(rawFileName)
+    .replace(/\/$/, "")
     .split("/")
-    .filter(Boolean)
-    .at(-1)
+    .pop()
 
   if (!sanitizedName) {
     return ""

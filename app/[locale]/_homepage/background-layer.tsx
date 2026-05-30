@@ -1,4 +1,5 @@
-import { motion, MotionValue } from "motion/react"
+import type { MotionValue } from "motion/react"
+import { motion } from "motion/react"
 import { useMemo } from "react"
 import { DecorElement } from "./decor-element"
 
@@ -168,9 +169,11 @@ export function BackgroundLayer({
         smoothMouseY={smoothMouseY}
         blurMax={blurMax}
         isReducedMotion={isReducedMotion}>
+        {/* eslint-disable react/jsx-no-comment-textnodes, react/jsx-curly-brace-presence */}
         <div className="text-tech-main-dark mb-2 font-bold">
-          {"//"} REDSTONE_BOOLEAN_LOGIC
+          {"// REDSTONE_BOOLEAN_LOGIC"}
         </div>
+        {/* eslint-enable react/jsx-no-comment-textnodes, react/jsx-curly-brace-presence */}
         <span>Y = (A ∧ B) ∨ (¬C)</span>
         <br />
         <span>T_delay = ∑(repeater_ticks) + 1_GT</span>

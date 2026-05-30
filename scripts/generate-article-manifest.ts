@@ -151,12 +151,12 @@ async function processSourceFile(
         .join(", ")
       throw new Error(`${relPath}: validation failed: ${errorMsg}`)
     }
-  } catch (err) {
-    const errMsg = err instanceof Error ? err.message : String(err)
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error)
     if (errMsg.includes("legacy key") || errMsg.includes("unknown key")) {
-      throw new Error(`${relPath}: ${errMsg}`, { cause: err })
+      throw new Error(`${relPath}: ${errMsg}`, { cause: error })
     }
-    throw err
+    throw error
   }
 
   const { author, coAuthors } = await getArticleAuthors(
@@ -342,9 +342,9 @@ async function processDirectory(
           aliases
         )
         manifest[slugPrefix] = entry as ArticleEntry
-      } catch (err) {
+      } catch (error) {
         process.stderr.write(
-          `Error: ${err instanceof Error ? err.message : String(err)}\n`
+          `Error: ${error instanceof Error ? error.message : String(error)}\n`
         )
         hasError = true
       }
@@ -406,9 +406,9 @@ async function processDirectory(
             aliases
           )
           return { compositeSlug, entry: entry as ArticleEntry, error: false }
-        } catch (err) {
+        } catch (error) {
           process.stderr.write(
-            `Error: ${err instanceof Error ? err.message : String(err)}\n`
+            `Error: ${error instanceof Error ? error.message : String(error)}\n`
           )
           return { compositeSlug, entry: null, error: true }
         }
@@ -433,9 +433,9 @@ async function processDirectory(
         maintainers,
         manifest
       )
-    } catch (err) {
+    } catch (error) {
       process.stderr.write(
-        `Error: ${err instanceof Error ? err.message : String(err)}\n`
+        `Error: ${error instanceof Error ? error.message : String(error)}\n`
       )
       hasError = true
     }
@@ -463,9 +463,9 @@ async function processDirectory(
           manifest
         )
         return false
-      } catch (err) {
+      } catch (error) {
         process.stderr.write(
-          `Error: ${err instanceof Error ? err.message : String(err)}\n`
+          `Error: ${error instanceof Error ? error.message : String(error)}\n`
         )
         return true
       }
@@ -809,9 +809,9 @@ async function main(): Promise<void> {
           aliases
         )
         return { rawSlug, entry: entry as ArticleEntry, error: false }
-      } catch (err) {
+      } catch (error) {
         process.stderr.write(
-          `Error: ${err instanceof Error ? err.message : String(err)}\n`
+          `Error: ${error instanceof Error ? error.message : String(error)}\n`
         )
         return { rawSlug, entry: null, error: true }
       }
@@ -847,9 +847,9 @@ async function main(): Promise<void> {
           manifest
         )
         return false
-      } catch (err) {
+      } catch (error) {
         process.stderr.write(
-          `Error: ${err instanceof Error ? err.message : String(err)}\n`
+          `Error: ${error instanceof Error ? error.message : String(error)}\n`
         )
         return true
       }

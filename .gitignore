@@ -53,8 +53,7 @@ docs/superpowers
 .pi
 
 # generated files
-data/manifest.json
-data/articles
+data
 public/article-assets
 public/gtmc.pdf
 public/.gtmc-pdf-temp.html

@@ -49,7 +49,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
         tags.add(tag)
       })
     })
-    return Array.from(tags)
+    return [...tags]
   }, [features])
 
   const toggleTag = useCallback((tag: string) => {

@@ -111,7 +111,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
     onInsertContent: (text: string) => {
       if (text === "") {
         setContent((prev) =>
-          prev.replace(/<!-- UPLOAD_PENDING_[a-f0-9-]+ -->\n?/g, "")
+          prev.replaceAll(/<!-- UPLOAD_PENDING_[a-f0-9-]+ -->\n?/g, "")
         )
       } else if (text.startsWith("<!--")) {
         insertTextAtCursor(text)
@@ -127,18 +127,21 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
     onClearBadge: clearBadge,
   })
 
-  const handleUploadWithCheck = (file: File) => {
-    if (!initialData?.id) {
-      showBadge(t("badgeCannotUploadBeforeSaving"), "error", 4000)
-      return
-    }
-    uploadFile(file)
-  }
+  const handleUploadWithCheck = React.useCallback(
+    (file: File) => {
+      if (!initialData?.id) {
+        showBadge(t("badgeCannotUploadBeforeSaving"), "error", 4000)
+        return
+      }
+      uploadFile(file)
+    },
+    [initialData?.id, showBadge, t, uploadFile]
+  )
 
   const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
     if (isReadOnly || isUploading) return
     const items = e.clipboardData.items
-    for (const item of Array.from(items)) {
+    for (const item of items) {
       if (item.type.indexOf("image") !== -1) {
         e.preventDefault()
         const file = item.getAsFile()
@@ -188,7 +191,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
 
     const tagArray = tags
       .split(",")
-      .map((t) => t.trim())
+      .map((tag) => tag.trim())
       .filter(Boolean)
 
     if (!initialData?.id) {
@@ -218,6 +221,25 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
       setIsSaving(false)
     }
   }
+
+  const fileUploadSlot = React.useMemo(
+    () => (
+      <EditorFileUploadInput
+        fileInputRef={fileInputRef}
+        onFileSelect={handleUploadWithCheck}
+        isUploading={isUploading}
+        isCompressing={isCompressing}
+        disabled={isReadOnly}
+      />
+    ),
+    [
+      fileInputRef,
+      handleUploadWithCheck,
+      isUploading,
+      isCompressing,
+      isReadOnly,
+    ]
+  )
 
   return (
     <EditorForm onSubmit={handleSave}>
@@ -280,15 +302,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
               disabled={isReadOnly || isUploading}
               lineWrap={lineWrap}
               onWrapToggle={() => setLineWrap((v) => !v)}
-              fileUploadSlot={
-                <EditorFileUploadInput
-                  fileInputRef={fileInputRef}
-                  onFileSelect={handleUploadWithCheck}
-                  isUploading={isUploading}
-                  isCompressing={isCompressing}
-                  disabled={isReadOnly}
-                />
-              }
+              fileUploadSlot={fileUploadSlot}
             />
           </>
         )}

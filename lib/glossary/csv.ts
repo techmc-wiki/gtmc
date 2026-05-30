@@ -116,7 +116,7 @@ export function parseGlossaryCsv(input: string): ParseGlossaryResult {
  */
 function escapeCell(value: string): string {
   if (value.includes(",") || value.includes('"') || value.includes("\n")) {
-    return `"${value.replace(/"/g, '""')}"`
+    return `"${value.replaceAll('"', '""')}"`
   }
   return value
 }
@@ -141,9 +141,9 @@ export function serializeGlossaryCsv(
 
   const headerLine = headerOrder.join(",")
 
-  const dataLines = rows.map((row) => {
-    return headerOrder.map((col) => escapeCell(row[col])).join(",")
-  })
+  const dataLines = rows.map((row) =>
+    headerOrder.map((col) => escapeCell(row[col])).join(",")
+  )
 
   let csv = headerLine + lineEnding + dataLines.join(lineEnding)
 

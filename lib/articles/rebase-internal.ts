@@ -10,7 +10,7 @@ import {
   parseConflictBlocks,
 } from "@/lib/review/rerere"
 import type { ConflictBlock, MergeConflictBlock } from "@/lib/review/rebase-types"
-import { Prisma } from "@prisma/client"
+import type { Prisma } from "@prisma/client"
 import { getMergeLibrary } from "@/lib/review/merge-strategy"
 import type {
   FileRebaseState,
@@ -174,6 +174,7 @@ export async function getCompareCommitFileInfos(input: {
   const commitFileInfos: CompareCommitFileInfo[] = []
 
   for (const commit of compareData.commits) {
+    // eslint-disable-next-line no-await-in-loop -- sequential: GitHub API rate limiting for potentially many commits
     const { data: commitData } = await octokit.repos.getCommit({
       owner: ARTICLES_REPO_OWNER,
       repo: ARTICLES_REPO_NAME,
@@ -330,7 +331,9 @@ export async function applyRebaseCommits(input: {
       commitIndex: i,
       commitSha: summarizeSha(commit.sha),
     })
+    // eslint-disable-next-line no-await-in-loop -- sequential rebase: each commit's base depends on previousSha from prior iteration
     const baseSnapshot = await getFileSnapshot(filePath, previousSha, token)
+    // eslint-disable-next-line no-await-in-loop -- sequential rebase: snapshot needed for merge in same iteration
     const latestSnapshot = await getFileSnapshot(filePath, commit.sha, token)
 
     if (!baseSnapshot) {
@@ -351,6 +354,7 @@ export async function applyRebaseCommits(input: {
         branch: "FILE_DELETED_CONFLICT",
         commitSha: summarizeSha(commit.sha),
       })
+      // eslint-disable-next-line no-await-in-loop -- sequential rebase: DB state update before early return
       await prisma.revision.update({
         where: { id: draftId },
         data: { rebaseState: deletedState as unknown as Prisma.InputJsonValue },
@@ -380,6 +384,7 @@ export async function applyRebaseCommits(input: {
       const conflictBlock = mergeResult.blocks.find(
         (b) => b.type === "conflict"
       ) as MergeConflictBlock
+      // eslint-disable-next-line no-await-in-loop -- sequential rebase: conflict resolution depends on current merge state
       const rerereResult = await autoResolveConflictContent({
         content: mergeResult.content,
         filePath,
@@ -423,6 +428,7 @@ export async function applyRebaseCommits(input: {
         branch: "CONFLICT",
         commitSha: summarizeSha(commit.sha),
       })
+      // eslint-disable-next-line no-await-in-loop -- sequential rebase: DB state update before early return
       await prisma.revision.update({
         where: { id: draftId },
         data: {
@@ -541,6 +547,7 @@ export async function applyRebaseCommitsMultiFile(input: {
 
   for (let i = startIndex; i < rebaseState.commitInfos.length; i++) {
     const commit = rebaseState.commitInfos[i]
+    // eslint-disable-next-line no-await-in-loop -- sequential rebase: each commit replayed in order
     const { data: commitData } = await octokit.repos.getCommit({
       owner: ARTICLES_REPO_OWNER,
       repo: ARTICLES_REPO_NAME,
@@ -563,7 +570,9 @@ export async function applyRebaseCommitsMultiFile(input: {
 
     for (const filePath of touchedFilePaths) {
       const currentFileState = fileStates[filePath]
+      // eslint-disable-next-line no-await-in-loop -- sequential rebase: base depends on previousSha from prior commit
       const baseSnapshot = await getFileSnapshot(filePath, previousSha, token)
+      // eslint-disable-next-line no-await-in-loop -- sequential rebase: snapshot needed for merge in same iteration
       const latestSnapshot = await getFileSnapshot(filePath, commit.sha, token)
 
       if (!latestSnapshot) {
@@ -581,6 +590,7 @@ export async function applyRebaseCommitsMultiFile(input: {
           conflictedCommitSha: commit.sha,
           fileStates: nextFileStates,
         }
+        // eslint-disable-next-line no-await-in-loop -- sequential rebase: DB state update before early return
         await prisma.revision.update({
           where: { id: draftId },
           data: {
@@ -607,6 +617,7 @@ export async function applyRebaseCommitsMultiFile(input: {
         const conflictBlock = mergeResult.blocks.find(
           (block) => block.type === "conflict"
         ) as MergeConflictBlock
+        // eslint-disable-next-line no-await-in-loop -- sequential rebase: conflict resolution depends on current merge state
         const rerereResult = await autoResolveConflictContent({
           content: mergeResult.content,
           filePath,
@@ -645,6 +656,7 @@ export async function applyRebaseCommitsMultiFile(input: {
           rerereApplied: rerereResult.applied,
         }
 
+        // eslint-disable-next-line no-await-in-loop -- sequential rebase: DB state update before early return
         await prisma.revision.update({
           where: { id: draftId },
           data: {

@@ -18,7 +18,7 @@ export function resolveArticleAssetPath(
   const rawPath = trimmedSrc.startsWith("/")
     ? trimmedSrc.slice(1)
     : path.join(path.dirname(articleFilePath), trimmedSrc)
-  const normalized = path.normalize(rawPath).replace(/\\/g, "/")
+  const normalized = path.normalize(rawPath).replaceAll('\\', "/")
 
   if (
     normalized === ".." ||

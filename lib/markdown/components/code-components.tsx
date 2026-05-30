@@ -25,12 +25,13 @@ export function CodeComponent({
       </code>
     )
   }
-  if ((className as string)?.startsWith("language-"))
+  if ((className as string)?.startsWith("language-")) {
     return (
       <code className={className as string} {...props}>
         {children}
       </code>
     )
+  }
   return (
     <code
       className="border-tech-main/30 bg-tech-main/10 text-tech-main mx-1 border px-1 py-[0.05rem] font-mono text-[0.8em] not-italic"

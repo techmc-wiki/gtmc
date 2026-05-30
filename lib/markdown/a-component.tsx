@@ -9,7 +9,7 @@ function resolveHref(initialHref: string, rawPath: string): string {
   if (href.startsWith("./") || href.startsWith("../")) {
     const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
     try {
-      const resolved = path.join(currentDir, href).replace(/\\/g, "/")
+      const resolved = path.join(currentDir, href).replaceAll("\\", "/")
       href = articleUrl(resolved)
     } catch {
       return href
@@ -22,7 +22,7 @@ function resolveHref(initialHref: string, rawPath: string): string {
     !href.startsWith("/")
   ) {
     const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
-    const resolved = path.join(currentDir, href).replace(/\\/g, "/")
+    const resolved = path.join(currentDir, href).replaceAll("\\", "/")
     href = articleUrl(resolved)
   }
   return href

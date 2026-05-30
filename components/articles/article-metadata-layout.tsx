@@ -3,7 +3,7 @@
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { ArticleBanner } from "@/components/articles/article-banner"
 import { getArticleAssetPublicUrl } from "@/lib/articles/asset-url"
-import { ReactNode } from "react"
+import type { ReactNode } from "react"
 
 interface ArticleMetadataLayoutProps {
   title: string

@@ -1,6 +1,6 @@
 "use client"
 
-import { StatusNotificationState } from "@/hooks/use-status-notification"
+import type { StatusNotificationState } from "@/hooks/use-status-notification"
 import { useTranslations } from "next-intl"
 
 interface EditorBadgeProps {

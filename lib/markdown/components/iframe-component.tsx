@@ -28,6 +28,7 @@ export function IframeComponent({
         title={(title as string) || "Embedded Video"}
         className="size-full"
         loading="lazy"
+        sandbox="allow-scripts allow-popups"
         allowFullScreen={allowFullScreen !== false}
         {...rest}
       />

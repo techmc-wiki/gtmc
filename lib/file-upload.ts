@@ -176,8 +176,8 @@ export function sanitizeFilename(
 
   // Sanitize basename: spaces → dashes, strip non-allowed chars, truncate
   basename = basename
-    .replace(/\s+/g, "-")
-    .replace(/[^a-zA-Z0-9._-]/g, "")
+    .replaceAll(/\s+/g, "-")
+    .replaceAll(/[^a-zA-Z0-9._-]/g, "")
     .substring(0, 80)
 
   // Fallback for empty basename

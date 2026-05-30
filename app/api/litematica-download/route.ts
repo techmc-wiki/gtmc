@@ -121,9 +121,9 @@ function errorResponse(message: string, status: number) {
 
 function normalizeUrlParam(input: string) {
   let value = input
-    .replace(/\r?\n/g, "")
+    .replaceAll(/\r?\n/g, "")
     .trim()
-    .replace(/^['"]|['"]$/g, "")
+    .replaceAll(/^['"]|['"]$/g, "")
 
   // Accept both raw and pre-encoded values.
   for (let i = 0; i < 2; i++) {
@@ -141,7 +141,7 @@ function normalizeUrlParam(input: string) {
 
 function normalizeArticleRepoPath(input: string) {
   const withoutQuery = input.split("?")[0]?.split("#")[0] ?? ""
-  const normalized = path.posix.normalize(withoutQuery.replace(/\\/g, "/"))
+  const normalized = path.posix.normalize(withoutQuery.replaceAll("\\", "/"))
   const safePath = normalized.replace(/^\.\.\/+/, "").replace(/^\/+/, "")
 
   if (!safePath || safePath.startsWith("../")) {

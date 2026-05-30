@@ -254,11 +254,13 @@ export async function resolveDraftSyncConflict({
   })
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    // eslint-disable-next-line no-await-in-loop -- retry loop: re-reads main SHA each attempt
     const latestMainSha = await getMainBranchHeadSha(token)
     let nextStatus: DraftSyncStatus = "IN_REVIEW"
     const nextFiles: DraftFileRecord[] = []
 
     for (const file of normalizedFiles.files) {
+      // eslint-disable-next-line no-await-in-loop -- sequential: each file resolution feeds into snapshot fetches below
       const resolvedFilePath = await resolveArticleFilePath(
         file.filePath,
         [latestMainSha],
@@ -271,11 +273,13 @@ export async function resolveDraftSyncConflict({
       }
 
       if (syncedMainSha && syncedMainSha !== latestMainSha) {
+        // eslint-disable-next-line no-await-in-loop -- sequential: snapshot needed for merge below
         const previousMainSnapshot = await getFileSnapshot(
           resolvedFilePath,
           syncedMainSha,
           token
         )
+        // eslint-disable-next-line no-await-in-loop -- sequential: snapshot needed for merge below
         const latestMainSnapshot = await getFileSnapshot(
           resolvedFilePath,
           latestMainSha,
@@ -318,6 +322,7 @@ export async function resolveDraftSyncConflict({
 
     if (nextStatus === "IN_REVIEW") {
       for (const [index, file] of resolvedFiles.files.entries()) {
+        // eslint-disable-next-line no-await-in-loop -- sequential: each git commit depends on the previous
         await upsertFileOnBranch({
           authorEmail,
           authorName,
@@ -333,6 +338,7 @@ export async function resolveDraftSyncConflict({
       }
     }
 
+    // eslint-disable-next-line no-await-in-loop -- retry loop: verify main SHA hasn't changed
     const verifiedMainSha = await getMainBranchHeadSha(token)
     if (verifiedMainSha === latestMainSha) {
       const primaryFile = getActiveDraftFile(resolvedFiles)
@@ -348,6 +354,7 @@ export async function resolveDraftSyncConflict({
     }
 
     if (attempt < MAX_RETRIES - 1) {
+      // eslint-disable-next-line no-await-in-loop -- retry loop: exponential backoff between attempts
       await sleep(2 ** attempt * 100)
     }
   }
@@ -395,7 +402,7 @@ function splitLines(content: string) {
     return [] as string[]
   }
 
-  return content.replace(/\r\n/g, "\n").split("\n")
+  return content.replaceAll('\r\n', "\n").split("\n")
 }
 
 function joinLines(lines: string[]) {

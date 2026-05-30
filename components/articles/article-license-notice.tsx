@@ -97,14 +97,12 @@ export function ArticleLicenseNotice({
             <button
               type="button"
               onClick={handleCopyAttribution}
-              className={
-                "bg-transparent p-0 text-left leading-tight"
-              }
+              className="bg-transparent p-0 text-left leading-tight"
               aria-label={t("copySuggestedAttributionAria")}
               title={t("copySuggestedAttributionTitle")}>
               {attributionPrompt}{" "}
               <span
-                className={`relative font-bold text-tech-main`}>
+                className="relative font-bold text-tech-main">
                 <span className={`transition-opacity ${isCopied ? "opacity-0" : "opacity-100"}`}>{attributionLabel}</span>
                 <span
                   aria-hidden="true"

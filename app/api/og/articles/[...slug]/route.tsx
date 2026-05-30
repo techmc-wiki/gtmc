@@ -107,16 +107,16 @@ function resolveLocale(rawLocale: string | null): ArticleLocale {
 function extractBodyHook(raw: string): string {
   const stripped = raw
     .replace(/^---[\s\S]*?---/m, "")
-    .replace(/```[\s\S]*?```/g, "")
-    .replace(/!\[.*?\]\(.*?\)/g, "")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/^#{1,6}\s+.+$/gm, "")
-    .replace(/[*_`~]/g, "")
+    .replaceAll(/```[\s\S]*?```/g, "")
+    .replaceAll(/!\[.*?\]\(.*?\)/g, "")
+    .replaceAll(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replaceAll(/^#{1,6}\s+.+$/gm, "")
+    .replaceAll(/[*_`~]/g, "")
     .trim()
 
   const firstPara = stripped
     .split(/\n\s*\n/)
-    .map((p) => p.replace(/\s+/g, " ").trim())
+    .map((p) => p.replaceAll(/\s+/g, " ").trim())
     .find((p) => p.length > 20)
 
   if (!firstPara) return ""
@@ -165,7 +165,7 @@ export async function GET(
   const rawTitle =
     manifestEntry?.titleByLocale[locale] ??
     manifestEntry?.titleByLocale["zh"] ??
-    slug[slug.length - 1]?.replace(/-/g, " ") ??
+    slug[slug.length - 1]?.replaceAll('-', " ") ??
     "Untitled"
   const title = rawTitle.length > 60 ? rawTitle.slice(0, 60) + "…" : rawTitle
 

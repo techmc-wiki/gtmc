@@ -85,9 +85,10 @@ export function GlossaryToolbar({
 }: GlossaryToolbarProps) {
   const t = useTranslations("Glossary")
 
-  const localeDefaults = React.useMemo(() => {
-    return defaultColumns[locale] ?? defaultColumns.en ?? []
-  }, [defaultColumns, locale])
+  const localeDefaults = React.useMemo(
+    () => defaultColumns[locale] ?? defaultColumns.en ?? [],
+    [defaultColumns, locale]
+  )
 
   const [query, setQuery] = React.useState("")
   const [searchScope, setSearchScope] = React.useState<"active" | "all">(

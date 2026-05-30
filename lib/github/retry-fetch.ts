@@ -21,6 +21,7 @@ export async function executeWithRetry<TResult>(params: {
 
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
+      // eslint-disable-next-line no-await-in-loop -- retry logic: each attempt must complete before the next
       return await operation()
     } catch (error) {
       const action = onError(error, attempt, retries)
@@ -36,6 +37,7 @@ export async function executeWithRetry<TResult>(params: {
       if (attempt < retries - 1) {
         const backoffMs = getBackoffMs?.(attempt) ?? 0
         if (backoffMs > 0) {
+          // eslint-disable-next-line no-await-in-loop -- retry logic: backoff delay between attempts
           await sleep(backoffMs)
         }
       }

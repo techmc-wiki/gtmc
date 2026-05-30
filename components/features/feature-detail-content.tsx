@@ -75,6 +75,9 @@ export async function FeatureDetailContent({
   const t = await getTranslations("Feature")
   const canEdit = isAuthor || isAdmin
 
+  const editorInitialData = buildEditorInitialData(feature)
+  const jsonLdHtml = buildJsonLdHtml(structuredData)
+
   return (
     <div className="container mx-auto max-w-4xl space-y-6 p-4 sm:p-6 md:p-8">
       <RevealSection delay={0}>
@@ -117,6 +120,7 @@ export async function FeatureDetailContent({
 
       <RevealSection delay={100}>
         <TechCard className="mb-8 p-4 sm:p-6">
+          {/* oxlint-disable react-perf/jsx-no-jsx-as-prop */}
           <div className="flex flex-col gap-2 font-mono text-xs sm:text-sm">
             <MetadataRow
               label={`${t("detailStatus")}:`}
@@ -125,47 +129,44 @@ export async function FeatureDetailContent({
             <MetadataRow
               label="Author:"
               value={
-                <span className="wrap-break-word">
-                  {feature.author.name || feature.author.email || "Unknown"}
-                </span>
+                <WordBreakSpan
+                  text={
+                    feature.author.name || feature.author.email || "Unknown"
+                  }
+                />
               }
             />
             <MetadataRow
               label={`${t("detailAssignee")}:`}
               value={
-                <span className="wrap-break-word">
-                  {feature.assignee
-                    ? feature.assignee.name || feature.assignee.email
-                    : t("unknownUser")}
-                </span>
+                <WordBreakSpan
+                  text={
+                    feature.assignee
+                      ? feature.assignee.name ||
+                        feature.assignee.email ||
+                        t("unknownUser")
+                      : t("unknownUser")
+                  }
+                />
               }
             />
             <MetadataRow
               label="Created:"
-              value={
-                <span suppressHydrationWarning>
-                  {new Date(feature.createdAt).toLocaleString()}
-                </span>
-              }
+              value={<DateDisplay date={feature.createdAt} />}
             />
             {feature.issueNumber && feature.htmlUrl && (
               <MetadataRow
                 label="GitHub:"
                 value={
-                  <div className="flex flex-wrap items-center gap-1">
-                    Linked to
-                    <a
-                      href={feature.htmlUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="border-tech-main/50 text-tech-main hover:bg-tech-main/80 border-b font-mono wrap-break-word transition-colors hover:text-white">
-                      Issue #{feature.issueNumber}
-                    </a>
-                  </div>
+                  <GithubIssueLink
+                    url={feature.htmlUrl}
+                    number={feature.issueNumber}
+                  />
                 }
               />
             )}
           </div>
+          {/* oxlint-enable react-perf/jsx-no-jsx-as-prop */}
         </TechCard>
       </RevealSection>
 
@@ -182,15 +183,7 @@ export async function FeatureDetailContent({
       <RevealSection delay={300}>
         <div>
           {!isClosed && canEdit ? (
-            <FeatureEditor
-              initialData={{
-                id: feature.id,
-                title: feature.title,
-                content: feature.content,
-                tags: feature.tags,
-                status: feature.status,
-              }}
-            />
+            <FeatureEditor initialData={editorInitialData} />
           ) : (
             <FeatureReadonlyView
               title={feature.title}
@@ -210,21 +203,57 @@ export async function FeatureDetailContent({
         />
       </RevealSection>
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebPage",
-            name: structuredData.name,
-            description: structuredData.description,
-            url: structuredData.url,
-            datePublished: structuredData.datePublished,
-            dateModified: structuredData.dateModified,
-            inLanguage: ["zh", "en"],
-          }),
-        }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdHtml} />
+    </div>
+  )
+}
+
+function buildEditorInitialData(feature: FeatureDetailContentProps["feature"]) {
+  return {
+    id: feature.id,
+    title: feature.title,
+    content: feature.content,
+    tags: feature.tags,
+    status: feature.status,
+  }
+}
+
+function buildJsonLdHtml(
+  structuredData: FeatureDetailContentProps["structuredData"]
+) {
+  return {
+    __html: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: structuredData.name,
+      description: structuredData.description,
+      url: structuredData.url,
+      datePublished: structuredData.datePublished,
+      dateModified: structuredData.dateModified,
+      inLanguage: ["zh", "en"],
+    }),
+  }
+}
+
+function WordBreakSpan({ text }: { text: string }) {
+  return <span className="wrap-break-word">{text}</span>
+}
+
+function DateDisplay({ date }: { date: Date }) {
+  return <span suppressHydrationWarning>{new Date(date).toLocaleString()}</span>
+}
+
+function GithubIssueLink({ url, number }: { url: string; number: number }) {
+  return (
+    <div className="flex flex-wrap items-center gap-1">
+      Linked to
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="border-tech-main/50 text-tech-main hover:bg-tech-main/80 border-b font-mono wrap-break-word transition-colors hover:text-white">
+        Issue #{number}
+      </a>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { ChapterNavPanel, type ChapterNavPanelHandle } from "./chapter-nav-panel"
 import { ReaderNavigationProvider } from "./reader-navigation/context"
 import { MobileChapterNavCard } from "./mobile-chapter-nav-card"
@@ -16,6 +16,12 @@ import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import { useLocale, useTranslations } from "next-intl"
 import { OutlineRail } from "@/components/articles/outline-rail"
 import { MobileOutlineBar } from "@/components/articles/mobile-outline-bar"
+
+const treeDropInStyle: React.CSSProperties = {
+  animation: "tree-drop-in 1.05s cubic-bezier(0.16, 1, 0.3, 1) both",
+}
+
+const EMPTY_TREE: ChapterNavNode[] = []
 
 interface ArticlesLayoutProps {
   children: React.ReactNode
@@ -40,9 +46,7 @@ function TreeLoadingPlaceholder() {
         motion-reduce:animate-none
         md:min-h-160 md:px-4 md:py-5
       "
-      style={{
-        animation: "tree-drop-in 1.05s cubic-bezier(0.16, 1, 0.3, 1) both",
-      }}
+      style={treeDropInStyle}
       aria-hidden="true">
       <ScanConfirmOverlay className="opacity-40" />
       <SectionRail
@@ -143,7 +147,7 @@ function ChapterNavWrapper({
         </div>
       ) : (
         <ChapterNavPanel
-          tree={[]}
+          tree={EMPTY_TREE}
           onNavigate={onNavigate}
           ref={chapterNavRef}
           internalScroll={internalScroll}
@@ -188,7 +192,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       const next = !prev
       try {
         localStorage.setItem(CHAPTER_NAV_HIDDEN_KEY, String(next))
-      } catch { }
+      } catch {}
       return next
     })
   }, [])
@@ -250,6 +254,47 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
   const onNavigate = useCallback(() => dispatch({ type: "NAVIGATE" }), [dispatch])
 
+  const mobileContainerStyle = useMemo(
+    (): React.CSSProperties => ({
+      padding: isStuck ? "1rem 1rem 0 1rem" : "0",
+      justifyContent: isStuck ? "flex-end" : "stretch",
+    }),
+    [isStuck]
+  )
+
+  const mobileButtonStyle = useMemo(
+    (): React.CSSProperties => ({
+      width: isStuck ? "5rem" : "100%",
+      minHeight: isStuck ? "" : "3rem",
+      padding: isStuck ? "0.125rem 0.5rem" : "1rem",
+      borderBottom: isStuck ? undefined : "1px solid",
+      boxShadow: isStuck
+        ? "0 1px 2px 0 rgba(0, 0, 0, 0.05)"
+        : "none",
+      right: isStuck ? undefined : 0,
+    }),
+    [isStuck]
+  )
+
+  const visibleOpacityStyle = useMemo(
+    (): React.CSSProperties => ({ opacity: showFullText ? 1 : 0 }),
+    [showFullText]
+  )
+
+  const hiddenOpacityStyle = useMemo(
+    (): React.CSSProperties => ({ opacity: showFullText ? 0 : 1 }),
+    [showFullText]
+  )
+
+  const chapterNavAsideStyle = useMemo(
+    (): React.CSSProperties => ({
+      width: chapterNavHidden ? 0 : undefined,
+      opacity: chapterNavHidden ? 0 : 1,
+      borderRightWidth: chapterNavHidden ? 0 : undefined,
+    }),
+    [chapterNavHidden]
+  )
+
   const handleMobileToggle = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
@@ -298,12 +343,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           `}>
           <div
             className="relative"
-            style={
-              {
-                padding: isStuck ? "1rem 1rem 0 1rem" : "0",
-                justifyContent: isStuck ? "flex-end" : "stretch",
-              } as React.CSSProperties
-            }>
+            style={mobileContainerStyle}>
             <button
               type="button"
                onClick={handleMobileToggle}
@@ -315,25 +355,14 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 hover:bg-tech-main/5
                 ${isStuck ? "fixed top-20 right-4 z-50" : "absolute"}
               `}
-              style={
-                {
-                  width: isStuck ? "5rem" : "100%",
-                  minHeight: isStuck ? "" : "3rem",
-                  padding: isStuck ? "0.125rem 0.5rem" : "1rem",
-                  borderBottom: isStuck ? undefined : "1px solid",
-                  boxShadow: isStuck
-                    ? "0 1px 2px 0 rgba(0, 0, 0, 0.05)"
-                    : "none",
-                  right: isStuck ? undefined : 0,
-                } as React.CSSProperties
-              }
+              style={mobileButtonStyle}
               aria-label={tA11y("toggleArticleTree")}
                aria-expanded={isChapterNavOpen}
                data-testid="mobile-tree-toggle">
               <div className="relative flex w-full items-center justify-between">
                 <span
                   className="transition-opacity duration-150"
-                  style={{ opacity: showFullText ? 1 : 0 }}>
+                  style={visibleOpacityStyle}>
                   {t("title")}
                 </span>
                 <span
@@ -341,12 +370,12 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                     absolute left-1/2 line-clamp-none w-full
                     -translate-x-1/2 transition-opacity
                   "
-                  style={{ opacity: showFullText ? 0 : 1 }}>
+                  style={hiddenOpacityStyle}>
                   {t("titleShort")}
                 </span>
                 <span
                   className="text-sm font-bold transition-opacity duration-200"
-                  style={{ opacity: showFullText ? 1 : 0 }}>
+                  style={visibleOpacityStyle}>
                    {isChapterNavOpen ? "▼" : "▶"}
                 </span>
               </div>
@@ -398,11 +427,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 ease-[cubic-bezier(0.16,1,0.3,1)]
                 lg:w-80
               "
-              style={{
-                width: chapterNavHidden ? 0 : undefined,
-                opacity: chapterNavHidden ? 0 : 1,
-                borderRightWidth: chapterNavHidden ? 0 : undefined,
-              }}>
+              style={chapterNavAsideStyle}>
               <div
                 className="
                   sticky top-20 flex w-64 flex-col justify-center

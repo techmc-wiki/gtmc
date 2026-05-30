@@ -30,7 +30,7 @@ export default function LoginPage() {
           [ GTMC_AUTH_GATEWAY ]
         </div>
         <div className="text-tech-main font-mono text-[0.625rem] tracking-widest opacity-30">
-          {"SECURE.CONN // PORT-443"}
+          SECURE.CONN // PORT-443
         </div>
       </div>
 

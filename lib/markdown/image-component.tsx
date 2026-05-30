@@ -13,7 +13,7 @@ export function createImageComponent(rawPath: string) {
         (!src.startsWith("http") && !src.startsWith("/")))
     ) {
       const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
-      const resolved = path.join(currentDir, src).replace(/\\/g, "/")
+      const resolved = path.join(currentDir, src).replaceAll("\\", "/")
       src = `/api/assets?path=${encodeURIComponent(resolved)}`
     }
     return <LazyImage src={src} alt={(alt as string) || ""} />

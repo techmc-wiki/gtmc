@@ -28,9 +28,7 @@ async function getCachedArticleTree(locale: ArticleLocale) {
 }
 
 const getCachedTranslations = unstable_cache(
-  async () => {
-    return getRepoTranslations()
-  },
+  async () => getRepoTranslations(),
   ["github-chapter-nav-translations"],
   { revalidate: 3600, tags: ["github-repo-translations"] }
 )

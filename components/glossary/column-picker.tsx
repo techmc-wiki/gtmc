@@ -120,22 +120,24 @@ export function ColumnPicker({
     ]
   }, [locale, t])
 
-  const otherLanguageGroups = React.useMemo(() => {
-    return LANGUAGE_CODES.filter((code) => code !== locale).map((code) => {
-      const mapping = LOCALE_TO_COLUMN[code]
-      return {
-        code,
-        display: LANGUAGE_DISPLAY[code],
-        entries: [
-          { column: mapping.termColumn, label: LANGUAGE_DISPLAY[code] },
-          {
-            column: mapping.descColumn,
-            label: t("columnDescription"),
-          },
-        ],
-      }
-    })
-  }, [locale, t])
+  const otherLanguageGroups = React.useMemo(
+    () =>
+      LANGUAGE_CODES.filter((code) => code !== locale).map((code) => {
+        const mapping = LOCALE_TO_COLUMN[code]
+        return {
+          code,
+          display: LANGUAGE_DISPLAY[code],
+          entries: [
+            { column: mapping.termColumn, label: LANGUAGE_DISPLAY[code] },
+            {
+              column: mapping.descColumn,
+              label: t("columnDescription"),
+            },
+          ],
+        }
+      }),
+    [locale, t]
+  )
 
   const coreEntries = React.useMemo(
     () =>

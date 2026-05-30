@@ -21,6 +21,11 @@ interface ChapterNavPanelProps {
   hideActions?: boolean
 }
 
+const fadeOverlayStyle: React.CSSProperties = {
+  background:
+    "repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 4px), linear-gradient(to bottom, color-mix(in oklab, var(--color-tech-bg) 0%, transparent) 0%, color-mix(in oklab, var(--color-tech-bg) 20%, transparent) 50%, color-mix(in oklab, var(--color-tech-bg) 40%, transparent) 100%)",
+}
+
 export const ChapterNavPanel = React.forwardRef<
   ChapterNavPanelHandle,
   ChapterNavPanelProps
@@ -155,10 +160,7 @@ const ChapterNavPanelInner = React.forwardRef<
               [-webkit-mask-image:linear-gradient(to_bottom,transparent,black)]
               sm:block
             "
-            style={{
-              background:
-                "repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 4px), linear-gradient(to bottom, color-mix(in oklab, var(--color-tech-bg) 0%, transparent) 0%, color-mix(in oklab, var(--color-tech-bg) 20%, transparent) 50%, color-mix(in oklab, var(--color-tech-bg) 40%, transparent) 100%)",
-            }}
+            style={fadeOverlayStyle}
           />
         </div>
       ) : (

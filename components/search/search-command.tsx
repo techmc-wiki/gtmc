@@ -120,8 +120,8 @@ export function SearchCommand() {
             setIsLoading(false)
           }
         })
-        .catch((err) => {
-          if (err.name !== "AbortError") {
+        .catch((error) => {
+          if (error.name !== "AbortError") {
             setIsLoading(false)
           }
         })
@@ -223,7 +223,7 @@ export function SearchCommand() {
   const highlightMatch = useCallback(
     (text: string) => {
       if (!query || query.length < 2) return text
-      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+      const escapedQuery = query.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&")
       const regex = new RegExp(`(${escapedQuery})`, "gi")
       const parts = text.split(regex)
       let position = 0

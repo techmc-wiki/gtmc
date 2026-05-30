@@ -1,12 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import type { MotionValue } from "motion/react"
 import {
   useMotionValue,
   useSpring,
   useTransform,
   useReducedMotion,
-  MotionValue,
 } from "motion/react"
 import { HOMEPAGE_MOTION } from "./homepage-constants"
 

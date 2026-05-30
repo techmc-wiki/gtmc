@@ -37,10 +37,10 @@ function generateSlug(
     .replace(/\*+$/, "")
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-{2,}/g, "-")
-    .replace(/^-+|-+$/g, "")
+    .replaceAll(/[^a-z0-9\s-]/g, "")
+    .replaceAll(/\s+/g, "-")
+    .replaceAll(/-{2,}/g, "-")
+    .replaceAll(/^-+|-+$/g, "")
   if (!slug) slug = "term"
   const count = slugCounts.get(slug) ?? 0
   slugCounts.set(slug, count + 1)
@@ -64,9 +64,9 @@ function main(): void {
   let csvText: string
   try {
     csvText = fs.readFileSync(CSV_FILE, "utf-8")
-  } catch (err) {
+  } catch (error) {
     process.stderr.write(
-      `Error: Failed to read CSV: ${err instanceof Error ? err.message : String(err)}\n`
+      `Error: Failed to read CSV: ${error instanceof Error ? error.message : String(error)}\n`
     )
     process.exit(1)
   }
@@ -74,9 +74,9 @@ function main(): void {
   let rows
   try {
     ;({ rows } = parseGlossaryCsv(csvText))
-  } catch (err) {
+  } catch (error) {
     process.stderr.write(
-      `Error: Failed to parse CSV: ${err instanceof Error ? err.message : String(err)}\n`
+      `Error: Failed to parse CSV: ${error instanceof Error ? error.message : String(error)}\n`
     )
     process.exit(1)
   }
@@ -129,9 +129,9 @@ function main(): void {
   try {
     writeJson(OUTPUT_FILE, entries)
     writeJson(SUMMARY_FILE, summaries)
-  } catch (err) {
+  } catch (error) {
     process.stderr.write(
-      `Error: Failed to write output: ${err instanceof Error ? err.message : String(err)}\n`
+      `Error: Failed to write output: ${error instanceof Error ? error.message : String(error)}\n`
     )
     process.exit(1)
   }

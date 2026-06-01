@@ -1,5 +1,9 @@
 import { ImageResponse } from "next/og"
 
+if (process.env.NODE_ENV === "production" && !process.env.CI && !process.env.VERCEL) {
+  process.env.VERCEL = "0"
+}
+
 export const runtime = "edge"
 export const alt = "Graduate Texts in Minecraft"
 export const size = { width: 1200, height: 630 }

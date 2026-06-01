@@ -143,7 +143,7 @@ export async function submitGlossaryDraftAction(
     body += `---\n`
     body += `This PR was created automatically from the GTMC glossary editor. Further edits cannot be pushed to this PR via the website. Please discuss changes in the PR comments or submit a new draft.`
 
-    const token = await getGlossaryWriteToken()
+    const token = getGlossaryWriteToken()
     const branchName = `glossary-update-${id.slice(0, 8)}`
 
     const result = await openGlossaryPullRequest({

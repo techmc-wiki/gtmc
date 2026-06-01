@@ -1,11 +1,35 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 import { del } from "@vercel/blob"
+import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { uploadFileToGithub, GithubFeaturesError } from "@/lib/github"
 import { classifyFile, isImageMime, sanitizeFilename } from "@/lib/file-upload"
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024
+
+const commitBodySchema = z.object({
+  blobUrl: z.string().min(1),
+  filename: z.string().min(1),
+})
+
+function parseCommitBody(
+  body: unknown
+):
+  | { success: true; data: z.infer<typeof commitBodySchema> }
+  | { success: false; error: string } {
+  const validated = commitBodySchema.safeParse(body)
+  if (validated.success) return { success: true, data: validated.data }
+
+  const invalidField = validated.error.issues[0]?.path[0]
+  if (invalidField === "blobUrl") {
+    return { success: false, error: "Missing blobUrl" }
+  }
+  if (invalidField === "filename") {
+    return { success: false, error: "Missing filename" }
+  }
+  return { success: false, error: "Invalid request body" }
+}
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -17,15 +41,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    blobUrl = body.blobUrl
-    const filename = body.filename
+    const parsedBody = parseCommitBody(body)
+    if (!parsedBody.success) {
+      return NextResponse.json({ error: parsedBody.error }, { status: 400 })
+    }
 
-    if (!blobUrl || typeof blobUrl !== "string") {
-      return NextResponse.json({ error: "Missing blobUrl" }, { status: 400 })
-    }
-    if (!filename || typeof filename !== "string") {
-      return NextResponse.json({ error: "Missing filename" }, { status: 400 })
-    }
+    const { blobUrl: parsedBlobUrl, filename } = parsedBody.data
+    blobUrl = parsedBlobUrl
 
     const blobHostname = process.env.BLOB_STORE_HOSTNAME
     const rawBlobPathPrefix = process.env.BLOB_STORE_PATH_PREFIX || "/"

@@ -20,7 +20,7 @@ export default async function AdminPage({
     )
   }
 
-  let isAdmin = false
+  let isAdmin: boolean
   try {
     const ctx = await getCurrentUserAuthContext(session.user.id)
     isAdmin = ctx.role === "ADMIN"

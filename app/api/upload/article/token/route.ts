@@ -1,9 +1,14 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client"
+import { z } from "zod"
 
 import { auth } from "@/lib/auth"
 import { classifyFile, getAllowedMimeTypes } from "@/lib/file-upload"
+
+const clientPayloadSchema = z.object({
+  mimeType: z.string().optional(),
+})
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,7 +28,7 @@ export async function POST(req: NextRequest) {
 
         if (clientPayload) {
           try {
-            const parsed = JSON.parse(clientPayload) as { mimeType?: string }
+            const parsed = clientPayloadSchema.parse(JSON.parse(clientPayload))
             mimeType = parsed.mimeType
           } catch {
             throw new Error("Invalid client payload")

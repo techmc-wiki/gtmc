@@ -8,17 +8,20 @@ const SIDEBAR_EXPANDED_KEY = "gtmc_sidebar_expanded"
 
 export function useExpandedFolders() {
   const mounted = useMounted()
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(() => {
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
+    () => new Set<string>()
+  )
+  const expandedFoldersRef = useRef(expandedFolders)
+  const isFirstRender = useRef(true)
+
+  useEffect(() => {
     try {
       const stored = localStorage.getItem(SIDEBAR_EXPANDED_KEY)
       if (stored) {
-        return new Set<string>(JSON.parse(stored))
+        setExpandedFolders(new Set<string>(JSON.parse(stored)))
       }
     } catch {}
-    return new Set<string>()
-  })
-  const expandedFoldersRef = useRef(expandedFolders)
-  const isFirstRender = useRef(true)
+  }, [])
 
   // Persist to localStorage on subsequent state changes
   useEffect(() => {

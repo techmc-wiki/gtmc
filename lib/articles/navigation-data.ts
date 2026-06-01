@@ -5,6 +5,7 @@ interface FlatArticle {
   slug: string
   title: string
   parentPath: string
+  chapterTitle?: string
 }
 
 interface ArticleInfo {
@@ -22,20 +23,26 @@ interface NavigationResult {
 export function flattenArticleTree(tree: ChapterNavNode[]): FlatArticle[] {
   const result: FlatArticle[] = []
 
-  function dfs(nodes: ChapterNavNode[]): void {
+  function dfs(
+    nodes: ChapterNavNode[],
+    chapterPath = "",
+    chapterTitle = ""
+  ): void {
     for (const node of nodes) {
       if (!node.isFolder) {
-        const parentPath = node.isReadmeIntro
+        const inferredParentPath = node.isReadmeIntro
           ? node.slug
           : node.slug.split("/").slice(0, -1).join("/")
+        const parentPath = chapterPath || inferredParentPath
         result.push({
           slug: node.slug,
           title: node.title,
           parentPath,
+          ...(chapterTitle ? { chapterTitle } : {}),
         })
       }
       if (node.children.length > 0) {
-        dfs(node.children)
+        dfs(node.children, node.slug, node.title)
       }
     }
   }
@@ -99,14 +106,24 @@ export function getArticleNavigation(
     return { prev: null, next: null }
   }
 
-  const getChapterTitle = (slug: string): string | undefined => {
-    const entry = getLocalizedArticleEntry(slug, locale)
-    const chapterTitle = entry?.chapterTitle
+  const getChapterTitle = (article: FlatArticle): string | undefined => {
+    if (article.chapterTitle) {
+      return article.chapterTitle
+    }
+
+    if (!article.parentPath) {
+      return undefined
+    }
+
+    const entry = getLocalizedArticleEntry(article.parentPath, locale)
+    const chapterTitle =
+      entry?.chapterTitle || entry?.titleByLocale[locale]?.trim()
     if (chapterTitle) {
       return chapterTitle
     }
-    const parts = slug.split("/")
-    return parts.length > 1 ? parts[parts.length - 2] : undefined
+
+    const parts = article.parentPath.split("/")
+    return parts.at(-1)
   }
 
   const prev =
@@ -117,7 +134,7 @@ export function getArticleNavigation(
           isCrossFolder:
             articles[currentIndex - 1].parentPath !==
             articles[currentIndex].parentPath,
-          chapterTitle: getChapterTitle(articles[currentIndex - 1].slug),
+          chapterTitle: getChapterTitle(articles[currentIndex - 1]),
         }
       : null
 
@@ -129,7 +146,7 @@ export function getArticleNavigation(
           isCrossFolder:
             articles[currentIndex + 1].parentPath !==
             articles[currentIndex].parentPath,
-          chapterTitle: getChapterTitle(articles[currentIndex + 1].slug),
+          chapterTitle: getChapterTitle(articles[currentIndex + 1]),
         }
       : null
 

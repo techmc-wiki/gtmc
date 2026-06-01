@@ -166,17 +166,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const [hasTreeFetchSettled, setHasTreeFetchSettled] = useState(
     () => tree.length > 0
   )
-  const [chapterNavHidden, setChapterNavHidden] = useState(() => {
-    if (typeof window === "undefined") {
-      return false
-    }
-
-    try {
-      return localStorage.getItem(CHAPTER_NAV_HIDDEN_KEY) === "true"
-    } catch {
-      return false
-    }
-  })
+  const [chapterNavHidden, setChapterNavHidden] = useState(false)
   const desktopChapterNavRef = useRef<ChapterNavPanelHandle>(null)
   const floatingCardChapterNavRef = useRef<ChapterNavPanelHandle>(null)
   const machine = useMobileChapterNavMachine()
@@ -186,6 +176,14 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const t = useTranslations("ChapterNav")
   const tA11y = useTranslations("CommonA11y")
   const treeData = tree.length > 0 ? tree : fetchedTreeData
+
+  useEffect(() => {
+    try {
+      setChapterNavHidden(
+        localStorage.getItem(CHAPTER_NAV_HIDDEN_KEY) === "true"
+      )
+    } catch {}
+  }, [])
 
   const toggleChapterNavHidden = useCallback(() => {
     setChapterNavHidden((prev) => {

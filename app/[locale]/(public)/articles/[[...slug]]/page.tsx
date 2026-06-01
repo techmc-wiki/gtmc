@@ -34,6 +34,7 @@ import {
   getArticleNavigation,
   getFirstArticleInChapter,
 } from "@/lib/articles/navigation-data"
+import { getPublicChapterNav } from "@/lib/articles/public-tree"
 
 import type { ArticleTreeNode as BaseArticleTreeNode } from "@/lib/github/sync"
 
@@ -343,7 +344,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   // Get navigation data
-  const tree = await getArticleTree(locale)
+  const tree = await getPublicChapterNav(locale)
   const flattenedArticles = flattenArticleTree(tree)
   const currentSlug = target.canonicalSlug || slugPath
   const navigation = getArticleNavigation(currentSlug, flattenedArticles, locale)

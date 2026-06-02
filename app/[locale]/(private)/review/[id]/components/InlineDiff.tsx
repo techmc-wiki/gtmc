@@ -22,9 +22,8 @@ export function InlineDiff({
           // current mode: showing what we have that incoming doesn't
           if (part.added) {
             return (
-              // eslint-disable-next-line react/no-array-index-key
               <span
-                key={index}
+                key={index} // eslint-disable-line react/no-array-index-key
                 className="rounded-xs border-b border-blue-400 bg-blue-300/80 px-0.5 font-bold text-blue-950">
                 {part.value}
               </span>
@@ -40,9 +39,8 @@ export function InlineDiff({
           // incoming mode: showing what incoming has that current doesn't
           if (part.removed) {
             return (
-              // eslint-disable-next-line react/no-array-index-key
               <span
-                key={index}
+                key={index} // eslint-disable-line react/no-array-index-key
                 className="rounded-xs border-b border-green-500 bg-green-400/80 px-0.5 font-bold text-green-950">
                 {part.value}
               </span>

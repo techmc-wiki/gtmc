@@ -4,33 +4,21 @@
  * Produces pure HTML strings (no React) using unified/remark/rehype,
  * designed for Playwright-based PDF generation.
  *
- * Mirrors the plugin setup in lib/markdown/processor.ts but replaces
- * react-markdown with rehype-stringify for HTML output.
+ * Uses the shared plugin builders from lib/markdown/pipeline/core.ts
+ * to stay in sync with the React renderer.
  */
 
 import { unified } from "unified"
 import remarkParse from "remark-parse"
-import remarkGfm from "remark-gfm"
-import remarkMath from "remark-math"
-import remarkBreaks from "remark-breaks"
 import remarkRehype from "remark-rehype"
-import rehypeRaw from "rehype-raw"
-import rehypeKatex from "rehype-katex"
-import rehypeSlug from "rehype-slug"
 import rehypeStringify from "rehype-stringify"
 import matter from "gray-matter"
-import type { PluggableList } from "unified"
 
-import { remarkAnsiColors } from "@/lib/markdown/plugins/remark-ansi-colors"
-import { remarkWikilinks } from "@/lib/markdown/plugins/remark-wikilinks"
-import { remarkCallouts } from "@/lib/markdown/plugins/remark-callouts"
-import { remarkAdvancedSections } from "@/lib/markdown/plugins/remark-advanced-sections"
-import { remarkPeopleMentions } from "@/lib/markdown/plugins/remark-people-mentions"
-import { remarkNumberedHeadingsDot } from "@/lib/markdown/plugins/remark-heading-numbering"
-import { rehypeAdvancedSections } from "@/lib/markdown/plugins/rehype-advanced-sections"
-import type { RehypeShikiPlugin } from "@/lib/markdown/plugins/rehype-shiki"
-
-import { rehypeLinkedCode, rehypeCJKSpacing } from "@/lib/markdown/processor"
+import type { RehypeShikiPlugin } from "@/lib/markdown/syntax/rehype-shiki"
+import {
+  buildRemarkPlugins,
+  buildRehypePlugins,
+} from "@/lib/markdown/pipeline/core"
 
 /**
  * Options for the PDF markdown pipeline.
@@ -54,15 +42,6 @@ export interface PdfPipelineOptions {
 }
 
 /**
- * Detect whether the content contains math expressions that need KaTeX.
- */
-function hasMathContent(content: string): boolean {
-  return (
-    content.includes("$") || content.includes("\\(") || content.includes("\\[")
-  )
-}
-
-/**
  * Render markdown content to a pure HTML string.
  *
  * Uses the same unified/remark/rehype plugin chain as the main markdown
@@ -79,40 +58,17 @@ export async function renderMarkdownToHtml(
   // ── Strip YAML frontmatter ────────────────────────────────────
   const { content: cleanContent } = matter(content)
 
-  // ── Build remark (markdown AST) plugin list ───────────────────────
-  const remarkPlugins: PluggableList = [
-    remarkGfm,
-    remarkBreaks,
-    remarkAnsiColors,
-    remarkWikilinks,
-    remarkCallouts,
-    remarkPeopleMentions,
-    remarkAdvancedSections,
-    [remarkNumberedHeadingsDot, { startDepth: 2 }],
-  ]
+  // ── Build plugin lists using shared builders ──────────────────────
+  const remarkPlugins = buildRemarkPlugins(cleanContent, {
+    includeWikilinks: true,
+    includeMath: true,
+  })
 
-  // ── Build rehype (HTML AST) plugin list ───────────────────────────
-  const rehypePlugins: PluggableList = [
-    rehypeRaw,
-    rehypeAdvancedSections,
-    rehypeLinkedCode,
-    rehypeSlug,
-  ]
-
-  // Conditionally include math support (KaTeX)
-  if (hasMathContent(cleanContent)) {
-    remarkPlugins.push(remarkMath)
-    // Insert rehypeKatex after rehypeAdvancedSections (index 2)
-    rehypePlugins.splice(2, 0, rehypeKatex)
-  }
-
-  // Conditionally include syntax highlighting
-  if (options?.shikiPlugin) {
-    rehypePlugins.push(options.shikiPlugin)
-  }
-
-  // Always apply CJK spacing last (after all transforms)
-  rehypePlugins.push(rehypeCJKSpacing)
+  const rehypePlugins = buildRehypePlugins({
+    includeShiki: !!options?.shikiPlugin,
+    shikiPlugin: options?.shikiPlugin,
+    includeMath: true,
+  })
 
   // ── Assemble and run the pipeline ─────────────────────────────────
   const file = await unified()

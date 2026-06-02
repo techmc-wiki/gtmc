@@ -9,7 +9,7 @@ import {
   generateDescription,
   MarkdownRenderer,
 } from "@/lib/markdown"
-import { getCachedRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
+import { getCachedRehypeShiki } from "@/lib/markdown/syntax/rehype-shiki"
 import {
   getArticleTree,
   getArticleAvailableLocales,

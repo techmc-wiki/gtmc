@@ -30,8 +30,8 @@ import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import type { ArticleLocale } from "@/lib/articles/manifest"
 import { buildEbookHtml, resolveImagesInHtml } from "@/lib/pdf/ebook-structure"
 import { renderMarkdownToHtml } from "@/lib/pdf/markdown-pipeline"
-import { createRehypeShiki } from "@/lib/markdown/plugins/rehype-shiki"
-import type { RehypeShikiPlugin } from "@/lib/markdown/plugins/rehype-shiki"
+import { createRehypeShiki } from "@/lib/markdown/syntax/rehype-shiki"
+import type { RehypeShikiPlugin } from "@/lib/markdown/syntax/rehype-shiki"
 
 // ── Types ───────────────────────────────────────────────────────────────────
 

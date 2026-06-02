@@ -110,7 +110,7 @@ export function ReviewDiffPanel({
               </div>
               <div className="divide-y divide-black/5">
                 {segment.lines.map((line, lineNum) => (
-                  // eslint-disable-next-line react/no-array-index-key
+                  /* eslint-disable react/no-array-index-key -- diff lines have no stable unique IDs */
                   <div
                     key={`${segment.id}:${lineNum}`}
                     className="grid grid-cols-[1.75rem_minmax(0,1fr)] gap-2 px-4 py-1.5 font-mono text-xs/relaxed">
@@ -122,6 +122,7 @@ export function ReviewDiffPanel({
                       {line || "\u00a0"}
                     </pre>
                   </div>
+                  /* eslint-enable react/no-array-index-key */
                 ))}
               </div>
             </div>

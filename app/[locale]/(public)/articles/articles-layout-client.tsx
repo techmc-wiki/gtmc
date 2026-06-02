@@ -2,7 +2,10 @@
 
 import * as React from "react"
 import { useState, useRef, useEffect, useCallback, useMemo } from "react"
-import { ChapterNavPanel, type ChapterNavPanelHandle } from "./chapter-nav-panel"
+import {
+  ChapterNavPanel,
+  type ChapterNavPanelHandle,
+} from "./chapter-nav-panel"
 import { ReaderNavigationProvider } from "./reader-navigation/context"
 import { MobileChapterNavCard } from "./mobile-chapter-nav-card"
 import { useMobileChapterNavMachine } from "@/app/[locale]/(public)/articles/mobile-chapter-nav/use-mobile-chapter-nav-machine"
@@ -170,7 +173,13 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const desktopChapterNavRef = useRef<ChapterNavPanelHandle>(null)
   const floatingCardChapterNavRef = useRef<ChapterNavPanelHandle>(null)
   const machine = useMobileChapterNavMachine()
-  const { state, dispatch, isOpen: isChapterNavOpen, isFloating, isStuck } = machine
+  const {
+    state,
+    dispatch,
+    isOpen: isChapterNavOpen,
+    isFloating,
+    isStuck,
+  } = machine
   void state
   const locale = useLocale()
   const t = useTranslations("ChapterNav")
@@ -250,7 +259,10 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const isChapterNavLoading = tree.length === 0 && !hasTreeFetchSettled
   const showChapterNavPlaceholder = isChapterNavLoading && treeData.length === 0
 
-  const onNavigate = useCallback(() => dispatch({ type: "NAVIGATE" }), [dispatch])
+  const onNavigate = useCallback(
+    () => dispatch({ type: "NAVIGATE" }),
+    [dispatch]
+  )
 
   const mobileContainerStyle = useMemo(
     (): React.CSSProperties => ({
@@ -266,9 +278,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       minHeight: isStuck ? "" : "3rem",
       padding: isStuck ? "0.125rem 0.5rem" : "1rem",
       borderBottom: isStuck ? undefined : "1px solid",
-      boxShadow: isStuck
-        ? "0 1px 2px 0 rgba(0, 0, 0, 0.05)"
-        : "none",
+      boxShadow: isStuck ? "0 1px 2px 0 rgba(0, 0, 0, 0.05)" : "none",
       right: isStuck ? undefined : 0,
     }),
     [isStuck]
@@ -333,18 +343,16 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         className="
           relative isolate flex min-h-[calc(100dvh-8rem)] min-w-0 flex-col
           overflow-x-clip
-          md:flex-row md:justify-center md:gap-8
+          md:flex-row md:justify-center md:gap-6
         ">
         <div
           className={`
             relative z-30 md:hidden
           `}>
-          <div
-            className="relative"
-            style={mobileContainerStyle}>
+          <div className="relative" style={mobileContainerStyle}>
             <button
               type="button"
-               onClick={handleMobileToggle}
+              onClick={handleMobileToggle}
               className={`
                 cursor-pointer overflow-hidden
                 border border-tech-main/40 bg-surface-overlay/70 font-mono text-xs
@@ -355,8 +363,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
               `}
               style={mobileButtonStyle}
               aria-label={tA11y("toggleArticleTree")}
-               aria-expanded={isChapterNavOpen}
-               data-testid="mobile-tree-toggle">
+              aria-expanded={isChapterNavOpen}
+              data-testid="mobile-tree-toggle">
               <div className="relative flex w-full items-center justify-between">
                 <span
                   className="transition-opacity duration-150"
@@ -374,7 +382,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 <span
                   className="text-sm font-bold transition-opacity duration-200"
                   style={visibleOpacityStyle}>
-                   {isChapterNavOpen ? "▼" : "▶"}
+                  {isChapterNavOpen ? "▼" : "▶"}
                 </span>
               </div>
             </button>
@@ -384,10 +392,11 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           <div
             className={`
               grid transition-all duration-300 ease-out
-              ${isChapterNavOpen && !isFloating
+              ${
+                isChapterNavOpen && !isFloating
                   ? "grid-rows-[1fr] opacity-100"
                   : "grid-rows-[0fr] opacity-0"
-                }
+              }
             `}>
             <div className="overflow-hidden">
               <div
@@ -420,18 +429,17 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           <div className="flex h-full">
             <aside
               className="
-                h-full w-64 overflow-clip border-r guide-line
+                h-full w-56 overflow-clip border-r guide-line
                 transition-[width,opacity,border-color] duration-300
                 ease-[cubic-bezier(0.16,1,0.3,1)]
-                lg:w-80
               "
               style={chapterNavAsideStyle}>
               <div
                 className="
-                  sticky top-20 flex w-64 flex-col justify-center
+                  sticky top-20 flex w-56 flex-col justify-center
                   hover:z-20
                   sm:top-26 sm:h-[calc(100dvh-128px)]
-                  lg:top-28 lg:h-[calc(100dvh-144px)] lg:w-80
+                  lg:top-28 lg:h-[calc(100dvh-144px)]
                 ">
                 <div
                   className="
@@ -518,22 +526,10 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         </div>
 
         <main
-          className={`
-            relative my-6 w-full min-w-0 flex-1 transition-all duration-300
-            ease-[cubic-bezier(0.16,1,0.3,1)]
-            ${chapterNavHidden
-              ? `
-                  md:max-w-3xl
-                  xl:max-w-3xl
-                  [1920px]:max-w-4xl
-                `
-              : `
-                  md:max-w-2xl
-                  xl:max-w-3xl
-                  [1920px]:max-w-4xl
-                `
-            }
-          `}>
+          className="
+            relative my-6 w-full min-w-0 flex-1
+            md:max-w-[48rem] md:basis-[48rem]
+          ">
           {children}
         </main>
 

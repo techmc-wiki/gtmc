@@ -36,17 +36,16 @@ export function ChapterNavToolbar({
     return (
       <div
         className="
-          ml-0.5 shrink-0 border-b guide-line bg-surface-overlay/95 px-6 py-3
+          ml-0.5 shrink-0 border-b guide-line px-2 py-4
           backdrop-blur-sm
         ">
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2">
+          <div className="flex gap-2 justify-between">
             <button
               type="button"
               onClick={handleCollapseAllWithBlur}
               className="
-                flex-3 cursor-pointer border border-tech-main/40 px-3 py-1.5
-                pl-2 font-mono text-[0.6875rem] transition-colors
+                w-full cursor-pointer border border-tech-main/40 px-2
+                pl-2 font-mono text-[0.625rem] transition-colors
                 hover:bg-tech-main hover:text-white
               ">
               {t("buttonCollapseAll")}
@@ -56,14 +55,13 @@ export function ChapterNavToolbar({
               disabled={locateDisabled}
               onClick={handleLocate}
               className="
-                flex-2 cursor-pointer border border-tech-main/40 px-3 py-1.5
-                pl-2 font-mono text-[0.6875rem] transition-colors
+                w-full cursor-pointer border border-tech-main/40 px-3 py-1.5
+                pl-2 font-mono text-[0.625rem] transition-colors
                 hover:bg-tech-main hover:text-white
                 disabled:cursor-not-allowed disabled:opacity-50
               ">
               {t("buttonLocate")}
             </button>
-          </div>
         </div>
       </div>
     )

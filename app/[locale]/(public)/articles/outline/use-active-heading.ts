@@ -3,26 +3,41 @@
 import { useState, useEffect, useRef } from "react"
 import type { OutlineItem } from "./use-outline"
 
+interface HeadingEntry {
+  id: string
+  element: Element
+}
+
+function getOutlineHeadingElement(id: string): Element | null {
+  if (typeof document === "undefined") return null
+
+  const escapedId = CSS.escape(id)
+  return document.querySelector(
+    `main h2#${escapedId}, main h3#${escapedId}, main h4#${escapedId}`
+  )
+}
+
+function getHeadingEntries(toc: OutlineItem[]): HeadingEntry[] {
+  return toc.flatMap((item) => {
+    const element = getOutlineHeadingElement(item.id)
+    return element ? [{ id: item.id, element }] : []
+  })
+}
+
 function computeInitialActiveHeading(toc: OutlineItem[]): string | null {
   if (!toc || toc.length === 0) return null
 
-  const headingIds = toc.map((item) => item.id)
-  const headingElements = headingIds
-    .map((id) => {
-      const escapedId = CSS.escape(id)
-      return document.querySelector(`main h2#${escapedId}`)
-    })
-    .filter((el) => el !== null) as Element[]
+  const headingEntries = getHeadingEntries(toc)
 
-  if (headingElements.length === 0) return null
+  if (headingEntries.length === 0) return null
 
   const threshold =
     typeof window !== "undefined" ? window.innerHeight * 0.25 : 0
-  let activeId: string | null = headingIds[0] || null
-  for (let i = 0; i < headingElements.length; i++) {
-    const rect = headingElements[i].getBoundingClientRect()
+  let activeId: string | null = headingEntries[0]?.id ?? null
+  for (const entry of headingEntries) {
+    const rect = entry.element.getBoundingClientRect()
     if (rect.top <= threshold) {
-      activeId = headingIds[i]
+      activeId = entry.id
     } else {
       break
     }
@@ -51,22 +66,19 @@ export function useActiveHeading(
       return
     }
 
-    const headingIds = toc.map((item) => item.id)
-
     const getActiveId = (): string | null => {
-      const threshold = window.innerHeight * 0.25
-      let activeId: string | null = headingIds[0] || null
+      const headingEntries = getHeadingEntries(toc)
+      if (headingEntries.length === 0) return null
 
-      for (let i = 0; i < headingIds.length; i++) {
-        const escapedId = CSS.escape(headingIds[i])
-        const el = document.querySelector(`main h2#${escapedId}`)
-        if (el) {
-          const rect = el.getBoundingClientRect()
-          if (rect.top <= threshold) {
-            activeId = headingIds[i]
-          } else {
-            break
-          }
+      const threshold = window.innerHeight * 0.25
+      let activeId: string | null = headingEntries[0]?.id ?? null
+
+      for (const entry of headingEntries) {
+        const rect = entry.element.getBoundingClientRect()
+        if (rect.top <= threshold) {
+          activeId = entry.id
+        } else {
+          break
         }
       }
       return activeId

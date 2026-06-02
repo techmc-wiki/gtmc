@@ -2,14 +2,25 @@
 
 import { useEffect, useState } from "react"
 
+export type OutlineDepth = 1 | 2 | 3
+
 export interface OutlineItem {
   id: string
   text: string
+  depth: OutlineDepth
+}
+
+const OUTLINE_HEADING_SELECTOR = "main h2[id], main h3[id], main h4[id]"
+
+function getOutlineDepth(heading: Element): OutlineDepth {
+  if (heading.tagName === "H3") return 2
+  if (heading.tagName === "H4") return 3
+  return 1
 }
 
 function scanHeadings(): OutlineItem[] {
   if (typeof document === "undefined") return []
-  const headings = document.querySelectorAll("main h2")
+  const headings = document.querySelectorAll(OUTLINE_HEADING_SELECTOR)
   if (headings.length === 0) return []
 
   const outlineItems: OutlineItem[] = []
@@ -20,7 +31,11 @@ function scanHeadings(): OutlineItem[] {
         el.remove()
       })
       const text = clone.textContent?.replace(/^#\s*/, "") ?? ""
-      outlineItems.push({ id: heading.id, text })
+      outlineItems.push({
+        id: heading.id,
+        text,
+        depth: getOutlineDepth(heading),
+      })
     }
   })
   return outlineItems

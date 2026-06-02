@@ -6,10 +6,16 @@ import { useReaderNavigation } from "@/app/[locale]/(public)/articles/reader-nav
 import { useModalEffects } from "@/hooks/use-modal-effects"
 
 const emptySubscribe = () => () => {}
+const outlineDepthClasses = {
+  1: "pl-4 text-sm/snug",
+  2: "pl-7 text-[0.8125rem]/snug",
+  3: "pl-10 text-xs/snug",
+} satisfies Record<1 | 2 | 3, string>
 
 function useScrollProgress() {
   const [progress, setProgress] = React.useState(0)
-  const [hasScrolledPastNavbar, setHasScrolledPastNavbar] = React.useState(false)
+  const [hasScrolledPastNavbar, setHasScrolledPastNavbar] =
+    React.useState(false)
 
   React.useEffect(() => {
     const onScroll = () => {
@@ -50,19 +56,19 @@ export function MobileOutlineBar() {
 
   const activeItem = outline.find((item) => item.id === activeHeadingId)
 
-
   return (
     <>
-
-
       {/* Progress strip — fixed just below sticky navbar */}
-      <div className={`pointer-events-none fixed inset-x-0 top-16 z-20 h-20 transition-opacity duration-500 sm:hidden ${hasScrolledPastNavbar ? "opacity-100" : "opacity-0"}`}>
+      <div
+        className={`pointer-events-none fixed inset-x-0 top-16 z-20 h-20 transition-opacity duration-500 md:hidden ${hasScrolledPastNavbar ? "opacity-100" : "opacity-0"}`}>
         {/* Section label — fixed right-aligned in navbar row */}
         {activeItem && (
-          <button type="button" className="pointer-events-auto flex h-fit w-full items-center px-4 py-2 pr-4 backdrop-blur-xs sm:hidden" aria-label="Open article outline" onClick={openSheet}>
-            <div
-              className="max-w-[40vw] truncate font-mono text-xs font-bold text-tech-main transition-colors duration-150 hover:text-tech-main"
-            >
+          <button
+            type="button"
+            className="pointer-events-auto flex h-fit w-full items-center px-4 py-2 pr-4 backdrop-blur-xs md:hidden"
+            aria-label="Open article outline"
+            onClick={openSheet}>
+            <div className="max-w-[40vw] truncate font-mono text-xs font-bold text-tech-main transition-colors duration-150 hover:text-tech-main">
               {activeItem.text}
             </div>
           </button>
@@ -73,12 +79,10 @@ export function MobileOutlineBar() {
         />
       </div>
 
-
       {/* Bottom Sheet overlay */}
       <div
-        className={`fixed inset-0 z-60 sm:hidden ${isSheetOpen ? "pointer-events-auto" : "pointer-events-none"}`}
-        aria-hidden={!isSheetOpen}
-      >
+        className={`fixed inset-0 z-60 md:hidden ${isSheetOpen ? "pointer-events-auto" : "pointer-events-none"}`}
+        aria-hidden={!isSheetOpen}>
         {/* Backdrop */}
         <button
           type="button"
@@ -92,8 +96,7 @@ export function MobileOutlineBar() {
           className={`absolute inset-x-0 bottom-0 flex max-h-[70dvh] flex-col border-t border-tech-main/30 bg-surface-overlay/95 backdrop-blur-md transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isSheetOpen ? "translate-y-0" : "translate-y-full"}`}
           role={isSheetOpen ? "dialog" : undefined}
           aria-modal={isSheetOpen ? "true" : undefined}
-          aria-label="Article outline"
-        >
+          aria-label="Article outline">
           {/* Header */}
           <div className="flex shrink-0 items-center justify-between border-b guide-line px-4 py-3">
             <div className="flex items-center gap-3">
@@ -115,8 +118,7 @@ export function MobileOutlineBar() {
               type="button"
               onClick={closeSheet}
               className="cursor-pointer px-3 py-2 font-mono text-xs font-bold tracking-[0.15em] text-tech-main uppercase transition-colors hover:bg-tech-main/10"
-              aria-label="Close article outline"
-            >
+              aria-label="Close article outline">
               CLOSE
             </button>
           </div>
@@ -130,11 +132,11 @@ export function MobileOutlineBar() {
                   <Link
                     href={`#${item.id}`}
                     onClick={closeSheet}
-                    className={`block border-l-[3px] py-2.5 pr-2 pl-4 text-sm/snug transition-all duration-200 ${isActive
-                      ? "border-tech-main font-semibold text-tech-main"
-                      : "border-transparent text-tech-main/60 hover:border-tech-main/30 hover:text-tech-main"
-                      }`}
-                  >
+                    className={`block border-l-[3px] py-2.5 pr-2 transition-all duration-200 ${outlineDepthClasses[item.depth]} ${
+                      isActive
+                        ? "border-tech-main font-semibold text-tech-main"
+                        : "border-transparent text-tech-main/60 hover:border-tech-main/30 hover:text-tech-main"
+                    }`}>
                     {item.text}
                   </Link>
                 </li>

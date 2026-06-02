@@ -128,7 +128,7 @@
     "titleShort": "目录",
     "buttonNewArticle": "+ 新建文章 / 目录",
     "buttonCollapseAll": "⊟ 折叠全部",
-    "buttonLocate": "◎ 定位文章",
+    "buttonLocate": "◎ 定位当前",
     "createDocTitleLabel": "标题",
     "createDocSlugLabel": "Slug（URL 路径）",
     "createDocSlugPlaceholder": "留空以自动生成",

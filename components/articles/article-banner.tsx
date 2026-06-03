@@ -61,12 +61,11 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
     if (locked || isReducedMotionRef.current) return
 
     const banner = bannerRef.current
-    if (!banner) return
 
     const processMouseMove = () => {
       rafIdRef.current = null
       const e = lastMouseEventRef.current
-      if (!e || !rectRef.current) return
+      if (!e || !rectRef.current || !banner) return
 
       const rect = rectRef.current
       const cx = rect.left + rect.width / 2
@@ -86,18 +85,10 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
       }
     }
 
-    const onMouseLeave = () => {
-      setOffset({ x: 0, y: 0 })
-      banner.style.setProperty("--parallax-x", "0")
-      banner.style.setProperty("--parallax-y", "0")
-    }
-
-    banner.addEventListener("mousemove", onMouseMove)
-    banner.addEventListener("mouseleave", onMouseLeave)
+    window.addEventListener("mousemove", onMouseMove)
 
     return () => {
-      banner.removeEventListener("mousemove", onMouseMove)
-      banner.removeEventListener("mouseleave", onMouseLeave)
+      window.removeEventListener("mousemove", onMouseMove)
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current)
       }

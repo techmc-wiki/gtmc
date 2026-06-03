@@ -32,17 +32,28 @@ export function ArticleMetadataLayout({
 
       <div
         className="
-          relative mb-8 animate-fade-in border guide-line bg-surface-overlay/80 p-4
+          relative mb-5 animate-fade-in border guide-line bg-surface-overlay/80 p-3
           font-mono text-xs text-tech-main
-          sm:p-6
+          sm:mb-6 sm:p-4
         ">
         <div
           className="
             flex flex-wrap items-center justify-between text-tech-main/50
           ">
-          <span className="flex items-center gap-2">
-            <span className="size-2 animate-pulse bg-tech-main/50" />
-            SYS.READ_STREAM | UTF-8
+          <span className="flex flex-wrap items-center gap-2">
+            <span className="flex items-center gap-2">
+              <span className="size-2 animate-pulse bg-tech-main/50" />
+              SYS.READ_STREAM | UTF-8
+            </span>
+            {isAdvanced && (
+              <span
+                className="
+                  bg-tech-advanced px-1.5 py-0.5 font-mono text-[0.625rem]
+                  font-bold tracking-widest text-white select-none
+                ">
+                ADVANCED
+              </span>
+            )}
           </span>
           <span
             className="
@@ -54,26 +65,7 @@ export function ArticleMetadataLayout({
           {headerActions}
         </div>
 
-        <div className="mt-4 flex flex-col gap-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1
-              className="
-                font-mono text-xl font-bold tracking-tight text-tech-main-dark
-                sm:text-2xl
-              ">
-              {title}
-            </h1>
-            {isAdvanced && (
-              <span
-                className="
-                  mx-2 shrink-0 bg-tech-advanced px-1.5 py-0.5 font-mono text-[0.625rem]
-                  font-bold tracking-widest text-white select-none
-                ">
-                ADVANCED
-              </span>
-            )}
-          </div>
-
+        <div className="mt-3 flex flex-col gap-3 sm:gap-4">
           {children}
         </div>
       </div>

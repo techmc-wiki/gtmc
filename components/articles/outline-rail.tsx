@@ -51,11 +51,11 @@ export function OutlineRail() {
   }, [activeHeadingId])
 
   if (outline.length === 0) {
-    return <div className="hidden w-52 shrink-0 md:block" aria-hidden="true" />
+    return <div className="hidden h-full w-52 shrink-0 md:block" aria-hidden="true" />
   }
 
   return (
-    <div className="hidden w-52 shrink-0 md:block">
+    <div className="hidden h-full w-52 shrink-0 md:block">
       <div
         className="
           sticky top-26 z-20 flex h-[calc(100dvh-128px)]

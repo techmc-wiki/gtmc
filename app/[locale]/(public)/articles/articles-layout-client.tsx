@@ -340,12 +340,13 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
     <ReaderNavigationProvider tree={treeData}>
       <MobileOutlineBar />
       <div
-        className="
+        className={`
           relative isolate flex min-h-[calc(100dvh-8rem)] min-w-0
           flex-col overflow-x-clip
-          md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,48rem)_minmax(0,1fr)]
+          md:grid md:grid-cols-12
           md:gap-6
-        ">
+          md:max-w-360 md:mx-auto
+        `}>
         <div
           className={`
             relative z-30 md:hidden
@@ -423,7 +424,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         <div
           className="
             relative hidden shrink-0 self-stretch
-            md:col-start-1 md:justify-self-end
+            md:col-start-1 md:col-span-3 md:justify-self-end
             md:block
           "
           data-chapter-nav-region
@@ -529,13 +530,17 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
         <main
           className="
-            relative my-6 w-full min-w-0
-            md:col-start-2 md:max-w-[48rem]
+            relative my-6 min-w-0
+            md:col-start-4
+            md:col-span-7
+            md:w-full
+            md:mx-auto
+            md:max-w-3xl
           ">
           {children}
         </main>
 
-        <div className="md:col-start-3 md:justify-self-start md:self-stretch">
+        <div className="md:col-start-11 md:col-span-2 md:justify-self-start md:self-stretch">
           <OutlineRail />
         </div>
       </div>

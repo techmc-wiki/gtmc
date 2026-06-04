@@ -20,7 +20,7 @@ export function SiteShell({ leftSlot, rightSlot, children }: SiteShellProps) {
         </div>
       </nav>
 
-      <main className="relative w-full max-w-full min-w-0 p-4 sm:p-6 lg:px-24 lg:py-8">
+      <main className="relative w-full max-w-full min-w-0 p-4 sm:p-6 lg:px-12 lg:py-8">
         {children}
       </main>
     </div>

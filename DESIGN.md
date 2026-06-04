@@ -127,12 +127,24 @@ Tracking
 
 Mobile-first, modest spacing, predictable container rhythm.
 
-- Page container: `page-container` = `mx-auto max-w-6xl space-y-8 px-6`. The `-pb` variant adds `pb-12`.
+- Page container: `page-container` = `mx-auto max-w-6xl space-y-8`. The `-pb` variant adds `pb-12`.
 - Site chrome max-width inside the nav strip: `max-w-450` (a custom Tailwind v4 spacing alias).
 - Common gutters: `p-4 sm:p-6`, `px-4 sm:px-6 lg:px-8`. Editor and reader pages may go wider (`max-w-[1400px]`, `lg:px-24`).
 - Common grids: `grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3`.
 - Page headers commonly stack on mobile and align on desktop: `flex flex-col gap-* md:flex-row md:items-end`.
 - Touch targets meet `touch-target` (≥ `44px`) on buttons and primary controls.
+
+12-column grid (asymmetric layouts)
+
+Use this grid only when the page has asymmetric column allocations (sidebars, rails). Single-column pages use `page-container` instead.
+
+- Container: `flex flex-col md:grid md:grid-cols-12 md:gap-6 md:max-w-360 md:mx-auto`. Mobile stacks vertically; grid activates at `md` (≥768px).
+- Column allocation (default 3 | 7 | 2 split):
+  - Left sidebar / nav: `md:col-span-3`
+  - Main content: `md:col-span-7`, further capped at `max-w-3xl`
+  - Right rail (TOC, related): `md:col-span-2`
+- Variant: the footer uses a 4 | 8 split (`md:col-span-4` / `md:col-span-8`) with `md:gap-10` instead of `md:gap-6`.
+- Current usages: article reader (`articles-layout-client.tsx`) and footer (`footer.tsx`).
 
 ## Navigation
 

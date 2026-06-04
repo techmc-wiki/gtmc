@@ -9,6 +9,7 @@
   "Homepage": {
     "startReading": "START READING →",
     "loginGithub": "LOGIN",
+    "loggedInAs": "LOGGED IN AS {username}",
     "initializing": "INITIALIZING..."
   },
   "Footer": {

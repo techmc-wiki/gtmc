@@ -9,6 +9,7 @@
   "Homepage": {
     "startReading": "开始阅读 →",
     "loginGithub": "登录",
+    "loggedInAs": "登录为 {username}",
     "initializing": "初始化中..."
   },
   "Footer": {

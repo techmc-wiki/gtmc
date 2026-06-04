@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback } from "react"
 import dynamic from "next/dynamic"
+import { SessionProvider, useSession } from "next-auth/react"
 import { useRouter } from "@/i18n/navigation"
 import { useHomepageMotion } from "./use-homepage-motion"
 import { HOMEPAGE_MOTION } from "./homepage-constants"
@@ -31,6 +32,52 @@ const MidgroundLayer = dynamic(
   () => import("./midground-layer").then((mod) => mod.MidgroundLayer),
   { ssr: false }
 )
+
+function HomepageLoginButton() {
+  const { data: session, status } = useSession()
+  const t = useTranslations("Homepage")
+  const loggedInUsername =
+    session?.user?.githubLogin ??
+    session?.user?.name ??
+    session?.user?.email ??
+    null
+
+  if (status === "loading") {
+    return (
+      <TechButton
+        variant="secondary"
+        disabled
+        className="border-tech-main/30 bg-tech-main/5 flex h-12 w-full items-center justify-center text-xs font-medium tracking-widest uppercase shadow-sm backdrop-blur-md sm:w-72 sm:text-sm">
+        {"// "}
+        {t("initializing")}
+      </TechButton>
+    )
+  }
+
+  if (loggedInUsername) {
+    return (
+      <TechButton
+        variant="secondary"
+        disabled
+        aria-label={t("loggedInAs", { username: loggedInUsername })}
+        className="border-tech-main/30 bg-tech-main/5 flex h-12 w-full items-center justify-center text-xs font-medium tracking-widest uppercase shadow-sm backdrop-blur-md sm:w-72 sm:text-sm">
+        {"// "}
+        {t("loggedInAs", { username: loggedInUsername })}
+      </TechButton>
+    )
+  }
+
+  return (
+    <Link href="/login" className="w-full sm:w-72">
+      <TechButton
+        variant="secondary"
+        className="flex h-12 w-full items-center justify-center text-xs font-medium tracking-widest uppercase shadow-sm backdrop-blur-md transition-transform duration-300 hover:scale-102 sm:text-sm">
+        {"// "}
+        {t("loginGithub")} <GithubIcon className="size-4" />
+      </TechButton>
+    </Link>
+  )
+}
 
 export function HomepageClient() {
   const router = useRouter()
@@ -128,14 +175,9 @@ export function HomepageClient() {
               )}
             </TechButton>
           </Link>
-          <Link href="/login" className="w-full sm:w-72">
-            <TechButton
-              variant="secondary"
-              className="flex h-12 w-full items-center justify-center text-xs font-medium tracking-widest uppercase shadow-sm backdrop-blur-md transition-transform duration-300 hover:scale-102 sm:text-sm">
-              {"// "}
-              {t("loginGithub")} <GithubIcon className="size-4" />
-            </TechButton>
-          </Link>
+          <SessionProvider>
+            <HomepageLoginButton />
+          </SessionProvider>
         </div>
 
         <div className="pointer-events-none relative mt-12 flex space-x-1 opacity-40">

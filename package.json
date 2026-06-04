@@ -95,7 +95,7 @@
   },
   "devDependencies": {
     "@lhci/cli": "^0.15.1",
-    "@next/bundle-analyzer": "^16.2.6",
+    "@next/bundle-analyzer": "^16.2.7",
     "@tailwindcss/postcss": "^4.3.0",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
@@ -105,17 +105,17 @@
     "@types/react": "^19.2.15",
     "@types/three": "^0.184.1",
     "ajv": "^8.20.0",
-    "oxfmt": "^0.52.0",
-    "oxlint": "^1.67.0",
+    "oxfmt": "^0.53.0",
+    "oxlint": "^1.68.0",
     "pdf-lib": "^1.17.1",
     "playwright": "^1.60.0",
     "rehype-stringify": "^10.0.1",
     "remark-rehype": "^11.1.2",
     "tailwindcss": "^4.3.0",
     "tailwindcss-animate": "^1.0.7",
-    "tsx": "^4.22.3",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.8"
   },
   "resolutions": {
     "form-data": "4.0.5"

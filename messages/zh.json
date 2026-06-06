@@ -527,7 +527,9 @@
     "showChapterNav": "显示章节导航",
     "hideChapterNav": "隐藏章节导航",
     "closeTree": "关闭目录树",
-    "toggleLineWrap": "切换自动换行"
+    "toggleLineWrap": "切换自动换行",
+    "mainNavigation": "主导航",
+    "skipToMainContent": "跳转到主要内容"
   },
   "PeopleMention": {
     "panelLabel": "SYS.PEOPLE_LOOKUP",

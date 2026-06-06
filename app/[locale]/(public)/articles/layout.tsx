@@ -1,34 +1,11 @@
 import * as React from "react"
-import { getTranslations } from "next-intl/server"
-import {
-  AuthAwareDesktopNav,
-  AuthAwareMobileNav,
-} from "@/components/layout/auth-aware-nav"
-import { LanguageSwitcher } from "@/components/layout/language-switcher"
-import { SiteShell } from "@/components/layout/site-shell"
-import { SearchCommand } from "@/components/search/search-command"
-import { Logo } from "@/components/ui/logo"
-import { AuthIsland } from "@/components/layout/auth-island"
-import { ThemeToggle } from "@/components/layout/theme-toggle"
+import { MainSiteShell } from "@/components/layout/main-site-shell"
 import { ArticlesLayoutClient } from "./articles-layout-client"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import type { ArticleLocale } from "@/lib/articles/manifest"
 
 function normalizeLocale(locale: string): ArticleLocale {
   return locale === "en" ? "en" : "zh"
-}
-
-function buildNavLinks(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
-  return [
-    { href: "/articles", label: t("articles") },
-    { href: "/draft", label: t("drafts") },
-    { href: "/glossary", label: t("glossary") },
-    { href: "/features", label: t("features") },
-  ]
-}
-
-function buildAdminLink(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
-  return { href: "/review", label: t("reviewHub") }
 }
 
 export default async function ArticlesLayout({
@@ -39,30 +16,12 @@ export default async function ArticlesLayout({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
-  const t = await getTranslations("Nav")
-  const navLinks = buildNavLinks(t)
-  const adminLink = buildAdminLink(t)
   const normalizedLocale = normalizeLocale(locale)
   const tree = await getPublicChapterNav(normalizedLocale)
 
   return (
-    <SiteShell
-      leftSlot={
-        <>
-          <Logo size="md" />
-          <AuthAwareDesktopNav navLinks={navLinks} adminLink={adminLink} />
-        </>
-      }
-      rightSlot={
-        <>
-          <SearchCommand />
-          <AuthAwareMobileNav navLinks={navLinks} adminLink={adminLink} />
-          <ThemeToggle className="hidden sm:flex" />
-          <LanguageSwitcher className="hidden sm:flex" />
-          <AuthIsland />
-        </>
-      }>
+    <MainSiteShell>
       <ArticlesLayoutClient tree={tree}>{children}</ArticlesLayoutClient>
-    </SiteShell>
+    </MainSiteShell>
   )
 }

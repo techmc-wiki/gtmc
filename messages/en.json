@@ -527,7 +527,9 @@
     "showChapterNav": "Show chapter navigation",
     "hideChapterNav": "Hide chapter navigation",
     "closeTree": "Close tree",
-    "toggleLineWrap": "Toggle line wrap"
+    "toggleLineWrap": "Toggle line wrap",
+    "mainNavigation": "Main Navigation",
+    "skipToMainContent": "Skip to main content"
   },
   "PeopleMention": {
     "panelLabel": "SYS.PEOPLE_LOOKUP",

@@ -1,29 +1,7 @@
 import * as React from "react"
-import { getTranslations } from "next-intl/server"
-
-import { AuthIsland } from "@/components/layout/auth-island"
-import { DesktopNav } from "@/components/layout/desktop-nav"
-import { ThemeToggle } from "@/components/layout/theme-toggle"
-import { LanguageSwitcher } from "@/components/layout/language-switcher"
-import { MobileNav } from "@/components/layout/mobile-nav"
-import { SiteShell } from "@/components/layout/site-shell"
-import { SearchCommand } from "@/components/search/search-command"
-import { Logo } from "@/components/ui/logo"
 import { auth } from "@/lib/auth"
 import { getCurrentUserAuthContext } from "@/lib/auth-context"
-
-function buildNavLinks(
-  t: Awaited<ReturnType<typeof getTranslations<"Nav">>>,
-  isAdmin: boolean
-) {
-  return [
-    { href: "/articles", label: t("articles") },
-    { href: "/draft", label: t("drafts") },
-    { href: "/glossary", label: t("glossary") },
-    ...(isAdmin ? [{ href: "/review", label: t("reviewHub") }] : []),
-    { href: "/features", label: t("features") },
-  ]
-}
+import { MainSiteShell } from "@/components/layout/main-site-shell"
 
 export default async function DashboardLayout({
   children,
@@ -42,27 +20,5 @@ export default async function DashboardLayout({
     }
   }
 
-  const t = await getTranslations("Nav")
-  const navLinks = buildNavLinks(t, isAdmin)
-
-  return (
-    <SiteShell
-      leftSlot={
-        <>
-          <Logo size="md" />
-          <DesktopNav navLinks={navLinks} />
-        </>
-      }
-      rightSlot={
-        <>
-          <SearchCommand />
-          <MobileNav navLinks={navLinks} />
-          <ThemeToggle className="hidden sm:flex" />
-          <LanguageSwitcher className="hidden sm:flex" />
-          <AuthIsland />
-        </>
-      }>
-      {children}
-    </SiteShell>
-  )
+  return <MainSiteShell isAdminServerSide={isAdmin}>{children}</MainSiteShell>
 }

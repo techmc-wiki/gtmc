@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useTranslations } from "next-intl"
 
 interface SiteShellProps {
   leftSlot: React.ReactNode
@@ -7,9 +8,18 @@ interface SiteShellProps {
 }
 
 export function SiteShell({ leftSlot, rightSlot, children }: SiteShellProps) {
+  const t = useTranslations("CommonA11y")
+
   return (
     <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative flex min-h-screen w-full max-w-full flex-col overflow-x-clip font-sans">
-      <nav className="border-tech-main/40 bg-surface-overlay/60 sticky top-0 z-50 w-full border-b backdrop-blur-sm">
+      <a
+        href="#main-content"
+        className="focus:bg-surface-overlay focus:border-tech-main focus:text-tech-main-dark sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:border focus:px-4 focus:py-2 focus:font-mono focus:text-xs focus:outline-none">
+        {t("skipToMainContent")}
+      </a>
+      <nav
+        aria-label={t("mainNavigation")}
+        className="border-tech-main/40 bg-surface-overlay/60 sticky top-0 z-50 w-full border-b backdrop-blur-sm">
         <div className="bg-tech-main/20 absolute top-0 left-0 h-px w-full" />
         <div className="mx-auto max-w-450 px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between md:h-20">
@@ -20,7 +30,9 @@ export function SiteShell({ leftSlot, rightSlot, children }: SiteShellProps) {
         </div>
       </nav>
 
-      <main className="relative w-full max-w-full min-w-0 p-4 sm:p-6 lg:px-12 lg:py-8">
+      <main
+        id="main-content"
+        className="relative w-full max-w-full min-w-0 p-4 sm:p-6 lg:px-12 lg:py-8">
         {children}
       </main>
     </div>

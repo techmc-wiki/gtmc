@@ -20,6 +20,7 @@ interface GlossaryTableProps {
   locale: string
   onOpenDetail?: (entry: GlossaryEntry) => void
   className?: string
+  isReady?: boolean
 }
 
 const ALPHA = /[A-Z]/
@@ -68,6 +69,7 @@ export function GlossaryTable({
   locale,
   onOpenDetail,
   className,
+  isReady,
 }: GlossaryTableProps) {
   const t = useTranslations("Glossary")
 
@@ -201,6 +203,7 @@ export function GlossaryTable({
                     density={density}
                     locale={locale}
                     onOpenDetail={onOpenDetail}
+                    isReady={isReady}
                   />
                 ))}
               </tbody>
@@ -218,6 +221,7 @@ export function GlossaryTable({
                   locale={locale}
                   density={density}
                   onOpenDetail={onOpenDetail}
+                  isReady={isReady}
                 />
               ))}
             </div>

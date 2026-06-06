@@ -16,6 +16,7 @@ interface GlossaryTableRowProps {
   density: GlossaryDensity
   locale: string
   onOpenDetail?: (entry: GlossaryEntry) => void
+  isReady?: boolean
 }
 
 const densityRowPadding = {
@@ -24,8 +25,7 @@ const densityRowPadding = {
   comfortable: "py-3",
 } as const satisfies Record<GlossaryDensity, string>
 
-const cellBase =
-  "px-3 align-top text-sm transition-[padding] duration-300 ease-out motion-reduce:transition-none"
+const cellBase = "px-3 align-top text-sm motion-reduce:transition-none"
 const termTriggerClass =
   "text-tech-main-dark hover:text-tech-main focus-visible:outline-tech-main cursor-pointer text-left font-mono font-medium tracking-tight underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
 
@@ -44,8 +44,14 @@ export function GlossaryTableRow({
   density,
   locale,
   onOpenDetail,
+  isReady,
 }: GlossaryTableRowProps) {
   const padding = densityRowPadding[density]
+  const cellClass = cn(
+    cellBase,
+    padding,
+    isReady && "transition-[padding] duration-300 ease-out"
+  )
 
   const relatedTokens = React.useMemo(
     () => parseRelated(entry.related),
@@ -87,11 +93,7 @@ export function GlossaryTableRow({
           return (
             <td
               key={column}
-              className={cn(
-                cellBase,
-                padding,
-                "text-tech-main/80 max-w-[24rem]"
-              )}>
+              className={cn(cellClass, "text-tech-main/80 max-w-[24rem]")}>
               {value ? (
                 <span className="line-clamp-2">{value}</span>
               ) : (
@@ -104,9 +106,7 @@ export function GlossaryTableRow({
         switch (column) {
           case "term":
             return (
-              <td
-                key={column}
-                className={cn(cellBase, padding, "min-w-[10rem]")}>
+              <td key={column} className={cn(cellClass, "min-w-[10rem]")}>
                 <Link
                   href={`/glossary/${entry.slug}`}
                   locale={locale as "en" | "zh"}
@@ -130,8 +130,7 @@ export function GlossaryTableRow({
               <td
                 key={column}
                 className={cn(
-                  cellBase,
-                  padding,
+                  cellClass,
                   "text-tech-main/70 font-mono text-xs"
                 )}>
                 {entry.shortForm || ""}
@@ -143,8 +142,7 @@ export function GlossaryTableRow({
               <td
                 key={column}
                 className={cn(
-                  cellBase,
-                  padding,
+                  cellClass,
                   "text-tech-main/60 font-mono text-xs"
                 )}>
                 {entry.category || ""}
@@ -156,8 +154,7 @@ export function GlossaryTableRow({
               <td
                 key={column}
                 className={cn(
-                  cellBase,
-                  padding,
+                  cellClass,
                   "text-tech-main/60 font-mono text-xs"
                 )}>
                 {entry.regex || ""}
@@ -168,18 +165,14 @@ export function GlossaryTableRow({
             return (
               <td
                 key={column}
-                className={cn(
-                  cellBase,
-                  padding,
-                  "text-tech-main/80 max-w-[36rem]"
-                )}>
+                className={cn(cellClass, "text-tech-main/80 max-w-[36rem]")}>
                 <span className="line-clamp-2">{entry.description}</span>
               </td>
             )
 
           case "related":
             return (
-              <td key={column} className={cn(cellBase, padding)}>
+              <td key={column} className={cellClass}>
                 {relatedTokens.length > 0 ? (
                   <CrossRefChips
                     related={relatedTokens}

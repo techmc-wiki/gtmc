@@ -40,7 +40,6 @@ The articles themselves live in a separate repo and are pulled in via a Git subm
 ├── components/ui/          tech-card, tech-button, corner-brackets, …
 ├── components/{articles,editor,features,layout,markdown,review,search}/
 ├── lib/                    Article pipeline, auth, db, search, GitHub helpers
-│   └── __tests__/          Vitest specs
 ├── articles/               Article content (Git submodule)
 ├── glossary/               Glossary CSV data (Git submodule)
 ├── data/                   Generated manifest + rendered article content + glossary*.json

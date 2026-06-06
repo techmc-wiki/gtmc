@@ -102,6 +102,14 @@ export function GlossaryToolbar({
   const [density, setDensity] = React.useState<GlossaryDensity>("normal")
   const [selectedEntry, setSelectedEntry] =
     React.useState<GlossaryEntry | null>(null)
+  const [isReady, setIsReady] = React.useState(false)
+
+  React.useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      setIsReady(true)
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [])
 
   const closeDetailPanel = React.useCallback(() => {
     setSelectedEntry(null)
@@ -185,6 +193,7 @@ export function GlossaryToolbar({
         selectedCategories={selectedCategories}
         locale={locale}
         onOpenDetail={setSelectedEntry}
+        isReady={isReady}
       />
 
       <GlossaryDetailPanel

@@ -169,8 +169,6 @@ export const CornerBrackets = React.forwardRef<
       )
     }
 
-
-
     return (
       <div
         ref={ref}

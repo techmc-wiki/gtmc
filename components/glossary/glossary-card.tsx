@@ -16,6 +16,7 @@ interface GlossaryCardProps {
   density: GlossaryDensity
   onOpenDetail?: (entry: GlossaryEntry) => void
   className?: string
+  isReady?: boolean
 }
 
 const labelClass =
@@ -44,6 +45,7 @@ export function GlossaryCard({
   density,
   onOpenDetail,
   className,
+  isReady,
 }: GlossaryCardProps) {
   const visible = React.useMemo(() => new Set(visibleColumns), [visibleColumns])
 
@@ -75,7 +77,10 @@ export function GlossaryCard({
     <article
       data-density={density}
       className={cn(
-        "border-tech-line/30 hover:border-tech-line/60 group bg-surface-overlay/40 flex flex-col border transition-[padding,gap,border-color,background-color] duration-300 ease-out motion-reduce:transition-none",
+        "border-tech-line/30 hover:border-tech-line/60 group bg-surface-overlay/40 flex flex-col border ease-out motion-reduce:transition-none",
+        isReady
+          ? "transition-[padding,gap,border-color,background-color] duration-300"
+          : "transition-[border-color,background-color] duration-150",
         densityCardClass[density],
         className
       )}>

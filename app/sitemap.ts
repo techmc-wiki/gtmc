@@ -6,6 +6,7 @@ import { shouldIgnoreFile } from "@/lib/articles/ignore"
 import { encodeSlug } from "@/lib/slug-resolver"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import type { ArticleLocale } from "@/lib/articles/manifest"
+import { loadGlossaryManifest } from "@/lib/glossary/manifest"
 
 export const revalidate = 3600
 
@@ -64,6 +65,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.9,
     },
+    {
+      url: `${BASE}/zh/glossary`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${BASE}/en/glossary`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${BASE}/zh/pdf`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${BASE}/en/pdf`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
   ]
 
   let articleUrls: MetadataRoute.Sitemap = []
@@ -114,5 +139,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     /* GitHub API unavailable — skip */
   }
 
-  return [...staticUrls, ...articleUrls, ...featureUrls]
+  let glossaryUrls: MetadataRoute.Sitemap = []
+  try {
+    const { entries } = loadGlossaryManifest()
+    glossaryUrls = entries.flatMap((entry) => [
+      {
+        url: `${BASE}/zh/glossary/${entry.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      },
+      {
+        url: `${BASE}/en/glossary/${entry.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      },
+    ])
+  } catch (error) {
+    console.warn("Sitemap: skipped glossary URLs due to manifest error:", error)
+  }
+
+  return [...staticUrls, ...articleUrls, ...featureUrls, ...glossaryUrls]
 }

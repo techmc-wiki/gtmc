@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono, Noto_Sans_SC } from "next/font/google"
 // oxlint-disable-next-line import/no-unassigned-import
 import "../globals.css"
@@ -62,45 +62,64 @@ const jsonLd = {
   ]),
 }
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: "Graduate Texts in Minecraft",
-  description:
-    "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
-  verification: {
-    google: "QE8InawtRuO1F7YrvI1JN56__AFPCAFo6Gn-Vi1QJI8",
-  },
-  alternates: {
-    canonical: "/zh",
-    languages: {
-      zh: "/zh",
-      en: "/en",
-      "x-default": "/zh",
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const canonical = `/${locale}`
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: "Graduate Texts in Minecraft",
+    description:
+      "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+    verification: {
+      google: "QE8InawtRuO1F7YrvI1JN56__AFPCAFo6Gn-Vi1QJI8",
     },
-  },
-  openGraph: {
-    type: "website",
-    siteName: "Graduate Texts in Minecraft",
-    url: "/",
-    title: "Graduate Texts in Minecraft",
-    description:
-      "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
-    images: [
-      {
-        url: "/opengraph-image",
-        width: 1200,
-        height: 630,
-        alt: "Graduate Texts in Minecraft",
+    alternates: {
+      canonical,
+      languages: {
+        zh: "/zh",
+        en: "/en",
+        "x-default": "/zh",
       },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Graduate Texts in Minecraft",
-    description:
-      "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
-    images: ["/opengraph-image"],
-  },
+    },
+    openGraph: {
+      type: "website",
+      siteName: "Graduate Texts in Minecraft",
+      url: canonical,
+      title: "Graduate Texts in Minecraft",
+      description:
+        "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+      images: [
+        {
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: "Graduate Texts in Minecraft",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Graduate Texts in Minecraft",
+      description:
+        "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+      images: ["/opengraph-image"],
+    },
+  }
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8f9fc" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e1525" },
+  ],
 }
 
 export function generateStaticParams() {
@@ -131,23 +150,7 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${notoSansSc.variable} scroll-smooth`}
       data-scroll-behavior="smooth"
       suppressHydrationWarning>
-      <head>
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, viewport-fit=cover"
-        />
-        <meta
-          name="theme-color"
-          media="(prefers-color-scheme: light)"
-          content="#f8f9fc"
-        />
-        <meta
-          name="theme-color"
-          media="(prefers-color-scheme: dark)"
-          content="#0e1525"
-        />
-        <title></title>
-      </head>
+      <head />
       <Analytics />
       <SpeedInsights />
       <body className="bg-tech-bg/50 flex min-h-screen w-full flex-col overflow-x-hidden antialiased">

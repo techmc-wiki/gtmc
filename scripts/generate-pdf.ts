@@ -491,7 +491,9 @@ async function main(): Promise<void> {
 
   console.log("[pdf] Phase 6/6: Generating PDF via Playwright...")
 
-  const browser = await chromium.launch().catch((error) => {
+  const browser = await chromium.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+  }).catch((error) => {
     console.warn(
       "[pdf] Failed to launch Playwright, skipping PDF generation:",
       error

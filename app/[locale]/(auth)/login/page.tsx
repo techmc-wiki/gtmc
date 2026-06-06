@@ -92,7 +92,7 @@ export default function LoginPage() {
 
           <div className="border-tech-main/40 bg-surface-overlay/60 relative overflow-hidden border p-6 text-center shadow-sm backdrop-blur-md md:p-10">
             {/* 闪光扫过效果 */}
-            <div className="pointer-events-none absolute inset-0 translate-x-[-200%] -skew-x-12 animate-[shimmer_3s_infinite_2s] bg-linear-to-r from-transparent via-white/40 to-transparent motion-reduce:animate-none" />
+            <div className="card-shimmer" />
 
             {/* 角落刻度 */}
             <div className="border-tech-main absolute top-0 left-0 size-3 -translate-0.5 border-t-2 border-l-2" />

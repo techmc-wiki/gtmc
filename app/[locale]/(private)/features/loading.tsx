@@ -3,7 +3,6 @@ import { TechCard } from "@/components/ui/tech-card"
 import {
   SectionRail,
   SegmentedBar,
-  ScanConfirmOverlay,
   SkeletonExitWrapper,
 } from "@/components/ui/loading-shell-primitives"
 
@@ -21,8 +20,7 @@ export default async function FeaturesLoading() {
         className="page-container-pb"
         aria-busy="true"
         aria-label={t("loadingFeaturesList")}>
-        <div className="animate-tech-slide-in border-tech-main/40 relative mt-8 flex flex-col items-start justify-between gap-4 border-b pb-6 md:flex-row md:items-end">
-          <ScanConfirmOverlay />
+        <div className="border-tech-main/40 relative mt-8 flex flex-col items-start justify-between gap-4 border-b pb-6 md:flex-row md:items-end">
           <div className="w-full md:w-auto">
             <SectionRail label="FEATURE_HEADER" />
             <SegmentedBar
@@ -40,7 +38,7 @@ export default async function FeaturesLoading() {
         </div>
 
         <div className="space-y-6">
-          <TechCard className="animate-tech-slide-in border-tech-main/40 bg-surface-overlay/80 p-6 backdrop-blur-sm [animation-delay:100ms]">
+          <TechCard className="border-tech-main/40 bg-surface-overlay/80 p-6 backdrop-blur-sm">
             <div className="space-y-4">
               <div>
                 <h4 className="text-tech-main mb-3 font-mono text-sm tracking-widest uppercase">
@@ -74,10 +72,7 @@ export default async function FeaturesLoading() {
           </TechCard>
 
           {SKELETON_GROUPS.map((group) => (
-            <div
-              key={group.label}
-              className="animate-tech-slide-in"
-              style={group.style}>
+            <div key={group.label} className="">
               <div className="mb-8">
                 <h2 className="guide-line text-tech-main-dark mb-6 border-b pb-2 text-lg font-bold tracking-widest uppercase md:text-xl">
                   {group.label} ({group.cards.length})

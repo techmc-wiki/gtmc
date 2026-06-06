@@ -412,6 +412,10 @@ body {
   perspective: 1000px;
 }
 
+@utility card-shimmer {
+  @apply fill-mode-backwards via-tech-main/25 pointer-events-none absolute inset-0 animate-[shimmer_3s_infinite_2s] bg-linear-to-r from-transparent to-transparent motion-reduce:animate-none dark:via-white/10;
+}
+
 /* Note: ::-webkit-scrollbar is WebKit-only (Chrome, Safari, Edge).
    Firefox uses scrollbar-width/scrollbar-color instead (standard). */
 @utility custom-bottom-scrollbar {

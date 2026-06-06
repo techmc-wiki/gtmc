@@ -11,7 +11,6 @@ import { PageHeader } from "@/components/ui/page-header"
 import { TechButton } from "@/components/ui/tech-button"
 import { FeatureList } from "@/app/[locale]/(private)/features/feature-list"
 import { PendingCreationBanner } from "@/app/[locale]/(private)/features/pending-creation-banner"
-import { RevealSection } from "@/app/[locale]/(private)/features/reveal-helpers"
 
 function buildFeatures(issues: GithubIssue[]) {
   const allIssues = [...issues]
@@ -67,22 +66,18 @@ export async function FeatureListContent({
 
   return (
     <div className="page-container-pb">
-      <RevealSection delay={0}>
-        <PageHeader
-          title={t("pageTitle")}
-          subtitle={t("pageSubtitle")}
-          topMargin
-          action={headerAction}
-        />
+      <PageHeader
+        title={t("pageTitle")}
+        subtitle={t("pageSubtitle")}
+        topMargin
+        action={headerAction}
+      />
 
-        {isCreated && <PendingCreationBanner />}
-      </RevealSection>
+      {isCreated && <PendingCreationBanner />}
 
-      <RevealSection delay={100}>
-        <div className="mt-8">
-          <FeatureList features={features} />
-        </div>
-      </RevealSection>
+      <div className="mt-8">
+        <FeatureList features={features} />
+      </div>
     </div>
   )
 }

@@ -1,7 +1,4 @@
-"use client"
-
-import { useEffect } from "react"
-import { useTranslations } from "next-intl"
+import { getTranslations } from "next-intl/server"
 import { TechCard } from "@/components/ui/tech-card"
 import { SectionTitle } from "@/components/ui/section-title"
 import {
@@ -11,12 +8,8 @@ import {
   SkeletonExitWrapper,
 } from "@/components/ui/loading-shell-primitives"
 
-export default function DraftLoading() {
-  const t = useTranslations("CommonA11y")
-
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
+export default async function DraftLoading() {
+  const t = await getTranslations("CommonA11y")
   return (
     <SkeletonExitWrapper>
       <div

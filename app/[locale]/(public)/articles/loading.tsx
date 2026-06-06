@@ -1,7 +1,4 @@
-"use client"
-
-import { useEffect } from "react"
-import { useTranslations } from "next-intl"
+import { getTranslations } from "next-intl/server"
 import {
   ScanConfirmOverlay,
   SectionFrame,
@@ -11,12 +8,8 @@ import {
 } from "@/components/ui/loading-shell-primitives"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 
-export default function ArticlesLoading() {
-  const t = useTranslations("CommonA11y")
-
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
+export default async function ArticlesLoading() {
+  const t = await getTranslations("CommonA11y")
   return (
     <SkeletonExitWrapper>
       <div

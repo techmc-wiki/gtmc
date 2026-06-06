@@ -1,7 +1,4 @@
-"use client"
-
-import { useEffect } from "react"
-import { useTranslations } from "next-intl"
+import { getTranslations } from "next-intl/server"
 import {
   SectionFrame,
   SegmentedBar,
@@ -11,12 +8,8 @@ import {
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { TechCard } from "@/components/ui/tech-card"
 
-export default function FeatureDetailLoading() {
-  const t = useTranslations("CommonA11y")
-
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
+export default async function FeatureDetailLoading() {
+  const t = await getTranslations("CommonA11y")
   return (
     <SkeletonExitWrapper>
       <div

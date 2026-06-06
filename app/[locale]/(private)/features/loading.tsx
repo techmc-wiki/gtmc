@@ -1,7 +1,4 @@
-"use client"
-
-import { useEffect } from "react"
-import { useTranslations } from "next-intl"
+import { getTranslations } from "next-intl/server"
 import { TechCard } from "@/components/ui/tech-card"
 import {
   SectionRail,
@@ -16,12 +13,8 @@ const SKELETON_GROUPS = [
   { label: "RESOLVED", style: { animationDelay: "400ms" }, cards: [5, 6] },
 ] as const
 
-export default function FeaturesLoading() {
-  const t = useTranslations("CommonA11y")
-
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
+export default async function FeaturesLoading() {
+  const t = await getTranslations("CommonA11y")
   return (
     <SkeletonExitWrapper>
       <div

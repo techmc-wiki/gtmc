@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 

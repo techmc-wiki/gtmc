@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react"
 
 interface CornerBracketsProps {
@@ -54,6 +56,37 @@ export const CornerBrackets = React.forwardRef<
     const posTopRight = "translate-x-px -translate-y-px border-t-2 border-r-2"
     const posBottomLeft = "-translate-x-px translate-y-px border-b-2 border-l-2"
     const posBottomRight = "translate-px border-r-2 border-b-2"
+
+    const basePx = sizeToPx[size] ?? 8
+    const bracketStyle = React.useMemo(
+      (): React.CSSProperties =>
+        ({
+          width: "var(--bracket-size)",
+          height: "var(--bracket-size)",
+          "--bracket-size": `${basePx}px`,
+        }) as React.CSSProperties,
+      [basePx]
+    )
+
+    const handleMouseEnter = React.useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        ;(e.currentTarget as HTMLElement).style.setProperty(
+          "--bracket-size",
+          `${basePx * hoverScale}px`
+        )
+      },
+      [basePx, hoverScale]
+    )
+
+    const handleMouseLeave = React.useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        ;(e.currentTarget as HTMLElement).style.setProperty(
+          "--bracket-size",
+          `${basePx}px`
+        )
+      },
+      [basePx]
+    )
 
     if (variant === "static") {
       return (
@@ -136,36 +169,7 @@ export const CornerBrackets = React.forwardRef<
       )
     }
 
-    const basePx = sizeToPx[size] ?? 8
-    const bracketStyle = React.useMemo(
-      (): React.CSSProperties =>
-        ({
-          width: "var(--bracket-size)",
-          height: "var(--bracket-size)",
-          "--bracket-size": `${basePx}px`,
-        }) as React.CSSProperties,
-      [basePx]
-    )
 
-    const handleMouseEnter = React.useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
-        ;(e.currentTarget as HTMLElement).style.setProperty(
-          "--bracket-size",
-          `${basePx * hoverScale}px`
-        )
-      },
-      [basePx, hoverScale]
-    )
-
-    const handleMouseLeave = React.useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
-        ;(e.currentTarget as HTMLElement).style.setProperty(
-          "--bracket-size",
-          `${basePx}px`
-        )
-      },
-      [basePx]
-    )
 
     return (
       <div

@@ -1,7 +1,4 @@
-"use client"
-
-import { useEffect } from "react"
-import { useTranslations } from "next-intl"
+import { getTranslations } from "next-intl/server"
 import {
   ScanConfirmOverlay,
   SectionFrame,
@@ -14,12 +11,8 @@ import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 const ALPHABET_NAV_KEYS = Array.from({ length: 14 }, (_, i) => `alpha-nav-${i}`)
 
-export default function GlossaryLoading() {
-  const t = useTranslations("Glossary")
-
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
+export default async function GlossaryLoading() {
+  const t = await getTranslations("Glossary")
 
   return (
     <SkeletonExitWrapper>

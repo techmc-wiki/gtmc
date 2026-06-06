@@ -22,6 +22,25 @@ export function MobileNav({ navLinks }: MobileNavProps) {
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
   const isMounted = useMounted()
 
+  React.useEffect(() => {
+    if (!isDrawerOpen) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsDrawerOpen(false)
+      }
+    }
+
+    const originalStyle = window.getComputedStyle(document.body).overflow
+    document.body.style.overflow = "hidden"
+    window.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = originalStyle
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [isDrawerOpen])
+
   return (
     <>
       <button
@@ -49,8 +68,8 @@ export function MobileNav({ navLinks }: MobileNavProps) {
             )}
 
             <div
-              className={`border-tech-main/40 bg-surface-overlay/95 fixed inset-x-0 top-16 z-40 overflow-hidden border-b backdrop-blur-md transition-all duration-300 md:hidden ${isDrawerOpen ? "max-h-screen" : "max-h-0"} `}>
-              <div className="space-y-2 p-4 sm:p-6">
+              className={`border-tech-main/40 bg-surface-overlay/95 fixed inset-x-0 top-16 z-40 overflow-hidden border-b backdrop-blur-md transition-all duration-300 md:hidden ${isDrawerOpen ? "max-h-[calc(100dvh-4rem)]" : "max-h-0"} `}>
+              <div className="max-h-[calc(100dvh-4rem)] space-y-2 overflow-y-auto p-4 sm:p-6">
                 {navLinks.map((link) => (
                   <Link
                     key={link.href}

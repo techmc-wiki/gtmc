@@ -23,12 +23,14 @@ const geistSans = Geist({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-geist-sans",
+  adjustFontFallback: false,
 })
 
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-geist-mono",
+  adjustFontFallback: false,
 })
 
 const notoSansSc = Noto_Sans_SC({
@@ -36,6 +38,7 @@ const notoSansSc = Noto_Sans_SC({
   display: "swap",
   preload: false,
   variable: "--font-noto-sans-sc",
+  adjustFontFallback: false,
 })
 
 const jsonLd = {

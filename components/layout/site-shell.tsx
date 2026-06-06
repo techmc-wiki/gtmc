@@ -1,5 +1,6 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
+import { PageTransition } from "./page-transition"
 
 interface SiteShellProps {
   leftSlot: React.ReactNode
@@ -11,7 +12,7 @@ export function SiteShell({ leftSlot, rightSlot, children }: SiteShellProps) {
   const t = useTranslations("CommonA11y")
 
   return (
-    <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative flex min-h-screen w-full max-w-full flex-col overflow-x-clip font-sans">
+    <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative flex min-h-screen w-full flex-col overflow-x-clip font-sans">
       <a
         href="#main-content"
         className="focus:bg-surface-overlay focus:border-tech-main focus:text-tech-main-dark sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:border focus:px-4 focus:py-2 focus:font-mono focus:text-xs focus:outline-none">
@@ -21,7 +22,7 @@ export function SiteShell({ leftSlot, rightSlot, children }: SiteShellProps) {
         aria-label={t("mainNavigation")}
         className="border-tech-main/40 bg-surface-overlay/60 sticky top-0 z-50 w-full border-b backdrop-blur-sm">
         <div className="bg-tech-main/20 absolute top-0 left-0 h-px w-full" />
-        <div className="mx-auto max-w-450 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between md:h-20">
             <div className="flex space-x-4 md:space-x-8">{leftSlot}</div>
 
@@ -32,8 +33,8 @@ export function SiteShell({ leftSlot, rightSlot, children }: SiteShellProps) {
 
       <main
         id="main-content"
-        className="relative w-full max-w-full min-w-0 p-4 sm:p-6 lg:px-12 lg:py-8">
-        {children}
+        className="relative flex w-full flex-1 flex-col p-4 sm:p-6 lg:px-12 lg:py-8">
+        <PageTransition>{children}</PageTransition>
       </main>
     </div>
   )

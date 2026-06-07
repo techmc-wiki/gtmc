@@ -36,17 +36,17 @@ const nextConfig: NextConfig = {
     "/api/articles/search": [
       "./articles/**/*.{png,gif,jpg,jpeg,webp,svg,mp4,webm,zip,litematic,nbt,schem,schematic,bmp,ico}",
       "./.git/**",
-      "./public/gtmc.pdf",
+      "./public/gtmc-*.pdf",
     ],
     "/api/litematica-assets/[...path]": [
       "./articles/**",
       "./.git/**",
-      "./public/gtmc.pdf",
+      "./public/gtmc-*.pdf",
     ],
     "/api/litematica-assets/*": [
       "./articles/**",
       "./.git/**",
-      "./public/gtmc.pdf",
+      "./public/gtmc-*.pdf",
     ],
     "/[locale]/glossary/**": ["./glossary/**"],
   },

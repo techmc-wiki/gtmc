@@ -36,7 +36,7 @@ import type { RehypeShikiPlugin } from "@/lib/markdown/syntax/rehype-shiki"
 // ── Types ───────────────────────────────────────────────────────────────────
 
 interface CliOptions {
-  locale: "en" | "zh"
+  locale: "en" | "zh" | "all"
   output: string
 }
 
@@ -77,19 +77,23 @@ interface OutlineNode {
 
 function parseArgs(): CliOptions {
   const args = process.argv.slice(2)
-  let locale: "en" | "zh" = "en"
-  let output = path.join(process.cwd(), "public", "gtmc.pdf")
+  let locale: "en" | "zh" | "all" = "all"
+  let output = ""
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]
     if (arg === "--locale" && i + 1 < args.length) {
       const val = args[i + 1].toLowerCase()
-      if (val === "en" || val === "zh") locale = val
+      if (val === "en" || val === "zh" || val === "all") locale = val as any
       i++
     } else if (arg === "--output" && i + 1 < args.length) {
       output = path.resolve(process.cwd(), args[i + 1])
       i++
     }
+  }
+
+  if (!output && locale !== "all") {
+    output = path.join(process.cwd(), "public", `gtmc-${locale}.pdf`)
   }
 
   return { locale, output }
@@ -140,24 +144,23 @@ async function checkHasMath(
   articles: LinearizedArticle[],
   locale: ArticleLocale
 ): Promise<boolean> {
-  /* oxlint-disable eslint/no-await-in-loop -- early-return on first match requires sequential iteration */
-  for (const article of articles) {
-    try {
-      const content = await getArticleContentForPdf(article.slug, locale)
-      if (!content) continue
-      if (
-        content.includes("$") ||
-        content.includes("\\(") ||
-        content.includes("\\[")
-      ) {
-        return true
+  const results = await Promise.all(
+    articles.map(async (article) => {
+      try {
+        const content = await getArticleContentForPdf(article.slug, locale)
+        if (!content) return false
+        return (
+          content.includes("$") ||
+          content.includes("\\(") ||
+          content.includes("\\[")
+        )
+      } catch {
+        // Skip articles that fail to load
+        return false
       }
-    } catch {
-      // Skip articles that fail to load
-    }
-  }
-  /* oxlint-enable eslint/no-await-in-loop */
-  return false
+    })
+  )
+  return results.some((r) => r)
 }
 
 // ── Custom Article Renderer ─────────────────────────────────────────────────
@@ -374,9 +377,7 @@ async function writePdfOutlines(
 
 // ── Main ────────────────────────────────────────────────────────────────────
 
-async function main(): Promise<void> {
-  const { locale, output } = parseArgs()
-
+async function runPdf(locale: "en" | "zh", output: string): Promise<void> {
   console.log(`[pdf] Generating PDF (locale=${locale}, output=${output})`)
 
   // Ensure output directory exists
@@ -393,15 +394,14 @@ async function main(): Promise<void> {
   try {
     tree = (await getArticleTree(locale)) as ChapterNavNode[]
   } catch (error) {
-    console.error("[pdf] Failed to load article tree:", error)
-    process.exit(1)
+    throw new Error(`[pdf] Failed to load article tree: ${error}`)
   }
 
   if (!tree || tree.length === 0) {
     console.warn(
       "[pdf] No articles found in tree (submodule may not be initialized). Skipping PDF generation."
     )
-    process.exit(0)
+    return
   }
 
   sortChapterTree(tree)
@@ -426,8 +426,7 @@ async function main(): Promise<void> {
       checkHasMath(articles, locale),
     ])
   } catch (error) {
-    console.error("[pdf] Failed to scan articles:", error)
-    process.exit(1)
+    throw new Error(`[pdf] Failed to scan articles: ${error}`)
   }
 
   if (codeLangs.length > 0) {
@@ -475,8 +474,7 @@ async function main(): Promise<void> {
       renderArticle,
     })
   } catch (error) {
-    console.error("[pdf] Failed to build ebook HTML:", error)
-    process.exit(1)
+    throw new Error(`[pdf] Failed to build ebook HTML: ${error}`)
   }
 
   console.log(
@@ -487,19 +485,27 @@ async function main(): Promise<void> {
   // Phase 6: Generate PDF via Playwright and add bookmarks
   // ═══════════════════════════════════════════════════════════════════════
   const tempPdfPath = output + ".tmp"
-  const tempHtmlPath = path.join(outDir, ".gtmc-pdf-temp.html")
+  const tempHtmlPath = path.join(outDir, `.gtmc-pdf-temp-${locale}.html`)
 
   console.log("[pdf] Phase 6/6: Generating PDF via Playwright...")
 
-  const browser = await chromium.launch({
-    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
-  }).catch((error) => {
-    console.warn(
-      "[pdf] Failed to launch Playwright, skipping PDF generation:",
-      error
-    )
-    process.exit(0)
-  })
+  const browser = await chromium
+    .launch({
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+      ],
+    })
+    .catch((error) => {
+      console.warn(
+        "[pdf] Failed to launch Playwright, skipping PDF generation:",
+        error
+      )
+      return null
+    })
+
+  if (!browser) return
 
   try {
     // Write HTML to a temp file so file:// images and CSS @import resolve
@@ -510,7 +516,7 @@ async function main(): Promise<void> {
 
     // Navigate to the temp HTML file so file:// URL images load properly
     await page.goto(pathToFileURL(tempHtmlPath).href, {
-      waitUntil: "networkidle",
+      waitUntil: "load",
     })
 
     // Wait for KaTeX font loading and PDF-specific font loading
@@ -550,7 +556,6 @@ async function main(): Promise<void> {
 
     console.log("[pdf]   → PDF written to temp file")
   } catch (error) {
-    console.error("[pdf] PDF generation failed:", error)
     await browser.close()
     // Clean up temp HTML file on error
     try {
@@ -558,7 +563,7 @@ async function main(): Promise<void> {
     } catch {
       /* ignore */
     }
-    process.exit(1)
+    throw new Error(`[pdf] PDF generation failed: ${error}`)
   }
 
   await browser.close()
@@ -605,7 +610,22 @@ async function main(): Promise<void> {
 
 // ── Execute ─────────────────────────────────────────────────────────────────
 
-main().catch((error) => {
-  console.error("[pdf] Fatal error:", error)
-  process.exit(1)
-})
+async function main() {
+  const { locale, output } = parseArgs()
+
+  try {
+    if (locale === "all") {
+      await Promise.all([
+        runPdf("en", path.join(process.cwd(), "public", "gtmc-en.pdf")),
+        runPdf("zh", path.join(process.cwd(), "public", "gtmc-zh.pdf")),
+      ])
+    } else {
+      await runPdf(locale as "en" | "zh", output)
+    }
+  } catch (error) {
+    console.error(error)
+    process.exit(1)
+  }
+}
+
+main()

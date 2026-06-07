@@ -89,6 +89,8 @@ export function linearizeArticles(tree: ChapterNavNode[]): LinearizedArticle[] {
   return result
 }
 
+const contentCache = new Map<string, string | null>()
+
 /**
  * Read the raw markdown content of an article by slug.
  *
@@ -102,6 +104,14 @@ export async function getArticleContentForPdf(
   slug: string,
   locale: ArticleLocale,
 ): Promise<string | null> {
+  const cacheKey = `${locale}:${slug}`
+  if (contentCache.has(cacheKey)) {
+    return contentCache.get(cacheKey) ?? null
+  }
+
   const artifact = getArticleContentBySlug(slug, locale)
-  return artifact?.content ?? null
+  const content = artifact?.content ?? null
+  
+  contentCache.set(cacheKey, content)
+  return content
 }

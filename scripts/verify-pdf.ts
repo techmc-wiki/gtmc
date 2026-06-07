@@ -77,7 +77,7 @@ async function main(): Promise<void> {
   const pdfPath =
     fileIdx !== -1 && fileIdx + 1 < args.length
       ? path.resolve(process.cwd(), args[fileIdx + 1])
-      : path.join(process.cwd(), "public", "gtmc.pdf")
+      : path.join(process.cwd(), "public", "gtmc-en.pdf")
 
   // ── File existence ───────────────────────────────────────────────
   if (!fs.existsSync(pdfPath)) {

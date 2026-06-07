@@ -208,10 +208,23 @@ export async function buildEbookHtml(options: EbookOptions): Promise<string> {
     }
   }
 
+  // Parallelize markdown rendering for all articles
+  const renderedHtmlMap = new Map<string, string | null>()
+  const renderedResults = await Promise.all(
+    options.articles.map(async (article) => {
+      const html = await renderArticle(article)
+      return { slug: article.slug, html }
+    })
+  )
+  for (const { slug, html } of renderedResults) {
+    renderedHtmlMap.set(slug, html)
+  }
+
   for (const article of options.articles) {
+    const html = renderedHtmlMap.get(article.slug)
+
     // Preface articles: no chapter divider, render inline after cover/toc
     if (article.isPreface) {
-      const html = await renderArticle(article) // eslint-disable-line no-await-in-loop
       if (html) {
         sections.push({
           type: "preface",
@@ -247,7 +260,6 @@ export async function buildEbookHtml(options: EbookOptions): Promise<string> {
     }
 
     // Render article content
-    const html = await renderArticle(article) // eslint-disable-line no-await-in-loop
     if (html) {
       const sectionType = article.isAppendix
         ? "appendix-article"

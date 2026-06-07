@@ -8,7 +8,12 @@ export const metadata: Metadata = {
   description: "Download the full GTMC knowledge base as a PDF document.",
 }
 
-export default async function PdfPage() {
+export default async function PdfPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
   const t = await getTranslations("Pdf")
 
   return (
@@ -37,11 +42,11 @@ export default async function PdfPage() {
             <span className="border-tech-main/40 bg-tech-main/10 inline-block size-2 border" />
             PDF
           </div>
-          {/* TODO: parse actual file size from public/gtmc.pdf at build time */}
+          {/* TODO: parse actual file size from public/gtmc-*.pdf at build time */}
           <div className="text-tech-main/40 font-mono text-xs">~3.7 MB</div>
         </div>
 
-        <a href="/gtmc.pdf" download>
+        <a href={`/gtmc-${locale}.pdf`} download>
           <TechButton variant="primary" size="lg" className="w-full sm:w-auto">
             {t("download")}
           </TechButton>

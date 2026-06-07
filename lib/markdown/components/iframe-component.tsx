@@ -28,7 +28,8 @@ export function IframeComponent({
         title={(title as string) || "Embedded Video"}
         className="size-full"
         loading="lazy"
-        sandbox="allow-scripts allow-popups"
+        // oxlint-disable-next-line react/iframe-missing-sandbox - embed videos needs both allow-scripts and allow-same-origin to work, although this is equivalent to disabling the sandbox at some situations.
+        sandbox="allow-scripts allow-popups allow-same-origin"
         allowFullScreen={allowFullScreen !== false}
         {...rest}
       />

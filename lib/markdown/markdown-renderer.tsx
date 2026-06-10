@@ -23,7 +23,7 @@ export function MarkdownRenderer({
     <ReactMarkdown
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
-      components={getMarkdownComponents(rawPath)}>
+      components={getMarkdownComponents(rawPath, content)}>
       {content}
     </ReactMarkdown>
   )

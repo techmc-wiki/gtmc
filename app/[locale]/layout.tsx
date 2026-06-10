@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next"
+import { cacheLife } from "next/cache"
 import { Geist, Geist_Mono, Noto_Sans_SC } from "next/font/google"
 // oxlint-disable-next-line import/no-unassigned-import
 import "../globals.css"
@@ -11,13 +12,27 @@ import { FooterWrapper } from "@/components/layout/footer-wrapper"
 import { getSiteUrl } from "@/lib/site-url"
 import { NextIntlClientProvider } from "next-intl"
 import { hasLocale } from "next-intl"
-import { getMessages, setRequestLocale } from "next-intl/server"
+import { setRequestLocale } from "next-intl/server"
 import { notFound } from "next/navigation"
 import { routing } from "@/i18n/routing"
 
 import React from "react"
 
 const siteUrl = getSiteUrl()
+
+type AppLocale = (typeof routing.locales)[number]
+
+async function getCachedMessages(locale: AppLocale) {
+  "use cache"
+  cacheLife("days")
+
+  switch (locale) {
+    case "en":
+      return (await import("@/messages/en.json")).default
+    case "zh":
+      return (await import("@/messages/zh.json")).default
+  }
+}
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -142,7 +157,7 @@ export default async function RootLayout({
   const unstable_setRequestLocale = setRequestLocale
   unstable_setRequestLocale(locale)
 
-  const messages = await getMessages()
+  const messages = await getCachedMessages(locale)
 
   return (
     <html

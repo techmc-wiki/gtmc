@@ -23,9 +23,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export const dynamic = "force-dynamic"
-export const revalidate = 0
-
 type PR = Awaited<ReturnType<typeof getOpenPRs>>[number]
 
 type PRWithConflictMode = PR & {

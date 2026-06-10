@@ -1,6 +1,9 @@
+import fs from "fs"
+import path from "path"
+
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import type { ArticleLocale } from "@/lib/articles/manifest"
-import { getArticleContentBySlug } from "@/lib/articles/content"
+import { artifactFilename } from "@/lib/articles/content"
 import { resolveLocalArticlePath } from "@/lib/articles/fs"
 
 /**
@@ -93,6 +96,27 @@ export async function linearizeArticles(tree: ChapterNavNode[]): Promise<Lineari
 
 const contentCache = new Map<string, string | null>()
 
+function loadArticleArtifactContent(
+  slug: string,
+  locale: ArticleLocale
+): string | null {
+  const filePath = path.join(
+    process.cwd(),
+    "data",
+    "articles",
+    locale,
+    `${artifactFilename(slug)}.json`
+  )
+
+  try {
+    const raw = fs.readFileSync(filePath, "utf-8")
+    const artifact = JSON.parse(raw) as { content?: unknown }
+    return typeof artifact.content === "string" ? artifact.content : null
+  } catch {
+    return null
+  }
+}
+
 /**
  * Read the raw markdown content of an article by slug.
  *
@@ -111,8 +135,7 @@ export async function getArticleContentForPdf(
     return contentCache.get(cacheKey) ?? null
   }
 
-  const artifact = await getArticleContentBySlug(slug, locale)
-  const content = artifact?.content ?? null
+  const content = loadArticleArtifactContent(slug, locale)
 
   contentCache.set(cacheKey, content)
   return content

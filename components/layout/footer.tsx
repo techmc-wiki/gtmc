@@ -13,7 +13,9 @@ export default async function Footer() {
   const stats = getManifestStats(locale)
   const buildSha = process.env.NEXT_PUBLIC_BUILD_SHA ?? "unknown"
   const startYear = 2024
-  const currentYear = new Date().getFullYear()
+  const currentYear = stats.lastRevision
+    ? Number(stats.lastRevision.slice(0, 4))
+    : startYear
   const lastRevision = stats.lastRevision
     ? new Date(stats.lastRevision).toISOString().slice(0, 10)
     : "—"

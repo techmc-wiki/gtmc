@@ -2,7 +2,7 @@ import fs from "fs"
 import path from "path"
 
 import { ARTICLES_PATH } from "@/lib/articles/fs"
-import { getArticleManifest } from "@/lib/articles/manifest-cached"
+import { loadArticleManifest } from "@/lib/articles/manifest"
 import type { ArticleLocale } from "@/lib/articles/manifest"
 import { artifactFilename } from "@/lib/articles/content"
 import type { ArticleContentArtifact } from "@/lib/articles/content"
@@ -83,7 +83,7 @@ async function main(): Promise<void> {
     fs.rmSync(PUBLIC_ARTICLE_ASSET_DIR, { recursive: true })
   }
 
-  const entries = Object.values(await getArticleManifest())
+  const entries = Object.values(loadArticleManifest())
 
   for (const entry of entries) {
     if (

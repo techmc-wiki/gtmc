@@ -124,7 +124,7 @@ export default function NotFound() {
             </div>
 
             <div className="animate-fade-in guide-line fill-mode-forwards mt-8 flex flex-col items-center space-y-1 border-t pt-4 font-mono text-[0.625rem] opacity-50 [animation-delay:1.4s] motion-reduce:animate-none">
-              <p>ERROR_CODE: 0x194 // TIMESTAMP: {new Date().toISOString()}</p>
+              <p>ERROR_CODE: 0x194 // STATUS: STATIC_FAULT</p>
               <p>END OF LINE.</p>
             </div>
           </div>

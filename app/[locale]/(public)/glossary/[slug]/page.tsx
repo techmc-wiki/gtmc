@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { cacheLife } from "next/cache"
 import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
@@ -9,6 +10,12 @@ import { getGlossaryEntry } from "@/lib/glossary/slug"
 import { getSiteUrl } from "@/lib/site-url"
 
 const MAX_DESCRIPTION_LENGTH = 160
+
+async function getCachedGlossaryEntry(slug: string) {
+  "use cache"
+  cacheLife("days")
+  return getGlossaryEntry(slug)
+}
 
 interface GlossarySlugPageProps {
   params: Promise<{ locale: string; slug: string }>
@@ -29,7 +36,7 @@ export async function generateMetadata({
   params,
 }: GlossarySlugPageProps): Promise<Metadata> {
   const { locale, slug } = await params
-  const entry = getGlossaryEntry(slug)
+  const entry = await getCachedGlossaryEntry(slug)
   const t = await getTranslations({ locale, namespace: "Glossary" })
 
   if (!entry) {
@@ -71,7 +78,7 @@ export default async function GlossarySlugPage({
   params,
 }: GlossarySlugPageProps) {
   const { locale, slug } = await params
-  const entry = getGlossaryEntry(slug)
+  const entry = await getCachedGlossaryEntry(slug)
 
   if (!entry) {
     notFound()

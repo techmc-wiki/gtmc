@@ -16,8 +16,6 @@ import { getArticleRemoteBuffer } from "@/lib/articles/remote-assets"
 import { calculateReadingMetrics } from "@/lib/markdown/reading-metrics"
 import { getSiteUrl } from "@/lib/site-url"
 
-export const runtime = "nodejs"
-
 const OG_CACHE_CONTROL =
   "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800"
 

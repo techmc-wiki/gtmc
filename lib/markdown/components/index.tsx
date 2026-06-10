@@ -1,4 +1,4 @@
-import LitematicaViewer from "@/components/articles/litematica-viewer"
+import { LitematicaViewerDynamic } from "@/components/articles/litematica-viewer-dynamic"
 import { PeopleMention } from "@/components/markdown/people-mention"
 import { createAComponent } from "@/lib/markdown/a-component"
 import {
@@ -32,6 +32,8 @@ import {
   TableHeaderCell,
 } from "./table-components"
 
+const LITEMATICA_VIEWER_TAG_RE = /<\s*litematicaviewer\b/i
+
 const ansiColorStyles: Record<AnsiColorName, Record<string, string>> = {
   black: { color: "var(--color-ansi-black)" },
   red: { color: "var(--color-ansi-red)" },
@@ -52,10 +54,12 @@ const ansiColorStyles: Record<AnsiColorName, Record<string, string>> = {
 }
 
 export function getMarkdownComponents(
-  rawPath: string
+  rawPath: string,
+  content = ""
 ): Record<string, MarkdownComponent> {
   const aComponent = createAComponent(rawPath)
   const imageComponent = createImageComponent(rawPath)
+  const hasLitematicaViewer = LITEMATICA_VIEWER_TAG_RE.test(content)
   const ansiColorComponents = Object.fromEntries(
     ANSI_COLOR_NAMES.map((color) => [
       createAnsiColorTagName(color),
@@ -63,7 +67,7 @@ export function getMarkdownComponents(
     ])
   ) satisfies Record<string, MarkdownComponent>
 
-  return {
+  const components = {
     ...ansiColorComponents,
     wtucolor: makeSpan({ color: "red" }),
     ttcolor: makeSpan({ color: "#ff7300" }),
@@ -79,9 +83,6 @@ export function getMarkdownComponents(
       <span {...props} />
     ),
     hidden: HiddenComponent,
-    litematicaviewer: ({ url, ...rest }: MarkdownComponentProps) => (
-      <LitematicaViewer url={url as string} {...rest} />
-    ),
     table: TableComponent,
     thead: TableHead,
     th: TableHeaderCell,
@@ -108,6 +109,17 @@ export function getMarkdownComponents(
     "people-mention": PeopleMention,
     iframe: IframeComponent,
   } satisfies Record<string, MarkdownComponent>
+
+  if (!hasLitematicaViewer) {
+    return components
+  }
+
+  return {
+    ...components,
+    litematicaviewer: ({ url, ...rest }: MarkdownComponentProps) => (
+      <LitematicaViewerDynamic url={url as string} {...rest} />
+    ),
+  }
 }
 
 function HiddenComponent({

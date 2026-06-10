@@ -1,3 +1,4 @@
+import { createElement } from "react"
 import { getTranslations } from "next-intl/server"
 import {
   labelsToStatus,
@@ -8,6 +9,7 @@ import {
 import { PageHeader } from "@/components/ui/page-header"
 import { FeatureList } from "@/app/[locale]/(private)/features/feature-list"
 import { PendingCreationBanner } from "@/app/[locale]/(private)/features/pending-creation-banner"
+import { FeaturesAuthGate } from "@/components/features/features-auth-gate"
 
 function buildFeatures(issues: GithubIssue[]) {
   const allIssues = [...issues]
@@ -42,19 +44,20 @@ function buildFeatures(issues: GithubIssue[]) {
 
 interface FeatureListContentProps {
   issues: GithubIssue[]
-  action?: React.ReactNode
+  createLabel: string
   created?: string | string[] | undefined
 }
 
 export async function FeatureListContent({
   issues,
-  action,
+  createLabel,
   created,
 }: FeatureListContentProps) {
   const t = await getTranslations("Feature")
   const isCreated = created === "true"
 
   const features = buildFeatures(issues)
+  const action = createElement(FeaturesAuthGate, { createLabel })
 
   return (
     <div className="page-container-pb">

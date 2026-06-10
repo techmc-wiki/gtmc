@@ -51,23 +51,24 @@ export interface LinearizedArticle {
  * not emitted as articles themselves.
  */
 export async function linearizeArticles(tree: ChapterNavNode[]): Promise<LinearizedArticle[]> {
-  const result: LinearizedArticle[] = []
-
-  async function dfs(
+  async function linearizeNodes(
     nodes: ChapterNavNode[],
     chapterSlug: string,
     chapterTitle: string,
     depth: number,
-  ): Promise<void> {
-    for (const node of nodes) {
+  ): Promise<LinearizedArticle[]> {
+    const nested = await Promise.all(
+      nodes.map(async (node): Promise<LinearizedArticle[]> => {
       if (node.isFolder) {
         // Descend into the folder, which becomes the active chapter
-        await dfs(node.children, node.slug, node.title, depth + 1)
-      } else {
-        // Resolve file path; may be null if slug is missing from the manifest
-        const filePath = await resolveLocalArticlePath(node.slug)
+        return linearizeNodes(node.children, node.slug, node.title, depth + 1)
+      }
 
-        result.push({
+      // Resolve file path; may be null if slug is missing from the manifest
+      const filePath = await resolveLocalArticlePath(node.slug)
+
+      return [
+        {
           slug: node.slug,
           title: node.title,
           filePath,
@@ -79,14 +80,15 @@ export async function linearizeArticles(tree: ChapterNavNode[]): Promise<Lineari
           isReadmeIntro: node.isReadmeIntro ?? false,
           index: node.index ?? -1,
           depth,
-        })
-      }
-    }
+        },
+      ]
+      })
+    )
+
+    return nested.flat()
   }
 
-  await dfs(tree, /* chapterSlug */ "", /* chapterTitle */ "", /* depth */ 0)
-
-  return result
+  return linearizeNodes(tree, /* chapterSlug */ "", /* chapterTitle */ "", /* depth */ 0)
 }
 
 const contentCache = new Map<string, string | null>()
@@ -111,7 +113,7 @@ export async function getArticleContentForPdf(
 
   const artifact = await getArticleContentBySlug(slug, locale)
   const content = artifact?.content ?? null
-  
+
   contentCache.set(cacheKey, content)
   return content
 }

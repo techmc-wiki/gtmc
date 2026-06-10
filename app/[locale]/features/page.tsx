@@ -3,7 +3,6 @@ import { getTranslations } from "next-intl/server"
 import { toAbsoluteUrl } from "@/lib/site-url"
 import { listAllIssues } from "@/lib/github"
 import { FeatureListContent } from "@/components/features/feature-list-content"
-import { FeaturesAuthGate } from "@/components/features/features-auth-gate"
 
 export async function generateMetadata({
   params,
@@ -47,7 +46,7 @@ export default async function FeaturesPage({
   return (
     <FeatureListContent
       issues={allIssues}
-      action={<FeaturesAuthGate createLabel={`+ ${t("createButton")}`} />}
+      createLabel={`+ ${t("createButton")}`}
       created={params?.created}
     />
   )

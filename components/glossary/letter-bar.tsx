@@ -41,6 +41,28 @@ const ALL_LETTERS = [
 
 const LETTER_ID_PREFIX = "letter-"
 
+function getVisibleLetterTarget(letter: string): HTMLElement | null {
+  const desktopTarget = document.getElementById(`${LETTER_ID_PREFIX}${letter}`)
+  const mobileTarget = document.getElementById(
+    `${LETTER_ID_PREFIX}${letter}-mobile`
+  )
+  const candidates = window.matchMedia("(min-width: 768px)").matches
+    ? [desktopTarget, mobileTarget]
+    : [mobileTarget, desktopTarget]
+
+  return (
+    candidates.find((target) => {
+      if (!target) return false
+      const style = window.getComputedStyle(target)
+      return (
+        style.display !== "none" &&
+        style.visibility !== "hidden" &&
+        (target.offsetParent !== null || target.getClientRects().length > 0)
+      )
+    }) ?? null
+  )
+}
+
 export interface LetterBarProps {
   /**
    * Letters that have at least one matching glossary entry.
@@ -84,7 +106,10 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
         const topEntry = visible[0]
         if (!topEntry) return
         const id = topEntry.target.id
-        const letter = id.slice(LETTER_ID_PREFIX.length).toUpperCase()
+        const letter = id
+          .slice(LETTER_ID_PREFIX.length)
+          .replace(/-mobile$/u, "")
+          .toUpperCase()
         setActiveLetter(letter)
       },
       {
@@ -128,7 +153,7 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
     (event: React.MouseEvent<HTMLButtonElement>) => {
       const letter = event.currentTarget.dataset.letter
       if (!letter) return
-      const target = document.getElementById(`${LETTER_ID_PREFIX}${letter}`)
+      const target = getVisibleLetterTarget(letter)
       if (target) {
         target.scrollIntoView({
           behavior: "smooth",

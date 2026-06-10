@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useVirtualizer } from "@tanstack/react-virtual"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/cn"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -24,10 +25,55 @@ interface GlossaryTableProps {
 }
 
 const ALPHA = /[A-Z]/
+const VIRTUAL_OVERSCAN = 10
+const VIRTUAL_LETTER_ROW_HEIGHT = 48
+const VIRTUAL_ROW_HEIGHT = {
+  compact: 40,
+  normal: 52,
+  comfortable: 64,
+} as const satisfies Record<GlossaryDensity, number>
+
+type IndexLocale = "en" | "zh"
+type SearchScope = "active" | "all"
+type GlossarySearchIndex = ReturnType<typeof buildGlossarySearchIndex>
+type VirtualGlossaryRow =
+  | { type: "letter"; letter: string; count: number }
+  | { type: "entry"; entry: GlossaryEntry }
+
+let searchIndexCache:
+  | {
+      entries: GlossaryEntry[]
+      scope: SearchScope
+      locale: IndexLocale
+      index: GlossarySearchIndex
+    }
+  | null = null
 
 function letterBucket(slug: string): string {
   const first = slug[0]?.toUpperCase() ?? "#"
   return ALPHA.test(first) ? first : "#"
+}
+
+function getCachedSearchIndex(
+  entries: GlossaryEntry[],
+  scope: SearchScope,
+  locale: IndexLocale
+): GlossarySearchIndex {
+  if (
+    !searchIndexCache ||
+    searchIndexCache.entries !== entries ||
+    searchIndexCache.scope !== scope ||
+    searchIndexCache.locale !== locale
+  ) {
+    searchIndexCache = {
+      entries,
+      scope,
+      locale,
+      index: buildGlossarySearchIndex(entries, scope, locale),
+    }
+  }
+
+  return searchIndexCache.index
 }
 
 const COLUMN_LABEL_KEYS: Record<string, string> = {
@@ -72,6 +118,7 @@ export function GlossaryTable({
   isReady,
 }: GlossaryTableProps) {
   const t = useTranslations("Glossary")
+  const tableScrollRef = React.useRef<HTMLDivElement>(null)
 
   const indexLocale = normalizeLocaleForIndex(locale)
 
@@ -86,11 +133,7 @@ export function GlossaryTable({
   const filteredEntries = React.useMemo(() => {
     if (!trimmedQuery) return categoryFiltered
 
-    const index = buildGlossarySearchIndex(
-      categoryFiltered,
-      searchScope,
-      indexLocale
-    )
+    const index = getCachedSearchIndex(categoryFiltered, searchScope, indexLocale)
     const hits = index.search(trimmedQuery)
     const hitOrder = new Map<string, number>()
     hits.forEach((hit, i) => {
@@ -127,6 +170,60 @@ export function GlossaryTable({
       .map(([letter, items]) => ({ letter, items }))
   }, [filteredEntries, trimmedQuery])
 
+  const virtualRows = React.useMemo<VirtualGlossaryRow[]>(() => {
+    const rows: VirtualGlossaryRow[] = []
+    for (const group of grouped) {
+      if (group.letter !== "_results") {
+        rows.push({
+          type: "letter",
+          letter: group.letter,
+          count: group.items.length,
+        })
+      }
+      for (const entry of group.items) {
+        rows.push({ type: "entry", entry })
+      }
+    }
+    return rows
+  }, [grouped])
+
+  const rowHeight = VIRTUAL_ROW_HEIGHT[density]
+
+  const letterOffsets = React.useMemo(() => {
+    let offset = 0
+    const offsets: { letter: string; top: number }[] = []
+    for (const row of virtualRows) {
+      if (row.type === "letter") {
+        offsets.push({ letter: row.letter, top: offset })
+        offset += VIRTUAL_LETTER_ROW_HEIGHT
+      } else {
+        offset += rowHeight
+      }
+    }
+    return offsets
+  }, [rowHeight, virtualRows])
+
+  const rowVirtualizer = useVirtualizer({
+    count: virtualRows.length,
+    getScrollElement: () => tableScrollRef.current,
+    estimateSize: (index) =>
+      virtualRows[index]?.type === "letter"
+        ? VIRTUAL_LETTER_ROW_HEIGHT
+        : rowHeight,
+    overscan: VIRTUAL_OVERSCAN,
+  })
+
+  const virtualItems = rowVirtualizer.getVirtualItems()
+  const paddingTop = virtualItems[0]?.start ?? 0
+  const paddingBottom =
+    virtualItems.length > 0
+      ? Math.max(
+          rowVirtualizer.getTotalSize() -
+            (virtualItems[virtualItems.length - 1]?.end ?? 0),
+          0
+        )
+      : 0
+
   if (filteredEntries.length === 0) {
     return (
       <div className={className}>
@@ -136,102 +233,164 @@ export function GlossaryTable({
   }
 
   const colCount = visibleColumns.length || 1
+  const mobileGrouped = grouped.filter((group) => group.letter !== "_results")
 
   return (
     <div className={cn("flex flex-col gap-8", className)}>
-      {grouped.map((group) => {
-        const sectionId =
-          group.letter === "_results"
-            ? "letter-results"
-            : `letter-${group.letter}`
-
-        return (
-          <section
-            key={sectionId}
-            id={sectionId}
-            aria-label={
-              group.letter === "_results"
-                ? "search results"
-                : `letter ${group.letter}`
-            }
-            className="scroll-mt-28 md:scroll-mt-32">
-            {group.letter !== "_results" && (
-              <div className="border-tech-line/30 mb-2 flex items-baseline gap-3 border-b pb-1">
-                <h2 className="text-tech-main-dark font-mono text-2xl font-bold tracking-widest uppercase">
-                  {group.letter}
-                </h2>
-                <span className="text-tech-main/40 font-mono text-xs tracking-widest uppercase">
-                  {group.items.length}
-                </span>
-              </div>
+      <div
+        ref={tableScrollRef}
+        className="border-tech-line/30 custom-bottom-scrollbar relative hidden h-[min(70vh,48rem)] overflow-auto border md:block"
+        data-density={density}>
+        {letterOffsets.length > 0 && (
+          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-0">
+            {letterOffsets.map(({ letter, top }) => (
+              <span
+                key={letter}
+                id={`letter-${letter}`}
+                className="absolute scroll-mt-28 md:scroll-mt-32"
+                style={{ top }}
+              />
+            ))}
+          </div>
+        )}
+        <table className="w-full table-fixed border-collapse">
+          <thead>
+            <tr>
+              {visibleColumns.map((col) => {
+                const key = COLUMN_LABEL_KEYS[col]
+                const translationLabel = getTranslationColumnLabel(
+                  col,
+                  t("columnDescription")
+                )
+                return (
+                  <th
+                    key={col}
+                    scope="col"
+                    className={cn(
+                      headerCellBase,
+                      col === "term" && "min-w-[10rem]",
+                      col === "description" && "max-w-[36rem]",
+                      col.startsWith("translation:") && "max-w-[24rem]"
+                    )}>
+                    {translationLabel ??
+                      (key ? t(key as Parameters<typeof t>[0]) : col)}
+                  </th>
+                )
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {paddingTop > 0 && (
+              <tr aria-hidden="true">
+                <td
+                  aria-label="virtual table top spacer"
+                  colSpan={colCount}
+                  className="p-0"
+                  style={{ height: paddingTop }}
+                />
+              </tr>
             )}
+            {virtualItems.map((virtualItem) => {
+              const row = virtualRows[virtualItem.index]
+              if (!row) return null
+              if (row.type === "letter") {
+                return (
+                  <tr
+                    aria-label={`letter ${row.letter}`}
+                    key={virtualItem.key}
+                    className="border-tech-line/30 bg-tech-bg/95 border-b"
+                    style={{ height: virtualItem.size }}>
+                    <td
+                      aria-label={`letter ${row.letter}`}
+                      colSpan={colCount}
+                      className="px-3 py-2">
+                      <div className="flex items-baseline gap-3">
+                        <h2 className="text-tech-main-dark font-mono text-2xl font-bold tracking-widest uppercase">
+                          {row.letter}
+                        </h2>
+                        <span className="text-tech-main/40 font-mono text-xs tracking-widest uppercase">
+                          {row.count}
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              }
 
-            <table
-              className="hidden w-full table-fixed border-collapse md:table"
-              data-density={density}>
-              <thead>
-                <tr>
-                  {visibleColumns.map((col) => {
-                    const key = COLUMN_LABEL_KEYS[col]
-                    const translationLabel = getTranslationColumnLabel(
-                      col,
-                      t("columnDescription")
-                    )
-                    return (
-                      <th
-                        key={col}
-                        scope="col"
-                        className={cn(
-                          headerCellBase,
-                          col === "term" && "min-w-[10rem]",
-                          col === "description" && "max-w-[36rem]",
-                          col.startsWith("translation:") && "max-w-[24rem]"
-                        )}>
-                        {translationLabel ??
-                          (key ? t(key as Parameters<typeof t>[0]) : col)}
-                      </th>
-                    )
-                  })}
-                </tr>
-              </thead>
-              <tbody>
+              return (
+                <GlossaryTableRow
+                  key={virtualItem.key}
+                  entry={row.entry}
+                  visibleColumns={visibleColumns}
+                  density={density}
+                  locale={locale}
+                  onOpenDetail={onOpenDetail}
+                  isReady={isReady}
+                />
+              )
+            })}
+            {paddingBottom > 0 && (
+              <tr aria-hidden="true">
+                <td
+                  aria-label="virtual table bottom spacer"
+                  colSpan={colCount}
+                  className="p-0"
+                  style={{ height: paddingBottom }}
+                />
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex flex-col gap-8 md:hidden" data-density={density}>
+        {(trimmedQuery ? grouped : mobileGrouped).map((group) => {
+          const sectionId =
+            group.letter === "_results"
+              ? "letter-results-mobile"
+              : `letter-${group.letter}-mobile`
+
+          return (
+            <section
+              key={sectionId}
+              id={sectionId}
+              aria-label={
+                group.letter === "_results"
+                  ? "search results"
+                  : `letter ${group.letter}`
+              }
+              className="scroll-mt-28">
+              {group.letter !== "_results" && (
+                <div className="border-tech-line/30 mb-2 flex items-baseline gap-3 border-b pb-1">
+                  <h2 className="text-tech-main-dark font-mono text-2xl font-bold tracking-widest uppercase">
+                    {group.letter}
+                  </h2>
+                  <span className="text-tech-main/40 font-mono text-xs tracking-widest uppercase">
+                    {group.items.length}
+                  </span>
+                </div>
+              )}
+              <div className="flex flex-col gap-2">
                 {group.items.map((entry) => (
-                  <GlossaryTableRow
+                  <GlossaryCard
                     key={entry.slug}
                     entry={entry}
                     visibleColumns={visibleColumns}
-                    density={density}
                     locale={locale}
+                    density={density}
                     onOpenDetail={onOpenDetail}
                     isReady={isReady}
                   />
                 ))}
-              </tbody>
-            </table>
+              </div>
 
-            <div
-              className="flex flex-col gap-2 md:hidden"
-              data-density={density}
-              aria-hidden={false}>
-              {group.items.map((entry) => (
-                <GlossaryCard
-                  key={entry.slug}
-                  entry={entry}
-                  visibleColumns={visibleColumns}
-                  locale={locale}
-                  density={density}
-                  onOpenDetail={onOpenDetail}
-                  isReady={isReady}
-                />
-              ))}
-            </div>
-
-            <span className="sr-only">
-              {group.items.length} {colCount > 0 ? "rows" : ""}
-            </span>
-          </section>
-        )
-      })}
+              <span className="sr-only">
+                {group.items.length} {colCount > 0 ? "rows" : ""}
+              </span>
+            </section>
+          )
+        })}
+      </div>
     </div>
   )
 }

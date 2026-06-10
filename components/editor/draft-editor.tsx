@@ -8,7 +8,7 @@ import { DraftEditorToolbar } from "@/components/editor/draft-editor-toolbar"
 import { DraftEditorFiles } from "@/components/editor/draft-editor-files"
 import { EditorBadge } from "@/components/editor/editor-badge"
 import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
-import { EditorTextarea } from "@/components/editor/editor-textarea"
+import { EditorTextareaDynamic } from "@/components/editor/editor-textarea-dynamic"
 import {
   createDraftFile,
   normalizeDraftFilePath,
@@ -308,7 +308,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         <EditorWritePanel
           id="draft-editor-write-panel"
           hidden={state.activeTab !== "write"}>
-          <EditorTextarea
+          <EditorTextareaDynamic
             ref={refs.textareaRef}
             value={state.activeFileContent}
             onChange={(value) => actions.updateActiveFile({ content: value })}

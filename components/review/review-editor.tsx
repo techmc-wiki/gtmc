@@ -10,7 +10,7 @@ import {
   EditorTabStrip,
   type TabType,
 } from "@/components/editor/editor-tab-strip"
-import { EditorTextarea } from "@/components/editor/editor-textarea"
+import { EditorTextareaDynamic } from "@/components/editor/editor-textarea-dynamic"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
 import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
 import { ReviewDiffPanel } from "@/components/review/review-diff-panel"
@@ -1058,7 +1058,7 @@ export function ReviewEditor({
                 className="editor-grow"
                 hidden={visibleActiveTab !== "write"}>
                 <div className="editor-surface">
-                  <EditorTextarea
+                  <EditorTextareaDynamic
                     ref={textareaRef}
                     value={activeContent}
                     onChange={updateActiveFileContent}

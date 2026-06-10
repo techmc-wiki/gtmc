@@ -17,7 +17,7 @@ import {
   EditorTabStrip,
   type TabType,
 } from "@/components/editor/editor-tab-strip"
-import { EditorTextarea } from "@/components/editor/editor-textarea"
+import { EditorTextareaDynamic } from "@/components/editor/editor-textarea-dynamic"
 import { EditorFileUploadInput } from "@/components/editor/editor-file-upload-input"
 import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
 import { useEditorUpload } from "@/hooks/use-editor-upload"
@@ -310,7 +310,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         <EditorWritePanel
           id="editor-write-panel"
           hidden={activeTab !== "write"}>
-          <EditorTextarea
+          <EditorTextareaDynamic
             ref={textareaRef}
             value={content}
             onChange={(value: string) => setContent(value)}

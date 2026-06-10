@@ -8,7 +8,7 @@ export const EditorTextareaDynamic = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-64 w-full animate-pulse rounded-md bg-muted" />
+      <div className="bg-muted h-64 w-full animate-pulse rounded-md" />
     ),
   }
 )

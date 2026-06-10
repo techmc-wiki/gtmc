@@ -40,14 +40,12 @@ type VirtualGlossaryRow =
   | { type: "letter"; letter: string; count: number }
   | { type: "entry"; entry: GlossaryEntry }
 
-let searchIndexCache:
-  | {
-      entries: GlossaryEntry[]
-      scope: SearchScope
-      locale: IndexLocale
-      index: GlossarySearchIndex
-    }
-  | null = null
+let searchIndexCache: {
+  entries: GlossaryEntry[]
+  scope: SearchScope
+  locale: IndexLocale
+  index: GlossarySearchIndex
+} | null = null
 
 function letterBucket(slug: string): string {
   const first = slug[0]?.toUpperCase() ?? "#"
@@ -87,6 +85,75 @@ const COLUMN_LABEL_KEYS: Record<string, string> = {
 
 const headerCellBase =
   "text-tech-main/50 border-tech-line/30 sticky top-0 z-10 border-b bg-tech-bg/95 px-3 py-2 text-left font-mono text-xs tracking-widest uppercase backdrop-blur-sm"
+
+function LetterAnchor({ letter, top }: { letter: string; top: number }) {
+  const style = React.useMemo<React.CSSProperties>(() => ({ top }), [top])
+
+  return (
+    <span
+      id={`letter-${letter}`}
+      className="absolute scroll-mt-28 md:scroll-mt-32"
+      style={style}
+    />
+  )
+}
+
+function VirtualSpacerCell({
+  colSpan,
+  height,
+  label,
+}: {
+  colSpan: number
+  height: number
+  label: string
+}) {
+  const style = React.useMemo<React.CSSProperties>(() => ({ height }), [height])
+
+  return (
+    <td aria-label={label} colSpan={colSpan} className="p-0" style={style} />
+  )
+}
+
+function VirtualLetterRow({
+  colCount,
+  count,
+  letter,
+  rowKey,
+  size,
+}: {
+  colCount: number
+  count: number
+  letter: string
+  rowKey: React.Key
+  size: number
+}) {
+  const style = React.useMemo<React.CSSProperties>(
+    () => ({ height: size }),
+    [size]
+  )
+
+  return (
+    <tr
+      aria-label={`letter ${letter}`}
+      key={rowKey}
+      className="border-tech-line/30 bg-tech-bg/95 border-b"
+      style={style}>
+      <td
+        aria-label={`letter ${letter}`}
+        colSpan={colCount}
+        className="px-3 py-2">
+        <div className="flex items-baseline gap-3">
+          <h2 className="text-tech-main-dark font-mono text-2xl font-bold tracking-widest uppercase">
+            {letter}
+          </h2>
+          <span className="text-tech-main/40 font-mono text-xs tracking-widest uppercase">
+            {count}
+          </span>
+        </div>
+      </td>
+    </tr>
+  )
+}
 
 function normalizeLocaleForIndex(locale: string): "en" | "zh" {
   return locale === "zh" ? "zh" : "en"
@@ -133,7 +200,11 @@ export function GlossaryTable({
   const filteredEntries = React.useMemo(() => {
     if (!trimmedQuery) return categoryFiltered
 
-    const index = getCachedSearchIndex(categoryFiltered, searchScope, indexLocale)
+    const index = getCachedSearchIndex(
+      categoryFiltered,
+      searchScope,
+      indexLocale
+    )
     const hits = index.search(trimmedQuery)
     const hitOrder = new Map<string, number>()
     hits.forEach((hit, i) => {
@@ -242,14 +313,11 @@ export function GlossaryTable({
         className="border-tech-line/30 custom-bottom-scrollbar relative hidden h-[min(70vh,48rem)] overflow-auto border md:block"
         data-density={density}>
         {letterOffsets.length > 0 && (
-          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-0">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-0">
             {letterOffsets.map(({ letter, top }) => (
-              <span
-                key={letter}
-                id={`letter-${letter}`}
-                className="absolute scroll-mt-28 md:scroll-mt-32"
-                style={{ top }}
-              />
+              <LetterAnchor key={letter} letter={letter} top={top} />
             ))}
           </div>
         )}
@@ -282,11 +350,10 @@ export function GlossaryTable({
           <tbody>
             {paddingTop > 0 && (
               <tr aria-hidden="true">
-                <td
-                  aria-label="virtual table top spacer"
+                <VirtualSpacerCell
+                  label="virtual table top spacer"
                   colSpan={colCount}
-                  className="p-0"
-                  style={{ height: paddingTop }}
+                  height={paddingTop}
                 />
               </tr>
             )}
@@ -295,25 +362,14 @@ export function GlossaryTable({
               if (!row) return null
               if (row.type === "letter") {
                 return (
-                  <tr
-                    aria-label={`letter ${row.letter}`}
+                  <VirtualLetterRow
                     key={virtualItem.key}
-                    className="border-tech-line/30 bg-tech-bg/95 border-b"
-                    style={{ height: virtualItem.size }}>
-                    <td
-                      aria-label={`letter ${row.letter}`}
-                      colSpan={colCount}
-                      className="px-3 py-2">
-                      <div className="flex items-baseline gap-3">
-                        <h2 className="text-tech-main-dark font-mono text-2xl font-bold tracking-widest uppercase">
-                          {row.letter}
-                        </h2>
-                        <span className="text-tech-main/40 font-mono text-xs tracking-widest uppercase">
-                          {row.count}
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
+                    rowKey={virtualItem.key}
+                    letter={row.letter}
+                    count={row.count}
+                    colCount={colCount}
+                    size={virtualItem.size}
+                  />
                 )
               }
 
@@ -331,11 +387,10 @@ export function GlossaryTable({
             })}
             {paddingBottom > 0 && (
               <tr aria-hidden="true">
-                <td
-                  aria-label="virtual table bottom spacer"
+                <VirtualSpacerCell
+                  label="virtual table bottom spacer"
                   colSpan={colCount}
-                  className="p-0"
-                  style={{ height: paddingBottom }}
+                  height={paddingBottom}
                 />
               </tr>
             )}

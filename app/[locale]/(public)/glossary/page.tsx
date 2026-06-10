@@ -6,8 +6,6 @@ import { GlossaryFloatingActions } from "@/components/glossary/glossary-floating
 import { loadGlossaryManifest } from "@/lib/glossary/manifest"
 import { toAbsoluteUrl } from "@/lib/site-url"
 
-const ALPHA = /[A-Z]/
-
 const DEFAULT_COLUMNS: Record<string, string[]> = {
   en: ["Full Form (English)", "Short Form", "Description", "Related"],
   zh: [
@@ -17,11 +15,6 @@ const DEFAULT_COLUMNS: Record<string, string[]> = {
     "Chinese",
     "Related",
   ],
-}
-
-function letterBucket(slug: string): string {
-  const first = slug[0]?.toUpperCase() ?? "#"
-  return ALPHA.test(first) ? first : "#"
 }
 
 export async function generateMetadata({
@@ -64,20 +57,17 @@ export default async function GlossaryIndexPage({
   const { entries } = await loadGlossaryManifest()
   const totalCount = entries.length
   const categoryCounts = new Map<string, number>()
-  const letterSet = new Set<string>()
 
   for (const entry of entries) {
     const category = entry.category?.trim()
     if (category) {
       categoryCounts.set(category, (categoryCounts.get(category) ?? 0) + 1)
     }
-    letterSet.add(letterBucket(entry.slug))
   }
 
   const categories = [...categoryCounts.entries()]
     .map(([name, count]) => ({ name, count }))
     .toSorted((a, b) => a.name.localeCompare(b.name))
-  const availableLetters = [...letterSet]
 
   return (
     <div className="page-container-pb">
@@ -90,7 +80,6 @@ export default async function GlossaryIndexPage({
       <div className="mt-8">
         <GlossaryToolbar
           categories={categories}
-          availableLetters={availableLetters}
           locale={locale}
           totalCount={totalCount}
           defaultColumns={DEFAULT_COLUMNS}

@@ -23,6 +23,12 @@ import type { GlossaryEntry } from "@/lib/glossary/manifest"
 import { cn } from "@/lib/cn"
 
 const entries = fullData as GlossaryEntry[]
+const ALPHA = /[A-Z]/
+
+function letterBucket(slug: string): string {
+  const first = slug[0]?.toUpperCase() ?? "#"
+  return ALPHA.test(first) ? first : "#"
+}
 
 /**
  * Map ColumnPicker CSV-style column names to GlossaryTable lowercase keys.
@@ -64,7 +70,6 @@ function csvColumnsToTableColumns(csvColumns: string[]): string[] {
 
 export interface GlossaryToolbarProps {
   categories: CategoryFilterCategory[]
-  availableLetters: string[]
   locale: string
   totalCount: number
   defaultColumns: Record<string, string[]>
@@ -74,7 +79,6 @@ export interface GlossaryToolbarProps {
 
 export function GlossaryToolbar({
   categories,
-  availableLetters,
   locale,
   totalCount,
   defaultColumns,
@@ -116,6 +120,11 @@ export function GlossaryToolbar({
   const tableColumns = React.useMemo(
     () => csvColumnsToTableColumns(visibleColumns),
     [visibleColumns]
+  )
+
+  const availableLetters = React.useMemo(
+    () => [...new Set(entries.map((entry) => letterBucket(entry.slug)))],
+    []
   )
 
   const trimmedQuery = query.trim()

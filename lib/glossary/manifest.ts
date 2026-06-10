@@ -49,9 +49,9 @@ let _summary: GlossarySummaryEntry[] | null = null
 export async function loadGlossaryManifest(): Promise<{
   entries: GlossaryEntry[]
 }> {
-  'use cache'
-  cacheLife('hours')
-  cacheTag('glossary-manifest')
+  "use cache"
+  cacheLife("hours")
+  cacheTag("glossary-manifest")
   return { entries: fullData as GlossaryEntry[] }
 }
 

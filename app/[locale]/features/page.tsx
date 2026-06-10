@@ -5,8 +5,6 @@ import { listAllIssues } from "@/lib/github"
 import { FeatureListContent } from "@/components/features/feature-list-content"
 import { FeaturesAuthGate } from "@/components/features/features-auth-gate"
 
-
-
 export async function generateMetadata({
   params,
 }: {

@@ -394,7 +394,9 @@ async function runPdf(locale: "en" | "zh", output: string): Promise<void> {
   try {
     tree = (await getArticleTree(locale)) as ChapterNavNode[]
   } catch (error) {
-    throw new Error(`[pdf] Failed to load article tree: ${error}`)
+    throw new Error(`[pdf] Failed to load article tree: ${error}`, {
+      cause: error,
+    })
   }
 
   if (!tree || tree.length === 0) {
@@ -426,7 +428,9 @@ async function runPdf(locale: "en" | "zh", output: string): Promise<void> {
       checkHasMath(articles, locale),
     ])
   } catch (error) {
-    throw new Error(`[pdf] Failed to scan articles: ${error}`)
+    throw new Error(`[pdf] Failed to scan articles: ${error}`, {
+      cause: error,
+    })
   }
 
   if (codeLangs.length > 0) {
@@ -474,7 +478,9 @@ async function runPdf(locale: "en" | "zh", output: string): Promise<void> {
       renderArticle,
     })
   } catch (error) {
-    throw new Error(`[pdf] Failed to build ebook HTML: ${error}`)
+    throw new Error(`[pdf] Failed to build ebook HTML: ${error}`, {
+      cause: error,
+    })
   }
 
   console.log(
@@ -563,7 +569,7 @@ async function runPdf(locale: "en" | "zh", output: string): Promise<void> {
     } catch {
       /* ignore */
     }
-    throw new Error(`[pdf] PDF generation failed: ${error}`)
+    throw new Error(`[pdf] PDF generation failed: ${error}`, { cause: error })
   }
 
   await browser.close()

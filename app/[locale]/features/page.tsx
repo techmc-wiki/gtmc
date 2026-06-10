@@ -1,10 +1,11 @@
 import type { Metadata } from "next"
-import { auth } from "@/lib/auth"
+import { getTranslations } from "next-intl/server"
 import { toAbsoluteUrl } from "@/lib/site-url"
 import { listAllIssues } from "@/lib/github"
 import { FeatureListContent } from "@/components/features/feature-list-content"
+import { FeaturesAuthGate } from "@/components/features/features-auth-gate"
 
-export const revalidate = 60
+
 
 export async function generateMetadata({
   params,
@@ -41,14 +42,14 @@ export default async function FeaturesPage({
     [key: string]: string | string[] | undefined
   }>
 }) {
-  const session = await auth()
+  const t = await getTranslations("Feature")
   const params = await searchParams
   const allIssues = await listAllIssues()
 
   return (
     <FeatureListContent
       issues={allIssues}
-      session={session}
+      action={<FeaturesAuthGate createLabel={`+ ${t("createButton")}`} />}
       created={params?.created}
     />
   )

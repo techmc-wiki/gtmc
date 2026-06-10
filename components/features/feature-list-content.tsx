@@ -1,6 +1,4 @@
-import type { Session } from "next-auth"
 import { getTranslations } from "next-intl/server"
-import { Link } from "@/i18n/navigation"
 import {
   labelsToStatus,
   labelsToTags,
@@ -8,7 +6,6 @@ import {
   type GithubIssue,
 } from "@/lib/github"
 import { PageHeader } from "@/components/ui/page-header"
-import { TechButton } from "@/components/ui/tech-button"
 import { FeatureList } from "@/app/[locale]/(private)/features/feature-list"
 import { PendingCreationBanner } from "@/app/[locale]/(private)/features/pending-creation-banner"
 
@@ -45,13 +42,13 @@ function buildFeatures(issues: GithubIssue[]) {
 
 interface FeatureListContentProps {
   issues: GithubIssue[]
-  session: Session | null
+  action?: React.ReactNode
   created?: string | string[] | undefined
 }
 
 export async function FeatureListContent({
   issues,
-  session,
+  action,
   created,
 }: FeatureListContentProps) {
   const t = await getTranslations("Feature")
@@ -59,18 +56,13 @@ export async function FeatureListContent({
 
   const features = buildFeatures(issues)
 
-  // oxlint-disable-next-line react-perf/jsx-no-jsx-as-prop
-  const headerAction = session?.user ? (
-    <FeatureCreateButton label={`+ ${t("createButton")}`} />
-  ) : undefined
-
   return (
     <div className="page-container-pb">
       <PageHeader
         title={t("pageTitle")}
         subtitle={t("pageSubtitle")}
         topMargin
-        action={headerAction}
+        action={action}
       />
 
       {isCreated && <PendingCreationBanner />}
@@ -79,17 +71,5 @@ export async function FeatureListContent({
         <FeatureList features={features} />
       </div>
     </div>
-  )
-}
-
-function FeatureCreateButton({ label }: { label: string }) {
-  return (
-    <Link href="/features/new" className="w-full md:w-auto">
-      <TechButton
-        variant="primary"
-        className="flex min-h-[44px] w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
-        {label}
-      </TechButton>
-    </Link>
   )
 }

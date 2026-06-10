@@ -25,6 +25,7 @@ const buildSha: string = (() => {
 const nextConfig: NextConfig = {
   env: { NEXT_PUBLIC_BUILD_SHA: buildSha },
   serverExternalPackages: ["@prisma/client", "prisma"],
+  cacheComponents: true,
   outputFileTracingIncludes: {
     "/*": ["data/manifest.json"],
     "/[locale]/articles/[[...slug]]": ["data/articles/**"],

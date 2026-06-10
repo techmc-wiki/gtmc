@@ -2,7 +2,8 @@ import fs from "fs"
 import path from "path"
 
 import { ARTICLES_PATH } from "@/lib/articles/fs"
-import { getArticleManifest, type ArticleLocale } from "@/lib/articles/manifest"
+import { getArticleManifest } from "@/lib/articles/manifest-cached"
+import type { ArticleLocale } from "@/lib/articles/manifest"
 import { artifactFilename } from "@/lib/articles/content"
 import type { ArticleContentArtifact } from "@/lib/articles/content"
 import {
@@ -69,7 +70,7 @@ function copyBannerAssetToPublic(
   }
 }
 
-function main(): void {
+async function main(): Promise<void> {
   let generatedCount = 0
   let errorCount = 0
 
@@ -82,7 +83,7 @@ function main(): void {
     fs.rmSync(PUBLIC_ARTICLE_ASSET_DIR, { recursive: true })
   }
 
-  const entries = Object.values(getArticleManifest())
+  const entries = Object.values(await getArticleManifest())
 
   for (const entry of entries) {
     if (
@@ -228,4 +229,4 @@ function main(): void {
   }
 }
 
-main()
+void main()

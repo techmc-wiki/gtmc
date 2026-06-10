@@ -10,11 +10,11 @@ export type { ArticleEntry }
 
 let filePathToSlugKeyCache: Record<string, string> | null = null
 
-function getFilePathToSlugKey(): Record<string, string> {
+async function getFilePathToSlugKey(): Promise<Record<string, string>> {
   if (filePathToSlugKeyCache) return filePathToSlugKeyCache
 
   const inverted: Record<string, string> = {}
-  for (const [slugKey, entry] of Object.entries(getArticleManifest())) {
+  for (const [slugKey, entry] of Object.entries(await getArticleManifest())) {
     if (entry?.filePath) {
       inverted[entry.filePath.replace(/\.md$/i, "")] = slugKey
     }
@@ -32,16 +32,16 @@ export interface ResolveResult {
  * @param slugPath - The slug path to resolve (e.g., "tree-farm/basics")
  * @returns The file path if found, null otherwise
  */
-export function resolveSlug(slugPath: string): string | null {
-  const result = resolveSlugWithIndicator(slugPath)
+export async function resolveSlug(slugPath: string): Promise<string | null> {
+  const result = await resolveSlugWithIndicator(slugPath)
   return result.filePath
 }
 
 /**
  * Resolves a slug path with indicator for raw file path fallback.
  */
-export function resolveSlugWithIndicator(slugPath: string): ResolveResult {
-  const manifest = getArticleManifest()
+export async function resolveSlugWithIndicator(slugPath: string): Promise<ResolveResult> {
+  const manifest = await getArticleManifest()
 
   // 1. Direct slug lookup
   if (manifest[slugPath] !== undefined) {
@@ -61,15 +61,15 @@ export function resolveSlugWithIndicator(slugPath: string): ResolveResult {
 /**
  * Gets the slug for a given file path if it exists in the article manifest.
  */
-export function getSlugForFilePath(filePath: string): string | null {
-  return getFilePathToSlugKey()[filePath.replace(/\.md$/i, "")] ?? null
+export async function getSlugForFilePath(filePath: string): Promise<string | null> {
+  return (await getFilePathToSlugKey())[filePath.replace(/\.md$/i, "")] ?? null
 }
 
 /**
  * Gets the article manifest entry for a given slug path.
  */
-export function getArticleEntry(slugPath: string): ArticleEntry | null {
-  return getArticleManifest()[slugPath] ?? null
+export async function getArticleEntry(slugPath: string): Promise<ArticleEntry | null> {
+  return (await getArticleManifest())[slugPath] ?? null
 }
 
 export function encodeSlug(slug: string): string {

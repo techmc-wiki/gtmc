@@ -326,11 +326,8 @@ function parseArticleManifest(
   }
 }
 
-let articleManifestCache: Record<string, ArticleEntry> | null = null
-
-export function getArticleManifest(): Record<string, ArticleEntry> {
-  articleManifestCache ??= loadArticleManifest()
-  return articleManifestCache
+export async function getArticleManifest(): Promise<Record<string, ArticleEntry>> {
+  return loadArticleManifest()
 }
 
 const localTreeCache = new Map<ArticleLocale, ArticleTreeNode[]>()
@@ -348,7 +345,7 @@ export async function getArticleTree(
   if (cached) return cached
 
   try {
-    const tree = buildLocalTree(locale)
+    const tree = await buildLocalTree(locale)
     localTreeCache.set(locale, tree)
     return tree
   } catch (error) {
@@ -363,8 +360,8 @@ export async function getArticleTree(
   return []
 }
 
-function buildLocalTree(locale: ArticleLocale): ArticleTreeNode[] {
-  const manifest = getArticleManifest()
+async function buildLocalTree(locale: ArticleLocale): Promise<ArticleTreeNode[]> {
+  const manifest = await getArticleManifest()
   const entries = Object.values(manifest)
   if (entries.length === 0) {
     return []
@@ -383,16 +380,16 @@ function buildLocalTree(locale: ArticleLocale): ArticleTreeNode[] {
     .toSorted((a, b) => compareEntries(a, b, locale))
 
   return roots
-    .map((entry) => buildTreeNode(entry, parentIndex, locale))
+    .map((entry) => buildTreeNode(entry, parentIndex, manifest, locale))
     .filter((node): node is ArticleTreeNode => node !== null)
 }
 
 function buildTreeNode(
   entry: ArticleEntry,
   parentIndex: Map<string, ArticleEntry[]>,
+  manifest: Record<string, ArticleEntry>,
   locale: ArticleLocale
 ): ArticleTreeNode | null {
-  const manifest = getArticleManifest()
   const childrenFromSlug = entry.children ?? []
   const childrenFromParent = parentIndex.get(entry.slug) ?? []
 
@@ -406,7 +403,7 @@ function buildTreeNode(
 
   const children = [...mergedChildrenBySlug.values()]
     .toSorted((a, b) => compareEntries(a, b, locale))
-    .map((child) => buildTreeNode(child, parentIndex, locale))
+    .map((child) => buildTreeNode(child, parentIndex, manifest, locale))
     .filter((node): node is ArticleTreeNode => node !== null)
 
   if (!entry.isFolder && !entry.availableLocales.includes(locale)) {
@@ -504,11 +501,11 @@ export function getLocalizedArticleMetadata(
   }
 }
 
-export function getLocalizedArticleEntry(
+export async function getLocalizedArticleEntry(
   slugPath: string,
   locale: ArticleLocale = "zh"
-): (ArticleEntry & LocalizedArticleMetadata) | null {
-  const entry = getArticleManifest()[slugPath]
+): Promise<(ArticleEntry & LocalizedArticleMetadata) | null> {
+  const entry = (await getArticleManifest())[slugPath]
   if (!entry) {
     return null
   }

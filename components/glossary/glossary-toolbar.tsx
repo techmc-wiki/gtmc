@@ -17,16 +17,12 @@ import { GlossaryTable } from "@/components/glossary/glossary-table"
 import { GlossaryDetailPanel } from "@/components/glossary/glossary-detail-panel"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { Link } from "@/i18n/navigation"
+import fullData from "@/data/glossary.json" with { type: "json" }
 import { LOCALE_TO_COLUMN } from "@/lib/glossary/locales"
 import type { GlossaryEntry } from "@/lib/glossary/manifest"
 import { cn } from "@/lib/cn"
 
-const ALPHA = /[A-Z]/
-
-function letterBucket(slug: string): string {
-  const first = slug[0]?.toUpperCase() ?? "#"
-  return ALPHA.test(first) ? first : "#"
-}
+const entries = fullData as GlossaryEntry[]
 
 /**
  * Map ColumnPicker CSV-style column names to GlossaryTable lowercase keys.
@@ -67,7 +63,8 @@ function csvColumnsToTableColumns(csvColumns: string[]): string[] {
 }
 
 export interface GlossaryToolbarProps {
-  entries: GlossaryEntry[]
+  categories: CategoryFilterCategory[]
+  availableLetters: string[]
   locale: string
   totalCount: number
   defaultColumns: Record<string, string[]>
@@ -76,7 +73,8 @@ export interface GlossaryToolbarProps {
 }
 
 export function GlossaryToolbar({
-  entries,
+  categories,
+  availableLetters,
   locale,
   totalCount,
   defaultColumns,
@@ -114,26 +112,6 @@ export function GlossaryToolbar({
   const closeDetailPanel = React.useCallback(() => {
     setSelectedEntry(null)
   }, [])
-
-  const categories = React.useMemo<CategoryFilterCategory[]>(() => {
-    const counts = new Map<string, number>()
-    for (const entry of entries) {
-      const name = entry.category?.trim()
-      if (!name) continue
-      counts.set(name, (counts.get(name) ?? 0) + 1)
-    }
-    return [...counts.entries()]
-      .map(([name, count]) => ({ name, count }))
-      .toSorted((a, b) => a.name.localeCompare(b.name))
-  }, [entries])
-
-  const availableLetters = React.useMemo(() => {
-    const set = new Set<string>()
-    for (const entry of entries) {
-      set.add(letterBucket(entry.slug))
-    }
-    return [...set]
-  }, [entries])
 
   const tableColumns = React.useMemo(
     () => csvColumnsToTableColumns(visibleColumns),

@@ -50,22 +50,22 @@ export interface LinearizedArticle {
  * Folder nodes become the "chapter" context for their descendants; they are
  * not emitted as articles themselves.
  */
-export function linearizeArticles(tree: ChapterNavNode[]): LinearizedArticle[] {
+export async function linearizeArticles(tree: ChapterNavNode[]): Promise<LinearizedArticle[]> {
   const result: LinearizedArticle[] = []
 
-  function dfs(
+  async function dfs(
     nodes: ChapterNavNode[],
     chapterSlug: string,
     chapterTitle: string,
     depth: number,
-  ): void {
+  ): Promise<void> {
     for (const node of nodes) {
       if (node.isFolder) {
         // Descend into the folder, which becomes the active chapter
-        dfs(node.children, node.slug, node.title, depth + 1)
+        await dfs(node.children, node.slug, node.title, depth + 1)
       } else {
         // Resolve file path; may be null if slug is missing from the manifest
-        const filePath = resolveLocalArticlePath(node.slug)
+        const filePath = await resolveLocalArticlePath(node.slug)
 
         result.push({
           slug: node.slug,
@@ -84,7 +84,7 @@ export function linearizeArticles(tree: ChapterNavNode[]): LinearizedArticle[] {
     }
   }
 
-  dfs(tree, /* chapterSlug */ "", /* chapterTitle */ "", /* depth */ 0)
+  await dfs(tree, /* chapterSlug */ "", /* chapterTitle */ "", /* depth */ 0)
 
   return result
 }
@@ -109,7 +109,7 @@ export async function getArticleContentForPdf(
     return contentCache.get(cacheKey) ?? null
   }
 
-  const artifact = getArticleContentBySlug(slug, locale)
+  const artifact = await getArticleContentBySlug(slug, locale)
   const content = artifact?.content ?? null
   
   contentCache.set(cacheKey, content)

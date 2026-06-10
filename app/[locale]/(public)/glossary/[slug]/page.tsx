@@ -14,8 +14,8 @@ interface GlossarySlugPageProps {
   params: Promise<{ locale: string; slug: string }>
 }
 
-export function generateStaticParams(): { slug: string }[] {
-  const { entries } = loadGlossaryManifest()
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  const { entries } = await loadGlossaryManifest()
   return entries.map((entry) => ({ slug: entry.slug }))
 }
 

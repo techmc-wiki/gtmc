@@ -40,7 +40,7 @@ import type { ArticleTreeNode as BaseArticleTreeNode } from "@/lib/github/sync"
 
 const EMPTY_STRING_ARRAY: string[] = []
 
-export const revalidate = 3600
+
 
 export async function generateStaticParams(): Promise<{ locale: string; slug: string[] }[]> {
   const locales: ArticleLocale[] = ["zh", "en"]
@@ -99,7 +99,7 @@ export async function generateMetadata({
   }
 
   try {
-    const artifact = getArticleContentBySlug(target.canonicalSlug ?? slugPath, locale)
+    const artifact = await getArticleContentBySlug(target.canonicalSlug ?? slugPath, locale)
     if (!artifact) {
       return {
         title: t("notFound"),
@@ -110,10 +110,10 @@ export async function generateMetadata({
     const { content: mdBody, frontmatter: data } = artifact
     const siteUrl = getSiteUrl()
     const effectiveSlug =
-      target.canonicalSlug ?? getSlugForFilePath(target.filePath) ?? slugPath
+      target.canonicalSlug ?? (await getSlugForFilePath(target.filePath)) ?? slugPath
     const canonicalUrl = `${getSiteUrl()}/${locale}/articles/${encodeSlug(effectiveSlug)}`
 
-    const resolvedTitle = resolveDisplayedArticleTitle(
+    const resolvedTitle = await resolveDisplayedArticleTitle(
       data["chapter-title"],
       target.filePath,
       target.canonicalSlug,
@@ -129,7 +129,7 @@ export async function generateMetadata({
     )
 
     // Build page title with chapter prefix if available
-    const manifestEntry = getLocalizedArticleEntry(effectiveSlug, locale)
+    const manifestEntry = await getLocalizedArticleEntry(effectiveSlug, locale)
     const chapterTitle = manifestEntry?.chapterTitleByLocale?.[locale]
     const pageTitle = chapterTitle
       ? `${chapterTitle} › ${articleTitle} — Graduate Texts in Minecraft`
@@ -203,14 +203,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     redirect(`/${locale}/articles/${redirectPath}`)
   }
 
-  const artifact = getArticleContentBySlug(target.canonicalSlug ?? slugPath, locale)
+  const artifact = await getArticleContentBySlug(target.canonicalSlug ?? slugPath, locale)
 
   if (!artifact) {
     notFound()
   }
 
   const { content: renderedContent, frontmatter: data } = artifact
-  const resolvedTitle = resolveDisplayedArticleTitle(
+  const resolvedTitle = await resolveDisplayedArticleTitle(
     data["chapter-title"],
     target.filePath,
     target.canonicalSlug,
@@ -236,7 +236,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const siteUrl = getSiteUrl()
   const effectiveSlug =
-    target.canonicalSlug ?? getSlugForFilePath(target.filePath) ?? slugPath
+    target.canonicalSlug ?? (await getSlugForFilePath(target.filePath)) ?? slugPath
   const canonicalUrl = `${getSiteUrl()}/${locale}/articles/${encodeSlug(effectiveSlug)}`
   const description = generateDescription(
     renderedContent,
@@ -259,7 +259,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     url: `https://github.com/${name}`,
   }))
 
-  const manifestEntry = getLocalizedArticleEntry(effectiveSlug, locale)
+  const manifestEntry = await getLocalizedArticleEntry(effectiveSlug, locale)
   const chapterTitle = manifestEntry?.chapterTitleByLocale?.[locale]
   const translationFreshnessByLocale =
     manifestEntry?.translationFreshnessByLocale as
@@ -347,7 +347,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const tree = await getPublicChapterNav(locale)
   const flattenedArticles = flattenArticleTree(tree)
   const currentSlug = target.canonicalSlug || slugPath
-  const navigation = getArticleNavigation(currentSlug, flattenedArticles, locale)
+  const navigation = await getArticleNavigation(currentSlug, flattenedArticles, locale)
 
   return (
     <div
@@ -467,7 +467,7 @@ async function resolveArticleTarget(
   }
 
   const canonicalSlug = targetNode.isFolder
-    ? resolveCanonicalSlugForFolder(targetNode, locale)
+    ? await resolveCanonicalSlugForFolder(targetNode, locale)
     : targetNode.slug
 
   if (!canonicalSlug) {
@@ -478,12 +478,11 @@ async function resolveArticleTarget(
     return null
   }
 
-  const filePath = getLocalizedArticleEntry(canonicalSlug, locale)?.filePath ?? null
+  const slugEntry = await getLocalizedArticleEntry(canonicalSlug, locale)
+  const filePath = slugEntry?.filePath ?? null
   if (!filePath) {
     return null
   }
-
-  const slugEntry = getLocalizedArticleEntry(canonicalSlug, locale)
 
   const redirectToSlug =
     targetNode.isFolder && canonicalSlug !== normalizedSlug
@@ -501,11 +500,11 @@ async function resolveArticleTarget(
   }
 }
 
-function resolveCanonicalSlugForFolder(
+async function resolveCanonicalSlugForFolder(
   targetNode: ArticleTreeNode,
   locale: ArticleLocale
-): string | null {
-  const mapEntry = getLocalizedArticleEntry(targetNode.slug, locale)
+): Promise<string | null> {
+  const mapEntry = await getLocalizedArticleEntry(targetNode.slug, locale)
   if (mapEntry?.hasIntro && hasArticleLocale(targetNode.slug, locale)) {
     return targetNode.slug
   }
@@ -531,17 +530,21 @@ function findNodeBySlug(
   return null
 }
 
-function resolveFirstArticleSlug(children: ArticleTreeNode[], locale: ArticleLocale): string | null {
+async function resolveFirstArticleSlug(children: ArticleTreeNode[], locale: ArticleLocale): Promise<string | null> {
   if (!children || children.length === 0) {
     return null
   }
 
-  const chapterEntries = children.map((child) => ({
-    filePath: getLocalizedArticleEntry(child.slug, locale)?.filePath ?? `${child.slug}.md`,
-    slug: child.slug,
-    index: child.index ?? -1,
-    isFolder: child.isFolder,
-  }))
+  const chapterEntries = await Promise.all(
+    children.map(async (child) => ({
+      filePath:
+        (await getLocalizedArticleEntry(child.slug, locale))?.filePath ??
+        `${child.slug}.md`,
+      slug: child.slug,
+      index: child.index ?? -1,
+      isFolder: child.isFolder,
+    }))
+  )
 
   const firstEntry = getFirstArticleInChapter(chapterEntries)
   if (!firstEntry) {
@@ -572,14 +575,14 @@ function resolveArticleTitle(rawTitle: unknown, fallbackPath: string): string {
   return fallback
 }
 
-function resolveDisplayedArticleTitle(
+async function resolveDisplayedArticleTitle(
   rawTitle: unknown,
   fallbackPath: string,
   canonicalSlug: string,
   isReadmeIntro: boolean,
   locale: ArticleLocale
-): string {
-  const slugEntry = getLocalizedArticleEntry(canonicalSlug, locale)
+): Promise<string> {
+  const slugEntry = await getLocalizedArticleEntry(canonicalSlug, locale)
   const introTitle = slugEntry?.introTitleByLocale?.[locale]?.trim()
 
   if (isReadmeIntro && introTitle) {

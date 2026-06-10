@@ -1,5 +1,6 @@
 import fs from "fs"
 import path from "path"
+import { cacheLife, cacheTag } from "next/cache"
 
 import type { ArticleLocale } from "./manifest"
 
@@ -111,10 +112,13 @@ function parseArticleContentArtifact(
  * malformed. In production, throws an error — callers handle not-found via
  * `notFound()`.
  */
-export function getArticleContentBySlug(
+export async function getArticleContentBySlug(
   slug: string,
   locale: ArticleLocale
-): ArticleContentArtifact | null {
+): Promise<ArticleContentArtifact | null> {
+  "use cache"
+  cacheLife("hours")
+  cacheTag(`article-${locale}-${slug}`)
   if (locale !== "zh" && locale !== "en") {
     if (process.env.NODE_ENV === "development") {
       console.warn(

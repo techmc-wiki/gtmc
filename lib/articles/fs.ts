@@ -5,8 +5,8 @@ import { resolveSlug, type ResolveResult } from "@/lib/slug-resolver"
 
 export const ARTICLES_PATH = path.join(process.cwd(), "articles")
 
-export function resolveLocalArticlePath(slugPath: string): string | null {
-  const manifestPath = resolveSlug(slugPath)
+export async function resolveLocalArticlePath(slugPath: string): Promise<string | null> {
+  const manifestPath = await resolveSlug(slugPath)
   if (manifestPath) return manifestPath
 
   return resolveRawArticlePath(slugPath).filePath

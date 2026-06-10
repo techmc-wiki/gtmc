@@ -141,7 +141,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let glossaryUrls: MetadataRoute.Sitemap = []
   try {
-    const { entries } = loadGlossaryManifest()
+    const { entries } = await loadGlossaryManifest()
     glossaryUrls = entries.flatMap((entry) => [
       {
         url: `${BASE}/zh/glossary/${entry.slug}`,

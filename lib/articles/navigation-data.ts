@@ -95,18 +95,18 @@ export function getFirstArticleInChapter(
   return sorted[0]
 }
 
-export function getArticleNavigation(
+export async function getArticleNavigation(
   currentSlug: string,
   articles: FlatArticle[],
   locale: "en" | "zh" = "zh"
-): NavigationResult {
+): Promise<NavigationResult> {
   const currentIndex = articles.findIndex((a) => a.slug === currentSlug)
 
   if (currentIndex === -1) {
     return { prev: null, next: null }
   }
 
-  const getChapterTitle = (article: FlatArticle): string | undefined => {
+  const getChapterTitle = async (article: FlatArticle): Promise<string | undefined> => {
     if (article.chapterTitle) {
       return article.chapterTitle
     }
@@ -115,7 +115,7 @@ export function getArticleNavigation(
       return undefined
     }
 
-    const entry = getLocalizedArticleEntry(article.parentPath, locale)
+    const entry = await getLocalizedArticleEntry(article.parentPath, locale)
     const chapterTitle =
       entry?.chapterTitle || entry?.titleByLocale[locale]?.trim()
     if (chapterTitle) {
@@ -134,7 +134,7 @@ export function getArticleNavigation(
           isCrossFolder:
             articles[currentIndex - 1].parentPath !==
             articles[currentIndex].parentPath,
-          chapterTitle: getChapterTitle(articles[currentIndex - 1]),
+          chapterTitle: await getChapterTitle(articles[currentIndex - 1]),
         }
       : null
 
@@ -146,7 +146,7 @@ export function getArticleNavigation(
           isCrossFolder:
             articles[currentIndex + 1].parentPath !==
             articles[currentIndex].parentPath,
-          chapterTitle: getChapterTitle(articles[currentIndex + 1]),
+          chapterTitle: await getChapterTitle(articles[currentIndex + 1]),
         }
       : null
 

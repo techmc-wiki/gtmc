@@ -173,9 +173,9 @@ export async function GET(
     return new Response("Not Found", { status: 404 })
   }
 
-  const artifact = (() => {
+  const artifact = await (async () => {
     try {
-      return getArticleContentBySlug(slugPath, locale)
+      return await getArticleContentBySlug(slugPath, locale)
     } catch {
       return null
     }
@@ -186,9 +186,9 @@ export async function GET(
   const content = artifact.content
   const siteUrl = getSiteUrl()
 
-  const manifestEntry = getLocalizedArticleEntry(slugPath, locale)
+  const manifestEntry = await getLocalizedArticleEntry(slugPath, locale)
   const parentEntry = manifestEntry?.parentSlug
-    ? getLocalizedArticleEntry(manifestEntry.parentSlug, locale)
+    ? await getLocalizedArticleEntry(manifestEntry.parentSlug, locale)
     : null
 
   const rawTitle =

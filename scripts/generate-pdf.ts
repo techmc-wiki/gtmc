@@ -410,7 +410,7 @@ async function runPdf(locale: "en" | "zh", output: string): Promise<void> {
   // Phase 2: Linearize
   // ═══════════════════════════════════════════════════════════════════════
   console.log("[pdf] Phase 2/6: Linearizing articles...")
-  const articles = linearizeArticles(tree)
+  const articles = await linearizeArticles(tree)
   console.log(`[pdf]   → ${articles.length} article(s) found`)
 
   // ═══════════════════════════════════════════════════════════════════════

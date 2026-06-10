@@ -58,7 +58,7 @@ export default async function EditGlossaryDraftPage({
   const realEmail = session.user.email ?? null
   const authorName = session.user.name ?? "GTMC Glossary Contributor"
 
-  const manifest = loadGlossaryManifest()
+  const manifest = await loadGlossaryManifest()
   const summary = loadGlossarySummary()
   const locale = await getLocale()
 

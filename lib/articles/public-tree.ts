@@ -1,4 +1,4 @@
-import { unstable_cache } from "next/cache"
+import { cacheLife, cacheTag } from "next/cache"
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/articles/ignore"
 import { type ArticleLocale, getArticleTree } from "@/lib/articles/manifest"
 import { getRepoTranslations, type ArticleTreeNode } from "@/lib/github/sync"
@@ -27,11 +27,12 @@ async function getCachedArticleTree(locale: ArticleLocale) {
   return getArticleTree(locale)
 }
 
-const getCachedTranslations = unstable_cache(
-  async () => getRepoTranslations(),
-  ["github-chapter-nav-translations"],
-  { revalidate: 3600, tags: ["github-repo-translations"] }
-)
+async function getCachedTranslations() {
+  "use cache"
+  cacheLife("hours")
+  cacheTag("github-repo-translations")
+  return getRepoTranslations()
+}
 
 /**
  * 获取公开章节导航树。

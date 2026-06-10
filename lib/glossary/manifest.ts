@@ -1,3 +1,7 @@
+import { cacheLife, cacheTag } from "next/cache"
+import fullData from "@/data/glossary.json" with { type: "json" }
+import summaryData from "@/data/glossary-summary.json" with { type: "json" }
+
 export type GlossaryLocale =
   | "ar"
   | "zh"
@@ -39,19 +43,16 @@ export interface GlossarySummaryEntry {
   category: string
 }
 
-import fullData from "@/data/glossary.json" with { type: "json" }
-import summaryData from "@/data/glossary-summary.json" with { type: "json" }
-
-// eslint-disable-next-line no-underscore-dangle
-let _manifest: { entries: GlossaryEntry[] } | null = null
 // eslint-disable-next-line no-underscore-dangle
 let _summary: GlossarySummaryEntry[] | null = null
 
-export function loadGlossaryManifest(): { entries: GlossaryEntry[] } {
-  if (!_manifest) {
-    _manifest = { entries: fullData as GlossaryEntry[] }
-  }
-  return _manifest
+export async function loadGlossaryManifest(): Promise<{
+  entries: GlossaryEntry[]
+}> {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('glossary-manifest')
+  return { entries: fullData as GlossaryEntry[] }
 }
 
 export function loadGlossarySummary(): GlossarySummaryEntry[] {

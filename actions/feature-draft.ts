@@ -17,6 +17,7 @@ import {
   parseIssueNumber,
   type IssueMetadata,
 } from "@/lib/github"
+import { updateGithubIssueCache } from "@/lib/github/cache-tags"
 
 async function sendQQBotNotification(payload: {
   type?: string
@@ -70,6 +71,7 @@ export async function createFeature(data: {
   const labels = [...tagsToLabels(data.tags), ...statusToLabels("PENDING")]
 
   const created = await createIssue(data.title, body, labels)
+  updateGithubIssueCache(created.number)
 
   // Send structured payload for AstrBot
   await sendQQBotNotification({
@@ -146,6 +148,7 @@ export async function updateFeature(
     body: newBody,
     labels: newLabels,
   })
+  updateGithubIssueCache(issue.number)
 
   revalidatePath(PATHS.FEATURES)
   revalidatePath(PATHS.FEATURE(id))

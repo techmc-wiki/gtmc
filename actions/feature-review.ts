@@ -28,6 +28,10 @@ import {
   parseIssueNumber,
   type IssueMetadata,
 } from "@/lib/github"
+import {
+  updateGithubIssueCache,
+  updateGithubIssueCommentsCache,
+} from "@/lib/github/cache-tags"
 
 async function getFeatureByIssueNumber(issueNumber: number) {
   const issue = await getIssue(issueNumber)
@@ -128,6 +132,7 @@ export async function updateFeatureExplanation(
   )
 
   await updateIssue(issue.number, { body: newBody })
+  updateGithubIssueCache(issue.number)
 
   revalidatePath(`/features/${id}`)
   return { success: true }
@@ -171,6 +176,7 @@ export async function assignFeature(id: string) {
     setIssueLabels(issue.number, newLabels),
     updateIssue(issue.number, { body: newBodyWithAssignee }),
   ])
+  updateGithubIssueCache(issue.number)
 
   // Post claim bot comment (best-effort, does not fail the action)
   try {
@@ -193,8 +199,10 @@ Assignee: ${mentionToken}
 AssigneeId: ${session.user.id}
 AssigneeEmail: ${assigneeEmail}
 By: ${mentionToken}
-At: ${new Date().toISOString()}`
+    At: ${new Date().toISOString()}`
     await addIssueComment(issue.number, serializeSystemComment(payload))
+    updateGithubIssueCommentsCache(issue.number)
+    updateGithubIssueCache(issue.number)
   } catch (error) {
     console.warn("Failed to post claim bot comment:", error)
   }
@@ -244,6 +252,7 @@ export async function unassignFeature(id: string) {
     setIssueLabels(issue.number, newLabels),
     updateIssue(issue.number, { body: newBody }),
   ])
+  updateGithubIssueCache(issue.number)
 
   // Post drop bot comment (best-effort, does not fail the action)
   try {
@@ -263,8 +272,10 @@ Action: DROPPED
 PreviousAssignee: ${previousMentionToken}
 PreviousAssigneeId: ${parsed.metadata?.assigneeId ?? "N/A"}
 By: ${mentionToken}
-At: ${new Date().toISOString()}`
+    At: ${new Date().toISOString()}`
     await addIssueComment(issue.number, serializeSystemComment(payload))
+    updateGithubIssueCommentsCache(issue.number)
+    updateGithubIssueCache(issue.number)
   } catch (error) {
     console.warn("Failed to post drop bot comment:", error)
   }
@@ -295,6 +306,7 @@ export async function resolveFeature(id: string, resolutionComment?: string) {
 
   await setIssueLabels(issue.number, newLabels)
   await setIssueState(issue.number, "closed")
+  updateGithubIssueCache(issue.number)
 
   if (resolutionComment) {
     await addIssueComment(
@@ -304,6 +316,8 @@ export async function resolveFeature(id: string, resolutionComment?: string) {
         createMetadataFromSession(session)
       )
     )
+    updateGithubIssueCommentsCache(issue.number)
+    updateGithubIssueCache(issue.number)
   }
 
   revalidatePath("/features")
@@ -356,6 +370,8 @@ export async function addFeatureComment(id: string, content: string) {
   )
 
   const ghComment = await addIssueComment(feature.issue.number, commentBody)
+  updateGithubIssueCommentsCache(feature.issue.number)
+  updateGithubIssueCache(feature.issue.number)
 
   revalidatePath(`/features/${id}`)
 

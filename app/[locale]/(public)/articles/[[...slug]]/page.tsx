@@ -11,16 +11,19 @@ import {
 } from "@/lib/markdown"
 import { getCachedRehypeShiki } from "@/lib/markdown/syntax/rehype-shiki"
 import {
-  getArticleTree,
   getArticleAvailableLocales,
-  getLocalizedArticleEntry,
   hasArticleLocale,
   type ArticleLocale,
 } from "@/lib/articles/manifest"
+import {
+  getCachedArticleTree,
+  getCachedLocalizedArticleEntry,
+  getCachedSlugForFilePath,
+} from "@/lib/articles/manifest-cached"
 import { getArticleContentBySlug } from "@/lib/articles/content"
 import { resolveArticleAssetPath } from "@/lib/articles/banner-assets"
 import { getArticleAssetPublicUrl } from "@/lib/articles/asset-url"
-import { decodeSlugPath, encodeSlug, getSlugForFilePath } from "@/lib/slug-resolver"
+import { decodeSlugPath, encodeSlug } from "@/lib/slug-resolver"
 import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
 import { getSiteUrl } from "@/lib/site-url"
 
@@ -46,7 +49,9 @@ export async function generateStaticParams(): Promise<{ locale: string; slug: st
   const locales: ArticleLocale[] = ["zh", "en"]
   const params: { locale: string; slug: string[] }[] = []
 
-  const trees = await Promise.all(locales.map((locale) => getArticleTree(locale)))
+  const trees = await Promise.all(
+    locales.map((locale) => getCachedArticleTree(locale))
+  )
 
   for (const [index, tree] of trees.entries()) {
     const locale = locales[index]
@@ -110,7 +115,7 @@ export async function generateMetadata({
     const { content: mdBody, frontmatter: data } = artifact
     const siteUrl = getSiteUrl()
     const effectiveSlug =
-      target.canonicalSlug ?? (await getSlugForFilePath(target.filePath)) ?? slugPath
+      target.canonicalSlug ?? (await getCachedSlugForFilePath(target.filePath)) ?? slugPath
     const canonicalUrl = `${getSiteUrl()}/${locale}/articles/${encodeSlug(effectiveSlug)}`
 
     const resolvedTitle = await resolveDisplayedArticleTitle(
@@ -129,7 +134,7 @@ export async function generateMetadata({
     )
 
     // Build page title with chapter prefix if available
-    const manifestEntry = await getLocalizedArticleEntry(effectiveSlug, locale)
+    const manifestEntry = await getCachedLocalizedArticleEntry(effectiveSlug, locale)
     const chapterTitle = manifestEntry?.chapterTitleByLocale?.[locale]
     const pageTitle = chapterTitle
       ? `${chapterTitle} › ${articleTitle} — Graduate Texts in Minecraft`
@@ -236,7 +241,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const siteUrl = getSiteUrl()
   const effectiveSlug =
-    target.canonicalSlug ?? (await getSlugForFilePath(target.filePath)) ?? slugPath
+    target.canonicalSlug ?? (await getCachedSlugForFilePath(target.filePath)) ?? slugPath
   const canonicalUrl = `${getSiteUrl()}/${locale}/articles/${encodeSlug(effectiveSlug)}`
   const description = generateDescription(
     renderedContent,
@@ -259,7 +264,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     url: `https://github.com/${name}`,
   }))
 
-  const manifestEntry = await getLocalizedArticleEntry(effectiveSlug, locale)
+  const manifestEntry = await getCachedLocalizedArticleEntry(effectiveSlug, locale)
   const chapterTitle = manifestEntry?.chapterTitleByLocale?.[locale]
   const translationFreshnessByLocale =
     manifestEntry?.translationFreshnessByLocale as
@@ -459,7 +464,7 @@ async function resolveArticleTarget(
   locale: ArticleLocale
 ): Promise<ResolvedArticleTarget | null> {
   const normalizedSlug = requestedSlugPath.replace(/\.md$/i, "")
-  const tree: ArticleTreeNode[] = await getArticleTree(locale)
+  const tree: ArticleTreeNode[] = await getCachedArticleTree(locale)
   const targetNode = findNodeBySlug(tree, normalizedSlug)
 
   if (!targetNode) {
@@ -478,7 +483,7 @@ async function resolveArticleTarget(
     return null
   }
 
-  const slugEntry = await getLocalizedArticleEntry(canonicalSlug, locale)
+  const slugEntry = await getCachedLocalizedArticleEntry(canonicalSlug, locale)
   const filePath = slugEntry?.filePath ?? null
   if (!filePath) {
     return null
@@ -504,7 +509,7 @@ async function resolveCanonicalSlugForFolder(
   targetNode: ArticleTreeNode,
   locale: ArticleLocale
 ): Promise<string | null> {
-  const mapEntry = await getLocalizedArticleEntry(targetNode.slug, locale)
+  const mapEntry = await getCachedLocalizedArticleEntry(targetNode.slug, locale)
   if (mapEntry?.hasIntro && hasArticleLocale(targetNode.slug, locale)) {
     return targetNode.slug
   }
@@ -538,7 +543,7 @@ async function resolveFirstArticleSlug(children: ArticleTreeNode[], locale: Arti
   const chapterEntries = await Promise.all(
     children.map(async (child) => ({
       filePath:
-        (await getLocalizedArticleEntry(child.slug, locale))?.filePath ??
+        (await getCachedLocalizedArticleEntry(child.slug, locale))?.filePath ??
         `${child.slug}.md`,
       slug: child.slug,
       index: child.index ?? -1,
@@ -582,7 +587,7 @@ async function resolveDisplayedArticleTitle(
   isReadmeIntro: boolean,
   locale: ArticleLocale
 ): Promise<string> {
-  const slugEntry = await getLocalizedArticleEntry(canonicalSlug, locale)
+  const slugEntry = await getCachedLocalizedArticleEntry(canonicalSlug, locale)
   const introTitle = slugEntry?.introTitleByLocale?.[locale]?.trim()
 
   if (isReadmeIntro && introTitle) {

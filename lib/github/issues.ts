@@ -1,4 +1,4 @@
-import { unstable_cache } from "next/cache"
+import { cacheLife, cacheTag } from "next/cache"
 
 import type { GithubIssue } from "./api-client"
 import {
@@ -10,6 +10,10 @@ import {
 } from "./api-client"
 import type { GithubIssueResponse } from "./normalize"
 import { normalizeIssue } from "./normalize"
+import { GITHUB_ISSUES_TAG, githubIssueTag } from "./cache-tags"
+
+const ISSUE_LIST_TTL = 300
+const ISSUE_TTL = 60
 
 // eslint-disable-next-line no-underscore-dangle
 async function _listAllIssuesUncached(
@@ -40,17 +44,21 @@ async function _listAllIssuesUncached(
   return allIssues
 }
 
-export const listAllIssues = unstable_cache(
-  _listAllIssuesUncached,
-  ["github-issues"],
-  {
-    revalidate: 300,
-  }
-)
+export async function listAllIssues(
+  state: "open" | "closed" | "all" = "open"
+): Promise<GithubIssue[]> {
+  "use cache"
+  cacheLife({
+    stale: ISSUE_LIST_TTL,
+    revalidate: ISSUE_LIST_TTL,
+    expire: ISSUE_LIST_TTL * 12,
+  })
+  cacheTag(GITHUB_ISSUES_TAG)
+
+  return _listAllIssuesUncached(state)
+}
 
 export const listIssues = listAllIssues
-
-const ISSUE_TTL = 60
 
 // eslint-disable-next-line no-underscore-dangle
 async function _getIssueUncached(
@@ -76,9 +84,19 @@ async function _getIssueUncached(
   return normalizeIssue(data)
 }
 
-export const getIssue = unstable_cache(_getIssueUncached, ["github-issue"], {
-  revalidate: ISSUE_TTL,
-})
+export async function getIssue(
+  issueNumber: number
+): Promise<GithubIssue | null> {
+  "use cache"
+  cacheLife({
+    stale: ISSUE_TTL,
+    revalidate: ISSUE_TTL,
+    expire: ISSUE_TTL * 10,
+  })
+  cacheTag(GITHUB_ISSUES_TAG, githubIssueTag(issueNumber))
+
+  return _getIssueUncached(issueNumber)
+}
 
 export async function createIssue(
   title: string,

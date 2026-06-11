@@ -1,6 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache"
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/articles/ignore"
-import { type ArticleLocale, getArticleTree } from "@/lib/articles/manifest"
+import type { ArticleLocale } from "@/lib/articles/manifest"
+import { getCachedArticleTree } from "@/lib/articles/manifest-cached"
 import { getRepoTranslations, type ArticleTreeNode } from "@/lib/github/sync"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 
@@ -21,10 +22,6 @@ function isReadmeArticle(node: ChapterNavNode): boolean {
   const slugTail = node.slug.split("/").pop() ?? ""
 
   return normalizeNodeValue(node.title) === "readme" || normalizeNodeValue(slugTail) === "readme"
-}
-
-async function getCachedArticleTree(locale: ArticleLocale) {
-  return getArticleTree(locale)
 }
 
 async function getCachedTranslations() {

@@ -1,4 +1,4 @@
-import { unstable_cache } from "next/cache"
+import { cacheLife, cacheTag } from "next/cache"
 
 import type { GithubComment } from "./api-client"
 import {
@@ -10,6 +10,7 @@ import {
 } from "./api-client"
 import type { GithubCommentResponse } from "./normalize"
 import { normalizeComment } from "./normalize"
+import { githubIssueCommentsTag } from "./cache-tags"
 
 export async function addIssueComment(
   issueNumber: number,
@@ -63,10 +64,16 @@ async function _listIssueCommentsUncached(
 
 const COMMENTS_TTL = 25
 
-export const listIssueComments = unstable_cache(
-  _listIssueCommentsUncached,
-  ["github-comments"],
-  {
+export async function listIssueComments(
+  issueNumber: number
+): Promise<GithubComment[]> {
+  "use cache"
+  cacheLife({
+    stale: COMMENTS_TTL,
     revalidate: COMMENTS_TTL,
-  }
-)
+    expire: COMMENTS_TTL * 12,
+  })
+  cacheTag(githubIssueCommentsTag(issueNumber))
+
+  return _listIssueCommentsUncached(issueNumber)
+}

@@ -24,7 +24,26 @@ const buildSha: string = (() => {
 
 const nextConfig: NextConfig = {
   env: { NEXT_PUBLIC_BUILD_SHA: buildSha },
-  serverExternalPackages: ["@prisma/client", "prisma"],
+  serverExternalPackages: [
+    "@prisma/client",
+    "prisma",
+    "gray-matter",
+    "papaparse",
+  ],
+  experimental: {
+    optimizePackageImports: [
+      "motion/react",
+      "@codemirror/state",
+      "@codemirror/view",
+      "@codemirror/language",
+      "@codemirror/commands",
+      "@codemirror/autocomplete",
+      "next-intl",
+      "@tanstack/react-virtual",
+      "zod",
+      "diff",
+    ],
+  },
   cacheComponents: true,
   outputFileTracingIncludes: {
     "/*": ["data/manifest.json"],

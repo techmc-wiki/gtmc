@@ -76,6 +76,7 @@ html {
   --animate-blueprint-sweep: shimmer 2s ease-out infinite;
   --animate-scan-confirm: scan-confirm 0.6s ease-out forwards;
   --animate-skeleton-exit: skeleton-exit 0.25s ease-out forwards;
+  --animate-page-enter: page-enter 0.3s ease-in-out forwards;
 
   @keyframes fade-in {
     0% {
@@ -155,6 +156,17 @@ html {
       opacity: 0;
       transform: translateY(3px);
       filter: blur(1.5px);
+    }
+  }
+
+  @keyframes page-enter {
+    0% {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
     }
   }
 

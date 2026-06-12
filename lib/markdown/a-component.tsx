@@ -40,7 +40,7 @@ export function createAComponent(rawPath: string) {
       return (
         <Link
           href={href}
-          className="bg-tech-main/10 text-tech-main hover:bg-tech-main/80 inline-block cursor-pointer px-1 py-[0.05rem] font-mono text-[0.8em] underline transition-colors hover:text-white hover:no-underline"
+          className="bg-tech-main/10 text-tech-main hover:bg-tech-main-dark hover:text-tech-bg inline-block cursor-pointer px-1 py-[0.05rem] font-mono text-[0.8em] underline transition-colors hover:no-underline"
           {...rest}>
           {children}
         </Link>
@@ -60,7 +60,7 @@ export function createAComponent(rawPath: string) {
     return (
       <Link
         href={href}
-        className="text-tech-main hover:bg-tech-main/80 cursor-pointer px-0.5 font-sans underline underline-offset-4 transition-colors hover:text-white hover:no-underline"
+        className="text-tech-main hover:bg-tech-main-dark hover:text-tech-bg cursor-pointer px-0.5 font-sans underline underline-offset-4 transition-colors hover:no-underline"
         {...props}>
         {children}
       </Link>

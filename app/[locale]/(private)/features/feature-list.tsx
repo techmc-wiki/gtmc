@@ -201,7 +201,7 @@ export function FeatureList({ features }: { features: Feature[] }) {
                     onClick={handleTagClick}
                     className={`flex min-h-8 cursor-pointer items-center justify-center border px-3 py-2 font-mono text-xs uppercase transition-all duration-200 ${
                       selectedTags.includes(tag)
-                        ? "border-tech-accent bg-tech-accent text-white"
+                        ? "border-tech-main-dark bg-tech-main-dark text-tech-bg"
                         : `border-tech-main/40 bg-tech-accent/5 text-tech-main hover:border-tech-main/60 hover:bg-tech-accent/10`
                     } `}>
                     {tag}

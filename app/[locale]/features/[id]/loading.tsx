@@ -75,7 +75,7 @@ export default async function FeatureDetailLoading() {
           </div>
 
           <div className="editor-grow border-tech-main/40 bg-surface-overlay/80 relative border backdrop-blur-sm">
-            <div className="border-tech-main/40 bg-tech-main sticky top-0 z-10 flex h-10 flex-wrap items-center gap-1 border-b p-2 px-2 font-mono text-xs text-white/90 sm:gap-2 sm:px-4">
+            <div className="border-tech-main/40 bg-tech-main-dark text-tech-bg/90 sticky top-0 z-10 flex h-10 flex-wrap items-center gap-1 border-b p-2 px-2 font-mono text-xs sm:gap-2 sm:px-4">
               <SegmentedBar opacity="high" className="h-6 w-8" />
               <div className="bg-surface/30 h-6 w-px" />
               <SegmentedBar opacity="medium" className="h-6 w-8" />

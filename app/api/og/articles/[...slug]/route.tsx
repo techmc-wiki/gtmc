@@ -47,59 +47,59 @@ const bannerContainerStyle = {
   display: "flex" as const,
   position: "relative" as const,
   overflow: "hidden" as const,
-  background: "linear-gradient(155deg, #1a2f52 0%, #0c1c36 55%, #070e1c 100%)",
+  background: "linear-gradient(155deg, #20283c 0%, #0c1c36 55%, #14120d 100%)",
 }
 
 const bannerImgStyle = { position: "absolute" as const, inset: 0, width: "100%", height: "100%", objectFit: "cover" as const }
 
 const bannerGridBaseStyle = {
   position: "absolute" as const, inset: 0, display: "flex" as const,
-  backgroundImage: "linear-gradient(to right, #60708f 1px, transparent 1px), linear-gradient(to bottom, #60708f 1px, transparent 1px)",
+  backgroundImage: "linear-gradient(to right, #4a5468 1px, transparent 1px), linear-gradient(to bottom, #4a5468 1px, transparent 1px)",
   backgroundSize: "44px 44px",
 }
 
-const cornerTLStyle = { position: "absolute" as const, top: 16, left: 16, width: 16, height: 24, borderTop: "1px solid rgba(96,112,143,0.6)", borderLeft: "1px solid rgba(96,112,143,0.6)", display: "flex" as const }
-const cornerTRStyle = { position: "absolute" as const, top: 16, right: 16, width: 16, height: 24, borderTop: "1px solid rgba(96,112,143,0.6)", borderRight: "1px solid rgba(96,112,143,0.6)", display: "flex" as const }
-const cornerBLStyle = { position: "absolute" as const, bottom: 16, left: 16, width: 16, height: 24, borderBottom: "1px solid rgba(96,112,143,0.6)", borderLeft: "1px solid rgba(96,112,143,0.6)", display: "flex" as const }
-const cornerBRStyle = { position: "absolute" as const, bottom: 16, right: 16, width: 16, height: 24, borderBottom: "1px solid rgba(96,112,143,0.6)", borderRight: "1px solid rgba(96,112,143,0.6)", display: "flex" as const }
-const bannerLabelStyle = { position: "absolute" as const, top: 12, left: 40, fontSize: 11, color: "rgba(96,112,143,0.55)", letterSpacing: 2, textTransform: "uppercase" as const, display: "flex" as const }
+const cornerTLStyle = { position: "absolute" as const, top: 16, left: 16, width: 16, height: 24, borderTop: "1px solid rgba(74,84,104,0.6)", borderLeft: "1px solid rgba(74,84,104,0.6)", display: "flex" as const }
+const cornerTRStyle = { position: "absolute" as const, top: 16, right: 16, width: 16, height: 24, borderTop: "1px solid rgba(74,84,104,0.6)", borderRight: "1px solid rgba(74,84,104,0.6)", display: "flex" as const }
+const cornerBLStyle = { position: "absolute" as const, bottom: 16, left: 16, width: 16, height: 24, borderBottom: "1px solid rgba(74,84,104,0.6)", borderLeft: "1px solid rgba(74,84,104,0.6)", display: "flex" as const }
+const cornerBRStyle = { position: "absolute" as const, bottom: 16, right: 16, width: 16, height: 24, borderBottom: "1px solid rgba(74,84,104,0.6)", borderRight: "1px solid rgba(74,84,104,0.6)", display: "flex" as const }
+const bannerLabelStyle = { position: "absolute" as const, top: 12, left: 40, fontSize: 11, color: "rgba(74,84,104,0.55)", letterSpacing: 2, textTransform: "uppercase" as const, display: "flex" as const }
 
 const cardStyle = {
   width: W,
   height: CARD_H,
   display: "flex" as const,
   flexDirection: "column" as const,
-  background: "#f8f9fc",
-  borderTop: "3px solid #60708f",
+  background: "#f5f4ef",
+  borderTop: "3px solid #e3b505",
   position: "relative" as const,
 }
 
-const cardGridStyle = { position: "absolute" as const, inset: 0, backgroundImage: "linear-gradient(to right, #60708f 1px, transparent 1px), linear-gradient(to bottom, #60708f 1px, transparent 1px)", backgroundSize: "28px 28px", opacity: 0.03, display: "flex" as const }
-const cardCornerTLStyle = { position: "absolute" as const, top: -3, left: 0, width: 12, height: 12, borderTop: "3px solid #60708f", borderLeft: "3px solid #60708f", display: "flex" as const }
-const cardCornerTRStyle = { position: "absolute" as const, top: -3, right: 0, width: 12, height: 12, borderTop: "3px solid #60708f", borderRight: "3px solid #60708f", display: "flex" as const }
-const cardCornerBLStyle = { position: "absolute" as const, bottom: 0, left: 0, width: 12, height: 12, borderBottom: "3px solid #60708f", borderLeft: "3px solid #60708f", display: "flex" as const }
-const cardCornerBRStyle = { position: "absolute" as const, bottom: 0, right: 0, width: 12, height: 12, borderBottom: "3px solid #60708f", borderRight: "3px solid #60708f", display: "flex" as const }
+const cardGridStyle = { position: "absolute" as const, inset: 0, backgroundImage: "linear-gradient(to right, #4a5468 1px, transparent 1px), linear-gradient(to bottom, #4a5468 1px, transparent 1px)", backgroundSize: "28px 28px", opacity: 0.03, display: "flex" as const }
+const cardCornerTLStyle = { position: "absolute" as const, top: -3, left: 0, width: 12, height: 12, borderTop: "3px solid #4a5468", borderLeft: "3px solid #4a5468", display: "flex" as const }
+const cardCornerTRStyle = { position: "absolute" as const, top: -3, right: 0, width: 12, height: 12, borderTop: "3px solid #4a5468", borderRight: "3px solid #4a5468", display: "flex" as const }
+const cardCornerBLStyle = { position: "absolute" as const, bottom: 0, left: 0, width: 12, height: 12, borderBottom: "3px solid #4a5468", borderLeft: "3px solid #4a5468", display: "flex" as const }
+const cardCornerBRStyle = { position: "absolute" as const, bottom: 0, right: 0, width: 12, height: 12, borderBottom: "3px solid #4a5468", borderRight: "3px solid #4a5468", display: "flex" as const }
 
-const metaBarStyle = { height: META_BAR_H, display: "flex" as const, alignItems: "center" as const, justifyContent: "space-between" as const, padding: "0 28px", borderBottom: "1px solid #cbd5e1", flexShrink: 0, position: "relative" as const }
-const metaBarLeftStyle = { display: "flex" as const, alignItems: "center" as const, gap: 9, fontSize: 21, color: "#4a5a78", letterSpacing: 0.5 }
-const metaBarDotStyle = { width: 9, height: 9, background: "#4a5a78", display: "flex" as const, flexShrink: 0 }
-const metaBarRightStyle = { fontSize: 18, color: "#4a5a78", letterSpacing: 0.3, padding: "2px 12px", background: "white", display: "flex" as const }
+const metaBarStyle = { height: META_BAR_H, display: "flex" as const, alignItems: "center" as const, justifyContent: "space-between" as const, padding: "0 28px", borderBottom: "1px solid #d6d3c8", flexShrink: 0, position: "relative" as const }
+const metaBarLeftStyle = { display: "flex" as const, alignItems: "center" as const, gap: 9, fontSize: 21, color: "#4a5468", letterSpacing: 0.5 }
+const metaBarDotStyle = { width: 9, height: 9, background: "#4a5468", display: "flex" as const, flexShrink: 0 }
+const metaBarRightStyle = { fontSize: 18, color: "#4a5468", letterSpacing: 0.3, padding: "2px 12px", background: "#fcfbf8", display: "flex" as const }
 
 const contentAreaStyle = { flex: 1, display: "flex" as const, flexDirection: "column" as const, padding: "16px 28px 0", position: "relative" as const, overflow: "hidden" as const }
-const chapterTitleStyle = { display: "flex" as const, alignItems: "center" as const, gap: 7, fontSize: 20, color: "#60708f", letterSpacing: 2, textTransform: "uppercase" as const, marginBottom: 8 }
-const titleStyle = { fontSize: 64, fontWeight: 400, color: "#1e293b", lineHeight: 1.2, marginBottom: 10, letterSpacing: -0.3, display: "flex" as const }
+const chapterTitleStyle = { display: "flex" as const, alignItems: "center" as const, gap: 7, fontSize: 20, color: "#4a5468", letterSpacing: 2, textTransform: "uppercase" as const, marginBottom: 8 }
+const titleStyle = { fontSize: 64, fontWeight: 400, color: "#20283c", lineHeight: 1.2, marginBottom: 10, letterSpacing: -0.3, display: "flex" as const }
 const metaLineStyle = { display: "flex" as const, alignItems: "center" as const, gap: 12, fontSize: 20, color: "rgba(96, 112, 143, 0.67)", marginBottom: 14, flexShrink: 0 }
 const metaSpanStyle = { display: "flex" as const }
-const metaSepStyle = { color: "#cbd5e1", display: "flex" as const }
+const metaSepStyle = { color: "#d6d3c8", display: "flex" as const }
 const advancedBadgeStyle = { border: "1px solid rgba(76,91,150,0.4)", background: "rgba(76,91,150,0.08)", color: "#4c5b96", padding: "2px 8px", fontSize: 12, letterSpacing: 2, textTransform: "uppercase" as const, display: "flex" as const }
 
 const bodyHookWrapperStyle = { position: "relative" as const, flex: 1, overflow: "hidden" as const, display: "flex" as const }
-const bodyHookTextStyle = { fontSize: 24, fontWeight: 350, color: "#60708f", lineHeight: 1.6, display: "flex" as const }
+const bodyHookTextStyle = { fontSize: 24, fontWeight: 350, color: "#4a5468", lineHeight: 1.6, display: "flex" as const }
 const bodyHookFadeStyle = { position: "absolute" as const, bottom: 0, left: 0, right: 0, height: 100, background: "linear-gradient(to bottom, rgba(248,249,252,0) 0%, rgba(248,249,252,0.6) 40%, rgba(248,249,252,1) 100%)", display: "flex" as const }
 
-const bottomBarStyle = { height: BOTTOM_BAR_H, borderTop: "1px solid #cbd5e1", background: "white", display: "flex" as const, alignItems: "center" as const, justifyContent: "space-between" as const, padding: "0 28px", flexShrink: 0 }
-const bottomBarUrlStyle = { fontSize: 13, color: "#60708f", letterSpacing: 1, display: "flex" as const }
-const bottomBarDimStyle = { fontSize: 12, color: "#c4d0df", letterSpacing: 0.5, display: "flex" as const }
+const bottomBarStyle = { height: BOTTOM_BAR_H, borderTop: "1px solid #d6d3c8", background: "#fcfbf8", display: "flex" as const, alignItems: "center" as const, justifyContent: "space-between" as const, padding: "0 28px", flexShrink: 0 }
+const bottomBarUrlStyle = { fontSize: 13, color: "#4a5468", letterSpacing: 1, display: "flex" as const }
+const bottomBarDimStyle = { fontSize: 12, color: "#c9cfdd", letterSpacing: 0.5, display: "flex" as const }
 const VALID_LOCALES = new Set<ArticleLocale>(["zh", "en"])
 
 function resolveLocale(rawLocale: string | null): ArticleLocale {

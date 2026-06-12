@@ -251,7 +251,7 @@ function GithubIssueLink({ url, number }: { url: string; number: number }) {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="border-tech-main/50 text-tech-main hover:bg-tech-main/80 border-b font-mono wrap-break-word transition-colors hover:text-white">
+        className="border-tech-main/50 text-tech-main hover:bg-tech-main-dark hover:text-tech-bg border-b font-mono wrap-break-word transition-colors">
         Issue #{number}
       </a>
     </div>

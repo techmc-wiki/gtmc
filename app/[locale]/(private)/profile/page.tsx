@@ -171,10 +171,10 @@ export default async function ProfilePage() {
           <div className="bg-tech-main/30 my-6 h-px w-full sm:my-8" />
 
           <div className="flex flex-col items-stretch justify-end gap-3 sm:gap-4 md:flex-row md:items-center md:gap-6">
-            <SignOutButton className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main relative flex min-h-11 w-full items-center justify-center border px-4 py-2.5 font-mono text-xs font-bold tracking-widest uppercase transition-colors hover:text-white sm:px-6 sm:py-3 md:px-8" />
+            <SignOutButton className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main-dark hover:text-tech-bg relative flex min-h-11 w-full items-center justify-center border px-4 py-2.5 font-mono text-xs font-bold tracking-widest uppercase transition-colors sm:px-6 sm:py-3 md:px-8" />
             <button
               type="submit"
-              className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main relative flex min-h-11 w-full cursor-pointer items-center justify-center border px-4 py-2.5 font-mono text-xs font-bold tracking-widest uppercase transition-colors hover:text-white sm:px-6 sm:py-3 md:px-8">
+              className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main-dark hover:text-tech-bg relative flex min-h-11 w-full cursor-pointer items-center justify-center border px-4 py-2.5 font-mono text-xs font-bold tracking-widest uppercase transition-colors sm:px-6 sm:py-3 md:px-8">
               {t("saveButton")}
             </button>
           </div>

@@ -266,7 +266,7 @@ export function SearchCommand() {
     return (
       <button
         type="button"
-        className="border-tech-main/40 text-tech-main/60 hover:bg-tech-main hidden cursor-pointer items-center gap-2 border px-3 py-1.5 font-mono text-[0.6875rem] transition-colors hover:text-white md:flex">
+        className="border-tech-main/40 text-tech-main/60 hover:bg-tech-main-dark hover:text-tech-bg hidden cursor-pointer items-center gap-2 border px-3 py-1.5 font-mono text-[0.6875rem] transition-colors md:flex">
         <span className="text-xs">&#x2315;</span>
         {t("heading")}
         <span className="border-tech-main/30 text-tech-main/40 ml-1 border px-1 py-0.5 text-[0.5625rem]">
@@ -285,7 +285,7 @@ export function SearchCommand() {
         type="button"
         onClick={openModal}
         aria-label={t("searchAriaLabel")}
-        className="border-tech-main/40 text-tech-main/60 hover:bg-tech-main hidden h-8 w-40 cursor-pointer items-center gap-2 border px-3 py-1.5 font-mono text-[0.6875rem] transition-colors hover:text-white md:flex">
+        className="border-tech-main/40 text-tech-main/60 hover:bg-tech-main-dark hover:text-tech-bg hidden h-8 w-40 cursor-pointer items-center gap-2 border px-3 py-1.5 font-mono text-[0.6875rem] transition-colors md:flex">
         <div className="flex w-full items-center justify-between">
           <span className="flex items-center gap-1 text-lg leading-none">
             &#x2315;{/* icon */}
@@ -335,7 +335,7 @@ export function SearchCommand() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="border-tech-main/40 text-tech-main/70 hover:bg-tech-main cursor-pointer border px-2 py-0.5 font-mono text-[0.625rem] transition-colors hover:text-white">
+                  className="border-tech-main/40 text-tech-main/70 hover:bg-tech-main-dark hover:text-tech-bg cursor-pointer border px-2 py-0.5 font-mono text-[0.625rem] transition-colors">
                   ESC
                 </button>
               </header>

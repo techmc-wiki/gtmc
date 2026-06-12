@@ -14,7 +14,7 @@ export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
 const CONTAINER_STYLE = {
-  background: "#0f172a",
+  background: "#20283c",
   width: "100%",
   height: "100%",
   display: "flex",
@@ -22,19 +22,20 @@ const CONTAINER_STYLE = {
   alignItems: "center",
   justifyContent: "center",
   gap: 16,
+  borderTop: "16px solid #e3b505",
 } as const
 
 const TITLE_STYLE = {
   fontSize: 64,
   fontWeight: 700,
-  color: "#f8fafc",
+  color: "#f5f4ef",
   textAlign: "center",
   lineHeight: 1.2,
 } as const
 
 const SUBTITLE_STYLE = {
   fontSize: 28,
-  color: "#94a3b8",
+  color: "#a8a290",
   textAlign: "center",
 } as const
 

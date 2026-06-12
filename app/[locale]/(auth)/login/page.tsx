@@ -121,7 +121,7 @@ export default function LoginPage() {
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
               </div>
-              <h1 className="animate-tech-slide-in text-tech-main-dark fill-mode-forwards relative inline-block overflow-hidden text-3xl font-bold tracking-tight opacity-0 [animation-delay:0.7s] motion-reduce:animate-none motion-reduce:opacity-100">
+              <h1 className="animate-tech-slide-in display-title text-tech-main-dark fill-mode-forwards relative inline-block overflow-hidden text-3xl tracking-tight opacity-0 [animation-delay:0.7s] motion-reduce:animate-none motion-reduce:opacity-100">
                 {t("heading")}
               </h1>
             </div>

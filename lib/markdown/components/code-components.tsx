@@ -11,7 +11,7 @@ export function CodeComponent({
     const { "data-linked-code": _linkedCode, ...rest } = props
     return (
       <code
-        className="border-tech-main/30 bg-tech-main/10 text-tech-main group-hover/lc:border-tech-main group-hover/lc:bg-tech-main/80 mx-1 border border-b-2 px-1 py-[0.05rem] font-mono text-[0.8em] not-italic transition-colors group-hover/lc:text-white"
+        className="border-tech-main/30 bg-tech-main/10 text-tech-main group-hover/lc:border-tech-main group-hover/lc:bg-tech-main-dark group-hover/lc:text-tech-bg mx-1 border border-b-2 px-1 py-[0.05rem] font-mono text-[0.8em] not-italic transition-colors"
         {...rest}>
         {children}
       </code>

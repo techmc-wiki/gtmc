@@ -279,7 +279,7 @@ export function ThemeToggle({ className }: { className?: string }) {
         aria-haspopup="menu"
         aria-expanded={isMenuOpen}
         title={toggleAriaLabel}
-        className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main flex size-8 cursor-pointer items-center justify-center border transition-all duration-300 hover:text-white md:size-10">
+        className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main-dark hover:text-tech-bg flex size-8 cursor-pointer items-center justify-center border transition-all duration-300 md:size-10">
         <ModeIcon mode={displayedIcon} className="size-4" />
       </button>
 

@@ -51,7 +51,7 @@ function AuthIslandContent() {
       <Link
         href="/login"
         aria-label="LOGIN"
-        className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main flex size-full items-center justify-center border font-mono text-[0.625rem] font-bold tracking-widest uppercase transition-all duration-300 hover:text-white md:text-xs">
+        className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main-dark hover:text-tech-bg flex size-full items-center justify-center border font-mono text-[0.625rem] font-bold tracking-widest uppercase transition-all duration-300 md:text-xs">
         IN
       </Link>
     )

@@ -189,12 +189,10 @@ export function HomepageClient() {
               key={slotKey}
               className={`flex size-8 items-center justify-center ${
                 i === 3
-                  ? `border-tech-main-dark bg-tech-main/10 border-2 shadow-[0_0_8px_rgba(96,112,143,0.3)]`
+                  ? `border-tech-main-dark bg-tech-signal/20 border-2`
                   : `border-tech-main/40 border`
               } `}>
-              {i === 3 && (
-                <div className="bg-tech-main-dark/80 size-4 rotate-45" />
-              )}
+              {i === 3 && <div className="bg-tech-signal size-4 rotate-45" />}
             </div>
           ))}
         </div>

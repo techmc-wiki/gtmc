@@ -23,12 +23,13 @@ export default async function Footer() {
   return (
     <footer
       aria-label="Site information"
-      className="border-tech-line bg-tech-bg/80 relative mt-auto w-full border-t pt-10 pb-12">
+      className="border-tech-main-dark bg-tech-bg/80 relative mt-auto w-full border-t-2 pt-10 pb-12">
+      <div className="bg-tech-signal absolute top-0 left-0 h-0.5 w-24" />
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Top status strip */}
         <div className="text-tech-main/55 flex flex-wrap gap-x-6 gap-y-1 font-mono text-xs tracking-[0.18em] uppercase">
           <span className="border-tech-main/30 inline-flex items-center gap-2 border-l pl-4 first:border-l-0 first:pl-0">
-            <span className="bg-tech-main/60 inline-block size-1.5 motion-safe:animate-pulse" />
+            <span className="bg-tech-signal inline-block size-1.5 motion-safe:animate-pulse" />
             SYS.ONLINE
           </span>
           <span className="border-tech-main/30 border-l pl-4 first:border-l-0 first:pl-0">

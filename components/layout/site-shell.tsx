@@ -20,8 +20,8 @@ export function SiteShell({ leftSlot, rightSlot, children }: SiteShellProps) {
       </a>
       <nav
         aria-label={t("mainNavigation")}
-        className="border-tech-main/40 bg-surface-overlay/60 sticky top-0 z-50 w-full border-b backdrop-blur-sm">
-        <div className="bg-tech-main/20 absolute top-0 left-0 h-px w-full" />
+        className="border-tech-main/30 bg-surface-overlay/85 sticky top-0 z-50 w-full border-b backdrop-blur-md">
+        <div className="bg-tech-signal absolute top-0 left-0 h-[3px] w-full" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between md:h-20">
             <div className="flex space-x-4 md:space-x-8">{leftSlot}</div>

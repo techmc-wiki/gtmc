@@ -75,7 +75,7 @@ export function MobileNav({ navLinks }: MobileNavProps) {
                     key={link.href}
                     href={link.href}
                     onClick={() => setIsDrawerOpen(false)}
-                    className="border-tech-main/40 text-tech-main-dark hover:bg-tech-main bg-surface-overlay/60 flex min-h-11 items-center border p-3 font-mono text-xs tracking-[0.15em] transition-colors hover:text-white">
+                    className="border-tech-main/40 text-tech-main-dark hover:bg-tech-main-dark hover:text-tech-bg bg-surface-overlay/60 flex min-h-11 items-center border p-3 font-mono text-xs tracking-[0.15em] uppercase transition-colors">
                     {link.label}
                   </Link>
                 ))}

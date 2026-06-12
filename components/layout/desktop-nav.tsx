@@ -25,10 +25,10 @@ export function DesktopNav({ navLinks }: DesktopNavProps) {
             <li key={link.href}>
               <Link
                 href={link.href}
-                className={`border-b-2 pb-1 font-mono text-xs tracking-[0.15em] transition-colors ${
+                className={`border-b-2 pb-1 font-mono text-xs tracking-[0.15em] uppercase transition-colors ${
                   isActive
-                    ? "border-tech-main text-tech-main"
-                    : `text-tech-main-dark hover:border-tech-main hover:text-tech-main border-transparent`
+                    ? "border-tech-signal text-tech-main-dark font-bold"
+                    : `text-tech-main hover:border-tech-main/40 hover:text-tech-main-dark border-transparent`
                 } `}>
                 {link.label}
               </Link>

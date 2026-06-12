@@ -4,6 +4,7 @@ import type { MotionValue } from "motion/react"
 import { motion } from "motion/react"
 import type { ForwardedRef } from "react"
 import { useMemo } from "react"
+import { useTranslations } from "next-intl"
 
 export function HeroCard({
   cardRef,
@@ -19,6 +20,7 @@ export function HeroCard({
     rotateY: MotionValue<number>
   }
 }) {
+  const t = useTranslations("Homepage")
   const cardStyle = useMemo(
     () => ({
       x: fgTransform.x,
@@ -76,9 +78,7 @@ export function HeroCard({
 
           <div className="animate-fade-in border-tech-signal fill-mode-forwards flex max-w-xl flex-col gap-2 border-l-[3px] pl-3 opacity-0 [animation-delay:1.2s] [animation-duration:1s] motion-reduce:animate-none motion-reduce:opacity-100 sm:gap-4 sm:pl-5">
             <span className="text-tech-main-dark/85 text-xs/relaxed sm:text-base/relaxed">
-              社区驱动的 Minecraft 红石和技术在线教科书。
-              <br className="sm:hidden" />
-              提供入门教程、机制阐述和源码阅读，助你在方块世界中攻克学术难题。
+              {t("heroDescription")}
             </span>
 
             <span className="text-tech-main font-mono text-[0.5625rem] tracking-wider sm:text-xs">

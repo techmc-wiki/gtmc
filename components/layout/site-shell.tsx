@@ -6,9 +6,15 @@ interface SiteShellProps {
   leftSlot: React.ReactNode
   rightSlot: React.ReactNode
   children: React.ReactNode
+  fullBleed?: boolean
 }
 
-export function SiteShell({ leftSlot, rightSlot, children }: SiteShellProps) {
+export function SiteShell({
+  leftSlot,
+  rightSlot,
+  children,
+  fullBleed = false,
+}: SiteShellProps) {
   const t = useTranslations("CommonA11y")
 
   return (
@@ -33,7 +39,9 @@ export function SiteShell({ leftSlot, rightSlot, children }: SiteShellProps) {
 
       <main
         id="main-content"
-        className="relative flex w-full flex-1 flex-col p-4 sm:p-6 lg:px-12 lg:py-8">
+        className={`relative flex w-full flex-1 flex-col ${
+          fullBleed ? "" : "p-4 sm:p-6 lg:px-12 lg:py-8"
+        }`}>
         <PageTransition>{children}</PageTransition>
       </main>
     </div>

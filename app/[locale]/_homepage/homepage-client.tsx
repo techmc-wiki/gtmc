@@ -2,7 +2,6 @@
 
 import { useRef, useEffect, useState, useCallback } from "react"
 import dynamic from "next/dynamic"
-import { SessionProvider, useSession } from "next-auth/react"
 import { useRouter } from "@/i18n/navigation"
 import { useHomepageMotion } from "./use-homepage-motion"
 import { HOMEPAGE_MOTION } from "./homepage-constants"
@@ -10,19 +9,6 @@ import { HeroCard } from "./hero-card"
 import { TechButton } from "@/components/ui/tech-button"
 import { Link } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
-import { GithubIcon } from "@/components/markdown/people-mention"
-
-const INVENTORY_SLOT_KEYS = [
-  "slot-0",
-  "slot-1",
-  "slot-2",
-  "slot-3",
-  "slot-4",
-  "slot-5",
-  "slot-6",
-  "slot-7",
-  "slot-8",
-] as const
 
 const BackgroundLayer = dynamic(
   () => import("./background-layer").then((mod) => mod.BackgroundLayer),
@@ -32,52 +18,6 @@ const MidgroundLayer = dynamic(
   () => import("./midground-layer").then((mod) => mod.MidgroundLayer),
   { ssr: false }
 )
-
-function HomepageLoginButton() {
-  const { data: session, status } = useSession()
-  const t = useTranslations("Homepage")
-  const loggedInUsername =
-    session?.user?.githubLogin ??
-    session?.user?.name ??
-    session?.user?.email ??
-    null
-
-  if (status === "loading") {
-    return (
-      <TechButton
-        variant="secondary"
-        disabled
-        className="border-tech-main/30 bg-tech-main/5 flex h-12 w-full items-center justify-center text-xs font-medium tracking-widest uppercase shadow-sm backdrop-blur-md sm:w-72 sm:text-sm">
-        {"// "}
-        {t("initializing")}
-      </TechButton>
-    )
-  }
-
-  if (loggedInUsername) {
-    return (
-      <TechButton
-        variant="secondary"
-        disabled
-        aria-label={t("loggedInAs", { username: loggedInUsername })}
-        className="border-tech-main/30 bg-tech-main/5 flex h-12 w-full items-center justify-center text-xs font-medium tracking-widest uppercase shadow-sm backdrop-blur-md sm:w-72 sm:text-sm">
-        {"// "}
-        {t("loggedInAs", { username: loggedInUsername })}
-      </TechButton>
-    )
-  }
-
-  return (
-    <Link href="/login" className="w-full sm:w-72">
-      <TechButton
-        variant="secondary"
-        className="flex h-12 w-full items-center justify-center text-xs font-medium tracking-widest uppercase shadow-sm backdrop-blur-md transition-transform duration-300 hover:scale-102 sm:text-sm">
-        {"// "}
-        {t("loginGithub")} <GithubIcon className="size-4" />
-      </TechButton>
-    </Link>
-  )
-}
 
 export function HomepageClient() {
   const router = useRouter()
@@ -148,7 +88,7 @@ export function HomepageClient() {
         isReducedMotion={isReducedMotion}
       />
 
-      <main className="relative z-10 mx-auto mt-[7vh] flex min-h-max w-full max-w-7xl flex-col items-center justify-center px-4 py-24">
+      <div className="relative z-10 mx-auto flex min-h-full w-full max-w-7xl flex-col items-center justify-center px-4 pt-4 pb-16">
         <HeroCard
           cardRef={cardRef}
           cardWidth={cardWidth}
@@ -175,28 +115,19 @@ export function HomepageClient() {
               )}
             </TechButton>
           </Link>
-          <SessionProvider>
-            <HomepageLoginButton />
-          </SessionProvider>
         </div>
 
-        <div className="pointer-events-none relative mt-12 flex space-x-1 opacity-40">
-          <div className="text-tech-main/60 absolute -top-4 font-mono text-[0.5rem]">
-            INVENTORY_SLOTS_
-          </div>
-          {INVENTORY_SLOT_KEYS.map((slotKey, i) => (
-            <div
-              key={slotKey}
-              className={`flex size-8 items-center justify-center ${
-                i === 3
-                  ? `border-tech-main-dark bg-tech-signal/20 border-2`
-                  : `border-tech-main/40 border`
-              } `}>
-              {i === 3 && <div className="bg-tech-signal size-4 rotate-45" />}
-            </div>
-          ))}
-        </div>
-      </main>
+        <a
+          href="#contents"
+          className="group animate-fade-in fill-mode-forwards absolute inset-x-0 bottom-4 flex flex-col items-center gap-1.5 opacity-0 [animation-delay:1.8s] motion-reduce:animate-none motion-reduce:opacity-100">
+          <span className="text-tech-main/60 group-hover:text-tech-main-dark font-mono text-[0.625rem] tracking-[0.25em] uppercase transition-colors">
+            {t("scrollHint")}
+          </span>
+          <span className="text-tech-main/60 group-hover:text-tech-main-dark animate-bounce text-xs transition-colors motion-reduce:animate-none">
+            ▼
+          </span>
+        </a>
+      </div>
     </>
   )
 }

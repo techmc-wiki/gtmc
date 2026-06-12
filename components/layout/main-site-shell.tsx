@@ -38,11 +38,13 @@ interface MainSiteShellProps {
    * This is useful for private routes where the session is already checked on the server.
    */
   isAdminServerSide?: boolean
+  fullBleed?: boolean
 }
 
 export async function MainSiteShell({
   children,
   isAdminServerSide,
+  fullBleed,
 }: MainSiteShellProps) {
   const t = await getTranslations("Nav")
   const baseLinks = buildNavLinks(t)
@@ -114,7 +116,7 @@ export async function MainSiteShell({
   )
 
   return (
-    <SiteShell leftSlot={leftSlot} rightSlot={rightSlot}>
+    <SiteShell leftSlot={leftSlot} rightSlot={rightSlot} fullBleed={fullBleed}>
       {children}
     </SiteShell>
   )

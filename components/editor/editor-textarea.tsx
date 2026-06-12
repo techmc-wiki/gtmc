@@ -44,6 +44,12 @@ const techTheme = EditorView.theme({
   },
 })
 
+const editorBasicSetup = {
+  lineNumbers: true,
+  foldGutter: false,
+  highlightActiveLine: false,
+}
+
 interface EditorTextareaProps {
   value: string
   onChange: (value: string) => void
@@ -184,15 +190,6 @@ export const EditorTextarea = React.forwardRef<
       ...(lineWrap ? [EditorView.lineWrapping] : []),
     ],
     [enableSyntaxHints, lineWrap]
-  )
-
-  const editorBasicSetup = React.useMemo(
-    () => ({
-      lineNumbers: true,
-      foldGutter: false,
-      highlightActiveLine: false,
-    }),
-    []
   )
 
   const handleKeyDownCapture = React.useCallback(

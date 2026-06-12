@@ -261,6 +261,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
             src={person.profile}
             alt={person.name}
             fallback={person.isFallback ? "?" : person.name[0]}
+            sizes="48px"
           />
         </div>
         <span className="font-mono text-sm font-medium tracking-wide">

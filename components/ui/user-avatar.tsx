@@ -6,6 +6,7 @@ interface UserAvatarProps {
   alt?: string | null
   fallback?: string
   className?: string
+  sizes?: string
 }
 
 export function UserAvatar({
@@ -13,6 +14,7 @@ export function UserAvatar({
   alt,
   fallback,
   className = "",
+  sizes = "(max-width: 768px) 32px, 40px",
 }: UserAvatarProps) {
   return (
     <div
@@ -53,7 +55,7 @@ export function UserAvatar({
           src={src}
           alt={alt || "Avatar"}
           fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          sizes={sizes}
           className="object-cover p-1 saturate-[0.85] transition-transform duration-500 group-hover:scale-105 group-hover:saturate-100"
         />
       ) : (

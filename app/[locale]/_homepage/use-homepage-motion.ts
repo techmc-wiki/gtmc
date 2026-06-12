@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useSyncExternalStore } from "react"
 import type { MotionValue } from "motion/react"
 import {
   useMotionValue,
@@ -9,6 +9,22 @@ import {
   useReducedMotion,
 } from "motion/react"
 import { HOMEPAGE_MOTION } from "./homepage-constants"
+
+const MOBILE_QUERY = "(max-width: 767px)"
+
+function subscribeMobileQuery(onStoreChange: () => void) {
+  const query = window.matchMedia(MOBILE_QUERY)
+  query.addEventListener("change", onStoreChange)
+  return () => query.removeEventListener("change", onStoreChange)
+}
+
+function getMobileSnapshot() {
+  return window.matchMedia(MOBILE_QUERY).matches
+}
+
+function getServerMobileSnapshot() {
+  return false
+}
 
 export interface LayerTransform {
   x: MotionValue<number>
@@ -38,16 +54,11 @@ export function useHomepageMotion(): HomepageMotionValues {
   const rawMouseX = useMotionValue(0)
   const rawMouseY = useMotionValue(0)
   const reducedMotionQuery = useReducedMotion()
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkMobile()
-    window.addEventListener("resize", checkMobile)
-    return () => window.removeEventListener("resize", checkMobile)
-  }, [])
+  const isMobile = useSyncExternalStore(
+    subscribeMobileQuery,
+    getMobileSnapshot,
+    getServerMobileSnapshot
+  )
 
   useEffect(() => {
     if (isMobile || reducedMotionQuery) return

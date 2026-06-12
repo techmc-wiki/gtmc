@@ -32,6 +32,11 @@ const VIRTUAL_ROW_HEIGHT = {
   normal: 52,
   comfortable: 64,
 } as const satisfies Record<GlossaryDensity, number>
+const MOBILE_VIRTUAL_ROW_HEIGHT = {
+  compact: 112,
+  normal: 132,
+  comfortable: 156,
+} as const satisfies Record<GlossaryDensity, number>
 
 type IndexLocale = "en" | "zh"
 type SearchScope = "active" | "all"
@@ -155,6 +160,97 @@ function VirtualLetterRow({
   )
 }
 
+function MobileLetterVirtualRow({
+  count,
+  index,
+  letter,
+  measureElement,
+  start,
+  virtualKey,
+}: {
+  count: number
+  index: number
+  letter: string
+  measureElement: (element: Element | null) => void
+  start: number
+  virtualKey: React.Key
+}) {
+  const style = React.useMemo<React.CSSProperties>(
+    () => ({ transform: `translateY(${start}px)` }),
+    [start]
+  )
+
+  return (
+    <section
+      key={virtualKey}
+      ref={measureElement}
+      id={`letter-${letter}-mobile`}
+      data-index={index}
+      aria-label={`letter ${letter}`}
+      className="absolute inset-x-0 top-0 scroll-mt-28 pb-2"
+      style={style}>
+      <div className="border-tech-line/30 flex items-baseline gap-3 border-b pb-1">
+        <h2 className="text-tech-main-dark font-mono text-2xl font-bold tracking-widest uppercase">
+          {letter}
+        </h2>
+        <span className="text-tech-main/40 font-mono text-xs tracking-widest uppercase">
+          {count}
+        </span>
+      </div>
+    </section>
+  )
+}
+
+function MobileEntryVirtualRow({
+  density,
+  entry,
+  index,
+  isReady,
+  locale,
+  measureElement,
+  onOpenDetail,
+  start,
+  virtualKey,
+  visibleColumns,
+  visibleColumnsSet,
+}: {
+  density: GlossaryDensity
+  entry: GlossaryEntry
+  index: number
+  isReady?: boolean
+  locale: string
+  measureElement: (element: Element | null) => void
+  onOpenDetail?: (entry: GlossaryEntry) => void
+  start: number
+  virtualKey: React.Key
+  visibleColumns: string[]
+  visibleColumnsSet: ReadonlySet<string>
+}) {
+  const style = React.useMemo<React.CSSProperties>(
+    () => ({ transform: `translateY(${start}px)` }),
+    [start]
+  )
+
+  return (
+    <div
+      key={virtualKey}
+      ref={measureElement}
+      data-index={index}
+      className="absolute inset-x-0 top-0 pb-2"
+      style={style}>
+      <GlossaryCard
+        entry={entry}
+        visibleColumns={visibleColumns}
+        visibleColumnsSet={visibleColumnsSet}
+        locale={locale}
+        density={density}
+        onOpenDetail={onOpenDetail}
+        isReady={isReady}
+      />
+    </div>
+  )
+}
+
 function normalizeLocaleForIndex(locale: string): "en" | "zh" {
   return locale === "zh" ? "zh" : "en"
 }
@@ -186,6 +282,7 @@ export function GlossaryTable({
 }: GlossaryTableProps) {
   const t = useTranslations("Glossary")
   const tableScrollRef = React.useRef<HTMLDivElement>(null)
+  const mobileScrollRef = React.useRef<HTMLDivElement>(null)
 
   const indexLocale = normalizeLocaleForIndex(locale)
 
@@ -259,6 +356,11 @@ export function GlossaryTable({
   }, [grouped])
 
   const rowHeight = VIRTUAL_ROW_HEIGHT[density]
+  const mobileRowHeight = MOBILE_VIRTUAL_ROW_HEIGHT[density]
+  const visibleColumnsSet = React.useMemo(
+    () => new Set(visibleColumns),
+    [visibleColumns]
+  )
 
   const letterOffsets = React.useMemo(() => {
     let offset = 0
@@ -284,6 +386,23 @@ export function GlossaryTable({
     overscan: VIRTUAL_OVERSCAN,
   })
 
+  const mobileVirtualizer = useVirtualizer({
+    count: virtualRows.length,
+    getScrollElement: () => mobileScrollRef.current,
+    estimateSize: (index) =>
+      virtualRows[index]?.type === "letter"
+        ? VIRTUAL_LETTER_ROW_HEIGHT
+        : mobileRowHeight,
+    overscan: VIRTUAL_OVERSCAN,
+    measureElement: (element) => element.getBoundingClientRect().height,
+  })
+
+  const mobileTotalSize = mobileVirtualizer.getTotalSize()
+  const mobileTotalSizeStyle = React.useMemo<React.CSSProperties>(
+    () => ({ height: mobileTotalSize }),
+    [mobileTotalSize]
+  )
+
   const virtualItems = rowVirtualizer.getVirtualItems()
   const paddingTop = virtualItems[0]?.start ?? 0
   const paddingBottom =
@@ -304,7 +423,7 @@ export function GlossaryTable({
   }
 
   const colCount = visibleColumns.length || 1
-  const mobileGrouped = grouped.filter((group) => group.letter !== "_results")
+  const mobileVirtualItems = mobileVirtualizer.getVirtualItems()
 
   return (
     <div className={cn("flex flex-col gap-8", className)}>
@@ -398,53 +517,47 @@ export function GlossaryTable({
         </table>
       </div>
 
-      <div className="flex flex-col gap-8 md:hidden" data-density={density}>
-        {(trimmedQuery ? grouped : mobileGrouped).map((group) => {
-          const sectionId =
-            group.letter === "_results"
-              ? "letter-results-mobile"
-              : `letter-${group.letter}-mobile`
+      <div
+        ref={mobileScrollRef}
+        className="custom-bottom-scrollbar relative h-[min(75vh,44rem)] overflow-auto md:hidden"
+        data-density={density}>
+        <div className="relative w-full" style={mobileTotalSizeStyle}>
+          {mobileVirtualItems.map((virtualItem) => {
+            const row = virtualRows[virtualItem.index]
+            if (!row) return null
 
-          return (
-            <section
-              key={sectionId}
-              id={sectionId}
-              aria-label={
-                group.letter === "_results"
-                  ? "search results"
-                  : `letter ${group.letter}`
-              }
-              className="scroll-mt-28">
-              {group.letter !== "_results" && (
-                <div className="border-tech-line/30 mb-2 flex items-baseline gap-3 border-b pb-1">
-                  <h2 className="text-tech-main-dark font-mono text-2xl font-bold tracking-widest uppercase">
-                    {group.letter}
-                  </h2>
-                  <span className="text-tech-main/40 font-mono text-xs tracking-widest uppercase">
-                    {group.items.length}
-                  </span>
-                </div>
-              )}
-              <div className="flex flex-col gap-2">
-                {group.items.map((entry) => (
-                  <GlossaryCard
-                    key={entry.slug}
-                    entry={entry}
-                    visibleColumns={visibleColumns}
-                    locale={locale}
-                    density={density}
-                    onOpenDetail={onOpenDetail}
-                    isReady={isReady}
-                  />
-                ))}
-              </div>
+            if (row.type === "letter") {
+              return (
+                <MobileLetterVirtualRow
+                  key={virtualItem.key}
+                  virtualKey={virtualItem.key}
+                  letter={row.letter}
+                  count={row.count}
+                  index={virtualItem.index}
+                  start={virtualItem.start}
+                  measureElement={mobileVirtualizer.measureElement}
+                />
+              )
+            }
 
-              <span className="sr-only">
-                {group.items.length} {colCount > 0 ? "rows" : ""}
-              </span>
-            </section>
-          )
-        })}
+            return (
+              <MobileEntryVirtualRow
+                key={virtualItem.key}
+                virtualKey={virtualItem.key}
+                entry={row.entry}
+                index={virtualItem.index}
+                start={virtualItem.start}
+                measureElement={mobileVirtualizer.measureElement}
+                visibleColumns={visibleColumns}
+                visibleColumnsSet={visibleColumnsSet}
+                locale={locale}
+                density={density}
+                onOpenDetail={onOpenDetail}
+                isReady={isReady}
+              />
+            )
+          })}
+        </div>
       </div>
     </div>
   )

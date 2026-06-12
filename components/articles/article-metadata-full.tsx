@@ -31,6 +31,10 @@ function getAvatarUrl(username: string) {
 
 const DEFAULT_CO_AUTHORS: string[] = []
 
+function collectContributors(author: string, coAuthors: string[]) {
+  return [author, ...coAuthors]
+}
+
 export function ArticleMetadataFull({
   title,
   author,
@@ -51,7 +55,7 @@ export function ArticleMetadataFull({
   const [copied, setCopied] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(true)
 
-  const allContributors = [author, ...coAuthors]
+  const allContributors = collectContributors(author, coAuthors)
   const displayContributors = allContributors.slice(0, 5)
   const remainingCount = allContributors.length - 5
 
@@ -72,11 +76,6 @@ export function ArticleMetadataFull({
   const toggleCollapsed = useCallback(() => {
     setIsCollapsed((current) => !current)
   }, [])
-
-  const allAuthors = useMemo(
-    () => [author, ...coAuthors],
-    [author, coAuthors]
-  )
 
   const collapseButton = useMemo(
     () => (
@@ -342,7 +341,7 @@ export function ArticleMetadataFull({
                 title={title}
                 canonicalUrl={canonicalUrl}
                 attributionDate={lastModified || createdAt}
-                authors={allAuthors}
+          authors={allContributors}
               />
             </div>
           </div>

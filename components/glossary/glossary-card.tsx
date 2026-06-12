@@ -12,6 +12,7 @@ import type { GlossaryDensity } from "./glossary-table-row"
 interface GlossaryCardProps {
   entry: GlossaryEntry
   visibleColumns: string[]
+  visibleColumnsSet: ReadonlySet<string>
   locale: string
   density: GlossaryDensity
   onOpenDetail?: (entry: GlossaryEntry) => void
@@ -41,14 +42,13 @@ function parseTranslationColumn(
 export function GlossaryCard({
   entry,
   visibleColumns,
+  visibleColumnsSet,
   locale,
   density,
   onOpenDetail,
   className,
   isReady,
 }: GlossaryCardProps) {
-  const visible = React.useMemo(() => new Set(visibleColumns), [visibleColumns])
-
   const relatedTokens = React.useMemo(
     () => parseRelated(entry.related),
     [entry.related]
@@ -99,7 +99,7 @@ export function GlossaryCard({
             </span>
           )}
         </Link>
-        {visible.has("shortForm") && entry.shortForm && (
+        {visibleColumnsSet.has("shortForm") && entry.shortForm && (
           <span className="text-tech-main/60 shrink-0 font-mono text-xs">
             {entry.shortForm}
           </span>

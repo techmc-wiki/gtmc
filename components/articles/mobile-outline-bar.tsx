@@ -4,6 +4,7 @@ import * as React from "react"
 import { Link } from "@/i18n/navigation"
 import { useReaderNavigation } from "@/app/[locale]/(public)/articles/reader-navigation/context"
 import { useModalEffects } from "@/hooks/use-modal-effects"
+import { useScrollProgress } from "@/hooks/use-scroll-progress"
 
 const emptySubscribe = () => () => {}
 const outlineDepthClasses = {
@@ -12,29 +13,11 @@ const outlineDepthClasses = {
   3: "pl-10 text-xs/snug",
 } satisfies Record<1 | 2 | 3, string>
 
-function useScrollProgress() {
-  const [progress, setProgress] = React.useState(0)
-  const [hasScrolledPastNavbar, setHasScrolledPastNavbar] =
-    React.useState(false)
-
-  React.useEffect(() => {
-    const onScroll = () => {
-      const scrollTop = window.scrollY
-      const docHeight = document.body.scrollHeight - window.innerHeight
-      setProgress(docHeight > 0 ? scrollTop / docHeight : 0)
-      setHasScrolledPastNavbar(scrollTop > 64)
-    }
-    onScroll()
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [])
-
-  return { hasScrolledPastNavbar, progress }
-}
-
 export function MobileOutlineBar() {
   const { outline, activeHeadingId } = useReaderNavigation()
-  const { hasScrolledPastNavbar, progress } = useScrollProgress()
+  const { hasScrolledPastNavbar, progress } = useScrollProgress({
+    navbarThreshold: 64,
+  })
   const [isSheetOpen, setIsSheetOpen] = React.useState(false)
   const closeSheet = React.useCallback(() => setIsSheetOpen(false), [])
   const openSheet = React.useCallback(() => setIsSheetOpen(true), [])

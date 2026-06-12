@@ -1,30 +1,12 @@
-"use client"
-
 import React from "react"
+import { CornerBracketsHoverExpand } from "@/components/ui/corner-brackets-hover-expand"
+import {
+  cornerPositionClasses,
+  getCornerVisibility,
+  type CornerBracketsProps,
+} from "@/components/ui/corner-brackets-shared"
 
-interface CornerBracketsProps {
-  className?: string
-  /** Base corner size (Tailwind class). Default: "size-2" */
-  size?: string
-  /** Base corner color (Tailwind border class). Default: "border-tech-main/40" */
-  color?: string
-  /** Which corners to render. Default: "all" */
-  corners?: "all" | "top-bottom" | "diagonal-tlbr" | "diagonal-trbl"
-  /** Behavior variant. Default: "static" */
-  variant?: "static" | "hover" | "hover-expand" | "hover-only"
-  /** Hover scale factor for hover-expand variant. Default: 1.5 */
-  hoverScale?: number
-}
-
-const sizeToPx: Record<string, number> = {
-  "size-1": 4,
-  "size-2": 8,
-  "size-3": 12,
-  "size-4": 16,
-  "size-5": 20,
-  "size-6": 24,
-  "size-8": 32,
-}
+export type { CornerBracketsProps } from "@/components/ui/corner-brackets-shared"
 
 export const CornerBrackets = React.forwardRef<
   HTMLDivElement,
@@ -37,78 +19,33 @@ export const CornerBrackets = React.forwardRef<
       color = "border-tech-main/40",
       corners = "all",
       variant = "static",
-      hoverScale = 1.5,
+      hoverScale,
     },
     ref
   ) => {
-    const showTopLeft =
-      corners === "all" ||
-      corners === "top-bottom" ||
-      corners === "diagonal-tlbr"
-    const showTopRight = corners === "all" || corners === "diagonal-trbl"
-    const showBottomLeft = corners === "all" || corners === "diagonal-trbl"
-    const showBottomRight =
-      corners === "all" ||
-      corners === "top-bottom" ||
-      corners === "diagonal-tlbr"
-
-    const posTopLeft = "-translate-px border-t-2 border-l-2"
-    const posTopRight = "translate-x-px -translate-y-px border-t-2 border-r-2"
-    const posBottomLeft = "-translate-x-px translate-y-px border-b-2 border-l-2"
-    const posBottomRight = "translate-px border-r-2 border-b-2"
-
-    const basePx = sizeToPx[size] ?? 8
-    const bracketStyle = React.useMemo(
-      (): React.CSSProperties =>
-        ({
-          width: "var(--bracket-size)",
-          height: "var(--bracket-size)",
-          "--bracket-size": `${basePx}px`,
-        }) as React.CSSProperties,
-      [basePx]
-    )
-
-    const handleMouseEnter = React.useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
-        ;(e.currentTarget as HTMLElement).style.setProperty(
-          "--bracket-size",
-          `${basePx * hoverScale}px`
-        )
-      },
-      [basePx, hoverScale]
-    )
-
-    const handleMouseLeave = React.useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
-        ;(e.currentTarget as HTMLElement).style.setProperty(
-          "--bracket-size",
-          `${basePx}px`
-        )
-      },
-      [basePx]
-    )
+    const visibility = getCornerVisibility(corners)
 
     if (variant === "static") {
       return (
         <div ref={ref} className={className}>
-          {showTopLeft && (
+          {visibility.topLeft && (
             <div
-              className={`pointer-events-none absolute top-0 left-0 ${size} ${posTopLeft} ${color}`}
+              className={`pointer-events-none absolute top-0 left-0 ${size} ${cornerPositionClasses.topLeft} ${color}`}
             />
           )}
-          {showTopRight && (
+          {visibility.topRight && (
             <div
-              className={`pointer-events-none absolute top-0 right-0 ${size} ${posTopRight} ${color}`}
+              className={`pointer-events-none absolute top-0 right-0 ${size} ${cornerPositionClasses.topRight} ${color}`}
             />
           )}
-          {showBottomLeft && (
+          {visibility.bottomLeft && (
             <div
-              className={`pointer-events-none absolute bottom-0 left-0 ${size} ${posBottomLeft} ${color}`}
+              className={`pointer-events-none absolute bottom-0 left-0 ${size} ${cornerPositionClasses.bottomLeft} ${color}`}
             />
           )}
-          {showBottomRight && (
+          {visibility.bottomRight && (
             <div
-              className={`pointer-events-none absolute right-0 bottom-0 ${size} ${posBottomRight} ${color}`}
+              className={`pointer-events-none absolute right-0 bottom-0 ${size} ${cornerPositionClasses.bottomRight} ${color}`}
             />
           )}
         </div>
@@ -118,24 +55,24 @@ export const CornerBrackets = React.forwardRef<
     if (variant === "hover") {
       return (
         <div ref={ref} className={className}>
-          {showTopLeft && (
+          {visibility.topLeft && (
             <div
-              className={`absolute top-0 left-0 ${size} ${posTopLeft} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
+              className={`absolute top-0 left-0 ${size} ${cornerPositionClasses.topLeft} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
             />
           )}
-          {showTopRight && (
+          {visibility.topRight && (
             <div
-              className={`absolute top-0 right-0 ${size} ${posTopRight} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
+              className={`absolute top-0 right-0 ${size} ${cornerPositionClasses.topRight} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
             />
           )}
-          {showBottomLeft && (
+          {visibility.bottomLeft && (
             <div
-              className={`absolute bottom-0 left-0 ${size} ${posBottomLeft} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
+              className={`absolute bottom-0 left-0 ${size} ${cornerPositionClasses.bottomLeft} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
             />
           )}
-          {showBottomRight && (
+          {visibility.bottomRight && (
             <div
-              className={`absolute right-0 bottom-0 ${size} ${posBottomRight} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
+              className={`absolute right-0 bottom-0 ${size} ${cornerPositionClasses.bottomRight} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
             />
           )}
         </div>
@@ -145,24 +82,24 @@ export const CornerBrackets = React.forwardRef<
     if (variant === "hover-only") {
       return (
         <div ref={ref} className={className}>
-          {showTopLeft && (
+          {visibility.topLeft && (
             <div
-              className={`pointer-events-none absolute top-0 left-0 ${size} ${posTopLeft} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
+              className={`pointer-events-none absolute top-0 left-0 ${size} ${cornerPositionClasses.topLeft} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
             />
           )}
-          {showTopRight && (
+          {visibility.topRight && (
             <div
-              className={`pointer-events-none absolute top-0 right-0 ${size} ${posTopRight} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
+              className={`pointer-events-none absolute top-0 right-0 ${size} ${cornerPositionClasses.topRight} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
             />
           )}
-          {showBottomLeft && (
+          {visibility.bottomLeft && (
             <div
-              className={`pointer-events-none absolute bottom-0 left-0 ${size} ${posBottomLeft} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
+              className={`pointer-events-none absolute bottom-0 left-0 ${size} ${cornerPositionClasses.bottomLeft} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
             />
           )}
-          {showBottomRight && (
+          {visibility.bottomRight && (
             <div
-              className={`pointer-events-none absolute right-0 bottom-0 ${size} ${posBottomRight} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
+              className={`pointer-events-none absolute right-0 bottom-0 ${size} ${cornerPositionClasses.bottomRight} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
             />
           )}
         </div>
@@ -170,36 +107,14 @@ export const CornerBrackets = React.forwardRef<
     }
 
     return (
-      <div
+      <CornerBracketsHoverExpand
         ref={ref}
         className={className}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}>
-        {showTopLeft && (
-          <div
-            className={`pointer-events-none absolute top-0 left-0 ${posTopLeft} ${color} transition-all`}
-            style={bracketStyle}
-          />
-        )}
-        {showTopRight && (
-          <div
-            className={`pointer-events-none absolute top-0 right-0 ${posTopRight} ${color} transition-all`}
-            style={bracketStyle}
-          />
-        )}
-        {showBottomLeft && (
-          <div
-            className={`pointer-events-none absolute bottom-0 left-0 ${posBottomLeft} ${color} transition-all`}
-            style={bracketStyle}
-          />
-        )}
-        {showBottomRight && (
-          <div
-            className={`pointer-events-none absolute right-0 bottom-0 ${posBottomRight} ${color} transition-all`}
-            style={bracketStyle}
-          />
-        )}
-      </div>
+        size={size}
+        color={color}
+        corners={corners}
+        hoverScale={hoverScale}
+      />
     )
   }
 )

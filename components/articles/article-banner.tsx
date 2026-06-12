@@ -26,6 +26,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
   const [locked, setLocked] = useState(false)
   const [flashing, setFlashing] = useState(false)
   const [imageError, setImageError] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
 
   const [offset, setOffset] = useState({ x: 0, y: 0 })
   const rafIdRef = useRef<number | null>(null)
@@ -58,7 +59,29 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
   }, [updateRect])
 
   useEffect(() => {
-    if (locked || isReducedMotionRef.current) return
+    const banner = bannerRef.current
+    if (!banner) return
+
+    if (!("IntersectionObserver" in window)) {
+      setIsVisible(true)
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const nextIsVisible = entry?.isIntersecting ?? false
+        setIsVisible(nextIsVisible)
+        if (nextIsVisible) updateRect()
+      },
+      { rootMargin: "120px" }
+    )
+
+    observer.observe(banner)
+    return () => observer.disconnect()
+  }, [updateRect])
+
+  useEffect(() => {
+    if (locked || !isVisible || isReducedMotionRef.current) return
 
     const banner = bannerRef.current
 
@@ -93,7 +116,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
         cancelAnimationFrame(rafIdRef.current)
       }
     }
-  }, [locked])
+  }, [isVisible, locked])
 
   useEffect(() => {
     if (locked) return

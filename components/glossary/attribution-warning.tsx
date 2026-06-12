@@ -31,13 +31,6 @@ export function AttributionWarning({
 }: AttributionWarningProps) {
   const t = useTranslations("Glossary")
 
-  const handleCheckboxChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onUseRealEmailChange(event.target.checked)
-    },
-    [onUseRealEmailChange]
-  )
-
   const canToggleRealEmail =
     realEmail !== null && realEmail !== githubNoreplyEmail
 
@@ -74,7 +67,7 @@ export function AttributionWarning({
             <input
               type="checkbox"
               checked={useRealEmail}
-              onChange={handleCheckboxChange}
+              onChange={(event) => onUseRealEmailChange(event.target.checked)}
               aria-label={t("editorRealEmailToggleLabel")}
               className="border-tech-line accent-tech-accent bg-surface-input mt-0.5 size-4 cursor-pointer border"
             />

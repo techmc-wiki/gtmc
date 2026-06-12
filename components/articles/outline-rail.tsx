@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Link } from "@/i18n/navigation"
 import { useReaderNavigation } from "@/app/[locale]/(public)/articles/reader-navigation/context"
+import { useScrollProgress } from "@/hooks/use-scroll-progress"
 
 const outlineDepthClasses = {
   1: "pl-3 text-sm/snug",
@@ -10,29 +11,11 @@ const outlineDepthClasses = {
   3: "pl-9 text-xs/snug",
 } satisfies Record<1 | 2 | 3, string>
 
-function useScrollProgress() {
-  const [progress, setProgress] = React.useState(0)
-
-  React.useEffect(() => {
-    const onScroll = () => {
-      const scrollTop = window.scrollY
-      const docHeight = document.body.scrollHeight - window.innerHeight
-      setProgress(docHeight > 0 ? scrollTop / docHeight : 0)
-    }
-    onScroll()
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [])
-
-  return progress
-}
-
 export function OutlineRail() {
   const { outline, activeHeadingId } = useReaderNavigation()
-  const progress = useScrollProgress()
+  const { progress } = useScrollProgress()
   const outlineListRef = React.useRef<HTMLUListElement | null>(null)
   const activeItemRef = React.useRef<HTMLLIElement | null>(null)
-
   const progressWidthStyle = React.useMemo(
     (): React.CSSProperties => ({ width: `${progress * 100}%` }),
     [progress]

@@ -221,7 +221,6 @@ export function OperationProgress({
   }, [state, stages.length, timeline])
 
   const percent = Math.round(displayProgress * 100)
-
   const sweepWidthStyle = React.useMemo(
     (): React.CSSProperties => ({
       width: `${Math.max(percent, 8)}%`,

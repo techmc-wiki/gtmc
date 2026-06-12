@@ -18,7 +18,7 @@ import {
   serializeDraftFilesForStorage,
 } from "@/lib/drafts/files"
 import { downloadDraftAsset } from "@/lib/drafts/storage"
-import { requireAuth } from "@/lib/auth-context"
+import { requireAuth } from "@/lib/auth/context"
 import { getGitHubWriteToken } from "@/lib/github/articles-repo"
 import { prisma } from "@/lib/prisma"
 import {

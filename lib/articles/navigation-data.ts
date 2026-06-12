@@ -59,7 +59,7 @@ export interface ArticleNavigationEntry {
   children?: ArticleNavigationEntry[]
 }
 
-function compareIndex(a: number, b: number): number {
+export function compareIndex(a: number, b: number): number {
   const aNoIndex = a === -1
   const bNoIndex = b === -1
 

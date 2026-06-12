@@ -11,11 +11,15 @@ import { mergePR } from "@/lib/github/pr-manager"
 import { prisma } from "@/lib/prisma"
 import type { RebaseState } from "@/lib/review/rebase-types"
 import type { ConflictMode, ReviewMergeMethod } from "@/lib/review/review-types"
-import { reviewLog, reviewError, summarizeSha } from "@/lib/review/logging"
+import { reviewLog, reviewError, summarizeSha } from "@/lib/logging"
 import {
   requireReviewAdminContext,
   getReviewRevalidatePaths,
 } from "@/lib/review/admin-context"
+import {
+  formatErrorMessage,
+  hasSimpleConflictMarkers,
+} from "@/lib/review/action-utils"
 import {
   ARTICLES_REPO_NAME,
   ARTICLES_REPO_OWNER,
@@ -23,13 +27,6 @@ import {
 
 const owner = ARTICLES_REPO_OWNER
 const repo = ARTICLES_REPO_NAME
-
-function formatErrorMessage(message: string, error: unknown): string {
-  if (error instanceof Error) {
-    return `${message}: ${error.message}`
-  }
-  return message
-}
 
 export async function mergePRAction(
   prNumber: number,
@@ -47,31 +44,10 @@ export async function mergePRAction(
       status: "start",
       mergeMethod: options?.mergeMethod ?? "auto",
     })
-    reviewLog("mergePRAction", {
-      prNumber,
-      status: "merge-dispatch",
-      mergeMethod: options?.mergeMethod ?? "auto",
-    })
     await mergePR(prNumber, options, token)
-    reviewLog("mergePRAction", {
-      prNumber,
-      status: "github-api-after",
-      operation: "mergePR",
-      result: "completed",
-    })
     try {
-      reviewLog("mergePRAction", {
-        prNumber,
-        status: "reconcile-start",
-        outcome: "PR-merged",
-      })
       await reconcileDraftAssetsForPRCompletion({
         prNumber,
-        outcome: "PR-merged",
-      })
-      reviewLog("mergePRAction", {
-        prNumber,
-        status: "reconcile-complete",
         outcome: "PR-merged",
       })
     } catch (reconcileError) {
@@ -97,37 +73,15 @@ export async function closePRAction(prNumber: number) {
 
   try {
     reviewLog("closePRAction", { prNumber, status: "start" })
-    reviewLog("closePRAction", {
-      prNumber,
-      status: "github-api-before",
-      operation: "pulls.update",
-      nextState: "closed",
-    })
     await octokit.pulls.update({
       owner,
       repo,
       pull_number: prNumber,
       state: "closed",
     })
-    reviewLog("closePRAction", {
-      prNumber,
-      status: "github-api-after",
-      operation: "pulls.update",
-      result: "closed",
-    })
     try {
-      reviewLog("closePRAction", {
-        prNumber,
-        status: "reconcile-start",
-        outcome: "PR-closed",
-      })
       await reconcileDraftAssetsForPRCompletion({
         prNumber,
-        outcome: "PR-closed",
-      })
-      reviewLog("closePRAction", {
-        prNumber,
-        status: "reconcile-complete",
         outcome: "PR-closed",
       })
     } catch (reconcileError) {
@@ -332,12 +286,4 @@ export async function finalizeReviewAction(
     reviewError("finalizeReviewAction", error, { prNumber, status: "error" })
     throw error
   }
-}
-
-const SIMPLE_CONFLICT_MARKER_RE =
-  /^<<<<<<< .*\n[\s\S]*?^=======\n[\s\S]*?^>>>>>>> .*$/gm
-
-function hasSimpleConflictMarkers(content: string): boolean {
-  SIMPLE_CONFLICT_MARKER_RE.lastIndex = 0
-  return SIMPLE_CONFLICT_MARKER_RE.test(content)
 }

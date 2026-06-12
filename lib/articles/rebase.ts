@@ -12,7 +12,7 @@ import type {
   RebaseState,
 } from "@/lib/review/rebase-types"
 import { prisma } from "@/lib/prisma"
-import { reviewLog, summarizeSha } from "@/lib/review/logging"
+import { reviewLog, summarizeSha } from "@/lib/logging"
 import {
   getCompareCommitFileInfos,
   analyzeRebaseNeedInternal,

@@ -18,7 +18,8 @@ import type {
   RebaseState,
 } from "@/lib/review/rebase-types"
 import { prisma } from "@/lib/prisma"
-import { reviewLog, reviewError, summarizeSha } from "@/lib/review/logging"
+import { getFileSnapshot } from "@/lib/articles/snapshot"
+import { reviewLog, summarizeSha } from "@/lib/logging"
 import type {
   RebaseOutcome,
   ResumeRebaseOutcome,
@@ -29,40 +30,6 @@ interface CompareCommitFileInfo {
   sha: string
   info: RebaseCommitInfo
   touchedFilePaths: string[]
-}
-
-export async function getFileSnapshot(
-  filePath: string,
-  ref: string,
-  token?: string
-): Promise<{ content: string; sha?: string } | null> {
-  const octokit = getOctokit(token)
-
-  try {
-    const { data } = await octokit.repos.getContent({
-      owner: ARTICLES_REPO_OWNER,
-      repo: ARTICLES_REPO_NAME,
-      path: filePath,
-      ref,
-    })
-
-    if (Array.isArray(data) || data.type !== "file") {
-      return null
-    }
-
-    return {
-      content: Buffer.from(data.content, "base64").toString("utf-8"),
-      sha: data.sha,
-    }
-  } catch (error) {
-    reviewError("getFileSnapshot", error, {
-      filePath,
-      ref: summarizeSha(ref),
-      status: "github-api-error",
-      operation: "repos.getContent",
-    })
-    return null
-  }
 }
 
 export function buildFileStates(

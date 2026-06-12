@@ -3,6 +3,10 @@ import {
   ARTICLES_REPO_OWNER,
   getOctokit,
 } from "@/lib/github/articles-repo"
+import {
+  getFileSnapshot,
+  mergeArticleContent,
+} from "@/lib/articles/snapshot"
 import type { ConflictBlock } from "@/lib/review/rebase-types"
 import {
   applyAutoAppliedResolutions,
@@ -11,7 +15,7 @@ import {
 } from "@/lib/review/rerere"
 import { GIT_BLOB_MODE } from "@/lib/github/constants"
 import { getMergeLibrary } from "@/lib/review/merge-strategy"
-import { reviewLog, summarizeSha } from "@/lib/review/logging"
+import { reviewLog, summarizeSha } from "@/lib/logging"
 import {
   getActiveDraftFile,
   getDuplicateDraftFilePaths,
@@ -368,72 +372,4 @@ function sleep(ms: number) {
   })
 }
 
-function mergeArticleContent({
-  baseContent,
-  draftContent,
-  latestMainContent,
-}: {
-  baseContent: string
-  draftContent: string
-  latestMainContent: string
-}) {
-  const { mergeDiff3 } = require("node-diff3")
-  const result = mergeDiff3(
-    splitLines(draftContent),
-    splitLines(baseContent),
-    splitLines(latestMainContent),
-    {
-      label: {
-        a: "draft",
-        o: "base",
-        b: "main",
-      },
-    }
-  )
 
-  return {
-    conflict: result.conflict,
-    content: joinLines(result.result),
-  }
-}
-
-function splitLines(content: string) {
-  if (!content) {
-    return [] as string[]
-  }
-
-  return content.replaceAll('\r\n', "\n").split("\n")
-}
-
-function joinLines(lines: string[]) {
-  return lines.join("\n")
-}
-
-interface FileSnapshot {
-  content: string
-  sha?: string
-}
-
-async function getFileSnapshot(filePath: string, ref: string, token?: string) {
-  const octokit = getOctokit(token)
-
-  try {
-    const { data } = await octokit.repos.getContent({
-      owner: ARTICLES_REPO_OWNER,
-      repo: ARTICLES_REPO_NAME,
-      path: filePath,
-      ref,
-    })
-
-    if (Array.isArray(data) || data.type !== "file") {
-      return null
-    }
-
-    return {
-      content: Buffer.from(data.content, "base64").toString("utf-8"),
-      sha: data.sha,
-    } satisfies FileSnapshot
-  } catch {
-    return null
-  }
-}

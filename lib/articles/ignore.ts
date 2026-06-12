@@ -16,6 +16,7 @@ export const IGNORED_ROOT_FILES: readonly string[] = [
   "readme_cn.md",
   "contributing.md",
   "contributing_cn.md",
+  "contributors.md",
   "_sidebar.md",
   "desynchronized.md",
 ]

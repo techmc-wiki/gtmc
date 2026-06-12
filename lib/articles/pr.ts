@@ -1,10 +1,12 @@
-import { mergeDiff3 } from "node-diff3"
-
 import {
   ARTICLES_REPO_NAME,
   ARTICLES_REPO_OWNER,
   getOctokit,
 } from "@/lib/github/articles-repo"
+import {
+  getFileSnapshot,
+  mergeArticleContent,
+} from "@/lib/articles/snapshot"
 import {
   analyzeRebaseNeed,
   analyzeRebaseNeedMultiFile,
@@ -230,71 +232,4 @@ function buildBranchName(draftId: string) {
   return `submission-${draftId}-${Date.now()}`.replaceAll(/[^a-zA-Z0-9/_-]/g, "-")
 }
 
-function mergeArticleContent({
-  baseContent,
-  draftContent,
-  latestMainContent,
-}: {
-  baseContent: string
-  draftContent: string
-  latestMainContent: string
-}) {
-  const result = mergeDiff3(
-    splitLines(draftContent),
-    splitLines(baseContent),
-    splitLines(latestMainContent),
-    {
-      label: {
-        a: "draft",
-        o: "base",
-        b: MAIN_BRANCH,
-      },
-    }
-  )
 
-  return {
-    conflict: result.conflict,
-    content: joinLines(result.result),
-  }
-}
-
-function splitLines(content: string) {
-  if (!content) {
-    return [] as string[]
-  }
-
-  return content.replaceAll('\r\n', "\n").split("\n")
-}
-
-function joinLines(lines: string[]) {
-  return lines.join("\n")
-}
-
-interface FileSnapshot {
-  content: string
-  sha?: string
-}
-
-async function getFileSnapshot(filePath: string, ref: string, token?: string) {
-  const octokit = getOctokit(token)
-
-  try {
-    const { data } = await octokit.repos.getContent({
-      owner: ARTICLES_REPO_OWNER,
-      repo: ARTICLES_REPO_NAME,
-      path: filePath,
-      ref,
-    })
-
-    if (Array.isArray(data) || data.type !== "file") {
-      return null
-    }
-
-    return {
-      content: Buffer.from(data.content, "base64").toString("utf-8"),
-      sha: data.sha,
-    } satisfies FileSnapshot
-  } catch {
-    return null
-  }
-}

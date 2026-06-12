@@ -29,7 +29,10 @@ import {
   normalizeDraftFileCollection,
   serializeDraftFilesPayload,
 } from "@/lib/drafts/files"
-import { getReauthLoginUrl, isReauthRequiredError } from "@/lib/admin-reauth"
+import {
+  getReauthLoginUrl,
+  isReauthRequiredError,
+} from "@/lib/auth/admin-reauth"
 import type {
   ConflictMode,
   ModeAnalysis,

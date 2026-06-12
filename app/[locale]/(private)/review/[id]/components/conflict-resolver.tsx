@@ -5,7 +5,10 @@ import type { RebaseState } from "@/lib/review/rebase-types"
 
 import { resolveConflictAction } from "@/actions/review-conflict"
 import { abortRebaseAction } from "@/actions/review-rebase"
-import { getReauthLoginUrl, isReauthRequiredError } from "@/lib/admin-reauth"
+import {
+  getReauthLoginUrl,
+  isReauthRequiredError,
+} from "@/lib/auth/admin-reauth"
 import { TechButton } from "@/components/ui/tech-button"
 import {
   getActiveDraftFile,

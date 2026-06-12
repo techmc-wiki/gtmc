@@ -4,6 +4,7 @@ import type { ArticleLocale } from "@/lib/articles/manifest"
 import { getCachedArticleTree } from "@/lib/articles/manifest-cached"
 import { getRepoTranslations, type ArticleTreeNode } from "@/lib/github/sync"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
+import { compareIndex } from "@/lib/articles/navigation-data"
 
 function isAppendixDirectoryName(name: string): boolean {
   const normalized = name.trim().toLowerCase()
@@ -83,21 +84,6 @@ export async function getPublicChapterNav(
   sortTree(filteredTree)
 
   return filteredTree
-}
-
-function compareIndex(a: number, b: number) {
-  const aNoIndex = a === -1
-  const bNoIndex = b === -1
-
-  if (aNoIndex !== bNoIndex) {
-    return aNoIndex ? 1 : -1
-  }
-
-  if (aNoIndex && bNoIndex) {
-    return 0
-  }
-
-  return a - b
 }
 
 function sortTree(nodes: ChapterNavNode[]) {

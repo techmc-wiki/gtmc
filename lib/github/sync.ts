@@ -10,25 +10,14 @@ import {
   getOctokit,
 } from "@/lib/github/articles-repo"
 
-const IGNORED_DIRS = new Set([
-  "img",
-  "oldimg",
-  "image",
-  "images",
-  "source",
-  "asset",
-  "exampleworld",
-  "desynchronized",
-  ".github",
-  "_scripts",
-])
+import {
+  IGNORED_DIRECTORIES,
+  IGNORED_ROOT_FILES as IGNORED_ROOT_FILE_LIST,
+} from "@/lib/articles/ignore"
 
-const IGNORED_ROOT_FILES = new Set([
-  "readme.md",
-  "contributors.md",
-  "_sidebar.md",
-  "desynchronized.md",
-])
+const IGNORED_DIRS = new Set([...IGNORED_DIRECTORIES, "_scripts"])
+
+const IGNORED_ROOT_FILES = new Set(IGNORED_ROOT_FILE_LIST)
 
 let rateLimitedUntilMs = 0
 

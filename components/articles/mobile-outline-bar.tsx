@@ -57,7 +57,7 @@ export function MobileOutlineBar() {
           </button>
         )}
         <div
-          className="h-0.5 bg-tech-main transition-[width] duration-150"
+          className="bg-tech-signal h-0.5 transition-[width] duration-150"
           style={progressWidthStyle}
         />
       </div>
@@ -117,8 +117,8 @@ export function MobileOutlineBar() {
                     onClick={closeSheet}
                     className={`block border-l-[3px] py-2.5 pr-2 transition-all duration-200 ${outlineDepthClasses[item.depth]} ${
                       isActive
-                        ? "border-tech-main font-semibold text-tech-main"
-                        : "border-transparent text-tech-main/60 hover:border-tech-main/30 hover:text-tech-main"
+                        ? "border-tech-signal text-tech-main-dark font-semibold"
+                        : "text-tech-main/60 hover:border-tech-main/30 hover:text-tech-main border-transparent"
                     }`}>
                     {item.text}
                   </Link>

@@ -46,7 +46,7 @@ export function ChapterNavToolbar({
               className="
                 w-full cursor-pointer border border-tech-main/40 px-2
                 pl-2 font-mono text-[0.625rem] transition-colors
-                hover:bg-tech-main hover:text-white
+                hover:bg-tech-main-dark hover:text-tech-bg
               ">
               {t("buttonCollapseAll")}
             </button>
@@ -57,7 +57,7 @@ export function ChapterNavToolbar({
               className="
                 w-full cursor-pointer border border-tech-main/40 px-3 py-1.5
                 pl-2 font-mono text-[0.625rem] transition-colors
-                hover:bg-tech-main hover:text-white
+                hover:bg-tech-main-dark hover:text-tech-bg
                 disabled:cursor-not-allowed disabled:opacity-50
               ">
               {t("buttonLocate")}
@@ -80,7 +80,7 @@ export function ChapterNavToolbar({
           className="
             cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
             text-[0.625rem] transition-colors
-            hover:bg-tech-main hover:text-white
+            hover:bg-tech-main-dark hover:text-tech-bg
           ">
           {t("buttonCollapseAll")}
         </button>
@@ -91,7 +91,7 @@ export function ChapterNavToolbar({
           className="
             cursor-pointer border border-tech-main/40 px-3 py-1.5 font-mono
             text-[0.625rem] transition-colors
-            hover:bg-tech-main hover:text-white
+            hover:bg-tech-main-dark hover:text-tech-bg
             disabled:cursor-not-allowed disabled:opacity-50
           ">
           {t("buttonLocate")}

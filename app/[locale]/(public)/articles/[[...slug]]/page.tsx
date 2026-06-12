@@ -27,7 +27,6 @@ import { decodeSlugPath, encodeSlug } from "@/lib/articles/slug-resolver"
 import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
 import { getSiteUrl } from "@/lib/site-url"
 
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { ArticleHighlight } from "@/components/articles/article-highlight"
 import { ArticleMetadataFull } from "@/components/articles/article-metadata-full"
 import { ArticleMetadataAnonymous } from "@/components/articles/article-metadata-anonymous"
@@ -357,11 +356,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   return (
     <div
       className="
-        relative min-h-screen min-w-0 border border-tech-main/40 bg-transparent
-        p-6 backdrop-blur-sm
-        sm:p-8
+        border-tech-main/30 bg-surface/80 relative min-h-screen
+        min-w-0 border border-t-2
+        border-t-tech-main-dark p-6 backdrop-blur-sm sm:p-8
       ">
-      <CornerBrackets size="size-4" />
+      <div className="bg-tech-signal absolute -top-0.5 left-0 h-0.5 w-16" />
 
       {/* Article Header */}
       {author && createdAt && lastModified ? (

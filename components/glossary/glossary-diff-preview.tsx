@@ -292,7 +292,7 @@ export function GlossaryDiffPreview({
             onClick={handleSubmit}
             disabled={submitDisabled}
             aria-busy={isSubmitting}
-            className="border-tech-main bg-tech-main hover:bg-tech-main-dark inline-flex min-h-[44px] cursor-pointer items-center justify-center border px-6 py-2 text-xs font-bold tracking-widest text-white uppercase transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60">
+            className="border-tech-main-dark bg-tech-main-dark hover:bg-tech-signal hover:border-tech-signal hover:text-tech-signal-ink text-tech-bg inline-flex min-h-[44px] cursor-pointer items-center justify-center border px-6 py-2 text-xs font-bold tracking-widest uppercase transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60">
             {isSubmitting ? "Submitting…" : "Submit PR"}
           </button>
         </div>

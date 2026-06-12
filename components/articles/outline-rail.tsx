@@ -53,9 +53,9 @@ export function OutlineRail() {
             transition-[width] duration-300
             ease-[cubic-bezier(0.16,1,0.3,1)] hover:w-52
           ">
-          <div className="absolute top-0 left-0 h-0.5 w-full bg-tech-main/15">
+          <div className="bg-tech-main/15 absolute top-0 left-0 h-0.5 w-full">
             <div
-              className="h-full bg-tech-main transition-[width] duration-100"
+              className="bg-tech-signal h-full transition-[width] duration-100"
               style={progressWidthStyle}
             />
           </div>
@@ -99,8 +99,8 @@ export function OutlineRail() {
                       ${outlineDepthClasses[item.depth]}
                       ${
                         isActive
-                          ? "border-tech-main font-semibold text-tech-main"
-                          : "border-transparent text-tech-main/50 hover:border-tech-main/30 hover:text-tech-main"
+                          ? "border-tech-signal text-tech-main-dark font-semibold"
+                          : "text-tech-main/50 hover:border-tech-main/30 hover:text-tech-main border-transparent"
                       }
                     `}>
                       {item.text}

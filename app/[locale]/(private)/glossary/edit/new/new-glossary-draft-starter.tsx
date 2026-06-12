@@ -73,7 +73,7 @@ export function NewGlossaryDraftStarter({
             <button
               type="button"
               onClick={() => void startDraft()}
-              className="border-tech-main bg-tech-main hover:bg-tech-main-dark w-fit cursor-pointer border px-4 py-2 text-xs font-bold tracking-widest text-white uppercase transition-colors">
+              className="border-tech-main-dark bg-tech-main-dark hover:bg-tech-signal hover:border-tech-signal hover:text-tech-signal-ink text-tech-bg w-fit cursor-pointer border px-4 py-2 text-xs font-bold tracking-widest uppercase transition-colors">
               Retry
             </button>
           </div>

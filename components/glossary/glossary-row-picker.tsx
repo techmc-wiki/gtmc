@@ -267,7 +267,7 @@ export function GlossaryRowPicker({
               <button
                 type="button"
                 onClick={handleAddNew}
-                className="border-tech-main/40 text-tech-main-dark hover:bg-tech-main tracking-tech-wide w-full cursor-pointer border px-3 py-2 font-mono text-xs uppercase transition-colors hover:text-white">
+                className="border-tech-main/40 text-tech-main-dark hover:bg-tech-main-dark tracking-tech-wide hover:text-tech-bg w-full cursor-pointer border px-3 py-2 font-mono text-xs uppercase transition-colors">
                 [+ ADD AS NEW TERM]
               </button>
             </div>

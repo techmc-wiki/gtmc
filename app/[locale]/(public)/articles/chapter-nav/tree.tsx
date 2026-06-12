@@ -195,7 +195,7 @@ export function ChapterNavTree({
                  md:text-sm
                 ${
                   !item.isFolder && isActive
-                    ? `before:w-[3px] before:bg-tech-main`
+                    ? `before:bg-tech-signal before:w-[3px]`
                     : !item.isFolder
                       ? `
                         before:bg-transparent

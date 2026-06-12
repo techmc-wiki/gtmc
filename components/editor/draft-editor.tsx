@@ -352,7 +352,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               onClick={() => actions.setActiveInfoTab("changes")}
               className={`flex-1 px-4 py-3 font-mono text-xs tracking-widest uppercase ${
                 state.activeInfoTab === "changes"
-                  ? "bg-tech-main text-white"
+                  ? "bg-tech-main-dark text-tech-bg"
                   : "text-tech-main hover:bg-tech-main/5"
               }`}>
               CHANGE MAP
@@ -362,7 +362,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               onClick={() => actions.setActiveInfoTab("guide")}
               className={`guide-line flex-1 border-l px-4 py-3 font-mono text-xs tracking-widest uppercase ${
                 state.activeInfoTab === "guide"
-                  ? "bg-tech-main text-white"
+                  ? "bg-tech-main-dark text-tech-bg"
                   : "text-tech-main hover:bg-tech-main/5"
               }`}>
               CONTRIBUTING

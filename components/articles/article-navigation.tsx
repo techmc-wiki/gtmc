@@ -107,7 +107,7 @@ export async function ArticleNavigation({
       className="relative mt-14 border-t border-tech-main/25 pt-6">
       <span
         aria-hidden="true"
-        className="absolute -top-px left-0 h-px w-28 bg-tech-main/60"
+        className="bg-tech-signal absolute -top-px left-0 h-0.5 w-28"
       />
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">

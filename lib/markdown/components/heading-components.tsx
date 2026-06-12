@@ -17,7 +17,7 @@ export function H1Component({
   return (
     <h1
       id={id}
-      className="markdown-title group border-tech-main/30 target:animate-target-blink target:border-tech-main text-tech-main-dark relative mt-8 mb-5 scroll-m-20 border-b pb-3 text-2xl leading-tight font-bold text-balance sm:text-3xl lg:text-4xl">
+      className="markdown-title group border-tech-main-dark/60 target:animate-target-blink target:border-tech-signal text-tech-main-dark relative mt-8 mb-5 scroll-m-20 border-b-2 pb-3 text-2xl leading-tight font-semibold text-balance sm:text-3xl lg:text-4xl">
       {id && <HeadingAnchor id={id} level={1} />}
       {children}
       {dataAdvanced === "true" && advancedBadge}
@@ -33,7 +33,7 @@ export function H2Component({
   return (
     <h2
       id={id}
-      className="markdown-title group border-tech-main/30 target:animate-target-blink target:border-tech-main text-tech-main-dark relative mt-10 mb-4 block w-fit max-w-full scroll-m-20 border-b pr-8 pb-2 text-2xl leading-tight font-bold text-balance">
+      className="markdown-title group border-tech-main/40 target:animate-target-blink target:border-tech-signal text-tech-main-dark relative mt-10 mb-4 block w-fit max-w-full scroll-m-20 border-b pr-8 pb-2 text-2xl leading-tight font-semibold text-balance">
       {id && <HeadingAnchor id={id} level={2} />}
       {children}
       {dataAdvanced === "true" && advancedBadge}
@@ -49,7 +49,7 @@ export function H3Component({
   return (
     <h3
       id={id}
-      className="markdown-title group border-tech-main/30 target:animate-target-blink target:border-tech-main text-tech-main-dark relative mt-7 mb-3 scroll-m-20 border-l pl-3 text-xl leading-snug font-bold text-balance">
+      className="markdown-title group border-tech-signal target:animate-target-blink text-tech-main-dark relative mt-7 mb-3 scroll-m-20 border-l-2 pl-3 text-xl leading-snug font-semibold text-balance">
       {id && <HeadingAnchor id={id} level={3} />}
       {children}
       {dataAdvanced === "true" && advancedBadge}

@@ -11,7 +11,7 @@ export const prisma =
     adapter: new PrismaPg({
       connectionString: process.env.DATABASE_URL,
     }),
-    log: ["query"],
+    log: process.env.NODE_ENV === "development" ? ["query"] : [],
   })
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma

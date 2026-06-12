@@ -1,8 +1,8 @@
 "use server"
 
-import { getCurrentUserAuthContext, requireAuth } from "@/lib/auth-context"
+import { getCurrentUserAuthContext, requireAuth } from "@/lib/auth/context"
 import { revalidatePath } from "next/cache"
-import { PATHS } from "@/lib/revalidation-paths"
+import { PATHS } from "@/lib/revalidate-paths"
 import {
   createIssue,
   updateIssue,
@@ -27,7 +27,6 @@ async function sendQQBotNotification(payload: {
   const QQ_BOT_WEBHOOK = process.env.QQ_BOT_WEBHOOK || ""
 
   if (!QQ_BOT_WEBHOOK) {
-    console.log("[Mock QQ Bot] Would send payload to webhook: ", payload.text)
     return
   }
 

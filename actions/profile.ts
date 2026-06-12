@@ -1,10 +1,10 @@
 ﻿"use server"
 
-import { requireAuth } from "@/lib/auth-context"
+import { requireAuth } from "@/lib/auth/context"
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { PATHS } from "@/lib/revalidation-paths"
+import { PATHS } from "@/lib/revalidate-paths"
 import { z } from "zod"
 
 const updateProfileSchema = z.object({

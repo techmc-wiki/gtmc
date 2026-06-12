@@ -5,7 +5,7 @@ import {
   getGithubPatForUser,
   requireAdmin,
   requireAuth,
-} from "@/lib/auth-context"
+} from "@/lib/auth/context"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import {

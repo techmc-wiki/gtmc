@@ -1,7 +1,7 @@
 /* oxlint-disable react-perf/jsx-no-new-object-as-prop -- server component: renders once, no re-render concern */
 import type { Metadata } from "next"
 import { auth } from "@/lib/auth"
-import { getCurrentUserAuthContext } from "@/lib/auth-context"
+import { getCurrentUserAuthContext } from "@/lib/auth/context"
 import {
   EXPLANATION_MARKER,
   SYSTEM_COMMENT_MARKER,

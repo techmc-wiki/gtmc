@@ -1,5 +1,5 @@
 ﻿import { auth } from "@/lib/auth"
-import { getCurrentUserAuthContext } from "@/lib/auth-context"
+import { getCurrentUserAuthContext } from "@/lib/auth/context"
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { TechButton } from "@/components/ui/tech-button"

@@ -2,8 +2,8 @@ import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
 import { auth } from "@/lib/auth"
-import { getGithubPatForUser } from "@/lib/auth-context"
-import { classifyFile, sanitizeFilename } from "@/lib/file-upload"
+import { getGithubPatForUser } from "@/lib/auth/context"
+import { classifyFile, sanitizeFilename } from "@/lib/uploads/file-upload"
 import {
   uploadArticleAssetToGithub,
   ArticleAssetUploadError,

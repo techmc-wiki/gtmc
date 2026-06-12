@@ -23,7 +23,7 @@ import {
 import { getArticleContentBySlug } from "@/lib/articles/content"
 import { resolveArticleAssetPath } from "@/lib/articles/banner-assets"
 import { getArticleAssetPublicUrl } from "@/lib/articles/asset-url"
-import { decodeSlugPath, encodeSlug } from "@/lib/slug-resolver"
+import { decodeSlugPath, encodeSlug } from "@/lib/articles/slug-resolver"
 import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
 import { getSiteUrl } from "@/lib/site-url"
 

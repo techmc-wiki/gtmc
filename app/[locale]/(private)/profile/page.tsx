@@ -111,6 +111,7 @@ export default async function ProfilePage() {
                 src={user.image}
                 alt={user.name}
                 className="size-full rounded-none"
+                sizes="(max-width: 640px) 96px, (max-width: 768px) 128px, 160px"
               />
             </div>
 

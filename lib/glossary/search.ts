@@ -1,5 +1,5 @@
 import MiniSearch from "minisearch"
-import { CJK_TOKENIZER } from "@/lib/cjk-tokenizer"
+import { CJK_TOKENIZER } from "@/lib/search/cjk-tokenizer"
 import type { GlossaryEntry, GlossarySummaryEntry } from "./manifest"
 import summaryData from "@/data/glossary-summary.json" with { type: "json" }
 

@@ -13,7 +13,7 @@ import {
   type DraftFileRecord,
 } from "@/lib/drafts/files"
 import { deleteDraftAsset } from "@/lib/drafts/storage"
-import { getGithubPatForUser, requireAuth } from "@/lib/auth-context"
+import { getGithubPatForUser, requireAuth } from "@/lib/auth/context"
 import { prisma } from "@/lib/prisma"
 import {
   findDraftAssetsByRevision,

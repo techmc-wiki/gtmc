@@ -10,7 +10,11 @@ import {
   deleteDraftAsset,
   uploadDraftAsset,
 } from "@/lib/drafts/storage"
-import { classifyFile, isImageMime, sanitizeFilename } from "@/lib/file-upload"
+import {
+  classifyFile,
+  isImageMime,
+  sanitizeFilename,
+} from "@/lib/uploads/file-upload"
 
 export async function POST(req: NextRequest) {
   const session = await auth()

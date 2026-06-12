@@ -1,6 +1,6 @@
 import * as React from "react"
 import { auth } from "@/lib/auth"
-import { getCurrentUserAuthContext } from "@/lib/auth-context"
+import { getCurrentUserAuthContext } from "@/lib/auth/context"
 import { MainSiteShell } from "@/components/layout/main-site-shell"
 
 export default async function DashboardLayout({

@@ -7,7 +7,7 @@ import {
   classifyFile,
   isImageMime,
   getNonImageMimeTypes,
-} from "@/lib/file-upload"
+} from "@/lib/uploads/file-upload"
 
 const clientPayloadSchema = z.object({
   mimeType: z.string().optional(),

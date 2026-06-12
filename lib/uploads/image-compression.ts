@@ -4,7 +4,7 @@ import {
   COMPRESS_TARGET_MB,
   COMPRESS_TRIGGER_BYTES,
   UPLOAD_SAFE_LIMIT_BYTES,
-} from "./upload-constants"
+} from "./constants"
 
 export interface CompressionResult {
   file: File

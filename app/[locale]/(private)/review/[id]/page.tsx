@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth"
-import { getCurrentUserAuthContext } from "@/lib/auth-context"
+import { getCurrentUserAuthContext } from "@/lib/auth/context"
 import { redirect, notFound } from "next/navigation"
 // oxlint-disable-next-line import/no-unassigned-import
 import "katex/dist/katex.min.css"

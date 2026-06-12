@@ -1,14 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { compressImageForUpload } from "@/lib/image-compression"
+import { compressImageForUpload } from "@/lib/uploads/image-compression"
 import {
   classifyFile,
   isImageMime,
   sanitizeFilename,
   generateMarkdownBlock,
   VERCEL_BODY_LIMIT_BYTES,
-} from "@/lib/file-upload"
+} from "@/lib/uploads/file-upload"
 import { upload } from "@vercel/blob/client"
 
 /**

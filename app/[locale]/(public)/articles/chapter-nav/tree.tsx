@@ -1,8 +1,8 @@
 import { Link } from "@/i18n/navigation"
 import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
-import { encodeSlug } from "@/lib/slug-resolver"
+import { encodeSlug } from "@/lib/articles/slug-resolver"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
-import React, { useCallback } from "react"
+import React from "react"
 import { useReaderNavigation } from "../reader-navigation/context"
 
 export type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
@@ -18,15 +18,10 @@ function FolderButton({
   folderExpanded: boolean
   toggleFolder: (id: string) => void
 }) {
-  const handleClick = useCallback(
-    () => toggleFolder(itemId),
-    [toggleFolder, itemId]
-  )
-
   return (
     <button
       type="button"
-      onClick={handleClick}
+      onClick={() => toggleFolder(itemId)}
       className="
         mt-3 mb-1 flex w-fit cursor-pointer items-center text-left
         font-bold text-tech-main/80 uppercase opacity-80
@@ -53,11 +48,6 @@ function ArticleLink({
   isActive: boolean
   onNavigate?: () => void
 }) {
-  const handleClick = useCallback(
-    () => onNavigate?.(),
-    [onNavigate]
-  )
-
   return (
     <div className="relative">
       <div
@@ -75,7 +65,7 @@ function ArticleLink({
         `}>
         <Link
           href={fileRoute}
-          onClick={handleClick}
+          onClick={() => onNavigate?.()}
           className="block w-full pb-px pl-1">
           {item.isReadmeIntro
             ? `00 ${item.title}`
@@ -113,17 +103,12 @@ function FolderGrid({
   folderGridRefs: React.RefObject<Map<string, HTMLDivElement>>
   onNavigate?: () => void
 }) {
-  const refCallback = useCallback(
-    (el: HTMLDivElement | null) => {
-      if (el) folderGridRefs.current.set(itemId, el)
-      else folderGridRefs.current.delete(itemId)
-    },
-    [folderGridRefs, itemId]
-  )
-
   return (
     <div
-      ref={refCallback}
+      ref={(el) => {
+        if (el) folderGridRefs.current.set(itemId, el)
+        else folderGridRefs.current.delete(itemId)
+      }}
       className={`
         grid transition-all duration-300 ease-out
         ${

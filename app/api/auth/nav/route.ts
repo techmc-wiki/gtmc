@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { getCurrentUserAuthContext } from "@/lib/auth-context"
+import { getCurrentUserAuthContext } from "@/lib/auth/context"
 
 export async function GET() {
   const session = await auth()

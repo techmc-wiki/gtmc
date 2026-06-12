@@ -4,7 +4,7 @@ import {
   getCurrentUserAuthContext,
   requireAdmin,
   requireAuth,
-} from "@/lib/auth-context"
+} from "@/lib/auth/context"
 import { createDirectFile, createPR } from "@/lib/github/pr-manager"
 
 export async function createDocument({

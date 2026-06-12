@@ -4,8 +4,8 @@ import { del } from "@vercel/blob"
 import { z } from "zod"
 
 import { auth } from "@/lib/auth"
-import { getGithubPatForUser } from "@/lib/auth-context"
-import { classifyFile, sanitizeFilename } from "@/lib/file-upload"
+import { getGithubPatForUser } from "@/lib/auth/context"
+import { classifyFile, sanitizeFilename } from "@/lib/uploads/file-upload"
 import {
   uploadArticleAssetToGithub,
   ArticleAssetUploadError,

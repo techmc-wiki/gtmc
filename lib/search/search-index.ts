@@ -1,7 +1,7 @@
 import MiniSearch from "minisearch"
 import { remark } from "remark"
 import stripMarkdownPlugin from "strip-markdown"
-import { CJK_TOKENIZER } from "@/lib/cjk-tokenizer"
+import { CJK_TOKENIZER } from "@/lib/search/cjk-tokenizer"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import {
   getOctokit,

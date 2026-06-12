@@ -1,10 +1,8 @@
-// lib/file-upload.ts
-
 import {
   FILE_MAX_BYTES,
   IMAGE_MAX_BYTES,
   VERCEL_BODY_LIMIT_BYTES,
-} from "./upload-constants"
+} from "./constants"
 export { VERCEL_BODY_LIMIT_BYTES }
 
 // ---------------------------------------------------------------------------

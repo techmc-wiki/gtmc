@@ -1,5 +1,5 @@
 import { GIT_BLOB_MODE } from "@/lib/github/constants"
-import { reviewError, summarizeSha } from "@/lib/review/logging"
+import { reviewError, summarizeSha } from "@/lib/logging"
 import { getOctokit, type RepoTarget } from "./repos"
 
 const MAIN_BRANCH = "main"

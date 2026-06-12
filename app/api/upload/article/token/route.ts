@@ -4,7 +4,7 @@ import { handleUpload, type HandleUploadBody } from "@vercel/blob/client"
 import { z } from "zod"
 
 import { auth } from "@/lib/auth"
-import { classifyFile, getAllowedMimeTypes } from "@/lib/file-upload"
+import { classifyFile, getAllowedMimeTypes } from "@/lib/uploads/file-upload"
 
 const clientPayloadSchema = z.object({
   mimeType: z.string().optional(),

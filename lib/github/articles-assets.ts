@@ -5,7 +5,7 @@ import {
   getOctokit,
 } from "@/lib/github/articles-repo"
 import { getGithubErrorStatusNumber } from "@/lib/github/errors"
-import type { FileCategory } from "@/lib/file-upload"
+import type { FileCategory } from "@/lib/uploads/file-upload"
 
 type ArticleAssetUploadErrorCode =
   | "CONFIG_MISSING"

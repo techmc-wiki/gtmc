@@ -5,7 +5,7 @@ import type { GlossaryRevision } from "@prisma/client"
 import type { Prisma } from "@prisma/client"
 import { z } from "zod"
 
-import { requireAuth } from "@/lib/auth-context"
+import { requireAuth } from "@/lib/auth/context"
 import { prisma } from "@/lib/prisma"
 
 const operationsSchema = z.array(z.record(z.string(), z.unknown()))

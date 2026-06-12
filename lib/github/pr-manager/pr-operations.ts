@@ -3,7 +3,7 @@ import {
   ARTICLES_REPO_OWNER,
   getOctokit,
 } from "@/lib/github/articles-repo"
-import { reviewLog, summarizeSha } from "@/lib/review/logging"
+import { reviewLog, summarizeSha } from "@/lib/logging"
 
 export async function createPR({
   title,

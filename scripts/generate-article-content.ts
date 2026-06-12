@@ -13,11 +13,11 @@ import {
 import {
   parseSourceFrontMatter,
   parseTranslationFrontMatter,
-} from "@/lib/frontmatter-parser"
+} from "@/lib/articles/frontmatter-parser"
 import type {
   SourceFrontMatter,
   TranslationFrontMatter,
-} from "@/lib/frontmatter-parser"
+} from "@/lib/articles/frontmatter-parser"
 
 const OUTPUT_DIR = path.join(process.cwd(), "data", "articles")
 const TEMP_DIR = path.join(process.cwd(), "data", "articles.tmp")

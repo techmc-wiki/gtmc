@@ -1,6 +1,9 @@
 "use client"
 
-import { getReauthLoginUrl, isReauthRequiredError } from "@/lib/admin-reauth"
+import {
+  getReauthLoginUrl,
+  isReauthRequiredError,
+} from "@/lib/auth/admin-reauth"
 import type { ReactNode } from "react"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 

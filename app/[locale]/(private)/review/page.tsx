@@ -12,7 +12,7 @@ import {
   ARTICLES_REPO_NAME,
 } from "@/lib/github/articles-repo"
 import { auth } from "@/lib/auth"
-import { getCurrentUserAuthContext } from "@/lib/auth-context"
+import { getCurrentUserAuthContext } from "@/lib/auth/context"
 import { PageHeader } from "@/components/ui/page-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { prisma } from "@/lib/prisma"

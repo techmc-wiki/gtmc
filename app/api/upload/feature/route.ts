@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { uploadFileToGithub, GithubFeaturesError } from "@/lib/github"
-import { classifyFile, sanitizeFilename } from "@/lib/file-upload"
+import { classifyFile, sanitizeFilename } from "@/lib/uploads/file-upload"
 
 export async function POST(req: NextRequest) {
   const session = await auth()

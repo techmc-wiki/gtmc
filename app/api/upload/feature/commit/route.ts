@@ -4,7 +4,11 @@ import { del } from "@vercel/blob"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { uploadFileToGithub, GithubFeaturesError } from "@/lib/github"
-import { classifyFile, isImageMime, sanitizeFilename } from "@/lib/file-upload"
+import {
+  classifyFile,
+  isImageMime,
+  sanitizeFilename,
+} from "@/lib/uploads/file-upload"
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024
 

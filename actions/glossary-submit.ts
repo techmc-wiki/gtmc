@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 
-import { requireAuth } from "@/lib/auth-context"
+import { requireAuth } from "@/lib/auth/context"
 import { prisma } from "@/lib/prisma"
 import {
   parseGlossaryCsv,

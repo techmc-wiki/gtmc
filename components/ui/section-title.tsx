@@ -10,9 +10,13 @@ export function SectionTitle({ children, className }: SectionTitleProps) {
   return (
     <h2
       className={cn(
-        `guide-line text-tech-main-dark mb-6 border-b pb-2 text-lg font-bold tracking-widest uppercase md:text-xl`,
+        `display-title text-tech-main-dark border-tech-main/30 mb-6 flex items-baseline gap-3 border-b pb-2 text-xl tracking-tight md:text-2xl`,
         className
       )}>
+      <span
+        aria-hidden="true"
+        className="bg-tech-signal inline-block size-2 shrink-0 self-center"
+      />
       {children}
     </h2>
   )

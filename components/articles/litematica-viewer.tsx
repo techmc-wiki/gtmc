@@ -169,7 +169,7 @@ export default function LitematicaViewer({
   const lastPointerUnlockAtRef = useRef(Number.NEGATIVE_INFINITY)
 
   const { resolvedTheme } = useTheme()
-  const backgroundColor = resolvedTheme === "dark" ? 0x0e1525 : 0xf8f9fc
+  const backgroundColor = resolvedTheme === "dark" ? 0x14120d : 0xf5f4ef
   const backgroundColorRef = useRef(backgroundColor)
   backgroundColorRef.current = backgroundColor
 

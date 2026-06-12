@@ -8,17 +8,16 @@ export interface TechButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
 export const TechButton = React.forwardRef<HTMLButtonElement, TechButtonProps>(
   ({ className = "", variant = "primary", size = "md", ...props }, ref) => {
     let baseStyles =
-      "relative inline-flex items-center justify-center font-bold tracking-widest transition-all duration-300 focus:outline-none focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 overflow-hidden group border border-tech-main cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+      "relative inline-flex items-center justify-center font-bold tracking-widest transition-all duration-300 focus:outline-none focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 overflow-hidden group border cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
 
-    // Tech Flat style based on image reference
     if (variant === "primary") {
       baseStyles +=
-        " bg-tech-main text-white hover:bg-tech-main-dark dark:bg-tech-accent dark:hover:bg-tech-accent/80"
+        " bg-tech-main-dark border-tech-main-dark text-tech-bg hover:bg-tech-signal hover:border-tech-signal hover:text-tech-signal-ink"
     } else if (variant === "secondary") {
       baseStyles +=
-        " bg-surface-overlay/80 text-tech-main hover:bg-tech-accent/20"
+        " bg-surface-overlay/80 border-tech-main text-tech-main hover:border-tech-main-dark hover:text-tech-main-dark hover:bg-tech-accent/20"
     } else if (variant === "danger") {
-      baseStyles += " bg-red-500 border-red-500 text-white hover:bg-red-700" // muted red
+      baseStyles += " bg-red-500 border-red-500 text-white hover:bg-red-700"
     } else if (variant === "ghost") {
       baseStyles +=
         " bg-transparent border-transparent text-tech-main hover:underline decoration-1 underline-offset-4"
@@ -44,9 +43,8 @@ export const TechButton = React.forwardRef<HTMLButtonElement, TechButtonProps>(
           {props.children}
         </span>
 
-        {/* 装饰性的小方块点缀 */}
         {variant !== "ghost" && (
-          <span className="border-tech-main bg-tech-bg absolute right-0 bottom-0 size-2 border-t border-l opacity-50 mix-blend-overlay"></span>
+          <span className="bg-tech-signal absolute right-0 bottom-0 size-1.5 opacity-80 transition-colors duration-300 group-hover:bg-current"></span>
         )}
       </button>
     )

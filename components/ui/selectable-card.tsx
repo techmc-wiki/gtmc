@@ -51,7 +51,7 @@ export const SelectableCard = React.forwardRef<
         className={cn(
           `group focus-visible:outline-tech-main relative border p-4 text-left transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 sm:p-5`,
           selected
-            ? "border-tech-main bg-tech-main/10"
+            ? "border-tech-main-dark bg-tech-main/10"
             : "guide-line hover:border-tech-main/50 bg-surface-overlay/70 hover:bg-surface-overlay/90",
           disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
           className
@@ -64,7 +64,7 @@ export const SelectableCard = React.forwardRef<
         {visibleBadge ? (
           <span
             className={cn(
-              `border-tech-main bg-tech-main mb-3 inline-block border px-3 py-1 font-mono text-[0.6875rem] font-bold tracking-widest text-white uppercase`,
+              `border-tech-main-dark bg-tech-main-dark text-tech-bg mb-3 inline-block border px-3 py-1 font-mono text-[0.6875rem] font-bold tracking-widest uppercase`,
               disabled && "opacity-70"
             )}>
             {visibleBadge}
@@ -91,7 +91,7 @@ export const SelectableCard = React.forwardRef<
           {selected ? (
             <span
               aria-hidden="true"
-              className="bg-tech-main mt-1 inline-block size-1.5 shrink-0"
+              className="bg-tech-signal mt-1 inline-block size-1.5 shrink-0"
             />
           ) : null}
         </div>
@@ -108,7 +108,7 @@ export const SelectableCard = React.forwardRef<
           <div className="mt-3 flex items-center gap-1.5">
             <span
               aria-hidden="true"
-              className="bg-tech-main inline-block size-1.5"
+              className="bg-tech-signal inline-block size-1.5"
             />
             <span className="text-tech-main font-mono text-[0.6875rem] tracking-widest uppercase">
               {selectedLabel}

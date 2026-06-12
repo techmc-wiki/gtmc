@@ -6,40 +6,41 @@ interface LogoProps {
   showSlash?: boolean
 }
 
+const sizeClasses = {
+  sm: "text-sm",
+  md: "text-lg",
+  lg: "text-2xl",
+  xl: "text-2xl sm:text-3xl md:text-4xl lg:text-5xl",
+  "2xl": "text-3xl sm:text-4xl md:text-5xl lg:text-6xl",
+} as const
+
+const markClasses = {
+  sm: "size-3.5 text-[0.5rem]",
+  md: "size-5 text-[0.625rem]",
+  lg: "size-7 text-sm",
+  xl: "size-8 text-base md:size-10 md:text-lg",
+  "2xl": "size-10 text-lg md:size-12 md:text-xl",
+} as const
+
 export function Logo({
   className = "",
   size = "md",
   showSlash = true,
 }: LogoProps) {
-  const sizeClasses = {
-    sm: "text-sm",
-    md: "text-xl",
-    lg: "text-3xl",
-    xl: "text-2xl sm:text-3xl md:text-5xl lg:text-6xl",
-    "2xl": "text-3xl sm:text-4xl md:text-6xl lg:text-7xl",
-  }
-
-  const slashClasses = {
-    sm: "text-[0.625rem]",
-    md: "text-sm",
-    lg: "text-lg",
-    xl: "text-sm sm:text-base md:text-2xl lg:text-3xl",
-    "2xl": "text-base sm:text-lg md:text-3xl lg:text-4xl",
-  }
-
   return (
     <Link
       href="/"
-      className={`inline-flex items-center font-sans tracking-widest transition-opacity hover:opacity-80 ${sizeClasses[size]} ${className} `}>
-      {/* eslint-disable react/jsx-no-comment-textnodes, react/jsx-curly-brace-presence */}
+      className={`group inline-flex items-center gap-2 transition-opacity hover:opacity-80 ${sizeClasses[size]} ${className} `}>
       {showSlash && (
         <span
-          className={`text-tech-main mr-1 font-light opacity-40 ${slashClasses[size]} `}>
-          {"//"}
+          aria-hidden="true"
+          className={`bg-tech-signal text-tech-signal-ink flex shrink-0 items-center justify-center font-mono font-bold ${markClasses[size]} `}>
+          G
         </span>
       )}
-      {/* eslint-enable react/jsx-no-comment-textnodes, react/jsx-curly-brace-presence */}
-      <span className="text-tech-main-dark font-bold">GTMC</span>
+      <span className="display-title text-tech-main-dark tracking-tight">
+        GTMC
+      </span>
     </Link>
   )
 }

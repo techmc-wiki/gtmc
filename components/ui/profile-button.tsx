@@ -10,7 +10,7 @@ export async function ProfileButton() {
     return (
       <Link
         href="/login"
-        className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main flex h-8 items-center justify-center border px-3 font-mono text-[0.625rem] font-bold tracking-widest uppercase transition-all duration-300 hover:text-white md:text-xs">
+        className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main-dark hover:text-tech-bg flex h-8 items-center justify-center border px-3 font-mono text-[0.625rem] font-bold tracking-widest uppercase transition-all duration-300 md:text-xs">
         LOGIN
       </Link>
     )

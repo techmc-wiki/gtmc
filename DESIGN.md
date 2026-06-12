@@ -4,15 +4,34 @@ This document records the visual system actually in use on the GTMC website. It 
 
 ## Design Direction
 
-The site uses a **technical blueprint / scientific drafting** aesthetic.
+The site uses a **"Print Edition"** aesthetic: an academic monograph series
+(think Springer *Graduate Texts in Mathematics*) re-set for the web, layered
+over the original technical-drafting bones.
 
-- Flat, near-square surfaces with thin blue-gray borders.
-- Monospace labels, status readouts, and bracketed metadata.
-- Corner brackets, ticks, guide lines, dot grids, and scan/sweep overlays.
-- Soft translucency through white overlays and `backdrop-blur-*`, not heavy shadows.
-- Motion that reads like instrumentation: fade, clip-path slide, pop-in, blueprint sweep, scan confirm.
+The conceit: GTMC is a textbook series, so the site looks like one. Archival
+paper, navy-black ink, a single unmistakable **Springer-yellow signal band**,
+serif display titles, and mono "apparatus" text (folios, running heads,
+colophons) where a book would have typographic furniture.
 
-Avoid generic SaaS gradients, pill cards, emoji-as-icons, heavy drop shadows, and ad-hoc hex colors when a `tech-*` token will do.
+- Warm paper surfaces (`tech-bg` is cream, not blue-white) with flat,
+  near-square geometry. No rounded corners.
+- Serif display type (`display-title` / STIX Two Text + Noto Serif SC) for
+  page titles, section titles, and article headings. Ink-dark, tight tracking,
+  sentence case — never uppercase serif.
+- Monospace remains the "apparatus" voice: nav links, labels, status readouts,
+  folios, build stamps. Uppercase + wide tracking belongs to mono only.
+- `tech-signal` (Springer yellow) is the one loud color. Used in hairline
+  accents (the 3px nav band, header rules, active-state underlines, the logo
+  mark) — never as a large fill except the hero book band.
+- Drafting motifs survive in supporting roles: dimension marks, guide lines,
+  corner brackets on technical panels, dot-grid backdrop.
+- Motion still reads like instrumentation: fade, clip-path slide, pop-in,
+  sweep, scan confirm.
+
+Avoid generic SaaS gradients, pill cards, emoji-as-icons, heavy drop shadows,
+purple-on-white "AI default" palettes, and ad-hoc hex colors when a `tech-*`
+token will do. Avoid uppercase serif and letter-spaced serif: the serif voice
+is calm; the mono voice is technical.
 
 ## Source Files
 
@@ -48,18 +67,22 @@ Homepage
 
 The Tailwind v4 theme is defined in `app/globals.css` (`@theme`). There is no `tailwind.config.*`. Use these tokens; avoid raw hex values.
 
-| Token            | Hex       | Role                                                      |
-| ---------------- | --------- | --------------------------------------------------------- |
-| `tech-bg`        | `#f8f9fc` | Off-white page background and pale surface fills          |
-| `tech-main`      | `#60708f` | Primary blueprint blue-gray for borders, controls, labels |
-| `tech-main-dark` | `#4a5a78` | Headings and high-emphasis text                           |
-| `tech-accent`    | `#c4d0df` | Hover fills, subtle highlights, selected states           |
-| `tech-line`      | `#cbd5e1` | Border-only token: dot grid and quiet dividers            |
+| Token             | Hex       | Role                                                       |
+| ----------------- | --------- | ---------------------------------------------------------- |
+| `tech-bg`         | `#f5f4ef` | Warm archival-paper page background                        |
+| `tech-main`       | `#4a5468` | Ink-gray for body text, borders, controls, labels          |
+| `tech-main-dark`  | `#20283c` | Navy-black ink: headings and high-emphasis text            |
+| `tech-accent`     | `#c9cfdd` | Hover fills, subtle highlights, selected states            |
+| `tech-line`       | `#d6d3c8` | Border-only token: dot grid and quiet dividers             |
+| `tech-signal`     | `#e3b505` | Springer yellow: hairline accents, active states, the mark |
+| `tech-signal-ink` | `#20283c` | Text color guaranteed legible on a `tech-signal` fill      |
 
 Usage rules
 - Default text: `text-tech-main`. High-emphasis titles: `text-tech-main-dark`.
-- Common borders: `border-tech-main/40`. Quiet guide lines: `guide-line` or `border-tech-main/20`.
-- Surfaces: `bg-white/70`–`/95` plus `backdrop-blur-sm` (or `backdrop-blur-md` on hero/modal panels). Pale fills use `bg-tech-bg/50`–`/80`.
+- Common borders: `border-tech-main/40`. Quiet guide lines: `guide-line` or `border-tech-main/20`. Strong structural rules (page header, footer top, nav band) use `border-tech-main-dark` with a short `bg-tech-signal` tick overlapping them.
+- Surfaces: `bg-surface/70`–`/95` plus `backdrop-blur-sm` (or `backdrop-blur-md` on hero/modal panels). Pale fills use `bg-tech-bg/50`–`/80`. Never raw `bg-white`.
+- `tech-signal` budget: at most one band + a few hairline ticks per screen. It marks "you are here" (active nav, current chapter, focus rules) and brand moments (logo mark, hero band). It is never body text on light backgrounds and never a large fill outside the hero.
+- Filled controls invert to ink: `bg-tech-main-dark text-tech-bg` (e.g. primary buttons, active language tab). Primary button hover flips to `bg-tech-signal text-tech-signal-ink`.
 - Hover/selection stay muted: `bg-tech-accent/10`, `bg-tech-main/5`–`/10`, `hover:border-tech-main/60`.
 - Semantic colors are translucent and bracketed: yellow/blue/green/red at `/10` fills with `/40` borders. Neutral states (loading, secondary metadata) may use gray/slate/zinc at low opacity.
 - `tech-line` is for borders only; it has no fill or text utility in practice.
@@ -72,16 +95,22 @@ Map every background, border, and text color to a semantic Tailwind token so bot
 
 | Tailwind class | Light | Dark |
 |---|---|---|
-| `bg-tech-bg` | #f8f9fc | #0e1525 |
-| `bg-surface` | #ffffff | #152038 |
-| `bg-surface-overlay` | #ffffff | #1c2a4a |
-| `bg-surface-input` | #ffffff | #0f1a2e |
-| `bg-surface-modal` | #ffffff | #1a2540 |
-| `text-tech-main` | #60708f | #a4b2cc |
-| `text-tech-main-dark` | #4a5a78 | #cfd8e6 |
-| `border-tech-line` | #cbd5e1 | #2a3349 |
-| `text-tech-advanced` | #4c5b96 | #7a89c4 |
-| `bg-tech-accent` | #c4d0df | #3a4866 |
+| `bg-tech-bg` | #f5f4ef | #14120d |
+| `bg-surface` | #fcfbf8 | #1c1912 |
+| `bg-surface-overlay` | #fcfbf8 | #221f16 |
+| `bg-surface-input` | #fffefb | #121009 |
+| `bg-surface-modal` | #fcfbf8 | #201d15 |
+| `text-tech-main` | #4a5468 | #a8a290 |
+| `text-tech-main-dark` | #20283c | #ece6d6 |
+| `border-tech-line` | #d6d3c8 | #2d2a21 |
+| `text-tech-advanced` | #4c5b96 | #9aa6d4 |
+| `bg-tech-accent` | #c9cfdd | #3d3a2f |
+| `bg-tech-signal` | #e3b505 | #e9c531 |
+| `text-tech-signal-ink` | #20283c | #14120d |
+
+Dark mode is "Night Print": the same paper book under a warm lamp — dark
+umber paper, cream ink, slightly brighter yellow. It is deliberately *not*
+a blue-dark theme.
 
 ### Dark variant conventions
 
@@ -92,7 +121,7 @@ Map every background, border, and text color to a semantic Tailwind token so bot
 
 ### Three.js background
 
-Schematic viewer passes theme-aware background color to Three.js `renderer.setClearColor()`. Light: `#f8f9fc`, dark: `#0e1525`.
+Schematic viewer passes theme-aware background color to Three.js `renderer.setClearColor()`. Light: `#f5f4ef`, dark: `#14120d`.
 
 ### Icon recoloring
 
@@ -107,17 +136,23 @@ Icons use `currentColor` or `text-tech-main`. When contained in a `dark:` block 
 Fonts are declared in `app/globals.css` and loaded via `app/[locale]/layout.tsx`.
 
 Families
-- Sans: `var(--font-geist-sans)`, `Noto Sans SC`, `PingFang SC`, `Microsoft YaHei`, `sans-serif`.
-- Mono: `var(--font-geist-mono)`, `Space Mono`, `SF Mono`, `Consolas`, `Noto Sans Mono SC`, `monospace`.
+- Sans (body): `var(--font-geist-sans)`, `Noto Sans SC`, `PingFang SC`, `Microsoft YaHei`, `sans-serif`.
+- Serif (display): `var(--font-stix-two-text)`, `Noto Serif SC`, `Songti SC`, `Georgia`, `serif` — exposed as `--font-serif` and the `display-title` utility.
+- Mono (apparatus): `var(--font-geist-mono)`, `SF Mono`, `Consolas`, `Noto Sans Mono SC`, `monospace`.
+
+Three voices
+1. **Serif** speaks as the book: page titles, section titles, article headings, the logo wordmark, the hero. `display-title` = serif, semibold, `-0.015em` tracking, sentence case.
+2. **Sans** speaks as the text block: body copy, descriptions, UI prose.
+3. **Mono** speaks as the apparatus: nav, labels, badges, folios, status strips. Mono owns uppercase and wide tracking.
 
 Scale
 - Root font size scales by viewport: `16px` on small screens, stepping up to `18px` on large screens via media queries in `html`.
-- Page titles: `text-2xl md:text-4xl font-bold tracking-tight text-tech-main-dark uppercase`.
-- Section titles: `text-lg md:text-xl font-bold tracking-widest uppercase text-tech-main-dark`, often above a guide line.
+- Page titles: `display-title text-3xl md:text-5xl tracking-tight text-tech-main-dark`, with a mono kicker label above (`text-[0.625rem] tracking-[0.25em] uppercase text-tech-main/60`).
+- Section titles: `display-title text-xl md:text-2xl` with a leading `size-2 bg-tech-signal` square and a bottom guide line (see `SectionTitle`).
 - HUD and metadata labels: `font-mono text-xs tracking-widest uppercase text-tech-main/50`.
 - Body copy: `text-sm/relaxed` to `text-base/relaxed`.
-- Article paragraphs: `font-sans text-base/relaxed text-slate-800`.
-- Article headings (H1–H3): `markdown-title`, regular capitalization, with bottom or right guide lines. The title font currently resolves to Geist Sans via `--font-markdown-title` and can be adjusted independently from body and mono text.
+- Article paragraphs: `font-sans text-base/relaxed text-tech-main-dark`.
+- Article headings (H1–H3): `markdown-title`, regular capitalization, semibold. `--font-markdown-title` resolves to the serif stack; H1 carries a heavy ink bottom rule, H3 a `tech-signal` left rule.
 
 Tracking
 - House default: `tracking-widest` (broadly used on labels, badges, nav).

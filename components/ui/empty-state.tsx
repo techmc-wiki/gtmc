@@ -26,7 +26,7 @@ export function EmptyState({
         colSpanFull && "col-span-full",
         className
       )}>
-      <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgb(var(--color-tech-main)/0.05)_10px,rgb(var(--color-tech-main)/0.05)_20px)]" />
+      <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,color-mix(in_oklab,var(--color-tech-main)_5%,transparent)_10px,color-mix(in_oklab,var(--color-tech-main)_5%,transparent)_20px)]" />
       <h2 className="text-tech-main/50 relative z-10 font-mono text-lg tracking-widest uppercase">
         {message}
       </h2>

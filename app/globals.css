@@ -6,8 +6,8 @@
   --background: var(--color-tech-bg);
   --foreground: var(--color-tech-main);
   --font-markdown-title:
-    var(--font-geist-sans), var(--font-noto-sans-sc), "PingFang SC",
-    "Microsoft YaHei", "微软雅黑", sans-serif;
+    var(--font-stix-two-text), var(--font-noto-serif-sc), "Songti SC", "STSong",
+    serif;
 }
 
 html {
@@ -34,16 +34,21 @@ html {
   --font-mono:
     var(--font-geist-mono), "SF Mono", "Consolas", "Noto Sans Mono SC",
     "PingFang Mono", "Microsoft YaHei Mono", monospace;
-  --color-tech-bg: #f8f9fc;
-  --color-tech-main: #60708f;
-  --color-tech-main-dark: #4a5a78;
-  --color-tech-accent: #c4d0df;
-  --color-tech-line: #cbd5e1;
+  --font-serif:
+    var(--font-stix-two-text), var(--font-noto-serif-sc), "Songti SC", "STSong",
+    Georgia, serif;
+  --color-tech-bg: #f5f4ef;
+  --color-tech-main: #4a5468;
+  --color-tech-main-dark: #20283c;
+  --color-tech-accent: #c9cfdd;
+  --color-tech-line: #d6d3c8;
   --color-tech-advanced: #4c5b96;
-  --color-surface: #ffffff;
-  --color-surface-overlay: #ffffff;
-  --color-surface-input: #ffffff;
-  --color-surface-modal: #ffffff;
+  --color-tech-signal: #e3b505;
+  --color-tech-signal-ink: #20283c;
+  --color-surface: #fcfbf8;
+  --color-surface-overlay: #fcfbf8;
+  --color-surface-input: #fffefb;
+  --color-surface-modal: #fcfbf8;
 
   --color-ansi-black: #334155;
   --color-ansi-red: #b91c1c;
@@ -189,13 +194,13 @@ html {
 
   @keyframes target-blink {
     0% {
-      background-color: var(--color-tech-main);
-      color: #fff;
+      background-color: var(--color-tech-signal);
+      color: var(--color-tech-signal-ink);
       padding-left: 0.5rem;
     }
     20% {
-      background-color: var(--color-tech-main);
-      color: #fff;
+      background-color: var(--color-tech-signal);
+      color: var(--color-tech-signal-ink);
       padding-left: 0.5rem;
     }
     100% {
@@ -235,16 +240,18 @@ html {
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --color-tech-bg: #0e1525;
-  --color-tech-main: #a4b2cc;
-  --color-tech-main-dark: #cfd8e6;
-  --color-tech-accent: #3a4866;
-  --color-tech-line: #2a3349;
-  --color-tech-advanced: #7a89c4;
-  --color-surface: #152038;
-  --color-surface-overlay: #1c2a4a;
-  --color-surface-input: #0f1a2e;
-  --color-surface-modal: #1a2540;
+  --color-tech-bg: #14120d;
+  --color-tech-main: #a8a290;
+  --color-tech-main-dark: #ece6d6;
+  --color-tech-accent: #3d3a2f;
+  --color-tech-line: #2d2a21;
+  --color-tech-advanced: #9aa6d4;
+  --color-tech-signal: #e9c531;
+  --color-tech-signal-ink: #14120d;
+  --color-surface: #1c1912;
+  --color-surface-overlay: #221f16;
+  --color-surface-input: #121009;
+  --color-surface-modal: #201d15;
 
   --color-ansi-black: #073642;
   --color-ansi-red: #dc322f;
@@ -363,8 +370,15 @@ body {
 
 @utility markdown-title {
   font-family: var(--font-markdown-title);
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   text-transform: none;
+}
+
+@utility display-title {
+  font-family: var(--font-serif);
+  letter-spacing: -0.015em;
+  text-transform: none;
+  font-weight: 600;
 }
 
 @utility animate-skeleton-exit {
@@ -547,7 +561,7 @@ body {
 }
 
 @utility editor-surface {
-  @apply relative flex grow flex-col bg-white;
+  @apply bg-surface relative flex grow flex-col;
 }
 
 @utility corner-tick {

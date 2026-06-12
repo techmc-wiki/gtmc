@@ -1,6 +1,12 @@
 import type { Metadata, Viewport } from "next"
 import { cacheLife } from "next/cache"
-import { Geist, Geist_Mono, Noto_Sans_SC } from "next/font/google"
+import {
+  Geist,
+  Geist_Mono,
+  Noto_Sans_SC,
+  Noto_Serif_SC,
+  STIX_Two_Text,
+} from "next/font/google"
 // oxlint-disable-next-line import/no-unassigned-import
 import "../globals.css"
 import { Analytics } from "@vercel/analytics/next"
@@ -53,6 +59,21 @@ const notoSansSc = Noto_Sans_SC({
   display: "swap",
   preload: false,
   variable: "--font-noto-sans-sc",
+  adjustFontFallback: false,
+})
+
+const stixTwoText = STIX_Two_Text({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-stix-two-text",
+  adjustFontFallback: false,
+})
+
+const notoSerifSc = Noto_Serif_SC({
+  weight: ["400", "600", "700"],
+  display: "swap",
+  preload: false,
+  variable: "--font-noto-serif-sc",
   adjustFontFallback: false,
 })
 
@@ -132,8 +153,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8f9fc" },
-    { media: "(prefers-color-scheme: dark)", color: "#0e1525" },
+    { media: "(prefers-color-scheme: light)", color: "#f5f4ef" },
+    { media: "(prefers-color-scheme: dark)", color: "#14120d" },
   ],
 }
 
@@ -162,7 +183,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable} ${notoSansSc.variable} scroll-smooth`}
+      className={`${geistSans.variable} ${geistMono.variable} ${notoSansSc.variable} ${stixTwoText.variable} ${notoSerifSc.variable} scroll-smooth`}
       data-scroll-behavior="smooth"
       suppressHydrationWarning>
       <head />

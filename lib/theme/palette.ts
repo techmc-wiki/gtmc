@@ -4,33 +4,36 @@
  * Runtime source of truth is CSS variables in app/globals.css.
  * This file exists for documentation and programmatic access.
  *
- * Dark palette: Candidate A — Deep Blueprint Navy (brand-consistent)
+ * Light: "Print Edition" — archival paper, navy-black ink, Springer yellow.
+ * Dark: "Night Print" — warm lamp-lit dark paper, cream ink.
  */
 
 export const lightPalette = {
-  "tech-bg": "#f8f9fc",
-  "tech-main": "#60708f",
-  "tech-main-dark": "#4a5a78",
-  "tech-accent": "#c4d0df",
-  "tech-line": "#cbd5e1",
+  "tech-bg": "#f5f4ef",
+  "tech-main": "#4a5468",
+  "tech-main-dark": "#20283c",
+  "tech-accent": "#c9cfdd",
+  "tech-line": "#d6d3c8",
   "tech-advanced": "#4c5b96",
-  surface: "#ffffff",
-  "surface-overlay": "#ffffff",
-  "surface-input": "#ffffff",
-  "surface-modal": "#ffffff",
+  "tech-signal": "#e3b505",
+  surface: "#fcfbf8",
+  "surface-overlay": "#fcfbf8",
+  "surface-input": "#fffefb",
+  "surface-modal": "#fcfbf8",
 } as const
 
 export const darkPalette = {
-  "tech-bg": "#0e1525",
-  "tech-main": "#a4b2cc",
-  "tech-main-dark": "#cfd8e6",
-  "tech-accent": "#3a4866",
-  "tech-line": "#2a3349",
-  "tech-advanced": "#7a89c4",
-  surface: "#152038",
-  "surface-overlay": "#1c2a4a",
-  "surface-input": "#0f1a2e",
-  "surface-modal": "#1a2540",
+  "tech-bg": "#14120d",
+  "tech-main": "#a8a290",
+  "tech-main-dark": "#ece6d6",
+  "tech-accent": "#3d3a2f",
+  "tech-line": "#2d2a21",
+  "tech-advanced": "#9aa6d4",
+  "tech-signal": "#e9c531",
+  surface: "#1c1912",
+  "surface-overlay": "#221f16",
+  "surface-input": "#121009",
+  "surface-modal": "#201d15",
 } as const
 
 export type TokenName = keyof typeof lightPalette

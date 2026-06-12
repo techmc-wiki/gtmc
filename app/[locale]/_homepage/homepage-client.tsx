@@ -9,6 +9,7 @@ import { HeroCard } from "./hero-card"
 import { TechButton } from "@/components/ui/tech-button"
 import { Link } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
+import { ContinueReading } from "./continue-reading"
 
 const BackgroundLayer = dynamic(
   () => import("./background-layer").then((mod) => mod.BackgroundLayer),
@@ -88,7 +89,7 @@ export function HomepageClient() {
         isReducedMotion={isReducedMotion}
       />
 
-      <div className="relative z-10 mx-auto flex min-h-full w-full max-w-7xl flex-col items-center justify-center px-4 pt-4 pb-16">
+      <div className="relative z-10 mx-auto flex min-h-full w-full max-w-7xl flex-col items-center justify-center px-4 pt-12 pb-24">
         <HeroCard
           cardRef={cardRef}
           cardWidth={cardWidth}
@@ -116,6 +117,8 @@ export function HomepageClient() {
             </TechButton>
           </Link>
         </div>
+
+        <ContinueReading />
 
         <a
           href="#contents"

@@ -2,7 +2,11 @@ import type { NextRequest} from "next/server";
 import { NextResponse } from "next/server"
 import { CJK_TOKENIZER } from "@/lib/search/cjk-tokenizer"
 import { getSearchIndex } from "@/lib/search/search-index"
+import { searchGlossary } from "@/lib/glossary/search"
+import type { GlossarySummaryEntry } from "@/lib/glossary/manifest"
 import type { ArticleLocale } from "@/lib/articles/manifest"
+
+const GLOSSARY_RESULT_CAP = 5
 
 const SEARCH_CACHE_CONTROL = "public, max-age=30, stale-while-revalidate=120"
 
@@ -90,9 +94,12 @@ function extractSnippet(
   return snippet
 }
 
-function jsonResponse(results: SearchResult[]) {
+function jsonResponse(
+  results: SearchResult[],
+  glossary: GlossarySummaryEntry[] = []
+) {
   return NextResponse.json(
-    { results },
+    { results, glossary },
     { headers: { "Cache-Control": SEARCH_CACHE_CONTROL } }
   )
 }
@@ -165,7 +172,12 @@ export async function GET(req: NextRequest) {
       return 0
     })
 
-    return jsonResponse(results.slice(0, 20))
+    const glossaryMatches = searchGlossary(query).slice(
+      0,
+      GLOSSARY_RESULT_CAP
+    )
+
+    return jsonResponse(results.slice(0, 20), glossaryMatches)
   } catch (error) {
     console.error("MiniSearch query failed:", error)
     return jsonResponse([])

@@ -17,6 +17,13 @@ interface SearchResult {
   matchType: "title" | "content"
 }
 
+interface GlossarySearchResult {
+  slug: string
+  fullFormEn: string
+  shortForm: string
+  category: string
+}
+
 function slugToPath(slug: string) {
   return "/" + slug
 }
@@ -28,6 +35,9 @@ export function SearchCommand() {
   const isMounted = useMounted()
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<SearchResult[]>([])
+  const [glossaryResults, setGlossaryResults] = useState<
+    GlossarySearchResult[]
+  >([])
   const [isLoading, setIsLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -40,6 +50,7 @@ export function SearchCommand() {
     setIsOpen(false)
     setQuery("")
     setResults([])
+    setGlossaryResults([])
     setSelectedIndex(0)
     setIsLoading(false)
   }, [])
@@ -61,6 +72,7 @@ export function SearchCommand() {
             // Closing — reset state synchronously
             setQuery("")
             setResults([])
+            setGlossaryResults([])
             setSelectedIndex(0)
             setIsLoading(false)
           }
@@ -120,6 +132,7 @@ export function SearchCommand() {
         .then((data) => {
           if (!controller.signal.aborted) {
             setResults(data.results || [])
+            setGlossaryResults(data.glossary || [])
             setIsLoading(false)
           }
         })
@@ -142,6 +155,7 @@ export function SearchCommand() {
       setSelectedIndex(0)
       if (!value || value.length < 2) {
         setResults([])
+        setGlossaryResults([])
         setIsLoading(false)
       }
     },
@@ -177,22 +191,38 @@ export function SearchCommand() {
     [router, closeModal, query, pathname]
   )
 
+  const navigateToGlossaryResult = useCallback(
+    (entry: GlossarySearchResult) => {
+      closeModal()
+      router.push(`/glossary/${entry.slug}`)
+    },
+    [router, closeModal]
+  )
+
+  const totalCount = results.length + glossaryResults.length
+
   // Keyboard navigation inside modal
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       switch (e.key) {
         case "ArrowDown":
           e.preventDefault()
-          setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0))
+          setSelectedIndex((prev) => (prev < totalCount - 1 ? prev + 1 : 0))
           break
         case "ArrowUp":
           e.preventDefault()
-          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1))
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : totalCount - 1))
           break
         case "Enter":
           e.preventDefault()
           if (results[selectedIndex]) {
             navigateToResult(results[selectedIndex])
+          } else {
+            const glossaryEntry =
+              glossaryResults[selectedIndex - results.length]
+            if (glossaryEntry) {
+              navigateToGlossaryResult(glossaryEntry)
+            }
           }
           break
         case "Escape":
@@ -201,7 +231,15 @@ export function SearchCommand() {
           break
       }
     },
-    [results, selectedIndex, navigateToResult, closeModal]
+    [
+      results,
+      glossaryResults,
+      totalCount,
+      selectedIndex,
+      navigateToResult,
+      navigateToGlossaryResult,
+      closeModal,
+    ]
   )
 
   const handleResultClick = useCallback(
@@ -220,6 +258,17 @@ export function SearchCommand() {
       setSelectedIndex(index)
     },
     []
+  )
+
+  const handleGlossaryResultClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      const index = Number(e.currentTarget.dataset.searchResultIndex)
+      const entry = glossaryResults[index - results.length]
+      if (entry) {
+        navigateToGlossaryResult(entry)
+      }
+    },
+    [glossaryResults, results.length, navigateToGlossaryResult]
   )
 
   // Highlight matched text in title/snippet
@@ -440,17 +489,71 @@ export function SearchCommand() {
                   </ul>
                 )}
 
-                {/* Empty state */}
-                {!isLoading && query.length >= 2 && results.length === 0 && (
-                  <div className="px-4 py-8 text-center">
-                    <div className="text-tech-main/60 font-mono text-xs tracking-wider uppercase">
-                      {t("noMatch")}
+                {/* Glossary section */}
+                {!isLoading && glossaryResults.length > 0 && (
+                  <div className="guide-line border-t">
+                    <div className="text-tech-main/50 flex items-center gap-2 px-4 pt-3 pb-1 font-mono text-[0.625rem] font-bold tracking-[0.2em] uppercase">
+                      <span className="bg-tech-signal inline-block size-1.5" />
+                      {t("glossarySection")}
                     </div>
-                    <div className="text-tech-main/40 mt-1 font-mono text-[0.625rem]">
-                      {t("tryDifferentKeywords")}
-                    </div>
+                    <ul className="py-1">
+                      {glossaryResults.map((entry, glossaryIndex) => {
+                        const index = results.length + glossaryIndex
+                        return (
+                          <li key={entry.slug}>
+                            <button
+                              type="button"
+                              onClick={handleGlossaryResultClick}
+                              onMouseEnter={handleResultMouseEnter}
+                              data-search-result-index={index}
+                              className={`group relative flex w-full cursor-pointer items-baseline gap-3 px-4 py-2.5 text-left transition-colors ${
+                                index === selectedIndex
+                                  ? "bg-tech-main/10"
+                                  : "hover:bg-tech-accent/10"
+                              }`}
+                              aria-label={t("selectResult", {
+                                title: entry.fullFormEn,
+                              })}
+                              tabIndex={-1}>
+                              {index === selectedIndex && (
+                                <CornerBrackets
+                                  variant="static"
+                                  color="border-tech-main/30"
+                                />
+                              )}
+                              <span className="text-tech-main-dark font-mono text-sm font-medium">
+                                {highlightMatch(entry.fullFormEn)}
+                              </span>
+                              {entry.shortForm && (
+                                <span className="text-tech-main/60 font-mono text-xs">
+                                  {highlightMatch(entry.shortForm)}
+                                </span>
+                              )}
+                              <span className="text-tech-main/40 ml-auto font-mono text-[0.5625rem] tracking-wider uppercase">
+                                {entry.category}
+                              </span>
+                            </button>
+                          </li>
+                        )
+                      })}
+                    </ul>
                   </div>
                 )}
+
+                {/* Empty state */}
+                {!isLoading &&
+                  query.length >= 2 &&
+                  results.length === 0 &&
+                  glossaryResults.length === 0 && (
+                    <div className="px-4 py-8 text-center">
+                      <div className="text-tech-main/60 font-mono text-xs tracking-wider uppercase">
+                        {t("noMatch")}
+                      </div>
+                      <div className="text-tech-main/40 mt-1 font-mono text-[0.625rem]">
+                        {t("tryDifferentKeywords")}
+                      </div>
+                    </div>
+                  )}
 
                 {/* Initial state */}
                 {query.length < 2 && (

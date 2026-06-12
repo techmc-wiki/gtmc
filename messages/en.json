@@ -18,6 +18,7 @@
     "glossaryCardDesc": "The index of terms — technical Minecraft vocabulary in 12 languages.",
     "feedbackCardTitle": "Errata & Feedback",
     "feedbackCardDesc": "Report mistakes, request features, track known issues.",
+    "continueReading": "BOOKMARK — CONTINUE READING",
     "contributeCardTitle": "Call for Contributions",
     "contributeCardDesc": "Write a section, submit it for review, get published.",
     "startReading": "START READING →",
@@ -496,7 +497,8 @@
     "dismissHint": "DISMISS",
     "pathLabel": "PATH:",
     "matchBody": "BODY",
-    "matchTitle": "TITLE"
+    "matchTitle": "TITLE",
+    "glossarySection": "INDEX — GLOSSARY"
   },
   "Outline": {
     "title": "On This Page",

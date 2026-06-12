@@ -28,6 +28,7 @@ import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
 import { getSiteUrl } from "@/lib/site-url"
 
 import { ArticleHighlight } from "@/components/articles/article-highlight"
+import { BookmarkRecorder } from "@/components/articles/bookmark-recorder"
 import { ArticleMetadataFull } from "@/components/articles/article-metadata-full"
 import { ArticleMetadataAnonymous } from "@/components/articles/article-metadata-anonymous"
 import { ArticleNavigation } from "@/components/articles/article-navigation"
@@ -361,6 +362,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         border-t-tech-main-dark p-6 backdrop-blur-sm sm:p-8
       ">
       <div className="bg-tech-signal absolute -top-0.5 left-0 h-0.5 w-16" />
+
+      <BookmarkRecorder slug={currentSlug} title={articleTitle} />
 
       {/* Article Header */}
       {author && createdAt && lastModified ? (

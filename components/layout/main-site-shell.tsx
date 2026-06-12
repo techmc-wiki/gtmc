@@ -16,10 +16,15 @@ import { Logo } from "@/components/ui/logo"
 function buildNavLinks(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
   return [
     { href: "/articles", label: t("articles") },
-    { href: "/draft", label: t("drafts") },
     { href: "/glossary", label: t("glossary") },
     { href: "/features", label: t("features") },
   ]
+}
+
+function buildContributorLink(
+  t: Awaited<ReturnType<typeof getTranslations<"Nav">>>
+) {
+  return { href: "/draft", label: t("drafts") }
 }
 
 function buildAdminLink(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
@@ -41,9 +46,25 @@ export async function MainSiteShell({
 }: MainSiteShellProps) {
   const t = await getTranslations("Nav")
   const baseLinks = buildNavLinks(t)
+  const contributorLink = buildContributorLink(t)
   const adminLink = buildAdminLink(t)
 
+  // Private routes pass isAdminServerSide, which implies an authenticated
+  // session — the contributor link is always shown there.
   let serverResolvedLinks = baseLinks
+  if (isAdminServerSide !== undefined) {
+    const glossaryIndex = serverResolvedLinks.findIndex(
+      (link) => link.href === "/glossary"
+    )
+    serverResolvedLinks =
+      glossaryIndex === -1
+        ? [...serverResolvedLinks, contributorLink]
+        : [
+            ...serverResolvedLinks.slice(0, glossaryIndex + 1),
+            contributorLink,
+            ...serverResolvedLinks.slice(glossaryIndex + 1),
+          ]
+  }
   if (isAdminServerSide) {
     const featuresIndex = serverResolvedLinks.findIndex(
       (link) => link.href === "/features"
@@ -65,7 +86,11 @@ export async function MainSiteShell({
       {isAdminServerSide !== undefined ? (
         <DesktopNav navLinks={serverResolvedLinks} />
       ) : (
-        <AuthAwareDesktopNav navLinks={baseLinks} adminLink={adminLink} />
+        <AuthAwareDesktopNav
+          navLinks={baseLinks}
+          contributorLink={contributorLink}
+          adminLink={adminLink}
+        />
       )}
     </>
   )
@@ -76,7 +101,11 @@ export async function MainSiteShell({
       {isAdminServerSide !== undefined ? (
         <MobileNav navLinks={serverResolvedLinks} />
       ) : (
-        <AuthAwareMobileNav navLinks={baseLinks} adminLink={adminLink} />
+        <AuthAwareMobileNav
+          navLinks={baseLinks}
+          contributorLink={contributorLink}
+          adminLink={adminLink}
+        />
       )}
       <ThemeToggle className="hidden sm:flex" />
       <LanguageSwitcher className="hidden sm:flex" />

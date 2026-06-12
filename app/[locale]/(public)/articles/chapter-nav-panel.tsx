@@ -1,5 +1,6 @@
 import * as React from "react"
 import { useImperativeHandle, useCallback } from "react"
+import { useTranslations } from "next-intl"
 import { usePathname } from "@/i18n/navigation"
 import { ChapterNavToolbar } from "./chapter-nav/chapter-nav-toolbar"
 import { ChapterNavTree, type ChapterNavNode } from "./chapter-nav/tree"
@@ -59,6 +60,7 @@ const ChapterNavPanelInner = React.forwardRef<
   { onNavigate, internalScroll = false, scrollClass = "", hideActions = false },
   ref
 ) {
+  const t = useTranslations("ChapterNav")
   const pathname = usePathname()
 
   const {
@@ -128,7 +130,7 @@ const ChapterNavPanelInner = React.forwardRef<
   const treeContent =
     tree.length === 0 ? (
       <div className="mt-4 font-mono text-sm text-tech-main/40">
-        SYS.DIR_TREE_EMPTY
+        {t("empty")}
       </div>
     ) : (
       <ChapterNavTree onNavigate={onNavigate} items={tree} />

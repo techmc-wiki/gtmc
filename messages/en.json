@@ -3,7 +3,7 @@
     "articles": "ARTICLES",
     "drafts": "MY DRAFTS",
     "reviewHub": "REVIEW HUB",
-    "features": "FEATURES",
+    "features": "FEEDBACK",
     "glossary": "GLOSSARY"
   },
   "Homepage": {
@@ -127,6 +127,8 @@
   "ChapterNav": {
     "title": "Table of Contents",
     "titleShort": "ToC",
+    "empty": "No entries in contents",
+    "buttonClose": "CLOSE",
     "buttonNewArticle": "+ New File / Dir",
     "buttonCollapseAll": "⊟ collapse",
     "buttonLocate": "◎ locate",
@@ -468,6 +470,9 @@
     "searchAriaLabel": "Search articles",
     "selectResult": "Select {title}",
     "heading": "SEARCH",
+    "modalTitle": "SEARCH THE TEXT",
+    "resultsCount": "RESULTS ({count})",
+    "resultsCountCapped": "RESULTS ({count} — TOP MATCHES)",
     "awaitingInput": "AWAITING INPUT",
     "scanning": "SCANNING...",
     "noMatch": "NO MATCH FOUND",
@@ -479,6 +484,15 @@
     "pathLabel": "PATH:",
     "matchBody": "BODY",
     "matchTitle": "TITLE"
+  },
+  "Outline": {
+    "title": "On This Page",
+    "hoverHint": "Hover to Show",
+    "railLabel": "On this page",
+    "openSheet": "Open article outline",
+    "closeSheet": "Close article outline",
+    "sheetLabel": "Article outline",
+    "close": "CLOSE"
   },
   "ArticleMeta": {
     "copyButton": "Copy",

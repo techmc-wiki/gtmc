@@ -3,7 +3,7 @@
     "articles": "文章",
     "drafts": "我的草稿",
     "reviewHub": "审核中心",
-    "features": "报告特性",
+    "features": "反馈",
     "glossary": "术语表"
   },
   "Homepage": {
@@ -127,6 +127,8 @@
   "ChapterNav": {
     "title": "文章目录",
     "titleShort": "目录",
+    "empty": "目录暂无条目",
+    "buttonClose": "关闭",
     "buttonNewArticle": "+ 新建文章 / 目录",
     "buttonCollapseAll": "⊟ 折叠全部",
     "buttonLocate": "◎ 定位当前",
@@ -468,6 +470,9 @@
     "searchAriaLabel": "搜索文章",
     "selectResult": "选择 {title}",
     "heading": "搜索",
+    "modalTitle": "全文检索",
+    "resultsCount": "结果（{count}）",
+    "resultsCountCapped": "结果（{count} — 最佳匹配）",
     "awaitingInput": "等待输入",
     "scanning": "搜索中...",
     "noMatch": "未找到匹配",
@@ -479,6 +484,15 @@
     "pathLabel": "路径：",
     "matchBody": "正文",
     "matchTitle": "标题"
+  },
+  "Outline": {
+    "title": "本文目录",
+    "hoverHint": "悬停展开",
+    "railLabel": "本文目录",
+    "openSheet": "打开本文目录",
+    "closeSheet": "关闭本文目录",
+    "sheetLabel": "本文目录",
+    "close": "关闭"
   },
   "ArticleMeta": {
     "copyButton": "复制",

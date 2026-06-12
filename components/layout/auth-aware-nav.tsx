@@ -12,6 +12,7 @@ interface NavLink {
 
 interface AuthAwareNavProps {
   navLinks: NavLink[]
+  contributorLink: NavLink
   adminLink: NavLink
 }
 
@@ -58,7 +59,11 @@ async function fetchNavAuth(): Promise<NavAuthResponse> {
   return cachedNavAuth
 }
 
-function useAdminAwareLinks(navLinks: NavLink[], adminLink: NavLink) {
+function useAuthAwareLinks(
+  navLinks: NavLink[],
+  contributorLink: NavLink,
+  adminLink: NavLink
+) {
   const { status } = useSession()
   const [isAdmin, setIsAdmin] = React.useState(false)
 
@@ -77,44 +82,63 @@ function useAdminAwareLinks(navLinks: NavLink[], adminLink: NavLink) {
     }
   }, [status])
 
-  const effectiveIsAdmin = status === "authenticated" && isAdmin
+  const isAuthenticated = status === "authenticated"
+  const effectiveIsAdmin = isAuthenticated && isAdmin
 
   return React.useMemo(() => {
-    if (!effectiveIsAdmin) {
-      return navLinks
+    let links = navLinks
+
+    if (
+      isAuthenticated &&
+      !links.some((link) => link.href === contributorLink.href)
+    ) {
+      const glossaryIndex = links.findIndex(
+        (link) => link.href === "/glossary"
+      )
+      links =
+        glossaryIndex === -1
+          ? [...links, contributorLink]
+          : [
+              ...links.slice(0, glossaryIndex + 1),
+              contributorLink,
+              ...links.slice(glossaryIndex + 1),
+            ]
     }
 
-    if (navLinks.some((link) => link.href === adminLink.href)) {
-      return navLinks
+    if (!effectiveIsAdmin || links.some((link) => link.href === adminLink.href)) {
+      return links
     }
 
-    const featuresIndex = navLinks.findIndex(
-      (link) => link.href === "/features"
-    )
+    const featuresIndex = links.findIndex((link) => link.href === "/features")
 
     if (featuresIndex === -1) {
-      return [...navLinks, adminLink]
+      return [...links, adminLink]
     }
 
     return [
-      ...navLinks.slice(0, featuresIndex),
+      ...links.slice(0, featuresIndex),
       adminLink,
-      ...navLinks.slice(featuresIndex),
+      ...links.slice(featuresIndex),
     ]
-  }, [adminLink, effectiveIsAdmin, navLinks])
+  }, [adminLink, contributorLink, effectiveIsAdmin, isAuthenticated, navLinks])
 }
 
 function AuthAwareDesktopNavContent({
   navLinks,
+  contributorLink,
   adminLink,
 }: AuthAwareNavProps) {
-  const links = useAdminAwareLinks(navLinks, adminLink)
+  const links = useAuthAwareLinks(navLinks, contributorLink, adminLink)
 
   return <DesktopNav navLinks={links} />
 }
 
-function AuthAwareMobileNavContent({ navLinks, adminLink }: AuthAwareNavProps) {
-  const links = useAdminAwareLinks(navLinks, adminLink)
+function AuthAwareMobileNavContent({
+  navLinks,
+  contributorLink,
+  adminLink,
+}: AuthAwareNavProps) {
+  const links = useAuthAwareLinks(navLinks, contributorLink, adminLink)
 
   return <MobileNav navLinks={links} />
 }

@@ -330,7 +330,7 @@ export function SearchCommand() {
               <header className="guide-line flex items-center justify-between border-b px-4 py-3">
                 <div className="tracking-tech-wide text-tech-main/80 flex items-center gap-2 font-mono text-xs font-bold uppercase">
                   <span className="bg-tech-main/80 inline-block size-1.5 animate-pulse" />
-                  SYS.QUERY_ENGINE
+                  {t("modalTitle")}
                 </div>
                 <button
                   type="button"
@@ -366,8 +366,8 @@ export function SearchCommand() {
                     {isLoading
                       ? t("scanning")
                       : results.length === 20
-                        ? `SCAN_RESULTS (${results.length} - TOP MATCHES)`
-                        : `SCAN_RESULTS (${results.length})`}
+                        ? t("resultsCountCapped", { count: results.length })
+                        : t("resultsCount", { count: results.length })}
                   </div>
                 )}
 

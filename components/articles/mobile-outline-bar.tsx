@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { useReaderNavigation } from "@/app/[locale]/(public)/articles/reader-navigation/context"
 import { useModalEffects } from "@/hooks/use-modal-effects"
@@ -14,6 +15,7 @@ const outlineDepthClasses = {
 } satisfies Record<1 | 2 | 3, string>
 
 export function MobileOutlineBar() {
+  const t = useTranslations("Outline")
   const { outline, activeHeadingId } = useReaderNavigation()
   const { hasScrolledPastNavbar, progress } = useScrollProgress({
     navbarThreshold: 64,
@@ -49,7 +51,7 @@ export function MobileOutlineBar() {
           <button
             type="button"
             className="pointer-events-auto flex h-fit w-full items-center px-4 py-2 pr-4 backdrop-blur-xs md:hidden"
-            aria-label="Open article outline"
+            aria-label={t("openSheet")}
             onClick={openSheet}>
             <div className="max-w-[40vw] truncate font-mono text-xs font-bold text-tech-main transition-colors duration-150 hover:text-tech-main">
               {activeItem.text}
@@ -69,7 +71,7 @@ export function MobileOutlineBar() {
         {/* Backdrop */}
         <button
           type="button"
-          aria-label="Close article outline"
+          aria-label={t("closeSheet")}
           className={`absolute inset-0 w-full bg-black/20 backdrop-blur-xs transition-opacity duration-300 ${isSheetOpen ? "opacity-100" : "opacity-0"}`}
           onClick={closeSheet}
         />
@@ -79,12 +81,12 @@ export function MobileOutlineBar() {
           className={`absolute inset-x-0 bottom-0 flex max-h-[70dvh] flex-col border-t border-tech-main/30 bg-surface-overlay/95 backdrop-blur-md transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isSheetOpen ? "translate-y-0" : "translate-y-full"}`}
           role={isSheetOpen ? "dialog" : undefined}
           aria-modal={isSheetOpen ? "true" : undefined}
-          aria-label="Article outline">
+          aria-label={t("sheetLabel")}>
           {/* Header */}
           <div className="flex shrink-0 items-center justify-between border-b guide-line px-4 py-3">
             <div className="flex items-center gap-3">
               <span className="font-mono text-xs font-bold tracking-[0.12em] text-tech-main/60 uppercase">
-                本文目录
+                {t("title")}
               </span>
               <span className="font-mono text-xs text-tech-main/40">·</span>
               <span className="mono-label">{pct}%</span>
@@ -101,8 +103,8 @@ export function MobileOutlineBar() {
               type="button"
               onClick={closeSheet}
               className="cursor-pointer px-3 py-2 font-mono text-xs font-bold tracking-[0.15em] text-tech-main uppercase transition-colors hover:bg-tech-main/10"
-              aria-label="Close article outline">
-              CLOSE
+              aria-label={t("closeSheet")}>
+              {t("close")}
             </button>
           </div>
 

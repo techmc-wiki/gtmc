@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { useReaderNavigation } from "@/app/[locale]/(public)/articles/reader-navigation/context"
 import { useScrollProgress } from "@/hooks/use-scroll-progress"
@@ -12,6 +13,7 @@ const outlineDepthClasses = {
 } satisfies Record<1 | 2 | 3, string>
 
 export function OutlineRail() {
+  const t = useTranslations("Outline")
   const { outline, activeHeadingId } = useReaderNavigation()
   const { progress } = useScrollProgress()
   const outlineListRef = React.useRef<HTMLUListElement | null>(null)
@@ -45,7 +47,7 @@ export function OutlineRail() {
           lg:top-28 lg:h-[calc(100dvh-144px)]
         ">
         <nav
-          aria-label="Paragraph Outline"
+          aria-label={t("railLabel")}
           className="
             group relative my-auto flex h-4/5 min-h-0 w-16
             overflow-hidden border-l
@@ -61,11 +63,11 @@ export function OutlineRail() {
           </div>
 
           <div className="absolute bottom-0 font-sans text-4xl font-black text-nowrap text-tech-main/10 uppercase transition-all duration-500 [writing-mode:vertical-rl] group-hover:opacity-0">
-            Hover to Show
+            {t("hoverHint")}
           </div>
 
           <div className="absolute bottom-0 font-sans text-4xl font-black text-nowrap text-tech-main/10 uppercase opacity-0 transition-all duration-500 [writing-mode:vertical-rl] group-hover:opacity-100">
-            Paragraph Outline
+            {t("title")}
           </div>
 
           <div
@@ -76,8 +78,8 @@ export function OutlineRail() {
             transition-opacity duration-200
             group-hover:pointer-events-auto group-hover:opacity-100
           ">
-            <div className="mb-3 font-mono text-[0.625rem] font-bold tracking-[0.12em] text-tech-main/50">
-              paragraph outline
+            <div className="mb-3 font-mono text-[0.625rem] font-bold tracking-[0.12em] text-tech-main/50 uppercase">
+              {t("title")}
             </div>
 
             <ul

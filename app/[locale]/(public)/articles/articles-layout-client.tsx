@@ -467,7 +467,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                             bg-tech-main/60
                           "
                         />
-                        SYS.DIR_TREE
+                        {t("title")}
                       </div>
                     </div>
                   </div>

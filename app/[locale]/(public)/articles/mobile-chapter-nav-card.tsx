@@ -21,6 +21,7 @@ export function MobileChapterNavCard({
   isFloating,
 }: MobileChapterNavCardProps) {
   const t = useTranslations("CommonA11y")
+  const tNav = useTranslations("ChapterNav")
   const isMounted = React.useSyncExternalStore(
     emptySubscribe,
     () => true,
@@ -65,7 +66,7 @@ export function MobileChapterNavCard({
               tracking-tech-wide text-tech-main/60 uppercase
             ">
             <span className="size-1.5 animate-pulse bg-tech-main/60" />
-            SYS.DIR_TREE
+            {tNav("title")}
           </div>
           <button
             onClick={onClose}
@@ -76,7 +77,7 @@ export function MobileChapterNavCard({
             "
             data-testid="mobile-tree-card-close"
             aria-label={t("closeTree")}>
-            CLOSE
+            {tNav("buttonClose")}
           </button>
         </div>
 

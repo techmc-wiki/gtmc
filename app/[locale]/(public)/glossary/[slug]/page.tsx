@@ -5,9 +5,11 @@ import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { TechCard } from "@/components/ui/tech-card"
 import { TermDetail } from "@/components/glossary/term-detail"
+import { MentionedIn } from "@/components/glossary/mentioned-in"
 import { loadGlossaryManifest } from "@/lib/glossary/manifest"
 import { getGlossaryEntry } from "@/lib/glossary/slug"
 import { getSiteUrl } from "@/lib/site-url"
+import type { ArticleLocale } from "@/lib/articles/manifest"
 
 const MAX_DESCRIPTION_LENGTH = 160
 
@@ -100,6 +102,12 @@ export default async function GlossarySlugPage({
       <TechCard padding="spacious" tone="main" borderOpacity="muted">
         <TermDetail entry={entry} locale={locale} slug={slug} />
       </TechCard>
+
+      <MentionedIn
+        termName={entry.fullFormEn}
+        shortForm={entry.shortForm}
+        locale={locale === "en" ? "en" : "zh"}
+      />
     </div>
   )
 }

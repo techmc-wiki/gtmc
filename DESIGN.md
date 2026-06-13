@@ -160,7 +160,7 @@ Map every background, border, and text color to a semantic Tailwind token so bot
 | `text-tech-main` | #4a5468 | #a8a290 |
 | `text-tech-main-dark` | #20283c | #ece6d6 |
 | `border-tech-line` | #d6d3c8 | #2d2a21 |
-| `text-tech-advanced` | #4c5b96 | #9aa6d4 |
+| `text-tech-advanced` | #8c2f39 | #c25664 |
 | `bg-tech-accent` | #c9cfdd | #3d3a2f |
 | `bg-tech-signal` | #e3b505 | #e9c531 |
 | `text-tech-signal-ink` | #20283c | #14120d |

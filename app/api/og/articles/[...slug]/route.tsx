@@ -91,7 +91,7 @@ const titleStyle = { fontSize: 64, fontWeight: 400, color: "#20283c", lineHeight
 const metaLineStyle = { display: "flex" as const, alignItems: "center" as const, gap: 12, fontSize: 20, color: "rgba(96, 112, 143, 0.67)", marginBottom: 14, flexShrink: 0 }
 const metaSpanStyle = { display: "flex" as const }
 const metaSepStyle = { color: "#d6d3c8", display: "flex" as const }
-const advancedBadgeStyle = { border: "1px solid rgba(76,91,150,0.4)", background: "rgba(76,91,150,0.08)", color: "#4c5b96", padding: "2px 8px", fontSize: 12, letterSpacing: 2, textTransform: "uppercase" as const, display: "flex" as const }
+const advancedBadgeStyle = { border: "1px solid rgba(140,47,57,0.4)", background: "rgba(140,47,57,0.08)", color: "#8c2f39", padding: "2px 8px", fontSize: 12, letterSpacing: 2, textTransform: "uppercase" as const, display: "flex" as const }
 
 const bodyHookWrapperStyle = { position: "relative" as const, flex: 1, overflow: "hidden" as const, display: "flex" as const }
 const bodyHookTextStyle = { fontSize: 24, fontWeight: 350, color: "#4a5468", lineHeight: 1.6, display: "flex" as const }

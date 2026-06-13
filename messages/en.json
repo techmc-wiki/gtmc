@@ -36,7 +36,14 @@
     "offlinePdf": "Offline (PDF)",
     "linkRepository": "Repository",
     "linkTeam": "Team",
-    "linkIssues": "Issues"
+    "linkIssues": "Issues",
+    "sectionRead": "READ",
+    "sectionCommunity": "COMMUNITY",
+    "sectionSource": "SOURCE",
+    "sectionDownload": "DOWNLOAD",
+    "linkGlossary": "Glossary",
+    "linkFeedback": "Errata & Feedback",
+    "linkContribute": "Contribute"
   },
   "Glossary": {
     "backToTop": "Back to top",

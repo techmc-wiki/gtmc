@@ -127,8 +127,8 @@ export default async function Footer() {
 
         {/* Link grid */}
         <div className="my-12 grid grid-cols-2 gap-6 sm:grid-cols-4">
-          <nav aria-label="Read">
-            <h3 className="section-label">READ</h3>
+          <nav aria-label={t("sectionRead")}>
+            <h3 className="section-label">{t("sectionRead")}</h3>
             <ul className="mt-3 flex flex-col gap-2">
               <li>
                 <Link
@@ -144,11 +144,25 @@ export default async function Footer() {
                   {t("linkArticles")}
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/glossary"
+                  className="text-tech-main hover:text-tech-main-dark hover:decoration-tech-main/40 focus-visible:outline-tech-main text-sm transition-colors hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+                  {t("linkGlossary")}
+                </Link>
+              </li>
             </ul>
           </nav>
-          <nav aria-label="Community">
-            <h3 className="section-label">COMMUNITY</h3>
+          <nav aria-label={t("sectionCommunity")}>
+            <h3 className="section-label">{t("sectionCommunity")}</h3>
             <ul className="mt-3 flex flex-col gap-2">
+              <li>
+                <Link
+                  href="/draft"
+                  className="text-tech-main hover:text-tech-main-dark hover:decoration-tech-main/40 focus-visible:outline-tech-main text-sm transition-colors hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+                  {t("linkContribute")}
+                </Link>
+              </li>
               <li>
                 <a
                   href="https://github.com/gtmc-dev"
@@ -169,9 +183,16 @@ export default async function Footer() {
               </li>
             </ul>
           </nav>
-          <nav aria-label="Source">
-            <h3 className="section-label">SOURCE</h3>
+          <nav aria-label={t("sectionSource")}>
+            <h3 className="section-label">{t("sectionSource")}</h3>
             <ul className="mt-3 flex flex-col gap-2">
+              <li>
+                <Link
+                  href="/features"
+                  className="text-tech-main hover:text-tech-main-dark hover:decoration-tech-main/40 focus-visible:outline-tech-main text-sm transition-colors hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+                  {t("linkFeedback")}
+                </Link>
+              </li>
               <li>
                 <a
                   href="https://github.com/gtmc-dev/gtmc-web"
@@ -192,8 +213,8 @@ export default async function Footer() {
               </li>
             </ul>
           </nav>
-          <nav aria-label="Download">
-            <h3 className="section-label">DOWNLOAD</h3>
+          <nav aria-label={t("sectionDownload")}>
+            <h3 className="section-label">{t("sectionDownload")}</h3>
             <ul className="mt-3 flex flex-col gap-2">
               <li>
                 <Link

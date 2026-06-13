@@ -36,7 +36,14 @@
     "offlinePdf": "离线版 (PDF)",
     "linkRepository": "代码仓库",
     "linkTeam": "团队",
-    "linkIssues": "议题"
+    "linkIssues": "议题",
+    "sectionRead": "阅读",
+    "sectionCommunity": "社区",
+    "sectionSource": "源码",
+    "sectionDownload": "下载",
+    "linkGlossary": "术语表",
+    "linkFeedback": "勘误与反馈",
+    "linkContribute": "参与贡献"
   },
   "Glossary": {
     "backToTop": "回到顶部",

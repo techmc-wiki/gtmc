@@ -92,9 +92,7 @@ function useAuthAwareLinks(
       isAuthenticated &&
       !links.some((link) => link.href === contributorLink.href)
     ) {
-      const glossaryIndex = links.findIndex(
-        (link) => link.href === "/glossary"
-      )
+      const glossaryIndex = links.findIndex((link) => link.href === "/glossary")
       links =
         glossaryIndex === -1
           ? [...links, contributorLink]
@@ -105,7 +103,10 @@ function useAuthAwareLinks(
             ]
     }
 
-    if (!effectiveIsAdmin || links.some((link) => link.href === adminLink.href)) {
+    if (
+      !effectiveIsAdmin ||
+      links.some((link) => link.href === adminLink.href)
+    ) {
       return links
     }
 

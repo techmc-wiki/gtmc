@@ -33,6 +33,63 @@ purple-on-white "AI default" palettes, and ad-hoc hex colors when a `tech-*`
 token will do. Avoid uppercase serif and letter-spaced serif: the serif voice
 is calm; the mono voice is technical.
 
+## UX Principles
+
+The visual system serves a reading experience. These principles govern how
+users move through the site and how affordances are surfaced.
+
+### The site is a book, not an app
+
+GTMC is a community textbook. Every surface should reinforce the book
+metaphor, not fight it.
+
+- **The homepage is the book opening.** A cover (hero) scrolls into a real
+  printed Table of Contents built from the live article tree — chapter
+  numbers, dotted leaders, section counts, appendix separator. The TOC is
+  the primary navigation, not a secondary index page.
+- **Reading progress is a bookmark, not a progress bar.** Articles record a
+  localStorage bookmark (slug, title, scroll position). The homepage shows
+  a bookmark ribbon — title, yellow progress bar, one-click return — like a
+  physical bookmark tucked into the book.
+- **The reader has a running head.** Articles inside a chapter show a
+  yellow `CH 01` chip and linked chapter title above the article metadata,
+  so a reader arriving from search always knows where they are in the book.
+- **Glossary is the index.** The command palette (`⌘K`) returns an
+  `INDEX — GLOSSARY` section alongside article results. Cross-linking
+  between articles and glossary terms is a first-class concern.
+
+### Navigation respects audience
+
+The site has three audiences: readers, contributors, and admins. The nav
+must not lie about what's available.
+
+- **Anonymous visitors see reader-only nav**: Articles, Glossary, Feedback.
+  No dead-end links to pages that require login.
+- **MY DRAFTS appears only for authenticated users** — after Glossary,
+  before Feedback. It's a contributor affordance, not a reader one.
+- **REVIEW HUB appears only for admins**, injected by `AuthAwareNav` after
+  a session check.
+- **FEEDBACK** (formerly FEATURES) describes what the page actually is:
+  bug reports and feature requests. The old label "FEATURES" implied a
+  feature list, not an issue tracker.
+
+### Reader surfaces speak the book's language
+
+Labels on reading surfaces use textbook vocabulary, not drafting jargon.
+
+- Chapter tree panel: **Table of Contents** (not `SYS.DIR_TREE`).
+- Search modal header: **Search the Text** (not `SYS.QUERY_ENGINE`).
+- Outline rail: **On This Page** (not `Paragraph Outline`).
+- All reader-surface labels are localized — no hardcoded English on
+  Chinese pages, no hardcoded Chinese on English pages.
+
+### Footer is a reader/contributor map
+
+The footer is organized by audience intent: READ (Preface, Articles,
+Glossary), COMMUNITY (Contribute, Team, Issues), SOURCE (Errata &
+Feedback, Repository, License), DOWNLOAD (Offline PDF). Section headers
+are localized.
+
 ## Source Files
 
 Tokens and global styles
@@ -191,8 +248,10 @@ Site shell
 
 Desktop
 - Hidden below `md`. Links are mono uppercase: `font-mono text-xs tracking-[0.15em] border-b-2 pb-1`.
-- Active: `border-tech-main text-tech-main`. Inactive: transparent border + `text-tech-main-dark`, hover swaps both to `tech-main`.
-- Admin-only links (e.g. `/review`) are injected by `AuthAwareNav` after a session check.
+- Active: `border-tech-signal text-tech-main`. Inactive: transparent border + `text-tech-main-dark`, hover swaps both to `tech-main`.
+- Base nav is reader-only: Articles, Glossary, Feedback. MY DRAFTS is
+  injected by `AuthAwareNav` for authenticated users (after Glossary).
+  REVIEW HUB is injected for admins (before Feedback).
 
 Mobile
 - Hamburger button uses three `h-0.5 w-5 bg-tech-main` bars with animated transform states; touch target `min-h-11 min-w-11`.

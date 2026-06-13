@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url"
 
 import { ArticleHighlight } from "@/components/articles/article-highlight"
 import { BookmarkRecorder } from "@/components/articles/bookmark-recorder"
+import { RunningHead } from "@/components/articles/running-head"
 import { ArticleMetadataFull } from "@/components/articles/article-metadata-full"
 import { ArticleMetadataAnonymous } from "@/components/articles/article-metadata-anonymous"
 import { ArticleNavigation } from "@/components/articles/article-navigation"
@@ -354,6 +355,22 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const currentSlug = target.canonicalSlug || slugPath
   const navigation = await getArticleNavigation(currentSlug, flattenedArticles, locale)
 
+  const parentSlug = currentSlug.includes("/")
+    ? currentSlug.split("/")[0]
+    : null
+  const parentChapter = parentSlug
+    ? tree.find(
+        (node) =>
+          node.slug === parentSlug ||
+          node.slug.split("/")[0] === parentSlug
+      )
+    : null
+  const runningHeadChapterSlug = parentChapter?.slug ?? null
+  const runningHeadChapterTitle = parentChapter?.title ?? chapterTitle ?? null
+  const runningHeadChapterIndex = parentChapter?.index
+  const runningHeadIsAppendix = parentChapter?.isAppendix ?? false
+  const runningHeadIsPreface = !!target.isPreface && !parentChapter
+
   return (
     <div
       className="
@@ -364,6 +381,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <div className="bg-tech-signal absolute -top-0.5 left-0 h-0.5 w-16" />
 
       <BookmarkRecorder slug={currentSlug} title={articleTitle} />
+
+      {runningHeadChapterSlug && runningHeadChapterTitle && (
+        <RunningHead
+          chapterTitle={runningHeadChapterTitle}
+          chapterSlug={runningHeadChapterSlug}
+          chapterIndex={runningHeadChapterIndex}
+          chapterIsAppendix={runningHeadIsAppendix}
+          isPreface={runningHeadIsPreface}
+        />
+      )}
 
       {/* Article Header */}
       {author && createdAt && lastModified ? (

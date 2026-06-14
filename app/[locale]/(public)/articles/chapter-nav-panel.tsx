@@ -150,7 +150,7 @@ const ChapterNavPanelInner = React.forwardRef<
           <div
             ref={scrollContainerRef}
             className={`
-              custom-left-scrollbar min-h-0 flex-1 overflow-y-auto pb-12
+              reader-rail-scrollbar min-h-0 flex-1 overflow-y-auto pb-12
               ${scrollClass}
             `}>
             {treeContent}

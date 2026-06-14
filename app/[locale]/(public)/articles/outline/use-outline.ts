@@ -24,6 +24,7 @@ function scanHeadings(): OutlineItem[] {
   if (headings.length === 0) return []
 
   const outlineItems: OutlineItem[] = []
+  const seenIds = new Map<string, number>()
   headings.forEach((heading) => {
     if (heading.id && heading.textContent) {
       const clone = heading.cloneNode(true) as Element
@@ -31,8 +32,16 @@ function scanHeadings(): OutlineItem[] {
         el.remove()
       })
       const text = clone.textContent?.replace(/^#\s*/, "") ?? ""
+
+      let uniqueId = heading.id
+      const count = seenIds.get(heading.id) ?? 0
+      if (count > 0) {
+        uniqueId = `${heading.id}-${count}`
+      }
+      seenIds.set(heading.id, count + 1)
+
       outlineItems.push({
-        id: heading.id,
+        id: uniqueId,
         text,
         depth: getOutlineDepth(heading),
       })

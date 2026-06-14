@@ -70,7 +70,7 @@ export async function MentionedIn({
               href={articleUrl(article.slug)}
               className="group flex items-baseline gap-2 text-sm transition-colors"
               locale={locale}>
-              <span className="text-tech-main/40 group-hover:text-tech-signal-ink font-mono text-xs transition-colors">
+              <span className="text-tech-main/40 group-hover:text-tech-main-dark font-mono text-xs transition-colors">
                 →
               </span>
               <span className="text-tech-main group-hover:text-tech-main-dark transition-colors">

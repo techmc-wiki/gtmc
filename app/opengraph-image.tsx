@@ -22,7 +22,7 @@ const CONTAINER_STYLE = {
   alignItems: "center",
   justifyContent: "center",
   gap: 16,
-  borderTop: "16px solid #e3b505",
+  borderTop: "16px solid #5fb0d4",
 } as const
 
 const TITLE_STYLE = {
@@ -35,7 +35,7 @@ const TITLE_STYLE = {
 
 const SUBTITLE_STYLE = {
   fontSize: 28,
-  color: "#a8a290",
+  color: "#9aa7bd",
   textAlign: "center",
 } as const
 

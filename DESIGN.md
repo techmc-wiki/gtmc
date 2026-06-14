@@ -9,9 +9,11 @@ The site uses a **"Print Edition"** aesthetic: an academic monograph series
 over the original technical-drafting bones.
 
 The conceit: GTMC is a textbook series, so the site looks like one. Archival
-paper, navy-black ink, a single unmistakable **Springer-yellow signal band**,
+paper, navy-black ink, a single unmistakable **blueprint-azure signal band**,
 serif display titles, and mono "apparatus" text (folios, running heads,
-colophons) where a book would have typographic furniture.
+colophons) where a book would have typographic furniture. The signal is cold
+on purpose: a printed monograph annotated in technical blue, so the original
+drafting-table bones read through the paper rather than being painted over.
 
 - Warm paper surfaces (`tech-bg` is cream, not blue-white) with flat,
   near-square geometry. No rounded corners.
@@ -20,9 +22,10 @@ colophons) where a book would have typographic furniture.
   sentence case — never uppercase serif.
 - Monospace remains the "apparatus" voice: nav links, labels, status readouts,
   folios, build stamps. Uppercase + wide tracking belongs to mono only.
-- `tech-signal` (Springer yellow) is the one loud color. Used in hairline
-  accents (the 3px nav band, header rules, active-state underlines, the logo
-  mark) — never as a large fill except the hero book band.
+- `tech-signal` (blueprint azure / cyanotype blue) is the one loud color. Used
+  in hairline accents (the 3px nav band, header rules, active-state underlines,
+  the logo mark) — never as a large fill except the hero book band. It is a
+  cold signal: a sun-printed blue mark layered over the warm page, not a glow.
 - Drafting motifs survive in supporting roles: dimension marks, guide lines,
   corner brackets on technical panels, dot-grid backdrop.
 - Motion still reads like instrumentation: fade, clip-path slide, pop-in,
@@ -49,11 +52,12 @@ metaphor, not fight it.
   the primary navigation, not a secondary index page.
 - **Reading progress is a bookmark, not a progress bar.** Articles record a
   localStorage bookmark (slug, title, scroll position). The homepage shows
-  a bookmark ribbon — title, yellow progress bar, one-click return — like a
-  physical bookmark tucked into the book.
+  a bookmark ribbon — title, blueprint-azure progress bar, one-click return —
+  like a physical bookmark tucked into the book.
 - **The reader has a running head.** Articles inside a chapter show a
-  yellow `CH 01` chip and linked chapter title above the article metadata,
-  so a reader arriving from search always knows where they are in the book.
+  blueprint-azure `CH 01` chip and linked chapter title above the article
+  metadata, so a reader arriving from search always knows where they are in
+  the book.
 - **Glossary is the index.** The command palette (`⌘K`) returns an
   `INDEX — GLOSSARY` section alongside article results. Cross-linking
   between articles and glossary terms is a first-class concern.
@@ -131,14 +135,14 @@ The Tailwind v4 theme is defined in `app/globals.css` (`@theme`). There is no `t
 | `tech-main-dark`  | `#20283c` | Navy-black ink: headings and high-emphasis text            |
 | `tech-accent`     | `#c9cfdd` | Hover fills, subtle highlights, selected states            |
 | `tech-line`       | `#d6d3c8` | Border-only token: dot grid and quiet dividers             |
-| `tech-signal`     | `#e3b505` | Springer yellow: hairline accents, active states, the mark |
-| `tech-signal-ink` | `#20283c` | Text color guaranteed legible on a `tech-signal` fill      |
+| `tech-signal`     | `#1d6a96` | Blueprint azure: hairline accents, active states, the mark |
+| `tech-signal-ink` | `#f5f4ef` | Text color guaranteed legible on a `tech-signal` fill      |
 
 Usage rules
 - Default text: `text-tech-main`. High-emphasis titles: `text-tech-main-dark`.
 - Common borders: `border-tech-main/40`. Quiet guide lines: `guide-line` or `border-tech-main/20`. Strong structural rules (page header, footer top, nav band) use `border-tech-main-dark` with a short `bg-tech-signal` tick overlapping them.
 - Surfaces: `bg-surface/70`–`/95` plus `backdrop-blur-sm` (or `backdrop-blur-md` on hero/modal panels). Pale fills use `bg-tech-bg/50`–`/80`. Never raw `bg-white`.
-- `tech-signal` budget: at most one band + a few hairline ticks per screen. It marks "you are here" (active nav, current chapter, focus rules) and brand moments (logo mark, hero band). It is never body text on light backgrounds and never a large fill outside the hero.
+- `tech-signal` budget: at most one band + a few hairline ticks per screen. It marks "you are here" (active nav, current chapter, focus rules) and brand moments (logo mark, hero band). It is never body text on light backgrounds and never a large fill outside the hero. As a cold signal it reads as a blueprint annotation, not a highlighter — keep it sparing so the warm page stays dominant.
 - Filled controls invert to ink: `bg-tech-main-dark text-tech-bg` (e.g. primary buttons, active language tab). Primary button hover flips to `bg-tech-signal text-tech-signal-ink`.
 - Hover/selection stay muted: `bg-tech-accent/10`, `bg-tech-main/5`–`/10`, `hover:border-tech-main/60`.
 - Semantic colors are translucent and bracketed: yellow/blue/green/red at `/10` fills with `/40` borders. Neutral states (loading, secondary metadata) may use gray/slate/zinc at low opacity.
@@ -152,22 +156,25 @@ Map every background, border, and text color to a semantic Tailwind token so bot
 
 | Tailwind class | Light | Dark |
 |---|---|---|
-| `bg-tech-bg` | #f5f4ef | #14120d |
-| `bg-surface` | #fcfbf8 | #1c1912 |
-| `bg-surface-overlay` | #fcfbf8 | #221f16 |
-| `bg-surface-input` | #fffefb | #121009 |
-| `bg-surface-modal` | #fcfbf8 | #201d15 |
-| `text-tech-main` | #4a5468 | #a8a290 |
-| `text-tech-main-dark` | #20283c | #ece6d6 |
-| `border-tech-line` | #d6d3c8 | #2d2a21 |
+| `bg-tech-bg` | #f5f4ef | #101826 |
+| `bg-surface` | #fcfbf8 | #162031 |
+| `bg-surface-overlay` | #fcfbf8 | #1a2536 |
+| `bg-surface-input` | #fffefb | #0c121d |
+| `bg-surface-modal` | #fcfbf8 | #18222f |
+| `text-tech-main` | #4a5468 | #9aa7bd |
+| `text-tech-main-dark` | #20283c | #e7ecf4 |
+| `border-tech-line` | #d6d3c8 | #243248 |
 | `text-tech-advanced` | #8c2f39 | #c25664 |
-| `bg-tech-accent` | #c9cfdd | #3d3a2f |
-| `bg-tech-signal` | #e3b505 | #e9c531 |
-| `text-tech-signal-ink` | #20283c | #14120d |
+| `bg-tech-accent` | #c9cfdd | #2a3852 |
+| `bg-tech-signal` | #1d6a96 | #5fb0d4 |
+| `text-tech-signal-ink` | #f5f4ef | #0e1521 |
 
-Dark mode is "Night Print": the same paper book under a warm lamp — dark
-umber paper, cream ink, slightly brighter yellow. It is deliberately *not*
-a blue-dark theme.
+Dark mode is "Blueprint": the book re-set as a drafting print — a cool
+blue-slate ground, cool slate ink, and a luminous cyan signal that glows
+against the dark. Where the light theme is warm paper annotated in blueprint
+blue, the dark theme is the blueprint itself: the cold drafting-table bones
+brought fully forward. Surfaces stay near-neutral blue-slate, never saturated
+navy, so long-form reading stays comfortable.
 
 ### Dark variant conventions
 
@@ -178,7 +185,7 @@ a blue-dark theme.
 
 ### Three.js background
 
-Schematic viewer passes theme-aware background color to Three.js `renderer.setClearColor()`. Light: `#f5f4ef`, dark: `#14120d`.
+Schematic viewer passes theme-aware background color to Three.js `renderer.setClearColor()`. Light: `#f5f4ef`, dark: `#101826`.
 
 ### Icon recoloring
 
@@ -393,6 +400,16 @@ The reader is its own layout, separate from the rest of the site chrome.
 - Markdown is rendered with custom components in `lib/markdown/components/*`. The Tailwind typography plugin is not used; do not introduce `prose-*` classes.
 - Code blocks use a custom chrome (language strip, line counts, wrap toggle, copy button) and a bordered light frame.
 - Prev/next article navigation is a 2-column grid on `md`+, with `min-h-[44px]` touch targets.
+
+### Reading as a set page
+
+The text block is typeset like a printed monograph, not a blog post.
+
+- **Series imprint, not a stream readout.** The metadata head strip opens with the series name (`Graduate Texts in Minecraft`) behind a blueprint-azure signal tick, in mono small-caps — it reads as a running imprint. `PATH:` stays as honest apparatus on the right.
+- **The opening paragraph starts plainly.** The article H1 already carries the book voice, so the first body paragraph stays in the normal sans body face without a versal, drop cap, or small-caps incipit. A small gap sits between the title rule and the opening paragraph so the text block has breathing room without adding a competing typographic device.
+- **Body paragraphs are justified at reading width.** At `md`+, top-level article paragraphs justify with `hyphens: auto`; mobile stays ragged-right where a narrow measure justifies poorly. Lists, blockquotes, and callouts are not justified.
+- **Thematic breaks are asterisms.** A `---` in source renders as a centered hairline-rule + ink diamond device, not a full-width line.
+- **Each article closes with a chapter-end mark.** A centered colophon device (three diamonds, the middle one in the article's accent — blueprint azure, or burgundy when Advanced) sits between the body and the prev/next navigation, the way a printed chapter ends before the next begins.
 
 ## Loading
 

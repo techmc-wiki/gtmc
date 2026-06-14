@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/navigation"
+import { TriangleIcon } from "@/components/ui/triangle-icon"
 import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
 import { encodeSlug } from "@/lib/articles/slug-resolver"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
@@ -29,8 +30,11 @@ function FolderButton({
         hover:text-tech-main
         focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 focus:outline-none
       ">
-      <span className="inline-block w-4 text-xs text-tech-main/50">
-        {folderExpanded ? "▼" : "▶"}
+      <span className="flex w-4 shrink-0 items-center text-tech-main/50">
+        <TriangleIcon
+          direction={folderExpanded ? "down" : "right"}
+          className="size-3"
+        />
       </span>
       <span>{title}</span>
     </button>

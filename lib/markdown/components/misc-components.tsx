@@ -9,12 +9,17 @@ export function BlockquoteComponent({ ...props }: MarkdownComponentProps) {
   )
 }
 
-export function HrComponent({ ...props }: MarkdownComponentProps) {
+export function HrComponent() {
   return (
-    <hr
-      className="border-tech-main/30 mx-auto my-8 w-4/5 border-t"
-      {...props}
-    />
+    <div
+      className="my-10 flex items-center justify-center gap-3"
+      aria-hidden="true">
+      <span className="bg-tech-main/25 h-px w-16" />
+      <span className="text-tech-main/45 rotate-45">
+        <span className="border-tech-main/45 block size-1.5 border" />
+      </span>
+      <span className="bg-tech-main/25 h-px w-16" />
+    </div>
   )
 }
 

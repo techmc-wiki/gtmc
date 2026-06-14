@@ -30,6 +30,7 @@ import { getSiteUrl } from "@/lib/site-url"
 import { ArticleHighlight } from "@/components/articles/article-highlight"
 import { BookmarkRecorder } from "@/components/articles/bookmark-recorder"
 import { RunningHead } from "@/components/articles/running-head"
+import { ChapterEndMark } from "@/components/articles/chapter-end-mark"
 import { ArticleMetadataFull } from "@/components/articles/article-metadata-full"
 import { ArticleMetadataAnonymous } from "@/components/articles/article-metadata-anonymous"
 import { ArticleNavigation } from "@/components/articles/article-navigation"
@@ -449,6 +450,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           shikiPlugin={shikiPlugin}
         />
       </article>
+
+      <ChapterEndMark isAdvanced={isAdvanced} />
 
       {(navigation.prev || navigation.next) && (
         <ArticleNavigation prev={navigation.prev} next={navigation.next} />

@@ -47,7 +47,7 @@ const bannerContainerStyle = {
   display: "flex" as const,
   position: "relative" as const,
   overflow: "hidden" as const,
-  background: "linear-gradient(155deg, #20283c 0%, #0c1c36 55%, #14120d 100%)",
+  background: "linear-gradient(155deg, #20283c 0%, #0c1c36 55%, #101826 100%)",
 }
 
 const bannerImgStyle = { position: "absolute" as const, inset: 0, width: "100%", height: "100%", objectFit: "cover" as const }
@@ -70,7 +70,7 @@ const cardStyle = {
   display: "flex" as const,
   flexDirection: "column" as const,
   background: "#f5f4ef",
-  borderTop: "3px solid #e3b505",
+  borderTop: "3px solid #1d6a96",
   position: "relative" as const,
 }
 

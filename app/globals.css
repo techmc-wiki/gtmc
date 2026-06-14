@@ -43,8 +43,8 @@ html {
   --color-tech-accent: #c9cfdd;
   --color-tech-line: #d6d3c8;
   --color-tech-advanced: #8c2f39;
-  --color-tech-signal: #e3b505;
-  --color-tech-signal-ink: #20283c;
+  --color-tech-signal: #1d6a96;
+  --color-tech-signal-ink: #f5f4ef;
   --color-surface: #fcfbf8;
   --color-surface-overlay: #fcfbf8;
   --color-surface-input: #fffefb;
@@ -240,18 +240,18 @@ html {
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --color-tech-bg: #14120d;
-  --color-tech-main: #a8a290;
-  --color-tech-main-dark: #ece6d6;
-  --color-tech-accent: #3d3a2f;
-  --color-tech-line: #2d2a21;
+  --color-tech-bg: #101826;
+  --color-tech-main: #9aa7bd;
+  --color-tech-main-dark: #e7ecf4;
+  --color-tech-accent: #2a3852;
+  --color-tech-line: #243248;
   --color-tech-advanced: #c25664;
-  --color-tech-signal: #e9c531;
-  --color-tech-signal-ink: #14120d;
-  --color-surface: #1c1912;
-  --color-surface-overlay: #221f16;
-  --color-surface-input: #121009;
-  --color-surface-modal: #201d15;
+  --color-tech-signal: #5fb0d4;
+  --color-tech-signal-ink: #0e1521;
+  --color-surface: #162031;
+  --color-surface-overlay: #1a2536;
+  --color-surface-input: #0c121d;
+  --color-surface-modal: #18222f;
 
   --color-ansi-black: #073642;
   --color-ansi-red: #dc322f;
@@ -352,6 +352,54 @@ body {
   button:disabled,
   [role="button"][aria-disabled="true"] {
     @apply cursor-not-allowed;
+  }
+
+  /*
+   * Global scrollbar in @layer base (lower precedence than the opt-in
+   * custom-*-scrollbar @utility blocks, so those still win where applied).
+   * Uses theme variables, so it adapts to dark mode automatically.
+   */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(
+        in oklab,
+        var(--color-tech-main) 38%,
+        transparent
+      )
+      transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: color-mix(
+      in oklab,
+      var(--color-tech-main) 32%,
+      transparent
+    );
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 0;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(
+      in oklab,
+      var(--color-tech-main-dark) 60%,
+      transparent
+    );
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
   }
 }
 
@@ -535,6 +583,43 @@ body {
     background-color: color-mix(
       in oklab,
       var(--color-tech-main) 80%,
+      transparent
+    );
+  }
+}
+
+@utility reader-rail-scrollbar {
+  direction: rtl;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--color-tech-main) 28%, transparent)
+    transparent;
+
+  & > * {
+    direction: ltr;
+  }
+
+  &::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: color-mix(
+      in oklab,
+      var(--color-tech-main) 28%,
+      transparent
+    );
+    border-radius: 0;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(
+      in oklab,
+      var(--color-tech-main) 60%,
       transparent
     );
   }
@@ -726,6 +811,24 @@ code[class^="language-"] {
 
   .article-prose li > p:last-child {
     margin-bottom: 0;
+  }
+
+  /* Print Edition: the text block reads like a set page.
+   * Body paragraphs are justified with hyphenation at reading widths;
+   * mobile stays ragged-right where a narrow measure justifies poorly. */
+  @media (min-width: 768px) {
+    .article-prose > p {
+      text-align: justify;
+      -webkit-hyphens: auto;
+      hyphens: auto;
+    }
+  }
+
+  /* Print Edition: the serif title is the chapter's chrome; the text block
+   * begins just below it, so give the opening paragraph a little air instead
+   * of butting it against the title rule. */
+  .article-prose h1 + p {
+    margin-top: 0.85rem;
   }
 
   .code-block-pre {

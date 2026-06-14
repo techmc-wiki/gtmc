@@ -110,10 +110,10 @@ export function MobileOutlineBar() {
 
           {/* Outline list */}
           <ul className="flex-1 overflow-y-auto px-4 py-3">
-            {outline.map((item) => {
+            {outline.map((item, index) => {
               const isActive = item.id === activeHeadingId
               return (
-                <li key={item.id}>
+                <li key={`${item.id}-${index}`}>
                   <Link
                     href={`#${item.id}`}
                     onClick={closeSheet}

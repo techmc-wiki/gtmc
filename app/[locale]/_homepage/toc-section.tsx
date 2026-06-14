@@ -83,7 +83,7 @@ function ChapterBlock({
                   )}
                 </span>
                 <span className="border-tech-main/25 mb-1 grow self-end border-b border-dotted" />
-                <span className="text-tech-main/0 group-hover/section:text-tech-signal-ink shrink-0 font-mono text-xs transition-colors">
+                <span className="text-tech-main/0 group-hover/section:text-tech-main-dark shrink-0 font-mono text-xs transition-colors">
                   →
                 </span>
               </Link>

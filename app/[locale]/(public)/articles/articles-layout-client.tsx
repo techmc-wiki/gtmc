@@ -15,6 +15,7 @@ import {
   SectionRail,
   SegmentedBar,
 } from "@/components/ui/loading-shell-primitives"
+import { TriangleIcon } from "@/components/ui/triangle-icon"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import { useLocale, useTranslations } from "next-intl"
 import { OutlineRail } from "@/components/articles/outline-rail"
@@ -382,9 +383,15 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                   {t("titleShort")}
                 </span>
                 <span
-                  className="text-sm font-bold transition-opacity duration-200"
+                  className="
+                    flex size-4 items-center justify-center
+                    transition-opacity duration-200
+                  "
                   style={visibleOpacityStyle}>
-                  {isChapterNavOpen ? "▼" : "▶"}
+                  <TriangleIcon
+                    direction={isChapterNavOpen ? "down" : "right"}
+                    className="size-3"
+                  />
                 </span>
               </div>
             </button>
@@ -475,7 +482,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                   {showChapterNavPlaceholder ? (
                     <div
                       className="
-                        custom-left-scrollbar h-full min-h-0 flex-1
+                        reader-rail-scrollbar h-full min-h-0 flex-1
                         overflow-y-auto
                       ">
                       <TreeLoadingPlaceholder />
@@ -514,9 +521,12 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                     ">
                   <span
                     className="
-                      text-[0.5rem] leading-none font-bold select-none
+                      flex size-3 items-center justify-center select-none
                     ">
-                    {chapterNavHidden ? "▶" : "◀"}
+                    <TriangleIcon
+                      direction={chapterNavHidden ? "right" : "left"}
+                      className="size-2.5"
+                    />
                   </span>
                 </button>
                 <span className="absolute top-4 -right-3 inline-block text-right font-mono text-[0.625rem] font-bold text-tech-main/40">

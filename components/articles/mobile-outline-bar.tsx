@@ -4,6 +4,7 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { useReaderNavigation } from "@/app/[locale]/(public)/articles/reader-navigation/context"
+import { useFooterOverlap } from "@/hooks/use-footer-overlap"
 import { useModalEffects } from "@/hooks/use-modal-effects"
 import { useScrollProgress } from "@/hooks/use-scroll-progress"
 
@@ -20,6 +21,7 @@ export function MobileOutlineBar() {
   const { hasScrolledPastNavbar, progress } = useScrollProgress({
     navbarThreshold: 64,
   })
+  const isOverlappingFooter = useFooterOverlap()
   const [isSheetOpen, setIsSheetOpen] = React.useState(false)
   const closeSheet = React.useCallback(() => setIsSheetOpen(false), [])
   const openSheet = React.useCallback(() => setIsSheetOpen(true), [])
@@ -45,7 +47,7 @@ export function MobileOutlineBar() {
     <>
       {/* Progress strip — fixed just below sticky navbar */}
       <div
-        className={`pointer-events-none fixed inset-x-0 top-16 z-20 h-20 transition-opacity duration-500 md:hidden ${hasScrolledPastNavbar ? "opacity-100" : "opacity-0"}`}>
+        className={`pointer-events-none fixed inset-x-0 top-16 z-20 h-20 transition-opacity duration-500 md:hidden ${hasScrolledPastNavbar && !isOverlappingFooter ? "opacity-100" : "opacity-0"}`}>
         {/* Section label — fixed right-aligned in navbar row */}
         {activeItem && (
           <button
@@ -58,10 +60,12 @@ export function MobileOutlineBar() {
             </div>
           </button>
         )}
-        <div
-          className="bg-tech-signal h-0.5 transition-[width] duration-150"
-          style={progressWidthStyle}
-        />
+        <div className="pr-28">
+          <div
+            className="bg-tech-signal h-0.5 transition-[width] duration-150"
+            style={progressWidthStyle}
+          />
+        </div>
       </div>
 
       {/* Bottom Sheet overlay */}

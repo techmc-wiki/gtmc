@@ -20,6 +20,7 @@ import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import { useLocale, useTranslations } from "next-intl"
 import { OutlineRail } from "@/components/articles/outline-rail"
 import { MobileOutlineBar } from "@/components/articles/mobile-outline-bar"
+import { useFooterOverlap } from "@/hooks/use-footer-overlap"
 
 const treeDropInStyle: React.CSSProperties = {
   animation: "tree-drop-in 1.05s cubic-bezier(0.16, 1, 0.3, 1) both",
@@ -186,6 +187,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const t = useTranslations("ChapterNav")
   const tA11y = useTranslations("CommonA11y")
   const treeData = tree.length > 0 ? tree : fetchedTreeData
+  const isOverlappingFooter = useFooterOverlap()
 
   useEffect(() => {
     try {
@@ -360,9 +362,10 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 cursor-pointer overflow-hidden
                 border border-tech-main/40 bg-surface-overlay/70 font-mono text-xs
                 font-bold tracking-[0.15em] text-tech-main
-                transition-[background-color,color] duration-150 ease-out
+                transition-[background-color,color,opacity] duration-150 ease-out
                 hover:bg-tech-main/5
-                ${isStuck ? "fixed top-20 right-4 z-50" : "absolute"}
+                ${isStuck ? "fixed top-28 right-4 z-50" : "absolute"}
+                ${isStuck && isOverlappingFooter ? "pointer-events-none opacity-0" : "opacity-100"}
               `}
               style={mobileButtonStyle}
               aria-label={tA11y("toggleArticleTree")}

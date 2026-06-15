@@ -26,7 +26,7 @@ export function SiteShell({
       </a>
       <nav
         aria-label={t("mainNavigation")}
-        className="border-tech-main/30 bg-surface-overlay/85 sticky top-0 z-50 w-full border-b backdrop-blur-md">
+        className="border-tech-main/30 bg-surface-overlay/85 fixed inset-x-0 top-0 z-50 w-full border-b backdrop-blur-md">
         <div className="bg-tech-signal absolute top-0 left-0 h-[3px] w-full" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between md:h-20">
@@ -36,6 +36,7 @@ export function SiteShell({
           </div>
         </div>
       </nav>
+      <div className="h-16 shrink-0 md:h-20" aria-hidden="true" />
 
       <main
         id="main-content"

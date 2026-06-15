@@ -89,7 +89,7 @@ export function HomepageClient() {
         isReducedMotion={isReducedMotion}
       />
 
-      <div className="relative z-10 mx-auto flex min-h-full w-full max-w-7xl flex-col items-center justify-center px-4 pt-12 pb-24">
+      <div className="relative z-10 mx-auto flex min-h-full w-full max-w-7xl flex-col items-center justify-center">
         <HeroCard
           cardRef={cardRef}
           cardWidth={cardWidth}

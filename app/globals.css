@@ -414,6 +414,26 @@ body {
   @apply border-tech-main/30 tracking-tech-wide text-tech-main mb-2 inline-block border-b pb-1 font-mono text-sm uppercase;
 }
 
+@utility footer-link {
+  @apply focus-visible:outline-tech-main hover:text-tech-main-dark relative inline-block w-fit no-underline transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2;
+
+  &::after {
+    @apply bg-tech-main/40 pointer-events-none absolute bottom-[-2px] left-0 h-px w-full origin-left scale-x-0 transition-transform duration-300 ease-out;
+    content: "";
+  }
+
+  &:hover::after,
+  &:focus-visible::after {
+    @apply scale-x-100;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      transition: none;
+    }
+  }
+}
+
 @utility markdown-title {
   font-family: var(--font-markdown-title);
   letter-spacing: 0;

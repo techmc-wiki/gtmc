@@ -46,7 +46,6 @@
     "linkContribute": "Contribute"
   },
   "Glossary": {
-    "backToTop": "Back to top",
     "pageTitle": "GLOSSARY",
     "pageDescription": "Browse technical Minecraft terms, definitions, and translations across 12 languages.",
     "searchPlaceholder": "> FILTER…",
@@ -55,7 +54,6 @@
     "letterBarLabel": "JUMP TO LETTER",
     "categoryAll": "ALL CATEGORIES",
     "categoriesSelectedCount": "{count, plural, one {# CATEGORY SELECTED} other {# CATEGORIES SELECTED}}",
-    "editFabLabel": "Propose glossary edits",
     "columnPickerLabel": "COLUMN VISIBILITY",
     "columnPickerToggle": "FIELDS",
     "densityCompact": "COMPACT",

@@ -83,7 +83,7 @@ export default async function Footer() {
                         href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hover:text-tech-main-dark hover:decoration-tech-main/40 focus-visible:outline-tech-main transition-colors hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+                        className="footer-link">
                         CC BY-NC-SA 4.0
                       </a>
                     ),
@@ -95,7 +95,7 @@ export default async function Footer() {
                         href="https://github.com/gtmc-dev/gtmc-web/blob/main/LICENSE"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hover:text-tech-main-dark hover:decoration-tech-main/40 focus-visible:outline-tech-main transition-colors hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+                        className="footer-link">
                         Apache-2.0
                       </a>
                     ),
@@ -133,21 +133,21 @@ export default async function Footer() {
               <li>
                 <Link
                   href={articleUrl("Preface")}
-                  className="text-tech-main hover:text-tech-main-dark hover:decoration-tech-main/40 focus-visible:outline-tech-main text-sm transition-colors hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+                  className="footer-link text-tech-main text-sm">
                   {t("linkPreface")}
                 </Link>
               </li>
               <li>
                 <Link
                   href="/articles"
-                  className="text-tech-main hover:text-tech-main-dark hover:decoration-tech-main/40 focus-visible:outline-tech-main text-sm transition-colors hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+                  className="footer-link text-tech-main text-sm">
                   {t("linkArticles")}
                 </Link>
               </li>
               <li>
                 <Link
                   href="/glossary"
-                  className="text-tech-main hover:text-tech-main-dark hover:decoration-tech-main/40 focus-visible:outline-tech-main text-sm transition-colors hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+                  className="footer-link text-tech-main text-sm">
                   {t("linkGlossary")}
                 </Link>
               </li>
@@ -159,7 +159,7 @@ export default async function Footer() {
               <li>
                 <Link
                   href="/draft"
-                  className="text-tech-main hover:text-tech-main-dark hover:decoration-tech-main/40 focus-visible:outline-tech-main text-sm transition-colors hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+                  className="footer-link text-tech-main text-sm">
                   {t("linkContribute")}
                 </Link>
               </li>
@@ -168,7 +168,7 @@ export default async function Footer() {
                   href="https://github.com/gtmc-dev"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-tech-main hover:text-tech-main-dark hover:decoration-tech-main/40 focus-visible:outline-tech-main text-sm transition-colors hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+                  className="footer-link text-tech-main text-sm">
                   {t("linkTeam")}
                 </a>
               </li>
@@ -177,7 +177,7 @@ export default async function Footer() {
                   href="https://github.com/gtmc-dev/gtmc-web/issues"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-tech-main hover:text-tech-main-dark hover:decoration-tech-main/40 focus-visible:outline-tech-main text-sm transition-colors hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+                  className="footer-link text-tech-main text-sm">
                   {t("linkIssues")}
                 </a>
               </li>
@@ -189,7 +189,7 @@ export default async function Footer() {
               <li>
                 <Link
                   href="/features"
-                  className="text-tech-main hover:text-tech-main-dark hover:decoration-tech-main/40 focus-visible:outline-tech-main text-sm transition-colors hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+                  className="footer-link text-tech-main text-sm">
                   {t("linkFeedback")}
                 </Link>
               </li>
@@ -198,7 +198,7 @@ export default async function Footer() {
                   href="https://github.com/gtmc-dev/gtmc-web"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-tech-main hover:text-tech-main-dark hover:decoration-tech-main/40 focus-visible:outline-tech-main text-sm transition-colors hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+                  className="footer-link text-tech-main text-sm">
                   {t("linkRepository")}
                 </a>
               </li>
@@ -207,7 +207,7 @@ export default async function Footer() {
                   href="https://github.com/gtmc-dev/gtmc-web/blob/main/LICENSE"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-tech-main hover:text-tech-main-dark hover:decoration-tech-main/40 focus-visible:outline-tech-main text-sm transition-colors hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+                  className="footer-link text-tech-main text-sm">
                   Apache-2.0
                 </a>
               </li>
@@ -219,7 +219,7 @@ export default async function Footer() {
               <li>
                 <Link
                   href="/pdf"
-                  className="text-tech-main hover:text-tech-main-dark hover:decoration-tech-main/40 focus-visible:outline-tech-main text-sm transition-colors hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+                  className="footer-link text-tech-main text-sm">
                   {t("offlinePdf")}
                 </Link>
               </li>

@@ -46,7 +46,6 @@
     "linkContribute": "参与贡献"
   },
   "Glossary": {
-    "backToTop": "回到顶部",
     "pageTitle": "术语表",
     "pageDescription": "浏览技术性 Minecraft 术语、定义及 12 种语言的翻译。",
     "searchPlaceholder": "> 筛选…",
@@ -55,7 +54,6 @@
     "letterBarLabel": "跳转到字母",
     "categoryAll": "全部分类",
     "categoriesSelectedCount": "已选择 {count} 个分类",
-    "editFabLabel": "提议术语表编辑",
     "columnPickerLabel": "列可见性",
     "columnPickerToggle": "字段",
     "densityCompact": "紧凑",

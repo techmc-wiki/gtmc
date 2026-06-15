@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { PageHeader } from "@/components/ui/page-header"
 import { GlossaryToolbar } from "@/components/glossary/glossary-toolbar"
-import { GlossaryFloatingActions } from "@/components/glossary/glossary-floating-actions"
 import { loadGlossaryManifest } from "@/lib/glossary/manifest"
 import { toAbsoluteUrl } from "@/lib/site-url"
 
@@ -85,8 +84,6 @@ export default async function GlossaryIndexPage({
           defaultColumns={DEFAULT_COLUMNS}
         />
       </div>
-
-      <GlossaryFloatingActions locale={locale as "en" | "zh"} />
     </div>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import type { OutlineItem } from "./use-outline"
+import { addSiteScrollListener } from "@/hooks/site-scroll-root"
 
 interface HeadingEntry {
   id: string
@@ -88,11 +89,7 @@ export function useActiveHeading(
       setActiveHeadingId(getActiveId())
     }
 
-    window.addEventListener("scroll", onScroll, { passive: true })
-
-    return () => {
-      window.removeEventListener("scroll", onScroll)
-    }
+    return addSiteScrollListener(onScroll, { passive: true })
   }, [toc])
 
   return activeHeadingId

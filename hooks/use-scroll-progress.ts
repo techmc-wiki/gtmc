@@ -1,6 +1,10 @@
 "use client"
 
 import * as React from "react"
+import {
+  addSiteScrollListener,
+  getSiteScrollMetrics,
+} from "@/hooks/site-scroll-root"
 
 interface ScrollProgressOptions {
   navbarThreshold?: number
@@ -15,8 +19,8 @@ export function useScrollProgress({
 
   React.useEffect(() => {
     const onScroll = () => {
-      const scrollTop = window.scrollY
-      const docHeight = document.body.scrollHeight - window.innerHeight
+      const { clientHeight, scrollHeight, scrollTop } = getSiteScrollMetrics()
+      const docHeight = scrollHeight - clientHeight
       setProgress(docHeight > 0 ? scrollTop / docHeight : 0)
 
       if (navbarThreshold !== undefined) {
@@ -25,8 +29,7 @@ export function useScrollProgress({
     }
 
     onScroll()
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
+    return addSiteScrollListener(onScroll, { passive: true })
   }, [navbarThreshold])
 
   return { hasScrolledPastNavbar, progress }

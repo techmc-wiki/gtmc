@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useId, useMemo } from "react"
 import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
+import { addSiteScrollListener } from "@/hooks/site-scroll-root"
 import { resolvePerson } from "@/lib/markdown/people"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
@@ -163,10 +164,13 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
       }
     }
 
-    window.addEventListener("scroll", handleRecalcPosition, true)
+    const removeSiteScrollListener = addSiteScrollListener(
+      handleRecalcPosition,
+      { capture: true, passive: true }
+    )
     window.addEventListener("resize", handleRecalcPosition)
     return () => {
-      window.removeEventListener("scroll", handleRecalcPosition, true)
+      removeSiteScrollListener()
       window.removeEventListener("resize", handleRecalcPosition)
     }
   }, [isOpen])

@@ -1,6 +1,10 @@
 "use client"
 
 import * as React from "react"
+import {
+  addSiteScrollListener,
+  getSiteScrollMetrics,
+} from "@/hooks/site-scroll-root"
 
 export interface ReadingBookmark {
   slug: string
@@ -42,9 +46,10 @@ export function useBookmarkRecorder(slug: string, title: string) {
 
     let frame = 0
     const save = () => {
-      const docHeight = document.body.scrollHeight - window.innerHeight
+      const { clientHeight, scrollHeight, scrollTop } = getSiteScrollMetrics()
+      const docHeight = scrollHeight - clientHeight
       const progress =
-        docHeight > 0 ? Math.min(1, Math.max(0, window.scrollY / docHeight)) : 0
+        docHeight > 0 ? Math.min(1, Math.max(0, scrollTop / docHeight)) : 0
       const bookmark: ReadingBookmark = {
         slug,
         title,
@@ -64,10 +69,12 @@ export function useBookmarkRecorder(slug: string, title: string) {
     }
 
     save()
-    window.addEventListener("scroll", onScroll, { passive: true })
+    const removeSiteScrollListener = addSiteScrollListener(onScroll, {
+      passive: true,
+    })
     return () => {
       cancelAnimationFrame(frame)
-      window.removeEventListener("scroll", onScroll)
+      removeSiteScrollListener()
     }
   }, [slug, title])
 }

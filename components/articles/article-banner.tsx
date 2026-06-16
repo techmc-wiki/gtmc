@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { useEffect, useRef, useState, useCallback, useMemo } from "react"
+import { addSiteScrollListener } from "@/hooks/site-scroll-root"
 
 interface ArticleBannerProps {
   src: string
@@ -133,8 +134,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
       }
     }
 
-    window.addEventListener("scroll", checkScrollLock, { passive: true })
-    return () => window.removeEventListener("scroll", checkScrollLock)
+    return addSiteScrollListener(checkScrollLock, { passive: true })
   }, [locked])
 
   const handleFirstHover = useCallback(() => {

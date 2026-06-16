@@ -3,6 +3,10 @@
 import { useEffect, useRef } from "react"
 import type { MachineEvent } from "./types"
 import { NAVBAR_HEIGHT } from "./config"
+import {
+  addSiteScrollListener,
+  getSiteScrollMetrics,
+} from "@/hooks/site-scroll-root"
 
 /**
  * Scroll-threshold-crossing detection hook for the mobile article tree state
@@ -25,7 +29,7 @@ export function useScrollCrossEffect(
   const prevCrossedRef = useRef<boolean | null>(null)
 
   useEffect(() => {
-    const initiallyStuck = window.scrollY > NAVBAR_HEIGHT
+    const initiallyStuck = getSiteScrollMetrics().scrollTop > NAVBAR_HEIGHT
     if (initiallyStuck !== isStuck) {
       dispatch({
         type: initiallyStuck ? "SCROLL_CROSS_DOWN" : "SCROLL_CROSS_UP",
@@ -34,7 +38,7 @@ export function useScrollCrossEffect(
     prevCrossedRef.current = initiallyStuck
 
     const handleScroll = () => {
-      const currentlyCrossed = window.scrollY > NAVBAR_HEIGHT
+      const currentlyCrossed = getSiteScrollMetrics().scrollTop > NAVBAR_HEIGHT
       const prev = prevCrossedRef.current
 
       if (prev !== null && currentlyCrossed !== prev) {
@@ -45,8 +49,7 @@ export function useScrollCrossEffect(
       }
     }
 
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
+    return addSiteScrollListener(handleScroll, { passive: true })
     // isStuck intentionally excluded — only used during mount sync (one-shot)
     // oxlint-disable-next-line react/exhaustive-deps
   }, [dispatch])

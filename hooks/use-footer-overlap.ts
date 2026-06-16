@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { addSiteScrollListener } from "@/hooks/site-scroll-root"
 
 interface UseFooterOverlapOptions {
   selector?: string
@@ -27,11 +28,13 @@ export function useFooterOverlap({
     }
 
     update()
-    window.addEventListener("scroll", update, { passive: true })
+    const removeSiteScrollListener = addSiteScrollListener(update, {
+      passive: true,
+    })
     window.addEventListener("resize", update)
 
     return () => {
-      window.removeEventListener("scroll", update)
+      removeSiteScrollListener()
       window.removeEventListener("resize", update)
     }
   }, [selector, threshold])

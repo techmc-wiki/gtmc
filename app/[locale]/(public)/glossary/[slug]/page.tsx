@@ -9,7 +9,6 @@ import { MentionedIn } from "@/components/glossary/mentioned-in"
 import { loadGlossaryManifest } from "@/lib/glossary/manifest"
 import { getGlossaryEntry } from "@/lib/glossary/slug"
 import { getSiteUrl } from "@/lib/site-url"
-import type { ArticleLocale } from "@/lib/articles/manifest"
 
 const MAX_DESCRIPTION_LENGTH = 160
 

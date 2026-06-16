@@ -15,6 +15,7 @@ import { ThemeProvider } from "@/lib/theme"
 import { FooterProvider } from "@/components/layout/footer-context"
 import Footer from "@/components/layout/footer"
 import { FooterWrapper } from "@/components/layout/footer-wrapper"
+import { ScrollRoot } from "@/components/layout/scroll-root"
 import { getSiteUrl } from "@/lib/site-url"
 import { NextIntlClientProvider } from "next-intl"
 import { hasLocale } from "next-intl"
@@ -189,14 +190,16 @@ export default async function RootLayout({
       <head />
       <Analytics />
       <SpeedInsights />
-      <body className="bg-tech-bg/50 flex min-h-screen w-full flex-col overflow-x-hidden antialiased">
+      <body className="bg-tech-bg/50 h-dvh w-full overflow-hidden antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider>
             <FooterProvider>
-              {children}
-              <FooterWrapper>
-                <Footer />
-              </FooterWrapper>
+              <ScrollRoot>
+                {children}
+                <FooterWrapper>
+                  <Footer />
+                </FooterWrapper>
+              </ScrollRoot>
             </FooterProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

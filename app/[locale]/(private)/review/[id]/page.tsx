@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { auth } from "@/lib/auth"
 import { getCurrentUserAuthContext } from "@/lib/auth/context"
 import { redirect, notFound } from "next/navigation"
@@ -29,6 +30,10 @@ const DEFAULT_MODE_ANALYSIS: ModeAnalysis = {
   filesAffected: 0,
   adminMessage: "No analysis available.",
 } as const
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 function buildReviewFiles(
   linkedDraftFiles: {

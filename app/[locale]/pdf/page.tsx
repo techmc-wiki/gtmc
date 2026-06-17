@@ -2,10 +2,28 @@ import { TechCard } from "@/components/ui/tech-card"
 import { TechButton } from "@/components/ui/tech-button"
 import { getTranslations } from "next-intl/server"
 import type { Metadata } from "next"
+import { toAbsoluteUrl } from "@/lib/site-url"
 
-export const metadata: Metadata = {
-  title: "PDF Download – GTMC Reference",
-  description: "Download the full GTMC knowledge base as a PDF document.",
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const canonical = toAbsoluteUrl(`/${locale}/pdf`)
+
+  return {
+    title: "PDF Download",
+    description: "Download the full GTMC knowledge base as a PDF document.",
+    alternates: {
+      canonical,
+      languages: {
+        en: toAbsoluteUrl("/en/pdf"),
+        zh: toAbsoluteUrl("/zh/pdf"),
+        "x-default": toAbsoluteUrl("/zh/pdf"),
+      },
+    },
+  }
 }
 
 export default async function PdfPage({

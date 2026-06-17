@@ -28,6 +28,20 @@ export async function generateMetadata({
       description: "Browse and track feature requests for Technical Minecraft.",
       type: "website",
       url: canonical,
+      images: [
+        {
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: "Feature Requests — Technical Minecraft",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Feature Requests — Technical Minecraft",
+      description: "Browse and track feature requests for Technical Minecraft.",
+      images: ["/opengraph-image"],
     },
   }
 }

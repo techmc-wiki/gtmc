@@ -5,10 +5,28 @@ import { getSiteUrl } from "@/lib/site-url"
 import { shouldIgnoreFile } from "@/lib/articles/ignore"
 import { encodeSlug } from "@/lib/articles/slug-resolver"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
-import type { ArticleLocale } from "@/lib/articles/manifest"
+import {
+  loadArticleManifest,
+  type ArticleLocale,
+} from "@/lib/articles/manifest"
 import { loadGlossaryManifest } from "@/lib/glossary/manifest"
 
 export const revalidate = 3600
+
+const STATIC_LAST_MODIFIED = new Date("2024-12-08T10:28:55.000Z")
+
+function localizedAlternates(base: string, path: string) {
+  return {
+    languages: {
+      en: `${base}/en${path}`,
+      zh: `${base}/zh${path}`,
+    },
+  }
+}
+
+function lastModifiedFrom(value: string | undefined): Date {
+  return value ? new Date(value) : STATIC_LAST_MODIFIED
+}
 
 function flattenTree(
   nodes: Awaited<ReturnType<typeof getPublicChapterNav>>
@@ -31,61 +49,71 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticUrls: MetadataRoute.Sitemap = [
     {
       url: `${BASE}/zh`,
-      lastModified: new Date(),
+      lastModified: STATIC_LAST_MODIFIED,
+      alternates: localizedAlternates(BASE, ""),
       changeFrequency: "weekly",
       priority: 1.0,
     },
     {
       url: `${BASE}/en`,
-      lastModified: new Date(),
+      lastModified: STATIC_LAST_MODIFIED,
+      alternates: localizedAlternates(BASE, ""),
       changeFrequency: "weekly",
       priority: 1.0,
     },
     {
       url: `${BASE}/zh/features`,
-      lastModified: new Date(),
+      lastModified: STATIC_LAST_MODIFIED,
+      alternates: localizedAlternates(BASE, "/features"),
       changeFrequency: "weekly",
       priority: 1.0,
     },
     {
       url: `${BASE}/en/features`,
-      lastModified: new Date(),
+      lastModified: STATIC_LAST_MODIFIED,
+      alternates: localizedAlternates(BASE, "/features"),
       changeFrequency: "weekly",
       priority: 1.0,
     },
     {
       url: `${BASE}/zh/articles`,
-      lastModified: new Date(),
+      lastModified: STATIC_LAST_MODIFIED,
+      alternates: localizedAlternates(BASE, "/articles"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${BASE}/en/articles`,
-      lastModified: new Date(),
+      lastModified: STATIC_LAST_MODIFIED,
+      alternates: localizedAlternates(BASE, "/articles"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${BASE}/zh/glossary`,
-      lastModified: new Date(),
+      lastModified: STATIC_LAST_MODIFIED,
+      alternates: localizedAlternates(BASE, "/glossary"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${BASE}/en/glossary`,
-      lastModified: new Date(),
+      lastModified: STATIC_LAST_MODIFIED,
+      alternates: localizedAlternates(BASE, "/glossary"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${BASE}/zh/pdf`,
-      lastModified: new Date(),
+      lastModified: STATIC_LAST_MODIFIED,
+      alternates: localizedAlternates(BASE, "/pdf"),
       changeFrequency: "monthly",
       priority: 0.5,
     },
     {
       url: `${BASE}/en/pdf`,
-      lastModified: new Date(),
+      lastModified: STATIC_LAST_MODIFIED,
+      alternates: localizedAlternates(BASE, "/pdf"),
       changeFrequency: "monthly",
       priority: 0.5,
     },
@@ -93,6 +121,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let articleUrls: MetadataRoute.Sitemap = []
   try {
+    const manifest = loadArticleManifest()
     const locales: ArticleLocale[] = ["zh", "en"]
     const localizedArticleUrls = await Promise.all(
       locales.map(async (locale) => {
@@ -105,7 +134,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           })
           .map((slug) => ({
             url: `${BASE}/${locale}/articles/${encodeSlug(slug)}`,
-            lastModified: new Date(),
+            lastModified: lastModifiedFrom(
+              manifest[slug]?.lastmodByLocale[locale] ?? manifest[slug]?.created
+            ),
+            alternates: localizedAlternates(
+              BASE,
+              `/articles/${encodeSlug(slug)}`
+            ),
             changeFrequency: "weekly" as const,
             priority: 0.8,
           }))
@@ -124,12 +159,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       {
         url: `${BASE}/zh/features/${issue.number}`,
         lastModified: new Date(issue.updatedAt),
+        alternates: localizedAlternates(BASE, `/features/${issue.number}`),
         changeFrequency: "weekly" as const,
         priority: 0.5,
       },
       {
         url: `${BASE}/en/features/${issue.number}`,
         lastModified: new Date(issue.updatedAt),
+        alternates: localizedAlternates(BASE, `/features/${issue.number}`),
         changeFrequency: "weekly" as const,
         priority: 0.5,
       },
@@ -145,13 +182,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     glossaryUrls = entries.flatMap((entry) => [
       {
         url: `${BASE}/zh/glossary/${entry.slug}`,
-        lastModified: new Date(),
+        lastModified: STATIC_LAST_MODIFIED,
+        alternates: localizedAlternates(BASE, `/glossary/${entry.slug}`),
         changeFrequency: "weekly" as const,
         priority: 0.7,
       },
       {
         url: `${BASE}/en/glossary/${entry.slug}`,
-        lastModified: new Date(),
+        lastModified: STATIC_LAST_MODIFIED,
+        alternates: localizedAlternates(BASE, `/glossary/${entry.slug}`),
         changeFrequency: "weekly" as const,
         priority: 0.7,
       },

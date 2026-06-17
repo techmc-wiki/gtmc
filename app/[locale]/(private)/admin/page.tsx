@@ -1,9 +1,14 @@
-﻿import { auth } from "@/lib/auth"
+﻿import type { Metadata } from "next"
+import { auth } from "@/lib/auth"
 import { getCurrentUserAuthContext } from "@/lib/auth/context"
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { TechButton } from "@/components/ui/tech-button"
 import { Link } from "@/i18n/navigation"
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 export default async function AdminPage({
   params,

@@ -60,17 +60,24 @@ export async function generateMetadata({
     description,
     alternates: {
       canonical: canonicalUrl,
+      languages: {
+        en: `${siteUrl}/en/glossary/${entry.slug}`,
+        zh: `${siteUrl}/zh/glossary/${entry.slug}`,
+        "x-default": `${siteUrl}/zh/glossary/${entry.slug}`,
+      },
     },
     openGraph: {
       title,
       description,
       type: "article",
       url: canonicalUrl,
+      images: ["/opengraph-image"],
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title,
       description,
+      images: ["/opengraph-image"],
     },
   }
 }
@@ -86,6 +93,35 @@ export default async function GlossarySlugPage({
   }
 
   const t = await getTranslations({ locale, namespace: "Glossary" })
+  const siteUrl = getSiteUrl()
+  const canonicalUrl = `${siteUrl}/${locale}/glossary/${entry.slug}`
+  const glossaryIndexUrl = `${siteUrl}/${locale}/glossary`
+  const description =
+    entry.description.trim() || entry.fullFormEn || entry.shortForm
+
+  const definedTermJsonLd: {
+    "@context": "https://schema.org"
+    "@type": "DefinedTerm"
+    name: string
+    description: string
+    url: string
+    inDefinedTermSet: {
+      "@type": "DefinedTermSet"
+      name: string
+      url: string
+    }
+  } = {
+    "@context": "https://schema.org",
+    "@type": "DefinedTerm",
+    name: entry.fullFormEn,
+    description,
+    url: canonicalUrl,
+    inDefinedTermSet: {
+      "@type": "DefinedTermSet",
+      name: "Technical Minecraft Glossary",
+      url: glossaryIndexUrl,
+    },
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
@@ -107,6 +143,10 @@ export default async function GlossarySlugPage({
         shortForm={entry.shortForm}
         locale={locale === "en" ? "en" : "zh"}
       />
+
+      <script type="application/ld+json">
+        {JSON.stringify(definedTermJsonLd)}
+      </script>
     </div>
   )
 }

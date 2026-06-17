@@ -139,8 +139,8 @@ export async function generateMetadata({
     const manifestEntry = await getCachedLocalizedArticleEntry(effectiveSlug, locale)
     const chapterTitle = manifestEntry?.chapterTitleByLocale?.[locale]
     const pageTitle = chapterTitle
-      ? `${chapterTitle} › ${articleTitle} — Graduate Texts in Minecraft`
-      : `${articleTitle} — Graduate Texts in Minecraft`
+      ? `${chapterTitle} › ${articleTitle}`
+      : articleTitle
 
     const description = generateDescription(
       mdBody,
@@ -333,13 +333,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: siteUrl,
+        item: `${siteUrl}/${locale}`,
       },
       {
         "@type": "ListItem",
         position: 2,
         name: chapterTitle || "Articles",
-        item: `${siteUrl}/articles`,
+        item: `${siteUrl}/${locale}/articles`,
       },
       {
         "@type": "ListItem",

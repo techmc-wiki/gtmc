@@ -85,7 +85,7 @@ const jsonLd = {
       "@type": "Organization",
       name: "Graduate Texts in Minecraft",
       url: siteUrl,
-      logo: `${siteUrl}/opengraph-image`,
+      logo: `${siteUrl}/favicon.ico`,
     },
     {
       "@context": "https://schema.org",
@@ -109,7 +109,10 @@ export async function generateMetadata({
 
   return {
     metadataBase: new URL(siteUrl),
-    title: "Graduate Texts in Minecraft",
+    title: {
+      default: "Graduate Texts in Minecraft",
+      template: "%s — Graduate Texts in Minecraft",
+    },
     description:
       "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
     verification: {

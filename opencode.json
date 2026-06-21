@@ -21,6 +21,13 @@
     "mdn": {
       "type": "remote",
       "url": "https://mcp.mdn.mozilla.net"
+    },
+    "gitnexus": {
+      "type": "local",
+      "command": [
+        "gitnexus",
+        "mcp"
+      ]
     }
   }
 }

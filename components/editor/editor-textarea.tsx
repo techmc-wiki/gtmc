@@ -236,7 +236,6 @@ export const EditorTextarea = React.forwardRef<
       onDragEnter={onDragEnter}
       onKeyDownCapture={handleKeyDownCapture}
       aria-busy={isSaving}
-      role="application"
       {...rest}>
       <CodeMirror
         ref={ref}

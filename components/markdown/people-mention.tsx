@@ -247,8 +247,8 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
           ? "animate-tech-pop-in"
           : "scale-95 opacity-0 transition-all duration-150 ease-out"
       } `}
-      onMouseEnter={cancelClose}
-      onMouseLeave={closeDelayed}>
+      onPointerEnter={cancelClose}
+      onPointerLeave={closeDelayed}>
       <CornerBrackets
         variant="static"
         color="border-tech-main/30"

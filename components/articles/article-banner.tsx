@@ -252,8 +252,8 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
           ref={imgRef}
           aria-label={alt}
           className={`relative aspect-21/9 w-full overflow-hidden ${imageError ? "hidden" : ""}`}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}>
+          onPointerEnter={handleMouseEnter}
+          onPointerLeave={handleMouseLeave}>
           {/* Shutter flash overlay */}
           <div
             className="pointer-events-none absolute inset-0 z-20 bg-black"

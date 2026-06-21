@@ -6,7 +6,7 @@
   --background: var(--color-tech-bg);
   --foreground: var(--color-tech-main);
   --font-markdown-title:
-    var(--font-stix-two-text), var(--font-noto-serif-sc), "Songti SC", "STSong",
+    var(--font-stix-two-text), var(--font-noto-serif-sc, "Songti SC"), "STSong",
     serif;
 }
 
@@ -29,13 +29,13 @@ html {
 
 @theme {
   --font-sans:
-    var(--font-geist-sans), var(--font-noto-sans-sc), "PingFang SC",
+    var(--font-geist-sans), var(--font-noto-sans-sc, "PingFang SC"),
     "Microsoft YaHei", "微软雅黑", sans-serif;
   --font-mono:
     var(--font-geist-mono), "SF Mono", "Consolas", "Noto Sans Mono SC",
     "PingFang Mono", "Microsoft YaHei Mono", monospace;
   --font-serif:
-    var(--font-stix-two-text), var(--font-noto-serif-sc), "Songti SC", "STSong",
+    var(--font-stix-two-text), var(--font-noto-serif-sc, "Songti SC"), "STSong",
     Georgia, serif;
   --color-tech-bg: #f5f4ef;
   --color-tech-main: #4a5468;
@@ -492,10 +492,15 @@ body {
 
 @utility homepage-decor-background {
   will-change: transform;
+  /* Skip paint/layout when off-screen; keeps decor from competing with HeroCard for LCP. */
+  content-visibility: auto;
+  contain-intrinsic-size: 100vw 100vh;
 }
 
 @utility homepage-decor-midground {
   will-change: transform;
+  content-visibility: auto;
+  contain-intrinsic-size: 100vw 100vh;
 }
 
 @utility homepage-decor-foreground {

@@ -1,6 +1,6 @@
 import type { MotionValue } from "motion/react"
 import { motion } from "motion/react"
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { DecorElement } from "./decor-element"
 
 const HEX_VALUES = [
@@ -32,6 +32,15 @@ const HEX_VALUES = [
 
 const HEX_KEYS = HEX_VALUES.map((v, i) => `hex-${i}-${v}`)
 
+// `content-visibility: hidden` is the spec-compliant way to keep this decor
+// wrapper OUT of the LCP candidate set while the page is still painting its
+// real content. Per the LCP spec, elements inside a `content-visibility:
+// hidden` subtree are skipped entirely (no layout, no paint, not LCP).
+// We flip it to `visible` on the next frame after mount, by which point the
+// HeroCard has already been recorded as the LCP element.
+const HIDDEN_STYLE = { contentVisibility: "hidden" } as const
+const VISIBLE_STYLE = { contentVisibility: "visible" } as const
+
 export function BackgroundLayer({
   bgTransform,
   smoothMouseX,
@@ -50,19 +59,35 @@ export function BackgroundLayer({
     [bgTransform.x, bgTransform.y]
   )
 
+  // Defer decor painting until after the HeroCard has locked in as LCP.
+  // requestAnimationFrame lets the browser complete at least one paint of the
+  // server-rendered HeroCard before we unhide the background layer.
+  const [decorVisible, setDecorVisible] = useState(false)
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setDecorVisible(true))
+    return () => cancelAnimationFrame(id)
+  }, [])
+
   return (
     <motion.div
       className="homepage-decor-background absolute inset-0 z-0"
       style={bgStyle}>
-      {/* 巨型背景水印 */}
-      <DecorElement
-        className="decor-desktop-only text-tech-main pointer-events-none absolute top-1/3 -right-20 hidden rotate-90 text-[10rem] font-black tracking-tighter whitespace-nowrap opacity-[0.05] mix-blend-multiply select-none lg:block dark:opacity-[0.03] dark:mix-blend-screen"
-        smoothMouseX={smoothMouseX}
-        smoothMouseY={smoothMouseY}
-        blurMax={blurMax}
-        isReducedMotion={isReducedMotion}>
-        SCHEMATIC_01
-      </DecorElement>
+      {/* 巨型背景水印
+          Hidden via `content-visibility: hidden` until rAF after mount so that
+          this huge-glyph raster does NOT become the LCP element. The wrapper
+          around this text is the largest painted area on the page; without the
+          initial hide, the browser re-attributes LCP from HeroCard to this
+          watermark once BackgroundLayer hydrates. */}
+      <div style={decorVisible ? VISIBLE_STYLE : HIDDEN_STYLE}>
+        <DecorElement
+          className="decor-desktop-only text-tech-main pointer-events-none absolute top-1/3 -right-20 hidden rotate-90 text-[10rem] font-black tracking-tighter whitespace-nowrap opacity-[0.05] mix-blend-multiply select-none lg:block dark:opacity-[0.03] dark:mix-blend-screen"
+          smoothMouseX={smoothMouseX}
+          smoothMouseY={smoothMouseY}
+          blurMax={blurMax}
+          isReducedMotion={isReducedMotion}>
+          SCHEMATIC_01
+        </DecorElement>
+      </div>
 
       {/* NBT二进制/Hex Dump 背景层 */}
       <DecorElement

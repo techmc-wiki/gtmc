@@ -1,12 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import { cacheLife } from "next/cache"
-import {
-  Geist,
-  Geist_Mono,
-  Noto_Sans_SC,
-  Noto_Serif_SC,
-  STIX_Two_Text,
-} from "next/font/google"
+import { Geist, Geist_Mono, STIX_Two_Text } from "next/font/google"
 // oxlint-disable-next-line import/no-unassigned-import
 import "../globals.css"
 import { Analytics } from "@vercel/analytics/next"
@@ -16,6 +10,7 @@ import { FooterProvider } from "@/components/layout/footer-context"
 import Footer from "@/components/layout/footer"
 import { FooterWrapper } from "@/components/layout/footer-wrapper"
 import { ScrollRoot } from "@/components/layout/scroll-root"
+import { SpeculationRules } from "@/components/layout/speculation-rules"
 import { getSiteUrl } from "@/lib/site-url"
 import { NextIntlClientProvider } from "next-intl"
 import { hasLocale } from "next-intl"
@@ -55,14 +50,6 @@ const geistMono = Geist_Mono({
   adjustFontFallback: false,
 })
 
-const notoSansSc = Noto_Sans_SC({
-  weight: ["400", "700"],
-  display: "swap",
-  preload: false,
-  variable: "--font-noto-sans-sc",
-  adjustFontFallback: false,
-})
-
 const stixTwoText = STIX_Two_Text({
   subsets: ["latin"],
   display: "swap",
@@ -70,13 +57,7 @@ const stixTwoText = STIX_Two_Text({
   adjustFontFallback: false,
 })
 
-const notoSerifSc = Noto_Serif_SC({
-  weight: ["400", "600", "700"],
-  display: "swap",
-  preload: false,
-  variable: "--font-noto-serif-sc",
-  adjustFontFallback: false,
-})
+const baseFontVariables = `${geistSans.variable} ${geistMono.variable} ${stixTwoText.variable}`
 
 const jsonLd = {
   __html: JSON.stringify([
@@ -187,7 +168,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable} ${notoSansSc.variable} ${stixTwoText.variable} ${notoSerifSc.variable} scroll-smooth`}
+      className={`${baseFontVariables} scroll-smooth`}
       data-scroll-behavior="smooth"
       suppressHydrationWarning>
       <head />
@@ -207,6 +188,7 @@ export default async function RootLayout({
           </ThemeProvider>
         </NextIntlClientProvider>
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
+        <SpeculationRules />
       </body>
     </html>
   )

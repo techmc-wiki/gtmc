@@ -15,14 +15,16 @@ import {
 } from "@/components/glossary/category-filter"
 import { GlossaryTable } from "@/components/glossary/glossary-table"
 import { GlossaryDetailPanel } from "@/components/glossary/glossary-detail-panel"
+import {
+  SegmentedBar,
+  SweepOverlay,
+} from "@/components/ui/loading-shell-primitives"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { Link } from "@/i18n/navigation"
-import fullData from "@/data/glossary.json" with { type: "json" }
 import { LOCALE_TO_COLUMN } from "@/lib/glossary/locales"
 import type { GlossaryEntry } from "@/lib/glossary/manifest"
+import { useGlossaryEntries } from "@/lib/glossary/use-glossary"
 import { cn } from "@/lib/cn"
-
-const entries = fullData as GlossaryEntry[]
 const ALPHA = /[A-Z]/
 
 function letterBucket(slug: string): string {
@@ -68,6 +70,74 @@ function csvColumnsToTableColumns(csvColumns: string[]): string[] {
   return result
 }
 
+const SKELETON_ROWS = 12
+
+function GlossaryTableSkeleton() {
+  return (
+    <>
+      {/* Desktop skeleton */}
+      <div
+        aria-busy="true"
+        aria-label="Loading glossary entries"
+        className="border-tech-line/30 relative hidden h-[min(70vh,48rem)] overflow-hidden border md:block">
+        <SweepOverlay />
+        <table className="w-full table-fixed border-collapse">
+          <thead>
+            <tr>
+              {["term", "shortForm", "description", "related"].map((col) => (
+                <th
+                  key={col}
+                  className="text-tech-main/50 border-tech-line/30 bg-tech-bg/95 sticky top-0 z-10 border-b px-3 py-2 text-left font-mono text-xs tracking-widest uppercase backdrop-blur-sm">
+                  <SegmentedBar opacity="low" className="h-3 w-16" />
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: SKELETON_ROWS }, (_, i) => (
+              <tr key={i} className="border-tech-line/30 border-b">
+                <td className="px-3 py-3">
+                  <SegmentedBar
+                    opacity={i % 3 === 0 ? "high" : "medium"}
+                    className="h-4 w-32"
+                  />
+                </td>
+                <td className="px-3 py-3">
+                  <SegmentedBar opacity="low" className="h-4 w-16" />
+                </td>
+                <td className="px-3 py-3">
+                  <SegmentedBar opacity="medium" className="h-4 w-48" />
+                </td>
+                <td className="px-3 py-3">
+                  <SegmentedBar opacity="low" className="h-4 w-24" />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile skeleton */}
+      <div
+        aria-busy="true"
+        aria-label="Loading glossary entries"
+        className="relative space-y-3 md:hidden">
+        <SweepOverlay />
+        {Array.from({ length: 6 }, (_, i) => (
+          <div key={i} className="border-tech-line/30 space-y-2 border p-3">
+            <SegmentedBar
+              opacity={i % 2 === 0 ? "high" : "medium"}
+              className="h-4 w-36"
+            />
+            <SegmentedBar opacity="low" className="h-3 w-20" />
+            <SegmentedBar opacity="medium" className="h-3 w-full" />
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
 export interface GlossaryToolbarProps {
   categories: CategoryFilterCategory[]
   locale: string
@@ -86,6 +156,7 @@ export function GlossaryToolbar({
   className,
 }: GlossaryToolbarProps) {
   const t = useTranslations("Glossary")
+  const { entries, isLoading: entriesLoading } = useGlossaryEntries()
 
   const localeDefaults = React.useMemo(
     () => defaultColumns[locale] ?? defaultColumns.en ?? [],
@@ -107,11 +178,12 @@ export function GlossaryToolbar({
   const [isReady, setIsReady] = React.useState(false)
 
   React.useEffect(() => {
+    if (entriesLoading) return
     const frame = requestAnimationFrame(() => {
       setIsReady(true)
     })
     return () => cancelAnimationFrame(frame)
-  }, [])
+  }, [entriesLoading])
 
   const closeDetailPanel = React.useCallback(() => {
     setSelectedEntry(null)
@@ -124,7 +196,7 @@ export function GlossaryToolbar({
 
   const availableLetters = React.useMemo(
     () => [...new Set(entries.map((entry) => letterBucket(entry.slug)))],
-    []
+    [entries]
   )
 
   const trimmedQuery = query.trim()
@@ -171,17 +243,21 @@ export function GlossaryToolbar({
 
       <LetterBar availableLetters={availableLetters} />
 
-      <GlossaryTable
-        entries={entries}
-        visibleColumns={tableColumns}
-        density={density}
-        query={query}
-        searchScope={searchScope}
-        selectedCategories={selectedCategories}
-        locale={locale}
-        onOpenDetail={setSelectedEntry}
-        isReady={isReady}
-      />
+      {entriesLoading ? (
+        <GlossaryTableSkeleton />
+      ) : (
+        <GlossaryTable
+          entries={entries}
+          visibleColumns={tableColumns}
+          density={density}
+          query={query}
+          searchScope={searchScope}
+          selectedCategories={selectedCategories}
+          locale={locale}
+          onOpenDetail={setSelectedEntry}
+          isReady={isReady}
+        />
+      )}
 
       <GlossaryDetailPanel
         entry={selectedEntry}

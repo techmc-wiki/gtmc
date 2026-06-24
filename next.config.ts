@@ -51,6 +51,7 @@ const nextConfig: NextConfig = {
     "/api/og/articles/[...slug]": ["articles/**"],
     "/[locale]/glossary": ["data/glossary*.json"],
     "/[locale]/glossary/[slug]": ["data/glossary*.json"],
+    "/api/glossary": ["data/glossary*.json"],
   },
   outputFileTracingExcludes: {
     "/api/articles/search": [

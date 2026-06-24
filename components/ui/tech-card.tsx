@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
-import { cn } from "@/lib/cn"
+import * as React from "react";
+import { CornerBrackets } from "@/components/ui/corner-brackets";
+import { cn } from "@/lib/cn";
 
 export type TechCardTone =
   | "main"
@@ -10,41 +10,33 @@ export type TechCardTone =
   | "danger"
   | "success"
   | "warning"
-  | "neutral"
+  | "neutral";
 
-export type TechCardBorderOpacity = "solid" | "medium" | "muted" | "subtle"
+export type TechCardBorderOpacity = "solid" | "medium" | "muted" | "subtle";
 
 export type TechCardBackground =
   | "default"
   | "solid"
   | "subtle"
   | "ghost"
-  | "transparent"
+  | "transparent";
 
-export type TechCardPadding = "default" | "compact" | "spacious" | "none"
+export type TechCardPadding = "default" | "compact" | "spacious" | "none";
 
 export type TechCardHover =
   | "default"
   | "none"
   | "border"
   | "surface"
-  | "elevated"
+  | "elevated";
 
-export type TechCardBracketVisibility = "visible" | "hidden"
+export type TechCardBracketVisibility = "visible" | "hidden";
 
 export type TechCardBracketVariant = React.ComponentProps<
   typeof CornerBrackets
->["variant"]
+>["variant"];
 
-export type TechCardLegacyColor =
-  | "white"
-  | "electric-blue"
-  | "neon-green"
-  | "hot-pink"
-  | "black"
-  | "sun-yellow"
-
-export type TechCardPattern = "none" | "grid"
+export type TechCardPattern = "none" | "grid";
 
 const toneClasses = {
   main: {
@@ -127,119 +119,94 @@ const toneClasses = {
     | "hoverElevated",
     string
   >
->
+>;
 
 const borderOpacityClasses = {
   solid: "",
   medium: "/60",
   muted: "/40",
   subtle: "/30",
-} as const satisfies Record<TechCardBorderOpacity, string>
+} as const satisfies Record<TechCardBorderOpacity, string>;
 
 const paddingClasses = {
   default: "p-4 sm:p-6",
   compact: "p-4",
   spacious: "p-6 sm:p-8",
   none: "p-0",
-} as const satisfies Record<TechCardPadding, string>
-
-const legacyColorTone = {
-  white: "main",
-  "electric-blue": "accent",
-  "neon-green": "success",
-  "hot-pink": "danger",
-  black: "neutral",
-  "sun-yellow": "warning",
-} as const satisfies Record<TechCardLegacyColor, TechCardTone>
-
-const legacyColorBackground = {
-  white: "bg-surface-overlay/80",
-  "electric-blue": "bg-blue-500/10",
-  "neon-green": "bg-emerald-500/10",
-  "hot-pink": "bg-pink-500/10",
-  black: "bg-zinc-950/90",
-  "sun-yellow": "bg-yellow-100/50",
-} as const satisfies Record<TechCardLegacyColor, string>
+} as const satisfies Record<TechCardPadding, string>;
 
 const patternClasses = {
   none: "",
   grid: "bg-[url('/bg-grid.svg')] bg-size-[24px_24px]",
-} as const satisfies Record<TechCardPattern, string>
+} as const satisfies Record<TechCardPattern, string>;
 
 function getBorderClass(
   tone: TechCardTone,
-  borderOpacity: TechCardBorderOpacity
+  borderOpacity: TechCardBorderOpacity,
 ) {
   if (borderOpacity === "solid") {
-    return toneClasses[tone].solidBorder
+    return toneClasses[tone].solidBorder;
   }
 
-  return `${toneClasses[tone].border}${borderOpacityClasses[borderOpacity]}`
+  return `${toneClasses[tone].border}${borderOpacityClasses[borderOpacity]}`;
 }
 
 function getBackgroundClass(
   tone: TechCardTone,
   background: TechCardBackground,
-  color?: TechCardLegacyColor
 ) {
-  if (color) {
-    return legacyColorBackground[color]
-  }
-
   if (background === "default" || background === "solid") {
-    return toneClasses[tone].background
+    return toneClasses[tone].background;
   }
 
   if (background === "subtle") {
-    return toneClasses[tone].subtleBackground
+    return toneClasses[tone].subtleBackground;
   }
 
   if (background === "ghost") {
-    return "bg-surface-overlay/40"
+    return "bg-surface-overlay/40";
   }
 
-  return "bg-transparent"
+  return "bg-transparent";
 }
 
 function getHoverClass(tone: TechCardTone, hover: TechCardHover) {
   if (hover === "default" || hover === "surface") {
-    return toneClasses[tone].hoverSurface
+    return toneClasses[tone].hoverSurface;
   }
 
   if (hover === "border") {
-    return toneClasses[tone].hoverBorder
+    return toneClasses[tone].hoverBorder;
   }
 
   if (hover === "elevated") {
     return cn(
       toneClasses[tone].hoverBorder,
       toneClasses[tone].hoverSurface,
-      toneClasses[tone].hoverElevated
-    )
+      toneClasses[tone].hoverElevated,
+    );
   }
 
-  return ""
+  return "";
 }
 
 export interface TechCardProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Tone maps audited frame accents: main, accent, danger, success, warning, neutral. */
-  tone?: TechCardTone
+  tone?: TechCardTone;
   /** Border opacity maps solid, /60, /40, and /30 shells used around dashboard cards. */
-  borderOpacity?: TechCardBorderOpacity
+  borderOpacity?: TechCardBorderOpacity;
   /** Background maps existing white, tinted, ghost, and transparent frame surfaces. */
-  background?: TechCardBackground
+  background?: TechCardBackground;
   /** Padding maps default card padding, compact, spacious section frames, and no-padding shells. */
-  padding?: TechCardPadding
+  padding?: TechCardPadding;
   /** Hover maps the current surface fade, border-only, elevated, or disabled hover styles. */
-  hover?: TechCardHover
+  hover?: TechCardHover;
   /** Controls the built-in corner brackets without requiring duplicate bracket markup. */
-  brackets?: TechCardBracketVisibility
+  brackets?: TechCardBracketVisibility;
   /** Passes through to CornerBrackets for static or hover bracket behavior. */
-  bracketVariant?: TechCardBracketVariant
-  /** Legacy color alias retained for existing callers; prefer tone/background for new code. */
-  color?: TechCardLegacyColor
+  bracketVariant?: TechCardBracketVariant;
   /** Optional blueprint surface pattern used by existing frame shells. */
-  pattern?: TechCardPattern
+  pattern?: TechCardPattern;
 }
 
 export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
@@ -254,23 +221,22 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
       hover = "default",
       brackets = "visible",
       bracketVariant = "static",
-      color,
       pattern = "none",
       ...props
     },
-    ref
+    ref,
   ) => {
-    const tone = toneProp ?? (color ? legacyColorTone[color] : "main")
+    const tone = toneProp ?? "main";
 
     // 技术扁平图纸感：细边框，无圆角，纯色几何；响应式内边距
     const baseStyles = cn(
       "group relative border backdrop-blur-sm transition-colors duration-300",
       getBorderClass(tone, borderOpacity),
-      getBackgroundClass(tone, background, color),
+      getBackgroundClass(tone, background),
       paddingClasses[padding],
       getHoverClass(tone, hover),
-      toneClasses[tone].text
-    )
+      toneClasses[tone].text,
+    );
 
     return (
       <div ref={ref} className={cn(baseStyles, className)} {...props}>
@@ -286,14 +252,14 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
           <div
             className={cn(
               "pointer-events-none absolute inset-0 z-0 opacity-[0.03]",
-              patternClasses[pattern]
+              patternClasses[pattern],
             )}
           />
         )}
 
         {children}
       </div>
-    )
-  }
-)
-TechCard.displayName = "TechCard"
+    );
+  },
+);
+TechCard.displayName = "TechCard";

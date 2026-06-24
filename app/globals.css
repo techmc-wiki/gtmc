@@ -314,6 +314,14 @@ html {
   border-color: currentColor !important;
 }
 
+.gtmc-logo-mark-bg {
+  display: inline-block;
+  background-image: var(--gtmc-mark-light);
+}
+[data-theme="dark"] .gtmc-logo-mark-bg {
+  background-image: var(--gtmc-mark-dark);
+}
+
 body {
   background-color: var(--background);
   background-image: radial-gradient(

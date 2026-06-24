@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/navigation"
+import { LogoMark } from "@/components/ui/logo-mark"
 
 interface LogoProps {
   className?: string
@@ -15,11 +16,11 @@ const sizeClasses = {
 } as const
 
 const markClasses = {
-  sm: "size-3.5 text-[0.5rem]",
-  md: "size-5 text-[0.625rem]",
-  lg: "size-7 text-sm",
-  xl: "size-8 text-base md:size-10 md:text-lg",
-  "2xl": "size-10 text-lg md:size-12 md:text-xl",
+  sm: "size-3.5",
+  md: "size-5",
+  lg: "size-7",
+  xl: "size-8 md:size-10",
+  "2xl": "size-10 md:size-12",
 } as const
 
 export function Logo({
@@ -31,13 +32,7 @@ export function Logo({
     <Link
       href="/"
       className={`group inline-flex items-center gap-2 transition-opacity hover:opacity-80 ${sizeClasses[size]} ${className} `}>
-      {showSlash && (
-        <span
-          aria-hidden="true"
-          className={`bg-tech-signal text-tech-signal-ink flex shrink-0 items-center justify-center font-mono font-bold ${markClasses[size]} `}>
-          G
-        </span>
-      )}
+      {showSlash && <LogoMark className={`shrink-0 ${markClasses[size]}`} />}
       <span className="display-title text-tech-main-dark tracking-tight">
         GTMC
       </span>

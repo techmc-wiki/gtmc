@@ -1,131 +1,133 @@
-import { routing } from "@/i18n/routing"
-import { type ArticleTreeNode } from "@/lib/github"
+import { routing } from "@/i18n/routing";
+import { type ArticleTreeNode } from "@/lib/github";
 
-export type ArticleLocale = "en" | "zh"
+export type ArticleLocale = "en" | "zh";
 
-export const MANIFEST_FILE_NAME = "manifest.json"
+export const MANIFEST_FILE_NAME = "manifest.json";
 
 function getNodeBuiltin<T>(name: string): T {
   const getBuiltinModule = (
     process as typeof process & {
-      getBuiltinModule?: (id: string) => unknown
+      getBuiltinModule?: (id: string) => unknown;
     }
-  ).getBuiltinModule
+  ).getBuiltinModule;
 
   if (getBuiltinModule) {
-    return getBuiltinModule(name) as T
+    return getBuiltinModule(name) as T;
   }
 
-  const nodeRequire = (0, eval)("require") as NodeRequire
-  return nodeRequire(name) as T
+  const nodeRequire = (0, eval)("require") as NodeRequire;
+  return nodeRequire(name) as T;
 }
 
 export function getManifestPath(): string {
   // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-  const path = getNodeBuiltin<typeof import("path")>("path")
-  return path.join(process.cwd(), "data", MANIFEST_FILE_NAME)
+  const path = getNodeBuiltin<typeof import("path")>("path");
+  return path.join(process.cwd(), "data", MANIFEST_FILE_NAME);
 }
 
 export interface ArticleEntry {
-  filePath: string
-  slug: string
-  titleByLocale: Partial<Record<ArticleLocale, string>>
-  availableLocales: ArticleLocale[]
-  localizedFilePaths: Partial<Record<ArticleLocale, string>>
-  chapterTitleByLocale: Partial<Record<ArticleLocale, string>>
-  introTitleByLocale: Partial<Record<ArticleLocale, string>>
-  descriptionByLocale: Partial<Record<ArticleLocale, string>>
-  hasIntro: boolean
-  index: number
-  isFolder: boolean
-  isAppendix: boolean
-  isPreface: boolean
-  children?: ArticleEntry[]
-  parentSlug?: string
+  filePath: string;
+  slug: string;
+  titleByLocale: Partial<Record<ArticleLocale, string>>;
+  availableLocales: ArticleLocale[];
+  localizedFilePaths: Partial<Record<ArticleLocale, string>>;
+  chapterTitleByLocale: Partial<Record<ArticleLocale, string>>;
+  introTitleByLocale: Partial<Record<ArticleLocale, string>>;
+  descriptionByLocale: Partial<Record<ArticleLocale, string>>;
+  hasIntro: boolean;
+  index: number;
+  isFolder: boolean;
+  isAppendix: boolean;
+  isPreface: boolean;
+  children?: ArticleEntry[];
+  parentSlug?: string;
   /** generator-derived from git, never read from frontmatter */
-  author?: string
+  author?: string;
   /** generator-derived from git, never read from frontmatter */
-  coAuthors?: string[]
-  created?: string
-  lastmodByLocale: Partial<Record<ArticleLocale, string>>
+  coAuthors?: string[];
+  created?: string;
+  lastmodByLocale: Partial<Record<ArticleLocale, string>>;
   translatedFromRevisionByLocale: Partial<
     Record<Exclude<ArticleLocale, "zh">, string>
-  >
+  >;
   translationFreshnessByLocale: Partial<
     Record<Exclude<ArticleLocale, "zh">, "fresh" | "stale" | "unknown">
-  >
-  bannerByLocale?: Partial<Record<ArticleLocale, { src: string; alt?: string }>>
-  isAdvanced?: boolean
+  >;
+  bannerByLocale?: Partial<
+    Record<ArticleLocale, { src: string; alt?: string }>
+  >;
+  isAdvanced?: boolean;
 }
 
 export interface LocalizedArticleMetadata {
-  chapterTitle: string
-  introTitle: string
+  chapterTitle: string;
+  introTitle: string;
 }
 
-const ARTICLE_LOCALES: ArticleLocale[] = ["zh", "en"]
+const ARTICLE_LOCALES: ArticleLocale[] = ["zh", "en"];
 
 interface LocaleBanner {
-  src: string
-  alt?: string
+  src: string;
+  alt?: string;
 }
 
 export function loadArticleManifest(): Record<string, ArticleEntry> {
-  let raw: string
-  const manifestPath = getManifestPath()
+  let raw: string;
+  const manifestPath = getManifestPath();
   // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-  const fs = getNodeBuiltin<typeof import("fs")>("fs")
+  const fs = getNodeBuiltin<typeof import("fs")>("fs");
 
   try {
-    raw = fs.readFileSync(manifestPath, "utf-8")
+    raw = fs.readFileSync(manifestPath, "utf-8");
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       console.warn(
-        `[article-manifest] Missing article manifest: ${manifestPath}`
-      )
-      return {}
+        `[article-manifest] Missing article manifest: ${manifestPath}`,
+      );
+      return {};
     }
 
     throw new Error(
       `[article-manifest] Failed to load article manifest: ${manifestPath}`,
       {
         cause: error,
-      }
-    )
+      },
+    );
   }
 
-  return parseArticleManifest(raw, manifestPath)
+  return parseArticleManifest(raw, manifestPath);
 }
 
 export interface ManifestStats {
-  articleCount: number
-  authorCount: number
-  lastRevision: string | null
+  articleCount: number;
+  authorCount: number;
+  lastRevision: string | null;
 }
 
 export function getManifestStats(locale: ArticleLocale): ManifestStats {
-  const manifest = loadArticleManifest()
-  const entries = Object.values(manifest)
-  
-  let articleCount = 0
-  const allAuthors = new Set<string>()
-  let maxLastmod: string | null = null
+  const manifest = loadArticleManifest();
+  const entries = Object.values(manifest);
+
+  let articleCount = 0;
+  const allAuthors = new Set<string>();
+  let maxLastmod: string | null = null;
 
   for (const entry of entries) {
-    if (entry.isFolder) continue
-    
-    articleCount++
-    
-    if (entry.author) allAuthors.add(entry.author)
+    if (entry.isFolder) continue;
+
+    articleCount++;
+
+    if (entry.author) allAuthors.add(entry.author);
     if (entry.coAuthors) {
       for (const coAuthor of entry.coAuthors) {
-        if (coAuthor) allAuthors.add(coAuthor)
+        if (coAuthor) allAuthors.add(coAuthor);
       }
     }
-    
-    const localeLastmod = entry.lastmodByLocale[locale]
+
+    const localeLastmod = entry.lastmodByLocale[locale];
     if (localeLastmod && (!maxLastmod || localeLastmod > maxLastmod)) {
-      maxLastmod = localeLastmod
+      maxLastmod = localeLastmod;
     }
   }
 
@@ -133,119 +135,119 @@ export function getManifestStats(locale: ArticleLocale): ManifestStats {
     articleCount,
     authorCount: allAuthors.size,
     lastRevision: maxLastmod,
-  }
+  };
 }
 
 function isArticleLocale(value: unknown): value is ArticleLocale {
   return (
     typeof value === "string" &&
     ARTICLE_LOCALES.includes(value as ArticleLocale)
-  )
+  );
 }
 
 function normalizeAvailableLocales(value: unknown): ArticleLocale[] {
-  if (!Array.isArray(value)) return ["zh"]
+  if (!Array.isArray(value)) return ["zh"];
 
-  const locales = value.filter(isArticleLocale)
-  return locales.length > 0 ? locales : ["zh"]
+  const locales = value.filter(isArticleLocale);
+  return locales.length > 0 ? locales : ["zh"];
 }
 
 function normalizeLocalizedFilePaths(
-  value: unknown
+  value: unknown,
 ): Partial<Record<ArticleLocale, string>> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return {}
+    return {};
   }
 
-  const paths: Partial<Record<ArticleLocale, string>> = {}
+  const paths: Partial<Record<ArticleLocale, string>> = {};
   for (const locale of ARTICLE_LOCALES) {
-    const filePath = (value as Partial<Record<ArticleLocale, unknown>>)[locale]
+    const filePath = (value as Partial<Record<ArticleLocale, unknown>>)[locale];
     if (typeof filePath === "string") {
-      paths[locale] = filePath
+      paths[locale] = filePath;
     }
   }
 
-  return paths
+  return paths;
 }
 
 function normalizeStringByLocale(
-  value: unknown
+  value: unknown,
 ): Partial<Record<ArticleLocale, string>> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return {}
+    return {};
   }
 
-  const record: Partial<Record<ArticleLocale, string>> = {}
+  const record: Partial<Record<ArticleLocale, string>> = {};
   for (const locale of ARTICLE_LOCALES) {
-    const val = (value as Partial<Record<ArticleLocale, unknown>>)[locale]
+    const val = (value as Partial<Record<ArticleLocale, unknown>>)[locale];
     if (typeof val === "string") {
-      record[locale] = val
+      record[locale] = val;
     }
   }
 
-  return record
+  return record;
 }
 
 function normalizeFreshnessByLocale(
-  value: unknown
+  value: unknown,
 ): Partial<
   Record<Exclude<ArticleLocale, "zh">, "fresh" | "stale" | "unknown">
 > {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return {}
+    return {};
   }
 
-  const valid = new Set(["fresh", "stale", "unknown"])
+  const valid = new Set(["fresh", "stale", "unknown"]);
   const record: Partial<
     Record<Exclude<ArticleLocale, "zh">, "fresh" | "stale" | "unknown">
-  > = {}
+  > = {};
 
   for (const locale of ARTICLE_LOCALES) {
-    if (locale === "zh") continue
-    const val = (value as Partial<Record<ArticleLocale, unknown>>)[locale]
+    if (locale === "zh") continue;
+    const val = (value as Partial<Record<ArticleLocale, unknown>>)[locale];
     if (typeof val === "string" && valid.has(val)) {
       record[locale as Exclude<ArticleLocale, "zh">] = val as
         | "fresh"
         | "stale"
-        | "unknown"
+        | "unknown";
     }
   }
 
-  return record
+  return record;
 }
 
 function normalizeBannerByLocale(
-  value: unknown
+  value: unknown,
 ): Partial<Record<ArticleLocale, LocaleBanner>> | undefined {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return undefined
+    return undefined;
   }
 
-  const record: Partial<Record<ArticleLocale, LocaleBanner>> = {}
+  const record: Partial<Record<ArticleLocale, LocaleBanner>> = {};
   for (const locale of ARTICLE_LOCALES) {
-    const val = (value as Partial<Record<ArticleLocale, unknown>>)[locale]
+    const val = (value as Partial<Record<ArticleLocale, unknown>>)[locale];
     if (typeof val === "object" && val !== null && !Array.isArray(val)) {
-      const banner = val as Record<string, unknown>
+      const banner = val as Record<string, unknown>;
       if (typeof banner.src === "string") {
         record[locale] = {
           src: banner.src,
           alt: typeof banner.alt === "string" ? banner.alt : undefined,
-        }
+        };
       }
     }
   }
 
-  return Object.keys(record).length > 0 ? record : undefined
+  return Object.keys(record).length > 0 ? record : undefined;
 }
 
 function normalizeArticleEntry(
   slugKey: string,
-  value: unknown
+  value: unknown,
 ): ArticleEntry | null {
-  if (typeof value !== "object" || value === null) return null
+  if (typeof value !== "object" || value === null) return null;
 
-  const entry = value as Record<string, unknown>
-  if (typeof entry.filePath !== "string") return null
+  const entry = value as Record<string, unknown>;
+  if (typeof entry.filePath !== "string") return null;
 
   // Reject legacy manifest entries with flat suffixed fields
   if (
@@ -256,12 +258,12 @@ function normalizeArticleEntry(
     console.error(
       `[article-manifest] Detected legacy manifest shape for "${slugKey}": ` +
         "flat *En fields are no longer supported. " +
-        "Migrate to per-locale record fields (titleByLocale, chapterTitleByLocale, etc.)."
-    )
-    return null
+        "Migrate to per-locale record fields (titleByLocale, chapterTitleByLocale, etc.).",
+    );
+    return null;
   }
 
-  const introByLocale = normalizeStringByLocale(entry.introTitleByLocale)
+  const introByLocale = normalizeStringByLocale(entry.introTitleByLocale);
 
   return {
     filePath: entry.filePath as string,
@@ -292,122 +294,123 @@ function normalizeArticleEntry(
     created: typeof entry.created === "string" ? entry.created : undefined,
     lastmodByLocale: normalizeStringByLocale(entry.lastmodByLocale),
     translatedFromRevisionByLocale: normalizeStringByLocale(
-      entry.translatedFromRevisionByLocale
+      entry.translatedFromRevisionByLocale,
     ) as Partial<Record<Exclude<ArticleLocale, "zh">, string>>,
     translationFreshnessByLocale: normalizeFreshnessByLocale(
-      entry.translationFreshnessByLocale
+      entry.translationFreshnessByLocale,
     ),
     bannerByLocale: normalizeBannerByLocale(entry.bannerByLocale),
     isAdvanced: entry.isAdvanced === true,
-  }
+  };
 }
 
 function parseArticleManifest(
   raw: string,
-  manifestPath: string
+  manifestPath: string,
 ): Record<string, ArticleEntry> {
   try {
-    const parsed = JSON.parse(raw) as Record<string, unknown>
-    const normalized: Record<string, ArticleEntry> = {}
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    const normalized: Record<string, ArticleEntry> = {};
 
     for (const [slugKey, value] of Object.entries(parsed)) {
-      const entry = normalizeArticleEntry(slugKey, value)
-      if (entry !== null) normalized[slugKey] = entry
+      const entry = normalizeArticleEntry(slugKey, value);
+      if (entry !== null) normalized[slugKey] = entry;
     }
 
-    return normalized
+    return normalized;
   } catch (error) {
     throw new Error(
       `[article-manifest] Failed to parse article manifest: ${manifestPath}`,
       {
         cause: error,
-      }
-    )
+      },
+    );
   }
 }
 
-export async function getArticleManifest(): Promise<Record<string, ArticleEntry>> {
-  return loadArticleManifest()
+export async function getArticleManifest(): Promise<
+  Record<string, ArticleEntry>
+> {
+  return loadArticleManifest();
 }
 
-const localTreeCache = new Map<ArticleLocale, ArticleTreeNode[]>()
+const localTreeCache = new Map<ArticleLocale, ArticleTreeNode[]>();
 
 /**
  * Builds the article navigation tree for a locale.
- *
- * Consumer boundaries should pass an explicit locale. The zh default is kept
- * only for backward compatibility with existing internal callers.
  */
 export async function getArticleTree(
-  locale: ArticleLocale = "zh"
+  locale: ArticleLocale,
 ): Promise<ArticleTreeNode[]> {
-  const cached = localTreeCache.get(locale)
-  if (cached) return cached
+  const cached = localTreeCache.get(locale);
+  if (cached) return cached;
 
   try {
-    const tree = await buildLocalTree(locale)
-    localTreeCache.set(locale, tree)
-    return tree
+    const tree = await buildLocalTree(locale);
+    localTreeCache.set(locale, tree);
+    return tree;
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       console.warn(
         "[article-manifest] Failed to build local tree from article manifest",
-        error
-      )
+        error,
+      );
     }
   }
 
-  return []
+  return [];
 }
 
-async function buildLocalTree(locale: ArticleLocale): Promise<ArticleTreeNode[]> {
-  const manifest = await getArticleManifest()
-  const entries = Object.values(manifest)
+async function buildLocalTree(
+  locale: ArticleLocale,
+): Promise<ArticleTreeNode[]> {
+  const manifest = await getArticleManifest();
+  const entries = Object.values(manifest);
   if (entries.length === 0) {
-    return []
+    return [];
   }
 
-  const parentIndex = new Map<string, ArticleEntry[]>()
+  const parentIndex = new Map<string, ArticleEntry[]>();
   for (const entry of entries) {
-    if (!entry.parentSlug) continue
-    const siblings = parentIndex.get(entry.parentSlug) ?? []
-    siblings.push(entry)
-    parentIndex.set(entry.parentSlug, siblings)
+    if (!entry.parentSlug) continue;
+    const siblings = parentIndex.get(entry.parentSlug) ?? [];
+    siblings.push(entry);
+    parentIndex.set(entry.parentSlug, siblings);
   }
 
   const roots = entries
     .filter((entry) => !entry.parentSlug || !manifest[entry.parentSlug])
-    .toSorted((a, b) => compareEntries(a, b, locale))
+    .toSorted((a, b) => compareEntries(a, b, locale));
 
   return roots
     .map((entry) => buildTreeNode(entry, parentIndex, manifest, locale))
-    .filter((node): node is ArticleTreeNode => node !== null)
+    .filter((node): node is ArticleTreeNode => node !== null);
 }
 
 function buildTreeNode(
   entry: ArticleEntry,
   parentIndex: Map<string, ArticleEntry[]>,
   manifest: Record<string, ArticleEntry>,
-  locale: ArticleLocale
+  locale: ArticleLocale,
 ): ArticleTreeNode | null {
-  const childrenFromSlug = entry.children ?? []
-  const childrenFromParent = parentIndex.get(entry.slug) ?? []
+  const childrenFromSlug = entry.children ?? [];
+  const childrenFromParent = parentIndex.get(entry.slug) ?? [];
 
-  const mergedChildrenBySlug = new Map<string, ArticleEntry>()
+  const mergedChildrenBySlug = new Map<string, ArticleEntry>();
   for (const child of childrenFromSlug) {
-    mergedChildrenBySlug.set(child.slug, manifest[child.slug] ?? child)
+    mergedChildrenBySlug.set(child.slug, manifest[child.slug] ?? child);
   }
   for (const child of childrenFromParent) {
-    mergedChildrenBySlug.set(child.slug, child)
+    mergedChildrenBySlug.set(child.slug, child);
   }
 
   const children = [...mergedChildrenBySlug.values()]
     .toSorted((a, b) => compareEntries(a, b, locale))
     .map((child) => buildTreeNode(child, parentIndex, manifest, locale))
-    .filter((node): node is ArticleTreeNode => node !== null)
+    .filter((node): node is ArticleTreeNode => node !== null);
 
   if (!entry.isFolder && !entry.availableLocales.includes(locale)) {
-    return null
+    return null;
   }
 
   if (
@@ -415,17 +418,17 @@ function buildTreeNode(
     children.length === 0 &&
     !entry.availableLocales.includes(locale)
   ) {
-    return null
+    return null;
   }
 
-  const localizedMetadata = getLocalizedArticleMetadata(entry, locale)
+  const localizedMetadata = getLocalizedArticleMetadata(entry, locale);
 
   const node: ArticleTreeNode & {
-    index: number
-    isAppendix: boolean
-    isPreface: boolean
-    introTitle?: string
-    isAdvanced?: boolean
+    index: number;
+    isAppendix: boolean;
+    isPreface: boolean;
+    introTitle?: string;
+    isAdvanced?: boolean;
   } = {
     id: entry.isFolder ? entry.slug : entry.filePath.replace(/\.md$/i, ""),
     title: getNodeTitle(entry, locale),
@@ -438,86 +441,101 @@ function buildTreeNode(
     isAdvanced: entry.isAdvanced,
     parentId: entry.parentSlug ?? null,
     children,
-  }
+  };
 
-  return node
+  return node;
 }
 
 function compareEntries(
   a: ArticleEntry,
   b: ArticleEntry,
-  locale: ArticleLocale
+  locale: ArticleLocale,
 ): number {
   if (a.isFolder === b.isFolder) {
-    return getNodeTitle(a, locale).localeCompare(getNodeTitle(b, locale))
+    return getNodeTitle(a, locale).localeCompare(getNodeTitle(b, locale));
   }
-  return a.isFolder ? -1 : 1
+  return a.isFolder ? -1 : 1;
 }
 
 function getNodeTitle(entry: ArticleEntry, locale: ArticleLocale): string {
-  const { chapterTitle } = getLocalizedArticleMetadata(entry, locale)
-  const fileTitle = entry.filePath.split("/").pop()?.replace(/\.md$/i, "")
-  const sourceChapterTitle = entry.chapterTitleByLocale.zh?.trim()
-  const sourceTitle = entry.titleByLocale.zh?.trim()
-  const slugTitle = entry.slug.split("/").pop() || entry.slug
+  const { chapterTitle } = getLocalizedArticleMetadata(entry, locale);
+  const fileTitle = entry.filePath.split("/").pop()?.replace(/\.md$/i, "");
+  const sourceChapterTitle = entry.chapterTitleByLocale.zh?.trim();
+  const sourceTitle = entry.titleByLocale.zh?.trim();
+  const slugTitle = entry.slug.split("/").pop() || entry.slug;
 
   if (entry.isFolder) {
-    return chapterTitle || sourceChapterTitle || sourceTitle || slugTitle
+    return chapterTitle || sourceChapterTitle || sourceTitle || slugTitle;
   }
 
   if (locale === routing.defaultLocale) {
-    return entry.titleByLocale[locale]?.trim() || chapterTitle || fileTitle || slugTitle
+    return (
+      entry.titleByLocale[locale]?.trim() ||
+      chapterTitle ||
+      fileTitle ||
+      slugTitle
+    );
   }
 
   if (entry.isPreface) {
-    return entry.titleByLocale[locale]?.trim() || chapterTitle || slugTitle
+    return entry.titleByLocale[locale]?.trim() || chapterTitle || slugTitle;
   }
 
   if (entry.isAppendix) {
-    return chapterTitle || entry.titleByLocale[locale]?.trim() || fileTitle || slugTitle
+    return (
+      chapterTitle ||
+      entry.titleByLocale[locale]?.trim() ||
+      fileTitle ||
+      slugTitle
+    );
   }
 
-  return chapterTitle || entry.titleByLocale[locale]?.trim() || fileTitle || slugTitle
+  return (
+    chapterTitle ||
+    entry.titleByLocale[locale]?.trim() ||
+    fileTitle ||
+    slugTitle
+  );
 }
 
 export function getLocalizedArticleMetadata(
   entry: ArticleEntry | null | undefined,
-  locale: ArticleLocale = "zh"
+  locale: ArticleLocale = "zh",
 ): LocalizedArticleMetadata {
   if (!entry) {
     return {
       chapterTitle: "",
       introTitle: "",
-    }
+    };
   }
 
-  const chapterTitle = entry.chapterTitleByLocale[locale]?.trim() || ""
+  const chapterTitle = entry.chapterTitleByLocale[locale]?.trim() || "";
 
-  const introTitle = entry.introTitleByLocale[locale]?.trim() || ""
+  const introTitle = entry.introTitleByLocale[locale]?.trim() || "";
 
   return {
     chapterTitle,
     introTitle,
-  }
+  };
 }
 
 export async function getLocalizedArticleEntry(
   slugPath: string,
-  locale: ArticleLocale = "zh"
+  locale: ArticleLocale = "zh",
 ): Promise<(ArticleEntry & LocalizedArticleMetadata) | null> {
-  const entry = (await getArticleManifest())[slugPath]
+  const entry = (await getArticleManifest())[slugPath];
   if (!entry) {
-    return null
+    return null;
   }
 
   return {
     ...entry,
     ...getLocalizedArticleMetadata(entry, locale),
-  }
+  };
 }
 
 export {
   hasArticleLocale,
   getArticleAvailableLocales,
   getArticleLocalizedFilePath,
-} from "./locale"
+} from "./locale";

@@ -24,10 +24,7 @@
     },
     "gitnexus": {
       "type": "local",
-      "command": [
-        "gitnexus",
-        "mcp"
-      ]
+      "command": ["gitnexus", "mcp"]
     }
   }
 }

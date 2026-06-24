@@ -77,6 +77,13 @@ export function PendingCreationBanner() {
     }
   }, [router])
 
+  const handleRetry = React.useCallback(() => {
+    startRetry(() => {
+      inFlightRef.current = false
+      void runCreation()
+    })
+  }, [runCreation])
+
   React.useEffect(() => {
     // Only run if there's a payload
     const raw = sessionStorage.getItem(PENDING_FEATURE_CREATE_KEY)
@@ -111,13 +118,6 @@ export function PendingCreationBanner() {
       </div>
     )
   }
-
-  const handleRetry = React.useCallback(() => {
-    startRetry(() => {
-      inFlightRef.current = false
-      void runCreation()
-    })
-  }, [runCreation])
 
   if (state.status === "error") {
     return (

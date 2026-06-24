@@ -44,6 +44,15 @@ export async function getClosedPRsAction(
 ): Promise<ClosedPRListItem[]> {
   "use server"
 
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+  const ctx = await getCurrentUserAuthContext(session.user.id)
+  if (ctx.role !== "ADMIN") {
+    throw new Error("Forbidden")
+  }
+
   const token = process.env.GITHUB_ARTICLES_WRITE_PAT
 
   try {

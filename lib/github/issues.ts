@@ -58,8 +58,6 @@ export async function listAllIssues(
   return _listAllIssuesUncached(state)
 }
 
-export const listIssues = listAllIssues
-
 // eslint-disable-next-line no-underscore-dangle
 async function _getIssueUncached(
   issueNumber: number

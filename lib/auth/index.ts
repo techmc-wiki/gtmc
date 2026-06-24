@@ -22,7 +22,7 @@ const authSecret =
     ? "gtmc-local-dev-auth-secret"
     : undefined)
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth } = NextAuth({
   secret: authSecret,
   adapter: PrismaAdapter(prisma),
   providers: [

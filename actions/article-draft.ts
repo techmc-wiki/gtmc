@@ -17,7 +17,6 @@ import { getGithubPatForUser, requireAuth } from "@/lib/auth/context"
 import { prisma } from "@/lib/prisma"
 import {
   findDraftAssetsByRevision,
-  findFailedDraftAssets,
   markDraftAssetCleanupFailed,
   markDraftAssetDeleted,
   markDraftAssetOrphaned,
@@ -33,7 +32,7 @@ const saveDraftSchema = z.object({
   draftFiles: z.string().nullable().default(null),
 })
 
-const EDITABLE_STATUSES = new Set(["DRAFT"])
+const EDITABLE_STATUSES: readonly string[] = ["DRAFT"] as const
 
 async function reconcileDraftAssetReferences(
   revisionId: string,
@@ -100,7 +99,7 @@ export async function saveDraftAction(formData: FormData) {
       throw new Error("Unauthorized")
     }
 
-    if (!EDITABLE_STATUSES.has(existing.status)) {
+    if (!EDITABLE_STATUSES.includes(existing.status)) {
       throw new Error("Cannot edit a draft that is already in review")
     }
 
@@ -187,57 +186,4 @@ export async function deleteDraftAction(revisionId: string) {
 
   revalidatePath("/draft")
   return { success: true }
-}
-
-export async function retryCleanupAction(revisionId: string) {
-  const session = await requireAuth()
-
-  if (!revisionId) {
-    throw new Error("Revision ID is required")
-  }
-
-  const existing = await prisma.revision.findUnique({
-    where: { id: revisionId },
-    select: { authorId: true },
-  })
-
-  if (!existing) {
-    throw new Error("Revision not found")
-  }
-
-  if (existing.authorId !== session.user.id) {
-    throw new Error("Unauthorized")
-  }
-
-  const failedAssets = await findFailedDraftAssets(revisionId)
-
-  let cleaned = 0
-  let failed = 0
-
-  const results = await Promise.all(
-    failedAssets.map(async (asset) => {
-      try {
-        await deleteDraftAsset(asset.storagePath)
-        await markDraftAssetDeleted(asset.id)
-        return "cleaned" as const
-      } catch (error) {
-        await markDraftAssetCleanupFailed(
-          asset.id,
-          error instanceof Error ? error.message : "Unknown error"
-        )
-        return "failed" as const
-      }
-    })
-  )
-
-  for (const result of results) {
-    if (result === "cleaned") {
-      cleaned += 1
-    } else {
-      failed += 1
-    }
-  }
-
-  revalidatePath("/draft")
-  return { success: true, cleaned, failed }
 }

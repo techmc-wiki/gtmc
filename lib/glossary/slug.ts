@@ -12,10 +12,6 @@ export function getGlossaryEntry(slug: string): GlossaryEntry | undefined {
   return entriesBySlug.get(slug)
 }
 
-export function getAllSlugs(): string[] {
-  return glossaryEntries.map((e) => e.slug)
-}
-
 export function generateSlug(englishTerm: string): string {
   const slug = englishTerm
     .replace(/\*+$/, "")

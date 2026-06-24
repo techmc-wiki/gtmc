@@ -1,11 +1,9 @@
 import {
   getArticleManifest,
-  getManifestPath,
-  MANIFEST_FILE_NAME,
   type ArticleEntry,
 } from "@/lib/articles/manifest"
 
-export { getArticleManifest, getManifestPath, MANIFEST_FILE_NAME }
+export { getArticleManifest }
 export type { ArticleEntry }
 
 let filePathToSlugKeyCache: Record<string, string> | null = null
@@ -40,7 +38,7 @@ export async function resolveSlug(slugPath: string): Promise<string | null> {
 /**
  * Resolves a slug path with indicator for raw file path fallback.
  */
-export async function resolveSlugWithIndicator(
+async function resolveSlugWithIndicator(
   slugPath: string
 ): Promise<ResolveResult> {
   const manifest = await getArticleManifest()

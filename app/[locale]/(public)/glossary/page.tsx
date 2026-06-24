@@ -56,9 +56,10 @@ export default async function GlossaryIndexPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
-  const t = await getTranslations({ locale, namespace: "Glossary" })
-
-  const { entries } = await loadGlossaryManifest()
+  const [t, { entries }] = await Promise.all([
+    getTranslations({ locale, namespace: "Glossary" }),
+    loadGlossaryManifest(),
+  ])
   const totalCount = entries.length
   const categoryCounts = new Map<string, number>()
 

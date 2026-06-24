@@ -19,26 +19,27 @@ export async function resolveConflictAndMerge(
   const branchName = pr.head.ref
   const prHeadSha = pr.head.sha
 
-  const { data: mainRef } = await octokit.git.getRef({
-    owner: ARTICLES_REPO_OWNER,
-    repo: ARTICLES_REPO_NAME,
-    ref: "heads/main",
-  })
+  const [{ data: mainRef }, { data: commitInfo }, { data: files }] =
+    await Promise.all([
+      octokit.git.getRef({
+        owner: ARTICLES_REPO_OWNER,
+        repo: ARTICLES_REPO_NAME,
+        ref: "heads/main",
+      }),
+      octokit.repos.getCommit({
+        owner: ARTICLES_REPO_OWNER,
+        repo: ARTICLES_REPO_NAME,
+        ref: prHeadSha,
+      }),
+      octokit.pulls.listFiles({
+        owner: ARTICLES_REPO_OWNER,
+        repo: ARTICLES_REPO_NAME,
+        pull_number: prNumber,
+      }),
+    ])
   const mainSha = mainRef.object.sha
-
-  const { data: commitInfo } = await octokit.repos.getCommit({
-    owner: ARTICLES_REPO_OWNER,
-    repo: ARTICLES_REPO_NAME,
-    ref: prHeadSha,
-  })
   const originalAuthor = commitInfo.commit.author
   const originalMessage = commitInfo.commit.message
-
-  const { data: files } = await octokit.pulls.listFiles({
-    owner: ARTICLES_REPO_OWNER,
-    repo: ARTICLES_REPO_NAME,
-    pull_number: prNumber,
-  })
 
   type TreeEntry = {
     path?: string

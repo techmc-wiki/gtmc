@@ -37,8 +37,10 @@ export async function generateMetadata({
   params,
 }: GlossarySlugPageProps): Promise<Metadata> {
   const { locale, slug } = await params
-  const entry = await getCachedGlossaryEntry(slug)
-  const t = await getTranslations({ locale, namespace: "Glossary" })
+  const [entry, t] = await Promise.all([
+    getCachedGlossaryEntry(slug),
+    getTranslations({ locale, namespace: "Glossary" }),
+  ])
 
   if (!entry) {
     return {
@@ -86,13 +88,15 @@ export default async function GlossarySlugPage({
   params,
 }: GlossarySlugPageProps) {
   const { locale, slug } = await params
-  const entry = await getCachedGlossaryEntry(slug)
+  const [entry, t] = await Promise.all([
+    getCachedGlossaryEntry(slug),
+    getTranslations({ locale, namespace: "Glossary" }),
+  ])
 
   if (!entry) {
     notFound()
   }
 
-  const t = await getTranslations({ locale, namespace: "Glossary" })
   const siteUrl = getSiteUrl()
   const canonicalUrl = `${siteUrl}/${locale}/glossary/${entry.slug}`
   const glossaryIndexUrl = `${siteUrl}/${locale}/glossary`

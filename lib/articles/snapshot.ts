@@ -75,7 +75,7 @@ export function mergeArticleContent({
   }
 }
 
-export function splitLines(content: string) {
+function splitLines(content: string) {
   if (!content) {
     return [] as string[]
   }
@@ -83,6 +83,6 @@ export function splitLines(content: string) {
   return content.replaceAll("\r\n", "\n").split("\n")
 }
 
-export function joinLines(lines: string[]) {
+function joinLines(lines: string[]) {
   return lines.join("\n")
 }

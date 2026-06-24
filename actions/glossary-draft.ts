@@ -1,7 +1,6 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import type { GlossaryRevision } from "@prisma/client"
 import type { Prisma } from "@prisma/client"
 import { z } from "zod"
 
@@ -70,17 +69,4 @@ export async function deleteGlossaryDraftAction(id: string): Promise<void> {
   await prisma.glossaryRevision.delete({ where: { id } })
 
   revalidatePath("/draft")
-}
-
-export async function loadGlossaryDraftAction(
-  id: string
-): Promise<GlossaryRevision> {
-  const session = await requireAuth()
-  const userId = session.user.id
-
-  const existing = await prisma.glossaryRevision.findUnique({ where: { id } })
-  if (!existing) throw new Error("Draft not found")
-  if (existing.authorId !== userId) throw new Error("Unauthorized")
-
-  return existing
 }

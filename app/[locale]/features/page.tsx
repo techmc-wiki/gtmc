@@ -53,9 +53,11 @@ export default async function FeaturesPage({
     [key: string]: string | string[] | undefined
   }>
 }) {
-  const t = await getTranslations("Feature")
-  const params = await searchParams
-  const allIssues = await listAllIssues()
+  const [t, params, allIssues] = await Promise.all([
+    getTranslations("Feature"),
+    searchParams,
+    listAllIssues(),
+  ])
 
   return (
     <FeatureListContent

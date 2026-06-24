@@ -1,4 +1,4 @@
-export const ARTICLE_ASSET_PUBLIC_PREFIX = "/article-assets"
+const ARTICLE_ASSET_PUBLIC_PREFIX = "/article-assets"
 
 export function getArticleAssetPublicUrl(assetPath: string): string {
   if (assetPath.startsWith("https://") || assetPath.startsWith("http://")) {

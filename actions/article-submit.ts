@@ -49,11 +49,11 @@ async function reconcileDraftAssetReferences(
 }
 
 export async function submitForReviewAction(revisionId: string) {
-  const session = await requireAuth()
-
   if (!revisionId) {
     throw new Error("Revision ID is required")
   }
+
+  const session = await requireAuth()
 
   const existing = await prisma.revision.findUnique({
     where: { id: revisionId },
@@ -148,16 +148,17 @@ export async function submitForReviewAction(revisionId: string) {
     await reconcileDraftAssetReferences(revisionId, storedDraftFiles.files)
 
     const token = getGitHubWriteToken(existing.author.githubPat)
-    const authorName = session.user.name || "GTMC Author"
-    const authorEmail = session.user.email || "author@gtmc.dev"
-    const baseMainSha =
-      existing.baseMainSha || (await getMainBranchHeadSha(token))
 
     if (!token) {
       throw new Error(
         "Failed to create PR: missing GITHUB_ARTICLES_WRITE_PAT or another token with repo write permission."
       )
     }
+
+    const authorName = session.user.name || "GTMC Author"
+    const authorEmail = session.user.email || "author@gtmc.dev"
+    const baseMainSha =
+      existing.baseMainSha || (await getMainBranchHeadSha(token))
 
     const tempPrefix = process.env.DRAFT_STORAGE_TEMP_PREFIX ?? "draft-temp"
     const parsedRefsByFileId = new Map<

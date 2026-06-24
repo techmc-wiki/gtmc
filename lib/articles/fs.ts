@@ -12,7 +12,7 @@ export async function resolveLocalArticlePath(slugPath: string): Promise<string 
   return resolveRawArticlePath(slugPath).filePath
 }
 
-export function resolveRawArticlePath(slugPath: string): ResolveResult {
+function resolveRawArticlePath(slugPath: string): ResolveResult {
   const normalizedPath = decodeURIComponent(slugPath)
 
   if (fs.existsSync(path.join(ARTICLES_PATH, normalizedPath))) {

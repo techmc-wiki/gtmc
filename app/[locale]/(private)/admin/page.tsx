@@ -15,9 +15,11 @@ export default async function AdminPage({
 }: {
   params: Promise<{ locale: string }>
 }) {
-  const { locale } = await params
-  const t = await getTranslations("Review")
-  const session = await auth()
+  const [{ locale }, t, session] = await Promise.all([
+    params,
+    getTranslations("Review"),
+    auth(),
+  ])
 
   if (!session?.user) {
     redirect(

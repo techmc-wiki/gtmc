@@ -165,7 +165,7 @@ export function computeDraftStoragePath(
  * @param storagePath - Storage path (e.g., "draft-temp/rev-abc123/file.png")
  * @returns Public URL
  */
-export function getDraftAssetPublicUrl(storagePath: string): string {
+function getDraftAssetPublicUrl(storagePath: string): string {
   const config = getDraftStorageConfig()
   const client = createSupabaseClient()
   const { data } = client.storage.from(config.bucket).getPublicUrl(storagePath)

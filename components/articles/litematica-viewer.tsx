@@ -180,6 +180,19 @@ export default function LitematicaViewer({
   const [schematicReady, setSchematicReady] = useState(false)
   const [isFlyMode, setIsFlyMode] = useState(false)
   const [isFlyEnabled, setIsFlyEnabled] = useState(false)
+  const prevUrlRef = useRef(url)
+
+  // Reset viewer state inline when `url` changes so users do not briefly
+  // see stale UI between commits. See:
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  if (url !== prevUrlRef.current) {
+    prevUrlRef.current = url
+    setSchematicReady(false)
+    setTargetLayer("all")
+    setIsFlyMode(false)
+    setIsFlyEnabled(false)
+    schematicIdRef.current = null
+  }
 
   const POINTER_LOCK_COOLDOWN_MS = 350
 
@@ -316,12 +329,6 @@ export default function LitematicaViewer({
     const loadToken = ++loadTokenRef.current
     let isActive = true
     const schematicRequestController = new AbortController()
-
-    setSchematicReady(false)
-    schematicIdRef.current = null
-    setTargetLayer("all")
-    setIsFlyMode(false)
-    setIsFlyEnabled(false)
 
     const isCurrentLoad = () => isActive && loadToken === loadTokenRef.current
 

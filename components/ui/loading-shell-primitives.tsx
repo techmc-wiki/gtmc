@@ -5,118 +5,143 @@ import { CornerBrackets } from "@/components/ui/corner-brackets"
  * Square section frame with optional corner brackets.
  * Reuses shared CornerBrackets primitive for consistency.
  */
-export const SectionFrame = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { showBrackets?: boolean }
->(({ className = "", showBrackets = true, children, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={`border-tech-main/40 bg-surface-overlay/80 relative border p-6 backdrop-blur-sm sm:p-8 ${className} `}
-    {...props}>
-    {showBrackets && (
-      <CornerBrackets size="size-2" color="border-tech-main/60" />
-    )}
-    {children}
-  </div>
-))
-SectionFrame.displayName = "SectionFrame"
+export function SectionFrame({
+  className = "",
+  showBrackets = true,
+  children,
+  ref,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & {
+  showBrackets?: boolean
+  ref?: React.Ref<HTMLDivElement>
+}) {
+  return (
+    <div
+      ref={ref}
+      className={`border-tech-main/40 bg-surface-overlay/80 relative border p-6 backdrop-blur-sm sm:p-8 ${className} `}
+      {...props}>
+      {showBrackets && (
+        <CornerBrackets size="size-2" color="border-tech-main/60" />
+      )}
+      {children}
+    </div>
+  )
+}
 
 /**
  * Monospace section rail label with trailing underscore.
  * Uppercase with wide letter spacing for technical aesthetic.
  */
-export const SectionRail = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { label: string }
->(({ label, className = "", ...props }, ref) => (
-  <div
-    ref={ref}
-    className={`tracking-tech-wide text-tech-main font-mono text-xs uppercase ${className} `}
-    {...props}>
-    {label}_
-  </div>
-))
-SectionRail.displayName = "SectionRail"
+export function SectionRail({
+  label,
+  className = "",
+  ref,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & {
+  label: string
+  ref?: React.Ref<HTMLDivElement>
+}) {
+  return (
+    <div
+      ref={ref}
+      className={`tracking-tech-wide text-tech-main font-mono text-xs uppercase ${className} `}
+      {...props}>
+      {label}_
+    </div>
+  )
+}
 
 /**
  * Segmented bar placeholder with opacity tier.
  * Used for skeleton loading states with subtle visual hierarchy.
  */
-export const SegmentedBar = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & {
-    opacity?: "high" | "medium" | "low"
-    showBorder?: boolean
+export function SegmentedBar({
+  opacity = "medium",
+  showBorder = false,
+  className = "",
+  ref,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & {
+  opacity?: "high" | "medium" | "low"
+  showBorder?: boolean
+  ref?: React.Ref<HTMLDivElement>
+}) {
+  const opacityMap = {
+    high: "bg-tech-accent/20",
+    medium: "bg-tech-accent/15",
+    low: "bg-tech-accent/10",
   }
->(
-  (
-    { opacity = "medium", showBorder = false, className = "", ...props },
-    ref
-  ) => {
-    const opacityMap = {
-      high: "bg-tech-accent/20",
-      medium: "bg-tech-accent/15",
-      low: "bg-tech-accent/10",
-    }
 
-    return (
-      <div
-        ref={ref}
-        className={`h-2 ${opacityMap[opacity]} ${showBorder ? `border-tech-line border` : ""} ${className} `}
-        {...props}
-      />
-    )
-  }
-)
-SegmentedBar.displayName = "SegmentedBar"
+  return (
+    <div
+      ref={ref}
+      className={`h-2 ${opacityMap[opacity]} ${showBorder ? `border-tech-line border` : ""} ${className} `}
+      {...props}
+    />
+  )
+}
 
 /**
  * Skeleton exit wrapper for loading shell handoff.
  * Applies skeleton-exit animation: opacity fade + subtle translateY + blur.
  * Motion-reduce fallback: opacity-only fade.
  */
-export const SkeletonExitWrapper = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { isExiting?: boolean }
->(({ isExiting = false, className = "", ...props }, ref) => (
-  <div
-    ref={ref}
-    className={` ${
-      isExiting ? `animate-skeleton-exit motion-reduce:animate-fade-out` : ""
-    } ${className} `}
-    {...props}
-  />
-))
-SkeletonExitWrapper.displayName = "SkeletonExitWrapper"
+export function SkeletonExitWrapper({
+  isExiting = false,
+  className = "",
+  ref,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & {
+  isExiting?: boolean
+  ref?: React.Ref<HTMLDivElement>
+}) {
+  return (
+    <div
+      ref={ref}
+      className={` ${
+        isExiting ? `animate-skeleton-exit motion-reduce:animate-fade-out` : ""
+      } ${className} `}
+      {...props}
+    />
+  )
+}
 
 /**
  * Scan/sweep overlay with blueprint animation.
  * Absolute positioned shimmer effect with motion-reduce fallback.
  */
-export const SweepOverlay = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className = "", ...props }, ref) => (
-  <div
-    ref={ref}
-    className={`animate-blueprint-sweep via-tech-accent/30 absolute inset-0 bg-linear-to-r from-transparent to-transparent motion-reduce:animate-none ${className} `}
-    {...props}
-  />
-))
-SweepOverlay.displayName = "SweepOverlay"
+export function SweepOverlay({
+  className = "",
+  ref,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & {
+  ref?: React.Ref<HTMLDivElement>
+}) {
+  return (
+    <div
+      ref={ref}
+      className={`animate-blueprint-sweep via-tech-accent/30 absolute inset-0 bg-linear-to-r from-transparent to-transparent motion-reduce:animate-none ${className} `}
+      {...props}
+    />
+  )
+}
 
 /**
  * Single-pass scan confirmation overlay.
  * Absolute positioned gradient fade for loading-to-content transition.
  */
-export const ScanConfirmOverlay = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className = "", ...props }, ref) => (
-  <div
-    ref={ref}
-    className={`animate-scan-confirm via-tech-accent/30 absolute inset-0 bg-linear-to-r from-transparent to-transparent motion-reduce:animate-none ${className} `}
-    {...props}
-  />
-))
-ScanConfirmOverlay.displayName = "ScanConfirmOverlay"
+export function ScanConfirmOverlay({
+  className = "",
+  ref,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & {
+  ref?: React.Ref<HTMLDivElement>
+}) {
+  return (
+    <div
+      ref={ref}
+      className={`animate-scan-confirm via-tech-accent/30 absolute inset-0 bg-linear-to-r from-transparent to-transparent motion-reduce:animate-none ${className} `}
+      {...props}
+    />
+  )
+}

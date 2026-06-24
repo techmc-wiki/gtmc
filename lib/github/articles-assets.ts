@@ -84,13 +84,6 @@ export async function uploadArticleAssetToGithub({
   }
 }
 
-export function buildArticleAssetPath(
-  category: FileCategory,
-  filename: string
-) {
-  return `data/${category}/${filename}`
-}
-
-export function buildArticleAssetUrl(filePath: string) {
+function buildArticleAssetUrl(filePath: string) {
   return `https://raw.githubusercontent.com/${ARTICLES_REPO_OWNER}/${ARTICLES_REPO_NAME}/main/${filePath}`
 }

@@ -69,6 +69,7 @@ interface EditorTextareaProps {
   canUndo?: boolean
   canRedo?: boolean
   enableSyntaxHints?: boolean
+  ref?: React.Ref<ReactCodeMirrorRef>
 }
 
 const markdownSyntaxHints = [
@@ -151,32 +152,27 @@ function markdownSyntaxHintSource(context: CompletionContext) {
   }
 }
 
-export const EditorTextarea = React.forwardRef<
-  ReactCodeMirrorRef,
-  EditorTextareaProps
->(function EditorTextarea(
-  {
-    value,
-    onChange,
-    onUndo,
-    onRedo,
-    onPaste,
-    onDrop,
-    onDragOver,
-    onDragEnter,
-    isReadOnly,
-    isSaving,
-    placeholder,
-    fileId,
-    lineWrap = false,
-    onWrapToggle,
-    canUndo = false,
-    canRedo = false,
-    enableSyntaxHints = false,
-    ...rest
-  },
-  ref
-) {
+export function EditorTextarea({
+  value,
+  onChange,
+  onUndo,
+  onRedo,
+  onPaste,
+  onDrop,
+  onDragOver,
+  onDragEnter,
+  isReadOnly,
+  isSaving,
+  placeholder,
+  fileId,
+  lineWrap = false,
+  onWrapToggle,
+  canUndo = false,
+  canRedo = false,
+  enableSyntaxHints = false,
+  ref,
+  ...rest
+}: EditorTextareaProps) {
   const t = useTranslations("Editor")
   const { resolvedTheme } = useTheme()
 
@@ -252,4 +248,4 @@ export const EditorTextarea = React.forwardRef<
       />
     </div>
   )
-})
+}

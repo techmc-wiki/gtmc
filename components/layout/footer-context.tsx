@@ -1,12 +1,6 @@
 "use client"
 
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react"
+import React, { createContext, use, useEffect, useMemo, useState } from "react"
 
 interface FooterContextValue {
   hidden: boolean
@@ -29,7 +23,7 @@ export function FooterProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useFooter() {
-  return useContext(FooterContext)
+  return use(FooterContext)
 }
 
 export function HideFooter() {

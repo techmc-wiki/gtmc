@@ -2,12 +2,15 @@ import * as React from "react"
 
 export interface TextAreaBoxProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   error?: boolean
+  ref?: React.Ref<HTMLTextAreaElement>
 }
 
-export const TextAreaBox = React.forwardRef<
-  HTMLTextAreaElement,
-  TextAreaBoxProps
->(({ className = "", error, ...props }, ref) => {
+export function TextAreaBox({
+  className = "",
+  error,
+  ref,
+  ...props
+}: TextAreaBoxProps) {
   let baseStyles =
     "w-full resize-y border border-tech-main/30 px-3 py-2.5 sm:px-4 sm:py-3 font-mono outline-none transition-colors focus:border-tech-main bg-surface-input/50 text-tech-main-dark min-h-[88px]"
 
@@ -18,5 +21,4 @@ export const TextAreaBox = React.forwardRef<
   return (
     <textarea ref={ref} className={` ${baseStyles} ${className} `} {...props} />
   )
-})
-TextAreaBox.displayName = "TextAreaBox"
+}

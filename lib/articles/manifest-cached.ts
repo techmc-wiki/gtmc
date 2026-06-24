@@ -11,15 +11,6 @@ import {
 } from "@/lib/articles/manifest"
 import type { ArticleTreeNode } from "@/lib/github"
 
-export async function getCachedArticleManifest(): Promise<
-  Record<string, ArticleEntry>
-> {
-  cacheLife("hours")
-  cacheTag("article-manifest")
-
-  return getArticleManifest()
-}
-
 export async function getCachedArticleTree(
   locale: ArticleLocale = "zh"
 ): Promise<ArticleTreeNode[]> {

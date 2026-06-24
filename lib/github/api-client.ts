@@ -107,7 +107,7 @@ export function getRepoIssuesBaseUrl(config: GithubRepoConfig): string {
   return `${GITHUB_API_BASE}/repos/${config.owner}/${config.repo}/issues`
 }
 
-export function parseJsonSafely(text: string): unknown {
+function parseJsonSafely(text: string): unknown {
   if (!text) {
     return null
   }
@@ -119,11 +119,11 @@ export function parseJsonSafely(text: string): unknown {
   }
 }
 
-export function parseErrorMessage(details: unknown): string | undefined {
+function parseErrorMessage(details: unknown): string | undefined {
   return parseGithubErrorMessage(details)
 }
 
-export function isRateLimited(response: Response, details: unknown): boolean {
+function isRateLimited(response: Response, details: unknown): boolean {
   return isGithubRateLimitedResponse(response, details)
 }
 

@@ -98,13 +98,6 @@ const MIME_ALLOWLIST: Record<string, MimeConfig> = {
   },
 }
 
-// MIME types that the proxy route can serve inline
-export const PROXY_INLINE_MIMES = new Set([
-  "video/mp4",
-  "video/webm",
-  "application/pdf",
-])
-
 // MIME-to-extension mapping for filename sanitization
 const MIME_TO_EXT: Record<string, string> = {
   "image/jpeg": "jpg",

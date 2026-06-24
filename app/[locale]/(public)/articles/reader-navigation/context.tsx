@@ -140,7 +140,7 @@ export function ReaderNavigationProvider({ tree, children }: ReaderNavigationPro
 }
 
 export function useReaderNavigation(): ReaderNavigationContextValue {
-  const context = React.useContext(ReaderNavigationContext)
+  const context = React.use(ReaderNavigationContext)
   if (!context) {
     throw new Error("useReaderNavigation must be used within ReaderNavigationProvider")
   }

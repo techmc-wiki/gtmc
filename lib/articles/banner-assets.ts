@@ -31,7 +31,7 @@ export function resolveArticleAssetPath(
   return normalized
 }
 
-export function isExternalArticleAssetUrl(assetSrc: string): boolean {
+function isExternalArticleAssetUrl(assetSrc: string): boolean {
   return assetSrc.startsWith("https://") || assetSrc.startsWith("http://")
 }
 

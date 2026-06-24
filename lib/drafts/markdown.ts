@@ -137,7 +137,7 @@ export function parseDraftTempImageRefs(
   return refs
 }
 
-export function computeChapterImagePath(
+function computeChapterImagePath(
   articleFilePath: string,
   assetFilename: string
 ): string {

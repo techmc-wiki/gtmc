@@ -115,7 +115,7 @@ export async function findFailedDraftAssets(
   return data ?? []
 }
 
-export async function findTempDraftAssetsForRevision(
+async function findTempDraftAssetsForRevision(
   revisionId: string,
   tempPrefix: string
 ): Promise<Pick<DraftAsset, "id" | "storagePath">[]> {
@@ -297,7 +297,7 @@ export async function markDraftAssetCleanupFailed(
   }
 }
 
-export async function markDraftAssetOutcome(
+async function markDraftAssetOutcome(
   assetId: string,
   outcome: string
 ): Promise<void> {

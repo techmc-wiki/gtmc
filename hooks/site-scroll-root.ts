@@ -2,7 +2,7 @@
 
 export const SITE_SCROLL_ROOT_ID = "site-scroll-root"
 
-export function getSiteScrollRoot(): HTMLElement | null {
+function getSiteScrollRoot(): HTMLElement | null {
   if (typeof document === "undefined") return null
   return document.getElementById(SITE_SCROLL_ROOT_ID)
 }

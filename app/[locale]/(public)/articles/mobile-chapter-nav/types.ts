@@ -48,26 +48,6 @@ export type MachineEvent =
   | { readonly type: "RESIZE_TO_DESKTOP" }
 
 /**
- * Returns `true` when the tree panel is visible (regardless of layout mode).
- *
- * @param state - Current machine state.
- * @returns `false` when `state.value === "closed"`, `true` otherwise.
- */
-export function isOpen(state: MachineState): boolean {
-  return state.value !== "closed"
-}
-
-/**
- * Returns `true` when the tree panel is open in floating (overlay) mode.
- *
- * @param state - Current machine state.
- * @returns `true` only when `state.value === "floating_open"`.
- */
-export function isFloating(state: MachineState): boolean {
-  return state.value === "floating_open"
-}
-
-/**
  * Create the initial machine state.
  *
  * The tree always starts closed.  The `isStuck` flag controls which open

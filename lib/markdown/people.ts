@@ -32,7 +32,7 @@ export type ResolvedPerson = {
   isFallback: boolean
 }
 
-export function normalizePeopleKey(raw: string): string {
+function normalizePeopleKey(raw: string): string {
   return raw.trim()
 }
 

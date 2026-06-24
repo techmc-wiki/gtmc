@@ -16,9 +16,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null
 }
 
-function isGithubErrorResponse(
-  value: unknown
-): value is GithubErrorResponse {
+function isGithubErrorResponse(value: unknown): value is GithubErrorResponse {
   if (!isRecord(value)) {
     return false
   }

@@ -3,12 +3,12 @@
 import * as React from "react"
 import { cn } from "@/lib/cn"
 
-export function getFileLabel(filePath: string, index: number): string {
+function getFileLabel(filePath: string, index: number): string {
   const segments = filePath.split("/").filter(Boolean)
   return segments[segments.length - 1] || `UNTITLED_FILE_${index + 1}`
 }
 
-export function getFileExtension(filePath: string): string | null {
+function getFileExtension(filePath: string): string | null {
   if (!filePath.includes(".")) return null
   return filePath.slice(filePath.lastIndexOf("."))
 }

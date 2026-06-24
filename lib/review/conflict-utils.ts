@@ -42,7 +42,7 @@ function parseConflictSections(content: string): ConflictSection[] {
   return sections
 }
 
-export function extractResolvedBlockResolutions(input: {
+function extractResolvedBlockResolutions(input: {
   originalConflictContent: string
   resolvedContent: string
   filePath: string

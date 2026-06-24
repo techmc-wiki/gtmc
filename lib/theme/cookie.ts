@@ -1,7 +1,7 @@
 import type { Theme } from "./types"
 
-export const THEME_COOKIE = "theme"
-export const COOKIE_MAX_AGE = 60 * 60 * 24 * 365
+const THEME_COOKIE = "theme"
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 
 export function parseThemeCookie(raw: string): Theme | null {
   const match = raw.match(/(?:^|;\s*)theme=(light|dark|system)/)

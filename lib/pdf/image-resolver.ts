@@ -14,7 +14,7 @@ import { hasExplicitUrlScheme } from "@/lib/markdown/url-utils"
  */
 export type ImagePathType = "relative" | "external" | "absolute" | "data-uri"
 
-export const IMAGES_BASE_DIR: string = ARTICLES_PATH
+const IMAGES_BASE_DIR: string = ARTICLES_PATH
 
 const DATA_URI_RE = /^data:/i
 
@@ -27,7 +27,7 @@ const DATA_URI_RE = /^data:/i
  * 3. leading `/` → `"absolute"`
  * 4. everything else → `"relative"`
  */
-export function classifyImagePath(imageSrc: string): ImagePathType {
+function classifyImagePath(imageSrc: string): ImagePathType {
   if (DATA_URI_RE.test(imageSrc)) return "data-uri"
   if (hasExplicitUrlScheme(imageSrc)) return "external"
   if (imageSrc.startsWith("/")) return "absolute"
@@ -51,7 +51,7 @@ export function classifyImagePath(imageSrc: string): ImagePathType {
  * @returns The resolved absolute path, or the original src for external/data-uri,
  *          or `null` when the input is empty/not a string.
  */
-export function resolveImagePath(
+function resolveImagePath(
   imageSrc: string,
   articleFilePath: string
 ): string | null {

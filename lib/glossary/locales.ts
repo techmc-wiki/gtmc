@@ -1,18 +1,5 @@
 import type { GlossaryLocale } from "./manifest"
 
-export const COLUMN_TO_LOCALE: Record<string, GlossaryLocale> = {
-  Arabic: "ar",
-  Chinese: "zh",
-  French: "fr",
-  German: "de",
-  Italian: "it",
-  Japanese: "ja",
-  Korean: "ko",
-  Portugese: "pt",
-  Russian: "ru",
-  Spanish: "es",
-}
-
 export const LOCALE_TO_COLUMN: Record<
   GlossaryLocale,
   { termColumn: string; descColumn: string }
@@ -42,14 +29,6 @@ const NEXT_INTL_TO_GLOSSARY: Record<string, GlossaryLocale> = {
   es: "es",
 }
 
-export function getActiveLocale(locale: string): GlossaryLocale {
-  const mapped = NEXT_INTL_TO_GLOSSARY[locale]
-  if (!mapped) {
-    throw new Error(`Unsupported glossary locale: "${locale}"`)
-  }
-  return mapped
-}
-
 export function isGlossaryLocale(locale: string): locale is GlossaryLocale {
   return locale in NEXT_INTL_TO_GLOSSARY
 }
@@ -66,14 +45,6 @@ export const LANGUAGE_CODES: GlossaryLocale[] = [
   "ru",
   "es",
 ]
-
-export const LOCALE_TO_CSV_LANGUAGE: Record<
-  "en" | "zh",
-  GlossaryLocale | null
-> = {
-  en: null,
-  zh: "zh",
-}
 
 export const LANGUAGE_DISPLAY: Record<GlossaryLocale, string> = {
   ar: "العربية",

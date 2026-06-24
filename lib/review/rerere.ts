@@ -8,10 +8,6 @@ import { prisma } from "@/lib/prisma"
 export const SIMPLE_CONFLICT_BLOCK_RE =
   /<<<<<<< draft\n([\s\S]*?)=======\n([\s\S]*?)>>>>>>> main\n?/g
 
-export function formatConflictMarker(ours: string, theirs: string): string {
-  return `<<<<<<< draft\n${ours}=======\n${theirs}>>>>>>> main\n`
-}
-
 export function parseConflictBlocks(
   content: string,
   filePath: string,
@@ -64,7 +60,7 @@ function normalizeInput(input: string): string {
   return input.replaceAll("\r\n", "\n").replaceAll("\r", "\n").trimEnd()
 }
 
-export function computeConflictHash(
+function computeConflictHash(
   filePath: string,
   base: string,
   ours: string,
@@ -80,9 +76,7 @@ export function computeConflictHash(
   return createHash("sha256").update(normalizedPayload).digest("hex")
 }
 
-export async function lookupRerere(
-  conflictHash: string
-): Promise<string | null> {
+async function lookupRerere(conflictHash: string): Promise<string | null> {
   const record = await prisma.conflictResolution.findUnique({
     where: { conflictHash },
     select: { resolution: true },

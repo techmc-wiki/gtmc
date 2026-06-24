@@ -11,38 +11,6 @@ for (const entry of glossaryEntries) {
   entriesByFullFormLower.set(entry.fullFormEn.toLowerCase(), entry)
 }
 
-function resolveTermToken(token: string): GlossaryEntry | undefined {
-  const stripped = token.includes(":")
-    ? token.slice(token.indexOf(":") + 1)
-    : token
-  const normalized = stripped.trim()
-  if (!normalized) return undefined
-
-  const slugCandidate = normalized.toLowerCase().replaceAll(/\s+/g, "-")
-  const bySlug = glossaryEntries.find((e) => e.slug === slugCandidate)
-  if (bySlug) return bySlug
-
-  return entriesByFullFormLower.get(normalized.toLowerCase())
-}
-
-export function parseRelatedTerms(related: string): ResolvedRelatedTerm[] {
-  if (!related.trim()) return []
-
-  const tokens = related.trim().split(/\s+/)
-  const seen = new Set<string>()
-  const results: ResolvedRelatedTerm[] = []
-
-  for (const token of tokens) {
-    const entry = resolveTermToken(token)
-    if (entry && !seen.has(entry.slug)) {
-      seen.add(entry.slug)
-      results.push({ slug: entry.slug, fullFormEn: entry.fullFormEn })
-    }
-  }
-
-  return results
-}
-
 export interface ParsedRelatedToken {
   kind: "synonym" | "see"
   target: string
@@ -62,17 +30,4 @@ export function parseRelated(relatedField: string): ParsedRelatedToken[] {
     }
   }
   return results
-}
-
-export function findDanglingRelated(
-  entry: GlossaryEntry,
-  manifest: GlossaryEntry[]
-): string[] {
-  const parsed = parseRelated(entry.related)
-  if (parsed.length === 0) return []
-
-  const fullFormSet = new Set(manifest.map((e) => e.fullFormEn))
-  return parsed
-    .map((r) => r.target)
-    .filter((target) => !fullFormSet.has(target))
 }

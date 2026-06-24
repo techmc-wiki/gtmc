@@ -15,36 +15,44 @@ const DELAY_STYLES: Record<RevealDelay, React.CSSProperties> = {
  * Applies staged animation delays matching loading shell timing (0ms, 100ms, 200ms, 300ms, 400ms).
  * Uses simple fade-in: plain opacity transition only.
  */
-export const RevealSection = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & {
-    delay?: RevealDelay
-  }
->(({ delay = 0, className = "", ...props }, ref) => (
-  <div
-    ref={ref}
-    className={`animate-fade-in ${className} `}
-    style={DELAY_STYLES[delay]}
-    {...props}
-  />
-))
-RevealSection.displayName = "RevealSection"
+export function RevealSection({
+  delay = 0,
+  className = "",
+  ref,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & {
+  delay?: RevealDelay
+  ref?: React.Ref<HTMLDivElement>
+}) {
+  return (
+    <div
+      ref={ref}
+      className={`animate-fade-in ${className} `}
+      style={DELAY_STYLES[delay]}
+      {...props}
+    />
+  )
+}
 
 /**
  * Fade-in wrapper for content that should reveal after frame settles.
  * Lighter animation for secondary content within sections.
  */
-export const RevealContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & {
-    delay?: RevealDelay
-  }
->(({ delay = 0, className = "", ...props }, ref) => (
-  <div
-    ref={ref}
-    className={`animate-fade-in ${className} `}
-    style={DELAY_STYLES[delay]}
-    {...props}
-  />
-))
-RevealContent.displayName = "RevealContent"
+export function RevealContent({
+  delay = 0,
+  className = "",
+  ref,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & {
+  delay?: RevealDelay
+  ref?: React.Ref<HTMLDivElement>
+}) {
+  return (
+    <div
+      ref={ref}
+      className={`animate-fade-in ${className} `}
+      style={DELAY_STYLES[delay]}
+      {...props}
+    />
+  )
+}

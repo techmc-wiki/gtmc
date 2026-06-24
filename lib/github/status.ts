@@ -3,27 +3,17 @@ import {
   GithubFeaturesError,
   requestGithub,
 } from "./api-client"
-import {
-  EXPLANATION_MARKER,
-  METADATA_MARKER,
-  SYSTEM_COMMENT_MARKER,
-} from "./constants"
+import { EXPLANATION_MARKER, SYSTEM_COMMENT_MARKER } from "./constants"
 
 // Re-export for barrel compatibility (@/lib/github)
-export { EXPLANATION_MARKER, METADATA_MARKER, SYSTEM_COMMENT_MARKER }
+export { EXPLANATION_MARKER, SYSTEM_COMMENT_MARKER }
 
 export type AppFeatureStatus = "PENDING" | "IN_PROGRESS" | "RESOLVED"
 
-export const APP_STATUS_LABELS = {
+const APP_STATUS_LABELS = {
   PENDING: "status:pending",
   IN_PROGRESS: "status:in-progress",
   RESOLVED: "status:resolved",
-} as const
-
-export const STATUS_LABEL_COLORS = {
-  "status:pending": "fbca04",
-  "status:in-progress": "0075ca",
-  "status:resolved": "0e8a16",
 } as const
 
 const STATUS_LABEL_PREFIX = "status:"
@@ -122,14 +112,6 @@ export function labelsToStatus(labels: string[]): AppFeatureStatus {
   }
 
   return "PENDING"
-}
-
-export function issueStateForStatus(status: string): "open" | "closed" {
-  if (status === "RESOLVED") {
-    return "closed"
-  }
-
-  return "open"
 }
 
 export function tagsToLabels(tags: string[]): string[] {

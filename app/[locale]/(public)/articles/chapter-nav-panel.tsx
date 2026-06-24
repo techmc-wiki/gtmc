@@ -27,19 +27,14 @@ const fadeOverlayStyle: React.CSSProperties = {
     "repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 4px), linear-gradient(to bottom, color-mix(in oklab, var(--color-tech-bg) 0%, transparent) 0%, color-mix(in oklab, var(--color-tech-bg) 20%, transparent) 50%, color-mix(in oklab, var(--color-tech-bg) 40%, transparent) 100%)",
 }
 
-export const ChapterNavPanel = React.forwardRef<
-  ChapterNavPanelHandle,
-  ChapterNavPanelProps
->(function ChapterNavPanel(
-  {
-    tree: _tree,
-    onNavigate,
-    internalScroll = false,
-    scrollClass = "",
-    hideActions = false,
-  },
-  ref
-) {
+export function ChapterNavPanel({
+  tree: _tree,
+  onNavigate,
+  internalScroll = false,
+  scrollClass = "",
+  hideActions = false,
+  ref,
+}: ChapterNavPanelProps & { ref?: React.Ref<ChapterNavPanelHandle> }) {
   void _tree
 
   return (
@@ -51,15 +46,17 @@ export const ChapterNavPanel = React.forwardRef<
       ref={ref}
     />
   )
-})
+}
 
-const ChapterNavPanelInner = React.forwardRef<
-  ChapterNavPanelHandle,
-  Omit<ChapterNavPanelProps, "tree">
->(function ChapterNavPanelInner(
-  { onNavigate, internalScroll = false, scrollClass = "", hideActions = false },
-  ref
-) {
+function ChapterNavPanelInner({
+  onNavigate,
+  internalScroll = false,
+  scrollClass = "",
+  hideActions = false,
+  ref,
+}: Omit<ChapterNavPanelProps, "tree"> & {
+  ref?: React.Ref<ChapterNavPanelHandle>
+}) {
   const t = useTranslations("ChapterNav")
   const pathname = usePathname()
 
@@ -113,11 +110,15 @@ const ChapterNavPanelInner = React.forwardRef<
     highlightActive,
   })
 
-  useImperativeHandle(ref, () => ({
-    openCreateModal: () => {},
-    collapseAll,
-    scrollToCurrent,
-  }))
+  useImperativeHandle(
+    ref,
+    () => ({
+      openCreateModal: () => {},
+      collapseAll,
+      scrollToCurrent,
+    }),
+    [collapseAll, scrollToCurrent]
+  )
 
   const handleCollapseAll = useCallback(
     (e: React.MouseEvent) => {
@@ -179,4 +180,4 @@ const ChapterNavPanelInner = React.forwardRef<
       )}
     </>
   )
-})
+}

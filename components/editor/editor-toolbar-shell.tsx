@@ -90,38 +90,3 @@ export function EditorToolbarStatus({
     </span>
   )
 }
-
-interface EditorMacroBarProps {
-  children: React.ReactNode
-  className?: string
-}
-
-export function EditorMacroBar({
-  children,
-  className = "",
-}: EditorMacroBarProps) {
-  return (
-    <div
-      className={`guide-line bg-tech-main/4 relative flex h-12 items-center gap-2 overflow-x-auto scroll-smooth border-b px-4 shadow-[inset_0_1px_4px_rgb(var(--color-tech-main)/0.05)] ${className} `}>
-      <div className="bg-tech-main/30 absolute inset-y-0 left-0 w-1" />
-      {children}
-    </div>
-  )
-}
-
-interface EditorMacroLabelProps {
-  children: React.ReactNode
-  className?: string
-}
-
-export function EditorMacroLabel({
-  children,
-  className = "",
-}: EditorMacroLabelProps) {
-  return (
-    <span
-      className={`text-tech-main/50 mr-2 font-mono text-[9px] tracking-widest uppercase opacity-70 ${className} `}>
-      {children}
-    </span>
-  )
-}

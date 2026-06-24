@@ -3,8 +3,8 @@
 import { usePathname } from "next/navigation"
 import React, {
   createContext,
+  use,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -105,7 +105,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useTheme(): ThemeContextValue {
-  const context = useContext(ThemeContext)
+  const context = use(ThemeContext)
   if (!context) throw new Error("useTheme must be used within ThemeProvider")
   return context
 }

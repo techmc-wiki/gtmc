@@ -76,6 +76,7 @@ export function GlossaryRowPicker({
   const [query, setQuery] = useState("")
   const [isOpen, setIsOpen] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(0)
+  const prevResultsRef = useRef<GlossarySummaryEntry[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const listboxId = useId()
@@ -101,9 +102,12 @@ export function GlossaryRowPicker({
 
   const showNoMatch = isOpen && trimmedQuery.length > 0 && results.length === 0
 
-  useEffect(() => {
+  // Reset highlight inline when results change so the stale index does not
+  // flash before the effect-driven reset commits.
+  if (results !== prevResultsRef.current) {
+    prevResultsRef.current = results
     setHighlightedIndex(0)
-  }, [results])
+  }
 
   useEffect(() => {
     if (!isOpen) return

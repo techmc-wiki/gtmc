@@ -48,7 +48,7 @@ export function buildFileStates(
   )
 }
 
-export function fileStatesToFiles(
+function fileStatesToFiles(
   fileStates: Record<string, FileRebaseState> | undefined
 ): RebasedFileContent[] {
   return Object.values(fileStates ?? {}).map((fileState) => ({
@@ -57,7 +57,7 @@ export function fileStatesToFiles(
   }))
 }
 
-export async function autoResolveConflictContent(input: {
+async function autoResolveConflictContent(input: {
   content: string
   filePath: string
   baseContent: string
@@ -104,7 +104,7 @@ export async function autoResolveConflictContent(input: {
   }
 }
 
-export function conflictBlockFromRerere(block: ConflictBlock): MergeConflictBlock {
+function conflictBlockFromRerere(block: ConflictBlock): MergeConflictBlock {
   return {
     type: "conflict",
     ours: block.ours.replace(/\n$/, "").split("\n"),

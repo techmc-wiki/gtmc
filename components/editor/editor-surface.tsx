@@ -97,20 +97,6 @@ export function EditorForm({
   )
 }
 
-interface EditorPanelProps {
-  children: React.ReactNode
-  className?: string
-}
-
-export function EditorPanel({ children, className = "" }: EditorPanelProps) {
-  return (
-    <div
-      className={`border-tech-main/40 bg-surface-overlay/80 border p-4 backdrop-blur-sm ${className} `}>
-      {children}
-    </div>
-  )
-}
-
 interface EditorActionsProps {
   children: React.ReactNode
   className?: string

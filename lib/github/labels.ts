@@ -57,19 +57,6 @@ export async function setIssueState(
   })
 }
 
-export async function setIssueAssignees(
-  issueNumber: number,
-  assignees: string[]
-): Promise<void> {
-  const config = getGithubRepoConfig()
-  const url = `${getRepoIssuesBaseUrl(config)}/${issueNumber}`
-
-  await requestGithub(url, {
-    method: "PATCH",
-    body: JSON.stringify({ assignees }),
-  })
-}
-
 interface GithubContentsUploadResponse {
   content?: {
     download_url?: string | null

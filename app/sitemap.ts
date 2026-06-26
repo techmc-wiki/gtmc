@@ -20,6 +20,7 @@ function localizedAlternates(base: string, path: string) {
     languages: {
       en: `${base}/en${path}`,
       zh: `${base}/zh${path}`,
+      "x-default": `${base}/zh${path}`,
     },
   }
 }

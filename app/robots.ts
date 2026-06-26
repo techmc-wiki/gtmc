@@ -1,5 +1,16 @@
 import type { MetadataRoute } from "next"
+import { routing } from "@/i18n/routing"
 import { getSiteUrl, toAbsoluteUrl } from "@/lib/site-url"
+
+const PRIVATE_SEGMENTS = [
+  "/draft",
+  "/review",
+  "/profile",
+  "/admin",
+  "/login",
+  "/glossary/edit",
+  "/features/new",
+]
 
 export default function robots(): MetadataRoute.Robots {
   const siteUrl = getSiteUrl()
@@ -9,12 +20,9 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
       disallow: [
-        "/draft",
-        "/review",
-        "/profile",
-        "/admin",
-        "/login",
-        "/glossary/edit",
+        ...routing.locales.flatMap((locale) =>
+          PRIVATE_SEGMENTS.map((segment) => `/${locale}${segment}`)
+        ),
         "/api/",
       ],
     },

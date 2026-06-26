@@ -1,6 +1,11 @@
+import type { Metadata } from "next"
 import { Link } from "@/i18n/navigation"
 import { TechButton } from "@/components/ui/tech-button"
 import { HideFooter } from "@/components/layout/footer-context"
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 export default function NotFound() {
   return (

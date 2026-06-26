@@ -7,6 +7,7 @@
     "glossary": "术语表"
   },
   "Homepage": {
+    "metaTitle": "技术性 Minecraft 教科书 — 红石、机制与代码分析",
     "heroDescription": "社区驱动的 Minecraft 红石和技术在线教科书。提供入门教程、机制阐述和源码阅读，助你在方块世界中攻克学术难题。",
     "scrollHint": "目录",
     "tocKicker": "GRADUATE TEXTS IN MINECRAFT — VOL.01",
@@ -583,6 +584,8 @@
     "label": "离线版 (PDF)",
     "title": "GTMC",
     "subtitle": "下载完整的 GTMC 文章。",
+    "metaTitle": "离线 PDF 下载",
+    "metaDescription": "下载完整的《Graduate Texts in Minecraft》技术 Minecraft 知识库为单个 PDF 文档 — 包含教程、机制详解与源码分析。",
     "download": "下载 PDF"
   },
   "Theme": {

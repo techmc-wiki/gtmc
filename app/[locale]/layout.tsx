@@ -65,8 +65,18 @@ const jsonLd = {
       "@context": "https://schema.org",
       "@type": "Organization",
       name: "Graduate Texts in Minecraft",
+      alternateName: "GTMC",
       url: siteUrl,
-      logo: `${siteUrl}/favicon.svg`,
+      description:
+        "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+      foundingDate: "2024",
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/favicon.svg`,
+        width: 100,
+        height: 100,
+      },
+      sameAs: ["https://github.com/gtmc-dev/gtmc"],
     },
     {
       "@context": "https://schema.org",
@@ -174,7 +184,9 @@ export default async function RootLayout({
       className={`${baseFontVariables} scroll-smooth`}
       data-scroll-behavior="smooth"
       suppressHydrationWarning>
-      <head />
+      <head>
+        <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
+      </head>
       <Analytics />
       <SpeedInsights />
       <body className="bg-tech-bg/50 h-dvh w-full overflow-hidden antialiased">
@@ -190,7 +202,6 @@ export default async function RootLayout({
             </FooterProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
-        <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
         <SpeculationRules />
       </body>
     </html>

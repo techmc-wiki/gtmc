@@ -13,6 +13,9 @@ const privateRoutes = [
 ]
 const protectedFeatureRoutes = ["/features/new"]
 const localePattern = /^\/(en|zh)(?=\/|$)/
+// Detects unrecognized locale prefixes to prevent next-intl redirecting e.g. /fr -> /zh/fr
+const invalidLocalePrefixPattern = /^\/([a-z]{2}(?:-[a-z]{2})?)(?=\/|$)/i
+const configuredLocales = new Set<string>(routing.locales)
 
 function getRequestOrigin(req: NextRequest): string {
   const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host")
@@ -55,6 +58,14 @@ export default auth((req) => {
   const pathname = req.nextUrl.pathname
   const locale = pathname.match(localePattern)?.[1] ?? routing.defaultLocale
   const pathWithoutLocale = pathname.replace(localePattern, "") || "/"
+
+  const invalidMatch = pathname.match(invalidLocalePrefixPattern)
+  const invalidSegment = invalidMatch?.[1]?.toLowerCase()
+  if (invalidSegment && !configuredLocales.has(invalidSegment)) {
+    const strippedPath = pathname.replace(`/${invalidMatch?.[1]}`, "") || "/"
+    const redirectUrl = new URL(strippedPath, getRequestOrigin(req))
+    return Response.redirect(redirectUrl, 308)
+  }
 
   const isPrivateRoute = privateRoutes.some(
     (route) =>

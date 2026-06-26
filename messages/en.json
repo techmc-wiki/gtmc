@@ -7,6 +7,7 @@
     "glossary": "GLOSSARY"
   },
   "Homepage": {
+    "metaTitle": "Technical Minecraft — Redstone, Mechanics & Code Analysis Textbook",
     "heroDescription": "The community-driven online textbook of Minecraft redstone and game mechanics. Tutorials, explanations, and code analysis for conquering academic problems in a world of blocks.",
     "scrollHint": "TABLE OF CONTENTS",
     "tocKicker": "GRADUATE TEXTS IN MINECRAFT — VOL.01",
@@ -583,6 +584,8 @@
     "label": "Offline Version (PDF)",
     "title": "GTMC",
     "subtitle": "Download the full GTMC articles as a PDF document.",
+    "metaTitle": "Offline PDF Download",
+    "metaDescription": "Download the complete Graduate Texts in Minecraft knowledge base as a single PDF document — tutorials, mechanics deep-dives, and code analysis.",
     "download": "DOWNLOAD PDF"
   },
   "Theme": {

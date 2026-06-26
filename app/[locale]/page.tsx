@@ -1,3 +1,5 @@
+import type { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import { HomepageClient } from "./_homepage/homepage-client"
 import { TocSection } from "./_homepage/toc-section"
 import { MainSiteShell } from "@/components/layout/main-site-shell"
@@ -6,6 +8,22 @@ import type { ArticleLocale } from "@/lib/articles/manifest"
 
 function normalizeLocale(locale: string): ArticleLocale {
   return locale === "en" ? "en" : "zh"
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "Homepage" })
+
+  return {
+    title: {
+      absolute: t("metaTitle"),
+    },
+    description: t("heroDescription"),
+  }
 }
 
 export default async function Home({

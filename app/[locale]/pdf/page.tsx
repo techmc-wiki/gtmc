@@ -10,11 +10,12 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "Pdf" })
   const canonical = toAbsoluteUrl(`/${locale}/pdf`)
 
   return {
-    title: "PDF Download",
-    description: "Download the full GTMC knowledge base as a PDF document.",
+    title: t("metaTitle"),
+    description: t("metaDescription"),
     alternates: {
       canonical,
       languages: {
@@ -22,6 +23,27 @@ export async function generateMetadata({
         zh: toAbsoluteUrl("/zh/pdf"),
         "x-default": toAbsoluteUrl("/zh/pdf"),
       },
+    },
+    openGraph: {
+      type: "website",
+      siteName: "Graduate Texts in Minecraft",
+      url: canonical,
+      title: t("metaTitle"),
+      description: t("metaDescription"),
+      images: [
+        {
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: "Graduate Texts in Minecraft — Offline PDF",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("metaTitle"),
+      description: t("metaDescription"),
+      images: ["/opengraph-image"],
     },
   }
 }

@@ -1,7 +1,12 @@
+import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { TechButton } from "@/components/ui/tech-button"
 import { HideFooter } from "@/components/layout/footer-context"
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 export default async function Unauthorized() {
   const t = await getTranslations("unauthorized")

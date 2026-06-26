@@ -301,7 +301,7 @@ export function SearchCommand() {
   // Platform-aware shortcut label
   const shortcutLabel = useMemo(() => {
     if (typeof navigator === "undefined") return "Ctrl+K"
-    return navigator.platform?.toLowerCase().includes("mac") ? (
+    return navigator.platform.toLowerCase().includes("mac") ? (
       <span className="flex flex-row items-center gap-0.5 leading-none">
         <span className="text-xs">{"\u2318"}</span>K
       </span>

@@ -23,7 +23,7 @@ export interface GlossaryDiffPreviewProps {
 }
 
 function renderInlineDiff(oldText: string, newText: string): React.ReactNode {
-  const changes = diffWords(oldText ?? "", newText ?? "")
+  const changes = diffWords(oldText, newText)
   let keyCounter = 0
   return changes.map((part) => {
     const key = `${part.added ? "a" : part.removed ? "r" : "s"}-${keyCounter++}`
@@ -53,15 +53,13 @@ function changedColumns(
   before: GlossaryRow,
   after: GlossaryRow
 ): readonly (typeof GLOSSARY_COLUMNS)[number][] {
-  return GLOSSARY_COLUMNS.filter(
-    (col) => (before[col] ?? "") !== (after[col] ?? "")
-  )
+  return GLOSSARY_COLUMNS.filter((col) => before[col] !== after[col])
 }
 
 function populatedColumns(
   row: GlossaryRow
 ): readonly (typeof GLOSSARY_COLUMNS)[number][] {
-  return GLOSSARY_COLUMNS.filter((col) => (row[col] ?? "").trim() !== "")
+  return GLOSSARY_COLUMNS.filter((col) => row[col].trim() !== "")
 }
 
 interface OperationCardProps {
@@ -96,7 +94,7 @@ function EditOperationCard({ operation }: OperationCardProps) {
                 {field}
               </dt>
               <dd className="text-tech-main-dark leading-relaxed break-words whitespace-pre-wrap">
-                {renderInlineDiff(before[field] ?? "", after[field] ?? "")}
+                {renderInlineDiff(before[field], after[field])}
               </dd>
             </div>
           ))}

@@ -290,8 +290,8 @@ export default async function ReviewDetailPage({
 
   if (
     isInReview &&
-    linkedDraft?.baseMainSha &&
-    linkedDraft?.syncedMainSha &&
+    linkedDraft.baseMainSha &&
+    linkedDraft.syncedMainSha &&
     linkedDraft.baseMainSha !== linkedDraft.syncedMainSha &&
     analysisFilePath
   ) {
@@ -305,12 +305,12 @@ export default async function ReviewDetailPage({
 
     modeAnalysis = {
       recommendation:
-        rebaseAnalysis?.recommendation === "REBASE_RECOMMENDED"
+        rebaseAnalysis.recommendation === "REBASE_RECOMMENDED"
           ? "FINE_GRAINED"
           : "SIMPLE",
-      commitCount: rebaseAnalysis?.totalCommits ?? 0,
-      filesAffected: rebaseAnalysis?.fileEditCount ?? 0,
-      adminMessage: rebaseAnalysis?.adminMessage ?? "No analysis available.",
+      commitCount: rebaseAnalysis.totalCommits,
+      filesAffected: rebaseAnalysis.fileEditCount,
+      adminMessage: rebaseAnalysis.adminMessage,
     }
   }
 
@@ -326,7 +326,7 @@ export default async function ReviewDetailPage({
       status: f.status,
       hasConflictContent: Boolean(f.conflictContent),
       conflictContentPreview: f.conflictContent?.slice(0, 80) ?? null,
-      contentPreview: f.content?.slice(0, 80),
+      contentPreview: f.content.slice(0, 80),
     }))
   )
 
@@ -416,9 +416,7 @@ export default async function ReviewDetailPage({
                   AUTHOR
                 </p>
                 <p className="text-tech-main mt-1 font-mono text-sm tracking-widest uppercase">
-                  {linkedDraft?.author?.name ||
-                    pr.user?.login ||
-                    "UNKNOWN_USER"}
+                  {linkedDraft?.author?.name || pr.user.login || "UNKNOWN_USER"}
                 </p>
               </div>
               <div className="guide-line bg-tech-main/5 border px-4 py-3">
@@ -535,7 +533,7 @@ export default async function ReviewDetailPage({
             <div className="text-tech-main/70 mt-3 space-y-3 font-mono text-[0.6875rem] leading-relaxed">
               <p>
                 Author:{" "}
-                {linkedDraft?.author?.name || pr.user?.login || "UNKNOWN_USER"}
+                {linkedDraft?.author?.name || pr.user.login || "UNKNOWN_USER"}
               </p>
               <p>Head branch: {pr.head.ref}</p>
               <p>Base branch: {pr.base.ref}</p>

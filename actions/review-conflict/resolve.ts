@@ -88,8 +88,8 @@ export async function resolveConflictAction(
       throw new Error("The linked draft is missing PR metadata")
     }
 
-    const submitterName = linkedDraft.author?.name || authorName
-    const submitterEmail = linkedDraft.author?.email || authorEmail
+    const submitterName = linkedDraft.author.name || authorName
+    const submitterEmail = linkedDraft.author.email || authorEmail
 
     const storedDraftFiles = decodeStoredDraftFiles({
       content: linkedDraft.content,

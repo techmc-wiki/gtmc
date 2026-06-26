@@ -326,7 +326,7 @@ function EnglishFieldItem({
       column={field.column}
       label={field.label}
       required={showRequired && isEnglishTerm}
-      value={row[field.column] ?? ""}
+      value={row[field.column]}
       multiline={field.multiline}
       error={fieldError}
       onValueChange={handleValueChange}
@@ -391,13 +391,13 @@ function ActiveLocaleFields({
       <Field
         column={termCol}
         label={display}
-        value={row[termCol] ?? ""}
+        value={row[termCol]}
         onValueChange={handleTermChange}
       />
       <Field
         column={descCol}
         label={`Description (${display})`}
-        value={row[descCol] ?? ""}
+        value={row[descCol]}
         multiline
         onValueChange={handleDescChange}
       />
@@ -432,13 +432,13 @@ function LanguagePairFields({ row, code, onChange }: LanguagePairFieldsProps) {
       <Field
         column={termCol}
         label={display}
-        value={row[termCol] ?? ""}
+        value={row[termCol]}
         onValueChange={handleTermChange}
       />
       <Field
         column={descCol}
         label={`Description (${display})`}
-        value={row[descCol] ?? ""}
+        value={row[descCol]}
         multiline
         onValueChange={handleDescChange}
       />

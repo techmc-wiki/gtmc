@@ -53,7 +53,7 @@ function sortChapterTree(nodes: ChapterNavNode[]) {
     return a.title.localeCompare(b.title)
   })
   for (const node of nodes) {
-    if (node.children?.length) sortChapterTree(node.children)
+    if (node.children.length) sortChapterTree(node.children)
   }
 }
 

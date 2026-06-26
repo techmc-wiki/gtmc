@@ -332,7 +332,7 @@ export function FeatureEditor({ initialData }: FeatureEditorProps) {
         <EditorPreviewPanel
           id="editor-preview-panel"
           hidden={activeTab !== "preview"}>
-          <EditorPreviewFrame isEmpty={!content?.trim()}>
+          <EditorPreviewFrame isEmpty={!content.trim()}>
             <LazyMarkdownPreview content={content} rawPath="" />
           </EditorPreviewFrame>
         </EditorPreviewPanel>

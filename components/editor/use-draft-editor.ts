@@ -292,7 +292,7 @@ export function useDraftEditor(initialData?: {
       const previous = current[fileId]
       if (
         previous?.undoCount === nextAvailability.undoCount &&
-        previous?.redoCount === nextAvailability.redoCount
+        previous.redoCount === nextAvailability.redoCount
       ) {
         return current
       }

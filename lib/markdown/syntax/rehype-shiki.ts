@@ -44,7 +44,7 @@ export async function createRehypeShiki(langs?: string[]) {
         )
         if (!codeNode) return
 
-        const classNames = Array.isArray(codeNode.properties?.className)
+        const classNames = Array.isArray(codeNode.properties.className)
           ? (codeNode.properties.className as string[])
           : []
         const langClass = classNames.find((c) => c.startsWith("language-"))
@@ -59,7 +59,6 @@ export async function createRehypeShiki(langs?: string[]) {
             const cached = highlightCache.get(cacheKey)
             if (cached) {
               codeNode.children = cached.children
-              node.properties = node.properties ?? {}
               node.properties["data-raw-code"] = rawCode
               node.properties["data-lang"] = lang
               node.properties["data-line-count"] = String(
@@ -116,7 +115,6 @@ export async function createRehypeShiki(langs?: string[]) {
               0
             )
             if (indent > 0) {
-              lineEl.properties = lineEl.properties ?? {}
               const existing = (lineEl.properties.style as string) ?? ""
               lineEl.properties.style =
                 (existing ? existing + ";" : "") + `--line-indent:${indent}ch`
@@ -130,7 +128,6 @@ export async function createRehypeShiki(langs?: string[]) {
 
           codeNode.children = filtered
 
-          node.properties = node.properties ?? {}
           node.properties["data-raw-code"] = rawCode
           node.properties["data-lang"] = lang
           node.properties["data-line-count"] = String(

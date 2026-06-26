@@ -3,7 +3,6 @@ import { Suspense } from "react"
 import "katex/dist/katex.min.css"
 import type { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
-import { getTranslations } from "next-intl/server"
 import {
   calculateReadingMetrics,
   generateDescription,
@@ -96,22 +95,21 @@ export async function generateMetadata({
   const locale = resolveLocale(rawLocale)
   const slugPath = decodeSlugPath(slug ?? []) || "preface"
   const target = await resolveArticleTarget(slugPath, locale)
-  const t = await getTranslations("Article")
 
+  // Per Next.js docs: call notFound() from generateMetadata (not return a
+  // fallback metadata object) so the route emits a real HTTP 404 status and
+  // avoids being indexed as a soft-404.
   if (target === null) {
-    return {
-      title: t("notFound"),
-      description: "The requested article could not be found.",
-    }
+    notFound()
   }
 
   try {
-    const artifact = await getArticleContentBySlug(target.canonicalSlug ?? slugPath, locale)
+    const artifact = await getArticleContentBySlug(
+      target.canonicalSlug ?? slugPath,
+      locale
+    )
     if (!artifact) {
-      return {
-        title: t("notFound"),
-        description: "The requested article could not be found.",
-      }
+      notFound()
     }
 
     const { content: mdBody, frontmatter: data } = artifact
@@ -187,10 +185,7 @@ export async function generateMetadata({
       },
     }
   } catch {
-    return {
-      title: t("notFound"),
-      description: "The requested article could not be found.",
-    }
+    notFound()
   }
 }
 

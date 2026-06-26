@@ -17,7 +17,7 @@ interface MimeConfig {
   proxyable: boolean
 }
 
-const MIME_ALLOWLIST: Record<string, MimeConfig> = {
+const MIME_ALLOWLIST: Partial<Record<string, MimeConfig>> = {
   // Images — 15 MB
   "image/jpeg": {
     category: "images",
@@ -99,7 +99,7 @@ const MIME_ALLOWLIST: Record<string, MimeConfig> = {
 }
 
 // MIME-to-extension mapping for filename sanitization
-const MIME_TO_EXT: Record<string, string> = {
+const MIME_TO_EXT: Partial<Record<string, string>> = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/gif": "gif",

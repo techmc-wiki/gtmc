@@ -136,8 +136,8 @@ export async function finalizeReviewAction(
       throw new Error("Linked draft not found")
     }
 
-    const submitterName = revision.author?.name || authorName
-    const submitterEmail = revision.author?.email || authorEmail
+    const submitterName = revision.author.name || authorName
+    const submitterEmail = revision.author.email || authorEmail
 
     const conflictMode = (revision as { conflictMode?: ConflictMode | null })
       .conflictMode

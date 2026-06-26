@@ -42,7 +42,7 @@ export async function FeatureReadonlyView({
           </div>
 
           <div className="min-h-[200px]">
-            {content?.trim() ? (
+            {content.trim() ? (
               <div className="selection:bg-tech-main/20 selection:text-tech-main-dark w-full max-w-none overflow-hidden p-6 wrap-break-word sm:p-8">
                 <MarkdownRenderer content={content} shikiPlugin={shikiPlugin} />
               </div>
@@ -55,7 +55,7 @@ export async function FeatureReadonlyView({
             <summary className="guide-line bg-tech-main/5 text-tech-main/70 cursor-pointer list-none border-b px-4 py-2 font-mono text-xs">
               SOURCE_ (Click to expand)
             </summary>
-            {content?.trim() ? (
+            {content.trim() ? (
               <pre className="p-6 font-mono text-sm/relaxed whitespace-pre-wrap">
                 {content}
               </pre>

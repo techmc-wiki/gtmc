@@ -148,7 +148,7 @@ async function main(): Promise<void> {
           author: entry.author || undefined,
           coAuthors: entry.coAuthors || undefined,
           created: entry.created || undefined,
-          lastmod: entry.lastmodByLocale?.zh || undefined,
+          lastmod: entry.lastmodByLocale.zh || undefined,
         }
       } else if (locale === "en") {
         let fm: TranslationFrontMatter
@@ -176,9 +176,9 @@ async function main(): Promise<void> {
           ...(fm.banner && { banner: fm.banner }),
           translatedFromRevision: fm["translated-from-revision"],
           translationFreshness:
-            entry.translationFreshnessByLocale?.en || undefined,
+            entry.translationFreshnessByLocale.en || undefined,
           created: entry.created || undefined,
-          lastmod: entry.lastmodByLocale?.en || undefined,
+          lastmod: entry.lastmodByLocale.en || undefined,
           index: entry.index >= 0 ? entry.index : undefined,
           ...(entry.isAdvanced !== undefined && {
             isAdvanced: entry.isAdvanced,

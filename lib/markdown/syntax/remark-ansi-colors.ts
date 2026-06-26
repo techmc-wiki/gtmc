@@ -21,7 +21,7 @@ function replaceAnsiColorMarkup(value: string): Content[] | null {
     const fullMatch = match[0]
     const color = match[1] as AnsiColorName
     const innerText = match[2] ?? ""
-    const matchIndex = match.index ?? 0
+    const matchIndex = match.index
 
     if (matchIndex > lastIndex) {
       nextChildren.push({

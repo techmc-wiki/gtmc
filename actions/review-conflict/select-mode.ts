@@ -57,8 +57,8 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
       throw new Error("The revision is missing PR metadata")
     }
 
-    const submitterName = revision.author?.name || authorName
-    const submitterEmail = revision.author?.email || authorEmail
+    const submitterName = revision.author.name || authorName
+    const submitterEmail = revision.author.email || authorEmail
 
     const storedDraftFiles = decodeStoredDraftFiles({
       content: revision.content,
@@ -360,7 +360,7 @@ export async function selectModeAction(revisionId: string, mode: ConflictMode) {
       fileResults: result.fileResults.map((file) => ({
         filePath: file.filePath,
         status: file.status,
-        contentLength: file.content?.length,
+        contentLength: file.content.length,
       })),
     })
 

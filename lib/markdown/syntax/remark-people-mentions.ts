@@ -71,7 +71,7 @@ function replacePeopleMentions(
   for (const match of value.matchAll(MENTION_PATTERN)) {
     const fullMatch = match[0]
     const personKey = match[1]
-    const matchIndex = match.index ?? 0
+    const matchIndex = match.index
 
     if (matchIndex > lastIndex) {
       nextChildren.push({

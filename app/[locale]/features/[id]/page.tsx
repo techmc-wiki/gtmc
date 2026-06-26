@@ -23,13 +23,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, id } = await params
   const issueNumber = Number.parseInt(id, 10)
-  if (isNaN(issueNumber)) return { title: "Feature Not Found" }
+  if (isNaN(issueNumber)) notFound()
 
   const issue = await getIssue(issueNumber)
-  if (!issue) return { title: "Feature Not Found" }
+  if (!issue) notFound()
 
   const canonical = toAbsoluteUrl(`/${locale}/features/${issue.number}`)
-  const description = generateDescription(issue.body ?? "", undefined, 155)
+  const description = generateDescription(issue.body, undefined, 155)
 
   return {
     title: issue.title,
@@ -94,7 +94,7 @@ export default async function FeatureDetailPage({
   }
 
   const canonical = toAbsoluteUrl(`/${locale}/features/${issue.number}`)
-  const description = generateDescription(issue.body ?? "", undefined, 155)
+  const description = generateDescription(issue.body, undefined, 155)
 
   const isClosed = issue.state === "closed"
 
@@ -141,8 +141,8 @@ export default async function FeatureDetailPage({
     },
     assignee: parsedIssue.metadata?.assigneeId
       ? {
-          name: parsedIssue.metadata?.assigneeName ?? null,
-          email: parsedIssue.metadata?.assigneeEmail ?? null,
+          name: parsedIssue.metadata.assigneeName ?? null,
+          email: parsedIssue.metadata.assigneeEmail ?? null,
           image: null,
         }
       : null,

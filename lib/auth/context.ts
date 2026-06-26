@@ -26,7 +26,7 @@ export async function getCurrentUserAuthContext(
   }
   return {
     id: user.id,
-    role: user.role ?? "USER",
+    role: user.role,
     githubPat: user.githubPat ?? null,
   }
 }

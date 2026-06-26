@@ -35,9 +35,7 @@ export function AttributionWarning({
     realEmail !== null && realEmail !== githubNoreplyEmail
 
   const displayedEmail =
-    canToggleRealEmail && useRealEmail && realEmail !== null
-      ? realEmail
-      : githubNoreplyEmail
+    canToggleRealEmail && useRealEmail ? realEmail : githubNoreplyEmail
 
   return (
     <div

@@ -43,10 +43,7 @@ export async function generateMetadata({
   ])
 
   if (!entry) {
-    return {
-      title: t("pageTitle"),
-      description: t("pageDescription"),
-    }
+    notFound()
   }
 
   const title = `${entry.fullFormEn} | ${t("pageTitle")}`

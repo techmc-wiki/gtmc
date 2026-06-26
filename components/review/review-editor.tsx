@@ -64,7 +64,7 @@ function parseEditorSegments(content: string): EditorSegment[] {
 
   for (const match of content.matchAll(CONFLICT_BLOCK_REGEX)) {
     const marker = match[0]
-    const start = match.index ?? 0
+    const start = match.index
     const precedingText = content.slice(lastIndex, start)
 
     if (precedingText) {
@@ -675,7 +675,7 @@ export function ReviewEditor({
     setIsSelectingMode(true)
     try {
       const result = await selectModeAction(revision.id, mode)
-      const selectedMode = result.conflictMode ?? mode
+      const selectedMode = result.conflictMode
 
       if (result.draftSnapshot) {
         applyDraftSnapshot(result.draftSnapshot)

@@ -397,7 +397,7 @@ function RebaseProgressContent({
       rebaseState?.commitInfos[
         Math.min(
           currentCommitIndex,
-          Math.max((rebaseState?.commitInfos.length ?? 1) - 1, 0)
+          Math.max(rebaseState.commitInfos.length - 1, 0)
         )
       ]
     const fileStates = fineGrainedFileStates

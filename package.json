@@ -8,7 +8,7 @@
     "build:next": "next build",
     "build:pdf": "tsx scripts/generate-pdf.ts --locale all",
     "build:vercel": "playwright install chromium && node --run db:migrate:deploy && node --run build",
-    "build": "pnpm build:content && pnpm build:next",
+    "build": "if [ \"$GTMC_SKIP_CONTENT_BUILD\" != 'true' ]; then pnpm build:content; fi && pnpm build:next",
     "db:migrate:deploy": "prisma migrate deploy",
     "generate:content": "tsx scripts/generate-article-content.ts",
     "generate:manifest": "tsx scripts/generate-article-manifest.ts",

@@ -40,8 +40,28 @@ jobs:
         env:
           DATABASE_URL: "postgresql://localhost:5432/placeholder"
 
+      - name: Resolve articles submodule SHA
+        id: submodule-sha
+        # postinstall initializes the submodule, so this is safe to run here.
+        run: git -C articles rev-parse HEAD
+
+      - name: Cache content artifacts
+        id: cache-content
+        uses: actions/cache@v5
+        with:
+          path: |
+            data/manifest.json
+            data/articles
+            data/glossary*.json
+            public/gtmc.pdf
+          key: content-${{ steps.submodule-sha.outputs.sha }}-${{ hashFiles('scripts/**', 'lib/articles/**') }}
+          restore-keys: |
+            content-${{ steps.submodule-sha.outputs.sha }}-
+
       - name: TypeScript Check
         run: node --run typecheck
 
       - name: Build
+        env:
+          GTMC_SKIP_CONTENT_BUILD: ${{ steps.cache-content.outputs.cache-hit == 'true' }}
         run: node --run build

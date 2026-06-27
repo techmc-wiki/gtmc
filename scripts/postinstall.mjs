@@ -49,11 +49,26 @@ if (isGitWorkTree()) {
   process.stdout.write("Skipping Git submodule setup outside a Git work tree\n")
 }
 
-run("prisma", ["generate"], {
-  env: {
-    ...process.env,
-    DATABASE_URL: process.env.DATABASE_URL ?? placeholderDatabaseUrl,
-  },
-})
-run("tsx", ["scripts/generate-article-manifest.ts"])
-run("playwright", ["install", "chromium"])
+// Heavy steps (prisma generate, article manifest, chromium install) are
+// skipped in CI lint runs and when explicitly opted out, so a pure lint
+// job doesn't pay for the full content pipeline.
+const isCI = process.env.CI === "true"
+const isVercel = process.env.VERCEL === "1"
+const skipHeavy =
+  process.env.GTMC_SKIP_POSTINSTALL === "1" ||
+  (isCI && !isVercel && process.env.GTMC_LINT_ONLY === "1")
+
+if (skipHeavy) {
+  process.stdout.write(
+    "Skipping heavy postinstall steps (prisma generate, article manifest, chromium install)\n"
+  )
+} else {
+  run("prisma", ["generate"], {
+    env: {
+      ...process.env,
+      DATABASE_URL: process.env.DATABASE_URL ?? placeholderDatabaseUrl,
+    },
+  })
+  run("tsx", ["scripts/generate-article-manifest.ts"])
+  run("playwright", ["install", "chromium"])
+}

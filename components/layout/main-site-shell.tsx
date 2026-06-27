@@ -16,6 +16,7 @@ import { Logo } from "@/components/ui/logo"
 function buildNavLinks(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
   return [
     { href: "/articles", label: t("articles") },
+    { href: "/pdf", label: t("pdf") },
     { href: "/glossary", label: t("glossary") },
     { href: "/features", label: t("features") },
   ]

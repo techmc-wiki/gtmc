@@ -4,7 +4,8 @@
     "drafts": "MY DRAFTS",
     "reviewHub": "REVIEW HUB",
     "features": "FEEDBACK",
-    "glossary": "GLOSSARY"
+    "glossary": "GLOSSARY",
+    "pdf": "PDF"
   },
   "Homepage": {
     "metaTitle": "Technical Minecraft — Redstone, Mechanics & Code Analysis Textbook",
@@ -22,6 +23,8 @@
     "continueReading": "BOOKMARK — CONTINUE READING",
     "contributeCardTitle": "Call for Contributions",
     "contributeCardDesc": "Write a section, submit it for review, get published.",
+    "pdfCardTitle": "Offline PDF",
+    "pdfCardDesc": "Download the full textbook for offline reading — complete, print-ready.",
     "startReading": "START READING →",
     "loginGithub": "LOGIN",
     "loggedInAs": "LOGGED IN AS {username}",

@@ -4,7 +4,8 @@
     "drafts": "我的草稿",
     "reviewHub": "审核中心",
     "features": "反馈",
-    "glossary": "术语表"
+    "glossary": "术语表",
+    "pdf": "PDF"
   },
   "Homepage": {
     "metaTitle": "技术性 Minecraft 教科书 — 红石、机制与代码分析",
@@ -22,6 +23,8 @@
     "continueReading": "书签 — 继续阅读",
     "contributeCardTitle": "征稿启事",
     "contributeCardDesc": "撰写章节，提交审核，发布成书。",
+    "pdfCardTitle": "离线 PDF",
+    "pdfCardDesc": "下载完整教科书以供离线阅读——内容完整，可直接打印。",
     "startReading": "开始阅读 →",
     "loginGithub": "登录",
     "loggedInAs": "登录为 {username}",

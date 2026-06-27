@@ -22,12 +22,9 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
-
-      - name: Generate Prisma Client
-        run: pnpm prisma generate
+        run: pnpm install --frozen-lockfile
         env:
-          DATABASE_URL: "postgresql://localhost:5432/placeholder"
+          GTMC_LINT_ONLY: "1"
 
       - name: Run linter
         run: node --run lint:check

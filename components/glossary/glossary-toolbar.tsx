@@ -23,6 +23,12 @@ import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { Link } from "@/i18n/navigation"
 import { LOCALE_TO_COLUMN } from "@/lib/glossary/locales"
 import type { GlossaryEntry } from "@/lib/glossary/manifest"
+import {
+  readPersistedGlossaryColumns,
+  readPersistedGlossaryDensity,
+  writePersistedGlossaryColumns,
+  writePersistedGlossaryDensity,
+} from "@/lib/glossary/persisted-prefs"
 import { useGlossaryEntries } from "@/lib/glossary/use-glossary"
 import { cn } from "@/lib/cn"
 const ALPHA = /[A-Z]/
@@ -170,20 +176,25 @@ export function GlossaryToolbar({
   const [selectedCategories, setSelectedCategories] = React.useState<string[]>(
     []
   )
-  const [visibleColumns, setVisibleColumns] =
-    React.useState<string[]>(localeDefaults)
-  const [density, setDensity] = React.useState<GlossaryDensity>("normal")
+  const [visibleColumns, setVisibleColumns] = React.useState<string[]>(
+    () => readPersistedGlossaryColumns() ?? localeDefaults
+  )
+  const [density, setDensity] = React.useState<GlossaryDensity>(
+    () => readPersistedGlossaryDensity() ?? "normal"
+  )
+
+  const handleVisibleColumnsChange = React.useCallback((next: string[]) => {
+    setVisibleColumns(next)
+    writePersistedGlossaryColumns(next)
+  }, [])
+
+  const handleDensityChange = React.useCallback((next: GlossaryDensity) => {
+    setDensity(next)
+    writePersistedGlossaryDensity(next)
+  }, [])
   const [selectedEntry, setSelectedEntry] =
     React.useState<GlossaryEntry | null>(null)
-  const [isReady, setIsReady] = React.useState(false)
-
-  React.useEffect(() => {
-    if (entriesLoading) return
-    const frame = requestAnimationFrame(() => {
-      setIsReady(true)
-    })
-    return () => cancelAnimationFrame(frame)
-  }, [entriesLoading])
+  const isReady = !entriesLoading
 
   const closeDetailPanel = React.useCallback(() => {
     setSelectedEntry(null)
@@ -219,10 +230,9 @@ export function GlossaryToolbar({
               <ColumnPicker
                 locale={locale}
                 visibleColumns={visibleColumns}
-                onChange={setVisibleColumns}
-                defaultColumns={localeDefaults}
+                onChange={handleVisibleColumnsChange}
               />
-              <DensityToggle value={density} onChange={setDensity} />
+              <DensityToggle value={density} onChange={handleDensityChange} />
               <Link
                 href="/glossary/edit/new"
                 locale={locale as "en" | "zh"}

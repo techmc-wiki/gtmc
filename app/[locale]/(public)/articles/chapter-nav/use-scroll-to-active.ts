@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react"
+import React, { useCallback, useEffect, useRef } from "react"
 import { articleUrl } from "@/lib/articles/url"
 import { HIGHLIGHT_TIMEOUT_MS, LOCATE_FALLBACK_MS } from "./constants"
 import type { ChapterNavNode } from "./tree"
@@ -22,6 +22,7 @@ export function useScrollToActive({
   scrollContainerRef,
   activeItemRef,
   folderGridRefs,
+  setHighlightActive,
 }: {
   tree: ChapterNavNode[]
   pathname: string
@@ -32,8 +33,8 @@ export function useScrollToActive({
   scrollContainerRef: React.RefObject<HTMLDivElement | null>
   activeItemRef: React.RefObject<HTMLLIElement | null>
   folderGridRefs: React.RefObject<Map<string, HTMLDivElement>>
+  setHighlightActive: React.Dispatch<React.SetStateAction<boolean>>
 }) {
-  const [highlightActive, setHighlightActive] = useState(false)
   const locateStateRef = useRef<LocateState>({ phase: "idle" })
   const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const transitionCleanupRef = useRef<(() => void) | null>(null)
@@ -132,7 +133,7 @@ export function useScrollToActive({
       setHighlightActive(false)
       highlightTimerRef.current = null
     }, HIGHLIGHT_TIMEOUT_MS)
-  }, [clearHighlightTimer, scrollContainerRef, activeItemRef])
+  }, [clearHighlightTimer, scrollContainerRef, activeItemRef, setHighlightActive])
 
   const enterScrollingPhase = useCallback(() => {
     locateStateRef.current = { phase: "scrolling" }
@@ -263,7 +264,6 @@ export function useScrollToActive({
   }, [runLocateFlow])
 
   return {
-    highlightActive,
     getEffectivePathname,
     scrollToCurrent,
   }

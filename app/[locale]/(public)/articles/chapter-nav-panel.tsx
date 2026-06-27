@@ -72,15 +72,12 @@ function ChapterNavPanelInner({
     scrollContainerRef,
     collapseAll,
     scrollToCurrent,
-    setScrollToCurrent,
+    scrollToCurrentRef,
     activeItemRef,
     folderGridRefs,
   } = useReaderNavigation()
 
-  const {
-    scrollToCurrent: scrollToCurrentFn,
-    highlightActive: highlightActiveFromScroll,
-  } = useScrollToActive({
+  const { scrollToCurrent: scrollToCurrentFn } = useScrollToActive({
     tree,
     pathname,
     mounted,
@@ -90,15 +87,10 @@ function ChapterNavPanelInner({
     scrollContainerRef,
     activeItemRef,
     folderGridRefs,
+    setHighlightActive,
   })
 
-  React.useEffect(() => {
-    setScrollToCurrent(scrollToCurrentFn)
-  }, [scrollToCurrentFn, setScrollToCurrent])
-
-  React.useEffect(() => {
-    setHighlightActive(highlightActiveFromScroll)
-  }, [highlightActiveFromScroll, setHighlightActive])
+  scrollToCurrentRef.current = scrollToCurrentFn
 
   useBlur({
     internalScroll,

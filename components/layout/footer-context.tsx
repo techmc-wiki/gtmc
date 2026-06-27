@@ -1,21 +1,38 @@
 "use client"
 
-import React, { createContext, use, useEffect, useMemo, useState } from "react"
+import React, {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 
 interface FooterContextValue {
   hidden: boolean
-  setHidden: (hidden: boolean) => void
+  registerHide: () => () => void
 }
 
 const FooterContext = createContext<FooterContextValue>({
   hidden: false,
-  setHidden: () => {},
+  registerHide: () => () => {},
 })
 
 export function FooterProvider({ children }: { children: React.ReactNode }) {
-  const [hidden, setHidden] = useState(false)
+  const [hideCount, setHideCount] = useState(0)
 
-  const value = useMemo(() => ({ hidden, setHidden }), [hidden])
+  const registerHide = useCallback(() => {
+    setHideCount((count) => count + 1)
+    return () => {
+      setHideCount((count) => Math.max(0, count - 1))
+    }
+  }, [])
+
+  const value = useMemo(
+    () => ({ hidden: hideCount > 0, registerHide }),
+    [hideCount, registerHide]
+  )
 
   return (
     <FooterContext.Provider value={value}>{children}</FooterContext.Provider>
@@ -26,13 +43,11 @@ export function useFooter() {
   return use(FooterContext)
 }
 
+/** Registers footer suppression for the subtree lifetime (ref-counted). */
 export function HideFooter() {
-  const { setHidden } = useFooter()
+  const { registerHide } = useFooter()
 
-  useEffect(() => {
-    setHidden(true)
-    return () => setHidden(false)
-  }, [setHidden])
+  useEffect(() => registerHide(), [registerHide])
 
   return null
 }

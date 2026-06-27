@@ -145,6 +145,7 @@ export function SearchCommand() {
 
     return () => {
       clearTimeout(timer)
+      abortRef.current?.abort()
     }
   }, [query, locale])
 

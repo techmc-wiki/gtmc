@@ -27,20 +27,26 @@ export function GlossarySearch({
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current)
-    }
-    debounceRef.current = setTimeout(() => {
-      onQueryChange(query)
-    }, DEBOUNCE_MS)
-
-    return () => {
+  const scheduleQueryChange = useCallback(
+    (nextQuery: string) => {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current)
       }
-    }
-  }, [query, onQueryChange])
+      debounceRef.current = setTimeout(() => {
+        onQueryChange(nextQuery)
+      }, DEBOUNCE_MS)
+    },
+    [onQueryChange]
+  )
+
+  useEffect(
+    () => () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
+    },
+    []
+  )
 
   // Capture phase so descendant handlers can't swallow Cmd+/ before it lands.
   useEffect(() => {
@@ -65,9 +71,11 @@ export function GlossarySearch({
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setQuery(e.target.value)
+      const next = e.target.value
+      setQuery(next)
+      scheduleQueryChange(next)
     },
-    []
+    [scheduleQueryChange]
   )
 
   const toggleScope = useCallback(() => {

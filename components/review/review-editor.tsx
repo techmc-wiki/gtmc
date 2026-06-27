@@ -129,17 +129,6 @@ function resolveFileStatus(
   return startedWithConflict ? "resolved" : "clean"
 }
 
-function getFirstConflictedFile(
-  files: ReviewFile[],
-  fileContents: Record<string, string>
-) {
-  return (
-    files.find((file) =>
-      fileHasConflicts(file, fileContents[file.id] ?? file.content)
-    ) ?? null
-  )
-}
-
 function inferMode(revision: {
   conflictMode: string | null
   rebaseState: unknown
@@ -247,15 +236,26 @@ export function ReviewEditor({
   const conflictFocusPathRef = React.useRef<string | null>(null)
   const conflictAutoScrollRef = React.useRef(false)
   const firstConflictAnchorRef = React.useRef<HTMLDivElement | null>(null)
-  const lastConflictSignatureRef = React.useRef<string | null>(null)
   const isMounted = useMounted()
 
   const textareaRef = React.useRef<ReactCodeMirrorRef>(null)
 
-  React.useEffect(() => {
+  const [prevServerFiles, setPrevServerFiles] = React.useState(files)
+  const [prevModeAnalysis, setPrevModeAnalysis] = React.useState(modeAnalysis)
+
+  if (prevServerFiles !== files || prevModeAnalysis !== modeAnalysis) {
+    setPrevServerFiles(files)
+    setPrevModeAnalysis(modeAnalysis)
+
+    const fullReplace = pendingServerRefreshRef.current
+    if (fullReplace) {
+      pendingServerRefreshRef.current = false
+    }
+
+    const fallbackActiveFileId = initialActiveFileId ?? files[0]?.id ?? ""
+
     setReviewSession((prev) => {
-      const fallbackActiveFileId = initialActiveFileId ?? files[0]?.id ?? ""
-      const nextActiveFileId = pendingServerRefreshRef.current
+      const nextActiveFileId = fullReplace
         ? fallbackActiveFileId
         : files.some((file) => file.id === prev.activeFileId)
           ? prev.activeFileId
@@ -268,28 +268,23 @@ export function ReviewEditor({
         activeFileId: nextActiveFileId,
       }
     })
-  }, [files, initialActiveFileId, modeAnalysis])
 
-  React.useEffect(() => {
     setFileContents((prev) => {
-      if (pendingServerRefreshRef.current) {
-        pendingServerRefreshRef.current = false
+      if (fullReplace) {
         return Object.fromEntries(
           files.map((file) => [file.id, file.conflictContent ?? file.content])
         )
       }
 
       const next = { ...prev }
-
-      for (const f of files) {
-        if (!(f.id in prev)) {
-          next[f.id] = f.conflictContent ?? f.content
+      for (const file of files) {
+        if (!(file.id in next)) {
+          next[file.id] = file.conflictContent ?? file.content
         }
       }
-
       return next
     })
-  }, [files])
+  }
 
   const sessionFiles = React.useMemo(
     () =>
@@ -325,10 +320,6 @@ export function ReviewEditor({
   const hasConflicts = sessionFiles.some((file) =>
     fileHasConflicts(file, file.content)
   )
-  const firstConflictedFile = React.useMemo(
-    () => getFirstConflictedFile(sessionFiles, fileContents),
-    [fileContents, sessionFiles]
-  )
   const parsedSegments = React.useMemo(
     () => parseEditorSegments(activeContent),
     [activeContent]
@@ -338,14 +329,6 @@ export function ReviewEditor({
     fileHasConflicts(activeFile, activeContent) &&
     parsedSegments.some((segment) => segment.type === "conflict")
   const effectiveMode = reviewSession.mode ?? null
-  const conflictSignature = React.useMemo(
-    () =>
-      sessionFiles
-        .filter((file) => fileHasConflicts(file, file.content))
-        .map((file) => file.filePath)
-        .join("||"),
-    [sessionFiles]
-  )
 
   const conflictRefs = React.useRef<Map<string, HTMLElement>>(new Map())
   const [currentConflictIdx, setCurrentConflictIdx] = React.useState(0)
@@ -380,55 +363,6 @@ export function ReviewEditor({
     },
     []
   )
-
-  React.useEffect(() => {
-    if (!conflictSignature) {
-      lastConflictSignatureRef.current = null
-      return
-    }
-
-    if (!effectiveMode || !hasConflicts) {
-      return
-    }
-
-    const requestedPath = conflictFocusPathRef.current
-    const shouldFocus =
-      Boolean(requestedPath) ||
-      lastConflictSignatureRef.current !== conflictSignature
-
-    if (!shouldFocus) {
-      return
-    }
-
-    const targetFile =
-      (requestedPath
-        ? sessionFiles.find(
-            (file) =>
-              file.filePath === requestedPath &&
-              fileHasConflicts(file, file.content)
-          )
-        : null) ?? firstConflictedFile
-
-    if (!targetFile) {
-      return
-    }
-
-    setReviewSession((prev) =>
-      prev.activeFileId === targetFile.id
-        ? prev
-        : { ...prev, activeFileId: targetFile.id }
-    )
-    setActiveTab("3-way")
-    conflictAutoScrollRef.current = true
-    conflictFocusPathRef.current = null
-    lastConflictSignatureRef.current = conflictSignature
-  }, [
-    conflictSignature,
-    effectiveMode,
-    firstConflictedFile,
-    hasConflicts,
-    sessionFiles,
-  ])
 
   React.useEffect(() => {
     if (
@@ -565,6 +499,20 @@ export function ReviewEditor({
 
         if (result.hasConflicts) {
           conflictFocusPathRef.current = result.focusFilePath ?? null
+          conflictAutoScrollRef.current = true
+          if (result.focusFilePath) {
+            const focusId = sessionFilesRef.current.find(
+              (file) => file.filePath === result.focusFilePath
+            )?.id
+            if (focusId) {
+              setReviewSession((prev) =>
+                prev.activeFileId === focusId
+                  ? prev
+                  : { ...prev, activeFileId: focusId }
+              )
+              setActiveTab("3-way")
+            }
+          }
 
           if (!options?.silent) {
             setActionNotice({

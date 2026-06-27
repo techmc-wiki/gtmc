@@ -7,11 +7,16 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
+  useSyncExternalStore,
   useTransition,
 } from "react"
 import { parseThemeCookie, serializeThemeCookie } from "./cookie"
+import {
+  getSystemThemeServerSnapshot,
+  getSystemThemeSnapshot,
+  subscribeSystemTheme,
+} from "./system-theme"
 import type { ResolvedTheme, Theme } from "./types"
 
 interface ThemeContextValue {
@@ -22,70 +27,37 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
-function getSystemTheme(): ResolvedTheme {
-  if (typeof window === "undefined") return "light"
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light"
-}
-
 function readInitialTheme(): Theme {
   if (typeof document === "undefined") return "light"
   const fromCookie = parseThemeCookie(document.cookie)
   return fromCookie ?? "system"
 }
 
-function readInitialResolvedTheme(): ResolvedTheme {
-  if (typeof document === "undefined") return "light"
-  const attr = document.documentElement.getAttribute("data-theme")
-  if (attr === "light" || attr === "dark") return attr
-  return getSystemTheme()
-}
-
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [theme, setThemeState] = useState<Theme>(readInitialTheme)
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(
-    readInitialResolvedTheme
+  const systemTheme = useSyncExternalStore(
+    subscribeSystemTheme,
+    getSystemThemeSnapshot,
+    getSystemThemeServerSnapshot
   )
-  const hasExplicitChoice = useRef(false)
+  const resolvedTheme = useMemo(
+    (): ResolvedTheme => (theme === "system" ? systemTheme : theme),
+    [theme, systemTheme]
+  )
   const [, startTransition] = useTransition()
 
   useEffect(() => {
-    hasExplicitChoice.current = parseThemeCookie(document.cookie) !== null
-  }, [])
-
-  useEffect(() => {
-    const resolved = theme === "system" ? getSystemTheme() : theme
-    setResolvedTheme(resolved)
-    document.documentElement.setAttribute("data-theme", resolved)
-  }, [pathname, theme])
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
-    const handler = () => {
-      if (hasExplicitChoice.current) return
-      const resolved: ResolvedTheme = mediaQuery.matches ? "dark" : "light"
-      setResolvedTheme(resolved)
-      document.documentElement.setAttribute("data-theme", resolved)
-    }
-    mediaQuery.addEventListener("change", handler)
-    return () => mediaQuery.removeEventListener("change", handler)
-  }, [])
+    document.documentElement.setAttribute("data-theme", resolvedTheme)
+  }, [pathname, resolvedTheme])
 
   const setTheme = useCallback((newTheme: Theme) => {
     if (newTheme === "system") {
-      hasExplicitChoice.current = false
       setThemeState("system")
-      const systemTheme = getSystemTheme()
-      setResolvedTheme(systemTheme)
-      document.documentElement.setAttribute("data-theme", systemTheme)
       document.cookie = serializeThemeCookie("system")
     } else {
-      hasExplicitChoice.current = true
       setThemeState(newTheme)
       startTransition(() => {
-        setResolvedTheme(newTheme)
         document.documentElement.setAttribute("data-theme", newTheme)
         document.cookie = serializeThemeCookie(newTheme)
       })

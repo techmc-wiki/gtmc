@@ -198,10 +198,10 @@ export async function TocSection({ tree, locale }: TocSectionProps) {
             href="/features"
             className="group border-tech-main/40 hover:border-tech-main-dark hover:bg-tech-main-dark hover:text-tech-bg flex flex-col gap-2 border p-5 transition-colors">
             <span className="display-title text-lg">
-              {t("feedbackCardTitle")}
+              {t("featureReportCardTitle")}
             </span>
             <span className="text-tech-main group-hover:text-tech-bg/80 text-xs/relaxed transition-colors">
-              {t("feedbackCardDesc")}
+              {t("featureReportCardDesc")}
             </span>
           </Link>
           <Link

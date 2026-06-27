@@ -115,11 +115,61 @@ function findDanglingRefsFor(
   return found
 }
 
-export function GlossaryEditor({
+function applyPrefillToOperations(
+  operations: GlossaryEditOperation[],
+  prefillSlug: string | undefined,
+  entriesBySlug: Map<string, GlossaryEntry>
+): GlossaryEditOperation[] {
+  if (!prefillSlug || operations.some((op) => op.slug === prefillSlug)) {
+    return operations
+  }
+  const entry = entriesBySlug.get(prefillSlug)
+  if (!entry) return operations
+  const row = entryToRow(entry)
+  return [
+    ...operations,
+    {
+      kind: "edit",
+      slug: entry.slug,
+      before: row,
+      after: { ...row },
+    },
+  ]
+}
+
+export function GlossaryEditor(props: GlossaryEditorProps) {
+  const entriesBySlug = React.useMemo(() => {
+    const map = new Map<string, GlossaryEntry>()
+    for (const entry of props.manifestEntries) {
+      map.set(entry.slug, entry)
+    }
+    return map
+  }, [props.manifestEntries])
+
+  const resolvedInitialOperations = React.useMemo(
+    () =>
+      applyPrefillToOperations(
+        props.initialOperations,
+        props.prefillSlug,
+        entriesBySlug
+      ),
+    [props.initialOperations, props.prefillSlug, entriesBySlug]
+  )
+
+  return (
+    <GlossaryEditorInner
+      key={`${props.draftId}:${props.prefillSlug ?? ""}`}
+      {...props}
+      initialOperations={resolvedInitialOperations}
+    />
+  )
+}
+
+function GlossaryEditorInner({
   draftId,
   initialTitle,
   initialOperations,
-  prefillSlug,
+  prefillSlug: _prefillSlug,
   manifestEntries,
   summaryEntries,
   locale,
@@ -127,6 +177,7 @@ export function GlossaryEditor({
   noreplyEmail,
   realEmail,
 }: GlossaryEditorProps) {
+  void _prefillSlug
   const t = useTranslations("Glossary")
   const router = useRouter()
   const isMounted = useMounted()
@@ -158,62 +209,43 @@ export function GlossaryEditor({
   const saveTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
     null
   )
-  const isFirstRunRef = React.useRef(true)
-  const prefillAppliedRef = React.useRef(false)
+  const operationsRef = React.useRef(operations)
+  const titleRef = React.useRef(title)
+  operationsRef.current = operations
+  titleRef.current = title
 
-  React.useEffect(() => {
-    if (prefillAppliedRef.current) return
-    if (!prefillSlug) {
-      prefillAppliedRef.current = true
-      return
-    }
-    if (operations.some((op) => op.slug === prefillSlug)) {
-      prefillAppliedRef.current = true
-      return
-    }
-    const entry = entriesBySlug.get(prefillSlug)
-    if (!entry) {
-      prefillAppliedRef.current = true
-      return
-    }
-    const row = entryToRow(entry)
-    setOperations((prev) => [
-      ...prev,
-      {
-        kind: "edit",
-        slug: entry.slug,
-        before: row,
-        after: { ...row },
-      },
-    ])
-    prefillAppliedRef.current = true
-  }, [prefillSlug, entriesBySlug, operations])
-
-  React.useEffect(() => {
-    if (isFirstRunRef.current) {
-      isFirstRunRef.current = false
-      return
-    }
+  const scheduleAutosave = React.useCallback(() => {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current)
     }
     showBadge("SAVING…", "progress")
     saveTimeoutRef.current = setTimeout(async () => {
       try {
-        await updateGlossaryDraftAction(draftId, operations)
+        await updateGlossaryDraftAction(draftId, operationsRef.current)
         showBadge("SAVED", "info", 2000)
       } catch (error) {
         const message = error instanceof Error ? error.message : "SAVE FAILED"
         showBadge(message.toUpperCase(), "error", 3000)
       }
     }, SAVE_DEBOUNCE_MS)
+  }, [draftId, showBadge])
 
-    return () => {
+  React.useEffect(
+    () => () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
       }
-    }
-  }, [operations, title, draftId, showBadge])
+    },
+    []
+  )
+
+  const handleTitleChange = React.useCallback(
+    (next: string) => {
+      setTitle(next)
+      scheduleAutosave()
+    },
+    [scheduleAutosave]
+  )
 
   const handlePick = React.useCallback(
     (slug: string) => {
@@ -232,8 +264,9 @@ export function GlossaryEditor({
           },
         ]
       })
+      scheduleAutosave()
     },
-    [entriesBySlug]
+    [entriesBySlug, scheduleAutosave]
   )
 
   const usedSlugs = React.useMemo(() => {
@@ -264,8 +297,9 @@ export function GlossaryEditor({
           after: row,
         },
       ])
+      scheduleAutosave()
     },
-    [usedSlugs]
+    [usedSlugs, scheduleAutosave]
   )
 
   const handleAddNewTerm = React.useCallback(() => {
@@ -284,20 +318,26 @@ export function GlossaryEditor({
         after: emptyRow(),
       },
     ])
-  }, [usedSlugs])
+    scheduleAutosave()
+  }, [usedSlugs, scheduleAutosave])
 
   const handleOperationChange = React.useCallback(
     ({ slug, after }: { slug: string; after: GlossaryRow }) => {
       setOperations((prev) =>
         prev.map((op) => (op.slug === slug ? { ...op, after } : op))
       )
+      scheduleAutosave()
     },
-    []
+    [scheduleAutosave]
   )
 
-  const handleOperationRemove = React.useCallback((slug: string) => {
-    setOperations((prev) => prev.filter((op) => op.slug !== slug))
-  }, [])
+  const handleOperationRemove = React.useCallback(
+    (slug: string) => {
+      setOperations((prev) => prev.filter((op) => op.slug !== slug))
+      scheduleAutosave()
+    },
+    [scheduleAutosave]
+  )
 
   const handleDiscard = React.useCallback(async () => {
     const confirmed = window.confirm(
@@ -380,7 +420,7 @@ export function GlossaryEditor({
     <div className="relative mx-auto flex max-w-[1100px] flex-col gap-6 p-4 md:p-8">
       <GlossaryEditToolbar
         title={title}
-        onTitleChange={setTitle}
+        onTitleChange={handleTitleChange}
         onDiscard={handleDiscard}
         onPreview={handleOpenPreview}
         onSubmit={handleOpenPreview}

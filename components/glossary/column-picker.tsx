@@ -12,7 +12,7 @@ import {
   isGlossaryLocale,
 } from "@/lib/glossary/locales"
 
-const STORAGE_KEY = "gtmc:glossary:columns:v1"
+import { writePersistedGlossaryColumns } from "@/lib/glossary/persisted-prefs"
 
 const CORE_COLUMNS = [
   "Full Form (English)",
@@ -26,7 +26,6 @@ export interface ColumnPickerProps {
   locale: string
   visibleColumns: string[]
   onChange: (columns: string[]) => void
-  defaultColumns: string[]
   className?: string
 }
 
@@ -34,35 +33,12 @@ export function ColumnPicker({
   locale,
   visibleColumns,
   onChange,
-  defaultColumns,
   className,
 }: ColumnPickerProps) {
   const mounted = useMounted()
   const t = useTranslations("Glossary")
   const [open, setOpen] = React.useState(false)
   const containerRef = React.useRef<HTMLDivElement | null>(null)
-
-  const hydratedRef = React.useRef(false)
-  React.useEffect(() => {
-    if (hydratedRef.current) return
-    hydratedRef.current = true
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (raw) {
-        const parsed = JSON.parse(raw) as unknown
-        if (
-          Array.isArray(parsed) &&
-          parsed.every((value) => typeof value === "string")
-        ) {
-          onChange(parsed)
-          return
-        }
-      }
-    } catch {
-      // SSR / private browsing — localStorage unavailable
-    }
-    onChange(defaultColumns)
-  }, [defaultColumns, onChange])
 
   React.useEffect(() => {
     if (!open) return
@@ -85,11 +61,7 @@ export function ColumnPicker({
   const persist = React.useCallback(
     (next: string[]) => {
       onChange(next)
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-      } catch {
-        // SSR / private browsing
-      }
+      writePersistedGlossaryColumns(next)
     },
     [onChange]
   )

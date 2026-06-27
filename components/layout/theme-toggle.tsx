@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
+import { useMounted } from "@/hooks/use-mounted"
 import { useTheme } from "@/lib/theme"
 import { cn } from "@/lib/cn"
 
@@ -136,8 +137,10 @@ function ModeIcon({ mode, className }: { mode: Mode; className?: string }) {
 export function ThemeToggle({ className }: { className?: string }) {
   const t = useTranslations("Theme")
   const { resolvedTheme, setTheme } = useTheme()
-  const [mode, setMode] = React.useState<Mode>("system")
-  const [isMounted, setIsMounted] = React.useState(false)
+  const [mode, setMode] = React.useState<Mode>(() =>
+    typeof document === "undefined" ? "system" : readModeFromCookie()
+  )
+  const isMounted = useMounted()
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
 
   const closeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -145,11 +148,6 @@ export function ThemeToggle({ className }: { className?: string }) {
     null
   )
   const longPressTriggeredRef = React.useRef(false)
-
-  React.useEffect(() => {
-    setMode(readModeFromCookie())
-    setIsMounted(true)
-  }, [])
 
   const clearCloseTimer = React.useCallback(() => {
     if (closeTimerRef.current) {

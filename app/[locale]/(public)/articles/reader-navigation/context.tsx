@@ -36,7 +36,6 @@ interface ReaderNavigationContextValue {
   collapseAll: () => void
   scrollToCurrentRef: React.MutableRefObject<() => void>
   scrollToCurrent: () => void
-  setScrollToCurrent: (fn: () => void) => void
 }
 
 const ReaderNavigationContext = React.createContext<ReaderNavigationContextValue | null>(null)
@@ -86,10 +85,6 @@ export function ReaderNavigationProvider({ tree, children }: ReaderNavigationPro
     setExpandedFolders(new Set())
   }, [setExpandedFolders])
 
-  const setScrollToCurrent = React.useCallback((fn: () => void) => {
-    scrollToCurrentRef.current = fn
-  }, [])
-
   const scrollToCurrent = React.useCallback(() => {
     scrollToCurrentRef.current()
   }, [])
@@ -114,7 +109,6 @@ export function ReaderNavigationProvider({ tree, children }: ReaderNavigationPro
       collapseAll,
       scrollToCurrentRef,
       scrollToCurrent,
-      setScrollToCurrent,
     }),
     [
       expandedFolders,
@@ -130,7 +124,6 @@ export function ReaderNavigationProvider({ tree, children }: ReaderNavigationPro
       effectivePath,
       collapseAll,
       scrollToCurrent,
-      setScrollToCurrent,
     ]
   )
 

@@ -712,6 +712,7 @@ export function useDraftEditor(initialData?: {
   )
 
   React.useEffect(() => {
+    const controller = new AbortController()
     const pendingFiles = draftCollection.files.filter((file) => {
       const normalizedPath = normalizeDraftFilePath(file.filePath)
       if (!normalizedPath) return false
@@ -727,9 +728,10 @@ export function useDraftEditor(initialData?: {
       repoSnapshotRequestsRef.current[file.id] = normalizedPath
       void fetch(
         `/api/draft/repo-file?path=${encodeURIComponent(normalizedPath)}`,
-        { cache: "no-store" }
+        { cache: "no-store", signal: controller.signal }
       )
         .then(async (response) => {
+          if (controller.signal.aborted) return
           if (response.status === 404) {
             setRepoSnapshots((current) => ({
               ...current,
@@ -757,7 +759,10 @@ export function useDraftEditor(initialData?: {
             },
           }))
         })
-        .catch(() => {
+        .catch((error: unknown) => {
+          if (error instanceof DOMException && error.name === "AbortError") {
+            return
+          }
           setRepoSnapshots((current) => ({
             ...current,
             [file.id]: {
@@ -767,6 +772,9 @@ export function useDraftEditor(initialData?: {
             },
           }))
         })
+    }
+    return () => {
+      controller.abort()
     }
   }, [draftCollection.files, repoSnapshots])
 

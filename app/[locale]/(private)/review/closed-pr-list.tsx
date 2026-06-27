@@ -89,10 +89,14 @@ export function ClosedPRList({ getClosedPRsAction }: ClosedPRListProps) {
   const [error, setError] = useState<string | null>(null)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   const isRequestInFlightRef = useRef(false)
+  const loadAbortRef = useRef<AbortController | null>(null)
 
   const loadPage = useCallback(
-    async (nextPage: number) => {
+    async (nextPage: number, signal?: AbortSignal) => {
       if (isRequestInFlightRef.current) {
+        return
+      }
+      if (signal?.aborted) {
         return
       }
 
@@ -107,6 +111,9 @@ export function ClosedPRList({ getClosedPRsAction }: ClosedPRListProps) {
 
       try {
         const nextPRs = await getClosedPRsAction(nextPage)
+        if (signal?.aborted) {
+          return
+        }
 
         setClosedPRs((current) =>
           nextPage === 1 ? nextPRs : [...current, ...nextPRs]
@@ -126,11 +133,18 @@ export function ClosedPRList({ getClosedPRsAction }: ClosedPRListProps) {
   )
 
   useEffect(() => {
+    loadAbortRef.current?.abort()
+    const controller = new AbortController()
+    loadAbortRef.current = controller
+
     const frame = window.requestAnimationFrame(() => {
-      void loadPage(1)
+      void loadPage(1, controller.signal)
     })
 
-    return () => window.cancelAnimationFrame(frame)
+    return () => {
+      window.cancelAnimationFrame(frame)
+      controller.abort()
+    }
   }, [loadPage])
 
   useEffect(() => {

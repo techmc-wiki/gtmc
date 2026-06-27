@@ -36,33 +36,35 @@
     "unicorn"
   ],
   "rules": {
+    "eslint/arrow-body-style": "warn",
+    "eslint/default-case-last": "warn",
     "no-control-regex": "off",
-    "react/react-in-jsx-scope": "off",
     "react-perf/jsx-no-new-function-as-prop": "off",
+    "react/jsx-boolean-value": "warn",
+    "react/jsx-curly-brace-presence": "warn",
+    "react/jsx-fragments": "warn",
+    "react/react-in-jsx-scope": "off",
+    "typescript/ban-ts-comment": "warn",
+    "typescript/consistent-type-imports": "warn",
+    "unicorn/catch-error-name": "warn",
+    "unicorn/consistent-date-clone": "warn",
+    "unicorn/empty-brace-spaces": "warn",
+    "unicorn/prefer-spread": "warn",
+    "unicorn/prefer-string-replace-all": "warn",
+    "eslint/curly": ["warn", "multi-line"],
+    "eslint/eqeqeq": [
+      "warn",
+      "smart",
+      {
+        "null": "ignore"
+      }
+    ],
     "typescript/no-unused-vars": [
       "warn",
       {
         "ignoreRestSiblings": true
       }
-    ],
-
-    "eslint/arrow-body-style": "warn",
-    "eslint/curly": ["warn", "multi-line"],
-    "eslint/default-case-last": "warn",
-    "eslint/eqeqeq": ["warn", "smart", { "null": "ignore" }],
-
-    "react/jsx-boolean-value": "warn",
-    "react/jsx-curly-brace-presence": "warn",
-    "react/jsx-fragments": "warn",
-
-    "typescript/ban-ts-comment": "warn",
-    "typescript/consistent-type-imports": "warn",
-
-    "unicorn/catch-error-name": "warn",
-    "unicorn/consistent-date-clone": "warn",
-    "unicorn/empty-brace-spaces": "warn",
-    "unicorn/prefer-spread": "warn",
-    "unicorn/prefer-string-replace-all": "warn"
+    ]
   },
   "settings": {
     "next": {

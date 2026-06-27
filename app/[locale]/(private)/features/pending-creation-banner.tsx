@@ -45,6 +45,7 @@ export function PendingCreationBanner() {
     status: "pending",
   })
   const inFlightRef = React.useRef(false)
+  const scheduledRef = React.useRef(false)
   const [isRetrying, startRetry] = React.useTransition()
 
   const runCreation = React.useCallback(async () => {
@@ -85,9 +86,9 @@ export function PendingCreationBanner() {
   }, [runCreation])
 
   React.useEffect(() => {
-    // Only run if there's a payload
     const raw = sessionStorage.getItem(PENDING_FEATURE_CREATE_KEY)
-    if (!raw) return
+    if (!raw || scheduledRef.current) return
+    scheduledRef.current = true
 
     const timer = window.setTimeout(() => {
       void runCreation()

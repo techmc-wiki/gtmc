@@ -11,11 +11,9 @@ import {
 
 export function ContinueReading() {
   const t = useTranslations("Homepage")
-  const [bookmark, setBookmark] = React.useState<ReadingBookmark | null>(null)
-
-  React.useEffect(() => {
-    setBookmark(readBookmark())
-  }, [])
+  const [bookmark] = React.useState<ReadingBookmark | null>(() =>
+    typeof window === "undefined" ? null : readBookmark()
+  )
 
   const pct = bookmark ? Math.round(bookmark.progress * 100) : 0
   const progressStyle = React.useMemo(

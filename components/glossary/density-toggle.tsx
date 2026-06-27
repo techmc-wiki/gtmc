@@ -4,10 +4,10 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/cn"
+import { writePersistedGlossaryDensity } from "@/lib/glossary/persisted-prefs"
 
 export type GlossaryDensity = "compact" | "normal" | "comfortable"
 
-const STORAGE_KEY = "gtmc:glossary:density:v1"
 const DENSITY_VALUES: readonly GlossaryDensity[] = [
   "compact",
   "normal",
@@ -28,13 +28,6 @@ export interface DensityToggleProps {
   value: GlossaryDensity
   onChange: (density: GlossaryDensity) => void
   className?: string
-}
-
-function isDensity(value: unknown): value is GlossaryDensity {
-  return (
-    typeof value === "string" &&
-    (DENSITY_VALUES as readonly string[]).includes(value)
-  )
 }
 
 function getNextDensity(value: GlossaryDensity): GlossaryDensity {
@@ -83,28 +76,10 @@ export function DensityToggle({
 }: DensityToggleProps) {
   const t = useTranslations("Glossary")
 
-  const hydratedRef = React.useRef(false)
-  React.useEffect(() => {
-    if (hydratedRef.current) return
-    hydratedRef.current = true
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (isDensity(raw) && raw !== value) {
-        onChange(raw)
-      }
-    } catch {
-      // SSR / private browsing — localStorage unavailable, use defaults
-    }
-  }, [onChange, value])
-
   const handleChange = React.useCallback(
     (next: GlossaryDensity) => {
       onChange(next)
-      try {
-        localStorage.setItem(STORAGE_KEY, next)
-      } catch {
-        // SSR / private browsing
-      }
+      writePersistedGlossaryDensity(next)
     },
     [onChange]
   )

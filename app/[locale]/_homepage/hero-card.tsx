@@ -53,27 +53,28 @@ export function HeroCard({
       <div className="border-tech-main-dark/80 bg-surface relative overflow-hidden border shadow-sm">
         <div className="card-shimmer" />
 
-        {/* 顶部黄色书带 */}
+        {/* 顶部书带 */}
         <div className="bg-tech-signal text-tech-signal-ink relative flex items-center justify-between px-6 py-3 sm:px-10 sm:py-4">
           <span className="animate-fade-in fill-mode-forwards font-mono text-[0.625rem] font-bold tracking-[0.25em] uppercase opacity-0 [animation-delay:0.6s] motion-reduce:animate-none motion-reduce:opacity-100 sm:text-xs">
-            Graduate Texts in Minecraft
+            Open Access
           </span>
           <span className="animate-fade-in fill-mode-forwards hidden font-mono text-[0.625rem] font-bold opacity-0 [animation-delay:0.8s] motion-reduce:animate-none motion-reduce:opacity-100 sm:block sm:text-xs">
-            VOL.01
+            Beta Edition
           </span>
         </div>
 
         <div className="relative p-6 sm:p-10 md:p-12">
           <h1 className="text-tech-main-dark relative mb-6 flex flex-col items-start text-4xl tracking-tight sm:mb-8 sm:gap-1 sm:text-6xl lg:text-7xl">
             <span className="animate-tech-slide-in display-title fill-mode-forwards opacity-0 [animation-delay:0.5s] motion-reduce:animate-none motion-reduce:opacity-100">
-              Technical
+              Graduate Texts
             </span>
-            <div className="flex flex-row items-baseline">
-              <span className="animate-tech-slide-in display-title text-tech-main fill-mode-forwards opacity-0 [animation-delay:0.7s] motion-reduce:animate-none motion-reduce:opacity-100">
-                Minecraft
-              </span>
-              <span className="bg-tech-signal fill-mode-forwards ml-3 inline-block h-[0.7em] w-[0.45ch] animate-pulse self-center opacity-0 [animation-delay:0.9s] motion-reduce:animate-none motion-reduce:opacity-100 sm:ml-5" />
-            </div>
+            <span className="animate-tech-slide-in display-title text-tech-main fill-mode-forwards flex flex-row items-baseline gap-3 opacity-0 [animation-delay:0.7s] motion-reduce:animate-none motion-reduce:opacity-100 sm:gap-5">
+              in Minecraft
+              <span
+                aria-hidden="true"
+                className="bg-tech-signal fill-mode-forwards inline-block h-[0.7em] w-[0.45ch] animate-pulse self-center opacity-0 [animation-delay:0.9s] motion-reduce:animate-none motion-reduce:opacity-100"
+              />
+            </span>
           </h1>
 
           <div className="animate-fade-in border-tech-signal fill-mode-forwards flex max-w-xl flex-col gap-2 border-l-[3px] pl-3 opacity-0 [animation-delay:1.2s] [animation-duration:1s] motion-reduce:animate-none motion-reduce:opacity-100 sm:gap-4 sm:pl-5">

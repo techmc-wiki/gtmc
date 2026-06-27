@@ -86,65 +86,64 @@ function parseArgs(): CliOptions {
 // ── Content Scanning ────────────────────────────────────────────────────────
 
 /**
- * Scan all articles for fenced code blocks and collect distinct languages.
+ * Read each article once and compute everything we need from its content:
+ * the set of fenced code-block languages, whether it contains math, and the
+ * raw markdown body (returned so the renderer can reuse it without re-reading).
  */
-async function collectCodeLangs(
-  articles: LinearizedArticle[],
+async function analyzeArticle(
+  article: LinearizedArticle,
   locale: ArticleLocale
-): Promise<string[]> {
-  const allLangs = new Set<string>()
+): Promise<{ codeLangs: string[]; hasMath: boolean; body: string | null }> {
+  try {
+    const body = await getArticleContentForPdf(article.slug, locale)
+    if (!body) return { codeLangs: [], hasMath: false, body: null }
 
-  const results = await Promise.all(
-    articles.map(async (article) => {
-      try {
-        const content = await getArticleContentForPdf(article.slug, locale)
-        if (!content) return []
-        const langs: string[] = []
-        const matches = content.matchAll(/^```(\w+)/gm)
-        for (const m of matches) {
-          const lang = m[1].toLowerCase()
-          if (lang !== "" && lang !== "text" && lang !== "plain") {
-            langs.push(lang)
-          }
-        }
-        return langs
-      } catch {
-        // Skip articles that fail to load during scanning
-        return []
+    const codeLangs: string[] = []
+    for (const m of body.matchAll(/^```(\w+)/gm)) {
+      const lang = m[1].toLowerCase()
+      if (lang !== "" && lang !== "text" && lang !== "plain") {
+        codeLangs.push(lang)
       }
-    })
-  )
-  for (const langs of results) {
-    for (const lang of langs) allLangs.add(lang)
-  }
+    }
 
-  return [...allLangs]
+    const hasMath =
+      body.includes("$") || body.includes("\\(") || body.includes("\\[")
+
+    return { codeLangs, hasMath, body }
+  } catch {
+    // Skip articles that fail to load during scanning
+    return { codeLangs: [], hasMath: false, body: null }
+  }
 }
 
 /**
- * Check whether any article contains math expressions that require KaTeX.
+ * Scan all articles once, returning the distinct code languages, whether any
+ * article needs KaTeX, and a map of slug → body so the renderer can reuse the
+ * already-read content.
  */
-async function checkHasMath(
+async function analyzeArticles(
   articles: LinearizedArticle[],
   locale: ArticleLocale
-): Promise<boolean> {
+): Promise<{
+  codeLangs: string[]
+  hasMath: boolean
+  bodies: Map<string, string>
+}> {
+  const allLangs = new Set<string>()
+  let hasMath = false
+  const bodies = new Map<string, string>()
+
   const results = await Promise.all(
-    articles.map(async (article) => {
-      try {
-        const content = await getArticleContentForPdf(article.slug, locale)
-        if (!content) return false
-        return (
-          content.includes("$") ||
-          content.includes("\\(") ||
-          content.includes("\\[")
-        )
-      } catch {
-        // Skip articles that fail to load
-        return false
-      }
-    })
+    articles.map((article) => analyzeArticle(article, locale))
   )
-  return results.some((r) => r)
+  for (let i = 0; i < articles.length; i++) {
+    const { codeLangs, hasMath: articleHasMath, body } = results[i]
+    for (const lang of codeLangs) allLangs.add(lang)
+    if (articleHasMath) hasMath = true
+    if (body !== null) bodies.set(articles[i].slug, body)
+  }
+
+  return { codeLangs: [...allLangs], hasMath, bodies }
 }
 
 // ── Custom Article Renderer ─────────────────────────────────────────────────
@@ -152,15 +151,17 @@ async function checkHasMath(
 /**
  * Factory that returns a renderArticle callback for `buildEbookHtml()`.
  * Each article's markdown is rendered through the PDF pipeline with optional
- * Shiki syntax highlighting.
+ * Shiki syntax highlighting. The body comes from the pre-read `bodies` map
+ * produced during content scanning, so each file is read only once.
  */
 function createRenderArticle(
   shikiPlugin: RehypeShikiPlugin | undefined,
-  locale: ArticleLocale
+  locale: ArticleLocale,
+  bodies: Map<string, string>
 ) {
   return async (article: LinearizedArticle): Promise<string> => {
     try {
-      const content = await getArticleContentForPdf(article.slug, locale)
+      const content = bodies.get(article.slug)
       if (!content) return ""
 
       const html = await renderMarkdownToHtml(content, {
@@ -228,11 +229,9 @@ async function runPdf(locale: "en" | "zh", output: string): Promise<void> {
 
   let codeLangs: string[]
   let hasMath: boolean
+  let bodies: Map<string, string>
   try {
-    ;[codeLangs, hasMath] = await Promise.all([
-      collectCodeLangs(articles, locale),
-      checkHasMath(articles, locale),
-    ])
+    ;({ codeLangs, hasMath, bodies } = await analyzeArticles(articles, locale))
   } catch (error) {
     throw new Error(`[pdf] Failed to scan articles: ${error}`, {
       cause: error,
@@ -267,7 +266,7 @@ async function runPdf(locale: "en" | "zh", output: string): Promise<void> {
   // ═══════════════════════════════════════════════════════════════════════
   console.log("[pdf] Phase 5/6: Building ebook HTML...")
 
-  const renderArticle = createRenderArticle(shikiPlugin, locale)
+  const renderArticle = createRenderArticle(shikiPlugin, locale, bodies)
 
   let html: string
   try {

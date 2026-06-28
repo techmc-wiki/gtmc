@@ -122,8 +122,7 @@ export function ArticleMetadataFull({
           <span className="inline-flex items-center gap-1.5">
             <span className="size-1.5 bg-tech-main/40" />
             <Link
-              href={`https://github.com/${author}`}
-              target="_blank"
+              href={`/authors/${encodeURIComponent(author)}`}
               className="text-tech-main underline decoration-tech-main/30 underline-offset-4">
               {author}
             </Link>
@@ -166,8 +165,7 @@ export function ArticleMetadataFull({
                         sm:size-10
                       ">
                       <Link
-                        href={`https://github.com/${author}`}
-                        target="_blank"
+                        href={`/authors/${encodeURIComponent(author)}`}
                         aria-label={author}
                         className="
                           relative inline-block size-6
@@ -183,8 +181,7 @@ export function ArticleMetadataFull({
                       </Link>
                     </span>
                     <Link
-                      href={`https://github.com/${author}`}
-                      target="_blank"
+                      href={`/authors/${encodeURIComponent(author)}`}
                       className="text-xs text-tech-main underline">
                       {author}
                     </Link>
@@ -207,8 +204,7 @@ export function ArticleMetadataFull({
                               sm:size-6
                             ">
                             <Link
-                              href={`https://github.com/${contributor}`}
-                              target="_blank"
+                              href={`/authors/${encodeURIComponent(contributor)}`}
                               aria-label={contributor}
                               className="
                                 relative inline-block size-4

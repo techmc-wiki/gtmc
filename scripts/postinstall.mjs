@@ -70,5 +70,6 @@ if (skipHeavy) {
     },
   })
   run("tsx", ["scripts/generate-article-manifest.ts"])
+  run("tsx", ["scripts/generate-author-profiles.ts"])
   run("playwright", ["install", "chromium"])
 }

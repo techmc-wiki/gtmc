@@ -181,6 +181,27 @@ export default async function Footer() {
                   {t("linkIssues")}
                 </a>
               </li>
+              <li>
+                <Link
+                  href="/about"
+                  className="footer-link text-tech-main text-sm">
+                  {t("linkAbout")}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/authors"
+                  className="footer-link text-tech-main text-sm">
+                  {t("linkAuthors")}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/editorial-policy"
+                  className="footer-link text-tech-main text-sm">
+                  {t("linkEditorialPolicy")}
+                </Link>
+              </li>
             </ul>
           </nav>
           <nav aria-label={t("sectionSource")}>

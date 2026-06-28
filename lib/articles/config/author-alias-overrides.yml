@@ -1,0 +1,10 @@
+# Manual author aliases — this file takes precedence over auto-generated aliases.
+# Format:
+#   canonical_username:
+#     - alias1
+#     - alias2
+Arcadi4:
+  - 4rcadia
+hotpad100c:
+  - Ryan100c
+  - RYAN

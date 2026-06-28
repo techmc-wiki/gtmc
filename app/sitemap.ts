@@ -5,6 +5,7 @@ import { getSiteUrl } from "@/lib/site-url"
 import { shouldIgnoreFile } from "@/lib/articles/ignore"
 import { encodeSlug } from "@/lib/articles/slug-resolver"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
+import { getUniqueAuthors } from "@/lib/articles/person-resolver"
 import {
   loadArticleManifest,
   type ArticleLocale,
@@ -118,6 +119,42 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.5,
     },
+    {
+      url: `${BASE}/zh/about`,
+      alternates: localizedAlternates(BASE, "/about"),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${BASE}/en/about`,
+      alternates: localizedAlternates(BASE, "/about"),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${BASE}/zh/authors`,
+      alternates: localizedAlternates(BASE, "/authors"),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE}/en/authors`,
+      alternates: localizedAlternates(BASE, "/authors"),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE}/zh/editorial-policy`,
+      alternates: localizedAlternates(BASE, "/editorial-policy"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${BASE}/en/editorial-policy`,
+      alternates: localizedAlternates(BASE, "/editorial-policy"),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
   ]
 
   let articleUrls: MetadataRoute.Sitemap = []
@@ -200,5 +237,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.warn("Sitemap: skipped glossary URLs due to manifest error:", error)
   }
 
-  return [...staticUrls, ...articleUrls, ...featureUrls, ...glossaryUrls]
+  let authorUrls: MetadataRoute.Sitemap = []
+  try {
+    const handles = getUniqueAuthors()
+    authorUrls = handles.flatMap((handle) => {
+      const encoded = encodeURIComponent(handle)
+      const path = `/authors/${encoded}`
+      return [
+        {
+          url: `${BASE}/zh${path}`,
+          alternates: localizedAlternates(BASE, path),
+          changeFrequency: "weekly" as const,
+          priority: 0.6,
+        },
+        {
+          url: `${BASE}/en${path}`,
+          alternates: localizedAlternates(BASE, path),
+          changeFrequency: "weekly" as const,
+          priority: 0.6,
+        },
+      ]
+    })
+  } catch (error) {
+    console.warn("Sitemap: skipped author URLs due to resolver error:", error)
+  }
+
+  return [
+    ...staticUrls,
+    ...articleUrls,
+    ...featureUrls,
+    ...glossaryUrls,
+    ...authorUrls,
+  ]
 }

@@ -25,6 +25,7 @@ import { getArticleAssetPublicUrl } from "@/lib/articles/asset-url"
 import { decodeSlugPath, encodeSlug } from "@/lib/articles/slug-resolver"
 import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
 import { getSiteUrl } from "@/lib/site-url"
+import { serializeJsonLd } from "@/lib/seo/json-ld"
 
 import { ArticleHighlight } from "@/components/articles/article-highlight"
 import { BookmarkRecorder } from "@/components/articles/bookmark-recorder"
@@ -258,7 +259,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const authorArray = allAuthors.map((name) => ({
     "@type": "Person" as const,
     name,
-    url: `https://github.com/${name}`,
+    url: `${siteUrl}/${locale}/authors/${encodeURIComponent(name)}`,
   }))
 
   const manifestEntry = await getCachedLocalizedArticleEntry(effectiveSlug, locale)
@@ -456,12 +457,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <ArticleHighlight />
       </Suspense>
 
-      <script type="application/ld+json">
-        {JSON.stringify(techArticleJsonLd)}
-      </script>
-      <script type="application/ld+json">
-        {JSON.stringify(breadcrumbJsonLd)}
-      </script>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={serializeJsonLd(techArticleJsonLd)}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={serializeJsonLd(breadcrumbJsonLd)}
+      />
     </div>
   )
 }

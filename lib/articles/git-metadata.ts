@@ -6,6 +6,11 @@ import { load as yamlLoad } from "js-yaml"
 
 const execFileAsync = promisify(execFile)
 
+const CONFIG_DIR = join(process.cwd(), "lib", "articles", "config")
+const MAINTAINERS_PATH = join(CONFIG_DIR, "maintainers.yml")
+const ALIASES_PATH = join(CONFIG_DIR, "authors-alias.yml")
+const ALIAS_OVERRIDES_PATH = join(CONFIG_DIR, "author-alias-overrides.yml")
+
 interface Commit {
   author: string
   committer: string
@@ -20,17 +25,19 @@ function getCacheKey(cwd: string, relPath: string, type: string): string {
   return `${cwd}:${relPath}:${type}`
 }
 
-export async function loadMaintainers(
-  articlesRepoCwd: string
-): Promise<string[]> {
-  const cacheKey = `${articlesRepoCwd}:maintainers`
+/**
+ * Maintainer git usernames from `lib/articles/config/maintainers.yml`,
+ * lowercased. Does NOT respect author aliases. Signature dropped the
+ * former `articlesRepoCwd` param — config is website-owned now.
+ */
+export async function loadMaintainers(): Promise<string[]> {
+  const cacheKey = "config:maintainers"
   if (cache.has(cacheKey)) {
     return cache.get(cacheKey)
   }
 
-  const maintainersPath = join(articlesRepoCwd, "_scripts", "maintainers.yml")
   try {
-    const content = await readFile(maintainersPath, "utf-8")
+    const content = await readFile(MAINTAINERS_PATH, "utf-8")
     const maintainers = (yamlLoad(content) as string[]) || []
     const lowercased = maintainers.map((m) => m.toLowerCase())
     cache.set(cacheKey, lowercased)
@@ -41,34 +48,50 @@ export async function loadMaintainers(
   }
 }
 
-export async function loadAuthorAliases(
-  articlesRepoCwd: string
-): Promise<Map<string, string>> {
-  const cacheKey = `${articlesRepoCwd}:aliases`
+/**
+ * Map of every known spelling (canonical + aliases) to canonical username.
+ * Auto-generated `authors-alias.yml` is merged first, then
+ * `author-alias-overrides.yml` takes precedence. Signature dropped the
+ * former `articlesRepoCwd` param — config is website-owned now.
+ */
+export async function loadAuthorAliases(): Promise<Map<string, string>> {
+  const cacheKey = "config:aliases"
   if (cache.has(cacheKey)) {
     return cache.get(cacheKey)
   }
 
-  const aliasesPath = join(articlesRepoCwd, "_scripts", "authors_alias.yml")
-  try {
-    const content = await readFile(aliasesPath, "utf-8")
-    const aliases = (yamlLoad(content) as Record<string, string[]>) || {}
-    const aliasMap = new Map<string, string>()
+  const aliasMap = new Map<string, string>()
 
-    for (const [canonical, aliasList] of Object.entries(aliases)) {
+  const mergeEntries = (
+    entries: Record<string, string[]> | null | undefined
+  ): void => {
+    if (!entries) return
+    for (const [canonical, aliasList] of Object.entries(entries)) {
+      // Re-registering the canonical key and its aliases overrides any prior
+      // mapping, which is exactly the precedence contract for the overrides file.
       aliasMap.set(canonical, canonical)
       for (const alias of aliasList) {
         aliasMap.set(alias, canonical)
       }
     }
-
-    cache.set(cacheKey, aliasMap)
-    return aliasMap
-  } catch {
-    const emptyMap = new Map<string, string>()
-    cache.set(cacheKey, emptyMap)
-    return emptyMap
   }
+
+  try {
+    const autoContent = await readFile(ALIASES_PATH, "utf-8")
+    mergeEntries(yamlLoad(autoContent) as Record<string, string[]> | null)
+  } catch {
+    // Missing auto-generated aliases is non-fatal; overrides may still apply.
+  }
+
+  try {
+    const overrideContent = await readFile(ALIAS_OVERRIDES_PATH, "utf-8")
+    mergeEntries(yamlLoad(overrideContent) as Record<string, string[]> | null)
+  } catch {
+    // Overrides are optional.
+  }
+
+  cache.set(cacheKey, aliasMap)
+  return aliasMap
 }
 
 export async function getArticleAuthors(
@@ -138,9 +161,24 @@ export async function getArticleAuthors(
       }
     }
 
-    const maintainersLower = new Set(maintainers)
-    const isMaintainer = (name: string) =>
-      maintainersLower.has(name.toLowerCase())
+    // B5 fix: maintainers must be recognized both by their raw git username
+    // (e.g. `4rcadia`) AND by their alias-resolved canonical form (e.g. `Arcadi4`).
+    // Without this, a maintainer who commits under an aliased username filters
+    // through as the article author instead of being excluded.
+    const maintainersLower = new Set<string>()
+    for (const m of maintainers) {
+      maintainersLower.add(m.toLowerCase())
+      const resolved = aliases.get(m)
+      if (resolved) {
+        maintainersLower.add(resolved.toLowerCase())
+      }
+    }
+    const isMaintainer = (name: string) => {
+      const lower = name.toLowerCase()
+      if (maintainersLower.has(lower)) return true
+      const resolved = aliases.get(name)
+      return resolved !== undefined && maintainersLower.has(resolved.toLowerCase())
+    }
     const resolve = (name: string) => aliases.get(name) || name
 
     const firstCommit = commits[commits.length - 1]

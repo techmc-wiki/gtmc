@@ -577,8 +577,8 @@ async function main(): Promise<void> {
     process.exit(1)
   }
 
-  const maintainers = await loadMaintainers(ARTICLES_PATH)
-  const aliases = await loadAuthorAliases(ARTICLES_PATH)
+  const maintainers = await loadMaintainers()
+  const aliases = await loadAuthorAliases()
 
   const topLevelFolders = fs
     .readdirSync(ARTICLES_PATH, { withFileTypes: true })

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "analyze": "next experimental-analyze",
-    "build:content": "tsx scripts/generate-article-manifest.ts && tsx scripts/generate-glossary-manifest.ts && tsx scripts/generate-article-content.ts && tsx scripts/generate-pdf.ts --locale all",
+    "build:content": "tsx scripts/generate-article-manifest.ts && tsx scripts/generate-author-profiles.ts && tsx scripts/generate-glossary-manifest.ts && tsx scripts/generate-article-content.ts && tsx scripts/generate-pdf.ts --locale all",
     "build:next": "next build",
     "build:pdf": "tsx scripts/generate-pdf.ts --locale all",
     "build:vercel": "playwright install chromium && node --run db:migrate:deploy && node --run build",
@@ -12,6 +12,8 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "generate:content": "tsx scripts/generate-article-content.ts",
     "generate:manifest": "tsx scripts/generate-article-manifest.ts",
+    "generate:author-profiles": "tsx scripts/generate-author-profiles.ts",
+    "generate:aliases": "tsx scripts/generate-author-aliases.ts",
     "generate:glossary-manifest": "tsx scripts/generate-glossary-manifest.ts",
     "articles:generate-content": "tsx scripts/generate-article-content.ts",
     "articles:generate-manifest": "tsx scripts/generate-article-manifest.ts",

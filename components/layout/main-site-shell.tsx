@@ -18,6 +18,8 @@ function buildNavLinks(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
     { href: "/articles", label: t("articles") },
     { href: "/pdf", label: t("pdf") },
     { href: "/glossary", label: t("glossary") },
+    { href: "/about", label: t("about") },
+    { href: "/authors", label: t("authors") },
     { href: "/features", label: t("features") },
   ]
 }

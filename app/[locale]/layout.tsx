@@ -12,6 +12,7 @@ import { FooterWrapper } from "@/components/layout/footer-wrapper"
 import { ScrollRoot } from "@/components/layout/scroll-root"
 import { SpeculationRules } from "@/components/layout/speculation-rules"
 import { getSiteUrl } from "@/lib/site-url"
+import { buildOrganizationJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
 import { NextIntlClientProvider } from "next-intl"
 import { hasLocale } from "next-intl"
 import { setRequestLocale } from "next-intl/server"
@@ -59,36 +60,18 @@ const stixTwoText = STIX_Two_Text({
 
 const baseFontVariables = `${geistSans.variable} ${geistMono.variable} ${stixTwoText.variable}`
 
-const jsonLd = {
-  __html: JSON.stringify([
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      name: "Graduate Texts in Minecraft",
-      alternateName: "GTMC",
-      url: siteUrl,
-      description:
-        "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
-      foundingDate: "2024",
-      logo: {
-        "@type": "ImageObject",
-        url: `${siteUrl}/favicon.svg`,
-        width: 100,
-        height: 100,
-      },
-      sameAs: ["https://github.com/gtmc-dev/gtmc"],
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      name: "Graduate Texts in Minecraft",
-      url: siteUrl,
-      description:
-        "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
-      inLanguage: ["zh", "en"],
-    },
-  ]),
-}
+const jsonLd = serializeJsonLd([
+  buildOrganizationJsonLd(siteUrl),
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Graduate Texts in Minecraft",
+    url: siteUrl,
+    description:
+      "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+    inLanguage: ["zh", "en"],
+  },
+])
 
 export async function generateMetadata({
   params,

@@ -1,4 +1,4 @@
-import { GithubIcon } from "@/components/markdown/people-mention"
+import { GithubIcon } from "@/components/ui/social-icons"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { TechButton } from "@/components/ui/tech-button"

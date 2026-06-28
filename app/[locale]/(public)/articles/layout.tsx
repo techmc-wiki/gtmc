@@ -1,5 +1,4 @@
 import * as React from "react"
-import { MainSiteShell } from "@/components/layout/main-site-shell"
 import { ArticlesLayoutClient } from "./articles-layout-client"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import type { ArticleLocale } from "@/lib/articles/manifest"
@@ -20,8 +19,6 @@ export default async function ArticlesLayout({
   const tree = await getPublicChapterNav(normalizedLocale)
 
   return (
-    <MainSiteShell>
-      <ArticlesLayoutClient tree={tree}>{children}</ArticlesLayoutClient>
-    </MainSiteShell>
+    <ArticlesLayoutClient tree={tree}>{children}</ArticlesLayoutClient>
   )
 }

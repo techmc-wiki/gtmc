@@ -1,5 +1,29 @@
-{
-  "$schema": "people.schema.json",
+// Generated from people.yml by scripts/generate-author-profiles.ts. Do not edit.
+export type PeopleEntry = {
+  name: string
+  description?: string
+  profile?: string
+  email?: string
+  social?: {
+    github?: string
+    bilibili?: string
+    twitter?: string
+    website?: string
+    custom?: Array<{ label: string; url: string }>
+  }
+}
+
+export type ResolvedPerson = {
+  key: string
+  name: string
+  description: string | null
+  profile: string | null
+  email: string | null
+  social: NonNullable<PeopleEntry["social"]>
+  isFallback: boolean
+}
+
+const peopleData: Readonly<Record<string, PeopleEntry>> = {
   "BFladderbean": {
     "name": "BFladderbean",
     "description": "不写在纸上也没有关系，书于手掌之上亦无妨，因为故事所需要的，仅仅只有悲剧和泪水而已。",
@@ -33,35 +57,30 @@
   },
   "Ryan100c": {
     "name": "Ryan100c",
-    "description": "GTMC contributor",
     "social": {
       "github": "https://github.com/Ryan100c"
     }
   },
   "yuhan2680": {
     "name": "yuhan2680",
-    "description": "GTMC contributor",
     "social": {
       "github": "https://github.com/yuhan2680"
     }
   },
   "Molforte": {
     "name": "Molforte",
-    "description": "GTMC contributor",
     "social": {
       "github": "https://github.com/Molforte"
     }
   },
   "Twisuki": {
     "name": "Twisuki",
-    "description": "GTMC contributor",
     "social": {
       "github": "https://github.com/Twisuki"
     }
   },
   "xhbsh": {
     "name": "xhbsh",
-    "description": "GTMC contributor",
     "social": {
       "github": "https://github.com/xhbsh"
     }
@@ -96,4 +115,29 @@
       "bilibili": "https://space.bilibili.com/397472062"
     }
   }
+}
+
+export function resolvePersonClient(key: string): ResolvedPerson {
+  const normalized = key.trim()
+  const entry = peopleData[normalized]
+
+  return entry
+    ? {
+        key: normalized,
+        name: entry.name,
+        description: entry.description ?? null,
+        profile: entry.profile ?? null,
+        email: entry.email ?? null,
+        social: entry.social ?? {},
+        isFallback: false,
+      }
+    : {
+        key: normalized,
+        name: normalized,
+        description: null,
+        profile: null,
+        email: null,
+        social: {},
+        isFallback: true,
+      }
 }

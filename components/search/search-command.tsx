@@ -24,6 +24,32 @@ interface GlossarySearchResult {
   category: string
 }
 
+function SearchIcon({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      aria-hidden="true"
+      focusable="false"
+      className={className}>
+      <circle
+        cx="7"
+        cy="7"
+        r="4.25"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="m10.25 10.25 3 3"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="square"
+        strokeWidth="1.5"
+      />
+    </svg>
+  )
+}
+
 function slugToPath(slug: string) {
   return "/" + slug
 }
@@ -317,7 +343,7 @@ export function SearchCommand() {
       <button
         type="button"
         className="border-tech-main/40 text-tech-main/60 hover:bg-tech-main-dark hover:text-tech-bg hidden cursor-pointer items-center gap-2 border px-3 py-1.5 font-mono text-[0.6875rem] transition-colors md:flex">
-        <span className="text-xs">&#x2315;</span>
+        <SearchIcon className="size-3.5" />
         {t("heading")}
         <span className="border-tech-main/30 text-tech-main/40 ml-1 border px-1 py-0.5 text-[0.5625rem]">
           <span className="flex flex-row items-center gap-0.5 leading-none">
@@ -337,8 +363,8 @@ export function SearchCommand() {
         aria-label={t("searchAriaLabel")}
         className="border-tech-main/40 text-tech-main/60 hover:bg-tech-main-dark hover:text-tech-bg hidden h-8 w-40 cursor-pointer items-center gap-2 border px-3 py-1.5 font-mono text-[0.6875rem] transition-colors md:flex">
         <div className="flex w-full items-center justify-between">
-          <span className="flex items-center gap-1 text-lg leading-none">
-            &#x2315;{/* icon */}
+          <span className="flex items-center gap-1.5 leading-none">
+            <SearchIcon className="size-3.5" />
             <span className="mt-0.5 text-[0.625rem]">{t("heading")}</span>
           </span>
           <span className="border-tech-main/30 text-tech-main/40 border px-1 text-[0.625rem]">
@@ -351,9 +377,9 @@ export function SearchCommand() {
       <button
         type="button"
         onClick={openModal}
-        className="text-tech-main hover:bg-tech-main/10 flex min-h-11 min-w-11 cursor-pointer items-center justify-center p-2 font-mono text-[2.5rem] transition-colors md:hidden"
+        className="text-tech-main hover:bg-tech-main/10 flex min-h-11 min-w-11 cursor-pointer items-center justify-center p-2 transition-colors md:hidden"
         aria-label={t("searchAriaLabel")}>
-        &#x2315;
+        <SearchIcon className="size-5" />
       </button>
 
       {/* Search modal (portal) */}

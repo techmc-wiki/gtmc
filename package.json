@@ -102,15 +102,15 @@
   },
   "devDependencies": {
     "@lhci/cli": "^0.15.1",
-    "@next/bundle-analyzer": "^16.2.9",
+    "@next/bundle-analyzer": "^16.2.10",
     "@tailwindcss/postcss": "^4.3.2",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/mime-types": "^3.0.1",
-    "@types/node": "^26.0.1",
+    "@types/node": "^26.1.0",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.17",
-    "@types/three": "^0.184.1",
+    "@types/three": "^0.185.0",
     "ajv": "^8.20.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.8",
@@ -122,9 +122,9 @@
     "remark-rehype": "^11.1.2",
     "tailwindcss": "^4.3.2",
     "tailwindcss-animate": "^1.0.7",
-    "tsx": "^4.22.4",
+    "tsx": "^4.23.0",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.10"
   },
   "resolutions": {
     "form-data": "4.0.5"

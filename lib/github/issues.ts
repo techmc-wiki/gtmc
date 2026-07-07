@@ -55,7 +55,17 @@ export async function listAllIssues(
   })
   cacheTag(GITHUB_ISSUES_TAG)
 
-  return _listAllIssuesUncached(state)
+  try {
+    return await _listAllIssuesUncached(state)
+  } catch (error) {
+    if (
+      error instanceof GithubFeaturesError &&
+      error.code === "CONFIG_MISSING"
+    ) {
+      return []
+    }
+    throw error
+  }
 }
 
 // eslint-disable-next-line no-underscore-dangle
@@ -93,7 +103,17 @@ export async function getIssue(
   })
   cacheTag(GITHUB_ISSUES_TAG, githubIssueTag(issueNumber))
 
-  return _getIssueUncached(issueNumber)
+  try {
+    return await _getIssueUncached(issueNumber)
+  } catch (error) {
+    if (
+      error instanceof GithubFeaturesError &&
+      error.code === "CONFIG_MISSING"
+    ) {
+      return null
+    }
+    throw error
+  }
 }
 
 export async function createIssue(

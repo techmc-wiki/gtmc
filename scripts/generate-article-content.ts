@@ -12,11 +12,15 @@ import {
   resolveArticleAssetPath,
 } from "@/lib/articles/banner-assets"
 import {
+  parseSourceReadmeFrontMatter,
   parseSourceFrontMatter,
+  parseTranslationReadmeFrontMatter,
   parseTranslationFrontMatter,
 } from "@/lib/articles/frontmatter-parser"
 import type {
+  SourceReadmeFrontMatter,
   SourceFrontMatter,
+  TranslationReadmeFrontMatter,
   TranslationFrontMatter,
 } from "@/lib/articles/frontmatter-parser"
 
@@ -250,56 +254,65 @@ function renderArtifact(
   let frontmatter: Record<string, unknown>
 
   if (locale === "zh") {
-    let fm: SourceFrontMatter
+    let fm: SourceFrontMatter | SourceReadmeFrontMatter
     try {
-      fm = parseSourceFrontMatter(fileContent, {
-        allowTitlelessFolder: entry.isFolder,
-      })
+      fm = entry.isFolder
+        ? parseSourceReadmeFrontMatter(fileContent)
+        : parseSourceFrontMatter(fileContent)
     } catch (error) {
       process.stderr.write(
-        `Error: Failed to parse source frontmatter for "${entry.slug}" (${locale}): ${(error as Error).message}\n`
+        `Error: Failed to parse source frontmatter for "${entry.slug}" (${locale}): ${error instanceof Error ? error.message : String(error)}\n`
       )
       return null
     }
 
     artifactContent = stripFrontMatter(fileContent)
+    const chapterTitle = "chapter-title" in fm ? fm["chapter-title"] : undefined
+    const introTitle = "intro-title" in fm ? fm["intro-title"] : undefined
     frontmatter = {
-      title: fm.title,
-      ...(fm["chapter-title"] && {
-        "chapter-title": fm["chapter-title"],
+      ...("title" in fm && { title: fm.title }),
+      ...(chapterTitle && {
+        "chapter-title": chapterTitle,
       }),
-      ...(fm["intro-title"] && { "intro-title": fm["intro-title"] }),
-      ...(fm.description && { description: fm.description }),
+      ...(introTitle && { "intro-title": introTitle }),
+      ...("description" in fm &&
+        fm.description && { description: fm.description }),
       index: fm.index,
-      ...(fm["is-advanced"] !== undefined && {
-        "is-advanced": fm["is-advanced"],
-      }),
-      ...(fm.banner && { banner: fm.banner }),
+      ...("is-advanced" in fm &&
+        fm["is-advanced"] !== undefined && {
+          "is-advanced": fm["is-advanced"],
+        }),
+      ...("banner" in fm && fm.banner && { banner: fm.banner }),
       author: entry.author || undefined,
       coAuthors: entry.coAuthors || undefined,
       created: entry.created || undefined,
       lastmod: entry.lastmodByLocale.zh || undefined,
     }
   } else if (locale === "en") {
-    let fm: TranslationFrontMatter
+    let fm: TranslationFrontMatter | TranslationReadmeFrontMatter
     try {
-      fm = parseTranslationFrontMatter(fileContent)
+      fm = entry.isFolder
+        ? parseTranslationReadmeFrontMatter(fileContent)
+        : parseTranslationFrontMatter(fileContent)
     } catch (error) {
       process.stderr.write(
-        `Error: Failed to parse translation frontmatter for "${entry.slug}" (${locale}): ${(error as Error).message}\n`
+        `Error: Failed to parse translation frontmatter for "${entry.slug}" (${locale}): ${error instanceof Error ? error.message : String(error)}\n`
       )
       return null
     }
 
     artifactContent = stripFrontMatter(fileContent)
+    const chapterTitle = "chapter-title" in fm ? fm["chapter-title"] : undefined
+    const introTitle = "intro-title" in fm ? fm["intro-title"] : undefined
     frontmatter = {
-      ...(fm.title && { title: fm.title }),
-      ...(fm["chapter-title"] && {
-        "chapter-title": fm["chapter-title"],
+      ...("title" in fm && fm.title && { title: fm.title }),
+      ...(chapterTitle && {
+        "chapter-title": chapterTitle,
       }),
-      ...(fm["intro-title"] && { "intro-title": fm["intro-title"] }),
-      ...(fm.description && { description: fm.description }),
-      ...(fm.banner && { banner: fm.banner }),
+      ...(introTitle && { "intro-title": introTitle }),
+      ...("description" in fm &&
+        fm.description && { description: fm.description }),
+      ...("banner" in fm && fm.banner && { banner: fm.banner }),
       translatedFromRevision: fm["translated-from-revision"],
       translationFreshness: entry.translationFreshnessByLocale.en || undefined,
       created: entry.created || undefined,
@@ -310,7 +323,7 @@ function renderArtifact(
       }),
       author: entry.author || undefined,
       coAuthors: entry.coAuthors || undefined,
-      ...(!fm.banner &&
+      ...(!("banner" in fm && fm.banner) &&
         entry.bannerByLocale?.zh && { banner: entry.bannerByLocale.zh }),
     }
   } else {

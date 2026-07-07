@@ -216,9 +216,6 @@ importers:
       '@types/three':
         specifier: ^0.185.0
         version: 0.185.0
-      ajv:
-        specifier: ^8.20.0
-        version: 8.20.0
       gitnexus:
         specifier: ^1.6.9
         version: 1.6.9(graphology-types@0.24.8)(zod@4.4.3)

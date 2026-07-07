@@ -4,7 +4,6 @@ export {
   getOpenPRs,
   getClosedPRs,
   getPR,
-  getPRFiles,
 } from "./pr-operations"
 
 export {

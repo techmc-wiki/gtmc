@@ -245,14 +245,3 @@ export async function getRepoFileBuffer(
     },
   })
 }
-
-export async function getRepoTranslations(): Promise<Record<string, string>> {
-  const content = await getRepoFileContent("sidebar-translations.json")
-  if (content) {
-    try {
-      return JSON.parse(content.replace(/^\uFEFF/, ""))
-    } catch {}
-  }
-
-  return {}
-}

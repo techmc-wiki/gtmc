@@ -1,9 +1,9 @@
-import { existsSync, readdirSync } from "node:fs"
-import { spawnSync } from "node:child_process"
+import { existsSync } from "node:fs"
+import { spawnSync, type SpawnSyncOptions } from "node:child_process"
 
 const placeholderDatabaseUrl = "postgresql://localhost:5432/placeholder"
 
-function run(command, args, options = {}) {
+function run(command: string, args: string[], options: SpawnSyncOptions = {}) {
   const result = spawnSync(command, args, {
     stdio: "inherit",
     shell: process.platform === "win32",
@@ -25,26 +25,41 @@ function isGitWorkTree() {
   return result.status === 0
 }
 
+function getSubmoduleStatus(path: string) {
+  return spawnSync("git", ["submodule", "status", "--recursive", path], {
+    encoding: "utf-8",
+  })
+}
+
+function isSubmoduleInitialized(path: string) {
+  const result = getSubmoduleStatus(path)
+  if (result.status !== 0) return false
+
+  const lines = result.stdout.split("\n").filter(Boolean)
+  return lines.length > 0 && lines.every((line) => line.startsWith(" "))
+}
+
+function ensureSubmoduleInitialized(path: string) {
+  if (!isSubmoduleInitialized(path)) {
+    run("git", ["submodule", "update", "--init", "--recursive", path])
+  }
+
+  if (!isSubmoduleInitialized(path)) {
+    process.stderr.write(`Submodule ${path} is not correctly initialized\n`)
+    process.exit(1)
+  }
+
+  process.stdout.write(`Submodule ${path} is initialized\n`)
+}
+
 if (isGitWorkTree()) {
   run("git", ["config", "--local", "include.path", ".gitconfig"])
 
-  if (!existsSync("articles") || readdirSync("articles").length === 0) {
-    run("git", ["submodule", "update", "--init", "--recursive"])
-  } else {
-    process.stdout.write(
-      "Skipping article submodule checkout because articles/ already exists\n"
-    )
-  }
+  ensureSubmoduleInitialized("articles")
+  ensureSubmoduleInitialized("glossary")
 
-  if (!existsSync("glossary") || readdirSync("glossary").length === 0) {
-    run("git", ["submodule", "update", "--init", "--recursive"])
-  } else {
-    process.stdout.write(
-      "Skipping glossary submodule checkout because glossary/ already exists\n"
-    )
-    process.stdout.write("  Generating glossary manifest...\n")
-    run("tsx", ["scripts/generate-glossary-manifest.ts"])
-  }
+  process.stdout.write("  Generating glossary manifest...\n")
+  run("tsx", ["scripts/generate-glossary-manifest.ts"])
 } else {
   process.stdout.write("Skipping Git submodule setup outside a Git work tree\n")
 }

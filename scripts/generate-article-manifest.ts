@@ -1,14 +1,18 @@
 import fs from "fs"
 import path from "path"
-import Ajv2020, { type AnySchema } from "ajv/dist/2020"
 import type { ArticleEntry } from "@/lib/articles/manifest"
 
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/articles/ignore"
 import { buildGenerationSummary } from "./manifest-preview"
 import {
+  parseSourceReadmeFrontMatter,
   parseSourceFrontMatter,
+  parseTranslationReadmeFrontMatter,
   parseTranslationFrontMatter,
+  type SourceReadmeFrontMatter,
   type SourceFrontMatter,
+  type TranslationReadmeFrontMatter,
+  type TranslationFrontMatter,
 } from "@/lib/articles/frontmatter-parser"
 import {
   loadMaintainers,
@@ -28,56 +32,26 @@ const MAX_DEPTH = 3
 
 type ArticleManifest = Record<string, ArticleEntry>
 
-let ajv: Ajv2020
-let validateFrontmatter: ReturnType<Ajv2020["compile"]>
-
 function isReadmeLocaleFile(filename: string): boolean {
   return /^README(?:\.\w{2})?\.md$/i.test(filename)
 }
 
-async function initAjv(): Promise<void> {
-  ajv = new Ajv2020({ strict: false })
-  const schemaPath = path.join(
-    process.cwd(),
-    "scripts",
-    "article-frontmatter.schema.json"
-  )
-  const schemaContent = fs.readFileSync(schemaPath, "utf-8")
-  const schema = normalizeNullableOptionalFields(
-    JSON.parse(schemaContent)
-  ) as AnySchema
-  validateFrontmatter = ajv.compile(schema)
+function parseSourceMetadata(
+  content: string,
+  isReadme: boolean
+): SourceFrontMatter | SourceReadmeFrontMatter {
+  return isReadme
+    ? parseSourceReadmeFrontMatter(content)
+    : parseSourceFrontMatter(content)
 }
 
-function normalizeNullableOptionalFields(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map(normalizeNullableOptionalFields)
-  }
-
-  if (typeof value !== "object" || value === null) {
-    return value
-  }
-
-  const input = value as Record<string, unknown>
-  const output: Record<string, unknown> = {}
-
-  for (const [key, childValue] of Object.entries(input)) {
-    output[key] = normalizeNullableOptionalFields(childValue)
-  }
-
-  if (output.type === "string") {
-    output.type = ["string", "null"]
-  }
-
-  return output
-}
-
-function sanitizeForSchema<T extends object>(
-  value: T
-): Record<string, unknown> {
-  return Object.fromEntries(
-    Object.entries(value).filter(([, fieldValue]) => fieldValue !== undefined)
-  )
+function parseTranslationMetadata(
+  content: string,
+  isReadme: boolean
+): TranslationFrontMatter | TranslationReadmeFrontMatter {
+  return isReadme
+    ? parseTranslationReadmeFrontMatter(content)
+    : parseTranslationFrontMatter(content)
 }
 
 function getParentSlug(slug: string): string | undefined {
@@ -118,7 +92,7 @@ function getParentSlugFromRelPath(relPath: string): string {
 
     if (!readmeSource) continue
 
-    const slug = getSlugFromFile(readmeSource)
+    const slug = tryReadSlugFromFile(readmeSource)
     if (slug) slugs.push(slug)
   }
 
@@ -141,19 +115,12 @@ async function processSourceFile(
 ): Promise<Partial<ArticleEntry>> {
   const content = fs.readFileSync(filePath, "utf-8")
 
-  let fm: SourceFrontMatter
+  let fm: SourceFrontMatter | SourceReadmeFrontMatter
   try {
-    fm = parseSourceFrontMatter(content, { allowTitlelessFolder: isFolder })
-    if (!validateFrontmatter(sanitizeForSchema(fm))) {
-      const errors = validateFrontmatter.errors || []
-      const errorMsg = errors
-        .map((e) => `${e.instancePath} ${e.message}`)
-        .join(", ")
-      throw new Error(`${relPath}: validation failed: ${errorMsg}`)
-    }
+    fm = parseSourceMetadata(content, isFolder)
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error)
-    if (errMsg.includes("legacy key") || errMsg.includes("unknown key")) {
+    if (errMsg.includes("unknown key")) {
       throw new Error(`${relPath}: ${errMsg}`, { cause: error })
     }
     throw error
@@ -170,19 +137,20 @@ async function processSourceFile(
     relPath,
     maintainers
   )
+  const chapterTitle = "chapter-title" in fm ? fm["chapter-title"] : undefined
+  const introTitle = "intro-title" in fm ? fm["intro-title"] : undefined
 
   const entry: Partial<ArticleEntry> = {
     filePath: relPath,
     slug,
-    titleByLocale: { zh: fm.title },
+    titleByLocale: "title" in fm ? { zh: fm.title } : {},
     availableLocales: ["zh"],
     localizedFilePaths: { zh: relPath },
-    chapterTitleByLocale: fm["chapter-title"]
-      ? { zh: fm["chapter-title"] }
-      : {},
-    introTitleByLocale: fm["intro-title"] ? { zh: fm["intro-title"] } : {},
-    descriptionByLocale: fm.description ? { zh: fm.description } : {},
-    hasIntro: !!fm["intro-title"],
+    chapterTitleByLocale: chapterTitle ? { zh: chapterTitle } : {},
+    introTitleByLocale: introTitle ? { zh: introTitle } : {},
+    descriptionByLocale:
+      "description" in fm && fm.description ? { zh: fm.description } : {},
+    hasIntro: !!introTitle,
     index: fm.index,
     isFolder,
     isAppendix:
@@ -197,10 +165,10 @@ async function processSourceFile(
     lastmodByLocale: lastmod ? { zh: lastmod } : {},
     translatedFromRevisionByLocale: {},
     translationFreshnessByLocale: {},
-    isAdvanced: fm["is-advanced"],
+    isAdvanced: "is-advanced" in fm ? fm["is-advanced"] : undefined,
   }
 
-  if (fm.banner) {
+  if ("banner" in fm && fm.banner) {
     entry.bannerByLocale = { zh: fm.banner }
   }
 
@@ -215,15 +183,8 @@ async function processTranslationFile(
   manifest: ArticleManifest
 ): Promise<void> {
   const content = fs.readFileSync(filePath, "utf-8")
-  const fm = parseTranslationFrontMatter(content)
-
-  if (!validateFrontmatter(sanitizeForSchema(fm))) {
-    const errors = validateFrontmatter.errors || []
-    const errorMsg = errors
-      .map((e) => `${e.instancePath} ${e.message}`)
-      .join(", ")
-    throw new Error(`${relPath}: validation failed: ${errorMsg}`)
-  }
+  const isReadme = isReadmeLocaleFile(path.basename(filePath))
+  const fm = parseTranslationMetadata(content, isReadme)
 
   const dirPath = path.dirname(filePath)
   const translatesPath = path.join(dirPath, fm.translates)
@@ -236,12 +197,19 @@ async function processTranslationFile(
 
   const translatesRelPath = path.relative(ARTICLES_PATH, translatesPath)
   const sourceContent = fs.readFileSync(translatesPath, "utf-8")
-  const sourceFm = parseSourceFrontMatter(sourceContent, {
-    allowTitlelessFolder: isReadmeLocaleFile(path.basename(translatesPath)),
-  })
+  const sourceIsReadme = isReadmeLocaleFile(path.basename(translatesPath))
+  let sourceFm: SourceFrontMatter | SourceReadmeFrontMatter
+  try {
+    sourceFm = parseSourceMetadata(sourceContent, sourceIsReadme)
+  } catch (error) {
+    throw new Error(
+      `${relPath}: source frontmatter invalid in ${translatesRelPath}: ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error }
+    )
+  }
   const sourceSlug = sourceFm.slug
   const sourceParentSlug = getParentSlugFromRelPath(translatesRelPath)
-  const resolvedSourceSlug = isReadmeLocaleFile(path.basename(translatesPath))
+  const resolvedSourceSlug = sourceIsReadme
     ? sourceParentSlug
     : resolveSourceSlug(sourceParentSlug, sourceSlug)
 
@@ -259,14 +227,19 @@ async function processTranslationFile(
   }
   entry.localizedFilePaths.en = relPath
 
-  if (fm.title) entry.titleByLocale.en = fm.title
-  if (fm["chapter-title"]) entry.chapterTitleByLocale.en = fm["chapter-title"]
-  if (fm["intro-title"]) {
-    entry.introTitleByLocale.en = fm["intro-title"]
+  if ("title" in fm && fm.title) entry.titleByLocale.en = fm.title
+  const chapterTitle = "chapter-title" in fm ? fm["chapter-title"] : undefined
+  const introTitle = "intro-title" in fm ? fm["intro-title"] : undefined
+
+  if (chapterTitle) entry.chapterTitleByLocale.en = chapterTitle
+  if (introTitle) {
+    entry.introTitleByLocale.en = introTitle
     entry.hasIntro = true
   }
-  if (fm.description) entry.descriptionByLocale.en = fm.description
-  if (fm.banner) {
+  if ("description" in fm && fm.description) {
+    entry.descriptionByLocale.en = fm.description
+  }
+  if ("banner" in fm && fm.banner) {
     if (!entry.bannerByLocale) entry.bannerByLocale = {}
     entry.bannerByLocale.en = fm.banner
   }
@@ -305,11 +278,17 @@ async function processTranslationFile(
   }
 }
 
-function getSlugFromFile(filePath: string): string | null {
+function readSlugFromFile(filePath: string): string {
+  const content = fs.readFileSync(filePath, "utf-8")
+  return parseSourceMetadata(
+    content,
+    isReadmeLocaleFile(path.basename(filePath))
+  ).slug
+}
+
+function tryReadSlugFromFile(filePath: string): string | null {
   try {
-    const content = fs.readFileSync(filePath, "utf-8")
-    const fm = parseSourceFrontMatter(content, { allowTitlelessFolder: true })
-    return fm.slug || null
+    return readSlugFromFile(filePath) || null
   } catch {
     return null
   }
@@ -337,7 +316,7 @@ async function processDirectory(
 
   if (readmeSource) {
     const readmePath = path.join(dirPath, readmeSource.name)
-    const readmeSlug = getSlugFromFile(readmePath)
+    const readmeSlug = tryReadSlugFromFile(readmePath)
 
     if (readmeSlug) {
       const parentSlug = getParentSlug(slugPrefix)
@@ -381,7 +360,7 @@ async function processDirectory(
     const sourcePath = path.join(dirPath, sourceFile.name)
     const relPath = `${relFromArticles}/${sourceFile.name}`
 
-    const articleSlug = getSlugFromFile(sourcePath)
+    const articleSlug = tryReadSlugFromFile(sourcePath)
     if (!articleSlug) {
       process.stderr.write(
         `WARN: Skipping file without slug: articles/${relPath}\n`
@@ -511,7 +490,7 @@ async function processDirectory(
 
     if (!subReadmeExists) continue
 
-    const subSlug = getSlugFromFile(subReadmeExists)
+    const subSlug = tryReadSlugFromFile(subReadmeExists)
     if (!subSlug) {
       if (depth < 1) {
         process.stderr.write(
@@ -565,8 +544,6 @@ async function processDirectory(
 }
 
 async function main(): Promise<void> {
-  await initAjv()
-
   let manifest: ArticleManifest = {}
   let hasError = false
 
@@ -608,7 +585,16 @@ async function main(): Promise<void> {
       continue
     }
 
-    const folderSlug = getSlugFromFile(readmeExists)
+    let folderSlug: string
+    try {
+      folderSlug = readSlugFromFile(readmeExists)
+    } catch (error) {
+      process.stderr.write(
+        `Error: articles/${folderName}/README.zh.md: ${error instanceof Error ? error.message : String(error)}\n`
+      )
+      hasError = true
+      continue
+    }
 
     if (!folderSlug) {
       process.stderr.write(
@@ -664,7 +650,7 @@ async function main(): Promise<void> {
   }> = []
   for (const rootFile of rootFiles) {
     const rootFilePath = path.join(ARTICLES_PATH, rootFile)
-    const rawSlug = getSlugFromFile(rootFilePath)
+    const rawSlug = tryReadSlugFromFile(rootFilePath)
 
     if (!rawSlug) {
       process.stderr.write(

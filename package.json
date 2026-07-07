@@ -110,7 +110,6 @@
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.17",
     "@types/three": "^0.185.0",
-    "ajv": "^8.20.0",
     "gitnexus": "^1.6.9",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.8",

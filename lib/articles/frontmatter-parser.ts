@@ -1,12 +1,8 @@
 import matter from "gray-matter"
 
-// ─── New API ────────────────────────────────────────────────────────────────
-
 export interface SourceFrontMatter {
   slug: string
   title: string
-  "chapter-title"?: string
-  "intro-title"?: string
   description?: string
   index: number
   "is-advanced"?: boolean
@@ -17,68 +13,94 @@ export interface TranslationFrontMatter {
   translates: string
   "translated-from-revision": string
   title?: string
-  "chapter-title"?: string
-  "intro-title"?: string
   description?: string
   banner?: { src: string; alt?: string }
 }
 
-interface ParseSourceFrontMatterOptions {
-  allowTitlelessFolder?: boolean
+export interface SourceReadmeFrontMatter {
+  slug: string
+  "chapter-title": string
+  "intro-title"?: string
+  index: number
 }
 
-// ─── Allowed / legacy key sets ─────────────────────────────────────────────
+export interface TranslationReadmeFrontMatter {
+  translates: string
+  "translated-from-revision": string
+  "chapter-title": string
+  "intro-title"?: string
+}
+
+type BannerFrontMatter = { src: string; alt?: string }
 
 const SOURCE_ALLOWED_KEYS = new Set([
   "slug",
   "title",
-  "chapter-title",
-  "intro-title",
   "description",
   "index",
   "is-advanced",
   "banner",
-  "author",
 ])
 
 const TRANSLATION_ALLOWED_KEYS = new Set([
   "translates",
   "translated-from-revision",
   "title",
-  "chapter-title",
-  "intro-title",
   "description",
   "banner",
 ])
 
-const LEGACY_KEYS = new Set([
-  "title-en",
-  "chapter-title-en",
-  "intro-title-en",
-  "date",
-  "lastmod",
-  "co-authors",
+const SOURCE_README_ALLOWED_KEYS = new Set([
+  "slug",
+  "chapter-title",
+  "intro-title",
+  "index",
+])
+
+const TRANSLATION_README_ALLOWED_KEYS = new Set([
+  "translates",
+  "translated-from-revision",
+  "chapter-title",
+  "intro-title",
 ])
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
-
-function checkLegacyKeys(data: Record<string, unknown>): void {
-  for (const key of Object.keys(data)) {
-    if (LEGACY_KEYS.has(key)) {
-      throw new Error(`legacy key '${key}' not allowed`)
-    }
-  }
-}
 
 function checkAdditionalProperties(
   data: Record<string, unknown>,
   allowedKeys: Set<string>
 ): void {
   for (const key of Object.keys(data)) {
-    if (!allowedKeys.has(key) && !LEGACY_KEYS.has(key)) {
+    if (!allowedKeys.has(key)) {
       throw new Error(`unknown key '${key}' not allowed`)
     }
   }
+}
+
+function parseRequiredString(
+  data: Record<string, unknown>,
+  key: string
+): string {
+  const value = data[key]
+  if (typeof value !== "string") {
+    throw new Error(`missing required key '${key}'`)
+  }
+  return value
+}
+
+function parseRequiredNonEmptyString(
+  data: Record<string, unknown>,
+  key: string
+): string {
+  const value = parseRequiredString(data, key)
+  if (value === "") {
+    throw new Error(`missing required key '${key}'`)
+  }
+  return value
+}
+
+function parseOptionalString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined
 }
 
 function parseIndex(value: unknown): number {
@@ -96,7 +118,7 @@ function parseIndex(value: unknown): number {
 
 function parseBanner(
   value: unknown
-): { src: string; alt?: string } | undefined {
+): BannerFrontMatter | undefined {
   if (typeof value !== "object" || value === null) return undefined
   const obj = value as Record<string, unknown>
   if (typeof obj.src !== "string") return undefined
@@ -108,36 +130,19 @@ function parseBanner(
 
 // ─── Parsers ────────────────────────────────────────────────────────────────
 
-export function parseSourceFrontMatter(
-  content: string,
-  options: ParseSourceFrontMatterOptions = {}
-): SourceFrontMatter {
+function parseFrontMatterData(content: string): Record<string, unknown> {
   const { data } = matter(content)
-  const raw = data as Record<string, unknown>
+  return data as Record<string, unknown>
+}
 
-  checkLegacyKeys(raw)
+export function parseSourceFrontMatter(content: string): SourceFrontMatter {
+  const raw = parseFrontMatterData(content)
   checkAdditionalProperties(raw, SOURCE_ALLOWED_KEYS)
 
-  if (typeof raw.slug !== "string" || raw.slug === "") {
-    throw new Error("missing required key 'slug'")
-  }
-  const title = typeof raw.title === "string" ? raw.title : ""
-
-  if (!options.allowTitlelessFolder && title === "") {
-    throw new Error("missing required key 'title'")
-  }
-
   return {
-    slug: raw.slug,
-    title,
-    "chapter-title":
-      typeof raw["chapter-title"] === "string"
-        ? raw["chapter-title"]
-        : undefined,
-    "intro-title":
-      typeof raw["intro-title"] === "string" ? raw["intro-title"] : undefined,
-    description:
-      typeof raw.description === "string" ? raw.description : undefined,
+    slug: parseRequiredNonEmptyString(raw, "slug"),
+    title: parseRequiredNonEmptyString(raw, "title"),
+    description: parseOptionalString(raw.description),
     index: parseIndex(raw.index),
     "is-advanced": raw["is-advanced"] === true ? true : undefined,
     banner: parseBanner(raw.banner),
@@ -147,34 +152,48 @@ export function parseSourceFrontMatter(
 export function parseTranslationFrontMatter(
   content: string
 ): TranslationFrontMatter {
-  const { data } = matter(content)
-  const raw = data as Record<string, unknown>
-
-  checkLegacyKeys(raw)
+  const raw = parseFrontMatterData(content)
   checkAdditionalProperties(raw, TRANSLATION_ALLOWED_KEYS)
 
-  if (typeof raw.translates !== "string" || raw.translates === "") {
-    throw new Error("missing required key 'translates'")
+  return {
+    translates: parseRequiredNonEmptyString(raw, "translates"),
+    "translated-from-revision": parseRequiredNonEmptyString(
+      raw,
+      "translated-from-revision"
+    ),
+    title: parseOptionalString(raw.title),
+    description: parseOptionalString(raw.description),
+    banner: parseBanner(raw.banner),
   }
-  if (
-    typeof raw["translated-from-revision"] !== "string" ||
-    raw["translated-from-revision"] === ""
-  ) {
-    throw new Error("missing required key 'translated-from-revision'")
-  }
+}
+
+export function parseSourceReadmeFrontMatter(
+  content: string
+): SourceReadmeFrontMatter {
+  const raw = parseFrontMatterData(content)
+  checkAdditionalProperties(raw, SOURCE_README_ALLOWED_KEYS)
 
   return {
-    translates: raw.translates,
-    "translated-from-revision": raw["translated-from-revision"],
-    title: typeof raw.title === "string" ? raw.title : undefined,
-    "chapter-title":
-      typeof raw["chapter-title"] === "string"
-        ? raw["chapter-title"]
-        : undefined,
-    "intro-title":
-      typeof raw["intro-title"] === "string" ? raw["intro-title"] : undefined,
-    description:
-      typeof raw.description === "string" ? raw.description : undefined,
-    banner: parseBanner(raw.banner),
+    slug: parseRequiredString(raw, "slug"),
+    "chapter-title": parseRequiredNonEmptyString(raw, "chapter-title"),
+    "intro-title": parseOptionalString(raw["intro-title"]),
+    index: parseIndex(raw.index),
+  }
+}
+
+export function parseTranslationReadmeFrontMatter(
+  content: string
+): TranslationReadmeFrontMatter {
+  const raw = parseFrontMatterData(content)
+  checkAdditionalProperties(raw, TRANSLATION_README_ALLOWED_KEYS)
+
+  return {
+    translates: parseRequiredNonEmptyString(raw, "translates"),
+    "translated-from-revision": parseRequiredNonEmptyString(
+      raw,
+      "translated-from-revision"
+    ),
+    "chapter-title": parseRequiredNonEmptyString(raw, "chapter-title"),
+    "intro-title": parseOptionalString(raw["intro-title"]),
   }
 }

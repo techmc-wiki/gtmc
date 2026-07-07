@@ -38,6 +38,7 @@ const SOURCE_ALLOWED_KEYS = new Set([
   "index",
   "is-advanced",
   "banner",
+  "author",
 ])
 
 const TRANSLATION_ALLOWED_KEYS = new Set([
@@ -56,7 +57,6 @@ const LEGACY_KEYS = new Set([
   "intro-title-en",
   "date",
   "lastmod",
-  "author",
   "co-authors",
 ])
 

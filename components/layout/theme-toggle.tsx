@@ -137,9 +137,7 @@ function ModeIcon({ mode, className }: { mode: Mode; className?: string }) {
 export function ThemeToggle({ className }: { className?: string }) {
   const t = useTranslations("Theme")
   const { resolvedTheme, setTheme } = useTheme()
-  const [mode, setMode] = React.useState<Mode>(() =>
-    typeof document === "undefined" ? "system" : readModeFromCookie()
-  )
+  const [mode, setMode] = React.useState<Mode>("system")
   const isMounted = useMounted()
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
 
@@ -170,6 +168,10 @@ export function ThemeToggle({ className }: { className?: string }) {
     },
     [clearCloseTimer, clearLongPressTimer]
   )
+
+  React.useEffect(() => {
+    setMode(readModeFromCookie())
+  }, [])
 
   const openMenu = React.useCallback(() => {
     clearCloseTimer()

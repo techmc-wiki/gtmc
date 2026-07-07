@@ -6,7 +6,7 @@ This file is the agent contract for the **GTMC website** repo. It complements `R
 
 ## Project Overview
 
-`gtmc-web` is the public website for **Graduate Texts in Minecraft (GTMC)** — a community-driven online textbook on technical Minecraft. It serves articles (tutorials, mechanics explanations, source-code analyses), a draft/review hub for contributors, and a feature-request tracker.
+This repo contains the public website for **Graduate Texts in Minecraft (GTMC)** — a community-driven online textbook on technical Minecraft. It serves articles (tutorials, mechanics explanations, source-code analyses), a draft/review hub for contributors, and a feature-request tracker.
 
 - **Framework**: Next.js 16 (App Router, Cache Components, Turbopack) on React 19
 - **Language**: TypeScript 6 (strict mode)
@@ -57,7 +57,7 @@ The articles themselves live in a separate repo and are pulled in via a Git subm
 The project uses **pnpm 11** (pinned via `packageManager` in `package.json`) and is tested on **Node 24** in CI. macOS, Linux, and Vercel build images are supported.
 
 ```bash
-git clone https://github.com/gtmc-dev/gtmc.git
+git clone https://github.com/techmc-wiki/gtmc.git
 cd gtmc
 pnpm install            # also runs scripts/postinstall.mjs (see below)
 cp .env.example .env    # fill in GitHub OAuth, DATABASE_URL, etc.

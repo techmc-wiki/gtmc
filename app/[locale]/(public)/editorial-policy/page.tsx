@@ -71,19 +71,19 @@ export default async function EditorialPolicyPage({
         <p>{t("sourceNote")}</p>
         <p className="mt-1 font-mono tracking-wider uppercase">
           <a
-            href="https://github.com/gtmc-dev/Articles/blob/main/CONTRIBUTING.md"
+            href="https://github.com/techmc-wiki/Articles/blob/main/CONTRIBUTING.md"
             className="hover:text-tech-main-dark underline">
             {t("sourceContributing")}
           </a>
           {" · "}
           <a
-            href="https://github.com/gtmc-dev/Articles/blob/main/REVIEWERS.md"
+            href="https://github.com/techmc-wiki/Articles/blob/main/REVIEWERS.md"
             className="hover:text-tech-main-dark underline">
             {t("sourceReviewers")}
           </a>
           {" · "}
           <a
-            href="https://github.com/gtmc-dev/Articles/blob/main/CODE_OF_CONDUCT.zh.md"
+            href="https://github.com/techmc-wiki/Articles/blob/main/CODE_OF_CONDUCT.zh.md"
             className="hover:text-tech-main-dark underline">
             {t("sourceConduct")}
           </a>

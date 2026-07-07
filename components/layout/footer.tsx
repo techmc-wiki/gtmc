@@ -92,7 +92,7 @@ export default async function Footer() {
                     label: "CODE LICENSE",
                     value: (
                       <a
-                        href="https://github.com/gtmc-dev/gtmc-web/blob/main/LICENSE"
+                        href="https://github.com/techmc-wiki/gtmc/blob/main/LICENSE"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="footer-link">
@@ -165,7 +165,7 @@ export default async function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com/gtmc-dev"
+                  href="https://github.com/techmc-wiki"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="footer-link text-tech-main text-sm">
@@ -174,7 +174,7 @@ export default async function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com/gtmc-dev/gtmc-web/issues"
+                  href="https://github.com/techmc-wiki/gtmc/issues"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="footer-link text-tech-main text-sm">
@@ -216,7 +216,7 @@ export default async function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com/gtmc-dev/gtmc-web"
+                  href="https://github.com/techmc-wiki/gtmc"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="footer-link text-tech-main text-sm">
@@ -225,7 +225,7 @@ export default async function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com/gtmc-dev/gtmc-web/blob/main/LICENSE"
+                  href="https://github.com/techmc-wiki/gtmc/blob/main/LICENSE"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="footer-link text-tech-main text-sm">

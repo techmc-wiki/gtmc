@@ -11,7 +11,7 @@ Read tutorials, mechanics deep-dives, and source-code walkthroughs. All openly w
 
 [![Website](https://img.shields.io/badge/site-beta.techmc.wiki-60708F?style=flat-square&labelColor=4A5A78)](https://beta.techmc.wiki) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/gtmc-dev/gtmc) [![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org) [![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org) [![License](https://img.shields.io/badge/Code-Apache--2.0-yellow?style=flat-square)](LICENSE) [![Articles](https://img.shields.io/badge/Articles-CC--BY--NC--SA%204.0-lightgrey?style=flat-square)](LICENSE)
 
-[Visit the Site](https://beta.techmc.wiki) · [Browse Raw Articles](https://github.com/gtmc-dev/articles) · [More GTMC Projects](https://github.com/orgs/gtmc-dev/repositories)
+[Visit the Site](https://beta.techmc.wiki) · [Browse Raw Articles](https://github.com/techmc-wiki/articles) · [More GTMC Projects](https://github.com/orgs/gtmc-dev/repositories)
 
 <!-- README-I18N:START -->
 
@@ -38,7 +38,7 @@ They span the whole stack of technical play: production builds like tree farms, 
 The fastest way to start is to **[visit the site](https://beta.techmc.wiki)**. Want to contribute? You can draft and submit articles right from the site, or open a feature request to suggest a topic.
 
 > [!NOTE]
-> This repo is the **website**. Articles live in [their own repo](https://github.com/gtmc-dev/articles) and are pulled in as a submodule. Other GTMC projects are at [github.com/orgs/gtmc-dev](https://github.com/orgs/gtmc-dev/repositories).
+> This repo is the **website**. Articles live in [their own repo](https://github.com/techmc-wiki/articles) and are pulled in as a submodule. Other GTMC projects are at [github.com/orgs/gtmc-dev](https://github.com/orgs/gtmc-dev/repositories).
 
 ## Running it locally
 
@@ -47,7 +47,7 @@ The fastest way to start is to **[visit the site](https://beta.techmc.wiki)**. W
 See [`DESIGN.md`](DESIGN.md) for the visual system and [`AGENTS.md`](AGENTS.md) for the full stack breakdown.
 
 ```bash
-git clone https://github.com/gtmc-dev/gtmc.git
+git clone https://github.com/techmc-wiki/gtmc.git
 cd gtmc
 pnpm install            # initializes the articles/ submodule if missing
 cp .env.example .env    # add GitHub OAuth, database URL, etc.

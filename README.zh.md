@@ -11,7 +11,7 @@
 
 [![Website](https://img.shields.io/badge/site-beta.techmc.wiki-60708F?style=flat-square&labelColor=4A5A78)](https://beta.techmc.wiki) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/gtmc-dev/gtmc) [![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org) [![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org) [![License](https://img.shields.io/badge/Code-Apache--2.0-yellow?style=flat-square)](LICENSE) [![Articles](https://img.shields.io/badge/Articles-CC--BY--NC--SA%204.0-lightgrey?style=flat-square)](LICENSE)
 
-[访问网站](https://beta.techmc.wiki) · [浏览原始文章](https://github.com/gtmc-dev/articles) · [更多 GTMC 项目](https://github.com/orgs/gtmc-dev/repositories)
+[访问网站](https://beta.techmc.wiki) · [浏览原始文章](https://github.com/techmc-wiki/articles) · [更多 GTMC 项目](https://github.com/orgs/gtmc-dev/repositories)
 
 <!-- README-I18N:START -->
 
@@ -38,7 +38,7 @@
 最快的上手方式就是**[访问网站](https://beta.techmc.wiki)**。想参与贡献？你可以直接在站内起草并提交文章，也可以提交一个 feature request 来建议选题。
 
 > [!NOTE]
-> 本仓库是**网站**本体。文章存放在[独立仓库](https://github.com/gtmc-dev/articles)中，以子模块形式引入。其他 GTMC 项目见 [github.com/orgs/gtmc-dev](https://github.com/orgs/gtmc-dev/repositories)。
+> 本仓库是**网站**本体。文章存放在[独立仓库](https://github.com/techmc-wiki/articles)中，以子模块形式引入。其他 GTMC 项目见 [github.com/orgs/gtmc-dev](https://github.com/orgs/gtmc-dev/repositories)。
 
 ## 本地运行
 
@@ -47,7 +47,7 @@
 视觉系统详见 [`DESIGN.md`](DESIGN.md)，完整技术栈详见 [`AGENTS.md`](AGENTS.md)。
 
 ```bash
-git clone https://github.com/gtmc-dev/gtmc.git
+git clone https://github.com/techmc-wiki/gtmc.git
 cd gtmc
 pnpm install            # 若 articles/ 子模块缺失则自动初始化
 cp .env.example .env    # 填写 GitHub OAuth、数据库 URL 等

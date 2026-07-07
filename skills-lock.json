@@ -55,17 +55,23 @@
       "skillPath": "manual-frontend-qa/SKILL.md",
       "computedHash": "ddbbeec4944fd7d2a2c59c6aa4e5e8298d78c986e79f62c499795a837c7b122c"
     },
-    "next-best-practices": {
-      "computedHash": "f4678aef4ffc10a5ea64a91e57abe5a5081af813b06d58d565caf3e8ef56e26c",
-      "skillPath": "skills/next-best-practices/SKILL.md",
-      "source": "vercel-labs/next-skills",
-      "sourceType": "github"
+    "next-cache-components-adoption": {
+      "source": "vercel/next.js",
+      "sourceType": "github",
+      "skillPath": "skills/next-cache-components-adoption/SKILL.md",
+      "computedHash": "aaee0946eff1ddcdeee10525953d32a11310e470ef4a13a2ebb3aa79bc1ae769"
     },
-    "next-cache-components": {
-      "computedHash": "f835d8226c28abf012cc013928e2627c8a7a046de61127ef229be1711bd1f255",
-      "skillPath": "skills/next-cache-components/SKILL.md",
-      "source": "vercel-labs/next-skills",
-      "sourceType": "github"
+    "next-cache-components-optimizer": {
+      "source": "vercel/next.js",
+      "sourceType": "github",
+      "skillPath": "skills/next-cache-components-optimizer/SKILL.md",
+      "computedHash": "b8d757a1fe10ebe7b10de1d5ee83f9bcdbd1de1e1147efc68cf249377f471067"
+    },
+    "next-dev-loop": {
+      "source": "vercel/next.js",
+      "sourceType": "github",
+      "skillPath": "skills/next-dev-loop/SKILL.md",
+      "computedHash": "aad97b32ba6efd31e92d063ec77120a694fe0d4a9401daf9af4c205cd5e21b07"
     },
     "performance": {
       "source": "addyosmani/web-quality-skills",
@@ -137,13 +143,13 @@
       "source": "nextlevelbuilder/ui-ux-pro-max-skill",
       "sourceType": "github",
       "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
-      "computedHash": "c0e71f1ea9d80c74f710960c2b4d9ab0f8a6d14c331f8d361df2c28d1879846e"
+      "computedHash": "b0f78bc58cc5a3ac68afdf6f2de214e147b09a3f8686447cb3804a921fa198c2"
     },
     "vercel-cli": {
       "source": "vercel/vercel",
       "sourceType": "github",
       "skillPath": "skills/vercel-cli/SKILL.md",
-      "computedHash": "089bc076ac3d1e9be59a2ab87798e2095a15b4c311db1b40cea9b2f5481d457d"
+      "computedHash": "c24c129a9f87cef301cde4516ca2f9d1a184ba419abed64f216596b6186a91b9"
     },
     "vercel-cli-with-tokens": {
       "source": "vercel-labs/agent-skills",

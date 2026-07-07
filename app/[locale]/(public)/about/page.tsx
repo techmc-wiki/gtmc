@@ -213,7 +213,7 @@ export default async function AboutPage({
             {t("linkGitHub")}
           </a>
           <a
-            href="https://github.com/gtmc-dev/Articles"
+            href="https://github.com/techmc-wiki/Articles"
             target="_blank"
             rel="noopener noreferrer"
             className="text-tech-main hover:text-tech-main-dark inline-flex items-center gap-1.5 font-mono text-xs tracking-widest uppercase transition-colors">

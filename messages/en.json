@@ -403,7 +403,7 @@
     "editorFieldTranslation": "TRANSLATION ({language})",
     "editorPickRowButton": "PICK EXISTING ROW",
     "editorPreviewDiff": "PREVIEW DIFF",
-    "editorPrOwnershipBody": "Once submitted, the PR is opened on your behalf by the gtmc-web bot. You will not be able to push further commits to it via this editor — any follow-up changes must be discussed in the PR comments on GitHub or submitted as a new draft.",
+    "editorPrOwnershipBody": "Once submitted, the PR is opened on your behalf by the gtmc bot. You will not be able to push further commits to it via this editor — any follow-up changes must be discussed in the PR comments on GitHub or submitted as a new draft.",
     "editorPrOwnershipLabel": "[PR OWNERSHIP]",
     "editorPrOwnershipNotice": "You will own the PR and receive notifications.",
     "editorRealEmailToggle": "USE REAL EMAIL",

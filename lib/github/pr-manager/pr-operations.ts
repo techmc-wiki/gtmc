@@ -238,13 +238,3 @@ export async function getPR(prNumber: number, token?: string) {
   })
   return data
 }
-
-export async function getPRFiles(prNumber: number, token?: string) {
-  const octokit = getOctokit(token)
-  const { data } = await octokit.pulls.listFiles({
-    owner: ARTICLES_REPO_OWNER,
-    repo: ARTICLES_REPO_NAME,
-    pull_number: prNumber,
-  })
-  return data
-}

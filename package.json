@@ -31,7 +31,7 @@
     "lint:check": "oxlint .",
     "lint:fix": "oxlint . --fix",
     "lint": "node --run lint:check",
-    "postinstall": "node scripts/postinstall.mjs",
+    "postinstall": "tsx scripts/postinstall.ts",
     "prepare": "husky && git submodule update --init --recursive && gitnexus analyze --index-only",
     "style:check": "node --run fmt:check",
     "style:fix": "node --run fmt:fix",

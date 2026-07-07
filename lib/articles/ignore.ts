@@ -22,7 +22,7 @@ export const IGNORED_ROOT_FILES: readonly string[] = [
 ]
 
 export function shouldIgnoreDirectory(name: string): boolean {
-  if (name.startsWith("_")) {
+  if (name.startsWith("_") || name.startsWith(".")) {
     return true
   }
   return IGNORED_DIRECTORIES.some(

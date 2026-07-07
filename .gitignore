@@ -41,17 +41,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# agent generated files
-.sisyphus
-docs/superpowers
-.superpowers
-.codex
-.claude
-.agents
-.kiro
-.qwen
-.windsurf
-.pi
+# installed skills
+.agents/skills
 
 # generated files
 data

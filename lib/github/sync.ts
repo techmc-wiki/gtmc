@@ -13,6 +13,7 @@ import {
 import {
   IGNORED_DIRECTORIES,
   IGNORED_ROOT_FILES as IGNORED_ROOT_FILE_LIST,
+  shouldIgnoreDirectory,
 } from "@/lib/articles/ignore"
 
 const IGNORED_DIRS = new Set([...IGNORED_DIRECTORIES, "_scripts"])
@@ -79,12 +80,20 @@ export async function getRepoContentTree(): Promise<ArticleTreeNode[]> {
     const name = parts[parts.length - 1]
     const parentPath = parts.slice(0, -1).join("/")
 
-    if (parts.slice(0, -1).some((p) => IGNORED_DIRS.has(p.toLowerCase()))) {
+    if (
+      parts
+        .slice(0, -1)
+        .some(
+          (p) => IGNORED_DIRS.has(p.toLowerCase()) || shouldIgnoreDirectory(p)
+        )
+    ) {
       continue
     }
 
     if (item.type === "tree") {
-      if (IGNORED_DIRS.has(name.toLowerCase())) continue
+      if (IGNORED_DIRS.has(name.toLowerCase()) || shouldIgnoreDirectory(name)) {
+        continue
+      }
 
       nodeMap.set(item.path, {
         id: `gh-${item.path}`,

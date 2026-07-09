@@ -1,5 +1,7 @@
 import fs from "fs"
+import https from "https"
 import path from "path"
+import { fileURLToPath } from "url"
 
 import { parseGlossaryCsv } from "@/lib/glossary/csv"
 import type {
@@ -8,9 +10,18 @@ import type {
   GlossarySummaryEntry,
 } from "@/lib/glossary/manifest"
 
-const CSV_FILE = path.join(process.cwd(), "glossary", "TechMC Glossary.csv")
-const OUTPUT_FILE = path.join(process.cwd(), "data", "glossary.json")
-const SUMMARY_FILE = path.join(process.cwd(), "data", "glossary-summary.json")
+const PROJECT_ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  ".."
+)
+const CSV_FILE = path.join(PROJECT_ROOT, "glossary", "TechMC Glossary.csv")
+const CSV_URL = new URL(
+  "https://raw.githubusercontent.com/TechMC-Glossary/TechMC-Glossary/main/TechMC%20Glossary.csv"
+)
+const FETCH_ATTEMPTS = 3
+const FETCH_TIMEOUT_MS = 20_000
+const OUTPUT_FILE = path.join(PROJECT_ROOT, "data", "glossary.json")
+const SUMMARY_FILE = path.join(PROJECT_ROOT, "data", "glossary-summary.json")
 
 const LOCALE_COLUMNS: Array<{
   locale: GlossaryLocale
@@ -55,18 +66,71 @@ function writeJson(filePath: string, data: unknown): void {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + "\n")
 }
 
-function main(): void {
-  if (!fs.existsSync(CSV_FILE)) {
-    process.stderr.write(`Error: CSV file not found at ${CSV_FILE}\n`)
-    process.exit(1)
+function fetchTextOnce(url: URL): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const request = https
+      .get(url, (response) => {
+        if (response.statusCode !== 200) {
+          reject(new Error(`HTTP ${response.statusCode ?? "unknown"}`))
+          response.resume()
+          return
+        }
+
+        response.setEncoding("utf8")
+        let body = ""
+        response.on("data", (chunk: string) => {
+          body += chunk
+        })
+        response.on("end", () => {
+          resolve(body)
+        })
+      })
+      .on("error", reject)
+
+    request.setTimeout(FETCH_TIMEOUT_MS, () => {
+      request.destroy(new Error(`timeout after ${FETCH_TIMEOUT_MS}ms`))
+    })
+  })
+}
+
+async function fetchText(url: URL, attempt = 1): Promise<string> {
+  try {
+    return await fetchTextOnce(url)
+  } catch (error) {
+    const lastError = error instanceof Error ? error : new Error(String(error))
+    process.stderr.write(
+      `Warning: CSV fetch attempt ${attempt}/${FETCH_ATTEMPTS} failed: ${lastError.message}\n`
+    )
+    if (attempt >= FETCH_ATTEMPTS) {
+      throw lastError
+    }
+
+    return fetchText(url, attempt + 1)
+  }
+}
+
+async function readCsvText(): Promise<{ source: string; text: string }> {
+  if (fs.existsSync(CSV_FILE)) {
+    return {
+      source: path.relative(PROJECT_ROOT, CSV_FILE),
+      text: fs.readFileSync(CSV_FILE, "utf-8"),
+    }
   }
 
+  process.stderr.write(
+    `Warning: CSV file not found at ${CSV_FILE}; fetching ${CSV_URL.href}\n`
+  )
+  return { source: CSV_URL.href, text: await fetchText(CSV_URL) }
+}
+
+async function main(): Promise<void> {
   let csvText: string
+  let source: string
   try {
-    csvText = fs.readFileSync(CSV_FILE, "utf-8")
+    ;({ source, text: csvText } = await readCsvText())
   } catch (error) {
     process.stderr.write(
-      `Error: Failed to read CSV: ${error instanceof Error ? error.message : String(error)}\n`
+      `Error: Failed to load CSV: ${error instanceof Error ? error.message : String(error)}\n`
     )
     process.exit(1)
   }
@@ -144,13 +208,13 @@ function main(): void {
   process.stdout.write(
     [
       "[glossary-manifest] Glossary manifest generated",
-      `Source: ${path.relative(process.cwd(), CSV_FILE)}`,
-      `Output: ${path.relative(process.cwd(), OUTPUT_FILE)}`,
-      `        ${path.relative(process.cwd(), SUMMARY_FILE)}`,
+      `Source: ${source}`,
+      `Output: ${path.relative(PROJECT_ROOT, OUTPUT_FILE)}`,
+      `        ${path.relative(PROJECT_ROOT, SUMMARY_FILE)}`,
       `Entries: ${entries.length} total (${controversial} controversial, ${withTranslations} with translations)`,
       "",
     ].join("\n")
   )
 }
 
-main()
+void main()

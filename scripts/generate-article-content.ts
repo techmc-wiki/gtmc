@@ -97,11 +97,12 @@ function readCachedFrontmatter(
  * Strip YAML frontmatter delimited by `---` and return the body text.
  */
 function stripFrontMatter(raw: string): string {
-  const idx = raw.indexOf("\n---\n")
-  if (raw.startsWith("---\n") && idx !== -1) {
-    return raw.slice(idx + 5)
+  const normalized = raw.startsWith("\uFEFF") ? raw.slice(1) : raw
+  const match = /^---\r?\n[\s\S]*?\r?\n---\r?\n?/.exec(normalized)
+  if (match) {
+    return normalized.slice(match[0].length)
   }
-  return raw
+  return normalized
 }
 
 function copyBannerAssetToPublic(

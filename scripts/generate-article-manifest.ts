@@ -1,5 +1,6 @@
 import fs from "fs"
 import path from "path"
+import { spawnSync } from "node:child_process"
 import type { ArticleEntry } from "@/lib/articles/manifest"
 
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/articles/ignore"
@@ -25,8 +26,10 @@ import {
 } from "@/lib/articles/git-metadata"
 
 const MANIFEST_FILE_NAME = "manifest.json"
-const ARTICLES_PATH = path.join(process.cwd(), "articles")
+const ARTICLES_PATH =
+  process.env.ARTICLES_PATH ?? path.join(process.cwd(), "articles")
 const OUTPUT_FILE = path.join(process.cwd(), "data", MANIFEST_FILE_NAME)
+const ARTICLES_REPO_URL = "https://github.com/techmc-wiki/Articles.git"
 const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const MAX_DEPTH = 3
 
@@ -184,7 +187,27 @@ async function processTranslationFile(
 ): Promise<void> {
   const content = fs.readFileSync(filePath, "utf-8")
   const isReadme = isReadmeLocaleFile(path.basename(filePath))
-  const fm = parseTranslationMetadata(content, isReadme)
+  let fm: TranslationFrontMatter | TranslationReadmeFrontMatter
+  try {
+    fm = parseTranslationMetadata(content, isReadme)
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === "missing required key 'translates'"
+    ) {
+      await processEnglishSourceFile(
+        content,
+        filePath,
+        relPath,
+        isReadme,
+        repoCwd,
+        maintainers,
+        manifest
+      )
+      return
+    }
+    throw error
+  }
 
   const dirPath = path.dirname(filePath)
   const translatesPath = path.join(dirPath, fm.translates)
@@ -278,6 +301,56 @@ async function processTranslationFile(
   }
 }
 
+async function processEnglishSourceFile(
+  content: string,
+  filePath: string,
+  relPath: string,
+  isReadme: boolean,
+  repoCwd: string,
+  maintainers: string[],
+  manifest: ArticleManifest
+): Promise<void> {
+  const fm = parseSourceMetadata(content, isReadme)
+  const parentSlug = getParentSlugFromRelPath(relPath)
+  const sourcePath = isReadme ? null : getSourcePathForEnglishFile(filePath)
+  const sourceSlug = sourcePath ? tryReadSlugFromFile(sourcePath) : null
+  const resolvedSlug = isReadme
+    ? parentSlug
+    : resolveSourceSlug(parentSlug, sourceSlug ?? fm.slug)
+  const entry = manifest[resolvedSlug]
+  if (!entry) {
+    throw new Error(
+      `${relPath}: source slug "${resolvedSlug}" not found in manifest`
+    )
+  }
+
+  const { lastmod } = await getArticleDates(repoCwd, relPath, maintainers)
+
+  if (!entry.availableLocales.includes("en")) {
+    entry.availableLocales.push("en")
+  }
+  entry.localizedFilePaths.en = relPath
+
+  if ("title" in fm && fm.title) entry.titleByLocale.en = fm.title
+  const chapterTitle = "chapter-title" in fm ? fm["chapter-title"] : undefined
+  const introTitle = "intro-title" in fm ? fm["intro-title"] : undefined
+
+  if (chapterTitle) entry.chapterTitleByLocale.en = chapterTitle
+  if (introTitle) {
+    entry.introTitleByLocale.en = introTitle
+    entry.hasIntro = true
+  }
+  if ("description" in fm && fm.description) {
+    entry.descriptionByLocale.en = fm.description
+  }
+  if ("banner" in fm && fm.banner) {
+    if (!entry.bannerByLocale) entry.bannerByLocale = {}
+    entry.bannerByLocale.en = fm.banner
+  }
+  if (lastmod) entry.lastmodByLocale.en = lastmod
+  entry.translationFreshnessByLocale.en = "unknown"
+}
+
 function readSlugFromFile(filePath: string): string {
   const content = fs.readFileSync(filePath, "utf-8")
   return parseSourceMetadata(
@@ -291,6 +364,67 @@ function tryReadSlugFromFile(filePath: string): string | null {
     return readSlugFromFile(filePath) || null
   } catch {
     return null
+  }
+}
+
+function getSourcePathForEnglishFile(filePath: string): string | null {
+  const dirname = path.dirname(filePath)
+  const basename = path.basename(filePath, ".en.md")
+  const zhPath = path.join(dirname, `${basename}.zh.md`)
+  if (fs.existsSync(zhPath)) return zhPath
+
+  const sourcePath = path.join(dirname, `${basename}.md`)
+  return fs.existsSync(sourcePath) ? sourcePath : null
+}
+
+function hasArticleSources(): boolean {
+  if (!fs.existsSync(ARTICLES_PATH)) return false
+  const entries = fs.readdirSync(ARTICLES_PATH, { withFileTypes: true })
+  return (
+    entries.some(
+      (entry) =>
+        entry.isFile() &&
+        (entry.name.endsWith(".md") || entry.name.endsWith(".zh.md"))
+    ) ||
+    entries.some(
+      (entry) => entry.isDirectory() && !shouldIgnoreDirectory(entry.name)
+    )
+  )
+}
+
+function cloneArticlesRepository(): void {
+  if (fs.existsSync(ARTICLES_PATH)) {
+    fs.rmSync(ARTICLES_PATH, { recursive: true, force: true })
+  }
+
+  process.stderr.write(
+    `Warning: articles/ sources missing; cloning ${ARTICLES_REPO_URL}\n`
+  )
+  const result = spawnSync(
+    "git",
+    ["clone", "--depth", "1", ARTICLES_REPO_URL, ARTICLES_PATH],
+    {
+      stdio: "inherit",
+      shell: process.platform === "win32",
+    }
+  )
+
+  if (result.status !== 0) {
+    process.stderr.write(
+      `Error: Failed to clone articles repository from ${ARTICLES_REPO_URL}\n`
+    )
+    process.exit(result.status ?? 1)
+  }
+}
+
+function ensureArticleSources(): void {
+  if (hasArticleSources()) return
+  cloneArticlesRepository()
+  if (!hasArticleSources()) {
+    process.stderr.write(
+      `Error: articles/ source tree is empty at ${ARTICLES_PATH}\n`
+    )
+    process.exit(1)
   }
 }
 
@@ -547,12 +681,7 @@ async function main(): Promise<void> {
   let manifest: ArticleManifest = {}
   let hasError = false
 
-  if (!fs.existsSync(ARTICLES_PATH)) {
-    process.stderr.write(
-      `Error: articles/ directory not found at ${ARTICLES_PATH}\n`
-    )
-    process.exit(1)
-  }
+  ensureArticleSources()
 
   const maintainers = await loadMaintainers()
   const aliases = await loadAuthorAliases()

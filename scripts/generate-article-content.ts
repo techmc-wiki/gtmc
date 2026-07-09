@@ -42,6 +42,11 @@ const IS_PRODUCTION = process.env.NODE_ENV !== "development"
  * regenerated, matching prior behaviour.
  */
 type ContentCache = Record<string, { hash: string }>
+type EnglishFrontMatter =
+  | TranslationFrontMatter
+  | TranslationReadmeFrontMatter
+  | SourceFrontMatter
+  | SourceReadmeFrontMatter
 
 function loadCache(): ContentCache {
   try {
@@ -127,6 +132,27 @@ function copyBannerAssetToPublic(
     fs.copyFileSync(sourcePath, targetPath)
   } catch {
     // Runtime banner routes can still fall back to the articles repository.
+  }
+}
+
+function parseEnglishFrontMatter(
+  fileContent: string,
+  isFolder: boolean
+): EnglishFrontMatter {
+  try {
+    return isFolder
+      ? parseTranslationReadmeFrontMatter(fileContent)
+      : parseTranslationFrontMatter(fileContent)
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === "missing required key 'translates'"
+    ) {
+      return isFolder
+        ? parseSourceReadmeFrontMatter(fileContent)
+        : parseSourceFrontMatter(fileContent)
+    }
+    throw error
   }
 }
 
@@ -289,14 +315,12 @@ function renderArtifact(
       lastmod: entry.lastmodByLocale.zh || undefined,
     }
   } else if (locale === "en") {
-    let fm: TranslationFrontMatter | TranslationReadmeFrontMatter
+    let fm: EnglishFrontMatter
     try {
-      fm = entry.isFolder
-        ? parseTranslationReadmeFrontMatter(fileContent)
-        : parseTranslationFrontMatter(fileContent)
+      fm = parseEnglishFrontMatter(fileContent, entry.isFolder)
     } catch (error) {
       process.stderr.write(
-        `Error: Failed to parse translation frontmatter for "${entry.slug}" (${locale}): ${error instanceof Error ? error.message : String(error)}\n`
+        `Error: Failed to parse English frontmatter for "${entry.slug}" (${locale}): ${error instanceof Error ? error.message : String(error)}\n`
       )
       return null
     }
@@ -313,7 +337,9 @@ function renderArtifact(
       ...("description" in fm &&
         fm.description && { description: fm.description }),
       ...("banner" in fm && fm.banner && { banner: fm.banner }),
-      translatedFromRevision: fm["translated-from-revision"],
+      ...("translated-from-revision" in fm && {
+        translatedFromRevision: fm["translated-from-revision"],
+      }),
       translationFreshness: entry.translationFreshnessByLocale.en || undefined,
       created: entry.created || undefined,
       lastmod: entry.lastmodByLocale.en || undefined,

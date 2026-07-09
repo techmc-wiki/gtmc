@@ -43,6 +43,9 @@ const SOURCE_ALLOWED_KEYS = new Set([
 ])
 
 const TRANSLATION_ALLOWED_KEYS = new Set([
+  "slug",
+  "index",
+  "is-advanced",
   "translates",
   "translated-from-revision",
   "title",
@@ -58,6 +61,8 @@ const SOURCE_README_ALLOWED_KEYS = new Set([
 ])
 
 const TRANSLATION_README_ALLOWED_KEYS = new Set([
+  "slug",
+  "index",
   "translates",
   "translated-from-revision",
   "chapter-title",

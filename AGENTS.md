@@ -59,18 +59,19 @@ The project uses **pnpm 11** (pinned via `packageManager` in `package.json`) and
 ```bash
 git clone https://github.com/techmc-wiki/gtmc.git
 cd gtmc
-pnpm install            # also runs scripts/postinstall.mjs (see below)
+pnpm install            # also runs scripts/postinstall.ts (see below)
 cp .env.example .env    # fill in GitHub OAuth, DATABASE_URL, etc.
 pnpm dev                # http://localhost:3000
 ```
 
-`pnpm install` triggers `scripts/postinstall.mjs`, which:
+`pnpm install` triggers `scripts/postinstall.ts`, which:
 
 1. Adds `.gitconfig` to the local Git config include path.
-2. Initializes the `articles/` submodule if it is missing or empty (otherwise leaves the existing checkout alone).
-3. Runs `prisma generate` (with a placeholder `DATABASE_URL` if none is set, to allow client codegen offline).
-4. Runs `tsx scripts/generate-article-manifest.ts` to seed `data/manifest.json`.
-5. Runs `playwright install chromium` for the PDF generator and any browser tests.
+2. Initializes the `articles/` and `glossary/` submodules at their pinned commits if needed.
+3. Generates the glossary manifest.
+4. Runs `prisma generate` (with a placeholder `DATABASE_URL` if none is set, to allow client codegen offline), unless heavy postinstall steps are explicitly skipped.
+5. Runs `tsx scripts/generate-article-manifest.ts` and `tsx scripts/generate-author-profiles.ts`.
+6. Runs `playwright install chromium` for the PDF generator and any browser tests.
 
 ### Environment variables
 
@@ -101,6 +102,7 @@ pnpm style:fix            # prettier --write
 pnpm build:content        # Generate content artifacts (manifest, glossary, articles, PDF)
 pnpm build:next           # Next.js production build
 pnpm build                # Both phases: content generation then Next build
+pnpm prepare:articles     # Prepare articles submodule for build (pinned by default)
 pnpm analyze              # ANALYZE=true pnpm build (bundle analyzer)
 pnpm lighthouse           # Run Lighthouse CI locally (requires running server)
 ```
@@ -118,12 +120,20 @@ Key things to know:
 pnpm articles:status        # Show submodule status
 pnpm articles:init          # Reinitialize at the pinned commit
 pnpm articles:update        # Pull the latest articles commit
+pnpm prepare:articles       # Prepare articles for a build using GTMC_ARTICLES_SOURCE
 pnpm generate:manifest      # Rebuild data/manifest.json
 pnpm generate:content       # Re-render rendered article content
 pnpm articles:pdf           # Re-render the offline PDF (public/gtmc.pdf)
 ```
 
-Vercel checkouts use whatever commit is pinned by this repo; to ship updated article content, commit the new submodule pointer here. **Do not mix submodule pointer updates into feature/fix commits** (see `CONTRIBUTING.md`).
+Article build source is controlled by `GTMC_ARTICLES_SOURCE`:
+
+- unset or `pinned`: use the `articles/` commit pinned by this repo.
+- `latest`: run `git submodule update --init --recursive --remote articles` before the content build, advancing to the branch configured in `.gitmodules` (currently `main`).
+
+Vercel runs `pnpm build:vercel`, which calls `pnpm prepare:articles` before database migrations and `pnpm build`. Leave `GTMC_ARTICLES_SOURCE` unset for reproducible deployments, or set it to `latest` in Vercel when deployments should automatically consume the newest article commit without first committing a submodule pointer update.
+
+For reproducible releases, update and commit the submodule pointer here with `pnpm articles:update`. **Do not mix submodule pointer updates into feature/fix commits** (see `CONTRIBUTING.md`).
 
 ### Glossary submodule
 
@@ -197,7 +207,7 @@ Notes:
 
 - `pnpm build` is **non-trivial** — phase 1 regenerates all content artifacts before phase 2 invokes `next build`. Allow time and disk space accordingly.
 - `next.config.ts` configures `outputFileTracingIncludes` / `Excludes` so search and litematica endpoints get the right files but article binaries are not pulled into every lambda. Keep these patterns in sync if you add similar routes. (Future: glossary manifests may need similar treatment if served from dedicated API routes.)
-- Vercel uses `vercel.json` to install Chromium system libraries on Amazon Linux before `pnpm install`, then runs `pnpm build` exactly as above.
+- Vercel uses `vercel.json` to install Chromium system libraries on Amazon Linux before `pnpm install`, then runs `pnpm build:vercel`. That script installs Playwright Chromium, prepares the articles submodule according to `GTMC_ARTICLES_SOURCE`, deploys Prisma migrations, and runs the two-phase `pnpm build`.
 - CI workflows (`.github/workflows/`):
   - `build.yml` — runs on every push and PR; installs deps with `--frozen-lockfile`, generates the Prisma client with a placeholder `DATABASE_URL`, then runs `pnpm typecheck` and `pnpm build`.
   - `style_and_lint.yml` — runs on pushes to `main`; runs `pnpm lint:check` and `pnpm style:check`.

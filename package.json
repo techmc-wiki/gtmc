@@ -11,7 +11,7 @@
     "build:content": "node --run generate:manifest && node --run generate:author-profiles && node --run generate:glossary-manifest && node --run generate:content && node --run build:pdf",
     "build:next": "next build",
     "build:pdf": "tsx scripts/generate-pdf.ts --locale all",
-    "build:vercel": "playwright install chromium && node --run prepare:articles && node --run db:migrate:deploy && node --run build",
+    "build:vercel": "GTMC_ARTICLES_SOURCE=latest playwright install chromium && node --run prepare:articles && node --run db:migrate:deploy && node --run build",
     "build": "if [ \"$GTMC_SKIP_CONTENT_BUILD\" != 'true' ]; then pnpm build:content; fi && pnpm build:next",
     "check": "node --run typecheck && node --run lint:check && node --run style:check",
     "db:migrate:deploy": "prisma migrate deploy",

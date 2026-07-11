@@ -36,7 +36,10 @@ function isSubmoduleInitialized(path: string) {
   if (result.status !== 0) return false
 
   const lines = result.stdout.split("\n").filter(Boolean)
-  return lines.length > 0 && lines.every((line) => line.startsWith(" "))
+  return (
+    lines.length > 0 &&
+    lines.every((line) => line.startsWith(" ") || line.startsWith("+"))
+  )
 }
 
 function ensureSubmoduleInitialized(path: string) {

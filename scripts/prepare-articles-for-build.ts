@@ -4,12 +4,17 @@ type ArticleSourceMode = "pinned" | "latest"
 
 const sourceMode = parseArticleSourceMode(process.env.GTMC_ARTICLES_SOURCE)
 
-function parseArticleSourceMode(value: string | undefined): ArticleSourceMode {
-  if (!value || value === "pinned") return "pinned"
-  if (value === "latest") return "latest"
+function parseArticleSourceMode(
+  value: string | undefined
+): ArticleSourceMode | undefined {
+  const trimmedValue = value?.trim()
+
+  if (!trimmedValue) return undefined
+  if (trimmedValue === "pinned") return "pinned"
+  if (trimmedValue === "latest") return "latest"
 
   process.stderr.write(
-    `Invalid GTMC_ARTICLES_SOURCE=${value}. Expected "pinned" or "latest".\n`
+    `Invalid GTMC_ARTICLES_SOURCE=${trimmedValue}. Expected "pinned" or "latest".\n`
   )
   process.exit(1)
 }
@@ -36,4 +41,10 @@ function runGitSubmoduleUpdate(mode: ArticleSourceMode): void {
   }
 }
 
-runGitSubmoduleUpdate(sourceMode)
+if (sourceMode) {
+  runGitSubmoduleUpdate(sourceMode)
+} else {
+  process.stdout.write(
+    "GTMC_ARTICLES_SOURCE is unset; leaving articles submodule unchanged\n"
+  )
+}

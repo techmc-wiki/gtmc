@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next"
+import { cacheLife } from "next/cache"
 
 import { listAllIssues } from "@/lib/github"
 import { getSiteUrl } from "@/lib/site-url"
@@ -11,8 +12,6 @@ import {
   type ArticleLocale,
 } from "@/lib/articles/manifest"
 import { loadGlossaryManifest } from "@/lib/glossary/manifest"
-
-export const revalidate = 3600
 
 const STATIC_LAST_MODIFIED = new Date("2024-12-08T10:28:55.000Z")
 
@@ -46,6 +45,9 @@ function flattenTree(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  "use cache"
+  cacheLife("hours")
+
   const BASE = getSiteUrl()
 
   const staticUrls: MetadataRoute.Sitemap = [

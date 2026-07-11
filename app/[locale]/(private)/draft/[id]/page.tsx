@@ -8,7 +8,6 @@ import { decodeStoredDraftFiles } from "@/lib/drafts/files"
 import { notFound, redirect } from "next/navigation"
 import { readFile } from "fs/promises"
 import path from "path"
-import { ARTICLES_PATH } from "@/lib/articles/fs"
 
 function buildDraftEditorData(
   draft: {
@@ -126,33 +125,14 @@ export default async function EditDraftPage({
 }
 
 async function loadContributingGuides() {
-  const guideTargets = [
-    {
-      id: "web",
-      title: "GTMC Web",
-      filePath: path.join(process.cwd(), "CONTRIBUTING.md"),
-    },
-    {
-      id: "articles",
-      title: "Articles",
-      filePath: path.join(ARTICLES_PATH, "CONTRIBUTING.md"),
-    },
-  ]
-
-  const guides = await Promise.all(
-    guideTargets.map(async (guide) => {
-      try {
-        const content = await readFile(guide.filePath, "utf8")
-        return {
-          id: guide.id,
-          title: guide.title,
-          content,
-        }
-      } catch {
-        return null
-      }
-    })
-  )
+  const guides = await Promise.all([
+    readFile(path.join(process.cwd(), "CONTRIBUTING.md"), "utf8")
+      .then((content) => ({ id: "web", title: "GTMC Web", content }))
+      .catch(() => null),
+    readFile(path.join(process.cwd(), "articles", "CONTRIBUTING.md"), "utf8")
+      .then((content) => ({ id: "articles", title: "Articles", content }))
+      .catch(() => null),
+  ])
 
   return guides.filter(
     (

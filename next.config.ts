@@ -31,6 +31,7 @@ const nextConfig: NextConfig = {
     "papaparse",
   ],
   experimental: {
+    useTypeScriptCli: true,
     optimizePackageImports: [
       "motion/react",
       "@codemirror/state",

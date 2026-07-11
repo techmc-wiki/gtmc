@@ -128,10 +128,11 @@ pnpm articles:pdf           # Re-render the offline PDF (public/gtmc.pdf)
 
 Article build source is controlled by `GTMC_ARTICLES_SOURCE`:
 
-- unset or `pinned`: use the `articles/` commit pinned by this repo.
+- unset or blank: leave the current `articles/` checkout untouched; no `git submodule` command runs.
+- `pinned`: run `git submodule update --init --recursive articles` to check out the commit pinned by this repo.
 - `latest`: run `git submodule update --init --recursive --remote articles` before the content build, advancing to the branch configured in `.gitmodules` (currently `main`).
 
-Vercel runs `pnpm build:vercel`, which calls `pnpm prepare:articles` before database migrations and `pnpm build`. Leave `GTMC_ARTICLES_SOURCE` unset for reproducible deployments, or set it to `latest` in Vercel when deployments should automatically consume the newest article commit without first committing a submodule pointer update.
+Vercel runs `pnpm build:vercel`, which sets `GTMC_ARTICLES_SOURCE=latest` before calling `pnpm prepare:articles`, so deployments consume the newest configured article branch. For reproducible local or CI builds, set `GTMC_ARTICLES_SOURCE=pinned`; leaving it unset preserves the checkout already prepared by `pnpm install`.
 
 For reproducible releases, update and commit the submodule pointer here with `pnpm articles:update`. **Do not mix submodule pointer updates into feature/fix commits** (see `CONTRIBUTING.md`).
 

@@ -3,7 +3,7 @@ import fs from "fs"
 import path from "path"
 
 const BASE_MINECRAFT_DIR = path.join(
-  /* turbopackIgnore: true */ process.cwd(),
+  process.cwd(),
   "litematica-renderer",
   "assets",
   "minecraft"
@@ -22,12 +22,12 @@ function getCachedFilePath(targetName: string) {
   return cached
 }
 
-function setCachedFilePath(targetName: string, fullPath: string) {
+function setCachedFilePath(targetName: string, relativePath: string) {
   if (fileCache.has(targetName)) {
     fileCache.delete(targetName)
   }
 
-  fileCache.set(targetName, fullPath)
+  fileCache.set(targetName, relativePath)
 
   if (fileCache.size > FILE_CACHE_LIMIT) {
     const oldestKey = fileCache.keys().next().value
@@ -52,6 +52,16 @@ export async function GET(
   const assetPath = pathArray.join("/")
   const fileName = pathArray[pathArray.length - 1]
 
+  const normalizedAssetPath = path.normalize(assetPath).replaceAll("\\", "/")
+  if (
+    normalizedAssetPath === ".." ||
+    normalizedAssetPath.startsWith("../") ||
+    normalizedAssetPath.split("/").includes("..") ||
+    path.isAbsolute(normalizedAssetPath)
+  ) {
+    return new NextResponse("Forbidden", { status: 403 })
+  }
+
   // 递归查找文件函数
   const findFile = async (
     dir: string,
@@ -69,46 +79,56 @@ export async function GET(
         const found = await findFile(fullPath, targetName)
         if (found) return found
       } else if (entry.name === targetName) {
-        setCachedFilePath(targetName, fullPath)
-        return fullPath
+        const relativePath = path.relative(BASE_MINECRAFT_DIR, fullPath)
+        setCachedFilePath(targetName, relativePath)
+        return relativePath
       }
     }
     /* oxlint-enable eslint/no-await-in-loop */
     return null
   }
 
-  let localTarget: string | null = null
+  let relativeTarget: string | null = null
 
   // 允许直接以 models/block/xxx.json 或者 textures/block/xxx.png 访问
-  const explicitTarget = path.join(BASE_MINECRAFT_DIR, assetPath)
+  const explicitTarget = path.join(BASE_MINECRAFT_DIR, normalizedAssetPath)
   if (fs.existsSync(explicitTarget)) {
-    localTarget = explicitTarget
+    relativeTarget = normalizedAssetPath
   } else {
     // 后备：旧逻辑直接查找 block/xxx 目录
-    const directTarget = path.join(BASE_TEXTURES_DIR, "block", assetPath)
+    const directTarget = path.join(
+      BASE_TEXTURES_DIR,
+      "block",
+      normalizedAssetPath
+    )
     if (fs.existsSync(directTarget)) {
-      localTarget = directTarget
+      relativeTarget = path.join("textures", "block", normalizedAssetPath)
     } else {
       // 否则我们在整个 textures 目录中进行全局搜索
-      localTarget = await findFile(BASE_TEXTURES_DIR, fileName)
+      relativeTarget = await findFile(BASE_TEXTURES_DIR, fileName)
     }
   }
 
-  if (!localTarget) {
+  if (!relativeTarget) {
     return new NextResponse("Asset Not Found", { status: 404 })
   }
 
-  // 安全检查：防止路径穿越攻击
-  if (!localTarget.startsWith(BASE_MINECRAFT_DIR)) {
+  if (
+    path.isAbsolute(relativeTarget) ||
+    relativeTarget === ".." ||
+    relativeTarget.startsWith(".." + path.sep)
+  ) {
     return new NextResponse("Forbidden", { status: 403 })
   }
 
   try {
-    const fileBuffer = await fs.promises.readFile(localTarget)
+    const fileBuffer = await fs.promises.readFile(
+      path.join(BASE_MINECRAFT_DIR, relativeTarget)
+    )
 
     let contentType = "image/png"
-    if (localTarget.endsWith(".json")) contentType = "application/json"
-    if (localTarget.endsWith(".mcmeta")) contentType = "application/json"
+    if (relativeTarget.endsWith(".json")) contentType = "application/json"
+    if (relativeTarget.endsWith(".mcmeta")) contentType = "application/json"
 
     return new NextResponse(new Uint8Array(fileBuffer), {
       headers: {

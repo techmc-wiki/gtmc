@@ -8,7 +8,6 @@ if (
   process.env.VERCEL = "0"
 }
 
-export const runtime = "edge"
 export const alt = "Graduate Texts in Minecraft"
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"

@@ -49,7 +49,7 @@ See [`DESIGN.md`](DESIGN.md) for the visual system and [`AGENTS.md`](AGENTS.md) 
 ```bash
 git clone https://github.com/techmc-wiki/gtmc.git
 cd gtmc
-pnpm install            # initializes the articles/ submodule if missing
+vp install              # uses the pinned pnpm version
 cp .env.example .env    # add GitHub OAuth, database URL, etc.
 pnpm dev                # http://localhost:3000
 ```
@@ -59,13 +59,14 @@ Common scripts:
 ```bash
 pnpm dev          # Start the dev server
 pnpm build        # Full production build (content + Next.js)
-pnpm typecheck    # tsc --noEmit
-pnpm lint         # oxlint
-pnpm style        # prettier --check
+vp check          # Check formatting and linting
+vp test run       # Run the Vitest suite once
+pnpm typecheck    # Run the Next.js-aware TypeScript check
 ```
 
 > [!TIP]
 > `pnpm build` runs in two phases: `build:content` generates static artifacts (article manifest, glossary, rendered content, offline PDF), then `build:next` builds the site from them. Run them separately when you only need one.
+> Vite+ supplements the Next.js toolchain; `vp dev` and `vp build` are Vite commands and are not used by this project.
 
 ---
 

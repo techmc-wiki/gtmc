@@ -1,14 +1,21 @@
-// @ts-expect-error Bun provides this module in test runtime.
-import { describe, expect, it, beforeEach, mock } from "bun:test"
+import { beforeEach, describe, expect, it, vi } from "vite-plus/test"
 
-const mockCompareCommits = mock()
-const mockGetCommit = mock()
-const mockGetContent = mock()
-const mockRevisionUpdate = mock(async () => ({}))
-const mockRevisionFindUnique = mock(async () => null)
+const {
+  mockCompareCommits,
+  mockGetCommit,
+  mockGetContent,
+  mockRevisionUpdate,
+  mockRevisionFindUnique,
+} = vi.hoisted(() => ({
+  mockCompareCommits: vi.fn(),
+  mockGetCommit: vi.fn(),
+  mockGetContent: vi.fn(),
+  mockRevisionUpdate: vi.fn(async () => ({})),
+  mockRevisionFindUnique: vi.fn(),
+}))
 
-mock.module("@/lib/github/articles-repo", () => ({
-  getOctokit: mock(() => ({
+vi.mock("@/lib/github/articles-repo", () => ({
+  getOctokit: vi.fn(() => ({
     repos: {
       compareCommits: mockCompareCommits,
       getCommit: mockGetCommit,
@@ -17,17 +24,17 @@ mock.module("@/lib/github/articles-repo", () => ({
   })),
   ARTICLES_REPO_OWNER: "gtmc-dev",
   ARTICLES_REPO_NAME: "Articles",
-  getGitHubWriteToken: mock(() => "token"),
+  getGitHubWriteToken: vi.fn(() => "token"),
 }))
 
-mock.module("@/lib/prisma", () => ({
+vi.mock("@/lib/prisma", () => ({
   prisma: {
     revision: {
       update: mockRevisionUpdate,
       findUnique: mockRevisionFindUnique,
     },
     conflictResolution: {
-      findUnique: mock(async () => null),
+      findUnique: vi.fn(async () => null),
     },
   },
 }))

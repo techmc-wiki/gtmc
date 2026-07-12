@@ -49,7 +49,7 @@
 ```bash
 git clone https://github.com/techmc-wiki/gtmc.git
 cd gtmc
-pnpm install            # 若 articles/ 子模块缺失则自动初始化
+vp install              # 使用项目锁定的 pnpm 版本
 cp .env.example .env    # 填写 GitHub OAuth、数据库 URL 等
 pnpm dev                # http://localhost:3000
 ```
@@ -59,13 +59,14 @@ pnpm dev                # http://localhost:3000
 ```bash
 pnpm dev          # 启动开发服务器
 pnpm build        # 完整生产构建（内容 + Next.js）
-pnpm typecheck    # tsc --noEmit
-pnpm lint         # oxlint
-pnpm style        # prettier --check
+vp check          # 检查格式与代码规范
+vp test run       # 运行一次 Vitest 测试套件
+pnpm typecheck    # 运行 Next.js 感知的 TypeScript 检查
 ```
 
 > [!TIP]
 > `pnpm build` 分两个阶段执行：`build:content` 生成静态产物（文章 manifest、术语表、渲染后的内容、离线 PDF），随后 `build:next` 基于这些产物构建站点。只需其中一个阶段时可单独运行。
+> Vite+ 仅补充 Next.js 工具链；本项目不使用属于 Vite 的 `vp dev` 和 `vp build`。
 
 ---
 

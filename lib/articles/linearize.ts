@@ -12,6 +12,11 @@ import { resolveLocalArticlePath } from "@/lib/articles/fs"
  * Each entry corresponds to one non-folder leaf in the article tree,
  * enriched with the chapter (section) metadata it belongs to.
  */
+export interface LinearizedFolder {
+  slug: string
+  title: string
+}
+
 export interface LinearizedArticle {
   /** Canonical slug used to look up the article (e.g. "tree-farm/basics"). */
   slug: string
@@ -23,10 +28,11 @@ export interface LinearizedArticle {
    * skip or handle gracefully.
    */
   filePath: string | null
-  /** Slug of the parent chapter (empty string for root-level articles like preface). */
+  /** Slug of the top-level chapter folder (empty string for root-level articles like preface). */
   chapterSlug: string
-  /** Display title of the parent chapter (empty string for root-level articles). */
+  /** Display title of the top-level chapter folder (empty string for root-level articles). */
   chapterTitle: string
+  folders: LinearizedFolder[]
   /** True when this node is flagged as preface content. */
   isPreface: boolean
   /** True when this node belongs to an appendix section. */
@@ -58,40 +64,55 @@ export async function linearizeArticles(tree: ChapterNavNode[]): Promise<Lineari
     nodes: ChapterNavNode[],
     chapterSlug: string,
     chapterTitle: string,
+    folders: LinearizedFolder[],
     depth: number,
   ): Promise<LinearizedArticle[]> {
     const nested = await Promise.all(
       nodes.map(async (node): Promise<LinearizedArticle[]> => {
-      if (node.isFolder) {
-        // Descend into the folder, which becomes the active chapter
-        return linearizeNodes(node.children, node.slug, node.title, depth + 1)
-      }
+        if (node.isFolder) {
+          if (depth === 0) {
+            return linearizeNodes(
+              node.children,
+              node.slug,
+              node.title,
+              [],
+              depth + 1
+            )
+          }
+          return linearizeNodes(
+            node.children,
+            chapterSlug,
+            chapterTitle,
+            [...folders, { slug: node.slug, title: node.title }],
+            depth + 1
+          )
+        }
 
-      // Resolve file path; may be null if slug is missing from the manifest
-      const filePath = await resolveLocalArticlePath(node.slug)
+        const filePath = await resolveLocalArticlePath(node.slug)
 
-      return [
-        {
-          slug: node.slug,
-          title: node.title,
-          filePath,
-          chapterSlug,
-          chapterTitle,
-          isPreface: node.isPreface ?? false,
-          isAppendix: node.isAppendix ?? false,
-          isAdvanced: node.isAdvanced ?? false,
-          isReadmeIntro: node.isReadmeIntro ?? false,
-          index: node.index ?? -1,
-          depth,
-        },
-      ]
+        return [
+          {
+            slug: node.slug,
+            title: node.title,
+            filePath,
+            chapterSlug,
+            chapterTitle,
+            folders,
+            isPreface: node.isPreface ?? false,
+            isAppendix: node.isAppendix ?? false,
+            isAdvanced: node.isAdvanced ?? false,
+            isReadmeIntro: node.isReadmeIntro ?? false,
+            index: node.index ?? -1,
+            depth,
+          },
+        ]
       })
     )
 
     return nested.flat()
   }
 
-  return linearizeNodes(tree, /* chapterSlug */ "", /* chapterTitle */ "", /* depth */ 0)
+  return linearizeNodes(tree, "", "", [], 0)
 }
 
 const contentCache = new Map<string, string | null>()

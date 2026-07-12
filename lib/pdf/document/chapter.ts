@@ -1,25 +1,35 @@
 import { formatChapterLabel, getLabels } from "./labels"
 import { escapeHtml } from "./html-utils"
-import type { ChapterGroup, PdfLocale } from "./types"
+import type { ChapterContent, ChapterGroup, PdfLocale } from "./types"
 
-/**
- * Chapter opener: dot-grid page with an oversized serif numeral, azure
- * tick, chapter title, and a mini table of the chapter's articles.
- */
 export function renderChapterOpenerHtml(
   chapter: ChapterGroup,
   locale: PdfLocale
 ): string {
   const labels = getLabels(locale)
 
-  const items = chapter.articles
-    .filter((entry) => entry.number !== null)
-    .map(
-      (entry) =>
-        `<li><span class="chapter-list-num">${entry.number}</span>` +
-        `${escapeHtml(entry.article.title)}</li>`
-    )
-    .join("\n      ")
+  const contentsParts: string[] = []
+  function renderContents(content: ChapterContent[]): void {
+    for (const item of content) {
+      if (item.kind === "folder") {
+        contentsParts.push(
+          `<li class="chapter-section-heading">${escapeHtml(item.title)}</li>`
+        )
+        renderContents(item.content)
+        continue
+      }
+
+      if (item.entry.number !== null) {
+        contentsParts.push(
+          `<li><span class="chapter-list-num">${item.entry.number}</span>` +
+            `${escapeHtml(item.entry.article.title)}</li>`
+        )
+      }
+    }
+  }
+  renderContents(chapter.content)
+
+  const items = contentsParts.join("\n      ")
 
   const contents = items
     ? [
@@ -33,7 +43,7 @@ export function renderChapterOpenerHtml(
     : ""
 
   return [
-    `<section id="chapter-${chapter.slug}" class="chapter-opener">`,
+    `<section id="chapter-${escapeHtml(chapter.slug)}" class="chapter-opener">`,
     `  <p class="chapter-kicker">${formatChapterLabel(locale, chapter.number, chapter.isAppendix)}</p>`,
     `  <p class="chapter-numeral">${chapter.number}</p>`,
     `  <h1 class="chapter-title">${escapeHtml(chapter.title)}</h1>`,

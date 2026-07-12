@@ -1,10 +1,14 @@
 import type { LinearizedArticle } from "@/lib/articles/linearize"
 
 import { unescapeHtml } from "./html-utils"
-import type { BookPlan, ChapterGroup, NumberedArticle } from "./types"
+import type {
+  BookPlan,
+  ChapterContent,
+  ChapterGroup,
+  NumberedArticle,
+} from "./types"
 
 function appendixLetter(ordinal: number): string {
-  // 0 → "A", 1 → "B", … 26 → "AA" (defensive; real books stop well short)
   let n = ordinal
   let out = ""
   do {
@@ -15,16 +19,13 @@ function appendixLetter(ordinal: number): string {
 }
 
 /**
- * Group linearized articles into a numbered book plan: preface entries stay
- * unnumbered up front, chapters are numbered 1..N, appendix chapters are
- * lettered A.., and articles get dotted numbers within their chapter
- * ("3.2", "A.1"). Synthetic README intros keep their position but carry no
- * number — they read as the chapter's untitled opening text.
+ * Group linearized articles into a recursively nested book plan. Articles are
+ * numbered flat across the chapter ("3.2", "A.1") regardless of folder depth.
  */
 export function buildBookPlan(articles: LinearizedArticle[]): BookPlan {
   const preface: NumberedArticle[] = []
   const chapters: ChapterGroup[] = []
-  const bySlug = new Map<string, ChapterGroup>()
+  const chapterBySlug = new Map<string, ChapterGroup>()
 
   let chapterCount = 0
   let appendixCount = 0
@@ -34,15 +35,18 @@ export function buildBookPlan(articles: LinearizedArticle[]): BookPlan {
       ...raw,
       title: unescapeHtml(raw.title),
       chapterTitle: unescapeHtml(raw.chapterTitle),
+      folders: raw.folders.map((folder) => ({
+        slug: folder.slug,
+        title: unescapeHtml(folder.title),
+      })),
     }
 
     if (article.isPreface || !article.chapterSlug) {
-      // Preface flag or root-level article: unnumbered front matter
       preface.push({ article, number: null })
       continue
     }
 
-    let chapter = bySlug.get(article.chapterSlug)
+    let chapter = chapterBySlug.get(article.chapterSlug)
     if (!chapter) {
       const number = article.isAppendix
         ? appendixLetter(appendixCount++)
@@ -52,20 +56,71 @@ export function buildBookPlan(articles: LinearizedArticle[]): BookPlan {
         title: article.chapterTitle,
         isAppendix: article.isAppendix,
         number,
-        articles: [],
+        content: [],
       }
-      bySlug.set(article.chapterSlug, chapter)
+      chapterBySlug.set(article.chapterSlug, chapter)
       chapters.push(chapter)
     }
 
-    const numbered = chapter.articles.filter((a) => a.number !== null).length
-    chapter.articles.push({
-      article,
-      number: article.isReadmeIntro
-        ? null
-        : `${chapter.number}.${numbered + 1}`,
+    let content = chapter.content
+    for (const folder of article.folders) {
+      let folderContent = content.find(
+        (item): item is Extract<ChapterContent, { kind: "folder" }> =>
+          item.kind === "folder" && item.slug === folder.slug
+      )
+      if (!folderContent) {
+        folderContent = {
+          kind: "folder",
+          slug: folder.slug,
+          title: folder.title,
+          content: [],
+        }
+        content.push(folderContent)
+      }
+      content = folderContent.content
+    }
+
+    content.push({ kind: "article", entry: { article, number: null } })
+  }
+
+  const numberedChapters: ChapterGroup[] = []
+  for (const chapter of chapters) {
+    let counter = 0
+
+    function numberContent(content: ChapterContent[]): ChapterContent[] {
+      const numberedContent: ChapterContent[] = []
+
+      for (const item of content) {
+        if (item.kind === "folder") {
+          numberedContent.push({
+            kind: "folder",
+            slug: item.slug,
+            title: item.title,
+            content: numberContent(item.content),
+          })
+          continue
+        }
+
+        if (item.entry.article.isReadmeIntro) {
+          numberedContent.push(item)
+          continue
+        }
+
+        counter += 1
+        numberedContent.push({
+          kind: "article",
+          entry: { ...item.entry, number: `${chapter.number}.${counter}` },
+        })
+      }
+
+      return numberedContent
+    }
+
+    numberedChapters.push({
+      ...chapter,
+      content: numberContent(chapter.content),
     })
   }
 
-  return { preface, chapters }
+  return { preface, chapters: numberedChapters }
 }

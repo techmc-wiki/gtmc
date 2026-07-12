@@ -8,11 +8,61 @@ import { renderChapterOpenerHtml } from "./chapter"
 import { renderColophonHtml } from "./colophon"
 import { renderCoverHtml } from "./cover"
 import { renderTocHtml } from "./toc"
-import type { BookOptions, BookPlan } from "./types"
+import type {
+  BookOptions,
+  BookPlan,
+  ChapterContent,
+  ChapterGroup,
+  NumberedArticle,
+} from "./types"
 
 const CSS_PATH = path.join(process.cwd(), "lib", "pdf", "print.css")
 
 let cachedCss: string | null = null
+
+function contentEntries(content: ChapterContent[]): NumberedArticle[] {
+  return content.flatMap((item) =>
+    item.kind === "article" ? [item.entry] : contentEntries(item.content)
+  )
+}
+
+function renumberChapter(chapter: ChapterGroup): ChapterGroup {
+  let counter = 0
+
+  function renumberContent(content: ChapterContent[]): ChapterContent[] {
+    const numberedContent: ChapterContent[] = []
+
+    for (const item of content) {
+      if (item.kind === "folder") {
+        numberedContent.push({
+          kind: "folder",
+          slug: item.slug,
+          title: item.title,
+          content: renumberContent(item.content),
+        })
+        continue
+      }
+
+      if (item.entry.article.isReadmeIntro) {
+        numberedContent.push({
+          kind: "article",
+          entry: { ...item.entry, number: null },
+        })
+        continue
+      }
+
+      counter += 1
+      numberedContent.push({
+        kind: "article",
+        entry: { ...item.entry, number: `${chapter.number}.${counter}` },
+      })
+    }
+
+    return numberedContent
+  }
+
+  return { ...chapter, content: renumberContent(chapter.content) }
+}
 
 function loadPrintCss(): string {
   cachedCss ??= fs.readFileSync(CSS_PATH, "utf-8")
@@ -72,10 +122,10 @@ export function buildCoverHtml(options: BookOptions): string {
 export async function buildBodyHtml(
   options: BookOptions,
   plan: BookPlan
-): Promise<string> {
+): Promise<{ html: string; plan: BookPlan }> {
   const allEntries = [
     ...plan.preface,
-    ...plan.chapters.flatMap((c) => c.articles),
+    ...plan.chapters.flatMap((chapter) => contentEntries(chapter.content)),
   ]
 
   const rendered = new Map<string, string>()
@@ -88,39 +138,78 @@ export async function buildBodyHtml(
     })
   )
 
-  // Drop entries whose article produced no HTML (empty drafts, load
-  // failures) so the TOC never points at a section that does not exist.
   const hasContent = (slug: string) => Boolean(rendered.get(slug))
+
+  function filterContent(content: ChapterContent[]): ChapterContent[] {
+    const filtered: ChapterContent[] = []
+
+    for (const item of content) {
+      if (item.kind === "article") {
+        if (hasContent(item.entry.article.slug)) {
+          filtered.push(item)
+        }
+        continue
+      }
+
+      const nested = filterContent(item.content)
+      if (nested.length > 0) {
+        filtered.push({ ...item, content: nested })
+      }
+    }
+
+    return filtered
+  }
+
   const effectivePlan: BookPlan = {
     preface: plan.preface.filter((e) => hasContent(e.article.slug)),
     chapters: plan.chapters
       .map((chapter) => ({
         ...chapter,
-        articles: chapter.articles.filter((e) => hasContent(e.article.slug)),
+        content: filterContent(chapter.content),
       }))
-      .filter((chapter) => chapter.articles.length > 0),
+      .filter((chapter) => chapter.content.length > 0)
+      .map(renumberChapter),
   }
 
   const sections: string[] = [renderTocHtml(effectivePlan, options.locale)]
 
   for (const entry of effectivePlan.preface) {
-    sections.push(
-      renderArticleSectionHtml(entry, rendered.get(entry.article.slug)!)
-    )
+    const articleHtml = rendered.get(entry.article.slug)
+    if (articleHtml) {
+      sections.push(renderArticleSectionHtml(entry, articleHtml))
+    }
   }
 
   let renderedArticleCount = 0
+  function renderContent(content: ChapterContent[]): void {
+    for (const item of content) {
+      if (item.kind === "folder") {
+        sections.push(
+          `<div class="section-divider">` +
+            `<h2 class="section-title">${escapeHtml(item.title)}</h2>` +
+            `</div>`
+        )
+        renderContent(item.content)
+        continue
+      }
+
+      const articleHtml = rendered.get(item.entry.article.slug)
+      if (articleHtml) {
+        sections.push(renderArticleSectionHtml(item.entry, articleHtml))
+        renderedArticleCount++
+      }
+    }
+  }
+
   for (const chapter of effectivePlan.chapters) {
     sections.push(renderChapterOpenerHtml(chapter, options.locale))
-    for (const entry of chapter.articles) {
-      sections.push(
-        renderArticleSectionHtml(entry, rendered.get(entry.article.slug)!)
-      )
-      renderedArticleCount++
-    }
+    renderContent(chapter.content)
   }
 
   sections.push(renderColophonHtml(options, renderedArticleCount))
 
-  return documentShell(options, sections.join("\n"), "body-document")
+  return {
+    html: documentShell(options, sections.join("\n"), "body-document"),
+    plan: effectivePlan,
+  }
 }

@@ -8,18 +8,40 @@ export interface NumberedArticle {
   number: string | null
 }
 
+export type ChapterContent =
+  | {
+      kind: "folder"
+      slug: string
+      title: string
+      content: ChapterContent[]
+    }
+  | {
+      kind: "article"
+      entry: NumberedArticle
+    }
+
 export interface ChapterGroup {
   slug: string
   title: string
   isAppendix: boolean
   /** Chapter numeral: "1", "2", … or "A", "B", … for appendices. */
   number: string
-  articles: NumberedArticle[]
+  content: ChapterContent[]
 }
 
 export interface BookPlan {
   preface: NumberedArticle[]
   chapters: ChapterGroup[]
+}
+
+function flattenChapterContent(content: ChapterContent[]): NumberedArticle[] {
+  return content.flatMap((item) =>
+    item.kind === "article" ? [item.entry] : flattenChapterContent(item.content)
+  )
+}
+
+export function chapterArticles(chapter: ChapterGroup): NumberedArticle[] {
+  return flattenChapterContent(chapter.content)
 }
 
 export interface BookOptions {

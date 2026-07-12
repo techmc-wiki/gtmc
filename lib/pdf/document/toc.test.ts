@@ -2,8 +2,10 @@ import { describe, expect, it } from "vite-plus/test"
 
 import type { LinearizedArticle } from "@/lib/articles/linearize"
 
+import { buildBodyHtml } from "./assemble"
 import { buildBookPlan } from "./numbering"
 import { renderTocHtml } from "./toc"
+import type { BookOptions } from "./types"
 
 function art(overrides: Partial<LinearizedArticle>): LinearizedArticle {
   return {
@@ -12,6 +14,7 @@ function art(overrides: Partial<LinearizedArticle>): LinearizedArticle {
     filePath: "chapter/article.en.md",
     chapterSlug: "chapter",
     chapterTitle: "Chapter",
+    folders: [],
     isPreface: false,
     isAppendix: false,
     isAdvanced: false,
@@ -29,6 +32,10 @@ const plan = buildBookPlan([
     chapterSlug: "ch",
     chapterTitle: "Blocks",
     title: "A & B",
+    folders: [
+      { slug: "ch/mechanics", title: "Mechanics & Timing" },
+      { slug: "ch/mechanics/signals", title: "Signals <Basics>" },
+    ],
   }),
   art({
     slug: "appendix/glossary",
@@ -54,8 +61,57 @@ describe("renderTocHtml", () => {
     expect(html).not.toContain("A & B<")
   })
 
+  it("renders recursive folder headings and escapes their titles", () => {
+    const html = renderTocHtml(plan, "en")
+
+    expect(html).toContain("Mechanics &amp; Timing")
+    expect(html).toContain("Signals &lt;Basics&gt;")
+    expect(html).toContain("toc-depth-3")
+  })
+
   it("shows chapter numbers and localizes the heading", () => {
     expect(renderTocHtml(plan, "en")).toContain("Contents")
     expect(renderTocHtml(plan, "zh")).toContain("目录")
+  })
+
+  it("prunes failed renders and renumbers surviving articles without gaps", async () => {
+    const recursivePlan = buildBookPlan([
+      art({
+        slug: 'ch/one"&',
+        title: "One",
+        folders: [{ slug: "ch/nested", title: "Nested" }],
+      }),
+      art({
+        slug: "ch/two",
+        title: "Two",
+        folders: [{ slug: "ch/nested", title: "Nested" }],
+      }),
+      art({ slug: "ch/three", title: "Three" }),
+    ])
+    const options: BookOptions = {
+      title: "Book",
+      locale: "en",
+      generatedDate: "2026-07-12",
+      renderArticle: async (article) =>
+        article.slug === "ch/two" ? "" : `<p>${article.title}</p>`,
+    }
+
+    const { html, plan: effectivePlan } = await buildBodyHtml(
+      options,
+      recursivePlan
+    )
+
+    expect(
+      effectivePlan.chapters[0].content.flatMap((item) =>
+        item.kind === "article"
+          ? [item.entry.number]
+          : item.content.flatMap((child) =>
+              child.kind === "article" ? [child.entry.number] : []
+            )
+      )
+    ).toEqual(["1.1", "1.2"])
+    expect(html).not.toContain("article-ch/two")
+    expect(html).toContain('href="#article-ch/one&quot;&amp;"')
+    expect(html).toContain('id="article-ch/one&quot;&amp;"')
   })
 })

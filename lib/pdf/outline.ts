@@ -9,7 +9,7 @@
 import type { PDFDict, PDFDocument, PDFRef } from "pdf-lib"
 import { PDFHexString, PDFName } from "pdf-lib"
 
-import type { BookPlan, PdfLocale } from "./document/types"
+import type { BookPlan, ChapterContent, PdfLocale } from "./document/types"
 import { formatChapterLabel } from "./document/labels"
 
 interface OutlineItemData {
@@ -73,16 +73,38 @@ export function buildOutlineTree(
       children: [],
     }
 
-    for (const entry of chapter.articles) {
-      const pageIndex = pageOf(`article-${entry.article.slug}`)
-      if (pageIndex === undefined) continue
-      const prefix = entry.number ? `${entry.number}  ` : ""
-      node.children.push({
-        title: `${prefix}${entry.article.title}`,
-        pageIndex,
-        children: [],
-      })
+    function outlineContent(content: ChapterContent[]): OutlineNode[] {
+      const children: OutlineNode[] = []
+
+      for (const item of content) {
+        if (item.kind === "article") {
+          const pageIndex = pageOf(`article-${item.entry.article.slug}`)
+          if (pageIndex !== undefined) {
+            const prefix = item.entry.number ? `${item.entry.number}  ` : ""
+            children.push({
+              title: `${prefix}${item.entry.article.title}`,
+              pageIndex,
+              children: [],
+            })
+          }
+          continue
+        }
+
+        const nested = outlineContent(item.content)
+        const firstDescendant = nested[0]
+        if (firstDescendant) {
+          children.push({
+            title: item.title,
+            pageIndex: firstDescendant.pageIndex,
+            children: nested,
+          })
+        }
+      }
+
+      return children
     }
+
+    node.children.push(...outlineContent(chapter.content))
 
     root.push(node)
   }

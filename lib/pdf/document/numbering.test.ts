@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import type { LinearizedArticle } from "@/lib/articles/linearize"
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
+import { preparePublicChapterNav } from "@/lib/articles/public-tree"
+import type { ArticleTreeNode } from "@/lib/github/sync"
 
 import { buildBookPlan } from "./numbering"
+import { chapterArticles } from "./types"
 
 function art(overrides: Partial<LinearizedArticle>): LinearizedArticle {
   return {
@@ -11,6 +15,7 @@ function art(overrides: Partial<LinearizedArticle>): LinearizedArticle {
     filePath: "chapter/article.en.md",
     chapterSlug: "chapter",
     chapterTitle: "Chapter",
+    folders: [],
     isPreface: false,
     isAppendix: false,
     isAdvanced: false,
@@ -61,11 +66,11 @@ describe("buildBookPlan", () => {
     ])
 
     expect(plan.chapters.map((c) => c.number)).toEqual(["1", "2"])
-    expect(plan.chapters[0].articles.map((a) => a.number)).toEqual([
+    expect(chapterArticles(plan.chapters[0]).map((a) => a.number)).toEqual([
       "1.1",
       "1.2",
     ])
-    expect(plan.chapters[1].articles[0].number).toBe("2.1")
+    expect(chapterArticles(plan.chapters[1])[0].number).toBe("2.1")
   })
 
   it("letters appendix chapters A.. and numbers their articles A.M", () => {
@@ -82,7 +87,7 @@ describe("buildBookPlan", () => {
 
     expect(plan.chapters[1].isAppendix).toBe(true)
     expect(plan.chapters[1].number).toBe("A")
-    expect(plan.chapters[1].articles[0].number).toBe("A.1")
+    expect(chapterArticles(plan.chapters[1])[0].number).toBe("A.1")
   })
 
   it("keeps readme-intro articles in place but unnumbered", () => {
@@ -97,8 +102,129 @@ describe("buildBookPlan", () => {
       art({ slug: "ch/a", chapterSlug: "ch", chapterTitle: "Ch", title: "A" }),
     ])
 
-    const [intro, first] = plan.chapters[0].articles
+    const [intro, first] = chapterArticles(plan.chapters[0])
     expect(intro.number).toBeNull()
     expect(first.number).toBe("1.1")
+  })
+
+  it("builds recursive folders while keeping article numbers flat", () => {
+    const plan = buildBookPlan([
+      art({
+        slug: "ch/mechanics",
+        title: "Mechanics intro",
+        folders: [{ slug: "ch/mechanics", title: "Mechanics &amp; Timing" }],
+        isReadmeIntro: true,
+      }),
+      art({
+        slug: "ch/mechanics/signals/a",
+        title: "Signals A",
+        folders: [
+          { slug: "ch/mechanics", title: "Mechanics &amp; Timing" },
+          { slug: "ch/mechanics/signals", title: "Signals" },
+        ],
+      }),
+      art({
+        slug: "ch/direct",
+        title: "Direct",
+      }),
+      art({
+        slug: "ch/mechanics/signals/b",
+        title: "Signals B",
+        folders: [
+          { slug: "ch/mechanics", title: "Mechanics &amp; Timing" },
+          { slug: "ch/mechanics/signals", title: "Signals" },
+        ],
+      }),
+    ])
+
+    const chapter = plan.chapters[0]
+    expect(chapterArticles(chapter).map((entry) => entry.number)).toEqual([
+      null,
+      "1.1",
+      "1.2",
+      "1.3",
+    ])
+    expect(chapter.content).toMatchObject([
+      {
+        kind: "folder",
+        slug: "ch/mechanics",
+        title: "Mechanics & Timing",
+        content: [
+          { kind: "article" },
+          {
+            kind: "folder",
+            slug: "ch/mechanics/signals",
+            content: [{ kind: "article" }, { kind: "article" }],
+          },
+        ],
+      },
+      { kind: "article" },
+    ])
+  })
+})
+
+function node(
+  overrides: Partial<ArticleTreeNode & ChapterNavNode> & { slug: string }
+): ArticleTreeNode & Partial<ChapterNavNode> {
+  return {
+    id: overrides.slug,
+    title: overrides.slug,
+    isFolder: false,
+    parentId: null,
+    children: [],
+    ...overrides,
+  }
+}
+
+describe("preparePublicChapterNav", () => {
+  it("clones, injects nested intros, and sorts folder/article siblings by index", () => {
+    const source = [
+      node({ slug: "unindexed", title: "Unindexed", index: -1 }),
+      node({
+        slug: "folder",
+        title: "Folder",
+        isFolder: true,
+        index: 2,
+        introTitle: "Folder intro",
+        children: [
+          node({
+            slug: "folder/nested",
+            title: "Nested",
+            isFolder: true,
+            parentId: "folder",
+            introTitle: "Nested intro",
+            children: [
+              node({
+                slug: "folder/nested/article",
+                title: "Nested article",
+                parentId: "folder/nested",
+                index: 1,
+              }),
+            ],
+          }),
+        ],
+      }),
+      node({ slug: "article", title: "Article", index: 1 }),
+    ]
+
+    const prepared = preparePublicChapterNav(source)
+
+    expect(prepared.map((item) => item.slug)).toEqual([
+      "article",
+      "folder",
+      "unindexed",
+    ])
+    expect(prepared[1].children[0]).toMatchObject({
+      slug: "folder",
+      title: "Folder intro",
+      isReadmeIntro: true,
+    })
+    expect(prepared[1].children[1].children[0]).toMatchObject({
+      slug: "folder/nested",
+      title: "Nested intro",
+      isReadmeIntro: true,
+    })
+    expect(source[1].children).toHaveLength(1)
+    expect(source[1].children[0].children).toHaveLength(1)
   })
 })

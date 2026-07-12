@@ -13,11 +13,11 @@
     "build:pdf": "tsx scripts/generate-pdf.ts --locale all",
     "build:vercel": "GTMC_ARTICLES_SOURCE=latest playwright install chromium && node --run prepare:articles && node --run db:migrate:deploy && node --run build",
     "build": "if [ \"$GTMC_SKIP_CONTENT_BUILD\" != 'true' ]; then pnpm build:content; fi && pnpm build:next",
-    "check": "node --run typecheck && node --run lint:check && node --run style:check",
+    "check": "vp check && node --run typecheck",
     "db:migrate:deploy": "prisma migrate deploy",
     "dev": "next dev",
-    "fmt:check": "oxfmt --check",
-    "fmt:fix": "oxfmt",
+    "fmt:check": "vp fmt --check",
+    "fmt:fix": "vp fmt --write",
     "fmt": "node --run fmt:check",
     "generate:aliases": "tsx scripts/generate-author-aliases.ts",
     "generate:author-profiles": "tsx scripts/generate-author-profiles.ts",
@@ -28,15 +28,16 @@
     "glossary:status": "git submodule status glossary",
     "glossary:update": "git submodule update --remote glossary",
     "lighthouse": "lhci autorun",
-    "lint:check": "oxlint .",
-    "lint:fix": "oxlint . --fix",
+    "lint:check": "vp lint",
+    "lint:fix": "vp lint --fix",
     "lint": "node --run lint:check",
     "postinstall": "tsx scripts/postinstall.ts",
     "prepare:articles": "tsx scripts/prepare-articles-for-build.ts",
-    "prepare": "husky",
+    "prepare": "vp config --no-agent",
     "style:check": "node --run fmt:check",
     "style:fix": "node --run fmt:fix",
     "style": "node --run style:check",
+    "test": "vp test run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -112,10 +113,6 @@
     "@types/react": "^19.2.17",
     "@types/three": "^0.185.0",
     "gitnexus": "^1.6.9",
-    "husky": "^9.1.7",
-    "lint-staged": "^17.0.8",
-    "oxfmt": "^0.57.0",
-    "oxlint": "^1.72.0",
     "pdf-lib": "^1.17.1",
     "playwright": "^1.61.1",
     "rehype-stringify": "^10.0.1",
@@ -124,19 +121,10 @@
     "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.23.0",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.10"
+    "vite-plus": "0.2.4"
   },
   "resolutions": {
     "form-data": "4.0.5"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx,mjs}": [
-      "oxlint --fix",
-      "oxfmt --write"
-    ],
-    "*.{json,css}": [
-      "oxfmt --write"
-    ]
   },
   "packageManager": "pnpm@11.10.0+sha512.0b7f8b98060031904c017e3a41eb187a16d40eeb829b95c4f8cb03681761fc4ab53dd219115b9b447f4dce1a05a214764461e7d3703392a9f32f9511ce8c86c8"
 }

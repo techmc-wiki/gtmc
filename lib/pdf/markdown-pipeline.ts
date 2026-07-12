@@ -39,6 +39,9 @@ export interface PdfPipelineOptions {
    * Article slug used for generating source links (e.g. for GIF captions).
    */
   articleSlug?: string
+
+  /** Locale for reader-facing notices (GIF captions) and source links. */
+  locale?: "en" | "zh"
 }
 
 /**
@@ -90,15 +93,18 @@ export async function renderMarkdownToHtml(
   )
 
   // ── Inject animated notice for GIF images ────────────────────────
+  const locale = options?.locale ?? "en"
+  const notice = locale === "zh" ? "该图为动图。" : "This figure is animated."
+  const linkText = locale === "zh" ? "查看原图" : "View original"
   const baseUrl = options?.articleSlug
-    ? `https://gtmc.wiki/en/articles/${options.articleSlug}`
+    ? `https://beta.techmc.wiki/${locale}/articles/${options.articleSlug}`
     : ""
   const sourceLink = baseUrl
-    ? ` <a href="${baseUrl}" class="gif-source-link">View original</a>`
+    ? ` <a href="${baseUrl}" class="gif-source-link">${linkText}</a>`
     : ""
   html = html.replaceAll(
     /(<img[^>]*src="(?!data:)[^"]*\.gif[^"]*"[^>]*\/?>)/gi,
-    `$1<p class="gif-caption">▶ This figure is animated.${sourceLink}</p>`
+    `$1<p class="gif-caption">▶ ${notice}${sourceLink}</p>`
   )
 
   return html

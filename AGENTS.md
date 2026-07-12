@@ -20,7 +20,7 @@ This repo contains the public website for **Graduate Texts in Minecraft (GTMC)**
 - **Search**: MiniSearch
 - **i18n**: `next-intl` with `en` and `zh` locales
 - **Hosting**: Vercel (Speed Insights, Analytics, Blob)
-- **Lint / Format**: oxlint (not ESLint), Prettier with Tailwind plugin
+- **Unified tooling**: Vite+ (`vp`) for package management, Oxlint, Oxfmt, and Vitest
 - **Tests**: Vitest, Playwright, Lighthouse CI
 
 The articles themselves live in a separate repo and are pulled in via a Git submodule at `articles/`, and the glossary CSV data is pulled in via a submodule at `glossary/`.
@@ -54,12 +54,12 @@ The articles themselves live in a separate repo and are pulled in via a Git subm
 
 ## Setup Commands
 
-The project uses **pnpm 11** (pinned via `packageManager` in `package.json`) and is tested on **Node 24** in CI. macOS, Linux, and Vercel build images are supported.
+The project uses **pnpm 11** (pinned via `packageManager` in `package.json`) through Vite+ and is tested on **Node 24** in CI. macOS, Linux, and Vercel build images are supported.
 
 ```bash
 git clone https://github.com/techmc-wiki/gtmc.git
 cd gtmc
-pnpm install            # also runs scripts/postinstall.ts (see below)
+vp install              # delegates to pinned pnpm; also runs postinstall
 cp .env.example .env    # fill in GitHub OAuth, DATABASE_URL, etc.
 pnpm dev                # http://localhost:3000
 ```
@@ -94,11 +94,11 @@ NextAuth additionally expects `AUTH_SECRET` and GitHub OAuth credentials configu
 
 ```bash
 pnpm dev                  # Start the Next.js dev server on :3000
-pnpm typecheck            # tsc --noEmit (strict)
-pnpm lint                 # oxlint (alias of lint:check)
-pnpm lint:fix             # oxlint --fix
-pnpm style                # prettier --check (alias of style:check)
-pnpm style:fix            # prettier --write
+vp check                  # Oxfmt check + Oxlint
+vp check --fix            # Format and autofix lint findings
+vp test run               # Run Vitest once
+vp install                # Install with the pinned pnpm version
+pnpm typecheck            # tsc --noEmit (strict, Next.js-aware)
 pnpm build:content        # Generate content artifacts (manifest, glossary, articles, PDF)
 pnpm build:next           # Next.js production build
 pnpm build                # Both phases: content generation then Next build
@@ -109,7 +109,8 @@ pnpm lighthouse           # Run Lighthouse CI locally (requires running server)
 
 Key things to know:
 
-- **Path alias**: `@/*` resolves to the repo root (see `tsconfig.json` and `vitest.config.ts`).
+- **Path alias**: `@/*` resolves to the repo root (see `tsconfig.json` and `vite.config.ts`).
+- **Next.js command boundary**: continue using `pnpm dev` and `pnpm build`. The built-in `vp dev` and `vp build` commands invoke Vite and must not replace the Next.js/Turbopack scripts.
 - **Middleware** lives in `proxy.ts` (not `middleware.ts`). It composes `next-intl` routing with NextAuth and gates `/admin`, `/draft`, `/profile`, `/review`, and `/features/new` behind a session.
 - **Prisma client** is imported from `@prisma/client`; `serverExternalPackages` in `next.config.ts` keeps Prisma out of the client bundle.
 - The build embeds a 7-char Git SHA as `NEXT_PUBLIC_BUILD_SHA` (falls back to `VERCEL_GIT_COMMIT_SHA`).
@@ -152,15 +153,13 @@ The glossary submodule works similarly to articles: Vercel uses the pinned commi
 Test runners are installed but the standing rule is: **do not add or propose tests unless explicitly requested.** Tests are handled as isolated tasks. When the user asks for tests, use the commands below.
 
 ```bash
-# Vitest is configured (vitest.config.ts) but no `pnpm test` script exists.
-# Invoke it directly:
-pnpm vitest run                                    # Run all tests once
-pnpm vitest                                        # Watch mode
-pnpm vitest run lib/articles/article-rebase.test.ts
-pnpm vitest run -t "merges conflicting drafts"     # Filter by test name
+vp test run                                    # Run all tests once
+vp test watch                                  # Watch mode
+vp test run lib/articles/article-rebase.test.ts
+vp test run -t "merges conflicting drafts"     # Filter by test name
 ```
 
-- Vitest config: `vitest.config.ts` (globals enabled, `@/*` alias resolves to the repo root).
+- Vite+ config: `vite.config.ts` contains Vitest, Oxlint, Oxfmt, and staged-file settings.
 - Existing specs live alongside the code in `lib/` (e.g. `lib/slug-utils.test.ts`, `lib/__tests__/article-loader.test.ts`, `lib/articles/*.test.ts`).
 - Playwright is installed for the PDF generator (`scripts/generate-pdf.ts`) and for any future e2e work; install browsers with `pnpm exec playwright install chromium` if missing.
 - Lighthouse CI: `pnpm lighthouse` runs `lhci autorun` against `/`, `/features`, `/articles` (config in `.lighthouserc.js`). Requires a running dev or preview server.
@@ -170,8 +169,8 @@ When fixing a bug or changing existing logic, update the colocated specs to matc
 ## Code Style
 
 - **TypeScript**: `strict` is on. Never silence type errors with `as any`, `@ts-ignore`, or `@ts-expect-error`. Fix the underlying type instead.
-- **Linter**: oxlint (`.oxlintrc.json`). Configured plugins: `typescript`, `react`, `nextjs`. `correctness` is `error`; `suspicious` is `off`. Ignored paths include `.next/`, `articles/`, `.sisyphus/`, `.agents/`, `.claude/`.
-- **Formatter**: Prettier (`.prettierrc.json`) — `printWidth: 80`, `semi: false`, `singleQuote: false`, `trailingComma: "es5"`, `bracketSameLine: true`, with `prettier-plugin-tailwindcss` to auto-sort class lists. **Markdown is excluded** from Prettier (`.prettierignore`); leave Markdown formatting alone unless asked.
+- **Linter**: Vite+ runs Oxlint from the `lint` block in `vite.config.ts`. Configured plugins include `typescript`, `react`, and `nextjs`; generated output, agent support directories, and the articles submodule are ignored.
+- **Formatter**: Vite+ runs Oxfmt from the `fmt` block in `vite.config.ts`, including Tailwind class sorting. Markdown and verification artifacts are excluded; leave Markdown formatting alone unless asked.
 - **React**: React 19 with the new JSX transform — no need to import `React` in scope. `react/react-in-jsx-scope` is disabled.
 - **File names**: kebab-case for modules and components (e.g. `tech-card.tsx`, `article-rebase.test.ts`).
 - **Import paths**: prefer the `@/...` alias over long relative paths.
@@ -211,13 +210,13 @@ Notes:
 - Vercel uses `vercel.json` to install Chromium system libraries on Amazon Linux before `pnpm install`, then runs `pnpm build:vercel`. That script installs Playwright Chromium, prepares the articles submodule according to `GTMC_ARTICLES_SOURCE`, deploys Prisma migrations, and runs the two-phase `pnpm build`.
 - CI workflows (`.github/workflows/`):
   - `build.yml` — runs on every push and PR; installs deps with `--frozen-lockfile`, generates the Prisma client with a placeholder `DATABASE_URL`, then runs `pnpm typecheck` and `pnpm build`.
-  - `style_and_lint.yml` — runs on pushes to `main`; runs `pnpm lint:check` and `pnpm style:check`.
+  - `style_and_lint.yml` — runs on pushes to `main`; its compatibility scripts delegate to Vite+ lint and format checks.
   - `submit_pr.yml` — `workflow_dispatch` only; opens automated article-submission PRs from the review hub.
 
 Before reporting a build-affecting change as "done":
 
 ```bash
-pnpm typecheck && pnpm lint:check && pnpm style:check
+pnpm check && pnpm test
 ```
 
 Run `pnpm build` locally for any change that touches `next.config.ts`, the article generators, or anything in `scripts/`.
@@ -260,9 +259,8 @@ Recent history frequently uses `fix(scope): …`, `feat(scope): …`, and `chore
 ### Required checks before requesting review
 
 ```bash
-pnpm typecheck
-pnpm lint:check
-pnpm style:check
+pnpm check
+pnpm test
 ```
 
 `pnpm build` will run in CI; run it locally if your change touches the build pipeline, generators, or `next.config.ts`.

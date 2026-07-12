@@ -1,23 +1,28 @@
 #!/usr/bin/env npx tsx
 
 /**
- * PDF Generation Script
+ * PDF Generation Script — archival print edition of the GTMC book.
  *
- * Loads linearized articles from the article tree, builds a complete ebook HTML
- * document, renders it to PDF via Playwright (headless Chromium), and adds PDF
- * bookmarks (outlines) using pdf-lib post-processing.
+ * Pipeline per locale:
+ *   1. Load + sort the article tree, linearize, and number it (book plan)
+ *   2. Scan article bodies once (code languages, math, content map)
+ *   3. Render the cover as its own single-page PDF (no running apparatus)
+ *   4. Render the body twice: pass 1 measures real page numbers from the
+ *      PDF's named destinations, pass 2 re-renders with TOC folios filled
+ *   5. Merge cover + body, write exact-page outlines and metadata
  *
  * Usage:
- *   npx tsx scripts/generate-pdf.ts --locale en --output public/gtmc.pdf
- *   npx tsx scripts/generate-pdf.ts --locale zh
- *   npx tsx scripts/generate-pdf.ts                          # defaults: en, public/gtmc.pdf
+ *   npx tsx scripts/generate-pdf.ts --locale en --output public/gtmc-en.pdf
+ *   npx tsx scripts/generate-pdf.ts               # defaults: all locales
  */
 
 import { chromium } from "playwright"
+import type { Browser, Page } from "playwright"
 import { PDFDocument } from "pdf-lib"
 import fs from "node:fs"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
+import { execSync } from "node:child_process"
 
 import { getArticleTree } from "@/lib/articles/manifest"
 import {
@@ -26,18 +31,73 @@ import {
 } from "@/lib/articles/linearize"
 import type { LinearizedArticle } from "@/lib/articles/linearize"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
-import type { ArticleLocale } from "@/lib/articles/manifest"
-import { buildEbookHtml, resolveImagesInHtml } from "@/lib/pdf/ebook-structure"
-import { buildOutlineTree, writePdfOutlines } from "@/lib/pdf/outline"
+import {
+  buildBodyHtml,
+  buildBookPlan,
+  buildCoverHtml,
+  getLabels,
+} from "@/lib/pdf/document"
+import type { BookOptions, PdfLocale } from "@/lib/pdf/document"
+import { resolveImagesInHtml } from "@/lib/pdf/images"
 import { renderMarkdownToHtml } from "@/lib/pdf/markdown-pipeline"
+import { buildOutlineTree, writePdfOutlines } from "@/lib/pdf/outline"
+import { fillTocFolios, readAnchorPageIndices } from "@/lib/pdf/paginate"
+import { paintPageBackgrounds } from "@/lib/pdf/paint-background"
+import {
+  PDF_REQUIRED_FONTS,
+  buildFooterTemplate,
+  buildHeaderTemplate,
+} from "@/lib/pdf/theme"
 import { createRehypeShiki } from "@/lib/markdown/syntax/rehype-shiki"
 import type { RehypeShikiPlugin } from "@/lib/markdown/syntax/rehype-shiki"
 
-// ── Types ───────────────────────────────────────────────────────────────────
+const BOOK_TITLE = "Graduate Texts in Minecraft"
+const BOOK_SUBTITLE = "An Introduction to Technical Minecraft"
+const SOURCE_URL = "https://beta.techmc.wiki"
+const TAGLINES: Record<PdfLocale, string> = {
+  en: "Knowledge exists. Structure matters.",
+  zh: "知识从未缺失，缺失的是连接。",
+}
+
+function getArticlesRevision(): string | undefined {
+  try {
+    const articlesDir = path.join(process.cwd(), "articles")
+    return execSync("git rev-parse --short=7 HEAD", {
+      cwd: articlesDir,
+      encoding: "utf-8",
+    }).trim()
+  } catch {
+    return undefined
+  }
+}
 
 interface CliOptions {
-  locale: "en" | "zh" | "all"
+  locale: PdfLocale | "all"
   output: string
+}
+
+function parseArgs(): CliOptions {
+  const args = process.argv.slice(2)
+  let locale: PdfLocale | "all" = "all"
+  let output = ""
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i]
+    if (arg === "--locale" && i + 1 < args.length) {
+      const val = args[i + 1].toLowerCase()
+      if (val === "en" || val === "zh" || val === "all") locale = val
+      i++
+    } else if (arg === "--output" && i + 1 < args.length) {
+      output = path.resolve(process.cwd(), args[i + 1])
+      i++
+    }
+  }
+
+  if (!output && locale !== "all") {
+    output = path.join(process.cwd(), "public", `gtmc-${locale}.pdf`)
+  }
+
+  return { locale, output }
 }
 
 function sortChapterTree(nodes: ChapterNavNode[]) {
@@ -57,73 +117,9 @@ function sortChapterTree(nodes: ChapterNavNode[]) {
   }
 }
 
-// ── CLI Parsing ─────────────────────────────────────────────────────────────
-
-function parseArgs(): CliOptions {
-  const args = process.argv.slice(2)
-  let locale: "en" | "zh" | "all" = "all"
-  let output = ""
-
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i]
-    if (arg === "--locale" && i + 1 < args.length) {
-      const val = args[i + 1].toLowerCase()
-      if (val === "en" || val === "zh" || val === "all") locale = val as any
-      i++
-    } else if (arg === "--output" && i + 1 < args.length) {
-      output = path.resolve(process.cwd(), args[i + 1])
-      i++
-    }
-  }
-
-  if (!output && locale !== "all") {
-    output = path.join(process.cwd(), "public", `gtmc-${locale}.pdf`)
-  }
-
-  return { locale, output }
-}
-
-// ── Content Scanning ────────────────────────────────────────────────────────
-
-/**
- * Read each article once and compute everything we need from its content:
- * the set of fenced code-block languages, whether it contains math, and the
- * raw markdown body (returned so the renderer can reuse it without re-reading).
- */
-async function analyzeArticle(
-  article: LinearizedArticle,
-  locale: ArticleLocale
-): Promise<{ codeLangs: string[]; hasMath: boolean; body: string | null }> {
-  try {
-    const body = await getArticleContentForPdf(article.slug, locale)
-    if (!body) return { codeLangs: [], hasMath: false, body: null }
-
-    const codeLangs: string[] = []
-    for (const m of body.matchAll(/^```(\w+)/gm)) {
-      const lang = m[1].toLowerCase()
-      if (lang !== "" && lang !== "text" && lang !== "plain") {
-        codeLangs.push(lang)
-      }
-    }
-
-    const hasMath =
-      body.includes("$") || body.includes("\\(") || body.includes("\\[")
-
-    return { codeLangs, hasMath, body }
-  } catch {
-    // Skip articles that fail to load during scanning
-    return { codeLangs: [], hasMath: false, body: null }
-  }
-}
-
-/**
- * Scan all articles once, returning the distinct code languages, whether any
- * article needs KaTeX, and a map of slug → body so the renderer can reuse the
- * already-read content.
- */
 async function analyzeArticles(
   articles: LinearizedArticle[],
-  locale: ArticleLocale
+  locale: PdfLocale
 ): Promise<{
   codeLangs: string[]
   hasMath: boolean
@@ -133,30 +129,32 @@ async function analyzeArticles(
   let hasMath = false
   const bodies = new Map<string, string>()
 
-  const results = await Promise.all(
-    articles.map((article) => analyzeArticle(article, locale))
+  await Promise.all(
+    articles.map(async (article) => {
+      const body = await getArticleContentForPdf(article.slug, locale).catch(
+        () => null
+      )
+      if (!body) return
+
+      for (const m of body.matchAll(/^```(\w+)/gm)) {
+        const lang = m[1].toLowerCase()
+        if (lang !== "" && lang !== "text" && lang !== "plain") {
+          allLangs.add(lang)
+        }
+      }
+      if (body.includes("$") || body.includes("\\(") || body.includes("\\[")) {
+        hasMath = true
+      }
+      bodies.set(article.slug, body)
+    })
   )
-  for (let i = 0; i < articles.length; i++) {
-    const { codeLangs, hasMath: articleHasMath, body } = results[i]
-    for (const lang of codeLangs) allLangs.add(lang)
-    if (articleHasMath) hasMath = true
-    if (body !== null) bodies.set(articles[i].slug, body)
-  }
 
   return { codeLangs: [...allLangs], hasMath, bodies }
 }
 
-// ── Custom Article Renderer ─────────────────────────────────────────────────
-
-/**
- * Factory that returns a renderArticle callback for `buildEbookHtml()`.
- * Each article's markdown is rendered through the PDF pipeline with optional
- * Shiki syntax highlighting. The body comes from the pre-read `bodies` map
- * produced during content scanning, so each file is read only once.
- */
 function createRenderArticle(
   shikiPlugin: RehypeShikiPlugin | undefined,
-  locale: ArticleLocale,
+  locale: PdfLocale,
   bodies: Map<string, string>
 ) {
   return async (article: LinearizedArticle): Promise<string> => {
@@ -168,9 +166,9 @@ function createRenderArticle(
         articlePath: article.filePath ?? undefined,
         articleSlug: article.slug,
         shikiPlugin,
+        locale,
       })
 
-      // Resolve relative image paths to file:// URLs for Playwright
       return resolveImagesInHtml(html, article.filePath)
     } catch (error) {
       console.warn(
@@ -182,124 +180,134 @@ function createRenderArticle(
   }
 }
 
-// ── Main ────────────────────────────────────────────────────────────────────
+interface RenderPdfOptions {
+  displayHeaderFooter: boolean
+  headerTemplate?: string
+  footerTemplate?: string
+}
 
-async function runPdf(locale: "en" | "zh", output: string): Promise<void> {
+async function renderHtmlToPdf(
+  browser: Browser,
+  html: string,
+  tempHtmlPath: string,
+  tempPdfPath: string,
+  options: RenderPdfOptions
+): Promise<Uint8Array> {
+  fs.writeFileSync(tempHtmlPath, html, "utf-8")
+
+  const context = await browser.newContext({ colorScheme: "light" })
+  try {
+    const page: Page = await context.newPage()
+    await page.goto(pathToFileURL(tempHtmlPath).href, { waitUntil: "load" })
+
+    const requiredFonts = [...PDF_REQUIRED_FONTS]
+    await page.waitForFunction(
+      (fonts) =>
+        document.fonts.ready.then(() =>
+          fonts.every((f) => document.fonts.check(f))
+        ),
+      requiredFonts,
+      { timeout: 30000 }
+    )
+
+    await page.pdf({
+      path: tempPdfPath,
+      format: "A4",
+      preferCSSPageSize: true,
+      printBackground: true,
+      tagged: true,
+      displayHeaderFooter: options.displayHeaderFooter,
+      headerTemplate: options.headerTemplate ?? "<span></span>",
+      footerTemplate: options.footerTemplate ?? "<span></span>",
+    })
+
+    return fs.readFileSync(tempPdfPath)
+  } finally {
+    await context.close()
+  }
+}
+
+async function runPdf(locale: PdfLocale, output: string): Promise<void> {
   console.log(`[pdf] Generating PDF (locale=${locale}, output=${output})`)
 
-  // Ensure output directory exists
   const outDir = path.dirname(output)
-  if (!fs.existsSync(outDir)) {
-    fs.mkdirSync(outDir, { recursive: true })
-  }
+  fs.mkdirSync(outDir, { recursive: true })
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // Phase 1: Load article tree
-  // ═══════════════════════════════════════════════════════════════════════
-  console.log("[pdf] Phase 1/6: Loading article tree...")
-  let tree: ChapterNavNode[]
-  try {
-    tree = (await getArticleTree(locale)) as ChapterNavNode[]
-  } catch (error) {
-    throw new Error(`[pdf] Failed to load article tree: ${error}`, {
-      cause: error,
-    })
-  }
-
+  console.log("[pdf] Phase 1/6: Loading and numbering article tree...")
+  const tree = (await getArticleTree(locale)) as ChapterNavNode[]
   if (!tree || tree.length === 0) {
     console.warn(
       "[pdf] No articles found in tree (submodule may not be initialized). Skipping PDF generation."
     )
     return
   }
-
   sortChapterTree(tree)
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // Phase 2: Linearize
-  // ═══════════════════════════════════════════════════════════════════════
-  console.log("[pdf] Phase 2/6: Linearizing articles...")
-  const articles = await linearizeArticles(tree)
-  console.log(`[pdf]   → ${articles.length} article(s) found`)
+  const linearized = await linearizeArticles(tree)
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // Phase 3: Scan content for code languages and math
-  // ═══════════════════════════════════════════════════════════════════════
-  console.log("[pdf] Phase 3/6: Scanning article content...")
+  console.log("[pdf] Phase 2/6: Scanning article content...")
+  const { codeLangs, hasMath, bodies } = await analyzeArticles(
+    linearized,
+    locale
+  )
 
-  let codeLangs: string[]
-  let hasMath: boolean
-  let bodies: Map<string, string>
-  try {
-    ;({ codeLangs, hasMath, bodies } = await analyzeArticles(articles, locale))
-  } catch (error) {
-    throw new Error(`[pdf] Failed to scan articles: ${error}`, {
-      cause: error,
-    })
-  }
+  // Empty drafts and unloadable artifacts get no number, no TOC row, and
+  // no section — they only exist as placeholders in the article tree.
+  const articles = linearized.filter((article) =>
+    bodies.get(article.slug)?.trim()
+  )
+  const plan = buildBookPlan(articles)
+  console.log(
+    `[pdf]   → ${articles.length}/${linearized.length} article(s) with content, ${plan.chapters.length} chapter(s)`
+  )
+  console.log(
+    `[pdf]   → Code languages: ${codeLangs.join(", ") || "none"} · math: ${hasMath}`
+  )
 
-  if (codeLangs.length > 0) {
-    console.log(`[pdf]   → Code languages: ${codeLangs.join(", ")}`)
-  } else {
-    console.log("[pdf]   → No code blocks detected")
-  }
-  console.log(`[pdf]   → Has math: ${hasMath}`)
-
-  // ═══════════════════════════════════════════════════════════════════════
-  // Phase 4: Initialize Shiki highlighter
-  // ═══════════════════════════════════════════════════════════════════════
-  console.log("[pdf] Phase 4/6: Initializing syntax highlighter...")
+  console.log("[pdf] Phase 3/6: Initializing syntax highlighter...")
   let shikiPlugin: RehypeShikiPlugin | undefined
   if (codeLangs.length > 0) {
-    try {
-      shikiPlugin = await createRehypeShiki(codeLangs)
-    } catch (error) {
+    shikiPlugin = await createRehypeShiki(codeLangs).catch((error) => {
       console.warn(
         "[pdf]   ⚠ Failed to initialize Shiki, continuing without highlighting:",
         error
       )
+      return undefined
+    })
+  }
+
+  console.log("[pdf] Phase 4/6: Building book HTML...")
+  const bookOptions: BookOptions = {
+    title: BOOK_TITLE,
+    subtitle: BOOK_SUBTITLE,
+    tagline: TAGLINES[locale],
+    locale,
+    generatedDate: new Date().toISOString().split("T")[0],
+    articlesRevision: getArticlesRevision(),
+    sourceUrl: SOURCE_URL,
+    hasMath,
+    renderArticle: createRenderArticle(shikiPlugin, locale, bodies),
+  }
+
+  const coverHtml = buildCoverHtml(bookOptions)
+  const bodyHtml = await buildBodyHtml(bookOptions, plan)
+  console.log(
+    `[pdf]   → HTML built (${(bodyHtml.length / 1024 / 1024).toFixed(1)} MB)`
+  )
+
+  const tempHtmlPath = path.join(outDir, `.gtmc-pdf-temp-${locale}.html`)
+  const tempPdfPath = output + ".tmp"
+  const cleanupTemp = () => {
+    for (const p of [tempHtmlPath, tempPdfPath]) {
+      try {
+        fs.rmSync(p, { force: true })
+      } catch {
+        /* ignore */
+      }
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // Phase 5: Build ebook HTML
-  // ═══════════════════════════════════════════════════════════════════════
-  console.log("[pdf] Phase 5/6: Building ebook HTML...")
-
-  const renderArticle = createRenderArticle(shikiPlugin, locale, bodies)
-
-  let html: string
-  try {
-    html = await buildEbookHtml({
-      title: "Graduate Texts in Minecraft",
-      subtitle: "An Introduction to Technical Minecraft",
-      meta: {
-        Locale: locale === "en" ? "English" : "中文",
-        Generated: new Date().toISOString().split("T")[0],
-      },
-      locale,
-      articles,
-      hasMath,
-      renderArticle,
-    })
-  } catch (error) {
-    throw new Error(`[pdf] Failed to build ebook HTML: ${error}`, {
-      cause: error,
-    })
-  }
-
-  console.log(
-    `[pdf]   → HTML built (${(html.length / 1024 / 1024).toFixed(1)} MB)`
-  )
-
-  // ═══════════════════════════════════════════════════════════════════════
-  // Phase 6: Generate PDF via Playwright and add bookmarks
-  // ═══════════════════════════════════════════════════════════════════════
-  const tempPdfPath = output + ".tmp"
-  const tempHtmlPath = path.join(outDir, `.gtmc-pdf-temp-${locale}.html`)
-
-  console.log("[pdf] Phase 6/6: Generating PDF via Playwright...")
-
+  console.log("[pdf] Phase 5/6: Rendering PDF (cover + two-pass body)...")
   const browser = await chromium
     .launch({
       args: [
@@ -315,111 +323,102 @@ async function runPdf(locale: "en" | "zh", output: string): Promise<void> {
       )
       return null
     })
-
   if (!browser) return
 
+  let coverBytes: Uint8Array
+  let bodyBytes: Uint8Array
+  let anchorPages: Map<string, number>
   try {
-    // Write HTML to a temp file so file:// images and CSS @import resolve
-    fs.writeFileSync(tempHtmlPath, html, "utf-8")
-
-    const context = await browser.newContext({ colorScheme: "light" })
-    const page = await context.newPage()
-
-    // Navigate to the temp HTML file so file:// URL images load properly
-    await page.goto(pathToFileURL(tempHtmlPath).href, {
-      waitUntil: "load",
-    })
-
-    // Wait for KaTeX font loading and PDF-specific font loading
-    await page.waitForFunction(
-      () =>
-        document.fonts.ready.then(
-          () =>
-            document.fonts.check('16px "Geist"') &&
-            document.fonts.check('16px "Geist Mono"') &&
-            document.fonts.check('16px "Noto Sans SC"')
-        ),
-      { timeout: 30000 }
-    )
-    console.log(
-      "[pdf]   → PDF fonts verified (Geist + Geist Mono + Noto Sans SC)"
+    coverBytes = await renderHtmlToPdf(
+      browser,
+      coverHtml,
+      tempHtmlPath,
+      tempPdfPath,
+      { displayHeaderFooter: false }
     )
 
-    // Force light theme for PDF rendering (scrollbars, form controls, etc.)
-    await page.evaluate(() => {
-      document.documentElement.setAttribute("data-theme", "light")
-    })
-
-    // ── Generate PDF ───────────────────────────────────────────────────────
-    console.log("[pdf]   → Rendering PDF pages...")
-    await page.pdf({
-      path: tempPdfPath,
-      format: "A4",
-      preferCSSPageSize: true,
-      printBackground: true,
-      tagged: true,
+    const bodyRenderOptions: RenderPdfOptions = {
       displayHeaderFooter: true,
-      headerTemplate:
-        '<div style="font-size:8pt; font-family:Geist Mono,monospace; color:#64748b; width:100%; text-align:center; padding-top:5px; letter-spacing:0.15em; text-transform:uppercase;">Graduate Texts in Minecraft</div>',
-      footerTemplate:
-        '<div style="font-size:8pt; font-family:Geist Mono,monospace; color:#64748b; width:100%; text-align:center; padding-top:5px;"><span class="pageNumber"></span> / <span class="totalPages"></span></div>',
-    })
-
-    console.log("[pdf]   → PDF written to temp file")
-  } catch (error) {
-    await browser.close()
-    // Clean up temp HTML file on error
-    try {
-      if (fs.existsSync(tempHtmlPath)) fs.unlinkSync(tempHtmlPath)
-    } catch {
-      /* ignore */
+      headerTemplate: buildHeaderTemplate(BOOK_TITLE),
+      footerTemplate: buildFooterTemplate(),
     }
-    throw new Error(`[pdf] PDF generation failed: ${error}`, { cause: error })
-  }
 
-  await browser.close()
-
-  try {
-    // Comment this line to keep temp HTML file at public/.gtmc-pdf-temp.html for debugging/inspection
-    if (fs.existsSync(tempHtmlPath)) fs.unlinkSync(tempHtmlPath)
-  } catch {
-    // Ignore cleanup errors
-  }
-
-  // ── Add PDF bookmarks (outlines) ────────────────────────────────────────
-  console.log("[pdf]   → Adding PDF bookmarks...")
-  try {
-    const pdfBytes = fs.readFileSync(tempPdfPath)
-    const pdfDoc = await PDFDocument.load(pdfBytes)
-
-    const outlineTree = buildOutlineTree(articles)
-    writePdfOutlines(pdfDoc, outlineTree)
-
-    fs.writeFileSync(output, await pdfDoc.save())
-    console.log("[pdf]   → Bookmarks added successfully")
-  } catch (error) {
-    // If pdf-lib post-processing fails, save the Playwright-generated PDF as-is
-    console.warn(
-      "[pdf]   ⚠ Failed to add bookmarks, saving without outlines:",
-      error
+    const pass1Bytes = await renderHtmlToPdf(
+      browser,
+      bodyHtml,
+      tempHtmlPath,
+      tempPdfPath,
+      bodyRenderOptions
     )
-    fs.copyFileSync(tempPdfPath, output)
-  } finally {
-    // Clean up temp file
-    try {
-      if (fs.existsSync(tempPdfPath)) fs.unlinkSync(tempPdfPath)
-    } catch {
-      // Ignore cleanup errors
+
+    anchorPages = await readAnchorPageIndices(pass1Bytes)
+    const { html: filledHtml, missing } = fillTocFolios(bodyHtml, anchorPages)
+    if (missing.length > 0) {
+      console.warn(
+        `[pdf]   ⚠ ${missing.length} TOC anchor(s) without a measured page: ${missing.slice(0, 3).join(", ")}${missing.length > 3 ? ", …" : ""}`
+      )
     }
+    console.log(
+      `[pdf]   → Pass 1 measured ${anchorPages.size} anchors; re-rendering with folios...`
+    )
+
+    bodyBytes = await renderHtmlToPdf(
+      browser,
+      filledHtml,
+      tempHtmlPath,
+      tempPdfPath,
+      bodyRenderOptions
+    )
+
+    // Folios can shift pagination if a TOC line wraps; re-measure so
+    // outlines stay exact even then.
+    anchorPages = await readAnchorPageIndices(bodyBytes)
+  } catch (error) {
+    cleanupTemp()
+    throw new Error(`[pdf] PDF generation failed: ${error}`, { cause: error })
+  } finally {
+    await browser.close()
   }
+  cleanupTemp()
 
-  // Report final file size
-  const stats = fs.statSync(output)
-  const sizeMb = (stats.size / 1024 / 1024).toFixed(1)
-  console.log(`[pdf] ✓ Done! PDF saved to: ${output} (${sizeMb} MB)`)
+  console.log("[pdf] Phase 6/6: Merging cover, outlines, and metadata...")
+  const coverDoc = await PDFDocument.load(coverBytes)
+  const coverPageCount = coverDoc.getPageCount()
+
+  // The body document stays the base so its catalog — including the
+  // /Dests dictionary that internal TOC links resolve through — survives
+  // the merge; building a fresh document via copyPages would drop it.
+  const merged = await PDFDocument.load(bodyBytes)
+  const coverPages = await merged.copyPages(coverDoc, coverDoc.getPageIndices())
+  coverPages.forEach((p, i) => merged.insertPage(i, p))
+
+  // Paint a full-page paper-colored rect behind all content on every page.
+  // CSS background can't reach the @page margin area; this pdf-lib step
+  // fills the entire media box so no white margins are visible.
+  paintPageBackgrounds(merged, "f5f4ef")
+
+  const outlineTree = buildOutlineTree(
+    plan,
+    anchorPages,
+    locale,
+    coverPageCount,
+    getLabels(locale).tocTitle
+  )
+  writePdfOutlines(merged, outlineTree)
+
+  merged.setTitle(`${BOOK_TITLE} — ${BOOK_SUBTITLE}`)
+  merged.setAuthor("The GTMC community")
+  merged.setSubject(TAGLINES[locale])
+  merged.setLanguage(locale === "zh" ? "zh-CN" : "en")
+  merged.setProducer("GTMC PDF pipeline (Playwright + pdf-lib)")
+
+  fs.writeFileSync(output, await merged.save())
+
+  const sizeMb = (fs.statSync(output).size / 1024 / 1024).toFixed(1)
+  console.log(
+    `[pdf] ✓ Done! ${merged.getPageCount()} pages saved to: ${output} (${sizeMb} MB)`
+  )
 }
-
-// ── Execute ─────────────────────────────────────────────────────────────────
 
 async function main() {
   const { locale, output } = parseArgs()
@@ -431,7 +430,7 @@ async function main() {
         runPdf("zh", path.join(process.cwd(), "public", "gtmc-zh.pdf")),
       ])
     } else {
-      await runPdf(locale as "en" | "zh", output)
+      await runPdf(locale, output)
     }
   } catch (error) {
     console.error(error)

@@ -1,15 +1,18 @@
-// @ts-expect-error Bun provides this module in test runtime.
-import { beforeEach, describe, expect, it, mock } from "bun:test"
+import { beforeEach, describe, expect, it, vi } from "vite-plus/test"
 
-const mockGetRef = mock()
-const mockGetContent = mock()
-const mockCreateOrUpdateFileContents = mock()
+const { mockGetRef, mockGetContent, mockCreateOrUpdateFileContents } =
+  vi.hoisted(() => ({
+    mockGetRef: vi.fn(),
+    mockGetContent: vi.fn(),
+    mockCreateOrUpdateFileContents: vi.fn(),
+  }))
 
-mock.module("@/lib/github/articles-repo", () => ({
-  ARTICLES_REPO_NAME: "Articles",
-  ARTICLES_REPO_OWNER: "gtmc-dev",
-  getGitHubWriteToken: mock(() => "token"),
-  getOctokit: mock(() => ({
+vi.mock("@/lib/github/repos", () => ({
+  ARTICLES_REPO: {
+    owner: "gtmc-dev",
+    name: "Articles",
+  },
+  getOctokit: vi.fn(() => ({
     git: {
       getRef: mockGetRef,
     },

@@ -79,7 +79,7 @@ export function HeroCard({
 
           <div className="animate-fade-in border-tech-signal fill-mode-forwards flex max-w-xl flex-col gap-2 border-l-[3px] pl-3 opacity-0 [animation-delay:1.2s] [animation-duration:1s] motion-reduce:animate-none motion-reduce:opacity-100 sm:gap-4 sm:pl-5">
             <span className="text-tech-main-dark/85 text-xs/relaxed sm:text-base/relaxed">
-              {t("heroDescription")}
+              {t("heroTagline")}
             </span>
 
             <span className="text-tech-main font-mono text-[0.5625rem] tracking-wider sm:text-xs">

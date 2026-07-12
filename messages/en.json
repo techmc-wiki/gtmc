@@ -347,7 +347,7 @@
     "sectionDownload": "DOWNLOAD",
     "sectionRead": "READ",
     "sectionSource": "SOURCE",
-    "tagline": "A community-authored treatise on Technical Minecraft."
+    "tagline": "Knowledge exists. Structure matters."
   },
   "forbidden": {
     "description": "Your operator level is insufficient for this operation. Request elevated permissions and try again.",
@@ -443,6 +443,7 @@
     "glossaryCardDesc": "The index of terms — technical Minecraft vocabulary in 12 languages.",
     "glossaryCardTitle": "Glossary",
     "heroDescription": "The community-driven online textbook of Minecraft redstone and game mechanics. Tutorials, explanations, and code analysis for conquering academic problems in a world of blocks.",
+    "heroTagline": "Knowledge exists. Structure matters.",
     "initializing": "INITIALIZING...",
     "loggedInAs": "LOGGED IN AS {username}",
     "loginGithub": "LOGIN",

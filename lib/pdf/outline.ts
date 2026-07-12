@@ -1,7 +1,31 @@
-import type { PDFDict, PDFDocument } from "pdf-lib"
-import { PDFName } from "pdf-lib"
+/**
+ * PDF outline (bookmark) writer.
+ *
+ * Builds the outline hierarchy from the book plan and the anchor→page map
+ * measured from the rendered PDF (see paginate.ts), so every bookmark lands
+ * on the exact page — no estimated indices.
+ */
 
-import type { LinearizedArticle } from "@/lib/articles/linearize"
+import type { PDFDict, PDFDocument, PDFRef } from "pdf-lib"
+import { PDFHexString, PDFName } from "pdf-lib"
+
+import type { BookPlan, PdfLocale } from "./document/types"
+import { formatChapterLabel } from "./document/labels"
+
+interface OutlineItemData {
+  ref: PDFRef
+  dict: PDFDict
+  children: OutlineItemData[]
+}
+
+function linkSiblings(items: OutlineItemData[]): void {
+  for (let i = 0; i < items.length; i++) {
+    if (i > 0) items[i].dict.set(PDFName.of("Prev"), items[i - 1].ref)
+    if (i < items.length - 1) {
+      items[i].dict.set(PDFName.of("Next"), items[i + 1].ref)
+    }
+  }
+}
 
 export interface OutlineNode {
   title: string
@@ -9,87 +33,66 @@ export interface OutlineNode {
   children: OutlineNode[]
 }
 
-interface TreeNode {
-  children: TreeNode[]
-}
-
-function countTreeItems(items: TreeNode[]): number {
-  let c = items.length
-  for (const item of items) c += countTreeItems(item.children)
-  return c
-}
-
 /**
- * Build a hierarchical outline tree from the linearized articles.
+ * Build the outline tree from the book plan using measured page indices.
  *
- * Page indices are sequential estimates (cover=0, toc=1, then each section
- * gets the next integer). Actual page numbers depend on content length, so
- * these are best-effort approximations.
+ * @param plan        Numbered book plan
+ * @param anchorPages Map of anchor id → 0-based page index in the body PDF
+ * @param locale      Locale for chapter designations
+ * @param pageOffset  Pages inserted before the body (e.g. the merged cover)
+ * @param tocTitle    Localized TOC bookmark title (TOC sits on body page 0)
  */
-export function buildOutlineTree(articles: LinearizedArticle[]): OutlineNode[] {
+export function buildOutlineTree(
+  plan: BookPlan,
+  anchorPages: Map<string, number>,
+  locale: PdfLocale,
+  pageOffset: number,
+  tocTitle: string
+): OutlineNode[] {
   const root: OutlineNode[] = []
-
-  // Cover → page 0, TOC → page 1, content starts at page 2
-  let nextPage = 2
-
-  // ── Preface articles (no chapter grouping) ──────────────────────────────
-  for (const article of articles) {
-    if (!article.isPreface) continue
-    root.push({
-      title: article.title,
-      pageIndex: nextPage++,
-      children: [],
-    })
+  const pageOf = (anchor: string): number | undefined => {
+    const index = anchorPages.get(anchor)
+    return index === undefined ? undefined : index + pageOffset
   }
 
-  // ── Group remaining articles by chapter ─────────────────────────────────
-  const chapters = new Map<
-    string,
-    { title: string; articles: LinearizedArticle[] }
-  >()
-  for (const article of articles) {
-    if (article.isPreface || !article.chapterSlug) continue
+  root.push({ title: tocTitle, pageIndex: pageOffset, children: [] })
 
-    let chapter = chapters.get(article.chapterSlug)
-    if (!chapter) {
-      chapter = { title: article.chapterTitle, articles: [] }
-      chapters.set(article.chapterSlug, chapter)
-    }
-    chapter.articles.push(article)
+  for (const entry of plan.preface) {
+    const pageIndex = pageOf(`article-${entry.article.slug}`)
+    if (pageIndex === undefined) continue
+    root.push({ title: entry.article.title, pageIndex, children: [] })
   }
 
-  for (const [, chapter] of chapters) {
-    const entry: OutlineNode = {
-      title: chapter.title,
-      pageIndex: nextPage++,
+  for (const chapter of plan.chapters) {
+    const chapterPage = pageOf(`chapter-${chapter.slug}`)
+    if (chapterPage === undefined) continue
+
+    const node: OutlineNode = {
+      title: `${formatChapterLabel(locale, chapter.number, chapter.isAppendix)} — ${chapter.title}`,
+      pageIndex: chapterPage,
       children: [],
     }
 
-    for (const article of chapter.articles) {
-      entry.children.push({
-        title: article.title,
-        pageIndex: nextPage++,
+    for (const entry of chapter.articles) {
+      const pageIndex = pageOf(`article-${entry.article.slug}`)
+      if (pageIndex === undefined) continue
+      const prefix = entry.number ? `${entry.number}  ` : ""
+      node.children.push({
+        title: `${prefix}${entry.article.title}`,
+        pageIndex,
         children: [],
       })
     }
 
-    root.push(entry)
+    root.push(node)
   }
 
   return root
 }
 
 /**
- * Write PDF outline items (bookmarks) into the document using low-level
- * pdf-lib API calls.
- *
- * Structure:
- *   Catalog → /Outlines (root dict)
- *   Root dict → /First → top-level item, /Last → top-level item
- *   Each item: { /Title, /Parent, /Dest, /First, /Last (if children), /Next, /Prev }
- *
- * @param pdfDoc   The loaded PDFDocument (from pdf-lib)
- * @param tree     Hierarchical outline tree with titles and estimated page indices
+ * Write outline items (bookmarks) into the document using low-level
+ * pdf-lib calls. Supports arbitrary nesting depth.
  */
 export function writePdfOutlines(
   pdfDoc: PDFDocument,
@@ -99,96 +102,57 @@ export function writePdfOutlines(
   const pages = pdfDoc.getPages()
   if (pages.length === 0 || tree.length === 0) return
 
-  // Helper: clamp page index into valid range
-  const clampPage = (idx: number): number =>
-    Math.max(0, Math.min(idx, pages.length - 1))
+  const clampPage = (index: number): number =>
+    Math.max(0, Math.min(index, pages.length - 1))
 
-  // Helper: build a destination array [pageRef /Fit]
-  const makeDest = (pageIdx: number): ReturnType<typeof context.obj> =>
-    context.obj([pages[clampPage(pageIdx)].ref, PDFName.of("Fit")])
+  const makeDest = (pageIndex: number): ReturnType<typeof context.obj> =>
+    context.obj([pages[clampPage(pageIndex)].ref, PDFName.of("Fit")])
 
-  // ── Phase 1: Build refs, create all dicts ───────────────────────────────
-  // We structure the data so we can link siblings after creation.
+  let totalCount = 0
 
-  interface ItemData {
-    ref: ReturnType<typeof context.nextRef>
-    dict: PDFDict
-    children: ItemData[]
-  }
-
-  function buildItem(
-    node: OutlineNode,
-    parentRef: ReturnType<typeof context.nextRef>
-  ): ItemData {
+  function buildItem(node: OutlineNode, parentRef: PDFRef): OutlineItemData {
+    totalCount++
     const ref = context.nextRef()
-    const dest = makeDest(node.pageIndex)
+    // PDFHexString (UTF-16BE): context.obj() would coerce a plain string
+    // into a PDFName, which mangles spaces and CJK titles in viewers.
     const dict = context.obj({
-      Title: node.title,
+      Title: PDFHexString.fromText(node.title),
       Parent: parentRef,
-      Dest: dest,
+      Dest: makeDest(node.pageIndex),
     })
 
-    const item: ItemData = { ref, dict, children: [] }
-
-    // Build children recursively
+    const item: OutlineItemData = { ref, dict, children: [] }
     for (const child of node.children) {
       item.children.push(buildItem(child, ref))
     }
 
-    // Link children on parent dict
+    linkSiblings(item.children)
     if (item.children.length > 0) {
       dict.set(PDFName.of("First"), item.children[0].ref)
       dict.set(PDFName.of("Last"), item.children[item.children.length - 1].ref)
-      // Count = number of children (positive = open)
-      dict.set(PDFName.of("Count"), context.obj(item.children.length))
+      // Negative count = children collapsed by default in viewers
+      dict.set(PDFName.of("Count"), context.obj(-item.children.length))
     }
 
     return item
   }
 
-  const rootRef = context.nextRef()
-  const topLevelItems: ItemData[] = tree.map((node) => buildItem(node, rootRef))
-
-  // Link top-level siblings
-  for (let i = 0; i < topLevelItems.length; i++) {
-    const dict = topLevelItems[i].dict
-    if (i > 0) dict.set(PDFName.of("Prev"), topLevelItems[i - 1].ref)
-    if (i < topLevelItems.length - 1) {
-      dict.set(PDFName.of("Next"), topLevelItems[i + 1].ref)
-    }
-  }
-
-  // Link children within each parent
-  for (const top of topLevelItems) {
-    for (let i = 0; i < top.children.length; i++) {
-      const dict = top.children[i].dict
-      if (i > 0) dict.set(PDFName.of("Prev"), top.children[i - 1].ref)
-      if (i < top.children.length - 1) {
-        dict.set(PDFName.of("Next"), top.children[i + 1].ref)
-      }
-    }
-  }
-
-  // ── Phase 2: Assign refs to their dicts ───────────────────────────────
-  function assignItem(item: ItemData): void {
+  function assignItem(item: OutlineItemData): void {
     context.assign(item.ref, item.dict)
     for (const child of item.children) assignItem(child)
   }
-  for (const item of topLevelItems) assignItem(item)
 
-  // ── Phase 3: Create root Outlines dict ─────────────────────────────────
-  // Total count = top-level items + all children
-  const totalCount = countTreeItems(topLevelItems)
+  const rootRef = context.nextRef()
+  const topLevel = tree.map((node) => buildItem(node, rootRef))
+  linkSiblings(topLevel)
+  for (const item of topLevel) assignItem(item)
 
   const rootDict = context.obj({
     Type: PDFName.of("Outlines"),
-    First: topLevelItems[0].ref,
-    Last: topLevelItems[topLevelItems.length - 1].ref,
+    First: topLevel[0].ref,
+    Last: topLevel[topLevel.length - 1].ref,
     Count: totalCount,
   })
-
   context.assign(rootRef, rootDict)
-
-  // ── Phase 4: Link root into document catalog ──────────────────────────
   pdfDoc.catalog.set(PDFName.of("Outlines"), rootRef)
 }

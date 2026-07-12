@@ -1,104 +1,86 @@
 /* ==========================================================================
-   GTMC PDF Print Stylesheet
-   Technical Blueprint / Scientific Drafting Aesthetic
+   GTMC PDF Print Stylesheet — Archival Print Edition
+   Warm paper, ink text, serif display, budgeted blueprint-azure signal.
+   Tokens are injected as CSS custom properties from lib/pdf/theme.ts.
    Target: Chromium 130+ via Playwright page.pdf()
    ========================================================================== */
 
-@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=Geist+Mono:wght@400;700&family=Noto+Sans+SC:wght@400;700&display=swap");
-
 /* --- Page Rules --- */
+/* Horizontal @page margins are zero so the html background fills left/right.
+   Vertical margins remain for Chromium's header/footer placement. The @page
+   margin areas (all four edges) get filled with the paper color by a pdf-lib
+   post-processing step (see paint-background.ts) since CSS backgrounds
+   cannot reach the margin area.                                             */
 @page {
   size: A4;
-  margin: 2.5cm 2cm;
-}
-
-@page :first {
-  margin-top: 4cm;
-}
-
-@page :left {
-  margin-left: 2.5cm;
-  margin-right: 1.8cm;
-}
-
-@page :right {
-  margin-left: 1.8cm;
-  margin-right: 2.5cm;
+  margin: 2.2cm 0 2.4cm;
 }
 
 /* --- Base --- */
 html {
-  font-size: 10.5pt;
-  line-height: 1.7;
-  color: #1e293b;
+  font-size: 10pt;
+  line-height: 1.65;
+  color: var(--pdf-ink-dark);
+  background: var(--pdf-paper);
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
 
 body {
-  font-family: "Geist", "Noto Sans SC", "PingFang SC", sans-serif;
+  font-family: var(--pdf-font-sans);
   margin: 0;
-  padding: 0;
+  padding: 0 1.9cm;
   hyphens: auto;
   -webkit-hyphens: auto;
-  text-align: justify;
-  text-justify: inter-word;
+  letter-spacing: -0.005em;
 }
 
-/* --- Headings (monospace, technical) --- */
+/* ==========================================================================
+   Headings — serif display, sentence case. Mono is reserved for apparatus.
+   ========================================================================== */
+
 h1,
 h2,
 h3,
-h4,
-h5,
-h6 {
-  font-family: "Geist Mono", monospace;
-  color: #3b4a6b;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  margin-top: 1.5em;
+h4 {
+  font-family: var(--pdf-font-serif);
+  color: var(--pdf-ink-dark);
+  line-height: 1.25;
+  margin-top: 1.6em;
   margin-bottom: 0.5em;
-  line-height: 1.3;
   break-after: avoid;
 }
 
-h1 {
-  font-size: 22pt;
-  font-weight: 700;
-  border-bottom: 2px solid #cbd5e1;
-  padding-bottom: 0.3em;
-}
-
 h2 {
-  font-size: 16pt;
-  font-weight: 700;
-  border-bottom: 1px solid #cbd5e1;
-  padding-bottom: 0.2em;
+  font-size: 15pt;
+  font-weight: 600;
+  border-bottom: 1px solid var(--pdf-line);
+  padding-bottom: 0.25em;
 }
 
 h3 {
-  font-size: 13pt;
-  font-weight: 700;
-  break-before: avoid;
-  page-break-after: avoid;
+  font-size: 12.5pt;
+  font-weight: 600;
+  padding-left: 0.55em;
+  border-left: 2px solid var(--pdf-signal);
 }
 
 h4 {
   font-size: 11pt;
-  font-weight: 700;
-  break-before: avoid;
-  page-break-after: avoid;
+  font-weight: 600;
 }
 
-h5 {
-  font-size: 10.5pt;
-  font-weight: 700;
-}
-
+h5,
 h6 {
-  font-size: 10pt;
-  font-weight: 400;
-  font-style: italic;
+  font-family: var(--pdf-font-mono);
+  font-size: 8.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--pdf-ink);
+  margin-top: 1.4em;
+  margin-bottom: 0.4em;
+  break-after: avoid;
 }
 
 /* --- Body Text --- */
@@ -111,7 +93,7 @@ p {
 ul,
 ol {
   margin: 0.5em 0;
-  padding-left: 1.8em;
+  padding-left: 1.7em;
 }
 
 li {
@@ -124,34 +106,40 @@ li > p {
   margin: 0.2em 0;
 }
 
-/* --- Links --- */
 a {
-  color: #4a5a78;
+  color: var(--pdf-signal);
   text-decoration: none;
 }
 
-/* --- Code --- */
+strong {
+  color: var(--pdf-ink-dark);
+}
+
+/* ==========================================================================
+   Code — mono on lifted surface, site-style line numbers via counters
+   ========================================================================== */
+
 code {
-  font-family: "Geist Mono", monospace;
-  font-size: 9pt;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  font-family: var(--pdf-font-mono);
+  font-size: 8.5pt;
+  background: var(--pdf-surface);
+  border: 1px solid var(--pdf-line);
   border-radius: 2px;
   padding: 0.1em 0.3em;
 }
 
 pre {
-  font-family: "Geist Mono", monospace;
-  font-size: 8.5pt;
-  line-height: 1.5;
-  background: #f8f9fc;
-  border: 1px solid #cbd5e1;
-  border-radius: 3px;
-  padding: 0.8em 1em;
+  font-family: var(--pdf-font-mono);
+  font-size: 8pt;
+  line-height: 1.55;
+  background: var(--pdf-surface);
+  border: 1px solid var(--pdf-line);
+  border-left: 2px solid var(--pdf-ink);
+  padding: 0.7em 0.9em;
   overflow: hidden;
   white-space: pre-wrap;
   word-wrap: break-word;
-  page-break-inside: avoid;
+  counter-reset: pdf-line;
 }
 
 pre code {
@@ -163,17 +151,71 @@ pre code {
 
 code .line {
   display: block;
+  counter-increment: pdf-line;
+  position: relative;
+  padding-left: calc(2.6em + var(--line-indent, 0ch));
+  text-indent: calc(-1 * var(--line-indent, 0ch));
 }
 
-/* --- Tables --- */
+code .line::before {
+  content: counter(pdf-line);
+  position: absolute;
+  left: 0;
+  width: 1.9em;
+  text-align: right;
+  color: var(--pdf-ink);
+  opacity: 0.45;
+  font-size: 7pt;
+  line-height: inherit;
+  padding-top: 0.1em;
+}
+
+/* Short snippets (≤3 lines) skip line numbers */
+pre[data-line-count="1"] code .line,
+pre[data-line-count="2"] code .line,
+pre[data-line-count="3"] code .line {
+  padding-left: 0;
+}
+pre[data-line-count="1"] code .line::before,
+pre[data-line-count="2"] code .line::before,
+pre[data-line-count="3"] code .line::before {
+  content: none;
+}
+
+/* Language tag in the block's top-right corner */
+pre[data-lang] {
+  position: relative;
+}
+
+pre[data-lang]::after {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 6.5pt;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pdf-ink);
+  opacity: 0.55;
+  padding: 0.3em 0.7em;
+}
+
+pre[data-lang="plaintext"]::after,
+pre[data-lang="text"]::after {
+  content: none;
+}
+
+/* ==========================================================================
+   Tables — hairline rules, mono column heads
+   ========================================================================== */
+
 table {
   width: 100%;
   border-collapse: collapse;
   margin: 1em 0;
-  font-family: "Geist", sans-serif;
-  font-size: 9.5pt;
+  font-size: 9pt;
   break-inside: auto;
-  page-break-inside: auto;
 }
 
 thead {
@@ -181,36 +223,45 @@ thead {
 }
 
 th {
-  font-family: "Geist Mono", monospace;
-  font-size: 8.5pt;
+  font-family: var(--pdf-font-mono);
+  font-size: 7.5pt;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: #f0f2f5;
-  border: 1px solid #cbd5e1;
+  letter-spacing: 0.08em;
+  color: var(--pdf-ink);
+  border-top: 1.5px solid var(--pdf-ink-dark);
+  border-bottom: 1px solid var(--pdf-ink);
   padding: 0.5em 0.7em;
   text-align: left;
-  color: #3b4a6b;
 }
 
 td {
-  border: 1px solid #cbd5e1;
-  padding: 0.4em 0.7em;
+  border-bottom: 1px solid var(--pdf-line);
+  padding: 0.45em 0.7em;
   vertical-align: top;
   orphans: 3;
   widows: 3;
+}
+
+tbody tr:last-child td {
+  border-bottom: 1.5px solid var(--pdf-ink-dark);
 }
 
 tr {
   page-break-inside: avoid;
 }
 
-/* --- Images --- */
+/* ==========================================================================
+   Figures
+   ========================================================================== */
+
 img {
-  max-width: 85%;
+  max-width: 82%;
   height: auto;
   page-break-inside: avoid;
   display: block;
-  margin: 1.5em auto;
+  margin: 1.4em auto;
+  border: 1px solid var(--pdf-line);
 }
 
 figure {
@@ -219,31 +270,33 @@ figure {
   text-align: center;
 }
 
-figcaption {
-  font-family: "Geist Mono", monospace;
-  font-size: 8.5pt;
-  color: #60708f;
-  margin-top: 0.4em;
+figcaption,
+.gif-caption {
+  font-family: var(--pdf-font-mono);
+  font-size: 7.5pt;
+  color: var(--pdf-ink);
   text-align: center;
-  orphans: 3;
-  widows: 3;
+  margin-top: -0.6em;
+  margin-bottom: 1em;
+  letter-spacing: 0.04em;
+}
+
+.gif-source-link {
+  color: var(--pdf-signal);
+  text-decoration: underline;
 }
 
 /* --- Blockquote --- */
 blockquote {
   margin: 1em 0;
-  padding: 0.6em 1em;
-  border-left: 3px solid #c4d0df;
-  background: #f8f9fc;
-  color: #4a5a78;
-  font-style: italic;
+  padding: 0.5em 1em;
+  border-left: 2px solid var(--pdf-accent);
+  color: var(--pdf-ink);
   break-inside: avoid;
 }
 
 blockquote p {
   margin: 0.3em 0;
-  orphans: 3;
-  widows: 3;
 }
 
 dd {
@@ -251,78 +304,68 @@ dd {
   widows: 3;
 }
 
-/* --- Article Measure --- */
-.chapter-content {
-  max-width: none;
-}
+/* ==========================================================================
+   Callouts — quiet bracketed asides with a mono label
+   ========================================================================== */
 
-/* --- Callouts / Admonitions --- */
 aside[data-callout] {
-  margin: 1em 0;
-  padding: 0.8em 1em;
-  border: 1px solid #cbd5e1;
-  border-left: 4px solid #60708f;
-  border-radius: 3px;
-  background: #f8f9fc;
+  margin: 1.1em 0;
+  padding: 0.75em 1em;
+  border: 1px solid var(--pdf-line);
+  border-left: 2.5px solid var(--pdf-ink);
+  background: var(--pdf-surface);
   page-break-inside: avoid;
 }
 
 aside[data-callout]::before {
-  font-family: "Geist Mono", monospace;
-  font-size: 8pt;
+  font-family: var(--pdf-font-mono);
+  font-size: 7.5pt;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   display: block;
-  margin-bottom: 0.4em;
-  color: #60708f;
+  margin-bottom: 0.35em;
+  color: var(--pdf-ink);
 }
 
 aside[data-callout="WARNING"] {
-  border-left-color: #d97706;
+  border-left-color: #b45309;
 }
-
 aside[data-callout="WARNING"]::before {
-  content: "⚠ WARNING";
-  color: #d97706;
+  content: "⚠ Warning";
+  color: #b45309;
 }
 
 aside[data-callout="TIP"] {
-  border-left-color: #059669;
+  border-left-color: #047857;
 }
-
 aside[data-callout="TIP"]::before {
-  content: "▸ TIP";
-  color: #059669;
+  content: "▸ Tip";
+  color: #047857;
 }
 
 aside[data-callout="IMPORTANT"] {
-  border-left-color: #3b4a6b;
+  border-left-color: var(--pdf-signal);
 }
-
 aside[data-callout="IMPORTANT"]::before {
-  content: "● IMPORTANT";
-  color: #3b4a6b;
+  content: "● Important";
+  color: var(--pdf-signal);
 }
 
 aside[data-callout="CRASH"] {
-  border-left-color: #dc2626;
-  background: #fef2f2;
+  border-left-color: #b91c1c;
 }
-
 aside[data-callout="CRASH"]::before {
-  content: "✕ CRASH";
-  color: #dc2626;
+  content: "✕ Crash";
+  color: #b91c1c;
 }
 
 aside[data-callout="CORRUPTION"] {
-  border-left-color: #7c3aed;
-  background: #faf5ff;
+  border-left-color: #6d28d9;
 }
-
 aside[data-callout="CORRUPTION"]::before {
-  content: "◆ CORRUPTION";
-  color: #7c3aed;
+  content: "◆ Corruption";
+  color: #6d28d9;
 }
 
 /* --- KaTeX Math --- */
@@ -335,194 +378,21 @@ aside[data-callout="CORRUPTION"]::before {
   page-break-inside: avoid;
 }
 
-/* --- Cover Page --- */
-.cover-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 80vh;
-  text-align: center;
-}
-
-.cover-frame {
-  position: relative;
-  padding: 3cm 2cm;
-  min-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-.cover-frame::before,
-.cover-frame::after {
-  content: "";
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-color: #60708f;
-  border-style: solid;
-}
-.cover-frame::before {
-  top: 2cm;
-  left: 1.5cm;
-  border-width: 2px 0 0 2px;
-}
-.cover-frame::after {
-  bottom: 2cm;
-  right: 1.5cm;
-  border-width: 0 2px 2px 0;
-}
-
-.cover-title {
-  font-family: "Geist Mono", monospace;
-  font-size: 28pt;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: #3b4a6b;
-  text-align: center;
-  margin-bottom: 0.5em;
-  border-bottom: none;
-  page-break-before: avoid;
-}
-
-.cover-subtitle {
-  font-family: "Geist", sans-serif;
-  font-size: 13pt;
-  color: #60708f;
-  text-align: center;
-}
-
-.cover-rule {
-  width: 60%;
-  border: none;
-  border-top: 1px solid #cbd5e1;
-  margin: 2em auto;
-}
-
-.cover-page .meta {
-  font-family: "Geist Mono", monospace;
-  font-size: 9pt;
-  color: #64748b;
-  margin-top: 2em;
-}
-
-/* --- Table of Contents --- */
-.toc-page {
-  page-break-before: always;
-}
-
-.toc-page h2 {
-  page-break-before: avoid;
-}
-
-.toc-page ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.toc-chapter {
-  margin-bottom: 1.5em;
-}
-
-.toc-chapter h3 {
-  font-family: "Geist Mono", monospace;
-  font-size: 11pt;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #3b4a6b;
-  margin-bottom: 0.3em;
-  border-bottom: 1px solid #cbd5e1;
-  padding-bottom: 0.2em;
-}
-
-.toc-entry {
-  font-size: 9.5pt;
-  line-height: 1.8;
-  color: #1e293b;
-  list-style: none;
-  padding-left: 0;
-}
-
-/* --- Chapter Title Page --- */
-.chapter-title-page {
-  page-break-before: always;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-  text-align: center;
-}
-
-.chapter-title-page h1 {
-  border-bottom: none;
-  page-break-before: avoid;
-}
-
-.chapter-title-page .chapter-number {
-  font-family: "Geist Mono", monospace;
-  font-size: 9pt;
-  color: #60708f;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  margin-bottom: 0.5em;
-}
-
-.chapter-frame {
-  position: relative;
-  padding: 2cm 2cm;
-  min-height: 60vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-.chapter-frame::before,
-.chapter-frame::after {
-  content: "";
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-color: #60708f;
-  border-style: solid;
-}
-.chapter-frame::before {
-  top: 2cm;
-  left: 1.5cm;
-  border-width: 2px 0 0 2px;
-}
-.chapter-frame::after {
-  bottom: 2cm;
-  right: 1.5cm;
-  border-width: 0 2px 2px 0;
-}
-
-.chapter-meta {
-  font-family: "Geist Mono", monospace;
-  font-size: 9pt;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #60708f;
-  margin-top: 1em;
-}
-
 /* --- Advanced Sections --- */
 div[data-advanced-section] {
-  border-left: 3px solid #60708f;
+  border-left: 2px solid var(--pdf-accent);
   padding-left: 1em;
   margin: 1em 0;
 }
 
 span[data-advanced] {
-  font-family: "Geist Mono", monospace;
-  font-size: 7.5pt;
+  font-family: var(--pdf-font-mono);
+  font-size: 7pt;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #f8f9fc;
-  background: #60708f;
+  color: var(--pdf-signal-ink);
+  background: var(--pdf-ink);
   padding: 0.15em 0.5em;
   border-radius: 2px;
   vertical-align: middle;
@@ -532,77 +402,409 @@ span[data-advanced] {
 /* --- Horizontal Rule --- */
 hr {
   border: none;
-  border-top: 1px solid #cbd5e1;
-  margin: 2em 0;
-}
-
-/* --- GIF Caption --- */
-.gif-caption {
-  font-family: "Geist Mono", monospace;
-  font-size: 8pt;
-  color: #60708f;
-  text-align: center;
-  margin-top: 0.3em;
-  margin-bottom: 1em;
-  letter-spacing: 0.05em;
+  border-top: 1px solid var(--pdf-line);
+  margin: 2em auto;
+  width: 40%;
 }
 
 /* --- Footnotes --- */
 .footnotes {
   margin-top: 2em;
-  padding-top: 1em;
-  border-top: 1px solid #cbd5e1;
-  font-size: 9pt;
+  padding-top: 0.8em;
+  border-top: 1px solid var(--pdf-line);
+  font-size: 8.5pt;
+  color: var(--pdf-ink);
 }
 
 .footnotes ol {
   padding-left: 1.5em;
 }
 
-/* --- Utility: suppress first h1 page break (cover already breaks) --- */
-.cover-page + * h1:first-of-type,
-body > h1:first-of-type {
-  page-break-before: avoid;
-}
-
-/* --- TOC Depth Indentation --- */
-.toc-depth-1 {
-  padding-left: 0;
-}
-.toc-depth-2 {
-  padding-left: 1.5em;
-}
-.toc-depth-3 {
-  padding-left: 3em;
-}
-
 /* --- People Mentions --- */
 people-mention {
-  font-family: "Geist Mono", monospace;
-  font-size: 0.8em;
-  border: 1px solid rgba(96, 112, 143, 0.3);
-  background: rgba(96, 112, 143, 0.05);
-  color: #60708f;
+  font-family: var(--pdf-font-mono);
+  font-size: 0.82em;
+  color: var(--pdf-ink);
+  border: 1px solid var(--pdf-accent);
+  background: var(--pdf-surface);
   padding: 0.05em 0.4em;
   border-radius: 2px;
   letter-spacing: 0.02em;
   white-space: nowrap;
 }
+
 people-mention::before {
   content: "@";
-  color: rgba(96, 112, 143, 0.4);
+  opacity: 0.5;
   margin-right: 0.1em;
 }
 
-/* --- GIF Source Link --- */
-.gif-source-link {
-  color: #60708f;
-  text-decoration: underline;
-  font-size: inherit;
+/* --- Wikilink (dead in print; styled as a quiet reference) --- */
+.wikilink {
+  color: var(--pdf-ink-dark);
+  border-bottom: 1px dotted var(--pdf-accent);
 }
 
-/* --- Wikilink --- */
-.wikilink {
-  color: #4a5a78;
-  border-bottom: 1px dotted #c4d0df;
+/* ==========================================================================
+   Cover — separate single-page document, no running header/footer
+   ========================================================================== */
+
+html:has(.cover-document) {
+  background-color: var(--pdf-paper);
+  background-image: radial-gradient(var(--pdf-line) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+.cover-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  page-break-after: avoid;
+}
+
+.cover-band {
+  height: 10px;
+  background: var(--pdf-signal);
+}
+
+.cover-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 2.4cm;
+}
+
+.cover-imprint {
+  font-family: var(--pdf-font-mono);
+  font-size: 9pt;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--pdf-ink);
+  margin-bottom: 2.5em;
+}
+
+.cover-title {
+  font-family: var(--pdf-font-serif);
+  font-size: 40pt;
+  font-weight: 700;
+  line-height: 1.12;
+  color: var(--pdf-ink-dark);
+  margin: 0 0 0.35em;
+}
+
+.cover-subtitle {
+  font-family: var(--pdf-font-serif);
+  font-size: 15pt;
+  font-style: italic;
+  color: var(--pdf-ink);
+  margin: 0;
+}
+
+.cover-rule {
+  width: 4cm;
+  margin: 2.2em 0;
+  border: none;
+  border-top: 1.5px solid var(--pdf-ink-dark);
+}
+
+.cover-tagline {
+  font-family: var(--pdf-font-mono);
+  font-size: 9pt;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pdf-ink);
+  margin: 0;
+}
+
+.cover-foot {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--pdf-font-mono);
+  font-size: 8pt;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--pdf-ink);
+  padding: 0 2.4cm 2.2cm;
+}
+
+/* ==========================================================================
+   Table of Contents — dotted leaders, real folios (filled in pass 2)
+   ========================================================================== */
+
+.toc-title {
+  font-family: var(--pdf-font-serif);
+  font-size: 24pt;
+  font-weight: 600;
+  border-bottom: 2px solid var(--pdf-ink-dark);
+  padding-bottom: 0.3em;
+  margin: 0 0 1.2em;
+}
+
+.toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.toc-front-matter {
+  margin-bottom: 1.6em;
+}
+
+.toc-chapter {
+  margin-bottom: 1.3em;
+  break-inside: avoid;
+}
+
+.toc-chapter-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7em;
+  border-bottom: 1px solid var(--pdf-line);
+  padding-bottom: 0.25em;
+  margin-bottom: 0.35em;
+}
+
+.toc-chapter-label {
+  font-family: var(--pdf-font-mono);
+  font-size: 7.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--pdf-signal);
+  white-space: nowrap;
+}
+
+.toc-chapter-title {
+  font-family: var(--pdf-font-serif);
+  font-size: 12pt;
+  font-weight: 600;
+  color: var(--pdf-ink-dark);
+  flex: 1;
+}
+
+.toc-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+  font-size: 9.5pt;
+  line-height: 1.9;
+  margin: 0;
+}
+
+.toc-num {
+  font-family: var(--pdf-font-mono);
+  font-size: 8pt;
+  color: var(--pdf-ink);
+  min-width: 2.2em;
+  text-align: right;
+}
+
+.toc-link {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  color: var(--pdf-ink-dark);
+  overflow: hidden;
+}
+
+.toc-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Dotted leader between title and folio */
+.toc-link::after {
+  content: "";
+  flex: 1;
+  min-width: 1.5em;
+  margin: 0 0.4em;
+  border-bottom: 1px dotted var(--pdf-accent);
+  transform: translateY(-0.25em);
+}
+
+.toc-folio {
+  font-family: var(--pdf-font-mono);
+  font-size: 8.5pt;
+  color: var(--pdf-ink);
+  min-width: 2em;
+  text-align: right;
+}
+
+.toc-depth-1 .toc-num {
+  margin-left: 1.4em;
+}
+
+.toc-depth-2 .toc-num,
+.toc-depth-3 .toc-num {
+  margin-left: 2.8em;
+}
+
+/* ==========================================================================
+   Chapter opener — oversized serif numeral on dot-grid paper
+   ========================================================================== */
+
+.chapter-opener {
+  page-break-before: always;
+  min-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-image: radial-gradient(var(--pdf-line) 1px, transparent 1px);
+  background-size: 26px 26px;
+  margin: 0 -1.9cm;
+  padding: 1cm calc(1.9cm + 0.5cm);
+}
+
+.chapter-kicker {
+  font-family: var(--pdf-font-mono);
+  font-size: 8.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--pdf-signal);
+  margin: 0 0 0.4em;
+}
+
+.chapter-numeral {
+  font-family: var(--pdf-font-serif);
+  font-size: 64pt;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--pdf-accent);
+  margin: 0 0 0.15em;
+}
+
+.chapter-title {
+  font-family: var(--pdf-font-serif);
+  font-size: 26pt;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--pdf-ink-dark);
+  border-top: 2px solid var(--pdf-ink-dark);
+  padding-top: 0.4em;
+  margin: 0 0 1.2em;
+  max-width: 80%;
+}
+
+.chapter-contents {
+  max-width: 70%;
+}
+
+.chapter-contents-label {
+  font-family: var(--pdf-font-mono);
+  font-size: 7.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--pdf-ink);
+  margin: 0 0 0.5em;
+}
+
+.chapter-contents ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.chapter-contents li {
+  font-size: 9.5pt;
+  color: var(--pdf-ink);
+  line-height: 1.9;
+  margin: 0;
+}
+
+.chapter-list-num {
+  font-family: var(--pdf-font-mono);
+  font-size: 8pt;
+  color: var(--pdf-signal);
+  display: inline-block;
+  min-width: 2.4em;
+}
+
+/* ==========================================================================
+   Article header — number + serif title with ink rule and azure tick
+   ========================================================================== */
+
+.article {
+  page-break-before: always;
+}
+
+.article-header {
+  margin-bottom: 1.6em;
+}
+
+.article-title {
+  font-family: var(--pdf-font-serif);
+  font-size: 20pt;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--pdf-ink-dark);
+  border-bottom: 2px solid var(--pdf-ink-dark);
+  padding-bottom: 0.35em;
+  margin: 0;
+  position: relative;
+}
+
+.article-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 3.5em;
+  border-bottom: 2px solid var(--pdf-signal);
+}
+
+.article-number {
+  font-family: var(--pdf-font-mono);
+  font-size: 12pt;
+  font-weight: 400;
+  color: var(--pdf-signal);
+  letter-spacing: 0.05em;
+  margin-right: 0.3em;
+}
+
+/* Article bodies start at H2; a stray H1 in content renders like H2 */
+.article-body h1 {
+  font-size: 15pt;
+  font-weight: 600;
+  border-bottom: 1px solid var(--pdf-line);
+  padding-bottom: 0.25em;
+}
+
+/* ==========================================================================
+   Colophon — quiet final page
+   ========================================================================== */
+
+.colophon-page {
+  page-break-before: always;
+  min-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: 2cm;
+}
+
+.colophon-title {
+  font-family: var(--pdf-font-mono);
+  font-size: 8.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--pdf-ink);
+  border: none;
+  margin: 0 0 1em;
+}
+
+.colophon-body {
+  border-top: 1.5px solid var(--pdf-ink-dark);
+  padding-top: 1em;
+  max-width: 65%;
+}
+
+.colophon-body p {
+  font-size: 9pt;
+  color: var(--pdf-ink);
+  margin: 0.5em 0;
 }

@@ -55,6 +55,7 @@ import {
 } from "@/lib/pdf/theme"
 import { createRehypeShiki } from "@/lib/markdown/syntax/rehype-shiki"
 import type { RehypeShikiPlugin } from "@/lib/markdown/syntax/rehype-shiki"
+import { getMermaidConfig } from "@/lib/markdown/mermaid-config"
 
 const BOOK_TITLE = "Graduate Texts in Minecraft"
 const BOOK_SUBTITLE = "An Introduction to Technical Minecraft"
@@ -126,7 +127,12 @@ async function analyzeArticles(
 
       for (const m of body.matchAll(/^```(\w+)/gm)) {
         const lang = m[1].toLowerCase()
-        if (lang !== "" && lang !== "text" && lang !== "plain") {
+        if (
+          lang !== "" &&
+          lang !== "text" &&
+          lang !== "plain" &&
+          lang !== "mermaid"
+        ) {
           allLangs.add(lang)
         }
       }
@@ -187,6 +193,57 @@ async function renderHtmlToPdf(
   try {
     const page: Page = await context.newPage()
     await page.goto(pathToFileURL(tempHtmlPath).href, { waitUntil: "load" })
+
+    if ((await page.locator("mermaid-diagram").count()) > 0) {
+      await page.addScriptTag({
+        path: path.join(
+          process.cwd(),
+          "node_modules",
+          "mermaid",
+          "dist",
+          "mermaid.min.js"
+        ),
+      })
+      await page.evaluate(async (config) => {
+        const mermaid = (
+          window as typeof window & {
+            mermaid: {
+              initialize: (value: typeof config) => void
+              render: (id: string, source: string) => Promise<{ svg: string }>
+            }
+          }
+        ).mermaid
+        const diagrams = document.querySelectorAll("mermaid-diagram")
+        const isChinese = document.documentElement.lang === "zh"
+
+        mermaid.initialize(config)
+
+        await Promise.all(
+          [...diagrams].map(async (diagram, index) => {
+            const source = diagram.textContent?.trim() ?? ""
+
+            try {
+              const { svg } = await mermaid.render(
+                `pdf-mermaid-${index}`,
+                source
+              )
+              diagram.innerHTML = svg
+              diagram.setAttribute("data-rendered", "true")
+            } catch {
+              const message = document.createElement("p")
+              const fallback = document.createElement("pre")
+              message.className = "mermaid-error"
+              message.textContent = isChinese
+                ? "无法渲染 Mermaid 图表。"
+                : "Unable to render Mermaid diagram."
+              fallback.textContent = source
+              diagram.replaceChildren(message, fallback)
+              diagram.setAttribute("data-rendered", "error")
+            }
+          })
+        )
+      }, getMermaidConfig("light"))
+    }
 
     const requiredFonts = [...PDF_REQUIRED_FONTS]
     await page.waitForFunction(

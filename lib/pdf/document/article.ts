@@ -19,7 +19,7 @@ export function renderArticleSectionHtml(
     : ""
 
   return [
-    `<article id="article-${article.slug}" class="article">`,
+    `<article id="article-${escapeHtml(article.slug)}" class="article">`,
     `  <header class="article-header">`,
     `    <h1 class="article-title">${numberSpan}${escapeHtml(article.title)}</h1>`,
     `  </header>`,

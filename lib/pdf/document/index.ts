@@ -1,6 +1,7 @@
 export type {
   BookOptions,
   BookPlan,
+  ChapterContent,
   ChapterGroup,
   NumberedArticle,
   PdfLocale,

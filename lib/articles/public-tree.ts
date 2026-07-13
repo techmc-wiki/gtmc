@@ -28,6 +28,20 @@ function isReadmeArticle(node: ChapterNavNode): boolean {
   );
 }
 
+function assignAppendixOwner(
+  node: ChapterNavNode,
+  appendixOwner: NonNullable<ChapterNavNode["appendixOwner"]>,
+): ChapterNavNode {
+  return {
+    ...node,
+    isAppendix: true,
+    appendixOwner,
+    children: node.children.map((child) =>
+      assignAppendixOwner(child, appendixOwner),
+    ),
+  };
+}
+
 /**
  * 获取公开章节导航树。
  * Chapter navigation is built from the public article source only.
@@ -39,44 +53,35 @@ export async function getPublicChapterNav(
   cacheLife("hours");
   cacheTag("article-tree", `article-tree-${locale}`);
 
-  const githubTree = await getCachedArticleTree(locale);
+  return preparePublicChapterNav(await getCachedArticleTree(locale));
+}
 
-  // 3. Build unified map keyed by slug
-  const unifiedMap = new Map<string, ChapterNavNode>();
-  const mergedTree: ChapterNavNode[] = [];
-
-  // Add GitHub tree
-  function addGithubNodes(
-    nodes: ArticleTreeNode[],
-    parentArray: ChapterNavNode[],
-  ) {
-    for (const node of nodes) {
-      const nodeWithMeta = node as ArticleTreeNode & Partial<ChapterNavNode>;
-      const clone: ChapterNavNode = {
-        ...node,
-        index: nodeWithMeta.index ?? -1,
-        isAppendix: nodeWithMeta.isAppendix ?? false,
-        isPreface: nodeWithMeta.isPreface ?? false,
-        isAdvanced: nodeWithMeta.isAdvanced ?? false,
-        introTitle: nodeWithMeta.introTitle ?? "",
-        children: [],
-      };
-      unifiedMap.set(clone.slug.toLowerCase(), clone);
-      parentArray.push(clone);
-      if (node.children && node.children.length > 0) {
-        addGithubNodes(node.children, clone.children);
-      }
-    }
-  }
-
-  addGithubNodes(githubTree, mergedTree);
-
-  const filteredTree = filterIgnoredNodes(mergedTree, true);
+export function preparePublicChapterNav(
+  source: ArticleTreeNode[],
+): ChapterNavNode[] {
+  const clonedTree = cloneNodes(source);
+  const filteredTree = filterIgnoredNodes(clonedTree, true);
 
   injectReadmeIntroNodes(filteredTree);
   sortTree(filteredTree);
 
   return filteredTree;
+}
+
+function cloneNodes(nodes: ArticleTreeNode[]): ChapterNavNode[] {
+  return nodes.map((node) => {
+    const nodeWithMeta = node as ArticleTreeNode & Partial<ChapterNavNode>;
+
+    return {
+      ...node,
+      index: nodeWithMeta.index ?? -1,
+      isAppendix: nodeWithMeta.isAppendix ?? false,
+      isPreface: nodeWithMeta.isPreface ?? false,
+      isAdvanced: nodeWithMeta.isAdvanced ?? false,
+      introTitle: nodeWithMeta.introTitle ?? "",
+      children: cloneNodes(node.children),
+    };
+  });
 }
 
 function sortTree(nodes: ChapterNavNode[]) {
@@ -89,37 +94,21 @@ function sortTree(nodes: ChapterNavNode[]) {
       return a.isReadmeIntro ? -1 : 1;
     }
 
-    if (a.isFolder && b.isFolder) {
-      const indexComparison = compareIndex(a.index ?? -1, b.index ?? -1);
-      if (indexComparison !== 0) {
-        return indexComparison;
-      }
+    const indexComparison = compareIndex(a.index ?? -1, b.index ?? -1);
+    if (indexComparison !== 0) {
+      return indexComparison;
     }
 
-    if (a.isFolder !== b.isFolder) {
-      return a.isFolder ? -1 : 1;
+    if (a.isAppendix !== b.isAppendix) {
+      return a.isAppendix ? 1 : -1;
     }
 
-    if (!a.isFolder && !b.isFolder) {
-      if (a.isAppendix !== b.isAppendix) {
-        return a.isAppendix ? 1 : -1;
-      }
-
-      const aIsReadme =
-        !a.title || a.title === "" || a.slug.toLowerCase().endsWith("/readme");
-      const bIsReadme =
-        !b.title || b.title === "" || b.slug.toLowerCase().endsWith("/readme");
-      if (aIsReadme !== bIsReadme) {
-        return aIsReadme ? -1 : 1;
-      }
-
-      const indexComparison = compareIndex(a.index ?? -1, b.index ?? -1);
-      if (indexComparison !== 0) {
-        return indexComparison;
-      }
+    const titleComparison = a.title.localeCompare(b.title);
+    if (titleComparison !== 0) {
+      return titleComparison;
     }
 
-    return a.title.localeCompare(b.title);
+    return a.slug.localeCompare(b.slug);
   });
   for (const node of nodes) {
     if (node.children && node.children.length > 0) {
@@ -144,25 +133,30 @@ function filterIgnoredNodes(
       }
     }
 
-    if (node.children && node.children.length > 0) {
-      node.children = filterIgnoredNodes(node.children, false);
-    }
+    const filteredNode = {
+      ...node,
+      children: filterIgnoredNodes(node.children, false),
+    };
 
-    if (node.isFolder && isAppendixDirectoryName(node.title)) {
-      const promotedChildren = node.children.filter(
+    if (filteredNode.isFolder && isAppendixDirectoryName(filteredNode.title)) {
+      const appendixOwner = {
+        slug: filteredNode.slug,
+        title: filteredNode.title,
+      };
+      const promotedChildren = filteredNode.children.filter(
         (child) => child.isFolder || !isReadmeArticle(child),
       );
-      const promotedParentId = node.parentId;
 
       for (const child of promotedChildren) {
-        child.parentId = promotedParentId;
+        result.push({
+          ...assignAppendixOwner(child, appendixOwner),
+          parentId: filteredNode.parentId,
+        });
       }
-
-      result.push(...promotedChildren);
       continue;
     }
 
-    result.push(node);
+    result.push(filteredNode);
   }
   return result;
 }
@@ -189,12 +183,13 @@ function injectReadmeIntroNodes(nodes: ChapterNavNode[]) {
       slug: node.slug,
       index: -1,
       isFolder: false,
-      isAppendix: false,
+      isAppendix: node.isAppendix ?? false,
       isPreface: false,
       isAdvanced: false,
       isReadmeIntro: true,
       parentId: node.id,
       children: [],
+      ...(node.appendixOwner ? { appendixOwner: node.appendixOwner } : {}),
     });
   }
 }

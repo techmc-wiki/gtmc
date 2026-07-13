@@ -25,12 +25,12 @@ import { pathToFileURL } from "node:url"
 import { execSync } from "node:child_process"
 
 import { getArticleTree } from "@/lib/articles/manifest"
+import { preparePublicChapterNav } from "@/lib/articles/public-tree"
 import {
   linearizeArticles,
   getArticleContentForPdf,
 } from "@/lib/articles/linearize"
 import type { LinearizedArticle } from "@/lib/articles/linearize"
-import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import {
   buildBodyHtml,
   buildBookPlan,
@@ -98,23 +98,6 @@ function parseArgs(): CliOptions {
   }
 
   return { locale, output }
-}
-
-function sortChapterTree(nodes: ChapterNavNode[]) {
-  nodes.sort((a: ChapterNavNode, b: ChapterNavNode) => {
-    if (a.isPreface !== b.isPreface) return a.isPreface ? -1 : 1
-    if (a.isFolder && b.isFolder && a.isAppendix !== b.isAppendix) {
-      return a.isAppendix ? 1 : -1
-    }
-    if (a.isFolder !== b.isFolder) return a.isFolder ? -1 : 1
-    if (!a.isFolder && a.isAppendix !== b.isAppendix) {
-      return a.isAppendix ? 1 : -1
-    }
-    return a.title.localeCompare(b.title)
-  })
-  for (const node of nodes) {
-    if (node.children.length) sortChapterTree(node.children)
-  }
 }
 
 async function analyzeArticles(
@@ -234,15 +217,13 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
   fs.mkdirSync(outDir, { recursive: true })
 
   console.log("[pdf] Phase 1/6: Loading and numbering article tree...")
-  const tree = (await getArticleTree(locale)) as ChapterNavNode[]
+  const tree = preparePublicChapterNav(await getArticleTree(locale))
   if (!tree || tree.length === 0) {
     console.warn(
       "[pdf] No articles found in tree (submodule may not be initialized). Skipping PDF generation."
     )
     return
   }
-  sortChapterTree(tree)
-
   const linearized = await linearizeArticles(tree)
 
   console.log("[pdf] Phase 2/6: Scanning article content...")
@@ -290,7 +271,10 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
   }
 
   const coverHtml = buildCoverHtml(bookOptions)
-  const bodyHtml = await buildBodyHtml(bookOptions, plan)
+  const { html: bodyHtml, plan: effectivePlan } = await buildBodyHtml(
+    bookOptions,
+    plan
+  )
   console.log(
     `[pdf]   → HTML built (${(bodyHtml.length / 1024 / 1024).toFixed(1)} MB)`
   )
@@ -398,7 +382,7 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
   paintPageBackgrounds(merged, "f5f4ef")
 
   const outlineTree = buildOutlineTree(
-    plan,
+    effectivePlan,
     anchorPages,
     locale,
     coverPageCount,

@@ -6,7 +6,7 @@
  * Reads a generated PDF and verifies it meets quality specifications.
  *
  * Usage:
- *   npx tsx scripts/verify-pdf.ts                                          # checks public/gtmc.pdf
+ *   npx tsx scripts/verify-pdf.ts                                          # checks public/gtmc-en.pdf
  *   npx tsx scripts/verify-pdf.ts --file path/to/output.pdf               # checks a custom path
  */
 

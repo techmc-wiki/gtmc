@@ -6,11 +6,6 @@ import type { ArticleTreeNode } from "@/lib/github/sync";
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types";
 import { compareIndex } from "@/lib/articles/navigation-data";
 
-function isAppendixDirectoryName(name: string): boolean {
-  const normalized = name.trim().toLowerCase();
-  return normalized.includes("appendix") || normalized.includes("附录");
-}
-
 function normalizeNodeValue(value: string) {
   return value.trim().toLowerCase().replace(/\.md$/, "");
 }
@@ -138,7 +133,7 @@ function filterIgnoredNodes(
       children: filterIgnoredNodes(node.children, false),
     };
 
-    if (filteredNode.isFolder && isAppendixDirectoryName(filteredNode.title)) {
+    if (filteredNode.isFolder && filteredNode.isAppendix) {
       const appendixOwner = {
         slug: filteredNode.slug,
         title: filteredNode.title,

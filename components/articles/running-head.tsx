@@ -6,6 +6,7 @@ interface RunningHeadProps {
   locale: string
   chapterIndex?: number
   chapterIsAppendix?: boolean
+  articleIsAppendix?: boolean
   isPreface?: boolean
 }
 
@@ -29,6 +30,7 @@ export function RunningHead({
   locale,
   chapterIndex,
   chapterIsAppendix,
+  articleIsAppendix,
   isPreface,
 }: RunningHeadProps) {
   const label = formatChapterLabel(
@@ -41,11 +43,15 @@ export function RunningHead({
     <nav
       aria-label="Chapter"
       className="mb-4 flex flex-wrap items-center gap-2 font-mono text-[0.6875rem] tracking-[0.15em] uppercase sm:text-xs">
-      {label && (
+      {label ? (
         <span className="bg-tech-signal text-tech-signal-ink inline-flex h-5 items-center px-1.5 text-[0.625rem] font-bold tracking-wider">
           {chapterIsAppendix ? "APP" : "CH"} {label}
         </span>
-      )}
+      ) : articleIsAppendix ? (
+        <span className="bg-tech-signal text-tech-signal-ink inline-flex h-5 items-center px-1.5 text-[0.625rem] font-bold tracking-wider">
+          APP
+        </span>
+      ) : null}
       <a
         href={`/${locale}${articleUrl(chapterSlug)}`}
         className="text-tech-main/70 hover:text-tech-main-dark hover:decoration-tech-main/40 transition-colors hover:underline hover:underline-offset-4">

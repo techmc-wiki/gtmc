@@ -282,7 +282,6 @@ describe("preparePublicChapterNav", () => {
             title: "Stacks",
             parentId: "appendix",
             index: 1,
-            isAppendix: true,
           }),
           node({
             slug: "appendix/glossary",
@@ -291,13 +290,11 @@ describe("preparePublicChapterNav", () => {
             isFolder: true,
             index: 2,
             introTitle: "Glossary intro",
-            isAppendix: true,
             children: [
               node({
                 slug: "appendix/glossary/terms",
                 title: "Terms",
                 parentId: "appendix/glossary",
-                isAppendix: true,
               }),
             ],
           }),

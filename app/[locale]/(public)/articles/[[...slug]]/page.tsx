@@ -396,6 +396,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           locale={locale}
           chapterIndex={runningHeadChapterIndex}
           chapterIsAppendix={runningHeadIsAppendix}
+          articleIsAppendix={target.isAppendix}
           isPreface={runningHeadIsPreface}
         />
       )}

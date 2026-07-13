@@ -26,10 +26,17 @@ export const ANSI_COLOR_TAG_PATTERN = new RegExp(
   "g"
 )
 
+const ANSI_DIRECTIVE_PATTERN = new RegExp(
+  String.raw`:(${ANSI_COLOR_ALTERNATION})\[([^\]]*)\]`,
+  "g"
+)
+
 export function createAnsiColorTagName(color: AnsiColorName) {
   return `ansi-color-${color}`
 }
 
 export function stripAnsiColorMarkup(markdown: string) {
-  return markdown.replace(ANSI_COLOR_TAG_PATTERN, "$2")
+  return markdown
+    .replace(ANSI_COLOR_TAG_PATTERN, "$2")
+    .replace(ANSI_DIRECTIVE_PATTERN, "$2")
 }

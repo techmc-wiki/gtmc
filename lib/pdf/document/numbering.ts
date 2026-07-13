@@ -27,9 +27,6 @@ export function buildBookPlan(articles: LinearizedArticle[]): BookPlan {
   const chapters: ChapterGroup[] = []
   const chapterBySlug = new Map<string, ChapterGroup>()
 
-  let chapterCount = 0
-  let appendixCount = 0
-
   for (const raw of articles) {
     const article: LinearizedArticle = {
       ...raw,
@@ -48,14 +45,11 @@ export function buildBookPlan(articles: LinearizedArticle[]): BookPlan {
 
     let chapter = chapterBySlug.get(article.chapterSlug)
     if (!chapter) {
-      const number = article.isAppendix
-        ? appendixLetter(appendixCount++)
-        : String(++chapterCount)
       chapter = {
         slug: article.chapterSlug,
         title: article.chapterTitle,
         isAppendix: article.isAppendix,
-        number,
+        number: "",
         content: [],
       }
       chapterBySlug.set(article.chapterSlug, chapter)
@@ -83,8 +77,17 @@ export function buildBookPlan(articles: LinearizedArticle[]): BookPlan {
     content.push({ kind: "article", entry: { article, number: null } })
   }
 
+  const orderedChapters = [
+    ...chapters.filter((chapter) => !chapter.isAppendix),
+    ...chapters.filter((chapter) => chapter.isAppendix),
+  ]
   const numberedChapters: ChapterGroup[] = []
-  for (const chapter of chapters) {
+  let chapterCount = 0
+  let appendixCount = 0
+  for (const chapter of orderedChapters) {
+    const chapterNumber = chapter.isAppendix
+      ? appendixLetter(appendixCount++)
+      : String(++chapterCount)
     let counter = 0
 
     function numberContent(content: ChapterContent[]): ChapterContent[] {
@@ -109,7 +112,7 @@ export function buildBookPlan(articles: LinearizedArticle[]): BookPlan {
         counter += 1
         numberedContent.push({
           kind: "article",
-          entry: { ...item.entry, number: `${chapter.number}.${counter}` },
+          entry: { ...item.entry, number: `${chapterNumber}.${counter}` },
         })
       }
 
@@ -118,6 +121,7 @@ export function buildBookPlan(articles: LinearizedArticle[]): BookPlan {
 
     numberedChapters.push({
       ...chapter,
+      number: chapterNumber,
       content: numberContent(chapter.content),
     })
   }

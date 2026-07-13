@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import type { LinearizedArticle } from "@/lib/articles/linearize"
+import { linearizeArticles } from "@/lib/articles/linearize"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import { preparePublicChapterNav } from "@/lib/articles/public-tree"
 import type { ArticleTreeNode } from "@/lib/github/sync"
@@ -88,6 +89,46 @@ describe("buildBookPlan", () => {
     expect(plan.chapters[1].isAppendix).toBe(true)
     expect(plan.chapters[1].number).toBe("A")
     expect(chapterArticles(plan.chapters[1])[0].number).toBe("A.1")
+  })
+
+  it("places ordinary chapters before appendices while preserving group order", () => {
+    const plan = buildBookPlan([
+      art({
+        slug: "appendix/first",
+        chapterSlug: "appendix/first",
+        chapterTitle: "First appendix",
+        isAppendix: true,
+      }),
+      art({
+        slug: "alpha/a",
+        chapterSlug: "alpha",
+        chapterTitle: "Alpha",
+      }),
+      art({
+        slug: "appendix/second",
+        chapterSlug: "appendix/second",
+        chapterTitle: "Second appendix",
+        isAppendix: true,
+      }),
+      art({
+        slug: "beta/b",
+        chapterSlug: "beta",
+        chapterTitle: "Beta",
+      }),
+    ])
+
+    expect(plan.chapters.map((chapter) => chapter.slug)).toEqual([
+      "alpha",
+      "beta",
+      "appendix/first",
+      "appendix/second",
+    ])
+    expect(plan.chapters.map((chapter) => chapter.number)).toEqual([
+      "1",
+      "2",
+      "A",
+      "B",
+    ])
   })
 
   it("keeps readme-intro articles in place but unnumbered", () => {
@@ -226,5 +267,119 @@ describe("preparePublicChapterNav", () => {
     })
     expect(source[1].children).toHaveLength(1)
     expect(source[1].children[0].children).toHaveLength(1)
+  })
+
+  it("preserves appendix ownership for promoted articles and folder intros", async () => {
+    const source = [
+      node({
+        slug: "appendix",
+        title: "Appendix",
+        isFolder: true,
+        isAppendix: true,
+        children: [
+          node({
+            slug: "appendix/stack",
+            title: "Stacks",
+            parentId: "appendix",
+            index: 1,
+            isAppendix: true,
+          }),
+          node({
+            slug: "appendix/glossary",
+            title: "Glossary",
+            parentId: "appendix",
+            isFolder: true,
+            index: 2,
+            introTitle: "Glossary intro",
+            isAppendix: true,
+            children: [
+              node({
+                slug: "appendix/glossary/terms",
+                title: "Terms",
+                parentId: "appendix/glossary",
+                isAppendix: true,
+              }),
+            ],
+          }),
+        ],
+      }),
+    ]
+
+    const prepared = preparePublicChapterNav(source)
+    const linearized = await linearizeArticles(prepared)
+
+    expect(prepared.map((item) => item.slug)).toEqual([
+      "appendix/stack",
+      "appendix/glossary",
+    ])
+    expect(prepared[0]).toMatchObject({
+      isAppendix: true,
+      appendixOwner: { slug: "appendix", title: "Appendix" },
+    })
+    expect(prepared[1].children[0]).toMatchObject({
+      slug: "appendix/glossary",
+      isReadmeIntro: true,
+      isAppendix: true,
+      appendixOwner: { slug: "appendix", title: "Appendix" },
+    })
+    expect(linearized).toMatchObject([
+      {
+        slug: "appendix/stack",
+        chapterSlug: "appendix",
+        chapterTitle: "Appendix",
+        isAppendix: true,
+      },
+      {
+        slug: "appendix/glossary",
+        chapterSlug: "appendix",
+        chapterTitle: "Appendix",
+        folders: [{ slug: "appendix/glossary", title: "Glossary" }],
+        isAppendix: true,
+        isReadmeIntro: true,
+      },
+      {
+        slug: "appendix/glossary/terms",
+        chapterSlug: "appendix",
+        chapterTitle: "Appendix",
+        folders: [{ slug: "appendix/glossary", title: "Glossary" }],
+        isAppendix: true,
+      },
+    ])
+  })
+
+  it("keeps nested appendix leaves inside their ordinary top-level chapter", async () => {
+    const prepared = preparePublicChapterNav([
+      node({
+        slug: "ordinary",
+        title: "Ordinary",
+        isFolder: true,
+        children: [
+          node({
+            slug: "ordinary/appendix",
+            title: "Appendix",
+            isFolder: true,
+            parentId: "ordinary",
+            isAppendix: true,
+            children: [
+              node({
+                slug: "ordinary/appendix/note",
+                title: "Note",
+                parentId: "ordinary/appendix",
+                isAppendix: true,
+              }),
+            ],
+          }),
+        ],
+      }),
+    ])
+
+    const [article] = await linearizeArticles(prepared)
+
+    expect(article).toMatchObject({
+      slug: "ordinary/appendix/note",
+      chapterSlug: "ordinary",
+      chapterTitle: "Ordinary",
+      isAppendix: false,
+    })
   })
 })

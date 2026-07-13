@@ -28,7 +28,12 @@
     "teamViewAll": "查看所有贡献者 →"
   },
   "Article": {
-    "notFound": "文章未找到"
+    "notFound": "文章未找到",
+    "translationLatestCommitAria": "在 GitHub 上查看原文提交 {sha}",
+    "translationOutdatedLag": "译文落后 {commitLag, plural, one {# 次源文提交} other {# 次源文提交}}，时间差为 {dayLag, plural, one {# 天} other {# 天}}。",
+    "translationOutdatedLabel": "译文已过期",
+    "translationOutdatedPrefix": "原文最新版本为",
+    "translationPending": "翻译待完成"
   },
   "ArticleMeta": {
     "articleLicenseAria": "文章许可",

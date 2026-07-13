@@ -5,12 +5,14 @@ import { getPluginsForContent } from "@/lib/markdown/pipeline/react"
 
 interface MarkdownRendererProps {
   content: string
+  locale?: string
   rawPath?: string
   shikiPlugin?: RehypeShikiPlugin
 }
 
 export function MarkdownRenderer({
   content,
+  locale,
   rawPath = "",
   shikiPlugin,
 }: MarkdownRendererProps) {
@@ -23,7 +25,7 @@ export function MarkdownRenderer({
     <ReactMarkdown
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
-      components={getMarkdownComponents(rawPath, content)}>
+      components={getMarkdownComponents(rawPath, content, locale)}>
       {content}
     </ReactMarkdown>
   )

@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server"
 import {
   ScanConfirmOverlay,
   SectionFrame,
@@ -8,8 +7,7 @@ import {
 } from "@/components/ui/loading-shell-primitives"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 
-export default async function ArticlesLoading() {
-  const t = await getTranslations("CommonA11y")
+export default function ArticlesLoading() {
   return (
     <SkeletonExitWrapper>
       <div
@@ -20,8 +18,8 @@ export default async function ArticlesLoading() {
         "
         aria-busy="true"
         aria-live="polite"
-        aria-label={t("loadingArticleContent")}>
-        <span className="sr-only">{t("loadingArticleContent")}</span>
+        aria-label="Loading article content">
+        <span className="sr-only">Loading article content</span>
         <div aria-hidden="true">
           <CornerBrackets
             size="size-4"

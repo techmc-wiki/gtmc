@@ -1,5 +1,3 @@
-import { getTranslations } from "next-intl/server"
-import { Link } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/articles/url"
 import { CornerBrackets } from "../ui/corner-brackets"
 
@@ -11,7 +9,10 @@ interface ArticleInfo {
 }
 
 interface ArticleNavigationProps {
+  locale: string
+  nextLabel: string
   prev: ArticleInfo | null
+  prevLabel: string
   next: ArticleInfo | null
 }
 
@@ -20,6 +21,7 @@ interface ArticleNavigationLinkProps {
   className?: string
   direction: "prev" | "next"
   label: string
+  locale: string
 }
 
 function ArticleNavigationLink({
@@ -27,13 +29,14 @@ function ArticleNavigationLink({
   className = "",
   direction,
   label,
+  locale,
 }: ArticleNavigationLinkProps) {
   const isNext = direction === "next"
   const arrow = isNext ? "→" : "←"
 
   return (
-    <Link
-      href={articleUrl(article.slug)}
+      <a
+        href={`/${locale}${articleUrl(article.slug)}`}
       className={`
         group relative flex min-h-24 w-full flex-col justify-between
         overflow-hidden border border-tech-main/30 bg-surface/55 p-4
@@ -91,19 +94,20 @@ function ArticleNavigationLink({
           {article.title}
         </span>
       </div>
-    </Link>
+      </a>
   )
 }
 
-export async function ArticleNavigation({
+export function ArticleNavigation({
+  locale,
+  nextLabel,
   prev,
+  prevLabel,
   next,
 }: ArticleNavigationProps) {
-  const t = await getTranslations("ArticleMeta")
-
   return (
     <nav
-      aria-label={`${t("prev")} / ${t("next")}`}
+      aria-label={`${prevLabel} / ${nextLabel}`}
       className="relative mt-14 border-t border-tech-main/25 pt-6">
       <span
         aria-hidden="true"
@@ -115,7 +119,8 @@ export async function ArticleNavigation({
           <ArticleNavigationLink
             article={prev}
             direction="prev"
-            label={t("prev")}
+            label={prevLabel}
+            locale={locale}
           />
         )}
 
@@ -124,7 +129,8 @@ export async function ArticleNavigation({
             article={next}
             className={prev ? "" : "md:col-start-2"}
             direction="next"
-            label={t("next")}
+            label={nextLabel}
+            locale={locale}
           />
         )}
       </div>

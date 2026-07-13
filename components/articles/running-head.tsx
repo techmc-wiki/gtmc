@@ -1,9 +1,9 @@
-import { Link } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/articles/url"
 
 interface RunningHeadProps {
   chapterTitle: string
   chapterSlug: string
+  locale: string
   chapterIndex?: number
   chapterIsAppendix?: boolean
   isPreface?: boolean
@@ -26,6 +26,7 @@ function formatChapterLabel(
 export function RunningHead({
   chapterTitle,
   chapterSlug,
+  locale,
   chapterIndex,
   chapterIsAppendix,
   isPreface,
@@ -45,11 +46,11 @@ export function RunningHead({
           {chapterIsAppendix ? "APP" : "CH"} {label}
         </span>
       )}
-      <Link
-        href={articleUrl(chapterSlug)}
+      <a
+        href={`/${locale}${articleUrl(chapterSlug)}`}
         className="text-tech-main/70 hover:text-tech-main-dark hover:decoration-tech-main/40 transition-colors hover:underline hover:underline-offset-4">
         {chapterTitle}
-      </Link>
+      </a>
       <span aria-hidden="true" className="text-tech-main/40">
         ›
       </span>

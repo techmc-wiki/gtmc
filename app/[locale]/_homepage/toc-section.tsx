@@ -1,6 +1,9 @@
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
-import { flattenArticleNodes } from "@/lib/articles/navigation-data"
+import {
+  flattenArticleNodes,
+  partitionAppendixNodes,
+} from "@/lib/articles/navigation-data"
 import { articleUrl } from "@/lib/articles/url"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 
@@ -98,9 +101,21 @@ function ChapterBlock({
 export async function TocSection({ tree, locale }: TocSectionProps) {
   const t = await getTranslations({ locale, namespace: "Homepage" })
 
-  const preface = tree.find((node) => node.isPreface && !node.isFolder)
-  const chapters = tree.filter((node) => node.isFolder && !node.isAppendix)
-  const appendices = tree.filter((node) => node.isFolder && node.isAppendix)
+  const { regularNodes, appendixGroups } = partitionAppendixNodes(tree)
+  const preface = regularNodes.find((node) => node.isPreface && !node.isFolder)
+  const chapters = regularNodes.filter((node) => node.isFolder)
+  const appendices = appendixGroups.map<ChapterNavNode>(
+    ({ owner, nodes }, index) => ({
+      id: owner.slug,
+      title: owner.title,
+      slug: owner.slug,
+      isFolder: true,
+      parentId: null,
+      children: nodes,
+      index: index + 1,
+      isAppendix: true,
+    })
+  )
 
   return (
     <section

@@ -20,6 +20,36 @@ interface NavigationResult {
   next: ArticleInfo | null
 }
 
+interface AppendixGroup {
+  owner: NonNullable<ChapterNavNode["appendixOwner"]>
+  nodes: ChapterNavNode[]
+}
+
+export function partitionAppendixNodes(nodes: ChapterNavNode[]): {
+  regularNodes: ChapterNavNode[]
+  appendixGroups: AppendixGroup[]
+} {
+  const regularNodes: ChapterNavNode[] = []
+  const groupsBySlug = new Map<string, AppendixGroup>()
+
+  for (const node of nodes) {
+    const owner = node.appendixOwner
+    if (!owner) {
+      regularNodes.push(node)
+      continue
+    }
+
+    const group = groupsBySlug.get(owner.slug)
+    if (group) {
+      group.nodes.push(node)
+    } else {
+      groupsBySlug.set(owner.slug, { owner, nodes: [node] })
+    }
+  }
+
+  return { regularNodes, appendixGroups: [...groupsBySlug.values()] }
+}
+
 function visitArticleNodes(
   nodes: ChapterNavNode[],
   visitor: (node: ChapterNavNode, parent: ChapterNavNode | null) => void,

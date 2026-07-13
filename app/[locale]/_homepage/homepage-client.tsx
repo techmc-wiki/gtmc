@@ -2,7 +2,6 @@
 
 import { useRef, useEffect, useState, useCallback } from "react"
 import dynamic from "next/dynamic"
-import { useRouter } from "@/i18n/navigation"
 import { useHomepageMotion } from "./use-homepage-motion"
 import { HOMEPAGE_MOTION } from "./homepage-constants"
 import { HeroCard } from "./hero-card"
@@ -21,7 +20,6 @@ const MidgroundLayer = dynamic(
 )
 
 export function HomepageClient() {
-  const router = useRouter()
   const t = useTranslations("Homepage")
   const motionDriver = useHomepageMotion()
   const [isAccessingDatabase, setIsAccessingDatabase] = useState(false)
@@ -38,13 +36,6 @@ export function HomepageClient() {
     },
     [isAccessingDatabase]
   )
-
-  useEffect(() => {
-    if (process.env.NODE_ENV !== "production") {
-      return
-    }
-    router.prefetch("/articles")
-  }, [router])
 
   useEffect(() => {
     if (!cardRef.current) return
@@ -99,7 +90,6 @@ export function HomepageClient() {
         <div className="animate-slide-up-fade fill-mode-forwards relative z-20 flex w-full max-w-48 flex-col items-stretch justify-center gap-5 opacity-0 [animation-delay:0.6s] motion-reduce:animate-none motion-reduce:opacity-100 sm:w-full sm:max-w-full sm:flex-row sm:items-center">
           <Link
             href="/articles"
-            prefetch
             onClick={handleArticlesClick}
             className="w-full sm:w-72">
             <TechButton

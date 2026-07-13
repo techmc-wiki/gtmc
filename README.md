@@ -25,7 +25,7 @@ Read tutorials, mechanics deep-dives, and source-code walkthroughs. All openly w
 
 ## About
 
-**Graduate Texts in Minecraft** (*GTMC*) is an open knowledge base for the technical side of Minecraft — redstone, game mechanics, and engine internals. Anyone can read it, and the community writes and reviews it together.
+**Graduate Texts in Minecraft** (_GTMC_) is an open knowledge base for the technical side of Minecraft — redstone, game mechanics, and engine internals. Anyone can read it, and the community writes and reviews it together.
 
 You'll find three kinds of articles:
 
@@ -43,8 +43,6 @@ The fastest way to start is to **[visit the site](https://techmc.wiki)**. Want t
 ## Running it locally
 
 <a href="https://skillicons.dev"><img src="https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,prisma,supabase,vercel" alt="Next.js, React, TypeScript, Tailwind CSS, Prisma, Supabase, Vercel" /></a>
-
-See [`DESIGN.md`](DESIGN.md) for the visual system and [`AGENTS.md`](AGENTS.md) for the full stack breakdown.
 
 ```bash
 git clone https://github.com/techmc-wiki/gtmc.git

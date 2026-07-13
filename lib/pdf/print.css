@@ -149,6 +149,30 @@ pre code {
   font-size: inherit;
 }
 
+mermaid-diagram {
+  display: block;
+  margin: 1.1em 0;
+  padding: 0.8em;
+  overflow: hidden;
+  border: 1px solid var(--pdf-line);
+  background: var(--pdf-surface);
+  break-inside: avoid;
+}
+
+mermaid-diagram svg {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+mermaid-diagram .mermaid-error {
+  margin: 0 0 0.6em;
+  color: var(--pdf-ink-dark);
+  font-weight: 600;
+}
+
 code .line {
   display: block;
   counter-increment: pdf-line;

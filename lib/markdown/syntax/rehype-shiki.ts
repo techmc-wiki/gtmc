@@ -18,7 +18,12 @@ function extractLangsFromMarkdown(content: string): string[] {
   const matches = content.matchAll(/^```(\w+)/gm)
   const langs = new Set<string>()
   for (const match of matches) {
-    if (match[1] && match[1] !== "text" && match[1] !== "plain") {
+    if (
+      match[1] &&
+      match[1] !== "text" &&
+      match[1] !== "plain" &&
+      match[1] !== "mermaid"
+    ) {
       langs.add(match[1].toLowerCase())
     }
   }

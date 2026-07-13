@@ -1,4 +1,5 @@
 import { LitematicaViewerDynamic } from "@/components/articles/litematica-viewer-dynamic"
+import { MermaidDiagram } from "@/components/markdown/mermaid-diagram"
 import { PeopleMention } from "@/components/markdown/people-mention"
 import { createAComponent } from "@/lib/markdown/a-component"
 import {
@@ -107,6 +108,7 @@ export function getMarkdownComponents(
     div: AdvancedSectionDivComponent,
     pre: PreComponent,
     code: CodeComponent,
+    "mermaid-diagram": MermaidDiagram,
     "people-mention": PeopleMention,
     iframe: IframeComponent,
   } satisfies Record<string, MarkdownComponent>

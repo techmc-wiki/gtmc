@@ -13,6 +13,7 @@ import { remarkPeopleMentions } from "../syntax/remark-people-mentions"
 import { remarkNumberedHeadingsDot } from "../syntax/remark-heading-numbering"
 import { remarkWikilinks } from "../syntax/remark-wikilinks"
 import { rehypeAdvancedSections } from "../syntax/rehype-advanced-sections"
+import { rehypeMermaid } from "../syntax/rehype-mermaid"
 import { rehypeLinkedCode } from "../transforms/rehype-linked-code"
 import { rehypeCJKSpacing } from "../transforms/rehype-cjk-spacing"
 import type { RehypeShikiPlugin } from "../syntax/rehype-shiki"
@@ -85,6 +86,7 @@ export function buildRehypePlugins(
 ): PluggableList {
   const plugins: PluggableList = [
     rehypeRaw,
+    rehypeMermaid,
     rehypeAdvancedSections,
     rehypeLinkedCode,
     rehypeSlug,

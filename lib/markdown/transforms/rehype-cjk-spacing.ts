@@ -12,7 +12,13 @@ export function rehypeCJKSpacing() {
       if (node.type !== "text") return
       if (parent?.type === "element") {
         const parentTag = (parent as Element).tagName
-        if (parentTag === "code" || parentTag === "pre") return
+        if (
+          parentTag === "code" ||
+          parentTag === "pre" ||
+          parentTag === "mermaid-diagram"
+        ) {
+          return
+        }
       }
       const textNode = node as Text
       textNode.value = pangu.spacingText(textNode.value)

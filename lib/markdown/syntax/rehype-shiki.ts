@@ -104,6 +104,15 @@ export async function createRehypeShiki(langs?: string[]) {
               )
           )
 
+          const lastChild = filtered.at(-1)
+          if (
+            lastChild?.type === "element" &&
+            lastChild.tagName === "span" &&
+            getTextContent(lastChild).trim() === ""
+          ) {
+            filtered.pop()
+          }
+
           for (const child of filtered) {
             if (child.type !== "element") continue
             const lineEl = child as Element

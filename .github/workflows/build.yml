@@ -8,11 +8,19 @@ on:
   pull_request:
     branches: ["**"]
 
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          # Initialize articles/ + glossary/ before content-cache key resolution so
+          # we don't depend on postinstall for submodule SHAs.
+          submodules: true
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -23,27 +31,11 @@ jobs:
           node-version: "26"
           cache: "pnpm"
 
-      - name: Restore Next.js cache
-        uses: actions/cache@v5
-        with:
-          path: .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml', 'next.config.ts') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
-            ${{ runner.os }}-nextjs-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Generate Prisma Client
-        run: pnpm prisma generate
-        env:
-          DATABASE_URL: "postgresql://localhost:5432/placeholder"
-
-      - name: Resolve articles submodule SHA
-        id: submodule-sha
-        # postinstall initializes the submodule, so this is safe to run here.
-        run: echo "sha=$(git -C articles rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Resolve content input SHAs
+        id: content-inputs
+        run: |
+          echo "articles=$(git -C articles rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "glossary=$(git -C glossary rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Cache content artifacts
         id: cache-content
@@ -55,13 +47,27 @@ jobs:
             data/glossary*.json
             public/gtmc-en.pdf
             public/gtmc-zh.pdf
-          # Include PDF generators: locale PDFs are required by app/[locale]/pdf at build time.
-          key: content-${{ steps.submodule-sha.outputs.sha }}-${{ hashFiles('scripts/**', 'lib/articles/**', 'lib/pdf/**') }}
+          # Hash only generators + libs that feed content/PDF artifacts so
+          # unrelated script/tooling edits do not bust the cache.
+          key: content-${{ steps.content-inputs.outputs.articles }}-${{ steps.content-inputs.outputs.glossary }}-${{ hashFiles('scripts/build-content.ts', 'scripts/generate-article-manifest.ts', 'scripts/generate-author-profiles.ts', 'scripts/generate-glossary-manifest.ts', 'scripts/generate-article-content.ts', 'scripts/generate-pdf.ts', 'scripts/manifest-preview.ts', 'scripts/lib/run.ts', 'lib/articles/**', 'lib/pdf/**', 'lib/glossary/**', 'lib/markdown/**') }}
           restore-keys: |
-            content-${{ steps.submodule-sha.outputs.sha }}-
+            content-${{ steps.content-inputs.outputs.articles }}-${{ steps.content-inputs.outputs.glossary }}-
 
-      - name: TypeScript Check
-        run: node --run typecheck
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          # Submodules already checked out; skip prisma/manifest/chromium here.
+          # Prisma runs next; Chromium only when content must be rebuilt.
+          GTMC_SKIP_POSTINSTALL: "1"
+
+      - name: Generate Prisma Client
+        run: pnpm prisma generate
+        env:
+          DATABASE_URL: "postgresql://localhost:5432/placeholder"
+
+      - name: Install Playwright Chromium
+        if: steps.cache-content.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Build
         env:

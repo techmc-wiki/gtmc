@@ -59,12 +59,14 @@ if (isGitWorkTree()) {
 
 // Heavy steps (prisma generate, article manifest, chromium install) are
 // skipped in CI lint runs and when explicitly opted out, so a pure lint
-// job doesn't pay for the full content pipeline.
+// job doesn't pay for the full content pipeline. Build CI also skips them
+// and installs Chromium only when content/PDF artifacts must be regenerated.
 const isCI = process.env.CI === "true"
 const isVercel = process.env.VERCEL === "1"
 const skipHeavy =
   process.env.GTMC_SKIP_POSTINSTALL === "1" ||
   (isCI && !isVercel && process.env.GTMC_LINT_ONLY === "1")
+const skipPlaywright = skipHeavy || process.env.GTMC_SKIP_PLAYWRIGHT === "1"
 
 if (skipHeavy) {
   process.stdout.write(
@@ -79,5 +81,11 @@ if (skipHeavy) {
   })
   runScript("scripts/generate-article-manifest.ts")
   runScript("scripts/generate-author-profiles.ts")
-  run("playwright", ["install", "chromium"])
+  if (skipPlaywright) {
+    process.stdout.write(
+      "Skipping Playwright Chromium install (GTMC_SKIP_PLAYWRIGHT=1)\n"
+    )
+  } else {
+    run("playwright", ["install", "chromium"])
+  }
 }

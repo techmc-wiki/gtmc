@@ -62,7 +62,7 @@ function isImageOrIframeUnit(node: MarkdownAstNode): boolean {
 /**
  * Check if a paragraph contains only image/iframe content.
  * This prevents invalid HTML nesting like <p><div>...</div></p>
- * when LazyImage or Iframe mapping (which returns a div) is used inside a paragraph.
+ * when the image or iframe mapping returns a div inside a paragraph.
  */
 function isMediaOnlyParagraph(node: unknown) {
   const paragraphNode = node as MarkdownAstNode | undefined

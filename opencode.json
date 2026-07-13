@@ -5,10 +5,6 @@
       "command": ["chrome-devtools-mcp"],
       "type": "local"
     },
-    "gitnexus": {
-      "command": ["gitnexus", "mcp"],
-      "type": "local"
-    },
     "mdn": {
       "type": "remote",
       "url": "https://mcp.mdn.mozilla.net"

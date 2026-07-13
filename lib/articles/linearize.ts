@@ -74,28 +74,21 @@ export async function linearizeArticles(tree: ChapterNavNode[]): Promise<Lineari
   ): Promise<LinearizedArticle[]> {
     const nested = await Promise.all(
       nodes.map(async (node): Promise<LinearizedArticle[]> => {
+        const isAppendix = context.isAppendix || (node.isAppendix ?? false)
+
         if (node.isFolder) {
-          if (context.depth === 0) {
-            const appendixOwner = node.appendixOwner
-            if (appendixOwner) {
-              return linearizeNodes(node.children, {
-                chapterSlug: appendixOwner.slug,
-                chapterTitle: appendixOwner.title,
-                isAppendix: true,
-                folders: [{ slug: node.slug, title: node.title }],
-                depth: context.depth + 1,
-              })
-            }
+          if (node.isAppendix || context.depth === 0) {
             return linearizeNodes(node.children, {
               chapterSlug: node.slug,
               chapterTitle: node.title,
-              isAppendix: node.isAppendix ?? false,
+              isAppendix,
               folders: [],
               depth: context.depth + 1,
             })
           }
           return linearizeNodes(node.children, {
             ...context,
+            isAppendix,
             folders: [
               ...context.folders,
               { slug: node.slug, title: node.title },
@@ -105,14 +98,9 @@ export async function linearizeArticles(tree: ChapterNavNode[]): Promise<Lineari
         }
 
         const filePath = await resolveLocalArticlePath(node.slug)
-        const appendixOwner =
-          context.chapterSlug === "" ? node.appendixOwner : undefined
-        const chapterSlug = context.chapterSlug || appendixOwner?.slug || ""
-        const chapterTitle = context.chapterTitle || appendixOwner?.title || ""
-        const isAppendix =
-          context.chapterSlug !== ""
-            ? context.isAppendix
-            : appendixOwner !== undefined
+        const startsAppendix = node.isAppendix && !node.isReadmeIntro
+        const chapterSlug = startsAppendix ? node.slug : context.chapterSlug
+        const chapterTitle = startsAppendix ? node.title : context.chapterTitle
 
         return [
           {

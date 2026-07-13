@@ -152,9 +152,7 @@ async function processSourceFile(
     hasIntro: !!introTitle,
     index: fm.index,
     isFolder,
-    isAppendix:
-      /(^|\/)appendix(\/|$)/i.test(slug) ||
-      /(^|\/)appendix(\/|$)/i.test(relPath),
+    isAppendix: "appendix" in fm && fm.appendix === true,
     isPreface:
       /(^|\/)preface(\/|$)/i.test(slug) || /^preface\.zh\.md$/i.test(relPath),
     parentSlug,

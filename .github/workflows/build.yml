@@ -18,6 +18,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          # Full history: article authors/dates come from git log in the articles
+          # submodule. A shallow checkout leaves generateStaticParams empty and
+          # fails Cache Components builds for /authors/[handle].
+          fetch-depth: 0
           # Initialize articles/ + glossary/ before content-cache key resolution so
           # we don't depend on postinstall for submodule SHAs.
           submodules: true

@@ -524,8 +524,8 @@
   "Outline": {
     "close": "CLOSE",
     "closeSheet": "Close article outline",
-    "hoverHint": "Hover to Show",
     "openSheet": "Open article outline",
+    "progressLabel": "Reading progress",
     "railLabel": "On this page",
     "sheetLabel": "Article outline",
     "title": "On This Page"

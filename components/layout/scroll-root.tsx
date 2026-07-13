@@ -16,7 +16,7 @@ export function ScrollRoot({ children }: { children: React.ReactNode }) {
     <div
       ref={rootRef}
       id={SITE_SCROLL_ROOT_ID}
-      className="h-dvh min-h-0 w-full overflow-x-hidden overflow-y-auto scroll-smooth">
+      className="h-dvh min-h-0 w-full overflow-x-hidden overflow-y-auto scroll-smooth [scroll-timeline:--site-scroll_block]">
       <div className="flex min-h-full flex-col">{children}</div>
     </div>
   )

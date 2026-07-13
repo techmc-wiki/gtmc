@@ -43,7 +43,7 @@ jobs:
       - name: Resolve articles submodule SHA
         id: submodule-sha
         # postinstall initializes the submodule, so this is safe to run here.
-        run: git -C articles rev-parse HEAD
+        run: echo "sha=$(git -C articles rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Cache content artifacts
         id: cache-content
@@ -53,8 +53,10 @@ jobs:
             data/manifest.json
             data/articles
             data/glossary*.json
-            public/gtmc.pdf
-          key: content-${{ steps.submodule-sha.outputs.sha }}-${{ hashFiles('scripts/**', 'lib/articles/**') }}
+            public/gtmc-en.pdf
+            public/gtmc-zh.pdf
+          # Include PDF generators: locale PDFs are required by app/[locale]/pdf at build time.
+          key: content-${{ steps.submodule-sha.outputs.sha }}-${{ hashFiles('scripts/**', 'lib/articles/**', 'lib/pdf/**') }}
           restore-keys: |
             content-${{ steps.submodule-sha.outputs.sha }}-
 
@@ -63,5 +65,6 @@ jobs:
 
       - name: Build
         env:
+          # Only skip when the exact key hits — partial restore-keys may lack locale PDFs.
           GTMC_SKIP_CONTENT_BUILD: ${{ steps.cache-content.outputs.cache-hit == 'true' }}
         run: node --run build

@@ -1,0 +1,63 @@
+.axis {
+  container-type: size;
+}
+
+.trace {
+  transform: scaleY(0);
+  transform-origin: center top;
+}
+
+.plotterHead {
+  opacity: 0;
+  transform: translate3d(-50%, 0, 0);
+}
+
+@supports (animation-timeline: scroll()) {
+  .trace {
+    animation-name: trace-progress;
+    animation-duration: 1ms;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: --site-scroll;
+    will-change: transform;
+  }
+
+  .plotterHead {
+    animation-name: plotter-head-progress;
+    animation-duration: 1ms;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: --site-scroll;
+    will-change: transform, opacity;
+  }
+}
+
+@keyframes trace-progress {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes plotter-head-progress {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, 0, 0);
+  }
+
+  3%,
+  97% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(-50%, calc(100cqh - 0.5rem), 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trace,
+  .plotterHead {
+    display: none;
+  }
+}

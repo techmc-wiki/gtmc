@@ -432,11 +432,11 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
 
         {/* Desktop chapter navigation */}
         <div
-          className="
+          className={`
             relative hidden shrink-0 self-stretch
-            md:col-start-1 md:col-span-3 md:justify-self-end
-            md:block
-          "
+            md:col-start-1 md:justify-self-end md:block
+            ${chapterNavHidden ? "md:col-span-1" : "md:col-span-3"}
+          `}
           data-chapter-nav-region
           data-chapter-nav-hidden={chapterNavHidden ? "" : undefined}>
           <div className="flex h-full">
@@ -542,18 +542,17 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         </div>
 
         <main
-          className="
+          className={`
             relative my-6 min-w-0
-            md:col-start-4
-            md:col-span-7
             md:w-full
             md:mx-auto
-            md:max-w-3xl
-          ">
+            md:max-w-4xl
+            ${chapterNavHidden ? "md:col-start-3 md:col-span-10 xl:col-span-9" : "md:col-start-4 md:col-span-9 xl:col-span-7"}
+          `}>
           {children}
         </main>
 
-        <div className="md:col-start-11 md:col-span-2 md:justify-self-start md:self-stretch">
+        <div className="hidden xl:col-start-11 xl:col-span-2 xl:block xl:justify-self-stretch xl:self-stretch">
           <OutlineRail />
         </div>
       </div>

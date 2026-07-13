@@ -40,6 +40,15 @@ function formatSectionNumber(
   return `${chapterPart}.${sectionIndex}`
 }
 
+function ChapterRegistrationTick() {
+  return (
+    <span
+      aria-hidden="true"
+      className="bg-tech-main/20 lg:group-hover/chapter-entry:bg-tech-signal lg:group-focus-within/chapter-entry:bg-tech-signal absolute top-4 -left-14 hidden h-px w-13 origin-right scale-x-[0.38] transition-[scale,background-color,opacity] duration-300 motion-reduce:transition-none lg:block lg:group-focus-within/chapter-entry:scale-x-100 lg:group-hover/chapter-entry:scale-x-100"
+    />
+  )
+}
+
 function ChapterBlock({
   chapter,
   sectionCountLabel,
@@ -50,9 +59,10 @@ function ChapterBlock({
   const sections = chapterSections(chapter)
 
   return (
-    <li>
+    <li className="group/chapter-entry relative">
+      <ChapterRegistrationTick />
       <div className="group/chapter flex items-baseline gap-4 sm:gap-6">
-        <span className="display-title text-tech-main/35 text-2xl sm:text-3xl">
+        <span className="display-title text-tech-main/35 group-hover/chapter-entry:text-tech-signal group-focus-within/chapter-entry:text-tech-signal text-2xl transition-colors duration-300 motion-reduce:transition-none sm:text-3xl">
           {formatChapterNumber(chapter)}
         </span>
         <Link
@@ -137,9 +147,10 @@ export async function TocSection({ tree, locale }: TocSectionProps) {
 
       <ol className="flex flex-col gap-10 sm:gap-12">
         {preface && (
-          <li>
+          <li className="group/chapter-entry relative">
+            <ChapterRegistrationTick />
             <div className="flex items-baseline gap-4 sm:gap-6">
-              <span className="display-title text-tech-main/35 text-2xl sm:text-3xl">
+              <span className="display-title text-tech-main/35 group-hover/chapter-entry:text-tech-signal group-focus-within/chapter-entry:text-tech-signal text-2xl transition-colors duration-300 motion-reduce:transition-none sm:text-3xl">
                 00
               </span>
               <Link

@@ -3,6 +3,7 @@ import { Suspense } from "react"
 import "katex/dist/katex.min.css"
 import type { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import {
   calculateReadingMetrics,
   generateDescription,
@@ -49,37 +50,39 @@ const EMPTY_STRING_ARRAY: string[] = []
 
 export async function generateStaticParams(): Promise<{ locale: string; slug: string[] }[]> {
   const locales: ArticleLocale[] = ["zh", "en"]
-  const params: { locale: string; slug: string[] }[] = []
-
-  const trees = await Promise.all(
-    locales.map((locale) => getCachedArticleTree(locale))
-  )
-
-  for (const [index, tree] of trees.entries()) {
-    const locale = locales[index]
-    const collectSlugs = (nodes: ArticleTreeNode[]): string[] => {
-      const slugs: string[] = []
-      for (const node of nodes) {
-        if (!node.isFolder && hasArticleLocale(node.slug, locale)) {
-          slugs.push(node.slug)
-        }
-        if (node.children && node.children.length > 0) {
-          slugs.push(...collectSlugs(node.children))
-        }
-      }
-      return slugs
+  const paramsByLocale = await Promise.all(
+    locales.map(async (locale) => {
+      const tree = await getCachedArticleTree(locale)
+    const collectSlugs = async (
+      nodes: ArticleTreeNode[]
+    ): Promise<string[]> => {
+      const slugGroups = await Promise.all(
+        nodes.map(async (node) => {
+        const manifestEntry = await getCachedLocalizedArticleEntry(
+          node.slug,
+          locale
+        )
+        const ownSlugs =
+          (!node.isFolder || manifestEntry?.hasIntro) &&
+          hasArticleLocale(node.slug, locale)
+            ? [node.slug]
+            : []
+        const childSlugs = await collectSlugs(node.children ?? [])
+        return [...ownSlugs, ...childSlugs]
+        })
+      )
+      return slugGroups.flat()
     }
 
-    const slugs = collectSlugs(tree)
-    for (const slug of slugs) {
-      params.push({
+    const slugs = await collectSlugs(tree)
+      return slugs.map((slug) => ({
         locale,
         slug: slug.split("/").filter(Boolean),
-      })
-    }
-  }
+      }))
+    })
+  )
 
-  return params
+  return paramsByLocale.flat()
 }
 
 interface ArticlePageProps {
@@ -193,6 +196,10 @@ export async function generateMetadata({
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { locale: rawLocale, slug } = await params
   const locale = resolveLocale(rawLocale)
+  const [t, tArticleMeta] = await Promise.all([
+    getTranslations({ locale, namespace: "Article" }),
+    getTranslations({ locale, namespace: "ArticleMeta" }),
+  ])
 
   const slugPath = decodeSlugPath(slug ?? []) || "preface"
   const target = await resolveArticleTarget(slugPath, locale)
@@ -212,7 +219,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     notFound()
   }
 
-  const { content: renderedContent, frontmatter: data } = artifact
+  const {
+    content: renderedContent,
+    frontmatter: data,
+    translationStatus,
+  } = artifact
   const resolvedTitle = await resolveDisplayedArticleTitle(
     data["chapter-title"],
     target.filePath,
@@ -264,13 +275,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const manifestEntry = await getCachedLocalizedArticleEntry(effectiveSlug, locale)
   const chapterTitle = manifestEntry?.chapterTitleByLocale?.[locale]
-  const translationFreshnessByLocale =
-    manifestEntry?.translationFreshnessByLocale as
-      | Record<string, string>
-      | undefined
   const isTranslationPending =
-    !!manifestEntry?.titleByLocale && !manifestEntry.titleByLocale[locale]
-  const isTranslationStale = translationFreshnessByLocale?.[locale] === "stale"
+    manifestEntry !== null && !manifestEntry.availableLocales.includes(locale)
+  const isTranslationStale =
+    locale === "en" &&
+    manifestEntry?.translationFreshnessByLocale.en === "stale" &&
+    translationStatus !== undefined
 
   const bannerSrc = (data.banner as { src?: string } | undefined)?.src
   const bannerUrl = resolveBannerUrl(bannerSrc, target.filePath, siteUrl)
@@ -383,6 +393,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <RunningHead
           chapterTitle={runningHeadChapterTitle}
           chapterSlug={runningHeadChapterSlug}
+          locale={locale}
           chapterIndex={runningHeadChapterIndex}
           chapterIsAppendix={runningHeadIsAppendix}
           isPreface={runningHeadIsPreface}
@@ -420,28 +431,51 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         />
       )}
 
-      {isTranslationPending || isTranslationStale ? (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {isTranslationPending && (
-            <span
-              data-testid="translation-pending-badge"
-              className="inline-flex border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 font-mono text-[0.625rem] tracking-wider text-amber-700 uppercase dark:text-amber-300">
-              Translation pending
-            </span>
-          )}
-          {isTranslationStale && (
-            <span
-              data-testid="translation-stale-badge"
-              className="inline-flex border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 font-mono text-[0.625rem] tracking-wider text-amber-700 uppercase dark:text-amber-300">
-              Translation may be out of date
-            </span>
-          )}
+      {isTranslationPending ? (
+        <div className="mt-4">
+          <span
+            data-testid="translation-pending-badge"
+            className="inline-flex border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 font-mono text-[0.625rem] tracking-wider text-amber-700 uppercase dark:text-amber-300">
+            {t("translationPending")}
+          </span>
         </div>
+      ) : null}
+
+      {isTranslationStale ? (
+        <aside
+          data-testid="translation-stale-badge"
+          aria-labelledby="translation-outdated-label"
+          className="mt-4 border border-amber-500/40 bg-amber-500/10 p-4 text-amber-950 dark:text-amber-100">
+          <p
+            id="translation-outdated-label"
+            className="font-mono text-[0.625rem] tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">
+            {t("translationOutdatedLabel")}
+          </p>
+          <p className="mt-2 text-sm/relaxed">
+            {t("translationOutdatedPrefix")} {" "}
+            <a
+              href={translationStatus.latestOriginalCommitUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t("translationLatestCommitAria", {
+                sha: translationStatus.latestOriginalRevision.slice(0, 7),
+              })}
+              className="font-mono underline decoration-amber-700/50 underline-offset-4 transition-colors hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:hover:text-amber-300 dark:focus-visible:outline-amber-300">
+              {translationStatus.latestOriginalRevision.slice(0, 7)}
+            </a>
+            {". "}
+            {t("translationOutdatedLag", {
+              commitLag: translationStatus.commitLag,
+              dayLag: translationStatus.dayLag,
+            })}
+          </p>
+        </aside>
       ) : null}
 
       <article className="article-prose min-w-0" data-article-content>
         <MarkdownRenderer
           content={embeddedArticleContent}
+          locale={locale}
           rawPath={target.filePath}
           shikiPlugin={shikiPlugin}
         />
@@ -450,7 +484,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <ChapterEndMark isAdvanced={isAdvanced} />
 
       {(navigation.prev || navigation.next) && (
-        <ArticleNavigation prev={navigation.prev} next={navigation.next} />
+        <ArticleNavigation
+          locale={locale}
+          next={navigation.next}
+          nextLabel={tArticleMeta("next")}
+          prev={navigation.prev}
+          prevLabel={tArticleMeta("prev")}
+        />
       )}
 
       <Suspense>

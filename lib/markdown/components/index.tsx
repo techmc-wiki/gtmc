@@ -55,9 +55,10 @@ const ansiColorStyles: Record<AnsiColorName, Record<string, string>> = {
 
 export function getMarkdownComponents(
   rawPath: string,
-  content = ""
+  content = "",
+  locale?: string
 ): Record<string, MarkdownComponent> {
-  const aComponent = createAComponent(rawPath)
+  const aComponent = createAComponent(rawPath, locale)
   const imageComponent = createImageComponent(rawPath)
   const hasLitematicaViewer = LITEMATICA_VIEWER_TAG_RE.test(content)
   const ansiColorComponents = Object.fromEntries(

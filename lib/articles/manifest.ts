@@ -2,6 +2,16 @@ import { routing } from "@/i18n/routing";
 import { type ArticleTreeNode } from "@/lib/github";
 
 export type ArticleLocale = "en" | "zh";
+export type TranslationLocale = Exclude<ArticleLocale, "zh">;
+export type TranslationFreshness = "fresh" | "stale" | "unknown";
+
+export type TranslationStatusDetail = {
+  readonly translatedFromRevision: string;
+  readonly latestOriginalRevision: string;
+  readonly commitLag: number;
+  readonly dayLag: number;
+  readonly latestOriginalCommitUrl: string;
+};
 
 export const MANIFEST_FILE_NAME = "manifest.json";
 
@@ -49,10 +59,13 @@ export interface ArticleEntry {
   created?: string;
   lastmodByLocale: Partial<Record<ArticleLocale, string>>;
   translatedFromRevisionByLocale: Partial<
-    Record<Exclude<ArticleLocale, "zh">, string>
+    Record<TranslationLocale, string>
   >;
   translationFreshnessByLocale: Partial<
-    Record<Exclude<ArticleLocale, "zh">, "fresh" | "stale" | "unknown">
+    Record<TranslationLocale, TranslationFreshness>
+  >;
+  translationStatusByLocale?: Partial<
+    Record<TranslationLocale, TranslationStatusDetail>
   >;
   bannerByLocale?: Partial<
     Record<ArticleLocale, { src: string; alt?: string }>
@@ -190,29 +203,60 @@ function normalizeStringByLocale(
 
 function normalizeFreshnessByLocale(
   value: unknown,
-): Partial<
-  Record<Exclude<ArticleLocale, "zh">, "fresh" | "stale" | "unknown">
-> {
+): Partial<Record<TranslationLocale, TranslationFreshness>> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return {};
   }
 
   const valid = new Set(["fresh", "stale", "unknown"]);
-  const record: Partial<
-    Record<Exclude<ArticleLocale, "zh">, "fresh" | "stale" | "unknown">
-  > = {};
+  const record: Partial<Record<TranslationLocale, TranslationFreshness>> = {};
 
   for (const locale of ARTICLE_LOCALES) {
     if (locale === "zh") continue;
     const val = (value as Partial<Record<ArticleLocale, unknown>>)[locale];
     if (typeof val === "string" && valid.has(val)) {
-      record[locale as Exclude<ArticleLocale, "zh">] = val as
-        | "fresh"
-        | "stale"
-        | "unknown";
+      record[locale as TranslationLocale] = val as TranslationFreshness;
     }
   }
 
+  return record;
+}
+
+function normalizeTranslationStatusByLocale(
+  value: unknown,
+): Partial<Record<TranslationLocale, TranslationStatusDetail>> | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const record: Partial<Record<TranslationLocale, TranslationStatusDetail>> = {};
+  const candidate = (value as Partial<Record<ArticleLocale, unknown>>).en;
+  if (typeof candidate !== "object" || candidate === null || Array.isArray(candidate)) {
+    return undefined;
+  }
+
+  const detail = candidate as Record<string, unknown>;
+  if (
+    typeof detail.translatedFromRevision !== "string" ||
+    typeof detail.latestOriginalRevision !== "string" ||
+    typeof detail.commitLag !== "number" ||
+    !Number.isInteger(detail.commitLag) ||
+    detail.commitLag < 0 ||
+    typeof detail.dayLag !== "number" ||
+    !Number.isInteger(detail.dayLag) ||
+    detail.dayLag < 0 ||
+    typeof detail.latestOriginalCommitUrl !== "string"
+  ) {
+    return undefined;
+  }
+
+  record.en = {
+    translatedFromRevision: detail.translatedFromRevision,
+    latestOriginalRevision: detail.latestOriginalRevision,
+    commitLag: detail.commitLag,
+    dayLag: detail.dayLag,
+    latestOriginalCommitUrl: detail.latestOriginalCommitUrl,
+  };
   return record;
 }
 
@@ -264,6 +308,9 @@ function normalizeArticleEntry(
   }
 
   const introByLocale = normalizeStringByLocale(entry.introTitleByLocale);
+  const translationStatusByLocale = normalizeTranslationStatusByLocale(
+    entry.translationStatusByLocale,
+  );
 
   return {
     filePath: entry.filePath as string,
@@ -295,10 +342,11 @@ function normalizeArticleEntry(
     lastmodByLocale: normalizeStringByLocale(entry.lastmodByLocale),
     translatedFromRevisionByLocale: normalizeStringByLocale(
       entry.translatedFromRevisionByLocale,
-    ) as Partial<Record<Exclude<ArticleLocale, "zh">, string>>,
+    ) as Partial<Record<TranslationLocale, string>>,
     translationFreshnessByLocale: normalizeFreshnessByLocale(
       entry.translationFreshnessByLocale,
     ),
+    ...(translationStatusByLocale ? { translationStatusByLocale } : {}),
     bannerByLocale: normalizeBannerByLocale(entry.bannerByLocale),
     isAdvanced: entry.isAdvanced === true,
   };

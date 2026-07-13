@@ -5,9 +5,12 @@ import { MainSiteShell } from "@/components/layout/main-site-shell"
 
 export default async function DashboardLayout({
   children,
+  params,
 }: {
   children: React.ReactNode
+  params: Promise<{ locale: string }>
 }) {
+  const { locale } = await params
   const session = await auth()
   let isAdmin = false
   if (session?.user?.id) {
@@ -20,5 +23,9 @@ export default async function DashboardLayout({
     }
   }
 
-  return <MainSiteShell isAdminServerSide={isAdmin}>{children}</MainSiteShell>
+  return (
+    <MainSiteShell isAdminServerSide={isAdmin} locale={locale}>
+      {children}
+    </MainSiteShell>
+  )
 }

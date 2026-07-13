@@ -28,7 +28,12 @@
     "teamViewAll": "View all contributors →"
   },
   "Article": {
-    "notFound": "Article Not Found"
+    "notFound": "Article Not Found",
+    "translationLatestCommitAria": "View original commit {sha} on GitHub",
+    "translationOutdatedLag": "Lag: {commitLag, plural, one {# source commit} other {# source commits}} and {dayLag, plural, one {# day} other {# days}}.",
+    "translationOutdatedLabel": "Outdated translation",
+    "translationOutdatedPrefix": "The latest original revision is",
+    "translationPending": "Translation pending"
   },
   "ArticleMeta": {
     "articleLicenseAria": "Article license",

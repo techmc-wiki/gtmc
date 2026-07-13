@@ -1,10 +1,11 @@
 import * as React from "react"
-import { useTranslations } from "next-intl"
 import { PageTransition } from "./page-transition"
 
 interface SiteShellProps {
   leftSlot: React.ReactNode
   rightSlot: React.ReactNode
+  mainNavigationLabel: string
+  skipToMainContentLabel: string
   children: React.ReactNode
   fullBleed?: boolean
 }
@@ -12,20 +13,20 @@ interface SiteShellProps {
 export function SiteShell({
   leftSlot,
   rightSlot,
+  mainNavigationLabel,
+  skipToMainContentLabel,
   children,
   fullBleed = false,
 }: SiteShellProps) {
-  const t = useTranslations("CommonA11y")
-
   return (
     <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative min-h-screen w-full font-sans">
       <a
         href="#main-content"
         className="focus:bg-surface-overlay focus:border-tech-main focus:text-tech-main-dark sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:border focus:px-4 focus:py-2 focus:font-mono focus:text-xs focus:outline-none">
-        {t("skipToMainContent")}
+        {skipToMainContentLabel}
       </a>
       <nav
-        aria-label={t("mainNavigation")}
+        aria-label={mainNavigationLabel}
         className="border-tech-main/30 bg-surface-overlay/85 fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md">
         <div className="bg-tech-signal absolute top-0 left-0 h-[3px] w-full" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

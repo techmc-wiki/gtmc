@@ -9,9 +9,9 @@ import {
   ARTICLES_REPO_NAME,
 } from "@/lib/github/articles-repo"
 import { getArticleContentBySlug } from "@/lib/articles/content"
+import { flattenArticleNodes } from "@/lib/articles/navigation-data"
 
 import type { ArticleLocale } from "@/lib/articles/manifest"
-import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 
 interface IndexedArticle {
   id: string
@@ -27,23 +27,6 @@ function stripMarkdown(text: string): string {
     .toString()
     .replaceAll(/\s+/g, " ")
     .trim()
-}
-
-function flattenTree(
-  nodes: ChapterNavNode[]
-): { title: string; slug: string }[] {
-  const result: { title: string; slug: string }[] = []
-
-  for (const node of nodes) {
-    if (!node.isFolder) {
-      result.push({ title: node.title, slug: node.slug })
-    }
-    if (node.children.length > 0) {
-      result.push(...flattenTree(node.children))
-    }
-  }
-
-  return result
 }
 
 const cachedIndexes = new Map<ArticleLocale, MiniSearch<IndexedArticle>>()
@@ -100,7 +83,7 @@ async function buildIndex(
 
   const uniqueGithubNodes = new Map<string, { title: string; slug: string }>()
 
-  for (const node of flattenTree(tree)) {
+  for (const node of flattenArticleNodes(tree)) {
     if (!uniqueGithubNodes.has(node.slug)) {
       uniqueGithubNodes.set(node.slug, node)
     }

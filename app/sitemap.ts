@@ -4,6 +4,7 @@ import { cacheLife } from "next/cache"
 import { listAllIssues } from "@/lib/github"
 import { getSiteUrl } from "@/lib/site-url"
 import { shouldIgnoreFile } from "@/lib/articles/ignore"
+import { flattenArticleNodes } from "@/lib/articles/navigation-data"
 import { encodeSlug } from "@/lib/articles/slug-resolver"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import { getUniqueAuthors } from "@/lib/articles/person-resolver"
@@ -27,21 +28,6 @@ function localizedAlternates(base: string, path: string) {
 
 function lastModifiedFrom(value: string | undefined): Date {
   return value ? new Date(value) : STATIC_LAST_MODIFIED
-}
-
-function flattenTree(
-  nodes: Awaited<ReturnType<typeof getPublicChapterNav>>
-): string[] {
-  const slugs: string[] = []
-  for (const node of nodes) {
-    if (!node.isFolder) {
-      slugs.push(node.slug)
-    }
-    if (node.children.length > 0) {
-      slugs.push(...flattenTree(node.children))
-    }
-  }
-  return slugs
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -166,7 +152,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const localizedArticleUrls = await Promise.all(
       locales.map(async (locale) => {
         const tree = await getPublicChapterNav(locale)
-        const slugs = flattenTree(tree)
+        const slugs = flattenArticleNodes(tree).map((node) => node.slug)
         return slugs
           .filter((slug) => {
             const fileName = slug.split("/").pop() || slug

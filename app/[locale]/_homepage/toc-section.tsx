@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
+import { flattenArticleNodes } from "@/lib/articles/navigation-data"
 import { articleUrl } from "@/lib/articles/url"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 
@@ -9,8 +10,8 @@ interface TocSectionProps {
 }
 
 function chapterSections(chapter: ChapterNavNode): ChapterNavNode[] {
-  return chapter.children.filter(
-    (child) => !child.isFolder && !child.isReadmeIntro
+  return flattenArticleNodes(chapter.children).filter(
+    (section) => !section.isReadmeIntro
   )
 }
 
@@ -24,10 +25,9 @@ function formatChapterNumber(chapter: ChapterNavNode): string {
 
 function formatSectionNumber(
   chapter: ChapterNavNode,
-  section: ChapterNavNode
+  sectionIndex: number
 ): string | null {
   const chapterIndex = chapter.index ?? -1
-  const sectionIndex = section.index ?? -1
   if (chapterIndex < 1 || sectionIndex < 1) {
     return null
   }
@@ -66,13 +66,13 @@ function ChapterBlock({
 
       {sections.length > 0 && (
         <ol className="border-tech-main/20 mt-3 ml-2 flex flex-col border-l pl-6 sm:ml-3 sm:pl-9">
-          {sections.map((section) => (
+          {sections.map((section, index) => (
             <li key={section.id}>
               <Link
                 href={articleUrl(section.slug)}
                 className="group/section text-tech-main hover:text-tech-main-dark flex items-baseline gap-3 py-1.5 transition-colors">
                 <span className="text-tech-main/50 shrink-0 font-mono text-xs">
-                  {formatSectionNumber(chapter, section) ?? "·"}
+                  {formatSectionNumber(chapter, index + 1) ?? "·"}
                 </span>
                 <span className="text-sm sm:text-base">
                   {section.title}

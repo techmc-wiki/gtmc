@@ -1,9 +1,6 @@
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
-import {
-  flattenArticleNodes,
-  partitionAppendixNodes,
-} from "@/lib/articles/navigation-data"
+import { collectAppendixGroups } from "@/lib/articles/navigation-data"
 import { articleUrl } from "@/lib/articles/url"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 
@@ -13,9 +10,18 @@ interface TocSectionProps {
 }
 
 function chapterSections(chapter: ChapterNavNode): ChapterNavNode[] {
-  return flattenArticleNodes(chapter.children).filter(
-    (section) => !section.isReadmeIntro
-  )
+  const sections: ChapterNavNode[] = []
+
+  for (const child of chapter.children) {
+    if (child.isAppendix) continue
+    if (child.isFolder) {
+      sections.push(...chapterSections(child))
+    } else if (!child.isReadmeIntro) {
+      sections.push(child)
+    }
+  }
+
+  return sections
 }
 
 function formatChapterNumber(chapter: ChapterNavNode): string {
@@ -111,17 +117,16 @@ function ChapterBlock({
 export async function TocSection({ tree, locale }: TocSectionProps) {
   const t = await getTranslations({ locale, namespace: "Homepage" })
 
-  const { regularNodes, appendixGroups } = partitionAppendixNodes(tree)
-  const preface = regularNodes.find((node) => node.isPreface && !node.isFolder)
-  const chapters = regularNodes.filter((node) => node.isFolder)
-  const appendices = appendixGroups.map<ChapterNavNode>(
+  const preface = tree.find((node) => node.isPreface && !node.isFolder)
+  const chapters = tree.filter((node) => node.isFolder && !node.isAppendix)
+  const appendices = collectAppendixGroups(tree).map<ChapterNavNode>(
     ({ owner, nodes }, index) => ({
-      id: owner.slug,
+      id: owner.id,
       title: owner.title,
       slug: owner.slug,
       isFolder: true,
       parentId: null,
-      children: nodes,
+      children: owner.isFolder ? nodes : [],
       index: index + 1,
       isAppendix: true,
     })

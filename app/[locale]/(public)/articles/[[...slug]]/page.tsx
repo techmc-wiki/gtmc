@@ -36,6 +36,7 @@ import { ArticleMetadataFull } from "@/components/articles/article-metadata-full
 import { ArticleMetadataAnonymous } from "@/components/articles/article-metadata-anonymous"
 import { ArticleNavigation } from "@/components/articles/article-navigation"
 import {
+  findNavigationOwner,
   flattenArticleTree,
   getArticleNavigation,
   getFirstArticleInChapter,
@@ -129,10 +130,13 @@ export async function generateMetadata({
       target.isReadmeIntro,
       locale
     )
+    const tree = await getPublicChapterNav(locale)
+    const structuralOwner = findNavigationOwner(tree, effectiveSlug)
+    const isStructuralAppendix = structuralOwner?.isAppendix ?? false
     const articleTitle = formatArticleTitle(
       resolvedTitle,
       target.index,
-      target.isAppendix,
+      isStructuralAppendix,
       target.isPreface,
       target.isReadmeIntro
     )
@@ -231,10 +235,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     target.isReadmeIntro,
     locale
   )
+  const tree = await getPublicChapterNav(locale)
+  const currentSlug = target.canonicalSlug || slugPath
+  const runningHeadOwner = findNavigationOwner(tree, currentSlug)
+  const isStructuralAppendix = runningHeadOwner?.isAppendix ?? false
   const articleTitle = formatArticleTitle(
     resolvedTitle,
     target.index,
-    target.isAppendix,
+    isStructuralAppendix,
     target.isPreface,
     target.isReadmeIntro
   )
@@ -356,27 +364,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     ],
   }
 
-  // Get navigation data
-  const tree = await getPublicChapterNav(locale)
+  // Get navigation data (tree already loaded for structural appendix context)
   const flattenedArticles = flattenArticleTree(tree)
-  const currentSlug = target.canonicalSlug || slugPath
   const navigation = await getArticleNavigation(currentSlug, flattenedArticles, locale)
 
-  const parentSlug = currentSlug.includes("/")
-    ? currentSlug.split("/")[0]
-    : null
-  const parentChapter = parentSlug
-    ? tree.find(
-        (node) =>
-          node.slug === parentSlug ||
-          node.slug.split("/")[0] === parentSlug
-      )
-    : null
-  const runningHeadChapterSlug = parentChapter?.slug ?? null
-  const runningHeadChapterTitle = parentChapter?.title ?? chapterTitle ?? null
-  const runningHeadChapterIndex = parentChapter?.index
-  const runningHeadIsAppendix = parentChapter?.isAppendix ?? false
-  const runningHeadIsPreface = !!target.isPreface && !parentChapter
+  const runningHeadChapterSlug = runningHeadOwner?.slug ?? null
+  const runningHeadChapterTitle =
+    runningHeadOwner?.title ?? chapterTitle ?? null
+  const runningHeadChapterIndex = runningHeadOwner?.index
+  const runningHeadIsAppendix = isStructuralAppendix
+  const runningHeadIsPreface = !!target.isPreface && !runningHeadOwner
 
   return (
     <div
@@ -396,7 +393,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           locale={locale}
           chapterIndex={runningHeadChapterIndex}
           chapterIsAppendix={runningHeadIsAppendix}
-          articleIsAppendix={target.isAppendix}
           isPreface={runningHeadIsPreface}
         />
       )}
@@ -524,7 +520,6 @@ interface ResolvedArticleTarget {
   filePath: string
   canonicalSlug: string
   index: number
-  isAppendix: boolean
   isPreface: boolean
   isReadmeIntro: boolean
   redirectToSlug?: string
@@ -569,7 +564,6 @@ async function resolveArticleTarget(
     filePath,
     canonicalSlug,
     index: slugEntry?.index ?? -1,
-    isAppendix: slugEntry?.isAppendix ?? false,
     isPreface: slugEntry?.isPreface ?? false,
     isReadmeIntro: Boolean(slugEntry?.isFolder && slugEntry?.hasIntro),
     redirectToSlug,

@@ -269,7 +269,7 @@ describe("preparePublicChapterNav", () => {
     expect(source[1].children[0].children).toHaveLength(1)
   })
 
-  it("preserves appendix ownership for promoted articles and folder intros", async () => {
+  it("retains appendix folder nodes and inherits appendix context for descendants", async () => {
     const source = [
       node({
         slug: "appendix",
@@ -305,19 +305,19 @@ describe("preparePublicChapterNav", () => {
     const prepared = preparePublicChapterNav(source)
     const linearized = await linearizeArticles(prepared)
 
-    expect(prepared.map((item) => item.slug)).toEqual([
+    expect(prepared.map((item) => item.slug)).toEqual(["appendix"])
+    expect(prepared[0]).toMatchObject({
+      isFolder: true,
+      isAppendix: true,
+    })
+    expect(prepared[0].children.map((child) => child.slug)).toEqual([
       "appendix/stack",
       "appendix/glossary",
     ])
-    expect(prepared[0]).toMatchObject({
-      isAppendix: true,
-      appendixOwner: { slug: "appendix", title: "Appendix" },
-    })
-    expect(prepared[1].children[0]).toMatchObject({
+    expect(prepared[0].children[1].children[0]).toMatchObject({
       slug: "appendix/glossary",
       isReadmeIntro: true,
-      isAppendix: true,
-      appendixOwner: { slug: "appendix", title: "Appendix" },
+      isAppendix: false,
     })
     expect(linearized).toMatchObject([
       {
@@ -344,7 +344,7 @@ describe("preparePublicChapterNav", () => {
     ])
   })
 
-  it("keeps nested appendix leaves inside their ordinary top-level chapter", async () => {
+  it("creates appendix sections for nested folders and standalone articles", async () => {
     const prepared = preparePublicChapterNav([
       node({
         slug: "ordinary",
@@ -352,31 +352,70 @@ describe("preparePublicChapterNav", () => {
         isFolder: true,
         children: [
           node({
-            slug: "ordinary/appendix",
-            title: "Appendix",
+            slug: "ordinary/main",
+            title: "Main",
+            parentId: "ordinary",
+            index: 1,
+          }),
+          node({
+            slug: "ordinary/nested-appendix",
+            title: "Nested appendix",
             isFolder: true,
             parentId: "ordinary",
             isAppendix: true,
             children: [
               node({
-                slug: "ordinary/appendix/note",
+                slug: "ordinary/nested-appendix/note",
                 title: "Note",
-                parentId: "ordinary/appendix",
-                isAppendix: true,
+                parentId: "ordinary/nested-appendix",
               }),
             ],
+          }),
+          node({
+            slug: "ordinary/standalone-appendix",
+            title: "Standalone appendix",
+            parentId: "ordinary",
+            isAppendix: true,
           }),
         ],
       }),
     ])
 
-    const [article] = await linearizeArticles(prepared)
+    const linearized = await linearizeArticles(prepared)
 
-    expect(article).toMatchObject({
-      slug: "ordinary/appendix/note",
-      chapterSlug: "ordinary",
-      chapterTitle: "Ordinary",
-      isAppendix: false,
-    })
+    expect(prepared[0].children.map((child) => child.slug)).toEqual([
+      "ordinary/main",
+      "ordinary/nested-appendix",
+      "ordinary/standalone-appendix",
+    ])
+    expect(linearized).toMatchObject([
+      {
+        slug: "ordinary/main",
+        chapterSlug: "ordinary",
+        isAppendix: false,
+      },
+      {
+        slug: "ordinary/nested-appendix/note",
+        chapterSlug: "ordinary/nested-appendix",
+        isAppendix: true,
+      },
+      {
+        slug: "ordinary/standalone-appendix",
+        chapterSlug: "ordinary/standalone-appendix",
+        isAppendix: true,
+      },
+    ])
+
+    const plan = buildBookPlan(linearized)
+    expect(plan.chapters.map((chapter) => chapter.slug)).toEqual([
+      "ordinary",
+      "ordinary/nested-appendix",
+      "ordinary/standalone-appendix",
+    ])
+    expect(plan.chapters.map((chapter) => chapter.number)).toEqual([
+      "1",
+      "A",
+      "B",
+    ])
   })
 })

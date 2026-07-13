@@ -9,6 +9,39 @@ import { useReaderNavigation } from "../reader-navigation/context"
 
 export type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 
+type ChapterNavRow =
+  | { kind: "appendix-separator"; id: string; title: string }
+  | { kind: "node"; item: ChapterNavNode; isAppendix: boolean }
+
+function buildChapterNavRows(
+  items: ChapterNavNode[],
+  parentIsAppendix: boolean
+): ChapterNavRow[] {
+  const { regularNodes, appendixGroups } = partitionAppendixNodes(items)
+  const rows = regularNodes.map<ChapterNavRow>((item) => ({
+    kind: "node",
+    item,
+    isAppendix: parentIsAppendix,
+  }))
+
+  for (const { owner, nodes } of appendixGroups) {
+    rows.push({
+      kind: "appendix-separator",
+      id: `${owner.id}-appendix-separator`,
+      title: owner.title,
+    })
+    for (const item of nodes) {
+      rows.push({
+        kind: "node",
+        item,
+        isAppendix: true,
+      })
+    }
+  }
+
+  return rows
+}
+
 function FolderButton({
   itemId,
   title,
@@ -46,11 +79,13 @@ function ArticleLink({
   item,
   fileRoute,
   isActive,
+  isAppendix,
   onNavigate,
 }: {
   item: ChapterNavNode
   fileRoute: string
   isActive: boolean
+  isAppendix: boolean
   onNavigate?: () => void
 }) {
   return (
@@ -75,7 +110,7 @@ function ArticleLink({
           {item.isReadmeIntro
             ? `00 ${item.title}`
             : !item.isFolder && item.index !== undefined
-              ? `${formatIndexPrefix(item.index, item.isAppendix ?? false, item.isPreface ?? false)}${item.title}`
+              ? `${formatIndexPrefix(item.index, isAppendix, item.isPreface ?? false)}${item.title}`
               : item.title}
           {item.isAdvanced && (
             <span
@@ -98,6 +133,7 @@ function FolderGrid({
   isFolder,
   folderExpanded,
   items,
+  parentIsAppendix,
   folderGridRefs,
   onNavigate,
 }: {
@@ -105,6 +141,7 @@ function FolderGrid({
   isFolder: boolean
   folderExpanded: boolean
   items: ChapterNavNode[]
+  parentIsAppendix: boolean
   folderGridRefs: React.RefObject<Map<string, HTMLDivElement>>
   onNavigate?: () => void
 }) {
@@ -125,8 +162,8 @@ function FolderGrid({
       <div className="overflow-hidden">
         <ChapterNavTree
           items={items}
+          parentIsAppendix={parentIsAppendix}
           onNavigate={onNavigate}
-          partitionAppendices={false}
         />
       </div>
     </div>
@@ -135,12 +172,12 @@ function FolderGrid({
 
 export function ChapterNavTree({
   items,
+  parentIsAppendix = false,
   onNavigate,
-  partitionAppendices = true,
 }: {
   items: ChapterNavNode[]
+  parentIsAppendix?: boolean
   onNavigate?: () => void
-  partitionAppendices?: boolean
 }) {
   const {
     effectivePath,
@@ -152,19 +189,28 @@ export function ChapterNavTree({
   } = useReaderNavigation()
 
   const decodedPathname = decodeURIComponent(effectivePath)
-  const { regularNodes, appendixGroups } = partitionAppendices
-    ? partitionAppendixNodes(items)
-    : { regularNodes: items, appendixGroups: [] }
-  const appendixNodes = appendixGroups.flatMap((group) => group.nodes)
-  const orderedItems = [...regularNodes, ...appendixNodes]
-  const firstAppendixIndex =
-    regularNodes.length > 0 && appendixNodes.length > 0
-      ? regularNodes.length
-      : -1
+  const rows = buildChapterNavRows(items, parentIsAppendix)
 
   return (
     <ul className="my-0.5 pl-5">
-      {orderedItems.map((item, index) => {
+      {rows.map((row) => {
+        if (row.kind === "appendix-separator") {
+          return (
+            <li
+              key={row.id}
+              className="
+                mt-2.5 mb-1 flex list-none items-center gap-2 pl-1 font-mono
+                text-[0.5625rem] tracking-[0.12em] text-tech-main/50 uppercase
+                md:text-[0.625rem]
+              ">
+              <span className="h-px flex-1 bg-tech-main/25" />
+              <span>{row.title}</span>
+              <span className="h-px w-4 bg-tech-main/25" />
+            </li>
+          )
+        }
+
+        const { item, isAppendix } = row
         const fileRoute = `/articles/${encodeSlug(item.slug)}`
         const decodedRoute = decodeURIComponent(fileRoute)
         const isActive =
@@ -172,32 +218,16 @@ export function ChapterNavTree({
           (decodedPathname === decodedRoute ||
             decodedPathname === `${decodedRoute}/`)
         const folderExpanded = item.isFolder ? isFolderExpanded(item.id) : false
-        const showAppendixSeparator = index === firstAppendixIndex
 
         return (
-          <React.Fragment key={item.id}>
-            {showAppendixSeparator && (
-              <li
-                key={`appendix-separator-before-${item.id}`}
-                className="
-                  mt-2.5 mb-1 flex list-none items-center gap-2 pl-1 font-mono
-                  text-[0.5625rem] tracking-[0.12em] text-tech-main/50 uppercase
-                  md:text-[0.625rem]
-                ">
-                <span className="h-px flex-1 bg-tech-main/25" />
-                <span>Appendix</span>
-                <span className="h-px w-4 bg-tech-main/25" />
-              </li>
-            )}
-
-            <li
-              key={item.id}
-              data-chapter-nav-row="1"
-              ref={!item.isFolder && isActive ? activeItemRef : undefined}
-              className={`
-                 relative my-1 list-none font-mono text-[0.8125rem] transition-all
-                 duration-300
-                 before:absolute before:top-0 before:left-0 before:h-full
+          <li
+            key={item.id}
+            data-chapter-nav-row="1"
+            ref={!item.isFolder && isActive ? activeItemRef : undefined}
+            className={`
+                  relative my-1 list-none font-mono text-[0.8125rem] transition-all
+                  duration-300
+                  before:absolute before:top-0 before:left-0 before:h-full
                  before:w-0.5 before:transition-all before:duration-200
                  before:content-['']
                  md:text-sm
@@ -220,35 +250,36 @@ export function ChapterNavTree({
                         ? `hover:bg-tech-main/5`
                         : ``
                 }
-              `}>
-              {item.isFolder ? (
-                <FolderButton
-                  itemId={item.id}
-                  title={item.title}
-                  folderExpanded={folderExpanded}
-                  toggleFolder={toggleFolder}
-                />
-              ) : (
-                <ArticleLink
-                  item={item}
-                  fileRoute={fileRoute}
-                  isActive={isActive}
-                  onNavigate={onNavigate}
-                />
-              )}
+             `}>
+            {item.isFolder ? (
+              <FolderButton
+                itemId={item.id}
+                title={item.title}
+                folderExpanded={folderExpanded}
+                toggleFolder={toggleFolder}
+              />
+            ) : (
+              <ArticleLink
+                item={item}
+                fileRoute={fileRoute}
+                isActive={isActive}
+                isAppendix={isAppendix}
+                onNavigate={onNavigate}
+              />
+            )}
 
-              {item.children && item.children.length > 0 && (
-                <FolderGrid
-                  itemId={item.id}
-                  isFolder={item.isFolder}
-                  folderExpanded={folderExpanded}
-                  items={item.children}
-                  folderGridRefs={folderGridRefs}
-                  onNavigate={onNavigate}
-                />
-              )}
-            </li>
-          </React.Fragment>
+            {item.children && item.children.length > 0 && (
+              <FolderGrid
+                itemId={item.id}
+                isFolder={item.isFolder}
+                folderExpanded={folderExpanded}
+                items={item.children}
+                parentIsAppendix={isAppendix}
+                folderGridRefs={folderGridRefs}
+                onNavigate={onNavigate}
+              />
+            )}
+          </li>
         )
       })}
     </ul>

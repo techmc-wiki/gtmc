@@ -20,8 +20,8 @@ interface NavigationResult {
   next: ArticleInfo | null
 }
 
-interface AppendixGroup {
-  owner: NonNullable<ChapterNavNode["appendixOwner"]>
+export interface AppendixGroup {
+  owner: ChapterNavNode
   nodes: ChapterNavNode[]
 }
 
@@ -30,24 +30,60 @@ export function partitionAppendixNodes(nodes: ChapterNavNode[]): {
   appendixGroups: AppendixGroup[]
 } {
   const regularNodes: ChapterNavNode[] = []
-  const groupsBySlug = new Map<string, AppendixGroup>()
+  const appendixGroups: AppendixGroup[] = []
 
   for (const node of nodes) {
-    const owner = node.appendixOwner
-    if (!owner) {
-      regularNodes.push(node)
-      continue
-    }
-
-    const group = groupsBySlug.get(owner.slug)
-    if (group) {
-      group.nodes.push(node)
+    if (node.isAppendix) {
+      appendixGroups.push({
+        owner: node,
+        nodes: node.isFolder ? node.children : [node],
+      })
     } else {
-      groupsBySlug.set(owner.slug, { owner, nodes: [node] })
+      regularNodes.push(node)
     }
   }
 
-  return { regularNodes, appendixGroups: [...groupsBySlug.values()] }
+  return { regularNodes, appendixGroups }
+}
+
+export function collectAppendixGroups(nodes: ChapterNavNode[]): AppendixGroup[] {
+  const groups: AppendixGroup[] = []
+
+  for (const node of nodes) {
+    if (node.isAppendix) {
+      groups.push({ owner: node, nodes: node.isFolder ? node.children : [node] })
+    } else {
+      groups.push(...collectAppendixGroups(node.children))
+    }
+  }
+
+  return groups
+}
+
+export function findNavigationOwner(
+  tree: ChapterNavNode[],
+  currentSlug: string
+): ChapterNavNode | null {
+  function visit(
+    node: ChapterNavNode,
+    root: ChapterNavNode | null,
+    appendix: ChapterNavNode | null
+  ): ChapterNavNode | null {
+    const nextAppendix = node.isAppendix ? node : appendix
+    if (node.slug === currentSlug) return nextAppendix ?? root ?? node
+
+    for (const child of node.children) {
+      const owner = visit(child, root, nextAppendix)
+      if (owner) return owner
+    }
+    return null
+  }
+
+  for (const root of tree) {
+    const owner = visit(root, root.isFolder ? root : null, null)
+    if (owner) return owner
+  }
+  return null
 }
 
 function visitArticleNodes(

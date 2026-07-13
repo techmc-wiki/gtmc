@@ -11,8 +11,4 @@ export interface ChapterNavNode {
   isReadmeIntro?: boolean
   introTitle?: string
   isAdvanced?: boolean
-  appendixOwner?: {
-    slug: string
-    title: string
-  }
 }

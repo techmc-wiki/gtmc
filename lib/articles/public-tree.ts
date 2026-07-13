@@ -6,37 +6,6 @@ import type { ArticleTreeNode } from "@/lib/github/sync";
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types";
 import { compareIndex } from "@/lib/articles/navigation-data";
 
-function normalizeNodeValue(value: string) {
-  return value.trim().toLowerCase().replace(/\.md$/, "");
-}
-
-function isReadmeArticle(node: ChapterNavNode): boolean {
-  if (node.isFolder) {
-    return false;
-  }
-
-  const slugTail = node.slug.split("/").pop() ?? "";
-
-  return (
-    normalizeNodeValue(node.title) === "readme" ||
-    normalizeNodeValue(slugTail) === "readme"
-  );
-}
-
-function assignAppendixOwner(
-  node: ChapterNavNode,
-  appendixOwner: NonNullable<ChapterNavNode["appendixOwner"]>,
-): ChapterNavNode {
-  return {
-    ...node,
-    isAppendix: true,
-    appendixOwner,
-    children: node.children.map((child) =>
-      assignAppendixOwner(child, appendixOwner),
-    ),
-  };
-}
-
 /**
  * 获取公开章节导航树。
  * Chapter navigation is built from the public article source only.
@@ -89,13 +58,13 @@ function sortTree(nodes: ChapterNavNode[]) {
       return a.isReadmeIntro ? -1 : 1;
     }
 
+    if (a.isAppendix !== b.isAppendix) {
+      return a.isAppendix ? 1 : -1;
+    }
+
     const indexComparison = compareIndex(a.index ?? -1, b.index ?? -1);
     if (indexComparison !== 0) {
       return indexComparison;
-    }
-
-    if (a.isAppendix !== b.isAppendix) {
-      return a.isAppendix ? 1 : -1;
     }
 
     const titleComparison = a.title.localeCompare(b.title);
@@ -128,30 +97,10 @@ function filterIgnoredNodes(
       }
     }
 
-    const filteredNode = {
+    result.push({
       ...node,
       children: filterIgnoredNodes(node.children, false),
-    };
-
-    if (filteredNode.isFolder && filteredNode.isAppendix) {
-      const appendixOwner = {
-        slug: filteredNode.slug,
-        title: filteredNode.title,
-      };
-      const promotedChildren = filteredNode.children.filter(
-        (child) => child.isFolder || !isReadmeArticle(child),
-      );
-
-      for (const child of promotedChildren) {
-        result.push({
-          ...assignAppendixOwner(child, appendixOwner),
-          parentId: filteredNode.parentId,
-        });
-      }
-      continue;
-    }
-
-    result.push(filteredNode);
+    });
   }
   return result;
 }
@@ -178,13 +127,12 @@ function injectReadmeIntroNodes(nodes: ChapterNavNode[]) {
       slug: node.slug,
       index: -1,
       isFolder: false,
-      isAppendix: node.isAppendix ?? false,
+      isAppendix: false,
       isPreface: false,
       isAdvanced: false,
       isReadmeIntro: true,
       parentId: node.id,
       children: [],
-      ...(node.appendixOwner ? { appendixOwner: node.appendixOwner } : {}),
     });
   }
 }

@@ -2,7 +2,7 @@ import fs from "fs"
 import path from "path"
 import { cacheLife, cacheTag } from "next/cache"
 
-import type { ArticleLocale } from "./manifest"
+import type { ArticleLocale, TranslationStatusDetail } from "./manifest"
 
 export interface ArticleContentArtifact {
   slug: string
@@ -10,6 +10,7 @@ export interface ArticleContentArtifact {
   filePath: string
   content: string
   frontmatter: Record<string, unknown>
+  translationStatus?: TranslationStatusDetail
 }
 
 /**
@@ -79,6 +80,7 @@ function parseArticleContentArtifact(
   const obj = parsed as Record<string, unknown>
 
   if (typeof obj.slug !== "string") return fail("slug")
+  if (obj.locale !== "zh" && obj.locale !== "en") return fail("locale")
   if (typeof obj.filePath !== "string") return fail("filePath")
   if (typeof obj.content !== "string") return fail("content")
   if (
@@ -87,6 +89,29 @@ function parseArticleContentArtifact(
     Array.isArray(obj.frontmatter)
   ) {
     return fail("frontmatter")
+  }
+  if (obj.translationStatus !== undefined) {
+    if (
+      typeof obj.translationStatus !== "object" ||
+      obj.translationStatus === null ||
+      Array.isArray(obj.translationStatus)
+    ) {
+      return fail("translationStatus")
+    }
+    const status = obj.translationStatus as Record<string, unknown>
+    if (
+      typeof status.translatedFromRevision !== "string" ||
+      typeof status.latestOriginalRevision !== "string" ||
+      typeof status.commitLag !== "number" ||
+      !Number.isInteger(status.commitLag) ||
+      status.commitLag < 0 ||
+      typeof status.dayLag !== "number" ||
+      !Number.isInteger(status.dayLag) ||
+      status.dayLag < 0 ||
+      typeof status.latestOriginalCommitUrl !== "string"
+    ) {
+      return fail("translationStatus")
+    }
   }
 
   if (obj.slug !== slug) {

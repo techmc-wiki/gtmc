@@ -6,12 +6,14 @@ const {
   mockGetContent,
   mockRevisionUpdate,
   mockRevisionFindUnique,
+  mockConflictResolutionFindUnique,
 } = vi.hoisted(() => ({
   mockCompareCommits: vi.fn(),
   mockGetCommit: vi.fn(),
   mockGetContent: vi.fn(),
   mockRevisionUpdate: vi.fn(async () => ({})),
   mockRevisionFindUnique: vi.fn(),
+  mockConflictResolutionFindUnique: vi.fn(async () => null),
 }))
 
 vi.mock("@/lib/github/articles-repo", () => ({
@@ -34,12 +36,12 @@ vi.mock("@/lib/prisma", () => ({
       findUnique: mockRevisionFindUnique,
     },
     conflictResolution: {
-      findUnique: vi.fn(async () => null),
+      findUnique: mockConflictResolutionFindUnique,
     },
   },
 }))
 
-const { rebaseArticleContent, analyzeRebaseNeed, abortRebase, resumeRebase } =
+const { rebaseArticleContent, rebaseArticleContentMultiFile, analyzeRebaseNeed, abortRebase, resumeRebase } =
   await import("./rebase")
 import type { RebaseInput, AnalyzeRebaseInput } from "./rebase"
 
@@ -633,6 +635,362 @@ describe("resumeRebase", () => {
 
     const result = await resumeRebase({
       draftId: "draft-1",
+      resolvedContent: "resolved",
+    })
+
+    expect(result).toEqual({
+      status: "ERROR",
+      message: "No conflict to resume from",
+    })
+    expect(mockRevisionUpdate).not.toHaveBeenCalled()
+  })
+})
+
+describe("rebaseArticleContentMultiFile", () => {
+  beforeEach(() => {
+    mockCompareCommits.mockReset()
+    mockGetCommit.mockReset()
+    mockGetContent.mockReset()
+    mockRevisionUpdate.mockReset()
+    mockRevisionFindUnique.mockReset()
+    mockConflictResolutionFindUnique.mockReset()
+    mockCompareCommits.mockImplementation(async () => ({
+      data: { commits: [] },
+    }))
+    mockGetCommit.mockImplementation(async () => ({ data: { files: [] } }))
+    mockGetContent.mockImplementation(async () => ({
+      data: { type: "file", content: "", sha: "" },
+    }))
+    mockRevisionUpdate.mockImplementation(async () => ({}))
+    mockRevisionFindUnique.mockImplementation(async () => null)
+    mockConflictResolutionFindUnique.mockImplementation(async () => null)
+  })
+
+  it("NO_CHANGE: baseMainSha === latestMainSha", async () => {
+    const result = await rebaseArticleContentMultiFile({
+      draftId: "draft-mf-1",
+      files: [{ filePath: "test.md", content: "content" }],
+      baseMainSha: "abc123",
+      latestMainSha: "abc123",
+    })
+    expect(result.status).toBe("NO_CHANGE")
+    if (result.status === "NO_CHANGE") {
+      expect(result).toHaveProperty("message")
+    }
+  })
+
+  it("NO_CHANGE: no commits modify tracked files", async () => {
+    mockCompareCommits.mockImplementation(async () => ({
+      data: {
+        commits: [
+          {
+            sha: "c1",
+            commit: {
+              message: "Update other file",
+              author: { name: "Author", date: "2024-01-01" },
+            },
+          },
+        ],
+      },
+    }))
+    mockGetCommit.mockImplementation(async () => ({
+      data: { files: [{ filename: "other.md" }] },
+    }))
+
+    const result = await rebaseArticleContentMultiFile({
+      draftId: "draft-mf-1",
+      files: [{ filePath: "test.md", content: "content" }],
+      baseMainSha: "abc",
+      latestMainSha: "def",
+    })
+    expect(result.status).toBe("NO_CHANGE")
+  })
+
+  it("SUCCESS: one file, one commit, no conflict", async () => {
+    mockCompareCommits.mockImplementation(async () => ({
+      data: {
+        commits: [
+          {
+            sha: "c1",
+            commit: {
+              message: "Edit",
+              author: { name: "Author", date: "2024-01-01" },
+            },
+          },
+        ],
+      },
+    }))
+    mockGetCommit.mockImplementation(async () => ({
+      data: { files: [{ filename: "test.md" }] },
+    }))
+    mockGetContent.mockImplementation(async ({ ref }: { ref: string }) => {
+      const map: Record<string, string> = { abc: "line1", c1: "line1\nadded" }
+      return {
+        data: {
+          type: "file",
+          content: Buffer.from(map[ref] || "").toString("base64"),
+          sha: "s" + ref,
+        },
+      }
+    })
+
+    const result = await rebaseArticleContentMultiFile({
+      draftId: "draft-mf-1",
+      files: [{ filePath: "test.md", content: "line1\nadded" }],
+      baseMainSha: "abc",
+      latestMainSha: "def",
+    })
+    expect(result.status).toBe("SUCCESS")
+    if (result.status === "SUCCESS") {
+      expect(result.appliedCommits).toHaveLength(1)
+      expect(result.files).toBeDefined()
+      expect(result.files!).toHaveLength(1)
+      expect(result.files![0].filePath).toBe("test.md")
+    }
+  })
+
+  it("CONFLICT: one file conflicts in multi-file path", async () => {
+    mockCompareCommits.mockImplementation(async () => ({
+      data: {
+        commits: [
+          {
+            sha: "c1",
+            commit: {
+              message: "Edit",
+              author: { name: "Author", date: "2024-01-01" },
+            },
+          },
+        ],
+      },
+    }))
+    mockGetCommit.mockImplementation(async () => ({
+      data: { files: [{ filename: "test.md" }] },
+    }))
+    mockGetContent.mockImplementation(async ({ ref }: { ref: string }) => {
+      const map: Record<string, string> = { abc: "line1", c1: "line1\nmain" }
+      return {
+        data: {
+          type: "file",
+          content: Buffer.from(map[ref] || "").toString("base64"),
+          sha: "s" + ref,
+        },
+      }
+    })
+
+    const result = await rebaseArticleContentMultiFile({
+      draftId: "draft-mf-1",
+      files: [{ filePath: "test.md", content: "line1\ndraft" }],
+      baseMainSha: "abc",
+      latestMainSha: "def",
+    })
+    expect(result.status).toBe("CONFLICT")
+    if (result.status === "CONFLICT") {
+      expect(result.conflictFilePath).toBe("test.md")
+      expect(result.appliedCommits).toHaveLength(0)
+      expect(result.files).toBeDefined()
+      expect(result.files![0].filePath).toBe("test.md")
+    }
+  })
+
+  it("FILE_DELETED_CONFLICT: file deleted in main", async () => {
+    mockCompareCommits.mockImplementation(async () => ({
+      data: {
+        commits: [
+          {
+            sha: "c1",
+            commit: {
+              message: "Delete article",
+              author: { name: "Maintainer", date: "2024-02-01" },
+            },
+          },
+        ],
+      },
+    }))
+    mockGetCommit.mockImplementation(async () => ({
+      data: { files: [{ filename: "test.md" }] },
+    }))
+    mockGetContent.mockImplementation(async ({ ref }: { ref: string }) => {
+      if (ref === "abc") {
+        return {
+          data: {
+            type: "file",
+            content: Buffer.from("original content").toString("base64"),
+            sha: "sabc",
+          },
+        }
+      }
+      throw new Error("404 Not Found")
+    })
+
+    const result = await rebaseArticleContentMultiFile({
+      draftId: "draft-mf-del",
+      files: [{ filePath: "test.md", content: "my draft content" }],
+      baseMainSha: "abc",
+      latestMainSha: "def",
+    })
+    expect(result.status).toBe("FILE_DELETED_CONFLICT")
+    if (result.status === "FILE_DELETED_CONFLICT") {
+      expect(result.draftContent).toBe("my draft content")
+      expect(result.deletedFilePath).toBe("test.md")
+      expect(result.deletedAtCommit.sha).toBe("c1")
+    }
+  })
+
+  it("CONFLICT auto-resolved via rerere in multi-file path", async () => {
+    mockConflictResolutionFindUnique.mockImplementation(async () => ({
+      resolution: "merged",
+    }))
+
+    mockCompareCommits.mockImplementation(async () => ({
+      data: {
+        commits: [
+          {
+            sha: "c1",
+            commit: {
+              message: "Edit",
+              author: { name: "Author", date: "2024-01-01" },
+            },
+          },
+        ],
+      },
+    }))
+    mockGetCommit.mockImplementation(async () => ({
+      data: { files: [{ filename: "test.md" }] },
+    }))
+    mockGetContent.mockImplementation(async ({ ref }: { ref: string }) => {
+      const map: Record<string, string> = { abc: "line1", c1: "line1\nmain" }
+      return {
+        data: {
+          type: "file",
+          content: Buffer.from(map[ref] || "").toString("base64"),
+          sha: "s" + ref,
+        },
+      }
+    })
+
+    const result = await rebaseArticleContentMultiFile({
+      draftId: "draft-mf-rr",
+      files: [{ filePath: "test.md", content: "line1\ndraft" }],
+      baseMainSha: "abc",
+      latestMainSha: "def",
+    })
+    expect(result.status).toBe("SUCCESS")
+    if (result.status === "SUCCESS") {
+      expect(result.appliedCommits).toHaveLength(1)
+      expect(result.files![0].content).toBe("line1\nmerged")
+    }
+
+    mockConflictResolutionFindUnique.mockReset()
+    mockConflictResolutionFindUnique.mockImplementation(async () => null)
+  })
+})
+
+describe("abortRebase (additional edge cases)", () => {
+  beforeEach(() => {
+    mockRevisionUpdate.mockReset()
+    mockRevisionFindUnique.mockReset()
+    mockConflictResolutionFindUnique.mockReset()
+    mockRevisionUpdate.mockImplementation(async () => ({}))
+    mockRevisionFindUnique.mockImplementation(async () => null)
+    mockConflictResolutionFindUnique.mockImplementation(async () => null)
+  })
+
+  it("returns ERROR when no revision found", async () => {
+    mockRevisionFindUnique.mockImplementation(async () => null)
+
+    const result = await abortRebase({ draftId: "draft-nonexistent" })
+
+    expect(result).toEqual({
+      status: "ERROR",
+      message: "No active rebase to abort",
+    })
+    expect(mockRevisionUpdate).not.toHaveBeenCalled()
+  })
+})
+
+describe("resumeRebase (additional edge cases)", () => {
+  beforeEach(() => {
+    mockGetCommit.mockReset()
+    mockGetContent.mockReset()
+    mockRevisionUpdate.mockReset()
+    mockRevisionFindUnique.mockReset()
+    mockConflictResolutionFindUnique.mockReset()
+    mockGetContent.mockImplementation(async () => ({
+      data: { type: "file", content: "", sha: "" },
+    }))
+    mockRevisionUpdate.mockImplementation(async () => ({}))
+    mockRevisionFindUnique.mockImplementation(async () => null)
+    mockConflictResolutionFindUnique.mockImplementation(async () => null)
+  })
+
+  it("continues multi-file rebase with resolvedFiles", async () => {
+    mockRevisionFindUnique.mockImplementation(async () => ({
+      rebaseState: {
+        status: "CONFLICT",
+        commitShas: ["c1", "c2"],
+        currentCommitIndex: 0,
+        conflictedCommitSha: "c1",
+        originalContent: "content",
+        commitInfos: [
+          {
+            sha: "c1",
+            message: "first",
+            author: "A1",
+            timestamp: "2024-01-01",
+          },
+          {
+            sha: "c2",
+            message: "second",
+            author: "A2",
+            timestamp: "2024-01-02",
+          },
+        ],
+        fileStates: {
+          "test.md": {
+            filePath: "test.md",
+            status: "conflict",
+            currentContent: "conflict content",
+            originalContent: "content",
+          },
+        },
+      },
+    }))
+
+    mockGetCommit.mockImplementation(async () => ({
+      data: { files: [{ filename: "test.md" }] },
+    }))
+
+    mockGetContent.mockImplementation(async ({ ref }: { ref: string }) => {
+      const map: Record<string, string> = {
+        c1: "resolved",
+        c2: "resolved\nnext",
+      }
+      return {
+        data: {
+          type: "file",
+          content: Buffer.from(map[ref] || "").toString("base64"),
+          sha: "s" + ref,
+        },
+      }
+    })
+
+    const result = await resumeRebase({
+      draftId: "draft-1",
+      resolvedFiles: [{ filePath: "test.md", content: "resolved" }],
+    })
+
+    expect(result.status).toBe("SUCCESS")
+    if (result.status === "SUCCESS") {
+      expect(result.appliedCommits).toHaveLength(1)
+      expect(result.appliedCommits[0].sha).toBe("c2")
+    }
+  })
+
+  it("returns ERROR when revision not found", async () => {
+    mockRevisionFindUnique.mockImplementation(async () => null)
+
+    const result = await resumeRebase({
+      draftId: "draft-nonexistent",
       resolvedContent: "resolved",
     })
 

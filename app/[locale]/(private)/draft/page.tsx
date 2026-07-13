@@ -187,38 +187,44 @@ export default async function DraftDashboardPage() {
     }
   }
 
-  const articleDrafts: ArticleDraftItem[] = await Promise.all(
-    allDraftsRaw.map(async (d) => {
-      let displayStatus = d.status
-      const decodedDraft = decodeStoredDraftFiles({
-        content: d.content,
-        conflictContent: d.conflictContent,
-        filePath: d.filePath,
-      })
-
-      if (d.githubPrNum) {
-        try {
-          const pr = await getPR(d.githubPrNum)
-          if (pr.state === "closed") {
-            displayStatus = pr.merged ? "MERGED" : "CLOSED"
-          }
-        } catch (error) {
-          console.error(`Failed to fetch PR #${d.githubPrNum}:`, error)
-        }
-      }
-      return Object.assign({}, d, {
-        kind: "article" as const,
-        cleanupFailedCount: cleanupFailedByRevisionId.get(d.id) ?? 0,
-        displayStatus,
-        fileCount: decodedDraft.files.length,
-      })
-    })
-  )
-
-  const glossaryDraftsRaw = await prisma.glossaryRevision.findMany({
+  const glossaryDraftsPromise = prisma.glossaryRevision.findMany({
     where: { authorId },
     orderBy: { updatedAt: "desc" },
   })
+
+  const [articleDrafts, glossaryDraftsRaw]: [
+    ArticleDraftItem[],
+    GlossaryRevision[],
+  ] = await Promise.all([
+    Promise.all(
+      allDraftsRaw.map(async (d) => {
+        let displayStatus = d.status
+        const decodedDraft = decodeStoredDraftFiles({
+          content: d.content,
+          conflictContent: d.conflictContent,
+          filePath: d.filePath,
+        })
+
+        if (d.githubPrNum) {
+          try {
+            const pr = await getPR(d.githubPrNum)
+            if (pr.state === "closed") {
+              displayStatus = pr.merged ? "MERGED" : "CLOSED"
+            }
+          } catch (error) {
+            console.error(`Failed to fetch PR #${d.githubPrNum}:`, error)
+          }
+        }
+        return Object.assign({}, d, {
+          kind: "article" as const,
+          cleanupFailedCount: cleanupFailedByRevisionId.get(d.id) ?? 0,
+          displayStatus,
+          fileCount: decodedDraft.files.length,
+        })
+      })
+    ),
+    glossaryDraftsPromise,
+  ])
 
   const glossaryDrafts: GlossaryDraftItem[] = glossaryDraftsRaw.map((d) =>
     Object.assign({}, d, { kind: "glossary" as const })

@@ -6,6 +6,7 @@ import {
   requireAdmin,
   requireAuth,
 } from "@/lib/auth/context"
+import { after } from "next/server"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import {
@@ -204,7 +205,7 @@ By: ${mentionToken}
     updateGithubIssueCommentsCache(issue.number)
     updateGithubIssueCache(issue.number)
   } catch (error) {
-    console.warn("Failed to post claim bot comment:", error)
+    after(() => console.warn("Failed to post claim bot comment:", error))
   }
 
   revalidatePath("/features")
@@ -277,7 +278,7 @@ By: ${mentionToken}
     updateGithubIssueCommentsCache(issue.number)
     updateGithubIssueCache(issue.number)
   } catch (error) {
-    console.warn("Failed to post drop bot comment:", error)
+    after(() => console.warn("Failed to post drop bot comment:", error))
   }
 
   revalidatePath("/features")
@@ -338,14 +339,15 @@ export async function addFeatureComment(id: string, content: string) {
   }
 
   // Query GitHub Account and check email visibility
-  const account = await prisma.account.findFirst({
-    where: {
-      provider: "github",
-      userId: session.user.id,
-    },
-  })
-
-  const token = await getGithubPatForUser(session.user.id)
+  const [account, token] = await Promise.all([
+    prisma.account.findFirst({
+      where: {
+        provider: "github",
+        userId: session.user.id,
+      },
+    }),
+    getGithubPatForUser(session.user.id),
+  ])
   const visibility = await getGithubEmailVisibility(token || "")
   const isPrivate = visibility === "private"
 

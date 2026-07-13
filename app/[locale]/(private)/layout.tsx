@@ -10,8 +10,7 @@ export default async function DashboardLayout({
   children: React.ReactNode
   params: Promise<{ locale: string }>
 }) {
-  const { locale } = await params
-  const session = await auth()
+  const [{ locale }, session] = await Promise.all([params, auth()])
   let isAdmin = false
   if (session?.user?.id) {
     try {

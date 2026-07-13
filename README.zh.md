@@ -9,9 +9,9 @@
 
 阅读入门教程、机制深析与源码解读，内容皆由社区公开编写与评审。
 
-[![Website](https://img.shields.io/badge/site-beta.techmc.wiki-60708F?style=flat-square&labelColor=4A5A78)](https://beta.techmc.wiki) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/gtmc-dev/gtmc) [![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org) [![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org) [![License](https://img.shields.io/badge/Code-Apache--2.0-yellow?style=flat-square)](LICENSE) [![Articles](https://img.shields.io/badge/Articles-CC--BY--NC--SA%204.0-lightgrey?style=flat-square)](LICENSE)
+[![Website](https://img.shields.io/badge/site-techmc.wiki-60708F?style=flat-square&labelColor=4A5A78)](https://techmc.wiki) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/gtmc-dev/gtmc) [![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org) [![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org) [![License](https://img.shields.io/badge/Code-Apache--2.0-yellow?style=flat-square)](LICENSE) [![Articles](https://img.shields.io/badge/Articles-CC--BY--NC--SA%204.0-lightgrey?style=flat-square)](LICENSE)
 
-[访问网站](https://beta.techmc.wiki) · [浏览原始文章](https://github.com/techmc-wiki/articles) · [更多 GTMC 项目](https://github.com/orgs/gtmc-dev/repositories)
+[访问网站](https://techmc.wiki) · [浏览原始文章](https://github.com/techmc-wiki/articles) · [更多 GTMC 项目](https://github.com/orgs/gtmc-dev/repositories)
 
 <!-- README-I18N:START -->
 
@@ -35,7 +35,7 @@
 
 内容覆盖技术玩法的方方面面：树场等量产装置、械电与元件特性、绿萌科技，以及把它们串联起来的时序与电路。在引擎层面，文章深入微时序、方块更新与更新顺序、区块加载与加载票（loading ticket）、实体 AI 与实体移动——必要之处佐以源码分析。工具章节则讲解技术存档的常用利器（Carpet、Litematica 与 masa 套件），让新手与老手都能找到入口。
 
-最快的上手方式就是**[访问网站](https://beta.techmc.wiki)**。想参与贡献？你可以直接在站内起草并提交文章，也可以提交一个 feature request 来建议选题。
+最快的上手方式就是**[访问网站](https://techmc.wiki)**。想参与贡献？你可以直接在站内起草并提交文章，也可以提交一个 feature request 来建议选题。
 
 > [!NOTE]
 > 本仓库是**网站**本体。文章存放在[独立仓库](https://github.com/techmc-wiki/articles)中，以子模块形式引入。其他 GTMC 项目见 [github.com/orgs/gtmc-dev](https://github.com/orgs/gtmc-dev/repositories)。

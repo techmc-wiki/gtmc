@@ -63,7 +63,7 @@ export type OrganizationJsonLd = {
  * default `sameAs` list contains the GitHub org; callers may append more
  * via `options.sameAs`.
  *
- * @param siteUrl Absolute site origin (no trailing slash), e.g. `https://beta.techmc.wiki`.
+ * @param siteUrl Absolute site origin (no trailing slash), e.g. `https://techmc.wiki`.
  */
 export function buildOrganizationJsonLd(
   siteUrl: string,

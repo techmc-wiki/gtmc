@@ -3,8 +3,6 @@ import { motion } from "motion/react"
 import { useMemo } from "react"
 import { DecorElement } from "./decor-element"
 
-const RULER_TICK_KEYS = Array.from({ length: 50 }, (_, i) => `tick-${i}`)
-
 export function MidgroundLayer({
   mgTransform,
   smoothMouseX,
@@ -105,18 +103,6 @@ export function MidgroundLayer({
         <span className="absolute -top-4 right-10 font-mono text-[0.625rem] opacity-50">
           L-AXIS
         </span>
-      </div>
-      <div className="decor-desktop-only w-pxfull bg-tech-main/10 absolute top-0 left-[25%] hidden flex-col items-center md:flex">
-        <div className="border-tech-main/50 bg-tech-bg mt-[50vh] size-2 border" />
-      </div>
-
-      <div className="decor-desktop-only border-tech-main/10 absolute top-0 left-0 hidden h-full w-2 flex-col overflow-hidden border-r opacity-30 md:flex dark:opacity-20">
-        {RULER_TICK_KEYS.map((tickKey) => (
-          <div
-            key={tickKey}
-            className="border-tech-main/40 relative h-8 w-full flex-none border-t"
-          />
-        ))}
       </div>
     </motion.div>
   )

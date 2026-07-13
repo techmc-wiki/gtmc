@@ -41,19 +41,21 @@ const HEX_KEYS = HEX_VALUES.map((v, i) => `hex-${i}-${v}`)
 const HIDDEN_STYLE = { contentVisibility: "hidden" } as const
 const VISIBLE_STYLE = { contentVisibility: "visible" } as const
 
-export function BackgroundLayer({
-  bgTransform,
-  smoothMouseX,
-  smoothMouseY,
-  blurMax,
-  isReducedMotion = false,
-}: {
+interface BackgroundLayerProps {
   bgTransform: { x: MotionValue<number>; y: MotionValue<number> }
   smoothMouseX: MotionValue<number>
   smoothMouseY: MotionValue<number>
   blurMax: number
   isReducedMotion?: boolean
-}) {
+}
+
+function BleedingWatermark({
+  bgTransform,
+  smoothMouseX,
+  smoothMouseY,
+  blurMax,
+  isReducedMotion = false,
+}: BackgroundLayerProps) {
   const bgStyle = useMemo(
     () => ({ x: bgTransform.x, y: bgTransform.y }),
     [bgTransform.x, bgTransform.y]
@@ -70,7 +72,7 @@ export function BackgroundLayer({
 
   return (
     <motion.div
-      className="homepage-decor-background absolute inset-0 z-0"
+      className="absolute inset-0 z-0 will-change-transform"
       style={bgStyle}>
       {/* 巨型背景水印
           Hidden via `content-visibility: hidden` until rAF after mount so that
@@ -80,7 +82,7 @@ export function BackgroundLayer({
           watermark once BackgroundLayer hydrates. */}
       <div style={decorVisible ? VISIBLE_STYLE : HIDDEN_STYLE}>
         <DecorElement
-          className="decor-desktop-only text-tech-main pointer-events-none absolute top-1/3 -right-20 hidden rotate-90 text-[10rem] font-black tracking-tighter whitespace-nowrap opacity-[0.05] mix-blend-multiply select-none lg:block dark:opacity-[0.03] dark:mix-blend-screen"
+          className="decor-desktop-only text-tech-main pointer-events-none absolute top-[55%] -right-20 hidden rotate-90 text-[12rem] font-black tracking-tighter whitespace-nowrap opacity-[0.05] mix-blend-multiply select-none lg:block xl:top-[58%] xl:text-[13rem] 2xl:text-[14rem] dark:opacity-[0.03] dark:mix-blend-screen"
           smoothMouseX={smoothMouseX}
           smoothMouseY={smoothMouseY}
           blurMax={blurMax}
@@ -88,7 +90,26 @@ export function BackgroundLayer({
           SCHEMATIC_01
         </DecorElement>
       </div>
+    </motion.div>
+  )
+}
 
+function ContainedBackgroundLayer({
+  bgTransform,
+  smoothMouseX,
+  smoothMouseY,
+  blurMax,
+  isReducedMotion = false,
+}: BackgroundLayerProps) {
+  const bgStyle = useMemo(
+    () => ({ x: bgTransform.x, y: bgTransform.y }),
+    [bgTransform.x, bgTransform.y]
+  )
+
+  return (
+    <motion.div
+      className="homepage-decor-background absolute inset-0 z-0"
+      style={bgStyle}>
       {/* NBT二进制/Hex Dump 背景层 */}
       <DecorElement
         className="decor-desktop-only text-tech-main pointer-events-none absolute top-[20%] left-[5%] hidden font-mono text-[0.625rem] leading-tight whitespace-pre opacity-[0.25] mix-blend-multiply select-none xl:block dark:opacity-[0.15] dark:mix-blend-screen"
@@ -313,5 +334,14 @@ export function BackgroundLayer({
         </svg>
       </DecorElement>
     </motion.div>
+  )
+}
+
+export function BackgroundLayer(props: BackgroundLayerProps) {
+  return (
+    <>
+      <ContainedBackgroundLayer {...props} />
+      <BleedingWatermark {...props} />
+    </>
   )
 }

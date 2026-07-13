@@ -850,14 +850,11 @@ code[class^="language-"] {
     overflow-wrap: anywhere;
   }
 
-  /* Print Edition: the text block reads like a set page.
-   * Body paragraphs are justified with hyphenation at reading widths;
-   * mobile stays ragged-right where a narrow measure justifies poorly. */
+  /* Keep article paragraphs ragged-right so whitespace and glyph spacing are
+   * not stretched to fill the reading column in either locale. */
   @media (min-width: 768px) {
     .article-prose > p {
-      text-align: justify;
-      -webkit-hyphens: auto;
-      hyphens: auto;
+      text-align: start;
     }
   }
 

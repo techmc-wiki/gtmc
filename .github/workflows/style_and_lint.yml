@@ -27,7 +27,7 @@ jobs:
           GTMC_LINT_ONLY: "1"
 
       - name: Run linter
-        run: node --run lint:check
+        run: node --run lint
 
       - name: Check code formatting
-        run: node --run fmt:check
+        run: node --run fmt

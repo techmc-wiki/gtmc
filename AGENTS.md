@@ -102,12 +102,14 @@ vp check --fix            # Format and autofix lint findings
 vp test run               # Run Vitest once
 vp install                # Install with the pinned pnpm version
 pnpm typecheck            # tsc --noEmit (strict, Next.js-aware)
-pnpm build:content        # Generate content artifacts (manifest, glossary, articles, locale PDFs)
-pnpm build:next           # Next.js production build
-pnpm build                # Both phases: content generation then Next build
-pnpm prepare:articles     # Prepare articles submodule for build (pinned by default)
-pnpm analyze              # ANALYZE=true pnpm build (bundle analyzer)
-pnpm lighthouse           # Run Lighthouse CI locally (requires running server)
+pnpm check                # vp check + typecheck
+pnpm build:content        # Generate content artifacts (manifest, glossary, articles, PDFs)
+pnpm build:next           # Next.js production build only
+pnpm build                # Both phases via scripts/build.ts
+pnpm build:pdf            # Offline PDFs only (public/gtmc-en.pdf, public/gtmc-zh.pdf)
+pnpm prepare:articles     # Prepare articles submodule (GTMC_ARTICLES_SOURCE)
+pnpm analyze              # next experimental-analyze
+pnpm lighthouse           # Lighthouse CI (requires a running server)
 ```
 
 Key things to know:
@@ -122,12 +124,13 @@ Key things to know:
 
 ```bash
 pnpm articles:status        # Show submodule status
-pnpm articles:init          # Reinitialize at the pinned commit
-pnpm articles:update        # Pull the latest articles commit
+pnpm articles:init          # Initialize/update to the pinned commit
+pnpm articles:update        # Pull the latest articles commit on the tracked branch
 pnpm prepare:articles       # Prepare articles for a build using GTMC_ARTICLES_SOURCE
 pnpm generate:manifest      # Rebuild data/manifest.json
-pnpm generate:content       # Re-render rendered article content
-pnpm articles:pdf           # Re-render the offline PDFs (public/gtmc-en.pdf and public/gtmc-zh.pdf)
+pnpm generate:content       # Re-render article content artifacts
+pnpm generate:authors       # Rebuild author profile artifacts
+pnpm build:pdf              # Rebuild offline PDFs
 ```
 
 Article build source is controlled by `GTMC_ARTICLES_SOURCE`:
@@ -143,10 +146,10 @@ For reproducible releases, update and commit the submodule pointer here with `pn
 ### Glossary submodule
 
 ```bash
-pnpm glossary:status            # Show submodule status
-pnpm glossary:init              # Reinitialize at the pinned commit
-pnpm glossary:update            # Pull the latest glossary commit
-pnpm generate:glossary-manifest # Rebuild data/glossary*.json
+pnpm glossary:status     # Show submodule status
+pnpm glossary:init       # Initialize/update to the pinned commit
+pnpm glossary:update     # Pull the latest glossary commit on the tracked branch
+pnpm generate:glossary   # Rebuild data/glossary*.json
 ```
 
 The glossary submodule works similarly to articles: Vercel uses the pinned commit, and updates require committing the new pointer. The generated `data/glossary*.json` files are used by the glossary page and search index.
@@ -192,17 +195,18 @@ When working on UI:
 ## Build and Deployment
 
 ```bash
-pnpm build:content  # Generate static content artifacts (manifest, glossary, articles, locale PDFs)
-pnpm build:next     # Next.js production build
-pnpm build          # Both phases in order: build:content && build:next
-pnpm analyze        # Same build with @next/bundle-analyzer enabled
+pnpm build:content  # Generate static content artifacts (manifest, glossary, articles, PDFs)
+pnpm build:next     # Next.js production build only
+pnpm build          # Both phases (scripts/build.ts); skip content with GTMC_SKIP_CONTENT_BUILD=true
+pnpm build:vercel   # Vercel entrypoint (scripts/build-vercel.ts)
+pnpm analyze        # next experimental-analyze
 ```
 
 **Two-phase build model:**
 
-- **Phase 1 (`build:content`)**: Generates static content artifacts — `data/manifest.json`, `data/glossary*.json`, rendered article content, and `public/gtmc-en.pdf` / `public/gtmc-zh.pdf` (via Playwright + Chromium).
+- **Phase 1 (`build:content` → `scripts/build-content.ts`)**: Generates static content artifacts — `data/manifest.json`, `data/glossary*.json`, rendered article content, and `public/gtmc-en.pdf` / `public/gtmc-zh.pdf` (via Playwright + Chromium).
 - **Phase 2 (`build:next`)**: Runs `next build`, consuming the artifacts from phase 1.
-- **`pnpm build`**: Runs both phases in order.
+- **`pnpm build`**: Runs both phases in order (`scripts/build.ts`).
 
 This is not a multi-package split or monorepo; it's a formalized build phase boundary within a single Next.js project. The content phase produces static artifacts that the Next.js build consumes.
 

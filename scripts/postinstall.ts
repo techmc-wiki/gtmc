@@ -1,19 +1,9 @@
 import { existsSync } from "node:fs"
-import { spawnSync, type SpawnSyncOptions } from "node:child_process"
+import { spawnSync } from "node:child_process"
+
+import { run, runScript } from "./lib/run"
 
 const placeholderDatabaseUrl = "postgresql://localhost:5432/placeholder"
-
-function run(command: string, args: string[], options: SpawnSyncOptions = {}) {
-  const result = spawnSync(command, args, {
-    stdio: "inherit",
-    shell: process.platform === "win32",
-    ...options,
-  })
-
-  if (result.status !== 0) {
-    process.exit(result.status ?? 1)
-  }
-}
 
 function isGitWorkTree() {
   if (!existsSync(".git")) return false
@@ -62,7 +52,7 @@ if (isGitWorkTree()) {
   ensureSubmoduleInitialized("glossary")
 
   process.stdout.write("  Generating glossary manifest...\n")
-  run("tsx", ["scripts/generate-glossary-manifest.ts"])
+  runScript("scripts/generate-glossary-manifest.ts")
 } else {
   process.stdout.write("Skipping Git submodule setup outside a Git work tree\n")
 }
@@ -87,7 +77,7 @@ if (skipHeavy) {
       DATABASE_URL: process.env.DATABASE_URL ?? placeholderDatabaseUrl,
     },
   })
-  run("tsx", ["scripts/generate-article-manifest.ts"])
-  run("tsx", ["scripts/generate-author-profiles.ts"])
+  runScript("scripts/generate-article-manifest.ts")
+  runScript("scripts/generate-author-profiles.ts")
   run("playwright", ["install", "chromium"])
 }

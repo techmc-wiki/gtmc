@@ -33,7 +33,8 @@ import {
   TableHeaderCell,
 } from "./table-components"
 
-const LITEMATICA_VIEWER_TAG_RE = /<\s*litematicaviewer\b/i
+const LITEMATICA_VIEWER_CONTENT_RE =
+  /(?:<\s*litematicaviewer\b|::litematica(?=$|[\s{]))/i
 
 const ansiColorStyles: Record<AnsiColorName, Record<string, string>> = {
   black: { color: "var(--color-ansi-black)" },
@@ -61,7 +62,7 @@ export function getMarkdownComponents(
 ): Record<string, MarkdownComponent> {
   const aComponent = createAComponent(rawPath, locale)
   const imageComponent = createImageComponent(rawPath)
-  const hasLitematicaViewer = LITEMATICA_VIEWER_TAG_RE.test(content)
+  const hasLitematicaViewer = LITEMATICA_VIEWER_CONTENT_RE.test(content)
   const ansiColorComponents = Object.fromEntries(
     ANSI_COLOR_NAMES.map((color) => [
       createAnsiColorTagName(color),

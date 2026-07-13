@@ -524,8 +524,8 @@
   "Outline": {
     "close": "关闭",
     "closeSheet": "关闭本文目录",
-    "hoverHint": "悬停展开",
     "openSheet": "打开本文目录",
+    "progressLabel": "阅读进度",
     "railLabel": "本文目录",
     "sheetLabel": "本文目录",
     "title": "本文目录"

@@ -1,0 +1,66 @@
+.trace {
+  transform: scaleY(var(--outline-progress));
+  transform-origin: center top;
+}
+
+.plotterHead {
+  top: 0;
+  height: calc(100% - 0.5rem);
+  transform: translate3d(-50%, var(--outline-progress-position), 0);
+}
+
+@supports (animation-timeline: scroll()) {
+  .trace {
+    animation-name: outline-trace-progress;
+    animation-duration: 1ms;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: --site-scroll;
+    will-change: transform;
+  }
+
+  .plotterHead {
+    animation-name: outline-head-progress;
+    animation-duration: 1ms;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: --site-scroll;
+    will-change: transform;
+  }
+}
+
+@keyframes outline-trace-progress {
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes outline-head-progress {
+  from {
+    transform: translate3d(-50%, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 100%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trace,
+  .plotterHead {
+    animation: none;
+    will-change: auto;
+  }
+
+  .trace {
+    transform: scaleY(0);
+  }
+
+  .plotterHead {
+    transform: translate3d(-50%, 0, 0);
+  }
+}

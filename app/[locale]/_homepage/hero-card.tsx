@@ -59,7 +59,7 @@ export function HeroCard({
             Open Access
           </span>
           <span className="animate-fade-in fill-mode-forwards hidden font-mono text-[0.625rem] font-bold opacity-0 [animation-delay:0.8s] motion-reduce:animate-none motion-reduce:opacity-100 sm:block sm:text-xs">
-            Beta Edition
+            {process.env.NEXT_PUBLIC_APP_VERSION}
           </span>
         </div>
 

@@ -22,8 +22,25 @@ const buildSha: string = (() => {
   }
 })()
 
+const appVersion: string = (() => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { execSync } = require("child_process") as typeof ChildProcess
+    return execSync("git describe --tags --abbrev=0", {
+      stdio: ["ignore", "pipe", "ignore"],
+    })
+      .toString()
+      .trim()
+  } catch {
+    return "unknown"
+  }
+})()
+
 const nextConfig: NextConfig = {
-  env: { NEXT_PUBLIC_BUILD_SHA: buildSha },
+  env: {
+    NEXT_PUBLIC_APP_VERSION: appVersion,
+    NEXT_PUBLIC_BUILD_SHA: buildSha,
+  },
   serverExternalPackages: [
     "@prisma/client",
     "prisma",

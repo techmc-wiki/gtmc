@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server"
 import { TechCard } from "@/components/ui/tech-card"
 import { SectionTitle } from "@/components/ui/section-title"
 import {
@@ -8,14 +7,15 @@ import {
   SkeletonExitWrapper,
 } from "@/components/ui/loading-shell-primitives"
 
-export default async function DraftLoading() {
-  const t = await getTranslations("CommonA11y")
+const LOADING_LABEL = "Loading drafts"
+
+export default function DraftLoading() {
   return (
     <SkeletonExitWrapper>
       <div
         className="page-container"
         aria-busy="true"
-        aria-label={t("loadingDrafts")}>
+        aria-label={LOADING_LABEL}>
         {/* PAGE_HEADER_ */}
         <div className="animate-tech-slide-in border-tech-main/40 relative flex flex-col items-start justify-between gap-4 border-b pb-6 md:flex-row md:items-end">
           <ScanConfirmOverlay />

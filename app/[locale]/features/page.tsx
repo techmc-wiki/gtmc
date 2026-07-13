@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import { getTranslations } from "next-intl/server"
 import { toAbsoluteUrl } from "@/lib/site-url"
-import { listAllIssues } from "@/lib/github"
+import { listAllIssues, type GithubIssue } from "@/lib/github"
 import { FeatureListContent } from "@/components/features/feature-list-content"
 
 export async function generateMetadata({
@@ -47,23 +48,61 @@ export async function generateMetadata({
 }
 
 export default async function FeaturesPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>
   searchParams?: Promise<{
     [key: string]: string | string[] | undefined
   }>
 }) {
-  const [t, params, allIssues] = await Promise.all([
-    getTranslations("Feature"),
-    searchParams,
+  const { locale } = await params
+  const [t, allIssues] = await Promise.all([
+    getTranslations({ locale, namespace: "Feature" }),
     listAllIssues(),
   ])
+  const createLabel = `+ ${t("createButton")}`
+
+  return (
+    <Suspense
+      fallback={
+        <FeatureListContent
+          issues={allIssues}
+          createLabel={createLabel}
+          locale={locale}
+        />
+      }>
+      <FeaturesWithSearchParams
+        issues={allIssues}
+        createLabel={createLabel}
+        locale={locale}
+        searchParams={searchParams}
+      />
+    </Suspense>
+  )
+}
+
+async function FeaturesWithSearchParams({
+  issues,
+  createLabel,
+  locale,
+  searchParams,
+}: {
+  issues: GithubIssue[]
+  createLabel: string
+  locale: string
+  searchParams?: Promise<{
+    [key: string]: string | string[] | undefined
+  }>
+}) {
+  const resolved = await searchParams
 
   return (
     <FeatureListContent
-      issues={allIssues}
-      createLabel={`+ ${t("createButton")}`}
-      created={params?.created}
+      issues={issues}
+      createLabel={createLabel}
+      locale={locale}
+      created={resolved?.created}
     />
   )
 }

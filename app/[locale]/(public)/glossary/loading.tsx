@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server"
 import {
   ScanConfirmOverlay,
   SectionFrame,
@@ -11,17 +10,17 @@ import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 const ALPHABET_NAV_KEYS = Array.from({ length: 14 }, (_, i) => `alpha-nav-${i}`)
 
-export default async function GlossaryLoading() {
-  const t = await getTranslations("Glossary")
+const LOADING_LABEL = "Loading glossary"
 
+export default function GlossaryLoading() {
   return (
     <SkeletonExitWrapper>
       <div
         className="border-tech-main/40 relative min-h-screen w-full border bg-transparent p-6 pb-32 backdrop-blur-sm sm:p-8"
         aria-busy="true"
         aria-live="polite"
-        aria-label={t("pageTitle")}>
-        <span className="sr-only">{t("pageTitle")}</span>
+        aria-label={LOADING_LABEL}>
+        <span className="sr-only">{LOADING_LABEL}</span>
         <div aria-hidden="true">
           <CornerBrackets
             size="size-4"

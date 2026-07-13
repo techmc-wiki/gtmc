@@ -26,7 +26,7 @@ const appVersion: string = (() => {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { execSync } = require("child_process") as typeof ChildProcess
-    return execSync("git describe --tags --abbrev=0", {
+    return execSync("git tag --sort=-version:refname | head -n 1", {
       stdio: ["ignore", "pipe", "ignore"],
     })
       .toString()

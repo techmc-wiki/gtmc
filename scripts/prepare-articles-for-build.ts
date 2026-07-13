@@ -1,8 +1,6 @@
-import { spawnSync } from "node:child_process"
+import { run } from "./lib/run"
 
 type ArticleSourceMode = "pinned" | "latest"
-
-const sourceMode = parseArticleSourceMode(process.env.GTMC_ARTICLES_SOURCE)
 
 function parseArticleSourceMode(
   value: string | undefined
@@ -19,30 +17,21 @@ function parseArticleSourceMode(
   process.exit(1)
 }
 
-function runGitSubmoduleUpdate(mode: ArticleSourceMode): void {
+const sourceMode = parseArticleSourceMode(process.env.GTMC_ARTICLES_SOURCE)
+
+if (sourceMode) {
   const args =
-    mode === "latest"
+    sourceMode === "latest"
       ? ["submodule", "update", "--init", "--recursive", "--remote", "articles"]
       : ["submodule", "update", "--init", "--recursive", "articles"]
 
   process.stdout.write(
-    mode === "latest"
+    sourceMode === "latest"
       ? "Preparing articles from latest configured submodule branch\n"
       : "Preparing articles from pinned submodule commit\n"
   )
 
-  const result = spawnSync("git", args, {
-    stdio: "inherit",
-    shell: process.platform === "win32",
-  })
-
-  if (result.status !== 0) {
-    process.exit(result.status ?? 1)
-  }
-}
-
-if (sourceMode) {
-  runGitSubmoduleUpdate(sourceMode)
+  run("git", args)
 } else {
   process.stdout.write(
     "GTMC_ARTICLES_SOURCE is unset; leaving articles submodule unchanged\n"

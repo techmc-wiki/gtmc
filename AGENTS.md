@@ -299,9 +299,9 @@ If you are an Oh-my-Opencode agent (Sisyphus, Prometheus, Atlas, Hephaestus):
 6. TypeScript 7 includes the native `tsgo` tool. This repo uses `next@16.3.0-canary.83`, which supports the TypeScript 7 toolchain; earlier pre-`canary.83` Next.js 16.3 versions do not. Keep using the existing `pnpm typecheck` script unless the Next.js typecheck integration is intentionally migrated to `tsgo`.
 
 <!-- BEGIN:nextjs-agent-rules -->
+# This is NOT the Next.js you know
 
-# Next.js: ALWAYS read docs before coding
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
-Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data is outdated — the docs are the source of truth.
-
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 <!-- END:nextjs-agent-rules -->

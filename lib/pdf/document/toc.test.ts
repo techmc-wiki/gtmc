@@ -6,6 +6,7 @@ import { buildBodyHtml } from "./assemble"
 import { buildBookPlan } from "./numbering"
 import { renderTocHtml } from "./toc"
 import type { BookOptions } from "./types"
+import { fillTocFolios } from "../paginate"
 
 function art(overrides: Partial<LinearizedArticle>): LinearizedArticle {
   return {
@@ -113,5 +114,18 @@ describe("renderTocHtml", () => {
     expect(html).not.toContain("article-ch/two")
     expect(html).toContain('href="#article-ch/one&quot;&amp;"')
     expect(html).toContain('id="article-ch/one&quot;&amp;"')
+
+    const filled = fillTocFolios(
+      html,
+      new Map([
+        ['article-ch/one"&', 4],
+        ["article-ch/three", 5],
+        ["chapter-chapter", 3],
+      ])
+    )
+    expect(filled.missing).toEqual([])
+    expect(filled.html).toContain(
+      'data-anchor="article-ch/one&quot;&amp;">5</span>'
+    )
   })
 })

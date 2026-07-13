@@ -10,6 +10,8 @@
 
 import { PDFArray, PDFDict, PDFDocument, PDFName, PDFRef } from "pdf-lib"
 
+import { unescapeHtml } from "./document/html-utils"
+
 /**
  * Decode a PDF name string ("/article-foo#2Fbar") into the original anchor
  * id ("article-foo/bar"). `#xx` is the PDF hex escape for a name byte.
@@ -66,9 +68,10 @@ export function fillTocFolios(
   const filled = html.replaceAll(
     /<span class="toc-folio" data-anchor="([^"]*)"><\/span>/g,
     (match, anchor: string) => {
-      const pageIndex = anchorPages.get(anchor)
+      const decodedAnchor = unescapeHtml(anchor)
+      const pageIndex = anchorPages.get(decodedAnchor)
       if (pageIndex === undefined) {
-        missing.push(anchor)
+        missing.push(decodedAnchor)
         return match
       }
       return `<span class="toc-folio" data-anchor="${anchor}">${pageIndex + 1}</span>`
@@ -76,4 +79,23 @@ export function fillTocFolios(
   )
 
   return { html: filled, missing }
+}
+
+export function haveTocFolioPagesChanged(
+  emptyFolioHtml: string,
+  insertedPages: Map<string, number>,
+  measuredPages: Map<string, number>
+): boolean {
+  for (const match of emptyFolioHtml.matchAll(
+    /<span class="toc-folio" data-anchor="([^"]*)"><\/span>/g
+  )) {
+    const anchor = match[1]
+    if (!anchor) continue
+    const decodedAnchor = unescapeHtml(anchor)
+    if (insertedPages.get(decodedAnchor) !== measuredPages.get(decodedAnchor)) {
+      return true
+    }
+  }
+
+  return false
 }

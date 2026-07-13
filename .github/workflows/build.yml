@@ -68,3 +68,13 @@ jobs:
           # Only skip when the exact key hits — partial restore-keys may lack locale PDFs.
           GTMC_SKIP_CONTENT_BUILD: ${{ steps.cache-content.outputs.cache-hit == 'true' }}
         run: node --run build
+
+      - name: Upload compiled PDFs
+        uses: actions/upload-artifact@v7
+        with:
+          name: gtmc-pdfs
+          path: |
+            public/gtmc-en.pdf
+            public/gtmc-zh.pdf
+          if-no-files-found: error
+          retention-days: 14

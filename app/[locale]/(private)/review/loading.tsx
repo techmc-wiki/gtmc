@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server"
 import { TechCard } from "@/components/ui/tech-card"
 import {
   SectionRail,
@@ -13,14 +12,15 @@ const CARD_STYLES = [
   { animationDelay: "250ms" },
 ] as const
 
-export default async function ReviewLoading() {
-  const t = await getTranslations("CommonA11y")
+const LOADING_LABEL = "Loading review hub"
+
+export default function ReviewLoading() {
   return (
     <SkeletonExitWrapper>
       <div
         className="page-container"
         aria-busy="true"
-        aria-label={t("loadingReviewHub")}>
+        aria-label={LOADING_LABEL}>
         {/* PAGE_HEADER_ */}
         <div className="animate-tech-slide-in border-tech-main/40 relative flex flex-col border-b pb-6">
           <ScanConfirmOverlay />

@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server"
 import { TechCard } from "@/components/ui/tech-card"
 import {
   SectionRail,
@@ -12,14 +11,15 @@ const SKELETON_GROUPS = [
   { label: "RESOLVED", style: { animationDelay: "400ms" }, cards: [5, 6] },
 ] as const
 
-export default async function FeaturesLoading() {
-  const t = await getTranslations("CommonA11y")
+const LOADING_LABEL = "Loading features list"
+
+export default function FeaturesLoading() {
   return (
     <SkeletonExitWrapper>
       <div
         className="page-container-pb"
         aria-busy="true"
-        aria-label={t("loadingFeaturesList")}>
+        aria-label={LOADING_LABEL}>
         <div className="border-tech-main/40 relative mt-8 flex flex-col items-start justify-between gap-4 border-b pb-6 md:flex-row md:items-end">
           <div className="w-full md:w-auto">
             <SectionRail label="FEATURE_HEADER" />

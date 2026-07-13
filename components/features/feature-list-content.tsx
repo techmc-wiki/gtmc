@@ -45,15 +45,17 @@ function buildFeatures(issues: GithubIssue[]) {
 interface FeatureListContentProps {
   issues: GithubIssue[]
   createLabel: string
+  locale: string
   created?: string | string[] | undefined
 }
 
 export async function FeatureListContent({
   issues,
   createLabel,
+  locale,
   created,
 }: FeatureListContentProps) {
-  const t = await getTranslations("Feature")
+  const t = await getTranslations({ locale, namespace: "Feature" })
   const isCreated = created === "true"
 
   const features = buildFeatures(issues)

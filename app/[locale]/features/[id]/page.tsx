@@ -168,6 +168,7 @@ export default async function FeatureDetailPage({
       isAssignee={isAssignee}
       isAdmin={isAdmin}
       isClosed={isClosed}
+      locale={locale}
       structuredData={structuredData}
     />
   )

@@ -54,6 +54,7 @@ interface FeatureDetailContentProps {
   isAssignee: boolean
   isAdmin: boolean
   isClosed: boolean
+  locale: string
   structuredData: {
     name: string
     description: string
@@ -70,9 +71,10 @@ export async function FeatureDetailContent({
   isAssignee,
   isAdmin,
   isClosed,
+  locale,
   structuredData,
 }: FeatureDetailContentProps) {
-  const t = await getTranslations("Feature")
+  const t = await getTranslations({ locale, namespace: "Feature" })
   const canEdit = isAuthor || isAdmin
 
   const editorInitialData = buildEditorInitialData(feature)

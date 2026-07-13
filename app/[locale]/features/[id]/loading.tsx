@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server"
 import {
   SectionFrame,
   SegmentedBar,
@@ -7,14 +6,15 @@ import {
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { TechCard } from "@/components/ui/tech-card"
 
-export default async function FeatureDetailLoading() {
-  const t = await getTranslations("CommonA11y")
+const LOADING_LABEL = "Loading feature details"
+
+export default function FeatureDetailLoading() {
   return (
     <SkeletonExitWrapper>
       <div
         className="container mx-auto max-w-4xl space-y-6 p-4 sm:p-6 md:p-8"
         aria-busy="true"
-        aria-label={t("loadingFeatureDetails")}>
+        aria-label={LOADING_LABEL}>
         {/* FEATURE_HEADER_ */}
         <div className="relative flex flex-col gap-4">
           <div>

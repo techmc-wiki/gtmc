@@ -2,13 +2,13 @@ import type { PluggableList } from "unified"
 import remarkGfm from "remark-gfm"
 import remarkMath from "remark-math"
 import remarkBreaks from "remark-breaks"
+import remarkDirective from "remark-directive"
 import rehypeRaw from "rehype-raw"
 import rehypeKatex from "rehype-katex"
 import rehypeSlug from "rehype-slug"
 
-import { remarkAnsiColors } from "../syntax/remark-ansi-colors"
+import { remarkDirectiveHandler } from "@/lib/markdown/syntax/remark-directive-handler"
 import { remarkCallouts } from "../syntax/remark-callouts"
-import { remarkAdvancedSections } from "../syntax/remark-advanced-sections"
 import { remarkPeopleMentions } from "../syntax/remark-people-mentions"
 import { remarkNumberedHeadingsDot } from "../syntax/remark-heading-numbering"
 import { remarkWikilinks } from "../syntax/remark-wikilinks"
@@ -56,16 +56,16 @@ export function buildRemarkPlugins(
   const plugins: PluggableList = [
     remarkGfm,
     remarkBreaks,
-    remarkAnsiColors,
+    remarkDirective,
+    remarkDirectiveHandler,
     remarkCallouts,
     remarkPeopleMentions,
-    remarkAdvancedSections,
     [remarkNumberedHeadingsDot, { startDepth: 2 }],
   ]
 
   // Insert wikilinks early if requested
   if (options.includeWikilinks) {
-    plugins.splice(3, 0, remarkWikilinks)
+    plugins.splice(2, 0, remarkWikilinks)
   }
 
   // Add math support if requested or auto-detected

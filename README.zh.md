@@ -25,7 +25,7 @@
 
 ## 关于
 
-**Graduate Texts in Minecraft**（*GTMC*）是一个开放的 Minecraft 技术知识库——涵盖红石、游戏机制与引擎内部原理。任何人都能阅读，并由社区共同编写、评审。
+**Graduate Texts in Minecraft**（_GTMC_）是一个开放的 Minecraft 技术知识库——涵盖红石、游戏机制与引擎内部原理。任何人都能阅读，并由社区共同编写、评审。
 
 这里有三类文章：
 
@@ -43,8 +43,6 @@
 ## 本地运行
 
 <a href="https://skillicons.dev"><img src="https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,prisma,supabase,vercel" alt="Next.js, React, TypeScript, Tailwind CSS, Prisma, Supabase, Vercel" /></a>
-
-视觉系统详见 [`DESIGN.md`](DESIGN.md)，完整技术栈详见 [`AGENTS.md`](AGENTS.md)。
 
 ```bash
 git clone https://github.com/techmc-wiki/gtmc.git

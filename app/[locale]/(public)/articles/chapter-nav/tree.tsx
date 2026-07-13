@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation"
 import { TriangleIcon } from "@/components/ui/triangle-icon"
 import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
+import { partitionAppendixNodes } from "@/lib/articles/navigation-data"
 import { encodeSlug } from "@/lib/articles/slug-resolver"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import React from "react"
@@ -125,6 +126,7 @@ function FolderGrid({
         <ChapterNavTree
           items={items}
           onNavigate={onNavigate}
+          partitionAppendices={false}
         />
       </div>
     </div>
@@ -134,9 +136,11 @@ function FolderGrid({
 export function ChapterNavTree({
   items,
   onNavigate,
+  partitionAppendices = true,
 }: {
   items: ChapterNavNode[]
   onNavigate?: () => void
+  partitionAppendices?: boolean
 }) {
   const {
     effectivePath,
@@ -148,18 +152,19 @@ export function ChapterNavTree({
   } = useReaderNavigation()
 
   const decodedPathname = decodeURIComponent(effectivePath)
-  const firstAppendixArticleIndex = items.findIndex(
-    (item) => !item.isFolder && (item.isAppendix ?? false)
-  )
-  const hasRegularBeforeFirstAppendix =
-    firstAppendixArticleIndex > 0 &&
-    items
-      .slice(0, firstAppendixArticleIndex)
-      .some((item) => !item.isFolder && !(item.isAppendix ?? false))
+  const { regularNodes, appendixGroups } = partitionAppendices
+    ? partitionAppendixNodes(items)
+    : { regularNodes: items, appendixGroups: [] }
+  const appendixNodes = appendixGroups.flatMap((group) => group.nodes)
+  const orderedItems = [...regularNodes, ...appendixNodes]
+  const firstAppendixIndex =
+    regularNodes.length > 0 && appendixNodes.length > 0
+      ? regularNodes.length
+      : -1
 
   return (
     <ul className="my-0.5 pl-5">
-      {items.map((item, index) => {
+      {orderedItems.map((item, index) => {
         const fileRoute = `/articles/${encodeSlug(item.slug)}`
         const decodedRoute = decodeURIComponent(fileRoute)
         const isActive =
@@ -167,8 +172,7 @@ export function ChapterNavTree({
           (decodedPathname === decodedRoute ||
             decodedPathname === `${decodedRoute}/`)
         const folderExpanded = item.isFolder ? isFolderExpanded(item.id) : false
-        const showAppendixSeparator =
-          index === firstAppendixArticleIndex && hasRegularBeforeFirstAppendix
+        const showAppendixSeparator = index === firstAppendixIndex
 
         return (
           <React.Fragment key={item.id}>

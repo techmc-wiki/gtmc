@@ -9,7 +9,7 @@ This file is the agent contract for the **GTMC website** repo. It complements `R
 This repo contains the public website for **Graduate Texts in Minecraft (GTMC)** — a community-driven online textbook on technical Minecraft. It serves articles (tutorials, mechanics explanations, source-code analyses), a draft/review hub for contributors, and a feature-request tracker.
 
 - **Framework**: Next.js 16 (App Router, Cache Components, Turbopack) on React 19
-- **Language**: TypeScript 6 (strict mode)
+- **Language**: TypeScript 7.0.2 (strict mode)
 - **Styling**: Tailwind CSS v4
 - **Motion**: `motion` (Framer Motion successor)
 - **Auth**: NextAuth v5 (GitHub provider) + Prisma adapter
@@ -20,7 +20,7 @@ This repo contains the public website for **Graduate Texts in Minecraft (GTMC)**
 - **Search**: MiniSearch
 - **i18n**: `next-intl` with `en` and `zh` locales
 - **Hosting**: Vercel (Speed Insights, Analytics, Blob)
-- **Unified tooling**: Vite+ (`vp`) for package management, Oxlint, Oxfmt, and Vitest
+- **Unified tooling**: pnpm 11 for package management, with Vite+ (`vp`) providing Oxlint, Oxfmt, and Vitest integration
 - **Tests**: Vitest, Playwright, Lighthouse CI
 
 The articles themselves live in a separate repo and are pulled in via a Git submodule at `articles/`, and the glossary CSV data is pulled in via a submodule at `glossary/`.
@@ -38,14 +38,14 @@ The articles themselves live in a separate repo and are pulled in via a Git subm
 │   └── api/                Route handlers
 ├── actions/                Server actions (drafts, reviews, profile, …)
 ├── components/ui/          tech-card, tech-button, corner-brackets, …
-├── components/{articles,editor,features,layout,markdown,review,search}/
+├── components/{articles,editor,features,glossary,layout,markdown,review,search,ui}/
 ├── lib/                    Article pipeline, auth, db, search, GitHub helpers
 ├── articles/               Article content (Git submodule)
 ├── glossary/               Glossary CSV data (Git submodule)
 ├── data/                   Generated manifest + rendered article content + glossary*.json
 ├── i18n/                   next-intl request config + routing
 ├── messages/               i18n catalogs (en.json, zh.json)
-├── public/                 Static assets including generated gtmc.pdf
+├── public/                 Static assets including generated gtmc-en.pdf and gtmc-zh.pdf
 ├── scripts/                Manifest, content, and PDF generators
 ├── proxy.ts                Auth + i18n middleware
 ├── schema.prisma           Database schema
@@ -54,7 +54,7 @@ The articles themselves live in a separate repo and are pulled in via a Git subm
 
 ## Setup Commands
 
-The project uses **pnpm 11** (pinned via `packageManager` in `package.json`) through Vite+ and is tested on **Node 24** in CI. macOS, Linux, and Vercel build images are supported.
+The project uses **pnpm v11** and runs on **Node 26** in CI. macOS, Linux, and Vercel build images are supported.
 
 ```bash
 git clone https://github.com/techmc-wiki/gtmc.git
@@ -77,18 +77,21 @@ pnpm dev                # http://localhost:3000
 
 `.env.example` lists the required keys. None are committed.
 
-| Variable | Purpose |
-| --- | --- |
-| `DATABASE_URL` | Postgres connection string (Supabase in production) |
-| `GITHUB_FEATURES_ISSUES_PAT` | PAT used to read/comment on feature issues |
-| `GITHUB_FEATURES_WRITE_PAT` | PAT used to open/edit feature issues |
-| `GITHUB_REPO_OWNER` / `GITHUB_REPO_NAME` | Target repo for article submission flows |
+| Variable                                                   | Purpose                                                                          |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                             | Pooled Postgres connection string (Supabase in production)                       |
+| `DIRECT_URL`                                               | Direct Postgres connection used by Prisma migrations                             |
+| `NEXT_PUBLIC_APP_URL`                                      | Public site origin used for canonical URLs and uploads                           |
+| `GITHUB_ID` / `GITHUB_SECRET`                              | GitHub OAuth application credentials for sign-in                                 |
+| `GITHUB_FEATURES_ISSUES_PAT`                               | PAT used to read/comment on feature issues                                       |
+| `GITHUB_FEATURES_WRITE_PAT`                                | PAT used to open/edit feature issues                                             |
+| `GITHUB_REPO_OWNER` / `GITHUB_REPO_NAME`                   | Target repo for article submission flows                                         |
 | `GITHUB_GLOSSARY_REPO_OWNER` / `GITHUB_GLOSSARY_REPO_NAME` | Target repo for glossary submodule (defaults to TechMC-Glossary/TechMC-Glossary) |
-| `GITHUB_GLOSSARY_WRITE_PAT` | PAT for opening glossary PRs (requires Contents + Pull requests read/write) |
-| `BLOB_READ_WRITE_TOKEN` | Vercel Blob token for uploads ≥ 4.5 MB |
-| `BLOB_STORE_HOSTNAME` | Hostname of the Vercel Blob store |
+| `GITHUB_GLOSSARY_WRITE_PAT`                                | PAT for opening glossary PRs (requires Contents + Pull requests read/write)      |
+| `BLOB_READ_WRITE_TOKEN`                                    | Vercel Blob token for uploads ≥ 4.5 MB                                           |
+| `BLOB_STORE_HOSTNAME`                                      | Hostname of the Vercel Blob store                                                |
 
-NextAuth additionally expects `AUTH_SECRET` and GitHub OAuth credentials configured per `lib/auth.ts`.
+NextAuth additionally expects `AUTH_SECRET` (or `NEXTAUTH_SECRET`) and the GitHub OAuth credentials used by `lib/auth/index.ts`.
 
 ## Development Workflow
 
@@ -99,7 +102,7 @@ vp check --fix            # Format and autofix lint findings
 vp test run               # Run Vitest once
 vp install                # Install with the pinned pnpm version
 pnpm typecheck            # tsc --noEmit (strict, Next.js-aware)
-pnpm build:content        # Generate content artifacts (manifest, glossary, articles, PDF)
+pnpm build:content        # Generate content artifacts (manifest, glossary, articles, locale PDFs)
 pnpm build:next           # Next.js production build
 pnpm build                # Both phases: content generation then Next build
 pnpm prepare:articles     # Prepare articles submodule for build (pinned by default)
@@ -111,7 +114,7 @@ Key things to know:
 
 - **Path alias**: `@/*` resolves to the repo root (see `tsconfig.json` and `vite.config.ts`).
 - **Next.js command boundary**: continue using `pnpm dev` and `pnpm build`. The built-in `vp dev` and `vp build` commands invoke Vite and must not replace the Next.js/Turbopack scripts.
-- **Middleware** lives in `proxy.ts` (not `middleware.ts`). It composes `next-intl` routing with NextAuth and gates `/admin`, `/draft`, `/profile`, `/review`, and `/features/new` behind a session.
+- **Middleware** lives in `proxy.ts` (not `middleware.ts`). It composes `next-intl` routing with NextAuth and gates `/admin`, `/draft`, `/glossary/edit`, `/profile`, `/review`, and `/features/new` behind a session.
 - **Prisma client** is imported from `@prisma/client`; `serverExternalPackages` in `next.config.ts` keeps Prisma out of the client bundle.
 - The build embeds a 7-char Git SHA as `NEXT_PUBLIC_BUILD_SHA` (falls back to `VERCEL_GIT_COMMIT_SHA`).
 
@@ -124,7 +127,7 @@ pnpm articles:update        # Pull the latest articles commit
 pnpm prepare:articles       # Prepare articles for a build using GTMC_ARTICLES_SOURCE
 pnpm generate:manifest      # Rebuild data/manifest.json
 pnpm generate:content       # Re-render rendered article content
-pnpm articles:pdf           # Re-render the offline PDF (public/gtmc.pdf)
+pnpm articles:pdf           # Re-render the offline PDFs (public/gtmc-en.pdf and public/gtmc-zh.pdf)
 ```
 
 Article build source is controlled by `GTMC_ARTICLES_SOURCE`:
@@ -189,7 +192,7 @@ When working on UI:
 ## Build and Deployment
 
 ```bash
-pnpm build:content  # Generate static content artifacts (manifest, glossary, articles, PDF)
+pnpm build:content  # Generate static content artifacts (manifest, glossary, articles, locale PDFs)
 pnpm build:next     # Next.js production build
 pnpm build          # Both phases in order: build:content && build:next
 pnpm analyze        # Same build with @next/bundle-analyzer enabled
@@ -197,7 +200,7 @@ pnpm analyze        # Same build with @next/bundle-analyzer enabled
 
 **Two-phase build model:**
 
-- **Phase 1 (`build:content`)**: Generates static content artifacts — `data/manifest.json`, `data/glossary*.json`, rendered article content, and `public/gtmc.pdf` (via Playwright + Chromium).
+- **Phase 1 (`build:content`)**: Generates static content artifacts — `data/manifest.json`, `data/glossary*.json`, rendered article content, and `public/gtmc-en.pdf` / `public/gtmc-zh.pdf` (via Playwright + Chromium).
 - **Phase 2 (`build:next`)**: Runs `next build`, consuming the artifacts from phase 1.
 - **`pnpm build`**: Runs both phases in order.
 
@@ -206,11 +209,11 @@ This is not a multi-package split or monorepo; it's a formalized build phase bou
 Notes:
 
 - `pnpm build` is **non-trivial** — phase 1 regenerates all content artifacts before phase 2 invokes `next build`. Allow time and disk space accordingly.
-- `next.config.ts` configures `outputFileTracingIncludes` / `Excludes` so search and litematica endpoints get the right files but article binaries are not pulled into every lambda. Keep these patterns in sync if you add similar routes. (Future: glossary manifests may need similar treatment if served from dedicated API routes.)
+- `next.config.ts` enables Cache Components and configures `outputFileTracingIncludes` / `Excludes` so article, glossary, search, and litematica routes get the right files without pulling article binaries or PDFs into every lambda. Keep these patterns in sync if you add similar routes.
 - Vercel uses `vercel.json` to install Chromium system libraries on Amazon Linux before `pnpm install`, then runs `pnpm build:vercel`. That script installs Playwright Chromium, prepares the articles submodule according to `GTMC_ARTICLES_SOURCE`, deploys Prisma migrations, and runs the two-phase `pnpm build`.
 - CI workflows (`.github/workflows/`):
-  - `build.yml` — runs on every push and PR; installs deps with `--frozen-lockfile`, generates the Prisma client with a placeholder `DATABASE_URL`, then runs `pnpm typecheck` and `pnpm build`.
-  - `style_and_lint.yml` — runs on pushes to `main`; its compatibility scripts delegate to Vite+ lint and format checks.
+  - `build.yml` — runs on every push and PR with Node 26; installs deps with `--frozen-lockfile`, generates the Prisma client with a placeholder `DATABASE_URL`, then runs the typecheck and build scripts. Content artifacts are cached by the articles SHA and generator inputs.
+  - `style_and_lint.yml` — runs on pushes to `main` with Node 26; skips heavy postinstall work, then runs the lint and format check scripts.
   - `submit_pr.yml` — `workflow_dispatch` only; opens automated article-submission PRs from the review hub.
 
 Before reporting a build-affecting change as "done":
@@ -237,16 +240,16 @@ Conventional Commits style:
 
 Allowed `<type>` values:
 
-| type | meaning |
-| --- | --- |
-| `feat` | new feature |
-| `fix` | bug fix |
-| `refactor` | code restructure (no new feature, no bug fix) |
-| `docs` | documentation only |
-| `style` | formatting/style-only changes (no semantic changes) |
-| `chore` | build / scripts / dependencies / general maintenance |
-| `test` | test-related work |
-| `perf` | performance optimization |
+| type       | meaning                                              |
+| ---------- | ---------------------------------------------------- |
+| `feat`     | new feature                                          |
+| `fix`      | bug fix                                              |
+| `refactor` | code restructure (no new feature, no bug fix)        |
+| `docs`     | documentation only                                   |
+| `style`    | formatting/style-only changes (no semantic changes)  |
+| `chore`    | build / scripts / dependencies / general maintenance |
+| `test`     | test-related work                                    |
+| `perf`     | performance optimization                             |
 
 Recent history frequently uses `fix(scope): …`, `feat(scope): …`, and `chore(scope): …`. Prefer including a scope (e.g. `sidebar`, `build`, `deps`, `api/*`) for traceability.
 
@@ -289,11 +292,12 @@ If you are an Oh-my-Opencode agent (Sisyphus, Prometheus, Atlas, Hephaestus):
 3. `AGENTS.md`, `docs/superpowers/`, and `.sisyphus/` are agent-support assets — be mindful of their `.gitignore` status before committing.
 4. If the current objective is fully done and the conversation context no longer helps, you may suggest opening a new session.
 5. `node_modules/next/dist/docs/` is the source of truth for Next.js behaviour — read it before relying on training-data knowledge of Next.js APIs (see the auto-managed Next.js block below).
+6. TypeScript 7 includes the native `tsgo` tool. This repo uses `next@16.3.0-canary.83`, which supports the TypeScript 7 toolchain; earlier pre-`canary.83` Next.js 16.3 versions do not. Keep using the existing `pnpm typecheck` script unless the Next.js typecheck integration is intentionally migrated to `tsgo`.
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **gtmc** (4983 symbols, 10973 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **gtmc** (5477 symbols, 11564 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > Index stale? Run `node .gitnexus/run.cjs analyze` from the project root — it auto-selects an available runner. No `.gitnexus/run.cjs` yet? `npx gitnexus analyze` (npm 11 crash → `npm i -g gitnexus`; #1939).
 

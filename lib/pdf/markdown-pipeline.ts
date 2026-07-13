@@ -97,7 +97,7 @@ export async function renderMarkdownToHtml(
   const notice = locale === "zh" ? "该图为动图。" : "This figure is animated."
   const linkText = locale === "zh" ? "查看原图" : "View original"
   const baseUrl = options?.articleSlug
-    ? `https://beta.techmc.wiki/${locale}/articles/${options.articleSlug}`
+    ? `https://techmc.wiki/${locale}/articles/${options.articleSlug}`
     : ""
   const sourceLink = baseUrl
     ? ` <a href="${baseUrl}" class="gif-source-link">${linkText}</a>`

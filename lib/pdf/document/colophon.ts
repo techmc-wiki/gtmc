@@ -8,7 +8,7 @@ export function renderColophonHtml(
   articleCount: number
 ): string {
   const labels = getLabels(options.locale)
-  const url = options.sourceUrl ?? "https://beta.techmc.wiki"
+  const url = options.sourceUrl ?? "https://techmc.wiki"
 
   const revisionLine = options.articlesRevision
     ? `    <p>${labels.colophonRevision} <code>${escapeHtml(options.articlesRevision)}</code></p>`

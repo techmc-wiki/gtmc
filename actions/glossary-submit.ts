@@ -134,7 +134,7 @@ export async function submitGlossaryDraftAction(
       draft.title ||
       `Update glossary: ${editCount} edited, ${addCount} added, ${deleteCount} deleted`
 
-    let body = `This PR updates glossary terms via [GTMC](https://beta.techmc.wiki).\n\n`
+    let body = `This PR updates glossary terms via [GTMC](https://techmc.wiki).\n\n`
     body += `Changes: ${editCount} edited, ${addCount} added, ${deleteCount} deleted.\n`
     if (githubLogin) {
       body += `Requested by @${githubLogin}.\n`

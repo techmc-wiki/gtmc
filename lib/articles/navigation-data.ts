@@ -20,34 +20,42 @@ interface NavigationResult {
   next: ArticleInfo | null
 }
 
+function visitArticleNodes(
+  nodes: ChapterNavNode[],
+  visitor: (node: ChapterNavNode, parent: ChapterNavNode | null) => void,
+  parent: ChapterNavNode | null = null
+): void {
+  for (const node of nodes) {
+    if (!node.isFolder) {
+      visitor(node, parent)
+    }
+    if (node.children.length > 0) {
+      visitArticleNodes(node.children, visitor, node)
+    }
+  }
+}
+
+export function flattenArticleNodes(tree: ChapterNavNode[]): ChapterNavNode[] {
+  const articles: ChapterNavNode[] = []
+  visitArticleNodes(tree, (node) => articles.push(node))
+  return articles
+}
+
 export function flattenArticleTree(tree: ChapterNavNode[]): FlatArticle[] {
   const result: FlatArticle[] = []
 
-  function dfs(
-    nodes: ChapterNavNode[],
-    chapterPath = "",
-    chapterTitle = ""
-  ): void {
-    for (const node of nodes) {
-      if (!node.isFolder) {
-        const inferredParentPath = node.isReadmeIntro
-          ? node.slug
-          : node.slug.split("/").slice(0, -1).join("/")
-        const parentPath = chapterPath || inferredParentPath
-        result.push({
-          slug: node.slug,
-          title: node.title,
-          parentPath,
-          ...(chapterTitle ? { chapterTitle } : {}),
-        })
-      }
-      if (node.children.length > 0) {
-        dfs(node.children, node.slug, node.title)
-      }
-    }
-  }
-
-  dfs(tree)
+  visitArticleNodes(tree, (node, parent) => {
+    const inferredParentPath = node.isReadmeIntro
+      ? node.slug
+      : node.slug.split("/").slice(0, -1).join("/")
+    const parentPath = parent?.slug || inferredParentPath
+    result.push({
+      slug: node.slug,
+      title: node.title,
+      parentPath,
+      ...(parent ? { chapterTitle: parent.title } : {}),
+    })
+  })
   return result
 }
 

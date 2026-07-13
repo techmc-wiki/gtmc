@@ -58,7 +58,7 @@ import type { RehypeShikiPlugin } from "@/lib/markdown/syntax/rehype-shiki"
 
 const BOOK_TITLE = "Graduate Texts in Minecraft"
 const BOOK_SUBTITLE = "An Introduction to Technical Minecraft"
-const SOURCE_URL = "https://beta.techmc.wiki"
+const SOURCE_URL = "https://techmc.wiki"
 const TAGLINES: Record<PdfLocale, string> = {
   en: "Knowledge exists. Structure matters.",
   zh: "知识从未缺失，缺失的是连接。",

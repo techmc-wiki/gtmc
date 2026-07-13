@@ -13,7 +13,7 @@ const {
   mockGetContent: vi.fn(),
   mockRevisionUpdate: vi.fn(async () => ({})),
   mockRevisionFindUnique: vi.fn(),
-  mockConflictResolutionFindUnique: vi.fn(async () => null),
+  mockConflictResolutionFindUnique: vi.fn(),
 }))
 
 vi.mock("@/lib/github/articles-repo", () => ({

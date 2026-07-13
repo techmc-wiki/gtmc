@@ -7,8 +7,9 @@
  *   1. Load + sort the article tree, linearize, and number it (book plan)
  *   2. Scan article bodies once (code languages, math, content map)
  *   3. Render the cover as its own single-page PDF (no running apparatus)
- *   4. Render the body twice: pass 1 measures real page numbers from the
- *      PDF's named destinations, pass 2 re-renders with TOC folios filled
+ *   4. Render the body to bounded convergence: pass 1 measures real page
+ *      numbers, pass 2 inserts TOC folios, and one final pass runs only when
+ *      those folios changed their own target pages
  *   5. Merge cover + body, write exact-page outlines and metadata
  *
  * Usage:
@@ -41,7 +42,11 @@ import type { BookOptions, PdfLocale } from "@/lib/pdf/document"
 import { resolveImagesInHtml } from "@/lib/pdf/images"
 import { renderMarkdownToHtml } from "@/lib/pdf/markdown-pipeline"
 import { buildOutlineTree, writePdfOutlines } from "@/lib/pdf/outline"
-import { fillTocFolios, readAnchorPageIndices } from "@/lib/pdf/paginate"
+import {
+  fillTocFolios,
+  haveTocFolioPagesChanged,
+  readAnchorPageIndices,
+} from "@/lib/pdf/paginate"
 import { paintPageBackgrounds } from "@/lib/pdf/paint-background"
 import {
   PDF_REQUIRED_FONTS,
@@ -291,7 +296,7 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
     }
   }
 
-  console.log("[pdf] Phase 5/6: Rendering PDF (cover + two-pass body)...")
+  console.log("[pdf] Phase 5/6: Rendering PDF (cover + convergent body)...")
   const browser = await chromium
     .launch({
       args: [
@@ -335,15 +340,18 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
       bodyRenderOptions
     )
 
-    anchorPages = await readAnchorPageIndices(pass1Bytes)
-    const { html: filledHtml, missing } = fillTocFolios(bodyHtml, anchorPages)
+    const pass1AnchorPages = await readAnchorPageIndices(pass1Bytes)
+    const { html: filledHtml, missing } = fillTocFolios(
+      bodyHtml,
+      pass1AnchorPages
+    )
     if (missing.length > 0) {
       console.warn(
         `[pdf]   ⚠ ${missing.length} TOC anchor(s) without a measured page: ${missing.slice(0, 3).join(", ")}${missing.length > 3 ? ", …" : ""}`
       )
     }
     console.log(
-      `[pdf]   → Pass 1 measured ${anchorPages.size} anchors; re-rendering with folios...`
+      `[pdf]   → Pass 1 measured ${pass1AnchorPages.size} anchors; re-rendering with folios...`
     )
 
     bodyBytes = await renderHtmlToPdf(
@@ -354,9 +362,30 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
       bodyRenderOptions
     )
 
-    // Folios can shift pagination if a TOC line wraps; re-measure so
-    // outlines stay exact even then.
-    anchorPages = await readAnchorPageIndices(bodyBytes)
+    const pass2AnchorPages = await readAnchorPageIndices(bodyBytes)
+    if (
+      haveTocFolioPagesChanged(bodyHtml, pass1AnchorPages, pass2AnchorPages)
+    ) {
+      console.log(
+        "[pdf]   → Pass 2 shifted TOC targets; rendering one final folio pass..."
+      )
+      const { html: finalHtml } = fillTocFolios(bodyHtml, pass2AnchorPages)
+      bodyBytes = await renderHtmlToPdf(
+        browser,
+        finalHtml,
+        tempHtmlPath,
+        tempPdfPath,
+        bodyRenderOptions
+      )
+      anchorPages = await readAnchorPageIndices(bodyBytes)
+      if (haveTocFolioPagesChanged(bodyHtml, pass2AnchorPages, anchorPages)) {
+        throw new Error(
+          "[pdf] TOC folios did not converge after the final pass"
+        )
+      }
+    } else {
+      anchorPages = pass2AnchorPages
+    }
   } catch (error) {
     cleanupTemp()
     throw new Error(`[pdf] PDF generation failed: ${error}`, { cause: error })

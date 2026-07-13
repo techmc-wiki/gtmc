@@ -47,6 +47,14 @@ export interface LinearizedArticle {
   depth: number
 }
 
+interface LinearizeContext {
+  chapterSlug: string
+  chapterTitle: string
+  isAppendix: boolean
+  folders: LinearizedFolder[]
+  depth: number
+}
+
 /**
  * Flatten a sorted `ChapterNavNode[]` into a display-order array of
  * `LinearizedArticle` entries.
@@ -62,33 +70,49 @@ export interface LinearizedArticle {
 export async function linearizeArticles(tree: ChapterNavNode[]): Promise<LinearizedArticle[]> {
   async function linearizeNodes(
     nodes: ChapterNavNode[],
-    chapterSlug: string,
-    chapterTitle: string,
-    folders: LinearizedFolder[],
-    depth: number,
+    context: LinearizeContext
   ): Promise<LinearizedArticle[]> {
     const nested = await Promise.all(
       nodes.map(async (node): Promise<LinearizedArticle[]> => {
         if (node.isFolder) {
-          if (depth === 0) {
-            return linearizeNodes(
-              node.children,
-              node.slug,
-              node.title,
-              [],
-              depth + 1
-            )
+          if (context.depth === 0) {
+            const appendixOwner = node.appendixOwner
+            if (appendixOwner) {
+              return linearizeNodes(node.children, {
+                chapterSlug: appendixOwner.slug,
+                chapterTitle: appendixOwner.title,
+                isAppendix: true,
+                folders: [{ slug: node.slug, title: node.title }],
+                depth: context.depth + 1,
+              })
+            }
+            return linearizeNodes(node.children, {
+              chapterSlug: node.slug,
+              chapterTitle: node.title,
+              isAppendix: node.isAppendix ?? false,
+              folders: [],
+              depth: context.depth + 1,
+            })
           }
-          return linearizeNodes(
-            node.children,
-            chapterSlug,
-            chapterTitle,
-            [...folders, { slug: node.slug, title: node.title }],
-            depth + 1
-          )
+          return linearizeNodes(node.children, {
+            ...context,
+            folders: [
+              ...context.folders,
+              { slug: node.slug, title: node.title },
+            ],
+            depth: context.depth + 1,
+          })
         }
 
         const filePath = await resolveLocalArticlePath(node.slug)
+        const appendixOwner =
+          context.chapterSlug === "" ? node.appendixOwner : undefined
+        const chapterSlug = context.chapterSlug || appendixOwner?.slug || ""
+        const chapterTitle = context.chapterTitle || appendixOwner?.title || ""
+        const isAppendix =
+          context.chapterSlug !== ""
+            ? context.isAppendix
+            : appendixOwner !== undefined
 
         return [
           {
@@ -97,13 +121,13 @@ export async function linearizeArticles(tree: ChapterNavNode[]): Promise<Lineari
             filePath,
             chapterSlug,
             chapterTitle,
-            folders,
+            folders: context.folders,
             isPreface: node.isPreface ?? false,
-            isAppendix: node.isAppendix ?? false,
+            isAppendix,
             isAdvanced: node.isAdvanced ?? false,
             isReadmeIntro: node.isReadmeIntro ?? false,
             index: node.index ?? -1,
-            depth,
+            depth: context.depth,
           },
         ]
       })
@@ -112,7 +136,13 @@ export async function linearizeArticles(tree: ChapterNavNode[]): Promise<Lineari
     return nested.flat()
   }
 
-  return linearizeNodes(tree, "", "", [], 0)
+  return linearizeNodes(tree, {
+    chapterSlug: "",
+    chapterTitle: "",
+    isAppendix: false,
+    folders: [],
+    depth: 0,
+  })
 }
 
 const contentCache = new Map<string, string | null>()

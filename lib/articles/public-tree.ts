@@ -28,6 +28,20 @@ function isReadmeArticle(node: ChapterNavNode): boolean {
   );
 }
 
+function assignAppendixOwner(
+  node: ChapterNavNode,
+  appendixOwner: NonNullable<ChapterNavNode["appendixOwner"]>,
+): ChapterNavNode {
+  return {
+    ...node,
+    isAppendix: true,
+    appendixOwner,
+    children: node.children.map((child) =>
+      assignAppendixOwner(child, appendixOwner),
+    ),
+  };
+}
+
 /**
  * 获取公开章节导航树。
  * Chapter navigation is built from the public article source only.
@@ -125,13 +139,17 @@ function filterIgnoredNodes(
     };
 
     if (filteredNode.isFolder && isAppendixDirectoryName(filteredNode.title)) {
+      const appendixOwner = {
+        slug: filteredNode.slug,
+        title: filteredNode.title,
+      };
       const promotedChildren = filteredNode.children.filter(
         (child) => child.isFolder || !isReadmeArticle(child),
       );
 
       for (const child of promotedChildren) {
         result.push({
-          ...child,
+          ...assignAppendixOwner(child, appendixOwner),
           parentId: filteredNode.parentId,
         });
       }
@@ -165,12 +183,13 @@ function injectReadmeIntroNodes(nodes: ChapterNavNode[]) {
       slug: node.slug,
       index: -1,
       isFolder: false,
-      isAppendix: false,
+      isAppendix: node.isAppendix ?? false,
       isPreface: false,
       isAdvanced: false,
       isReadmeIntro: true,
       parentId: node.id,
       children: [],
+      ...(node.appendixOwner ? { appendixOwner: node.appendixOwner } : {}),
     });
   }
 }

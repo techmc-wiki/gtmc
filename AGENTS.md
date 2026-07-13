@@ -71,7 +71,13 @@ pnpm dev                # http://localhost:3000
 3. Generates the glossary manifest.
 4. Runs `prisma generate` (with a placeholder `DATABASE_URL` if none is set, to allow client codegen offline), unless heavy postinstall steps are explicitly skipped.
 5. Runs `tsx scripts/generate-article-manifest.ts` and `tsx scripts/generate-author-profiles.ts`.
-6. Runs `playwright install chromium` for the PDF generator and any browser tests.
+6. Runs `playwright install chromium` for the PDF generator and any browser tests, unless `GTMC_SKIP_PLAYWRIGHT=1` (or heavy postinstall is already skipped).
+
+CI notes for the Build workflow:
+
+- Content/PDF artifacts are cached by articles SHA + glossary SHA + generator/lib hashes. Exact cache hits set `GTMC_SKIP_CONTENT_BUILD=true`.
+- Install uses `GTMC_SKIP_POSTINSTALL=1`; Prisma is generated in a dedicated step; Chromium is installed only on content-cache miss.
+- Superseded runs on the same ref are cancelled via `concurrency`.
 
 ### Environment variables
 
@@ -216,7 +222,7 @@ Notes:
 - `next.config.ts` enables Cache Components and configures `outputFileTracingIncludes` / `Excludes` so article, glossary, search, and litematica routes get the right files without pulling article binaries or PDFs into every lambda. Keep these patterns in sync if you add similar routes.
 - Vercel uses `vercel.json` to install Chromium system libraries on Amazon Linux before `pnpm install`, then runs `pnpm build:vercel`. That script installs Playwright Chromium, prepares the articles submodule according to `GTMC_ARTICLES_SOURCE`, deploys Prisma migrations, and runs the two-phase `pnpm build`.
 - CI workflows (`.github/workflows/`):
-  - `build.yml` — runs on every push and PR with Node 26; installs deps with `--frozen-lockfile`, generates the Prisma client with a placeholder `DATABASE_URL`, then runs the typecheck and build scripts. Content artifacts are cached by the articles SHA and generator inputs.
+  - `build.yml` — runs on every push and PR with Node 26; concurrency-cancels superseded runs on the same ref; checks out submodules, restores content/PDF artifacts by articles+glossary SHA and generator hashes, installs with `GTMC_SKIP_POSTINSTALL=1`, generates Prisma, installs Chromium only on content-cache miss, then runs `pnpm build` (Next typechecks during build; standalone `tsc` is omitted). Exact content-cache hits set `GTMC_SKIP_CONTENT_BUILD=true`.
   - `style_and_lint.yml` — runs on pushes to `main` with Node 26; skips heavy postinstall work, then runs the lint and format check scripts.
   - `submit_pr.yml` — `workflow_dispatch` only; opens automated article-submission PRs from the review hub.
 

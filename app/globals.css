@@ -844,6 +844,12 @@ code[class^="language-"] {
     margin-bottom: 0;
   }
 
+  /* Citations may be rendered as a reference list or as generated footnotes.
+   * Allow a long URL to break rather than widening the reader column. */
+  .article-prose a {
+    overflow-wrap: anywhere;
+  }
+
   /* Print Edition: the text block reads like a set page.
    * Body paragraphs are justified with hyphenation at reading widths;
    * mobile stays ragged-right where a narrow measure justifies poorly. */

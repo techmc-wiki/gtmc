@@ -11,7 +11,6 @@ export interface SourceFrontMatter {
 
 export interface TranslationFrontMatter {
   translates: string
-  "translated-from-revision": string
   title?: string
   description?: string
   banner?: { src: string; alt?: string }
@@ -26,7 +25,6 @@ export interface SourceReadmeFrontMatter {
 
 export interface TranslationReadmeFrontMatter {
   translates: string
-  "translated-from-revision": string
   "chapter-title": string
   "intro-title"?: string
 }
@@ -157,10 +155,6 @@ export function parseTranslationFrontMatter(
 
   return {
     translates: parseRequiredNonEmptyString(raw, "translates"),
-    "translated-from-revision": parseRequiredNonEmptyString(
-      raw,
-      "translated-from-revision"
-    ),
     title: parseOptionalString(raw.title),
     description: parseOptionalString(raw.description),
     banner: parseBanner(raw.banner),
@@ -189,10 +183,6 @@ export function parseTranslationReadmeFrontMatter(
 
   return {
     translates: parseRequiredNonEmptyString(raw, "translates"),
-    "translated-from-revision": parseRequiredNonEmptyString(
-      raw,
-      "translated-from-revision"
-    ),
     "chapter-title": parseRequiredNonEmptyString(raw, "chapter-title"),
     "intro-title": parseOptionalString(raw["intro-title"]),
   }

@@ -185,7 +185,15 @@ function main(): void {
         continue
       }
 
-      const { regenerate } = shouldRegenerate(fileContent, cacheKey, cache)
+      const generationInput =
+        locale === "en"
+          ? `${fileContent}\x00${JSON.stringify({
+              translatedFromRevision: entry.translatedFromRevisionByLocale.en,
+              translationFreshness: entry.translationFreshnessByLocale.en,
+              translationStatus: entry.translationStatusByLocale?.en,
+            })}`
+          : fileContent
+      const { regenerate } = shouldRegenerate(generationInput, cacheKey, cache)
 
       const cachedFrontmatter =
         !regenerate && fs.existsSync(prevOutputPath)
@@ -314,7 +322,7 @@ function renderArtifact(
       ...("description" in fm &&
         fm.description && { description: fm.description }),
       ...("banner" in fm && fm.banner && { banner: fm.banner }),
-      translatedFromRevision: fm["translated-from-revision"],
+      translatedFromRevision: entry.translatedFromRevisionByLocale.en,
       translationFreshness: entry.translationFreshnessByLocale.en || undefined,
       created: entry.created || undefined,
       lastmod: entry.lastmodByLocale.en || undefined,
@@ -337,6 +345,9 @@ function renderArtifact(
     filePath: localizedPath,
     content: artifactContent,
     frontmatter,
+    ...(locale === "en" && entry.translationStatusByLocale?.en
+      ? { translationStatus: entry.translationStatusByLocale.en }
+      : {}),
   }
 
   fs.writeFileSync(outputPath, JSON.stringify(artifact, null, 2) + "\n")

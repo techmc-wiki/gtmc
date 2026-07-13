@@ -17,6 +17,27 @@ interface Commit {
   coAuthors: string[]
 }
 
+export type GitPathCommit = {
+  readonly revision: string
+  readonly committedAt: string
+}
+
+export type TranslationProvenance = {
+  readonly translatedFromRevision: string
+  readonly latestOriginalRevision: string
+  readonly commitLag: number
+  readonly dayLag: number
+}
+
+type GitPathCommitRange = {
+  readonly repoCwd: string
+  readonly relPath: string
+  readonly ancestorRevision: string
+  readonly descendantRevision: string
+}
+
+const MILLISECONDS_PER_DAY = 86_400_000
+
 // Cache stores various types (e.g., string[] for maintainers, Map<string, string> for aliases,
 // {author, coAuthors} for parsed commits, {created, lastmod} for dates, string for SHAs)
 const cache = new Map<string, any>()
@@ -378,6 +399,92 @@ export async function hasPathChangedSince(
     { cwd: repoCwd, encoding: "utf-8" }
   )
   return stdout.trim().length > 0
+}
+
+export async function getLatestPathCommit(
+  repoCwd: string,
+  relPath: string,
+  revision = "HEAD"
+): Promise<GitPathCommit | null> {
+  const { stdout } = await execFileAsync(
+    "git",
+    ["log", "-n", "1", "--format=%H%x00%cI", revision, "--", relPath],
+    { cwd: repoCwd, encoding: "utf-8" }
+  )
+  const [commitRevision, committedAt] = stdout.trim().split("\x00", 2)
+  if (!commitRevision || !committedAt) return null
+  return { revision: commitRevision, committedAt }
+}
+
+export async function getPathCommitCount({
+  repoCwd,
+  relPath,
+  ancestorRevision,
+  descendantRevision,
+}: GitPathCommitRange): Promise<number> {
+  const { stdout } = await execFileAsync(
+    "git",
+    [
+      "log",
+      "--format=%H",
+      `${ancestorRevision}..${descendantRevision}`,
+      "--",
+      relPath,
+    ],
+    { cwd: repoCwd, encoding: "utf-8" }
+  )
+  return stdout.split("\n").filter(Boolean).length
+}
+
+export async function getTranslationProvenance(
+  repoCwd: string,
+  translationRelPath: string,
+  sourceRelPath: string
+): Promise<TranslationProvenance | null> {
+  try {
+    const translationCommit = await getLatestPathCommit(
+      repoCwd,
+      translationRelPath
+    )
+    if (!translationCommit) return null
+
+    const [translatedFromCommit, latestOriginalCommit] = await Promise.all([
+      getLatestPathCommit(repoCwd, sourceRelPath, translationCommit.revision),
+      getLatestPathCommit(repoCwd, sourceRelPath),
+    ])
+    if (!translatedFromCommit || !latestOriginalCommit) return null
+
+    const commitLag = await getPathCommitCount({
+      repoCwd,
+      relPath: sourceRelPath,
+      ancestorRevision: translatedFromCommit.revision,
+      descendantRevision: "HEAD",
+    })
+    const latestOriginalTimestamp = Date.parse(latestOriginalCommit.committedAt)
+    const translationTimestamp = Date.parse(translationCommit.committedAt)
+    if (
+      !Number.isFinite(latestOriginalTimestamp) ||
+      !Number.isFinite(translationTimestamp)
+    ) {
+      return null
+    }
+
+    return {
+      translatedFromRevision: translatedFromCommit.revision,
+      latestOriginalRevision: latestOriginalCommit.revision,
+      commitLag,
+      dayLag: Math.max(
+        0,
+        Math.floor(
+          (latestOriginalTimestamp - translationTimestamp) /
+            MILLISECONDS_PER_DAY
+        )
+      ),
+    }
+  } catch (error) {
+    if (error instanceof Error) return null
+    throw error
+  }
 }
 
 export async function getHeadSha(repoCwd: string): Promise<string> {

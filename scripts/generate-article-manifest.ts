@@ -19,10 +19,9 @@ import {
   loadAuthorAliases,
   getArticleAuthors,
   getArticleDates,
-  isAncestor,
-  getHeadSha,
-  hasPathChangedSince,
+  getTranslationProvenance,
 } from "@/lib/articles/git-metadata"
+import { getArticlesCommitUrl } from "@/lib/github/repos"
 
 const MANIFEST_FILE_NAME = "manifest.json"
 const ARTICLES_PATH = path.join(process.cwd(), "articles")
@@ -165,6 +164,7 @@ async function processSourceFile(
     lastmodByLocale: lastmod ? { zh: lastmod } : {},
     translatedFromRevisionByLocale: {},
     translationFreshnessByLocale: {},
+    translationStatusByLocale: {},
     isAdvanced: "is-advanced" in fm ? fm["is-advanced"] : undefined,
   }
 
@@ -246,35 +246,28 @@ async function processTranslationFile(
 
   if (lastmod) entry.lastmodByLocale.en = lastmod
 
-  entry.translatedFromRevisionByLocale.en = fm["translated-from-revision"]
-
-  try {
-    const headSha = await getHeadSha(repoCwd)
-
-    if (fm["translated-from-revision"] === headSha) {
-      entry.translationFreshnessByLocale.en = "fresh"
-    } else {
-      const sourceRevisionIsAncestor = await isAncestor(
-        repoCwd,
-        fm["translated-from-revision"],
-        headSha
-      )
-      if (!sourceRevisionIsAncestor) {
-        entry.translationFreshnessByLocale.en = "unknown"
-      } else {
-        const sourceChanged = await hasPathChangedSince(
-          repoCwd,
-          fm["translated-from-revision"],
-          headSha,
-          translatesRelPath
-        )
-        entry.translationFreshnessByLocale.en = sourceChanged
-          ? "stale"
-          : "fresh"
-      }
-    }
-  } catch {
+  const provenance = await getTranslationProvenance(
+    repoCwd,
+    relPath,
+    translatesRelPath
+  )
+  if (!provenance) {
     entry.translationFreshnessByLocale.en = "unknown"
+    return
+  }
+
+  entry.translatedFromRevisionByLocale.en = provenance.translatedFromRevision
+  entry.translationFreshnessByLocale.en =
+    provenance.commitLag > 0 ? "stale" : "fresh"
+  entry.translationStatusByLocale ??= {}
+  entry.translationStatusByLocale.en = {
+    translatedFromRevision: provenance.translatedFromRevision,
+    latestOriginalRevision: provenance.latestOriginalRevision,
+    commitLag: provenance.commitLag,
+    dayLag: provenance.dayLag,
+    latestOriginalCommitUrl: getArticlesCommitUrl(
+      provenance.latestOriginalRevision
+    ),
   }
 }
 

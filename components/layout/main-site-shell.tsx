@@ -36,6 +36,7 @@ function buildAdminLink(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
 
 interface MainSiteShellProps {
   children: React.ReactNode
+  locale: string
   /**
    * If provided, skips the client-side AuthAware check and uses these links statically.
    * This is useful for private routes where the session is already checked on the server.
@@ -46,10 +47,14 @@ interface MainSiteShellProps {
 
 export async function MainSiteShell({
   children,
+  locale,
   isAdminServerSide,
   fullBleed,
 }: MainSiteShellProps) {
-  const t = await getTranslations("Nav")
+  const [t, tCommonA11y] = await Promise.all([
+    getTranslations({ locale, namespace: "Nav" }),
+    getTranslations({ locale, namespace: "CommonA11y" }),
+  ])
   const baseLinks = buildNavLinks(t)
   const contributorLink = buildContributorLink(t)
   const adminLink = buildAdminLink(t)
@@ -119,7 +124,12 @@ export async function MainSiteShell({
   )
 
   return (
-    <SiteShell leftSlot={leftSlot} rightSlot={rightSlot} fullBleed={fullBleed}>
+    <SiteShell
+      leftSlot={leftSlot}
+      mainNavigationLabel={tCommonA11y("mainNavigation")}
+      rightSlot={rightSlot}
+      skipToMainContentLabel={tCommonA11y("skipToMainContent")}
+      fullBleed={fullBleed}>
       {children}
     </SiteShell>
   )

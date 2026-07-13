@@ -1,6 +1,14 @@
 import type { ReactNode } from "react"
 import { MainSiteShell } from "@/components/layout/main-site-shell"
 
-export default function PublicLayout({ children }: { children: ReactNode }) {
-  return <MainSiteShell>{children}</MainSiteShell>
+export default async function PublicLayout({
+  children,
+  params,
+}: {
+  children: ReactNode
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+
+  return <MainSiteShell locale={locale}>{children}</MainSiteShell>
 }

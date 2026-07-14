@@ -11,7 +11,7 @@
     "licenseSectionTitle": "许可证",
     "linkArticlesRepo": "文章仓库",
     "linkGitHub": "GitHub 仓库",
-    "metaDescription": "Graduate Texts in Minecraft（GTMC）是一本社区编写的开放教科书，涵盖技术向 Minecraft 的红石、游戏机制和引擎内部原理。",
+    "metaDescription": "Graduate Texts in Minecraft（GTMC）是社区编写的技术向 Minecraft 开放教科书，系统讲解红石工程、游戏机制、区块系统、实体运动与引擎内部原理，提供教程、机制解析与源码分析，适合自学、查阅与社区协作贡献。",
     "missionBody": "Graduate Texts in Minecraft（GTMC）是一个面向 Minecraft 技术领域的开放知识库。我们发布教程、机制解析和带注释的源代码分析——所有内容均由社区编写和审阅。",
     "missionBody2": "本项目以学术专著丛书为范本：严谨、结构化的内容，涵盖从生产型建筑和红石工程到刻级引擎内部原理的技术玩法全栈。",
     "missionTitle": "我们的使命",
@@ -97,7 +97,7 @@
   "Authors": {
     "articleCount": "{count, plural, other {# 篇文章}}",
     "fallbackBio": "GTMC 贡献者",
-    "metaDescription": "了解撰写和审阅 Graduate Texts in Minecraft 的贡献者们——教程、机制解析和源代码分析。",
+    "metaDescription": "认识 Graduate Texts in Minecraft（GTMC）的贡献者：技术向 Minecraft 教程、机制解析与源码分析的作者名单，以及社区审稿流程、协作方式、署名规范、贡献路径、参与入口、联系方式与协作文化等内容的完整介绍。",
     "pageDescription": "文本背后的人们",
     "pageTitle": "贡献者",
     "sectionTitle": "所有贡献者",
@@ -273,7 +273,7 @@
   },
   "EditorialPolicy": {
     "lastReviewed": "最近一次对照源文档审阅：{date}。",
-    "metaDescription": "Graduate Texts in Minecraft 如何审阅投稿、管理编辑部以及为内容授权。",
+    "metaDescription": "Graduate Texts in Minecraft（GTMC）如何审阅文章投稿、管理编辑部、规范内容授权与署名，并持续维护技术向 Minecraft 教科书的准确性、可读性、结构一致性、版本演进、引用规范与整体质量标准的完整政策说明页。",
     "pageDescription": "审阅流程、编辑部、社区规范与许可",
     "pageTitle": "编辑政策",
     "sectionEditorialBoard": "编辑部",
@@ -431,7 +431,7 @@
     "mentionedIn": "提及于",
     "mobileTapToOpen": "点击展开",
     "noResults": "无匹配术语",
-    "pageDescription": "浏览技术性 Minecraft 术语、定义及 12 种语言的翻译。",
+    "pageDescription": "浏览 Graduate Texts in Minecraft 术语表：收录技术向 Minecraft 词汇与简明定义，覆盖红石元件、更新理论、区块加载与引擎相关用语，并提供 12 种语言翻译，便于检索、对照、跨语言学习、写作引用与术语统一。",
     "pageTitle": "术语表",
     "proposeEditsCta": "+ 提议编辑",
     "relatedSeeLabel": "参见：",
@@ -450,7 +450,7 @@
     "featureReportCardTitle": "游戏特性",
     "glossaryCardDesc": "全书索引——以 12 种语言收录的技术性 Minecraft 词汇。",
     "glossaryCardTitle": "术语表",
-    "heroDescription": "社区驱动的 Minecraft 红石和技术在线教科书。提供入门教程、机制阐述和源码阅读，助你在方块世界中攻克学术难题。",
+    "heroDescription": "社区驱动的技术向 Minecraft 在线教科书 Graduate Texts in Minecraft（GTMC）。系统讲解红石工程、游戏机制、区块加载、实体运动与引擎内部原理，提供入门教程、机制详解与源码阅读，帮助读者在方块世界中攻克学术级问题，适合自学、查阅与社区协作。",
     "heroTagline": "知识从未缺失，缺失的是连接。",
     "initializing": "初始化中...",
     "loggedInAs": "登录为 {username}",
@@ -533,7 +533,7 @@
   "Pdf": {
     "download": "下载 PDF",
     "label": "离线版 (PDF)",
-    "metaDescription": "下载完整的《Graduate Texts in Minecraft》技术 Minecraft 知识库为单个 PDF 文档 — 包含教程、机制详解与源码分析。",
+    "metaDescription": "下载完整的《Graduate Texts in Minecraft》（GTMC）技术向 Minecraft 知识库为单个离线 PDF 文档。内容涵盖入门教程、机制详解、工程实践与源码分析，适合打印、存档、离线阅读、系统复习、长期查阅与课堂分享使用。",
     "metaTitle": "离线 PDF 下载",
     "subtitle": "下载完整的 GTMC 文章。",
     "title": "GTMC"

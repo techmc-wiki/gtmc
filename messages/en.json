@@ -11,7 +11,7 @@
     "licenseSectionTitle": "License",
     "linkArticlesRepo": "Articles Repository",
     "linkGitHub": "GitHub Repository",
-    "metaDescription": "Graduate Texts in Minecraft (GTMC) is a community-written open textbook on technical Minecraft — redstone, game mechanics, and engine internals.",
+    "metaDescription": "Graduate Texts in Minecraft (GTMC) is a community-written open textbook on technical Minecraft — redstone, game mechanics, chunk systems, and engine internals.",
     "missionBody": "Graduate Texts in Minecraft (GTMC) is an open knowledge base for the technical side of Minecraft. We publish tutorials, mechanics explanations, and annotated source-code readings — all written and reviewed by the community.",
     "missionBody2": "The project models itself on an academic monograph series: rigorous, structured content that covers the full stack of technical play, from production builds and redstone engineering to tick-level engine internals.",
     "missionTitle": "Our Mission",
@@ -97,7 +97,7 @@
   "Authors": {
     "articleCount": "{count, plural, =1 {1 article} other {# articles}}",
     "fallbackBio": "GTMC contributor",
-    "metaDescription": "Meet the contributors who write and review Graduate Texts in Minecraft — tutorials, mechanics explanations, and source-code analyses.",
+    "metaDescription": "Meet the contributors who write and review Graduate Texts in Minecraft — tutorials, mechanics explanations, and source-code analyses for technical Minecraft.",
     "pageDescription": "The people behind the text",
     "pageTitle": "Contributors",
     "sectionTitle": "All Contributors",
@@ -273,7 +273,7 @@
   },
   "EditorialPolicy": {
     "lastReviewed": "Last reviewed against the source documents: {date}.",
-    "metaDescription": "How Graduate Texts in Minecraft reviews submissions, governs its editorial board, and licenses content.",
+    "metaDescription": "How Graduate Texts in Minecraft reviews article submissions, governs its editorial board, licenses content, and keeps the technical Minecraft textbook accurate.",
     "pageDescription": "Review process, editorial board, community standards, and licensing",
     "pageTitle": "Editorial Policy",
     "sectionEditorialBoard": "Editorial Board",
@@ -431,7 +431,7 @@
     "mentionedIn": "MENTIONED IN",
     "mobileTapToOpen": "TAP TO EXPAND",
     "noResults": "NO MATCHING TERMS",
-    "pageDescription": "Browse technical Minecraft terms, definitions, and translations across 12 languages.",
+    "pageDescription": "Browse the Graduate Texts in Minecraft glossary: technical Minecraft terms, concise definitions, and translations across 12 languages for redstone and mechanics.",
     "pageTitle": "GLOSSARY",
     "proposeEditsCta": "+ PROPOSE EDITS",
     "relatedSeeLabel": "SEE:",
@@ -450,7 +450,7 @@
     "featureReportCardTitle": "Report Game Features",
     "glossaryCardDesc": "The index of terms — technical Minecraft vocabulary in 12 languages.",
     "glossaryCardTitle": "Glossary",
-    "heroDescription": "The community-driven online textbook of Minecraft redstone and game mechanics. Tutorials, explanations, and code analysis for conquering academic problems in a world of blocks.",
+    "heroDescription": "The community-driven online textbook of Minecraft redstone and game mechanics. Tutorials, explanations, and code analysis for technical play in a world of blocks.",
     "heroTagline": "Knowledge exists. Structure matters.",
     "initializing": "INITIALIZING...",
     "loggedInAs": "LOGGED IN AS {username}",
@@ -533,7 +533,7 @@
   "Pdf": {
     "download": "DOWNLOAD PDF",
     "label": "Offline Version (PDF)",
-    "metaDescription": "Download the complete Graduate Texts in Minecraft knowledge base as a single PDF document — tutorials, mechanics deep-dives, and code analysis.",
+    "metaDescription": "Download the complete Graduate Texts in Minecraft knowledge base as one offline PDF — tutorials, mechanics deep-dives, and code analysis for technical Minecraft.",
     "metaTitle": "Offline PDF Download",
     "subtitle": "Download the full GTMC articles as a PDF document.",
     "title": "GTMC"

@@ -68,10 +68,13 @@ const jsonLd = serializeJsonLd([
     name: "Graduate Texts in Minecraft",
     url: siteUrl,
     description:
-      "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+      "Graduate Texts in Minecraft (GTMC) is a community-written open textbook on technical Minecraft — redstone, game mechanics, chunk systems, and engine internals.",
     inLanguage: ["zh", "en"],
   },
 ])
+
+const DEFAULT_SITE_DESCRIPTION =
+  "Graduate Texts in Minecraft (GTMC) is a community-written open textbook on technical Minecraft — redstone, game mechanics, chunk systems, and engine internals."
 
 export async function generateMetadata({
   params,
@@ -90,8 +93,7 @@ export async function generateMetadata({
     icons: {
       icon: "/favicon.svg",
     },
-    description:
-      "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+    description: DEFAULT_SITE_DESCRIPTION,
     verification: {
       google: "QE8InawtRuO1F7YrvI1JN56__AFPCAFo6Gn-Vi1QJI8",
     },
@@ -108,8 +110,7 @@ export async function generateMetadata({
       siteName: "Graduate Texts in Minecraft",
       url: canonical,
       title: "Graduate Texts in Minecraft",
-      description:
-        "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+      description: DEFAULT_SITE_DESCRIPTION,
       images: [
         {
           url: "/opengraph-image",
@@ -122,8 +123,7 @@ export async function generateMetadata({
     twitter: {
       card: "summary_large_image",
       title: "Graduate Texts in Minecraft",
-      description:
-        "Graduate Texts in Technical Minecraft - collaboratively written comprehensive textbook for technical Minecraft.",
+      description: DEFAULT_SITE_DESCRIPTION,
       images: ["/opengraph-image"],
     },
   }

@@ -6,6 +6,7 @@ import { notFound, redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import {
   calculateReadingMetrics,
+  ensureMetaDescriptionLength,
   generateDescription,
   MarkdownRenderer,
 } from "@/lib/markdown"
@@ -148,9 +149,13 @@ export async function generateMetadata({
       ? `${chapterTitle} › ${articleTitle}`
       : articleTitle
 
-    const description = generateDescription(
-      mdBody,
-      data.description as string | undefined
+    const description = ensureMetaDescriptionLength(
+      generateDescription(mdBody, data.description as string | undefined),
+      {
+        title: articleTitle,
+        chapterTitle,
+        locale,
+      }
     )
 
     const articlePath = encodeSlug(effectiveSlug)
@@ -260,9 +265,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const effectiveSlug =
     target.canonicalSlug ?? (await getCachedSlugForFilePath(target.filePath)) ?? slugPath
   const canonicalUrl = `${getSiteUrl()}/${locale}/articles/${encodeSlug(effectiveSlug)}`
-  const description = generateDescription(
-    renderedContent,
-    data.description as string | undefined
+  const manifestEntry = await getCachedLocalizedArticleEntry(effectiveSlug, locale)
+  const chapterTitle = manifestEntry?.chapterTitleByLocale?.[locale]
+  const description = ensureMetaDescriptionLength(
+    generateDescription(
+      renderedContent,
+      data.description as string | undefined
+    ),
+    {
+      title: articleTitle,
+      chapterTitle,
+      locale,
+    }
   )
 
   const author = data.author as string | undefined
@@ -280,9 +294,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     name,
     url: `${siteUrl}/${locale}/authors/${encodeURIComponent(name)}`,
   }))
-
-  const manifestEntry = await getCachedLocalizedArticleEntry(effectiveSlug, locale)
-  const chapterTitle = manifestEntry?.chapterTitleByLocale?.[locale]
   const isTranslationPending =
     manifestEntry !== null && !manifestEntry.availableLocales.includes(locale)
   const isTranslationStale =

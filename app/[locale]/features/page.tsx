@@ -15,7 +15,7 @@ export async function generateMetadata({
   return {
     title: "Feature Requests",
     description:
-      "Browse and track feature requests for Technical Minecraft. Vote on ideas, report bugs, and suggest improvements.",
+      "Browse and track feature requests for Graduate Texts in Minecraft. Vote on ideas, report bugs, and suggest improvements to the technical Minecraft textbook.",
     alternates: {
       canonical,
       languages: {
@@ -26,7 +26,8 @@ export async function generateMetadata({
     },
     openGraph: {
       title: "Feature Requests — Technical Minecraft",
-      description: "Browse and track feature requests for Technical Minecraft.",
+      description:
+        "Browse and track feature requests for Graduate Texts in Minecraft. Vote on ideas, report bugs, and suggest improvements to the technical Minecraft textbook.",
       type: "website",
       url: canonical,
       images: [
@@ -41,7 +42,8 @@ export async function generateMetadata({
     twitter: {
       card: "summary_large_image",
       title: "Feature Requests — Technical Minecraft",
-      description: "Browse and track feature requests for Technical Minecraft.",
+      description:
+        "Browse and track feature requests for Graduate Texts in Minecraft. Vote on ideas, report bugs, and suggest improvements to the technical Minecraft textbook.",
       images: ["/opengraph-image"],
     },
   }

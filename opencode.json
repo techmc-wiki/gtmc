@@ -16,11 +16,16 @@
     "vercel": {
       "oauth": {},
       "type": "remote",
-      "url": "https://mcp.vercel.com"
+      "url": "https://mcp.vercel.com",
+      "enabled": false
     },
     "webstorm": {
       "type": "remote",
       "url": "http://127.0.0.1:64343/sse"
+    },
+    "codegraph": {
+      "type": "local",
+      "command": ["codegraph", "serve", "--mcp"]
     }
   }
 }

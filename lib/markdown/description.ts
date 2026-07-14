@@ -2,24 +2,74 @@ import { remark } from "remark"
 import stripMarkdown from "strip-markdown"
 import { stripAnsiColorMarkup } from "@/lib/markdown/ansi-colors"
 
+/** Typical Bing/Google SERP target: long enough to be informative, short enough not to truncate. */
+export const META_DESCRIPTION_MAX_LENGTH = 155
+/** Below this, Bing Webmaster often flags the description as "too short". */
+export const META_DESCRIPTION_MIN_LENGTH = 120
+
+function truncateAtWord(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text
+  const budget = maxLength - 1
+  const truncated = text.slice(0, budget)
+  const minBreak = Math.floor(budget * 0.75)
+  const lastSpace = truncated.lastIndexOf(" ")
+  if (lastSpace >= minBreak) {
+    return truncated.slice(0, lastSpace) + "…"
+  }
+  const punctMatch = truncated.match(/.*[。！？；，、.!?;,]/u)
+  if (punctMatch && punctMatch[0].length >= minBreak) {
+    return punctMatch[0] + "…"
+  }
+  return truncated + "…"
+}
+
+function toPlainText(markdownFragment: string): string {
+  return remark()
+    .use(stripMarkdown)
+    .processSync(markdownFragment)
+    .toString()
+    .replaceAll(/\^\[?\d+\]?/g, "")
+    .replaceAll(/~~+/g, "")
+    .replaceAll(/\s+/g, " ")
+    .trim()
+}
+
+function isSkipLine(trimmed: string, inCodeFence: boolean): boolean {
+  if (inCodeFence) return true
+  if (!trimmed) return true
+  if (trimmed.startsWith("#")) return true
+  if (trimmed.startsWith("![")) return true
+  if (trimmed.startsWith(">")) return true
+  if (trimmed.startsWith("<")) return true
+  if (trimmed === "---" || trimmed === "***" || trimmed === "___") return true
+  return false
+}
+
+function isListItem(trimmed: string): boolean {
+  return /^[-*+]\s/.test(trimmed) || /^\d+\.\s/.test(trimmed)
+}
+
+function stripListMarker(trimmed: string): string {
+  return trimmed.replace(/^[-*+]\s+/, "").replace(/^\d+\.\s+/, "")
+}
+
 export function generateDescription(
   markdown: string,
   frontmatterDescription?: string,
-  maxLength: number = 155
+  maxLength: number = META_DESCRIPTION_MAX_LENGTH,
+  minLength: number = META_DESCRIPTION_MIN_LENGTH
 ): string {
   const normalizedMarkdown = stripAnsiColorMarkup(markdown)
+  const parts: string[] = []
 
-  // If frontmatter description is provided and non-empty, use it
-  if (frontmatterDescription?.trim()) {
-    const trimmed = frontmatterDescription.trim()
-    if (trimmed.length <= maxLength) return trimmed
-
-    const truncated = trimmed.slice(0, maxLength)
-    const lastSpace = truncated.lastIndexOf(" ")
-    return lastSpace > 0 ? truncated.slice(0, lastSpace) + "…" : truncated + "…"
+  const frontmatter = frontmatterDescription?.trim()
+  if (frontmatter) {
+    parts.push(frontmatter)
+    if (toPlainText(frontmatter).length >= minLength) {
+      return truncateAtWord(toPlainText(frontmatter), maxLength)
+    }
   }
 
-  // Extract first real paragraph from markdown
   const lines = normalizedMarkdown.split("\n")
   let lineIndex = 0
 
@@ -32,55 +82,62 @@ export function generateDescription(
     if (lineIndex < lines.length) lineIndex++ // Skip closing ---
   }
 
-  // Walk through lines to find first real paragraph
   let inCodeFence = false
-  const paragraphLines: string[] = []
 
   while (lineIndex < lines.length) {
+    const joined = parts.join(" ")
+    if (toPlainText(joined).length >= minLength) break
+
     const line = lines[lineIndex]
     const trimmed = line.trim()
 
-    // Toggle code fence state
     if (trimmed.startsWith("```")) {
       inCodeFence = !inCodeFence
       lineIndex++
       continue
     }
 
-    // Skip lines while in code fence
-    if (inCodeFence) {
+    if (isSkipLine(trimmed, inCodeFence)) {
       lineIndex++
       continue
     }
 
-    // Skip blank lines
-    if (!trimmed) {
-      lineIndex++
+    // List items: useful when an article opens with an outline
+    if (isListItem(trimmed)) {
+      const listBits: string[] = []
+      while (lineIndex < lines.length) {
+        const currentTrimmed = lines[lineIndex].trim()
+        if (currentTrimmed.startsWith("```")) break
+        if (!currentTrimmed) break
+        if (!isListItem(currentTrimmed)) break
+        if (
+          currentTrimmed.startsWith("#") ||
+          currentTrimmed.startsWith("![") ||
+          currentTrimmed.startsWith(">") ||
+          currentTrimmed.startsWith("<")
+        ) {
+          break
+        }
+        listBits.push(stripListMarker(currentTrimmed))
+        lineIndex++
+        if (
+          toPlainText([...parts, ...listBits].join(" ")).length >= minLength
+        ) {
+          break
+        }
+      }
+      if (listBits.length > 0) {
+        parts.push(listBits.join("; "))
+      }
       continue
     }
 
-    // Skip headings, images, blockquotes, HTML, horizontal rules, list items
-    if (
-      trimmed.startsWith("#") ||
-      trimmed.startsWith("![") ||
-      trimmed.startsWith(">") ||
-      trimmed.startsWith("<") ||
-      trimmed === "---" ||
-      trimmed === "***" ||
-      trimmed === "___" ||
-      /^[-*+]\s/.test(trimmed) ||
-      /^\d+\.\s/.test(trimmed)
-    ) {
-      lineIndex++
-      continue
-    }
-
-    // Found first real line - collect contiguous non-skipped lines
+    // Contiguous prose paragraph
+    const paragraphLines: string[] = []
     while (lineIndex < lines.length) {
       const currentLine = lines[lineIndex]
       const currentTrimmed = currentLine.trim()
 
-      // Stop at blank line or skip-worthy line
       if (
         !currentTrimmed ||
         currentTrimmed.startsWith("#") ||
@@ -90,8 +147,7 @@ export function generateDescription(
         currentTrimmed === "---" ||
         currentTrimmed === "***" ||
         currentTrimmed === "___" ||
-        /^[-*+]\s/.test(currentTrimmed) ||
-        /^\d+\.\s/.test(currentTrimmed) ||
+        isListItem(currentTrimmed) ||
         currentTrimmed.startsWith("```")
       ) {
         break
@@ -101,24 +157,78 @@ export function generateDescription(
       lineIndex++
     }
 
-    break
+    if (paragraphLines.length > 0) {
+      parts.push(paragraphLines.join("\n"))
+    }
   }
 
-  // If no paragraph found, return empty string
-  if (paragraphLines.length === 0) return ""
+  if (parts.length === 0) return ""
 
-  // Process extracted paragraph through remark + strip-markdown
-  const paragraphText = paragraphLines.join("\n")
-  const plainText = remark()
-    .use(stripMarkdown)
-    .processSync(paragraphText)
-    .toString()
-    .replaceAll(/\s+/g, " ")
-    .trim()
+  const plainText = toPlainText(parts.join("\n\n"))
+  if (!plainText) return ""
 
-  if (plainText.length <= maxLength) return plainText
+  return truncateAtWord(plainText, maxLength)
+}
 
-  const truncated = plainText.slice(0, maxLength)
-  const lastSpace = truncated.lastIndexOf(" ")
-  return lastSpace > 0 ? truncated.slice(0, lastSpace) + "…" : truncated + "…"
+function looksMostlyCjk(text: string): boolean {
+  const letters = text.replaceAll(/\s+/g, "")
+  if (!letters) return false
+  const cjk = letters.match(/[\u3400-\u9fff\uf900-\ufaff]/g)?.length ?? 0
+  return cjk / letters.length >= 0.3
+}
+
+export function ensureMetaDescriptionLength(
+  description: string,
+  context: {
+    title: string
+    chapterTitle?: string | null
+    siteName?: string
+    locale?: string
+  },
+  maxLength: number = META_DESCRIPTION_MAX_LENGTH,
+  minLength: number = META_DESCRIPTION_MIN_LENGTH
+): string {
+  const siteName = context.siteName ?? "Graduate Texts in Minecraft"
+  const title = context.title.trim()
+  const chapter = context.chapterTitle?.trim()
+  let result = description.trim()
+  const isZh =
+    context.locale === "zh" ||
+    looksMostlyCjk(`${result} ${title} ${chapter ?? ""}`)
+
+  if (result.length >= minLength) {
+    return truncateAtWord(result, maxLength)
+  }
+
+  const contextBits = [title, chapter].filter((bit): bit is string =>
+    Boolean(bit && bit.length > 0)
+  )
+
+  for (const bit of contextBits) {
+    if (result.length >= minLength) break
+    if (!bit) continue
+    if (result.includes(bit)) continue
+    result = result ? `${result} — ${bit}` : bit
+  }
+
+  while (result.length < minLength) {
+    const topicFiller = isZh
+      ? "技术向 Minecraft 开放教科书章节，讲解红石工程、游戏机制、区块系统、实体运动与引擎内部原理，适合自学、查阅与社区协作。"
+      : "technical Minecraft textbook chapter covering redstone engineering, game mechanics, chunk systems, and engine internals."
+    const filler = result.includes(siteName)
+      ? topicFiller
+      : isZh
+        ? `${siteName}：${topicFiller}`
+        : `${siteName} ${topicFiller}`
+    const next = result ? `${result} — ${filler}` : filler
+    if (next === result) break
+    result = next
+  }
+
+  result = result.replaceAll(/\s+/g, " ").trim()
+  if (result.length <= maxLength) return result
+
+  const soft = truncateAtWord(result, maxLength)
+  if (soft.length >= minLength) return soft
+  return result.slice(0, maxLength - 1) + "…"
 }

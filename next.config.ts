@@ -48,6 +48,7 @@ const nextConfig: NextConfig = {
     "papaparse",
   ],
   experimental: {
+    cpus: 2,
     useTypeScriptCli: true,
     optimizePackageImports: [
       "motion/react",

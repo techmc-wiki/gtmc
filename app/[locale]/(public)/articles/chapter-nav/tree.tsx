@@ -57,12 +57,12 @@ function FolderButton({
       onClick={() => toggleFolder(itemId)}
       aria-expanded={folderExpanded}
       className="
-        mt-2 flex min-h-11 w-full cursor-pointer items-center text-left
+        mt-2 flex min-h-11 w-full cursor-pointer items-center gap-2 pl-2 text-left
         font-sans text-[0.8125rem] leading-snug font-semibold text-tech-main/80
         transition-colors hover:text-tech-main-dark md:mt-1 md:min-h-7
         focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 focus:outline-none
       ">
-      <span className="flex w-4 shrink-0 items-center text-tech-main/50">
+      <span className="flex w-4 shrink-0 items-center justify-center text-tech-main/50">
         <TriangleIcon
           direction={folderExpanded ? "down" : "right"}
           className="size-3"
@@ -103,14 +103,14 @@ function ArticleLink({
       aria-current={isActive ? "page" : undefined}
       className={`
         grid min-h-11 w-full grid-cols-[1rem_minmax(0,1fr)] items-baseline
-        py-1.5 pr-1 font-sans text-[0.8125rem] leading-snug
+        gap-x-2 py-1.5 pr-1 pl-2 font-sans text-[0.8125rem] leading-snug
         transition-colors focus-visible:outline-tech-main focus-visible:outline-2
         focus-visible:outline-offset-2 md:min-h-7 md:py-0.5 md:text-sm
         ${isActive ? "font-semibold text-tech-main-dark" : "text-tech-main hover:text-tech-main-dark"}
       `}>
       <span
         aria-hidden={!prefix}
-        className="text-center font-mono text-[0.6875rem] leading-none text-tech-main/55 tabular-nums">
+        className={`text-center font-mono leading-none text-tech-main/55 tabular-nums ${prefix ? "text-[0.6875rem]" : "text-xs"}`}>
         {prefix || "•"}
       </span>
       <span className="min-w-0">

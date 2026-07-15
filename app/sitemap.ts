@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next"
 import { cacheLife } from "next/cache"
 
-import { listAllIssues } from "@/lib/github"
 import { getSiteUrl } from "@/lib/site-url"
 import { shouldIgnoreFile } from "@/lib/articles/ignore"
 import { flattenArticleNodes } from "@/lib/articles/navigation-data"
@@ -48,20 +47,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${BASE}/en`,
       lastModified: STATIC_LAST_MODIFIED,
       alternates: localizedAlternates(BASE, ""),
-      changeFrequency: "weekly",
-      priority: 1.0,
-    },
-    {
-      url: `${BASE}/zh/features`,
-      lastModified: STATIC_LAST_MODIFIED,
-      alternates: localizedAlternates(BASE, "/features"),
-      changeFrequency: "weekly",
-      priority: 1.0,
-    },
-    {
-      url: `${BASE}/en/features`,
-      lastModified: STATIC_LAST_MODIFIED,
-      alternates: localizedAlternates(BASE, "/features"),
       changeFrequency: "weekly",
       priority: 1.0,
     },
@@ -178,30 +163,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     /* Sidebar tree unavailable — skip articles */
   }
 
-  let featureUrls: MetadataRoute.Sitemap = []
-  try {
-    const issues = await listAllIssues()
-    featureUrls = issues.flatMap((issue) => [
-      {
-        url: `${BASE}/zh/features/${issue.number}`,
-        lastModified: new Date(issue.updatedAt),
-        alternates: localizedAlternates(BASE, `/features/${issue.number}`),
-        changeFrequency: "weekly" as const,
-        priority: 0.5,
-      },
-      {
-        url: `${BASE}/en/features/${issue.number}`,
-        lastModified: new Date(issue.updatedAt),
-        alternates: localizedAlternates(BASE, `/features/${issue.number}`),
-        changeFrequency: "weekly" as const,
-        priority: 0.5,
-      },
-    ])
-  } catch (error) {
-    console.warn("Sitemap: skipped feature URLs due to GitHub error:", error)
-    /* GitHub API unavailable — skip */
-  }
-
   let glossaryUrls: MetadataRoute.Sitemap = []
   try {
     const { entries } = await loadGlossaryManifest()
@@ -250,11 +211,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.warn("Sitemap: skipped author URLs due to resolver error:", error)
   }
 
-  return [
-    ...staticUrls,
-    ...articleUrls,
-    ...featureUrls,
-    ...glossaryUrls,
-    ...authorUrls,
-  ]
+  return [...staticUrls, ...articleUrls, ...glossaryUrls, ...authorUrls]
 }

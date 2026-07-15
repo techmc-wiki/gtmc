@@ -208,13 +208,6 @@ export default async function Footer() {
             <h3 className="section-label">{t("sectionSource")}</h3>
             <ul className="mt-3 flex flex-col gap-2">
               <li>
-                <Link
-                  href="/features"
-                  className="footer-link text-tech-main text-sm">
-                  {t("linkFeedback")}
-                </Link>
-              </li>
-              <li>
                 <a
                   href="https://github.com/techmc-wiki/gtmc"
                   target="_blank"

@@ -6,7 +6,7 @@ This file is the agent contract for the **GTMC website** repo. It complements `R
 
 ## Project Overview
 
-This repo contains the public website for **Graduate Texts in Minecraft (GTMC)** — a community-driven online textbook on technical Minecraft. It serves articles (tutorials, mechanics explanations, source-code analyses), a draft/review hub for contributors, and a feature-request tracker.
+This repo contains the public website for **Graduate Texts in Minecraft (GTMC)** — a community-driven online textbook on technical Minecraft. It serves articles (tutorials, mechanics explanations, source-code analyses) and a draft/review hub for contributors.
 
 - **Framework**: Next.js 16 (App Router, Cache Components, Turbopack) on React 19
 - **Language**: TypeScript 7.0.2 (strict mode)
@@ -38,7 +38,7 @@ The articles themselves live in a separate repo and are pulled in via a Git subm
 │   └── api/                Route handlers
 ├── actions/                Server actions (drafts, reviews, profile, …)
 ├── components/ui/          tech-card, tech-button, corner-brackets, …
-├── components/{articles,editor,features,glossary,layout,markdown,review,search,ui}/
+├── components/{articles,editor,glossary,layout,markdown,review,search,ui}/
 ├── lib/                    Article pipeline, auth, db, search, GitHub helpers
 ├── articles/               Article content (Git submodule)
 ├── glossary/               Glossary CSV data (Git submodule)
@@ -89,9 +89,9 @@ CI notes for the Build workflow:
 | `DIRECT_URL`                                               | Direct Postgres connection used by Prisma migrations                             |
 | `NEXT_PUBLIC_APP_URL`                                      | Public site origin used for canonical URLs and uploads                           |
 | `GITHUB_ID` / `GITHUB_SECRET`                              | GitHub OAuth application credentials for sign-in                                 |
-| `GITHUB_FEATURES_ISSUES_PAT`                               | PAT used to read/comment on feature issues                                       |
-| `GITHUB_FEATURES_WRITE_PAT`                                | PAT used to open/edit feature issues                                             |
-| `GITHUB_REPO_OWNER` / `GITHUB_REPO_NAME`                   | Target repo for article submission flows                                         |
+| `GITHUB_ARTICLES_READ_PAT`                                 | PAT used to read the articles repository                                         |
+| `GITHUB_ARTICLES_WRITE_PAT`                                | PAT used to write branches, assets, and pull requests in the articles repository |
+| `GITHUB_ARTICLES_REPO_OWNER` / `GITHUB_ARTICLES_REPO_NAME` | Target repo for article submission flows                                         |
 | `GITHUB_GLOSSARY_REPO_OWNER` / `GITHUB_GLOSSARY_REPO_NAME` | Target repo for glossary submodule (defaults to TechMC-Glossary/TechMC-Glossary) |
 | `GITHUB_GLOSSARY_WRITE_PAT`                                | PAT for opening glossary PRs (requires Contents + Pull requests read/write)      |
 | `BLOB_READ_WRITE_TOKEN`                                    | Vercel Blob token for uploads ≥ 4.5 MB                                           |
@@ -122,7 +122,7 @@ Key things to know:
 
 - **Path alias**: `@/*` resolves to the repo root (see `tsconfig.json` and `vite.config.ts`).
 - **Next.js command boundary**: continue using `pnpm dev` and `pnpm build`. The built-in `vp dev` and `vp build` commands invoke Vite and must not replace the Next.js/Turbopack scripts.
-- **Middleware** lives in `proxy.ts` (not `middleware.ts`). It composes `next-intl` routing with NextAuth and gates `/admin`, `/draft`, `/glossary/edit`, `/profile`, `/review`, and `/features/new` behind a session.
+- **Middleware** lives in `proxy.ts` (not `middleware.ts`). It composes `next-intl` routing with NextAuth and gates `/admin`, `/draft`, `/glossary/edit`, `/profile`, and `/review` behind a session.
 - **Prisma client** is imported from `@prisma/client`; `serverExternalPackages` in `next.config.ts` keeps Prisma out of the client bundle.
 - The build embeds a 7-char Git SHA as `NEXT_PUBLIC_BUILD_SHA` (falls back to `VERCEL_GIT_COMMIT_SHA`).
 
@@ -174,7 +174,7 @@ vp test run -t "merges conflicting drafts"     # Filter by test name
 - Vite+ config: `vite.config.ts` contains Vitest, Oxlint, Oxfmt, and staged-file settings.
 - Existing specs live alongside the code in `lib/` (e.g. `lib/slug-utils.test.ts`, `lib/__tests__/article-loader.test.ts`, `lib/articles/*.test.ts`).
 - Playwright is installed for the PDF generator (`scripts/generate-pdf.ts`) and for any future e2e work; install browsers with `pnpm exec playwright install chromium` if missing.
-- Lighthouse CI: `pnpm lighthouse` runs `lhci autorun` against `/`, `/features`, `/articles` (config in `.lighthouserc.js`). Requires a running dev or preview server.
+- Lighthouse CI: `pnpm lighthouse` runs `lhci autorun` against `/` and `/articles` (config in `.lighthouserc.js`). Requires a running dev or preview server.
 
 When fixing a bug or changing existing logic, update the colocated specs to match — but do **not** introduce new test infrastructure or scaffolding without an explicit ask.
 

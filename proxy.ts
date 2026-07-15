@@ -11,7 +11,6 @@ const privateRoutes = [
   "/profile",
   "/review",
 ]
-const protectedFeatureRoutes = ["/features/new"]
 const localePattern = /^\/(en|zh)(?=\/|$)/
 // Detects unrecognized locale prefixes to prevent next-intl redirecting e.g. /fr -> /zh/fr
 const invalidLocalePrefixPattern = /^\/([a-z]{2}(?:-[a-z]{2})?)(?=\/|$)/i
@@ -71,12 +70,7 @@ export default auth((req) => {
     (route) =>
       pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`)
   )
-  const isProtectedFeatureRoute = protectedFeatureRoutes.some(
-    (route) =>
-      pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`)
-  )
-
-  if (isPrivateRoute || isProtectedFeatureRoute) {
+  if (isPrivateRoute) {
     if (!req.auth?.user) {
       const loginUrl = new URL(`/${locale}/login`, getRequestOrigin(req))
       loginUrl.searchParams.set("callbackUrl", pathname + req.nextUrl.search)

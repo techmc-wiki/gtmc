@@ -15,7 +15,7 @@ import {
   type DraftFileCollection,
 } from "@/lib/drafts/files"
 import { useStatusNotification } from "@/hooks/use-status-notification"
-import { useEditorUpload } from "@/hooks/use-editor-upload"
+import { useDraftImageUpload } from "@/hooks/use-draft-image-upload"
 import type { OperationProgressState } from "@/components/ui/operation-progress"
 import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
 import type { TabType } from "@/components/editor/editor-tab-strip"
@@ -519,18 +519,13 @@ export function useDraftEditor(initialData?: {
       if (res.status === 413) throw new Error(t("errorFileTooLarge"))
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || t("errorUploadFailed"))
-      return {
-        url: data.url,
-        filename: data.filename,
-        mimeType: data.mimeType,
-        fileSize: data.fileSize,
-      }
+      return { url: data.url, filename: data.filename }
     },
     [revisionId, t]
   )
 
-  const { uploadFile, isUploading, isCompressing } = useEditorUpload({
-    adapter: draftUploadAdapter,
+  const { uploadFile, isUploading, isCompressing } = useDraftImageUpload({
+    upload: draftUploadAdapter,
     onInsertContent: (text: string) => {
       if (text === "") {
         updateActiveFile({

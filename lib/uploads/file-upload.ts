@@ -1,9 +1,4 @@
-import {
-  FILE_MAX_BYTES,
-  IMAGE_MAX_BYTES,
-  VERCEL_BODY_LIMIT_BYTES,
-} from "./constants"
-export { VERCEL_BODY_LIMIT_BYTES }
+import { FILE_MAX_BYTES, IMAGE_MAX_BYTES } from "./constants"
 
 // ---------------------------------------------------------------------------
 // MIME allowlist and category classification
@@ -14,7 +9,6 @@ export type FileCategory = "images" | "videos" | "files"
 interface MimeConfig {
   category: FileCategory
   maxBytes: number
-  proxyable: boolean
 }
 
 const MIME_ALLOWLIST: Partial<Record<string, MimeConfig>> = {
@@ -22,79 +16,64 @@ const MIME_ALLOWLIST: Partial<Record<string, MimeConfig>> = {
   "image/jpeg": {
     category: "images",
     maxBytes: IMAGE_MAX_BYTES,
-    proxyable: false,
   },
   "image/png": {
     category: "images",
     maxBytes: IMAGE_MAX_BYTES,
-    proxyable: false,
   },
   "image/gif": {
     category: "images",
     maxBytes: IMAGE_MAX_BYTES,
-    proxyable: false,
   },
   "image/webp": {
     category: "images",
     maxBytes: IMAGE_MAX_BYTES,
-    proxyable: false,
   },
   // Videos — 50 MB
   "video/mp4": {
     category: "videos",
     maxBytes: FILE_MAX_BYTES,
-    proxyable: true,
   },
   "video/webm": {
     category: "videos",
     maxBytes: FILE_MAX_BYTES,
-    proxyable: true,
   },
   "video/quicktime": {
     category: "videos",
     maxBytes: FILE_MAX_BYTES,
-    proxyable: false,
   },
   // Files — 50 MB
   "application/pdf": {
     category: "files",
     maxBytes: FILE_MAX_BYTES,
-    proxyable: true,
   },
   "application/msword": {
     category: "files",
     maxBytes: FILE_MAX_BYTES,
-    proxyable: false,
   },
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
     category: "files",
     maxBytes: FILE_MAX_BYTES,
-    proxyable: false,
   },
   "application/vnd.ms-excel": {
     category: "files",
     maxBytes: FILE_MAX_BYTES,
-    proxyable: false,
   },
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
     category: "files",
     maxBytes: FILE_MAX_BYTES,
-    proxyable: false,
   },
   "application/zip": {
     category: "files",
     maxBytes: FILE_MAX_BYTES,
-    proxyable: false,
   },
   "text/plain": {
     category: "files",
     maxBytes: FILE_MAX_BYTES,
-    proxyable: false,
   },
   "text/csv": {
     category: "files",
     maxBytes: FILE_MAX_BYTES,
-    proxyable: false,
   },
 }
 
@@ -125,7 +104,6 @@ const MIME_TO_EXT: Partial<Record<string, string>> = {
 export interface FileClassification {
   category: FileCategory
   maxBytes: number
-  proxyable: boolean
   mimeType: string
 }
 
@@ -142,10 +120,6 @@ export function isImageMime(mimeType: string): boolean {
 
 export function getAllowedMimeTypes(): string[] {
   return Object.keys(MIME_ALLOWLIST)
-}
-
-export function getNonImageMimeTypes(): string[] {
-  return Object.keys(MIME_ALLOWLIST).filter((m) => !isImageMime(m))
 }
 
 // ---------------------------------------------------------------------------
@@ -179,49 +153,4 @@ export function sanitizeFilename(
 
   // Prepend timestamp for uniqueness
   return `${Date.now()}-${basename}.${ext}`
-}
-
-// ---------------------------------------------------------------------------
-// Markdown block generation
-// ---------------------------------------------------------------------------
-
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
-export function generateMarkdownBlock(
-  filename: string,
-  rawGithubUrl: string,
-  mimeType: string,
-  fileSize: number
-): string {
-  const classification = classifyFile(mimeType)
-  if (!classification) return `[${filename}](${rawGithubUrl})`
-
-  const displayName = filename.replace(/^\d+-/, "") // Strip timestamp prefix for display
-  const sizeStr = formatFileSize(fileSize)
-
-  // Images: standard markdown image
-  if (classification.category === "images") {
-    return `![${displayName}](${rawGithubUrl})`
-  }
-
-  // Extract the storage path from the raw URL for proxy
-  // raw URL: https://raw.githubusercontent.com/OWNER/REPO/main/data/videos/filename.mp4
-  // proxy path: data/videos/filename.mp4
-  const pathMatch = rawGithubUrl.match(/\/main\/(.+)$/)
-  const storagePath = pathMatch ? pathMatch[1] : null
-
-  const emoji = classification.category === "videos" ? "🎬" : "📎"
-
-  if (classification.proxyable && storagePath) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || ""
-    const proxyUrl = `${appUrl}/api/files/proxy?path=${encodeURIComponent(storagePath)}`
-    return `${emoji} **${displayName}** (${sizeStr})\n[[▶ View / Download]](${proxyUrl})`
-  }
-
-  // Non-proxyable: direct download link
-  return `${emoji} **${displayName}** (${sizeStr})\n[[↓ Download]](${rawGithubUrl})`
 }

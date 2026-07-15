@@ -2,9 +2,6 @@
 // Upload size limits
 // ---------------------------------------------------------------------------
 
-// Vercel serverless function hard payload limit (4.5 MB)
-export const VERCEL_BODY_LIMIT_BYTES = 4.5 * 1024 * 1024
-
 // Safe upload limit with FormData overhead headroom
 export const UPLOAD_SAFE_LIMIT_BYTES = 4.3 * 1024 * 1024
 

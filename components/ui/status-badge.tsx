@@ -25,29 +25,6 @@ interface StatusBadgeProps {
   status: string
 }
 
-export function FeatureStatusBadge({ status }: StatusBadgeProps) {
-  const t = useTranslations("Status")
-  let label = t("pending")
-  let className = "border-gray-500/40 bg-gray-500/10 text-gray-600"
-
-  switch (status) {
-    case "PENDING":
-      className = "border-yellow-500/40 text-yellow-600 bg-yellow-500/10"
-      label = t("pending")
-      break
-    case "IN_PROGRESS":
-      className = "border-blue-500/40 text-blue-600 bg-blue-500/10"
-      label = t("inProgress")
-      break
-    case "RESOLVED":
-      className = "border-green-500/40 text-green-600 bg-green-500/10"
-      label = t("resolved")
-      break
-  }
-
-  return <TechBadge className={className}>[{label}]</TechBadge>
-}
-
 export function DraftStatusBadge({ status }: StatusBadgeProps) {
   const t = useTranslations("Status")
   let label = status

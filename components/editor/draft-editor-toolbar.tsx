@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
-import { EditorFileUploadInput } from "@/components/editor/editor-file-upload-input"
+import { DraftImageUploadInput } from "@/components/editor/draft-image-upload-input"
 import {
   EditorTabStrip,
   type TabType,
@@ -51,7 +51,7 @@ export function DraftEditorToolbar({
   const fileUploadSlot = React.useMemo(
     () =>
       !isReadOnly ? (
-        <EditorFileUploadInput
+        <DraftImageUploadInput
           fileInputRef={fileInputRef}
           onFileSelect={onFileSelect}
           isUploading={isUploading}

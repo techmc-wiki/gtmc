@@ -58,7 +58,6 @@ export async function POST(req: NextRequest) {
       mimeType: file.type,
       fileSize: buffer.length,
       category: classification.category,
-      proxyable: classification.proxyable,
     })
   } catch (error) {
     if (error instanceof ArticleAssetUploadError) {

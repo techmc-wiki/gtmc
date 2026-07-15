@@ -161,7 +161,6 @@ export async function POST(req: NextRequest) {
       mimeType,
       fileSize: buffer.length,
       category: classification.category,
-      proxyable: classification.proxyable,
     })
   } catch (error) {
     if (blobUrl) {

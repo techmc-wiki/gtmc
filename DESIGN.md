@@ -67,15 +67,13 @@ metaphor, not fight it.
 The site has three audiences: readers, contributors, and admins. The nav
 must not lie about what's available.
 
-- **Anonymous visitors see reader-only nav**: Articles, Glossary, Feedback.
+- **Anonymous visitors see reader-only nav**: Articles, PDF, Glossary, About,
+  Authors.
   No dead-end links to pages that require login.
 - **MY DRAFTS appears only for authenticated users** — after Glossary,
-  before Feedback. It's a contributor affordance, not a reader one.
+  as a contributor affordance rather than a reader link.
 - **REVIEW HUB appears only for admins**, injected by `AuthAwareNav` after
   a session check.
-- **FEEDBACK** (formerly FEATURES) describes what the page actually is:
-  bug reports and feature requests. The old label "FEATURES" implied a
-  feature list, not an issue tracker.
 
 ### Reader surfaces speak the book's language
 
@@ -90,9 +88,8 @@ Labels on reading surfaces use textbook vocabulary, not drafting jargon.
 ### Footer is a reader/contributor map
 
 The footer is organized by audience intent: READ (Preface, Articles,
-Glossary), COMMUNITY (Contribute, Team, Issues), SOURCE (Errata &
-Feedback, Repository, License), DOWNLOAD (Offline PDF). Section headers
-are localized.
+Glossary), COMMUNITY (Contribute, Team, Issues), SOURCE (Repository,
+License), DOWNLOAD (Offline PDF). Section headers are localized.
 
 ## Source Files
 
@@ -256,9 +253,9 @@ Site shell
 Desktop
 - Hidden below `md`. Links are mono uppercase: `font-mono text-xs tracking-[0.15em] border-b-2 pb-1`.
 - Active: `border-tech-signal text-tech-main`. Inactive: transparent border + `text-tech-main-dark`, hover swaps both to `tech-main`.
-- Base nav is reader-only: Articles, Glossary, Feedback. MY DRAFTS is
+- Base nav is reader-only: Articles, PDF, Glossary, About, Authors. MY DRAFTS is
   injected by `AuthAwareNav` for authenticated users (after Glossary).
-  REVIEW HUB is injected for admins (before Feedback).
+  REVIEW HUB is appended for admins.
 
 Mobile
 - Hamburger button uses three `h-0.5 w-5 bg-tech-main` bars with animated transform states; touch target `min-h-11 min-w-11`.
@@ -274,7 +271,7 @@ Auth island and language switcher
 There is no single universal card. Several surface systems coexist; each is internally consistent.
 
 `TechCard` (`components/ui/tech-card.tsx`)
-- The default framed panel for feature, draft, review, and dashboard surfaces.
+- The default framed panel for draft, review, and dashboard surfaces.
 - Real props include: `tone`, `borderOpacity`, `background`, `padding`, `hover`, `brackets`, `bracketVariant`, `pattern` (`grid` only — `dots` is defined but unused).
 - Conventions: thin `border-tech-main/40` borders, near-square geometry, optional `CornerBrackets`, hover changes border/fill opacity rather than adding elevation.
 
@@ -415,7 +412,6 @@ The text block is typeset like a printed monograph, not a blog post.
 
 A coherent loading language exists; reach for it before inventing new spinners.
 
-- `LoadingIndicator`: a pulsing `size-2` square dot with a mono uppercase label. The canonical inline loading treatment.
 - `loading-shell-primitives.tsx` exposes `SegmentedBar`, `SweepOverlay`, `ScanConfirmOverlay`, and `SkeletonExitWrapper`. Route-level loading states use `SkeletonExitWrapper` with `aria-busy="true"` and an `aria-label`.
 - `OperationProgress` provides a longer-running shell with `role="status" aria-live="polite"` and a `role="progressbar"` track.
 - Mark async action buttons with `aria-busy` while pending; the system relies on this consistently.

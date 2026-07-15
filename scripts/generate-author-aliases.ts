@@ -29,9 +29,13 @@ const OVERRIDES_PATH = join(CONFIG_DIR, "author-alias-overrides.yml")
 const ARTICLES_PATH =
   process.env.ARTICLES_PATH ?? join(process.cwd(), "articles")
 
-const GITHUB_TOKEN = process.env.GITHUB_FEATURES_ISSUES_PAT
+const GITHUB_TOKEN =
+  process.env.GITHUB_ARTICLES_READ_PAT ??
+  process.env.GITHUB_ARTICLES_WRITE_PAT ??
+  process.env.GITHUB_TOKEN ??
+  process.env.GITHUB_PERSONAL_ACCESS_TOKEN
 const GITHUB_API_BASE = "https://api.github.com"
-const GITHUB_ARTICLES_REPO = "gtmc-dev/Articles"
+const GITHUB_ARTICLES_REPO = `${process.env.GITHUB_ARTICLES_REPO_OWNER ?? "gtmc-dev"}/${process.env.GITHUB_ARTICLES_REPO_NAME ?? "Articles"}`
 
 const NOREPLY_PATTERN = /\+([a-z\d-]+)@users\.noreply\.github\.com/i
 

@@ -206,7 +206,7 @@ export async function TocSection({ tree, locale }: TocSectionProps) {
         <p className="text-tech-main/60 mb-6 font-mono text-[0.625rem] font-bold tracking-[0.25em] uppercase">
           {t("backMatterKicker")}
         </p>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Link
             href="/glossary"
             className="group border-tech-main/40 hover:border-tech-main-dark hover:bg-tech-main-dark hover:text-tech-bg flex flex-col gap-2 border p-5 transition-colors">
@@ -223,16 +223,6 @@ export async function TocSection({ tree, locale }: TocSectionProps) {
             <span className="display-title text-lg">{t("pdfCardTitle")}</span>
             <span className="text-tech-main group-hover:text-tech-bg/80 text-xs/relaxed transition-colors">
               {t("pdfCardDesc")}
-            </span>
-          </Link>
-          <Link
-            href="/features"
-            className="group border-tech-main/40 hover:border-tech-main-dark hover:bg-tech-main-dark hover:text-tech-bg flex flex-col gap-2 border p-5 transition-colors">
-            <span className="display-title text-lg">
-              {t("featureReportCardTitle")}
-            </span>
-            <span className="text-tech-main group-hover:text-tech-bg/80 text-xs/relaxed transition-colors">
-              {t("featureReportCardDesc")}
             </span>
           </Link>
           <Link

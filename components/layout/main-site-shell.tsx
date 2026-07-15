@@ -20,7 +20,6 @@ function buildNavLinks(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
     { href: "/glossary", label: t("glossary") },
     { href: "/about", label: t("about") },
     { href: "/authors", label: t("authors") },
-    { href: "/features", label: t("features") },
   ]
 }
 
@@ -76,18 +75,7 @@ export async function MainSiteShell({
           ]
   }
   if (isAdminServerSide) {
-    const featuresIndex = serverResolvedLinks.findIndex(
-      (link) => link.href === "/features"
-    )
-    if (featuresIndex === -1) {
-      serverResolvedLinks = [...serverResolvedLinks, adminLink]
-    } else {
-      serverResolvedLinks = [
-        ...serverResolvedLinks.slice(0, featuresIndex),
-        adminLink,
-        ...serverResolvedLinks.slice(featuresIndex),
-      ]
-    }
+    serverResolvedLinks = [...serverResolvedLinks, adminLink]
   }
 
   const leftSlot = (

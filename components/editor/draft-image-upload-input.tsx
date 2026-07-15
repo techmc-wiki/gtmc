@@ -1,9 +1,10 @@
 "use client"
 
 import * as React from "react"
+
 import { EditorToolbarButton } from "@/components/editor/editor-toolbar-shell"
 
-interface EditorFileUploadInputProps {
+interface DraftImageUploadInputProps {
   fileInputRef: React.RefObject<HTMLInputElement | null>
   onFileSelect: (file: File) => void
   isUploading: boolean
@@ -11,24 +12,24 @@ interface EditorFileUploadInputProps {
   disabled?: boolean
 }
 
-export function EditorFileUploadInput({
+export function DraftImageUploadInput({
   fileInputRef,
   onFileSelect,
   isUploading,
   isCompressing,
   disabled = false,
-}: EditorFileUploadInputProps) {
+}: DraftImageUploadInputProps) {
   const handleClick = React.useCallback(
     () => fileInputRef.current?.click(),
     [fileInputRef]
   )
 
   const handleChange = React.useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0]
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0]
       if (file) {
         onFileSelect(file)
-        e.target.value = ""
+        event.target.value = ""
       }
     },
     [onFileSelect]
@@ -42,15 +43,15 @@ export function EditorFileUploadInput({
         onClick={handleClick}
         disabled={disabled || isUploading}
         aria-busy={isUploading}>
-        {isCompressing ? "CMP" : isUploading ? "UPL" : "FILES"}
+        {isCompressing ? "CMP" : isUploading ? "UPL" : "IMG"}
       </EditorToolbarButton>
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,text/plain,text/csv"
+        accept="image/jpeg,image/png,image/gif,image/webp"
         className="hidden"
         onChange={handleChange}
-        aria-label="Upload file"
+        aria-label="Upload image"
       />
     </>
   )

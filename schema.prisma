@@ -28,9 +28,6 @@ model User {
   revisions          Revision[]          @relation("RevisionAuthor")
   reviews            Revision[]          @relation("RevisionReviewer")
   glossaryRevisions  GlossaryRevision[]  @relation("GlossaryRevisionAuthor")
-  features         Feature[] @relation("FeatureAuthor")
-  assignedFeatures Feature[] @relation("FeatureAssignee")
-  featureComments  FeatureComment[] @relation("CommentAuthor")
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -121,44 +118,7 @@ model GlossaryRevision {
 }
 
 // ==========================================
-// 5. Feature Report
-// ==========================================
-
-model Feature {
-  id          String   @id @default(cuid())
-  title       String
-  content     String
-  explanation String?
-  tags        String[]
-  status      String   @default("PENDING") // PENDING, IN_PROGRESS, RESOLVED
-  
-  authorId    String
-  author      User     @relation("FeatureAuthor", fields: [authorId], references: [id])
-  
-  assigneeId  String?
-  assignee    User?    @relation("FeatureAssignee", fields: [assigneeId], references: [id])
-
-  comments    FeatureComment[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model FeatureComment {
-   id          String   @id @default(cuid())
-   content     String
-   
-   featureId   String
-   feature     Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
-   
-   authorId    String
-   author      User     @relation("CommentAuthor", fields: [authorId], references: [id])
-   
-   createdAt   DateTime @default(now())
-}
-
-// ==========================================
-// 6. Draft Asset Lifecycle
+// 5. Draft Asset Lifecycle
 // ==========================================
 
 model DraftAsset {
@@ -203,7 +163,7 @@ model DraftAsset {
 }
 
 // ==========================================
-// 7. Conflict Resolution Cache
+// 6. Conflict Resolution Cache
 // ==========================================
 
 model ConflictResolution {
@@ -214,5 +174,3 @@ model ConflictResolution {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
-
-

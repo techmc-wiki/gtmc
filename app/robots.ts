@@ -9,7 +9,6 @@ const PRIVATE_SEGMENTS = [
   "/admin",
   "/login",
   "/glossary/edit",
-  "/features/new",
 ]
 
 export default function robots(): MetadataRoute.Robots {

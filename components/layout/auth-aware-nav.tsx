@@ -110,17 +110,7 @@ function useAuthAwareLinks(
       return links
     }
 
-    const featuresIndex = links.findIndex((link) => link.href === "/features")
-
-    if (featuresIndex === -1) {
-      return [...links, adminLink]
-    }
-
-    return [
-      ...links.slice(0, featuresIndex),
-      adminLink,
-      ...links.slice(featuresIndex),
-    ]
+    return [...links, adminLink]
   }, [adminLink, contributorLink, effectiveIsAdmin, isAuthenticated, navLinks])
 }
 

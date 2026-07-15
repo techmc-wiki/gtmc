@@ -7,10 +7,7 @@ import {
 export type RepoTarget = { owner: string; name: string }
 
 export const ARTICLES_REPO: RepoTarget = {
-  owner:
-    process.env.GITHUB_ARTICLES_REPO_OWNER ||
-    process.env.GITHUB_REPO_OWNER ||
-    "gtmc-dev",
+  owner: process.env.GITHUB_ARTICLES_REPO_OWNER || "gtmc-dev",
   name: process.env.GITHUB_ARTICLES_REPO_NAME || "Articles",
 }
 

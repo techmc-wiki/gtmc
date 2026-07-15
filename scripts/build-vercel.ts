@@ -1,20 +1,29 @@
 /**
  * Vercel production build entrypoint (see vercel.json buildCommand).
- *
- * 1. Refresh tags for version metadata
- * 2. Ensure Chromium for PDF generation
- * 3. Pull latest articles submodule branch (GTMC_ARTICLES_SOURCE=latest)
- * 4. Apply Prisma migrations
- * 5. Full site build
+ * 1. Initialize Git configuration and both content submodules
+ * 2. Refresh tags and latest articles branch
+ * 3. Generate Prisma Client, install Chromium, and apply migrations
+ * 4. Full site build
  *
  * Usage: pnpm build:vercel
  */
 import { run, runScript } from "./lib/run"
 
-process.env.GTMC_ARTICLES_SOURCE = "latest"
-
+run("git", ["config", "--local", "include.path", ".gitconfig"])
+run("git", [
+  "submodule",
+  "update",
+  "--init",
+  "--recursive",
+  "articles",
+  "glossary",
+])
 run("git", ["fetch", "--tags"])
-run("playwright", ["install", "chromium"])
+
+process.env.GTMC_ARTICLES_SOURCE = "latest"
 runScript("scripts/prepare-articles-for-build.ts")
+
+run("prisma", ["generate"])
+run("playwright", ["install", "chromium"])
 run("prisma", ["migrate", "deploy"])
 runScript("scripts/build.ts")

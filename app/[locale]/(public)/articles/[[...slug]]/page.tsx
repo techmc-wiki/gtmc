@@ -285,6 +285,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const createdAt = data.created as string | undefined
   const lastModified = data.lastmod as string | undefined
   const isAdvanced = data["is-advanced"] === true
+  const isRevising = manifestEntry?.isRevising === true
 
   const allAuthors = [
     ...new Set([author, ...coAuthors].filter(Boolean) as string[]),
@@ -390,11 +391,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     <div
       className="
         border-tech-main/30 bg-surface/80 relative min-h-screen
-        min-w-0 border border-t-2
-        border-t-tech-main-dark p-6 backdrop-blur-sm sm:p-8
+        min-w-0 border p-6 backdrop-blur-sm sm:p-8
       ">
-      <div className="bg-tech-signal absolute -top-0.5 left-0 h-0.5 w-16" />
-
       <BookmarkRecorder slug={currentSlug} title={articleTitle} />
 
       {runningHeadChapterSlug && runningHeadChapterTitle && (
@@ -422,6 +420,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           readingTime={readingTime}
           editPath={editPath}
           isAdvanced={isAdvanced}
+          isRevising={isRevising}
           bannerPath={bannerPath}
           bannerAlt={bannerAlt}
         />
@@ -434,6 +433,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           wordCount={wordCount}
           readingTime={readingTime}
           isAdvanced={isAdvanced}
+          isRevising={isRevising}
           bannerPath={bannerPath}
           bannerAlt={bannerAlt}
         />

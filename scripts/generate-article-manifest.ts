@@ -3,7 +3,7 @@ import path from "path"
 import type { ArticleEntry } from "@/lib/articles/manifest"
 
 import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/articles/ignore"
-import { buildGenerationSummary } from "./manifest-preview"
+import { buildManifestPreview } from "./manifest-preview"
 import {
   parseSourceReadmeFrontMatter,
   parseSourceFrontMatter,
@@ -22,6 +22,9 @@ import {
   getTranslationProvenance,
 } from "@/lib/articles/git-metadata"
 import { getArticlesCommitUrl } from "@/lib/github/repos"
+import { createLogger } from "./lib/logger"
+
+const logger = createLogger("manifest")
 
 const MANIFEST_FILE_NAME = "manifest.json"
 const ARTICLES_PATH = path.join(process.cwd(), "articles")
@@ -30,6 +33,10 @@ const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const MAX_DEPTH = 3
 
 type ArticleManifest = Record<string, ArticleEntry>
+
+function reportValidationError(message: string): void {
+  logger.error("manifest.validation.failed", {}, message)
+}
 
 function isReadmeLocaleFile(filename: string): boolean {
   return /^README(?:\.\w{2})?\.md$/i.test(filename)
@@ -325,7 +332,7 @@ async function processDirectory(
         )
         manifest[slugPrefix] = entry as ArticleEntry
       } catch (error) {
-        process.stderr.write(
+        reportValidationError(
           `Error: ${error instanceof Error ? error.message : String(error)}\n`
         )
         hasError = true
@@ -354,14 +361,16 @@ async function processDirectory(
 
     const articleSlug = tryReadSlugFromFile(sourcePath)
     if (!articleSlug) {
-      process.stderr.write(
-        `WARN: Skipping file without slug: articles/${relPath}\n`
+      logger.warn(
+        "manifest.file.skipped",
+        { reason: "missing-slug" },
+        `articles/${relPath}`
       )
       continue
     }
 
     if (!SLUG_REGEX.test(articleSlug)) {
-      process.stderr.write(
+      reportValidationError(
         `Error: Invalid slug format "${articleSlug}" in: articles/${relPath}\n`
       )
       hasError = true
@@ -389,7 +398,7 @@ async function processDirectory(
           )
           return { compositeSlug, entry: entry as ArticleEntry, error: false }
         } catch (error) {
-          process.stderr.write(
+          reportValidationError(
             `Error: ${error instanceof Error ? error.message : String(error)}\n`
           )
           return { compositeSlug, entry: null, error: true }
@@ -416,7 +425,7 @@ async function processDirectory(
         manifest
       )
     } catch (error) {
-      process.stderr.write(
+      reportValidationError(
         `Error: ${error instanceof Error ? error.message : String(error)}\n`
       )
       hasError = true
@@ -446,7 +455,7 @@ async function processDirectory(
         )
         return false
       } catch (error) {
-        process.stderr.write(
+        reportValidationError(
           `Error: ${error instanceof Error ? error.message : String(error)}\n`
         )
         return true
@@ -465,7 +474,7 @@ async function processDirectory(
     const subRelPath = `${relFromArticles}/${subDirEntry.name}`
 
     if (depth >= MAX_DEPTH) {
-      process.stderr.write(
+      reportValidationError(
         `Error: Directory nesting exceeds maximum depth of ${MAX_DEPTH}: articles/${subRelPath}\n`
       )
       hasError = true
@@ -485,7 +494,7 @@ async function processDirectory(
     const subSlug = tryReadSlugFromFile(subReadmeExists)
     if (!subSlug) {
       if (depth < 1) {
-        process.stderr.write(
+        reportValidationError(
           `Error: Empty slug not allowed in top-level folder: articles/${subRelPath}/README.zh.md\n`
         )
         hasError = true
@@ -507,7 +516,7 @@ async function processDirectory(
     }
 
     if (!SLUG_REGEX.test(subSlug)) {
-      process.stderr.write(
+      reportValidationError(
         `Error: Invalid slug format "${subSlug}" in: articles/${subRelPath}/README.zh.md\n`
       )
       hasError = true
@@ -540,7 +549,7 @@ async function main(): Promise<void> {
   let hasError = false
 
   if (!fs.existsSync(ARTICLES_PATH)) {
-    process.stderr.write(
+    reportValidationError(
       `Error: articles/ directory not found at ${ARTICLES_PATH}\n`
     )
     process.exit(1)
@@ -570,7 +579,7 @@ async function main(): Promise<void> {
         : null
 
     if (!readmeExists) {
-      process.stderr.write(
+      reportValidationError(
         `Error: Missing README.zh.md or README.md in folder: articles/${folderName}/\n`
       )
       hasError = true
@@ -581,7 +590,7 @@ async function main(): Promise<void> {
     try {
       folderSlug = readSlugFromFile(readmeExists)
     } catch (error) {
-      process.stderr.write(
+      reportValidationError(
         `Error: articles/${folderName}/README.zh.md: ${error instanceof Error ? error.message : String(error)}\n`
       )
       hasError = true
@@ -589,7 +598,7 @@ async function main(): Promise<void> {
     }
 
     if (!folderSlug) {
-      process.stderr.write(
+      reportValidationError(
         `Error: Missing slug in folder README: articles/${folderName}/README.zh.md\n`
       )
       hasError = true
@@ -597,7 +606,7 @@ async function main(): Promise<void> {
     }
 
     if (!SLUG_REGEX.test(folderSlug)) {
-      process.stderr.write(
+      reportValidationError(
         `Error: Invalid slug format "${folderSlug}" in: articles/${folderName}/README.zh.md\n`
       )
       hasError = true
@@ -640,19 +649,18 @@ async function main(): Promise<void> {
     rootFile: string
     rawSlug: string
   }> = []
+  const skippedRootFilesWithoutSlugs: string[] = []
   for (const rootFile of rootFiles) {
     const rootFilePath = path.join(ARTICLES_PATH, rootFile)
     const rawSlug = tryReadSlugFromFile(rootFilePath)
 
     if (!rawSlug) {
-      process.stderr.write(
-        `WARN: Skipping root file without slug: articles/${rootFile}\n`
-      )
+      skippedRootFilesWithoutSlugs.push(`articles/${rootFile}`)
       continue
     }
 
     if (!SLUG_REGEX.test(rawSlug)) {
-      process.stderr.write(
+      reportValidationError(
         `Error: Invalid slug format "${rawSlug}" in: articles/${rootFile}\n`
       )
       hasError = true
@@ -660,6 +668,14 @@ async function main(): Promise<void> {
     }
 
     rootFileJobs.push({ rootFilePath, rootFile, rawSlug })
+  }
+
+  if (skippedRootFilesWithoutSlugs.length > 0) {
+    logger.warn(
+      "manifest.files.skipped",
+      { count: skippedRootFilesWithoutSlugs.length, reason: "missing-slug" },
+      skippedRootFilesWithoutSlugs.map((file) => `• ${file}`).join("\n")
+    )
   }
 
   const rootFileResults = await Promise.all(
@@ -677,7 +693,7 @@ async function main(): Promise<void> {
         )
         return { rawSlug, entry: entry as ArticleEntry, error: false }
       } catch (error) {
-        process.stderr.write(
+        reportValidationError(
           `Error: ${error instanceof Error ? error.message : String(error)}\n`
         )
         return { rawSlug, entry: null, error: true }
@@ -715,7 +731,7 @@ async function main(): Promise<void> {
         )
         return false
       } catch (error) {
-        process.stderr.write(
+        reportValidationError(
           `Error: ${error instanceof Error ? error.message : String(error)}\n`
         )
         return true
@@ -738,7 +754,7 @@ async function main(): Promise<void> {
   }
 
   if (hasError) {
-    process.stderr.write(
+    reportValidationError(
       "\nArticle manifest generation failed due to validation errors above.\n"
     )
     process.exit(1)
@@ -752,15 +768,22 @@ async function main(): Promise<void> {
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(manifest, null, 2) + "\n")
 
   const entryCount = Object.keys(manifest).length
-  process.stdout.write(
-    buildGenerationSummary(manifest, {
-      articlesPath: ARTICLES_PATH,
-      outputFile: OUTPUT_FILE,
-      maxDepth: MAX_DEPTH,
-    })
-  )
-  process.stdout.write(
-    `Generated ${MANIFEST_FILE_NAME} with ${entryCount} entries\n`
+  const entries = Object.values(manifest)
+  const includeStructure = process.env.GTMC_LOG_DETAIL === "1"
+  logger.event(
+    "manifest.generated",
+    {
+      entry_count: entryCount,
+      folder_count: entries.filter((entry) => entry.isFolder).length,
+      output: path.relative(process.cwd(), OUTPUT_FILE),
+    },
+    includeStructure
+      ? buildManifestPreview(manifest, {
+          articlesPath: ARTICLES_PATH,
+          outputFile: OUTPUT_FILE,
+          maxDepth: MAX_DEPTH,
+        })
+      : undefined
   )
 }
 

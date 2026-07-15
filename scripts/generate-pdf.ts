@@ -56,6 +56,9 @@ import {
 import { createRehypeShiki } from "@/lib/markdown/syntax/rehype-shiki"
 import type { RehypeShikiPlugin } from "@/lib/markdown/syntax/rehype-shiki"
 import { getMermaidConfig } from "@/lib/markdown/mermaid-config"
+import { createLogger } from "./lib/logger"
+
+const logger = createLogger("pdf")
 
 const BOOK_TITLE = "Graduate Texts in Minecraft"
 const BOOK_SUBTITLE = "An Introduction to Technical Minecraft"
@@ -165,9 +168,10 @@ function createRenderArticle(
 
       return resolveImagesInHtml(html, article.filePath)
     } catch (error) {
-      console.warn(
-        `[pdf] Warning: failed to render article "${article.slug}":`,
-        error
+      logger.warn(
+        "pdf.article.render-skipped",
+        { slug: article.slug },
+        String(error)
       )
       return ""
     }
@@ -273,22 +277,19 @@ async function renderHtmlToPdf(
 }
 
 async function runPdf(locale: PdfLocale, output: string): Promise<void> {
-  console.log(`[pdf] Generating PDF (locale=${locale}, output=${output})`)
+  const startedAt = performance.now()
+  logger.event("pdf.started", { locale, output })
 
   const outDir = path.dirname(output)
   fs.mkdirSync(outDir, { recursive: true })
 
-  console.log("[pdf] Phase 1/6: Loading and numbering article tree...")
   const tree = preparePublicChapterNav(await getArticleTree(locale))
   if (!tree || tree.length === 0) {
-    console.warn(
-      "[pdf] No articles found in tree (submodule may not be initialized). Skipping PDF generation."
-    )
+    logger.warn("pdf.skipped", { locale, reason: "empty-article-tree" })
     return
   }
   const linearized = await linearizeArticles(tree)
 
-  console.log("[pdf] Phase 2/6: Scanning article content...")
   const { codeLangs, hasMath, bodies } = await analyzeArticles(
     linearized,
     locale
@@ -300,26 +301,27 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
     bodies.get(article.slug)?.trim()
   )
   const plan = buildBookPlan(articles)
-  console.log(
-    `[pdf]   → ${articles.length}/${linearized.length} article(s) with content, ${plan.chapters.length} chapter(s)`
-  )
-  console.log(
-    `[pdf]   → Code languages: ${codeLangs.join(", ") || "none"} · math: ${hasMath}`
-  )
+  logger.event("pdf.content.analyzed", {
+    article_count: articles.length,
+    chapter_count: plan.chapters.length,
+    code_language_count: codeLangs.length,
+    has_math: hasMath,
+    locale,
+    tree_entry_count: linearized.length,
+  })
 
-  console.log("[pdf] Phase 3/6: Initializing syntax highlighter...")
   let shikiPlugin: RehypeShikiPlugin | undefined
   if (codeLangs.length > 0) {
     shikiPlugin = await createRehypeShiki(codeLangs).catch((error) => {
-      console.warn(
-        "[pdf]   ⚠ Failed to initialize Shiki, continuing without highlighting:",
-        error
+      logger.warn(
+        "pdf.syntax-highlighting.unavailable",
+        { locale },
+        String(error)
       )
       return undefined
     })
   }
 
-  console.log("[pdf] Phase 4/6: Building book HTML...")
   const bookOptions: BookOptions = {
     title: BOOK_TITLE,
     subtitle: BOOK_SUBTITLE,
@@ -337,9 +339,10 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
     bookOptions,
     plan
   )
-  console.log(
-    `[pdf]   → HTML built (${(bodyHtml.length / 1024 / 1024).toFixed(1)} MB)`
-  )
+  logger.event("pdf.html.generated", {
+    locale,
+    size_mb: (bodyHtml.length / 1024 / 1024).toFixed(1),
+  })
 
   const tempHtmlPath = path.join(outDir, `.gtmc-pdf-temp-${locale}.html`)
   const tempPdfPath = output + ".tmp"
@@ -353,7 +356,6 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
     }
   }
 
-  console.log("[pdf] Phase 5/6: Rendering PDF (cover + convergent body)...")
   const browser = await chromium
     .launch({
       args: [
@@ -363,9 +365,10 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
       ],
     })
     .catch((error) => {
-      console.warn(
-        "[pdf] Failed to launch Playwright, skipping PDF generation:",
-        error
+      logger.warn(
+        "pdf.skipped",
+        { locale, reason: "browser-launch-failed" },
+        String(error)
       )
       return null
     })
@@ -403,14 +406,12 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
       pass1AnchorPages
     )
     if (missing.length > 0) {
-      console.warn(
-        `[pdf]   ⚠ ${missing.length} TOC anchor(s) without a measured page: ${missing.slice(0, 3).join(", ")}${missing.length > 3 ? ", …" : ""}`
+      logger.warn(
+        "pdf.toc.anchors-missing",
+        { count: missing.length, locale },
+        missing.slice(0, 3).join(", ")
       )
     }
-    console.log(
-      `[pdf]   → Pass 1 measured ${pass1AnchorPages.size} anchors; re-rendering with folios...`
-    )
-
     bodyBytes = await renderHtmlToPdf(
       browser,
       filledHtml,
@@ -423,9 +424,6 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
     if (
       haveTocFolioPagesChanged(bodyHtml, pass1AnchorPages, pass2AnchorPages)
     ) {
-      console.log(
-        "[pdf]   → Pass 2 shifted TOC targets; rendering one final folio pass..."
-      )
       const { html: finalHtml } = fillTocFolios(bodyHtml, pass2AnchorPages)
       bodyBytes = await renderHtmlToPdf(
         browser,
@@ -451,7 +449,6 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
   }
   cleanupTemp()
 
-  console.log("[pdf] Phase 6/6: Merging cover, outlines, and metadata...")
   const coverDoc = await PDFDocument.load(coverBytes)
   const coverPageCount = coverDoc.getPageCount()
 
@@ -484,10 +481,13 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
 
   fs.writeFileSync(output, await merged.save())
 
-  const sizeMb = (fs.statSync(output).size / 1024 / 1024).toFixed(1)
-  console.log(
-    `[pdf] ✓ Done! ${merged.getPageCount()} pages saved to: ${output} (${sizeMb} MB)`
-  )
+  logger.event("pdf.generated", {
+    duration_ms: Math.round(performance.now() - startedAt),
+    locale,
+    output,
+    page_count: merged.getPageCount(),
+    size_mb: (fs.statSync(output).size / 1024 / 1024).toFixed(1),
+  })
 }
 
 async function main() {
@@ -503,7 +503,11 @@ async function main() {
       await runPdf(locale, output)
     }
   } catch (error) {
-    console.error(error)
+    logger.error(
+      "pdf.failed",
+      {},
+      error instanceof Error ? (error.stack ?? error.message) : String(error)
+    )
     process.exit(1)
   }
 }

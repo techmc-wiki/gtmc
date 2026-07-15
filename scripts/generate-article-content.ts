@@ -23,6 +23,9 @@ import type {
   TranslationReadmeFrontMatter,
   TranslationFrontMatter,
 } from "@/lib/articles/frontmatter-parser"
+import { createLogger } from "./lib/logger"
+
+const logger = createLogger("article-content")
 
 const OUTPUT_DIR = path.join(process.cwd(), "data", "articles")
 const TEMP_DIR = path.join(process.cwd(), "data", "articles.tmp")
@@ -175,8 +178,13 @@ function main(): void {
       try {
         fileContent = fs.readFileSync(sourcePath, "utf-8")
       } catch {
-        process.stderr.write(
-          `Error: Cannot read source file for "${entry.slug}" (${locale}): ${sourcePath}\n`
+        logger.error(
+          "article-content.source.read-failed",
+          {
+            locale,
+            slug: entry.slug,
+          },
+          sourcePath
         )
         errorCount++
         if (IS_PRODUCTION) {
@@ -243,9 +251,10 @@ function main(): void {
   }
   saveCache(cache)
 
-  process.stdout.write(
-    `Generated ${generatedCount} article content artifacts, reused ${reusedCount} from cache\n`
-  )
+  logger.event("article-content.generated", {
+    generated_count: generatedCount,
+    reused_count: reusedCount,
+  })
 
   if (errorCount > 0) {
     process.exit(1)
@@ -269,8 +278,10 @@ function renderArtifact(
         ? parseSourceReadmeFrontMatter(fileContent)
         : parseSourceFrontMatter(fileContent)
     } catch (error) {
-      process.stderr.write(
-        `Error: Failed to parse source frontmatter for "${entry.slug}" (${locale}): ${error instanceof Error ? error.message : String(error)}\n`
+      logger.error(
+        "article-content.frontmatter.parse-failed",
+        { locale, slug: entry.slug, type: "source" },
+        String(error)
       )
       return null
     }
@@ -304,8 +315,10 @@ function renderArtifact(
         ? parseTranslationReadmeFrontMatter(fileContent)
         : parseTranslationFrontMatter(fileContent)
     } catch (error) {
-      process.stderr.write(
-        `Error: Failed to parse translation frontmatter for "${entry.slug}" (${locale}): ${error instanceof Error ? error.message : String(error)}\n`
+      logger.error(
+        "article-content.frontmatter.parse-failed",
+        { locale, slug: entry.slug, type: "translation" },
+        String(error)
       )
       return null
     }

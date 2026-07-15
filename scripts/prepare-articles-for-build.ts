@@ -1,4 +1,7 @@
 import { run } from "./lib/run"
+import { createLogger, runBuildStep } from "./lib/logger"
+
+const logger = createLogger("articles")
 
 type ArticleSourceMode = "pinned" | "latest"
 
@@ -11,8 +14,10 @@ function parseArticleSourceMode(
   if (trimmedValue === "pinned") return "pinned"
   if (trimmedValue === "latest") return "latest"
 
-  process.stderr.write(
-    `Invalid GTMC_ARTICLES_SOURCE=${trimmedValue}. Expected "pinned" or "latest".\n`
+  logger.error(
+    "articles.prepare.invalid-source",
+    { source: trimmedValue },
+    'Expected "pinned" or "latest".'
   )
   process.exit(1)
 }
@@ -25,15 +30,9 @@ if (sourceMode) {
       ? ["submodule", "update", "--init", "--recursive", "--remote", "articles"]
       : ["submodule", "update", "--init", "--recursive", "articles"]
 
-  process.stdout.write(
-    sourceMode === "latest"
-      ? "Preparing articles from latest configured submodule branch\n"
-      : "Preparing articles from pinned submodule commit\n"
-  )
-
-  run("git", args)
+  runBuildStep(logger, "submodule.update", () => run("git", args), {
+    source: sourceMode,
+  })
 } else {
-  process.stdout.write(
-    "GTMC_ARTICLES_SOURCE is unset; leaving articles submodule unchanged\n"
-  )
+  logger.event("articles.prepare.skipped", { reason: "source-unset" })
 }

@@ -3,6 +3,9 @@ import { createHash } from "node:crypto"
 import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
+import { createLogger } from "./logger"
+
+const logger = createLogger("content-cache")
 
 const CACHE_FORMAT_VERSION = 2
 const CACHE_DIRECTORY = path.resolve(
@@ -83,6 +86,10 @@ interface ContentArtifactCacheManifest {
 interface TarResult {
   readonly ok: boolean
   readonly output: string
+}
+
+function getCacheId(cache: ContentArtifactCache): string {
+  return cache.key.slice(0, 12)
 }
 
 function listContentGeneratorFiles(): string[] {
@@ -216,9 +223,7 @@ export function createContentArtifactCache(): ContentArtifactCache | null {
       manifestPath: path.join(CACHE_DIRECTORY, `${key}.json`),
     }
   } catch (error) {
-    console.warn(
-      `[content-cache] disabled: ${error instanceof Error ? error.message : String(error)}`
-    )
+    logger.warn("content-cache.disabled", {}, String(error))
     return null
   }
 }
@@ -229,7 +234,10 @@ export function restoreContentArtifacts(cache: ContentArtifactCache): boolean {
       !fs.existsSync(cache.archivePath) ||
       !fs.existsSync(cache.manifestPath)
     ) {
-      console.log(`[content-cache] miss key=${cache.key}`)
+      logger.event("content-cache.restore", {
+        outcome: "miss",
+        reason: "not-found",
+      })
       return false
     }
 
@@ -243,13 +251,20 @@ export function restoreContentArtifacts(cache: ContentArtifactCache): boolean {
       manifest.nodeVersion !== process.versions.node ||
       JSON.stringify(manifest.artifacts) !== JSON.stringify(expectedArtifacts)
     ) {
-      console.warn(`[content-cache] miss key=${cache.key} (invalid manifest)`)
+      logger.warn("content-cache.restore", {
+        outcome: "miss",
+        reason: "invalid-manifest",
+      })
       return false
     }
 
     const listing = runTar(["-tzf", cache.archivePath])
     if (!listing.ok) {
-      console.warn(`[content-cache] miss key=${cache.key} (${listing.output})`)
+      logger.warn(
+        "content-cache.restore",
+        { outcome: "miss", reason: "unreadable" },
+        listing.output
+      )
       return false
     }
 
@@ -257,8 +272,13 @@ export function restoreContentArtifacts(cache: ContentArtifactCache): boolean {
       listing.output.split("\n").filter(Boolean)
     )
     if (unexpectedEntry) {
-      console.warn(
-        `[content-cache] miss key=${cache.key} (unexpected archive entry ${unexpectedEntry})`
+      logger.warn(
+        "content-cache.restore",
+        {
+          outcome: "miss",
+          reason: "unexpected-entry",
+        },
+        unexpectedEntry
       )
       return false
     }
@@ -274,16 +294,20 @@ export function restoreContentArtifacts(cache: ContentArtifactCache): boolean {
         temporaryDirectory,
       ])
       if (!extracted.ok) {
-        console.warn(
-          `[content-cache] miss key=${cache.key} (${extracted.output})`
+        logger.warn(
+          "content-cache.restore",
+          { outcome: "miss", reason: "extract-failed" },
+          extracted.output
         )
         return false
       }
 
       const missingArtifact = hasEveryGeneratedArtifact(temporaryDirectory)
       if (missingArtifact) {
-        console.warn(
-          `[content-cache] miss key=${cache.key} (missing ${missingArtifact})`
+        logger.warn(
+          "content-cache.restore",
+          { outcome: "miss", reason: "missing-artifact" },
+          missingArtifact
         )
         return false
       }
@@ -303,11 +327,16 @@ export function restoreContentArtifacts(cache: ContentArtifactCache): boolean {
       fs.rmSync(temporaryDirectory, { recursive: true, force: true })
     }
 
-    console.log(`[content-cache] hit key=${cache.key}`)
+    logger.event("content-cache.restore", {
+      cache_id: getCacheId(cache),
+      outcome: "hit",
+    })
     return true
   } catch (error) {
-    console.warn(
-      `[content-cache] miss key=${cache.key} (${error instanceof Error ? error.message : String(error)})`
+    logger.warn(
+      "content-cache.restore",
+      { outcome: "miss", reason: "exception" },
+      String(error)
     )
     return false
   }
@@ -317,8 +346,10 @@ export function saveContentArtifacts(cache: ContentArtifactCache): void {
   try {
     const missingArtifact = hasEveryGeneratedArtifact(process.cwd())
     if (missingArtifact) {
-      console.warn(
-        `[content-cache] not saved key=${cache.key} (missing ${missingArtifact})`
+      logger.warn(
+        "content-cache.save",
+        { outcome: "skipped", reason: "missing-artifact" },
+        missingArtifact
       )
       return
     }
@@ -333,8 +364,10 @@ export function saveContentArtifacts(cache: ContentArtifactCache): void {
         ...GENERATED_ARTIFACTS,
       ])
       if (!archived.ok) {
-        console.warn(
-          `[content-cache] not saved key=${cache.key} (${archived.output})`
+        logger.warn(
+          "content-cache.save",
+          { outcome: "failed", reason: "archive-failed" },
+          archived.output
         )
         return
       }
@@ -352,14 +385,19 @@ export function saveContentArtifacts(cache: ContentArtifactCache): void {
       )
       fs.renameSync(temporaryArchivePath, cache.archivePath)
       fs.renameSync(temporaryManifestPath, cache.manifestPath)
-      console.log(`[content-cache] saved key=${cache.key}`)
+      logger.event("content-cache.save", {
+        cache_id: getCacheId(cache),
+        outcome: "saved",
+      })
     } finally {
       fs.rmSync(temporaryArchivePath, { force: true })
       fs.rmSync(temporaryManifestPath, { force: true })
     }
   } catch (error) {
-    console.warn(
-      `[content-cache] not saved key=${cache.key} (${error instanceof Error ? error.message : String(error)})`
+    logger.warn(
+      "content-cache.save",
+      { outcome: "failed", reason: "exception" },
+      String(error)
     )
   }
 }

@@ -2,6 +2,9 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs"
 import { join } from "node:path"
 import { load as yamlLoad } from "js-yaml"
 import type { ArticleEntry } from "@/lib/articles/manifest"
+import { createLogger } from "./lib/logger"
+
+const logger = createLogger("authors")
 
 const CONFIG_DIR = join(process.cwd(), "lib", "articles", "config")
 const PEOPLE_PATH = join(CONFIG_DIR, "people.yml")
@@ -116,7 +119,7 @@ export function resolvePersonClient(key: string): ResolvedPerson {
 function main(): void {
   const people = loadYaml<PeopleMap>(PEOPLE_PATH)
   if (!people || typeof people !== "object" || Array.isArray(people)) {
-    process.stderr.write(`Error: could not parse ${PEOPLE_PATH}\n`)
+    logger.error("authors.people.parse-failed", { path: PEOPLE_PATH })
     process.exit(1)
   }
 
@@ -161,9 +164,9 @@ function main(): void {
   writeFileSync(PROFILES_JSON_PATH, `${JSON.stringify(sorted, null, 2)}\n`)
   writeFileSync(PROFILES_TS_PATH, renderAuthorProfiles(sorted, authors))
   writeFileSync(PEOPLE_TS_PATH, renderPeopleData(people))
-  process.stdout.write(
-    `Generated people artifacts for ${Object.keys(sorted).length} profiles\n`
-  )
+  logger.event("authors.profiles.generated", {
+    profile_count: Object.keys(sorted).length,
+  })
 }
 
 main()

@@ -222,12 +222,18 @@ importers:
       '@types/three':
         specifier: ^0.185.0
         version: 0.185.1
+      consola:
+        specifier: ^3.4.2
+        version: 3.4.2
       gitnexus:
         specifier: ^1.6.9
         version: 1.6.9(graphology-types@0.24.8)(zod@4.4.3)
       pdf-lib:
         specifier: ^1.17.1
         version: 1.17.1
+      picocolors:
+        specifier: ^1.1.1
+        version: 1.1.1
       playwright:
         specifier: ^1.61.1
         version: 1.61.1
@@ -2998,6 +3004,10 @@ packages:
   configstore@5.0.1:
     resolution: {integrity: sha512-aMKprgk5YhBNyH25hj8wGt2+D52Sw1DRRIzqBwLp2Ya9mFmY8KPvvtvmna8SxVR9JMZ4kzMD68N22vlaRpkeFA==}
     engines: {node: '>=8'}
+
+  consola@3.4.2:
+    resolution: {integrity: sha512-5IKcdX0nnYavi6G7TtOhwkYzyjfJlatbjMjuLSfE2kYT5pMDOilZ4OvMhi637CcDICTmz3wARPoyhqyX1Y+XvA==}
+    engines: {node: ^14.18.0 || >=16.10.0}
 
   content-disposition@0.5.4:
     resolution: {integrity: sha512-FveZTNuGw04cxlAiWbzi6zTAL/lhehaWbTtgluJh4/E95DqMwTmha3KZN1aAWA8cFIhHzMZUvLevkw5Rqk+tSQ==}
@@ -8820,6 +8830,8 @@ snapshots:
       write-file-atomic: 3.0.3
       xdg-basedir: 4.0.0
 
+  consola@3.4.2: {}
+
   content-disposition@0.5.4:
     dependencies:
       safe-buffer: 5.2.1
@@ -10782,7 +10794,7 @@ snapshots:
       seq-queue: 0.0.5
       sqlstring: 2.3.3
 
-  n8ao@1.10.3(postprocessing@6.39.2(three@0.185.1))(three@0.184.0):
+  n8ao@1.10.3(postprocessing@6.39.2(three@0.184.0))(three@0.184.0):
     dependencies:
       postprocessing: 6.39.2(three@0.184.0)
       three: 0.184.0
@@ -11684,7 +11696,7 @@ snapshots:
       http-proxy-middleware: 0.2.0
       jszip: 3.10.1
       lil-gui: 0.19.2
-      n8ao: 1.10.3(postprocessing@6.39.2(three@0.185.1))(three@0.184.0)
+      n8ao: 1.10.3(postprocessing@6.39.2(three@0.184.0))(three@0.184.0)
       nucleation: 0.2.18
       pako: 2.2.0
       postprocessing: 6.39.2(three@0.184.0)

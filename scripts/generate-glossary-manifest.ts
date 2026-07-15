@@ -7,6 +7,9 @@ import type {
   GlossaryLocale,
   GlossarySummaryEntry,
 } from "@/lib/glossary/manifest"
+import { createLogger } from "./lib/logger"
+
+const logger = createLogger("glossary")
 
 const CSV_FILE = path.join(process.cwd(), "glossary", "TechMC Glossary.csv")
 const OUTPUT_FILE = path.join(process.cwd(), "data", "glossary.json")
@@ -57,7 +60,7 @@ function writeJson(filePath: string, data: unknown): void {
 
 function main(): void {
   if (!fs.existsSync(CSV_FILE)) {
-    process.stderr.write(`Error: CSV file not found at ${CSV_FILE}\n`)
+    logger.error("glossary.source.unavailable", { path: CSV_FILE })
     process.exit(1)
   }
 
@@ -65,9 +68,7 @@ function main(): void {
   try {
     csvText = fs.readFileSync(CSV_FILE, "utf-8")
   } catch (error) {
-    process.stderr.write(
-      `Error: Failed to read CSV: ${error instanceof Error ? error.message : String(error)}\n`
-    )
+    logger.error("glossary.source.read-failed", {}, String(error))
     process.exit(1)
   }
 
@@ -75,9 +76,7 @@ function main(): void {
   try {
     ;({ rows } = parseGlossaryCsv(csvText))
   } catch (error) {
-    process.stderr.write(
-      `Error: Failed to parse CSV: ${error instanceof Error ? error.message : String(error)}\n`
-    )
+    logger.error("glossary.source.parse-failed", {}, String(error))
     process.exit(1)
   }
 
@@ -130,9 +129,7 @@ function main(): void {
     writeJson(OUTPUT_FILE, entries)
     writeJson(SUMMARY_FILE, summaries)
   } catch (error) {
-    process.stderr.write(
-      `Error: Failed to write output: ${error instanceof Error ? error.message : String(error)}\n`
-    )
+    logger.error("glossary.output.write-failed", {}, String(error))
     process.exit(1)
   }
 
@@ -141,16 +138,12 @@ function main(): void {
     (e) => Object.keys(e.translations).length > 0
   ).length
 
-  process.stdout.write(
-    [
-      "[glossary-manifest] Glossary manifest generated",
-      `Source: ${path.relative(process.cwd(), CSV_FILE)}`,
-      `Output: ${path.relative(process.cwd(), OUTPUT_FILE)}`,
-      `        ${path.relative(process.cwd(), SUMMARY_FILE)}`,
-      `Entries: ${entries.length} total (${controversial} controversial, ${withTranslations} with translations)`,
-      "",
-    ].join("\n")
-  )
+  logger.event("glossary.generated", {
+    controversial_count: controversial,
+    entry_count: entries.length,
+    output: path.relative(process.cwd(), OUTPUT_FILE),
+    translated_count: withTranslations,
+  })
 }
 
 main()

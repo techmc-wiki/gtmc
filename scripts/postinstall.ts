@@ -2,6 +2,9 @@ import { existsSync } from "node:fs"
 import { spawnSync } from "node:child_process"
 
 import { run, runScript } from "./lib/run"
+import { createLogger, runBuildStep } from "./lib/logger"
+
+const logger = createLogger("setup")
 
 const placeholderDatabaseUrl = "postgresql://localhost:5432/placeholder"
 
@@ -33,17 +36,25 @@ function isSubmoduleInitialized(path: string) {
 }
 
 function ensureSubmoduleInitialized(path: string) {
+  let initialized = false
   if (!isSubmoduleInitialized(path)) {
     run("git", ["submodule", "update", "--init", "--recursive", path])
+    initialized = true
   }
 
   if (!isSubmoduleInitialized(path)) {
-    process.stderr.write(`Submodule ${path} is not correctly initialized\n`)
+    logger.error("submodule.unavailable", { path })
     process.exit(1)
   }
 
-  process.stdout.write(`Submodule ${path} is initialized\n`)
+  logger.event("submodule.ready", {
+    action: initialized ? "initialized" : "reused",
+    path,
+  })
 }
+
+const startedAt = performance.now()
+logger.event("setup.started")
 
 if (isGitWorkTree()) {
   run("git", ["config", "--local", "include.path", ".gitconfig"])
@@ -51,10 +62,11 @@ if (isGitWorkTree()) {
   ensureSubmoduleInitialized("articles")
   ensureSubmoduleInitialized("glossary")
 
-  process.stdout.write("  Generating glossary manifest...\n")
-  runScript("scripts/generate-glossary-manifest.ts")
+  runBuildStep(logger, "glossary", () =>
+    runScript("scripts/generate-glossary-manifest.ts")
+  )
 } else {
-  process.stdout.write("Skipping Git submodule setup outside a Git work tree\n")
+  logger.event("submodule.setup.skipped", { reason: "outside-work-tree" })
 }
 
 // Heavy steps (prisma generate, article manifest, chromium install) are
@@ -69,23 +81,31 @@ const skipHeavy =
 const skipPlaywright = skipHeavy || process.env.GTMC_SKIP_PLAYWRIGHT === "1"
 
 if (skipHeavy) {
-  process.stdout.write(
-    "Skipping heavy postinstall steps (prisma generate, article manifest, chromium install)\n"
-  )
+  logger.event("setup.heavy-work.skipped", { reason: "environment" })
 } else {
-  run("prisma", ["generate"], {
-    env: {
-      ...process.env,
-      DATABASE_URL: process.env.DATABASE_URL ?? placeholderDatabaseUrl,
-    },
-  })
-  runScript("scripts/generate-article-manifest.ts")
-  runScript("scripts/generate-author-profiles.ts")
+  runBuildStep(logger, "prisma.generate", () =>
+    run("prisma", ["generate"], {
+      env: {
+        ...process.env,
+        DATABASE_URL: process.env.DATABASE_URL ?? placeholderDatabaseUrl,
+      },
+    })
+  )
+  runBuildStep(logger, "manifest", () =>
+    runScript("scripts/generate-article-manifest.ts")
+  )
+  runBuildStep(logger, "author-profiles", () =>
+    runScript("scripts/generate-author-profiles.ts")
+  )
   if (skipPlaywright) {
-    process.stdout.write(
-      "Skipping Playwright Chromium install (GTMC_SKIP_PLAYWRIGHT=1)\n"
-    )
+    logger.event("browser.install.skipped", { reason: "environment" })
   } else {
-    run("playwright", ["install", "chromium"])
+    runBuildStep(logger, "browser.install", () =>
+      run("playwright", ["install", "chromium"])
+    )
   }
 }
+
+logger.event("setup.completed", {
+  duration_ms: Math.round(performance.now() - startedAt),
+})

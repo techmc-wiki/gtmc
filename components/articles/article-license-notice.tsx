@@ -21,7 +21,6 @@ export function ArticleLicenseNotice({
   authors = DEFAULT_AUTHORS,
 }: ArticleLicenseNoticeProps) {
   const t = useTranslations("ArticleMeta")
-  const [isExpanded, setIsExpanded] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
   const orderedAuthors = [...new Set(authors)]
   const sortedAuthors = [...orderedAuthors].toSorted((left, right) =>
@@ -46,11 +45,6 @@ export function ArticleLicenseNotice({
   ]
     .filter(Boolean)
     .join(", ")
-  const attributionPrompt =
-    orderedAuthors.length > 7
-      ? t("attributionPromptTruncated")
-      : t("attributionPromptAlphabetical")
-
   const handleCopyAttribution = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(attributionLabel)
@@ -61,64 +55,37 @@ export function ArticleLicenseNotice({
     }
   }, [attributionLabel])
 
-  const toggleExpanded = useCallback(() => {
-    setIsExpanded((current) => !current)
-  }, [])
-
   return (
     <section
       aria-label={t("articleLicenseAria")}
-      className="border-t guide-line pt-3 text-[0.6875rem] text-tech-main/70">
+      className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.6875rem] text-tech-main/70">
+      <span className="mono-label text-[0.625rem] text-tech-main/55">
+        {t("reuseLicenseTitle")}
+      </span>
+      <span aria-hidden="true" className="text-tech-main/35">
+        |
+      </span>
+      <Link
+        href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline decoration-tech-main/30 underline-offset-4 transition-colors hover:text-tech-main-dark hover:decoration-tech-main-dark">
+        CC BY-NC-SA 4.0
+      </Link>
+      <span aria-hidden="true" className="text-tech-main/35">
+        |
+      </span>
       <button
         type="button"
-        onClick={toggleExpanded}
-        className="flex w-full items-center justify-between gap-3 text-left transition-colors hover:text-tech-main"
-        aria-expanded={isExpanded}>
-        <span className="mono-label">{t("reuseLicenseTitle")}</span>
-        <span className="font-mono text-[0.625rem] text-tech-main/55 uppercase">
-          {isExpanded ? t("hideDetails") : t("showDetails")}
-        </span>
+        onClick={handleCopyAttribution}
+        className="underline decoration-dotted decoration-tech-main/30 underline-offset-4 transition-colors hover:text-tech-main-dark hover:decoration-tech-main-dark"
+        aria-label={t("copySuggestedAttributionAria")}
+        title={t("copySuggestedAttributionTitle")}>
+        {isCopied ? t("copiedButton") : t("copyAttribution")}
       </button>
-
-      {isExpanded && (
-        <div className="mt-2 space-y-2 font-mono leading-relaxed">
-          <p>
-            {t("licenseDescriptionPrefix")}{" "}
-            <Link
-              href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline decoration-tech-main/30 underline-offset-4 transition-colors hover:text-tech-main-dark hover:decoration-tech-main-dark">
-              CC BY-NC-SA 4.0
-            </Link>
-            {t("licenseDescriptionSuffix")}
-          </p>
-          <p>
-            <button
-              type="button"
-              onClick={handleCopyAttribution}
-              className="bg-transparent p-0 text-left leading-tight"
-              aria-label={t("copySuggestedAttributionAria")}
-              title={t("copySuggestedAttributionTitle")}>
-              {attributionPrompt}{" "}
-              <span
-                className="relative font-bold text-tech-main">
-                <span className={`transition-opacity ${isCopied ? "opacity-0" : "opacity-100"}`}>{attributionLabel}</span>
-                <span
-                  aria-hidden="true"
-                  className={
-                    `pointer-events-none absolute top-0 left-0 transition-opacity ${isCopied ? "opacity-100" : "opacity-0"}`
-                  }>
-                  {t("copiedButton")}
-                </span>
-              </span>
-            </button>
-          </p>
-          <p>
-            {t("attributionHistoryNote")}
-          </p>
-        </div>
-      )}
+      <span className="sr-only" aria-live="polite">
+        {isCopied ? t("copiedButton") : ""}
+      </span>
     </section>
   )
 }

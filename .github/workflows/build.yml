@@ -4,9 +4,9 @@ permissions:
 
 on:
   push:
-    branches: ["**"]
+    branches: ["dev", "production"]
   pull_request:
-    branches: ["**"]
+    branches: ["dev", "production"]
 
 concurrency:
   group: build-${{ github.workflow }}-${{ github.ref }}

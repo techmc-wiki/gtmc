@@ -1,11 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { useState, useRef, useEffect, useCallback, useMemo } from "react"
-import {
-  ChapterNavPanel,
-  type ChapterNavPanelHandle,
-} from "./chapter-nav-panel"
+import { useState, useEffect, useCallback, useMemo } from "react"
+import { ChapterNavPanel } from "./chapter-nav-panel"
 import { ReaderNavigationProvider } from "./reader-navigation/context"
 import { MobileChapterNavCard } from "./mobile-chapter-nav-card"
 import { useMobileChapterNavMachine } from "@/app/[locale]/(public)/articles/mobile-chapter-nav/use-mobile-chapter-nav-machine"
@@ -26,20 +23,15 @@ const treeDropInStyle: React.CSSProperties = {
   animation: "tree-drop-in 1.05s cubic-bezier(0.16, 1, 0.3, 1) both",
 }
 
-const EMPTY_TREE: ChapterNavNode[] = []
-
 interface ArticlesLayoutProps {
   children: React.ReactNode
   tree: ChapterNavNode[]
 }
 
-interface ChapterNavWrapperProps {
-  chapterNavRef: React.Ref<ChapterNavPanelHandle>
+interface ChapterNavContentProps {
   showPlaceholder: boolean
   onNavigate: () => void
-  internalScroll?: boolean
-  scrollClass?: string
-  hideActions?: boolean
+  className?: string
 }
 
 function TreeLoadingPlaceholder() {
@@ -126,39 +118,21 @@ function TreeLoadingPlaceholder() {
   )
 }
 
-function ChapterNavWrapper({
-  chapterNavRef,
+function ChapterNavContent({
   showPlaceholder,
   onNavigate,
-  internalScroll = false,
-  scrollClass = "",
-  hideActions = false,
-}: ChapterNavWrapperProps) {
+  className,
+}: ChapterNavContentProps) {
   return (
     <div
-      className={`
-         w-full pb-4 font-mono text-[0.9375rem] wrap-break-word
-         [&_li]:mt-1.5
-         [&_ul]:list-none
-         [&_ul_ul]:mt-1.5 [&_ul_ul]:mb-3 [&_ul_ul]:border-l [&_ul_ul]:guide-line
-         [&_ul_ul]:pl-3
-         [&>ul]:pl-0
-         ${showPlaceholder ? "h-full min-h-full pb-0" : ""}
-       `}
+      className={`flex min-h-0 w-full flex-1 flex-col ${showPlaceholder ? "h-full" : ""}`}
       aria-busy={showPlaceholder}>
       {showPlaceholder ? (
         <div className="h-full min-h-full pr-4">
           <TreeLoadingPlaceholder />
         </div>
       ) : (
-        <ChapterNavPanel
-          tree={EMPTY_TREE}
-          onNavigate={onNavigate}
-          ref={chapterNavRef}
-          internalScroll={internalScroll}
-          scrollClass={scrollClass}
-          hideActions={hideActions}
-        />
+        <ChapterNavPanel onNavigate={onNavigate} className={className} />
       )}
     </div>
   )
@@ -172,17 +146,13 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
     () => tree.length > 0
   )
   const [chapterNavHidden, setChapterNavHidden] = useState(false)
-  const desktopChapterNavRef = useRef<ChapterNavPanelHandle>(null)
-  const floatingCardChapterNavRef = useRef<ChapterNavPanelHandle>(null)
   const machine = useMobileChapterNavMachine()
   const {
-    state,
     dispatch,
     isOpen: isChapterNavOpen,
     isFloating,
     isStuck,
   } = machine
-  void state
   const locale = useLocale()
   const t = useTranslations("ChapterNav")
   const tA11y = useTranslations("CommonA11y")
@@ -321,21 +291,17 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   )
 
   const fixedChapterNavContent = (
-    <ChapterNavWrapper
-      chapterNavRef={desktopChapterNavRef}
+    <ChapterNavContent
       showPlaceholder={showChapterNavPlaceholder}
       onNavigate={onNavigate}
-      internalScroll
-      scrollClass="pr-4"
+      className="pr-4"
     />
   )
 
   const floatingChapterNavContent = (
-    <ChapterNavWrapper
-      chapterNavRef={floatingCardChapterNavRef}
+    <ChapterNavContent
       showPlaceholder={showChapterNavPlaceholder}
       onNavigate={onNavigate}
-      internalScroll
     />
   )
 
@@ -456,30 +422,15 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                 ">
                 <div
                   className="
-                    group relative flex max-h-4/5 min-h-0 flex-1 flex-col
-                    overflow-visible border-b guide-line text-tech-main
+                    flex max-h-4/5 min-h-0 flex-1 flex-col overflow-visible
+                    border-b guide-line text-tech-main
                     md:px-4 md:py-2
                   ">
-                  <div className="flex shrink-0 flex-col">
-                    <div
-                      className="
-                        group/title flex shrink-0 items-center justify-between
-                        border-b guide-line px-4 pb-2
-                      ">
-                      <div
-                        className="
-                          flex items-center font-mono text-xs font-bold
-                          tracking-tech-wide text-tech-main/60 uppercase
-                        ">
-                        <span
-                          className="
-                            mr-2 inline-block size-1.5 animate-pulse
-                            bg-tech-main/60
-                          "
-                        />
-                        {t("title")}
-                      </div>
-                    </div>
+                  <div className="flex shrink-0 items-center gap-2 border-b pb-2 guide-line">
+                    <span className="size-1.5 shrink-0 bg-tech-signal" />
+                    <h2 className="display-title text-sm text-tech-main-dark/70">
+                      {t("title")}
+                    </h2>
                   </div>
 
                   {showChapterNavPlaceholder ? (
@@ -491,12 +442,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                       <TreeLoadingPlaceholder />
                     </div>
                   ) : (
-                    <ChapterNavPanel
-                      ref={desktopChapterNavRef}
-                      tree={treeData}
-                      internalScroll
-                      scrollClass="pr-4"
-                    />
+                    <ChapterNavPanel className="pr-4" />
                   )}
                 </div>
               </div>

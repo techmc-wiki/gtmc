@@ -57,11 +57,11 @@ function FolderButton({
     <button
       type="button"
       onClick={() => toggleFolder(itemId)}
+      aria-expanded={folderExpanded}
       className="
-        mt-3 mb-1 flex w-fit cursor-pointer items-center text-left
-        font-bold text-tech-main/80 uppercase opacity-80
-        transition-colors
-        hover:text-tech-main
+        mt-2 flex min-h-11 w-full cursor-pointer items-center text-left
+        font-sans text-[0.8125rem] leading-snug font-semibold text-tech-main/80
+        transition-colors hover:text-tech-main-dark md:mt-1 md:min-h-7
         focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 focus:outline-none
       ">
       <span className="flex w-4 shrink-0 items-center text-tech-main/50">
@@ -88,30 +88,35 @@ function ArticleLink({
   isAppendix: boolean
   onNavigate?: () => void
 }) {
+  const prefix = item.isReadmeIntro
+    ? "00"
+    : !item.isFolder && item.index !== undefined
+      ? formatIndexPrefix(
+          item.index,
+          isAppendix,
+          item.isPreface ?? false
+        ).trim()
+      : ""
+
   return (
-    <div className="relative">
-      <div
-        className={`
-          group relative flex items-center py-1 pl-3.5
-          transition-colors
-          ${
-            isActive
-              ? `font-bold text-tech-main`
-              : `
-                text-tech-main
-                hover:text-tech-main
-              `
-          }
-        `}>
-        <Link
-          href={fileRoute}
-          onClick={() => onNavigate?.()}
-          className="block w-full pb-px pl-1">
-          {item.isReadmeIntro
-            ? `00 ${item.title}`
-            : !item.isFolder && item.index !== undefined
-              ? `${formatIndexPrefix(item.index, isAppendix, item.isPreface ?? false)}${item.title}`
-              : item.title}
+    <Link
+      href={fileRoute}
+      onClick={() => onNavigate?.()}
+      aria-current={isActive ? "page" : undefined}
+      className={`
+        grid min-h-11 w-full grid-cols-[2ch_minmax(0,1fr)] items-baseline
+        gap-x-2 py-1.5 pr-1 pl-3 font-sans text-[0.8125rem] leading-snug
+        transition-colors focus-visible:outline-tech-main focus-visible:outline-2
+        focus-visible:outline-offset-2 md:min-h-7 md:py-0.5 md:text-sm
+        ${isActive ? "font-semibold text-tech-main-dark" : "text-tech-main hover:text-tech-main-dark"}
+      `}>
+      <span
+        aria-hidden={!prefix}
+        className="text-center font-mono text-[0.6875rem] leading-none text-tech-main/55 tabular-nums">
+        {prefix || "•"}
+      </span>
+      <span className="min-w-0">
+        {item.title}
           {item.isAdvanced && (
             <span
               className="
@@ -122,9 +127,8 @@ function ArticleLink({
               ADVANCED
             </span>
           )}
-        </Link>
-      </div>
-    </div>
+      </span>
+    </Link>
   )
 }
 
@@ -164,6 +168,7 @@ function FolderGrid({
           items={items}
           parentIsAppendix={parentIsAppendix}
           onNavigate={onNavigate}
+          isNested
         />
       </div>
     </div>
@@ -174,10 +179,12 @@ export function ChapterNavTree({
   items,
   parentIsAppendix = false,
   onNavigate,
+  isNested = false,
 }: {
   items: ChapterNavNode[]
   parentIsAppendix?: boolean
   onNavigate?: () => void
+  isNested?: boolean
 }) {
   const {
     effectivePath,
@@ -192,7 +199,10 @@ export function ChapterNavTree({
   const rows = buildChapterNavRows(items, parentIsAppendix)
 
   return (
-    <ul className="my-0.5 pl-5">
+    <ul
+      className={
+        isNested ? "my-0.5 ml-2 border-l pl-2 guide-line" : "my-0.5"
+      }>
       {rows.map((row) => {
         if (row.kind === "appendix-separator") {
           return (
@@ -225,12 +235,9 @@ export function ChapterNavTree({
             data-chapter-nav-row="1"
             ref={!item.isFolder && isActive ? activeItemRef : undefined}
             className={`
-                  relative my-1 list-none font-mono text-[0.8125rem] transition-all
-                  duration-300
-                  before:absolute before:top-0 before:left-0 before:h-full
-                 before:w-0.5 before:transition-all before:duration-200
-                 before:content-['']
-                 md:text-sm
+                  relative my-0.5 list-none transition-all duration-300 md:my-0
+                  before:absolute before:top-0 before:left-0 before:h-full before:w-0.5
+                  before:transition-all before:duration-200 before:content-['']
                 ${
                   !item.isFolder && isActive
                     ? `before:bg-tech-signal before:w-[3px]`

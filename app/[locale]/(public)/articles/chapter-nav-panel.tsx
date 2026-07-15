@@ -1,83 +1,35 @@
-import * as React from "react"
-import { useImperativeHandle, useCallback } from "react"
 import { useTranslations } from "next-intl"
 import { usePathname } from "@/i18n/navigation"
 import { ChapterNavToolbar } from "./chapter-nav/chapter-nav-toolbar"
-import { ChapterNavTree, type ChapterNavNode } from "./chapter-nav/tree"
-import { useBlur } from "./chapter-nav/use-blur"
+import { ChapterNavTree } from "./chapter-nav/tree"
 import { useReaderNavigation } from "./reader-navigation/context"
 import { useScrollToActive } from "./chapter-nav/use-scroll-to-active"
 
-export interface ChapterNavPanelHandle {
-  openCreateModal: () => void
-  collapseAll: () => void
-  scrollToCurrent: () => void
-}
-
 interface ChapterNavPanelProps {
-  tree: ChapterNavNode[]
   onNavigate?: () => void
-  internalScroll?: boolean
-  scrollClass?: string
-  hideActions?: boolean
-}
-
-const fadeOverlayStyle: React.CSSProperties = {
-  background:
-    "repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 4px), linear-gradient(to bottom, color-mix(in oklab, var(--color-tech-bg) 0%, transparent) 0%, color-mix(in oklab, var(--color-tech-bg) 20%, transparent) 50%, color-mix(in oklab, var(--color-tech-bg) 40%, transparent) 100%)",
+  className?: string
 }
 
 export function ChapterNavPanel({
-  tree: _tree,
   onNavigate,
-  internalScroll = false,
-  scrollClass = "",
-  hideActions = false,
-  ref,
-}: ChapterNavPanelProps & { ref?: React.Ref<ChapterNavPanelHandle> }) {
-  void _tree
-
-  return (
-    <ChapterNavPanelInner
-      onNavigate={onNavigate}
-      internalScroll={internalScroll}
-      scrollClass={scrollClass}
-      hideActions={hideActions}
-      ref={ref}
-    />
-  )
-}
-
-function ChapterNavPanelInner({
-  onNavigate,
-  internalScroll = false,
-  scrollClass = "",
-  hideActions = false,
-  ref,
-}: Omit<ChapterNavPanelProps, "tree"> & {
-  ref?: React.Ref<ChapterNavPanelHandle>
-}) {
+  className = "",
+}: ChapterNavPanelProps) {
   const t = useTranslations("ChapterNav")
   const pathname = usePathname()
-
   const {
     tree,
     expandedFolders,
     setExpandedFolders,
     expandedFoldersRef,
     mounted,
-    outline,
-    highlightActive,
     setHighlightActive,
     scrollContainerRef,
     collapseAll,
-    scrollToCurrent,
-    scrollToCurrentRef,
     activeItemRef,
     folderGridRefs,
   } = useReaderNavigation()
 
-  const { scrollToCurrent: scrollToCurrentFn } = useScrollToActive({
+  const { scrollToCurrent } = useScrollToActive({
     tree,
     pathname,
     mounted,
@@ -90,86 +42,23 @@ function ChapterNavPanelInner({
     setHighlightActive,
   })
 
-  scrollToCurrentRef.current = scrollToCurrentFn
-
-  useBlur({
-    internalScroll,
-    scrollContainerRef,
-    pathname,
-    tree,
-    expandedFolders,
-    outline,
-    highlightActive,
-  })
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      openCreateModal: () => {},
-      collapseAll,
-      scrollToCurrent,
-    }),
-    [collapseAll, scrollToCurrent]
-  )
-
-  const handleCollapseAll = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault()
-      collapseAll()
-    },
-    [collapseAll]
-  )
-
-  const treeContent =
-    tree.length === 0 ? (
-      <div className="mt-4 font-mono text-sm text-tech-main/40">
-        {t("empty")}
-      </div>
-    ) : (
-      <ChapterNavTree onNavigate={onNavigate} items={tree} />
-    )
-
   return (
-    <>
-      {internalScroll ? (
-        <div className="relative flex min-h-0 flex-1 flex-col">
-          {!hideActions && (
-            <ChapterNavToolbar
-              internalScroll={internalScroll}
-              onCollapseAll={handleCollapseAll}
-              onLocate={scrollToCurrent}
-            />
-          )}
-          <div
-            ref={scrollContainerRef}
-            className={`
-              reader-rail-scrollbar min-h-0 flex-1 overflow-y-auto pb-12
-              ${scrollClass}
-            `}>
-            {treeContent}
+    <div className="relative flex min-h-0 flex-1 flex-col">
+      <ChapterNavToolbar
+        onCollapseAll={collapseAll}
+        onLocate={scrollToCurrent}
+      />
+      <div
+        ref={scrollContainerRef}
+        className={`reader-rail-scrollbar min-h-0 flex-1 overflow-y-auto pt-2 pb-4 ${className}`}>
+        {tree.length === 0 ? (
+          <div className="mt-4 font-mono text-sm text-tech-main/40">
+            {t("empty")}
           </div>
-          <div
-            className="
-              pointer-events-none absolute inset-x-0 bottom-0 z-20 -mr-4 -mb-2
-              hidden h-12 mask-[linear-gradient(to_bottom,transparent,black)]
-              [-webkit-mask-image:linear-gradient(to_bottom,transparent,black)]
-              sm:block
-            "
-            style={fadeOverlayStyle}
-          />
-        </div>
-      ) : (
-        <>
-          {!hideActions && (
-            <ChapterNavToolbar
-              internalScroll={internalScroll}
-              onCollapseAll={handleCollapseAll}
-              onLocate={scrollToCurrent}
-            />
-          )}
-          {treeContent}
-        </>
-      )}
-    </>
+        ) : (
+          <ChapterNavTree onNavigate={onNavigate} items={tree} />
+        )}
+      </div>
+    </div>
   )
 }

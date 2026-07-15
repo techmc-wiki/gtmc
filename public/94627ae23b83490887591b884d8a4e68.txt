@@ -1,0 +1,3 @@
+94627ae23b83490887591b884d8a4e68
+This file is for Microsoft Bing's IndexNow service.
+See https://www.bing.com/indexnow/getstarted

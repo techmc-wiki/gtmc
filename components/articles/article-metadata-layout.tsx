@@ -3,12 +3,14 @@
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { ArticleBanner } from "@/components/articles/article-banner"
 import { getArticleAssetPublicUrl } from "@/lib/articles/asset-url"
+import { useTranslations } from "next-intl"
 import type { ReactNode } from "react"
 
 interface ArticleMetadataLayoutProps {
   title: string
   filePath: string
   isAdvanced?: boolean
+  isRevising?: boolean
   bannerPath?: string | null
   bannerAlt?: string
   pathLabel?: string
@@ -20,12 +22,15 @@ export function ArticleMetadataLayout({
   title,
   filePath,
   isAdvanced,
+  isRevising,
   bannerPath,
   bannerAlt,
   pathLabel = "PATH:",
   headerActions,
   children,
 }: ArticleMetadataLayoutProps) {
+  const t = useTranslations("ArticleMeta")
+
   return (
     <header>
       <CornerBrackets />
@@ -54,6 +59,17 @@ export function ArticleMetadataLayout({
                 ADVANCED
               </span>
             )}
+            {isRevising ? (
+              <span
+                className="
+                  border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5
+                  font-mono text-[0.625rem] font-bold tracking-widest
+                  text-amber-700 uppercase select-none
+                  dark:text-amber-300
+                ">
+                {t("underRevision")}
+              </span>
+            ) : null}
           </span>
           <span
             className="

@@ -6,6 +6,7 @@ export interface SourceFrontMatter {
   description?: string
   index: number
   "is-advanced"?: boolean
+  revising?: boolean
   appendix?: boolean
   banner?: { src: string; alt?: string }
 }
@@ -23,6 +24,7 @@ export interface SourceReadmeFrontMatter {
   "intro-title"?: string
   index: number
   appendix?: boolean
+  revising?: boolean
 }
 
 export interface TranslationReadmeFrontMatter {
@@ -39,6 +41,7 @@ const SOURCE_ALLOWED_KEYS = new Set([
   "description",
   "index",
   "is-advanced",
+  "revising",
   "appendix",
   "banner",
 ])
@@ -57,6 +60,7 @@ const SOURCE_README_ALLOWED_KEYS = new Set([
   "intro-title",
   "index",
   "appendix",
+  "revising",
 ])
 
 const TRANSLATION_README_ALLOWED_KEYS = new Set([
@@ -147,6 +151,7 @@ export function parseSourceFrontMatter(content: string): SourceFrontMatter {
     description: parseOptionalString(raw.description),
     index: parseIndex(raw.index),
     "is-advanced": raw["is-advanced"] === true ? true : undefined,
+    revising: raw.revising === true ? true : undefined,
     appendix: raw.appendix === true ? true : undefined,
     banner: parseBanner(raw.banner),
   }
@@ -178,6 +183,7 @@ export function parseSourceReadmeFrontMatter(
     "intro-title": parseOptionalString(raw["intro-title"]),
     index: parseIndex(raw.index),
     appendix: raw.appendix === true ? true : undefined,
+    revising: raw.revising === true ? true : undefined,
   }
 }
 

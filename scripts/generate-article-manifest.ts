@@ -164,6 +164,7 @@ async function processSourceFile(
     translationFreshnessByLocale: {},
     translationStatusByLocale: {},
     isAdvanced: "is-advanced" in fm ? fm["is-advanced"] : undefined,
+    isRevising: fm.revising,
   }
 
   if ("banner" in fm && fm.banner) {

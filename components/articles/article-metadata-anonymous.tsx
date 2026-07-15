@@ -11,6 +11,7 @@ interface ArticleMetadataAnonymousProps {
   wordCount: number
   readingTime: number
   isAdvanced?: boolean
+  isRevising?: boolean
   bannerPath?: string | null
   bannerAlt?: string
 }
@@ -23,6 +24,7 @@ export function ArticleMetadataAnonymous({
   wordCount,
   readingTime,
   isAdvanced,
+  isRevising,
   bannerPath,
   bannerAlt,
 }: ArticleMetadataAnonymousProps) {
@@ -31,6 +33,7 @@ export function ArticleMetadataAnonymous({
       title={title}
       filePath={filePath}
       isAdvanced={isAdvanced}
+      isRevising={isRevising}
       bannerPath={bannerPath}
       bannerAlt={bannerAlt}
       pathLabel="PATH:">

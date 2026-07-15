@@ -285,6 +285,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const createdAt = data.created as string | undefined
   const lastModified = data.lastmod as string | undefined
   const isAdvanced = data["is-advanced"] === true
+  const isRevising = manifestEntry?.isRevising === true
 
   const allAuthors = [
     ...new Set([author, ...coAuthors].filter(Boolean) as string[]),
@@ -422,6 +423,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           readingTime={readingTime}
           editPath={editPath}
           isAdvanced={isAdvanced}
+          isRevising={isRevising}
           bannerPath={bannerPath}
           bannerAlt={bannerAlt}
         />
@@ -434,6 +436,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           wordCount={wordCount}
           readingTime={readingTime}
           isAdvanced={isAdvanced}
+          isRevising={isRevising}
           bannerPath={bannerPath}
           bannerAlt={bannerAlt}
         />

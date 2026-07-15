@@ -71,6 +71,7 @@ export interface ArticleEntry {
     Record<ArticleLocale, { src: string; alt?: string }>
   >;
   isAdvanced?: boolean;
+  isRevising?: boolean;
 }
 
 export interface LocalizedArticleMetadata {
@@ -349,6 +350,7 @@ function normalizeArticleEntry(
     ...(translationStatusByLocale ? { translationStatusByLocale } : {}),
     bannerByLocale: normalizeBannerByLocale(entry.bannerByLocale),
     isAdvanced: entry.isAdvanced === true,
+    isRevising: entry.isRevising === true,
   };
 }
 

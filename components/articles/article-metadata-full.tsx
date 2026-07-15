@@ -21,6 +21,7 @@ interface ArticleMetadataFullProps {
   readingTime: number
   editPath: string
   isAdvanced?: boolean
+  isRevising?: boolean
   bannerPath?: string | null
   bannerAlt?: string
 }
@@ -47,6 +48,7 @@ export function ArticleMetadataFull({
   readingTime,
   editPath,
   isAdvanced,
+  isRevising,
   bannerPath,
   bannerAlt,
 }: ArticleMetadataFullProps) {
@@ -108,6 +110,7 @@ export function ArticleMetadataFull({
       title={title}
       filePath={filePath}
       isAdvanced={isAdvanced}
+      isRevising={isRevising}
       bannerPath={bannerPath}
       bannerAlt={bannerAlt}
       pathLabel={t("pathLabel")}

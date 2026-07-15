@@ -10782,7 +10782,7 @@ snapshots:
       seq-queue: 0.0.5
       sqlstring: 2.3.3
 
-  n8ao@1.10.3(postprocessing@6.39.2(three@0.184.0))(three@0.184.0):
+  n8ao@1.10.3(postprocessing@6.39.2(three@0.185.1))(three@0.184.0):
     dependencies:
       postprocessing: 6.39.2(three@0.184.0)
       three: 0.184.0
@@ -11684,7 +11684,7 @@ snapshots:
       http-proxy-middleware: 0.2.0
       jszip: 3.10.1
       lil-gui: 0.19.2
-      n8ao: 1.10.3(postprocessing@6.39.2(three@0.184.0))(three@0.184.0)
+      n8ao: 1.10.3(postprocessing@6.39.2(three@0.185.1))(three@0.184.0)
       nucleation: 0.2.18
       pako: 2.2.0
       postprocessing: 6.39.2(three@0.184.0)

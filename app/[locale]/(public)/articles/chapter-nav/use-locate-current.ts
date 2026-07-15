@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useRef } from "react"
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import { articleUrl } from "@/lib/articles/url"
-import { HIGHLIGHT_TIMEOUT_MS, LOCATE_FALLBACK_MS } from "./constants"
-import type { ChapterNavNode } from "./tree"
+
+const HIGHLIGHT_TIMEOUT_MS = 2000
+const LOCATE_FALLBACK_MS = 600
 
 type LocateState =
   | { phase: "idle" }
@@ -10,22 +12,10 @@ type LocateState =
       pendingIds: string[]
       fallbackTimer: ReturnType<typeof setTimeout>
     }
-  | { phase: "scrolling" }
 
-export function useScrollToActive({
-  tree,
-  pathname,
-  mounted,
-  expandedFolders,
-  expandedFoldersRef,
-  setExpandedFolders,
-  scrollContainerRef,
-  activeItemRef,
-  folderGridRefs,
-  setHighlightActive,
-}: {
+interface LocateCurrentOptions {
   tree: ChapterNavNode[]
-  pathname: string
+  effectivePath: string
   mounted: boolean
   expandedFolders: Set<string>
   expandedFoldersRef: React.RefObject<Set<string>>
@@ -34,7 +24,45 @@ export function useScrollToActive({
   activeItemRef: React.RefObject<HTMLLIElement | null>
   folderGridRefs: React.RefObject<Map<string, HTMLDivElement>>
   setHighlightActive: React.Dispatch<React.SetStateAction<boolean>>
-}) {
+}
+
+function findParentIds(items: ChapterNavNode[], target: string): string[] {
+  const decodedTarget = decodeURIComponent(target).toLowerCase()
+
+  const walk = (
+    nodes: ChapterNavNode[],
+    parents: string[] = []
+  ): string[] | null => {
+    for (const item of nodes) {
+      if (item.children?.length) {
+        const result = walk(item.children, [...parents, item.id])
+        if (result) return result
+      }
+
+      const slug = decodeURIComponent(articleUrl(item.slug)).toLowerCase()
+      if (slug === decodedTarget || `${slug}/` === decodedTarget) {
+        return parents
+      }
+    }
+
+    return null
+  }
+
+  return walk(items) ?? []
+}
+
+export function useLocateCurrent({
+  tree,
+  effectivePath,
+  mounted,
+  expandedFolders,
+  expandedFoldersRef,
+  setExpandedFolders,
+  scrollContainerRef,
+  activeItemRef,
+  folderGridRefs,
+  setHighlightActive,
+}: LocateCurrentOptions) {
   const locateStateRef = useRef<LocateState>({ phase: "idle" })
   const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const transitionCleanupRef = useRef<(() => void) | null>(null)
@@ -62,55 +90,12 @@ export function useScrollToActive({
     locateStateRef.current = { phase: "idle" }
   }, [clearTransitionListeners])
 
-  useEffect(() => () => {
+  useEffect(
+    () => () => {
       clearHighlightTimer()
       resetLocateState()
-    }, [clearHighlightTimer, resetLocateState])
-
-  const getEffectivePathname = useCallback(() => {
-    if (
-      pathname === "/" ||
-      pathname === "/articles" ||
-      pathname === "/articles/"
-    ) {
-      return "/articles/preface"
-    }
-    return pathname
-  }, [pathname])
-
-  const findItemAndParents = useCallback(
-    (
-      items: ChapterNavNode[],
-      target: string
-    ): { item: ChapterNavNode | null; parentIds: string[] } => {
-      const decodedTarget = decodeURIComponent(target)
-
-      const walk = (
-        nodes: ChapterNavNode[],
-        parents: string[] = []
-      ): { item: ChapterNavNode | null; parentIds: string[] } => {
-        for (const item of nodes) {
-          if (item.children?.length) {
-            const result = walk(item.children, [...parents, item.id])
-            if (result.item) return result
-          }
-
-          const slug = articleUrl(item.slug)
-          const decodedSlug = decodeURIComponent(slug)
-          if (
-            decodedSlug.toLowerCase() === decodedTarget.toLowerCase() ||
-            `${decodedSlug}/`.toLowerCase() === decodedTarget.toLowerCase()
-          ) {
-            return { item, parentIds: parents }
-          }
-        }
-
-        return { item: null, parentIds: [] }
-      }
-
-      return walk(items)
     },
-    []
+    [clearHighlightTimer, resetLocateState]
   )
 
   const scrollActiveItem = useCallback(() => {
@@ -135,8 +120,7 @@ export function useScrollToActive({
     }, HIGHLIGHT_TIMEOUT_MS)
   }, [clearHighlightTimer, scrollContainerRef, activeItemRef, setHighlightActive])
 
-  const enterScrollingPhase = useCallback(() => {
-    locateStateRef.current = { phase: "scrolling" }
+  const scrollAndReset = useCallback(() => {
     scrollActiveItem()
     locateStateRef.current = { phase: "idle" }
   }, [scrollActiveItem])
@@ -147,11 +131,11 @@ export function useScrollToActive({
 
     clearTimeout(state.fallbackTimer)
     clearTransitionListeners()
-    enterScrollingPhase()
-  }, [clearTransitionListeners, enterScrollingPhase])
+    scrollAndReset()
+  }, [clearTransitionListeners, scrollAndReset])
 
-  const runLocateFlow = useCallback(() => {
-    const { parentIds } = findItemAndParents(tree, getEffectivePathname())
+  const locateCurrent = useCallback(() => {
+    const parentIds = findParentIds(tree, effectivePath)
     const pendingIds = parentIds.filter(
       (id) => !expandedFoldersRef.current.has(id)
     )
@@ -159,7 +143,7 @@ export function useScrollToActive({
     resetLocateState()
 
     if (pendingIds.length === 0) {
-      enterScrollingPhase()
+      scrollAndReset()
       return
     }
 
@@ -181,17 +165,17 @@ export function useScrollToActive({
       fallbackTimer,
     }
   }, [
-    enterScrollingPhase,
+    effectivePath,
     expandedFoldersRef,
-    findItemAndParents,
     finishExpansionAndScroll,
-    getEffectivePathname,
     resetLocateState,
+    scrollAndReset,
     setExpandedFolders,
     tree,
   ])
 
   useEffect(() => {
+    // Run after expanded folder refs have committed to the DOM.
     void expandedFolders
 
     const state = locateStateRef.current
@@ -247,24 +231,15 @@ export function useScrollToActive({
   }, [expandedFolders, finishExpansionAndScroll, folderGridRefs])
 
   useEffect(() => {
-    void pathname
-
     if (!mounted || tree.length === 0) return
     const routeLocateTimer = window.setTimeout(() => {
-      runLocateFlow()
+      locateCurrent()
     }, 0)
 
     return () => {
       clearTimeout(routeLocateTimer)
     }
-  }, [pathname, mounted, tree, runLocateFlow])
+  }, [locateCurrent, mounted, tree])
 
-  const scrollToCurrent = useCallback(() => {
-    runLocateFlow()
-  }, [runLocateFlow])
-
-  return {
-    getEffectivePathname,
-    scrollToCurrent,
-  }
+  return locateCurrent
 }

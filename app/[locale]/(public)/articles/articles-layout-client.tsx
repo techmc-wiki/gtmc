@@ -31,7 +31,7 @@ interface ArticlesLayoutProps {
 interface ChapterNavContentProps {
   showPlaceholder: boolean
   onNavigate: () => void
-  className?: string
+  scrollClassName?: string
 }
 
 function TreeLoadingPlaceholder() {
@@ -121,7 +121,7 @@ function TreeLoadingPlaceholder() {
 function ChapterNavContent({
   showPlaceholder,
   onNavigate,
-  className,
+  scrollClassName,
 }: ChapterNavContentProps) {
   return (
     <div
@@ -132,7 +132,10 @@ function ChapterNavContent({
           <TreeLoadingPlaceholder />
         </div>
       ) : (
-        <ChapterNavPanel onNavigate={onNavigate} className={className} />
+        <ChapterNavPanel
+          onNavigate={onNavigate}
+          scrollClassName={scrollClassName}
+        />
       )}
     </div>
   )
@@ -294,7 +297,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
     <ChapterNavContent
       showPlaceholder={showChapterNavPlaceholder}
       onNavigate={onNavigate}
-      className="pr-4"
+      scrollClassName="pr-4"
     />
   )
 
@@ -442,7 +445,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
                       <TreeLoadingPlaceholder />
                     </div>
                   ) : (
-                    <ChapterNavPanel className="pr-4" />
+                    <ChapterNavPanel scrollClassName="pr-4" />
                   )}
                 </div>
               </div>

@@ -7,8 +7,6 @@ import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import React from "react"
 import { useReaderNavigation } from "../reader-navigation/context"
 
-export type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
-
 type ChapterNavRow =
   | { kind: "appendix-separator"; id: string; title: string }
   | { kind: "node"; item: ChapterNavNode; isAppendix: boolean }
@@ -104,8 +102,8 @@ function ArticleLink({
       onClick={() => onNavigate?.()}
       aria-current={isActive ? "page" : undefined}
       className={`
-        grid min-h-11 w-full grid-cols-[2ch_minmax(0,1fr)] items-baseline
-        gap-x-2 py-1.5 pr-1 pl-3 font-sans text-[0.8125rem] leading-snug
+        grid min-h-11 w-full grid-cols-[1rem_minmax(0,1fr)] items-baseline
+        py-1.5 pr-1 font-sans text-[0.8125rem] leading-snug
         transition-colors focus-visible:outline-tech-main focus-visible:outline-2
         focus-visible:outline-offset-2 md:min-h-7 md:py-0.5 md:text-sm
         ${isActive ? "font-semibold text-tech-main-dark" : "text-tech-main hover:text-tech-main-dark"}
@@ -149,19 +147,19 @@ function FolderGrid({
   folderGridRefs: React.RefObject<Map<string, HTMLDivElement>>
   onNavigate?: () => void
 }) {
+  const collapsed = isFolder && !folderExpanded
+
   return (
     <div
+      aria-hidden={collapsed}
+      inert={collapsed ? true : undefined}
       ref={(el) => {
         if (el) folderGridRefs.current.set(itemId, el)
         else folderGridRefs.current.delete(itemId)
       }}
       className={`
         grid transition-all duration-300 ease-out
-        ${
-          !isFolder || folderExpanded
-            ? `grid-rows-[1fr] opacity-100`
-            : `grid-rows-[0fr] opacity-0`
-        }
+        ${collapsed ? `grid-rows-[0fr] opacity-0` : `grid-rows-[1fr] opacity-100`}
       `}>
       <div className="overflow-hidden">
         <ChapterNavTree

@@ -1,23 +1,22 @@
 import { useTranslations } from "next-intl"
-import { usePathname } from "@/i18n/navigation"
 import { ChapterNavToolbar } from "./chapter-nav/chapter-nav-toolbar"
 import { ChapterNavTree } from "./chapter-nav/tree"
+import { useLocateCurrent } from "./chapter-nav/use-locate-current"
 import { useReaderNavigation } from "./reader-navigation/context"
-import { useScrollToActive } from "./chapter-nav/use-scroll-to-active"
 
 interface ChapterNavPanelProps {
   onNavigate?: () => void
-  className?: string
+  scrollClassName?: string
 }
 
 export function ChapterNavPanel({
   onNavigate,
-  className = "",
+  scrollClassName = "",
 }: ChapterNavPanelProps) {
   const t = useTranslations("ChapterNav")
-  const pathname = usePathname()
   const {
     tree,
+    effectivePath,
     expandedFolders,
     setExpandedFolders,
     expandedFoldersRef,
@@ -29,9 +28,9 @@ export function ChapterNavPanel({
     folderGridRefs,
   } = useReaderNavigation()
 
-  const { scrollToCurrent } = useScrollToActive({
+  const locateCurrent = useLocateCurrent({
     tree,
-    pathname,
+    effectivePath,
     mounted,
     expandedFolders,
     expandedFoldersRef,
@@ -46,11 +45,11 @@ export function ChapterNavPanel({
     <div className="relative flex min-h-0 flex-1 flex-col">
       <ChapterNavToolbar
         onCollapseAll={collapseAll}
-        onLocate={scrollToCurrent}
+        onLocate={locateCurrent}
       />
       <div
         ref={scrollContainerRef}
-        className={`reader-rail-scrollbar min-h-0 flex-1 overflow-y-auto pt-2 pb-4 ${className}`}>
+        className={`reader-rail-scrollbar min-h-0 flex-1 overflow-y-auto pt-2 pb-4 ${scrollClassName}`}>
         {tree.length === 0 ? (
           <div className="mt-4 font-mono text-sm text-tech-main/40">
             {t("empty")}

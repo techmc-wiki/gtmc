@@ -394,8 +394,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         min-w-0 border border-t-2
         border-t-tech-main-dark p-6 backdrop-blur-sm sm:p-8
       ">
-      <div className="bg-tech-signal absolute -top-0.5 left-0 h-0.5 w-16" />
-
       <BookmarkRecorder slug={currentSlug} title={articleTitle} />
 
       {runningHeadChapterSlug && runningHeadChapterTitle && (

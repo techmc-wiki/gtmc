@@ -46,10 +46,6 @@ export function ArticleMetadataLayout({
             flex flex-wrap items-center justify-between text-tech-main/50
           ">
           <span className="flex flex-wrap items-center gap-2">
-            <span className="flex items-center gap-2 tracking-tech-wide uppercase">
-              <span className="size-1.5 bg-tech-signal" />
-              Graduate Texts in Minecraft
-            </span>
             {isAdvanced && (
               <span
                 className="

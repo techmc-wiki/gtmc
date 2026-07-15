@@ -139,6 +139,12 @@ export function ArticleMetadataFull({
           <span>
             {wordCount.toLocaleString()} / {readingTime} {t("minuteUnit")}
           </span>
+          <span aria-hidden="true" className="text-tech-main/35">
+            |
+          </span>
+          <span>
+            {t("lastEdited")} {formatRelativeTime(lastModified)}
+          </span>
         </div>
 
         <div

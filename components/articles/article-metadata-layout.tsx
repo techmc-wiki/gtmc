@@ -39,45 +39,43 @@ export function ArticleMetadataLayout({
         className="
           relative mb-5 animate-fade-in border guide-line bg-surface-overlay/80 p-3
           font-mono text-xs text-tech-main
-          sm:mb-6 sm:p-4
+          sm:mb-6 sm:p-3
         ">
         <div
           className="
-            flex flex-wrap items-center justify-between text-tech-main/50
+            flex flex-wrap items-center gap-x-3 gap-y-2 text-tech-main/50
           ">
-          <span className="flex flex-wrap items-center gap-2">
-            {isAdvanced && (
-              <span
-                className="
-                  bg-tech-advanced px-1.5 py-0.5 font-mono text-[0.625rem]
-                  font-bold tracking-widest text-white select-none
-                ">
-                ADVANCED
-              </span>
-            )}
-            {isRevising ? (
-              <span
-                className="
-                  border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5
-                  font-mono text-[0.625rem] font-bold tracking-widest
-                  text-amber-700 uppercase select-none
-                  dark:text-amber-300
-                ">
-                {t("underRevision")}
-              </span>
-            ) : null}
-          </span>
+          {isAdvanced && (
+            <span
+              className="
+                bg-tech-advanced px-1.5 py-0.5 font-mono text-[0.625rem]
+                font-bold tracking-widest text-white select-none
+              ">
+              ADVANCED
+            </span>
+          )}
+          {isRevising ? (
+            <span
+              className="
+                border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5
+                font-mono text-[0.625rem] font-bold tracking-widest
+                text-amber-700 uppercase select-none
+                dark:text-amber-300
+              ">
+              {t("underRevision")}
+            </span>
+          ) : null}
           <span
             className="
-              hidden items-center gap-3
+              hidden min-w-0 items-center gap-3
               sm:inline-flex
             ">
             {pathLabel} {filePath}
           </span>
-          {headerActions}
+          {headerActions && <span className="ml-auto">{headerActions}</span>}
         </div>
 
-        <div className="mt-3 flex flex-col gap-3 sm:gap-4">
+        <div className="mt-2 flex flex-col gap-3 sm:gap-4">
           {children}
         </div>
       </div>

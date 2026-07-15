@@ -34,8 +34,6 @@ interface ReaderNavigationContextValue {
   scrollContainerRef: React.RefObject<HTMLDivElement | null>
 
   collapseAll: () => void
-  scrollToCurrentRef: React.MutableRefObject<() => void>
-  scrollToCurrent: () => void
 }
 
 const ReaderNavigationContext = React.createContext<ReaderNavigationContextValue | null>(null)
@@ -59,7 +57,6 @@ export function ReaderNavigationProvider({ tree, children }: ReaderNavigationPro
   const activeItemRef = React.useRef<HTMLLIElement | null>(null)
   const folderGridRefs = React.useRef<Map<string, HTMLDivElement>>(new Map())
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null)
-  const scrollToCurrentRef = React.useRef<() => void>(() => {})
 
   const effectivePath =
     pathname === "/articles" || pathname === "/articles/" || pathname === "/"
@@ -85,10 +82,6 @@ export function ReaderNavigationProvider({ tree, children }: ReaderNavigationPro
     setExpandedFolders(new Set())
   }, [setExpandedFolders])
 
-  const scrollToCurrent = React.useCallback(() => {
-    scrollToCurrentRef.current()
-  }, [])
-
   const value = React.useMemo<ReaderNavigationContextValue>(
     () => ({
       expandedFolders,
@@ -107,8 +100,6 @@ export function ReaderNavigationProvider({ tree, children }: ReaderNavigationPro
       folderGridRefs,
       scrollContainerRef,
       collapseAll,
-      scrollToCurrentRef,
-      scrollToCurrent,
     }),
     [
       expandedFolders,
@@ -123,7 +114,6 @@ export function ReaderNavigationProvider({ tree, children }: ReaderNavigationPro
       tree,
       effectivePath,
       collapseAll,
-      scrollToCurrent,
     ]
   )
 

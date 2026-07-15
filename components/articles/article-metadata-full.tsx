@@ -116,12 +116,7 @@ export function ArticleMetadataFull({
       pathLabel={t("pathLabel")}
       headerActions={collapseButton}>
       <div className="flex flex-col">
-        <div
-          className={`
-            items-center gap-x-3 gap-y-1 text-[0.6875rem] text-tech-main/65
-            transition-opacity duration-200 sm:text-xs
-            ${isCollapsed ? "flex flex-wrap opacity-100" : "hidden opacity-0"}
-          `}>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-tech-main/65 sm:text-xs">
           <span className="inline-flex items-center gap-1.5">
             <span className="size-1.5 bg-tech-main/40" />
             <Link
@@ -160,7 +155,7 @@ export function ArticleMetadataFull({
             }
           `}>
           <div className="min-h-0 overflow-hidden">
-            <div className="flex flex-col gap-3 sm:gap-4">
+            <div className="mt-3 flex flex-col gap-3 border-t guide-line pt-3 sm:gap-4">
               <div
                 className="
                   flex flex-col items-start gap-3
@@ -285,31 +280,8 @@ export function ArticleMetadataFull({
                   {t("lastEdited")}
                   <span className="text-tech-main">
                     <time dateTime={lastModified}>
-                      {formatRelativeTime(lastModified)}
+                      {formatAbsoluteTime(lastModified, false)}
                     </time>
-                  </span>
-                  <br />
-
-                  {t("wordCount")}
-                  <span className="text-tech-main">
-                    {wordCount.toLocaleString()}
-                  </span>
-                  <br
-                    className="
-                      block
-                      sm:hidden
-                    "
-                  />
-                  <span
-                    className="
-                      hidden
-                      sm:inline
-                    ">
-                    {" | "}
-                  </span>
-                  {t("estReadTime")}
-                  <span className="text-tech-main">
-                    {readingTime} {t("minuteUnit")}
                   </span>
                 </p>
               </div>
@@ -346,8 +318,9 @@ export function ArticleMetadataFull({
                 title={title}
                 canonicalUrl={canonicalUrl}
                 attributionDate={lastModified || createdAt}
-          authors={allContributors}
+                authors={allContributors}
               />
+
             </div>
           </div>
         </div>

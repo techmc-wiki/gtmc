@@ -21,6 +21,9 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { dump as yamlDump, load as yamlLoad } from "js-yaml"
+import { createLogger } from "./lib/logger"
+
+const logger = createLogger("authors")
 
 const CONFIG_DIR = join(process.cwd(), "lib", "articles", "config")
 const OUTPUT_PATH = join(CONFIG_DIR, "authors-alias.yml")
@@ -103,13 +106,15 @@ async function fetchGithubLoginFromEmail(
     const response = await fetch(url, { headers })
     if (!response.ok) {
       if (response.status === 403 || response.status === 429) {
-        process.stderr.write(
-          `Warning: GitHub API rate-limited while resolving <${email}>. Skipping API lookup.\n`
-        )
+        logger.warn("authors.alias.lookup-skipped", {
+          reason: "rate-limited",
+          status_code: response.status,
+        })
       } else {
-        process.stderr.write(
-          `Warning: GitHub API returned ${response.status} for <${email}>. Skipping.\n`
-        )
+        logger.warn("authors.alias.lookup-skipped", {
+          reason: "unexpected-status",
+          status_code: response.status,
+        })
       }
       return undefined
     }
@@ -120,8 +125,10 @@ async function fetchGithubLoginFromEmail(
     return undefined
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    process.stderr.write(
-      `Warning: GitHub API lookup failed for <${email}>: ${message}. Skipping.\n`
+    logger.warn(
+      "authors.alias.lookup-skipped",
+      { reason: "request-failed" },
+      message
     )
     return undefined
   }
@@ -244,9 +251,9 @@ async function main(): Promise<void> {
   })
 
   writeFileSync(OUTPUT_PATH, header + body, "utf-8")
-  process.stdout.write(
-    `Generated authors-alias.yml with ${Object.keys(aliases).length} canonical authors\n`
-  )
+  logger.event("authors.aliases.generated", {
+    canonical_author_count: Object.keys(aliases).length,
+  })
 }
 
 void main()

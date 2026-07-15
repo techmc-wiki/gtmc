@@ -1,5 +1,9 @@
 import { spawnSync, type SpawnSyncOptions } from "node:child_process"
 
+import { createLogger } from "./logger"
+
+const logger = createLogger("command")
+
 /**
  * Run a command with inherited stdio. Exits the process on non-zero status.
  * On Windows, uses shell so `.cmd` shims (pnpm, prisma, etc.) resolve correctly.
@@ -16,11 +20,15 @@ export function run(
   })
 
   if (result.error) {
-    process.stderr.write(`Failed to run ${command}: ${result.error.message}\n`)
+    logger.error("command.failed", { command }, result.error.message)
     process.exit(1)
   }
 
   if (result.status !== 0) {
+    logger.error("command.failed", {
+      command,
+      exit_code: result.status ?? 1,
+    })
     process.exit(result.status ?? 1)
   }
 }

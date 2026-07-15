@@ -8,31 +8,41 @@
  * Usage: pnpm build:content
  */
 import { runScript } from "./lib/run"
+import { createLogger, runBuildStep } from "./lib/logger"
 
-const steps: Array<{ label: string; script: string; args?: string[] }> = [
-  { label: "Article manifest", script: "scripts/generate-article-manifest.ts" },
+const logger = createLogger("content")
+
+const steps: Array<{ stage: string; script: string; args?: string[] }> = [
+  { stage: "manifest", script: "scripts/generate-article-manifest.ts" },
   {
-    label: "Author profiles",
+    stage: "author-profiles",
     script: "scripts/generate-author-profiles.ts",
   },
   {
-    label: "Glossary manifest",
+    stage: "glossary",
     script: "scripts/generate-glossary-manifest.ts",
   },
   {
-    label: "Rendered article content",
+    stage: "article-content",
     script: "scripts/generate-article-content.ts",
   },
   {
-    label: "Offline PDFs",
+    stage: "pdf",
     script: "scripts/generate-pdf.ts",
     args: ["--locale", "all"],
   },
 ]
 
+const startedAt = performance.now()
+logger.event("content.started", { stage_count: steps.length })
+
 for (const step of steps) {
-  process.stdout.write(`\n→ ${step.label}\n`)
-  runScript(step.script, step.args ?? [])
+  runBuildStep(logger, step.stage, () =>
+    runScript(step.script, step.args ?? [])
+  )
 }
 
-process.stdout.write("\nContent build complete.\n")
+logger.event("content.completed", {
+  duration_ms: Math.round(performance.now() - startedAt),
+  stage_count: steps.length,
+})

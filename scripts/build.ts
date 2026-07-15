@@ -7,15 +7,22 @@
  * Usage: pnpm build
  */
 import { run, runScript } from "./lib/run"
+import { createLogger, runBuildStep } from "./lib/logger"
+
+const logger = createLogger("build")
 
 const skipContent = process.env.GTMC_SKIP_CONTENT_BUILD === "true"
+const startedAt = performance.now()
+
+logger.event("build.started", { content_generation: !skipContent })
 
 if (!skipContent) {
-  runScript("scripts/build-content.ts")
+  runBuildStep(logger, "content", () => runScript("scripts/build-content.ts"))
 } else {
-  process.stdout.write(
-    "GTMC_SKIP_CONTENT_BUILD=true — skipping content generation\n"
-  )
+  logger.event("content.reused", { reason: "GTMC_SKIP_CONTENT_BUILD" })
 }
 
-run("next", ["build"])
+runBuildStep(logger, "next", () => run("next", ["build"]))
+logger.event("build.completed", {
+  duration_ms: Math.round(performance.now() - startedAt),
+})

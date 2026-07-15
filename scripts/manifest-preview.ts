@@ -1,106 +1,127 @@
 import path from "path"
 import type { ArticleEntry } from "@/lib/articles/manifest"
 
-const TREE_PREVIEW_DEPTH = 3
-const TREE_PREVIEW_CHILD_LIMIT = 12
+const TREE_PREVIEW_DEPTH = 2
+const TREE_PREVIEW_CHILD_LIMIT = 8
 
 type ArticleManifest = Record<string, ArticleEntry>
 
-export interface GenerationSummaryOptions {
+export interface ManifestPreviewOptions {
   articlesPath: string
   outputFile: string
   maxDepth: number
 }
 
-export function buildGenerationSummary(
+/** Build the optional, human-readable manifest detail shown with GTMC_LOG_DETAIL=1. */
+export function buildManifestPreview(
   manifest: ArticleManifest,
-  { articlesPath, outputFile, maxDepth }: GenerationSummaryOptions
+  { articlesPath, outputFile, maxDepth }: ManifestPreviewOptions
 ): string {
   const entries = Object.values(manifest)
-  const folders = entries.filter((e) => e.isFolder)
-  const articles = entries.filter((e) => !e.isFolder)
+  const folders = entries.filter((entry) => entry.isFolder)
+  const articles = entries.filter((entry) => !entry.isFolder)
   const roots = entries
-    .filter((e) => !e.parentSlug || !manifest[e.parentSlug])
+    .filter((entry) => !entry.parentSlug || !manifest[entry.parentSlug])
     .toSorted(comparePreviewEntries)
   const maxSlugDepth = entries.reduce(
-    (max, e) => Math.max(max, e.slug.split("/").length),
+    (max, entry) => Math.max(max, entry.slug.split("/").length),
     0
   )
 
   const summaryLines = [
-    "[manifest] Article structure indexed",
-    `Source: ${path.relative(process.cwd(), articlesPath) || "."}`,
-    `Output: ${path.relative(process.cwd(), outputFile) || outputFile}`,
-    `Entries: ${entries.length} total (${folders.length} folders, ${articles.length} articles)`,
-    `Roots: ${roots.length} | max slug depth: ${maxSlugDepth} | max directory depth: ${maxDepth}`,
-    `Flags: ${countFlagged(entries, "isPreface")} preface, ${countFlagged(entries, "isAppendix")} appendix, ${countFlagged(entries, "isAdvanced")} advanced, ${countFlagged(entries, "hasIntro")} with intro`,
-    "Legend: [dir] folder README, [doc] article, * advanced, + intro, ! preface/appendix",
+    "Manifest summary",
+    `  ${entries.length} entries  ·  ${folders.length} folders  ·  ${articles.length} articles`,
+    `  ${roots.length} top-level routes  ·  ${maxSlugDepth}/${maxDepth} slug/directory depth`,
+    `  ${formatFlags(entries)}`,
     "",
-    "Structure preview:",
+    `Source  ${path.relative(process.cwd(), articlesPath) || "."}`,
+    `Output  ${path.relative(process.cwd(), outputFile) || outputFile}`,
   ]
 
-  const previewLines = formatPreviewEntries(roots, 0)
+  const previewLines = formatPreviewEntries(roots)
   if (previewLines.length === 0) {
     previewLines.push("  (no routable articles found)")
   }
 
-  return [...summaryLines, ...previewLines, ""].join("\n")
+  return [...summaryLines, "", "Contents", ...previewLines].join("\n")
+}
+
+function formatFlags(entries: ArticleEntry[]): string {
+  const flags: Record<string, number> = {
+    preface: countFlagged(entries, "isPreface"),
+    appendix: countFlagged(entries, "isAppendix"),
+    advanced: countFlagged(entries, "isAdvanced"),
+    intro: countFlagged(entries, "hasIntro"),
+  }
+
+  return Object.entries(flags)
+    .filter(([, count]) => count > 0)
+    .map(([label, count]) => `${count} ${label}`)
+    .join("  ·  ")
 }
 
 function countFlagged(
   entries: ArticleEntry[],
   field: "isPreface" | "isAppendix" | "isAdvanced" | "hasIntro"
 ): number {
-  return entries.filter((e) => e[field]).length
+  return entries.filter((entry) => entry[field]).length
 }
 
 function formatPreviewEntries(
   entries: ArticleEntry[],
-  depth: number
+  prefix = "",
+  depth = 0
 ): string[] {
   const visibleEntries = entries.slice(0, TREE_PREVIEW_CHILD_LIMIT)
   const lines: string[] = []
-  const nextDepth = depth + 1
 
-  for (const entry of visibleEntries) {
-    lines.push(formatPreviewEntry(entry, depth))
+  for (const [index, entry] of visibleEntries.entries()) {
+    const isLast =
+      index === visibleEntries.length - 1 &&
+      entries.length === visibleEntries.length
+    const branch = isLast ? "└─" : "├─"
+    lines.push(`${prefix}${branch} ${formatPreviewEntry(entry)}`)
 
     const children = [...(entry.children ?? [])].toSorted(comparePreviewEntries)
-    if (children.length > 0) {
-      if (nextDepth < TREE_PREVIEW_DEPTH) {
-        lines.push(...formatPreviewEntries(children, nextDepth))
-      } else {
-        lines.push(
-          `${indent(nextDepth)}... ${children.length} nested entries hidden`
-        )
-      }
+    if (children.length === 0) continue
+
+    const childPrefix = `${prefix}${isLast ? "   " : "│  "}`
+    if (depth + 1 < TREE_PREVIEW_DEPTH) {
+      lines.push(...formatPreviewEntries(children, childPrefix, depth + 1))
+    } else {
+      lines.push(`${childPrefix}└─ … ${children.length} nested entries`)
     }
   }
 
   const hiddenCount = entries.length - visibleEntries.length
   if (hiddenCount > 0) {
-    lines.push(`${indent(depth)}... ${hiddenCount} more entries`)
+    lines.push(`${prefix}└─ … ${hiddenCount} more entries`)
   }
 
   return lines
 }
 
-function formatPreviewEntry(entry: ArticleEntry, depth: number): string {
-  const kind = entry.isFolder ? "dir" : "doc"
-  const markers = [
-    entry.isAdvanced ? "*" : "",
-    entry.hasIntro ? "+" : "",
-    entry.isPreface || entry.isAppendix ? "!" : "",
-  ]
-    .filter(Boolean)
-    .join("")
-  const markerSuffix = markers === "" ? "" : ` ${markers}`
-  const indexSuffix = entry.index >= 0 ? ` #${entry.index}` : ""
-  const childCount = entry.children?.length ?? 0
-  const childSuffix = childCount > 0 ? `, ${childCount} children` : ""
-  const title = truncate(getPreviewTitle(entry), 72)
+function formatPreviewEntry(entry: ArticleEntry): string {
+  const kind = entry.isFolder ? "📁" : "📄"
+  const index = entry.index >= 0 ? `#${entry.index}` : ""
+  const children = entry.children?.length ?? 0
+  const details = [
+    index,
+    children > 0 ? `📚 ${children}` : "",
+    ...getMarkers(entry),
+  ].filter(Boolean)
+  const suffix = details.length > 0 ? `  ${details.join(" · ")}` : ""
 
-  return `${indent(depth)}- [${kind}] ${title} <${entry.slug}>${indexSuffix}${markerSuffix}${childSuffix} @ articles/${entry.filePath}`
+  return `${kind} ${truncate(getPreviewTitle(entry), 54)}  ${entry.slug}${suffix}`
+}
+
+function getMarkers(entry: ArticleEntry): string[] {
+  return [
+    entry.isAdvanced ? "⭐" : "",
+    entry.hasIntro ? "📖" : "",
+    entry.isPreface ? "👋" : "",
+    entry.isAppendix ? "📎" : "",
+  ].filter(Boolean)
 }
 
 function comparePreviewEntries(a: ArticleEntry, b: ArticleEntry): number {
@@ -130,9 +151,5 @@ function getPreviewTitle(entry: ArticleEntry): string {
 
 function truncate(value: string, maxLength: number): string {
   if (value.length <= maxLength) return value
-  return `${value.slice(0, maxLength - 1)}...`
-}
-
-function indent(depth: number): string {
-  return "  ".repeat(depth)
+  return `${value.slice(0, maxLength - 1)}…`
 }

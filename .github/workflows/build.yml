@@ -69,9 +69,20 @@ jobs:
         env:
           DATABASE_URL: "postgresql://localhost:5432/placeholder"
 
-      - name: Install Playwright Chromium
+      - name: Cache Playwright browsers
+        id: cache-playwright
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright system dependencies
         if: steps.cache-content.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install-deps chromium
+
+      - name: Install Playwright Chromium
+        if: steps.cache-content.outputs.cache-hit != 'true' && steps.cache-playwright.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install chromium
 
       - name: Build
         env:

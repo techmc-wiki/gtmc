@@ -805,6 +805,19 @@ code[class^="language-"] {
     text-wrap: pretty;
   }
 
+  /* Keep every Markdown-generated anchor below the fixed reader chrome.
+   * This covers headings beyond the custom H1-H3 components as well as
+   * generated footnote references and backlinks. */
+  .article-prose [id] {
+    scroll-margin-top: 7rem;
+  }
+
+  @media (min-width: 768px) {
+    .article-prose [id] {
+      scroll-margin-top: 10rem;
+    }
+  }
+
   .article-prose > :first-child {
     margin-top: 0;
   }

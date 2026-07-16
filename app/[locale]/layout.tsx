@@ -91,7 +91,7 @@ export async function generateMetadata({
       template: "%s — Graduate Texts in Minecraft",
     },
     icons: {
-      icon: "/favicon.svg",
+      icon: "/logo-mark-light.svg",
     },
     description: DEFAULT_SITE_DESCRIPTION,
     verification: {

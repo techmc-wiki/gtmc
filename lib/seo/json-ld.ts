@@ -83,7 +83,7 @@ export function buildOrganizationJsonLd(
     foundingDate: "2024",
     logo: {
       "@type": "ImageObject",
-      url: `${siteUrl}/favicon.svg`,
+      url: `${siteUrl}/logo-mark-light.svg`,
       width: 100,
       height: 100,
     },

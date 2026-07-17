@@ -15,7 +15,7 @@ import {
   type TranslationFrontMatter,
 } from "@/lib/articles/frontmatter-parser"
 import {
-  loadMaintainers,
+  loadArticleEditExclusions,
   loadAuthorAliases,
   getArticleAuthors,
   getArticleDates,
@@ -116,7 +116,7 @@ async function processSourceFile(
   isFolder: boolean,
   parentSlug: string | undefined,
   repoCwd: string,
-  maintainers: string[],
+  articleEditExclusions: string[],
   aliases: Map<string, string>
 ): Promise<Partial<ArticleEntry>> {
   const content = fs.readFileSync(filePath, "utf-8")
@@ -135,13 +135,13 @@ async function processSourceFile(
   const { author, coAuthors } = await getArticleAuthors(
     repoCwd,
     relPath,
-    maintainers,
+    articleEditExclusions,
     aliases
   )
   const { created, lastmod } = await getArticleDates(
     repoCwd,
     relPath,
-    maintainers
+    articleEditExclusions
   )
   const chapterTitle = "chapter-title" in fm ? fm["chapter-title"] : undefined
   const introTitle = "intro-title" in fm ? fm["intro-title"] : undefined
@@ -185,7 +185,7 @@ async function processTranslationFile(
   filePath: string,
   relPath: string,
   repoCwd: string,
-  maintainers: string[],
+  articleEditExclusions: string[],
   manifest: ArticleManifest
 ): Promise<void> {
   const content = fs.readFileSync(filePath, "utf-8")
@@ -226,7 +226,11 @@ async function processTranslationFile(
     )
   }
 
-  const { lastmod } = await getArticleDates(repoCwd, relPath, maintainers)
+  const { lastmod } = await getArticleDates(
+    repoCwd,
+    relPath,
+    articleEditExclusions
+  )
 
   if (!entry.availableLocales.includes("en")) {
     entry.availableLocales.push("en")
@@ -300,7 +304,7 @@ async function processDirectory(
   depth: number,
   manifest: ArticleManifest,
   repoCwd: string,
-  maintainers: string[],
+  articleEditExclusions: string[],
   aliases: Map<string, string>
 ): Promise<boolean> {
   let hasError = false
@@ -327,7 +331,7 @@ async function processDirectory(
           true,
           parentSlug,
           repoCwd,
-          maintainers,
+          articleEditExclusions,
           aliases
         )
         manifest[slugPrefix] = entry as ArticleEntry
@@ -393,7 +397,7 @@ async function processDirectory(
             false,
             parentSlug,
             repoCwd,
-            maintainers,
+            articleEditExclusions,
             aliases
           )
           return { compositeSlug, entry: entry as ArticleEntry, error: false }
@@ -421,7 +425,7 @@ async function processDirectory(
         readmePath,
         `${relFromArticles}/${readmeEn.name}`,
         repoCwd,
-        maintainers,
+        articleEditExclusions,
         manifest
       )
     } catch (error) {
@@ -450,7 +454,7 @@ async function processDirectory(
           enPath,
           relPath,
           repoCwd,
-          maintainers,
+          articleEditExclusions,
           manifest
         )
         return false
@@ -508,7 +512,7 @@ async function processDirectory(
           depth + 1,
           manifest,
           repoCwd,
-          maintainers,
+          articleEditExclusions,
           aliases
         )
       )
@@ -532,7 +536,7 @@ async function processDirectory(
         depth + 1,
         manifest,
         repoCwd,
-        maintainers,
+        articleEditExclusions,
         aliases
       )
     )
@@ -555,7 +559,7 @@ async function main(): Promise<void> {
     process.exit(1)
   }
 
-  const maintainers = await loadMaintainers()
+  const articleEditExclusions = await loadArticleEditExclusions()
   const aliases = await loadAuthorAliases()
 
   const topLevelFolders = fs
@@ -625,7 +629,7 @@ async function main(): Promise<void> {
         1,
         manifest,
         ARTICLES_PATH,
-        maintainers,
+        articleEditExclusions,
         aliases
       )
     )
@@ -688,7 +692,7 @@ async function main(): Promise<void> {
           false,
           undefined,
           ARTICLES_PATH,
-          maintainers,
+          articleEditExclusions,
           aliases
         )
         return { rawSlug, entry: entry as ArticleEntry, error: false }
@@ -726,7 +730,7 @@ async function main(): Promise<void> {
           rootEnPath,
           rootEnFile,
           ARTICLES_PATH,
-          maintainers,
+          articleEditExclusions,
           manifest
         )
         return false

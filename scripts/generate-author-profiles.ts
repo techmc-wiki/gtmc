@@ -11,6 +11,10 @@ const PEOPLE_PATH = join(CONFIG_DIR, "people.yml")
 const ALIASES_PATH = join(CONFIG_DIR, "authors-alias.yml")
 const ALIAS_OVERRIDES_PATH = join(CONFIG_DIR, "author-alias-overrides.yml")
 const MAINTAINERS_PATH = join(CONFIG_DIR, "maintainers.yml")
+const ARTICLE_EDIT_EXCLUSIONS_PATH = join(
+  CONFIG_DIR,
+  "article-edit-exclusions.yml"
+)
 const MANIFEST_PATH = join(process.cwd(), "data", "manifest.json")
 const PROFILES_JSON_PATH = join(CONFIG_DIR, "author-profiles.json")
 const PROFILES_TS_PATH = join(CONFIG_DIR, "author-profiles.ts")
@@ -136,13 +140,20 @@ function main(): void {
     string,
     ArticleEntry
   >
-  const excluded = new Set(["gtmc-bot"])
-  for (const maintainer of loadYaml<string[]>(MAINTAINERS_PATH) ?? []) {
-    excluded.add(maintainer.toLowerCase())
+  const excluded = new Set<string>()
+  for (const identity of loadYaml<string[]>(ARTICLE_EDIT_EXCLUSIONS_PATH) ??
+    []) {
+    excluded.add(identity.toLowerCase())
     excluded.add(
-      (resolver.get(maintainer.toLowerCase()) ?? maintainer).toLowerCase()
+      (resolver.get(identity.toLowerCase()) ?? identity).toLowerCase()
     )
   }
+
+  const maintainers = new Set(
+    (loadYaml<string[]>(MAINTAINERS_PATH) ?? []).map((identity) =>
+      (resolver.get(identity.toLowerCase()) ?? identity).toLowerCase()
+    )
+  )
 
   const profileHandles = new Set<string>()
   for (const entry of Object.values(manifest)) {
@@ -156,12 +167,12 @@ function main(): void {
     }
   }
 
-  // Human maintainers have standalone public profiles even though they are
-  // excluded from contributor attribution. Service accounts are absent from
-  // people.yml and therefore never enter this generated client-side map.
+  // Maintainer identity is independent of contributor attribution. Human
+  // maintainers always receive public profiles, whether or not article edits
+  // are attributed to them.
   for (const handle of Object.values(profileMap)) {
     const canonical = handle.toLowerCase()
-    if (canonical !== "gtmc-bot" && excluded.has(canonical)) {
+    if (maintainers.has(canonical)) {
       profileHandles.add(canonical)
     }
   }

@@ -7,7 +7,10 @@ import { load as yamlLoad } from "js-yaml"
 const execFileAsync = promisify(execFile)
 
 const CONFIG_DIR = join(process.cwd(), "lib", "articles", "config")
-const MAINTAINERS_PATH = join(CONFIG_DIR, "maintainers.yml")
+const ARTICLE_EDIT_EXCLUSIONS_PATH = join(
+  CONFIG_DIR,
+  "article-edit-exclusions.yml"
+)
 const ALIASES_PATH = join(CONFIG_DIR, "authors-alias.yml")
 const ALIAS_OVERRIDES_PATH = join(CONFIG_DIR, "author-alias-overrides.yml")
 
@@ -38,7 +41,7 @@ type GitPathCommitRange = {
 
 const MILLISECONDS_PER_DAY = 86_400_000
 
-// Cache stores various types (e.g., string[] for maintainers, Map<string, string> for aliases,
+// Cache stores various types (e.g., string[] for attribution exclusions, Map<string, string> for aliases,
 // {author, coAuthors} for parsed commits, {created, lastmod} for dates, string for SHAs)
 const cache = new Map<string, any>()
 
@@ -47,20 +50,20 @@ function getCacheKey(cwd: string, relPath: string, type: string): string {
 }
 
 /**
- * Maintainer git usernames from `lib/articles/config/maintainers.yml`,
+ * Git usernames from `lib/articles/config/article-edit-exclusions.yml`,
  * lowercased. Does NOT respect author aliases. Signature dropped the
  * former `articlesRepoCwd` param — config is website-owned now.
  */
-export async function loadMaintainers(): Promise<string[]> {
-  const cacheKey = "config:maintainers"
+export async function loadArticleEditExclusions(): Promise<string[]> {
+  const cacheKey = "config:article-edit-exclusions"
   if (cache.has(cacheKey)) {
     return cache.get(cacheKey)
   }
 
   try {
-    const content = await readFile(MAINTAINERS_PATH, "utf-8")
-    const maintainers = (yamlLoad(content) as string[]) || []
-    const lowercased = maintainers.map((m) => m.toLowerCase())
+    const content = await readFile(ARTICLE_EDIT_EXCLUSIONS_PATH, "utf-8")
+    const exclusions = (yamlLoad(content) as string[]) || []
+    const lowercased = exclusions.map((identity) => identity.toLowerCase())
     cache.set(cacheKey, lowercased)
     return lowercased
   } catch {
@@ -118,7 +121,7 @@ export async function loadAuthorAliases(): Promise<Map<string, string>> {
 export async function getArticleAuthors(
   repoCwd: string,
   relPath: string,
-  maintainers: string[],
+  excludedEditors: string[],
   aliases: Map<string, string>
 ): Promise<{ author: string; coAuthors: string[] }> {
   const cacheKey = getCacheKey(repoCwd, relPath, "authors")
@@ -182,23 +185,26 @@ export async function getArticleAuthors(
       }
     }
 
-    // B5 fix: maintainers must be recognized both by their raw git username
+    // Excluded editors must be recognized both by their raw git username
     // (e.g. `4rcadia`) AND by their alias-resolved canonical form (e.g. `Arcadi4`).
-    // Without this, a maintainer who commits under an aliased username filters
+    // Without this, an excluded editor using an aliased username filters
     // through as the article author instead of being excluded.
-    const maintainersLower = new Set<string>()
-    for (const m of maintainers) {
-      maintainersLower.add(m.toLowerCase())
-      const resolved = aliases.get(m)
+    const excludedEditorsLower = new Set<string>()
+    for (const editor of excludedEditors) {
+      excludedEditorsLower.add(editor.toLowerCase())
+      const resolved = aliases.get(editor)
       if (resolved) {
-        maintainersLower.add(resolved.toLowerCase())
+        excludedEditorsLower.add(resolved.toLowerCase())
       }
     }
-    const isMaintainer = (name: string) => {
+    const isExcludedEditor = (name: string) => {
       const lower = name.toLowerCase()
-      if (maintainersLower.has(lower)) return true
+      if (excludedEditorsLower.has(lower)) return true
       const resolved = aliases.get(name)
-      return resolved !== undefined && maintainersLower.has(resolved.toLowerCase())
+      return (
+        resolved !== undefined &&
+        excludedEditorsLower.has(resolved.toLowerCase())
+      )
     }
     const resolve = (name: string) => aliases.get(name) || name
 
@@ -234,30 +240,30 @@ export async function getArticleAuthors(
       }
     }
 
-    const nonMaintainers = uniqueAuthors.filter((a) => !isMaintainer(a))
-    const nonMaintainerCoauthors = allCoauthorsResolved.filter(
-      (a) => !isMaintainer(a)
+    const attributedAuthors = uniqueAuthors.filter((a) => !isExcludedEditor(a))
+    const attributedCoauthors = allCoauthorsResolved.filter(
+      (a) => !isExcludedEditor(a)
     )
 
     let result: { author: string; coAuthors: string[] }
 
-    if (isMaintainer(firstAuthor)) {
+    if (isExcludedEditor(firstAuthor)) {
       if (allCoauthorsResolved.length > 0) {
         const firstAuthorNew =
           allCoauthorsResolved[allCoauthorsResolved.length - 1]
         const coAuthorsList = allCoauthorsResolved.filter(
           (a) => a !== firstAuthorNew
         )
-        for (const a of nonMaintainers) {
+        for (const a of attributedAuthors) {
           if (a !== firstAuthorNew && !coAuthorsList.includes(a)) {
             coAuthorsList.push(a)
           }
         }
         result = { author: firstAuthorNew, coAuthors: coAuthorsList }
       } else {
-        if (nonMaintainers.length > 0) {
-          const firstAuthorNew = nonMaintainers[0]
-          const coAuthorsList = nonMaintainers.filter(
+        if (attributedAuthors.length > 0) {
+          const firstAuthorNew = attributedAuthors[0]
+          const coAuthorsList = attributedAuthors.filter(
             (a) => a !== firstAuthorNew
           )
           result = { author: firstAuthorNew, coAuthors: coAuthorsList }
@@ -270,20 +276,22 @@ export async function getArticleAuthors(
         }
       }
     } else {
-      if (nonMaintainers.length > 0) {
-        const firstAuthorNew = nonMaintainers[nonMaintainers.length - 1]
-        const coAuthorsList = nonMaintainers.filter((a) => a !== firstAuthorNew)
-        for (const a of nonMaintainerCoauthors) {
+      if (attributedAuthors.length > 0) {
+        const firstAuthorNew = attributedAuthors[attributedAuthors.length - 1]
+        const coAuthorsList = attributedAuthors.filter(
+          (a) => a !== firstAuthorNew
+        )
+        for (const a of attributedCoauthors) {
           if (!coAuthorsList.includes(a)) {
             coAuthorsList.push(a)
           }
         }
         result = { author: firstAuthorNew, coAuthors: coAuthorsList }
       } else {
-        if (nonMaintainerCoauthors.length > 0) {
+        if (attributedCoauthors.length > 0) {
           const firstAuthorNew =
-            nonMaintainerCoauthors[nonMaintainerCoauthors.length - 1]
-          const coAuthorsList = nonMaintainerCoauthors.filter(
+            attributedCoauthors[attributedCoauthors.length - 1]
+          const coAuthorsList = attributedCoauthors.filter(
             (a) => a !== firstAuthorNew
           )
           result = { author: firstAuthorNew, coAuthors: coAuthorsList }
@@ -309,7 +317,7 @@ export async function getArticleAuthors(
 export async function getArticleDates(
   repoCwd: string,
   relPath: string,
-  maintainers: string[]
+  excludedEditors: string[]
 ): Promise<{ created: string | null; lastmod: string | null }> {
   const cacheKey = getCacheKey(repoCwd, relPath, "dates")
   if (cache.has(cacheKey)) {
@@ -334,7 +342,7 @@ export async function getArticleDates(
       if (!line.includes("\t")) continue
       const [date, author] = line.split("\t", 2)
       allDates.push(date)
-      if (!maintainers.includes(author)) {
+      if (!excludedEditors.includes(author)) {
         dates.push(date)
       }
     }

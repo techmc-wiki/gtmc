@@ -29,6 +29,10 @@ import { resolvePerson, type ResolvedPerson } from "@/lib/markdown/people"
 
 const CONFIG_DIR = join(process.cwd(), "lib", "articles", "config")
 const MAINTAINERS_PATH = join(CONFIG_DIR, "maintainers.yml")
+const ARTICLE_EDIT_EXCLUSIONS_PATH = join(
+  CONFIG_DIR,
+  "article-edit-exclusions.yml"
+)
 const ALIASES_PATH = join(CONFIG_DIR, "authors-alias.yml")
 const ALIAS_OVERRIDES_PATH = join(CONFIG_DIR, "author-alias-overrides.yml")
 const PROFILES_PATH = join(CONFIG_DIR, "author-profiles.json")
@@ -56,7 +60,7 @@ let reverseAliasCache: Map<string, string> | null = null
 let forwardAliasCache: Map<string, string> | null = null
 let maintainersCache: Set<string> | null = null
 let maintainerHandlesCache: string[] | null = null
-let excludedAuthorsCache: Set<string> | null = null
+let articleEditExclusionsCache: Set<string> | null = null
 
 /**
  * Build the forward alias map: every known spelling (canonical + aliases)
@@ -228,20 +232,43 @@ function getMaintainerSet(): Set<string> {
 }
 
 /**
- * The full exclusion set for `getUniqueAuthors`: maintainers (raw +
- * canonical) plus `gtmc-bot`. All lowercased for case-insensitive matching.
+ * Git identities excluded from article attribution, expanded with their
+ * alias-resolved canonical forms. This policy is independent of maintainer
+ * identity: maintainers may still be attributed article authors.
  */
 function getExcludedAuthors(): Set<string> {
-  if (excludedAuthorsCache !== null) return excludedAuthorsCache
+  if (articleEditExclusionsCache !== null) return articleEditExclusionsCache
 
-  const set = new Set(getMaintainerSet())
-  set.add("gtmc-bot")
-  excludedAuthorsCache = set
+  let raw: string[]
+  try {
+    const parsed = yamlLoad(
+      readFileSync(ARTICLE_EDIT_EXCLUSIONS_PATH, "utf8")
+    )
+    raw = Array.isArray(parsed) ? (parsed as string[]) : []
+  } catch {
+    raw = []
+  }
+
+  const set = new Set<string>()
+  const forward = getForwardAliasMap()
+  for (const identity of raw) {
+    const lower = identity.toLowerCase()
+    set.add(lower)
+    const resolved = forward.get(lower)
+    if (resolved) set.add(resolved.toLowerCase())
+  }
+
+  articleEditExclusionsCache = set
   return set
 }
 
 function isExcludedAuthor(handle: string): boolean {
   return getExcludedAuthors().has(handle.toLowerCase())
+}
+
+/** Return whether maintenance commits should be omitted from article credit. */
+export function isArticleAttributionExcluded(handle: string): boolean {
+  return isExcludedAuthor(canonicalizeHandle(handle))
 }
 
 /**
@@ -312,8 +339,8 @@ export function resolveAuthorPerson(handle: string): ResolvedPerson {
  * Return sorted unique canonical author handles from the article manifest.
  *
  * Scans every non-folder entry's `author` and `coAuthors` fields. Excludes
- * maintainers (raw git usernames + their alias-resolved canonical forms)
- * and `gtmc-bot`. Output is sorted alphabetically for stable UI rendering.
+ * identities configured in `article-edit-exclusions.yml`. Output is sorted
+ * alphabetically for stable UI rendering.
  *
  * @param manifest Optional pre-loaded manifest (e.g. from `loadArticleManifest()`).
  *                 When omitted, the manifest is loaded from disk.
@@ -352,8 +379,8 @@ export function getUniqueAuthors(
 /**
  * Return every canonical handle that has a public profile route.
  *
- * Contributor counts continue to exclude maintainers, but maintainers remain
- * first-class people with standalone profiles and discoverable URLs.
+ * Maintainers and attributed article authors are independent sets; this
+ * returns their union so both roles have discoverable profile URLs.
  */
 export function getProfileHandles(
   manifest?: Record<string, ArticleEntry>

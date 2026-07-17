@@ -18,6 +18,7 @@ import {
   resolveAuthorPerson,
   resolveProfileHandle,
   getArticlesByAuthor,
+  isArticleAttributionExcluded,
   isMaintainer,
   isSameAuthor,
 } from "@/lib/articles/person-resolver"
@@ -145,11 +146,12 @@ export default async function AuthorDetailPage({
   const person = resolveAuthorPerson(handle)
   const articles = getArticlesByAuthor(handle, articleLocale, manifest)
   const maintainer = isMaintainer(handle)
+  const articleAttributionExcluded = isArticleAttributionExcluded(handle)
   const repositoryStats = maintainer
     ? getRepositoryContributorStats([handle, person.key, person.name])
     : null
 
-  const coAuthoredCount = maintainer
+  const coAuthoredCount = articleAttributionExcluded
     ? 0
     : articles.filter(
         (article) =>
@@ -161,7 +163,7 @@ export default async function AuthorDetailPage({
       role: maintainer ? t("maintainerLabel") : t("joinedLabel"),
     })
   )
-  const contributorSince = maintainer
+  const contributorSince = articleAttributionExcluded
     ? undefined
     : getArticlesByAuthor(handle, "zh", manifest)
         .map((article) => manifest[article.slug]?.created)
@@ -295,7 +297,8 @@ export default async function AuthorDetailPage({
                     </span>
                   ) : null}
                 </>
-              ) : (
+              ) : null}
+              {!articleAttributionExcluded ? (
                 <>
                   <span>
                     {t("articlesLabel")}: {articles.length}
@@ -314,7 +317,7 @@ export default async function AuthorDetailPage({
                       : "—"}
                   </span>
                 </>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
@@ -341,7 +344,9 @@ export default async function AuthorDetailPage({
             </div>
           ) : null}
         </section>
-      ) : (
+      ) : null}
+
+      {!articleAttributionExcluded ? (
         <section className="mt-10">
           <SectionTitle>{t("articlesSectionTitle")}</SectionTitle>
           <p className="text-tech-main/60 mb-6 font-mono text-xs tracking-widest uppercase">
@@ -366,7 +371,7 @@ export default async function AuthorDetailPage({
             </p>
           )}
         </section>
-      )}
+      ) : null}
 
       <nav className="mt-10">
         <Link

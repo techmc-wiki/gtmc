@@ -14,8 +14,13 @@ import { getCachedRehypeShiki } from "@/lib/markdown/syntax/rehype-shiki"
 import {
   getArticleAvailableLocales,
   hasArticleLocale,
+  loadArticleManifest,
   type ArticleLocale,
 } from "@/lib/articles/manifest"
+import {
+  resolveAuthorPerson,
+  resolveProfileHandle,
+} from "@/lib/articles/person-resolver"
 import {
   getCachedArticleTree,
   getCachedLocalizedArticleEntry,
@@ -290,10 +295,19 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const allAuthors = [
     ...new Set([author, ...coAuthors].filter(Boolean) as string[]),
   ]
-  const authorArray = allAuthors.map((name) => ({
+  const profileManifest = loadArticleManifest()
+  const profileHandles = [
+    ...new Set(
+      allAuthors.map(
+        (name) => resolveProfileHandle(name, profileManifest) ?? name
+      )
+    ),
+  ]
+  const authorArray = profileHandles.map((handle) => ({
     "@type": "Person" as const,
-    name,
-    url: `${siteUrl}/${locale}/authors/${encodeURIComponent(name)}`,
+    "@id": `${siteUrl}/${locale}/authors/${encodeURIComponent(handle)}#person`,
+    name: resolveAuthorPerson(handle).name,
+    url: `${siteUrl}/${locale}/authors/${encodeURIComponent(handle)}`,
   }))
   const isTranslationPending =
     manifestEntry !== null && !manifestEntry.availableLocales.includes(locale)
@@ -317,6 +331,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     dateModified?: string
     author?: Array<{
       "@type": "Person"
+      "@id": string
       name: string
       url: string
     }>
@@ -410,8 +425,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       {author && createdAt && lastModified ? (
         <ArticleMetadataFull
           title={articleTitle}
-          author={author}
-          coAuthors={coAuthors}
+          author={profileHandles[0] ?? author}
+          coAuthors={profileHandles.slice(1)}
           createdAt={createdAt}
           lastModified={lastModified}
           canonicalUrl={canonicalUrl}

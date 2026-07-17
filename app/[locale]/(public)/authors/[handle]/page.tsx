@@ -1,7 +1,11 @@
 import type { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
+import {
+  MaintainerBadge,
+  MaintainerCallout,
+} from "@/components/authors/maintainer-callout"
 import { SectionTitle } from "@/components/ui/section-title"
 import { TechCard } from "@/components/ui/tech-card"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
@@ -14,27 +18,22 @@ import {
 } from "@/components/ui/social-icons"
 import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
 import {
-  getUniqueAuthors,
+  getProfileHandles,
   resolveAuthorPerson,
+  resolveProfileHandle,
   getArticlesByAuthor,
+  isMaintainer,
+  isSameAuthor,
 } from "@/lib/articles/person-resolver"
 import { buildPersonJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
 import {
   loadArticleManifest,
-  type ArticleEntry,
   type ArticleLocale,
 } from "@/lib/articles/manifest"
 import type { AuthorArticleSummary } from "@/lib/articles/person-resolver"
 
 interface AuthorDetailPageProps {
   params: Promise<{ locale: string; handle: string }>
-}
-
-function isValidHandle(
-  handle: string,
-  manifest?: Record<string, ArticleEntry>
-): boolean {
-  return getUniqueAuthors(manifest).includes(handle)
 }
 
 function decodeHandle(rawHandle: string): string {
@@ -48,7 +47,7 @@ function decodeHandle(rawHandle: string): string {
 export async function generateStaticParams(): Promise<
   { locale: string; handle: string }[]
 > {
-  const handles = getUniqueAuthors()
+  const handles = getProfileHandles()
   const locales = ["en", "zh"]
   return locales.flatMap((locale) =>
     handles.map((handle) => ({ locale, handle }))
@@ -59,30 +58,36 @@ export async function generateMetadata({
   params,
 }: AuthorDetailPageProps): Promise<Metadata> {
   const { locale, handle: rawHandle } = await params
-  const handle = decodeHandle(rawHandle)
-  const urlHandle = encodeURIComponent(handle)
+  const requestedHandle = decodeHandle(rawHandle)
   const manifest = loadArticleManifest()
+  const handle = resolveProfileHandle(requestedHandle, manifest)
 
-  if (!isValidHandle(handle, manifest)) {
+  if (handle === null) {
     notFound()
   }
+
+  const urlHandle = encodeURIComponent(handle)
 
   const t = await getTranslations({ locale, namespace: "AuthorDetail" })
   const person = resolveAuthorPerson(handle)
   const articleLocale = locale as ArticleLocale
   const articles = getArticlesByAuthor(handle, articleLocale, manifest)
   const canonical = toAbsoluteUrl(`/${locale}/authors/${urlHandle}`)
+  const maintainer = isMaintainer(handle)
 
-  const description =
-    person.description ??
-    (articles.length > 0
-      ? t("metaDescription", {
-          name: person.name,
-          articleCount: articles.length,
-        })
-      : t("metaDescriptionFallback"))
+  const description = maintainer
+    ? t("maintainerMetaDescription", { name: person.name })
+    : (person.description ??
+      (articles.length > 0
+        ? t("metaDescription", {
+            name: person.name,
+            articleCount: articles.length,
+          })
+        : t("metaDescriptionFallback")))
 
-  const title = `${person.name} | ${t("articlesLabel")}`
+  const title = `${person.name} | ${t(
+    maintainer ? "maintainerLabel" : "articlesLabel"
+  )}`
 
   return {
     title,
@@ -115,12 +120,18 @@ export default async function AuthorDetailPage({
   params,
 }: AuthorDetailPageProps) {
   const { locale, handle: rawHandle } = await params
-  const handle = decodeHandle(rawHandle)
-  const urlHandle = encodeURIComponent(handle)
+  const requestedHandle = decodeHandle(rawHandle)
   const manifest = loadArticleManifest()
+  const handle = resolveProfileHandle(requestedHandle, manifest)
 
-  if (!isValidHandle(handle, manifest)) {
+  if (handle === null) {
     notFound()
+  }
+
+  const urlHandle = encodeURIComponent(handle)
+
+  if (requestedHandle !== handle) {
+    permanentRedirect(`/${locale}/authors/${urlHandle}`)
   }
 
   const articleLocale = locale as ArticleLocale
@@ -129,17 +140,17 @@ export default async function AuthorDetailPage({
 
   const person = resolveAuthorPerson(handle)
   const articles = getArticlesByAuthor(handle, articleLocale, manifest)
+  const maintainer = isMaintainer(handle)
 
   const coAuthoredCount = articles.filter(
-    (a) =>
-      a.author !== undefined &&
-      a.author.toLowerCase() !== handle.toLowerCase() &&
-      (a.coAuthors?.some((co) => co.toLowerCase() === handle.toLowerCase()) ??
-        false)
+    (article) =>
+      article.author !== undefined && !isSameAuthor(article.author, handle)
   ).length
 
   const jsonLd = serializeJsonLd(
-    buildPersonJsonLd(person, siteUrl, locale, urlHandle)
+    buildPersonJsonLd(person, siteUrl, locale, urlHandle, {
+      role: maintainer ? t("maintainerLabel") : t("joinedLabel"),
+    })
   )
   const contributorSince = getArticlesByAuthor(handle, "zh", manifest)
     .map((article) => manifest[article.slug]?.created)
@@ -200,13 +211,19 @@ export default async function AuthorDetailPage({
               alt={person.name}
               fallback={person.name}
               sizes="(max-width: 768px) 96px, 128px"
+              loading="eager"
             />
           </div>
 
           <div className="min-w-0 flex-1 text-center sm:text-left">
-            <h1 className="display-title text-tech-main-dark text-2xl tracking-tight md:text-3xl">
-              {person.name}
-            </h1>
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+              <h1 className="display-title text-tech-main-dark text-2xl tracking-tight md:text-3xl">
+                {person.name}
+              </h1>
+              {maintainer ? (
+                <MaintainerBadge>{t("maintainerLabel")}</MaintainerBadge>
+              ) : null}
+            </div>
             <p className="text-tech-main/60 mt-1 font-mono text-sm">
               @{handle}
             </p>
@@ -214,6 +231,13 @@ export default async function AuthorDetailPage({
             <p className="text-tech-main mt-3 max-w-2xl text-sm/relaxed">
               {person.description ?? t("fallbackBio")}
             </p>
+
+            {maintainer ? (
+              <MaintainerCallout
+                title={t("maintainerCalloutTitle")}
+                description={t("maintainerCalloutDescription")}
+              />
+            ) : null}
 
             {hasSocialLinks && (
               <div className="mt-4">
@@ -344,12 +368,7 @@ function ArticleRow({
   coauthoredLabel: string
 }) {
   const isCoAuthored =
-    article.author !== undefined &&
-    article.author.toLowerCase() !== handle.toLowerCase() &&
-    (article.coAuthors?.some(
-      (co) => co.toLowerCase() === handle.toLowerCase()
-    ) ??
-      false)
+    article.author !== undefined && !isSameAuthor(article.author, handle)
 
   const metaParts: string[] = []
   if (article.isPreface) metaParts.push("PREFACE")

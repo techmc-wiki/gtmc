@@ -110,7 +110,7 @@ const peopleData: Readonly<Record<string, PeopleEntry>> = {
   },
   "Petris": {
     "name": "Petris5256",
-    "profile": "/avatars/petris.png",
+    "profile": "/avatars/Petris.jpg",
     "social": {
       "bilibili": "https://space.bilibili.com/397472062"
     }

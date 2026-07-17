@@ -110,9 +110,12 @@ export function buildPersonJsonLd(
   person: ResolvedPerson,
   siteUrl: string,
   locale: string,
-  handle: string
+  handle: string,
+  options: { role?: string } = {}
 ): JsonLdObject {
   const profileUrl = `${siteUrl}/${locale}/authors/${handle}`
+  const personId = `${profileUrl}#person`
+  const decodedHandle = decodeURIComponent(handle)
 
   const sameAs: string[] = []
   if (person.social.github) {
@@ -147,8 +150,22 @@ export function buildPersonJsonLd(
 
   const personObject: Record<string, unknown> = {
     "@type": "Person",
+    "@id": personId,
     name: person.name,
     url: profileUrl,
+    affiliation: {
+      "@type": "Organization",
+      name: "Graduate Texts in Minecraft",
+      url: siteUrl,
+    },
+  }
+
+  if (person.name.toLowerCase() !== decodedHandle.toLowerCase()) {
+    personObject.alternateName = decodedHandle
+  }
+
+  if (options.role) {
+    personObject.jobTitle = options.role
   }
 
   if (person.description) {
@@ -167,6 +184,9 @@ export function buildPersonJsonLd(
     "@context": "https://schema.org",
     "@type": "ProfilePage",
     url: profileUrl,
+    name: options.role ? `${person.name} — ${options.role}` : person.name,
+    inLanguage: locale,
+    ...(person.description ? { description: person.description } : {}),
     mainEntity: personObject,
   }
 }

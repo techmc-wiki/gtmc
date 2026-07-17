@@ -7,6 +7,7 @@ interface UserAvatarProps {
   fallback?: string
   className?: string
   sizes?: string
+  loading?: "eager" | "lazy"
 }
 
 export function UserAvatar({
@@ -15,6 +16,7 @@ export function UserAvatar({
   fallback,
   className = "",
   sizes = "(max-width: 768px) 32px, 40px",
+  loading = "lazy",
 }: UserAvatarProps) {
   return (
     <div
@@ -56,6 +58,7 @@ export function UserAvatar({
           alt={alt || "Avatar"}
           fill
           sizes={sizes}
+          loading={loading}
           className="object-cover p-1 saturate-[0.85] transition-transform duration-500 group-hover:scale-105 group-hover:saturate-100"
         />
       ) : (

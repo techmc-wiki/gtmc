@@ -1,7 +1,8 @@
 import { execFileSync } from "node:child_process"
-import { mkdirSync, writeFileSync } from "node:fs"
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 
+import { resolveGithubArticlesReadToken } from "@/lib/github/tokens"
 import { createLogger } from "./lib/logger"
 
 const logger = createLogger("repository-contributors")
@@ -96,6 +97,20 @@ function getRepositoryFromEnvironment(): string | null {
   return owner && name ? `${owner}/${name}` : null
 }
 
+function getRepositoryFromPackage(): string | null {
+  try {
+    const packageMetadata = JSON.parse(
+      readFileSync(join(process.cwd(), "package.json"), "utf8")
+    ) as { repository?: string | { url?: string } }
+    const repository = packageMetadata.repository
+    const url = typeof repository === "string" ? repository : repository?.url
+    if (!url) return null
+    return /github\.com[/:]([^/]+\/[^/]+?)(?:\.git)?$/.exec(url)?.[1] ?? null
+  } catch {
+    return null
+  }
+}
+
 function getRepositoryFromRemote(): string | null {
   try {
     const remote = execFileSync(
@@ -113,11 +128,7 @@ function getRepositoryFromRemote(): string | null {
 }
 
 function getGitHubToken(): string | null {
-  const environmentToken =
-    process.env.GITHUB_TOKEN ??
-    process.env.GITHUB_ARTICLES_READ_PAT ??
-    process.env.GITHUB_ARTICLES_WRITE_PAT ??
-    process.env.GITHUB_PERSONAL_ACCESS_TOKEN
+  const environmentToken = resolveGithubArticlesReadToken()
   if (environmentToken) return environmentToken
 
   try {
@@ -280,7 +291,10 @@ async function loadContributorStats(
 }
 
 async function main(): Promise<void> {
-  const repository = getRepositoryFromEnvironment() ?? getRepositoryFromRemote()
+  const repository =
+    getRepositoryFromEnvironment() ??
+    getRepositoryFromPackage() ??
+    getRepositoryFromRemote()
   if (!repository) throw new Error("Unable to determine the GitHub repository")
 
   const token = getGitHubToken()

@@ -174,7 +174,7 @@ function ProfileCard({
     <Link
       href={`/authors/${encodeURIComponent(handle)}`}
       className="group/link focus-visible:outline-tech-main block focus-visible:outline-2 focus-visible:outline-offset-2">
-      <TechCard padding="compact" hover="border">
+      <TechCard padding="compact" hover="border" className="h-full">
         <div className="flex items-start gap-3">
           <div className="size-12 shrink-0">
             <UserAvatar

@@ -4,7 +4,6 @@ import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { SectionTitle } from "@/components/ui/section-title"
 import { TechCard } from "@/components/ui/tech-card"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import {
   GithubIcon,
@@ -211,12 +210,7 @@ export default async function AuthorDetailPage({
         </p>
       </nav>
 
-      <div className="bg-surface-overlay/60 border-tech-main/20 relative border p-6 backdrop-blur sm:p-8">
-        <CornerBrackets
-          className="pointer-events-none absolute inset-0"
-          size="size-3"
-          color="border-tech-main/40"
-        />
+      <div className="bg-surface-overlay/60 border-tech-main/20 border p-6 sm:p-8">
         <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
           <div className="size-24 shrink-0 md:size-32">
             <UserAvatar

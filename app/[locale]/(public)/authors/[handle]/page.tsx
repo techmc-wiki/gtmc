@@ -2,10 +2,6 @@ import type { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
-import {
-  MaintainerBadge,
-  MaintainerCallout,
-} from "@/components/authors/maintainer-callout"
 import { SectionTitle } from "@/components/ui/section-title"
 import { TechCard } from "@/components/ui/tech-card"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
@@ -25,6 +21,7 @@ import {
   isMaintainer,
   isSameAuthor,
 } from "@/lib/articles/person-resolver"
+import { getRepositoryContributorStats } from "@/lib/git/repository-contributor-stats"
 import { buildPersonJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
 import {
   loadArticleManifest,
@@ -74,16 +71,23 @@ export async function generateMetadata({
   const articles = getArticlesByAuthor(handle, articleLocale, manifest)
   const canonical = toAbsoluteUrl(`/${locale}/authors/${urlHandle}`)
   const maintainer = isMaintainer(handle)
+  const repositoryStats = maintainer
+    ? getRepositoryContributorStats([handle, person.key, person.name])
+    : null
 
-  const description = maintainer
-    ? t("maintainerMetaDescription", { name: person.name })
-    : (person.description ??
-      (articles.length > 0
-        ? t("metaDescription", {
-            name: person.name,
-            articleCount: articles.length,
-          })
-        : t("metaDescriptionFallback")))
+  const description =
+    maintainer && repositoryStats
+      ? t("maintainerMetaDescription", {
+          name: person.name,
+          ...repositoryStats,
+        })
+      : (person.description ??
+        (articles.length > 0
+          ? t("metaDescription", {
+              name: person.name,
+              articleCount: articles.length,
+            })
+          : t("metaDescriptionFallback")))
 
   const title = `${person.name} | ${t(
     maintainer ? "maintainerLabel" : "articlesLabel"
@@ -141,21 +145,28 @@ export default async function AuthorDetailPage({
   const person = resolveAuthorPerson(handle)
   const articles = getArticlesByAuthor(handle, articleLocale, manifest)
   const maintainer = isMaintainer(handle)
+  const repositoryStats = maintainer
+    ? getRepositoryContributorStats([handle, person.key, person.name])
+    : null
 
-  const coAuthoredCount = articles.filter(
-    (article) =>
-      article.author !== undefined && !isSameAuthor(article.author, handle)
-  ).length
+  const coAuthoredCount = maintainer
+    ? 0
+    : articles.filter(
+        (article) =>
+          article.author !== undefined && !isSameAuthor(article.author, handle)
+      ).length
 
   const jsonLd = serializeJsonLd(
     buildPersonJsonLd(person, siteUrl, locale, urlHandle, {
       role: maintainer ? t("maintainerLabel") : t("joinedLabel"),
     })
   )
-  const contributorSince = getArticlesByAuthor(handle, "zh", manifest)
-    .map((article) => manifest[article.slug]?.created)
-    .filter((date): date is string => date !== undefined)
-    .toSorted()[0]
+  const contributorSince = maintainer
+    ? undefined
+    : getArticlesByAuthor(handle, "zh", manifest)
+        .map((article) => manifest[article.slug]?.created)
+        .filter((date): date is string => date !== undefined)
+        .toSorted()[0]
 
   const githubUrl = person.social.github
     ? person.social.github.startsWith("http")
@@ -220,9 +231,6 @@ export default async function AuthorDetailPage({
               <h1 className="display-title text-tech-main-dark text-2xl tracking-tight md:text-3xl">
                 {person.name}
               </h1>
-              {maintainer ? (
-                <MaintainerBadge>{t("maintainerLabel")}</MaintainerBadge>
-              ) : null}
             </div>
             <p className="text-tech-main/60 mt-1 font-mono text-sm">
               @{handle}
@@ -231,13 +239,6 @@ export default async function AuthorDetailPage({
             <p className="text-tech-main mt-3 max-w-2xl text-sm/relaxed">
               {person.description ?? t("fallbackBio")}
             </p>
-
-            {maintainer ? (
-              <MaintainerCallout
-                title={t("maintainerCalloutTitle")}
-                description={t("maintainerCalloutDescription")}
-              />
-            ) : null}
 
             {hasSocialLinks && (
               <div className="mt-4">
@@ -278,51 +279,94 @@ export default async function AuthorDetailPage({
             )}
 
             <div className="text-tech-main/50 mt-4 flex flex-wrap gap-x-6 gap-y-1 font-mono text-[0.625rem] tracking-[0.25em] uppercase">
-              <span>
-                {t("articlesLabel")}: {articles.length}
-              </span>
-              <span>
-                {t("coAuthoredLabel")}: {coAuthoredCount}
-              </span>
-              <span>
-                {t("contributorSinceLabel")}:{" "}
-                {contributorSince
-                  ? new Date(contributorSince).toLocaleDateString(locale, {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })
-                  : "—"}
-              </span>
+              {maintainer ? (
+                <>
+                  <span>
+                    {t("roleLabel")}: {t("maintainerLabel")}
+                  </span>
+                  {repositoryStats ? (
+                    <span>
+                      {t("commitsLabel")}: {repositoryStats.commits}
+                    </span>
+                  ) : null}
+                  {repositoryStats ? (
+                    <span>
+                      {t("linesChangedLabel")}: {repositoryStats.linesChanged}
+                    </span>
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  <span>
+                    {t("articlesLabel")}: {articles.length}
+                  </span>
+                  <span>
+                    {t("coAuthoredLabel")}: {coAuthoredCount}
+                  </span>
+                  <span>
+                    {t("contributorSinceLabel")}:{" "}
+                    {contributorSince
+                      ? new Date(contributorSince).toLocaleDateString(locale, {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : "—"}
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      <section className="mt-10">
-        <SectionTitle>{t("articlesSectionTitle")}</SectionTitle>
-        <p className="text-tech-main/60 mb-6 font-mono text-xs tracking-widest uppercase">
-          {t("articlesSortLabel")}
-        </p>
-
-        {articles.length > 0 ? (
-          <div className="space-y-3">
-            {articles.map((article, i) => (
-              <ArticleRow
-                key={article.slug}
-                article={article}
-                handle={handle}
-                rowIndex={i + 1}
-                coauthoredLabel={t("coauthoredBadge")}
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="text-tech-main/60 font-mono text-xs tracking-widest uppercase">
-            {t("noArticles")}
+      {maintainer ? (
+        <section className="mt-10">
+          <SectionTitle>{t("repositoryActivityTitle")}</SectionTitle>
+          <p className="text-tech-main mb-6 max-w-3xl text-sm/relaxed">
+            {t("repositoryActivityDescription")}
           </p>
-        )}
-      </section>
+          {repositoryStats ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <RepositoryStat
+                label={t("commitsLabel")}
+                value={repositoryStats.commits}
+                locale={locale}
+              />
+              <RepositoryStat
+                label={t("linesChangedLabel")}
+                value={repositoryStats.linesChanged}
+                locale={locale}
+              />
+            </div>
+          ) : null}
+        </section>
+      ) : (
+        <section className="mt-10">
+          <SectionTitle>{t("articlesSectionTitle")}</SectionTitle>
+          <p className="text-tech-main/60 mb-6 font-mono text-xs tracking-widest uppercase">
+            {t("articlesSortLabel")}
+          </p>
+
+          {articles.length > 0 ? (
+            <div className="space-y-3">
+              {articles.map((article, i) => (
+                <ArticleRow
+                  key={article.slug}
+                  article={article}
+                  handle={handle}
+                  rowIndex={i + 1}
+                  coauthoredLabel={t("coauthoredBadge")}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-tech-main/60 font-mono text-xs tracking-widest uppercase">
+              {t("noArticles")}
+            </p>
+          )}
+        </section>
+      )}
 
       <nav className="mt-10">
         <Link
@@ -332,6 +376,27 @@ export default async function AuthorDetailPage({
         </Link>
       </nav>
     </div>
+  )
+}
+
+function RepositoryStat({
+  label,
+  value,
+  locale,
+}: {
+  label: string
+  value: number
+  locale: string
+}) {
+  return (
+    <TechCard padding="compact">
+      <p className="text-tech-main/60 font-mono text-[0.625rem] tracking-[0.25em] uppercase">
+        {label}
+      </p>
+      <p className="text-tech-main-dark mt-2 text-2xl font-semibold tabular-nums">
+        {new Intl.NumberFormat(locale).format(value)}
+      </p>
+    </TechCard>
   )
 }
 

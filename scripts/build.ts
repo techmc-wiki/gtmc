@@ -20,6 +20,9 @@ if (!skipContent) {
   runBuildStep(logger, "content", () => runScript("scripts/build-content.ts"))
 } else {
   logger.event("content.reused", { reason: "GTMC_SKIP_CONTENT_BUILD" })
+  runBuildStep(logger, "repository-contributors", () =>
+    runScript("scripts/generate-repository-contributor-stats.ts")
+  )
 }
 
 runBuildStep(logger, "next", () => run("next", ["build"]))

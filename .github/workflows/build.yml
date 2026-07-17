@@ -88,6 +88,7 @@ jobs:
         env:
           # Only skip when the exact key hits — partial restore-keys may lack locale PDFs.
           GTMC_SKIP_CONTENT_BUILD: ${{ steps.cache-content.outputs.cache-hit == 'true' }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: node --run build
 
       - name: Upload compiled PDFs

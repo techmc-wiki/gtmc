@@ -5,7 +5,6 @@ import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { addSiteScrollListener } from "@/hooks/site-scroll-root"
-import { resolvePersonClient } from "@/lib/articles/config/people-data"
 import { getAuthorProfileHandle } from "@/lib/articles/config/author-profiles"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
@@ -15,12 +14,55 @@ import {
   GlobeIcon,
   TwitterIcon,
 } from "@/components/ui/social-icons"
-import type { ResolvedPerson } from "@/lib/articles/config/people-data"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
+import type { ResolvedPerson } from "@/lib/markdown/people"
+
+const personCache = new Map<string, ResolvedPerson>()
+const pendingPersonRequests = new Map<string, Promise<ResolvedPerson>>()
+
+function createFallbackPerson(key: string): ResolvedPerson {
+  return {
+    key,
+    name: key,
+    description: null,
+    profile: null,
+    email: null,
+    social: {},
+    isFallback: true,
+  }
+}
+
+function getPerson(key: string): Promise<ResolvedPerson> {
+  const cached = personCache.get(key)
+  if (cached) return Promise.resolve(cached)
+
+  const pending = pendingPersonRequests.get(key)
+  if (pending) return pending
+
+  const request = fetch(`/api/people?key=${encodeURIComponent(key)}`)
+    .then(async (response): Promise<ResolvedPerson> => {
+      if (!response.ok) {
+        throw new Error(`Unable to load person: ${response.status}`)
+      }
+
+      const person: ResolvedPerson = await response.json()
+      personCache.set(key, person)
+      return person
+    })
+    .finally(() => {
+      pendingPersonRequests.delete(key)
+    })
+
+  pendingPersonRequests.set(key, request)
+  return request
+}
 
 export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
   const personKey = (props["data-person-key"] as string) ?? ""
-  const person: ResolvedPerson = resolvePersonClient(personKey)
+  const normalizedPersonKey = personKey.trim()
+  const [person, setPerson] = useState<ResolvedPerson>(() =>
+    createFallbackPerson(normalizedPersonKey)
+  )
   const [isOpen, setIsOpen] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
   const generatedId = useId()
@@ -32,6 +74,23 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null)
   const t = useTranslations("PeopleMention")
+
+  useEffect(() => {
+    const cached = personCache.get(normalizedPersonKey)
+    if (cached) {
+      setPerson(cached)
+    } else {
+      setPerson(createFallbackPerson(normalizedPersonKey))
+    }
+  }, [normalizedPersonKey])
+
+  const loadPerson = () => {
+    void getPerson(normalizedPersonKey)
+      .then(setPerson)
+      .catch(() => {
+        // The fallback already displayed by the component is correct for a failed lookup.
+      })
+  }
 
   const recalcPosition = () => {
     if (containerRef.current) {
@@ -65,6 +124,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
       animTimeoutRef.current = null
     }
     recalcPosition()
+    loadPerson()
     setIsAnimating(false)
     setIsOpen(true)
   }
@@ -358,6 +418,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
               closeWithAnimation()
             } else {
               recalcPosition()
+              loadPerson()
               setIsOpen(true)
             }
           }}

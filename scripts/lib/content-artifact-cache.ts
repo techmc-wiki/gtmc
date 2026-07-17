@@ -24,7 +24,6 @@ const GENERATED_ARTIFACTS = [
   "public/gtmc-zh.pdf",
   "lib/articles/config/author-profiles.json",
   "lib/articles/config/author-profiles.ts",
-  "lib/articles/config/people-data.ts",
 ] as const
 
 const GENERATED_ARTIFACT_DIRECTORIES = new Set([
@@ -58,7 +57,6 @@ const CONTENT_GENERATOR_DIRECTORIES: string[] = [
 const GENERATED_SOURCE_FILES = new Set([
   "lib/articles/config/author-profiles.json",
   "lib/articles/config/author-profiles.ts",
-  "lib/articles/config/people-data.ts",
 ])
 
 const ARCHIVE_PARENT_DIRECTORIES = new Set<string>()

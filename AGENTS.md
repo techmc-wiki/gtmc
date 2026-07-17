@@ -264,6 +264,24 @@ Allowed `<type>` values:
 
 Recent history frequently uses `fix(scope): …`, `feat(scope): …`, and `chore(scope): …`. Prefer including a scope (e.g. `sidebar`, `build`, `deps`, `api/*`) for traceability.
 
+### Publishing GitHub releases
+
+Release tags use the `vX.Y.Z` format and are published from the `dev` branch. The target commit must already be present on the remote `dev` branch; agents must not push or pull, so stop for a user-managed push when the local branch is ahead. Before publishing, inspect the commits since the previous release and confirm the worktree is clean. Match the existing release-note style: use `Feature:`/`Features:` and optional `Dev:` headings, with a numbered list under each heading. Keep `Dev` selective: include only changes that affect the developer workflow, CI/CD, or release process, and omit internal refactors and implementation details.
+
+Create and publish a release with the GitHub CLI so the tag is created on the target branch and the release is public:
+
+```bash
+gh auth status
+gh release create vX.Y.Z \
+  --repo techmc-wiki/gtmc \
+  --target dev \
+  --title vX.Y.Z \
+  --notes $'Features:\n\n1. Describe the user-facing change\n\nDev:\n\n1. Describe the developer-facing change'
+gh release view vX.Y.Z --repo techmc-wiki/gtmc
+```
+
+Use `--verify-tag` only when the tag already exists remotely. Verify the release is neither a draft nor a prerelease and that it appears in `gh release list` after publishing.
+
 ### Splitting
 
 - Each commit should be **single-purpose, easily reversible, and atomic**.

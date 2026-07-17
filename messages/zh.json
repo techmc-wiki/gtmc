@@ -98,7 +98,7 @@
     "metaDescription": "{name}——Graduate Texts in Minecraft 贡献者。{articleCount, plural, other {# 篇}}技术 Minecraft 文章。",
     "metaDescriptionFallback": "Graduate Texts in Minecraft 贡献者主页。",
     "noArticles": "该语言暂无文章。",
-    "repositoryActivityDescription": "主仓库历史记录，不含文章与术语表子模块。",
+    "repositoryActivityDescription": "主仓库的 GitHub 贡献者统计，不含合并提交与空提交。",
     "repositoryActivityTitle": "仓库活动",
     "roleLabel": "角色",
     "socialLinksLabel": "链接"

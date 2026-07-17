@@ -97,6 +97,9 @@ if (skipHeavy) {
   runBuildStep(logger, "author-profiles", () =>
     runScript("scripts/generate-author-profiles.ts")
   )
+  runBuildStep(logger, "repository-contributors", () =>
+    runScript("scripts/generate-repository-contributor-stats.ts")
+  )
   if (skipPlaywright) {
     logger.event("browser.install.skipped", { reason: "environment" })
   } else {

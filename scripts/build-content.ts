@@ -13,6 +13,10 @@ import { createLogger, runBuildStep } from "./lib/logger"
 const logger = createLogger("content")
 
 const steps: Array<{ stage: string; script: string; args?: string[] }> = [
+  {
+    stage: "repository-contributors",
+    script: "scripts/generate-repository-contributor-stats.ts",
+  },
   { stage: "manifest", script: "scripts/generate-article-manifest.ts" },
   {
     stage: "author-profiles",

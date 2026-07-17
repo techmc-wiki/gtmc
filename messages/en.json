@@ -98,7 +98,7 @@
     "metaDescription": "{name} — contributor to Graduate Texts in Minecraft. {articleCount, plural, =1 {1 article} other {# articles}} on technical Minecraft.",
     "metaDescriptionFallback": "Contributor profile on Graduate Texts in Minecraft.",
     "noArticles": "No articles in this language yet.",
-    "repositoryActivityDescription": "Main repository history, excluding the article and glossary submodules.",
+    "repositoryActivityDescription": "GitHub contributor statistics for the main repository. Merge and empty commits are excluded.",
     "repositoryActivityTitle": "Repository activity",
     "roleLabel": "Role",
     "socialLinksLabel": "Links"

@@ -22,6 +22,7 @@
     "generate:content": "tsx scripts/generate-article-content.ts",
     "generate:glossary": "tsx scripts/generate-glossary-manifest.ts",
     "generate:authors": "tsx scripts/generate-author-profiles.ts",
+    "generate:contributors": "tsx scripts/generate-repository-contributor-stats.ts",
     "generate:aliases": "tsx scripts/generate-author-aliases.ts",
     "articles:init": "git submodule update --init --recursive articles",
     "articles:update": "git submodule update --remote articles",

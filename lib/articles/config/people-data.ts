@@ -36,7 +36,7 @@ const peopleData: Readonly<Record<string, PeopleEntry>> = {
   },
   "4rcadia": {
     "name": "4rcadia",
-    "description": "网站开发/运维\n\nA man who thinks he is a king is mad, a king who thinks he is a king is no less so.",
+    "description": "A man who thinks he is a king is mad, a king who thinks he is a king is no less so.",
     "profile": "https://avatars.githubusercontent.com/u/97033226",
     "email": "4rcadia.0@gmail.com",
     "social": {

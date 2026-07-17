@@ -1,12 +1,11 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
-import { MaintainerBadge } from "@/components/authors/maintainer-callout"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { PageHeader } from "@/components/ui/page-header"
 import { SectionTitle } from "@/components/ui/section-title"
 import { TechCard } from "@/components/ui/tech-card"
 import { UserAvatar } from "@/components/ui/user-avatar"
+import type { ResolvedPerson } from "@/lib/markdown/people"
 import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
 import { getManifestStats, loadArticleManifest } from "@/lib/articles/manifest"
 import {
@@ -15,6 +14,7 @@ import {
   resolveAuthorPerson,
   getArticlesByAuthor,
 } from "@/lib/articles/person-resolver"
+import { getRepositoryContributorStats } from "@/lib/git/repository-contributor-stats"
 import { buildWebPageJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
 import type { ArticleLocale } from "@/lib/articles/manifest"
 
@@ -65,11 +65,18 @@ export default async function AuthorsPage({
   const stats = getManifestStats(articleLocale)
   const manifest = loadArticleManifest()
   const allAuthors = getUniqueAuthors(manifest)
-  const maintainers = getMaintainerHandles().map((handle) => ({
-    handle,
-    person: resolveAuthorPerson(handle),
-    articleCount: getArticlesByAuthor(handle, articleLocale, manifest).length,
-  }))
+  const maintainers = getMaintainerHandles().map((handle) => {
+    const person = resolveAuthorPerson(handle)
+    return {
+      handle,
+      person,
+      repositoryStats: getRepositoryContributorStats([
+        handle,
+        person.key,
+        person.name,
+      ]),
+    }
+  })
 
   const authorsWithCount = allAuthors.map((handle) => ({
     handle,
@@ -117,56 +124,15 @@ export default async function AuthorsPage({
           <p className="text-tech-main mb-6 max-w-3xl text-sm/relaxed">
             {t("maintainersDescription")}
           </p>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {maintainers.map(({ handle, person, articleCount }) => (
-              <Link
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {maintainers.map(({ handle, person, repositoryStats }) => (
+              <ProfileCard
                 key={handle}
-                href={`/authors/${encodeURIComponent(handle)}`}
-                className="group/maintainer focus-visible:outline-tech-main block focus-visible:outline-2 focus-visible:outline-offset-2">
-                <div className="border-tech-main/30 bg-surface-overlay/70 group-hover/maintainer:border-tech-main/60 relative h-full overflow-hidden border p-5 pl-6 backdrop-blur-sm transition-colors">
-                  <span
-                    aria-hidden="true"
-                    className="bg-tech-signal absolute inset-y-0 left-0 w-1"
-                  />
-                  <CornerBrackets
-                    className="pointer-events-none absolute inset-0"
-                    size="size-3"
-                    color="border-tech-main/40"
-                  />
-                  <div className="flex items-start gap-4">
-                    <div className="size-16 shrink-0">
-                      <UserAvatar
-                        src={person.profile}
-                        alt={person.name}
-                        fallback={person.name}
-                        sizes="64px"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <MaintainerBadge>{t("maintainerBadge")}</MaintainerBadge>
-                      <p className="text-tech-main-dark mt-3 truncate text-base font-medium">
-                        {person.name}
-                      </p>
-                      <p className="text-tech-main/60 truncate font-mono text-xs">
-                        @{handle}
-                      </p>
-                      <p className="text-tech-main mt-2 line-clamp-2 text-xs/relaxed">
-                        {person.description ?? t("fallbackBio")}
-                      </p>
-                      <div className="text-tech-main/50 mt-3 flex items-center justify-between font-mono text-[0.625rem] tracking-[0.2em] uppercase">
-                        <span>
-                          {t("articleCount", { count: articleCount })}
-                        </span>
-                        <span
-                          aria-hidden="true"
-                          className="text-tech-main/40 group-hover/maintainer:text-tech-signal transition-colors">
-                          →
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Link>
+                handle={handle}
+                person={person}
+                fallbackBio={t("fallbackBio")}
+                footer={t("maintainerStats", { ...repositoryStats })}
+              />
             ))}
           </div>
         </section>
@@ -179,46 +145,67 @@ export default async function AuthorsPage({
         </p>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {authorsWithCount.map(({ handle, person, articleCount }) => (
-            <Link
+            <ProfileCard
               key={handle}
-              href={`/authors/${encodeURIComponent(handle)}`}
-              className="group/link focus-visible:outline-tech-main block focus-visible:outline-2 focus-visible:outline-offset-2">
-              <TechCard padding="compact" hover="border">
-                <div className="flex items-start gap-3">
-                  <div className="size-12 shrink-0">
-                    <UserAvatar
-                      src={person.profile}
-                      alt={person.name}
-                      fallback={person.name}
-                      sizes="48px"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-tech-main-dark truncate text-sm font-medium">
-                      {person.name}
-                    </p>
-                    <p className="text-tech-main/60 truncate font-mono text-xs">
-                      @{handle}
-                    </p>
-                    <p className="text-tech-main mt-1 line-clamp-2 text-xs/relaxed">
-                      {person.description ?? t("fallbackBio")}
-                    </p>
-                    <div className="text-tech-main/50 mt-2 flex items-center justify-between font-mono text-[0.625rem] tracking-[0.25em] uppercase">
-                      <span>{t("articleCount", { count: articleCount })}</span>
-                      <span
-                        aria-hidden="true"
-                        className="text-tech-main/40 group-hover/link:text-tech-signal transition-colors">
-                        →
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </TechCard>
-            </Link>
+              handle={handle}
+              person={person}
+              fallbackBio={t("fallbackBio")}
+              footer={t("articleCount", { count: articleCount })}
+            />
           ))}
         </div>
       </section>
     </div>
+  )
+}
+
+function ProfileCard({
+  handle,
+  person,
+  fallbackBio,
+  footer,
+}: {
+  handle: string
+  person: ResolvedPerson
+  fallbackBio: string
+  footer: string
+}) {
+  return (
+    <Link
+      href={`/authors/${encodeURIComponent(handle)}`}
+      className="group/link focus-visible:outline-tech-main block focus-visible:outline-2 focus-visible:outline-offset-2">
+      <TechCard padding="compact" hover="border">
+        <div className="flex items-start gap-3">
+          <div className="size-12 shrink-0">
+            <UserAvatar
+              src={person.profile}
+              alt={person.name}
+              fallback={person.name}
+              sizes="48px"
+            />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-tech-main-dark truncate text-sm font-medium">
+              {person.name}
+            </p>
+            <p className="text-tech-main/60 truncate font-mono text-xs">
+              @{handle}
+            </p>
+            <p className="text-tech-main mt-1 line-clamp-2 text-xs/relaxed">
+              {person.description ?? fallbackBio}
+            </p>
+            <div className="text-tech-main/50 mt-2 flex items-center justify-between gap-3 font-mono text-[0.625rem] tracking-[0.2em] uppercase">
+              <span className="truncate">{footer}</span>
+              <span
+                aria-hidden="true"
+                className="text-tech-main/40 group-hover/link:text-tech-signal shrink-0 transition-colors">
+                →
+              </span>
+            </div>
+          </div>
+        </div>
+      </TechCard>
+    </Link>
   )
 }
 

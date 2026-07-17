@@ -18,7 +18,6 @@ const ARTICLE_EDIT_EXCLUSIONS_PATH = join(
 const MANIFEST_PATH = join(process.cwd(), "data", "manifest.json")
 const PROFILES_JSON_PATH = join(CONFIG_DIR, "author-profiles.json")
 const PROFILES_TS_PATH = join(CONFIG_DIR, "author-profiles.ts")
-const PEOPLE_TS_PATH = join(CONFIG_DIR, "people-data.ts")
 
 type AliasMap = Record<string, string[]>
 type PeopleMap = Record<string, unknown>
@@ -61,61 +60,6 @@ export const authorProfilesMap: Readonly<Record<string, string>> = ${JSON.string
 
 export function getAuthorProfileHandle(peopleKey: string): string | null {
   return authorProfilesMap[peopleKey] ?? null
-}
-`
-}
-
-function renderPeopleData(people: PeopleMap): string {
-  return `// Generated from people.yml by scripts/generate-author-profiles.ts. Do not edit.
-export type PeopleEntry = {
-  name: string
-  description?: string
-  profile?: string
-  email?: string
-  social?: {
-    github?: string
-    bilibili?: string
-    twitter?: string
-    website?: string
-    custom?: Array<{ label: string; url: string }>
-  }
-}
-
-export type ResolvedPerson = {
-  key: string
-  name: string
-  description: string | null
-  profile: string | null
-  email: string | null
-  social: NonNullable<PeopleEntry["social"]>
-  isFallback: boolean
-}
-
-const peopleData: Readonly<Record<string, PeopleEntry>> = ${JSON.stringify(people, null, 2)}
-
-export function resolvePersonClient(key: string): ResolvedPerson {
-  const normalized = key.trim()
-  const entry = peopleData[normalized]
-
-  return entry
-    ? {
-        key: normalized,
-        name: entry.name,
-        description: entry.description ?? null,
-        profile: entry.profile ?? null,
-        email: entry.email ?? null,
-        social: entry.social ?? {},
-        isFallback: false,
-      }
-    : {
-        key: normalized,
-        name: normalized,
-        description: null,
-        profile: null,
-        email: null,
-        social: {},
-        isFallback: true,
-      }
 }
 `
 }
@@ -184,7 +128,6 @@ function main(): void {
 
   writeFileSync(PROFILES_JSON_PATH, `${JSON.stringify(sorted, null, 2)}\n`)
   writeFileSync(PROFILES_TS_PATH, renderAuthorProfiles(sorted, profileHandles))
-  writeFileSync(PEOPLE_TS_PATH, renderPeopleData(people))
   logger.event("authors.profiles.generated", {
     profile_count: Object.keys(sorted).length,
   })

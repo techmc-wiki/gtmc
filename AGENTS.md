@@ -123,6 +123,7 @@ Key things to know:
 - **Path alias**: `@/*` resolves to the repo root (see `tsconfig.json` and `vite.config.ts`).
 - **Next.js command boundary**: continue using `pnpm dev` and `pnpm build`. The built-in `vp dev` and `vp build` commands invoke Vite and must not replace the Next.js/Turbopack scripts.
 - **Middleware** lives in `proxy.ts` (not `middleware.ts`). It composes `next-intl` routing with NextAuth and gates `/admin`, `/draft`, `/glossary/edit`, `/profile`, and `/review` behind a session.
+- **Local auth fixture**: `pnpm dev` seeds and injects the local admin `debug@gtmc.local` on localhost to exercise authenticated pages. Set `GTMC_DEV_FIXTURE_AUTH=0` to test the real sign-in flow; never rely on the fixture outside development.
 - **Prisma client** is imported from `@prisma/client`; `serverExternalPackages` in `next.config.ts` keeps Prisma out of the client bundle.
 - The build embeds a 7-char Git SHA as `NEXT_PUBLIC_BUILD_SHA` (falls back to `VERCEL_GIT_COMMIT_SHA`).
 

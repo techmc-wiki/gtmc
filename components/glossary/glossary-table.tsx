@@ -6,25 +6,33 @@ import { useTranslations } from "next-intl"
 import { cn } from "@/lib/cn"
 import { EmptyState } from "@/components/ui/empty-state"
 import { buildGlossarySearchIndex } from "@/lib/glossary/search"
-import type { GlossaryEntry } from "@/lib/glossary/manifest"
-import { LANGUAGE_DISPLAY, isGlossaryLocale } from "@/lib/glossary/locales"
-import { GlossaryTableRow, type GlossaryDensity } from "./glossary-table-row"
+import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
+import {
+  normalizeGlossarySiteLocale,
+  type GlossarySiteLocale,
+} from "@/lib/glossary/locales"
+import {
+  getGlossaryDisplayName,
+  parseGlossaryTranslationColumn,
+  type GlossaryDensity,
+  type GlossaryTableColumn,
+} from "@/lib/glossary/view-options"
+import { GlossaryTableRow } from "./glossary-table-row"
 import { GlossaryCard } from "./glossary-card"
 
 interface GlossaryTableProps {
-  entries: GlossaryEntry[]
-  visibleColumns: string[]
+  entries: GlossaryIndexEntry[]
+  visibleColumns: GlossaryTableColumn[]
   density: GlossaryDensity
   query: string
   searchScope: "active" | "all"
   selectedCategories: string[]
   locale: string
-  onOpenDetail?: (entry: GlossaryEntry) => void
+  onOpenDetail?: (entry: GlossaryIndexEntry) => void
   className?: string
   isReady?: boolean
 }
 
-const ALPHA = /[A-Z]/
 const VIRTUAL_OVERSCAN = 10
 const VIRTUAL_LETTER_ROW_HEIGHT = 48
 const VIRTUAL_ROW_HEIGHT = {
@@ -38,29 +46,23 @@ const MOBILE_VIRTUAL_ROW_HEIGHT = {
   comfortable: 156,
 } as const satisfies Record<GlossaryDensity, number>
 
-type IndexLocale = "en" | "zh"
 type SearchScope = "active" | "all"
 type GlossarySearchIndex = ReturnType<typeof buildGlossarySearchIndex>
 type VirtualGlossaryRow =
   | { type: "letter"; letter: string; count: number }
-  | { type: "entry"; entry: GlossaryEntry }
+  | { type: "entry"; entry: GlossaryIndexEntry }
 
 let searchIndexCache: {
-  entries: GlossaryEntry[]
+  entries: GlossaryIndexEntry[]
   scope: SearchScope
-  locale: IndexLocale
+  locale: GlossarySiteLocale
   index: GlossarySearchIndex
 } | null = null
 
-function letterBucket(slug: string): string {
-  const first = slug[0]?.toUpperCase() ?? "#"
-  return ALPHA.test(first) ? first : "#"
-}
-
 function getCachedSearchIndex(
-  entries: GlossaryEntry[],
+  entries: GlossaryIndexEntry[],
   scope: SearchScope,
-  locale: IndexLocale
+  locale: GlossarySiteLocale
 ): GlossarySearchIndex {
   if (
     !searchIndexCache ||
@@ -215,15 +217,15 @@ function MobileEntryVirtualRow({
   visibleColumnsSet,
 }: {
   density: GlossaryDensity
-  entry: GlossaryEntry
+  entry: GlossaryIndexEntry
   index: number
   isReady?: boolean
   locale: string
   measureElement: (element: Element | null) => void
-  onOpenDetail?: (entry: GlossaryEntry) => void
+  onOpenDetail?: (entry: GlossaryIndexEntry) => void
   start: number
   virtualKey: React.Key
-  visibleColumns: string[]
+  visibleColumns: GlossaryTableColumn[]
   visibleColumnsSet: ReadonlySet<string>
 }) {
   const style = React.useMemo<React.CSSProperties>(
@@ -251,19 +253,16 @@ function MobileEntryVirtualRow({
   )
 }
 
-function normalizeLocaleForIndex(locale: string): "en" | "zh" {
-  return locale === "zh" ? "zh" : "en"
-}
-
 function getTranslationColumnLabel(
   column: string,
   descriptionLabel: string
 ): string | null {
-  const [, locale, field] = column.split(":")
-  if (!isGlossaryLocale(locale)) return null
-  if (field === "term") return LANGUAGE_DISPLAY[locale]
-  if (field === "description") {
-    return `${descriptionLabel} (${LANGUAGE_DISPLAY[locale]})`
+  const translationColumn = parseGlossaryTranslationColumn(column)
+  if (!translationColumn) return null
+  const displayName = getGlossaryDisplayName(translationColumn.locale)
+  if (translationColumn.field === "term") return displayName
+  if (translationColumn.field === "description") {
+    return `${descriptionLabel} (${displayName})`
   }
   return null
 }
@@ -284,7 +283,7 @@ export function GlossaryTable({
   const tableScrollRef = React.useRef<HTMLDivElement>(null)
   const mobileScrollRef = React.useRef<HTMLDivElement>(null)
 
-  const indexLocale = normalizeLocaleForIndex(locale)
+  const indexLocale = normalizeGlossarySiteLocale(locale)
 
   const categoryFiltered = React.useMemo(() => {
     if (selectedCategories.length === 0) return entries
@@ -319,9 +318,9 @@ export function GlossaryTable({
     if (trimmedQuery) {
       return [{ letter: "_results", items: filteredEntries }]
     }
-    const byLetter = new Map<string, GlossaryEntry[]>()
+    const byLetter = new Map<string, GlossaryIndexEntry[]>()
     for (const entry of filteredEntries) {
-      const letter = letterBucket(entry.slug)
+      const letter = entry.indexLetter
       let bucket = byLetter.get(letter)
       if (!bucket) {
         bucket = []

@@ -1,6 +1,7 @@
 import MiniSearch from "minisearch"
 import { CJK_TOKENIZER } from "@/lib/search/cjk-tokenizer"
-import type { GlossaryEntry, GlossarySummaryEntry } from "./manifest"
+import type { GlossarySiteLocale } from "./locales"
+import type { GlossaryEntryBase, GlossarySummaryEntry } from "./manifest"
 import summaryData from "@/data/glossary-summary.json" with { type: "json" }
 
 const glossarySummary = summaryData as GlossarySummaryEntry[]
@@ -54,11 +55,15 @@ export function searchGlossary(query: string): GlossarySummaryEntry[] {
 }
 
 type IndexedFullEntry = { id: string } & Record<string, string>
+type GlossarySearchSource = Pick<
+  GlossaryEntryBase,
+  "slug" | "fullFormEn" | "shortForm" | "translations"
+>
 
 export function buildGlossarySearchIndex(
-  entries: GlossaryEntry[],
+  entries: GlossarySearchSource[],
   scope: "active" | "all",
-  activeLocale: "en" | "zh"
+  activeLocale: GlossarySiteLocale
 ): MiniSearch<IndexedFullEntry> {
   let fields: string[]
 
@@ -88,7 +93,7 @@ export function buildGlossarySearchIndex(
     storeFields: ["slug", "fullFormEn", "shortForm"],
     tokenize: CJK_TOKENIZER,
     searchOptions: {
-      boost: { fullFormEn: 2 },
+      boost: activeLocale === "zh" ? { trans_zh: 2 } : { fullFormEn: 2 },
       fuzzy: 0.2,
       prefix: true,
       tokenize: CJK_TOKENIZER,

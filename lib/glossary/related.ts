@@ -1,16 +1,3 @@
-import type { GlossaryEntry } from "./manifest"
-import { glossaryEntries } from "./slug"
-
-export interface ResolvedRelatedTerm {
-  slug: string
-  fullFormEn: string
-}
-
-const entriesByFullFormLower = new Map<string, GlossaryEntry>()
-for (const entry of glossaryEntries) {
-  entriesByFullFormLower.set(entry.fullFormEn.toLowerCase(), entry)
-}
-
 export interface ParsedRelatedToken {
   kind: "synonym" | "see"
   target: string

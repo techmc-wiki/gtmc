@@ -5,27 +5,27 @@ import { useTranslations } from "next-intl"
 
 import { useMounted } from "@/hooks/use-mounted"
 import { cn } from "@/lib/cn"
+import { normalizeGlossarySiteLocale } from "@/lib/glossary/locales"
 import {
-  LANGUAGE_CODES,
-  LANGUAGE_DISPLAY,
-  LOCALE_TO_COLUMN,
-  isGlossaryLocale,
-} from "@/lib/glossary/locales"
+  GLOSSARY_DISPLAY_LOCALES,
+  createGlossaryTranslationColumn,
+  getGlossaryDisplayName,
+  type GlossaryCoreColumn,
+  type GlossaryTableColumn,
+} from "@/lib/glossary/view-options"
 
-import { writePersistedGlossaryColumns } from "@/lib/glossary/persisted-prefs"
-
-const CORE_COLUMNS = [
-  "Full Form (English)",
-  "Short Form",
-  "Description",
-  "Related",
-  "Category",
-] as const
+const PICKER_CORE_COLUMNS = [
+  "term",
+  "shortForm",
+  "description",
+  "related",
+  "category",
+] as const satisfies readonly GlossaryCoreColumn[]
 
 export interface ColumnPickerProps {
   locale: string
-  visibleColumns: string[]
-  onChange: (columns: string[]) => void
+  visibleColumns: GlossaryTableColumn[]
+  onChange: (columns: GlossaryTableColumn[]) => void
   className?: string
 }
 
@@ -58,62 +58,43 @@ export function ColumnPicker({
     }
   }, [open])
 
-  const persist = React.useCallback(
-    (next: string[]) => {
-      onChange(next)
-      writePersistedGlossaryColumns(next)
-    },
-    [onChange]
-  )
-
   const toggleOpen = React.useCallback(() => {
     setOpen((prev) => !prev)
   }, [])
 
   const toggle = React.useCallback(
-    (column: string) => {
+    (column: GlossaryTableColumn) => {
       const next = visibleColumns.includes(column)
         ? visibleColumns.filter((entry) => entry !== column)
         : [...visibleColumns, column]
-      persist(next)
+      onChange(next)
     },
-    [persist, visibleColumns]
+    [onChange, visibleColumns]
   )
 
-  const activeLocaleEntries = React.useMemo(() => {
-    if (!isGlossaryLocale(locale)) return []
-    const mapping = LOCALE_TO_COLUMN[locale]
-    return [
-      { column: mapping.termColumn, label: LANGUAGE_DISPLAY[locale] },
-      {
-        column: mapping.descColumn,
-        label: `${t("columnDescription")} (${LANGUAGE_DISPLAY[locale]})`,
-      },
-    ]
+  const otherLanguageGroups = React.useMemo(() => {
+    const activeLocale = normalizeGlossarySiteLocale(locale)
+    return GLOSSARY_DISPLAY_LOCALES.filter((code) => code !== activeLocale).map(
+      (code) => ({
+        code,
+        display: getGlossaryDisplayName(code),
+        entries: [
+          {
+            column: createGlossaryTranslationColumn(code, "term"),
+            label: getGlossaryDisplayName(code),
+          },
+          {
+            column: createGlossaryTranslationColumn(code, "description"),
+            label: t("columnDescription"),
+          },
+        ],
+      })
+    )
   }, [locale, t])
-
-  const otherLanguageGroups = React.useMemo(
-    () =>
-      LANGUAGE_CODES.filter((code) => code !== locale).map((code) => {
-        const mapping = LOCALE_TO_COLUMN[code]
-        return {
-          code,
-          display: LANGUAGE_DISPLAY[code],
-          entries: [
-            { column: mapping.termColumn, label: LANGUAGE_DISPLAY[code] },
-            {
-              column: mapping.descColumn,
-              label: t("columnDescription"),
-            },
-          ],
-        }
-      }),
-    [locale, t]
-  )
 
   const coreEntries = React.useMemo(
     () =>
-      CORE_COLUMNS.map((column) => ({
+      PICKER_CORE_COLUMNS.map((column) => ({
         column,
         label: coreLabel(column, t),
       })),
@@ -145,15 +126,6 @@ export function ColumnPicker({
               onToggle={toggle}
             />
 
-            {activeLocaleEntries.length > 0 ? (
-              <ColumnGroup
-                title={t("searchScopeActive")}
-                entries={activeLocaleEntries}
-                visibleColumns={visibleColumns}
-                onToggle={toggle}
-              />
-            ) : null}
-
             <details className="group mt-3">
               <summary className="border-tech-line/30 text-tech-main/70 hover:text-tech-main flex cursor-pointer list-none items-center justify-between border-b pb-1.5 font-mono text-[0.6875rem] font-bold tracking-widest uppercase transition-colors [&::-webkit-details-marker]:hidden">
                 <span>{t("columnLanguageGroup")}</span>
@@ -181,35 +153,37 @@ export function ColumnPicker({
 }
 
 function coreLabel(
-  column: (typeof CORE_COLUMNS)[number],
+  column: GlossaryCoreColumn,
   t: ReturnType<typeof useTranslations<"Glossary">>
 ): string {
   switch (column) {
-    case "Full Form (English)":
+    case "term":
       return t("columnTerm")
-    case "Short Form":
+    case "shortForm":
       return t("columnShortForm")
-    case "Description":
+    case "description":
       return t("columnDescription")
-    case "Related":
+    case "related":
       return t("columnRelated")
-    case "Category":
+    case "category":
       return t("columnCategory")
+    case "regex":
+      return t("columnRegex")
   }
 }
 
 interface ColumnGroupProps {
   title: React.ReactNode
-  entries: ReadonlyArray<{ column: string; label: string }>
-  visibleColumns: string[]
-  onToggle: (column: string) => void
+  entries: ReadonlyArray<{ column: GlossaryTableColumn; label: string }>
+  visibleColumns: GlossaryTableColumn[]
+  onToggle: (column: GlossaryTableColumn) => void
 }
 
 interface ColumnCheckboxProps {
-  column: string
+  column: GlossaryTableColumn
   label: string
   checked: boolean
-  onToggle: (column: string) => void
+  onToggle: (column: GlossaryTableColumn) => void
 }
 
 function ColumnCheckbox({

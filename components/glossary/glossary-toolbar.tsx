@@ -5,10 +5,7 @@ import { useTranslations } from "next-intl"
 import { LetterBar } from "@/components/glossary/letter-bar"
 import { GlossarySearch } from "@/components/glossary/glossary-search"
 import { ColumnPicker } from "@/components/glossary/column-picker"
-import {
-  DensityToggle,
-  type GlossaryDensity,
-} from "@/components/glossary/density-toggle"
+import { DensityToggle } from "@/components/glossary/density-toggle"
 import {
   CategoryFilter,
   type CategoryFilterCategory,
@@ -21,60 +18,20 @@ import {
 } from "@/components/ui/loading-shell-primitives"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { Link } from "@/i18n/navigation"
-import { LOCALE_TO_COLUMN } from "@/lib/glossary/locales"
-import type { GlossaryEntry } from "@/lib/glossary/manifest"
+import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
 import {
   readPersistedGlossaryColumns,
   readPersistedGlossaryDensity,
   writePersistedGlossaryColumns,
   writePersistedGlossaryDensity,
 } from "@/lib/glossary/persisted-prefs"
-import { useGlossaryEntries } from "@/lib/glossary/use-glossary"
+import {
+  getDefaultGlossaryTableColumns,
+  type GlossaryDensity,
+  type GlossaryTableColumn,
+} from "@/lib/glossary/view-options"
+import { useLocalizedGlossary } from "@/lib/glossary/use-localized-glossary"
 import { cn } from "@/lib/cn"
-const ALPHA = /[A-Z]/
-
-function letterBucket(slug: string): string {
-  const first = slug[0]?.toUpperCase() ?? "#"
-  return ALPHA.test(first) ? first : "#"
-}
-
-/**
- * Map ColumnPicker CSV-style column names to GlossaryTable lowercase keys.
- * Translation columns include their target locale and field in the table key.
- */
-function csvColumnsToTableColumns(csvColumns: string[]): string[] {
-  const result: string[] = []
-  const seen = new Set<string>()
-  const push = (key: string) => {
-    if (!seen.has(key)) {
-      seen.add(key)
-      result.push(key)
-    }
-  }
-
-  for (const col of csvColumns) {
-    if (col === "Full Form (English)") push("term")
-    else if (col === "Short Form") push("shortForm")
-    else if (col === "Category") push("category")
-    else if (col === "Description") push("description")
-    else if (col === "Related") push("related")
-    else if (col === "Regex") push("regex")
-    else {
-      for (const [code, mapping] of Object.entries(LOCALE_TO_COLUMN)) {
-        if (col === mapping.termColumn) {
-          push(`translation:${code}:term`)
-          break
-        }
-        if (col === mapping.descColumn) {
-          push(`translation:${code}:description`)
-          break
-        }
-      }
-    }
-  }
-
-  return result
-}
 
 const SKELETON_ROWS = 12
 
@@ -148,7 +105,6 @@ export interface GlossaryToolbarProps {
   categories: CategoryFilterCategory[]
   locale: string
   totalCount: number
-  defaultColumns: Record<string, string[]>
   children?: React.ReactNode
   className?: string
 }
@@ -157,16 +113,15 @@ export function GlossaryToolbar({
   categories,
   locale,
   totalCount,
-  defaultColumns,
   children,
   className,
 }: GlossaryToolbarProps) {
   const t = useTranslations("Glossary")
-  const { entries, isLoading: entriesLoading } = useGlossaryEntries()
+  const { entries, isLoading: entriesLoading } = useLocalizedGlossary(locale)
 
   const localeDefaults = React.useMemo(
-    () => defaultColumns[locale] ?? defaultColumns.en ?? [],
-    [defaultColumns, locale]
+    () => getDefaultGlossaryTableColumns(locale),
+    [locale]
   )
 
   const [query, setQuery] = React.useState("")
@@ -176,37 +131,35 @@ export function GlossaryToolbar({
   const [selectedCategories, setSelectedCategories] = React.useState<string[]>(
     []
   )
-  const [visibleColumns, setVisibleColumns] = React.useState<string[]>(
-    () => readPersistedGlossaryColumns() ?? localeDefaults
-  )
+  const [visibleColumns, setVisibleColumns] = React.useState<
+    GlossaryTableColumn[]
+  >(() => readPersistedGlossaryColumns(locale) ?? localeDefaults)
   const [density, setDensity] = React.useState<GlossaryDensity>(
     () => readPersistedGlossaryDensity() ?? "normal"
   )
 
-  const handleVisibleColumnsChange = React.useCallback((next: string[]) => {
-    setVisibleColumns(next)
-    writePersistedGlossaryColumns(next)
-  }, [])
+  const handleVisibleColumnsChange = React.useCallback(
+    (next: GlossaryTableColumn[]) => {
+      setVisibleColumns(next)
+      writePersistedGlossaryColumns(locale, next)
+    },
+    [locale]
+  )
 
   const handleDensityChange = React.useCallback((next: GlossaryDensity) => {
     setDensity(next)
     writePersistedGlossaryDensity(next)
   }, [])
   const [selectedEntry, setSelectedEntry] =
-    React.useState<GlossaryEntry | null>(null)
+    React.useState<GlossaryIndexEntry | null>(null)
   const isReady = !entriesLoading
 
   const closeDetailPanel = React.useCallback(() => {
     setSelectedEntry(null)
   }, [])
 
-  const tableColumns = React.useMemo(
-    () => csvColumnsToTableColumns(visibleColumns),
-    [visibleColumns]
-  )
-
   const availableLetters = React.useMemo(
-    () => [...new Set(entries.map((entry) => letterBucket(entry.slug)))],
+    () => [...new Set(entries.map((entry) => entry.indexLetter))],
     [entries]
   )
 
@@ -258,7 +211,7 @@ export function GlossaryToolbar({
       ) : (
         <GlossaryTable
           entries={entries}
-          visibleColumns={tableColumns}
+          visibleColumns={visibleColumns}
           density={density}
           query={query}
           searchScope={searchScope}

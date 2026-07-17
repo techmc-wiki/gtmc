@@ -1,25 +1,19 @@
 import { cacheLife, cacheTag } from "next/cache"
 import fullData from "@/data/glossary.json" with { type: "json" }
 import summaryData from "@/data/glossary-summary.json" with { type: "json" }
+import type { GlossaryLocale, GlossarySiteLocale } from "@/lib/glossary/locales"
 
-export type GlossaryLocale =
-  | "ar"
-  | "zh"
-  | "fr"
-  | "de"
-  | "it"
-  | "ja"
-  | "ko"
-  | "pt"
-  | "ru"
-  | "es"
+export interface GlossaryLocaleIndex {
+  sortKey: string
+  letter: string
+}
 
 export interface GlossaryTranslation {
   value: string
   description: string
 }
 
-export interface GlossaryEntry {
+export interface GlossaryEntryBase {
   slug: string
   fullFormEn: string
   shortForm: string
@@ -35,6 +29,11 @@ export interface GlossaryEntry {
   translations: Partial<Record<GlossaryLocale, GlossaryTranslation>>
 }
 
+export interface GlossaryEntry extends GlossaryEntryBase {
+  /** Precomputed sort and letter-bucket metadata for each public site locale. */
+  indexByLocale: Record<GlossarySiteLocale, GlossaryLocaleIndex>
+}
+
 /** Reduced entry for fast client-side search — omits description, regex, related, isControversial, and translations. */
 export interface GlossarySummaryEntry {
   slug: string
@@ -42,6 +41,11 @@ export interface GlossarySummaryEntry {
   shortForm: string
   category: string
 }
+
+const glossaryEntries = fullData as GlossaryEntry[]
+const entriesBySlug = new Map(
+  glossaryEntries.map((entry) => [entry.slug, entry] as const)
+)
 
 // eslint-disable-next-line no-underscore-dangle
 let _summary: GlossarySummaryEntry[] | null = null
@@ -52,7 +56,11 @@ export async function loadGlossaryManifest(): Promise<{
   "use cache"
   cacheLife("hours")
   cacheTag("glossary-manifest")
-  return { entries: fullData as GlossaryEntry[] }
+  return { entries: glossaryEntries }
+}
+
+export function getGlossaryEntry(slug: string): GlossaryEntry | undefined {
+  return entriesBySlug.get(slug)
 }
 
 export function loadGlossarySummary(): GlossarySummaryEntry[] {

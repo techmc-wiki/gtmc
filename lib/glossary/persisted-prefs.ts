@@ -1,33 +1,35 @@
 "use client"
 
-import type { GlossaryDensity } from "@/components/glossary/density-toggle"
+import {
+  GLOSSARY_DENSITIES,
+  isGlossaryTableColumn,
+  type GlossaryDensity,
+  type GlossaryTableColumn,
+} from "@/lib/glossary/view-options"
+import { normalizeGlossarySiteLocale } from "@/lib/glossary/locales"
 
-const COLUMNS_KEY = "gtmc:glossary:columns:v1"
 const DENSITY_KEY = "gtmc:glossary:density:v1"
-
-const DENSITY_VALUES: readonly GlossaryDensity[] = [
-  "compact",
-  "normal",
-  "comfortable",
-]
 
 function isDensity(value: unknown): value is GlossaryDensity {
   return (
     typeof value === "string" &&
-    (DENSITY_VALUES as readonly string[]).includes(value)
+    (GLOSSARY_DENSITIES as readonly string[]).includes(value)
   )
 }
 
-export function readPersistedGlossaryColumns(): string[] | null {
+function columnsKey(locale: string): string {
+  return `gtmc:glossary:columns:v2:${normalizeGlossarySiteLocale(locale)}`
+}
+
+export function readPersistedGlossaryColumns(
+  locale: string
+): GlossaryTableColumn[] | null {
   if (typeof window === "undefined") return null
   try {
-    const raw = localStorage.getItem(COLUMNS_KEY)
+    const raw = localStorage.getItem(columnsKey(locale))
     if (!raw) return null
     const parsed = JSON.parse(raw) as unknown
-    if (
-      Array.isArray(parsed) &&
-      parsed.every((value) => typeof value === "string")
-    ) {
+    if (Array.isArray(parsed) && parsed.every(isGlossaryTableColumn)) {
       return parsed
     }
   } catch {
@@ -36,9 +38,12 @@ export function readPersistedGlossaryColumns(): string[] | null {
   return null
 }
 
-export function writePersistedGlossaryColumns(columns: string[]): void {
+export function writePersistedGlossaryColumns(
+  locale: string,
+  columns: readonly GlossaryTableColumn[]
+): void {
   try {
-    localStorage.setItem(COLUMNS_KEY, JSON.stringify(columns))
+    localStorage.setItem(columnsKey(locale), JSON.stringify(columns))
   } catch {
     // ignore
   }

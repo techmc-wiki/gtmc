@@ -1,0 +1,4 @@
+# Git identities whose commits are maintenance noise rather than article edits.
+# This file does not respect author aliases; use the Git author name.
+- 4rcadia
+- gtmc-bot

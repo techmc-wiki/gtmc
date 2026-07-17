@@ -5,17 +5,6 @@ import { GlossaryToolbar } from "@/components/glossary/glossary-toolbar"
 import { loadGlossaryManifest } from "@/lib/glossary/manifest"
 import { toAbsoluteUrl } from "@/lib/site-url"
 
-const DEFAULT_COLUMNS: Record<string, string[]> = {
-  en: ["Full Form (English)", "Short Form", "Description", "Related"],
-  zh: [
-    "Full Form (English)",
-    "Short Form",
-    "Description",
-    "Chinese",
-    "Related",
-  ],
-}
-
 export async function generateMetadata({
   params,
 }: {
@@ -84,10 +73,10 @@ export default async function GlossaryIndexPage({
 
       <div className="mt-8">
         <GlossaryToolbar
+          key={locale}
           categories={categories}
           locale={locale}
           totalCount={totalCount}
-          defaultColumns={DEFAULT_COLUMNS}
         />
       </div>
     </div>

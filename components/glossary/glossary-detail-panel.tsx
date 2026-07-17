@@ -4,11 +4,11 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { useModalEffects } from "@/hooks/use-modal-effects"
-import type { GlossaryEntry } from "@/lib/glossary/manifest"
+import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
 import { TermDetail } from "./term-detail"
 
 interface GlossaryDetailPanelProps {
-  entry: GlossaryEntry | null
+  entry: GlossaryIndexEntry | null
   locale: string
   onClose: () => void
 }

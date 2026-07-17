@@ -6,11 +6,9 @@ import {
   LANGUAGE_CODES,
   LANGUAGE_DISPLAY,
   isGlossaryLocale,
+  type GlossaryLocale,
 } from "@/lib/glossary/locales"
-import type {
-  GlossaryLocale,
-  GlossaryTranslation,
-} from "@/lib/glossary/manifest"
+import type { GlossaryTranslation } from "@/lib/glossary/manifest"
 
 interface TranslationsListProps {
   translations: Partial<Record<GlossaryLocale, GlossaryTranslation>>

@@ -3,19 +3,24 @@
 import * as React from "react"
 import { Link } from "@/i18n/navigation"
 import { cn } from "@/lib/cn"
-import { parseRelated } from "@/lib/glossary/related"
-import type { GlossaryEntry, GlossaryLocale } from "@/lib/glossary/manifest"
-import { isGlossaryLocale } from "@/lib/glossary/locales"
+import {
+  getGlossaryContent,
+  getPrimaryGlossaryContent,
+  type GlossaryIndexEntry,
+} from "@/lib/glossary/localized-index"
+import {
+  parseGlossaryTranslationColumn,
+  type GlossaryDensity,
+  type GlossaryTableColumn,
+} from "@/lib/glossary/view-options"
 import { CrossRefChips } from "./cross-ref-chips"
 
-export type GlossaryDensity = "compact" | "normal" | "comfortable"
-
 interface GlossaryTableRowProps {
-  entry: GlossaryEntry
-  visibleColumns: string[]
+  entry: GlossaryIndexEntry
+  visibleColumns: GlossaryTableColumn[]
   density: GlossaryDensity
   locale: string
-  onOpenDetail?: (entry: GlossaryEntry) => void
+  onOpenDetail?: (entry: GlossaryIndexEntry) => void
   isReady?: boolean
 }
 
@@ -28,15 +33,6 @@ const densityRowPadding = {
 const cellBase = "px-3 align-top text-sm motion-reduce:transition-none"
 const termTriggerClass =
   "text-tech-main-dark hover:text-tech-main focus-visible:outline-tech-main cursor-pointer text-left font-mono font-medium tracking-tight underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
-
-function parseTranslationColumn(
-  column: string
-): { locale: GlossaryLocale; field: "term" | "description" } | null {
-  const [, locale, field] = column.split(":")
-  if (!isGlossaryLocale(locale)) return null
-  if (field !== "term" && field !== "description") return null
-  return { locale, field }
-}
 
 export function GlossaryTableRow({
   entry,
@@ -53,10 +49,7 @@ export function GlossaryTableRow({
     isReady && "transition-[padding] duration-300 ease-out"
   )
 
-  const relatedTokens = React.useMemo(
-    () => parseRelated(entry.related),
-    [entry.related]
-  )
+  const primaryContent = getPrimaryGlossaryContent(entry, locale)
 
   const handleOpenDetail = React.useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -82,9 +75,12 @@ export function GlossaryTableRow({
       data-density={density}
       className="border-tech-line/10 hover:bg-tech-accent/5 border-b transition-colors duration-150">
       {visibleColumns.map((column) => {
-        const translationColumn = parseTranslationColumn(column)
+        const translationColumn = parseGlossaryTranslationColumn(column)
         if (translationColumn) {
-          const translation = entry.translations[translationColumn.locale]
+          const translation = getGlossaryContent(
+            entry,
+            translationColumn.locale
+          )
           const value =
             translationColumn.field === "term"
               ? translation?.value
@@ -112,7 +108,7 @@ export function GlossaryTableRow({
                   locale={locale as "en" | "zh"}
                   onClick={handleOpenDetail}
                   className={termTriggerClass}>
-                  {entry.fullFormEn}
+                  {primaryContent.value}
                 </Link>
                 {entry.isControversial && (
                   <span
@@ -166,16 +162,18 @@ export function GlossaryTableRow({
               <td
                 key={column}
                 className={cn(cellClass, "text-tech-main/80 max-w-[36rem]")}>
-                <span className="line-clamp-2">{entry.description}</span>
+                <span className="line-clamp-2">
+                  {primaryContent.description}
+                </span>
               </td>
             )
 
           case "related":
             return (
               <td key={column} className={cellClass}>
-                {relatedTokens.length > 0 ? (
+                {entry.relatedTerms.length > 0 ? (
                   <CrossRefChips
-                    related={relatedTokens}
+                    related={entry.relatedTerms}
                     mode="index"
                     locale={locale}
                   />

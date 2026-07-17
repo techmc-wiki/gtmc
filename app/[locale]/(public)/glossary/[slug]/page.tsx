@@ -6,8 +6,7 @@ import { Link } from "@/i18n/navigation"
 import { TechCard } from "@/components/ui/tech-card"
 import { TermDetail } from "@/components/glossary/term-detail"
 import { MentionedIn } from "@/components/glossary/mentioned-in"
-import { loadGlossaryManifest } from "@/lib/glossary/manifest"
-import { getGlossaryEntry } from "@/lib/glossary/slug"
+import { getGlossaryEntry, loadGlossaryManifest } from "@/lib/glossary/manifest"
 import { getSiteUrl } from "@/lib/site-url"
 
 const MAX_DESCRIPTION_LENGTH = 160

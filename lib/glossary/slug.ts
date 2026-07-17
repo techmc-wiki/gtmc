@@ -1,17 +1,3 @@
-import type { GlossaryEntry } from "./manifest"
-import data from "@/data/glossary.json" with { type: "json" }
-
-export const glossaryEntries = data as GlossaryEntry[]
-
-const entriesBySlug = new Map<string, GlossaryEntry>()
-for (const entry of glossaryEntries) {
-  entriesBySlug.set(entry.slug, entry)
-}
-
-export function getGlossaryEntry(slug: string): GlossaryEntry | undefined {
-  return entriesBySlug.get(slug)
-}
-
 export function generateSlug(englishTerm: string): string {
   const slug = englishTerm
     .replace(/\*+$/, "")

@@ -9,10 +9,10 @@ import { SectionTitle } from "@/components/ui/section-title"
 import { CrossRefChips } from "@/components/glossary/cross-ref-chips"
 import { TranslationsList } from "@/components/glossary/translations-list"
 import { parseRelated } from "@/lib/glossary/related"
-import type { GlossaryEntry } from "@/lib/glossary/manifest"
+import type { GlossaryEntryBase } from "@/lib/glossary/manifest"
 
 interface TermDetailProps {
-  entry: GlossaryEntry
+  entry: GlossaryEntryBase
   locale: string
   slug: string
 }

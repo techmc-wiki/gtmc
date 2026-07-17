@@ -3,19 +3,26 @@
 import * as React from "react"
 import { Link } from "@/i18n/navigation"
 import { cn } from "@/lib/cn"
-import { parseRelated } from "@/lib/glossary/related"
-import type { GlossaryEntry, GlossaryLocale } from "@/lib/glossary/manifest"
-import { LANGUAGE_DISPLAY, isGlossaryLocale } from "@/lib/glossary/locales"
+import {
+  getGlossaryContent,
+  getPrimaryGlossaryContent,
+  type GlossaryIndexEntry,
+} from "@/lib/glossary/localized-index"
+import {
+  getGlossaryDisplayName,
+  parseGlossaryTranslationColumn,
+  type GlossaryDensity,
+  type GlossaryTableColumn,
+} from "@/lib/glossary/view-options"
 import { CrossRefChips } from "./cross-ref-chips"
-import type { GlossaryDensity } from "./glossary-table-row"
 
 interface GlossaryCardProps {
-  entry: GlossaryEntry
-  visibleColumns: string[]
+  entry: GlossaryIndexEntry
+  visibleColumns: GlossaryTableColumn[]
   visibleColumnsSet: ReadonlySet<string>
   locale: string
   density: GlossaryDensity
-  onOpenDetail?: (entry: GlossaryEntry) => void
+  onOpenDetail?: (entry: GlossaryIndexEntry) => void
   className?: string
   isReady?: boolean
 }
@@ -30,15 +37,6 @@ const densityCardClass = {
   comfortable: "gap-3 p-4",
 } as const satisfies Record<GlossaryDensity, string>
 
-function parseTranslationColumn(
-  column: string
-): { locale: GlossaryLocale; field: "term" | "description" } | null {
-  const [, locale, field] = column.split(":")
-  if (!isGlossaryLocale(locale)) return null
-  if (field !== "term" && field !== "description") return null
-  return { locale, field }
-}
-
 export function GlossaryCard({
   entry,
   visibleColumns,
@@ -49,10 +47,7 @@ export function GlossaryCard({
   className,
   isReady,
 }: GlossaryCardProps) {
-  const relatedTokens = React.useMemo(
-    () => parseRelated(entry.related),
-    [entry.related]
-  )
+  const primaryContent = getPrimaryGlossaryContent(entry, locale)
 
   const handleOpenDetail = React.useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -90,7 +85,7 @@ export function GlossaryCard({
           locale={locale as "en" | "zh"}
           onClick={handleOpenDetail}
           className={termTriggerClass}>
-          {entry.fullFormEn}
+          {primaryContent.value}
           {entry.isControversial && (
             <span
               aria-label="controversial"
@@ -107,9 +102,12 @@ export function GlossaryCard({
       </header>
 
       {visibleColumns.map((column) => {
-        const translationColumn = parseTranslationColumn(column)
+        const translationColumn = parseGlossaryTranslationColumn(column)
         if (translationColumn) {
-          const translation = entry.translations[translationColumn.locale]
+          const translation = getGlossaryContent(
+            entry,
+            translationColumn.locale
+          )
           const value =
             translationColumn.field === "term"
               ? translation?.value
@@ -120,8 +118,8 @@ export function GlossaryCard({
             <p key={column} className="text-tech-main/70 line-clamp-2 text-sm">
               <span className={cn(labelClass, "mr-2")}>
                 {translationColumn.field === "term"
-                  ? LANGUAGE_DISPLAY[translationColumn.locale]
-                  : `DESC ${LANGUAGE_DISPLAY[translationColumn.locale]}`}
+                  ? getGlossaryDisplayName(translationColumn.locale)
+                  : `DESC ${getGlossaryDisplayName(translationColumn.locale)}`}
               </span>
               {value}
             </p>
@@ -139,12 +137,12 @@ export function GlossaryCard({
             )
 
           case "description":
-            if (!entry.description) return null
+            if (!primaryContent.description) return null
             return (
               <p
                 key={column}
                 className="text-tech-main/80 line-clamp-2 text-sm">
-                {entry.description}
+                {primaryContent.description}
               </p>
             )
 
@@ -160,14 +158,14 @@ export function GlossaryCard({
             )
 
           case "related":
-            if (relatedTokens.length === 0) return null
+            if (entry.relatedTerms.length === 0) return null
             return (
               <div
                 key={column}
                 className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span className={labelClass}>REL</span>
                 <CrossRefChips
-                  related={relatedTokens}
+                  related={entry.relatedTerms}
                   mode="index"
                   locale={locale}
                 />

@@ -4,15 +4,10 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/cn"
-import { writePersistedGlossaryDensity } from "@/lib/glossary/persisted-prefs"
-
-export type GlossaryDensity = "compact" | "normal" | "comfortable"
-
-const DENSITY_VALUES: readonly GlossaryDensity[] = [
-  "compact",
-  "normal",
-  "comfortable",
-]
+import {
+  GLOSSARY_DENSITIES,
+  type GlossaryDensity,
+} from "@/lib/glossary/view-options"
 const DENSITY_LABEL_KEYS = {
   compact: "densityCompact",
   normal: "densityNormal",
@@ -31,8 +26,8 @@ export interface DensityToggleProps {
 }
 
 function getNextDensity(value: GlossaryDensity): GlossaryDensity {
-  const index = DENSITY_VALUES.indexOf(value)
-  return DENSITY_VALUES[(index + 1) % DENSITY_VALUES.length]
+  const index = GLOSSARY_DENSITIES.indexOf(value)
+  return GLOSSARY_DENSITIES[(index + 1) % GLOSSARY_DENSITIES.length]
 }
 
 function DensityIcon({ variant }: { variant: GlossaryDensity }) {
@@ -76,14 +71,6 @@ export function DensityToggle({
 }: DensityToggleProps) {
   const t = useTranslations("Glossary")
 
-  const handleChange = React.useCallback(
-    (next: GlossaryDensity) => {
-      onChange(next)
-      writePersistedGlossaryDensity(next)
-    },
-    [onChange]
-  )
-
   const nextDensity = getNextDensity(value)
   const currentLabel = t(DENSITY_LABEL_KEYS[value])
   const nextLabel = t(DENSITY_LABEL_KEYS[nextDensity])
@@ -93,8 +80,8 @@ export function DensityToggle({
   })
 
   const handleClick = React.useCallback(() => {
-    handleChange(nextDensity)
-  }, [handleChange, nextDensity])
+    onChange(nextDensity)
+  }, [nextDensity, onChange])
 
   return (
     <button

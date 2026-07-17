@@ -11,8 +11,8 @@ import {
   LANGUAGE_DISPLAY,
   LOCALE_TO_COLUMN,
   isGlossaryLocale,
+  type GlossaryLocale,
 } from "@/lib/glossary/locales"
-import type { GlossaryLocale } from "@/lib/glossary/manifest"
 
 export type GlossaryEditOperationKind = "edit" | "add" | "delete"
 

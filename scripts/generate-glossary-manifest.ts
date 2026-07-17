@@ -1,12 +1,15 @@
 import fs from "fs"
 import path from "path"
+import { customPinyin, pinyin } from "pinyin-pro"
 
 import { parseGlossaryCsv } from "@/lib/glossary/csv"
 import type {
   GlossaryEntry,
-  GlossaryLocale,
+  GlossaryLocaleIndex,
   GlossarySummaryEntry,
 } from "@/lib/glossary/manifest"
+import { LANGUAGE_CODES, LOCALE_TO_COLUMN } from "@/lib/glossary/locales"
+import { generateUniqueSlug } from "@/lib/glossary/slug"
 import { createLogger } from "./lib/logger"
 
 const logger = createLogger("glossary")
@@ -15,39 +18,52 @@ const CSV_FILE = path.join(process.cwd(), "glossary", "TechMC Glossary.csv")
 const OUTPUT_FILE = path.join(process.cwd(), "data", "glossary.json")
 const SUMMARY_FILE = path.join(process.cwd(), "data", "glossary-summary.json")
 
-const LOCALE_COLUMNS: Array<{
-  locale: GlossaryLocale
-  termCol: string
-  descCol: string
-}> = [
-  { locale: "ar", termCol: "Arabic", descCol: "Description (Arabic)" },
-  { locale: "zh", termCol: "Chinese", descCol: "Description (Chinese)" },
-  { locale: "fr", termCol: "French", descCol: "Description (French)" },
-  { locale: "de", termCol: "German", descCol: "Description (German)" },
-  { locale: "it", termCol: "Italian", descCol: "Description (Italian)" },
-  { locale: "ja", termCol: "Japanese", descCol: "Description (Japanese)" },
-  { locale: "ko", termCol: "Korean", descCol: "Description (Korean)" },
-  { locale: "pt", termCol: "Portugese", descCol: "Description (Portugese)" },
-  { locale: "ru", termCol: "Russian", descCol: "Description (Russian)" },
-  { locale: "es", termCol: "Spanish", descCol: "Description (Spanish)" },
-]
+const HAN_CHARACTER = /\p{Script=Han}/u
+const ASCII_INDEX_CHARACTER = /[^a-z0-9]+/g
+const DOMAIN_PINYIN = { 重载: "chong zai" }
 
-function generateSlug(
-  fullFormEn: string,
-  slugCounts: Map<string, number>
-): string {
-  let slug = fullFormEn
-    .replace(/\*+$/, "")
+// Technical terms whose domain pronunciation differs from the library default.
+customPinyin(DOMAIN_PINYIN)
+
+function normalizeIndexSortKey(value: string): string {
+  return value
+    .normalize("NFKD")
+    .replaceAll(/\p{Mark}/gu, "")
+    .toLocaleLowerCase("en")
+    .replaceAll(ASCII_INDEX_CHARACTER, " ")
     .trim()
-    .toLowerCase()
-    .replaceAll(/[^a-z0-9\s-]/g, "")
-    .replaceAll(/\s+/g, "-")
-    .replaceAll(/-{2,}/g, "-")
-    .replaceAll(/^-+|-+$/g, "")
-  if (!slug) slug = "term"
-  const count = slugCounts.get(slug) ?? 0
-  slugCounts.set(slug, count + 1)
-  return count === 0 ? slug : `${slug}-${count + 1}`
+}
+
+function createIndexRecord(value: string): GlossaryLocaleIndex {
+  const sortKey = normalizeIndexSortKey(value)
+  const first = sortKey[0]?.toUpperCase()
+
+  return {
+    sortKey,
+    letter: first && first >= "A" && first <= "Z" ? first : "#",
+  }
+}
+
+function createEntryIndex(
+  fullFormEn: string,
+  chinese: string | undefined
+): GlossaryEntry["indexByLocale"] {
+  const english = createIndexRecord(fullFormEn)
+
+  if (!chinese || !HAN_CHARACTER.test(chinese)) {
+    return { en: english, zh: english }
+  }
+
+  const chinesePinyin = pinyin(chinese, {
+    toneType: "none",
+    nonZh: "consecutive",
+  })
+  const chineseIndex = createIndexRecord(chinesePinyin)
+
+  return {
+    en: english,
+    zh: chineseIndex.sortKey ? chineseIndex : english,
+  }
 }
 
 function writeJson(filePath: string, data: unknown): void {
@@ -80,7 +96,7 @@ function main(): void {
     process.exit(1)
   }
 
-  const slugCounts = new Map<string, number>()
+  const usedSlugs = new Set<string>()
   const entries: GlossaryEntry[] = []
   const summaries: GlossarySummaryEntry[] = []
 
@@ -92,15 +108,16 @@ function main(): void {
       ? rawDescription.slice(0, -1)
       : rawDescription
 
-    const slug = generateSlug(fullFormEn, slugCounts)
+    const slug = generateUniqueSlug(fullFormEn, usedSlugs)
 
     const translations: GlossaryEntry["translations"] = {}
-    for (const { locale, termCol, descCol } of LOCALE_COLUMNS) {
-      const termValue = row[termCol as keyof typeof row]
+    for (const locale of LANGUAGE_CODES) {
+      const { termColumn, descColumn } = LOCALE_TO_COLUMN[locale]
+      const termValue = row[termColumn]
       if (termValue) {
         translations[locale] = {
           value: termValue,
-          description: row[descCol as keyof typeof row],
+          description: row[descColumn],
         }
       }
     }
@@ -115,6 +132,7 @@ function main(): void {
       related: row["Related"],
       isControversial,
       translations,
+      indexByLocale: createEntryIndex(fullFormEn, translations.zh?.value),
     })
 
     summaries.push({

@@ -3,26 +3,24 @@
 import * as React from "react"
 import { Link } from "@/i18n/navigation"
 import { cn } from "@/lib/cn"
+import type { GlossaryIndexRelatedTerm } from "@/lib/glossary/localized-index"
 import { generateSlug } from "@/lib/glossary/slug"
 import type { ParsedRelatedToken } from "@/lib/glossary/related"
 
-interface CrossRefChipsProps {
-  related: ParsedRelatedToken[]
+interface CrossRefChipsBaseProps {
   /**
    * `index` — link to in-page letter anchor (`#letter-{X}`) on the index page.
    * `detail` — full route link to `/{locale}/glossary/{slug}` for use on detail pages.
    */
-  mode: "index" | "detail"
   locale: string
   className?: string
 }
 
-function letterBucketFromTarget(target: string): string {
-  const trimmed = target.trim()
-  if (!trimmed) return "#"
-  const first = trimmed[0]?.toUpperCase() ?? "#"
-  return /[A-Z]/.test(first) ? first : "#"
-}
+type CrossRefChipsProps = CrossRefChipsBaseProps &
+  (
+    | { mode: "index"; related: GlossaryIndexRelatedTerm[] }
+    | { mode: "detail"; related: ParsedRelatedToken[] }
+  )
 
 const chipBase =
   "border-tech-line/40 text-tech-main/80 hover:text-tech-main hover:outline-tech-main/30 focus-visible:outline-tech-main inline-flex items-center border bg-transparent px-1.5 py-0.5 font-mono text-xs leading-none transition-[outline-color,color] duration-150 hover:outline hover:outline-1 focus-visible:outline focus-visible:outline-1 [text-decoration-line:underline] [text-decoration-style:dotted] [text-underline-offset:3px]"
@@ -32,12 +30,8 @@ const labelMap = {
   see: "see:",
 } as const satisfies Record<ParsedRelatedToken["kind"], string>
 
-export function CrossRefChips({
-  related,
-  mode,
-  locale,
-  className,
-}: CrossRefChipsProps) {
+export function CrossRefChips(props: CrossRefChipsProps) {
+  const { related, locale, className } = props
   if (related.length === 0) return null
 
   return (
@@ -51,15 +45,20 @@ export function CrossRefChips({
         const display = `${labelMap[entry.kind]}${entry.target}`
         const key = `${entry.kind}-${entry.target}-${index}`
 
-        const chip =
-          mode === "index" ? (
+        let chip: React.ReactNode
+        if (props.mode === "index") {
+          const indexedEntry = props.related[index]
+          if (!indexedEntry) return null
+          chip = (
             <a
-              href={`#letter-${letterBucketFromTarget(entry.target)}`}
+              href={`#letter-${indexedEntry.indexLetter}`}
               className={chipBase}
               title={entry.target}>
               {display}
             </a>
-          ) : (
+          )
+        } else {
+          chip = (
             <Link
               href={`/glossary/${generateSlug(entry.target)}`}
               locale={locale as "en" | "zh"}
@@ -68,6 +67,7 @@ export function CrossRefChips({
               {display}
             </Link>
           )
+        }
 
         return (
           <React.Fragment key={key}>

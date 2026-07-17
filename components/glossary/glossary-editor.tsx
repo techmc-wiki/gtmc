@@ -27,9 +27,8 @@ import { generateSlug } from "@/lib/glossary/slug"
 import type {
   GlossaryEntry,
   GlossarySummaryEntry,
-  GlossaryLocale,
 } from "@/lib/glossary/manifest"
-import { LOCALE_TO_COLUMN } from "@/lib/glossary/locales"
+import { LOCALE_TO_COLUMN, type GlossaryLocale } from "@/lib/glossary/locales"
 import { useRouter } from "@/i18n/navigation"
 
 export type GlossaryEditOperationKind = "edit" | "add" | "delete"

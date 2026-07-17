@@ -80,6 +80,8 @@ export const { handlers, auth } = NextAuth({
   session: {
     strategy: "jwt",
   },
+  // Local development may use a deployed HTTPS AUTH_URL while Next runs on HTTP.
+  useSecureCookies: process.env.NODE_ENV !== "development",
   trustHost: true,
   debug: process.env.NODE_ENV === "development",
 })

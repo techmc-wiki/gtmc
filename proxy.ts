@@ -1,4 +1,8 @@
 import { auth } from "@/lib/auth"
+import {
+  isDevFixtureAuthEnabled,
+  isLocalDevelopmentRequest,
+} from "@/lib/auth/dev-fixture-config"
 import createMiddleware from "next-intl/middleware"
 import type { NextRequest } from "next/server"
 import { routing } from "@/i18n/routing"
@@ -54,6 +58,19 @@ function normalizeRedirectOrigin(
 }
 
 export default auth((req) => {
+  if (
+    isDevFixtureAuthEnabled() &&
+    isLocalDevelopmentRequest(req) &&
+    !req.auth?.user
+  ) {
+    const fixtureUrl = new URL("/api/auth/dev-fixture", getRequestOrigin(req))
+    fixtureUrl.searchParams.set(
+      "callbackUrl",
+      req.nextUrl.pathname + req.nextUrl.search
+    )
+    return Response.redirect(fixtureUrl)
+  }
+
   const pathname = req.nextUrl.pathname
   const locale = pathname.match(localePattern)?.[1] ?? routing.defaultLocale
   const pathWithoutLocale = pathname.replace(localePattern, "") || "/"

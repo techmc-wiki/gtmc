@@ -55,6 +55,7 @@ export interface AuthorArticleSummary {
 let reverseAliasCache: Map<string, string> | null = null
 let forwardAliasCache: Map<string, string> | null = null
 let maintainersCache: Set<string> | null = null
+let maintainerHandlesCache: string[] | null = null
 let excludedAuthorsCache: Set<string> | null = null
 
 /**
@@ -181,19 +182,20 @@ function getPeopleKeyToCanonical(): Map<string, string> {
  * 3. Identity — unrecognized handles pass through unchanged (fallback authors).
  */
 function canonicalizeHandle(handle: string): string {
+  const normalized = handle.trim()
   const forward = getForwardAliasMap()
-  const fromForward = forward.get(handle.toLowerCase())
+  const fromForward = forward.get(normalized.toLowerCase())
   if (fromForward) return fromForward
 
   const peopleKeysLower = getPeopleKeysLower()
-  const peopleKey = peopleKeysLower.get(handle.toLowerCase())
+  const peopleKey = peopleKeysLower.get(normalized.toLowerCase())
   if (peopleKey) {
     const keyToCanonical = getPeopleKeyToCanonical()
     const canonical = keyToCanonical.get(peopleKey)
     if (canonical) return canonical
   }
 
-  return handle
+  return normalized
 }
 
 /**
@@ -240,6 +242,43 @@ function getExcludedAuthors(): Set<string> {
 
 function isExcludedAuthor(handle: string): boolean {
   return getExcludedAuthors().has(handle.toLowerCase())
+}
+
+/**
+ * Return the canonical profile handles for human project maintainers.
+ *
+ * Service accounts such as `gtmc-bot` are intentionally omitted, as are
+ * maintainer entries without a matching person record. This keeps the public
+ * profile surface tied to the same identity data as contributor profiles.
+ */
+export function getMaintainerHandles(): string[] {
+  if (maintainerHandlesCache !== null) return maintainerHandlesCache
+
+  const reverse = getReverseAliasMap()
+  const handles = new Map<string, string>()
+
+  for (const maintainer of getMaintainerSet()) {
+    const canonical = canonicalizeHandle(maintainer)
+    const key = canonical.toLowerCase()
+
+    if (key !== "gtmc-bot" && reverse.has(key)) {
+      handles.set(key, canonical)
+    }
+  }
+
+  maintainerHandlesCache = [...handles.values()].toSorted((a, b) =>
+    a.localeCompare(b)
+  )
+  return maintainerHandlesCache
+}
+
+/** Return whether a handle or known alias belongs to a human maintainer. */
+export function isMaintainer(handle: string): boolean {
+  const canonical = canonicalizeHandle(handle)
+  return (
+    canonical.toLowerCase() !== "gtmc-bot" &&
+    getMaintainerSet().has(canonical.toLowerCase())
+  )
 }
 
 /**
@@ -308,6 +347,52 @@ export function getUniqueAuthors(
   }
 
   return [...authors].toSorted((a, b) => a.localeCompare(b))
+}
+
+/**
+ * Return every canonical handle that has a public profile route.
+ *
+ * Contributor counts continue to exclude maintainers, but maintainers remain
+ * first-class people with standalone profiles and discoverable URLs.
+ */
+export function getProfileHandles(
+  manifest?: Record<string, ArticleEntry>
+): string[] {
+  const handles = new Map<string, string>()
+
+  for (const handle of [
+    ...getUniqueAuthors(manifest),
+    ...getMaintainerHandles(),
+  ]) {
+    handles.set(handle.toLowerCase(), handle)
+  }
+
+  return [...handles.values()].toSorted((a, b) => a.localeCompare(b))
+}
+
+/**
+ * Resolve an arbitrary profile URL handle or alias to its canonical route.
+ * Returns null when the handle does not belong to a public profile.
+ */
+export function resolveProfileHandle(
+  handle: string,
+  manifest?: Record<string, ArticleEntry>
+): string | null {
+  const canonical = canonicalizeHandle(handle)
+  return (
+    getProfileHandles(manifest).find(
+      (profileHandle) =>
+        profileHandle.toLowerCase() === canonical.toLowerCase()
+    ) ?? null
+  )
+}
+
+/** Compare author handles after applying case-insensitive alias resolution. */
+export function isSameAuthor(first: string, second: string): boolean {
+  return (
+    canonicalizeHandle(first).toLowerCase() ===
+    canonicalizeHandle(second).toLowerCase()
+  )
 }
 
 /**

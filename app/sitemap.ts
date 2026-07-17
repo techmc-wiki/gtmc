@@ -6,7 +6,7 @@ import { shouldIgnoreFile } from "@/lib/articles/ignore"
 import { flattenArticleNodes } from "@/lib/articles/navigation-data"
 import { encodeSlug } from "@/lib/articles/slug-resolver"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
-import { getUniqueAuthors } from "@/lib/articles/person-resolver"
+import { getProfileHandles } from "@/lib/articles/person-resolver"
 import {
   loadArticleManifest,
   type ArticleLocale,
@@ -188,7 +188,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let authorUrls: MetadataRoute.Sitemap = []
   try {
-    const handles = getUniqueAuthors()
+    const handles = getProfileHandles()
     authorUrls = handles.flatMap((handle) => {
       const encoded = encodeURIComponent(handle)
       const path = `/authors/${encoded}`

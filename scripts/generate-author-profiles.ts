@@ -44,11 +44,11 @@ function buildAliasResolver(
 
 function renderAuthorProfiles(
   profiles: Record<string, string>,
-  authors: Set<string>
+  profileHandles: Set<string>
 ): string {
   const navigable = Object.fromEntries(
     Object.entries(profiles).filter(([, handle]) =>
-      authors.has(handle.toLowerCase())
+      profileHandles.has(handle.toLowerCase())
     )
   )
 
@@ -144,7 +144,7 @@ function main(): void {
     )
   }
 
-  const authors = new Set<string>()
+  const profileHandles = new Set<string>()
   for (const entry of Object.values(manifest)) {
     if (entry.isFolder) continue
     for (const handle of [entry.author, ...(entry.coAuthors ?? [])]) {
@@ -152,7 +152,17 @@ function main(): void {
       const canonical = (
         resolver.get(handle.toLowerCase()) ?? handle
       ).toLowerCase()
-      if (!excluded.has(canonical)) authors.add(canonical)
+      if (!excluded.has(canonical)) profileHandles.add(canonical)
+    }
+  }
+
+  // Human maintainers have standalone public profiles even though they are
+  // excluded from contributor attribution. Service accounts are absent from
+  // people.yml and therefore never enter this generated client-side map.
+  for (const handle of Object.values(profileMap)) {
+    const canonical = handle.toLowerCase()
+    if (canonical !== "gtmc-bot" && excluded.has(canonical)) {
+      profileHandles.add(canonical)
     }
   }
 
@@ -162,7 +172,7 @@ function main(): void {
   }
 
   writeFileSync(PROFILES_JSON_PATH, `${JSON.stringify(sorted, null, 2)}\n`)
-  writeFileSync(PROFILES_TS_PATH, renderAuthorProfiles(sorted, authors))
+  writeFileSync(PROFILES_TS_PATH, renderAuthorProfiles(sorted, profileHandles))
   writeFileSync(PEOPLE_TS_PATH, renderPeopleData(people))
   logger.event("authors.profiles.generated", {
     profile_count: Object.keys(sorted).length,

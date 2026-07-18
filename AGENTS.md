@@ -70,7 +70,7 @@ pnpm dev                # http://localhost:3000
 2. Initializes the `articles/` and `glossary/` submodules at their pinned commits if needed.
 3. Generates the glossary manifest.
 4. Runs `prisma generate` (with a placeholder `DATABASE_URL` if none is set, to allow client codegen offline), unless heavy postinstall steps are explicitly skipped.
-5. Runs `tsx scripts/generate-article-manifest.ts` and `tsx scripts/generate-author-profiles.ts`.
+5. Runs `tsx scripts/generate-article-manifest.ts`.
 6. Runs `playwright install chromium` for the PDF generator and any browser tests, unless `GTMC_SKIP_PLAYWRIGHT=1` (or heavy postinstall is already skipped).
 
 CI notes for the Build workflow:
@@ -135,7 +135,6 @@ pnpm articles:update        # Pull the latest articles commit on the tracked bra
 pnpm prepare:articles       # Prepare articles for a build using GTMC_ARTICLES_SOURCE
 pnpm generate:manifest      # Rebuild data/manifest.json
 pnpm generate:content       # Re-render article content artifacts
-pnpm generate:authors       # Rebuild author profile artifacts
 pnpm build:pdf              # Rebuild offline PDFs
 ```
 

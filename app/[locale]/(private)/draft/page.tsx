@@ -1,21 +1,23 @@
 import type { Metadata } from "next"
 import type { GlossaryRevision, Revision } from "@prisma/client"
 
-import { TechCard } from "@/components/ui/tech-card"
-import { TechButton } from "@/components/ui/tech-button"
-import { Link } from "@/i18n/navigation"
-import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { getTranslations } from "next-intl/server"
 import { redirect } from "next/navigation"
+
 import { deleteDraftAction } from "@/actions/article-draft"
 import { deleteGlossaryDraftAction } from "@/actions/glossary-draft"
-import { getPR } from "@/lib/github/pr-manager"
-import { PageHeader } from "@/components/ui/page-header"
 import { EmptyState } from "@/components/ui/empty-state"
-import { DraftStatusBadge } from "@/components/ui/status-badge"
+import { PageHeader } from "@/components/ui/page-header"
 import { SectionTitle } from "@/components/ui/section-title"
-import { decodeStoredDraftFiles } from "@/lib/drafts/files"
+import { DraftStatusBadge, TechBadge } from "@/components/ui/status-badge"
+import { TechButton } from "@/components/ui/tech-button"
+import { TechCard } from "@/components/ui/tech-card"
+import { Link } from "@/i18n/navigation"
+import { auth } from "@/lib/auth"
 import { countCleanupFailedByRevision } from "@/lib/drafts/asset-db"
+import { decodeStoredDraftFiles } from "@/lib/drafts/files"
+import { getPR } from "@/lib/github/pr-manager"
+import { prisma } from "@/lib/prisma"
 
 const ARCHIVED_DRAFT_STATUSES = new Set([
   "APPROVED",
@@ -35,6 +37,17 @@ const NON_DELETABLE_DRAFT_STATUSES = new Set([
 
 const ARCHIVED_GLOSSARY_STATUSES = new Set(["SUBMITTED"])
 
+const dateFormatters: Record<string, Intl.DateTimeFormat> = {
+  en: new Intl.DateTimeFormat("en", { dateStyle: "medium" }),
+  zh: new Intl.DateTimeFormat("zh", { dateStyle: "medium" }),
+}
+
+const primaryActionClassName =
+  "group/link border-tech-main-dark bg-tech-main-dark text-tech-bg hover:border-tech-signal hover:bg-tech-signal hover:text-tech-signal-ink focus-visible:outline-tech-main relative inline-flex min-h-11 w-full items-center justify-between gap-4 border px-4 py-2.5 font-mono text-[0.6875rem] font-bold tracking-widest uppercase transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2"
+
+const secondaryActionClassName =
+  "group/link border-tech-main/40 bg-surface-overlay/60 text-tech-main-dark hover:border-tech-main hover:bg-tech-accent/20 focus-visible:outline-tech-main relative inline-flex min-h-11 w-full items-center justify-between gap-4 border px-4 py-2.5 font-mono text-[0.6875rem] font-bold tracking-widest uppercase transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2"
+
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
@@ -52,130 +65,165 @@ type GlossaryDraftItem = {
 
 type DraftItem = ArticleDraftItem | GlossaryDraftItem
 
-function renderGlossaryCard(draft: GlossaryDraftItem) {
-  const ops = Array.isArray(draft.operations)
-    ? (draft.operations as Array<{ kind: string }>)
-    : []
-  const editCount = ops.filter((o) => o.kind === "edit").length
-  const addCount = ops.filter((o) => o.kind === "add").length
-  const deleteCount = ops.filter((o) => o.kind === "delete").length
-  const opSummary = [
-    editCount > 0 ? `edit ${editCount}` : null,
-    addCount > 0 ? `add ${addCount}` : null,
-    deleteCount > 0 ? `delete ${deleteCount}` : null,
-  ]
-    .filter(Boolean)
-    .join(", ")
+interface DraftRecordProps {
+  actionLabel: string
+  deleteAction?: () => Promise<void>
+  deleteLabel: string
+  deleteWarning: string
+  detail: string
+  history?: boolean
+  href: `/draft/${string}` | `/glossary/edit/${string}`
+  kindLabel: string
+  moreActionsLabel: string
+  moreActionsLabelForDraft: string
+  prLabel: string
+  prUrl?: string | null
+  status: string
+  title: string
+  updatedLabel: string
+  warning?: string
+}
 
-  return (
-    <TechCard
-      key={draft.id}
-      tone="main"
-      borderOpacity="muted"
-      background="default"
-      padding="spacious"
-      hover="elevated"
-      brackets="visible"
-      bracketVariant="hover"
-      pattern="grid"
-      className="group relative flex h-auto flex-col justify-between sm:h-64">
-      <div className="relative z-10">
-        <div className="card-header-row border-tech-main/10 border-b pb-3">
-          <div className="flex items-center gap-3">
-            <div className="bg-tech-main/20 flex size-2 items-center justify-center">
-              <div className="bg-tech-main group-hover:animate-target-blink size-1" />
-            </div>
-            <span className="border-tech-main/40 bg-tech-main/5 text-tech-main shrink-0 border px-2 py-0.5 font-mono text-xs tracking-wider">
-              [GLOSSARY]
-            </span>
-            <DraftStatusBadge status={draft.status} />
-          </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="mono-label text-tech-main/50">
-              LAST_SYNC // {draft.updatedAt.toLocaleDateString()}
-            </span>
-            {draft.status === "DRAFT" && (
-              <form
-                action={async () => {
-                  "use server"
-                  await deleteGlossaryDraftAction(draft.id)
-                }}>
-                <button
-                  type="submit"
-                  className="flex cursor-pointer items-center font-mono text-[10px] text-red-500/70 uppercase transition-colors hover:text-red-600 hover:underline">
-                  [ TERMINATE ]
-                </button>
-              </form>
-            )}
-          </div>
+function DraftRecord({
+  actionLabel,
+  deleteAction,
+  deleteLabel,
+  deleteWarning,
+  detail,
+  history = false,
+  href,
+  kindLabel,
+  moreActionsLabel,
+  moreActionsLabelForDraft,
+  prLabel,
+  prUrl,
+  status,
+  title,
+  updatedLabel,
+  warning,
+}: DraftRecordProps) {
+  const content = (
+    <div
+      className={`grid min-w-0 gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center ${
+        history ? "p-4 sm:px-5 sm:py-4" : "p-5 sm:p-6"
+      }`}>
+      <div className="min-w-0">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <TechBadge className="border-tech-main/30 bg-tech-main/5 text-tech-main">
+            [{kindLabel}]
+          </TechBadge>
+          <DraftStatusBadge status={status} />
+          <span className="text-tech-main/55 font-mono text-[0.625rem] tracking-wider uppercase sm:ml-1">
+            {updatedLabel}
+          </span>
         </div>
 
-        <div className="mt-4 flex flex-col gap-2">
-          <h3 className="border-tech-main/40 text-tech-main-dark group-hover:border-tech-main line-clamp-2 border-l-2 pl-3 text-lg font-bold tracking-tight uppercase transition-colors">
-            {draft.title || "GLOSSARY_REVISION"}
-          </h3>
+        <h3
+          className={`display-title text-tech-main-dark text-balance break-words ${
+            history ? "text-lg sm:text-xl" : "text-xl sm:text-2xl"
+          }`}>
+          {title}
+        </h3>
 
-          <div className="border-tech-main/10 mt-2 grid grid-cols-2 gap-2 border-t pt-3">
-            <div className="flex flex-col">
-              <span className="mono-label text-tech-main/40">SYS_REF</span>
-              <span className="text-tech-main/80 truncate font-mono text-xs">
-                {draft.id.split("-")[0]}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="mono-label text-tech-main/40">OPS</span>
-              <span className="text-tech-main/80 truncate font-mono text-xs">
-                {opSummary || "NO_OPS"}
-              </span>
-            </div>
-          </div>
-
-          {draft.status === "SUBMITTED" && draft.githubPrUrl && (
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <span className="text-tech-main/70 text-sm">{detail}</span>
+          {prUrl ? (
             <a
-              href={draft.githubPrUrl}
+              href={prUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-tech-main/60 hover:text-tech-main mt-1 font-mono text-xs transition-colors">
-              PR ↗
+              className="text-tech-main hover:text-tech-main-dark focus-visible:outline-tech-main font-mono text-[0.6875rem] tracking-wider uppercase underline decoration-1 underline-offset-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2">
+              {prLabel} <span aria-hidden="true">↗</span>
             </a>
-          )}
+          ) : null}
         </div>
+
+        {warning ? (
+          <p className="mt-3 border-l-2 border-red-500/50 pl-3 text-sm text-red-600">
+            {warning}
+          </p>
+        ) : null}
       </div>
 
-      <Link
-        href={`/glossary/edit/${draft.id}`}
-        className="relative z-10 mt-6 sm:mt-auto">
-        <TechButton
-          variant="ghost"
-          className="guide-line bg-tech-main/5 group-hover:border-tech-main/60 group-hover:bg-tech-main/10 group-hover:text-tech-main-dark min-h-11 w-full border font-mono text-xs tracking-widest transition-all">
-          <span className="flex w-full items-center justify-between px-2">
-            <span>
-              {draft.status === "DRAFT"
-                ? "INIT_EDIT_SEQUENCE"
-                : "ENGAGE_VIEWER"}
-            </span>
-            <span className="group-hover:animate-target-blink opacity-0 transition-opacity group-hover:opacity-100">
-              {">"}
-            </span>
-          </span>
-        </TechButton>
-      </Link>
-    </TechCard>
+      <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:min-w-40 sm:items-end">
+        <Link
+          href={href}
+          className={`${
+            history ? secondaryActionClassName : primaryActionClassName
+          } sm:w-auto`}>
+          <span>{actionLabel}</span>
+          <span aria-hidden="true">→</span>
+        </Link>
+        {deleteAction ? (
+          <details className="w-full text-left sm:w-auto sm:text-right">
+            <summary
+              aria-label={moreActionsLabelForDraft}
+              className="text-tech-main/60 hover:text-tech-main focus-visible:outline-tech-main inline-flex min-h-11 cursor-pointer items-center font-mono text-[0.625rem] tracking-wider uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2">
+              {moreActionsLabel}
+            </summary>
+            <div className="border-tech-main/20 mt-1 space-y-2 border-t pt-3 sm:w-52">
+              <p className="text-tech-main/65 text-xs leading-relaxed">
+                {deleteWarning}
+              </p>
+              <form action={deleteAction}>
+                <TechButton
+                  type="submit"
+                  variant="danger"
+                  size="sm"
+                  className="min-h-11 w-full text-[0.625rem] uppercase">
+                  {deleteLabel}
+                </TechButton>
+              </form>
+            </div>
+          </details>
+        ) : null}
+      </div>
+    </div>
+  )
+
+  if (history) {
+    return <li>{content}</li>
+  }
+
+  return (
+    <article>
+      <TechCard
+        tone="main"
+        borderOpacity="muted"
+        background="default"
+        padding="none"
+        hover="border"
+        brackets="hidden">
+        {content}
+      </TechCard>
+    </article>
   )
 }
 
-export default async function DraftDashboardPage() {
+export default async function DraftDashboardPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
   const session = await auth()
   if (!session?.user) {
     redirect("/login")
   }
 
+  const [{ locale }, t] = await Promise.all([params, getTranslations("Drafts")])
+  const dateFormatter = dateFormatters[locale] ?? dateFormatters.en
   const authorId = session.user.id
 
-  const allDraftsRaw = await prisma.revision.findMany({
-    where: { authorId },
-    orderBy: { updatedAt: "desc" },
-  })
+  const [allDraftsRaw, glossaryDraftsRaw] = await Promise.all([
+    prisma.revision.findMany({
+      where: { authorId },
+      orderBy: { updatedAt: "desc" },
+    }),
+    prisma.glossaryRevision.findMany({
+      where: { authorId },
+      orderBy: { updatedAt: "desc" },
+    }),
+  ])
 
   const cleanupFailedByRevisionId = new Map<string, number>()
   if (allDraftsRaw.length > 0) {
@@ -187,47 +235,37 @@ export default async function DraftDashboardPage() {
     }
   }
 
-  const glossaryDraftsPromise = prisma.glossaryRevision.findMany({
-    where: { authorId },
-    orderBy: { updatedAt: "desc" },
-  })
-
-  const [articleDrafts, glossaryDraftsRaw]: [
-    ArticleDraftItem[],
-    GlossaryRevision[],
-  ] = await Promise.all([
-    Promise.all(
-      allDraftsRaw.map(async (d) => {
-        let displayStatus = d.status
-        const decodedDraft = decodeStoredDraftFiles({
-          content: d.content,
-          conflictContent: d.conflictContent,
-          filePath: d.filePath,
-        })
-
-        if (d.githubPrNum) {
-          try {
-            const pr = await getPR(d.githubPrNum)
-            if (pr.state === "closed") {
-              displayStatus = pr.merged ? "MERGED" : "CLOSED"
-            }
-          } catch (error) {
-            console.error(`Failed to fetch PR #${d.githubPrNum}:`, error)
-          }
-        }
-        return Object.assign({}, d, {
-          kind: "article" as const,
-          cleanupFailedCount: cleanupFailedByRevisionId.get(d.id) ?? 0,
-          displayStatus,
-          fileCount: decodedDraft.files.length,
-        })
+  const articleDrafts: ArticleDraftItem[] = await Promise.all(
+    allDraftsRaw.map(async (draft) => {
+      let displayStatus = draft.status
+      const decodedDraft = decodeStoredDraftFiles({
+        content: draft.content,
+        conflictContent: draft.conflictContent,
+        filePath: draft.filePath,
       })
-    ),
-    glossaryDraftsPromise,
-  ])
 
-  const glossaryDrafts: GlossaryDraftItem[] = glossaryDraftsRaw.map((d) =>
-    Object.assign({}, d, { kind: "glossary" as const })
+      if (draft.githubPrNum) {
+        try {
+          const pr = await getPR(draft.githubPrNum)
+          if (pr.state === "closed") {
+            displayStatus = pr.merged ? "MERGED" : "CLOSED"
+          }
+        } catch (error) {
+          console.error(`Failed to fetch PR #${draft.githubPrNum}:`, error)
+        }
+      }
+
+      return Object.assign({}, draft, {
+        kind: "article" as const,
+        cleanupFailedCount: cleanupFailedByRevisionId.get(draft.id) ?? 0,
+        displayStatus,
+        fileCount: decodedDraft.files.length,
+      })
+    })
+  )
+
+  const glossaryDrafts: GlossaryDraftItem[] = glossaryDraftsRaw.map((draft) =>
+    Object.assign({}, draft, { kind: "glossary" as const })
   )
 
   const allItems: DraftItem[] = [...articleDrafts, ...glossaryDrafts].toSorted(
@@ -248,153 +286,157 @@ export default async function DraftDashboardPage() {
     return ARCHIVED_GLOSSARY_STATUSES.has(item.status)
   })
 
-  const renderArticleCard = (draft: ArticleDraftItem) => (
-    <TechCard
-      key={draft.id}
-      tone="main"
-      borderOpacity="muted"
-      background="default"
-      padding="spacious"
-      hover="elevated"
-      brackets="visible"
-      bracketVariant="hover"
-      pattern="grid"
-      className="group relative flex h-auto flex-col justify-between sm:h-64">
-      <div className="relative z-10">
-        <div className="card-header-row border-tech-main/10 border-b pb-3">
-          <div className="flex items-center gap-3">
-            <div className="bg-tech-main/20 flex size-2 items-center justify-center">
-              <div className="bg-tech-main group-hover:animate-target-blink size-1" />
-            </div>
-            <DraftStatusBadge status={draft.displayStatus} />
-            {draft.cleanupFailedCount > 0 ? (
-              <span className="animate-pulse font-mono text-xs text-red-500 uppercase">
-                ! CLEANUP_FAILED
-              </span>
-            ) : null}
-          </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="mono-label text-tech-main/50">
-              LAST_SYNC // {draft.updatedAt.toLocaleDateString()}
-            </span>
-            {!NON_DELETABLE_DRAFT_STATUSES.has(draft.displayStatus) && (
-              <form
-                action={async () => {
-                  "use server"
-                  await deleteDraftAction(draft.id)
-                }}>
-                <button
-                  type="submit"
-                  className="flex cursor-pointer items-center font-mono text-[10px] text-red-500/70 uppercase transition-colors hover:text-red-600 hover:underline">
-                  [ TERMINATE ]
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
+  const renderRecord = (item: DraftItem, history = false) => {
+    const isArticle = item.kind === "article"
+    const title = isArticle
+      ? item.title || t("untitledArticle")
+      : item.title || t("untitledGlossary")
+    const status = isArticle ? item.displayStatus : item.status
+    const canContinue = status === "DRAFT"
+    const actionLabel = canContinue
+      ? t("continueDraft")
+      : status === "CLOSED"
+        ? t("reopenDraft")
+        : t("viewDraft")
+    const detail = isArticle
+      ? t("filesCount", { count: item.fileCount })
+      : t("changesCount", {
+          count: Array.isArray(item.operations) ? item.operations.length : 0,
+        })
+    const href = isArticle
+      ? (`/draft/${item.id}` as const)
+      : (`/glossary/edit/${item.id}` as const)
+    const canDelete = isArticle
+      ? !NON_DELETABLE_DRAFT_STATUSES.has(item.displayStatus)
+      : item.status === "DRAFT"
 
-        <div className="mt-4 flex flex-col gap-2">
-          <h3 className="border-tech-main/40 text-tech-main-dark group-hover:border-tech-main line-clamp-2 border-l-2 pl-3 text-lg font-bold tracking-tight uppercase transition-colors">
-            {draft.title || "UNTITLED_DOCUMENT"}
-          </h3>
+    const deleteAction =
+      !history && canDelete
+        ? async () => {
+            "use server"
+            if (isArticle) {
+              await deleteDraftAction(item.id)
+            } else {
+              await deleteGlossaryDraftAction(item.id)
+            }
+          }
+        : undefined
 
-          <div className="border-tech-main/10 mt-2 grid grid-cols-2 gap-2 border-t pt-3">
-            <div className="flex flex-col">
-              <span className="mono-label text-tech-main/40">SYS_REF</span>
-              <span className="text-tech-main/80 truncate font-mono text-xs">
-                {draft.id.split("-")[0]}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="mono-label text-tech-main/40">FILE_METRICS</span>
-              <span className="text-tech-main/80 font-mono text-xs">
-                {draft.fileCount} NODE(S)
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Link
-        href={`/draft/${draft.id}`}
-        className="relative z-10 mt-6 sm:mt-auto">
-        <TechButton
-          variant="ghost"
-          className="guide-line bg-tech-main/5 group-hover:border-tech-main/60 group-hover:bg-tech-main/10 group-hover:text-tech-main-dark min-h-11 w-full border font-mono text-xs tracking-widest transition-all">
-          <span className="flex w-full items-center justify-between px-2">
-            <span>
-              {draft.displayStatus === "DRAFT" ||
-              draft.displayStatus === "CLOSED"
-                ? "INIT_EDIT_SEQUENCE"
-                : "ENGAGE_VIEWER"}
-            </span>
-            <span className="group-hover:animate-target-blink opacity-0 transition-opacity group-hover:opacity-100">
-              {">"}
-            </span>
-          </span>
-        </TechButton>
-      </Link>
-    </TechCard>
-  )
-
-  const renderCard = (item: DraftItem) => {
-    if (item.kind === "article") return renderArticleCard(item)
-    return renderGlossaryCard(item)
+    return (
+      <DraftRecord
+        key={`${item.kind}:${item.id}`}
+        actionLabel={actionLabel}
+        deleteAction={deleteAction}
+        deleteLabel={t("deleteDraft")}
+        deleteWarning={t("deleteWarning")}
+        detail={detail}
+        history={history}
+        href={href}
+        kindLabel={isArticle ? t("articleType") : t("glossaryType")}
+        moreActionsLabel={t("moreActions")}
+        moreActionsLabelForDraft={t("moreActionsFor", { title })}
+        prLabel={t("openPullRequest")}
+        prUrl={item.githubPrUrl}
+        status={status}
+        title={title}
+        updatedLabel={t("updatedAt", {
+          date: dateFormatter.format(item.updatedAt),
+        })}
+        warning={
+          isArticle && item.cleanupFailedCount > 0
+            ? t("cleanupWarning")
+            : undefined
+        }
+      />
+    )
   }
 
-  // oxlint-disable-next-line react-perf/jsx-no-jsx-as-prop
-  const pageAction = <DraftPageActions />
-
   return (
-    <div className="page-container">
-      <PageHeader
-        title="Ops Center"
-        subtitle="YOUR DIGITAL WORKSHOP / DRAFTS & REVISIONS"
-        action={pageAction}
-      />
+    <div className="page-container animate-fade-in">
+      <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
 
-      <div className="space-y-8">
-        <div>
-          <SectionTitle>Active Records</SectionTitle>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {activeItems.length === 0 ? (
-              <EmptyState message="NO ACTIVE RECORDS FOUND." colSpanFull />
-            ) : (
-              activeItems.map(renderCard)
-            )}
-          </div>
-        </div>
+      <p className="text-tech-main max-w-2xl text-base leading-relaxed">
+        {t("pageDescription")}
+      </p>
 
-        {archivedItems.length > 0 && (
-          <div>
-            <SectionTitle>Archived / Approved Records</SectionTitle>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {archivedItems.map(renderCard)}
+      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
+        <section className="min-w-0 lg:col-start-1 lg:row-start-1">
+          <SectionTitle className="mb-4">
+            <span>{t("inProgress")}</span>
+            <span className="text-tech-main/50 ml-auto font-mono text-xs font-normal tracking-widest">
+              {activeItems.length}
+            </span>
+          </SectionTitle>
+
+          {activeItems.length === 0 ? (
+            <EmptyState
+              message={t("noActiveTitle")}
+              className="py-12 [&_h2]:text-base [&_h2]:normal-case"
+            />
+          ) : (
+            <div className="space-y-4">
+              {activeItems.map((item) => renderRecord(item))}
             </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
+          )}
+        </section>
 
-function DraftPageActions() {
-  return (
-    <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row">
-      <Link href="/draft/new" className="w-full md:w-auto">
-        <TechButton
-          variant="primary"
-          className="flex min-h-11 w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
-          + INITIALIZE SUBMISSION
-        </TechButton>
-      </Link>
-      <Link href="/glossary/edit/new" className="w-full md:w-auto">
-        <TechButton
-          variant="secondary"
-          className="flex min-h-11 w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
-          + NEW GLOSSARY DRAFT
-        </TechButton>
-      </Link>
+        <aside className="lg:sticky lg:top-28 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <TechCard
+            tone="main"
+            borderOpacity="medium"
+            background="subtle"
+            padding="default"
+            hover="none"
+            brackets="visible"
+            bracketVariant="static"
+            className="border-t-tech-signal border-t-2">
+            <p className="text-tech-main/60 font-mono text-[0.625rem] tracking-[0.22em] uppercase">
+              {t("newDraftLabel")}
+            </p>
+            <h2 className="display-title text-tech-main-dark mt-2 text-2xl">
+              {t("newDraftTitle")}
+            </h2>
+            <p className="text-tech-main/75 mt-3 text-sm leading-relaxed">
+              {t("newDraftDescription")}
+            </p>
+
+            <div className="mt-6 space-y-3">
+              <Link href="/draft/new" className={primaryActionClassName}>
+                <span>{t("newArticle")}</span>
+                <span aria-hidden="true">→</span>
+              </Link>
+              <Link
+                href="/glossary/edit/new"
+                className={secondaryActionClassName}>
+                <span>{t("newGlossary")}</span>
+                <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </TechCard>
+        </aside>
+
+        {archivedItems.length > 0 ? (
+          <section className="min-w-0 lg:col-start-1 lg:row-start-2">
+            <SectionTitle className="mb-4">
+              <span>{t("pastWork")}</span>
+              <span className="text-tech-main/50 ml-auto font-mono text-xs font-normal tracking-widest">
+                {archivedItems.length}
+              </span>
+            </SectionTitle>
+            <TechCard
+              tone="main"
+              borderOpacity="subtle"
+              background="ghost"
+              padding="none"
+              hover="none"
+              brackets="hidden">
+              <ul className="divide-tech-main/15 divide-y">
+                {archivedItems.map((item) => renderRecord(item, true))}
+              </ul>
+            </TechCard>
+          </section>
+        ) : null}
+      </div>
     </div>
   )
 }

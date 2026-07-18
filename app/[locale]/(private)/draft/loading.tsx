@@ -1,13 +1,35 @@
-import { TechCard } from "@/components/ui/tech-card"
 import { SectionTitle } from "@/components/ui/section-title"
+import { TechCard } from "@/components/ui/tech-card"
 import {
-  SectionRail,
   SegmentedBar,
   ScanConfirmOverlay,
   SkeletonExitWrapper,
 } from "@/components/ui/loading-shell-primitives"
 
 const LOADING_LABEL = "Loading drafts"
+
+function DraftRowSkeleton({ compact = false }: { compact?: boolean }) {
+  return (
+    <div
+      className={`grid gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center ${
+        compact ? "p-4 sm:px-5" : "p-5 sm:p-6"
+      }`}>
+      <div className="min-w-0">
+        <div className="mb-4 flex items-center gap-2">
+          <SegmentedBar opacity="medium" className="h-6 w-20" />
+          <SegmentedBar opacity="high" className="h-6 w-20" />
+          <SegmentedBar opacity="low" className="h-4 w-28" />
+        </div>
+        <SegmentedBar opacity="high" className="h-7 w-3/5" />
+        <SegmentedBar opacity="medium" className="mt-3 h-4 w-24" />
+      </div>
+      <SegmentedBar
+        opacity={compact ? "medium" : "high"}
+        className="border-tech-main/30 h-11 w-full border sm:w-40"
+      />
+    </div>
+  )
+}
 
 export default function DraftLoading() {
   return (
@@ -16,98 +38,78 @@ export default function DraftLoading() {
         className="page-container"
         aria-busy="true"
         aria-label={LOADING_LABEL}>
-        {/* PAGE_HEADER_ */}
-        <div className="animate-tech-slide-in border-tech-main/40 relative flex flex-col items-start justify-between gap-4 border-b pb-6 md:flex-row md:items-end">
+        <div className="border-tech-main-dark relative border-b-2 pb-6">
           <ScanConfirmOverlay />
-          <div className="w-full md:w-auto">
-            <SectionRail label="OPS_CENTER" />
-            <SegmentedBar
-              opacity="high"
-              className="border-tech-main/40 mt-2 h-10 w-64 border-b"
-            />
-            <SegmentedBar opacity="low" className="mt-2 h-4 w-80" />
-          </div>
-          <div className="w-full md:w-auto">
-            <SegmentedBar
-              opacity="high"
-              className="border-tech-main/40 h-10 w-full border md:w-48"
-            />
-          </div>
+          <div className="bg-tech-signal absolute -bottom-0.5 left-0 h-0.5 w-16" />
+          <SegmentedBar opacity="low" className="mb-3 h-3 w-40" />
+          <SegmentedBar opacity="high" className="h-12 w-64 max-w-full" />
         </div>
 
-        {/* ACTIVE_RECORDS_ */}
-        <div className="animate-tech-slide-in [animation-delay:100ms]">
-          <SectionTitle>Active Records</SectionTitle>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <TechCard
-                key={i}
-                className="border-tech-main/40 bg-surface-overlay/80 flex h-auto flex-col justify-between border p-6 backdrop-blur-sm sm:h-64">
-                {/* Status badge + date row */}
-                <div className="card-header-row">
-                  <SegmentedBar
-                    opacity="high"
-                    className="h-6 w-20 border border-yellow-200/50 bg-yellow-100/50"
-                  />
-                  <SegmentedBar opacity="medium" className="h-5 w-24" />
-                </div>
-
-                {/* Title block */}
-                <div className="border-tech-main/40 mb-4 border-l-2 pl-3">
-                  <SegmentedBar opacity="high" className="mb-2 h-6 w-full" />
-                  <SegmentedBar opacity="high" className="h-6 w-3/4" />
-                </div>
-
-                {/* MOD_LIVE_DB indicator */}
-                <div className="my-2">
-                  <SegmentedBar opacity="low" className="h-4 w-28" />
-                </div>
-
-                {/* Action button */}
-                <div className="mt-auto pt-4">
-                  <SegmentedBar
-                    opacity="medium"
-                    className="border-tech-main/40 h-11 w-full border"
-                  />
-                </div>
-              </TechCard>
-            ))}
-          </div>
+        <div className="max-w-2xl space-y-2">
+          <SegmentedBar opacity="medium" className="h-4 w-full" />
+          <SegmentedBar opacity="low" className="h-4 w-2/3" />
         </div>
 
-        {/* ARCHIVED_RECORDS_ */}
-        <div className="animate-tech-slide-in [animation-delay:200ms]">
-          <SectionTitle>Archived / Approved Records</SectionTitle>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2].map((i) => (
-              <TechCard
-                key={i}
-                className="border-tech-main/40 bg-surface-overlay/80 flex h-auto flex-col justify-between border p-6 backdrop-blur-sm sm:h-64">
-                {/* Status badge + date row */}
-                <div className="card-header-row">
-                  <SegmentedBar
-                    opacity="high"
-                    className="h-6 w-24 border border-green-200/50 bg-green-100/50"
-                  />
-                  <SegmentedBar opacity="medium" className="h-5 w-24" />
-                </div>
+        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
+          <section className="animate-tech-slide-in min-w-0 motion-reduce:animate-none lg:col-start-1 lg:row-start-1">
+            <SectionTitle className="mb-4">In progress</SectionTitle>
+            <div className="space-y-4">
+              {[1, 2].map((item) => (
+                <TechCard
+                  key={item}
+                  tone="main"
+                  borderOpacity="muted"
+                  background="default"
+                  padding="none"
+                  hover="none"
+                  brackets="hidden">
+                  <DraftRowSkeleton />
+                </TechCard>
+              ))}
+            </div>
+          </section>
 
-                {/* Title block */}
-                <div className="border-tech-main/40 mb-4 border-l-2 pl-3">
-                  <SegmentedBar opacity="high" className="mb-2 h-6 w-full" />
-                  <SegmentedBar opacity="medium" className="h-6 w-2/3" />
-                </div>
+          <aside className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
+            <TechCard
+              tone="main"
+              borderOpacity="medium"
+              background="subtle"
+              padding="default"
+              hover="none"
+              brackets="visible"
+              bracketVariant="static"
+              className="border-t-tech-signal border-t-2">
+              <SegmentedBar opacity="low" className="h-3 w-24" />
+              <SegmentedBar opacity="high" className="mt-3 h-7 w-4/5" />
+              <div className="mt-4 space-y-2">
+                <SegmentedBar opacity="medium" className="h-4 w-full" />
+                <SegmentedBar opacity="low" className="h-4 w-3/4" />
+              </div>
+              <div className="mt-6 space-y-3">
+                <SegmentedBar
+                  opacity="high"
+                  className="border-tech-main/30 h-11 w-full border"
+                />
+                <SegmentedBar
+                  opacity="medium"
+                  className="border-tech-main/30 h-11 w-full border"
+                />
+              </div>
+            </TechCard>
+          </aside>
 
-                {/* Action button */}
-                <div className="mt-auto pt-4">
-                  <SegmentedBar
-                    opacity="low"
-                    className="border-tech-main/40 h-11 w-full border"
-                  />
-                </div>
-              </TechCard>
-            ))}
-          </div>
+          <section className="animate-tech-slide-in min-w-0 [animation-delay:100ms] motion-reduce:animate-none lg:col-start-1 lg:row-start-2">
+            <SectionTitle className="mb-4">Past work</SectionTitle>
+            <TechCard
+              tone="main"
+              borderOpacity="subtle"
+              background="ghost"
+              padding="none"
+              hover="none"
+              brackets="hidden">
+              <DraftRowSkeleton compact />
+            </TechCard>
+          </section>
         </div>
       </div>
     </SkeletonExitWrapper>

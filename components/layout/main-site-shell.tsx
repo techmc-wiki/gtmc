@@ -37,8 +37,12 @@ interface MainSiteShellProps {
   children: React.ReactNode
   locale: string
   /**
+   * Includes the contributor link in the static shell while the client-side
+   * auth-aware navigation resolves any admin-only links.
+   */
+  includeContributorLink?: boolean
+  /**
    * If provided, skips the client-side AuthAware check and uses these links statically.
-   * This is useful for private routes where the session is already checked on the server.
    */
   isAdminServerSide?: boolean
   fullBleed?: boolean
@@ -47,6 +51,7 @@ interface MainSiteShellProps {
 export async function MainSiteShell({
   children,
   locale,
+  includeContributorLink = false,
   isAdminServerSide,
   fullBleed,
 }: MainSiteShellProps) {
@@ -58,22 +63,21 @@ export async function MainSiteShell({
   const contributorLink = buildContributorLink(t)
   const adminLink = buildAdminLink(t)
 
-  // Private routes pass isAdminServerSide, which implies an authenticated
-  // session — the contributor link is always shown there.
-  let serverResolvedLinks = baseLinks
-  if (isAdminServerSide !== undefined) {
-    const glossaryIndex = serverResolvedLinks.findIndex(
+  let initialLinks = baseLinks
+  if (includeContributorLink || isAdminServerSide !== undefined) {
+    const glossaryIndex = initialLinks.findIndex(
       (link) => link.href === "/glossary"
     )
-    serverResolvedLinks =
+    initialLinks =
       glossaryIndex === -1
-        ? [...serverResolvedLinks, contributorLink]
+        ? [...initialLinks, contributorLink]
         : [
-            ...serverResolvedLinks.slice(0, glossaryIndex + 1),
+            ...initialLinks.slice(0, glossaryIndex + 1),
             contributorLink,
-            ...serverResolvedLinks.slice(glossaryIndex + 1),
+            ...initialLinks.slice(glossaryIndex + 1),
           ]
   }
+  let serverResolvedLinks = initialLinks
   if (isAdminServerSide) {
     serverResolvedLinks = [...serverResolvedLinks, adminLink]
   }
@@ -85,7 +89,7 @@ export async function MainSiteShell({
         <DesktopNav navLinks={serverResolvedLinks} />
       ) : (
         <AuthAwareDesktopNav
-          navLinks={baseLinks}
+          navLinks={initialLinks}
           contributorLink={contributorLink}
           adminLink={adminLink}
         />
@@ -100,7 +104,7 @@ export async function MainSiteShell({
         <MobileNav navLinks={serverResolvedLinks} />
       ) : (
         <AuthAwareMobileNav
-          navLinks={baseLinks}
+          navLinks={initialLinks}
           contributorLink={contributorLink}
           adminLink={adminLink}
         />

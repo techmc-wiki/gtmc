@@ -1,29 +1,18 @@
-import * as React from "react"
-import { auth } from "@/lib/auth"
-import { getCurrentUserAuthContext } from "@/lib/auth/context"
+import type { ReactNode } from "react"
+
 import { MainSiteShell } from "@/components/layout/main-site-shell"
 
 export default async function DashboardLayout({
   children,
   params,
 }: {
-  children: React.ReactNode
+  children: ReactNode
   params: Promise<{ locale: string }>
 }) {
-  const [{ locale }, session] = await Promise.all([params, auth()])
-  let isAdmin = false
-  if (session?.user?.id) {
-    try {
-      const ctx = await getCurrentUserAuthContext(session.user.id)
-      isAdmin = ctx.role === "ADMIN"
-    } catch (error) {
-      console.error("[layout] Failed to resolve auth context:", error)
-      isAdmin = false
-    }
-  }
+  const { locale } = await params
 
   return (
-    <MainSiteShell isAdminServerSide={isAdmin} locale={locale}>
+    <MainSiteShell includeContributorLink locale={locale}>
       {children}
     </MainSiteShell>
   )

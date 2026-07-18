@@ -115,7 +115,6 @@ pnpm build                # Both phases via scripts/build.ts
 pnpm build:pdf            # Offline PDFs only (public/gtmc-en.pdf, public/gtmc-zh.pdf)
 pnpm prepare:articles     # Prepare articles submodule (GTMC_ARTICLES_SOURCE)
 pnpm analyze              # next experimental-analyze
-pnpm lighthouse           # Lighthouse CI (requires a running server)
 ```
 
 Key things to know:
@@ -175,7 +174,6 @@ vp test run -t "merges conflicting drafts"     # Filter by test name
 - Vite+ config: `vite.config.ts` contains Vitest, Oxlint, Oxfmt, and staged-file settings.
 - Existing specs live alongside the code in `lib/` (e.g. `lib/slug-utils.test.ts`, `lib/__tests__/article-loader.test.ts`, `lib/articles/*.test.ts`).
 - Playwright is installed for the PDF generator (`scripts/generate-pdf.ts`) and for any future e2e work; install browsers with `pnpm exec playwright install chromium` if missing.
-- Lighthouse CI: `pnpm lighthouse` runs `lhci autorun` against `/` and `/articles` (config in `.lighthouserc.js`). Requires a running dev or preview server.
 
 When fixing a bug or changing existing logic, update the colocated specs to match — but do **not** introduce new test infrastructure or scaffolding without an explicit ask.
 
@@ -324,6 +322,7 @@ If you are an Oh-my-Opencode agent (Sisyphus, Prometheus, Atlas, Hephaestus):
 6. TypeScript 7 includes the native `tsgo` tool. This repo uses `next@16.3.0-canary.83`, which supports the TypeScript 7 toolchain; earlier pre-`canary.83` Next.js 16.3 versions do not. Keep using the existing `pnpm typecheck` script unless the Next.js typecheck integration is intentionally migrated to `tsgo`.
 
 <!-- BEGIN:nextjs-agent-rules -->
+
 # This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.

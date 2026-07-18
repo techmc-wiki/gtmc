@@ -21,7 +21,6 @@
     "lint:fix": "vp lint --fix",
     "fmt": "vp fmt --check",
     "fmt:fix": "vp fmt --write",
-    "lighthouse": "lhci autorun",
     "generate:manifest": "tsx scripts/generate-article-manifest.ts",
     "generate:content": "tsx scripts/generate-article-content.ts",
     "generate:glossary": "tsx scripts/generate-glossary-manifest.ts",
@@ -103,7 +102,6 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@lhci/cli": "^0.15.1",
     "@next/bundle-analyzer": "^16.2.10",
     "@tailwindcss/postcss": "^4.3.2",
     "@types/hast": "^3.0.4",

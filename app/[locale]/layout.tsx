@@ -13,6 +13,7 @@ import { ScrollRoot } from "@/components/layout/scroll-root"
 import { SpeculationRules } from "@/components/layout/speculation-rules"
 import { getSiteUrl } from "@/lib/site-url"
 import { buildOrganizationJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
+import { noFlashScript } from "@/lib/theme/no-flash-script"
 import { NextIntlClientProvider } from "next-intl"
 import { hasLocale } from "next-intl"
 import { setRequestLocale } from "next-intl/server"
@@ -22,6 +23,7 @@ import { routing } from "@/i18n/routing"
 import React from "react"
 
 const siteUrl = getSiteUrl()
+const noFlashHtml = { __html: noFlashScript }
 
 type AppLocale = (typeof routing.locales)[number]
 
@@ -168,6 +170,7 @@ export default async function RootLayout({
       data-scroll-behavior="smooth"
       suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={noFlashHtml} />
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
       </head>
       <Analytics />

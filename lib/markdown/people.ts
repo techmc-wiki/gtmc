@@ -64,6 +64,15 @@ function normalizePeopleKey(raw: string): string {
 }
 
 /**
+ * Return the people.yml identity keys (original casing preserved).
+ *
+ * Shares the same cached YAML load as `resolvePerson` so callers do not re-parse.
+ */
+export function listPeopleKeys(): string[] {
+  return Object.keys(loadPeople())
+}
+
+/**
  * Resolve a person key to a `ResolvedPerson`.
  *
  * Returns the matching entry from `lib/articles/config/people.yml` when found,

@@ -5,17 +5,8 @@
 export const noFlashScript = `
 (function () {
   try {
-    var cookies = document.cookie.split(";")
-    var theme = null
-
-    for (var i = 0; i < cookies.length; i++) {
-      var cookie = cookies[i].trim()
-      if (cookie.indexOf("theme=") === 0) {
-        theme = cookie.substring(6)
-        break
-      }
-    }
-
+    var match = document.cookie.match(/(?:^|;\\s*)theme=(light|dark|system)(?:;|$)/)
+    var theme = match ? match[1] : "system"
     var resolved =
       theme === "light" || theme === "dark"
         ? theme

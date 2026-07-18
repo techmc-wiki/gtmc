@@ -94,9 +94,6 @@ if (skipHeavy) {
   runBuildStep(logger, "manifest", () =>
     runScript("scripts/generate-article-manifest.ts")
   )
-  runBuildStep(logger, "author-profiles", () =>
-    runScript("scripts/generate-author-profiles.ts")
-  )
   runBuildStep(logger, "repository-contributors", () =>
     runScript("scripts/generate-repository-contributor-stats.ts")
   )

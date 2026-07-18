@@ -1,9 +1,9 @@
 /**
  * Content-generation phase of the production build.
  *
- * Order matters: manifest feeds author profiles and rendered content;
- * glossary is independent but lives in the same artifact phase; PDF
- * needs rendered content + manifest.
+ * Order matters: manifest feeds rendered content; glossary is
+ * independent but lives in the same artifact phase; PDF needs
+ * rendered content + manifest.
  *
  * Usage: pnpm build:content
  */
@@ -18,10 +18,6 @@ const steps: Array<{ stage: string; script: string; args?: string[] }> = [
     script: "scripts/generate-repository-contributor-stats.ts",
   },
   { stage: "manifest", script: "scripts/generate-article-manifest.ts" },
-  {
-    stage: "author-profiles",
-    script: "scripts/generate-author-profiles.ts",
-  },
   {
     stage: "glossary",
     script: "scripts/generate-glossary-manifest.ts",

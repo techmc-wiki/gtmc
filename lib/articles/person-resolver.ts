@@ -1,10 +1,14 @@
 /**
  * Unified person data layer for author-centric pages and features.
  *
- * Bridges three data sources:
+ * Bridges two config sources:
  * - `people.yml` — person identities (peopleMention keys, social links, bios).
  * - `authors-alias.yml` + overrides — canonical manifest handles and their aliases.
- * - `author-profiles.json` — generated `peopleKey → canonicalManifestHandle` map.
+ *
+ * Identity mappings (`peopleKey → canonicalManifestHandle` and the reverse)
+ * are derived at runtime from `people.yml` keys plus the alias maps — the same
+ * rule the former author-profiles generator used: alias-resolve each people
+ * key (case-insensitive), falling back to the key itself.
  *
  * The manifest stores canonical git-derived handles (e.g. `Arcadi4`,
  * `hotpad100c`), while `people.yml` keys are the identity handles used in
@@ -25,7 +29,11 @@ import {
   type ArticleLocale,
   loadArticleManifest,
 } from "@/lib/articles/manifest"
-import { resolvePerson, type ResolvedPerson } from "@/lib/markdown/people"
+import {
+  listPeopleKeys,
+  resolvePerson,
+  type ResolvedPerson,
+} from "@/lib/markdown/people"
 
 const CONFIG_DIR = join(process.cwd(), "lib", "articles", "config")
 const MAINTAINERS_PATH = join(CONFIG_DIR, "maintainers.yml")
@@ -35,7 +43,6 @@ const ARTICLE_EDIT_EXCLUSIONS_PATH = join(
 )
 const ALIASES_PATH = join(CONFIG_DIR, "authors-alias.yml")
 const ALIAS_OVERRIDES_PATH = join(CONFIG_DIR, "author-alias-overrides.yml")
-const PROFILES_PATH = join(CONFIG_DIR, "author-profiles.json")
 
 type AliasYaml = Record<string, string[]>
 
@@ -105,25 +112,17 @@ function getForwardAliasMap(): Map<string, string> {
 /**
  * Build the reverse alias map: canonical manifest handle → people.yml key.
  *
- * Derived by inverting `author-profiles.json` (`peopleKey → canonical`).
- * Lookup is case-tolerant: the index is built lowercased and queries are
- * lowercased, but the returned peopleKey preserves its original casing from
- * the profiles file so `resolvePerson()` receives the exact people.yml key.
+ * Derived by inverting the runtime `peopleKey → canonical` map (from
+ * `people.yml` keys + alias resolution). Lookup is case-tolerant: the index
+ * is built lowercased and queries are lowercased, but the returned peopleKey
+ * preserves its original casing from `people.yml` so `resolvePerson()`
+ * receives the exact key.
  */
 function getReverseAliasMap(): Map<string, string> {
   if (reverseAliasCache !== null) return reverseAliasCache
 
   const map = new Map<string, string>()
-  let profiles: Record<string, string>
-  try {
-    profiles = JSON.parse(
-      readFileSync(PROFILES_PATH, "utf8")
-    ) as Record<string, string>
-  } catch {
-    profiles = {}
-  }
-
-  for (const [peopleKey, canonical] of Object.entries(profiles)) {
+  for (const [peopleKey, canonical] of getPeopleKeyToCanonical()) {
     map.set(canonical.toLowerCase(), peopleKey)
   }
 
@@ -151,24 +150,17 @@ function getPeopleKeysLower(): Map<string, string> {
 }
 
 /**
- * Direct `peopleKey → canonical` map from `author-profiles.json`,
- * preserving original key/value casing.
+ * Direct `peopleKey → canonical` map derived from `people.yml` keys plus the
+ * forward alias map (alias lookup lowercased, people key as fallback).
+ * Preserves original key/value casing.
  */
 function getPeopleKeyToCanonical(): Map<string, string> {
   if (peopleKeyToCanonicalCache !== null) return peopleKeyToCanonicalCache
 
-  let profiles: Record<string, string>
-  try {
-    profiles = JSON.parse(
-      readFileSync(PROFILES_PATH, "utf8")
-    ) as Record<string, string>
-  } catch {
-    profiles = {}
-  }
-
+  const forward = getForwardAliasMap()
   const map = new Map<string, string>()
-  for (const [peopleKey, canonical] of Object.entries(profiles)) {
-    map.set(peopleKey, canonical)
+  for (const peopleKey of listPeopleKeys()) {
+    map.set(peopleKey, forward.get(peopleKey.toLowerCase()) ?? peopleKey)
   }
 
   peopleKeyToCanonicalCache = map
@@ -181,8 +173,7 @@ function getPeopleKeyToCanonical(): Map<string, string> {
  * Resolution order:
  * 1. Forward alias map (case-insensitive) — covers aliased spellings.
  * 2. People-key case bridge — if the handle case-insensitively matches a
- *    known people key, resolve to that key's canonical manifest handle via
- *    `author-profiles.json`.
+ *    known people key, resolve to that key's canonical manifest handle.
  * 3. Identity — unrecognized handles pass through unchanged (fallback authors).
  */
 function canonicalizeHandle(handle: string): string {
@@ -312,7 +303,7 @@ export function isMaintainer(handle: string): boolean {
  * Resolve a manifest canonical author handle to a `ResolvedPerson`.
  *
  * - Handles that map back to a `people.yml` key (via the reverse alias map
- *   from `author-profiles.json`) return a full, non-fallback person.
+ *   from people keys + aliases) return a full, non-fallback person.
  * - Handles with no known people entry return a fallback person
  *   (`isFallback: true`) so callers always get a usable display name.
  *
@@ -333,6 +324,20 @@ export function resolveAuthorPerson(handle: string): ResolvedPerson {
 
   // No known people entry — return a fallback so callers always get a name.
   return resolvePerson(canonical)
+}
+
+/**
+ * Resolve a `people.yml` key to its public author profile handle.
+ *
+ * Returns the canonical manifest handle only when that handle is eligible for
+ * a public author/maintainer profile route (`resolveProfileHandle`). Unknown
+ * people keys, or people whose canonical handle is not publicly navigable,
+ * return `null`.
+ */
+export function getAuthorProfileHandle(peopleKey: string): string | null {
+  const canonical = getPeopleKeyToCanonical().get(peopleKey)
+  if (!canonical) return null
+  return resolveProfileHandle(canonical)
 }
 
 /**

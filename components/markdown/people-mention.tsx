@@ -5,7 +5,6 @@ import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { addSiteScrollListener } from "@/hooks/site-scroll-root"
-import { getAuthorProfileHandle } from "@/lib/articles/config/author-profiles"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import {
@@ -17,10 +16,12 @@ import {
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
 import type { ResolvedPerson } from "@/lib/markdown/people"
 
-const personCache = new Map<string, ResolvedPerson>()
-const pendingPersonRequests = new Map<string, Promise<ResolvedPerson>>()
+type PersonResponse = ResolvedPerson & { profileHandle: string | null }
 
-function createFallbackPerson(key: string): ResolvedPerson {
+const personCache = new Map<string, PersonResponse>()
+const pendingPersonRequests = new Map<string, Promise<PersonResponse>>()
+
+function createFallbackPerson(key: string): PersonResponse {
   return {
     key,
     name: key,
@@ -29,10 +30,11 @@ function createFallbackPerson(key: string): ResolvedPerson {
     email: null,
     social: {},
     isFallback: true,
+    profileHandle: null,
   }
 }
 
-function getPerson(key: string): Promise<ResolvedPerson> {
+function getPerson(key: string): Promise<PersonResponse> {
   const cached = personCache.get(key)
   if (cached) return Promise.resolve(cached)
 
@@ -40,12 +42,12 @@ function getPerson(key: string): Promise<ResolvedPerson> {
   if (pending) return pending
 
   const request = fetch(`/api/people?key=${encodeURIComponent(key)}`)
-    .then(async (response): Promise<ResolvedPerson> => {
+    .then(async (response): Promise<PersonResponse> => {
       if (!response.ok) {
         throw new Error(`Unable to load person: ${response.status}`)
       }
 
-      const person: ResolvedPerson = await response.json()
+      const person: PersonResponse = await response.json()
       personCache.set(key, person)
       return person
     })
@@ -60,7 +62,7 @@ function getPerson(key: string): Promise<ResolvedPerson> {
 export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
   const personKey = (props["data-person-key"] as string) ?? ""
   const normalizedPersonKey = personKey.trim()
-  const [person, setPerson] = useState<ResolvedPerson>(() =>
+  const [person, setPerson] = useState<PersonResponse>(() =>
     createFallbackPerson(normalizedPersonKey)
   )
   const [isOpen, setIsOpen] = useState(false)
@@ -79,17 +81,18 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
     const cached = personCache.get(normalizedPersonKey)
     if (cached) {
       setPerson(cached)
-    } else {
-      setPerson(createFallbackPerson(normalizedPersonKey))
+      return
     }
+    setPerson(createFallbackPerson(normalizedPersonKey))
+    void getPerson(normalizedPersonKey)
+      .then(setPerson)
+      .catch(() => setPerson(createFallbackPerson(normalizedPersonKey)))
   }, [normalizedPersonKey])
 
   const loadPerson = () => {
     void getPerson(normalizedPersonKey)
       .then(setPerson)
-      .catch(() => {
-        // The fallback already displayed by the component is correct for a failed lookup.
-      })
+      .catch(() => setPerson(createFallbackPerson(normalizedPersonKey)))
   }
 
   const recalcPosition = () => {
@@ -235,7 +238,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
     []
   )
 
-  const authorProfileHandle = getAuthorProfileHandle(personKey)
+  const authorProfileHandle = person.profileHandle
 
   const hasSocial = !person.isFallback && Object.keys(person.social).length > 0
 

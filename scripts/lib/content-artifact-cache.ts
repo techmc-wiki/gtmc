@@ -22,8 +22,6 @@ const GENERATED_ARTIFACTS = [
   "public/article-assets",
   "public/gtmc-en.pdf",
   "public/gtmc-zh.pdf",
-  "lib/articles/config/author-profiles.json",
-  "lib/articles/config/author-profiles.ts",
 ] as const
 
 const GENERATED_ARTIFACT_DIRECTORIES = new Set([
@@ -40,7 +38,6 @@ const CONTENT_GENERATOR_FILES: string[] = [
   "scripts/build-content.ts",
   "scripts/generate-article-manifest.ts",
   "scripts/manifest-preview.ts",
-  "scripts/generate-author-profiles.ts",
   "scripts/generate-glossary-manifest.ts",
   "scripts/generate-article-content.ts",
   "scripts/generate-pdf.ts",
@@ -53,11 +50,6 @@ const CONTENT_GENERATOR_DIRECTORIES: string[] = [
   "lib/markdown",
   "lib/pdf",
 ]
-
-const GENERATED_SOURCE_FILES = new Set([
-  "lib/articles/config/author-profiles.json",
-  "lib/articles/config/author-profiles.ts",
-])
 
 const ARCHIVE_PARENT_DIRECTORIES = new Set<string>()
 for (const artifact of GENERATED_ARTIFACTS) {
@@ -114,11 +106,7 @@ function listContentGeneratorFiles(): string[] {
           pendingDirectories.push(relativePath)
           continue
         }
-        if (
-          !entry.isFile() ||
-          entry.name.endsWith(".test.ts") ||
-          GENERATED_SOURCE_FILES.has(relativePath)
-        ) {
+        if (!entry.isFile() || entry.name.endsWith(".test.ts")) {
           continue
         }
         files.push(relativePath)

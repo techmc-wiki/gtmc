@@ -53,7 +53,7 @@ jobs:
             public/gtmc-zh.pdf
           # Hash dependency resolution plus generators/libs that feed content/PDF
           # artifacts so generated locale indexes cannot outlive their Pinyin data.
-          key: content-${{ steps.content-inputs.outputs.articles }}-${{ steps.content-inputs.outputs.glossary }}-${{ hashFiles('package.json', 'pnpm-lock.yaml', 'scripts/build-content.ts', 'scripts/generate-article-manifest.ts', 'scripts/generate-author-profiles.ts', 'scripts/generate-glossary-manifest.ts', 'scripts/generate-article-content.ts', 'scripts/generate-pdf.ts', 'scripts/manifest-preview.ts', 'scripts/lib/run.ts', 'lib/articles/**', 'lib/pdf/**', 'lib/glossary/**', 'lib/markdown/**') }}
+          key: content-${{ steps.content-inputs.outputs.articles }}-${{ steps.content-inputs.outputs.glossary }}-${{ hashFiles('package.json', 'pnpm-lock.yaml', 'scripts/build-content.ts', 'scripts/generate-article-manifest.ts', 'scripts/generate-glossary-manifest.ts', 'scripts/generate-article-content.ts', 'scripts/generate-pdf.ts', 'scripts/manifest-preview.ts', 'scripts/lib/run.ts', 'lib/articles/**', 'lib/pdf/**', 'lib/glossary/**', 'lib/markdown/**') }}
           restore-keys: |
             content-${{ steps.content-inputs.outputs.articles }}-${{ steps.content-inputs.outputs.glossary }}-
 

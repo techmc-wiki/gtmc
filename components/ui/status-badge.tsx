@@ -60,6 +60,14 @@ export function DraftStatusBadge({ status }: StatusBadgeProps) {
       className = "border-blue-500/40 bg-blue-500/10 text-blue-700"
       label = t("draftSubmitted")
       break
+    case "APPROVED":
+      className = "border-green-500/40 bg-green-500/10 text-green-600"
+      label = t("approved")
+      break
+    case "MERGED":
+      className = "border-green-500/40 bg-green-500/10 text-green-600"
+      label = t("merged")
+      break
   }
 
   return <TechBadge className={className}>[{label}]</TechBadge>

@@ -3,6 +3,7 @@ import { notFound, permanentRedirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { SectionTitle } from "@/components/ui/section-title"
+import { TechBadge } from "@/components/ui/status-badge"
 import { TechCard } from "@/components/ui/tech-card"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import {
@@ -227,6 +228,11 @@ export default async function AuthorDetailPage({
               <h1 className="display-title text-tech-main-dark text-2xl tracking-tight md:text-3xl">
                 {person.name}
               </h1>
+              {maintainer ? (
+                <TechBadge className="border-tech-main/40 bg-tech-main/5 text-tech-main">
+                  {t("maintainerLabel")}
+                </TechBadge>
+              ) : null}
             </div>
             <p className="text-tech-main/60 mt-1 font-mono text-sm">
               @{handle}
@@ -277,9 +283,6 @@ export default async function AuthorDetailPage({
             <div className="text-tech-main/50 mt-4 flex flex-wrap gap-x-6 gap-y-1 font-mono text-[0.625rem] tracking-[0.25em] uppercase">
               {maintainer ? (
                 <>
-                  <span>
-                    {t("roleLabel")}: {t("maintainerLabel")}
-                  </span>
                   {repositoryStats ? (
                     <span>
                       {t("commitsLabel")}: {repositoryStats.commits}

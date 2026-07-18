@@ -35,6 +35,10 @@ Ryan100c:
 MorningMC:
   name: MorningMC
   profile: /avatars/MorningMC.png
+  description: An ordinary text-based man
+  social:
+    website: morningmc.qzz.io
+    twitter: https://x.com/morningminecrft
 yuhan2680:
   name: yuhan2680
   social:

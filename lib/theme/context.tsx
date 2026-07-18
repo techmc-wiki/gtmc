@@ -9,7 +9,6 @@ import React, {
   useMemo,
   useState,
   useSyncExternalStore,
-  useTransition,
 } from "react"
 import { parseThemeCookie, serializeThemeCookie } from "./cookie"
 import {
@@ -27,6 +26,15 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
+function applyDocumentTheme(theme: Theme): void {
+  const resolvedTheme = theme === "system" ? getSystemThemeSnapshot() : theme
+  const root = document.documentElement
+
+  if (root.dataset.theme !== resolvedTheme) {
+    root.setAttribute("data-theme", resolvedTheme)
+  }
+}
+
 function readInitialTheme(): Theme {
   if (typeof document === "undefined") return "light"
   const fromCookie = parseThemeCookie(document.cookie)
@@ -41,27 +49,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     getSystemThemeSnapshot,
     getSystemThemeServerSnapshot
   )
-  const resolvedTheme = useMemo(
-    (): ResolvedTheme => (theme === "system" ? systemTheme : theme),
-    [theme, systemTheme]
-  )
-  const [, startTransition] = useTransition()
-
+  const resolvedTheme = theme === "system" ? systemTheme : theme
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", resolvedTheme)
-  }, [pathname, resolvedTheme])
+    applyDocumentTheme(theme)
+  }, [pathname, systemTheme, theme])
 
   const setTheme = useCallback((newTheme: Theme) => {
-    if (newTheme === "system") {
-      setThemeState("system")
-      document.cookie = serializeThemeCookie("system")
-    } else {
-      setThemeState(newTheme)
-      startTransition(() => {
-        document.documentElement.setAttribute("data-theme", newTheme)
-        document.cookie = serializeThemeCookie(newTheme)
-      })
-    }
+    setThemeState(newTheme)
+    applyDocumentTheme(newTheme)
+    document.cookie = serializeThemeCookie(newTheme)
   }, [])
 
   const contextValue = useMemo(

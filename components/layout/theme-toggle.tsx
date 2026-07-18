@@ -4,6 +4,7 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 import { useMounted } from "@/hooks/use-mounted"
 import { useTheme } from "@/lib/theme"
+import { parseThemeCookie } from "@/lib/theme/cookie"
 import { cn } from "@/lib/cn"
 
 type Mode = "light" | "dark" | "system"
@@ -31,9 +32,7 @@ const LONG_PRESS_MS = 500
 
 function readModeFromCookie(): Mode {
   if (typeof document === "undefined") return "system"
-  const match = document.cookie.match(/(?:^|;\s*)theme=(light|dark)/)
-  if (match) return match[1] as "light" | "dark"
-  return "system"
+  return parseThemeCookie(document.cookie) ?? "system"
 }
 
 interface IconProps {

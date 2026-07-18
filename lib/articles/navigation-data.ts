@@ -86,6 +86,44 @@ export function findNavigationOwner(
   return null
 }
 
+/**
+ * Returns the folder hierarchy for an article, ordered from the root chapter
+ * to its immediate parent. Folder introductions include their own folder so
+ * their breadcrumb still identifies the chapter they introduce.
+ */
+export function getNavigationBreadcrumbs(
+  tree: ChapterNavNode[],
+  currentSlug: string
+): ChapterNavNode[] {
+  const path = findNavigationPath(tree, currentSlug)
+  if (!path) {
+    return []
+  }
+
+  const chapters = path.filter((node) => node.isFolder)
+  return chapters.length > 0 ? chapters : path
+}
+
+function findNavigationPath(
+  nodes: ChapterNavNode[],
+  currentSlug: string,
+  parents: ChapterNavNode[] = []
+): ChapterNavNode[] | null {
+  for (const node of nodes) {
+    const path = [...parents, node]
+    if (node.slug === currentSlug) {
+      return path
+    }
+
+    const nested = findNavigationPath(node.children, currentSlug, path)
+    if (nested) {
+      return nested
+    }
+  }
+
+  return null
+}
+
 function visitArticleNodes(
   nodes: ChapterNavNode[],
   visitor: (node: ChapterNavNode, parent: ChapterNavNode | null) => void,

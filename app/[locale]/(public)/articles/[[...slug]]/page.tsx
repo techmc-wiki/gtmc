@@ -29,6 +29,7 @@ import {
 import { getArticleContentBySlug } from "@/lib/articles/content"
 import { resolveArticleAssetPath } from "@/lib/articles/banner-assets"
 import { getArticleAssetPublicUrl } from "@/lib/articles/asset-url"
+import { articleUrl } from "@/lib/articles/url"
 import { decodeSlugPath, encodeSlug } from "@/lib/articles/slug-resolver"
 import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
 import { getSiteUrl } from "@/lib/site-url"
@@ -42,6 +43,7 @@ import { ArticleMetadataFull } from "@/components/articles/article-metadata-full
 import { ArticleMetadataAnonymous } from "@/components/articles/article-metadata-anonymous"
 import { ArticleNavigation } from "@/components/articles/article-navigation"
 import {
+  getNavigationBreadcrumbs,
   findNavigationOwner,
   flattenArticleTree,
   getArticleNavigation,
@@ -248,6 +250,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const tree = await getPublicChapterNav(locale)
   const currentSlug = target.canonicalSlug || slugPath
   const runningHeadOwner = findNavigationOwner(tree, currentSlug)
+  const runningHeadChapters = getNavigationBreadcrumbs(tree, currentSlug)
   const isStructuralAppendix = runningHeadOwner?.isAppendix ?? false
   const articleTitle = formatArticleTitle(
     resolvedTitle,
@@ -379,12 +382,22 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       {
         "@type": "ListItem",
         position: 2,
-        name: chapterTitle || "Articles",
+        name: "Articles",
         item: `${siteUrl}/${locale}/articles`,
       },
+      ...runningHeadChapters
+        .filter((chapter) => chapter.slug !== effectiveSlug)
+        .map((chapter, index) => ({
+          "@type": "ListItem" as const,
+          position: index + 3,
+          name: chapter.title,
+          item: `${siteUrl}/${locale}${articleUrl(chapter.slug)}`,
+        })),
       {
         "@type": "ListItem",
-        position: 3,
+        position:
+          runningHeadChapters.filter((chapter) => chapter.slug !== effectiveSlug)
+            .length + 3,
         name: articleTitle,
         item: canonicalUrl,
       },
@@ -395,9 +408,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const flattenedArticles = flattenArticleTree(tree)
   const navigation = await getArticleNavigation(currentSlug, flattenedArticles, locale)
 
-  const runningHeadChapterSlug = runningHeadOwner?.slug ?? null
-  const runningHeadChapterTitle =
-    runningHeadOwner?.title ?? chapterTitle ?? null
   const runningHeadChapterIndex = runningHeadOwner?.index
   const runningHeadIsAppendix = isStructuralAppendix
   const runningHeadIsPreface = !!target.isPreface && !runningHeadOwner
@@ -410,10 +420,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       ">
       <BookmarkRecorder slug={currentSlug} title={articleTitle} />
 
-      {runningHeadChapterSlug && runningHeadChapterTitle && (
+      {runningHeadChapters.length > 0 && (
         <RunningHead
-          chapterTitle={runningHeadChapterTitle}
-          chapterSlug={runningHeadChapterSlug}
+          chapters={runningHeadChapters}
+          articleSlug={effectiveSlug}
+          articleTitle={articleTitle}
           locale={locale}
           chapterIndex={runningHeadChapterIndex}
           chapterIsAppendix={runningHeadIsAppendix}

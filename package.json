@@ -102,7 +102,7 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.2.10",
-    "@tailwindcss/postcss": "^4.3.2",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/mime-types": "^3.0.1",
@@ -118,11 +118,11 @@
     "playwright": "^1.61.1",
     "rehype-stringify": "^10.0.1",
     "remark-rehype": "^11.1.2",
-    "tailwindcss": "^4.3.2",
+    "tailwindcss": "^4.3.3",
     "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.23.1",
     "typescript": "^7.0.2",
-    "vite-plus": "0.2.4"
+    "vite-plus": "0.2.5"
   },
   "resolutions": {
     "form-data": "4.0.5"

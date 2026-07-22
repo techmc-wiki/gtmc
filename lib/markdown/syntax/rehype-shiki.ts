@@ -1,10 +1,29 @@
 import type { Root, Element, Text } from "hast"
 import { visit } from "unist-util-visit"
+import { createHighlighterCore, type HighlighterCore } from "shiki/core"
+import { createJavaScriptRegexEngine } from "shiki/engine/javascript"
+import java from "shiki/langs/java.mjs"
+import log from "shiki/langs/log.mjs"
+import markdown from "shiki/langs/markdown.mjs"
+import perl from "shiki/langs/perl.mjs"
+import yaml from "shiki/langs/yaml.mjs"
+import minDark from "shiki/themes/min-dark.mjs"
+import solarizedLight from "shiki/themes/solarized-light.mjs"
 
 export type RehypeShikiPlugin = Awaited<ReturnType<typeof createRehypeShiki>>
 
 const highlightCache = new Map<string, Element | null>()
-const pluginCache = new Map<string, Promise<RehypeShikiPlugin>>()
+let pluginPromise: Promise<RehypeShikiPlugin> | null = null
+let highlighterPromise: Promise<HighlighterCore> | null = null
+
+function getArticleHighlighter(): Promise<HighlighterCore> {
+  highlighterPromise ??= createHighlighterCore({
+    themes: [solarizedLight, minDark],
+    langs: [java, yaml, markdown, log, perl],
+    engine: createJavaScriptRegexEngine(),
+  })
+  return highlighterPromise
+}
 
 function createNoopRehypeShiki(): RehypeShikiPlugin {
   return function rehypeShiki() {
@@ -30,13 +49,8 @@ function extractLangsFromMarkdown(content: string): string[] {
   return [...langs]
 }
 
-export async function createRehypeShiki(langs?: string[]) {
-  const langsToLoad = langs && langs.length > 0 ? langs : ["javascript"]
-  const { getSingletonHighlighter } = await import("shiki")
-  const highlighter = await getSingletonHighlighter({
-    themes: ["solarized-light", "min-dark"],
-    langs: langsToLoad,
-  })
+export async function createRehypeShiki() {
+  const highlighter = await getArticleHighlighter()
 
   return function rehypeShiki() {
     return function (tree: Root): void {
@@ -165,15 +179,8 @@ export function getCachedRehypeShiki(
     return Promise.resolve(createNoopRehypeShiki())
   }
 
-  const langKey = [...new Set(langs)].toSorted().join(",")
-  const cachedPlugin = pluginCache.get(langKey)
-  if (cachedPlugin) {
-    return cachedPlugin
-  }
-
-  const createdPlugin = createRehypeShiki(langs)
-  pluginCache.set(langKey, createdPlugin)
-  return createdPlugin
+  pluginPromise ??= createRehypeShiki()
+  return pluginPromise
 }
 
 function getTextContent(node: Element | Text): string {

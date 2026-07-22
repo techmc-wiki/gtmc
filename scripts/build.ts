@@ -6,7 +6,7 @@
  *
  * Usage: pnpm build
  */
-import { run, runScript } from "./lib/run"
+import { runScript } from "./lib/run"
 import { createLogger, runBuildStep } from "./lib/logger"
 
 const logger = createLogger("build")
@@ -25,7 +25,7 @@ if (!skipContent) {
   )
 }
 
-runBuildStep(logger, "next", () => run("next", ["build"]))
+runBuildStep(logger, "next", () => runScript("scripts/build-next.ts"))
 logger.event("build.completed", {
   duration_ms: Math.round(performance.now() - startedAt),
 })

@@ -312,7 +312,7 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
 
   let shikiPlugin: RehypeShikiPlugin | undefined
   if (codeLangs.length > 0) {
-    shikiPlugin = await createRehypeShiki(codeLangs).catch((error) => {
+    shikiPlugin = await createRehypeShiki().catch((error) => {
       logger.warn(
         "pdf.syntax-highlighting.unavailable",
         { locale },

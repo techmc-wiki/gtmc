@@ -10,7 +10,7 @@ import type { ArticleContentArtifact } from "@/lib/articles/content"
 import {
   isLocalArticleAssetPath,
   resolveArticleAssetPath,
-} from "@/lib/articles/banner-assets"
+} from "@/lib/articles/article-asset-path"
 import {
   parseSourceReadmeFrontMatter,
   parseSourceFrontMatter,

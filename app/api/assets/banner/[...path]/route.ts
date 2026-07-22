@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server"
 import path from "path"
 import mime from "mime-types"
-import {
-  ARTICLE_BANNER_CACHE_CONTROL,
-  readLocalArticleAsset,
-} from "@/lib/articles/banner-assets"
 import { getArticleRemoteBuffer } from "@/lib/articles/remote-assets"
+
+const ARTICLE_BANNER_CACHE_CONTROL = "public, max-age=86400, s-maxage=86400"
 
 export async function GET(
   _request: Request,
@@ -30,9 +28,7 @@ export async function GET(
 
   const safePath = normalizedPath.replace(/^\/+/, "")
 
-  const fileBuffer =
-    (await readLocalArticleAsset(safePath)) ??
-    (await getArticleRemoteBuffer(safePath))
+  const fileBuffer = await getArticleRemoteBuffer(safePath)
   if (fileBuffer) {
     const mimeType = mime.lookup(safePath) || "application/octet-stream"
     return new NextResponse(new Uint8Array(fileBuffer), {

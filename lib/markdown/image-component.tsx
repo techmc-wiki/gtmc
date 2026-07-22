@@ -1,7 +1,6 @@
-import path from "path"
 import { ArticleImage } from "@/components/markdown/article-image"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
-import { hasExplicitUrlScheme } from "./url-utils"
+import { hasExplicitUrlScheme, resolveRelativeArticlePath } from "./url-utils"
 
 function decodeImageSource(src: string): string {
   try {
@@ -20,10 +19,10 @@ export function createImageComponent(rawPath: string) {
         src.startsWith("../") ||
         (!src.startsWith("http") && !src.startsWith("/")))
     ) {
-      const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
-      const resolved = path
-        .join(currentDir, decodeImageSource(src))
-        .replaceAll("\\", "/")
+      const resolved = resolveRelativeArticlePath(
+        rawPath,
+        decodeImageSource(src)
+      )
       src = `/api/assets?path=${encodeURIComponent(resolved)}`
     }
     return <ArticleImage src={src} alt={(alt as string) || ""} />

@@ -10,7 +10,7 @@
     "dev": "next dev",
     "build": "tsx scripts/build.ts",
     "build:content": "tsx scripts/build-content.ts",
-    "build:next": "next build",
+    "build:next": "tsx scripts/build-next.ts",
     "build:pdf": "tsx scripts/generate-pdf.ts --locale all",
     "build:vercel": "tsx scripts/build-vercel.ts",
     "analyze": "next experimental-analyze",

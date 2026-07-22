@@ -3,21 +3,6 @@ import { TechButton } from "@/components/ui/tech-button"
 import { getTranslations } from "next-intl/server"
 import type { Metadata } from "next"
 import { toAbsoluteUrl } from "@/lib/site-url"
-import { cacheLife } from "next/cache"
-import { stat } from "node:fs/promises"
-import path from "node:path"
-
-async function getPdfMetadata(locale: string) {
-  "use cache"
-
-  cacheLife("max")
-
-  const filename = `gtmc-${locale}.pdf`
-  const pdfPath = path.join(process.cwd(), "public", filename)
-  const { size } = await stat(pdfPath)
-
-  return { filename, sizeInMegabytes: size / 1024 ** 2 }
-}
 
 export async function generateMetadata({
   params,
@@ -70,7 +55,7 @@ export default async function PdfPage({
 }) {
   const { locale } = await params
   const t = await getTranslations("Pdf")
-  const { filename, sizeInMegabytes } = await getPdfMetadata(locale)
+  const filename = `gtmc-${locale}.pdf`
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col items-center justify-center py-12 sm:py-20">
@@ -93,13 +78,10 @@ export default async function PdfPage({
           {t("subtitle")}
         </p>
 
-        <div className="border-tech-line/40 mb-6 flex items-center gap-4 border-t pt-6">
+        <div className="border-tech-line/40 mb-6 flex items-center border-t pt-6">
           <div className="text-tech-main/60 flex items-center gap-2 font-mono text-xs">
             <span className="border-tech-main/40 bg-tech-main/10 inline-block size-2 border" />
             {filename}
-          </div>
-          <div className="text-tech-main/40 font-mono text-xs">
-            {sizeInMegabytes.toFixed(1)} MB
           </div>
         </div>
 

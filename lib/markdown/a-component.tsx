@@ -1,15 +1,13 @@
 import { Link } from "@/i18n/navigation"
-import path from "path"
 import { articleUrl } from "@/lib/articles/url"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
-import { hasExplicitUrlScheme } from "./url-utils"
+import { hasExplicitUrlScheme, resolveRelativeArticlePath } from "./url-utils"
 
 function resolveHref(initialHref: string, rawPath: string): string {
   let href = initialHref
   if (href.startsWith("./") || href.startsWith("../")) {
-    const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
     try {
-      const resolved = path.join(currentDir, href).replaceAll("\\", "/")
+      const resolved = resolveRelativeArticlePath(rawPath, href)
       href = articleUrl(resolved)
     } catch {
       return href
@@ -21,8 +19,7 @@ function resolveHref(initialHref: string, rawPath: string): string {
     !href.startsWith("#") &&
     !href.startsWith("/")
   ) {
-    const currentDir = path.dirname("/" + rawPath).replace(/^\/+/, "")
-    const resolved = path.join(currentDir, href).replaceAll("\\", "/")
+    const resolved = resolveRelativeArticlePath(rawPath, href)
     href = articleUrl(resolved)
   }
   return href

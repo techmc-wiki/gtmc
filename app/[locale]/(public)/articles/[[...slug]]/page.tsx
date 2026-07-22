@@ -27,7 +27,7 @@ import {
   getCachedSlugForFilePath,
 } from "@/lib/articles/manifest-cached"
 import { getArticleContentBySlug } from "@/lib/articles/content"
-import { resolveArticleAssetPath } from "@/lib/articles/banner-assets"
+import { resolveArticleAssetPath } from "@/lib/articles/article-asset-path"
 import { getArticleAssetPublicUrl } from "@/lib/articles/asset-url"
 import { articleUrl } from "@/lib/articles/url"
 import { decodeSlugPath, encodeSlug } from "@/lib/articles/slug-resolver"

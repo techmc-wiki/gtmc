@@ -5,6 +5,12 @@ import createNextIntlPlugin from "next-intl/plugin"
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts")
 
+const remoteArticleAssetTraceExcludes = [
+  "./articles/**",
+  "./.git/**",
+  "./public/gtmc-*.pdf",
+]
+
 const buildSha: string = (() => {
   if (process.env.VERCEL_GIT_COMMIT_SHA) {
     return process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 7)
@@ -66,29 +72,25 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   outputFileTracingIncludes: {
     "/*": ["data/manifest.json"],
-    "/[locale]/articles/[[...slug]]": ["data/articles/**"],
-    "/api/og/articles/[...slug]": ["articles/**"],
-    "/[locale]/glossary": ["data/glossary*.json"],
-    "/[locale]/glossary/[slug]": ["data/glossary*.json"],
+    "/\\[locale\\]/articles/\\[\\[\\.\\.\\.slug\\]\\]": ["data/articles/**"],
+    "/\\[locale\\]/glossary": ["data/glossary*.json"],
+    "/\\[locale\\]/glossary/\\[slug\\]": ["data/glossary*.json"],
     "/api/glossary": ["data/glossary*.json"],
   },
   outputFileTracingExcludes: {
+    "/api/assets/banner/\\[\\.\\.\\.path\\]": remoteArticleAssetTraceExcludes,
+    "/api/og/articles/\\[\\.\\.\\.slug\\]": remoteArticleAssetTraceExcludes,
     "/api/articles/search": [
       "./articles/**/*.{png,gif,jpg,jpeg,webp,svg,mp4,webm,zip,litematic,nbt,schem,schematic,bmp,ico}",
       "./.git/**",
       "./public/gtmc-*.pdf",
     ],
-    "/api/litematica-assets/[...path]": [
+    "/api/litematica-assets/\\[\\.\\.\\.path\\]": [
       "./articles/**",
       "./.git/**",
       "./public/gtmc-*.pdf",
     ],
-    "/api/litematica-assets/*": [
-      "./articles/**",
-      "./.git/**",
-      "./public/gtmc-*.pdf",
-    ],
-    "/[locale]/glossary/**": ["./glossary/**"],
+    "/\\[locale\\]/glossary/**": ["./glossary/**"],
   },
   turbopack: {
     resolveAlias: {

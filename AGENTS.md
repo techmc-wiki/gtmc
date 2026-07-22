@@ -263,7 +263,7 @@ Recent history frequently uses `fix(scope): …`, `feat(scope): …`, and `chore
 
 ### Publishing GitHub releases
 
-Release tags use the `vX.Y.Z` format and are published from the `dev` branch. The target commit must already be present on the remote `dev` branch; agents must not push or pull, so stop for a user-managed push when the local branch is ahead. Before publishing, inspect the commits since the previous release and confirm the worktree is clean. Match the existing release-note style: use `Feature:`/`Features:` and optional `Dev:` headings, with a numbered list under each heading. Keep `Dev` selective: include only changes that affect the developer workflow, CI/CD, or release process, and omit internal refactors and implementation details.
+Release tags use the `vX.Y.Z` format and are published from the `dev` branch. Release versioning must follow semver standards. The target commit must already be present on the remote `dev` branch; agents must not push or pull, so stop for a user-managed push when the local branch is ahead. Before publishing, inspect the commits since the previous release and confirm the worktree is clean. Match the existing release-note style: use `Feature:`/`Features:` and optional `Dev:` headings, with a numbered list under each heading. Keep `Dev` selective: include only changes that affect the developer workflow, CI/CD, or release process, and omit internal refactors and implementation details.
 
 Create and publish a release with the GitHub CLI so the tag is created on the target branch and the release is public:
 
@@ -302,14 +302,6 @@ pnpm test
 4. Keep commits medium-sized and maximally reversible; split large patches.
 5. If files or commit hashes change unexpectedly (e.g. mid-rebase), do not force-revert unrelated changes — surface the issue to the user.
 6. Never use destructive Git operations (`reset --hard`, `clean -f`, force-push, branch deletion) without explicit instruction.
-
-## Sisyphus / OhMyOpenCode Agents
-
-If you are an Oh-my-Opencode agent (Sisyphus, Prometheus, Atlas, Hephaestus):
-
-1. Do not commit anything inside `.sisyphus/`.
-2. `.sisyphus/` is already in `.gitignore`.
-3. Simplify the QA stage if the task is not complex or critical.
 
 ## Other Notes
 

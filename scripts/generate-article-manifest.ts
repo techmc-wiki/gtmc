@@ -2,13 +2,14 @@ import fs from "fs"
 import path from "path"
 import type { ArticleEntry } from "@/lib/articles/manifest"
 
-import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/articles/ignore"
+import { isReservedArticlePath } from "@/lib/articles/path-conventions"
 import { buildManifestPreview } from "./manifest-preview"
 import {
   parseSourceReadmeFrontMatter,
   parseSourceFrontMatter,
   parseTranslationReadmeFrontMatter,
   parseTranslationFrontMatter,
+  shouldSkipArticleFile,
   type SourceReadmeFrontMatter,
   type SourceFrontMatter,
   type TranslationReadmeFrontMatter,
@@ -58,6 +59,10 @@ function parseTranslationMetadata(
   return isReadme
     ? parseTranslationReadmeFrontMatter(content)
     : parseTranslationFrontMatter(content)
+}
+
+function isExplicitlySkippedFile(filePath: string): boolean {
+  return shouldSkipArticleFile(fs.readFileSync(filePath, "utf-8"))
 }
 
 function getParentSlug(slug: string): string | undefined {
@@ -319,6 +324,9 @@ async function processDirectory(
 
   if (readmeSource) {
     const readmePath = path.join(dirPath, readmeSource.name)
+    if (isExplicitlySkippedFile(readmePath)) {
+      return false
+    }
     const readmeSlug = tryReadSlugFromFile(readmePath)
 
     if (readmeSlug) {
@@ -349,8 +357,9 @@ async function processDirectory(
       e.isFile() &&
       (e.name.endsWith(".zh.md") ||
         (e.name.endsWith(".md") && !e.name.endsWith(".en.md"))) &&
+      !isReservedArticlePath(e.name) &&
       !isReadmeLocaleFile(e.name) &&
-      !shouldIgnoreFile(e.name, false)
+      !isExplicitlySkippedFile(path.join(dirPath, e.name))
   )
 
   const sourceFileJobs: Array<{
@@ -418,7 +427,11 @@ async function processDirectory(
   }
 
   const readmeEn = entries.find((e) => e.isFile() && e.name === "README.en.md")
-  if (readmeEn && manifest[slugPrefix]) {
+  if (
+    readmeEn &&
+    manifest[slugPrefix] &&
+    !isExplicitlySkippedFile(path.join(dirPath, readmeEn.name))
+  ) {
     const readmePath = path.join(dirPath, readmeEn.name)
     try {
       await processTranslationFile(
@@ -440,8 +453,9 @@ async function processDirectory(
     (e) =>
       e.isFile() &&
       e.name.endsWith(".en.md") &&
+      !isReservedArticlePath(e.name) &&
       !isReadmeLocaleFile(e.name) &&
-      !shouldIgnoreFile(e.name, false)
+      !isExplicitlySkippedFile(path.join(dirPath, e.name))
   )
 
   const enFileResults = await Promise.all(
@@ -469,7 +483,7 @@ async function processDirectory(
   if (enFileResults.some(Boolean)) hasError = true
 
   const subDirs = entries.filter(
-    (e) => e.isDirectory() && !shouldIgnoreDirectory(e.name)
+    (e) => e.isDirectory() && !isReservedArticlePath(e.name)
   )
 
   const subDirJobs: Array<() => Promise<boolean>> = []
@@ -494,6 +508,7 @@ async function processDirectory(
         : null
 
     if (!subReadmeExists) continue
+    if (isExplicitlySkippedFile(subReadmeExists)) continue
 
     const subSlug = tryReadSlugFromFile(subReadmeExists)
     if (!subSlug) {
@@ -564,7 +579,7 @@ async function main(): Promise<void> {
 
   const topLevelFolders = fs
     .readdirSync(ARTICLES_PATH, { withFileTypes: true })
-    .filter((e) => e.isDirectory() && !shouldIgnoreDirectory(e.name))
+    .filter((e) => e.isDirectory() && !isReservedArticlePath(e.name))
     .map((e) => e.name)
 
   const folderJobs: Array<{
@@ -583,12 +598,10 @@ async function main(): Promise<void> {
         : null
 
     if (!readmeExists) {
-      reportValidationError(
-        `Error: Missing README.zh.md or README.md in folder: articles/${folderName}/\n`
-      )
-      hasError = true
       continue
     }
+
+    if (isExplicitlySkippedFile(readmeExists)) continue
 
     let folderSlug: string
     try {
@@ -643,8 +656,9 @@ async function main(): Promise<void> {
         e.isFile() &&
         (e.name.endsWith(".zh.md") ||
           (e.name.endsWith(".md") && !e.name.endsWith(".en.md"))) &&
+        !isReservedArticlePath(e.name) &&
         !isReadmeLocaleFile(e.name) &&
-        !shouldIgnoreFile(e.name, true)
+        !isExplicitlySkippedFile(path.join(ARTICLES_PATH, e.name))
     )
     .map((e) => e.name)
 
@@ -717,8 +731,9 @@ async function main(): Promise<void> {
       (e) =>
         e.isFile() &&
         e.name.endsWith(".en.md") &&
+        !isReservedArticlePath(e.name) &&
         !isReadmeLocaleFile(e.name) &&
-        !shouldIgnoreFile(e.name, true)
+        !isExplicitlySkippedFile(path.join(ARTICLES_PATH, e.name))
     )
     .map((e) => e.name)
 

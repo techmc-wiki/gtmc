@@ -29,6 +29,8 @@
   },
   "Article": {
     "notFound": "文章未找到",
+    "translationFallbackBody": "本文尚未提供所选语言的译文，当前显示中文原文。",
+    "translationFallbackCta": "打开中文页面",
     "translationLatestCommitAria": "在 GitHub 上查看原文提交 {sha}",
     "translationOutdatedLag": "译文落后 {commitLag, plural, one {# 次源文提交} other {# 次源文提交}}，时间差为 {dayLag, plural, one {# 天} other {# 天}}。",
     "translationOutdatedLabel": "译文已过期",

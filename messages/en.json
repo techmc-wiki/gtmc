@@ -29,6 +29,8 @@
   },
   "Article": {
     "notFound": "Article Not Found",
+    "translationFallbackBody": "This article has not been translated into English yet. You are reading the original Chinese version.",
+    "translationFallbackCta": "Open the Chinese page",
     "translationLatestCommitAria": "View original commit {sha} on GitHub",
     "translationOutdatedLag": "Lag: {commitLag, plural, one {# source commit} other {# source commits}} and {dayLag, plural, one {# day} other {# days}}.",
     "translationOutdatedLabel": "Outdated translation",

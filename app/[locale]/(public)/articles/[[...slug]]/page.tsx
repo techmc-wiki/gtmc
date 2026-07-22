@@ -54,36 +54,36 @@ import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import type { ArticleTreeNode as BaseArticleTreeNode } from "@/lib/github/sync"
 
 const EMPTY_STRING_ARRAY: string[] = []
-
-
+const SOURCE_ARTICLE_LOCALE: ArticleLocale = "zh"
 
 export async function generateStaticParams(): Promise<{ locale: string; slug: string[] }[]> {
   const locales: ArticleLocale[] = ["zh", "en"]
   const paramsByLocale = await Promise.all(
     locales.map(async (locale) => {
-      const tree = await getCachedArticleTree(locale)
-    const collectSlugs = async (
-      nodes: ArticleTreeNode[]
-    ): Promise<string[]> => {
-      const slugGroups = await Promise.all(
-        nodes.map(async (node) => {
-        const manifestEntry = await getCachedLocalizedArticleEntry(
-          node.slug,
-          locale
+      const contentLocale = getArticleFallbackLocale(locale)
+      const tree = await getCachedArticleTree(contentLocale)
+      const collectSlugs = async (
+        nodes: ArticleTreeNode[]
+      ): Promise<string[]> => {
+        const slugGroups = await Promise.all(
+          nodes.map(async (node) => {
+            const manifestEntry = await getCachedLocalizedArticleEntry(
+              node.slug,
+              contentLocale
+            )
+            const ownSlugs =
+              (!node.isFolder || manifestEntry?.hasIntro) &&
+              hasArticleLocale(node.slug, contentLocale)
+                ? [node.slug]
+                : []
+            const childSlugs = await collectSlugs(node.children ?? [])
+            return [...ownSlugs, ...childSlugs]
+          })
         )
-        const ownSlugs =
-          (!node.isFolder || manifestEntry?.hasIntro) &&
-          hasArticleLocale(node.slug, locale)
-            ? [node.slug]
-            : []
-        const childSlugs = await collectSlugs(node.children ?? [])
-        return [...ownSlugs, ...childSlugs]
-        })
-      )
-      return slugGroups.flat()
-    }
+        return slugGroups.flat()
+      }
 
-    const slugs = await collectSlugs(tree)
+      const slugs = await collectSlugs(tree)
       return slugs.map((slug) => ({
         locale,
         slug: slug.split("/").filter(Boolean),
@@ -107,19 +107,20 @@ export async function generateMetadata({
   const { locale: rawLocale, slug } = await params
   const locale = resolveLocale(rawLocale)
   const slugPath = decodeSlugPath(slug ?? []) || "preface"
-  const target = await resolveArticleTarget(slugPath, locale)
+  const resolvedRequest = await resolveArticleRequest(slugPath, locale)
 
   // Per Next.js docs: call notFound() from generateMetadata (not return a
   // fallback metadata object) so the route emits a real HTTP 404 status and
   // avoids being indexed as a soft-404.
-  if (target === null) {
+  if (resolvedRequest === null) {
     notFound()
   }
 
   try {
+    const { contentLocale, target } = resolvedRequest
     const artifact = await getArticleContentBySlug(
       target.canonicalSlug ?? slugPath,
-      locale
+      contentLocale
     )
     if (!artifact) {
       notFound()
@@ -129,16 +130,16 @@ export async function generateMetadata({
     const siteUrl = getSiteUrl()
     const effectiveSlug =
       target.canonicalSlug ?? (await getCachedSlugForFilePath(target.filePath)) ?? slugPath
-    const canonicalUrl = `${getSiteUrl()}/${locale}/articles/${encodeSlug(effectiveSlug)}`
+    const canonicalUrl = `${getSiteUrl()}/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`
 
     const resolvedTitle = await resolveDisplayedArticleTitle(
       data["chapter-title"],
       target.filePath,
       target.canonicalSlug,
       target.isReadmeIntro,
-      locale
+      contentLocale
     )
-    const tree = await getPublicChapterNav(locale)
+    const tree = await getPublicChapterNav(contentLocale)
     const structuralOwner = findNavigationOwner(tree, effectiveSlug)
     const isStructuralAppendix = structuralOwner?.isAppendix ?? false
     const articleTitle = formatArticleTitle(
@@ -150,8 +151,11 @@ export async function generateMetadata({
     )
 
     // Build page title with chapter prefix if available
-    const manifestEntry = await getCachedLocalizedArticleEntry(effectiveSlug, locale)
-    const chapterTitle = manifestEntry?.chapterTitleByLocale?.[locale]
+    const manifestEntry = await getCachedLocalizedArticleEntry(
+      effectiveSlug,
+      contentLocale
+    )
+    const chapterTitle = manifestEntry?.chapterTitleByLocale?.[contentLocale]
     const pageTitle = chapterTitle
       ? `${chapterTitle} › ${articleTitle}`
       : articleTitle
@@ -161,7 +165,7 @@ export async function generateMetadata({
       {
         title: articleTitle,
         chapterTitle,
-        locale,
+        locale: contentLocale,
       }
     )
 
@@ -181,7 +185,7 @@ export async function generateMetadata({
       languageAlternates["x-default"] = `${siteUrl}/${defaultLocale}/articles/${articlePath}`
     }
 
-    const ogImageUrl = `${siteUrl}/api/og/articles/${effectiveSlug}?locale=${locale}`
+    const ogImageUrl = `${siteUrl}/api/og/articles/${effectiveSlug}?locale=${contentLocale}`
 
     return {
       title: pageTitle,
@@ -218,18 +222,23 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   ])
 
   const slugPath = decodeSlugPath(slug ?? []) || "preface"
-  const target = await resolveArticleTarget(slugPath, locale)
+  const resolvedRequest = await resolveArticleRequest(slugPath, locale)
 
-  if (target === null) {
+  if (resolvedRequest === null) {
     notFound()
   }
+
+  const { contentLocale, target } = resolvedRequest
 
   if (target.redirectToSlug) {
     const redirectPath = encodeSlug(target.redirectToSlug)
     redirect(`/${locale}/articles/${redirectPath}`)
   }
 
-  const artifact = await getArticleContentBySlug(target.canonicalSlug ?? slugPath, locale)
+  const artifact = await getArticleContentBySlug(
+    target.canonicalSlug ?? slugPath,
+    contentLocale
+  )
 
   if (!artifact) {
     notFound()
@@ -245,9 +254,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     target.filePath,
     target.canonicalSlug,
     target.isReadmeIntro,
-    locale
+    contentLocale
   )
-  const tree = await getPublicChapterNav(locale)
+  const tree = await getPublicChapterNav(contentLocale)
   const currentSlug = target.canonicalSlug || slugPath
   const runningHeadOwner = findNavigationOwner(tree, currentSlug)
   const runningHeadChapters = getNavigationBreadcrumbs(tree, currentSlug)
@@ -272,9 +281,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const siteUrl = getSiteUrl()
   const effectiveSlug =
     target.canonicalSlug ?? (await getCachedSlugForFilePath(target.filePath)) ?? slugPath
-  const canonicalUrl = `${getSiteUrl()}/${locale}/articles/${encodeSlug(effectiveSlug)}`
-  const manifestEntry = await getCachedLocalizedArticleEntry(effectiveSlug, locale)
-  const chapterTitle = manifestEntry?.chapterTitleByLocale?.[locale]
+  const canonicalUrl = `${getSiteUrl()}/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`
+  const manifestEntry = await getCachedLocalizedArticleEntry(
+    effectiveSlug,
+    contentLocale
+  )
+  const chapterTitle = manifestEntry?.chapterTitleByLocale?.[contentLocale]
   const description = ensureMetaDescriptionLength(
     generateDescription(
       renderedContent,
@@ -283,7 +295,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     {
       title: articleTitle,
       chapterTitle,
-      locale,
+      locale: contentLocale,
     }
   )
 
@@ -312,8 +324,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     name: resolveAuthorPerson(handle).name,
     url: `${siteUrl}/${locale}/authors/${encodeURIComponent(handle)}`,
   }))
-  const isTranslationPending =
-    manifestEntry !== null && !manifestEntry.availableLocales.includes(locale)
+  const isTranslationPending = contentLocale !== locale
   const isTranslationStale =
     locale === "en" &&
     manifestEntry?.translationFreshnessByLocale.en === "stale" &&
@@ -466,13 +477,25 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       )}
 
       {isTranslationPending ? (
-        <div className="mt-4">
-          <span
+        <aside
+          data-testid="translation-pending-notice"
+          aria-labelledby="translation-pending-label"
+          className="mt-4 border border-amber-500/40 bg-amber-500/10 p-4 text-amber-950 dark:text-amber-100">
+          <p
+            id="translation-pending-label"
             data-testid="translation-pending-badge"
-            className="inline-flex border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 font-mono text-[0.625rem] tracking-wider text-amber-700 uppercase dark:text-amber-300">
+            className="font-mono text-[0.625rem] tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">
             {t("translationPending")}
-          </span>
-        </div>
+          </p>
+          <p className="mt-2 text-sm/relaxed">
+            {t("translationFallbackBody")}
+          </p>
+          <a
+            href={`/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`}
+            className="mt-3 inline-flex min-h-11 items-center font-mono text-xs tracking-wider text-amber-900 underline decoration-amber-700/50 underline-offset-4 transition-colors hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:text-amber-100 dark:hover:text-amber-300 dark:focus-visible:outline-amber-300">
+            {t("translationFallbackCta")} →
+          </a>
+        </aside>
       ) : null}
 
       {isTranslationStale ? (
@@ -506,7 +529,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </aside>
       ) : null}
 
-      <article className="article-prose min-w-0" data-article-content>
+      <article
+        lang={contentLocale}
+        className="article-prose min-w-0"
+        data-article-content>
         <MarkdownRenderer
           content={embeddedArticleContent}
           locale={locale}
@@ -560,6 +586,38 @@ interface ResolvedArticleTarget {
   isPreface: boolean
   isReadmeIntro: boolean
   redirectToSlug?: string
+}
+
+interface ResolvedArticleRequest {
+  contentLocale: ArticleLocale
+  target: ResolvedArticleTarget
+}
+
+async function resolveArticleRequest(
+  requestedSlugPath: string,
+  locale: ArticleLocale
+): Promise<ResolvedArticleRequest | null> {
+  const localizedTarget = await resolveArticleTarget(requestedSlugPath, locale)
+  if (localizedTarget) {
+    return { contentLocale: locale, target: localizedTarget }
+  }
+
+  const fallbackLocale = getArticleFallbackLocale(locale)
+  if (fallbackLocale === locale) {
+    return null
+  }
+
+  const fallbackTarget = await resolveArticleTarget(
+    requestedSlugPath,
+    fallbackLocale
+  )
+  return fallbackTarget
+    ? { contentLocale: fallbackLocale, target: fallbackTarget }
+    : null
+}
+
+function getArticleFallbackLocale(locale: ArticleLocale): ArticleLocale {
+  return locale === SOURCE_ARTICLE_LOCALE ? locale : SOURCE_ARTICLE_LOCALE
 }
 
 async function resolveArticleTarget(

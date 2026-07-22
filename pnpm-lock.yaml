@@ -193,8 +193,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@next/bundle-analyzer':
-        specifier: ^16.2.10
-        version: 16.2.10
+        specifier: ^16.2.11
+        version: 16.2.11
       '@tailwindcss/postcss':
         specifier: ^4.3.3
         version: 4.3.3
@@ -232,8 +232,8 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1
       pinyin-pro:
-        specifier: ^3.28.1
-        version: 3.28.1
+        specifier: ^3.28.2
+        version: 3.28.2
       playwright:
         specifier: ^1.61.1
         version: 1.61.1
@@ -922,8 +922,8 @@ packages:
       '@emnapi/core': ^1.7.1
       '@emnapi/runtime': ^1.7.1
 
-  '@next/bundle-analyzer@16.2.10':
-    resolution: {integrity: sha512-KcepWhb3IVniZgm00GSSCQDEUQqZXuXtuXRh8J6e3Un342TcQ77iK4DedeEkct+fcx7yFEDL2J6z4Jeho5JDAw==}
+  '@next/bundle-analyzer@16.2.11':
+    resolution: {integrity: sha512-C5228wy1RC0g7uOSvmQhrZXCuEeLIPureKkqramAkySmqY2Y0yw6K+TyAxXXvtrYe4uehnZs3YMFfJcorBRwpg==}
 
   '@next/env@16.3.0-preview.6':
     resolution: {integrity: sha512-tdsih48yzumsL060VIsZ9BwDYlZk0AAMT8HccspSbPUzp6ntCZ9xOMFU4W0SmqaOCEpPmTyP+5e6WT36mqN2fw==}
@@ -4548,8 +4548,8 @@ packages:
     resolution: {integrity: sha512-r34yH/GlQpKZbU1BvFFqOjhISRo1MNx1tWYsYvmj6KIRHSPMT2+yHOEb1SG6NMvRoHRF0a07kCOox/9yakl1vg==}
     hasBin: true
 
-  pinyin-pro@3.28.1:
-    resolution: {integrity: sha512-oqz8ulwRgtUXRi0vbqEfGNly19zpyCxYrjhkk5TibGcgSW6eNwS5woajCXRwqURi8Ehc2yOFTiB4uNoZ+NJOnA==}
+  pinyin-pro@3.28.2:
+    resolution: {integrity: sha512-jV38yxXHLfidirMC4hrXasLDozLCSq/4DfX88GnHcSEJ2+GpSedG6I9VOiEXJu6iQ5dbJC/RjmzyMuS5h/wH5A==}
 
   pkce-challenge@5.0.1:
     resolution: {integrity: sha512-wQ0b/W4Fr01qtpHlqSqspcj3EhBvimsdh0KlHhH8HRZnMsEa0ea2fTULOXOS9ccQr3om+GcGRk4e+isrZWV8qQ==}
@@ -5537,8 +5537,8 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
-  ws@7.5.11:
-    resolution: {integrity: sha512-zS54Oen9bITtp7kp2XM3AydrCIq1D+HwJOuH+c+e4LfpL/lotP5osijd+UoMnxwAam1GN8R4KtLAyIrIcBNpiA==}
+  ws@7.5.13:
+    resolution: {integrity: sha512-rsKI6xDBFVf4r/x8XyChGK04QR/XHroxs/jUcoWvtEZM8TPU/X/uIY9B1CsSzYws9ZJb/6bbBu7dPhFW00CAoA==}
     engines: {node: '>=8.3.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -6360,7 +6360,7 @@ snapshots:
       '@tybys/wasm-util': 0.10.3
     optional: true
 
-  '@next/bundle-analyzer@16.2.10':
+  '@next/bundle-analyzer@16.2.11':
     dependencies:
       webpack-bundle-analyzer: 4.10.1
     transitivePeerDependencies:
@@ -9885,7 +9885,7 @@ snapshots:
       sonic-boom: 4.2.1
       thread-stream: 4.2.0
 
-  pinyin-pro@3.28.1: {}
+  pinyin-pro@3.28.2: {}
 
   pkce-challenge@5.0.1: {}
 
@@ -11004,7 +11004,7 @@ snapshots:
       opener: 1.5.2
       picocolors: 1.1.1
       sirv: 2.0.4
-      ws: 7.5.11
+      ws: 7.5.13
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -11032,7 +11032,7 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  ws@7.5.11: {}
+  ws@7.5.13: {}
 
   ws@8.21.1: {}
 

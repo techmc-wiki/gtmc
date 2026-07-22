@@ -1,5 +1,4 @@
 import { cacheLife, cacheTag } from "next/cache";
-import { shouldIgnoreDirectory, shouldIgnoreFile } from "@/lib/articles/ignore";
 import type { ArticleLocale } from "@/lib/articles/manifest";
 import { getCachedArticleTree } from "@/lib/articles/manifest-cached";
 import type { ArticleTreeNode } from "@/lib/github/sync";
@@ -23,13 +22,12 @@ export async function getPublicChapterNav(
 export function preparePublicChapterNav(
   source: ArticleTreeNode[],
 ): ChapterNavNode[] {
-  const clonedTree = cloneNodes(source);
-  const filteredTree = filterIgnoredNodes(clonedTree, true);
+  const tree = cloneNodes(source);
 
-  injectReadmeIntroNodes(filteredTree);
-  sortTree(filteredTree);
+  injectReadmeIntroNodes(tree);
+  sortTree(tree);
 
-  return filteredTree;
+  return tree;
 }
 
 function cloneNodes(nodes: ArticleTreeNode[]): ChapterNavNode[] {
@@ -79,30 +77,6 @@ function sortTree(nodes: ChapterNavNode[]) {
       sortTree(node.children);
     }
   }
-}
-
-function filterIgnoredNodes(
-  nodes: ChapterNavNode[],
-  isRoot: boolean,
-): ChapterNavNode[] {
-  const result: ChapterNavNode[] = [];
-  for (const node of nodes) {
-    if (node.isFolder) {
-      if (shouldIgnoreDirectory(node.title)) {
-        continue;
-      }
-    } else {
-      if (shouldIgnoreFile(node.title, isRoot)) {
-        continue;
-      }
-    }
-
-    result.push({
-      ...node,
-      children: filterIgnoredNodes(node.children, false),
-    });
-  }
-  return result;
 }
 
 function injectReadmeIntroNodes(nodes: ChapterNavNode[]) {

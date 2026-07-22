@@ -36,6 +36,7 @@ export interface TranslationReadmeFrontMatter {
 type BannerFrontMatter = { src: string; alt?: string }
 
 const SOURCE_ALLOWED_KEYS = new Set([
+  "skip",
   "slug",
   "title",
   "description",
@@ -47,6 +48,7 @@ const SOURCE_ALLOWED_KEYS = new Set([
 ])
 
 const TRANSLATION_ALLOWED_KEYS = new Set([
+  "skip",
   "translates",
   "translated-from-revision",
   "title",
@@ -55,6 +57,7 @@ const TRANSLATION_ALLOWED_KEYS = new Set([
 ])
 
 const SOURCE_README_ALLOWED_KEYS = new Set([
+  "skip",
   "slug",
   "chapter-title",
   "intro-title",
@@ -64,6 +67,7 @@ const SOURCE_README_ALLOWED_KEYS = new Set([
 ])
 
 const TRANSLATION_README_ALLOWED_KEYS = new Set([
+  "skip",
   "translates",
   "translated-from-revision",
   "chapter-title",
@@ -139,6 +143,10 @@ function parseBanner(
 function parseFrontMatterData(content: string): Record<string, unknown> {
   const { data } = matter(content)
   return data as Record<string, unknown>
+}
+
+export function shouldSkipArticleFile(content: string): boolean {
+  return parseFrontMatterData(content).skip === true
 }
 
 export function parseSourceFrontMatter(content: string): SourceFrontMatter {

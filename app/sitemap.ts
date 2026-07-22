@@ -2,7 +2,6 @@ import type { MetadataRoute } from "next"
 import { cacheLife } from "next/cache"
 
 import { getSiteUrl } from "@/lib/site-url"
-import { shouldIgnoreFile } from "@/lib/articles/ignore"
 import { flattenArticleNodes } from "@/lib/articles/navigation-data"
 import { encodeSlug } from "@/lib/articles/slug-resolver"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
@@ -138,23 +137,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       locales.map(async (locale) => {
         const tree = await getPublicChapterNav(locale)
         const slugs = flattenArticleNodes(tree).map((node) => node.slug)
-        return slugs
-          .filter((slug) => {
-            const fileName = slug.split("/").pop() || slug
-            return !shouldIgnoreFile(fileName, !slug.includes("/"))
-          })
-          .map((slug) => ({
-            url: `${BASE}/${locale}/articles/${encodeSlug(slug)}`,
-            lastModified: lastModifiedFrom(
-              manifest[slug]?.lastmodByLocale[locale] ?? manifest[slug]?.created
-            ),
-            alternates: localizedAlternates(
-              BASE,
-              `/articles/${encodeSlug(slug)}`
-            ),
-            changeFrequency: "weekly" as const,
-            priority: 0.8,
-          }))
+        return slugs.map((slug) => ({
+          url: `${BASE}/${locale}/articles/${encodeSlug(slug)}`,
+          lastModified: lastModifiedFrom(
+            manifest[slug]?.lastmodByLocale[locale] ?? manifest[slug]?.created
+          ),
+          alternates: localizedAlternates(
+            BASE,
+            `/articles/${encodeSlug(slug)}`
+          ),
+          changeFrequency: "weekly" as const,
+          priority: 0.8,
+        }))
       })
     )
     articleUrls = localizedArticleUrls.flat()

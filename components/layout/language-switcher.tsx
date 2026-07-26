@@ -20,7 +20,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
 
   return (
     <div
-      className={`border-tech-main/40 relative flex items-center border font-mono text-[0.625rem] tracking-[0.15em] ${className} `}>
+      className={`border-tech-main/40 relative flex h-8 items-stretch border font-mono text-[0.625rem] tracking-[0.15em] md:h-10 ${className} `}>
       {LOCALES.map((loc, i) => (
         <button
           key={loc}
@@ -28,7 +28,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
           onClick={() => switchLocale(loc)}
           aria-label={t("languageSwitcher")}
           aria-pressed={locale === loc}
-          className={`touch-target flex min-h-8 min-w-7 items-center justify-center px-2 py-1 uppercase transition-colors duration-200 ${i > 0 ? "border-tech-main/40 border-l" : ""} ${
+          className={`flex h-full min-w-7 cursor-pointer items-center justify-center px-2 uppercase transition-colors duration-200 ${i > 0 ? "border-tech-main/40 border-l" : ""} ${
             locale === loc
               ? "bg-tech-main-dark text-tech-bg"
               : "text-tech-main hover:bg-tech-accent/30 bg-transparent"

@@ -31,9 +31,9 @@ export function SiteShell({
         <div className="bg-tech-signal absolute top-0 left-0 h-[3px] w-full" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between md:h-20">
-            <div className="flex space-x-4 md:space-x-8">{leftSlot}</div>
+            <div className="flex items-center gap-4 md:gap-8">{leftSlot}</div>
 
-            <div className="flex items-center gap-4">{rightSlot}</div>
+            <div className="flex items-center gap-2 md:gap-3">{rightSlot}</div>
           </div>
         </div>
       </nav>

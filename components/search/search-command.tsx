@@ -361,7 +361,7 @@ export function SearchCommand() {
         type="button"
         onClick={openModal}
         aria-label={t("searchAriaLabel")}
-        className="border-tech-main/40 text-tech-main/60 hover:bg-tech-main-dark hover:text-tech-bg hidden h-8 w-40 cursor-pointer items-center gap-2 border px-3 py-1.5 font-mono text-[0.6875rem] transition-colors md:flex">
+        className="border-tech-main/40 text-tech-main/60 hover:bg-tech-main-dark hover:text-tech-bg hidden h-8 w-40 cursor-pointer items-center gap-2 border px-3 font-mono text-[0.6875rem] transition-colors md:flex md:h-10">
         <div className="flex w-full items-center justify-between">
           <span className="flex items-center gap-1.5 leading-none">
             <SearchIcon className="size-3.5" />

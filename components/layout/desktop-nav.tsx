@@ -17,7 +17,7 @@ export function DesktopNav({ navLinks }: DesktopNavProps) {
 
   return (
     <>
-      <ul className="mb-1.5 hidden space-x-6 md:flex">
+      <ul className="hidden items-center gap-6 md:flex">
         {navLinks.map((link) => {
           const isActive = pathname.startsWith(link.href)
 

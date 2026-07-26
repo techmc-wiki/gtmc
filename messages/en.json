@@ -360,7 +360,7 @@
     "sectionDownload": "Download",
     "sectionRead": "Read",
     "sectionSource": "Source",
-    "tagline": "Knowledge is already out there. We connect it."
+    "tagline": "\"Curiosity in 'cubic' inch.\""
   },
   "forbidden": {
     "description": "You do not have permission to do this. Ask an admin to grant access and try again.",
@@ -454,7 +454,7 @@
     "glossaryCardDesc": "The index of terms — technical Minecraft vocabulary in 12 languages.",
     "glossaryCardTitle": "Glossary",
     "heroDescription": "A community-built online textbook for technical Minecraft. Tutorials, mechanics deep-dives, and annotated source code for players who want to understand how the game really works.",
-    "heroTagline": "Knowledge is already out there. We connect it.",
+    "heroTagline": "\"Curiosity in 'cubic' inch.\"",
     "initializing": "Initializing...",
     "loggedInAs": "Logged in as {username}",
     "loginGithub": "Log in",

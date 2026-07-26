@@ -1,6 +1,5 @@
 "use client"
 
-import { usePathname } from "next/navigation"
 import React, {
   createContext,
   use,
@@ -42,7 +41,6 @@ function readInitialTheme(): Theme {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
   const [theme, setThemeState] = useState<Theme>(readInitialTheme)
   const systemTheme = useSyncExternalStore(
     subscribeSystemTheme,
@@ -52,7 +50,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const resolvedTheme = theme === "system" ? systemTheme : theme
   useEffect(() => {
     applyDocumentTheme(theme)
-  }, [pathname, systemTheme, theme])
+  }, [systemTheme, theme])
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme)

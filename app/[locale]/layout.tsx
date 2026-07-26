@@ -173,9 +173,9 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={noFlashHtml} />
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
       </head>
-      <Analytics />
-      <SpeedInsights />
       <body className="bg-tech-bg/50 h-dvh w-full overflow-hidden antialiased">
+        <Analytics />
+        <SpeedInsights />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider>
             <FooterProvider>

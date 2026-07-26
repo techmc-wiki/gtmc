@@ -84,10 +84,13 @@ export async function generateStaticParams(): Promise<{ locale: string; slug: st
       }
 
       const slugs = await collectSlugs(tree)
-      return slugs.map((slug) => ({
-        locale,
-        slug: slug.split("/").filter(Boolean),
-      }))
+      return [
+        { locale, slug: [] },
+        ...slugs.map((slug) => ({
+          locale,
+          slug: slug.split("/").filter(Boolean),
+        })),
+      ]
     })
   )
 

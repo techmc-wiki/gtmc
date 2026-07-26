@@ -336,6 +336,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const bannerAlt =
     (data.banner as { alt?: string } | undefined)?.alt || articleTitle
 
+  const bannerPreloadHref = bannerPath
+    ? getArticleAssetPublicUrl(bannerPath)
+    : null
+
   const techArticleJsonLd: {
     "@context": "https://schema.org"
     "@type": "TechArticle"
@@ -429,6 +433,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         border-tech-main/30 bg-surface/80 relative min-h-screen
         min-w-0 border p-6 backdrop-blur-sm sm:p-8
       ">
+      {bannerPreloadHref ? (
+        <link
+          rel="preload"
+          as="image"
+          href={bannerPreloadHref}
+          fetchPriority="high"
+        />
+      ) : null}
       <BookmarkRecorder slug={currentSlug} title={articleTitle} />
 
       {runningHeadChapters.length > 0 && (

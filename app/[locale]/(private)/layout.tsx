@@ -2,6 +2,8 @@ import type { ReactNode } from "react"
 
 import { MainSiteShell } from "@/components/layout/main-site-shell"
 
+export const instant = false
+
 export default async function DashboardLayout({
   children,
   params,

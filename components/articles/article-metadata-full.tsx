@@ -4,8 +4,7 @@ import { formatAbsoluteTime, formatRelativeTime } from "@/lib/format-time"
 import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
-import { useRouter } from "@/i18n/navigation"
-import { useState, useCallback, useMemo } from "react"
+import { useState, useCallback, useEffect, useMemo } from "react"
 import { ArticleMetadataLayout } from "@/components/articles/article-metadata-layout"
 import { ArticleLicenseNotice } from "@/components/articles/article-license-notice"
 
@@ -53,9 +52,17 @@ export function ArticleMetadataFull({
   bannerAlt,
 }: ArticleMetadataFullProps) {
   const t = useTranslations("ArticleMeta")
-  const router = useRouter()
   const [copied, setCopied] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(true)
+  // Prerender-safe timestamp: absolute date in server HTML ("now" would make
+  // the segment dynamic under cacheComponents), upgraded to relative on mount.
+  const [lastEditedLabel, setLastEditedLabel] = useState(() =>
+    formatAbsoluteTime(lastModified, false)
+  )
+
+  useEffect(() => {
+    setLastEditedLabel(formatRelativeTime(lastModified))
+  }, [lastModified])
 
   const allContributors = collectContributors(author, coAuthors)
   const displayContributors = allContributors.slice(0, 5)
@@ -70,10 +77,6 @@ export function ArticleMetadataFull({
       console.error("Failed to copy:", error)
     }
   }, [canonicalUrl])
-
-  const handleEditClick = useCallback(() => {
-    router.push(`/draft/new?file=${encodeURIComponent(editPath)}`)
-  }, [router, editPath])
 
   const toggleCollapsed = useCallback(() => {
     setIsCollapsed((current) => !current)
@@ -138,7 +141,7 @@ export function ArticleMetadataFull({
             |
           </span>
           <span>
-            {t("lastEdited")} {formatRelativeTime(lastModified)}
+            {t("lastEdited")} {lastEditedLabel}
           </span>
         </div>
 
@@ -234,9 +237,8 @@ export function ArticleMetadataFull({
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleEditClick}
+                <Link
+                  href={`/draft/new?file=${encodeURIComponent(editPath)}`}
                   className="
                     group relative inline-flex cursor-pointer items-center justify-center
                     text-tech-main transition-colors after:absolute after:-inset-2.5
@@ -251,7 +253,7 @@ export function ArticleMetadataFull({
                     ">
                     {t("editArticle")}
                   </span>
-                </button>
+                </Link>
               </div>
 
               <hr className="my-1 border-tech-main/40 sm:my-2" />

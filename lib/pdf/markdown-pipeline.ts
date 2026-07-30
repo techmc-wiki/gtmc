@@ -19,6 +19,7 @@ import {
   buildRemarkPlugins,
   buildRehypePlugins,
 } from "@/lib/markdown/pipeline/core"
+import { rehypeCJKSpacing } from "@/lib/markdown/transforms/rehype-cjk-spacing"
 
 /**
  * Options for the PDF markdown pipeline.
@@ -71,6 +72,7 @@ export async function renderMarkdownToHtml(
     includeShiki: !!options?.shikiPlugin,
     shikiPlugin: options?.shikiPlugin,
     includeMath: true,
+    cjkSpacingPlugin: rehypeCJKSpacing,
   })
 
   // ── Assemble and run the pipeline ─────────────────────────────────

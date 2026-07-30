@@ -1,4 +1,5 @@
 import type { createRehypeShiki } from "../syntax/rehype-shiki"
+import { rehypeCJKSpacingBrowser } from "../transforms/rehype-cjk-spacing.browser"
 import { buildRemarkPlugins, buildRehypePlugins } from "./core"
 
 /**
@@ -16,6 +17,7 @@ export function getPluginsForContent(
       includeShiki: !!rehypeShikiPlugin,
       shikiPlugin: rehypeShikiPlugin,
       includeMath: true,
+      cjkSpacingPlugin: rehypeCJKSpacingBrowser,
     }),
   }
 }

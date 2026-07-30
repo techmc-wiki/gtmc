@@ -15,7 +15,6 @@ import { remarkWikilinks } from "../syntax/remark-wikilinks"
 import { rehypeAdvancedSections } from "../syntax/rehype-advanced-sections"
 import { rehypeMermaid } from "../syntax/rehype-mermaid"
 import { rehypeLinkedCode } from "../transforms/rehype-linked-code"
-import { rehypeCJKSpacing } from "../transforms/rehype-cjk-spacing"
 import type { RehypeShikiPlugin } from "../syntax/rehype-shiki"
 
 /**
@@ -33,6 +32,9 @@ export interface PipelineOptions {
 
   /** Shiki plugin instance (required if includeShiki is true) */
   shikiPlugin?: RehypeShikiPlugin
+
+  /** CJK spacing plugin for the active runtime */
+  cjkSpacingPlugin?: PluggableList[number]
 }
 
 /**
@@ -103,11 +105,12 @@ export function buildRehypePlugins(
   }
 
   // CJK spacing should run last (after all other transforms)
-  plugins.push(rehypeCJKSpacing)
+  if (options.cjkSpacingPlugin) {
+    plugins.push(options.cjkSpacingPlugin)
+  }
 
   return plugins
 }
 
 // Re-export transforms for direct access if needed
 export { rehypeLinkedCode } from "../transforms/rehype-linked-code"
-export { rehypeCJKSpacing } from "../transforms/rehype-cjk-spacing"

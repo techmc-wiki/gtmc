@@ -29,7 +29,7 @@ type AppLocale = (typeof routing.locales)[number]
 
 async function getCachedMessages(locale: AppLocale) {
   "use cache"
-  cacheLife("days")
+  cacheLife("max")
 
   switch (locale) {
     case "en":

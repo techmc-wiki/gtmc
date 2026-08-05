@@ -54,7 +54,7 @@ export async function loadGlossaryManifest(): Promise<{
   entries: GlossaryEntry[]
 }> {
   "use cache"
-  cacheLife("hours")
+  cacheLife("max")
   cacheTag("glossary-manifest")
   return { entries: glossaryEntries }
 }

@@ -13,7 +13,7 @@ export async function getPublicChapterNav(
   locale: ArticleLocale = "zh",
 ): Promise<ChapterNavNode[]> {
   "use cache";
-  cacheLife("hours");
+  cacheLife("max");
   cacheTag("article-tree", `article-tree-${locale}`);
 
   return preparePublicChapterNav(await getCachedArticleTree(locale));

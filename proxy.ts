@@ -1,10 +1,11 @@
 import { auth } from "@/lib/auth"
+import type { NextAuthRequest } from "next-auth"
 import {
   isDevFixtureAuthEnabled,
   isLocalDevelopmentRequest,
 } from "@/lib/auth/dev-fixture-config"
 import createMiddleware from "next-intl/middleware"
-import type { NextRequest } from "next/server"
+import type { NextFetchEvent, NextRequest } from "next/server"
 import { routing } from "@/i18n/routing"
 
 const intlMiddleware = createMiddleware(routing)
@@ -57,23 +58,18 @@ function normalizeRedirectOrigin(
   return response
 }
 
-export default auth((req) => {
-  if (
-    isDevFixtureAuthEnabled() &&
-    isLocalDevelopmentRequest(req) &&
-    !req.auth?.user
-  ) {
-    const fixtureUrl = new URL("/api/auth/dev-fixture", getRequestOrigin(req))
-    fixtureUrl.searchParams.set(
-      "callbackUrl",
-      req.nextUrl.pathname + req.nextUrl.search
-    )
-    return Response.redirect(fixtureUrl)
-  }
+function isPrivateRequest(req: NextRequest): boolean {
+  const pathWithoutLocale =
+    req.nextUrl.pathname.replace(localePattern, "") || "/"
 
+  return privateRoutes.some(
+    (route) =>
+      pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`)
+  )
+}
+
+function handleIntlRequest(req: NextRequest): Response {
   const pathname = req.nextUrl.pathname
-  const locale = pathname.match(localePattern)?.[1] ?? routing.defaultLocale
-  const pathWithoutLocale = pathname.replace(localePattern, "") || "/"
 
   const invalidMatch = pathname.match(invalidLocalePrefixPattern)
   const invalidSegment = invalidMatch?.[1]?.toLowerCase()
@@ -83,20 +79,49 @@ export default auth((req) => {
     return Response.redirect(redirectUrl, 308)
   }
 
-  const isPrivateRoute = privateRoutes.some(
-    (route) =>
-      pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`)
-  )
-  if (isPrivateRoute) {
+  return normalizeRedirectOrigin(req, intlMiddleware(req))
+}
+
+const authenticatedProxy = auth(
+  (req: NextAuthRequest, event: NextFetchEvent) => {
+    void event
+
+    if (
+      isDevFixtureAuthEnabled() &&
+      isLocalDevelopmentRequest(req) &&
+      !req.auth?.user
+    ) {
+      const fixtureUrl = new URL("/api/auth/dev-fixture", getRequestOrigin(req))
+      fixtureUrl.searchParams.set(
+        "callbackUrl",
+        req.nextUrl.pathname + req.nextUrl.search
+      )
+      return Response.redirect(fixtureUrl)
+    }
+
+    const pathname = req.nextUrl.pathname
+    const locale = pathname.match(localePattern)?.[1] ?? routing.defaultLocale
+
     if (!req.auth?.user) {
       const loginUrl = new URL(`/${locale}/login`, getRequestOrigin(req))
       loginUrl.searchParams.set("callbackUrl", pathname + req.nextUrl.search)
       return Response.redirect(loginUrl)
     }
+
+    return handleIntlRequest(req)
+  }
+)
+
+export default function proxy(req: NextRequest, event: NextFetchEvent) {
+  if (
+    isPrivateRequest(req) ||
+    (isDevFixtureAuthEnabled() && isLocalDevelopmentRequest(req))
+  ) {
+    return authenticatedProxy(req, event)
   }
 
-  return normalizeRedirectOrigin(req, intlMiddleware(req))
-})
+  return handleIntlRequest(req)
+}
 
 export const config = {
   matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],

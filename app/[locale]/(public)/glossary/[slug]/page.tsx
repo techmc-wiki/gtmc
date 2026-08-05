@@ -13,7 +13,7 @@ const MAX_DESCRIPTION_LENGTH = 160
 
 async function getCachedGlossaryEntry(slug: string) {
   "use cache"
-  cacheLife("days")
+  cacheLife("max")
   return getGlossaryEntry(slug)
 }
 

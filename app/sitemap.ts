@@ -30,7 +30,7 @@ function lastModifiedFrom(value: string | undefined): Date {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   "use cache"
-  cacheLife("hours")
+  cacheLife("max")
 
   const BASE = getSiteUrl()
 

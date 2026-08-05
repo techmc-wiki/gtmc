@@ -14,7 +14,7 @@ import type { ArticleTreeNode } from "@/lib/github"
 export async function getCachedArticleTree(
   locale: ArticleLocale = "zh"
 ): Promise<ArticleTreeNode[]> {
-  cacheLife("hours")
+  cacheLife("max")
   cacheTag("article-tree", `article-tree-${locale}`)
 
   return getArticleTree(locale)
@@ -24,7 +24,7 @@ export async function getCachedLocalizedArticleEntry(
   slugPath: string,
   locale: ArticleLocale = "zh"
 ): Promise<(ArticleEntry & LocalizedArticleMetadata) | null> {
-  cacheLife("hours")
+  cacheLife("max")
   cacheTag("article-manifest", `article-entry-${locale}-${slugPath}`)
 
   return getLocalizedArticleEntry(slugPath, locale)
@@ -33,7 +33,7 @@ export async function getCachedLocalizedArticleEntry(
 export async function getCachedSlugForFilePath(
   filePath: string
 ): Promise<string | null> {
-  cacheLife("hours")
+  cacheLife("max")
   cacheTag("article-manifest")
 
   const normalizedFilePath = filePath.replace(/\.md$/i, "")

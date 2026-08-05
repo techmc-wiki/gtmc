@@ -142,7 +142,7 @@ export async function getArticleContentBySlug(
   locale: ArticleLocale
 ): Promise<ArticleContentArtifact | null> {
   "use cache"
-  cacheLife("hours")
+  cacheLife("max")
   cacheTag(`article-${locale}-${slug}`)
   if (locale !== "zh" && locale !== "en") {
     if (process.env.NODE_ENV === "development") {

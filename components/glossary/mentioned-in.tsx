@@ -19,7 +19,7 @@ async function findMentions(
   locale: ArticleLocale
 ): Promise<{ title: string; slug: string }[]> {
   "use cache"
-  cacheLife("hours")
+  cacheLife("max")
 
   const queries = shortForm ? [shortForm, termName] : [termName]
 

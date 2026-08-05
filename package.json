@@ -69,7 +69,7 @@
     "mime-types": "^3.0.2",
     "minisearch": "^7.2.0",
     "motion": "^12.43.0",
-    "next": "16.3.0-preview.10",
+    "next": "16.3.0",
     "next-auth": "5.0.0-beta.32",
     "next-intl": "^4.13.4",
     "node-diff3": "^3.2.1",
@@ -127,5 +127,5 @@
   "resolutions": {
     "form-data": "4.0.5"
   },
-  "packageManager": "pnpm@11.17.0+sha512.cca3cea332ad254bb84145f966d19f4879615210346fc92c79a047f23a0d7b3cca3c3792f0076ba1f1831d277efbcf0a9119b31a9a60eca7fb3d6231f331ef72"
+  "packageManager": "pnpm@11.20.0+sha512.9a6f330a95b66446ea088faf1521405a8a01f07fde7124cc9958dfed52d4bb436737e65b08f85f37b46fcba375092558ac51262b816844b22f63406ed166bfee"
 }

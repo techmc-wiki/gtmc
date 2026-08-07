@@ -86,7 +86,7 @@ export async function StatusPage({ kind }: StatusPageProps) {
             [ SYSTEM_ERROR ]
           </div>
           <div className="text-tech-main font-mono text-[0.625rem] tracking-widest opacity-30">
-            STATUS: {config.code} // {config.status}
+            {`STATUS: ${config.code} // ${config.status}`}
           </div>
         </div>
         <div className="text-tech-main absolute top-8 right-12 hidden space-y-1 text-right font-mono text-[0.625rem] opacity-40 select-none sm:block">

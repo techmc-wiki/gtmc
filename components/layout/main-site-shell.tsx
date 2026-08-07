@@ -4,12 +4,11 @@ import {
   AuthAwareDesktopNav,
   AuthAwareMobileNav,
 } from "@/components/layout/auth-aware-nav"
-import { DesktopNav } from "@/components/layout/desktop-nav"
-import { MobileNav } from "@/components/layout/mobile-nav"
+import { DesktopNav, MobileNav } from "@/components/layout/nav"
 import { AuthIsland } from "@/components/layout/auth-island"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
-import { SiteShell } from "@/components/layout/site-shell"
+import { PageTransition } from "@/components/layout/navigation-effects"
 import { SearchCommand } from "@/components/search/search-command"
 import { Logo } from "@/components/ui/logo"
 
@@ -116,13 +115,36 @@ export async function MainSiteShell({
   )
 
   return (
-    <SiteShell
-      leftSlot={leftSlot}
-      mainNavigationLabel={tCommonA11y("mainNavigation")}
-      rightSlot={rightSlot}
-      skipToMainContentLabel={tCommonA11y("skipToMainContent")}
-      fullBleed={fullBleed}>
-      {children}
-    </SiteShell>
+    <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative min-h-screen w-full font-sans">
+      <a
+        href="#main-content"
+        className="focus:bg-surface-overlay focus:border-tech-main focus:text-tech-main-dark sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:border focus:px-4 focus:py-2 focus:font-mono focus:text-xs focus:outline-none">
+        {tCommonA11y("skipToMainContent")}
+      </a>
+      <nav
+        aria-label={tCommonA11y("mainNavigation")}
+        className="border-tech-main/30 bg-surface-overlay/85 fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md">
+        <div className="bg-tech-signal absolute top-0 left-0 h-[3px] w-full" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between md:h-20">
+            <div className="flex items-center gap-4 md:gap-8">{leftSlot}</div>
+
+            <div className="flex items-center gap-2 md:gap-3">{rightSlot}</div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="flex min-h-screen w-full flex-col overflow-x-clip">
+        <div className="h-16 shrink-0 md:h-20" aria-hidden="true" />
+
+        <main
+          id="main-content"
+          className={`relative flex w-full flex-1 flex-col ${
+            fullBleed ? "" : "p-4 sm:p-6 lg:px-12 lg:py-8"
+          }`}>
+          <PageTransition>{children}</PageTransition>
+        </main>
+      </div>
+    </div>
   )
 }

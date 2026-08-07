@@ -2,13 +2,7 @@
 
 import * as React from "react"
 import { SessionProvider, useSession } from "next-auth/react"
-import { DesktopNav } from "@/components/layout/desktop-nav"
-import { MobileNav } from "@/components/layout/mobile-nav"
-
-interface NavLink {
-  href: string
-  label: string
-}
+import { DesktopNav, MobileNav, type NavLink } from "@/components/layout/nav"
 
 interface AuthAwareNavProps {
   navLinks: NavLink[]

@@ -6,10 +6,12 @@ import "../globals.css"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { ThemeProvider } from "@/lib/theme"
-import { FooterProvider } from "@/components/layout/footer-context"
+import {
+  FooterProvider,
+  FooterWrapper,
+} from "@/components/layout/footer-context"
 import Footer from "@/components/layout/footer"
-import { FooterWrapper } from "@/components/layout/footer-wrapper"
-import { ScrollRoot } from "@/components/layout/scroll-root"
+import { ScrollRoot } from "@/components/layout/navigation-effects"
 import { SpeculationRules } from "@/components/layout/speculation-rules"
 import { getSiteUrl } from "@/lib/site-url"
 import { buildOrganizationJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"

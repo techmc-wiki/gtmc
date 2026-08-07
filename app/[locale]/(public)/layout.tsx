@@ -9,6 +9,5 @@ export default async function PublicLayout({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
-
   return <MainSiteShell locale={locale}>{children}</MainSiteShell>
 }

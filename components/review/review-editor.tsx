@@ -19,11 +19,9 @@ import { ModeSelector } from "@/components/review/review-pickers"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { type OperationProgressState } from "@/components/ui/operation-progress"
 import { RebaseProgress } from "@/components/review/rebase-progress"
-import {
-  selectModeAction,
-  abortResolutionAction,
-  resolveConflictAction,
-} from "@/actions/review-conflict"
+import { selectModeAction } from "@/actions/review-conflict/select-mode"
+import { abortResolutionAction } from "@/actions/review-conflict/abort"
+import { resolveConflictAction } from "@/actions/review-conflict/resolve"
 import { finalizeReviewAction } from "@/actions/review-pr"
 import {
   normalizeDraftFileCollection,
@@ -105,6 +103,31 @@ function serializeEditorSegments(segments: EditorSegment[]) {
       segment.type === "text" ? segment.content : segment.marker
     )
     .join("")
+}
+function ConflictLines({
+  segmentId,
+  side,
+  content,
+}: {
+  segmentId: string
+  side: "ours" | "theirs"
+  content: string
+}) {
+  const className =
+    side === "ours"
+      ? "block border-l-2 border-red-300 bg-red-500/5 pl-2 text-red-900"
+      : "block border-l-2 border-blue-300 bg-blue-500/5 pl-2 text-blue-900"
+  let offset = 0
+
+  return content.split("\n").map((line) => {
+    const key = `${segmentId}-${side}-${offset}`
+    offset += line.length + 1
+    return (
+      <span key={key} className={className}>
+        {line || "\u00a0"}
+      </span>
+    )
+  })
 }
 
 function fileHasConflicts(file: ReviewFile, content: string) {
@@ -944,47 +967,19 @@ export function ReviewEditor({
                                   [accept theirs]
                                 </button>
                               </span>
-                              {
-                                segment.ours.split("\n").reduce<{
-                                  nodes: React.ReactNode[]
-                                  offset: number
-                                }>(
-                                  (acc, line) => {
-                                    acc.nodes.push(
-                                      <span
-                                        key={`${segment.id}-o${acc.offset}`}
-                                        className="block border-l-2 border-red-300 bg-red-500/5 pl-2 text-red-900">
-                                        {line || "\u00a0"}
-                                      </span>
-                                    )
-                                    acc.offset += line.length + 1
-                                    return acc
-                                  },
-                                  { nodes: [], offset: 0 }
-                                ).nodes
-                              }
+                              <ConflictLines
+                                segmentId={segment.id}
+                                side="ours"
+                                content={segment.ours}
+                              />
                               <span className="block border-l-2 border-gray-400 bg-gray-100 pl-2 text-gray-500">
                                 =======
                               </span>
-                              {
-                                segment.theirs.split("\n").reduce<{
-                                  nodes: React.ReactNode[]
-                                  offset: number
-                                }>(
-                                  (acc, line) => {
-                                    acc.nodes.push(
-                                      <span
-                                        key={`${segment.id}-t${acc.offset}`}
-                                        className="block border-l-2 border-blue-300 bg-blue-500/5 pl-2 text-blue-900">
-                                        {line || "\u00a0"}
-                                      </span>
-                                    )
-                                    acc.offset += line.length + 1
-                                    return acc
-                                  },
-                                  { nodes: [], offset: 0 }
-                                ).nodes
-                              }
+                              <ConflictLines
+                                segmentId={segment.id}
+                                side="theirs"
+                                content={segment.theirs}
+                              />
                               <span className="block border-l-2 border-blue-500 bg-blue-500/10 pl-2 font-bold text-blue-700">
                                 {">>>>>>> main"}
                               </span>

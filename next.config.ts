@@ -2,8 +2,10 @@ import type { NextConfig } from "next"
 import type * as ChildProcess from "child_process"
 import withBundleAnalyzer from "@next/bundle-analyzer"
 import createNextIntlPlugin from "next-intl/plugin"
+import createMDX from "@next/mdx"
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts")
+const withMDX = createMDX({})
 
 const remoteArticleAssetTraceExcludes = [
   "./articles/**",
@@ -126,4 +128,4 @@ const config =
     ? withBundleAnalyzer({ enabled: true })(nextConfig)
     : nextConfig
 
-export default withNextIntl(config)
+export default withNextIntl(withMDX(config))

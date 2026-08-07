@@ -79,6 +79,11 @@ const nextConfig: NextConfig = {
         destination: "https://qm.qq.com/q/OzhZSSm6A4",
         statusCode: 301,
       },
+      {
+        source: "/gh",
+        destination: "https://github.com/techmc-wiki/gtmc",
+        statusCode: 301,
+      },
     ]
   },
   outputFileTracingIncludes: {

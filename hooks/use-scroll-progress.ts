@@ -4,6 +4,7 @@ import * as React from "react"
 import {
   addSiteScrollListener,
   getSiteScrollMetrics,
+  getSiteScrollProgress,
 } from "@/hooks/site-scroll-root"
 
 interface ScrollProgressOptions {
@@ -22,12 +23,10 @@ export function useScrollProgress({
 
     const updateProgress = () => {
       animationFrame = null
-      const { clientHeight, scrollHeight, scrollTop } = getSiteScrollMetrics()
-      const docHeight = scrollHeight - clientHeight
-      const progress = docHeight > 0 ? scrollTop / docHeight : 0
-      const clampedProgress = Math.min(1, Math.max(0, progress))
+      const progress = getSiteScrollProgress()
+      const { scrollTop } = getSiteScrollMetrics()
 
-      setProgressPercentage(Math.round(clampedProgress * 100))
+      setProgressPercentage(Math.round(progress * 100))
 
       if (navbarThreshold !== undefined) {
         setHasScrolledPastNavbar(scrollTop > navbarThreshold)

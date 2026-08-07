@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { TechButton } from "@/components/ui/tech-button"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { StatusDot } from "@/components/ui/status"
-import { MergeMethodPicker } from "@/components/review/merge-method-picker"
+import { MergeMethodPicker } from "@/components/review/review-pickers"
 import {
   OperationProgress,
   type OperationProgressStage,

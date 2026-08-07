@@ -4,7 +4,6 @@ import {
   AuthAwareDesktopNav,
   AuthAwareMobileNav,
 } from "@/components/layout/auth-aware-nav"
-import { DesktopNav, MobileNav } from "@/components/layout/nav"
 import { AuthIsland } from "@/components/layout/auth-island"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
@@ -40,10 +39,6 @@ interface MainSiteShellProps {
    * auth-aware navigation resolves any admin-only links.
    */
   includeContributorLink?: boolean
-  /**
-   * If provided, skips the client-side AuthAware check and uses these links statically.
-   */
-  isAdminServerSide?: boolean
   fullBleed?: boolean
 }
 
@@ -51,7 +46,6 @@ export async function MainSiteShell({
   children,
   locale,
   includeContributorLink = false,
-  isAdminServerSide,
   fullBleed,
 }: MainSiteShellProps) {
   const [t, tCommonA11y] = await Promise.all([
@@ -63,7 +57,7 @@ export async function MainSiteShell({
   const adminLink = buildAdminLink(t)
 
   let initialLinks = baseLinks
-  if (includeContributorLink || isAdminServerSide !== undefined) {
+  if (includeContributorLink) {
     const glossaryIndex = initialLinks.findIndex(
       (link) => link.href === "/glossary"
     )
@@ -76,38 +70,26 @@ export async function MainSiteShell({
             ...initialLinks.slice(glossaryIndex + 1),
           ]
   }
-  let serverResolvedLinks = initialLinks
-  if (isAdminServerSide) {
-    serverResolvedLinks = [...serverResolvedLinks, adminLink]
-  }
 
   const leftSlot = (
     <>
       <Logo size="md" />
-      {isAdminServerSide !== undefined ? (
-        <DesktopNav navLinks={serverResolvedLinks} />
-      ) : (
-        <AuthAwareDesktopNav
-          navLinks={initialLinks}
-          contributorLink={contributorLink}
-          adminLink={adminLink}
-        />
-      )}
+      <AuthAwareDesktopNav
+        navLinks={initialLinks}
+        contributorLink={contributorLink}
+        adminLink={adminLink}
+      />
     </>
   )
 
   const rightSlot = (
     <>
       <SearchCommand />
-      {isAdminServerSide !== undefined ? (
-        <MobileNav navLinks={serverResolvedLinks} />
-      ) : (
-        <AuthAwareMobileNav
-          navLinks={initialLinks}
-          contributorLink={contributorLink}
-          adminLink={adminLink}
-        />
-      )}
+      <AuthAwareMobileNav
+        navLinks={initialLinks}
+        contributorLink={contributorLink}
+        adminLink={adminLink}
+      />
       <ThemeToggle className="hidden sm:flex" />
       <LanguageSwitcher className="hidden sm:flex" />
       <AuthIsland />

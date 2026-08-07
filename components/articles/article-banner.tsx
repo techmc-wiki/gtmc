@@ -20,6 +20,17 @@ const blueprintGridStyle: React.CSSProperties = {
   backgroundSize: "40px 40px",
 }
 
+function BannerCorners() {
+  return (
+    <>
+      <div className="pointer-events-none absolute top-2 left-2 size-4 border-t-2 border-l-2 border-tech-main/85 mix-blend-color-burn transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
+      <div className="pointer-events-none absolute top-2 right-2 size-4 border-t-2 border-r-2 border-tech-main/85 mix-blend-color-burn transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
+      <div className="pointer-events-none absolute bottom-2 left-2 size-4 border-b-2 border-l-2 border-tech-main/85 mix-blend-color-burn transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
+      <div className="pointer-events-none absolute right-2 bottom-2 size-4 border-r-2 border-b-2 border-tech-main/85 mix-blend-color-burn transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
+    </>
+  )
+}
+
 export function ArticleBanner({ src, alt }: ArticleBannerProps) {
   const bannerRef = useRef<HTMLDivElement>(null)
   const imgRef = useRef<HTMLElement>(null)
@@ -289,10 +300,7 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
           />
 
           {/* Corner brackets — expand on hover */}
-          <div className="pointer-events-none absolute top-2 left-2 size-4 border-t-2 border-l-2 border-tech-main/85 mix-blend-color-burn transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
-          <div className="pointer-events-none absolute top-2 right-2 size-4 border-t-2 border-r-2 border-tech-main/85 mix-blend-color-burn transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
-          <div className="pointer-events-none absolute bottom-2 left-2 size-4 border-b-2 border-l-2 border-tech-main/85 mix-blend-color-burn transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
-          <div className="pointer-events-none absolute right-2 bottom-2 size-4 border-r-2 border-b-2 border-tech-main/85 mix-blend-color-burn transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
+          <BannerCorners />
 
           {/* Crosshair — parallax until locked, then stays centered */}
           <div

@@ -491,12 +491,8 @@
     "title": "本文目录"
   },
   "Pdf": {
-    "download": "下载 PDF",
-    "label": "离线版 (PDF)",
     "metaDescription": "下载完整的《Graduate Texts in Minecraft》（GTMC）为单个离线 PDF，包含入门教程、机制详解、工程实践与源码分析。",
-    "metaTitle": "离线 PDF 下载",
-    "subtitle": "下载完整的 GTMC 文章。",
-    "title": "GTMC"
+    "metaTitle": "离线 PDF 下载"
   },
   "PeopleMention": {
     "bilibiliLabel": "bilibili",

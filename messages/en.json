@@ -491,12 +491,8 @@
     "title": "On this page"
   },
   "Pdf": {
-    "download": "Download PDF",
-    "label": "Offline Version (PDF)",
     "metaDescription": "Download the complete Graduate Texts in Minecraft as one offline PDF, with tutorials, mechanics deep-dives, and code analysis for technical Minecraft.",
-    "metaTitle": "Offline PDF Download",
-    "subtitle": "Download the full GTMC articles as a PDF.",
-    "title": "GTMC"
+    "metaTitle": "Offline PDF Download"
   },
   "PeopleMention": {
     "bilibiliLabel": "bilibili",

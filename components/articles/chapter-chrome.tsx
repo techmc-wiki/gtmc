@@ -29,6 +29,7 @@ function formatChapterLabel(
   return String(index).padStart(2, "0")
 }
 
+/** Running head above an article: chapter chip + breadcrumbs + section mark. */
 export function RunningHead({
   chapters,
   articleSlug,
@@ -77,5 +78,28 @@ export function RunningHead({
         §
       </a>
     </nav>
+  )
+}
+
+interface ChapterEndMarkProps {
+  isAdvanced?: boolean
+}
+
+/** Centered chapter-end colophon (three diamonds, accent in the middle). */
+export function ChapterEndMark({ isAdvanced }: ChapterEndMarkProps) {
+  const accent = isAdvanced ? "bg-tech-advanced" : "bg-tech-signal"
+
+  return (
+    <div
+      className="mt-14 flex items-center justify-center gap-4"
+      aria-hidden="true">
+      <span className="bg-tech-main/20 h-px w-20" />
+      <span className="flex items-center gap-1.5">
+        <span className="bg-tech-main/40 size-1 rotate-45" />
+        <span className={`${accent} size-1.5 rotate-45`} />
+        <span className="bg-tech-main/40 size-1 rotate-45" />
+      </span>
+      <span className="bg-tech-main/20 h-px w-20" />
+    </div>
   )
 }

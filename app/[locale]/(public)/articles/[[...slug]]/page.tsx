@@ -37,10 +37,11 @@ import { serializeJsonLd } from "@/lib/seo/json-ld"
 
 import { ArticleHighlight } from "@/components/articles/article-highlight"
 import { BookmarkRecorder } from "@/components/articles/bookmark-recorder"
-import { RunningHead } from "@/components/articles/running-head"
-import { ChapterEndMark } from "@/components/articles/chapter-end-mark"
-import { ArticleMetadataFull } from "@/components/articles/article-metadata-full"
-import { ArticleMetadataAnonymous } from "@/components/articles/article-metadata-anonymous"
+import { RunningHead, ChapterEndMark } from "@/components/articles/chapter-chrome"
+import {
+  ArticleMetadataFull,
+  ArticleMetadataAnonymous,
+} from "@/components/articles/article-metadata"
 import { ArticleNavigation } from "@/components/articles/article-navigation"
 import {
   getNavigationBreadcrumbs,

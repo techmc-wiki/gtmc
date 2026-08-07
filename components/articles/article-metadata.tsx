@@ -1,12 +1,168 @@
 "use client"
 
-import { formatAbsoluteTime, formatRelativeTime } from "@/lib/format-time"
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react"
 import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
-import { useState, useCallback, useEffect, useMemo } from "react"
-import { ArticleMetadataLayout } from "@/components/articles/article-metadata-layout"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { ArticleBanner } from "@/components/articles/article-banner"
 import { ArticleLicenseNotice } from "@/components/articles/article-license-notice"
+import { getArticleAssetPublicUrl } from "@/lib/articles/asset-url"
+import { formatAbsoluteTime, formatRelativeTime } from "@/lib/format-time"
+
+interface ArticleMetadataLayoutProps {
+  title: string
+  filePath: string
+  isAdvanced?: boolean
+  isRevising?: boolean
+  bannerPath?: string | null
+  bannerAlt?: string
+  pathLabel?: string
+  headerActions?: ReactNode
+  children: ReactNode
+}
+
+/** Shared article metadata frame: imprint strip + banner. */
+function ArticleMetadataLayout({
+  title,
+  filePath,
+  isAdvanced,
+  isRevising,
+  bannerPath,
+  bannerAlt,
+  pathLabel = "PATH:",
+  headerActions,
+  children,
+}: ArticleMetadataLayoutProps) {
+  const t = useTranslations("ArticleMeta")
+
+  return (
+    <header>
+      <CornerBrackets />
+
+      <div
+        className="
+          relative mb-5 animate-fade-in border guide-line bg-surface-overlay/80 p-3
+          font-mono text-xs text-tech-main
+          sm:mb-6 sm:p-3
+        ">
+        <div
+          className="
+            flex flex-wrap items-center gap-x-3 gap-y-2 text-tech-main/50
+          ">
+          {isAdvanced && (
+            <span
+              className="
+                bg-tech-advanced px-1.5 py-0.5 font-mono text-[0.625rem]
+                font-bold tracking-widest text-white select-none
+              ">
+              ADVANCED
+            </span>
+          )}
+          {isRevising ? (
+            <span
+              className="
+                border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5
+                font-mono text-[0.625rem] font-bold tracking-widest
+                text-amber-700 uppercase select-none
+                dark:text-amber-300
+              ">
+              {t("underRevision")}
+            </span>
+          ) : null}
+          <span
+            className="
+              hidden min-w-0 items-center gap-3
+              sm:inline-flex
+            ">
+            {pathLabel} {filePath}
+          </span>
+          {headerActions && <span className="ml-auto">{headerActions}</span>}
+        </div>
+
+        <div className="mt-2 flex flex-col gap-3 sm:gap-4">
+          {children}
+        </div>
+      </div>
+
+      {bannerPath && (
+        <ArticleBanner
+          src={getArticleAssetPublicUrl(bannerPath)}
+          alt={bannerAlt || title}
+        />
+      )}
+    </header>
+  )
+}
+
+interface ArticleMetadataAnonymousProps {
+  title: string
+  canonicalUrl: string
+  attributionDate?: string
+  filePath: string
+  wordCount: number
+  readingTime: number
+  isAdvanced?: boolean
+  isRevising?: boolean
+  bannerPath?: string | null
+  bannerAlt?: string
+}
+
+/** Anonymous-reader metadata: word count, reading time, and license. */
+export function ArticleMetadataAnonymous({
+  title,
+  canonicalUrl,
+  attributionDate,
+  filePath,
+  wordCount,
+  readingTime,
+  isAdvanced,
+  isRevising,
+  bannerPath,
+  bannerAlt,
+}: ArticleMetadataAnonymousProps) {
+  return (
+    <ArticleMetadataLayout
+      title={title}
+      filePath={filePath}
+      isAdvanced={isAdvanced}
+      isRevising={isRevising}
+      bannerPath={bannerPath}
+      bannerAlt={bannerAlt}
+      pathLabel="PATH:">
+      <div className="text-tech-main/60">
+        <p>
+          {"WORD_COUNT: "}
+          <span className="text-tech-main">
+            {wordCount.toLocaleString()}
+          </span>
+          <span
+            className="
+              hidden
+              sm:inline
+            ">
+            {" "}
+            |{" "}
+          </span>
+          <br
+            className="
+              block
+              sm:hidden
+            "
+          />
+          {"EST_READ_TIME: "}
+          <span className="text-tech-main">{readingTime} MIN</span>
+        </p>
+      </div>
+
+      <ArticleLicenseNotice
+        title={title}
+        canonicalUrl={canonicalUrl}
+        attributionDate={attributionDate}
+      />
+    </ArticleMetadataLayout>
+  )
+}
 
 interface ArticleMetadataFullProps {
   title: string
@@ -31,10 +187,7 @@ function getAvatarUrl(username: string) {
 
 const DEFAULT_CO_AUTHORS: string[] = []
 
-function collectContributors(author: string, coAuthors: string[]) {
-  return [author, ...coAuthors]
-}
-
+/** Signed-in-reader metadata: contributors, timestamps, edit + copy controls. */
 export function ArticleMetadataFull({
   title,
   author,
@@ -64,7 +217,7 @@ export function ArticleMetadataFull({
     setLastEditedLabel(formatRelativeTime(lastModified))
   }, [lastModified])
 
-  const allContributors = collectContributors(author, coAuthors)
+  const allContributors = [author, ...coAuthors]
   const displayContributors = allContributors.slice(0, 5)
   const remainingCount = allContributors.length - 5
 

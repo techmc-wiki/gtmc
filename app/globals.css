@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
+/* MDX page content (content/**) must be scanned for utility classes. */
+@source "../content/**/*.mdx";
+
 :root {
   color-scheme: light;
   --background: var(--color-tech-bg);

@@ -9,7 +9,6 @@ import { updateProfileAction } from "@/actions/profile"
 import { SignOutButton } from "@/components/ui/sign-out-button"
 import { getGithubEmailVisibility } from "@/lib/github"
 import { FormField } from "./form-field"
-import { MetadataRow } from "@/components/ui/metadata-row"
 
 export const metadata: Metadata = {
   title: "User Profile",
@@ -112,7 +111,12 @@ export default async function ProfilePage({
           </div>
 
           <div className="border-tech-main/30 flex flex-col items-start justify-between gap-3 border-b py-3 sm:flex-row sm:items-center sm:gap-4">
-            <MetadataRow label={t("assignedRole")} value={roleValue} />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <span className="mono-label font-bold text-zinc-500 sm:w-24">
+                {t("assignedRole")}
+              </span>
+              <span className="wrap-break-word">{roleValue}</span>
+            </div>
           </div>
 
           <div className="flex flex-col items-stretch justify-end gap-3 sm:gap-4 md:flex-row md:items-center md:gap-6">

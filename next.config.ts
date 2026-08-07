@@ -70,6 +70,15 @@ const nextConfig: NextConfig = {
     ],
   },
   cacheComponents: true,
+  redirects() {
+    return [
+      {
+        source: "/qq",
+        destination: "https://qm.qq.com/q/OzhZSSm6A4",
+        statusCode: 301,
+      },
+    ]
+  },
   outputFileTracingIncludes: {
     "/*": ["data/manifest.json"],
     "/\\[locale\\]/articles/\\[\\[\\.\\.\\.slug\\]\\]": ["data/articles/**"],

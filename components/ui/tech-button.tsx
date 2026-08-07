@@ -1,8 +1,10 @@
 import * as React from "react"
+import { cn } from "@/lib/cn"
 
 export interface TechButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "danger" | "ghost"
   size?: "sm" | "md" | "lg"
+  asChild?: boolean
   ref?: React.Ref<HTMLButtonElement>
 }
 
@@ -10,7 +12,11 @@ export function TechButton({
   className = "",
   variant = "primary",
   size = "md",
+  asChild = false,
+  children,
+  disabled,
   ref,
+  type,
   ...props
 }: TechButtonProps) {
   let baseStyles =
@@ -40,18 +46,46 @@ export function TechButton({
       " px-6 py-3 sm:px-8 sm:py-4 text-base min-h-[44px] sm:min-h-auto"
   }
 
+  const buttonClasses = cn(
+    baseStyles,
+    className,
+    "flex items-center justify-center"
+  )
+  const cornerMark =
+    variant !== "ghost" ? (
+      <span className="bg-tech-signal absolute right-0 bottom-0 size-1.5 opacity-80 transition-colors duration-300 group-hover:bg-current"></span>
+    ) : null
+
+  if (asChild) {
+    const child = React.Children.only(children) as React.ReactElement<
+      React.ButtonHTMLAttributes<HTMLButtonElement>
+    >
+
+    return React.cloneElement(
+      child,
+      {
+        ...props,
+        "aria-disabled": disabled || undefined,
+        className: cn(buttonClasses, child.props.className),
+      },
+      <span className="relative z-10 flex items-center justify-center gap-2">
+        {child.props.children}
+      </span>,
+      cornerMark
+    )
+  }
+
   return (
     <button
       ref={ref}
-      className={` ${baseStyles} ${className} flex items-center justify-center`} // 强制确保 button 是 flex 且居中
+      className={buttonClasses}
+      disabled={disabled}
+      type={type}
       {...props}>
       <span className="relative z-10 flex items-center justify-center gap-2">
-        {props.children}
+        {children}
       </span>
-
-      {variant !== "ghost" && (
-        <span className="bg-tech-signal absolute right-0 bottom-0 size-1.5 opacity-80 transition-colors duration-300 group-hover:bg-current"></span>
-      )}
+      {cornerMark}
     </button>
   )
 }

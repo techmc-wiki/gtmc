@@ -1,0 +1,16 @@
+<StatGrid variant="pair">
+  <StatCard label="作者" value={props.stats.authors} />
+  <StatCard label="已发布文章" value={props.stats.articles} />
+</StatGrid>
+
+## 维护者
+
+负责保障 GTMC 网站与出版系统正常运行的成员。
+
+<ProfileGrid profiles={props.maintainers} fallbackBio={props.fallbackBio} />
+
+## 所有贡献者
+
+按文章数量排序
+
+<ProfileGrid profiles={props.profiles} fallbackBio={props.fallbackBio} />

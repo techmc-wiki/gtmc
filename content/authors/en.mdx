@@ -1,0 +1,16 @@
+<StatGrid variant="pair">
+  <StatCard label="AUTHORS" value={props.stats.authors} />
+  <StatCard label="ARTICLES PUBLISHED" value={props.stats.articles} />
+</StatGrid>
+
+## Maintainers
+
+The people who keep GTMC's website and publishing systems working.
+
+<ProfileGrid profiles={props.maintainers} fallbackBio={props.fallbackBio} />
+
+## All Contributors
+
+Sorted by article count
+
+<ProfileGrid profiles={props.profiles} fallbackBio={props.fallbackBio} />

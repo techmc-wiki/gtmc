@@ -86,15 +86,9 @@
     "fallbackBio": "GTMC 贡献者",
     "maintainerLabel": "维护者",
     "maintainerStats": "{commits, number} 次提交 · {linesChanged, number} 行变更",
-    "maintainersDescription": "负责保障 GTMC 网站与出版系统正常运行的成员。",
-    "maintainersTitle": "维护者",
     "metaDescription": "认识 Graduate Texts in Minecraft（GTMC）的贡献者：撰写技术向 Minecraft 教程、机制解析与源码分析的作者们。",
     "pageDescription": "文本背后的人们",
     "pageTitle": "贡献者",
-    "sectionTitle": "所有贡献者",
-    "sortLabel": "按文章数量排序",
-    "statsArticles": "已发布文章",
-    "statsAuthors": "作者",
     "viewProfile": "查看主页 →"
   },
   "callouts": {

@@ -335,7 +335,13 @@
   },
   "forbidden": {
     "description": "You do not have permission to do this. Ask an admin to grant access and try again.",
+    "returnHome": "RETURN TO HOME →",
     "title": "Access denied"
+  },
+  "not-found": {
+    "description": "The requested path does not exist in the database. Please verify the coordinates and try again.",
+    "returnHome": "RETURN TO HOME →",
+    "title": "Resource not found"
   },
   "Glossary": {
     "categoriesSelectedCount": "{count, plural, one {# category selected} other {# categories selected}}",
@@ -652,6 +658,7 @@
   },
   "unauthorized": {
     "description": "Sign in with a valid session to access this page, then try again.",
+    "returnHome": "RETURN TO HOME →",
     "title": "Sign in required"
   }
 }

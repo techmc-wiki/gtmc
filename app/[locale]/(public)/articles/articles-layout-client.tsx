@@ -15,8 +15,10 @@ import {
 import { TriangleIcon } from "@/components/ui/icons"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import { useLocale, useTranslations } from "next-intl"
-import { OutlineRail } from "@/components/articles/outline-rail"
-import { MobileOutlineBar } from "@/components/articles/mobile-outline-bar"
+import {
+  OutlineRail,
+  MobileOutlineBar,
+} from "@/components/articles/outline-navigation"
 import { useFooterOverlap } from "@/hooks/use-footer-overlap"
 
 const treeDropInStyle: React.CSSProperties = {

@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@plugin "tailwindcss-animate";
+@import "tw-animate-css";
 
 /* MDX page content (content/**) must be scanned for utility classes. */
 @source "../content/**/*.mdx";

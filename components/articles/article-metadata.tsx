@@ -185,6 +185,38 @@ function getAvatarUrl(username: string) {
   return `https://github.com/${username}.png`
 }
 
+function AuthorAvatar({
+  username,
+  sizes,
+  imageSizes,
+  title,
+}: {
+  username: string
+  sizes: string
+  imageSizes: string
+  title?: string
+}) {
+  const href = `/authors/${encodeURIComponent(username)}`
+
+  return (
+    <span className={`relative border guide-line ${sizes}`}>
+      <Link
+        href={href}
+        aria-label={username}
+        className={`relative inline-block ${sizes}`}>
+        <Image
+          src={getAvatarUrl(username)}
+          alt={username}
+          className="border guide-line"
+          fill
+          title={title}
+          sizes={imageSizes}
+        />
+      </Link>
+    </span>
+  )
+}
+
 const DEFAULT_CO_AUTHORS: string[] = []
 
 /** Signed-in-reader metadata: contributors, timestamps, edit + copy controls. */
@@ -320,27 +352,11 @@ export function ArticleMetadataFull({
                 ">
                 <div className="flex flex-row items-center gap-2">
                   <span className="flex items-center gap-2">
-                    <span
-                      className="
-                        relative size-6 border guide-line
-                        sm:size-10
-                      ">
-                      <Link
-                        href={`/authors/${encodeURIComponent(author)}`}
-                        aria-label={author}
-                        className="
-                          relative inline-block size-6
-                          sm:size-10
-                        ">
-                        <Image
-                          src={getAvatarUrl(author)}
-                          alt={author}
-                          className="border guide-line"
-                          fill
-                          sizes="(max-width: 640px) 24px, 40px"
-                        />
-                      </Link>
-                    </span>
+                    <AuthorAvatar
+                      username={author}
+                      sizes="size-6 sm:size-10"
+                      imageSizes="(max-width: 640px) 24px, 40px"
+                    />
                     <Link
                       href={`/authors/${encodeURIComponent(author)}`}
                       className="text-xs text-tech-main underline">
@@ -358,28 +374,13 @@ export function ArticleMetadataFull({
                       ">
                       <span className="flex items-center gap-1">
                         {displayContributors.slice(1).map((contributor) => (
-                          <span
+                          <AuthorAvatar
                             key={contributor}
-                            className="
-                              relative size-4 border guide-line
-                              sm:size-6
-                            ">
-                            <Link
-                              href={`/authors/${encodeURIComponent(contributor)}`}
-                              aria-label={contributor}
-                              className="
-                                relative inline-block size-4
-                                sm:size-6
-                              ">
-                              <Image
-                                src={getAvatarUrl(contributor)}
-                                alt={contributor}
-                                fill
-                                title={contributor}
-                                sizes="(max-width: 640px) 16px, 24px"
-                              />
-                            </Link>
-                          </span>
+                            username={contributor}
+                            sizes="size-4 sm:size-6"
+                            imageSizes="(max-width: 640px) 16px, 24px"
+                            title={contributor}
+                          />
                         ))}
                         {remainingCount > 0 && (
                           <span className="ml-1 text-tech-main/60">

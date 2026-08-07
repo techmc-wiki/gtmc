@@ -6,6 +6,21 @@ import { TechBadge } from "@/components/ui/status"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { articleUrl } from "@/lib/articles/url"
 import { getManifestStats, type ArticleLocale } from "@/lib/articles/manifest"
+import type { ReactNode } from "react"
+
+interface FooterSectionProps {
+  label: string
+  children: ReactNode
+}
+
+function FooterSection({ label, children }: FooterSectionProps) {
+  return (
+    <nav aria-label={label}>
+      <h3 className="section-label">{label}</h3>
+      <ul className="mt-3 flex flex-col gap-2">{children}</ul>
+    </nav>
+  )
+}
 
 export default async function Footer() {
   const locale = (await getLocale()) as ArticleLocale
@@ -127,118 +142,107 @@ export default async function Footer() {
 
         {/* Link grid */}
         <div className="my-12 grid grid-cols-2 gap-6 sm:grid-cols-4">
-          <nav aria-label={t("sectionRead")}>
-            <h3 className="section-label">{t("sectionRead")}</h3>
-            <ul className="mt-3 flex flex-col gap-2">
-              <li>
-                <Link
-                  href={articleUrl("Preface")}
-                  className="footer-link text-tech-main text-sm">
-                  {t("linkPreface")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/articles"
-                  className="footer-link text-tech-main text-sm">
-                  {t("linkArticles")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/glossary"
-                  className="footer-link text-tech-main text-sm">
-                  {t("linkGlossary")}
-                </Link>
-              </li>
-            </ul>
-          </nav>
-          <nav aria-label={t("sectionCommunity")}>
-            <h3 className="section-label">{t("sectionCommunity")}</h3>
-            <ul className="mt-3 flex flex-col gap-2">
-              <li>
-                <Link
-                  href="/draft"
-                  className="footer-link text-tech-main text-sm">
-                  {t("linkContribute")}
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/techmc-wiki"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="footer-link text-tech-main text-sm">
-                  {t("linkTeam")}
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/techmc-wiki/gtmc/issues"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="footer-link text-tech-main text-sm">
-                  {t("linkIssues")}
-                </a>
-              </li>
-              <li>
-                <Link
-                  href="/about"
-                  className="footer-link text-tech-main text-sm">
-                  {t("linkAbout")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/authors"
-                  className="footer-link text-tech-main text-sm">
-                  {t("linkAuthors")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/editorial-policy"
-                  className="footer-link text-tech-main text-sm">
-                  {t("linkEditorialPolicy")}
-                </Link>
-              </li>
-            </ul>
-          </nav>
-          <nav aria-label={t("sectionSource")}>
-            <h3 className="section-label">{t("sectionSource")}</h3>
-            <ul className="mt-3 flex flex-col gap-2">
-              <li>
-                <a
-                  href="https://github.com/techmc-wiki/gtmc"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="footer-link text-tech-main text-sm">
-                  {t("linkRepository")}
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/techmc-wiki/gtmc/blob/main/LICENSE"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="footer-link text-tech-main text-sm">
-                  Apache-2.0
-                </a>
-              </li>
-            </ul>
-          </nav>
-          <nav aria-label={t("sectionDownload")}>
-            <h3 className="section-label">{t("sectionDownload")}</h3>
-            <ul className="mt-3 flex flex-col gap-2">
-              <li>
-                <Link
-                  href="/pdf"
-                  className="footer-link text-tech-main text-sm">
-                  {t("offlinePdf")}
-                </Link>
-              </li>
-            </ul>
-          </nav>
+          <FooterSection label={t("sectionRead")}>
+            <li>
+              <Link
+                href={articleUrl("Preface")}
+                className="footer-link text-tech-main text-sm">
+                {t("linkPreface")}
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/articles"
+                className="footer-link text-tech-main text-sm">
+                {t("linkArticles")}
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/glossary"
+                className="footer-link text-tech-main text-sm">
+                {t("linkGlossary")}
+              </Link>
+            </li>
+          </FooterSection>
+
+          <FooterSection label={t("sectionCommunity")}>
+            <li>
+              <Link
+                href="/draft"
+                className="footer-link text-tech-main text-sm">
+                {t("linkContribute")}
+              </Link>
+            </li>
+            <li>
+              <a
+                href="https://github.com/techmc-wiki"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link text-tech-main text-sm">
+                {t("linkTeam")}
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://github.com/techmc-wiki/gtmc/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link text-tech-main text-sm">
+                {t("linkIssues")}
+              </a>
+            </li>
+            <li>
+              <Link
+                href="/about"
+                className="footer-link text-tech-main text-sm">
+                {t("linkAbout")}
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/authors"
+                className="footer-link text-tech-main text-sm">
+                {t("linkAuthors")}
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/editorial-policy"
+                className="footer-link text-tech-main text-sm">
+                {t("linkEditorialPolicy")}
+              </Link>
+            </li>
+          </FooterSection>
+
+          <FooterSection label={t("sectionSource")}>
+            <li>
+              <a
+                href="https://github.com/techmc-wiki/gtmc"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link text-tech-main text-sm">
+                {t("linkRepository")}
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://github.com/techmc-wiki/gtmc/blob/main/LICENSE"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link text-tech-main text-sm">
+                Apache-2.0
+              </a>
+            </li>
+          </FooterSection>
+
+          <FooterSection label={t("sectionDownload")}>
+            <li>
+              <Link href="/pdf" className="footer-link text-tech-main text-sm">
+                {t("offlinePdf")}
+              </Link>
+            </li>
+          </FooterSection>
         </div>
 
         <div className="border-tech-main/15 my-8 border-t" />

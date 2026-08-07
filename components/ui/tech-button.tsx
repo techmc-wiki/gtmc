@@ -5,6 +5,7 @@ export interface TechButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
   variant?: "primary" | "secondary" | "danger" | "ghost"
   size?: "sm" | "md" | "lg"
   asChild?: boolean
+  /** Applies only when rendering a button; ignored when asChild is true. */
   ref?: React.Ref<HTMLButtonElement>
 }
 
@@ -58,18 +59,47 @@ export function TechButton({
 
   if (asChild) {
     const child = React.Children.only(children) as React.ReactElement<
-      React.ButtonHTMLAttributes<HTMLButtonElement>
+      Record<string, unknown>
     >
+    const childClassName =
+      typeof child.props.className === "string"
+        ? child.props.className
+        : undefined
+    const childOnClick =
+      typeof child.props.onClick === "function"
+        ? (child.props.onClick as React.MouseEventHandler<HTMLButtonElement>)
+        : undefined
+    // Parent handlers run before the child's own handler.
+    const onClick =
+      props.onClick && childOnClick
+        ? (event: React.MouseEvent<HTMLButtonElement>) => {
+            props.onClick?.(event)
+            childOnClick(event)
+          }
+        : props.onClick || childOnClick
+    const anchorSafeProps: Record<string, unknown> = {
+      className: cn(buttonClasses, childClassName),
+      onClick,
+      id: props.id,
+      title: props.title,
+      "aria-label": props["aria-label"],
+      "aria-current": props["aria-current"],
+      role: props.role,
+    }
+
+    for (const [key, value] of Object.entries(props)) {
+      if (key.startsWith("aria-") || key.startsWith("data-")) {
+        anchorSafeProps[key] = value
+      }
+    }
+
+    anchorSafeProps["aria-disabled"] = disabled || undefined
 
     return React.cloneElement(
       child,
-      {
-        ...props,
-        "aria-disabled": disabled || undefined,
-        className: cn(buttonClasses, child.props.className),
-      },
+      anchorSafeProps,
       <span className="relative z-10 flex items-center justify-center gap-2">
-        {child.props.children}
+        {child.props.children as React.ReactNode}
       </span>,
       cornerMark
     )

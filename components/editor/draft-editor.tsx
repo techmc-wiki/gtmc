@@ -21,13 +21,11 @@ import { FieldBox } from "../ui/field-box"
 import {
   EditorSurface,
   EditorActions,
-} from "@/components/editor/editor-surface"
-import {
   EditorContentArea,
   EditorWritePanel,
   EditorPreviewPanel,
   EditorPreviewFrame,
-} from "@/components/editor/editor-preview-frame"
+} from "@/components/editor/editor-frames"
 
 interface DraftEditorProps {
   initialData?: {

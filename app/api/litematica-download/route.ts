@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import path from "path"
-import { getArticleRemoteBuffer } from "@/lib/articles/remote-assets"
+import { getRepoFileBuffer } from "@/lib/github/sync"
 import { getSiteUrl } from "@/lib/site-url"
 
 const ALLOWED_REMOTE_HOSTNAMES = new Set<string>()
@@ -154,13 +154,13 @@ function normalizeArticleRepoPath(input: string) {
 }
 
 async function getRemoteLitematicaBuffer(filePath: string) {
-  const direct = await getArticleRemoteBuffer(filePath)
+  const direct = await getRepoFileBuffer(filePath)
   if (direct || !filePath.toLowerCase().endsWith(".zip")) {
     return { buffer: direct, resolvedFromZip: false }
   }
 
   const siblingLitematicPath = filePath.replace(/\.zip$/i, ".litematic")
-  const sibling = await getArticleRemoteBuffer(siblingLitematicPath)
+  const sibling = await getRepoFileBuffer(siblingLitematicPath)
   return { buffer: sibling, resolvedFromZip: Boolean(sibling) }
 }
 

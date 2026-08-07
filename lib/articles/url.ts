@@ -1,13 +1,24 @@
 import { encodeSlug } from "@/lib/articles/slug-resolver"
 
+const ARTICLE_ASSET_PUBLIC_PREFIX = "/article-assets"
+
 /**
  * Constructs a consistent article URL with proper encoding.
  * Encodes each slug segment individually to match tree-node.tsx pattern.
- * @param slug - The article slug (e.g., "tree-farm/basics" or "Chapter 1/Section 2")
- * @returns The encoded article URL (e.g., "/articles/tree-farm/basics" or "/articles/Chapter%201/Section%202")
  */
 export function articleUrl(slug: string): string {
   return `/articles/${encodeSlug(slug)}`
+}
+
+export function getArticleAssetPublicUrl(assetPath: string): string {
+  if (assetPath.startsWith("https://") || assetPath.startsWith("http://")) {
+    return assetPath
+  }
+
+  return `${ARTICLE_ASSET_PUBLIC_PREFIX}/${assetPath
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/")}`
 }
 
 

@@ -4,7 +4,7 @@ export function resolveArticleAssetPath(
   assetSrc: string | undefined,
   articleFilePath: string
 ): string | null {
-  if (!assetSrc || typeof assetSrc !== "string") return null
+  if (!assetSrc) return null
 
   const trimmedSrc = assetSrc.trim()
   if (!trimmedSrc) return null

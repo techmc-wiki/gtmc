@@ -9,7 +9,7 @@ import {
 import { getCachedLocalizedArticleEntry } from "@/lib/articles/manifest-cached"
 import { getArticleContentBySlug } from "@/lib/articles/content"
 import { resolveArticleAssetPath } from "@/lib/articles/article-asset-path"
-import { getArticleRemoteBuffer } from "@/lib/articles/remote-assets"
+import { getRepoFileBuffer } from "@/lib/github/sync"
 import { calculateReadingMetrics } from "@/lib/markdown/reading-metrics"
 import { getSiteUrl } from "@/lib/site-url"
 
@@ -219,7 +219,7 @@ export async function GET(
       const resolvedBannerPath = resolveArticleAssetPath(bannerSrc, filePath)
       if (!resolvedBannerPath) throw new Error("Invalid banner path")
 
-      const buf = await getArticleRemoteBuffer(resolvedBannerPath)
+      const buf = await getRepoFileBuffer(resolvedBannerPath)
       if (buf) {
         const mt = mime.lookup(bannerSrc) || "image/png"
         bannerDataUri = `data:${mt};base64,${Buffer.from(buf).toString("base64")}`

@@ -1,7 +1,8 @@
-import { GLOSSARY_REPO, getOctokit } from "@/lib/github/repos"
 import { getMainBranchHeadSha, upsertFileOnBranch } from "@/lib/github/branch"
-import { GLOSSARY_MAIN_BRANCH, GLOSSARY_CSV_PATH } from "./repo"
+import { GLOSSARY_REPO, getOctokit } from "@/lib/github/repos"
 
+const GLOSSARY_MAIN_BRANCH = "main"
+const GLOSSARY_CSV_PATH = "TechMC Glossary.csv"
 export interface GlossaryPrInput {
   csvContent: string
   title: string

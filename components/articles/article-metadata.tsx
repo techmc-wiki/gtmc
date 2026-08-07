@@ -7,7 +7,7 @@ import { Link } from "@/i18n/navigation"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { ArticleBanner } from "@/components/articles/article-banner"
 import { ArticleLicenseNotice } from "@/components/articles/article-license-notice"
-import { getArticleAssetPublicUrl } from "@/lib/articles/asset-url"
+import { getArticleAssetPublicUrl } from "@/lib/articles/url"
 import { formatAbsoluteTime, formatRelativeTime } from "@/lib/format-time"
 
 interface ArticleMetadataLayoutProps {

@@ -5,11 +5,11 @@ import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 
 import { GlossaryEditToolbar } from "@/components/glossary/glossary-edit-toolbar"
-import { ComplexChangesNotice } from "@/components/glossary/complex-changes-notice"
+import { ComplexChangesNotice } from "@/components/glossary/glossary-notices"
 import { GlossaryRowPicker } from "@/components/glossary/glossary-row-picker"
 import { GlossaryEditCard } from "@/components/glossary/glossary-edit-card"
 import { GlossaryDiffPreview } from "@/components/glossary/glossary-diff-preview"
-import { AttributionWarning } from "@/components/glossary/attribution-warning"
+import { AttributionWarning } from "@/components/glossary/glossary-notices"
 import {
   OperationProgress,
   type OperationProgressState,

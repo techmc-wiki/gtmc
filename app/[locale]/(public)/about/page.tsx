@@ -10,7 +10,7 @@ import {
 } from "@/lib/articles/person-resolver"
 import { buildWebPageJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
 import type { ArticleLocale } from "@/lib/articles/manifest"
-import type { ContributorGridAuthor } from "@/components/mdx/contributor-grid"
+import type { AuthorGridItem } from "@/components/mdx/author-grid"
 import AboutContentEn from "@/content/about/en.mdx"
 import AboutContentZh from "@/content/about/zh.mdx"
 
@@ -68,7 +68,7 @@ export default async function AboutPage({
   const stats = getManifestStats(articleLocale)
   const manifest = loadArticleManifest()
   const allAuthors = getUniqueAuthors(manifest)
-  const previewAuthors: ContributorGridAuthor[] = allAuthors
+  const previewAuthors: AuthorGridItem[] = allAuthors
     .map((handle) => ({
       handle,
       person: resolveAuthorPerson(handle),

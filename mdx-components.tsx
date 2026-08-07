@@ -1,9 +1,7 @@
 import type { MDXComponents } from "mdx/types"
 import { SectionTitle } from "@/components/ui/headings"
-import { StatCard } from "@/components/mdx/stat-card"
-import { StatGrid } from "@/components/mdx/stat-grid"
-import { ContributorGrid } from "@/components/mdx/contributor-grid"
-import { ProfileGrid } from "@/components/mdx/profile-grid"
+import { StatCard, StatGrid } from "@/components/mdx/stats"
+import { AuthorGrid } from "@/components/mdx/author-grid"
 import { DownloadButton } from "@/components/mdx/download-button"
 
 /**
@@ -46,8 +44,7 @@ const components: MDXComponents = {
   ),
   StatGrid,
   StatCard,
-  ContributorGrid,
-  ProfileGrid,
+  AuthorGrid,
   DownloadButton,
 }
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
-import { PageHeader } from "@/components/ui/page-header"
+import { PageHeader } from "@/components/ui/headings"
 import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
 import { getManifestStats, loadArticleManifest } from "@/lib/articles/manifest"
 import {

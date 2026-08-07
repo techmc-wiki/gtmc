@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import * as React from "react"
-import { StatusDot } from "@/components/ui/status-dot"
+import { StatusDot } from "@/components/ui/status"
 import {
   FileListSidebar,
   FileListHeader,

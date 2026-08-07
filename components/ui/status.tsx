@@ -1,5 +1,23 @@
 import { cn } from "@/lib/cn"
 
+interface TechBadgeProps {
+  children: React.ReactNode
+  className?: string
+}
+
+/** Bordered mono status chip, e.g. `[Pending]`. */
+export function TechBadge({ children, className }: TechBadgeProps) {
+  return (
+    <span
+      className={cn(
+        "shrink-0 border px-2 py-0.5 font-mono text-xs tracking-wider",
+        className
+      )}>
+      {children}
+    </span>
+  )
+}
+
 type StatusDotVariant =
   | "main"
   | "accent"
@@ -51,6 +69,7 @@ const variantClasses: Record<StatusDotVariant, Record<"sm" | "md", string>> = {
   },
 }
 
+/** Small colored indicator dot for live/status readouts. */
 export function StatusDot({
   size = "md",
   variant = "main",

@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
-import { InputBox } from "@/components/ui/input-box"
+import { FieldBox } from "@/components/ui/field-box"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { updateProfileAction } from "@/actions/profile"
 import { SignOutButton } from "@/components/ui/sign-out-button"
@@ -76,7 +76,7 @@ export default async function ProfilePage() {
             />
 
             <FormField label={t("avatarUrlLabel")} className="w-full flex-1">
-              <InputBox
+              <FieldBox
                 name="image"
                 defaultValue={user.image || ""}
                 placeholder="https://..."
@@ -88,7 +88,7 @@ export default async function ProfilePage() {
 
           <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
             <FormField label={t("usernameLabel")}>
-              <InputBox
+              <FieldBox
                 name="name"
                 defaultValue={user.name || ""}
                 required
@@ -96,7 +96,7 @@ export default async function ProfilePage() {
               />
             </FormField>
             <FormField label={emailLabel}>
-              <InputBox
+              <FieldBox
                 defaultValue={user.email || ""}
                 disabled
                 className="bg-tech-main/5 text-tech-main/60 w-full cursor-not-allowed rounded-none border font-mono text-xs tracking-wide shadow-none sm:text-sm"

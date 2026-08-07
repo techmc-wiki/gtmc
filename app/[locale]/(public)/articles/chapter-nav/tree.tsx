@@ -1,5 +1,5 @@
 import { Link } from "@/i18n/navigation"
-import { TriangleIcon } from "@/components/ui/triangle-icon"
+import { TriangleIcon } from "@/components/ui/icons"
 import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
 import { partitionAppendixNodes } from "@/lib/articles/navigation-data"
 import { encodeSlug } from "@/lib/articles/slug-resolver"

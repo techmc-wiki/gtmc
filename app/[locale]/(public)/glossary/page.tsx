@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
-import { PageHeader } from "@/components/ui/page-header"
+import { PageHeader } from "@/components/ui/headings"
 import { GlossaryToolbar } from "@/components/glossary/glossary-toolbar"
 import { loadGlossaryManifest } from "@/lib/glossary/manifest"
 import { toAbsoluteUrl } from "@/lib/site-url"

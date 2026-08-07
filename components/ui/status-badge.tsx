@@ -1,30 +1,13 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { cn } from "@/lib/cn"
-import React from "react"
-
-interface TechBadgeProps {
-  children: React.ReactNode
-  className?: string
-}
-
-export function TechBadge({ children, className }: TechBadgeProps) {
-  return (
-    <span
-      className={cn(
-        "shrink-0 border px-2 py-0.5 font-mono text-xs tracking-wider",
-        className
-      )}>
-      {children}
-    </span>
-  )
-}
+import { TechBadge } from "@/components/ui/status"
 
 interface StatusBadgeProps {
   status: string
 }
 
+/** Localized draft-status chip (DRAFT, IN_REVIEW, SYNC_CONFLICT, …). */
 export function DraftStatusBadge({ status }: StatusBadgeProps) {
   const t = useTranslations("Status")
   let label = status
@@ -82,6 +65,7 @@ interface ReviewStatusBadgeProps {
   prNumber?: number
 }
 
+/** Review-hub status chip (PR, conflict, resolution mode). */
 export function ReviewStatusBadge({
   variant,
   prNumber,

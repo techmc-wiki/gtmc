@@ -1,0 +1,38 @@
+## 我们的使命
+
+Graduate Texts in Minecraft（GTMC）是一个面向 Minecraft 技术玩法的开放知识库。我们发布教程、机制解析和带注释的源码分析，所有内容都由社区编写和审阅。
+
+我们以学术专著丛书为参考：内容严谨、结构清晰，覆盖从生产型建筑、红石工程到引擎刻级内部原理的技术玩法全栈。
+
+## 文本现状
+
+<StatGrid>
+  <StatCard label="已发布文章" value={props.stats.articleCount} />
+  <StatCard label="贡献者" value={props.stats.contributors} />
+  <StatCard label="语言" value="中文和英文" />
+  <StatCard label="最近修订" value={props.stats.lastRevision} />
+</StatGrid>
+
+## 贡献者
+
+文章由有技术向 Minecraft 实践经验的社区成员撰写。每位贡献者在特定子系统上有深入研究，例如红石时序或区块加载内部原理。
+
+<ContributorGrid
+  authors={props.previewAuthors}
+  viewAllLabel="查看所有贡献者 →"
+/>
+
+## 参与贡献
+
+GTMC 依靠社区贡献成长。你可以在网站上直接起草和提交文章，或参与代码库开发。
+
+- **撰写文章** — 通过内置编辑器起草、预览和提交文章。
+- **贡献代码** — 网站代码是开源的，欢迎提交错误报告、改进建议和新功能。
+
+[GitHub 仓库](https://github.com/techmc-wiki/gtmc) · [文章仓库](https://github.com/techmc-wiki/Articles)
+
+## 许可证
+
+网站代码使用 Apache-2.0 许可证。
+
+文章内容使用 CC BY-NC-SA 4.0 许可证。

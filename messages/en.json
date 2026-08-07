@@ -1,31 +1,8 @@
 {
   "About": {
-    "contributeArticles": "Write an Article",
-    "contributeArticlesDescription": "Draft, preview, and submit articles through the built-in editor.",
-    "contributeBody": "GTMC grows through community contributions. Draft and submit articles on the site, or help build the codebase.",
-    "contributeCode": "Contribute Code",
-    "contributeCodeDescription": "The website is open source. Bug reports, improvements, and new features are welcome.",
-    "contributeTitle": "Contribute",
-    "licenseArticles": "Article content is licensed under CC BY-NC-SA 4.0.",
-    "licenseCode": "Website code is licensed under Apache-2.0.",
-    "licenseSectionTitle": "License",
-    "linkArticlesRepo": "Articles Repository",
-    "linkGitHub": "GitHub Repository",
     "metaDescription": "Graduate Texts in Minecraft (GTMC) is a community-written open textbook on technical Minecraft: redstone, game mechanics, chunk systems, and engine internals.",
-    "missionBody": "Graduate Texts in Minecraft (GTMC) is an open knowledge base for the technical side of Minecraft. We publish tutorials, mechanics explanations, and annotated source-code readings, all written and reviewed by the community.",
-    "missionBody2": "We follow the example of an academic monograph series: rigorous, structured writing that covers the whole stack of technical play, from production farms and redstone engineering to the tick-by-tick details of the engine.",
-    "missionTitle": "Our Mission",
     "pageDescription": "About this project",
-    "pageTitle": "About GTMC",
-    "statsArticles": "ARTICLES PUBLISHED",
-    "statsContributors": "CONTRIBUTORS",
-    "statsLanguages": "LANGUAGES",
-    "statsLanguagesValue": "Chinese & English",
-    "statsLastRevision": "LAST REVISION",
-    "statsTitle": "The Text So Far",
-    "teamDescription": "Articles are written by community members who actually build and break things in technical Minecraft. Each contributor specializes in specific subsystems, from redstone timing to chunk loading internals.",
-    "teamTitle": "Contributors",
-    "teamViewAll": "View all contributors →"
+    "pageTitle": "About GTMC"
   },
   "Article": {
     "notFound": "Article Not Found",

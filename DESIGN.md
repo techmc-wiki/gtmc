@@ -98,24 +98,24 @@ Tokens and global styles
 - `app/[locale]/layout.tsx` — root locale shell, font injection, footer wrapper.
 
 Layout and navigation
-- `components/layout/site-shell.tsx`, `desktop-nav.tsx`, `mobile-nav.tsx`, `auth-aware-nav.tsx`, `auth-island.tsx`, `language-switcher.tsx`, `footer.tsx`, `footer-wrapper.tsx`, `footer-context.tsx`.
+- `components/layout/main-site-shell.tsx`, `nav.tsx`, `auth-aware-nav.tsx`, `auth-island.tsx`, `language-switcher.tsx`, `theme-toggle.tsx`, `footer.tsx`, `footer-context.tsx`, `navigation-effects.tsx`.
 
 Core primitives
-- `components/ui/tech-card.tsx`, `tech-button.tsx`, `input-box.tsx`, `textarea-box.tsx`, `corner-brackets.tsx`, `selectable-card.tsx`, `segmented-control.tsx`.
+- `components/ui/tech-card.tsx`, `tech-button.tsx`, `field-box.tsx`, `corner-brackets.tsx`, `selectable-card.tsx`, `segmented-control.tsx`, `icons.tsx`.
 
 Headings, status, metadata
-- `components/ui/page-header.tsx`, `section-title.tsx`, `status-badge.tsx`, `status-dot.tsx`, `tag-list.tsx`, `metadata-row.tsx`, `empty-state.tsx`, `loading-indicator.tsx`.
+- `components/ui/headings.tsx`, `status.tsx`, `status-badge.tsx`, `metadata-row.tsx`, `empty-state.tsx`, `loading-indicator.tsx`.
 
 Loading and progress
 - `components/ui/loading-shell-primitives.tsx`, `operation-progress.tsx`.
 
 Editor and review subsystems
-- `components/editor/editor-surface.tsx`, `editor-toolbar-shell.tsx`, `editor-tab-strip.tsx`, `editor-textarea.tsx`, `editor-preview-frame.tsx`.
-- `components/review/review-editor.tsx`, `conflict-block.tsx`, `rebase-progress.tsx`.
+- `components/editor/editor-frames.tsx`, `editor-toolbar-shell.tsx`, `editor-tab-strip.tsx`, `editor-textarea.tsx`.
+- `components/review/review-editor.tsx`, `conflict-block.tsx`, `rebase-progress.tsx`, `review-pickers.tsx`.
 
 Article reader
 - `app/[locale]/(public)/articles/articles-layout-client.tsx`, `chapter-nav-panel.tsx`, `chapter-nav/tree.tsx`, `mobile-chapter-nav-card.tsx`.
-- `components/articles/article-metadata-layout.tsx`, `article-metadata-full.tsx`, `article-navigation.tsx`, `outline-rail.tsx`, `mobile-outline-bar.tsx`.
+- `components/articles/article-metadata.tsx`, `article-navigation.tsx`, `outline-navigation.tsx`, `chapter-chrome.tsx`.
 - `lib/markdown/components/*` — custom markdown rendering (no `prose` plugin).
 
 Homepage
@@ -244,7 +244,7 @@ Use this grid only when the page has asymmetric column allocations (sidebars, ra
 
 ## Navigation
 
-Path: `components/layout/{site-shell,desktop-nav,mobile-nav,auth-aware-nav,auth-island,language-switcher}.tsx`.
+Path: `components/layout/{main-site-shell,nav,auth-aware-nav,auth-island,language-switcher}.tsx`.
 
 Site shell
 - `SiteShell` is the canonical frame: a sticky translucent top nav (`sticky top-0 z-50 border-b bg-white/60 backdrop-blur-sm`) over a full-width `main`.
@@ -275,7 +275,7 @@ There is no single universal card. Several surface systems coexist; each is inte
 - Real props include: `tone`, `borderOpacity`, `background`, `padding`, `hover`, `brackets`, `bracketVariant`, `pattern` (`grid` only — `dots` is defined but unused).
 - Conventions: thin `border-tech-main/40` borders, near-square geometry, optional `CornerBrackets`, hover changes border/fill opacity rather than adding elevation.
 
-Editor surfaces (`components/editor/editor-surface.tsx`)
+Editor surfaces (`components/editor/editor-frames.tsx`)
 - A separate frame system used by the draft editor.
 - Two visible variants: `default` (white/80 panel) and `grid` (grid-paper texture with inset shadow and corner ticks).
 - Pairs with `EditorToolbarShell`, `EditorTabStrip`, `EditorTextarea` (CodeMirror), and `EditorPreviewFrame`.

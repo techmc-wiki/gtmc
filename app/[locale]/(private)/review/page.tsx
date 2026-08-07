@@ -155,11 +155,9 @@ export default async function ReviewHubPage() {
           {t("accessDenied")}
         </h1>
         <p className="mt-4 text-xl font-bold">{t("adminRequired")}</p>
-        <Link href="/">
-          <TechButton variant="primary" className="mt-8">
-            {t("returnToBase")}
-          </TechButton>
-        </Link>
+        <TechButton asChild variant="primary" className="mt-8">
+          <Link href="/">{t("returnToBase")}</Link>
+        </TechButton>
       </div>
     )
   }
@@ -252,13 +250,14 @@ export default async function ReviewHubPage() {
       </div>
 
       <div className="relative z-10 flex w-full flex-col gap-4 md:w-auto md:flex-row">
-        <Link href={`/review/${pr.number}`} className="w-full md:w-auto">
-          <TechButton
-            variant={isConflict ? "danger" : "primary"}
-            className="flex min-h-11 w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
+        <TechButton
+          asChild
+          variant={isConflict ? "danger" : "primary"}
+          className="flex min-h-11 w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
+          <Link href={`/review/${pr.number}`} className="w-full md:w-auto">
             {t("resolveButton")} →
-          </TechButton>
-        </Link>
+          </Link>
+        </TechButton>
       </div>
     </TechCard>
   )

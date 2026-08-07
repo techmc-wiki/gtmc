@@ -378,11 +378,9 @@ export default async function ReviewDetailPage({
 
   return (
     <div className="mx-auto max-w-352 space-y-8 p-4 pb-32 md:p-8">
-      <Link href="/review">
-        <TechButton variant="ghost" size="sm">
-          {"<"} BACK_TO_HUB
-        </TechButton>
-      </Link>
+      <TechButton asChild variant="ghost" size="sm">
+        <Link href="/review">{"<"} BACK_TO_HUB</Link>
+      </TechButton>
 
       <section className="border-tech-main/30 relative border-b pb-8">
         <div className="border-tech-main/50 bg-tech-main/20 absolute -bottom-1.25 left-0 size-2 border"></div>

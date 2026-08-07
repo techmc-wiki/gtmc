@@ -15,7 +15,7 @@ This repo contains the public website for **Graduate Texts in Minecraft (GTMC)**
 - **Auth**: NextAuth v5 (GitHub provider) + Prisma adapter
 - **Database**: Prisma 7 against Supabase Postgres
 - **Content pipeline**: Markdown via remark/rehype, KaTeX math, Shiki code highlighting, gray-matter frontmatter
-- **Editor**: CodeMirror 6 (markdown, autocomplete, merge view)
+- **Editor**: CodeMirror 6 (markdown, autocomplete)
 - **Schematics**: `schematic-renderer` + Three.js
 - **Search**: MiniSearch
 - **i18n**: `next-intl` with `en` and `zh` locales

@@ -9,8 +9,8 @@
     "translationFallbackBody": "This article has not been translated into English yet. You are reading the original Chinese version.",
     "translationFallbackCta": "Open the Chinese page",
     "translationLatestCommitAria": "View original commit {sha} on GitHub",
-    "translationOutdatedLag": "Lag: {commitLag, plural, one {# source commit} other {# source commits}} and {dayLag, plural, one {# day} other {# days}}.",
     "translationOutdatedLabel": "Outdated translation",
+    "translationOutdatedLag": "Lag: {commitLag, plural, one {# source commit} other {# source commits}} and {dayLag, plural, one {# day} other {# days}}.",
     "translationOutdatedPrefix": "The latest original revision is",
     "translationPending": "Translation pending"
   },
@@ -64,9 +64,9 @@
     "backToAuthors": "← All contributors",
     "backToList": "← All contributors",
     "breadcrumbAuthors": "Authors",
-    "commitsLabel": "Commits",
     "coauthoredBadge": "Co-authored",
     "coAuthoredLabel": "Co-authored",
+    "commitsLabel": "Commits",
     "contributorSinceLabel": "Contributor since",
     "fallbackBio": "GTMC contributor",
     "githubProfile": "GitHub",
@@ -137,35 +137,6 @@
     "toggleLineWrap": "Toggle line wrap",
     "toggleNavigationMenu": "Toggle navigation menu"
   },
-  "Drafts": {
-    "articleType": "Article",
-    "changesCount": "{count, plural, one {# change} other {# changes}}",
-    "cleanupWarning": "Some uploaded assets could not be cleaned up. Open the draft to review them.",
-    "continueDraft": "Continue editing",
-    "deleteDraft": "Delete draft",
-    "deleteWarning": "This permanently deletes the draft.",
-    "filesCount": "{count, plural, one {# file} other {# files}}",
-    "glossaryType": "Glossary",
-    "inProgress": "In progress",
-    "moreActions": "More actions",
-    "moreActionsFor": "More actions for {title}",
-    "newArticle": "New article draft",
-    "newDraftDescription": "Choose the kind of contribution you want to make. You can save and return at any time.",
-    "newDraftLabel": "New draft",
-    "newDraftTitle": "Start something new",
-    "newGlossary": "New glossary draft",
-    "noActiveTitle": "No drafts in progress",
-    "openPullRequest": "Open pull request",
-    "pageDescription": "Continue an article or glossary change, or begin a new contribution.",
-    "pageSubtitle": "Contributor workspace",
-    "pageTitle": "Your drafts",
-    "pastWork": "Past work",
-    "reopenDraft": "Open draft",
-    "untitledArticle": "Untitled article",
-    "untitledGlossary": "Untitled glossary revision",
-    "updatedAt": "Updated {date}",
-    "viewDraft": "View draft"
-  },
   "DraftFiles": {
     "addButton": "Add",
     "addExistingFile": "Add existing file",
@@ -210,6 +181,35 @@
     "selectExistingFile": "Select existing file",
     "selectFileButton": "Select file",
     "uploadModeLabel": "Upload"
+  },
+  "Drafts": {
+    "articleType": "Article",
+    "changesCount": "{count, plural, one {# change} other {# changes}}",
+    "cleanupWarning": "Some uploaded assets could not be cleaned up. Open the draft to review them.",
+    "continueDraft": "Continue editing",
+    "deleteDraft": "Delete draft",
+    "deleteWarning": "This permanently deletes the draft.",
+    "filesCount": "{count, plural, one {# file} other {# files}}",
+    "glossaryType": "Glossary",
+    "inProgress": "In progress",
+    "moreActions": "More actions",
+    "moreActionsFor": "More actions for {title}",
+    "newArticle": "New article draft",
+    "newDraftDescription": "Choose the kind of contribution you want to make. You can save and return at any time.",
+    "newDraftLabel": "New draft",
+    "newDraftTitle": "Start something new",
+    "newGlossary": "New glossary draft",
+    "noActiveTitle": "No drafts in progress",
+    "openPullRequest": "Open pull request",
+    "pageDescription": "Continue an article or glossary change, or begin a new contribution.",
+    "pageSubtitle": "Contributor workspace",
+    "pageTitle": "Your drafts",
+    "pastWork": "Past work",
+    "reopenDraft": "Open draft",
+    "untitledArticle": "Untitled article",
+    "untitledGlossary": "Untitled glossary revision",
+    "updatedAt": "Updated {date}",
+    "viewDraft": "View draft"
   },
   "Editor": {
     "activeFileLabel": "Active file",
@@ -338,11 +338,6 @@
     "returnHome": "RETURN TO HOME →",
     "title": "Access denied"
   },
-  "not-found": {
-    "description": "The requested path does not exist in the database. Please verify the coordinates and try again.",
-    "returnHome": "RETURN TO HOME →",
-    "title": "Resource not found"
-  },
   "Glossary": {
     "categoriesSelectedCount": "{count, plural, one {# category selected} other {# categories selected}}",
     "categoryAll": "All categories",
@@ -431,7 +426,6 @@
     "glossaryCardDesc": "The index of terms — technical Minecraft vocabulary in 12 languages.",
     "glossaryCardTitle": "Glossary",
     "heroDescription": "A community-built online textbook for technical Minecraft. Tutorials, mechanics deep-dives, and annotated source code for players who want to understand how the game really works.",
-    "slogan": "\"Curiosity in 'cubic' inch.\"",
     "initializing": "Initializing...",
     "loggedInAs": "Logged in as {username}",
     "loginGithub": "Log in",
@@ -440,6 +434,7 @@
     "pdfCardTitle": "Offline PDF",
     "scrollHint": "Table of contents",
     "sectionCount": "{count, plural, one {# section} other {# sections}}",
+    "slogan": "\"Curiosity in 'cubic' inch.\"",
     "startReading": "Start reading →",
     "tocKicker": "GRADUATE TEXTS IN MINECRAFT",
     "tocTitle": "Contents"
@@ -452,6 +447,11 @@
     "glossary": "Glossary",
     "pdf": "PDF",
     "reviewHub": "Review hub"
+  },
+  "not-found": {
+    "description": "The requested path does not exist in the database. Please verify the coordinates and try again.",
+    "returnHome": "RETURN TO HOME →",
+    "title": "Resource not found"
   },
   "OperationProgress": {
     "finalizeError": "Finalize interrupted",
@@ -498,11 +498,11 @@
   },
   "Pdf": {
     "bookSubtitle": "An Introduction to Technical Minecraft",
-    "slogan": "\"Curiosity in 'cubic' inch.\"",
     "bookTitle": "Graduate Texts in Minecraft",
     "mermaidRenderError": "Unable to render Mermaid diagram.",
     "metaDescription": "Download the complete Graduate Texts in Minecraft as one offline PDF, with tutorials, mechanics deep-dives, and code analysis for technical Minecraft.",
-    "metaTitle": "Offline PDF Download"
+    "metaTitle": "Offline PDF Download",
+    "slogan": "\"Curiosity in 'cubic' inch.\""
   },
   "PeopleMention": {
     "bilibiliLabel": "bilibili",

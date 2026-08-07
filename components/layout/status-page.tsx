@@ -154,13 +154,12 @@ export async function StatusPage({ kind }: StatusPageProps) {
               {description}
             </p>
             <div className="animate-slide-up-fade fill-mode-forwards w-full opacity-0 [animation-delay:1.2s] motion-reduce:animate-none motion-reduce:opacity-100">
-              <Link href="/" className="inline-block">
-                <TechButton
-                  variant="primary"
-                  className="flex h-12 items-center justify-center px-8 text-sm tracking-widest uppercase transition-transform duration-300 hover:scale-105 active:scale-95">
-                  {returnHome}
-                </TechButton>
-              </Link>
+              <TechButton
+                asChild
+                variant="primary"
+                className="flex h-12 items-center justify-center px-8 text-sm tracking-widest uppercase transition-transform duration-300 hover:scale-105 active:scale-95">
+                <Link href="/">{returnHome}</Link>
+              </TechButton>
             </div>
             <div className="animate-fade-in guide-line fill-mode-forwards mt-8 flex flex-col items-center space-y-1 border-t pt-4 font-mono text-[0.625rem] opacity-50 [animation-delay:1.4s] motion-reduce:animate-none">
               <p>ERROR_CODE: {config.errorCode}</p>

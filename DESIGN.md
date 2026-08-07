@@ -104,7 +104,7 @@ Core primitives
 - `components/ui/tech-card.tsx`, `tech-button.tsx`, `field-box.tsx`, `corner-brackets.tsx`, `selectable-card.tsx`, `segmented-control.tsx`, `icons.tsx`.
 
 Headings, status, metadata
-- `components/ui/headings.tsx`, `status.tsx`, `status-badge.tsx`, `metadata-row.tsx`, `empty-state.tsx`, `loading-indicator.tsx`.
+- `components/ui/headings.tsx`, `status.tsx`, `metadata-row.tsx`, `empty-state.tsx`, `loading-indicator.tsx`.
 
 Loading and progress
 - `components/ui/loading-shell-primitives.tsx`, `operation-progress.tsx`.

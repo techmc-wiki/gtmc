@@ -1,31 +1,8 @@
 {
   "About": {
-    "contributeArticles": "撰写文章",
-    "contributeArticlesDescription": "通过内置编辑器起草、预览和提交文章。",
-    "contributeBody": "GTMC 依靠社区贡献成长。你可以在网站上直接起草和提交文章，或参与代码库开发。",
-    "contributeCode": "贡献代码",
-    "contributeCodeDescription": "网站代码是开源的，欢迎提交错误报告、改进建议和新功能。",
-    "contributeTitle": "参与贡献",
-    "licenseArticles": "文章内容使用 CC BY-NC-SA 4.0 许可证。",
-    "licenseCode": "网站代码使用 Apache-2.0 许可证。",
-    "licenseSectionTitle": "许可证",
-    "linkArticlesRepo": "文章仓库",
-    "linkGitHub": "GitHub 仓库",
     "metaDescription": "Graduate Texts in Minecraft（GTMC）是社区共同编写的技术向 Minecraft 开放教科书，涵盖红石工程、游戏机制、区块系统、实体运动与引擎内部原理。",
-    "missionBody": "Graduate Texts in Minecraft（GTMC）是一个面向 Minecraft 技术玩法的开放知识库。我们发布教程、机制解析和带注释的源码分析，所有内容都由社区编写和审阅。",
-    "missionBody2": "我们以学术专著丛书为参考：内容严谨、结构清晰，覆盖从生产型建筑、红石工程到引擎刻级内部原理的技术玩法全栈。",
-    "missionTitle": "我们的使命",
     "pageDescription": "关于本项目",
-    "pageTitle": "关于 GTMC",
-    "statsArticles": "已发布文章",
-    "statsContributors": "贡献者",
-    "statsLanguages": "语言",
-    "statsLanguagesValue": "中文和英文",
-    "statsLastRevision": "最近修订",
-    "statsTitle": "文本现状",
-    "teamDescription": "文章由有技术向 Minecraft 实践经验的社区成员撰写。每位贡献者在特定子系统上有深入研究，例如红石时序或区块加载内部原理。",
-    "teamTitle": "贡献者",
-    "teamViewAll": "查看所有贡献者 →"
+    "pageTitle": "关于 GTMC"
   },
   "Article": {
     "notFound": "文章未找到",

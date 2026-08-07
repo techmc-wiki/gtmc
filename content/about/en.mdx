@@ -1,0 +1,46 @@
+## Our Mission
+
+Graduate Texts in Minecraft (GTMC) is an open knowledge base for the
+technical side of Minecraft. We publish tutorials, mechanics explanations,
+and annotated source-code readings, all written and reviewed by the
+community.
+
+We follow the example of an academic monograph series: rigorous, structured
+writing that covers the whole stack of technical play, from production farms
+and redstone engineering to the tick-by-tick details of the engine.
+
+## The Text So Far
+
+<StatGrid>
+  <StatCard label="ARTICLES PUBLISHED" value={props.stats.articleCount} />
+  <StatCard label="CONTRIBUTORS" value={props.stats.contributors} />
+  <StatCard label="LANGUAGES" value="Chinese & English" />
+  <StatCard label="LAST REVISION" value={props.stats.lastRevision} />
+</StatGrid>
+
+## Contributors
+
+Articles are written by community members who actually build and break
+things in technical Minecraft. Each contributor specializes in specific
+subsystems, from redstone timing to chunk loading internals.
+
+<ContributorGrid
+  authors={props.previewAuthors}
+  viewAllLabel="View all contributors →"
+/>
+
+## Contribute
+
+GTMC grows through community contributions. Draft and submit articles on
+the site, or help build the codebase.
+
+- **Write an Article** — Draft, preview, and submit articles through the built-in editor.
+- **Contribute Code** — The website is open source. Bug reports, improvements, and new features are welcome.
+
+[GitHub Repository](https://github.com/techmc-wiki/gtmc) · [Articles Repository](https://github.com/techmc-wiki/Articles)
+
+## License
+
+Website code is licensed under Apache-2.0.
+
+Article content is licensed under CC BY-NC-SA 4.0.

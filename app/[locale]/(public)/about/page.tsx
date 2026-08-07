@@ -93,11 +93,7 @@ export default async function AboutPage({
     <div className="page-container-pb">
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
 
-      <PageHeader
-        title={t("pageTitle")}
-        subtitle={t("pageDescription")}
-        topMargin
-      />
+      <PageHeader title={t("pageTitle")} topMargin />
 
       <Content
         stats={{

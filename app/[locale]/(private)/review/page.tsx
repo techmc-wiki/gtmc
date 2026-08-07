@@ -265,7 +265,7 @@ export default async function ReviewHubPage() {
 
   return (
     <div className="page-container">
-      <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
+      <PageHeader title={t("pageTitle")} />
 
       <div className="grid grid-cols-1 gap-6">
         {openPRs.length === 0 ? (

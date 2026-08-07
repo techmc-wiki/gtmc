@@ -208,7 +208,7 @@ Three voices
 
 Scale
 - Root font size scales by viewport: `16px` on small screens, stepping up to `18px` on large screens via media queries in `html`.
-- Page titles: `display-title text-3xl md:text-5xl tracking-tight text-tech-main-dark`, with a mono kicker label above (`text-[0.625rem] tracking-[0.25em] uppercase text-tech-main/60`).
+- Page titles: `display-title text-3xl md:text-5xl tracking-tight text-tech-main-dark`.
 - Section titles: `display-title text-xl md:text-2xl` with a leading `size-2 bg-tech-signal` square and a bottom guide line (see `SectionTitle`).
 - HUD and metadata labels: `font-mono text-xs tracking-widest uppercase text-tech-main/50`.
 - Body copy: `text-sm/relaxed` to `text-base/relaxed`.

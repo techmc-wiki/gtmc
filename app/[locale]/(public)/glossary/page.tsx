@@ -65,11 +65,7 @@ export default async function GlossaryIndexPage({
 
   return (
     <div className="page-container-pb">
-      <PageHeader
-        title={t("pageTitle")}
-        subtitle={t("pageDescription")}
-        topMargin
-      />
+      <PageHeader title={t("pageTitle")} topMargin />
 
       <div className="mt-8">
         <GlossaryToolbar

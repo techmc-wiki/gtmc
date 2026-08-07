@@ -68,11 +68,7 @@ export function TermDetail({ entry, locale, slug }: TermDetailProps) {
   return (
     <div className="flex min-h-full flex-col gap-8">
       <div className="flex flex-col gap-3">
-        <PageHeader
-          title={entry.fullFormEn}
-          subtitle={entry.category}
-          action={headerAction}
-        />
+        <PageHeader title={entry.fullFormEn} action={headerAction} />
         {hasShortForm && (
           <p className="text-tech-main/50 font-mono text-sm">
             {entry.shortForm}

@@ -138,9 +138,6 @@ export async function TocSection({ tree, locale }: TocSectionProps) {
       aria-label={t("tocTitle")}
       className="relative z-10 mx-auto w-full max-w-3xl scroll-mt-16 px-4 pt-20 pb-16 sm:px-6 sm:pt-28 sm:pb-24">
       <header className="mb-10 sm:mb-14">
-        <p className="text-tech-main/60 mb-3 font-mono text-[0.625rem] tracking-[0.25em] uppercase">
-          {t("tocKicker")}
-        </p>
         <div className="flex items-end justify-between gap-4">
           <h2 className="display-title text-tech-main-dark text-4xl sm:text-5xl">
             {t("tocTitle")}

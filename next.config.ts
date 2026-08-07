@@ -90,7 +90,6 @@ const nextConfig: NextConfig = {
     "/*": ["data/manifest.json"],
     "/\\[locale\\]/articles/\\[\\[\\.\\.\\.slug\\]\\]": ["data/articles/**"],
     "/\\[locale\\]/glossary": ["data/glossary*.json"],
-    "/\\[locale\\]/glossary/\\[slug\\]": ["data/glossary*.json"],
     "/api/glossary": ["data/glossary*.json"],
   },
   outputFileTracingExcludes: {

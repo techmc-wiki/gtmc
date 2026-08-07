@@ -6,6 +6,10 @@ import { createPortal } from "react-dom"
 import { useTranslations, useLocale } from "next-intl"
 import { useRouter, usePathname } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/articles/url"
+import {
+  OPEN_GLOSSARY_TERM_EVENT,
+  type OpenGlossaryTermDetail,
+} from "@/lib/glossary/browser-events"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { useMounted } from "@/hooks/use-mounted"
 import { useModalEffects } from "@/hooks/use-modal-effects"
@@ -256,7 +260,12 @@ export function SearchCommand() {
   const navigateToGlossaryResult = useCallback(
     (entry: GlossarySearchResult) => {
       closeModal()
-      router.push(`/glossary/${entry.slug}`)
+      router.push(`/glossary#term=${encodeURIComponent(entry.slug)}`)
+      window.dispatchEvent(
+        new CustomEvent<OpenGlossaryTermDetail>(OPEN_GLOSSARY_TERM_EVENT, {
+          detail: { slug: entry.slug },
+        })
+      )
     },
     [router, closeModal]
   )

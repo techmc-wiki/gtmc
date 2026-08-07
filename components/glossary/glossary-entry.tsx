@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { Link } from "@/i18n/navigation"
 import { cn } from "@/lib/cn"
 import {
   getGlossaryContent,
@@ -23,34 +22,6 @@ interface GlossaryEntryViewProps {
   density: GlossaryDensity
   onOpenDetail?: (entry: GlossaryIndexEntry) => void
   isReady?: boolean
-}
-
-/**
- * Opens the detail panel for plain left-clicks; lets modifier-clicks fall
- * through to the actual route link.
- */
-function useOpenDetailHandler(
-  entry: GlossaryIndexEntry,
-  onOpenDetail?: (entry: GlossaryIndexEntry) => void
-) {
-  return React.useCallback(
-    (event: React.MouseEvent<HTMLAnchorElement>) => {
-      if (!onOpenDetail) return
-      if (
-        event.defaultPrevented ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey ||
-        event.button !== 0
-      ) {
-        return
-      }
-      event.preventDefault()
-      onOpenDetail(entry)
-    },
-    [entry, onOpenDetail]
-  )
 }
 
 const termTriggerClass =
@@ -78,7 +49,6 @@ export function GlossaryCard({
   className?: string
 }) {
   const primaryContent = getPrimaryGlossaryContent(entry, locale)
-  const handleOpenDetail = useOpenDetailHandler(entry, onOpenDetail)
 
   return (
     <article
@@ -92,10 +62,9 @@ export function GlossaryCard({
         className
       )}>
       <header className="flex items-baseline justify-between gap-3">
-        <Link
-          href={`/glossary/${entry.slug}`}
-          locale={locale as "en" | "zh"}
-          onClick={handleOpenDetail}
+        <button
+          type="button"
+          onClick={() => onOpenDetail?.(entry)}
           className={cn(termTriggerClass, "text-base leading-snug")}>
           {primaryContent.value}
           {entry.isControversial && (
@@ -105,7 +74,7 @@ export function GlossaryCard({
               *
             </span>
           )}
-        </Link>
+        </button>
         {visibleColumnsSet.has("shortForm") && entry.shortForm && (
           <span className="text-tech-main/60 shrink-0 font-mono text-xs">
             {entry.shortForm}
@@ -176,11 +145,7 @@ export function GlossaryCard({
                 key={column}
                 className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span className={labelClass}>REL</span>
-                <CrossRefChips
-                  related={entry.relatedTerms}
-                  mode="index"
-                  locale={locale}
-                />
+                <CrossRefChips related={entry.relatedTerms} mode="index" />
               </div>
             )
 
@@ -216,7 +181,6 @@ export function GlossaryTableRow({
   )
 
   const primaryContent = getPrimaryGlossaryContent(entry, locale)
-  const handleOpenDetail = useOpenDetailHandler(entry, onOpenDetail)
 
   return (
     <tr
@@ -251,13 +215,12 @@ export function GlossaryTableRow({
           case "term":
             return (
               <td key={column} className={cn(cellClass, "min-w-[10rem]")}>
-                <Link
-                  href={`/glossary/${entry.slug}`}
-                  locale={locale as "en" | "zh"}
-                  onClick={handleOpenDetail}
+                <button
+                  type="button"
+                  onClick={() => onOpenDetail?.(entry)}
                   className={cn(termTriggerClass, "tracking-tight")}>
                   {primaryContent.value}
-                </Link>
+                </button>
                 {entry.isControversial && (
                   <span
                     aria-label="controversial"
@@ -320,11 +283,7 @@ export function GlossaryTableRow({
             return (
               <td key={column} className={cellClass}>
                 {entry.relatedTerms.length > 0 ? (
-                  <CrossRefChips
-                    related={entry.relatedTerms}
-                    mode="index"
-                    locale={locale}
-                  />
+                  <CrossRefChips related={entry.relatedTerms} mode="index" />
                 ) : (
                   <span className="text-tech-main/30 font-mono text-xs">—</span>
                 )}

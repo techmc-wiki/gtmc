@@ -43,9 +43,6 @@ export interface GlossarySummaryEntry {
 }
 
 const glossaryEntries = fullData as GlossaryEntry[]
-const entriesBySlug = new Map(
-  glossaryEntries.map((entry) => [entry.slug, entry] as const)
-)
 
 // eslint-disable-next-line no-underscore-dangle
 let _summary: GlossarySummaryEntry[] | null = null
@@ -57,10 +54,6 @@ export async function loadGlossaryManifest(): Promise<{
   cacheLife("max")
   cacheTag("glossary-manifest")
   return { entries: glossaryEntries }
-}
-
-export function getGlossaryEntry(slug: string): GlossaryEntry | undefined {
-  return entriesBySlug.get(slug)
 }
 
 export function loadGlossarySummary(): GlossarySummaryEntry[] {

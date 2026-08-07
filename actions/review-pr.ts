@@ -1,7 +1,6 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { revalidatePaths } from "@/lib/revalidate-paths"
 import { forcePushResolvedToPRBranch } from "@/lib/articles/conflict"
 import { getMainBranchHeadSha } from "@/lib/articles/branch"
 import { decodeStoredDraftFiles } from "@/lib/drafts/files"
@@ -12,10 +11,7 @@ import { prisma } from "@/lib/prisma"
 import type { RebaseState } from "@/lib/review/rebase-types"
 import type { ConflictMode, ReviewMergeMethod } from "@/lib/review/review-types"
 import { reviewLog, reviewError, summarizeSha } from "@/lib/logging"
-import {
-  requireReviewAdminContext,
-  getReviewRevalidatePaths,
-} from "@/lib/review/admin-context"
+import { requireReviewAdminContext } from "@/lib/review/admin-context"
 import {
   formatErrorMessage,
   hasSimpleConflictMarkers,

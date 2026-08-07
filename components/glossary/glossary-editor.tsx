@@ -5,11 +5,16 @@ import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 
 import { GlossaryEditToolbar } from "@/components/glossary/glossary-edit-toolbar"
-import { ComplexChangesNotice } from "@/components/glossary/glossary-notices"
+import {
+  ComplexChangesNotice,
+  AttributionWarning,
+} from "@/components/glossary/glossary-notices"
 import { GlossaryRowPicker } from "@/components/glossary/glossary-row-picker"
-import { GlossaryEditCard } from "@/components/glossary/glossary-edit-card"
+import {
+  GlossaryEditCard,
+  type GlossaryEditOperation,
+} from "@/components/glossary/glossary-edit-card"
 import { GlossaryDiffPreview } from "@/components/glossary/glossary-diff-preview"
-import { AttributionWarning } from "@/components/glossary/glossary-notices"
 import {
   OperationProgress,
   type OperationProgressState,
@@ -30,15 +35,6 @@ import type {
 } from "@/lib/glossary/manifest"
 import { LOCALE_TO_COLUMN, type GlossaryLocale } from "@/lib/glossary/locales"
 import { useRouter } from "@/i18n/navigation"
-
-export type GlossaryEditOperationKind = "edit" | "add" | "delete"
-
-export interface GlossaryEditOperation {
-  kind: GlossaryEditOperationKind
-  slug: string
-  before?: GlossaryRow
-  after?: GlossaryRow
-}
 
 export interface GlossaryEditorProps {
   draftId: string
@@ -168,7 +164,6 @@ function GlossaryEditorInner({
   draftId,
   initialTitle,
   initialOperations,
-  prefillSlug: _prefillSlug,
   manifestEntries,
   summaryEntries,
   locale,
@@ -176,7 +171,6 @@ function GlossaryEditorInner({
   noreplyEmail,
   realEmail,
 }: GlossaryEditorProps) {
-  void _prefillSlug
   const t = useTranslations("Glossary")
   const router = useRouter()
   const isMounted = useMounted()

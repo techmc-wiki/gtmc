@@ -101,7 +101,7 @@ function GlossaryTableSkeleton() {
   )
 }
 
-export interface GlossaryToolbarProps {
+export interface GlossaryBrowserProps {
   categories: CategoryFilterCategory[]
   locale: string
   totalCount: number
@@ -109,13 +109,13 @@ export interface GlossaryToolbarProps {
   className?: string
 }
 
-export function GlossaryToolbar({
+export function GlossaryBrowser({
   categories,
   locale,
   totalCount,
   children,
   className,
-}: GlossaryToolbarProps) {
+}: GlossaryBrowserProps) {
   const t = useTranslations("Glossary")
   const { entries, isLoading: entriesLoading } = useLocalizedGlossary(locale)
 

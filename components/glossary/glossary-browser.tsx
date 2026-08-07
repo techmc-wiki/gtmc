@@ -20,6 +20,10 @@ import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { Link } from "@/i18n/navigation"
 import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
 import {
+  OPEN_GLOSSARY_TERM_EVENT,
+  type OpenGlossaryTermDetail,
+} from "@/lib/glossary/browser-events"
+import {
   readPersistedGlossaryColumns,
   readPersistedGlossaryDensity,
   writePersistedGlossaryColumns,
@@ -154,9 +158,56 @@ export function GlossaryBrowser({
     React.useState<GlossaryIndexEntry | null>(null)
   const isReady = !entriesLoading
 
+  const entriesBySlug = React.useMemo(
+    () => new Map(entries.map((entry) => [entry.slug, entry] as const)),
+    [entries]
+  )
+
+  const openDetailBySlug = React.useCallback(
+    (slug: string) => {
+      const entry = entriesBySlug.get(slug)
+      if (entry) setSelectedEntry(entry)
+    },
+    [entriesBySlug]
+  )
+
   const closeDetailPanel = React.useCallback(() => {
     setSelectedEntry(null)
+
+    if (window.location.hash.startsWith("#term=")) {
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}${window.location.search}`
+      )
+    }
   }, [])
+
+  React.useEffect(() => {
+    const openDetailFromHash = () => {
+      const encodedSlug = window.location.hash.slice("#term=".length)
+      if (!window.location.hash.startsWith("#term=") || !encodedSlug) return
+
+      try {
+        openDetailBySlug(decodeURIComponent(encodedSlug))
+      } catch {
+        // Ignore malformed external hashes and leave the glossary index open.
+      }
+    }
+
+    const openDetailFromEvent = (event: Event) => {
+      const { slug } = (event as CustomEvent<OpenGlossaryTermDetail>).detail
+      openDetailBySlug(slug)
+    }
+
+    openDetailFromHash()
+    window.addEventListener("hashchange", openDetailFromHash)
+    window.addEventListener(OPEN_GLOSSARY_TERM_EVENT, openDetailFromEvent)
+    return () => {
+      window.removeEventListener("hashchange", openDetailFromHash)
+      window.removeEventListener(OPEN_GLOSSARY_TERM_EVENT, openDetailFromEvent)
+    }
+  }, [openDetailBySlug])
 
   const availableLetters = React.useMemo(
     () => [...new Set(entries.map((entry) => entry.indexLetter))],
@@ -226,6 +277,7 @@ export function GlossaryBrowser({
         entry={selectedEntry}
         locale={locale}
         onClose={closeDetailPanel}
+        onOpenRelated={openDetailBySlug}
       />
 
       {children}

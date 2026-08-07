@@ -1,25 +1,23 @@
 "use client"
 
 import * as React from "react"
-import { Link } from "@/i18n/navigation"
 import { cn } from "@/lib/cn"
 import type { GlossaryIndexRelatedTerm } from "@/lib/glossary/localized-index"
 import { generateSlug } from "@/lib/glossary/slug"
 import type { ParsedRelatedToken } from "@/lib/glossary/related"
 
 interface CrossRefChipsBaseProps {
-  /**
-   * `index` — link to in-page letter anchor (`#letter-{X}`) on the index page.
-   * `detail` — full route link to `/{locale}/glossary/{slug}` for use on detail pages.
-   */
-  locale: string
   className?: string
 }
 
 type CrossRefChipsProps = CrossRefChipsBaseProps &
   (
     | { mode: "index"; related: GlossaryIndexRelatedTerm[] }
-    | { mode: "detail"; related: ParsedRelatedToken[] }
+    | {
+        mode: "detail"
+        related: ParsedRelatedToken[]
+        onOpenDetail: (slug: string) => void
+      }
   )
 
 const chipBase =
@@ -31,7 +29,7 @@ const labelMap = {
 } as const satisfies Record<ParsedRelatedToken["kind"], string>
 
 export function CrossRefChips(props: CrossRefChipsProps) {
-  const { related, locale, className } = props
+  const { related, className } = props
   if (related.length === 0) return null
 
   return (
@@ -59,13 +57,13 @@ export function CrossRefChips(props: CrossRefChipsProps) {
           )
         } else {
           chip = (
-            <Link
-              href={`/glossary/${generateSlug(entry.target)}`}
-              locale={locale as "en" | "zh"}
+            <button
+              type="button"
+              onClick={() => props.onOpenDetail(generateSlug(entry.target))}
               className={chipBase}
               title={entry.target}>
               {display}
-            </Link>
+            </button>
           )
         }
 

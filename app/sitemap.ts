@@ -10,7 +10,6 @@ import {
   loadArticleManifest,
   type ArticleLocale,
 } from "@/lib/articles/manifest"
-import { loadGlossaryManifest } from "@/lib/glossary/manifest"
 
 const STATIC_LAST_MODIFIED = new Date("2024-12-08T10:28:55.000Z")
 
@@ -157,29 +156,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     /* Sidebar tree unavailable — skip articles */
   }
 
-  let glossaryUrls: MetadataRoute.Sitemap = []
-  try {
-    const { entries } = await loadGlossaryManifest()
-    glossaryUrls = entries.flatMap((entry) => [
-      {
-        url: `${BASE}/zh/glossary/${entry.slug}`,
-        lastModified: STATIC_LAST_MODIFIED,
-        alternates: localizedAlternates(BASE, `/glossary/${entry.slug}`),
-        changeFrequency: "weekly" as const,
-        priority: 0.7,
-      },
-      {
-        url: `${BASE}/en/glossary/${entry.slug}`,
-        lastModified: STATIC_LAST_MODIFIED,
-        alternates: localizedAlternates(BASE, `/glossary/${entry.slug}`),
-        changeFrequency: "weekly" as const,
-        priority: 0.7,
-      },
-    ])
-  } catch (error) {
-    console.warn("Sitemap: skipped glossary URLs due to manifest error:", error)
-  }
-
   let authorUrls: MetadataRoute.Sitemap = []
   try {
     const handles = getProfileHandles()
@@ -205,5 +181,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.warn("Sitemap: skipped author URLs due to resolver error:", error)
   }
 
-  return [...staticUrls, ...articleUrls, ...glossaryUrls, ...authorUrls]
+  return [...staticUrls, ...articleUrls, ...authorUrls]
 }

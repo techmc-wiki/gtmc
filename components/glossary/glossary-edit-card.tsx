@@ -370,38 +370,7 @@ function ActiveLocaleFields({
   code: GlossaryLocale
   onChange: (column: GlossaryColumn, value: string) => void
 }) {
-  const { termColumn, descColumn } = LOCALE_TO_COLUMN[code]
-  const display = LANGUAGE_DISPLAY[code]
-  const termCol = termColumn as GlossaryColumn
-  const descCol = descColumn as GlossaryColumn
-
-  const handleTermChange = React.useCallback(
-    (value: string) => onChange(termCol, value),
-    [onChange, termCol]
-  )
-
-  const handleDescChange = React.useCallback(
-    (value: string) => onChange(descCol, value),
-    [onChange, descCol]
-  )
-
-  return (
-    <div className="flex flex-col gap-3">
-      <Field
-        column={termCol}
-        label={display}
-        value={row[termCol]}
-        onValueChange={handleTermChange}
-      />
-      <Field
-        column={descCol}
-        label={`Description (${display})`}
-        value={row[descCol]}
-        multiline
-        onValueChange={handleDescChange}
-      />
-    </div>
-  )
+  return <LanguageFields row={row} code={code} onChange={onChange} />
 }
 
 interface LanguagePairFieldsProps {
@@ -411,6 +380,22 @@ interface LanguagePairFieldsProps {
 }
 
 function LanguagePairFields({ row, code, onChange }: LanguagePairFieldsProps) {
+  return (
+    <LanguageFields
+      row={row}
+      code={code}
+      onChange={onChange}
+      className="border-tech-line/10 ml-1 border-l-2 pl-3"
+    />
+  )
+}
+
+function LanguageFields({
+  row,
+  code,
+  onChange,
+  className,
+}: LanguagePairFieldsProps & { className?: string }) {
   const { termColumn, descColumn } = LOCALE_TO_COLUMN[code]
   const display = LANGUAGE_DISPLAY[code]
   const termCol = termColumn as GlossaryColumn
@@ -420,14 +405,13 @@ function LanguagePairFields({ row, code, onChange }: LanguagePairFieldsProps) {
     (value: string) => onChange(termCol, value),
     [onChange, termCol]
   )
-
   const handleDescChange = React.useCallback(
     (value: string) => onChange(descCol, value),
     [onChange, descCol]
   )
 
   return (
-    <div className="border-tech-line/10 ml-1 flex flex-col gap-2 border-l-2 pl-3">
+    <div className={cn("flex flex-col gap-3", className)}>
       <Field
         column={termCol}
         label={display}
@@ -444,7 +428,6 @@ function LanguagePairFields({ row, code, onChange }: LanguagePairFieldsProps) {
     </div>
   )
 }
-
 function OtherLanguagesFields({
   row,
   codes,

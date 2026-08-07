@@ -17,7 +17,7 @@ import {
 } from "@/lib/drafts/files"
 import { OperationProgress } from "@/components/ui/operation-progress"
 import { TechButton } from "../ui/tech-button"
-import { InputBox } from "../ui/input-box"
+import { FieldBox } from "../ui/field-box"
 import {
   EditorSurface,
   EditorActions,
@@ -222,7 +222,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               {t("titleLabel")}
             </label>
           </div>
-          <InputBox
+          <FieldBox
             id="draft-title"
             required
             placeholder={t("titlePlaceholder")}

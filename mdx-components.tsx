@@ -1,5 +1,5 @@
 import type { MDXComponents } from "mdx/types"
-import { SectionTitle } from "@/components/ui/section-title"
+import { SectionTitle } from "@/components/ui/headings"
 import { StatCard } from "@/components/mdx/stat-card"
 import { StatGrid } from "@/components/mdx/stat-grid"
 import { ContributorGrid } from "@/components/mdx/contributor-grid"
@@ -17,8 +17,8 @@ import { DownloadButton } from "@/components/mdx/download-button"
  * - `a` — underlined ink link
  * - `ul` — body list with item spacing
  *
- * Data-driven pieces (stat readouts, contributor grids, the download
- * button) remain components because they render dynamic props.
+ * Data-driven pieces (stat readouts, author grids, the download button)
+ * remain components because they render dynamic props.
  */
 const components: MDXComponents = {
   h1: ({ children }) => (

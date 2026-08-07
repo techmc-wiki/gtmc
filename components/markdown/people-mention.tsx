@@ -12,7 +12,7 @@ import {
   GithubIcon,
   GlobeIcon,
   TwitterIcon,
-} from "@/components/ui/social-icons"
+} from "@/components/ui/icons"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
 import type { ResolvedPerson } from "@/lib/markdown/people"
 

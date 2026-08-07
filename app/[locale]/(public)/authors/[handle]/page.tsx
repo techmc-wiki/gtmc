@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
-import { SectionTitle } from "@/components/ui/section-title"
-import { TechBadge } from "@/components/ui/status-badge"
+import { SectionTitle } from "@/components/ui/headings"
+import { TechBadge } from "@/components/ui/status"
 import { TechCard } from "@/components/ui/tech-card"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import {
@@ -11,7 +11,7 @@ import {
   BilibiliIcon,
   TwitterIcon,
   GlobeIcon,
-} from "@/components/ui/social-icons"
+} from "@/components/ui/icons"
 import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
 import {
   getProfileHandles,

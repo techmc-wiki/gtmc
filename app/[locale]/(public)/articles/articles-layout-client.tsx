@@ -12,7 +12,7 @@ import {
   SectionRail,
   SegmentedBar,
 } from "@/components/ui/loading-shell-primitives"
-import { TriangleIcon } from "@/components/ui/triangle-icon"
+import { TriangleIcon } from "@/components/ui/icons"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import { useLocale, useTranslations } from "next-intl"
 import { OutlineRail } from "@/components/articles/outline-rail"

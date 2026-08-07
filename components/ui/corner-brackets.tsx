@@ -1,113 +1,85 @@
-import React from "react"
-import { CornerBracketsHoverExpand } from "@/components/ui/corner-brackets-hover-expand"
-import {
-  cornerPositionClasses,
-  getCornerVisibility,
-  type CornerBracketsProps,
-} from "@/components/ui/corner-brackets-shared"
+import * as React from "react"
 
-export type { CornerBracketsProps } from "@/components/ui/corner-brackets-shared"
+export interface CornerBracketsProps {
+  className?: string
+  /** Base corner size (Tailwind class). Default: "size-2" */
+  size?: string
+  /** Base corner color (Tailwind border class). Default: "border-tech-main/40" */
+  color?: string
+  /** Which corners to render. Default: "all" */
+  corners?: "all" | "top-bottom" | "diagonal-tlbr" | "diagonal-trbl"
+  /** Behavior variant. Default: "static" */
+  variant?: "static" | "hover" | "hover-only"
+  ref?: React.Ref<HTMLDivElement>
+}
 
+export const cornerPositionClasses = {
+  topLeft: "-translate-px border-t-2 border-l-2",
+  topRight: "translate-x-px -translate-y-px border-t-2 border-r-2",
+  bottomLeft: "-translate-x-px translate-y-px border-b-2 border-l-2",
+  bottomRight: "translate-px border-r-2 border-b-2",
+} as const
+
+export function getCornerVisibility(
+  corners: NonNullable<CornerBracketsProps["corners"]>
+) {
+  return {
+    topLeft:
+      corners === "all" ||
+      corners === "top-bottom" ||
+      corners === "diagonal-tlbr",
+    topRight: corners === "all" || corners === "diagonal-trbl",
+    bottomLeft: corners === "all" || corners === "diagonal-trbl",
+    bottomRight:
+      corners === "all" ||
+      corners === "top-bottom" ||
+      corners === "diagonal-tlbr",
+  }
+}
+
+const hoverClasses = "opacity-0 transition-opacity group-hover:opacity-100"
+
+/**
+ * Drafting-table corner brackets. Server-safe: `static` shows the frame,
+ * `hover`/`hover-only` reveal it when an ancestor `group` is hovered (the
+ * latter keeps the corners click-transparent).
+ */
 export function CornerBrackets({
   className,
   size = "size-2",
   color = "border-tech-main/40",
   corners = "all",
   variant = "static",
-  hoverScale,
   ref,
-}: CornerBracketsProps & { ref?: React.Ref<HTMLDivElement> }) {
+}: CornerBracketsProps) {
   const visibility = getCornerVisibility(corners)
-
-  if (variant === "static") {
-    return (
-      <div ref={ref} className={className}>
-        {visibility.topLeft && (
-          <div
-            className={`pointer-events-none absolute top-0 left-0 ${size} ${cornerPositionClasses.topLeft} ${color}`}
-          />
-        )}
-        {visibility.topRight && (
-          <div
-            className={`pointer-events-none absolute top-0 right-0 ${size} ${cornerPositionClasses.topRight} ${color}`}
-          />
-        )}
-        {visibility.bottomLeft && (
-          <div
-            className={`pointer-events-none absolute bottom-0 left-0 ${size} ${cornerPositionClasses.bottomLeft} ${color}`}
-          />
-        )}
-        {visibility.bottomRight && (
-          <div
-            className={`pointer-events-none absolute right-0 bottom-0 ${size} ${cornerPositionClasses.bottomRight} ${color}`}
-          />
-        )}
-      </div>
-    )
-  }
-
-  if (variant === "hover") {
-    return (
-      <div ref={ref} className={className}>
-        {visibility.topLeft && (
-          <div
-            className={`absolute top-0 left-0 ${size} ${cornerPositionClasses.topLeft} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
-          />
-        )}
-        {visibility.topRight && (
-          <div
-            className={`absolute top-0 right-0 ${size} ${cornerPositionClasses.topRight} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
-          />
-        )}
-        {visibility.bottomLeft && (
-          <div
-            className={`absolute bottom-0 left-0 ${size} ${cornerPositionClasses.bottomLeft} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
-          />
-        )}
-        {visibility.bottomRight && (
-          <div
-            className={`absolute right-0 bottom-0 ${size} ${cornerPositionClasses.bottomRight} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
-          />
-        )}
-      </div>
-    )
-  }
-
-  if (variant === "hover-only") {
-    return (
-      <div ref={ref} className={className}>
-        {visibility.topLeft && (
-          <div
-            className={`pointer-events-none absolute top-0 left-0 ${size} ${cornerPositionClasses.topLeft} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
-          />
-        )}
-        {visibility.topRight && (
-          <div
-            className={`pointer-events-none absolute top-0 right-0 ${size} ${cornerPositionClasses.topRight} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
-          />
-        )}
-        {visibility.bottomLeft && (
-          <div
-            className={`pointer-events-none absolute bottom-0 left-0 ${size} ${cornerPositionClasses.bottomLeft} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
-          />
-        )}
-        {visibility.bottomRight && (
-          <div
-            className={`pointer-events-none absolute right-0 bottom-0 ${size} ${cornerPositionClasses.bottomRight} ${color} opacity-0 transition-opacity group-hover:opacity-100`}
-          />
-        )}
-      </div>
-    )
-  }
+  const pointerEvents = variant === "hover" ? "" : "pointer-events-none"
+  const cornerClass = `absolute ${size} ${color} ${pointerEvents} ${
+    variant === "static" ? "" : hoverClasses
+  }`
 
   return (
-    <CornerBracketsHoverExpand
-      ref={ref}
-      className={className}
-      size={size}
-      color={color}
-      corners={corners}
-      hoverScale={hoverScale}
-    />
+    <div ref={ref} className={className}>
+      {visibility.topLeft && (
+        <div
+          className={`top-0 left-0 ${cornerPositionClasses.topLeft} ${cornerClass}`}
+        />
+      )}
+      {visibility.topRight && (
+        <div
+          className={`top-0 right-0 ${cornerPositionClasses.topRight} ${cornerClass}`}
+        />
+      )}
+      {visibility.bottomLeft && (
+        <div
+          className={`bottom-0 left-0 ${cornerPositionClasses.bottomLeft} ${cornerClass}`}
+        />
+      )}
+      {visibility.bottomRight && (
+        <div
+          className={`right-0 bottom-0 ${cornerPositionClasses.bottomRight} ${cornerClass}`}
+        />
+      )}
+    </div>
   )
 }

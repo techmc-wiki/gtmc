@@ -2,8 +2,7 @@
 
 import * as React from "react"
 import { cn } from "@/lib/cn"
-import { InputBox } from "@/components/ui/input-box"
-import { TextAreaBox } from "@/components/ui/textarea-box"
+import { FieldBox } from "@/components/ui/field-box"
 import { SegmentedControl } from "@/components/ui/segmented-control"
 import type { GlossaryRow, GlossaryColumn } from "@/lib/glossary/csv"
 import {
@@ -516,7 +515,8 @@ function Field({
         {required && <span className="ml-1 text-red-600/80">*</span>}
       </label>
       {multiline ? (
-        <TextAreaBox
+        <FieldBox
+          multiline
           id={fieldId}
           value={value}
           error={error}
@@ -524,7 +524,7 @@ function Field({
           rows={3}
         />
       ) : (
-        <InputBox
+        <FieldBox
           id={fieldId}
           value={value}
           error={error}

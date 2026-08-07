@@ -1,4 +1,4 @@
-import { SectionTitle } from "@/components/ui/section-title"
+import { SectionTitle } from "@/components/ui/headings"
 import { TechCard } from "@/components/ui/tech-card"
 import {
   SegmentedBar,

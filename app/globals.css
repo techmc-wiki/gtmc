@@ -667,10 +667,6 @@ body {
   @apply mx-auto max-w-6xl space-y-8 pb-12;
 }
 
-@utility card-header-row {
-  @apply mb-4 flex items-start justify-between gap-2;
-}
-
 @utility editor-panel {
   @apply text-tech-main/40 p-6 font-mono text-xs;
 }

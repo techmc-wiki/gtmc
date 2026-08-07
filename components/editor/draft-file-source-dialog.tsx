@@ -4,7 +4,7 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 
 import { TechButton } from "@/components/ui/tech-button"
-import { InputBox } from "@/components/ui/input-box"
+import { FieldBox } from "@/components/ui/field-box"
 import { SegmentedControl } from "@/components/ui/segmented-control"
 import { normalizeDraftFilePath } from "@/lib/drafts/files"
 
@@ -366,7 +366,7 @@ export function DraftFileSourceDialog({
                   <label className="section-label" htmlFor="draft-import-name">
                     {t("fileNameLabel")}
                   </label>
-                  <InputBox
+                  <FieldBox
                     id="draft-import-name"
                     placeholder={t("repoFileNamePlaceholder")}
                     value={customUploadName}
@@ -395,7 +395,7 @@ export function DraftFileSourceDialog({
                     htmlFor="draft-new-file-name">
                     {t("fileNameLabel")}
                   </label>
-                  <InputBox
+                  <FieldBox
                     id="draft-new-file-name"
                     placeholder={t("newFileNamePlaceholder")}
                     value={newFileName}
@@ -429,7 +429,7 @@ export function DraftFileSourceDialog({
                     htmlFor="draft-new-folder-name">
                     {t("fileNameLabel")}
                   </label>
-                  <InputBox
+                  <FieldBox
                     id="draft-new-folder-name"
                     placeholder="例如：new-section"
                     value={newFolderName}

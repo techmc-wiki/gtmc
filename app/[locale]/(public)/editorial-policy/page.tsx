@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
-import { PageHeader } from "@/components/ui/page-header"
-import { SectionTitle } from "@/components/ui/section-title"
+import { PageHeader, SectionTitle } from "@/components/ui/headings"
 import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
 import { buildWebPageJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
 

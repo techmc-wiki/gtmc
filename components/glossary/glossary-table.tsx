@@ -17,8 +17,7 @@ import {
   type GlossaryDensity,
   type GlossaryTableColumn,
 } from "@/lib/glossary/view-options"
-import { GlossaryTableRow } from "./glossary-table-row"
-import { GlossaryCard } from "./glossary-card"
+import { GlossaryTableRow, GlossaryCard } from "./glossary-entry"
 
 interface GlossaryTableProps {
   entries: GlossaryIndexEntry[]

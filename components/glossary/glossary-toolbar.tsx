@@ -11,7 +11,7 @@ import {
   type CategoryFilterCategory,
 } from "@/components/glossary/category-filter"
 import { GlossaryTable } from "@/components/glossary/glossary-table"
-import { GlossaryDetailPanel } from "@/components/glossary/glossary-detail-panel"
+import { GlossaryDetailPanel } from "@/components/glossary/term-detail"
 import {
   SegmentedBar,
   SweepOverlay,

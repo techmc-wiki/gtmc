@@ -421,12 +421,7 @@ export async function resolveConflictAction(
         throw new Error(formatErrorMessage("Resume rebase failed", result))
       }
 
-      revalidatePaths([
-        "/draft",
-        `/draft/${linkedDraft.id}`,
-        "/review",
-        `/review/${prNumber}`,
-      ])
+      revalidatePaths(getReviewRevalidatePaths(linkedDraft.id, prNumber))
       reviewLog("resolveConflictAction", {
         prNumber,
         status: "complete",
@@ -509,12 +504,7 @@ export async function resolveConflictAction(
       syncedMainSha: summarizeSha(result.syncedMainSha),
     })
 
-    revalidatePaths([
-      "/draft",
-      `/draft/${linkedDraft.id}`,
-      "/review",
-      `/review/${prNumber}`,
-    ])
+    revalidatePaths(getReviewRevalidatePaths(linkedDraft.id, prNumber))
 
     reviewLog("resolveConflictAction", {
       prNumber,

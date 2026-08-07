@@ -21,6 +21,63 @@ const authorsContentByLocale = {
   zh: AuthorsContentZh,
 } as const
 
+/**
+ * Author-grid data builders live at module scope so the render body doesn't
+ * construct arrays directly. The page is a server component and renders once
+ * per request.
+ */
+async function buildMaintainers(
+  articleLocale: ArticleLocale
+): Promise<AuthorGridItem[]> {
+  const t = await getTranslations({
+    locale: articleLocale,
+    namespace: "Authors",
+  })
+  return getMaintainerHandles().map((handle) => {
+    const person = resolveAuthorPerson(handle)
+    const repositoryStats = getRepositoryContributorStats([
+      handle,
+      person.key,
+      person.name,
+    ])
+    return {
+      handle,
+      person,
+      footer: t("maintainerStats", { ...repositoryStats }),
+    }
+  })
+}
+
+async function buildProfiles(
+  articleLocale: ArticleLocale,
+  allAuthors: string[],
+  manifest: ReturnType<typeof loadArticleManifest>
+): Promise<AuthorGridItem[]> {
+  const t = await getTranslations({
+    locale: articleLocale,
+    namespace: "Authors",
+  })
+  return allAuthors
+    .map((handle) => ({
+      handle,
+      person: resolveAuthorPerson(handle),
+      articleCount: getArticlesByAuthor(handle, articleLocale, manifest).length,
+    }))
+    .toSorted((a, b) => b.articleCount - a.articleCount)
+    .map(({ handle, person, articleCount }) => ({
+      handle,
+      person,
+      footer: t("articleCount", { count: articleCount }),
+    }))
+}
+
+function buildAuthorsStats(allAuthors: string[], articleCount: number) {
+  return {
+    authors: String(allAuthors.length),
+    articles: String(articleCount),
+  }
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -69,32 +126,12 @@ export default async function AuthorsPage({
   const manifest = loadArticleManifest()
   const allAuthors = getUniqueAuthors(manifest)
 
-  const maintainers: AuthorGridItem[] = getMaintainerHandles().map((handle) => {
-    const person = resolveAuthorPerson(handle)
-    const repositoryStats = getRepositoryContributorStats([
-      handle,
-      person.key,
-      person.name,
-    ])
-    return {
-      handle,
-      person,
-      footer: t("maintainerStats", { ...repositoryStats }),
-    }
-  })
+  const [maintainers, profiles] = await Promise.all([
+    buildMaintainers(articleLocale),
+    buildProfiles(articleLocale, allAuthors, manifest),
+  ])
 
-  const profiles: AuthorGridItem[] = allAuthors
-    .map((handle) => ({
-      handle,
-      person: resolveAuthorPerson(handle),
-      articleCount: getArticlesByAuthor(handle, articleLocale, manifest).length,
-    }))
-    .toSorted((a, b) => b.articleCount - a.articleCount)
-    .map(({ handle, person, articleCount }) => ({
-      handle,
-      person,
-      footer: t("articleCount", { count: articleCount }),
-    }))
+  const displayStats = buildAuthorsStats(allAuthors, stats.articleCount)
 
   const jsonLd = serializeJsonLd(
     buildWebPageJsonLd(
@@ -114,10 +151,7 @@ export default async function AuthorsPage({
       <PageHeader title={t("pageTitle")} topMargin />
 
       <Content
-        stats={{
-          authors: String(allAuthors.length),
-          articles: String(stats.articleCount),
-        }}
+        stats={displayStats}
         maintainers={maintainers}
         profiles={profiles}
         fallbackBio={t("fallbackBio")}

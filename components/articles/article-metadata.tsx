@@ -217,7 +217,8 @@ export function ArticleMetadataFull({
     setLastEditedLabel(formatRelativeTime(lastModified))
   }, [lastModified])
 
-  const allContributors = [author, ...coAuthors]
+  // Stable reference for the `authors` prop: recomputed only when author list changes
+  const allContributors = useMemo(() => [author, ...coAuthors], [author, coAuthors])
   const displayContributors = allContributors.slice(0, 5)
   const remainingCount = allContributors.length - 5
 

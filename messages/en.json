@@ -86,15 +86,9 @@
     "fallbackBio": "GTMC contributor",
     "maintainerLabel": "Maintainer",
     "maintainerStats": "{commits, plural, =1 {1 commit} other {# commits}} · {linesChanged, number} lines changed",
-    "maintainersDescription": "The people who keep GTMC's website and publishing systems working.",
-    "maintainersTitle": "Maintainers",
     "metaDescription": "Meet the people who write and review Graduate Texts in Minecraft: tutorials, mechanics explanations, and source-code analyses for technical Minecraft.",
     "pageDescription": "The people behind the text",
     "pageTitle": "Contributors",
-    "sectionTitle": "All Contributors",
-    "sortLabel": "Sorted by article count",
-    "statsArticles": "ARTICLES PUBLISHED",
-    "statsAuthors": "AUTHORS",
     "viewProfile": "View profile →"
   },
   "callouts": {

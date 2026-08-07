@@ -2,7 +2,10 @@ import fs from "fs"
 import path from "path"
 import type { ArticleEntry } from "@/lib/articles/manifest"
 
-import { isReservedArticlePath } from "@/lib/articles/path-conventions"
+function isReservedArticlePath(filePath: string): boolean {
+  return filePath.split("/").some((segment) => segment.startsWith("_"))
+}
+
 import { buildManifestPreview } from "./manifest-preview"
 import {
   parseSourceReadmeFrontMatter,

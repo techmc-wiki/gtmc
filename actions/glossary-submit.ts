@@ -10,10 +10,12 @@ import {
   type GlossaryRow,
 } from "@/lib/glossary/csv"
 import { openGlossaryPullRequest } from "@/lib/glossary/pr"
-import { GLOSSARY_REPO, getGlossaryWriteToken } from "@/lib/github/repos"
 import { getFileSnapshot } from "@/lib/github/branch"
-import { GLOSSARY_CSV_PATH, GLOSSARY_MAIN_BRANCH } from "@/lib/glossary/repo"
 import { generateSlug } from "@/lib/glossary/slug"
+import { GLOSSARY_REPO, getGlossaryWriteToken } from "@/lib/github/repos"
+
+const GLOSSARY_MAIN_BRANCH = "main"
+const GLOSSARY_CSV_PATH = "TechMC Glossary.csv"
 
 interface GlossaryOperation {
   kind: "edit" | "add" | "delete"

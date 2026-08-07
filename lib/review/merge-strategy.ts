@@ -25,15 +25,6 @@ export interface IMergeLibrary {
   }): MergeResult
 }
 
-function splitLines(content: string): string[] {
-  if (!content) return []
-  return content.replaceAll("\r\n", "\n").split("\n")
-}
-
-function joinLines(lines: string[]): string {
-  return lines.join("\n")
-}
-
 class NodeDiff3Adapter implements IMergeLibrary {
   merge(params: {
     baseContent: string
@@ -41,9 +32,15 @@ class NodeDiff3Adapter implements IMergeLibrary {
     latestMainContent: string
     labels?: { base?: string; draft?: string; main?: string }
   }): MergeResult {
-    const draftLines = splitLines(params.draftContent)
-    const baseLines = splitLines(params.baseContent)
-    const mainLines = splitLines(params.latestMainContent)
+    const draftLines = params.draftContent
+      ? params.draftContent.replaceAll("\r\n", "\n").split("\n")
+      : []
+    const baseLines = params.baseContent
+      ? params.baseContent.replaceAll("\r\n", "\n").split("\n")
+      : []
+    const mainLines = params.latestMainContent
+      ? params.latestMainContent.replaceAll("\r\n", "\n").split("\n")
+      : []
 
     const diff3Result = diff3Merge(draftLines, baseLines, mainLines)
 
@@ -83,7 +80,7 @@ class NodeDiff3Adapter implements IMergeLibrary {
     return {
       conflict: hasConflict,
       blocks,
-      content: joinLines(contentLines),
+      content: contentLines.join("\n"),
     }
   }
 }

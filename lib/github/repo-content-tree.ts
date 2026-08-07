@@ -1,5 +1,4 @@
 import { shouldSkipArticleFile } from "@/lib/articles/frontmatter-parser"
-import { isReservedArticlePath } from "@/lib/articles/path-conventions"
 import {
   ARTICLES_REPO_NAME,
   ARTICLES_REPO_OWNER,
@@ -21,6 +20,9 @@ export interface ArticleTreeNode {
   children: ArticleTreeNode[]
 }
 
+function isReservedArticlePath(filePath: string): boolean {
+  return filePath.split("/").some((segment) => segment.startsWith("_"))
+}
 export async function getRepoContentTree(): Promise<ArticleTreeNode[]> {
   if (isGithubSyncRateLimited()) {
     return []

@@ -1,4 +1,3 @@
-import React from "react"
 import Image from "next/image"
 import { cn } from "@/lib/cn"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
@@ -16,7 +15,7 @@ export function UserAvatar({
   src,
   alt,
   fallback,
-  className = "",
+  className,
   sizes = "(max-width: 768px) 32px, 40px",
   loading = "lazy",
 }: UserAvatarProps) {

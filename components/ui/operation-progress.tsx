@@ -23,13 +23,6 @@ interface OperationProgressProps {
   compact?: boolean
 }
 
-interface StageTimelineEntry extends OperationProgressStage {
-  endMs: number
-  endProgress: number
-  startMs: number
-  startProgress: number
-}
-
 const MIN_VISIBLE_PROGRESS = 0.06
 const RUNNING_PROGRESS_LIMIT = 0.94
 const SPRING_STIFFNESS = 16
@@ -39,8 +32,11 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
 }
 
-function easeOutCubic(value: number) {
-  return 1 - Math.pow(1 - value, 3)
+interface StageTimelineEntry extends OperationProgressStage {
+  endMs: number
+  endProgress: number
+  startMs: number
+  startProgress: number
 }
 
 function buildTimeline(stages: OperationProgressStage[]): StageTimelineEntry[] {
@@ -55,7 +51,6 @@ function buildTimeline(stages: OperationProgressStage[]): StageTimelineEntry[] {
   return stages.map((stage, index) => {
     const startMs = currentMs
     currentMs += stage.durationMs
-
     const endProgress =
       index === stages.length - 1
         ? RUNNING_PROGRESS_LIMIT
@@ -70,7 +65,6 @@ function buildTimeline(stages: OperationProgressStage[]): StageTimelineEntry[] {
       startMs,
       startProgress: currentProgress,
     }
-
     currentProgress = endProgress
     return entry
   })
@@ -85,24 +79,21 @@ function getRunningTarget(
   const activeStage =
     timeline.find((stage) => elapsedMs < stage.endMs) ??
     timeline[timeline.length - 1]
-
   const stageDuration = Math.max(activeStage.endMs - activeStage.startMs, 1)
-  const stageElapsed = clamp(
-    (elapsedMs - activeStage.startMs) / stageDuration,
-    0,
+  const stageElapsed = Math.min(
+    Math.max((elapsedMs - activeStage.startMs) / stageDuration, 0),
     1
   )
+  const easedElapsed = 1 - Math.pow(1 - stageElapsed, 3)
 
   return (
     activeStage.startProgress +
-    (activeStage.endProgress - activeStage.startProgress) *
-      easeOutCubic(stageElapsed)
+    (activeStage.endProgress - activeStage.startProgress) * easedElapsed
   )
 }
 
 function getStageIndex(elapsedMs: number, timeline: StageTimelineEntry[]) {
   if (timeline.length === 0) return 0
-
   const index = timeline.findIndex((stage) => elapsedMs < stage.endMs)
   return index === -1 ? timeline.length - 1 : index
 }

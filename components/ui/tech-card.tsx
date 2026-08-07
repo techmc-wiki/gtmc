@@ -4,39 +4,16 @@ import * as React from "react"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { cn } from "@/lib/cn"
 
-export type TechCardTone =
-  | "main"
-  | "accent"
-  | "danger"
-  | "success"
-  | "warning"
-  | "neutral"
-
-export type TechCardBorderOpacity = "solid" | "medium" | "muted" | "subtle"
-
-export type TechCardBackground =
-  | "default"
-  | "solid"
-  | "subtle"
-  | "ghost"
-  | "transparent"
-
-export type TechCardPadding = "default" | "compact" | "spacious" | "none"
-
-export type TechCardHover =
-  | "default"
-  | "none"
-  | "border"
-  | "surface"
-  | "elevated"
-
-export type TechCardBracketVisibility = "visible" | "hidden"
-
-export type TechCardBracketVariant = React.ComponentProps<
+type TechCardTone = "main" | "danger"
+type TechCardBorderOpacity = "solid" | "medium" | "muted" | "subtle"
+type TechCardBackground = "default" | "subtle" | "ghost"
+type TechCardPadding = "default" | "compact" | "spacious" | "none"
+type TechCardHover = "default" | "none" | "border" | "elevated"
+type TechCardBracketVisibility = "visible" | "hidden"
+type TechCardBracketVariant = React.ComponentProps<
   typeof CornerBrackets
 >["variant"]
-
-export type TechCardPattern = "none" | "grid"
+type TechCardPattern = "none" | "grid"
 
 const toneClasses = {
   main: {
@@ -50,17 +27,6 @@ const toneClasses = {
     hoverSurface: "hover:bg-tech-accent/10",
     hoverElevated: "hover:shadow-[0_0_20px_rgb(var(--color-tech-main)/0.15)]",
   },
-  accent: {
-    border: "border-tech-accent",
-    solidBorder: "border-tech-accent",
-    background: "bg-surface-overlay/80",
-    subtleBackground: "bg-tech-accent/5",
-    text: "text-tech-main",
-    bracket: "border-tech-accent/40",
-    hoverBorder: "hover:border-tech-accent/60",
-    hoverSurface: "hover:bg-tech-accent/10",
-    hoverElevated: "hover:shadow-[0_0_20px_rgb(var(--color-tech-accent)/0.15)]",
-  },
   danger: {
     border: "border-red-500",
     solidBorder: "border-red-500",
@@ -71,39 +37,6 @@ const toneClasses = {
     hoverBorder: "hover:border-red-500/70",
     hoverSurface: "hover:bg-red-500/15",
     hoverElevated: "hover:shadow-[0_0_20px_rgb(239_68_68/0.15)]",
-  },
-  success: {
-    border: "border-emerald-500",
-    solidBorder: "border-emerald-500",
-    background: "bg-emerald-500/10",
-    subtleBackground: "bg-emerald-500/10",
-    text: "text-emerald-700",
-    bracket: "border-emerald-500/40",
-    hoverBorder: "hover:border-emerald-500/60",
-    hoverSurface: "hover:bg-emerald-500/15",
-    hoverElevated: "hover:shadow-[0_0_20px_rgb(16_185_129/0.15)]",
-  },
-  warning: {
-    border: "border-yellow-400",
-    solidBorder: "border-yellow-400",
-    background: "bg-yellow-100/50",
-    subtleBackground: "bg-yellow-100/50",
-    text: "text-yellow-700",
-    bracket: "border-yellow-400/50",
-    hoverBorder: "hover:border-yellow-400/70",
-    hoverSurface: "hover:bg-yellow-100/70",
-    hoverElevated: "hover:shadow-[0_0_20px_rgb(250_204_21/0.15)]",
-  },
-  neutral: {
-    border: "border-tech-line",
-    solidBorder: "border-tech-line",
-    background: "bg-surface-overlay/80",
-    subtleBackground: "bg-tech-bg",
-    text: "text-tech-main",
-    bracket: "border-tech-main/30",
-    hoverBorder: "hover:border-tech-main/40",
-    hoverSurface: "hover:bg-tech-bg",
-    hoverElevated: "hover:shadow-[0_0_20px_rgb(var(--color-tech-main)/0.1)]",
   },
 } as const satisfies Record<
   TechCardTone,
@@ -155,7 +88,7 @@ function getBackgroundClass(
   tone: TechCardTone,
   background: TechCardBackground
 ) {
-  if (background === "default" || background === "solid") {
+  if (background === "default") {
     return toneClasses[tone].background
   }
 
@@ -163,15 +96,11 @@ function getBackgroundClass(
     return toneClasses[tone].subtleBackground
   }
 
-  if (background === "ghost") {
-    return "bg-surface-overlay/40"
-  }
-
-  return "bg-transparent"
+  return "bg-surface-overlay/40"
 }
 
 function getHoverClass(tone: TechCardTone, hover: TechCardHover) {
-  if (hover === "default" || hover === "surface") {
+  if (hover === "default") {
     return toneClasses[tone].hoverSurface
   }
 
@@ -191,21 +120,21 @@ function getHoverClass(tone: TechCardTone, hover: TechCardHover) {
 }
 
 export interface TechCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Tone maps audited frame accents: main, accent, danger, success, warning, neutral. */
+  /** Tone maps the main frame or danger state used by current cards. */
   tone?: TechCardTone
-  /** Border opacity maps solid, /60, /40, and /30 shells used around dashboard cards. */
+  /** Border opacity maps the audited card shells. */
   borderOpacity?: TechCardBorderOpacity
-  /** Background maps existing white, tinted, ghost, and transparent frame surfaces. */
+  /** Background maps the current default, tinted, and ghost surfaces. */
   background?: TechCardBackground
-  /** Padding maps default card padding, compact, spacious section frames, and no-padding shells. */
+  /** Padding maps current card spacing. */
   padding?: TechCardPadding
-  /** Hover maps the current surface fade, border-only, elevated, or disabled hover styles. */
+  /** Hover maps current surface, border-only, elevated, or disabled states. */
   hover?: TechCardHover
-  /** Controls the built-in corner brackets without requiring duplicate bracket markup. */
+  /** Controls the built-in corner brackets. */
   brackets?: TechCardBracketVisibility
-  /** Passes through to CornerBrackets for static or hover bracket behavior. */
+  /** Passes through to CornerBrackets for static or hover behavior. */
   bracketVariant?: TechCardBracketVariant
-  /** Optional blueprint surface pattern used by existing frame shells. */
+  /** Optional blueprint grid pattern. */
   pattern?: TechCardPattern
   ref?: React.Ref<HTMLDivElement>
 }
@@ -225,8 +154,6 @@ export function TechCard({
   ...props
 }: TechCardProps) {
   const tone = toneProp ?? "main"
-
-  // 技术扁平图纸感：细边框，无圆角，纯色几何；响应式内边距
   const baseStyles = cn(
     "group relative border backdrop-blur-sm transition-colors duration-300",
     getBorderClass(tone, borderOpacity),
@@ -238,14 +165,12 @@ export function TechCard({
 
   return (
     <div ref={ref} className={cn(baseStyles, className)} {...props}>
-      {/* 卡片的十字定位角标 */}
       {brackets === "visible" && (
         <CornerBrackets
           color={toneClasses[tone].bracket}
           variant={bracketVariant}
         />
       )}
-
       {pattern !== "none" && (
         <div
           className={cn(
@@ -254,7 +179,6 @@ export function TechCard({
           )}
         />
       )}
-
       {children}
     </div>
   )

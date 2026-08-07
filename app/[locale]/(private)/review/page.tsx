@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server"
 import { ClosedPRList } from "./closed-pr-list"
 import { TechCard } from "@/components/ui/tech-card"
 import { TechButton } from "@/components/ui/tech-button"
-import { ReviewStatusBadge } from "@/components/ui/status-badge"
+import { ReviewStatusBadge } from "@/components/ui/status"
 import { Link } from "@/i18n/navigation"
 import { getClosedPRs, getOpenPRs, getPR } from "@/lib/github/pr-manager"
 import {

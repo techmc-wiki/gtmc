@@ -7,7 +7,7 @@ import {
   OperationProgress,
   type OperationProgressStage,
 } from "@/components/ui/operation-progress"
-import { MergeMethodPicker } from "@/components/review/merge-method-picker"
+import { MergeMethodPicker } from "@/components/review/review-pickers"
 import { TechButton } from "@/components/ui/tech-button"
 import { ActionForm } from "./action-form"
 import type {

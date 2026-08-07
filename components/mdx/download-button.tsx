@@ -10,10 +10,14 @@ export function DownloadButton({
   children: React.ReactNode
 }) {
   return (
-    <a href={`/${filename}`} download>
-      <TechButton variant="primary" size="lg" className="w-full sm:w-auto">
+    <TechButton
+      asChild
+      variant="primary"
+      size="lg"
+      className="w-full sm:w-auto">
+      <a href={`/${filename}`} download>
         {children}
-      </TechButton>
-    </a>
+      </a>
+    </TechButton>
   )
 }

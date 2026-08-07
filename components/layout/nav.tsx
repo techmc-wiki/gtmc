@@ -3,21 +3,45 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
-import { Link } from "@/i18n/navigation"
+import { Link, usePathname } from "@/i18n/navigation"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { useMounted } from "@/hooks/use-mounted"
 
-interface NavLink {
+export interface NavLink {
   href: string
   label: string
 }
 
-interface MobileNavProps {
-  navLinks: NavLink[]
+/** Desktop nav: mono uppercase links with a signal underline on the active route. */
+export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
+  const pathname = usePathname()
+
+  return (
+    <ul className="hidden items-center gap-6 md:flex">
+      {navLinks.map((link) => {
+        const isActive = pathname.startsWith(link.href)
+
+        return (
+          <li key={link.href}>
+            <Link
+              href={link.href}
+              className={`border-b-2 pb-1 font-mono text-xs tracking-[0.15em] uppercase transition-colors ${
+                isActive
+                  ? "border-tech-signal text-tech-main-dark font-bold"
+                  : `text-tech-main hover:border-tech-main/40 hover:text-tech-main-dark border-transparent`
+              } `}>
+              {link.label}
+            </Link>
+          </li>
+        )
+      })}
+    </ul>
+  )
 }
 
-export function MobileNav({ navLinks }: MobileNavProps) {
+/** Mobile nav: hamburger trigger + portal drawer with the same links. */
+export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
   const t = useTranslations("CommonA11y")
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
   const isMounted = useMounted()

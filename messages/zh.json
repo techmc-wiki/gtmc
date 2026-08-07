@@ -9,8 +9,8 @@
     "translationFallbackBody": "本文尚未提供所选语言的译文，当前显示中文原文。",
     "translationFallbackCta": "打开中文页面",
     "translationLatestCommitAria": "在 GitHub 上查看原文提交 {sha}",
-    "translationOutdatedLag": "译文落后 {commitLag, plural, one {# 次源文提交} other {# 次源文提交}}，时间差为 {dayLag, plural, one {# 天} other {# 天}}。",
     "translationOutdatedLabel": "译文已过期",
+    "translationOutdatedLag": "译文落后 {commitLag, plural, one {# 次源文提交} other {# 次源文提交}}，时间差为 {dayLag, plural, one {# 天} other {# 天}}。",
     "translationOutdatedPrefix": "原文最新版本为",
     "translationPending": "翻译待完成"
   },
@@ -64,9 +64,9 @@
     "backToAuthors": "← 所有贡献者",
     "backToList": "← 所有贡献者",
     "breadcrumbAuthors": "作者",
-    "commitsLabel": "提交次数",
     "coauthoredBadge": "合著",
     "coAuthoredLabel": "合著",
+    "commitsLabel": "提交次数",
     "contributorSinceLabel": "贡献者始于",
     "fallbackBio": "GTMC 贡献者",
     "githubProfile": "GitHub",
@@ -137,35 +137,6 @@
     "toggleLineWrap": "切换自动换行",
     "toggleNavigationMenu": "切换导航菜单"
   },
-  "Drafts": {
-    "articleType": "文章",
-    "changesCount": "{count} 处修改",
-    "cleanupWarning": "部分已上传资源未能清理。请打开草稿进行检查。",
-    "continueDraft": "继续编辑",
-    "deleteDraft": "删除草稿",
-    "deleteWarning": "此操作会永久删除该草稿。",
-    "filesCount": "{count} 个文件",
-    "glossaryType": "术语表",
-    "inProgress": "进行中",
-    "moreActions": "更多操作",
-    "moreActionsFor": "{title} 的更多操作",
-    "newArticle": "新建文章草稿",
-    "newDraftDescription": "选择要贡献的内容类型。草稿可以随时保存，稍后继续。",
-    "newDraftLabel": "新草稿",
-    "newDraftTitle": "开始新的内容",
-    "newGlossary": "新建术语表草稿",
-    "noActiveTitle": "没有进行中的草稿",
-    "openPullRequest": "打开拉取请求",
-    "pageDescription": "继续编辑文章或术语表修改，或开始新的贡献。",
-    "pageSubtitle": "贡献者工作区",
-    "pageTitle": "你的草稿",
-    "pastWork": "历史记录",
-    "reopenDraft": "打开草稿",
-    "untitledArticle": "未命名文章",
-    "untitledGlossary": "未命名术语表修订",
-    "updatedAt": "更新于 {date}",
-    "viewDraft": "查看草稿"
-  },
   "DraftFiles": {
     "addButton": "添加",
     "addExistingFile": "添加已有文件",
@@ -210,6 +181,35 @@
     "selectExistingFile": "选择已有文件",
     "selectFileButton": "选择文件",
     "uploadModeLabel": "上传"
+  },
+  "Drafts": {
+    "articleType": "文章",
+    "changesCount": "{count} 处修改",
+    "cleanupWarning": "部分已上传资源未能清理。请打开草稿进行检查。",
+    "continueDraft": "继续编辑",
+    "deleteDraft": "删除草稿",
+    "deleteWarning": "此操作会永久删除该草稿。",
+    "filesCount": "{count} 个文件",
+    "glossaryType": "术语表",
+    "inProgress": "进行中",
+    "moreActions": "更多操作",
+    "moreActionsFor": "{title} 的更多操作",
+    "newArticle": "新建文章草稿",
+    "newDraftDescription": "选择要贡献的内容类型。草稿可以随时保存，稍后继续。",
+    "newDraftLabel": "新草稿",
+    "newDraftTitle": "开始新的内容",
+    "newGlossary": "新建术语表草稿",
+    "noActiveTitle": "没有进行中的草稿",
+    "openPullRequest": "打开拉取请求",
+    "pageDescription": "继续编辑文章或术语表修改，或开始新的贡献。",
+    "pageSubtitle": "贡献者工作区",
+    "pageTitle": "你的草稿",
+    "pastWork": "历史记录",
+    "reopenDraft": "打开草稿",
+    "untitledArticle": "未命名文章",
+    "untitledGlossary": "未命名术语表修订",
+    "updatedAt": "更新于 {date}",
+    "viewDraft": "查看草稿"
   },
   "Editor": {
     "activeFileLabel": "当前文件",
@@ -338,11 +338,6 @@
     "returnHome": "返回首页 →",
     "title": "访问被拒绝"
   },
-  "not-found": {
-    "description": "请求的路径在数据库中不存在。请核对坐标后重试。",
-    "returnHome": "返回首页 →",
-    "title": "资源未找到"
-  },
   "Glossary": {
     "categoriesSelectedCount": "已选择 {count} 个分类",
     "categoryAll": "全部分类",
@@ -431,7 +426,6 @@
     "glossaryCardDesc": "全书索引，以 12 种语言收录技术向 Minecraft 词汇。",
     "glossaryCardTitle": "术语表",
     "heroDescription": "社区共建的技术向 Minecraft 在线教科书。从入门教程到机制详解，再到带注释的源码阅读，帮助玩家真正理解这个方块世界。",
-    "slogan": "求知于方寸之间。",
     "initializing": "初始化中...",
     "loggedInAs": "已登录为 {username}",
     "loginGithub": "登录",
@@ -440,6 +434,7 @@
     "pdfCardTitle": "离线 PDF",
     "scrollHint": "目录",
     "sectionCount": "{count} 节",
+    "slogan": "求知于方寸之间。",
     "startReading": "开始阅读 →",
     "tocKicker": "GRADUATE TEXTS IN MINECRAFT",
     "tocTitle": "目录"
@@ -452,6 +447,11 @@
     "glossary": "术语表",
     "pdf": "PDF",
     "reviewHub": "审核中心"
+  },
+  "not-found": {
+    "description": "请求的路径在数据库中不存在。请核对坐标后重试。",
+    "returnHome": "返回首页 →",
+    "title": "资源未找到"
   },
   "OperationProgress": {
     "finalizeError": "收尾流程中断",
@@ -498,11 +498,11 @@
   },
   "Pdf": {
     "bookSubtitle": "技术性 Minecraft 入门",
-    "slogan": "求知于方寸之间。",
     "bookTitle": "Graduate Texts in Minecraft",
     "mermaidRenderError": "无法渲染 Mermaid 图表。",
     "metaDescription": "下载完整的《Graduate Texts in Minecraft》（GTMC）为单个离线 PDF，包含入门教程、机制详解、工程实践与源码分析。",
-    "metaTitle": "离线 PDF 下载"
+    "metaTitle": "离线 PDF 下载",
+    "slogan": "求知于方寸之间。"
   },
   "PeopleMention": {
     "bilibiliLabel": "bilibili",

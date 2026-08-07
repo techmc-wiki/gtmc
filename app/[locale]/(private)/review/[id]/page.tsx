@@ -6,6 +6,7 @@ import { redirect, notFound } from "next/navigation"
 import "katex/dist/katex.min.css"
 import { Link } from "@/i18n/navigation"
 import { TechButton } from "@/components/ui/tech-button"
+import { ActionForm } from "./components/action-form"
 import {
   getGitHubWriteToken,
   getOctokit,
@@ -493,18 +494,22 @@ export default async function ReviewDetailPage({
                 </p>
               </div>
 
-              <form
+              <ActionForm
                 action={async () => {
                   "use server"
                   await closePRAction(prNumber)
                 }}>
-                <TechButton
-                  type="submit"
-                  variant="secondary"
-                  className="w-full border-red-600 text-red-600 hover:bg-red-600 hover:text-white">
-                  CLOSE_PR
-                </TechButton>
-              </form>
+                {({ isPending }) => (
+                  <TechButton
+                    type="submit"
+                    variant="secondary"
+                    disabled={isPending}
+                    aria-busy={isPending}
+                    className="w-full border-red-600 text-red-600 hover:bg-red-600 hover:text-white">
+                    {isPending ? "CLOSING..." : "CLOSE_PR"}
+                  </TechButton>
+                )}
+              </ActionForm>
             </div>
           ) : (
             <PRActionButtons

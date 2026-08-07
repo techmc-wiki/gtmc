@@ -7,6 +7,7 @@ import { Link, usePathname } from "@/i18n/navigation"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { useMounted } from "@/hooks/use-mounted"
+import { useModalEffects } from "@/hooks/use-modal-effects"
 
 export interface NavLink {
   href: string
@@ -45,25 +46,11 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
   const t = useTranslations("CommonA11y")
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
   const isMounted = useMounted()
+  const closeDrawer = React.useCallback(() => {
+    setIsDrawerOpen(false)
+  }, [])
 
-  React.useEffect(() => {
-    if (!isDrawerOpen) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsDrawerOpen(false)
-      }
-    }
-
-    const originalStyle = window.getComputedStyle(document.body).overflow
-    document.body.style.overflow = "hidden"
-    window.addEventListener("keydown", handleKeyDown)
-
-    return () => {
-      document.body.style.overflow = originalStyle
-      window.removeEventListener("keydown", handleKeyDown)
-    }
-  }, [isDrawerOpen])
+  useModalEffects({ isOpen: isDrawerOpen, onClose: closeDrawer })
 
   return (
     <>

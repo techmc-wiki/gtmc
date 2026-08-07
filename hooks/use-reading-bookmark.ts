@@ -3,7 +3,7 @@
 import * as React from "react"
 import {
   addSiteScrollListener,
-  getSiteScrollMetrics,
+  getSiteScrollProgress,
 } from "@/hooks/site-scroll-root"
 
 export interface ReadingBookmark {
@@ -46,10 +46,7 @@ export function useBookmarkRecorder(slug: string, title: string) {
 
     let frame = 0
     const save = () => {
-      const { clientHeight, scrollHeight, scrollTop } = getSiteScrollMetrics()
-      const docHeight = scrollHeight - clientHeight
-      const progress =
-        docHeight > 0 ? Math.min(1, Math.max(0, scrollTop / docHeight)) : 0
+      const progress = getSiteScrollProgress()
       const bookmark: ReadingBookmark = {
         slug,
         title,

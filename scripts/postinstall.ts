@@ -56,7 +56,18 @@ function ensureSubmoduleInitialized(path: string) {
 const startedAt = performance.now()
 logger.event("setup.started")
 
-if (isGitWorkTree()) {
+// The skip flag gates submodule/content setup too: CI checks out submodules
+// in the workflow and Vercel prepares them inside build:vercel, so the
+// install-time copy is redundant there — and hard-fails the install when
+// the clone or build cache lacks submodule content.
+const isCI = process.env.CI === "true"
+const isVercel = process.env.VERCEL === "1"
+const skipHeavy =
+  process.env.GTMC_SKIP_POSTINSTALL === "1" ||
+  (isCI && !isVercel && process.env.GTMC_LINT_ONLY === "1")
+const skipPlaywright = skipHeavy || process.env.GTMC_SKIP_PLAYWRIGHT === "1"
+
+if (!skipHeavy && isGitWorkTree()) {
   run("git", ["config", "--local", "include.path", ".gitconfig"])
 
   ensureSubmoduleInitialized("articles")
@@ -65,20 +76,11 @@ if (isGitWorkTree()) {
   runBuildStep(logger, "glossary", () =>
     runScript("scripts/generate-glossary-manifest.ts")
   )
+} else if (isGitWorkTree()) {
+  logger.event("setup.submodules.skipped", { reason: "environment" })
 } else {
   logger.event("submodule.setup.skipped", { reason: "outside-work-tree" })
 }
-
-// Heavy steps (prisma generate, article manifest, chromium install) are
-// skipped in CI lint runs and when explicitly opted out, so a pure lint
-// job doesn't pay for the full content pipeline. Build CI also skips them
-// and installs Chromium only when content/PDF artifacts must be regenerated.
-const isCI = process.env.CI === "true"
-const isVercel = process.env.VERCEL === "1"
-const skipHeavy =
-  process.env.GTMC_SKIP_POSTINSTALL === "1" ||
-  (isCI && !isVercel && process.env.GTMC_LINT_ONLY === "1")
-const skipPlaywright = skipHeavy || process.env.GTMC_SKIP_PLAYWRIGHT === "1"
 
 if (skipHeavy) {
   logger.event("setup.heavy-work.skipped", { reason: "environment" })

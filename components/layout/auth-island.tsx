@@ -6,35 +6,15 @@ import { Link } from "@/i18n/navigation"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { SignOutButton } from "@/components/ui/sign-out-button"
 import { cn } from "@/lib/cn"
-
-const PROFILE_MENU_CLOSE_DELAY_MS = 180
+import { useHoverMenu } from "@/components/layout/use-hover-menu"
 
 function AuthIslandContent() {
   const { data: session, status } = useSession()
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false)
-  const closeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const clearCloseTimer = React.useCallback(() => {
-    if (closeTimerRef.current) {
-      clearTimeout(closeTimerRef.current)
-      closeTimerRef.current = null
-    }
-  }, [])
-
-  const openMenu = React.useCallback(() => {
-    clearCloseTimer()
-    setIsMenuOpen(true)
-  }, [clearCloseTimer])
-
-  const scheduleCloseMenu = React.useCallback(() => {
-    clearCloseTimer()
-    closeTimerRef.current = setTimeout(() => {
-      setIsMenuOpen(false)
-      closeTimerRef.current = null
-    }, PROFILE_MENU_CLOSE_DELAY_MS)
-  }, [clearCloseTimer])
-
-  React.useEffect(() => clearCloseTimer, [clearCloseTimer])
+  const {
+    isOpen: isMenuOpen,
+    open: openMenu,
+    scheduleClose: scheduleCloseMenu,
+  } = useHoverMenu(180)
 
   // Loading state: pulse skeleton matching dashboard style
   if (status === "loading") {

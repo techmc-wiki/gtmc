@@ -3,16 +3,9 @@ import { getTranslations } from "next-intl/server"
 import { PageHeader } from "@/components/ui/headings"
 import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
 import { getManifestStats, loadArticleManifest } from "@/lib/articles/manifest"
-import {
-  getUniqueAuthors,
-  getMaintainerHandles,
-  resolveAuthorPerson,
-  getArticlesByAuthor,
-} from "@/lib/articles/person-resolver"
-import { getRepositoryContributorStats } from "@/lib/git/repository-contributor-stats"
+import { getUniqueAuthors } from "@/lib/articles/person-resolver"
 import { buildWebPageJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
 import type { ArticleLocale } from "@/lib/articles/manifest"
-import type { AuthorGridItem } from "@/components/mdx/author-grid"
 import AuthorsContentEn from "@/content/authors/en.mdx"
 import AuthorsContentZh from "@/content/authors/zh.mdx"
 
@@ -21,62 +14,11 @@ const authorsContentByLocale = {
   zh: AuthorsContentZh,
 } as const
 
-/**
- * Author-grid data builders live at module scope so the render body doesn't
- * construct arrays directly. The page is a server component and renders once
- * per request.
- */
-async function buildMaintainers(
-  articleLocale: ArticleLocale
-): Promise<AuthorGridItem[]> {
-  const t = await getTranslations({
-    locale: articleLocale,
-    namespace: "Authors",
-  })
-  return getMaintainerHandles().map((handle) => {
-    const person = resolveAuthorPerson(handle)
-    const repositoryStats = getRepositoryContributorStats([
-      handle,
-      person.key,
-      person.name,
-    ])
-    return {
-      handle,
-      person,
-      footer: t("maintainerStats", { ...repositoryStats }),
-    }
-  })
-}
-
-async function buildProfiles(
-  articleLocale: ArticleLocale,
-  allAuthors: string[],
-  manifest: ReturnType<typeof loadArticleManifest>
-): Promise<AuthorGridItem[]> {
-  const t = await getTranslations({
-    locale: articleLocale,
-    namespace: "Authors",
-  })
-  return allAuthors
-    .map((handle) => ({
-      handle,
-      person: resolveAuthorPerson(handle),
-      articleCount: getArticlesByAuthor(handle, articleLocale, manifest).length,
-    }))
-    .toSorted((a, b) => b.articleCount - a.articleCount)
-    .map(({ handle, person, articleCount }) => ({
-      handle,
-      person,
-      footer: t("articleCount", { count: articleCount }),
-    }))
-}
-
-function buildAuthorsStats(allAuthors: string[], articleCount: number) {
-  return {
-    authors: String(allAuthors.length),
-    articles: String(articleCount),
-  }
-}
+import {
+  buildAuthorsStats,
+  buildMaintainers,
+  buildProfiles,
+} from "../_shared/author-page-data"
 
 export async function generateMetadata({
   params,

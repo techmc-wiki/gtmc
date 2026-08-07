@@ -2,67 +2,19 @@ import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { PageHeader } from "@/components/ui/headings"
 import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
-import {
-  getManifestStats,
-  loadArticleManifest,
-  type ManifestStats,
-} from "@/lib/articles/manifest"
-import {
-  getArticlesByAuthor,
-  getUniqueAuthors,
-  resolveAuthorPerson,
-} from "@/lib/articles/person-resolver"
+import { getManifestStats, loadArticleManifest } from "@/lib/articles/manifest"
+import { getUniqueAuthors } from "@/lib/articles/person-resolver"
 import { buildWebPageJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
 import type { ArticleLocale } from "@/lib/articles/manifest"
-import type { AuthorGridItem } from "@/components/mdx/author-grid"
 import AboutContentEn from "@/content/about/en.mdx"
 import AboutContentZh from "@/content/about/zh.mdx"
 
-const PREVIEW_AUTHOR_COUNT = 8
+const aboutContentByLocale = { en: AboutContentEn, zh: AboutContentZh } as const
 
-const aboutContentByLocale = {
-  en: AboutContentEn,
-  zh: AboutContentZh,
-} as const
-
-/**
- * Page data builders live at module scope so the render body doesn't
- * construct arrays directly. The page is a server component and renders once
- * per request.
- */
-function buildPreviewAuthors(
-  articleLocale: ArticleLocale,
-  allAuthors: string[],
-  manifest: ReturnType<typeof loadArticleManifest>
-): AuthorGridItem[] {
-  return allAuthors
-    .map((handle) => ({
-      handle,
-      person: resolveAuthorPerson(handle),
-      articleCount: getArticlesByAuthor(handle, articleLocale, manifest).length,
-    }))
-    .toSorted((a, b) => b.articleCount - a.articleCount)
-    .slice(0, PREVIEW_AUTHOR_COUNT)
-    .map(({ handle, person }) => ({ handle, person }))
-}
-
-function buildAboutStats(
-  stats: ManifestStats,
-  allAuthors: string[],
-  locale: string
-) {
-  return {
-    articleCount: String(stats.articleCount),
-    contributors: String(allAuthors.length),
-    lastRevision: stats.lastRevision
-      ? new Date(stats.lastRevision).toLocaleDateString(locale, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : "—",
-  }
-}
+import {
+  buildAboutStats,
+  buildPreviewAuthors,
+} from "../_shared/author-page-data"
 
 export async function generateMetadata({
   params,

@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import type { GlossaryRevision, Revision } from "@prisma/client"
 
 import { getTranslations } from "next-intl/server"
-import { redirect } from "next/navigation"
 
 import { deleteDraftAction } from "@/actions/article-draft"
 import { deleteGlossaryDraftAction } from "@/actions/glossary-draft"
@@ -13,7 +12,7 @@ import { TechBadge } from "@/components/ui/status"
 import { TechButton } from "@/components/ui/tech-button"
 import { TechCard } from "@/components/ui/tech-card"
 import { Link } from "@/i18n/navigation"
-import { auth } from "@/lib/auth"
+import { guardUser } from "@/lib/auth/guards"
 import { countCleanupFailedByRevision } from "@/lib/drafts/asset-db"
 import { decodeStoredDraftFiles } from "@/lib/drafts/files"
 import { getPR } from "@/lib/github/pr-manager"
@@ -205,12 +204,9 @@ export default async function DraftDashboardPage({
 }: {
   params: Promise<{ locale: string }>
 }) {
-  const session = await auth()
-  if (!session?.user) {
-    redirect("/login")
-  }
-
-  const [{ locale }, t] = await Promise.all([params, getTranslations("Drafts")])
+  const { locale } = await params
+  const session = await guardUser(locale, `/${locale}/draft`)
+  const t = await getTranslations("Drafts")
   const dateFormatter = dateFormatters[locale] ?? dateFormatters.en
   const authorId = session.user.id
 

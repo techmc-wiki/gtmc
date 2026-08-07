@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
-import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { guardUser } from "@/lib/auth/guards"
 import { redirect } from "next/navigation"
 import { FieldBox } from "@/components/ui/field-box"
 import { UserAvatar } from "@/components/ui/user-avatar"
@@ -17,11 +17,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default async function ProfilePage() {
-  const session = await auth()
-  if (!session?.user?.id) {
-    redirect("/login")
-  }
+export default async function ProfilePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+  const session = await guardUser(locale, `/${locale}/profile`)
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },

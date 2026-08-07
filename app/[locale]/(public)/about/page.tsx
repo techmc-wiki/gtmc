@@ -2,7 +2,11 @@ import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { PageHeader } from "@/components/ui/headings"
 import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
-import { getManifestStats, loadArticleManifest } from "@/lib/articles/manifest"
+import {
+  getManifestStats,
+  loadArticleManifest,
+  type ManifestStats,
+} from "@/lib/articles/manifest"
 import {
   getArticlesByAuthor,
   getUniqueAuthors,
@@ -20,6 +24,45 @@ const aboutContentByLocale = {
   en: AboutContentEn,
   zh: AboutContentZh,
 } as const
+
+/**
+ * Page data builders live at module scope so the render body doesn't
+ * construct arrays directly. The page is a server component and renders once
+ * per request.
+ */
+function buildPreviewAuthors(
+  articleLocale: ArticleLocale,
+  allAuthors: string[],
+  manifest: ReturnType<typeof loadArticleManifest>
+): AuthorGridItem[] {
+  return allAuthors
+    .map((handle) => ({
+      handle,
+      person: resolveAuthorPerson(handle),
+      articleCount: getArticlesByAuthor(handle, articleLocale, manifest).length,
+    }))
+    .toSorted((a, b) => b.articleCount - a.articleCount)
+    .slice(0, PREVIEW_AUTHOR_COUNT)
+    .map(({ handle, person }) => ({ handle, person }))
+}
+
+function buildAboutStats(
+  stats: ManifestStats,
+  allAuthors: string[],
+  locale: string
+) {
+  return {
+    articleCount: String(stats.articleCount),
+    contributors: String(allAuthors.length),
+    lastRevision: stats.lastRevision
+      ? new Date(stats.lastRevision).toLocaleDateString(locale, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : "—",
+  }
+}
 
 export async function generateMetadata({
   params,
@@ -68,15 +111,12 @@ export default async function AboutPage({
   const stats = getManifestStats(articleLocale)
   const manifest = loadArticleManifest()
   const allAuthors = getUniqueAuthors(manifest)
-  const previewAuthors: AuthorGridItem[] = allAuthors
-    .map((handle) => ({
-      handle,
-      person: resolveAuthorPerson(handle),
-      articleCount: getArticlesByAuthor(handle, articleLocale, manifest).length,
-    }))
-    .toSorted((a, b) => b.articleCount - a.articleCount)
-    .slice(0, PREVIEW_AUTHOR_COUNT)
-    .map(({ handle, person }) => ({ handle, person }))
+  const previewAuthors = buildPreviewAuthors(
+    articleLocale,
+    allAuthors,
+    manifest
+  )
+  const displayStats = buildAboutStats(stats, allAuthors, locale)
 
   const jsonLd = serializeJsonLd(
     buildWebPageJsonLd(
@@ -95,20 +135,7 @@ export default async function AboutPage({
 
       <PageHeader title={t("pageTitle")} topMargin />
 
-      <Content
-        stats={{
-          articleCount: String(stats.articleCount),
-          contributors: String(allAuthors.length),
-          lastRevision: stats.lastRevision
-            ? new Date(stats.lastRevision).toLocaleDateString(locale, {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })
-            : "—",
-        }}
-        previewAuthors={previewAuthors}
-      />
+      <Content stats={displayStats} previewAuthors={previewAuthors} />
     </div>
   )
 }

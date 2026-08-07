@@ -15,7 +15,7 @@ Read tutorials, mechanics deep-dives, and source-code walkthroughs. All openly w
 
 <!-- README-I18N:START -->
 
-**English** | [汉语](./README.zh.md)
+**English** | [中文](./README.zh.md)
 
 <!-- README-I18N:END -->
 

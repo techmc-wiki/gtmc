@@ -113,6 +113,36 @@ function FileStatusDot({ status }: { status: string }) {
             : "clean"
   return <StatusDot variant={variant} size="md" />
 }
+function FileStatusList({
+  files,
+  label,
+}: {
+  files: Array<{ filePath: string; status: string }>
+  label?: string
+}) {
+  return (
+    <div className="space-y-1">
+      {label ? (
+        <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
+          {label}
+        </p>
+      ) : null}
+      <ul className="space-y-1">
+        {files.map((file) => (
+          <li
+            key={file.filePath}
+            className="text-tech-main/70 flex items-center gap-2 font-mono text-[0.6875rem]">
+            <FileStatusDot status={file.status} />
+            <span className="truncate">{file.filePath}</span>
+            <span className="text-tech-main/40 ml-auto shrink-0 tracking-widest uppercase">
+              {file.status.toUpperCase()}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
 
 function CurrentCommitPanel({
   commitSha,
@@ -154,24 +184,7 @@ function CurrentCommitPanel({
       </div>
 
       {fileStates.length > 0 ? (
-        <div className="space-y-1">
-          <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
-            FILE_STATES
-          </p>
-          <ul className="space-y-1">
-            {fileStates.map((fs) => (
-              <li
-                key={fs.filePath}
-                className="text-tech-main/70 flex items-center gap-2 font-mono text-[0.6875rem]">
-                <FileStatusDot status={fs.status} />
-                <span className="truncate">{fs.filePath}</span>
-                <span className="text-tech-main/40 ml-auto shrink-0 tracking-widest uppercase">
-                  {fs.status.toUpperCase()}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <FileStatusList files={fileStates} label="FILE_STATES" />
       ) : null}
     </div>
   )
@@ -522,21 +535,7 @@ function RebaseProgressContent({
         </p>
       </div>
 
-      {(files ?? []).length > 0 && (
-        <ul className="space-y-1">
-          {(files ?? []).map((f) => (
-            <li
-              key={f.filePath}
-              className="text-tech-main/70 flex items-center gap-2 font-mono text-[0.6875rem]">
-              <FileStatusDot status={f.status} />
-              <span className="truncate">{f.filePath}</span>
-              <span className="text-tech-main/40 ml-auto shrink-0 tracking-widest uppercase">
-                {f.status.toUpperCase()}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+      {files ? <FileStatusList files={files} /> : null}
 
       {allResolved && !isBranchSyncing ? (
         <MergeMethodPicker

@@ -1,4 +1,4 @@
-import { CodeBlockPre } from "@/components/markdown/code-block-pre"
+import { CodeBlockPre } from "@/components/markdown/code-block"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
 
 export function CodeComponent({

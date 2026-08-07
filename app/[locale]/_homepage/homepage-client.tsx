@@ -87,15 +87,13 @@ export function HomepageClient() {
           fgTransform={fgTransform}
         />
 
-        <div className="animate-slide-up-fade fill-mode-forwards relative z-20 flex w-full max-w-48 flex-col items-stretch justify-center gap-5 opacity-0 [animation-delay:0.6s] motion-reduce:animate-none motion-reduce:opacity-100 sm:w-full sm:max-w-full sm:flex-row sm:items-center">
-          <Link
-            href="/articles"
-            onClick={handleArticlesClick}
-            className="w-full sm:w-72">
-            <TechButton
-              variant="primary"
-              disabled={isAccessingDatabase}
-              className="flex h-12 w-full items-center justify-center text-xs tracking-widest uppercase shadow-md transition-transform duration-300 hover:scale-102 active:scale-95 disabled:cursor-wait disabled:opacity-90 sm:text-sm">
+        <div className="animate-slide-up-fade fill-mode-forwards relative z-20 flex w-full max-w-48 flex-col items-stretch justify-center gap-5 opacity-0 [animation-delay:0.6s] motion-reduce:animate-none sm:w-full sm:max-w-full sm:flex-row sm:items-center">
+          <TechButton
+            asChild
+            variant="primary"
+            disabled={isAccessingDatabase}
+            className="flex h-12 w-full items-center justify-center text-xs tracking-widest uppercase shadow-md transition-transform duration-300 hover:scale-102 active:scale-95 disabled:cursor-wait disabled:opacity-90 sm:w-72 sm:text-sm">
+            <Link href="/articles" onClick={handleArticlesClick}>
               {isAccessingDatabase ? (
                 <>
                   <span className="bg-surface inline-block size-2 animate-pulse motion-reduce:animate-none" />
@@ -104,8 +102,8 @@ export function HomepageClient() {
               ) : (
                 t("startReading")
               )}
-            </TechButton>
-          </Link>
+            </Link>
+          </TechButton>
         </div>
 
         <ContinueReading />

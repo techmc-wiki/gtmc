@@ -331,7 +331,7 @@
     "sectionDownload": "下载",
     "sectionRead": "阅读",
     "sectionSource": "源码",
-    "tagline": "求知于方寸之间。"
+    "slogan": "求知于方寸之间。"
   },
   "forbidden": {
     "description": "您没有权限执行此操作。请联系管理员获取权限后重试。",
@@ -431,7 +431,7 @@
     "glossaryCardDesc": "全书索引，以 12 种语言收录技术向 Minecraft 词汇。",
     "glossaryCardTitle": "术语表",
     "heroDescription": "社区共建的技术向 Minecraft 在线教科书。从入门教程到机制详解，再到带注释的源码阅读，帮助玩家真正理解这个方块世界。",
-    "heroTagline": "求知于方寸之间。",
+    "slogan": "求知于方寸之间。",
     "initializing": "初始化中...",
     "loggedInAs": "已登录为 {username}",
     "loginGithub": "登录",
@@ -497,6 +497,10 @@
     "title": "本文目录"
   },
   "Pdf": {
+    "bookSubtitle": "技术性 Minecraft 入门",
+    "slogan": "求知于方寸之间。",
+    "bookTitle": "Graduate Texts in Minecraft",
+    "mermaidRenderError": "无法渲染 Mermaid 图表。",
     "metaDescription": "下载完整的《Graduate Texts in Minecraft》（GTMC）为单个离线 PDF，包含入门教程、机制详解、工程实践与源码分析。",
     "metaTitle": "离线 PDF 下载"
   },

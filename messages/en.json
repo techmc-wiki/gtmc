@@ -331,7 +331,7 @@
     "sectionDownload": "Download",
     "sectionRead": "Read",
     "sectionSource": "Source",
-    "tagline": "\"Curiosity in 'cubic' inch.\""
+    "slogan": "\"Curiosity in 'cubic' inch.\""
   },
   "forbidden": {
     "description": "You do not have permission to do this. Ask an admin to grant access and try again.",
@@ -431,7 +431,7 @@
     "glossaryCardDesc": "The index of terms — technical Minecraft vocabulary in 12 languages.",
     "glossaryCardTitle": "Glossary",
     "heroDescription": "A community-built online textbook for technical Minecraft. Tutorials, mechanics deep-dives, and annotated source code for players who want to understand how the game really works.",
-    "heroTagline": "\"Curiosity in 'cubic' inch.\"",
+    "slogan": "\"Curiosity in 'cubic' inch.\"",
     "initializing": "Initializing...",
     "loggedInAs": "Logged in as {username}",
     "loginGithub": "Log in",
@@ -497,6 +497,10 @@
     "title": "On this page"
   },
   "Pdf": {
+    "bookSubtitle": "An Introduction to Technical Minecraft",
+    "slogan": "\"Curiosity in 'cubic' inch.\"",
+    "bookTitle": "Graduate Texts in Minecraft",
+    "mermaidRenderError": "Unable to render Mermaid diagram.",
     "metaDescription": "Download the complete Graduate Texts in Minecraft as one offline PDF, with tutorials, mechanics deep-dives, and code analysis for technical Minecraft.",
     "metaTitle": "Offline PDF Download"
   },

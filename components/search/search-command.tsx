@@ -53,6 +53,41 @@ function SearchIcon({ className = "size-4" }: { className?: string }) {
 function slugToPath(slug: string) {
   return "/" + slug
 }
+interface SearchResultButtonProps {
+  index: number
+  selectedIndex: number
+  onClick: React.MouseEventHandler<HTMLButtonElement>
+  onMouseEnter: React.MouseEventHandler<HTMLButtonElement>
+  ariaLabel: string
+  className?: string
+  children: React.ReactNode
+}
+
+function SearchResultButton({
+  index,
+  selectedIndex,
+  onClick,
+  onMouseEnter,
+  ariaLabel,
+  className = "",
+  children,
+}: SearchResultButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      data-search-result-index={index}
+      className={`group relative w-full cursor-pointer text-left transition-colors ${index === selectedIndex ? "bg-tech-main/10" : "hover:bg-tech-accent/10"} ${className}`}
+      aria-label={ariaLabel}
+      tabIndex={-1}>
+      {index === selectedIndex && (
+        <CornerBrackets variant="static" color="border-tech-main/30" />
+      )}
+      {children}
+    </button>
+  )
+}
 
 export function SearchCommand() {
   const t = useTranslations("Search")
@@ -466,27 +501,15 @@ export function SearchCommand() {
                   <ul className="py-1">
                     {results.map((result, index) => (
                       <li key={result.slug}>
-                        <button
-                          type="button"
+                        <SearchResultButton
+                          index={index}
+                          selectedIndex={selectedIndex}
                           onClick={handleResultClick}
                           onMouseEnter={handleResultMouseEnter}
-                          data-search-result-index={index}
-                          className={`group relative w-full cursor-pointer px-4 py-3 text-left transition-colors ${
-                            index === selectedIndex
-                              ? "bg-tech-main/10"
-                              : "hover:bg-tech-accent/10"
-                          } `}
-                          aria-label={t("selectResult", {
+                          ariaLabel={t("selectResult", {
                             title: result.title,
                           })}
-                          tabIndex={-1}>
-                          {index === selectedIndex && (
-                            <CornerBrackets
-                              variant="static"
-                              color="border-tech-main/30"
-                            />
-                          )}
-
+                          className="px-4 py-3">
                           {/* Title */}
                           <div className="text-tech-main-dark font-mono text-sm font-medium">
                             {highlightMatch(result.title)}
@@ -510,7 +533,7 @@ export function SearchCommand() {
                               ? t("matchBody")
                               : t("matchTitle")}
                           </div>
-                        </button>
+                        </SearchResultButton>
                       </li>
                     ))}
                   </ul>
@@ -528,26 +551,15 @@ export function SearchCommand() {
                         const index = results.length + glossaryIndex
                         return (
                           <li key={entry.slug}>
-                            <button
-                              type="button"
+                            <SearchResultButton
+                              index={index}
+                              selectedIndex={selectedIndex}
                               onClick={handleGlossaryResultClick}
                               onMouseEnter={handleResultMouseEnter}
-                              data-search-result-index={index}
-                              className={`group relative flex w-full cursor-pointer items-baseline gap-3 px-4 py-2.5 text-left transition-colors ${
-                                index === selectedIndex
-                                  ? "bg-tech-main/10"
-                                  : "hover:bg-tech-accent/10"
-                              }`}
-                              aria-label={t("selectResult", {
+                              ariaLabel={t("selectResult", {
                                 title: entry.fullFormEn,
                               })}
-                              tabIndex={-1}>
-                              {index === selectedIndex && (
-                                <CornerBrackets
-                                  variant="static"
-                                  color="border-tech-main/30"
-                                />
-                              )}
+                              className="flex items-baseline gap-3 px-4 py-2.5">
                               <span className="text-tech-main-dark font-mono text-sm font-medium">
                                 {highlightMatch(entry.fullFormEn)}
                               </span>
@@ -559,14 +571,13 @@ export function SearchCommand() {
                               <span className="text-tech-main/40 ml-auto font-mono text-[0.5625rem] tracking-wider uppercase">
                                 {entry.category}
                               </span>
-                            </button>
+                            </SearchResultButton>
                           </li>
                         )
                       })}
                     </ul>
                   </div>
                 )}
-
                 {/* Empty state */}
                 {!isLoading &&
                   query.length >= 2 &&

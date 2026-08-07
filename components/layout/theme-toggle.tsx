@@ -12,6 +12,7 @@ import {
   MoonIcon,
   SunIcon,
 } from "@/components/ui/icons"
+import { useHoverMenu } from "@/components/layout/use-hover-menu"
 
 type Mode = "light" | "dark" | "system"
 
@@ -33,9 +34,7 @@ const MENU_LABEL_KEY: Record<Mode, "labelLight" | "labelDark" | "labelSystem"> =
     system: "labelSystem",
   }
 
-const MENU_CLOSE_DELAY_MS = 180
 const LONG_PRESS_MS = 500
-
 function readModeFromCookie(): Mode {
   if (typeof document === "undefined") return "system"
   return parseThemeCookie(document.cookie) ?? "system"
@@ -52,20 +51,16 @@ export function ThemeToggle({ className }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme()
   const [mode, setMode] = React.useState<Mode>("system")
   const isMounted = useMounted()
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false)
-
-  const closeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+  const {
+    isOpen: isMenuOpen,
+    open: openMenu,
+    close: closeMenu,
+    scheduleClose: scheduleCloseMenu,
+  } = useHoverMenu(180)
   const longPressTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
     null
   )
   const longPressTriggeredRef = React.useRef(false)
-
-  const clearCloseTimer = React.useCallback(() => {
-    if (closeTimerRef.current) {
-      clearTimeout(closeTimerRef.current)
-      closeTimerRef.current = null
-    }
-  }, [])
 
   const clearLongPressTimer = React.useCallback(() => {
     if (longPressTimerRef.current) {
@@ -76,28 +71,14 @@ export function ThemeToggle({ className }: { className?: string }) {
 
   React.useEffect(
     () => () => {
-      clearCloseTimer()
       clearLongPressTimer()
     },
-    [clearCloseTimer, clearLongPressTimer]
+    [clearLongPressTimer]
   )
 
   React.useEffect(() => {
     setMode(readModeFromCookie())
   }, [])
-
-  const openMenu = React.useCallback(() => {
-    clearCloseTimer()
-    setIsMenuOpen(true)
-  }, [clearCloseTimer])
-
-  const scheduleCloseMenu = React.useCallback(() => {
-    clearCloseTimer()
-    closeTimerRef.current = setTimeout(() => {
-      setIsMenuOpen(false)
-      closeTimerRef.current = null
-    }, MENU_CLOSE_DELAY_MS)
-  }, [clearCloseTimer])
 
   const applyMode = React.useCallback(
     (next: Mode) => {
@@ -145,19 +126,19 @@ export function ThemeToggle({ className }: { className?: string }) {
   const onMenuItemClick = React.useCallback(
     (next: Mode) => {
       applyMode(next)
-      setIsMenuOpen(false)
+      closeMenu()
     },
-    [applyMode]
+    [applyMode, closeMenu]
   )
 
   const onKeyDown = React.useCallback(
     (event: React.KeyboardEvent) => {
       if (event.key === "Escape" && isMenuOpen) {
         event.stopPropagation()
-        setIsMenuOpen(false)
+        closeMenu()
       }
     },
-    [isMenuOpen]
+    [isMenuOpen, closeMenu]
   )
 
   const displayedMode: Mode = mode === "system" ? "system" : mode

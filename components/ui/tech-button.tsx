@@ -69,14 +69,16 @@ export function TechButton({
       typeof child.props.onClick === "function"
         ? (child.props.onClick as React.MouseEventHandler<HTMLButtonElement>)
         : undefined
-    // Parent handlers run before the child's own handler.
+    // Child handlers run first; preventDefault suppresses the parent handler.
     const onClick =
       props.onClick && childOnClick
         ? (event: React.MouseEvent<HTMLButtonElement>) => {
-            props.onClick?.(event)
             childOnClick(event)
+            if (!event.defaultPrevented) {
+              props.onClick?.(event)
+            }
           }
-        : props.onClick || childOnClick
+        : childOnClick || props.onClick
     const anchorSafeProps: Record<string, unknown> = {
       className: cn(buttonClasses, childClassName),
       onClick,

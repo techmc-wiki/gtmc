@@ -28,6 +28,22 @@ import {
 const owner = ARTICLES_REPO_OWNER
 const repo = ARTICLES_REPO_NAME
 
+async function reconcileReviewAssets(
+  action: string,
+  prNumber: number,
+  outcome: "PR-merged" | "PR-closed"
+) {
+  try {
+    await reconcileDraftAssetsForPRCompletion({ prNumber, outcome })
+  } catch (error) {
+    reviewError(action, error, {
+      prNumber,
+      status: "reconcile-error",
+      outcome,
+    })
+  }
+}
+
 export async function mergePRAction(
   prNumber: number,
   options?: {
@@ -45,18 +61,7 @@ export async function mergePRAction(
       mergeMethod: options?.mergeMethod ?? "auto",
     })
     await mergePR(prNumber, options, token)
-    try {
-      await reconcileDraftAssetsForPRCompletion({
-        prNumber,
-        outcome: "PR-merged",
-      })
-    } catch (reconcileError) {
-      reviewError("mergePRAction", reconcileError, {
-        prNumber,
-        status: "reconcile-error",
-        outcome: "PR-merged",
-      })
-    }
+    await reconcileReviewAssets("mergePRAction", prNumber, "PR-merged")
     revalidatePath("/draft")
     revalidatePath("/review")
     reviewLog("mergePRAction", { prNumber, status: "complete" })
@@ -79,18 +84,7 @@ export async function closePRAction(prNumber: number) {
       pull_number: prNumber,
       state: "closed",
     })
-    try {
-      await reconcileDraftAssetsForPRCompletion({
-        prNumber,
-        outcome: "PR-closed",
-      })
-    } catch (reconcileError) {
-      reviewError("closePRAction", reconcileError, {
-        prNumber,
-        status: "reconcile-error",
-        outcome: "PR-closed",
-      })
-    }
+    await reconcileReviewAssets("closePRAction", prNumber, "PR-closed")
     revalidatePath("/draft")
     revalidatePath("/review")
     reviewLog("closePRAction", { prNumber, status: "complete" })
@@ -252,35 +246,7 @@ export async function finalizeReviewAction(
       })
     }
 
-    try {
-      reviewLog("finalizeReviewAction", {
-        prNumber,
-        status: "db-cleanup-start",
-        operation: "reconcileDraftAssetsForPRCompletion",
-      })
-      await reconcileDraftAssetsForPRCompletion({
-        prNumber,
-        outcome: "PR-merged",
-      })
-      reviewLog("finalizeReviewAction", {
-        prNumber,
-        status: "db-cleanup-complete",
-        operation: "reconcileDraftAssetsForPRCompletion",
-      })
-    } catch (reconcileError) {
-      reviewError("finalizeReviewAction", reconcileError, {
-        prNumber,
-        status: "db-cleanup-error",
-        operation: "reconcileDraftAssetsForPRCompletion",
-      })
-    }
-
-    revalidatePaths(getReviewRevalidatePaths(revision.id, prNumber))
-    reviewLog("finalizeReviewAction", {
-      prNumber,
-      status: "complete",
-      conflictMode,
-    })
+    await reconcileReviewAssets("finalizeReviewAction", prNumber, "PR-merged")
     return { success: true }
   } catch (error) {
     reviewError("finalizeReviewAction", error, { prNumber, status: "error" })

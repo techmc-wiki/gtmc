@@ -104,7 +104,6 @@
     "@types/react": "^19.2.18",
     "consola": "^3.4.2",
     "dotenv": "^17.4.2",
-    "gitnexus": "^1.6.9",
     "pdf-lib": "^1.17.1",
     "picocolors": "^1.1.1",
     "pinyin-pro": "^3.28.2",

@@ -33,6 +33,7 @@ import {
   getArticleContentForPdf,
 } from "@/lib/articles/linearize"
 import type { LinearizedArticle } from "@/lib/articles/linearize"
+import { artifactFilename } from "@/lib/articles/content"
 import {
   buildBodyHtml,
   buildBookPlan,
@@ -54,8 +55,11 @@ import {
   buildFooterTemplate,
   buildHeaderTemplate,
 } from "@/lib/pdf/theme"
-import { createRehypeShiki } from "@/lib/markdown/syntax/rehype-shiki"
-import type { RehypeShikiPlugin } from "@/lib/markdown/syntax/rehype-shiki"
+import {
+  createRehypeShiki,
+  persistHighlightCache,
+  type RehypeShikiPlugin,
+} from "@/lib/markdown/syntax/rehype-shiki"
 import { getMermaidConfig } from "@/lib/markdown/mermaid-config"
 import { createLogger } from "./lib/logger"
 
@@ -156,12 +160,42 @@ async function analyzeArticles(
   return { codeLangs: [...allLangs], hasMath, bodies }
 }
 
+/**
+ * Pre-rendered article HTML produced by `generate-article-content.ts`
+ * (incremental per article). Returns `null` when the sidecar is missing —
+ * the caller falls back to rendering the markdown on the fly so standalone
+ * `pnpm build:pdf` runs keep working on a fresh checkout.
+ */
+function loadPdfHtmlSidecar(slug: string, locale: PdfLocale): string | null {
+  try {
+    return fs.readFileSync(
+      path.join(
+        process.cwd(),
+        "data",
+        "pdf-html",
+        locale,
+        `${artifactFilename(slug)}.html`
+      ),
+      "utf-8"
+    )
+  } catch {
+    return null
+  }
+}
+
 function createRenderArticle(
   shikiPlugin: RehypeShikiPlugin | undefined,
   locale: PdfLocale,
-  bodies: Map<string, string>
+  bodies: Map<string, string>,
+  sourceCounters: { cached: number; rendered: number }
 ) {
   return async (article: LinearizedArticle): Promise<string> => {
+    const cached = loadPdfHtmlSidecar(article.slug, locale)
+    if (cached !== null) {
+      sourceCounters.cached++
+      return resolveImagesInHtml(cached, article.filePath)
+    }
+
     try {
       const content = bodies.get(article.slug)
       if (!content) return ""
@@ -172,6 +206,7 @@ function createRenderArticle(
         shikiPlugin,
         locale,
       })
+      sourceCounters.rendered++
 
       return resolveImagesInHtml(html, article.filePath)
     } catch (error) {
@@ -333,6 +368,7 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
   }
 
   const messages = PDF_MESSAGES[locale]
+  const sourceCounters = { cached: 0, rendered: 0 }
   const bookOptions: BookOptions = {
     title: messages.bookTitle,
     subtitle: messages.bookSubtitle,
@@ -342,7 +378,12 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
     articlesRevision: getArticlesRevision(),
     sourceUrl: SOURCE_URL,
     hasMath,
-    renderArticle: createRenderArticle(shikiPlugin, locale, bodies),
+    renderArticle: createRenderArticle(
+      shikiPlugin,
+      locale,
+      bodies,
+      sourceCounters
+    ),
   }
 
   const coverHtml = buildCoverHtml(bookOptions)
@@ -350,6 +391,11 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
     bookOptions,
     plan
   )
+  logger.event("pdf.html.source", {
+    locale,
+    cached: sourceCounters.cached,
+    rendered: sourceCounters.rendered,
+  })
   logger.event("pdf.html.generated", {
     locale,
     size_mb: (bodyHtml.length / 1024 / 1024).toFixed(1),
@@ -524,6 +570,10 @@ async function main() {
       error instanceof Error ? (error.stack ?? error.message) : String(error)
     )
     process.exit(1)
+  } finally {
+    // The standalone `pnpm build:pdf` path may have rendered articles on the
+    // fly (no sidecars); keep the highlight cache warm for the next build.
+    persistHighlightCache()
   }
 }
 

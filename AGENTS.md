@@ -42,7 +42,7 @@ The articles themselves live in a separate repo and are pulled in via a Git subm
 ├── lib/                    Article pipeline, auth, db, search, GitHub helpers
 ├── articles/               Article content (Git submodule)
 ├── glossary/               Glossary CSV data (Git submodule)
-├── data/                   Generated manifest + rendered article content + glossary*.json
+├── data/                   Generated manifest + article artifacts + PDF-ready HTML + glossary*.json + build caches
 ├── i18n/                   next-intl request config + routing
 ├── messages/               i18n catalogs (en.json, zh.json)
 ├── public/                 Static assets including generated gtmc-en.pdf and gtmc-zh.pdf
@@ -209,6 +209,7 @@ pnpm analyze        # next experimental-analyze
 **Two-phase build model:**
 
 - **Phase 1 (`build:content` → `scripts/build-content.ts`)**: Generates static content artifacts — `data/manifest.json`, `data/glossary*.json`, rendered article content, and `public/gtmc-en.pdf` / `public/gtmc-zh.pdf` (via Playwright + Chromium).
+- The article-content step emits PDF-ready HTML sidecars under `data/pdf-html/{locale}/` (incremental per article, keyed the same way as the artifacts) that the PDF generator consumes instead of re-rendering markdown, plus a persisted Shiki highlight cache at `data/.shiki-cache.json` that the Next.js SSG build reuses so unchanged code blocks are not re-highlighted. Both live outside `data/articles/**` on purpose — that glob is traced into article-route lambdas.
 - **Phase 2 (`build:next`)**: Runs `next build`, consuming the artifacts from phase 1.
 - **`pnpm build`**: Runs both phases in order (`scripts/build.ts`).
 

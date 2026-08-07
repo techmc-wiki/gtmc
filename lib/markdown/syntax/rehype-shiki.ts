@@ -1,3 +1,5 @@
+import fs from "node:fs"
+import path from "node:path"
 import type { Root, Element, Text } from "hast"
 import { visit } from "unist-util-visit"
 import { createHighlighterCore, type HighlighterCore } from "shiki/core"
@@ -12,9 +14,60 @@ import solarizedLight from "shiki/themes/solarized-light.mjs"
 
 export type RehypeShikiPlugin = Awaited<ReturnType<typeof createRehypeShiki>>
 
+const HIGHLIGHT_CACHE_FILE = path.join(
+  process.cwd(),
+  "data",
+  ".shiki-cache.json"
+)
 const highlightCache = new Map<string, Element | null>()
+let highlightCacheDirty = false
 let pluginPromise: Promise<RehypeShikiPlugin> | null = null
 let highlighterPromise: Promise<HighlighterCore> | null = null
+
+/**
+ * Load a persisted highlight cache written by a previous build phase.
+ *
+ * The article content phase and the PDF generator render every article with
+ * this highlighter; persisting the cache lets the Next.js SSG build reuse
+ * those highlights instead of re-running the (regex-engine) highlighter on
+ * every unchanged code block. Entries are content-addressed, so a stale
+ * cache can never produce wrong output — it only costs a re-highlight.
+ */
+function loadPersistedHighlightCache(): void {
+  try {
+    const raw = fs.readFileSync(HIGHLIGHT_CACHE_FILE, "utf-8")
+    const parsed = JSON.parse(raw) as Record<string, Element | null> | null
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      for (const [key, value] of Object.entries(parsed)) {
+        highlightCache.set(key, value)
+      }
+    }
+  } catch {
+    // First run or unreadable cache — start cold.
+  }
+}
+
+/**
+ * Persist the in-process highlight cache to disk so later build phases
+ * (PDF generation, the Next.js SSG) reuse it. Best-effort: a missing cache
+ * only costs a re-highlight. No-op unless new entries were added since the
+ * cache was loaded.
+ */
+export function persistHighlightCache(): void {
+  if (!highlightCacheDirty) return
+  try {
+    fs.mkdirSync(path.dirname(HIGHLIGHT_CACHE_FILE), { recursive: true })
+    fs.writeFileSync(
+      HIGHLIGHT_CACHE_FILE,
+      JSON.stringify(Object.fromEntries(highlightCache)) + "\n"
+    )
+    highlightCacheDirty = false
+  } catch {
+    // Best-effort — a missing cache only costs a re-highlight.
+  }
+}
+
+loadPersistedHighlightCache()
 
 function getArticleHighlighter(): Promise<HighlighterCore> {
   highlighterPromise ??= createHighlighterCore({
@@ -153,6 +206,7 @@ export async function createRehypeShiki() {
             ...highlightedCode,
             children: filtered,
           })
+          highlightCacheDirty = true
 
           codeNode.children = filtered
 

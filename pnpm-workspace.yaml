@@ -1,11 +1,10 @@
 allowBuilds:
-  '@ladybugdb/core': true
-  '@parcel/watcher': true
-  '@prisma/engines': true
-  '@scarf/scarf': true
-  '@swc/core': true
+  "@ladybugdb/core": true
+  "@parcel/watcher": true
+  "@prisma/engines": true
+  "@scarf/scarf": true
+  "@swc/core": true
   esbuild: true
-  gitnexus: true
   onnxruntime-node: true
   prisma: true
   protobufjs: true

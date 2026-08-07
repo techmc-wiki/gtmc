@@ -80,10 +80,11 @@ export default async function EditDraftPage({
 
       <div className="guide-line relative flex flex-col gap-3 border-b pb-6 md:flex-row md:items-end md:justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/draft">
-            <TechButton
-              variant="ghost"
-              className="text-tech-main/70 hover:bg-tech-main/5 hover:text-tech-main h-9 gap-2 px-3 text-[10px] tracking-widest">
+          <TechButton
+            asChild
+            variant="ghost"
+            className="text-tech-main/70 hover:bg-tech-main/5 hover:text-tech-main h-9 gap-2 px-3 text-[10px] tracking-widest">
+            <Link href="/draft">
               <svg
                 width="12"
                 height="12"
@@ -95,8 +96,8 @@ export default async function EditDraftPage({
                 <path d="M19 12H5M12 19l-7-7 7-7" />
               </svg>
               ABORT_EDIT_SEQUENCE
-            </TechButton>
-          </Link>
+            </Link>
+          </TechButton>
         </div>
         <div className="flex flex-col items-end gap-1">
           <div className="flex items-center gap-2">

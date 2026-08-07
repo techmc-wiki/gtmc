@@ -4,13 +4,11 @@ import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
 import { getMainBranchHeadSha } from "@/lib/articles/branch"
-import { parseDraftTempImageRefs } from "@/lib/drafts/markdown"
 import {
   createDraftFile,
   deserializeDraftFilesPayload,
   normalizeDraftFileCollection,
   serializeDraftFilesForStorage,
-  type DraftFileRecord,
 } from "@/lib/drafts/files"
 import { deleteDraftAsset } from "@/lib/drafts/storage"
 import { getGithubPatForUser, requireAuth } from "@/lib/auth/context"
@@ -19,8 +17,7 @@ import {
   findDraftAssetsByRevision,
   markDraftAssetCleanupFailed,
   markDraftAssetDeleted,
-  markDraftAssetOrphaned,
-  markDraftAssetReferenced,
+  reconcileDraftAssetReferences,
 } from "@/lib/drafts/asset-db"
 
 const saveDraftSchema = z.object({
@@ -33,24 +30,6 @@ const saveDraftSchema = z.object({
 })
 
 const EDITABLE_STATUSES: readonly string[] = ["DRAFT"] as const
-
-async function reconcileDraftAssetReferences(
-  revisionId: string,
-  files: DraftFileRecord[]
-) {
-  const tempPrefix = process.env.DRAFT_STORAGE_TEMP_PREFIX ?? "draft-temp"
-  const referencedStoragePaths = new Set<string>()
-
-  for (const file of files) {
-    const refs = parseDraftTempImageRefs(file.content, tempPrefix)
-    for (const ref of refs) {
-      referencedStoragePaths.add(ref.storagePath)
-    }
-  }
-
-  await markDraftAssetReferenced(revisionId, [...referencedStoragePaths])
-  await markDraftAssetOrphaned(revisionId, [...referencedStoragePaths])
-}
 
 export async function saveDraftAction(formData: FormData) {
   const session = await requireAuth()

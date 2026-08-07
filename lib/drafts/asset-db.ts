@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js"
 import { deleteDraftAsset } from "@/lib/drafts/storage"
+import { parseDraftTempImageRefs } from "@/lib/drafts/markdown"
 import { prisma } from "@/lib/prisma"
 
 export interface DraftAsset {
@@ -135,6 +136,24 @@ async function findTempDraftAssetsForRevision(
   }
 
   return data ?? []
+}
+
+export async function reconcileDraftAssetReferences(
+  revisionId: string,
+  files: Array<{ content: string }>
+): Promise<void> {
+  const tempPrefix = process.env.DRAFT_STORAGE_TEMP_PREFIX ?? "draft-temp"
+  const referencedStoragePaths = new Set<string>()
+
+  for (const file of files) {
+    const refs = parseDraftTempImageRefs(file.content, tempPrefix)
+    for (const ref of refs) {
+      referencedStoragePaths.add(ref.storagePath)
+    }
+  }
+
+  await markDraftAssetReferenced(revisionId, [...referencedStoragePaths])
+  await markDraftAssetOrphaned(revisionId, [...referencedStoragePaths])
 }
 
 export async function reconcileDraftAssetsForPRCompletion({

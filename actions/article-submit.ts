@@ -24,29 +24,10 @@ import { prisma } from "@/lib/prisma"
 import {
   findDraftAssetsByRevisionForSubmit,
   markDraftAssetMigrated,
-  markDraftAssetOrphaned,
-  markDraftAssetReferenced,
+  reconcileDraftAssetReferences,
 } from "@/lib/drafts/asset-db"
 
 const UPLOAD_PLACEHOLDER_RE = /<!--\s*UPLOAD_PENDING_[a-f0-9-]+\s*-->/i
-
-async function reconcileDraftAssetReferences(
-  revisionId: string,
-  files: Array<{ id: string; content: string }>
-) {
-  const tempPrefix = process.env.DRAFT_STORAGE_TEMP_PREFIX ?? "draft-temp"
-  const referencedStoragePaths = new Set<string>()
-
-  for (const file of files) {
-    const refs = parseDraftTempImageRefs(file.content, tempPrefix)
-    for (const ref of refs) {
-      referencedStoragePaths.add(ref.storagePath)
-    }
-  }
-
-  await markDraftAssetReferenced(revisionId, [...referencedStoragePaths])
-  await markDraftAssetOrphaned(revisionId, [...referencedStoragePaths])
-}
 
 export async function submitForReviewAction(revisionId: string) {
   if (!revisionId) {

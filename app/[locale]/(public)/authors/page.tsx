@@ -12,7 +12,7 @@ import {
 import { getRepositoryContributorStats } from "@/lib/git/repository-contributor-stats"
 import { buildWebPageJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
 import type { ArticleLocale } from "@/lib/articles/manifest"
-import type { AuthorProfile } from "@/components/mdx/profile-grid"
+import type { AuthorGridItem } from "@/components/mdx/author-grid"
 import AuthorsContentEn from "@/content/authors/en.mdx"
 import AuthorsContentZh from "@/content/authors/zh.mdx"
 
@@ -69,7 +69,7 @@ export default async function AuthorsPage({
   const manifest = loadArticleManifest()
   const allAuthors = getUniqueAuthors(manifest)
 
-  const maintainers: AuthorProfile[] = getMaintainerHandles().map((handle) => {
+  const maintainers: AuthorGridItem[] = getMaintainerHandles().map((handle) => {
     const person = resolveAuthorPerson(handle)
     const repositoryStats = getRepositoryContributorStats([
       handle,
@@ -83,7 +83,7 @@ export default async function AuthorsPage({
     }
   })
 
-  const profiles: AuthorProfile[] = allAuthors
+  const profiles: AuthorGridItem[] = allAuthors
     .map((handle) => ({
       handle,
       person: resolveAuthorPerson(handle),

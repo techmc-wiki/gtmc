@@ -61,11 +61,7 @@ export default async function EditorialPolicyPage({
     <div className="page-container-pb">
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
 
-      <PageHeader
-        title={t("pageTitle")}
-        subtitle={t("pageDescription")}
-        topMargin
-      />
+      <PageHeader title={t("pageTitle")} topMargin />
 
       <aside className="border-tech-main/20 text-tech-main mt-8 border-l-2 px-4 text-xs/relaxed">
         <p>{t("sourceNote")}</p>

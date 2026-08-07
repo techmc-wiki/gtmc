@@ -335,7 +335,13 @@
   },
   "forbidden": {
     "description": "您没有权限执行此操作。请联系管理员获取权限后重试。",
+    "returnHome": "返回首页 →",
     "title": "访问被拒绝"
+  },
+  "not-found": {
+    "description": "请求的路径在数据库中不存在。请核对坐标后重试。",
+    "returnHome": "返回首页 →",
+    "title": "资源未找到"
   },
   "Glossary": {
     "categoriesSelectedCount": "已选择 {count} 个分类",
@@ -652,6 +658,7 @@
   },
   "unauthorized": {
     "description": "您需要先登录才能访问该页面。请登录后重试。",
+    "returnHome": "返回首页 →",
     "title": "请先登录"
   }
 }

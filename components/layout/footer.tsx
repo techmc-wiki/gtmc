@@ -72,7 +72,7 @@ export default async function Footer() {
                 Graduate Texts in Minecraft
               </p>
               <p className="text-tech-main mt-2 max-w-xs text-sm/relaxed">
-                {t("tagline")}
+                {t("slogan")}
               </p>
             </div>
 

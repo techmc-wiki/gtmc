@@ -24,7 +24,8 @@ import fs from "node:fs"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
 import { execSync } from "node:child_process"
-
+import enMessages from "@/messages/en.json"
+import zhMessages from "@/messages/zh.json"
 import { getArticleTree } from "@/lib/articles/manifest"
 import { preparePublicChapterNav } from "@/lib/articles/public-tree"
 import {
@@ -60,13 +61,19 @@ import { createLogger } from "./lib/logger"
 
 const logger = createLogger("pdf")
 
-const BOOK_TITLE = "Graduate Texts in Minecraft"
-const BOOK_SUBTITLE = "An Introduction to Technical Minecraft"
+const PDF_MESSAGES = {
+  en: enMessages.Pdf,
+  zh: zhMessages.Pdf,
+} satisfies Record<
+  PdfLocale,
+  {
+    bookTitle: string
+    bookSubtitle: string
+    slogan: string
+    mermaidRenderError: string
+  }
+>
 const SOURCE_URL = "https://techmc.wiki"
-const TAGLINES: Record<PdfLocale, string> = {
-  en: "Knowledge exists. Structure matters.",
-  zh: "知识从未缺失，缺失的是连接。",
-}
 
 function getArticlesRevision(): string | undefined {
   try {
@@ -182,8 +189,8 @@ interface RenderPdfOptions {
   displayHeaderFooter: boolean
   headerTemplate?: string
   footerTemplate?: string
+  mermaidRenderError: string
 }
-
 async function renderHtmlToPdf(
   browser: Browser,
   html: string,
@@ -208,45 +215,48 @@ async function renderHtmlToPdf(
           "mermaid.min.js"
         ),
       })
-      await page.evaluate(async (config) => {
-        const mermaid = (
-          window as typeof window & {
-            mermaid: {
-              initialize: (value: typeof config) => void
-              render: (id: string, source: string) => Promise<{ svg: string }>
+      await page.evaluate(
+        async ({ config, errorMessage }) => {
+          const mermaid = (
+            window as typeof window & {
+              mermaid: {
+                initialize: (value: typeof config) => void
+                render: (id: string, source: string) => Promise<{ svg: string }>
+              }
             }
-          }
-        ).mermaid
-        const diagrams = document.querySelectorAll("mermaid-diagram")
-        const isChinese = document.documentElement.lang === "zh"
+          ).mermaid
+          const diagrams = document.querySelectorAll("mermaid-diagram")
 
-        mermaid.initialize(config)
+          mermaid.initialize(config)
 
-        await Promise.all(
-          [...diagrams].map(async (diagram, index) => {
-            const source = diagram.textContent?.trim() ?? ""
+          await Promise.all(
+            [...diagrams].map(async (diagram, index) => {
+              const source = diagram.textContent?.trim() ?? ""
 
-            try {
-              const { svg } = await mermaid.render(
-                `pdf-mermaid-${index}`,
-                source
-              )
-              diagram.innerHTML = svg
-              diagram.setAttribute("data-rendered", "true")
-            } catch {
-              const message = document.createElement("p")
-              const fallback = document.createElement("pre")
-              message.className = "mermaid-error"
-              message.textContent = isChinese
-                ? "无法渲染 Mermaid 图表。"
-                : "Unable to render Mermaid diagram."
-              fallback.textContent = source
-              diagram.replaceChildren(message, fallback)
-              diagram.setAttribute("data-rendered", "error")
-            }
-          })
-        )
-      }, getMermaidConfig("light"))
+              try {
+                const { svg } = await mermaid.render(
+                  `pdf-mermaid-${index}`,
+                  source
+                )
+                diagram.innerHTML = svg
+                diagram.setAttribute("data-rendered", "true")
+              } catch {
+                const message = document.createElement("p")
+                const fallback = document.createElement("pre")
+                message.className = "mermaid-error"
+                message.textContent = errorMessage
+                fallback.textContent = source
+                diagram.replaceChildren(message, fallback)
+                diagram.setAttribute("data-rendered", "error")
+              }
+            })
+          )
+        },
+        {
+          config: getMermaidConfig("light"),
+          errorMessage: options.mermaidRenderError,
+        }
+      )
     }
 
     const requiredFonts = [...PDF_REQUIRED_FONTS]
@@ -322,10 +332,11 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
     })
   }
 
+  const messages = PDF_MESSAGES[locale]
   const bookOptions: BookOptions = {
-    title: BOOK_TITLE,
-    subtitle: BOOK_SUBTITLE,
-    tagline: TAGLINES[locale],
+    title: messages.bookTitle,
+    subtitle: messages.bookSubtitle,
+    tagline: messages.slogan,
     locale,
     generatedDate: new Date().toISOString().split("T")[0],
     articlesRevision: getArticlesRevision(),
@@ -383,13 +394,17 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
       coverHtml,
       tempHtmlPath,
       tempPdfPath,
-      { displayHeaderFooter: false }
+      {
+        displayHeaderFooter: false,
+        mermaidRenderError: messages.mermaidRenderError,
+      }
     )
 
     const bodyRenderOptions: RenderPdfOptions = {
       displayHeaderFooter: true,
-      headerTemplate: buildHeaderTemplate(BOOK_TITLE),
+      headerTemplate: buildHeaderTemplate(messages.bookTitle),
       footerTemplate: buildFooterTemplate(),
+      mermaidRenderError: messages.mermaidRenderError,
     }
 
     const pass1Bytes = await renderHtmlToPdf(
@@ -473,9 +488,9 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
   )
   writePdfOutlines(merged, outlineTree)
 
-  merged.setTitle(`${BOOK_TITLE} — ${BOOK_SUBTITLE}`)
+  merged.setTitle(`${messages.bookTitle} — ${messages.bookSubtitle}`)
   merged.setAuthor("The GTMC community")
-  merged.setSubject(TAGLINES[locale])
+  merged.setSubject(messages.slogan)
   merged.setLanguage(locale === "zh" ? "zh-CN" : "en")
   merged.setProducer("GTMC PDF pipeline (Playwright + pdf-lib)")
 

@@ -48,6 +48,8 @@ jobs:
           path: |
             data/manifest.json
             data/articles
+            data/pdf-html
+            data/.shiki-cache.json
             data/glossary*.json
             public/gtmc-en.pdf
             public/gtmc-zh.pdf

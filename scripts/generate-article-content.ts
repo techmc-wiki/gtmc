@@ -23,12 +23,20 @@ import type {
   TranslationReadmeFrontMatter,
   TranslationFrontMatter,
 } from "@/lib/articles/frontmatter-parser"
+import { renderMarkdownToHtml } from "@/lib/pdf/markdown-pipeline"
+import {
+  createRehypeShiki,
+  persistHighlightCache,
+  type RehypeShikiPlugin,
+} from "@/lib/markdown/syntax/rehype-shiki"
 import { createLogger } from "./lib/logger"
 
 const logger = createLogger("article-content")
 
 const OUTPUT_DIR = path.join(process.cwd(), "data", "articles")
 const TEMP_DIR = path.join(process.cwd(), "data", "articles.tmp")
+const PDF_HTML_DIR = path.join(process.cwd(), "data", "pdf-html")
+const PDF_HTML_TEMP_DIR = path.join(process.cwd(), "data", "pdf-html.tmp")
 const PUBLIC_ARTICLE_ASSET_DIR = path.join(
   process.cwd(),
   "public",
@@ -36,6 +44,14 @@ const PUBLIC_ARTICLE_ASSET_DIR = path.join(
 )
 const CACHE_FILE = path.join(process.cwd(), "data", ".content-cache.json")
 const IS_PRODUCTION = process.env.NODE_ENV !== "development"
+
+/**
+ * Bump when the artifact or PDF-HTML rendering pipeline changes. The
+ * per-article cache is keyed on source bytes only; without a version
+ * component, a renderer fix would keep serving stale output for unchanged
+ * articles.
+ */
+const CONTENT_PIPELINE_VERSION = "v1"
 
 /**
  * Incremental-build cache. Keyed by the article's path relative to the
@@ -135,6 +151,10 @@ function copyBannerAssetToPublic(
 }
 
 function main(): void {
+  void mainAsync()
+}
+
+async function mainAsync(): Promise<void> {
   let generatedCount = 0
   let reusedCount = 0
   let errorCount = 0
@@ -147,11 +167,20 @@ function main(): void {
   }
   fs.mkdirSync(TEMP_DIR, { recursive: true })
 
+  if (fs.existsSync(PDF_HTML_TEMP_DIR)) {
+    fs.rmSync(PDF_HTML_TEMP_DIR, { recursive: true })
+  }
+  fs.mkdirSync(PDF_HTML_TEMP_DIR, { recursive: true })
+
   if (fs.existsSync(PUBLIC_ARTICLE_ASSET_DIR)) {
     fs.rmSync(PUBLIC_ARTICLE_ASSET_DIR, { recursive: true })
   }
 
+  const shikiPlugin = await createRehypeShiki()
   const entries = Object.values(loadArticleManifest())
+  // Independent per-article renders (artifact JSON + PDF-HTML sidecar);
+  // collected and run concurrently after the sync bookkeeping loop.
+  const renderJobs: Array<() => Promise<void>> = []
 
   for (const entry of entries) {
     if (
@@ -173,6 +202,11 @@ function main(): void {
       const filename = `${artifactFilename(entry.slug)}.json`
       const tempOutputPath = path.join(localeDir, filename)
       const prevOutputPath = path.join(OUTPUT_DIR, locale, filename)
+      const htmlFilename = `${artifactFilename(entry.slug)}.html`
+      const pdfHtmlLocaleDir = path.join(PDF_HTML_TEMP_DIR, locale)
+      fs.mkdirSync(pdfHtmlLocaleDir, { recursive: true })
+      const tempHtmlPath = path.join(pdfHtmlLocaleDir, htmlFilename)
+      const prevHtmlPath = path.join(PDF_HTML_DIR, locale, htmlFilename)
 
       let fileContent: string
       try {
@@ -199,8 +233,8 @@ function main(): void {
               translatedFromRevision: entry.translatedFromRevisionByLocale.en,
               translationFreshness: entry.translationFreshnessByLocale.en,
               translationStatus: entry.translationStatusByLocale?.en,
-            })}`
-          : fileContent
+            })}\x00${CONTENT_PIPELINE_VERSION}`
+          : `${fileContent}\x00${CONTENT_PIPELINE_VERSION}`
       const { regenerate } = shouldRegenerate(generationInput, cacheKey, cache)
 
       const cachedFrontmatter =
@@ -213,36 +247,65 @@ function main(): void {
           cachedFrontmatter.banner as { src: string } | undefined,
           localizedPath
         )
-        reusedCount++
+        if (fs.existsSync(prevHtmlPath)) {
+          // Incremental hit: reuse the previously rendered PDF HTML too.
+          fs.copyFileSync(prevHtmlPath, tempHtmlPath)
+          reusedCount++
+        } else {
+          // Artifact hit but the sidecar predates this pipeline (or was
+          // deleted): render just the sidecar so the PDF stays incremental.
+          renderJobs.push(async () => {
+            const artifactContent = stripFrontMatter(fileContent)
+            const html = await renderMarkdownToHtml(artifactContent, {
+              articleSlug: entry.slug,
+              locale: locale as "en" | "zh",
+              shikiPlugin,
+            })
+            fs.writeFileSync(tempHtmlPath, html)
+            generatedCount++
+          })
+        }
         continue
       }
 
-      const rendered = renderArtifact(
-        entry,
-        locale,
-        localizedPath,
-        fileContent,
-        tempOutputPath
-      )
-      if (rendered) {
-        copyBannerAssetToPublic(
-          rendered.banner as { src: string } | undefined,
-          localizedPath
+      renderJobs.push(async () => {
+        const rendered = await renderArtifact(
+          entry,
+          locale,
+          localizedPath,
+          fileContent,
+          tempOutputPath,
+          tempHtmlPath,
+          shikiPlugin
         )
-        generatedCount++
-      } else {
-        errorCount++
-        if (IS_PRODUCTION) {
-          process.exit(1)
+        if (rendered) {
+          copyBannerAssetToPublic(
+            rendered.banner as { src: string } | undefined,
+            localizedPath
+          )
+          generatedCount++
+        } else {
+          errorCount++
+          if (IS_PRODUCTION) {
+            process.exit(1)
+          }
         }
-      }
+      })
     }
   }
+
+  // Renders are independent per article — run them concurrently.
+  await Promise.all(renderJobs.map((job) => job()))
 
   if (fs.existsSync(OUTPUT_DIR)) {
     fs.rmSync(OUTPUT_DIR, { recursive: true })
   }
   fs.renameSync(TEMP_DIR, OUTPUT_DIR)
+
+  if (fs.existsSync(PDF_HTML_DIR)) {
+    fs.rmSync(PDF_HTML_DIR, { recursive: true })
+  }
+  fs.renameSync(PDF_HTML_TEMP_DIR, PDF_HTML_DIR)
 
   for (const key of Object.keys(cache)) {
     if (!seenKeys.has(key)) {
@@ -250,6 +313,7 @@ function main(): void {
     }
   }
   saveCache(cache)
+  persistHighlightCache()
 
   logger.event("article-content.generated", {
     generated_count: generatedCount,
@@ -261,13 +325,15 @@ function main(): void {
   }
 }
 
-function renderArtifact(
+async function renderArtifact(
   entry: ArticleEntry,
   locale: string,
   localizedPath: string,
   fileContent: string,
-  outputPath: string
-): Record<string, unknown> | null {
+  outputPath: string,
+  htmlOutputPath: string,
+  shikiPlugin: RehypeShikiPlugin
+): Promise<Record<string, unknown> | null> {
   let artifactContent: string
   let frontmatter: Record<string, unknown>
 
@@ -364,6 +430,24 @@ function renderArtifact(
   }
 
   fs.writeFileSync(outputPath, JSON.stringify(artifact, null, 2) + "\n")
+
+  try {
+    const html = await renderMarkdownToHtml(artifact.content, {
+      articleSlug: entry.slug,
+      locale: locale as "en" | "zh",
+      shikiPlugin,
+    })
+    fs.mkdirSync(path.dirname(htmlOutputPath), { recursive: true })
+    fs.writeFileSync(htmlOutputPath, html)
+  } catch (error) {
+    logger.error(
+      "article-content.pdf-html.render-failed",
+      { locale, slug: entry.slug },
+      String(error)
+    )
+    return null
+  }
+
   return frontmatter
 }
 

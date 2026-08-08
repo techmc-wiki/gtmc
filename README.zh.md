@@ -63,7 +63,7 @@ pnpm typecheck    # 运行 Next.js 感知的 TypeScript 检查
 ```
 
 > [!TIP]
-> `pnpm build` 分两个阶段执行：`build:content` 生成静态产物（文章 manifest、术语表、渲染后的内容、离线 PDF），随后 `build:next` 基于这些产物构建站点。只需其中一个阶段时可单独运行。
+> `pnpm build` 分两个阶段执行：`build:content` 生成站点产物（文章 manifest、术语表、渲染后的内容和 PDF HTML sidecar），随后 `build:next` 基于这些产物构建站点。独立的 `pnpm build:pdf` 使用这些 sidecar，输出 `data/pdf-dist/gtmc-en.pdf` 和 `data/pdf-dist/gtmc-zh.pdf`；`.github/workflows/pdf.yml` 会将它们发布到 R2。只需其中一个阶段时可单独运行。
 > Vite+ 仅补充 Next.js 工具链；本项目不使用属于 Vite 的 `vp dev` 和 `vp build`。
 
 ---

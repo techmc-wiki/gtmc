@@ -1,36 +1,26 @@
 #!/usr/bin/env npx tsx
 
 /**
- * PDF Generation Script — archival print edition of the GTMC book.
+ * PDF generation script — archival print edition of the GTMC book.
  *
- * Pipeline per locale:
- *   1. Load + sort the article tree, linearize, and number it (book plan)
- *   2. Scan article bodies once (code languages, math, content map)
- *   3. Render the cover as its own single-page PDF (no running apparatus)
- *   4. Render the body to bounded convergence: pass 1 measures real page
- *      numbers, pass 2 inserts TOC folios, and one final pass runs only when
- *      those folios changed their own target pages
- *   5. Merge cover + body, write exact-page outlines and metadata
- *
- * Usage:
- *   npx tsx scripts/generate-pdf.ts --locale en --output public/gtmc-en.pdf
- *   npx tsx scripts/generate-pdf.ts               # defaults: all locales
+ * TypeScript owns book planning and HTML assembly. The pdfgen binary owns
+ * Chromium rendering and PDF post-processing. Each locale converges TOC folios
+ * in at most three body renders before pdfgen merges the cover and writes the
+ * measured outline tree.
  */
 
-import { chromium } from "playwright"
-import type { Browser, Page } from "playwright"
-import { PDFDocument } from "pdf-lib"
+import { execFileSync, execSync, spawnSync } from "node:child_process"
 import fs from "node:fs"
+import os from "node:os"
 import path from "node:path"
-import { pathToFileURL } from "node:url"
-import { execSync } from "node:child_process"
+
 import enMessages from "@/messages/en.json"
 import zhMessages from "@/messages/zh.json"
 import { getArticleTree } from "@/lib/articles/manifest"
 import { preparePublicChapterNav } from "@/lib/articles/public-tree"
 import {
-  linearizeArticles,
   getArticleContentForPdf,
+  linearizeArticles,
 } from "@/lib/articles/linearize"
 import type { LinearizedArticle } from "@/lib/articles/linearize"
 import { artifactFilename } from "@/lib/articles/content"
@@ -38,32 +28,23 @@ import {
   buildBodyHtml,
   buildBookPlan,
   buildCoverHtml,
+  formatChapterLabel,
   getLabels,
 } from "@/lib/pdf/document"
-import type { BookOptions, PdfLocale } from "@/lib/pdf/document"
-import { resolveImagesInHtml } from "@/lib/pdf/images"
-import { renderMarkdownToHtml } from "@/lib/pdf/markdown-pipeline"
-import { buildOutlineTree, writePdfOutlines } from "@/lib/pdf/outline"
-import {
-  fillTocFolios,
-  haveTocFolioPagesChanged,
-  readAnchorPageIndices,
-} from "@/lib/pdf/paginate"
-import { paintPageBackgrounds } from "@/lib/pdf/paint-background"
-import {
-  PDF_REQUIRED_FONTS,
-  buildFooterTemplate,
-  buildHeaderTemplate,
-} from "@/lib/pdf/theme"
-import {
-  createRehypeShiki,
-  persistHighlightCache,
-  type RehypeShikiPlugin,
-} from "@/lib/markdown/syntax/rehype-shiki"
-import { getMermaidConfig } from "@/lib/markdown/mermaid-config"
+import type {
+  BookOptions,
+  BookPlan,
+  ChapterContent,
+  PdfLocale,
+} from "@/lib/pdf/document"
+import { resolveImagesInHtml } from "@/lib/pdf-images"
+import { fillTocFolios, haveTocFolioPagesChanged } from "@/lib/pdf/paginate"
+import { PDF_COLORS, PDF_REQUIRED_FONTS } from "@/lib/pdf/theme"
 import { createLogger } from "./lib/logger"
 
 const logger = createLogger("pdf")
+const SOURCE_URL = "https://techmc.wiki"
+const PDFGEN_ENV = "PDFGEN_BIN"
 
 const PDF_MESSAGES = {
   en: enMessages.Pdf,
@@ -74,26 +55,37 @@ const PDF_MESSAGES = {
     bookTitle: string
     bookSubtitle: string
     slogan: string
-    mermaidRenderError: string
   }
 >
-const SOURCE_URL = "https://techmc.wiki"
+
+interface CliOptions {
+  locale: PdfLocale | "all"
+  output: string
+}
+
+interface PdfgenReport {
+  pages: number
+  dests: Record<string, number>
+}
+
+interface OutlineNode {
+  title: string
+  page: number
+  children: OutlineNode[]
+}
+
+let resolvedPdfgen: string | undefined
+let pdfgenBuildDir: string | undefined
 
 function getArticlesRevision(): string | undefined {
   try {
-    const articlesDir = path.join(process.cwd(), "articles")
     return execSync("git rev-parse --short=7 HEAD", {
-      cwd: articlesDir,
+      cwd: path.join(process.cwd(), "articles"),
       encoding: "utf-8",
     }).trim()
   } catch {
     return undefined
   }
-}
-
-interface CliOptions {
-  locale: PdfLocale | "all"
-  output: string
 }
 
 function parseArgs(): CliOptions {
@@ -104,8 +96,8 @@ function parseArgs(): CliOptions {
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]
     if (arg === "--locale" && i + 1 < args.length) {
-      const val = args[i + 1].toLowerCase()
-      if (val === "en" || val === "zh" || val === "all") locale = val
+      const value = args[i + 1].toLowerCase()
+      if (value === "en" || value === "zh" || value === "all") locale = value
       i++
     } else if (arg === "--output" && i + 1 < args.length) {
       output = path.resolve(process.cwd(), args[i + 1])
@@ -113,11 +105,184 @@ function parseArgs(): CliOptions {
     }
   }
 
-  if (!output && locale !== "all") {
-    output = path.join(process.cwd(), "public", `gtmc-${locale}.pdf`)
+  return { locale, output }
+}
+
+function findOnPath(command: string): string | undefined {
+  const result = spawnSync("which", [command], {
+    encoding: "utf-8",
+    stdio: ["ignore", "pipe", "ignore"],
+  })
+  if (result.status !== 0) return undefined
+  const resolved = result.stdout.trim()
+  return resolved || undefined
+}
+
+function resolvePdfgen(): string {
+  if (resolvedPdfgen) return resolvedPdfgen
+
+  const configured = process.env[PDFGEN_ENV]
+  if (configured) {
+    resolvedPdfgen = configured
+    return configured
   }
 
-  return { locale, output }
+  const onPath = findOnPath("pdfgen")
+  if (onPath) {
+    resolvedPdfgen = onPath
+    return onPath
+  }
+
+  pdfgenBuildDir = fs.mkdtempSync(path.join(os.tmpdir(), "gtmc-pdfgen-"))
+  const builtPath = path.join(pdfgenBuildDir, "pdfgen")
+  logger.event("pdfgen.build.started", { output: builtPath })
+  const goProject = fs.existsSync(path.join(process.cwd(), "pdfgen", "go.mod"))
+  try {
+    const args = goProject
+      ? ["build", "-C", "pdfgen", "-o", builtPath, "."]
+      : ["build", "-o", builtPath, "./pdfgen"]
+    execFileSync("go", args, {
+      cwd: process.cwd(),
+      stdio: "inherit",
+    })
+  } catch (error) {
+    throw new Error(
+      `Unable to find pdfgen in PATH or build the pdfgen Go module: ${String(error)}`,
+      { cause: error }
+    )
+  }
+  resolvedPdfgen = builtPath
+  logger.event("pdfgen.build.completed", { output: builtPath })
+  return builtPath
+}
+
+function commonPdfgenArgs(): string[] {
+  const args = ["--fonts", PDF_REQUIRED_FONTS.join(",")]
+  const mermaidPath = path.join(
+    process.cwd(),
+    "node_modules",
+    "mermaid",
+    "dist",
+    "mermaid.min.js"
+  )
+  if (fs.existsSync(mermaidPath)) args.push("--mermaid-js", mermaidPath)
+
+  const chromiumPath =
+    process.env.PDFGEN_CHROMIUM ??
+    process.env.CHROMIUM_PATH ??
+    process.env.CHROMIUM
+  if (chromiumPath) args.push("--chromium", chromiumPath)
+
+  return args
+}
+
+function runPdfgen(args: string[], report = false): PdfgenReport | undefined {
+  const binary = resolvePdfgen()
+  const result = spawnSync(binary, args, {
+    cwd: process.cwd(),
+    encoding: "utf-8",
+    stdio: ["ignore", "pipe", "pipe"],
+  })
+  if (result.error) {
+    throw new Error(`pdfgen failed to start: ${result.error.message}`)
+  }
+  if (result.status !== 0) {
+    const detail = [result.stderr.trim(), result.stdout.trim()]
+      .filter(Boolean)
+      .join("\n")
+    throw new Error(`pdfgen ${args[0] ?? "command"} failed: ${detail}`)
+  }
+  if (!report) return undefined
+
+  const lines = result.stdout
+    .trim()
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+  const lastLine = lines.at(-1)
+  if (!lastLine) throw new Error("pdfgen render did not report page data")
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(lastLine)
+  } catch (error) {
+    throw new Error(
+      `pdfgen render returned invalid report JSON: ${String(error)}`,
+      { cause: error }
+    )
+  }
+  if (
+    !parsed ||
+    typeof parsed !== "object" ||
+    Array.isArray(parsed) ||
+    !("pages" in parsed) ||
+    !("dests" in parsed)
+  ) {
+    throw new Error("pdfgen render report is not an object")
+  }
+  const pages = parsed.pages
+  const rawDests = parsed.dests
+  if (
+    typeof pages !== "number" ||
+    !Number.isInteger(pages) ||
+    pages < 0 ||
+    !rawDests ||
+    typeof rawDests !== "object" ||
+    Array.isArray(rawDests)
+  ) {
+    throw new Error("pdfgen render report has an invalid pages/dests shape")
+  }
+
+  const dests: Record<string, number> = {}
+  for (const [anchor, page] of Object.entries(rawDests)) {
+    if (typeof page !== "number" || !Number.isInteger(page) || page < 0) {
+      throw new Error(`pdfgen render reported an invalid page for ${anchor}`)
+    }
+    dests[anchor] = page
+  }
+
+  return { pages, dests }
+}
+
+function pdfgenPages(pdfPath: string): number {
+  const binary = resolvePdfgen()
+  const pageResult = spawnSync(binary, ["pages", pdfPath], {
+    cwd: process.cwd(),
+    encoding: "utf-8",
+    stdio: ["ignore", "pipe", "pipe"],
+  })
+  if (pageResult.error || pageResult.status !== 0) {
+    throw new Error(
+      `pdfgen pages failed: ${pageResult.stderr?.trim() || pageResult.error?.message || "unknown error"}`
+    )
+  }
+  const lines = pageResult.stdout
+    .trim()
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+  const lastLine = lines.at(-1)
+  if (!lastLine) throw new Error("pdfgen pages returned no JSON")
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(lastLine)
+  } catch (error) {
+    throw new Error(`pdfgen pages returned invalid JSON: ${String(error)}`, {
+      cause: error,
+    })
+  }
+  if (
+    !parsed ||
+    typeof parsed !== "object" ||
+    Array.isArray(parsed) ||
+    !("pages" in parsed) ||
+    typeof parsed.pages !== "number" ||
+    !Number.isInteger(parsed.pages) ||
+    parsed.pages < 0
+  ) {
+    throw new Error("pdfgen pages returned an invalid response")
+  }
+  return parsed.pages
 }
 
 async function analyzeArticles(
@@ -126,11 +291,9 @@ async function analyzeArticles(
 ): Promise<{
   codeLangs: string[]
   hasMath: boolean
-  bodies: Map<string, string>
 }> {
   const allLangs = new Set<string>()
   let hasMath = false
-  const bodies = new Map<string, string>()
 
   await Promise.all(
     articles.map(async (article) => {
@@ -139,8 +302,8 @@ async function analyzeArticles(
       )
       if (!body) return
 
-      for (const m of body.matchAll(/^```(\w+)/gm)) {
-        const lang = m[1].toLowerCase()
+      for (const match of body.matchAll(/^```(\w+)/gm)) {
+        const lang = match[1].toLowerCase()
         if (
           lang !== "" &&
           lang !== "text" &&
@@ -153,201 +316,130 @@ async function analyzeArticles(
       if (body.includes("$") || body.includes("\\(") || body.includes("\\[")) {
         hasMath = true
       }
-      bodies.set(article.slug, body)
     })
   )
 
-  return { codeLangs: [...allLangs], hasMath, bodies }
+  return { codeLangs: [...allLangs], hasMath }
 }
 
-/**
- * Pre-rendered article HTML produced by `generate-article-content.ts`
- * (incremental per article). Returns `null` when the sidecar is missing —
- * the caller falls back to rendering the markdown on the fly so standalone
- * `pnpm build:pdf` runs keep working on a fresh checkout.
- */
-function loadPdfHtmlSidecar(slug: string, locale: PdfLocale): string | null {
+function loadPdfHtmlSidecar(slug: string, locale: PdfLocale): string {
+  const sidecarPath = path.join(
+    process.cwd(),
+    "data",
+    "pdf-html",
+    locale,
+    `${artifactFilename(slug)}.html`
+  )
   try {
-    return fs.readFileSync(
-      path.join(
-        process.cwd(),
-        "data",
-        "pdf-html",
-        locale,
-        `${artifactFilename(slug)}.html`
-      ),
-      "utf-8"
-    )
+    return fs.readFileSync(sidecarPath, "utf-8")
   } catch {
-    return null
+    throw new Error(
+      `Missing PDF HTML sidecar: ${sidecarPath}. Run pnpm build:content or pnpm generate:content first.`
+    )
   }
 }
 
 function createRenderArticle(
-  shikiPlugin: RehypeShikiPlugin | undefined,
   locale: PdfLocale,
-  bodies: Map<string, string>,
-  sourceCounters: { cached: number; rendered: number }
-) {
+  sourceCounters: { cached: number }
+): BookOptions["renderArticle"] {
   return async (article: LinearizedArticle): Promise<string> => {
-    const cached = loadPdfHtmlSidecar(article.slug, locale)
-    if (cached !== null) {
-      sourceCounters.cached++
-      return resolveImagesInHtml(cached, article.filePath)
-    }
-
-    try {
-      const content = bodies.get(article.slug)
-      if (!content) return ""
-
-      const html = await renderMarkdownToHtml(content, {
-        articlePath: article.filePath ?? undefined,
-        articleSlug: article.slug,
-        shikiPlugin,
-        locale,
-      })
-      sourceCounters.rendered++
-
-      return resolveImagesInHtml(html, article.filePath)
-    } catch (error) {
-      logger.warn(
-        "pdf.article.render-skipped",
-        { slug: article.slug },
-        String(error)
-      )
-      return ""
-    }
+    const html = loadPdfHtmlSidecar(article.slug, locale)
+    sourceCounters.cached++
+    return resolveImagesInHtml(html, article.filePath)
   }
 }
 
-interface RenderPdfOptions {
-  displayHeaderFooter: boolean
-  headerTemplate?: string
-  footerTemplate?: string
-  mermaidRenderError: string
-}
-async function renderHtmlToPdf(
-  browser: Browser,
-  html: string,
-  tempHtmlPath: string,
-  tempPdfPath: string,
-  options: RenderPdfOptions
-): Promise<Uint8Array> {
-  fs.writeFileSync(tempHtmlPath, html, "utf-8")
+function buildOutlineTree(
+  plan: BookPlan,
+  anchorPages: Map<string, number>,
+  locale: PdfLocale
+): OutlineNode[] {
+  const root: OutlineNode[] = [
+    { title: getLabels(locale).tocTitle, page: 0, children: [] },
+  ]
+  const pageOf = (anchor: string): number | undefined => anchorPages.get(anchor)
 
-  const context = await browser.newContext({ colorScheme: "light" })
-  try {
-    const page: Page = await context.newPage()
-    await page.goto(pathToFileURL(tempHtmlPath).href, { waitUntil: "load" })
+  for (const entry of plan.preface) {
+    const page = pageOf(`article-${entry.article.slug}`)
+    if (page === undefined) continue
+    root.push({ title: entry.article.title, page, children: [] })
+  }
 
-    if ((await page.locator("mermaid-diagram").count()) > 0) {
-      await page.addScriptTag({
-        path: path.join(
-          process.cwd(),
-          "node_modules",
-          "mermaid",
-          "dist",
-          "mermaid.min.js"
-        ),
-      })
-      await page.evaluate(
-        async ({ config, errorMessage }) => {
-          const mermaid = (
-            window as typeof window & {
-              mermaid: {
-                initialize: (value: typeof config) => void
-                render: (id: string, source: string) => Promise<{ svg: string }>
-              }
-            }
-          ).mermaid
-          const diagrams = document.querySelectorAll("mermaid-diagram")
-
-          mermaid.initialize(config)
-
-          await Promise.all(
-            [...diagrams].map(async (diagram, index) => {
-              const source = diagram.textContent?.trim() ?? ""
-
-              try {
-                const { svg } = await mermaid.render(
-                  `pdf-mermaid-${index}`,
-                  source
-                )
-                diagram.innerHTML = svg
-                diagram.setAttribute("data-rendered", "true")
-              } catch {
-                const message = document.createElement("p")
-                const fallback = document.createElement("pre")
-                message.className = "mermaid-error"
-                message.textContent = errorMessage
-                fallback.textContent = source
-                diagram.replaceChildren(message, fallback)
-                diagram.setAttribute("data-rendered", "error")
-              }
-            })
-          )
-        },
-        {
-          config: getMermaidConfig("light"),
-          errorMessage: options.mermaidRenderError,
+  function outlineContent(content: ChapterContent[]): OutlineNode[] {
+    const children: OutlineNode[] = []
+    for (const item of content) {
+      if (item.kind === "article") {
+        const page = pageOf(`article-${item.entry.article.slug}`)
+        if (page !== undefined) {
+          const prefix = item.entry.number ? `${item.entry.number}  ` : ""
+          children.push({
+            title: `${prefix}${item.entry.article.title}`,
+            page,
+            children: [],
+          })
         }
-      )
+        continue
+      }
+
+      const nested = outlineContent(item.content)
+      const firstDescendant = nested[0]
+      if (firstDescendant) {
+        children.push({
+          title: item.title,
+          page: firstDescendant.page,
+          children: nested,
+        })
+      }
     }
-
-    const requiredFonts = [...PDF_REQUIRED_FONTS]
-    await page.waitForFunction(
-      (fonts) =>
-        document.fonts.ready.then(() =>
-          fonts.every((f) => document.fonts.check(f))
-        ),
-      requiredFonts,
-      { timeout: 30000 }
-    )
-
-    await page.pdf({
-      path: tempPdfPath,
-      format: "A4",
-      preferCSSPageSize: true,
-      printBackground: true,
-      tagged: true,
-      displayHeaderFooter: options.displayHeaderFooter,
-      headerTemplate: options.headerTemplate ?? "<span></span>",
-      footerTemplate: options.footerTemplate ?? "<span></span>",
-    })
-
-    return fs.readFileSync(tempPdfPath)
-  } finally {
-    await context.close()
+    return children
   }
+
+  for (const chapter of plan.chapters) {
+    const page = pageOf(`chapter-${chapter.slug}`)
+    if (page === undefined) continue
+    root.push({
+      title: `${formatChapterLabel(locale, chapter.number, chapter.isAppendix)} — ${chapter.title}`,
+      page,
+      children: outlineContent(chapter.content),
+    })
+  }
+
+  return root
 }
 
-async function runPdf(locale: PdfLocale, output: string): Promise<void> {
-  const startedAt = performance.now()
-  logger.event("pdf.started", { locale, output })
+function writeBodyHtml(workDir: string, html: string, pass: string): string {
+  const filePath = path.join(workDir, `body-${pass}.html`)
+  fs.writeFileSync(filePath, html, "utf-8")
+  return filePath
+}
 
-  const outDir = path.dirname(output)
-  fs.mkdirSync(outDir, { recursive: true })
+async function runPdf(
+  locale: PdfLocale,
+  requestedOutput: string
+): Promise<void> {
+  const startedAt = performance.now()
+  const output =
+    requestedOutput ||
+    path.join(process.cwd(), "data", "pdf-dist", `gtmc-${locale}.pdf`)
+  fs.mkdirSync(path.dirname(output), { recursive: true })
+  logger.event("pdf.started", { locale, output })
 
   const tree = preparePublicChapterNav(await getArticleTree(locale))
   if (!tree || tree.length === 0) {
     logger.warn("pdf.skipped", { locale, reason: "empty-article-tree" })
     return
   }
+
   const linearized = await linearizeArticles(tree)
-
-  const { codeLangs, hasMath, bodies } = await analyzeArticles(
-    linearized,
-    locale
+  const { codeLangs, hasMath } = await analyzeArticles(linearized, locale)
+  const plan = buildBookPlan(
+    linearized.filter((article) =>
+      loadPdfHtmlSidecar(article.slug, locale).trim()
+    )
   )
-
-  // Empty drafts and unloadable artifacts get no number, no TOC row, and
-  // no section — they only exist as placeholders in the article tree.
-  const articles = linearized.filter((article) =>
-    bodies.get(article.slug)?.trim()
-  )
-  const plan = buildBookPlan(articles)
   logger.event("pdf.content.analyzed", {
-    article_count: articles.length,
+    article_count: linearized.length,
     chapter_count: plan.chapters.length,
     code_language_count: codeLangs.length,
     has_math: hasMath,
@@ -355,21 +447,9 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
     tree_entry_count: linearized.length,
   })
 
-  let shikiPlugin: RehypeShikiPlugin | undefined
-  if (codeLangs.length > 0) {
-    shikiPlugin = await createRehypeShiki().catch((error) => {
-      logger.warn(
-        "pdf.syntax-highlighting.unavailable",
-        { locale },
-        String(error)
-      )
-      return undefined
-    })
-  }
-
   const messages = PDF_MESSAGES[locale]
-  const sourceCounters = { cached: 0, rendered: 0 }
-  const bookOptions: BookOptions = {
+  const sourceCounters = { cached: 0 }
+  const bookOptions = {
     title: messages.bookTitle,
     subtitle: messages.bookSubtitle,
     tagline: messages.slogan,
@@ -378,12 +458,7 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
     articlesRevision: getArticlesRevision(),
     sourceUrl: SOURCE_URL,
     hasMath,
-    renderArticle: createRenderArticle(
-      shikiPlugin,
-      locale,
-      bodies,
-      sourceCounters
-    ),
+    renderArticle: createRenderArticle(locale, sourceCounters),
   }
 
   const coverHtml = buildCoverHtml(bookOptions)
@@ -394,172 +469,127 @@ async function runPdf(locale: PdfLocale, output: string): Promise<void> {
   logger.event("pdf.html.source", {
     locale,
     cached: sourceCounters.cached,
-    rendered: sourceCounters.rendered,
   })
   logger.event("pdf.html.generated", {
     locale,
     size_mb: (bodyHtml.length / 1024 / 1024).toFixed(1),
   })
 
-  const tempHtmlPath = path.join(outDir, `.gtmc-pdf-temp-${locale}.html`)
-  const tempPdfPath = output + ".tmp"
-  const cleanupTemp = () => {
-    for (const p of [tempHtmlPath, tempPdfPath]) {
-      try {
-        fs.rmSync(p, { force: true })
-      } catch {
-        /* ignore */
-      }
-    }
-  }
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), `gtmc-pdf-${locale}-`))
+  const coverHtmlPath = path.join(workDir, "cover.html")
+  const bodyHtmlPath = path.join(workDir, "body.html")
+  const coverPdfPath = path.join(workDir, "cover.pdf")
+  const bodyPdfPath = path.join(workDir, "body.pdf")
+  const outlinesPath = path.join(workDir, "outlines.json")
+  fs.writeFileSync(coverHtmlPath, coverHtml, "utf-8")
+  fs.writeFileSync(bodyHtmlPath, bodyHtml, "utf-8")
 
-  const browser = await chromium
-    .launch({
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-      ],
-    })
-    .catch((error) => {
-      logger.warn(
-        "pdf.skipped",
-        { locale, reason: "browser-launch-failed" },
-        String(error)
-      )
-      return null
-    })
-  if (!browser) return
-
-  let coverBytes: Uint8Array
-  let bodyBytes: Uint8Array
-  let anchorPages: Map<string, number>
   try {
-    coverBytes = await renderHtmlToPdf(
-      browser,
-      coverHtml,
-      tempHtmlPath,
-      tempPdfPath,
-      {
-        displayHeaderFooter: false,
-        mermaidRenderError: messages.mermaidRenderError,
-      }
-    )
+    runPdfgen([
+      "render",
+      "--html",
+      coverHtmlPath,
+      "--out",
+      coverPdfPath,
+      ...commonPdfgenArgs(),
+    ])
 
-    const bodyRenderOptions: RenderPdfOptions = {
-      displayHeaderFooter: true,
-      headerTemplate: buildHeaderTemplate(messages.bookTitle),
-      footerTemplate: buildFooterTemplate(),
-      mermaidRenderError: messages.mermaidRenderError,
+    const renderBody = (html: string, pass: string): PdfgenReport => {
+      const htmlPath =
+        pass === "empty" ? bodyHtmlPath : writeBodyHtml(workDir, html, pass)
+      const report = runPdfgen(
+        [
+          "render",
+          "--html",
+          htmlPath,
+          "--out",
+          bodyPdfPath,
+          "--report-pages",
+          "--report-dests",
+          "--header-footer",
+          ...commonPdfgenArgs(),
+        ],
+        true
+      )
+      if (!report) throw new Error("pdfgen did not return a body report")
+      return report
     }
 
-    const pass1Bytes = await renderHtmlToPdf(
-      browser,
-      bodyHtml,
-      tempHtmlPath,
-      tempPdfPath,
-      bodyRenderOptions
-    )
-
-    const pass1AnchorPages = await readAnchorPageIndices(pass1Bytes)
-    const { html: filledHtml, missing } = fillTocFolios(
-      bodyHtml,
-      pass1AnchorPages
-    )
-    if (missing.length > 0) {
+    const pass1 = renderBody(bodyHtml, "empty")
+    const pass1Pages = new Map(Object.entries(pass1.dests))
+    const filledPass1 = fillTocFolios(bodyHtml, pass1Pages)
+    if (filledPass1.missing.length > 0) {
       logger.warn(
         "pdf.toc.anchors-missing",
-        { count: missing.length, locale },
-        missing.slice(0, 3).join(", ")
+        { count: filledPass1.missing.length, locale },
+        filledPass1.missing.slice(0, 3).join(", ")
       )
     }
-    bodyBytes = await renderHtmlToPdf(
-      browser,
-      filledHtml,
-      tempHtmlPath,
-      tempPdfPath,
-      bodyRenderOptions
-    )
-
-    const pass2AnchorPages = await readAnchorPageIndices(bodyBytes)
-    if (
-      haveTocFolioPagesChanged(bodyHtml, pass1AnchorPages, pass2AnchorPages)
-    ) {
-      const { html: finalHtml } = fillTocFolios(bodyHtml, pass2AnchorPages)
-      bodyBytes = await renderHtmlToPdf(
-        browser,
-        finalHtml,
-        tempHtmlPath,
-        tempPdfPath,
-        bodyRenderOptions
-      )
-      anchorPages = await readAnchorPageIndices(bodyBytes)
-      if (haveTocFolioPagesChanged(bodyHtml, pass2AnchorPages, anchorPages)) {
+    let finalReport = renderBody(filledPass1.html, "filled-1")
+    const pass2Pages = new Map(Object.entries(finalReport.dests))
+    if (haveTocFolioPagesChanged(bodyHtml, pass1Pages, pass2Pages)) {
+      const filledPass2 = fillTocFolios(bodyHtml, pass2Pages)
+      finalReport = renderBody(filledPass2.html, "filled-2")
+      const pass3Pages = new Map(Object.entries(finalReport.dests))
+      if (haveTocFolioPagesChanged(bodyHtml, pass2Pages, pass3Pages)) {
         throw new Error(
           "[pdf] TOC folios did not converge after the final pass"
         )
       }
-    } else {
-      anchorPages = pass2AnchorPages
     }
+
+    const finalAnchorPages = new Map(Object.entries(finalReport.dests))
+    fs.writeFileSync(
+      outlinesPath,
+      `${JSON.stringify(buildOutlineTree(effectivePlan, finalAnchorPages, locale))}\n`,
+      "utf-8"
+    )
+
+    runPdfgen([
+      "postprocess",
+      "--cover",
+      coverPdfPath,
+      "--body",
+      bodyPdfPath,
+      "--out",
+      output,
+      "--outlines",
+      outlinesPath,
+      "--background",
+      PDF_COLORS.paper,
+      "--title",
+      `${messages.bookTitle} — ${messages.bookSubtitle}`,
+      "--subject",
+      messages.slogan,
+      "--author",
+      "The GTMC community",
+    ])
+
+    const coverPages = pdfgenPages(coverPdfPath)
+    const finalPages = pdfgenPages(output)
+    logger.event("pdf.generated", {
+      body_pages: finalReport.pages,
+      cover_pages: coverPages,
+      duration_ms: Math.round(performance.now() - startedAt),
+      locale,
+      output,
+      page_count: finalPages,
+      size_mb: (fs.statSync(output).size / 1024 / 1024).toFixed(1),
+    })
   } catch (error) {
-    cleanupTemp()
-    throw new Error(`[pdf] PDF generation failed: ${error}`, { cause: error })
+    throw new Error(`[pdf] PDF generation failed: ${String(error)}`, {
+      cause: error,
+    })
   } finally {
-    await browser.close()
+    fs.rmSync(workDir, { recursive: true, force: true })
   }
-  cleanupTemp()
-
-  const coverDoc = await PDFDocument.load(coverBytes)
-  const coverPageCount = coverDoc.getPageCount()
-
-  // The body document stays the base so its catalog — including the
-  // /Dests dictionary that internal TOC links resolve through — survives
-  // the merge; building a fresh document via copyPages would drop it.
-  const merged = await PDFDocument.load(bodyBytes)
-  const coverPages = await merged.copyPages(coverDoc, coverDoc.getPageIndices())
-  coverPages.forEach((p, i) => merged.insertPage(i, p))
-
-  // Paint a full-page paper-colored rect behind all content on every page.
-  // CSS background can't reach the @page margin area; this pdf-lib step
-  // fills the entire media box so no white margins are visible.
-  paintPageBackgrounds(merged, "f5f4ef")
-
-  const outlineTree = buildOutlineTree(
-    effectivePlan,
-    anchorPages,
-    locale,
-    coverPageCount,
-    getLabels(locale).tocTitle
-  )
-  writePdfOutlines(merged, outlineTree)
-
-  merged.setTitle(`${messages.bookTitle} — ${messages.bookSubtitle}`)
-  merged.setAuthor("The GTMC community")
-  merged.setSubject(messages.slogan)
-  merged.setLanguage(locale === "zh" ? "zh-CN" : "en")
-  merged.setProducer("GTMC PDF pipeline (Playwright + pdf-lib)")
-
-  fs.writeFileSync(output, await merged.save())
-
-  logger.event("pdf.generated", {
-    duration_ms: Math.round(performance.now() - startedAt),
-    locale,
-    output,
-    page_count: merged.getPageCount(),
-    size_mb: (fs.statSync(output).size / 1024 / 1024).toFixed(1),
-  })
 }
 
-async function main() {
+async function main(): Promise<void> {
   const { locale, output } = parseArgs()
-
   try {
     if (locale === "all") {
-      await Promise.all([
-        runPdf("en", path.join(process.cwd(), "public", "gtmc-en.pdf")),
-        runPdf("zh", path.join(process.cwd(), "public", "gtmc-zh.pdf")),
-      ])
+      await Promise.all([runPdf("en", ""), runPdf("zh", "")])
     } else {
       await runPdf(locale, output)
     }
@@ -569,12 +599,12 @@ async function main() {
       {},
       error instanceof Error ? (error.stack ?? error.message) : String(error)
     )
-    process.exit(1)
+    process.exitCode = 1
   } finally {
-    // The standalone `pnpm build:pdf` path may have rendered articles on the
-    // fly (no sidecars); keep the highlight cache warm for the next build.
-    persistHighlightCache()
+    if (pdfgenBuildDir) {
+      fs.rmSync(pdfgenBuildDir, { recursive: true, force: true })
+    }
   }
 }
 
-main()
+void main()

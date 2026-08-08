@@ -48,11 +48,7 @@ if (restoredContent) {
   process.env.GTMC_SKIP_CONTENT_BUILD = "true"
 } else {
   delete process.env.GTMC_SKIP_CONTENT_BUILD
-  runBuildStep(logger, "browser.install", () =>
-    run("playwright", ["install", "chromium"])
-  )
 }
-
 runBuildStep(logger, "prisma.migrate", () =>
   run("prisma", ["migrate", "deploy"])
 )

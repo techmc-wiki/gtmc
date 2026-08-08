@@ -65,7 +65,6 @@ const isVercel = process.env.VERCEL === "1"
 const skipHeavy =
   process.env.GTMC_SKIP_POSTINSTALL === "1" ||
   (isCI && !isVercel && process.env.GTMC_LINT_ONLY === "1")
-const skipPlaywright = skipHeavy || process.env.GTMC_SKIP_PLAYWRIGHT === "1"
 
 if (!skipHeavy && isGitWorkTree()) {
   run("git", ["config", "--local", "include.path", ".gitconfig"])
@@ -99,13 +98,6 @@ if (skipHeavy) {
   runBuildStep(logger, "repository-contributors", () =>
     runScript("scripts/generate-repository-contributor-stats.ts")
   )
-  if (skipPlaywright) {
-    logger.event("browser.install.skipped", { reason: "environment" })
-  } else {
-    runBuildStep(logger, "browser.install", () =>
-      run("playwright", ["install", "chromium"])
-    )
-  }
 }
 
 logger.event("setup.completed", {

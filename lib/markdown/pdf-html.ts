@@ -1,13 +1,3 @@
-/**
- * PDF-specific markdown processing pipeline.
- *
- * Produces pure HTML strings (no React) using unified/remark/rehype,
- * designed for Playwright-based PDF generation.
- *
- * Uses the shared plugin builders from lib/markdown/pipeline/core.ts
- * to stay in sync with the React renderer.
- */
-
 import { unified } from "unified"
 import remarkParse from "remark-parse"
 import remarkRehype from "remark-rehype"
@@ -21,53 +11,22 @@ import {
 } from "@/lib/markdown/pipeline/core"
 import { rehypeCJKSpacing } from "@/lib/markdown/transforms/rehype-cjk-spacing"
 
-/**
- * Options for the PDF markdown pipeline.
- */
 export interface PdfPipelineOptions {
-  /**
-   * Optional Shiki syntax highlighting plugin instance (created via
-   * `createRehypeShiki` or `getCachedRehypeShiki`).
-   */
   shikiPlugin?: RehypeShikiPlugin
-
-  /**
-   * Article path used for resolving relative image URLs in the PDF context.
-   */
   articlePath?: string
-
-  /**
-   * Article slug used for generating source links (e.g. for GIF captions).
-   */
   articleSlug?: string
-
-  /** Locale for reader-facing notices (GIF captions) and source links. */
   locale?: "en" | "zh"
 }
 
-/**
- * Render markdown content to a pure HTML string.
- *
- * Uses the same unified/remark/rehype plugin chain as the main markdown
- * renderer, but outputs HTML via rehype-stringify instead of React components.
- *
- * @param content - Raw markdown text
- * @param options - Optional pipeline configuration
- * @returns Promise resolving to an HTML string
- */
 export async function renderMarkdownToHtml(
   content: string,
   options?: PdfPipelineOptions
 ): Promise<string> {
-  // ── Strip YAML frontmatter ────────────────────────────────────
   const { content: cleanContent } = matter(content)
-
-  // ── Build plugin lists using shared builders ──────────────────────
   const remarkPlugins = buildRemarkPlugins(cleanContent, {
     includeWikilinks: true,
     includeMath: true,
   })
-
   const rehypePlugins = buildRehypePlugins({
     includeShiki: !!options?.shikiPlugin,
     shikiPlugin: options?.shikiPlugin,
@@ -75,7 +34,6 @@ export async function renderMarkdownToHtml(
     cjkSpacingPlugin: rehypeCJKSpacing,
   })
 
-  // ── Assemble and run the pipeline ─────────────────────────────────
   const file = await unified()
     .use(remarkParse)
     .use(remarkPlugins)
@@ -85,16 +43,11 @@ export async function renderMarkdownToHtml(
     .process(cleanContent)
 
   let html = String(file)
-
-  // ── Strip href from wikilinks (produces dead relative links in PDF) ──
-  // Wikilinks generate: <a href="../slug" class="wikilink">text</a>
-  // Convert to: <span class="wikilink">text</span>
   html = html.replaceAll(
     /<a\s+href="[^"]*"([^>]*class="[^"]*wikilink[^"]*"[^>]*)>(.*?)<\/a>/gi,
     "<span$1>$2</span>"
   )
 
-  // ── Inject animated notice for GIF images ────────────────────────
   const locale = options?.locale ?? "en"
   const notice = locale === "zh" ? "该图为动图。" : "This figure is animated."
   const linkText = locale === "zh" ? "查看原图" : "View original"
@@ -105,7 +58,7 @@ export async function renderMarkdownToHtml(
     ? ` <a href="${baseUrl}" class="gif-source-link">${linkText}</a>`
     : ""
   html = html.replaceAll(
-    /(<img[^>]*src="(?!data:)[^"]*\.gif[^"]*"[^>]*\/?>)/gi,
+    /(<img[^>]*src="(?!data:)[^"]*\.gif[^>]*\/?\s*>)/gi,
     `$1<p class="gif-caption">▶ ${notice}${sourceLink}</p>`
   )
 

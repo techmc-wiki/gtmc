@@ -51,19 +51,15 @@ jobs:
             data/pdf-html
             data/.shiki-cache.json
             data/glossary*.json
-            public/gtmc-en.pdf
-            public/gtmc-zh.pdf
-          # Hash dependency resolution plus generators/libs that feed content/PDF
-          # artifacts so generated locale indexes cannot outlive their Pinyin data.
-          key: content-${{ steps.content-inputs.outputs.articles }}-${{ steps.content-inputs.outputs.glossary }}-${{ hashFiles('package.json', 'pnpm-lock.yaml', 'scripts/build-content.ts', 'scripts/generate-article-manifest.ts', 'scripts/generate-glossary-manifest.ts', 'scripts/generate-article-content.ts', 'scripts/generate-pdf.ts', 'scripts/manifest-preview.ts', 'scripts/lib/run.ts', 'lib/articles/**', 'lib/pdf/**', 'lib/glossary/**', 'lib/markdown/**') }}
+          # Hash dependency resolution plus generators/libs that feed content artifacts.
+          key: content-${{ steps.content-inputs.outputs.articles }}-${{ steps.content-inputs.outputs.glossary }}-${{ hashFiles('package.json', 'pnpm-lock.yaml', 'scripts/build-content.ts', 'scripts/generate-article-manifest.ts', 'scripts/generate-glossary-manifest.ts', 'scripts/generate-article-content.ts', 'scripts/manifest-preview.ts', 'scripts/lib/run.ts', 'lib/articles/**', 'lib/glossary/**', 'lib/markdown/**') }}
           restore-keys: |
             content-${{ steps.content-inputs.outputs.articles }}-${{ steps.content-inputs.outputs.glossary }}-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         env:
-          # Submodules already checked out; skip prisma/manifest/chromium here.
-          # Prisma runs next; Chromium only when content must be rebuilt.
+          # Submodules are already checked out; skip install-time generation.
           GTMC_SKIP_POSTINSTALL: "1"
 
       - name: Generate Prisma Client
@@ -71,34 +67,9 @@ jobs:
         env:
           DATABASE_URL: "postgresql://localhost:5432/placeholder"
 
-      - name: Cache Playwright browsers
-        id: cache-playwright
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: Install Playwright system dependencies
-        if: steps.cache-content.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install-deps chromium
-
-      - name: Install Playwright Chromium
-        if: steps.cache-content.outputs.cache-hit != 'true' && steps.cache-playwright.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install chromium
-
       - name: Build
         env:
-          # Only skip when the exact key hits — partial restore-keys may lack locale PDFs.
+          # Only skip when the exact content cache key hits.
           GTMC_SKIP_CONTENT_BUILD: ${{ steps.cache-content.outputs.cache-hit == 'true' }}
           GITHUB_TOKEN: ${{ github.token }}
         run: node --run build
-
-      - name: Upload compiled PDFs
-        uses: actions/upload-artifact@v7
-        with:
-          name: gtmc-pdfs
-          path: |
-            public/gtmc-en.pdf
-            public/gtmc-zh.pdf
-          if-no-files-found: error
-          retention-days: 14

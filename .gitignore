@@ -48,8 +48,6 @@ next-env.d.ts
 # generated files
 data
 public/article-assets
-public/gtmc-*.pdf
-public/.gtmc-pdf-temp-*.html
 
 # lighthouse and playwright
 .lighthouseci

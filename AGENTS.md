@@ -43,10 +43,11 @@ The articles themselves live in a separate repo and are pulled in via a Git subm
 ├── articles/               Article content (Git submodule)
 ├── glossary/               Glossary CSV data (Git submodule)
 ├── data/                   Generated manifest + article artifacts + PDF-ready HTML + glossary*.json + build caches
+├── pdfgen/                 Go PDF renderer and post-processor
 ├── i18n/                   next-intl request config + routing
 ├── messages/               i18n catalogs (en.json, zh.json)
-├── public/                 Static assets including generated gtmc-en.pdf and gtmc-zh.pdf
-├── scripts/                Manifest, content, and PDF generators
+├── public/                 Static site assets (PDFs are published to R2)
+├── scripts/                Manifest and content generators
 ├── proxy.ts                Auth + i18n middleware
 ├── schema.prisma           Database schema
 └── DESIGN.md               Visual system reference
@@ -71,31 +72,34 @@ pnpm dev                # http://localhost:3000
 3. Generates the glossary manifest.
 4. Runs `prisma generate` (with a placeholder `DATABASE_URL` if none is set, to allow client codegen offline), unless heavy postinstall steps are explicitly skipped.
 5. Runs `tsx scripts/generate-article-manifest.ts`.
-6. Runs `playwright install chromium` for the PDF generator and any browser tests, unless `GTMC_SKIP_PLAYWRIGHT=1` (or heavy postinstall is already skipped).
+6. Runs `tsx scripts/generate-repository-contributor-stats.ts`; PDF rendering is handled separately by `pdfgen` in `.github/workflows/pdf.yml`.
 
 CI notes for the Build workflow:
 
-- Content/PDF artifacts are cached by articles SHA + glossary SHA + generator/lib hashes. Exact cache hits set `GTMC_SKIP_CONTENT_BUILD=true`.
-- Install uses `GTMC_SKIP_POSTINSTALL=1`; Prisma is generated in a dedicated step; Chromium is installed only on content-cache miss.
+- Content artifacts are cached by articles SHA + glossary SHA + generator/lib hashes. Exact cache hits set `GTMC_SKIP_CONTENT_BUILD=true`.
+- Install uses `GTMC_SKIP_POSTINSTALL=1`; Prisma is generated in a dedicated step. PDF rendering is not part of the site Build workflow.
 - Superseded runs on the same ref are cancelled via `concurrency`.
 
 ### Environment variables
 
 `.env.example` lists the required keys. None are committed.
 
-| Variable                                                   | Purpose                                                                          |
-| ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `DATABASE_URL`                                             | Pooled Postgres connection string (Supabase in production)                       |
-| `DIRECT_URL`                                               | Direct Postgres connection used by Prisma migrations                             |
-| `NEXT_PUBLIC_APP_URL`                                      | Public site origin used for canonical URLs and uploads                           |
-| `GITHUB_ID` / `GITHUB_SECRET`                              | GitHub OAuth application credentials for sign-in                                 |
-| `GITHUB_ARTICLES_READ_PAT`                                 | PAT used to read the articles repository                                         |
-| `GITHUB_ARTICLES_WRITE_PAT`                                | PAT used to write branches, assets, and pull requests in the articles repository |
-| `GITHUB_ARTICLES_REPO_OWNER` / `GITHUB_ARTICLES_REPO_NAME` | Target repo for article submission flows                                         |
-| `GITHUB_GLOSSARY_REPO_OWNER` / `GITHUB_GLOSSARY_REPO_NAME` | Target repo for glossary submodule (defaults to TechMC-Glossary/TechMC-Glossary) |
-| `GITHUB_GLOSSARY_WRITE_PAT`                                | PAT for opening glossary PRs (requires Contents + Pull requests read/write)      |
-| `BLOB_READ_WRITE_TOKEN`                                    | Vercel Blob token for uploads ≥ 4.5 MB                                           |
-| `BLOB_STORE_HOSTNAME`                                      | Hostname of the Vercel Blob store                                                |
+| Variable                                                    | Purpose                                                                          |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                              | Pooled Postgres connection string (Supabase in production)                       |
+| `DIRECT_URL`                                                | Direct Postgres connection used by Prisma migrations                             |
+| `NEXT_PUBLIC_APP_URL`                                       | Public site origin used for canonical URLs and uploads                           |
+| `GITHUB_ID` / `GITHUB_SECRET`                               | GitHub OAuth application credentials for sign-in                                 |
+| `GITHUB_ARTICLES_READ_PAT`                                  | PAT used to read the articles repository                                         |
+| `GITHUB_ARTICLES_WRITE_PAT`                                 | PAT used to write branches, assets, and pull requests in the articles repository |
+| `GITHUB_ARTICLES_REPO_OWNER` / `GITHUB_ARTICLES_REPO_NAME`  | Target repo for article submission flows                                         |
+| `GITHUB_GLOSSARY_REPO_OWNER` / `GITHUB_GLOSSARY_REPO_NAME`  | Target repo for glossary submodule (defaults to TechMC-Glossary/TechMC-Glossary) |
+| `GITHUB_GLOSSARY_WRITE_PAT`                                 | PAT for opening glossary PRs (requires Contents + Pull requests read/write)      |
+| `BLOB_READ_WRITE_TOKEN`                                     | Vercel Blob token for uploads ≥ 4.5 MB                                           |
+| `BLOB_STORE_HOSTNAME`                                       | Hostname of the Vercel Blob store                                                |
+| `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | Cloudflare R2 credentials used by the PDF publishing workflow                    |
+| `R2_BUCKET_NAME`                                            | R2 bucket receiving `gtmc-en.pdf`, `gtmc-zh.pdf`, and build state                |
+| `NEXT_PUBLIC_PDF_BASE_URL`                                  | Public R2 base URL used by the PDF download buttons                             |
 
 NextAuth additionally expects `AUTH_SECRET` (or `NEXTAUTH_SECRET`) and the GitHub OAuth credentials used by `lib/auth/index.ts`.
 
@@ -109,10 +113,10 @@ vp test run               # Run Vitest once
 vp install                # Install with the pinned pnpm version
 pnpm typecheck            # tsc --noEmit (strict, Next.js-aware)
 pnpm check                # vp check + typecheck
-pnpm build:content        # Generate content artifacts (manifest, glossary, articles, PDFs)
+pnpm build:content        # Generate content artifacts (manifest, glossary, articles, PDF HTML sidecars)
 pnpm build:next           # Next.js production build only
 pnpm build                # Both phases via scripts/build.ts
-pnpm build:pdf            # Offline PDFs only (public/gtmc-en.pdf, public/gtmc-zh.pdf)
+pnpm build:pdf            # Render data/pdf-dist/gtmc-en.pdf and gtmc-zh.pdf with pdfgen
 pnpm prepare:articles     # Prepare articles submodule (GTMC_ARTICLES_SOURCE)
 pnpm analyze              # next experimental-analyze
 ```
@@ -135,7 +139,7 @@ pnpm articles:update        # Pull the latest articles commit on the tracked bra
 pnpm prepare:articles       # Prepare articles for a build using GTMC_ARTICLES_SOURCE
 pnpm generate:manifest      # Rebuild data/manifest.json
 pnpm generate:content       # Re-render article content artifacts
-pnpm build:pdf              # Rebuild offline PDFs
+pnpm build:pdf              # Rebuild PDFs from the generated HTML sidecars
 ```
 
 Article build source is controlled by `GTMC_ARTICLES_SOURCE`:
@@ -172,7 +176,7 @@ vp test run -t "merges conflicting drafts"     # Filter by test name
 
 - Vite+ config: `vite.config.ts` contains Vitest, Oxlint, Oxfmt, and staged-file settings.
 - Existing specs live alongside the code in `lib/` (e.g. `lib/slug-utils.test.ts`, `lib/__tests__/article-loader.test.ts`, `lib/articles/*.test.ts`).
-- Playwright is installed for the PDF generator (`scripts/generate-pdf.ts`) and for any future e2e work; install browsers with `pnpm exec playwright install chromium` if missing.
+- Playwright is retained for browser-based checks; PDF rendering uses the Go `pdfgen` binary and Chromium provisioned by `.github/workflows/pdf.yml`.
 
 When fixing a bug or changing existing logic, update the colocated specs to match — but do **not** introduce new test infrastructure or scaffolding without an explicit ask.
 
@@ -199,17 +203,18 @@ When working on UI:
 ## Build and Deployment
 
 ```bash
-pnpm build:content  # Generate static content artifacts (manifest, glossary, articles, PDFs)
+pnpm build:content  # Generate static content artifacts and PDF HTML sidecars
 pnpm build:next     # Next.js production build only
 pnpm build          # Both phases (scripts/build.ts); skip content with GTMC_SKIP_CONTENT_BUILD=true
 pnpm build:vercel   # Vercel entrypoint (scripts/build-vercel.ts)
+pnpm build:pdf      # Generate data/pdf-dist/gtmc-en.pdf and gtmc-zh.pdf with pdfgen
 pnpm analyze        # next experimental-analyze
 ```
 
 **Two-phase build model:**
 
-- **Phase 1 (`build:content` → `scripts/build-content.ts`)**: Generates static content artifacts — `data/manifest.json`, `data/glossary*.json`, rendered article content, and `public/gtmc-en.pdf` / `public/gtmc-zh.pdf` (via Playwright + Chromium).
-- The article-content step emits PDF-ready HTML sidecars under `data/pdf-html/{locale}/` (incremental per article, keyed the same way as the artifacts) that the PDF generator consumes instead of re-rendering markdown, plus a persisted Shiki highlight cache at `data/.shiki-cache.json` that the Next.js SSG build reuses so unchanged code blocks are not re-highlighted. Both live outside `data/articles/**` on purpose — that glob is traced into article-route lambdas.
+- **Phase 1 (`build:content` → `scripts/build-content.ts`)**: Generates static site artifacts — `data/manifest.json`, `data/glossary*.json`, rendered article content, and PDF-ready HTML sidecars under `data/pdf-html/{locale}/`.
+- **PDF publishing (`pnpm build:pdf`)**: Consumes those sidecars, uses the Go `pdfgen` binary plus Chromium, and writes `data/pdf-dist/gtmc-en.pdf` and `data/pdf-dist/gtmc-zh.pdf`. `.github/workflows/pdf.yml` runs this only when the Articles revision or PDF pipeline code changed, then uploads both PDFs to Cloudflare R2.
 - **Phase 2 (`build:next`)**: Runs `next build`, consuming the artifacts from phase 1.
 - **`pnpm build`**: Runs both phases in order (`scripts/build.ts`).
 
@@ -219,9 +224,10 @@ Notes:
 
 - `pnpm build` is **non-trivial** — phase 1 regenerates all content artifacts before phase 2 invokes `next build`. Allow time and disk space accordingly.
 - `next.config.ts` enables Cache Components and configures `outputFileTracingIncludes` / `Excludes` so article, glossary, search, and litematica routes get the right files without pulling article binaries or PDFs into every lambda. Keep these patterns in sync if you add similar routes.
-- Vercel uses `vercel.json` to install Chromium system libraries on Amazon Linux before `pnpm install`, then runs `pnpm build:vercel`. That script installs Playwright Chromium, prepares the articles submodule according to `GTMC_ARTICLES_SOURCE`, deploys Prisma migrations, and runs the two-phase `pnpm build`.
+- Vercel uses `vercel.json` to install the site runtime libraries before `pnpm install`, then runs `pnpm build:vercel`. That script prepares the articles submodule according to `GTMC_ARTICLES_SOURCE`, deploys Prisma migrations, and runs the site content/Next.js build; PDF publishing is handled separately by `.github/workflows/pdf.yml`.
 - CI workflows (`.github/workflows/`):
-  - `build.yml` — runs on every push and PR with Node 26; concurrency-cancels superseded runs on the same ref; checks out submodules, restores content/PDF artifacts by articles+glossary SHA and generator hashes, installs with `GTMC_SKIP_POSTINSTALL=1`, generates Prisma, installs Chromium only on content-cache miss, then runs `pnpm build` (Next typechecks during build; standalone `tsc` is omitted). Exact content-cache hits set `GTMC_SKIP_CONTENT_BUILD=true`.
+  - `build.yml` — runs the site build on every push and PR with Node 26; concurrency-cancels superseded runs on the same ref; restores content artifacts by articles+glossary SHA and generator hashes, installs with `GTMC_SKIP_POSTINSTALL=1`, generates Prisma, then runs `pnpm build` (Next typechecks during build; standalone `tsc` is omitted).
+  - `pdf.yml` — runs on `dev` pushes, a six-hour schedule, or manual dispatch; compares the latest Articles `main` SHA and a hash of the PDF pipeline inputs, builds sidecars then `pdfgen`, provisions pinned Chromium, and uploads PDFs plus state to R2 only when either input changed.
   - `style_and_lint.yml` — runs on pushes to `main` with Node 26; skips heavy postinstall work, then runs the lint and format check scripts.
   - `submit_pr.yml` — `workflow_dispatch` only; opens automated article-submission PRs from the review hub.
 

@@ -60,12 +60,13 @@ export default async function PdfPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "Pdf" })
   const filename = `gtmc-${locale}.pdf`
   const Content = pdfContentByLocale[locale as ArticleLocale]
 
   return (
     <div className="page-container-pb">
-      <Content filename={filename} />
+      <Content filename={filename} unavailableNote={t("unavailableNote")} />
     </div>
   )
 }

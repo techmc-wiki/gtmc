@@ -1,0 +1,235 @@
+name: Publish PDFs
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Check for article updates every six hours without aligning with the hour.
+    - cron: "17 */6 * * *"
+  push:
+    branches: ["dev"]
+
+concurrency:
+  group: pdf-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+  R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+  R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Configure R2 credentials
+        uses: aws-actions/configure-aws-credentials@v6.2.3
+        with:
+          aws-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          aws-region: auto
+
+      - name: Resolve article and pipeline revisions
+        id: revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          articles_sha="$(git ls-remote https://github.com/techmc-wiki/Articles.git refs/heads/main | cut -f1)"
+          if [[ -z "$articles_sha" ]]; then
+            echo "Could not resolve Articles/main" >&2
+            exit 1
+          fi
+
+          pipeline_paths=(
+            pdfgen
+            scripts/build-content.ts
+            scripts/generate-article-content.ts
+            scripts/generate-pdf.ts
+            lib/articles
+            lib/markdown
+            lib/pdf
+            lib/pdf-images.ts
+            package.json
+            pnpm-lock.yaml
+          )
+          code_sha="$(git ls-tree -r HEAD -- "${pipeline_paths[@]}" | sha256sum | cut -d' ' -f1)"
+          echo "articles_sha=$articles_sha" >> "$GITHUB_OUTPUT"
+          echo "code_sha=$code_sha" >> "$GITHUB_OUTPUT"
+          echo "Articles SHA: $articles_sha"
+          echo "Pipeline SHA: $code_sha"
+
+      - name: Check R2 build state
+        id: change-check
+        shell: bash
+        env:
+          ARTICLES_SHA: ${{ steps.revisions.outputs.articles_sha }}
+          CODE_SHA: ${{ steps.revisions.outputs.code_sha }}
+        run: |
+          set -euo pipefail
+
+          state_path="$RUNNER_TEMP/last-build.json"
+          state_error="$RUNNER_TEMP/last-build.error"
+          if aws s3 cp "s3://${R2_BUCKET_NAME}/state/last-build.json" "$state_path" \
+            --endpoint-url "$R2_ENDPOINT" 2>"$state_error"; then
+            previous_articles_sha="$(jq -r '.articlesSha // empty' "$state_path")"
+            previous_code_sha="$(jq -r '.codeSha // empty' "$state_path")"
+          else
+            state_error_text="$(cat "$state_error")"
+            if [[ "$state_error_text" =~ 404|NoSuchKey|Not[[:space:]]Found ]]; then
+              echo "No previous PDF build state found; this is the first run."
+              previous_articles_sha=""
+              previous_code_sha=""
+            else
+              printf '%s\n' "$state_error_text" >&2
+              exit 1
+            fi
+          fi
+
+          if [[ "$ARTICLES_SHA" == "$previous_articles_sha" && "$CODE_SHA" == "$previous_code_sha" ]]; then
+            echo "no changes"
+            echo "should-build=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "PDF inputs changed; building PDFs."
+          echo "should-build=true" >> "$GITHUB_OUTPUT"
+
+      - name: Advance articles to latest
+        if: steps.change-check.outputs.should-build == 'true'
+        run: git submodule update --remote articles
+
+      - name: Set up pnpm
+        if: steps.change-check.outputs.should-build == 'true'
+        uses: pnpm/action-setup@v6.0.10
+
+      - name: Set up Node.js
+        if: steps.change-check.outputs.should-build == 'true'
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: "26"
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.change-check.outputs.should-build == 'true'
+        run: pnpm install --frozen-lockfile
+        env:
+          GTMC_SKIP_POSTINSTALL: "1"
+
+      - name: Generate Prisma Client
+        if: steps.change-check.outputs.should-build == 'true'
+        run: pnpm prisma generate
+        env:
+          DATABASE_URL: "postgresql://localhost:5432/placeholder"
+
+      - name: Set up Go
+        if: steps.change-check.outputs.should-build == 'true'
+        uses: actions/setup-go@v7.0.0
+        with:
+          go-version-file: pdfgen/go.mod
+          cache: false
+
+      - name: Provision pinned Chromium headless shell
+        if: steps.change-check.outputs.should-build == 'true'
+        id: chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          playwright_version="1.62.1"
+          dry_run="$(npx -y "playwright@${playwright_version}" install --only-shell --dry-run chromium 2>&1)"
+          printf '%s\n' "$dry_run"
+          install_root="$(printf '%s\n' "$dry_run" | sed -n 's/^[[:space:]]*Install location: //p' | sed -n '1p')"
+          if [[ -z "$install_root" ]]; then
+            echo "Could not determine the Playwright browser install location." >&2
+            exit 1
+          fi
+
+          npx -y "playwright@${playwright_version}" install --only-shell chromium
+          chromium_path="$install_root/chrome-headless-shell-linux64/chrome-headless-shell"
+          if [[ ! -x "$chromium_path" ]]; then
+            echo "Expected Chromium executable was not installed: $chromium_path" >&2
+            exit 1
+          fi
+
+          echo "executable=$chromium_path" >> "$GITHUB_OUTPUT"
+          echo "Chromium executable: $chromium_path"
+
+      - name: Build content sidecars
+        if: steps.change-check.outputs.should-build == 'true'
+        run: pnpm build:content
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Build pdfgen binary
+        if: steps.change-check.outputs.should-build == 'true'
+        run: go build -C pdfgen -o "$RUNNER_TEMP/pdfgen" .
+
+      - name: Build PDFs
+        if: steps.change-check.outputs.should-build == 'true'
+        run: pnpm build:pdf
+        env:
+          PDFGEN_BIN: ${{ runner.temp }}/pdfgen
+          PDFGEN_CHROMIUM: ${{ steps.chromium.outputs.executable }}
+
+      - name: Check generated PDF pages
+        if: steps.change-check.outputs.should-build == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for pdf in data/pdf-dist/gtmc-en.pdf data/pdf-dist/gtmc-zh.pdf; do
+            if [[ ! -s "$pdf" ]]; then
+              echo "Missing or empty PDF: $pdf" >&2
+              exit 1
+            fi
+
+            pages_json="$("$RUNNER_TEMP/pdfgen" pages "$pdf")"
+            pages="$(jq -r '.pages // 0' <<< "$pages_json")"
+            if [[ "$pages" -le 0 ]]; then
+              echo "PDF has no pages: $pdf ($pages_json)" >&2
+              exit 1
+            fi
+            echo "$pdf: $pages pages"
+          done
+
+      - name: Upload PDFs to R2
+        if: steps.change-check.outputs.should-build == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for locale in en zh; do
+            aws s3 cp "data/pdf-dist/gtmc-${locale}.pdf" \
+              "s3://${R2_BUCKET_NAME}/gtmc-${locale}.pdf" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --content-type application/pdf \
+              --cache-control "public,max-age=3600"
+          done
+
+      - name: Record successful build state
+        if: steps.change-check.outputs.should-build == 'true'
+        shell: bash
+        env:
+          ARTICLES_SHA: ${{ steps.revisions.outputs.articles_sha }}
+          CODE_SHA: ${{ steps.revisions.outputs.code_sha }}
+        run: |
+          set -euo pipefail
+
+          state_path="$RUNNER_TEMP/last-build.json"
+          jq -n \
+            --arg articlesSha "$ARTICLES_SHA" \
+            --arg codeSha "$CODE_SHA" \
+            '{articlesSha: $articlesSha, codeSha: $codeSha}' > "$state_path"
+          aws s3 cp "$state_path" "s3://${R2_BUCKET_NAME}/state/last-build.json" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --content-type application/json \
+            --cache-control "no-cache"

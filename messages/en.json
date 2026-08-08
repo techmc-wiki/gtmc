@@ -500,7 +500,8 @@
     "mermaidRenderError": "Unable to render Mermaid diagram.",
     "metaDescription": "Download the complete Graduate Texts in Minecraft as one offline PDF, with tutorials, mechanics deep-dives, and code analysis for technical Minecraft.",
     "metaTitle": "Offline PDF Download",
-    "slogan": "\"Curiosity in 'cubic' inch.\""
+    "slogan": "\"Curiosity in 'cubic' inch.\"",
+    "unavailableNote": "PDF downloads are not configured yet."
   },
   "PeopleMention": {
     "bilibiliLabel": "bilibili",

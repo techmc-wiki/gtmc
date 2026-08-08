@@ -2,15 +2,12 @@
    GTMC PDF Print Stylesheet — Archival Print Edition
    Warm paper, ink text, serif display, budgeted blueprint-azure signal.
    Tokens are injected as CSS custom properties from lib/pdf/theme.ts.
-   Target: Chromium 130+ via Playwright page.pdf()
+   Target: Chromium via pdfgen.
    ========================================================================== */
 
 /* --- Page Rules --- */
 /* Horizontal @page margins are zero so the html background fills left/right.
-   Vertical margins remain for Chromium's header/footer placement. The @page
-   margin areas (all four edges) get filled with the paper color by a pdf-lib
-   post-processing step (see paint-background.ts) since CSS backgrounds
-   cannot reach the margin area.                                             */
+   Vertical margins remain for Chromium's running apparatus. */
 @page {
   size: A4;
   margin: 2.2cm 0 2.4cm;

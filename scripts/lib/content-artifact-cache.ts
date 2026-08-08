@@ -16,16 +16,17 @@ const CACHE_DIRECTORY = path.resolve(
 const GENERATED_ARTIFACTS = [
   "data/manifest.json",
   "data/articles",
+  "data/pdf-html",
   "data/.content-cache.json",
+  "data/.shiki-cache.json",
   "data/glossary.json",
   "data/glossary-summary.json",
   "public/article-assets",
-  "public/gtmc-en.pdf",
-  "public/gtmc-zh.pdf",
 ] as const
 
 const GENERATED_ARTIFACT_DIRECTORIES = new Set([
   "data/articles",
+  "data/pdf-html",
   "public/article-assets",
 ])
 
@@ -40,7 +41,6 @@ const CONTENT_GENERATOR_FILES: string[] = [
   "scripts/manifest-preview.ts",
   "scripts/generate-glossary-manifest.ts",
   "scripts/generate-article-content.ts",
-  "scripts/generate-pdf.ts",
 ]
 
 const CONTENT_GENERATOR_DIRECTORIES: string[] = [
@@ -48,7 +48,6 @@ const CONTENT_GENERATOR_DIRECTORIES: string[] = [
   "lib/github",
   "lib/glossary",
   "lib/markdown",
-  "lib/pdf",
 ]
 
 const ARCHIVE_PARENT_DIRECTORIES = new Set<string>()

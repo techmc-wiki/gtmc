@@ -23,7 +23,7 @@ import type {
   TranslationReadmeFrontMatter,
   TranslationFrontMatter,
 } from "@/lib/articles/frontmatter-parser"
-import { renderMarkdownToHtml } from "@/lib/pdf/markdown-pipeline"
+import { renderMarkdownToHtml } from "@/lib/markdown/pdf-html"
 import {
   createRehypeShiki,
   persistHighlightCache,

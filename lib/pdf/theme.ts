@@ -1,9 +1,6 @@
 /**
  * PDF design tokens — the single source of truth for the print edition's
- * look. Mirrors the site's archival-book identity (DESIGN.md): warm paper,
- * ink-gray text, serif display faces, and a strictly budgeted blueprint-azure
- * signal. Values are consumed by `print.css` (via injected CSS custom
- * properties) and by the Chromium header/footer templates.
+ * look. Values are consumed by `print.css` and by pdfgen's running apparatus.
  */
 
 export const PDF_COLORS = {
@@ -55,40 +52,6 @@ export const PDF_REQUIRED_FONTS = [
   '16px "Noto Sans SC"',
   '16px "Noto Serif SC"',
 ] as const
-
-/**
- * Chromium's `headerTemplate`/`footerTemplate` render in an isolated page
- * that cannot load webfonts, so the running apparatus falls back to system
- * mono. Colors stay on-palette.
- */
-// Single-quoted family names: these strings are interpolated into a
-// double-quoted style="…" attribute, where an inner double quote would
-// terminate the attribute and silently drop every declaration after it.
-const RUNNING_FONT = `ui-monospace, 'SF Mono', Menlo, Consolas, monospace`
-
-// Chromium's template renderer ignores flex/grid on the root element, so
-// both templates rely on width:100% + text-align, which it does honor.
-export function buildHeaderTemplate(bookTitle: string): string {
-  return (
-    `<div style="font-size:7pt; font-family:${RUNNING_FONT}; ` +
-    `color:${PDF_COLORS.ink}; width:100%; text-align:center; ` +
-    `padding-top:8px; letter-spacing:0.22em; text-transform:uppercase; ` +
-    `-webkit-print-color-adjust:exact;">` +
-    `${bookTitle} <span style="color:${PDF_COLORS.signal};">&#9632;</span>` +
-    `</div>`
-  )
-}
-
-export function buildFooterTemplate(): string {
-  return (
-    `<div style="font-size:8pt; font-family:${RUNNING_FONT}; ` +
-    `color:${PDF_COLORS.ink}; width:100%; text-align:center; ` +
-    `padding-bottom:6px; letter-spacing:0.08em; ` +
-    `-webkit-print-color-adjust:exact;">` +
-    `<span class="pageNumber"></span>` +
-    `</div>`
-  )
-}
 
 /** CSS custom properties block injected ahead of `print.css`. */
 export function buildThemeCssVariables(): string {

@@ -1,22 +1,5 @@
 import { describe, expect, it } from "vite-plus/test"
-
-import {
-  decodePdfDestName,
-  fillTocFolios,
-  haveTocFolioPagesChanged,
-} from "./paginate"
-
-describe("decodePdfDestName", () => {
-  it("decodes #-escaped bytes in PDF names", () => {
-    expect(
-      decodePdfDestName("/article-block-update#2Fcontinuous-updates")
-    ).toBe("article-block-update/continuous-updates")
-  })
-
-  it("returns plain names unchanged (without leading slash)", () => {
-    expect(decodePdfDestName("/article-preface")).toBe("article-preface")
-  })
-})
+import { fillTocFolios, haveTocFolioPagesChanged } from "./paginate"
 
 describe("fillTocFolios", () => {
   it("replaces folio placeholders with 1-based page numbers", () => {

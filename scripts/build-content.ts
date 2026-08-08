@@ -1,9 +1,8 @@
 /**
  * Content-generation phase of the production build.
  *
- * Order matters: manifest feeds rendered content; glossary is
- * independent but lives in the same artifact phase; PDF needs
- * rendered content + manifest.
+ * Manifest, glossary, and rendered article sidecars are generated here.
+ * PDF generation runs separately via `pnpm build:pdf`.
  *
  * Usage: pnpm build:content
  */
@@ -25,11 +24,6 @@ const steps: Array<{ stage: string; script: string; args?: string[] }> = [
   {
     stage: "article-content",
     script: "scripts/generate-article-content.ts",
-  },
-  {
-    stage: "pdf",
-    script: "scripts/generate-pdf.ts",
-    args: ["--locale", "all"],
   },
 ]
 

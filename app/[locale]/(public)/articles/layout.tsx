@@ -1,4 +1,6 @@
 import * as React from "react"
+// oxlint-disable-next-line import/no-unassigned-import
+import "./articles.css"
 import { ArticlesLayoutClient } from "./articles-layout-client"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import type { ArticleLocale } from "@/lib/articles/manifest"

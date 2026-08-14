@@ -1,4 +1,6 @@
 import type { Metadata } from "next"
+// oxlint-disable-next-line import/no-unassigned-import
+import "../auth.css"
 import React from "react"
 
 export const metadata: Metadata = {

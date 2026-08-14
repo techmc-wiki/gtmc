@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
+// oxlint-disable-next-line import/no-unassigned-import
+import "../../public-content.css"
 import { Link } from "@/i18n/navigation"
 import { SectionTitle } from "@/components/ui/headings"
 import { TechBadge } from "@/components/ui/status"

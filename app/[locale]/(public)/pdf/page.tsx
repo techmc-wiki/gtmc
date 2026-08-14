@@ -1,5 +1,7 @@
 import { getTranslations } from "next-intl/server"
 import type { Metadata } from "next"
+// oxlint-disable-next-line import/no-unassigned-import
+import "../public-content.css"
 import { toAbsoluteUrl } from "@/lib/site-url"
 import type { ArticleLocale } from "@/lib/articles/manifest"
 import PdfContentEn from "@/content/pdf/en.mdx"

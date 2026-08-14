@@ -1,0 +1,14 @@
+@import "tailwindcss" source(none);
+@import "tw-animate-css";
+@reference "../../globals.css";
+
+/* Shared locale shell. */
+@source "../layout.tsx";
+@source "../../../components/layout";
+@source "../../../components/search";
+@source "../../../components/ui";
+@source "../../../lib/theme";
+
+/* Homepage composition. */
+@source "../page.tsx";
+@source ".";

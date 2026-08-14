@@ -19,6 +19,9 @@ env:
   R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
   R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
   R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+  AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: auto
 
 jobs:
   publish:
@@ -29,13 +32,6 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
-
-      - name: Configure R2 credentials
-        uses: aws-actions/configure-aws-credentials@v6.2.3
-        with:
-          aws-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          aws-region: auto
 
       - name: Resolve article and pipeline revisions
         id: revisions

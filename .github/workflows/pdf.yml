@@ -143,7 +143,7 @@ jobs:
           playwright_version="1.62.1"
           dry_run="$(npx -y "playwright@${playwright_version}" install --only-shell --dry-run chromium 2>&1)"
           printf '%s\n' "$dry_run"
-          install_root="$(printf '%s\n' "$dry_run" | sed -n 's/^[[:space:]]*Install location: //p' | sed -n '1p')"
+          install_root="$(printf '%s\n' "$dry_run" | sed -n 's/^[[:space:]]*Install location:[[:space:]]*//p' | sed -n '1p')"
           if [[ -z "$install_root" ]]; then
             echo "Could not determine the Playwright browser install location." >&2
             exit 1

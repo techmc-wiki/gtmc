@@ -85,7 +85,7 @@ function documentShell(
     "<head>",
     '  <meta charset="utf-8">',
     `  <title>${escapeHtml(options.title)}</title>`,
-    `  <link rel="stylesheet" href="${PDF_FONT_STYLESHEET_URL}">`,
+    `  <link rel="stylesheet" href="${options.fontsHref ?? PDF_FONT_STYLESHEET_URL}">`,
     katexCss,
     `  <style>${buildThemeCssVariables()}</style>`,
     `  <style>${loadPrintCss()}</style>`,

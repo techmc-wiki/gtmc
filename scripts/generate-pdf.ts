@@ -40,6 +40,7 @@ import type {
 import { resolveImagesInHtml } from "@/lib/pdf-images"
 import { fillTocFolios, haveTocFolioPagesChanged } from "@/lib/pdf/paginate"
 import { PDF_COLORS, PDF_REQUIRED_FONTS } from "@/lib/pdf/theme"
+import { hasLocalPdfFonts, pdfFontsDir, syncPdfFonts } from "@/lib/pdf/fonts"
 import { createLogger } from "./lib/logger"
 
 const logger = createLogger("pdf")
@@ -76,6 +77,8 @@ interface OutlineNode {
 
 let resolvedPdfgen: string | undefined
 let pdfgenBuildDir: string | undefined
+/** Local font set synced once per run; null when falling back to the CDN. */
+let syncedPdfFontsDir: string | null = null
 
 function getArticlesRevision(): string | undefined {
   try {
@@ -458,6 +461,7 @@ async function runPdf(
     articlesRevision: getArticlesRevision(),
     sourceUrl: SOURCE_URL,
     hasMath,
+    fontsHref: syncedPdfFontsDir ? "fonts/fonts.css" : undefined,
     renderArticle: createRenderArticle(locale, sourceCounters),
   }
 
@@ -481,6 +485,11 @@ async function runPdf(
   const coverPdfPath = path.join(workDir, "cover.pdf")
   const bodyPdfPath = path.join(workDir, "body.pdf")
   const outlinesPath = path.join(workDir, "outlines.json")
+  if (syncedPdfFontsDir) {
+    fs.cpSync(syncedPdfFontsDir, path.join(workDir, "fonts"), {
+      recursive: true,
+    })
+  }
   fs.writeFileSync(coverHtmlPath, coverHtml, "utf-8")
   fs.writeFileSync(bodyHtmlPath, bodyHtml, "utf-8")
 
@@ -587,6 +596,22 @@ async function runPdf(
 
 async function main(): Promise<void> {
   const { locale, output } = parseArgs()
+  try {
+    if (hasLocalPdfFonts()) {
+      logger.event("pdf.fonts.local", {})
+    } else {
+      await syncPdfFonts()
+      logger.event("pdf.fonts.synced", {})
+    }
+    syncedPdfFontsDir = pdfFontsDir()
+  } catch (error) {
+    logger.warn(
+      "pdf.fonts.fallback",
+      {},
+      `Local font sync failed (${String(error)}); rendering will use the Google Fonts CDN.`
+    )
+  }
+
   try {
     if (locale === "all") {
       await Promise.all([runPdf("en", ""), runPdf("zh", "")])

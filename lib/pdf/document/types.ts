@@ -55,5 +55,7 @@ export interface BookOptions {
   articlesRevision?: string
   sourceUrl?: string
   hasMath?: boolean
+  /** Stylesheet href for the PDF font families; defaults to Google Fonts. */
+  fontsHref?: string
   renderArticle: (article: LinearizedArticle) => Promise<string>
 }

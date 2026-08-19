@@ -93,7 +93,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^16.3.0",
+    "@next/bundle-analyzer": "^16.3.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
@@ -105,7 +105,7 @@
     "consola": "^3.4.2",
     "dotenv": "^17.4.2",
     "picocolors": "^1.1.1",
-    "pinyin-pro": "^3.29.0",
+    "pinyin-pro": "^3.29.2",
     "prisma": "7.9.1",
     "rehype-stringify": "^10.0.1",
     "remark-rehype": "^11.1.2",

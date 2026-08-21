@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/shadcn/dialog"
 
 interface MobileChapterNavCardProps {
@@ -32,7 +31,6 @@ export function MobileChapterNavCard({
         showCloseButton={false}
         className="border-tech-main/40 bg-surface-overlay/95 left-1/2 top-1/2 max-h-[calc(100dvh-6rem)] w-[calc(100dvw-4rem)] max-w-[24rem] -translate-x-1/2 -translate-y-1/2 border backdrop-blur-md md:hidden"
         data-testid="mobile-tree-card">
-        <CornerBrackets />
 
         <div
           className="z-20 flex h-10/12 shrink-0 items-center justify-between border-b border-tech-main/40 px-4"

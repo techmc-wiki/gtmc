@@ -8,7 +8,6 @@ import { MobileChapterNavCard } from "./mobile-chapter-nav-card"
 import { useMobileChapterNavMachine } from "@/app/[locale]/(public)/articles/mobile-chapter-nav/use-mobile-chapter-nav-machine"
 import { LABEL_MORPH_DELAY_MS } from "@/app/[locale]/(public)/articles/mobile-chapter-nav/config"
 import {
-  ScanConfirmOverlay,
   SectionRail,
   SegmentedBar,
 } from "@/components/ui/loading-shell-primitives"
@@ -47,9 +46,8 @@ function TreeLoadingPlaceholder() {
       "
       style={treeDropInStyle}
       aria-hidden="true">
-      <ScanConfirmOverlay className="opacity-40" />
       <SectionRail
-        label="TREE_BOOTSTRAP"
+        label="Loading"
         className="mb-3 text-[0.625rem] opacity-75"
       />
 

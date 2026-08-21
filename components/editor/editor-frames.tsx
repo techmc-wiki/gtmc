@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { TabsContent } from "@/components/ui/shadcn/tabs"
 
 interface EditorSurfaceProps {
@@ -66,7 +65,6 @@ export function EditorSurface({
   if (as === "form") {
     return (
       <form onSubmit={onSubmit} className={defaultClasses} {...props}>
-        <CornerBrackets />
         {children}
       </form>
     )
@@ -74,7 +72,6 @@ export function EditorSurface({
 
   return (
     <div className={defaultClasses} {...props}>
-      <CornerBrackets />
       {children}
     </div>
   )

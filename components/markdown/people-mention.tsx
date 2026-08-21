@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useId } from "react"
 import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import {
   Avatar,
   AvatarImage,
@@ -204,12 +203,6 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
         onMouseEnter={cancelClose}
         onMouseLeave={closeDelayed}
         className="border-tech-main/40 bg-surface-overlay/70 w-72 max-w-[calc(100vw-2rem)] border p-4 backdrop-blur-sm sm:w-80">
-        <CornerBrackets
-          variant="static"
-          color="border-tech-main/30"
-          size="size-3"
-        />
-
         <p className="text-tech-main/60 mb-3 font-mono text-[10px] tracking-wide">
           {t("panelLabel")}
         </p>
@@ -217,11 +210,6 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
         <div className="flex items-center gap-3">
           <div className="size-12">
             <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-full items-center justify-center overflow-hidden border-2 p-1 ring-1">
-              <CornerBrackets
-                className="pointer-events-none absolute inset-0 z-10"
-                size="size-2"
-                color="border-tech-main/70"
-              />
               {person.profile ? (
                 <AvatarImage asChild src={person.profile}>
                   <Image

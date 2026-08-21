@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/shadcn/card"
 import {
   SectionRail,
   SegmentedBar,
-  ScanConfirmOverlay,
 } from "@/components/ui/loading-shell-primitives"
 
 const CARD_STYLES = [
@@ -16,9 +15,8 @@ export default function ReviewLoading() {
   return (
     <PageSkeleton label="Loading review hub">
       <div className="animate-tech-slide-in border-tech-main/40 relative flex flex-col border-b pb-6">
-        <ScanConfirmOverlay />
         <div>
-          <SectionRail label="REVIEW_HUB" />
+          <SectionRail label="Review hub" />
           <SegmentedBar
             opacity="high"
             className="border-tech-main/40 mt-2 h-10 w-64 border-b"
@@ -28,8 +26,8 @@ export default function ReviewLoading() {
       </div>
       <div className="animate-tech-slide-in flex flex-col gap-10 [animation-delay:100ms]">
         <div className="space-y-4">
-          <h2 className="border-tech-main/50 text-tech-main border-b-2 pb-2 font-bold tracking-widest uppercase">
-            PENDING REVIEWS
+          <h2 className="text-tech-main-dark border-tech-main/50 border-b-2 pb-2 text-lg font-semibold">
+            Pending reviews
           </h2>
           <div className="grid grid-cols-1 gap-6">
             {CARD_STYLES.map((style) => (

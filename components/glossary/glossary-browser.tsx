@@ -12,11 +12,7 @@ import {
 } from "@/components/glossary/category-filter"
 import { GlossaryTable } from "@/components/glossary/glossary-table"
 import { GlossaryDetailPanel } from "@/components/glossary/term-detail"
-import {
-  SegmentedBar,
-  SweepOverlay,
-} from "@/components/ui/loading-shell-primitives"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
 import { Link } from "@/i18n/navigation"
 import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
 import {
@@ -47,7 +43,6 @@ function GlossaryTableSkeleton() {
         aria-busy="true"
         aria-label="Loading glossary entries"
         className="border-tech-line/30 relative hidden h-[min(70vh,48rem)] overflow-hidden border md:block">
-        <SweepOverlay />
         <table className="w-full table-fixed border-collapse">
           <thead>
             <tr>
@@ -89,7 +84,6 @@ function GlossaryTableSkeleton() {
         aria-busy="true"
         aria-label="Loading glossary entries"
         className="relative space-y-3 md:hidden">
-        <SweepOverlay />
         {Array.from({ length: 6 }, (_, i) => (
           <div key={i} className="border-tech-line/30 space-y-2 border p-3">
             <SegmentedBar
@@ -220,7 +214,6 @@ export function GlossaryBrowser({
   return (
     <div className={cn("flex flex-col gap-6", className)}>
       <section aria-label={t("letterBarLabel")} className="relative z-30">
-        <CornerBrackets size="size-2" color="border-tech-main/30" />
         <div className="border-tech-main/30 bg-surface-overlay/60 relative flex flex-col gap-3 border p-3 backdrop-blur-sm sm:p-4">
           <div className="grid gap-3 sm:flex sm:flex-row sm:items-center">
             <GlossarySearch

@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState, useMemo, type MouseEvent } from "react"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { useTheme } from "@/lib/theme"
 
 const layerSliderStyleHtml = {
@@ -681,7 +680,6 @@ export default function LitematicaViewer({
       font-mono
     "
     >
-      <CornerBrackets size="size-4" color="border-tech-main/40" />
 
       <canvas
         ref={canvasRef}

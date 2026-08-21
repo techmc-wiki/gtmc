@@ -2,7 +2,6 @@
 
 import * as React from "react"
 
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { cn } from "@/lib/cn"
 
 export type OperationProgressState = "idle" | "running" | "success" | "error"
@@ -251,10 +250,6 @@ export function OperationProgress({
         className
       )}
       aria-live="polite">
-      <CornerBrackets
-        color={state === "error" ? "border-red-500/20" : "border-tech-main/20"}
-      />
-
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
           className={cn(

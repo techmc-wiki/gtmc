@@ -4,7 +4,6 @@ import * as React from "react"
 import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/shadcn/button"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { SelectableCard } from "@/components/ui/selectable-card"
 import type {
   ConflictMode,
@@ -84,8 +83,6 @@ export function MergeMethodPicker({
   return (
     <div
       className={`border-tech-main/30 bg-surface-overlay/80 relative border ${compact ? "p-3" : "p-4"}`}>
-      <CornerBrackets color="border-tech-main/20" />
-
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-tech-main/60 font-mono text-[0.6875rem] tracking-widest uppercase">
@@ -223,7 +220,6 @@ export function ModeSelector({
     <div className="flex flex-col gap-6">
       {!hasConflicts && (
         <div className="relative border border-green-500/30 bg-green-500/5 px-4 py-3">
-          <CornerBrackets color="border-green-500/30" />
           <div className="flex items-center gap-2">
             <span
               className="inline-block size-2 bg-green-500"

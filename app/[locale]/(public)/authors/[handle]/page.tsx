@@ -8,7 +8,6 @@ import { Link } from "@/i18n/navigation"
 import { SectionTitle } from "@/components/ui/headings"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Card } from "@/components/ui/shadcn/card"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import {
   Avatar,
   AvatarImage,
@@ -223,11 +222,6 @@ export default async function AuthorDetailPage({
         <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
           <div className="size-24 shrink-0 md:size-32">
             <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-full items-center justify-center overflow-hidden border-2 p-1 ring-1">
-              <CornerBrackets
-                className="pointer-events-none absolute inset-0 z-10"
-                size="size-2"
-                color="border-tech-main/70"
-              />
               {person.profile ? (
                 <AvatarImage asChild src={person.profile}>
                   <Image

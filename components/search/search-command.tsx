@@ -9,7 +9,6 @@ import {
   OPEN_GLOSSARY_TERM_EVENT,
   type OpenGlossaryTermDetail,
 } from "@/lib/glossary/browser-events"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { useMounted } from "@/hooks/use-mounted"
 import {
   CommandDialog,
@@ -304,8 +303,6 @@ export function SearchCommand() {
         shouldFilter={false}
         showCloseButton={false}
         className="border-tech-main bg-surface-modal/95 top-[10vh] left-1/2 w-full max-w-xl -translate-x-1/2 border shadow-xl backdrop-blur-md sm:top-[15vh]">
-        <CornerBrackets variant="static" />
-
         {/* Header */}
         <header className="guide-line flex items-center justify-between border-b px-4 py-3">
           <div className="text-tech-main-dark flex items-center gap-2 text-sm font-semibold">

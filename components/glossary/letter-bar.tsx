@@ -4,7 +4,6 @@ import * as React from "react"
 
 import { useTranslations } from "next-intl"
 
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { cn } from "@/lib/cn"
 
 const TOUCH_SCROLL_STYLE = { WebkitOverflowScrolling: "touch" } as const
@@ -173,7 +172,6 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
         className
       )}>
       <div className="relative">
-        <CornerBrackets color="border-tech-main/30" size="size-2" />
         <ul
           ref={scrollRef}
           className="custom-bottom-scrollbar flex items-stretch overflow-x-auto [-webkit-overflow-scrolling:touch]"

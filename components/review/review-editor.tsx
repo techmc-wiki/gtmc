@@ -21,7 +21,6 @@ import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
 import { ReviewDiffPanel } from "@/components/review/review-diff-panel"
 import { ReviewFileList } from "@/components/review/review-file-list"
 import { ModeSelector } from "@/components/review/review-pickers"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { type OperationProgressState } from "@/components/ui/operation-progress"
 import { RebaseProgress } from "@/components/review/rebase-progress"
 import { selectModeAction } from "@/actions/review-conflict/select-mode"
@@ -820,7 +819,6 @@ export function ReviewEditor({
         {effectiveMode === null && isMounted ? (
           <AlertDialog open>
             <AlertDialogContent className="border-tech-main/40 bg-surface-modal top-1/2 left-1/2 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 p-6 shadow-xl">
-              <CornerBrackets color="border-tech-main/40" />
               <AlertDialogTitle className="text-tech-main-dark mb-4 text-sm font-semibold">
                 RESOLUTION_METHOD_
               </AlertDialogTitle>

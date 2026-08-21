@@ -4,7 +4,6 @@ import * as React from "react"
 import Image from "next/image"
 import { SessionProvider, useSession } from "next-auth/react"
 import { Link } from "@/i18n/navigation"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { SignOutButton } from "@/components/ui/sign-out-button"
 import {
   Avatar,
@@ -52,11 +51,6 @@ function AuthIslandContent() {
           className="block size-8 transition-transform hover:scale-110 md:size-10"
           aria-label={session.user.name ?? undefined}>
           <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-full items-center justify-center overflow-hidden border-2 p-1 ring-1">
-            <CornerBrackets
-              className="pointer-events-none absolute inset-0 z-10"
-              size="size-2"
-              color="border-tech-main/70"
-            />
             {session.user.image ? (
               <AvatarImage asChild src={session.user.image}>
                 <Image

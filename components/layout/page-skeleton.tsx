@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { SkeletonExitWrapper } from "@/components/ui/loading-shell-primitives"
 
 type PageSkeletonProps = {
@@ -25,18 +24,7 @@ export function PageSkeleton({
         aria-live="polite"
         aria-label={label}>
         <span className="sr-only">{label}</span>
-        {framed ? (
-          <div aria-hidden="true">
-            <CornerBrackets
-              size="size-4"
-              color="border-tech-main/40"
-              corners="diagonal-tlbr"
-            />
-            {children}
-          </div>
-        ) : (
-          children
-        )}
+        {framed ? <div aria-hidden="true">{children}</div> : children}
       </div>
     </SkeletonExitWrapper>
   )

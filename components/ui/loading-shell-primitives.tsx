@@ -4,7 +4,7 @@ import { cn } from "@/lib/cn"
 
 export function SectionFrame({
   className,
-  showBrackets = true,
+  showBrackets = false,
   children,
   ref,
   ...props
@@ -40,12 +40,9 @@ export function SectionRail({
   return (
     <div
       ref={ref}
-      className={cn(
-        "tracking-tech-wide text-tech-main font-mono text-xs uppercase",
-        className
-      )}
+      className={cn("text-xs text-tech-main/40", className)}
       {...props}>
-      {label}_
+      {label}
     </div>
   )
 }
@@ -95,44 +92,6 @@ export function SkeletonExitWrapper({
       ref={ref}
       className={cn(
         isExiting && "animate-skeleton-exit motion-reduce:animate-fade-out",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-export function SweepOverlay({
-  className,
-  ref,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement> & {
-  ref?: React.Ref<HTMLDivElement>
-}) {
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        "animate-blueprint-sweep via-tech-accent/30 absolute inset-0 bg-linear-to-r from-transparent to-transparent motion-reduce:animate-none",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-export function ScanConfirmOverlay({
-  className,
-  ref,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement> & {
-  ref?: React.Ref<HTMLDivElement>
-}) {
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        "animate-scan-confirm via-tech-accent/30 absolute inset-0 bg-linear-to-r from-transparent to-transparent motion-reduce:animate-none",
         className
       )}
       {...props}

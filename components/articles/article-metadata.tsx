@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { ArticleBanner } from "@/components/articles/article-banner"
 import { ArticleLicenseNotice } from "@/components/articles/article-license-notice"
 import { getArticleAssetPublicUrl } from "@/lib/articles/url"
@@ -38,7 +37,6 @@ function ArticleMetadataLayout({
 
   return (
     <header>
-      <CornerBrackets />
 
       <div
         className="

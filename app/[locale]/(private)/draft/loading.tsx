@@ -1,10 +1,7 @@
 import { PageSkeleton } from "@/components/layout/page-skeleton"
 import { SectionTitle } from "@/components/ui/headings"
 import { Card } from "@/components/ui/shadcn/card"
-import {
-  SegmentedBar,
-  ScanConfirmOverlay,
-} from "@/components/ui/loading-shell-primitives"
+import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
 
 function DraftRowSkeleton({ compact = false }: { compact?: boolean }) {
   return (
@@ -31,8 +28,6 @@ export default function DraftLoading() {
   return (
     <PageSkeleton label="Loading drafts">
       <div className="border-tech-main-dark relative border-b-2 pb-6">
-        <ScanConfirmOverlay />
-        <div className="bg-tech-signal absolute -bottom-0.5 left-0 h-0.5 w-16" />
         <SegmentedBar opacity="low" className="mb-3 h-3 w-40" />
         <SegmentedBar opacity="high" className="h-12 w-64 max-w-full" />
       </div>

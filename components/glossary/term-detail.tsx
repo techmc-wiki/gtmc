@@ -4,7 +4,6 @@ import * as React from "react"
 import { useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { CrossRefChips } from "@/components/glossary/cross-ref-chips"
 import { TranslationsList } from "@/components/glossary/translations-list"
 import { parseRelated } from "@/lib/glossary/related"
@@ -151,7 +150,6 @@ export function GlossaryDetailPanel({
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         className="border-tech-main/35 animate-tech-pop-in bg-surface-modal fixed inset-x-0 top-auto bottom-0 m-0 max-h-[calc(100dvh-0.75rem)] w-full max-w-none overflow-hidden border-x-0 border-t shadow-[-1.5rem_0_4rem_-2.5rem_rgb(15_23_42/0.55)] motion-reduce:animate-none sm:inset-y-0 sm:right-0 sm:left-auto sm:h-dvh sm:max-h-none sm:w-[min(34rem,calc(100vw-2rem))] sm:border-y-0 sm:border-r-0 sm:border-l">
-        <CornerBrackets size="size-3" color="border-tech-main/40" />
         <header className="border-tech-main/25 bg-surface-overlay/95 relative flex shrink-0 items-start gap-4 border-b px-4 py-4 sm:px-6 sm:py-5">
           <span
             aria-hidden="true"

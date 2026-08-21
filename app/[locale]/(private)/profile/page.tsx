@@ -5,7 +5,6 @@ import { prisma } from "@/lib/prisma"
 import { guardUser } from "@/lib/auth/guards"
 import { redirect } from "next/navigation"
 import { Input } from "@/components/ui/shadcn/input"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
 import {
   Avatar,
   AvatarImage,
@@ -76,11 +75,6 @@ export default async function ProfilePage({
           className="space-y-8 p-4 sm:p-6 md:p-8 lg:p-12">
           <div className="flex flex-col items-start gap-4 sm:gap-6 md:gap-8">
             <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-24 size-full items-center justify-center overflow-hidden rounded-none border-2 p-1 ring-1 sm:size-32 md:size-40">
-              <CornerBrackets
-                className="pointer-events-none absolute inset-0 z-10"
-                size="size-2"
-                color="border-tech-main/70"
-              />
               {user.image ? (
                 <AvatarImage asChild src={user.image}>
                   <Image

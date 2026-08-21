@@ -3,24 +3,7 @@
 import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/cn"
-
-interface TechBadgeProps {
-  children: React.ReactNode
-  className?: string
-}
-
-/** Bordered mono status chip, e.g. `[Pending]`. */
-export function TechBadge({ children, className }: TechBadgeProps) {
-  return (
-    <span
-      className={cn(
-        "shrink-0 border px-2 py-0.5 font-mono text-xs tracking-wider",
-        className
-      )}>
-      {children}
-    </span>
-  )
-}
+import { Badge } from "@/components/ui/shadcn/badge"
 
 type StatusDotVariant =
   | "main"
@@ -142,7 +125,7 @@ export function DraftStatusBadge({ status }: StatusBadgeProps) {
       break
   }
 
-  return <TechBadge className={className}>[{label}]</TechBadge>
+  return <Badge className={className}>[{label}]</Badge>
 }
 
 interface ReviewStatusBadgeProps {
@@ -164,27 +147,27 @@ export function ReviewStatusBadge({
   switch (variant) {
     case "pr":
       return (
-        <TechBadge className="border-blue-500/40 bg-blue-500/10 text-blue-600">
+        <Badge className="border-blue-500/40 bg-blue-500/10 text-blue-600">
           [PR #{prNumber}]
-        </TechBadge>
+        </Badge>
       )
     case "conflict":
       return (
-        <TechBadge className="animate-pulse border-red-500/40 bg-red-500 text-white">
+        <Badge className="animate-pulse border-red-500/40 bg-red-500 text-white">
           {t("unresolvedConflicts")}
-        </TechBadge>
+        </Badge>
       )
     case "conflict-mode-fine-grained":
       return (
-        <TechBadge className="border-blue-500/30 bg-blue-500/10 text-blue-700">
+        <Badge className="border-blue-500/30 bg-blue-500/10 text-blue-700">
           {t("modeFineGrained")}
-        </TechBadge>
+        </Badge>
       )
     case "conflict-mode-simple":
       return (
-        <TechBadge className="border-tech-main/30 bg-tech-main/10 text-tech-main">
+        <Badge className="border-tech-main/30 bg-tech-main/10 text-tech-main">
           SIMPLE
-        </TechBadge>
+        </Badge>
       )
     default:
       return null

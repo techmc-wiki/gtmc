@@ -2,7 +2,7 @@ import { getLocale, getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { Logo } from "@/components/ui/logo"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
-import { TechBadge } from "@/components/ui/status"
+import { Badge } from "@/components/ui/shadcn/badge"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { articleUrl } from "@/lib/articles/url"
 import { getManifestStats, type ArticleLocale } from "@/lib/articles/manifest"
@@ -86,9 +86,9 @@ export default async function Footer() {
                   {
                     label: "STATUS",
                     value: (
-                      <TechBadge className="border-tech-main/30 bg-tech-main/10 text-tech-main-dark">
+                      <Badge className="border-tech-main/30 bg-tech-main/10 text-tech-main-dark">
                         [ BETA ]
-                      </TechBadge>
+                      </Badge>
                     ),
                   },
                   {

@@ -3,7 +3,6 @@ import "../public-content.css"
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
-import { DownloadButton } from "@/components/mdx/download-button"
 import { PdfCoverPreview } from "@/components/mdx/pdf-cover-preview"
 import { toAbsoluteUrl } from "@/lib/site-url"
 import { getManifestStats } from "@/lib/articles/manifest"
@@ -80,8 +79,8 @@ export default async function PdfPage({
   // secondary links. The PDF's rendered first page is the interactive
   // piece — a CanvasUI DecryptReveal that shows the cover as an ASCII
   // cipher and decodes it around the cursor (html-in-canvas browsers;
-  // plain image fallback elsewhere). Title, button, and metadata stay
-  // real HTML in both modes.
+  // plain image fallback elsewhere). The cover itself is the download
+  // link; title and metadata stay real HTML in both modes.
   return (
     <div className="page-container-pb flex w-full flex-1 flex-col justify-center">
       <div className="border-tech-main/40 bg-surface/80 mx-auto w-full max-w-xl border shadow-sm backdrop-blur-sm">
@@ -97,15 +96,7 @@ export default async function PdfPage({
             <PdfCoverPreview filename={filename} />
           </div>
 
-          <div className="mt-8">
-            <DownloadButton
-              filename={filename}
-              unavailableNote={t("unavailableNote")}>
-              {t("downloadButton")}
-            </DownloadButton>
-          </div>
-
-          <p className="text-tech-main/60 mt-5 text-sm">
+          <p className="text-tech-main/60 mt-6 text-sm">
             {[
               t("metaArticles", { count: stats.articleCount }),
               lastRevision ? t("metaRevised", { date: lastRevision }) : null,

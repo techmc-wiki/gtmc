@@ -389,7 +389,7 @@
     "editorPreviewDiff": "预览差异",
     "editorPrOwnershipBody": "提交后，PR 将由 gtmc 机器人代表您发起。您无法通过此编辑器再向该 PR 推送新的提交。任何后续更改请在 GitHub 上的 PR 评论中讨论，或作为新的草稿提交。",
     "editorPrOwnershipLabel": "[PR 归属]",
-    "editorPrOwnershipNotice": "您将拥有此 PR 并接收通知。",
+    "editorPrOwnershipNotice": "此拉取请求将由 gtmc 机器人代表您创建。",
     "editorRealEmailToggle": "使用真实邮箱",
     "editorRealEmailToggleLabel": "本次提交使用我的真实邮箱",
     "editorSaveDraft": "保存草稿",

@@ -93,8 +93,9 @@ CI notes for the Build workflow:
 | `GITHUB_ARTICLES_READ_PAT`                                  | PAT used to read the articles repository                                         |
 | `GITHUB_ARTICLES_WRITE_PAT`                                 | PAT used to write branches, assets, and pull requests in the articles repository |
 | `GITHUB_ARTICLES_REPO_OWNER` / `GITHUB_ARTICLES_REPO_NAME`  | Target repo for article submission flows                                         |
-| `GITHUB_GLOSSARY_REPO_OWNER` / `GITHUB_GLOSSARY_REPO_NAME`  | Target repo for glossary submodule (defaults to TechMC-Glossary/TechMC-Glossary) |
-| `GITHUB_GLOSSARY_WRITE_PAT`                                 | PAT for opening glossary PRs (requires Contents + Pull requests read/write)      |
+| `GITHUB_GLOSSARY_REPO_OWNER` / `GITHUB_GLOSSARY_REPO_NAME`  | Upstream target repo for glossary (defaults to TechMC-Glossary/TechMC-Glossary)   |
+| `GITHUB_GLOSSARY_FORK_REPO_OWNER` / `GITHUB_GLOSSARY_FORK_REPO_NAME` | Our fork repo receiving branches/commits before PR (defaults to techmc-wiki/glossary) |
+| `GITHUB_GLOSSARY_FORK_WRITE_PAT`                            | PAT for opening glossary PRs (Contents write on fork + Pull requests write on upstream) |
 | `BLOB_READ_WRITE_TOKEN`                                     | Vercel Blob token for uploads ≥ 4.5 MB                                           |
 | `BLOB_STORE_HOSTNAME`                                       | Hostname of the Vercel Blob store                                                |
 | `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | Cloudflare R2 credentials used by the PDF publishing workflow                    |

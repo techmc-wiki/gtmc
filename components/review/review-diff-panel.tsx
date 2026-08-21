@@ -3,6 +3,10 @@
 import * as React from "react"
 import { diffLines } from "diff"
 import { useTranslations } from "next-intl"
+import {
+  Collapsible,
+  CollapsibleTrigger,
+} from "@/components/ui/shadcn/collapsible"
 
 type DiffSegment =
   | { id: string; type: "context"; lines: string[] }
@@ -59,22 +63,27 @@ export function ReviewDiffPanel({
               <div
                 key={segment.id}
                 className="guide-line bg-tech-main/3 border border-dashed">
-                <pre className="text-tech-main/70 px-4 py-3 font-mono text-xs/relaxed whitespace-pre-wrap">
-                  {visibleLines.join("\n") || "\u00a0"}
-                </pre>
-                {canCollapse && !isExpanded ? (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setExpandedSegments((prev) => ({
-                        ...prev,
-                        [segment.id]: true,
-                      }))
-                    }
-                    className="guide-line bg-tech-main/10 text-tech-main/70 hover:border-tech-main/30 hover:bg-tech-main/15 mx-4 mb-3 block border px-3 py-1 font-mono text-[0.625rem] tracking-widest uppercase transition">
-                    {t("unchangedLinesHidden", { count: hiddenCount })}
-                  </button>
-                ) : null}
+                <Collapsible
+                  open={isExpanded}
+                  onOpenChange={(open) =>
+                    setExpandedSegments((prev) => ({
+                      ...prev,
+                      [segment.id]: open,
+                    }))
+                  }>
+                  <pre className="text-tech-main/70 px-4 py-3 font-mono text-xs/relaxed whitespace-pre-wrap">
+                    {visibleLines.join("\n") || "\u00a0"}
+                  </pre>
+                  {canCollapse && !isExpanded ? (
+                    <CollapsibleTrigger asChild>
+                      <button
+                        type="button"
+                        className="guide-line bg-tech-main/10 text-tech-main/70 hover:border-tech-main/30 hover:bg-tech-main/15 mx-4 mb-3 block border px-3 py-1 font-mono text-[0.625rem] tracking-widest uppercase transition">
+                        {t("unchangedLinesHidden", { count: hiddenCount })}
+                      </button>
+                    </CollapsibleTrigger>
+                  ) : null}
+                </Collapsible>
               </div>
             )
           }

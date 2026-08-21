@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import ReactDOM from "react-dom"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror"
@@ -10,6 +9,12 @@ import {
   EditorTabStrip,
   type TabType,
 } from "@/components/editor/editor-tab-strip"
+import { Tabs, TabsContent } from "@/components/ui/shadcn/tabs"
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogTitle,
+} from "@/components/ui/shadcn/alert-dialog"
 import { EditorTextareaDynamic } from "@/components/editor/editor-textarea-dynamic"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
 import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
@@ -814,25 +819,22 @@ export function ReviewEditor({
         </div>
         <div className="bg-tech-main/20 h-px" />
 
-        {effectiveMode === null && isMounted
-          ? ReactDOM.createPortal(
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                <div className="border-tech-main/40 bg-surface-modal relative w-full max-w-2xl border p-6 shadow-xl">
-                  <CornerBrackets color="border-tech-main/40" />
-                  <p className="text-tech-main/60 mb-4 font-mono text-xs tracking-widest uppercase">
-                    RESOLUTION_METHOD_
-                  </p>
-                  <ModeSelector
-                    modeAnalysis={reviewSession.modeAnalysis}
-                    onSelectMode={handleSelectMode}
-                    hasConflicts={hasConflicts}
-                    isSelecting={isSelectingMode}
-                  />
-                </div>
-              </div>,
-              document.body
-            )
-          : null}
+        {effectiveMode === null && isMounted ? (
+          <AlertDialog open>
+            <AlertDialogContent className="border-tech-main/40 bg-surface-modal top-1/2 left-1/2 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 p-6 shadow-xl">
+              <CornerBrackets color="border-tech-main/40" />
+              <AlertDialogTitle className="text-tech-main/60 mb-4 font-mono text-xs tracking-widest uppercase">
+                RESOLUTION_METHOD_
+              </AlertDialogTitle>
+              <ModeSelector
+                modeAnalysis={reviewSession.modeAnalysis}
+                onSelectMode={handleSelectMode}
+                hasConflicts={hasConflicts}
+                isSelecting={isSelectingMode}
+              />
+            </AlertDialogContent>
+          </AlertDialog>
+        ) : null}
 
         {effectiveMode !== null ? (
           <>
@@ -879,178 +881,174 @@ export function ReviewEditor({
             />
 
             <div className="editor-grow border-tech-main/40 bg-surface-overlay/80 relative border backdrop-blur-sm">
-              <EditorTabStrip
-                activeTab={visibleActiveTab}
-                onTabChange={setActiveTab}
-                threeWayId="review-editor-three-way-panel"
-                writeId="review-editor-write-panel"
-                diffId="review-editor-diff-panel"
-                previewId="review-editor-preview-panel"
-                showThreeWayTab={hasInlineConflicts}
-                showDiffTab
-                rightSlot={activeFile?.filePath || "UNTITLED_FILE_"}
-              />
-
-              {visibleActiveTab === "3-way" && hasInlineConflicts && (
-                <div className="guide-line bg-tech-main/3 flex items-center border-b px-3 py-1">
-                  <button
-                    type="button"
-                    onClick={handleJumpToNextConflict}
-                    className="border-tech-main/30 text-tech-main/60 hover:border-tech-main hover:text-tech-main border px-2 py-1 font-mono text-[0.625rem] tracking-widest uppercase">
-                    NEXT_CONFLICT_ ↓
-                  </button>
-                  <span className="text-tech-main/40 ml-2 font-mono text-[0.625rem] tracking-widest uppercase">
-                    {conflictSegments.length} UNRESOLVED
-                  </span>
-                </div>
-              )}
-
-              {visibleActiveTab === "write" && !hasInlineConflicts && (
-                <EditorToolbar
-                  onInsert={insertSyntax}
-                  lineWrap={lineWrap}
-                  onWrapToggle={() => setLineWrap((v) => !v)}
+              <Tabs
+                value={visibleActiveTab}
+                onValueChange={(value) => setActiveTab(value as TabType)}
+                className="flex min-h-0 grow flex-col">
+                <EditorTabStrip
+                  showThreeWayTab={hasInlineConflicts}
+                  showDiffTab
+                  rightSlot={activeFile?.filePath || "UNTITLED_FILE_"}
                 />
-              )}
 
-              <section
-                id="review-editor-three-way-panel"
-                role="tabpanel"
-                className="editor-grow"
-                hidden={visibleActiveTab !== "3-way"}>
-                <div className="editor-surface">
-                  {hasInlineConflicts ? (
-                    <div className="custom-left-scrollbar overflow-auto">
-                      <pre className="p-4 font-mono text-xs/relaxed whitespace-pre-wrap sm:p-6">
-                        {parsedSegments.map((segment) => {
-                          if (segment.type === "text") {
-                            return (
-                              <span
-                                key={segment.id}
-                                className="text-tech-main/80 block">
-                                {segment.content || "\u00a0"}
-                              </span>
-                            )
-                          }
-                          return (
-                            <span
-                              key={segment.id}
-                              ref={(el) => {
-                                if (el) conflictRefs.current.set(segment.id, el)
-                                else conflictRefs.current.delete(segment.id)
-                              }}>
-                              <span className="block border-l-2 border-red-500 bg-red-500/10 pl-2 font-bold text-red-700">
-                                {"<<<<<<< draft"}
-                              </span>
-                              <span className="block pl-2 font-mono text-[0.6rem] text-red-600/70 select-none">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    resolveConflictSegment(
-                                      segment.id,
-                                      segment.ours
-                                    )
-                                  }
-                                  className="cursor-pointer hover:text-red-700 hover:underline">
-                                  [accept ours]
-                                </button>
-                                {" · "}
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    resolveConflictSegment(
-                                      segment.id,
-                                      segment.theirs
-                                    )
-                                  }
-                                  className="cursor-pointer hover:text-blue-700 hover:underline">
-                                  [accept theirs]
-                                </button>
-                              </span>
-                              <ConflictLines
-                                segmentId={segment.id}
-                                side="ours"
-                                content={segment.ours}
-                              />
-                              <span className="block border-l-2 border-gray-400 bg-gray-100 pl-2 text-gray-500">
-                                =======
-                              </span>
-                              <ConflictLines
-                                segmentId={segment.id}
-                                side="theirs"
-                                content={segment.theirs}
-                              />
-                              <span className="block border-l-2 border-blue-500 bg-blue-500/10 pl-2 font-bold text-blue-700">
-                                {">>>>>>> main"}
-                              </span>
-                            </span>
-                          )
-                        })}
-                      </pre>
-                    </div>
-                  ) : (
-                    <div className="space-y-3 p-6">
-                      <p className="text-tech-main/60 font-mono text-xs tracking-widest uppercase">
-                        NO_CONFLICTS_LEFT_
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </section>
+                {visibleActiveTab === "3-way" && hasInlineConflicts && (
+                  <div className="guide-line bg-tech-main/3 flex items-center border-b px-3 py-1">
+                    <button
+                      type="button"
+                      onClick={handleJumpToNextConflict}
+                      className="border-tech-main/30 text-tech-main/60 hover:border-tech-main hover:text-tech-main border px-2 py-1 font-mono text-[0.625rem] tracking-widest uppercase">
+                      NEXT_CONFLICT_ ↓
+                    </button>
+                    <span className="text-tech-main/40 ml-2 font-mono text-[0.625rem] tracking-widest uppercase">
+                      {conflictSegments.length} UNRESOLVED
+                    </span>
+                  </div>
+                )}
 
-              <section
-                id="review-editor-write-panel"
-                role="tabpanel"
-                className="editor-grow"
-                hidden={visibleActiveTab !== "write"}>
-                <div className="editor-surface">
-                  <EditorTextareaDynamic
-                    ref={textareaRef}
-                    value={activeContent}
-                    onChange={updateActiveFileContent}
-                    placeholder={t("reviewContentPlaceholder")}
+                {visibleActiveTab === "write" && !hasInlineConflicts && (
+                  <EditorToolbar
+                    onInsert={insertSyntax}
                     lineWrap={lineWrap}
                     onWrapToggle={() => setLineWrap((v) => !v)}
                   />
-                </div>
-              </section>
+                )}
 
-              <section
-                id="review-editor-diff-panel"
-                role="tabpanel"
-                hidden={visibleActiveTab !== "diff"}
-                className="editor-grow">
-                <ReviewDiffPanel
-                  baseContent={diffBaseContent}
-                  currentContent={activeContent}
-                />
-              </section>
-
-              <section
-                id="review-editor-preview-panel"
-                role="tabpanel"
-                hidden={visibleActiveTab !== "preview"}
-                className="editor-grow">
-                {hasInlineConflicts ? (
-                  <div className="space-y-3 p-6">
-                    <p className="font-mono text-xs tracking-widest text-red-600 uppercase">
-                      CONFLICTS_UNRESOLVED_
-                    </p>
-                    <p className="mono-label">
-                      Resolve all conflicts before previewing.
-                    </p>
+                <TabsContent
+                  value="3-way"
+                  forceMount
+                  className="editor-grow data-[state=inactive]:hidden">
+                  <div className="editor-surface">
+                    {hasInlineConflicts ? (
+                      <div className="custom-left-scrollbar overflow-auto">
+                        <pre className="p-4 font-mono text-xs/relaxed whitespace-pre-wrap sm:p-6">
+                          {parsedSegments.map((segment) => {
+                            if (segment.type === "text") {
+                              return (
+                                <span
+                                  key={segment.id}
+                                  className="text-tech-main/80 block">
+                                  {segment.content || "\u00a0"}
+                                </span>
+                              )
+                            }
+                            return (
+                              <span
+                                key={segment.id}
+                                ref={(el) => {
+                                  if (el) {
+                                    conflictRefs.current.set(segment.id, el)
+                                  } else conflictRefs.current.delete(segment.id)
+                                }}>
+                                <span className="block border-l-2 border-red-500 bg-red-500/10 pl-2 font-bold text-red-700">
+                                  {"<<<<<<< draft"}
+                                </span>
+                                <span className="block pl-2 font-mono text-[0.6rem] text-red-600/70 select-none">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      resolveConflictSegment(
+                                        segment.id,
+                                        segment.ours
+                                      )
+                                    }
+                                    className="cursor-pointer hover:text-red-700 hover:underline">
+                                    [accept ours]
+                                  </button>
+                                  {" · "}
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      resolveConflictSegment(
+                                        segment.id,
+                                        segment.theirs
+                                      )
+                                    }
+                                    className="cursor-pointer hover:text-blue-700 hover:underline">
+                                    [accept theirs]
+                                  </button>
+                                </span>
+                                <ConflictLines
+                                  segmentId={segment.id}
+                                  side="ours"
+                                  content={segment.ours}
+                                />
+                                <span className="block border-l-2 border-gray-400 bg-gray-100 pl-2 text-gray-500">
+                                  =======
+                                </span>
+                                <ConflictLines
+                                  segmentId={segment.id}
+                                  side="theirs"
+                                  content={segment.theirs}
+                                />
+                                <span className="block border-l-2 border-blue-500 bg-blue-500/10 pl-2 font-bold text-blue-700">
+                                  {">>>>>>> main"}
+                                </span>
+                              </span>
+                            )
+                          })}
+                        </pre>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 p-6">
+                        <p className="text-tech-main/60 font-mono text-xs tracking-widest uppercase">
+                          NO_CONFLICTS_LEFT_
+                        </p>
+                      </div>
+                    )}
                   </div>
-                ) : activeContent.trim() ? (
-                  <div className="selection:bg-tech-main/20 selection:text-tech-main-dark w-full max-w-none overflow-hidden p-6 wrap-break-word sm:p-8">
-                    <LazyMarkdownPreview
-                      content={activeContent}
-                      rawPath={activeFile?.filePath ?? ""}
+                </TabsContent>
+
+                <TabsContent
+                  value="write"
+                  forceMount
+                  className="editor-grow data-[state=inactive]:hidden">
+                  <div className="editor-surface">
+                    <EditorTextareaDynamic
+                      ref={textareaRef}
+                      value={activeContent}
+                      onChange={updateActiveFileContent}
+                      placeholder={t("reviewContentPlaceholder")}
+                      lineWrap={lineWrap}
+                      onWrapToggle={() => setLineWrap((v) => !v)}
                     />
                   </div>
-                ) : (
-                  <p className="editor-panel">NOTHING_TO_PREVIEW_</p>
-                )}
-              </section>
+                </TabsContent>
+
+                <TabsContent
+                  value="diff"
+                  forceMount
+                  className="editor-grow data-[state=inactive]:hidden">
+                  <ReviewDiffPanel
+                    baseContent={diffBaseContent}
+                    currentContent={activeContent}
+                  />
+                </TabsContent>
+
+                <TabsContent
+                  value="preview"
+                  forceMount
+                  className="editor-grow data-[state=inactive]:hidden">
+                  {hasInlineConflicts ? (
+                    <div className="space-y-3 p-6">
+                      <p className="font-mono text-xs tracking-widest text-red-600 uppercase">
+                        CONFLICTS_UNRESOLVED_
+                      </p>
+                      <p className="mono-label">
+                        Resolve all conflicts before previewing.
+                      </p>
+                    </div>
+                  ) : activeContent.trim() ? (
+                    <div className="selection:bg-tech-main/20 selection:text-tech-main-dark w-full max-w-none overflow-hidden p-6 wrap-break-word sm:p-8">
+                      <LazyMarkdownPreview
+                        content={activeContent}
+                        rawPath={activeFile?.filePath ?? ""}
+                      />
+                    </div>
+                  ) : (
+                    <p className="editor-panel">NOTHING_TO_PREVIEW_</p>
+                  )}
+                </TabsContent>
+              </Tabs>
             </div>
           </>
         ) : null}

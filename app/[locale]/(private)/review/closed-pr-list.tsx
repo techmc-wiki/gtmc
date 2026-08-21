@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
-import { TechCard } from "@/components/ui/tech-card"
+import { Card } from "@/components/ui/shadcn/card"
 import type { ClosedPRListItem } from "./page"
 
 const PAGE_SIZE = 10
@@ -17,7 +17,7 @@ function ClosedPRSkeletonRows() {
   return (
     <div className="grid grid-cols-1 gap-6">
       {skeletonKeys.map((key) => (
-        <TechCard
+        <Card
           key={`closed-pr-skeleton-${key}`}
           className="border-tech-line bg-surface-overlay/80 relative border p-6 backdrop-blur-sm">
           <CornerBrackets variant="hover" />
@@ -31,7 +31,7 @@ function ClosedPRSkeletonRows() {
             <div className="bg-tech-accent/30 h-4 w-40" />
             <div className="border-tech-line bg-tech-bg h-6 w-36 border" />
           </div>
-        </TechCard>
+        </Card>
       ))}
     </div>
   )
@@ -43,7 +43,7 @@ function ClosedPRCard({ pr }: { pr: ClosedPRListItem }) {
     : "border-[var(--color-tech-line)] bg-[var(--color-tech-bg)] text-[var(--color-tech-main)]"
 
   return (
-    <TechCard className="group border-tech-line bg-surface-overlay/80 relative border p-6 backdrop-blur-sm">
+    <Card className="group border-tech-line bg-surface-overlay/80 relative border p-6 backdrop-blur-sm">
       <CornerBrackets variant="hover" />
 
       <div className="relative z-10 space-y-3">
@@ -76,7 +76,7 @@ function ClosedPRCard({ pr }: { pr: ClosedPRListItem }) {
           {pr.headRef}
         </p>
       </div>
-    </TechCard>
+    </Card>
   )
 }
 

@@ -105,6 +105,23 @@ const nextConfig: NextConfig = {
         "./lib/schematic-renderer/extensions.json",
     },
   },
+  async headers() {
+    return [
+      {
+        // Chrome HTML-in-Canvas origin trial: enables the CanvasUI
+        // DecryptReveal effect on the PDF download page. Token is bound
+        // to https://www.techmc.wiki and expires 2026-10-19.
+        source: "/:locale/pdf",
+        headers: [
+          {
+            key: "Origin-Trial",
+            value:
+              "AlNE6Dr0We0vv7HNSzPGSc7HI46ID49UvB3aYU/5wKlwPqseeiEaXQQsRsndqjH2/ZQVO+qg2vSyIxk2k7KR/AIAAABoeyJvcmlnaW4iOiJodHRwczovL3d3dy50ZWNobWMud2lraTo0NDMiLCJmZWF0dXJlIjoiSFRNTEluQ2FudmFzIiwiZXhwaXJ5IjoxNzkyNDU0NDAwLCJpc1N1YmRvbWFpbiI6dHJ1ZX0=",
+          },
+        ],
+      },
+    ]
+  },
   images: {
     remotePatterns: [
       {

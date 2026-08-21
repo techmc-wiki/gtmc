@@ -1,5 +1,9 @@
 import { getMainBranchHeadSha, upsertFileOnBranch } from "@/lib/github/branch"
-import { GLOSSARY_REPO, getOctokit } from "@/lib/github/repos"
+import {
+  GLOSSARY_FORK_REPO,
+  GLOSSARY_REPO,
+  getOctokit,
+} from "@/lib/github/repos"
 
 const GLOSSARY_MAIN_BRANCH = "main"
 const GLOSSARY_CSV_PATH = "TechMC Glossary.csv"
@@ -33,15 +37,18 @@ export async function openGlossaryPullRequest(
   } = input
   const octokit = getOctokit(token)
 
-  const mainSha = await getMainBranchHeadSha(token, GLOSSARY_REPO)
+  // 1. Get HEAD commit of main branch on our fork repo (techmc-wiki/glossary)
+  const forkHeadSha = await getMainBranchHeadSha(token, GLOSSARY_FORK_REPO)
 
+  // 2. Create the new branch in our fork
   await octokit.git.createRef({
-    owner: GLOSSARY_REPO.owner,
-    repo: GLOSSARY_REPO.name,
+    owner: GLOSSARY_FORK_REPO.owner,
+    repo: GLOSSARY_FORK_REPO.name,
     ref: `refs/heads/${branchName}`,
-    sha: mainSha,
+    sha: forkHeadSha,
   })
 
+  // 3. Commit the updated CSV file to that branch in our fork
   await upsertFileOnBranch({
     authorEmail,
     authorName,
@@ -50,14 +57,17 @@ export async function openGlossaryPullRequest(
     filePath: GLOSSARY_CSV_PATH,
     message: `docs: ${title}`,
     token,
-    repo: GLOSSARY_REPO,
+    repo: GLOSSARY_FORK_REPO,
   })
+
+  // 4. Open cross-repository Pull Request from our fork's branch to upstream main
+  const headParam = `${GLOSSARY_FORK_REPO.owner}:${branchName}`
 
   const { data: pr } = await octokit.pulls.create({
     owner: GLOSSARY_REPO.owner,
     repo: GLOSSARY_REPO.name,
     title,
-    head: branchName,
+    head: headParam,
     base: GLOSSARY_MAIN_BRANCH,
     body,
   })

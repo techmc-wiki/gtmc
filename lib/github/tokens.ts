@@ -28,13 +28,7 @@ export function resolveGithubArticlesWriteToken(
   ])
 }
 
-export function resolveGithubGlossaryWriteToken(
-  fallbackToken?: string | null
-): string | undefined {
-  return resolveFirstDefinedToken([
-    process.env.GITHUB_GLOSSARY_WRITE_PAT,
-    fallbackToken,
-    process.env.GITHUB_TOKEN,
-    process.env.GITHUB_PERSONAL_ACCESS_TOKEN,
-  ])
+export function resolveGithubGlossaryWriteToken(): string | undefined {
+  const token = process.env.GITHUB_GLOSSARY_FORK_WRITE_PAT
+  return typeof token === "string" && token.length > 0 ? token : undefined
 }

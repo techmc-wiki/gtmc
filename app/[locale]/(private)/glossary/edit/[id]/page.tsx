@@ -77,6 +77,9 @@ export default async function EditGlossaryDraftPage({
       authorName={authorName}
       noreplyEmail={noreplyEmail}
       realEmail={realEmail}
+      status={draft.status}
+      githubPrUrl={draft.githubPrUrl}
+      githubPrNum={draft.githubPrNum}
     />
   )
 }

@@ -19,6 +19,10 @@ export const GLOSSARY_REPO: RepoTarget = {
   name: process.env.GITHUB_GLOSSARY_REPO_NAME || "TechMC-Glossary",
 }
 
+export const GLOSSARY_FORK_REPO: RepoTarget = {
+  owner: process.env.GITHUB_GLOSSARY_FORK_REPO_OWNER || "techmc-wiki",
+  name: process.env.GITHUB_GLOSSARY_FORK_REPO_NAME || "glossary",
+}
 export const getOctokit = (token?: string, silent404 = false) =>
   new Octokit({
     auth: token || resolveGithubArticlesReadToken(),
@@ -32,10 +36,8 @@ export const getOctokit = (token?: string, silent404 = false) =>
       : undefined,
   })
 
-export const getGlossaryWriteToken = (
-  fallbackToken?: string | null
-): string => {
-  const token = resolveGithubGlossaryWriteToken(fallbackToken)
-  if (!token) throw new Error("GITHUB_GLOSSARY_WRITE_PAT not configured")
+export const getGlossaryWriteToken = (): string => {
+  const token = resolveGithubGlossaryWriteToken()
+  if (!token) throw new Error("GITHUB_GLOSSARY_FORK_WRITE_PAT not configured")
   return token
 }

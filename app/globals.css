@@ -40,8 +40,34 @@
   --color-ansi-bright-magenta: #c026d3;
   --color-ansi-bright-cyan: #0891b2;
   --color-ansi-bright-white: #475569;
+  /* shadcn token aliases → GTMC design tokens */
+  --radius: 0px; /* square corners: the blueprint aesthetic */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
   --background: var(--color-tech-bg);
-  --foreground: var(--color-tech-main);
+  --foreground: var(--color-tech-main-dark);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-tech-main-dark);
+  --popover: var(--color-surface-modal);
+  --popover-foreground: var(--color-tech-main-dark);
+  --primary: var(--color-tech-main-dark);
+  --primary-foreground: var(--color-tech-bg);
+  --secondary: var(--color-tech-accent);
+  --secondary-foreground: var(--color-tech-main-dark);
+  --muted: var(--color-tech-accent);
+  --muted-foreground: var(--color-tech-main);
+  --accent: var(--color-tech-accent);
+  --accent-foreground: var(--color-tech-main-dark);
+  --destructive: #b91c1c;
+  --destructive-foreground: var(--color-tech-bg);
+  --border: var(--color-tech-line);
+  --input: var(--color-tech-line);
+  --ring: var(--color-tech-signal);
   --font-markdown-title:
     var(--font-stix-two-text), var(--font-noto-serif-sc, "Songti SC"), "STSong",
     serif;
@@ -269,6 +295,30 @@ html {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-3xl: var(--radius-3xl);
+  --radius-4xl: var(--radius-4xl);
 }
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -287,6 +337,35 @@ html {
   --color-surface-overlay: #1a2536;
   --color-surface-input: #0c121d;
   --color-surface-modal: #18222f;
+
+  /* shadcn token aliases → GTMC design tokens (dark values via tech-* overrides) */
+  --radius: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
+  --background: var(--color-tech-bg);
+  --foreground: var(--color-tech-main-dark);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-tech-main-dark);
+  --popover: var(--color-surface-modal);
+  --popover-foreground: var(--color-tech-main-dark);
+  --primary: var(--color-tech-main-dark);
+  --primary-foreground: var(--color-tech-bg);
+  --secondary: var(--color-tech-accent);
+  --secondary-foreground: var(--color-tech-main-dark);
+  --muted: var(--color-tech-accent);
+  --muted-foreground: var(--color-tech-main);
+  --accent: var(--color-tech-accent);
+  --accent-foreground: var(--color-tech-main-dark);
+  --destructive: #dc2626;
+  --destructive-foreground: var(--color-tech-bg);
+  --border: var(--color-tech-line);
+  --input: var(--color-tech-line);
+  --ring: var(--color-tech-signal);
 
   --color-ansi-black: #073642;
   --color-ansi-red: #dc322f;

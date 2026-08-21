@@ -2,6 +2,7 @@
 
 import type * as PdfjsModule from "pdfjs-dist"
 import * as React from "react"
+import { supportsHtmlInCanvas } from "@/components/canvasui/DecryptReveal"
 import { ThemeDecrypt } from "@/components/canvasui/theme-decrypt"
 
 /**
@@ -12,15 +13,16 @@ import { ThemeDecrypt } from "@/components/canvasui/theme-decrypt"
  *
  * pdf.js is loaded inside the effect (runtime-selected because the module
  * evaluates browser globals at import time and must never run during SSR).
+ * It fetches through the proxy with byte-range requests only — never the
+ * whole file.
  */
 export function PdfCoverPreview({ filename }: { filename: string }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const [state, setState] = React.useState<"loading" | "ready" | "error">(
     "loading"
   )
-  const [cursor, setCursor] = React.useState<{ x: number; y: number } | null>(
-    null
-  )
+  const [cursor, setCursor] = React.useState({ x: 0.5, y: 0.5 })
+  const [hovered, setHovered] = React.useState(false)
 
   const baseUrl = process.env.NEXT_PUBLIC_PDF_BASE_URL?.trim().replace(
     /\/+$/,
@@ -41,13 +43,15 @@ export function PdfCoverPreview({ filename }: { filename: string }) {
         )) as typeof PdfjsModule
         pdfjs.GlobalWorkerOptions.workerSrc = "/pdfjs/pdf.worker.min.mjs"
 
-        const response = await fetch(`/api/pdf/${filename}`, {
-          signal: AbortSignal.timeout(15000),
-        })
-        if (!response.ok) throw new Error(`fetch ${response.status}`)
-        const data = await response.arrayBuffer()
-
-        const doc = await pdfjs.getDocument({ data }).promise
+        // Range-only loading: pdf.js issues byte-range requests against
+        // this URL (the proxy forwards them to R2), pulling just the xref
+        // and page 1 instead of the whole ~44 MB file.
+        const doc = await pdfjs.getDocument({
+          url: `/api/pdf/${filename}`,
+          rangeChunkSize: 16384,
+          disableAutoFetch: true,
+          disableStream: false,
+        }).promise
         const page = await doc.getPage(1)
 
         // Render at device resolution for a crisp preview.
@@ -64,14 +68,27 @@ export function PdfCoverPreview({ filename }: { filename: string }) {
         const ctx = canvas.getContext("2d")
         if (!ctx) throw new Error("no 2d context")
 
-        // pdf.js renders the page bitmap upright but draws it into the
-        // canvas with a flipped Y axis under html-in-canvas capture, so
-        // flip it back here.
-        ctx.save()
-        ctx.translate(0, canvas.height)
-        ctx.scale(1, -1)
+        // The WebGL capture pass flips Y when compositing the source
+        // canvas; pre-flip here so the cover lands upright on screen in
+        // native mode. Fallback mode composites the raw canvas, which
+        // pdf.js already drew upright.
+        const nativeMode = supportsHtmlInCanvas()
         await page.render({ canvas, canvasContext: ctx, viewport }).promise
-        ctx.restore()
+        if (nativeMode) {
+          const flipped = document.createElement("canvas")
+          flipped.width = canvas.width
+          flipped.height = canvas.height
+          const fctx = flipped.getContext("2d")
+          if (!fctx) throw new Error("no flip context")
+          fctx.translate(0, flipped.height)
+          fctx.scale(1, -1)
+          fctx.drawImage(canvas, 0, 0)
+          ctx.save()
+          ctx.setTransform(1, 0, 0, 1, 0, 0)
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          ctx.drawImage(flipped, 0, 0)
+          ctx.restore()
+        }
 
         if (!cancelled) setState("ready")
       } catch {
@@ -91,8 +108,8 @@ export function PdfCoverPreview({ filename }: { filename: string }) {
         download
         aria-disabled={!baseUrl}
         aria-label={`${state === "ready" ? "" : "Loading "}PDF cover — download`}
-        onMouseEnter={() => setCursor({ x: 0.5, y: 0.5 })}
-        onMouseLeave={() => setCursor(null)}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         onMouseMove={(event) => {
           const rect = event.currentTarget.getBoundingClientRect()
           setCursor({
@@ -100,8 +117,8 @@ export function PdfCoverPreview({ filename }: { filename: string }) {
             y: (event.clientY - rect.top) / rect.height,
           })
         }}
-        onFocus={() => setCursor({ x: 0.5, y: 0.5 })}
-        onBlur={() => setCursor(null)}
+        onFocus={() => setHovered(true)}
+        onBlur={() => setHovered(false)}
         className="focus-visible:outline-tech-main block h-full w-full focus-visible:outline-2 focus-visible:outline-offset-4">
         <div className="border-tech-main/40 bg-surface relative h-full w-full overflow-hidden border">
           {state === "error" ? (
@@ -118,19 +135,17 @@ export function PdfCoverPreview({ filename }: { filename: string }) {
             />
           )}
 
-          {/* Cursor-following Download label (mouse only). */}
+          {/* Cursor-following Download label (mouse only). Position is
+              kept from the last mousemove so the exit transition plays in
+              place instead of snapping to the container corner. */}
           <span
             aria-hidden="true"
-            style={
-              cursor
-                ? {
-                    left: `${cursor.x * 100}%`,
-                    top: `${cursor.y * 100}%`,
-                  }
-                : undefined
-            }
-            className={`border-tech-main-dark bg-tech-main-dark text-tech-bg pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2 border px-3 py-1.5 font-mono text-xs font-semibold tracking-wider transition-opacity duration-150 ${
-              cursor ? "opacity-100" : "opacity-0"
+            style={{
+              left: `${cursor.x * 100}%`,
+              top: `${cursor.y * 100}%`,
+            }}
+            className={`border-tech-main-dark bg-tech-main-dark text-tech-bg pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2 border px-3 py-1.5 font-mono text-xs font-semibold tracking-wider transition-[opacity,scale] duration-200 ease-out ${
+              hovered ? "scale-100 opacity-100" : "scale-50 opacity-0"
             }`}>
             Download
           </span>

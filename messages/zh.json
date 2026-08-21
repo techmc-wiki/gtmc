@@ -498,9 +498,14 @@
   "Pdf": {
     "bookSubtitle": "技术性 Minecraft 入门",
     "bookTitle": "Graduate Texts in Minecraft",
+    "downloadButton": "下载 PDF",
+    "editionLabel": "离线版",
     "mermaidRenderError": "无法渲染 Mermaid 图表。",
+    "metaArticles": "{count} 篇文章",
     "metaDescription": "以离线 PDF 下载整个网站的文章。",
+    "metaRevised": "更新于 {date}",
     "metaTitle": "PDF 下载",
+    "readOnline": "在线阅读",
     "slogan": "求知于方寸之间。",
     "unavailableNote": "PDF 下载尚未配置。"
   },

@@ -19,6 +19,7 @@
   },
   "iconLibrary": "lucide",
   "registries": {
-    "@coss": "https://coss.com/ui/r/{name}.json"
+    "@coss": "https://coss.com/ui/r/{name}.json",
+    "@canvas-ui": "https://canvasui.dev/r/{name}.json"
   }
 }

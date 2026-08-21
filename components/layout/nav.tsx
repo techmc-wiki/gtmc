@@ -274,8 +274,9 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
 /**
  * Floating site header frame. Transparent and borderless at the top of the
  * page so it reads as part of the hero, then condenses into a surfaced,
- * hairline-bordered bar with soft elevation once the user scrolls
- * (scroll-reactive sticky pattern).
+ * full-bleed band with a viewport-spanning hairline once the user scrolls.
+ * Content aligns to the shared page container so the band's edges always
+ * read as intentional chrome, never a plate cut off mid-air.
  */
 export function SiteHeader({
   left,
@@ -290,9 +291,13 @@ export function SiteHeader({
     <header className="fixed inset-x-0 top-0 z-50">
       <div
         data-scrolled={scrolled ? "" : undefined}
-        className="data-scrolled:border-tech-main/30 data-scrolled:bg-surface-overlay/90 mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 border-b border-transparent px-4 transition-[background-color,border-color,box-shadow] duration-300 data-scrolled:shadow-[0_8px_24px_-16px_rgb(32_40_60/0.35)] data-scrolled:backdrop-blur-md sm:px-6 md:h-20 lg:px-8">
-        <div className="flex min-w-0 items-center gap-4 md:gap-6">{left}</div>
-        <div className="flex shrink-0 items-center gap-2 md:gap-3">{right}</div>
+        className="data-scrolled:border-tech-main/30 data-scrolled:bg-surface-overlay/90 border-b border-transparent transition-[background-color,border-color,box-shadow] duration-300 data-scrolled:shadow-[0_8px_24px_-16px_rgb(32_40_60/0.35)] data-scrolled:backdrop-blur-md">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 md:h-20 lg:px-8">
+          <div className="flex min-w-0 items-center gap-4 md:gap-6">{left}</div>
+          <div className="flex shrink-0 items-center gap-2 md:gap-3">
+            {right}
+          </div>
+        </div>
       </div>
     </header>
   )

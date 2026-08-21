@@ -4,6 +4,7 @@ import {
   AuthAwareDesktopNav,
   AuthAwareMobileNav,
 } from "@/components/layout/auth-aware-nav"
+import { SiteHeader } from "@/components/layout/nav"
 import { AuthIsland } from "@/components/layout/auth-island"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
@@ -105,17 +106,7 @@ export async function MainSiteShell({
         className="focus:bg-surface-overlay focus:border-tech-main focus:text-tech-main-dark sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:border focus:px-4 focus:py-2 focus:font-mono focus:text-xs focus:outline-none">
         {tCommonA11y("skipToMainContent")}
       </a>
-      <nav
-        aria-label={tCommonA11y("mainNavigation")}
-        className="border-tech-main/30 bg-surface-overlay/85 fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between md:h-20">
-            <div className="flex items-center gap-4 md:gap-8">{leftSlot}</div>
-
-            <div className="flex items-center gap-2 md:gap-3">{rightSlot}</div>
-          </div>
-        </div>
-      </nav>
+      <SiteHeader left={leftSlot} right={rightSlot} />
 
       <div className="flex min-h-screen w-full flex-col overflow-x-clip">
         <div className="h-16 shrink-0 md:h-20" aria-hidden="true" />

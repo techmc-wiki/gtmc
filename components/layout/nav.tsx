@@ -1,13 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { Link, usePathname } from "@/i18n/navigation"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
-import { useMounted } from "@/hooks/use-mounted"
-import { useModalEffects } from "@/hooks/use-modal-effects"
+import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/shadcn/sheet"
 
 export interface NavLink {
   href: string
@@ -41,64 +39,47 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
   )
 }
 
-/** Mobile nav: hamburger trigger + portal drawer with the same links. */
+/** Mobile nav: hamburger trigger + top sheet drawer with the same links. */
 export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
   const t = useTranslations("CommonA11y")
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
-  const isMounted = useMounted()
-  const closeDrawer = React.useCallback(() => {
-    setIsDrawerOpen(false)
-  }, [])
-
-  useModalEffects({ isOpen: isDrawerOpen, onClose: closeDrawer })
 
   return (
-    <>
-      <button
-        onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-        className="hover:bg-tech-main/10 flex min-h-11 min-w-11 cursor-pointer flex-col items-center justify-center gap-1.5 p-2 transition-colors md:hidden"
+    <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+      <SheetTrigger asChild>
+        <button
+          className="hover:bg-tech-main/10 flex min-h-11 min-w-11 cursor-pointer flex-col items-center justify-center gap-1.5 p-2 transition-colors md:hidden"
+          aria-label={t("toggleNavigationMenu")}>
+          <span
+            className={`bg-tech-main h-0.5 w-5 transition-all ${isDrawerOpen ? `translate-y-2 rotate-45` : ""} `}></span>
+          <span
+            className={`bg-tech-main h-0.5 w-5 transition-all ${isDrawerOpen ? `opacity-0` : ""} `}></span>
+          <span
+            className={`bg-tech-main h-0.5 w-5 transition-all ${isDrawerOpen ? `-translate-y-2 -rotate-45` : ""} `}></span>
+        </button>
+      </SheetTrigger>
+
+      <SheetContent
+        side="top"
+        showCloseButton={false}
         aria-label={t("toggleNavigationMenu")}
-        aria-expanded={isDrawerOpen}>
-        <span
-          className={`bg-tech-main h-0.5 w-5 transition-all ${isDrawerOpen ? `translate-y-2 rotate-45` : ""} `}></span>
-        <span
-          className={`bg-tech-main h-0.5 w-5 transition-all ${isDrawerOpen ? `opacity-0` : ""} `}></span>
-        <span
-          className={`bg-tech-main h-0.5 w-5 transition-all ${isDrawerOpen ? `-translate-y-2 -rotate-45` : ""} `}></span>
-      </button>
-
-      {isMounted &&
-        createPortal(
-          <div>
-            {isDrawerOpen && (
-              <div
-                className="bg-tech-main-dark/20 fixed top-16 left-0 z-40 h-[calc(100dvh-4rem)] w-screen backdrop-blur-xs supports-[height:100dvh]:h-[calc(100dvh-4rem)] supports-[width:100dvw]:w-dvw md:hidden"
-                onClick={() => setIsDrawerOpen(false)}
-                aria-hidden="true"
-              />
-            )}
-
-            <div
-              className={`border-tech-main/40 bg-surface-overlay/95 fixed inset-x-0 top-16 z-40 overflow-hidden border-b backdrop-blur-md transition-all duration-300 md:hidden ${isDrawerOpen ? "max-h-[calc(100dvh-4rem)]" : "max-h-0"} `}>
-              <div className="max-h-[calc(100dvh-4rem)] space-y-2 overflow-y-auto p-4 sm:p-6">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setIsDrawerOpen(false)}
-                    className="border-tech-main/40 text-tech-main-dark hover:bg-tech-main-dark hover:text-tech-bg bg-surface-overlay/60 flex min-h-11 items-center border p-3 font-mono text-xs tracking-[0.15em] uppercase transition-colors">
-                    {link.label}
-                  </Link>
-                ))}
-                <div className="flex items-center gap-2">
-                  <ThemeToggle />
-                  <LanguageSwitcher className="border-none" />
-                </div>
-              </div>
-            </div>
-          </div>,
-          document.body
-        )}
-    </>
+        className="border-tech-main/40 bg-surface-overlay/95 top-16 max-h-[calc(100dvh-4rem)] border-b p-0 backdrop-blur-md md:hidden">
+        <div className="max-h-[calc(100dvh-4rem)] space-y-2 overflow-y-auto p-4 sm:p-6">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setIsDrawerOpen(false)}
+              className="border-tech-main/40 text-tech-main-dark hover:bg-tech-main-dark hover:text-tech-bg bg-surface-overlay/60 flex min-h-11 items-center border p-3 font-mono text-xs tracking-[0.15em] uppercase transition-colors">
+              {link.label}
+            </Link>
+          ))}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <LanguageSwitcher className="border-none" />
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }

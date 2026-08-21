@@ -86,11 +86,10 @@ export async function openGlossaryPullRequest(
     if (status === 403 && message.includes("Resource not accessible")) {
       throw new Error(
         `GitHub rejected pull request creation with 403. ` +
-          `GITHUB_PUBLIC_REPO_PAT must grant "Pull requests: Read ` +
-          `and write" on ${GLOSSARY_REPO.owner}/${GLOSSARY_REPO.name} (the ` +
-          `repo the PR is opened on) as well as ` +
-          `${GLOSSARY_FORK_REPO.owner}/${GLOSSARY_FORK_REPO.name}; a ` +
-          `classic PAT with the public_repo scope also works.`,
+          `Fine-grained PATs cannot act across two organizations, so ` +
+          `${GLOSSARY_REPO.owner}/${GLOSSARY_REPO.name} cannot be added to ` +
+          `their repository access. Use a classic PAT with the public_repo ` +
+          `scope for GITHUB_PUBLIC_REPO_PAT.`,
         { cause: error }
       )
     }

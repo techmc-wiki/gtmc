@@ -3,8 +3,8 @@ import "../public-content.css"
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
-import { DecryptReveal } from "@/components/canvasui/DecryptReveal"
 import { DownloadButton } from "@/components/mdx/download-button"
+import { PdfCoverPreview } from "@/components/mdx/pdf-cover-preview"
 import { toAbsoluteUrl } from "@/lib/site-url"
 import { getManifestStats } from "@/lib/articles/manifest"
 import type { ArticleLocale } from "@/lib/articles/manifest"
@@ -77,19 +77,15 @@ export default async function PdfPage({
 
   // Centered single-CTA layout (release/open-access download pattern):
   // one dominant action, trust metadata directly beneath it, quieter
-  // secondary links. The whole card is a CanvasUI DecryptReveal: the
-  // content renders as an ASCII cipher and decodes around the cursor
-  // (html-in-canvas browsers; plain HTML fallback elsewhere).
+  // secondary links. The PDF's rendered first page is the interactive
+  // piece — a CanvasUI DecryptReveal that shows the cover as an ASCII
+  // cipher and decodes it around the cursor (html-in-canvas browsers;
+  // plain image fallback elsewhere). Title, button, and metadata stay
+  // real HTML in both modes.
   return (
-    <div className="page-container-pb flex flex-1 flex-col justify-center">
-      <DecryptReveal
-        radius={220}
-        softness={0.55}
-        cell={9}
-        color="#1d6a96"
-        background="#f5f4ef"
-        className="border-tech-main/40 mx-auto w-full max-w-xl touch-none border shadow-sm">
-        <div className="bg-surface flex min-h-[26rem] flex-col items-center justify-center px-6 py-12 text-center sm:px-12 sm:py-16">
+    <div className="page-container-pb flex w-full flex-1 flex-col justify-center">
+      <div className="border-tech-main/40 bg-surface/80 mx-auto w-full max-w-xl border shadow-sm backdrop-blur-sm">
+        <div className="flex flex-col items-center px-6 py-10 text-center sm:px-12 sm:py-12">
           <h1 className="display-title text-tech-main-dark text-3xl text-balance md:text-4xl">
             {t("bookTitle")}
           </h1>
@@ -97,7 +93,11 @@ export default async function PdfPage({
             {t("bookSubtitle")}
           </p>
 
-          <div className="mt-10">
+          <div className="mt-8">
+            <PdfCoverPreview filename={filename} />
+          </div>
+
+          <div className="mt-8">
             <DownloadButton
               filename={filename}
               unavailableNote={t("unavailableNote")}>
@@ -120,7 +120,7 @@ export default async function PdfPage({
             {t("readOnline")}
           </Link>
         </div>
-      </DecryptReveal>
+      </div>
     </div>
   )
 }

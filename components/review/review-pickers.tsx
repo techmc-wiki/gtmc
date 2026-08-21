@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useState } from "react"
 import { useTranslations } from "next-intl"
-import { TechButton } from "@/components/ui/tech-button"
+import { Button } from "@/components/ui/shadcn/button"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { SelectableCard } from "@/components/ui/selectable-card"
 import type {
@@ -287,7 +287,7 @@ export function ModeSelector({
       </div>
 
       <div className="flex justify-end">
-        <TechButton
+        <Button
           variant="primary"
           size="md"
           disabled={isSelecting}
@@ -296,7 +296,7 @@ export function ModeSelector({
           {isSelecting
             ? homepageT("initializing")
             : `${t("resolveButton")} [${selectedMode}]`}
-        </TechButton>
+        </Button>
       </div>
     </div>
   )

@@ -8,7 +8,7 @@ import {
   type OperationProgressStage,
 } from "@/components/ui/operation-progress"
 import { MergeMethodPicker } from "@/components/review/review-pickers"
-import { TechButton } from "@/components/ui/tech-button"
+import { Button } from "@/components/ui/shadcn/button"
 import { ActionForm } from "./action-form"
 import type {
   ReviewMergeMethod,
@@ -172,27 +172,27 @@ function PRActionButtonsContent({
       <div className="grid gap-3 sm:grid-cols-2">
         <ActionForm action={closePRAction} className="flex-1">
           {({ isPending }) => (
-            <TechButton
+            <Button
               type="submit"
               variant="secondary"
               disabled={isPending}
               className="w-full border-red-600 text-red-600 hover:bg-red-600 hover:text-white">
               {isPending ? "CLOSING..." : "CLOSE_PR"}
-            </TechButton>
+            </Button>
           )}
         </ActionForm>
 
         <ActionForm action={handleMerge} className="flex-1">
           {({ isPending, state }) => (
             <div className="space-y-3">
-              <TechButton
+              <Button
                 type="submit"
                 variant="primary"
                 disabled={isPending || !mergePRAction}
                 aria-busy={isPending}
                 className="w-full">
                 {isPending ? reviewT("merging") : reviewT("confirmMerge")}
-              </TechButton>
+              </Button>
 
               <OperationProgress
                 state={state}

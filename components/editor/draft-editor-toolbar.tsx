@@ -7,11 +7,10 @@ import {
   EditorTabStrip,
   type TabType,
 } from "@/components/editor/editor-tab-strip"
-import { TechButton } from "../ui/tech-button"
+import { Button } from "@/components/ui/shadcn/button"
 
 interface DraftEditorToolbarProps {
   activeTab: TabType
-  onTabChange: (tab: TabType) => void
   activeFile: { filePath: string }
   activeFileIndex: number
   lineWrap: boolean
@@ -31,7 +30,6 @@ interface DraftEditorToolbarProps {
 
 export function DraftEditorToolbar({
   activeTab,
-  onTabChange,
   activeFile,
   activeFileIndex,
   lineWrap,
@@ -64,10 +62,6 @@ export function DraftEditorToolbar({
   return (
     <>
       <EditorTabStrip
-        activeTab={activeTab}
-        onTabChange={onTabChange}
-        writeId="draft-editor-write-panel"
-        previewId="draft-editor-preview-panel"
         rightSlot={activeFile.filePath || `UNTITLED_FILE_${activeFileIndex}`}
       />
 
@@ -86,7 +80,7 @@ export function DraftEditorToolbar({
               MACROS
             </span>
 
-            <TechButton
+            <Button
               type="button"
               variant="ghost"
               className="text-tech-main hover:guide-line hover:text-tech-main hover:bg-surface-overlay h-7 border border-transparent px-3 text-[10px] tracking-widest transition-all hover:shadow-sm"
@@ -95,8 +89,8 @@ export function DraftEditorToolbar({
               <span className="flex items-center gap-1.5">
                 <span className="text-tech-main/40 font-bold">#</span> SECTION
               </span>
-            </TechButton>
-            <TechButton
+            </Button>
+            <Button
               type="button"
               variant="ghost"
               className="text-tech-main hover:guide-line hover:text-tech-main hover:bg-surface-overlay h-7 border border-transparent px-3 text-[10px] tracking-widest transition-all hover:shadow-sm"
@@ -108,8 +102,8 @@ export function DraftEditorToolbar({
                 <span className="text-tech-main/40 font-bold">{">"}</span>{" "}
                 CALLOUT
               </span>
-            </TechButton>
-            <TechButton
+            </Button>
+            <Button
               type="button"
               variant="ghost"
               className="text-tech-main hover:guide-line hover:text-tech-main hover:bg-surface-overlay h-7 border border-transparent px-3 text-[10px] tracking-widest transition-all hover:shadow-sm"
@@ -122,11 +116,11 @@ export function DraftEditorToolbar({
               <span className="flex items-center gap-1.5">
                 <span className="text-tech-main/40 font-bold">||</span> TABLE
               </span>
-            </TechButton>
+            </Button>
 
             <div className="bg-tech-main/20 mx-2 h-4 w-px" />
 
-            <TechButton
+            <Button
               type="button"
               variant="secondary"
               className="group guide-line text-tech-main-dark/80 hover:border-tech-main/50 bg-surface-overlay/50 hover:bg-surface-overlay h-7 px-3 text-[10px] font-bold tracking-widest transition-all"
@@ -145,8 +139,8 @@ export function DraftEditorToolbar({
                 </svg>
                 UNDO
               </span>
-            </TechButton>
-            <TechButton
+            </Button>
+            <Button
               type="button"
               variant="secondary"
               className="group guide-line text-tech-main-dark/80 hover:border-tech-main/50 bg-surface-overlay/50 hover:bg-surface-overlay h-7 px-3 text-[10px] font-bold tracking-widest transition-all"
@@ -166,7 +160,7 @@ export function DraftEditorToolbar({
                   <path d="M3 7v6h6M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3z" />
                 </svg>
               </span>
-            </TechButton>
+            </Button>
           </div>
         </>
       )}

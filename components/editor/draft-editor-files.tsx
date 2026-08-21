@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import { DraftFileList } from "@/components/editor/draft-file-list"
-import { TechButton } from "../ui/tech-button"
+import { Button } from "@/components/ui/shadcn/button"
 import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
 import type { DraftFileCollection } from "@/lib/drafts/files"
 
@@ -62,46 +62,46 @@ export function DraftEditorFiles({
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <TechButton
+              <Button
                 type="button"
                 variant="secondary"
                 size="sm"
                 disabled={isReadOnly}
                 onClick={() => onOpenFileDialog("replace", "repo")}>
                 {t("chooseExistingFile")}
-              </TechButton>
-              <TechButton
+              </Button>
+              <Button
                 type="button"
                 variant="secondary"
                 size="sm"
                 disabled={isReadOnly}
                 onClick={() => onOpenFileDialog("replace", "new")}>
                 {t("createTargetFile")}
-              </TechButton>
-              <TechButton
+              </Button>
+              <Button
                 type="button"
                 variant="secondary"
                 size="sm"
                 disabled={isReadOnly}
                 onClick={() => onOpenFileDialog("replace", "upload")}>
                 {t("importTargetFile")}
-              </TechButton>
-              <TechButton
+              </Button>
+              <Button
                 type="button"
                 variant="secondary"
                 size="sm"
                 disabled={isReadOnly}
                 onClick={() => onOpenFileDialog("add", "folder")}>
                 NEW FOLDER
-              </TechButton>
-              <TechButton
+              </Button>
+              <Button
                 type="button"
                 variant="secondary"
                 size="sm"
                 disabled={isReadOnly}
                 onClick={() => onSetInsertDialogIntent(true)}>
                 INSERT FILE LINK
-              </TechButton>
+              </Button>
             </div>
           </div>
 

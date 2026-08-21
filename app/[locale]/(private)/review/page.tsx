@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { ClosedPRList } from "./closed-pr-list"
-import { TechCard } from "@/components/ui/tech-card"
-import { TechButton } from "@/components/ui/tech-button"
+import { Card } from "@/components/ui/shadcn/card"
+import { Button } from "@/components/ui/shadcn/button"
 import { ReviewStatusBadge } from "@/components/ui/status"
 import { Link } from "@/i18n/navigation"
 import { getClosedPRs, getOpenPRs, getPR } from "@/lib/github/pr-manager"
@@ -155,9 +155,9 @@ export default async function ReviewHubPage() {
           {t("accessDenied")}
         </h1>
         <p className="mt-4 text-xl font-bold">{t("adminRequired")}</p>
-        <TechButton asChild variant="primary" className="mt-8">
+        <Button asChild variant="primary" className="mt-8">
           <Link href="/">{t("returnToBase")}</Link>
-        </TechButton>
+        </Button>
       </div>
     )
   }
@@ -203,7 +203,7 @@ export default async function ReviewHubPage() {
   }
 
   const renderPRCard = (pr: PRWithConflictMode, isConflict: boolean) => (
-    <TechCard
+    <Card
       key={pr.id}
       tone={isConflict ? "danger" : "main"}
       borderOpacity="muted"
@@ -250,16 +250,16 @@ export default async function ReviewHubPage() {
       </div>
 
       <div className="relative z-10 flex w-full flex-col gap-4 md:w-auto md:flex-row">
-        <TechButton
+        <Button
           asChild
           variant={isConflict ? "danger" : "primary"}
           className="flex min-h-11 w-full items-center justify-center px-6 text-xs tracking-widest uppercase transition-transform hover:scale-[1.02] md:w-auto">
           <Link href={`/review/${pr.number}`} className="w-full md:w-auto">
             {t("resolveButton")} →
           </Link>
-        </TechButton>
+        </Button>
       </div>
-    </TechCard>
+    </Card>
   )
 
   return (

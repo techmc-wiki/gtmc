@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { useState, useEffect, useRef, useCallback, useMemo } from "react"
-import { createPortal } from "react-dom"
 import { useTranslations, useLocale } from "next-intl"
 import { useRouter, usePathname } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/articles/url"
@@ -12,7 +11,13 @@ import {
 } from "@/lib/glossary/browser-events"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { useMounted } from "@/hooks/use-mounted"
-import { useModalEffects } from "@/hooks/use-modal-effects"
+import {
+  CommandDialog,
+  CommandInput,
+  CommandList,
+  CommandGroup,
+  CommandItem,
+} from "@/components/ui/shadcn/command"
 
 interface SearchResult {
   title: string
@@ -54,45 +59,6 @@ function SearchIcon({ className = "size-4" }: { className?: string }) {
   )
 }
 
-function slugToPath(slug: string) {
-  return "/" + slug
-}
-interface SearchResultButtonProps {
-  index: number
-  selectedIndex: number
-  onClick: React.MouseEventHandler<HTMLButtonElement>
-  onMouseEnter: React.MouseEventHandler<HTMLButtonElement>
-  ariaLabel: string
-  className?: string
-  children: React.ReactNode
-}
-
-function SearchResultButton({
-  index,
-  selectedIndex,
-  onClick,
-  onMouseEnter,
-  ariaLabel,
-  className = "",
-  children,
-}: SearchResultButtonProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      onMouseEnter={onMouseEnter}
-      data-search-result-index={index}
-      className={`group relative w-full cursor-pointer text-left transition-colors ${index === selectedIndex ? "bg-tech-main/10" : "hover:bg-tech-accent/10"} ${className}`}
-      aria-label={ariaLabel}
-      tabIndex={-1}>
-      {index === selectedIndex && (
-        <CornerBrackets variant="static" color="border-tech-main/30" />
-      )}
-      {children}
-    </button>
-  )
-}
-
 export function SearchCommand() {
   const t = useTranslations("Search")
   const locale = useLocale()
@@ -104,27 +70,31 @@ export function SearchCommand() {
     GlossarySearchResult[]
   >([])
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedIndex, setSelectedIndex] = useState(0)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const resultsContainerRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const pathname = usePathname()
+
+  // Auto-focus input when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => {
+        inputRef.current?.focus()
+      })
+    }
+  }, [isOpen])
 
   const closeModal = useCallback(() => {
     setIsOpen(false)
     setQuery("")
     setResults([])
     setGlossaryResults([])
-    setSelectedIndex(0)
     setIsLoading(false)
   }, [])
 
   const openModal = useCallback(() => {
     setIsOpen(true)
   }, [])
-
-  useModalEffects({ isOpen, onClose: closeModal })
 
   // Global Cmd+K / Ctrl+K handler. Register in the capture phase so dormant
   // article dialogs do not intercept the shortcut before search can open.
@@ -138,7 +108,6 @@ export function SearchCommand() {
             setQuery("")
             setResults([])
             setGlossaryResults([])
-            setSelectedIndex(0)
             setIsLoading(false)
           }
           return !prev
@@ -148,31 +117,6 @@ export function SearchCommand() {
     document.addEventListener("keydown", handleKeyDown, { capture: true })
     return () => document.removeEventListener("keydown", handleKeyDown, true)
   }, [])
-
-  // Auto-focus input when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      requestAnimationFrame(() => {
-        inputRef.current?.focus()
-      })
-    }
-  }, [isOpen])
-
-  useEffect(() => {
-    if (!isOpen || results.length === 0) return
-
-    const container = resultsContainerRef.current
-    if (!container) return
-
-    const selectedItem = container.querySelector<HTMLElement>(
-      `[data-search-result-index="${selectedIndex}"]`
-    )
-
-    selectedItem?.scrollIntoView({
-      block: "nearest",
-      inline: "nearest",
-    })
-  }, [isOpen, results, selectedIndex])
 
   // Debounced search
   useEffect(() => {
@@ -214,19 +158,14 @@ export function SearchCommand() {
     }
   }, [query, locale])
 
-  const handleQueryChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-      setQuery(value)
-      setSelectedIndex(0)
-      if (!value || value.length < 2) {
-        setResults([])
-        setGlossaryResults([])
-        setIsLoading(false)
-      }
-    },
-    []
-  )
+  const handleQueryChange = useCallback((value: string) => {
+    setQuery(value)
+    if (!value || value.length < 2) {
+      setResults([])
+      setGlossaryResults([])
+      setIsLoading(false)
+    }
+  }, [])
 
   const navigateToResult = useCallback(
     (result: SearchResult) => {
@@ -268,78 +207,6 @@ export function SearchCommand() {
       )
     },
     [router, closeModal]
-  )
-
-  const totalCount = results.length + glossaryResults.length
-
-  // Keyboard navigation inside modal
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      switch (e.key) {
-        case "ArrowDown":
-          e.preventDefault()
-          setSelectedIndex((prev) => (prev < totalCount - 1 ? prev + 1 : 0))
-          break
-        case "ArrowUp":
-          e.preventDefault()
-          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : totalCount - 1))
-          break
-        case "Enter":
-          e.preventDefault()
-          if (results[selectedIndex]) {
-            navigateToResult(results[selectedIndex])
-          } else {
-            const glossaryEntry =
-              glossaryResults[selectedIndex - results.length]
-            if (glossaryEntry) {
-              navigateToGlossaryResult(glossaryEntry)
-            }
-          }
-          break
-        case "Escape":
-          e.preventDefault()
-          closeModal()
-          break
-      }
-    },
-    [
-      results,
-      glossaryResults,
-      totalCount,
-      selectedIndex,
-      navigateToResult,
-      navigateToGlossaryResult,
-      closeModal,
-    ]
-  )
-
-  const handleResultClick = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      const index = Number(e.currentTarget.dataset.searchResultIndex)
-      if (results[index]) {
-        navigateToResult(results[index])
-      }
-    },
-    [results, navigateToResult]
-  )
-
-  const handleResultMouseEnter = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      const index = Number(e.currentTarget.dataset.searchResultIndex)
-      setSelectedIndex(index)
-    },
-    []
-  )
-
-  const handleGlossaryResultClick = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      const index = Number(e.currentTarget.dataset.searchResultIndex)
-      const entry = glossaryResults[index - results.length]
-      if (entry) {
-        navigateToGlossaryResult(entry)
-      }
-    },
-    [glossaryResults, results.length, navigateToGlossaryResult]
   )
 
   // Highlight matched text in title/snippet
@@ -426,212 +293,183 @@ export function SearchCommand() {
         <SearchIcon className="size-5" />
       </button>
 
-      {/* Search modal (portal) */}
-      {isOpen &&
-        createPortal(
-          <dialog
-            open
-            className="animate-in fade-in fixed inset-0 z-[9999] m-0 flex h-screen max-h-none w-screen max-w-none items-start justify-center overflow-y-auto bg-black/80 p-4 pt-[10vh] duration-200 supports-[height:100dvh]:h-dvh supports-[width:100dvw]:w-dvw sm:pt-[15vh]"
-            aria-modal="true"
-            aria-label={t("searchAriaLabel")}>
-            <button
-              type="button"
-              className="absolute inset-0 cursor-default"
-              aria-label={t("dismissHint")}
-              onClick={closeModal}
-              tabIndex={-1}
-            />
-            <section
-              aria-label={t("searchAriaLabel")}
-              className="border-tech-main animate-in slide-in-from-top-4 bg-surface-modal/95 relative w-full max-w-xl border shadow-xl backdrop-blur-md duration-200">
-              <CornerBrackets variant="static" />
+      {/* Search modal */}
+      <CommandDialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) closeModal()
+        }}
+        title={t("searchAriaLabel")}
+        description={t("placeholder")}
+        shouldFilter={false}
+        showCloseButton={false}
+        className="border-tech-main bg-surface-modal/95 top-[10vh] left-1/2 w-full max-w-xl -translate-x-1/2 border shadow-xl backdrop-blur-md sm:top-[15vh]">
+        <CornerBrackets variant="static" />
 
-              {/* Header */}
-              <header className="guide-line flex items-center justify-between border-b px-4 py-3">
-                <div className="tracking-tech-wide text-tech-main/80 flex items-center gap-2 font-mono text-xs font-bold uppercase">
-                  <span className="bg-tech-main/80 inline-block size-1.5 animate-pulse" />
-                  {t("modalTitle")}
-                </div>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="border-tech-main/40 text-tech-main/70 hover:bg-tech-main-dark hover:text-tech-bg cursor-pointer border px-2 py-0.5 font-mono text-[0.625rem] transition-colors">
-                  ESC
-                </button>
-              </header>
+        {/* Header */}
+        <header className="guide-line flex items-center justify-between border-b px-4 py-3">
+          <div className="tracking-tech-wide text-tech-main/80 flex items-center gap-2 font-mono text-xs font-bold uppercase">
+            <span className="bg-tech-main/80 inline-block size-1.5 animate-pulse" />
+            {t("modalTitle")}
+          </div>
+          <button
+            type="button"
+            onClick={closeModal}
+            className="border-tech-main/40 text-tech-main/70 hover:bg-tech-main-dark hover:text-tech-bg cursor-pointer border px-2 py-0.5 font-mono text-[0.625rem] transition-colors">
+            ESC
+          </button>
+        </header>
 
-              {/* Search input */}
-              <div className="guide-line border-b px-4 py-3">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={query}
-                  onChange={handleQueryChange}
-                  onKeyDown={handleKeyDown}
-                  placeholder={t("placeholder")}
-                  aria-label={t("searchAriaLabel")}
-                  className="border-tech-main/40 text-tech-main-dark placeholder:text-tech-main/50 focus:border-tech-main/70 bg-surface-input/60 focus:bg-surface-input/80 w-full border px-3 py-2.5 font-mono text-sm transition-colors outline-none"
-                  autoComplete="off"
-                  spellCheck={false}
-                />
+        {/* Search input */}
+        <div className="guide-line border-b px-4 py-3">
+          <CommandInput
+            ref={inputRef}
+            value={query}
+            onValueChange={handleQueryChange}
+            placeholder={t("placeholder")}
+            aria-label={t("searchAriaLabel")}
+            className="border-tech-main/40 text-tech-main-dark placeholder:text-tech-main/50 focus:border-tech-main/70 bg-surface-input/60 focus:bg-surface-input/80 w-full border px-3 py-2.5 font-mono text-sm transition-colors outline-none"
+          />
+        </div>
+
+        <CommandList className="custom-left-scrollbar max-h-[50vh]">
+          {/* Status line */}
+          {query.length >= 2 && (
+            <div className="guide-line text-tech-main/70 border-b px-4 py-2 font-mono text-[0.625rem] tracking-wider uppercase">
+              {isLoading
+                ? t("scanning")
+                : results.length === 20
+                  ? t("resultsCountCapped", { count: results.length })
+                  : t("resultsCount", { count: results.length })}
+            </div>
+          )}
+
+          {/* Loading state */}
+          {isLoading && (
+            <div className="px-4 py-6">
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="space-y-1.5">
+                    <div className="bg-tech-main/10 h-4 w-3/5 animate-pulse" />
+                    <div className="bg-tech-main/5 h-3 w-2/5 animate-pulse" />
+                  </div>
+                ))}
               </div>
+            </div>
+          )}
 
-              {/* Results area */}
-              <div
-                ref={resultsContainerRef}
-                className="custom-left-scrollbar max-h-[50vh] overflow-y-auto">
-                {/* Status line */}
-                {query.length >= 2 && (
-                  <div className="guide-line text-tech-main/70 border-b px-4 py-2 font-mono text-[0.625rem] tracking-wider uppercase">
-                    {isLoading
-                      ? t("scanning")
-                      : results.length === 20
-                        ? t("resultsCountCapped", { count: results.length })
-                        : t("resultsCount", { count: results.length })}
+          {/* Results list */}
+          {!isLoading && results.length > 0 && (
+            <CommandGroup>
+              {results.map((result) => (
+                <CommandItem
+                  key={result.slug}
+                  value={result.slug}
+                  onSelect={() => navigateToResult(result)}
+                  className="cursor-pointer px-4 py-3"
+                  aria-label={t("selectResult", { title: result.title })}>
+                  {/* Title */}
+                  <div className="text-tech-main-dark font-mono text-sm font-medium">
+                    {highlightMatch(result.title)}
                   </div>
-                )}
 
-                {/* Loading state */}
-                {isLoading && (
-                  <div className="px-4 py-6">
-                    <div className="space-y-3">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="space-y-1.5">
-                          <div className="bg-tech-main/10 h-4 w-3/5 animate-pulse" />
-                          <div className="bg-tech-main/5 h-3 w-2/5 animate-pulse" />
-                        </div>
-                      ))}
-                    </div>
+                  {/* Path */}
+                  <div className="text-tech-main/60 mt-0.5 font-mono text-[0.625rem] tracking-wider uppercase">
+                    {t("pathLabel")} /{result.slug}
                   </div>
-                )}
 
-                {/* Results list */}
-                {!isLoading && results.length > 0 && (
-                  <ul className="py-1">
-                    {results.map((result, index) => (
-                      <li key={result.slug}>
-                        <SearchResultButton
-                          index={index}
-                          selectedIndex={selectedIndex}
-                          onClick={handleResultClick}
-                          onMouseEnter={handleResultMouseEnter}
-                          ariaLabel={t("selectResult", {
-                            title: result.title,
-                          })}
-                          className="px-4 py-3">
-                          {/* Title */}
-                          <div className="text-tech-main-dark font-mono text-sm font-medium">
-                            {highlightMatch(result.title)}
-                          </div>
-
-                          {/* Path */}
-                          <div className="text-tech-main/60 mt-0.5 font-mono text-[0.625rem] tracking-wider uppercase">
-                            {t("pathLabel")} {slugToPath(result.slug)}
-                          </div>
-
-                          {/* Content snippet */}
-                          {result.snippet && (
-                            <div className="text-tech-main/70 mt-1 text-xs/relaxed">
-                              {highlightMatch(result.snippet)}
-                            </div>
-                          )}
-
-                          {/* Match type badge */}
-                          <div className="text-tech-main/50 absolute top-3 right-4 font-mono text-[0.5625rem] tracking-wider uppercase">
-                            {result.matchType === "content"
-                              ? t("matchBody")
-                              : t("matchTitle")}
-                          </div>
-                        </SearchResultButton>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                {/* Glossary section */}
-                {!isLoading && glossaryResults.length > 0 && (
-                  <div className="guide-line border-t">
-                    <div className="text-tech-main/50 flex items-center gap-2 px-4 pt-3 pb-1 font-mono text-[0.625rem] font-bold tracking-[0.2em] uppercase">
-                      <span className="bg-tech-signal inline-block size-1.5" />
-                      {t("glossarySection")}
-                    </div>
-                    <ul className="py-1">
-                      {glossaryResults.map((entry, glossaryIndex) => {
-                        const index = results.length + glossaryIndex
-                        return (
-                          <li key={entry.slug}>
-                            <SearchResultButton
-                              index={index}
-                              selectedIndex={selectedIndex}
-                              onClick={handleGlossaryResultClick}
-                              onMouseEnter={handleResultMouseEnter}
-                              ariaLabel={t("selectResult", {
-                                title: entry.fullFormEn,
-                              })}
-                              className="flex items-baseline gap-3 px-4 py-2.5">
-                              <span className="text-tech-main-dark font-mono text-sm font-medium">
-                                {highlightMatch(entry.fullFormEn)}
-                              </span>
-                              {entry.shortForm && (
-                                <span className="text-tech-main/60 font-mono text-xs">
-                                  {highlightMatch(entry.shortForm)}
-                                </span>
-                              )}
-                              <span className="text-tech-main/40 ml-auto font-mono text-[0.5625rem] tracking-wider uppercase">
-                                {entry.category}
-                              </span>
-                            </SearchResultButton>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  </div>
-                )}
-                {/* Empty state */}
-                {!isLoading &&
-                  query.length >= 2 &&
-                  results.length === 0 &&
-                  glossaryResults.length === 0 && (
-                    <div className="px-4 py-8 text-center">
-                      <div className="text-tech-main/60 font-mono text-xs tracking-wider uppercase">
-                        {t("noMatch")}
-                      </div>
-                      <div className="text-tech-main/40 mt-1 font-mono text-[0.625rem]">
-                        {t("tryDifferentKeywords")}
-                      </div>
+                  {/* Content snippet */}
+                  {result.snippet && (
+                    <div className="text-tech-main/70 mt-1 text-xs/relaxed">
+                      {highlightMatch(result.snippet)}
                     </div>
                   )}
 
-                {/* Initial state */}
-                {query.length < 2 && (
-                  <div className="px-4 py-8 text-center">
-                    <div className="text-tech-main/60 font-mono text-xs tracking-wider uppercase">
-                      {t("awaitingInput")}
-                    </div>
-                    <div className="text-tech-main/40 mt-1 font-mono text-[0.625rem]">
-                      {t("minCharsHint")}
-                    </div>
+                  {/* Match type badge */}
+                  <div className="text-tech-main/50 absolute top-3 right-4 font-mono text-[0.5625rem] tracking-wider uppercase">
+                    {result.matchType === "content"
+                      ? t("matchBody")
+                      : t("matchTitle")}
                   </div>
-                )}
-              </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
 
-              {/* Footer hints */}
-              <footer className="guide-line text-tech-main/60 flex items-center gap-4 border-t px-4 py-2 font-mono text-[0.625rem]">
-                <span>
-                  <kbd className="kbd-badge">&#x2191;&#x2193;</kbd>{" "}
-                  {t("navigateHint")}
-                </span>
-                <span>
-                  <kbd className="kbd-badge">&#x23CE;</kbd> {t("openHint")}
-                </span>
-                <span>
-                  <kbd className="kbd-badge">ESC</kbd> {t("dismissHint")}
-                </span>
-              </footer>
-            </section>
-          </dialog>,
-          document.body
-        )}
+          {/* Glossary section */}
+          {!isLoading && glossaryResults.length > 0 && (
+            <CommandGroup className="guide-line border-t">
+              <div className="text-tech-main/50 flex items-center gap-2 px-4 pt-3 pb-1 font-mono text-[0.625rem] font-bold tracking-[0.2em] uppercase">
+                <span className="bg-tech-signal inline-block size-1.5" />
+                {t("glossarySection")}
+              </div>
+              {glossaryResults.map((entry) => (
+                <CommandItem
+                  key={entry.slug}
+                  value={`glossary-${entry.slug}`}
+                  onSelect={() => navigateToGlossaryResult(entry)}
+                  className="flex cursor-pointer items-baseline gap-3 px-4 py-2.5"
+                  aria-label={t("selectResult", {
+                    title: entry.fullFormEn,
+                  })}>
+                  <span className="text-tech-main-dark font-mono text-sm font-medium">
+                    {highlightMatch(entry.fullFormEn)}
+                  </span>
+                  {entry.shortForm && (
+                    <span className="text-tech-main/60 font-mono text-xs">
+                      {highlightMatch(entry.shortForm)}
+                    </span>
+                  )}
+                  <span className="text-tech-main/40 ml-auto font-mono text-[0.5625rem] tracking-wider uppercase">
+                    {entry.category}
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+
+          {/* Empty state */}
+          {!isLoading &&
+            query.length >= 2 &&
+            results.length === 0 &&
+            glossaryResults.length === 0 && (
+              <div className="px-4 py-8 text-center">
+                <div className="text-tech-main/60 font-mono text-xs tracking-wider uppercase">
+                  {t("noMatch")}
+                </div>
+                <div className="text-tech-main/40 mt-1 font-mono text-[0.625rem]">
+                  {t("tryDifferentKeywords")}
+                </div>
+              </div>
+            )}
+
+          {/* Initial state */}
+          {query.length < 2 && (
+            <div className="px-4 py-8 text-center">
+              <div className="text-tech-main/60 font-mono text-xs tracking-wider uppercase">
+                {t("awaitingInput")}
+              </div>
+              <div className="text-tech-main/40 mt-1 font-mono text-[0.625rem]">
+                {t("minCharsHint")}
+              </div>
+            </div>
+          )}
+        </CommandList>
+
+        {/* Footer hints */}
+        <footer className="guide-line text-tech-main/60 flex items-center gap-4 border-t px-4 py-2 font-mono text-[0.625rem]">
+          <span>
+            <kbd className="kbd-badge">&#x2191;&#x2193;</kbd>{" "}
+            {t("navigateHint")}
+          </span>
+          <span>
+            <kbd className="kbd-badge">&#x23CE;</kbd> {t("openHint")}
+          </span>
+          <span>
+            <kbd className="kbd-badge">ESC</kbd> {t("dismissHint")}
+          </span>
+        </footer>
+      </CommandDialog>
     </>
   )
 }

@@ -5,22 +5,20 @@ import { Slot } from "radix-ui"
 import { cn } from "@/lib/cn"
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap font-mono font-bold uppercase tracking-widest transition-all duration-300 rounded-none outline-none focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 overflow-hidden group border cursor-pointer disabled:pointer-events-none disabled:opacity-60 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap font-mono text-xs font-semibold uppercase tracking-wider transition-all duration-300 rounded-none outline-none focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 overflow-hidden group border cursor-pointer disabled:pointer-events-none disabled:opacity-60 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default:
-          "before:content-[''] before:bg-tech-signal before:absolute before:right-0 before:bottom-0 before:size-1.5 before:opacity-80 group-hover:before:bg-current bg-tech-main-dark border-tech-main-dark text-tech-bg hover:bg-tech-signal hover:border-tech-signal hover:text-tech-signal-ink",
+          "bg-tech-main-dark border-tech-main-dark text-tech-bg hover:bg-tech-signal hover:border-tech-signal hover:text-tech-signal-ink",
         primary:
-          "before:content-[''] before:bg-tech-signal before:absolute before:right-0 before:bottom-0 before:size-1.5 before:opacity-80 group-hover:before:bg-current bg-tech-main-dark border-tech-main-dark text-tech-bg hover:bg-tech-signal hover:border-tech-signal hover:text-tech-signal-ink",
-        destructive:
-          "before:content-[''] before:bg-tech-signal before:absolute before:right-0 before:bottom-0 before:size-1.5 before:opacity-80 group-hover:before:bg-current bg-red-500 border-red-500 text-white hover:bg-red-700",
-        danger:
-          "before:content-[''] before:bg-tech-signal before:absolute before:right-0 before:bottom-0 before:size-1.5 before:opacity-80 group-hover:before:bg-current bg-red-500 border-red-500 text-white hover:bg-red-700",
+          "bg-tech-main-dark border-tech-main-dark text-tech-bg hover:bg-tech-signal hover:border-tech-signal hover:text-tech-signal-ink",
+        destructive: "bg-red-500 border-red-500 text-white hover:bg-red-700",
+        danger: "bg-red-500 border-red-500 text-white hover:bg-red-700",
         outline:
-          "before:content-[''] before:bg-tech-signal before:absolute before:right-0 before:bottom-0 before:size-1.5 before:opacity-80 group-hover:before:bg-current bg-background border-tech-main text-tech-main hover:bg-tech-accent/20 hover:text-tech-main-dark",
+          "bg-background border-tech-main text-tech-main hover:bg-tech-accent/20 hover:text-tech-main-dark",
         secondary:
-          "before:content-[''] before:bg-tech-signal before:absolute before:right-0 before:bottom-0 before:size-1.5 before:opacity-80 group-hover:before:bg-current bg-surface-overlay/80 border-tech-main text-tech-main hover:border-tech-main-dark hover:text-tech-main-dark hover:bg-tech-accent/20",
+          "bg-surface-overlay/80 border-tech-main text-tech-main hover:border-tech-main-dark hover:text-tech-main-dark hover:bg-tech-accent/20",
         ghost:
           "bg-transparent border-transparent text-tech-main hover:underline decoration-1 underline-offset-4",
         link: "text-primary underline-offset-4 hover:underline",

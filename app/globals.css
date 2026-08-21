@@ -535,7 +535,7 @@ body {
 }
 
 @utility section-label {
-  @apply border-tech-main/30 tracking-tech-wide text-tech-main mb-2 inline-block border-b pb-1 font-mono text-sm uppercase;
+  @apply border-tech-main/30 text-tech-main mb-2 inline-block border-b pb-1 text-sm font-semibold tracking-wide;
 }
 
 @utility footer-link {

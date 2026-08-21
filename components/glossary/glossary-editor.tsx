@@ -520,8 +520,9 @@ function GlossaryEditorInner({
       {operations.length === 0 ? (
         <div className="border-border bg-surface/30 rounded-none border border-dashed p-8 text-center">
           <p className="text-muted-foreground text-sm">
-            Search existing terms above to propose changes or click &ldquo;+ Add
-            term&rdquo; to add a new glossary term.
+            Search existing terms above to propose changes, or click &ldquo;Add
+            term&rdquo; to create a new glossary entry. Changes are saved
+            automatically.
           </p>
         </div>
       ) : (

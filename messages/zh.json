@@ -366,7 +366,7 @@
     "draftKindArticle": "文章",
     "draftKindGlossary": "术语表",
     "editorAddingRow": "添加行",
-    "editorAddTermButton": "+ 添加术语",
+    "editorAddTermButton": "添加术语",
     "editorAttributionBody": "您的提交将以以下身份记录：<authorName>{name}</authorName> <authorEmail>{email}</authorEmail>。默认情况下我们使用您的 GitHub no-reply 邮箱，以便保护您的真实邮箱地址。",
     "editorAttributionLabel": "[作者信息]",
     "editorAttributionWarning": "您的 GitHub 身份（{name} <{email}>）将记录在 PR 中。",

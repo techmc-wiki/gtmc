@@ -222,7 +222,7 @@ export function GlossaryEditCard({
             value={tab}
             onValueChange={(value) => setTab(value as TabValue)}
             className="w-full">
-            <TabsList className="bg-muted/60 mb-3 h-8 p-0.5">
+            <TabsList className="mb-3 h-8 self-start p-0.5">
               {tabOptions.map((option) => (
                 <TabsTrigger
                   key={option.value}

@@ -90,7 +90,7 @@ export function GlossaryRowPicker({
               placeholder="Search existing terms to edit…"
               autoComplete="off"
               spellCheck={false}
-              className="h-10 pr-3 pl-9 text-sm font-normal"
+              className="h-10 pr-3 pl-9 text-sm font-normal sm:pl-9"
             />
           </div>
         </PopoverTrigger>

@@ -1,20 +1,26 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { SessionProvider, useSession } from "next-auth/react"
 import { Link } from "@/i18n/navigation"
-import { UserAvatar } from "@/components/ui/user-avatar"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { SignOutButton } from "@/components/ui/sign-out-button"
-import { cn } from "@/lib/cn"
-import { useHoverMenu } from "@/components/layout/use-hover-menu"
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+} from "@/components/ui/shadcn/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+} from "@/components/ui/shadcn/dropdown-menu"
 
 function AuthIslandContent() {
   const { data: session, status } = useSession()
-  const {
-    isOpen: isMenuOpen,
-    open: openMenu,
-    scheduleClose: scheduleCloseMenu,
-  } = useHoverMenu(180)
 
   // Loading state: pulse skeleton matching dashboard style
   if (status === "loading") {
@@ -37,50 +43,66 @@ function AuthIslandContent() {
     )
   }
 
-  // Authenticated state: Avatar + name dropdown (matching ProfileButton behavior)
+  // Authenticated state: Avatar trigger + name dropdown
   return (
-    <div
-      className="relative"
-      onMouseEnter={openMenu}
-      onMouseLeave={scheduleCloseMenu}
-      onFocus={openMenu}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) {
-          scheduleCloseMenu()
-        }
-      }}>
-      <Link
-        href="/profile"
-        className="block size-8 transition-transform hover:scale-110 md:size-10">
-        <UserAvatar src={session.user.image} alt={session.user.name} />
-      </Link>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Link
+          href="/profile"
+          className="block size-8 transition-transform hover:scale-110 md:size-10"
+          aria-label={session.user.name ?? undefined}>
+          <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-full items-center justify-center overflow-hidden border-2 p-1 ring-1">
+            <CornerBrackets
+              className="pointer-events-none absolute inset-0 z-10"
+              size="size-2"
+              color="border-tech-main/70"
+            />
+            {session.user.image ? (
+              <AvatarImage asChild src={session.user.image}>
+                <Image
+                  src={session.user.image}
+                  alt={session.user.name || "Avatar"}
+                  fill
+                  sizes="(max-width: 768px) 32px, 40px"
+                  loading="lazy"
+                  className="object-cover"
+                />
+              </AvatarImage>
+            ) : (
+              <AvatarFallback className="text-tech-main/50 bg-transparent font-mono text-xl font-bold tracking-widest uppercase">
+                {(session.user.name || "?")[0]}
+              </AvatarFallback>
+            )}
+          </Avatar>
+        </Link>
+      </DropdownMenuTrigger>
 
-      {/* Dropdown menu */}
-      <div
-        className={cn(
-          "pointer-events-none absolute top-full right-0 z-50 w-48 origin-top-right pt-2 opacity-0 transition-all duration-200",
-          isMenuOpen && "pointer-events-auto opacity-100"
-        )}>
-        <div className="border-tech-main/30 bg-surface-overlay/95 border p-2 shadow-lg backdrop-blur-sm">
-          <div className="guide-line mb-2 border-b pb-2">
-            <p className="text-tech-main-dark truncate font-mono text-xs font-bold">
-              {session.user.name}
-            </p>
-            <p className="text-tech-main/70 truncate font-mono text-[0.625rem]">
-              {session.user.email}
-            </p>
-          </div>
-          <div className="flex flex-col gap-1">
-            <Link
-              href="/profile"
-              className="text-tech-main-dark hover:bg-tech-main/10 px-2 py-1.5 font-mono text-[0.625rem] transition-colors">
-              PROFILE
-            </Link>
-            <SignOutButton className="text-tech-main-dark hover:bg-tech-main/10 w-full px-2 py-1.5 text-left font-mono text-[0.625rem] transition-colors" />
-          </div>
+      <DropdownMenuContent
+        align="end"
+        sideOffset={8}
+        className="border-tech-main/30 bg-surface-overlay/95 w-48 border p-2 shadow-lg backdrop-blur-sm">
+        <div className="guide-line mb-2 border-b pb-2">
+          <p className="text-tech-main-dark truncate font-mono text-xs font-bold">
+            {session.user.name}
+          </p>
+          <p className="text-tech-main/70 truncate font-mono text-[0.625rem]">
+            {session.user.email}
+          </p>
         </div>
-      </div>
-    </div>
+        <DropdownMenuGroup className="flex flex-col gap-1">
+          <DropdownMenuItem
+            asChild
+            className="text-tech-main-dark hover:bg-tech-main/10 focus:bg-tech-main/10 focus:text-tech-main-dark cursor-pointer rounded-none px-2 py-1.5 font-mono text-[0.625rem] transition-colors">
+            <Link href="/profile">PROFILE</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            asChild
+            className="rounded-none px-0 py-0 hover:bg-transparent focus:bg-transparent">
+            <SignOutButton className="text-tech-main-dark hover:bg-tech-main/10 w-full px-2 py-1.5 text-left font-mono text-[0.625rem] transition-colors" />
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

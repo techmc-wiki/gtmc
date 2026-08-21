@@ -16,8 +16,8 @@ import {
   type DraftFileCollection,
 } from "@/lib/drafts/files"
 import { OperationProgress } from "@/components/ui/operation-progress"
-import { TechButton } from "../ui/tech-button"
-import { FieldBox } from "../ui/field-box"
+import { Button } from "@/components/ui/shadcn/button"
+import { Input } from "@/components/ui/shadcn/input"
 import {
   EditorSurface,
   EditorActions,
@@ -26,6 +26,8 @@ import {
   EditorPreviewPanel,
   EditorPreviewFrame,
 } from "@/components/editor/editor-frames"
+import { Tabs } from "@/components/ui/shadcn/tabs"
+import type { TabType } from "@/components/editor/editor-tab-strip"
 
 interface DraftEditorProps {
   initialData?: {
@@ -220,7 +222,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               {t("titleLabel")}
             </label>
           </div>
-          <FieldBox
+          <Input
             id="draft-title"
             required
             placeholder={t("titlePlaceholder")}
@@ -281,65 +283,65 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       />
 
       <EditorContentArea>
-        <DraftEditorToolbar
-          activeTab={state.activeTab}
-          onTabChange={actions.setActiveTab}
-          activeFile={state.activeFile}
-          activeFileIndex={state.activeFileIndex}
-          lineWrap={state.lineWrap}
-          onWrapToggle={() => actions.setLineWrap((v) => !v)}
-          isReadOnly={state.isReadOnly}
-          isUploading={upload.isUploading}
-          fileInputRef={refs.fileInputRef}
-          onFileSelect={actions.handleUploadWithAutoSave}
-          isCompressing={upload.isCompressing}
-          onInsertSyntax={actions.insertSyntax}
-          onInsertText={actions.insertTextAtCursor}
-          onUndo={actions.handleUndoDraftEdit}
-          onRedo={actions.handleRedoDraftEdit}
-          canUndo={Boolean(state.activeFileHistoryAvailability?.undoCount)}
-          canRedo={Boolean(state.activeFileHistoryAvailability?.redoCount)}
-        />
-
-        <EditorBadge badge={badge.badge} onDismiss={badge.clearBadge} />
-
-        <EditorWritePanel
-          id="draft-editor-write-panel"
-          hidden={state.activeTab !== "write"}>
-          <EditorTextareaDynamic
-            ref={refs.textareaRef}
-            value={state.activeFileContent}
-            onChange={(value) => actions.updateActiveFile({ content: value })}
+        <Tabs
+          value={state.activeTab}
+          onValueChange={(value) => actions.setActiveTab(value as TabType)}
+          className="flex min-h-0 grow flex-col">
+          <DraftEditorToolbar
+            activeTab={state.activeTab}
+            activeFile={state.activeFile}
+            activeFileIndex={state.activeFileIndex}
+            lineWrap={state.lineWrap}
+            onWrapToggle={() => actions.setLineWrap((v) => !v)}
+            isReadOnly={state.isReadOnly}
+            isUploading={upload.isUploading}
+            fileInputRef={refs.fileInputRef}
+            onFileSelect={actions.handleUploadWithAutoSave}
+            isCompressing={upload.isCompressing}
+            onInsertSyntax={actions.insertSyntax}
+            onInsertText={actions.insertTextAtCursor}
             onUndo={actions.handleUndoDraftEdit}
             onRedo={actions.handleRedoDraftEdit}
-            onPaste={actions.handlePaste}
-            onDrop={actions.handleDrop}
-            onDragOver={(e) => {
-              if (!state.isReadOnly) e.preventDefault()
-            }}
-            onDragEnter={(e) => {
-              if (!state.isReadOnly) e.preventDefault()
-            }}
-            isReadOnly={state.isReadOnly}
-            isSaving={state.isSaving}
-            placeholder={t("contentPlaceholder")}
-            lineWrap={state.lineWrap}
             canUndo={Boolean(state.activeFileHistoryAvailability?.undoCount)}
             canRedo={Boolean(state.activeFileHistoryAvailability?.redoCount)}
-            enableSyntaxHints
           />
-        </EditorWritePanel>
 
-        <EditorPreviewPanel
-          id="draft-editor-preview-panel"
-          hidden={state.activeTab !== "preview"}>
-          <EditorPreviewFrame isEmpty={!state.activeFileContent.trim()}>
-            <LazyMarkdownPreview
-              content={state.activeFileContent}
-              rawPath={state.activeFile.filePath || ""}
+          <EditorBadge badge={badge.badge} onDismiss={badge.clearBadge} />
+
+          <EditorWritePanel value="write">
+            <EditorTextareaDynamic
+              ref={refs.textareaRef}
+              value={state.activeFileContent}
+              onChange={(value) => actions.updateActiveFile({ content: value })}
+              onUndo={actions.handleUndoDraftEdit}
+              onRedo={actions.handleRedoDraftEdit}
+              onPaste={actions.handlePaste}
+              onDrop={actions.handleDrop}
+              onDragOver={(e) => {
+                if (!state.isReadOnly) e.preventDefault()
+              }}
+              onDragEnter={(e) => {
+                if (!state.isReadOnly) e.preventDefault()
+              }}
+              isReadOnly={state.isReadOnly}
+              isSaving={state.isSaving}
+              placeholder={t("contentPlaceholder")}
+              lineWrap={state.lineWrap}
+              canUndo={Boolean(state.activeFileHistoryAvailability?.undoCount)}
+              canRedo={Boolean(state.activeFileHistoryAvailability?.redoCount)}
+              enableSyntaxHints
             />
-          </EditorPreviewFrame>
-        </EditorPreviewPanel>
+          </EditorWritePanel>
+
+          <EditorPreviewPanel value="preview">
+            <EditorPreviewFrame isEmpty={!state.activeFileContent.trim()}>
+              <LazyMarkdownPreview
+                content={state.activeFileContent}
+                rawPath={state.activeFile.filePath || ""}
+              />
+            </EditorPreviewFrame>
+          </EditorPreviewPanel>
+        </Tabs>
       </EditorContentArea>
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
@@ -432,7 +434,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                 <>
                   <div className="mb-4 flex flex-wrap gap-2">
                     {state.contributingGuides.map((guide) => (
-                      <TechButton
+                      <Button
                         key={guide.id}
                         type="button"
                         variant={
@@ -443,7 +445,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                         size="sm"
                         onClick={() => actions.setActiveGuideId(guide.id)}>
                         {guide.title}
-                      </TechButton>
+                      </Button>
                     ))}
                   </div>
                   <div className="max-h-136 overflow-y-auto pr-2">
@@ -510,7 +512,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           />
 
           <EditorActions>
-            <TechButton
+            <Button
               type="submit"
               variant="primary"
               disabled={state.saveDisabled}
@@ -520,16 +522,16 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                 : state.hasUnsavedChanges
                   ? `${t("saveButton")}_*`
                   : t("saveButton")}
-            </TechButton>
+            </Button>
 
-            <TechButton
+            <Button
               type="button"
               variant="ghost"
               onClick={actions.handleSubmitReview}
               disabled={state.submitDisabled}
               aria-busy={state.isSubmittingReview}>
               {state.isSubmittingReview ? progressT("submitBusy") : t("openPr")}
-            </TechButton>
+            </Button>
           </EditorActions>
 
           <section

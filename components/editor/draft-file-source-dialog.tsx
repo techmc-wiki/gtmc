@@ -3,9 +3,19 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 
-import { TechButton } from "@/components/ui/tech-button"
-import { FieldBox } from "@/components/ui/field-box"
-import { SegmentedControl } from "@/components/ui/segmented-control"
+import { Button } from "@/components/ui/shadcn/button"
+import { Input } from "@/components/ui/shadcn/input"
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/ui/shadcn/tabs"
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/shadcn/dialog"
 import { normalizeDraftFilePath } from "@/lib/drafts/files"
 
 interface DraftRepoTreeNode {
@@ -269,20 +279,26 @@ export function DraftFileSourceDialog({
   const canSubmitUpload = Boolean(localFile) && !isSubmitting
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
-      <div className="border-tech-main bg-surface-modal flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden border shadow-2xl">
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose()
+      }}>
+      <DialogContent
+        showCloseButton={false}
+        className="border-tech-main bg-surface-modal top-1/2 left-1/2 max-h-[90vh] w-full max-w-6xl -translate-x-1/2 -translate-y-1/2 overflow-hidden border shadow-2xl">
         <div className="guide-line bg-tech-main/5 flex items-center justify-between border-b px-5 py-4">
           <div>
-            <p className="text-tech-main font-mono text-sm tracking-widest uppercase">
+            <DialogTitle className="text-tech-main font-mono text-sm tracking-widest uppercase">
               {t("dialogTitle")}
-            </p>
+            </DialogTitle>
             <p className="text-tech-main/60 mt-1 font-mono text-xs uppercase">
               {t("dialogSubtitle")}
             </p>
           </div>
-          <TechButton type="button" variant="ghost" size="sm" onClick={onClose}>
+          <Button type="button" variant="ghost" size="sm" onClick={onClose}>
             {t("close")}
-          </TechButton>
+          </Button>
         </div>
 
         <div className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[20rem_minmax(0,1fr)]">
@@ -317,40 +333,39 @@ export function DraftFileSourceDialog({
           </aside>
 
           <div className="min-h-0 overflow-y-auto p-5">
-            <div className="mb-5">
-              <SegmentedControl<SourceMode>
-                options={sourceModeOptions}
-                value={mode}
-                onValueChange={setMode}
-                controlRole="group"
-                size="sm"
-              />
-            </div>
+            <Tabs
+              value={mode}
+              onValueChange={(value) => setMode(value as SourceMode)}
+              className="gap-2">
+              <TabsList>
+                {sourceModeOptions.map((option) => (
+                  <TabsTrigger key={option.value} value={option.value}>
+                    {option.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
 
-            {treeError ? (
-              <div className="mb-4 border border-red-500/30 bg-red-500/10 px-4 py-3 font-mono text-xs text-red-700">
-                {treeError}
-              </div>
-            ) : null}
+              {treeError ? (
+                <div className="mb-4 border border-red-500/30 bg-red-500/10 px-4 py-3 font-mono text-xs text-red-700">
+                  {treeError}
+                </div>
+              ) : null}
 
-            {mode === "repo" ? (
-              <div className="space-y-4">
+              <TabsContent value="repo" className="space-y-4">
                 <SectionLabel>{t("selectExistingFile")}</SectionLabel>
                 <p className="text-tech-main/60 font-mono text-xs uppercase">
                   {t("selected")}: {selectedRepoFilePath || "NONE"}
                 </p>
-                <TechButton
+                <Button
                   type="button"
                   variant="primary"
                   onClick={handleAddRepoFile}
                   disabled={!canSubmitRepo}>
                   {isSubmitting ? t("adding") : t("addExistingFile")}
-                </TechButton>
-              </div>
-            ) : null}
+                </Button>
+              </TabsContent>
 
-            {mode === "upload" ? (
-              <div className="space-y-4">
+              <TabsContent value="upload" className="space-y-4">
                 <SectionLabel>{t("importLocalText")}</SectionLabel>
                 <p className="text-tech-main/60 font-mono text-xs uppercase">
                   {t("destinationFolder")}: {selectedFolderPath || "ROOT"}
@@ -366,25 +381,23 @@ export function DraftFileSourceDialog({
                   <label className="section-label" htmlFor="draft-import-name">
                     {t("fileNameLabel")}
                   </label>
-                  <FieldBox
+                  <Input
                     id="draft-import-name"
                     placeholder={t("repoFileNamePlaceholder")}
                     value={customUploadName}
                     onChange={handleCustomUploadNameChange}
                   />
                 </div>
-                <TechButton
+                <Button
                   type="button"
                   variant="primary"
                   onClick={handleImportLocalFile}
                   disabled={!canSubmitUpload}>
                   {isSubmitting ? t("importing") : t("importLocalFile")}
-                </TechButton>
-              </div>
-            ) : null}
+                </Button>
+              </TabsContent>
 
-            {mode === "new" ? (
-              <div className="space-y-4">
+              <TabsContent value="new" className="space-y-4">
                 <SectionLabel>{t("createNewFile")}</SectionLabel>
                 <p className="text-tech-main/60 font-mono text-xs uppercase">
                   {t("destinationFolder")}: {selectedFolderPath || "ROOT"}
@@ -395,7 +408,7 @@ export function DraftFileSourceDialog({
                     htmlFor="draft-new-file-name">
                     {t("fileNameLabel")}
                   </label>
-                  <FieldBox
+                  <Input
                     id="draft-new-file-name"
                     placeholder={t("newFileNamePlaceholder")}
                     value={newFileName}
@@ -407,18 +420,16 @@ export function DraftFileSourceDialog({
                   {buildDraftFilePath(selectedFolderPath, newFileName) ||
                     t("pending")}
                 </div>
-                <TechButton
+                <Button
                   type="button"
                   variant="primary"
                   onClick={handleCreateNewFile}
                   disabled={!canSubmitNew}>
                   {t("createEmptyFile")}
-                </TechButton>
-              </div>
-            ) : null}
+                </Button>
+              </TabsContent>
 
-            {mode === "folder" ? (
-              <div className="space-y-4">
+              <TabsContent value="folder" className="space-y-4">
                 <SectionLabel>新建文件夹</SectionLabel>
                 <p className="text-tech-main/60 font-mono text-xs uppercase">
                   {t("destinationFolder")}: {selectedFolderPath || "ROOT"}
@@ -429,7 +440,7 @@ export function DraftFileSourceDialog({
                     htmlFor="draft-new-folder-name">
                     {t("fileNameLabel")}
                   </label>
-                  <FieldBox
+                  <Input
                     id="draft-new-folder-name"
                     placeholder="例如：new-section"
                     value={newFolderName}
@@ -442,19 +453,19 @@ export function DraftFileSourceDialog({
                     .filter(Boolean)
                     .join("/") || t("pending")}
                 </div>
-                <TechButton
+                <Button
                   type="button"
                   variant="primary"
                   onClick={handleCreateNewFolder}
                   disabled={!newFolderName.trim()}>
                   创建文件夹
-                </TechButton>
-              </div>
-            ) : null}
+                </Button>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 

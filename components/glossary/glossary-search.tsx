@@ -3,6 +3,13 @@
 import * as React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslations } from "next-intl"
+import { SearchIcon } from "lucide-react"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/shadcn/input-group"
 
 const DEBOUNCE_MS = 100
 
@@ -102,27 +109,25 @@ export function GlossarySearch({
   return (
     <search
       className={`grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:flex sm:items-center ${className}`}>
-      <div className="border-tech-main/40 focus-within:border-tech-main/70 bg-surface-input/50 col-span-2 flex h-9 min-w-0 flex-1 items-stretch border transition-colors sm:col-span-1">
-        <span
-          aria-hidden="true"
-          className="text-tech-main/60 flex items-center px-3 font-mono text-sm select-none">
-          &gt;
-        </span>
-        <input
+      <InputGroup className="col-span-2 h-9 min-h-0 sm:col-span-1 sm:flex-1">
+        <InputGroupAddon align="inline-start">
+          <SearchIcon className="text-tech-main/60 size-3.5" />
+        </InputGroupAddon>
+        <InputGroupInput
           ref={inputRef}
-          type="text"
           value={inputValue}
           onChange={handleInputChange}
           placeholder={t("searchPlaceholder")}
           aria-label="Search glossary terms"
           autoComplete="off"
           spellCheck={false}
-          className="text-tech-main-dark placeholder:text-tech-main/50 w-full bg-transparent pr-3 font-mono text-sm outline-none"
         />
-        <span className="text-tech-main/50 hidden items-center pr-3 font-mono text-xs whitespace-nowrap select-none sm:flex">
-          {resultCount} of {totalCount}
-        </span>
-      </div>
+        <InputGroupAddon align="inline-end" className="hidden sm:flex">
+          <InputGroupText tabular-nums>
+            {resultCount} / {totalCount}
+          </InputGroupText>
+        </InputGroupAddon>
+      </InputGroup>
 
       <button
         type="button"

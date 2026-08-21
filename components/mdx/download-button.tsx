@@ -21,7 +21,7 @@ export function DownloadButton({
       <div className="space-y-2">
         <Button
           variant="primary"
-          size="lg"
+          size="md"
           className="w-full sm:w-auto"
           disabled
           aria-disabled="true">
@@ -35,7 +35,7 @@ export function DownloadButton({
   }
 
   return (
-    <Button asChild variant="primary" size="lg" className="w-full sm:w-auto">
+    <Button asChild variant="primary" size="md" className="w-full sm:w-auto">
       <a href={`${baseUrl}/${filename}`} download>
         {children}
       </a>

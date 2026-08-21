@@ -110,6 +110,9 @@ importers:
       node-diff3:
         specifier: ^3.2.1
         version: 3.2.1
+      nuqs:
+        specifier: ^2.10.0
+        version: 2.10.0(next@16.3.0(@types/node@26.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       pangu:
         specifier: ^9.1.0
         version: 9.1.0
@@ -4777,6 +4780,27 @@ packages:
 
   nucleation@0.2.18:
     resolution: {integrity: sha512-eMeXFBCP3U9SGFMAnZPriRLqTsZNf3k1MUmSJO24M9DePtgEq1WDd9bPoDVFaQ+kR1IllshVrTkANzoE7Whvqw==}
+
+  nuqs@2.10.0:
+    resolution: {integrity: sha512-uy62jWCXiU1mcGfoClUFNTfrbaxfPQ8WuiomYlkXw5llVdN8kRZVYxOQ2LD70k3DzVQz5bZczE9ClVXwOC22Dw==}
+    peerDependencies:
+      '@remix-run/react': '>=2'
+      '@tanstack/react-router': ^1
+      next: '>=14.2.0'
+      react: '>=18.2.0 || ^19.0.0-0'
+      react-router: ^5 || ^6 || ^7 || ^8
+      react-router-dom: ^5 || ^6 || ^7
+    peerDependenciesMeta:
+      '@remix-run/react':
+        optional: true
+      '@tanstack/react-router':
+        optional: true
+      next:
+        optional: true
+      react-router:
+        optional: true
+      react-router-dom:
+        optional: true
 
   oauth4webapi@3.8.7:
     resolution: {integrity: sha512-4RxcKxXjuItDFZ20RRPf4YTw3kpeXJyCgJFxVzJ068A7PNJ18st2Dg90tlC1LkSDS0GecroagCLHYEIVUhCAkw==}
@@ -10330,6 +10354,13 @@ snapshots:
       path-key: 3.1.1
 
   nucleation@0.2.18: {}
+
+  nuqs@2.10.0(next@16.3.0(@types/node@26.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8):
+    dependencies:
+      '@standard-schema/spec': 1.1.0
+      react: 19.2.8
+    optionalDependencies:
+      next: 16.3.0(@types/node@26.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
 
   oauth4webapi@3.8.7: {}
 

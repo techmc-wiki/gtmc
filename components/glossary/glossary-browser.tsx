@@ -32,6 +32,12 @@ import {
 } from "@/lib/glossary/view-options"
 import { useLocalizedGlossary } from "@/lib/glossary/use-localized-glossary"
 import { cn } from "@/lib/cn"
+import {
+  parseAsArrayOf,
+  parseAsString,
+  parseAsStringLiteral,
+  useQueryState,
+} from "nuqs"
 
 const SKELETON_ROWS = 12
 
@@ -122,12 +128,16 @@ export function GlossaryBrowser({
     [locale]
   )
 
-  const [query, setQuery] = React.useState("")
-  const [searchScope, setSearchScope] = React.useState<"active" | "all">(
-    "active"
+  const resultCount = entries.length
+
+  const [query, setQuery] = useQueryState("q", parseAsString.withDefault(""))
+  const [searchScope, setSearchScope] = useQueryState(
+    "scope",
+    parseAsStringLiteral(["active", "all"]).withDefault("active")
   )
-  const [selectedCategories, setSelectedCategories] = React.useState<string[]>(
-    []
+  const [selectedCategories, setSelectedCategories] = useQueryState(
+    "categories",
+    parseAsArrayOf(parseAsString).withDefault([])
   )
   const [visibleColumns, setVisibleColumns] = React.useState<
     GlossaryTableColumn[]
@@ -208,15 +218,14 @@ export function GlossaryBrowser({
     [entries]
   )
 
-  const trimmedQuery = query.trim()
-  const resultCount = trimmedQuery ? entries.length : entries.length
-
   return (
     <div className={cn("flex flex-col gap-6", className)}>
       <section aria-label={t("letterBarLabel")} className="relative z-30">
         <div className="border-tech-main/30 bg-surface-overlay/60 relative flex flex-col gap-3 border p-3 backdrop-blur-sm sm:p-4">
           <div className="grid gap-3 sm:flex sm:flex-row sm:items-center">
             <GlossarySearch
+              query={query}
+              scope={searchScope}
               onQueryChange={setQuery}
               onScopeChange={setSearchScope}
               resultCount={resultCount}

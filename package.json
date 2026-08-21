@@ -72,6 +72,7 @@
     "next-auth": "5.0.0-beta.32",
     "next-intl": "^4.13.6",
     "node-diff3": "^3.2.1",
+    "nuqs": "^2.10.0",
     "pangu": "^9.1.0",
     "papaparse": "^5.5.4",
     "radix-ui": "^1.6.7",

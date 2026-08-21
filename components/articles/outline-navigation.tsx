@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation"
 import { useReaderNavigation } from "@/app/[locale]/(public)/articles/reader-navigation/context"
 import { useFooterOverlap } from "@/hooks/use-footer-overlap"
 import { useScrollProgress } from "@/hooks/use-scroll-progress"
+import { ReaderDock } from "@/components/articles/reader-dock"
 import {
   Sheet,
   SheetTrigger,
@@ -190,7 +191,7 @@ export function OutlineRail() {
 
 const emptySubscribe = () => () => {}
 
-/** Mobile outline: progress strip under the navbar + bottom sheet with the same links. */
+/** Mobile outline: floating progress pill + bottom sheet with the same links. */
 export function MobileOutlineBar() {
   const t = useTranslations("Outline")
   const { outline, activeHeadingId } = useReaderNavigation()
@@ -218,41 +219,28 @@ export function MobileOutlineBar() {
   const activeItem = outline.find(
     (item) => item.id === effectiveActiveHeadingId
   )
-
   return (
     <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-      {/* Progress strip — fixed just below sticky navbar */}
-      <div
-        className={`pointer-events-none fixed inset-x-0 top-16 z-20 h-20 transition-opacity duration-500 md:top-20 xl:hidden ${hasScrolledPastNavbar && !isOverlappingFooter ? "opacity-100" : "opacity-0"}`}>
-        {/* Section label — fixed right-aligned in navbar row */}
-        {activeItem && (
-          <SheetTrigger asChild>
-            <button
-              type="button"
-              className="pointer-events-auto flex h-fit w-full items-center px-4 py-2 pr-4 backdrop-blur-xs xl:hidden"
-              aria-label={t("openSheet")}>
-              <div className="max-w-[40vw] truncate font-mono text-xs font-bold text-tech-main transition-colors duration-150 hover:text-tech-main">
-                {activeItem.text}
-              </div>
-            </button>
-          </SheetTrigger>
-        )}
-        <div
-          className="pr-28">
-          <progress
-            className="sr-only"
-            aria-label={t("progressLabel")}
-            max={100}
-            value={pct}>
-            {pct}%
-          </progress>
-          <div
-            className="bg-tech-signal h-0.5 transition-[width] duration-150"
-            style={progressWidthStyle}
-          />
-        </div>
-      </div>
-
+      <ReaderDock
+        pct={pct}
+        visible={hasScrolledPastNavbar && !isOverlappingFooter}
+        sectionLabel={activeItem?.text ?? null}>
+        <SheetTrigger asChild>
+          <button
+            type="button"
+            className="text-tech-main-dark hover:bg-tech-main/5 flex h-full min-w-0 cursor-pointer items-center gap-2 px-3 py-2 text-left transition-colors"
+            aria-label={t("openSheet")}>
+            <span className="max-w-[38vw] truncate font-mono text-xs font-bold">
+              {activeItem?.text}
+            </span>
+            <span
+              aria-hidden="true"
+              className="text-tech-main/50 font-mono text-[0.625rem]">
+              ▸
+            </span>
+          </button>
+        </SheetTrigger>
+      </ReaderDock>
       {/* Bottom Sheet */}
       <SheetContent
         side="bottom"

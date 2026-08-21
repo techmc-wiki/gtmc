@@ -4,6 +4,7 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 import { Link, usePathname } from "@/i18n/navigation"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
+import { Logo } from "@/components/ui/logo"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/shadcn/sheet"
 
@@ -39,9 +40,14 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
   )
 }
 
-/** Mobile nav: hamburger trigger + top sheet drawer with the same links. */
+/**
+ * Mobile nav: hamburger trigger + modal side drawer (research default over
+ * top dropdowns — preserves page context via the scrim and gives the IA room).
+ * Radix Dialog supplies the modal semantics: focus trap, Escape, focus return.
+ */
 export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
   const t = useTranslations("CommonA11y")
+  const tFooter = useTranslations("Footer")
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
 
   return (
@@ -60,21 +66,36 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
       </SheetTrigger>
 
       <SheetContent
-        side="top"
+        side="left"
         showCloseButton={false}
         aria-label={t("toggleNavigationMenu")}
-        className="border-tech-main/40 bg-surface-overlay/95 top-16 max-h-[calc(100dvh-4rem)] border-b p-0 backdrop-blur-md md:hidden">
-        <div className="max-h-[calc(100dvh-4rem)] space-y-2 overflow-y-auto p-4 sm:p-6">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setIsDrawerOpen(false)}
-              className="border-tech-main/40 text-tech-main-dark hover:bg-tech-main-dark hover:text-tech-bg bg-surface-overlay/60 flex min-h-11 items-center border p-3 font-mono text-xs tracking-[0.15em] uppercase transition-colors">
-              {link.label}
-            </Link>
-          ))}
-          <div className="flex items-center gap-2">
+        aria-describedby={undefined}
+        className="border-tech-main/40 bg-surface-overlay/95 w-[85vw] max-w-xs border-r p-0 backdrop-blur-md md:hidden">
+        <div className="flex h-full flex-col">
+          <div className="border-tech-main/30 flex h-16 shrink-0 items-center justify-between border-b px-4">
+            <Logo size="sm" />
+          </div>
+          <nav
+            aria-label={t("toggleNavigationMenu")}
+            className="flex-1 overflow-y-auto p-3">
+            <p className="text-tech-main/50 mb-2 px-1 font-mono text-[0.625rem] tracking-[0.2em] uppercase">
+              {tFooter("sectionRead")}
+            </p>
+            <ul className="space-y-1">
+              {navLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    onClick={() => setIsDrawerOpen(false)}
+                    className="border-tech-main/40 text-tech-main-dark hover:border-tech-signal hover:bg-tech-main/5 flex min-h-11 items-center border-b px-3 font-mono text-xs tracking-[0.15em] uppercase transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="border-tech-main/30 flex shrink-0 items-center gap-2 border-t p-3">
             <ThemeToggle />
             <LanguageSwitcher className="border-none" />
           </div>

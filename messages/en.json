@@ -366,7 +366,7 @@
     "draftKindArticle": "Article",
     "draftKindGlossary": "Glossary",
     "editorAddingRow": "Adding row",
-    "editorAddTermButton": "+ Add term",
+    "editorAddTermButton": "Add term",
     "editorAttributionBody": "Your commit will be authored under: <authorName>{name}</authorName> <authorEmail>{email}</authorEmail>. By default we use your GitHub no-reply email to keep your real address private.",
     "editorAttributionLabel": "[Authorship]",
     "editorAttributionWarning": "Your GitHub identity ({name} <{email}>) will be recorded in the PR.",

@@ -109,7 +109,7 @@ export function AttributionWarning({
       <CardHeader className="p-0 pb-2">
         <CardTitle className="text-foreground flex items-center gap-1.5 text-xs font-semibold">
           <UserCheck className="text-tech-signal size-3.5" />
-          {t("editorAttributionLabel").replaceAll(/[[\\]]/g, "")}
+          {t("editorAttributionLabel").replaceAll("[", "").replaceAll("]", "")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 p-0">

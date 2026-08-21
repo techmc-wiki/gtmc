@@ -8,9 +8,14 @@ import { deleteGlossaryDraftAction } from "@/actions/glossary-draft"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageHeader, SectionTitle } from "@/components/ui/headings"
 import { DraftStatusBadge } from "@/components/ui/status"
-import { TechBadge } from "@/components/ui/status"
-import { TechButton } from "@/components/ui/tech-button"
-import { TechCard } from "@/components/ui/tech-card"
+import { Badge } from "@/components/ui/shadcn/badge"
+import { Button } from "@/components/ui/shadcn/button"
+import { Card } from "@/components/ui/shadcn/card"
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/shadcn/collapsible"
 import { Link } from "@/i18n/navigation"
 import { guardUser } from "@/lib/auth/guards"
 import { countCleanupFailedByRevision } from "@/lib/drafts/asset-db"
@@ -108,9 +113,9 @@ function DraftRecord({
       }`}>
       <div className="min-w-0">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <TechBadge className="border-tech-main/30 bg-tech-main/5 text-tech-main">
+          <Badge className="border-tech-main/30 bg-tech-main/5 text-tech-main">
             [{kindLabel}]
-          </TechBadge>
+          </Badge>
           <DraftStatusBadge status={status} />
           <span className="text-tech-main/55 font-mono text-[0.625rem] tracking-wider uppercase sm:ml-1">
             {updatedLabel}
@@ -154,27 +159,30 @@ function DraftRecord({
           <span aria-hidden="true">→</span>
         </Link>
         {deleteAction ? (
-          <details className="w-full text-left sm:w-auto sm:text-right">
-            <summary
-              aria-label={moreActionsLabelForDraft}
-              className="text-tech-main/60 hover:text-tech-main focus-visible:outline-tech-main inline-flex min-h-11 cursor-pointer items-center font-mono text-[0.625rem] tracking-wider uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2">
-              {moreActionsLabel}
-            </summary>
-            <div className="border-tech-main/20 mt-1 space-y-2 border-t pt-3 sm:w-52">
+          <Collapsible className="w-full text-left sm:w-auto sm:text-right">
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                aria-label={moreActionsLabelForDraft}
+                className="text-tech-main/60 hover:text-tech-main focus-visible:outline-tech-main inline-flex min-h-11 cursor-pointer items-center font-mono text-[0.625rem] tracking-wider uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2">
+                {moreActionsLabel}
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="border-tech-main/20 mt-1 space-y-2 border-t pt-3 sm:w-52">
               <p className="text-tech-main/65 text-xs leading-relaxed">
                 {deleteWarning}
               </p>
               <form action={deleteAction}>
-                <TechButton
+                <Button
                   type="submit"
                   variant="danger"
                   size="sm"
                   className="min-h-11 w-full text-[0.625rem] uppercase">
                   {deleteLabel}
-                </TechButton>
+                </Button>
               </form>
-            </div>
-          </details>
+            </CollapsibleContent>
+          </Collapsible>
         ) : null}
       </div>
     </div>
@@ -186,7 +194,7 @@ function DraftRecord({
 
   return (
     <article>
-      <TechCard
+      <Card
         tone="main"
         borderOpacity="muted"
         background="default"
@@ -194,7 +202,7 @@ function DraftRecord({
         hover="border"
         brackets="hidden">
         {content}
-      </TechCard>
+      </Card>
     </article>
   )
 }
@@ -377,7 +385,7 @@ export default async function DraftDashboardPage({
         </section>
 
         <aside className="lg:sticky lg:top-28 lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <TechCard
+          <Card
             tone="main"
             borderOpacity="medium"
             background="subtle"
@@ -408,7 +416,7 @@ export default async function DraftDashboardPage({
                 <span aria-hidden="true">→</span>
               </Link>
             </div>
-          </TechCard>
+          </Card>
         </aside>
 
         {archivedItems.length > 0 ? (
@@ -419,7 +427,7 @@ export default async function DraftDashboardPage({
                 {archivedItems.length}
               </span>
             </SectionTitle>
-            <TechCard
+            <Card
               tone="main"
               borderOpacity="subtle"
               background="ghost"
@@ -429,7 +437,7 @@ export default async function DraftDashboardPage({
               <ul className="divide-tech-main/15 divide-y">
                 {archivedItems.map((item) => renderRecord(item, true))}
               </ul>
-            </TechCard>
+            </Card>
           </section>
         ) : null}
       </div>

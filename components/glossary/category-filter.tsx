@@ -1,9 +1,13 @@
 "use client"
 
 import * as React from "react"
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/cn"
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/shadcn/collapsible"
 
 export interface CategoryFilterCategory {
   name: string
@@ -34,10 +38,6 @@ const ROW_ACTIVE = "border-tech-main/60 bg-tech-main/10 text-tech-main-dark"
 
 const ROW_INACTIVE =
   "border-tech-main/30 bg-surface-overlay/50 text-tech-main/80 hover:border-tech-main/60 hover:bg-tech-accent/10"
-
-const PANEL_COLLAPSED = { gridTemplateRows: "0fr", opacity: 0 }
-const PANEL_EXPANDED = { gridTemplateRows: "1fr", opacity: 1 }
-const PANEL_EASE = [0.32, 0.72, 0, 1] as const
 
 interface RowProps {
   label: string
@@ -81,11 +81,7 @@ function Row({ label, count, active, name, onClick, onToggle }: RowProps) {
   )
 }
 
-interface ChevronProps {
-  open: boolean
-}
-
-function Chevron({ open }: ChevronProps) {
+function Chevron({ open }: { open: boolean }) {
   return (
     <svg
       aria-hidden="true"
@@ -116,11 +112,6 @@ export function CategoryFilter({
   const allLabel = t("categoryAll")
   const reactId = React.useId()
   const panelId = `${reactId}-panel`
-  const reduceMotion = useReducedMotion()
-  const panelTransition = React.useMemo(
-    () => ({ duration: reduceMotion ? 0 : 0.18, ease: PANEL_EASE }),
-    [reduceMotion]
-  )
 
   const [isOpen, setIsOpen] = React.useState(false)
   const noneSelected = selected.length === 0
@@ -140,10 +131,6 @@ export function CategoryFilter({
     if (selected.length > 0) onChange([])
   }, [selected, onChange])
 
-  const handleTriggerClick = React.useCallback(() => {
-    setIsOpen((prev) => !prev)
-  }, [])
-
   // Inline disclosure: Esc closes; outside click does not (would be jarring).
   React.useEffect(() => {
     if (!isOpen) return
@@ -159,57 +146,50 @@ export function CategoryFilter({
     : `[${t("categoriesSelectedCount", { count: selected.length })}]`
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      <button
-        type="button"
-        onClick={handleTriggerClick}
-        aria-expanded={isOpen}
-        aria-controls={panelId}
-        className={cn(
-          TRIGGER_BASE,
-          noneSelected ? TRIGGER_INACTIVE : TRIGGER_ACTIVE
-        )}>
-        <span className="truncate">{triggerLabel}</span>
-        <Chevron open={isOpen} />
-      </button>
+    <Collapsible
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      className={cn("flex flex-col gap-2", className)}>
+      <CollapsibleTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            TRIGGER_BASE,
+            noneSelected ? TRIGGER_INACTIVE : TRIGGER_ACTIVE
+          )}>
+          <span className="truncate">{triggerLabel}</span>
+          <Chevron open={isOpen} />
+        </button>
+      </CollapsibleTrigger>
 
-      <AnimatePresence initial={false}>
-        {isOpen ? (
-          <motion.div
-            key="panel"
+      <CollapsibleContent className="grid transition-[grid-template-rows,opacity] duration-200 data-[state=closed]:[grid-template-rows:0fr] data-[state=closed]:opacity-0 data-[state=open]:[grid-template-rows:1fr] data-[state=open]:opacity-100 motion-reduce:transition-none">
+        <div className="overflow-hidden">
+          <div
             id={panelId}
-            initial={PANEL_COLLAPSED}
-            animate={PANEL_EXPANDED}
-            exit={PANEL_COLLAPSED}
-            transition={panelTransition}
-            className="grid">
-            <div className="overflow-hidden">
-              <div className="border-tech-main/30 bg-surface-overlay/60 flex flex-col gap-2 border p-2 backdrop-blur-sm sm:p-3">
-                <Row
-                  label={allLabel}
-                  count={totalCount}
-                  active={noneSelected}
-                  onClick={handleSelectAll}
-                />
-                {categories.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                    {categories.map((category) => (
-                      <Row
-                        key={category.name}
-                        label={category.name}
-                        name={category.name}
-                        count={category.count}
-                        active={selected.includes(category.name)}
-                        onToggle={handleToggle}
-                      />
-                    ))}
-                  </div>
-                ) : null}
+            className="border-tech-main/30 bg-surface-overlay/60 flex flex-col gap-2 border p-2 backdrop-blur-sm sm:p-3">
+            <Row
+              label={allLabel}
+              count={totalCount}
+              active={noneSelected}
+              onClick={handleSelectAll}
+            />
+            {categories.length > 0 ? (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {categories.map((category) => (
+                  <Row
+                    key={category.name}
+                    label={category.name}
+                    name={category.name}
+                    count={category.count}
+                    active={selected.includes(category.name)}
+                    onToggle={handleToggle}
+                  />
+                ))}
               </div>
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
-    </div>
+            ) : null}
+          </div>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }

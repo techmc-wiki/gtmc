@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { createPortal } from "react-dom"
 import { useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
@@ -9,8 +8,7 @@ import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { CrossRefChips } from "@/components/glossary/cross-ref-chips"
 import { TranslationsList } from "@/components/glossary/translations-list"
 import { parseRelated } from "@/lib/glossary/related"
-import { useModalEffects } from "@/hooks/use-modal-effects"
-import { useMounted } from "@/hooks/use-mounted"
+import { Dialog, DialogContent } from "@/components/ui/shadcn/dialog"
 import type { GlossaryEntryBase } from "@/lib/glossary/manifest"
 import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
 
@@ -135,95 +133,24 @@ export function GlossaryDetailPanel({
   onOpenRelated,
 }: GlossaryDetailPanelProps) {
   const t = useTranslations("Glossary")
-  const dialogRef = React.useRef<HTMLDialogElement>(null)
-  const previouslyFocusedRef = React.useRef<HTMLElement | null>(null)
-  const isMounted = useMounted()
-  const isOpen = entry !== null
 
-  useModalEffects({ isOpen, onClose })
-
-  React.useEffect(() => {
-    if (!isOpen || !isMounted) return
-
-    const dialog = dialogRef.current
-    previouslyFocusedRef.current =
-      document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null
-    if (!dialog?.open) dialog?.showModal()
-    dialog?.focus({ preventScroll: true })
-
-    const handleBackdropClick = (event: MouseEvent) => {
-      if (event.target === dialog) onClose()
-    }
-
-    const handleTab = (event: KeyboardEvent) => {
-      if (event.key !== "Tab" || !dialog) return
-
-      const focusableElements = [
-        ...dialog.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), summary, [tabindex]:not([tabindex="-1"])'
-        ),
-      ].filter((element) => element.getClientRects().length > 0)
-
-      if (focusableElements.length === 0) {
-        event.preventDefault()
-        dialog.focus({ preventScroll: true })
-        return
-      }
-
-      const first = focusableElements[0]
-      const last = focusableElements.at(-1)
-      const activeElement = document.activeElement
-      const focusIsOutside =
-        activeElement instanceof Node && !dialog.contains(activeElement)
-
-      if (
-        event.shiftKey &&
-        (activeElement === first || activeElement === dialog || focusIsOutside)
-      ) {
-        event.preventDefault()
-        last?.focus()
-      } else if (
-        !event.shiftKey &&
-        (activeElement === last || focusIsOutside)
-      ) {
-        event.preventDefault()
-        first?.focus()
-      }
-    }
-
-    dialog?.addEventListener("click", handleBackdropClick)
-    document.addEventListener("keydown", handleTab, true)
-
-    return () => {
-      dialog?.removeEventListener("click", handleBackdropClick)
-      document.removeEventListener("keydown", handleTab, true)
-      if (dialog?.open) dialog.close()
-      previouslyFocusedRef.current?.focus({ preventScroll: true })
-      previouslyFocusedRef.current = null
-    }
-  }, [isOpen, isMounted, onClose])
-
-  if (!entry || !isMounted) return null
+  if (!entry) return null
 
   const titleId = `glossary-detail-panel-${entry.slug}`
   const descriptionId = `${titleId}-description`
   const hasShortForm = entry.shortForm.trim().length > 0
 
-  return createPortal(
-    <div className="fixed inset-0 z-60">
-      <dialog
-        ref={dialogRef}
-        tabIndex={-1}
-        aria-modal="true"
+  return (
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose()
+      }}>
+      <DialogContent
+        showCloseButton={false}
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        onCancel={(event) => {
-          event.preventDefault()
-          onClose()
-        }}
-        className="border-tech-main/35 animate-tech-pop-in bg-surface-modal backdrop:bg-tech-main-dark/25 fixed inset-x-0 top-auto bottom-0 m-0 max-h-[calc(100dvh-0.75rem)] w-full max-w-none flex-col overflow-hidden border-x-0 border-t shadow-[-1.5rem_0_4rem_-2.5rem_rgb(15_23_42/0.55)] open:flex motion-reduce:animate-none sm:inset-y-0 sm:right-0 sm:left-auto sm:h-dvh sm:max-h-none sm:w-[min(34rem,calc(100vw-2rem))] sm:border-y-0 sm:border-r-0 sm:border-l">
+        className="border-tech-main/35 animate-tech-pop-in bg-surface-modal fixed inset-x-0 top-auto bottom-0 m-0 max-h-[calc(100dvh-0.75rem)] w-full max-w-none overflow-hidden border-x-0 border-t shadow-[-1.5rem_0_4rem_-2.5rem_rgb(15_23_42/0.55)] motion-reduce:animate-none sm:inset-y-0 sm:right-0 sm:left-auto sm:h-dvh sm:max-h-none sm:w-[min(34rem,calc(100vw-2rem))] sm:border-y-0 sm:border-r-0 sm:border-l">
         <CornerBrackets size="size-3" color="border-tech-main/40" />
         <header className="border-tech-main/25 bg-surface-overlay/95 relative flex shrink-0 items-start gap-4 border-b px-4 py-4 sm:px-6 sm:py-5">
           <span
@@ -273,8 +200,7 @@ export function GlossaryDetailPanel({
             onOpenRelated={onOpenRelated}
           />
         </div>
-      </dialog>
-    </div>,
-    document.body
+      </DialogContent>
+    </Dialog>
   )
 }

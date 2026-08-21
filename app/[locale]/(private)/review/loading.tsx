@@ -1,5 +1,5 @@
 import { PageSkeleton } from "@/components/layout/page-skeleton"
-import { TechCard } from "@/components/ui/tech-card"
+import { Card } from "@/components/ui/shadcn/card"
 import {
   SectionRail,
   SegmentedBar,
@@ -33,7 +33,7 @@ export default function ReviewLoading() {
           </h2>
           <div className="grid grid-cols-1 gap-6">
             {CARD_STYLES.map((style) => (
-              <TechCard
+              <Card
                 key={style.animationDelay}
                 style={style}
                 className="border-tech-main/40 bg-surface-overlay/80 flex flex-col items-start justify-between space-y-4 border p-6 backdrop-blur-sm md:flex-row md:items-center md:space-y-0">
@@ -67,7 +67,7 @@ export default function ReviewLoading() {
                     className="border-tech-main/40 h-11 w-full border md:w-44"
                   />
                 </div>
-              </TechCard>
+              </Card>
             ))}
           </div>
         </div>

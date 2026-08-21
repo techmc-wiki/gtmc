@@ -84,23 +84,23 @@ CI notes for the Build workflow:
 
 `.env.example` lists the required keys. None are committed.
 
-| Variable                                                    | Purpose                                                                          |
-| ----------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `DATABASE_URL`                                              | Pooled Postgres connection string (Supabase in production)                       |
-| `DIRECT_URL`                                                | Direct Postgres connection used by Prisma migrations                             |
-| `NEXT_PUBLIC_APP_URL`                                       | Public site origin used for canonical URLs and uploads                           |
-| `GITHUB_ID` / `GITHUB_SECRET`                               | GitHub OAuth application credentials for sign-in                                 |
-| `GITHUB_ARTICLES_READ_PAT`                                  | PAT used to read the articles repository                                         |
-| `GITHUB_ARTICLES_WRITE_PAT`                                 | PAT used to write branches, assets, and pull requests in the articles repository |
-| `GITHUB_ARTICLES_REPO_OWNER` / `GITHUB_ARTICLES_REPO_NAME`  | Target repo for article submission flows                                         |
-| `GITHUB_GLOSSARY_REPO_OWNER` / `GITHUB_GLOSSARY_REPO_NAME`  | Upstream target repo for glossary (defaults to TechMC-Glossary/TechMC-Glossary)   |
-| `GITHUB_GLOSSARY_FORK_REPO_OWNER` / `GITHUB_GLOSSARY_FORK_REPO_NAME` | Our fork repo receiving branches/commits before PR (defaults to techmc-wiki/glossary) |
-| `GITHUB_GLOSSARY_FORK_WRITE_PAT`                            | PAT for opening glossary PRs (Contents write on fork + Pull requests write on upstream) |
-| `BLOB_READ_WRITE_TOKEN`                                     | Vercel Blob token for uploads ≥ 4.5 MB                                           |
-| `BLOB_STORE_HOSTNAME`                                       | Hostname of the Vercel Blob store                                                |
-| `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | Cloudflare R2 credentials used by the PDF publishing workflow                    |
-| `R2_BUCKET_NAME`                                            | R2 bucket receiving `gtmc-en.pdf`, `gtmc-zh.pdf`, and build state                |
-| `NEXT_PUBLIC_PDF_BASE_URL`                                  | Public R2 base URL used by the PDF download buttons                             |
+| Variable                                                             | Purpose                                                                                 |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                                       | Pooled Postgres connection string (Supabase in production)                              |
+| `DIRECT_URL`                                                         | Direct Postgres connection used by Prisma migrations                                    |
+| `NEXT_PUBLIC_APP_URL`                                                | Public site origin used for canonical URLs and uploads                                  |
+| `GITHUB_ID` / `GITHUB_SECRET`                                        | GitHub OAuth application credentials for sign-in                                        |
+| `GITHUB_ARTICLES_READ_PAT`                                           | PAT used to read the articles repository                                                |
+| `GITHUB_ARTICLES_WRITE_PAT`                                          | PAT used to write branches, assets, and pull requests in the articles repository        |
+| `GITHUB_ARTICLES_REPO_OWNER` / `GITHUB_ARTICLES_REPO_NAME`           | Target repo for article submission flows                                                |
+| `GITHUB_GLOSSARY_REPO_OWNER` / `GITHUB_GLOSSARY_REPO_NAME`           | Upstream target repo for glossary (defaults to TechMC-Glossary/TechMC-Glossary)         |
+| `GITHUB_GLOSSARY_FORK_REPO_OWNER` / `GITHUB_GLOSSARY_FORK_REPO_NAME` | Our fork repo receiving branches/commits before PR (defaults to techmc-wiki/glossary)   |
+| `GITHUB_GLOSSARY_FORK_WRITE_PAT`                                     | PAT for opening glossary PRs (Contents write on fork + Pull requests write on upstream) |
+| `BLOB_READ_WRITE_TOKEN`                                              | Vercel Blob token for uploads ≥ 4.5 MB                                                  |
+| `BLOB_STORE_HOSTNAME`                                                | Hostname of the Vercel Blob store                                                       |
+| `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY`        | Cloudflare R2 credentials used by the PDF publishing workflow                           |
+| `R2_BUCKET_NAME`                                                     | R2 bucket receiving `gtmc-en.pdf`, `gtmc-zh.pdf`, and build state                       |
+| `NEXT_PUBLIC_PDF_BASE_URL`                                           | Public R2 base URL used by the PDF download buttons                                     |
 
 NextAuth additionally expects `AUTH_SECRET` (or `NEXTAUTH_SECRET`) and the GitHub OAuth credentials used by `lib/auth/index.ts`.
 
@@ -330,48 +330,3 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 <!-- END:nextjs-agent-rules -->
-
-<!-- gitnexus:start -->
-# GitNexus — Code Intelligence
-
-This project is indexed by GitNexus as **gtmc** (5040 symbols, 10627 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
-
-> Index stale? Run `node .gitnexus/run.cjs analyze` from the project root — it auto-selects an available runner. No `.gitnexus/run.cjs` yet? `npx gitnexus analyze` (npm 11 crash → `npm i -g gitnexus`; #1939).
-
-## Always Do
-
-- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
-- **MUST run `detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows. For regression review, compare against the default branch: `detect_changes({scope: "compare", base_ref: "dev"})`.
-- **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
-- When exploring unfamiliar code, use `query({search_query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
-- When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `context({name: "symbolName"})`.
-- For security review, `explain({target: "fileOrSymbol"})` lists taint findings (source→sink flows; needs `analyze --pdg`).
-
-## Never Do
-
-- NEVER edit a function, class, or method without first running `impact` on it.
-- NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
-- NEVER rename symbols with find-and-replace — use `rename` which understands the call graph.
-- NEVER commit changes without running `detect_changes()` to check affected scope.
-
-## Resources
-
-| Resource | Use for |
-|----------|---------|
-| `gitnexus://repo/gtmc/context` | Codebase overview, check index freshness |
-| `gitnexus://repo/gtmc/clusters` | All functional areas |
-| `gitnexus://repo/gtmc/processes` | All execution flows |
-| `gitnexus://repo/gtmc/process/{name}` | Step-by-step execution trace |
-
-## CLI
-
-| Task | Read this skill file |
-|------|---------------------|
-| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
-| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
-| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
-| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
-| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
-| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
-
-<!-- gitnexus:end -->

@@ -305,7 +305,8 @@ export function GlossaryDiffPreview({
   const submitDisabled = isSubmitting || !canSubmit || operations.length === 0
 
   return (
-    <div className={cn("flex flex-col overflow-hidden", className)}>
+    <div
+      className={cn("flex min-h-0 flex-1 flex-col overflow-hidden", className)}>
       <div className="border-border bg-surface flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-6">
         <div className="flex items-center gap-2">
           <span className="text-foreground font-mono text-xs font-medium">
@@ -331,7 +332,7 @@ export function GlossaryDiffPreview({
         </div>
       </div>
 
-      <ScrollArea className="max-h-[50vh] px-4 py-4 sm:px-6">
+      <ScrollArea className="min-h-0 flex-1 px-4 py-4 sm:px-6">
         <div className="flex flex-col gap-3 pr-3">
           {operations.length === 0 ? (
             <p className="text-muted-foreground py-4 text-center text-sm italic">

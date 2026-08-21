@@ -565,7 +565,7 @@ function GlossaryEditorInner({
           }}>
           <DialogContent
             showCloseButton={!isSubmitting}
-            className="bg-surface border-border flex max-h-[85vh] max-w-3xl flex-col gap-0 overflow-hidden p-0">
+            className="bg-surface border-border top-1/2 left-1/2 flex max-h-[85vh] w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 flex-col gap-0 overflow-hidden p-0">
             <DialogHeader className="border-border border-b p-4 sm:p-5">
               <DialogTitle className="text-foreground flex items-center gap-2 text-base font-semibold">
                 <GitPullRequest className="text-tech-signal size-4" />

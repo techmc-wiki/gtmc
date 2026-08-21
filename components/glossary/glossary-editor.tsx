@@ -391,6 +391,7 @@ function GlossaryEditorInner({
 
   const handleSubmit = React.useCallback(
     async ({ useRealEmail: useReal }: { useRealEmail: boolean }) => {
+      if (isSubmitting) return
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
         saveTimeoutRef.current = null
@@ -429,17 +430,17 @@ function GlossaryEditorInner({
         } else {
           setSubmitState("error")
           setSubmitError(result.error)
-          setIsSubmitting(false)
         }
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Submission failed"
         setSubmitState("error")
         setSubmitError(message)
+      } finally {
         setIsSubmitting(false)
       }
     },
-    [draftId, operations, title]
+    [draftId, operations, title, isSubmitting]
   )
 
   const handleDismissSuccess = React.useCallback(() => {

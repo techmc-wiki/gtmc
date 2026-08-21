@@ -2,7 +2,14 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
-import { TechCard } from "@/components/ui/tech-card"
+import { ExternalLink, Info, UserCheck } from "lucide-react"
+
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/shadcn/card"
 import { cn } from "@/lib/cn"
 
 const DEFAULT_GLOSSARY_REPO_URL =
@@ -13,7 +20,6 @@ export interface ComplexChangesNoticeProps {
   className?: string
 }
 
-/** Editorial note pointing glossary editors at the upstream repository. */
 export function ComplexChangesNotice({
   repoUrl = DEFAULT_GLOSSARY_REPO_URL,
   className,
@@ -26,35 +32,27 @@ export function ComplexChangesNotice({
         href={repoUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-tech-accent hover:text-tech-accent/80 underline decoration-dotted underline-offset-4 transition-colors">
+        className="text-foreground hover:text-tech-signal inline-flex items-center gap-0.5 font-medium underline decoration-dotted underline-offset-4">
         {chunks}
+        <ExternalLink className="ml-0.5 size-3" />
       </a>
     ),
     [repoUrl]
   )
 
   return (
-    <TechCard
-      tone="main"
-      borderOpacity="muted"
-      background="ghost"
-      padding="compact"
-      brackets="hidden"
-      hover="none"
-      className={cn("border-tech-main/40 bg-tech-bg/50 border-l-2", className)}>
-      <div className="flex flex-col gap-2">
-        <span
-          aria-hidden="true"
-          className="text-tech-main/60 font-mono text-[10px] tracking-widest uppercase">
-          {t("editorComplexChangesLabel")}
-        </span>
-        <p className="text-tech-main text-sm leading-relaxed">
-          {t.rich("editorComplexChangesBody", {
-            repoLink: repoLinkTag,
-          })}
-        </p>
+    <div
+      className={cn(
+        "flex items-start gap-3 rounded-none border border-border/60 bg-surface/50 p-3.5 text-xs text-muted-foreground leading-relaxed",
+        className
+      )}>
+      <Info className="text-tech-signal mt-0.5 size-4 shrink-0" />
+      <div>
+        {t.rich("editorComplexChangesBody", {
+          repoLink: repoLinkTag,
+        })}
       </div>
-    </TechCard>
+    </div>
   )
 }
 
@@ -67,15 +65,6 @@ export interface AttributionWarningProps {
   className?: string
 }
 
-const AuthorNameTag = (chunks: React.ReactNode) => (
-  <strong className="text-tech-main-dark font-semibold">{chunks}</strong>
-)
-
-const AuthorEmailTag = (chunks: React.ReactNode) => (
-  <span className="text-tech-main/70 font-mono text-xs">&lt;{chunks}&gt;</span>
-)
-
-/** Attribution + PR-ownership advisory shown before submitting glossary edits. */
 export function AttributionWarning({
   authorName,
   githubNoreplyEmail,
@@ -86,59 +75,68 @@ export function AttributionWarning({
 }: AttributionWarningProps) {
   const t = useTranslations("Glossary")
 
-  const canToggleRealEmail =
-    realEmail !== null && realEmail !== githubNoreplyEmail
-
+  const canToggleRealEmail = Boolean(
+    realEmail && realEmail !== githubNoreplyEmail
+  )
   const displayedEmail =
     canToggleRealEmail && useRealEmail ? realEmail : githubNoreplyEmail
 
+  const authorNameTag = React.useCallback(
+    (chunks: React.ReactNode) => (
+      <strong className="text-foreground font-semibold">{chunks}</strong>
+    ),
+    []
+  )
+
+  const authorEmailTag = React.useCallback(
+    (chunks: React.ReactNode) => (
+      <span className="text-foreground font-mono text-[11px]">
+        &lt;{chunks}&gt;
+      </span>
+    ),
+    []
+  )
+
   return (
-    <div
-      className={cn(
-        "border-tech-line/20 bg-surface-overlay/80 flex flex-col border backdrop-blur-sm",
-        className
-      )}>
-      <section className="flex flex-col gap-2 px-4 py-3 sm:px-5 sm:py-4">
-        <span
-          aria-hidden="true"
-          className="text-tech-main/60 font-mono text-[10px] tracking-widest uppercase">
-          {t("editorAttributionLabel")}
-        </span>
-        <p className="text-tech-main text-sm leading-relaxed">
+    <Card
+      tone="main"
+      borderOpacity="subtle"
+      background="default"
+      padding="compact"
+      brackets="hidden"
+      hover="none"
+      className={cn("border-border", className)}>
+      <CardHeader className="p-0 pb-2">
+        <CardTitle className="text-foreground flex items-center gap-1.5 text-xs font-semibold">
+          <UserCheck className="text-tech-signal size-3.5" />
+          {t("editorAttributionLabel").replaceAll(/[[\\]]/g, "")}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3 p-0">
+        <p className="text-muted-foreground text-xs leading-relaxed">
           {t.rich("editorAttributionBody", {
             name: authorName,
-            email: displayedEmail,
-            authorName: AuthorNameTag,
-            authorEmail: AuthorEmailTag,
+            email: displayedEmail || githubNoreplyEmail || "",
+            authorName: authorNameTag,
+            authorEmail: authorEmailTag,
           })}
         </p>
-      </section>
 
-      {canToggleRealEmail ? (
-        <section className="border-tech-line/20 flex flex-col gap-2 border-t px-4 py-3 sm:px-5 sm:py-4">
-          <label className="text-tech-main hover:text-tech-main-dark group flex cursor-pointer items-start gap-3 text-sm leading-relaxed transition-colors">
+        {canToggleRealEmail && (
+          <label
+            htmlFor="attribution-real-email-input"
+            className="text-foreground border-border/40 flex cursor-pointer items-center gap-2 border-t pt-1 text-xs">
             <input
+              id="attribution-real-email-input"
               type="checkbox"
               checked={useRealEmail}
-              onChange={(event) => onUseRealEmailChange(event.target.checked)}
-              aria-label={t("editorRealEmailToggleLabel")}
-              className="border-tech-line accent-tech-accent bg-surface-input mt-0.5 size-4 cursor-pointer border"
+              onChange={(e) => onUseRealEmailChange(e.target.checked)}
+              className="accent-tech-signal size-3.5 cursor-pointer"
             />
             <span>{t("editorRealEmailToggleLabel")}</span>
           </label>
-        </section>
-      ) : null}
-
-      <section className="border-tech-line/20 flex flex-col gap-2 border-t px-4 py-3 sm:px-5 sm:py-4">
-        <span
-          aria-hidden="true"
-          className="text-tech-main/60 font-mono text-[10px] tracking-widest uppercase">
-          {t("editorPrOwnershipLabel")}
-        </span>
-        <p className="text-tech-main text-sm leading-relaxed">
-          {t("editorPrOwnershipBody")}
-        </p>
-      </section>
-    </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

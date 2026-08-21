@@ -2,36 +2,33 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
-import {
-  EditorToolbarShell,
-  EditorToolbarButton,
-  EditorToolbarStatus,
-  EditorToolbarDivider,
-} from "@/components/editor/editor-toolbar-shell"
+import { GitPullRequest, Trash2 } from "lucide-react"
+
+import { Button } from "@/components/ui/shadcn/button"
+import { Input } from "@/components/ui/shadcn/input"
+import { Badge } from "@/components/ui/shadcn/badge"
 import { cn } from "@/lib/cn"
 
 export interface GlossaryEditToolbarProps {
   title: string
   onTitleChange: (title: string) => void
   onDiscard: () => void
-  onPreview: () => void
   onSubmit: () => void
-  canPreview: boolean
   canSubmit: boolean
   saveState: string
   className?: string
+  isReadOnly?: boolean
 }
 
 export function GlossaryEditToolbar({
   title,
   onTitleChange,
   onDiscard,
-  onPreview,
   onSubmit,
-  canPreview,
   canSubmit,
   saveState,
   className,
+  isReadOnly = false,
 }: GlossaryEditToolbarProps) {
   const t = useTranslations("Glossary")
 
@@ -42,35 +39,59 @@ export function GlossaryEditToolbar({
     [onTitleChange]
   )
 
+  const isSaving = saveState.toLowerCase().includes("saving")
+  const isError =
+    saveState.toLowerCase().includes("fail") ||
+    saveState.toLowerCase().includes("error")
+
   return (
-    <EditorToolbarShell className={cn(className)}>
-      <input
-        type="text"
-        value={title}
-        onChange={handleTitleChange}
-        placeholder={t("editorTitlePlaceholder")}
-        aria-label={t("editorTitlePlaceholder")}
-        className="text-tech-bg placeholder:text-tech-bg/30 relative z-10 w-48 border-none bg-transparent font-mono text-sm outline-none focus:ring-0 sm:w-64"
-      />
-      <EditorToolbarDivider />
-      <EditorToolbarButton type="button" onClick={onDiscard}>
-        {t("editorToolbarDiscard")}
-      </EditorToolbarButton>
-      <EditorToolbarButton
-        type="button"
-        onClick={onPreview}
-        disabled={!canPreview}
-        isActive={canPreview}>
-        {t("editorToolbarReview")}
-      </EditorToolbarButton>
-      <EditorToolbarButton
-        type="button"
-        onClick={onSubmit}
-        disabled={!canSubmit}
-        isActive={canSubmit}>
-        {t("editorToolbarSubmit")}
-      </EditorToolbarButton>
-      <EditorToolbarStatus>{saveState}</EditorToolbarStatus>
-    </EditorToolbarShell>
+    <div
+      className={cn(
+        "flex flex-col gap-3 rounded-none border border-border bg-surface p-3 sm:flex-row sm:items-center sm:justify-between sm:px-4",
+        className
+      )}>
+      <div className="flex flex-1 items-center gap-3">
+        <Input
+          type="text"
+          value={title}
+          onChange={handleTitleChange}
+          disabled={isReadOnly}
+          placeholder={t("editorTitlePlaceholder")}
+          aria-label={t("editorTitlePlaceholder")}
+          className="h-9 max-w-xs text-xs font-medium sm:max-w-md sm:text-sm"
+        />
+        {saveState && (
+          <Badge
+            variant={isError ? "destructive" : isSaving ? "pending" : "neutral"}
+            className="shrink-0 font-mono text-[10px] uppercase">
+            {saveState}
+          </Badge>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2 self-end sm:self-auto">
+        {!isReadOnly && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onDiscard}
+            className="text-xs">
+            <Trash2 className="text-muted-foreground mr-1 size-3.5" />
+            {t("editorToolbarDiscard")}
+          </Button>
+        )}
+        <Button
+          type="button"
+          variant="default"
+          size="sm"
+          onClick={onSubmit}
+          disabled={!canSubmit || isReadOnly}
+          className="text-xs">
+          <GitPullRequest className="mr-1.5 size-3.5" />
+          {t("editorToolbarSubmit")}
+        </Button>
+      </div>
+    </div>
   )
 }

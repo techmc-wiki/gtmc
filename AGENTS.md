@@ -37,7 +37,7 @@ The articles themselves live in a separate repo and are pulled in via a Git subm
 │   │   └── _homepage/      Hero card, foreground/background layers
 │   └── api/                Route handlers
 ├── actions/                Server actions (drafts, reviews, profile, …)
-├── components/ui/          tech-card, tech-button, corner-brackets, …
+├── components/ui/          shadcn primitives in ui/shadcn/, corner-brackets, …
 ├── components/{articles,editor,glossary,layout,markdown,review,search,ui}/
 ├── lib/                    Article pipeline, auth, db, search, GitHub helpers
 ├── articles/               Article content (Git submodule)
@@ -187,7 +187,8 @@ When fixing a bug or changing existing logic, update the colocated specs to matc
 - **Linter**: Vite+ runs Oxlint from the `lint` block in `vite.config.ts`. Configured plugins include `typescript`, `react`, and `nextjs`; generated output, agent support directories, and the articles submodule are ignored.
 - **Formatter**: Vite+ runs Oxfmt from the `fmt` block in `vite.config.ts`, including Tailwind class sorting. Markdown and verification artifacts are excluded; leave Markdown formatting alone unless asked.
 - **React**: React 19 with the new JSX transform — no need to import `React` in scope. `react/react-in-jsx-scope` is disabled.
-- **File names**: kebab-case for modules and components (e.g. `tech-card.tsx`, `article-rebase.test.ts`).
+- **File names**: kebab-case for modules and components (e.g. `tech-card.tsx` → migrated to `shadcn/card.tsx`, `article-rebase.test.ts`).
+- **UI primitives**: shadcn/ui is the canonical primitive source. Components live in `components/ui/shadcn/` (installed via `pnpm dlx shadcn@latest add <name>` into the `@/components/ui/shadcn` alias; see `components.json`). **New features MUST use shadcn components first** — Button, Card, Input, Textarea, Badge, Avatar, Dialog, AlertDialog, Sheet, DropdownMenu, Popover, Tabs, ToggleGroup, Command, Collapsible, Separator, Tooltip, ScrollArea, Skeleton, Progress — instead of hand-rolling Radix-like behavior (focus traps, ARIA wiring, outside-click, scroll-lock, keyboard navigation). Hand-rolled replacements are only acceptable when no shadcn component fits; keep shadcn source files GTMC-styled (square geometry, `tech-*` tokens, mono labels).
 - **Import paths**: prefer the `@/...` alias over long relative paths.
 - **Server vs client**: keep server actions in `actions/`, route handlers in `app/api/`, and client components explicitly marked with `"use client"`.
 

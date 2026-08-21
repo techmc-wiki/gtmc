@@ -1,11 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
-
-const emptySubscribe = () => () => {}
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/shadcn/dialog"
 
 interface MobileChapterNavCardProps {
   isOpen: boolean
@@ -22,74 +20,38 @@ export function MobileChapterNavCard({
 }: MobileChapterNavCardProps) {
   const t = useTranslations("CommonA11y")
   const tNav = useTranslations("ChapterNav")
-  const isMounted = React.useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false
-  )
+  const isModalOpen = isOpen && isFloating
 
-  if (!isMounted || !isOpen || !isFloating) return null
-
-  return createPortal(
-    <div
-      className="
-        fixed inset-0 z-59
-        md:hidden
-      ">
-      <div
-        className="
-          absolute inset-0 animate-fade-in bg-tech-main-dark/20 backdrop-blur-xs
-        "
-        onClick={onClose}
-        data-testid="mobile-tree-card-backdrop"
-        aria-hidden="true"
-      />
-
-      <div
-        className="
-          absolute top-1/2 left-1/2 z-60 flex max-h-[calc(100dvh-6rem)]
-          w-[calc(100dvw-4rem)] max-w-[24rem] -translate-1/2 animate-tech-pop-in
-          flex-col border border-tech-main/40 bg-surface-overlay/95 backdrop-blur-md
-        "
+  return (
+    <Dialog
+      open={isModalOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose()
+      }}>
+      <DialogContent
+        showCloseButton={false}
+        className="border-tech-main/40 bg-surface-overlay/95 left-1/2 top-1/2 max-h-[calc(100dvh-6rem)] w-[calc(100dvw-4rem)] max-w-[24rem] -translate-x-1/2 -translate-y-1/2 border backdrop-blur-md md:hidden"
         data-testid="mobile-tree-card">
         <CornerBrackets />
 
         <div
-          className="
-            z-20 flex h-10/12 shrink-0 items-center justify-between border-b
-            border-tech-main/40 px-4
-          "
+          className="z-20 flex h-10/12 shrink-0 items-center justify-between border-b border-tech-main/40 px-4"
           data-testid="mobile-tree-card-header">
-          <div
-            className="
-              flex items-center gap-2 font-mono text-xs font-bold
-              tracking-tech-wide text-tech-main/60 uppercase
-            ">
+          <DialogTitle className="flex items-center gap-2 font-mono text-xs font-bold tracking-tech-wide text-tech-main/60 uppercase">
             <span className="size-1.5 animate-pulse bg-tech-main/60" />
             {tNav("title")}
-          </div>
+          </DialogTitle>
           <button
             onClick={onClose}
-            className="
-              cursor-pointer px-3 py-2 font-mono text-xs font-bold
-              tracking-[0.15em] text-tech-main uppercase transition-colors
-              hover:bg-tech-main/10
-            "
+            className="cursor-pointer px-3 py-2 font-mono text-xs font-bold tracking-[0.15em] text-tech-main uppercase transition-colors hover:bg-tech-main/10"
             data-testid="mobile-tree-card-close"
             aria-label={t("closeTree")}>
             {tNav("buttonClose")}
           </button>
         </div>
 
-        <div
-          className="
-            min-h-0 overflow-y-auto p-4
-            sm:p-6
-          ">
-          {children}
-        </div>
-      </div>
-    </div>,
-    document.body
+        <div className="min-h-0 overflow-y-auto p-4 sm:p-6">{children}</div>
+      </DialogContent>
+    </Dialog>
   )
 }

@@ -7,6 +7,10 @@ import { useTranslations } from "next-intl"
 const DEBOUNCE_MS = 100
 
 export interface GlossarySearchProps {
+  /** URL-backed query state owned by the parent (nuqs). */
+  query: string
+  /** URL-backed scope state owned by the parent (nuqs). */
+  scope: "active" | "all"
   onQueryChange: (q: string) => void
   onScopeChange: (scope: "active" | "all") => void
   resultCount: number
@@ -15,6 +19,8 @@ export interface GlossarySearchProps {
 }
 
 export function GlossarySearch({
+  query,
+  scope,
   onQueryChange,
   onScopeChange,
   resultCount,
@@ -22,8 +28,9 @@ export function GlossarySearch({
   className = "",
 }: GlossarySearchProps) {
   const t = useTranslations("Glossary")
-  const [query, setQuery] = useState("")
-  const [scope, setScope] = useState<"active" | "all">("active")
+  // Local mirror so typing stays instant while parent updates are debounced;
+  // re-syncs when the URL state changes externally (deep link, back button).
+  const [inputValue, setInputValue] = useState(query)
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -38,6 +45,10 @@ export function GlossarySearch({
     },
     [onQueryChange]
   )
+
+  useEffect(() => {
+    setInputValue(query)
+  }, [query])
 
   useEffect(
     () => () => {
@@ -59,32 +70,29 @@ export function GlossarySearch({
       if (
         e.key === "Escape" &&
         document.activeElement === inputRef.current &&
-        query.length > 0
+        inputValue.length > 0
       ) {
-        setQuery("")
+        setInputValue("")
+        onQueryChange("")
       }
     }
     document.addEventListener("keydown", handleKeyDown, { capture: true })
     return () =>
       document.removeEventListener("keydown", handleKeyDown, { capture: true })
-  }, [query])
+  }, [inputValue, onQueryChange])
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const next = e.target.value
-      setQuery(next)
+      setInputValue(next)
       scheduleQueryChange(next)
     },
     [scheduleQueryChange]
   )
 
   const toggleScope = useCallback(() => {
-    setScope((prev) => {
-      const next = prev === "active" ? "all" : "active"
-      onScopeChange(next)
-      return next
-    })
-  }, [onScopeChange])
+    onScopeChange(scope === "active" ? "all" : "active")
+  }, [scope, onScopeChange])
 
   const isActiveScope = scope === "active"
   const scopeLabel = isActiveScope
@@ -103,7 +111,7 @@ export function GlossarySearch({
         <input
           ref={inputRef}
           type="text"
-          value={query}
+          value={inputValue}
           onChange={handleInputChange}
           placeholder={t("searchPlaceholder")}
           aria-label="Search glossary terms"

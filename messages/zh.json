@@ -490,6 +490,7 @@
     "closeSheet": "关闭本文目录",
     "openSheet": "打开本文目录",
     "progressLabel": "阅读进度",
+    "backToTopPct": "阅读进度 {pct}%——回到顶部",
     "railLabel": "本文目录",
     "sheetLabel": "本文目录",
     "title": "本文目录"

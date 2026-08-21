@@ -490,6 +490,7 @@
     "closeSheet": "Close article outline",
     "openSheet": "Open article outline",
     "progressLabel": "Reading progress",
+    "backToTopPct": "Reading progress {pct}% — back to top",
     "railLabel": "On this page",
     "sheetLabel": "Article outline",
     "title": "On this page"

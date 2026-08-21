@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { PageTransition } from "@/components/layout/navigation-effects"
 import { SearchCommand } from "@/components/search/search-command"
 import { Logo } from "@/components/ui/logo"
+import { Toaster } from "@/components/ui/shadcn/sonner"
 
 function buildNavLinks(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
   return [
@@ -98,6 +99,7 @@ export async function MainSiteShell({
 
   return (
     <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative min-h-screen w-full font-sans">
+      <Toaster />
       <a
         href="#main-content"
         className="focus:bg-surface-overlay focus:border-tech-main focus:text-tech-main-dark sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:border focus:px-4 focus:py-2 focus:font-mono focus:text-xs focus:outline-none">

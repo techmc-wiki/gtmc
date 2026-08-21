@@ -14,7 +14,7 @@ import {
   serializeDraftFilesPayload,
   type DraftFileCollection,
 } from "@/lib/drafts/files"
-import { useStatusNotification } from "@/hooks/use-status-notification"
+import { toast } from "sonner"
 import { useDraftImageUpload } from "@/hooks/use-draft-image-upload"
 import type { OperationProgressState } from "@/components/ui/operation-progress"
 import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
@@ -113,7 +113,6 @@ export function useDraftEditor(initialData?: {
     {}
   )
   const repoSnapshotRequestsRef = React.useRef<Record<string, string>>({})
-  const { badge, showBadge, clearBadge } = useStatusNotification()
 
   const saveProgressStages = React.useMemo(
     () => [
@@ -425,23 +424,23 @@ export function useDraftEditor(initialData?: {
         await persistDraft()
         if (mode === "manual") {
           updateSaveProgressState("success")
-          showBadge("DRAFT_SAVED_", "info", 3000)
+          toast.success(t("badgeDraftSaved"))
         } else {
-          showBadge("AUTOSAVED_", "info", 1800)
+          toast.success("Autosaved", { duration: 1800 })
         }
       } catch (error) {
         console.error(error)
         if (mode === "manual") {
           updateSaveProgressState("error")
-          showBadge("SAVE_FAILED_", "error")
+          toast.error(t("badgeSaveFailed"))
         } else {
-          showBadge("AUTOSAVE_FAILED_", "error")
+          toast.error("Autosave failed")
         }
       } finally {
         setIsSaving(false)
       }
     },
-    [isSaving, persistDraft, showBadge, title]
+    [isSaving, persistDraft, title, t]
   )
 
   const handleUndoDraftEdit = React.useCallback(() => {
@@ -545,10 +544,6 @@ export function useDraftEditor(initialData?: {
         })
       }
     },
-    onShowBadge: (message: string, type: "info" | "error" | "progress") => {
-      showBadge(message, type)
-    },
-    onClearBadge: clearBadge,
   })
 
   React.useEffect(() => {
@@ -609,22 +604,24 @@ export function useDraftEditor(initialData?: {
 
   const handleUploadWithAutoSave = async (file: File) => {
     if (!revisionId) {
-      showBadge(t("badgeSavingBeforeUpload"), "progress")
+      const savingToastId = toast.loading(t("badgeSavingBeforeUpload"))
       setIsSaving(true)
       updateSaveProgressState("running")
       try {
         const result = await persistDraft()
         if (result.revisionId) {
           updateSaveProgressState("success")
-          clearBadge()
+          toast.dismiss(savingToastId)
         } else {
           updateSaveProgressState("error")
-          showBadge(t("badgeSaveFailedUpload"), "error")
+          toast.dismiss(savingToastId)
+          toast.error(t("badgeSaveFailedUpload"))
           return
         }
       } catch {
         updateSaveProgressState("error")
-        showBadge(t("badgeSaveFailedUpload"), "error")
+        toast.dismiss(savingToastId)
+        toast.error(t("badgeSaveFailedUpload"))
         return
       } finally {
         setIsSaving(false)
@@ -662,16 +659,14 @@ export function useDraftEditor(initialData?: {
 
   const handleSubmitReview = async () => {
     if (hasMissingFilePath) {
-      showBadge(t("badgeAllFilesNeedPath"), "error", 4000)
+      toast.error(t("badgeAllFilesNeedPath"), { duration: 4000 })
       return
     }
     if (duplicateFilePaths.length > 0) {
-      showBadge(
+      toast.error(
         t("duplicatePathsError", { paths: duplicateFilePaths.join(", ") }),
-        "error",
-        4000
+        { duration: 4000 }
       )
-      return
     }
     setIsSubmittingReview(true)
     updateSubmitProgressState("running")
@@ -680,19 +675,18 @@ export function useDraftEditor(initialData?: {
       const result = await submitForReviewAction(persistedDraft.revisionId)
       setDraftStatus(result.status)
       updateSubmitProgressState("success")
-      showBadge(
+      toast.success(
         result.status === "SYNC_CONFLICT"
           ? t("badgeSyncConflict")
           : t("badgePrOpened"),
-        "info",
-        4000
+        { duration: 4000 }
       )
       router.push(`/draft/${persistedDraft.revisionId}`)
       router.refresh()
     } catch (error) {
       console.error(error)
       updateSubmitProgressState("error")
-      showBadge(t("badgeSubmitFailed"), "error")
+      toast.error(t("badgeSubmitFailed"))
     } finally {
       setIsSubmittingReview(false)
     }
@@ -842,7 +836,6 @@ export function useDraftEditor(initialData?: {
       openFileDialog,
     },
     upload: { uploadFile, isUploading, isCompressing },
-    badge: { badge, showBadge, clearBadge },
     progress: { saveProgressStages, submitProgressStages },
     t,
     progressT,

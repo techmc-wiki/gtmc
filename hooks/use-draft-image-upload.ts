@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { toast } from "sonner"
 
 import { compressImageForUpload } from "@/lib/uploads/image-compression"
 import { classifyFile, isImageMime } from "@/lib/uploads/file-upload"
@@ -13,8 +14,6 @@ interface DraftImageUploadResult {
 interface UseDraftImageUploadConfig {
   upload: (file: File) => Promise<DraftImageUploadResult>
   onInsertContent: (text: string) => void
-  onShowBadge: (message: string, type: "info" | "error" | "progress") => void
-  onClearBadge: () => void
 }
 
 export function useDraftImageUpload(config: UseDraftImageUploadConfig) {
@@ -27,13 +26,13 @@ export function useDraftImageUpload(config: UseDraftImageUploadConfig) {
 
       const classification = classifyFile(file.type)
       if (!classification || !isImageMime(file.type)) {
-        config.onShowBadge("IMAGE TYPE NOT ALLOWED_", "error")
+        toast.error("Image type not allowed")
         return
       }
 
       if (file.size > classification.maxBytes) {
         const maxMB = Math.round(classification.maxBytes / (1024 * 1024))
-        config.onShowBadge(`IMAGE TOO LARGE_ (max ${maxMB}MB)`, "error")
+        toast.error(`Image too large (max ${maxMB}MB)`)
         return
       }
 
@@ -44,24 +43,26 @@ export function useDraftImageUpload(config: UseDraftImageUploadConfig) {
       const placeholder = `<!-- UPLOAD_PENDING_${uploadId} -->`
       config.onInsertContent(placeholder + "\n")
 
+      let stageToastId: string | number | undefined
       try {
-        config.onShowBadge("COMPRESSING_IMAGE...", "progress")
+        stageToastId = toast.loading("Compressing image…")
         const compressed = await compressImageForUpload(file)
         setIsCompressing(false)
 
         if (compressed.error) {
           throw new Error(compressed.error)
         }
-
-        config.onShowBadge("UPLOADING_IMAGE...", "progress")
+        toast.dismiss(stageToastId)
+        stageToastId = toast.loading("Uploading image…")
         const result = await config.upload(compressed.file)
         const displayName = result.filename.replace(/^\d+-/, "")
 
         config.onInsertContent(`![${displayName}](${result.url})`)
-        config.onClearBadge()
+        toast.dismiss(stageToastId)
       } catch (error) {
         const message = error instanceof Error ? error.message : "Upload error"
-        config.onShowBadge(`UPLOAD FAILED_ ${message}`, "error")
+        toast.dismiss(stageToastId)
+        toast.error(`Upload failed: ${message}`)
         config.onInsertContent("")
         console.error("Draft image upload error:", error)
       } finally {

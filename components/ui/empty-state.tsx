@@ -1,5 +1,5 @@
 import * as React from "react"
-import { TechCard } from "@/components/ui/tech-card"
+import { Card } from "@/components/ui/shadcn/card"
 import { cn } from "@/lib/cn"
 
 interface EmptyStateProps {
@@ -14,7 +14,7 @@ export function EmptyState({
   className,
 }: EmptyStateProps) {
   return (
-    <TechCard
+    <Card
       tone="main"
       borderOpacity="muted"
       background="ghost"
@@ -30,6 +30,6 @@ export function EmptyState({
       <h2 className="text-tech-main/50 relative z-10 font-mono text-lg tracking-widest uppercase">
         {message}
       </h2>
-    </TechCard>
+    </Card>
   )
 }

@@ -3,6 +3,11 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/shadcn/collapsible"
+import {
   LANGUAGE_CODES,
   LANGUAGE_DISPLAY,
   isGlossaryLocale,
@@ -51,38 +56,41 @@ export function TranslationsList({
 
         return (
           <li key={code}>
-            <details className="group relative" open={isActive}>
+            <Collapsible className="group relative" defaultOpen={isActive}>
               {isActive && (
                 <span
                   aria-hidden="true"
                   className="bg-tech-signal absolute top-0 bottom-0 left-0 w-0.5"
                 />
               )}
-              <summary
-                aria-label={`${displayName} translation`}
-                className="hover:bg-tech-main/5 focus-visible:outline-tech-main flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-3 transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 [&::-webkit-details-marker]:hidden">
-                <span className="grid min-w-0 grid-cols-[2.25rem_1fr] items-center gap-2">
-                  <span className="text-tech-main/45 font-mono text-[0.625rem] tracking-widest uppercase">
-                    {code.toUpperCase()}
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  aria-label={`${displayName} translation`}
+                  className="hover:bg-tech-main/5 focus-visible:outline-tech-main flex min-h-11 w-full cursor-pointer list-none items-center justify-between gap-3 px-3 text-left transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2">
+                  <span className="grid min-w-0 grid-cols-[2.25rem_1fr] items-center gap-2">
+                    <span className="text-tech-main/45 font-mono text-[0.625rem] tracking-widest uppercase">
+                      {code.toUpperCase()}
+                    </span>
+                    <span className="text-tech-main-dark truncate text-sm">
+                      {displayName}
+                    </span>
                   </span>
-                  <span className="text-tech-main-dark truncate text-sm">
-                    {displayName}
-                  </span>
-                </span>
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 12 12"
-                  className="text-tech-main/60 size-3 shrink-0 transition-transform duration-200 group-open:rotate-90">
-                  <path
-                    d="M4 2 L8 6 L4 10"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="square"
-                  />
-                </svg>
-              </summary>
-              <div className="border-tech-line/15 bg-tech-main/3 grid grid-cols-[2.25rem_1fr] gap-2 border-t px-3 py-3">
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 12 12"
+                    className="text-tech-main/60 size-3 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90">
+                    <path
+                      d="M4 2 L8 6 L4 10"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="square"
+                    />
+                  </svg>
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="border-tech-line/15 bg-tech-main/3 grid grid-cols-[2.25rem_1fr] gap-2 border-t px-3 py-3">
                 <span aria-hidden="true" />
                 <div className="flex min-w-0 flex-col gap-2">
                   <p
@@ -98,8 +106,8 @@ export function TranslationsList({
                     </p>
                   )}
                 </div>
-              </div>
-            </details>
+              </CollapsibleContent>
+            </Collapsible>
           </li>
         )
       })}

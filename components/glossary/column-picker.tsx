@@ -3,9 +3,18 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 
-import { useMounted } from "@/hooks/use-mounted"
 import { cn } from "@/lib/cn"
 import { normalizeGlossarySiteLocale } from "@/lib/glossary/locales"
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/shadcn/popover"
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/shadcn/collapsible"
 import {
   GLOSSARY_DISPLAY_LOCALES,
   createGlossaryTranslationColumn,
@@ -35,32 +44,8 @@ export function ColumnPicker({
   onChange,
   className,
 }: ColumnPickerProps) {
-  const mounted = useMounted()
   const t = useTranslations("Glossary")
   const [open, setOpen] = React.useState(false)
-  const containerRef = React.useRef<HTMLDivElement | null>(null)
-
-  React.useEffect(() => {
-    if (!open) return
-    function handlePointer(event: MouseEvent) {
-      const node = containerRef.current
-      if (!node) return
-      if (!node.contains(event.target as Node)) setOpen(false)
-    }
-    function handleKey(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false)
-    }
-    document.addEventListener("mousedown", handlePointer)
-    document.addEventListener("keydown", handleKey)
-    return () => {
-      document.removeEventListener("mousedown", handlePointer)
-      document.removeEventListener("keydown", handleKey)
-    }
-  }, [open])
-
-  const toggleOpen = React.useCallback(() => {
-    setOpen((prev) => !prev)
-  }, [])
 
   const toggle = React.useCallback(
     (column: GlossaryTableColumn) => {
@@ -102,22 +87,22 @@ export function ColumnPicker({
   )
 
   return (
-    <div ref={containerRef} className={cn("relative flex h-9", className)}>
-      <button
-        type="button"
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        aria-label={t("columnPickerLabel")}
-        onClick={toggleOpen}
-        className="border-tech-main/40 text-tech-main hover:bg-tech-main/10 focus-visible:outline-tech-main bg-surface-overlay/70 inline-flex h-9 w-full cursor-pointer items-center justify-center border px-3 font-mono text-xs font-bold tracking-widest uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto">
-        [§ {t("columnPickerToggle")}]
-      </button>
+    <div className={cn("relative flex h-9", className)}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            aria-label={t("columnPickerLabel")}
+            className="border-tech-main/40 text-tech-main hover:bg-tech-main/10 focus-visible:outline-tech-main bg-surface-overlay/70 inline-flex h-9 w-full cursor-pointer items-center justify-center border px-3 font-mono text-xs font-bold tracking-widest uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto">
+            [§ {t("columnPickerToggle")}]
+          </button>
+        </PopoverTrigger>
 
-      {mounted && open ? (
-        <dialog
-          open
+        <PopoverContent
+          align="end"
+          sideOffset={8}
           aria-label={t("columnPickerLabel")}
-          className="border-tech-line/30 bg-surface-overlay/95 absolute top-full right-0 z-40 mt-2 w-72 border backdrop-blur-md">
+          className="border-tech-line/30 bg-surface-overlay/95 w-72 border p-0 backdrop-blur-md">
           <div className="custom-vertical-scrollbar max-h-[60vh] overflow-y-auto p-3">
             <ColumnGroup
               title="CORE"
@@ -126,14 +111,18 @@ export function ColumnPicker({
               onToggle={toggle}
             />
 
-            <details className="group mt-3">
-              <summary className="border-tech-line/30 text-tech-main/70 hover:text-tech-main flex cursor-pointer list-none items-center justify-between border-b pb-1.5 font-mono text-[0.6875rem] font-bold tracking-widest uppercase transition-colors [&::-webkit-details-marker]:hidden">
-                <span>{t("columnLanguageGroup")}</span>
-                <span className="text-tech-main/40 transition-transform group-open:rotate-90">
-                  ▸
-                </span>
-              </summary>
-              <div className="mt-2 space-y-2">
+            <Collapsible className="group mt-3">
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  className="border-tech-line/30 text-tech-main/70 hover:text-tech-main flex w-full cursor-pointer list-none items-center justify-between border-b pb-1.5 font-mono text-[0.6875rem] font-bold tracking-widest uppercase transition-colors">
+                  <span>{t("columnLanguageGroup")}</span>
+                  <span className="text-tech-main/40 transition-transform group-data-[state=open]:rotate-90">
+                    ▸
+                  </span>
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-2 space-y-2">
                 {otherLanguageGroups.map((group) => (
                   <ColumnGroup
                     key={group.code}
@@ -143,11 +132,11 @@ export function ColumnPicker({
                     onToggle={toggle}
                   />
                 ))}
-              </div>
-            </details>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
-        </dialog>
-      ) : null}
+        </PopoverContent>
+      </Popover>
     </div>
   )
 }

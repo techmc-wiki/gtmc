@@ -3,6 +3,12 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import { TabsContent } from "@/components/ui/shadcn/tabs"
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/shadcn/resizable"
+import { useDefaultLayout } from "react-resizable-panels"
 
 interface EditorSurfaceProps {
   children: React.ReactNode
@@ -144,7 +150,7 @@ export function EditorPreviewPanel({
     <TabsContent
       value={value}
       forceMount
-      className={`editor-grow data-[state=inactive]:hidden ${className} `}>
+      className={`editor-grow data-[state=inactive]:hidden md:data-[state=inactive]:flex ${className} `}>
       {children}
     </TabsContent>
   )
@@ -166,9 +172,48 @@ export function EditorWritePanel({
     <TabsContent
       value={value}
       forceMount
-      className={`editor-grow data-[state=inactive]:hidden ${className} `}>
+      className={`editor-grow data-[state=inactive]:hidden md:data-[state=inactive]:flex ${className} `}>
       <div className="editor-surface">{children}</div>
     </TabsContent>
+  )
+}
+
+interface EditorSplitLayoutProps {
+  /** Write panel element (rendered once by the caller). */
+  write: React.ReactNode
+  /** Preview panel element (rendered once by the caller). */
+  preview: React.ReactNode
+}
+
+/**
+ * Side-by-side write/preview on md+ with a draggable divider persisted to
+ * localStorage (`gtmc:editor-layout`). Stacks vertically below md, where the
+ * tab strip decides which panel is visible.
+ */
+export function EditorSplitLayout({ write, preview }: EditorSplitLayoutProps) {
+  const defaultLayout = useDefaultLayout({
+    id: "gtmc:editor-layout",
+    storage: typeof window === "undefined" ? undefined : window.localStorage,
+  })
+
+  return (
+    <ResizablePanelGroup
+      orientation="horizontal"
+      defaultLayout={defaultLayout.defaultLayout}
+      onLayoutChanged={defaultLayout.onLayoutChanged}
+      className="editor-grow flex-col md:flex-row">
+      <ResizablePanel id="write" defaultSize="50" minSize="25" className="flex">
+        {write}
+      </ResizablePanel>
+      <ResizableHandle className="bg-tech-main/20 hover:bg-tech-main/40 hidden w-px transition-colors md:flex" />
+      <ResizablePanel
+        id="preview"
+        defaultSize="50"
+        minSize="25"
+        className="flex">
+        {preview}
+      </ResizablePanel>
+    </ResizablePanelGroup>
   )
 }
 

@@ -25,6 +25,7 @@ import {
   EditorWritePanel,
   EditorPreviewPanel,
   EditorPreviewFrame,
+  EditorSplitLayout,
 } from "@/components/editor/editor-frames"
 import { Tabs } from "@/components/ui/shadcn/tabs"
 import type { TabType } from "@/components/editor/editor-tab-strip"
@@ -306,39 +307,50 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             canRedo={Boolean(state.activeFileHistoryAvailability?.redoCount)}
           />
 
-          <EditorWritePanel value="write">
-            <EditorTextareaDynamic
-              ref={refs.textareaRef}
-              value={state.activeFileContent}
-              onChange={(value) => actions.updateActiveFile({ content: value })}
-              onUndo={actions.handleUndoDraftEdit}
-              onRedo={actions.handleRedoDraftEdit}
-              onPaste={actions.handlePaste}
-              onDrop={actions.handleDrop}
-              onDragOver={(e) => {
-                if (!state.isReadOnly) e.preventDefault()
-              }}
-              onDragEnter={(e) => {
-                if (!state.isReadOnly) e.preventDefault()
-              }}
-              isReadOnly={state.isReadOnly}
-              isSaving={state.isSaving}
-              placeholder={t("contentPlaceholder")}
-              lineWrap={state.lineWrap}
-              canUndo={Boolean(state.activeFileHistoryAvailability?.undoCount)}
-              canRedo={Boolean(state.activeFileHistoryAvailability?.redoCount)}
-              enableSyntaxHints
-            />
-          </EditorWritePanel>
-
-          <EditorPreviewPanel value="preview">
-            <EditorPreviewFrame isEmpty={!state.activeFileContent.trim()}>
-              <LazyMarkdownPreview
-                content={state.activeFileContent}
-                rawPath={state.activeFile.filePath || ""}
-              />
-            </EditorPreviewFrame>
-          </EditorPreviewPanel>
+          <EditorSplitLayout
+            write={
+              <EditorWritePanel value="write">
+                <EditorTextareaDynamic
+                  ref={refs.textareaRef}
+                  value={state.activeFileContent}
+                  onChange={(value) =>
+                    actions.updateActiveFile({ content: value })
+                  }
+                  onUndo={actions.handleUndoDraftEdit}
+                  onRedo={actions.handleRedoDraftEdit}
+                  onPaste={actions.handlePaste}
+                  onDrop={actions.handleDrop}
+                  onDragOver={(e) => {
+                    if (!state.isReadOnly) e.preventDefault()
+                  }}
+                  onDragEnter={(e) => {
+                    if (!state.isReadOnly) e.preventDefault()
+                  }}
+                  isReadOnly={state.isReadOnly}
+                  isSaving={state.isSaving}
+                  placeholder={t("contentPlaceholder")}
+                  lineWrap={state.lineWrap}
+                  canUndo={Boolean(
+                    state.activeFileHistoryAvailability?.undoCount
+                  )}
+                  canRedo={Boolean(
+                    state.activeFileHistoryAvailability?.redoCount
+                  )}
+                  enableSyntaxHints
+                />
+              </EditorWritePanel>
+            }
+            preview={
+              <EditorPreviewPanel value="preview">
+                <EditorPreviewFrame isEmpty={!state.activeFileContent.trim()}>
+                  <LazyMarkdownPreview
+                    content={state.activeFileContent}
+                    rawPath={state.activeFile.filePath || ""}
+                  />
+                </EditorPreviewFrame>
+              </EditorPreviewPanel>
+            }
+          />
         </Tabs>
       </EditorContentArea>
 

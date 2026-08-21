@@ -498,7 +498,8 @@
     "bookSubtitle": "An Introduction to Technical Minecraft",
     "bookTitle": "Graduate Texts in Minecraft",
     "mermaidRenderError": "Unable to render Mermaid diagram.",
-    "metaTitle": "Offline PDF Download",
+    "metaDescription": "Download the whole site's articles as a PDF to read offline.",
+    "metaTitle": "PDF Download",
     "slogan": "\"Curiosity in 'cubic' inch.\"",
     "unavailableNote": "PDF downloads are not configured yet."
   },

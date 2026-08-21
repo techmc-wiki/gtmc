@@ -498,7 +498,8 @@
     "bookSubtitle": "技术性 Minecraft 入门",
     "bookTitle": "Graduate Texts in Minecraft",
     "mermaidRenderError": "无法渲染 Mermaid 图表。",
-    "metaTitle": "离线 PDF 下载",
+    "metaDescription": "以离线 PDF 下载整个网站的文章。",
+    "metaTitle": "PDF 下载",
     "slogan": "求知于方寸之间。",
     "unavailableNote": "PDF 下载尚未配置。"
   },

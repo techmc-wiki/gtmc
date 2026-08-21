@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { TabsContent } from "@/components/ui/shadcn/tabs"
 
 interface EditorSurfaceProps {
   children: React.ReactNode
@@ -133,48 +134,44 @@ export function EditorPreviewFrame({
 interface EditorPreviewPanelProps {
   children: React.ReactNode
   className?: string
-  id?: string
-  hidden?: boolean
+  /** TabsContent value matching the tab trigger. */
+  value: string
 }
 
 export function EditorPreviewPanel({
   children,
   className = "",
-  id,
-  hidden,
+  value,
 }: EditorPreviewPanelProps) {
   return (
-    <div
-      id={id}
-      role="tabpanel"
-      hidden={hidden}
-      className={`editor-grow ${className} `}>
+    <TabsContent
+      value={value}
+      forceMount
+      className={`editor-grow data-[state=inactive]:hidden ${className} `}>
       {children}
-    </div>
+    </TabsContent>
   )
 }
 
 interface EditorWritePanelProps {
   children: React.ReactNode
   className?: string
-  id?: string
-  hidden?: boolean
+  /** TabsContent value matching the tab trigger. */
+  value: string
 }
 
 export function EditorWritePanel({
   children,
   className = "",
-  id,
-  hidden,
+  value,
 }: EditorWritePanelProps) {
   return (
-    <div
-      id={id}
-      role="tabpanel"
-      hidden={hidden}
-      className={`editor-grow ${className} `}>
+    <TabsContent
+      value={value}
+      forceMount
+      className={`editor-grow data-[state=inactive]:hidden ${className} `}>
       <div className="editor-surface">{children}</div>
-    </div>
+    </TabsContent>
   )
 }
 

@@ -106,7 +106,6 @@ export async function MainSiteShell({
       <nav
         aria-label={tCommonA11y("mainNavigation")}
         className="border-tech-main/30 bg-surface-overlay/85 fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md">
-        <div className="bg-tech-signal absolute top-0 left-0 h-[3px] w-full" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between md:h-20">
             <div className="flex items-center gap-4 md:gap-8">{leftSlot}</div>

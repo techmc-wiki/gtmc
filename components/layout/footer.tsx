@@ -1,8 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { Logo } from "@/components/ui/logo"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
-import { Badge } from "@/components/ui/shadcn/badge"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { articleUrl } from "@/lib/articles/url"
 import { getManifestStats, type ArticleLocale } from "@/lib/articles/manifest"
@@ -26,43 +24,17 @@ export default async function Footer() {
   const locale = (await getLocale()) as ArticleLocale
   const t = await getTranslations({ locale, namespace: "Footer" })
   const stats = getManifestStats(locale)
-  const buildSha = process.env.NEXT_PUBLIC_BUILD_SHA ?? "unknown"
   const startYear = 2024
   const currentYear = stats.lastRevision
     ? Number(stats.lastRevision.slice(0, 4))
     : startYear
-  const lastRevision = stats.lastRevision
-    ? new Date(stats.lastRevision).toISOString().slice(0, 10)
-    : "—"
 
   return (
     <footer
       aria-label="Site information"
       className="border-tech-main-dark bg-tech-bg/80 relative mt-auto w-full border-t-2 pt-10 pb-12">
-      <div className="bg-tech-signal absolute top-0 left-0 h-0.5 w-24" />
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Top status strip */}
-        <div className="text-tech-main/55 flex flex-wrap gap-x-6 gap-y-1 font-mono text-xs tracking-[0.18em] uppercase">
-          <span className="border-tech-main/30 inline-flex items-center gap-2 border-l pl-4 first:border-l-0 first:pl-0">
-            <span className="bg-tech-signal inline-block size-1.5 motion-safe:animate-pulse" />
-            SYS.ONLINE
-          </span>
-          <span className="border-tech-main/30 border-l pl-4 first:border-l-0 first:pl-0">
-            LAST REVISION: {lastRevision}
-          </span>
-          <span className="border-tech-main/30 border-l pl-4 first:border-l-0 first:pl-0">
-            BUILD {buildSha}
-          </span>
-        </div>
-
         <div className="relative mt-12">
-          <CornerBrackets
-            variant="static"
-            size="size-2"
-            color="border-tech-main/40"
-            corners="all"
-          />
-
           {/* Main grid — brand column + title-block grid */}
           <div className="md:grid md:grid-cols-12 md:gap-10">
             {/* Brand column */}
@@ -82,15 +54,6 @@ export default async function Footer() {
                 {[
                   { label: "ARTICLES", value: stats.articleCount },
                   { label: "AUTHORS", value: stats.authorCount },
-                  { label: "EDITION", value: `${startYear}–${currentYear}` },
-                  {
-                    label: "STATUS",
-                    value: (
-                      <Badge className="border-tech-main/30 bg-tech-main/10 text-tech-main-dark">
-                        [ BETA ]
-                      </Badge>
-                    ),
-                  },
                   {
                     label: "CONTENT LICENSE",
                     value: (
@@ -114,14 +77,6 @@ export default async function Footer() {
                         Apache-2.0
                       </a>
                     ),
-                  },
-                  {
-                    label: "REVISION",
-                    value: <code>{buildSha}</code>,
-                  },
-                  {
-                    label: "LAST UPDATE",
-                    value: <span>{lastRevision}</span>,
                   },
                 ].map((cell) => (
                   <div

@@ -29,6 +29,6 @@ export function resolveGithubArticlesWriteToken(
 }
 
 export function resolveGithubGlossaryWriteToken(): string | undefined {
-  const token = process.env.GITHUB_GLOSSARY_FORK_WRITE_PAT
+  const token = process.env.GITHUB_PUBLIC_REPO_PAT
   return typeof token === "string" && token.length > 0 ? token : undefined
 }

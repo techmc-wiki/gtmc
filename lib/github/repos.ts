@@ -38,6 +38,6 @@ export const getOctokit = (token?: string, silent404 = false) =>
 
 export const getGlossaryWriteToken = (): string => {
   const token = resolveGithubGlossaryWriteToken()
-  if (!token) throw new Error("GITHUB_GLOSSARY_FORK_WRITE_PAT not configured")
+  if (!token) throw new Error("GITHUB_PUBLIC_REPO_PAT not configured")
   return token
 }

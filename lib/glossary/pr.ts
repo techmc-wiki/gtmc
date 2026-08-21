@@ -86,7 +86,7 @@ export async function openGlossaryPullRequest(
     if (status === 403 && message.includes("Resource not accessible")) {
       throw new Error(
         `GitHub rejected pull request creation with 403. ` +
-          `GITHUB_GLOSSARY_FORK_WRITE_PAT must grant "Pull requests: Read ` +
+          `GITHUB_PUBLIC_REPO_PAT must grant "Pull requests: Read ` +
           `and write" on ${GLOSSARY_REPO.owner}/${GLOSSARY_REPO.name} (the ` +
           `repo the PR is opened on) as well as ` +
           `${GLOSSARY_FORK_REPO.owner}/${GLOSSARY_FORK_REPO.name}; a ` +

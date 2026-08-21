@@ -74,7 +74,7 @@ export async function submitGlossaryDraftAction(
       return {
         success: false,
         error:
-          "GitHub glossary write token is not configured on the server (missing GITHUB_GLOSSARY_FORK_WRITE_PAT).",
+          "GitHub glossary write token is not configured on the server (missing GITHUB_PUBLIC_REPO_PAT).",
       }
     }
 

@@ -1,19 +1,78 @@
 "use client"
 
-import { useCallback, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { useTranslations } from "next-intl"
 
 const TILT_MAX_DEG = 4
+// Exponential smoothing factor per 60fps frame; lower = softer, lagged follow.
+const TILT_SMOOTHING = 0.1
 
 export function HeroCard() {
   const t = useTranslations("Homepage")
   const tiltRef = useRef<HTMLDivElement>(null)
 
-  const applyTilt = useCallback((rx: number, ry: number) => {
+  const tiltStateRef = useRef({
+    rx: 0,
+    ry: 0,
+    targetRx: 0,
+    targetRy: 0,
+    last: 0,
+  })
+  const coverRef = useRef<HTMLDivElement>(null)
+  const rafRef = useRef<number | null>(null)
+
+  useEffect(
+    () => () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current)
+    },
+    []
+  )
+
+  const step = useCallback((now: number) => {
     const el = tiltRef.current
-    if (!el) return
-    el.style.transform = `perspective(1000px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`
+    const s = tiltStateRef.current
+    if (!el) {
+      rafRef.current = null
+      return
+    }
+    // Frame-rate-independent easing: matches TILT_SMOOTHING per 60fps frame.
+    const dt = Math.min(now - s.last, 100)
+    s.last = now
+    const ease = 1 - Math.pow(1 - TILT_SMOOTHING, dt / 16.67)
+    s.rx += (s.targetRx - s.rx) * ease
+    s.ry += (s.targetRy - s.ry) * ease
+    el.style.transform = `perspective(1000px) rotateX(${s.rx.toFixed(2)}deg) rotateY(${s.ry.toFixed(2)}deg)`
+    // Directional cast shadow: shifts toward the dipped side and softens with lift.
+    const cover = coverRef.current
+    if (cover) {
+      const nx = s.ry / TILT_MAX_DEG
+      const ny = s.rx / TILT_MAX_DEG
+      const mag = Math.hypot(nx, ny) / Math.SQRT2
+      const sx = (-nx * 6).toFixed(1)
+      const sy = (8 + ny * 4).toFixed(1)
+      const blur = Math.round(24 + mag * 14)
+      const alpha = (0.16 + mag * 0.06).toFixed(2)
+      cover.style.boxShadow = `${sx}px ${sy}px ${blur}px -6px rgba(32, 40, 60, ${alpha})`
+    }
+    if (
+      Math.abs(s.targetRx - s.rx) < 0.01 &&
+      Math.abs(s.targetRy - s.ry) < 0.01
+    ) {
+      // Settled: snap to target and idle until the next pointer event.
+      s.rx = s.targetRx
+      s.ry = s.targetRy
+      rafRef.current = null
+      return
+    }
+    rafRef.current = requestAnimationFrame(step)
   }, [])
+
+  const startTiltLoop = useCallback(() => {
+    if (rafRef.current === null) {
+      tiltStateRef.current.last = performance.now()
+      rafRef.current = requestAnimationFrame(step)
+    }
+  }, [step])
 
   const onPointerMove = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
@@ -32,14 +91,18 @@ export function HeroCard() {
         ((event.clientX - rect.left - halfWidth) / halfWidth) * TILT_MAX_DEG
       const rotateX =
         -((event.clientY - rect.top - halfHeight) / halfHeight) * TILT_MAX_DEG
-      applyTilt(rotateX, rotateY)
+      tiltStateRef.current.targetRx = rotateX
+      tiltStateRef.current.targetRy = rotateY
+      startTiltLoop()
     },
-    [applyTilt]
+    [startTiltLoop]
   )
 
   const onPointerLeave = useCallback(() => {
-    applyTilt(0, 0)
-  }, [applyTilt])
+    tiltStateRef.current.targetRx = 0
+    tiltStateRef.current.targetRy = 0
+    startTiltLoop()
+  }, [startTiltLoop])
 
   return (
     <div className="group animate-tech-pop-in fill-mode-forwards relative mb-8 w-full max-w-sm opacity-0 [animation-delay:0.2s] [animation-duration:0.8s] motion-reduce:animate-none motion-reduce:opacity-100 sm:max-w-xl md:max-w-2xl lg:max-w-3xl">
@@ -47,12 +110,11 @@ export function HeroCard() {
         ref={tiltRef}
         onPointerMove={onPointerMove}
         onPointerLeave={onPointerLeave}
-        className="relative transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform">
-        {/* 书脊投影：模拟实体书叠放的错位 */}
-        <div className="bg-tech-main-dark/15 absolute inset-0 -z-10 translate-2 transition-transform duration-500 ease-out group-hover:translate-3" />
-
+        className="relative will-change-transform">
         {/* 书籍封面：Springer GTM 风格 */}
-        <div className="border-tech-main-dark/80 bg-surface relative overflow-hidden border shadow-sm">
+        <div
+          ref={coverRef}
+          className="border-tech-main-dark/80 bg-surface relative overflow-hidden border shadow-[0_8px_24px_-6px_rgba(32,40,60,0.16)]">
           {/* 顶部书带 */}
           <div className="bg-tech-signal text-tech-signal-ink relative flex items-center justify-between px-6 py-3 sm:px-10 sm:py-4">
             <span className="animate-fade-in fill-mode-forwards font-mono text-[0.625rem] font-bold tracking-[0.25em] uppercase opacity-0 [animation-delay:0.6s] motion-reduce:animate-none motion-reduce:opacity-100 sm:text-xs">

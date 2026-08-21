@@ -71,7 +71,7 @@ export function TermDetail({
           aria-hidden="true"
           className="bg-tech-signal absolute top-1.5 bottom-1.5 left-0 w-0.5"
         />
-        <h3 className="text-tech-main/55 mb-2 font-mono text-[0.625rem] tracking-[0.18em] uppercase">
+        <h3 className="text-tech-main/60 mb-2 text-xs font-medium">
           {t("columnDescription")}
         </h3>
         <p className="text-tech-main-dark text-[0.9375rem]/7 wrap-break-word sm:text-base/7">
@@ -81,7 +81,7 @@ export function TermDetail({
 
       {hasRegex && (
         <section className="border-tech-line/25 grid border-y py-4 sm:grid-cols-[8rem_1fr] sm:items-start sm:gap-4">
-          <h3 className="text-tech-main/55 mb-2 font-mono text-[0.625rem] tracking-[0.18em] uppercase sm:mb-0 sm:pt-0.5">
+          <h3 className="text-tech-main/60 mb-2 text-xs font-medium sm:mb-0 sm:pt-0.5">
             {t("detailRegexLabel")}
           </h3>
           <code className="text-tech-main-dark bg-tech-main/4 border-tech-line/20 block border px-3 py-2 font-mono text-xs/5 wrap-break-word">
@@ -92,7 +92,7 @@ export function TermDetail({
 
       {hasRelated && (
         <section>
-          <h3 className="text-tech-main/55 mb-3 font-mono text-[0.625rem] tracking-[0.18em] uppercase">
+          <h3 className="text-tech-main/60 mb-3 text-xs font-medium">
             {t("detailRelatedLabel")}
           </h3>
           <CrossRefChips
@@ -104,7 +104,7 @@ export function TermDetail({
       )}
 
       <section>
-        <h3 className="text-tech-main/55 mb-3 font-mono text-[0.625rem] tracking-[0.18em] uppercase">
+        <h3 className="text-tech-main/60 mb-3 text-xs font-medium">
           {t("detailTranslationsLabel")}
         </h3>
         <TranslationsList

@@ -308,7 +308,7 @@ export function SearchCommand() {
 
         {/* Header */}
         <header className="guide-line flex items-center justify-between border-b px-4 py-3">
-          <div className="tracking-tech-wide text-tech-main/80 flex items-center gap-2 font-mono text-xs font-bold uppercase">
+          <div className="text-tech-main-dark flex items-center gap-2 text-sm font-semibold">
             <span className="bg-tech-main/80 inline-block size-1.5 animate-pulse" />
             {t("modalTitle")}
           </div>
@@ -328,14 +328,14 @@ export function SearchCommand() {
             onValueChange={handleQueryChange}
             placeholder={t("placeholder")}
             aria-label={t("searchAriaLabel")}
-            className="border-tech-main/40 text-tech-main-dark placeholder:text-tech-main/50 focus:border-tech-main/70 bg-surface-input/60 focus:bg-surface-input/80 w-full border px-3 py-2.5 font-mono text-sm transition-colors outline-none"
+            className="border-tech-main/40 text-tech-main-dark placeholder:text-tech-main/50 focus:border-tech-main/70 bg-surface-input/60 focus:bg-surface-input/80 w-full border px-3 py-2.5 text-sm transition-colors outline-none"
           />
         </div>
 
         <CommandList className="custom-left-scrollbar max-h-[50vh]">
           {/* Status line */}
           {query.length >= 2 && (
-            <div className="guide-line text-tech-main/70 border-b px-4 py-2 font-mono text-[0.625rem] tracking-wider uppercase">
+            <div className="guide-line text-tech-main/50 border-b px-4 py-2 text-xs">
               {isLoading
                 ? t("scanning")
                 : results.length === 20
@@ -369,12 +369,12 @@ export function SearchCommand() {
                   className="cursor-pointer px-4 py-3"
                   aria-label={t("selectResult", { title: result.title })}>
                   {/* Title */}
-                  <div className="text-tech-main-dark font-mono text-sm font-medium">
+                  <div className="text-tech-main-dark text-sm font-medium">
                     {highlightMatch(result.title)}
                   </div>
 
                   {/* Path */}
-                  <div className="text-tech-main/60 mt-0.5 font-mono text-[0.625rem] tracking-wider uppercase">
+                  <div className="text-tech-main/60 mt-0.5 font-mono text-[0.625rem] tracking-wider">
                     {t("pathLabel")} /{result.slug}
                   </div>
 
@@ -386,7 +386,7 @@ export function SearchCommand() {
                   )}
 
                   {/* Match type badge */}
-                  <div className="text-tech-main/50 absolute top-3 right-4 font-mono text-[0.5625rem] tracking-wider uppercase">
+                  <div className="text-tech-main/50 absolute top-3 right-4 font-mono text-[0.5625rem] tracking-wider">
                     {result.matchType === "content"
                       ? t("matchBody")
                       : t("matchTitle")}
@@ -399,7 +399,7 @@ export function SearchCommand() {
           {/* Glossary section */}
           {!isLoading && glossaryResults.length > 0 && (
             <CommandGroup className="guide-line border-t">
-              <div className="text-tech-main/50 flex items-center gap-2 px-4 pt-3 pb-1 font-mono text-[0.625rem] font-bold tracking-[0.2em] uppercase">
+              <div className="text-tech-main/50 flex items-center gap-2 px-4 pt-3 pb-1 text-xs font-medium">
                 <span className="bg-tech-signal inline-block size-1.5" />
                 {t("glossarySection")}
               </div>
@@ -412,7 +412,7 @@ export function SearchCommand() {
                   aria-label={t("selectResult", {
                     title: entry.fullFormEn,
                   })}>
-                  <span className="text-tech-main-dark font-mono text-sm font-medium">
+                  <span className="text-tech-main-dark text-sm font-medium">
                     {highlightMatch(entry.fullFormEn)}
                   </span>
                   {entry.shortForm && (
@@ -420,7 +420,7 @@ export function SearchCommand() {
                       {highlightMatch(entry.shortForm)}
                     </span>
                   )}
-                  <span className="text-tech-main/40 ml-auto font-mono text-[0.5625rem] tracking-wider uppercase">
+                  <span className="text-tech-main/40 ml-auto font-mono text-[0.5625rem] tracking-wider">
                     {entry.category}
                   </span>
                 </CommandItem>
@@ -434,10 +434,8 @@ export function SearchCommand() {
             results.length === 0 &&
             glossaryResults.length === 0 && (
               <div className="px-4 py-8 text-center">
-                <div className="text-tech-main/60 font-mono text-xs tracking-wider uppercase">
-                  {t("noMatch")}
-                </div>
-                <div className="text-tech-main/40 mt-1 font-mono text-[0.625rem]">
+                <div className="text-tech-main/60 text-sm">{t("noMatch")}</div>
+                <div className="text-tech-main/40 mt-1 text-xs">
                   {t("tryDifferentKeywords")}
                 </div>
               </div>
@@ -446,10 +444,10 @@ export function SearchCommand() {
           {/* Initial state */}
           {query.length < 2 && (
             <div className="px-4 py-8 text-center">
-              <div className="text-tech-main/60 font-mono text-xs tracking-wider uppercase">
+              <div className="text-tech-main/60 text-sm">
                 {t("awaitingInput")}
               </div>
-              <div className="text-tech-main/40 mt-1 font-mono text-[0.625rem]">
+              <div className="text-tech-main/40 mt-1 text-xs">
                 {t("minCharsHint")}
               </div>
             </div>

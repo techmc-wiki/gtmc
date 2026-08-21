@@ -289,10 +289,10 @@ export function DraftFileSourceDialog({
         className="border-tech-main bg-surface-modal top-1/2 left-1/2 max-h-[90vh] w-full max-w-6xl -translate-x-1/2 -translate-y-1/2 overflow-hidden border shadow-2xl">
         <div className="guide-line bg-tech-main/5 flex items-center justify-between border-b px-5 py-4">
           <div>
-            <DialogTitle className="text-tech-main font-mono text-sm tracking-widest uppercase">
+            <DialogTitle className="text-tech-main-dark text-sm font-semibold">
               {t("dialogTitle")}
             </DialogTitle>
-            <p className="text-tech-main/60 mt-1 font-mono text-xs uppercase">
+            <p className="text-tech-main/60 mt-1 text-xs">
               {t("dialogSubtitle")}
             </p>
           </div>
@@ -303,7 +303,7 @@ export function DraftFileSourceDialog({
 
         <div className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[20rem_minmax(0,1fr)]">
           <aside className="guide-line bg-tech-main/5 flex min-h-0 flex-col border-r">
-            <div className="guide-line text-tech-main shrink-0 border-b px-4 py-3 font-mono text-xs tracking-widest uppercase">
+            <div className="guide-line text-tech-main/60 shrink-0 border-b px-4 py-3 text-xs font-medium">
               {t("destinationTree")}
             </div>
 
@@ -353,7 +353,7 @@ export function DraftFileSourceDialog({
 
               <TabsContent value="repo" className="space-y-4">
                 <SectionLabel>{t("selectExistingFile")}</SectionLabel>
-                <p className="text-tech-main/60 font-mono text-xs uppercase">
+                <p className="text-tech-main/60 text-xs">
                   {t("selected")}: {selectedRepoFilePath || "NONE"}
                 </p>
                 <Button
@@ -367,7 +367,7 @@ export function DraftFileSourceDialog({
 
               <TabsContent value="upload" className="space-y-4">
                 <SectionLabel>{t("importLocalText")}</SectionLabel>
-                <p className="text-tech-main/60 font-mono text-xs uppercase">
+                <p className="text-tech-main/60 text-xs">
                   {t("destinationFolder")}: {selectedFolderPath || "ROOT"}
                 </p>
                 <input
@@ -378,7 +378,9 @@ export function DraftFileSourceDialog({
                   onChange={handleFileInputChange}
                 />
                 <div className="space-y-2">
-                  <label className="section-label" htmlFor="draft-import-name">
+                  <label
+                    className="text-tech-main/60 text-xs font-medium"
+                    htmlFor="draft-import-name">
                     {t("fileNameLabel")}
                   </label>
                   <Input
@@ -399,12 +401,12 @@ export function DraftFileSourceDialog({
 
               <TabsContent value="new" className="space-y-4">
                 <SectionLabel>{t("createNewFile")}</SectionLabel>
-                <p className="text-tech-main/60 font-mono text-xs uppercase">
+                <p className="text-tech-main/60 text-xs">
                   {t("destinationFolder")}: {selectedFolderPath || "ROOT"}
                 </p>
                 <div className="space-y-2">
                   <label
-                    className="section-label"
+                    className="text-tech-main/60 text-xs font-medium"
                     htmlFor="draft-new-file-name">
                     {t("fileNameLabel")}
                   </label>
@@ -415,7 +417,7 @@ export function DraftFileSourceDialog({
                     onChange={handleNewFileNameChange}
                   />
                 </div>
-                <div className="text-tech-main/60 font-mono text-xs uppercase">
+                <div className="text-tech-main/60 text-xs">
                   {t("result")}:{" "}
                   {buildDraftFilePath(selectedFolderPath, newFileName) ||
                     t("pending")}
@@ -431,12 +433,12 @@ export function DraftFileSourceDialog({
 
               <TabsContent value="folder" className="space-y-4">
                 <SectionLabel>新建文件夹</SectionLabel>
-                <p className="text-tech-main/60 font-mono text-xs uppercase">
+                <p className="text-tech-main/60 text-xs">
                   {t("destinationFolder")}: {selectedFolderPath || "ROOT"}
                 </p>
                 <div className="space-y-2">
                   <label
-                    className="section-label"
+                    className="text-tech-main/60 text-xs font-medium"
                     htmlFor="draft-new-folder-name">
                     {t("fileNameLabel")}
                   </label>
@@ -447,7 +449,7 @@ export function DraftFileSourceDialog({
                     onChange={handleNewFolderNameChange}
                   />
                 </div>
-                <div className="text-tech-main/60 font-mono text-xs uppercase">
+                <div className="text-tech-main/60 text-xs">
                   {t("result")}:{" "}
                   {[selectedFolderPath, newFolderName.trim()]
                     .filter(Boolean)
@@ -470,11 +472,7 @@ export function DraftFileSourceDialog({
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-tech-main font-mono text-sm tracking-widest uppercase">
-      {children}
-    </p>
-  )
+  return <p className="text-tech-main/60 text-xs font-medium">{children}</p>
 }
 
 function TreeNode({

@@ -115,7 +115,7 @@ export function ColumnPicker({
               <CollapsibleTrigger asChild>
                 <button
                   type="button"
-                  className="border-tech-line/30 text-tech-main/70 hover:text-tech-main flex w-full cursor-pointer list-none items-center justify-between border-b pb-1.5 font-mono text-[0.6875rem] font-bold tracking-widest uppercase transition-colors">
+                  className="border-tech-line/30 text-tech-main/70 hover:text-tech-main flex w-full cursor-pointer list-none items-center justify-between border-b pb-1.5 text-[0.6875rem] font-semibold transition-colors">
                   <span>{t("columnLanguageGroup")}</span>
                   <span className="text-tech-main/40 transition-transform group-data-[state=open]:rotate-90">
                     ▸
@@ -199,9 +199,7 @@ function ColumnCheckbox({
           aria-label={label}
           className="accent-tech-main size-3.5 cursor-pointer"
         />
-        <span className="text-tech-main font-mono text-xs tracking-widest uppercase">
-          {label}
-        </span>
+        <span className="text-tech-main text-xs font-medium">{label}</span>
       </label>
     </li>
   )
@@ -215,7 +213,7 @@ function ColumnGroup({
 }: ColumnGroupProps) {
   return (
     <div className="mb-3 last:mb-0">
-      <p className="border-tech-line/30 text-tech-main/70 border-b pb-1.5 font-mono text-[0.6875rem] font-bold tracking-widest uppercase">
+      <p className="border-tech-line/30 text-tech-main/70 border-b pb-1.5 text-[0.6875rem] font-semibold">
         {title}
       </p>
       <ul className="mt-1.5 flex flex-col">

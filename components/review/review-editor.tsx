@@ -778,41 +778,39 @@ export function ReviewEditor({
       />
 
       <div className="space-y-4">
-        <div className="border-tech-main/40 bg-tech-bg/95 text-tech-main sticky top-0 z-40 flex flex-wrap items-center justify-between gap-2 border px-4 py-3 font-mono text-xs backdrop-blur-sm">
+        <div className="border-tech-main/40 bg-tech-bg/95 text-tech-main sticky top-0 z-40 flex flex-wrap items-center justify-between gap-2 border px-4 py-3 text-xs backdrop-blur-sm">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
-            <span className="border-tech-main/40 bg-tech-main/10 shrink-0 border px-2 py-0.5 tracking-widest uppercase">
+            <span className="border-tech-main/40 bg-tech-main/10 text-tech-main/60 shrink-0 border px-2 py-0.5 text-xs font-medium">
               FILES_CHANGED_#{pr.number}
             </span>
-            <span className="truncate tracking-widest uppercase">
-              {pr.title}
-            </span>
+            <span className="display-title truncate text-2xl">{pr.title}</span>
             {effectiveMode && (
-              <span className="border-tech-main/30 bg-tech-main/5 text-tech-main/70 shrink-0 border px-2 py-0.5 tracking-widest uppercase">
+              <span className="border-tech-main/30 bg-tech-main/5 text-tech-main/70 shrink-0 border px-2 py-0.5 font-mono text-xs">
                 {effectiveMode}
               </span>
             )}
-            <span className="guide-line text-tech-main/60 bg-surface-overlay/70 shrink-0 border px-2 py-0.5 tracking-widest uppercase">
+            <span className="guide-line text-tech-main/60 bg-surface-overlay/70 shrink-0 border px-2 py-0.5 font-mono text-xs">
               {pr.baseRef} ← {pr.headRef}
             </span>
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-3">
-            <span className="text-tech-main/60 font-mono text-[0.6875rem] tracking-widest uppercase">
+            <span className="text-tech-main/60 font-mono text-[0.6875rem]">
               {pr.commits}_COMMITS
             </span>
-            <span className="text-tech-main/60 font-mono text-[0.6875rem] tracking-widest uppercase">
+            <span className="text-tech-main/60 font-mono text-[0.6875rem]">
               {pr.changedFiles}_FILES
             </span>
-            <span className="font-mono text-[0.6875rem] tracking-widest text-green-700 uppercase">
+            <span className="font-mono text-[0.6875rem] text-green-700">
               +{pr.additions}
             </span>
-            <span className="font-mono text-[0.6875rem] tracking-widest text-red-600 uppercase">
+            <span className="font-mono text-[0.6875rem] text-red-600">
               -{pr.deletions}
             </span>
             <a
               href={pr.htmlUrl}
               target="_blank"
               rel="noreferrer"
-              className="hover:text-tech-main-dark shrink-0 tracking-widest uppercase underline underline-offset-4">
+              className="hover:text-tech-main-dark shrink-0 underline underline-offset-4">
               OPEN_PR_
             </a>
           </div>
@@ -823,7 +821,7 @@ export function ReviewEditor({
           <AlertDialog open>
             <AlertDialogContent className="border-tech-main/40 bg-surface-modal top-1/2 left-1/2 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 p-6 shadow-xl">
               <CornerBrackets color="border-tech-main/40" />
-              <AlertDialogTitle className="text-tech-main/60 mb-4 font-mono text-xs tracking-widest uppercase">
+              <AlertDialogTitle className="text-tech-main-dark mb-4 text-sm font-semibold">
                 RESOLUTION_METHOD_
               </AlertDialogTitle>
               <ModeSelector
@@ -896,10 +894,10 @@ export function ReviewEditor({
                     <button
                       type="button"
                       onClick={handleJumpToNextConflict}
-                      className="border-tech-main/30 text-tech-main/60 hover:border-tech-main hover:text-tech-main border px-2 py-1 font-mono text-[0.625rem] tracking-widest uppercase">
+                      className="border-tech-main/30 text-tech-main/60 hover:border-tech-main hover:text-tech-main border px-2 py-1 font-mono text-[0.625rem]">
                       NEXT_CONFLICT_ ↓
                     </button>
-                    <span className="text-tech-main/40 ml-2 font-mono text-[0.625rem] tracking-widest uppercase">
+                    <span className="text-tech-main/40 ml-2 font-mono text-[0.625rem]">
                       {conflictSegments.length} UNRESOLVED
                     </span>
                   </div>
@@ -990,7 +988,7 @@ export function ReviewEditor({
                       </div>
                     ) : (
                       <div className="space-y-3 p-6">
-                        <p className="text-tech-main/60 font-mono text-xs tracking-widest uppercase">
+                        <p className="text-tech-main/60 text-sm">
                           NO_CONFLICTS_LEFT_
                         </p>
                       </div>
@@ -1030,10 +1028,10 @@ export function ReviewEditor({
                   className="editor-grow data-[state=inactive]:hidden">
                   {hasInlineConflicts ? (
                     <div className="space-y-3 p-6">
-                      <p className="font-mono text-xs tracking-widest text-red-600 uppercase">
+                      <p className="text-sm text-red-600">
                         CONFLICTS_UNRESOLVED_
                       </p>
-                      <p className="mono-label">
+                      <p className="text-tech-main/60 text-sm">
                         Resolve all conflicts before previewing.
                       </p>
                     </div>
@@ -1045,7 +1043,9 @@ export function ReviewEditor({
                       />
                     </div>
                   ) : (
-                    <p className="editor-panel">NOTHING_TO_PREVIEW_</p>
+                    <p className="text-tech-main/60 text-sm">
+                      NOTHING_TO_PREVIEW_
+                    </p>
                   )}
                 </TabsContent>
               </Tabs>

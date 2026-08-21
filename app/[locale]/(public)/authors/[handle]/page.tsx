@@ -268,7 +268,7 @@ export default async function AuthorDetailPage({
 
             {hasSocialLinks && (
               <div className="mt-4">
-                <p className="text-tech-main/50 mb-2 font-mono text-[0.625rem] tracking-[0.25em] uppercase">
+                <p className="text-tech-main/50 mb-2 text-xs font-medium">
                   {t("socialLinksLabel")}
                 </p>
                 <div className="flex flex-wrap gap-3">
@@ -304,7 +304,7 @@ export default async function AuthorDetailPage({
               </div>
             )}
 
-            <div className="text-tech-main/50 mt-4 flex flex-wrap gap-x-6 gap-y-1 font-mono text-[0.625rem] tracking-[0.25em] uppercase">
+            <div className="text-tech-main/50 mt-4 flex flex-wrap gap-x-6 gap-y-1 text-xs font-medium">
               {maintainer ? (
                 <>
                   {repositoryStats ? (
@@ -416,9 +416,7 @@ function RepositoryStat({
 }) {
   return (
     <Card padding="compact">
-      <p className="text-tech-main/60 font-mono text-[0.625rem] tracking-[0.25em] uppercase">
-        {label}
-      </p>
+      <p className="text-tech-main/60 text-xs font-medium">{label}</p>
       <p className="text-tech-main-dark mt-2 text-2xl font-semibold tabular-nums">
         {new Intl.NumberFormat(locale).format(value)}
       </p>
@@ -440,7 +438,7 @@ function SocialLink({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-tech-main hover:text-tech-main-dark inline-flex items-center gap-1.5 font-mono text-xs tracking-widest uppercase transition-colors">
+      className="text-tech-main hover:text-tech-main-dark inline-flex items-center gap-1.5 text-xs font-medium transition-colors">
       {children}
       {label}
     </a>

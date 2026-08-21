@@ -217,7 +217,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           <div className="flex items-center justify-between">
             <label
               htmlFor="draft-title"
-              className="text-tech-main flex items-center gap-2 font-mono text-[10px] tracking-widest uppercase">
+              className="text-tech-main/60 flex items-center gap-2 text-xs font-medium">
               <span className="bg-tech-main/40 inline-block size-2" />
               {t("titleLabel")}
             </label>
@@ -350,7 +350,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             <button
               type="button"
               onClick={() => actions.setActiveInfoTab("changes")}
-              className={`flex-1 px-4 py-3 font-mono text-xs tracking-widest uppercase ${
+              className={`flex-1 px-4 py-3 text-xs font-medium ${
                 state.activeInfoTab === "changes"
                   ? "bg-tech-main-dark text-tech-bg"
                   : "text-tech-main hover:bg-tech-main/5"
@@ -360,7 +360,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             <button
               type="button"
               onClick={() => actions.setActiveInfoTab("guide")}
-              className={`guide-line flex-1 border-l px-4 py-3 font-mono text-xs tracking-widest uppercase ${
+              className={`guide-line flex-1 border-l px-4 py-3 text-xs font-medium ${
                 state.activeInfoTab === "guide"
                   ? "bg-tech-main-dark text-tech-bg"
                   : "text-tech-main hover:bg-tech-main/5"
@@ -395,7 +395,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
               </div>
 
               {changeEntries.length === 0 ? (
-                <p className="guide-line bg-tech-main/5 text-tech-main/60 border p-4 font-mono text-xs uppercase">
+                <p className="guide-line bg-tech-main/5 text-tech-main/60 border p-4 text-xs">
                   NO_LOCAL_DIFF_
                 </p>
               ) : (
@@ -427,9 +427,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           ) : (
             <div className="p-4">
               {state.contributingGuides.length === 0 ? (
-                <p className="text-tech-main/60 font-mono text-xs uppercase">
-                  NO_GUIDE_AVAILABLE_
-                </p>
+                <p className="text-tech-main/60 text-xs">NO_GUIDE_AVAILABLE_</p>
               ) : (
                 <>
                   <div className="mb-4 flex flex-wrap gap-2">
@@ -466,7 +464,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
 
         <div className="border-tech-main/35 bg-surface-overlay/80 border p-4 backdrop-blur-sm">
           <p className="section-label">WORKSPACE OVERVIEW</p>
-          <div className="space-y-3 font-mono text-xs uppercase">
+          <div className="space-y-3 text-xs">
             <InfoLine
               label="OPEN FILES"
               value={String(state.draftCollection.files.length)}
@@ -652,10 +650,8 @@ function describeSnapshotStatus(snapshot?: RepoFileSnapshot) {
 function InfoStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="guide-line bg-tech-main/5 border p-3">
-      <p className="text-tech-main/55 font-mono text-[0.6875rem] tracking-widest uppercase">
-        {label}
-      </p>
-      <p className="text-tech-main mt-2 font-mono text-lg uppercase">{value}</p>
+      <p className="text-tech-main/60 text-xs font-medium">{label}</p>
+      <p className="text-tech-main mt-2 font-mono text-lg">{value}</p>
     </div>
   )
 }
@@ -663,8 +659,10 @@ function InfoStat({ label, value }: { label: string; value: string }) {
 function InfoLine({ label, value }: { label: string; value: string }) {
   return (
     <div className="border-tech-main/10 flex items-start justify-between gap-3 border-b pb-2">
-      <span className="text-tech-main/55">{label}</span>
-      <span className="text-tech-main text-right break-all">{value}</span>
+      <span className="text-tech-main/55 text-xs font-medium">{label}</span>
+      <span className="text-tech-main text-right font-mono break-all">
+        {value}
+      </span>
     </div>
   )
 }
@@ -681,11 +679,9 @@ function ChangePreviewCard({
   return (
     <section className="guide-line bg-surface-overlay/70 border">
       <div className="guide-line bg-tech-main/5 flex items-center justify-between border-b px-4 py-3">
-        <p className="text-tech-main font-mono text-xs tracking-widest break-all uppercase">
-          {filePath}
-        </p>
+        <p className="text-tech-main font-mono text-xs break-all">{filePath}</p>
         <span
-          className={`border px-2 py-1 font-mono text-[0.625rem] tracking-widest uppercase ${
+          className={`border px-2 py-1 font-mono text-[0.625rem] ${
             changeType === "new"
               ? `border-emerald-500/30 text-emerald-700`
               : changeType === "modified"

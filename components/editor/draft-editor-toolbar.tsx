@@ -76,7 +76,7 @@ export function DraftEditorToolbar({
           />
           <div className="guide-line bg-tech-main/4 relative flex h-12 items-center gap-2 overflow-x-auto scroll-smooth border-b px-4 shadow-[inset_0_1px_4px_rgb(var(--color-tech-main)/0.05)]">
             <div className="bg-tech-main/30 absolute inset-y-0 left-0 w-1" />
-            <span className="text-tech-main/50 mr-2 font-mono text-[9px] tracking-widest uppercase opacity-70">
+            <span className="text-tech-main/60 mr-2 text-xs font-medium opacity-70">
               MACROS
             </span>
 

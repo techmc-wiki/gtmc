@@ -8,6 +8,8 @@ import React, { useRef, useEffect, useCallback, useMemo } from "react"
 import { gsap } from "gsap"
 import { InertiaPlugin } from "gsap/InertiaPlugin"
 
+import { cn } from "@/lib/cn"
+
 gsap.registerPlugin(InertiaPlugin)
 
 const throttle = (func: (event: MouseEvent) => void, limit: number) => {
@@ -344,7 +346,7 @@ const DotGrid: React.FC<DotGridProps> = ({
   return (
     <section
       aria-hidden="true"
-      className={`pointer-events-none relative h-full w-full ${className}`}
+      className={cn("pointer-events-none relative h-full w-full", className)}
       style={style}>
       <div ref={wrapperRef} className="relative h-full w-full">
         <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />

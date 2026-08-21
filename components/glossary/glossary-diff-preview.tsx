@@ -2,6 +2,25 @@
 
 import * as React from "react"
 import { diffWords } from "diff"
+import { useTranslations } from "next-intl"
+import {
+  AlertCircle,
+  CheckCircle2,
+  ExternalLink,
+  GitPullRequest,
+  Loader2,
+} from "lucide-react"
+
+import { Button } from "@/components/ui/shadcn/button"
+import { Badge } from "@/components/ui/shadcn/badge"
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/shadcn/card"
+import { ScrollArea } from "@/components/ui/shadcn/scroll-area"
+import { Separator } from "@/components/ui/shadcn/separator"
 import { GLOSSARY_COLUMNS, type GlossaryRow } from "@/lib/glossary/csv"
 import { cn } from "@/lib/cn"
 
@@ -20,6 +39,12 @@ export interface GlossaryDiffPreviewProps {
   canSubmit?: boolean
   validationMessage?: string
   className?: string
+  authorName?: string
+  noreplyEmail?: string
+  realEmail?: string | null
+  submitState?: "idle" | "running" | "success" | "error"
+  submitResult?: { prUrl: string; prNumber: number } | null
+  onDismissSuccess?: () => void
 }
 
 function renderInlineDiff(oldText: string, newText: string): React.ReactNode {
@@ -31,7 +56,7 @@ function renderInlineDiff(oldText: string, newText: string): React.ReactNode {
       return (
         <ins
           key={key}
-          className="bg-green-100/50 px-0.5 text-green-800 no-underline">
+          className="rounded-xs bg-green-500/15 px-1 py-0.5 font-medium text-green-700 no-underline dark:text-green-400">
           {part.value}
         </ins>
       )
@@ -40,7 +65,7 @@ function renderInlineDiff(oldText: string, newText: string): React.ReactNode {
       return (
         <del
           key={key}
-          className="bg-red-100/50 px-0.5 text-red-700 line-through">
+          className="rounded-xs bg-red-500/15 px-1 py-0.5 text-red-700 line-through opacity-80 dark:text-red-400">
           {part.value}
         </del>
       )
@@ -59,7 +84,7 @@ function changedColumns(
 function populatedColumns(
   row: GlossaryRow
 ): readonly (typeof GLOSSARY_COLUMNS)[number][] {
-  return GLOSSARY_COLUMNS.filter((col) => row[col].trim() !== "")
+  return GLOSSARY_COLUMNS.filter((col) => row[col]?.trim() !== "")
 }
 
 interface OperationCardProps {
@@ -72,35 +97,47 @@ function EditOperationCard({ operation }: OperationCardProps) {
   const fields = changedColumns(before, after)
 
   return (
-    <article
-      aria-label={`Edit ${operation.slug}`}
-      className="border-tech-line/40 border-l-tech-main bg-surface-overlay/70 border border-l-4 p-4 backdrop-blur-sm">
-      <header className="mb-3 flex items-baseline gap-2 font-mono text-xs">
-        <span className="text-tech-main font-bold tracking-widest uppercase">
-          [EDIT]
-        </span>
-        <span className="text-tech-main-dark font-bold">{operation.slug}</span>
-      </header>
-
-      {fields.length === 0 ? (
-        <p className="text-tech-main/60 font-mono text-xs italic">
-          No field changes detected.
-        </p>
-      ) : (
-        <dl className="flex flex-col gap-2 font-mono text-sm">
-          {fields.map((field) => (
-            <div key={field} className="flex flex-col gap-1">
-              <dt className="text-tech-main/60 text-[0.7rem] tracking-widest uppercase">
-                {field}
-              </dt>
-              <dd className="text-tech-main-dark leading-relaxed break-words whitespace-pre-wrap">
-                {renderInlineDiff(before[field], after[field])}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      )}
-    </article>
+    <Card
+      tone="main"
+      borderOpacity="subtle"
+      background="default"
+      padding="compact"
+      brackets="hidden"
+      hover="none"
+      className="border-tech-line/40">
+      <CardHeader className="p-0 pb-3">
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="text-foreground text-sm font-semibold">
+            {operation.after?.["Full Form (English)"] ||
+              operation.before?.["Full Form (English)"] ||
+              operation.slug}
+          </CardTitle>
+          <Badge variant="secondary">Edited</Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        {fields.length === 0 ? (
+          <p className="text-muted-foreground text-xs italic">
+            No field changes detected.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-2.5">
+            {fields.map((field) => (
+              <div
+                key={field}
+                className="bg-surface-overlay/50 border-border/50 rounded-none border p-2.5 text-xs">
+                <div className="text-muted-foreground mb-1 font-mono text-[11px] tracking-wider uppercase">
+                  {field}
+                </div>
+                <div className="text-foreground leading-relaxed break-words whitespace-pre-wrap">
+                  {renderInlineDiff(before[field] || "", after[field] || "")}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
@@ -109,35 +146,43 @@ function AddOperationCard({ operation }: OperationCardProps) {
   const fields = populatedColumns(after)
 
   return (
-    <article
-      aria-label={`Add ${operation.slug}`}
-      className="border-tech-line/40 bg-surface-overlay/70 border border-l-4 border-l-green-500/40 p-4 backdrop-blur-sm">
-      <header className="mb-3 flex items-baseline gap-2 font-mono text-xs">
-        <span className="font-bold tracking-widest text-green-700 uppercase">
-          [NEW TERM]
-        </span>
-        <span className="text-tech-main-dark font-bold">{operation.slug}</span>
-      </header>
-
-      {fields.length === 0 ? (
-        <p className="text-tech-main/60 font-mono text-xs italic">Empty row.</p>
-      ) : (
-        <dl className="flex flex-col gap-1.5 font-mono text-sm">
-          {fields.map((field) => (
-            <div
-              key={field}
-              className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-3">
-              <dt className="text-tech-main/60 text-[0.7rem] tracking-widest uppercase sm:w-48 sm:shrink-0">
-                {field}
-              </dt>
-              <dd className="text-tech-main-dark leading-relaxed break-words whitespace-pre-wrap">
-                {after[field]}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      )}
-    </article>
+    <Card
+      tone="main"
+      borderOpacity="subtle"
+      background="default"
+      padding="compact"
+      brackets="hidden"
+      hover="none"
+      className="border-tech-line/40">
+      <CardHeader className="p-0 pb-3">
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="text-foreground text-sm font-semibold">
+            {after["Full Form (English)"] || operation.slug}
+          </CardTitle>
+          <Badge variant="success">New Term</Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        {fields.length === 0 ? (
+          <p className="text-muted-foreground text-xs italic">Empty term.</p>
+        ) : (
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {fields.map((field) => (
+              <div
+                key={field}
+                className="bg-surface-overlay/50 border-border/50 rounded-none border p-2 text-xs">
+                <span className="text-muted-foreground block font-mono text-[10px] tracking-wider uppercase">
+                  {field}
+                </span>
+                <span className="text-foreground mt-0.5 block break-words whitespace-pre-wrap">
+                  {after[field]}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
@@ -146,37 +191,39 @@ function DeleteOperationCard({ operation }: OperationCardProps) {
   const fields = populatedColumns(before)
 
   return (
-    <article
-      aria-label={`Delete ${operation.slug}`}
-      className="border-tech-line/40 bg-surface-overlay/70 border border-l-4 border-l-red-700/40 p-4 backdrop-blur-sm">
-      <header className="mb-3 flex items-baseline gap-2 font-mono text-xs">
-        <span className="font-bold tracking-widest text-red-700 uppercase">
-          [TO BE DELETED]
-        </span>
-        <span className="text-tech-main-dark font-bold line-through">
-          {operation.slug}
-        </span>
-      </header>
-
-      {fields.length === 0 ? (
-        <p className="text-tech-main/60 font-mono text-xs italic">Empty row.</p>
-      ) : (
-        <dl className="flex flex-col gap-1 font-mono text-sm opacity-50">
-          {fields.map((field) => (
-            <div
-              key={field}
-              className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-3">
-              <dt className="text-tech-main/70 text-[0.7rem] tracking-widest uppercase line-through sm:w-48 sm:shrink-0">
-                {field}
-              </dt>
-              <dd className="text-tech-main-dark leading-relaxed break-words whitespace-pre-wrap line-through">
-                {before[field]}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      )}
-    </article>
+    <Card
+      tone="danger"
+      borderOpacity="subtle"
+      background="subtle"
+      padding="compact"
+      brackets="hidden"
+      hover="none"
+      className="border-red-500/30">
+      <CardHeader className="p-0 pb-3">
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="text-sm font-semibold text-red-700 line-through dark:text-red-400">
+            {before["Full Form (English)"] || operation.slug}
+          </CardTitle>
+          <Badge variant="destructive">To be deleted</Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        {fields.length > 0 && (
+          <div className="flex flex-col gap-1 text-xs opacity-75">
+            {fields.map((field) => (
+              <div key={field} className="flex gap-2">
+                <span className="text-muted-foreground shrink-0 font-mono text-[10px] tracking-wider uppercase sm:w-32">
+                  {field}:
+                </span>
+                <span className="text-foreground break-words line-through">
+                  {before[field]}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
@@ -188,15 +235,15 @@ export function GlossaryDiffPreview({
   canSubmit = true,
   validationMessage,
   className,
+  authorName,
+  noreplyEmail,
+  realEmail,
+  submitState = "idle",
+  submitResult,
+  onDismissSuccess,
 }: GlossaryDiffPreviewProps) {
+  const t = useTranslations("Glossary")
   const [useRealEmail, setUseRealEmail] = React.useState(false)
-
-  const handleUseRealEmailChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setUseRealEmail(event.target.checked)
-    },
-    []
-  )
 
   const counts = React.useMemo(() => {
     let edit = 0
@@ -215,85 +262,161 @@ export function GlossaryDiffPreview({
     await onSubmit({ useRealEmail })
   }, [isSubmitting, canSubmit, onSubmit, useRealEmail])
 
+  const canToggleRealEmail = Boolean(
+    realEmail && noreplyEmail && realEmail !== noreplyEmail
+  )
+
+  if (submitState === "success" && submitResult) {
+    return (
+      <div className={cn("flex flex-col p-6 sm:p-8", className)}>
+        <div className="flex flex-col items-center justify-center gap-4 text-center">
+          <div className="flex size-12 items-center justify-center rounded-full bg-green-500/15 text-green-600">
+            <CheckCircle2 className="size-6" />
+          </div>
+          <div className="space-y-1.5">
+            <h3 className="text-foreground text-lg font-semibold">
+              Pull Request #{submitResult.prNumber} Opened
+            </h3>
+            <p className="text-muted-foreground max-w-lg text-xs leading-relaxed sm:text-sm">
+              {t("editorPrOwnershipBody")}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <a
+              href={submitResult.prUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border-border hover:bg-accent inline-flex items-center gap-1.5 border px-4 py-2 font-mono text-xs font-bold tracking-wider uppercase transition-colors">
+              View on GitHub <ExternalLink className="size-3.5" />
+            </a>
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              onClick={onDismissSuccess || onClose}>
+              Return to drafts
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const submitDisabled = isSubmitting || !canSubmit || operations.length === 0
 
   return (
-    <div
-      className={cn(
-        "border-tech-main/40 bg-surface-overlay/95 flex flex-col border backdrop-blur-sm",
-        className
-      )}>
-      <output
-        aria-live="polite"
-        className="border-tech-line/30 bg-surface-overlay/95 sticky top-0 z-10 flex items-center justify-between gap-4 border-b px-4 py-3 font-mono text-xs backdrop-blur-sm sm:px-6">
-        <span className="text-tech-main-dark tracking-widest uppercase">
-          {`Edit: ${counts.edit} / Add: ${counts.add} / Delete: ${counts.delete}`}
-        </span>
-        <span className="text-tech-main/60 tracking-widest uppercase">
-          {`${operations.length} OP${operations.length === 1 ? "" : "S"}`}
-        </span>
-      </output>
-
-      <div className="flex flex-col gap-3 px-4 py-4 sm:px-6">
-        {operations.length === 0 ? (
-          <p className="text-tech-main/60 font-mono text-sm italic">
-            No staged operations.
-          </p>
-        ) : (
-          operations.map((op) => {
-            const key = `${op.kind}:${op.slug}`
-            if (op.kind === "edit") {
-              return <EditOperationCard key={key} operation={op} />
-            }
-            if (op.kind === "add") {
-              return <AddOperationCard key={key} operation={op} />
-            }
-            return <DeleteOperationCard key={key} operation={op} />
-          })
-        )}
+    <div className={cn("flex flex-col overflow-hidden", className)}>
+      <div className="border-border bg-surface flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-6">
+        <div className="flex items-center gap-2">
+          <span className="text-foreground font-mono text-xs font-medium">
+            {operations.length} {operations.length === 1 ? "change" : "changes"}
+          </span>
+          <div className="flex items-center gap-1.5">
+            {counts.edit > 0 && (
+              <Badge variant="secondary" className="text-[10px]">
+                {counts.edit} Edited
+              </Badge>
+            )}
+            {counts.add > 0 && (
+              <Badge variant="success" className="text-[10px]">
+                {counts.add} Added
+              </Badge>
+            )}
+            {counts.delete > 0 && (
+              <Badge variant="destructive" className="text-[10px]">
+                {counts.delete} Deleted
+              </Badge>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="border-tech-line/30 bg-tech-bg/40 flex flex-col gap-3 border-t px-4 py-4 font-mono text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <label className="flex items-center gap-2 text-xs">
-          <input
-            type="checkbox"
-            checked={useRealEmail}
-            onChange={handleUseRealEmailChange}
-            disabled={isSubmitting}
-            aria-label="Use real email"
-            className="border-tech-main/60 accent-tech-main size-4 cursor-pointer disabled:cursor-not-allowed"
-          />
-          <span className="text-tech-main tracking-widest uppercase">
-            USE REAL EMAIL
-          </span>
-        </label>
-
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-          {validationMessage && !canSubmit ? (
-            <span
-              role="alert"
-              className="text-xs tracking-widest text-red-700 uppercase">
-              {validationMessage}
-            </span>
-          ) : null}
-
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="text-tech-main/70 hover:text-tech-main cursor-pointer text-xs tracking-widest uppercase underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-50">
-            Save &amp; continue editing
-          </button>
-
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={submitDisabled}
-            aria-busy={isSubmitting}
-            className="border-tech-main-dark bg-tech-main-dark hover:bg-tech-signal hover:border-tech-signal hover:text-tech-signal-ink text-tech-bg inline-flex min-h-[44px] cursor-pointer items-center justify-center border px-6 py-2 text-xs font-bold tracking-widest uppercase transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60">
-            {isSubmitting ? "Submitting…" : "Submit PR"}
-          </button>
+      <ScrollArea className="max-h-[50vh] px-4 py-4 sm:px-6">
+        <div className="flex flex-col gap-3 pr-3">
+          {operations.length === 0 ? (
+            <p className="text-muted-foreground py-4 text-center text-sm italic">
+              No staged operations.
+            </p>
+          ) : (
+            operations.map((op) => {
+              const key = `${op.kind}:${op.slug}`
+              if (op.kind === "edit") {
+                return <EditOperationCard key={key} operation={op} />
+              }
+              if (op.kind === "add") {
+                return <AddOperationCard key={key} operation={op} />
+              }
+              return <DeleteOperationCard key={key} operation={op} />
+            })
+          )}
         </div>
+      </ScrollArea>
+
+      <Separator />
+
+      {canToggleRealEmail ? (
+        <div className="bg-surface-overlay/50 border-border border-b px-4 py-3 sm:px-6">
+          <label
+            htmlFor="diff-preview-real-email-toggle"
+            aria-label={t("editorRealEmailToggleLabel")}
+            className="flex cursor-pointer items-start gap-2.5 text-xs">
+            <input
+              id="diff-preview-real-email-toggle"
+              type="checkbox"
+              checked={useRealEmail}
+              onChange={(e) => setUseRealEmail(e.target.checked)}
+              disabled={isSubmitting}
+              aria-label={t("editorRealEmailToggleLabel")}
+              className="accent-tech-signal mt-0.5 size-4 cursor-pointer"
+            />
+            <span className="flex flex-col gap-0.5">
+              <span className="text-foreground font-medium">
+                {t("editorRealEmailToggleLabel")}
+              </span>
+              <span className="text-muted-foreground text-[11px]">
+                {useRealEmail
+                  ? `Commit will be authored by ${authorName} <${realEmail}>`
+                  : `Default commit author: ${authorName} <${noreplyEmail}>`}
+              </span>
+            </span>
+          </label>
+        </div>
+      ) : null}
+
+      {validationMessage ? (
+        <div className="flex items-center gap-2 border-b border-red-500/20 bg-red-500/10 px-4 py-2.5 text-xs text-red-700 sm:px-6 dark:text-red-400">
+          <AlertCircle className="size-4 shrink-0" />
+          <span className="leading-snug">{validationMessage}</span>
+        </div>
+      ) : null}
+
+      <div className="bg-surface flex flex-col-reverse gap-2 p-4 sm:flex-row sm:items-center sm:justify-end sm:px-6">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={onClose}
+          disabled={isSubmitting}>
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          variant="default"
+          size="sm"
+          onClick={handleSubmit}
+          disabled={submitDisabled}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+              Submitting Pull Request…
+            </>
+          ) : (
+            <>
+              <GitPullRequest className="mr-1.5 size-3.5" />
+              Submit Pull Request
+            </>
+          )}
+        </Button>
       </div>
     </div>
   )

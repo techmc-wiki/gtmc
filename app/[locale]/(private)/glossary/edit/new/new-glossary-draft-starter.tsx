@@ -1,8 +1,16 @@
 "use client"
 
 import * as React from "react"
+import { AlertCircle, Loader2 } from "lucide-react"
 
 import { createGlossaryDraftAction } from "@/actions/glossary-draft"
+import { Button } from "@/components/ui/shadcn/button"
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/shadcn/card"
 import { useRouter } from "@/i18n/navigation"
 
 interface NewGlossaryDraftStarterProps {
@@ -17,12 +25,12 @@ export function NewGlossaryDraftStarter({
 }: NewGlossaryDraftStarterProps) {
   const router = useRouter()
   const inFlightRef = React.useRef(false)
-  const [error, setError] = React.useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const startDraft = React.useCallback(async () => {
     if (inFlightRef.current) return
     inFlightRef.current = true
-    setError(null)
+    setErrorMessage(null)
 
     try {
       const creation = pendingDraftCreation ?? createGlossaryDraftAction()
@@ -42,11 +50,10 @@ export function NewGlossaryDraftStarter({
         }
         clearPendingDraftCreation = null
       }, 5000)
-      // eslint-disable-next-line no-shadow, unicorn/catch-error-name -- catch param must match outer state name
     } catch (error) {
       inFlightRef.current = false
       pendingDraftCreation = null
-      setError(
+      setErrorMessage(
         error instanceof Error
           ? error.message
           : "Failed to create glossary draft"
@@ -59,26 +66,47 @@ export function NewGlossaryDraftStarter({
   }, [startDraft])
 
   return (
-    <div className="page-container">
-      <div className="border-tech-main/40 bg-surface-overlay/80 p-6 font-mono backdrop-blur-sm">
-        <p className="text-tech-main/60 text-[10px] tracking-widest uppercase">
-          [GLOSSARY_DRAFT_INITIALIZATION]
-        </p>
-        <p className="text-tech-main-dark mt-3 text-sm tracking-wide uppercase">
-          {error ? "Creation failed." : "Creating glossary draft..."}
-        </p>
-        {error ? (
-          <div className="mt-4 flex flex-col gap-3">
-            <p className="text-sm text-red-700 normal-case">{error}</p>
-            <button
-              type="button"
-              onClick={() => void startDraft()}
-              className="border-tech-main-dark bg-tech-main-dark hover:bg-tech-signal hover:border-tech-signal hover:text-tech-signal-ink text-tech-bg w-fit cursor-pointer border px-4 py-2 text-xs font-bold tracking-widest uppercase transition-colors">
-              Retry
-            </button>
-          </div>
-        ) : null}
-      </div>
+    <div className="page-container py-12">
+      <Card
+        tone="main"
+        borderOpacity="subtle"
+        background="default"
+        padding="spacious"
+        brackets="hidden"
+        hover="none"
+        className="border-border mx-auto max-w-md">
+        <CardHeader className="p-0 pb-4 text-center">
+          <CardTitle className="text-foreground text-base font-semibold">
+            {errorMessage
+              ? "Draft Initialization Failed"
+              : "Initializing Glossary Draft"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0 text-center">
+          {errorMessage ? (
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex w-full items-center gap-2 bg-red-500/10 p-3 text-left text-xs text-red-600 dark:text-red-400">
+                <AlertCircle className="size-4 shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                onClick={() => void startDraft()}>
+                Retry
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3 py-4">
+              <Loader2 className="text-tech-signal size-6 animate-spin" />
+              <p className="text-muted-foreground text-xs">
+                Creating your workspace, please wait…
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

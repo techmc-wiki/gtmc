@@ -1,9 +1,18 @@
 "use client"
 
 import * as React from "react"
-import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
+import { ExternalLink, GitPullRequest, Plus } from "lucide-react"
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/shadcn/dialog"
+import { Button } from "@/components/ui/shadcn/button"
+import { Badge } from "@/components/ui/shadcn/badge"
 import { GlossaryEditToolbar } from "@/components/glossary/glossary-edit-toolbar"
 import {
   ComplexChangesNotice,
@@ -15,11 +24,6 @@ import {
   type GlossaryEditOperation,
 } from "@/components/glossary/glossary-edit-card"
 import { GlossaryDiffPreview } from "@/components/glossary/glossary-diff-preview"
-import {
-  OperationProgress,
-  type OperationProgressState,
-  type OperationProgressStage,
-} from "@/components/ui/operation-progress"
 import { useStatusNotification } from "@/hooks/use-status-notification"
 import {
   deleteGlossaryDraftAction,
@@ -47,15 +51,12 @@ export interface GlossaryEditorProps {
   authorName: string
   noreplyEmail: string
   realEmail: string | null
+  status?: string
+  githubPrUrl?: string | null
+  githubPrNum?: number | null
 }
 
 const SAVE_DEBOUNCE_MS = 2000
-
-const SUBMIT_STAGES: OperationProgressStage[] = [
-  { id: "fetch", label: "FETCH UPSTREAM CSV", durationMs: 1500 },
-  { id: "merge", label: "APPLY OPERATIONS", durationMs: 800 },
-  { id: "branch", label: "OPEN PULL REQUEST", durationMs: 3000 },
-]
 
 function emptyRow(): GlossaryRow {
   const row = {} as GlossaryRow
@@ -170,10 +171,15 @@ function GlossaryEditorInner({
   authorName,
   noreplyEmail,
   realEmail,
+  status = "DRAFT",
+  githubPrUrl,
+  githubPrNum,
 }: GlossaryEditorProps) {
   const t = useTranslations("Glossary")
   const router = useRouter()
   const isMounted = useMounted()
+
+  const isReadOnly = status === "SUBMITTED" || status === "PENDING"
 
   const entriesBySlug = React.useMemo(() => {
     const map = new Map<string, GlossaryEntry>()
@@ -189,13 +195,18 @@ function GlossaryEditorInner({
   const [showPreview, setShowPreview] = React.useState(false)
   const [useRealEmail, setUseRealEmail] = React.useState(false)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
-  const [submitState, setSubmitState] =
-    React.useState<OperationProgressState>("idle")
+  const [submitState, setSubmitState] = React.useState<
+    "idle" | "running" | "success" | "error"
+  >("idle")
   const [submitError, setSubmitError] = React.useState<string | null>(null)
   const [submitResult, setSubmitResult] = React.useState<{
     prUrl: string
     prNumber: number
-  } | null>(null)
+  } | null>(
+    githubPrUrl && githubPrNum
+      ? { prUrl: githubPrUrl, prNumber: githubPrNum }
+      : null
+  )
 
   const { badge, showBadge, clearBadge } = useStatusNotification()
 
@@ -208,20 +219,33 @@ function GlossaryEditorInner({
   titleRef.current = title
 
   const scheduleAutosave = React.useCallback(() => {
+    if (isReadOnly) return
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current)
     }
     showBadge("SAVING…", "progress")
     saveTimeoutRef.current = setTimeout(async () => {
       try {
-        await updateGlossaryDraftAction(draftId, operationsRef.current)
-        showBadge("SAVED", "info", 2000)
+        const result = await updateGlossaryDraftAction(
+          draftId,
+          operationsRef.current,
+          titleRef.current
+        )
+        if (result.success) {
+          showBadge("SAVED", "info", 2000)
+        } else {
+          const message =
+            result.errors?.general ||
+            result.errors?.operations?.join(", ") ||
+            "SAVE FAILED"
+          showBadge(message.toUpperCase(), "error", 3000)
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : "SAVE FAILED"
         showBadge(message.toUpperCase(), "error", 3000)
       }
     }, SAVE_DEBOUNCE_MS)
-  }, [draftId, showBadge])
+  }, [draftId, showBadge, isReadOnly])
 
   React.useEffect(
     () => () => {
@@ -234,14 +258,16 @@ function GlossaryEditorInner({
 
   const handleTitleChange = React.useCallback(
     (next: string) => {
+      if (isReadOnly) return
       setTitle(next)
       scheduleAutosave()
     },
-    [scheduleAutosave]
+    [scheduleAutosave, isReadOnly]
   )
 
   const handlePick = React.useCallback(
     (slug: string) => {
+      if (isReadOnly) return
       const entry = entriesBySlug.get(slug)
       if (!entry) return
       setOperations((prev) => {
@@ -259,7 +285,7 @@ function GlossaryEditorInner({
       })
       scheduleAutosave()
     },
-    [entriesBySlug, scheduleAutosave]
+    [entriesBySlug, scheduleAutosave, isReadOnly]
   )
 
   const usedSlugs = React.useMemo(() => {
@@ -271,6 +297,7 @@ function GlossaryEditorInner({
 
   const handleAddNew = React.useCallback(
     (query: string) => {
+      if (isReadOnly) return
       const trimmed = query.trim()
       if (!trimmed) return
       const baseSlug = generateSlug(trimmed)
@@ -292,10 +319,11 @@ function GlossaryEditorInner({
       ])
       scheduleAutosave()
     },
-    [usedSlugs, scheduleAutosave]
+    [usedSlugs, scheduleAutosave, isReadOnly]
   )
 
   const handleAddNewTerm = React.useCallback(() => {
+    if (isReadOnly) return
     const baseSlug = "new-term"
     let slug = baseSlug
     let counter = 2
@@ -312,24 +340,26 @@ function GlossaryEditorInner({
       },
     ])
     scheduleAutosave()
-  }, [usedSlugs, scheduleAutosave])
+  }, [usedSlugs, scheduleAutosave, isReadOnly])
 
   const handleOperationChange = React.useCallback(
     ({ slug, after }: { slug: string; after: GlossaryRow }) => {
+      if (isReadOnly) return
       setOperations((prev) =>
         prev.map((op) => (op.slug === slug ? { ...op, after } : op))
       )
       scheduleAutosave()
     },
-    [scheduleAutosave]
+    [scheduleAutosave, isReadOnly]
   )
 
   const handleOperationRemove = React.useCallback(
     (slug: string) => {
+      if (isReadOnly) return
       setOperations((prev) => prev.filter((op) => op.slug !== slug))
       scheduleAutosave()
     },
-    [scheduleAutosave]
+    [scheduleAutosave, isReadOnly]
   )
 
   const handleDiscard = React.useCallback(async () => {
@@ -342,9 +372,17 @@ function GlossaryEditorInner({
       saveTimeoutRef.current = null
     }
     try {
-      await deleteGlossaryDraftAction(draftId)
-      clearBadge()
-      router.push("/draft")
+      const result = await deleteGlossaryDraftAction(draftId)
+      if (result.success) {
+        clearBadge()
+        router.push("/draft")
+      } else {
+        showBadge(
+          (result.error || "DELETE FAILED").toUpperCase(),
+          "error",
+          3000
+        )
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "DELETE FAILED"
       showBadge(message.toUpperCase(), "error", 3000)
@@ -358,10 +396,22 @@ function GlossaryEditorInner({
         saveTimeoutRef.current = null
       }
       try {
-        await updateGlossaryDraftAction(draftId, operations)
+        const saveRes = await updateGlossaryDraftAction(
+          draftId,
+          operations,
+          title
+        )
+        if (!saveRes.success) {
+          const message =
+            saveRes.errors?.general ||
+            saveRes.errors?.operations?.join(", ") ||
+            "Failed to save draft before submitting"
+          setSubmitError(message)
+          return
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : "SAVE FAILED"
-        showBadge(message.toUpperCase(), "error", 3000)
+        setSubmitError(message)
         return
       }
 
@@ -373,8 +423,14 @@ function GlossaryEditorInner({
         const result = await submitGlossaryDraftAction(draftId, {
           useRealEmail: useReal,
         })
-        setSubmitState("success")
-        setSubmitResult(result)
+        if (result.success) {
+          setSubmitState("success")
+          setSubmitResult({ prUrl: result.prUrl, prNumber: result.prNumber })
+        } else {
+          setSubmitState("error")
+          setSubmitError(result.error)
+          setIsSubmitting(false)
+        }
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Submission failed"
@@ -383,7 +439,7 @@ function GlossaryEditorInner({
         setIsSubmitting(false)
       }
     },
-    [draftId, operations, showBadge]
+    [draftId, operations, title]
   )
 
   const handleDismissSuccess = React.useCallback(() => {
@@ -406,45 +462,65 @@ function GlossaryEditorInner({
 
   const saveStateLabel = badge?.message ?? ""
 
-  const canPreview = operations.length > 0
-  const canSubmit = operations.length > 0
+  const canSubmit = operations.length > 0 && !isReadOnly
 
   return (
-    <div className="relative mx-auto flex max-w-[1100px] flex-col gap-6 p-4 md:p-8">
+    <div className="relative mx-auto flex max-w-4xl flex-col gap-6 p-4 sm:p-6 md:p-8">
+      {status === "SUBMITTED" && githubPrUrl && (
+        <div className="flex items-center justify-between gap-4 border border-green-500/30 bg-green-500/10 p-4">
+          <div className="flex items-center gap-2.5">
+            <Badge variant="success">Submitted</Badge>
+            <span className="text-foreground text-sm font-medium">
+              This glossary draft was submitted as PR #{githubPrNum ?? ""}.
+            </span>
+          </div>
+          <a
+            href={githubPrUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-tech-signal inline-flex items-center gap-1 font-mono text-xs font-bold tracking-wider uppercase hover:underline">
+            View PR <ExternalLink className="size-3.5" />
+          </a>
+        </div>
+      )}
+
       <GlossaryEditToolbar
         title={title}
         onTitleChange={handleTitleChange}
         onDiscard={handleDiscard}
-        onPreview={handleOpenPreview}
         onSubmit={handleOpenPreview}
-        canPreview={canPreview}
         canSubmit={canSubmit}
         saveState={saveStateLabel}
+        isReadOnly={isReadOnly}
       />
 
       <ComplexChangesNotice />
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-stretch">
-        <div className="flex-1">
-          <GlossaryRowPicker
-            entries={summaryEntries}
-            onPick={handlePick}
-            onAddNew={handleAddNew}
-          />
+      {!isReadOnly && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex-1">
+            <GlossaryRowPicker
+              entries={summaryEntries}
+              onPick={handlePick}
+              onAddNew={handleAddNew}
+            />
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleAddNewTerm}
+            className="h-10 shrink-0 text-xs font-medium">
+            <Plus className="mr-1.5 size-3.5" />
+            {t("editorAddTermButton")}
+          </Button>
         </div>
-        <button
-          type="button"
-          onClick={handleAddNewTerm}
-          className="border-tech-main/40 text-tech-main-dark hover:bg-tech-main-dark tracking-tech-wide bg-surface-overlay/50 hover:text-tech-bg cursor-pointer border px-4 py-2 font-mono text-xs uppercase transition-colors">
-          [+ ADD NEW TERM]
-        </button>
-      </div>
+      )}
 
       {operations.length === 0 ? (
-        <div className="border-tech-line/20 bg-surface-overlay/50 border p-8 text-center">
-          <p className="text-tech-main/50 font-mono text-xs tracking-widest">
-            Add terms using the search above or create new ones. Changes are
-            saved automatically.
+        <div className="border-border bg-surface/30 rounded-none border border-dashed p-8 text-center">
+          <p className="text-muted-foreground text-sm">
+            Search existing terms above to propose changes or click &ldquo;+ Add
+            term&rdquo; to add a new glossary term.
           </p>
         </div>
       ) : (
@@ -466,6 +542,7 @@ function GlossaryEditorInner({
                 onChange={handleOperationChange}
                 onRemove={handleOperationRemove}
                 danglingRefs={danglingRefs}
+                isReadOnly={isReadOnly}
               />
             )
           })}
@@ -480,64 +557,46 @@ function GlossaryEditorInner({
         onUseRealEmailChange={setUseRealEmail}
       />
 
-      {showPreview && isMounted
-        ? createPortal(
-            <dialog
-              open
-              aria-modal="true"
-              aria-label={t("editorPreviewDiff")}
-              className="fixed inset-0 z-50 m-0 flex h-screen max-h-none w-screen max-w-none items-start justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm supports-[height:100dvh]:h-dvh supports-[width:100dvw]:w-dvw sm:p-8">
-              <div className="flex w-full max-w-4xl flex-col gap-4">
-                {submitState === "success" && submitResult ? (
-                  <div className="border-tech-main/40 bg-surface-overlay/95 flex flex-col gap-3 border p-6 backdrop-blur-sm">
-                    <p className="text-tech-main/60 font-mono text-[10px] tracking-widest uppercase">
-                      [SUBMITTED]
-                    </p>
-                    <p className="text-tech-main-dark font-mono text-base">
-                      PR #{submitResult.prNumber} opened.{" "}
-                      <a
-                        href={submitResult.prUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-tech-accent underline decoration-dotted underline-offset-4">
-                        View on GitHub ↗
-                      </a>
-                    </p>
-                    <p className="text-tech-main text-sm leading-relaxed">
-                      {t("editorPrOwnershipBody")}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleDismissSuccess}
-                      className="border-tech-main-dark bg-tech-main-dark hover:bg-tech-signal hover:border-tech-signal hover:text-tech-signal-ink text-tech-bg mt-2 cursor-pointer self-end border px-6 py-2 font-mono text-xs font-bold tracking-widest uppercase transition-colors">
-                      Return to drafts
-                    </button>
-                  </div>
-                ) : (
-                  <GlossaryDiffPreview
-                    operations={operations}
-                    onClose={handleClosePreview}
-                    onSubmit={handleSubmit}
-                    isSubmitting={isSubmitting}
-                    validationMessage={submitError ?? undefined}
-                    canSubmit={!submitError}
-                  />
-                )}
+      {showPreview && isMounted ? (
+        <Dialog
+          open={showPreview}
+          onOpenChange={(open) => {
+            if (!open) handleClosePreview()
+          }}>
+          <DialogContent
+            showCloseButton={!isSubmitting}
+            className="bg-surface border-border flex max-h-[85vh] max-w-3xl flex-col gap-0 overflow-hidden p-0">
+            <DialogHeader className="border-border border-b p-4 sm:p-5">
+              <DialogTitle className="text-foreground flex items-center gap-2 text-base font-semibold">
+                <GitPullRequest className="text-tech-signal size-4" />
+                {submitState === "success"
+                  ? "Pull Request Submitted"
+                  : t("editorPreviewDiff")}
+              </DialogTitle>
+              <DialogDescription className="text-muted-foreground text-xs">
+                {submitState === "success"
+                  ? "Your glossary draft has been submitted to GitHub."
+                  : t("editorPrOwnershipNotice")}
+              </DialogDescription>
+            </DialogHeader>
 
-                {submitState !== "idle" && submitState !== "success" ? (
-                  <OperationProgress
-                    state={submitState}
-                    title="Submitting glossary changes"
-                    stages={SUBMIT_STAGES}
-                    successLabel="PR OPENED"
-                    errorLabel={submitError ?? "Submission failed"}
-                  />
-                ) : null}
-              </div>
-            </dialog>,
-            document.body
-          )
-        : null}
+            <GlossaryDiffPreview
+              operations={operations}
+              onClose={handleClosePreview}
+              onSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
+              validationMessage={submitError ?? undefined}
+              canSubmit={!isSubmitting}
+              authorName={authorName}
+              noreplyEmail={noreplyEmail}
+              realEmail={realEmail}
+              submitState={submitState}
+              submitResult={submitResult}
+              onDismissSuccess={handleDismissSuccess}
+            />
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </div>
   )
 }

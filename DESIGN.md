@@ -100,8 +100,9 @@ Tokens and global styles
 Layout and navigation
 - `components/layout/main-site-shell.tsx`, `nav.tsx`, `auth-aware-nav.tsx`, `auth-island.tsx`, `language-switcher.tsx`, `theme-toggle.tsx`, `footer.tsx`, `footer-context.tsx`, `navigation-effects.tsx`.
 
-Core primitives
-- `components/ui/tech-card.tsx`, `tech-button.tsx`, `field-box.tsx`, `corner-brackets.tsx`, `selectable-card.tsx`, `segmented-control.tsx`, `icons.tsx`.
+Core primitives (shadcn/ui — Radix-based, GTMC-styled)
+- `components/ui/shadcn/*.tsx` — `button`, `card`, `input`, `textarea`, `label`, `badge`, `avatar`, `dialog`, `alert-dialog`, `sheet`, `dropdown-menu`, `popover`, `tabs`, `toggle-group`, `command`, `collapsible`, `separator`, `tooltip`, `scroll-area`, `skeleton`, `progress`. This is the canonical source for these primitives; new features MUST use them rather than hand-rolling equivalents.
+- `components/ui/corner-brackets.tsx`, `selectable-card.tsx`, `icons.tsx` — GTMC-specific pieces with no shadcn equivalent.
 
 Headings, status, metadata
 - `components/ui/headings.tsx`, `status.tsx`, `metadata-row.tsx`, `empty-state.tsx`, `loading-indicator.tsx`.
@@ -270,9 +271,9 @@ Auth island and language switcher
 
 There is no single universal card. Several surface systems coexist; each is internally consistent.
 
-`TechCard` (`components/ui/tech-card.tsx`)
-- The default framed panel for draft, review, and dashboard surfaces.
-- Real props include: `tone`, `borderOpacity`, `background`, `padding`, `hover`, `brackets`, `bracketVariant`, `pattern` (`grid` only — `dots` is defined but unused).
+`Card` (`components/ui/shadcn/card.tsx`)
+- The default framed panel for draft, review, and dashboard surfaces (formerly `TechCard`).
+- Real props include: `tone`, `borderOpacity`, `background`, `padding`, `hover`, `brackets`, `bracketVariant`, `pattern` (`grid` only).
 - Conventions: thin `border-tech-main/40` borders, near-square geometry, optional `CornerBrackets`, hover changes border/fill opacity rather than adding elevation.
 
 Editor surfaces (`components/editor/editor-frames.tsx`)
@@ -281,24 +282,24 @@ Editor surfaces (`components/editor/editor-frames.tsx`)
 - Pairs with `EditorToolbarShell`, `EditorTabStrip`, `EditorTextarea` (CodeMirror), and `EditorPreviewFrame`.
 
 Article reader shell
-- A bordered translucent sheet around the entire reader: `border border-tech-main/40 bg-transparent p-6 sm:p-8` with corner brackets. This is its own surface, not a `TechCard`.
+- A bordered translucent sheet around the entire reader: `border border-tech-main/40 bg-transparent p-6 sm:p-8` with corner brackets. This is its own surface, not a `Card`.
 
 Profile and admin panels
-- Custom panels with `border-tech-main/40 bg-white/60 backdrop-blur-md` and corner ticks. Used in profile and admin where `TechCard`’s API is too tight.
+- Custom panels with `border-tech-main/40 bg-white/60 backdrop-blur-md` and corner ticks. Used in profile and admin where `Card`'s API is too tight.
 
-Selectable cards and segmented controls
-- `SelectableCard` and `SegmentedControl` provide consistent radio-group / tab-group behavior with the same square, bordered, mono-label language.
+Selectable cards and tabs
+- `SelectableCard` covers radio-group-style selection cards. Tab and segmented-toggle behavior uses shadcn `Tabs` (`TabsList`/`TabsTrigger`/`TabsContent`) and `ToggleGroup` — same square, bordered, mono-label language.
 
 Geometry guidance
 - Default to square (`rounded-none`). Small radii are acceptable on dense indicators and skeletons (`rounded-sm`, `rounded-xs`, `rounded-[2px]`) and on circular dots (`rounded-full`). Reach for radii consciously, not by default.
 
 ## Buttons
 
-`TechButton` is the primary control.
+`Button` (`components/ui/shadcn/button.tsx`) is the primary control (formerly `TechButton`).
 
 - Square geometry, border, bold mono uppercase text, wide tracking, `duration-300` transitions.
-- Variants: `primary`, `secondary`, `danger`, `ghost`. Sizes: `sm`, `md`, `lg` (md/lg meet touch minimums).
-- Non-ghost buttons include a small accent corner mark.
+- Variants: `primary`, `secondary`, `danger`, `ghost` — `primary`/`danger` are GTMC aliases over the shadcn variant set (`default`/`destructive`). Sizes: `sm`, `md`, `lg` (md/lg meet touch minimums); `md` aliases shadcn's `default`.
+- Non-ghost buttons include a small accent corner mark (a `before:` pseudo-element in `tech-signal`).
 - Two hover rhythms exist on the site:
   - Color/fill change (default): `hover:bg-tech-main hover:text-white transition-colors`.
   - Scale transform (heroes, error pages, key CTAs): `hover:scale-[1.02] active:scale-95 transition-transform duration-300`.
@@ -306,11 +307,11 @@ Geometry guidance
 
 ## Form Fields
 
-`InputBox` and `TextAreaBox` are the canonical fields.
+`Input` and `Textarea` (`components/ui/shadcn/input.tsx`, `components/ui/shadcn/textarea.tsx`) are the canonical fields (formerly `InputBox`/`TextAreaBox`).
 
-- Base: `border border-tech-main/30 bg-white/50 font-mono text-tech-main-dark`, square geometry, comfortable padding (`px-3 py-2.5 sm:px-4 sm:py-3`), min height `44px`.
+- Base: `border border-tech-main/30 bg-surface-input font-mono text-tech-main-dark`, square geometry, comfortable padding (`px-3 py-2.5 sm:px-4 sm:py-3`), min height `44px` (inputs).
 - Focus is a deliberate border-color change (`focus:border-tech-main`) — fields do not use ring/outline.
-- Error: red border and helper text, same square geometry.
+- Error: `aria-invalid` plus a red border and helper text, same square geometry.
 - Provide visible labels and helper text near fields; placeholder-only labeling is not enough.
 - Composition: form labels often live in a `FormField` with a left border accent and mono uppercase label.
 
@@ -332,11 +333,11 @@ Bracketed and translucent. Examples: `[Pending]`, `[Resolved]`, `[Closed]`.
 Decoration should read as drafting overlay or instrumentation, not ornament.
 
 Cross-verified motifs
-- `CornerBrackets` (`components/ui/corner-brackets.tsx`) at `size-2`–`size-3`. Common variants: static frame, hover reveal, hover-only on `TechCard`, hover-expand on `TechCard`, diagonal pairs, top-bottom pairs.
+- `CornerBrackets` (`components/ui/corner-brackets.tsx`) at `size-2`–`size-3`. Common variants: static frame, hover reveal, hover-only on `Card`, hover-expand on `Card`, diagonal pairs, top-bottom pairs.
 - Thin guide lines: `guide-line`, `border-tech-main/20`, `section-divider`.
 - Small square markers: `size-3 border border-tech-main/40 bg-tech-main/20`.
 - Dot-grid backdrop on the body via a radial gradient using `tech-line` (mobile fixes grid size to `40px 40px`).
-- Grid-paper texture on `EditorSurface variant="grid"` and `TechCard pattern="grid"`.
+- Grid-paper texture on `EditorSurface variant="grid"` and `Card pattern="grid"`.
 - Watermark + HUD label families on full-screen routes (auth, errors, homepage layers). Use them as a family, not as literal strings.
 - Code/HUD readouts, hex dumps, isometric or radar diagrams, dimension marks (`|< ---- 640px ---- >|`).
 
@@ -461,10 +462,11 @@ General rules
 
 Before adding or changing UI, check:
 
+- [ ] Uses shadcn/ui primitives from `components/ui/shadcn/` (Button, Card, Input, Textarea, Badge, Avatar, Dialog, AlertDialog, Sheet, DropdownMenu, Popover, Tabs, ToggleGroup, Command, Collapsible, …) before hand-rolling equivalents — shadcn is always prioritized for new features.
 - [ ] Uses `tech-*` tokens instead of raw hex.
 - [ ] Defaults to square geometry; reaches for radius consciously.
-- [ ] Uses existing primitives (`TechCard`, `TechButton`, `InputBox`, `TextAreaBox`, `SelectableCard`, `SegmentedControl`, `CornerBrackets`, `PageHeader`, `SectionTitle`, `StatusBadge`, `StatusDot`) before inventing new ones.
-- [ ] Picks the right surface system: `TechCard` for general panels, `EditorSurface` for editor work, the article shell for reader work, custom panels only when none of the above fit.
+- [ ] Uses existing primitives (`Card`, `Button`, `Input`/`Textarea`, `SelectableCard`, `CornerBrackets`, `PageHeader`, `SectionTitle`, `StatusDot`, shadcn `Badge`) before inventing new ones.
+- [ ] Picks the right surface system: `Card` for general panels, `EditorSurface` for editor work, the article shell for reader work, custom panels only when none of the above fit.
 - [ ] Respects mobile-first layout and `44px` touch targets.
 - [ ] Uses mono labels and HUD text intentionally, not for long prose.
 - [ ] Keeps decorative HUD/grid/scan motifs subordinate to content.

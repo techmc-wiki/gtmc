@@ -4,37 +4,37 @@ This document records the visual system actually in use on the GTMC website. It 
 
 ## Design Direction
 
-The site uses a **"Print Edition"** aesthetic: an academic monograph series
-(think Springer *Graduate Texts in Mathematics*) re-set for the web, layered
-over the original technical-drafting bones.
+The site has a split identity, and both halves share one visual system.
 
-The conceit: GTMC is a textbook series, so the site looks like one. Archival
-paper, navy-black ink, a single unmistakable **blueprint-azure signal band**,
-serif display titles, and mono "apparatus" text (folios, running heads,
-colophons) where a book would have typographic furniture. The signal is cold
-on purpose: a printed monograph annotated in technical blue, so the original
-drafting-table bones read through the paper rather than being painted over.
+**Reader surfaces are a book.** Articles, the table of contents, the glossary
+index, the PDF page — these carry the "Print Edition" conceit: an academic
+monograph series (think Springer *Graduate Texts in Mathematics*) re-set for
+the web. Archival paper, navy-black ink, serif display titles, and mono
+"apparatus" text only where a book would have typographic furniture.
+
+**App surfaces are an application.** Homepage chrome around the hero, login,
+profile, drafts, review hub, search, footer, error pages — these are clean,
+quiet, and interactive. No fake HUD readouts, watermarks, hex dumps,
+dimension marks, or terminal cosplay. Labels are sans with normal
+capitalization; controls keep the square, bordered GTMC geometry.
+
+Shared rules:
 
 - Warm paper surfaces (`tech-bg` is cream, not blue-white) with flat,
   near-square geometry. No rounded corners.
 - Serif display type (`display-title` / STIX Two Text + Noto Serif SC) for
   page titles, section titles, and article headings. Ink-dark, tight tracking,
   sentence case — never uppercase serif.
-- Monospace remains the "apparatus" voice: nav links, labels, status readouts,
-  folios, build stamps. Uppercase + wide tracking belongs to mono only.
-- `tech-signal` (blueprint azure / cyanotype blue) is the one loud color. Used
-  in hairline accents (the 3px nav band, header rules, active-state underlines,
-  the logo mark) — never as a large fill except the hero book band. It is a
-  cold signal: a sun-printed blue mark layered over the warm page, not a glow.
-- Drafting motifs survive in supporting roles: dimension marks, guide lines,
-  corner brackets on technical panels, dot-grid backdrop.
-- Motion still reads like instrumentation: fade, clip-path slide, pop-in,
-  sweep, scan confirm.
-
-Avoid generic SaaS gradients, pill cards, emoji-as-icons, heavy drop shadows,
-purple-on-white "AI default" palettes, and ad-hoc hex colors when a `tech-*`
-token will do. Avoid uppercase serif and letter-spaced serif: the serif voice
-is calm; the mono voice is technical.
+- Monospace is the "apparatus" voice and is scoped to apparatus controls:
+  nav links, buttons, badges, tabs, code/data values. Uppercase + wide
+  tracking belongs to those controls only — never to form labels, dialog
+  titles, empty states, or descriptive text.
+- `tech-signal` (blueprint azure / cyanotype blue) is the one loud color,
+  used sparingly: active-state underlines, focus accents, the logo mark, the
+  hero book band. Never a large fill outside the hero.
+- The dot-grid backdrop survives site-wide; on the homepage it becomes an
+  interactive field that reacts to the cursor.
+- Motion reads like instrumentation: fade, clip-path slide, pop-in.
 
 ## UX Principles
 
@@ -120,7 +120,7 @@ Article reader
 - `lib/markdown/components/*` — custom markdown rendering (no `prose` plugin).
 
 Homepage
-- `app/[locale]/_homepage/use-homepage-motion.ts`, `background-layer.tsx`, `midground-layer.tsx`, `foreground-layer.tsx`, `hero-card.tsx`, `decor-element.tsx`.
+- `app/[locale]/_homepage/homepage-client.tsx`, `hero-card.tsx`, `homepage-dot-grid.tsx`, `toc-section.tsx`, `continue-reading.tsx`; `components/DotGrid.tsx` (vendored from ReactBits).
 
 ## Color Tokens
 
@@ -138,7 +138,7 @@ The Tailwind v4 theme is defined in `app/globals.css` (`@theme`). There is no `t
 
 Usage rules
 - Default text: `text-tech-main`. High-emphasis titles: `text-tech-main-dark`.
-- Common borders: `border-tech-main/40`. Quiet guide lines: `guide-line` or `border-tech-main/20`. Strong structural rules (page header, footer top, nav band) use `border-tech-main-dark` with a short `bg-tech-signal` tick overlapping them.
+- Common borders: `border-tech-main/40`. Quiet guide lines: `guide-line` or `border-tech-main/20`. Strong structural rules (page header, footer top, nav band) use `border-tech-main-dark` without overlay ticks.
 - Surfaces: `bg-surface/70`–`/95` plus `backdrop-blur-sm` (or `backdrop-blur-md` on hero/modal panels). Pale fills use `bg-tech-bg/50`–`/80`. Never raw `bg-white`.
 - `tech-signal` budget: at most one band + a few hairline ticks per screen. It marks "you are here" (active nav, current chapter, focus rules) and brand moments (logo mark, hero band). It is never body text on light backgrounds and never a large fill outside the hero. As a cold signal it reads as a blueprint annotation, not a highlighter — keep it sparing so the warm page stays dominant.
 - Filled controls invert to ink: `bg-tech-main-dark text-tech-bg` (e.g. primary buttons, active language tab). Primary button hover flips to `bg-tech-signal text-tech-signal-ink`.
@@ -204,21 +204,21 @@ Families
 
 Three voices
 1. **Serif** speaks as the book: page titles, section titles, article headings, the logo wordmark, the hero. `display-title` = serif, semibold, `-0.015em` tracking, sentence case.
-2. **Sans** speaks as the text block: body copy, descriptions, UI prose.
-3. **Mono** speaks as the apparatus: nav, labels, badges, folios, status strips. Mono owns uppercase and wide tracking.
+2. **Sans** speaks as the text block and as app-surface UI: body copy, descriptions, form labels, dialog titles, empty states.
+3. **Mono** speaks as the apparatus and is scoped to apparatus controls: nav links, buttons, badges, tabs, code/data values. Mono owns uppercase and wide tracking — never apply it to form labels, dialog titles, or descriptive text.
 
 Scale
 - Root font size scales by viewport: `16px` on small screens, stepping up to `18px` on large screens via media queries in `html`.
 - Page titles: `display-title text-3xl md:text-5xl tracking-tight text-tech-main-dark`.
-- Section titles: `display-title text-xl md:text-2xl` with a leading `size-2 bg-tech-signal` square and a bottom guide line (see `SectionTitle`).
-- HUD and metadata labels: `font-mono text-xs tracking-widest uppercase text-tech-main/50`.
+- Section titles: `display-title text-xl md:text-2xl` with a bottom guide line (see `SectionTitle`).
+- Quiet labels (app surfaces): `text-xs font-medium text-tech-main/60` in sans with normal capitalization.
 - Body copy: `text-sm/relaxed` to `text-base/relaxed`.
 - Article paragraphs: `font-sans text-base/relaxed text-tech-main-dark`.
 - Article headings (H1–H3): `markdown-title`, regular capitalization, semibold. `--font-markdown-title` resolves to the serif stack; H1 carries a heavy ink bottom rule, H3 a `tech-signal` left rule.
 
 Tracking
-- House default: `tracking-widest` (broadly used on labels, badges, nav).
-- Custom step: `tracking-tech-wide` (`0.2em`) for slightly tighter HUD text.
+- House default: `tracking-wider` on mono apparatus controls (buttons, badges, tabs, nav).
+- Custom step: `tracking-tech-wide` (`0.2em`) reserved for the tightest apparatus text (hero band, folios).
 
 ## Layout and Spacing
 
@@ -274,18 +274,18 @@ There is no single universal card. Several surface systems coexist; each is inte
 `Card` (`components/ui/shadcn/card.tsx`)
 - The default framed panel for draft, review, and dashboard surfaces (formerly `TechCard`).
 - Real props include: `tone`, `borderOpacity`, `background`, `padding`, `hover`, `brackets`, `bracketVariant`, `pattern` (`grid` only).
-- Conventions: thin `border-tech-main/40` borders, near-square geometry, optional `CornerBrackets`, hover changes border/fill opacity rather than adding elevation.
+- Conventions: thin `border-tech-main/40` borders, near-square geometry, corner brackets hidden by default (opt in via `brackets="visible"`), hover changes border/fill opacity rather than adding elevation.
 
 Editor surfaces (`components/editor/editor-frames.tsx`)
 - A separate frame system used by the draft editor.
-- Two visible variants: `default` (white/80 panel) and `grid` (grid-paper texture with inset shadow and corner ticks).
+- Two visible variants: `default` (white/80 panel) and `grid` (grid-paper texture with inset shadow).
 - Pairs with `EditorToolbarShell`, `EditorTabStrip`, `EditorTextarea` (CodeMirror), and `EditorPreviewFrame`.
 
 Article reader shell
-- A bordered translucent sheet around the entire reader: `border border-tech-main/40 bg-transparent p-6 sm:p-8` with corner brackets. This is its own surface, not a `Card`.
+- A bordered translucent sheet around the entire reader: `border border-tech-main/40 bg-transparent p-6 sm:p-8`. This is its own surface, not a `Card`.
 
 Profile and admin panels
-- Custom panels with `border-tech-main/40 bg-white/60 backdrop-blur-md` and corner ticks. Used in profile and admin where `Card`'s API is too tight.
+- Custom panels with `border-tech-main/40 bg-white/60 backdrop-blur-md`. Used in profile and admin where `Card`'s API is too tight.
 
 Selectable cards and tabs
 - `SelectableCard` covers radio-group-style selection cards. Tab and segmented-toggle behavior uses shadcn `Tabs` (`TabsList`/`TabsTrigger`/`TabsContent`) and `ToggleGroup` — same square, bordered, mono-label language.
@@ -297,9 +297,9 @@ Geometry guidance
 
 `Button` (`components/ui/shadcn/button.tsx`) is the primary control (formerly `TechButton`).
 
-- Square geometry, border, bold mono uppercase text, wide tracking, `duration-300` transitions.
+- Square geometry, border, mono uppercase text at `text-xs font-semibold tracking-wider`, `duration-300` transitions.
 - Variants: `primary`, `secondary`, `danger`, `ghost` — `primary`/`danger` are GTMC aliases over the shadcn variant set (`default`/`destructive`). Sizes: `sm`, `md`, `lg` (md/lg meet touch minimums); `md` aliases shadcn's `default`.
-- Non-ghost buttons include a small accent corner mark (a `before:` pseudo-element in `tech-signal`).
+- No corner ticks or `before:` accent marks on buttons.
 - Two hover rhythms exist on the site:
   - Color/fill change (default): `hover:bg-tech-main hover:text-white transition-colors`.
   - Scale transform (heroes, error pages, key CTAs): `hover:scale-[1.02] active:scale-95 transition-transform duration-300`.
@@ -313,13 +313,13 @@ Geometry guidance
 - Focus is a deliberate border-color change (`focus:border-tech-main`) — fields do not use ring/outline.
 - Error: `aria-invalid` plus a red border and helper text, same square geometry.
 - Provide visible labels and helper text near fields; placeholder-only labeling is not enough.
-- Composition: form labels often live in a `FormField` with a left border accent and mono uppercase label.
+- Composition: form labels live in a `FormField` with a left border accent and a sans `text-xs font-medium` label (normal capitalization).
 
 ## Status, Badges, Tags
 
 Bracketed and translucent. Examples: `[Pending]`, `[Resolved]`, `[Closed]`.
 
-- Base: `border px-2 py-0.5 font-mono text-xs tracking-wider`.
+- Base: `border px-2 py-0.5 font-mono text-xs tracking-wide`.
 - Pending: yellow border/text on yellow `/10` fill.
 - In progress / review: blue border/text on blue `/10` fill.
 - Resolved / success: green border/text on green `/10` fill.
@@ -330,18 +330,20 @@ Bracketed and translucent. Examples: `[Pending]`, `[Resolved]`, `[Closed]`.
 
 ## Decorative Motifs
 
-Decoration should read as drafting overlay or instrumentation, not ornament.
+Decoration should be quiet, purposeful, and interactive where it earns its place.
 
-Cross-verified motifs
-- `CornerBrackets` (`components/ui/corner-brackets.tsx`) at `size-2`–`size-3`. Common variants: static frame, hover reveal, hover-only on `Card`, hover-expand on `Card`, diagonal pairs, top-bottom pairs.
+Surviving motifs
+- Dot-grid backdrop on the body via a radial gradient using `tech-line` (mobile fixes grid size to `40px 40px`). On the homepage it becomes `HomepageDotGrid` — an interactive canvas field (vendored ReactBits `DotGrid`, gsap inertia) whose dots brighten toward `tech-signal` near the cursor.
+- `CornerBrackets` (`components/ui/corner-brackets.tsx`) survive ONLY as interactive affordances: hover reveal on prev/next article cards (`article-navigation.tsx`) and closed-PR cards (`closed-pr-list.tsx`), and the selection cue on `SelectableCard`. `Card` can opt in via `brackets="visible"` but defaults to hidden.
 - Thin guide lines: `guide-line`, `border-tech-main/20`, `section-divider`.
 - Small square markers: `size-3 border border-tech-main/40 bg-tech-main/20`.
-- Dot-grid backdrop on the body via a radial gradient using `tech-line` (mobile fixes grid size to `40px 40px`).
 - Grid-paper texture on `EditorSurface variant="grid"` and `Card pattern="grid"`.
-- Watermark + HUD label families on full-screen routes (auth, errors, homepage layers). Use them as a family, not as literal strings.
-- Code/HUD readouts, hex dumps, isometric or radar diagrams, dimension marks (`|< ---- 640px ---- >|`).
 
-Use `decor-desktop-only` to hide complex decoration on small screens.
+Removed from the vocabulary — do not reintroduce
+- Fake HUD labels/status readouts (`SYS.ONLINE`, hex dumps, stack traces).
+- Watermarks, dimension marks (`|< ---- 640px ---- >|`), crosshairs.
+- Static corner brackets on panels, cards, avatars, dialogs, and skeletons.
+- `decor-desktop-only` and `card-shimmer` utilities.
 
 Avoid
 - One-off vignettes or radial glows unless they belong to a recurring surface system.
@@ -366,10 +368,10 @@ CSS animation tokens (defined in `app/globals.css`, used across the site)
 | `animate-scan-confirm`                | Loading → content handoff                 |
 | `animate-skeleton-exit`               | Skeleton → content fade with translate    |
 
-Homepage parallax (`app/[locale]/_homepage/*`)
-- The only place that imports `motion/react`. Drives a single bespoke parallax/tilt/blur system built on `useMotionValue`, `useSpring`, and `useTransform`.
-- Spring physics only (`damping`, `stiffness`); no shared duration/easing tokens.
-- Honors reduced motion and mobile gating inside `use-homepage-motion.ts`.
+Homepage interactivity (`app/[locale]/_homepage/*`)
+- `motion/react` is REMOVED from the project — do not import it. Homepage interactivity comes from two vanilla pieces:
+  - `HomepageDotGrid` wraps `components/DotGrid.tsx` (vendored ReactBits component, gsap inertia physics): an interactive dot field that brightens toward `tech-signal` near the cursor. Sleeps when idle/off-screen; honors `prefers-reduced-motion`.
+  - `HeroCard` tilt is plain CSS: pointer handlers compute `rotateX`/`rotateY` (max ~4deg) and set `transform: perspective(1000px) …` with a `cubic-bezier(0.16, 1, 0.3, 1)` transition; gated on reduced motion and non-mouse pointers.
 
 Rules
 - Prefer `transform`, `opacity`, and `clip-path`; avoid layout-shifting animation.
@@ -389,7 +391,7 @@ Rules
 
 The reader is its own layout, separate from the rest of the site chrome.
 
-- Outer frame: bordered translucent sheet with corner brackets, large gutters.
+- Outer frame: bordered translucent sheet, large gutters.
 - Desktop layout (3 columns):
   - Left chapter nav (`w-64 lg:w-80`), sticky, internally scrollable.
   - Center column: `md:max-w-2xl` (or `md:max-w-3xl` when nav hidden), `1920:max-w-4xl` on very wide screens.
@@ -413,7 +415,7 @@ The text block is typeset like a printed monograph, not a blog post.
 
 A coherent loading language exists; reach for it before inventing new spinners.
 
-- `loading-shell-primitives.tsx` exposes `SegmentedBar`, `SweepOverlay`, `ScanConfirmOverlay`, and `SkeletonExitWrapper`. Route-level loading states use `SkeletonExitWrapper` with `aria-busy="true"` and an `aria-label`.
+- `loading-shell-primitives.tsx` exposes `SectionFrame` (brackets opt-in, hidden by default), `SectionRail` (quiet sans label), `SegmentedBar`, and `SkeletonExitWrapper`. Route-level loading states use `SkeletonExitWrapper` with `aria-busy="true"` and an `aria-label`. The old `SweepOverlay`/`ScanConfirmOverlay` were removed.
 - `OperationProgress` provides a longer-running shell with `role="status" aria-live="polite"` and a `role="progressbar"` track.
 - Mark async action buttons with `aria-busy` while pending; the system relies on this consistently.
 
@@ -468,9 +470,9 @@ Before adding or changing UI, check:
 - [ ] Uses existing primitives (`Card`, `Button`, `Input`/`Textarea`, `SelectableCard`, `CornerBrackets`, `PageHeader`, `SectionTitle`, `StatusDot`, shadcn `Badge`) before inventing new ones.
 - [ ] Picks the right surface system: `Card` for general panels, `EditorSurface` for editor work, the article shell for reader work, custom panels only when none of the above fit.
 - [ ] Respects mobile-first layout and `44px` touch targets.
-- [ ] Uses mono labels and HUD text intentionally, not for long prose.
-- [ ] Keeps decorative HUD/grid/scan motifs subordinate to content.
-- [ ] Uses motion from the existing `animate-*` catalog and avoids layout shift.
+- [ ] Uses mono only on apparatus controls (nav, buttons, badges, tabs, code/data); app-surface labels, dialog titles, and empty states are sans with normal capitalization.
+- [ ] Keeps decoration subordinate to content; no HUD readouts, watermarks, dimension marks, or static corner brackets.
+- [ ] Uses motion from the existing `animate-*` catalog and avoids layout shift; `motion/react` is unavailable — interactive effects use vendored canvas components or vanilla CSS transforms.
 - [ ] Supplies a visible focus state — outline for controls, border-color for inputs.
 - [ ] Pairs nontrivial decorative motion with a `motion-reduce:` fallback.
 - [ ] Avoids emoji as structural icons; uses text, CSS geometry, or SVG instead.

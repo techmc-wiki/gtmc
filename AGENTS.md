@@ -11,7 +11,7 @@ This repo contains the public website for **Graduate Texts in Minecraft (GTMC)**
 - **Framework**: Next.js 16 (App Router, Cache Components, Turbopack) on React 19
 - **Language**: TypeScript 7.0.2 (strict mode)
 - **Styling**: Tailwind CSS v4
-- **Motion**: `motion` (Framer Motion successor)
+- **Motion**: none — `motion` was removed. Homepage interactivity uses the vendored `components/DotGrid.tsx` (ReactBits, gsap inertia) and vanilla CSS transforms; see `DESIGN.md` → Motion.
 - **Auth**: NextAuth v5 (GitHub provider) + Prisma adapter
 - **Database**: Prisma 7 against Supabase Postgres
 - **Content pipeline**: Markdown via remark/rehype, KaTeX math, Shiki code highlighting, gray-matter frontmatter
@@ -191,6 +191,7 @@ When fixing a bug or changing existing logic, update the colocated specs to matc
 - **UI primitives**: shadcn/ui is the canonical primitive source. Components live in `components/ui/shadcn/` (installed via `pnpm dlx shadcn@latest add <name>` into the `@/components/ui/shadcn` alias; see `components.json`). **New features MUST use shadcn components first** — Button, Card, Input, Textarea, Badge, Avatar, Dialog, AlertDialog, Sheet, DropdownMenu, Popover, Tabs, ToggleGroup, Command, Collapsible, Separator, Tooltip, ScrollArea, Skeleton, Progress — instead of hand-rolling Radix-like behavior (focus traps, ARIA wiring, outside-click, scroll-lock, keyboard navigation). Hand-rolled replacements are only acceptable when no shadcn component fits; keep shadcn source files GTMC-styled (square geometry, `tech-*` tokens, mono labels).
 - **Import paths**: prefer the `@/...` alias over long relative paths.
 - **Server vs client**: keep server actions in `actions/`, route handlers in `app/api/`, and client components explicitly marked with `"use client"`.
+- **Mono scope**: monospace + uppercase + wide tracking is the apparatus voice for controls only (nav links, buttons, badges, tabs, code/data values). Form labels, dialog titles, empty states, and descriptive text on non-reader surfaces use sans with normal capitalization. See `DESIGN.md` → Typography.
 
 ## Visual System
 

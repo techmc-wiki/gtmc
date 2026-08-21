@@ -123,7 +123,7 @@ export function GlossarySearch({
           spellCheck={false}
         />
         <InputGroupAddon align="inline-end" className="hidden sm:flex">
-          <InputGroupText tabular-nums>
+          <InputGroupText className="tabular-nums">
             {resultCount} / {totalCount}
           </InputGroupText>
         </InputGroupAddon>

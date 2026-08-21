@@ -63,21 +63,37 @@ export async function openGlossaryPullRequest(
     repo: GLOSSARY_FORK_REPO,
   })
 
-  // 4. Open cross-repository Pull Request from our fork's branch to upstream main
-  const headParam = `${GLOSSARY_FORK_REPO.owner}:${branchName}`
+  try {
+    // 4. Open cross-repository Pull Request from our fork's branch to
+    // upstream main
+    const { data: pr } = await octokit.pulls.create({
+      owner: GLOSSARY_REPO.owner,
+      repo: GLOSSARY_REPO.name,
+      title,
+      head: `${GLOSSARY_FORK_REPO.owner}:${branchName}`,
+      base: GLOSSARY_MAIN_BRANCH,
+      body,
+    })
 
-  const { data: pr } = await octokit.pulls.create({
-    owner: GLOSSARY_REPO.owner,
-    repo: GLOSSARY_REPO.name,
-    title,
-    head: headParam,
-    base: GLOSSARY_MAIN_BRANCH,
-    body,
-  })
-
-  return {
-    prUrl: pr.html_url,
-    prNumber: pr.number,
-    branchName,
+    return {
+      prUrl: pr.html_url,
+      prNumber: pr.number,
+      branchName,
+    }
+  } catch (error) {
+    const status = (error as { status?: number } | null)?.status
+    const message = (error as { message?: string } | null)?.message ?? ""
+    if (status === 403 && message.includes("Resource not accessible")) {
+      throw new Error(
+        `GitHub rejected pull request creation with 403. ` +
+          `GITHUB_GLOSSARY_FORK_WRITE_PAT must grant "Pull requests: Read ` +
+          `and write" on ${GLOSSARY_REPO.owner}/${GLOSSARY_REPO.name} (the ` +
+          `repo the PR is opened on) as well as ` +
+          `${GLOSSARY_FORK_REPO.owner}/${GLOSSARY_FORK_REPO.name}; a ` +
+          `classic PAT with the public_repo scope also works.`,
+        { cause: error }
+      )
+    }
+    throw error
   }
 }

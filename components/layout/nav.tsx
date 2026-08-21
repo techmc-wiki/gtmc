@@ -57,6 +57,9 @@ function useHeaderScrolled() {
   return scrolled
 }
 
+/** How long the preview chip lingers after the cursor leaves before returning. */
+const LEAVE_LINGER_MS = 120
+
 /** Longest href wins so `/draft/123` keeps MY DRAFTS active over partials. */
 function resolveActiveHref(pathname: string, navLinks: NavLink[]) {
   const matches = navLinks.filter((link) => pathname.startsWith(link.href))
@@ -76,6 +79,26 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
   const listRef = React.useRef<HTMLUListElement>(null)
   const chipRef = React.useRef<HTMLSpanElement>(null)
   const [previewKey, setPreviewKey] = React.useState<string | null>(null)
+  // Delayed release: on leave, the chip lingers briefly so quick diagonal
+  // mouse paths across the bar don't flash it away and back.
+  const releaseTimer = React.useRef<number | null>(null)
+  const clearRelease = () => {
+    if (releaseTimer.current !== null) {
+      window.clearTimeout(releaseTimer.current)
+      releaseTimer.current = null
+    }
+  }
+  const previewLink = (href: string) => {
+    clearRelease()
+    setPreviewKey(href)
+  }
+  const scheduleRelease = () => {
+    clearRelease()
+    releaseTimer.current = window.setTimeout(() => {
+      releaseTimer.current = null
+      setPreviewKey(null)
+    }, LEAVE_LINGER_MS)
+  }
 
   const activeHref = React.useMemo(
     () => resolveActiveHref(pathname, navLinks),
@@ -83,6 +106,8 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
   )
   // Hover/focus borrows the chip; otherwise it rests on the active link.
   const chipKey = previewKey ?? activeHref
+
+  React.useEffect(() => clearRelease, [])
 
   const [resizeTick, setResizeTick] = React.useState(0)
 
@@ -159,10 +184,10 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
               href={link.href}
               aria-current={isActive ? "page" : undefined}
               data-nav-key={link.href}
-              onMouseEnter={() => setPreviewKey(link.href)}
-              onFocus={() => setPreviewKey(link.href)}
-              onBlur={() => setPreviewKey(null)}
-              onMouseLeave={() => setPreviewKey(null)}
+              onMouseEnter={() => previewLink(link.href)}
+              onFocus={() => previewLink(link.href)}
+              onBlur={() => scheduleRelease()}
+              onMouseLeave={() => scheduleRelease()}
               className={`focus-visible:outline-tech-main flex h-9 items-center rounded-none border border-transparent px-3 font-mono text-xs tracking-[0.15em] uppercase transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-[-2px] ${
                 isChipTarget
                   ? "text-tech-signal-ink font-bold"

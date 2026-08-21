@@ -41,7 +41,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   return (
     <div
       ref={ref}
-      className="animate-page-enter w-full motion-reduce:animate-none">
+      className="animate-page-enter flex w-full flex-1 flex-col motion-reduce:animate-none">
       <React.Suspense fallback={null}>
         <ReplayOnNavigate target={ref} />
       </React.Suspense>

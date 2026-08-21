@@ -5,7 +5,7 @@ import { redirect, notFound } from "next/navigation"
 // oxlint-disable-next-line import/no-unassigned-import
 import "katex/dist/katex.min.css"
 import { Link } from "@/i18n/navigation"
-import { TechButton } from "@/components/ui/tech-button"
+import { Button } from "@/components/ui/shadcn/button"
 import { ActionForm } from "./components/action-form"
 import {
   getGitHubWriteToken,
@@ -378,9 +378,9 @@ export default async function ReviewDetailPage({
 
   return (
     <div className="mx-auto max-w-352 space-y-8 p-4 pb-32 md:p-8">
-      <TechButton asChild variant="ghost" size="sm">
+      <Button asChild variant="ghost" size="sm">
         <Link href="/review">{"<"} BACK_TO_HUB</Link>
-      </TechButton>
+      </Button>
 
       <section className="border-tech-main/30 relative border-b pb-8">
         <div className="border-tech-main/50 bg-tech-main/20 absolute -bottom-1.25 left-0 size-2 border"></div>
@@ -498,14 +498,14 @@ export default async function ReviewDetailPage({
                   await closePRAction(prNumber)
                 }}>
                 {({ isPending }) => (
-                  <TechButton
+                  <Button
                     type="submit"
                     variant="secondary"
                     disabled={isPending}
                     aria-busy={isPending}
                     className="w-full border-red-600 text-red-600 hover:bg-red-600 hover:text-white">
                     {isPending ? "CLOSING..." : "CLOSE_PR"}
-                  </TechButton>
+                  </Button>
                 )}
               </ActionForm>
             </div>

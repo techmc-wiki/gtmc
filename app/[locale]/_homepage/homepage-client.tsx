@@ -5,7 +5,7 @@ import dynamic from "next/dynamic"
 import { useHomepageMotion } from "./use-homepage-motion"
 import { HOMEPAGE_MOTION } from "./homepage-constants"
 import { HeroCard } from "./hero-card"
-import { TechButton } from "@/components/ui/tech-button"
+import { Button } from "@/components/ui/shadcn/button"
 import { Link } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 import { ContinueReading } from "./continue-reading"
@@ -88,11 +88,15 @@ export function HomepageClient() {
         />
 
         <div className="animate-slide-up-fade fill-mode-forwards relative z-20 flex w-full max-w-48 flex-col items-stretch justify-center gap-5 opacity-0 [animation-delay:0.6s] motion-reduce:animate-none sm:w-full sm:max-w-full sm:flex-row sm:items-center">
-          <TechButton
+          <Button
             asChild
             variant="primary"
-            disabled={isAccessingDatabase}
-            className="flex h-12 w-full items-center justify-center text-xs tracking-widest uppercase shadow-md transition-transform duration-300 hover:scale-102 active:scale-95 disabled:cursor-wait disabled:opacity-90 sm:w-72 sm:text-sm">
+            aria-disabled={isAccessingDatabase}
+            className={`flex h-12 w-full items-center justify-center text-xs tracking-widest uppercase shadow-md transition-transform duration-300 hover:scale-102 active:scale-95 ${
+              isAccessingDatabase
+                ? "pointer-events-none cursor-wait opacity-90"
+                : ""
+            } sm:w-72 sm:text-sm`}>
             <Link href="/articles" onClick={handleArticlesClick}>
               {isAccessingDatabase ? (
                 <>
@@ -103,7 +107,7 @@ export function HomepageClient() {
                 t("startReading")
               )}
             </Link>
-          </TechButton>
+          </Button>
         </div>
 
         <ContinueReading />

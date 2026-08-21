@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { DraftEditor } from "@/components/editor/draft-editor"
 import { Link } from "@/i18n/navigation"
-import { TechButton } from "@/components/ui/tech-button"
+import { Button } from "@/components/ui/shadcn/button"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { decodeStoredDraftFiles } from "@/lib/drafts/files"
@@ -80,7 +80,7 @@ export default async function EditDraftPage({
 
       <div className="guide-line relative flex flex-col gap-3 border-b pb-6 md:flex-row md:items-end md:justify-between">
         <div className="flex items-center gap-4">
-          <TechButton
+          <Button
             asChild
             variant="ghost"
             className="text-tech-main/70 hover:bg-tech-main/5 hover:text-tech-main h-9 gap-2 px-3 text-[10px] tracking-widest">
@@ -97,7 +97,7 @@ export default async function EditDraftPage({
               </svg>
               ABORT_EDIT_SEQUENCE
             </Link>
-          </TechButton>
+          </Button>
         </div>
         <div className="flex flex-col items-end gap-1">
           <div className="flex items-center gap-2">

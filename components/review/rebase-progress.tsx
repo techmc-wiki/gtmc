@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
-import { TechButton } from "@/components/ui/tech-button"
+import { Button } from "@/components/ui/shadcn/button"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { StatusDot } from "@/components/ui/status"
 import { MergeMethodPicker } from "@/components/review/review-pickers"
@@ -207,7 +207,7 @@ function AbortButton({
         <span className="font-mono text-[0.6875rem] tracking-widest text-red-400 uppercase">
           {t("confirmAbort")}
         </span>
-        <TechButton
+        <Button
           variant="danger"
           size="sm"
           disabled={isAborting}
@@ -216,25 +216,25 @@ function AbortButton({
             onAbort()
           }}>
           {isAborting ? t("aborting") : t("yesAbort")}
-        </TechButton>
-        <TechButton
+        </Button>
+        <Button
           variant="secondary"
           size="sm"
           onClick={() => setConfirming(false)}>
           {editorT("cancelButton")}
-        </TechButton>
+        </Button>
       </div>
     )
   }
 
   return (
-    <TechButton
+    <Button
       variant="danger"
       size="sm"
       disabled={isAborting}
       onClick={() => setConfirming(true)}>
       {t("abortResolution")}
-    </TechButton>
+    </Button>
   )
 }
 
@@ -481,14 +481,14 @@ function RebaseProgressContent({
         <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
           <AbortButton onAbort={onAbort} isAborting={isAborting} />
           {isCompleted && (
-            <TechButton
+            <Button
               variant="primary"
               size="md"
               disabled={isFinalizing}
               className="border-green-700! bg-green-700! hover:bg-green-800!"
               onClick={() => onFinalize(buildFinalizeOptions())}>
               {isFinalizing ? t("finalizing") : t("finalizeAndMerge")}
-            </TechButton>
+            </Button>
           )}
         </div>
 
@@ -555,14 +555,14 @@ function RebaseProgressContent({
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
         <AbortButton onAbort={onAbort} isAborting={isAborting} />
         {allResolved && !isBranchSyncing && (
-          <TechButton
+          <Button
             variant="primary"
             size="sm"
             disabled={isFinalizing}
             className="border-green-700! bg-green-700! hover:bg-green-800!"
             onClick={() => onFinalize(buildFinalizeOptions())}>
             {isFinalizing ? t("finalizing") : t("finalizeAndMerge")}
-          </TechButton>
+          </Button>
         )}
       </div>
     </div>

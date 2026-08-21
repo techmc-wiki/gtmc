@@ -3,7 +3,7 @@
 
 import { signIn } from "next-auth/react"
 import { useTranslations } from "next-intl"
-import { TechButton } from "@/components/ui/tech-button"
+import { Button } from "@/components/ui/shadcn/button"
 import { useState } from "react"
 import { Link } from "@/i18n/navigation"
 
@@ -131,7 +131,7 @@ export default function LoginPage() {
             </p>
 
             <div className="animate-slide-up-fade fill-mode-forwards w-full opacity-0 [animation-delay:1.3s] motion-reduce:animate-none motion-reduce:opacity-100">
-              <TechButton
+              <Button
                 onClick={handleLogin}
                 disabled={isLoading}
                 variant="primary"
@@ -144,7 +144,7 @@ export default function LoginPage() {
                 ) : (
                   t("loginCta")
                 )}
-              </TechButton>
+              </Button>
             </div>
 
             <div className="animate-fade-in fill-mode-forwards mt-6 font-mono text-[0.625rem] opacity-40 [animation-delay:1.6s] motion-reduce:animate-none">

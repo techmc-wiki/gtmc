@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 
-import { TechButton } from "@/components/ui/tech-button"
+import { Button } from "@/components/ui/shadcn/button"
 import {
   FileListSidebar,
   FileListHeader,
@@ -37,14 +37,14 @@ export function DraftFileList({
   const headerActions = React.useMemo(
     () =>
       !isReadOnly ? (
-        <TechButton
+        <Button
           type="button"
           variant="secondary"
           size="sm"
           className="hover:bg-tech-main/10 shrink-0 transition-colors"
           onClick={onAddFile}>
           <span className="mr-1">+</span> {t("addButton")}
-        </TechButton>
+        </Button>
       ) : null,
     [isReadOnly, onAddFile, t]
   )

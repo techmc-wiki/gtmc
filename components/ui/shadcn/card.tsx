@@ -117,7 +117,7 @@ function Card({
   background = "default",
   padding = "default",
   hover = "default",
-  brackets = "visible",
+  brackets = "hidden",
   bracketVariant = "static",
   pattern = "none",
   children,

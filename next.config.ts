@@ -54,7 +54,6 @@ const nextConfig: NextConfig = {
     cpus: 2,
     useTypeScriptCli: true,
     optimizePackageImports: [
-      "motion/react",
       "@codemirror/state",
       "@codemirror/view",
       "@codemirror/language",

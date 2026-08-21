@@ -1,30 +1,16 @@
 "use client"
 
-import { useRef, useEffect, useState, useCallback } from "react"
-import dynamic from "next/dynamic"
-import { useHomepageMotion } from "./use-homepage-motion"
-import { HOMEPAGE_MOTION } from "./homepage-constants"
+import { useState, useCallback } from "react"
 import { HeroCard } from "./hero-card"
+import { HomepageDotGrid } from "./homepage-dot-grid"
 import { Button } from "@/components/ui/shadcn/button"
 import { Link } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 import { ContinueReading } from "./continue-reading"
 
-const BackgroundLayer = dynamic(
-  () => import("./background-layer").then((mod) => mod.BackgroundLayer),
-  { ssr: false }
-)
-const MidgroundLayer = dynamic(
-  () => import("./midground-layer").then((mod) => mod.MidgroundLayer),
-  { ssr: false }
-)
-
 export function HomepageClient() {
   const t = useTranslations("Homepage")
-  const motionDriver = useHomepageMotion()
   const [isAccessingDatabase, setIsAccessingDatabase] = useState(false)
-  const [cardWidth, setCardWidth] = useState(900)
-  const cardRef = useRef<HTMLDivElement>(null)
 
   const handleArticlesClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -37,55 +23,14 @@ export function HomepageClient() {
     [isAccessingDatabase]
   )
 
-  useEffect(() => {
-    if (!cardRef.current) return
-
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setCardWidth(Math.round(entry.contentRect.width))
-      }
-    })
-
-    observer.observe(cardRef.current)
-    return () => observer.disconnect()
-  }, [])
-
-  const {
-    background: bgTransform,
-    midground: mgTransform,
-    foreground: fgTransform,
-    smoothMouseX,
-    smoothMouseY,
-    isReducedMotion,
-  } = motionDriver
-
-  const bgBlurMax = isReducedMotion ? 0 : HOMEPAGE_MOTION.blurMax.background
-  const mgBlurMax = isReducedMotion ? 0 : HOMEPAGE_MOTION.blurMax.midground
-
   return (
     <>
-      <BackgroundLayer
-        bgTransform={bgTransform}
-        smoothMouseX={smoothMouseX}
-        smoothMouseY={smoothMouseY}
-        blurMax={bgBlurMax}
-        isReducedMotion={isReducedMotion}
-      />
-
-      <MidgroundLayer
-        mgTransform={mgTransform}
-        smoothMouseX={smoothMouseX}
-        smoothMouseY={smoothMouseY}
-        blurMax={mgBlurMax}
-        isReducedMotion={isReducedMotion}
-      />
+      <div aria-hidden="true" className="absolute inset-0">
+        <HomepageDotGrid />
+      </div>
 
       <div className="relative z-10 mx-auto flex min-h-full w-full max-w-7xl flex-col items-center justify-center">
-        <HeroCard
-          cardRef={cardRef}
-          cardWidth={cardWidth}
-          fgTransform={fgTransform}
-        />
+        <HeroCard />
 
         <div className="animate-slide-up-fade fill-mode-forwards relative z-20 flex w-full max-w-48 flex-col items-stretch justify-center gap-5 opacity-0 [animation-delay:0.6s] motion-reduce:animate-none sm:w-full sm:max-w-full sm:flex-row sm:items-center">
           <Button

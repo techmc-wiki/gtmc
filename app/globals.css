@@ -614,25 +614,6 @@ body {
   transition-duration: 500ms;
 }
 
-@utility homepage-decor-background {
-  will-change: transform;
-  /* Skip paint/layout when off-screen; keeps decor from competing with HeroCard for LCP. */
-  content-visibility: auto;
-  contain-intrinsic-size: 100vw 100vh;
-}
-
-@utility homepage-decor-midground {
-  will-change: transform;
-  content-visibility: auto;
-  contain-intrinsic-size: 100vw 100vh;
-}
-
-@utility homepage-decor-foreground {
-  will-change: transform;
-  transform-style: preserve-3d;
-  perspective: 1000px;
-}
-
 @utility card-shimmer {
   @apply fill-mode-backwards via-tech-main/25 pointer-events-none absolute inset-0 animate-[shimmer_3s_infinite_2s] bg-linear-to-r from-transparent to-transparent motion-reduce:animate-none dark:via-white/10;
 }

@@ -1,6 +1,6 @@
 import { PageSkeleton } from "@/components/layout/page-skeleton"
 import { SectionTitle } from "@/components/ui/headings"
-import { TechCard } from "@/components/ui/tech-card"
+import { Card } from "@/components/ui/shadcn/card"
 import {
   SegmentedBar,
   ScanConfirmOverlay,
@@ -45,7 +45,7 @@ export default function DraftLoading() {
           <SectionTitle className="mb-4">In progress</SectionTitle>
           <div className="space-y-4">
             {[1, 2].map((item) => (
-              <TechCard
+              <Card
                 key={item}
                 tone="main"
                 borderOpacity="muted"
@@ -54,12 +54,12 @@ export default function DraftLoading() {
                 hover="none"
                 brackets="hidden">
                 <DraftRowSkeleton />
-              </TechCard>
+              </Card>
             ))}
           </div>
         </section>
         <aside className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <TechCard
+          <Card
             tone="main"
             borderOpacity="medium"
             background="subtle"
@@ -84,11 +84,11 @@ export default function DraftLoading() {
                 className="border-tech-main/30 h-11 w-full border"
               />
             </div>
-          </TechCard>
+          </Card>
         </aside>
         <section className="animate-tech-slide-in min-w-0 [animation-delay:100ms] motion-reduce:animate-none lg:col-start-1 lg:row-start-2">
           <SectionTitle className="mb-4">Past work</SectionTitle>
-          <TechCard
+          <Card
             tone="main"
             borderOpacity="subtle"
             background="ghost"
@@ -96,7 +96,7 @@ export default function DraftLoading() {
             hover="none"
             brackets="hidden">
             <DraftRowSkeleton compact />
-          </TechCard>
+          </Card>
         </section>
       </div>
     </PageSkeleton>

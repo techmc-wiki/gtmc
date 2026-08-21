@@ -57,7 +57,7 @@ function FolderButton({
       onClick={() => toggleFolder(itemId)}
       aria-expanded={folderExpanded}
       className="
-        mt-2 flex min-h-11 w-full cursor-pointer items-center gap-2 pl-2 text-left
+        mt-2 grid min-h-11 w-full cursor-pointer grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-x-2 pl-2 text-left
         font-sans text-[0.8125rem] leading-snug font-semibold text-tech-main/80
         transition-colors hover:text-tech-main-dark md:mt-1 md:min-h-7
         focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 focus:outline-none
@@ -102,8 +102,8 @@ function ArticleLink({
       onClick={() => onNavigate?.()}
       aria-current={isActive ? "page" : undefined}
       className={`
-        grid min-h-11 w-full grid-cols-[1rem_minmax(0,1fr)] items-baseline
-        gap-x-2 py-1.5 pr-1 pl-2 font-sans text-[0.8125rem] leading-snug
+        grid min-h-11 w-full grid-cols-[1.25rem_minmax(0,1fr)] items-baseline
+        gap-x-2 py-2 pr-1 pl-2 font-sans text-[0.8125rem] leading-snug
         transition-colors focus-visible:outline-tech-main focus-visible:outline-2
         focus-visible:outline-offset-2 md:min-h-7 md:py-0.5 md:text-sm
         ${isActive ? "font-semibold text-tech-main-dark" : "text-tech-main hover:text-tech-main-dark"}

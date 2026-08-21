@@ -6,7 +6,7 @@ import { useDraftEditor } from "@/components/editor/use-draft-editor"
 import { DraftFileSourceDialog } from "@/components/editor/draft-file-source-dialog"
 import { DraftEditorToolbar } from "@/components/editor/draft-editor-toolbar"
 import { DraftEditorFiles } from "@/components/editor/draft-editor-files"
-import { EditorBadge } from "@/components/editor/editor-badge"
+import { toast } from "sonner"
 import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
 import { EditorTextareaDynamic } from "@/components/editor/editor-textarea-dynamic"
 import {
@@ -61,7 +61,7 @@ interface RepoFileSnapshot {
 
 export function DraftEditor({ initialData }: DraftEditorProps) {
   const hook = useDraftEditor(initialData)
-  const { state, refs, actions, upload, badge, progress, t, progressT } = hook
+  const { state, refs, actions, upload, progress, t, progressT } = hook
 
   const handleAddFile = () => {
     actions.openFileDialog("add", "repo")
@@ -100,7 +100,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           file.id !== state.activeFile.id)
     )
     if (hasDuplicate) {
-      badge.showBadge(t("badgeFileAlreadyExists"), "error", 3000)
+      toast.error(t("badgeFileAlreadyExists"), { duration: 3000 })
       return false
     }
     if (state.fileDialogIntent?.kind === "replace") {
@@ -198,14 +198,14 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   const handleCreateFolder = (folderPath: string) => {
     const normalizedFolderPath = normalizeDraftFolderPath(folderPath)
     if (!normalizedFolderPath) {
-      badge.showBadge("INVALID_FOLDER_NAME_", "error", 2800)
+      toast.error("Invalid folder name", { duration: 2800 })
       return false
     }
     actions.updateDraftCollection((current) => ({
       ...current,
       folders: [...(current.folders || []), normalizedFolderPath],
     }))
-    badge.showBadge("FOLDER_READY_", "info", 2000)
+    toast.success("Folder ready", { duration: 2000 })
     actions.setFileDialogIntent(null)
     return true
   }
@@ -305,8 +305,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             canUndo={Boolean(state.activeFileHistoryAvailability?.undoCount)}
             canRedo={Boolean(state.activeFileHistoryAvailability?.redoCount)}
           />
-
-          <EditorBadge badge={badge.badge} onDismiss={badge.clearBadge} />
 
           <EditorWritePanel value="write">
             <EditorTextareaDynamic

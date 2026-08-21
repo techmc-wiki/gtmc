@@ -24,7 +24,7 @@ import {
   type GlossaryEditOperation,
 } from "@/components/glossary/glossary-edit-card"
 import { GlossaryDiffPreview } from "@/components/glossary/glossary-diff-preview"
-import { useStatusNotification } from "@/hooks/use-status-notification"
+import { toast } from "sonner"
 import {
   deleteGlossaryDraftAction,
   updateGlossaryDraftAction,
@@ -208,7 +208,7 @@ function GlossaryEditorInner({
       : null
   )
 
-  const { badge, showBadge, clearBadge } = useStatusNotification()
+  const [saveState, setSaveState] = React.useState("")
 
   const saveTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
     null
@@ -223,7 +223,8 @@ function GlossaryEditorInner({
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current)
     }
-    showBadge("SAVING…", "progress")
+    const savingToastId = toast.loading("Saving…")
+    setSaveState("Saving…")
     saveTimeoutRef.current = setTimeout(async () => {
       try {
         const result = await updateGlossaryDraftAction(
@@ -232,20 +233,23 @@ function GlossaryEditorInner({
           titleRef.current
         )
         if (result.success) {
-          showBadge("SAVED", "info", 2000)
+          toast.success("Saved", { id: savingToastId })
+          setTimeout(() => setSaveState(""), 2000)
         } else {
           const message =
             result.errors?.general ||
-            result.errors?.operations?.join(", ") ||
-            "SAVE FAILED"
-          showBadge(message.toUpperCase(), "error", 3000)
+            Object.values(result.errors ?? {}).find(Boolean) ||
+            "Save failed"
+          toast.error(message, { id: savingToastId, duration: 3000 })
+          setSaveState("")
         }
       } catch (error) {
-        const message = error instanceof Error ? error.message : "SAVE FAILED"
-        showBadge(message.toUpperCase(), "error", 3000)
+        const message = error instanceof Error ? error.message : "Save failed"
+        toast.error(message, { id: savingToastId, duration: 3000 })
+        setSaveState("")
       }
     }, SAVE_DEBOUNCE_MS)
-  }, [draftId, showBadge, isReadOnly])
+  }, [draftId, isReadOnly])
 
   React.useEffect(
     () => () => {
@@ -374,20 +378,15 @@ function GlossaryEditorInner({
     try {
       const result = await deleteGlossaryDraftAction(draftId)
       if (result.success) {
-        clearBadge()
         router.push("/draft")
       } else {
-        showBadge(
-          (result.error || "DELETE FAILED").toUpperCase(),
-          "error",
-          3000
-        )
+        toast.error(result.error || "Delete failed", { duration: 3000 })
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "DELETE FAILED"
-      showBadge(message.toUpperCase(), "error", 3000)
+      const message = error instanceof Error ? error.message : "Delete failed"
+      toast.error(message, { duration: 3000 })
     }
-  }, [draftId, router, showBadge, clearBadge])
+  }, [draftId, router])
 
   const handleSubmit = React.useCallback(
     async ({ useRealEmail: useReal }: { useRealEmail: boolean }) => {
@@ -461,7 +460,7 @@ function GlossaryEditorInner({
     setSubmitError(null)
   }, [isSubmitting])
 
-  const saveStateLabel = badge?.message ?? ""
+  const saveStateLabel = saveState
 
   const canSubmit = operations.length > 0 && !isReadOnly
 

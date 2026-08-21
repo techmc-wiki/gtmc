@@ -1,12 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { useState, useEffect, useCallback, useMemo } from "react"
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react"
 import { ChapterNavPanel } from "./chapter-nav-panel"
 import { ReaderNavigationProvider } from "./reader-navigation/context"
-import { MobileChapterNavCard } from "./mobile-chapter-nav-card"
-import { useMobileChapterNavMachine } from "@/app/[locale]/(public)/articles/mobile-chapter-nav/use-mobile-chapter-nav-machine"
-import { LABEL_MORPH_DELAY_MS } from "@/app/[locale]/(public)/articles/mobile-chapter-nav/config"
 import {
   SectionRail,
   SegmentedBar,
@@ -143,19 +146,14 @@ function ChapterNavContent({
 
 export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const CHAPTER_NAV_HIDDEN_KEY = "gtmc_chapter_nav_hidden"
-  const [showFullText, setShowFullText] = useState(true)
   const [fetchedTreeData, setFetchedTreeData] = useState<ChapterNavNode[]>([])
   const [hasTreeFetchSettled, setHasTreeFetchSettled] = useState(
     () => tree.length > 0
   )
   const [chapterNavHidden, setChapterNavHidden] = useState(false)
-  const machine = useMobileChapterNavMachine()
-  const {
-    dispatch,
-    isOpen: isChapterNavOpen,
-    isFloating,
-    isStuck,
-  } = machine
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  const [isStuck, setIsStuck] = useState(false)
+  const [isChapterNavOpen, setIsChapterNavOpen] = useState(false)
   const locale = useLocale()
   const t = useTranslations("ChapterNav")
   const tA11y = useTranslations("CommonA11y")
@@ -179,16 +177,6 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       return next
     })
   }, [])
-
-  useEffect(() => {
-    const timer = setTimeout(
-      () => {
-        setShowFullText(!isStuck)
-      },
-      isStuck ? 0 : LABEL_MORPH_DELAY_MS
-    )
-    return () => clearTimeout(timer)
-  }, [isStuck])
 
   useEffect(() => {
     if (tree.length > 0) {
@@ -235,41 +223,6 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const isChapterNavLoading = tree.length === 0 && !hasTreeFetchSettled
   const showChapterNavPlaceholder = isChapterNavLoading && treeData.length === 0
 
-  const onNavigate = useCallback(
-    () => dispatch({ type: "NAVIGATE" }),
-    [dispatch]
-  )
-
-  const mobileContainerStyle = useMemo(
-    (): React.CSSProperties => ({
-      padding: isStuck ? "1rem 1rem 0 1rem" : "0",
-      justifyContent: isStuck ? "flex-end" : "stretch",
-    }),
-    [isStuck]
-  )
-
-  const mobileButtonStyle = useMemo(
-    (): React.CSSProperties => ({
-      width: isStuck ? "5rem" : "100%",
-      minHeight: isStuck ? "" : "3rem",
-      padding: isStuck ? "0.125rem 0.5rem" : "1rem",
-      borderBottom: isStuck ? undefined : "1px solid",
-      boxShadow: isStuck ? "0 1px 2px 0 rgba(0, 0, 0, 0.05)" : "none",
-      right: isStuck ? undefined : 0,
-    }),
-    [isStuck]
-  )
-
-  const visibleOpacityStyle = useMemo(
-    (): React.CSSProperties => ({ opacity: showFullText ? 1 : 0 }),
-    [showFullText]
-  )
-
-  const hiddenOpacityStyle = useMemo(
-    (): React.CSSProperties => ({ opacity: showFullText ? 0 : 1 }),
-    [showFullText]
-  )
-
   const chapterNavAsideStyle = useMemo(
     (): React.CSSProperties => ({
       width: chapterNavHidden ? 0 : undefined,
@@ -279,34 +232,31 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
     [chapterNavHidden]
   )
 
-  const handleMobileToggle = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-      dispatch({ type: "TOGGLE" })
-    },
-    [dispatch]
+  const onNavigate = useCallback(() => {
+    setIsChapterNavOpen(false)
+  }, [])
+
+  const handleMobileToggle = useCallback(() => {
+    setIsChapterNavOpen((open) => !open)
+  }, [])
+
+  // Sentinel + IntersectionObserver: the only JS involved in the
+  // sticky-to-stuck transition (visual state only — CSS does the sticking).
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsStuck(!entry.isIntersecting),
+      { threshold: 0 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  const chapterNavContent = (
+              <ChapterNavPanel onNavigate={onNavigate} />
   )
 
-  const handleMobileClose = useCallback(
-    () => dispatch({ type: "CLOSE" }),
-    [dispatch]
-  )
-
-  const fixedChapterNavContent = (
-    <ChapterNavContent
-      showPlaceholder={showChapterNavPlaceholder}
-      onNavigate={onNavigate}
-      scrollClassName="pr-4"
-    />
-  )
-
-  const floatingChapterNavContent = (
-    <ChapterNavContent
-      showPlaceholder={showChapterNavPlaceholder}
-      onNavigate={onNavigate}
-    />
-  )
 
   return (
     <ReaderNavigationProvider tree={treeData}>
@@ -319,85 +269,45 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           md:gap-6
           md:max-w-360 md:mx-auto
         `}>
-        <div
-          className={`
-            relative z-30 md:hidden
-          `}>
-          <div className="relative" style={mobileContainerStyle}>
+          {/* Mobile chapter nav: CSS sticky bar; JS only toggles stuck visuals */}
+          <div ref={sentinelRef} aria-hidden="true" className="h-px" />
+          <div
+            className={`
+              sticky top-16 z-30 border-y transition-[background-color,box-shadow,border-color]
+              duration-200 md:hidden
+              ${
+                isStuck
+                  ? "border-tech-main/40 bg-surface-overlay/95 shadow-sm backdrop-blur-sm"
+                  : "border-transparent bg-transparent"
+              }
+              ${isOverlappingFooter && !isChapterNavOpen ? "pointer-events-none opacity-0" : "opacity-100"}
+            `}>
             <button
               type="button"
               onClick={handleMobileToggle}
-              className={`
-                cursor-pointer overflow-hidden
-                border border-tech-main/40 bg-surface-overlay/70 font-mono text-xs
-                font-bold tracking-[0.15em] text-tech-main
-                transition-[background-color,color,opacity] duration-150 ease-out
-                hover:bg-tech-main/5
-                ${isStuck ? "fixed top-28 right-4 z-50" : "absolute"}
-                ${isStuck && isOverlappingFooter ? "pointer-events-none opacity-0" : "opacity-100"}
-              `}
-              style={mobileButtonStyle}
-              aria-label={tA11y("toggleArticleTree")}
               aria-expanded={isChapterNavOpen}
-              data-testid="mobile-tree-toggle">
-              <div className="relative flex w-full items-center justify-between">
-                <span
-                  className="transition-opacity duration-150"
-                  style={visibleOpacityStyle}>
-                  {t("title")}
-                </span>
-                <span
-                  className="
-                    absolute left-1/2 line-clamp-none w-full
-                    -translate-x-1/2 transition-opacity
-                  "
-                  style={hiddenOpacityStyle}>
-                  {t("titleShort")}
-                </span>
-                <span
-                  className="
-                    flex size-4 items-center justify-center
-                    transition-opacity duration-200
-                  "
-                  style={visibleOpacityStyle}>
-                  <TriangleIcon
-                    direction={isChapterNavOpen ? "down" : "right"}
-                    className="size-3"
-                  />
-                </span>
-              </div>
+              aria-label={tA11y("toggleArticleTree")}
+              data-testid="mobile-tree-toggle"
+              className="flex h-12 w-full cursor-pointer items-center justify-between px-4 font-mono text-xs font-bold tracking-[0.15em] text-tech-main uppercase transition-colors hover:bg-tech-main/5">
+              <span>{t("title")}</span>
+              <TriangleIcon
+                direction={isChapterNavOpen ? "down" : "right"}
+                className="size-3"
+              />
             </button>
-            <div className="h-12" />
-          </div>
-
-          <div
-            className={`
-              grid transition-all duration-300 ease-out
-              ${
-                isChapterNavOpen && !isFloating
-                  ? "grid-rows-[1fr] opacity-100"
-                  : "grid-rows-[0fr] opacity-0"
-              }
-            `}>
-            <div className="overflow-hidden">
-              <div
-                className="
-                  max-h-[calc(100dvh-12rem)] overflow-y-auto overscroll-contain
-                  border-t guide-line bg-surface-overlay/95 px-4 pt-3 pb-4
-                ">
-                {fixedChapterNavContent}
+            <div
+              className={`
+                grid transition-all duration-300 ease-out
+                ${isChapterNavOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}
+              `}>
+              <div className="overflow-hidden">
+                <div className="border-t border-tech-main/30 bg-surface-overlay/95 max-h-[calc(100dvh-12rem)] overflow-y-auto overscroll-contain px-4 pt-3 pb-4">
+                  {chapterNavContent}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Mobile floating chapter navigation card */}
-        <MobileChapterNavCard
-          isOpen={isChapterNavOpen}
-          onClose={handleMobileClose}
-          isFloating={isFloating}>
-          {floatingChapterNavContent}
-        </MobileChapterNavCard>
 
         {/* Desktop chapter navigation */}
         <div

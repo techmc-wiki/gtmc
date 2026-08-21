@@ -1,6 +1,12 @@
+import Image from "next/image"
 import { Link } from "@/i18n/navigation"
-import { TechCard } from "@/components/ui/tech-card"
-import { UserAvatar } from "@/components/ui/user-avatar"
+import { Card } from "@/components/ui/shadcn/card"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+} from "@/components/ui/shadcn/avatar"
 import type { ResolvedPerson } from "@/lib/markdown/people"
 
 export interface AuthorGridItem {
@@ -39,7 +45,7 @@ export function AuthorGrid({
             key={handle}
             href={`/authors/${encodeURIComponent(handle)}`}
             className="group/link focus-visible:outline-tech-main block focus-visible:outline-2 focus-visible:outline-offset-2">
-            <TechCard
+            <Card
               padding="compact"
               hover="border"
               className={isCompact ? undefined : "h-full"}>
@@ -50,12 +56,29 @@ export function AuthorGrid({
                     : "flex items-start gap-3"
                 }>
                 <div className={`shrink-0 ${isCompact ? "size-9" : "size-12"}`}>
-                  <UserAvatar
-                    src={person.profile}
-                    alt={person.name}
-                    fallback={person.name}
-                    sizes={isCompact ? "36px" : "48px"}
-                  />
+                  <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-full items-center justify-center overflow-hidden border-2 p-1 ring-1">
+                    <CornerBrackets
+                      className="pointer-events-none absolute inset-0 z-10"
+                      size="size-2"
+                      color="border-tech-main/70"
+                    />
+                    {person.profile ? (
+                      <AvatarImage asChild src={person.profile}>
+                        <Image
+                          src={person.profile}
+                          alt={person.name}
+                          fill
+                          sizes={isCompact ? "36px" : "48px"}
+                          loading="lazy"
+                          className="object-cover"
+                        />
+                      </AvatarImage>
+                    ) : (
+                      <AvatarFallback className="text-tech-main/50 bg-transparent font-mono text-xl font-bold tracking-widest uppercase">
+                        {person.name[0]}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
                 </div>
                 <div className={isCompact ? "min-w-0" : "min-w-0 flex-1"}>
                   <p className="text-tech-main-dark truncate text-sm font-medium">
@@ -83,7 +106,7 @@ export function AuthorGrid({
                   )}
                 </div>
               </div>
-            </TechCard>
+            </Card>
           </Link>
         ))}
       </div>

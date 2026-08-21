@@ -1,13 +1,19 @@
 import type { Metadata } from "next"
+import Image from "next/image"
 import { notFound, permanentRedirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 // oxlint-disable-next-line import/no-unassigned-import
 import "../../public-content.css"
 import { Link } from "@/i18n/navigation"
 import { SectionTitle } from "@/components/ui/headings"
-import { TechBadge } from "@/components/ui/status"
-import { TechCard } from "@/components/ui/tech-card"
-import { UserAvatar } from "@/components/ui/user-avatar"
+import { Badge } from "@/components/ui/shadcn/badge"
+import { Card } from "@/components/ui/shadcn/card"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+} from "@/components/ui/shadcn/avatar"
 import {
   GithubIcon,
   BilibiliIcon,
@@ -216,13 +222,29 @@ export default async function AuthorDetailPage({
       <div className="bg-surface-overlay/60 border-tech-main/20 border p-6 sm:p-8">
         <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
           <div className="size-24 shrink-0 md:size-32">
-            <UserAvatar
-              src={person.profile}
-              alt={person.name}
-              fallback={person.name}
-              sizes="(max-width: 768px) 96px, 128px"
-              loading="eager"
-            />
+            <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-full items-center justify-center overflow-hidden border-2 p-1 ring-1">
+              <CornerBrackets
+                className="pointer-events-none absolute inset-0 z-10"
+                size="size-2"
+                color="border-tech-main/70"
+              />
+              {person.profile ? (
+                <AvatarImage asChild src={person.profile}>
+                  <Image
+                    src={person.profile}
+                    alt={person.name}
+                    fill
+                    sizes="(max-width: 768px) 96px, 128px"
+                    loading="eager"
+                    className="object-cover"
+                  />
+                </AvatarImage>
+              ) : (
+                <AvatarFallback className="text-tech-main/50 bg-transparent font-mono text-xl font-bold tracking-widest uppercase">
+                  {person.name[0]}
+                </AvatarFallback>
+              )}
+            </Avatar>
           </div>
 
           <div className="min-w-0 flex-1 text-center sm:text-left">
@@ -231,9 +253,9 @@ export default async function AuthorDetailPage({
                 {person.name}
               </h1>
               {maintainer ? (
-                <TechBadge className="border-tech-main/40 bg-tech-main/5 text-tech-main">
+                <Badge className="border-tech-main/40 bg-tech-main/5 text-tech-main">
                   {t("maintainerLabel")}
-                </TechBadge>
+                </Badge>
               ) : null}
             </div>
             <p className="text-tech-main/60 mt-1 font-mono text-sm">
@@ -393,14 +415,14 @@ function RepositoryStat({
   locale: string
 }) {
   return (
-    <TechCard padding="compact">
+    <Card padding="compact">
       <p className="text-tech-main/60 font-mono text-[0.625rem] tracking-[0.25em] uppercase">
         {label}
       </p>
       <p className="text-tech-main-dark mt-2 text-2xl font-semibold tabular-nums">
         {new Intl.NumberFormat(locale).format(value)}
       </p>
-    </TechCard>
+    </Card>
   )
 }
 
@@ -449,7 +471,7 @@ function ArticleRow({
     <Link
       href={`/articles/${article.slug}`}
       className="group/article focus-visible:outline-tech-main block focus-visible:outline-2 focus-visible:outline-offset-2">
-      <TechCard padding="compact" hover="border">
+      <Card padding="compact" hover="border">
         <div className="flex items-center gap-3">
           <span className="text-tech-main/40 w-8 shrink-0 text-right font-mono text-xs">
             {String(rowIndex).padStart(2, "0")}
@@ -476,7 +498,7 @@ function ArticleRow({
             </span>
           </div>
         </div>
-      </TechCard>
+      </Card>
     </Link>
   )
 }

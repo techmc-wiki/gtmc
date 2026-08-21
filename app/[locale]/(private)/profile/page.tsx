@@ -1,10 +1,16 @@
 import type { Metadata } from "next"
+import Image from "next/image"
 import { getTranslations } from "next-intl/server"
 import { prisma } from "@/lib/prisma"
 import { guardUser } from "@/lib/auth/guards"
 import { redirect } from "next/navigation"
-import { FieldBox } from "@/components/ui/field-box"
-import { UserAvatar } from "@/components/ui/user-avatar"
+import { Input } from "@/components/ui/shadcn/input"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+} from "@/components/ui/shadcn/avatar"
 import { updateProfileAction } from "@/actions/profile"
 import { SignOutButton } from "@/components/ui/sign-out-button"
 import { getGithubEmailVisibility } from "@/lib/github"
@@ -69,15 +75,32 @@ export default async function ProfilePage({
           }
           className="space-y-8 p-4 sm:p-6 md:p-8 lg:p-12">
           <div className="flex flex-col items-start gap-4 sm:gap-6 md:gap-8">
-            <UserAvatar
-              src={user.image}
-              alt={user.name}
-              className="size-24 rounded-none sm:size-32 md:size-40"
-              sizes="(max-width: 640px) 96px, (max-width: 768px) 128px, 160px"
-            />
+            <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-24 size-full items-center justify-center overflow-hidden rounded-none border-2 p-1 ring-1 sm:size-32 md:size-40">
+              <CornerBrackets
+                className="pointer-events-none absolute inset-0 z-10"
+                size="size-2"
+                color="border-tech-main/70"
+              />
+              {user.image ? (
+                <AvatarImage asChild src={user.image}>
+                  <Image
+                    src={user.image}
+                    alt={user.name || "Avatar"}
+                    fill
+                    sizes="(max-width: 640px) 96px, (max-width: 768px) 128px, 160px"
+                    loading="lazy"
+                    className="object-cover"
+                  />
+                </AvatarImage>
+              ) : (
+                <AvatarFallback className="text-tech-main/50 bg-transparent font-mono text-xl font-bold tracking-widest uppercase">
+                  {(user.name || "?")[0]}
+                </AvatarFallback>
+              )}
+            </Avatar>
 
             <FormField label={t("avatarUrlLabel")} className="w-full flex-1">
-              <FieldBox
+              <Input
                 name="image"
                 defaultValue={user.image || ""}
                 placeholder="https://..."
@@ -89,7 +112,7 @@ export default async function ProfilePage({
 
           <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
             <FormField label={t("usernameLabel")}>
-              <FieldBox
+              <Input
                 name="name"
                 defaultValue={user.name || ""}
                 required
@@ -97,7 +120,7 @@ export default async function ProfilePage({
               />
             </FormField>
             <FormField label={emailLabel}>
-              <FieldBox
+              <Input
                 defaultValue={user.email || ""}
                 disabled
                 className="bg-tech-main/5 text-tech-main/60 w-full cursor-not-allowed rounded-none border font-mono text-xs tracking-wide shadow-none sm:text-sm"

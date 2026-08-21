@@ -26,8 +26,7 @@ interface GlossaryEntryViewProps {
 
 const termTriggerClass =
   "text-tech-main-dark hover:text-tech-main focus-visible:outline-tech-main cursor-pointer text-left font-mono font-medium underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
-const labelClass =
-  "text-tech-main/40 font-mono text-[0.6875rem] tracking-widest uppercase"
+const labelClass = "text-tech-main/40 text-[0.6875rem] font-medium"
 const densityCardClass = {
   compact: "gap-1.5 p-2.5",
   normal: "gap-2 p-3",

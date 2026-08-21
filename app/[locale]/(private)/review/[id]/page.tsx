@@ -405,40 +405,32 @@ export default async function ReviewDetailPage({
               </span>
             </div>
 
-            <h1 className="text-tech-main-dark font-mono text-3xl/tight tracking-widest uppercase lg:text-4xl">
+            <h1 className="display-title text-tech-main-dark text-2xl tracking-tight lg:text-4xl">
               {pr.title}
             </h1>
 
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               <div className="guide-line bg-tech-main/5 border px-4 py-3">
-                <p className="text-tech-main/45 font-mono text-[0.625rem] tracking-widest uppercase">
-                  AUTHOR
-                </p>
-                <p className="text-tech-main mt-1 font-mono text-sm tracking-widest uppercase">
+                <p className="text-tech-main/45 text-xs font-medium">AUTHOR</p>
+                <p className="text-tech-main mt-1 font-mono text-sm">
                   {linkedDraft?.author?.name || pr.user.login || "UNKNOWN_USER"}
                 </p>
               </div>
               <div className="guide-line bg-tech-main/5 border px-4 py-3">
-                <p className="text-tech-main/45 font-mono text-[0.625rem] tracking-widest uppercase">
-                  TARGET
-                </p>
-                <p className="text-tech-main mt-1 font-mono text-sm tracking-widest uppercase">
+                <p className="text-tech-main/45 text-xs font-medium">TARGET</p>
+                <p className="text-tech-main mt-1 font-mono text-sm">
                   {targetFileLabel}
                 </p>
               </div>
               <div className="guide-line bg-tech-main/5 border px-4 py-3">
-                <p className="text-tech-main/45 font-mono text-[0.625rem] tracking-widest uppercase">
-                  STATS
-                </p>
-                <p className="text-tech-main mt-1 font-mono text-sm tracking-widest uppercase">
+                <p className="text-tech-main/45 text-xs font-medium">STATS</p>
+                <p className="text-tech-main mt-1 font-mono text-sm">
                   {pr.commits} COMMITS / {pr.changed_files} FILES
                 </p>
               </div>
               <div className="guide-line bg-tech-main/5 border px-4 py-3">
-                <p className="text-tech-main/45 font-mono text-[0.625rem] tracking-widest uppercase">
-                  DIFF
-                </p>
-                <p className="mt-1 font-mono text-sm tracking-widest uppercase">
+                <p className="text-tech-main/45 text-xs font-medium">DIFF</p>
+                <p className="mt-1 font-mono text-sm">
                   <span className="text-green-700">+{pr.additions}</span>
                   <span className="text-tech-main/30 px-2">/</span>
                   <span className="text-red-600">-{pr.deletions}</span>

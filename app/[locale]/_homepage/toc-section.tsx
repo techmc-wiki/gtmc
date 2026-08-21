@@ -77,7 +77,7 @@ function ChapterBlock({
           {chapter.title}
         </Link>
         {sections.length > 0 && (
-          <span className="text-tech-main/50 hidden shrink-0 font-mono text-[0.625rem] tracking-[0.15em] uppercase sm:block">
+          <span className="text-tech-main/50 hidden shrink-0 text-xs sm:block">
             {sectionCountLabel}
           </span>
         )}
@@ -178,7 +178,7 @@ export async function TocSection({ tree, locale }: TocSectionProps) {
           <li aria-label={t("appendixHeading")}>
             <div className="border-tech-main/30 mb-8 flex items-center gap-3 border-t pt-8">
               <span className="bg-tech-signal h-2.5 w-2.5" />
-              <span className="text-tech-main/60 font-mono text-[0.625rem] font-bold tracking-[0.25em] uppercase">
+              <span className="display-title text-tech-main-dark text-xl">
                 {t("appendixHeading")}
               </span>
             </div>

@@ -55,12 +55,11 @@ function ClosedPRCard({ pr }: { pr: ClosedPRListItem }) {
             {new Date(pr.createdAt).toLocaleString()}
           </span>
           <span
-            className={`border px-2 py-0.5 font-mono text-[0.6875rem] tracking-widest ${statusClassName}`}>
+            className={`border px-2 py-0.5 text-xs font-medium ${statusClassName}`}>
             {pr.isMerged ? "MERGED_" : "CLOSED_"}
           </span>
         </div>
-
-        <h3 className="border-tech-main/40 text-tech-main-dark border-l-2 pl-3 text-lg font-bold tracking-tight uppercase md:text-xl">
+        <h3 className="border-tech-main/40 text-tech-main-dark border-l-2 pl-3 text-lg font-bold tracking-tight md:text-xl">
           {pr.title || "UNTITLED"}
         </h3>
 
@@ -173,7 +172,7 @@ export function ClosedPRList({ getClosedPRsAction }: ClosedPRListProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="border-tech-main/50 text-tech-main border-b-2 pb-2 font-bold tracking-widest uppercase">
+      <h2 className="display-title border-tech-main/50 text-tech-main border-b-2 pb-2 text-2xl">
         CLOSED_&amp;_MERGED_
       </h2>
 
@@ -188,7 +187,7 @@ export function ClosedPRList({ getClosedPRsAction }: ClosedPRListProps) {
       {(isInitialLoading || isFetchingMore) && <ClosedPRSkeletonRows />}
 
       {!isInitialLoading && closedPRs.length === 0 && !error && (
-        <p className="text-tech-main/60 font-mono text-xs tracking-widest uppercase">
+        <p className="text-tech-main/60 text-sm">
           No closed pull requests found.
         </p>
       )}

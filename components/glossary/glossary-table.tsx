@@ -90,7 +90,7 @@ const COLUMN_LABEL_KEYS: Record<string, string> = {
 }
 
 const headerCellBase =
-  "text-tech-main/50 border-tech-line/30 sticky top-0 z-10 border-b bg-tech-bg/95 px-3 py-2 text-left font-mono text-xs tracking-widest uppercase backdrop-blur-sm"
+  "text-xs font-medium text-tech-main/60 uppercase border-tech-line/30 sticky top-0 z-10 border-b bg-tech-bg/95 px-3 py-2 text-left backdrop-blur-sm"
 
 function LetterAnchor({ letter, top }: { letter: string; top: number }) {
   const style = React.useMemo<React.CSSProperties>(() => ({ top }), [top])
@@ -149,7 +149,7 @@ function VirtualLetterRow({
         colSpan={colCount}
         className="px-3 py-2">
         <div className="flex items-baseline gap-3">
-          <h2 className="text-tech-main-dark font-mono text-2xl font-bold tracking-widest uppercase">
+          <h2 className="display-title text-tech-main-dark text-2xl">
             {letter}
           </h2>
           <span className="text-tech-main/40 font-mono text-xs tracking-widest uppercase">
@@ -191,9 +191,7 @@ function MobileLetterVirtualRow({
       className="absolute inset-x-0 top-0 scroll-mt-28 pb-2"
       style={style}>
       <div className="border-tech-line/30 flex items-baseline gap-3 border-b pb-1">
-        <h2 className="text-tech-main-dark font-mono text-2xl font-bold tracking-widest uppercase">
-          {letter}
-        </h2>
+        <h2 className="display-title text-tech-main-dark text-2xl">{letter}</h2>
         <span className="text-tech-main/40 font-mono text-xs tracking-widest uppercase">
           {count}
         </span>
@@ -201,7 +199,6 @@ function MobileLetterVirtualRow({
     </section>
   )
 }
-
 function MobileEntryVirtualRow({
   density,
   entry,

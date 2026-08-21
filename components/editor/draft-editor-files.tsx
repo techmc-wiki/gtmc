@@ -57,7 +57,7 @@ export function DraftEditorFiles({
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="section-label">{t("activeFileLabel")}</p>
-              <p className="text-tech-main/70 font-mono text-xs tracking-widest uppercase">
+              <p className="text-tech-main/60 text-xs font-medium">
                 {`${t("slotLabel")}_${activeFileIndex}/${files.length}`}
               </p>
             </div>
@@ -107,10 +107,10 @@ export function DraftEditorFiles({
 
           <div className="guide-line bg-tech-main/5 space-y-3 border p-4">
             <div>
-              <p className="text-tech-main/45 font-mono text-[0.6875rem] tracking-widest uppercase">
+              <p className="text-tech-main/60 text-xs font-medium">
                 {t("targetFileLabel")}
               </p>
-              <p className="text-tech-main mt-1 font-mono text-sm tracking-widest break-all uppercase">
+              <p className="text-tech-main mt-1 font-mono text-sm break-all">
                 {activeFile.filePath || t("targetFileUnset")}
               </p>
             </div>

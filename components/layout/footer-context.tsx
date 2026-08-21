@@ -9,7 +9,6 @@ import React, {
   useState,
   type ReactNode,
 } from "react"
-import { usePathname } from "@/i18n/navigation"
 
 interface FooterContextValue {
   hidden: boolean
@@ -56,13 +55,12 @@ export function HideFooter() {
 
 /**
  * Route-aware footer gate: renders `children` unless the footer is suppressed
- * via `HideFooter` or the route is the homepage.
+ * via `HideFooter`.
  */
 export function FooterWrapper({ children }: { children: ReactNode }) {
-  const pathname = usePathname()
   const { hidden } = useFooter()
 
-  if (hidden || pathname === "/") return null
+  if (hidden) return null
 
   return <>{children}</>
 }

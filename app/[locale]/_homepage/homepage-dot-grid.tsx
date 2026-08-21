@@ -1,7 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import DotGrid from "@/components/DotGrid"
+import {
+  addSiteScrollListener,
+  getSiteScrollMetrics,
+} from "@/hooks/site-scroll-root"
 
 /**
  * Interactive dot-grid field behind the homepage hero. Echoes the site-wide
@@ -23,6 +27,7 @@ function currentTheme(): keyof typeof PALETTES {
 
 export function HomepageDotGrid() {
   const [theme, setTheme] = useState<keyof typeof PALETTES>("light")
+  const fadeRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setTheme(currentTheme())
@@ -34,17 +39,38 @@ export function HomepageDotGrid() {
     return () => observer.disconnect()
   }, [])
 
+  // Fade the field out across the first viewport so the TOC reads on calm
+  // paper instead of a busy dot matrix.
+  useEffect(() => {
+    let raf = 0
+    const apply = () => {
+      raf = 0
+      const el = fadeRef.current
+      if (!el) return
+      const { scrollTop } = getSiteScrollMetrics()
+      const range = window.innerHeight * 0.85
+      el.style.opacity = Math.max(0, 1 - scrollTop / range).toFixed(3)
+    }
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(apply)
+    }
+    apply()
+    return addSiteScrollListener(onScroll)
+  }, [])
+
   const palette = PALETTES[theme]
 
   return (
-    <DotGrid
-      dotSize={3}
-      gap={26}
-      baseColor={palette.base}
-      activeColor={palette.active}
-      proximity={140}
-      speedTrigger={120}
-      className="absolute inset-0"
-    />
+    <div ref={fadeRef} className="pointer-events-none absolute inset-0">
+      <DotGrid
+        dotSize={3}
+        gap={26}
+        baseColor={palette.base}
+        activeColor={palette.active}
+        proximity={140}
+        speedTrigger={120}
+        className="absolute inset-0"
+      />
+    </div>
   )
 }

@@ -764,6 +764,14 @@ body {
   @apply bg-surface relative flex grow flex-col;
 }
 
+/* In the split editor, a panel whose tab content is inactive takes no space
+   below md (tabs decide visibility); both panels show side-by-side at md+. */
+@media (max-width: 767.999px) {
+  [data-slot="resizable-panel"]:has([data-state="inactive"]) {
+    display: none !important;
+  }
+}
+
 @utility corner-tick {
   @apply bg-tech-main absolute top-0 right-0 h-px w-8;
 }

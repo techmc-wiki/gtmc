@@ -61,9 +61,11 @@ export function DraftEditorToolbar({
 
   return (
     <>
-      <EditorTabStrip
-        rightSlot={activeFile.filePath || `UNTITLED_FILE_${activeFileIndex}`}
-      />
+      <div className="md:hidden">
+        <EditorTabStrip
+          rightSlot={activeFile.filePath || `UNTITLED_FILE_${activeFileIndex}`}
+        />
+      </div>
 
       {activeTab === "write" && (
         <>

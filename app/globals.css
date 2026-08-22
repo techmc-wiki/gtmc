@@ -745,11 +745,11 @@ body {
 }
 
 @utility page-container {
-  @apply mx-auto max-w-6xl space-y-8;
+  @apply mx-auto w-full max-w-6xl space-y-8;
 }
 
 @utility page-container-pb {
-  @apply mx-auto max-w-6xl space-y-8 pb-12;
+  @apply mx-auto w-full max-w-6xl space-y-8 pb-12;
 }
 
 @utility editor-panel {

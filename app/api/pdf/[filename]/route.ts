@@ -30,13 +30,19 @@ export async function GET(
   }
 
   try {
-    // Pass the browser's Range header through so pdf.js can fetch only
-    // the bytes it needs (xref + page 1) instead of the whole ~44 MB file.
+    // pdf.js's initial probe is a plain GET with no Range header; a
+    // compliant 200 would stream the whole ~44 MB file before pdf.js can
+    // cancel. Bounding the upstream request to the first chunks keeps
+    // every response small: pdf.js reads Content-Range's total, marks
+    // range support, and re-fetches exactly what it needs.
+    const INITIAL_WINDOW_BYTES = 262144
     const range = _request.headers.get("range")
     const upstream = await fetch(`${baseUrl}/${filename}`, {
       signal: AbortSignal.timeout(20000),
       cache: "no-store",
-      ...(range ? { headers: { Range: range } } : {}),
+      headers: {
+        Range: range ?? `bytes=0-${INITIAL_WINDOW_BYTES - 1}`,
+      },
     })
 
     if (!upstream.ok && upstream.status !== 206) {

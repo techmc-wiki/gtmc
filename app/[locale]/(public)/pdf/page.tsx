@@ -1,5 +1,3 @@
-// oxlint-disable-next-line import/no-unassigned-import
-import "../public-content.css"
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"

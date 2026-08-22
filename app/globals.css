@@ -1,5 +1,8 @@
-@reference "tailwindcss";
-@reference "tw-animate-css";
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* MDX page content (content/**) must be scanned for utility classes. */
+@source "../content/**/*.mdx";
 
 :root {
   color-scheme: light;

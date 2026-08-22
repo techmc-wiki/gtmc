@@ -1,7 +1,5 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
-// oxlint-disable-next-line import/no-unassigned-import
-import "../public-content.css"
 import { PageHeader } from "@/components/ui/headings"
 import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
 import { getManifestStats, loadArticleManifest } from "@/lib/articles/manifest"

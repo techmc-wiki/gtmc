@@ -1,6 +1,4 @@
 import type { ReactNode } from "react"
-// oxlint-disable-next-line import/no-unassigned-import
-import "./private.css"
 import { MainSiteShell } from "@/components/layout/main-site-shell"
 
 export const instant = false

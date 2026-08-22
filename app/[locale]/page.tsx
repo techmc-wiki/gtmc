@@ -1,7 +1,5 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
-// oxlint-disable-next-line import/no-unassigned-import
-import "./_homepage/homepage.css"
 import { HomepageClient } from "./_homepage/homepage-client"
 import { HomepageDotGrid } from "./_homepage/homepage-dot-grid"
 import { TocSection } from "./_homepage/toc-section"

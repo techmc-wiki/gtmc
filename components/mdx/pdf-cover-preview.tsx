@@ -56,14 +56,17 @@ export function PdfCoverPreview({ filename }: { filename: string }) {
 
           {/* Cursor-following Download label (mouse only). Position is
               kept from the last mousemove so the exit transition plays in
-              place instead of snapping to the container corner. */}
+              place instead of snapping to the container corner. Fill and
+              text are fixed ink-on-paper values — the cover render is
+              always bright, so the chip must stay a dark button in both
+              themes; only its outline softens on dark pages. */}
           <span
             aria-hidden="true"
             style={{
               left: `${cursor.x * 100}%`,
               top: `${cursor.y * 100}%`,
             }}
-            className={`border-tech-main-dark bg-tech-main-dark text-tech-bg hover:bg-tech-signal hover:border-tech-signal hover:text-tech-signal-ink pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2 border px-3 py-1.5 font-mono text-xs font-semibold tracking-wider transition-[opacity,scale,background-color,border-color,color] duration-200 ease-out ${
+            className={`dark:border-tech-bg/40 pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2 border border-[#20283c] bg-[#20283c] px-3 py-1.5 font-mono text-xs font-semibold tracking-wider text-[#f5f4ef] transition-[opacity,scale,border-color] duration-200 ease-out ${
               hovered ? "scale-100 opacity-100" : "scale-50 opacity-0"
             }`}>
             Download

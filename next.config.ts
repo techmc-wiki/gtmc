@@ -111,7 +111,7 @@ const nextConfig: NextConfig = {
         // Chrome HTML-in-Canvas origin trial: enables the CanvasUI
         // DecryptReveal effect on the PDF download page. Token is bound
         // to https://www.techmc.wiki and expires 2026-10-19.
-        source: "/:locale/pdf",
+        source: "/:path*",
         headers: [
           {
             key: "Origin-Trial",

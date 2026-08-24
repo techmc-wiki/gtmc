@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   useSyncExternalStore,
@@ -1083,7 +1084,7 @@ export function DecryptReveal({
   )
   const native = supported && !failed
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const source = sourceRef.current
     const content = contentRef.current
     const output = outputRef.current

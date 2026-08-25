@@ -85,11 +85,26 @@ Labels on reading surfaces use textbook vocabulary, not drafting jargon.
 - All reader-surface labels are localized — no hardcoded English on
   Chinese pages, no hardcoded Chinese on English pages.
 
-### Footer is a reader/contributor map
+### Footer is the back cover
 
-The footer is organized by audience intent: READ (Preface, Articles,
-Glossary), COMMUNITY (Contribute, Team, Issues), SOURCE (Repository,
-License), DOWNLOAD (Offline PDF). Section headers are localized.
+
+The footer closes the book. Reading routes live in the top nav and are not
+repeated; the footer carries what the nav does not, as a colophon page:
+
+- **Imprint band** — logo, serif series title, slogan, and a "Preface →"
+  entry link; beside it a printing-record ledger (articles, authors, last
+  revision) in mono apparatus type.
+- **Index** — three audience sections: COMMUNITY (About, Authors, Team,
+  QQ Group), PARTICIPATE (Contribute, Editorial Policy, Issues), SOURCE
+  (Repository, content and code licenses). Section headers are localized.
+- **Closing devices** — the chapter-end mark (same three-diamond device that
+  closes each article), the colophon (disclaimers, copyright, build SHA,
+  language switcher), and a full-bleed `GTMC` wordmark band sized in
+  container query units, ink-inverted (`bg-tech-main-dark text-tech-bg`).
+- **Cipher credits strip** — a decorative production-credit line under the
+  top rule rendered through `ThemeDecrypt`; it reads as ASCII cipher and
+  decodes around the cursor (plain-text fallback where html-in-canvas is
+  unavailable). aria-hidden decoration, never load-bearing content.
 
 ## Source Files
 
@@ -98,7 +113,7 @@ Tokens and global styles
 - `app/[locale]/layout.tsx` — root locale shell, font injection, footer wrapper.
 
 Layout and navigation
-- `components/layout/main-site-shell.tsx`, `nav.tsx`, `auth-aware-nav.tsx`, `auth-island.tsx`, `language-switcher.tsx`, `theme-toggle.tsx`, `footer.tsx`, `footer-context.tsx`, `navigation-effects.tsx`.
+- `components/layout/main-site-shell.tsx`, `nav.tsx`, `auth-aware-nav.tsx`, `auth-island.tsx`, `language-switcher.tsx`, `theme-toggle.tsx`, `footer.tsx`, `footer-cipher-strip.tsx`, `footer-context.tsx`, `navigation-effects.tsx`.
 
 Core primitives (shadcn/ui — Radix-based, GTMC-styled)
 - `components/ui/shadcn/*.tsx` — `button`, `card`, `input`, `textarea`, `label`, `badge`, `avatar`, `dialog`, `alert-dialog`, `sheet`, `dropdown-menu`, `popover`, `tabs`, `toggle-group`, `command`, `collapsible`, `separator`, `tooltip`, `scroll-area`, `skeleton`, `progress`. This is the canonical source for these primitives; new features MUST use them rather than hand-rolling equivalents.
@@ -240,8 +255,10 @@ Use this grid only when the page has asymmetric column allocations (sidebars, ra
   - Left sidebar / nav: `md:col-span-3`
   - Main content: `md:col-span-7`, further capped at `max-w-3xl`
   - Right rail (TOC, related): `md:col-span-2`
-- Variant: the footer uses a 4 | 8 split (`md:col-span-4` / `md:col-span-8`) with `md:gap-10` instead of `md:gap-6`.
-- Current usages: article reader (`articles-layout-client.tsx`) and footer (`footer.tsx`).
+- Variant: the footer imprint band uses a 7 | 5 split (`md:col-span-7` /
+  `md:col-span-5`) with `md:gap-8`.
+- Current usages: article reader (`articles-layout-client.tsx`) and the
+  footer imprint band (`footer.tsx`).
 
 ## Navigation
 

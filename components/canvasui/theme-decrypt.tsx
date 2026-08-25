@@ -1,7 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { DecryptReveal } from "@/components/canvasui/DecryptReveal"
+import {
+  DecryptReveal,
+  type DecryptRevealOptions,
+} from "@/components/canvasui/DecryptReveal"
 
 /**
  * Theme-aware DecryptReveal preset for GTMC surfaces. The cipher color and
@@ -10,13 +13,22 @@ import { DecryptReveal } from "@/components/canvasui/DecryptReveal"
  * budget), so this wrapper observes the attribute and pushes updated
  * options into the effect.
  */
+export interface ThemeDecryptProps {
+  children: React.ReactNode
+  className?: string
+  /**
+   * Per-surface tuning applied after the GTMC preset values. Omit to get the
+   * standard calibration; `color`/`background` still default to the active
+   * theme unless overridden here.
+   */
+  options?: DecryptRevealOptions
+}
+
 export function ThemeDecrypt({
   children,
   className,
-}: {
-  children: React.ReactNode
-  className?: string
-}) {
+  options,
+}: ThemeDecryptProps) {
   const [isDark, setIsDark] = React.useState(false)
 
   React.useEffect(() => {
@@ -44,7 +56,8 @@ export function ThemeDecrypt({
       edgeTint={0.6}
       scramble={0.07}
       color={isDark ? "#5fb0d4" : "#1d6a96"}
-      background={isDark ? "#101826" : "#f5f4ef"}>
+      background={isDark ? "#101826" : "#f5f4ef"}
+      {...options}>
       {children}
     </DecryptReveal>
   )

@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useRef } from "react"
 import { useTranslations } from "next-intl"
 
+import { QqIcon } from "@/components/ui/icons"
+import { Button } from "@/components/ui/shadcn/button"
+
 const TILT_MAX_DEG = 4
 // Exponential smoothing factor per 60fps frame; lower = softer, lagged follow.
 const TILT_SMOOTHING = 0.1
@@ -158,6 +161,19 @@ export function HeroCard() {
                 </span>
               </span>
             </div>
+            <Button
+              asChild
+              variant="secondary"
+              size="sm"
+              className="animate-fade-in fill-mode-forwards mt-4 self-start opacity-0 [animation-delay:1.4s] motion-reduce:animate-none motion-reduce:opacity-100 sm:mt-6">
+              <a
+                href="https://qm.qq.com/q/IIaL1EnBuY"
+                target="_blank"
+                rel="noopener noreferrer">
+                <QqIcon className="size-4" />
+                {t("joinQqGroup")}
+              </a>
+            </Button>
           </div>
         </div>
       </div>

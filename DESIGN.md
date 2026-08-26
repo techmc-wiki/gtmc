@@ -113,7 +113,7 @@ Tokens and global styles
 - `app/[locale]/layout.tsx` — root locale shell, font injection, footer wrapper.
 
 Layout and navigation
-- `components/layout/main-site-shell.tsx`, `nav.tsx`, `auth-aware-nav.tsx`, `auth-island.tsx`, `language-switcher.tsx`, `theme-toggle.tsx`, `footer.tsx`, `footer-cipher-strip.tsx`, `footer-context.tsx`, `navigation-effects.tsx`.
+- `components/layout/main-site-shell.tsx`, `nav.tsx`, `auth-aware-nav.tsx`, `auth-island.tsx`, `language-switcher.tsx`, `theme-toggle.tsx`, `footer.tsx`, `footer-context.tsx`, `navigation-effects.tsx`.
 
 Core primitives (shadcn/ui — Radix-based, GTMC-styled)
 - `components/ui/shadcn/*.tsx` — `button`, `card`, `input`, `textarea`, `label`, `badge`, `avatar`, `dialog`, `alert-dialog`, `sheet`, `dropdown-menu`, `popover`, `tabs`, `toggle-group`, `command`, `collapsible`, `separator`, `tooltip`, `scroll-area`, `skeleton`, `progress`. This is the canonical source for these primitives; new features MUST use them rather than hand-rolling equivalents.

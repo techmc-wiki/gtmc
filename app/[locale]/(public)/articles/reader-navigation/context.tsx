@@ -39,8 +39,36 @@ interface ReaderNavigationContextValue {
 const ReaderNavigationContext = React.createContext<ReaderNavigationContextValue | null>(null)
 
 export function ReaderNavigationProvider({ tree, children }: ReaderNavigationProviderProps) {
-  const pathname = usePathname()
+  return (
+    <React.Suspense
+      fallback={
+        <ReaderNavigationProviderContent pathname="/articles/preface" tree={tree}>
+          {children}
+        </ReaderNavigationProviderContent>
+      }>
+      <ReaderNavigationProviderWithPathname tree={tree}>
+        {children}
+      </ReaderNavigationProviderWithPathname>
+    </React.Suspense>
+  )
+}
 
+function ReaderNavigationProviderWithPathname({
+  tree,
+  children,
+}: ReaderNavigationProviderProps) {
+  return (
+    <ReaderNavigationProviderContent pathname={usePathname()} tree={tree}>
+      {children}
+    </ReaderNavigationProviderContent>
+  )
+}
+
+function ReaderNavigationProviderContent({
+  tree,
+  children,
+  pathname,
+}: ReaderNavigationProviderProps & { pathname: string }) {
   const {
     expandedFolders,
     setExpandedFolders,

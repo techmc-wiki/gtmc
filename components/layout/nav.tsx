@@ -263,7 +263,9 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
 
           <div className="border-tech-main/30 flex shrink-0 items-center gap-2 border-t p-3">
             <ThemeToggle />
-            <LanguageSwitcher className="border-none" />
+            <React.Suspense fallback={null}>
+              <LanguageSwitcher className="border-none" />
+            </React.Suspense>
           </div>
         </div>
       </SheetContent>

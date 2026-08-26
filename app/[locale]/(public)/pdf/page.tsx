@@ -74,11 +74,10 @@ export default async function PdfPage({
 
   // Centered single-CTA layout (release/open-access download pattern):
   // one dominant action, trust metadata directly beneath it, quieter
-  // secondary links. The cover is a pre-rendered page-one image wrapped
-  // in a CanvasUI DecryptReveal — it shows as an ASCII cipher and decodes
-  // around the cursor (html-in-canvas browsers; plain image fallback
-  // elsewhere). The cover itself is the download link; title and
-  // metadata stay real HTML in both modes.
+  // in a CanvasUI Canvas painting — the cover renders on a woven artist
+  // canvas weave and the cursor paints wet strokes that dry back flat
+  // (html-in-canvas browsers; plain image fallback elsewhere). The cover
+  // itself is the download link; title and metadata stay real HTML in both modes.
   return (
     <div className="page-container-pb flex w-full flex-1 flex-col justify-center">
       <div className="border-tech-main/40 bg-surface/80 mx-auto w-full max-w-xl border shadow-sm backdrop-blur-sm">

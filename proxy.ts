@@ -5,7 +5,11 @@ import {
   isLocalDevelopmentRequest,
 } from "@/lib/auth/dev-fixture-config"
 import createMiddleware from "next-intl/middleware"
-import type { NextFetchEvent, NextRequest } from "next/server"
+import {
+  NextResponse,
+  type NextFetchEvent,
+  type NextRequest,
+} from "next/server"
 import { routing } from "@/i18n/routing"
 
 const intlMiddleware = createMiddleware(routing)
@@ -68,6 +72,30 @@ function isPrivateRequest(req: NextRequest): boolean {
   )
 }
 
+/**
+ * Content negotiation for article pages: requests for a locale-prefixed
+ * article URL carrying `Accept: text/markdown` are rewritten to the
+ * markdown API route, so one URL serves HTML to browsers and raw markdown
+ * to agents and the copy-page button. Runs before auth/fixture handling:
+ * articles are a public reader surface.
+ */
+function negotiateMarkdownRewrite(req: NextRequest): Response | null {
+  const accept = req.headers.get("accept")
+  if (!accept || !accept.includes("text/markdown")) {
+    return null
+  }
+
+  // "/{locale}/articles/{slug...}" → "/api/articles/{locale}/{slug...}"
+  const articleMatch = /^\/(en|zh)\/articles\/(.+)$/.exec(req.nextUrl.pathname)
+  if (!articleMatch) {
+    return null
+  }
+
+  const rewriteUrl = req.nextUrl.clone()
+  rewriteUrl.pathname = `/api/articles/${articleMatch[1]}/${articleMatch[2]}`
+  return NextResponse.rewrite(rewriteUrl)
+}
+
 function handleIntlRequest(req: NextRequest): Response {
   const pathname = req.nextUrl.pathname
 
@@ -113,6 +141,12 @@ const authenticatedProxy = auth(
 )
 
 export default function proxy(req: NextRequest, event: NextFetchEvent) {
+  // Markdown content negotiation short-circuits auth and i18n handling.
+  const markdownRewrite = negotiateMarkdownRewrite(req)
+  if (markdownRewrite) {
+    return markdownRewrite
+  }
+
   if (
     isPrivateRequest(req) ||
     (isDevFixtureAuthEnabled() && isLocalDevelopmentRequest(req))

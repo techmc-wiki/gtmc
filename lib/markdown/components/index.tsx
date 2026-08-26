@@ -1,4 +1,6 @@
 import { LitematicaViewerDynamic } from "@/components/articles/litematica-viewer-dynamic"
+import type { ReactNode } from "react"
+
 import { MermaidDiagram } from "@/components/markdown/mermaid-diagram"
 import { PeopleMention } from "@/components/markdown/people-mention"
 import { createAComponent } from "@/lib/markdown/a-component"
@@ -58,7 +60,8 @@ const ansiColorStyles: Record<AnsiColorName, Record<string, string>> = {
 export function getMarkdownComponents(
   rawPath: string,
   content = "",
-  locale?: string
+  locale?: string,
+  headingAction?: ReactNode
 ): Record<string, MarkdownComponent> {
   const aComponent = createAComponent(rawPath, locale)
   const imageComponent = createImageComponent(rawPath)
@@ -114,12 +117,21 @@ export function getMarkdownComponents(
     iframe: IframeComponent,
   } satisfies Record<string, MarkdownComponent>
 
+  const withH1Action = headingAction
+    ? {
+        ...components,
+        h1: (props: MarkdownComponentProps) => (
+          <H1Component {...props} action={headingAction} />
+        ),
+      }
+    : components
+
   if (!hasLitematicaViewer) {
-    return components
+    return withH1Action
   }
 
   return {
-    ...components,
+    ...withH1Action,
     litematicaviewer: ({ url, ...rest }: MarkdownComponentProps) => (
       <LitematicaViewerDynamic url={url as string} {...rest} />
     ),

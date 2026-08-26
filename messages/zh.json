@@ -25,6 +25,8 @@
     "copyAttribution": "复制署名",
     "copyButton": "复制",
     "copyHeadingLink": "复制标题链接",
+    "copyPage": "复制为 Markdown",
+    "copyPageFailed": "复制失败",
     "copySuggestedAttributionAria": "复制建议署名",
     "copySuggestedAttributionTitle": "点击复制建议署名",
     "created": "创建时间：",

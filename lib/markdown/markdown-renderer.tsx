@@ -1,4 +1,6 @@
 import ReactMarkdown from "react-markdown"
+import type { ReactNode } from "react"
+
 import type { RehypeShikiPlugin } from "@/lib/markdown/syntax/rehype-shiki"
 import { getMarkdownComponents } from "@/lib/markdown/components"
 import { getPluginsForContent } from "@/lib/markdown/pipeline/react"
@@ -8,6 +10,8 @@ interface MarkdownRendererProps {
   locale?: string
   rawPath?: string
   shikiPlugin?: RehypeShikiPlugin
+  /** Optional control rendered at the right edge of the article H1. */
+  headingAction?: ReactNode
 }
 
 export function MarkdownRenderer({
@@ -15,6 +19,7 @@ export function MarkdownRenderer({
   locale,
   rawPath = "",
   shikiPlugin,
+  headingAction,
 }: MarkdownRendererProps) {
   const { remarkPlugins, rehypePlugins } = getPluginsForContent(
     content,
@@ -25,7 +30,12 @@ export function MarkdownRenderer({
     <ReactMarkdown
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
-      components={getMarkdownComponents(rawPath, content, locale)}>
+      components={getMarkdownComponents(
+        rawPath,
+        content,
+        locale,
+        headingAction
+      )}>
       {content}
     </ReactMarkdown>
   )

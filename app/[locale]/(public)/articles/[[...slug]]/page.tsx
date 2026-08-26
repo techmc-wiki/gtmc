@@ -46,6 +46,7 @@ import { serializeJsonLd } from "@/lib/seo/json-ld"
 import { ArticleHighlight } from "@/components/articles/article-highlight"
 import { BookmarkRecorder } from "@/components/articles/bookmark-recorder"
 import { RunningHead, ChapterEndMark } from "@/components/articles/chapter-chrome"
+import { CopyArticleButton } from "@/components/articles/copy-article-button"
 import {
   ArticleMetadataFull,
   ArticleMetadataAnonymous,
@@ -61,6 +62,7 @@ import { getPublicChapterNav } from "@/lib/articles/public-tree"
 
 
 const EMPTY_STRING_ARRAY: string[] = []
+const COPY_PAGE_ACTION = <CopyArticleButton />
 
 export async function generateStaticParams(): Promise<{ locale: string; slug: string[] }[]> {
   const locales: ArticleLocale[] = ["zh", "en"]
@@ -549,6 +551,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           locale={locale}
           rawPath={target.filePath}
           shikiPlugin={shikiPlugin}
+          headingAction={COPY_PAGE_ACTION}
         />
       </article>
 

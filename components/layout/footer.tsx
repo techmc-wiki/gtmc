@@ -2,7 +2,6 @@ import { getLocale, getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { Logo } from "@/components/ui/logo"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
-import { FooterCipherStrip } from "@/components/layout/footer-cipher-strip"
 import { ChapterEndMark } from "@/components/articles/chapter-chrome"
 import { Separator } from "@/components/ui/shadcn/separator"
 import { articleUrl } from "@/lib/articles/url"
@@ -142,11 +141,6 @@ export default async function Footer() {
       aria-label="Site information"
       className="border-tech-main-dark bg-tech-bg relative mt-auto w-full border-t-2 before:pointer-events-none before:absolute before:inset-0 before:z-[-1] before:bg-[url('/bg-grid.svg')] before:bg-size-[24px_24px] before:opacity-[0.04]">
       <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Cipher imprint strip — decode with the cursor */}
-        <div className="pt-5 pb-2">
-          <FooterCipherStrip />
-        </div>
-
         {/* Imprint band */}
         <div className="grid gap-10 py-8 md:grid-cols-12 md:gap-8">
           <div className="md:col-span-7">
@@ -168,7 +162,7 @@ export default async function Footer() {
           </div>
 
           {/* Printing record */}
-          <div className="border-tech-main/20 md:col-span-5 md:border-l md:pl-8">
+          <div className="guide-line md:col-span-5 md:border-l md:pl-8">
             <dl aria-label={t("recordHeading")}>
               <RecordRow
                 term={t("recordArticles")}

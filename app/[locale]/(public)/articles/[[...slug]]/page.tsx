@@ -28,9 +28,18 @@ import {
 } from "@/lib/articles/manifest-cached"
 import { getArticleContentBySlug } from "@/lib/articles/content"
 import { resolveArticleAssetPath } from "@/lib/articles/article-asset-path"
+import {
+  getArticleFallbackLocale,
+  resolveArticleLocale,
+  resolveArticleRequest,
+  type ArticleTreeNode,
+} from "@/lib/articles/article-request"
+import {
+  embedTitleInMarkdown,
+  formatArticleDisplayTitle,
+} from "@/lib/articles/article-title"
 import { articleUrl, getArticleAssetPublicUrl } from "@/lib/articles/url"
 import { decodeSlugPath, encodeSlug } from "@/lib/articles/slug-resolver"
-import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
 import { getSiteUrl } from "@/lib/site-url"
 import { serializeJsonLd } from "@/lib/seo/json-ld"
 
@@ -47,14 +56,11 @@ import {
   findNavigationOwner,
   flattenArticleTree,
   getArticleNavigation,
-  getFirstArticleInChapter,
 } from "@/lib/articles/navigation-data"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
 
-import type { ArticleTreeNode as BaseArticleTreeNode } from "@/lib/github/sync"
 
 const EMPTY_STRING_ARRAY: string[] = []
-const SOURCE_ARTICLE_LOCALE: ArticleLocale = "zh"
 
 export async function generateStaticParams(): Promise<{ locale: string; slug: string[] }[]> {
   const locales: ArticleLocale[] = ["zh", "en"]
@@ -111,7 +117,7 @@ export async function generateMetadata({
   params,
 }: ArticlePageProps): Promise<Metadata> {
   const { locale: rawLocale, slug } = await params
-  const locale = resolveLocale(rawLocale)
+  const locale = resolveArticleLocale(rawLocale)
   const slugPath = decodeSlugPath(slug ?? []) || "preface"
   const resolvedRequest = await resolveArticleRequest(slugPath, locale)
 
@@ -138,23 +144,15 @@ export async function generateMetadata({
       target.canonicalSlug ?? (await getCachedSlugForFilePath(target.filePath)) ?? slugPath
     const canonicalUrl = `${getSiteUrl()}/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`
 
-    const resolvedTitle = await resolveDisplayedArticleTitle(
-      data["chapter-title"],
-      target.filePath,
-      target.canonicalSlug,
-      target.isReadmeIntro,
-      contentLocale
-    )
-    const tree = await getPublicChapterNav(contentLocale)
-    const structuralOwner = findNavigationOwner(tree, effectiveSlug)
-    const isStructuralAppendix = structuralOwner?.isAppendix ?? false
-    const articleTitle = formatArticleTitle(
-      resolvedTitle,
-      target.index,
-      isStructuralAppendix,
-      target.isPreface,
-      target.isReadmeIntro
-    )
+    const articleTitle = await formatArticleDisplayTitle({
+      frontmatterTitle: data["chapter-title"],
+      filePath: target.filePath,
+      canonicalSlug: target.canonicalSlug,
+      index: target.index,
+      isPreface: target.isPreface,
+      isReadmeIntro: target.isReadmeIntro,
+      locale: contentLocale,
+    })
 
     // Build page title with chapter prefix if available
     const manifestEntry = await getCachedLocalizedArticleEntry(
@@ -221,7 +219,7 @@ export async function generateMetadata({
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { locale: rawLocale, slug } = await params
-  const locale = resolveLocale(rawLocale)
+  const locale = resolveArticleLocale(rawLocale)
   const [t, tArticleMeta] = await Promise.all([
     getTranslations({ locale, namespace: "Article" }),
     getTranslations({ locale, namespace: "ArticleMeta" }),
@@ -255,25 +253,20 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     frontmatter: data,
     translationStatus,
   } = artifact
-  const resolvedTitle = await resolveDisplayedArticleTitle(
-    data["chapter-title"],
-    target.filePath,
-    target.canonicalSlug,
-    target.isReadmeIntro,
-    contentLocale
-  )
+  const articleTitle = await formatArticleDisplayTitle({
+    frontmatterTitle: data["chapter-title"],
+    filePath: target.filePath,
+    canonicalSlug: target.canonicalSlug,
+    index: target.index,
+    isPreface: target.isPreface,
+    isReadmeIntro: target.isReadmeIntro,
+    locale: contentLocale,
+  })
   const tree = await getPublicChapterNav(contentLocale)
   const currentSlug = target.canonicalSlug || slugPath
   const runningHeadOwner = findNavigationOwner(tree, currentSlug)
   const runningHeadChapters = getNavigationBreadcrumbs(tree, currentSlug)
   const isStructuralAppendix = runningHeadOwner?.isAppendix ?? false
-  const articleTitle = formatArticleTitle(
-    resolvedTitle,
-    target.index,
-    isStructuralAppendix,
-    target.isPreface,
-    target.isReadmeIntro
-  )
   const embeddedArticleContent = embedTitleInMarkdown(
     renderedContent,
     articleTitle
@@ -593,238 +586,6 @@ function normalizeDraftTargetPath(filePath: string) {
   }
 
   return filePath.replace(/\.md$/, "")
-}
-
-type ArticleTreeNode = BaseArticleTreeNode & { index?: number }
-
-interface ResolvedArticleTarget {
-  filePath: string
-  canonicalSlug: string
-  index: number
-  isPreface: boolean
-  isReadmeIntro: boolean
-  redirectToSlug?: string
-}
-
-interface ResolvedArticleRequest {
-  contentLocale: ArticleLocale
-  target: ResolvedArticleTarget
-}
-
-async function resolveArticleRequest(
-  requestedSlugPath: string,
-  locale: ArticleLocale
-): Promise<ResolvedArticleRequest | null> {
-  const localizedTarget = await resolveArticleTarget(requestedSlugPath, locale)
-  if (localizedTarget) {
-    return { contentLocale: locale, target: localizedTarget }
-  }
-
-  const fallbackLocale = getArticleFallbackLocale(locale)
-  if (fallbackLocale === locale) {
-    return null
-  }
-
-  const fallbackTarget = await resolveArticleTarget(
-    requestedSlugPath,
-    fallbackLocale
-  )
-  return fallbackTarget
-    ? { contentLocale: fallbackLocale, target: fallbackTarget }
-    : null
-}
-
-function getArticleFallbackLocale(locale: ArticleLocale): ArticleLocale {
-  return locale === SOURCE_ARTICLE_LOCALE ? locale : SOURCE_ARTICLE_LOCALE
-}
-
-async function resolveArticleTarget(
-  requestedSlugPath: string,
-  locale: ArticleLocale
-): Promise<ResolvedArticleTarget | null> {
-  const normalizedSlug = requestedSlugPath.replace(/\.md$/i, "")
-  const tree: ArticleTreeNode[] = await getCachedArticleTree(locale)
-  const targetNode = findNodeBySlug(tree, normalizedSlug)
-
-  if (!targetNode) {
-    return null
-  }
-
-  const canonicalSlug = targetNode.isFolder
-    ? await resolveCanonicalSlugForFolder(targetNode, locale)
-    : targetNode.slug
-
-  if (!canonicalSlug) {
-    return null
-  }
-
-  if (!hasArticleLocale(canonicalSlug, locale)) {
-    return null
-  }
-
-  const slugEntry = await getCachedLocalizedArticleEntry(canonicalSlug, locale)
-  const filePath = slugEntry?.filePath ?? null
-  if (!filePath) {
-    return null
-  }
-
-  const redirectToSlug =
-    targetNode.isFolder && canonicalSlug !== normalizedSlug
-      ? canonicalSlug
-      : undefined
-
-  return {
-    filePath,
-    canonicalSlug,
-    index: slugEntry?.index ?? -1,
-    isPreface: slugEntry?.isPreface ?? false,
-    isReadmeIntro: Boolean(slugEntry?.isFolder && slugEntry?.hasIntro),
-    redirectToSlug,
-  }
-}
-
-async function resolveCanonicalSlugForFolder(
-  targetNode: ArticleTreeNode,
-  locale: ArticleLocale
-): Promise<string | null> {
-  const mapEntry = await getCachedLocalizedArticleEntry(targetNode.slug, locale)
-  if (mapEntry?.hasIntro && hasArticleLocale(targetNode.slug, locale)) {
-    return targetNode.slug
-  }
-
-  return resolveFirstArticleSlug(targetNode.children ?? [], locale)
-}
-
-function findNodeBySlug(
-  nodes: ArticleTreeNode[],
-  targetSlug: string
-): ArticleTreeNode | null {
-  for (const node of nodes) {
-    if (node.slug === targetSlug) {
-      return node
-    }
-
-    const nested = findNodeBySlug(node.children ?? [], targetSlug)
-    if (nested) {
-      return nested
-    }
-  }
-
-  return null
-}
-
-async function resolveFirstArticleSlug(children: ArticleTreeNode[], locale: ArticleLocale): Promise<string | null> {
-  if (!children || children.length === 0) {
-    return null
-  }
-
-  const chapterEntries = await Promise.all(
-    children.map(async (child) => ({
-      filePath:
-        (await getCachedLocalizedArticleEntry(child.slug, locale))?.filePath ??
-        `${child.slug}.md`,
-      slug: child.slug,
-      index: child.index ?? -1,
-      isFolder: child.isFolder,
-    }))
-  )
-
-  const firstEntry = getFirstArticleInChapter(chapterEntries)
-  if (!firstEntry) {
-    return null
-  }
-
-  if (!firstEntry.isFolder) {
-    return hasArticleLocale(firstEntry.slug, locale) ? firstEntry.slug : null
-  }
-
-  const matchedFolder = children.find((child) => child.slug === firstEntry.slug)
-  if (!matchedFolder) {
-    return null
-  }
-
-  return resolveFirstArticleSlug(matchedFolder.children ?? [], locale)
-}
-
-function resolveArticleTitle(rawTitle: unknown, fallbackPath: string): string {
-  if (typeof rawTitle === "string" && rawTitle.trim()) {
-    return rawTitle.trim()
-  }
-
-  const fallback =
-    fallbackPath.replace(/\/$/, "").split("/").pop()?.replace(/\.md$/i, "") ||
-    "Article"
-
-  return fallback
-}
-
-async function resolveDisplayedArticleTitle(
-  rawTitle: unknown,
-  fallbackPath: string,
-  canonicalSlug: string,
-  isReadmeIntro: boolean,
-  locale: ArticleLocale
-): Promise<string> {
-  const slugEntry = await getCachedLocalizedArticleEntry(canonicalSlug, locale)
-  const introTitle = slugEntry?.introTitleByLocale?.[locale]?.trim()
-
-  if (isReadmeIntro && introTitle) {
-    return introTitle
-  }
-
-  const localizedTitle = slugEntry?.titleByLocale?.[locale]?.trim()
-  if (localizedTitle) {
-    return localizedTitle
-  }
-
-  // Cross-locale fallback: for English locale, use zh title if available
-  if (locale === "en" && slugEntry?.titleByLocale?.zh?.trim()) {
-    return slugEntry.titleByLocale.zh.trim()
-  }
-
-  return resolveArticleTitle(rawTitle, fallbackPath)
-}
-
-function resolveLocale(locale: string): ArticleLocale {
-  return locale === "zh" ? "zh" : "en"
-}
-
-function formatArticleTitle(
-  title: string,
-  index: number,
-  isAppendix: boolean,
-  isPreface: boolean,
-  isReadmeIntro: boolean
-): string {
-  const prefix = isReadmeIntro
-    ? formatIndexPrefix(0, false, false)
-    : formatIndexPrefix(index, isAppendix, isPreface)
-
-  return `${prefix}${title}`
-}
-
-function embedTitleInMarkdown(content: string, title: string): string {
-  const leadingWhitespace = content.match(/^\s*/)?.[0] ?? ""
-  const trimmedStartContent = content.slice(leadingWhitespace.length)
-  const escapedTitle = title.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&")
-  const sameTitleHeadingPattern = new RegExp(
-    `^#\\s+${escapedTitle}\\s*(?:\\r?\\n|$)`
-  )
-  const topLevelHeadingPattern = /^#\s+.+\s*(?:\r?\n|$)/
-
-  if (sameTitleHeadingPattern.test(trimmedStartContent)) {
-    return content
-  }
-
-  if (topLevelHeadingPattern.test(trimmedStartContent)) {
-    const replacedContent = trimmedStartContent.replace(
-      topLevelHeadingPattern,
-      `# ${title}\n`
-    )
-    return `${leadingWhitespace}${replacedContent}`
-  }
-
-  return `# ${title}\n\n${content}`
 }
 
 function resolveBannerUrl(

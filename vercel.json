@@ -1,5 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "dnf install -y nspr nss atk at-spi2-atk cups-libs libdrm libxkbcommon mesa-libgbm pango cairo alsa-lib gtk3 libX11 libXcomposite libXdamage libXext libXfixes libXrandr libxcb dbus-libs expat glib2; SHELL=/bin/bash npx --yes get-pnpm@0.0.3 12.0.0 && PATH=\"${PNPM_HOME:-$HOME/.local/share/pnpm}/bin:$PATH\" GTMC_SKIP_POSTINSTALL=1 pnpm install --frozen-lockfile",
+  "installCommand": "bash scripts/vercel-install.sh",
   "buildCommand": "export PNPM_HOME=\"${PNPM_HOME:-$HOME/.local/share/pnpm}\" && export PATH=\"$PNPM_HOME/bin:$PATH\" && pnpm build:vercel"
 }

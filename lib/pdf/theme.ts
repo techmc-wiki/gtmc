@@ -28,7 +28,12 @@ export const PDF_FONTS = {
   /** Display: cover title, chapter numerals, article/section headings. */
   serif: `"STIX Two Text", "Noto Serif SC", "Songti SC", Georgia, serif`,
   /** Apparatus: labels, folios, captions, code. */
-  mono: `"Geist Mono", "Noto Sans Mono SC", monospace`,
+  // Noto Sans Mono SC is not served via Google Fonts (400 Font family not
+  // found). Keep it for system fallback, but precede it with Noto Sans SC so
+  // headless Chromium (no system CJK) has a real CJK fallback. This covers
+  // TOC chapter labels like "第 1 章" which render in mono and previously
+  // showed tofu in the zh PDF.
+  mono: `"Geist Mono", "Noto Sans SC", "Noto Sans Mono SC", monospace`,
 } as const
 
 /**

@@ -25,6 +25,8 @@
     "copyAttribution": "Copy attribution",
     "copyButton": "Copy",
     "copyHeadingLink": "Copy link to heading",
+    "copyPage": "Copy as Markdown",
+    "copyPageFailed": "Copy failed",
     "copySuggestedAttributionAria": "Copy suggested attribution",
     "copySuggestedAttributionTitle": "Click to copy suggested attribution",
     "created": "Created:",

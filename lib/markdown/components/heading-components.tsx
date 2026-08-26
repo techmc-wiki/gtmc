@@ -1,3 +1,5 @@
+import type { ReactNode } from "react"
+
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
 import { HeadingAnchor } from "@/lib/markdown/heading-anchor"
 
@@ -9,18 +11,31 @@ const advancedBadge = (
   </span>
 )
 
+interface H1ComponentProps extends MarkdownComponentProps {
+  /** Optional control rendered at the right edge of the heading row. */
+  action?: ReactNode
+}
+
 export function H1Component({
   id,
   children,
   "data-advanced": dataAdvanced,
-}: MarkdownComponentProps) {
-  return (
-    <h1
-      id={id}
-      className="markdown-title group border-tech-main-dark/60 target:animate-target-blink target:border-tech-signal text-tech-main-dark relative mt-8 mb-5 border-b-2 pb-3 text-2xl leading-tight font-semibold text-balance sm:text-3xl lg:text-4xl">
+  action,
+}: H1ComponentProps) {
+  const heading = (
+    <>
       {id && <HeadingAnchor id={id} level={1} />}
       {children}
       {dataAdvanced === "true" && advancedBadge}
+    </>
+  )
+
+  return (
+    <h1
+      id={id}
+      className={`markdown-title group border-tech-main-dark/60 target:animate-target-blink target:border-tech-signal text-tech-main-dark relative mt-8 mb-5 border-b-2 pb-3 text-2xl leading-tight font-semibold text-balance sm:text-3xl lg:text-4xl${action ? " flex items-start gap-4" : ""} `}>
+      {action ? <span className="min-w-0 flex-1">{heading}</span> : heading}
+      {action}
     </h1>
   )
 }

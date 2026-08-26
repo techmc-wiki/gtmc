@@ -1,12 +1,13 @@
+import { Suspense, type ReactNode } from "react"
 import { getLocale, getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { Logo } from "@/components/ui/logo"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { ChapterEndMark } from "@/components/articles/chapter-chrome"
 import { Separator } from "@/components/ui/shadcn/separator"
+import { FooterWordmark } from "@/components/layout/footer-wordmark"
 import { articleUrl } from "@/lib/articles/url"
 import { getManifestStats, type ArticleLocale } from "@/lib/articles/manifest"
-import type { ReactNode } from "react"
 
 interface FooterSectionProps {
   label: string
@@ -153,7 +154,7 @@ export default async function Footer() {
             </p>
             <p className="mt-4">
               <Link
-                href={articleUrl("Preface")}
+                href={articleUrl("preface")}
                 className="footer-link text-tech-main-dark text-sm font-medium">
                 {t("linkPreface")}
                 <span aria-hidden="true"> →</span>
@@ -212,21 +213,18 @@ export default async function Footer() {
                 </span>
               ) : null}
             </p>
-            <LanguageSwitcher />
+            <Suspense fallback={null}>
+              <LanguageSwitcher />
+            </Suspense>
           </div>
         </div>
       </div>
-
       {/* Closing wordmark — full-bleed spine stamp, like a back cover.
-          Sized in container query units so the serif caps always span the
-          viewport; the band clips the baseline for an anchored crop. */}
-      <div
-        aria-hidden="true"
-        className="bg-tech-main-dark text-tech-bg @container w-full overflow-hidden select-none">
-        <p className="display-title translate-y-[7%] text-center text-[31cqw] leading-[0.78] tracking-[-0.03em] whitespace-nowrap">
-          GTMC
-        </p>
-      </div>
+          Feathered paper→ink mask so the huge caps ease in over ~28px
+          instead of cutting from cream to navy in one pixel, then
+          redrawn as live ascii around the cursor via the CanvasUI
+          Asciify html-in-canvas pass (Chromium; plain type elsewhere). */}
+      <FooterWordmark />
     </footer>
   )
 }

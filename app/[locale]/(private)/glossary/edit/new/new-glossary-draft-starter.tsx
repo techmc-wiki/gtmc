@@ -27,13 +27,18 @@ export function NewGlossaryDraftStarter({
   const inFlightRef = React.useRef(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
+  const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const startDraft = React.useCallback(async () => {
     if (inFlightRef.current) return
     inFlightRef.current = true
     setErrorMessage(null)
-
     try {
       const creation = pendingDraftCreation ?? createGlossaryDraftAction()
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
       if (clearPendingDraftCreation) {
         clearTimeout(clearPendingDraftCreation)
         clearPendingDraftCreation = null
@@ -44,12 +49,15 @@ export function NewGlossaryDraftStarter({
       if (prefillSlug) params.set("prefill", prefillSlug)
       const qs = params.toString()
       router.replace(`/glossary/edit/${id}${qs ? `?${qs}` : ""}`)
-      clearPendingDraftCreation = setTimeout(() => {
+      const timer = setTimeout(() => {
         if (pendingDraftCreation === creation) {
           pendingDraftCreation = null
         }
+        timerRef.current = null
         clearPendingDraftCreation = null
       }, 5000)
+      timerRef.current = timer
+      clearPendingDraftCreation = timer
     } catch (error) {
       inFlightRef.current = false
       pendingDraftCreation = null
@@ -63,8 +71,17 @@ export function NewGlossaryDraftStarter({
 
   React.useEffect(() => {
     void startDraft()
+    return () => {
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
+      if (clearPendingDraftCreation !== null) {
+        clearTimeout(clearPendingDraftCreation)
+        clearPendingDraftCreation = null
+      }
+    }
   }, [startDraft])
-
   return (
     <div className="page-container py-12">
       <Card

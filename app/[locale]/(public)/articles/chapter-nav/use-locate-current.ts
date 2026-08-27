@@ -210,23 +210,22 @@ export function useLocateCurrent({
       }
     }
 
-    watchEntries.forEach(([, grid]) => {
-      grid.addEventListener("transitionend", onTransitionEnd)
-    })
+    const controller = new AbortController()
+    for (const [, grid] of watchEntries) {
+      grid.addEventListener("transitionend", onTransitionEnd, {
+        signal: controller.signal,
+      })
+    }
 
     const cleanup = () => {
-      watchEntries.forEach(([, grid]) => {
-        grid.removeEventListener("transitionend", onTransitionEnd)
-      })
+      controller.abort()
     }
 
     transitionCleanupRef.current = cleanup
 
     return () => {
-      if (transitionCleanupRef.current === cleanup) {
-        cleanup()
-        transitionCleanupRef.current = null
-      }
+      controller.abort()
+      transitionCleanupRef.current = null
     }
   }, [expandedFolders, finishExpansionAndScroll, folderGridRefs])
 

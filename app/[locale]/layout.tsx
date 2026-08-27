@@ -5,6 +5,7 @@ import { Geist, Geist_Mono, STIX_Two_Text } from "next/font/google"
 import "../globals.css"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { ClarityAnalytics } from "@/components/layout/clarity-analytics"
 import { ThemeProvider } from "@/lib/theme"
 import {
   FooterProvider,
@@ -176,6 +177,7 @@ export default async function RootLayout({
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
       </head>
       <body className="bg-tech-bg/50 h-dvh w-full overflow-hidden antialiased">
+        <ClarityAnalytics />
         <Analytics />
         <SpeedInsights />
         <NextIntlClientProvider locale={locale} messages={messages}>

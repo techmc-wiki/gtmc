@@ -46,6 +46,7 @@
     "@codemirror/view": "^6.43.8",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
+    "@microsoft/clarity": "^1.0.2",
     "@next/mdx": "16.3.2",
     "@octokit/rest": "^22.0.1",
     "@prisma/adapter-pg": "^7.9.1",

@@ -181,25 +181,28 @@ export async function rebaseArticleContent(
     head: latestMainSha,
   })
 
-  const relevantCommits: RebaseCommitInfo[] = []
-  for (const commit of compareData.commits) {
-    // eslint-disable-next-line no-await-in-loop -- sequential: GitHub API rate limiting for potentially many commits
-    const { data: commitData } = await octokit.repos.getCommit({
-      owner: ARTICLES_REPO_OWNER,
-      repo: ARTICLES_REPO_NAME,
-      ref: commit.sha,
-    })
+  const relevantCommits = (
+    await Promise.all(
+      compareData.commits.map(async (commit) => {
+        const { data: commitData } = await octokit.repos.getCommit({
+          owner: ARTICLES_REPO_OWNER,
+          repo: ARTICLES_REPO_NAME,
+          ref: commit.sha,
+        })
 
-    const modifiedFile = commitData.files?.some((f) => f.filename === filePath)
-    if (modifiedFile) {
-      relevantCommits.push({
-        sha: commit.sha,
-        message: commit.commit.message,
-        author: commit.commit.author?.name || "Unknown",
-        timestamp: commit.commit.author?.date || new Date().toISOString(),
+        if (!commitData.files?.some((file) => file.filename === filePath)) {
+          return null
+        }
+
+        return {
+          sha: commit.sha,
+          message: commit.commit.message,
+          author: commit.commit.author?.name || "Unknown",
+          timestamp: commit.commit.author?.date || new Date().toISOString(),
+        } satisfies RebaseCommitInfo
       })
-    }
-  }
+    )
+  ).filter((commit): commit is RebaseCommitInfo => commit !== null)
 
   if (relevantCommits.length === 0) {
     reviewLog("rebaseArticleContent", {

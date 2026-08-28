@@ -138,37 +138,39 @@ export async function getCompareCommitFileInfos(input: {
     head: latestMainSha,
   })
 
-  const commitFileInfos: CompareCommitFileInfo[] = []
+  const commitFileInfos = (
+    await Promise.all(
+      compareData.commits.map(async (commit) => {
+        const { data: commitData } = await octokit.repos.getCommit({
+          owner: ARTICLES_REPO_OWNER,
+          repo: ARTICLES_REPO_NAME,
+          ref: commit.sha,
+        })
 
-  for (const commit of compareData.commits) {
-    // eslint-disable-next-line no-await-in-loop -- sequential: GitHub API rate limiting for potentially many commits
-    const { data: commitData } = await octokit.repos.getCommit({
-      owner: ARTICLES_REPO_OWNER,
-      repo: ARTICLES_REPO_NAME,
-      ref: commit.sha,
-    })
+        const touchedFilePaths =
+          commitData.files
+            ?.map((file) => file.filename)
+            .filter((filePath): filePath is string =>
+              trackedPaths.has(filePath)
+            ) ?? []
 
-    const touchedFilePaths =
-      commitData.files
-        ?.map((file) => file.filename)
-        .filter((filePath): filePath is string => trackedPaths.has(filePath)) ??
-      []
+        if (touchedFilePaths.length === 0) {
+          return null
+        }
 
-    if (touchedFilePaths.length === 0) {
-      continue
-    }
-
-    commitFileInfos.push({
-      sha: commit.sha,
-      info: {
-        sha: commit.sha,
-        message: commit.commit.message,
-        author: commit.commit.author?.name || "Unknown",
-        timestamp: commit.commit.author?.date || new Date().toISOString(),
-      },
-      touchedFilePaths,
-    })
-  }
+        return {
+          sha: commit.sha,
+          info: {
+            sha: commit.sha,
+            message: commit.commit.message,
+            author: commit.commit.author?.name || "Unknown",
+            timestamp: commit.commit.author?.date || new Date().toISOString(),
+          },
+          touchedFilePaths,
+        } satisfies CompareCommitFileInfo
+      })
+    )
+  ).filter((commit): commit is CompareCommitFileInfo => commit !== null)
 
   return {
     totalCommits: compareData.commits.length,

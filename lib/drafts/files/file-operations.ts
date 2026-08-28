@@ -13,9 +13,6 @@ export function createDraftFile(
     id: overrides.id || createDraftFileId(filePath),
     filePath,
     content: overrides.content ?? "",
-    ...(overrides.conflictContent !== undefined
-      ? { conflictContent: overrides.conflictContent }
-      : {}),
   }
 }
 

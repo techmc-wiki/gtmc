@@ -4,7 +4,6 @@ import { requireAuth } from "@/lib/auth/context"
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { PATHS } from "@/lib/revalidate-paths"
 import { z } from "zod"
 
 const updateProfileSchema = z.object({
@@ -32,7 +31,7 @@ export async function updateProfileAction(formData: FormData) {
     },
   })
 
-  revalidatePath(PATHS.PROFILE)
-  revalidatePath(PATHS.HOME)
-  redirect(PATHS.PROFILE)
+  revalidatePath("/profile")
+  revalidatePath("/")
+  redirect("/profile")
 }

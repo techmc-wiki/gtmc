@@ -1,6 +1,6 @@
 "use server"
 
-import { revalidatePaths } from "@/lib/revalidate-paths"
+import { revalidatePath } from "next/cache"
 import {
   getMainBranchHeadSha,
   type BranchFileEntry,
@@ -29,7 +29,7 @@ import {
 
 const UPLOAD_PLACEHOLDER_RE = /<!--\s*UPLOAD_PENDING_[a-f0-9-]+\s*-->/i
 
-export async function submitForReviewAction(revisionId: string) {
+export async function submitDraftAction(revisionId: string) {
   if (!revisionId) {
     throw new Error("Revision ID is required")
   }
@@ -49,11 +49,7 @@ export async function submitForReviewAction(revisionId: string) {
     throw new Error("Unauthorized")
   }
 
-  if (
-    existing.status !== "DRAFT" &&
-    existing.githubPrNum &&
-    (existing.status === "IN_REVIEW" || existing.status === "SYNC_CONFLICT")
-  ) {
+  if (existing.status === "SUBMITTED" && existing.githubPrNum) {
     return { success: true, status: existing.status }
   }
 
@@ -78,11 +74,7 @@ export async function submitForReviewAction(revisionId: string) {
       select: { status: true, githubPrNum: true },
     })
 
-    if (
-      latestState?.githubPrNum &&
-      (latestState.status === "IN_REVIEW" ||
-        latestState.status === "SYNC_CONFLICT")
-    ) {
+    if (latestState?.githubPrNum && latestState.status === "SUBMITTED") {
       return { success: true, status: latestState.status }
     }
 
@@ -96,7 +88,6 @@ export async function submitForReviewAction(revisionId: string) {
   try {
     const storedDraftFiles = decodeStoredDraftFiles({
       content: existing.content,
-      conflictContent: existing.conflictContent,
       filePath: existing.filePath,
     })
     const missingFilePath = storedDraftFiles.files.find(
@@ -325,7 +316,7 @@ export async function submitForReviewAction(revisionId: string) {
       token,
     })
 
-    const syncedDraftStorage = serializeDraftFilesForStorage({
+    const submittedDraftStorage = serializeDraftFilesForStorage({
       activeFileId: result.activeFileId,
       folders: [],
       files: result.files,
@@ -349,20 +340,17 @@ export async function submitForReviewAction(revisionId: string) {
       where: { id: revisionId },
       data: {
         baseMainSha,
-        conflictContent: syncedDraftStorage.conflictContent,
-        content: syncedDraftStorage.content,
-        filePath: syncedDraftStorage.filePath,
+        content: submittedDraftStorage.content,
+        filePath: submittedDraftStorage.filePath,
         githubPrNum: result.prNumber,
         githubPrUrl: result.prUrl,
-        prBranchName: result.branchName,
-        status: result.status,
+        status: "SUBMITTED",
         submittedAt: new Date(),
-        syncedMainSha: result.syncedMainSha,
       },
     })
 
-    revalidatePaths(["/draft", "/review"])
-    return { success: true, status: result.status }
+    revalidatePath("/draft")
+    return { success: true, status: "SUBMITTED" }
   } catch (error) {
     await prisma.revision.updateMany({
       where: { id: revisionId, status: "PENDING" },

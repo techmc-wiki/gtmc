@@ -1,5 +1,4 @@
 import { GIT_BLOB_MODE } from "@/lib/github/constants"
-import { reviewError, summarizeSha } from "@/lib/logging"
 import { getOctokit, type RepoTarget } from "./repos"
 
 const MAIN_BRANCH = "main"
@@ -54,11 +53,15 @@ export async function getFileSnapshot(
       sha: data.sha,
     } satisfies FileSnapshot
   } catch (error) {
-    reviewError("getFileSnapshot", error, {
+    console.error("[github:getFileSnapshot]", {
       filePath,
-      ref: summarizeSha(ref),
+      ref: ref.slice(0, 7),
       status: "github-api-error",
       operation: "repos.getContent",
+      error:
+        error instanceof Error
+          ? { name: error.name, message: error.message, stack: error.stack }
+          : error,
     })
     return null
   }

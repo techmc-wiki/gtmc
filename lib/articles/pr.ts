@@ -4,16 +4,6 @@ import {
   getOctokit,
 } from "@/lib/github/articles-repo"
 import {
-  getFileSnapshot,
-  mergeArticleContent,
-} from "@/lib/articles/snapshot"
-import {
-  analyzeRebaseNeed,
-  analyzeRebaseNeedMultiFile,
-} from "@/lib/articles/rebase"
-import type { RebaseAnalysis } from "@/lib/articles/rebase"
-import {
-  getActiveDraftFile,
   getDuplicateDraftFilePaths,
   normalizeDraftFileCollection,
   type DraftFileRecord,
@@ -27,8 +17,6 @@ import {
 } from "@/lib/articles/branch"
 const MAIN_BRANCH = "main"
 
-type DraftSyncStatus = "IN_REVIEW" | "SYNC_CONFLICT"
-
 interface DraftSubmissionInput {
   activeFileId?: string
   draftId: string
@@ -41,20 +29,6 @@ interface DraftSubmissionInput {
   token?: string
 }
 
-export interface DraftSyncResult {
-  activeFileId: string
-  branchName: string
-  content: string
-  conflictContent: string | null
-  filePath: string
-  files: DraftFileRecord[]
-  prNumber: number
-  prUrl: string
-  status: DraftSyncStatus
-  syncedMainSha: string
-  rebaseAnalysis?: RebaseAnalysis
-}
-
 export async function openDraftPullRequest({
   activeFileId,
   draftId,
@@ -65,7 +39,7 @@ export async function openDraftPullRequest({
   authorName,
   authorEmail,
   token,
-}: DraftSubmissionInput): Promise<DraftSyncResult> {
+}: DraftSubmissionInput) {
   const octokit = getOctokit(token)
   const latestMainSha = await getMainBranchHeadSha(token)
   const resolvedDraftFiles = await Promise.all(
@@ -123,7 +97,7 @@ export async function openDraftPullRequest({
   }
 
   if (imageEntries && imageEntries.length > 0) {
-    await upsertFilesOnBranch(token as string, imageEntries, branchName)
+    await upsertFilesOnBranch(token, imageEntries, branchName)
   }
 
   const { data: pr } = await octokit.pulls.create({
@@ -135,117 +109,23 @@ export async function openDraftPullRequest({
     body: `由 ${authorName} 提交审核。`,
   })
 
-  const primaryFile = getActiveDraftFile(normalizedFiles)
-
-  if (latestMainSha === baseMainSha) {
-    return {
-      activeFileId: normalizedFiles.activeFileId,
-      branchName,
-      content: primaryFile.content,
-      conflictContent: null,
-      filePath: primaryFile.filePath,
-      files: normalizedFiles.files,
-      prNumber: pr.number,
-      prUrl: pr.html_url,
-      status: "IN_REVIEW",
-      syncedMainSha: latestMainSha,
-    }
-  }
-
-  const rebaseAnalysis =
-    normalizedFiles.files.length === 1
-      ? await analyzeRebaseNeed({
-          filePath: normalizedFiles.files[0].filePath,
-          baseMainSha,
-          latestMainSha,
-          token,
-        })
-      : await analyzeRebaseNeedMultiFile({
-          files: normalizedFiles.files.map((file) => ({
-            filePath: file.filePath,
-          })),
-          baseMainSha,
-          latestMainSha,
-          token,
-        })
-
-  const fileSnapshots = await Promise.all(
-    normalizedFiles.files.map(async (file) => {
-      const [baseSnapshot, latestSnapshot] = await Promise.all([
-        getFileSnapshot(file.filePath, baseMainSha, token),
-        getFileSnapshot(file.filePath, latestMainSha, token),
-      ])
-      return { file, baseSnapshot, latestSnapshot }
-    })
-  )
-
-  const mergeResults = fileSnapshots.map(
-    ({ file, baseSnapshot, latestSnapshot }) => {
-      const mergeResult = mergeArticleContent({
-        baseContent: baseSnapshot?.content ?? "",
-        draftContent: file.content,
-        latestMainContent: latestSnapshot?.content ?? "",
-      })
-
-      return {
-        file: mergeResult.conflict
-          ? { ...file, conflictContent: mergeResult.content }
-          : { ...file, content: mergeResult.content },
-        hasConflict: mergeResult.conflict,
-        needsUpdate:
-          !mergeResult.conflict && mergeResult.content !== file.content,
-      }
-    }
-  )
-  const filesToUpdate = mergeResults.filter((result) => result.needsUpdate)
-  if (filesToUpdate.length === 1) {
-    const file = filesToUpdate[0].file
-    await upsertFileOnBranch({
-      authorEmail,
-      authorName,
-      branchName,
-      content: file.content,
-      filePath: file.filePath,
-      message: `docs: sync ${file.filePath} with latest ${MAIN_BRANCH}`,
-      token,
-    })
-  } else if (filesToUpdate.length > 1) {
-    await upsertFilesOnBranch(
-      token,
-      filesToUpdate.map(({ file }) => ({
-        path: file.filePath,
-        content: file.content,
-      })),
-      branchName,
-      { name: authorName, email: authorEmail }
-    )
-  }
-  const hasConflict = mergeResults.some((result) => result.hasConflict)
-  const mergedFiles = mergeResults.map(({ file }) => file)
-
-  const nextFiles = normalizeDraftFileCollection({
-    activeFileId: normalizedFiles.activeFileId,
-    files: mergedFiles,
-  })
-  const nextPrimaryFile = getActiveDraftFile(nextFiles)
-
   return {
-    activeFileId: nextFiles.activeFileId,
-    branchName,
-    content: nextPrimaryFile.content,
-    conflictContent: nextPrimaryFile.conflictContent || null,
-    filePath: nextPrimaryFile.filePath,
-    files: nextFiles.files,
+    activeFileId: normalizedFiles.activeFileId,
+    files: normalizedFiles.files,
     prNumber: pr.number,
     prUrl: pr.html_url,
-    status: hasConflict ? "SYNC_CONFLICT" : "IN_REVIEW",
-    syncedMainSha: latestMainSha,
-    rebaseAnalysis,
   }
+}
+
+export async function getArticlePullRequest(prNumber: number, token?: string) {
+  const { data } = await getOctokit(token).pulls.get({
+    owner: ARTICLES_REPO_OWNER,
+    repo: ARTICLES_REPO_NAME,
+    pull_number: prNumber,
+  })
+  return data
 }
 
 function buildBranchName(draftId: string) {
   return `submission-${draftId}-${Date.now()}`.replaceAll(/[^a-zA-Z0-9/_-]/g, "-")
 }
-
-

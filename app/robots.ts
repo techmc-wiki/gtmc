@@ -4,7 +4,6 @@ import { getSiteUrl, toAbsoluteUrl } from "@/lib/site-url"
 
 const PRIVATE_SEGMENTS = [
   "/draft",
-  "/review",
   "/profile",
   "/admin",
   "/login",

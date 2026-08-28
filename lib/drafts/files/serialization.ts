@@ -6,26 +6,22 @@ import type {
 } from "./types"
 import { normalizeDraftFileCollection } from "./collection"
 import { createDraftFile, getActiveDraftFile } from "./file-operations"
-import { normalizeComparablePath, collectParentFolders } from "./normalization"
+import { collectParentFolders } from "./normalization"
 
 const BUNDLE_PREFIX: typeof DRAFT_BUNDLE_PREFIX = "GTMC_DRAFT_BUNDLE_V1:"
 
 export function decodeStoredDraftFiles({
   content,
-  conflictContent,
   filePath,
 }: {
   content: string
-  conflictContent?: string | null
   filePath?: string | null
 }) {
   const contentBundle = parseStoredBundle(content)
-  const conflictBundle = parseStoredBundle(conflictContent)
 
   if (!contentBundle) {
     const legacyFile = createDraftFile({
       content,
-      conflictContent: conflictContent ?? undefined,
       filePath: filePath || "",
     })
 
@@ -36,7 +32,7 @@ export function decodeStoredDraftFiles({
     } satisfies DraftFileCollection
   }
 
-  const contentFiles = normalizeDraftFileCollection({
+  return normalizeDraftFileCollection({
     activeFileId: contentBundle.activeFileId,
     folders: contentBundle.folders || [],
     files: contentBundle.files.map((storedFile) => ({
@@ -45,40 +41,6 @@ export function decodeStoredDraftFiles({
       content: storedFile.content || "",
     })),
   })
-
-  if (!conflictBundle) {
-    return contentFiles
-  }
-
-  const conflictMap = new Map<string, string>()
-
-  for (const conflictFile of conflictBundle.files) {
-    const conflictValue = conflictFile.content ?? ""
-    if (conflictFile.id) {
-      conflictMap.set(`id:${conflictFile.id}`, conflictValue)
-    }
-
-    const normalizedPath = normalizeComparablePath(conflictFile.filePath)
-    if (normalizedPath) {
-      conflictMap.set(`path:${normalizedPath}`, conflictValue)
-    }
-  }
-
-  return {
-    activeFileId: contentFiles.activeFileId,
-    folders: contentFiles.folders,
-    files: contentFiles.files.map((file) => {
-      const conflictValue =
-        conflictMap.get(`id:${file.id}`) ??
-        conflictMap.get(`path:${normalizeComparablePath(file.filePath)}`)
-
-      if (conflictValue === undefined) {
-        return file
-      }
-
-      return Object.assign({}, file, { conflictContent: conflictValue })
-    }),
-  } satisfies DraftFileCollection
 }
 
 export function serializeDraftFilesForStorage(collection: DraftFileCollection) {
@@ -88,7 +50,6 @@ export function serializeDraftFilesForStorage(collection: DraftFileCollection) {
   if (normalized.files.length === 1 && normalized.folders.length === 0) {
     return {
       content: activeFile.content,
-      conflictContent: activeFile.conflictContent ?? null,
       filePath: activeFile.filePath || null,
     }
   }
@@ -104,28 +65,8 @@ export function serializeDraftFilesForStorage(collection: DraftFileCollection) {
     })),
   })
 
-  const conflictFiles = normalized.files
-    .filter(
-      (file) =>
-        file.conflictContent !== undefined && file.conflictContent !== null
-    )
-    .map((file) => ({
-      id: file.id,
-      filePath: file.filePath,
-      content: file.conflictContent ?? "",
-    }))
-
   return {
     content,
-    conflictContent:
-      conflictFiles.length > 0
-        ? serializeStoredBundle({
-            version: 1,
-            activeFileId: normalized.activeFileId,
-            folders: normalized.folders,
-            files: conflictFiles,
-          })
-        : null,
     filePath: activeFile.filePath || null,
   }
 }
@@ -136,18 +77,11 @@ export function serializeDraftFilesPayload(collection: DraftFileCollection) {
   return JSON.stringify({
     activeFileId: normalized.activeFileId,
     folders: normalized.folders,
-    files: normalized.files.map((file) =>
-      Object.assign(
-        {
-          id: file.id,
-          filePath: file.filePath,
-          content: file.content,
-        },
-        file.conflictContent !== undefined
-          ? { conflictContent: file.conflictContent }
-          : {}
-      )
-    ),
+    files: normalized.files.map((file) => ({
+      id: file.id,
+      filePath: file.filePath,
+      content: file.content,
+    })),
   })
 }
 

@@ -29,8 +29,6 @@ const saveDraftSchema = z.object({
   draftFiles: z.string().nullable().default(null),
 })
 
-const EDITABLE_STATUSES: readonly string[] = ["DRAFT"] as const
-
 export async function saveDraftAction(formData: FormData) {
   const session = await requireAuth()
 
@@ -78,14 +76,13 @@ export async function saveDraftAction(formData: FormData) {
       throw new Error("Unauthorized")
     }
 
-    if (!EDITABLE_STATUSES.includes(existing.status)) {
-      throw new Error("Cannot edit a draft that is already in review")
+    if (existing.status !== "DRAFT") {
+      throw new Error("Cannot edit a draft after submission")
     }
 
     savedRevision = await prisma.revision.update({
       where: { id: revisionId },
       data: {
-        conflictContent: nextDraftStorage.conflictContent,
         content: nextDraftStorage.content,
         filePath: nextDraftStorage.filePath,
         title,
@@ -98,12 +95,8 @@ export async function saveDraftAction(formData: FormData) {
     const createData: Parameters<typeof prisma.revision.create>[0]["data"] = {
       baseMainSha,
       content: nextDraftStorage.content,
-      ...(nextDraftStorage.conflictContent
-        ? { conflictContent: nextDraftStorage.conflictContent }
-        : {}),
       filePath: nextDraftStorage.filePath || undefined,
       status: "DRAFT",
-      syncedMainSha: baseMainSha,
       title,
       author: { connect: { id: userId } },
     }
@@ -135,12 +128,8 @@ export async function deleteDraftAction(revisionId: string) {
     throw new Error("Unauthorized to delete this draft")
   }
 
-  if (
-    existing.githubPrNum ||
-    existing.status === "IN_REVIEW" ||
-    existing.status === "SYNC_CONFLICT"
-  ) {
-    throw new Error("Cannot delete a draft after a PR has been opened")
+  if (existing.githubPrNum || existing.status !== "DRAFT") {
+    throw new Error("Cannot delete a draft after submission has started")
   }
 
   const draftAssets = await findDraftAssetsByRevision(revisionId)

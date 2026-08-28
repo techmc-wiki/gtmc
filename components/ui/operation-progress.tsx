@@ -6,7 +6,7 @@ import { cn } from "@/lib/cn"
 
 export type OperationProgressState = "idle" | "running" | "success" | "error"
 
-export interface OperationProgressStage {
+interface OperationProgressStage {
   id: string
   label: string
   durationMs: number

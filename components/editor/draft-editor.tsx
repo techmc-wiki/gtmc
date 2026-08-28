@@ -265,15 +265,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         </div>
       ) : null}
 
-      {state.isSyncConflict ? (
-        <div className="border-l-4 border-amber-500 bg-amber-500/10 p-4 text-amber-700">
-          <p className="font-bold tracking-widest uppercase">
-            {t("conflictTitle")}
-          </p>
-          <p className="text-sm">{t("conflictMessage")}</p>
-        </div>
-      ) : null}
-
       <DraftEditorFiles
         files={state.draftCollection.files}
         activeFileId={state.draftCollection.activeFileId}
@@ -547,10 +538,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             <Button
               type="button"
               variant="ghost"
-              onClick={actions.handleSubmitReview}
+              onClick={actions.handleSubmitDraft}
               disabled={state.submitDisabled}
-              aria-busy={state.isSubmittingReview}>
-              {state.isSubmittingReview ? progressT("submitBusy") : t("openPr")}
+              aria-busy={state.isSubmitting}>
+              {state.isSubmitting ? progressT("submitBusy") : t("openPr")}
             </Button>
           </EditorActions>
 

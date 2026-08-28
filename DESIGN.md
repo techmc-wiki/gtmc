@@ -13,7 +13,7 @@ the web. Archival paper, navy-black ink, serif display titles, and mono
 "apparatus" text only where a book would have typographic furniture.
 
 **App surfaces are an application.** Homepage chrome around the hero, login,
-profile, drafts, review hub, search, footer, error pages — these are clean,
+profile, drafts, search, footer, error pages — these are clean,
 quiet, and interactive. No fake HUD readouts, watermarks, hex dumps,
 dimension marks, or terminal cosplay. Labels are sans with normal
 capitalization; controls keep the square, bordered GTMC geometry.
@@ -72,8 +72,6 @@ must not lie about what's available.
   No dead-end links to pages that require login.
 - **MY DRAFTS appears only for authenticated users** — after Glossary,
   as a contributor affordance rather than a reader link.
-- **REVIEW HUB appears only for admins**, injected by `AuthAwareNav` after
-  a session check.
 
 ### Reader surfaces speak the book's language
 
@@ -116,8 +114,8 @@ Layout and navigation
 - `components/layout/main-site-shell.tsx`, `nav.tsx`, `auth-aware-nav.tsx`, `auth-island.tsx`, `language-switcher.tsx`, `theme-toggle.tsx`, `footer.tsx`, `footer-context.tsx`, `navigation-effects.tsx`.
 
 Core primitives (shadcn/ui — Radix-based, GTMC-styled)
-- `components/ui/shadcn/*.tsx` — `button`, `card`, `input`, `textarea`, `label`, `badge`, `avatar`, `dialog`, `alert-dialog`, `sheet`, `dropdown-menu`, `popover`, `tabs`, `toggle-group`, `command`, `collapsible`, `separator`, `tooltip`, `scroll-area`, `skeleton`, `progress`. This is the canonical source for these primitives; new features MUST use them rather than hand-rolling equivalents.
-- `components/ui/corner-brackets.tsx`, `selectable-card.tsx`, `icons.tsx` — GTMC-specific pieces with no shadcn equivalent.
+- `components/ui/shadcn/*.tsx` — `button`, `card`, `input`, `textarea`, `label`, `badge`, `avatar`, `dialog`, `sheet`, `dropdown-menu`, `popover`, `tabs`, `toggle-group`, `command`, `collapsible`, `separator`, `tooltip`, `scroll-area`, `skeleton`, `progress`. This is the canonical source for these primitives; new features MUST use them rather than hand-rolling equivalents.
+- `components/ui/corner-brackets.tsx`, `icons.tsx` — GTMC-specific pieces with no shadcn equivalent.
 
 Headings, status, metadata
 - `components/ui/headings.tsx`, `status.tsx`, `metadata-row.tsx`, `empty-state.tsx`, `loading-indicator.tsx`.
@@ -125,9 +123,8 @@ Headings, status, metadata
 Loading and progress
 - `components/ui/loading-shell-primitives.tsx`, `operation-progress.tsx`.
 
-Editor and review subsystems
+Editor subsystem
 - `components/editor/editor-frames.tsx`, `editor-toolbar-shell.tsx`, `editor-tab-strip.tsx`, `editor-textarea.tsx`.
-- `components/review/review-editor.tsx`, `conflict-block.tsx`, `rebase-progress.tsx`, `review-pickers.tsx`.
 
 Article reader
 - `app/[locale]/(public)/articles/articles-layout-client.tsx`, `chapter-nav-panel.tsx`, `chapter-nav/tree.tsx`, `mobile-chapter-nav-card.tsx`.
@@ -273,7 +270,6 @@ Desktop
 - Active: `border-tech-signal text-tech-main`. Inactive: transparent border + `text-tech-main-dark`, hover swaps both to `tech-main`.
 - Base nav is reader-only: Articles, PDF, Glossary, About, Authors. MY DRAFTS is
   injected by `AuthAwareNav` for authenticated users (after Glossary).
-  REVIEW HUB is appended for admins.
 
 Mobile
 - Hamburger button uses three `h-0.5 w-5 bg-tech-main` bars with animated transform states; touch target `min-h-11 min-w-11`.
@@ -289,7 +285,7 @@ Auth island and language switcher
 There is no single universal card. Several surface systems coexist; each is internally consistent.
 
 `Card` (`components/ui/shadcn/card.tsx`)
-- The default framed panel for draft, review, and dashboard surfaces (formerly `TechCard`).
+- The default framed panel for draft and dashboard surfaces (formerly `TechCard`).
 - Real props include: `tone`, `borderOpacity`, `background`, `padding`, `hover`, `brackets`, `bracketVariant`, `pattern` (`grid` only).
 - Conventions: thin `border-tech-main/40` borders, near-square geometry, corner brackets hidden by default (opt in via `brackets="visible"`), hover changes border/fill opacity rather than adding elevation.
 
@@ -304,8 +300,8 @@ Article reader shell
 Profile and admin panels
 - Custom panels with `border-tech-main/40 bg-white/60 backdrop-blur-md`. Used in profile and admin where `Card`'s API is too tight.
 
-Selectable cards and tabs
-- `SelectableCard` covers radio-group-style selection cards. Tab and segmented-toggle behavior uses shadcn `Tabs` (`TabsList`/`TabsTrigger`/`TabsContent`) and `ToggleGroup` — same square, bordered, mono-label language.
+Tabs and toggles
+- Tab and segmented-toggle behavior uses shadcn `Tabs` (`TabsList`/`TabsTrigger`/`TabsContent`) and `ToggleGroup` — same square, bordered, mono-label language.
 
 Geometry guidance
 - Default to square (`rounded-none`). Small radii are acceptable on dense indicators and skeletons (`rounded-sm`, `rounded-xs`, `rounded-[2px]`) and on circular dots (`rounded-full`). Reach for radii consciously, not by default.
@@ -334,13 +330,13 @@ Geometry guidance
 
 ## Status, Badges, Tags
 
-Bracketed and translucent. Examples: `[Pending]`, `[Resolved]`, `[Closed]`.
+Bracketed and translucent. Examples: `[Submitted]`, `[Merged]`, `[Closed]`.
 
 - Base: `border px-2 py-0.5 font-mono text-xs tracking-wide`.
 - Pending: yellow border/text on yellow `/10` fill.
-- In progress / review: blue border/text on blue `/10` fill.
-- Resolved / success: green border/text on green `/10` fill.
-- Rejected / closed / destructive: red border/text on red `/10` fill.
+- Submitted: blue border/text on blue `/10` fill.
+- Merged / success: green border/text on green `/10` fill.
+- Closed / destructive: red border/text on red `/10` fill.
 - Neutral / loading: gray or slate at low opacity.
 - Tags use `guide-line`, `bg-tech-main/5`, mono uppercase text, square borders.
 - Pulsing status dots: `size-1.5 animate-pulse rounded-full bg-tech-main` for live indicators; reserve for state that actually updates.
@@ -351,7 +347,7 @@ Decoration should be quiet, purposeful, and interactive where it earns its place
 
 Surviving motifs
 - Dot-grid backdrop on the body via a radial gradient using `tech-line` (mobile fixes grid size to `40px 40px`). On the homepage it becomes `HomepageDotGrid` — an interactive canvas field (vendored ReactBits `DotGrid`, gsap inertia) whose dots brighten toward `tech-signal` near the cursor.
-- `CornerBrackets` (`components/ui/corner-brackets.tsx`) survive ONLY as interactive affordances: hover reveal on prev/next article cards (`article-navigation.tsx`) and closed-PR cards (`closed-pr-list.tsx`), and the selection cue on `SelectableCard`. `Card` can opt in via `brackets="visible"` but defaults to hidden.
+- `CornerBrackets` (`components/ui/corner-brackets.tsx`) survive ONLY as interactive affordances: hover reveal on prev/next article cards (`article-navigation.tsx`). `Card` can opt in via `brackets="visible"` but defaults to hidden.
 - Thin guide lines: `guide-line`, `border-tech-main/20`, `section-divider`.
 - Small square markers: `size-3 border border-tech-main/40 bg-tech-main/20`.
 - Grid-paper texture on `EditorSurface variant="grid"` and `Card pattern="grid"`.
@@ -481,10 +477,10 @@ General rules
 
 Before adding or changing UI, check:
 
-- [ ] Uses shadcn/ui primitives from `components/ui/shadcn/` (Button, Card, Input, Textarea, Badge, Avatar, Dialog, AlertDialog, Sheet, DropdownMenu, Popover, Tabs, ToggleGroup, Command, Collapsible, …) before hand-rolling equivalents — shadcn is always prioritized for new features.
+- [ ] Uses shadcn/ui primitives from `components/ui/shadcn/` (Button, Card, Input, Textarea, Badge, Avatar, Dialog, Sheet, DropdownMenu, Popover, Tabs, ToggleGroup, Command, Collapsible, …) before hand-rolling equivalents — shadcn is always prioritized for new features.
 - [ ] Uses `tech-*` tokens instead of raw hex.
 - [ ] Defaults to square geometry; reaches for radius consciously.
-- [ ] Uses existing primitives (`Card`, `Button`, `Input`/`Textarea`, `SelectableCard`, `CornerBrackets`, `PageHeader`, `SectionTitle`, `StatusDot`, shadcn `Badge`) before inventing new ones.
+- [ ] Uses existing primitives (`Card`, `Button`, `Input`/`Textarea`, `CornerBrackets`, `PageHeader`, `SectionTitle`, shadcn `Badge`) before inventing new ones.
 - [ ] Picks the right surface system: `Card` for general panels, `EditorSurface` for editor work, the article shell for reader work, custom panels only when none of the above fit.
 - [ ] Respects mobile-first layout and `44px` touch targets.
 - [ ] Uses mono only on apparatus controls (nav, buttons, badges, tabs, code/data); app-surface labels, dialog titles, and empty states are sans with normal capitalization.

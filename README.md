@@ -35,7 +35,7 @@ You'll find three kinds of articles:
 
 They span the whole stack of technical play: production builds like tree farms, mechanical redstone and component behavior, slime-tech flying machines, and the timing and wiring that hold them together. On the engine side, articles dig into micro-timing, block updates and update order, chunk loading and loading tickets, and entity AI and movement — backed by source reading where it matters. Tooling chapters cover the staples of a technical setup (Carpet, Litematica, and the masa suite), so newcomers and veterans both have a way in.
 
-The fastest way to start is to **[visit the site](https://techmc.wiki)**. Want to contribute? You can draft and submit articles right from the site.
+The fastest way to start is to **[visit the site](https://techmc.wiki)**. Want to contribute? You can draft articles and open pull requests right from the site. Reviews and merge conflicts are handled on GitHub.
 
 > [!NOTE]
 > This repo is the **website**. Articles live in [their own repo](https://github.com/techmc-wiki/articles) and are pulled in as a submodule. Other GTMC projects are at [github.com/orgs/gtmc-dev](https://github.com/orgs/gtmc-dev/repositories).

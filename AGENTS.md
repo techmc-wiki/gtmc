@@ -6,7 +6,7 @@ This file is the agent contract for the **GTMC website** repo. It complements `R
 
 ## Project Overview
 
-This repo contains the public website for **Graduate Texts in Minecraft (GTMC)** — a community-driven online textbook on technical Minecraft. It serves articles (tutorials, mechanics explanations, source-code analyses) and a draft/review hub for contributors.
+This repo contains the public website for **Graduate Texts in Minecraft (GTMC)** — a community-driven online textbook on technical Minecraft. It serves articles (tutorials, mechanics explanations, source-code analyses) and a draft workspace with GitHub PR submission for contributors.
 
 - **Framework**: Next.js 16 (App Router, Cache Components, Turbopack) on React 19
 - **Language**: TypeScript 7.0.2 (strict mode)
@@ -32,13 +32,13 @@ The articles themselves live in a separate repo and are pulled in via a Git subm
 ├── app/                    Next.js App Router (locale-scoped routes)
 │   ├── [locale]/
 │   │   ├── (public)/       Articles, public pages
-│   │   ├── (private)/      Drafts, review hub, profile, admin
+│   │   ├── (private)/      Drafts, profile, admin
 │   │   ├── (auth)/         GitHub sign-in flow
 │   │   └── _homepage/      Hero card, foreground/background layers
 │   └── api/                Route handlers
-├── actions/                Server actions (drafts, reviews, profile, …)
+├── actions/                Server actions (drafts, profile, …)
 ├── components/ui/          shadcn primitives in ui/shadcn/, corner-brackets, …
-├── components/{articles,editor,glossary,layout,markdown,review,search,ui}/
+├── components/{articles,editor,glossary,layout,markdown,search,ui}/
 ├── lib/                    Article pipeline, auth, db, search, GitHub helpers
 ├── articles/               Article content (Git submodule)
 ├── glossary/               Glossary CSV data (Git submodule)
@@ -126,7 +126,7 @@ Key things to know:
 
 - **Path alias**: `@/*` resolves to the repo root (see `tsconfig.json` and `vite.config.ts`).
 - **Next.js command boundary**: continue using `pnpm dev` and `pnpm build`. The built-in `vp dev` and `vp build` commands invoke Vite and must not replace the Next.js/Turbopack scripts.
-- **Middleware** lives in `proxy.ts` (not `middleware.ts`). It composes `next-intl` routing with NextAuth and gates `/admin`, `/draft`, `/glossary/edit`, `/profile`, and `/review` behind a session.
+- **Middleware** lives in `proxy.ts` (not `middleware.ts`). It composes `next-intl` routing with NextAuth and gates `/admin`, `/draft`, `/glossary/edit`, and `/profile` behind a session.
 - **Local auth fixture**: `pnpm dev` seeds and injects the local admin `debug@gtmc.local` on localhost to exercise authenticated pages. Set `GTMC_DEV_FIXTURE_AUTH=0` to test the real sign-in flow; never rely on the fixture outside development.
 - **Prisma client** is imported from `@prisma/client`; `serverExternalPackages` in `next.config.ts` keeps Prisma out of the client bundle.
 - The build embeds a 7-char Git SHA as `NEXT_PUBLIC_BUILD_SHA` (falls back to `VERCEL_GIT_COMMIT_SHA`).
@@ -171,8 +171,8 @@ Test runners are installed but the standing rule is: **do not add or propose tes
 ```bash
 vp test run                                    # Run all tests once
 vp test watch                                  # Watch mode
-vp test run lib/articles/article-rebase.test.ts
-vp test run -t "merges conflicting drafts"     # Filter by test name
+vp test run lib/articles/slug-resolver.test.ts
+vp test run -t "resolveArticleSlug"     # Filter by test name
 ```
 
 - Vite+ config: `vite.config.ts` contains Vitest, Oxlint, Oxfmt, and staged-file settings.
@@ -187,7 +187,7 @@ When fixing a bug or changing existing logic, update the colocated specs to matc
 - **Linter**: Vite+ runs Oxlint from the `lint` block in `vite.config.ts`. Configured plugins include `typescript`, `react`, and `nextjs`; generated output, agent support directories, and the articles submodule are ignored.
 - **Formatter**: Vite+ runs Oxfmt from the `fmt` block in `vite.config.ts`, including Tailwind class sorting. Markdown and verification artifacts are excluded; leave Markdown formatting alone unless asked.
 - **React**: React 19 with the new JSX transform — no need to import `React` in scope. `react/react-in-jsx-scope` is disabled.
-- **File names**: kebab-case for modules and components (e.g. `tech-card.tsx` → migrated to `shadcn/card.tsx`, `article-rebase.test.ts`).
+- **File names**: kebab-case for modules and components (e.g. `tech-card.tsx` → migrated to `shadcn/card.tsx`, `slug-resolver.test.ts`).
 - **UI primitives**: shadcn/ui is the canonical primitive source. Components live in `components/ui/shadcn/` (installed via `pnpm dlx shadcn@latest add <name>` into the `@/components/ui/shadcn` alias; see `components.json`). **New features MUST use shadcn components first** — Button, Card, Input, Textarea, Badge, Avatar, Dialog, AlertDialog, Sheet, DropdownMenu, Popover, Tabs, ToggleGroup, Command, Collapsible, Separator, Tooltip, ScrollArea, Skeleton, Progress — instead of hand-rolling Radix-like behavior (focus traps, ARIA wiring, outside-click, scroll-lock, keyboard navigation). Hand-rolled replacements are only acceptable when no shadcn component fits; keep shadcn source files GTMC-styled (square geometry, `tech-*` tokens, mono labels).
 - **Import paths**: prefer the `@/...` alias over long relative paths.
 - **Server vs client**: keep server actions in `actions/`, route handlers in `app/api/`, and client components explicitly marked with `"use client"`.
@@ -232,7 +232,6 @@ Notes:
   - `build.yml` — runs the site build on every push and PR with Node 26; concurrency-cancels superseded runs on the same ref; restores content artifacts by articles+glossary SHA and generator hashes, installs with `GTMC_SKIP_POSTINSTALL=1`, generates Prisma, then runs `pnpm build` (Next typechecks during build; standalone `tsc` is omitted).
   - `pdf.yml` — runs on `dev` pushes, a six-hour schedule, or manual dispatch; compares the latest Articles `main` SHA and a hash of the PDF pipeline inputs, builds sidecars then `pdfgen`, provisions pinned Chromium, and uploads PDFs plus state to R2 only when either input changed.
   - `style_and_lint.yml` — runs on pushes to `main` with Node 26; skips heavy postinstall work, then runs the lint and format check scripts.
-  - `submit_pr.yml` — `workflow_dispatch` only; opens automated article-submission PRs from the review hub.
 
 Before reporting a build-affecting change as "done":
 
@@ -329,4 +328,5 @@ pnpm test
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
 <!-- END:nextjs-agent-rules -->

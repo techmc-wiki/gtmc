@@ -8,28 +8,16 @@ function getFileLabel(filePath: string, index: number): string {
   return segments[segments.length - 1] || `UNTITLED_FILE_${index + 1}`
 }
 
-function getFileExtension(filePath: string): string | null {
-  if (!filePath.includes(".")) return null
-  return filePath.slice(filePath.lastIndexOf("."))
-}
-
 interface FileListSidebarProps {
   children: React.ReactNode
   className?: string
-  sticky?: boolean
 }
 
-export function FileListSidebar({
-  children,
-  className,
-  sticky = false,
-}: FileListSidebarProps) {
+export function FileListSidebar({ children, className }: FileListSidebarProps) {
   return (
     <aside
       className={cn(
         "border-tech-main/30 bg-surface-overlay/40 flex flex-col border shadow-[inset_0_0_40px_rgb(var(--color-tech-main)/0.05)] backdrop-blur-sm",
-        sticky &&
-          "sticky top-16 max-h-[calc(100dvh-4rem)] self-start overflow-y-auto md:top-20 md:max-h-[calc(100dvh-5rem)]",
         className
       )}>
       {children}
@@ -83,36 +71,6 @@ export function FileListHeader({
   )
 }
 
-const STATUS_BAR_VARIANT_STYLES = {
-  default: "border-tech-main/20 bg-tech-main/5 text-tech-main/70",
-  success: "border-green-500/20 bg-green-500/5 text-green-700",
-  error: "border-red-500/20 bg-red-500/5 text-red-600",
-  warning: "border-amber-500/20 bg-amber-500/5 text-amber-700",
-} as const
-
-interface FileListStatusBarProps {
-  children: React.ReactNode
-  variant?: "default" | "success" | "error" | "warning"
-  className?: string
-}
-
-export function FileListStatusBar({
-  children,
-  variant = "default",
-  className,
-}: FileListStatusBarProps) {
-  return (
-    <div
-      className={cn(
-        "border-b px-4 py-2 font-mono text-[0.6875rem] tracking-widest uppercase",
-        STATUS_BAR_VARIANT_STYLES[variant],
-        className
-      )}>
-      {children}
-    </div>
-  )
-}
-
 interface FileListItemProps {
   fileId: string
   filePath: string
@@ -122,7 +80,6 @@ interface FileListItemProps {
   primaryAction?: React.ReactNode
   secondaryAction?: React.ReactNode
   className?: string
-  children?: React.ReactNode
 }
 
 export function FileListItem({
@@ -134,7 +91,6 @@ export function FileListItem({
   primaryAction,
   secondaryAction,
   className,
-  children,
 }: FileListItemProps) {
   const fileLabel = getFileLabel(filePath, index)
 
@@ -191,30 +147,9 @@ export function FileListItem({
           )}>
           {filePath || "TARGET_PATH_NOT_SET"}
         </span>
-        {children}
       </button>
       {secondaryAction}
     </div>
-  )
-}
-
-interface FileExtBadgeProps {
-  filePath: string
-  className?: string
-}
-
-export function FileExtBadge({ filePath, className }: FileExtBadgeProps) {
-  const ext = getFileExtension(filePath)
-  if (!ext) return null
-
-  return (
-    <span
-      className={cn(
-        "kbd-badge bg-tech-main/5 text-tech-main/50 shrink-0 font-mono text-[0.5625rem] tracking-widest uppercase",
-        className
-      )}>
-      {ext}
-    </span>
   )
 }
 

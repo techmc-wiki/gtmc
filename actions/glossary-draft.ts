@@ -57,7 +57,7 @@ export async function updateGlossaryDraftAction(
       return {
         success: false,
         errors: {
-          general: "Cannot edit a draft that is already submitted or in review",
+          general: "Cannot edit a draft after submission has started",
         },
       }
     }

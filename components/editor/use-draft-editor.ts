@@ -701,6 +701,7 @@ export function useDraftEditor(initialData?: {
   )
 
   React.useEffect(() => {
+    let cancelled = false
     const controller = new AbortController()
     const pendingFiles = draftCollection.files.filter((file) => {
       const normalizedPath = normalizeDraftFilePath(file.filePath)
@@ -715,54 +716,64 @@ export function useDraftEditor(initialData?: {
       const normalizedPath = normalizeDraftFilePath(file.filePath)
       if (!normalizedPath) continue
       repoSnapshotRequestsRef.current[file.id] = normalizedPath
-      void fetch(
-        `/api/draft/repo-file?path=${encodeURIComponent(normalizedPath)}`,
-        { cache: "no-store", signal: controller.signal }
-      )
-        .then(async (response) => {
-          if (controller.signal.aborted) return
+      void (async () => {
+        try {
+          const response = await fetch(
+            `/api/draft/repo-file?path=${encodeURIComponent(normalizedPath)}`,
+            { cache: "no-store", signal: controller.signal }
+          )
+          if (cancelled) return
           if (response.status === 404) {
-            setRepoSnapshots((current) => ({
-              ...current,
-              [file.id]: {
-                content: null,
-                filePath: normalizedPath,
-                status: "missing",
-              },
-            }))
+            if (!cancelled) {
+              setRepoSnapshots((current) => ({
+                ...current,
+                [file.id]: {
+                  content: null,
+                  filePath: normalizedPath,
+                  status: "missing",
+                },
+              }))
+            }
             return
           }
           const data = (await response.json()) as {
             content?: string
             error?: string
           }
+          if (cancelled) return
           if (!response.ok || typeof data.content !== "string") {
             throw new Error(data.error || "Failed to load repository file")
           }
-          setRepoSnapshots((current) => ({
-            ...current,
-            [file.id]: {
-              content: data.content ?? "",
-              filePath: normalizedPath,
-              status: "loaded",
-            },
-          }))
-        })
-        .catch((error: unknown) => {
+          if (!cancelled) {
+            setRepoSnapshots((current) => ({
+              ...current,
+              [file.id]: {
+                content: data.content ?? "",
+                filePath: normalizedPath,
+                status: "loaded",
+              },
+            }))
+          }
+        } catch (error: unknown) {
+          if (cancelled) return
           if (error instanceof DOMException && error.name === "AbortError") {
             return
           }
-          setRepoSnapshots((current) => ({
-            ...current,
-            [file.id]: {
-              content: null,
-              filePath: normalizedPath,
-              status: "error",
-            },
-          }))
-        })
+          if (!cancelled) {
+            setRepoSnapshots((current) => ({
+              ...current,
+              [file.id]: {
+                content: null,
+                filePath: normalizedPath,
+                status: "error",
+              },
+            }))
+          }
+        }
+      })()
     }
     return () => {
+      cancelled = true
       controller.abort()
     }
   }, [draftCollection.files, repoSnapshots])

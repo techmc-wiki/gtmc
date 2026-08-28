@@ -116,9 +116,7 @@ export function DraftFileSourceDialog({
           setTreeError(error instanceof Error ? error.message : t("repoError"))
         }
       } finally {
-        if (!disposed) {
-          setIsLoadingTree(false)
-        }
+        setIsLoadingTree(false)
       }
     }
 

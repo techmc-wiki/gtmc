@@ -83,6 +83,13 @@ export function FileListHeader({
   )
 }
 
+const STATUS_BAR_VARIANT_STYLES = {
+  default: "border-tech-main/20 bg-tech-main/5 text-tech-main/70",
+  success: "border-green-500/20 bg-green-500/5 text-green-700",
+  error: "border-red-500/20 bg-red-500/5 text-red-600",
+  warning: "border-amber-500/20 bg-amber-500/5 text-amber-700",
+} as const
+
 interface FileListStatusBarProps {
   children: React.ReactNode
   variant?: "default" | "success" | "error" | "warning"
@@ -94,18 +101,11 @@ export function FileListStatusBar({
   variant = "default",
   className,
 }: FileListStatusBarProps) {
-  const variantStyles = {
-    default: "border-tech-main/20 bg-tech-main/5 text-tech-main/70",
-    success: "border-green-500/20 bg-green-500/5 text-green-700",
-    error: "border-red-500/20 bg-red-500/5 text-red-600",
-    warning: "border-amber-500/20 bg-amber-500/5 text-amber-700",
-  }
-
   return (
     <div
       className={cn(
         "border-b px-4 py-2 font-mono text-[0.6875rem] tracking-widest uppercase",
-        variantStyles[variant],
+        STATUS_BAR_VARIANT_STYLES[variant],
         className
       )}>
       {children}

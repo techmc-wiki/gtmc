@@ -14,6 +14,17 @@ const contentVisibilityStyle: React.CSSProperties = {
   contentVisibility: "auto",
 }
 
+const LINE_WIDTHS = [
+  "w-3/4 bg-tech-accent/20",
+  "w-1/2 bg-tech-accent/15",
+  "w-5/6 bg-tech-accent/20",
+  "w-2/5 bg-tech-accent/10",
+  "w-3/5 bg-tech-accent/15",
+  "w-4/5 bg-tech-accent/20",
+  "w-1/3 bg-tech-accent/10",
+  "w-2/3 bg-tech-accent/15",
+] as const
+
 /**
  * Intersection-observed code container: shows a skeleton until the block is
  * near the viewport, then reveals the rendered code.
@@ -52,16 +63,6 @@ function LazyCodeBlock({
   const handleSkeletonEnd = useCallback(() => {
     if (isVisible) setIsSkeletonRemoved(true)
   }, [isVisible])
-  const lineWidths = [
-    "w-3/4 bg-tech-accent/20",
-    "w-1/2 bg-tech-accent/15",
-    "w-5/6 bg-tech-accent/20",
-    "w-2/5 bg-tech-accent/10",
-    "w-3/5 bg-tech-accent/15",
-    "w-4/5 bg-tech-accent/20",
-    "w-1/3 bg-tech-accent/10",
-    "w-2/3 bg-tech-accent/15",
-  ]
 
   return (
     <div
@@ -105,7 +106,7 @@ function LazyCodeBlock({
               <div
                 // oxlint-disable-next-line react/no-array-index-key
                 key={String(i)}
-                className={`my-1.5 h-2 ${lineWidths[i % lineWidths.length]} `}
+                className={`my-1.5 h-2 ${LINE_WIDTHS[i % LINE_WIDTHS.length]} `}
               />
             ))}
           </div>

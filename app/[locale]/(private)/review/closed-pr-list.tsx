@@ -6,17 +6,16 @@ import { Card } from "@/components/ui/shadcn/card"
 import type { ClosedPRListItem } from "./page"
 
 const PAGE_SIZE = 10
+const SKELETON_KEYS = ["alpha", "beta", "gamma"] as const
 
 type ClosedPRListProps = {
   getClosedPRsAction: (page: number) => Promise<ClosedPRListItem[]>
 }
 
 function ClosedPRSkeletonRows() {
-  const skeletonKeys = ["alpha", "beta", "gamma"]
-
   return (
     <div className="grid grid-cols-1 gap-6">
-      {skeletonKeys.map((key) => (
+      {SKELETON_KEYS.map((key) => (
         <Card
           key={`closed-pr-skeleton-${key}`}
           className="border-tech-line bg-surface-overlay/80 relative border p-6 backdrop-blur-sm">

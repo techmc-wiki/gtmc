@@ -17,6 +17,14 @@ interface EditorSurfaceProps {
   as?: "div" | "form"
   onSubmit?: React.FormEventHandler<HTMLFormElement>
 }
+const CORNER_TICKS = (
+  <>
+    <div className="border-tech-main absolute -top-px -left-px size-3 border-t-2 border-l-2" />
+    <div className="border-tech-main absolute -top-px -right-px size-3 border-t-2 border-r-2" />
+    <div className="border-tech-main absolute -bottom-px -left-px size-3 border-b-2 border-l-2" />
+    <div className="border-tech-main absolute -right-px -bottom-px size-3 border-r-2 border-b-2" />
+  </>
+)
 
 /** Editor page frame: bordered paper surface, optionally grid-paper or a `<form>`. */
 export function EditorSurface({
@@ -39,23 +47,14 @@ export function EditorSurface({
       ${className}
     `
 
-    const cornerTicks = (
-      <>
-        <div className="border-tech-main absolute -top-px -left-px size-3 border-t-2 border-l-2" />
-        <div className="border-tech-main absolute -top-px -right-px size-3 border-t-2 border-r-2" />
-        <div className="border-tech-main absolute -bottom-px -left-px size-3 border-b-2 border-l-2" />
-        <div className="border-tech-main absolute -right-px -bottom-px size-3 border-r-2 border-b-2" />
-      </>
-    )
-
     return as === "form" ? (
       <form onSubmit={onSubmit} className={gridClasses} {...props}>
-        {cornerTicks}
+        {CORNER_TICKS}
         {content}
       </form>
     ) : (
       <div className={gridClasses} {...props}>
-        {cornerTicks}
+        {CORNER_TICKS}
         {content}
       </div>
     )

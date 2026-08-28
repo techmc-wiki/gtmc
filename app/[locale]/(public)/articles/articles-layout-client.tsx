@@ -169,14 +169,12 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   }, [])
 
   const toggleChapterNavHidden = useCallback(() => {
-    setChapterNavHidden((prev) => {
-      const next = !prev
-      try {
-        localStorage.setItem(CHAPTER_NAV_HIDDEN_KEY, String(next))
-      } catch {}
-      return next
-    })
-  }, [])
+    const next = !chapterNavHidden
+    setChapterNavHidden(next)
+    try {
+      localStorage.setItem(CHAPTER_NAV_HIDDEN_KEY, String(next))
+    } catch {}
+  }, [chapterNavHidden])
 
   useEffect(() => {
     if (tree.length > 0) {

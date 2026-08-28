@@ -93,6 +93,8 @@ export function GlossaryEditCard({
   const [row, setRow] = React.useState<GlossaryRow | null>(
     seed ? ({ ...seed } as GlossaryRow) : null
   )
+  const rowRef = React.useRef(row)
+  rowRef.current = row
 
   const activeLocale: GlossaryLocale | null = isGlossaryLocale(locale)
     ? locale
@@ -102,13 +104,11 @@ export function GlossaryEditCard({
     activeLocale ? "active" : "english"
   )
 
-  const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+  const debounceRef = React.useRef<number | undefined>(undefined)
 
   React.useEffect(
     () => () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
-      }
+      clearTimeout(debounceRef.current)
     },
     []
   )
@@ -118,15 +118,14 @@ export function GlossaryEditCard({
       if (isReadOnly) return
       setRow((prev) => {
         if (!prev) return prev
-        const next: GlossaryRow = { ...prev, [column]: value }
-        if (debounceRef.current) {
-          clearTimeout(debounceRef.current)
-        }
-        debounceRef.current = setTimeout(() => {
-          onChange({ slug: operation.slug, after: next })
-        }, DEBOUNCE_MS)
-        return next
+        return { ...prev, [column]: value }
       })
+      clearTimeout(debounceRef.current)
+      debounceRef.current = window.setTimeout(() => {
+        if (rowRef.current) {
+          onChange({ slug: operation.slug, after: rowRef.current })
+        }
+      }, DEBOUNCE_MS)
     },
     [onChange, operation.slug, isReadOnly]
   )

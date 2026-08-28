@@ -64,6 +64,8 @@ export function HeroCard() {
       // Settled: snap to target and idle until the next pointer event.
       s.rx = s.targetRx
       s.ry = s.targetRy
+      el.style.transform = `perspective(1000px) rotateX(${s.rx.toFixed(2)}deg) rotateY(${s.ry.toFixed(2)}deg)`
+      el.style.willChange = "auto"
       rafRef.current = null
       return
     }
@@ -72,6 +74,9 @@ export function HeroCard() {
 
   const startTiltLoop = useCallback(() => {
     if (rafRef.current === null) {
+      if (tiltRef.current) {
+        tiltRef.current.style.willChange = "transform"
+      }
       tiltStateRef.current.last = performance.now()
       rafRef.current = requestAnimationFrame(step)
     }
@@ -113,7 +118,7 @@ export function HeroCard() {
         ref={tiltRef}
         onPointerMove={onPointerMove}
         onPointerLeave={onPointerLeave}
-        className="relative will-change-transform">
+        className="relative">
         {/* 书籍封面：Springer GTM 风格 */}
         <div
           ref={coverRef}

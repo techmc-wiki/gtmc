@@ -1,24 +1,27 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 import { z } from "zod"
 
 import { getMainBranchHeadSha } from "@/lib/articles/branch"
-import {
-  createDraftFile,
-  deserializeDraftFilesPayload,
-  normalizeDraftFileCollection,
-  serializeDraftFilesForStorage,
-} from "@/lib/drafts/files"
-import { deleteDraftAsset } from "@/lib/drafts/storage"
 import { getGithubPatForUser, requireAuth } from "@/lib/auth/context"
-import { prisma } from "@/lib/prisma"
 import {
   findDraftAssetsByRevision,
   markDraftAssetCleanupFailed,
   markDraftAssetDeleted,
   reconcileDraftAssetReferences,
 } from "@/lib/drafts/asset-db"
+import {
+  createDraftFile,
+  deserializeDraftFilesPayload,
+  normalizeDraftFileCollection,
+  normalizeDraftFilePath,
+  serializeDraftFilesForStorage,
+} from "@/lib/drafts/files"
+import { deleteDraftAsset } from "@/lib/drafts/storage"
+import { getRepoFileContent } from "@/lib/github/sync"
+import { prisma } from "@/lib/prisma"
 
 const saveDraftSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -28,6 +31,48 @@ const saveDraftSchema = z.object({
   activeFileId: z.string().nullable().default(null),
   draftFiles: z.string().nullable().default(null),
 })
+export async function createDraftAction(formData: FormData): Promise<never> {
+  const session = await requireAuth()
+  const rawFilePath = formData.get("filePath")
+  const normalizedPath = normalizeDraftFilePath(
+    typeof rawFilePath === "string" ? rawFilePath : ""
+  )
+  if (normalizedPath.includes("..")) {
+    throw new Error("Invalid draft file path")
+  }
+
+  let content = ""
+  let resolvedFilePath = normalizedPath
+  if (normalizedPath) {
+    const candidates = normalizedPath.endsWith(".md")
+      ? [normalizedPath]
+      : [normalizedPath, `${normalizedPath}.md`]
+    const contents = await Promise.all(
+      candidates.map((candidate) => getRepoFileContent(candidate))
+    )
+    const matchedIndex = contents.findIndex((value) => value !== null)
+    if (matchedIndex >= 0) {
+      content = contents[matchedIndex] ?? ""
+      resolvedFilePath = candidates[matchedIndex]
+    }
+  }
+
+  const token =
+    (await getGithubPatForUser(session.user.id)) ?? process.env.GITHUB_TOKEN
+  const draft = await prisma.revision.create({
+    data: {
+      author: { connect: { id: session.user.id } },
+      baseMainSha: await getMainBranchHeadSha(token),
+      content,
+      filePath: resolvedFilePath || undefined,
+      status: "DRAFT",
+      title: resolvedFilePath || "Untitled article",
+    },
+  })
+
+  revalidatePath("/draft")
+  redirect(`/draft/${draft.id}`)
+}
 
 export async function saveDraftAction(formData: FormData) {
   const session = await requireAuth()

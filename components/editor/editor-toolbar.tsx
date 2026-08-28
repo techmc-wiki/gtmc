@@ -3,12 +3,10 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import {
-  EditorToolbarShell,
   EditorToolbarButton,
   EditorToolbarDivider,
-  EditorToolbarStatus,
+  EditorToolbarShell,
 } from "@/components/editor/editor-toolbar-shell"
-
 interface EditorToolbarProps {
   onInsert: (prefix: string, suffix?: string) => void
   disabled?: boolean
@@ -73,7 +71,6 @@ export function EditorToolbar({
         title={t("toolbarBlock")}>
         BLOCK
       </EditorToolbarButton>
-      <EditorToolbarStatus>MD_SYNTAX_READY</EditorToolbarStatus>
       {onWrapToggle !== undefined && (
         <>
           <EditorToolbarDivider className="mx-2 hidden sm:block" />

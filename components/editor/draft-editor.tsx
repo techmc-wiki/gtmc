@@ -5,7 +5,13 @@ import { diffLines } from "diff"
 import { useDraftEditor } from "@/components/editor/use-draft-editor"
 import { DraftFileSourceDialog } from "@/components/editor/draft-file-source-dialog"
 import { DraftEditorToolbar } from "@/components/editor/draft-editor-toolbar"
-import { DraftEditorFiles } from "@/components/editor/draft-editor-files"
+import { DraftFileNavigator } from "@/components/editor/draft-file-navigator"
+import { DraftEditorHeader } from "@/components/editor/draft-editor-header"
+import { DraftEditorReview } from "@/components/editor/draft-editor-review"
+import type {
+  DraftChangeEntry,
+  DraftDiffRow,
+} from "@/components/editor/draft-editor-review"
 import { toast } from "sonner"
 import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
 import { EditorTextareaDynamic } from "@/components/editor/editor-textarea-dynamic"
@@ -14,20 +20,20 @@ import {
   normalizeDraftFilePath,
   normalizeDraftFolderPath,
   type DraftFileCollection,
-  type DraftFileRecord,
 } from "@/lib/drafts/files"
 import { OperationProgress } from "@/components/ui/operation-progress"
-import { Button } from "@/components/ui/shadcn/button"
-import { Input } from "@/components/ui/shadcn/input"
 import {
   EditorSurface,
-  EditorActions,
   EditorContentArea,
   EditorWritePanel,
   EditorPreviewPanel,
   EditorPreviewFrame,
   EditorSplitLayout,
 } from "@/components/editor/editor-frames"
+import {
+  ResizableHandle,
+  ResizablePanel,
+} from "@/components/ui/shadcn/resizable"
 import { Tabs } from "@/components/ui/shadcn/tabs"
 import type { TabType } from "@/components/editor/editor-tab-strip"
 
@@ -48,31 +54,9 @@ interface DraftEditorProps {
   }
 }
 
-interface DraftDiffRow {
-  newLine: number | null
-  oldLine: number | null
-  type: "add" | "context" | "remove" | "skipped"
-  value: string
-}
-
-interface DraftChangeEntry {
-  changeType: "modified" | "new" | "pending"
-  file: DraftFileRecord
-  rows: DraftDiffRow[]
-}
-interface RepoFileSnapshot {
-  content: string | null
-  filePath: string
-  status: "error" | "loaded" | "loading" | "missing"
-}
-
 export function DraftEditor({ initialData }: DraftEditorProps) {
   const hook = useDraftEditor(initialData)
   const { state, refs, actions, upload, progress, t, progressT } = hook
-
-  const handleAddFile = () => {
-    actions.openFileDialog("add", "repo")
-  }
 
   const handleRemoveFile = (fileId: string) => {
     if (state.isReadOnly || state.draftCollection.files.length <= 1) return
@@ -183,11 +167,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     [state.draftCollection.files, state.repoSnapshots]
   )
 
-  const newFolderPaths = React.useMemo(
-    () => state.draftCollection.folders || [],
-    [state.draftCollection.folders]
-  )
-
   const handleInsertSelectedFile = ({
     filePath,
   }: {
@@ -224,33 +203,21 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   }
 
   return (
-    <EditorSurface variant="grid" as="form" onSubmit={actions.handleSaveDraft}>
-      <div className="flex flex-col space-y-4">
-        <div className="flex flex-col space-y-2">
-          <div className="flex items-center justify-between">
-            <label
-              htmlFor="draft-title"
-              className="text-tech-main/60 flex items-center gap-2 text-xs font-medium">
-              <span className="bg-tech-main/40 inline-block size-2" />
-              {t("titleLabel")}
-            </label>
-          </div>
-          <Input
-            id="draft-title"
-            required
-            placeholder={t("titlePlaceholder")}
-            className={`border-tech-main/40 focus:border-tech-main focus:ring-tech-main/20 bg-surface-input/50 focus:bg-surface-input py-3 font-mono text-lg backdrop-blur-sm transition-all duration-300 focus:ring-1 ${
-              state.isReadOnly
-                ? `bg-tech-main/5 cursor-not-allowed opacity-70`
-                : `hover:bg-surface-input/80`
-            } `}
-            value={state.title}
-            onChange={(e) => actions.setTitle(e.target.value)}
-            readOnly={state.isReadOnly}
-            aria-busy={state.isSaving}
-          />
-        </div>
-      </div>
+    <EditorSurface>
+      <DraftEditorHeader
+        hasUnsavedChanges={state.hasUnsavedChanges}
+        isReadOnly={state.isReadOnly}
+        isSaving={state.isSaving}
+        isSubmitting={state.isSubmitting}
+        saveDisabled={state.saveDisabled}
+        saveError={state.saveError}
+        submitDisabled={state.submitDisabled}
+        title={state.title}
+        onSave={actions.saveDraft}
+        onSubmit={actions.handleSubmitDraft}
+        onTitleChange={actions.setTitle}
+        submitLabel={state.isSubmitting ? progressT("submitBusy") : t("openPr")}
+      />
 
       {state.githubPrUrl ? (
         <div className="guide-line bg-tech-main/5 text-tech-main flex items-center justify-between gap-3 border px-4 py-3 font-mono text-xs">
@@ -265,9 +232,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         </div>
       ) : null}
 
-      <DraftEditorFiles
+      <DraftFileNavigator
         files={state.draftCollection.files}
         activeFileId={state.draftCollection.activeFileId}
+        activeFile={state.activeFile}
         unsavedFileIds={state.unsavedFileIds}
         onSelectFile={(fileId) =>
           actions.setDraftCollection((current) => ({
@@ -275,11 +243,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             activeFileId: fileId,
           }))
         }
-        onAddFile={handleAddFile}
         onRemoveFile={handleRemoveFile}
         isReadOnly={state.isReadOnly}
-        activeFile={state.activeFile}
-        activeFileIndex={state.activeFileIndex}
         activeFileHasDuplicatePath={state.activeFileHasDuplicatePath}
         duplicateFilePaths={state.duplicateFilePaths}
         onOpenFileDialog={actions.openFileDialog}
@@ -310,8 +275,12 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             canRedo={Boolean(state.activeFileHistoryAvailability?.redoCount)}
           />
 
-          <EditorSplitLayout
-            write={
+          <EditorSplitLayout>
+            <ResizablePanel
+              id="write"
+              defaultSize="50"
+              minSize="25"
+              className="flex">
               <EditorWritePanel value="write">
                 <EditorTextareaDynamic
                   ref={refs.textareaRef}
@@ -323,11 +292,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   onRedo={actions.handleRedoDraftEdit}
                   onPaste={actions.handlePaste}
                   onDrop={actions.handleDrop}
-                  onDragOver={(e) => {
-                    if (!state.isReadOnly) e.preventDefault()
+                  onDragOver={(event) => {
+                    if (!state.isReadOnly) event.preventDefault()
                   }}
-                  onDragEnter={(e) => {
-                    if (!state.isReadOnly) e.preventDefault()
+                  onDragEnter={(event) => {
+                    if (!state.isReadOnly) event.preventDefault()
                   }}
                   readOnly={state.isReadOnly}
                   saving={state.isSaving}
@@ -342,8 +311,13 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   enableSyntaxHints
                 />
               </EditorWritePanel>
-            }
-            preview={
+            </ResizablePanel>
+            <ResizableHandle className="bg-tech-main/20 hover:bg-tech-main/40 hidden w-px transition-colors md:flex" />
+            <ResizablePanel
+              id="preview"
+              defaultSize="50"
+              minSize="25"
+              className="flex">
               <EditorPreviewPanel value="preview">
                 <EditorPreviewFrame isEmpty={!state.activeFileContent.trim()}>
                   <LazyMarkdownPreview
@@ -352,157 +326,20 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   />
                 </EditorPreviewFrame>
               </EditorPreviewPanel>
-            }
-          />
+            </ResizablePanel>
+          </EditorSplitLayout>
         </Tabs>
       </EditorContentArea>
 
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-        <div className="border-tech-main/35 bg-surface-overlay/80 border backdrop-blur-sm">
-          <div className="guide-line flex border-b">
-            <button
-              type="button"
-              onClick={() => actions.setActiveInfoTab("changes")}
-              className={`flex-1 px-4 py-3 text-xs font-medium ${
-                state.activeInfoTab === "changes"
-                  ? "bg-tech-main-dark text-tech-bg"
-                  : "text-tech-main hover:bg-tech-main/5"
-              }`}>
-              CHANGE MAP
-            </button>
-            <button
-              type="button"
-              onClick={() => actions.setActiveInfoTab("guide")}
-              className={`guide-line flex-1 border-l px-4 py-3 text-xs font-medium ${
-                state.activeInfoTab === "guide"
-                  ? "bg-tech-main-dark text-tech-bg"
-                  : "text-tech-main hover:bg-tech-main/5"
-              }`}>
-              CONTRIBUTING
-            </button>
-          </div>
-
-          {state.activeInfoTab === "changes" ? (
-            <div className="space-y-4 p-4">
-              <div className="grid gap-3 sm:grid-cols-3">
-                <InfoStat
-                  label="MODIFIED FILES"
-                  value={String(
-                    changeEntries.filter(
-                      (entry) => entry && entry.changeType === "modified"
-                    ).length
-                  )}
-                />
-                <InfoStat
-                  label="NEW FILES"
-                  value={String(
-                    changeEntries.filter(
-                      (entry) => entry && entry.changeType === "new"
-                    ).length
-                  )}
-                />
-                <InfoStat
-                  label="NEW FOLDERS"
-                  value={String((state.draftCollection.folders || []).length)}
-                />
-              </div>
-
-              {changeEntries.length === 0 ? (
-                <p className="guide-line bg-tech-main/5 text-tech-main/60 border p-4 text-xs">
-                  NO_LOCAL_DIFF_
-                </p>
-              ) : (
-                <div className="space-y-4">
-                  {changeEntries.map((entry) =>
-                    entry ? (
-                      <ChangePreviewCard
-                        key={entry.file.id}
-                        filePath={entry.file.filePath || "PATH_NOT_SET"}
-                        changeType={entry.changeType}
-                        rows={entry.rows}
-                      />
-                    ) : null
-                  )}
-                </div>
-              )}
-
-              {newFolderPaths.length > 0 ? (
-                <div className="guide-line bg-tech-main/5 border p-4">
-                  <p className="section-label">NEW FOLDERS</p>
-                  <div className="space-y-1 font-mono text-xs text-emerald-700">
-                    {newFolderPaths.map((folderPath) => (
-                      <p key={folderPath}>+ {folderPath}</p>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          ) : (
-            <div className="p-4">
-              {state.contributingGuides.length === 0 ? (
-                <p className="text-tech-main/60 text-xs">NO_GUIDE_AVAILABLE_</p>
-              ) : (
-                <>
-                  <div className="mb-4 flex flex-wrap gap-2">
-                    {state.contributingGuides.map((guide) => (
-                      <Button
-                        key={guide.id}
-                        type="button"
-                        variant={
-                          state.activeGuideId === guide.id
-                            ? "primary"
-                            : "secondary"
-                        }
-                        size="sm"
-                        onClick={() => actions.setActiveGuideId(guide.id)}>
-                        {guide.title}
-                      </Button>
-                    ))}
-                  </div>
-                  <div className="max-h-136 overflow-y-auto pr-2">
-                    <LazyMarkdownPreview
-                      content={
-                        state.contributingGuides.find(
-                          (guide) => guide.id === state.activeGuideId
-                        )?.content || state.contributingGuides[0].content
-                      }
-                      rawPath="CONTRIBUTING.md"
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="border-tech-main/35 bg-surface-overlay/80 border p-4 backdrop-blur-sm">
-          <p className="section-label">WORKSPACE OVERVIEW</p>
-          <div className="space-y-3 text-xs">
-            <InfoLine
-              label="OPEN FILES"
-              value={String(state.draftCollection.files.length)}
-            />
-            <InfoLine
-              label="FOLDERS"
-              value={String((state.draftCollection.folders || []).length)}
-            />
-            <InfoLine
-              label="UNSAVED FILES"
-              value={String(state.unsavedFileIds.size)}
-            />
-            <InfoLine
-              label="ACTIVE FILE"
-              value={state.activeFile.filePath || "PATH_NOT_SET"}
-            />
-            <InfoLine
-              label="GITHUB BASE"
-              value={describeSnapshotStatus(
-                state.repoSnapshots[state.activeFile.id]
-              )}
-            />
-          </div>
-        </div>
-      </section>
+      <DraftEditorReview
+        activeTab={state.activeInfoTab}
+        changeEntries={changeEntries}
+        contributingGuides={state.contributingGuides}
+        folders={state.draftCollection.folders}
+        selectedGuideId={state.activeGuideId}
+        onSelectTab={actions.setActiveInfoTab}
+        onSelectGuide={actions.setActiveGuideId}
+      />
 
       {!state.isReadOnly && (
         <>
@@ -521,29 +358,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             successLabel={progressT("submitSuccess")}
             errorLabel={progressT("submitError")}
           />
-
-          <EditorActions>
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={state.saveDisabled}
-              aria-busy={state.isSaving}>
-              {state.isSaving
-                ? t("savingLabel")
-                : state.hasUnsavedChanges
-                  ? `${t("saveButton")}_*`
-                  : t("saveButton")}
-            </Button>
-
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={actions.handleSubmitDraft}
-              disabled={state.submitDisabled}
-              aria-busy={state.isSubmitting}>
-              {state.isSubmitting ? progressT("submitBusy") : t("openPr")}
-            </Button>
-          </EditorActions>
 
           <section
             aria-label={t("submissionLicenseAria")}
@@ -650,81 +464,4 @@ function buildDiffRows(previousContent: string, nextContent: string) {
     }
   }
   return rows
-}
-
-function describeSnapshotStatus(snapshot?: RepoFileSnapshot) {
-  if (!snapshot) return "CHECKING"
-  if (snapshot.status === "missing") return "NEW_FILE"
-  if (snapshot.status === "loading") return "LOADING"
-  if (snapshot.status === "error") return "UNKNOWN"
-  return "TRACKED"
-}
-
-function InfoStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="guide-line bg-tech-main/5 border p-3">
-      <p className="text-tech-main/60 text-xs font-medium">{label}</p>
-      <p className="text-tech-main mt-2 font-mono text-lg">{value}</p>
-    </div>
-  )
-}
-
-function InfoLine({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="border-tech-main/10 flex items-start justify-between gap-3 border-b pb-2">
-      <span className="text-tech-main/55 text-xs font-medium">{label}</span>
-      <span className="text-tech-main text-right font-mono break-all">
-        {value}
-      </span>
-    </div>
-  )
-}
-
-function ChangePreviewCard({
-  filePath,
-  changeType,
-  rows,
-}: {
-  filePath: string
-  changeType: "modified" | "new" | "pending"
-  rows: DraftDiffRow[]
-}) {
-  return (
-    <section className="guide-line bg-surface-overlay/70 border">
-      <div className="guide-line bg-tech-main/5 flex items-center justify-between border-b px-4 py-3">
-        <p className="text-tech-main font-mono text-xs break-all">{filePath}</p>
-        <span
-          className={`border px-2 py-1 font-mono text-[0.625rem] ${
-            changeType === "new"
-              ? `border-emerald-500/30 text-emerald-700`
-              : changeType === "modified"
-                ? `border-amber-500/30 text-amber-700`
-                : `guide-line text-tech-main/55`
-          } `}>
-          {changeType}
-        </span>
-      </div>
-      <div className="max-h-72 overflow-auto bg-slate-950/95 font-mono text-[0.6875rem] text-slate-100">
-        {rows.map((row) => (
-          <div
-            key={`${filePath}:${row.oldLine ?? "x"}:${row.newLine ?? "x"}:${row.type}`}
-            className={`grid grid-cols-[3rem_3rem_minmax(0,1fr)] px-2 py-1 ${
-              row.type === "add"
-                ? `bg-emerald-500/10 text-emerald-200`
-                : row.type === "remove"
-                  ? `bg-red-500/10 text-red-200`
-                  : row.type === "skipped"
-                    ? `bg-slate-800/70 text-slate-400`
-                    : `text-slate-300`
-            } `}>
-            <span className="text-slate-500">{row.oldLine ?? ""}</span>
-            <span className="text-slate-500">{row.newLine ?? ""}</span>
-            <span className="break-all whitespace-pre-wrap">
-              {row.type === "skipped" ? `… ${row.value}` : row.value || " "}
-            </span>
-          </div>
-        ))}
-      </div>
-    </section>
-  )
 }

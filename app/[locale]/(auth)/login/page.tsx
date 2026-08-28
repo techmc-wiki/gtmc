@@ -7,14 +7,26 @@ import { Button } from "@/components/ui/shadcn/button"
 import { useState } from "react"
 import { Link } from "@/i18n/navigation"
 
+function sanitizeCallbackUrl(raw: string | null): string {
+  if (!raw) return "/draft"
+  try {
+    const parsed = new URL(raw, window.location.origin)
+    if (parsed.origin === window.location.origin) {
+      return parsed.pathname + parsed.search + parsed.hash
+    }
+  } catch {}
+  return "/draft"
+}
+
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const t = useTranslations("Auth")
 
   const handleLogin = async () => {
     setIsLoading(true)
-    const callbackUrl =
-      new URLSearchParams(window.location.search).get("callbackUrl") || "/draft"
+    const callbackUrl = sanitizeCallbackUrl(
+      new URLSearchParams(window.location.search).get("callbackUrl")
+    )
     await signIn("github", { callbackUrl })
   }
 

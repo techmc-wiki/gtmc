@@ -259,7 +259,7 @@ export function ReviewEditor({
     null
   )
   const finalizeProgressResetRef = React.useRef<number | null>(null)
-  const pendingServerRefreshRef = React.useRef(false)
+  const [pendingServerRefresh, setPendingServerRefresh] = React.useState(false)
   const conflictFocusPathRef = React.useRef<string | null>(null)
   const conflictAutoScrollRef = React.useRef(false)
   const firstConflictAnchorRef = React.useRef<HTMLDivElement | null>(null)
@@ -274,9 +274,9 @@ export function ReviewEditor({
     setPrevServerFiles(files)
     setPrevModeAnalysis(modeAnalysis)
 
-    const fullReplace = pendingServerRefreshRef.current
+    const fullReplace = pendingServerRefresh
     if (fullReplace) {
-      pendingServerRefreshRef.current = false
+      setPendingServerRefresh(false)
     }
 
     const fallbackActiveFileId = initialActiveFileId ?? files[0]?.id ?? ""
@@ -556,7 +556,7 @@ export function ReviewEditor({
           })
         }
 
-        pendingServerRefreshRef.current = true
+        setPendingServerRefresh(true)
         router.refresh()
       } catch (error) {
         if (!options?.silent) {
@@ -684,7 +684,7 @@ export function ReviewEditor({
               ?.id ?? prev.activeFileId)
           : prev.activeFileId,
       }))
-      pendingServerRefreshRef.current = true
+      setPendingServerRefresh(true)
       router.refresh()
     } catch (error) {
       if (isReauthRequiredError(error)) {
@@ -714,7 +714,7 @@ export function ReviewEditor({
       await abortResolutionAction(revision.id)
       abortedRef.current = true
       setReviewSession((prev) => ({ ...prev, mode: null }))
-      pendingServerRefreshRef.current = true
+      setPendingServerRefresh(true)
       router.refresh()
     } catch (error) {
       if (isReauthRequiredError(error)) {

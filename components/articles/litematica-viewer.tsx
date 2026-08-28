@@ -170,7 +170,9 @@ export default function LitematicaViewer({
   const { resolvedTheme } = useTheme()
   const backgroundColor = resolvedTheme === "dark" ? 0x101826 : 0xf5f4ef
   const backgroundColorRef = useRef(backgroundColor)
-  backgroundColorRef.current = backgroundColor
+  useEffect(() => {
+    backgroundColorRef.current = backgroundColor
+  }, [backgroundColor])
 
   const [maxLayer, setMaxLayer] = useState(0)
   const [sliderLayer, setSliderLayer] = useState(0)
@@ -179,19 +181,25 @@ export default function LitematicaViewer({
   const [schematicReady, setSchematicReady] = useState(false)
   const [isFlyMode, setIsFlyMode] = useState(false)
   const [isFlyEnabled, setIsFlyEnabled] = useState(false)
-  const prevUrlRef = useRef(url)
+  const [prevUrl, setPrevUrl] = useState(url)
 
   // Reset viewer state inline when `url` changes so users do not briefly
   // see stale UI between commits. See:
   // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
-  if (url !== prevUrlRef.current) {
-    prevUrlRef.current = url
+  if (url !== prevUrl) {
+    setPrevUrl(url)
     setSchematicReady(false)
     setTargetLayer("all")
     setIsFlyMode(false)
     setIsFlyEnabled(false)
-    schematicIdRef.current = null
   }
+
+  // Clear the loaded-schematic id when the url changes. Refs must not be
+  // written during render, so this runs after commit; the load effect below
+  // is declared later and only reads the id asynchronously after this runs.
+  useEffect(() => {
+    schematicIdRef.current = null
+  }, [url])
 
   const POINTER_LOCK_COOLDOWN_MS = 350
 

@@ -53,6 +53,17 @@ interface RecordRowProps {
   value: ReactNode
 }
 
+const revisedDateFormatters: Record<string, Intl.DateTimeFormat> = {
+  en: new Intl.DateTimeFormat("en", {
+    year: "numeric",
+    month: "long",
+  }),
+  zh: new Intl.DateTimeFormat("zh", {
+    year: "numeric",
+    month: "long",
+  }),
+}
+
 /** One ledger line of the printing record. */
 function RecordRow({ term, value }: RecordRowProps) {
   return (
@@ -76,10 +87,9 @@ export default async function Footer() {
     ? Number(stats.lastRevision.slice(0, 4))
     : startYear
   const revised = stats.lastRevision
-    ? new Intl.DateTimeFormat(locale, {
-        year: "numeric",
-        month: "long",
-      }).format(new Date(stats.lastRevision))
+    ? (revisedDateFormatters[locale] ?? revisedDateFormatters.en).format(
+        new Date(stats.lastRevision)
+      )
     : "—"
   const buildSha = process.env.NEXT_PUBLIC_BUILD_SHA
 

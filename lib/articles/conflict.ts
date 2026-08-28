@@ -26,6 +26,7 @@ import {
   getMainBranchHeadSha,
   resolveArticleFilePath,
   upsertFileOnBranch,
+  upsertFilesOnBranch,
 } from "@/lib/articles/branch"
 
 type DraftSyncStatus = "IN_REVIEW" | "SYNC_CONFLICT"
@@ -240,7 +241,6 @@ export async function forcePushResolvedToPRBranch({
 
   return { newSha: newCommit.sha }
 }
-
 export async function resolveDraftSyncConflict({
   activeFileId,
   branchName,
@@ -258,58 +258,51 @@ export async function resolveDraftSyncConflict({
   })
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    // eslint-disable-next-line no-await-in-loop -- retry loop: re-reads main SHA each attempt
     const latestMainSha = await getMainBranchHeadSha(token)
-    let nextStatus: DraftSyncStatus = "IN_REVIEW"
-    const nextFiles: DraftFileRecord[] = []
-
-    for (const file of normalizedFiles.files) {
-      // eslint-disable-next-line no-await-in-loop -- sequential: each file resolution feeds into snapshot fetches below
-      const resolvedFilePath = await resolveArticleFilePath(
-        file.filePath,
-        [latestMainSha],
-        token
-      )
-      let nextFile: DraftFileRecord = {
-        ...file,
-        conflictContent: undefined,
-        filePath: resolvedFilePath,
-      }
-
-      if (syncedMainSha && syncedMainSha !== latestMainSha) {
-        // eslint-disable-next-line no-await-in-loop -- sequential: snapshot needed for merge below
-        const previousMainSnapshot = await getFileSnapshot(
-          resolvedFilePath,
-          syncedMainSha,
+    const resolvedFileResults = await Promise.all(
+      normalizedFiles.files.map(async (file) => {
+        const resolvedFilePath = await resolveArticleFilePath(
+          file.filePath,
+          [latestMainSha],
           token
         )
-        // eslint-disable-next-line no-await-in-loop -- sequential: snapshot needed for merge below
-        const latestMainSnapshot = await getFileSnapshot(
-          resolvedFilePath,
-          latestMainSha,
-          token
-        )
-        const mergeResult = mergeArticleContent({
-          baseContent: previousMainSnapshot?.content ?? "",
-          draftContent: file.content,
-          latestMainContent: latestMainSnapshot?.content ?? "",
-        })
+        let nextFile: DraftFileRecord = {
+          ...file,
+          conflictContent: undefined,
+          filePath: resolvedFilePath,
+        }
+        let hasConflict = false
 
-        nextFile = {
-          ...nextFile,
-          content: mergeResult.conflict ? file.content : mergeResult.content,
-          ...(mergeResult.conflict
-            ? { conflictContent: mergeResult.content }
-            : {}),
+        if (syncedMainSha && syncedMainSha !== latestMainSha) {
+          const [previousMainSnapshot, latestMainSnapshot] = await Promise.all([
+            getFileSnapshot(resolvedFilePath, syncedMainSha, token),
+            getFileSnapshot(resolvedFilePath, latestMainSha, token),
+          ])
+          const mergeResult = mergeArticleContent({
+            baseContent: previousMainSnapshot?.content ?? "",
+            draftContent: file.content,
+            latestMainContent: latestMainSnapshot?.content ?? "",
+          })
+
+          nextFile = {
+            ...nextFile,
+            content: mergeResult.conflict ? file.content : mergeResult.content,
+            ...(mergeResult.conflict
+              ? { conflictContent: mergeResult.content }
+              : {}),
+          }
+          hasConflict = mergeResult.conflict
         }
 
-        if (mergeResult.conflict) {
-          nextStatus = "SYNC_CONFLICT"
-        }
-      }
-
-      nextFiles.push(nextFile)
-    }
+        return { nextFile, hasConflict }
+      })
+    )
+    const nextFiles = resolvedFileResults.map(({ nextFile }) => nextFile)
+    const nextStatus: DraftSyncStatus = resolvedFileResults.some(
+      ({ hasConflict }) => hasConflict
+    )
+      ? "SYNC_CONFLICT"
+      : "IN_REVIEW"
 
     const resolvedFiles = normalizeDraftFileCollection({
       activeFileId: normalizedFiles.activeFileId,
@@ -324,25 +317,29 @@ export async function resolveDraftSyncConflict({
       )
     }
 
-    if (nextStatus === "IN_REVIEW") {
-      for (const [index, file] of resolvedFiles.files.entries()) {
-        // eslint-disable-next-line no-await-in-loop -- sequential: each git commit depends on the previous
-        await upsertFileOnBranch({
-          authorEmail,
-          authorName,
-          branchName,
+    if (nextStatus === "IN_REVIEW" && resolvedFiles.files.length === 1) {
+      const file = resolvedFiles.files[0]
+      await upsertFileOnBranch({
+        authorEmail,
+        authorName,
+        branchName,
+        content: file.content,
+        filePath: file.filePath,
+        message: `docs: resolve sync conflict for ${title}`,
+        token,
+      })
+    } else if (nextStatus === "IN_REVIEW" && resolvedFiles.files.length > 1) {
+      await upsertFilesOnBranch(
+        token,
+        resolvedFiles.files.map((file) => ({
+          path: file.filePath,
           content: file.content,
-          filePath: file.filePath,
-          message:
-            index === 0
-              ? `docs: resolve sync conflict for ${title}`
-              : `docs: update ${file.filePath} after conflict resolution`,
-          token,
-        })
-      }
+        })),
+        branchName,
+        { name: authorName, email: authorEmail }
+      )
     }
 
-    // eslint-disable-next-line no-await-in-loop -- retry loop: verify main SHA hasn't changed
     const verifiedMainSha = await getMainBranchHeadSha(token)
     if (verifiedMainSha === latestMainSha) {
       const primaryFile = getActiveDraftFile(resolvedFiles)
@@ -358,7 +355,6 @@ export async function resolveDraftSyncConflict({
     }
 
     if (attempt < MAX_RETRIES - 1) {
-      // eslint-disable-next-line no-await-in-loop -- retry loop: exponential backoff between attempts
       await sleep(2 ** attempt * 100)
     }
   }

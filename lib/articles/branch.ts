@@ -81,9 +81,16 @@ export async function upsertFileOnBranch({
 }
 
 export async function upsertFilesOnBranch(
-  token: string,
+  token: string | undefined,
   entries: BranchFileEntry[],
-  branchName: string
+  branchName: string,
+  author?: { name: string; email: string }
 ): Promise<void> {
-  return upsertFilesOnBranchShared(token, entries, branchName, ARTICLES_REPO)
+  return upsertFilesOnBranchShared(
+    token,
+    entries,
+    branchName,
+    ARTICLES_REPO,
+    author
+  )
 }

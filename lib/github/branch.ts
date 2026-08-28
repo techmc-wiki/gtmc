@@ -99,10 +99,11 @@ export async function upsertFileOnBranch({
 }
 
 export async function upsertFilesOnBranch(
-  token: string,
+  token: string | undefined,
   entries: BranchFileEntry[],
   branchName: string,
-  repo: RepoTarget
+  repo: RepoTarget,
+  author?: { name: string; email: string }
 ): Promise<void> {
   if (entries.length === 0) {
     return
@@ -161,6 +162,7 @@ export async function upsertFilesOnBranch(
     message: `docs: update ${entries.length} draft file${entries.length === 1 ? "" : "s"}`,
     tree: treeData.sha,
     parents: [latestCommitSha],
+    ...(author ? { author } : {}),
   })
 
   await octokit.git.updateRef({

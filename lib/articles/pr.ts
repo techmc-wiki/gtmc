@@ -25,7 +25,6 @@ import {
   upsertFilesOnBranch,
   type BranchFileEntry,
 } from "@/lib/articles/branch"
-
 const MAIN_BRANCH = "main"
 
 type DraftSyncStatus = "IN_REVIEW" | "SYNC_CONFLICT"
@@ -100,17 +99,27 @@ export async function openDraftPullRequest({
     sha: baseMainSha,
   })
 
-  // Each commit depends on the previous branch state — must be sequential
-  for (const [index, file] of normalizedFiles.files.entries()) {
-    await upsertFileOnBranch({ // eslint-disable-line no-await-in-loop
+  if (normalizedFiles.files.length === 1) {
+    const file = normalizedFiles.files[0]
+    await upsertFileOnBranch({
       authorEmail,
       authorName,
       branchName,
       content: file.content,
       filePath: file.filePath,
-      message: index === 0 ? `docs: ${title}` : `docs: update ${file.filePath}`,
+      message: `docs: ${title}`,
       token,
     })
+  } else if (normalizedFiles.files.length > 1) {
+    await upsertFilesOnBranch(
+      token,
+      normalizedFiles.files.map((file) => ({
+        path: file.filePath,
+        content: file.content,
+      })),
+      branchName,
+      { name: authorName, email: authorEmail }
+    )
   }
 
   if (imageEntries && imageEntries.length > 0) {
@@ -160,9 +169,6 @@ export async function openDraftPullRequest({
           token,
         })
 
-  let hasConflict = false
-  const mergedFiles: DraftFileRecord[] = []
-
   const fileSnapshots = await Promise.all(
     normalizedFiles.files.map(async (file) => {
       const [baseSnapshot, latestSnapshot] = await Promise.all([
@@ -173,39 +179,49 @@ export async function openDraftPullRequest({
     })
   )
 
-  for (const { file, baseSnapshot, latestSnapshot } of fileSnapshots) {
-    const mergeResult = mergeArticleContent({
-      baseContent: baseSnapshot?.content ?? "",
-      draftContent: file.content,
-      latestMainContent: latestSnapshot?.content ?? "",
-    })
-
-    if (mergeResult.conflict) {
-      hasConflict = true
-      mergedFiles.push({
-        ...file,
-        conflictContent: mergeResult.content,
+  const mergeResults = fileSnapshots.map(
+    ({ file, baseSnapshot, latestSnapshot }) => {
+      const mergeResult = mergeArticleContent({
+        baseContent: baseSnapshot?.content ?? "",
+        draftContent: file.content,
+        latestMainContent: latestSnapshot?.content ?? "",
       })
-      continue
-    }
 
-    if (mergeResult.content !== file.content) {
-      await upsertFileOnBranch({ // eslint-disable-line no-await-in-loop
-        authorEmail,
-        authorName,
-        branchName,
-        content: mergeResult.content,
-        filePath: file.filePath,
-        message: `docs: sync ${file.filePath} with latest ${MAIN_BRANCH}`,
-        token,
-      })
+      return {
+        file: mergeResult.conflict
+          ? { ...file, conflictContent: mergeResult.content }
+          : { ...file, content: mergeResult.content },
+        hasConflict: mergeResult.conflict,
+        needsUpdate:
+          !mergeResult.conflict && mergeResult.content !== file.content,
+      }
     }
-
-    mergedFiles.push({
-      ...file,
-      content: mergeResult.content,
+  )
+  const filesToUpdate = mergeResults.filter((result) => result.needsUpdate)
+  if (filesToUpdate.length === 1) {
+    const file = filesToUpdate[0].file
+    await upsertFileOnBranch({
+      authorEmail,
+      authorName,
+      branchName,
+      content: file.content,
+      filePath: file.filePath,
+      message: `docs: sync ${file.filePath} with latest ${MAIN_BRANCH}`,
+      token,
     })
+  } else if (filesToUpdate.length > 1) {
+    await upsertFilesOnBranch(
+      token,
+      filesToUpdate.map(({ file }) => ({
+        path: file.filePath,
+        content: file.content,
+      })),
+      branchName,
+      { name: authorName, email: authorEmail }
+    )
   }
+  const hasConflict = mergeResults.some((result) => result.hasConflict)
+  const mergedFiles = mergeResults.map(({ file }) => file)
 
   const nextFiles = normalizeDraftFileCollection({
     activeFileId: normalizedFiles.activeFileId,

@@ -155,6 +155,65 @@ function normalizeUrlInput(input: string) {
   return value
 }
 
+/* eslint-disable no-underscore-dangle */
+function patchCanvasPointerCapture(canvas: CanvasWithPatch) {
+  if (canvas.__gtmcPointerCapturePatched) return
+
+  const canvasAny = canvas as unknown as CanvasWithPatch & Record<string, unknown>
+  const originalSetPointerCapture =
+    typeof canvas.setPointerCapture === "function"
+      ? canvas.setPointerCapture.bind(canvas)
+      : null
+  const originalReleasePointerCapture =
+    typeof canvas.releasePointerCapture === "function"
+      ? canvas.releasePointerCapture.bind(canvas)
+      : null
+
+  if (originalSetPointerCapture) {
+    canvasAny.setPointerCapture = (pointerId: number) => {
+      try {
+        originalSetPointerCapture(pointerId)
+      } catch {
+        // Ignore invalid pointer capture states from transient pointer lifecycle races.
+      }
+    }
+  }
+
+  if (originalReleasePointerCapture) {
+    canvasAny.releasePointerCapture = (pointerId: number) => {
+      try {
+        originalReleasePointerCapture(pointerId)
+      } catch {
+        // Ignore invalid pointer release states for symmetry with setPointerCapture.
+      }
+    }
+  }
+
+  canvasAny.__gtmcOriginalSetPointerCapture = originalSetPointerCapture
+  canvasAny.__gtmcOriginalReleasePointerCapture = originalReleasePointerCapture
+  canvasAny.__gtmcPointerCapturePatched = true
+}
+
+function restoreCanvasPointerCapture(canvas: CanvasWithPatch | null) {
+  if (!canvas) return
+  if (!canvas.__gtmcPointerCapturePatched) return
+
+  const canvasAny = canvas as unknown as CanvasWithPatch & Record<string, unknown>
+  if ((canvas as CanvasWithPatch & { __gtmcOriginalSetPointerCapture?: unknown })
+    .__gtmcOriginalSetPointerCapture) {
+    canvas.setPointerCapture = (canvas as CanvasWithPatch & { __gtmcOriginalSetPointerCapture?: typeof canvas.setPointerCapture })
+      .__gtmcOriginalSetPointerCapture!
+  }
+  if (canvasAny.__gtmcOriginalReleasePointerCapture) {
+    canvas.releasePointerCapture = canvasAny.__gtmcOriginalReleasePointerCapture as typeof canvas.releasePointerCapture
+  }
+
+  delete canvasAny.__gtmcOriginalSetPointerCapture
+  delete canvasAny.__gtmcOriginalReleasePointerCapture
+  delete canvasAny.__gtmcPointerCapturePatched
+}
+/* eslint-enable no-underscore-dangle */
+
 export default function LitematicaViewer({
   url,
   height = 400,
@@ -268,65 +327,6 @@ export default function LitematicaViewer({
     // eslint-disable-next-line no-underscore-dangle
     flyControls.__gtmcSafeLockPatched = true
   }
-
-  /* eslint-disable no-underscore-dangle */
-  const patchCanvasPointerCapture = (canvas: CanvasWithPatch) => {
-    if (canvas.__gtmcPointerCapturePatched) return
-
-    const canvasAny = canvas as unknown as CanvasWithPatch & Record<string, unknown>
-    const originalSetPointerCapture =
-      typeof canvas.setPointerCapture === "function"
-        ? canvas.setPointerCapture.bind(canvas)
-        : null
-    const originalReleasePointerCapture =
-      typeof canvas.releasePointerCapture === "function"
-        ? canvas.releasePointerCapture.bind(canvas)
-        : null
-
-    if (originalSetPointerCapture) {
-      canvasAny.setPointerCapture = (pointerId: number) => {
-        try {
-          originalSetPointerCapture(pointerId)
-        } catch {
-          // Ignore invalid pointer capture states from transient pointer lifecycle races.
-        }
-      }
-    }
-
-    if (originalReleasePointerCapture) {
-      canvasAny.releasePointerCapture = (pointerId: number) => {
-        try {
-          originalReleasePointerCapture(pointerId)
-        } catch {
-          // Ignore invalid pointer release states for symmetry with setPointerCapture.
-        }
-      }
-    }
-
-    canvasAny.__gtmcOriginalSetPointerCapture = originalSetPointerCapture
-    canvasAny.__gtmcOriginalReleasePointerCapture = originalReleasePointerCapture
-    canvasAny.__gtmcPointerCapturePatched = true
-  }
-
-  const restoreCanvasPointerCapture = (canvas: CanvasWithPatch | null) => {
-    if (!canvas) return
-    if (!canvas.__gtmcPointerCapturePatched) return
-
-    const canvasAny = canvas as unknown as CanvasWithPatch & Record<string, unknown>
-    if ((canvas as CanvasWithPatch & { __gtmcOriginalSetPointerCapture?: unknown })
-      .__gtmcOriginalSetPointerCapture) {
-      canvas.setPointerCapture = (canvas as CanvasWithPatch & { __gtmcOriginalSetPointerCapture?: typeof canvas.setPointerCapture })
-        .__gtmcOriginalSetPointerCapture!
-    }
-    if (canvasAny.__gtmcOriginalReleasePointerCapture) {
-      canvas.releasePointerCapture = canvasAny.__gtmcOriginalReleasePointerCapture as typeof canvas.releasePointerCapture
-    }
-
-    delete canvasAny.__gtmcOriginalSetPointerCapture
-    delete canvasAny.__gtmcOriginalReleasePointerCapture
-    delete canvasAny.__gtmcPointerCapturePatched
-  }
-  /* eslint-enable no-underscore-dangle */
 
   useEffect(() => {
     const canvas = canvasRef.current

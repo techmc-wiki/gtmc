@@ -204,7 +204,7 @@ export default async function AuthorDetailPage({
     <div className="page-container-pb">
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
 
-      <nav className="mt-8 mb-6">
+      <nav aria-label={t("breadcrumbAria")} className="mt-8 mb-6">
         <p className="font-mono text-xs tracking-widest uppercase">
           <Link
             href="/authors"
@@ -386,7 +386,7 @@ export default async function AuthorDetailPage({
         </section>
       ) : null}
 
-      <nav className="mt-10">
+      <nav aria-label={t("backToListAria")} className="mt-10">
         <Link
           href="/authors"
           className="text-tech-main/70 hover:text-tech-main-dark inline-flex items-center font-mono text-xs tracking-widest uppercase transition-colors">

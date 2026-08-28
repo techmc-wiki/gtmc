@@ -65,6 +65,8 @@
     "articlesSortLabel": "Sorted by chapter order",
     "backToAuthors": "← All contributors",
     "backToList": "← All contributors",
+    "backToListAria": "Back to all contributors",
+    "breadcrumbAria": "Breadcrumb",
     "breadcrumbAuthors": "Authors",
     "coauthoredBadge": "Co-authored",
     "coAuthoredLabel": "Co-authored",

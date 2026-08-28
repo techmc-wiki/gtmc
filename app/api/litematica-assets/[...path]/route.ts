@@ -10,33 +10,6 @@ const BASE_MINECRAFT_DIR = path.join(
 )
 const BASE_TEXTURES_DIR = path.join(BASE_MINECRAFT_DIR, "textures")
 
-const FILE_CACHE_LIMIT = 512
-const fileCache = new Map<string, string>()
-
-function getCachedFilePath(targetName: string) {
-  const cached = fileCache.get(targetName)
-  if (!cached) return null
-
-  fileCache.delete(targetName)
-  fileCache.set(targetName, cached)
-  return cached
-}
-
-function setCachedFilePath(targetName: string, relativePath: string) {
-  if (fileCache.has(targetName)) {
-    fileCache.delete(targetName)
-  }
-
-  fileCache.set(targetName, relativePath)
-
-  if (fileCache.size > FILE_CACHE_LIMIT) {
-    const oldestKey = fileCache.keys().next().value
-    if (oldestKey) {
-      fileCache.delete(oldestKey)
-    }
-  }
-}
-
 export async function GET(
   request: Request,
   context: { params: Promise<{ path: string[] }> | { path: string[] } }
@@ -67,10 +40,6 @@ export async function GET(
     dir: string,
     targetName: string
   ): Promise<string | null> => {
-    const cachedPath = getCachedFilePath(targetName)
-    if (cachedPath) {
-      return cachedPath
-    }
     const entries = await fs.promises.readdir(dir, { withFileTypes: true })
     /* oxlint-disable eslint/no-await-in-loop -- recursive directory search: returns on first match */
     for (const entry of entries) {
@@ -80,7 +49,6 @@ export async function GET(
         if (found) return found
       } else if (entry.name === targetName) {
         const relativePath = path.relative(BASE_MINECRAFT_DIR, fullPath)
-        setCachedFilePath(targetName, relativePath)
         return relativePath
       }
     }

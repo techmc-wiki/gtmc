@@ -274,9 +274,9 @@ function GlossaryEditorInner({
       if (isReadOnly) return
       const entry = entriesBySlug.get(slug)
       if (!entry) return
+      const row = entryToRow(entry)
       setOperations((prev) => {
         if (prev.some((op) => op.slug === slug)) return prev
-        const row = entryToRow(entry)
         return [
           ...prev,
           {
@@ -335,12 +335,13 @@ function GlossaryEditorInner({
       slug = `${baseSlug}-${counter}`
       counter++
     }
+    const row = emptyRow()
     setOperations((prev) => [
       ...prev,
       {
         kind: "add",
         slug,
-        after: emptyRow(),
+        after: row,
       },
     ])
     scheduleAutosave()

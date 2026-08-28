@@ -48,6 +48,7 @@ export function getActiveDraftFile(collection: {
 export function getDuplicateDraftFilePaths(files: DraftFileRecord[]) {
   const duplicates: string[] = []
   const seenPaths = new Set<string>()
+  const duplicateFilePathSet = new Set<string>()
 
   for (const file of files) {
     const normalizedPath = normalizeComparablePath(file.filePath)
@@ -57,7 +58,8 @@ export function getDuplicateDraftFilePaths(files: DraftFileRecord[]) {
     }
 
     if (seenPaths.has(normalizedPath)) {
-      if (!duplicates.includes(file.filePath)) {
+      if (!duplicateFilePathSet.has(file.filePath)) {
+        duplicateFilePathSet.add(file.filePath)
         duplicates.push(file.filePath)
       }
       continue

@@ -508,6 +508,8 @@ export async function applyRebaseCommitsMultiFile(input: {
     )
   )
   const trackedFilePaths = Object.keys(fileStates)
+  const trackedFilePathSet = new Set(trackedFilePaths)
+
   const appliedCommits = [...input.appliedCommitsBefore]
   const octokit = getOctokit(token)
   let previousSha = initialPreviousSha
@@ -525,7 +527,7 @@ export async function applyRebaseCommitsMultiFile(input: {
       commitData.files
         ?.map((file) => file.filename)
         .filter((filePath): filePath is string =>
-          trackedFilePaths.includes(filePath)
+          trackedFilePathSet.has(filePath)
         ) ?? []
 
     for (const filePath of touchedFilePaths) {

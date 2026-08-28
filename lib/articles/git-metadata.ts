@@ -254,11 +254,14 @@ export async function getArticleAuthors(
         const coAuthorsList = allCoauthorsResolved.filter(
           (a) => a !== firstAuthorNew
         )
+        const coAuthorsSet = new Set(coAuthorsList)
         for (const a of attributedAuthors) {
-          if (a !== firstAuthorNew && !coAuthorsList.includes(a)) {
+          if (a !== firstAuthorNew && !coAuthorsSet.has(a)) {
+            coAuthorsSet.add(a)
             coAuthorsList.push(a)
           }
         }
+
         result = { author: firstAuthorNew, coAuthors: coAuthorsList }
       } else {
         if (attributedAuthors.length > 0) {
@@ -281,11 +284,14 @@ export async function getArticleAuthors(
         const coAuthorsList = attributedAuthors.filter(
           (a) => a !== firstAuthorNew
         )
+        const coAuthorsSet = new Set(coAuthorsList)
         for (const a of attributedCoauthors) {
-          if (!coAuthorsList.includes(a)) {
+          if (!coAuthorsSet.has(a)) {
+            coAuthorsSet.add(a)
             coAuthorsList.push(a)
           }
         }
+
         result = { author: firstAuthorNew, coAuthors: coAuthorsList }
       } else {
         if (attributedCoauthors.length > 0) {
@@ -337,12 +343,13 @@ export async function getArticleDates(
       .filter((l) => l.trim())
     const dates: string[] = []
     const allDates: string[] = []
+    const excludedEditorsSet = new Set(excludedEditors)
 
     for (const line of lines) {
       if (!line.includes("\t")) continue
       const [date, author] = line.split("\t", 2)
       allDates.push(date)
-      if (!excludedEditors.includes(author)) {
+      if (!excludedEditorsSet.has(author)) {
         dates.push(date)
       }
     }

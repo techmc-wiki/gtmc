@@ -65,6 +65,8 @@
     "articlesSortLabel": "按章节顺序排序",
     "backToAuthors": "← 所有贡献者",
     "backToList": "← 所有贡献者",
+    "backToListAria": "返回所有贡献者",
+    "breadcrumbAria": "面包屑导航",
     "breadcrumbAuthors": "作者",
     "coauthoredBadge": "合著",
     "coAuthoredLabel": "合著",

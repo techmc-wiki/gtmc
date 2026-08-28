@@ -46,10 +46,16 @@ function getTraceSize(tracePath: string, trace: FunctionTrace): number {
 function listFunctionTraces(appServerDir: string): string[] {
   if (!fs.existsSync(appServerDir)) return []
 
-  return fs
-    .readdirSync(appServerDir, { recursive: true, withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".nft.json"))
-    .map((entry) => path.join(entry.parentPath, entry.name))
+  const traces: string[] = []
+  for (const entry of fs.readdirSync(appServerDir, {
+    recursive: true,
+    withFileTypes: true,
+  })) {
+    if (entry.isFile() && entry.name.endsWith(".nft.json")) {
+      traces.push(path.join(entry.parentPath, entry.name))
+    }
+  }
+  return traces
 }
 
 export function auditFunctionTraces(

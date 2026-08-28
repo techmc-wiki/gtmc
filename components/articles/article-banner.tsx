@@ -23,10 +23,10 @@ const blueprintGridStyle: React.CSSProperties = {
 function BannerCorners() {
   return (
     <>
-      <div className="pointer-events-none absolute top-2 left-2 size-4 border-t-2 border-l-2 border-tech-main/85 mix-blend-color-burn transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
-      <div className="pointer-events-none absolute top-2 right-2 size-4 border-t-2 border-r-2 border-tech-main/85 mix-blend-color-burn transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
-      <div className="pointer-events-none absolute bottom-2 left-2 size-4 border-b-2 border-l-2 border-tech-main/85 mix-blend-color-burn transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
-      <div className="pointer-events-none absolute right-2 bottom-2 size-4 border-r-2 border-b-2 border-tech-main/85 mix-blend-color-burn transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
+      <div className="pointer-events-none absolute top-2 left-2 size-4 border-t-2 border-l-2 border-tech-main/85 mix-blend-color-burn transition-[width,height,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
+      <div className="pointer-events-none absolute top-2 right-2 size-4 border-t-2 border-r-2 border-tech-main/85 mix-blend-color-burn transition-[width,height,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
+      <div className="pointer-events-none absolute bottom-2 left-2 size-4 border-b-2 border-l-2 border-tech-main/85 mix-blend-color-burn transition-[width,height,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
+      <div className="pointer-events-none absolute right-2 bottom-2 size-4 border-r-2 border-b-2 border-tech-main/85 mix-blend-color-burn transition-[width,height,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:size-6 group-hover/banner:border-tech-main" />
     </>
   )
 }
@@ -227,13 +227,13 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
       ref={bannerRef}
       className="
         group/banner relative mb-8 animate-fade-in
-        transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
+        transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
         hover:-translate-y-1.5
         hover:shadow-[0_16px_40px_rgb(var(--color-tech-main-dark)/0.16),0_4px_12px_rgb(var(--color-tech-main-dark)/0.10)]
       ">
       {/* Depth frame layers — expand outward on hover */}
-      <div className="pointer-events-none absolute inset-0 border border-tech-main/15 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:-inset-2" />
-      <div className="pointer-events-none absolute inset-0 border border-tech-main/8 transition-all delay-30 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:-inset-4" />
+      <div className="pointer-events-none absolute inset-0 border border-tech-main/15 transition-[inset] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:-inset-2" />
+      <div className="pointer-events-none absolute inset-0 border border-tech-main/8 transition-[inset] delay-30 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:-inset-4" />
 
       {/* Outer frame */}
       <div className="relative border border-tech-main/40 bg-surface-overlay/60">

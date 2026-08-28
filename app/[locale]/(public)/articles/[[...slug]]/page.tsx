@@ -130,16 +130,23 @@ export async function generateMetadata({
     notFound()
   }
 
+  const { contentLocale, target } = resolvedRequest
+
+  let artifact: Awaited<ReturnType<typeof getArticleContentBySlug>> | null = null
   try {
-    const { contentLocale, target } = resolvedRequest
-    const artifact = await getArticleContentBySlug(
+    artifact = await getArticleContentBySlug(
       target.canonicalSlug ?? slugPath,
       contentLocale
     )
-    if (!artifact) {
-      notFound()
-    }
+  } catch {
+    notFound()
+  }
 
+  if (!artifact) {
+    notFound()
+  }
+
+  try {
     const { content: mdBody, frontmatter: data } = artifact
     const siteUrl = getSiteUrl()
     const effectiveSlug =

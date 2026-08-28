@@ -21,25 +21,41 @@ async function createAssetIndex(): Promise<{
   const assetFiles = new Map<string, LitematicaAsset>()
   const textureFilePaths = new Map<string, string>()
 
-  const indexDirectory = async (dir: string): Promise<void> => {
+  type IndexedAsset = {
+    entry: fs.Dirent
+    relativePath: string
+    content: Buffer
+    contentType: string
+  }
+
+  const indexDirectory = async (dir: string): Promise<IndexedAsset[]> => {
     const entries = await fs.promises.readdir(dir, { withFileTypes: true })
-    /* oxlint-disable eslint/no-await-in-loop -- preserves first-match asset lookup order */
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name)
-      if (entry.isDirectory()) {
-        await indexDirectory(fullPath)
-        continue
-      }
+    const indexedEntries = await Promise.all(
+      entries.map(async (entry): Promise<IndexedAsset[]> => {
+        const fullPath = path.join(dir, entry.name)
+        if (entry.isDirectory()) {
+          return indexDirectory(fullPath)
+        }
 
-      const relativePath = path
-        .relative(BASE_MINECRAFT_DIR, fullPath)
-        .replaceAll(path.sep, "/")
-      const content = await fs.promises.readFile(fullPath)
-      const contentType =
-        relativePath.endsWith(".json") || relativePath.endsWith(".mcmeta")
-          ? "application/json"
-          : "image/png"
+        const relativePath = path
+          .relative(BASE_MINECRAFT_DIR, fullPath)
+          .replaceAll(path.sep, "/")
+        const content = await fs.promises.readFile(fullPath)
+        const contentType =
+          relativePath.endsWith(".json") || relativePath.endsWith(".mcmeta")
+            ? "application/json"
+            : "image/png"
 
+        return [{ entry, relativePath, content, contentType }]
+      })
+    )
+
+    return indexedEntries.flat()
+  }
+
+  try {
+    const indexedAssets = await indexDirectory(BASE_MINECRAFT_DIR)
+    indexedAssets.forEach(({ entry, relativePath, content, contentType }) => {
       assetFiles.set(relativePath, { content, contentType })
       if (
         relativePath.startsWith("textures/") &&
@@ -47,12 +63,7 @@ async function createAssetIndex(): Promise<{
       ) {
         textureFilePaths.set(entry.name, relativePath)
       }
-    }
-    /* oxlint-enable eslint/no-await-in-loop */
-  }
-
-  try {
-    await indexDirectory(BASE_MINECRAFT_DIR)
+    })
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
       throw error

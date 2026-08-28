@@ -1,7 +1,6 @@
 "use client"
 
-import * as React from "react"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, type ChangeEvent } from "react"
 import { useTranslations } from "next-intl"
 import { SearchIcon } from "lucide-react"
 import {
@@ -10,8 +9,6 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@/components/ui/shadcn/input-group"
-
-const DEBOUNCE_MS = 100
 
 export interface GlossarySearchProps {
   /** URL-backed query state owned by the parent (nuqs). */
@@ -35,36 +32,7 @@ export function GlossarySearch({
   className = "",
 }: GlossarySearchProps) {
   const t = useTranslations("Glossary")
-  // Local mirror so typing stays instant while parent updates are debounced;
-  // re-syncs when the URL state changes externally (deep link, back button).
-  const [inputValue, setInputValue] = useState(query)
   const inputRef = useRef<HTMLInputElement>(null)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const scheduleQueryChange = useCallback(
-    (nextQuery: string) => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
-      }
-      debounceRef.current = setTimeout(() => {
-        onQueryChange(nextQuery)
-      }, DEBOUNCE_MS)
-    },
-    [onQueryChange]
-  )
-
-  useEffect(() => {
-    setInputValue(query)
-  }, [query])
-
-  useEffect(
-    () => () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
-      }
-    },
-    []
-  )
 
   // Capture phase so descendant handlers can't swallow Cmd+/ before it lands.
   useEffect(() => {
@@ -77,24 +45,21 @@ export function GlossarySearch({
       if (
         e.key === "Escape" &&
         document.activeElement === inputRef.current &&
-        inputValue.length > 0
+        query.length > 0
       ) {
-        setInputValue("")
         onQueryChange("")
       }
     }
     document.addEventListener("keydown", handleKeyDown, { capture: true })
     return () =>
       document.removeEventListener("keydown", handleKeyDown, { capture: true })
-  }, [inputValue, onQueryChange])
+  }, [query, onQueryChange])
 
   const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const next = e.target.value
-      setInputValue(next)
-      scheduleQueryChange(next)
+    (e: ChangeEvent<HTMLInputElement>) => {
+      onQueryChange(e.target.value)
     },
-    [scheduleQueryChange]
+    [onQueryChange]
   )
 
   const toggleScope = useCallback(() => {
@@ -115,7 +80,7 @@ export function GlossarySearch({
         </InputGroupAddon>
         <InputGroupInput
           ref={inputRef}
-          value={inputValue}
+          value={query}
           onChange={handleInputChange}
           placeholder={t("searchPlaceholder")}
           aria-label="Search glossary terms"

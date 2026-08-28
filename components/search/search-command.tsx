@@ -71,6 +71,7 @@ export function SearchCommand() {
   const [isLoading, setIsLoading] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const prevIsOpenRef = useRef(false)
   const router = useRouter()
   const pathname = usePathname()
 
@@ -81,6 +82,17 @@ export function SearchCommand() {
         inputRef.current?.focus()
       })
     }
+  }, [isOpen])
+
+  // Reset search state when dialog closes (e.g. via Cmd+K toggle)
+  useEffect(() => {
+    if (prevIsOpenRef.current && !isOpen) {
+      setQuery("")
+      setResults([])
+      setGlossaryResults([])
+      setIsLoading(false)
+    }
+    prevIsOpenRef.current = isOpen
   }, [isOpen])
 
   const closeModal = useCallback(() => {
@@ -101,16 +113,7 @@ export function SearchCommand() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault()
-        setIsOpen((prev) => {
-          if (prev) {
-            // Closing — reset state synchronously
-            setQuery("")
-            setResults([])
-            setGlossaryResults([])
-            setIsLoading(false)
-          }
-          return !prev
-        })
+        setIsOpen((prev) => !prev)
       }
     }
     document.addEventListener("keydown", handleKeyDown, { capture: true })

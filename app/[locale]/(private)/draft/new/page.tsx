@@ -1,10 +1,11 @@
 import type { Metadata } from "next"
-import { auth } from "@/lib/auth"
-import { getGithubPatForUser } from "@/lib/auth/context"
-import { getMainBranchHeadSha } from "@/lib/articles/branch"
-import { getRepoFileContent } from "@/lib/github/sync"
-import { prisma } from "@/lib/prisma"
+import { getTranslations } from "next-intl/server"
 import { redirect } from "next/navigation"
+
+import { createDraftAction } from "@/actions/article-draft"
+import { Button } from "@/components/ui/shadcn/button"
+import { Input } from "@/components/ui/shadcn/input"
+import { auth } from "@/lib/auth"
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -21,48 +22,42 @@ export default async function NewDraftPage({
   }
 
   const { file: fileParam } = await searchParams
-  const filePath = typeof fileParam === "string" ? fileParam : undefined
+  const filePath = typeof fileParam === "string" ? fileParam : ""
+  const t = await getTranslations("Drafts")
 
-  let initialTitle = "UNTITLED"
-  let initialContent = ""
-  const normalizedFilePath = filePath
-
-  if (filePath) {
-    initialTitle = filePath
-    const normalizedPath = filePath.replace(/^\/+/, "")
-    const candidates = normalizedPath.endsWith(".md")
-      ? [normalizedPath]
-      : [normalizedPath, `${normalizedPath}.md`]
-
-    /* oxlint-disable eslint/no-await-in-loop -- sequential: returns on first match to avoid unnecessary fetches */
-    for (const candidate of candidates) {
-      const content = await getRepoFileContent(candidate)
-      if (content !== null) {
-        initialContent = content
-        break
-      }
-    }
-    /* oxlint-enable eslint/no-await-in-loop */
-
-    if (!initialContent) {
-      initialContent = ""
-    }
-  }
-
-  const token =
-    (await getGithubPatForUser(session.user.id)) ?? process.env.GITHUB_TOKEN
-  const baseMainSha = await getMainBranchHeadSha(token)
-  const createData = {
-    author: { connect: { id: session.user.id } },
-    baseMainSha,
-    content: initialContent,
-    filePath: normalizedFilePath,
-    status: "DRAFT",
-    title: initialTitle,
-  }
-  const draft = await prisma.revision.create({
-    data: createData,
-  })
-
-  redirect(`/draft/${draft.id}`)
+  return (
+    <main className="mx-auto max-w-xl space-y-6 p-4 md:p-8">
+      <header className="border-tech-main/40 border-b pb-4">
+        <h1 className="display-title text-tech-main-dark text-3xl">
+          {t("newArticleDraftTitle")}
+        </h1>
+        <p className="text-tech-main/70 mt-2 text-sm/relaxed">
+          {t("newArticleDraftDescription")}
+        </p>
+      </header>
+      <form
+        action={createDraftAction}
+        className="border-tech-main/40 bg-surface-overlay/80 space-y-5 border p-4 backdrop-blur-sm sm:p-6">
+        <div className="space-y-2">
+          <label
+            htmlFor="draft-file-path"
+            className="text-tech-main/60 text-xs font-medium">
+            {t("existingFilePath")}
+          </label>
+          <Input
+            id="draft-file-path"
+            name="filePath"
+            defaultValue={filePath}
+            placeholder="e.g. SlimeTech/Molforte/04-new-machine.md"
+          />
+          <p className="text-tech-main/60 text-xs/relaxed">
+            {t("existingFilePathHint")}
+          </p>
+        </div>
+        <Button type="submit" variant="primary">
+          {t("createDraft")}
+        </Button>
+      </form>
+    </main>
+  )
 }

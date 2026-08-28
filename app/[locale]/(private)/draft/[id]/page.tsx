@@ -59,11 +59,6 @@ export default async function EditDraftPage({
     content: draft.content,
     filePath: draft.filePath,
   })
-
-  const draftWorkspaceLabel =
-    draftFiles.files.length > 1
-      ? `FILES_[${draftFiles.files.length}]`
-      : draftFiles.files[0]?.filePath || "DRAFT_WORKSPACE"
   const contributingGuides = await loadContributingGuides()
 
   const draftEditorInitialData = buildDraftEditorData(
@@ -73,54 +68,15 @@ export default async function EditDraftPage({
   )
 
   return (
-    <div className="relative mx-auto max-w-[1400px] space-y-6 p-4 md:p-8">
-      <div className="from-tech-main/0 via-tech-main to-tech-main/0 absolute top-0 right-10 h-px w-24 bg-linear-to-r" />
-      <div className="from-tech-main/0 via-tech-main/50 to-tech-main/0 absolute top-10 right-0 h-24 w-px bg-linear-to-b" />
-
-      <div className="guide-line relative flex flex-col gap-3 border-b pb-6 md:flex-row md:items-end md:justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            asChild
-            variant="ghost"
-            className="text-tech-main/70 hover:bg-tech-main/5 hover:text-tech-main h-9 gap-2 px-3 text-[10px] tracking-widest">
-            <Link href="/draft">
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="square">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-              ABORT_EDIT_SEQUENCE
-            </Link>
-          </Button>
-        </div>
-        <div className="flex flex-col items-end gap-1">
-          <div className="flex items-center gap-2">
-            <span className="bg-tech-main/40 h-[2px] w-4" />
-            <p className="text-tech-main-dark font-mono text-xl font-bold tracking-tighter uppercase">
-              WORKSPACE_TERMINAL
-            </p>
-          </div>
-          <p className="tracking-tech-wide text-tech-main/50 font-mono text-[9px] uppercase">
-            TARGET_NODE // {draftWorkspaceLabel}
-          </p>
-        </div>
-      </div>
-
-      <div className="relative mx-auto w-full">
-        {/* Subtle decorative scanline behind the editor */}
-        <div className="pointer-events-none absolute inset-0 z-[-1] overflow-hidden">
-          <div className="size-full bg-[linear-gradient(to_bottom,transparent_50%,rgb(var(--color-tech-main)/0.02)_50%)] bg-size-[100%_4px]" />
-          <div className="bg-tech-main/10 absolute inset-x-0 top-0 h-[2px] animate-[tree-drop-in_10s_ease-in-out_infinite] shadow-[0_0_10px_rgb(var(--color-tech-main)/0.2)]" />
-        </div>
-
-        <DraftEditor initialData={draftEditorInitialData} />
-      </div>
-    </div>
+    <main className="mx-auto max-w-[1400px] space-y-6 p-4 md:p-8">
+      <header className="border-tech-main/40 flex items-center justify-between gap-4 border-b pb-4">
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/draft">Back to drafts</Link>
+        </Button>
+        <p className="text-tech-main/60 text-sm">Article draft</p>
+      </header>
+      <DraftEditor initialData={draftEditorInitialData} />
+    </main>
   )
 }
 

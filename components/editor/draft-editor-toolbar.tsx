@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { MoreHorizontalIcon, Redo2Icon, Undo2Icon } from "lucide-react"
 import { EditorToolbar } from "@/components/editor/editor-toolbar"
 import { DraftImageUploadInput } from "@/components/editor/draft-image-upload-input"
 import {
@@ -8,6 +9,12 @@ import {
   type TabType,
 } from "@/components/editor/editor-tab-strip"
 import { Button } from "@/components/ui/shadcn/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/shadcn/dropdown-menu"
 
 interface DraftEditorToolbarProps {
   activeTab: TabType
@@ -76,92 +83,61 @@ export function DraftEditorToolbar({
             onWrapToggle={onWrapToggle}
             fileUploadSlot={fileUploadSlot}
           />
-          <div className="guide-line bg-tech-main/4 relative flex h-12 items-center gap-2 overflow-x-auto scroll-smooth border-b px-4 shadow-[inset_0_1px_4px_rgb(var(--color-tech-main)/0.05)]">
-            <div className="bg-tech-main/30 absolute inset-y-0 left-0 w-1" />
-            <span className="text-tech-main/60 mr-2 text-xs font-medium opacity-70">
-              MACROS
-            </span>
-
+          <div className="border-tech-main/20 flex min-h-11 items-center justify-end gap-1 border-b px-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={readOnly}
+                  aria-label="Insert Markdown">
+                  <MoreHorizontalIcon aria-hidden className="size-4" />
+                  Insert
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="border-tech-main/40 bg-surface-modal rounded-none">
+                <DropdownMenuItem
+                  onSelect={() => onInsertText("\n## Section title\n\n")}>
+                  Section heading
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() =>
+                    onInsertText(
+                      "\n> [!TIP]\n> Add contributor guidance here.\n\n"
+                    )
+                  }>
+                  Callout
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() =>
+                    onInsertText(
+                      "\n| Parameter | Value | Notes |\n| --- | --- | --- |\n| Example | Value | Detail |\n\n"
+                    )
+                  }>
+                  Table
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               type="button"
               variant="ghost"
-              className="text-tech-main hover:guide-line hover:text-tech-main hover:bg-surface-overlay h-7 border border-transparent px-3 text-[10px] tracking-widest transition-[background-color,border-color,box-shadow] hover:shadow-sm"
-              disabled={readOnly}
-              onClick={() => onInsertText("\n## Section Title\n\n")}>
-              <span className="flex items-center gap-1.5">
-                <span className="text-tech-main/40 font-bold">#</span> SECTION
-              </span>
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className="text-tech-main hover:guide-line hover:text-tech-main hover:bg-surface-overlay h-7 border border-transparent px-3 text-[10px] tracking-widest transition-[background-color,border-color,box-shadow] hover:shadow-sm"
-              disabled={readOnly}
-              onClick={() =>
-                onInsertText("\n> [!TIP]\n> Add contributor guidance here.\n\n")
-              }>
-              <span className="flex items-center gap-1.5">
-                <span className="text-tech-main/40 font-bold">{">"}</span>{" "}
-                CALLOUT
-              </span>
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className="text-tech-main hover:guide-line hover:text-tech-main hover:bg-surface-overlay h-7 border border-transparent px-3 text-[10px] tracking-widest transition-[background-color,border-color,box-shadow] hover:shadow-sm"
-              disabled={readOnly}
-              onClick={() =>
-                onInsertText(
-                  "\n| Parameter | Value | Notes |\n| --- | --- | --- |\n| Example | Value | Detail |\n\n"
-                )
-              }>
-              <span className="flex items-center gap-1.5">
-                <span className="text-tech-main/40 font-bold">||</span> TABLE
-              </span>
-            </Button>
-
-            <div className="bg-tech-main/20 mx-2 h-4 w-px" />
-
-            <Button
-              type="button"
-              variant="secondary"
-              className="group guide-line text-tech-main-dark/80 hover:border-tech-main/50 bg-surface-overlay/50 hover:bg-surface-overlay h-7 px-3 text-[10px] font-bold tracking-widest transition-colors"
+              size="sm"
               disabled={readOnly || !canUndo}
-              onClick={onUndo}>
-              <span className="flex items-center gap-1">
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="square">
-                  <path d="M3 7v6h6M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3z" />
-                </svg>
-                UNDO
-              </span>
+              onClick={onUndo}
+              aria-label="Undo">
+              <Undo2Icon aria-hidden className="size-4" />
             </Button>
             <Button
               type="button"
-              variant="secondary"
-              className="group guide-line text-tech-main-dark/80 hover:border-tech-main/50 bg-surface-overlay/50 hover:bg-surface-overlay h-7 px-3 text-[10px] font-bold tracking-widest transition-colors"
+              variant="ghost"
+              size="sm"
               disabled={readOnly || !canRedo}
-              onClick={onRedo}>
-              <span className="flex items-center gap-1">
-                REDO
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="square"
-                  className="scale-x-[-1]">
-                  <path d="M3 7v6h6M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3z" />
-                </svg>
-              </span>
+              onClick={onRedo}
+              aria-label="Redo">
+              <Redo2Icon aria-hidden className="size-4" />
             </Button>
           </div>
         </>

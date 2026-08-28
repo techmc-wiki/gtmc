@@ -82,12 +82,13 @@ export function useDraftEditor(initialData?: {
   )
   const [fileDialogIntent, setFileDialogIntent] =
     React.useState<DraftFileDialogIntent | null>(null)
-  const [isSaving, setIsSaving] = React.useState(false)
+  const [pendingSaveCount, setPendingSaveCount] = React.useState(0)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [saveProgressState, setSaveProgressState] =
     React.useState<OperationProgressState>("idle")
   const [submitProgressState, setSubmitProgressState] =
     React.useState<OperationProgressState>("idle")
+  const [saveError, setSaveError] = React.useState<string | null>(null)
   const [activeTab, setActiveTab] = React.useState<TabType>("write")
   const [lineWrap, setLineWrap] = React.useState(false)
   const [activeInfoTab, setActiveInfoTab] = React.useState<"changes" | "guide">(
@@ -113,6 +114,9 @@ export function useDraftEditor(initialData?: {
     {}
   )
   const repoSnapshotRequestsRef = React.useRef<Record<string, string>>({})
+  const revisionIdRef = React.useRef<string | undefined>(initialData?.id)
+  const saveQueueRef = React.useRef<Promise<unknown> | null>(null)
+  const submissionInFlightRef = React.useRef(false)
 
   const saveProgressStages = React.useMemo(
     () => [
@@ -218,6 +222,7 @@ export function useDraftEditor(initialData?: {
   }
 
   const githubPrUrl = initialData?.githubPrUrl
+  const isSaving = pendingSaveCount > 0
   const isReadOnly = draftStatus !== "DRAFT"
   const activeFile = getActiveDraftFile(draftCollection)
   const activeFileContent = activeFile.content
@@ -377,61 +382,75 @@ export function useDraftEditor(initialData?: {
   const persistDraft = React.useCallback(async () => {
     const normalizedDraftCollection =
       normalizeDraftFileCollection(draftCollection)
-    const primaryFile = getActiveDraftFile(normalizedDraftCollection)
-    const formData = new FormData()
-    formData.append("title", title)
-    formData.append("activeFileId", normalizedDraftCollection.activeFileId)
-    formData.append("content", primaryFile.content)
-    formData.append(
-      "draftFiles",
-      serializeDraftFilesPayload(normalizedDraftCollection)
-    )
-    formData.append("filePath", primaryFile.filePath)
-    if (revisionId) formData.append("revisionId", revisionId)
-
-    const result = await saveDraftAction(formData)
-    if (!result.success || !result.revisionId) {
-      throw new Error("Failed to save draft")
+    const snapshot = {
+      draftCollection: normalizedDraftCollection,
+      title,
     }
 
-    setDraftCollection(normalizedDraftCollection)
-    setLastSavedDraftCollection(normalizedDraftCollection)
-    setLastSavedTitle(title)
-    setRevisionId(result.revisionId)
+    setPendingSaveCount((count) => count + 1)
+    const previousSave = saveQueueRef.current || Promise.resolve()
+    const saveTask = previousSave.then(async () => {
+      const primaryFile = getActiveDraftFile(snapshot.draftCollection)
+      const formData = new FormData()
+      formData.append("title", snapshot.title)
+      formData.append("activeFileId", snapshot.draftCollection.activeFileId)
+      formData.append("content", primaryFile.content)
+      formData.append(
+        "draftFiles",
+        serializeDraftFilesPayload(snapshot.draftCollection)
+      )
+      formData.append("filePath", primaryFile.filePath)
+      if (revisionIdRef.current) {
+        formData.append("revisionId", revisionIdRef.current)
+      }
 
-    return { normalizedDraftCollection, revisionId: result.revisionId }
-  }, [draftCollection, revisionId, title])
+      const result = await saveDraftAction(formData)
+      if (!result.success || !result.revisionId) {
+        throw new Error("Failed to save draft")
+      }
+
+      revisionIdRef.current = result.revisionId
+      setLastSavedDraftCollection(snapshot.draftCollection)
+      setLastSavedTitle(snapshot.title)
+      setRevisionId(result.revisionId)
+      return { revisionId: result.revisionId }
+    })
+
+    saveQueueRef.current = saveTask.catch(() => undefined)
+    try {
+      return await saveTask
+    } finally {
+      setPendingSaveCount((count) => Math.max(0, count - 1))
+    }
+  }, [draftCollection, title])
 
   const saveDraftWithFeedback = React.useCallback(
     async (mode: "manual" | "auto" = "manual") => {
-      if (isSaving || !title.trim()) return
+      if (!title.trim()) return
       if (autoSaveTimeoutRef.current !== null) {
         window.clearTimeout(autoSaveTimeoutRef.current)
         autoSaveTimeoutRef.current = null
       }
-      setIsSaving(true)
-      if (mode === "manual") updateSaveProgressState("running")
+      if (mode === "manual") {
+        setSaveError(null)
+        updateSaveProgressState("running")
+      }
       try {
         await persistDraft()
         if (mode === "manual") {
           updateSaveProgressState("success")
           toast.success(t("badgeDraftSaved"))
-        } else {
-          toast.success("Autosaved", { duration: 1800 })
         }
       } catch (error) {
         console.error(error)
+        setSaveError(t("badgeSaveFailed"))
         if (mode === "manual") {
           updateSaveProgressState("error")
           toast.error(t("badgeSaveFailed"))
-        } else {
-          toast.error("Autosave failed")
         }
-      } finally {
-        setIsSaving(false)
       }
     },
-    [isSaving, persistDraft, title, t]
+    [persistDraft, t, title]
   )
 
   const handleUndoDraftEdit = React.useCallback(() => {
@@ -496,12 +515,13 @@ export function useDraftEditor(initialData?: {
 
   const draftUploadAdapter = React.useCallback(
     async (file: File) => {
-      if (!revisionId) {
+      const currentRevisionId = revisionIdRef.current
+      if (!currentRevisionId) {
         throw new Error("Save draft first before uploading files.")
       }
       const formData = new FormData()
       formData.append("file", file)
-      formData.append("revisionId", revisionId)
+      formData.append("revisionId", currentRevisionId)
       const res = await fetch("/api/upload/draft", {
         method: "POST",
         body: formData,
@@ -511,7 +531,7 @@ export function useDraftEditor(initialData?: {
       if (!res.ok) throw new Error(data.error || t("errorUploadFailed"))
       return { url: data.url, filename: data.filename }
     },
-    [revisionId, t]
+    [t]
   )
 
   const { uploadFile, isUploading, isCompressing } = useDraftImageUpload({
@@ -546,9 +566,6 @@ export function useDraftEditor(initialData?: {
       return
     }
     if (isSaving || isSubmitting || isUploading) return
-    if (autoSaveTimeoutRef.current !== null) {
-      window.clearTimeout(autoSaveTimeoutRef.current)
-    }
     autoSaveTimeoutRef.current = window.setTimeout(() => {
       autoSaveTimeoutRef.current = null
       void saveDraftWithFeedback("auto")
@@ -571,6 +588,25 @@ export function useDraftEditor(initialData?: {
   ])
 
   React.useEffect(() => {
+    if (isReadOnly || !hasUnsavedChanges) return
+    const warnBeforeExit = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+      event.returnValue = true
+    }
+    const saveWhenHidden = () => {
+      if (document.visibilityState === "hidden" && !isUploading) {
+        void saveDraftWithFeedback("auto")
+      }
+    }
+    window.addEventListener("beforeunload", warnBeforeExit)
+    document.addEventListener("visibilitychange", saveWhenHidden)
+    return () => {
+      window.removeEventListener("beforeunload", warnBeforeExit)
+      document.removeEventListener("visibilitychange", saveWhenHidden)
+    }
+  }, [hasUnsavedChanges, isReadOnly, isUploading, saveDraftWithFeedback])
+
+  React.useEffect(() => {
     if (isReadOnly) return
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
@@ -580,36 +616,33 @@ export function useDraftEditor(initialData?: {
         return
       }
       event.preventDefault()
-      if (isSubmitting || isUploading || !title.trim()) return
+      if (isSaving || isSubmitting || isUploading || !title.trim()) return
       void saveDraftWithFeedback("manual")
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isReadOnly, isSubmitting, isUploading, saveDraftWithFeedback, title])
+  }, [
+    isReadOnly,
+    isSaving,
+    isSubmitting,
+    isUploading,
+    saveDraftWithFeedback,
+    title,
+  ])
 
   const handleUploadWithAutoSave = async (file: File) => {
-    if (!revisionId) {
+    if (!revisionIdRef.current) {
       const savingToastId = toast.loading(t("badgeSavingBeforeUpload"))
-      setIsSaving(true)
       updateSaveProgressState("running")
       try {
-        const result = await persistDraft()
-        if (result.revisionId) {
-          updateSaveProgressState("success")
-          toast.dismiss(savingToastId)
-        } else {
-          updateSaveProgressState("error")
-          toast.dismiss(savingToastId)
-          toast.error(t("badgeSaveFailedUpload"))
-          return
-        }
+        await persistDraft()
+        updateSaveProgressState("success")
+        toast.dismiss(savingToastId)
       } catch {
         updateSaveProgressState("error")
         toast.dismiss(savingToastId)
         toast.error(t("badgeSaveFailedUpload"))
         return
-      } finally {
-        setIsSaving(false)
       }
     }
     uploadFile(file)
@@ -632,17 +665,27 @@ export function useDraftEditor(initialData?: {
     if (isReadOnly || isUploading) return
     e.preventDefault()
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0]
-      handleUploadWithAutoSave(file)
+      handleUploadWithAutoSave(e.dataTransfer.files[0])
     }
+  }
+
+  const saveDraft = () => {
+    void saveDraftWithFeedback("manual")
   }
 
   const handleSaveDraft = async (e: React.FormEvent) => {
     e.preventDefault()
     await saveDraftWithFeedback("manual")
   }
-
   const handleSubmitDraft = async () => {
+    if (
+      isReadOnly ||
+      submissionInFlightRef.current ||
+      isSaving ||
+      isUploading
+    ) {
+      return
+    }
     if (hasMissingFilePath) {
       toast.error(t("badgeAllFilesNeedPath"), { duration: 4000 })
       return
@@ -652,7 +695,9 @@ export function useDraftEditor(initialData?: {
         t("duplicatePathsError", { paths: duplicateFilePaths.join(", ") }),
         { duration: 4000 }
       )
+      return
     }
+    submissionInFlightRef.current = true
     setIsSubmitting(true)
     updateSubmitProgressState("running")
     try {
@@ -668,6 +713,7 @@ export function useDraftEditor(initialData?: {
       updateSubmitProgressState("error")
       toast.error(t("badgeSubmitFailed"))
     } finally {
+      submissionInFlightRef.current = false
       setIsSubmitting(false)
     }
   }
@@ -778,6 +824,7 @@ export function useDraftEditor(initialData?: {
       fileDialogIntent,
       isSaving,
       isSubmitting,
+      saveError,
       saveProgressState,
       submitProgressState,
       activeTab,
@@ -815,6 +862,7 @@ export function useDraftEditor(initialData?: {
       updateActiveFile,
       updateFileById,
       handleSaveDraft,
+      saveDraft,
       handleSubmitDraft,
       handleUndoDraftEdit,
       handleRedoDraftEdit,

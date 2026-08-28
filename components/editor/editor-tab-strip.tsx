@@ -45,9 +45,8 @@ export function EditorTabStrip({
       </div>
 
       {rightSlot ? (
-        <div className="text-tech-main/50 flex items-center gap-2 pr-4 text-[9px] uppercase">
-          TARGET_BUFFER //{" "}
-          <span className="text-tech-main-dark/80 font-bold">{rightSlot}</span>
+        <div className="text-tech-main/60 hidden min-w-0 truncate pr-4 text-xs font-medium sm:block">
+          {rightSlot}
         </div>
       ) : null}
     </div>

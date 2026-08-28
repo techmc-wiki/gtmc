@@ -46,12 +46,8 @@ export default defineConfig({
       "build/**",
       "next-env.d.ts",
       ".worktrees/**",
-      ".sisyphus/**",
       ".agents/**",
-      ".claude/**",
       "articles/**",
-      ".qa-*.ts",
-      "*.qa-*.ts",
       "**/*.cjs",
     ],
     plugins: [

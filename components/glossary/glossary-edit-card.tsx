@@ -94,7 +94,9 @@ export function GlossaryEditCard({
     seed ? ({ ...seed } as GlossaryRow) : null
   )
   const rowRef = React.useRef(row)
-  rowRef.current = row
+  React.useEffect(() => {
+    rowRef.current = row
+  }, [row])
 
   const activeLocale: GlossaryLocale | null = isGlossaryLocale(locale)
     ? locale

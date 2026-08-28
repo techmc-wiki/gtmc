@@ -215,8 +215,10 @@ function GlossaryEditorInner({
   )
   const operationsRef = React.useRef(operations)
   const titleRef = React.useRef(title)
-  operationsRef.current = operations
-  titleRef.current = title
+  React.useEffect(() => {
+    operationsRef.current = operations
+    titleRef.current = title
+  }, [operations, title])
 
   const scheduleAutosave = React.useCallback(() => {
     if (isReadOnly) return

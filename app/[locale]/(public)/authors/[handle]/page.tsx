@@ -397,6 +397,11 @@ export default async function AuthorDetailPage({
   )
 }
 
+const numberFormatters: Record<string, Intl.NumberFormat> = {
+  en: new Intl.NumberFormat("en"),
+  zh: new Intl.NumberFormat("zh"),
+}
+
 function RepositoryStat({
   label,
   value,
@@ -406,11 +411,12 @@ function RepositoryStat({
   value: number
   locale: string
 }) {
+  const formatter = numberFormatters[locale] ?? numberFormatters.en
   return (
     <Card padding="compact">
       <p className="text-tech-main/60 text-xs font-medium">{label}</p>
       <p className="text-tech-main-dark mt-2 text-2xl font-semibold tabular-nums">
-        {new Intl.NumberFormat(locale).format(value)}
+        {formatter.format(value)}
       </p>
     </Card>
   )

@@ -2,8 +2,10 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
-import type { ReactCodeMirrorRef } from "@uiw/react-codemirror"
-import CodeMirror from "@uiw/react-codemirror"
+import CodeMirror, {
+  EditorView,
+  type ReactCodeMirrorRef,
+} from "@uiw/react-codemirror"
 import {
   autocompletion,
   type CompletionContext,
@@ -11,7 +13,6 @@ import {
 } from "@codemirror/autocomplete"
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown"
 import { languages } from "@codemirror/language-data"
-import { EditorView } from "@codemirror/view"
 import { useTheme } from "@/lib/theme"
 
 const techTheme = EditorView.theme({

@@ -53,6 +53,7 @@ export function PRActionButtons({
       mergeStrategyAnalysis={mergeStrategyAnalysis}
       mergeBlockedReason={mergeBlockedReason}
       squashCommitDefaults={squashCommitDefaults}
+      defaultMethod={mergeStrategyAnalysis.recommendation}
     />
   )
 }
@@ -63,6 +64,7 @@ function PRActionButtonsContent({
   mergeStrategyAnalysis,
   mergeBlockedReason,
   squashCommitDefaults,
+  defaultMethod,
 }: {
   closePRAction: () => Promise<void>
   mergePRAction:
@@ -79,12 +81,12 @@ function PRActionButtonsContent({
     body: string
     coauthorLines: string[]
   }
+  defaultMethod: ReviewMergeMethod
 }) {
   const t = useTranslations("OperationProgress")
   const reviewT = useTranslations("Review")
-  const [selectedMethod, setSelectedMethod] = React.useState<ReviewMergeMethod>(
-    mergeStrategyAnalysis.recommendation
-  )
+  const [selectedMethod, setSelectedMethod] =
+    React.useState<ReviewMergeMethod>(defaultMethod)
   const [commitTitle, setCommitTitle] = React.useState(
     squashCommitDefaults?.title ?? ""
   )

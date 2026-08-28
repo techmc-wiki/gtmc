@@ -41,6 +41,7 @@ interface RebaseProgressProps {
   defaultCommitBody?: string
   coauthorLines?: string[]
   mergeStrategyAnalysis: ReviewMergeStrategyAnalysis
+  defaultMethod?: ReviewMergeMethod
 }
 
 const EMPTY_COAUTHOR_LINES: string[] = []
@@ -250,12 +251,13 @@ export function RebaseProgress({
   defaultCommitBody = "",
   coauthorLines = EMPTY_COAUTHOR_LINES,
   mergeStrategyAnalysis,
+  defaultMethod = mergeStrategyAnalysis.recommendation,
 }: RebaseProgressProps) {
   const resetKey = [
     mode,
     defaultCommitTitle,
     defaultCommitBody,
-    mergeStrategyAnalysis.recommendation,
+    defaultMethod,
     coauthorLines.join("\n"),
   ].join("::")
 
@@ -275,6 +277,7 @@ export function RebaseProgress({
       defaultCommitBody={defaultCommitBody}
       coauthorLines={coauthorLines}
       mergeStrategyAnalysis={mergeStrategyAnalysis}
+      defaultMethod={defaultMethod}
     />
   )
 }
@@ -293,14 +296,14 @@ function RebaseProgressContent({
   defaultCommitBody = "",
   coauthorLines = EMPTY_COAUTHOR_LINES,
   mergeStrategyAnalysis,
+  defaultMethod = mergeStrategyAnalysis.recommendation,
 }: RebaseProgressProps) {
   const t = useTranslations("Review")
   const progressT = useTranslations("OperationProgress")
   const [commitTitle, setCommitTitle] = React.useState(defaultCommitTitle)
   const [commitBody, setCommitBody] = React.useState(defaultCommitBody)
-  const [selectedMethod, setSelectedMethod] = React.useState<ReviewMergeMethod>(
-    mergeStrategyAnalysis.recommendation
-  )
+  const [selectedMethod, setSelectedMethod] =
+    React.useState<ReviewMergeMethod>(defaultMethod)
 
   const finalizeStages = React.useMemo<OperationProgressStage[]>(
     () =>

@@ -60,8 +60,8 @@ interface EditorTextareaProps {
   onDrop?: (e: React.DragEvent<HTMLDivElement>) => void
   onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void
   onDragEnter?: (e: React.DragEvent<HTMLDivElement>) => void
-  isReadOnly?: boolean
-  isSaving?: boolean
+  readOnly?: boolean
+  saving?: boolean
   placeholder?: string
   "aria-busy"?: boolean
   fileId?: string // to preserve state per file
@@ -162,8 +162,8 @@ export function EditorTextarea({
   onDrop,
   onDragOver,
   onDragEnter,
-  isReadOnly,
-  isSaving,
+  readOnly,
+  saving,
   placeholder,
   fileId,
   lineWrap = false,
@@ -191,7 +191,7 @@ export function EditorTextarea({
 
   const handleKeyDownCapture = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (isReadOnly) {
+      if (readOnly) {
         return
       }
 
@@ -221,18 +221,18 @@ export function EditorTextarea({
         }
       }
     },
-    [canRedo, canUndo, isReadOnly, onRedo, onUndo]
+    [canRedo, canUndo, readOnly, onRedo, onUndo]
   )
 
   return (
     <div
-      className={`custom-left-scrollbar flex w-full grow flex-col ${isReadOnly ? `cursor-not-allowed bg-gray-50` : `bg-transparent`} `}
+      className={`custom-left-scrollbar flex w-full grow flex-col ${readOnly ? `cursor-not-allowed bg-gray-50` : `bg-transparent`} `}
       onPaste={onPaste}
       onDrop={onDrop}
       onDragOver={onDragOver}
       onDragEnter={onDragEnter}
       onKeyDownCapture={handleKeyDownCapture}
-      aria-busy={isSaving}
+      aria-busy={saving}
       {...rest}>
       <CodeMirror
         ref={ref}
@@ -242,8 +242,8 @@ export function EditorTextarea({
         placeholder={placeholder ?? t("bodyPlaceholder")}
         extensions={editorExtensions}
         onChange={onChange}
-        readOnly={isReadOnly}
-        editable={!isReadOnly}
+        readOnly={readOnly}
+        editable={!readOnly}
         basicSetup={editorBasicSetup}
         theme={resolvedTheme === "dark" ? "dark" : "light"}
       />

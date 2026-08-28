@@ -15,11 +15,11 @@ interface DraftEditorToolbarProps {
   activeFileIndex: number
   lineWrap: boolean
   onWrapToggle: () => void
-  isReadOnly: boolean
-  isUploading: boolean
+  readOnly: boolean
+  uploading: boolean
   fileInputRef: React.RefObject<HTMLInputElement | null>
   onFileSelect: (file: File) => void
-  isCompressing: boolean
+  compressing: boolean
   onInsertSyntax: (prefix: string, suffix?: string) => void
   onInsertText: (text: string) => void
   onUndo: () => void
@@ -34,11 +34,11 @@ export function DraftEditorToolbar({
   activeFileIndex,
   lineWrap,
   onWrapToggle,
-  isReadOnly,
-  isUploading,
+  readOnly,
+  uploading,
   fileInputRef,
   onFileSelect,
-  isCompressing,
+  compressing,
   onInsertSyntax,
   onInsertText,
   onUndo,
@@ -48,15 +48,15 @@ export function DraftEditorToolbar({
 }: DraftEditorToolbarProps) {
   const fileUploadSlot = React.useMemo(
     () =>
-      !isReadOnly ? (
+      !readOnly ? (
         <DraftImageUploadInput
           fileInputRef={fileInputRef}
           onFileSelect={onFileSelect}
-          isUploading={isUploading}
-          isCompressing={isCompressing}
+          isUploading={uploading}
+          isCompressing={compressing}
         />
       ) : undefined,
-    [isReadOnly, fileInputRef, onFileSelect, isUploading, isCompressing]
+    [readOnly, fileInputRef, onFileSelect, uploading, compressing]
   )
 
   return (
@@ -71,7 +71,7 @@ export function DraftEditorToolbar({
         <>
           <EditorToolbar
             onInsert={onInsertSyntax}
-            disabled={isReadOnly || isUploading}
+            disabled={readOnly || uploading}
             lineWrap={lineWrap}
             onWrapToggle={onWrapToggle}
             fileUploadSlot={fileUploadSlot}
@@ -86,7 +86,7 @@ export function DraftEditorToolbar({
               type="button"
               variant="ghost"
               className="text-tech-main hover:guide-line hover:text-tech-main hover:bg-surface-overlay h-7 border border-transparent px-3 text-[10px] tracking-widest transition-[background-color,border-color,box-shadow] hover:shadow-sm"
-              disabled={isReadOnly}
+              disabled={readOnly}
               onClick={() => onInsertText("\n## Section Title\n\n")}>
               <span className="flex items-center gap-1.5">
                 <span className="text-tech-main/40 font-bold">#</span> SECTION
@@ -96,7 +96,7 @@ export function DraftEditorToolbar({
               type="button"
               variant="ghost"
               className="text-tech-main hover:guide-line hover:text-tech-main hover:bg-surface-overlay h-7 border border-transparent px-3 text-[10px] tracking-widest transition-[background-color,border-color,box-shadow] hover:shadow-sm"
-              disabled={isReadOnly}
+              disabled={readOnly}
               onClick={() =>
                 onInsertText("\n> [!TIP]\n> Add contributor guidance here.\n\n")
               }>
@@ -109,7 +109,7 @@ export function DraftEditorToolbar({
               type="button"
               variant="ghost"
               className="text-tech-main hover:guide-line hover:text-tech-main hover:bg-surface-overlay h-7 border border-transparent px-3 text-[10px] tracking-widest transition-[background-color,border-color,box-shadow] hover:shadow-sm"
-              disabled={isReadOnly}
+              disabled={readOnly}
               onClick={() =>
                 onInsertText(
                   "\n| Parameter | Value | Notes |\n| --- | --- | --- |\n| Example | Value | Detail |\n\n"
@@ -126,7 +126,7 @@ export function DraftEditorToolbar({
               type="button"
               variant="secondary"
               className="group guide-line text-tech-main-dark/80 hover:border-tech-main/50 bg-surface-overlay/50 hover:bg-surface-overlay h-7 px-3 text-[10px] font-bold tracking-widest transition-colors"
-              disabled={isReadOnly || !canUndo}
+              disabled={readOnly || !canUndo}
               onClick={onUndo}>
               <span className="flex items-center gap-1">
                 <svg
@@ -146,7 +146,7 @@ export function DraftEditorToolbar({
               type="button"
               variant="secondary"
               className="group guide-line text-tech-main-dark/80 hover:border-tech-main/50 bg-surface-overlay/50 hover:bg-surface-overlay h-7 px-3 text-[10px] font-bold tracking-widest transition-colors"
-              disabled={isReadOnly || !canRedo}
+              disabled={readOnly || !canRedo}
               onClick={onRedo}>
               <span className="flex items-center gap-1">
                 REDO

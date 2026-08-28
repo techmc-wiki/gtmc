@@ -14,6 +14,7 @@ import {
   normalizeDraftFilePath,
   normalizeDraftFolderPath,
   type DraftFileCollection,
+  type DraftFileRecord,
 } from "@/lib/drafts/files"
 import { OperationProgress } from "@/components/ui/operation-progress"
 import { Button } from "@/components/ui/shadcn/button"
@@ -54,6 +55,11 @@ interface DraftDiffRow {
   value: string
 }
 
+interface DraftChangeEntry {
+  changeType: "modified" | "new" | "pending"
+  file: DraftFileRecord
+  rows: DraftDiffRow[]
+}
 interface RepoFileSnapshot {
   content: string | null
   filePath: string
@@ -128,46 +134,52 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     return true
   }
 
-  const changeEntries = React.useMemo(
+  const changeEntries = React.useMemo<DraftChangeEntry[]>(
     () =>
-      state.draftCollection.files
-        .map((file) => {
-          const normalizedPath = normalizeDraftFilePath(file.filePath)
-          const snapshot = state.repoSnapshots[file.id]
-          if (!normalizedPath) {
-            return {
-              changeType: "pending" as const,
+      state.draftCollection.files.flatMap((file): DraftChangeEntry[] => {
+        const normalizedPath = normalizeDraftFilePath(file.filePath)
+        const snapshot = state.repoSnapshots[file.id]
+        if (!normalizedPath) {
+          return [
+            {
+              changeType: "pending",
               file,
               rows: buildDiffRows("", file.content),
-            }
-          }
-          if (!snapshot || snapshot.status === "loading") {
-            return {
-              changeType: "pending" as const,
+            },
+          ]
+        }
+        if (!snapshot || snapshot.status === "loading") {
+          return [
+            {
+              changeType: "pending",
               file,
               rows: buildDiffRows("", file.content),
-            }
-          }
-          if (snapshot.status === "missing") {
-            return {
-              changeType: "new" as const,
+            },
+          ]
+        }
+        if (snapshot.status === "missing") {
+          return [
+            {
+              changeType: "new",
               file,
               rows: buildDiffRows("", file.content),
-            }
-          }
-          if (snapshot.status === "error" || snapshot.content === null) {
-            return null
-          }
-          if (snapshot.content === file.content) {
-            return null
-          }
-          return {
-            changeType: "modified" as const,
+            },
+          ]
+        }
+        if (snapshot.status === "error" || snapshot.content === null) {
+          return []
+        }
+        if (snapshot.content === file.content) {
+          return []
+        }
+        return [
+          {
+            changeType: "modified",
             file,
             rows: buildDiffRows(snapshot.content, file.content),
-          }
-        })
-        .filter(Boolean),
+          },
+        ]
+      }),
     [state.draftCollection.files, state.repoSnapshots]
   )
 

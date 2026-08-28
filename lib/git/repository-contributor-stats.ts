@@ -17,7 +17,12 @@ function normalizeIdentity(value: string): string {
 export function getRepositoryContributorStats(
   identities: string[]
 ): RepositoryContributorStats {
-  const targets = new Set(identities.map(normalizeIdentity).filter(Boolean))
+  const targets = new Set(
+    identities.flatMap((identity) => {
+      const normalized = normalizeIdentity(identity)
+      return normalized ? [normalized] : []
+    })
+  )
   let commits = 0
   let linesChanged = 0
 

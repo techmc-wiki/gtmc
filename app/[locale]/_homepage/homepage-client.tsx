@@ -23,7 +23,7 @@ export function HomepageClient() {
   )
 
   return (
-    <div className="relative z-10 mx-auto flex min-h-full w-full max-w-7xl flex-col items-center justify-center">
+    <div className="relative z-10 mx-auto flex min-h-full w-full max-w-7xl flex-col items-center justify-center px-4">
       <HeroCard />
 
       <div className="animate-slide-up-fade fill-mode-forwards relative z-20 flex w-full max-w-48 flex-col items-stretch justify-center gap-5 opacity-0 [animation-delay:0.6s] motion-reduce:animate-none sm:w-full sm:max-w-full sm:flex-row sm:items-center">

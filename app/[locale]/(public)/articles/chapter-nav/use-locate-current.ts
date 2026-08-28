@@ -5,6 +5,14 @@ import { articleUrl } from "@/lib/articles/url"
 const HIGHLIGHT_TIMEOUT_MS = 2000
 const LOCATE_FALLBACK_MS = 600
 
+function attachTransitionEnd(grid: HTMLDivElement, handler: (e: TransitionEvent) => void) {
+  grid.addEventListener("transitionend", handler)
+}
+
+function detachTransitionEnd(grid: HTMLDivElement, handler: (e: TransitionEvent) => void) {
+  grid.removeEventListener("transitionend", handler)
+}
+
 type LocateState =
   | { phase: "idle" }
   | {
@@ -185,15 +193,6 @@ export function useLocateCurrent({
       .map((id) => [id, folderGridRefs.current.get(id)] as const)
       .filter((entry): entry is readonly [string, HTMLDivElement] => !!entry[1])
 
-    if (watchEntries.length === 0) {
-      const immediateFinishTimer = window.setTimeout(() => {
-        finishExpansionAndScroll()
-      }, 0)
-      return () => {
-        clearTimeout(immediateFinishTimer)
-      }
-    }
-
     const remainingIds = new Set(watchEntries.map(([id]) => id))
 
     const onTransitionEnd = (event: TransitionEvent) => {
@@ -210,21 +209,32 @@ export function useLocateCurrent({
       }
     }
 
-    const controller = new AbortController()
+    let immediateFinishTimer: number | undefined
+    if (watchEntries.length === 0) {
+      immediateFinishTimer = window.setTimeout(() => {
+        finishExpansionAndScroll()
+      }, 0)
+    }
     for (const [, grid] of watchEntries) {
-      grid.addEventListener("transitionend", onTransitionEnd, {
-        signal: controller.signal,
-      })
+      attachTransitionEnd(grid, onTransitionEnd)
     }
 
     const cleanup = () => {
-      controller.abort()
+      clearTimeout(immediateFinishTimer)
+      for (const [, grid] of watchEntries) {
+        detachTransitionEnd(grid, onTransitionEnd)
+      }
+      clearTimeout((locateStateRef.current as unknown as { fallbackTimer?: number }).fallbackTimer)
     }
 
     transitionCleanupRef.current = cleanup
 
     return () => {
-      controller.abort()
+      clearTimeout(immediateFinishTimer)
+      for (const [, grid] of watchEntries) {
+        detachTransitionEnd(grid, onTransitionEnd)
+      }
+      clearTimeout((locateStateRef.current as unknown as { fallbackTimer?: number }).fallbackTimer)
       transitionCleanupRef.current = null
     }
   }, [expandedFolders, finishExpansionAndScroll, folderGridRefs])

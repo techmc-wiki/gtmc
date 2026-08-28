@@ -35,7 +35,8 @@
     "prepare:articles": "tsx scripts/prepare-articles-for-build.ts",
     "db:migrate:deploy": "prisma migrate deploy",
     "postinstall": "tsx scripts/postinstall.ts",
-    "prepare": "vp config --no-agent"
+    "prepare": "vp config --no-agent",
+    "doctor": "npx react-doctor@latest"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",

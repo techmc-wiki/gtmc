@@ -181,8 +181,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       return
     }
 
+    let cancelled = false
     const controller = new AbortController()
-    let active = true
 
     const loadTree = async () => {
       try {
@@ -191,20 +191,24 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           signal: controller.signal,
         })
 
+        if (cancelled) return
+
         if (!response.ok) {
           return
         }
 
         const payload = (await response.json()) as ChapterNavNode[]
-        if (active && Array.isArray(payload)) {
+        if (cancelled) return
+        if (Array.isArray(payload)) {
           setFetchedTreeData(payload)
         }
       } catch (error) {
+        if (cancelled) return
         if (error instanceof Error && error.name === "AbortError") {
           return
         }
       } finally {
-        if (active) {
+        if (!cancelled) {
           setHasTreeFetchSettled(true)
         }
       }
@@ -213,7 +217,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
     void loadTree()
 
     return () => {
-      active = false
+      cancelled = true
       controller.abort()
     }
   }, [locale, tree, tree.length])

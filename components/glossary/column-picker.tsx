@@ -64,8 +64,18 @@ export function ColumnPicker({
 
   const otherLanguageGroups = React.useMemo(() => {
     const activeLocale = normalizeGlossarySiteLocale(locale)
-    return GLOSSARY_DISPLAY_LOCALES.filter((code) => code !== activeLocale).map(
-      (code) => ({
+    const groups: Array<{
+      code: (typeof GLOSSARY_DISPLAY_LOCALES)[number]
+      display: string
+      entries: Array<{
+        column: GlossaryTableColumn
+        label: string
+      }>
+    }> = []
+
+    for (const code of GLOSSARY_DISPLAY_LOCALES) {
+      if (code === activeLocale) continue
+      groups.push({
         code,
         display: getGlossaryDisplayName(code),
         entries: [
@@ -79,7 +89,9 @@ export function ColumnPicker({
           },
         ],
       })
-    )
+    }
+
+    return groups
   }, [locale, t])
 
   const coreEntries = React.useMemo(

@@ -383,6 +383,24 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     ...(bannerUrl ? { image: bannerUrl } : {}),
   }
 
+  const breadcrumbChapterItems: Array<{
+    "@type": "ListItem"
+    position: number
+    name: string
+    item: string
+  }> = []
+
+  for (const chapter of runningHeadChapters) {
+    if (chapter.slug !== effectiveSlug) {
+      breadcrumbChapterItems.push({
+        "@type": "ListItem",
+        position: breadcrumbChapterItems.length + 3,
+        name: chapter.title,
+        item: `${siteUrl}/${locale}${articleUrl(chapter.slug)}`,
+      })
+    }
+  }
+
   const breadcrumbJsonLd: {
     "@context": "https://schema.org"
     "@type": "BreadcrumbList"
@@ -408,19 +426,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         name: "Articles",
         item: `${siteUrl}/${locale}/articles`,
       },
-      ...runningHeadChapters
-        .filter((chapter) => chapter.slug !== effectiveSlug)
-        .map((chapter, index) => ({
-          "@type": "ListItem" as const,
-          position: index + 3,
-          name: chapter.title,
-          item: `${siteUrl}/${locale}${articleUrl(chapter.slug)}`,
-        })),
+      ...breadcrumbChapterItems,
       {
         "@type": "ListItem",
-        position:
-          runningHeadChapters.filter((chapter) => chapter.slug !== effectiveSlug)
-            .length + 3,
+        position: breadcrumbChapterItems.length + 3,
         name: articleTitle,
         item: canonicalUrl,
       },

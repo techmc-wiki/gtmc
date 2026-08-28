@@ -160,15 +160,17 @@ export async function buildBodyHtml(
     return filtered
   }
 
+  const chapters: ChapterGroup[] = []
+  for (const chapter of plan.chapters) {
+    const content = filterContent(chapter.content)
+    if (content.length > 0) {
+      chapters.push(renumberChapter({ ...chapter, content }))
+    }
+  }
+
   const effectivePlan: BookPlan = {
     preface: plan.preface.filter((e) => hasContent(e.article.slug)),
-    chapters: plan.chapters
-      .map((chapter) => ({
-        ...chapter,
-        content: filterContent(chapter.content),
-      }))
-      .filter((chapter) => chapter.content.length > 0)
-      .map(renumberChapter),
+    chapters,
   }
 
   const sections: string[] = [renderTocHtml(effectivePlan, options.locale)]

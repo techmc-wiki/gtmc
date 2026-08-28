@@ -41,7 +41,7 @@ export function CrossRefChips(props: CrossRefChipsProps) {
       {related.map((entry, index) => {
         const isLast = index === related.length - 1
         const display = `${labelMap[entry.kind]}${entry.target}`
-        const key = `${entry.kind}-${entry.target}-${index}`
+        const key = `${entry.kind}-${entry.target}`
 
         let chip: React.ReactNode
         if (props.mode === "index") {

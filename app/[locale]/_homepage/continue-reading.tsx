@@ -4,18 +4,11 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/articles/url"
-import {
-  readBookmark,
-  type ReadingBookmark,
-} from "@/hooks/use-reading-bookmark"
+import { useReadingBookmark } from "@/hooks/use-reading-bookmark"
 
 export function ContinueReading() {
   const t = useTranslations("Homepage")
-  const [bookmark, setBookmark] = React.useState<ReadingBookmark | null>(null)
-
-  React.useEffect(() => {
-    setBookmark(readBookmark())
-  }, [])
+  const bookmark = useReadingBookmark()
 
   const pct = bookmark ? Math.round(bookmark.progress * 100) : 0
   const progressStyle = React.useMemo(

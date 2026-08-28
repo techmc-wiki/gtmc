@@ -182,17 +182,19 @@ export async function reconcileDraftAssetsForPRCompletion({
   const tempPrefix = process.env.DRAFT_STORAGE_TEMP_PREFIX ?? "draft-temp"
   const assets = await findTempDraftAssetsForRevision(revision.id, tempPrefix)
 
-  for (const asset of assets) {
-    await markDraftAssetOutcome(asset.id, outcome) // eslint-disable-line no-await-in-loop
+  await Promise.all(
+    assets.map(async (asset) => {
+      await markDraftAssetOutcome(asset.id, outcome)
 
-    try {
-      await deleteDraftAsset(asset.storagePath) // eslint-disable-line no-await-in-loop
-      await markDraftAssetDeleted(asset.id) // eslint-disable-line no-await-in-loop
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error)
-      await markDraftAssetCleanupFailed(asset.id, `[${outcome}] ${reason}`) // eslint-disable-line no-await-in-loop
-    }
-  }
+      try {
+        await deleteDraftAsset(asset.storagePath)
+        await markDraftAssetDeleted(asset.id)
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error)
+        await markDraftAssetCleanupFailed(asset.id, `[${outcome}] ${reason}`)
+      }
+    })
+  )
 }
 
 export async function countCleanupFailedByRevision(

@@ -31,25 +31,27 @@ export function FooterWordmark() {
   return (
     <div
       aria-hidden="true"
-      className="bg-tech-bg @container relative w-full overflow-hidden select-none">
-      <div className="relative h-[28cqw] max-h-85 min-h-47.5 w-full">
-        {/* Static fallback — faint watermark when WebGL is unavailable, full-width like original */}
-        <p className="display-title text-tech-main/15 pointer-events-none absolute inset-0 flex translate-y-[7%] items-center justify-center text-center text-[31cqw] leading-[0.78] tracking-[-0.03em] whitespace-nowrap select-none">
-          GTMC
-        </p>
-        <ParticleObject
-          src={src}
-          count={20000}
-          size={2}
-          sizeVariance={0.2}
-          scale={12}
-          floatIntensity={1}
-          rotationIntensity={0.45}
-          floatSpeed={1.6}
-          fov={15}
-          cameraDistance={12}
-          className="h-full w-full"
-        />
+      className="bg-tech-bg relative w-full overflow-hidden select-none">
+      <div className="@container mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="relative h-[28cqi] max-h-85 min-h-47.5 w-full">
+          {/* Static fallback — faint watermark when WebGL is unavailable, full-width like original */}
+          <p className="display-title text-tech-main/15 pointer-events-none absolute inset-0 flex translate-y-[7%] items-center justify-center text-center text-[31cqi] leading-[0.78] tracking-[-0.03em] whitespace-nowrap select-none">
+            GTMC
+          </p>
+          <ParticleObject
+            src={src}
+            count={18000}
+            size={1.5}
+            sizeVariance={0.1}
+            scale={10}
+            floatIntensity={1}
+            rotationIntensity={0.45}
+            floatSpeed={1.6}
+            fov={15}
+            cameraDistance={12}
+            className="h-full w-full"
+          />
+        </div>
       </div>
     </div>
   )

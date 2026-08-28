@@ -29,17 +29,10 @@ function buildContributorLink(
   return { href: "/draft", label: t("drafts") }
 }
 
-function buildAdminLink(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
-  return { href: "/review", label: t("reviewHub") }
-}
-
 interface MainSiteShellProps {
   children: React.ReactNode
   locale: string
-  /**
-   * Includes the contributor link in the static shell while the client-side
-   * auth-aware navigation resolves any admin-only links.
-   */
+  /** Includes the contributor link in the authenticated route shell. */
   includeContributorLink?: boolean
   fullBleed?: boolean
 }
@@ -56,7 +49,6 @@ export async function MainSiteShell({
   ])
   const baseLinks = buildNavLinks(t)
   const contributorLink = buildContributorLink(t)
-  const adminLink = buildAdminLink(t)
 
   let initialLinks = baseLinks
   if (includeContributorLink) {
@@ -80,7 +72,6 @@ export async function MainSiteShell({
         <AuthAwareDesktopNav
           navLinks={initialLinks}
           contributorLink={contributorLink}
-          adminLink={adminLink}
         />
       </React.Suspense>
     </>
@@ -94,7 +85,6 @@ export async function MainSiteShell({
       <AuthAwareMobileNav
         navLinks={initialLinks}
         contributorLink={contributorLink}
-        adminLink={adminLink}
       />
       <ThemeToggle className="hidden sm:flex" />
       <React.Suspense fallback={null}>

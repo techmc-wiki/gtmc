@@ -20,24 +20,10 @@ import { Link } from "@/i18n/navigation"
 import { guardUser } from "@/lib/auth/guards"
 import { countCleanupFailedByRevision } from "@/lib/drafts/asset-db"
 import { decodeStoredDraftFiles } from "@/lib/drafts/files"
-import { getPR } from "@/lib/github/pr-manager"
+import { getArticlePullRequest } from "@/lib/articles/pr"
 import { prisma } from "@/lib/prisma"
 
-const ARCHIVED_DRAFT_STATUSES = new Set([
-  "APPROVED",
-  "ARCHIVED",
-  "MERGED",
-  "CLOSED",
-])
-
-const NON_DELETABLE_DRAFT_STATUSES = new Set([
-  "PENDING",
-  "APPROVED",
-  "IN_REVIEW",
-  "SYNC_CONFLICT",
-  "MERGED",
-  "CLOSED",
-])
+const ARCHIVED_DRAFT_STATUSES = new Set(["ARCHIVED", "MERGED", "CLOSED"])
 
 const ARCHIVED_GLOSSARY_STATUSES = new Set(["SUBMITTED"])
 
@@ -244,13 +230,12 @@ export default async function DraftDashboardPage({
       let displayStatus = draft.status
       const decodedDraft = decodeStoredDraftFiles({
         content: draft.content,
-        conflictContent: draft.conflictContent,
         filePath: draft.filePath,
       })
 
       if (draft.githubPrNum) {
         try {
-          const pr = await getPR(draft.githubPrNum)
+          const pr = await getArticlePullRequest(draft.githubPrNum)
           if (pr.state === "closed") {
             displayStatus = pr.merged ? "MERGED" : "CLOSED"
           }
@@ -297,11 +282,7 @@ export default async function DraftDashboardPage({
       : item.title || t("untitledGlossary")
     const status = isArticle ? item.displayStatus : item.status
     const canContinue = status === "DRAFT"
-    const actionLabel = canContinue
-      ? t("continueDraft")
-      : status === "CLOSED"
-        ? t("reopenDraft")
-        : t("viewDraft")
+    const actionLabel = canContinue ? t("continueDraft") : t("viewDraft")
     const detail = isArticle
       ? t("filesCount", { count: item.fileCount })
       : t("changesCount", {
@@ -311,7 +292,7 @@ export default async function DraftDashboardPage({
       ? (`/draft/${item.id}` as const)
       : (`/glossary/edit/${item.id}` as const)
     const canDelete = isArticle
-      ? !NON_DELETABLE_DRAFT_STATUSES.has(item.displayStatus)
+      ? item.status === "DRAFT" && !item.githubPrNum
       : item.status === "DRAFT"
 
     const deleteAction =

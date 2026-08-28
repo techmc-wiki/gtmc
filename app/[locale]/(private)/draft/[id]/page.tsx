@@ -57,7 +57,6 @@ export default async function EditDraftPage({
 
   const draftFiles = decodeStoredDraftFiles({
     content: draft.content,
-    conflictContent: draft.conflictContent,
     filePath: draft.filePath,
   })
 

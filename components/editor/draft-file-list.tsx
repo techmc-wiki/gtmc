@@ -53,7 +53,7 @@ export function DraftFileList({
     <FileListSidebar>
       <FileListHeader
         title="FILE_NODE_TREE"
-        subtitle="SAVE_AND_REVIEW_APPLY_TO_ALL"
+        subtitle="SAVE_AND_SUBMIT_APPLY_TO_ALL"
         count={files.length}
         actions={headerActions}
       />

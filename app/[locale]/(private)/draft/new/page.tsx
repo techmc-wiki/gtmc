@@ -58,7 +58,6 @@ export default async function NewDraftPage({
     content: initialContent,
     filePath: normalizedFilePath,
     status: "DRAFT",
-    syncedMainSha: baseMainSha,
     title: initialTitle,
   }
   const draft = await prisma.revision.create({

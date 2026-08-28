@@ -26,7 +26,6 @@ model User {
 
 
   revisions          Revision[]          @relation("RevisionAuthor")
-  reviews            Revision[]          @relation("RevisionReviewer")
   glossaryRevisions  GlossaryRevision[]  @relation("GlossaryRevisionAuthor")
 
   createdAt     DateTime  @default(now())
@@ -63,35 +62,24 @@ model Session {
 
 
 model Revision {
-   id          String         @id @default(cuid())
-   title       String
-   content     String
-   coverImage  String?
-   
-    status      String         @default("DRAFT") // DRAFT, SYNC_CONFLICT, IN_REVIEW
-   githubPrUrl String?
-   githubPrNum Int?
-    prBranchName String?
-   filePath    String?
-    baseMainSha String?
-   syncedMainSha String?
-   conflictContent String?
-   submittedAt DateTime?
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  coverImage  String?
+  status      String   @default("DRAFT") // DRAFT, PENDING, SUBMITTED, MERGED, CLOSED, ARCHIVED
+  githubPrUrl String?
+  githubPrNum Int?
+  filePath    String?
+  baseMainSha String?
+  submittedAt DateTime?
 
-   authorId    String
-   author      User           @relation("RevisionAuthor", fields: [authorId], references: [id])
+  authorId String
+  author   User   @relation("RevisionAuthor", fields: [authorId], references: [id])
 
-    reviewerId  String?
-    reviewer    User?          @relation("RevisionReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  draftAssets DraftAsset[]
 
-    rebaseState Json?
-    conflictMode String?
-     
-     // Draft asset lifecycle relation
-     draftAssets DraftAsset[]
-
-   createdAt   DateTime       @default(now())
-   updatedAt   DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // ==========================================
@@ -160,17 +148,4 @@ model DraftAsset {
     @@index([status])
     @@index([githubPrNum])
     @@index([revisionId, status])
-}
-
-// ==========================================
-// 6. Conflict Resolution Cache
-// ==========================================
-
-model ConflictResolution {
-  id            String   @id @default(cuid())
-  conflictHash  String   @unique
-  filePath      String
-  resolution    String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
 }

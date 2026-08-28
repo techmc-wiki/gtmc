@@ -5,7 +5,7 @@ import type { ReactCodeMirrorRef } from "@uiw/react-codemirror"
 import { useRouter } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 import { saveDraftAction } from "@/actions/article-draft"
-import { submitForReviewAction } from "@/actions/article-submit"
+import { submitDraftAction } from "@/actions/article-submit"
 import {
   getActiveDraftFile,
   getDuplicateDraftFilePaths,
@@ -83,7 +83,7 @@ export function useDraftEditor(initialData?: {
   const [fileDialogIntent, setFileDialogIntent] =
     React.useState<DraftFileDialogIntent | null>(null)
   const [isSaving, setIsSaving] = React.useState(false)
-  const [isSubmittingReview, setIsSubmittingReview] = React.useState(false)
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [saveProgressState, setSaveProgressState] =
     React.useState<OperationProgressState>("idle")
   const [submitProgressState, setSubmitProgressState] =
@@ -218,14 +218,9 @@ export function useDraftEditor(initialData?: {
   }
 
   const githubPrUrl = initialData?.githubPrUrl
-  const isSyncConflict = draftStatus === "SYNC_CONFLICT"
-  const isReadOnly =
-    draftStatus === "IN_REVIEW" || draftStatus === "SYNC_CONFLICT"
+  const isReadOnly = draftStatus !== "DRAFT"
   const activeFile = getActiveDraftFile(draftCollection)
-  const activeFileContent =
-    isSyncConflict && activeFile.conflictContent !== undefined
-      ? activeFile.conflictContent || ""
-      : activeFile.content
+  const activeFileContent = activeFile.content
   const duplicateFilePaths = getDuplicateDraftFilePaths(draftCollection.files)
   const hasMissingFilePath = draftCollection.files.some(
     (file) => !file.filePath
@@ -315,7 +310,6 @@ export function useDraftEditor(initialData?: {
     updates: {
       content?: string
       filePath?: string
-      conflictContent?: string | null
     }
   ) => {
     updateDraftCollection((current) => ({
@@ -329,9 +323,6 @@ export function useDraftEditor(initialData?: {
                 : {}),
               ...(updates.filePath !== undefined
                 ? { filePath: normalizeDraftFilePath(updates.filePath) }
-                : {}),
-              ...(updates.conflictContent !== undefined
-                ? { conflictContent: updates.conflictContent }
                 : {}),
             }
           : file
@@ -554,7 +545,7 @@ export function useDraftEditor(initialData?: {
       }
       return
     }
-    if (isSaving || isSubmittingReview || isUploading) return
+    if (isSaving || isSubmitting || isUploading) return
     if (autoSaveTimeoutRef.current !== null) {
       window.clearTimeout(autoSaveTimeoutRef.current)
     }
@@ -573,7 +564,7 @@ export function useDraftEditor(initialData?: {
     hasUnsavedChanges,
     isReadOnly,
     isSaving,
-    isSubmittingReview,
+    isSubmitting,
     isUploading,
     saveDraftWithFeedback,
     title,
@@ -589,18 +580,12 @@ export function useDraftEditor(initialData?: {
         return
       }
       event.preventDefault()
-      if (isSubmittingReview || isUploading || !title.trim()) return
+      if (isSubmitting || isUploading || !title.trim()) return
       void saveDraftWithFeedback("manual")
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [
-    isReadOnly,
-    isSubmittingReview,
-    isUploading,
-    saveDraftWithFeedback,
-    title,
-  ])
+  }, [isReadOnly, isSubmitting, isUploading, saveDraftWithFeedback, title])
 
   const handleUploadWithAutoSave = async (file: File) => {
     if (!revisionId) {
@@ -657,7 +642,7 @@ export function useDraftEditor(initialData?: {
     await saveDraftWithFeedback("manual")
   }
 
-  const handleSubmitReview = async () => {
+  const handleSubmitDraft = async () => {
     if (hasMissingFilePath) {
       toast.error(t("badgeAllFilesNeedPath"), { duration: 4000 })
       return
@@ -668,19 +653,14 @@ export function useDraftEditor(initialData?: {
         { duration: 4000 }
       )
     }
-    setIsSubmittingReview(true)
+    setIsSubmitting(true)
     updateSubmitProgressState("running")
     try {
       const persistedDraft = await persistDraft()
-      const result = await submitForReviewAction(persistedDraft.revisionId)
+      const result = await submitDraftAction(persistedDraft.revisionId)
       setDraftStatus(result.status)
       updateSubmitProgressState("success")
-      toast.success(
-        result.status === "SYNC_CONFLICT"
-          ? t("badgeSyncConflict")
-          : t("badgePrOpened"),
-        { duration: 4000 }
-      )
+      toast.success(t("badgePrOpened"), { duration: 4000 })
       router.push(`/draft/${persistedDraft.revisionId}`)
       router.refresh()
     } catch (error) {
@@ -688,7 +668,7 @@ export function useDraftEditor(initialData?: {
       updateSubmitProgressState("error")
       toast.error(t("badgeSubmitFailed"))
     } finally {
-      setIsSubmittingReview(false)
+      setIsSubmitting(false)
     }
   }
 
@@ -782,7 +762,7 @@ export function useDraftEditor(initialData?: {
   const activeFileHistoryAvailability =
     historyAvailability[draftCollection.activeFileId]
   const submitDisabled =
-    isSubmittingReview ||
+    isSubmitting ||
     isSaving ||
     isUploading ||
     !title.trim() ||
@@ -797,7 +777,7 @@ export function useDraftEditor(initialData?: {
       revisionId,
       fileDialogIntent,
       isSaving,
-      isSubmittingReview,
+      isSubmitting,
       saveProgressState,
       submitProgressState,
       activeTab,
@@ -807,7 +787,6 @@ export function useDraftEditor(initialData?: {
       repoSnapshots,
       insertDialogIntent,
       githubPrUrl,
-      isSyncConflict,
       isReadOnly,
       activeFile,
       activeFileContent,
@@ -836,7 +815,7 @@ export function useDraftEditor(initialData?: {
       updateActiveFile,
       updateFileById,
       handleSaveDraft,
-      handleSubmitReview,
+      handleSubmitDraft,
       handleUndoDraftEdit,
       handleRedoDraftEdit,
       handlePaste,

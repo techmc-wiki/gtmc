@@ -5,25 +5,20 @@ import { useTranslations } from "next-intl"
 
 import { TabsList, TabsTrigger } from "@/components/ui/shadcn/tabs"
 
-export type TabType = "write" | "preview" | "3-way" | "diff"
+export type TabType = "write" | "preview" | "diff"
 
 interface EditorTabStripProps {
-  showThreeWayTab?: boolean
   showDiffTab?: boolean
   rightSlot?: React.ReactNode
 }
 
 export function EditorTabStrip({
-  showThreeWayTab = false,
   showDiffTab = false,
   rightSlot,
 }: EditorTabStripProps) {
   const t = useTranslations("Editor")
 
   const tabItems: { value: TabType; label: React.ReactNode }[] = []
-  if (showThreeWayTab) {
-    tabItems.push({ value: "3-way", label: t("tabThreeWay") })
-  }
   tabItems.push({ value: "write", label: t("writeTab") })
   if (showDiffTab) {
     tabItems.push({ value: "diff", label: t("tabDiff") })

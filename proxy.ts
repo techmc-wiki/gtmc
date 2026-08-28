@@ -13,13 +13,7 @@ import {
 import { routing } from "@/i18n/routing"
 
 const intlMiddleware = createMiddleware(routing)
-const privateRoutes = [
-  "/admin",
-  "/draft",
-  "/glossary/edit",
-  "/profile",
-  "/review",
-]
+const privateRoutes = ["/admin", "/draft", "/glossary/edit", "/profile"]
 const localePattern = /^\/(en|zh)(?=\/|$)/
 // Detects unrecognized locale prefixes to prevent next-intl redirecting e.g. /fr -> /zh/fr
 const invalidLocalePrefixPattern = /^\/([a-z]{2}(?:-[a-z]{2})?)(?=\/|$)/i

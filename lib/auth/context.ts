@@ -8,7 +8,7 @@ type AuthenticatedSession = Session & {
   user: NonNullable<Session["user"]> & { id: string }
 }
 
-export type AuthContext = {
+type AuthContext = {
   id: string
   role: string
   githubPat: string | null
@@ -29,14 +29,6 @@ export async function getCurrentUserAuthContext(
     role: user.role,
     githubPat: user.githubPat ?? null,
   }
-}
-
-export async function requireAdmin(userId: string): Promise<AuthContext> {
-  const ctx = await getCurrentUserAuthContext(userId)
-  if (ctx.role !== "ADMIN") {
-    throw new Error("Forbidden: admin access required")
-  }
-  return ctx
 }
 
 /**

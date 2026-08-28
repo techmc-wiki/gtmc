@@ -13,14 +13,6 @@ export async function getMainBranchHeadSha(token?: string) {
   return getMainBranchHeadShaShared(token, ARTICLES_REPO)
 }
 
-export async function getArticleFileContent(
-  filePath: string,
-  ref: string,
-  token?: string
-) {
-  return (await getFileSnapshotShared(filePath, ref, token, ARTICLES_REPO))?.content ?? ""
-}
-
 export async function resolveArticleFilePath(
   filePath: string,
   refs: string[],

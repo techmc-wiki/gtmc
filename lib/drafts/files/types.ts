@@ -2,7 +2,6 @@ export interface DraftFileRecord {
   id: string
   filePath: string
   content: string
-  conflictContent?: string | null
 }
 
 export interface DraftFileCollection {

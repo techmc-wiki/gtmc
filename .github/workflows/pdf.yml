@@ -116,7 +116,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.change-check.outputs.should-build == 'true'
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
         env:
           GTMC_SKIP_POSTINSTALL: "1"
 

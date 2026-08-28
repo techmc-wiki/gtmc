@@ -38,6 +38,12 @@ function ClosedPRSkeletonRows() {
 }
 
 function ClosedPRCard({ pr }: { pr: ClosedPRListItem }) {
+  const [createdAtLabel, setCreatedAtLabel] = useState("")
+
+  useEffect(() => {
+    setCreatedAtLabel(new Date(pr.createdAt).toLocaleString())
+  }, [pr.createdAt])
+
   const statusClassName = pr.isMerged
     ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700"
     : "border-[var(--color-tech-line)] bg-[var(--color-tech-bg)] text-[var(--color-tech-main)]"
@@ -51,9 +57,7 @@ function ClosedPRCard({ pr }: { pr: ClosedPRListItem }) {
           <span className="border border-blue-500/40 bg-blue-500/10 px-2 py-0.5 font-mono text-xs tracking-wider text-blue-600">
             [PR #{pr.number}]
           </span>
-          <span className="mono-label">
-            {new Date(pr.createdAt).toLocaleString()}
-          </span>
+          <span className="mono-label">{createdAtLabel}</span>
           <span
             className={`border px-2 py-0.5 text-xs font-medium ${statusClassName}`}>
             {pr.isMerged ? "MERGED_" : "CLOSED_"}

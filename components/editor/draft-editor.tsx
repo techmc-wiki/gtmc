@@ -306,11 +306,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             activeFileIndex={state.activeFileIndex}
             lineWrap={state.lineWrap}
             onWrapToggle={() => actions.setLineWrap((v) => !v)}
-            isReadOnly={state.isReadOnly}
-            isUploading={upload.isUploading}
+            readOnly={state.isReadOnly}
+            uploading={upload.isUploading}
             fileInputRef={refs.fileInputRef}
             onFileSelect={actions.handleUploadWithAutoSave}
-            isCompressing={upload.isCompressing}
+            compressing={upload.isCompressing}
             onInsertSyntax={actions.insertSyntax}
             onInsertText={actions.insertTextAtCursor}
             onUndo={actions.handleUndoDraftEdit}
@@ -338,8 +338,8 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
                   onDragEnter={(e) => {
                     if (!state.isReadOnly) e.preventDefault()
                   }}
-                  isReadOnly={state.isReadOnly}
-                  isSaving={state.isSaving}
+                  readOnly={state.isReadOnly}
+                  saving={state.isSaving}
                   placeholder={t("contentPlaceholder")}
                   lineWrap={state.lineWrap}
                   canUndo={Boolean(

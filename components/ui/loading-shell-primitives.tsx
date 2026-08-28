@@ -47,6 +47,12 @@ export function SectionRail({
   )
 }
 
+const OPACITY_MAP = {
+  high: "bg-tech-accent/20",
+  medium: "bg-tech-accent/15",
+  low: "bg-tech-accent/10",
+} as const
+
 export function SegmentedBar({
   opacity = "medium",
   showBorder = false,
@@ -58,18 +64,12 @@ export function SegmentedBar({
   showBorder?: boolean
   ref?: React.Ref<HTMLDivElement>
 }) {
-  const opacityMap = {
-    high: "bg-tech-accent/20",
-    medium: "bg-tech-accent/15",
-    low: "bg-tech-accent/10",
-  }
-
   return (
     <div
       ref={ref}
       className={cn(
         "h-2",
-        opacityMap[opacity],
+        OPACITY_MAP[opacity],
         showBorder && "border-tech-line border",
         className
       )}

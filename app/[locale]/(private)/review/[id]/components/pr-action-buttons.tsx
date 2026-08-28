@@ -120,10 +120,20 @@ function PRActionButtonsContent({
 
   const buildMergeOptions = React.useCallback(() => {
     const coauthorLines = squashCommitDefaults?.coauthorLines ?? []
+    const coauthorLineSet = new Set(coauthorLines)
+    const bodyLineSet = new Set(commitBody.split("\n"))
+    let hasCoauthorLine = false
+    for (const line of coauthorLineSet) {
+      if (bodyLineSet.has(line)) {
+        hasCoauthorLine = true
+        break
+      }
+    }
+
     const finalBody =
       selectedMethod === "squash" &&
       coauthorLines.length > 0 &&
-      !coauthorLines.some((line) => commitBody.includes(line))
+      !hasCoauthorLine
         ? `${commitBody.trimEnd()}${commitBody.trim() ? "\n\n" : ""}${coauthorLines.join("\n")}`
         : commitBody
 

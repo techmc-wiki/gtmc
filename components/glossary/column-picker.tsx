@@ -46,10 +46,15 @@ export function ColumnPicker({
 }: ColumnPickerProps) {
   const t = useTranslations("Glossary")
   const [open, setOpen] = React.useState(false)
+  const visibleColumnSet = React.useMemo(
+    () => new Set(visibleColumns),
+    [visibleColumns]
+  )
 
   const toggle = React.useCallback(
     (column: GlossaryTableColumn) => {
-      const next = visibleColumns.includes(column)
+      const visibleColumnSet = new Set(visibleColumns)
+      const next = visibleColumnSet.has(column)
         ? visibleColumns.filter((entry) => entry !== column)
         : [...visibleColumns, column]
       onChange(next)
@@ -107,7 +112,7 @@ export function ColumnPicker({
             <ColumnGroup
               title="CORE"
               entries={coreEntries}
-              visibleColumns={visibleColumns}
+              visibleColumnSet={visibleColumnSet}
               onToggle={toggle}
             />
 
@@ -128,7 +133,7 @@ export function ColumnPicker({
                     key={group.code}
                     title={group.display}
                     entries={group.entries}
-                    visibleColumns={visibleColumns}
+                    visibleColumnSet={visibleColumnSet}
                     onToggle={toggle}
                   />
                 ))}
@@ -164,7 +169,7 @@ function coreLabel(
 interface ColumnGroupProps {
   title: React.ReactNode
   entries: ReadonlyArray<{ column: GlossaryTableColumn; label: string }>
-  visibleColumns: GlossaryTableColumn[]
+  visibleColumnSet: ReadonlySet<GlossaryTableColumn>
   onToggle: (column: GlossaryTableColumn) => void
 }
 
@@ -208,7 +213,7 @@ function ColumnCheckbox({
 function ColumnGroup({
   title,
   entries,
-  visibleColumns,
+  visibleColumnSet,
   onToggle,
 }: ColumnGroupProps) {
   return (
@@ -222,7 +227,7 @@ function ColumnGroup({
             key={column}
             column={column}
             label={label}
-            checked={visibleColumns.includes(column)}
+            checked={visibleColumnSet.has(column)}
             onToggle={onToggle}
           />
         ))}

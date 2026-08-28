@@ -115,10 +115,12 @@ export function CategoryFilter({
 
   const [isOpen, setIsOpen] = React.useState(false)
   const noneSelected = selected.length === 0
+  const selectedSet = React.useMemo(() => new Set(selected), [selected])
 
   const handleToggle = React.useCallback(
     (name: string) => {
-      if (selected.includes(name)) {
+      const selectedSet = new Set(selected)
+      if (selectedSet.has(name)) {
         onChange(selected.filter((entry) => entry !== name))
       } else {
         onChange([...selected, name])
@@ -181,7 +183,7 @@ export function CategoryFilter({
                     label={category.name}
                     name={category.name}
                     count={category.count}
-                    active={selected.includes(category.name)}
+                    active={selectedSet.has(category.name)}
                     onToggle={handleToggle}
                   />
                 ))}

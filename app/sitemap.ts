@@ -2,184 +2,123 @@ import type { MetadataRoute } from "next"
 import { cacheLife } from "next/cache"
 
 import { getSiteUrl } from "@/lib/site-url"
-import { flattenArticleNodes } from "@/lib/articles/navigation-data"
 import { encodeSlug } from "@/lib/articles/slug-resolver"
-import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import { getProfileHandles } from "@/lib/articles/person-resolver"
 import {
   loadArticleManifest,
   type ArticleLocale,
 } from "@/lib/articles/manifest"
+import { loadGlossaryManifest } from "@/lib/glossary/manifest"
 
-const STATIC_LAST_MODIFIED = new Date("2024-12-08T10:28:55.000Z")
+const SITE_LOCALES: ArticleLocale[] = ["zh", "en"]
 
-function localizedAlternates(base: string, path: string) {
-  return {
-    languages: {
-      en: `${base}/en${path}`,
-      zh: `${base}/zh${path}`,
-      "x-default": `${base}/zh${path}`,
-    },
+function localizedAlternates(
+  base: string,
+  path: string,
+  locales: readonly ArticleLocale[] = SITE_LOCALES
+) {
+  const languages = Object.fromEntries(
+    locales.map((locale) => [locale, `${base}/${locale}${path}`])
+  )
+  const defaultLocale = locales.includes("zh") ? "zh" : locales[0]
+
+  if (defaultLocale) {
+    languages["x-default"] = `${base}/${defaultLocale}${path}`
   }
-}
 
-function lastModifiedFrom(value: string | undefined): Date {
-  return value ? new Date(value) : STATIC_LAST_MODIFIED
+  return { languages }
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   "use cache"
   cacheLife("max")
 
-  const BASE = getSiteUrl()
-
+  const base = getSiteUrl()
   const staticUrls: MetadataRoute.Sitemap = [
-    {
-      url: `${BASE}/zh`,
-      lastModified: STATIC_LAST_MODIFIED,
-      alternates: localizedAlternates(BASE, ""),
-      changeFrequency: "weekly",
+    ...SITE_LOCALES.map((locale) => ({
+      url: `${base}/${locale}`,
+      alternates: localizedAlternates(base, ""),
+      changeFrequency: "weekly" as const,
       priority: 1.0,
-    },
-    {
-      url: `${BASE}/en`,
-      lastModified: STATIC_LAST_MODIFIED,
-      alternates: localizedAlternates(BASE, ""),
-      changeFrequency: "weekly",
-      priority: 1.0,
-    },
-    {
-      url: `${BASE}/zh/articles`,
-      lastModified: STATIC_LAST_MODIFIED,
-      alternates: localizedAlternates(BASE, "/articles"),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE}/en/articles`,
-      lastModified: STATIC_LAST_MODIFIED,
-      alternates: localizedAlternates(BASE, "/articles"),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE}/zh/glossary`,
-      lastModified: STATIC_LAST_MODIFIED,
-      alternates: localizedAlternates(BASE, "/glossary"),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE}/en/glossary`,
-      lastModified: STATIC_LAST_MODIFIED,
-      alternates: localizedAlternates(BASE, "/glossary"),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE}/zh/pdf`,
-      lastModified: STATIC_LAST_MODIFIED,
-      alternates: localizedAlternates(BASE, "/pdf"),
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
-    {
-      url: `${BASE}/en/pdf`,
-      lastModified: STATIC_LAST_MODIFIED,
-      alternates: localizedAlternates(BASE, "/pdf"),
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
-    {
-      url: `${BASE}/zh/about`,
-      alternates: localizedAlternates(BASE, "/about"),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE}/en/about`,
-      alternates: localizedAlternates(BASE, "/about"),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE}/zh/authors`,
-      alternates: localizedAlternates(BASE, "/authors"),
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE}/en/authors`,
-      alternates: localizedAlternates(BASE, "/authors"),
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE}/zh/editorial-policy`,
-      alternates: localizedAlternates(BASE, "/editorial-policy"),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE}/en/editorial-policy`,
-      alternates: localizedAlternates(BASE, "/editorial-policy"),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
+    })),
+    ...SITE_LOCALES.flatMap((locale) => [
+      {
+        url: `${base}/${locale}/glossary`,
+        alternates: localizedAlternates(base, "/glossary"),
+        changeFrequency: "weekly" as const,
+        priority: 0.9,
+      },
+      {
+        url: `${base}/${locale}/pdf`,
+        alternates: localizedAlternates(base, "/pdf"),
+        changeFrequency: "monthly" as const,
+        priority: 0.5,
+      },
+      {
+        url: `${base}/${locale}/about`,
+        alternates: localizedAlternates(base, "/about"),
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+      },
+      {
+        url: `${base}/${locale}/authors`,
+        alternates: localizedAlternates(base, "/authors"),
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      },
+      {
+        url: `${base}/${locale}/editorial-policy`,
+        alternates: localizedAlternates(base, "/editorial-policy"),
+        changeFrequency: "monthly" as const,
+        priority: 0.8,
+      },
+    ]),
   ]
 
-  let articleUrls: MetadataRoute.Sitemap = []
-  try {
-    const manifest = loadArticleManifest()
-    const locales: ArticleLocale[] = ["zh", "en"]
-    const localizedArticleUrls = await Promise.all(
-      locales.map(async (locale) => {
-        const tree = await getPublicChapterNav(locale)
-        const slugs = flattenArticleNodes(tree).map((node) => node.slug)
-        return slugs.map((slug) => ({
-          url: `${BASE}/${locale}/articles/${encodeSlug(slug)}`,
-          lastModified: lastModifiedFrom(
-            manifest[slug]?.lastmodByLocale[locale] ?? manifest[slug]?.created
-          ),
-          alternates: localizedAlternates(
-            BASE,
-            `/articles/${encodeSlug(slug)}`
-          ),
-          changeFrequency: "weekly" as const,
-          priority: 0.8,
-        }))
-      })
-    )
-    articleUrls = localizedArticleUrls.flat()
-  } catch (error) {
-    console.warn("Sitemap: skipped article URLs due to tree error:", error)
-    /* Sidebar tree unavailable — skip articles */
-  }
+  const manifest = loadArticleManifest()
+  const articleUrls = Object.values(manifest).flatMap((entry) => {
+    if (entry.isFolder && !entry.hasIntro) return []
 
-  let authorUrls: MetadataRoute.Sitemap = []
-  try {
-    const handles = getProfileHandles()
-    authorUrls = handles.flatMap((handle) => {
-      const encoded = encodeURIComponent(handle)
-      const path = `/authors/${encoded}`
-      return [
-        {
-          url: `${BASE}/zh${path}`,
-          alternates: localizedAlternates(BASE, path),
-          changeFrequency: "weekly" as const,
-          priority: 0.6,
-        },
-        {
-          url: `${BASE}/en${path}`,
-          alternates: localizedAlternates(BASE, path),
-          changeFrequency: "weekly" as const,
-          priority: 0.6,
-        },
-      ]
+    const articlePath = `/articles/${encodeSlug(entry.slug)}`
+    return entry.availableLocales.map((locale) => {
+      const modifiedValue = entry.lastmodByLocale[locale] ?? entry.created
+      const modified = modifiedValue ? new Date(modifiedValue) : undefined
+
+      return {
+        url: `${base}/${locale}${articlePath}`,
+        ...(modified ? { lastModified: modified } : {}),
+        alternates: localizedAlternates(
+          base,
+          articlePath,
+          entry.availableLocales
+        ),
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+      }
     })
-  } catch (error) {
-    console.warn("Sitemap: skipped author URLs due to resolver error:", error)
-  }
+  })
 
-  return [...staticUrls, ...articleUrls, ...authorUrls]
+  const { entries } = await loadGlossaryManifest()
+  const glossaryUrls = entries.flatMap((entry) => {
+    const path = `/glossary/${encodeURIComponent(entry.slug)}`
+    return SITE_LOCALES.map((locale) => ({
+      url: `${base}/${locale}${path}`,
+      alternates: localizedAlternates(base, path),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    }))
+  })
+
+  const authorUrls = getProfileHandles().flatMap((handle) => {
+    const encoded = encodeURIComponent(handle)
+    const path = `/authors/${encoded}`
+    return SITE_LOCALES.map((locale) => ({
+      url: `${base}/${locale}${path}`,
+      alternates: localizedAlternates(base, path),
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    }))
+  })
+
+  return [...staticUrls, ...articleUrls, ...glossaryUrls, ...authorUrls]
 }

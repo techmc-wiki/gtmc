@@ -2,7 +2,7 @@ import { Suspense } from "react"
 // eslint-disable-next-line import/no-unassigned-import
 import "katex/dist/katex.min.css"
 import type { Metadata } from "next"
-import { notFound, redirect } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import {
   calculateReadingMetrics,
@@ -29,7 +29,6 @@ import {
 import { getArticleContentBySlug } from "@/lib/articles/content"
 import { resolveArticleAssetPath } from "@/lib/articles/article-asset-path"
 import {
-  getArticleFallbackLocale,
   resolveArticleLocale,
   resolveArticleRequest,
   type ArticleTreeNode,
@@ -68,8 +67,7 @@ export async function generateStaticParams(): Promise<{ locale: string; slug: st
   const locales: ArticleLocale[] = ["zh", "en"]
   const paramsByLocale = await Promise.all(
     locales.map(async (locale) => {
-      const contentLocale = getArticleFallbackLocale(locale)
-      const tree = await getCachedArticleTree(contentLocale)
+      const tree = await getCachedArticleTree(locale)
       const collectSlugs = async (
         nodes: ArticleTreeNode[]
       ): Promise<string[]> => {
@@ -77,11 +75,11 @@ export async function generateStaticParams(): Promise<{ locale: string; slug: st
           nodes.map(async (node) => {
             const manifestEntry = await getCachedLocalizedArticleEntry(
               node.slug,
-              contentLocale
+              locale
             )
             const ownSlugs =
               (!node.isFolder || manifestEntry?.hasIntro) &&
-              hasArticleLocale(node.slug, contentLocale)
+              hasArticleLocale(node.slug, locale)
                 ? [node.slug]
                 : []
             const childSlugs = await collectSlugs(node.children ?? [])
@@ -92,9 +90,7 @@ export async function generateStaticParams(): Promise<{ locale: string; slug: st
       }
 
       const slugs = await collectSlugs(tree)
-      const entries: Array<{ locale: ArticleLocale; slug: string[] }> = [
-        { locale, slug: [] },
-      ]
+      const entries: Array<{ locale: ArticleLocale; slug: string[] }> = []
       for (const slug of slugs) {
         entries.push({
           locale,
@@ -130,7 +126,13 @@ export async function generateMetadata({
     notFound()
   }
 
-  const { contentLocale, target } = resolvedRequest
+  const { contentLocale, target, redirectToLocale } = resolvedRequest
+
+  if (!slug?.length || target.redirectToSlug || redirectToLocale) {
+    permanentRedirect(
+      `/${redirectToLocale ?? locale}/articles/${encodeSlug(target.canonicalSlug)}`
+    )
+  }
 
   let artifact: Awaited<ReturnType<typeof getArticleContentBySlug>> | null = null
   try {
@@ -241,11 +243,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     notFound()
   }
 
-  const { contentLocale, target } = resolvedRequest
+  const { contentLocale, target, redirectToLocale } = resolvedRequest
 
-  if (target.redirectToSlug) {
-    const redirectPath = encodeSlug(target.redirectToSlug)
-    redirect(`/${locale}/articles/${redirectPath}`)
+  if (!slug?.length || target.redirectToSlug || redirectToLocale) {
+    permanentRedirect(
+      `/${redirectToLocale ?? locale}/articles/${encodeSlug(target.canonicalSlug)}`
+    )
   }
 
   const artifact = await getArticleContentBySlug(

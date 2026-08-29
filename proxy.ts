@@ -11,6 +11,81 @@ import {
   type NextRequest,
 } from "next/server"
 import { routing } from "@/i18n/routing"
+import articleManifest from "./data/manifest.json" with { type: "json" }
+interface SitemapArticleEntry {
+  slug: string
+  availableLocales: string[]
+  hasIntro: boolean
+  isFolder: boolean
+  children?: SitemapArticleEntry[]
+}
+
+const articleEntries: SitemapArticleEntry[] = []
+function collectArticleEntries(entries: SitemapArticleEntry[]): void {
+  for (const entry of entries) {
+    articleEntries.push(entry)
+    collectArticleEntries(entry.children ?? [])
+  }
+}
+collectArticleEntries(Object.values(articleManifest) as SitemapArticleEntry[])
+
+function decodeArticlePath(path: string): string {
+  try {
+    return path
+      .split("/")
+      .map((segment) => decodeURIComponent(segment))
+      .join("/")
+      .replace(/\.md$/i, "")
+  } catch {
+    return path
+  }
+}
+
+function resolveCanonicalArticleSlug(
+  entry: SitemapArticleEntry,
+  locale: string
+): string | null {
+  if (!entry.isFolder) {
+    return entry.availableLocales.includes(locale) ? entry.slug : null
+  }
+
+  if (entry.hasIntro && entry.availableLocales.includes(locale)) {
+    return entry.slug
+  }
+
+  for (const child of entry.children ?? []) {
+    const slug = resolveCanonicalArticleSlug(child, locale)
+    if (slug) return slug
+  }
+
+  return null
+}
+
+function canonicalizeArticleRequest(req: NextRequest): Response | null {
+  const match = /^\/(en|zh)\/articles(?:\/(.*))?$/.exec(req.nextUrl.pathname)
+  if (!match) return null
+
+  const [, requestedLocale, rawPath] = match
+  const requestedSlug = rawPath ? decodeArticlePath(rawPath) : "preface"
+  const entry = articleEntries.find(
+    (candidate) => candidate.slug === requestedSlug
+  )
+  if (!entry) return null
+
+  const contentLocale = entry.availableLocales.includes(requestedLocale)
+    ? requestedLocale
+    : "zh"
+  const canonicalSlug = resolveCanonicalArticleSlug(entry, contentLocale)
+  if (!canonicalSlug) return null
+
+  const canonicalPath = `/${contentLocale}/articles/${canonicalSlug
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/")}`
+  if (req.nextUrl.pathname === canonicalPath) return null
+
+  return Response.redirect(new URL(canonicalPath, getRequestOrigin(req)), 308)
+}
 
 const intlMiddleware = createMiddleware(routing)
 const privateRoutes = ["/admin", "/draft", "/glossary/edit", "/profile"]
@@ -136,6 +211,11 @@ const authenticatedProxy = auth(
 
 export default function proxy(req: NextRequest, event: NextFetchEvent) {
   // Markdown content negotiation short-circuits auth and i18n handling.
+  const canonicalArticleRedirect = canonicalizeArticleRequest(req)
+  if (canonicalArticleRedirect) {
+    return canonicalArticleRedirect
+  }
+
   const markdownRewrite = negotiateMarkdownRewrite(req)
   if (markdownRewrite) {
     return markdownRewrite

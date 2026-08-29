@@ -26,6 +26,7 @@ export interface ResolvedArticleTarget {
 export interface ResolvedArticleRequest {
   contentLocale: ArticleLocale
   target: ResolvedArticleTarget
+  redirectToLocale?: ArticleLocale
 }
 
 /**
@@ -63,7 +64,11 @@ export async function resolveArticleRequest(
     fallbackLocale
   )
   return fallbackTarget
-    ? { contentLocale: fallbackLocale, target: fallbackTarget }
+    ? {
+        contentLocale: fallbackLocale,
+        target: fallbackTarget,
+        redirectToLocale: fallbackLocale,
+      }
     : null
 }
 

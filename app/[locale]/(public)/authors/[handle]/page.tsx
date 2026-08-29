@@ -27,6 +27,7 @@ import {
   isMaintainer,
   isSameAuthor,
 } from "@/lib/articles/person-resolver"
+import { getPersonDescription } from "@/lib/markdown/people"
 import { getRepositoryContributorStats } from "@/lib/git/repository-contributor-stats"
 import { buildPersonJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
 import {
@@ -81,20 +82,20 @@ export async function generateMetadata({
     ? getRepositoryContributorStats([handle, person.key, person.name])
     : null
 
+  const personDescription = getPersonDescription(person, locale as "en" | "zh")
   const description =
     maintainer && repositoryStats
       ? t("maintainerMetaDescription", {
           name: person.name,
           ...repositoryStats,
         })
-      : (person.description ??
+      : (personDescription ??
         (articles.length > 0
           ? t("metaDescription", {
               name: person.name,
               articleCount: articles.length,
             })
           : t("metaDescriptionFallback")))
-
   const title = `${person.name} | ${t(
     maintainer ? "maintainerLabel" : "articlesLabel"
   )}`
@@ -163,10 +164,15 @@ export default async function AuthorDetailPage({
           article.author !== undefined && !isSameAuthor(article.author, handle)
       ).length
 
+  const personDescription = getPersonDescription(person, locale as "en" | "zh")
   const jsonLd = serializeJsonLd(
-    buildPersonJsonLd(person, siteUrl, locale, urlHandle, {
-      role: maintainer ? t("maintainerLabel") : t("joinedLabel"),
-    })
+    buildPersonJsonLd(
+      { ...person, description: personDescription },
+      siteUrl,
+      locale,
+      urlHandle,
+      { role: maintainer ? t("maintainerLabel") : t("joinedLabel") }
+    )
   )
   const contributorSince = articleAttributionExcluded
     ? undefined
@@ -255,7 +261,7 @@ export default async function AuthorDetailPage({
             </p>
 
             <p className="text-tech-main mt-3 max-w-2xl text-sm/relaxed">
-              {person.description ?? t("fallbackBio")}
+              {personDescription ?? t("fallbackBio")}
             </p>
 
             {hasSocialLinks && (

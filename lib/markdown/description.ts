@@ -1,5 +1,7 @@
 import { remark } from "remark"
 import stripMarkdown from "strip-markdown"
+import { visit } from "unist-util-visit"
+import type { Html } from "mdast"
 import { stripAnsiColorMarkup } from "@/lib/markdown/ansi-colors"
 
 /** Typical Bing/Google SERP target: long enough to be informative, short enough not to truncate. */
@@ -34,6 +36,25 @@ function toPlainText(markdownFragment: string): string {
     .trim()
 }
 
+function removeRawHtmlBlocks(markdown: string): string {
+  const ranges: Array<{ start: number; end: number }> = []
+  const tree = remark().parse(markdown)
+
+  visit(tree, "html", (node: Html) => {
+    const start = node.position?.start.offset
+    const end = node.position?.end.offset
+    if (start !== undefined && end !== undefined) {
+      ranges.push({ start, end })
+    }
+  })
+
+  let result = markdown
+  for (const { start, end } of ranges.toReversed()) {
+    result = `${result.slice(0, start)}${result.slice(end)}`
+  }
+  return result
+}
+
 function isSkipLine(trimmed: string, inCodeFence: boolean): boolean {
   if (inCodeFence) return true
   if (!trimmed) return true
@@ -59,7 +80,7 @@ export function generateDescription(
   maxLength: number = META_DESCRIPTION_MAX_LENGTH,
   minLength: number = META_DESCRIPTION_MIN_LENGTH
 ): string {
-  const normalizedMarkdown = stripAnsiColorMarkup(markdown)
+  const normalizedMarkdown = removeRawHtmlBlocks(stripAnsiColorMarkup(markdown))
   const parts: string[] = []
 
   const frontmatter = frontmatterDescription?.trim()

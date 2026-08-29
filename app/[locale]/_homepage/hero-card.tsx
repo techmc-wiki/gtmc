@@ -134,11 +134,17 @@ export function HeroCard() {
           </div>
 
           <div className="relative p-6 sm:p-10 md:p-12">
-            <h1 className="text-tech-main-dark relative mb-6 flex flex-col items-start text-4xl tracking-tight sm:mb-8 sm:gap-1 sm:text-6xl lg:text-7xl">
-              <span className="animate-tech-slide-in display-title fill-mode-forwards opacity-0 [animation-delay:0.5s] motion-reduce:animate-none motion-reduce:opacity-100">
+            <h1
+              aria-label="Graduate Texts in Minecraft"
+              className="text-tech-main-dark relative mb-6 flex flex-col items-start text-4xl tracking-tight sm:mb-8 sm:gap-1 sm:text-6xl lg:text-7xl">
+              <span
+                aria-hidden="true"
+                className="animate-tech-slide-in display-title fill-mode-forwards opacity-0 [animation-delay:0.5s] motion-reduce:animate-none motion-reduce:opacity-100">
                 Graduate Texts
               </span>
-              <span className="animate-tech-slide-in display-title text-tech-main fill-mode-forwards flex flex-row items-baseline gap-3 opacity-0 [animation-delay:0.7s] motion-reduce:animate-none motion-reduce:opacity-100 sm:gap-5">
+              <span
+                aria-hidden="true"
+                className="animate-tech-slide-in display-title text-tech-main fill-mode-forwards flex flex-row items-baseline gap-3 opacity-0 [animation-delay:0.7s] motion-reduce:animate-none motion-reduce:opacity-100 sm:gap-5">
                 in Minecraft
                 <span
                   aria-hidden="true"

@@ -93,7 +93,7 @@ export async function generateMetadata({
     metadataBase: new URL(siteUrl),
     title: {
       default: "Graduate Texts in Minecraft",
-      template: "%s — Graduate Texts in Minecraft",
+      template: "%s | GTMC",
     },
     icons: {
       icon: "/logo-mark-light.svg",

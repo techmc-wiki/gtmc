@@ -6,6 +6,7 @@ import { load as yamlLoad } from "js-yaml"
 export type PeopleEntry = {
   name: string
   description?: string
+  descriptions?: Partial<Record<"en" | "zh", string>>
   profile?: string
   email?: string
   social?: {
@@ -104,4 +105,21 @@ export function resolvePerson(key: string): ResolvedPerson {
     social: {},
     isFallback: true,
   }
+}
+
+export function getPersonDescription(
+  person: ResolvedPerson,
+  locale: "en" | "zh"
+): string | null {
+  const entry = loadPeople()[person.key]
+  const localized = entry?.descriptions?.[locale]?.trim()
+  if (localized) return localized
+
+  const legacyDescription = entry?.description?.trim()
+  if (!legacyDescription || legacyDescription === "（这里是简介）") return null
+
+  const containsCjk = /[\u3400-\u9fff\uf900-\ufaff]/u.test(legacyDescription)
+  if ((locale === "zh") === containsCjk) return legacyDescription
+
+  return null
 }

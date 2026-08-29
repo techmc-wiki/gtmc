@@ -265,16 +265,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     frontmatter: data,
     translationStatus,
   } = artifact
-  const articleTitle = await formatArticleDisplayTitle({
-    frontmatterTitle: data["chapter-title"],
-    filePath: target.filePath,
-    canonicalSlug: target.canonicalSlug,
-    index: target.index,
-    isPreface: target.isPreface,
-    isReadmeIntro: target.isReadmeIntro,
-    locale: contentLocale,
-  })
-  const tree = await getPublicChapterNav(contentLocale)
+  const [articleTitle, tree] = await Promise.all([
+    formatArticleDisplayTitle({
+      frontmatterTitle: data["chapter-title"],
+      filePath: target.filePath,
+      canonicalSlug: target.canonicalSlug,
+      index: target.index,
+      isPreface: target.isPreface,
+      isReadmeIntro: target.isReadmeIntro,
+      locale: contentLocale,
+    }),
+    getPublicChapterNav(contentLocale),
+  ])
   const currentSlug = target.canonicalSlug || slugPath
   const runningHeadOwner = findNavigationOwner(tree, currentSlug)
   const runningHeadChapters = getNavigationBreadcrumbs(tree, currentSlug)

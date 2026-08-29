@@ -27,8 +27,10 @@ export async function generateStaticParams(): Promise<
 export async function generateMetadata({
   params,
 }: GlossaryTermPageProps): Promise<Metadata> {
-  const { locale, slug } = await params
-  const { entries } = await loadGlossaryManifest()
+  const [{ locale, slug }, { entries }] = await Promise.all([
+    params,
+    loadGlossaryManifest(),
+  ])
   const entry = entries.find((candidate) => candidate.slug === slug)
 
   if (!entry) notFound()

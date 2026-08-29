@@ -13,14 +13,14 @@ export interface CornerBracketsProps {
   ref?: React.Ref<HTMLDivElement>
 }
 
-export const cornerPositionClasses = {
+const cornerPositionClasses = {
   topLeft: "-translate-px border-t-2 border-l-2",
   topRight: "translate-x-px -translate-y-px border-t-2 border-r-2",
   bottomLeft: "-translate-x-px translate-y-px border-b-2 border-l-2",
   bottomRight: "translate-px border-r-2 border-b-2",
 } as const
 
-export function getCornerVisibility(
+function getCornerVisibility(
   corners: NonNullable<CornerBracketsProps["corners"]>
 ) {
   return {

@@ -497,7 +497,7 @@ function clampAspect(aspect: number) {
   return Math.min(Math.max(aspect || DEFAULTS.aspect, 0.35), 1.25)
 }
 
-export function supportsHtmlInCanvas(): boolean {
+function supportsHtmlInCanvas(): boolean {
   if (typeof document === "undefined") return false
   const probe = document.createElement("canvas") as PaintableCanvas
   const ctx = probe.getContext("2d") as ElementImageContext | null
@@ -508,7 +508,7 @@ export function supportsHtmlInCanvas(): boolean {
   )
 }
 
-export function createDecryptReveal(
+function createDecryptReveal(
   elements: DecryptRevealElements,
   options: DecryptRevealOptions = {}
 ): DecryptRevealInstance | null {

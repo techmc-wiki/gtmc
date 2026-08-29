@@ -517,8 +517,11 @@ function TreeNode({
           <button
             type="button"
             onClick={handleToggle}
+            aria-label={
+              isExpanded ? `Collapse ${node.title}` : `Expand ${node.title}`
+            }
             className="text-tech-main/50 hover:text-tech-main flex h-8 w-6 shrink-0 items-center justify-center font-mono text-[0.625rem] transition-colors">
-            {isExpanded ? "▼" : "▶"}
+            <span aria-hidden="true">{isExpanded ? "▼" : "▶"}</span>
           </button>
         ) : (
           <span className="text-tech-main/20 inline-flex h-8 w-6 shrink-0 items-center justify-center font-mono text-[0.625rem]">

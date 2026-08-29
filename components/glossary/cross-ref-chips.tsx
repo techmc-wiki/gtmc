@@ -17,6 +17,7 @@ type CrossRefChipsProps = CrossRefChipsBaseProps &
         mode: "detail"
         related: ParsedRelatedToken[]
         onOpenDetail: (slug: string) => void
+        locale: string
       }
   )
 
@@ -57,13 +58,18 @@ export function CrossRefChips(props: CrossRefChipsProps) {
           )
         } else {
           chip = (
-            <button
-              type="button"
-              onClick={() => props.onOpenDetail(generateSlug(entry.target))}
+            <a
+              href={`/${props.locale}/glossary/${encodeURIComponent(
+                generateSlug(entry.target)
+              )}`}
+              onClick={(event) => {
+                event.preventDefault()
+                props.onOpenDetail(generateSlug(entry.target))
+              }}
               className={chipBase}
               title={entry.target}>
               {display}
-            </button>
+            </a>
           )
         }
 

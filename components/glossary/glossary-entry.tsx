@@ -61,9 +61,13 @@ export function GlossaryCard({
         className
       )}>
       <header className="flex items-baseline justify-between gap-3">
-        <button
-          type="button"
-          onClick={() => onOpenDetail?.(entry)}
+        <a
+          href={`/${locale}/glossary/${encodeURIComponent(entry.slug)}`}
+          onClick={(event) => {
+            if (!onOpenDetail) return
+            event.preventDefault()
+            onOpenDetail(entry)
+          }}
           className={cn(termTriggerClass, "text-base leading-snug")}>
           {primaryContent.value}
           {entry.isControversial && (
@@ -73,7 +77,7 @@ export function GlossaryCard({
               *
             </span>
           )}
-        </button>
+        </a>
         {visibleColumnsSet.has("shortForm") && entry.shortForm && (
           <span className="text-tech-main/60 shrink-0 font-mono text-xs">
             {entry.shortForm}
@@ -214,12 +218,16 @@ export function GlossaryTableRow({
           case "term":
             return (
               <td key={column} className={cn(cellClass, "min-w-[10rem]")}>
-                <button
-                  type="button"
-                  onClick={() => onOpenDetail?.(entry)}
+                <a
+                  href={`/${locale}/glossary/${encodeURIComponent(entry.slug)}`}
+                  onClick={(event) => {
+                    if (!onOpenDetail) return
+                    event.preventDefault()
+                    onOpenDetail(entry)
+                  }}
                   className={cn(termTriggerClass, "tracking-tight")}>
                   {primaryContent.value}
-                </button>
+                </a>
                 {entry.isControversial && (
                   <span
                     aria-label="controversial"

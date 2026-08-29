@@ -65,7 +65,7 @@ const ROOT_NODE: DraftRepoTreeNode = {
   children: [],
 }
 
-export function DraftFileSourceDialog({
+function useDraftFileSourceDialog({
   isOpen,
   initialFolderPath,
   initialMode = "new",
@@ -253,20 +253,59 @@ export function DraftFileSourceDialog({
     []
   )
 
-  if (!isOpen) {
-    return null
+  return {
+    canSubmitNew: Boolean(buildDraftFilePath(selectedFolderPath, newFileName)),
+    canSubmitRepo: Boolean(selectedRepoFilePath) && !isSubmitting,
+    canSubmitUpload: Boolean(localFile) && !isSubmitting,
+    customUploadName,
+    expandedPaths,
+    handleAddRepoFile,
+    handleCreateNewFile,
+    handleCreateNewFolder,
+    handleCustomUploadNameChange,
+    handleFileInputChange,
+    handleImportLocalFile,
+    handleNewFileNameChange,
+    handleNewFolderNameChange,
+    handleTogglePath,
+    isLoadingTree,
+    isSubmitting,
+    mode,
+    newFileName,
+    newFolderName,
+    selectedFolderPath,
+    selectedRepoFilePath,
+    setMode,
+    setSelectedFolderPath,
+    setSelectedRepoFilePath,
+    sourceModeOptions,
+    tree,
+    treeError,
   }
+}
 
-  const treeRoots = [{ ...ROOT_NODE, children: tree }]
-  const canSubmitRepo = Boolean(selectedRepoFilePath) && !isSubmitting
-  const canSubmitNew = Boolean(
-    buildDraftFilePath(selectedFolderPath, newFileName)
-  )
-  const canSubmitUpload = Boolean(localFile) && !isSubmitting
+type DraftFileSourceDialogState = ReturnType<typeof useDraftFileSourceDialog>
+
+export function DraftFileSourceDialog(props: DraftFileSourceDialogProps) {
+  const dialog = useDraftFileSourceDialog(props)
+  if (!props.isOpen) return null
+
+  return <DraftFileSourceDialogLayout dialog={dialog} onClose={props.onClose} />
+}
+
+function DraftFileSourceDialogLayout({
+  dialog,
+  onClose,
+}: {
+  dialog: DraftFileSourceDialogState
+  onClose: () => void
+}) {
+  const t = useTranslations("DraftFiles")
+  const treeRoots = [{ ...ROOT_NODE, children: dialog.tree }]
 
   return (
     <Dialog
-      open={isOpen}
+      open
       onOpenChange={(open) => {
         if (!open) onClose()
       }}>
@@ -286,15 +325,13 @@ export function DraftFileSourceDialog({
             {t("close")}
           </Button>
         </div>
-
         <div className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[20rem_minmax(0,1fr)]">
           <aside className="guide-line bg-tech-main/5 flex min-h-0 flex-col border-r">
             <div className="guide-line text-tech-main/60 shrink-0 border-b px-4 py-3 text-xs font-medium">
               {t("destinationTree")}
             </div>
-
             <div className="flex-1 overflow-y-auto p-3">
-              {isLoadingTree ? (
+              {dialog.isLoadingTree ? (
                 <p className="text-tech-main/60 font-mono text-xs">
                   {t("loadingRepo")}
                 </p>
@@ -303,157 +340,164 @@ export function DraftFileSourceDialog({
                   {treeRoots.map((node) => (
                     <TreeNode
                       key={node.id}
-                      expandedPaths={expandedPaths}
-                      mode={mode}
+                      expandedPaths={dialog.expandedPaths}
+                      mode={dialog.mode}
                       node={node}
-                      onSelectFile={setSelectedRepoFilePath}
-                      onSelectFolder={setSelectedFolderPath}
-                      onTogglePath={handleTogglePath}
-                      selectedFilePath={selectedRepoFilePath}
-                      selectedFolderPath={selectedFolderPath}
+                      onSelectFile={dialog.setSelectedRepoFilePath}
+                      onSelectFolder={dialog.setSelectedFolderPath}
+                      onTogglePath={dialog.handleTogglePath}
+                      selectedFilePath={dialog.selectedRepoFilePath}
+                      selectedFolderPath={dialog.selectedFolderPath}
                     />
                   ))}
                 </div>
               )}
             </div>
           </aside>
-
-          <div className="min-h-0 overflow-y-auto p-5">
-            <Tabs
-              value={mode}
-              onValueChange={(value) => setMode(value as SourceMode)}
-              className="gap-2">
-              <TabsList>
-                {sourceModeOptions.map((option) => (
-                  <TabsTrigger key={option.value} value={option.value}>
-                    {option.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-
-              {treeError ? (
-                <div className="mb-4 border border-red-500/30 bg-red-500/10 px-4 py-3 font-mono text-xs text-red-700">
-                  {treeError}
-                </div>
-              ) : null}
-
-              <TabsContent value="repo" className="space-y-4">
-                <SectionLabel>{t("selectExistingFile")}</SectionLabel>
-                <p className="text-tech-main/60 text-xs">
-                  {t("selected")}: {selectedRepoFilePath || "NONE"}
-                </p>
-                <Button
-                  type="button"
-                  variant="primary"
-                  onClick={handleAddRepoFile}
-                  disabled={!canSubmitRepo}>
-                  {isSubmitting ? t("adding") : t("addExistingFile")}
-                </Button>
-              </TabsContent>
-
-              <TabsContent value="upload" className="space-y-4">
-                <SectionLabel>{t("importLocalText")}</SectionLabel>
-                <p className="text-tech-main/60 text-xs">
-                  {t("destinationFolder")}: {selectedFolderPath || "ROOT"}
-                </p>
-                <input
-                  type="file"
-                  accept=".md,.mdx,.txt,.csv,.json,.yml,.yaml"
-                  className="text-tech-main block w-full font-mono text-xs"
-                  aria-label={t("importLocalText")}
-                  onChange={handleFileInputChange}
-                />
-                <div className="space-y-2">
-                  <label
-                    className="text-tech-main/60 text-xs font-medium"
-                    htmlFor="draft-import-name">
-                    {t("fileNameLabel")}
-                  </label>
-                  <Input
-                    id="draft-import-name"
-                    placeholder={t("repoFileNamePlaceholder")}
-                    value={customUploadName}
-                    onChange={handleCustomUploadNameChange}
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="primary"
-                  onClick={handleImportLocalFile}
-                  disabled={!canSubmitUpload}>
-                  {isSubmitting ? t("importing") : t("importLocalFile")}
-                </Button>
-              </TabsContent>
-
-              <TabsContent value="new" className="space-y-4">
-                <SectionLabel>{t("createNewFile")}</SectionLabel>
-                <p className="text-tech-main/60 text-xs">
-                  {t("destinationFolder")}: {selectedFolderPath || "ROOT"}
-                </p>
-                <div className="space-y-2">
-                  <label
-                    className="text-tech-main/60 text-xs font-medium"
-                    htmlFor="draft-new-file-name">
-                    {t("fileNameLabel")}
-                  </label>
-                  <Input
-                    id="draft-new-file-name"
-                    placeholder={t("newFileNamePlaceholder")}
-                    value={newFileName}
-                    onChange={handleNewFileNameChange}
-                  />
-                </div>
-                <div className="text-tech-main/60 text-xs">
-                  {t("result")}:{" "}
-                  {buildDraftFilePath(selectedFolderPath, newFileName) ||
-                    t("pending")}
-                </div>
-                <Button
-                  type="button"
-                  variant="primary"
-                  onClick={handleCreateNewFile}
-                  disabled={!canSubmitNew}>
-                  {t("createEmptyFile")}
-                </Button>
-              </TabsContent>
-
-              <TabsContent value="folder" className="space-y-4">
-                <SectionLabel>新建文件夹</SectionLabel>
-                <p className="text-tech-main/60 text-xs">
-                  {t("destinationFolder")}: {selectedFolderPath || "ROOT"}
-                </p>
-                <div className="space-y-2">
-                  <label
-                    className="text-tech-main/60 text-xs font-medium"
-                    htmlFor="draft-new-folder-name">
-                    {t("fileNameLabel")}
-                  </label>
-                  <Input
-                    id="draft-new-folder-name"
-                    placeholder="例如：new-section"
-                    value={newFolderName}
-                    onChange={handleNewFolderNameChange}
-                  />
-                </div>
-                <div className="text-tech-main/60 text-xs">
-                  {t("result")}:{" "}
-                  {[selectedFolderPath, newFolderName.trim()]
-                    .filter(Boolean)
-                    .join("/") || t("pending")}
-                </div>
-                <Button
-                  type="button"
-                  variant="primary"
-                  onClick={handleCreateNewFolder}
-                  disabled={!newFolderName.trim()}>
-                  创建文件夹
-                </Button>
-              </TabsContent>
-            </Tabs>
-          </div>
+          <DraftFileSourcePanels dialog={dialog} />
         </div>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function DraftFileSourcePanels({
+  dialog,
+}: {
+  dialog: DraftFileSourceDialogState
+}) {
+  const t = useTranslations("DraftFiles")
+  return (
+    <div className="min-h-0 overflow-y-auto p-5">
+      <Tabs
+        value={dialog.mode}
+        onValueChange={(value) => dialog.setMode(value as SourceMode)}
+        className="gap-2">
+        <TabsList>
+          {dialog.sourceModeOptions.map((option) => (
+            <TabsTrigger key={option.value} value={option.value}>
+              {option.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {dialog.treeError ? (
+          <div className="mb-4 border border-red-500/30 bg-red-500/10 px-4 py-3 font-mono text-xs text-red-700">
+            {dialog.treeError}
+          </div>
+        ) : null}
+        <TabsContent value="repo" className="space-y-4">
+          <SectionLabel>{t("selectExistingFile")}</SectionLabel>
+          <p className="text-tech-main/60 text-xs">
+            {t("selected")}: {dialog.selectedRepoFilePath || "NONE"}
+          </p>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={dialog.handleAddRepoFile}
+            disabled={!dialog.canSubmitRepo}>
+            {dialog.isSubmitting ? t("adding") : t("addExistingFile")}
+          </Button>
+        </TabsContent>
+        <TabsContent value="upload" className="space-y-4">
+          <SectionLabel>{t("importLocalText")}</SectionLabel>
+          <p className="text-tech-main/60 text-xs">
+            {t("destinationFolder")}: {dialog.selectedFolderPath || "ROOT"}
+          </p>
+          <input
+            type="file"
+            accept=".md,.mdx,.txt,.csv,.json,.yml,.yaml"
+            className="text-tech-main block w-full font-mono text-xs"
+            aria-label={t("importLocalText")}
+            onChange={dialog.handleFileInputChange}
+          />
+          <div className="space-y-2">
+            <label
+              className="text-tech-main/60 text-xs font-medium"
+              htmlFor="draft-import-name">
+              {t("fileNameLabel")}
+            </label>
+            <Input
+              id="draft-import-name"
+              placeholder={t("repoFileNamePlaceholder")}
+              value={dialog.customUploadName}
+              onChange={dialog.handleCustomUploadNameChange}
+            />
+          </div>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={dialog.handleImportLocalFile}
+            disabled={!dialog.canSubmitUpload}>
+            {dialog.isSubmitting ? t("importing") : t("importLocalFile")}
+          </Button>
+        </TabsContent>
+        <TabsContent value="new" className="space-y-4">
+          <SectionLabel>{t("createNewFile")}</SectionLabel>
+          <p className="text-tech-main/60 text-xs">
+            {t("destinationFolder")}: {dialog.selectedFolderPath || "ROOT"}
+          </p>
+          <div className="space-y-2">
+            <label
+              className="text-tech-main/60 text-xs font-medium"
+              htmlFor="draft-new-file-name">
+              {t("fileNameLabel")}
+            </label>
+            <Input
+              id="draft-new-file-name"
+              placeholder={t("newFileNamePlaceholder")}
+              value={dialog.newFileName}
+              onChange={dialog.handleNewFileNameChange}
+            />
+          </div>
+          <div className="text-tech-main/60 text-xs">
+            {t("result")}:{" "}
+            {buildDraftFilePath(
+              dialog.selectedFolderPath,
+              dialog.newFileName
+            ) || t("pending")}
+          </div>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={dialog.handleCreateNewFile}
+            disabled={!dialog.canSubmitNew}>
+            {t("createEmptyFile")}
+          </Button>
+        </TabsContent>
+        <TabsContent value="folder" className="space-y-4">
+          <SectionLabel>新建文件夹</SectionLabel>
+          <p className="text-tech-main/60 text-xs">
+            {t("destinationFolder")}: {dialog.selectedFolderPath || "ROOT"}
+          </p>
+          <div className="space-y-2">
+            <label
+              className="text-tech-main/60 text-xs font-medium"
+              htmlFor="draft-new-folder-name">
+              {t("fileNameLabel")}
+            </label>
+            <Input
+              id="draft-new-folder-name"
+              placeholder="例如：new-section"
+              value={dialog.newFolderName}
+              onChange={dialog.handleNewFolderNameChange}
+            />
+          </div>
+          <div className="text-tech-main/60 text-xs">
+            {t("result")}:{" "}
+            {[dialog.selectedFolderPath, dialog.newFolderName.trim()]
+              .filter(Boolean)
+              .join("/") || t("pending")}
+          </div>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={dialog.handleCreateNewFolder}
+            disabled={!dialog.newFolderName.trim()}>
+            创建文件夹
+          </Button>
+        </TabsContent>
+      </Tabs>
+    </div>
   )
 }
 

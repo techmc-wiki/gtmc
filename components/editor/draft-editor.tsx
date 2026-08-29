@@ -56,7 +56,7 @@ interface DraftEditorProps {
 
 export function DraftEditor({ initialData }: DraftEditorProps) {
   const hook = useDraftEditor(initialData)
-  const { state, refs, actions, upload, progress, t, progressT } = hook
+  const { state, actions, t } = hook
 
   const handleRemoveFile = (fileId: string) => {
     if (state.isReadOnly || state.draftCollection.files.length <= 1) return
@@ -203,6 +203,46 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   }
 
   return (
+    <DraftEditorSurface
+      actions={actions}
+      changeEntries={changeEntries}
+      handleApplyDraftFileSource={handleApplyDraftFileSource}
+      handleCreateFolder={handleCreateFolder}
+      handleInsertSelectedFile={handleInsertSelectedFile}
+      handleRemoveFile={handleRemoveFile}
+      hook={hook}
+    />
+  )
+}
+
+interface DraftEditorSurfaceProps {
+  actions: ReturnType<typeof useDraftEditor>["actions"]
+  changeEntries: DraftChangeEntry[]
+  handleApplyDraftFileSource: (input: {
+    content: string
+    filePath: string
+  }) => boolean
+  handleCreateFolder: (folderPath: string) => boolean
+  handleInsertSelectedFile: (input: {
+    content: string
+    filePath: string
+  }) => boolean
+  handleRemoveFile: (fileId: string) => void
+  hook: ReturnType<typeof useDraftEditor>
+}
+
+function DraftEditorSurface({
+  actions,
+  changeEntries,
+  handleApplyDraftFileSource,
+  handleCreateFolder,
+  handleInsertSelectedFile,
+  handleRemoveFile,
+  hook,
+}: DraftEditorSurfaceProps) {
+  const { state, refs, upload, progress, t, progressT } = hook
+
+  return (
     <EditorSurface>
       <DraftEditorHeader
         hasUnsavedChanges={state.hasUnsavedChanges}
@@ -218,7 +258,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         onTitleChange={actions.setTitle}
         submitLabel={state.isSubmitting ? progressT("submitBusy") : t("openPr")}
       />
-
       {state.githubPrUrl ? (
         <div className="guide-line bg-tech-main/5 text-tech-main flex items-center justify-between gap-3 border px-4 py-3 font-mono text-xs">
           <span>{t("prStreamActive")}</span>
@@ -231,7 +270,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           </a>
         </div>
       ) : null}
-
       <DraftFileNavigator
         files={state.draftCollection.files}
         activeFileId={state.draftCollection.activeFileId}
@@ -250,7 +288,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         onOpenFileDialog={actions.openFileDialog}
         onSetInsertDialogIntent={actions.setInsertDialogIntent}
       />
-
       <EditorContentArea>
         <Tabs
           value={state.activeTab}
@@ -261,7 +298,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             activeFile={state.activeFile}
             activeFileIndex={state.activeFileIndex}
             lineWrap={state.lineWrap}
-            onWrapToggle={() => actions.setLineWrap((v) => !v)}
+            onWrapToggle={() => actions.setLineWrap((value) => !value)}
             readOnly={state.isReadOnly}
             uploading={upload.isUploading}
             fileInputRef={refs.fileInputRef}
@@ -274,7 +311,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             canUndo={Boolean(state.activeFileHistoryAvailability?.undoCount)}
             canRedo={Boolean(state.activeFileHistoryAvailability?.redoCount)}
           />
-
           <EditorSplitLayout>
             <ResizablePanel
               id="write"
@@ -330,7 +366,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           </EditorSplitLayout>
         </Tabs>
       </EditorContentArea>
-
       <DraftEditorReview
         activeTab={state.activeInfoTab}
         changeEntries={changeEntries}
@@ -340,57 +375,15 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         onSelectTab={actions.setActiveInfoTab}
         onSelectGuide={actions.setActiveGuideId}
       />
-
       {!state.isReadOnly && (
-        <>
-          <OperationProgress
-            state={state.saveProgressState}
-            title={progressT("saveDraftTitle")}
-            stages={progress.saveProgressStages}
-            successLabel={progressT("saveDraftSuccess")}
-            errorLabel={progressT("saveDraftError")}
-          />
-
-          <OperationProgress
-            state={state.submitProgressState}
-            title={progressT("submitTitle")}
-            stages={progress.submitProgressStages}
-            successLabel={progressT("submitSuccess")}
-            errorLabel={progressT("submitError")}
-          />
-
-          <section
-            aria-label={t("submissionLicenseAria")}
-            className="guide-line bg-tech-main/5 text-tech-main/80 mt-4 border p-4 font-mono text-[0.6875rem] leading-relaxed">
-            <div className="border-tech-main/15 mb-3 border-b pb-3">
-              <p className="section-label">{t("syntaxHintsTitle")}</p>
-              <p className="text-tech-main/70 mt-2">
-                {t("syntaxHintsDescription")}
-              </p>
-              <p className="text-tech-main/55 mt-1">
-                {t("syntaxHintsShortcut")}
-              </p>
-            </div>
-            <p className="section-label">{t("submissionLicenseTitle")}</p>
-            <div className="mt-2 space-y-2">
-              <p>{t("submissionLicenseIntro")}</p>
-              <p>
-                {t("submissionLicenseReusePrefix")}{" "}
-                <a
-                  href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="decoration-tech-main/30 hover:text-tech-main-dark hover:decoration-tech-main-dark underline underline-offset-4 transition-colors">
-                  CC BY-NC-SA 4.0
-                </a>
-                {t("submissionLicenseReuseSuffix")}
-              </p>
-              <p>{t("submissionLicenseAttribution")}</p>
-            </div>
-          </section>
-        </>
+        <DraftEditorStatusPanels
+          progress={progress}
+          progressT={progressT}
+          saveProgressState={state.saveProgressState}
+          submitProgressState={state.submitProgressState}
+          t={t}
+        />
       )}
-
       <DraftFileSourceDialog
         key={
           state.fileDialogIntent
@@ -404,7 +397,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         onCreate={handleApplyDraftFileSource}
         onCreateFolder={handleCreateFolder}
       />
-
       <DraftFileSourceDialog
         key={
           state.insertDialogIntent
@@ -418,6 +410,70 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
         onCreate={handleInsertSelectedFile}
       />
     </EditorSurface>
+  )
+}
+
+function DraftEditorStatusPanels({
+  progress,
+  progressT,
+  saveProgressState,
+  submitProgressState,
+  t,
+}: {
+  progress: ReturnType<typeof useDraftEditor>["progress"]
+  progressT: ReturnType<typeof useDraftEditor>["progressT"]
+  saveProgressState: ReturnType<
+    typeof useDraftEditor
+  >["state"]["saveProgressState"]
+  submitProgressState: ReturnType<
+    typeof useDraftEditor
+  >["state"]["submitProgressState"]
+  t: ReturnType<typeof useDraftEditor>["t"]
+}) {
+  return (
+    <>
+      <OperationProgress
+        state={saveProgressState}
+        title={progressT("saveDraftTitle")}
+        stages={progress.saveProgressStages}
+        successLabel={progressT("saveDraftSuccess")}
+        errorLabel={progressT("saveDraftError")}
+      />
+      <OperationProgress
+        state={submitProgressState}
+        title={progressT("submitTitle")}
+        stages={progress.submitProgressStages}
+        successLabel={progressT("submitSuccess")}
+        errorLabel={progressT("submitError")}
+      />
+      <section
+        aria-label={t("submissionLicenseAria")}
+        className="guide-line bg-tech-main/5 text-tech-main/80 mt-4 border p-4 font-mono text-[0.6875rem] leading-relaxed">
+        <div className="border-tech-main/15 mb-3 border-b pb-3">
+          <p className="section-label">{t("syntaxHintsTitle")}</p>
+          <p className="text-tech-main/70 mt-2">
+            {t("syntaxHintsDescription")}
+          </p>
+          <p className="text-tech-main/55 mt-1">{t("syntaxHintsShortcut")}</p>
+        </div>
+        <p className="section-label">{t("submissionLicenseTitle")}</p>
+        <div className="mt-2 space-y-2">
+          <p>{t("submissionLicenseIntro")}</p>
+          <p>
+            {t("submissionLicenseReusePrefix")}{" "}
+            <a
+              href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="decoration-tech-main/30 hover:text-tech-main-dark hover:decoration-tech-main-dark underline underline-offset-4 transition-colors">
+              CC BY-NC-SA 4.0
+            </a>
+            {t("submissionLicenseReuseSuffix")}
+          </p>
+          <p>{t("submissionLicenseAttribution")}</p>
+        </div>
+      </section>
+    </>
   )
 }
 

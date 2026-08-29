@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import useSWR from "swr"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/shadcn/button"
@@ -24,6 +25,22 @@ interface DraftRepoTreeNode {
   path: string
   isFolder: boolean
   children: DraftRepoTreeNode[]
+}
+
+async function fetchDraftRepoTree() {
+  const response = await fetch("/api/draft/repo-tree", {
+    cache: "no-store",
+  })
+  const data = (await response.json()) as {
+    error?: string
+    tree?: DraftRepoTreeNode[]
+  }
+
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load repository tree")
+  }
+
+  return data.tree || []
 }
 
 interface DraftFileSourceDialogProps {
@@ -58,9 +75,6 @@ export function DraftFileSourceDialog({
 }: DraftFileSourceDialogProps) {
   const t = useTranslations("DraftFiles")
   const [mode, setMode] = React.useState<SourceMode>(initialMode)
-  const [tree, setTree] = React.useState<DraftRepoTreeNode[]>([])
-  const [isLoadingTree, setIsLoadingTree] = React.useState(false)
-  const [treeError, setTreeError] = React.useState<string | null>(null)
   const [expandedPaths, setExpandedPaths] = React.useState<Set<string>>(
     () => new Set(["", initialFolderPath || ""])
   )
@@ -84,48 +98,22 @@ export function DraftFileSourceDialog({
     [t]
   )
 
-  React.useEffect(() => {
-    if (!isOpen) {
-      return
-    }
-
-    let disposed = false
-
-    const loadTree = async () => {
-      setIsLoadingTree(true)
-      setTreeError(null)
-
-      try {
-        const response = await fetch("/api/draft/repo-tree", {
-          cache: "no-store",
-        })
-        const data = (await response.json()) as {
-          error?: string
-          tree?: DraftRepoTreeNode[]
-        }
-
-        if (!response.ok) {
-          throw new Error(data.error || t("repoError"))
-        }
-
-        if (!disposed) {
-          setTree(data.tree || [])
-        }
-      } catch (error) {
-        if (!disposed) {
-          setTreeError(error instanceof Error ? error.message : t("repoError"))
-        }
-      } finally {
-        setIsLoadingTree(false)
-      }
-    }
-
-    loadTree()
-
-    return () => {
-      disposed = true
-    }
-  }, [isOpen, t])
+  const {
+    data: tree = [],
+    error: treeFetchError,
+    isLoading: isLoadingTree,
+  } = useSWR<DraftRepoTreeNode[]>(
+    isOpen ? "/api/draft/repo-tree" : null,
+    fetchDraftRepoTree
+  )
+  const [localTreeError, setLocalTreeError] = React.useState<string | null>(
+    null
+  )
+  const treeError = treeFetchError
+    ? treeFetchError instanceof Error
+      ? treeFetchError.message
+      : t("repoError")
+    : localTreeError
 
   const handleTogglePath = React.useCallback((path: string) => {
     setExpandedPaths((current) => {
@@ -168,7 +156,7 @@ export function DraftFileSourceDialog({
         onClose()
       }
     } catch (error) {
-      setTreeError(error instanceof Error ? error.message : t("repoError"))
+      setLocalTreeError(error instanceof Error ? error.message : t("repoError"))
     } finally {
       setIsSubmitting(false)
     }
@@ -177,7 +165,7 @@ export function DraftFileSourceDialog({
   const handleCreateNewFile = React.useCallback(() => {
     const filePath = buildDraftFilePath(selectedFolderPath, newFileName)
     if (!filePath) {
-      setTreeError(t("fileNameValidationError"))
+      setLocalTreeError(t("fileNameValidationError"))
       return
     }
 
@@ -195,7 +183,7 @@ export function DraftFileSourceDialog({
       .pop()
 
     if (!normalizedFolderName || !onCreateFolder) {
-      setTreeError(t("fileNameValidationError"))
+      setLocalTreeError(t("fileNameValidationError"))
       return
     }
 
@@ -212,7 +200,7 @@ export function DraftFileSourceDialog({
 
   const handleImportLocalFile = React.useCallback(async () => {
     if (!localFile) {
-      setTreeError(t("fileNameValidationError"))
+      setLocalTreeError(t("fileNameValidationError"))
       return
     }
 
@@ -232,7 +220,7 @@ export function DraftFileSourceDialog({
         onClose()
       }
     } catch (error) {
-      setTreeError(error instanceof Error ? error.message : t("repoError"))
+      setLocalTreeError(error instanceof Error ? error.message : t("repoError"))
     } finally {
       setIsSubmitting(false)
     }

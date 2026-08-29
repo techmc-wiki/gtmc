@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import useSWR from "swr"
 
 import * as THREE from "three"
 import { OrbitControls } from "three/addons/controls/OrbitControls.js"
@@ -64,6 +65,11 @@ export interface ParticleObjectOptions {
   onError?: ((error: unknown) => void) | null
 }
 
+type ParticleObjectRuntimeOptions = ParticleObjectOptions & {
+  assetData?: ArrayBuffer
+  assetError?: unknown
+}
+
 export interface ParticleObjectElements {
   /** Canvas the scene renders to. */
   canvas: HTMLCanvasElement
@@ -71,7 +77,7 @@ export interface ParticleObjectElements {
 
 export interface ParticleObjectInstance {
   /** Update options live. Changing src loads the new asset. */
-  setOptions: (options: ParticleObjectOptions) => void
+  setOptions: (options: ParticleObjectRuntimeOptions) => void
   /** Re-read canvas size. Call when the element is resized. */
   resize: () => void
   /** Stop the loop and release all GPU resources. */
@@ -112,6 +118,12 @@ const CAMERA_DIR = new THREE.Vector3(0, -1, 4).normalize()
 const MODEL_LIFT = 0.3
 const RASTER_SIZE = 420
 const ALBEDO_SIZE = 128
+
+async function fetchParticleAsset(src: string) {
+  const response = await fetch(src)
+  if (!response.ok) throw new Error(`HTTP ${response.status}`)
+  return response.arrayBuffer()
+}
 
 const VERT = `
 in vec3 aColor;
@@ -544,10 +556,10 @@ function rasterizeImage(blob: Blob): Promise<ImageData> {
 
 function createParticleObject(
   elements: ParticleObjectElements,
-  options: ParticleObjectOptions = {}
+  options: ParticleObjectRuntimeOptions = {}
 ): ParticleObjectInstance | null {
   const { canvas } = elements
-  const config: Required<ParticleObjectOptions> = { ...DEFAULTS, ...options }
+  const config = { ...DEFAULTS, ...options }
 
   let renderer: THREE.WebGLRenderer
   try {
@@ -600,6 +612,8 @@ function createParticleObject(
   let assetSource: AssetSource | null = null
   let builtCount = -1
   let loadedSrc: string | null = null
+  let loadedAssetData: ArrayBuffer | undefined
+  let loadedAssetError: unknown
   let loadToken = 0
   let disposed = false
 
@@ -661,17 +675,28 @@ function createParticleObject(
 
   async function loadAsset() {
     const src = config.src
-    if (src === loadedSrc) return
+    if (
+      src === loadedSrc &&
+      config.assetData === loadedAssetData &&
+      config.assetError === loadedAssetError
+    ) {
+      return
+    }
     loadedSrc = src
+    loadedAssetData = config.assetData
+    loadedAssetError = config.assetError
     const token = ++loadToken
     if (!src) {
       clearAsset()
       return
     }
+    if (config.assetError) {
+      config.onError?.(config.assetError)
+      return
+    }
+    if (!config.assetData) return
     try {
-      const response = await fetch(src)
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      const buffer = await response.arrayBuffer()
+      const buffer = config.assetData
       if (disposed || token !== loadToken) return
       const bytes = new Uint8Array(buffer)
       const kind = sniffKind(bytes)
@@ -1058,6 +1083,10 @@ export function ParticleObject({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const instanceRef = useRef<ParticleObjectInstance | null>(null)
   const [initialOptions] = useState(options)
+  const { data: assetData, error: assetError } = useSWR<ArrayBuffer>(
+    options.src || null,
+    fetchParticleAsset
+  )
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -1070,8 +1099,8 @@ export function ParticleObject({
   }, [initialOptions])
 
   useEffect(() => {
-    instanceRef.current?.setOptions(options)
-  })
+    instanceRef.current?.setOptions({ ...options, assetData, assetError })
+  }, [options, assetData, assetError])
 
   return (
     <div className={className} style={{ position: "relative", ...style }}>

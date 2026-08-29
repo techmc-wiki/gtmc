@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useId } from "react"
+import useSWR from "swr"
 import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
@@ -69,9 +70,6 @@ function getPerson(key: string): Promise<PersonResponse> {
 export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
   const personKey = (props["data-person-key"] as string) ?? ""
   const normalizedPersonKey = personKey.trim()
-  const [person, setPerson] = useState<PersonResponse>(() =>
-    createFallbackPerson(normalizedPersonKey)
-  )
   const [isOpen, setIsOpen] = useState(false)
   const generatedId = useId()
   const popupId = `people-popup-${generatedId}`
@@ -80,22 +78,18 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const t = useTranslations("PeopleMention")
 
-  useEffect(() => {
-    const cached = personCache.get(normalizedPersonKey)
-    if (cached) {
-      setPerson(cached)
-      return
-    }
-    setPerson(createFallbackPerson(normalizedPersonKey))
-    void getPerson(normalizedPersonKey)
-      .then(setPerson)
-      .catch(() => setPerson(createFallbackPerson(normalizedPersonKey)))
-  }, [normalizedPersonKey])
+  const fallbackPerson = createFallbackPerson(normalizedPersonKey)
+  const { data: fetchedPerson, mutate: refreshPerson } = useSWR<PersonResponse>(
+    normalizedPersonKey
+      ? `/api/people?key=${encodeURIComponent(normalizedPersonKey)}`
+      : null,
+    () => getPerson(normalizedPersonKey),
+    { fallbackData: personCache.get(normalizedPersonKey) }
+  )
+  const person = fetchedPerson || fallbackPerson
 
   const loadPerson = () => {
-    void getPerson(normalizedPersonKey)
-      .then(setPerson)
-      .catch(() => setPerson(createFallbackPerson(normalizedPersonKey)))
+    if (!fetchedPerson) void refreshPerson()
   }
 
   /**

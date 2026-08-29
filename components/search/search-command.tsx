@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import useSWR from "swr"
 import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { useTranslations, useLocale } from "next-intl"
 import { useRouter, usePathname } from "@/i18n/navigation"
@@ -19,6 +20,19 @@ interface SearchResult {
   slug: string
   snippet: string | null
   matchType: "title" | "content"
+}
+
+interface SearchResponse {
+  results?: SearchResult[]
+  glossary?: GlossarySearchResult[]
+}
+
+async function fetchSearchResults(url: string): Promise<SearchResponse> {
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Search request failed: ${response.status}`)
+  }
+  return response.json()
 }
 
 interface GlossarySearchResult {
@@ -60,12 +74,7 @@ export function SearchCommand() {
   const [isOpen, setIsOpen] = useState(false)
   const isMounted = useMounted()
   const [query, setQuery] = useState("")
-  const [results, setResults] = useState<SearchResult[]>([])
-  const [glossaryResults, setGlossaryResults] = useState<
-    GlossarySearchResult[]
-  >([])
-  const [isLoading, setIsLoading] = useState(false)
-  const abortRef = useRef<AbortController | null>(null)
+  const [debouncedQuery, setDebouncedQuery] = useState("")
   const inputRef = useRef<HTMLInputElement>(null)
   const prevIsOpenRef = useRef(false)
   const router = useRouter()
@@ -84,9 +93,6 @@ export function SearchCommand() {
   useEffect(() => {
     if (prevIsOpenRef.current && !isOpen) {
       setQuery("")
-      setResults([])
-      setGlossaryResults([])
-      setIsLoading(false)
     }
     prevIsOpenRef.current = isOpen
   }, [isOpen])
@@ -94,9 +100,6 @@ export function SearchCommand() {
   const closeModal = useCallback(() => {
     setIsOpen(false)
     setQuery("")
-    setResults([])
-    setGlossaryResults([])
-    setIsLoading(false)
   }, [])
 
   const openModal = useCallback(() => {
@@ -116,53 +119,30 @@ export function SearchCommand() {
     return () => document.removeEventListener("keydown", handleKeyDown, true)
   }, [])
 
-  // Debounced search
+  // Debounce only the query key; SWR owns the request lifecycle.
   useEffect(() => {
-    if (!query || query.length < 2) {
-      return
-    }
-
     const timer = setTimeout(() => {
-      abortRef.current?.abort()
-      const controller = new AbortController()
-      abortRef.current = controller
-
-      setIsLoading(true)
-
-      fetch(
-        `/api/articles/search?q=${encodeURIComponent(query)}&locale=${locale}`,
-        {
-          signal: controller.signal,
-        }
-      )
-        .then((res) => res.json())
-        .then((data) => {
-          if (!controller.signal.aborted) {
-            setResults(data.results || [])
-            setGlossaryResults(data.glossary || [])
-            setIsLoading(false)
-          }
-        })
-        .catch((error) => {
-          if (error.name !== "AbortError") {
-            setIsLoading(false)
-          }
-        })
+      setDebouncedQuery(query.length >= 2 ? query : "")
     }, 300)
+    return () => clearTimeout(timer)
+  }, [query])
 
-    return () => {
-      clearTimeout(timer)
-      abortRef.current?.abort()
-    }
-  }, [query, locale])
+  const searchKey =
+    debouncedQuery.length >= 2
+      ? `/api/articles/search?q=${encodeURIComponent(debouncedQuery)}&locale=${locale}`
+      : null
+  const { data: searchData, isValidating } = useSWR<SearchResponse>(
+    searchKey,
+    fetchSearchResults
+  )
+  const results = searchData?.results || []
+  const glossaryResults = searchData?.glossary || []
+  const isLoading =
+    query.length >= 2 && (debouncedQuery !== query || isValidating)
 
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value)
-    if (!value || value.length < 2) {
-      setResults([])
-      setGlossaryResults([])
-      setIsLoading(false)
-    }
+    if (!value || value.length < 2) setDebouncedQuery("")
   }, [])
 
   const navigateToResult = useCallback(

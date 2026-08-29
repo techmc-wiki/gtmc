@@ -77,14 +77,16 @@ export interface ArticleDisplayTitleInput {
 export async function formatArticleDisplayTitle(
   input: ArticleDisplayTitleInput
 ): Promise<string> {
-  const displayTitle = await resolveDisplayedArticleTitle(
-    input.frontmatterTitle,
-    input.filePath,
-    input.canonicalSlug,
-    input.isReadmeIntro,
-    input.locale
-  )
-  const tree = await getPublicChapterNav(input.locale)
+  const [displayTitle, tree] = await Promise.all([
+    resolveDisplayedArticleTitle(
+      input.frontmatterTitle,
+      input.filePath,
+      input.canonicalSlug,
+      input.isReadmeIntro,
+      input.locale
+    ),
+    getPublicChapterNav(input.locale),
+  ])
   const structuralOwner = findNavigationOwner(tree, input.canonicalSlug)
 
   return formatArticleTitle(

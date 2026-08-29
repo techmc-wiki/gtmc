@@ -258,59 +258,18 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
           </span>
         </div>
 
-        {/* Image container */}
-        <figure
-          ref={imgRef}
-          aria-label={alt}
-          className={`relative aspect-21/9 w-full overflow-hidden ${imageError ? "hidden" : ""}`}
-          onPointerEnter={handleMouseEnter}
-          onPointerLeave={handleMouseLeave}>
-          {/* Shutter flash overlay */}
-          <div
-            className="pointer-events-none absolute inset-0 z-20 bg-black"
-            style={flashOverlayStyle}
-          />
-
-          <Image
-            src={src}
-            alt={alt}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
-            className="object-cover"
-            style={imageTransformStyle}
-            priority
-            unoptimized={src.startsWith("/article-assets/")}
-            onError={handleImageError}
-          />
-
-          {/* Blueprint grid overlay */}
-          <div
-            className="pointer-events-none absolute inset-0 opacity-[0.1] mix-blend-multiply transition-transform duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:scale-105"
-            style={blueprintGridStyle}
-          />
-
-          {/* Vignette — deepens on hover */}
-          <div
-            className="
-              pointer-events-none absolute inset-0 z-10 opacity-60
-              mix-blend-darken transition-opacity
-              duration-500
-              [background:radial-gradient(ellipse_at_center,transparent_40%,rgb(var(--color-tech-main-dark)/0.45)_100%)] group-hover/banner:opacity-100
-            "
-          />
-
-          {/* Corner brackets — expand on hover */}
-          <BannerCorners />
-
-          {/* Crosshair — parallax until locked, then stays centered */}
-          <div
-            className="pointer-events-none absolute opacity-20 mix-blend-multiply group-hover/banner:opacity-40"
-            style={crosshairStyle}>
-            <div className="absolute top-1/2 left-1/2 h-px w-10 -translate-1/2 bg-tech-main" />
-            <div className="absolute top-1/2 left-1/2 h-10 w-px -translate-1/2 bg-tech-main" />
-            <div className="size-5 rounded-full border border-tech-main" />
-          </div>
-        </figure>
+        <BannerImage
+          alt={alt}
+          crosshairStyle={crosshairStyle}
+          flashOverlayStyle={flashOverlayStyle}
+          imageError={imageError}
+          imageTransformStyle={imageTransformStyle}
+          imgRef={imgRef}
+          onImageError={handleImageError}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          src={src}
+        />
 
         {/* Bottom bar — alt text as caption */}
         <div
@@ -330,5 +289,76 @@ export function ArticleBanner({ src, alt }: ArticleBannerProps) {
       <div className="pointer-events-none absolute -bottom-px -left-px size-2 border-b-2 border-l-2 border-tech-main/60" />
       <div className="pointer-events-none absolute -right-px -bottom-px size-2 border-r-2 border-b-2 border-tech-main/60" />
     </div>
+  )
+}
+
+interface BannerImageProps {
+  alt: string
+  crosshairStyle: React.CSSProperties
+  flashOverlayStyle: React.CSSProperties
+  imageError: boolean
+  imageTransformStyle: React.CSSProperties
+  imgRef: React.RefObject<HTMLElement | null>
+  onImageError: () => void
+  onMouseEnter: () => void
+  onMouseLeave: () => void
+  src: string
+}
+
+function BannerImage({
+  alt,
+  crosshairStyle,
+  flashOverlayStyle,
+  imageError,
+  imageTransformStyle,
+  imgRef,
+  onImageError,
+  onMouseEnter,
+  onMouseLeave,
+  src,
+}: BannerImageProps) {
+  return (
+    <figure
+      ref={imgRef}
+      aria-label={alt}
+      className={`relative aspect-21/9 w-full overflow-hidden ${imageError ? "hidden" : ""}`}
+      onPointerEnter={onMouseEnter}
+      onPointerLeave={onMouseLeave}>
+      <div
+        className="pointer-events-none absolute inset-0 z-20 bg-black"
+        style={flashOverlayStyle}
+      />
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
+        className="object-cover"
+        style={imageTransformStyle}
+        priority
+        unoptimized={src.startsWith("/article-assets/")}
+        onError={onImageError}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.1] mix-blend-multiply transition-transform duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/banner:scale-105"
+        style={blueprintGridStyle}
+      />
+      <div
+        className="
+          pointer-events-none absolute inset-0 z-10 opacity-60
+          mix-blend-darken transition-opacity
+          duration-500
+          [background:radial-gradient(ellipse_at_center,transparent_40%,rgb(var(--color-tech-main-dark)/0.45)_100%)] group-hover/banner:opacity-100
+        "
+      />
+      <BannerCorners />
+      <div
+        className="pointer-events-none absolute opacity-20 mix-blend-multiply group-hover/banner:opacity-40"
+        style={crosshairStyle}>
+        <div className="absolute top-1/2 left-1/2 h-px w-10 -translate-1/2 bg-tech-main" />
+        <div className="absolute top-1/2 left-1/2 h-10 w-px -translate-1/2 bg-tech-main" />
+        <div className="size-5 rounded-full border border-tech-main" />
+      </div>
+    </figure>
   )
 }

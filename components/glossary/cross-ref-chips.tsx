@@ -58,18 +58,13 @@ export function CrossRefChips(props: CrossRefChipsProps) {
           )
         } else {
           chip = (
-            <a
-              href={`/${props.locale}/glossary/${encodeURIComponent(
-                generateSlug(entry.target)
-              )}`}
-              onClick={(event) => {
-                event.preventDefault()
-                props.onOpenDetail(generateSlug(entry.target))
-              }}
-              className={chipBase}
+            <button
+              type="button"
+              onClick={() => props.onOpenDetail(generateSlug(entry.target))}
+              className={cn(chipBase, "cursor-pointer")}
               title={entry.target}>
               {display}
-            </a>
+            </button>
           )
         }
 

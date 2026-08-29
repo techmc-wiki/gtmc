@@ -97,6 +97,7 @@ export function TermDetail({
           <CrossRefChips
             related={parsedRelated}
             mode="detail"
+            locale={locale}
             onOpenDetail={onOpenRelated}
           />
         </section>

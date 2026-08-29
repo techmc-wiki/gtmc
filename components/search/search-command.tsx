@@ -5,10 +5,6 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { useTranslations, useLocale } from "next-intl"
 import { useRouter, usePathname } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/articles/url"
-import {
-  OPEN_GLOSSARY_TERM_EVENT,
-  type OpenGlossaryTermDetail,
-} from "@/lib/glossary/browser-events"
 import { useMounted } from "@/hooks/use-mounted"
 import {
   CommandDialog,
@@ -201,12 +197,7 @@ export function SearchCommand() {
   const navigateToGlossaryResult = useCallback(
     (entry: GlossarySearchResult) => {
       closeModal()
-      router.push(`/glossary#term=${encodeURIComponent(entry.slug)}`)
-      window.dispatchEvent(
-        new CustomEvent<OpenGlossaryTermDetail>(OPEN_GLOSSARY_TERM_EVENT, {
-          detail: { slug: entry.slug },
-        })
-      )
+      router.push(`/glossary/${encodeURIComponent(entry.slug)}`)
     },
     [router, closeModal]
   )

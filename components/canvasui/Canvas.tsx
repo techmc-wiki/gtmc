@@ -320,7 +320,7 @@ void main () {
   outColor = vec4(col, alpha);
 }`
 
-export function supportsHtmlInCanvas(): boolean {
+function supportsHtmlInCanvas(): boolean {
   if (typeof document === "undefined") return false
   const probe = document.createElement("canvas") as PaintableCanvas
   const ctx = probe.getContext("2d") as ElementImageContext | null
@@ -728,7 +728,7 @@ function paintFallbackBorders(
   }
 }
 
-export function createCanvasPainting(
+function createCanvasPainting(
   elements: CanvasElements,
   options: CanvasOptions = {}
 ): CanvasInstance | null {

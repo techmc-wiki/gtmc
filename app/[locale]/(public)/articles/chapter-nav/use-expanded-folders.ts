@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 
 import { useMounted } from "@/hooks/use-mounted"
 
-const SIDEBAR_EXPANDED_KEY = "gtmc_sidebar_expanded"
+const SIDEBAR_EXPANDED_KEY = "gtmc_sidebar_expanded:v1"
 
 export function useExpandedFolders() {
   const mounted = useMounted()

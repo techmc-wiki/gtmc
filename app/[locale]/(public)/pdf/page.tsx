@@ -103,7 +103,7 @@ export default async function PdfPage({
           </p>
 
           <Link
-            href="/articles"
+            href="/articles/preface"
             className="text-tech-main hover:text-tech-main-dark decoration-tech-main/40 hover:decoration-tech-main-dark mt-3 underline underline-offset-4 transition-colors">
             {t("readOnline")}
           </Link>

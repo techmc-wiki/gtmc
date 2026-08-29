@@ -36,7 +36,7 @@ export function HomepageClient() {
               ? "pointer-events-none cursor-wait opacity-90"
               : ""
           } sm:w-72 sm:text-sm`}>
-          <Link href="/articles" onClick={handleArticlesClick}>
+          <Link href="/articles/preface" onClick={handleArticlesClick}>
             {isAccessingDatabase ? (
               <>
                 <span className="bg-surface inline-block size-2 animate-pulse motion-reduce:animate-none" />

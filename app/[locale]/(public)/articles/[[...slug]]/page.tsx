@@ -351,254 +351,169 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     ? getArticleAssetPublicUrl(bannerPath)
     : null
 
-  const techArticleJsonLd: {
-    "@context": "https://schema.org"
-    "@type": "TechArticle"
-    headline: string
-    url: string
-    datePublished?: string
-    dateModified?: string
-    author?: Array<{
-      "@type": "Person"
-      "@id": string
-      name: string
-      url: string
-    }>
-    description: string
-    wordCount: number
-    timeRequired: string
-    articleSection?: string
-    proficiencyLevel: string
-    image?: string
-  } = {
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    headline: articleTitle,
-    url: canonicalUrl,
-    ...(createdAt ? { datePublished: createdAt } : {}),
-    ...(lastModified ? { dateModified: lastModified } : {}),
-    ...(authorArray.length > 0 ? { author: authorArray } : {}),
-    description,
+  const { breadcrumbJsonLd, techArticleJsonLd } = buildArticleStructuredData({
+    articleTitle,
+    authorArray,
+    bannerUrl,
+    canonicalUrl,
+    chapterTitle,
+    createdAt,
+    effectiveSlug,
+    isAdvanced,
+    lastModified,
+    locale,
+    readingTime,
+    runningHeadChapters,
+    siteUrl,
     wordCount,
-    timeRequired: `PT${readingTime}M`,
-    ...(chapterTitle ? { articleSection: chapterTitle } : {}),
-    proficiencyLevel: isAdvanced ? "Expert" : "Beginner",
-    ...(bannerUrl ? { image: bannerUrl } : {}),
-  }
-
-  const breadcrumbChapterItems: Array<{
-    "@type": "ListItem"
-    position: number
-    name: string
-    item: string
-  }> = []
-
-  for (const chapter of runningHeadChapters) {
-    if (chapter.slug !== effectiveSlug) {
-      breadcrumbChapterItems.push({
-        "@type": "ListItem",
-        position: breadcrumbChapterItems.length + 3,
-        name: chapter.title,
-        item: `${siteUrl}/${locale}${articleUrl(chapter.slug)}`,
-      })
-    }
-  }
-
-  const breadcrumbJsonLd: {
-    "@context": "https://schema.org"
-    "@type": "BreadcrumbList"
-    itemListElement: Array<{
-      "@type": "ListItem"
-      position: number
-      name: string
-      item: string
-    }>
-  } = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: `${siteUrl}/${locale}`,
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Articles",
-        item: `${siteUrl}/${locale}/articles`,
-      },
-      ...breadcrumbChapterItems,
-      {
-        "@type": "ListItem",
-        position: breadcrumbChapterItems.length + 3,
-        name: articleTitle,
-        item: canonicalUrl,
-      },
-    ],
-  }
+    description,
+  })
 
   // Get navigation data (tree already loaded for structural appendix context)
   const flattenedArticles = flattenArticleTree(tree)
   const navigation = await getArticleNavigation(currentSlug, flattenedArticles, locale)
 
-  const runningHeadChapterIndex = runningHeadOwner?.index
-  const runningHeadIsAppendix = isStructuralAppendix
-  const runningHeadIsPreface = !!target.isPreface && !runningHeadOwner
 
   return (
-    <div
-      className="
-        border-tech-main/30 bg-surface/80 relative min-h-screen
-        min-w-0 border p-6 backdrop-blur-sm sm:p-8
-      ">
-      {bannerPreloadHref ? (
-        <link
-          rel="preload"
-          as="image"
-          href={bannerPreloadHref}
-          fetchPriority="high"
-        />
-      ) : null}
+    <ArticlePageContent
+      articleTitle={articleTitle}
+      bannerAlt={bannerAlt}
+      bannerPath={bannerPath}
+      bannerPreloadHref={bannerPreloadHref}
+      breadcrumbJsonLd={breadcrumbJsonLd}
+      canonicalUrl={canonicalUrl}
+      contentLocale={contentLocale}
+      createdAt={createdAt}
+      currentSlug={currentSlug}
+      editPath={editPath}
+      effectiveSlug={effectiveSlug}
+      embeddedArticleContent={embeddedArticleContent}
+      isAdvanced={isAdvanced}
+      isRevising={isRevising}
+      isTranslationPending={isTranslationPending}
+      isTranslationStale={isTranslationStale}
+      lastModified={lastModified}
+      locale={locale}
+      navigation={navigation}
+      profileHandles={profileHandles}
+      readingTime={readingTime}
+      runningHeadChapterIndex={runningHeadOwner?.index}
+      runningHeadChapters={runningHeadChapters}
+      runningHeadIsAppendix={isStructuralAppendix}
+      runningHeadIsPreface={!!target.isPreface && !runningHeadOwner}
+      shikiPlugin={shikiPlugin}
+      t={t}
+      tArticleMeta={tArticleMeta}
+      targetFilePath={target.filePath}
+      techArticleJsonLd={techArticleJsonLd}
+      translationStatus={translationStatus}
+      wordCount={wordCount}
+      author={author}
+    />
+  )
+}
+
+interface ArticlePageContentProps {
+  articleTitle: string
+  author: string | undefined
+  bannerAlt: string
+  bannerPath: string | null
+  bannerPreloadHref: string | null
+  breadcrumbJsonLd: object
+  canonicalUrl: string
+  contentLocale: ArticleLocale
+  createdAt: string | undefined
+  currentSlug: string
+  editPath: string
+  effectiveSlug: string
+  embeddedArticleContent: string
+  isAdvanced: boolean
+  isRevising: boolean
+  isTranslationPending: boolean
+  isTranslationStale: boolean
+  lastModified: string | undefined
+  locale: ArticleLocale
+  navigation: Awaited<ReturnType<typeof getArticleNavigation>>
+  profileHandles: string[]
+  readingTime: number
+  runningHeadChapterIndex: number | undefined
+  runningHeadChapters: Awaited<ReturnType<typeof getNavigationBreadcrumbs>>
+  runningHeadIsAppendix: boolean
+  runningHeadIsPreface: boolean
+  shikiPlugin: Awaited<ReturnType<typeof getCachedRehypeShiki>>
+  t: Awaited<ReturnType<typeof getTranslations>>
+  tArticleMeta: Awaited<ReturnType<typeof getTranslations>>
+  targetFilePath: string
+  techArticleJsonLd: object
+  translationStatus: NonNullable<Awaited<ReturnType<typeof getArticleContentBySlug>>>["translationStatus"]
+  wordCount: number
+}
+
+function ArticlePageContent({
+  articleTitle,
+  author,
+  bannerAlt,
+  bannerPath,
+  bannerPreloadHref,
+  breadcrumbJsonLd,
+  canonicalUrl,
+  contentLocale,
+  createdAt,
+  currentSlug,
+  editPath,
+  effectiveSlug,
+  embeddedArticleContent,
+  isAdvanced,
+  isRevising,
+  isTranslationPending,
+  isTranslationStale,
+  lastModified,
+  locale,
+  navigation,
+  profileHandles,
+  readingTime,
+  runningHeadChapterIndex,
+  runningHeadChapters,
+  runningHeadIsAppendix,
+  runningHeadIsPreface,
+  shikiPlugin,
+  t,
+  tArticleMeta,
+  targetFilePath,
+  techArticleJsonLd,
+  translationStatus,
+  wordCount,
+}: ArticlePageContentProps) {
+  return (
+    <div className="border-tech-main/30 bg-surface/80 relative min-h-screen min-w-0 border p-6 backdrop-blur-sm sm:p-8">
+      {bannerPreloadHref ? <link rel="preload" as="image" href={bannerPreloadHref} fetchPriority="high" /> : null}
       <BookmarkRecorder slug={currentSlug} title={articleTitle} />
-
-      {runningHeadChapters.length > 0 && (
-        <RunningHead
-          chapters={runningHeadChapters}
-          articleSlug={effectiveSlug}
-          articleTitle={articleTitle}
-          locale={locale}
-          chapterIndex={runningHeadChapterIndex}
-          chapterIsAppendix={runningHeadIsAppendix}
-          isPreface={runningHeadIsPreface}
-        />
-      )}
-
-      {/* Article Header */}
-      {author && createdAt && lastModified ? (
-        <ArticleMetadataFull
-          title={articleTitle}
-          author={profileHandles[0] ?? author}
-          coAuthors={profileHandles.slice(1)}
-          createdAt={createdAt}
-          lastModified={lastModified}
-          canonicalUrl={canonicalUrl}
-          filePath={target.filePath}
-          wordCount={wordCount}
-          readingTime={readingTime}
-          editPath={editPath}
-          isAdvanced={isAdvanced}
-          isRevising={isRevising}
-          bannerPath={bannerPath}
-          bannerAlt={bannerAlt}
-        />
-      ) : (
-        <ArticleMetadataAnonymous
-          title={articleTitle}
-          canonicalUrl={canonicalUrl}
-          attributionDate={lastModified || createdAt}
-          filePath={target.filePath}
-          wordCount={wordCount}
-          readingTime={readingTime}
-          isAdvanced={isAdvanced}
-          isRevising={isRevising}
-          bannerPath={bannerPath}
-          bannerAlt={bannerAlt}
-        />
-      )}
-
-      {isTranslationPending ? (
-        <aside
-          data-testid="translation-pending-notice"
-          aria-labelledby="translation-pending-label"
-          className="mt-4 border border-amber-500/40 bg-amber-500/10 p-4 text-amber-950 dark:text-amber-100">
-          <p
-            id="translation-pending-label"
-            data-testid="translation-pending-badge"
-            className="font-mono text-[0.625rem] tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">
-            {t("translationPending")}
-          </p>
-          <p className="mt-2 text-sm/relaxed">
-            {t("translationFallbackBody")}
-          </p>
-          <a
-            href={`/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`}
-            className="mt-3 inline-flex min-h-11 items-center font-mono text-xs tracking-wider text-amber-900 underline decoration-amber-700/50 underline-offset-4 transition-colors hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:text-amber-100 dark:hover:text-amber-300 dark:focus-visible:outline-amber-300">
-            {t("translationFallbackCta")} →
-          </a>
-        </aside>
-      ) : null}
-
-      {isTranslationStale ? (
-        <aside
-          data-testid="translation-stale-badge"
-          aria-labelledby="translation-outdated-label"
-          className="mt-4 border border-amber-500/40 bg-amber-500/10 p-4 text-amber-950 dark:text-amber-100">
-          <p
-            id="translation-outdated-label"
-            className="font-mono text-[0.625rem] tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">
-            {t("translationOutdatedLabel")}
-          </p>
-          <p className="mt-2 text-sm/relaxed">
-            {t("translationOutdatedPrefix")} {" "}
-            <a
-              href={translationStatus.latestOriginalCommitUrl}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={t("translationLatestCommitAria", {
-                sha: translationStatus.latestOriginalRevision.slice(0, 7),
-              })}
-              className="font-mono underline decoration-amber-700/50 underline-offset-4 transition-colors hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:hover:text-amber-300 dark:focus-visible:outline-amber-300">
-              {translationStatus.latestOriginalRevision.slice(0, 7)}
-            </a>
-            {". "}
-            {t("translationOutdatedLag", {
-              commitLag: translationStatus.commitLag,
-              dayLag: translationStatus.dayLag,
-            })}
-          </p>
-        </aside>
-      ) : null}
-
-      <article
-        lang={contentLocale}
-        className="article-prose min-w-0"
-        data-article-content>
-        <MarkdownRenderer
-          content={embeddedArticleContent}
-          locale={locale}
-          rawPath={target.filePath}
-          shikiPlugin={shikiPlugin}
-          headingAction={COPY_PAGE_ACTION}
-        />
-      </article>
-
+      {runningHeadChapters.length > 0 && <RunningHead chapters={runningHeadChapters} articleSlug={effectiveSlug} articleTitle={articleTitle} locale={locale} chapterIndex={runningHeadChapterIndex} chapterIsAppendix={runningHeadIsAppendix} isPreface={runningHeadIsPreface} />}
+      {author && createdAt && lastModified ? <ArticleMetadataFull title={articleTitle} author={profileHandles[0] ?? author} coAuthors={profileHandles.slice(1)} createdAt={createdAt} lastModified={lastModified} canonicalUrl={canonicalUrl} filePath={targetFilePath} wordCount={wordCount} readingTime={readingTime} editPath={editPath} isAdvanced={isAdvanced} isRevising={isRevising} bannerPath={bannerPath} bannerAlt={bannerAlt} /> : <ArticleMetadataAnonymous title={articleTitle} canonicalUrl={canonicalUrl} attributionDate={lastModified || createdAt} filePath={targetFilePath} wordCount={wordCount} readingTime={readingTime} isAdvanced={isAdvanced} isRevising={isRevising} bannerPath={bannerPath} bannerAlt={bannerAlt} />}
+      <TranslationNotices contentLocale={contentLocale} effectiveSlug={effectiveSlug} isTranslationPending={isTranslationPending} isTranslationStale={isTranslationStale} t={t} translationStatus={translationStatus} />
+      <article lang={contentLocale} className="article-prose min-w-0" data-article-content><MarkdownRenderer content={embeddedArticleContent} locale={locale} rawPath={targetFilePath} shikiPlugin={shikiPlugin} headingAction={COPY_PAGE_ACTION} /></article>
       <ChapterEndMark isAdvanced={isAdvanced} />
-
-      {(navigation.prev || navigation.next) && (
-        <ArticleNavigation
-          locale={locale}
-          next={navigation.next}
-          nextLabel={tArticleMeta("next")}
-          prev={navigation.prev}
-          prevLabel={tArticleMeta("prev")}
-        />
-      )}
-
-      <Suspense>
-        <ArticleHighlight />
-      </Suspense>
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={serializeJsonLd(techArticleJsonLd)}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={serializeJsonLd(breadcrumbJsonLd)}
-      />
+      {(navigation.prev || navigation.next) && <ArticleNavigation locale={locale} next={navigation.next} nextLabel={tArticleMeta("next")} prev={navigation.prev} prevLabel={tArticleMeta("prev")} />}
+      <Suspense><ArticleHighlight /></Suspense>
+      <script type="application/ld+json" dangerouslySetInnerHTML={serializeJsonLd(techArticleJsonLd)} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={serializeJsonLd(breadcrumbJsonLd)} />
     </div>
+  )
+}
+
+function TranslationNotices({
+  contentLocale,
+  effectiveSlug,
+  isTranslationPending,
+  isTranslationStale,
+  t,
+  translationStatus,
+}: Pick<ArticlePageContentProps, "contentLocale" | "effectiveSlug" | "isTranslationPending" | "isTranslationStale" | "t" | "translationStatus">) {
+  return (
+    <>
+      {isTranslationPending ? <aside data-testid="translation-pending-notice" aria-labelledby="translation-pending-label" className="mt-4 border border-amber-500/40 bg-amber-500/10 p-4 text-amber-950 dark:text-amber-100"><p id="translation-pending-label" data-testid="translation-pending-badge" className="font-mono text-[0.625rem] tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">{t("translationPending")}</p><p className="mt-2 text-sm/relaxed">{t("translationFallbackBody")}</p><a href={`/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`} className="mt-3 inline-flex min-h-11 items-center font-mono text-xs tracking-wider text-amber-900 underline decoration-amber-700/50 underline-offset-4 transition-colors hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:text-amber-100 dark:hover:text-amber-300 dark:focus-visible:outline-amber-300">{t("translationFallbackCta")} →</a></aside> : null}
+      {isTranslationStale && translationStatus ? <aside data-testid="translation-stale-badge" aria-labelledby="translation-outdated-label" className="mt-4 border border-amber-500/40 bg-amber-500/10 p-4 text-amber-950 dark:text-amber-100"><p id="translation-outdated-label" className="font-mono text-[0.625rem] tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">{t("translationOutdatedLabel")}</p><p className="mt-2 text-sm/relaxed">{t("translationOutdatedPrefix")} <a href={translationStatus.latestOriginalCommitUrl} target="_blank" rel="noreferrer" aria-label={t("translationLatestCommitAria", { sha: translationStatus.latestOriginalRevision.slice(0, 7) })} className="font-mono underline decoration-amber-700/50 underline-offset-4 transition-colors hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:hover:text-amber-300 dark:focus-visible:outline-amber-300">{translationStatus.latestOriginalRevision.slice(0, 7)}</a>{". "}{t("translationOutdatedLag", { commitLag: translationStatus.commitLag, dayLag: translationStatus.dayLag })}</p></aside> : null}
+    </>
   )
 }
 
@@ -631,4 +546,81 @@ function resolveBannerPath(
   filePath: string
 ): string | null {
   return resolveArticleAssetPath(bannerSrc, filePath)
+}
+
+function buildArticleStructuredData({
+  articleTitle,
+  authorArray,
+  bannerUrl,
+  canonicalUrl,
+  chapterTitle,
+  createdAt,
+  description,
+  effectiveSlug,
+  isAdvanced,
+  lastModified,
+  locale,
+  readingTime,
+  runningHeadChapters,
+  siteUrl,
+  wordCount,
+}: {
+  articleTitle: string
+  authorArray: Array<{ "@type": "Person"; "@id": string; name: string; url: string }>
+  bannerUrl: string | null
+  canonicalUrl: string
+  chapterTitle: string | undefined
+  createdAt: string | undefined
+  description: string
+  effectiveSlug: string
+  isAdvanced: boolean
+  lastModified: string | undefined
+  locale: ArticleLocale
+  readingTime: number
+  runningHeadChapters: Awaited<ReturnType<typeof getNavigationBreadcrumbs>>
+  siteUrl: string
+  wordCount: number
+}) {
+  const techArticleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TechArticle" as const,
+    headline: articleTitle,
+    url: canonicalUrl,
+    ...(createdAt ? { datePublished: createdAt } : {}),
+    ...(lastModified ? { dateModified: lastModified } : {}),
+    ...(authorArray.length > 0 ? { author: authorArray } : {}),
+    description,
+    wordCount,
+    timeRequired: `PT${readingTime}M`,
+    ...(chapterTitle ? { articleSection: chapterTitle } : {}),
+    proficiencyLevel: isAdvanced ? "Expert" : "Beginner",
+    ...(bannerUrl ? { image: bannerUrl } : {}),
+  }
+  const breadcrumbChapterItems = runningHeadChapters.flatMap((chapter, index) =>
+    chapter.slug === effectiveSlug
+      ? []
+      : [{
+          "@type": "ListItem" as const,
+          position: index + 3,
+          name: chapter.title,
+          item: `${siteUrl}/${locale}${articleUrl(chapter.slug)}`,
+        }]
+  )
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList" as const,
+    itemListElement: [
+      { "@type": "ListItem" as const, position: 1, name: "Home", item: `${siteUrl}/${locale}` },
+      { "@type": "ListItem" as const, position: 2, name: "Articles", item: `${siteUrl}/${locale}/articles` },
+      ...breadcrumbChapterItems,
+      {
+        "@type": "ListItem" as const,
+        position: breadcrumbChapterItems.length + 3,
+        name: articleTitle,
+        item: canonicalUrl,
+      },
+    ],
+  }
+
+  return { breadcrumbJsonLd, techArticleJsonLd }
 }

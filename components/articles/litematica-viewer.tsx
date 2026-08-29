@@ -214,7 +214,7 @@ function restoreCanvasPointerCapture(canvas: CanvasWithPatch | null) {
 }
 /* eslint-enable no-underscore-dangle */
 
-export default function LitematicaViewer({
+function useLitematicaViewer({
   url,
   height = 400,
 }: LitematicaViewerProps) {
@@ -370,6 +370,9 @@ export default function LitematicaViewer({
           {
             default: async () => {
               const res = await fetch("/pack.zip")
+              if (!res.ok) {
+                throw new Error(`Failed to fetch pack.zip: ${res.status} ${res.statusText}`)
+              }
               return await res.blob()
             },
           },
@@ -680,22 +683,103 @@ export default function LitematicaViewer({
     }),
     [isFlyMode, height]
   )
+  return {
+    canvasRef,
+    canvasStyle,
+    commitLayerSelection,
+    isFlyEnabled,
+    isFlyMode,
+    layerMode,
+    maxLayer,
+    setLayerMode,
+    setSliderLayer,
+    setTargetLayer,
+    sliderLayer,
+    targetLayer,
+    toggleFlyMode,
+  }
+}
 
+export default function LitematicaViewer(props: LitematicaViewerProps) {
+  const {
+    canvasRef,
+    canvasStyle,
+    commitLayerSelection,
+    isFlyEnabled,
+    isFlyMode,
+    layerMode,
+    maxLayer,
+    setLayerMode,
+    setSliderLayer,
+    setTargetLayer,
+    sliderLayer,
+    targetLayer,
+    toggleFlyMode,
+  } = useLitematicaViewer(props)
+
+  return (
+    <LitematicaViewerSurface
+      canvasRef={canvasRef}
+      canvasStyle={canvasStyle}
+      commitLayerSelection={commitLayerSelection}
+      isFlyEnabled={isFlyEnabled}
+      isFlyMode={isFlyMode}
+      layerMode={layerMode}
+      maxLayer={maxLayer}
+      onLayerModeChange={setLayerMode}
+      onSliderLayerChange={setSliderLayer}
+      onTargetLayerChange={setTargetLayer}
+      sliderLayer={sliderLayer}
+      targetLayer={targetLayer}
+      toggleFlyMode={toggleFlyMode}
+    />
+  )
+}
+
+interface LitematicaViewerSurfaceProps {
+  canvasRef: React.RefObject<CanvasWithPatch | null>
+  canvasStyle: React.CSSProperties
+  commitLayerSelection: () => void
+  isFlyEnabled: boolean
+  isFlyMode: boolean
+  layerMode: "single" | "below"
+  maxLayer: number
+  onLayerModeChange: (mode: "single" | "below") => void
+  onSliderLayerChange: (layer: number) => void
+  onTargetLayerChange: (layer: number | "all") => void
+  sliderLayer: number
+  targetLayer: number | "all"
+  toggleFlyMode: (event: MouseEvent<HTMLButtonElement>) => void
+}
+
+function LitematicaViewerSurface({
+  canvasRef,
+  canvasStyle,
+  commitLayerSelection,
+  isFlyEnabled,
+  isFlyMode,
+  layerMode,
+  maxLayer,
+  onLayerModeChange,
+  onSliderLayerChange,
+  onTargetLayerChange,
+  sliderLayer,
+  targetLayer,
+  toggleFlyMode,
+}: LitematicaViewerSurfaceProps) {
+  
   return (
     <div
       className="
       group relative my-8 w-full rounded-sm border-2 guide-line bg-tech-bg
       font-mono
-    "
-    >
-
+    ">
       <canvas
         ref={canvasRef}
         aria-label="Litematica schematic 3D viewer"
         className="block w-full outline-none"
         style={canvasStyle}
       />
-
       <button
         type="button"
         onClick={toggleFlyMode}
@@ -703,201 +787,193 @@ export default function LitematicaViewer({
           isFlyEnabled
             ? "border-tech-main bg-tech-main text-white"
             : "border-tech-main/60 bg-surface-overlay/90 text-tech-main hover:bg-tech-main hover:text-white"
-        }`}
-      >
+        }`}>
         {isFlyEnabled ? "SYS.EXIT_FLY" : "SYS.FIRST_PERSON"}
       </button>
-
-      <div
-        className="
-        pointer-events-none absolute top-4 left-4 flex items-center gap-3
-      "
-      >
-        <span
-          className="
-          shrink-0 border border-tech-main/40 bg-surface-overlay/70 px-2 py-0.5 text-xs
-          font-bold tracking-wider text-tech-main shadow-sm backdrop-blur-sm
-        "
-        >
+      <div className="pointer-events-none absolute top-4 left-4 flex items-center gap-3">
+        <span className="shrink-0 border border-tech-main/40 bg-surface-overlay/70 px-2 py-0.5 text-xs font-bold tracking-wider text-tech-main shadow-sm backdrop-blur-sm">
           [LITEMATICA]
         </span>
-        <span
-          className="
-          hidden text-[10px] tracking-widest text-tech-main/80 uppercase
-          md:inline-block
-        "
-        >
+        <span className="hidden text-[10px] tracking-widest text-tech-main/80 uppercase md:inline-block">
           INTERACTIVE BLUEPRINT
         </span>
       </div>
-
       {maxLayer > 0 && (
-        <div
-          className={`absolute right-4 bottom-16 z-10 w-[250px] border border-tech-main/60 bg-surface-overlay/90 p-3 text-tech-main shadow-sm backdrop-blur-md transition-all ${
-            isFlyEnabled ? "pointer-events-none translate-x-2 opacity-0" : "opacity-100"
-          }`}
-        >
-          <div className="mb-2 flex items-center justify-between border-b guide-line pb-1">
-            <span className="text-[10px] font-bold tracking-widest uppercase">
-              SYS.LAYER_FILTER
-            </span>
-
-            <button
-              type="button"
-              onClick={() => {
-                setTargetLayer("all")
-                setSliderLayer(maxLayer)
-              }}
-              className="border border-tech-main/30 px-1.5 py-0.5 text-[10px] font-bold uppercase transition-colors hover:bg-tech-main hover:text-white"
-            >
-              RESET
-            </button>
-          </div>
-
-          <div className="mb-2 flex items-center justify-between text-xs font-bold">
-            <span>LAYER {targetLayer === "all" ? "ALL" : targetLayer}</span>
-            {targetLayer !== "all" && targetLayer !== sliderLayer && (
-              <span className="text-[10px] opacity-70">PENDING {sliderLayer}</span>
-            )}
-          </div>
-
-          <div className="mb-3 flex border border-tech-main/40 text-[10px] font-bold uppercase">
-            <button
-              type="button"
-              onClick={() => setLayerMode("single")}
-              className={`flex-1 py-1 transition-colors ${
-                layerMode === "single"
-                  ? "bg-tech-main text-white"
-                  : "bg-surface-overlay text-tech-main hover:bg-tech-main/10"
-              }`}
-            >
-              SINGLE
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setLayerMode("below")}
-              className={`flex-1 border-l border-tech-main/40 py-1 transition-colors ${
-                layerMode === "below"
-                  ? "bg-tech-main text-white"
-                  : "bg-surface-overlay text-tech-main hover:bg-tech-main/10"
-              }`}
-            >
-              BELOW
-            </button>
-          </div>
-
-          <input
-            type="range"
-            min={0}
-            max={maxLayer}
-            value={sliderLayer}
-            aria-label="Layer selection"
-            onChange={(e) => setSliderLayer(Number(e.target.value))}
-            onPointerUp={commitLayerSelection}
-            onMouseUp={commitLayerSelection}
-            onTouchEnd={commitLayerSelection}
-            onKeyUp={commitLayerSelection}
-            data-litematica-layer-slider className="w-full cursor-ew-resize"
-          />
-
-          <div className="mt-2 flex justify-end">
-            <button
-              type="button"
-              onClick={commitLayerSelection}
-              className="border border-tech-main px-2 py-0.5 text-[10px] font-bold uppercase transition-colors hover:bg-tech-main hover:text-white"
-            >
-              APPLY
-            </button>
-          </div>
-
-          <style
-            dangerouslySetInnerHTML={layerSliderStyleHtml}
-          />
-        </div>
+        <LitematicaLayerControls
+          commitLayerSelection={commitLayerSelection}
+          isFlyEnabled={isFlyEnabled}
+          layerMode={layerMode}
+          maxLayer={maxLayer}
+          onLayerModeChange={onLayerModeChange}
+          onSliderLayerChange={onSliderLayerChange}
+          onTargetLayerChange={onTargetLayerChange}
+          sliderLayer={sliderLayer}
+          targetLayer={targetLayer}
+        />
       )}
+      <LitematicaControlsHint
+        isFlyEnabled={isFlyEnabled}
+        isFlyMode={isFlyMode}
+      />
+    </div>
+  )
+}
 
-      <div
-        className="
-        pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2
-        opacity-80 transition-opacity duration-300
-        group-hover:opacity-100
-      "
-      >
-        <div
-          className="
-          flex items-center gap-4 rounded-sm border guide-line bg-surface-overlay/80 px-3
-          py-1.5 text-xs whitespace-nowrap text-tech-main/80 shadow-sm
-          backdrop-blur-md
-        "
-        >
-          {isFlyEnabled ? (
-            <>
-              <span className="flex items-center gap-1.5">
-                <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
-                  WASD
-                </kbd>{" "}
-                Move
-              </span>
-              <span className="flex items-center gap-1.5 opacity-60">|</span>
-              <span className="flex items-center gap-1.5">
-                <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
-                  SPACE
-                </kbd>{" "}
-                Up
-              </span>
-              <span className="flex items-center gap-1.5 opacity-60">|</span>
-              <span className="flex items-center gap-1.5">
-                <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
-                  C
-                </kbd>{" "}
-                Down
-              </span>
-              <span className="flex items-center gap-1.5 opacity-60">|</span>
-              <span className="flex items-center gap-1.5">
-                <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
-                  ESC
-                </kbd>{" "}
-                Unlock
-              </span>
-              {!isFlyMode && (
-                <>
-                  <span className="flex items-center gap-1.5 opacity-60">|</span>
-                  <span className="flex items-center gap-1.5">
-                    <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
-                      Click
-                    </kbd>{" "}
-                    Lock
-                  </span>
-                </>
-              )}
-            </>
-          ) : (
-            <>
-              <span className="flex items-center gap-1.5">
-                <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
-                  Left
-                </kbd>{" "}
-                Rotate
-              </span>
-              <span className="flex items-center gap-1.5 opacity-60">|</span>
-              <span className="flex items-center gap-1.5">
-                <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
-                  Right
-                </kbd>{" "}
-                Pan
-              </span>
-              <span className="flex items-center gap-1.5 opacity-60">|</span>
-              <span className="flex items-center gap-1.5">
-                <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
-                  Wheel
-                </kbd>{" "}
-                Zoom
-              </span>
-            </>
-          )}
-        </div>
+interface LitematicaLayerControlsProps {
+  commitLayerSelection: () => void
+  isFlyEnabled: boolean
+  layerMode: "single" | "below"
+  maxLayer: number
+  onLayerModeChange: (mode: "single" | "below") => void
+  onSliderLayerChange: (layer: number) => void
+  onTargetLayerChange: (layer: number | "all") => void
+  sliderLayer: number
+  targetLayer: number | "all"
+}
+
+function LitematicaLayerControls({
+  commitLayerSelection,
+  isFlyEnabled,
+  layerMode,
+  maxLayer,
+  onLayerModeChange,
+  onSliderLayerChange,
+  onTargetLayerChange,
+  sliderLayer,
+  targetLayer,
+}: LitematicaLayerControlsProps) {
+  return (
+    <div
+      className={`absolute right-4 bottom-16 z-10 w-[250px] border border-tech-main/60 bg-surface-overlay/90 p-3 text-tech-main shadow-sm backdrop-blur-md transition-all ${
+        isFlyEnabled ? "pointer-events-none translate-x-2 opacity-0" : "opacity-100"
+      }`}>
+      <div className="mb-2 flex items-center justify-between border-b guide-line pb-1">
+        <span className="text-[10px] font-bold tracking-widest uppercase">
+          SYS.LAYER_FILTER
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            onTargetLayerChange("all")
+            onSliderLayerChange(maxLayer)
+          }}
+          className="border border-tech-main/30 px-1.5 py-0.5 text-[10px] font-bold uppercase transition-colors hover:bg-tech-main hover:text-white">
+          RESET
+        </button>
+      </div>
+      <div className="mb-2 flex items-center justify-between text-xs font-bold">
+        <span>LAYER {targetLayer === "all" ? "ALL" : targetLayer}</span>
+        {targetLayer !== "all" && targetLayer !== sliderLayer && (
+          <span className="text-[10px] opacity-70">PENDING {sliderLayer}</span>
+        )}
+      </div>
+      <div className="mb-3 flex border border-tech-main/40 text-[10px] font-bold uppercase">
+        <button
+          type="button"
+          onClick={() => onLayerModeChange("single")}
+          className={`flex-1 py-1 transition-colors ${
+            layerMode === "single"
+              ? "bg-tech-main text-white"
+              : "bg-surface-overlay text-tech-main hover:bg-tech-main/10"
+          }`}>
+          SINGLE
+        </button>
+        <button
+          type="button"
+          onClick={() => onLayerModeChange("below")}
+          className={`flex-1 border-l border-tech-main/40 py-1 transition-colors ${
+            layerMode === "below"
+              ? "bg-tech-main text-white"
+              : "bg-surface-overlay text-tech-main hover:bg-tech-main/10"
+          }`}>
+          BELOW
+        </button>
+      </div>
+      <input
+        type="range"
+        min={0}
+        max={maxLayer}
+        value={sliderLayer}
+        aria-label="Layer selection"
+        onChange={(event) => onSliderLayerChange(Number(event.target.value))}
+        onPointerUp={commitLayerSelection}
+        onMouseUp={commitLayerSelection}
+        onTouchEnd={commitLayerSelection}
+        onKeyUp={commitLayerSelection}
+        data-litematica-layer-slider
+        className="w-full cursor-ew-resize"
+      />
+      <div className="mt-2 flex justify-end">
+        <button
+          type="button"
+          onClick={commitLayerSelection}
+          className="border border-tech-main px-2 py-0.5 text-[10px] font-bold uppercase transition-colors hover:bg-tech-main hover:text-white">
+          APPLY
+        </button>
+      </div>
+      <style dangerouslySetInnerHTML={layerSliderStyleHtml} />
+    </div>
+  )
+}
+
+function LitematicaControlsHint({
+  isFlyEnabled,
+  isFlyMode,
+}: {
+  isFlyEnabled: boolean
+  isFlyMode: boolean
+}) {
+  return (
+    <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 opacity-80 transition-opacity duration-300 group-hover:opacity-100">
+      <div className="flex items-center gap-4 rounded-sm border guide-line bg-surface-overlay/80 px-3 py-1.5 text-xs whitespace-nowrap text-tech-main/80 shadow-sm backdrop-blur-md">
+        {isFlyEnabled ? (
+          <>
+            <LitematicaControlKey label="WASD" instruction="Move" />
+            <LitematicaControlDivider />
+            <LitematicaControlKey label="SPACE" instruction="Up" />
+            <LitematicaControlDivider />
+            <LitematicaControlKey label="C" instruction="Down" />
+            <LitematicaControlDivider />
+            <LitematicaControlKey label="ESC" instruction="Unlock" />
+            {!isFlyMode && (
+              <>
+                <LitematicaControlDivider />
+                <LitematicaControlKey label="Click" instruction="Lock" />
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            <LitematicaControlKey label="Left" instruction="Rotate" />
+            <LitematicaControlDivider />
+            <LitematicaControlKey label="Right" instruction="Pan" />
+            <LitematicaControlDivider />
+            <LitematicaControlKey label="Wheel" instruction="Zoom" />
+          </>
+        )}
       </div>
     </div>
   )
 }
+
+function LitematicaControlDivider() {
+  return <span className="flex items-center gap-1.5 opacity-60">|</span>
+}
+
+function LitematicaControlKey({
+  instruction,
+  label,
+}: {
+  instruction: string
+  label: string
+}) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
+        {label}
+      </kbd>{" "}
+      {instruction}
+    </span>
+  )
+}
+

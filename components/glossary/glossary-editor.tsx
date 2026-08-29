@@ -208,59 +208,12 @@ function GlossaryEditorInner({
       : null
   )
 
-  const [saveState, setSaveState] = React.useState("")
-
-  const saveTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  )
-  const operationsRef = React.useRef(operations)
-  const titleRef = React.useRef(title)
-  React.useEffect(() => {
-    operationsRef.current = operations
-    titleRef.current = title
-  }, [operations, title])
-
-  const scheduleAutosave = React.useCallback(() => {
-    if (isReadOnly) return
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
-    }
-    const savingToastId = toast.loading("Saving…")
-    setSaveState("Saving…")
-    saveTimeoutRef.current = setTimeout(async () => {
-      try {
-        const result = await updateGlossaryDraftAction(
-          draftId,
-          operationsRef.current,
-          titleRef.current
-        )
-        if (result.success) {
-          toast.success("Saved", { id: savingToastId })
-          setTimeout(() => setSaveState(""), 2000)
-        } else {
-          const message =
-            result.errors?.general ||
-            Object.values(result.errors ?? {}).find(Boolean) ||
-            "Save failed"
-          toast.error(message, { id: savingToastId, duration: 3000 })
-          setSaveState("")
-        }
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "Save failed"
-        toast.error(message, { id: savingToastId, duration: 3000 })
-        setSaveState("")
-      }
-    }, SAVE_DEBOUNCE_MS)
-  }, [draftId, isReadOnly])
-
-  React.useEffect(
-    () => () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current)
-      }
-    },
-    []
-  )
+  const { saveState, saveTimeoutRef, scheduleAutosave } = useGlossaryAutosave({
+    draftId,
+    isReadOnly,
+    operations,
+    title,
+  })
 
   const handleTitleChange = React.useCallback(
     (next: string) => {
@@ -389,7 +342,7 @@ function GlossaryEditorInner({
       const message = error instanceof Error ? error.message : "Delete failed"
       toast.error(message, { duration: 3000 })
     }
-  }, [draftId, router])
+  }, [draftId, router, saveTimeoutRef])
 
   const handleSubmit = React.useCallback(
     async ({ useRealEmail: useReal }: { useRealEmail: boolean }) => {
@@ -442,7 +395,7 @@ function GlossaryEditorInner({
         setIsSubmitting(false)
       }
     },
-    [draftId, operations, title, isSubmitting]
+    [draftId, operations, title, isSubmitting, saveTimeoutRef]
   )
 
   const handleDismissSuccess = React.useCallback(() => {
@@ -463,10 +416,187 @@ function GlossaryEditorInner({
     setSubmitError(null)
   }, [isSubmitting])
 
-  const saveStateLabel = saveState
-
   const canSubmit = operations.length > 0 && !isReadOnly
 
+  return (
+    <GlossaryEditorContent
+      authorName={authorName}
+      canSubmit={canSubmit}
+      githubPrNum={githubPrNum}
+      githubPrUrl={githubPrUrl}
+      handleAddNew={handleAddNew}
+      handleAddNewTerm={handleAddNewTerm}
+      handleClosePreview={handleClosePreview}
+      handleDismissSuccess={handleDismissSuccess}
+      handleDiscard={handleDiscard}
+      handleOpenPreview={handleOpenPreview}
+      handleOperationChange={handleOperationChange}
+      handleOperationRemove={handleOperationRemove}
+      handlePick={handlePick}
+      handleSubmit={handleSubmit}
+      handleTitleChange={handleTitleChange}
+      isMounted={isMounted}
+      isReadOnly={isReadOnly}
+      isSubmitting={isSubmitting}
+      locale={locale}
+      manifestEntries={manifestEntries}
+      noreplyEmail={noreplyEmail}
+      operations={operations}
+      realEmail={realEmail}
+      saveStateLabel={saveState}
+      showPreview={showPreview}
+      status={status}
+      submitError={submitError}
+      submitResult={submitResult}
+      submitState={submitState}
+      summaryEntries={summaryEntries}
+      t={t}
+      title={title}
+      useRealEmail={useRealEmail}
+      onUseRealEmailChange={setUseRealEmail}
+    />
+  )
+}
+
+function useGlossaryAutosave({
+  draftId,
+  isReadOnly,
+  operations,
+  title,
+}: {
+  draftId: string
+  isReadOnly: boolean
+  operations: GlossaryEditOperation[]
+  title: string
+}) {
+  const [saveState, setSaveState] = React.useState("")
+  const saveTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
+  const operationsRef = React.useRef(operations)
+  const titleRef = React.useRef(title)
+
+  React.useEffect(() => {
+    operationsRef.current = operations
+    titleRef.current = title
+  }, [operations, title])
+
+  const scheduleAutosave = React.useCallback(() => {
+    if (isReadOnly) return
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+    const savingToastId = toast.loading("Saving…")
+    setSaveState("Saving…")
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        const result = await updateGlossaryDraftAction(
+          draftId,
+          operationsRef.current,
+          titleRef.current
+        )
+        if (result.success) {
+          toast.success("Saved", { id: savingToastId })
+          setTimeout(() => setSaveState(""), 2000)
+          return
+        }
+        const message =
+          result.errors?.general ||
+          Object.values(result.errors ?? {}).find(Boolean) ||
+          "Save failed"
+        toast.error(message, { id: savingToastId, duration: 3000 })
+        setSaveState("")
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Save failed", {
+          id: savingToastId,
+          duration: 3000,
+        })
+        setSaveState("")
+      }
+    }, SAVE_DEBOUNCE_MS)
+  }, [draftId, isReadOnly])
+
+  React.useEffect(
+    () => () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+    },
+    []
+  )
+
+  return { saveState, saveTimeoutRef, scheduleAutosave }
+}
+
+interface GlossaryEditorContentProps {
+  authorName: string
+  canSubmit: boolean
+  githubPrNum: number | null | undefined
+  githubPrUrl: string | null | undefined
+  handleAddNew: (query: string) => void
+  handleAddNewTerm: () => void
+  handleClosePreview: () => void
+  handleDismissSuccess: () => void
+  handleDiscard: () => void
+  handleOpenPreview: () => void
+  handleOperationChange: (input: { slug: string; after: GlossaryRow }) => void
+  handleOperationRemove: (slug: string) => void
+  handlePick: (slug: string) => void
+  handleSubmit: (input: { useRealEmail: boolean }) => Promise<void>
+  handleTitleChange: (title: string) => void
+  isMounted: boolean
+  isReadOnly: boolean
+  isSubmitting: boolean
+  locale: string
+  manifestEntries: GlossaryEntry[]
+  noreplyEmail: string
+  operations: GlossaryEditOperation[]
+  onUseRealEmailChange: (value: boolean) => void
+  realEmail: string | null
+  saveStateLabel: string
+  showPreview: boolean
+  status: string
+  submitError: string | null
+  submitResult: { prUrl: string; prNumber: number } | null
+  submitState: "idle" | "running" | "success" | "error"
+  summaryEntries: GlossarySummaryEntry[]
+  t: ReturnType<typeof useTranslations>
+  title: string
+  useRealEmail: boolean
+}
+
+function GlossaryEditorContent({
+  authorName,
+  canSubmit,
+  githubPrNum,
+  githubPrUrl,
+  handleAddNew,
+  handleAddNewTerm,
+  handleClosePreview,
+  handleDismissSuccess,
+  handleDiscard,
+  handleOpenPreview,
+  handleOperationChange,
+  handleOperationRemove,
+  handlePick,
+  handleSubmit,
+  handleTitleChange,
+  isMounted,
+  isReadOnly,
+  isSubmitting,
+  locale,
+  manifestEntries,
+  noreplyEmail,
+  operations,
+  onUseRealEmailChange,
+  realEmail,
+  saveStateLabel,
+  showPreview,
+  status,
+  submitError,
+  submitResult,
+  submitState,
+  summaryEntries,
+  t,
+  title,
+  useRealEmail,
+}: GlossaryEditorContentProps) {
   return (
     <div className="relative mx-auto flex max-w-4xl flex-col gap-6 p-4 sm:p-6 md:p-8">
       {status === "SUBMITTED" && githubPrUrl && (
@@ -486,7 +616,6 @@ function GlossaryEditorInner({
           </a>
         </div>
       )}
-
       <GlossaryEditToolbar
         title={title}
         onTitleChange={handleTitleChange}
@@ -496,9 +625,7 @@ function GlossaryEditorInner({
         saveState={saveStateLabel}
         isReadOnly={isReadOnly}
       />
-
       <ComplexChangesNotice />
-
       {!isReadOnly && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex-1">
@@ -518,7 +645,6 @@ function GlossaryEditorInner({
           </Button>
         </div>
       )}
-
       {operations.length === 0 ? (
         <div className="border-border bg-surface/30 rounded-none border border-dashed p-8 text-center">
           <p className="text-muted-foreground text-sm">
@@ -529,19 +655,23 @@ function GlossaryEditorInner({
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {operations.map((op) => {
+          {operations.map((operation) => {
             const headerEnglish =
-              op.before?.["Full Form (English)"] ??
-              op.after?.["Full Form (English)"] ??
-              op.slug
+              operation.before?.["Full Form (English)"] ??
+              operation.after?.["Full Form (English)"] ??
+              operation.slug
             const danglingRefs =
-              op.kind === "delete"
-                ? findDanglingRefsFor(op.slug, headerEnglish, manifestEntries)
+              operation.kind === "delete"
+                ? findDanglingRefsFor(
+                    operation.slug,
+                    headerEnglish,
+                    manifestEntries
+                  )
                 : undefined
             return (
               <GlossaryEditCard
-                key={op.slug}
-                operation={op}
+                key={operation.slug}
+                operation={operation}
                 locale={locale}
                 onChange={handleOperationChange}
                 onRemove={handleOperationRemove}
@@ -552,15 +682,13 @@ function GlossaryEditorInner({
           })}
         </div>
       )}
-
       <AttributionWarning
         authorName={authorName}
         githubNoreplyEmail={noreplyEmail}
         realEmail={realEmail}
         useRealEmail={useRealEmail}
-        onUseRealEmailChange={setUseRealEmail}
+        onUseRealEmailChange={onUseRealEmailChange}
       />
-
       {showPreview && isMounted ? (
         <Dialog
           open={showPreview}
@@ -583,7 +711,6 @@ function GlossaryEditorInner({
                   : t("editorPrOwnershipNotice")}
               </DialogDescription>
             </DialogHeader>
-
             <GlossaryDiffPreview
               operations={operations}
               onClose={handleClosePreview}

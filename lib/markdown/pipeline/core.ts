@@ -9,12 +9,15 @@ import rehypeSlug from "rehype-slug"
 
 import { remarkDirectiveHandler } from "@/lib/markdown/syntax/remark-directive-handler"
 import { remarkCallouts } from "../syntax/remark-callouts"
+import { remarkCodeProvenance } from "../syntax/remark-code-provenance"
 import { remarkPeopleMentions } from "../syntax/remark-people-mentions"
 import { remarkNumberedHeadingsDot } from "../syntax/remark-heading-numbering"
 import { remarkWikilinks } from "../syntax/remark-wikilinks"
 import { rehypeAdvancedSections } from "../syntax/rehype-advanced-sections"
+import { rehypeCodeProvenance } from "../syntax/rehype-code-provenance"
 import { rehypeMermaid } from "../syntax/rehype-mermaid"
 import { rehypeLinkedCode } from "../transforms/rehype-linked-code"
+import type { CodeReference } from "../code-provenance"
 import type { RehypeShikiPlugin } from "../syntax/rehype-shiki"
 
 /**
@@ -32,6 +35,9 @@ export interface PipelineOptions {
 
   /** Shiki plugin instance (required if includeShiki is true) */
   shikiPlugin?: RehypeShikiPlugin
+
+  /** Generated Java code references for the current article */
+  codeReferences?: readonly CodeReference[]
 
   /** CJK spacing plugin for the active runtime */
   cjkSpacingPlugin?: PluggableList[number]
@@ -61,6 +67,7 @@ export function buildRemarkPlugins(
     remarkDirective,
     remarkDirectiveHandler,
     remarkCallouts,
+    remarkCodeProvenance,
     remarkPeopleMentions,
     [remarkNumberedHeadingsDot, { startDepth: 2 }],
   ]
@@ -88,6 +95,7 @@ export function buildRehypePlugins(
 ): PluggableList {
   const plugins: PluggableList = [
     rehypeRaw,
+    [rehypeCodeProvenance, { references: options.codeReferences }],
     rehypeMermaid,
     rehypeAdvancedSections,
     rehypeLinkedCode,

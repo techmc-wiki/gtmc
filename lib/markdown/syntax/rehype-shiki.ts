@@ -87,7 +87,7 @@ function createNoopRehypeShiki(): RehypeShikiPlugin {
 }
 
 function extractLangsFromMarkdown(content: string): string[] {
-  const matches = content.matchAll(/^```(\w+)/gm)
+  const matches = content.matchAll(/^(?:`{3,}|~{3,})(\w+)/gm)
   const langs = new Set<string>()
   for (const match of matches) {
     if (

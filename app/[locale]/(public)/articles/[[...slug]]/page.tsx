@@ -46,6 +46,7 @@ import { ArticleHighlight } from "@/components/articles/article-highlight"
 import { BookmarkRecorder } from "@/components/articles/bookmark-recorder"
 import { RunningHead, ChapterEndMark } from "@/components/articles/chapter-chrome"
 import { CopyArticleButton } from "@/components/articles/copy-article-button"
+import { CodeSourceSummary } from "@/components/articles/code-source-summary"
 import {
   ArticleMetadataFull,
   ArticleMetadataAnonymous,
@@ -262,6 +263,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const {
     content: renderedContent,
+    codeReferences,
     frontmatter: data,
     translationStatus,
   } = artifact
@@ -385,6 +387,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       breadcrumbJsonLd={breadcrumbJsonLd}
       canonicalUrl={canonicalUrl}
       contentLocale={contentLocale}
+      codeReferences={codeReferences}
       createdAt={createdAt}
       currentSlug={currentSlug}
       editPath={editPath}
@@ -424,6 +427,7 @@ interface ArticlePageContentProps {
   breadcrumbJsonLd: object
   canonicalUrl: string
   contentLocale: ArticleLocale
+  codeReferences: NonNullable<Awaited<ReturnType<typeof getArticleContentBySlug>>>["codeReferences"]
   createdAt: string | undefined
   currentSlug: string
   editPath: string
@@ -460,6 +464,7 @@ function ArticlePageContent({
   breadcrumbJsonLd,
   canonicalUrl,
   contentLocale,
+  codeReferences,
   createdAt,
   currentSlug,
   editPath,
@@ -492,8 +497,14 @@ function ArticlePageContent({
       <BookmarkRecorder slug={currentSlug} title={articleTitle} />
       {runningHeadChapters.length > 0 && <RunningHead chapters={runningHeadChapters} articleSlug={effectiveSlug} articleTitle={articleTitle} locale={locale} chapterIndex={runningHeadChapterIndex} chapterIsAppendix={runningHeadIsAppendix} isPreface={runningHeadIsPreface} />}
       {author && createdAt && lastModified ? <ArticleMetadataFull title={articleTitle} author={profileHandles[0] ?? author} coAuthors={profileHandles.slice(1)} createdAt={createdAt} lastModified={lastModified} canonicalUrl={canonicalUrl} filePath={targetFilePath} wordCount={wordCount} readingTime={readingTime} editPath={editPath} isAdvanced={isAdvanced} isRevising={isRevising} bannerPath={bannerPath} bannerAlt={bannerAlt} /> : <ArticleMetadataAnonymous title={articleTitle} canonicalUrl={canonicalUrl} attributionDate={lastModified || createdAt} filePath={targetFilePath} wordCount={wordCount} readingTime={readingTime} isAdvanced={isAdvanced} isRevising={isRevising} bannerPath={bannerPath} bannerAlt={bannerAlt} />}
+      <CodeSourceSummary
+        label={tArticleMeta("codeBasis")}
+        mixedLabel={tArticleMeta("mixedVersions")}
+        referenceLabel={tArticleMeta("codeReferences", { count: codeReferences.length })}
+        references={codeReferences}
+      />
       <TranslationNotices contentLocale={contentLocale} effectiveSlug={effectiveSlug} isTranslationPending={isTranslationPending} isTranslationStale={isTranslationStale} t={t} translationStatus={translationStatus} />
-      <article lang={contentLocale} className="article-prose min-w-0" data-article-content><MarkdownRenderer content={embeddedArticleContent} locale={locale} rawPath={targetFilePath} shikiPlugin={shikiPlugin} headingAction={COPY_PAGE_ACTION} /></article>
+      <article lang={contentLocale} className="article-prose min-w-0" data-article-content><MarkdownRenderer content={embeddedArticleContent} codeReferences={codeReferences} locale={locale} rawPath={targetFilePath} shikiPlugin={shikiPlugin} headingAction={COPY_PAGE_ACTION} /></article>
       <ChapterEndMark isAdvanced={isAdvanced} />
       {(navigation.prev || navigation.next) && <ArticleNavigation locale={locale} next={navigation.next} nextLabel={tArticleMeta("next")} prev={navigation.prev} prevLabel={tArticleMeta("prev")} />}
       <Suspense><ArticleHighlight /></Suspense>

@@ -222,6 +222,25 @@ pre[data-lang]::after {
   padding: 0.3em 0.7em;
 }
 
+pre[data-code-label]::before {
+  content: attr(data-code-label);
+  display: block;
+  margin: -0.7em -0.9em 0.7em;
+  border-bottom: 1px solid var(--pdf-line);
+  padding: 0.45em 0.9em;
+  color: var(--pdf-ink);
+  font-size: 6.5pt;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  white-space: normal;
+}
+
+pre[data-code-label]::after {
+  content: none;
+}
+
 pre[data-lang="plaintext"]::after,
 pre[data-lang="text"]::after {
   content: none;

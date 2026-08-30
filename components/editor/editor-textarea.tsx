@@ -13,7 +13,9 @@ import {
 } from "@codemirror/autocomplete"
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown"
 import { languages } from "@codemirror/language-data"
+import { linter } from "@codemirror/lint"
 import { useTheme } from "@/lib/theme"
+import { getJavaFenceDiagnostics } from "@/lib/markdown/code-provenance"
 
 const techTheme = EditorView.theme({
   "&": {
@@ -114,6 +116,11 @@ const markdownSyntaxHints = [
     detail: "Code block",
     info: "Insert a fenced code block",
   }),
+  snippetCompletion("```java mc=${1.20.1} mapping=${yarn}\n${code}\n```", {
+    label: "java-source",
+    detail: "Minecraft Java source",
+    info: "Insert a versioned Minecraft Java code block",
+  }),
   snippetCompletion(
     "| Column | Value |\n| --- | --- |\n| ${left} | ${right} |",
     {
@@ -129,12 +136,43 @@ const markdownSyntaxHints = [
   }),
 ] as const
 
+const javaProvenanceHints = [
+  snippetCompletion("mc=${1.20.1}", {
+    label: "mc=",
+    detail: "Minecraft version",
+  }),
+  snippetCompletion("mapping=${yarn}", {
+    label: "mapping=",
+    detail: "Mappings",
+  }),
+  snippetCompletion("decompiler=${vineflower}", {
+    label: "decompiler=",
+    detail: "Decompiler",
+  }),
+  snippetCompletion("file=${net/minecraft/Class.java}", {
+    label: "file=",
+    detail: "Source path (optional)",
+  }),
+  snippetCompletion("lines=${1-10}", {
+    label: "lines=",
+    detail: "Source lines (optional)",
+  }),
+] as const
+
 function markdownSyntaxHintSource(context: CompletionContext) {
   const word = context.matchBefore(/[\w-]*/)
+  const line = context.state.doc.lineAt(context.pos)
+  const prefix = line.text.slice(0, context.pos - line.from)
+
+  if (/^\s*(?:`{3,}|~{3,})java(?:\s+.*)?$/i.test(prefix)) {
+    return {
+      from: word ? word.from : context.pos,
+      options: [...javaProvenanceHints],
+      validFor: /[\w-]*/,
+    }
+  }
 
   if (!context.explicit) {
-    const line = context.state.doc.lineAt(context.pos)
-    const prefix = line.text.slice(0, context.pos - line.from)
     const trigger = prefix.slice(-1)
     const onlyWhitespace = prefix.trim().length === 0
 
@@ -182,11 +220,60 @@ export function EditorTextarea({
       markdown({ base: markdownLanguage, codeLanguages: languages }),
       techTheme,
       ...(enableSyntaxHints
-        ? [autocompletion({ override: [markdownSyntaxHintSource] })]
+        ? [
+            autocompletion({ override: [markdownSyntaxHintSource] }),
+            linter((view) =>
+              getJavaFenceDiagnostics(view.state.doc.toString()).map(
+                (diagnostic) => {
+                  let message: string
+                  switch (diagnostic.code) {
+                    case "expected-field":
+                      message = t("provenanceExpectedField")
+                      break
+                    case "unknown-field":
+                      message = t("provenanceUnknownField", {
+                        field: diagnostic.field ?? "",
+                      })
+                      break
+                    case "duplicate-field":
+                      message = t("provenanceDuplicateField", {
+                        field: diagnostic.field ?? "",
+                      })
+                      break
+                    case "empty-value":
+                      message = t("provenanceEmptyValue", {
+                        field: diagnostic.field ?? "",
+                      })
+                      break
+                    case "invalid-minecraft-version":
+                      message = t("provenanceInvalidMinecraftVersion")
+                      break
+                    case "invalid-tool":
+                      message = t("provenanceInvalidTool", {
+                        field: diagnostic.field ?? "tool",
+                      })
+                      break
+                    case "invalid-file":
+                      message = t("provenanceInvalidFile")
+                      break
+                    case "invalid-lines":
+                      message = t("provenanceInvalidLines")
+                      break
+                  }
+                  return {
+                    from: diagnostic.from,
+                    to: Math.max(diagnostic.from + 1, diagnostic.to),
+                    severity: "error" as const,
+                    message,
+                  }
+                }
+              )
+            ),
+          ]
         : []),
       ...(lineWrap ? [EditorView.lineWrapping] : []),
     ],
-    [enableSyntaxHints, lineWrap]
+    [enableSyntaxHints, lineWrap, t]
   )
 
   const handleKeyDownCapture = React.useCallback(

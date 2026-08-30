@@ -2,6 +2,7 @@ import ReactMarkdown from "react-markdown"
 import type { ReactNode } from "react"
 
 import type { RehypeShikiPlugin } from "@/lib/markdown/syntax/rehype-shiki"
+import type { CodeReference } from "@/lib/markdown/code-provenance"
 import { getMarkdownComponents } from "@/lib/markdown/components"
 import { getPluginsForContent } from "@/lib/markdown/pipeline/react"
 
@@ -10,6 +11,7 @@ interface MarkdownRendererProps {
   locale?: string
   rawPath?: string
   shikiPlugin?: RehypeShikiPlugin
+  codeReferences?: readonly CodeReference[]
   /** Optional control rendered at the right edge of the article H1. */
   headingAction?: ReactNode
 }
@@ -19,11 +21,13 @@ export function MarkdownRenderer({
   locale,
   rawPath = "",
   shikiPlugin,
+  codeReferences,
   headingAction,
 }: MarkdownRendererProps) {
   const { remarkPlugins, rehypePlugins } = getPluginsForContent(
     content,
-    shikiPlugin
+    shikiPlugin,
+    codeReferences
   )
 
   return (

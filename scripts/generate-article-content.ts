@@ -24,6 +24,7 @@ import type {
   TranslationFrontMatter,
 } from "@/lib/articles/frontmatter-parser"
 import { renderMarkdownToHtml } from "@/lib/markdown/pdf-html"
+import { analyzeJavaCodeReferences } from "@/lib/markdown/code-provenance.server"
 import {
   createRehypeShiki,
   persistHighlightCache,
@@ -51,7 +52,7 @@ const IS_PRODUCTION = process.env.NODE_ENV !== "development"
  * component, a renderer fix would keep serving stale output for unchanged
  * articles.
  */
-const CONTENT_PIPELINE_VERSION = "v1"
+const CONTENT_PIPELINE_VERSION = "v2-java-provenance"
 
 /**
  * Incremental-build cache. Keyed by the article's path relative to the
@@ -92,16 +93,15 @@ function shouldRegenerate(
   return { regenerate: true, hash }
 }
 
-function readCachedFrontmatter(
+function readCachedArtifact(
   prevOutputPath: string,
   tempOutputPath: string
-): Record<string, unknown> | null {
+): ArticleContentArtifact | null {
   try {
     fs.copyFileSync(prevOutputPath, tempOutputPath)
-    const prev = JSON.parse(
+    return JSON.parse(
       fs.readFileSync(prevOutputPath, "utf-8")
     ) as ArticleContentArtifact
-    return prev.frontmatter
   } catch {
     return null
   }
@@ -237,14 +237,14 @@ async function mainAsync(): Promise<void> {
           : `${fileContent}\x00${CONTENT_PIPELINE_VERSION}`
       const { regenerate } = shouldRegenerate(generationInput, cacheKey, cache)
 
-      const cachedFrontmatter =
+      const cachedArtifact =
         !regenerate && fs.existsSync(prevOutputPath)
-          ? readCachedFrontmatter(prevOutputPath, tempOutputPath)
+          ? readCachedArtifact(prevOutputPath, tempOutputPath)
           : null
 
-      if (cachedFrontmatter) {
+      if (cachedArtifact) {
         copyBannerAssetToPublic(
-          cachedFrontmatter.banner as { src: string } | undefined,
+          cachedArtifact.frontmatter.banner as { src: string } | undefined,
           localizedPath
         )
         if (fs.existsSync(prevHtmlPath)) {
@@ -258,6 +258,7 @@ async function mainAsync(): Promise<void> {
             const artifactContent = stripFrontMatter(fileContent)
             const html = await renderMarkdownToHtml(artifactContent, {
               articleSlug: entry.slug,
+              codeReferences: cachedArtifact.codeReferences,
               locale: locale as "en" | "zh",
               shikiPlugin,
             })
@@ -418,12 +419,25 @@ async function renderArtifact(
     return null
   }
 
+  let codeReferences
+  try {
+    codeReferences = analyzeJavaCodeReferences(artifactContent)
+  } catch (error) {
+    logger.error(
+      "article-content.code-provenance.invalid",
+      { locale, slug: entry.slug },
+      String(error)
+    )
+    return null
+  }
+
   const artifact: ArticleContentArtifact = {
     slug: entry.slug,
     locale: locale as ArticleLocale,
     filePath: localizedPath,
     content: artifactContent,
     frontmatter,
+    codeReferences,
     ...(locale === "en" && entry.translationStatusByLocale?.en
       ? { translationStatus: entry.translationStatusByLocale.en }
       : {}),
@@ -434,6 +448,7 @@ async function renderArtifact(
   try {
     const html = await renderMarkdownToHtml(artifact.content, {
       articleSlug: entry.slug,
+      codeReferences: artifact.codeReferences,
       locale: locale as "en" | "zh",
       shikiPlugin,
     })

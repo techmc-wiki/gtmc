@@ -2,6 +2,7 @@ import fs from "fs"
 import path from "path"
 import { cacheLife, cacheTag } from "next/cache"
 
+import type { CodeReference } from "@/lib/markdown/code-provenance"
 import type { ArticleLocale, TranslationStatusDetail } from "./manifest"
 
 export interface ArticleContentArtifact {
@@ -10,7 +11,61 @@ export interface ArticleContentArtifact {
   filePath: string
   content: string
   frontmatter: Record<string, unknown>
+  codeReferences: CodeReference[]
   translationStatus?: TranslationStatusDetail
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+}
+
+function isToolReference(value: unknown): boolean {
+  if (!isRecord(value) || typeof value.name !== "string") return false
+  return value.version === undefined || typeof value.version === "string"
+}
+
+function isLineRange(value: unknown): boolean {
+  if (!isRecord(value)) return false
+  if (
+    typeof value.start !== "number" ||
+    !Number.isInteger(value.start) ||
+    value.start < 1
+  ) {
+    return false
+  }
+  return (
+    value.end === undefined ||
+    (typeof value.end === "number" &&
+      Number.isInteger(value.end) &&
+      value.end >= value.start)
+  )
+}
+
+function isCodeReference(value: unknown, expectedIndex: number): boolean {
+  if (!isRecord(value)) return false
+  if (
+    typeof value.id !== "string" ||
+    value.id.length === 0 ||
+    value.blockIndex !== expectedIndex ||
+    value.language !== "java" ||
+    typeof value.minecraftVersion !== "string" ||
+    !isToolReference(value.mapping) ||
+    typeof value.codeHash !== "string" ||
+    value.codeHash.length === 0 ||
+    typeof value.markdownLine !== "number" ||
+    !Number.isInteger(value.markdownLine) ||
+    value.markdownLine < 1
+  ) {
+    return false
+  }
+  if (
+    value.decompiler !== undefined &&
+    !isToolReference(value.decompiler)
+  ) {
+    return false
+  }
+  if (value.file !== undefined && typeof value.file !== "string") return false
+  return value.lines === undefined || isLineRange(value.lines)
 }
 
 /**
@@ -89,6 +144,14 @@ function parseArticleContentArtifact(
     Array.isArray(obj.frontmatter)
   ) {
     return fail("frontmatter")
+  }
+  if (
+    !Array.isArray(obj.codeReferences) ||
+    !obj.codeReferences.every((reference, index) =>
+      isCodeReference(reference, index)
+    )
+  ) {
+    return fail("codeReferences")
   }
   if (obj.translationStatus !== undefined) {
     if (

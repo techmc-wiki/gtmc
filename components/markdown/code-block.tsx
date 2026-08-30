@@ -30,9 +30,11 @@ const LINE_WIDTHS = [
  * near the viewport, then reveals the rendered code.
  */
 function LazyCodeBlock({
+  id,
   lineCount,
   children,
 }: {
+  id?: string
   lineCount: string
   children: ReactNode
 }) {
@@ -66,8 +68,9 @@ function LazyCodeBlock({
 
   return (
     <div
+      id={id}
       ref={containerRef}
-      className="border-tech-main/30 bg-tech-bg relative my-6 w-full border font-mono text-sm"
+      className="border-tech-main/30 bg-tech-bg relative my-6 w-full scroll-mt-24 border font-mono text-sm"
       style={contentVisibilityStyle}>
       <div className="border-tech-main/30 pointer-events-none absolute top-0 left-0 z-20 size-3 -translate-px border-t-2 border-l-2" />
       <div className="border-tech-main/30 pointer-events-none absolute top-0 right-0 z-20 size-3 translate-x-px -translate-y-px border-t-2 border-r-2" />
@@ -124,13 +127,21 @@ function LazyCodeBlock({
   )
 }
 
-/** Copy-to-clipboard button used in the code block chrome. */
-function CodeCopyButton({ code }: { code: string }) {
-  const t = useTranslations("ArticleMeta")
+function ClipboardButton({
+  ariaLabel,
+  doneLabel,
+  getValue,
+  idleLabel,
+}: {
+  ariaLabel: string
+  doneLabel: string
+  getValue: () => string
+  idleLabel: string
+}) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(code)
+    await navigator.clipboard.writeText(getValue())
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -139,8 +150,10 @@ function CodeCopyButton({ code }: { code: string }) {
     <button
       type="button"
       onClick={handleCopy}
+      aria-label={ariaLabel}
+      title={ariaLabel}
       className="text-tech-main hover:text-tech-main/80 font-mono text-[0.625rem] tracking-widest uppercase transition-colors">
-      {copied ? t("copiedButton") : t("copyButton")}
+      {copied ? doneLabel : idleLabel}
     </button>
   )
 }
@@ -150,6 +163,12 @@ type CodeBlockPreProps = {
   "data-raw-code"?: string
   "data-lang"?: string
   "data-line-count"?: string
+  "data-mc"?: string
+  "data-mapping"?: string
+  "data-decompiler"?: string
+  "data-source-file"?: string
+  "data-source-lines"?: string
+  id?: string
   [key: string]: unknown
 }
 
@@ -159,9 +178,16 @@ type CodeBlockPreProps = {
  */
 export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
   const t = useTranslations("CommonA11y")
+  const tArticleMeta = useTranslations("ArticleMeta")
   const rawCode = props["data-raw-code"] as string | undefined
   const lang = (props["data-lang"] as string) || ""
   const lineCount = (props["data-line-count"] as string) || "0"
+  const id = props.id
+  const minecraftVersion = props["data-mc"]
+  const mapping = props["data-mapping"]
+  const decompiler = props["data-decompiler"]
+  const sourceFile = props["data-source-file"]
+  const sourceLines = props["data-source-lines"]
   const [isWrapped, setIsWrapped] = useState(false)
 
   const toggleWrap = useCallback(() => {
@@ -185,32 +211,78 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
   if (!rawCode) return <>{children}</>
 
   return (
-    <LazyCodeBlock lineCount={lineCount}>
-      <div className="guide-line bg-tech-main/10 flex items-center justify-between border-b px-4 py-1.5">
-        <div className="flex items-center gap-2">
-          <span className="bg-tech-main/40 size-1.5 animate-pulse" />
-          <span className="text-tech-main text-xs tracking-widest uppercase">
-            {lang}
-          </span>
+    <LazyCodeBlock id={id} lineCount={lineCount}>
+      <div className="guide-line bg-tech-main/10 border-b">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="bg-tech-main/40 size-1.5 animate-pulse" />
+            <span className="text-tech-main text-xs tracking-widest uppercase">
+              {lang}
+            </span>
+            {minecraftVersion && (
+              <span className="border-tech-main/20 text-tech-main/75 border-l pl-2 text-[0.625rem] tracking-wider uppercase">
+                MC {minecraftVersion}
+              </span>
+            )}
+            {mapping && (
+              <span className="text-tech-main/65 text-[0.625rem] tracking-wider uppercase">
+                {mapping}
+              </span>
+            )}
+            {decompiler && (
+              <span className="text-tech-main/50 text-[0.625rem] tracking-wider uppercase">
+                {decompiler}
+              </span>
+            )}
+          </div>
+          <div className="text-tech-main flex flex-wrap items-center gap-3 font-mono text-[0.625rem] tracking-widest">
+            <span>{lineCount} LINES</span>
+            {id && (
+              <>
+                <span className="text-tech-main/50">|</span>
+                <ClipboardButton
+                  ariaLabel={tArticleMeta("copyCodeLink")}
+                  doneLabel={tArticleMeta("copiedButton")}
+                  getValue={() =>
+                    `${window.location.origin}${window.location.pathname}${window.location.search}#${id}`
+                  }
+                  idleLabel={tArticleMeta("linkButton")}
+                />
+              </>
+            )}
+            <span className="text-tech-main/50">|</span>
+            <button
+              type="button"
+              aria-label={t("toggleLineWrap")}
+              title={t("toggleLineWrap")}
+              onClick={toggleWrap}
+              className={`font-mono text-[0.625rem] tracking-widest transition-colors ${
+                isWrapped
+                  ? "text-tech-main"
+                  : `text-tech-main/40 hover:text-tech-main/70`
+              } `}>
+              ↩
+            </button>
+            <span className="text-tech-main/50">|</span>
+            <ClipboardButton
+              ariaLabel={tArticleMeta("copyCode")}
+              doneLabel={tArticleMeta("copiedButton")}
+              getValue={() => rawCode}
+              idleLabel={tArticleMeta("copyButton")}
+            />
+          </div>
         </div>
-        <div className="text-tech-main flex items-center gap-3 font-mono text-[0.625rem] tracking-widest">
-          <span>{lineCount} LINES</span>
-          <span className="text-tech-main/50">|</span>
-          <button
-            type="button"
-            aria-label={t("toggleLineWrap")}
-            title={t("toggleLineWrap")}
-            onClick={toggleWrap}
-            className={`font-mono text-[0.625rem] tracking-widest transition-colors ${
-              isWrapped
-                ? "text-tech-main"
-                : `text-tech-main/40 hover:text-tech-main/70`
-            } `}>
-            ↩
-          </button>
-          <span className="text-tech-main/50">|</span>
-          <CodeCopyButton code={rawCode} />
-        </div>
+        {(sourceFile || sourceLines) && (
+          <div className="border-tech-main/15 text-tech-main/55 flex flex-wrap items-center gap-x-2 border-t px-4 py-1 font-mono text-[0.5625rem] tracking-wider">
+            <span className="uppercase">{tArticleMeta("sourceLabel")}</span>
+            {sourceFile && (
+              <span className="text-tech-main/75">{sourceFile}</span>
+            )}
+            {sourceLines && (
+              <span className="text-tech-main/60">L{sourceLines}</span>
+            )}
+          </div>
+        )}
       </div>
       <div className="relative">
         <div className="border-tech-main/10 pointer-events-none absolute inset-0 border" />

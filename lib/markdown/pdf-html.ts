@@ -5,6 +5,7 @@ import rehypeStringify from "rehype-stringify"
 import matter from "gray-matter"
 
 import type { RehypeShikiPlugin } from "@/lib/markdown/syntax/rehype-shiki"
+import type { CodeReference } from "@/lib/markdown/code-provenance"
 import {
   buildRemarkPlugins,
   buildRehypePlugins,
@@ -13,6 +14,7 @@ import { rehypeCJKSpacing } from "@/lib/markdown/transforms/rehype-cjk-spacing"
 
 export interface PdfPipelineOptions {
   shikiPlugin?: RehypeShikiPlugin
+  codeReferences?: readonly CodeReference[]
   articlePath?: string
   articleSlug?: string
   locale?: "en" | "zh"
@@ -30,6 +32,7 @@ export async function renderMarkdownToHtml(
   const rehypePlugins = buildRehypePlugins({
     includeShiki: !!options?.shikiPlugin,
     shikiPlugin: options?.shikiPlugin,
+    codeReferences: options?.codeReferences,
     includeMath: true,
     cjkSpacingPlugin: rehypeCJKSpacing,
   })

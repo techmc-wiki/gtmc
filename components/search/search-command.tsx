@@ -14,6 +14,7 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/shadcn/command"
+import { Badge } from "@/components/ui/shadcn/badge"
 
 interface SearchResult {
   title: string
@@ -393,29 +394,32 @@ function SearchCommandResults({ search }: { search: SearchCommandState }) {
         </div>
       )}
       {!search.isLoading && search.results.length > 0 && (
-        <CommandGroup>
+        <CommandGroup className="space-y-2 p-2">
           {search.results.map((result) => (
             <CommandItem
               key={result.slug}
               value={result.slug}
               onSelect={() => search.navigateToResult(result)}
-              className="cursor-pointer px-4 py-3"
+              className="group border-tech-main/20 bg-surface-overlay/50 hover:border-tech-main/40 hover:bg-tech-main/5 data-[selected=true]:border-tech-main/40 data-[selected=true]:bg-tech-main/10 cursor-pointer items-start border px-3 py-3 transition-colors"
               aria-label={search.t("selectResult", { title: result.title })}>
-              <div className="text-tech-main-dark text-sm font-medium">
-                {search.highlightMatch(result.title)}
-              </div>
-              <div className="text-tech-main/60 mt-0.5 font-mono text-[0.625rem] tracking-wider">
-                {search.t("pathLabel")} /{result.slug}
-              </div>
-              {result.snippet && (
-                <div className="text-tech-main/70 mt-1 text-xs/relaxed">
-                  {search.highlightMatch(result.snippet)}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="text-tech-main-dark text-sm font-medium">
+                    {search.highlightMatch(result.title)}
+                  </div>
+                  <Badge
+                    variant="neutral"
+                    className="text-[0.5625rem] leading-none">
+                    {result.matchType === "content"
+                      ? search.t("matchBody")
+                      : search.t("matchTitle")}
+                  </Badge>
                 </div>
-              )}
-              <div className="text-tech-main/50 absolute top-3 right-4 font-mono text-[0.5625rem] tracking-wider">
-                {result.matchType === "content"
-                  ? search.t("matchBody")
-                  : search.t("matchTitle")}
+                {result.snippet && (
+                  <div className="text-tech-main/70 mt-1.5 line-clamp-2 text-xs/relaxed">
+                    {search.highlightMatch(result.snippet)}
+                  </div>
+                )}
               </div>
             </CommandItem>
           ))}

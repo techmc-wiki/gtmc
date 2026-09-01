@@ -32,7 +32,6 @@ const SPECULATION_RULES = {
 
 const RULES_JSON = JSON.stringify(SPECULATION_RULES)
 
-// Hoisted: see react-perf/jsx-no-new-object-as-prop
 const RULES_HTML = { __html: RULES_JSON }
 
 export function SpeculationRules() {

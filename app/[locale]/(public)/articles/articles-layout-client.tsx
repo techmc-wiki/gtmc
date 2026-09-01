@@ -32,12 +32,6 @@ interface ArticlesLayoutProps {
   tree: ChapterNavNode[]
 }
 
-interface ChapterNavContentProps {
-  showPlaceholder: boolean
-  onNavigate: () => void
-  scrollClassName?: string
-}
-
 function TreeLoadingPlaceholder() {
   return (
     <div
@@ -117,29 +111,6 @@ function TreeLoadingPlaceholder() {
           </div>
         </div>
       </div>
-    </div>
-  )
-}
-
-function ChapterNavContent({
-  showPlaceholder,
-  onNavigate,
-  scrollClassName,
-}: ChapterNavContentProps) {
-  return (
-    <div
-      className={`flex min-h-0 w-full flex-1 flex-col ${showPlaceholder ? "h-full" : ""}`}
-      aria-busy={showPlaceholder}>
-      {showPlaceholder ? (
-        <div className="h-full min-h-full pr-4">
-          <TreeLoadingPlaceholder />
-        </div>
-      ) : (
-        <ChapterNavPanel
-          onNavigate={onNavigate}
-          scrollClassName={scrollClassName}
-        />
-      )}
     </div>
   )
 }

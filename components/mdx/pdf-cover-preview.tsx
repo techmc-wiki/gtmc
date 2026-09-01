@@ -15,6 +15,8 @@ import { CanvasPainting } from "@/components/canvasui/Canvas"
  * recovery scans against their broken xref pointers, which no amount of
  * byte-range plumbing makes cheap.
  */
+const COVER_TINT: [number, number, number] = [0.961, 0.957, 0.937]
+
 export function PdfCoverPreview({ filename }: { filename: string }) {
   const mounted = useMounted()
   const [cursor, setCursor] = React.useState({ x: 0.5, y: 0.5 })
@@ -52,7 +54,7 @@ export function PdfCoverPreview({ filename }: { filename: string }) {
           className="h-full w-full"
           // GTMC-tuned weave: warm archival-paper tint, a quiet halftone
           // screen, and a brush sized to the cover rather than the viewport.
-          tint={[0.961, 0.957, 0.937]}
+          tint={COVER_TINT}
           tintStrength={0.12}
           halftone={0.15}
           dotSize={5}

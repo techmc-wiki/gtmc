@@ -28,7 +28,7 @@ interface Dot {
   cy: number
   xOffset: number
   yOffset: number
-  _inertiaApplied: boolean
+  inertiaApplied: boolean
 }
 
 export interface DotGridProps {
@@ -129,7 +129,7 @@ const DotGrid: React.FC<DotGridProps> = ({
       for (let x = 0; x < cols; x++) {
         const cx = startX + x * cell
         const cy = startY + y * cell
-        dots.push({ cx, cy, xOffset: 0, yOffset: 0, _inertiaApplied: false })
+        dots.push({ cx, cy, xOffset: 0, yOffset: 0, inertiaApplied: false })
       }
     }
     dotsRef.current = dots
@@ -183,7 +183,7 @@ const DotGrid: React.FC<DotGridProps> = ({
 
     const hasSettledDots = () =>
       dotsRef.current.some(
-        (dot) => dot.xOffset !== 0 || dot.yOffset !== 0 || dot._inertiaApplied
+        (dot) => dot.xOffset !== 0 || dot.yOffset !== 0 || dot.inertiaApplied
       )
 
     const tick = () => {
@@ -240,8 +240,8 @@ const DotGrid: React.FC<DotGridProps> = ({
 
       for (const dot of dotsRef.current) {
         const dist = Math.hypot(dot.cx - pr.x, dot.cy - pr.y)
-        if (speed > speedTrigger && dist < proximity && !dot._inertiaApplied) {
-          dot._inertiaApplied = true
+        if (speed > speedTrigger && dist < proximity && !dot.inertiaApplied) {
+          dot.inertiaApplied = true
           gsap.killTweensOf(dot)
           const pushX = dot.cx - pr.x + vx * 0.005
           const pushY = dot.cy - pr.y + vy * 0.005
@@ -254,7 +254,7 @@ const DotGrid: React.FC<DotGridProps> = ({
                 duration: returnDuration,
                 ease: "elastic.out(1,0.75)",
               })
-              dot._inertiaApplied = false
+              dot.inertiaApplied = false
             },
           })
         }
@@ -278,7 +278,7 @@ const DotGrid: React.FC<DotGridProps> = ({
         for (const dot of dotsRef.current) {
           dot.xOffset = 0
           dot.yOffset = 0
-          dot._inertiaApplied = false
+          dot.inertiaApplied = false
         }
         if (running) {
           running = false

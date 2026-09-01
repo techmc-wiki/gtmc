@@ -53,13 +53,12 @@ export function ColumnPicker({
 
   const toggle = React.useCallback(
     (column: GlossaryTableColumn) => {
-      const visibleColumnSet = new Set(visibleColumns)
       const next = visibleColumnSet.has(column)
         ? visibleColumns.filter((entry) => entry !== column)
         : [...visibleColumns, column]
       onChange(next)
     },
-    [onChange, visibleColumns]
+    [onChange, visibleColumnSet, visibleColumns]
   )
 
   const otherLanguageGroups = React.useMemo(() => {

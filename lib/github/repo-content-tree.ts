@@ -28,7 +28,7 @@ export async function getRepoContentTree(): Promise<ArticleTreeNode[]> {
     return []
   }
 
-  const octokit = getOctokit(process.env.GITHUB_ARTICLES_WRITE_PAT)
+  const octokit = getOctokit()
 
   try {
     const { data: ref } = await octokit.git.getRef({

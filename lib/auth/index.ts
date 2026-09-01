@@ -16,8 +16,7 @@ if (process.env.HTTPS_PROXY || process.env.http_proxy) {
 }
 
 const authSecret =
-  process.env.AUTH_SECRET ||
-  process.env.NEXTAUTH_SECRET ||
+  process.env.NEXTAUTH_SECRET ??
   (process.env.NODE_ENV === "development"
     ? "gtmc-local-dev-auth-secret"
     : undefined)

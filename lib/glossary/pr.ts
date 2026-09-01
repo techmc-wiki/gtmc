@@ -88,8 +88,8 @@ export async function openGlossaryPullRequest(
         `GitHub rejected pull request creation with 403. ` +
           `Fine-grained PATs cannot act across two organizations, so ` +
           `${GLOSSARY_REPO.owner}/${GLOSSARY_REPO.name} cannot be added to ` +
-          `their repository access. Use a classic PAT with the public_repo ` +
-          `scope for GITHUB_PUBLIC_REPO_PAT.`,
+          `their repository access. Set GITHUB_TOKEN to a classic PAT with the public_repo ` +
+          `scope.`,
         { cause: error }
       )
     }

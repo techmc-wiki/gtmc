@@ -1,4 +1,3 @@
-/* oxlint-disable react-perf/jsx-no-new-object-as-prop -- OG image route: renders once via Satori, no React re-render cycle */
 import { ImageResponse } from "next/og"
 import { type NextRequest } from "next/server"
 import mime from "mime-types"

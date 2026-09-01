@@ -46,7 +46,6 @@ export default async function ProfilePage({
     account?.access_token || ""
   )
 
-  // oxlint-disable-next-line react-perf/jsx-no-jsx-as-prop -- server component, no re-renders
   const emailLabel = (
     <EmailLabel
       label={t("emailLabel")}
@@ -56,7 +55,6 @@ export default async function ProfilePage({
     />
   )
 
-  // oxlint-disable-next-line react-perf/jsx-no-jsx-as-prop -- server component, no re-renders
   const roleValue = <RoleValue role={user.role} />
 
   return (

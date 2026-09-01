@@ -35,7 +35,7 @@ const ARTICLES_PATH =
 
 const GITHUB_TOKEN = resolveGithubToken()
 const GITHUB_API_BASE = "https://api.github.com"
-const GITHUB_ARTICLES_REPO = `${process.env.GITHUB_ARTICLES_REPO_OWNER ?? "gtmc-dev"}/${process.env.GITHUB_ARTICLES_REPO_NAME ?? "Articles"}`
+const GITHUB_ARTICLES_REPO = `${process.env.GITHUB_ARTICLES_REPO_OWNER ?? "techmc-wiki"}/${process.env.GITHUB_ARTICLES_REPO_NAME ?? "Articles"}`
 
 const NOREPLY_PATTERN = /\+([a-z\d-]+)@users\.noreply\.github\.com/i
 

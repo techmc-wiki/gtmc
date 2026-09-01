@@ -21,7 +21,7 @@ export async function getRepoFileContent(
     return null
   }
 
-  const octokit = getOctokit(process.env.GITHUB_ARTICLES_WRITE_PAT, true)
+  const octokit = getOctokit(undefined, true)
 
   return executeWithRetry<string | null>({
     retries,
@@ -69,7 +69,7 @@ export async function getRepoFileBuffer(
     return null
   }
 
-  const octokit = getOctokit(process.env.GITHUB_ARTICLES_WRITE_PAT, true)
+  const octokit = getOctokit(undefined, true)
 
   return executeWithRetry<Buffer | null>({
     retries,

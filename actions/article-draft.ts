@@ -56,9 +56,7 @@ export async function createDraftAction(formData: FormData): Promise<never> {
       resolvedFilePath = candidates[matchedIndex]
     }
   }
-
-  const token =
-    (await getGithubPatForUser(session.user.id)) ?? process.env.GITHUB_TOKEN
+  const token = await getGithubPatForUser(session.user.id)
   const draft = await prisma.revision.create({
     data: {
       author: { connect: { id: session.user.id } },

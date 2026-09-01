@@ -19,8 +19,9 @@
 import { execFileSync } from "node:child_process"
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
-
 import { dump as yamlDump, load as yamlLoad } from "js-yaml"
+
+import { resolveGithubToken } from "@/lib/github/tokens"
 import { createLogger } from "./lib/logger"
 
 const logger = createLogger("authors")
@@ -32,11 +33,7 @@ const OVERRIDES_PATH = join(CONFIG_DIR, "author-alias-overrides.yml")
 const ARTICLES_PATH =
   process.env.ARTICLES_PATH ?? join(process.cwd(), "articles")
 
-const GITHUB_TOKEN =
-  process.env.GITHUB_ARTICLES_READ_PAT ??
-  process.env.GITHUB_ARTICLES_WRITE_PAT ??
-  process.env.GITHUB_TOKEN ??
-  process.env.GITHUB_PERSONAL_ACCESS_TOKEN
+const GITHUB_TOKEN = resolveGithubToken()
 const GITHUB_API_BASE = "https://api.github.com"
 const GITHUB_ARTICLES_REPO = `${process.env.GITHUB_ARTICLES_REPO_OWNER ?? "gtmc-dev"}/${process.env.GITHUB_ARTICLES_REPO_NAME ?? "Articles"}`
 

@@ -13,7 +13,7 @@ import { openGlossaryPullRequest } from "@/lib/glossary/pr"
 import { getFileSnapshot } from "@/lib/github/branch"
 import { generateSlug } from "@/lib/glossary/slug"
 import { GLOSSARY_FORK_REPO, GLOSSARY_REPO } from "@/lib/github/repos"
-import { resolveGithubGlossaryWriteToken } from "@/lib/github/tokens"
+import { resolveGithubToken } from "@/lib/github/tokens"
 
 const GLOSSARY_MAIN_BRANCH = "main"
 const GLOSSARY_CSV_PATH = "TechMC Glossary.csv"
@@ -68,13 +68,13 @@ export async function submitGlossaryDraftAction(
       }
     }
 
-    const token = resolveGithubGlossaryWriteToken()
+    const token = resolveGithubToken()
 
     if (!token) {
       return {
         success: false,
         error:
-          "GitHub glossary write token is not configured on the server (missing GITHUB_PUBLIC_REPO_PAT).",
+          "GitHub glossary write token is not configured on the server (missing GITHUB_TOKEN).",
       }
     }
 

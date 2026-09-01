@@ -8,7 +8,7 @@ import {
 } from "node:fs"
 import { dirname, join } from "node:path"
 
-import { resolveGithubArticlesReadToken } from "@/lib/github/tokens"
+import { resolveGithubToken } from "@/lib/github/tokens"
 import { createLogger } from "./lib/logger"
 
 const logger = createLogger("repository-contributors")
@@ -156,7 +156,7 @@ function getRepositoryFromRemote(): string | null {
 }
 
 function getGitHubToken(): string | null {
-  const environmentToken = resolveGithubArticlesReadToken()
+  const environmentToken = resolveGithubToken()
   if (environmentToken) return environmentToken
 
   try {
@@ -415,9 +415,7 @@ async function main(): Promise<void> {
 
   const token = getGitHubToken()
   if (!token && (process.env.CI === "true" || process.env.VERCEL === "1")) {
-    throw new Error(
-      "GitHub authentication is required; set GITHUB_TOKEN or GITHUB_ARTICLES_READ_PAT"
-    )
+    throw new Error("GitHub authentication is required; set GITHUB_TOKEN")
   }
 
   if (!token) {

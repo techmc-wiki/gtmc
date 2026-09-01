@@ -123,7 +123,7 @@ export async function submitDraftAction(revisionId: string) {
 
     if (!token) {
       throw new Error(
-        "Failed to create PR: missing GITHUB_ARTICLES_WRITE_PAT or another token with repo write permission."
+        "Failed to create PR: missing GITHUB_TOKEN or another token with Articles write permission."
       )
     }
 
@@ -360,7 +360,7 @@ export async function submitDraftAction(revisionId: string) {
     const message = error instanceof Error ? error.message : "Unknown error"
     if (message.includes("Resource not accessible by personal access token")) {
       throw new Error(
-        "Failed to create PR: the configured GitHub token cannot create branches in the Articles repo. Set GITHUB_ARTICLES_WRITE_PAT with repo write access on Vercel.",
+        "Failed to create PR: the configured GitHub token cannot create branches in the Articles repo. Set GITHUB_TOKEN with Articles write access on Vercel.",
         { cause: error }
       )
     }

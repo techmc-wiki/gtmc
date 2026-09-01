@@ -9,10 +9,7 @@ import {
   isLocalDevelopmentRequest,
 } from "@/lib/auth/dev-fixture-config"
 
-const authSecret =
-  process.env.AUTH_SECRET ||
-  process.env.NEXTAUTH_SECRET ||
-  "gtmc-local-dev-auth-secret"
+const authSecret = process.env.NEXTAUTH_SECRET ?? "gtmc-local-dev-auth-secret"
 
 function getSafeCallbackUrl(request: NextRequest): URL {
   const callbackUrl = request.nextUrl.searchParams.get("callbackUrl")

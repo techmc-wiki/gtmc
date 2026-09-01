@@ -1,8 +1,5 @@
 import { Octokit } from "@octokit/rest"
-import {
-  resolveGithubArticlesReadToken,
-  resolveGithubGlossaryWriteToken,
-} from "./tokens"
+import { resolveGithubToken } from "./tokens"
 
 export type RepoTarget = { owner: string; name: string }
 
@@ -25,7 +22,7 @@ export const GLOSSARY_FORK_REPO: RepoTarget = {
 }
 export const getOctokit = (token?: string, silent404 = false) =>
   new Octokit({
-    auth: token || resolveGithubArticlesReadToken(),
+    auth: token ?? resolveGithubToken(),
     log: silent404
       ? {
           debug: () => {},

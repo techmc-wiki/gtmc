@@ -4,34 +4,35 @@ import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/shadcn/button"
 import { Input } from "@/components/ui/shadcn/input"
 
+/** Save/submit activity, rendered as one explicit status line state. */
+export type DraftEditorStatus =
+  | { kind: "error"; message: string }
+  | { kind: "saved" }
+  | { kind: "saving" }
+  | { kind: "unsaved" }
+
+interface DraftEditorHeaderAction {
+  busy: boolean
+  disabled: boolean
+  onClick: () => void
+}
+
 interface DraftEditorHeaderProps {
-  hasUnsavedChanges: boolean
   isReadOnly: boolean
-  isSaving: boolean
-  isSubmitting: boolean
-  saveDisabled: boolean
-  saveError: string | null
-  submitDisabled: boolean
-  title: string
-  onSave: () => void
-  onSubmit: () => void
   onTitleChange: (title: string) => void
-  submitLabel: string
+  save: DraftEditorHeaderAction
+  status: DraftEditorStatus
+  submit: DraftEditorHeaderAction & { label: string }
+  title: string
 }
 
 export function DraftEditorHeader({
-  hasUnsavedChanges,
   isReadOnly,
-  isSaving,
-  isSubmitting,
-  saveDisabled,
-  saveError,
-  submitDisabled,
-  title,
-  onSave,
-  onSubmit,
   onTitleChange,
-  submitLabel,
+  save,
+  status,
+  submit,
+  title,
 }: DraftEditorHeaderProps) {
   const t = useTranslations("Editor")
 
@@ -51,14 +52,14 @@ export function DraftEditorHeader({
           value={title}
           onChange={(event) => onTitleChange(event.target.value)}
           readOnly={isReadOnly}
-          aria-busy={isSaving}
+          aria-busy={status.kind === "saving"}
         />
         <p className="text-tech-main/60 text-xs" aria-live="polite">
-          {saveError
-            ? saveError
-            : isSaving
+          {status.kind === "error"
+            ? status.message
+            : status.kind === "saving"
               ? t("savingLabel")
-              : hasUnsavedChanges
+              : status.kind === "unsaved"
                 ? t("unsavedLabel")
                 : t("savedLabel")}
         </p>
@@ -68,18 +69,18 @@ export function DraftEditorHeader({
           <Button
             type="button"
             variant="secondary"
-            disabled={saveDisabled}
-            aria-busy={isSaving}
-            onClick={onSave}>
+            disabled={save.disabled}
+            aria-busy={save.busy}
+            onClick={save.onClick}>
             {t("saveButton")}
           </Button>
           <Button
             type="button"
             variant="primary"
-            onClick={onSubmit}
-            disabled={submitDisabled}
-            aria-busy={isSubmitting}>
-            {submitLabel}
+            onClick={submit.onClick}
+            disabled={submit.disabled}
+            aria-busy={submit.busy}>
+            {submit.label}
           </Button>
         </div>
       ) : null}

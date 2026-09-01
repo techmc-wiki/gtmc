@@ -245,18 +245,29 @@ function DraftEditorSurface({
   return (
     <EditorSurface>
       <DraftEditorHeader
-        hasUnsavedChanges={state.hasUnsavedChanges}
         isReadOnly={state.isReadOnly}
-        isSaving={state.isSaving}
-        isSubmitting={state.isSubmitting}
-        saveDisabled={state.saveDisabled}
-        saveError={state.saveError}
-        submitDisabled={state.submitDisabled}
-        title={state.title}
-        onSave={actions.saveDraft}
-        onSubmit={actions.handleSubmitDraft}
         onTitleChange={actions.setTitle}
-        submitLabel={state.isSubmitting ? progressT("submitBusy") : t("openPr")}
+        save={{
+          busy: state.isSaving,
+          disabled: state.saveDisabled,
+          onClick: actions.saveDraft,
+        }}
+        status={
+          state.saveError
+            ? { kind: "error", message: state.saveError }
+            : state.isSaving
+              ? { kind: "saving" }
+              : state.hasUnsavedChanges
+                ? { kind: "unsaved" }
+                : { kind: "saved" }
+        }
+        submit={{
+          busy: state.isSubmitting,
+          disabled: state.submitDisabled,
+          label: state.isSubmitting ? progressT("submitBusy") : t("openPr"),
+          onClick: actions.handleSubmitDraft,
+        }}
+        title={state.title}
       />
       {state.githubPrUrl ? (
         <div className="guide-line bg-tech-main/5 text-tech-main flex items-center justify-between gap-3 border px-4 py-3 font-mono text-xs">

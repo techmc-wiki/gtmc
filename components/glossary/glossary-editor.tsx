@@ -177,7 +177,6 @@ function GlossaryEditorInner({
 }: GlossaryEditorProps) {
   const t = useTranslations("Glossary")
   const router = useRouter()
-  const isMounted = useMounted()
 
   const isReadOnly = status === "SUBMITTED" || status === "PENDING"
 
@@ -416,12 +415,9 @@ function GlossaryEditorInner({
     setSubmitError(null)
   }, [isSubmitting])
 
-  const canSubmit = operations.length > 0 && !isReadOnly
-
   return (
     <GlossaryEditorContent
       authorName={authorName}
-      canSubmit={canSubmit}
       githubPrNum={githubPrNum}
       githubPrUrl={githubPrUrl}
       handleAddNew={handleAddNew}
@@ -435,9 +431,7 @@ function GlossaryEditorInner({
       handlePick={handlePick}
       handleSubmit={handleSubmit}
       handleTitleChange={handleTitleChange}
-      isMounted={isMounted}
       isReadOnly={isReadOnly}
-      isSubmitting={isSubmitting}
       locale={locale}
       manifestEntries={manifestEntries}
       noreplyEmail={noreplyEmail}
@@ -526,7 +520,6 @@ function useGlossaryAutosave({
 
 interface GlossaryEditorContentProps {
   authorName: string
-  canSubmit: boolean
   githubPrNum: number | null | undefined
   githubPrUrl: string | null | undefined
   handleAddNew: (query: string) => void
@@ -540,9 +533,7 @@ interface GlossaryEditorContentProps {
   handlePick: (slug: string) => void
   handleSubmit: (input: { useRealEmail: boolean }) => Promise<void>
   handleTitleChange: (title: string) => void
-  isMounted: boolean
   isReadOnly: boolean
-  isSubmitting: boolean
   locale: string
   manifestEntries: GlossaryEntry[]
   noreplyEmail: string
@@ -563,7 +554,6 @@ interface GlossaryEditorContentProps {
 
 function GlossaryEditorContent({
   authorName,
-  canSubmit,
   githubPrNum,
   githubPrUrl,
   handleAddNew,
@@ -577,9 +567,7 @@ function GlossaryEditorContent({
   handlePick,
   handleSubmit,
   handleTitleChange,
-  isMounted,
   isReadOnly,
-  isSubmitting,
   locale,
   manifestEntries,
   noreplyEmail,
@@ -597,6 +585,8 @@ function GlossaryEditorContent({
   title,
   useRealEmail,
 }: GlossaryEditorContentProps) {
+  const isMounted = useMounted()
+  const isSubmitting = submitState === "running"
   return (
     <div className="relative mx-auto flex max-w-4xl flex-col gap-6 p-4 sm:p-6 md:p-8">
       {status === "SUBMITTED" && githubPrUrl && (
@@ -621,7 +611,7 @@ function GlossaryEditorContent({
         onTitleChange={handleTitleChange}
         onDiscard={handleDiscard}
         onSubmit={handleOpenPreview}
-        canSubmit={canSubmit}
+        canSubmit={operations.length > 0}
         saveState={saveStateLabel}
         isReadOnly={isReadOnly}
       />

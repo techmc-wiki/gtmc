@@ -1,4 +1,4 @@
-import { Suspense } from "react"
+import { Suspense, type ReactNode } from "react"
 // eslint-disable-next-line import/no-unassigned-import
 import "katex/dist/katex.min.css"
 import type { Metadata } from "next"
@@ -339,7 +339,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     name: resolveAuthorPerson(handle).name,
     url: `${siteUrl}/${locale}/authors/${encodeURIComponent(handle)}`,
   }))
-  const isTranslationPending = contentLocale !== locale
   const isTranslationStale =
     locale === "en" &&
     manifestEntry?.translationFreshnessByLocale.en === "stale" &&
@@ -378,134 +377,193 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const navigation = await getArticleNavigation(currentSlug, flattenedArticles, locale)
 
 
+  const stage: ArticlePageStage = { advanced: isAdvanced, revising: isRevising }
+  const headerVariant: ArticlePageHeaderVariant =
+    author && createdAt && lastModified
+      ? {
+          kind: "attributed",
+          authorName: profileHandles[0] ?? author,
+          coAuthors: profileHandles.slice(1),
+          editPath,
+        }
+      : { kind: "anonymous" }
+
   return (
     <ArticlePageContent
       articleTitle={articleTitle}
-      bannerAlt={bannerAlt}
-      bannerPath={bannerPath}
       bannerPreloadHref={bannerPreloadHref}
       breadcrumbJsonLd={breadcrumbJsonLd}
-      canonicalUrl={canonicalUrl}
       contentLocale={contentLocale}
       codeReferences={codeReferences}
-      createdAt={createdAt}
       currentSlug={currentSlug}
-      editPath={editPath}
       effectiveSlug={effectiveSlug}
       embeddedArticleContent={embeddedArticleContent}
-      isAdvanced={isAdvanced}
-      isRevising={isRevising}
-      isTranslationPending={isTranslationPending}
+      header={
+        <ArticlePageHeader
+          articleTitle={articleTitle}
+          bannerAlt={bannerAlt}
+          bannerPath={bannerPath}
+          canonicalUrl={canonicalUrl}
+          createdAt={createdAt}
+          filePath={target.filePath}
+          lastModified={lastModified}
+          readingTime={readingTime}
+          stage={stage}
+          variant={headerVariant}
+          wordCount={wordCount}
+        />
+      }
       isTranslationStale={isTranslationStale}
-      lastModified={lastModified}
       locale={locale}
       navigation={navigation}
-      profileHandles={profileHandles}
-      readingTime={readingTime}
       runningHeadChapterIndex={runningHeadOwner?.index}
       runningHeadChapters={runningHeadChapters}
       runningHeadIsAppendix={isStructuralAppendix}
       runningHeadIsPreface={!!target.isPreface && !runningHeadOwner}
       shikiPlugin={shikiPlugin}
+      stage={stage}
       t={t}
       tArticleMeta={tArticleMeta}
       targetFilePath={target.filePath}
       techArticleJsonLd={techArticleJsonLd}
       translationStatus={translationStatus}
+    />
+  )
+}
+
+type ArticlePageStage = { advanced: boolean; revising: boolean }
+
+type ArticlePageHeaderVariant =
+  | { kind: "anonymous" }
+  | { kind: "attributed"; authorName: string; coAuthors: string[]; editPath: string }
+
+interface ArticlePageHeaderProps {
+  articleTitle: string
+  bannerAlt: string
+  bannerPath: string | null
+  canonicalUrl: string
+  createdAt: string | undefined
+  filePath: string
+  lastModified: string | undefined
+  readingTime: number
+  stage: ArticlePageStage
+  variant: ArticlePageHeaderVariant
+  wordCount: number
+}
+
+/** Metadata block: selects the attributed or anonymous variant once, explicitly. */
+function ArticlePageHeader({
+  articleTitle,
+  bannerAlt,
+  bannerPath,
+  canonicalUrl,
+  createdAt,
+  filePath,
+  lastModified,
+  readingTime,
+  stage,
+  variant,
+  wordCount,
+}: ArticlePageHeaderProps) {
+  return variant.kind === "attributed" && createdAt && lastModified ? (
+    <ArticleMetadataFull
+      title={articleTitle}
+      author={variant.authorName}
+      coAuthors={variant.coAuthors}
+      createdAt={createdAt}
+      lastModified={lastModified}
+      canonicalUrl={canonicalUrl}
+      filePath={filePath}
       wordCount={wordCount}
-      author={author}
+      readingTime={readingTime}
+      editPath={variant.editPath}
+      isAdvanced={stage.advanced}
+      isRevising={stage.revising}
+      bannerPath={bannerPath}
+      bannerAlt={bannerAlt}
+    />
+  ) : (
+    <ArticleMetadataAnonymous
+      title={articleTitle}
+      canonicalUrl={canonicalUrl}
+      attributionDate={lastModified || createdAt}
+      filePath={filePath}
+      wordCount={wordCount}
+      readingTime={readingTime}
+      isAdvanced={stage.advanced}
+      isRevising={stage.revising}
+      bannerPath={bannerPath}
+      bannerAlt={bannerAlt}
     />
   )
 }
 
 interface ArticlePageContentProps {
   articleTitle: string
-  author: string | undefined
-  bannerAlt: string
-  bannerPath: string | null
   bannerPreloadHref: string | null
   breadcrumbJsonLd: object
-  canonicalUrl: string
   contentLocale: ArticleLocale
   codeReferences: NonNullable<Awaited<ReturnType<typeof getArticleContentBySlug>>>["codeReferences"]
-  createdAt: string | undefined
   currentSlug: string
-  editPath: string
   effectiveSlug: string
   embeddedArticleContent: string
-  isAdvanced: boolean
-  isRevising: boolean
-  isTranslationPending: boolean
+  header: ReactNode
   isTranslationStale: boolean
-  lastModified: string | undefined
   locale: ArticleLocale
   navigation: Awaited<ReturnType<typeof getArticleNavigation>>
-  profileHandles: string[]
-  readingTime: number
   runningHeadChapterIndex: number | undefined
   runningHeadChapters: Awaited<ReturnType<typeof getNavigationBreadcrumbs>>
   runningHeadIsAppendix: boolean
   runningHeadIsPreface: boolean
   shikiPlugin: Awaited<ReturnType<typeof getCachedRehypeShiki>>
+  stage: ArticlePageStage
   t: Awaited<ReturnType<typeof getTranslations>>
   tArticleMeta: Awaited<ReturnType<typeof getTranslations>>
   targetFilePath: string
   techArticleJsonLd: object
   translationStatus: NonNullable<Awaited<ReturnType<typeof getArticleContentBySlug>>>["translationStatus"]
-  wordCount: number
 }
 
 function ArticlePageContent({
   articleTitle,
-  author,
-  bannerAlt,
-  bannerPath,
   bannerPreloadHref,
   breadcrumbJsonLd,
-  canonicalUrl,
   contentLocale,
   codeReferences,
-  createdAt,
   currentSlug,
-  editPath,
   effectiveSlug,
   embeddedArticleContent,
-  isAdvanced,
-  isRevising,
-  isTranslationPending,
+  header,
   isTranslationStale,
-  lastModified,
   locale,
   navigation,
-  profileHandles,
-  readingTime,
   runningHeadChapterIndex,
   runningHeadChapters,
   runningHeadIsAppendix,
   runningHeadIsPreface,
   shikiPlugin,
+  stage,
   t,
   tArticleMeta,
   targetFilePath,
   techArticleJsonLd,
   translationStatus,
-  wordCount,
 }: ArticlePageContentProps) {
   return (
     <div className="border-tech-main/30 bg-surface/80 relative min-h-screen min-w-0 border p-6 backdrop-blur-sm sm:p-8">
       {bannerPreloadHref ? <link rel="preload" as="image" href={bannerPreloadHref} fetchPriority="high" /> : null}
       <BookmarkRecorder slug={currentSlug} title={articleTitle} />
       {runningHeadChapters.length > 0 && <RunningHead chapters={runningHeadChapters} articleSlug={effectiveSlug} articleTitle={articleTitle} locale={locale} chapterIndex={runningHeadChapterIndex} chapterIsAppendix={runningHeadIsAppendix} isPreface={runningHeadIsPreface} />}
-      {author && createdAt && lastModified ? <ArticleMetadataFull title={articleTitle} author={profileHandles[0] ?? author} coAuthors={profileHandles.slice(1)} createdAt={createdAt} lastModified={lastModified} canonicalUrl={canonicalUrl} filePath={targetFilePath} wordCount={wordCount} readingTime={readingTime} editPath={editPath} isAdvanced={isAdvanced} isRevising={isRevising} bannerPath={bannerPath} bannerAlt={bannerAlt} /> : <ArticleMetadataAnonymous title={articleTitle} canonicalUrl={canonicalUrl} attributionDate={lastModified || createdAt} filePath={targetFilePath} wordCount={wordCount} readingTime={readingTime} isAdvanced={isAdvanced} isRevising={isRevising} bannerPath={bannerPath} bannerAlt={bannerAlt} />}
+      {header}
       <CodeSourceSummary
         label={tArticleMeta("codeBasis")}
         mixedLabel={tArticleMeta("mixedVersions")}
         referenceLabel={tArticleMeta("codeReferences", { count: codeReferences.length })}
         references={codeReferences}
       />
-      <TranslationNotices contentLocale={contentLocale} effectiveSlug={effectiveSlug} isTranslationPending={isTranslationPending} isTranslationStale={isTranslationStale} t={t} translationStatus={translationStatus} />
+      <TranslationNotices contentLocale={contentLocale} effectiveSlug={effectiveSlug} isTranslationStale={isTranslationStale} locale={locale} t={t} translationStatus={translationStatus} />
       <article lang={contentLocale} className="article-prose min-w-0" data-article-content><MarkdownRenderer content={embeddedArticleContent} codeReferences={codeReferences} locale={locale} rawPath={targetFilePath} shikiPlugin={shikiPlugin} headingAction={COPY_PAGE_ACTION} /></article>
-      <ChapterEndMark isAdvanced={isAdvanced} />
+      <ChapterEndMark isAdvanced={stage.advanced} />
       {(navigation.prev || navigation.next) && <ArticleNavigation locale={locale} next={navigation.next} nextLabel={tArticleMeta("next")} prev={navigation.prev} prevLabel={tArticleMeta("prev")} />}
       <Suspense><ArticleHighlight /></Suspense>
       <script type="application/ld+json" dangerouslySetInnerHTML={serializeJsonLd(techArticleJsonLd)} />
@@ -517,11 +575,12 @@ function ArticlePageContent({
 function TranslationNotices({
   contentLocale,
   effectiveSlug,
-  isTranslationPending,
   isTranslationStale,
+  locale,
   t,
   translationStatus,
-}: Pick<ArticlePageContentProps, "contentLocale" | "effectiveSlug" | "isTranslationPending" | "isTranslationStale" | "t" | "translationStatus">) {
+}: Pick<ArticlePageContentProps, "contentLocale" | "effectiveSlug" | "isTranslationStale" | "locale" | "t" | "translationStatus">) {
+  const isTranslationPending = contentLocale !== locale
   return (
     <>
       {isTranslationPending ? <aside data-testid="translation-pending-notice" aria-labelledby="translation-pending-label" className="mt-4 border border-amber-500/40 bg-amber-500/10 p-4 text-amber-950 dark:text-amber-100"><p id="translation-pending-label" data-testid="translation-pending-badge" className="font-mono text-[0.625rem] tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">{t("translationPending")}</p><p className="mt-2 text-sm/relaxed">{t("translationFallbackBody")}</p><a href={`/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`} className="mt-3 inline-flex min-h-11 items-center font-mono text-xs tracking-wider text-amber-900 underline decoration-amber-700/50 underline-offset-4 transition-colors hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:text-amber-100 dark:hover:text-amber-300 dark:focus-visible:outline-amber-300">{t("translationFallbackCta")} →</a></aside> : null}

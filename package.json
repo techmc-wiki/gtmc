@@ -40,7 +40,6 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",
-    "@base-ui/react": "^1.7.0",
     "@codemirror/autocomplete": "^6.20.3",
     "@codemirror/lang-markdown": "^6.5.2",
     "@codemirror/language-data": "^6.5.2",

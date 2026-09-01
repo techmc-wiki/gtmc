@@ -10,6 +10,8 @@ import {
 
 import { createRectCache } from "@/components/canvasui/rect-cache"
 
+const noop = () => {}
+
 // Vendored from Canvas UI (canvasui.dev/r/canvas-react): paints the wrapped
 // content onto woven artist canvas — fiber texture, paper tint, grain, a
 // dotted halftone screen — and the cursor works as a loaded brush leaving
@@ -766,7 +768,7 @@ function initializeCanvasPainting(
 
   let destroyed = false
   let contentDirty = false
-  let wake = () => {}
+  let wake: () => void = noop
   let fallbackSource: HTMLCanvasElement | null = null
   let fallbackCaptureTimer = 0
   let fallbackCaptureDeadline = 0
@@ -1319,24 +1321,13 @@ function initializeCanvasPainting(
     attributeFilter: ["class", "style", "data-theme"],
   })
 
-  let outputRect = output.getBoundingClientRect()
-  const refreshOutputRect = () => {
-    outputRect = output.getBoundingClientRect()
-  }
-
   const observer = new ResizeObserver(() => {
-    refreshOutputRect()
     if (syncCanvasSize()) queueFallbackCapture()
     scheduleTextMask()
     start()
   })
   observer.observe(output)
   observer.observe(content)
-  window.addEventListener("resize", refreshOutputRect, { passive: true })
-  window.addEventListener("scroll", refreshOutputRect, {
-    capture: true,
-    passive: true,
-  })
 
   const intersection = new IntersectionObserver((entries) => {
     visible = entries[entries.length - 1]?.isIntersecting ?? true
@@ -1446,8 +1437,6 @@ function initializeCanvasPainting(
       themeObserver.disconnect()
       contentObserver?.disconnect()
       motionQuery.removeEventListener("change", onMotionChange)
-      window.removeEventListener("resize", refreshOutputRect)
-      window.removeEventListener("scroll", refreshOutputRect, true)
       listenTarget.removeEventListener("pointermove", onPointerMove)
       listenTarget.removeEventListener("pointerleave", onPointerLeave)
       content.removeEventListener("scroll", onContentScroll, true)
@@ -1482,6 +1471,28 @@ export interface CanvasPaintingProps extends CanvasOptions {
 }
 
 const emptySubscribe = () => () => {}
+
+const CANVAS_ABSOLUTE_FILL_STYLE: React.CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+}
+
+const CANVAS_ABSOLUTE_FILL_INERT_STYLE: React.CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  pointerEvents: "none",
+}
+
+const CANVAS_CONTENT_STYLE: React.CSSProperties = {
+  position: "relative",
+  width: "100%",
+  height: "100%",
+  overflow: "auto",
+}
 
 export function CanvasPainting({
   children,
@@ -1531,51 +1542,23 @@ export function CanvasPainting({
         layoutsubtree="true"
         suppressHydrationWarning
         style={
-          native
-            ? { position: "absolute", inset: 0, width: "100%", height: "100%" }
-            : {
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                pointerEvents: "none",
-              }
+          native ? CANVAS_ABSOLUTE_FILL_STYLE : CANVAS_ABSOLUTE_FILL_INERT_STYLE
         }>
         {native ? (
-          <div
-            ref={contentRef}
-            style={{
-              position: "relative",
-              width: "100%",
-              height: "100%",
-              overflow: "auto",
-            }}>
+          <div ref={contentRef} style={CANVAS_CONTENT_STYLE}>
             {children}
           </div>
         ) : null}
       </canvas>
       {!native ? (
-        <div
-          ref={contentRef}
-          style={{
-            position: "relative",
-            width: "100%",
-            height: "100%",
-            overflow: "auto",
-          }}>
+        <div ref={contentRef} style={CANVAS_CONTENT_STYLE}>
           {children}
         </div>
       ) : null}
       <canvas
         ref={outputRef}
         aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          pointerEvents: "none",
-        }}
+        style={CANVAS_ABSOLUTE_FILL_INERT_STYLE}
       />
     </div>
   )

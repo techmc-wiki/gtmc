@@ -265,6 +265,10 @@ function sampleAlbedo(
   )
 }
 
+function vertexIndex(bucket: TriangleBucket, tri: number, corner: number) {
+  return bucket.index ? bucket.index.getX(tri * 3 + corner) : tri * 3 + corner
+}
+
 function sampleMesh(scene: THREE.Group, count: number): CloudSample {
   scene.updateMatrixWorld(true)
   const buckets: TriangleBucket[] = []
@@ -311,10 +315,6 @@ function sampleMesh(scene: THREE.Group, count: number): CloudSample {
   const ab = new THREE.Vector3()
   const ac = new THREE.Vector3()
   let totalArea = 0
-
-  const vertexIndex = (bucket: TriangleBucket, tri: number, corner: number) =>
-    bucket.index ? bucket.index.getX(tri * 3 + corner) : tri * 3 + corner
-
   for (const bucket of buckets) {
     for (let tri = 0; tri < bucket.triangleCount; tri++) {
       const i0 = vertexIndex(bucket, tri, 0)
@@ -530,26 +530,34 @@ function rasterizeImage(blob: Blob): Promise<ImageData> {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(blob)
     const image = new Image()
-    image.onload = () => {
-      URL.revokeObjectURL(url)
-      const width = image.naturalWidth || 1024
-      const height = image.naturalHeight || 1024
-      const ratio = Math.min(1, RASTER_SIZE / Math.max(width, height))
-      const canvas = document.createElement("canvas")
-      canvas.width = Math.max(1, Math.round(width * ratio))
-      canvas.height = Math.max(1, Math.round(height * ratio))
-      const ctx = canvas.getContext("2d")
-      if (!ctx) {
-        reject(new Error("2d context unavailable"))
-        return
-      }
-      ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
-      resolve(ctx.getImageData(0, 0, canvas.width, canvas.height))
-    }
-    image.onerror = () => {
-      URL.revokeObjectURL(url)
-      reject(new Error("Could not decode the image"))
-    }
+    image.addEventListener(
+      "load",
+      () => {
+        URL.revokeObjectURL(url)
+        const width = image.naturalWidth || 1024
+        const height = image.naturalHeight || 1024
+        const ratio = Math.min(1, RASTER_SIZE / Math.max(width, height))
+        const canvas = document.createElement("canvas")
+        canvas.width = Math.max(1, Math.round(width * ratio))
+        canvas.height = Math.max(1, Math.round(height * ratio))
+        const ctx = canvas.getContext("2d")
+        if (!ctx) {
+          reject(new Error("2d context unavailable"))
+          return
+        }
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
+        resolve(ctx.getImageData(0, 0, canvas.width, canvas.height))
+      },
+      { once: true }
+    )
+    image.addEventListener(
+      "error",
+      () => {
+        URL.revokeObjectURL(url)
+        reject(new Error("Could not decode the image"))
+      },
+      { once: true }
+    )
     image.src = url
   })
 }
@@ -1075,6 +1083,15 @@ export interface ParticleObjectProps extends ParticleObjectOptions {
   style?: React.CSSProperties
 }
 
+const PARTICLE_CANVAS_STYLE: React.CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  display: "block",
+  touchAction: "none",
+}
+
 export function ParticleObject({
   className,
   style,
@@ -1104,17 +1121,7 @@ export function ParticleObject({
 
   return (
     <div className={className} style={{ position: "relative", ...style }}>
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          display: "block",
-          touchAction: "none",
-        }}
-      />
+      <canvas ref={canvasRef} style={PARTICLE_CANVAS_STYLE} />
     </div>
   )
 }

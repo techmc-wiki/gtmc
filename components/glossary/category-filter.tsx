@@ -119,14 +119,13 @@ export function CategoryFilter({
 
   const handleToggle = React.useCallback(
     (name: string) => {
-      const selectedSet = new Set(selected)
       if (selectedSet.has(name)) {
         onChange(selected.filter((entry) => entry !== name))
       } else {
         onChange([...selected, name])
       }
     },
-    [selected, onChange]
+    [selectedSet, selected, onChange]
   )
 
   const handleSelectAll = React.useCallback(() => {

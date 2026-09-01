@@ -6,21 +6,6 @@ import {
 export { getArticleManifest }
 export type { ArticleEntry }
 
-let filePathToSlugKeyCache: Record<string, string> | null = null
-
-async function getFilePathToSlugKey(): Promise<Record<string, string>> {
-  if (filePathToSlugKeyCache) return filePathToSlugKeyCache
-
-  const inverted: Record<string, string> = {}
-  for (const [slugKey, entry] of Object.entries(await getArticleManifest())) {
-    if (entry?.filePath) {
-      inverted[entry.filePath.replace(/\.md$/i, "")] = slugKey
-    }
-  }
-  filePathToSlugKeyCache = inverted
-  return filePathToSlugKeyCache
-}
-
 export interface ResolveResult {
   filePath: string | null
 }

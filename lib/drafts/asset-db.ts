@@ -98,24 +98,6 @@ export async function findDraftAssetsByRevisionForSubmit(
   return data ?? []
 }
 
-export async function findFailedDraftAssets(
-  revisionId: string
-): Promise<Pick<DraftAsset, "id" | "storagePath">[]> {
-  const db = getDbClient()
-  const { data, error } = await db
-    .from("DraftAsset")
-    .select("id, storagePath")
-    .eq("revisionId", revisionId)
-    .eq("status", "cleanup-failed")
-    .is("deletedAt", null)
-
-  if (error) {
-    throw new Error(`Failed to query failed DraftAssets: ${error.message}`)
-  }
-
-  return data ?? []
-}
-
 async function findTempDraftAssetsForRevision(
   revisionId: string,
   tempPrefix: string

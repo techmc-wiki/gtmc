@@ -92,19 +92,3 @@ export function InputGroupInput({
     />
   )
 }
-
-/** Bare textarea: see {@link InputGroupInput}. */
-export function InputGroupTextarea({
-  className,
-  ...props
-}: React.ComponentProps<"textarea">): React.ReactElement {
-  return (
-    <textarea
-      className={cn(
-        "text-tech-main-dark placeholder:text-tech-main/50 field-sizing-content min-h-16 w-full flex-1 resize-none bg-transparent px-1 py-2 font-mono text-sm outline-none",
-        className
-      )}
-      {...props}
-    />
-  )
-}

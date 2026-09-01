@@ -48,12 +48,7 @@ function EditTermCta({ locale, slug }: { locale: string; slug: string }) {
   )
 }
 
-export function TermDetail({
-  entry,
-  locale,
-  slug,
-  onOpenRelated,
-}: TermDetailProps) {
+function TermDetail({ entry, locale, slug, onOpenRelated }: TermDetailProps) {
   const t = useTranslations("Glossary")
   const parsedRelated = React.useMemo(
     () => parseRelated(entry.related),

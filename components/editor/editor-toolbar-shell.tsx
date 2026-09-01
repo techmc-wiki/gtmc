@@ -72,21 +72,3 @@ export function EditorToolbarDivider({
 }: EditorToolbarDividerProps) {
   return <div className={`bg-surface/10 mx-1 h-4 w-px ${className} `} />
 }
-
-interface EditorToolbarStatusProps {
-  children: React.ReactNode
-  className?: string
-}
-
-export function EditorToolbarStatus({
-  children,
-  className = "",
-}: EditorToolbarStatusProps) {
-  return (
-    <span
-      className={`text-tech-accent/40 ml-auto hidden items-center gap-2 text-[9px] tracking-widest uppercase sm:flex ${className} `}>
-      <span className="bg-tech-accent/40 size-1.5 animate-pulse rounded-full" />
-      {children}
-    </span>
-  )
-}

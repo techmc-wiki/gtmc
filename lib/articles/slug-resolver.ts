@@ -58,23 +58,6 @@ async function resolveSlugWithIndicator(
   return { filePath: null }
 }
 
-/**
- * Gets the slug for a given file path if it exists in the article manifest.
- */
-export async function getSlugForFilePath(
-  filePath: string
-): Promise<string | null> {
-  return (await getFilePathToSlugKey())[filePath.replace(/\.md$/i, "")] ?? null
-}
-
-/**
- * Gets the article manifest entry for a given slug path.
- */
-export async function getArticleEntry(
-  slugPath: string
-): Promise<ArticleEntry | null> {
-  return (await getArticleManifest())[slugPath] ?? null
-}
 
 export function encodeSlug(slug: string): string {
   return slug.split("/").map(encodeURIComponent).join("/")

@@ -23,9 +23,3 @@ export function getArticleAvailableLocales(slug: string): ArticleLocale[] {
   return manifest[slug]?.availableLocales ?? []
 }
 
-export function getArticleLocalizedFilePath(
-  slug: string,
-  locale: ArticleLocale
-): string | undefined {
-  return manifest[slug]?.localizedFilePaths[locale]
-}

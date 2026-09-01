@@ -1,5 +1,11 @@
 import { execFileSync } from "node:child_process"
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import {
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs"
 import { dirname, join } from "node:path"
 
 import { resolveGithubArticlesReadToken } from "@/lib/github/tokens"
@@ -11,9 +17,17 @@ const OUTPUT_PATH = join(
   "data",
   "repository-contributor-stats.json"
 )
+const CACHE_PATH = join(
+  process.cwd(),
+  ".next",
+  "cache",
+  "repository-contributors",
+  "stats.json"
+)
 const GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
 const COMMIT_MARKER = "__GTMC_COMMIT__"
 const FIELD_SEPARATOR = "\u001f"
+const CACHE_FORMAT_VERSION = 1
 
 type GitHubCommitActivity = {
   additions: number
@@ -34,6 +48,7 @@ type GitHubHistoryPage = {
       defaultBranchRef?: {
         target?: {
           history?: GitHubCommitHistory
+          oid?: string
         }
       }
     }
@@ -41,10 +56,22 @@ type GitHubHistoryPage = {
   errors?: Array<{ message: string }>
 }
 
+interface GitHubHistoryResult {
+  revision: string
+  history: GitHubCommitHistory
+}
+
 type RepositoryContributorStats = Record<
   string,
   { commits: number; linesChanged: number }
 >
+
+interface CachedContributorStats {
+  formatVersion: number
+  repository: string
+  revision: string
+  stats: RepositoryContributorStats
+}
 
 type LocalCommitActivity = {
   authorName: string
@@ -63,6 +90,7 @@ const HISTORY_QUERY = `
       defaultBranchRef {
         target {
           ... on Commit {
+            oid
             history(first: 100, after: $cursor) {
               nodes {
                 additions
@@ -141,6 +169,80 @@ function getGitHubToken(): string | null {
   }
 }
 
+function isRepositoryContributorStats(
+  value: unknown
+): value is RepositoryContributorStats {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false
+  }
+
+  return Object.values(value).every(
+    (contributor) =>
+      typeof contributor === "object" &&
+      contributor !== null &&
+      !Array.isArray(contributor) &&
+      typeof contributor.commits === "number" &&
+      Number.isFinite(contributor.commits) &&
+      typeof contributor.linesChanged === "number" &&
+      Number.isFinite(contributor.linesChanged)
+  )
+}
+
+function loadCachedContributorStats(
+  repository: string,
+  revision: string
+): RepositoryContributorStats | null {
+  try {
+    const cached = JSON.parse(readFileSync(CACHE_PATH, "utf8")) as unknown
+    if (
+      typeof cached !== "object" ||
+      cached === null ||
+      Array.isArray(cached)
+    ) {
+      return null
+    }
+
+    const {
+      formatVersion,
+      repository: cachedRepository,
+      revision: cachedRevision,
+      stats,
+    } = cached as CachedContributorStats
+    if (
+      formatVersion !== CACHE_FORMAT_VERSION ||
+      cachedRepository !== repository ||
+      cachedRevision !== revision ||
+      !isRepositoryContributorStats(stats)
+    ) {
+      return null
+    }
+    return stats
+  } catch {
+    return null
+  }
+}
+
+function saveCachedContributorStats(
+  repository: string,
+  revision: string,
+  stats: RepositoryContributorStats
+): void {
+  mkdirSync(dirname(CACHE_PATH), { recursive: true })
+  const temporaryPath = `${CACHE_PATH}.${process.pid}.tmp`
+  try {
+    const cached: CachedContributorStats = {
+      formatVersion: CACHE_FORMAT_VERSION,
+      repository,
+      revision,
+      stats,
+    }
+    writeFileSync(temporaryPath, `${JSON.stringify(cached)}\n`)
+    renameSync(temporaryPath, CACHE_PATH)
+  } finally {
+    rmSync(temporaryPath, { force: true })
+  }
+}
+
 function getNoreplyLogin(email: string): string | null {
   return (
     /^(?:\d+\+)?([^@]+)@users\.noreply\.github\.com$/i.exec(email)?.[1] ?? null
@@ -213,7 +315,7 @@ async function fetchHistoryPage(
   name: string,
   cursor: string | null,
   token: string
-): Promise<GitHubCommitHistory> {
+): Promise<GitHubHistoryResult> {
   const response = await fetch(GITHUB_GRAPHQL_URL, {
     method: "POST",
     headers: {
@@ -236,11 +338,13 @@ async function fetchHistoryPage(
     throw new Error(payload.errors.map((error) => error.message).join("; "))
   }
 
-  const history = payload.data?.repository?.defaultBranchRef?.target?.history
-  if (!history) {
+  const target = payload.data?.repository?.defaultBranchRef?.target
+  const revision = target?.oid
+  const history = target?.history
+  if (!revision || !history) {
     throw new Error("GitHub returned no default-branch commit history")
   }
-  return history
+  return { revision, history }
 }
 
 async function loadContributorStats(
@@ -252,13 +356,18 @@ async function loadContributorStats(
     throw new Error(`Invalid GitHub repository: ${repository}`)
   }
 
+  const initial = await fetchHistoryPage(owner, name, null, token)
+  const cached = loadCachedContributorStats(repository, initial.revision)
+  if (cached) {
+    logger.event("repository-contributors.cache", { outcome: "hit" })
+    return cached
+  }
+
   const stats: RepositoryContributorStats = {}
   const loadPage = async (
-    cursor: string | null,
+    history: GitHubCommitHistory,
     pageCount: number
   ): Promise<number> => {
-    const history = await fetchHistoryPage(owner, name, cursor, token)
-
     for (const commit of history.nodes) {
       const login = commit?.author?.user?.login
       if (!commit || !login || commit.changedFilesIfAvailable === 0) {
@@ -278,16 +387,23 @@ async function loadContributorStats(
     if (!nextCursor) {
       throw new Error("GitHub history pagination omitted its cursor")
     }
-    return loadPage(nextCursor, nextPageCount)
+    const next = await fetchHistoryPage(owner, name, nextCursor, token)
+    if (next.revision !== initial.revision) {
+      throw new Error("GitHub default branch changed while loading history")
+    }
+    return loadPage(next.history, nextPageCount)
   }
 
-  const pageCount = await loadPage(null, 0)
-  logger.event("repository-contributors.fetched", { page_count: pageCount })
-  return Object.fromEntries(
+  const pageCount = await loadPage(initial.history, 0)
+  const sorted = Object.fromEntries(
     Object.entries(stats).toSorted(([left], [right]) =>
       left.localeCompare(right)
     )
   )
+  saveCachedContributorStats(repository, initial.revision, sorted)
+  logger.event("repository-contributors.cache", { outcome: "miss" })
+  logger.event("repository-contributors.fetched", { page_count: pageCount })
+  return sorted
 }
 
 async function main(): Promise<void> {

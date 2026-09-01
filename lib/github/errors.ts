@@ -34,56 +34,6 @@ function isGithubErrorResponse(value: unknown): value is GithubErrorResponse {
   return true
 }
 
-export function isGithubError(value: unknown): value is GithubErrorFields {
-  if (!isRecord(value)) {
-    return false
-  }
-
-  const status = value.status
-  const message = value.message
-  const error = value.error
-  const response = value.response
-
-  if (status !== undefined && typeof status !== "number") {
-    return false
-  }
-
-  if (message !== undefined && typeof message !== "string") {
-    return false
-  }
-
-  if (error !== undefined && typeof error !== "string") {
-    return false
-  }
-
-  if (response !== undefined && !isGithubErrorResponse(response)) {
-    return false
-  }
-
-  return (
-    status !== undefined ||
-    message !== undefined ||
-    error !== undefined ||
-    response !== undefined
-  )
-}
-
-export function getGithubErrorMessage(error: unknown): string | undefined {
-  if (!isRecord(error)) {
-    return undefined
-  }
-
-  if (typeof error.message === "string") {
-    return error.message
-  }
-
-  if (typeof error.error === "string") {
-    return error.error
-  }
-
-  return undefined
-}
-
 export function getGithubErrorStatus(error: unknown): number | undefined {
   if (!isRecord(error)) {
     return undefined

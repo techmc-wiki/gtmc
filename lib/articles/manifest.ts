@@ -587,5 +587,4 @@ export async function getLocalizedArticleEntry(
 export {
   hasArticleLocale,
   getArticleAvailableLocales,
-  getArticleLocalizedFilePath,
 } from "./locale";

@@ -377,44 +377,7 @@ export async function getArticleDates(
   }
 }
 
-export async function isAncestor(
-  repoCwd: string,
-  ancestorSha: string,
-  descendantRef: string
-): Promise<boolean> {
-  try {
-    await execFileAsync(
-      "git",
-      ["merge-base", "--is-ancestor", ancestorSha, descendantRef],
-      { cwd: repoCwd }
-    )
-    return true
-  } catch {
-    return false
-  }
-}
 
-export async function hasPathChangedSince(
-  repoCwd: string,
-  ancestorSha: string,
-  descendantRef: string,
-  relPath: string
-): Promise<boolean> {
-  const { stdout } = await execFileAsync(
-    "git",
-    [
-      "log",
-      "--format=%H",
-      "-n",
-      "1",
-      `${ancestorSha}..${descendantRef}`,
-      "--",
-      relPath,
-    ],
-    { cwd: repoCwd, encoding: "utf-8" }
-  )
-  return stdout.trim().length > 0
-}
 
 export async function getLatestPathCommit(
   repoCwd: string,
@@ -502,21 +465,3 @@ export async function getTranslationProvenance(
   }
 }
 
-export async function getHeadSha(repoCwd: string): Promise<string> {
-  const cacheKey = `${repoCwd}:head`
-  if (cache.has(cacheKey)) {
-    return cache.get(cacheKey)
-  }
-
-  try {
-    const { stdout } = await execFileAsync("git", ["rev-parse", "HEAD"], {
-      cwd: repoCwd,
-      encoding: "utf-8",
-    })
-    const sha = stdout.trim()
-    cache.set(cacheKey, sha)
-    return sha
-  } catch {
-    return ""
-  }
-}

@@ -78,6 +78,156 @@ type TabValue = "active" | "english" | "other"
 const DEBOUNCE_MS = 200
 const EMPTY_DANGLING_REFS: ReadonlyArray<GlossaryEditCardDanglingRef> = []
 
+function getOperationBadge(kind: GlossaryEditOperationKind) {
+  if (kind === "add") {
+    return { label: "New Term", variant: "success" as const }
+  }
+  if (kind === "delete") {
+    return { label: "Deleted", variant: "destructive" as const }
+  }
+  return { label: "Edit", variant: "secondary" as const }
+}
+
+function GlossaryEditCardHeader({
+  headerTerm,
+  isDelete,
+  isReadOnly,
+  kind,
+  onRemove,
+}: {
+  headerTerm: string
+  isDelete: boolean
+  isReadOnly: boolean
+  kind: GlossaryEditOperationKind
+  onRemove: () => void
+}) {
+  const badge = getOperationBadge(kind)
+
+  return (
+    <CardHeader className="border-border/40 flex flex-row items-center justify-between gap-3 border-b p-0 pb-3">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <Badge variant={badge.variant} className="text-[10px]">
+          {badge.label}
+        </Badge>
+        <CardTitle
+          className={cn(
+            "text-sm font-semibold truncate",
+            isDelete && "line-through text-red-700 dark:text-red-400"
+          )}
+          title={headerTerm}>
+          {headerTerm || "—"}
+        </CardTitle>
+      </div>
+      {!isReadOnly && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          onClick={onRemove}
+          aria-label="Remove term edit"
+          className="text-muted-foreground hover:bg-red-500/10 hover:text-red-600">
+          <Trash2 className="size-3.5" />
+        </Button>
+      )}
+    </CardHeader>
+  )
+}
+
+interface GlossaryEditCardBodyProps {
+  activeLocale: GlossaryLocale | null
+  danglingRefs: ReadonlyArray<GlossaryEditCardDanglingRef>
+  englishMissing: boolean
+  isAdd: boolean
+  isDelete: boolean
+  isReadOnly: boolean
+  onTabChange: (value: TabValue) => void
+  onUpdateField: (column: GlossaryColumn, value: string) => void
+  operation: GlossaryEditOperation
+  otherLanguageCodes: GlossaryLocale[]
+  row: GlossaryRow | null
+  tab: TabValue
+  tabOptions: Array<{ value: TabValue; label: string }>
+}
+
+function GlossaryEditCardBody({
+  activeLocale,
+  danglingRefs,
+  englishMissing,
+  isAdd,
+  isDelete,
+  isReadOnly,
+  onTabChange,
+  onUpdateField,
+  operation,
+  otherLanguageCodes,
+  row,
+  tab,
+  tabOptions,
+}: GlossaryEditCardBodyProps) {
+  if (isDelete) {
+    return (
+      <CardContent className="p-0 pt-3">
+        <DeleteSummary
+          before={operation.before ?? null}
+          danglingRefs={danglingRefs}
+        />
+      </CardContent>
+    )
+  }
+
+  return (
+    <CardContent className="p-0 pt-3">
+      {row ? (
+        <Tabs
+          value={tab}
+          onValueChange={(value) => onTabChange(value as TabValue)}
+          className="w-full">
+          <TabsList className="mb-3 h-8 self-start p-0.5">
+            {tabOptions.map((option) => (
+              <TabsTrigger
+                key={option.value}
+                value={option.value}
+                className="h-7 px-3 text-xs">
+                {option.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          {activeLocale && (
+            <TabsContent value="active" className="mt-0 space-y-3">
+              <ActiveLocaleFields
+                row={row}
+                code={activeLocale}
+                onChange={onUpdateField}
+                disabled={isReadOnly}
+              />
+            </TabsContent>
+          )}
+
+          <TabsContent value="english" className="mt-0 space-y-3">
+            <EnglishFields
+              row={row}
+              onChange={onUpdateField}
+              missing={englishMissing}
+              showRequired={isAdd}
+              disabled={isReadOnly}
+            />
+          </TabsContent>
+
+          <TabsContent value="other" className="mt-0 space-y-3">
+            <OtherLanguagesFields
+              row={row}
+              codes={otherLanguageCodes}
+              onChange={onUpdateField}
+              disabled={isReadOnly}
+            />
+          </TabsContent>
+        </Tabs>
+      ) : null}
+    </CardContent>
+  )
+}
+
 export function GlossaryEditCard({
   operation,
   locale,
@@ -171,101 +321,28 @@ export function GlossaryEditCard({
       brackets="hidden"
       hover="none"
       className="border-border">
-      <CardHeader className="border-border/40 flex flex-row items-center justify-between gap-3 border-b p-0 pb-3">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <Badge
-            variant={
-              operation.kind === "add"
-                ? "success"
-                : operation.kind === "delete"
-                  ? "destructive"
-                  : "secondary"
-            }
-            className="text-[10px]">
-            {operation.kind === "add"
-              ? "New Term"
-              : operation.kind === "delete"
-                ? "Deleted"
-                : "Edit"}
-          </Badge>
-          <CardTitle
-            className={cn(
-              "text-sm font-semibold truncate",
-              isDelete && "line-through text-red-700 dark:text-red-400"
-            )}
-            title={headerTerm}>
-            {headerTerm || "—"}
-          </CardTitle>
-        </div>
-        {!isReadOnly && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            onClick={handleRemove}
-            aria-label="Remove term edit"
-            className="text-muted-foreground hover:bg-red-500/10 hover:text-red-600">
-            <Trash2 className="size-3.5" />
-          </Button>
-        )}
-      </CardHeader>
-
-      <CardContent className="p-0 pt-3">
-        {isDelete && (
-          <DeleteSummary
-            before={operation.before ?? null}
-            danglingRefs={danglingRefs}
-          />
-        )}
-
-        {!isDelete && row && (
-          <Tabs
-            value={tab}
-            onValueChange={(value) => setTab(value as TabValue)}
-            className="w-full">
-            <TabsList className="mb-3 h-8 self-start p-0.5">
-              {tabOptions.map((option) => (
-                <TabsTrigger
-                  key={option.value}
-                  value={option.value}
-                  className="h-7 px-3 text-xs">
-                  {option.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            {activeLocale && (
-              <TabsContent value="active" className="mt-0 space-y-3">
-                <ActiveLocaleFields
-                  row={row}
-                  code={activeLocale}
-                  onChange={updateField}
-                  disabled={isReadOnly}
-                />
-              </TabsContent>
-            )}
-
-            <TabsContent value="english" className="mt-0 space-y-3">
-              <EnglishFields
-                row={row}
-                onChange={updateField}
-                missing={englishMissing}
-                showRequired={isAdd}
-                disabled={isReadOnly}
-              />
-            </TabsContent>
-
-            <TabsContent value="other" className="mt-0 space-y-3">
-              <OtherLanguagesFields
-                row={row}
-                codes={otherLanguageCodes}
-                onChange={updateField}
-                disabled={isReadOnly}
-              />
-            </TabsContent>
-          </Tabs>
-        )}
-      </CardContent>
+      <GlossaryEditCardHeader
+        headerTerm={headerTerm}
+        isDelete={isDelete}
+        isReadOnly={isReadOnly}
+        kind={operation.kind}
+        onRemove={handleRemove}
+      />
+      <GlossaryEditCardBody
+        activeLocale={activeLocale}
+        danglingRefs={danglingRefs}
+        englishMissing={englishMissing}
+        isAdd={isAdd}
+        isDelete={isDelete}
+        isReadOnly={isReadOnly}
+        onTabChange={setTab}
+        onUpdateField={updateField}
+        operation={operation}
+        otherLanguageCodes={otherLanguageCodes}
+        row={row}
+        tab={tab}
+        tabOptions={tabOptions}
+      />
     </Card>
   )
 }

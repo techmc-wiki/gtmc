@@ -127,9 +127,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function AuthorDetailPage({
-  params,
-}: AuthorDetailPageProps) {
+async function loadAuthorPage(params: AuthorDetailPageProps["params"]) {
   const { locale, handle: rawHandle } = await params
   const requestedHandle = decodeHandle(rawHandle)
   const manifest = loadArticleManifest()
@@ -196,9 +194,71 @@ export default async function AuthorDetailPage({
       ? person.social.twitter
       : `https://twitter.com/${person.social.twitter}`
     : null
-  const websiteUrl = person.social.website ?? null
-  const customLinks = person.social.custom ?? []
 
+  return {
+    articleAttributionExcluded,
+    articles,
+    bilibiliUrl,
+    coAuthoredCount,
+    contributorSince,
+    customLinks: person.social.custom ?? [],
+    githubUrl,
+    handle,
+    jsonLd,
+    locale,
+    maintainer,
+    person,
+    personDescription,
+    repositoryStats,
+    t,
+    twitterUrl,
+    websiteUrl: person.social.website ?? null,
+  }
+}
+
+type AuthorPageData = Awaited<ReturnType<typeof loadAuthorPage>>
+
+function AuthorAvatar({ person }: Pick<AuthorPageData, "person">) {
+  return (
+    <div className="size-24 shrink-0 md:size-32">
+      <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-full items-center justify-center overflow-hidden border-2 p-1 ring-1">
+        {person.profile ? (
+          <AvatarImage asChild src={person.profile}>
+            <Image
+              src={person.profile}
+              alt={person.name}
+              fill
+              sizes="(max-width: 768px) 96px, 128px"
+              loading="eager"
+              className="object-cover"
+            />
+          </AvatarImage>
+        ) : (
+          <AvatarFallback className="text-tech-main/50 bg-transparent font-mono text-xl font-bold tracking-widest uppercase">
+            {person.name[0]}
+          </AvatarFallback>
+        )}
+      </Avatar>
+    </div>
+  )
+}
+
+function AuthorSocialLinks({
+  bilibiliUrl,
+  customLinks,
+  githubUrl,
+  t,
+  twitterUrl,
+  websiteUrl,
+}: Pick<
+  AuthorPageData,
+  | "bilibiliUrl"
+  | "customLinks"
+  | "githubUrl"
+  | "t"
+  | "twitterUrl"
+  | "websiteUrl"
+>) {
   const hasSocialLinks =
     githubUrl !== null ||
     bilibiliUrl !== null ||
@@ -206,10 +266,206 @@ export default async function AuthorDetailPage({
     websiteUrl !== null ||
     customLinks.length > 0
 
+  if (!hasSocialLinks) return null
+
+  return (
+    <div className="mt-4">
+      <p className="text-tech-main/50 mb-2 text-xs font-medium">
+        {t("socialLinksLabel")}
+      </p>
+      <div className="flex flex-wrap gap-3">
+        {githubUrl && (
+          <SocialLink href={githubUrl} label={t("githubProfile")}>
+            <GithubIcon className="size-3.5" />
+          </SocialLink>
+        )}
+        {bilibiliUrl && (
+          <SocialLink href={bilibiliUrl} label="bilibili">
+            <BilibiliIcon className="size-3.5" />
+          </SocialLink>
+        )}
+        {twitterUrl && (
+          <SocialLink href={twitterUrl} label="X / Twitter">
+            <TwitterIcon className="size-3.5" />
+          </SocialLink>
+        )}
+        {websiteUrl && (
+          <SocialLink href={websiteUrl} label="Website">
+            <GlobeIcon className="size-3.5" />
+          </SocialLink>
+        )}
+        {customLinks.map((link) => (
+          <SocialLink key={link.url} href={link.url} label={link.label}>
+            <GlobeIcon className="size-3.5" />
+          </SocialLink>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function AuthorContributionSummary({
+  articleAttributionExcluded,
+  articles,
+  coAuthoredCount,
+  contributorSince,
+  locale,
+  maintainer,
+  repositoryStats,
+  t,
+}: Pick<
+  AuthorPageData,
+  | "articleAttributionExcluded"
+  | "articles"
+  | "coAuthoredCount"
+  | "contributorSince"
+  | "locale"
+  | "maintainer"
+  | "repositoryStats"
+  | "t"
+>) {
+  return (
+    <div className="text-tech-main/50 mt-4 flex flex-wrap gap-x-6 gap-y-1 text-xs font-medium">
+      {maintainer && repositoryStats ? (
+        <>
+          <span>
+            {t("commitsLabel")}: {repositoryStats.commits}
+          </span>
+          <span>
+            {t("linesChangedLabel")}: {repositoryStats.linesChanged}
+          </span>
+        </>
+      ) : null}
+      {!articleAttributionExcluded ? (
+        <>
+          <span>
+            {t("articlesLabel")}: {articles.length}
+          </span>
+          <span>
+            {t("coAuthoredLabel")}: {coAuthoredCount}
+          </span>
+          <span>
+            {t("contributorSinceLabel")}:{" "}
+            {contributorSince
+              ? new Date(contributorSince).toLocaleDateString(locale, {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "—"}
+          </span>
+        </>
+      ) : null}
+    </div>
+  )
+}
+
+function AuthorProfileCard({ data }: { data: AuthorPageData }) {
+  const { handle, maintainer, person, personDescription, t } = data
+
+  return (
+    <div className="bg-surface-overlay/60 border-tech-main/20 border p-6 sm:p-8">
+      <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
+        <AuthorAvatar person={person} />
+        <div className="min-w-0 flex-1 text-center sm:text-left">
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+            <h1 className="display-title text-tech-main-dark text-2xl tracking-tight md:text-3xl">
+              {person.name}
+            </h1>
+            {maintainer ? (
+              <Badge className="border-tech-main/40 bg-tech-main/5 text-tech-main">
+                {t("maintainerLabel")}
+              </Badge>
+            ) : null}
+          </div>
+          <p className="text-tech-main/60 mt-1 font-mono text-sm">@{handle}</p>
+          <p className="text-tech-main mt-3 max-w-2xl text-sm/relaxed">
+            {personDescription ?? t("fallbackBio")}
+          </p>
+          <AuthorSocialLinks {...data} />
+          <AuthorContributionSummary {...data} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function RepositoryActivity({
+  locale,
+  maintainer,
+  repositoryStats,
+  t,
+}: Pick<AuthorPageData, "locale" | "maintainer" | "repositoryStats" | "t">) {
+  if (!maintainer) return null
+
+  return (
+    <section className="mt-10">
+      <SectionTitle>{t("repositoryActivityTitle")}</SectionTitle>
+      <p className="text-tech-main mb-6 max-w-3xl text-sm/relaxed">
+        {t("repositoryActivityDescription")}
+      </p>
+      {repositoryStats ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <RepositoryStat
+            label={t("commitsLabel")}
+            value={repositoryStats.commits}
+            locale={locale}
+          />
+          <RepositoryStat
+            label={t("linesChangedLabel")}
+            value={repositoryStats.linesChanged}
+            locale={locale}
+          />
+        </div>
+      ) : null}
+    </section>
+  )
+}
+
+function AuthorArticles({
+  articleAttributionExcluded,
+  articles,
+  handle,
+  t,
+}: Pick<
+  AuthorPageData,
+  "articleAttributionExcluded" | "articles" | "handle" | "t"
+>) {
+  if (articleAttributionExcluded) return null
+
+  return (
+    <section className="mt-10">
+      <SectionTitle>{t("articlesSectionTitle")}</SectionTitle>
+      <p className="text-tech-main/60 mb-6 font-mono text-xs tracking-widest uppercase">
+        {t("articlesSortLabel")}
+      </p>
+      {articles.length > 0 ? (
+        <div className="space-y-3">
+          {articles.map((article, index) => (
+            <ArticleRow
+              key={article.slug}
+              article={article}
+              handle={handle}
+              rowIndex={index + 1}
+              coauthoredLabel={t("coauthoredBadge")}
+            />
+          ))}
+        </div>
+      ) : (
+        <p className="text-tech-main/60 font-mono text-xs tracking-widest uppercase">
+          {t("noArticles")}
+        </p>
+      )}
+    </section>
+  )
+}
+
+function AuthorPageContent({ data }: { data: AuthorPageData }) {
+  const { handle, jsonLd, t } = data
+
   return (
     <div className="page-container-pb">
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
-
       <nav aria-label={t("breadcrumbAria")} className="mt-8 mb-6">
         <p className="font-mono text-xs tracking-widest uppercase">
           <Link
@@ -221,177 +477,9 @@ export default async function AuthorDetailPage({
           <span className="text-tech-main">{handle.toUpperCase()}</span>
         </p>
       </nav>
-
-      <div className="bg-surface-overlay/60 border-tech-main/20 border p-6 sm:p-8">
-        <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-          <div className="size-24 shrink-0 md:size-32">
-            <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-full items-center justify-center overflow-hidden border-2 p-1 ring-1">
-              {person.profile ? (
-                <AvatarImage asChild src={person.profile}>
-                  <Image
-                    src={person.profile}
-                    alt={person.name}
-                    fill
-                    sizes="(max-width: 768px) 96px, 128px"
-                    loading="eager"
-                    className="object-cover"
-                  />
-                </AvatarImage>
-              ) : (
-                <AvatarFallback className="text-tech-main/50 bg-transparent font-mono text-xl font-bold tracking-widest uppercase">
-                  {person.name[0]}
-                </AvatarFallback>
-              )}
-            </Avatar>
-          </div>
-
-          <div className="min-w-0 flex-1 text-center sm:text-left">
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
-              <h1 className="display-title text-tech-main-dark text-2xl tracking-tight md:text-3xl">
-                {person.name}
-              </h1>
-              {maintainer ? (
-                <Badge className="border-tech-main/40 bg-tech-main/5 text-tech-main">
-                  {t("maintainerLabel")}
-                </Badge>
-              ) : null}
-            </div>
-            <p className="text-tech-main/60 mt-1 font-mono text-sm">
-              @{handle}
-            </p>
-
-            <p className="text-tech-main mt-3 max-w-2xl text-sm/relaxed">
-              {personDescription ?? t("fallbackBio")}
-            </p>
-
-            {hasSocialLinks && (
-              <div className="mt-4">
-                <p className="text-tech-main/50 mb-2 text-xs font-medium">
-                  {t("socialLinksLabel")}
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  {githubUrl && (
-                    <SocialLink href={githubUrl} label={t("githubProfile")}>
-                      <GithubIcon className="size-3.5" />
-                    </SocialLink>
-                  )}
-                  {bilibiliUrl && (
-                    <SocialLink href={bilibiliUrl} label="bilibili">
-                      <BilibiliIcon className="size-3.5" />
-                    </SocialLink>
-                  )}
-                  {twitterUrl && (
-                    <SocialLink href={twitterUrl} label="X / Twitter">
-                      <TwitterIcon className="size-3.5" />
-                    </SocialLink>
-                  )}
-                  {websiteUrl && (
-                    <SocialLink href={websiteUrl} label="Website">
-                      <GlobeIcon className="size-3.5" />
-                    </SocialLink>
-                  )}
-                  {customLinks.map((link) => (
-                    <SocialLink
-                      key={link.url}
-                      href={link.url}
-                      label={link.label}>
-                      <GlobeIcon className="size-3.5" />
-                    </SocialLink>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="text-tech-main/50 mt-4 flex flex-wrap gap-x-6 gap-y-1 text-xs font-medium">
-              {maintainer ? (
-                <>
-                  {repositoryStats ? (
-                    <span>
-                      {t("commitsLabel")}: {repositoryStats.commits}
-                    </span>
-                  ) : null}
-                  {repositoryStats ? (
-                    <span>
-                      {t("linesChangedLabel")}: {repositoryStats.linesChanged}
-                    </span>
-                  ) : null}
-                </>
-              ) : null}
-              {!articleAttributionExcluded ? (
-                <>
-                  <span>
-                    {t("articlesLabel")}: {articles.length}
-                  </span>
-                  <span>
-                    {t("coAuthoredLabel")}: {coAuthoredCount}
-                  </span>
-                  <span>
-                    {t("contributorSinceLabel")}:{" "}
-                    {contributorSince
-                      ? new Date(contributorSince).toLocaleDateString(locale, {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })
-                      : "—"}
-                  </span>
-                </>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {maintainer ? (
-        <section className="mt-10">
-          <SectionTitle>{t("repositoryActivityTitle")}</SectionTitle>
-          <p className="text-tech-main mb-6 max-w-3xl text-sm/relaxed">
-            {t("repositoryActivityDescription")}
-          </p>
-          {repositoryStats ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <RepositoryStat
-                label={t("commitsLabel")}
-                value={repositoryStats.commits}
-                locale={locale}
-              />
-              <RepositoryStat
-                label={t("linesChangedLabel")}
-                value={repositoryStats.linesChanged}
-                locale={locale}
-              />
-            </div>
-          ) : null}
-        </section>
-      ) : null}
-
-      {!articleAttributionExcluded ? (
-        <section className="mt-10">
-          <SectionTitle>{t("articlesSectionTitle")}</SectionTitle>
-          <p className="text-tech-main/60 mb-6 font-mono text-xs tracking-widest uppercase">
-            {t("articlesSortLabel")}
-          </p>
-
-          {articles.length > 0 ? (
-            <div className="space-y-3">
-              {articles.map((article, i) => (
-                <ArticleRow
-                  key={article.slug}
-                  article={article}
-                  handle={handle}
-                  rowIndex={i + 1}
-                  coauthoredLabel={t("coauthoredBadge")}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-tech-main/60 font-mono text-xs tracking-widest uppercase">
-              {t("noArticles")}
-            </p>
-          )}
-        </section>
-      ) : null}
-
+      <AuthorProfileCard data={data} />
+      <RepositoryActivity {...data} />
+      <AuthorArticles {...data} />
       <nav aria-label={t("backToListAria")} className="mt-10">
         <Link
           href="/authors"
@@ -401,6 +489,13 @@ export default async function AuthorDetailPage({
       </nav>
     </div>
   )
+}
+
+export default async function AuthorDetailPage({
+  params,
+}: AuthorDetailPageProps) {
+  const data = await loadAuthorPage(params)
+  return <AuthorPageContent data={data} />
 }
 
 const numberFormatters: Record<string, Intl.NumberFormat> = {

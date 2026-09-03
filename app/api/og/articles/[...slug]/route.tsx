@@ -146,8 +146,129 @@ async function getSpaceMonoFontData(): Promise<ArrayBuffer | null> {
   return spaceMonoFontDataPromise
 }
 
-export async function GET(
-  _req: NextRequest,
+interface ArticleOgImageData {
+  author: string | null
+  bannerDataUri: string | null
+  bodyHook: string
+  chapterTitle: string | null
+  fontData: ArrayBuffer | null
+  isAdvanced: boolean
+  readingTime: number
+  title: string
+  urlLabel: string
+}
+
+function createArticleOgImageResponse({
+  author,
+  bannerDataUri,
+  bodyHook,
+  chapterTitle,
+  fontData,
+  isAdvanced,
+  readingTime,
+  title,
+  urlLabel,
+}: ArticleOgImageData) {
+  const fonts = fontData
+    ? [
+        {
+          name: "SpaceMono",
+          data: fontData,
+          weight: 400 as const,
+          style: "normal" as const,
+        },
+      ]
+    : []
+  const computedRootStyle = {
+    ...rootStyle,
+    fontFamily: fontData ? "SpaceMono" : "monospace",
+  }
+  const computedGridStyle = {
+    ...bannerGridBaseStyle,
+    opacity: bannerDataUri ? 0.05 : 0.1,
+  }
+
+  return new ImageResponse(
+    (
+      <div style={computedRootStyle}>
+        {/* BANNER STRIP */}
+        <div style={bannerContainerStyle}>
+          {bannerDataUri && (
+            // oxlint-disable-next-line nextjs/no-img-element
+            <img src={bannerDataUri} alt="" style={bannerImgStyle} />
+          )}
+          <div style={computedGridStyle} />
+          <div style={cornerTLStyle} />
+          <div style={cornerTRStyle} />
+          <div style={cornerBLStyle} />
+          <div style={cornerBRStyle} />
+          <div style={bannerLabelStyle}>IMG.BANNER</div>
+        </div>
+
+        {/* INFO CARD */}
+        <div style={cardStyle}>
+          <div style={cardGridStyle} />
+          <div style={cardCornerTLStyle} />
+          <div style={cardCornerTRStyle} />
+          <div style={cardCornerBLStyle} />
+          <div style={cardCornerBRStyle} />
+
+          {/* META BAR */}
+          <div style={metaBarStyle}>
+            <div style={metaBarLeftStyle}>
+              <div style={metaBarDotStyle} />
+              Graduate Texts in Minecraft
+            </div>
+            <div style={metaBarRightStyle}>techmc.wiki</div>
+          </div>
+
+          {/* CONTENT AREA */}
+          <div style={contentAreaStyle}>
+            {chapterTitle && <div style={chapterTitleStyle}>{chapterTitle}</div>}
+            <div style={titleStyle}>{title}</div>
+            <div style={metaLineStyle}>
+              {author && <span style={metaSpanStyle}>by {author}</span>}
+              {author && readingTime > 0 && (
+                <span style={metaSepStyle}>|</span>
+              )}
+              {readingTime > 0 && (
+                <span style={metaSpanStyle}>~{readingTime} min to read</span>
+              )}
+              {isAdvanced && (
+                <>
+                  <span style={metaSepStyle}>|</span>
+                  <span style={advancedBadgeStyle}>ADVANCED CONTENT</span>
+                </>
+              )}
+            </div>
+
+            {bodyHook && (
+              <div style={bodyHookWrapperStyle}>
+                <div style={bodyHookTextStyle}>{bodyHook}</div>
+                <div style={bodyHookFadeStyle} />
+              </div>
+            )}
+          </div>
+
+          {/* BOTTOM BAR */}
+          <div style={bottomBarStyle}>
+            <span style={bottomBarUrlStyle}>{urlLabel}</span>
+            <span style={bottomBarDimStyle}>1200 × 630</span>
+          </div>
+        </div>
+      </div>
+    ),
+    {
+      width: W,
+      height: H,
+      fonts,
+      headers: { "Cache-Control": OG_CACHE_CONTROL },
+    }
+  )
+}
+
+async function handleArticleOgRequest(
+  request: NextRequest,
   { params }: { params: Promise<{ slug: string[] }> }
 ) {
   const { slug } = await params
@@ -161,7 +282,7 @@ export async function GET(
   } catch {
     return new Response("Invalid slug encoding", { status: 400 })
   }
-  const locale = resolveLocale(_req.nextUrl.searchParams.get("locale"))
+  const locale = resolveLocale(request.nextUrl.searchParams.get("locale"))
 
   if (!hasArticleLocale(slugPath, locale)) {
     return new Response("Not Found", { status: 404 })
@@ -206,9 +327,6 @@ export async function GET(
   const urlLabel = `${host}/articles/${slugPath}`
 
   const fontData = await getSpaceMonoFontData()
-  const fonts = fontData
-    ? [{ name: "SpaceMono", data: fontData, weight: 400 as const, style: "normal" as const }]
-    : []
 
   let bannerDataUri: string | null = null
   const bannerEntry = manifestEntry?.bannerByLocale?.[locale] ?? manifestEntry?.bannerByLocale?.zh
@@ -228,106 +346,17 @@ export async function GET(
     }
   }
 
-  const computedRootStyle = {
-    ...rootStyle,
-    fontFamily: fontData ? "SpaceMono" : "monospace",
-  }
-  const computedGridStyle = {
-    ...bannerGridBaseStyle,
-    opacity: bannerDataUri ? 0.05 : 0.1,
-  }
-
-  return new ImageResponse(
-    (
-      <div style={computedRootStyle}>
-        {/* BANNER STRIP */}
-        <div style={bannerContainerStyle}>
-          {bannerDataUri && (
-            // oxlint-disable-next-line nextjs/no-img-element
-            <img
-              src={bannerDataUri}
-              alt=""
-              style={bannerImgStyle}
-            />
-          )}
-          <div style={computedGridStyle} />
-          <div style={cornerTLStyle} />
-          <div style={cornerTRStyle} />
-          <div style={cornerBLStyle} />
-          <div style={cornerBRStyle} />
-          <div style={bannerLabelStyle}>
-            IMG.BANNER
-          </div>
-        </div>
-
-        {/* INFO CARD */}
-        <div style={cardStyle}>
-          <div style={cardGridStyle} />
-          <div style={cardCornerTLStyle} />
-          <div style={cardCornerTRStyle} />
-          <div style={cardCornerBLStyle} />
-          <div style={cardCornerBRStyle} />
-
-          {/* META BAR */}
-          <div style={metaBarStyle}>
-            <div style={metaBarLeftStyle}>
-              <div style={metaBarDotStyle} />
-              Graduate Texts in Minecraft
-            </div>
-            <div style={metaBarRightStyle}>
-              techmc.wiki
-            </div>
-          </div>
-
-          {/* CONTENT AREA */}
-          <div style={contentAreaStyle}>
-            {chapterTitle && (
-              <div style={chapterTitleStyle}>
-                {chapterTitle}
-              </div>
-            )}
-
-            <div style={titleStyle}>
-              {title}
-            </div>
-
-            <div style={metaLineStyle}>
-              {author && <span style={metaSpanStyle}>by {author}</span>}
-              {author && readingTime > 0 && <span style={metaSepStyle}>|</span>}
-              {readingTime > 0 && <span style={metaSpanStyle}>~{readingTime} min to read</span>}
-              {isAdvanced && (
-                <>
-                  <span style={metaSepStyle}>|</span>
-                  <span style={advancedBadgeStyle}>
-                    ADVANCED CONTENT
-                  </span>
-                </>
-              )}
-            </div>
-
-            {bodyHook && (
-              <div style={bodyHookWrapperStyle}>
-                <div style={bodyHookTextStyle}>
-                  {bodyHook}
-                </div>
-                <div style={bodyHookFadeStyle} />
-              </div>
-            )}
-          </div>
-
-          {/* BOTTOM BAR */}
-          <div style={bottomBarStyle}>
-            <span style={bottomBarUrlStyle}>{urlLabel}</span>
-            <span style={bottomBarDimStyle}>1200 × 630</span>
-          </div>
-        </div>
-      </div>
-    ),
-    {
-      width: W,
-      height: H,
-      fonts,
-      headers: { "Cache-Control": OG_CACHE_CONTROL },
-    }
-  )
+  return createArticleOgImageResponse({
+    author,
+    bannerDataUri,
+    bodyHook,
+    chapterTitle,
+    fontData,
+    isAdvanced,
+    readingTime,
+    title,
+    urlLabel,
+  })
 }
+
+export { handleArticleOgRequest as GET }

@@ -229,7 +229,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function ArticlePage({ params }: ArticlePageProps) {
+async function loadArticlePage(params: ArticlePageProps["params"]) {
   const { locale: rawLocale, slug } = await params
   const locale = resolveArticleLocale(rawLocale)
   const [t, tArticleMeta] = await Promise.all([
@@ -295,8 +295,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const siteUrl = getSiteUrl()
   const effectiveSlug =
-    target.canonicalSlug ?? (await getCachedSlugForFilePath(target.filePath)) ?? slugPath
-  const canonicalUrl = `${getSiteUrl()}/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`
+    target.canonicalSlug ??
+    (await getCachedSlugForFilePath(target.filePath)) ??
+    slugPath
+  const canonicalUrl = `${siteUrl}/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`
   const manifestEntry = await getCachedLocalizedArticleEntry(
     effectiveSlug,
     contentLocale
@@ -372,12 +374,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     description,
   })
 
-  // Get navigation data (tree already loaded for structural appendix context)
   const flattenedArticles = flattenArticleTree(tree)
-  const navigation = await getArticleNavigation(currentSlug, flattenedArticles, locale)
-
-
-  const stage: ArticlePageStage = { advanced: isAdvanced, revising: isRevising }
+  const navigation = await getArticleNavigation(
+    currentSlug,
+    flattenedArticles,
+    locale
+  )
+  const stage: ArticlePageStage = {
+    advanced: isAdvanced,
+    revising: isRevising,
+  }
   const headerVariant: ArticlePageHeaderVariant =
     author && createdAt && lastModified
       ? {
@@ -388,45 +394,54 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         }
       : { kind: "anonymous" }
 
+  return {
+    contentProps: {
+      articleTitle,
+      bannerPreloadHref,
+      breadcrumbJsonLd,
+      contentLocale,
+      codeReferences,
+      currentSlug,
+      effectiveSlug,
+      embeddedArticleContent,
+      isTranslationStale,
+      locale,
+      navigation,
+      runningHeadChapterIndex: runningHeadOwner?.index,
+      runningHeadChapters,
+      runningHeadIsAppendix: isStructuralAppendix,
+      runningHeadIsPreface: Boolean(target.isPreface && !runningHeadOwner),
+      shikiPlugin,
+      stage,
+      t,
+      tArticleMeta,
+      targetFilePath: target.filePath,
+      techArticleJsonLd,
+      translationStatus,
+    },
+    headerProps: {
+      articleTitle,
+      bannerAlt,
+      bannerPath,
+      canonicalUrl,
+      createdAt,
+      filePath: target.filePath,
+      lastModified,
+      readingTime,
+      stage,
+      variant: headerVariant,
+      wordCount,
+    },
+  }
+}
+
+export default async function ArticlePage({ params }: ArticlePageProps) {
+  const { contentProps, headerProps } = await loadArticlePage(params)
+
   return (
     <ArticlePageContent
-      articleTitle={articleTitle}
-      bannerPreloadHref={bannerPreloadHref}
-      breadcrumbJsonLd={breadcrumbJsonLd}
-      contentLocale={contentLocale}
-      codeReferences={codeReferences}
-      currentSlug={currentSlug}
-      effectiveSlug={effectiveSlug}
-      embeddedArticleContent={embeddedArticleContent}
-      header={
-        <ArticlePageHeader
-          articleTitle={articleTitle}
-          bannerAlt={bannerAlt}
-          bannerPath={bannerPath}
-          canonicalUrl={canonicalUrl}
-          createdAt={createdAt}
-          filePath={target.filePath}
-          lastModified={lastModified}
-          readingTime={readingTime}
-          stage={stage}
-          variant={headerVariant}
-          wordCount={wordCount}
-        />
-      }
-      isTranslationStale={isTranslationStale}
-      locale={locale}
-      navigation={navigation}
-      runningHeadChapterIndex={runningHeadOwner?.index}
-      runningHeadChapters={runningHeadChapters}
-      runningHeadIsAppendix={isStructuralAppendix}
-      runningHeadIsPreface={!!target.isPreface && !runningHeadOwner}
-      shikiPlugin={shikiPlugin}
-      stage={stage}
-      t={t}
-      tArticleMeta={tArticleMeta}
-      targetFilePath={target.filePath}
-      techArticleJsonLd={techArticleJsonLd}
-      translationStatus={translationStatus}
+      {...contentProps}
+      header={<ArticlePageHeader {...headerProps} />}
     />
   )
 }

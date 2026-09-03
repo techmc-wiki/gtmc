@@ -505,6 +505,75 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   return <p className="text-tech-main/60 text-xs font-medium">{children}</p>
 }
 
+interface TreeNodeProps {
+  expandedPaths: Set<string>
+  mode: SourceMode
+  node: DraftRepoTreeNode
+  onSelectFile: (path: string) => void
+  onSelectFolder: (path: string) => void
+  onTogglePath: (path: string) => void
+  selectedFilePath: string
+  selectedFolderPath: string
+}
+
+function TreeNodeToggle({
+  isExpanded,
+  node,
+  onToggle,
+}: {
+  isExpanded: boolean
+  node: DraftRepoTreeNode
+  onToggle: () => void
+}) {
+  if (!node.isFolder) {
+    return (
+      <span className="text-tech-main/20 inline-flex h-8 w-6 shrink-0 items-center justify-center font-mono text-[0.625rem]">
+        ·
+      </span>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={
+        isExpanded ? `Collapse ${node.title}` : `Expand ${node.title}`
+      }
+      className="text-tech-main/50 hover:text-tech-main flex h-8 w-6 shrink-0 items-center justify-center font-mono text-[0.625rem] transition-colors">
+      <span aria-hidden="true">{isExpanded ? "▼" : "▶"}</span>
+    </button>
+  )
+}
+
+function getTreeNodeLabelClassName({
+  isFileSelected,
+  isFolder,
+  isFolderSelected,
+  isSelectableFile,
+  isSelectableFolder,
+}: {
+  isFileSelected: boolean
+  isFolder: boolean
+  isFolderSelected: boolean
+  isSelectableFile: boolean
+  isSelectableFolder: boolean
+}) {
+  const selectionClassName = isFolder
+    ? isFolderSelected
+      ? "bg-tech-main/10 text-tech-main font-bold"
+      : "text-tech-main/80 font-bold"
+    : isFileSelected
+      ? "bg-tech-main/10 text-tech-main font-bold"
+      : "text-tech-main/70"
+  const interactionClassName =
+    (isFolder && isSelectableFolder) || (!isFolder && isSelectableFile)
+      ? "hover:bg-tech-main/5 hover:text-tech-main"
+      : "cursor-default opacity-60"
+
+  return `flex min-h-8 flex-1 items-center px-1 text-left font-mono text-[0.875rem] tracking-wide transition-colors ${selectionClassName} ${interactionClassName}`
+}
+
 function TreeNode({
   expandedPaths,
   mode,
@@ -514,16 +583,7 @@ function TreeNode({
   onTogglePath,
   selectedFilePath,
   selectedFolderPath,
-}: {
-  expandedPaths: Set<string>
-  mode: SourceMode
-  node: DraftRepoTreeNode
-  onSelectFile: (path: string) => void
-  onSelectFolder: (path: string) => void
-  onTogglePath: (path: string) => void
-  selectedFilePath: string
-  selectedFolderPath: string
-}) {
+}: TreeNodeProps) {
   const isExpanded = expandedPaths.has(node.path)
   const isFolderSelected = selectedFolderPath === node.path
   const isFileSelected = selectedFilePath === node.path
@@ -557,39 +617,22 @@ function TreeNode({
   return (
     <div className="space-y-0.5">
       <div className="group relative flex items-center">
-        {node.isFolder ? (
-          <button
-            type="button"
-            onClick={handleToggle}
-            aria-label={
-              isExpanded ? `Collapse ${node.title}` : `Expand ${node.title}`
-            }
-            className="text-tech-main/50 hover:text-tech-main flex h-8 w-6 shrink-0 items-center justify-center font-mono text-[0.625rem] transition-colors">
-            <span aria-hidden="true">{isExpanded ? "▼" : "▶"}</span>
-          </button>
-        ) : (
-          <span className="text-tech-main/20 inline-flex h-8 w-6 shrink-0 items-center justify-center font-mono text-[0.625rem]">
-            ·
-          </span>
-        )}
+        <TreeNodeToggle
+          isExpanded={isExpanded}
+          node={node}
+          onToggle={handleToggle}
+        />
 
         <button
           type="button"
           onClick={handleSelect}
-          className={`flex min-h-8 flex-1 items-center px-1 text-left font-mono text-[0.875rem] tracking-wide transition-colors ${
-            node.isFolder
-              ? isFolderSelected
-                ? `bg-tech-main/10 text-tech-main font-bold`
-                : `text-tech-main/80 font-bold`
-              : isFileSelected
-                ? `bg-tech-main/10 text-tech-main font-bold`
-                : `text-tech-main/70`
-          } ${
-            (node.isFolder && isSelectableFolder) ||
-            (!node.isFolder && isSelectableFile)
-              ? `hover:bg-tech-main/5 hover:text-tech-main`
-              : `cursor-default opacity-60`
-          } `}>
+          className={getTreeNodeLabelClassName({
+            isFileSelected,
+            isFolder: node.isFolder,
+            isFolderSelected,
+            isSelectableFile,
+            isSelectableFolder,
+          })}>
           <span className="truncate">{node.title}</span>
         </button>
       </div>

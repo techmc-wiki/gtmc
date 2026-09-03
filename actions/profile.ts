@@ -1,4 +1,4 @@
-﻿"use server"
+"use server"
 
 import { requireAuth } from "@/lib/auth/context"
 import { prisma } from "@/lib/prisma"

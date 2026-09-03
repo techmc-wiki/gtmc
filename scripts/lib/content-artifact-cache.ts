@@ -17,7 +17,6 @@ const GENERATED_ARTIFACTS = [
   "data/manifest.json",
   "data/articles",
   "data/pdf-html",
-  "data/.content-cache.json",
   "data/.shiki-cache.json",
   "data/glossary.json",
   "data/glossary-summary.json",

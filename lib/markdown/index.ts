@@ -1,6 +1,4 @@
 export * from "./components"
 export * from "./markdown-renderer"
-export * from "./pipeline/core"
-export * from "./pipeline/react"
 export * from "./reading-metrics"
 export * from "./description"

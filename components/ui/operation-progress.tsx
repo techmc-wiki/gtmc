@@ -97,6 +97,277 @@ function getStageIndex(elapsedMs: number, timeline: StageTimelineEntry[]) {
   return index === -1 ? timeline.length - 1 : index
 }
 
+function getStageMarkerClassName({
+  isCompleted,
+  isCurrent,
+  isErrored,
+}: {
+  isCompleted: boolean
+  isCurrent: boolean
+  isErrored: boolean
+}) {
+  if (isErrored) return "border-red-500 bg-red-500"
+  if (isCompleted) return "border-tech-main bg-tech-main"
+  if (isCurrent) return "border-tech-main/70 bg-tech-main/50 animate-pulse"
+  return "border-tech-main/25 bg-transparent"
+}
+
+function getStageLabelClassName({
+  isCompleted,
+  isCurrent,
+  isErrored,
+}: {
+  isCompleted: boolean
+  isCurrent: boolean
+  isErrored: boolean
+}) {
+  if (isErrored) return "text-red-600"
+  if (isCompleted || isCurrent) return "text-tech-main-dark"
+  return "text-tech-main/45"
+}
+
+function ProgressSweep({
+  state,
+  style,
+}: {
+  state: OperationProgressState
+  style: React.CSSProperties
+}) {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div
+        className={cn(
+          "from-tech-main/10 via-tech-accent/25 absolute inset-y-0 left-0 bg-linear-to-r to-transparent transition-[width] duration-300",
+          state === "running" ? "animate-blueprint-sweep" : "",
+          state === "success" ? "animate-scan-confirm" : "",
+          state === "error"
+            ? "from-red-500/10 via-red-400/15 to-transparent"
+            : ""
+        )}
+        style={style}
+      />
+    </div>
+  )
+}
+
+function ProgressStatus({
+  percent,
+  state,
+  statusLabel,
+  title,
+}: {
+  percent: number
+  state: OperationProgressState
+  statusLabel: string
+  title: string
+}) {
+  return (
+    <div className="relative flex items-start justify-between gap-3">
+      <div className="min-w-0 space-y-1">
+        <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
+          {title}
+        </p>
+        <p
+          className={cn(
+            "font-mono text-[0.75rem] tracking-widest uppercase",
+            state === "success"
+              ? "text-green-600"
+              : state === "error"
+                ? "text-red-600"
+                : "text-tech-main-dark"
+          )}>
+          {statusLabel}
+        </p>
+      </div>
+
+      <div className="guide-line text-tech-main/70 bg-surface-overlay/70 shrink-0 border px-2 py-1 font-mono text-[0.6875rem] tracking-widest uppercase">
+        {percent.toString().padStart(2, "0")}%
+      </div>
+    </div>
+  )
+}
+
+function ProgressBar({
+  percent,
+  state,
+  style,
+  title,
+}: {
+  percent: number
+  state: OperationProgressState
+  style: React.CSSProperties
+  title: string
+}) {
+  return (
+    <progress
+      className="guide-line bg-tech-main/5 relative mt-3 block h-2 w-full appearance-none overflow-hidden border [&::-moz-progress-bar]:bg-transparent [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:bg-transparent"
+      aria-label={title}
+      max={100}
+      value={percent}>
+      <div
+        className={cn(
+          "bg-tech-main absolute inset-y-0 left-0 transition-[width] duration-300",
+          state === "success" ? "bg-green-600" : "",
+          state === "error" ? "bg-red-500" : ""
+        )}
+        style={style}
+      />
+      {state === "running" ? (
+        <div className="animate-blueprint-sweep pointer-events-none absolute inset-0 bg-linear-to-r from-transparent via-white/70 to-transparent" />
+      ) : null}
+    </progress>
+  )
+}
+
+function ProgressStage({
+  displayProgress,
+  entry,
+  index,
+  stage,
+  stageIndex,
+  state,
+}: {
+  displayProgress: number
+  entry: StageTimelineEntry
+  index: number
+  stage: OperationProgressStage
+  stageIndex: number
+  state: OperationProgressState
+}) {
+  const isCompleted =
+    state === "success" ||
+    index < stageIndex ||
+    (state === "running" && displayProgress >= entry.endProgress - 0.01)
+  const isCurrent = state === "running" && index === stageIndex
+  const isErrored = state === "error" && index === stageIndex
+  const status = { isCompleted, isCurrent, isErrored }
+
+  return (
+    <li className="min-w-0">
+      <div className="flex items-center gap-2">
+        <span
+          className={cn(
+            "block size-2.5 shrink-0 border transition-all duration-300",
+            getStageMarkerClassName(status)
+          )}
+        />
+        <span
+          className={cn(
+            "truncate font-mono tracking-widest uppercase",
+            getStageLabelClassName(status)
+          )}>
+          {stage.label}
+        </span>
+      </div>
+    </li>
+  )
+}
+
+function ProgressStages({
+  compact,
+  displayProgress,
+  stageIndex,
+  stages,
+  state,
+  style,
+  timeline,
+}: {
+  compact: boolean
+  displayProgress: number
+  stageIndex: number
+  stages: OperationProgressStage[]
+  state: OperationProgressState
+  style: React.CSSProperties
+  timeline: StageTimelineEntry[]
+}) {
+  return (
+    <ol
+      className={cn(
+        "relative mt-4 grid gap-2 sm:gap-3",
+        compact ? "text-[0.625rem]" : "text-[0.6875rem]"
+      )}
+      style={style}>
+      {stages.map((stage, index) => (
+        <ProgressStage
+          key={stage.id}
+          displayProgress={displayProgress}
+          entry={timeline[index]}
+          index={index}
+          stage={stage}
+          stageIndex={stageIndex}
+          state={state}
+        />
+      ))}
+    </ol>
+  )
+}
+
+interface ProgressDisplayProps {
+  barWidthStyle: React.CSSProperties
+  className?: string
+  compact: boolean
+  displayProgress: number
+  percent: number
+  stageGridStyle: React.CSSProperties
+  stageIndex: number
+  stages: OperationProgressStage[]
+  state: OperationProgressState
+  statusLabel: string
+  sweepWidthStyle: React.CSSProperties
+  timeline: StageTimelineEntry[]
+  title: string
+}
+
+function ProgressDisplay({
+  barWidthStyle,
+  className,
+  compact,
+  displayProgress,
+  percent,
+  stageGridStyle,
+  stageIndex,
+  stages,
+  state,
+  statusLabel,
+  sweepWidthStyle,
+  timeline,
+  title,
+}: ProgressDisplayProps) {
+  return (
+    <output
+      className={cn(
+        "guide-line bg-surface-overlay/85 relative block overflow-hidden border backdrop-blur-sm",
+        compact ? "p-3" : "p-4",
+        state === "error" ? "border-red-500/30 bg-red-500/5" : "",
+        className
+      )}
+      aria-live="polite">
+      <ProgressSweep state={state} style={sweepWidthStyle} />
+      <ProgressStatus
+        percent={percent}
+        state={state}
+        statusLabel={statusLabel}
+        title={title}
+      />
+      <ProgressBar
+        percent={percent}
+        state={state}
+        style={barWidthStyle}
+        title={title}
+      />
+      <ProgressStages
+        compact={compact}
+        displayProgress={displayProgress}
+        stageIndex={stageIndex}
+        stages={stages}
+        state={state}
+        style={stageGridStyle}
+        timeline={timeline}
+      />
+    </output>
+  )
+}
+
 export function OperationProgress({
   state,
   title,
@@ -242,115 +513,20 @@ export function OperationProgress({
         : activeStage?.label || title
 
   return (
-    <output
-      className={cn(
-        "guide-line bg-surface-overlay/85 relative block overflow-hidden border backdrop-blur-sm",
-        compact ? "p-3" : "p-4",
-        state === "error" ? "border-red-500/30 bg-red-500/5" : "",
-        className
-      )}
-      aria-live="polite">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div
-          className={cn(
-            "from-tech-main/10 via-tech-accent/25 absolute inset-y-0 left-0 bg-linear-to-r to-transparent transition-[width] duration-300",
-            state === "running" ? "animate-blueprint-sweep" : "",
-            state === "success" ? "animate-scan-confirm" : "",
-            state === "error"
-              ? "from-red-500/10 via-red-400/15 to-transparent"
-              : ""
-          )}
-          style={sweepWidthStyle}
-        />
-      </div>
-
-      <div className="relative flex items-start justify-between gap-3">
-        <div className="min-w-0 space-y-1">
-          <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
-            {title}
-          </p>
-          <p
-            className={cn(
-              "font-mono text-[0.75rem] tracking-widest uppercase",
-              state === "success"
-                ? "text-green-600"
-                : state === "error"
-                  ? "text-red-600"
-                  : "text-tech-main-dark"
-            )}>
-            {statusLabel}
-          </p>
-        </div>
-
-        <div className="guide-line text-tech-main/70 bg-surface-overlay/70 shrink-0 border px-2 py-1 font-mono text-[0.6875rem] tracking-widest uppercase">
-          {percent.toString().padStart(2, "0")}%
-        </div>
-      </div>
-
-      <progress
-        className="guide-line bg-tech-main/5 relative mt-3 block h-2 w-full appearance-none overflow-hidden border [&::-moz-progress-bar]:bg-transparent [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:bg-transparent"
-        aria-label={title}
-        max={100}
-        value={percent}>
-        <div
-          className={cn(
-            "bg-tech-main absolute inset-y-0 left-0 transition-[width] duration-300",
-            state === "success" ? "bg-green-600" : "",
-            state === "error" ? "bg-red-500" : ""
-          )}
-          style={barWidthStyle}
-        />
-        {state === "running" ? (
-          <div className="animate-blueprint-sweep pointer-events-none absolute inset-0 bg-linear-to-r from-transparent via-white/70 to-transparent" />
-        ) : null}
-      </progress>
-
-      <ol
-        className={cn(
-          "relative mt-4 grid gap-2 sm:gap-3",
-          compact ? "text-[0.625rem]" : "text-[0.6875rem]"
-        )}
-        style={stageGridStyle}>
-        {stages.map((stage, index) => {
-          const entry = timeline[index]
-          const isCompleted =
-            state === "success" ||
-            index < stageIndex ||
-            (state === "running" && displayProgress >= entry.endProgress - 0.01)
-          const isCurrent = state === "running" && index === stageIndex
-          const isErrored = state === "error" && index === stageIndex
-
-          return (
-            <li key={stage.id} className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span
-                  className={cn(
-                    "block size-2.5 shrink-0 border transition-all duration-300",
-                    isErrored
-                      ? "border-red-500 bg-red-500"
-                      : isCompleted
-                        ? "border-tech-main bg-tech-main"
-                        : isCurrent
-                          ? "border-tech-main/70 bg-tech-main/50 animate-pulse"
-                          : "border-tech-main/25 bg-transparent"
-                  )}
-                />
-                <span
-                  className={cn(
-                    "truncate font-mono tracking-widest uppercase",
-                    isErrored
-                      ? "text-red-600"
-                      : isCompleted || isCurrent
-                        ? "text-tech-main-dark"
-                        : "text-tech-main/45"
-                  )}>
-                  {stage.label}
-                </span>
-              </div>
-            </li>
-          )
-        })}
-      </ol>
-    </output>
+    <ProgressDisplay
+      barWidthStyle={barWidthStyle}
+      className={className}
+      compact={compact}
+      displayProgress={displayProgress}
+      percent={percent}
+      stageGridStyle={stageGridStyle}
+      stageIndex={stageIndex}
+      stages={stages}
+      state={state}
+      statusLabel={statusLabel}
+      sweepWidthStyle={sweepWidthStyle}
+      timeline={timeline}
+      title={title}
+    />
   )
 }

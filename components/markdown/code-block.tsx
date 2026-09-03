@@ -172,6 +172,157 @@ type CodeBlockPreProps = {
   [key: string]: unknown
 }
 
+interface CodeBlockHeaderProps {
+  copyCodeLabel: string
+  copyButtonLabel: string
+  copyLinkLabel: string
+  copiedLabel: string
+  decompiler?: string
+  id?: string
+  isWrapped: boolean
+  lang: string
+  lineCount: string
+  linkLabel: string
+  mapping?: string
+  minecraftVersion?: string
+  onToggleWrap: () => void
+  rawCode: string
+  sourceFile?: string
+  sourceLabel: string
+  sourceLines?: string
+  toggleLineWrapLabel: string
+}
+
+function CodeBlockHeader({
+  copyCodeLabel,
+  copyButtonLabel,
+  copyLinkLabel,
+  copiedLabel,
+  decompiler,
+  id,
+  isWrapped,
+  lang,
+  lineCount,
+  linkLabel,
+  mapping,
+  minecraftVersion,
+  onToggleWrap,
+  rawCode,
+  sourceFile,
+  sourceLabel,
+  sourceLines,
+  toggleLineWrapLabel,
+}: CodeBlockHeaderProps) {
+  return (
+    <div className="guide-line bg-tech-main/10 border-b">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-1.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="bg-tech-main/40 size-1.5 animate-pulse" />
+          <span className="text-tech-main text-xs tracking-widest uppercase">
+            {lang}
+          </span>
+          {minecraftVersion && (
+            <span className="border-tech-main/20 text-tech-main/75 border-l pl-2 text-[0.625rem] tracking-wider uppercase">
+              MC {minecraftVersion}
+            </span>
+          )}
+          {mapping && (
+            <span className="text-tech-main/65 text-[0.625rem] tracking-wider uppercase">
+              {mapping}
+            </span>
+          )}
+          {decompiler && (
+            <span className="text-tech-main/50 text-[0.625rem] tracking-wider uppercase">
+              {decompiler}
+            </span>
+          )}
+        </div>
+        <div className="text-tech-main flex flex-wrap items-center gap-3 font-mono text-[0.625rem] tracking-widest">
+          <span>{lineCount} LINES</span>
+          {id && (
+            <>
+              <span className="text-tech-main/50">|</span>
+              <ClipboardButton
+                ariaLabel={copyLinkLabel}
+                doneLabel={copiedLabel}
+                getValue={() =>
+                  `${window.location.origin}${window.location.pathname}${window.location.search}#${id}`
+                }
+                idleLabel={linkLabel}
+              />
+            </>
+          )}
+          <span className="text-tech-main/50">|</span>
+          <button
+            type="button"
+            aria-label={toggleLineWrapLabel}
+            title={toggleLineWrapLabel}
+            onClick={onToggleWrap}
+            className={`font-mono text-[0.625rem] tracking-widest transition-colors ${
+              isWrapped
+                ? "text-tech-main"
+                : "text-tech-main/40 hover:text-tech-main/70"
+            }`}>
+            ↩
+          </button>
+          <span className="text-tech-main/50">|</span>
+          <ClipboardButton
+            ariaLabel={copyCodeLabel}
+            doneLabel={copiedLabel}
+            getValue={() => rawCode}
+            idleLabel={copyButtonLabel}
+          />
+        </div>
+      </div>
+      {sourceFile || sourceLines ? (
+        <div className="border-tech-main/15 text-tech-main/55 flex flex-wrap items-center gap-x-2 border-t px-4 py-1 font-mono text-[0.5625rem] tracking-wider">
+          <span className="uppercase">{sourceLabel}</span>
+          {sourceFile && (
+            <span className="text-tech-main/75">{sourceFile}</span>
+          )}
+          {sourceLines && (
+            <span className="text-tech-main/60">L{sourceLines}</span>
+          )}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function CodeBlockBody({
+  children,
+  codeBlockStyle,
+  isWrapped,
+}: {
+  children?: ReactNode
+  codeBlockStyle: React.CSSProperties
+  isWrapped: boolean
+}) {
+  return (
+    <div className="relative">
+      <div className="border-tech-main/10 pointer-events-none absolute inset-0 border" />
+      <div className="bg-tech-main/3 pointer-events-none absolute inset-x-0 top-1/4 h-px" />
+      <div className="bg-tech-main/3 pointer-events-none absolute inset-x-0 top-3/4 h-px" />
+      <div
+        className="code-block-pre relative"
+        data-wrapped={isWrapped}
+        style={codeBlockStyle}>
+        <div className="custom-bottom-scrollbar overflow-x-auto">
+          <div
+            dir="ltr"
+            className={
+              isWrapped
+                ? "p-4 whitespace-pre-wrap [&_.line]:whitespace-pre-wrap! [&_code]:whitespace-pre-wrap!"
+                : "p-4 whitespace-pre [&_code]:whitespace-pre!"
+            }>
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /**
  * Markdown `<pre>` replacement: language strip with copy/wrap controls over a
  * lazily revealed code frame.
@@ -212,99 +363,29 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
 
   return (
     <LazyCodeBlock id={id} lineCount={lineCount}>
-      <div className="guide-line bg-tech-main/10 border-b">
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-1.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="bg-tech-main/40 size-1.5 animate-pulse" />
-            <span className="text-tech-main text-xs tracking-widest uppercase">
-              {lang}
-            </span>
-            {minecraftVersion && (
-              <span className="border-tech-main/20 text-tech-main/75 border-l pl-2 text-[0.625rem] tracking-wider uppercase">
-                MC {minecraftVersion}
-              </span>
-            )}
-            {mapping && (
-              <span className="text-tech-main/65 text-[0.625rem] tracking-wider uppercase">
-                {mapping}
-              </span>
-            )}
-            {decompiler && (
-              <span className="text-tech-main/50 text-[0.625rem] tracking-wider uppercase">
-                {decompiler}
-              </span>
-            )}
-          </div>
-          <div className="text-tech-main flex flex-wrap items-center gap-3 font-mono text-[0.625rem] tracking-widest">
-            <span>{lineCount} LINES</span>
-            {id && (
-              <>
-                <span className="text-tech-main/50">|</span>
-                <ClipboardButton
-                  ariaLabel={tArticleMeta("copyCodeLink")}
-                  doneLabel={tArticleMeta("copiedButton")}
-                  getValue={() =>
-                    `${window.location.origin}${window.location.pathname}${window.location.search}#${id}`
-                  }
-                  idleLabel={tArticleMeta("linkButton")}
-                />
-              </>
-            )}
-            <span className="text-tech-main/50">|</span>
-            <button
-              type="button"
-              aria-label={t("toggleLineWrap")}
-              title={t("toggleLineWrap")}
-              onClick={toggleWrap}
-              className={`font-mono text-[0.625rem] tracking-widest transition-colors ${
-                isWrapped
-                  ? "text-tech-main"
-                  : `text-tech-main/40 hover:text-tech-main/70`
-              } `}>
-              ↩
-            </button>
-            <span className="text-tech-main/50">|</span>
-            <ClipboardButton
-              ariaLabel={tArticleMeta("copyCode")}
-              doneLabel={tArticleMeta("copiedButton")}
-              getValue={() => rawCode}
-              idleLabel={tArticleMeta("copyButton")}
-            />
-          </div>
-        </div>
-        {(sourceFile || sourceLines) && (
-          <div className="border-tech-main/15 text-tech-main/55 flex flex-wrap items-center gap-x-2 border-t px-4 py-1 font-mono text-[0.5625rem] tracking-wider">
-            <span className="uppercase">{tArticleMeta("sourceLabel")}</span>
-            {sourceFile && (
-              <span className="text-tech-main/75">{sourceFile}</span>
-            )}
-            {sourceLines && (
-              <span className="text-tech-main/60">L{sourceLines}</span>
-            )}
-          </div>
-        )}
-      </div>
-      <div className="relative">
-        <div className="border-tech-main/10 pointer-events-none absolute inset-0 border" />
-        <div className="bg-tech-main/3 pointer-events-none absolute inset-x-0 top-1/4 h-px" />
-        <div className="bg-tech-main/3 pointer-events-none absolute inset-x-0 top-3/4 h-px" />
-        <div
-          className="code-block-pre relative"
-          data-wrapped={isWrapped}
-          style={codeBlockStyle}>
-          <div className="custom-bottom-scrollbar overflow-x-auto">
-            <div
-              dir="ltr"
-              className={
-                isWrapped
-                  ? `p-4 whitespace-pre-wrap [&_.line]:whitespace-pre-wrap! [&_code]:whitespace-pre-wrap!`
-                  : `p-4 whitespace-pre [&_code]:whitespace-pre!`
-              }>
-              {children}
-            </div>
-          </div>
-        </div>
-      </div>
+      <CodeBlockHeader
+        copyCodeLabel={tArticleMeta("copyCode")}
+        copyButtonLabel={tArticleMeta("copyButton")}
+        copyLinkLabel={tArticleMeta("copyCodeLink")}
+        copiedLabel={tArticleMeta("copiedButton")}
+        decompiler={decompiler}
+        id={id}
+        isWrapped={isWrapped}
+        lang={lang}
+        lineCount={lineCount}
+        linkLabel={tArticleMeta("linkButton")}
+        mapping={mapping}
+        minecraftVersion={minecraftVersion}
+        onToggleWrap={toggleWrap}
+        rawCode={rawCode}
+        sourceFile={sourceFile}
+        sourceLabel={tArticleMeta("sourceLabel")}
+        sourceLines={sourceLines}
+        toggleLineWrapLabel={t("toggleLineWrap")}
+      />
+      <CodeBlockBody codeBlockStyle={codeBlockStyle} isWrapped={isWrapped}>
+        {children}
+      </CodeBlockBody>
     </LazyCodeBlock>
   )
 }

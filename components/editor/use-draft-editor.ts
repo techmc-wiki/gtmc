@@ -43,7 +43,7 @@ interface RepoFileSnapshot {
   status: "error" | "loaded" | "loading" | "missing"
 }
 
-export function useDraftEditor(initialData?: {
+interface DraftEditorInitialData {
   activeFileId?: string
   contributingGuides?: Array<{
     id: string
@@ -56,29 +56,48 @@ export function useDraftEditor(initialData?: {
   files: DraftFileCollection["files"]
   title: string
   status?: string
-}) {
+}
+
+function normalizeDraftEditorInput(initialData?: DraftEditorInitialData) {
+  return {
+    activeGuideId: initialData?.contributingGuides?.[0]?.id || "",
+    collection: normalizeDraftFileCollection({
+      activeFileId: initialData?.activeFileId,
+      folders: initialData?.folders || [],
+      files: initialData?.files || [],
+    }),
+    contributingGuides: initialData?.contributingGuides || [],
+    githubPrUrl: initialData?.githubPrUrl,
+    revisionId: initialData?.id,
+    status: initialData?.status || "DRAFT",
+    title: initialData?.title || "",
+  }
+}
+
+export function useDraftEditor(initialData?: DraftEditorInitialData) {
   const router = useRouter()
   const t = useTranslations("Editor")
   const progressT = useTranslations("OperationProgress")
-  const initialStatus = initialData?.status || "DRAFT"
-  const initialDraftCollection = normalizeDraftFileCollection({
-    activeFileId: initialData?.activeFileId,
-    folders: initialData?.folders || [],
-    files: initialData?.files || [],
-  })
+  const {
+    activeGuideId: initialGuideId,
+    collection: initialDraftCollection,
+    contributingGuides,
+    githubPrUrl,
+    revisionId: initialRevisionId,
+    status: initialStatus,
+    title: initialTitle,
+  } = normalizeDraftEditorInput(initialData)
 
   const [draftStatus, setDraftStatus] = React.useState(initialStatus)
-  const [title, setTitle] = React.useState(initialData?.title || "")
+  const [title, setTitle] = React.useState(initialTitle)
   const [draftCollection, setDraftCollection] = React.useState(
     initialDraftCollection
   )
   const [lastSavedDraftCollection, setLastSavedDraftCollection] =
     React.useState(initialDraftCollection)
-  const [lastSavedTitle, setLastSavedTitle] = React.useState(
-    initialData?.title || ""
-  )
+  const [lastSavedTitle, setLastSavedTitle] = React.useState(initialTitle)
   const [revisionId, setRevisionId] = React.useState<string | undefined>(
-    initialData?.id
+    initialRevisionId
   )
   const [fileDialogIntent, setFileDialogIntent] =
     React.useState<DraftFileDialogIntent | null>(null)
@@ -94,9 +113,7 @@ export function useDraftEditor(initialData?: {
   const [activeInfoTab, setActiveInfoTab] = React.useState<"changes" | "guide">(
     "changes"
   )
-  const [activeGuideId, setActiveGuideId] = React.useState(
-    initialData?.contributingGuides?.[0]?.id || ""
-  )
+  const [activeGuideId, setActiveGuideId] = React.useState(initialGuideId)
   const [repoSnapshots, setRepoSnapshots] = React.useState<
     Record<string, RepoFileSnapshot>
   >({})
@@ -114,7 +131,7 @@ export function useDraftEditor(initialData?: {
     {}
   )
   const repoSnapshotRequestsRef = React.useRef<Record<string, string>>({})
-  const revisionIdRef = React.useRef<string | undefined>(initialData?.id)
+  const revisionIdRef = React.useRef<string | undefined>(initialRevisionId)
   const saveQueueRef = React.useRef<Promise<unknown> | null>(null)
   const submissionInFlightRef = React.useRef(false)
 
@@ -221,7 +238,6 @@ export function useDraftEditor(initialData?: {
     )
   }
 
-  const githubPrUrl = initialData?.githubPrUrl
   const isSaving = pendingSaveCount > 0
   const isReadOnly = draftStatus !== "DRAFT"
   const activeFile = getActiveDraftFile(draftCollection)
@@ -237,7 +253,6 @@ export function useDraftEditor(initialData?: {
   )
   const activeFileIndex =
     draftCollection.files.findIndex((file) => file.id === activeFile.id) + 1
-  const contributingGuides = initialData?.contributingGuides || []
 
   const unsavedFileIds = React.useMemo(() => {
     const savedFilesById = new Map(

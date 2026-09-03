@@ -227,6 +227,220 @@ function DeleteOperationCard({ operation }: OperationCardProps) {
   )
 }
 
+interface OperationCounts {
+  add: number
+  delete: number
+  edit: number
+}
+
+function SubmissionSuccess({
+  className,
+  onReturn,
+  ownershipBody,
+  submitResult,
+}: {
+  className?: string
+  onReturn: () => void
+  ownershipBody: string
+  submitResult: NonNullable<GlossaryDiffPreviewProps["submitResult"]>
+}) {
+  return (
+    <div className={cn("flex flex-col p-6 sm:p-8", className)}>
+      <div className="flex flex-col items-center justify-center gap-4 text-center">
+        <div className="flex size-12 items-center justify-center rounded-full bg-green-500/15 text-green-600">
+          <CheckCircle2 className="size-6" />
+        </div>
+        <div className="space-y-1.5">
+          <h3 className="text-foreground text-lg font-semibold">
+            Pull Request #{submitResult.prNumber} Opened
+          </h3>
+          <p className="text-muted-foreground max-w-lg text-xs leading-relaxed sm:text-sm">
+            {ownershipBody}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <a
+            href={submitResult.prUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="border-border hover:bg-accent inline-flex items-center gap-1.5 border px-4 py-2 font-mono text-xs font-bold tracking-wider uppercase transition-colors">
+            View on GitHub <ExternalLink className="size-3.5" />
+          </a>
+          <Button type="button" variant="default" size="sm" onClick={onReturn}>
+            Return to drafts
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function OperationSummary({
+  counts,
+  operationCount,
+}: {
+  counts: OperationCounts
+  operationCount: number
+}) {
+  return (
+    <div className="border-border bg-surface flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-6">
+      <div className="flex items-center gap-2">
+        <span className="text-foreground font-mono text-xs font-medium">
+          {operationCount} {operationCount === 1 ? "change" : "changes"}
+        </span>
+        <div className="flex items-center gap-1.5">
+          {counts.edit > 0 && (
+            <Badge variant="secondary" className="text-[10px]">
+              {counts.edit} Edited
+            </Badge>
+          )}
+          {counts.add > 0 && (
+            <Badge variant="success" className="text-[10px]">
+              {counts.add} Added
+            </Badge>
+          )}
+          {counts.delete > 0 && (
+            <Badge variant="destructive" className="text-[10px]">
+              {counts.delete} Deleted
+            </Badge>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function OperationList({
+  operations,
+}: Pick<GlossaryDiffPreviewProps, "operations">) {
+  return (
+    <ScrollArea className="min-h-0 flex-1 px-4 py-4 sm:px-6">
+      <div className="flex flex-col gap-3 pr-3">
+        {operations.length === 0 ? (
+          <p className="text-muted-foreground py-4 text-center text-sm italic">
+            No staged operations.
+          </p>
+        ) : (
+          operations.map((operation) => {
+            const key = `${operation.kind}:${operation.slug}`
+            if (operation.kind === "edit") {
+              return <EditOperationCard key={key} operation={operation} />
+            }
+            if (operation.kind === "add") {
+              return <AddOperationCard key={key} operation={operation} />
+            }
+            return <DeleteOperationCard key={key} operation={operation} />
+          })
+        )}
+      </div>
+    </ScrollArea>
+  )
+}
+
+function CommitAuthorToggle({
+  authorName,
+  isSubmitting,
+  noreplyEmail,
+  onChange,
+  realEmail,
+  toggleLabel,
+  useRealEmail,
+}: Pick<
+  GlossaryDiffPreviewProps,
+  "authorName" | "isSubmitting" | "noreplyEmail" | "realEmail"
+> & {
+  onChange: (checked: boolean) => void
+  toggleLabel: string
+  useRealEmail: boolean
+}) {
+  const canToggle = Boolean(
+    realEmail && noreplyEmail && realEmail !== noreplyEmail
+  )
+
+  if (!canToggle) return null
+
+  return (
+    <div className="bg-surface-overlay/50 border-border border-b px-4 py-3 sm:px-6">
+      <label
+        htmlFor="diff-preview-real-email-toggle"
+        aria-label={toggleLabel}
+        className="flex cursor-pointer items-start gap-2.5 text-xs">
+        <input
+          id="diff-preview-real-email-toggle"
+          type="checkbox"
+          checked={useRealEmail}
+          onChange={(event) => onChange(event.target.checked)}
+          disabled={isSubmitting}
+          aria-label={toggleLabel}
+          className="accent-tech-signal mt-0.5 size-4 cursor-pointer"
+        />
+        <span className="flex flex-col gap-0.5">
+          <span className="text-foreground font-medium">{toggleLabel}</span>
+          <span className="text-muted-foreground text-[11px]">
+            {useRealEmail
+              ? `Commit will be authored by ${authorName} <${realEmail}>`
+              : `Default commit author: ${authorName} <${noreplyEmail}>`}
+          </span>
+        </span>
+      </label>
+    </div>
+  )
+}
+
+function DiffValidationMessage({ message }: { message?: string }) {
+  if (!message) return null
+
+  return (
+    <div className="flex items-center gap-2 border-b border-red-500/20 bg-red-500/10 px-4 py-2.5 text-xs text-red-700 sm:px-6 dark:text-red-400">
+      <AlertCircle className="size-4 shrink-0" />
+      <span className="leading-snug">{message}</span>
+    </div>
+  )
+}
+
+function SubmitActions({
+  isSubmitting,
+  onClose,
+  onSubmit,
+  submitDisabled,
+}: {
+  isSubmitting: boolean
+  onClose: () => void
+  onSubmit: () => void
+  submitDisabled: boolean
+}) {
+  return (
+    <div className="bg-surface flex flex-col-reverse gap-2 p-4 sm:flex-row sm:items-center sm:justify-end sm:px-6">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={onClose}
+        disabled={isSubmitting}>
+        Cancel
+      </Button>
+      <Button
+        type="button"
+        variant="default"
+        size="sm"
+        onClick={onSubmit}
+        disabled={submitDisabled}>
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+            Submitting Pull Request…
+          </>
+        ) : (
+          <>
+            <GitPullRequest className="mr-1.5 size-3.5" />
+            Submit Pull Request
+          </>
+        )}
+      </Button>
+    </div>
+  )
+}
+
 export function GlossaryDiffPreview({
   operations,
   onClose,
@@ -249,10 +463,10 @@ export function GlossaryDiffPreview({
     let edit = 0
     let add = 0
     let del = 0
-    for (const op of operations) {
-      if (op.kind === "edit") edit++
-      else if (op.kind === "add") add++
-      else if (op.kind === "delete") del++
+    for (const operation of operations) {
+      if (operation.kind === "edit") edit++
+      else if (operation.kind === "add") add++
+      else if (operation.kind === "delete") del++
     }
     return { edit, add, delete: del }
   }, [operations])
@@ -262,163 +476,39 @@ export function GlossaryDiffPreview({
     await onSubmit({ useRealEmail })
   }, [isSubmitting, canSubmit, onSubmit, useRealEmail])
 
-  const canToggleRealEmail = Boolean(
-    realEmail && noreplyEmail && realEmail !== noreplyEmail
-  )
-
   if (submitState === "success" && submitResult) {
     return (
-      <div className={cn("flex flex-col p-6 sm:p-8", className)}>
-        <div className="flex flex-col items-center justify-center gap-4 text-center">
-          <div className="flex size-12 items-center justify-center rounded-full bg-green-500/15 text-green-600">
-            <CheckCircle2 className="size-6" />
-          </div>
-          <div className="space-y-1.5">
-            <h3 className="text-foreground text-lg font-semibold">
-              Pull Request #{submitResult.prNumber} Opened
-            </h3>
-            <p className="text-muted-foreground max-w-lg text-xs leading-relaxed sm:text-sm">
-              {t("editorPrOwnershipBody")}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <a
-              href={submitResult.prUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border-border hover:bg-accent inline-flex items-center gap-1.5 border px-4 py-2 font-mono text-xs font-bold tracking-wider uppercase transition-colors">
-              View on GitHub <ExternalLink className="size-3.5" />
-            </a>
-            <Button
-              type="button"
-              variant="default"
-              size="sm"
-              onClick={onDismissSuccess || onClose}>
-              Return to drafts
-            </Button>
-          </div>
-        </div>
-      </div>
+      <SubmissionSuccess
+        className={className}
+        onReturn={onDismissSuccess || onClose}
+        ownershipBody={t("editorPrOwnershipBody")}
+        submitResult={submitResult}
+      />
     )
   }
-
-  const submitDisabled = isSubmitting || !canSubmit || operations.length === 0
 
   return (
     <div
       className={cn("flex min-h-0 flex-1 flex-col overflow-hidden", className)}>
-      <div className="border-border bg-surface flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-6">
-        <div className="flex items-center gap-2">
-          <span className="text-foreground font-mono text-xs font-medium">
-            {operations.length} {operations.length === 1 ? "change" : "changes"}
-          </span>
-          <div className="flex items-center gap-1.5">
-            {counts.edit > 0 && (
-              <Badge variant="secondary" className="text-[10px]">
-                {counts.edit} Edited
-              </Badge>
-            )}
-            {counts.add > 0 && (
-              <Badge variant="success" className="text-[10px]">
-                {counts.add} Added
-              </Badge>
-            )}
-            {counts.delete > 0 && (
-              <Badge variant="destructive" className="text-[10px]">
-                {counts.delete} Deleted
-              </Badge>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <ScrollArea className="min-h-0 flex-1 px-4 py-4 sm:px-6">
-        <div className="flex flex-col gap-3 pr-3">
-          {operations.length === 0 ? (
-            <p className="text-muted-foreground py-4 text-center text-sm italic">
-              No staged operations.
-            </p>
-          ) : (
-            operations.map((op) => {
-              const key = `${op.kind}:${op.slug}`
-              if (op.kind === "edit") {
-                return <EditOperationCard key={key} operation={op} />
-              }
-              if (op.kind === "add") {
-                return <AddOperationCard key={key} operation={op} />
-              }
-              return <DeleteOperationCard key={key} operation={op} />
-            })
-          )}
-        </div>
-      </ScrollArea>
-
+      <OperationSummary counts={counts} operationCount={operations.length} />
+      <OperationList operations={operations} />
       <Separator />
-
-      {canToggleRealEmail ? (
-        <div className="bg-surface-overlay/50 border-border border-b px-4 py-3 sm:px-6">
-          <label
-            htmlFor="diff-preview-real-email-toggle"
-            aria-label={t("editorRealEmailToggleLabel")}
-            className="flex cursor-pointer items-start gap-2.5 text-xs">
-            <input
-              id="diff-preview-real-email-toggle"
-              type="checkbox"
-              checked={useRealEmail}
-              onChange={(e) => setUseRealEmail(e.target.checked)}
-              disabled={isSubmitting}
-              aria-label={t("editorRealEmailToggleLabel")}
-              className="accent-tech-signal mt-0.5 size-4 cursor-pointer"
-            />
-            <span className="flex flex-col gap-0.5">
-              <span className="text-foreground font-medium">
-                {t("editorRealEmailToggleLabel")}
-              </span>
-              <span className="text-muted-foreground text-[11px]">
-                {useRealEmail
-                  ? `Commit will be authored by ${authorName} <${realEmail}>`
-                  : `Default commit author: ${authorName} <${noreplyEmail}>`}
-              </span>
-            </span>
-          </label>
-        </div>
-      ) : null}
-
-      {validationMessage ? (
-        <div className="flex items-center gap-2 border-b border-red-500/20 bg-red-500/10 px-4 py-2.5 text-xs text-red-700 sm:px-6 dark:text-red-400">
-          <AlertCircle className="size-4 shrink-0" />
-          <span className="leading-snug">{validationMessage}</span>
-        </div>
-      ) : null}
-
-      <div className="bg-surface flex flex-col-reverse gap-2 p-4 sm:flex-row sm:items-center sm:justify-end sm:px-6">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={onClose}
-          disabled={isSubmitting}>
-          Cancel
-        </Button>
-        <Button
-          type="button"
-          variant="default"
-          size="sm"
-          onClick={handleSubmit}
-          disabled={submitDisabled}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-1.5 size-3.5 animate-spin" />
-              Submitting Pull Request…
-            </>
-          ) : (
-            <>
-              <GitPullRequest className="mr-1.5 size-3.5" />
-              Submit Pull Request
-            </>
-          )}
-        </Button>
-      </div>
+      <CommitAuthorToggle
+        authorName={authorName}
+        isSubmitting={isSubmitting}
+        noreplyEmail={noreplyEmail}
+        onChange={setUseRealEmail}
+        realEmail={realEmail}
+        toggleLabel={t("editorRealEmailToggleLabel")}
+        useRealEmail={useRealEmail}
+      />
+      <DiffValidationMessage message={validationMessage} />
+      <SubmitActions
+        isSubmitting={isSubmitting}
+        onClose={onClose}
+        onSubmit={handleSubmit}
+        submitDisabled={isSubmitting || !canSubmit || operations.length === 0}
+      />
     </div>
   )
 }

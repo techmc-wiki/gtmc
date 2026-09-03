@@ -4,7 +4,11 @@ import type { ReactNode } from "react"
 import type { RehypeShikiPlugin } from "@/lib/markdown/syntax/rehype-shiki"
 import type { CodeReference } from "@/lib/markdown/code-provenance"
 import { getMarkdownComponents } from "@/lib/markdown/components"
-import { getPluginsForContent } from "@/lib/markdown/pipeline/react"
+import {
+  buildRehypePlugins,
+  buildRemarkPlugins,
+} from "@/lib/markdown/pipeline/core"
+import { rehypeCJKSpacingBrowser } from "@/lib/markdown/transforms/rehype-cjk-spacing.browser"
 
 interface MarkdownRendererProps {
   content: string
@@ -24,11 +28,12 @@ export function MarkdownRenderer({
   codeReferences,
   headingAction,
 }: MarkdownRendererProps) {
-  const { remarkPlugins, rehypePlugins } = getPluginsForContent(
-    content,
+  const remarkPlugins = buildRemarkPlugins()
+  const rehypePlugins = buildRehypePlugins({
     shikiPlugin,
-    codeReferences
-  )
+    codeReferences,
+    cjkSpacingPlugin: rehypeCJKSpacingBrowser,
+  })
 
   return (
     <ReactMarkdown

@@ -6,9 +6,6 @@ import type { CodeReference } from "@/lib/markdown/code-provenance"
 import type { ArticleLocale, TranslationStatusDetail } from "./manifest"
 
 export interface ArticleContentArtifact {
-  slug: string
-  locale: ArticleLocale
-  filePath: string
   content: string
   frontmatter: Record<string, unknown>
   codeReferences: CodeReference[]
@@ -77,9 +74,6 @@ function isCodeReference(value: unknown, expectedIndex: number): boolean {
  * boundaries) or `%` (which can be misinterpreted in some filesystem contexts).
  * The tilde (`~`) is chosen as a safe, printable ASCII replacement for `%`.
  *
- * The reverse mapping is unnecessary because the original slug is stored
- * inside the artifact JSON, so decoding can be done via artifact content.
- *
  * @example
  *   artifactFilename("preface")                      // => "preface"
  *   artifactFilename("TreeFarm/foo")                 // => "TreeFarm~2Ffoo"
@@ -99,7 +93,7 @@ export function artifactFilename(slug: string): string {
 function parseArticleContentArtifact(
   raw: string,
   slug: string,
-  filePath: string
+  artifactPath: string
 ): ArticleContentArtifact | null {
   let parsed: unknown
   try {
@@ -107,24 +101,24 @@ function parseArticleContentArtifact(
   } catch {
     if (process.env.NODE_ENV === "development") {
       console.warn(
-        `[article-content-store] Invalid JSON in artifact for slug "${slug}": ${filePath}`
+        `[article-content-store] Invalid JSON in artifact for slug "${slug}": ${artifactPath}`
       )
       return null
     }
     throw new Error(
-      `[article-content-store] Invalid JSON in artifact for slug "${slug}": ${filePath}`
+      `[article-content-store] Invalid JSON in artifact for slug "${slug}": ${artifactPath}`
     )
   }
 
   const fail = (field: string): ArticleContentArtifact | null => {
     if (process.env.NODE_ENV === "development") {
       console.warn(
-        `[article-content-store] Artifact for slug "${slug}" has invalid/missing field "${field}": ${filePath}`
+        `[article-content-store] Artifact for slug "${slug}" has invalid/missing field "${field}": ${artifactPath}`
       )
       return null
     }
     throw new Error(
-      `[article-content-store] Artifact for slug "${slug}" has invalid/missing field "${field}": ${filePath}`
+      `[article-content-store] Artifact for slug "${slug}" has invalid/missing field "${field}": ${artifactPath}`
     )
   }
 
@@ -134,9 +128,6 @@ function parseArticleContentArtifact(
 
   const obj = parsed as Record<string, unknown>
 
-  if (typeof obj.slug !== "string") return fail("slug")
-  if (obj.locale !== "zh" && obj.locale !== "en") return fail("locale")
-  if (typeof obj.filePath !== "string") return fail("filePath")
   if (typeof obj.content !== "string") return fail("content")
   if (
     typeof obj.frontmatter !== "object" ||
@@ -175,18 +166,6 @@ function parseArticleContentArtifact(
     ) {
       return fail("translationStatus")
     }
-  }
-
-  if (obj.slug !== slug) {
-    if (process.env.NODE_ENV === "development") {
-      console.warn(
-        `[article-content-store] Artifact slug mismatch for "${slug}": expected "${slug}", got "${obj.slug}": ${filePath}`
-      )
-      return null
-    }
-    throw new Error(
-      `[article-content-store] Artifact slug mismatch for "${slug}": expected "${slug}", got "${obj.slug}": ${filePath}`
-    )
   }
 
   return obj as unknown as ArticleContentArtifact

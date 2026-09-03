@@ -176,11 +176,11 @@ export async function GET(
   })()
   if (!artifact) return new Response("Not Found", { status: 404 })
 
-  const filePath = artifact.filePath
   const content = artifact.content
   const siteUrl = getSiteUrl()
 
   const manifestEntry = await getCachedLocalizedArticleEntry(slugPath, locale)
+  const filePath = manifestEntry?.filePath
   const parentEntry = manifestEntry?.parentSlug
     ? await getCachedLocalizedArticleEntry(manifestEntry.parentSlug, locale)
     : null

@@ -20,36 +20,14 @@ import { rehypeLinkedCode } from "../transforms/rehype-linked-code"
 import type { CodeReference } from "../code-provenance"
 import type { RehypeShikiPlugin } from "../syntax/rehype-shiki"
 
-/**
- * Options for building markdown plugin lists.
- */
-export interface PipelineOptions {
-  /** Include wikilink syntax support (default: false) */
+interface RemarkPipelineOptions {
   includeWikilinks?: boolean
-
-  /** Include math/KaTeX support (auto-detected if not set) */
-  includeMath?: boolean
-
-  /** Include Shiki syntax highlighting */
-  includeShiki?: boolean
-
-  /** Shiki plugin instance (required if includeShiki is true) */
-  shikiPlugin?: RehypeShikiPlugin
-
-  /** Generated Java code references for the current article */
-  codeReferences?: readonly CodeReference[]
-
-  /** CJK spacing plugin for the active runtime */
-  cjkSpacingPlugin?: PluggableList[number]
 }
 
-/**
- * Detect whether content contains math expressions that need KaTeX.
- */
-function hasMathContent(content: string): boolean {
-  return (
-    content.includes("$") || content.includes("\\(") || content.includes("\\[")
-  )
+interface RehypePipelineOptions {
+  shikiPlugin?: RehypeShikiPlugin
+  codeReferences?: readonly CodeReference[]
+  cjkSpacingPlugin: PluggableList[number]
 }
 
 /**
@@ -58,8 +36,7 @@ function hasMathContent(content: string): boolean {
  * Shared between React renderer and PDF pipeline to eliminate duplication.
  */
 export function buildRemarkPlugins(
-  content: string,
-  options: PipelineOptions = {}
+  options: RemarkPipelineOptions = {}
 ): PluggableList {
   const plugins: PluggableList = [
     remarkGfm,
@@ -72,15 +49,11 @@ export function buildRemarkPlugins(
     [remarkNumberedHeadingsDot, { startDepth: 2 }],
   ]
 
-  // Insert wikilinks early if requested
   if (options.includeWikilinks) {
     plugins.splice(2, 0, remarkWikilinks)
   }
 
-  // Add math support if requested or auto-detected
-  if (options.includeMath || hasMathContent(content)) {
-    plugins.push(remarkMath)
-  }
+  plugins.push(remarkMath)
 
   return plugins
 }
@@ -91,7 +64,7 @@ export function buildRemarkPlugins(
  * Shared between React renderer and PDF pipeline to eliminate duplication.
  */
 export function buildRehypePlugins(
-  options: PipelineOptions = {}
+  options: RehypePipelineOptions
 ): PluggableList {
   const plugins: PluggableList = [
     rehypeRaw,
@@ -102,23 +75,12 @@ export function buildRehypePlugins(
     rehypeSlug,
   ]
 
-  // Add Shiki syntax highlighting if available
-  if (options.includeShiki && options.shikiPlugin) {
+  if (options.shikiPlugin) {
     plugins.push(options.shikiPlugin)
   }
 
-  // Add KaTeX for math rendering
-  if (options.includeMath) {
-    plugins.push(rehypeKatex)
-  }
-
-  // CJK spacing should run last (after all other transforms)
-  if (options.cjkSpacingPlugin) {
-    plugins.push(options.cjkSpacingPlugin)
-  }
+  plugins.push(rehypeKatex)
+  plugins.push(options.cjkSpacingPlugin)
 
   return plugins
 }
-
-// Re-export transforms for direct access if needed
-export { rehypeLinkedCode } from "../transforms/rehype-linked-code"

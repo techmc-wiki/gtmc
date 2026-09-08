@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "bash scripts/vercel-install.sh",
-  "buildCommand": "export PNPM_HOME=\"${PNPM_HOME:-$HOME/.local/share/pnpm}\" && export PATH=\"$PNPM_HOME/bin:$PATH\" && pnpm build:vercel"
+  "buildCommand": "export PNPM_HOME=\"${PNPM_HOME:-$HOME/.local/share/pnpm}\" && export PATH=\"$PNPM_HOME/bin:$PATH\" && pnpm build:vercel",
+  "ignoreCommand": "if echo \"$VERCEL_GIT_COMMIT_MESSAGE\" | grep -q '\\[skip vercel\\]'; then exit 0; else exit 1; fi"
 }

@@ -18,7 +18,6 @@ import { toast } from "sonner"
 import { useDraftImageUpload } from "@/hooks/use-draft-image-upload"
 import type { OperationProgressState } from "@/components/ui/operation-progress"
 import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
-import type { TabType } from "@/components/editor/editor-tab-strip"
 
 const MAX_DRAFT_HISTORY_ENTRIES = 100
 
@@ -108,8 +107,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
   const [submitProgressState, setSubmitProgressState] =
     React.useState<OperationProgressState>("idle")
   const [saveError, setSaveError] = React.useState<string | null>(null)
-  const [activeTab, setActiveTab] = React.useState<TabType>("write")
-  const [lineWrap, setLineWrap] = React.useState(false)
+  const [lineWrap, setLineWrap] = React.useState(true)
   const [activeInfoTab, setActiveInfoTab] = React.useState<"changes" | "guide">(
     "changes"
   )
@@ -744,19 +742,20 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
   React.useEffect(() => {
     let cancelled = false
     const controller = new AbortController()
+    const snapshotRequests = repoSnapshotRequestsRef.current
     const pendingFiles = draftCollection.files.filter((file) => {
       const normalizedPath = normalizeDraftFilePath(file.filePath)
       if (!normalizedPath) return false
       const snapshot = repoSnapshots[file.id]
       return (
         (!snapshot || snapshot.filePath !== normalizedPath) &&
-        repoSnapshotRequestsRef.current[file.id] !== normalizedPath
+        snapshotRequests[file.id] !== normalizedPath
       )
     })
     for (const file of pendingFiles) {
       const normalizedPath = normalizeDraftFilePath(file.filePath)
       if (!normalizedPath) continue
-      repoSnapshotRequestsRef.current[file.id] = normalizedPath
+      snapshotRequests[file.id] = normalizedPath
       void (async () => {
         try {
           const response = await fetch(
@@ -816,6 +815,14 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     return () => {
       cancelled = true
       controller.abort()
+      // A content edit can interrupt comparisons; allow the next effect to retry.
+      for (const file of pendingFiles) {
+        if (
+          snapshotRequests[file.id] === normalizeDraftFilePath(file.filePath)
+        ) {
+          delete snapshotRequests[file.id]
+        }
+      }
     }
   }, [draftCollection.files, repoSnapshots])
 
@@ -842,7 +849,6 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
       saveError,
       saveProgressState,
       submitProgressState,
-      activeTab,
       lineWrap,
       activeInfoTab,
       activeGuideId,
@@ -868,7 +874,6 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
       setTitle,
       setDraftCollection,
       setFileDialogIntent,
-      setActiveTab,
       setLineWrap,
       setActiveInfoTab,
       setActiveGuideId,

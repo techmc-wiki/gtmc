@@ -22,20 +22,42 @@ import {
   type DraftFileCollection,
 } from "@/lib/drafts/files"
 import { OperationProgress } from "@/components/ui/operation-progress"
-import {
-  EditorSurface,
-  EditorContentArea,
-  EditorWritePanel,
-  EditorPreviewPanel,
-  EditorPreviewFrame,
-  EditorSplitLayout,
-} from "@/components/editor/editor-frames"
+import { EditorPreviewFrame } from "@/components/editor/editor-frames"
 import {
   ResizableHandle,
   ResizablePanel,
+  ResizablePanelGroup,
 } from "@/components/ui/shadcn/resizable"
-import { Tabs } from "@/components/ui/shadcn/tabs"
-import type { TabType } from "@/components/editor/editor-tab-strip"
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/ui/shadcn/tabs"
+import { Button } from "@/components/ui/shadcn/button"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/shadcn/sheet"
+import {
+  PenLineIcon,
+  Columns2Icon,
+  EyeIcon,
+  GitPullRequestIcon,
+  BookOpenIcon,
+} from "lucide-react"
+import { cn } from "@/lib/cn"
+import { EditorIconButton } from "@/components/editor/editor-icon-button"
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/shadcn/tooltip"
+import styles from "@/components/editor/draft-editor.module.css"
 
 interface DraftEditorProps {
   initialData?: {
@@ -103,7 +125,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             : file
         ),
       }))
-      actions.setActiveTab("write")
       actions.setFileDialogIntent(null)
       return true
     }
@@ -113,7 +134,6 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       folders: current.folders || [],
       files: [...current.files, nextFile],
     }))
-    actions.setActiveTab("write")
     actions.setFileDialogIntent(null)
     return true
   }
@@ -132,7 +152,11 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             },
           ]
         }
-        if (!snapshot || snapshot.status === "loading") {
+        if (
+          !snapshot ||
+          snapshot.filePath !== normalizedPath ||
+          snapshot.status === "loading"
+        ) {
           return [
             {
               changeType: "pending",
@@ -151,7 +175,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           ]
         }
         if (snapshot.status === "error" || snapshot.content === null) {
-          return []
+          return [{ changeType: "error", file, rows: [] }]
         }
         if (snapshot.content === file.content) {
           return []
@@ -190,14 +214,14 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
   const handleCreateFolder = (folderPath: string) => {
     const normalizedFolderPath = normalizeDraftFolderPath(folderPath)
     if (!normalizedFolderPath) {
-      toast.error("Invalid folder name", { duration: 2800 })
+      toast.error(t("invalidFolder"), { duration: 2800 })
       return false
     }
     actions.updateDraftCollection((current) => ({
       ...current,
       folders: [...(current.folders || []), normalizedFolderPath],
     }))
-    toast.success("Folder ready", { duration: 2000 })
+    toast.success(t("folderReady"), { duration: 2000 })
     actions.setFileDialogIntent(null)
     return true
   }
@@ -242,185 +266,392 @@ function DraftEditorSurface({
 }: DraftEditorSurfaceProps) {
   const { state, refs, upload, progress, t, progressT } = hook
 
+  const [mode, setMode] = React.useState<"write" | "split" | "preview">("write")
+  const [inspectorOpen, setInspectorOpen] = React.useState(false)
+  React.useEffect(() => {
+    const viewport = window.matchMedia("(min-width: 48rem)")
+    const adaptMode = () => {
+      if (!viewport.matches) {
+        setMode((current) => (current === "split" ? "write" : current))
+      }
+    }
+    adaptMode()
+    viewport.addEventListener("change", adaptMode)
+    return () => viewport.removeEventListener("change", adaptMode)
+  }, [])
+  const openInspector = (tab: "changes" | "guide") => {
+    actions.setActiveInfoTab(tab)
+    setInspectorOpen(true)
+  }
+  const submissionIssues = [
+    ...(!state.title.trim() ? [t("titleRequired")] : []),
+    ...(state.hasMissingFilePath ? [t("badgeAllFilesNeedPath")] : []),
+    ...(state.duplicateFilePaths.length
+      ? [
+          t("duplicatePathsError", {
+            paths: state.duplicateFilePaths.join(", "),
+          }),
+        ]
+      : []),
+  ]
+
   return (
-    <EditorSurface>
-      <DraftEditorHeader
-        isReadOnly={state.isReadOnly}
-        onTitleChange={actions.setTitle}
-        save={{
-          busy: state.isSaving,
-          disabled: state.saveDisabled,
-          onClick: actions.saveDraft,
-        }}
-        status={
-          state.saveError
-            ? { kind: "error", message: state.saveError }
-            : state.isSaving
-              ? { kind: "saving" }
-              : state.hasUnsavedChanges
-                ? { kind: "unsaved" }
-                : { kind: "saved" }
-        }
-        submit={{
-          busy: state.isSubmitting,
-          disabled: state.submitDisabled,
-          label: state.isSubmitting ? progressT("submitBusy") : t("openPr"),
-          onClick: actions.handleSubmitDraft,
-        }}
-        title={state.title}
-      />
-      {state.githubPrUrl ? (
-        <div className="guide-line bg-tech-main/5 text-tech-main flex items-center justify-between gap-3 border px-4 py-3 font-mono text-xs">
-          <span>{t("prStreamActive")}</span>
-          <a
-            href={state.githubPrUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="underline underline-offset-4">
-            {t("openGithubPr")}
-          </a>
-        </div>
-      ) : null}
-      <DraftFileNavigator
-        files={state.draftCollection.files}
-        activeFileId={state.draftCollection.activeFileId}
-        activeFile={state.activeFile}
-        unsavedFileIds={state.unsavedFileIds}
-        onSelectFile={(fileId) =>
-          actions.setDraftCollection((current) => ({
-            ...current,
-            activeFileId: fileId,
-          }))
-        }
-        onRemoveFile={handleRemoveFile}
-        isReadOnly={state.isReadOnly}
-        activeFileHasDuplicatePath={state.activeFileHasDuplicatePath}
-        duplicateFilePaths={state.duplicateFilePaths}
-        onOpenFileDialog={actions.openFileDialog}
-        onSetInsertDialogIntent={actions.setInsertDialogIntent}
-      />
-      <EditorContentArea>
-        <Tabs
-          value={state.activeTab}
-          onValueChange={(value) => actions.setActiveTab(value as TabType)}
-          className="flex min-h-0 grow flex-col">
-          <DraftEditorToolbar
-            activeTab={state.activeTab}
-            activeFile={state.activeFile}
-            activeFileIndex={state.activeFileIndex}
-            lineWrap={state.lineWrap}
-            onWrapToggle={() => actions.setLineWrap((value) => !value)}
-            readOnly={state.isReadOnly}
-            uploading={upload.isUploading}
-            fileInputRef={refs.fileInputRef}
-            onFileSelect={actions.handleUploadWithAutoSave}
-            compressing={upload.isCompressing}
-            onInsertSyntax={actions.insertSyntax}
-            onInsertText={actions.insertTextAtCursor}
-            onUndo={actions.handleUndoDraftEdit}
-            onRedo={actions.handleRedoDraftEdit}
-            canUndo={Boolean(state.activeFileHistoryAvailability?.undoCount)}
-            canRedo={Boolean(state.activeFileHistoryAvailability?.redoCount)}
-          />
-          <EditorSplitLayout>
-            <ResizablePanel
-              id="write"
-              defaultSize="50"
-              minSize="25"
-              className="flex">
-              <EditorWritePanel value="write">
-                <EditorTextareaDynamic
-                  ref={refs.textareaRef}
-                  value={state.activeFileContent}
-                  onChange={(value) =>
-                    actions.updateActiveFile({ content: value })
-                  }
-                  onUndo={actions.handleUndoDraftEdit}
-                  onRedo={actions.handleRedoDraftEdit}
-                  onPaste={actions.handlePaste}
-                  onDrop={actions.handleDrop}
-                  onDragOver={(event) => {
-                    if (!state.isReadOnly) event.preventDefault()
-                  }}
-                  onDragEnter={(event) => {
-                    if (!state.isReadOnly) event.preventDefault()
-                  }}
-                  readOnly={state.isReadOnly}
-                  saving={state.isSaving}
-                  placeholder={t("contentPlaceholder")}
-                  lineWrap={state.lineWrap}
-                  canUndo={Boolean(
-                    state.activeFileHistoryAvailability?.undoCount
-                  )}
-                  canRedo={Boolean(
-                    state.activeFileHistoryAvailability?.redoCount
-                  )}
-                  enableSyntaxHints
-                />
-              </EditorWritePanel>
-            </ResizablePanel>
-            <ResizableHandle className="bg-tech-main/20 hover:bg-tech-main/40 hidden w-px transition-colors md:flex" />
-            <ResizablePanel
-              id="preview"
-              defaultSize="50"
-              minSize="25"
-              className="flex">
-              <EditorPreviewPanel value="preview">
-                <EditorPreviewFrame isEmpty={!state.activeFileContent.trim()}>
-                  <LazyMarkdownPreview
-                    content={state.activeFileContent}
-                    rawPath={state.activeFile.filePath || ""}
-                  />
-                </EditorPreviewFrame>
-              </EditorPreviewPanel>
-            </ResizablePanel>
-          </EditorSplitLayout>
-        </Tabs>
-      </EditorContentArea>
-      <DraftEditorReview
-        activeTab={state.activeInfoTab}
-        changeEntries={changeEntries}
-        contributingGuides={state.contributingGuides}
-        folders={state.draftCollection.folders}
-        selectedGuideId={state.activeGuideId}
-        onSelectTab={actions.setActiveInfoTab}
-        onSelectGuide={actions.setActiveGuideId}
-      />
-      {!state.isReadOnly && (
-        <DraftEditorStatusPanels
-          progress={progress}
-          progressT={progressT}
-          saveProgressState={state.saveProgressState}
-          submitProgressState={state.submitProgressState}
-          t={t}
+    <TooltipProvider>
+      <div className="border-tech-main/25 bg-surface w-full min-w-0 border">
+        <DraftEditorHeader
+          onOpenGuide={() => openInspector("guide")}
+          isReadOnly={state.isReadOnly}
+          onTitleChange={actions.setTitle}
+          save={{
+            busy: state.isSaving,
+            disabled: state.saveDisabled,
+            onClick: actions.saveDraft,
+          }}
+          status={
+            state.saveError
+              ? { kind: "error", message: state.saveError }
+              : state.isSaving
+                ? { kind: "saving" }
+                : state.hasUnsavedChanges
+                  ? { kind: "unsaved" }
+                  : { kind: "saved" }
+          }
+          submit={{
+            busy: state.isSubmitting,
+            disabled: state.isSubmitting,
+            onClick: () => openInspector("changes"),
+          }}
+          title={state.title}
         />
-      )}
-      <DraftFileSourceDialog
-        key={
-          state.fileDialogIntent
-            ? `${state.fileDialogIntent.kind}:${state.fileDialogIntent.initialMode}:${getParentFolderPath(state.activeFile.filePath)}`
-            : "closed:file-dialog"
-        }
-        isOpen={state.fileDialogIntent !== null}
-        initialFolderPath={getParentFolderPath(state.activeFile.filePath)}
-        initialMode={state.fileDialogIntent?.initialMode}
-        onClose={() => actions.setFileDialogIntent(null)}
-        onCreate={handleApplyDraftFileSource}
-        onCreateFolder={handleCreateFolder}
-      />
-      <DraftFileSourceDialog
-        key={
-          state.insertDialogIntent
-            ? `insert:${getParentFolderPath(state.activeFile.filePath)}`
-            : "closed:insert-dialog"
-        }
-        isOpen={state.insertDialogIntent}
-        initialFolderPath={getParentFolderPath(state.activeFile.filePath)}
-        initialMode="repo"
-        onClose={() => actions.setInsertDialogIntent(false)}
-        onCreate={handleInsertSelectedFile}
-      />
-    </EditorSurface>
+        {state.githubPrUrl ? (
+          <div className="guide-line bg-tech-main/5 text-tech-main flex items-center justify-between gap-3 border px-4 py-3 font-mono text-xs">
+            <span>{t("prStreamActive")}</span>
+            <a
+              href={state.githubPrUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-4">
+              {t("openGithubPr")}
+            </a>
+          </div>
+        ) : null}
+        <Tabs
+          value={mode}
+          onValueChange={(value) => {
+            if (value === "write" || value === "split" || value === "preview") {
+              setMode(value)
+            }
+          }}
+          className="min-w-0">
+          <DraftFileNavigator
+            headerActions={
+              <>
+                <TabsList aria-label={t("editorModeAria")} className="gap-0">
+                  {[
+                    { value: "write", label: t("writeTab"), icon: PenLineIcon },
+                    {
+                      value: "split",
+                      label: t("splitView"),
+                      icon: Columns2Icon,
+                    },
+                    { value: "preview", label: t("previewTab"), icon: EyeIcon },
+                  ].map(({ value, label, icon: Icon }) => (
+                    <Tooltip key={value}>
+                      <TooltipTrigger asChild>
+                        <TabsTrigger
+                          value={value}
+                          aria-label={label}
+                          className={cn(
+                            "size-11 border-0 bg-transparent p-0 shadow-none data-[state=active]:bg-tech-main/10 data-[state=active]:text-tech-main-dark data-[state=active]:shadow-[inset_0_-2px_0_var(--color-tech-signal)]",
+                            value === "split" && "hidden md:flex"
+                          )}>
+                          <Icon aria-hidden className="size-4" />
+                        </TabsTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>{label}</TooltipContent>
+                    </Tooltip>
+                  ))}
+                </TabsList>
+                <EditorIconButton
+                  label={t("reviewChanges")}
+                  onClick={() => openInspector("changes")}>
+                  <GitPullRequestIcon aria-hidden />
+                </EditorIconButton>
+              </>
+            }
+            onRenameFile={(path) => {
+              const normalized = normalizeDraftFilePath(path)
+              if (!normalized) return false
+              if (
+                state.draftCollection.files.some(
+                  (file) =>
+                    file.id !== state.activeFile.id &&
+                    normalizeDraftFilePath(file.filePath) === normalized
+                )
+              ) {
+                toast.error(t("badgeFileAlreadyExists"))
+                return false
+              }
+              actions.updateActiveFile({ filePath: normalized })
+              return true
+            }}
+            files={state.draftCollection.files}
+            activeFileId={state.draftCollection.activeFileId}
+            activeFile={state.activeFile}
+            unsavedFileIds={state.unsavedFileIds}
+            onSelectFile={(fileId) => {
+              actions.setDraftCollection((current) => ({
+                ...current,
+                activeFileId: fileId,
+              }))
+              setMode("write")
+            }}
+            onRemoveFile={handleRemoveFile}
+            isReadOnly={state.isReadOnly}
+            activeFileHasDuplicatePath={state.activeFileHasDuplicatePath}
+            duplicateFilePaths={state.duplicateFilePaths}
+            onOpenFileDialog={actions.openFileDialog}
+            onSetInsertDialogIntent={(open) => {
+              if (open) setMode("write")
+              actions.setInsertDialogIntent(open)
+            }}>
+            <div className="flex min-w-0 flex-col">
+              <TabsContent value={mode} className="min-w-0">
+                {mode !== "preview" && (
+                  <DraftEditorToolbar
+                    lineWrap={state.lineWrap}
+                    onWrapToggle={() => actions.setLineWrap((value) => !value)}
+                    readOnly={state.isReadOnly}
+                    uploading={upload.isUploading}
+                    fileInputRef={refs.fileInputRef}
+                    onFileSelect={actions.handleUploadWithAutoSave}
+                    compressing={upload.isCompressing}
+                    onInsertSyntax={actions.insertSyntax}
+                    onInsertText={actions.insertTextAtCursor}
+                    onUndo={actions.handleUndoDraftEdit}
+                    onRedo={actions.handleRedoDraftEdit}
+                    canUndo={Boolean(
+                      state.activeFileHistoryAvailability?.undoCount
+                    )}
+                    canRedo={Boolean(
+                      state.activeFileHistoryAvailability?.redoCount
+                    )}
+                  />
+                )}
+                <ResizablePanelGroup
+                  orientation="horizontal"
+                  data-mode={mode}
+                  className={cn(styles.workspace, "min-w-0")}>
+                  <ResizablePanel
+                    id="write"
+                    defaultSize="50%"
+                    minSize="25%"
+                    className="h-full min-w-0">
+                    <section
+                      aria-label={t("writeTab")}
+                      className="h-full w-full min-w-0 overflow-auto [&_.cm-editor]:min-h-full [&_.cm-editor]:bg-transparent! [&_.cm-scroller]:overflow-auto [&>div]:h-full">
+                      <EditorTextareaDynamic
+                        key={state.activeFile.id}
+                        ref={refs.textareaRef}
+                        value={state.activeFileContent}
+                        onChange={(value) =>
+                          actions.updateActiveFile({ content: value })
+                        }
+                        onUndo={actions.handleUndoDraftEdit}
+                        onRedo={actions.handleRedoDraftEdit}
+                        onPaste={actions.handlePaste}
+                        onDrop={actions.handleDrop}
+                        onDragOver={(event) => {
+                          if (!state.isReadOnly) event.preventDefault()
+                        }}
+                        onDragEnter={(event) => {
+                          if (!state.isReadOnly) event.preventDefault()
+                        }}
+                        readOnly={state.isReadOnly}
+                        saving={state.isSaving}
+                        placeholder={t("contentPlaceholder")}
+                        lineWrap={state.lineWrap}
+                        canUndo={Boolean(
+                          state.activeFileHistoryAvailability?.undoCount
+                        )}
+                        canRedo={Boolean(
+                          state.activeFileHistoryAvailability?.redoCount
+                        )}
+                        enableSyntaxHints
+                      />
+                    </section>
+                  </ResizablePanel>
+                  <ResizableHandle
+                    withHandle
+                    className={cn(
+                      "bg-tech-main/20 hidden w-px",
+                      mode === "split" && "md:flex"
+                    )}
+                  />
+                  <ResizablePanel
+                    id="preview"
+                    defaultSize="50%"
+                    minSize="25%"
+                    className="h-full min-w-0">
+                    <section
+                      aria-label={t("previewTab")}
+                      className="bg-tech-bg/30 h-full overflow-y-auto">
+                      <EditorPreviewFrame
+                        isEmpty={!state.activeFileContent.trim()}
+                        emptyState={t("previewEmpty")}
+                        className="mx-auto max-w-3xl">
+                        <LazyMarkdownPreview
+                          content={state.activeFileContent}
+                          rawPath={state.activeFile.filePath || ""}
+                        />
+                      </EditorPreviewFrame>
+                    </section>
+                  </ResizablePanel>
+                </ResizablePanelGroup>
+              </TabsContent>
+              <div className="border-tech-main/20 text-tech-main flex flex-wrap items-center justify-between gap-2 border-t px-3 py-2 text-xs">
+                <span>
+                  {t("characterCount", {
+                    count: [...state.activeFileContent].length,
+                  })}{" "}
+                  ·{" "}
+                  {t("lineCount", {
+                    count: state.activeFileContent.split("\n").length,
+                  })}
+                </span>
+                <EditorIconButton
+                  label={t("syntaxHintsTitle")}
+                  onClick={() => openInspector("guide")}>
+                  <BookOpenIcon aria-hidden />
+                </EditorIconButton>
+              </div>
+            </div>
+          </DraftFileNavigator>
+        </Tabs>
+        <Sheet open={inspectorOpen} onOpenChange={setInspectorOpen}>
+          <SheetContent className="bg-surface-modal w-full gap-0 overflow-hidden p-0 sm:max-w-3xl">
+            <SheetHeader className="border-tech-main/20 border-b p-5 pr-12">
+              <SheetTitle>
+                {state.activeInfoTab === "changes"
+                  ? t("reviewAndSubmit")
+                  : t("writingGuide")}
+              </SheetTitle>
+              <SheetDescription>
+                {state.activeInfoTab === "changes"
+                  ? t("reviewDescription")
+                  : t("guideDescription")}
+              </SheetDescription>
+            </SheetHeader>
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              {state.activeInfoTab === "guide" && (
+                <section className="border-tech-main/20 space-y-2 border-b p-5 text-sm leading-relaxed">
+                  <h3 className="font-semibold">{t("syntaxHintsTitle")}</h3>
+                  <p>{t("syntaxHintsDescription")}</p>
+                  <p>{t("syntaxHintsShortcut")}</p>
+                </section>
+              )}
+              <DraftEditorReview
+                activeTab={state.activeInfoTab}
+                changeEntries={changeEntries}
+                contributingGuides={state.contributingGuides}
+                folders={state.draftCollection.folders}
+                selectedGuideId={state.activeGuideId}
+                onSelectTab={actions.setActiveInfoTab}
+                onSelectGuide={actions.setActiveGuideId}
+              />
+              {state.activeInfoTab === "changes" && !state.isReadOnly && (
+                <section
+                  aria-label={t("submissionLicenseAria")}
+                  className="border-tech-main/20 space-y-2 border-t p-5 text-sm leading-relaxed">
+                  <h3 className="font-semibold">
+                    {t("submissionLicenseTitle")}
+                  </h3>
+                  <p>{t("submissionLicenseIntro")}</p>
+                  <p>
+                    {t("submissionLicenseReusePrefix")}{" "}
+                    <a
+                      className="underline underline-offset-4"
+                      href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+                      target="_blank"
+                      rel="noopener noreferrer">
+                      CC BY-NC-SA 4.0
+                    </a>
+                    {t("submissionLicenseReuseSuffix")}
+                  </p>
+                  <p>{t("submissionLicenseAttribution")}</p>
+                </section>
+              )}
+            </div>
+            {state.activeInfoTab === "changes" && !state.isReadOnly && (
+              <div className="border-tech-main/25 space-y-3 border-t p-5">
+                {submissionIssues.length > 0 && (
+                  <ul className="list-disc space-y-1 pl-4 text-sm text-amber-800 dark:text-amber-300">
+                    {submissionIssues.map((issue) => (
+                      <li key={issue}>{issue}</li>
+                    ))}
+                  </ul>
+                )}
+                <p className="text-tech-main text-xs">
+                  {t("submitSavesChanges")}
+                </p>
+                <Button
+                  className="w-full"
+                  onClick={actions.handleSubmitDraft}
+                  disabled={state.submitDisabled}
+                  aria-busy={state.isSubmitting}>
+                  <GitPullRequestIcon aria-hidden className="size-4" />
+                  {state.isSubmitting ? progressT("submitBusy") : t("openPr")}
+                </Button>
+              </div>
+            )}
+          </SheetContent>
+        </Sheet>
+        {!state.isReadOnly && (
+          <div className="px-4">
+            <DraftEditorStatusPanels
+              progress={progress}
+              progressT={progressT}
+              saveProgressState={state.saveProgressState}
+              submitProgressState={state.submitProgressState}
+            />
+          </div>
+        )}
+        <DraftFileSourceDialog
+          key={
+            state.fileDialogIntent
+              ? `${state.fileDialogIntent.kind}:${state.fileDialogIntent.initialMode}:${getParentFolderPath(state.activeFile.filePath)}`
+              : "closed:file-dialog"
+          }
+          description={
+            state.fileDialogIntent?.kind === "replace"
+              ? t("replaceFileWarning")
+              : undefined
+          }
+          isOpen={state.fileDialogIntent !== null}
+          initialFolderPath={getParentFolderPath(state.activeFile.filePath)}
+          initialMode={state.fileDialogIntent?.initialMode}
+          onClose={() => actions.setFileDialogIntent(null)}
+          onCreate={(input) => {
+            const applied = handleApplyDraftFileSource(input)
+            if (applied) setMode("write")
+            return applied
+          }}
+          onCreateFolder={handleCreateFolder}
+        />
+        <DraftFileSourceDialog
+          key={
+            state.insertDialogIntent
+              ? `insert:${getParentFolderPath(state.activeFile.filePath)}`
+              : "closed:insert-dialog"
+          }
+          isOpen={state.insertDialogIntent}
+          initialFolderPath={getParentFolderPath(state.activeFile.filePath)}
+          initialMode="repo"
+          onClose={() => actions.setInsertDialogIntent(false)}
+          onCreate={handleInsertSelectedFile}
+        />
+      </div>
+    </TooltipProvider>
   )
 }
 
@@ -429,7 +660,6 @@ function DraftEditorStatusPanels({
   progressT,
   saveProgressState,
   submitProgressState,
-  t,
 }: {
   progress: ReturnType<typeof useDraftEditor>["progress"]
   progressT: ReturnType<typeof useDraftEditor>["progressT"]
@@ -439,7 +669,6 @@ function DraftEditorStatusPanels({
   submitProgressState: ReturnType<
     typeof useDraftEditor
   >["state"]["submitProgressState"]
-  t: ReturnType<typeof useDraftEditor>["t"]
 }) {
   return (
     <>
@@ -457,33 +686,6 @@ function DraftEditorStatusPanels({
         successLabel={progressT("submitSuccess")}
         errorLabel={progressT("submitError")}
       />
-      <section
-        aria-label={t("submissionLicenseAria")}
-        className="guide-line bg-tech-main/5 text-tech-main/80 mt-4 border p-4 font-mono text-[0.6875rem] leading-relaxed">
-        <div className="border-tech-main/15 mb-3 border-b pb-3">
-          <p className="section-label">{t("syntaxHintsTitle")}</p>
-          <p className="text-tech-main/70 mt-2">
-            {t("syntaxHintsDescription")}
-          </p>
-          <p className="text-tech-main/55 mt-1">{t("syntaxHintsShortcut")}</p>
-        </div>
-        <p className="section-label">{t("submissionLicenseTitle")}</p>
-        <div className="mt-2 space-y-2">
-          <p>{t("submissionLicenseIntro")}</p>
-          <p>
-            {t("submissionLicenseReusePrefix")}{" "}
-            <a
-              href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="decoration-tech-main/30 hover:text-tech-main-dark hover:decoration-tech-main-dark underline underline-offset-4 transition-colors">
-              CC BY-NC-SA 4.0
-            </a>
-            {t("submissionLicenseReuseSuffix")}
-          </p>
-          <p>{t("submissionLicenseAttribution")}</p>
-        </div>
-      </section>
     </>
   )
 }
@@ -510,8 +712,11 @@ function buildDiffRows(previousContent: string, nextContent: string) {
         newLine: null,
         oldLine: null,
         type: "skipped",
-        value: `${values.length - 4} unchanged lines`,
+        value: String(values.length - 4),
+        skippedLines: values.length - 4,
       })
+      oldLine += values.length - 4
+      newLine += values.length - 4
       for (const line of values.slice(-2)) {
         rows.push({ newLine, oldLine, type: "context", value: line })
         oldLine += 1

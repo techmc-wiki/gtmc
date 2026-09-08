@@ -1,14 +1,22 @@
 "use client"
 
 import * as React from "react"
-import { MoreHorizontalIcon, Redo2Icon, Undo2Icon } from "lucide-react"
-import { EditorToolbar } from "@/components/editor/editor-toolbar"
-import { DraftImageUploadInput } from "@/components/editor/draft-image-upload-input"
+import { useTranslations } from "next-intl"
 import {
-  EditorTabStrip,
-  type TabType,
-} from "@/components/editor/editor-tab-strip"
-import { Button } from "@/components/ui/shadcn/button"
+  BoldIcon,
+  ItalicIcon,
+  LinkIcon,
+  CodeIcon,
+  Heading2Icon,
+  ImagePlusIcon,
+  ListIcon,
+  PlusIcon,
+  Redo2Icon,
+  Undo2Icon,
+  WrapTextIcon,
+  LoaderCircleIcon,
+} from "lucide-react"
+import { EditorIconButton } from "@/components/editor/editor-icon-button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,9 +25,6 @@ import {
 } from "@/components/ui/shadcn/dropdown-menu"
 
 interface DraftEditorToolbarProps {
-  activeTab: TabType
-  activeFile: { filePath: string }
-  activeFileIndex: number
   lineWrap: boolean
   onWrapToggle: () => void
   readOnly: boolean
@@ -36,9 +41,6 @@ interface DraftEditorToolbarProps {
 }
 
 export function DraftEditorToolbar({
-  activeTab,
-  activeFile,
-  activeFileIndex,
   lineWrap,
   onWrapToggle,
   readOnly,
@@ -53,95 +55,159 @@ export function DraftEditorToolbar({
   canUndo,
   canRedo,
 }: DraftEditorToolbarProps) {
-  const fileUploadSlot = React.useMemo(
-    () =>
-      !readOnly ? (
-        <DraftImageUploadInput
-          fileInputRef={fileInputRef}
-          onFileSelect={onFileSelect}
-          isUploading={uploading}
-          isCompressing={compressing}
-        />
-      ) : undefined,
-    [readOnly, fileInputRef, onFileSelect, uploading, compressing]
-  )
-
+  const t = useTranslations("Editor")
+  const disabled = readOnly || uploading
+  const tools = [
+    {
+      label: t("undo"),
+      icon: Undo2Icon,
+      action: onUndo,
+      disabled: readOnly || !canUndo,
+    },
+    {
+      label: t("redo"),
+      icon: Redo2Icon,
+      action: onRedo,
+      disabled: readOnly || !canRedo,
+    },
+    {
+      label: t("bold"),
+      icon: BoldIcon,
+      action: () => onInsertSyntax("**", "**"),
+      disabled,
+    },
+    {
+      label: t("italic"),
+      icon: ItalicIcon,
+      action: () => onInsertSyntax("*", "*"),
+      disabled,
+    },
+    {
+      label: t("sectionHeading"),
+      icon: Heading2Icon,
+      action: () => onInsertSyntax("## "),
+      disabled,
+    },
+    {
+      label: t("bulletList"),
+      icon: ListIcon,
+      action: () => onInsertSyntax("- "),
+      disabled,
+    },
+    {
+      label: t("toolbarLink"),
+      icon: LinkIcon,
+      action: () => onInsertSyntax("[", "](url)"),
+      disabled,
+    },
+    {
+      label: t("toolbarCode"),
+      icon: CodeIcon,
+      action: () => onInsertSyntax("`", "`"),
+      disabled,
+    },
+  ]
   return (
-    <>
-      <div className="md:hidden">
-        <EditorTabStrip
-          rightSlot={activeFile.filePath || `UNTITLED_FILE_${activeFileIndex}`}
-        />
-      </div>
-
-      {activeTab === "write" && (
-        <>
-          <EditorToolbar
-            onInsert={onInsertSyntax}
-            disabled={readOnly || uploading}
-            lineWrap={lineWrap}
-            onWrapToggle={onWrapToggle}
-            fileUploadSlot={fileUploadSlot}
-          />
-          <div className="border-tech-main/20 flex min-h-11 items-center justify-end gap-1 border-b px-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  disabled={readOnly}
-                  aria-label="Insert Markdown">
-                  <MoreHorizontalIcon aria-hidden className="size-4" />
-                  Insert
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="border-tech-main/40 bg-surface-modal rounded-none">
-                <DropdownMenuItem
-                  onSelect={() => onInsertText("\n## Section title\n\n")}>
-                  Section heading
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() =>
-                    onInsertText(
-                      "\n> [!TIP]\n> Add contributor guidance here.\n\n"
-                    )
-                  }>
-                  Callout
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() =>
-                    onInsertText(
-                      "\n| Parameter | Value | Notes |\n| --- | --- | --- |\n| Example | Value | Detail |\n\n"
-                    )
-                  }>
-                  Table
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button
+    <fieldset
+      className="border-tech-main/20 bg-surface flex w-full min-w-0 items-center gap-0.5 overflow-x-auto border-b px-2 py-1"
+      aria-label={t("formattingTools")}>
+      {tools.map(
+        ({ label, icon: Icon, action, disabled: toolDisabled }, index) => (
+          <React.Fragment key={label}>
+            {index === 2 && (
+              <span aria-hidden className="bg-tech-main/20 mx-1 h-5 w-px" />
+            )}
+            <EditorIconButton
               type="button"
               variant="ghost"
               size="sm"
-              disabled={readOnly || !canUndo}
-              onClick={onUndo}
-              aria-label="Undo">
-              <Undo2Icon aria-hidden className="size-4" />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={readOnly || !canRedo}
-              onClick={onRedo}
-              aria-label="Redo">
-              <Redo2Icon aria-hidden className="size-4" />
-            </Button>
-          </div>
-        </>
+              className="size-11 p-0"
+              label={label}
+              disabled={toolDisabled}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={action}>
+              <Icon aria-hidden className="size-4" />
+            </EditorIconButton>
+          </React.Fragment>
+        )
       )}
-    </>
+      <EditorIconButton
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="size-11 p-0"
+        label={
+          compressing
+            ? t("compressingImage")
+            : uploading
+              ? t("uploadingImage")
+              : t("uploadImage")
+        }
+        aria-busy={uploading}
+        disabled={disabled}
+        onClick={() => fileInputRef.current?.click()}>
+        {uploading ? (
+          <LoaderCircleIcon
+            aria-hidden
+            className="size-4 animate-spin motion-reduce:animate-none"
+          />
+        ) : (
+          <ImagePlusIcon aria-hidden className="size-4" />
+        )}
+      </EditorIconButton>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/gif,image/webp"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0]
+          if (file) onFileSelect(file)
+          event.target.value = ""
+        }}
+      />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <EditorIconButton
+            type="button"
+            variant="ghost"
+            size="sm"
+            label={t("insert")}
+            disabled={disabled}>
+            <PlusIcon aria-hidden className="size-4" />
+          </EditorIconButton>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          <DropdownMenuItem onSelect={() => onInsertText(t("calloutTemplate"))}>
+            {t("callout")}
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onInsertText(t("tableTemplate"))}>
+            {t("table")}
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onInsertSyntax("```\n", "\n```")}>
+            {t("codeBlock")}
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onInsertSyntax("$$\n", "\n$$")}>
+            {t("mathBlock")}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() =>
+              onInsertText("\n```java mc=1.20.1 mapping=yarn\n\n```\n")
+            }>
+            {t("javaSource")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <EditorIconButton
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="ml-auto size-11 p-0"
+        label={t("toolbarWrap")}
+        aria-pressed={lineWrap}
+        onClick={onWrapToggle}>
+        <WrapTextIcon aria-hidden className="size-4" />
+      </EditorIconButton>
+    </fieldset>
   )
 }

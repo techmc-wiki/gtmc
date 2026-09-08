@@ -16,6 +16,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/shadcn/dialog"
 import { normalizeDraftFilePath } from "@/lib/drafts/files"
 
@@ -44,6 +45,7 @@ async function fetchDraftRepoTree() {
 }
 
 interface DraftFileSourceDialogProps {
+  description?: string
   isOpen: boolean
   initialFolderPath?: string
   initialMode?: SourceMode
@@ -93,9 +95,11 @@ function useDraftFileSourceDialog({
       { value: "repo" as const, label: t("modeRepo") },
       { value: "upload" as const, label: t("modeLocal") },
       { value: "new" as const, label: t("modeNew") },
-      { value: "folder" as const, label: "新建文件夹" },
+      ...(onCreateFolder
+        ? [{ value: "folder" as const, label: t("modeFolder") }]
+        : []),
     ],
-    [t]
+    [t, onCreateFolder]
   )
 
   const {
@@ -290,18 +294,28 @@ export function DraftFileSourceDialog(props: DraftFileSourceDialogProps) {
   const dialog = useDraftFileSourceDialog(props)
   if (!props.isOpen) return null
 
-  return <DraftFileSourceDialogLayout dialog={dialog} onClose={props.onClose} />
+  return (
+    <DraftFileSourceDialogLayout
+      dialog={dialog}
+      onClose={props.onClose}
+      description={props.description}
+    />
+  )
 }
 
 function DraftFileSourceDialogLayout({
+  description,
   dialog,
   onClose,
 }: {
+  description?: string
   dialog: DraftFileSourceDialogState
   onClose: () => void
 }) {
   const t = useTranslations("DraftFiles")
-  const treeRoots = [{ ...ROOT_NODE, children: dialog.tree }]
+  const treeRoots = [
+    { ...ROOT_NODE, title: t("rootFolder"), children: dialog.tree },
+  ]
 
   return (
     <Dialog
@@ -311,26 +325,26 @@ function DraftFileSourceDialogLayout({
       }}>
       <DialogContent
         showCloseButton={false}
-        className="border-tech-main bg-surface-modal top-1/2 left-1/2 max-h-[90vh] w-full max-w-6xl -translate-x-1/2 -translate-y-1/2 overflow-hidden border shadow-2xl">
+        className="border-tech-main/30 bg-surface-modal top-1/2 left-1/2 max-h-[90dvh] w-[calc(100%-2rem)] max-w-5xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto border">
         <div className="guide-line bg-tech-main/5 flex items-center justify-between border-b px-5 py-4">
           <div>
             <DialogTitle className="text-tech-main-dark text-sm font-semibold">
               {t("dialogTitle")}
             </DialogTitle>
-            <p className="text-tech-main/60 mt-1 text-xs">
-              {t("dialogSubtitle")}
-            </p>
+            <DialogDescription className="text-tech-main mt-1 text-sm">
+              {description || t("dialogSubtitle")}
+            </DialogDescription>
           </div>
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>
             {t("close")}
           </Button>
         </div>
-        <div className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[20rem_minmax(0,1fr)]">
+        <div className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[17rem_minmax(0,1fr)]">
           <aside className="guide-line bg-tech-main/5 flex min-h-0 flex-col border-r">
             <div className="guide-line text-tech-main/60 shrink-0 border-b px-4 py-3 text-xs font-medium">
               {t("destinationTree")}
             </div>
-            <div className="flex-1 overflow-y-auto p-3">
+            <div className="max-h-40 flex-1 overflow-y-auto p-3 lg:max-h-[60dvh]">
               {dialog.isLoadingTree ? (
                 <p className="text-tech-main/60 font-mono text-xs">
                   {t("loadingRepo")}
@@ -373,9 +387,12 @@ function DraftFileSourcePanels({
         value={dialog.mode}
         onValueChange={(value) => dialog.setMode(value as SourceMode)}
         className="gap-2">
-        <TabsList>
+        <TabsList className="flex-wrap" aria-label={t("sourceModeLabel")}>
           {dialog.sourceModeOptions.map((option) => (
-            <TabsTrigger key={option.value} value={option.value}>
+            <TabsTrigger
+              key={option.value}
+              value={option.value}
+              className="min-h-11">
               {option.label}
             </TabsTrigger>
           ))}
@@ -388,7 +405,8 @@ function DraftFileSourcePanels({
         <TabsContent value="repo" className="space-y-4">
           <SectionLabel>{t("selectExistingFile")}</SectionLabel>
           <p className="text-tech-main/60 text-xs">
-            {t("selected")}: {dialog.selectedRepoFilePath || "NONE"}
+            {t("selected")}:{" "}
+            {dialog.selectedRepoFilePath || t("nothingSelected")}
           </p>
           <Button
             type="button"
@@ -401,7 +419,8 @@ function DraftFileSourcePanels({
         <TabsContent value="upload" className="space-y-4">
           <SectionLabel>{t("importLocalText")}</SectionLabel>
           <p className="text-tech-main/60 text-xs">
-            {t("destinationFolder")}: {dialog.selectedFolderPath || "ROOT"}
+            {t("destinationFolder")}:{" "}
+            {dialog.selectedFolderPath || t("rootFolder")}
           </p>
           <input
             type="file"
@@ -434,7 +453,8 @@ function DraftFileSourcePanels({
         <TabsContent value="new" className="space-y-4">
           <SectionLabel>{t("createNewFile")}</SectionLabel>
           <p className="text-tech-main/60 text-xs">
-            {t("destinationFolder")}: {dialog.selectedFolderPath || "ROOT"}
+            {t("destinationFolder")}:{" "}
+            {dialog.selectedFolderPath || t("rootFolder")}
           </p>
           <div className="space-y-2">
             <label
@@ -465,9 +485,10 @@ function DraftFileSourcePanels({
           </Button>
         </TabsContent>
         <TabsContent value="folder" className="space-y-4">
-          <SectionLabel>新建文件夹</SectionLabel>
+          <SectionLabel>{t("modeFolder")}</SectionLabel>
           <p className="text-tech-main/60 text-xs">
-            {t("destinationFolder")}: {dialog.selectedFolderPath || "ROOT"}
+            {t("destinationFolder")}:{" "}
+            {dialog.selectedFolderPath || t("rootFolder")}
           </p>
           <div className="space-y-2">
             <label
@@ -477,7 +498,7 @@ function DraftFileSourcePanels({
             </label>
             <Input
               id="draft-new-folder-name"
-              placeholder="例如：new-section"
+              placeholder={t("folderNamePlaceholder")}
               value={dialog.newFolderName}
               onChange={dialog.handleNewFolderNameChange}
             />
@@ -493,7 +514,7 @@ function DraftFileSourcePanels({
             variant="primary"
             onClick={dialog.handleCreateNewFolder}
             disabled={!dialog.newFolderName.trim()}>
-            创建文件夹
+            {t("modeFolder")}
           </Button>
         </TabsContent>
       </Tabs>
@@ -525,9 +546,10 @@ function TreeNodeToggle({
   node: DraftRepoTreeNode
   onToggle: () => void
 }) {
+  const t = useTranslations("DraftFiles")
   if (!node.isFolder) {
     return (
-      <span className="text-tech-main/20 inline-flex h-8 w-6 shrink-0 items-center justify-center font-mono text-[0.625rem]">
+      <span className="text-tech-main/20 inline-flex size-11 shrink-0 items-center justify-center font-mono text-[0.625rem]">
         ·
       </span>
     )
@@ -537,10 +559,13 @@ function TreeNodeToggle({
     <button
       type="button"
       onClick={onToggle}
+      aria-expanded={isExpanded}
       aria-label={
-        isExpanded ? `Collapse ${node.title}` : `Expand ${node.title}`
+        isExpanded
+          ? t("collapseFolder", { name: node.title })
+          : t("expandFolder", { name: node.title })
       }
-      className="text-tech-main/50 hover:text-tech-main flex h-8 w-6 shrink-0 items-center justify-center font-mono text-[0.625rem] transition-colors">
+      className="text-tech-main/50 hover:text-tech-main flex size-11 shrink-0 items-center justify-center font-mono text-[0.625rem] transition-colors">
       <span aria-hidden="true">{isExpanded ? "▼" : "▶"}</span>
     </button>
   )
@@ -571,7 +596,7 @@ function getTreeNodeLabelClassName({
       ? "hover:bg-tech-main/5 hover:text-tech-main"
       : "cursor-default opacity-60"
 
-  return `flex min-h-8 flex-1 items-center px-1 text-left font-mono text-[0.875rem] tracking-wide transition-colors ${selectionClassName} ${interactionClassName}`
+  return `flex min-h-11 min-w-0 flex-1 items-center px-1 text-left font-mono text-[0.875rem] tracking-wide transition-colors ${selectionClassName} ${interactionClassName}`
 }
 
 function TreeNode({

@@ -1,0 +1,15 @@
+.workspace {
+  height: max(25rem, calc(100dvh - 28rem)) !important;
+}
+
+/* Panel classes apply to an inner wrapper; visibility belongs to the outer panel. */
+.workspace[data-mode="write"] > [data-panel][id="preview"],
+.workspace[data-mode="preview"] > [data-panel][id="write"] {
+  display: none !important;
+}
+
+@media (width < 48rem) {
+  .workspace[data-mode="split"] > [data-panel][id="preview"] {
+    display: none !important;
+  }
+}

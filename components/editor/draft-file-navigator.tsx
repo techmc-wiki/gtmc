@@ -1,7 +1,13 @@
 "use client"
 
 import * as React from "react"
-import { MoreHorizontalIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import {
+  FileTextIcon,
+  PanelLeftIcon,
+  MoreHorizontalIcon,
+  PlusIcon,
+  Trash2Icon,
+} from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
 import { Button } from "@/components/ui/shadcn/button"
@@ -23,16 +29,20 @@ import {
 } from "@/components/ui/shadcn/dropdown-menu"
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/shadcn/sheet"
+import { EditorIconButton } from "@/components/editor/editor-icon-button"
+import { Input } from "@/components/ui/shadcn/input"
 import { cn } from "@/lib/cn"
 import type { DraftFileCollection } from "@/lib/drafts/files"
 
 interface DraftFileNavigatorProps {
+  headerActions: React.ReactNode
+  children: React.ReactNode
+  onRenameFile: (path: string) => boolean
   files: DraftFileCollection["files"]
   activeFileId: string
   activeFile: { content: string; filePath: string }
@@ -47,6 +57,9 @@ interface DraftFileNavigatorProps {
 }
 
 export function DraftFileNavigator({
+  headerActions,
+  children,
+  onRenameFile,
   files,
   activeFileId,
   activeFile,
@@ -79,203 +92,242 @@ export function DraftFileNavigator({
     }
   })
 
+  const [sidebarVisible, setSidebarVisible] = React.useState(true)
+  const [filesOpen, setFilesOpen] = React.useState(false)
+  const [search, setSearch] = React.useState("")
+  const [renaming, setRenaming] = React.useState(false)
+  const [path, setPath] = React.useState("")
+  const visibleFiles = fileRows.filter(({ file, label }) =>
+    `${file.filePath} ${label}`.toLowerCase().includes(search.toLowerCase())
+  )
+  const fileList = (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="space-y-1 p-2">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-tech-main-dark text-sm font-semibold">
+            {t("filesLabel")}
+          </h2>
+          <div className="flex items-center gap-1">
+            <span className="text-tech-main text-xs">{files.length}</span>{" "}
+            <EditorIconButton
+              label={fileT("addButton")}
+              disabled={isReadOnly}
+              onClick={() => {
+                setFilesOpen(false)
+                onOpenFileDialog("add", "new")
+              }}>
+              <PlusIcon aria-hidden className="size-4" />
+            </EditorIconButton>
+          </div>
+        </div>
+        <Input
+          aria-label={t("searchFiles")}
+          placeholder={t("searchFiles")}
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          className="hover:border-tech-main/20 focus:border-tech-main min-h-11 border-transparent bg-transparent px-2 font-sans text-sm shadow-none"
+        />
+      </div>
+      <nav
+        aria-label={t("filesAria")}
+        className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
+        {visibleFiles.map(({ file, isActive, isUnsaved, label }) => (
+          <Button
+            key={file.id}
+            variant="ghost"
+            aria-current={isActive ? "page" : undefined}
+            onClick={() => {
+              onSelectFile(file.id)
+              setFilesOpen(false)
+            }}
+            title={file.filePath || label}
+            className={cn(
+              "mb-0.5 h-auto min-h-11 w-full justify-start gap-2 border-0 border-l-2 px-2 py-1.5 text-left font-sans tracking-normal normal-case",
+              isActive
+                ? "border-tech-signal bg-tech-main/5"
+                : "border-transparent"
+            )}>
+            <FileTextIcon aria-hidden className="size-4 shrink-0" />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-medium">
+                {label}
+              </span>
+              <span className="text-tech-main/70 block truncate text-[11px] font-normal">
+                {file.filePath.split("/").slice(0, -1).join("/")}
+              </span>
+            </span>
+            {isUnsaved && (
+              <span className="size-1.5 shrink-0 bg-amber-600">
+                <span className="sr-only">{t("unsavedLabel")}</span>
+              </span>
+            )}
+          </Button>
+        ))}
+        {visibleFiles.length === 0 && (
+          <p className="text-tech-main p-3 text-sm">{t("noMatchingFiles")}</p>
+        )}
+      </nav>
+    </div>
+  )
+
   return (
     <>
-      <section className="border-tech-main/40 bg-surface-overlay/80 border backdrop-blur-sm">
-        <div className="border-tech-main/30 bg-tech-main/3 flex min-h-14 items-center justify-between gap-3 border-b px-4 py-2 lg:hidden">
-          <div>
-            <p className="text-tech-main-dark text-sm font-medium">
-              {t("filesLabel")}
-            </p>
-            <p className="text-tech-main/60 text-xs">
-              {t("filesCount", { count: files.length })}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              disabled={isReadOnly}
-              onClick={() => onOpenFileDialog("add", "repo")}>
-              <PlusIcon aria-hidden className="size-3" />
-              {fileT("addButton")}
-            </Button>
-            <Sheet>
+      <div
+        className={cn(
+          "grid min-w-0",
+          sidebarVisible && "lg:grid-cols-[13rem_minmax(0,1fr)]"
+        )}>
+        <aside
+          className={cn(
+            "bg-tech-bg/50 border-tech-main/15 hidden min-h-0 border-r",
+            sidebarVisible && "lg:flex lg:flex-col"
+          )}>
+          {fileList}
+        </aside>
+        <div className="bg-surface min-w-0">
+          <div className="border-tech-main/15 flex min-h-12 items-center gap-1 border-b px-2">
+            <EditorIconButton
+              label={sidebarVisible ? t("hideFiles") : t("showFiles")}
+              className="hidden lg:flex"
+              aria-expanded={sidebarVisible}
+              onClick={() => setSidebarVisible((value) => !value)}>
+              <PanelLeftIcon aria-hidden />
+            </EditorIconButton>
+            <Sheet open={filesOpen} onOpenChange={setFilesOpen}>
               <SheetTrigger asChild>
-                <Button type="button" variant="secondary" size="sm">
-                  {t("filesLabel")}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="min-h-11 lg:hidden"
+                  aria-label={t("filesLabel")}>
+                  <PanelLeftIcon aria-hidden className="size-4" />
                 </Button>
               </SheetTrigger>
               <SheetContent
                 side="left"
-                className="border-tech-main/40 bg-surface-modal p-0">
-                <SheetHeader className="border-tech-main/30 border-b">
-                  <SheetTitle>{t("filesLabel")}</SheetTitle>
+                className="bg-surface-modal w-[85vw] p-0"
+                aria-describedby={undefined}>
+                <SheetHeader className="p-0">
+                  <SheetTitle className="sr-only">{t("filesLabel")}</SheetTitle>
                 </SheetHeader>
-                <div className="space-y-1 overflow-y-auto p-2">
-                  {fileRows.map(({ file, isActive, label }) => (
-                    <SheetClose asChild key={file.id}>
-                      <button
-                        type="button"
-                        onClick={() => onSelectFile(file.id)}
-                        className={cn(
-                          "focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 flex min-h-11 w-full flex-col justify-center border-l-2 px-3 text-left",
-                          isActive
-                            ? "border-tech-signal bg-tech-main/5"
-                            : "border-transparent"
-                        )}>
-                        <span className="text-tech-main-dark truncate text-sm font-medium">
-                          {label}
-                        </span>
-                        <span className="text-tech-main/60 truncate font-mono text-[0.625rem]">
-                          {file.filePath || t("targetFileUnset")}
-                        </span>
-                      </button>
-                    </SheetClose>
-                  ))}
-                </div>
+                {fileList}
               </SheetContent>
             </Sheet>
-          </div>
-        </div>
 
-        <div className="grid lg:grid-cols-[17rem_minmax(0,1fr)]">
-          <nav
-            aria-label={t("filesAria")}
-            className="border-tech-main/30 hidden border-r lg:block">
-            <div className="border-tech-main/30 bg-tech-main/3 flex min-h-14 items-center justify-between gap-3 border-b px-4 py-2">
-              <div>
-                <p className="text-tech-main-dark text-sm font-medium">
-                  {t("filesLabel")}
-                </p>
-                <p className="text-tech-main/60 text-xs">
-                  {t("filesCount", { count: files.length })}
-                </p>
-              </div>
+            <p
+              className="text-tech-main-dark min-w-0 flex-1 truncate text-sm"
+              title={activeFile.filePath}>
+              {activeFile.filePath || t("targetFileUnset")}
+            </p>
+            {!activeFile.filePath && !isReadOnly && (
+              <EditorIconButton
+                label={t("setFilePath")}
+                onClick={() => {
+                  setPath(activeFile.filePath)
+                  setRenaming(true)
+                }}>
+                <FileTextIcon aria-hidden />
+              </EditorIconButton>
+            )}
+            {headerActions}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="size-11 p-0"
+                  aria-label={t("fileActionsAria")}
+                  disabled={isReadOnly}>
+                  <MoreHorizontalIcon aria-hidden className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setPath(activeFile.filePath)
+                    setRenaming(true)
+                  }}>
+                  {t("renameFile")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => onSetInsertDialogIntent(true)}>
+                  {t("insertFileLink")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => onOpenFileDialog("add", "folder")}>
+                  {t("createFolder")}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={() => onOpenFileDialog("replace", "repo")}>
+                  {t("chooseExistingFile")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => onOpenFileDialog("replace", "upload")}>
+                  {t("importTargetFile")}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  disabled={files.length <= 1}
+                  onSelect={() => {
+                    const file = files.find((item) => item.id === activeFileId)
+                    if (file) requestFileRemoval(file)
+                  }}
+                  className="text-red-700 dark:text-red-400">
+                  <Trash2Icon aria-hidden className="size-4" />
+                  {fileT("removeFile")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          {activeFileHasDuplicatePath || duplicateFilePaths.length > 0 ? (
+            <p
+              className="border-b border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300"
+              role="alert">
+              {t("duplicatePathsError", {
+                paths: duplicateFilePaths.join(", "),
+              })}
+            </p>
+          ) : null}
+          {children}
+        </div>
+      </div>
+      <Dialog open={renaming} onOpenChange={setRenaming}>
+        <DialogContent className="bg-surface-modal top-1/2 left-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-5 p-6">
+          <DialogHeader>
+            <DialogTitle>{t("renameFile")}</DialogTitle>
+            <DialogDescription>{t("renameFileHint")}</DialogDescription>
+          </DialogHeader>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault()
+              if (onRenameFile(path)) setRenaming(false)
+            }}
+            className="space-y-4">
+            <label htmlFor="draft-rename-path" className="text-sm font-medium">
+              {t("targetFileLabel")}
+            </label>
+            <Input
+              id="draft-rename-path"
+              value={path}
+              onChange={(event) => setPath(event.target.value)}
+              placeholder="chapter/article.md"
+              required
+            />
+            <DialogFooter>
               <Button
                 type="button"
                 variant="secondary"
-                size="sm"
-                disabled={isReadOnly}
-                onClick={() => onOpenFileDialog("add", "repo")}>
-                <PlusIcon aria-hidden className="size-3" />
-                {fileT("addButton")}
+                onClick={() => setRenaming(false)}>
+                {t("cancelButton")}
               </Button>
-            </div>
-            <div className="max-h-125 space-y-1 overflow-y-auto p-2">
-              {fileRows.map(({ file, isActive, isUnsaved, label }) => (
-                <div
-                  key={file.id}
-                  className={cn(
-                    "flex min-w-0 items-center gap-1 border-l-2",
-                    isActive
-                      ? "border-tech-signal bg-tech-main/5"
-                      : "border-transparent"
-                  )}>
-                  <button
-                    type="button"
-                    onClick={() => onSelectFile(file.id)}
-                    className="focus-visible:outline-tech-main flex min-h-11 min-w-0 flex-1 flex-col justify-center px-3 text-left focus-visible:outline-2 focus-visible:outline-offset-2">
-                    <span className="text-tech-main-dark flex min-w-0 items-center gap-2 text-sm font-medium">
-                      <span
-                        className={cn(
-                          "size-1.5 shrink-0",
-                          isUnsaved ? "bg-amber-600" : "bg-transparent"
-                        )}
-                      />
-                      <span className="truncate">{label}</span>
-                    </span>
-                    <span className="text-tech-main/60 truncate pl-3.5 font-mono text-[0.625rem]">
-                      {file.filePath || t("targetFileUnset")}
-                    </span>
-                  </button>
-                  {!isReadOnly && files.length > 1 ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="text-tech-main/60 size-11 p-0 hover:text-red-600"
-                      aria-label={fileT("removeFile")}
-                      onClick={() => requestFileRemoval(file)}>
-                      <Trash2Icon aria-hidden className="size-4" />
-                    </Button>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </nav>
-
-          <div className="min-w-0 p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-tech-main/60 text-xs font-medium">
-                  {t("activeFileLabel")}
-                </p>
-                <p className="text-tech-main-dark mt-1 font-mono text-sm break-all">
-                  {activeFile.filePath || t("targetFileUnset")}
-                </p>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    aria-label={t("fileActionsAria")}
-                    disabled={isReadOnly}>
-                    <MoreHorizontalIcon aria-hidden className="size-4" />
-                    {t("fileActions")}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="border-tech-main/40 bg-surface-modal rounded-none">
-                  <DropdownMenuItem
-                    onSelect={() => onOpenFileDialog("replace", "repo")}>
-                    {t("chooseExistingFile")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => onOpenFileDialog("replace", "new")}>
-                    {t("createTargetFile")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => onOpenFileDialog("replace", "upload")}>
-                    {t("importTargetFile")}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onSelect={() => onOpenFileDialog("add", "folder")}>
-                    {t("createFolder")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => onSetInsertDialogIntent(true)}>
-                    {t("insertFileLink")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            {!activeFile.filePath && !isReadOnly ? (
-              <output className="mt-4 block text-sm/relaxed text-amber-700">
-                {t("filePathBlankHint")}
-              </output>
-            ) : null}
-            {activeFileHasDuplicatePath ? (
-              <p className="mt-4 text-sm/relaxed text-red-700" role="alert">
-                {t("duplicatePathError")}
-              </p>
-            ) : null}
-            {duplicateFilePaths.length > 0 ? (
-              <p className="mt-4 text-sm/relaxed text-red-700" role="alert">
-                {t("duplicatePathsError", {
-                  paths: duplicateFilePaths.join(", "),
-                })}
-              </p>
-            ) : null}
-          </div>
-        </div>
-      </section>
+              <Button type="submit" disabled={!path.trim()}>
+                {t("applyFilePath")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Dialog
         open={filePendingRemoval !== null}

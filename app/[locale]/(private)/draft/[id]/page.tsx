@@ -1,3 +1,5 @@
+import { getTranslations } from "next-intl/server"
+import { ArrowLeftIcon } from "lucide-react"
 import type { Metadata } from "next"
 import { DraftEditor } from "@/components/editor/draft-editor"
 import { Link } from "@/i18n/navigation"
@@ -45,6 +47,7 @@ export default async function EditDraftPage({
     redirect("/login")
   }
 
+  const t = await getTranslations("Editor")
   const { id } = await params
 
   const draft = await prisma.revision.findUnique({
@@ -68,15 +71,18 @@ export default async function EditDraftPage({
   )
 
   return (
-    <main className="mx-auto max-w-[1400px] space-y-6 p-4 md:p-8">
-      <header className="border-tech-main/40 flex items-center justify-between gap-4 border-b pb-4">
+    <div className="mx-auto w-full max-w-[1800px] space-y-3">
+      <header className="flex items-center justify-between gap-4">
         <Button asChild variant="ghost" size="sm">
-          <Link href="/draft">Back to drafts</Link>
+          <Link href="/draft">
+            <ArrowLeftIcon aria-hidden className="size-4" />
+            {t("backToDrafts")}
+          </Link>
         </Button>
-        <p className="text-tech-main/60 text-sm">Article draft</p>
+        <p className="text-tech-main/60 text-sm">{t("articleDraft")}</p>
       </header>
       <DraftEditor initialData={draftEditorInitialData} />
-    </main>
+    </div>
   )
 }
 

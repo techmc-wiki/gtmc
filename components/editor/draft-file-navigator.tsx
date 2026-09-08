@@ -351,7 +351,7 @@ export function DraftFileNavigator({
             </DialogClose>
             <Button
               type="button"
-              variant="danger"
+              variant="destructive"
               onClick={() => {
                 if (filePendingRemoval) onRemoveFile(filePendingRemoval.id)
                 setFilePendingRemoval(null)

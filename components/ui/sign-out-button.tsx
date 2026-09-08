@@ -1,7 +1,7 @@
 "use client"
 
 import { signOut } from "next-auth/react"
-import { cn } from "@/lib/cn"
+import { Button } from "@/components/ui/shadcn/button"
 
 type SignOutButtonProps = {
   className?: string
@@ -9,11 +9,12 @@ type SignOutButtonProps = {
 
 export function SignOutButton({ className }: SignOutButtonProps) {
   return (
-    <button
+    <Button
+      variant="outline"
       onClick={() => signOut({ callbackUrl: "/" })}
-      className={cn("cursor-pointer", className)}
+      className={className}
       type="button">
-      SIGN OUT
-    </button>
+      Sign out
+    </Button>
   )
 }

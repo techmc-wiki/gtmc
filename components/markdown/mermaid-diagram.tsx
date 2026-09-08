@@ -65,7 +65,7 @@ export function MermaidDiagram({ children }: MermaidDiagramProps) {
         className="custom-bottom-scrollbar overflow-x-auto [&_svg]:mx-auto [&_svg]:h-auto [&_svg]:max-w-none"
       />
       {state === "loading" ? (
-        <output className="text-tech-main/60 m-0 font-mono text-xs tracking-widest uppercase">
+        <output className="text-tech-main/60 m-0 text-xs">
           {t("loadingMermaidDiagram")}
         </output>
       ) : null}

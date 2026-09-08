@@ -346,7 +346,7 @@ function DraftFileSourceDialogLayout({
             </div>
             <div className="max-h-40 flex-1 overflow-y-auto p-3 lg:max-h-[60dvh]">
               {dialog.isLoadingTree ? (
-                <p className="text-tech-main/60 font-mono text-xs">
+                <p className="text-muted-foreground text-sm">
                   {t("loadingRepo")}
                 </p>
               ) : (
@@ -398,7 +398,7 @@ function DraftFileSourcePanels({
           ))}
         </TabsList>
         {dialog.treeError ? (
-          <div className="mb-4 border border-red-500/30 bg-red-500/10 px-4 py-3 font-mono text-xs text-red-700">
+          <div className="mb-4 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700">
             {dialog.treeError}
           </div>
         ) : null}
@@ -410,7 +410,6 @@ function DraftFileSourcePanels({
           </p>
           <Button
             type="button"
-            variant="primary"
             onClick={dialog.handleAddRepoFile}
             disabled={!dialog.canSubmitRepo}>
             {dialog.isSubmitting ? t("adding") : t("addExistingFile")}
@@ -444,7 +443,6 @@ function DraftFileSourcePanels({
           </div>
           <Button
             type="button"
-            variant="primary"
             onClick={dialog.handleImportLocalFile}
             disabled={!dialog.canSubmitUpload}>
             {dialog.isSubmitting ? t("importing") : t("importLocalFile")}
@@ -478,7 +476,6 @@ function DraftFileSourcePanels({
           </div>
           <Button
             type="button"
-            variant="primary"
             onClick={dialog.handleCreateNewFile}
             disabled={!dialog.canSubmitNew}>
             {t("createEmptyFile")}
@@ -511,7 +508,6 @@ function DraftFileSourcePanels({
           </div>
           <Button
             type="button"
-            variant="primary"
             onClick={dialog.handleCreateNewFolder}
             disabled={!dialog.newFolderName.trim()}>
             {t("modeFolder")}

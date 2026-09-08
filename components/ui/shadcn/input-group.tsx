@@ -1,11 +1,10 @@
 "use client"
 
-// Vendored from Coss UI input-group (coss.com/ui), adapted for GTMC:
-// - square geometry + tech-* tokens (no radii, no shadows)
-// - inner input/textarea render bare (the group owns the border), so no
-//   dependency on Coss's `unstyled` input variant
+// Vendored from Coss UI input-group (coss.com/ui), using the shared Input.
+// The group owns the border and focus treatment.
 import { cva, type VariantProps } from "class-variance-authority"
 import type * as React from "react"
+import { Input } from "@/components/ui/shadcn/input"
 import { cn } from "@/lib/cn"
 
 const inputGroupAddonVariants = cva(
@@ -68,7 +67,7 @@ export function InputGroupText({
   return (
     <span
       className={cn(
-        "text-tech-main/60 flex items-center gap-2 truncate font-mono text-xs select-none",
+        "text-tech-main/60 flex items-center gap-2 truncate text-xs select-none",
         className
       )}
       {...props}
@@ -76,16 +75,16 @@ export function InputGroupText({
   )
 }
 
-/** Bare input: the surrounding InputGroup owns borders and focus styling. */
+/** Shares Input typography, validation, and disabled states; the group owns the frame. */
 export function InputGroupInput({
   className,
   ...props
 }: React.ComponentProps<"input">): React.ReactElement {
   return (
-    <input
+    <Input
       type="text"
       className={cn(
-        "text-tech-main-dark placeholder:text-tech-main/50 h-full min-w-0 flex-1 bg-transparent px-1 py-2 font-mono text-sm outline-none",
+        "h-full min-h-0 flex-1 border-0 bg-transparent px-1 py-2 sm:px-1 sm:py-2",
         className
       )}
       {...props}

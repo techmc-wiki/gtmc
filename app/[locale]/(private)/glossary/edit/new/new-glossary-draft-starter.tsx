@@ -84,14 +84,7 @@ export function NewGlossaryDraftStarter({
   }, [startDraft])
   return (
     <div className="page-container py-12">
-      <Card
-        tone="main"
-        borderOpacity="subtle"
-        background="default"
-        padding="spacious"
-        brackets="hidden"
-        hover="none"
-        className="border-border mx-auto max-w-md">
+      <Card className="border-border mx-auto max-w-md p-6 sm:p-8">
         <CardHeader className="p-0 pb-4 text-center">
           <CardTitle className="text-foreground text-base font-semibold">
             {errorMessage

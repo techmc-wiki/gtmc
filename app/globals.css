@@ -759,14 +759,6 @@ body {
   @apply text-tech-main/40 p-6 font-mono text-xs;
 }
 
-@utility editor-grow {
-  @apply flex min-h-125 grow flex-col;
-}
-
-@utility editor-surface {
-  @apply bg-surface relative flex grow flex-col;
-}
-
 /* In the split editor, a panel whose tab content is inactive takes no space
    below md (tabs decide visibility); both panels show side-by-side at md+. */
 @media (max-width: 767.999px) {
@@ -822,7 +814,7 @@ code .line {
   appearance: none;
   height: 2px;
   background: color-mix(in oklab, var(--color-tech-main) 28%, transparent);
-  outline: none;
+  outline-offset: 4px;
 }
 
 [data-litematica-layer-slider]::-webkit-slider-thumb {
@@ -879,20 +871,6 @@ code .line {
 
 code[class^="language-"] {
   white-space: pre;
-}
-
-@media (max-width: 767px) {
-  .absolute.hidden.lg\:block,
-  .absolute.hidden.md\:block,
-  .absolute.hidden.xl\:block {
-    display: none;
-  }
-
-  .opacity-\[0\.03\],
-  .opacity-\[0\.25\],
-  .opacity-40 {
-    opacity: 0;
-  }
 }
 
 @layer components {
@@ -986,7 +964,14 @@ code[class^="language-"] {
   }
 
   [data-sidebar-wrapper]:hover [data-sidebar-toggle],
+  [data-sidebar-wrapper]:focus-within [data-sidebar-toggle],
   [data-sidebar-wrapper][data-sidebar-hidden] [data-sidebar-toggle] {
+    opacity: 1;
+  }
+}
+
+@media (hover: none) {
+  [data-sidebar-wrapper] [data-sidebar-toggle] {
     opacity: 1;
   }
 }

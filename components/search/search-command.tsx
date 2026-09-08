@@ -14,7 +14,7 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/shadcn/command"
-import { Badge } from "@/components/ui/shadcn/badge"
+import { Button } from "@/components/ui/shadcn/button"
 
 interface SearchResult {
   title: string
@@ -81,15 +81,6 @@ function useSearchCommand() {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Auto-focus input when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      requestAnimationFrame(() => {
-        inputRef.current?.focus()
-      })
-    }
-  }, [isOpen])
-
   // Reset search state when dialog closes (e.g. via Cmd+K toggle)
   useEffect(() => {
     if (prevIsOpenRef.current && !isOpen) {
@@ -101,10 +92,6 @@ function useSearchCommand() {
   const closeModal = useCallback(() => {
     setIsOpen(false)
     setQuery("")
-  }, [])
-
-  const openModal = useCallback(() => {
-    setIsOpen(true)
   }, [])
 
   // Global Cmd+K / Ctrl+K handler. Register in the capture phase so dormant
@@ -231,9 +218,9 @@ function useSearchCommand() {
     isLoading,
     isMounted,
     isOpen,
+    setIsOpen,
     navigateToGlossaryResult,
     navigateToResult,
-    openModal,
     query,
     results,
     shortcutLabel,
@@ -253,23 +240,16 @@ function SearchCommandLayout({ search }: { search: SearchCommandState }) {
     return <SearchCommandPlaceholder t={search.t} />
   }
 
-  return (
-    <>
-      <SearchCommandTriggers
-        onOpen={search.openModal}
-        shortcutLabel={search.shortcutLabel}
-        t={search.t}
-      />
-      <SearchCommandDialog search={search} />
-    </>
-  )
+  return <SearchCommandDialog search={search} />
 }
 
 function SearchCommandPlaceholder({ t }: { t: SearchCommandState["t"] }) {
   return (
-    <button
+    <Button
       type="button"
-      className="border-tech-main/40 text-tech-main/60 hover:bg-tech-main-dark hover:text-tech-bg hidden cursor-pointer items-center gap-2 border px-3 py-1.5 font-mono text-[0.6875rem] transition-colors md:flex">
+      variant="outline"
+      disabled
+      className="hidden md:inline-flex">
       <SearchIcon className="size-3.5" />
       {t("heading")}
       <span className="border-tech-main/30 text-tech-main/40 ml-1 border px-1 py-0.5 text-[0.5625rem]">
@@ -277,44 +257,7 @@ function SearchCommandPlaceholder({ t }: { t: SearchCommandState["t"] }) {
           <span className="text-xs">{"\u2318"}</span>K
         </span>
       </span>
-    </button>
-  )
-}
-
-function SearchCommandTriggers({
-  onOpen,
-  shortcutLabel,
-  t,
-}: {
-  onOpen: () => void
-  shortcutLabel: React.ReactNode
-  t: SearchCommandState["t"]
-}) {
-  return (
-    <>
-      <button
-        type="button"
-        onClick={onOpen}
-        aria-label={t("searchAriaLabel")}
-        className="border-tech-main/40 text-tech-main/60 hover:bg-tech-main-dark hover:text-tech-bg hidden h-8 w-40 cursor-pointer items-center gap-2 border px-3 font-mono text-[0.6875rem] transition-colors md:flex md:h-10">
-        <div className="flex w-full items-center justify-between">
-          <span className="flex items-center gap-1.5 leading-none">
-            <SearchIcon className="size-3.5" />
-            <span className="mt-0.5 text-[0.625rem]">{t("heading")}</span>
-          </span>
-          <span className="border-tech-main/30 text-tech-main/40 border px-1 text-[0.625rem]">
-            {shortcutLabel}
-          </span>
-        </div>
-      </button>
-      <button
-        type="button"
-        onClick={onOpen}
-        className="text-tech-main hover:bg-tech-main/10 flex min-h-11 min-w-11 cursor-pointer items-center justify-center p-2 transition-colors md:hidden"
-        aria-label={t("searchAriaLabel")}>
-        <SearchIcon className="size-5" />
-      </button>
-    </>
+    </Button>
   )
 }
 
@@ -322,38 +265,56 @@ function SearchCommandDialog({ search }: { search: SearchCommandState }) {
   return (
     <CommandDialog
       open={search.isOpen}
-      onOpenChange={(open) => {
-        if (!open) search.closeModal()
+      onOpenChange={search.setIsOpen}
+      onOpenAutoFocus={(event) => {
+        event.preventDefault()
+        search.inputRef.current?.focus()
       }}
+      trigger={
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          aria-label={search.t("searchAriaLabel")}
+          className="size-11 px-0 md:w-40 md:justify-between md:px-3">
+          <SearchIcon className="size-4" />
+          <span className="hidden text-sm md:inline">
+            {search.t("heading")}
+          </span>
+          <kbd className="text-muted-foreground hidden text-xs md:inline">
+            {search.shortcutLabel}
+          </kbd>
+        </Button>
+      }
       title={search.t("searchAriaLabel")}
       description={search.t("placeholder")}
       shouldFilter={false}
       showCloseButton={false}
-      className="border-tech-main bg-surface-modal/95 top-[10vh] left-1/2 w-full max-w-xl -translate-x-1/2 border shadow-xl backdrop-blur-md sm:top-[15vh]">
+      className="bg-popover top-[10vh] left-1/2 w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 sm:top-[15vh]">
       <header className="guide-line flex items-center justify-between border-b px-4 py-3">
         <div className="text-tech-main-dark flex items-center gap-2 text-sm font-semibold">
-          <span className="bg-tech-main/80 inline-block size-1.5 animate-pulse" />
           {search.t("modalTitle")}
         </div>
-        <button
+        <Button
           type="button"
           onClick={search.closeModal}
-          className="border-tech-main/40 text-tech-main/70 hover:bg-tech-main-dark hover:text-tech-bg cursor-pointer border px-2 py-0.5 font-mono text-[0.625rem] transition-colors">
+          variant="ghost"
+          size="sm"
+          aria-label={search.t("dismissHint")}>
           ESC
-        </button>
+        </Button>
       </header>
-      <div className="guide-line border-b px-4 py-3">
+      <div className="border-b">
         <CommandInput
           ref={search.inputRef}
           value={search.query}
           onValueChange={search.handleQueryChange}
           placeholder={search.t("placeholder")}
           aria-label={search.t("searchAriaLabel")}
-          className="border-tech-main/40 text-tech-main-dark placeholder:text-tech-main/50 focus:border-tech-main/70 bg-surface-input/60 focus:bg-surface-input/80 w-full border px-3 py-2.5 text-sm transition-colors outline-none"
         />
       </div>
       <SearchCommandResults search={search} />
-      <footer className="guide-line text-tech-main/60 flex items-center gap-4 border-t px-4 py-2 font-mono text-[0.625rem]">
+      <footer className="text-muted-foreground hidden items-center gap-4 border-t px-4 py-2 text-xs sm:flex">
         <span>
           <kbd className="kbd-badge">&#x2191;&#x2193;</kbd>{" "}
           {search.t("navigateHint")}
@@ -373,47 +334,40 @@ function SearchCommandResults({ search }: { search: SearchCommandState }) {
   return (
     <CommandList className="custom-left-scrollbar max-h-[50vh]">
       {search.query.length >= 2 && (
-        <div className="guide-line text-tech-main/50 border-b px-4 py-2 text-xs">
+        <output className="text-muted-foreground block px-4 py-2 text-xs">
           {search.isLoading
             ? search.t("scanning")
             : search.results.length === 20
               ? search.t("resultsCountCapped", { count: search.results.length })
               : search.t("resultsCount", { count: search.results.length })}
-        </div>
+        </output>
       )}
       {search.isLoading && (
         <div className="px-4 py-6">
           <div className="space-y-3">
             {[1, 2, 3].map((index) => (
               <div key={index} className="space-y-1.5">
-                <div className="bg-tech-main/10 h-4 w-3/5 animate-pulse" />
-                <div className="bg-tech-main/5 h-3 w-2/5 animate-pulse" />
+                <div className="bg-tech-main/10 h-4 w-3/5 animate-pulse motion-reduce:animate-none" />
+                <div className="bg-tech-main/5 h-3 w-2/5 animate-pulse motion-reduce:animate-none" />
               </div>
             ))}
           </div>
         </div>
       )}
       {!search.isLoading && search.results.length > 0 && (
-        <CommandGroup className="space-y-2 p-2">
+        <CommandGroup className="p-2">
           {search.results.map((result) => (
             <CommandItem
               key={result.slug}
               value={result.slug}
               onSelect={() => search.navigateToResult(result)}
-              className="group border-tech-main/20 bg-surface-overlay/50 hover:border-tech-main/40 hover:bg-tech-main/5 data-[selected=true]:border-tech-main/40 data-[selected=true]:bg-tech-main/10 cursor-pointer items-start border px-3 py-3 transition-colors"
+              className="cursor-pointer items-start px-3 py-3"
               aria-label={search.t("selectResult", { title: result.title })}>
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div className="text-tech-main-dark text-sm font-medium">
                     {search.highlightMatch(result.title)}
                   </div>
-                  <Badge
-                    variant="neutral"
-                    className="text-[0.5625rem] leading-none">
-                    {result.matchType === "content"
-                      ? search.t("matchBody")
-                      : search.t("matchTitle")}
-                  </Badge>
                 </div>
                 {result.snippet && (
                   <div className="text-tech-main/70 mt-1.5 line-clamp-2 text-xs/relaxed">

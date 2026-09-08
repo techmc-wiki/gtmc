@@ -21,10 +21,10 @@ export function EditorIconButton({
         <Button
           type="button"
           variant="ghost"
-          size="sm"
+          size="icon"
           aria-label={label}
           className={cn(
-            "hover:bg-tech-main/8 size-11 shrink-0 border-0 p-0 hover:no-underline aria-pressed:bg-tech-main/10 [&_svg]:size-4",
+            "hover:bg-accent hover:no-underline aria-pressed:bg-accent",
             className
           )}
           {...props}>

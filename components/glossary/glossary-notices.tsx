@@ -98,14 +98,7 @@ export function AttributionWarning({
   )
 
   return (
-    <Card
-      tone="main"
-      borderOpacity="subtle"
-      background="default"
-      padding="compact"
-      brackets="hidden"
-      hover="none"
-      className={cn("border-border", className)}>
+    <Card className={cn("sm:p-4 border-border", className)}>
       <CardHeader className="p-0 pb-2">
         <CardTitle className="text-foreground flex items-center gap-1.5 text-xs font-semibold">
           <UserCheck className="text-tech-signal size-3.5" />

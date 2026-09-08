@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 
+import { Button } from "@/components/ui/shadcn/button"
 import { cn } from "@/lib/cn"
 import { normalizeGlossarySiteLocale } from "@/lib/glossary/locales"
 import {
@@ -103,15 +104,17 @@ export function ColumnPicker({
   )
 
   return (
-    <div className={cn("relative flex h-9", className)}>
+    <div className={cn("relative flex", className)}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <button
+          <Button
             type="button"
             aria-label={t("columnPickerLabel")}
-            className="border-tech-main/40 text-tech-main hover:bg-tech-main/10 focus-visible:outline-tech-main bg-surface-overlay/70 inline-flex h-9 w-full cursor-pointer items-center justify-center border px-3 font-mono text-xs font-bold tracking-widest uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto">
-            [§ {t("columnPickerToggle")}]
-          </button>
+            variant="outline"
+            size="sm"
+            className="min-h-11 w-full sm:w-auto">
+            {t("columnPickerToggle")}
+          </Button>
         </PopoverTrigger>
 
         <PopoverContent
@@ -121,7 +124,7 @@ export function ColumnPicker({
           className="border-tech-line/30 bg-surface-overlay/95 w-72 border p-0 backdrop-blur-md">
           <div className="custom-vertical-scrollbar max-h-[60vh] overflow-y-auto p-3">
             <ColumnGroup
-              title="CORE"
+              title={t("columnPickerToggle")}
               entries={coreEntries}
               visibleColumnSet={visibleColumnSet}
               onToggle={toggle}
@@ -129,14 +132,16 @@ export function ColumnPicker({
 
             <Collapsible className="group mt-3">
               <CollapsibleTrigger asChild>
-                <button
+                <Button
                   type="button"
-                  className="border-tech-line/30 text-tech-main/70 hover:text-tech-main flex w-full cursor-pointer list-none items-center justify-between border-b pb-1.5 text-[0.6875rem] font-semibold transition-colors">
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-between">
                   <span>{t("columnLanguageGroup")}</span>
                   <span className="text-tech-main/40 transition-transform group-data-[state=open]:rotate-90">
                     ▸
                   </span>
-                </button>
+                </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="mt-2 space-y-2">
                 {otherLanguageGroups.map((group) => (

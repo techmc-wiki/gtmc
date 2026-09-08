@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 
+import { Button } from "@/components/ui/shadcn/button"
 import { cn } from "@/lib/cn"
 import {
   GLOSSARY_DENSITIES,
@@ -84,20 +85,19 @@ export function DensityToggle({
   }, [nextDensity, onChange])
 
   return (
-    <button
+    <Button
       type="button"
       aria-label={buttonLabel}
       title={buttonLabel}
       onClick={handleClick}
       data-density={value}
-      className={cn(
-        "focus-visible:outline-tech-main border-tech-main/40 bg-tech-main/5 text-tech-main hover:border-tech-main/60 hover:bg-tech-main/10 relative inline-flex h-9 w-9 cursor-pointer items-center justify-center border px-2.5 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2",
-        className
-      )}>
+      variant="outline"
+      size="icon"
+      className={className}>
       <DensityIcon variant={value} />
       <span className="sr-only" aria-live="polite">
         {currentLabel}
       </span>
-    </button>
+    </Button>
   )
 }

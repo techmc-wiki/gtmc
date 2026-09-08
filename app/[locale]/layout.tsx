@@ -1,3 +1,4 @@
+import { TooltipProvider } from "@/components/ui/shadcn/tooltip"
 import type { Metadata, Viewport } from "next"
 import { cacheLife } from "next/cache"
 import { Geist, Geist_Mono, STIX_Two_Text } from "next/font/google"
@@ -181,16 +182,18 @@ export default async function RootLayout({
         <Analytics />
         <SpeedInsights />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeProvider>
-            <FooterProvider>
-              <ScrollRoot>
-                {children}
-                <FooterWrapper>
-                  <Footer />
-                </FooterWrapper>
-              </ScrollRoot>
-            </FooterProvider>
-          </ThemeProvider>
+          <TooltipProvider>
+            <ThemeProvider>
+              <FooterProvider>
+                <ScrollRoot>
+                  {children}
+                  <FooterWrapper>
+                    <Footer />
+                  </FooterWrapper>
+                </ScrollRoot>
+              </FooterProvider>
+            </ThemeProvider>
+          </TooltipProvider>
         </NextIntlClientProvider>
         <SpeculationRules />
       </body>

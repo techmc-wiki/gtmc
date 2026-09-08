@@ -40,29 +40,14 @@ export default function DraftLoading() {
           <SectionTitle className="mb-4">In progress</SectionTitle>
           <div className="space-y-4">
             {[1, 2].map((item) => (
-              <Card
-                key={item}
-                tone="main"
-                borderOpacity="muted"
-                background="default"
-                padding="none"
-                hover="none"
-                brackets="hidden">
+              <Card key={item} className="p-0 sm:p-0">
                 <DraftRowSkeleton />
               </Card>
             ))}
           </div>
         </section>
         <aside className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <Card
-            tone="main"
-            borderOpacity="medium"
-            background="subtle"
-            padding="default"
-            hover="none"
-            brackets="visible"
-            bracketVariant="static"
-            className="border-t-tech-signal border-t-2">
+          <Card className="border-t-tech-signal border-t-2">
             <SegmentedBar opacity="low" className="h-3 w-24" />
             <SegmentedBar opacity="high" className="mt-3 h-7 w-4/5" />
             <div className="mt-4 space-y-2">
@@ -83,13 +68,7 @@ export default function DraftLoading() {
         </aside>
         <section className="animate-tech-slide-in min-w-0 [animation-delay:100ms] motion-reduce:animate-none lg:col-start-1 lg:row-start-2">
           <SectionTitle className="mb-4">Past work</SectionTitle>
-          <Card
-            tone="main"
-            borderOpacity="subtle"
-            background="ghost"
-            padding="none"
-            hover="none"
-            brackets="hidden">
+          <Card className="p-0 sm:p-0">
             <DraftRowSkeleton compact />
           </Card>
         </section>

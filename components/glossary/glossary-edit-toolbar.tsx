@@ -58,12 +58,13 @@ export function GlossaryEditToolbar({
           disabled={isReadOnly}
           placeholder={t("editorTitlePlaceholder")}
           aria-label={t("editorTitlePlaceholder")}
-          className="h-9 max-w-xs text-xs font-medium sm:max-w-md sm:text-sm"
+          className="max-w-xs sm:max-w-md"
         />
         {saveState && (
           <Badge
-            variant={isError ? "destructive" : isSaving ? "pending" : "neutral"}
-            className="shrink-0 font-mono text-[10px] uppercase">
+            variant={
+              isError ? "destructive" : isSaving ? "pending" : "neutral"
+            }>
             {saveState}
           </Badge>
         )}
@@ -71,13 +72,8 @@ export function GlossaryEditToolbar({
 
       <div className="flex items-center gap-2 self-end sm:self-auto">
         {!isReadOnly && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={onDiscard}
-            className="text-xs">
-            <Trash2 className="text-muted-foreground mr-1 size-3.5" />
+          <Button type="button" variant="outline" size="sm" onClick={onDiscard}>
+            <Trash2 className="text-muted-foreground size-3.5" />
             {t("editorToolbarDiscard")}
           </Button>
         )}
@@ -86,9 +82,8 @@ export function GlossaryEditToolbar({
           variant="default"
           size="sm"
           onClick={onSubmit}
-          disabled={!canSubmit || isReadOnly}
-          className="text-xs">
-          <GitPullRequest className="mr-1.5 size-3.5" />
+          disabled={!canSubmit || isReadOnly}>
+          <GitPullRequest className="size-3.5" />
           {t("editorToolbarSubmit")}
         </Button>
       </div>

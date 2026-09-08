@@ -15,21 +15,12 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <Card
-      tone="main"
-      borderOpacity="muted"
-      background="ghost"
-      padding="spacious"
-      hover="none"
-      brackets="hidden"
       className={cn(
-        "relative border-dashed py-16 text-center",
+        "py-12 text-center sm:py-12",
         colSpanFull && "col-span-full",
         className
       )}>
-      <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,color-mix(in_oklab,var(--color-tech-main)_5%,transparent)_10px,color-mix(in_oklab,var(--color-tech-main)_5%,transparent)_20px)]" />
-      <h2 className="text-tech-main/50 relative z-10 font-mono text-lg tracking-widest uppercase">
-        {message}
-      </h2>
+      <h2 className="text-muted-foreground text-base">{message}</h2>
     </Card>
   )
 }

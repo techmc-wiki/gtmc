@@ -19,12 +19,7 @@ export function DownloadButton({
   if (!baseUrl) {
     return (
       <div className="space-y-2">
-        <Button
-          variant="primary"
-          size="md"
-          className="w-full sm:w-auto"
-          disabled
-          aria-disabled="true">
+        <Button className="w-full sm:w-auto" disabled aria-disabled="true">
           {children}
         </Button>
         <p className="text-tech-main/60 font-mono text-xs tracking-wide">
@@ -35,7 +30,7 @@ export function DownloadButton({
   }
 
   return (
-    <Button asChild variant="primary" size="md" className="w-full sm:w-auto">
+    <Button asChild className="w-full sm:w-auto">
       <a href={`${baseUrl}/${filename}`} download>
         {children}
       </a>

@@ -844,7 +844,7 @@ function LitematicaLayerControls({
 }: LitematicaLayerControlsProps) {
   return (
     <div
-      className={`absolute right-4 bottom-16 z-10 w-[250px] border border-tech-main/60 bg-surface-overlay/90 p-3 text-tech-main shadow-sm backdrop-blur-md transition-all ${
+      className={`absolute right-4 bottom-16 z-10 w-[250px] border border-tech-main/60 bg-surface-overlay/90 p-3 text-tech-main shadow-sm backdrop-blur-md transition-[opacity,transform,translate] motion-reduce:transition-none ${
         isFlyEnabled ? "pointer-events-none translate-x-2 opacity-0" : "opacity-100"
       }`}>
       <div className="mb-2 flex items-center justify-between border-b guide-line pb-1">

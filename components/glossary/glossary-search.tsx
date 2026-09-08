@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, type ChangeEvent } from "react"
 import { useTranslations } from "next-intl"
+import { Button } from "@/components/ui/shadcn/button"
 import { SearchIcon } from "lucide-react"
 import {
   InputGroup,
@@ -74,7 +75,7 @@ export function GlossarySearch({
   return (
     <search
       className={`grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:flex sm:items-center ${className}`}>
-      <InputGroup className="col-span-2 h-9 min-h-0 sm:col-span-1 sm:flex-1">
+      <InputGroup className="col-span-2 sm:col-span-1 sm:flex-1">
         <InputGroupAddon align="inline-start">
           <SearchIcon className="text-tech-main/60 size-3.5" />
         </InputGroupAddon>
@@ -83,7 +84,7 @@ export function GlossarySearch({
           value={query}
           onChange={handleInputChange}
           placeholder={t("searchPlaceholder")}
-          aria-label="Search glossary terms"
+          aria-label={t("searchPlaceholder")}
           autoComplete="off"
           spellCheck={false}
         />
@@ -94,20 +95,18 @@ export function GlossarySearch({
         </InputGroupAddon>
       </InputGroup>
 
-      <button
+      <Button
         type="button"
         onClick={toggleScope}
         aria-pressed={!isActiveScope}
         aria-label={scopeLabel}
-        className={`tracking-tech-wide flex h-9 cursor-pointer items-center justify-center border px-3 font-mono text-xs uppercase transition-colors sm:px-4 ${
-          isActiveScope
-            ? "border-tech-main/60 bg-tech-main/10 text-tech-main-dark"
-            : "border-tech-main/20 text-tech-main/70 hover:border-tech-main/40"
-        }`}>
-        [{scopeLabel}]
-      </button>
+        variant={isActiveScope ? "secondary" : "outline"}
+        size="sm"
+        className="min-h-11">
+        {scopeLabel}
+      </Button>
 
-      <span className="border-tech-main/20 text-tech-main/50 bg-surface-overlay/35 flex h-9 items-center border px-3 font-mono text-xs whitespace-nowrap select-none sm:hidden">
+      <span className="text-muted-foreground flex items-center px-3 text-xs tabular-nums sm:hidden">
         {resultCount} of {totalCount}
       </span>
     </search>

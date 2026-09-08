@@ -3,6 +3,8 @@
 import * as React from "react"
 import { useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
+import { Badge } from "@/components/ui/shadcn/badge"
+import { Button } from "@/components/ui/shadcn/button"
 import { Link } from "@/i18n/navigation"
 import { CrossRefChips } from "@/components/glossary/cross-ref-chips"
 import { TranslationsList } from "@/components/glossary/translations-list"
@@ -19,14 +21,7 @@ interface TermDetailProps {
 }
 
 function ControversyBadge({ label }: { label: string }) {
-  return (
-    <span
-      className="inline-flex min-h-7 items-center gap-1 border border-yellow-500/40 bg-yellow-500/10 px-2 font-mono text-[0.625rem] tracking-widest whitespace-nowrap text-yellow-700 uppercase"
-      title={label}>
-      <span aria-hidden="true">[*]</span>
-      <span>{label}</span>
-    </span>
-  )
+  return <Badge variant="pending">{label}</Badge>
 }
 
 function EditTermCta({ locale, slug }: { locale: string; slug: string }) {
@@ -37,13 +32,14 @@ function EditTermCta({ locale, slug }: { locale: string; slug: string }) {
 
   return (
     <div className="border-tech-line/20 border-t pt-5">
-      <Link
-        href={`/glossary/edit/new?prefill=${encodeURIComponent(slug)}`}
-        locale={locale as "en" | "zh"}
-        className="border-tech-main/30 hover:border-tech-main/60 hover:bg-tech-main/5 focus-visible:outline-tech-main flex min-h-11 w-full items-center justify-between gap-4 border px-3 font-mono text-xs tracking-widest uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2">
-        <span>{t("detailEditCta")}</span>
-        <span aria-hidden="true">-&gt;</span>
-      </Link>
+      <Button asChild variant="outline" className="w-full justify-between">
+        <Link
+          href={`/glossary/edit/new?prefill=${encodeURIComponent(slug)}`}
+          locale={locale as "en" | "zh"}>
+          <span>{t("detailEditCta")}</span>
+          <span aria-hidden="true">-&gt;</span>
+        </Link>
+      </Button>
     </div>
   )
 }

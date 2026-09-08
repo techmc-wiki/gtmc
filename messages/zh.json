@@ -113,8 +113,8 @@
   },
   "ChapterNav": {
     "buttonClose": "关闭",
-    "buttonCollapseAll": "⊟ 折叠全部",
-    "buttonLocate": "◎ 定位当前",
+    "buttonCollapseAll": "折叠全部",
+    "buttonLocate": "定位当前",
     "buttonNewArticle": "+ 新建文章 / 目录",
     "createDocAbortButton": "中止",
     "createDocAsDirectory": "对象类型",

@@ -13,6 +13,7 @@ import {
 import { GlossaryTable } from "@/components/glossary/glossary-table"
 import { GlossaryDetailPanel } from "@/components/glossary/term-detail"
 import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
+import { Button } from "@/components/ui/shadcn/button"
 import { Link } from "@/i18n/navigation"
 import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
 import {
@@ -55,7 +56,7 @@ function GlossaryTableSkeleton() {
               {["term", "shortForm", "description", "related"].map((col) => (
                 <th
                   key={col}
-                  className="text-tech-main/50 border-tech-line/30 bg-tech-bg/95 sticky top-0 z-10 border-b px-3 py-2 text-left font-mono text-xs tracking-widest uppercase backdrop-blur-sm">
+                  className="text-tech-main/50 border-tech-line/30 bg-tech-bg/95 sticky top-0 z-10 border-b px-3 py-2 text-left text-xs font-medium backdrop-blur-sm">
                   <SegmentedBar opacity="low" className="h-3 w-16" />
                 </th>
               ))}
@@ -239,12 +240,11 @@ export function GlossaryBrowser({
                 onChange={handleVisibleColumnsChange}
               />
               <DensityToggle value={density} onChange={handleDensityChange} />
-              <Link
-                href="/glossary/edit/new"
-                locale={locale as "en" | "zh"}
-                className="bg-tech-main-dark hover:bg-tech-signal hover:text-tech-signal-ink text-tech-bg hidden h-9 items-center border border-transparent px-3 font-mono text-xs tracking-widest whitespace-nowrap uppercase transition-colors sm:flex">
-                {t("proposeEditsCta")}
-              </Link>
+              <Button asChild size="sm" className="col-span-2 min-h-11">
+                <Link href="/glossary/edit/new" locale={locale as "en" | "zh"}>
+                  {t("proposeEditsCta")}
+                </Link>
+              </Button>
             </div>
           </div>
 

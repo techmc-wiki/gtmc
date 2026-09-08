@@ -54,7 +54,6 @@ export async function StatusPage({ kind }: StatusPageProps) {
             <div className="animate-slide-up-fade fill-mode-forwards w-full opacity-0 [animation-delay:1.2s] motion-reduce:animate-none motion-reduce:opacity-100">
               <Button
                 asChild
-                variant="primary"
                 className="flex h-12 items-center justify-center px-8 transition-transform duration-300 hover:scale-105 active:scale-95">
                 <Link href="/">{returnHome}</Link>
               </Button>

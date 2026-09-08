@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server"
 import { prisma } from "@/lib/prisma"
 import { guardUser } from "@/lib/auth/guards"
 import { redirect } from "next/navigation"
+import { Button } from "@/components/ui/shadcn/button"
 import { Input } from "@/components/ui/shadcn/input"
 import {
   Avatar,
@@ -72,7 +73,7 @@ export default async function ProfilePage({
           }
           className="space-y-8 p-4 sm:p-6 md:p-8 lg:p-12">
           <div className="flex flex-col items-start gap-4 sm:gap-6 md:gap-8">
-            <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-24 size-full items-center justify-center overflow-hidden rounded-none border-2 p-1 ring-1 sm:size-32 md:size-40">
+            <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-24 items-center justify-center overflow-hidden rounded-none border-2 p-1 ring-1 sm:size-32 md:size-40">
               {user.image ? (
                 <AvatarImage asChild src={user.image}>
                   <Image
@@ -91,35 +92,47 @@ export default async function ProfilePage({
               )}
             </Avatar>
 
-            <FormField label={t("avatarUrlLabel")} className="w-full flex-1">
+            <FormField
+              htmlFor="profile-image"
+              label={t("avatarUrlLabel")}
+              className="w-full flex-1">
               <Input
+                id="profile-image"
                 name="image"
+                type="url"
+                autoComplete="url"
+                aria-describedby="profile-image-hint"
                 defaultValue={user.image || ""}
                 placeholder="https://..."
-                className="border-tech-main/30 focus:border-tech-main bg-surface-input w-full rounded-none border font-mono text-xs shadow-none transition-colors sm:text-sm"
               />
-              <p className="text-tech-main/60 text-xs">{t("avatarUrlHint")}</p>
+              <p
+                id="profile-image-hint"
+                className="text-muted-foreground text-xs">
+                {t("avatarUrlHint")}
+              </p>
             </FormField>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
-            <FormField label={t("usernameLabel")}>
+            <FormField htmlFor="profile-name" label={t("usernameLabel")}>
               <Input
+                id="profile-name"
                 name="name"
+                autoComplete="name"
                 defaultValue={user.name || ""}
                 required
-                className="border-tech-main/30 focus:border-tech-main bg-surface-input w-full rounded-none border font-mono text-xs shadow-none transition-colors sm:text-sm"
               />
             </FormField>
-            <FormField label={emailLabel}>
+            <FormField htmlFor="profile-email" label={emailLabel}>
               <Input
+                id="profile-email"
+                type="email"
                 defaultValue={user.email || ""}
                 disabled
-                className="bg-tech-main/5 text-tech-main/60 w-full cursor-not-allowed rounded-none border font-mono text-xs tracking-wide shadow-none sm:text-sm"
               />
               {emailVisibility === "private" && (
-                <p className="border-l border-amber-400/40 pl-2 font-mono text-[0.5625rem] tracking-widest text-amber-600/70 uppercase sm:text-[0.625rem]">
-                  {">"} {t("emailPrivateNotice")}
+                <p className="text-muted-foreground text-xs">
+                  {t("emailPrivateNotice")}
                 </p>
               )}
             </FormField>
@@ -127,7 +140,7 @@ export default async function ProfilePage({
 
           <div className="border-tech-main/30 flex flex-col items-start justify-between gap-3 border-b py-3 sm:flex-row sm:items-center sm:gap-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <span className="mono-label font-bold text-zinc-500 sm:w-24">
+              <span className="text-muted-foreground text-sm sm:w-24">
                 {t("assignedRole")}
               </span>
               <span className="wrap-break-word">{roleValue}</span>
@@ -135,12 +148,10 @@ export default async function ProfilePage({
           </div>
 
           <div className="flex flex-col items-stretch justify-end gap-3 sm:gap-4 md:flex-row md:items-center md:gap-6">
-            <SignOutButton className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main-dark hover:text-tech-bg relative flex min-h-11 w-full items-center justify-center border px-4 py-2.5 font-mono text-xs font-bold tracking-widest uppercase transition-colors sm:px-6 sm:py-3 md:px-8" />
-            <button
-              type="submit"
-              className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main-dark hover:text-tech-bg relative flex min-h-11 w-full cursor-pointer items-center justify-center border px-4 py-2.5 font-mono text-xs font-bold tracking-widest uppercase transition-colors sm:px-6 sm:py-3 md:px-8">
+            <SignOutButton className="w-full" />
+            <Button type="submit" className="w-full">
               {t("saveButton")}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

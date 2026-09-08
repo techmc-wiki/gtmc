@@ -223,11 +223,11 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
           aria-label={t("toggleNavigationMenu")}
           aria-expanded={isDrawerOpen}>
           <span
-            className={`bg-tech-main h-0.5 w-5 transition-all ${isDrawerOpen ? `translate-y-2 rotate-45` : ""} `}></span>
+            className={`bg-tech-main h-0.5 w-5 transition-[translate,rotate,opacity] motion-reduce:transition-none ${isDrawerOpen ? `translate-y-2 rotate-45` : ""} `}></span>
           <span
-            className={`bg-tech-main h-0.5 w-5 transition-all ${isDrawerOpen ? `opacity-0` : ""} `}></span>
+            className={`bg-tech-main h-0.5 w-5 transition-[translate,rotate,opacity] motion-reduce:transition-none ${isDrawerOpen ? `opacity-0` : ""} `}></span>
           <span
-            className={`bg-tech-main h-0.5 w-5 transition-all ${isDrawerOpen ? `-translate-y-2 -rotate-45` : ""} `}></span>
+            className={`bg-tech-main h-0.5 w-5 transition-[translate,rotate,opacity] motion-reduce:transition-none ${isDrawerOpen ? `-translate-y-2 -rotate-45` : ""} `}></span>
         </button>
       </SheetTrigger>
 

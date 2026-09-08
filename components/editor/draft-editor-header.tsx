@@ -103,7 +103,6 @@ export function DraftEditorHeader({
             </EditorIconButton>
             <Button
               type="button"
-              variant="primary"
               size="sm"
               className="min-h-11 px-3 font-sans tracking-normal normal-case"
               onClick={submit.onClick}

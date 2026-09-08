@@ -54,9 +54,7 @@ export default async function NewDraftPage({
             {t("existingFilePathHint")}
           </p>
         </div>
-        <Button type="submit" variant="primary">
-          {t("createDraft")}
-        </Button>
+        <Button type="submit">{t("createDraft")}</Button>
       </form>
     </main>
   )

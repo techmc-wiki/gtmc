@@ -97,14 +97,7 @@ function EditOperationCard({ operation }: OperationCardProps) {
   const fields = changedColumns(before, after)
 
   return (
-    <Card
-      tone="main"
-      borderOpacity="subtle"
-      background="default"
-      padding="compact"
-      brackets="hidden"
-      hover="none"
-      className="border-tech-line/40">
+    <Card className="border-tech-line/40 sm:p-4">
       <CardHeader className="p-0 pb-3">
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-foreground text-sm font-semibold">
@@ -126,7 +119,7 @@ function EditOperationCard({ operation }: OperationCardProps) {
               <div
                 key={field}
                 className="bg-surface-overlay/50 border-border/50 rounded-none border p-2.5 text-xs">
-                <div className="text-muted-foreground mb-1 font-mono text-[11px] tracking-wider uppercase">
+                <div className="text-muted-foreground mb-1 text-[11px]">
                   {field}
                 </div>
                 <div className="text-foreground leading-relaxed break-words whitespace-pre-wrap">
@@ -146,14 +139,7 @@ function AddOperationCard({ operation }: OperationCardProps) {
   const fields = populatedColumns(after)
 
   return (
-    <Card
-      tone="main"
-      borderOpacity="subtle"
-      background="default"
-      padding="compact"
-      brackets="hidden"
-      hover="none"
-      className="border-tech-line/40">
+    <Card className="border-tech-line/40 sm:p-4">
       <CardHeader className="p-0 pb-3">
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-foreground text-sm font-semibold">
@@ -171,7 +157,7 @@ function AddOperationCard({ operation }: OperationCardProps) {
               <div
                 key={field}
                 className="bg-surface-overlay/50 border-border/50 rounded-none border p-2 text-xs">
-                <span className="text-muted-foreground block font-mono text-[10px] tracking-wider uppercase">
+                <span className="text-muted-foreground block text-[10px]">
                   {field}
                 </span>
                 <span className="text-foreground mt-0.5 block break-words whitespace-pre-wrap">
@@ -191,14 +177,7 @@ function DeleteOperationCard({ operation }: OperationCardProps) {
   const fields = populatedColumns(before)
 
   return (
-    <Card
-      tone="danger"
-      borderOpacity="subtle"
-      background="subtle"
-      padding="compact"
-      brackets="hidden"
-      hover="none"
-      className="border-red-500/30">
+    <Card className="border-destructive/30 bg-destructive/5 text-destructive border-red-500/30 sm:p-4">
       <CardHeader className="p-0 pb-3">
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-sm font-semibold text-red-700 line-through dark:text-red-400">
@@ -212,7 +191,7 @@ function DeleteOperationCard({ operation }: OperationCardProps) {
           <div className="flex flex-col gap-1 text-xs opacity-75">
             {fields.map((field) => (
               <div key={field} className="flex gap-2">
-                <span className="text-muted-foreground shrink-0 font-mono text-[10px] tracking-wider uppercase sm:w-32">
+                <span className="text-muted-foreground shrink-0 text-[10px] sm:w-32">
                   {field}:
                 </span>
                 <span className="text-foreground break-words line-through">
@@ -263,7 +242,7 @@ function SubmissionSuccess({
             href={submitResult.prUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="border-border hover:bg-accent inline-flex items-center gap-1.5 border px-4 py-2 font-mono text-xs font-bold tracking-wider uppercase transition-colors">
+            className="border-border hover:bg-accent inline-flex items-center gap-1.5 border px-4 py-2 text-xs font-bold transition-colors">
             View on GitHub <ExternalLink className="size-3.5" />
           </a>
           <Button type="button" variant="default" size="sm" onClick={onReturn}>

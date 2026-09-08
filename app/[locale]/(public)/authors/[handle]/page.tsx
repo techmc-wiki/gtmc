@@ -514,7 +514,7 @@ function RepositoryStat({
 }) {
   const formatter = numberFormatters[locale] ?? numberFormatters.en
   return (
-    <Card padding="compact">
+    <Card className="sm:p-4">
       <p className="text-tech-main/60 text-xs font-medium">{label}</p>
       <p className="text-tech-main-dark mt-2 text-2xl font-semibold tabular-nums">
         {formatter.format(value)}
@@ -568,7 +568,7 @@ function ArticleRow({
     <Link
       href={`/articles/${article.slug}`}
       className="group/article focus-visible:outline-tech-main block focus-visible:outline-2 focus-visible:outline-offset-2">
-      <Card padding="compact" hover="border">
+      <Card className="hover:border-ring transition-colors sm:p-4">
         <div className="flex items-center gap-3">
           <span className="text-tech-main/40 w-8 shrink-0 text-right font-mono text-xs">
             {String(rowIndex).padStart(2, "0")}

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/cn"
+import { Label } from "@/components/ui/shadcn/label"
 import React from "react"
 
 interface FormFieldProps {
@@ -16,11 +17,9 @@ export function FormField({
 }: FormFieldProps) {
   return (
     <div className={cn(`space-y-3 sm:space-y-4`, className)}>
-      <label
-        htmlFor={htmlFor}
-        className="border-tech-main text-tech-main-dark block border-l-2 pl-2.5 text-xs font-medium">
+      <Label htmlFor={htmlFor} className="block">
         {label}
-      </label>
+      </Label>
       {children}
     </div>
   )

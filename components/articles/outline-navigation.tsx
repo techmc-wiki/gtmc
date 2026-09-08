@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
+import { Button } from "@/components/ui/shadcn/button"
 import { Link } from "@/i18n/navigation"
 import { useReaderNavigation } from "@/app/[locale]/(public)/articles/reader-navigation/context"
 import { useFooterOverlap } from "@/hooks/use-footer-overlap"
@@ -83,7 +84,7 @@ function PlotterAxis() {
       <span className={`${styles.plotterHead} absolute left-0`} aria-hidden="true">
         <span className="bg-tech-signal absolute top-0 left-0 size-2 -translate-x-1/2 -translate-y-1/2" />
         <span className="bg-tech-signal/75 absolute top-0 right-2 h-px w-2" />
-        <span className="text-tech-signal absolute top-0 right-4 -translate-y-1/2 font-mono text-[0.5rem] tracking-[0.08em] whitespace-nowrap uppercase tabular-nums">
+        <span className="text-tech-signal absolute top-0 right-4 -translate-y-1/2 text-[0.5rem] whitespace-nowrap tabular-nums">
           ΔY {String(percentage).padStart(3, "0")}%
         </span>
       </span>
@@ -141,7 +142,7 @@ export function OutlineRail() {
 
           <div className="flex min-h-0 w-full flex-col pl-16">
             <header className="guide-line flex shrink-0 items-baseline justify-between gap-2 border-b pt-1 pb-3">
-              <span className="font-mono text-[0.625rem] font-bold tracking-[0.18em] text-tech-main/60 uppercase">
+              <span className="text-[0.625rem] font-bold text-tech-main/60">
                 {t("title")}
               </span>
               <span className="font-mono text-[0.5625rem] tracking-[0.12em] text-tech-main/45 tabular-nums">
@@ -250,10 +251,10 @@ export function MobileOutlineBar() {
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b guide-line px-4 py-3">
           <div className="flex items-center gap-3">
-            <SheetTitle className="font-mono text-xs font-bold tracking-[0.12em] text-tech-main/60 uppercase">
+            <SheetTitle className="text-xs font-bold text-tech-main/60">
               {t("title")}
             </SheetTitle>
-            <span className="font-mono text-[0.625rem] tracking-[0.08em] text-tech-signal uppercase tabular-nums">
+            <span className="text-[0.625rem] text-tech-signal tabular-nums">
               ΔY {String(pct).padStart(3, "0")}%
             </span>
           </div>
@@ -266,12 +267,13 @@ export function MobileOutlineBar() {
           </div>
 
           <SheetClose asChild>
-            <button
+            <Button
               type="button"
-              className="cursor-pointer px-3 py-2 font-mono text-xs font-bold tracking-[0.15em] text-tech-main uppercase transition-colors hover:bg-tech-main/10"
+              variant="ghost"
+              size="sm"
               aria-label={t("closeSheet")}>
               {t("close")}
-            </button>
+            </Button>
           </SheetClose>
         </div>
 
@@ -285,7 +287,7 @@ export function MobileOutlineBar() {
                   href={`#${item.id}`}
                   aria-current={isActive ? "location" : undefined}
                   onClick={closeSheet}
-                  className={`block border-l-[3px] py-2.5 pr-2 transition-all duration-200 ${mobileDepthClasses[item.depth]} ${
+                  className={`block border-l-[3px] py-2.5 pr-2 transition-colors duration-200 ${mobileDepthClasses[item.depth]} ${
                     isActive
                       ? "border-tech-signal text-tech-main-dark font-semibold"
                       : "text-tech-main/60 hover:border-tech-main/30 hover:text-tech-main border-transparent"

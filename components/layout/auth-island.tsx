@@ -92,7 +92,7 @@ function AuthIslandContent() {
           <DropdownMenuItem
             asChild
             className="rounded-none px-0 py-0 hover:bg-transparent focus:bg-transparent">
-            <SignOutButton className="text-tech-main-dark hover:bg-tech-main/10 w-full px-2 py-1.5 text-left font-mono text-[0.625rem] transition-colors" />
+            <SignOutButton className="w-full justify-start" />
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

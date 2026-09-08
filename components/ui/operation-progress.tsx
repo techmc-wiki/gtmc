@@ -108,7 +108,9 @@ function getStageMarkerClassName({
 }) {
   if (isErrored) return "border-red-500 bg-red-500"
   if (isCompleted) return "border-tech-main bg-tech-main"
-  if (isCurrent) return "border-tech-main/70 bg-tech-main/50 animate-pulse"
+  if (isCurrent) {
+    return "border-tech-main/70 bg-tech-main/50 animate-pulse motion-reduce:animate-none"
+  }
   return "border-tech-main/25 bg-transparent"
 }
 
@@ -126,30 +128,6 @@ function getStageLabelClassName({
   return "text-tech-main/45"
 }
 
-function ProgressSweep({
-  state,
-  style,
-}: {
-  state: OperationProgressState
-  style: React.CSSProperties
-}) {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div
-        className={cn(
-          "from-tech-main/10 via-tech-accent/25 absolute inset-y-0 left-0 bg-linear-to-r to-transparent transition-[width] duration-300",
-          state === "running" ? "animate-blueprint-sweep" : "",
-          state === "success" ? "animate-scan-confirm" : "",
-          state === "error"
-            ? "from-red-500/10 via-red-400/15 to-transparent"
-            : ""
-        )}
-        style={style}
-      />
-    </div>
-  )
-}
-
 function ProgressStatus({
   percent,
   state,
@@ -164,12 +142,10 @@ function ProgressStatus({
   return (
     <div className="relative flex items-start justify-between gap-3">
       <div className="min-w-0 space-y-1">
-        <p className="text-tech-main/50 font-mono text-[0.6875rem] tracking-widest uppercase">
-          {title}
-        </p>
+        <p className="text-tech-main/50 text-[0.6875rem]">{title}</p>
         <p
           className={cn(
-            "font-mono text-[0.75rem] tracking-widest uppercase",
+            "text-[0.75rem]",
             state === "success"
               ? "text-green-600"
               : state === "error"
@@ -180,7 +156,7 @@ function ProgressStatus({
         </p>
       </div>
 
-      <div className="guide-line text-tech-main/70 bg-surface-overlay/70 shrink-0 border px-2 py-1 font-mono text-[0.6875rem] tracking-widest uppercase">
+      <div className="guide-line text-tech-main/70 bg-surface-overlay/70 shrink-0 border px-2 py-1 text-[0.6875rem]">
         {percent.toString().padStart(2, "0")}%
       </div>
     </div>
@@ -190,32 +166,25 @@ function ProgressStatus({
 function ProgressBar({
   percent,
   state,
-  style,
   title,
 }: {
   percent: number
   state: OperationProgressState
-  style: React.CSSProperties
   title: string
 }) {
   return (
     <progress
-      className="guide-line bg-tech-main/5 relative mt-3 block h-2 w-full appearance-none overflow-hidden border [&::-moz-progress-bar]:bg-transparent [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:bg-transparent"
+      className={cn(
+        "mt-3 block h-2 w-full appearance-none overflow-hidden bg-muted [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-primary [&::-moz-progress-bar]:bg-primary",
+        state === "success" &&
+          "[&::-webkit-progress-value]:bg-green-600 [&::-moz-progress-bar]:bg-green-600",
+        state === "error" &&
+          "[&::-webkit-progress-value]:bg-destructive [&::-moz-progress-bar]:bg-destructive"
+      )}
       aria-label={title}
       max={100}
-      value={percent}>
-      <div
-        className={cn(
-          "bg-tech-main absolute inset-y-0 left-0 transition-[width] duration-300",
-          state === "success" ? "bg-green-600" : "",
-          state === "error" ? "bg-red-500" : ""
-        )}
-        style={style}
-      />
-      {state === "running" ? (
-        <div className="animate-blueprint-sweep pointer-events-none absolute inset-0 bg-linear-to-r from-transparent via-white/70 to-transparent" />
-      ) : null}
-    </progress>
+      value={percent}
+    />
   )
 }
 
@@ -247,15 +216,11 @@ function ProgressStage({
       <div className="flex items-center gap-2">
         <span
           className={cn(
-            "block size-2.5 shrink-0 border transition-all duration-300",
+            "block size-2.5 shrink-0 border transition-colors duration-300",
             getStageMarkerClassName(status)
           )}
         />
-        <span
-          className={cn(
-            "truncate font-mono tracking-widest uppercase",
-            getStageLabelClassName(status)
-          )}>
+        <span className={cn("truncate ", getStageLabelClassName(status))}>
           {stage.label}
         </span>
       </div>
@@ -303,7 +268,6 @@ function ProgressStages({
 }
 
 interface ProgressDisplayProps {
-  barWidthStyle: React.CSSProperties
   className?: string
   compact: boolean
   displayProgress: number
@@ -313,13 +277,11 @@ interface ProgressDisplayProps {
   stages: OperationProgressStage[]
   state: OperationProgressState
   statusLabel: string
-  sweepWidthStyle: React.CSSProperties
   timeline: StageTimelineEntry[]
   title: string
 }
 
 function ProgressDisplay({
-  barWidthStyle,
   className,
   compact,
   displayProgress,
@@ -329,7 +291,6 @@ function ProgressDisplay({
   stages,
   state,
   statusLabel,
-  sweepWidthStyle,
   timeline,
   title,
 }: ProgressDisplayProps) {
@@ -342,19 +303,13 @@ function ProgressDisplay({
         className
       )}
       aria-live="polite">
-      <ProgressSweep state={state} style={sweepWidthStyle} />
       <ProgressStatus
         percent={percent}
         state={state}
         statusLabel={statusLabel}
         title={title}
       />
-      <ProgressBar
-        percent={percent}
-        state={state}
-        style={barWidthStyle}
-        title={title}
-      />
+      <ProgressBar percent={percent} state={state} title={title} />
       <ProgressStages
         compact={compact}
         displayProgress={displayProgress}
@@ -482,16 +437,6 @@ export function OperationProgress({
   }, [state, stages.length, timeline])
 
   const percent = Math.round(displayProgress * 100)
-  const sweepWidthStyle = React.useMemo(
-    (): React.CSSProperties => ({
-      width: `${Math.max(percent, 8)}%`,
-    }),
-    [percent]
-  )
-  const barWidthStyle = React.useMemo(
-    (): React.CSSProperties => ({ width: `${percent}%` }),
-    [percent]
-  )
   const stageGridStyle = React.useMemo(
     (): React.CSSProperties => ({
       gridTemplateColumns: `repeat(auto-fit, minmax(${compact ? "7rem" : "8rem"}, 1fr))`,
@@ -514,7 +459,6 @@ export function OperationProgress({
 
   return (
     <ProgressDisplay
-      barWidthStyle={barWidthStyle}
       className={className}
       compact={compact}
       displayProgress={displayProgress}
@@ -524,7 +468,6 @@ export function OperationProgress({
       stages={stages}
       state={state}
       statusLabel={statusLabel}
-      sweepWidthStyle={sweepWidthStyle}
       timeline={timeline}
       title={title}
     />

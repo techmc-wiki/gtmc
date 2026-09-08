@@ -73,7 +73,6 @@ export default function LoginPage() {
               <Button
                 onClick={handleLogin}
                 disabled={isLoading}
-                variant="primary"
                 className="flex h-12 w-full items-center justify-center transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98]">
                 {isLoading ? (
                   <span className="flex items-center">

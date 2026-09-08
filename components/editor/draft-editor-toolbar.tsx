@@ -118,10 +118,6 @@ export function DraftEditorToolbar({
               <span aria-hidden className="bg-tech-main/20 mx-1 h-5 w-px" />
             )}
             <EditorIconButton
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="size-11 p-0"
               label={label}
               disabled={toolDisabled}
               onMouseDown={(event) => event.preventDefault()}
@@ -132,10 +128,6 @@ export function DraftEditorToolbar({
         )
       )}
       <EditorIconButton
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="size-11 p-0"
         label={
           compressing
             ? t("compressingImage")
@@ -168,12 +160,7 @@ export function DraftEditorToolbar({
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <EditorIconButton
-            type="button"
-            variant="ghost"
-            size="sm"
-            label={t("insert")}
-            disabled={disabled}>
+          <EditorIconButton label={t("insert")} disabled={disabled}>
             <PlusIcon aria-hidden className="size-4" />
           </EditorIconButton>
         </DropdownMenuTrigger>
@@ -199,10 +186,7 @@ export function DraftEditorToolbar({
         </DropdownMenuContent>
       </DropdownMenu>
       <EditorIconButton
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="ml-auto size-11 p-0"
+        className="ml-auto"
         label={t("toolbarWrap")}
         aria-pressed={lineWrap}
         onClick={onWrapToggle}>

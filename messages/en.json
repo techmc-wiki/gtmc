@@ -113,8 +113,8 @@
   },
   "ChapterNav": {
     "buttonClose": "Close",
-    "buttonCollapseAll": "⊟ Collapse all",
-    "buttonLocate": "◎ Locate current",
+    "buttonCollapseAll": "Collapse all",
+    "buttonLocate": "Locate current",
     "buttonNewArticle": "+ New file / dir",
     "createDocAbortButton": "Abort",
     "createDocAsDirectory": "Object type",

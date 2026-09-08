@@ -1,3 +1,4 @@
+import { cn } from "@/lib/cn"
 import Image from "next/image"
 import { Link } from "@/i18n/navigation"
 import { Card } from "@/components/ui/shadcn/card"
@@ -45,9 +46,10 @@ export function AuthorGrid({
             href={`/authors/${encodeURIComponent(handle)}`}
             className="group/link focus-visible:outline-tech-main block focus-visible:outline-2 focus-visible:outline-offset-2">
             <Card
-              padding="compact"
-              hover="border"
-              className={isCompact ? undefined : "h-full"}>
+              className={cn(
+                "sm:p-4 transition-colors hover:border-ring",
+                !isCompact && "h-full"
+              )}>
               <div
                 className={
                   isCompact

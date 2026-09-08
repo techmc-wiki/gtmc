@@ -136,7 +136,7 @@ export function DraftEditorReview({
                       key={guide.id}
                       type="button"
                       variant={
-                        selectedGuideId === guide.id ? "primary" : "secondary"
+                        selectedGuideId === guide.id ? "default" : "secondary"
                       }
                       size="sm"
                       onClick={() => onSelectGuide(guide.id)}>

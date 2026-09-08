@@ -90,7 +90,7 @@ const COLUMN_LABEL_KEYS: Record<string, string> = {
 }
 
 const headerCellBase =
-  "text-xs font-medium text-tech-main/60 uppercase border-tech-line/30 sticky top-0 z-10 border-b bg-tech-bg/95 px-3 py-2 text-left backdrop-blur-sm"
+  "text-xs font-medium text-tech-main/60 border-tech-line/30 sticky top-0 z-10 border-b bg-tech-bg/95 px-3 py-2 text-left backdrop-blur-sm"
 
 function LetterAnchor({ letter, top }: { letter: string; top: number }) {
   const style = React.useMemo<React.CSSProperties>(() => ({ top }), [top])
@@ -152,7 +152,7 @@ function VirtualLetterRow({
           <h2 className="display-title text-tech-main-dark text-2xl">
             {letter}
           </h2>
-          <span className="text-tech-main/40 font-mono text-xs tracking-widest uppercase">
+          <span className="text-tech-main/40 text-xs tabular-nums">
             {count}
           </span>
         </div>
@@ -192,9 +192,7 @@ function MobileLetterVirtualRow({
       style={style}>
       <div className="border-tech-line/30 flex items-baseline gap-3 border-b pb-1">
         <h2 className="display-title text-tech-main-dark text-2xl">{letter}</h2>
-        <span className="text-tech-main/40 font-mono text-xs tracking-widest uppercase">
-          {count}
-        </span>
+        <span className="text-tech-main/40 text-xs tabular-nums">{count}</span>
       </div>
     </section>
   )

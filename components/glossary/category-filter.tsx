@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
+import { Button } from "@/components/ui/shadcn/button"
 import { cn } from "@/lib/cn"
 import {
   Collapsible,
@@ -22,23 +23,6 @@ export interface CategoryFilterProps {
   className?: string
 }
 
-const TRIGGER_BASE =
-  "focus-visible:outline-tech-main flex w-full cursor-pointer items-center justify-between gap-3 border px-3 py-2 font-mono text-xs font-bold tracking-widest uppercase transition-colors select-none focus-visible:outline-2 focus-visible:outline-offset-2"
-
-const TRIGGER_ACTIVE =
-  "border-tech-main/60 bg-tech-main/10 text-tech-main-dark hover:bg-tech-main/15"
-
-const TRIGGER_INACTIVE =
-  "border-tech-main/40 bg-surface-overlay/70 text-tech-main hover:border-tech-main/60 hover:bg-tech-accent/10"
-
-const ROW_BASE =
-  "focus-visible:outline-tech-main group flex w-full cursor-pointer items-center gap-2.5 border px-3 py-2 text-left font-mono text-xs tracking-widest uppercase transition-colors select-none focus-visible:outline-2 focus-visible:outline-offset-2"
-
-const ROW_ACTIVE = "border-tech-main/60 bg-tech-main/10 text-tech-main-dark"
-
-const ROW_INACTIVE =
-  "border-tech-main/30 bg-surface-overlay/50 text-tech-main/80 hover:border-tech-main/60 hover:bg-tech-accent/10"
-
 interface RowProps {
   label: string
   count: number
@@ -55,11 +39,15 @@ function Row({ label, count, active, name, onClick, onToggle }: RowProps) {
   }, [onClick, onToggle, name])
 
   return (
-    <button
+    <Button
       type="button"
       onClick={handleClick}
       aria-pressed={active}
-      className={cn(ROW_BASE, active ? ROW_ACTIVE : ROW_INACTIVE)}>
+      variant="ghost"
+      className={cn(
+        "w-full justify-start whitespace-normal text-left",
+        active && "bg-accent"
+      )}>
       <span
         aria-hidden="true"
         className={cn(
@@ -75,9 +63,9 @@ function Row({ label, count, active, name, onClick, onToggle }: RowProps) {
           "shrink-0",
           active ? "text-tech-main-dark/70" : "text-tech-main/60"
         )}>
-        [{count}]
+        {count}
       </span>
-    </button>
+    </Button>
   )
 }
 
@@ -132,42 +120,31 @@ export function CategoryFilter({
     if (selected.length > 0) onChange([])
   }, [selected, onChange])
 
-  // Inline disclosure: Esc closes; outside click does not (would be jarring).
-  React.useEffect(() => {
-    if (!isOpen) return
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsOpen(false)
-    }
-    document.addEventListener("keydown", handleKey)
-    return () => document.removeEventListener("keydown", handleKey)
-  }, [isOpen])
-
   const triggerLabel = noneSelected
-    ? `[${allLabel} · ${totalCount}]`
-    : `[${t("categoriesSelectedCount", { count: selected.length })}]`
+    ? `${allLabel} · ${totalCount}`
+    : t("categoriesSelectedCount", { count: selected.length })
 
   return (
     <Collapsible
       open={isOpen}
       onOpenChange={setIsOpen}
-      className={cn("flex flex-col gap-2", className)}>
+      className={cn("flex flex-col gap-2", className)}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") setIsOpen(false)
+      }}>
       <CollapsibleTrigger asChild>
-        <button
+        <Button
           type="button"
-          className={cn(
-            TRIGGER_BASE,
-            noneSelected ? TRIGGER_INACTIVE : TRIGGER_ACTIVE
-          )}>
+          variant="outline"
+          className="w-full justify-between">
           <span className="truncate">{triggerLabel}</span>
           <Chevron open={isOpen} />
-        </button>
+        </Button>
       </CollapsibleTrigger>
 
-      <CollapsibleContent className="grid transition-[grid-template-rows,opacity] duration-200 data-[state=closed]:[grid-template-rows:0fr] data-[state=closed]:opacity-0 data-[state=open]:[grid-template-rows:1fr] data-[state=open]:opacity-100 motion-reduce:transition-none">
+      <CollapsibleContent>
         <div className="overflow-hidden">
-          <div
-            id={panelId}
-            className="border-tech-main/30 bg-surface-overlay/60 flex flex-col gap-2 border p-2 backdrop-blur-sm sm:p-3">
+          <div id={panelId} className="flex flex-col gap-2 py-2">
             <Row
               label={allLabel}
               count={totalCount}

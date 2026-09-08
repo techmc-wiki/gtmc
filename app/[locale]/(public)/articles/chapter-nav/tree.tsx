@@ -158,7 +158,7 @@ function FolderGrid({
         else folderGridRefs.current.delete(itemId)
       }}
       className={`
-        grid transition-all duration-300 ease-out
+        grid transition-[grid-template-rows,opacity] motion-reduce:transition-none duration-300 ease-out
         ${collapsed ? `grid-rows-[0fr] opacity-0` : `grid-rows-[1fr] opacity-100`}
       `}>
       <div className="overflow-hidden">
@@ -233,9 +233,9 @@ export function ChapterNavTree({
             data-chapter-nav-row="1"
             ref={!item.isFolder && isActive ? activeItemRef : undefined}
             className={`
-                  relative my-0.5 list-none transition-all duration-300 md:my-0
+                  relative my-0.5 list-none transition-colors duration-300 md:my-0
                   before:absolute before:top-0 before:left-0 before:h-full before:w-0.5
-                  before:transition-all before:duration-200 before:content-['']
+                  before:transition-[width,background-color] motion-reduce:before:transition-none before:duration-200 before:content-['']
                 ${
                   !item.isFolder && isActive
                     ? `before:bg-tech-signal before:w-[3px]`

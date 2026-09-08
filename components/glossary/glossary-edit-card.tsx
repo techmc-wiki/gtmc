@@ -314,13 +314,10 @@ export function GlossaryEditCard({
 
   return (
     <Card
-      tone={isDelete ? "danger" : "main"}
-      borderOpacity="subtle"
-      background="default"
-      padding="compact"
-      brackets="hidden"
-      hover="none"
-      className="border-border">
+      className={cn(
+        "sm:p-4",
+        isDelete && "border-destructive/30 bg-destructive/5 text-destructive"
+      )}>
       <GlossaryEditCardHeader
         headerTerm={headerTerm}
         isDelete={isDelete}
@@ -637,10 +634,10 @@ function Field({
           value={value}
           disabled={disabled}
           aria-invalid={error || undefined}
-          className={cn(
-            "text-xs leading-relaxed",
-            error && "border-red-500 text-red-600 focus-visible:ring-red-500"
-          )}
+          aria-describedby={
+            error && errorMessage ? `${fieldId}-error` : undefined
+          }
+          className="leading-relaxed"
           onChange={handleChange}
           rows={3}
         />
@@ -650,15 +647,14 @@ function Field({
           value={value}
           disabled={disabled}
           aria-invalid={error || undefined}
-          className={cn(
-            "h-8 text-xs",
-            error && "border-red-500 text-red-600 focus-visible:ring-red-500"
-          )}
+          aria-describedby={
+            error && errorMessage ? `${fieldId}-error` : undefined
+          }
           onChange={handleChange}
         />
       )}
       {error && errorMessage && (
-        <p className="text-[11px] font-medium text-red-600 dark:text-red-400">
+        <p id={`${fieldId}-error`} className="text-destructive text-xs">
           {errorMessage}
         </p>
       )}

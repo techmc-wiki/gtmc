@@ -32,12 +32,6 @@ const dateFormatters: Record<string, Intl.DateTimeFormat> = {
   zh: new Intl.DateTimeFormat("zh", { dateStyle: "medium" }),
 }
 
-const primaryActionClassName =
-  "group/link border-tech-main-dark bg-tech-main-dark text-tech-bg hover:border-tech-signal hover:bg-tech-signal hover:text-tech-signal-ink focus-visible:outline-tech-main relative inline-flex min-h-11 w-full items-center justify-between gap-4 border px-4 py-2.5 font-mono text-[0.6875rem] font-bold tracking-widest uppercase transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2"
-
-const secondaryActionClassName =
-  "group/link border-tech-main/40 bg-surface-overlay/60 text-tech-main-dark hover:border-tech-main hover:bg-tech-accent/20 focus-visible:outline-tech-main relative inline-flex min-h-11 w-full items-center justify-between gap-4 border px-4 py-2.5 font-mono text-[0.6875rem] font-bold tracking-widest uppercase transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2"
-
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
@@ -136,14 +130,15 @@ function DraftRecord({
       </div>
 
       <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:min-w-40 sm:items-end">
-        <Link
-          href={href}
-          className={`${
-            history ? secondaryActionClassName : primaryActionClassName
-          } sm:w-auto`}>
-          <span>{actionLabel}</span>
-          <span aria-hidden="true">→</span>
-        </Link>
+        <Button
+          asChild
+          variant={history ? "outline" : "default"}
+          className="w-full justify-between sm:w-auto">
+          <Link href={href}>
+            <span>{actionLabel}</span>
+            <span aria-hidden="true">→</span>
+          </Link>
+        </Button>
         {deleteAction ? (
           <Collapsible className="w-full text-left sm:w-auto sm:text-right">
             <CollapsibleTrigger asChild>
@@ -161,7 +156,7 @@ function DraftRecord({
               <form action={deleteAction}>
                 <Button
                   type="submit"
-                  variant="danger"
+                  variant="destructive"
                   size="sm"
                   className="min-h-11 w-full text-[0.625rem] uppercase">
                   {deleteLabel}
@@ -180,13 +175,7 @@ function DraftRecord({
 
   return (
     <article>
-      <Card
-        tone="main"
-        borderOpacity="muted"
-        background="default"
-        padding="none"
-        hover="border"
-        brackets="hidden">
+      <Card className="hover:border-ring p-0 transition-colors sm:p-0">
         {content}
       </Card>
     </article>
@@ -354,10 +343,7 @@ export default async function DraftDashboardPage({
           </SectionTitle>
 
           {activeItems.length === 0 ? (
-            <EmptyState
-              message={t("noActiveTitle")}
-              className="py-12 [&_h2]:text-base [&_h2]:normal-case"
-            />
+            <EmptyState message={t("noActiveTitle")} className="py-12" />
           ) : (
             <div className="space-y-4">
               {activeItems.map((item) => renderRecord(item))}
@@ -366,16 +352,8 @@ export default async function DraftDashboardPage({
         </section>
 
         <aside className="lg:sticky lg:top-28 lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <Card
-            tone="main"
-            borderOpacity="medium"
-            background="subtle"
-            padding="default"
-            hover="none"
-            brackets="visible"
-            bracketVariant="static"
-            className="border-t-tech-signal border-t-2">
-            <p className="text-tech-main/60 font-mono text-[0.625rem] tracking-[0.22em] uppercase">
+          <Card className="border-t-tech-signal border-t-2">
+            <p className="text-tech-main/60 text-xs font-medium">
               {t("newDraftLabel")}
             </p>
             <h2 className="display-title text-tech-main-dark mt-2 text-2xl">
@@ -386,16 +364,21 @@ export default async function DraftDashboardPage({
             </p>
 
             <div className="mt-6 space-y-3">
-              <Link href="/draft/new" className={primaryActionClassName}>
-                <span>{t("newArticle")}</span>
-                <span aria-hidden="true">→</span>
-              </Link>
-              <Link
-                href="/glossary/edit/new"
-                className={secondaryActionClassName}>
-                <span>{t("newGlossary")}</span>
-                <span aria-hidden="true">→</span>
-              </Link>
+              <Button asChild className="w-full justify-between">
+                <Link href="/draft/new">
+                  <span>{t("newArticle")}</span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-between">
+                <Link href="/glossary/edit/new">
+                  <span>{t("newGlossary")}</span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </Button>
             </div>
           </Card>
         </aside>
@@ -408,13 +391,7 @@ export default async function DraftDashboardPage({
                 {archivedItems.length}
               </span>
             </SectionTitle>
-            <Card
-              tone="main"
-              borderOpacity="subtle"
-              background="ghost"
-              padding="none"
-              hover="none"
-              brackets="hidden">
+            <Card className="p-0 sm:p-0">
               <ul className="divide-tech-main/15 divide-y">
                 {archivedItems.map((item) => renderRecord(item, true))}
               </ul>

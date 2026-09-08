@@ -11,6 +11,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/shadcn/dialog"
 
 function Command({
@@ -33,11 +34,17 @@ function CommandDialog({
   title = "Command Palette",
   description = "Search for a command to run...",
   children,
+  trigger,
+  onOpenAutoFocus,
   className,
   showCloseButton = true,
   shouldFilter = true,
   ...props
 }: React.ComponentProps<typeof Dialog> & {
+  trigger?: React.ReactNode
+  onOpenAutoFocus?: React.ComponentProps<
+    typeof DialogContent
+  >["onOpenAutoFocus"]
   title?: string
   description?: string
   className?: string
@@ -47,18 +54,17 @@ function CommandDialog({
 }) {
   return (
     <Dialog {...props}>
-      <DialogHeader className="sr-only">
-        <DialogTitle>{title}</DialogTitle>
-        <DialogDescription>{description}</DialogDescription>
-      </DialogHeader>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent
         className={cn("overflow-hidden p-0", className)}
-        showCloseButton={showCloseButton}>
-        <Command
-          shouldFilter={shouldFilter}
-          className="[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
-          {children}
-        </Command>
+        showCloseButton={showCloseButton}
+        onOpenAutoFocus={onOpenAutoFocus}>
+        <DialogHeader className="sr-only">
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+
+        <Command shouldFilter={shouldFilter}>{children}</Command>
       </DialogContent>
     </Dialog>
   )
@@ -71,12 +77,12 @@ function CommandInput({
   return (
     <div
       data-slot="command-input-wrapper"
-      className="flex h-12 items-center gap-2.5 px-4">
+      className="focus-within:ring-ring flex items-center gap-2.5 px-4 focus-within:ring-2 focus-within:ring-inset">
       <SearchIcon className="size-4 shrink-0 opacity-50" />
       <CommandPrimitive.Input
         data-slot="command-input"
         className={cn(
-          "placeholder:text-muted-foreground flex h-12 w-full bg-transparent py-3.5 font-mono text-sm tracking-wide outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+          "font-sans placeholder:text-muted-foreground flex h-12 min-w-0 w-full bg-transparent py-3.5 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
         {...props}

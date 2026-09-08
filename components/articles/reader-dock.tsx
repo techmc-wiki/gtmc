@@ -4,6 +4,7 @@ import { useCallback } from "react"
 import { ArrowUpIcon } from "lucide-react"
 import { SITE_SCROLL_ROOT_ID } from "@/hooks/site-scroll-root"
 import { useTranslations } from "next-intl"
+import { Button } from "@/components/ui/shadcn/button"
 import { cn } from "@/lib/cn"
 
 const RING_RADIUS = 15.5
@@ -41,17 +42,18 @@ export function ReaderDock({
 
   return (
     <div
+      inert={!visible}
       className={cn(
-        "border-tech-main/20 bg-surface-overlay/95 backdrop-blur-sm fixed right-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-30 flex items-stretch border transition-all duration-300 xl:hidden",
+        "border-tech-main/20 bg-surface-overlay/95 backdrop-blur-sm fixed right-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-30 flex items-stretch border transition-[translate,opacity] motion-reduce:transition-none duration-300 xl:hidden",
         visible
           ? "translate-y-0 opacity-100"
           : "pointer-events-none translate-y-2 opacity-0"
       )}>
-      <button
+      <Button variant="ghost" size="icon"
         type="button"
         onClick={scrollToTop}
         aria-label={t("backToTopPct", { pct })}
-        className="relative flex size-11 cursor-pointer items-center justify-center">
+        className="relative">
         <svg
           viewBox="0 0 36 36"
           aria-hidden="true"
@@ -80,7 +82,7 @@ export function ReaderDock({
           className="text-tech-main-dark size-4"
           aria-hidden="true"
         />
-      </button>
+      </Button>
 
       {sectionLabel ? (
         <div className="border-tech-main/20 flex min-w-0 items-center border-l">

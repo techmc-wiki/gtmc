@@ -14,6 +14,7 @@ import {
   SectionRail,
   SegmentedBar,
 } from "@/components/ui/loading-shell-primitives"
+import { Button } from "@/components/ui/shadcn/button"
 import { TriangleIcon } from "@/components/ui/icons"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import { useLocale, useTranslations } from "next-intl"
@@ -268,22 +269,24 @@ function MobileChapterNavigation({
           }
           ${isOverlappingFooter && !isChapterNavOpen ? "pointer-events-none opacity-0" : "opacity-100"}
         `}>
-        <button
+        <Button
           type="button"
+          variant="ghost"
           onClick={onToggle}
           aria-expanded={isChapterNavOpen}
           aria-label={tA11y("toggleArticleTree")}
           data-testid="mobile-tree-toggle"
-          className="flex h-12 w-full cursor-pointer items-center justify-between px-4 font-mono text-xs font-bold tracking-[0.15em] text-tech-main uppercase transition-colors hover:bg-tech-main/5">
+          className="h-12 w-full justify-between">
           <span>{t("title")}</span>
           <TriangleIcon
             direction={isChapterNavOpen ? "down" : "right"}
             className="size-3"
           />
-        </button>
+        </Button>
         <div
+          inert={!isChapterNavOpen}
           className={`
-            grid transition-all duration-300 ease-out
+            grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none
             ${isChapterNavOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}
           `}>
           <div className="overflow-hidden">
@@ -330,6 +333,7 @@ function DesktopChapterNavigation({
       data-chapter-nav-hidden={chapterNavHidden ? "" : undefined}>
       <div className="flex h-full">
         <aside
+          inert={chapterNavHidden}
           className="
             h-full w-56 overflow-clip border-r guide-line
             transition-[width,opacity,border-color] duration-300
@@ -349,23 +353,17 @@ function DesktopChapterNavigation({
                 border-b guide-line text-tech-main
                 md:px-4 md:py-2
               ">
-              <div className="flex shrink-0 items-center gap-2 border-b pb-2 guide-line">
-                <span className="size-1.5 shrink-0 bg-tech-signal" />
-                <h2 className="display-title text-tech-main-dark/70 text-sm">
-                  {t("title")}
-                </h2>
-              </div>
-
               {showPlaceholder ? (
                 <div
                   className="
                     reader-rail-scrollbar h-full min-h-0 flex-1
                     overflow-y-auto
                   ">
+                  <h2 className="mb-2 text-sm font-semibold">{t("title")}</h2>
                   <TreeLoadingPlaceholder />
                 </div>
               ) : (
-                <ChapterNavPanel scrollClassName="pr-4" />
+                <ChapterNavPanel showTitle scrollClassName="pr-1" />
               )}
             </div>
           </div>
@@ -373,7 +371,7 @@ function DesktopChapterNavigation({
 
         <div className="relative h-full w-0">
           <div className="sticky top-[50vh] -translate-y-1/2 justify-center overflow-visible">
-            <button
+            <Button variant="outline" size="icon-sm"
               type="button"
               onClick={onToggle}
               aria-label={
@@ -383,14 +381,7 @@ function DesktopChapterNavigation({
               }
               aria-expanded={!chapterNavHidden}
               data-chapter-nav-toggle=""
-              className="
-                absolute top-0 -left-3 z-40 flex size-6
-                -translate-y-1/2 cursor-pointer items-center justify-center
-                border guide-line bg-tech-bg text-tech-main/40
-                transition-[opacity,color,background-color] duration-300
-                ease-[cubic-bezier(0.16,1,0.3,1)]
-                hover:bg-tech-main/5 hover:text-tech-main
-              ">
+              className="absolute top-0 -left-4 z-40 -translate-y-1/2">
               <span
                 className="
                   flex size-3 items-center justify-center select-none
@@ -400,10 +391,8 @@ function DesktopChapterNavigation({
                   className="size-2.5"
                 />
               </span>
-            </button>
-            <span className="text-tech-main/40 absolute top-4 -right-3 inline-block text-right font-mono text-[0.625rem] font-bold">
-              {chapterNavHidden ? "chapter navigation" : ""}
-            </span>
+            </Button>
+
           </div>
         </div>
       </div>

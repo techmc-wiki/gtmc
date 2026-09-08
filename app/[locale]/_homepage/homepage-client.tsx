@@ -29,7 +29,6 @@ export function HomepageClient() {
       <div className="animate-slide-up-fade fill-mode-forwards relative z-20 flex w-full max-w-48 flex-col items-stretch justify-center gap-5 opacity-0 [animation-delay:0.6s] motion-reduce:animate-none sm:w-full sm:max-w-full sm:flex-row sm:items-center">
         <Button
           asChild
-          variant="primary"
           aria-disabled={isAccessingDatabase}
           className={`flex h-12 w-full items-center justify-center text-xs tracking-widest uppercase shadow-md transition-transform duration-300 hover:scale-102 active:scale-95 ${
             isAccessingDatabase

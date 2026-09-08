@@ -4,10 +4,8 @@ import { Card } from "@/components/ui/shadcn/card"
 /** Single labeled statistic readout. */
 export function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <Card padding="compact">
-      <p className="text-tech-main/60 mb-1 font-mono text-[0.625rem] tracking-[0.25em] uppercase">
-        {label}
-      </p>
+    <Card className="sm:p-4">
+      <p className="text-tech-main/60 mb-1 text-[0.625rem]">{label}</p>
       <p className="text-tech-main-dark text-lg font-semibold">{value}</p>
     </Card>
   )

@@ -26,7 +26,7 @@ Shared rules:
   page titles, section titles, and article headings. Ink-dark, tight tracking,
   sentence case — never uppercase serif.
 - Monospace is the "apparatus" voice and is scoped to apparatus controls:
-  nav links, buttons, badges, tabs, code/data values. Uppercase + wide
+  occasional nav links and code/data values. Uppercase + wide
   tracking belongs to those controls only — never to form labels, dialog
   titles, empty states, or descriptive text.
 - `tech-signal` (blueprint azure / cyanotype blue) is the one loud color,
@@ -35,6 +35,22 @@ Shared rules:
 - The dot-grid backdrop survives site-wide; on the homepage it becomes an
   interactive field that reacts to the cursor.
 - Motion reads like instrumentation: fade, clip-path slide, pop-in.
+
+## Styling principle
+
+Use a thin theme layer on the existing shadcn components. Shared tokens own
+paper, ink, accent, and square geometry. Shared components own focus, disabled
+states, and control typography. Call sites add layout and meaningful state
+only; do not repeat the primitive's borders, padding, font, or transitions.
+
+Standard buttons, tabs, badges, inputs, labels, dialog titles, and empty states
+use sans text in normal capitalization. Monospace is an opt-in for code,
+identifiers, keyboard shortcuts, and occasional reader/navigation apparatus.
+Do not turn an entire toolbar or form into all-caps mono text.
+
+Before removing styling, compare the surface with that layer disabled. Keep
+layout, focus, selection, and touch sizing that affect usability; remove
+texture, redundant borders, decorative status signals, and unused variants.
 
 ## UX Principles
 
@@ -124,7 +140,7 @@ Loading and progress
 - `components/ui/loading-shell-primitives.tsx`, `operation-progress.tsx`.
 
 Editor subsystem
-- `components/editor/editor-frames.tsx`, `editor-toolbar-shell.tsx`, `editor-tab-strip.tsx`, `editor-textarea.tsx`.
+- `components/editor/draft-editor.tsx`, `draft-editor-toolbar.tsx`, `editor-frames.tsx`, and `editor-icon-button.tsx`.
 
 Article reader
 - `app/[locale]/(public)/articles/articles-layout-client.tsx`, `chapter-nav-panel.tsx`, `chapter-nav/tree.tsx`, `mobile-chapter-nav-card.tsx`.
@@ -217,7 +233,7 @@ Families
 Three voices
 1. **Serif** speaks as the book: page titles, section titles, article headings, the logo wordmark, the hero. `display-title` = serif, semibold, `-0.015em` tracking, sentence case.
 2. **Sans** speaks as the text block and as app-surface UI: body copy, descriptions, form labels, dialog titles, empty states.
-3. **Mono** speaks as the apparatus and is scoped to apparatus controls: nav links, buttons, badges, tabs, code/data values. Mono owns uppercase and wide tracking — never apply it to form labels, dialog titles, or descriptive text.
+3. **Mono** speaks as the apparatus and is scoped to apparatus controls: occasional nav links and code/data values. Mono owns uppercase and wide tracking — never apply it to form labels, dialog titles, or descriptive text.
 
 Scale
 - Root font size scales by viewport: `16px` on small screens, stepping up to `18px` on large screens via media queries in `html`.
@@ -286,13 +302,13 @@ There is no single universal card. Several surface systems coexist; each is inte
 
 `Card` (`components/ui/shadcn/card.tsx`)
 - The default framed panel for draft and dashboard surfaces (formerly `TechCard`).
-- Real props include: `tone`, `borderOpacity`, `background`, `padding`, `hover`, `brackets`, `bracketVariant`, `pattern` (`grid` only).
-- Conventions: thin `border-tech-main/40` borders, near-square geometry, corner brackets hidden by default (opt in via `brackets="visible"`), hover changes border/fill opacity rather than adding elevation.
+- Uses standard div props and `className`; no custom decoration or variant API.
+- Base: `border bg-card text-card-foreground`, square theme radius, `p-4 sm:p-6`. Use `sm:p-4` for compact content or `p-0 sm:p-0` for flush lists. Static cards have no hover effect; linked cards can opt into a border change.
 
-Editor surfaces (`components/editor/editor-frames.tsx`)
-- A separate frame system used by the draft editor.
-- Two visible variants: `default` (white/80 panel) and `grid` (grid-paper texture with inset shadow).
-- Pairs with `EditorToolbarShell`, `EditorTabStrip`, `EditorTextarea` (CodeMirror), and `EditorPreviewFrame`.
+Editor surfaces
+- The current draft editor composes shadcn Tabs, resizable panels, Input, and Button.
+- `EditorIconButton` adds an accessible label and tooltip to Button; it does not own a separate control style.
+- `EditorPreviewFrame` retains Markdown layout and its empty-preview fallback. The unused legacy toolbar, tab strip, and frame system have been removed.
 
 Article reader shell
 - A bordered translucent sheet around the entire reader: `border border-tech-main/40 bg-transparent p-6 sm:p-8`. This is its own surface, not a `Card`.
@@ -301,7 +317,7 @@ Profile and admin panels
 - Custom panels with `border-tech-main/40 bg-white/60 backdrop-blur-md`. Used in profile and admin where `Card`'s API is too tight.
 
 Tabs and toggles
-- Tab and segmented-toggle behavior uses shadcn `Tabs` (`TabsList`/`TabsTrigger`/`TabsContent`) and `ToggleGroup` — same square, bordered, mono-label language.
+- Tab and segmented-toggle behavior uses shadcn `Tabs` (`TabsList`/`TabsTrigger`/`TabsContent`) and `ToggleGroup` — the same square geometry and normal sans labels.
 
 Geometry guidance
 - Default to square (`rounded-none`). Small radii are acceptable on dense indicators and skeletons (`rounded-sm`, `rounded-xs`, `rounded-[2px]`) and on circular dots (`rounded-full`). Reach for radii consciously, not by default.
@@ -310,8 +326,8 @@ Geometry guidance
 
 `Button` (`components/ui/shadcn/button.tsx`) is the primary control (formerly `TechButton`).
 
-- Square geometry, border, mono uppercase text at `text-xs font-semibold tracking-wider`, `duration-300` transitions.
-- Variants: `primary`, `secondary`, `danger`, `ghost` — `primary`/`danger` are GTMC aliases over the shadcn variant set (`default`/`destructive`). Sizes: `sm`, `md`, `lg` (md/lg meet touch minimums); `md` aliases shadcn's `default`.
+- Square geometry, border, normal-case sans text, and color transitions. Standard controls inherit this styling without local typography overrides.
+- Use standard variants: `default`, `secondary`, `destructive`, `outline`, `ghost`, `link`. Sizes include `default`, `xs`, `sm`, `lg`, and icon sizes. Legacy `primary`, `danger`, and `md` aliases were removed after migrating their consumers.
 - No corner ticks or `before:` accent marks on buttons.
 - Two hover rhythms exist on the site:
   - Color/fill change (default): `hover:bg-tech-main hover:text-white transition-colors`.
@@ -322,23 +338,23 @@ Geometry guidance
 
 `Input` and `Textarea` (`components/ui/shadcn/input.tsx`, `components/ui/shadcn/textarea.tsx`) are the canonical fields (formerly `InputBox`/`TextAreaBox`).
 
-- Base: `border border-tech-main/30 bg-surface-input font-mono text-tech-main-dark`, square geometry, comfortable padding (`px-3 py-2.5 sm:px-4 sm:py-3`), min height `44px` (inputs).
+- Base: `border border-tech-main/30 bg-surface-input text-base text-tech-main-dark`, square geometry, comfortable padding (`px-3 py-2.5 sm:px-4 sm:py-3`), min height `44px` (inputs).
 - Focus is a deliberate border-color change (`focus:border-tech-main`) — fields do not use ring/outline.
 - Error: `aria-invalid` plus a red border and helper text, same square geometry.
 - Provide visible labels and helper text near fields; placeholder-only labeling is not enough.
-- Composition: form labels live in a `FormField` with a left border accent and a sans `text-xs font-medium` label (normal capitalization).
+- Composition: form labels use shadcn `Label` with `htmlFor` matching the input ID; helper text is linked with `aria-describedby`.
 
 ## Status, Badges, Tags
 
-Bracketed and translucent. Examples: `[Submitted]`, `[Merged]`, `[Closed]`.
+Status labels use shared Badge variants without decorative brackets. `DraftStatusBadge` adds only status-to-variant mapping and localization.
 
-- Base: `border px-2 py-0.5 font-mono text-xs tracking-wide`.
+- Base: `border px-2 py-0.5 text-xs` with normal sans text.
 - Pending: yellow border/text on yellow `/10` fill.
 - Submitted: blue border/text on blue `/10` fill.
 - Merged / success: green border/text on green `/10` fill.
 - Closed / destructive: red border/text on red `/10` fill.
 - Neutral / loading: gray or slate at low opacity.
-- Tags use `guide-line`, `bg-tech-main/5`, mono uppercase text, square borders.
+- Tags use the shared Badge with a suitable variant; do not repeat its border, color, or typography at call sites.
 - Pulsing status dots: `size-1.5 animate-pulse rounded-full bg-tech-main` for live indicators; reserve for state that actually updates.
 
 ## Decorative Motifs
@@ -347,10 +363,9 @@ Decoration should be quiet, purposeful, and interactive where it earns its place
 
 Surviving motifs
 - Dot-grid backdrop on the body via a radial gradient using `tech-line` (mobile fixes grid size to `40px 40px`). On the homepage it becomes `HomepageDotGrid` — an interactive canvas field (vendored ReactBits `DotGrid`, gsap inertia) whose dots brighten toward `tech-signal` near the cursor.
-- `CornerBrackets` (`components/ui/corner-brackets.tsx`) survive ONLY as interactive affordances: hover reveal on prev/next article cards (`article-navigation.tsx`). `Card` can opt in via `brackets="visible"` but defaults to hidden.
+- `CornerBrackets` (`components/ui/corner-brackets.tsx`) survive ONLY as interactive affordances: hover reveal on prev/next article cards (`article-navigation.tsx`). Cards have no bracket API.
 - Thin guide lines: `guide-line`, `border-tech-main/20`, `section-divider`.
 - Small square markers: `size-3 border border-tech-main/40 bg-tech-main/20`.
-- Grid-paper texture on `EditorSurface variant="grid"` and `Card pattern="grid"`.
 
 Removed from the vocabulary — do not reintroduce
 - Fake HUD labels/status readouts (`SYS.ONLINE`, hex dumps, stack traces).
@@ -397,7 +412,7 @@ Rules
 - Body background is a radial dot grid using `tech-line`, with responsive grid sizing.
 - Panels use `bg-white/60`–`/95` plus `backdrop-blur-sm` or `backdrop-blur-md`.
 - Mobile drawers and full-screen overlays use a translucent dark scrim: `bg-tech-main-dark/20 backdrop-blur-xs` (or similar).
-- Empty states may layer dashed borders over a low-opacity diagonal stripe background.
+- Empty states use a plain Card and readable sans text.
 - Localized scanline / striped overlays exist (empty states, chapter nav panel, draft editor backdrop). Implementation is intentionally ad hoc; treat them as a vocabulary, not a single utility.
 
 ## Article Reader
@@ -429,7 +444,7 @@ The text block is typeset like a printed monograph, not a blog post.
 A coherent loading language exists; reach for it before inventing new spinners.
 
 - `loading-shell-primitives.tsx` exposes `SectionFrame` (brackets opt-in, hidden by default), `SectionRail` (quiet sans label), `SegmentedBar`, and `SkeletonExitWrapper`. Route-level loading states use `SkeletonExitWrapper` with `aria-busy="true"` and an `aria-label`. The old `SweepOverlay`/`ScanConfirmOverlay` were removed.
-- `OperationProgress` provides a longer-running shell with `role="status" aria-live="polite"` and a `role="progressbar"` track.
+- `OperationProgress` uses a live `output` and a native `progress` element, without sweep overlays or custom fallback fill elements.
 - Mark async action buttons with `aria-busy` while pending; the system relies on this consistently.
 
 ## Interaction States
@@ -461,8 +476,8 @@ The system reliably provides
 - A canonical focus-visible outline (see above).
 
 Open gaps to be careful with when adding new UI
-- Dialog/sheet focus trap and `aria-modal` are not provided centrally; supply them per-component.
-- `aria-describedby` and `aria-labelledby` on dialogs/popovers are not consistent — set them when introducing a new overlay.
+- shadcn Dialog and Sheet provide focus trapping, Escape dismissal, and modal semantics. Keep their title and description inside the portalled content.
+- Give each overlay an accessible title and description using its shared primitives.
 - Decorative `motion-*` animations outside the loading system do not have `motion-reduce:` fallbacks; add them when you reach for a new animation.
 
 General rules
@@ -481,7 +496,7 @@ Before adding or changing UI, check:
 - [ ] Uses `tech-*` tokens instead of raw hex.
 - [ ] Defaults to square geometry; reaches for radius consciously.
 - [ ] Uses existing primitives (`Card`, `Button`, `Input`/`Textarea`, `CornerBrackets`, `PageHeader`, `SectionTitle`, shadcn `Badge`) before inventing new ones.
-- [ ] Picks the right surface system: `Card` for general panels, `EditorSurface` for editor work, the article shell for reader work, custom panels only when none of the above fit.
+- [ ] Picks the right surface system: `Card` for general panels, shadcn panels and `EditorPreviewFrame` for editor work, the article shell for reader work, custom panels only when none of the above fit.
 - [ ] Respects mobile-first layout and `44px` touch targets.
 - [ ] Uses mono only on apparatus controls (nav, buttons, badges, tabs, code/data); app-surface labels, dialog titles, and empty states are sans with normal capitalization.
 - [ ] Keeps decoration subordinate to content; no HUD readouts, watermarks, dimension marks, or static corner brackets.

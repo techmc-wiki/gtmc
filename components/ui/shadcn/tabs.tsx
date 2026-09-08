@@ -48,9 +48,9 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "flex min-h-8 cursor-pointer items-center justify-center gap-1.5 rounded-none border px-3 py-2 font-mono text-xs tracking-wider uppercase transition-all duration-200 select-none outline-none focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "font-sans flex min-h-8 cursor-pointer items-center justify-center gap-1.5 rounded-none border px-3 py-2 text-sm font-medium transition-colors duration-200 select-none outline-none focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         "border-tech-main/40 bg-tech-main/5 text-tech-main hover:border-tech-main/60 hover:bg-tech-main/10",
-        "data-[state=active]:border-tech-main-dark data-[state=active]:bg-tech-main-dark data-[state=active]:font-bold data-[state=active]:text-tech-bg",
+        "data-[state=active]:border-tech-main-dark data-[state=active]:bg-tech-main-dark data-[state=active]:text-tech-bg",
         className
       )}
       {...props}
@@ -65,7 +65,10 @@ function TabsContent({
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn("flex-1 outline-none", className)}
+      className={cn(
+        "flex-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        className
+      )}
       {...props}
     />
   )

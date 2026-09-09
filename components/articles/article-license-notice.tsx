@@ -1,5 +1,8 @@
 "use client"
 
+import { IconButton } from "@/components/ui/icon-button"
+import { Check, Copy } from "lucide-react"
+
 import { Link } from "@/i18n/navigation"
 import { useState, useCallback } from "react"
 import { useTranslations } from "next-intl"
@@ -75,14 +78,7 @@ export function ArticleLicenseNotice({
       <span aria-hidden="true" className="text-tech-main/35">
         |
       </span>
-      <button
-        type="button"
-        onClick={handleCopyAttribution}
-        className="underline decoration-dotted decoration-tech-main/30 underline-offset-4 transition-colors hover:text-tech-main-dark hover:decoration-tech-main-dark"
-        aria-label={t("copySuggestedAttributionAria")}
-        title={t("copySuggestedAttributionTitle")}>
-        {isCopied ? t("copiedButton") : t("copyAttribution")}
-      </button>
+      <IconButton onClick={handleCopyAttribution} label={isCopied ? t("copiedButton") : t("copySuggestedAttributionAria")}>{isCopied ? <Check aria-hidden /> : <Copy aria-hidden />}</IconButton>
       <span className="sr-only" aria-live="polite">
         {isCopied ? t("copiedButton") : ""}
       </span>

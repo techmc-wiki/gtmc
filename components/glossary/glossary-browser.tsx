@@ -233,14 +233,17 @@ export function GlossaryBrowser({
               totalCount={totalCount}
               className="min-w-0 sm:flex-1"
             />
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex">
+            <div className="flex items-center gap-2">
               <ColumnPicker
                 locale={locale}
                 visibleColumns={visibleColumns}
                 onChange={handleVisibleColumnsChange}
               />
               <DensityToggle value={density} onChange={handleDensityChange} />
-              <Button asChild size="sm" className="col-span-2 min-h-11">
+              <Button
+                asChild
+                size="sm"
+                className="ml-auto min-h-11 flex-1 sm:flex-none">
                 <Link href="/glossary/edit/new" locale={locale as "en" | "zh"}>
                   {t("proposeEditsCta")}
                 </Link>

@@ -1,5 +1,7 @@
 "use client"
 
+import { IconButton } from "@/components/ui/icon-button"
+
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import { GitPullRequest, Trash2 } from "lucide-react"
@@ -72,10 +74,13 @@ export function GlossaryEditToolbar({
 
       <div className="flex items-center gap-2 self-end sm:self-auto">
         {!isReadOnly && (
-          <Button type="button" variant="outline" size="sm" onClick={onDiscard}>
-            <Trash2 className="text-muted-foreground size-3.5" />
-            {t("editorToolbarDiscard")}
-          </Button>
+          <IconButton
+            type="button"
+            variant="outline"
+            onClick={onDiscard}
+            label={t("editorToolbarDiscard")}>
+            <Trash2 aria-hidden />
+          </IconButton>
         )}
         <Button
           type="button"

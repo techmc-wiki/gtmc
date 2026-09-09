@@ -1,20 +1,24 @@
 "use client"
 
 import { signOut } from "next-auth/react"
-import { Button } from "@/components/ui/shadcn/button"
+import { IconButton } from "@/components/ui/icon-button"
+import { LogOut } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 type SignOutButtonProps = {
   className?: string
 }
 
 export function SignOutButton({ className }: SignOutButtonProps) {
+  const t = useTranslations("IconActions")
   return (
-    <Button
+    <IconButton
+      label={t("signOut")}
       variant="outline"
       onClick={() => signOut({ callbackUrl: "/" })}
       className={className}
       type="button">
-      Sign out
-    </Button>
+      <LogOut aria-hidden />
+    </IconButton>
   )
 }

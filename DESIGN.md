@@ -55,6 +55,9 @@ consult `app/globals.css` and the shared components.
 
 - Keep visible focus states from shared primitives: outlines for controls,
   border changes for inputs. Never remove focus without a visible replacement.
+- Use `IconButton` for utility actions with recognizable icons and localized
+  hover/focus labels. Keep explicit text for primary CTAs, confirmations, and
+  content choices (chapters, files, languages, filters); never hide their meaning.
 - Provide visible field labels, linked helper text, accessible icon-button
   names, and overlay titles/descriptions inside Dialog or Sheet content.
 - Maintain 44px touch targets, keyboard access, readable contrast, and zoom.

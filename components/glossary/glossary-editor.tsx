@@ -1,5 +1,7 @@
 "use client"
 
+import { IconButton } from "@/components/ui/icon-button"
+
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import { ExternalLink, GitPullRequest, Plus } from "lucide-react"
@@ -11,7 +13,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/shadcn/dialog"
-import { Button } from "@/components/ui/shadcn/button"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { GlossaryEditToolbar } from "@/components/glossary/glossary-edit-toolbar"
 import {
@@ -625,14 +626,14 @@ function GlossaryEditorContent({
               onAddNew={handleAddNew}
             />
           </div>
-          <Button
+          <IconButton
             type="button"
             variant="outline"
             onClick={handleAddNewTerm}
-            className="h-10 shrink-0 text-xs font-medium">
-            <Plus className="mr-1.5 size-3.5" />
-            {t("editorAddTermButton")}
-          </Button>
+            className="shrink-0"
+            label={t("editorAddTermButton")}>
+            <Plus aria-hidden />
+          </IconButton>
         </div>
       )}
       {operations.length === 0 ? (

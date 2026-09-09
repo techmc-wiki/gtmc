@@ -1,5 +1,8 @@
 "use client"
 
+import { Columns3 } from "lucide-react"
+import { IconButton } from "@/components/ui/icon-button"
+
 import * as React from "react"
 import { useTranslations } from "next-intl"
 
@@ -107,14 +110,13 @@ export function ColumnPicker({
     <div className={cn("relative flex", className)}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
+          <IconButton
             type="button"
             aria-label={t("columnPickerLabel")}
             variant="outline"
-            size="sm"
-            className="min-h-11 w-full sm:w-auto">
-            {t("columnPickerToggle")}
-          </Button>
+            label={t("columnPickerLabel")}>
+            <Columns3 aria-hidden />
+          </IconButton>
         </PopoverTrigger>
 
         <PopoverContent

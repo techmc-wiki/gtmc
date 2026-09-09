@@ -1,5 +1,8 @@
 "use client"
 
+import { IconButton } from "@/components/ui/icon-button"
+import { Check, Copy, WrapText } from "lucide-react"
+
 import React, {
   useCallback,
   useEffect,
@@ -147,14 +150,15 @@ function ClipboardButton({
   }
 
   return (
-    <button
-      type="button"
+    <IconButton
       onClick={handleCopy}
-      aria-label={ariaLabel}
-      title={ariaLabel}
-      className="text-tech-main hover:text-tech-main/80 font-mono text-[0.625rem] tracking-widest uppercase transition-colors">
-      {copied ? doneLabel : idleLabel}
-    </button>
+      label={copied ? doneLabel : ariaLabel}
+      title={idleLabel}>
+      {copied ? <Check aria-hidden /> : <Copy aria-hidden />}
+      <span className="sr-only" aria-live="polite">
+        {copied ? doneLabel : ""}
+      </span>
+    </IconButton>
   )
 }
 
@@ -253,18 +257,12 @@ function CodeBlockHeader({
             </>
           )}
           <span className="text-tech-main/50">|</span>
-          <button
-            type="button"
-            aria-label={toggleLineWrapLabel}
-            title={toggleLineWrapLabel}
+          <IconButton
+            label={toggleLineWrapLabel}
             onClick={onToggleWrap}
-            className={`font-mono text-[0.625rem] tracking-widest transition-colors ${
-              isWrapped
-                ? "text-tech-main"
-                : "text-tech-main/40 hover:text-tech-main/70"
-            }`}>
-            ↩
-          </button>
+            aria-pressed={isWrapped}>
+            <WrapText aria-hidden />
+          </IconButton>
           <span className="text-tech-main/50">|</span>
           <ClipboardButton
             ariaLabel={copyCodeLabel}

@@ -1,3 +1,5 @@
+import { MoreHorizontal } from "lucide-react"
+import { IconButton } from "@/components/ui/icon-button"
 import type { Metadata } from "next"
 import type { GlossaryRevision, Revision } from "@prisma/client"
 
@@ -142,12 +144,11 @@ function DraftRecord({
         {deleteAction ? (
           <Collapsible className="w-full text-left sm:w-auto sm:text-right">
             <CollapsibleTrigger asChild>
-              <button
-                type="button"
-                aria-label={moreActionsLabelForDraft}
-                className="text-tech-main/60 hover:text-tech-main focus-visible:outline-tech-main inline-flex min-h-11 cursor-pointer items-center font-mono text-[0.625rem] tracking-wider uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2">
-                {moreActionsLabel}
-              </button>
+              <IconButton
+                label={moreActionsLabelForDraft}
+                title={moreActionsLabel}>
+                <MoreHorizontal aria-hidden />
+              </IconButton>
             </CollapsibleTrigger>
             <CollapsibleContent className="border-tech-main/20 mt-1 space-y-2 border-t pt-3 sm:w-52">
               <p className="text-tech-main/65 text-xs leading-relaxed">

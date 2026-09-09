@@ -1,5 +1,8 @@
 "use client"
 
+import { X } from "lucide-react"
+import { IconButton } from "@/components/ui/icon-button"
+
 import * as React from "react"
 import useSWR from "swr"
 import { useTranslations } from "next-intl"
@@ -335,9 +338,13 @@ function DraftFileSourceDialogLayout({
               {description || t("dialogSubtitle")}
             </DialogDescription>
           </div>
-          <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-            {t("close")}
-          </Button>
+          <IconButton
+            type="button"
+            variant="ghost"
+            onClick={onClose}
+            label={t("close")}>
+            <X aria-hidden />
+          </IconButton>
         </div>
         <div className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[17rem_minmax(0,1fr)]">
           <aside className="guide-line bg-tech-main/5 flex min-h-0 flex-col border-r">

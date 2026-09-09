@@ -1,9 +1,11 @@
 "use client"
 
+import { CircleAlert } from "lucide-react"
+import { IconButton } from "@/components/ui/icon-button"
+
 import { useCallback, useEffect, useRef, useState } from "react"
 import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { Button } from "@/components/ui/shadcn/button"
 import { Check, Clipboard } from "lucide-react"
 
 /**
@@ -69,19 +71,12 @@ export function CopyArticleButton() {
         : t("copyPage")
 
   return (
-    <Button variant="ghost" size="sm"
+    <IconButton variant="ghost"
       type="button"
       onClick={handleCopy}
       disabled={state === "pending"}
       aria-busy={state === "pending"}
       aria-live="polite"
-      className={state === "failed" ? "text-destructive" : "text-muted-foreground"}>
-      {state === "copied" ? (
-        <Check className="size-3.5" aria-hidden="true" />
-      ) : (
-        <Clipboard className="size-3.5" aria-hidden="true" />
-      )}
-      {label}
-    </Button>
+      className={state === "failed" ? "text-destructive" : "text-muted-foreground"} label={label}>{state === "copied" ? <Check aria-hidden /> : state === "failed" ? <CircleAlert aria-hidden /> : <Clipboard aria-hidden />}<span className="sr-only" aria-live="polite">{label}</span></IconButton>
   )
 }

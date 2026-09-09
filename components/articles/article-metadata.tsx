@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { Check, ChevronDown, ChevronUp, Copy } from "lucide-react"
 import { IconButton } from "@/components/ui/icon-button"
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react"
@@ -436,24 +436,7 @@ export function ArticleMetadataFull({
                   ">
                   {canonicalUrl}
                 </code>
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className={`
-                    shrink-0 whitespace-nowrap border guide-line px-2 py-1
-                    text-[0.6875rem] leading-none transition-colors
-                    ${
-                      copied
-                        ? `bg-tech-main text-tech-bg`
-                        : `
-                          bg-surface-overlay
-                          hover:bg-tech-accent/10
-                        `
-                    }
-                  `}
-                  aria-label={t("copyButton")}>
-                  {copied ? "✓" : t("copyButton")}
-                </button>
+                <IconButton onClick={handleCopy} label={copied ? t("copiedButton") : t("copyButton")} variant="outline">{copied ? <Check aria-hidden /> : <Copy aria-hidden />}</IconButton>
               </div>
 
               <ArticleLicenseNotice

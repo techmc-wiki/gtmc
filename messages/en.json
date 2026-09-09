@@ -1,4 +1,13 @@
 {
+  "IconActions": {
+    "exitFly": "Exit first-person view",
+    "enterFly": "Enter first-person view",
+    "resetLayers": "Show all layers",
+    "singleLayer": "Show selected layer only",
+    "layersBelow": "Show selected layer and below",
+    "applyLayer": "Apply layer selection",
+    "signOut": "Sign out"
+  },
   "About": {
     "metaDescription": "Graduate Texts in Minecraft (GTMC) is a community-written open textbook on technical Minecraft: redstone, game mechanics, chunk systems, and engine internals.",
     "pageDescription": "About this project",

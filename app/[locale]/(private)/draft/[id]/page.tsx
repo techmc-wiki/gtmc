@@ -1,9 +1,9 @@
+import { IconButton } from "@/components/ui/icon-button"
 import { getTranslations } from "next-intl/server"
 import { ArrowLeftIcon } from "lucide-react"
 import type { Metadata } from "next"
 import { DraftEditor } from "@/components/editor/draft-editor"
 import { Link } from "@/i18n/navigation"
-import { Button } from "@/components/ui/shadcn/button"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { decodeStoredDraftFiles } from "@/lib/drafts/files"
@@ -73,12 +73,11 @@ export default async function EditDraftPage({
   return (
     <div className="mx-auto w-full max-w-[1800px] space-y-3">
       <header className="flex items-center justify-between gap-4">
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/draft">
+        <IconButton asChild variant="ghost" label={t("backToDrafts")}>
+          <Link href="/draft" aria-label={t("backToDrafts")}>
             <ArrowLeftIcon aria-hidden className="size-4" />
-            {t("backToDrafts")}
           </Link>
-        </Button>
+        </IconButton>
         <p className="text-tech-main/60 text-sm">{t("articleDraft")}</p>
       </header>
       <DraftEditor initialData={draftEditorInitialData} />

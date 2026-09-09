@@ -1,8 +1,10 @@
 "use client"
 
+import { ListFilter, Globe } from "lucide-react"
+import { IconButton } from "@/components/ui/icon-button"
+
 import { useCallback, useEffect, useRef, type ChangeEvent } from "react"
 import { useTranslations } from "next-intl"
-import { Button } from "@/components/ui/shadcn/button"
 import { SearchIcon } from "lucide-react"
 import {
   InputGroup,
@@ -73,9 +75,8 @@ export function GlossarySearch({
     : t("searchScopeAll")
 
   return (
-    <search
-      className={`grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:flex sm:items-center ${className}`}>
-      <InputGroup className="col-span-2 sm:col-span-1 sm:flex-1">
+    <search className={`flex items-center gap-2 ${className}`}>
+      <InputGroup className="min-w-0 flex-1">
         <InputGroupAddon align="inline-start">
           <SearchIcon className="text-tech-main/60 size-3.5" />
         </InputGroupAddon>
@@ -95,18 +96,18 @@ export function GlossarySearch({
         </InputGroupAddon>
       </InputGroup>
 
-      <Button
+      <IconButton
         type="button"
         onClick={toggleScope}
         aria-pressed={!isActiveScope}
         aria-label={scopeLabel}
         variant={isActiveScope ? "secondary" : "outline"}
-        size="sm"
-        className="min-h-11">
-        {scopeLabel}
-      </Button>
+        className="min-h-11"
+        label={scopeLabel}>
+        {isActiveScope ? <ListFilter aria-hidden /> : <Globe aria-hidden />}
+      </IconButton>
 
-      <span className="text-muted-foreground flex items-center px-3 text-xs tabular-nums sm:hidden">
+      <span className="sr-only sm:hidden">
         {resultCount} of {totalCount}
       </span>
     </search>

@@ -1,8 +1,10 @@
 "use client"
 
+import { X } from "lucide-react"
+import { IconButton } from "@/components/ui/icon-button"
+
 import * as React from "react"
 import { useTranslations } from "next-intl"
-import { Button } from "@/components/ui/shadcn/button"
 import { Link } from "@/i18n/navigation"
 import { useReaderNavigation } from "@/app/[locale]/(public)/articles/reader-navigation/context"
 import { useFooterOverlap } from "@/hooks/use-footer-overlap"
@@ -267,13 +269,10 @@ export function MobileOutlineBar() {
           </div>
 
           <SheetClose asChild>
-            <Button
+            <IconButton
               type="button"
               variant="ghost"
-              size="sm"
-              aria-label={t("closeSheet")}>
-              {t("close")}
-            </Button>
+              aria-label={t("closeSheet")} label={t("closeSheet")}><X aria-hidden /></IconButton>
           </SheetClose>
         </div>
 

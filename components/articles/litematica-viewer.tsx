@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+import { IconButton } from "@/components/ui/icon-button"
+import { ScanEye, LogOut, RotateCcw, Layers, Square, Check } from "lucide-react"
+
 import { useEffect, useRef, useState, useMemo, type MouseEvent } from "react"
 import { useTheme } from "@/lib/theme"
 
@@ -767,7 +771,8 @@ function LitematicaViewerSurface({
   targetLayer,
   toggleFlyMode,
 }: LitematicaViewerSurfaceProps) {
-  
+  const t = useTranslations("IconActions")
+
   return (
     <div
       className="
@@ -780,16 +785,7 @@ function LitematicaViewerSurface({
         className="block w-full outline-none"
         style={canvasStyle}
       />
-      <button
-        type="button"
-        onClick={toggleFlyMode}
-        className={`absolute top-4 right-4 z-20 border px-3 py-1 text-[11px] font-bold tracking-widest uppercase transition-colors ${
-          isFlyEnabled
-            ? "border-tech-main bg-tech-main text-white"
-            : "border-tech-main/60 bg-surface-overlay/90 text-tech-main hover:bg-tech-main hover:text-white"
-        }`}>
-        {isFlyEnabled ? "SYS.EXIT_FLY" : "SYS.FIRST_PERSON"}
-      </button>
+      <IconButton label={isFlyEnabled ? t("exitFly") : t("enterFly")} aria-pressed={isFlyEnabled} onClick={toggleFlyMode} variant="outline" className="absolute top-4 right-4 z-20 bg-surface-overlay">{isFlyEnabled ? <LogOut aria-hidden /> : <ScanEye aria-hidden />}</IconButton>
       <div className="pointer-events-none absolute top-4 left-4 flex items-center gap-3">
         <span className="shrink-0 border border-tech-main/40 bg-surface-overlay/70 px-2 py-0.5 text-xs font-bold tracking-wider text-tech-main shadow-sm backdrop-blur-sm">
           [LITEMATICA]
@@ -842,6 +838,7 @@ function LitematicaLayerControls({
   sliderLayer,
   targetLayer,
 }: LitematicaLayerControlsProps) {
+  const t = useTranslations("IconActions")
   return (
     <div
       className={`absolute right-4 bottom-16 z-10 w-[250px] border border-tech-main/60 bg-surface-overlay/90 p-3 text-tech-main shadow-sm backdrop-blur-md transition-[opacity,transform,translate] motion-reduce:transition-none ${
@@ -851,15 +848,7 @@ function LitematicaLayerControls({
         <span className="text-[10px] font-bold tracking-widest uppercase">
           SYS.LAYER_FILTER
         </span>
-        <button
-          type="button"
-          onClick={() => {
-            onTargetLayerChange("all")
-            onSliderLayerChange(maxLayer)
-          }}
-          className="border border-tech-main/30 px-1.5 py-0.5 text-[10px] font-bold uppercase transition-colors hover:bg-tech-main hover:text-white">
-          RESET
-        </button>
+        <IconButton label={t("resetLayers")} onClick={() => { onTargetLayerChange("all"); onSliderLayerChange(maxLayer) }}><RotateCcw aria-hidden /></IconButton>
       </div>
       <div className="mb-2 flex items-center justify-between text-xs font-bold">
         <span>LAYER {targetLayer === "all" ? "ALL" : targetLayer}</span>
@@ -868,26 +857,8 @@ function LitematicaLayerControls({
         )}
       </div>
       <div className="mb-3 flex border border-tech-main/40 text-[10px] font-bold uppercase">
-        <button
-          type="button"
-          onClick={() => onLayerModeChange("single")}
-          className={`flex-1 py-1 transition-colors ${
-            layerMode === "single"
-              ? "bg-tech-main text-white"
-              : "bg-surface-overlay text-tech-main hover:bg-tech-main/10"
-          }`}>
-          SINGLE
-        </button>
-        <button
-          type="button"
-          onClick={() => onLayerModeChange("below")}
-          className={`flex-1 border-l border-tech-main/40 py-1 transition-colors ${
-            layerMode === "below"
-              ? "bg-tech-main text-white"
-              : "bg-surface-overlay text-tech-main hover:bg-tech-main/10"
-          }`}>
-          BELOW
-        </button>
+        <IconButton label={t("singleLayer")} aria-pressed={layerMode === "single"} onClick={() => onLayerModeChange("single")} className="flex-1"><Square aria-hidden /></IconButton>
+        <IconButton label={t("layersBelow")} aria-pressed={layerMode === "below"} onClick={() => onLayerModeChange("below")} className="flex-1"><Layers aria-hidden /></IconButton>
       </div>
       <input
         type="range"
@@ -904,12 +875,7 @@ function LitematicaLayerControls({
         className="w-full cursor-ew-resize"
       />
       <div className="mt-2 flex justify-end">
-        <button
-          type="button"
-          onClick={commitLayerSelection}
-          className="border border-tech-main px-2 py-0.5 text-[10px] font-bold uppercase transition-colors hover:bg-tech-main hover:text-white">
-          APPLY
-        </button>
+        <IconButton label={t("applyLayer")} onClick={commitLayerSelection}><Check aria-hidden /></IconButton>
       </div>
       <style dangerouslySetInnerHTML={layerSliderStyleHtml} />
     </div>

@@ -1,5 +1,8 @@
 "use client"
 
+import { X } from "lucide-react"
+import { IconButton } from "@/components/ui/icon-button"
+
 import * as React from "react"
 import { diffWords } from "diff"
 import { useTranslations } from "next-intl"
@@ -390,14 +393,14 @@ function SubmitActions({
 }) {
   return (
     <div className="bg-surface flex flex-col-reverse gap-2 p-4 sm:flex-row sm:items-center sm:justify-end sm:px-6">
-      <Button
+      <IconButton
         type="button"
         variant="outline"
-        size="sm"
         onClick={onClose}
-        disabled={isSubmitting}>
-        Cancel
-      </Button>
+        disabled={isSubmitting}
+        label="Cancel">
+        <X aria-hidden />
+      </IconButton>
       <Button
         type="button"
         variant="default"

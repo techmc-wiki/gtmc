@@ -1,4 +1,13 @@
 {
+  "IconActions": {
+    "exitFly": "退出第一人称视角",
+    "enterFly": "进入第一人称视角",
+    "resetLayers": "显示所有层",
+    "singleLayer": "仅显示选中层",
+    "layersBelow": "显示选中层及下方",
+    "applyLayer": "应用层选择",
+    "signOut": "退出登录"
+  },
   "About": {
     "metaDescription": "Graduate Texts in Minecraft（GTMC）是社区共同编写的技术向 Minecraft 开放教科书，涵盖红石工程、游戏机制、区块系统、实体运动与引擎内部原理。",
     "pageDescription": "关于本项目",

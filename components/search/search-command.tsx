@@ -14,7 +14,8 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/shadcn/command"
-import { Button } from "@/components/ui/shadcn/button"
+import { IconButton } from "@/components/ui/icon-button"
+import { X } from "lucide-react"
 
 interface SearchResult {
   title: string
@@ -200,13 +201,7 @@ function useSearchCommand() {
   // Platform-aware shortcut label
   const shortcutLabel = useMemo(() => {
     if (typeof navigator === "undefined") return "Ctrl+K"
-    return navigator.platform.toLowerCase().includes("mac") ? (
-      <span className="flex flex-row items-center gap-0.5 leading-none">
-        <span className="text-xs">{"\u2318"}</span>K
-      </span>
-    ) : (
-      "Ctrl+K"
-    )
+    return navigator.platform.toLowerCase().includes("mac") ? "⌘K" : "Ctrl+K"
   }, [])
 
   return {
@@ -245,19 +240,9 @@ function SearchCommandLayout({ search }: { search: SearchCommandState }) {
 
 function SearchCommandPlaceholder({ t }: { t: SearchCommandState["t"] }) {
   return (
-    <Button
-      type="button"
-      variant="outline"
-      disabled
-      className="hidden md:inline-flex">
-      <SearchIcon className="size-3.5" />
-      {t("heading")}
-      <span className="border-tech-main/30 text-tech-main/40 ml-1 border px-1 py-0.5 text-[0.5625rem]">
-        <span className="flex flex-row items-center gap-0.5 leading-none">
-          <span className="text-xs">{"\u2318"}</span>K
-        </span>
-      </span>
-    </Button>
+    <IconButton label={t("searchAriaLabel")} disabled>
+      <SearchIcon aria-hidden className="size-4" />
+    </IconButton>
   )
 }
 
@@ -271,20 +256,10 @@ function SearchCommandDialog({ search }: { search: SearchCommandState }) {
         search.inputRef.current?.focus()
       }}
       trigger={
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          aria-label={search.t("searchAriaLabel")}
-          className="xl:border-input xl:bg-background size-11 border-transparent bg-transparent px-0 sm:px-0 xl:w-36 xl:justify-start xl:px-3">
-          <SearchIcon className="size-4" />
-          <span className="hidden text-sm xl:inline">
-            {search.t("heading")}
-          </span>
-          <kbd className="text-muted-foreground ml-auto hidden text-xs xl:inline">
-            {search.shortcutLabel}
-          </kbd>
-        </Button>
+        <IconButton
+          label={`${search.t("searchAriaLabel")} (${search.shortcutLabel})`}>
+          <SearchIcon aria-hidden className="size-4" />
+        </IconButton>
       }
       title={search.t("searchAriaLabel")}
       description={search.t("placeholder")}
@@ -295,14 +270,13 @@ function SearchCommandDialog({ search }: { search: SearchCommandState }) {
         <div className="text-tech-main-dark flex items-center gap-2 text-sm font-semibold">
           {search.t("modalTitle")}
         </div>
-        <Button
-          type="button"
+        <IconButton
+          label={search.t("dismissHint")}
           onClick={search.closeModal}
           variant="ghost"
-          size="sm"
           aria-label={search.t("dismissHint")}>
-          ESC
-        </Button>
+          <X aria-hidden />
+        </IconButton>
       </header>
       <div className="border-b">
         <CommandInput

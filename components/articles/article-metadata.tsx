@@ -1,12 +1,14 @@
 "use client"
 
+import { ChevronDown, ChevronUp } from "lucide-react"
+import { IconButton } from "@/components/ui/icon-button"
+
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react"
 import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { ArticleBanner } from "@/components/articles/article-banner"
 import { ArticleLicenseNotice } from "@/components/articles/article-license-notice"
-import { Button } from "@/components/ui/shadcn/button"
 import { getArticleAssetPublicUrl } from "@/lib/articles/url"
 import { formatAbsoluteTime, formatRelativeTime } from "@/lib/format-time"
 
@@ -259,18 +261,18 @@ export function ArticleMetadataFull({
 
   const collapseButton = useMemo(
     () => (
-      <Button
+      <IconButton
         type="button"
         variant="outline"
-        size="icon"
+        size="icon-sm"
         onClick={toggleCollapsed}
-        className="size-11 font-mono text-xs sm:size-8"
         aria-expanded={!isCollapsed}
         aria-label={
           isCollapsed ? t("expandMetadata") : t("collapseMetadata")
-        }>
-        {isCollapsed ? "[+]" : "[-]"}
-      </Button>
+        }
+        label={isCollapsed ? t("expandMetadata") : t("collapseMetadata")}>
+        {isCollapsed ? <ChevronDown aria-hidden /> : <ChevronUp aria-hidden />}
+      </IconButton>
     ),
     [toggleCollapsed, isCollapsed, t]
   )
@@ -285,7 +287,7 @@ export function ArticleMetadataFull({
       bannerAlt={bannerAlt}
       pathLabel={t("pathLabel")}>
       <div className="flex flex-col">
-        <div className="flex items-start gap-3">
+        <div className="flex items-center gap-3">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-tech-main/65 sm:text-xs">
             <span className="inline-flex items-center gap-1.5">
               <span className="size-1.5 bg-tech-main/40" />

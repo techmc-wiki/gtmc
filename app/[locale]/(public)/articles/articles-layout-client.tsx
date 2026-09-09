@@ -6,7 +6,6 @@ import {
   useEffect,
   useCallback,
   useMemo,
-  useRef,
 } from "react"
 import { ChapterNavPanel } from "./chapter-nav-panel"
 import { ReaderNavigationProvider } from "./reader-navigation/context"
@@ -216,59 +215,29 @@ function useChapterNavVisibility() {
   }
 }
 
-function useStickyChapterNav() {
-  const sentinelRef = useRef<HTMLDivElement>(null)
-  const [isStuck, setIsStuck] = useState(false)
-
-  useEffect(() => {
-    const element = sentinelRef.current
-    if (!element) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsStuck(!entry.isIntersecting),
-      { threshold: 0 }
-    )
-    observer.observe(element)
-    return () => observer.disconnect()
-  }, [])
-
-  return { isStuck, sentinelRef }
-}
-
 interface MobileChapterNavigationProps {
   isChapterNavOpen: boolean
   isOverlappingFooter: boolean
-  isStuck: boolean
   onNavigate: () => void
   onToggle: () => void
-  sentinelRef: React.RefObject<HTMLDivElement | null>
 }
 
 function MobileChapterNavigation({
   isChapterNavOpen,
   isOverlappingFooter,
-  isStuck,
   onNavigate,
   onToggle,
-  sentinelRef,
 }: MobileChapterNavigationProps) {
   const t = useTranslations("ChapterNav")
   const tA11y = useTranslations("CommonA11y")
 
   return (
-    <>
-      <div ref={sentinelRef} aria-hidden="true" className="h-px" />
-      <div
-        className={`
-          sticky top-16 z-30 border-y transition-[background-color,box-shadow,border-color]
-          duration-200 md:hidden
-          ${
-            isStuck
-              ? "border-tech-main/40 bg-surface-overlay/95 shadow-sm backdrop-blur-sm"
-              : "border-transparent bg-transparent"
-          }
-          ${isOverlappingFooter && !isChapterNavOpen ? "pointer-events-none opacity-0" : "opacity-100"}
-        `}>
+    <div
+      className={`
+        border-tech-main/40 bg-surface-overlay/95 sticky top-16 z-30 border-y
+        shadow-sm backdrop-blur-sm transition-[opacity] duration-200 md:hidden
+        ${isOverlappingFooter && !isChapterNavOpen ? "pointer-events-none opacity-0" : "opacity-100"}
+      `}>
         <Button
           type="button"
           variant="ghost"
@@ -295,8 +264,7 @@ function MobileChapterNavigation({
             </div>
           </div>
         </div>
-      </div>
-    </>
+    </div>
   )
 }
 
@@ -430,7 +398,6 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
     toggleChapterNavHidden,
     toggleMobileChapterNav,
   } = useChapterNavVisibility()
-  const { isStuck, sentinelRef } = useStickyChapterNav()
   const isOverlappingFooter = useFooterOverlap()
 
   return (
@@ -447,10 +414,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         <MobileChapterNavigation
           isChapterNavOpen={isChapterNavOpen}
           isOverlappingFooter={isOverlappingFooter}
-          isStuck={isStuck}
           onNavigate={closeChapterNav}
           onToggle={toggleMobileChapterNav}
-          sentinelRef={sentinelRef}
         />
         <DesktopChapterNavigation
           chapterNavHidden={chapterNavHidden}

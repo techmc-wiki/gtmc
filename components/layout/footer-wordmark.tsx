@@ -5,6 +5,7 @@ import { ParticleObject } from "@/components/canvasui/ParticleObject"
 
 export function FooterWordmark() {
   const [isDark, setIsDark] = React.useState(false)
+  const [isCompact, setIsCompact] = React.useState(false)
 
   React.useEffect(() => {
     const root = document.documentElement
@@ -17,7 +18,16 @@ export function FooterWordmark() {
     })
     return () => observer.disconnect()
   }, [])
-  const particleText = "Graduate Texts in Minecraft"
+
+  React.useEffect(() => {
+    const viewport = window.matchMedia("(max-width: 39.999rem)")
+    const update = () => setIsCompact(viewport.matches)
+    update()
+    viewport.addEventListener("change", update)
+    return () => viewport.removeEventListener("change", update)
+  }, [])
+
+  const particleText = isCompact ? "GTMC" : "Graduate Texts in Minecraft"
 
   const src = React.useMemo(() => {
     const fill = isDark ? "#e7ecf4" : "#20283c"
@@ -43,7 +53,7 @@ export function FooterWordmark() {
             count={18000}
             size={1.5}
             sizeVariance={0.1}
-            scale={10}
+            scale={isCompact ? 4.75 : 10}
             floatIntensity={1}
             rotationIntensity={0.45}
             floatSpeed={1.6}

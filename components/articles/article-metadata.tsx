@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { ArticleBanner } from "@/components/articles/article-banner"
 import { ArticleLicenseNotice } from "@/components/articles/article-license-notice"
+import { Button } from "@/components/ui/shadcn/button"
 import { getArticleAssetPublicUrl } from "@/lib/articles/url"
 import { formatAbsoluteTime, formatRelativeTime } from "@/lib/format-time"
 
@@ -17,7 +18,6 @@ interface ArticleMetadataLayoutProps {
   bannerPath?: string | null
   bannerAlt?: string
   pathLabel?: string
-  headerActions?: ReactNode
   children: ReactNode
 }
 
@@ -30,7 +30,6 @@ function ArticleMetadataLayout({
   bannerPath,
   bannerAlt,
   pathLabel = "PATH:",
-  headerActions,
   children,
 }: ArticleMetadataLayoutProps) {
   const t = useTranslations("ArticleMeta")
@@ -44,10 +43,7 @@ function ArticleMetadataLayout({
           font-mono text-xs text-tech-main
           sm:mb-6 sm:p-3
         ">
-        <div
-          className="
-            flex flex-wrap items-center gap-x-3 gap-y-2 text-tech-main/50
-          ">
+        <div className="hidden flex-wrap items-center gap-x-3 gap-y-2 text-tech-main/50 sm:flex">
           {isAdvanced && (
             <span
               className="
@@ -68,17 +64,12 @@ function ArticleMetadataLayout({
               {t("underRevision")}
             </span>
           ) : null}
-          <span
-            className="
-              hidden min-w-0 items-center gap-3
-              sm:inline-flex
-            ">
+          <span className="inline-flex min-w-0 items-center gap-3">
             {pathLabel} {filePath}
           </span>
-          {headerActions && <span className="ml-auto">{headerActions}</span>}
         </div>
 
-        <div className="mt-2 flex flex-col gap-3 sm:gap-4">
+        <div className="flex flex-col gap-3 sm:mt-2 sm:gap-4">
           {children}
         </div>
       </div>
@@ -268,26 +259,18 @@ export function ArticleMetadataFull({
 
   const collapseButton = useMemo(
     () => (
-      <button
+      <Button
         type="button"
+        variant="outline"
+        size="icon"
         onClick={toggleCollapsed}
-        className="
-          group relative inline-flex cursor-pointer items-center justify-center
-          text-tech-main/65 transition-colors after:absolute after:-inset-2.5
-          after:content-[''] hover:text-tech-main focus-visible:outline-tech-main
-          focus-visible:outline-2 focus-visible:outline-offset-2
-        "
+        className="size-11 font-mono text-xs sm:size-8"
+        aria-expanded={!isCollapsed}
         aria-label={
           isCollapsed ? t("expandMetadata") : t("collapseMetadata")
         }>
-        <span
-          className="
-            border guide-line bg-surface-overlay px-1.5 py-0.5 text-[0.625rem]
-            leading-none transition-colors group-hover:bg-tech-accent/10
-          ">
-          {isCollapsed ? "[+]" : "[-]"}
-        </span>
-      </button>
+        {isCollapsed ? "[+]" : "[-]"}
+      </Button>
     ),
     [toggleCollapsed, isCollapsed, t]
   )
@@ -300,33 +283,35 @@ export function ArticleMetadataFull({
       isRevising={isRevising}
       bannerPath={bannerPath}
       bannerAlt={bannerAlt}
-      pathLabel={t("pathLabel")}
-      headerActions={collapseButton}>
+      pathLabel={t("pathLabel")}>
       <div className="flex flex-col">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-tech-main/65 sm:text-xs">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="size-1.5 bg-tech-main/40" />
-            <Link
-              href={`/authors/${encodeURIComponent(author)}`}
-              className="text-tech-main underline decoration-tech-main/30 underline-offset-4">
-              {author}
-            </Link>
-            {coAuthors.length > 0 && (
-              <span className="text-tech-main/50">+{coAuthors.length}</span>
-            )}
-          </span>
-          <span aria-hidden="true" className="text-tech-main/35">
-            |
-          </span>
-          <span>
-            {wordCount.toLocaleString()} / {readingTime} {t("minuteUnit")}
-          </span>
-          <span aria-hidden="true" className="text-tech-main/35">
-            |
-          </span>
-          <span>
-            {t("lastEdited")} {lastEditedLabel}
-          </span>
+        <div className="flex items-start gap-3">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-tech-main/65 sm:text-xs">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="size-1.5 bg-tech-main/40" />
+              <Link
+                href={`/authors/${encodeURIComponent(author)}`}
+                className="text-tech-main underline decoration-tech-main/30 underline-offset-4">
+                {author}
+              </Link>
+              {coAuthors.length > 0 && (
+                <span className="text-tech-main/50">+{coAuthors.length}</span>
+              )}
+            </span>
+            <span aria-hidden="true" className="text-tech-main/35">
+              |
+            </span>
+            <span>
+              {wordCount.toLocaleString()} / {readingTime} {t("minuteUnit")}
+            </span>
+            <span aria-hidden="true" className="text-tech-main/35">
+              |
+            </span>
+            <span>
+              {t("lastEdited")} {lastEditedLabel}
+            </span>
+          </div>
+          {collapseButton}
         </div>
 
         <div

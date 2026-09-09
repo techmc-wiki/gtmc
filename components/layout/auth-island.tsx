@@ -48,16 +48,16 @@ function AuthIslandContent() {
       <DropdownMenuTrigger asChild>
         <Link
           href="/profile"
-          className="block size-8 transition-transform hover:scale-110 md:size-10"
+          className="hover:bg-tech-main/10 focus-visible:outline-tech-main flex size-11 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2"
           aria-label={session.user.name ?? undefined}>
-          <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-full items-center justify-center overflow-hidden border-2 p-1 ring-1">
+          <Avatar className="border-tech-main/30 bg-tech-main/10 relative size-8 overflow-hidden border">
             {session.user.image ? (
               <AvatarImage asChild src={session.user.image}>
                 <Image
                   src={session.user.image}
                   alt={session.user.name || "Avatar"}
                   fill
-                  sizes="(max-width: 768px) 32px, 40px"
+                  sizes="32px"
                   loading="lazy"
                   className="object-cover"
                 />
@@ -102,7 +102,7 @@ function AuthIslandContent() {
 
 export function AuthIsland() {
   return (
-    <div className="relative size-8 shrink-0 md:size-10">
+    <div className="relative size-11 shrink-0">
       <SessionProvider>
         <AuthIslandContent />
       </SessionProvider>

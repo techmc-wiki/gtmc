@@ -276,12 +276,12 @@ function SearchCommandDialog({ search }: { search: SearchCommandState }) {
           variant="outline"
           size="sm"
           aria-label={search.t("searchAriaLabel")}
-          className="size-11 px-0 md:w-40 md:justify-between md:px-3">
+          className="xl:border-input xl:bg-background size-11 border-transparent bg-transparent px-0 sm:px-0 xl:w-36 xl:justify-start xl:px-3">
           <SearchIcon className="size-4" />
-          <span className="hidden text-sm md:inline">
+          <span className="hidden text-sm xl:inline">
             {search.t("heading")}
           </span>
-          <kbd className="text-muted-foreground hidden text-xs md:inline">
+          <kbd className="text-muted-foreground ml-auto hidden text-xs xl:inline">
             {search.shortcutLabel}
           </kbd>
         </Button>

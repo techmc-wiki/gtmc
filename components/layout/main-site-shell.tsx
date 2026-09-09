@@ -67,7 +67,7 @@ export async function MainSiteShell({
 
   const leftSlot = (
     <>
-      <Logo size="md" />
+      <Logo size="md" className="min-h-11 shrink-0" />
       <React.Suspense fallback={null}>
         <AuthAwareDesktopNav
           navLinks={initialLinks}
@@ -82,15 +82,15 @@ export async function MainSiteShell({
       <React.Suspense fallback={null}>
         <SearchCommand />
       </React.Suspense>
+      <ThemeToggle className="hidden size-11 md:size-11 xl:flex" />
+      <React.Suspense fallback={null}>
+        <LanguageSwitcher className="hidden size-11 md:size-11 xl:flex" />
+      </React.Suspense>
+      <AuthIsland />
       <AuthAwareMobileNav
         navLinks={initialLinks}
         contributorLink={contributorLink}
       />
-      <ThemeToggle className="hidden sm:flex" />
-      <React.Suspense fallback={null}>
-        <LanguageSwitcher className="hidden sm:flex" />
-      </React.Suspense>
-      <AuthIsland />
     </>
   )
 

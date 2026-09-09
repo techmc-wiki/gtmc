@@ -131,6 +131,7 @@
     "titleShort": "ToC"
   },
   "CommonA11y": {
+    "closeNavigationMenu": "Close navigation menu",
     "closeTree": "Close tree",
     "currentLocale": "Current language: {locale}",
     "hideChapterNav": "Hide chapter navigation",

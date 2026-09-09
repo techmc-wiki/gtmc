@@ -131,6 +131,7 @@
     "titleShort": "目录"
   },
   "CommonA11y": {
+    "closeNavigationMenu": "关闭导航菜单",
     "closeTree": "关闭目录树",
     "currentLocale": "当前语言：{locale}",
     "hideChapterNav": "隐藏章节导航",

@@ -1,12 +1,20 @@
 "use client"
 
 import * as React from "react"
+import { MenuIcon, XIcon } from "lucide-react"
+import { Button } from "@/components/ui/shadcn/button"
 import { useTranslations } from "next-intl"
 import { Link, usePathname } from "@/i18n/navigation"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { Logo } from "@/components/ui/logo"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/shadcn/sheet"
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetClose,
+  SheetTitle,
+} from "@/components/ui/shadcn/sheet"
 
 export interface NavLink {
   href: string
@@ -163,11 +171,11 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
   const chipIsHome = activeHref !== null && chipKey === activeHref
 
   return (
-    <ul ref={listRef} className="relative hidden items-center gap-1 md:flex">
+    <ul ref={listRef} className="relative hidden items-center gap-1 xl:flex">
       <span
         ref={chipRef}
         aria-hidden="true"
-        className={`bg-tech-main-dark pointer-events-none invisible absolute top-1/2 z-0 h-[calc(100%-0.5rem)] -translate-y-1/2 border shadow-sm transition-[left,width] duration-300 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
+        className={`bg-tech-main-dark pointer-events-none invisible absolute top-1/2 z-0 h-full -translate-y-1/2 border shadow-sm transition-[left,width] duration-300 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
           chipIsHome
             ? "border-tech-main-dark"
             : "border-tech-main/40 bg-tech-accent"
@@ -188,7 +196,7 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
               onFocus={() => previewLink(link.href)}
               onBlur={() => scheduleRelease()}
               onMouseLeave={() => scheduleRelease()}
-              className={`focus-visible:outline-tech-main flex h-9 items-center rounded-none border border-transparent px-3 font-mono text-xs tracking-[0.15em] uppercase transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-[-2px] ${
+              className={`focus-visible:outline-tech-main flex h-11 items-center rounded-none border border-transparent px-3 text-sm font-medium whitespace-nowrap transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-[-2px] ${
                 isChipTarget
                   ? "text-tech-signal-ink font-bold"
                   : isActive
@@ -218,17 +226,14 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
   return (
     <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
       <SheetTrigger asChild>
-        <button
-          className="hover:bg-tech-main/10 flex min-h-11 min-w-11 cursor-pointer flex-col items-center justify-center gap-1.5 p-2 transition-colors md:hidden"
+        <Button
+          variant="ghost"
+          size="icon"
+          className="xl:hidden"
           aria-label={t("toggleNavigationMenu")}
           aria-expanded={isDrawerOpen}>
-          <span
-            className={`bg-tech-main h-0.5 w-5 transition-[translate,rotate,opacity] motion-reduce:transition-none ${isDrawerOpen ? `translate-y-2 rotate-45` : ""} `}></span>
-          <span
-            className={`bg-tech-main h-0.5 w-5 transition-[translate,rotate,opacity] motion-reduce:transition-none ${isDrawerOpen ? `opacity-0` : ""} `}></span>
-          <span
-            className={`bg-tech-main h-0.5 w-5 transition-[translate,rotate,opacity] motion-reduce:transition-none ${isDrawerOpen ? `-translate-y-2 -rotate-45` : ""} `}></span>
-        </button>
+          <MenuIcon className="size-5" />
+        </Button>
       </SheetTrigger>
 
       <SheetContent
@@ -236,10 +241,21 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
         showCloseButton={false}
         aria-label={t("toggleNavigationMenu")}
         aria-describedby={undefined}
-        className="border-tech-main/40 bg-surface-overlay/95 w-[85vw] max-w-xs border-r p-0 backdrop-blur-md md:hidden">
+        className="border-tech-main/40 bg-surface-overlay/95 w-[85vw] max-w-xs border-r p-0 backdrop-blur-md xl:hidden">
         <div className="flex h-full flex-col">
           <div className="border-tech-main/30 flex h-16 shrink-0 items-center justify-between border-b px-4">
-            <Logo size="sm" />
+            <Logo size="md" />
+            <SheetTitle className="sr-only">
+              {t("toggleNavigationMenu")}
+            </SheetTitle>
+            <SheetClose asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t("closeNavigationMenu")}>
+                <XIcon className="size-5" />
+              </Button>
+            </SheetClose>
           </div>
           <nav
             aria-label={t("toggleNavigationMenu")}
@@ -253,7 +269,7 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
                   <Link
                     href={link.href}
                     onClick={() => setIsDrawerOpen(false)}
-                    className="border-tech-main/40 text-tech-main-dark hover:border-tech-signal hover:bg-tech-main/5 flex min-h-11 items-center border-b px-3 font-mono text-xs tracking-[0.15em] uppercase transition-colors">
+                    className="border-tech-main/40 text-tech-main-dark hover:border-tech-signal hover:bg-tech-main/5 flex min-h-11 items-center border-b px-3 text-sm font-medium whitespace-nowrap transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -262,9 +278,9 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
           </nav>
 
           <div className="border-tech-main/30 flex shrink-0 items-center gap-2 border-t p-3">
-            <ThemeToggle />
+            <ThemeToggle className="size-11" />
             <React.Suspense fallback={null}>
-              <LanguageSwitcher className="border-none" />
+              <LanguageSwitcher className="size-11" />
             </React.Suspense>
           </div>
         </div>
@@ -294,11 +310,9 @@ export function SiteHeader({
       <div
         data-scrolled={scrolled ? "" : undefined}
         className="data-scrolled:border-tech-main/30 data-scrolled:bg-surface-overlay/90 border-b border-transparent transition-[background-color,border-color,box-shadow] duration-300 data-scrolled:shadow-[0_8px_24px_-16px_rgb(32_40_60/0.35)] data-scrolled:backdrop-blur-md">
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 md:h-20 lg:px-8">
-          <div className="flex min-w-0 items-center gap-4 md:gap-6">{left}</div>
-          <div className="flex shrink-0 items-center gap-2 md:gap-3">
-            {right}
-          </div>
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 md:h-20 lg:px-8">
+          <div className="flex min-w-0 items-center gap-4 xl:gap-6">{left}</div>
+          <div className="flex shrink-0 items-center gap-1">{right}</div>
         </div>
       </div>
     </header>

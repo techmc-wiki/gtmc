@@ -72,12 +72,7 @@ export default async function PdfPage({
     ? formatRevisionDate(stats.lastRevision, locale)
     : null
 
-  // Centered single-CTA layout (release/open-access download pattern):
-  // one dominant action, trust metadata directly beneath it, quieter
-  // in a CanvasUI Canvas painting — the cover renders on a woven artist
-  // canvas weave and the cursor paints wet strokes that dry back flat
-  // (html-in-canvas browsers; plain image fallback elsewhere). The cover
-  // itself is the download link; title and metadata stay real HTML in both modes.
+  // The cover peels open; download and reading links stay regular HTML.
   return (
     <div className="page-container-pb flex w-full flex-1 flex-col justify-center">
       <div className="border-tech-main/40 bg-surface/80 mx-auto w-full max-w-xl border shadow-sm backdrop-blur-sm">
@@ -89,7 +84,7 @@ export default async function PdfPage({
             {t("bookSubtitle")}
           </p>
 
-          <div className="mt-8">
+          <div className="mt-8 w-full">
             <PdfCoverPreview filename={filename} />
           </div>
 

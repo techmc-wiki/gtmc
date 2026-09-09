@@ -584,6 +584,8 @@
     "metaDescription": "以离线 PDF 下载整个网站的文章。",
     "metaRevised": "更新于 {date}",
     "metaTitle": "PDF 下载",
+    "peelHint": "轻点打开或合上封面，也可横向拖动翻开。",
+    "previewCover": "预览书籍封面",
     "readOnline": "在线阅读",
     "slogan": "求知于方寸之间。",
     "unavailableNote": "PDF 下载尚未配置。"

@@ -16,6 +16,7 @@ import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { cn } from "@/lib/cn"
 import { ArticleBanner } from "@/components/articles/article-banner"
+import { AdvancedMarker } from "@/components/articles/advanced-marker"
 import { ArticleLicenseNotice } from "@/components/articles/article-license-notice"
 import { getArticleAssetPublicUrl } from "@/lib/articles/url"
 import { formatAbsoluteTime, formatRelativeTime } from "@/lib/format-time"
@@ -46,7 +47,6 @@ function ArticleMetadataLayout({
 
   return (
     <header>
-
       <div
         className="
           relative mb-5 border guide-line bg-surface-overlay/80 p-3
@@ -54,15 +54,6 @@ function ArticleMetadataLayout({
           sm:mb-6 sm:p-3
         ">
         <div className="hidden flex-wrap items-center gap-x-3 gap-y-2 text-tech-main/50 sm:flex">
-          {isAdvanced && (
-            <span
-              className="
-                bg-tech-advanced px-1.5 py-0.5 font-mono text-[0.625rem]
-                font-bold tracking-widest text-white select-none
-              ">
-              ADVANCED
-            </span>
-          )}
           {isRevising ? (
             <span
               className="
@@ -77,6 +68,7 @@ function ArticleMetadataLayout({
           <span className="inline-flex min-w-0 items-center gap-3">
             {pathLabel} {filePath}
           </span>
+          {isAdvanced && <AdvancedMarker className="-ml-1" />}
         </div>
 
         <div className="flex flex-col gap-3 sm:mt-2 sm:gap-4">

@@ -18,6 +18,7 @@ import {
   GlobeIcon,
 } from "@/components/ui/icons"
 import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
+import { AdvancedMarker } from "@/components/articles/advanced-marker"
 import {
   getProfileHandles,
   resolveAuthorPerson,
@@ -562,7 +563,6 @@ function ArticleRow({
   if (article.isPreface) metaParts.push("PREFACE")
   else if (article.isAppendix) metaParts.push("APPENDIX")
   else metaParts.push(`CH.${String(article.index).padStart(2, "0")}`)
-  if (article.isAdvanced) metaParts.push("ADV")
 
   return (
     <Link
@@ -576,6 +576,7 @@ function ArticleRow({
           <div className="min-w-0 flex-1">
             <p className="text-tech-main-dark truncate text-sm font-medium">
               {article.title}
+              {article.isAdvanced && <AdvancedMarker className="ml-1.5" />}
             </p>
             <p className="text-tech-main/50 mt-0.5 truncate font-mono text-[0.625rem] tracking-wider uppercase">
               {metaParts.join(" · ")}

@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/navigation"
+import { AdvancedMarker } from "@/components/articles/advanced-marker"
 import { TriangleIcon } from "@/components/ui/icons"
 import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
 import { partitionAppendixNodes } from "@/lib/articles/navigation-data"
@@ -115,16 +116,7 @@ function ArticleLink({
       </span>
       <span className="min-w-0">
         {item.title}
-          {item.isAdvanced && (
-            <span
-              className="
-                mx-1 inline-block shrink-0 bg-tech-advanced px-[3px]
-                align-middle font-mono text-[0.5625rem] font-bold
-                tracking-widest text-white select-none
-              ">
-              ADVANCED
-            </span>
-          )}
+        {item.isAdvanced && <AdvancedMarker className="ml-1.5 -mb-0.5 align-middle" />}
       </span>
     </Link>
   )

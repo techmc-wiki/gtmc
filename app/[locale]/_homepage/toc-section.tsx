@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
+import { AdvancedMarker } from "@/components/articles/advanced-marker"
 import { collectAppendixGroups } from "@/lib/articles/navigation-data"
 import { articleUrl } from "@/lib/articles/url"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
@@ -106,9 +107,7 @@ function ChapterBlock({
             <span className="text-sm sm:text-base">
               {section.title}
               {section.isAdvanced && (
-                <span className="bg-tech-advanced ml-2 inline-block px-1 py-px align-middle font-mono text-[0.5625rem] font-bold tracking-wider text-white uppercase">
-                  ADV
-                </span>
+                <AdvancedMarker className="-mb-0.5 ml-1.5 align-middle" />
               )}
             </span>
             <span className="border-tech-main/25 mb-1 grow self-end border-b border-dotted" />

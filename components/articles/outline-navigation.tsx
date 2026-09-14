@@ -10,6 +10,7 @@ import { useReaderNavigation } from "@/app/[locale]/(public)/articles/reader-nav
 import { useFooterOverlap } from "@/hooks/use-footer-overlap"
 import { useScrollProgress } from "@/hooks/use-scroll-progress"
 import { ReaderDock } from "@/components/articles/reader-dock"
+import { AdvancedMarker } from "@/components/articles/advanced-marker"
 import {
   Sheet,
   SheetTrigger,
@@ -180,6 +181,9 @@ export function OutlineRail() {
                           : `${inactiveDepthClasses[item.depth]} hover:text-tech-main-dark`
                       }`}>
                       {item.text}
+                      {item.isAdvanced && (
+                        <AdvancedMarker className="ml-1.5 -mb-0.5 align-middle" />
+                      )}
                     </Link>
                   </li>
                 )
@@ -292,6 +296,9 @@ export function MobileOutlineBar() {
                       : "text-tech-main/60 hover:border-tech-main/30 hover:text-tech-main border-transparent"
                   }`}>
                   {item.text}
+                  {item.isAdvanced && (
+                    <AdvancedMarker className="ml-1.5 -mb-0.5 align-middle" />
+                  )}
                 </Link>
               </li>
             )

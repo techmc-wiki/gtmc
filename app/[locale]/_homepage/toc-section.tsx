@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { AdvancedMarker } from "@/components/articles/advanced-marker"
@@ -26,12 +27,12 @@ function chapterSections(chapter: ChapterNavNode): ChapterNavNode[] {
   return sections
 }
 
-function formatChapterNumber(chapter: ChapterNavNode): string {
+function formatChapterNumber(chapter: ChapterNavNode): string | null {
   const index = chapter.index ?? -1
   if (chapter.isAppendix) {
-    return index >= 1 && index <= 26 ? String.fromCharCode(64 + index) : "-"
+    return index >= 1 && index <= 26 ? String.fromCharCode(64 + index) : null
   }
-  return index >= 1 ? String(index).padStart(2, "0") : "-"
+  return index >= 1 ? String(index).padStart(2, "0") : null
 }
 
 function formatSectionNumber(
@@ -45,6 +46,9 @@ function formatSectionNumber(
   const chapterPart = chapter.isAppendix
     ? formatChapterNumber(chapter)
     : String(chapterIndex)
+  if (chapterPart === null) {
+    return null
+  }
   return `${chapterPart}.${sectionIndex}`
 }
 
@@ -69,11 +73,12 @@ function ChapterBlock({
   collapseLabel: string
 }) {
   const sections = chapterSections(chapter)
+  const chapterNumber = formatChapterNumber(chapter)
 
   const head = (
     <>
-      <span className="display-title text-tech-main/35 group-hover/chapter-entry:text-tech-signal group-focus-within/chapter-entry:text-tech-signal text-2xl transition-colors duration-300 motion-reduce:transition-none sm:text-3xl">
-        {formatChapterNumber(chapter)}
+      <span className="display-title text-tech-main/35 group-hover/chapter-entry:text-tech-signal group-focus-within/chapter-entry:text-tech-signal min-w-6 text-2xl transition-colors duration-300 motion-reduce:transition-none sm:min-w-7.5 sm:text-3xl">
+        {chapterNumber}
       </span>
       <Link
         href={articleUrl(chapter.slug)}
@@ -101,8 +106,8 @@ function ChapterBlock({
           <Link
             href={articleUrl(section.slug)}
             className="group/section text-tech-main hover:text-tech-main-dark flex items-baseline gap-3 py-1.5 transition-colors">
-            <span className="text-tech-main/50 shrink-0 font-mono text-xs">
-              {formatSectionNumber(chapter, index + 1) ?? "-"}
+            <span className="text-tech-main/50 min-w-6 shrink-0 font-mono text-xs">
+              {formatSectionNumber(chapter, index + 1)}
             </span>
             <span className="text-sm sm:text-base">
               {section.title}
@@ -111,8 +116,8 @@ function ChapterBlock({
               )}
             </span>
             <span className="border-tech-main/25 mb-1 grow self-end border-b border-dotted" />
-            <span className="text-tech-main/0 group-hover/section:text-tech-main-dark shrink-0 font-mono text-xs transition-colors">
-              →
+            <span className="text-tech-main/0 group-hover/section:text-tech-main-dark shrink-0 transition-colors">
+              <ArrowRight aria-hidden="true" className="size-3" />
             </span>
           </Link>
         </li>

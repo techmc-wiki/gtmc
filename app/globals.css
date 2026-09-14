@@ -638,10 +638,6 @@ body {
   @apply text-tech-main/50 font-mono text-xs;
 }
 
-@utility kbd-badge {
-  @apply guide-line border px-1;
-}
-
 @utility nested-list {
   @apply guide-line space-y-3 border-l pl-3;
 }
@@ -846,5 +842,12 @@ code[class^="language-"] {
 @media (hover: none) {
   [data-sidebar-wrapper] [data-sidebar-toggle] {
     opacity: 1;
+  }
+
+  /* Heading copy-links are hover-revealed on pointer devices; on hoverless
+   * devices they would otherwise sit invisible in the gutter. Rest at low
+   * opacity so they stay discoverable without shouting next to the text. */
+  [data-heading-anchor] {
+    opacity: 0.55;
   }
 }

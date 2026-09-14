@@ -1,7 +1,9 @@
 "use client"
 
-import { X } from "lucide-react"
+import { ChevronRight, X } from "lucide-react"
 import { IconButton } from "@/components/ui/icon-button"
+import { Badge } from "@/components/ui/shadcn/badge"
+import { Separator } from "@/components/ui/shadcn/separator"
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
@@ -49,10 +51,6 @@ type ProgressStyle = React.CSSProperties & {
   "--outline-progress-position": string
 }
 
-function formatOrdinal(value: number): string {
-  return String(value).padStart(2, "0")
-}
-
 function PlotterAxis() {
   const t = useTranslations("Outline")
   const { progress } = useScrollProgress()
@@ -88,7 +86,7 @@ function PlotterAxis() {
         <span className="bg-tech-signal absolute top-0 left-0 size-2 -translate-x-1/2 -translate-y-1/2" />
         <span className="bg-tech-signal/75 absolute top-0 right-2 h-px w-2" />
         <span className="text-tech-signal absolute top-0 right-4 -translate-y-1/2 text-[0.5rem] whitespace-nowrap tabular-nums">
-          ΔY {String(percentage).padStart(3, "0")}%
+          {percentage}%
         </span>
       </span>
     </div>
@@ -148,8 +146,13 @@ export function OutlineRail() {
               <span className="text-[0.625rem] font-bold text-tech-main/60">
                 {t("title")}
               </span>
-              <span className="font-mono text-[0.5625rem] tracking-[0.12em] text-tech-main/45 tabular-nums">
-                {formatOrdinal(activeIndex + 1)} / {formatOrdinal(outline.length)}
+              <span className="flex items-center gap-1.5 font-mono text-[0.5625rem] tracking-[0.12em] tabular-nums">
+                <span className="text-tech-main/70">{activeIndex + 1}</span>
+                <Separator
+                  orientation="vertical"
+                  className="bg-tech-main/25 h-2.5"
+                />
+                <span className="text-tech-main/35">{outline.length}</span>
               </span>
             </header>
 
@@ -242,8 +245,8 @@ export function MobileOutlineBar() {
             </span>
             <span
               aria-hidden="true"
-              className="text-tech-main/50 font-mono text-[0.625rem]">
-              ▸
+              className="text-tech-main/50 flex shrink-0 items-center">
+              <ChevronRight aria-hidden="true" className="size-3.5" />
             </span>
           </button>
         </SheetTrigger>
@@ -260,9 +263,11 @@ export function MobileOutlineBar() {
             <SheetTitle className="text-xs font-bold text-tech-main/60">
               {t("title")}
             </SheetTitle>
-            <span className="text-[0.625rem] text-tech-signal tabular-nums">
-              ΔY {String(pct).padStart(3, "0")}%
-            </span>
+            <Badge
+              variant="neutral"
+              className="font-mono text-[0.625rem] tabular-nums">
+              {pct}%
+            </Badge>
           </div>
 
           <div className="mx-4 h-0.5 flex-1 bg-tech-main/15">

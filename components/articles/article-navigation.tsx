@@ -1,3 +1,5 @@
+import { ArrowLeft, ArrowRight } from "lucide-react"
+
 import { articleUrl } from "@/lib/articles/url"
 import { CornerBrackets } from "../ui/corner-brackets"
 
@@ -32,7 +34,7 @@ function ArticleNavigationLink({
   locale,
 }: ArticleNavigationLinkProps) {
   const isNext = direction === "next"
-  const arrow = isNext ? "→" : "←"
+  const ArrowIcon = isNext ? ArrowRight : ArrowLeft
 
   return (
       <a
@@ -84,11 +86,11 @@ function ArticleNavigationLink({
           aria-hidden="true"
           className="
             flex size-6 shrink-0 items-center justify-center border
-            border-tech-main/30 bg-tech-bg/60 font-mono text-[0.75rem]
-            leading-none text-tech-main transition-colors
+            border-tech-main/30 bg-tech-bg/60 leading-none text-tech-main
+            transition-colors
             group-hover:border-tech-main/60 group-hover:bg-tech-main/10
           ">
-          {arrow}
+          <ArrowIcon className="size-3.5" />
         </span>
         <span className="line-clamp-2 text-sm font-medium text-tech-main-dark sm:text-base">
           {article.title}
@@ -107,7 +109,7 @@ export function ArticleNavigation({
 }: ArticleNavigationProps) {
   return (
     <nav
-      aria-label={`${prevLabel} / ${nextLabel}`}
+      aria-label={`${prevLabel}, ${nextLabel}`}
       className="relative mt-14 border-t border-tech-main/25 pt-6">
       <span
         aria-hidden="true"

@@ -1,3 +1,5 @@
+import { ChevronRight } from "lucide-react"
+
 import { articleUrl } from "@/lib/articles/url"
 
 interface BreadcrumbChapter {
@@ -7,8 +9,6 @@ interface BreadcrumbChapter {
 
 interface RunningHeadProps {
   chapters: BreadcrumbChapter[]
-  articleSlug: string
-  articleTitle: string
   locale: string
   chapterIndex?: number
   chapterIsAppendix?: boolean
@@ -29,11 +29,9 @@ function formatChapterLabel(
   return String(index).padStart(2, "0")
 }
 
-/** Running head above an article: chapter chip + breadcrumbs + section mark. */
+/** Running head above an article: chapter chip + chapter trail. */
 export function RunningHead({
   chapters,
-  articleSlug,
-  articleTitle,
   locale,
   chapterIndex,
   chapterIsAppendix,
@@ -58,25 +56,21 @@ export function RunningHead({
           APP
         </span>
       ) : null}
-      {chapters.map((chapter) => (
+      {chapters.map((chapter, index) => (
         <span key={chapter.slug} className="contents">
           <a
             href={`/${locale}${articleUrl(chapter.slug)}`}
             className="text-tech-main/70 hover:text-tech-main-dark hover:decoration-tech-main/40 transition-colors hover:underline hover:underline-offset-4">
             {chapter.title}
           </a>
-          <span aria-hidden="true" className="text-tech-main/40">
-            ›
-          </span>
+          {index < chapters.length - 1 && (
+            <ChevronRight
+              aria-hidden="true"
+              className="text-tech-main/40 size-3 shrink-0"
+            />
+          )}
         </span>
       ))}
-      <a
-        href={`/${locale}${articleUrl(articleSlug)}`}
-        aria-current="page"
-        aria-label={articleTitle}
-        className="text-tech-main/40 hover:text-tech-main-dark hover:decoration-tech-main/40 transition-colors hover:underline hover:underline-offset-4">
-        §
-      </a>
     </nav>
   )
 }

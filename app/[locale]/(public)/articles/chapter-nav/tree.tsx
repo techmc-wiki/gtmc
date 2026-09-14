@@ -111,8 +111,8 @@ function ArticleLink({
       `}>
       <span
         aria-hidden={!prefix}
-        className={`text-center font-mono leading-none text-tech-main/55 tabular-nums ${prefix ? "text-[0.6875rem]" : "text-xs"}`}>
-        {prefix || "•"}
+        className="text-center font-mono text-[0.6875rem] leading-none text-tech-main/55 tabular-nums">
+        {prefix}
       </span>
       <span className="min-w-0">
         {item.title}

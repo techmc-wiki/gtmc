@@ -112,11 +112,11 @@ export function GlossaryCard({
 
         switch (column) {
           case "category":
-            if (!entry.category) return null
+            if (entry.categories.length === 0) return null
             return (
               <p key={column} className="text-tech-main/60 font-mono text-xs">
                 <span className={cn(labelClass, "mr-2")}>CAT</span>
-                {entry.category}
+                {entry.categories.join("; ")}
               </p>
             )
 
@@ -259,7 +259,7 @@ export function GlossaryTableRow({
                   cellClass,
                   "text-tech-main/60 font-mono text-xs"
                 )}>
-                {entry.category || ""}
+                {entry.categories.join("; ")}
               </td>
             )
 

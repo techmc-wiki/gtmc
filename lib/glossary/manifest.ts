@@ -17,7 +17,8 @@ export interface GlossaryEntryBase {
   slug: string
   fullFormEn: string
   shortForm: string
-  category: string
+  /** Canonical categories split from the CSV `"; "`-separated `Category` cell. */
+  categories: string[]
   regex: string
   /** English description with trailing `*` stripped. */
   description: string
@@ -39,7 +40,7 @@ export interface GlossarySummaryEntry {
   slug: string
   fullFormEn: string
   shortForm: string
-  category: string
+  categories: string[]
 }
 
 const glossaryEntries = fullData as GlossaryEntry[]

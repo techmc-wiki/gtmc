@@ -282,7 +282,7 @@ export function GlossaryTable({
   const categoryFiltered = React.useMemo(() => {
     if (selectedCategories.length === 0) return entries
     const allow = new Set(selectedCategories)
-    return entries.filter((e) => allow.has(e.category))
+    return entries.filter((e) => e.categories.some((c) => allow.has(c)))
   }, [entries, selectedCategories])
 
   const trimmedQuery = query.trim()

@@ -25,6 +25,21 @@ const DOMAIN_PINYIN = { 重载: "chong zai" }
 // Technical terms whose domain pronunciation differs from the library default.
 customPinyin(DOMAIN_PINYIN)
 
+/**
+ * Split the CSV `Category` cell (a `"; "`-separated list) into canonical
+ * categories (trimmed, de-duplicated, order preserved).
+ */
+function parseCategories(raw: string): string[] {
+  return [
+    ...new Set(
+      raw
+        .split(";")
+        .map((category) => category.trim())
+        .filter(Boolean)
+    ),
+  ]
+}
+
 function normalizeIndexSortKey(value: string): string {
   return value
     .normalize("NFKD")
@@ -126,7 +141,7 @@ function main(): void {
       slug,
       fullFormEn,
       shortForm: row["Short Form"],
-      category: row["Category"],
+      categories: parseCategories(row["Category"]),
       regex: row["Regex"],
       description,
       related: row["Related"],
@@ -139,7 +154,7 @@ function main(): void {
       slug,
       fullFormEn,
       shortForm: row["Short Form"],
-      category: row["Category"],
+      categories: parseCategories(row["Category"]),
     })
   }
 

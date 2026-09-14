@@ -114,8 +114,10 @@ export function GlossaryRowPicker({
                       </div>
                       <div className="text-muted-foreground mt-0.5 text-xs">
                         {entry.shortForm}
-                        {entry.shortForm && entry.category ? " · " : ""}
-                        {entry.category}
+                        {entry.shortForm && entry.categories.length > 0
+                          ? ", "
+                          : ""}
+                        {entry.categories.join("; ")}
                       </div>
                     </div>
                   </CommandItem>

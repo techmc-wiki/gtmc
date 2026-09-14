@@ -53,8 +53,7 @@ export default async function GlossaryIndexPage({
   const categoryCounts = new Map<string, number>()
 
   for (const entry of entries) {
-    const category = entry.category.trim()
-    if (category) {
+    for (const category of entry.categories) {
       categoryCounts.set(category, (categoryCounts.get(category) ?? 0) + 1)
     }
   }

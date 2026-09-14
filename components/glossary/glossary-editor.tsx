@@ -71,7 +71,7 @@ function entryToRow(entry: GlossaryEntry): GlossaryRow {
   const row = emptyRow()
   row["Full Form (English)"] = entry.fullFormEn
   row["Short Form"] = entry.shortForm
-  row["Category"] = entry.category
+  row["Category"] = entry.categories.join("; ")
   row["Regex"] = entry.regex
   row["Description"] = entry.isControversial
     ? `${entry.description}*`

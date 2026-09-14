@@ -11,7 +11,7 @@ type IndexedGlossaryEntry = GlossarySummaryEntry & { id: string }
 export function createGlossarySearch(): MiniSearch<IndexedGlossaryEntry> {
   const miniSearch = new MiniSearch<IndexedGlossaryEntry>({
     fields: ["fullFormEn", "shortForm", "category"],
-    storeFields: ["slug", "fullFormEn", "shortForm", "category"],
+    storeFields: ["slug", "fullFormEn", "shortForm", "categories"],
     tokenize: CJK_TOKENIZER,
     searchOptions: {
       boost: { fullFormEn: 2 },
@@ -24,6 +24,9 @@ export function createGlossarySearch(): MiniSearch<IndexedGlossaryEntry> {
   const documents: IndexedGlossaryEntry[] = glossarySummary.map((entry) => {
     const doc: IndexedGlossaryEntry = Object.assign({}, entry, {
       id: entry.slug,
+      // MiniSearch tokenizes string fields only: index the joined list,
+      // keep `categories` (stored) as the structured value.
+      category: entry.categories.join("; "),
     })
     return doc
   })
@@ -50,7 +53,7 @@ export function searchGlossary(query: string): GlossarySummaryEntry[] {
     slug: r.slug as string,
     fullFormEn: r.fullFormEn as string,
     shortForm: r.shortForm as string,
-    category: r.category as string,
+    categories: r.categories as string[],
   }))
 }
 

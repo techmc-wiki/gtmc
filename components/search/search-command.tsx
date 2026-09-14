@@ -41,7 +41,7 @@ interface GlossarySearchResult {
   slug: string
   fullFormEn: string
   shortForm: string
-  category: string
+  categories: string[]
 }
 
 function SearchIcon({ className = "size-4" }: { className?: string }) {
@@ -377,7 +377,7 @@ function SearchCommandResults({ search }: { search: SearchCommandState }) {
                 </span>
               )}
               <span className="text-tech-main/40 ml-auto font-mono text-[0.5625rem] tracking-wider">
-                {entry.category}
+                {entry.categories.join("; ")}
               </span>
             </CommandItem>
           ))}

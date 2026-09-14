@@ -5,8 +5,8 @@
 # only published when the tag matches the version `package.json` declares at
 # that commit.
 #
-# The body is created empty on purpose. Curate notes afterwards with
-# `gh release edit` (same section of AGENTS.md).
+# The body is initialized with a link to the website. Curate notes afterwards
+# with `gh release edit` (same section of AGENTS.md), preserving that leading link.
 
 name: Release
 
@@ -53,13 +53,15 @@ jobs:
             exit 0
           fi
 
-          # Empty body on purpose: notes are curated afterwards with
-          # `gh release edit` (AGENTS.md § Publishing GitHub releases). Nothing
-          # else fills it in — neither --notes-from-tag nor --generate-notes is
-          # passed — and omitting --title leaves GitHub showing the tag name.
+          # Initialized with a link to the website; curated notes are added
+          # afterwards with `gh release edit` (AGENTS.md § Publishing GitHub releases).
+          # That leading link must be preserved when editing to prevent accidental
+          # rewrite. Nothing else fills it in — neither --notes-from-tag nor
+          # --generate-notes is passed — and omitting --title leaves GitHub showing
+          # the tag name.
           # --verify-tag: without it gh creates a missing tag off the default
           # branch instead of failing.
           gh release create "$GITHUB_REF_NAME" \
             --repo "$GITHUB_REPOSITORY" \
             --verify-tag \
-            --notes ""
+            --notes "[Graduate Texts in Minecraft](https://www.techmc.wiki)"

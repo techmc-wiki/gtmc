@@ -95,12 +95,12 @@ Release tags use the `vX.Y.Z` format (semver) and are published from the `dev` b
    git push origin vX.Y.Z
    ```
 
-3. Once the release appears on GitHub with an empty message, edit it to match the existing style: `Features:` and optional `Dev:` headings, numbered lists under each. Keep `Dev` selective: developer workflow, CI/CD, or release process only.
+3. Once the release appears on GitHub (initialized by CI with `[Graduate Texts in Minecraft](https://www.techmc.wiki)`), edit it to match the existing style: always preserve the leading website link, followed by `Features:` and optional `Dev:` headings with numbered lists under each. Never overwrite or omit the leading `[Graduate Texts in Minecraft](https://www.techmc.wiki)` link when rewriting or updating notes. Keep `Dev` selective: developer workflow, CI/CD, or release process only.
 
    ```bash
    gh release edit vX.Y.Z \
      --repo techmc-wiki/gtmc \
-     --notes $'Features:\n\n1. Describe the user-facing change\n\nDev:\n\n1. Describe the developer-facing change'
+     --notes $'[Graduate Texts in Minecraft](https://www.techmc.wiki)\n\nFeatures:\n\n1. Describe the user-facing change\n\nDev:\n\n1. Describe the developer-facing change'
    ```
 
 Tags are never re-pointed at an already-published release. Verify the release is neither a draft nor a prerelease and that it appears in `gh release list` after publishing.

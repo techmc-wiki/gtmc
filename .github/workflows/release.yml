@@ -1,0 +1,65 @@
+# Release — turns a version tag into a GitHub release.
+#
+# Tags are pushed by hand (see AGENTS.md § Publishing GitHub releases), so this
+# workflow is the gate that keeps the tag and the manifest honest: a release is
+# only published when the tag matches the version `package.json` declares at
+# that commit.
+#
+# The body is created empty on purpose. Curate notes afterwards with
+# `gh release edit` (same section of AGENTS.md).
+
+name: Release
+
+on:
+  # Version tags only: `v*.*.*` skips the legacy `v1` tag and non-release tags.
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out tagged commit
+        uses: actions/checkout@v7
+
+      - name: Check tag matches package.json
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag="${GITHUB_REF_NAME#v}"
+          version="$(jq -r .version package.json)"
+          if [[ "$tag" != "$version" ]]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $version." >&2
+            echo "Commit the version bump, then move the tag onto that commit." >&2
+            exit 1
+          fi
+          echo "$GITHUB_REF_NAME matches package.json version $version."
+
+      - name: Create release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          # Idempotent, and never clobbers notes added after publishing, so
+          # re-running this job (or tagging an already-released commit) is safe.
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists; leaving it untouched."
+            exit 0
+          fi
+
+          # Empty body on purpose: notes are curated afterwards with
+          # `gh release edit` (AGENTS.md § Publishing GitHub releases). Nothing
+          # else fills it in — neither --notes-from-tag nor --generate-notes is
+          # passed — and omitting --title leaves GitHub showing the tag name.
+          # --verify-tag: without it gh creates a missing tag off the default
+          # branch instead of failing.
+          gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --notes ""

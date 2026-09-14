@@ -70,13 +70,13 @@ export default async function EditorialPolicyPage({
             className="hover:text-tech-main-dark underline">
             {t("sourceContributing")}
           </a>
-          {" · "}
+          {" / "}
           <a
             href="https://github.com/techmc-wiki/Articles/blob/main/REVIEWERS.md"
             className="hover:text-tech-main-dark underline">
             {t("sourceReviewers")}
           </a>
-          {" · "}
+          {" / "}
           <a
             href="https://github.com/techmc-wiki/Articles/blob/main/CODE_OF_CONDUCT.zh.md"
             className="hover:text-tech-main-dark underline">

@@ -115,7 +115,7 @@ function GlossaryEditCardHeader({
             isDelete && "line-through text-red-700 dark:text-red-400"
           )}
           title={headerTerm}>
-          {headerTerm || "—"}
+          {headerTerm || "-"}
         </CardTitle>
       </div>
       {!isReadOnly && (

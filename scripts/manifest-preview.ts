@@ -30,8 +30,8 @@ export function buildManifestPreview(
 
   const summaryLines = [
     "Manifest summary",
-    `  ${entries.length} entries  ·  ${folders.length} folders  ·  ${articles.length} articles`,
-    `  ${roots.length} top-level routes  ·  ${maxSlugDepth}/${maxDepth} slug/directory depth`,
+    `  ${entries.length} entries, ${folders.length} folders, ${articles.length} articles`,
+    `  ${roots.length} top-level routes, ${maxSlugDepth}/${maxDepth} slug/directory depth`,
     `  ${formatFlags(entries)}`,
     "",
     `Source  ${path.relative(process.cwd(), articlesPath) || "."}`,
@@ -57,7 +57,7 @@ function formatFlags(entries: ArticleEntry[]): string {
   return Object.entries(flags)
     .filter(([, count]) => count > 0)
     .map(([label, count]) => `${count} ${label}`)
-    .join("  ·  ")
+    .join(", ")
 }
 
 function countFlagged(
@@ -110,7 +110,7 @@ function formatPreviewEntry(entry: ArticleEntry): string {
     children > 0 ? `📚 ${children}` : "",
     ...getMarkers(entry),
   ].filter(Boolean)
-  const suffix = details.length > 0 ? `  ${details.join(" · ")}` : ""
+  const suffix = details.length > 0 ? `  (${details.join(", ")})` : ""
 
   return `${kind} ${truncate(getPreviewTitle(entry), 54)}  ${entry.slug}${suffix}`
 }

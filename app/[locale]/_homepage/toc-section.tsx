@@ -29,9 +29,9 @@ function chapterSections(chapter: ChapterNavNode): ChapterNavNode[] {
 function formatChapterNumber(chapter: ChapterNavNode): string {
   const index = chapter.index ?? -1
   if (chapter.isAppendix) {
-    return index >= 1 && index <= 26 ? String.fromCharCode(64 + index) : "·"
+    return index >= 1 && index <= 26 ? String.fromCharCode(64 + index) : "-"
   }
-  return index >= 1 ? String(index).padStart(2, "0") : "·"
+  return index >= 1 ? String(index).padStart(2, "0") : "-"
 }
 
 function formatSectionNumber(
@@ -102,7 +102,7 @@ function ChapterBlock({
             href={articleUrl(section.slug)}
             className="group/section text-tech-main hover:text-tech-main-dark flex items-baseline gap-3 py-1.5 transition-colors">
             <span className="text-tech-main/50 shrink-0 font-mono text-xs">
-              {formatSectionNumber(chapter, index + 1) ?? "·"}
+              {formatSectionNumber(chapter, index + 1) ?? "-"}
             </span>
             <span className="text-sm sm:text-base">
               {section.title}

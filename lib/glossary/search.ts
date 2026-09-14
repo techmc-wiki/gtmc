@@ -32,7 +32,7 @@ export function createGlossarySearch(): MiniSearch<IndexedGlossaryEntry> {
   return miniSearch
 }
 
-// Singleton instance — built once per module load (server-side only)
+// Singleton instance: built once per module load (server-side only)
 let glossaryIndex: MiniSearch<IndexedGlossaryEntry> | null = null
 
 function getGlossaryIndex(): MiniSearch<IndexedGlossaryEntry> {

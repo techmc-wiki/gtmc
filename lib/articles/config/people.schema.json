@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "PeopleEntry",
-  "description": "Schema for lib/articles/config/people.yml — GTMC people mention entries",
+  "description": "Schema for lib/articles/config/people.yml: GTMC people mention entries",
   "type": "object",
   "properties": {
     "$schema": true,

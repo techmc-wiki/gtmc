@@ -353,7 +353,7 @@ function AuthorContributionSummary({
                   month: "short",
                   day: "numeric",
                 })
-              : "—"}
+              : "-"}
           </span>
         </>
       ) : null}
@@ -579,8 +579,8 @@ function ArticleRow({
               {article.isAdvanced && <AdvancedMarker className="ml-1.5" />}
             </p>
             <p className="text-tech-main/50 mt-0.5 truncate font-mono text-[0.625rem] tracking-wider uppercase">
-              {metaParts.join(" · ")}
-              {article.author ? ` — ${article.author}` : ""}
+              {metaParts.join(" / ")}
+              {article.author ? ` / ${article.author}` : ""}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">

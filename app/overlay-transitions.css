@@ -8,7 +8,7 @@
  * primitive mounted only while a CSS *animation* runs on it, so plain
  * .is-open/.is-closing transitions would unmount instantly with no exit
  * motion. The open/close states below are therefore data-state-driven
- * keyframes reading the recipe variables — no JS orchestration, no timers.
+ * keyframes reading the recipe variables: no JS orchestration, no timers.
  * Every keyframe declares both from and to, so close/reopen restarts cleanly
  * with no state remnants.
  *
@@ -119,7 +119,7 @@
   animation: t-overlay-out var(--modal-close-dur) var(--modal-ease);
 }
 
-/* transitions.dev: 07-panel-reveal.md — verbatim recipe; ReaderDock drives it
+/* transitions.dev: 07-panel-reveal.md: verbatim recipe; ReaderDock drives it
  * via data-open with its own --panel-translate-y. Leave untouched. */
 :root {
   --panel-open-dur: 400ms;
@@ -196,7 +196,7 @@
   animation: t-sheet-out var(--panel-close-dur) var(--panel-ease);
 }
 
-/* transitions.dev: 17-tooltip.md — fitted to a single Radix tooltip (no shared
+/* transitions.dev: 17-tooltip.md: fitted to a single Radix tooltip (no shared
  * group, so no travel/measurement lanes or theme colors pulled in). The appear
  * delay lives only on the open rule, so leave hides immediately. */
 :root {

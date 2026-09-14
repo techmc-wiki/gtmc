@@ -8,8 +8,8 @@ import { CopyButton } from "@/components/ui/copy-button"
 
 /**
  * "Copy as Markdown" control at the right edge of the article H1. Fetches the
- * public article URL with `Accept: text/markdown` — which the proxy rewrites to
- * the markdown endpoint — and copies the raw markdown to the clipboard.
+ * public article URL with `Accept: text/markdown` (which the proxy rewrites to
+ * the markdown endpoint) and copies the raw markdown to the clipboard.
  */
 export function CopyArticleButton() {
   const t = useTranslations("ArticleMeta")

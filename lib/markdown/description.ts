@@ -229,7 +229,7 @@ export function ensureMetaDescriptionLength(
     if (result.length >= minLength) break
     if (!bit) continue
     if (result.includes(bit)) continue
-    result = result ? `${result} — ${bit}` : bit
+    result = result ? (isZh ? `${result}，${bit}` : `${result}, ${bit}`) : bit
   }
 
   while (result.length < minLength) {
@@ -241,7 +241,11 @@ export function ensureMetaDescriptionLength(
       : isZh
         ? `${siteName}：${topicFiller}`
         : `${siteName} ${topicFiller}`
-    const next = result ? `${result} — ${filler}` : filler
+    const next = result
+      ? isZh
+        ? `${result}，${filler}`
+        : `${result}, ${filler}`
+      : filler
     if (next === result) break
     result = next
   }

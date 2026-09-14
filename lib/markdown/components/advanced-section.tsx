@@ -9,7 +9,7 @@ import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
 /**
  * A deep dive. The reader meets it mid-article, so the header carries the same
  * mark the outline and contents use, then says what the section adds and offers
- * the way past — one line, three pieces of information, no badge, no second row.
+ * the way past: one line, three pieces of information, no badge, no second row.
  */
 function AdvancedSection({
   children,

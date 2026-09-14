@@ -1,5 +1,5 @@
 /**
- * PDF design tokens — the single source of truth for the print edition's
+ * PDF design tokens: the single source of truth for the print edition's
  * look. Values are consumed by `print.css` and by pdfgen's running apparatus.
  */
 
@@ -16,7 +16,7 @@ export const PDF_COLORS = {
   accent: "#c9cfdd",
   /** Warm hairline for quiet rules and the dot grid (site `tech-line`). */
   line: "#d6d3c8",
-  /** Blueprint azure — budgeted: ticks, chapter numerals, active accents. */
+  /** Blueprint azure, budgeted: ticks, chapter numerals, active accents. */
   signal: "#1d6a96",
   /** Text guaranteed legible on a `signal` fill. */
   signalInk: "#f5f4ef",

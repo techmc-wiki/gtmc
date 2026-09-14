@@ -2,11 +2,11 @@
  * Unified person data layer for author-centric pages and features.
  *
  * Bridges two config sources:
- * - `people.yml` — person identities (peopleMention keys, social links, bios).
- * - `authors-alias.yml` + overrides — canonical manifest handles and their aliases.
+ * - `people.yml`: person identities (peopleMention keys, social links, bios).
+ * - `authors-alias.yml` + overrides: canonical manifest handles and their aliases.
  *
  * Identity mappings (`peopleKey → canonicalManifestHandle` and the reverse)
- * are derived at runtime from `people.yml` keys plus the alias maps — the same
+ * are derived at runtime from `people.yml` keys plus the alias maps (the same
  * rule the former author-profiles generator used: alias-resolve each people
  * key (case-insensitive), falling back to the key itself.
  *
@@ -95,7 +95,7 @@ function getForwardAliasMap(): Map<string, string> {
   try {
     merge(yamlLoad(readFileSync(ALIASES_PATH, "utf8")) as AliasYaml | null)
   } catch {
-    // auto-generated aliases missing — non-fatal
+    // auto-generated aliases missing: non-fatal
   }
   try {
     merge(
@@ -171,10 +171,10 @@ function getPeopleKeyToCanonical(): Map<string, string> {
  * Canonicalize a raw manifest author handle to its canonical manifest form.
  *
  * Resolution order:
- * 1. Forward alias map (case-insensitive) — covers aliased spellings.
- * 2. People-key case bridge — if the handle case-insensitively matches a
+ * 1. Forward alias map (case-insensitive): covers aliased spellings.
+ * 2. People-key case bridge: if the handle case-insensitively matches a
  *    known people key, resolve to that key's canonical manifest handle.
- * 3. Identity — unrecognized handles pass through unchanged (fallback authors).
+ * 3. Identity: unrecognized handles pass through unchanged (fallback authors).
  */
 function canonicalizeHandle(handle: string): string {
   const normalized = handle.trim()
@@ -322,7 +322,7 @@ export function resolveAuthorPerson(handle: string): ResolvedPerson {
     return resolvePerson(peopleKey)
   }
 
-  // No known people entry — return a fallback so callers always get a name.
+  // No known people entry: return a fallback so callers always get a name.
   return resolvePerson(canonical)
 }
 

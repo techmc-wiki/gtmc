@@ -171,7 +171,7 @@ function getAvatarUrl(username: string) {
 
 /**
  * One contributor in the byline roster. The primary author is set apart by
- * weight alone — order and emphasis carry the hierarchy, so the roster stays a
+ * weight alone; order and emphasis carry the hierarchy, so the roster stays a
  * single wrapping row that reads the same at two authors or twelve.
  */
 function ContributorChip({

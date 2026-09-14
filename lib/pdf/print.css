@@ -1,5 +1,5 @@
 /* ==========================================================================
-   GTMC PDF Print Stylesheet — Archival Print Edition
+   GTMC PDF Print Stylesheet: Archival Print Edition
    Warm paper, ink text, serif display, budgeted blueprint-azure signal.
    Tokens are injected as CSS custom properties from lib/pdf/theme.ts.
    Target: Chromium via pdfgen.
@@ -33,7 +33,7 @@ body {
 }
 
 /* ==========================================================================
-   Headings — serif display, sentence case. Mono is reserved for apparatus.
+   Headings: serif display, sentence case. Mono is reserved for apparatus.
    ========================================================================== */
 
 h1,
@@ -113,7 +113,7 @@ strong {
 }
 
 /* ==========================================================================
-   Code — mono on lifted surface, site-style line numbers via counters
+   Code: mono on lifted surface, site-style line numbers via counters
    ========================================================================== */
 
 code {
@@ -247,7 +247,7 @@ pre[data-lang="text"]::after {
 }
 
 /* ==========================================================================
-   Tables — hairline rules, mono column heads
+   Tables: hairline rules, mono column heads
    ========================================================================== */
 
 table {
@@ -345,7 +345,7 @@ dd {
 }
 
 /* ==========================================================================
-   Callouts — quiet bracketed asides with a mono label
+   Callouts: quiet bracketed asides with a mono label
    ========================================================================== */
 
 aside[data-callout] {
@@ -486,7 +486,7 @@ people-mention::before {
 }
 
 /* ==========================================================================
-   Cover — separate single-page document, no running header/footer
+   Cover: separate single-page document, no running header/footer
    ========================================================================== */
 
 html:has(.cover-document) {
@@ -569,7 +569,7 @@ html:has(.cover-document) {
 }
 
 /* ==========================================================================
-   Table of Contents — dotted leaders, real folios (filled in pass 2)
+   Table of Contents: dotted leaders, real folios (filled in pass 2)
    ========================================================================== */
 
 .toc-title {
@@ -682,7 +682,7 @@ html:has(.cover-document) {
 }
 
 /* ==========================================================================
-   Chapter opener — oversized serif numeral on dot-grid paper
+   Chapter opener: oversized serif numeral on dot-grid paper
    ========================================================================== */
 
 .chapter-opener {
@@ -764,7 +764,7 @@ html:has(.cover-document) {
 }
 
 /* ==========================================================================
-   Article header — number + serif title with ink rule and azure tick
+   Article header: number + serif title with ink rule and azure tick
    ========================================================================== */
 
 .article {
@@ -814,7 +814,7 @@ html:has(.cover-document) {
 }
 
 /* ==========================================================================
-   Colophon — quiet final page
+   Colophon: quiet final page
    ========================================================================== */
 
 .colophon-page {

@@ -24,7 +24,7 @@ export interface LinearizedArticle {
   title: string
   /**
    * Resolved file path relative to the articles submodule root.
-   * `null` when `resolveSlug` cannot find a match — the caller should
+   * `null` when `resolveSlug` cannot find a match; the caller should
    * skip or handle gracefully.
    */
   filePath: string | null
@@ -61,7 +61,7 @@ interface LinearizeContext {
  *
  * The input tree is expected to already be sorted (e.g. the output of
  * `getPublicChapterNav()`).  The DFS traversal preserves that order so the
- * result is ready for serial PDF generation — iterate once and create
+ * result is ready for serial PDF generation: iterate once and create
  * section/page breaks each time `chapterSlug` changes.
  *
  * Folder nodes become the "chapter" context for their descendants; they are

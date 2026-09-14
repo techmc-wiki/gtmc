@@ -110,7 +110,7 @@ export function parseGlossaryCsv(input: string): ParseGlossaryResult {
 }
 
 /**
- * Escape a CSV cell value — only quote when strictly necessary
+ * Escape a CSV cell value: only quote when strictly necessary
  * (contains delimiter, double-quote, or newline) to match the
  * original CSV's quoting style.
  */
@@ -125,7 +125,7 @@ function escapeCell(value: string): string {
  * Serialize glossary rows back to CSV text.
  *
  * Uses a hand-rolled serializer instead of Papa.unparse to avoid
- * auto-quoting cells with leading/trailing whitespace — matching
+ * auto-quoting cells with leading/trailing whitespace, matching
  * the original CSV's quoting conventions exactly.
  *
  * Produces byte-identical output when the same data is round-tripped:

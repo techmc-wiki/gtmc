@@ -116,7 +116,7 @@ export function CategoryFilter({
   }, [selected, onChange])
 
   const triggerLabel = noneSelected
-    ? `${allLabel} · ${totalCount}`
+    ? `${allLabel} (${totalCount})`
     : t("categoriesSelectedCount", { count: selected.length })
 
   return (

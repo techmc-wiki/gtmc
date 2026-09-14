@@ -24,7 +24,7 @@ export function CodeSourceSummary({
         const mapping = formatToolReference(reference.mapping)
         return [
           `${reference.minecraftVersion}\u0000${mapping}`,
-          `MC ${reference.minecraftVersion} · ${mapping}`,
+          `MC ${reference.minecraftVersion} (${mapping})`,
         ]
       })
     ).values(),

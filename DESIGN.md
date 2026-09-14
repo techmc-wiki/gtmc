@@ -15,8 +15,8 @@ consult `app/globals.css` and the shared components.
   indicators and skeletons; circles are for dots and avatars.
 - Before removing styles, compare the surface with the layer disabled. Preserve
   layout, focus, selection, and touch sizing; remove redundant decoration.
-- Show, don't tell. A level, state, or category is carried by a mark — a glyph,
-  a rule, a tint — not by a text tag. Where a mark repeats across surfaces
+- Show, don't tell. A level, state, or category is carried by a mark (a glyph,
+  a rule, a tint) rather than a text tag. Where a mark repeats across surfaces
   (outline, contents, chapter tree, imprint), the same glyph carries it
   everywhere so the reader learns it once.
 - Minimalism means less chrome, not less information. Strip a control down to a
@@ -27,7 +27,7 @@ consult `app/globals.css` and the shared components.
 - Keep the word count honest. Label a block and state its scope; never
   prescribe how someone should read ("safe to skip on a first read" is a
   directive, "goes deeper into the underlying mechanics" is a description).
-- Never use ` · ` as a separator in interface text. Finish the thought in one
+- Never use middle dots as separators in interface text. Finish the thought in one
   clear line.
 
 ## Color and type
@@ -49,7 +49,7 @@ consult `app/globals.css` and the shared components.
 - Verify a new or changed token before shipping it: measure contrast against
   every surface it sits on in both themes (≥ 6:1 light, ≥ 4.5:1 dark for text),
   keep chroma inside the band the rest of the palette occupies, and check the
-  hue distance from the tokens it will appear next to — including under
+  hue distance from the tokens it will appear next to, including under
   protanopia, deuteranopia, and tritanopia.
 - Page, section, and article headings use the serif `display-title` or
   `markdown-title` styles in sentence case. Body text uses sans.
@@ -84,9 +84,9 @@ consult `app/globals.css` and the shared components.
 - Keep 44px touch targets on mobile, then tighten with `sm:min-h-0` (or a size
   utility) once a pointer is likely, so dense surfaces stay compact.
 - Composite headers (code blocks, imprint strips, section bars) put identity on
-  the left — language, version, path, level — and controls on the right, with
+  the left (language, version, path, level) and controls on the right, with
   the row balanced across the full width. Separate run-together metadata with a
-  border or spacing, not a `|` or ` · ` character, and keep the row to one line.
+  border or spacing, not a `|` or middle dot character, and keep the row to one line.
 - Use `IconButton` for utility actions with recognizable icons and localized
   hover/focus labels. Keep explicit text for primary CTAs, confirmations, and
   content choices (chapters, files, languages, filters); never hide their meaning.

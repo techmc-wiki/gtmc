@@ -219,7 +219,7 @@
   filter: blur(0);
 }
 /* Exit decouples from the stagger: same fade for every line,
-   no Y return, no blur — so the disappearance reads as a
+   no Y return, no blur, so the disappearance reads as a
    single quiet fade instead of a reverse reveal. */
 .t-stagger.is-hiding .t-stagger-line {
   opacity: 0;
@@ -335,15 +335,21 @@
   --tabs-text-active: var(--color-tech-main-dark);
   --tabs-bar-bg: color-mix(in srgb, var(--color-tech-accent) 30%, transparent);
   --tabs-pill-bg: var(--color-surface);
+  height: 2.75rem;
+  padding: 0;
+  gap: 0;
   border: 1px solid var(--color-tech-line);
   border-radius: 0;
+  box-sizing: border-box;
 }
 .t-tabs--density .t-tab {
-  height: 44px;
+  height: 100%;
+  min-height: 0;
   padding-inline: 10px;
   border-radius: 0;
   font-size: 0.75rem;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 .t-tabs--density .t-tab:has(input:checked) {
   color: var(--tabs-text-active);
@@ -353,6 +359,8 @@
   outline-offset: -2px;
 }
 .t-tabs--density .t-tabs-pill {
-  height: 44px;
+  top: 0;
+  height: 100%;
   border-radius: 0;
+  box-sizing: border-box;
 }

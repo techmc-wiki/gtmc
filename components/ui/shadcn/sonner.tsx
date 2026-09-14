@@ -10,7 +10,7 @@ import {
 } from "lucide-react"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 
-/** Observes the runtime `data-theme` attribute — the single source of truth for theming. */
+/** Observes the runtime `data-theme` attribute, the single source of truth for theming. */
 function useDataTheme(): "light" | "dark" {
   const [theme, setTheme] = useState<"light" | "dark">("light")
 

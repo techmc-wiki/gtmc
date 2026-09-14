@@ -9,7 +9,7 @@ const DEFAULT_EMBED_TOKENS = "allow-scripts allow-popups"
  * third-party player origin, which keeps the frame on its own origin: it cannot reach this
  * document's DOM, and that is the precondition for `allow-same-origin` being safe here.
  *
- * Granting this to any other host is only safe under the same evidence — a third-party
+ * Granting this to any other host is only safe under the same evidence: a third-party
  * player origin whose bundle fails to boot without it.
  */
 const PLAYER_EMBED_HOST = "player.bilibili.com"

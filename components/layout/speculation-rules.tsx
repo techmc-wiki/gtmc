@@ -3,13 +3,13 @@
 import { useServerInsertedHTML } from "next/navigation"
 
 /**
- * Speculation Rules API — progressive enhancement for cross-document prerender.
+ * Speculation Rules API: progressive enhancement for cross-document prerender.
  *
  * Browsers that support the API (Chromium 121+) will prerender matched URLs on
  * moderate user intent (~200ms hover). Other browsers ignore this script.
  *
  * Prerender fetches the destination's HTML, CSS, JS, fonts, and images in the
- * background, so when the user clicks, the page is already rendered — FCP/LCP
+ * background, so when the user clicks, the page is already rendered; FCP/LCP
  * for the navigation event approach zero.
  *
  * {@link https://developer.chrome.com/docs/web-platform/speculation-rules}

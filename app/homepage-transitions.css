@@ -73,7 +73,7 @@
   }
 }
 
-/* GTMC hero adaptations — kept separate from the verbatim snippet above. */
+/* GTMC hero adaptations: kept separate from the verbatim snippet above. */
 /* Pointer mouse only on fine hover: never steal mobile scrolling. */
 .t-tilt {
   touch-action: pan-y;

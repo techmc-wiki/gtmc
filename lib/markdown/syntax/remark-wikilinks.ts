@@ -110,7 +110,7 @@ export function remarkWikilinks() {
             } as Text)
           }
         } else {
-          // No wikilinks in this text node — keep as-is
+          // No wikilinks in this text node: keep as-is
           newChildren.push(child)
         }
       }

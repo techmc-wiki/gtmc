@@ -12,7 +12,7 @@ interface MimeConfig {
 }
 
 const MIME_ALLOWLIST: Partial<Record<string, MimeConfig>> = {
-  // Images — 15 MB
+  // Images: 15 MB
   "image/jpeg": {
     category: "images",
     maxBytes: IMAGE_MAX_BYTES,
@@ -29,7 +29,7 @@ const MIME_ALLOWLIST: Partial<Record<string, MimeConfig>> = {
     category: "images",
     maxBytes: IMAGE_MAX_BYTES,
   },
-  // Videos — 50 MB
+  // Videos: 50 MB
   "video/mp4": {
     category: "videos",
     maxBytes: FILE_MAX_BYTES,
@@ -42,7 +42,7 @@ const MIME_ALLOWLIST: Partial<Record<string, MimeConfig>> = {
     category: "videos",
     maxBytes: FILE_MAX_BYTES,
   },
-  // Files — 50 MB
+  // Files: 50 MB
   "application/pdf": {
     category: "files",
     maxBytes: FILE_MAX_BYTES,

@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 
 /**
- * PDF generation script — archival print edition of the GTMC book.
+ * PDF generation script: archival print edition of the GTMC book.
  *
  * TypeScript owns book planning and HTML assembly. The pdfgen binary owns
  * Chromium rendering and PDF post-processing. Each locale converges TOC folios
@@ -402,7 +402,7 @@ function buildOutlineTree(
     const page = pageOf(`chapter-${chapter.slug}`)
     if (page === undefined) continue
     root.push({
-      title: `${formatChapterLabel(locale, chapter.number, chapter.isAppendix)} — ${chapter.title}`,
+      title: `${formatChapterLabel(locale, chapter.number, chapter.isAppendix)}: ${chapter.title}`,
       page,
       children: outlineContent(chapter.content),
     })
@@ -567,7 +567,7 @@ async function runPdf(
       "--background",
       PDF_COLORS.paper,
       "--title",
-      `${messages.bookTitle} — ${messages.bookSubtitle}`,
+      `${messages.bookTitle}: ${messages.bookSubtitle}`,
       "--subject",
       messages.slogan,
       "--author",

@@ -4,7 +4,7 @@
  * These helpers construct plain JSON objects (no React/Next.js APIs) so they
  * can be reused from server components, route handlers, scripts, or tests.
  *
- * Builders always omit optional fields when the value is absent — schema.org
+ * Builders always omit optional fields when the value is absent: schema.org
  * consumers treat missing keys cleaner than explicit `null` values.
  */
 
@@ -184,7 +184,7 @@ export function buildPersonJsonLd(
     "@context": "https://schema.org",
     "@type": "ProfilePage",
     url: profileUrl,
-    name: options.role ? `${person.name} — ${options.role}` : person.name,
+    name: options.role ? `${person.name} (${options.role})` : person.name,
     inLanguage: locale,
     ...(person.description ? { description: person.description } : {}),
     mainEntity: personObject,

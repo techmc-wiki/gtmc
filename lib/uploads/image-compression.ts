@@ -15,7 +15,7 @@ export interface CompressionResult {
 export async function compressImageForUpload(
   file: File
 ): Promise<CompressionResult> {
-  // GIF bypass — compressing GIFs destroys animation
+  // GIF bypass: compressing GIFs destroys animation
   if (file.type === "image/gif") {
     if (file.size > UPLOAD_SAFE_LIMIT_BYTES) {
       return {
@@ -62,14 +62,14 @@ export async function compressImageForUpload(
       }
     }
 
-    // Compression made the file larger (e.g. already well-optimized PNG) — use original
+    // Compression made the file larger (e.g. already well-optimized PNG): use original
     if (compressed.size >= file.size) {
       return { file, compressed: false }
     }
 
     return { file: compressed, compressed: true }
   } catch {
-    // Compression failed — fall back to original if it fits, otherwise error
+    // Compression failed: fall back to original if it fits, otherwise error
     if (file.size > UPLOAD_SAFE_LIMIT_BYTES) {
       return {
         file,

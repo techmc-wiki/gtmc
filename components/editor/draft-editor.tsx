@@ -447,8 +447,8 @@ function DraftEditorSurface({
               <span>
                 {t("characterCount", {
                   count: [...state.activeFileContent].length,
-                })}{" "}
-                ·{" "}
+                })}
+                ,{" "}
                 {t("lineCount", {
                   count: state.activeFileContent.split("\n").length,
                 })}

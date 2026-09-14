@@ -553,7 +553,7 @@ function TreeNodeToggle({
   if (!node.isFolder) {
     return (
       <span className="text-tech-main/20 inline-flex size-11 shrink-0 items-center justify-center font-mono text-[0.625rem]">
-        ·
+        -
       </span>
     )
   }

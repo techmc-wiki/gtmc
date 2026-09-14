@@ -4,7 +4,7 @@
  * The assembled PDF documents link the Google Fonts stylesheet
  * (`PDF_FONT_STYLESHEET_URL`). pdfgen spawns a fresh Chromium per render, so
  * every render pass re-downloads the full font set (five families, ~225 woff2
- * files) from fonts.googleapis.com — repeated rapid fetches from one runner
+ * files) from fonts.googleapis.com; repeated rapid fetches from one runner
  * IP hit transient CDN failures and aborted whole runs with a font-readiness
  * timeout. Downloading the set once and rendering from local files removes
  * the network dependency from rendering entirely.

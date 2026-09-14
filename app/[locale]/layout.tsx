@@ -72,13 +72,13 @@ const jsonLd = serializeJsonLd([
     name: "Graduate Texts in Minecraft",
     url: siteUrl,
     description:
-      "Graduate Texts in Minecraft (GTMC) is a community-written open textbook on technical Minecraft — redstone, game mechanics, chunk systems, and engine internals.",
+      "Graduate Texts in Minecraft (GTMC) is a community-written open textbook on technical Minecraft: redstone, game mechanics, chunk systems, and engine internals.",
     inLanguage: ["zh", "en"],
   },
 ])
 
 const DEFAULT_SITE_DESCRIPTION =
-  "Graduate Texts in Minecraft (GTMC) is a community-written open textbook on technical Minecraft — redstone, game mechanics, chunk systems, and engine internals."
+  "Graduate Texts in Minecraft (GTMC) is a community-written open textbook on technical Minecraft: redstone, game mechanics, chunk systems, and engine internals."
 
 export async function generateMetadata({
   params,

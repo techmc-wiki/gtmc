@@ -11,7 +11,7 @@
 
 [![Website](https://img.shields.io/badge/site-techmc.wiki-60708F?style=flat-square&labelColor=4A5A78)](https://techmc.wiki) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/techmc-wiki/gtmc) [![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org) [![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org) [![License](https://img.shields.io/badge/Code-Apache--2.0-yellow?style=flat-square)](LICENSE) [![Articles](https://img.shields.io/badge/Articles-CC--BY--NC--SA%204.0-lightgrey?style=flat-square)](LICENSE)
 
-[访问网站](https://techmc.wiki) · [浏览原始文章](https://github.com/techmc-wiki/articles) · [更多 GTMC 项目](https://github.com/orgs/techmc-wiki/repositories)
+[访问网站](https://techmc.wiki) | [浏览原始文章](https://github.com/techmc-wiki/articles) | [更多 GTMC 项目](https://github.com/orgs/techmc-wiki/repositories)
 
 <!-- README-I18N:START -->
 
@@ -25,15 +25,15 @@
 
 ## 关于
 
-**Graduate Texts in Minecraft**（_GTMC_）是一个开放的 Minecraft 技术知识库——涵盖红石、游戏机制与引擎内部原理。任何人都能阅读，并由社区共同编写、评审。
+**Graduate Texts in Minecraft**（_GTMC_）是一个开放的 Minecraft 技术知识库，涵盖红石、游戏机制与引擎内部原理。任何人都能阅读，并由社区共同编写、评审。
 
 这里有三类文章：
 
-- **教程（Tutorials）** —— 面向建造者的分步讲解。
-- **机制讲解（Explanations）** —— 从基本原理出发，剖析机制的真正运作方式。
-- **源码解读（Code Analysis）** —— 带注释的游戏源码阅读。
+- **教程（Tutorials）**：面向建造者的分步讲解。
+- **机制讲解（Explanations）**：从基本原理出发，剖析机制的真正运作方式。
+- **源码解读（Code Analysis）**：带注释的游戏源码阅读。
 
-内容覆盖技术玩法的方方面面：树场等量产装置、械电与元件特性、绿萌科技，以及把它们串联起来的时序与电路。在引擎层面，文章深入微时序、方块更新与更新顺序、区块加载与加载票（loading ticket）、实体 AI 与实体移动——必要之处佐以源码分析。工具章节则讲解技术存档的常用利器（Carpet、Litematica 与 masa 套件），让新手与老手都能找到入口。
+内容覆盖技术玩法的方方面面：树场等量产装置、械电与元件特性、绿萌科技，以及把它们串联起来的时序与电路。在引擎层面，文章深入微时序、方块更新与更新顺序、区块加载与加载票（loading ticket）、实体 AI 与实体移动，必要之处佐以源码分析。工具章节则讲解技术存档的常用利器（Carpet、Litematica 与 masa 套件），让新手与老手都能找到入口。
 
 最快的上手方式就是**[访问网站](https://techmc.wiki)**。想参与贡献？你可以直接在站内起草文章并创建拉取请求。审阅和合并冲突处理均在 GitHub 上完成。
 
@@ -71,7 +71,7 @@ pnpm typecheck    # 运行 Next.js 感知的 TypeScript 检查
 <div align="center">
 
 <sub>
-代码：<a href="LICENSE">Apache-2.0</a> · 文章：<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>
+代码：<a href="LICENSE">Apache-2.0</a> | 文章：<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>
 </sub>
 
 </div>

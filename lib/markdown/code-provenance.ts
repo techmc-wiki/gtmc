@@ -221,7 +221,7 @@ export function formatCodeProvenanceLabel(
   } else if (provenance.lines) {
     parts.push(`L${formatLineRange(provenance.lines)}`)
   }
-  return parts.join(" · ")
+  return parts.join(" / ")
 }
 
 export interface JavaFenceDiagnostic {

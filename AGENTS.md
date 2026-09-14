@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Agent context for the **GTMC website** — public site for Graduate Texts in Minecraft (reader surfaces, drafts workspace, GitHub PR integration).
+Agent context for the **GTMC website**, the public site for Graduate Texts in Minecraft (reader surfaces, drafts workspace, GitHub PR integration).
 
 The site is live at <https://www.techmc.wiki>. The infra was provided by Vercel and DNS by Cloudflare.
 
@@ -81,7 +81,7 @@ Before declaring any build-affecting change complete, run `pnpm check && pnpm te
 
 Release tags use the `vX.Y.Z` format (semver) and are published from the `dev` branch. The target commit must already be present on the remote `dev` branch; agents must not push or pull, so stop for a user-managed push when the local branch is ahead. Before publishing, inspect the commits since the previous release, pick the next version (`feat` → minor, `fix`/`perf` → patch, breaking → major), and confirm the worktree is clean.
 
-1. Bump `version` in `package.json` to the new version — bare semver, no `v` prefix — in its own commit. A bump never touches `pnpm-lock.yaml`, so stage the manifest alone and never regenerate dependencies for it.
+1. Bump `version` in `package.json` to the new version (bare semver, no `v` prefix) in its own commit. A bump never touches `pnpm-lock.yaml`, so stage the manifest alone and never regenerate dependencies for it.
 
    ```bash
    git add package.json
@@ -109,8 +109,8 @@ Tags are never re-pointed at an already-published release. Verify the release is
 
 # This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+This version has breaking changes: APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+This block is written and re-added by `next dev` (verify at `node_modules/next/dist/server/lib/generate-agent-files.js`). Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->

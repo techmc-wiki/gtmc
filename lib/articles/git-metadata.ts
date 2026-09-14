@@ -52,7 +52,7 @@ function getCacheKey(cwd: string, relPath: string, type: string): string {
 /**
  * Git usernames from `lib/articles/config/article-edit-exclusions.yml`,
  * lowercased. Does NOT respect author aliases. Signature dropped the
- * former `articlesRepoCwd` param — config is website-owned now.
+ * former `articlesRepoCwd` param; config is website-owned now.
  */
 export async function loadArticleEditExclusions(): Promise<string[]> {
   const cacheKey = "config:article-edit-exclusions"
@@ -76,7 +76,7 @@ export async function loadArticleEditExclusions(): Promise<string[]> {
  * Map of every known spelling (canonical + aliases) to canonical username.
  * Auto-generated `authors-alias.yml` is merged first, then
  * `author-alias-overrides.yml` takes precedence. Signature dropped the
- * former `articlesRepoCwd` param — config is website-owned now.
+ * former `articlesRepoCwd` param; config is website-owned now.
  */
 export async function loadAuthorAliases(): Promise<Map<string, string>> {
   const cacheKey = "config:aliases"

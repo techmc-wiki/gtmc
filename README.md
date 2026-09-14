@@ -11,7 +11,7 @@ Read tutorials, mechanics deep-dives, and source-code walkthroughs. All openly w
 
 [![Website](https://img.shields.io/badge/site-techmc.wiki-60708F?style=flat-square&labelColor=4A5A78)](https://techmc.wiki) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/techmc-wiki/gtmc) [![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org) [![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org) [![License](https://img.shields.io/badge/Code-Apache--2.0-yellow?style=flat-square)](LICENSE) [![Articles](https://img.shields.io/badge/Articles-CC--BY--NC--SA%204.0-lightgrey?style=flat-square)](LICENSE)
 
-[Visit the Site](https://techmc.wiki) · [Browse Raw Articles](https://github.com/techmc-wiki/articles) · [More GTMC Projects](https://github.com/orgs/techmc-wiki/repositories)
+[Visit the Site](https://techmc.wiki) | [Browse Raw Articles](https://github.com/techmc-wiki/articles) | [More GTMC Projects](https://github.com/orgs/techmc-wiki/repositories)
 
 <!-- README-I18N:START -->
 
@@ -25,15 +25,15 @@ Read tutorials, mechanics deep-dives, and source-code walkthroughs. All openly w
 
 ## About
 
-**Graduate Texts in Minecraft** (_GTMC_) is an open knowledge base for the technical side of Minecraft — redstone, game mechanics, and engine internals. Anyone can read it, and the community writes and reviews it together.
+**Graduate Texts in Minecraft** (_GTMC_) is an open knowledge base for the technical side of Minecraft: redstone, game mechanics, and engine internals. Anyone can read it, and the community writes and reviews it together.
 
 You'll find three kinds of articles:
 
-- **Tutorials** — step-by-step walkthroughs for builders.
-- **Explanations** — how in-game mechanics actually work, from first principles.
-- **Code Analysis** — annotated readings of the game's source.
+- **Tutorials**: step-by-step walkthroughs for builders.
+- **Explanations**: how in-game mechanics actually work, from first principles.
+- **Code Analysis**: annotated readings of the game's source.
 
-They span the whole stack of technical play: production builds like tree farms, mechanical redstone and component behavior, slime-tech flying machines, and the timing and wiring that hold them together. On the engine side, articles dig into micro-timing, block updates and update order, chunk loading and loading tickets, and entity AI and movement — backed by source reading where it matters. Tooling chapters cover the staples of a technical setup (Carpet, Litematica, and the masa suite), so newcomers and veterans both have a way in.
+They span the whole stack of technical play: production builds like tree farms, mechanical redstone and component behavior, slime-tech flying machines, and the timing and wiring that hold them together. On the engine side, articles dig into micro-timing, block updates and update order, chunk loading and loading tickets, and entity AI and movement, backed by source reading where it matters. Tooling chapters cover the staples of a technical setup (Carpet, Litematica, and the masa suite), so newcomers and veterans both have a way in.
 
 The fastest way to start is to **[visit the site](https://techmc.wiki)**. Want to contribute? You can draft articles and open pull requests right from the site. Reviews and merge conflicts are handled on GitHub.
 
@@ -73,7 +73,7 @@ In development, the first localhost request automatically signs in as the local 
 <div align="center">
 
 <sub>
-Code: <a href="LICENSE">Apache-2.0</a> · Articles: <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>
+Code: <a href="LICENSE">Apache-2.0</a> | Articles: <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>
 </sub>
 
 </div>

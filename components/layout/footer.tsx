@@ -90,7 +90,7 @@ export default async function Footer() {
     ? (revisedDateFormatters[locale] ?? revisedDateFormatters.en).format(
         new Date(stats.lastRevision)
       )
-    : "—"
+    : "-"
   const buildSha = process.env.NEXT_PUBLIC_BUILD_SHA
 
   // The index groups the community, contribution, and source destinations;
@@ -200,7 +200,7 @@ export default async function Footer() {
           ))}
         </div>
 
-        {/* The book ends here — same device that closes each article */}
+        {/* The book ends here: same device that closes each article */}
         <ChapterEndMark />
 
         {/* Colophon */}
@@ -219,7 +219,7 @@ export default async function Footer() {
               {buildSha ? (
                 <span className="text-tech-main/40 font-mono">
                   {" "}
-                  · BUILD {buildSha}
+                  ({buildSha})
                 </span>
               ) : null}
             </p>
@@ -229,7 +229,7 @@ export default async function Footer() {
           </div>
         </div>
       </div>
-      {/* Closing wordmark — full-bleed spine stamp, like a back cover.
+      {/* Closing wordmark: full-bleed spine stamp, like a back cover.
           Feathered paper→ink mask so the huge caps ease in over ~28px
           instead of cutting from cream to navy in one pixel, then
           redrawn as live ascii around the cursor via the CanvasUI

@@ -34,7 +34,7 @@ export interface GlossaryEntry extends GlossaryEntryBase {
   indexByLocale: Record<GlossarySiteLocale, GlossaryLocaleIndex>
 }
 
-/** Reduced entry for fast client-side search — omits description, regex, related, isControversial, and translations. */
+/** Reduced entry for fast client-side search: omits description, regex, related, isControversial, and translations. */
 export interface GlossarySummaryEntry {
   slug: string
   fullFormEn: string

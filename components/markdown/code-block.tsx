@@ -154,7 +154,7 @@ interface CodeBlockHeaderProps {
 /**
  * The listing's caption. The language identifies the block, so it gets a chip;
  * version, mapping, and decompiler are provenance for that language and stay
- * quiet behind the chip. The line count is deliberately absent — the gutter
+ * quiet behind the chip. The line count is deliberately absent: the gutter
  * already numbers every line, so repeating the total is chrome, not content.
  */
 function CodeBlockHeader({

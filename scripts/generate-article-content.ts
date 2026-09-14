@@ -178,7 +178,7 @@ async function mainAsync(): Promise<void> {
     }
   }
 
-  // Renders are independent per article — run them concurrently.
+  // Renders are independent per article; run them concurrently.
   await Promise.all(renderJobs.map((job) => job()))
 
   if (fs.existsSync(OUTPUT_DIR)) {

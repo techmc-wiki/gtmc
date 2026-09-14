@@ -31,7 +31,7 @@ let highlighterPromise: Promise<HighlighterCore> | null = null
  * this highlighter; persisting the cache lets the Next.js SSG build reuse
  * those highlights instead of re-running the (regex-engine) highlighter on
  * every unchanged code block. Entries are content-addressed, so a stale
- * cache can never produce wrong output — it only costs a re-highlight.
+ * cache can never produce wrong output: it only costs a re-highlight.
  */
 function loadPersistedHighlightCache(): void {
   try {
@@ -43,7 +43,7 @@ function loadPersistedHighlightCache(): void {
       }
     }
   } catch {
-    // First run or unreadable cache — start cold.
+    // First run or unreadable cache: start cold.
   }
 }
 
@@ -63,7 +63,7 @@ export function persistHighlightCache(): void {
     )
     highlightCacheDirty = false
   } catch {
-    // Best-effort — a missing cache only costs a re-highlight.
+    // Best-effort: a missing cache only costs a re-highlight.
   }
 }
 
@@ -218,7 +218,7 @@ export async function createRehypeShiki() {
               : rawCode.split("\n").length
           )
         } catch {
-          /* unsupported language or highlighting error — leave node untouched */
+          /* unsupported language or highlighting error: leave node untouched */
         }
       })
     }

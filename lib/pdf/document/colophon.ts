@@ -18,7 +18,7 @@ export function renderColophonHtml(
     '<section class="colophon-page">',
     `  <h2 class="colophon-title">${labels.colophonTitle}</h2>`,
     '  <div class="colophon-body">',
-    `    <p>${escapeHtml(options.title)} — ${articleCount} articles.</p>`,
+    `    <p>${escapeHtml(options.title)}: ${articleCount} articles.</p>`,
     `    <p>${labels.colophonCommunity}</p>`,
     `    <p>${labels.colophonGenerated} ${escapeHtml(options.generatedDate)}.</p>`,
     revisionLine,

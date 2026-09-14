@@ -176,7 +176,7 @@ function parseArticleContentArtifact(
  *
  * Reads the JSON artifact file produced by `scripts/generate-article-content.ts`.
  * In development, returns `null` (with a warning) if the file is missing or
- * malformed. In production, throws an error — callers handle not-found via
+ * malformed. In production, throws an error: callers handle not-found via
  * `notFound()`.
  */
 export async function getArticleContentBySlug(

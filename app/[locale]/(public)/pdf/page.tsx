@@ -45,7 +45,7 @@ export async function generateMetadata({
           url: "/opengraph-image",
           width: 1200,
           height: 630,
-          alt: "Graduate Texts in Minecraft — Offline PDF",
+          alt: "Graduate Texts in Minecraft (Offline PDF)",
         },
       ],
     },
@@ -94,7 +94,7 @@ export default async function PdfPage({
               lastRevision ? t("metaRevised", { date: lastRevision }) : null,
             ]
               .filter(Boolean)
-              .join(" · ")}
+              .join(", ")}
           </p>
 
           <Link

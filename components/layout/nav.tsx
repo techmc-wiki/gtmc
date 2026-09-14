@@ -33,7 +33,7 @@ function useHeaderScrolled() {
       const target: EventTarget | null = evt ? evt.target : null
       // The homepage scrolls inside an h-dvh overflow container that wraps
       // the page content, so accept the window plus any scroller that is an
-      // ancestor of — or nested within — #main-content. Ignore unrelated
+      // ancestor of (or nested within) #main-content. Ignore unrelated
       // scroll surfaces (command palettes, side rails).
       const main = document.getElementById("main-content")
       const isWindowOrDoc = target === window || target === document
@@ -214,7 +214,7 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
 
 /**
  * Mobile navigation: hamburger trigger + modal side drawer (research default
- * over top dropdowns — preserves page context via the scrim and gives the IA
+ * over top dropdowns; preserves page context via the scrim and gives the IA
  * room). Radix Dialog supplies the modal semantics: focus trap, Escape,
  * focus return.
  */

@@ -1,4 +1,4 @@
-# Release — turns a version tag into a GitHub release.
+# Release: turns a version tag into a GitHub release.
 #
 # Tags are pushed by hand (see AGENTS.md § Publishing GitHub releases), so this
 # workflow is the gate that keeps the tag and the manifest honest: a release is
@@ -56,8 +56,8 @@ jobs:
           # Initialized with a link to the website; curated notes are added
           # afterwards with `gh release edit` (AGENTS.md § Publishing GitHub releases).
           # That leading link must be preserved when editing to prevent accidental
-          # rewrite. Nothing else fills it in — neither --notes-from-tag nor
-          # --generate-notes is passed — and omitting --title leaves GitHub showing
+          # rewrite. Nothing else fills it in (neither --notes-from-tag nor
+          # --generate-notes is passed) and omitting --title leaves GitHub showing
           # the tag name.
           # --verify-tag: without it gh creates a missing tag off the default
           # branch instead of failing.

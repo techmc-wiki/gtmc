@@ -12,7 +12,7 @@ interface RawFile {
 /**
  * Regex matching `[@name]` where name is one or more non-bracket characters.
  * The negative character class `[^\[\]]+` allows CJK, spaces, underscores,
- * hyphens, periods, and mixed case — any character that isn't `[` or `]`.
+ * hyphens, periods, and mixed case: any character that isn't `[` or `]`.
  */
 const MENTION_PATTERN = /\[@([^[\]]+)\]/g
 
@@ -135,7 +135,7 @@ function isBackslashEscapedAt(source: string, pos: number): boolean {
 }
 
 /**
- * Remark plugin — transforms `[@PersonKey]` syntax into `<people-mention>` tags.
+ * Remark plugin: transforms `[@PersonKey]` syntax into `<people-mention>` tags.
  *
  * The rehype pipeline (specifically `rehype-raw`) will process the emitted
  * HTML elements, making them available to downstream React components via

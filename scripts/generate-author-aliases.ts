@@ -195,7 +195,7 @@ async function generateAliases(): Promise<AliasMap> {
     emailToDisplayNames.set(email, set)
   }
 
-  // github username → set of emails. Resolve all emails in parallel — order
+  // github username → set of emails. Resolve all emails in parallel: order
   // does not affect the final map, and this avoids both an await-in-loop and
   // slow serial API round-trips.
   const distinctEmails = [...emailToDisplayNames.keys()]

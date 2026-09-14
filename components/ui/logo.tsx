@@ -19,8 +19,8 @@ interface LogoMarkProps {
 /**
  * GTMC brand mark. Two static SVGs (one per theme) keep the paper-tone glyph
  * readable on both cream and dark surfaces. Rendered as a CSS background image
- * (not `<img>`) so the active variant swaps via `[data-theme]` — no client JS,
- * hydration-safe, and avoids the `next/image` SVG limitation.
+ * (not `<img>`) so the active variant swaps via `[data-theme]` (no client JS,
+ * hydration-safe, and avoids the `next/image` SVG limitation).
  */
 function LogoMark({ className = "", title }: LogoMarkProps) {
   return (

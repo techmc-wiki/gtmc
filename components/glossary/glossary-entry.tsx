@@ -208,7 +208,7 @@ export function GlossaryTableRow({
               {value ? (
                 <span className="line-clamp-2">{value}</span>
               ) : (
-                <span className="text-tech-main/30 font-mono text-xs">—</span>
+                <span className="text-tech-main/30 font-mono text-xs">-</span>
               )}
             </td>
           )
@@ -292,7 +292,7 @@ export function GlossaryTableRow({
                 {entry.relatedTerms.length > 0 ? (
                   <CrossRefChips related={entry.relatedTerms} mode="index" />
                 ) : (
-                  <span className="text-tech-main/30 font-mono text-xs">—</span>
+                  <span className="text-tech-main/30 font-mono text-xs">-</span>
                 )}
               </td>
             )

@@ -7,6 +7,8 @@
     "layersBelow": "Show selected layer and below",
     "applyLayer": "Apply layer selection",
     "signOut": "Sign out",
+    "profile": "Profile",
+    "login": "Log in",
     "layerFilter": "Layer filter"
   },
   "About": {

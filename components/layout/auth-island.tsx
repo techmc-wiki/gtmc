@@ -2,9 +2,10 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { SessionProvider, useSession } from "next-auth/react"
+import { SessionProvider, useSession, signOut } from "next-auth/react"
+import { useTranslations } from "next-intl"
+import { LogOut, User } from "lucide-react"
 import { Link } from "@/i18n/navigation"
-import { SignOutButton } from "@/components/ui/sign-out-button"
 import {
   Avatar,
   AvatarImage,
@@ -20,6 +21,7 @@ import {
 
 function AuthIslandContent() {
   const { data: session, status } = useSession()
+  const t = useTranslations("IconActions")
 
   // Loading state: pulse skeleton sized to the resolved avatar footprint so
   // the header controls do not shift when the session lands.
@@ -36,9 +38,8 @@ function AuthIslandContent() {
     return (
       <Link
         href="/login"
-        aria-label="LOGIN"
         className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main-dark hover:text-tech-bg flex size-full items-center justify-center border font-mono text-[0.6rem] font-bold uppercase transition-colors duration-300 md:text-xs">
-        LOGIN
+        {t("login")}
       </Link>
     )
   }
@@ -47,10 +48,10 @@ function AuthIslandContent() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Link
-          href="/profile"
-          className="hover:bg-tech-main/10 focus-visible:outline-tech-main flex size-11 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2"
-          aria-label={session.user.name ?? undefined}>
+        <button
+          type="button"
+          aria-label={session.user.name ?? undefined}
+          className="hover:bg-tech-main/10 focus-visible:outline-tech-main flex size-11 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2">
           <Avatar className="border-tech-main/30 bg-tech-main/10 relative size-8 overflow-hidden border">
             {session.user.image ? (
               <AvatarImage asChild src={session.user.image}>
@@ -69,7 +70,7 @@ function AuthIslandContent() {
               </AvatarFallback>
             )}
           </Avatar>
-        </Link>
+        </button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
@@ -88,12 +89,16 @@ function AuthIslandContent() {
           <DropdownMenuItem
             asChild
             className="text-tech-main-dark hover:bg-tech-main/10 focus:bg-tech-main/10 focus:text-tech-main-dark cursor-pointer rounded-none px-2 py-1.5 font-mono text-[0.625rem] transition-colors">
-            <Link href="/profile">PROFILE</Link>
+            <Link href="/profile">
+              <User aria-hidden="true" className="size-3.5" />
+              <span>{t("profile")}</span>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem
-            asChild
-            className="rounded-none px-0 py-0 hover:bg-transparent focus:bg-transparent">
-            <SignOutButton className="w-full justify-start" />
+            onSelect={() => signOut({ callbackUrl: "/" })}
+            className="text-tech-main-dark hover:bg-tech-main/10 focus:bg-tech-main/10 focus:text-tech-main-dark cursor-pointer rounded-none px-2 py-1.5 font-mono text-[0.625rem] transition-colors">
+            <LogOut aria-hidden="true" className="size-3.5" />
+            <span>{t("signOut")}</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

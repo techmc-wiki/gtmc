@@ -526,40 +526,36 @@ function sniffKind(
   return null
 }
 
-function rasterizeImage(blob: Blob): Promise<ImageData> {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(blob)
-    const image = new Image()
-    image.addEventListener(
-      "load",
-      () => {
-        URL.revokeObjectURL(url)
-        const width = image.naturalWidth || 1024
-        const height = image.naturalHeight || 1024
-        const ratio = Math.min(1, RASTER_SIZE / Math.max(width, height))
-        const canvas = document.createElement("canvas")
-        canvas.width = Math.max(1, Math.round(width * ratio))
-        canvas.height = Math.max(1, Math.round(height * ratio))
-        const ctx = canvas.getContext("2d")
-        if (!ctx) {
-          reject(new Error("2d context unavailable"))
-          return
-        }
-        ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
-        resolve(ctx.getImageData(0, 0, canvas.width, canvas.height))
-      },
-      { once: true }
-    )
-    image.addEventListener(
-      "error",
-      () => {
-        URL.revokeObjectURL(url)
-        reject(new Error("Could not decode the image"))
-      },
-      { once: true }
-    )
-    image.src = url
-  })
+function loadImageElement(url: string): Promise<HTMLImageElement> {
+  const { promise, resolve, reject } = Promise.withResolvers<HTMLImageElement>()
+  const image = new Image()
+  image.addEventListener("load", () => resolve(image), { once: true })
+  image.addEventListener(
+    "error",
+    () => reject(new Error("Could not decode the image")),
+    { once: true }
+  )
+  image.src = url
+  return promise
+}
+
+async function rasterizeImage(blob: Blob): Promise<ImageData> {
+  const url = URL.createObjectURL(blob)
+  try {
+    const image = await loadImageElement(url)
+    const width = image.naturalWidth || 1024
+    const height = image.naturalHeight || 1024
+    const ratio = Math.min(1, RASTER_SIZE / Math.max(width, height))
+    const canvas = document.createElement("canvas")
+    canvas.width = Math.max(1, Math.round(width * ratio))
+    canvas.height = Math.max(1, Math.round(height * ratio))
+    const ctx = canvas.getContext("2d")
+    if (!ctx) throw new Error("2d context unavailable")
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
+    return ctx.getImageData(0, 0, canvas.width, canvas.height)
+  } finally {
+    URL.revokeObjectURL(url)
+  }
 }
 
 function createParticleObject(

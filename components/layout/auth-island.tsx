@@ -21,11 +21,12 @@ import {
 function AuthIslandContent() {
   const { data: session, status } = useSession()
 
-  // Loading state: pulse skeleton matching dashboard style
+  // Loading state: pulse skeleton sized to the resolved avatar footprint so
+  // the header controls do not shift when the session lands.
   if (status === "loading") {
     return (
-      <div className="guide-line bg-tech-main/5 flex size-full animate-pulse items-center justify-center border">
-        <div className="bg-tech-main/20 size-2" />
+      <div className="flex size-11 items-center justify-center">
+        <div className="border-tech-main/30 bg-tech-main/5 size-8 animate-pulse border" />
       </div>
     )
   }
@@ -63,7 +64,7 @@ function AuthIslandContent() {
                 />
               </AvatarImage>
             ) : (
-              <AvatarFallback className="text-tech-main/50 bg-transparent font-mono text-xl font-bold tracking-widest uppercase">
+              <AvatarFallback className="text-tech-main/70 bg-transparent font-mono text-xs font-bold uppercase">
                 {(session.user.name || "?")[0]}
               </AvatarFallback>
             )}

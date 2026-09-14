@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation"
 import { collectAppendixGroups } from "@/lib/articles/navigation-data"
 import { articleUrl } from "@/lib/articles/url"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
+import { ChapterDisclosure } from "./chapter-disclosure"
 
 interface TocSectionProps {
   tree: ChapterNavNode[]
@@ -58,58 +59,78 @@ function ChapterRegistrationTick() {
 function ChapterBlock({
   chapter,
   sectionCountLabel,
+  expandLabel,
+  collapseLabel,
 }: {
   chapter: ChapterNavNode
   sectionCountLabel: string
+  expandLabel: string
+  collapseLabel: string
 }) {
   const sections = chapterSections(chapter)
+
+  const head = (
+    <>
+      <span className="display-title text-tech-main/35 group-hover/chapter-entry:text-tech-signal group-focus-within/chapter-entry:text-tech-signal text-2xl transition-colors duration-300 motion-reduce:transition-none sm:text-3xl">
+        {formatChapterNumber(chapter)}
+      </span>
+      <Link
+        href={articleUrl(chapter.slug)}
+        className="display-title text-tech-main-dark decoration-tech-signal grow text-xl underline-offset-4 transition-colors hover:underline sm:text-2xl">
+        {chapter.title}
+      </Link>
+    </>
+  )
+
+  if (sections.length === 0) {
+    return (
+      <li className="group/chapter-entry relative">
+        <ChapterRegistrationTick />
+        <div className="group/chapter flex items-baseline gap-4 sm:gap-6">
+          {head}
+        </div>
+      </li>
+    )
+  }
+
+  const panel = (
+    <ol className="border-tech-main/20 mt-3 ml-2 flex flex-col border-l pl-6 sm:ml-3 sm:pl-9">
+      {sections.map((section, index) => (
+        <li key={section.id}>
+          <Link
+            href={articleUrl(section.slug)}
+            className="group/section text-tech-main hover:text-tech-main-dark flex items-baseline gap-3 py-1.5 transition-colors">
+            <span className="text-tech-main/50 shrink-0 font-mono text-xs">
+              {formatSectionNumber(chapter, index + 1) ?? "·"}
+            </span>
+            <span className="text-sm sm:text-base">
+              {section.title}
+              {section.isAdvanced && (
+                <span className="bg-tech-advanced ml-2 inline-block px-1 py-px align-middle font-mono text-[0.5625rem] font-bold tracking-wider text-white uppercase">
+                  ADV
+                </span>
+              )}
+            </span>
+            <span className="border-tech-main/25 mb-1 grow self-end border-b border-dotted" />
+            <span className="text-tech-main/0 group-hover/section:text-tech-main-dark shrink-0 font-mono text-xs transition-colors">
+              →
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ol>
+  )
 
   return (
     <li className="group/chapter-entry relative">
       <ChapterRegistrationTick />
-      <div className="group/chapter flex items-baseline gap-4 sm:gap-6">
-        <span className="display-title text-tech-main/35 group-hover/chapter-entry:text-tech-signal group-focus-within/chapter-entry:text-tech-signal text-2xl transition-colors duration-300 motion-reduce:transition-none sm:text-3xl">
-          {formatChapterNumber(chapter)}
-        </span>
-        <Link
-          href={articleUrl(chapter.slug)}
-          className="display-title text-tech-main-dark decoration-tech-signal grow text-xl underline-offset-4 transition-colors hover:underline sm:text-2xl">
-          {chapter.title}
-        </Link>
-        {sections.length > 0 && (
-          <span className="text-tech-main/50 hidden shrink-0 text-xs sm:block">
-            {sectionCountLabel}
-          </span>
-        )}
-      </div>
-
-      {sections.length > 0 && (
-        <ol className="border-tech-main/20 mt-3 ml-2 flex flex-col border-l pl-6 sm:ml-3 sm:pl-9">
-          {sections.map((section, index) => (
-            <li key={section.id}>
-              <Link
-                href={articleUrl(section.slug)}
-                className="group/section text-tech-main hover:text-tech-main-dark flex items-baseline gap-3 py-1.5 transition-colors">
-                <span className="text-tech-main/50 shrink-0 font-mono text-xs">
-                  {formatSectionNumber(chapter, index + 1) ?? "·"}
-                </span>
-                <span className="text-sm sm:text-base">
-                  {section.title}
-                  {section.isAdvanced && (
-                    <span className="bg-tech-advanced ml-2 inline-block px-1 py-px align-middle font-mono text-[0.5625rem] font-bold tracking-wider text-white uppercase">
-                      ADV
-                    </span>
-                  )}
-                </span>
-                <span className="border-tech-main/25 mb-1 grow self-end border-b border-dotted" />
-                <span className="text-tech-main/0 group-hover/section:text-tech-main-dark shrink-0 font-mono text-xs transition-colors">
-                  →
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ol>
-      )}
+      <ChapterDisclosure
+        head={head}
+        panel={panel}
+        sectionCountLabel={sectionCountLabel}
+        expandLabel={expandLabel}
+        collapseLabel={collapseLabel}
+      />
     </li>
   )
 }
@@ -172,6 +193,8 @@ export async function TocSection({ tree, locale }: TocSectionProps) {
               sectionCountLabel={t("sectionCount", {
                 count: chapterSections(chapter).length,
               })}
+              expandLabel={t("expandSections", { title: chapter.title })}
+              collapseLabel={t("collapseSections", { title: chapter.title })}
             />
           ))}
 
@@ -190,6 +213,10 @@ export async function TocSection({ tree, locale }: TocSectionProps) {
                     chapter={chapter}
                     sectionCountLabel={t("sectionCount", {
                       count: chapterSections(chapter).length,
+                    })}
+                    expandLabel={t("expandSections", { title: chapter.title })}
+                    collapseLabel={t("collapseSections", {
+                      title: chapter.title,
                     })}
                   />
                 ))}

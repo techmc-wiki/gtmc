@@ -522,6 +522,8 @@
     "appendixHeading": "Appendices",
     "backMatterKicker": "Back matter",
     "continueReading": "Bookmark — continue reading",
+    "collapseSections": "Collapse sections in {title}",
+    "expandSections": "Expand sections in {title}",
     "contributeCardDesc": "Write a section, submit it for review, and see it published.",
     "contributeCardTitle": "Call for Contributions",
     "glossaryCardDesc": "The index of terms — technical Minecraft vocabulary in 12 languages.",

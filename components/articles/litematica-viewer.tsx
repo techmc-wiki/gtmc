@@ -846,7 +846,7 @@ function LitematicaLayerControls({
       }`}>
       <div className="mb-2 flex items-center justify-between border-b guide-line pb-1">
         <span className="text-[10px] font-bold tracking-widest uppercase">
-          SYS.LAYER_FILTER
+          {t("layerFilter")}
         </span>
         <IconButton label={t("resetLayers")} onClick={() => { onTargetLayerChange("all"); onSliderLayerChange(maxLayer) }}><RotateCcw aria-hidden /></IconButton>
       </div>

@@ -43,7 +43,6 @@ export function PdfCoverPreview({ filename }: { filename: string }) {
           </div>
         </ImagePeel>
       </Button>
-      <p className="text-tech-main/60 text-xs">{t("peelHint")}</p>
       {baseUrl ? (
         <Button asChild>
           <a href={`${baseUrl}/${filename}`} download>

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./overlay-transitions.css";
+@import "./transitions.css";
+@import "./homepage-transitions.css";
 
 /* MDX page content (content/**) must be scanned for utility classes. */
 @source "../content/**/*.mdx";

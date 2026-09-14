@@ -15,7 +15,14 @@ import {
   CommandItem,
 } from "@/components/ui/shadcn/command"
 import { IconButton } from "@/components/ui/icon-button"
-import { X } from "lucide-react"
+import { Button } from "@/components/ui/shadcn/button"
+import { Kbd, KbdGroup } from "@/components/ui/shadcn/kbd"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/shadcn/tooltip"
+import { ArrowDown, ArrowUp, CornerDownLeft, X } from "lucide-react"
 
 interface SearchResult {
   title: string
@@ -198,11 +205,16 @@ function useSearchCommand() {
     [query]
   )
 
-  // Platform-aware shortcut label
-  const shortcutLabel = useMemo(() => {
-    if (typeof navigator === "undefined") return "Ctrl+K"
-    return navigator.platform.toLowerCase().includes("mac") ? "⌘K" : "Ctrl+K"
+  // Platform detection for the search shortcut. The dialog renders only
+  // after mount (see SearchCommandLayout), so this never mismatches SSR.
+  const isMac = useMemo(() => {
+    if (typeof navigator === "undefined") return false
+    return navigator.platform.toLowerCase().includes("mac")
   }, [])
+
+  // Plain-text shortcut for string-only surfaces (aria-label,
+  // aria-keyshortcuts, title). Visible keys render as Kbd below.
+  const shortcutLabel = isMac ? "Command+K" : "Ctrl+K"
 
   return {
     closeModal,
@@ -212,6 +224,7 @@ function useSearchCommand() {
     inputRef,
     isLoading,
     isMounted,
+    isMac,
     isOpen,
     setIsOpen,
     navigateToGlossaryResult,
@@ -256,10 +269,28 @@ function SearchCommandDialog({ search }: { search: SearchCommandState }) {
         search.inputRef.current?.focus()
       }}
       trigger={
-        <IconButton
-          label={`${search.t("searchAriaLabel")} (${search.shortcutLabel})`}>
-          <SearchIcon aria-hidden className="size-4" />
-        </IconButton>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={`${search.t("searchAriaLabel")} (${search.shortcutLabel})`}
+              aria-keyshortcuts={search.shortcutLabel}
+              className="hover:bg-accent aria-pressed:bg-accent hover:no-underline">
+              <SearchIcon aria-hidden className="size-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <span className="inline-flex items-center gap-1.5">
+              <span>{search.t("searchAriaLabel")}</span>
+              <KbdGroup>
+                {search.isMac ? <Kbd>⌘</Kbd> : <Kbd>Ctrl</Kbd>}
+                <Kbd>K</Kbd>
+              </KbdGroup>
+            </span>
+          </TooltipContent>
+        </Tooltip>
       }
       title={search.t("searchAriaLabel")}
       description={search.t("placeholder")}
@@ -289,15 +320,25 @@ function SearchCommandDialog({ search }: { search: SearchCommandState }) {
       </div>
       <SearchCommandResults search={search} />
       <footer className="text-muted-foreground hidden items-center gap-4 border-t px-4 py-2 text-xs sm:flex">
-        <span>
-          <kbd className="kbd-badge">&#x2191;&#x2193;</kbd>{" "}
+        <span className="inline-flex items-center gap-1.5">
+          <KbdGroup>
+            <Kbd>
+              <ArrowUp aria-hidden="true" />
+            </Kbd>
+            <Kbd>
+              <ArrowDown aria-hidden="true" />
+            </Kbd>
+          </KbdGroup>{" "}
           {search.t("navigateHint")}
         </span>
-        <span>
-          <kbd className="kbd-badge">&#x23CE;</kbd> {search.t("openHint")}
+        <span className="inline-flex items-center gap-1.5">
+          <Kbd>
+            <CornerDownLeft aria-hidden="true" />
+          </Kbd>{" "}
+          {search.t("openHint")}
         </span>
-        <span>
-          <kbd className="kbd-badge">ESC</kbd> {search.t("dismissHint")}
+        <span className="inline-flex items-center gap-1.5">
+          <Kbd>ESC</Kbd> {search.t("dismissHint")}
         </span>
       </footer>
     </CommandDialog>

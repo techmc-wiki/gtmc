@@ -26,7 +26,7 @@ export function HomepageClient() {
     <div className="relative z-10 mx-auto flex min-h-full w-full max-w-7xl flex-col items-center justify-center px-4">
       <HeroCard />
 
-      <div className="animate-slide-up-fade fill-mode-forwards relative z-20 flex w-full max-w-48 flex-col items-stretch justify-center gap-5 opacity-0 [animation-delay:0.6s] motion-reduce:animate-none sm:w-full sm:max-w-full sm:flex-row sm:items-center">
+      <div className="relative z-20 flex w-full max-w-48 flex-col items-stretch justify-center gap-5 sm:w-full sm:max-w-full sm:flex-row sm:items-center">
         <Button
           asChild
           aria-disabled={isAccessingDatabase}
@@ -52,7 +52,7 @@ export function HomepageClient() {
 
       <a
         href="#contents"
-        className="group animate-fade-in fill-mode-forwards absolute inset-x-0 bottom-4 flex flex-col items-center gap-1.5 opacity-0 [animation-delay:1.8s] motion-reduce:animate-none motion-reduce:opacity-100">
+        className="group absolute inset-x-0 bottom-4 flex flex-col items-center gap-1.5">
         <span className="text-tech-main/60 group-hover:text-tech-main-dark font-mono text-[0.625rem] tracking-[0.25em] uppercase transition-colors">
           {t("scrollHint")}
         </span>

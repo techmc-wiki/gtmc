@@ -21,7 +21,7 @@ export function ContinueReading() {
   return (
     <Link
       href={articleUrl(bookmark.slug)}
-      className="group animate-fade-in fill-mode-forwards border-tech-main/40 bg-surface-overlay/80 hover:border-tech-main-dark relative mt-6 flex w-full max-w-md items-center gap-3 border px-4 py-3 opacity-0 backdrop-blur-sm transition-colors [animation-delay:1s] motion-reduce:animate-none motion-reduce:opacity-100">
+      className="group border-tech-main/40 bg-surface-overlay/80 hover:border-tech-main-dark relative mt-6 flex w-full max-w-md items-center gap-3 border px-4 py-3 backdrop-blur-sm transition-colors">
       <span className="bg-tech-signal absolute -top-px left-4 h-[3px] w-8" />
       <span className="flex min-w-0 grow flex-col gap-0.5">
         <span className="text-tech-main/60 font-mono text-[0.5625rem] tracking-[0.2em] uppercase">

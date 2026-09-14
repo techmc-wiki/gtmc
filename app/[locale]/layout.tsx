@@ -7,7 +7,7 @@ import "../globals.css"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { ClarityAnalytics } from "@/components/layout/clarity-analytics"
-import { ThemeProvider } from "@/lib/theme"
+import { ThemeProvider, ThemeScript } from "@/lib/theme"
 import {
   FooterProvider,
   FooterWrapper,
@@ -17,7 +17,6 @@ import { ScrollRoot } from "@/components/layout/navigation-effects"
 import { SpeculationRules } from "@/components/layout/speculation-rules"
 import { getSiteUrl } from "@/lib/site-url"
 import { buildOrganizationJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
-import { noFlashScript } from "@/lib/theme/no-flash-script"
 import { NextIntlClientProvider } from "next-intl"
 import { hasLocale } from "next-intl"
 import { setRequestLocale } from "next-intl/server"
@@ -27,7 +26,6 @@ import { routing } from "@/i18n/routing"
 import React from "react"
 
 const siteUrl = getSiteUrl()
-const noFlashHtml = { __html: noFlashScript }
 
 type AppLocale = (typeof routing.locales)[number]
 
@@ -174,7 +172,7 @@ export default async function RootLayout({
       data-scroll-behavior="smooth"
       suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={noFlashHtml} />
+        <ThemeScript />
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
       </head>
       <body className="bg-tech-bg/50 h-dvh w-full overflow-hidden antialiased">

@@ -1,4 +1,6 @@
-import React from "react"
+"use client"
+
+import { useServerInsertedHTML } from "next/navigation"
 
 /**
  * Speculation Rules API — progressive enhancement for cross-document prerender.
@@ -35,5 +37,12 @@ const RULES_JSON = JSON.stringify(SPECULATION_RULES)
 const RULES_HTML = { __html: RULES_JSON }
 
 export function SpeculationRules() {
-  return <script type="speculationrules" dangerouslySetInnerHTML={RULES_HTML} />
+  useServerInsertedHTML(() => (
+    <script
+      key="speculation-rules"
+      type="speculationrules"
+      dangerouslySetInnerHTML={RULES_HTML}
+    />
+  ))
+  return null
 }

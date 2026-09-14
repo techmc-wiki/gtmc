@@ -13,13 +13,14 @@ export function IconButton({
   label,
   className,
   children,
+  type,
   ...props
 }: React.ComponentProps<typeof Button> & { label: string }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
-          type="button"
+          type={props.asChild ? type : (type ?? "button")}
           variant="ghost"
           size="icon"
           aria-label={label}

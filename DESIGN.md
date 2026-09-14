@@ -65,9 +65,13 @@ consult `app/globals.css` and the shared components.
 - Use `aria-busy` for pending work, disabled semantics for blocked actions,
   and appropriate live regions for status. Reuse loading-shell primitives
   and `OperationProgress` instead of inventing spinners or progress treatments.
-- Prefer color transitions; reserve scale effects for hero/primary CTAs.
-  Reuse CSS animation tokens, avoid layout shifts, and honor reduced motion.
-  `motion/react` is unavailable; existing interactive effects use canvas or CSS.
+- Use the transitions.dev recipes in `app/transitions.css` for disclosures,
+  selection indicators, icon swaps, and loading reveals. Keep overlay motion
+  in `app/overlay-transitions.css`; its CSS animations preserve Radix exit
+  lifecycles. Hero tilt lives in `app/homepage-transitions.css`.
+- Keep recipe CSS and site-specific geometry overrides separate. Honor reduced
+  motion, avoid layout shifts, and show primary actions without entrance delays.
+  Prefer color transitions for hover feedback; do not add a motion library.
 - Keep decoration subordinate: dot grids, quiet rules, and interactive
   article-navigation brackets. No fake HUD readouts, watermarks, dimension
   marks, static corner brackets, heavy shadows, or ornamental noninteractive

@@ -3,11 +3,12 @@
 import * as React from "react"
 import { diffLines } from "diff"
 import { useDraftEditor } from "@/components/editor/use-draft-editor"
-import { DraftFileSourceDialog } from "@/components/editor/draft-file-source-dialog"
 import { DraftEditorToolbar } from "@/components/editor/draft-editor-toolbar"
 import { DraftFileNavigator } from "@/components/editor/draft-file-navigator"
+import { DraftEditorModeBar } from "@/components/editor/draft-editor-mode-bar"
 import { DraftEditorHeader } from "@/components/editor/draft-editor-header"
-import { DraftEditorReview } from "@/components/editor/draft-editor-review"
+import { DraftEditorInspector } from "@/components/editor/draft-editor-inspector"
+import { DraftFileDialogs } from "@/components/editor/draft-file-dialogs"
 import type {
   DraftChangeEntry,
   DraftDiffRow,
@@ -28,34 +29,10 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/shadcn/resizable"
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/shadcn/tabs"
-import { Button } from "@/components/ui/shadcn/button"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/shadcn/sheet"
-import {
-  PenLineIcon,
-  Columns2Icon,
-  EyeIcon,
-  GitPullRequestIcon,
-  BookOpenIcon,
-} from "lucide-react"
+import { Tabs, TabsContent } from "@/components/ui/shadcn/tabs"
+import { BookOpenIcon } from "lucide-react"
 import { cn } from "@/lib/cn"
 import { EditorIconButton } from "@/components/editor/editor-icon-button"
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/shadcn/tooltip"
 import styles from "@/components/editor/draft-editor.module.css"
 
 interface DraftEditorProps {
@@ -282,17 +259,6 @@ function DraftEditorSurface({
     actions.setActiveInfoTab(tab)
     setInspectorOpen(true)
   }
-  const submissionIssues = [
-    ...(!state.title.trim() ? [t("titleRequired")] : []),
-    ...(state.hasMissingFilePath ? [t("badgeAllFilesNeedPath")] : []),
-    ...(state.duplicateFilePaths.length
-      ? [
-          t("duplicatePathsError", {
-            paths: state.duplicateFilePaths.join(", "),
-          }),
-        ]
-      : []),
-  ]
 
   return (
     <div className="border-tech-main/25 bg-surface w-full min-w-0 border">
@@ -343,39 +309,9 @@ function DraftEditorSurface({
         className="min-w-0">
         <DraftFileNavigator
           headerActions={
-            <>
-              <TabsList aria-label={t("editorModeAria")} className="gap-0">
-                {[
-                  { value: "write", label: t("writeTab"), icon: PenLineIcon },
-                  {
-                    value: "split",
-                    label: t("splitView"),
-                    icon: Columns2Icon,
-                  },
-                  { value: "preview", label: t("previewTab"), icon: EyeIcon },
-                ].map(({ value, label, icon: Icon }) => (
-                  <Tooltip key={value}>
-                    <TooltipTrigger asChild>
-                      <TabsTrigger
-                        value={value}
-                        aria-label={label}
-                        className={cn(
-                          "size-11 border-0 bg-transparent p-0 shadow-none data-[state=active]:bg-tech-main/10 data-[state=active]:text-tech-main-dark data-[state=active]:shadow-[inset_0_-2px_0_var(--color-tech-signal)]",
-                          value === "split" && "hidden md:flex"
-                        )}>
-                        <Icon aria-hidden className="size-4" />
-                      </TabsTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>{label}</TooltipContent>
-                  </Tooltip>
-                ))}
-              </TabsList>
-              <EditorIconButton
-                label={t("reviewChanges")}
-                onClick={() => openInspector("changes")}>
-                <GitPullRequestIcon aria-hidden />
-              </EditorIconButton>
-            </>
+            <DraftEditorModeBar
+              onOpenChanges={() => openInspector("changes")}
+            />
           }
           onRenameFile={(path) => {
             const normalized = normalizeDraftFilePath(path)
@@ -526,82 +462,24 @@ function DraftEditorSurface({
           </div>
         </DraftFileNavigator>
       </Tabs>
-      <Sheet open={inspectorOpen} onOpenChange={setInspectorOpen}>
-        <SheetContent className="bg-surface-modal w-full gap-0 overflow-hidden p-0 sm:max-w-3xl">
-          <SheetHeader className="border-tech-main/20 border-b p-5 pr-12">
-            <SheetTitle>
-              {state.activeInfoTab === "changes"
-                ? t("reviewAndSubmit")
-                : t("writingGuide")}
-            </SheetTitle>
-            <SheetDescription>
-              {state.activeInfoTab === "changes"
-                ? t("reviewDescription")
-                : t("guideDescription")}
-            </SheetDescription>
-          </SheetHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            {state.activeInfoTab === "guide" && (
-              <section className="border-tech-main/20 space-y-2 border-b p-5 text-sm leading-relaxed">
-                <h3 className="font-semibold">{t("syntaxHintsTitle")}</h3>
-                <p>{t("syntaxHintsDescription")}</p>
-                <p>{t("syntaxHintsShortcut")}</p>
-              </section>
-            )}
-            <DraftEditorReview
-              activeTab={state.activeInfoTab}
-              changeEntries={changeEntries}
-              contributingGuides={state.contributingGuides}
-              folders={state.draftCollection.folders}
-              selectedGuideId={state.activeGuideId}
-              onSelectTab={actions.setActiveInfoTab}
-              onSelectGuide={actions.setActiveGuideId}
-            />
-            {state.activeInfoTab === "changes" && !state.isReadOnly && (
-              <section
-                aria-label={t("submissionLicenseAria")}
-                className="border-tech-main/20 space-y-2 border-t p-5 text-sm leading-relaxed">
-                <h3 className="font-semibold">{t("submissionLicenseTitle")}</h3>
-                <p>{t("submissionLicenseIntro")}</p>
-                <p>
-                  {t("submissionLicenseReusePrefix")}{" "}
-                  <a
-                    className="underline underline-offset-4"
-                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    CC BY-NC-SA 4.0
-                  </a>
-                  {t("submissionLicenseReuseSuffix")}
-                </p>
-                <p>{t("submissionLicenseAttribution")}</p>
-              </section>
-            )}
-          </div>
-          {state.activeInfoTab === "changes" && !state.isReadOnly && (
-            <div className="border-tech-main/25 space-y-3 border-t p-5">
-              {submissionIssues.length > 0 && (
-                <ul className="list-disc space-y-1 pl-4 text-sm text-amber-800 dark:text-amber-300">
-                  {submissionIssues.map((issue) => (
-                    <li key={issue}>{issue}</li>
-                  ))}
-                </ul>
-              )}
-              <p className="text-tech-main text-xs">
-                {t("submitSavesChanges")}
-              </p>
-              <Button
-                className="w-full"
-                onClick={actions.handleSubmitDraft}
-                disabled={state.submitDisabled}
-                aria-busy={state.isSubmitting}>
-                <GitPullRequestIcon aria-hidden className="size-4" />
-                {state.isSubmitting ? progressT("submitBusy") : t("openPr")}
-              </Button>
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
+      <DraftEditorInspector
+        open={inspectorOpen}
+        onOpenChange={setInspectorOpen}
+        activeTab={state.activeInfoTab}
+        onSelectTab={actions.setActiveInfoTab}
+        changeEntries={changeEntries}
+        contributingGuides={state.contributingGuides}
+        folders={state.draftCollection.folders}
+        selectedGuideId={state.activeGuideId}
+        onSelectGuide={actions.setActiveGuideId}
+        isReadOnly={state.isReadOnly}
+        title={state.title}
+        hasMissingFilePath={state.hasMissingFilePath}
+        duplicateFilePaths={state.duplicateFilePaths}
+        isSubmitting={state.isSubmitting}
+        submitDisabled={state.submitDisabled}
+        onSubmit={actions.handleSubmitDraft}
+      />
       {!state.isReadOnly && (
         <div className="px-4">
           <DraftEditorStatusPanels
@@ -612,39 +490,19 @@ function DraftEditorSurface({
           />
         </div>
       )}
-      <DraftFileSourceDialog
-        key={
-          state.fileDialogIntent
-            ? `${state.fileDialogIntent.kind}:${state.fileDialogIntent.initialMode}:${getParentFolderPath(state.activeFile.filePath)}`
-            : "closed:file-dialog"
-        }
-        description={
-          state.fileDialogIntent?.kind === "replace"
-            ? t("replaceFileWarning")
-            : undefined
-        }
-        isOpen={state.fileDialogIntent !== null}
-        initialFolderPath={getParentFolderPath(state.activeFile.filePath)}
-        initialMode={state.fileDialogIntent?.initialMode}
-        onClose={() => actions.setFileDialogIntent(null)}
-        onCreate={(input) => {
+      <DraftFileDialogs
+        activeFilePath={state.activeFile.filePath}
+        fileDialogIntent={state.fileDialogIntent}
+        insertDialogOpen={state.insertDialogIntent}
+        onCloseFileDialog={() => actions.setFileDialogIntent(null)}
+        onCloseInsertDialog={() => actions.setInsertDialogIntent(false)}
+        onCreateFile={(input) => {
           const applied = handleApplyDraftFileSource(input)
           if (applied) setMode("write")
           return applied
         }}
         onCreateFolder={handleCreateFolder}
-      />
-      <DraftFileSourceDialog
-        key={
-          state.insertDialogIntent
-            ? `insert:${getParentFolderPath(state.activeFile.filePath)}`
-            : "closed:insert-dialog"
-        }
-        isOpen={state.insertDialogIntent}
-        initialFolderPath={getParentFolderPath(state.activeFile.filePath)}
-        initialMode="repo"
-        onClose={() => actions.setInsertDialogIntent(false)}
-        onCreate={handleInsertSelectedFile}
+        onInsertFile={handleInsertSelectedFile}
       />
     </div>
   )
@@ -683,12 +541,6 @@ function DraftEditorStatusPanels({
       />
     </>
   )
-}
-
-function getParentFolderPath(filePath: string) {
-  const normalized = normalizeDraftFilePath(filePath)
-  const lastSlashIndex = normalized.lastIndexOf("/")
-  return lastSlashIndex >= 0 ? normalized.slice(0, lastSlashIndex) : ""
 }
 
 function buildDiffRows(previousContent: string, nextContent: string) {

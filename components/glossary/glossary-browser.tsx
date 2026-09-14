@@ -233,7 +233,7 @@ export function GlossaryBrowser({
               totalCount={totalCount}
               className="min-w-0 sm:flex-1"
             />
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <ColumnPicker
                 locale={locale}
                 visibleColumns={visibleColumns}

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { guardUser } from "@/lib/auth/guards"
 import { redirect } from "next/navigation"
 import { Button } from "@/components/ui/shadcn/button"
+import { Badge } from "@/components/ui/shadcn/badge"
 import { Input } from "@/components/ui/shadcn/input"
 import {
   Avatar,
@@ -172,15 +173,9 @@ function EmailLabel({
 }) {
   return (
     <span className="flex items-center gap-2">
-      {label}{" "}
-      <span className="border-tech-main/30 bg-tech-main/5 text-tech-main/60 border px-1 text-[0.5rem] sm:text-[0.5625rem]">
-        {readOnlyBadge}
-      </span>
-      {isPrivate && (
-        <span className="border border-amber-400/60 bg-amber-50 px-1 text-[0.5rem] text-amber-600 sm:text-[0.5625rem]">
-          {privateBadge}
-        </span>
-      )}
+      {label}
+      <Badge variant="neutral">{readOnlyBadge}</Badge>
+      {isPrivate && <Badge variant="pending">{privateBadge}</Badge>}
     </span>
   )
 }
@@ -188,7 +183,7 @@ function EmailLabel({
 function RoleValue({ role }: { role: string }) {
   return (
     <span className="text-tech-main-dark font-mono text-xs font-bold tracking-widest uppercase sm:text-sm">
-      [{role}]
+      {role}
     </span>
   )
 }

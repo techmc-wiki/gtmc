@@ -1,6 +1,8 @@
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
+import { Asterisk } from "lucide-react"
 import { cn } from "@/lib/cn"
 import {
   getGlossaryContent,
@@ -48,6 +50,7 @@ export function GlossaryCard({
   className?: string
 }) {
   const primaryContent = getPrimaryGlossaryContent(entry, locale)
+  const t = useTranslations("Glossary")
 
   return (
     <article
@@ -72,9 +75,10 @@ export function GlossaryCard({
           {primaryContent.value}
           {entry.isControversial && (
             <span
-              aria-label="controversial"
+              title={t("controversialBadge")}
               className="text-tech-main/40 ml-1 select-none">
-              *
+              <Asterisk aria-hidden="true" className="size-3" />
+              <span className="sr-only">{t("controversialBadge")}</span>
             </span>
           )}
         </a>
@@ -183,6 +187,7 @@ export function GlossaryTableRow({
     isReady && "transition-[padding] duration-300 ease-out"
   )
 
+  const t = useTranslations("Glossary")
   const primaryContent = getPrimaryGlossaryContent(entry, locale)
 
   return (
@@ -205,11 +210,7 @@ export function GlossaryTableRow({
             <td
               key={column}
               className={cn(cellClass, "text-tech-main/80 max-w-[24rem]")}>
-              {value ? (
-                <span className="line-clamp-2">{value}</span>
-              ) : (
-                <span className="text-tech-main/30 font-mono text-xs">-</span>
-              )}
+              {value ? <span className="line-clamp-2">{value}</span> : null}
             </td>
           )
         }
@@ -230,10 +231,10 @@ export function GlossaryTableRow({
                 </a>
                 {entry.isControversial && (
                   <span
-                    aria-label="controversial"
-                    title="controversial"
-                    className="text-tech-main/40 ml-1 font-mono text-xs select-none">
-                    *
+                    title={t("controversialBadge")}
+                    className="text-tech-main/40 ml-1 select-none">
+                    <Asterisk aria-hidden="true" className="size-3" />
+                    <span className="sr-only">{t("controversialBadge")}</span>
                   </span>
                 )}
               </td>
@@ -291,9 +292,7 @@ export function GlossaryTableRow({
               <td key={column} className={cellClass}>
                 {entry.relatedTerms.length > 0 ? (
                   <CrossRefChips related={entry.relatedTerms} mode="index" />
-                ) : (
-                  <span className="text-tech-main/30 font-mono text-xs">-</span>
-                )}
+                ) : null}
               </td>
             )
 

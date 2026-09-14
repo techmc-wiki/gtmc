@@ -14,7 +14,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/shadcn/collapsible"
-import { ChevronDownIcon } from "lucide-react"
+import { ChevronDownIcon, Ellipsis, Minus, Plus } from "lucide-react"
 import type { DraftFileRecord } from "@/lib/drafts/files"
 
 export interface DraftDiffRow {
@@ -222,7 +222,7 @@ function ChangePreviewCard({
             {rows.map((row) => (
               <div
                 key={`${filePath}:${row.oldLine ?? "x"}:${row.newLine ?? "x"}:${row.type}`}
-                className={`grid grid-cols-[3rem_3rem_minmax(0,1fr)] px-2 py-1 ${
+                className={`grid grid-cols-[1rem_3rem_3rem_minmax(0,1fr)] px-2 py-1 ${
                   row.type === "add"
                     ? "bg-emerald-500/10 text-emerald-200"
                     : row.type === "remove"
@@ -231,12 +231,24 @@ function ChangePreviewCard({
                         ? "bg-slate-800/70 text-slate-400"
                         : "text-slate-300"
                 }`}>
+                <span className="flex items-center">
+                  {row.type === "add" ? (
+                    <Plus aria-hidden="true" className="size-3" />
+                  ) : row.type === "remove" ? (
+                    <Minus aria-hidden="true" className="size-3" />
+                  ) : null}
+                </span>
                 <span className="text-slate-500">{row.oldLine ?? ""}</span>
                 <span className="text-slate-500">{row.newLine ?? ""}</span>
                 <span className="break-all whitespace-pre-wrap">
-                  {row.type === "skipped"
-                    ? `… ${t("diffSkipped", { count: row.skippedLines ?? 0 })}`
-                    : row.value || " "}
+                  {row.type === "skipped" ? (
+                    <span className="flex items-center gap-1.5">
+                      <Ellipsis aria-hidden="true" className="size-3" />
+                      {t("diffSkipped", { count: row.skippedLines ?? 0 })}
+                    </span>
+                  ) : (
+                    row.value || " "
+                  )}
                 </span>
               </div>
             ))}

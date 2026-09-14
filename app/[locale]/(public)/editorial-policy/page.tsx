@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { PageHeader, SectionTitle } from "@/components/ui/headings"
+import { Separator } from "@/components/ui/shadcn/separator"
 import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
 import { buildWebPageJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
 
@@ -64,19 +65,19 @@ export default async function EditorialPolicyPage({
 
       <aside className="border-tech-main/20 text-tech-main mt-8 border-l-2 px-4 text-xs/relaxed">
         <p>{t("sourceNote")}</p>
-        <p className="mt-1 font-mono tracking-wider uppercase">
+        <p className="mt-1 flex flex-wrap items-center gap-x-2 font-mono tracking-wider uppercase">
           <a
             href="https://github.com/techmc-wiki/Articles/blob/main/CONTRIBUTING.md"
             className="hover:text-tech-main-dark underline">
             {t("sourceContributing")}
           </a>
-          {" / "}
+          <Separator orientation="vertical" className="bg-tech-main/25 h-3" />
           <a
             href="https://github.com/techmc-wiki/Articles/blob/main/REVIEWERS.md"
             className="hover:text-tech-main-dark underline">
             {t("sourceReviewers")}
           </a>
-          {" / "}
+          <Separator orientation="vertical" className="bg-tech-main/25 h-3" />
           <a
             href="https://github.com/techmc-wiki/Articles/blob/main/CODE_OF_CONDUCT.zh.md"
             className="hover:text-tech-main-dark underline">

@@ -1,6 +1,6 @@
 "use client"
 
-import { X } from "lucide-react"
+import { ChevronRight, X } from "lucide-react"
 import { IconButton } from "@/components/ui/icon-button"
 
 import * as React from "react"
@@ -552,9 +552,7 @@ function TreeNodeToggle({
   const t = useTranslations("DraftFiles")
   if (!node.isFolder) {
     return (
-      <span className="text-tech-main/20 inline-flex size-11 shrink-0 items-center justify-center font-mono text-[0.625rem]">
-        -
-      </span>
+      <span className="inline-flex size-11 shrink-0 items-center justify-center" />
     )
   }
 
@@ -568,8 +566,12 @@ function TreeNodeToggle({
           ? t("collapseFolder", { name: node.title })
           : t("expandFolder", { name: node.title })
       }
-      className="text-tech-main/50 hover:text-tech-main flex size-11 shrink-0 items-center justify-center font-mono text-[0.625rem] transition-colors">
-      <span aria-hidden="true">{isExpanded ? "▼" : "▶"}</span>
+      className="text-tech-main/50 hover:text-tech-main group flex size-11 shrink-0 items-center justify-center transition-colors">
+      <span
+        aria-hidden="true"
+        className="inline-flex transition-transform group-aria-expanded:rotate-90 motion-reduce:transition-none">
+        <ChevronRight aria-hidden="true" className="size-4" />
+      </span>
     </button>
   )
 }

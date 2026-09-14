@@ -14,6 +14,7 @@ import {
   CommandList,
   CommandItem,
 } from "@/components/ui/shadcn/command"
+import { Separator } from "@/components/ui/shadcn/separator"
 import { Input } from "@/components/ui/shadcn/input"
 import type { GlossarySummaryEntry } from "@/lib/glossary/manifest"
 import { cn } from "@/lib/cn"
@@ -112,12 +113,17 @@ export function GlossaryRowPicker({
                       <div className="text-foreground text-sm font-medium">
                         {entry.fullFormEn}
                       </div>
-                      <div className="text-muted-foreground mt-0.5 text-xs">
-                        {entry.shortForm}
-                        {entry.shortForm && entry.categories.length > 0
-                          ? ", "
-                          : ""}
-                        {entry.categories.join("; ")}
+                      <div className="text-muted-foreground mt-0.5 flex items-center gap-1.5 text-xs">
+                        {entry.shortForm && <span>{entry.shortForm}</span>}
+                        {entry.shortForm && entry.categories.length > 0 && (
+                          <Separator
+                            orientation="vertical"
+                            className="bg-muted-foreground/40 h-3"
+                          />
+                        )}
+                        {entry.categories.length > 0 && (
+                          <span>{entry.categories.join("; ")}</span>
+                        )}
                       </div>
                     </div>
                   </CommandItem>

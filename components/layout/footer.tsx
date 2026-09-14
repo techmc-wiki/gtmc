@@ -1,4 +1,5 @@
 import { Suspense, type ReactNode } from "react"
+import { ArrowRight } from "lucide-react"
 import { getLocale, getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { Logo } from "@/components/ui/logo"
@@ -90,7 +91,7 @@ export default async function Footer() {
     ? (revisedDateFormatters[locale] ?? revisedDateFormatters.en).format(
         new Date(stats.lastRevision)
       )
-    : "-"
+    : null
   const buildSha = process.env.NEXT_PUBLIC_BUILD_SHA
 
   // The index groups the community, contribution, and source destinations;
@@ -165,9 +166,9 @@ export default async function Footer() {
             <p className="mt-4">
               <Link
                 href={articleUrl("preface")}
-                className="footer-link text-tech-main-dark text-sm font-medium">
+                className="footer-link text-tech-main-dark inline-flex items-center gap-1 text-sm font-medium">
                 {t("linkPreface")}
-                <span aria-hidden="true"> →</span>
+                <ArrowRight aria-hidden="true" className="size-4" />
               </Link>
             </p>
           </div>
@@ -180,7 +181,9 @@ export default async function Footer() {
                 value={stats.articleCount}
               />
               <RecordRow term={t("recordAuthors")} value={stats.authorCount} />
-              <RecordRow term={t("recordRevised")} value={revised} />
+              {revised ? (
+                <RecordRow term={t("recordRevised")} value={revised} />
+              ) : null}
             </dl>
           </div>
         </div>
@@ -214,13 +217,12 @@ export default async function Footer() {
             </p>
           </div>
           <div className="flex flex-col items-start gap-3 md:items-end">
-            <p className="text-tech-main/70 text-xs">
-              {t("copyright", { start: startYear, year: currentYear })}
+            <p className="text-tech-main/70 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+              <span>
+                {t("copyright", { start: startYear, year: currentYear })}
+              </span>
               {buildSha ? (
-                <span className="text-tech-main/40 font-mono">
-                  {" "}
-                  ({buildSha})
-                </span>
+                <span className="text-tech-main/40 font-mono">{buildSha}</span>
               ) : null}
             </p>
             <Suspense fallback={null}>

@@ -1,4 +1,4 @@
-import { MoreHorizontal } from "lucide-react"
+import { ArrowRight, ArrowUpRight, MoreHorizontal } from "lucide-react"
 import { IconButton } from "@/components/ui/icon-button"
 import type { Metadata } from "next"
 import type { GlossaryRevision, Revision } from "@prisma/client"
@@ -118,8 +118,9 @@ function DraftRecord({
               href={prUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-tech-main hover:text-tech-main-dark focus-visible:outline-tech-main font-mono text-[0.6875rem] tracking-wider uppercase underline decoration-1 underline-offset-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2">
-              {prLabel} <span aria-hidden="true">↗</span>
+              className="text-tech-main hover:text-tech-main-dark focus-visible:outline-tech-main inline-flex items-center gap-1 font-mono text-[0.6875rem] tracking-wider uppercase underline decoration-1 underline-offset-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2">
+              {prLabel}
+              <ArrowUpRight aria-hidden="true" className="size-3.5" />
             </a>
           ) : null}
         </div>
@@ -138,7 +139,7 @@ function DraftRecord({
           className="w-full justify-between sm:w-auto">
           <Link href={href}>
             <span>{actionLabel}</span>
-            <span aria-hidden="true">→</span>
+            <ArrowRight aria-hidden="true" />
           </Link>
         </Button>
         {deleteAction ? (
@@ -368,7 +369,7 @@ export default async function DraftDashboardPage({
               <Button asChild className="w-full justify-between">
                 <Link href="/draft/new">
                   <span>{t("newArticle")}</span>
-                  <span aria-hidden="true">→</span>
+                  <ArrowRight aria-hidden="true" />
                 </Link>
               </Button>
               <Button
@@ -377,7 +378,7 @@ export default async function DraftDashboardPage({
                 className="w-full justify-between">
                 <Link href="/glossary/edit/new">
                   <span>{t("newGlossary")}</span>
-                  <span aria-hidden="true">→</span>
+                  <ArrowRight aria-hidden="true" />
                 </Link>
               </Button>
             </div>

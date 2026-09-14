@@ -6,6 +6,7 @@ import { ScanEye, LogOut, RotateCcw, Layers, Square, Check } from "lucide-react"
 
 import { useEffect, useRef, useState, useMemo, type MouseEvent } from "react"
 import { useTheme } from "@/lib/theme"
+import { Separator } from "@/components/ui/shadcn/separator"
 
 const layerSliderStyleHtml = {
   __html: `
@@ -923,7 +924,12 @@ function LitematicaControlsHint({
 }
 
 function LitematicaControlDivider() {
-  return <span className="flex items-center gap-1.5 opacity-60">|</span>
+  return (
+    <Separator
+      orientation="vertical"
+      className="bg-tech-main/30 h-3 opacity-60"
+    />
+  )
 }
 
 function LitematicaControlKey({

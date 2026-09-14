@@ -3,6 +3,8 @@
 import { ChevronDown } from "lucide-react"
 import { CopyButton } from "@/components/ui/copy-button"
 import { IconButton } from "@/components/ui/icon-button"
+import { Badge } from "@/components/ui/shadcn/badge"
+import { Separator } from "@/components/ui/shadcn/separator"
 import {
   Avatar,
   AvatarFallback,
@@ -303,18 +305,29 @@ export function ArticleMetadataFull({
                 {author}
               </Link>
               {coAuthors.length > 0 && (
-                <span className="text-tech-main/50">+{coAuthors.length}</span>
+                <Badge variant="ghost" className="px-0 text-tech-main/50">
+                  +{coAuthors.length}
+                </Badge>
               )}
             </span>
-            <span aria-hidden="true" className="text-tech-main/35">
-              |
-            </span>
+            <Separator
+              orientation="vertical"
+              className="bg-tech-main/35 h-3"
+            />
             <span>
-              {wordCount.toLocaleString()} / {readingTime} {t("minuteUnit")}
+              {t("wordCount")} {wordCount.toLocaleString()}
             </span>
-            <span aria-hidden="true" className="text-tech-main/35">
-              |
+            <Separator
+              orientation="vertical"
+              className="bg-tech-main/35 h-3"
+            />
+            <span>
+              {t("estReadTime")} {readingTime} {t("minuteUnit")}
             </span>
+            <Separator
+              orientation="vertical"
+              className="bg-tech-main/35 h-3"
+            />
             <span>
               {t("lastEdited")} {lastEditedLabel}
             </span>

@@ -45,7 +45,7 @@ export async function generateMetadata({
           url: "/opengraph-image",
           width: 1200,
           height: 630,
-          alt: "Graduate Texts in Minecraft (Offline PDF)",
+          alt: "Graduate Texts in Minecraft, available as an offline PDF",
         },
       ],
     },

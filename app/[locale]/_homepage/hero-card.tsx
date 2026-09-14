@@ -1,13 +1,21 @@
 "use client"
 
-import { useCallback, useRef } from "react"
+import { Fragment, useCallback, useRef } from "react"
 import { useTranslations } from "next-intl"
 
 import { QqIcon } from "@/components/ui/icons"
 import { Button } from "@/components/ui/shadcn/button"
+import { Separator } from "@/components/ui/shadcn/separator"
 
 // Restrained peak tilt at the card edges; the live demo goes far higher.
 const TILT_MAX_DEG = 4
+
+/**
+ * The three parts of the book, in reading order. Sentence case in the DOM
+ * (the row is uppercased by CSS so screen readers do not spell the words
+ * out); hardcoded English pending catalog keys, see the migration report.
+ */
+const BOOK_CATEGORIES = ["Tutorials", "Explanations", "Code analysis"] as const
 
 export function HeroCard() {
   const t = useTranslations("Homepage")
@@ -109,19 +117,19 @@ export function HeroCard() {
                   {t("slogan")}
                 </span>
 
-                <span className="text-tech-main font-mono text-[0.5625rem] tracking-wider sm:text-xs">
-                  <span className="sm:hidden">
-                    -&gt; TUTORIALS
-                    <br />
-                    -&gt; EXPLANATIONS
-                    <br />
-                    -&gt; CODE ANALYSIS
-                  </span>
-                  <span className="hidden sm:inline">
-                    &gt;&gt; TUTORIALS&ensp;|&ensp;EXPLANATIONS&ensp;|&ensp;CODE
-                    ANALYSIS
-                  </span>
-                </span>
+                <div className="text-tech-main flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs tracking-wider uppercase sm:text-sm">
+                  {BOOK_CATEGORIES.map((category, index) => (
+                    <Fragment key={category}>
+                      {index > 0 && (
+                        <Separator
+                          orientation="vertical"
+                          className="bg-tech-main/30 h-3"
+                        />
+                      )}
+                      <span>{category}</span>
+                    </Fragment>
+                  ))}
+                </div>
               </div>
             </div>
             <Button

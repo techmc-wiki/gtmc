@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
+import { ArrowRight } from "lucide-react"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Button } from "@/components/ui/shadcn/button"
 import { Link } from "@/i18n/navigation"
@@ -37,7 +38,7 @@ function EditTermCta({ locale, slug }: { locale: string; slug: string }) {
           href={`/glossary/edit/new?prefill=${encodeURIComponent(slug)}`}
           locale={locale as "en" | "zh"}>
           <span>{t("detailEditCta")}</span>
-          <span aria-hidden="true">-&gt;</span>
+          <ArrowRight aria-hidden="true" />
         </Link>
       </Button>
     </div>

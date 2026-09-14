@@ -53,7 +53,6 @@
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "7.9.1",
     "@supabase/supabase-js": "^2.116.0",
-    "@tanstack/react-virtual": "^3.14.12",
     "@uiw/react-codemirror": "^4.25.11",
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "2.4.0",

@@ -126,7 +126,7 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
     return () => {
       observer.disconnect()
     }
-  }, [])
+  }, [availableLetters])
 
   React.useEffect(() => {
     const el = scrollRef.current

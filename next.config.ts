@@ -60,7 +60,6 @@ const nextConfig: NextConfig = {
       "@codemirror/commands",
       "@codemirror/autocomplete",
       "next-intl",
-      "@tanstack/react-virtual",
       "zod",
       "diff",
     ],

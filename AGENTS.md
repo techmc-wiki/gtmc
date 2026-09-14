@@ -79,27 +79,31 @@ Before declaring any build-affecting change complete, run `pnpm check && pnpm te
 
 ### Publishing GitHub releases
 
-Release tags use the `vX.Y.Z` format (semver) and are published from the `dev` branch. The target commit must already be present on the remote `dev` branch; agents must not push or pull, so stop for a user-managed push when the local branch is ahead. Before publishing, inspect the commits since the previous release, pick the next version (`feat` → minor, `fix`/`perf` → patch, breaking → major), and confirm the worktree is clean. Match the existing release-note style: `Features:` and optional `Dev:` headings, numbered lists under each. Keep `Dev` selective: developer workflow, CI/CD, or release process only.
+Release tags use the `vX.Y.Z` format (semver) and are published from the `dev` branch. The target commit must already be present on the remote `dev` branch; agents must not push or pull, so stop for a user-managed push when the local branch is ahead. Before publishing, inspect the commits since the previous release, pick the next version (`feat` → minor, `fix`/`perf` → patch, breaking → major), and confirm the worktree is clean.
 
-Bump `version` in `package.json` to that version — bare semver, no `v` prefix — in its own commit created before the tag exists, so the tag points at a commit that already declares the released version; that commit must be on remote `dev` (user-managed push) before the release is created. A bump never touches `pnpm-lock.yaml`, so commit the manifest alone and never regenerate dependencies for it.
+1. Bump `version` in `package.json` to the new version — bare semver, no `v` prefix — in its own commit. A bump never touches `pnpm-lock.yaml`, so stage the manifest alone and never regenerate dependencies for it.
 
-```bash
-git add package.json
-git commit -m "chore: bump package version to vX.Y.Z"
-```
+   ```bash
+   git add package.json
+   git commit -m "chore: bump package version to vX.Y.Z"
+   ```
 
-```bash
-gh auth status
-gh release create vX.Y.Z \
-  --repo techmc-wiki/gtmc \
-  --target dev \
-  --title vX.Y.Z \
-  --notes $'Features:\n\n1. Describe the user-facing change\n\nDev:\n\n1. Describe the developer-facing change'
-gh release view vX.Y.Z --repo techmc-wiki/gtmc
-gh api repos/techmc-wiki/gtmc/commits/vX.Y.Z --jq .sha # must print the bump commit
-```
+2. Tag that same commit and push the tag. `-m ""` makes an empty-message annotated tag (signed, per `tag.gpgSign`) without opening an editor.
 
-Use `--verify-tag` only when the tag already exists remotely, and only if it already points at the version-bump commit — otherwise that release would announce a version the repository does not declare. Verify the release is neither a draft nor a prerelease and that it appears in `gh release list` after publishing.
+   ```bash
+   git tag -m "" vX.Y.Z
+   git push origin vX.Y.Z
+   ```
+
+3. Once the release appears on GitHub with an empty message, edit it to match the existing style: `Features:` and optional `Dev:` headings, numbered lists under each. Keep `Dev` selective: developer workflow, CI/CD, or release process only.
+
+   ```bash
+   gh release edit vX.Y.Z \
+     --repo techmc-wiki/gtmc \
+     --notes $'Features:\n\n1. Describe the user-facing change\n\nDev:\n\n1. Describe the developer-facing change'
+   ```
+
+Tags are never re-pointed at an already-published release. Verify the release is neither a draft nor a prerelease and that it appears in `gh release list` after publishing.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

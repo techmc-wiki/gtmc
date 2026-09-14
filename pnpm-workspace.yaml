@@ -1,3 +1,5 @@
+minimumReleaseAge: 10080
+trustPolicy: no-downgrade
 allowBuilds:
   "@ladybugdb/core": true
   "@parcel/watcher": true

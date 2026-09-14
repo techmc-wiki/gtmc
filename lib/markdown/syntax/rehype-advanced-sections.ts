@@ -21,11 +21,14 @@ function isAdvancedHeading(node: ElementContent): node is Element {
 }
 
 function wrapAdvancedSections(children: ElementContent[]) {
-  const sections: Array<{ start: number; endExclusive: number }> = []
+  const result: ElementContent[] = []
 
   for (let i = 0; i < children.length; i++) {
     const node = children[i]
-    if (!isAdvancedHeading(node)) continue
+    if (!isAdvancedHeading(node)) {
+      result.push(node)
+      continue
+    }
 
     const sectionDepth = getHeadingDepth(node)
     if (sectionDepth === null) continue
@@ -40,26 +43,22 @@ function wrapAdvancedSections(children: ElementContent[]) {
       }
     }
 
-    sections.push({ start: i, endExclusive })
-  }
-
-  for (let i = sections.length - 1; i >= 0; i--) {
-    const section = sections[i]
-    const wrappedNodes = children.slice(section.start, section.endExclusive)
-
-    const wrapper: Element = {
+    result.push({
       type: "element",
       tagName: "div",
-      properties: { "data-advanced-section": "true" },
-      children: wrappedNodes,
-    }
+      properties: {
+        "data-advanced-section": "true",
+        "data-advanced-heading": node.properties.id,
+      },
+      children: children.slice(i, endExclusive),
+    })
 
-    children.splice(
-      section.start,
-      section.endExclusive - section.start,
-      wrapper
-    )
+    // A deeper advanced heading already belongs to this deep dive. Consuming
+    // the range once preserves sibling boundaries and avoids nested chrome.
+    i = endExclusive - 1
   }
+
+  children.splice(0, children.length, ...result)
 }
 
 export function rehypeAdvancedSections() {

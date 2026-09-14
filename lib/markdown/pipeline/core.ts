@@ -70,9 +70,9 @@ export function buildRehypePlugins(
     rehypeRaw,
     [rehypeCodeProvenance, { references: options.codeReferences }],
     rehypeMermaid,
+    rehypeSlug,
     rehypeAdvancedSections,
     rehypeLinkedCode,
-    rehypeSlug,
   ]
 
   if (options.shikiPlugin) {

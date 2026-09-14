@@ -75,17 +75,11 @@ function resolveActiveHref(pathname: string, navLinks: NavLink[]) {
   return matches.toSorted((a, b) => b.href.length - a.href.length)[0].href
 }
 
-/**
- * Desktop navigation links as a segmented control with a sliding active chip,
- * adapted from the @coss registry segmented-control pattern and squared to
- * GTMC geometry. One absolutely-positioned ink chip measures and animates to
- * the active link, magnetically following hover/focus previews. Vanilla CSS
- * transforms only; honors prefers-reduced-motion.
- */
+/** Desktop links with the transitions.dev sliding selection indicator. */
 export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
   const pathname = usePathname()
   const listRef = React.useRef<HTMLUListElement>(null)
-  const chipRef = React.useRef<HTMLSpanElement>(null)
+  const chipRef = React.useRef<HTMLLIElement>(null)
   const [previewKey, setPreviewKey] = React.useState<string | null>(null)
   // Delayed release: on leave, the chip lingers briefly so quick diagonal
   // mouse paths across the bar don't flash it away and back.
@@ -118,6 +112,7 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
   React.useEffect(() => clearRelease, [])
 
   const [resizeTick, setResizeTick] = React.useState(0)
+  const lastResizeTick = React.useRef(resizeTick)
 
   React.useEffect(() => {
     const list = listRef.current
@@ -135,7 +130,7 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
     }
   }, [])
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     const chipEl = chipRef.current
     const listEl = listRef.current
     if (!chipEl || !listEl) return
@@ -158,13 +153,17 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
     const linkRect = link.getBoundingClientRect()
     const left = linkRect.left - listRect.left + listEl.scrollLeft
     const width = linkRect.width
-    // Place instantly on (re)entry so the chip never glides from stale
-    // coordinates; subsequent moves between links keep their transition.
-    chipEl.style.transitionDuration = "0s"
-    chipEl.style.left = `${left}px`
+    const animate =
+      chipEl.style.visibility === "visible" &&
+      lastResizeTick.current === resizeTick
+    lastResizeTick.current = resizeTick
+    if (!animate) chipEl.style.transition = "none"
+    chipEl.style.transform = `translateX(${left}px)`
     chipEl.style.width = `${width}px`
-    void chipEl.offsetWidth
-    chipEl.style.transitionDuration = ""
+    if (!animate) {
+      void chipEl.offsetWidth
+      chipEl.style.transition = ""
+    }
     chipEl.style.visibility = "visible"
   }, [chipKey, resizeTick])
 
@@ -172,13 +171,14 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
 
   return (
     <ul ref={listRef} className="relative hidden items-center gap-1 xl:flex">
-      <span
+      <li
         ref={chipRef}
         aria-hidden="true"
-        className={`bg-tech-main-dark pointer-events-none invisible absolute top-1/2 z-0 h-full -translate-y-1/2 border shadow-sm transition-[left,width] duration-300 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
+        data-slot="navigation-indicator"
+        className={`t-tabs-pill invisible list-none border ${
           chipIsHome
-            ? "border-tech-main-dark"
-            : "border-tech-main/40 bg-tech-accent"
+            ? "border-tech-main-dark [--tabs-pill-bg:var(--color-tech-main-dark)]"
+            : "border-tech-main/40 [--tabs-pill-bg:var(--color-tech-accent)]"
         }`}
       />
 
@@ -197,9 +197,9 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
               onBlur={() => scheduleRelease()}
               onMouseLeave={() => scheduleRelease()}
               className={`focus-visible:outline-tech-main flex h-11 items-center rounded-none border border-transparent px-3 text-sm font-medium whitespace-nowrap transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-[-2px] ${
-                isChipTarget
+                isChipTarget && chipIsHome
                   ? "text-tech-signal-ink font-bold"
-                  : isActive
+                  : isChipTarget || isActive
                     ? "text-tech-main-dark font-bold"
                     : "text-tech-main hover:text-tech-main-dark"
               }`}>

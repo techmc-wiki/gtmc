@@ -758,6 +758,16 @@ code[class^="language-"] {
     margin-top: 0;
   }
 
+  /* The section header already separates the deep dive from what precedes it,
+   * so the body's own leading margin would only widen that gap. */
+  .advanced-section-body > :first-child {
+    margin-top: 0;
+  }
+
+  .advanced-section-body > :last-child {
+    margin-bottom: 0;
+  }
+
   .article-prose h1,
   .article-prose h2,
   .article-prose h3 {

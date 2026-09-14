@@ -1,20 +1,75 @@
+import { useId, type ReactNode } from "react"
+import { ArrowDown } from "lucide-react"
+import { useTranslations } from "next-intl"
+
+import { Button } from "@/components/ui/shadcn/button"
+import { AdvancedMarker } from "@/components/articles/advanced-marker"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
+
+/**
+ * A deep dive. The reader meets it mid-article, so the header carries the same
+ * mark the outline and contents use, then says what the section adds and offers
+ * the way past — one line, three pieces of information, no badge, no second row.
+ */
+function AdvancedSection({
+  children,
+  headingId,
+}: {
+  children: ReactNode
+  headingId?: string
+}) {
+  const t = useTranslations("AdvancedReading")
+  const fallbackId = useId()
+  const endId = `advanced-end-${headingId ?? fallbackId}`
+
+  return (
+    <section
+      data-advanced-section="true"
+      aria-labelledby={headingId}
+      aria-label={headingId ? undefined : t("sectionLabel")}
+      className="advanced-section border-tech-advanced/40 my-10 min-w-0 border-l-2 py-1 pl-4 sm:pl-6">
+      <div className="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span className="text-tech-main flex flex-wrap items-center gap-x-1.5 text-xs font-medium">
+          <AdvancedMarker decorative className="mr-0.5" />
+          <span className="text-tech-advanced">{t("label")}</span>
+          <span>{t("optional")}</span>
+        </span>
+        <Button
+          asChild
+          variant="ghost"
+          size="xs"
+          className="text-tech-main -my-2 min-h-11 shrink-0 sm:min-h-0">
+          <a href={`#${encodeURIComponent(endId)}`}>
+            {t("skipSection")}
+            <ArrowDown aria-hidden="true" />
+          </a>
+        </Button>
+      </div>
+      <div className="advanced-section-body min-w-0">{children}</div>
+      <span id={endId} tabIndex={-1} className="sr-only">
+        {t("sectionEnd")}
+      </span>
+    </section>
+  )
+}
 
 export function AdvancedSectionDivComponent({
   children,
   "data-advanced-section": dataAdvancedSection,
+  "data-advanced-heading": dataAdvancedHeading,
+  node: _node,
   ...rest
 }: MarkdownComponentProps) {
   if (dataAdvancedSection === "true") {
     return (
-      <div className="group relative my-8" {...rest}>
-        <div className="bg-tech-advanced/65 absolute top-0 left-[calc(100%+1.5rem)] z-10 flex h-full w-3.5 -translate-x-1/2 items-start justify-center rounded-sm pt-6 sm:left-[calc(100%+2rem)]">
-          <span className="font-mono text-[0.625rem] leading-none font-bold tracking-[0.3em] text-white select-none [writing-mode:vertical-rl]">
-            ADVANCED
-          </span>
-        </div>
-        <div className="relative z-0 w-full">{children}</div>
-      </div>
+      <AdvancedSection
+        headingId={
+          typeof dataAdvancedHeading === "string"
+            ? dataAdvancedHeading
+            : undefined
+        }>
+        {children}
+      </AdvancedSection>
     )
   }
   return <div {...rest}>{children}</div>

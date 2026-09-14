@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-import { SkeletonExitWrapper } from "@/components/ui/loading-shell-primitives"
 
 type PageSkeletonProps = {
   label: string
@@ -13,7 +12,7 @@ export function PageSkeleton({
   framed = false,
 }: PageSkeletonProps) {
   return (
-    <SkeletonExitWrapper>
+    <div>
       <div
         className={
           framed
@@ -26,6 +25,6 @@ export function PageSkeleton({
         <span className="sr-only">{label}</span>
         {framed ? <div aria-hidden="true">{children}</div> : children}
       </div>
-    </SkeletonExitWrapper>
+    </div>
   )
 }

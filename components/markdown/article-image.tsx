@@ -21,14 +21,18 @@ export function ArticleImage({ src, alt }: ArticleImageProps) {
     setStatus("error")
   }, [])
 
+  const isRevealed = status === "loaded"
+
   return (
-    <div className="relative my-8 aspect-video max-w-full">
+    <div
+      data-state={status}
+      className={`t-skel article-image-skel relative my-8 aspect-video max-w-full ${
+        isRevealed ? "is-revealed" : ""
+      }`}>
       <div
-        className={`border-tech-main/30 bg-tech-main/5 absolute inset-0 z-10 flex flex-col border p-1 shadow-sm ${
-          status === "loaded"
-            ? `animate-skeleton-exit motion-reduce:animate-fade-out pointer-events-none opacity-0`
-            : ""
-        } `}
+        className={`t-skel-skeleton border-tech-main/30 bg-tech-main/5 pointer-events-none absolute inset-0 z-10 flex flex-col border p-1 shadow-sm ${
+          status === "loading" ? "is-pulsing" : ""
+        }`}
         aria-hidden="true">
         <div className="bg-tech-accent/10 relative flex size-full flex-1 items-center justify-center overflow-hidden">
           <div className="border-tech-main/30 absolute top-0 left-0 size-2 border-t-2 border-l-2" />
@@ -39,28 +43,22 @@ export function ArticleImage({ src, alt }: ArticleImageProps) {
           <span className="text-tech-main/40 relative z-10 text-[0.5625rem] tracking-widest uppercase select-none">
             {status === "error" ? "// LOAD_FAIL" : "// IMG_LOAD"}
           </span>
-
-          {status === "loading" && (
-            <div className="animate-blueprint-sweep via-tech-accent/30 absolute inset-0 bg-linear-to-r from-transparent to-transparent motion-reduce:animate-none" />
-          )}
         </div>
       </div>
 
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 900px"
-        loading="lazy"
-        onLoad={handleLoad}
-        onError={handleError}
-        className={`border-tech-main/30 bg-tech-main/5 border object-contain p-1 shadow-sm ${
-          status === "loaded"
-            ? `animate-fade-in motion-reduce:animate-none`
-            : "opacity-0"
-        } `}
-        unoptimized={src.includes("/api/assets")}
-      />
+      <div className="t-skel-content">
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 900px"
+          loading="lazy"
+          onLoad={handleLoad}
+          onError={handleError}
+          className="border-tech-main/30 bg-tech-main/5 border object-contain p-1 shadow-sm"
+          unoptimized={src.includes("/api/assets")}
+        />
+      </div>
     </div>
   )
 }

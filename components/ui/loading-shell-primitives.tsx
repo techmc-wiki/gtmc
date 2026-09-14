@@ -77,24 +77,3 @@ export function SegmentedBar({
     />
   )
 }
-
-export function SkeletonExitWrapper({
-  isExiting = false,
-  className,
-  ref,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement> & {
-  isExiting?: boolean
-  ref?: React.Ref<HTMLDivElement>
-}) {
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        isExiting && "animate-skeleton-exit motion-reduce:animate-fade-out",
-        className
-      )}
-      {...props}
-    />
-  )
-}

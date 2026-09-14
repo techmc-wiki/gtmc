@@ -100,8 +100,14 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     resolveAlias: {
-      "../extensions/extensions.json":
-        "./lib/schematic-renderer/extensions.json",
+      // nucleation's Node<22 fallback imports `fs`, which breaks the browser
+      // bundle; the real `fs` module is kept for server bundles.
+      fs: {
+        browser: "./lib/nucleation/fs-browser-stub.mjs",
+      },
+      "node:fs": {
+        browser: "./lib/nucleation/fs-browser-stub.mjs",
+      },
     },
   },
   async headers() {

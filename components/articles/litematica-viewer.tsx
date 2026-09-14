@@ -1,12 +1,146 @@
 "use client"
 
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react"
 import { useTranslations } from "next-intl"
-import { IconButton } from "@/components/ui/icon-button"
+import * as THREE from "three"
+import { OrbitControls } from "three/addons/controls/OrbitControls.js"
+import { PointerLockControls } from "three/addons/controls/PointerLockControls.js"
 import { ScanEye, LogOut, RotateCcw, Layers, Square, Check } from "lucide-react"
-
-import { useEffect, useRef, useState, useMemo, type MouseEvent } from "react"
-import { useTheme } from "@/lib/theme"
+import { IconButton } from "@/components/ui/icon-button"
 import { Separator } from "@/components/ui/shadcn/separator"
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js"
+import { useTheme } from "@/lib/theme"
+import { loadSchematicByFileName } from "@/lib/schematic/formats"
+import { getSharedResourcePack } from "@/lib/schematic/pack"
+import type * as Nucleation from "nucleation"
+
+type NucleationModule = typeof Nucleation
+type Schematic = InstanceType<NucleationModule["Schematic"]>
+type ResourcePack = InstanceType<NucleationModule["ResourcePack"]>
+
+const MOVE_SPEED = 16
+const SPRINT_MULTIPLIER = 2.4
+const POINTER_LOCK_COOLDOWN_MS = 350
+
+interface Bounds {
+  minX: number
+  minY: number
+  minZ: number
+  maxX: number
+  maxY: number
+  maxZ: number
+}
+
+type LayerRange =
+  | { mode: "all" }
+  | { mode: "below"; y: number }
+  | { mode: "single"; y: number }
+
+type LoadError = "TOO_DETAILED" | "FAILED"
+
+export interface LitematicaViewerProps {
+  url: string
+  height?: string | number
+}
+
+function b64ToBytes(b64: string): Uint8Array {
+  const bin = atob(b64)
+  const bytes = new Uint8Array(bin.length)
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
+  return bytes
+}
+
+function parseGlb(bytes: Uint8Array): Promise<THREE.Group> {
+  const { promise, resolve, reject } = Promise.withResolvers<THREE.Group>()
+  // GLTFLoader.parse wants a standalone ArrayBuffer; copy so the loader
+  // never reads outside the byte range it owns.
+  const buffer = new ArrayBuffer(bytes.byteLength)
+  new Uint8Array(buffer).set(bytes)
+  new GLTFLoader().parse(
+    buffer,
+    "",
+    (gltf) => resolve(gltf.scene),
+    (err) => reject(err instanceof Error ? err : new Error(String(err)))
+  )
+  return promise
+}
+
+/**
+ * Mesh a schematic, optionally bounded to a layer range. `all` meshes the
+ * source directly; ranges copy a bounded region into a fresh schematic and
+ * mesh that, so the source stays cached for later layer changes.
+ *
+ * Meshing is synchronous; mesher exhaustion (very complex schematics)
+ * surfaces as a WASM trap, not a regular Error — callers must catch
+ * everything and treat it as "too detailed". See the LitematicaQL findings.
+ */
+function meshSchematic(
+  nuc: NucleationModule,
+  source: Schematic,
+  pack: ResourcePack,
+  range: LayerRange,
+  tight: { x: number; y: number; z: number }
+): { glb: Uint8Array; bounds: Bounds; triangles: number } {
+  let target = source
+  if (range.mode !== "all") {
+    target = nuc.Schematic.create("slice")
+    const minY = range.mode === "single" ? range.y : 0
+    const maxY = range.y
+    target.copyRegion(source, 0, minY, 0, tight.x - 1, maxY, tight.z - 1, 0, 0, 0, "[]")
+  }
+  const result = nuc.MeshResult.create(target, pack, nuc.MeshConfig.create())
+  const b = result.bounds()
+  return {
+    glb: b64ToBytes(result.glbDataB64()),
+    bounds: { minX: b.minX, minY: b.minY, minZ: b.minZ, maxX: b.maxX, maxY: b.maxY, maxZ: b.maxZ },
+    triangles: result.triangleCount(),
+  }
+}
+
+function disposeGroup(group: THREE.Object3D) {
+  group.traverse((obj) => {
+    if (obj instanceof THREE.Mesh) {
+      obj.geometry.dispose()
+      const materials = Array.isArray(obj.material) ? obj.material : [obj.material]
+      for (const material of materials) {
+        material.map?.dispose()
+        material.dispose()
+      }
+    }
+  })
+}
+
+function swapMeshGroup(scene: THREE.Scene, next: THREE.Group) {
+  // Iterate backwards: children are removed while traversing.
+  for (let i = scene.children.length - 1; i >= 0; i--) {
+    const child = scene.children[i]
+    if (child?.userData.meshGroup) {
+      scene.remove(child)
+      disposeGroup(child)
+    }
+  }
+  next.userData.meshGroup = true
+  scene.add(next)
+}
+
+function normalizeUrlInput(input: string) {
+  let value = input
+    .replaceAll(/\r?\n/g, "")
+    .trim()
+    .replaceAll(/^['"]|['"]$/g, "")
+
+  for (let i = 0; i < 2; i++) {
+    try {
+      const decoded = decodeURIComponent(value)
+      if (decoded === value) break
+      value = decoded
+    } catch {
+      break
+    }
+  }
+
+  return value
+}
 
 const layerSliderStyleHtml = {
   __html: `
@@ -36,200 +170,23 @@ const layerSliderStyleHtml = {
   `,
 }
 
-// Interfaces for schematic-renderer library
-interface SchematicManager {
-  getFirstSchematic?: () => { id: string }
-  getSchematic?: (id: string) => unknown
-  getMaxSchematicDimensions?: () => { x: number; y: number; z: number }
-  loadSchematic?: (name: string, buffer: ArrayBuffer) => Promise<void>
-}
-
-interface UIManager {
-  showFPVOverlay?: () => void
-  fpvOverlay?: HTMLElement
-}
-
-interface CanvasWithPatch extends HTMLCanvasElement {
-  __gtmcPointerCapturePatched?: boolean
-}
-
-interface FlyControls {
-  setOverlayVisible?: () => void
-  overlayElement?: HTMLElement
-  __gtmcSafeLockPatched?: boolean
-  lock?: () => void
-  enabled?: boolean
-  isLocked?: boolean
-  getPointerLockControls?: () => { domElement?: HTMLElement }
-}
-
-interface CameraManager {
-  flyControls?: FlyControls
-  isFlyControlsLocked?: () => boolean
-  isFlyControlsEnabled?: () => boolean
-  disableFlyControls?: () => void
-  enableFlyControls?: () => void
-  stopAnimation?: () => void
-  stopAutoOrbit?: () => void
-  setAutoOrbitAfterZoom?: (value: boolean) => void
-  setZoomInOnLoad?: (value: boolean) => void
-  setFlyControlsSettings?: (settings: unknown) => void
-  focusOnSchematic?: (opts: { animationDuration: number; skipPathFitting: boolean }) => Promise<void>
-}
-
-interface LitematicaRenderer {
-  getLoadedSchematics?: () => string[]
-  schematicManager?: SchematicManager
-  uiManager?: UIManager
-  cameraManager?: CameraManager
-  dispose?: () => void
-  enabled?: boolean
-  isLocked?: boolean
-  flyControls?: FlyControls
-  isFlyControlsLocked?: () => boolean
-  resetRenderingBounds?: (schematicId: string, all: boolean) => void
-  setRenderingBounds?: (
-    schematicId: string,
-    min: [number, number, number],
-    max: [number, number, number],
-    all: boolean
-  ) => void
-  renderManager?: { render?: () => void }
-  targetFPS?: number
-  idleFPS?: number
-  enableAdaptiveFPS?: boolean
-  setBackgroundColor?: (color: string | number) => void
-}
-
-export interface LitematicaViewerProps {
-  url: string
-  height?: string | number
-}
-
-function suppressNativeFpOverlays(instance: LitematicaRenderer) {
-  const ui = instance?.uiManager
-  const cm = instance?.cameraManager
-
-  try {
-    if (ui) {
-      ui.showFPVOverlay = () => {}
-      if (ui.fpvOverlay) {
-        ui.fpvOverlay.style.setProperty("display", "none", "important")
-        ui.fpvOverlay.style.setProperty("pointer-events", "none", "important")
-        ui.fpvOverlay.style.setProperty("opacity", "0", "important")
-      }
-    }
-
-    if (cm?.flyControls) {
-      cm.flyControls.setOverlayVisible = () => {}
-      if (cm.flyControls.overlayElement) {
-        cm.flyControls.overlayElement.style.setProperty(
-          "display",
-          "none",
-          "important"
-        )
-        cm.flyControls.overlayElement.style.setProperty(
-          "pointer-events",
-          "none",
-          "important"
-        )
-        cm.flyControls.overlayElement.style.setProperty("opacity", "0", "important")
-      }
-    }
-  } catch {
-    // Keep rendering resilient even if internals change.
-  }
-}
-
-function normalizeUrlInput(input: string) {
-  let value = input
-    .replaceAll(/\r?\n/g, "")
-    .trim()
-    .replaceAll(/^['"]|['"]$/g, "")
-
-  for (let i = 0; i < 2; i++) {
-    try {
-      const decoded = decodeURIComponent(value)
-      if (decoded === value) break
-      value = decoded
-    } catch {
-      break
-    }
-  }
-
-  return value
-}
-
-/* eslint-disable no-underscore-dangle */
-function patchCanvasPointerCapture(canvas: CanvasWithPatch) {
-  if (canvas.__gtmcPointerCapturePatched) return
-
-  const canvasAny = canvas as unknown as CanvasWithPatch & Record<string, unknown>
-  const originalSetPointerCapture =
-    typeof canvas.setPointerCapture === "function"
-      ? canvas.setPointerCapture.bind(canvas)
-      : null
-  const originalReleasePointerCapture =
-    typeof canvas.releasePointerCapture === "function"
-      ? canvas.releasePointerCapture.bind(canvas)
-      : null
-
-  if (originalSetPointerCapture) {
-    canvasAny.setPointerCapture = (pointerId: number) => {
-      try {
-        originalSetPointerCapture(pointerId)
-      } catch {
-        // Ignore invalid pointer capture states from transient pointer lifecycle races.
-      }
-    }
-  }
-
-  if (originalReleasePointerCapture) {
-    canvasAny.releasePointerCapture = (pointerId: number) => {
-      try {
-        originalReleasePointerCapture(pointerId)
-      } catch {
-        // Ignore invalid pointer release states for symmetry with setPointerCapture.
-      }
-    }
-  }
-
-  canvasAny.__gtmcOriginalSetPointerCapture = originalSetPointerCapture
-  canvasAny.__gtmcOriginalReleasePointerCapture = originalReleasePointerCapture
-  canvasAny.__gtmcPointerCapturePatched = true
-}
-
-function restoreCanvasPointerCapture(canvas: CanvasWithPatch | null) {
-  if (!canvas) return
-  if (!canvas.__gtmcPointerCapturePatched) return
-
-  const canvasAny = canvas as unknown as CanvasWithPatch & Record<string, unknown>
-  if ((canvas as CanvasWithPatch & { __gtmcOriginalSetPointerCapture?: unknown })
-    .__gtmcOriginalSetPointerCapture) {
-    canvas.setPointerCapture = (canvas as CanvasWithPatch & { __gtmcOriginalSetPointerCapture?: typeof canvas.setPointerCapture })
-      .__gtmcOriginalSetPointerCapture!
-  }
-  if (canvasAny.__gtmcOriginalReleasePointerCapture) {
-    canvas.releasePointerCapture = canvasAny.__gtmcOriginalReleasePointerCapture as typeof canvas.releasePointerCapture
-  }
-
-  delete canvasAny.__gtmcOriginalSetPointerCapture
-  delete canvasAny.__gtmcOriginalReleasePointerCapture
-  delete canvasAny.__gtmcPointerCapturePatched
-}
-/* eslint-enable no-underscore-dangle */
-
-function useLitematicaViewer({
-  url,
-  height = 400,
-}: LitematicaViewerProps) {
-  const ACTIVE_TARGET_FPS = 60
-  const IDLE_TARGET_FPS = 24
-  const canvasRef = useRef<CanvasWithPatch | null>(null)
-  const rendererRef = useRef<LitematicaRenderer | null>(null)
-  const schematicIdRef = useRef<string | null>(null)
+function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
+  const sceneRef = useRef<THREE.Scene | null>(null)
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
+  const orbitRef = useRef<OrbitControls | null>(null)
+  const flyRef = useRef<PointerLockControls | null>(null)
+  const nucRef = useRef<NucleationModule | null>(null)
+  const schematicRef = useRef<Schematic | null>(null)
+  const packRef = useRef<ResourcePack | null>(null)
+  const tightRef = useRef({ x: 1, y: 1, z: 1 })
   const loadTokenRef = useRef(0)
-  const lastPointerUnlockAtRef = useRef(Number.NEGATIVE_INFINITY)
+  const remeshTokenRef = useRef(0)
+  const needsRenderRef = useRef(true)
+  const lastUnlockAtRef = useRef(Number.NEGATIVE_INFINITY)
+  const isFlyEnabledRef = useRef(false)
+  const lastFrameTimeRef = useRef(0)
 
   const { resolvedTheme } = useTheme()
   const backgroundColor = resolvedTheme === "dark" ? 0x101826 : 0xf5f4ef
@@ -243,6 +200,7 @@ function useLitematicaViewer({
   const [targetLayer, setTargetLayer] = useState<number | "all">("all")
   const [layerMode, setLayerMode] = useState<"single" | "below">("below")
   const [schematicReady, setSchematicReady] = useState(false)
+  const [loadError, setLoadError] = useState<LoadError | null>(null)
   const [isFlyMode, setIsFlyMode] = useState(false)
   const [isFlyEnabled, setIsFlyEnabled] = useState(false)
   const [prevUrl, setPrevUrl] = useState(url)
@@ -254,432 +212,380 @@ function useLitematicaViewer({
     setPrevUrl(url)
     setSchematicReady(false)
     setTargetLayer("all")
+    setLoadError(null)
     setIsFlyMode(false)
     setIsFlyEnabled(false)
   }
 
-  // Clear the loaded-schematic id when the url changes. Refs must not be
-  // written during render, so this runs after commit; the load effect below
-  // is declared later and only reads the id asynchronously after this runs.
-  useEffect(() => {
-    schematicIdRef.current = null
-  }, [url])
+  const toggleFlyMode = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
 
-  const POINTER_LOCK_COOLDOWN_MS = 350
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-  const resolveLoadedSchematicId = (renderer: LitematicaRenderer) => {
-    const loadedSchematics = renderer?.getLoadedSchematics?.()
-
-    if (Array.isArray(loadedSchematics) && loadedSchematics.length > 0) {
-      if (
-        schematicIdRef.current &&
-        loadedSchematics.includes(schematicIdRef.current)
-      ) {
-        return schematicIdRef.current
-      }
-
-      return loadedSchematics[0]
+    if (isFlyEnabledRef.current) {
+      isFlyEnabledRef.current = false
+      setIsFlyEnabled(false)
+      if (document.pointerLockElement === canvas) document.exitPointerLock()
+      lastUnlockAtRef.current = performance.now()
+      return
     }
 
-    return renderer?.schematicManager?.getFirstSchematic?.()?.id ?? null
-  }
+    isFlyEnabledRef.current = true
+    setIsFlyEnabled(true)
 
-  const patchFlyLockWithCooldown = (cameraManager: CameraManager) => {
-    const flyControls = cameraManager?.flyControls
-    if (!flyControls) return
-    // eslint-disable-next-line no-underscore-dangle
-    if (flyControls.__gtmcSafeLockPatched) return
+    const elapsedSinceUnlock = performance.now() - lastUnlockAtRef.current
+    if (elapsedSinceUnlock < POINTER_LOCK_COOLDOWN_MS) return
 
-    const originalLock =
-      typeof flyControls.lock === "function" ? flyControls.lock.bind(flyControls) : null
-    if (!originalLock) return
-
-    const pointerLockControls = flyControls.getPointerLockControls?.()
-    const pointerLockElement = pointerLockControls?.domElement || canvasRef.current
-
-    flyControls.lock = () => {
-      if (!flyControls.enabled || flyControls.isLocked) return
-
-      if (document.pointerLockElement === canvasRef.current) return
-
-      const elapsedSinceUnlock = performance.now() - lastPointerUnlockAtRef.current
-      if (elapsedSinceUnlock < POINTER_LOCK_COOLDOWN_MS) {
-        return
-      }
-
-      try {
-        if (
-          pointerLockElement &&
-          typeof pointerLockElement.requestPointerLock === "function"
-        ) {
-          const lockResult = pointerLockElement.requestPointerLock()
-
-          if (lockResult && typeof lockResult.catch === "function") {
-            lockResult.catch(() => {
-              // Swallow rejected pointer lock promises; state is handled by events.
-            })
-          }
-
-          return
-        }
-
-        originalLock()
-      } catch {
-        // Ignore lock failures; pointerlockerror handler updates UI state.
-      }
+    const lockResult = canvas.requestPointerLock()
+    if (lockResult && typeof lockResult.catch === "function") {
+      lockResult.catch(() => {
+        // Swallow rejected pointer lock promises; state is handled by events.
+      })
     }
+  }, [])
 
-    // eslint-disable-next-line no-underscore-dangle
-    flyControls.__gtmcSafeLockPatched = true
-  }
-
+  // Engine lifecycle: renderer, scene, camera, controls, render loop.
+  // Runs once per mount; the load effect below swaps scene contents per url.
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    patchCanvasPointerCapture(canvas)
 
+    // three's OrbitControls calls setPointerCapture unguarded (r184,
+    // OrbitControls.js:1550); a pointercancel race makes the pointerId
+    // inactive and the throw would abort its own drag setup mid-handler.
+    const originalSetPointerCapture = canvas.setPointerCapture.bind(canvas)
+    canvas.setPointerCapture = (pointerId: number) => {
+      try {
+        originalSetPointerCapture(pointerId)
+      } catch {
+        // Transient pointer lifecycle race; next pointerdown re-captures.
+      }
+    }
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
+    const flyKeys = new Set<string>()
+    renderer.setSize(canvas.clientWidth || 300, canvas.clientHeight || 400, false)
+
+    const scene = new THREE.Scene()
+    scene.background = new THREE.Color(backgroundColorRef.current)
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x22262e, 1.1))
+    const sun = new THREE.DirectionalLight(0xffffff, 1.4)
+    sun.position.set(1, 1.6, 0.8)
+    scene.add(sun)
+
+    const camera = new THREE.PerspectiveCamera(
+      50,
+      (canvas.clientWidth || 300) / (canvas.clientHeight || 400),
+      0.1,
+      10000
+    )
+    camera.position.set(10, 10, 10)
+
+    const orbit = new OrbitControls(camera, canvas)
+    orbit.enableDamping = true
+
+    const fly = new PointerLockControls(camera, canvas)
+    fly.addEventListener("lock", () => setIsFlyMode(true))
+    fly.addEventListener("unlock", () => {
+      lastUnlockAtRef.current = performance.now()
+      setIsFlyMode(false)
+    })
+
+    rendererRef.current = renderer
+    sceneRef.current = scene
+    cameraRef.current = camera
+    orbitRef.current = orbit
+    flyRef.current = fly
+    needsRenderRef.current = true
+
+    const resizeObserver = new ResizeObserver(() => {
+      const width = canvas.clientWidth
+      const heightPx = canvas.clientHeight
+      if (width === 0 || heightPx === 0) return
+      renderer.setSize(width, heightPx, false)
+      camera.aspect = width / heightPx
+      camera.updateProjectionMatrix()
+      needsRenderRef.current = true
+    })
+    resizeObserver.observe(canvas)
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!isFlyEnabledRef.current) return
+      if (event.code === "Space") event.preventDefault()
+      flyKeys.add(event.code)
+    }
+    const onKeyUp = (event: KeyboardEvent) => {
+      flyKeys.delete(event.code)
+    }
+    const onClick = () => {
+      if (!isFlyEnabledRef.current) return
+      if (document.pointerLockElement === canvas) return
+      const elapsedSinceUnlock = performance.now() - lastUnlockAtRef.current
+      if (elapsedSinceUnlock < POINTER_LOCK_COOLDOWN_MS) return
+      const lockResult = canvas.requestPointerLock()
+      if (lockResult && typeof lockResult.catch === "function") {
+        lockResult.catch(() => {
+          // Pointer lock failures are surfaced by the unlock state instead.
+        })
+      }
+    }
+    document.addEventListener("keydown", onKeyDown)
+    document.addEventListener("keyup", onKeyUp)
+    canvas.addEventListener("click", onClick)
+
+    let frameHandle = 0
+    const loop = (timeMs: number) => {
+      frameHandle = requestAnimationFrame(loop)
+      const dt = Math.min((timeMs - lastFrameTimeRef.current) / 1000, 0.1)
+      lastFrameTimeRef.current = timeMs
+
+      let dirty = needsRenderRef.current
+
+      if (isFlyEnabledRef.current && fly.isLocked && dt > 0) {
+        const sprint = flyKeys.has("ShiftLeft") ? SPRINT_MULTIPLIER : 1
+        const distance = MOVE_SPEED * sprint * dt
+        const forward = flyKeys.has("KeyW") ? 1 : flyKeys.has("KeyS") ? -1 : 0
+        const right = flyKeys.has("KeyD") ? 1 : flyKeys.has("KeyA") ? -1 : 0
+        const up = flyKeys.has("Space") ? 1 : flyKeys.has("KeyC") ? -1 : 0
+        if (forward !== 0) fly.moveForward(forward * distance)
+        if (right !== 0) fly.moveRight(right * distance)
+        if (up !== 0) {
+          camera.position.y += up * distance
+          dirty = true
+        }
+        if (forward !== 0 || right !== 0) dirty = true
+      }
+
+      const orbitMoved = orbit.update()
+      if (orbitMoved || dirty) {
+        renderer.render(scene, camera)
+        needsRenderRef.current = false
+      }
+    }
+    frameHandle = requestAnimationFrame(loop)
+
+    return () => {
+      cancelAnimationFrame(frameHandle)
+      resizeObserver.disconnect()
+      document.removeEventListener("keydown", onKeyDown)
+      document.removeEventListener("keyup", onKeyUp)
+      canvas.removeEventListener("click", onClick)
+      flyKeys.clear()
+      fly.dispose()
+      orbit.dispose()
+      disposeGroup(scene)
+      renderer.dispose()
+      rendererRef.current = null
+      sceneRef.current = null
+      cameraRef.current = null
+      orbitRef.current = null
+      flyRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    const scene = sceneRef.current
+    if (!scene) return
+    scene.background = new THREE.Color(backgroundColor)
+    needsRenderRef.current = true
+  }, [backgroundColor])
+
+  // Schematic load: fetch → parse → pack → mesh → GLB → scene.
+  // Dynamic import is load-bearing: the 16.9 MB wasm must stay in a lazy
+  // chunk, and this is the only engine entry point.
+  useEffect(() => {
     const loadToken = ++loadTokenRef.current
-    let isActive = true
-    const schematicRequestController = new AbortController()
-
-    const isCurrentLoad = () => isActive && loadToken === loadTokenRef.current
+    const isCurrentLoad = () => loadToken === loadTokenRef.current
+    const controller = new AbortController()
 
     const cleanUrl = normalizeUrlInput(url)
-    let renderer: LitematicaRenderer | null = null
-
     const proxyUrl = `/api/litematica-download?${new URLSearchParams({
       url: cleanUrl,
       ts: String(Date.now()),
     }).toString()}`
 
-    const initRenderer = async () => {
+    const run = async () => {
+      setSchematicReady(false)
+      setLoadError(null)
+
+      let nuc: NucleationModule
       try {
-        const mod = await import("schematic-renderer") as unknown as {
-          SchematicRenderer?: new (canvas: HTMLCanvasElement, opts: unknown, fetchFn: unknown, config: unknown) => LitematicaRenderer
-          default?: { SchematicRenderer?: new (canvas: HTMLCanvasElement, opts: unknown, fetchFn: unknown, config: unknown) => LitematicaRenderer }
+        nuc = await import("nucleation")
+      } catch (error) {
+        console.error("Error importing nucleation:", error)
+        setLoadError("FAILED")
+        return
+      }
+      if (!isCurrentLoad()) return
+      nucRef.current = nuc
+
+      let arrayBuffer: ArrayBuffer
+      try {
+        const response = await fetch(proxyUrl, {
+          cache: "no-store",
+          signal: controller.signal,
+        })
+        if (!response.ok) {
+          throw new Error(`Failed to fetch schematic: ${response.status}`)
         }
-        const SR =
-          typeof mod.SchematicRenderer === "function"
-            ? mod.SchematicRenderer
-            : typeof mod.default === "function"
-              ? mod.default
-              : mod.default?.SchematicRenderer
+        arrayBuffer = await response.arrayBuffer()
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return
+        console.error("Error fetching schematic:", error)
+        setLoadError("FAILED")
+        return
+      }
+      if (!isCurrentLoad()) return
 
-        if (!SR) {
-          throw new Error("SchematicRenderer constructor not found in module exports")
-        }
+      const fileName = cleanUrl.split("/").pop() || "schematic.litematic"
+      const bytes = new Uint8Array(arrayBuffer)
 
-        renderer = new SR(
-          canvas,
-          {},
-          {
-            default: async () => {
-              const res = await fetch("/pack.zip")
-              if (!res.ok) {
-                throw new Error(`Failed to fetch pack.zip: ${res.status} ${res.statusText}`)
-              }
-              return await res.blob()
-            },
-          },
-          {
-            showGrid: true,
-            backgroundColor: backgroundColorRef.current,
-            enableInteraction: false,
-            enableDragAndDrop: false,
-            enableGizmos: false,
-            meshBuildingMode: "incremental",
-            targetFPS: 120,
-            idleFPS: 120,
-            enableAdaptiveFPS: false,
-            postProcessingOptions: {
-              enabled: true,
-              enableSSAO: false,
-              enableSMAA: true,
-              enableGamma: true,
-            },
-            ffmpeg: { terminate: () => {} },
-            cameraOptions: {
-              position: [10, 10, 10],
-              autoOrbitAfterZoom: false,
-              enableZoomInOnLoad: false,
-            },
-            callbacks: {
-              onRendererInitialized: async (r: LitematicaRenderer) => {
-                if (!isCurrentLoad()) {
-                  r.dispose?.()
-                  return
-                }
+      let schematic: Schematic
+      let pack: ResourcePack
+      try {
+        schematic = loadSchematicByFileName(nuc, fileName, [...bytes])
+        pack = await getSharedResourcePack(nuc)
+      } catch (error) {
+        console.error("Error parsing schematic:", error)
+        setLoadError("FAILED")
+        return
+      }
+      if (!isCurrentLoad()) return
 
-                try {
-                  suppressNativeFpOverlays(r)
+      const tight = schematic.tightDimensions()
+      tightRef.current = { x: Math.max(1, tight.x), y: Math.max(1, tight.y), z: Math.max(1, tight.z) }
 
-                  const res = await fetch(proxyUrl, {
-                    cache: "no-store",
-                    signal: schematicRequestController.signal,
-                  })
-                  if (!res.ok) {
-                    throw new Error("Failed to fetch proxy: " + res.status)
-                  }
-                  let arrayBuffer = await res.arrayBuffer()
+      // Mesher exhaustion (very detailed schematics) traps in wasm, so every
+      // failure here is surfaced as "too detailed" rather than a stack trace.
+      let glb: Uint8Array
+      let bounds: Bounds
+      try {
+        const meshed = meshSchematic(nuc, schematic, pack, { mode: "all" }, tightRef.current)
+        glb = meshed.glb
+        bounds = meshed.bounds
+      } catch (error) {
+        console.error("Error meshing schematic:", error)
+        setLoadError("TOO_DETAILED")
+        return
+      }
+      if (!isCurrentLoad()) return
 
-                  const fileName = cleanUrl.split("/").pop() || "schem.litematic"
-                  await r.schematicManager?.loadSchematic?.(fileName, arrayBuffer)
-                  arrayBuffer = new ArrayBuffer(0)
+      schematicRef.current = schematic
+      packRef.current = pack
 
-                  if (!isCurrentLoad()) {
-                    r.dispose?.()
-                    return
-                  }
+      const scene = sceneRef.current
+      if (!scene) return
 
-                  const resolvedSchematicId = resolveLoadedSchematicId(r)
-                  if (!resolvedSchematicId) {
-                    throw new Error("No loaded schematic ID found after loadSchematic")
-                  }
-                  schematicIdRef.current = resolvedSchematicId
-
-                  const dim = r.schematicManager?.getMaxSchematicDimensions?.()
-                  if (dim) {
-                    const topLayer = Math.max(0, Math.ceil(dim.y) - 1)
-                    setMaxLayer(topLayer)
-                    setSliderLayer(topLayer)
-                  }
-
-                  // Avoid camera animation/auto orbit fighting with first-person controls.
-                  await r.cameraManager?.focusOnSchematic?.({
-                    animationDuration: 0,
-                    skipPathFitting: true,
-                  })
-                  r.cameraManager?.stopAnimation?.()
-                  r.cameraManager?.stopAutoOrbit?.()
-                  r.cameraManager?.setAutoOrbitAfterZoom?.(false)
-
-                  suppressNativeFpOverlays(r)
-                  if (!isCurrentLoad()) return
-
-                  r.targetFPS = ACTIVE_TARGET_FPS
-                  r.idleFPS = IDLE_TARGET_FPS
-                  r.enableAdaptiveFPS = true
-
-                  setSchematicReady(true)
-                } catch (error) {
-                  if (error instanceof Error && error.name === "AbortError") {
-                    return
-                  }
-
-                  console.error("Error loading schematic:", error)
-                }
-              },
-              onSchematicFileLoadFailure: (err: Error) => {
-                console.error("Failed to load schematic file:", err)
-              },
-            },
-          }
-        )
-
+      try {
+        const group = await parseGlb(glb)
         if (!isCurrentLoad()) {
-          renderer?.dispose?.()
+          disposeGroup(group)
           return
         }
-
-        rendererRef.current = renderer
+        swapMeshGroup(scene, group)
       } catch (error) {
-        console.error("Error setting up schematic-renderer:", error)
-      }
-    }
-
-    const handlePointerLockChange = () => {
-      const current = rendererRef.current
-      if (!current) return
-
-      suppressNativeFpOverlays(current)
-
-      const cm = current.cameraManager
-      const locked = cm?.isFlyControlsLocked?.() ?? document.pointerLockElement === canvas
-      const flyEnabled = Boolean(cm?.isFlyControlsEnabled?.())
-
-      if (!locked) {
-        lastPointerUnlockAtRef.current = performance.now()
-      }
-
-      setIsFlyEnabled(flyEnabled)
-      setIsFlyMode(Boolean(locked && flyEnabled))
-    }
-
-    const handlePointerLockError = (event: Event) => {
-      const current = rendererRef.current
-      const cm = current?.cameraManager
-      if (!cm?.isFlyControlsEnabled?.()) {
+        console.error("Error loading mesh:", error)
+        setLoadError("TOO_DETAILED")
         return
       }
 
-      lastPointerUnlockAtRef.current = performance.now()
+      // Ground grid sized to the meshed bounds, not the padded declared size.
+      const widthX = bounds.maxX - bounds.minX
+      const widthZ = bounds.maxZ - bounds.minZ
+      const grid = new THREE.GridHelper(
+        Math.max(widthX, widthZ),
+        Math.max(Math.round(Math.max(widthX, widthZ)), 10),
+        0x475569,
+        0x334155
+      )
+      grid.position.set(
+        (bounds.minX + bounds.maxX) / 2,
+        bounds.minY - 0.5,
+        (bounds.minZ + bounds.maxZ) / 2
+      )
+      grid.name = "litematica-grid"
+      const previousGrid = scene.getObjectByName("litematica-grid")
+      if (previousGrid) scene.remove(previousGrid)
+      scene.add(grid)
 
-      cm.disableFlyControls?.()
-      setIsFlyMode(false)
-      setIsFlyEnabled(false)
-
-      // Prevent PointerLockControls' internal error listener from logging noisy errors.
-      event.stopImmediatePropagation()
-    }
-
-    const handleEscapeKeyDown = (event: KeyboardEvent) => {
-      if (event.code !== "Escape") return
-
-      const current = rendererRef.current
-      const cm = current?.cameraManager
-      if (cm?.isFlyControlsEnabled?.()) {
-        // ESC acts as explicit exit from first-person mode.
-        lastPointerUnlockAtRef.current = performance.now()
-        cm.disableFlyControls?.()
-        setIsFlyMode(false)
-        setIsFlyEnabled(false)
+      // Frame the camera on the mesher's actual bounds.
+      const camera = cameraRef.current
+      const orbit = orbitRef.current
+      if (camera && orbit) {
+        const centerX = (bounds.minX + bounds.maxX) / 2
+        const centerY = (bounds.minY + bounds.maxY) / 2
+        const centerZ = (bounds.minZ + bounds.maxZ) / 2
+        const extent = Math.max(widthX, bounds.maxY - bounds.minY, widthZ, 1)
+        camera.position.set(centerX + extent, centerY + extent * 0.8, centerZ + extent)
+        orbit.target.set(centerX, centerY, centerZ)
+        orbit.update()
       }
+      const topLayer = Math.max(0, tightRef.current.y - 1)
+      setMaxLayer(topLayer)
+      setSliderLayer(topLayer)
+      setTargetLayer("all")
+      setSchematicReady(true)
     }
 
-    document.addEventListener("pointerlockchange", handlePointerLockChange)
-    document.addEventListener("pointerlockerror", handlePointerLockError, true)
-    document.addEventListener("keydown", handleEscapeKeyDown, true)
-    initRenderer()
+    void run()
 
     return () => {
-      isActive = false
-      schematicRequestController.abort()
-      document.removeEventListener("pointerlockchange", handlePointerLockChange)
-      document.removeEventListener("pointerlockerror", handlePointerLockError, true)
-      document.removeEventListener("keydown", handleEscapeKeyDown, true)
+      controller.abort()
       setSchematicReady(false)
-      schematicIdRef.current = null
-      setIsFlyMode(false)
-      setIsFlyEnabled(false)
-
-      if (
-        rendererRef.current?.cameraManager?.isFlyControlsEnabled?.() &&
-        typeof rendererRef.current.cameraManager.disableFlyControls === "function"
-      ) {
-        rendererRef.current.cameraManager.disableFlyControls()
-      }
-
-      if (rendererRef.current && typeof rendererRef.current.dispose === "function") {
-        rendererRef.current.dispose()
-      }
-
-      restoreCanvasPointerCapture(canvas)
-
-      rendererRef.current = null
+      schematicRef.current = null
+      packRef.current = null
     }
   }, [url])
 
+  // Layer slicing: re-mesh a bounded region and swap it into the scene.
   useEffect(() => {
-    const renderer = rendererRef.current
-    if (!renderer) return
-    try {
-      renderer.setBackgroundColor?.(backgroundColor)
-      renderer.renderManager?.render?.()
-    } catch {
-      // setBackgroundColor is best-effort; failures are non-critical.
-    }
-  }, [backgroundColor])
+    if (!schematicReady) return
+    const nuc = nucRef.current
+    const schematic = schematicRef.current
+    const pack = packRef.current
+    const scene = sceneRef.current
+    if (!nuc || !schematic || !pack || !scene) return
 
-  useEffect(() => {
-    if (!schematicReady || !rendererRef.current) {
-      return
-    }
+    const token = ++remeshTokenRef.current
+    const isCurrent = () => token === remeshTokenRef.current
 
-    const renderer = rendererRef.current
-    if (!renderer) return
+    const range: LayerRange =
+      targetLayer === "all"
+        ? { mode: "all" }
+        : layerMode === "single"
+          ? {
+              mode: "single",
+              y: Math.max(0, Math.min(targetLayer, tightRef.current.y - 1)),
+            }
+          : {
+              mode: "below",
+              y: Math.max(0, Math.min(targetLayer, tightRef.current.y - 1)),
+            }
 
-    const sm = renderer.schematicManager
-    if (!sm) return
-
-    const schematicId = resolveLoadedSchematicId(renderer)
-    if (!schematicId) return
-
-    schematicIdRef.current = schematicId
-    if (!sm.getSchematic?.(schematicId)) return
-
-    const dim = sm.getMaxSchematicDimensions?.()
-    if (!dim) return
-
-    const maxX = Math.max(1, Math.ceil(dim.x))
-    const maxY = Math.max(1, Math.ceil(dim.y))
-    const maxZ = Math.max(1, Math.ceil(dim.z))
-
-    try {
-      if (targetLayer === "all") {
-        renderer?.resetRenderingBounds?.(schematicId, true)
-      } else {
-        const y = Math.max(0, Math.min(targetLayer, maxY - 1))
-
-        if (layerMode === "single") {
-          renderer?.setRenderingBounds?.(
-            schematicId,
-            [0, y, 0],
-            [maxX, y + 1, maxZ],
-            false
-          )
-        } else {
-          renderer?.setRenderingBounds?.(
-            schematicId,
-            [0, 0, 0],
-            [maxX, y + 1, maxZ],
-            false
-          )
+    void (async () => {
+      try {
+        const { glb } = meshSchematic(nuc, schematic, pack, range, tightRef.current)
+        if (!isCurrent()) return
+        const group = await parseGlb(glb)
+        if (!isCurrent()) {
+          disposeGroup(group)
+          return
         }
+        swapMeshGroup(scene, group)
+        needsRenderRef.current = true
+      } catch (error) {
+        // Keep the last good mesh visible; meshing failures are wasm traps.
+        console.error("Failed to re-mesh layer range:", error)
+        setLoadError("TOO_DETAILED")
       }
-
-      renderer?.renderManager?.render?.()
-    } catch (error) {
-      console.error("Failed to update rendering bounds:", error)
-    }
+    })()
   }, [schematicReady, targetLayer, layerMode])
 
-  const commitLayerSelection = () => {
+  const commitLayerSelection = useCallback(() => {
     if (!schematicReady) return
     setTargetLayer(sliderLayer)
-  }
-
-  const toggleFlyMode = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation()
-
-    const current = rendererRef.current
-    if (!current?.cameraManager) return
-
-    const cm = current.cameraManager
-    suppressNativeFpOverlays(current)
-
-    cm.stopAnimation?.()
-    cm.stopAutoOrbit?.()
-    cm.setAutoOrbitAfterZoom?.(false)
-    cm.setZoomInOnLoad?.(false)
-
-    const flyEnabled = Boolean(cm.isFlyControlsEnabled?.())
-
-    if (flyEnabled) {
-      lastPointerUnlockAtRef.current = performance.now()
-      cm.disableFlyControls?.()
-      setIsFlyMode(false)
-      setIsFlyEnabled(false)
-      return
-    }
-
-    cm.enableFlyControls?.()
-    cm.setFlyControlsSettings?.({
-      moveSpeed: 16,
-      sprintMultiplier: 2.4,
-      keybinds: {
-        up: "Space",
-        down: "KeyC",
-        sprint: "ShiftLeft",
-      },
-    })
-
-    patchFlyLockWithCooldown(cm)
-    // If already enabled but unlocked, this acts as a reliable re-lock action.
-    cm.flyControls?.lock?.()
-
-    setIsFlyEnabled(true)
-    setIsFlyMode(Boolean(cm.isFlyControlsLocked?.()))
-  }
+  }, [schematicReady, sliderLayer])
 
   const canvasStyle = useMemo(
     (): React.CSSProperties => ({
@@ -688,6 +594,7 @@ function useLitematicaViewer({
     }),
     [isFlyMode, height]
   )
+
   return {
     canvasRef,
     canvasStyle,
@@ -695,6 +602,7 @@ function useLitematicaViewer({
     isFlyEnabled,
     isFlyMode,
     layerMode,
+    loadError,
     maxLayer,
     setLayerMode,
     setSliderLayer,
@@ -713,6 +621,7 @@ export default function LitematicaViewer(props: LitematicaViewerProps) {
     isFlyEnabled,
     isFlyMode,
     layerMode,
+    loadError,
     maxLayer,
     setLayerMode,
     setSliderLayer,
@@ -730,6 +639,7 @@ export default function LitematicaViewer(props: LitematicaViewerProps) {
       isFlyEnabled={isFlyEnabled}
       isFlyMode={isFlyMode}
       layerMode={layerMode}
+      loadError={loadError}
       maxLayer={maxLayer}
       onLayerModeChange={setLayerMode}
       onSliderLayerChange={setSliderLayer}
@@ -742,12 +652,13 @@ export default function LitematicaViewer(props: LitematicaViewerProps) {
 }
 
 interface LitematicaViewerSurfaceProps {
-  canvasRef: React.RefObject<CanvasWithPatch | null>
+  canvasRef: React.RefObject<HTMLCanvasElement | null>
   canvasStyle: React.CSSProperties
   commitLayerSelection: () => void
   isFlyEnabled: boolean
   isFlyMode: boolean
   layerMode: "single" | "below"
+  loadError: LoadError | null
   maxLayer: number
   onLayerModeChange: (mode: "single" | "below") => void
   onSliderLayerChange: (layer: number) => void
@@ -764,6 +675,7 @@ function LitematicaViewerSurface({
   isFlyEnabled,
   isFlyMode,
   layerMode,
+  loadError,
   maxLayer,
   onLayerModeChange,
   onSliderLayerChange,
@@ -795,6 +707,15 @@ function LitematicaViewerSurface({
           INTERACTIVE BLUEPRINT
         </span>
       </div>
+      {loadError ? (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="border-tech-main/40 bg-surface-overlay/90 text-tech-main shadow-sm absolute border px-3 py-1.5 text-xs font-bold tracking-wider backdrop-blur-md">
+            {loadError === "TOO_DETAILED"
+              ? "SCHEMATIC TOO DETAILED — MESH LIMIT REACHED"
+              : "SCHEMATIC LOAD FAILED"}
+          </div>
+        </div>
+      ) : null}
       {maxLayer > 0 && (
         <LitematicaLayerControls
           commitLayerSelection={commitLayerSelection}
@@ -948,4 +869,3 @@ function LitematicaControlKey({
     </span>
   )
 }
-

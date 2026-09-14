@@ -24,6 +24,13 @@
     "translationOutdatedPrefix": "原文最新版本为",
     "translationPending": "翻译待完成"
   },
+  "AdvancedReading": {
+    "label": "进阶",
+    "optional": "深入底层机制细节",
+    "sectionEnd": "进阶内容结束",
+    "sectionLabel": "进阶内容",
+    "skipSection": "跳过"
+  },
   "ArticleMeta": {
     "collapseMetadata": "折叠元数据",
     "codeBasis": "代码来源",

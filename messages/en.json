@@ -24,6 +24,13 @@
     "translationOutdatedPrefix": "The latest original revision is",
     "translationPending": "Translation pending"
   },
+  "AdvancedReading": {
+    "label": "Advanced",
+    "optional": "Goes deeper into the underlying mechanics",
+    "sectionEnd": "End of advanced section",
+    "sectionLabel": "Advanced section",
+    "skipSection": "Skip"
+  },
   "ArticleMeta": {
     "collapseMetadata": "Collapse metadata",
     "codeBasis": "Code basis",

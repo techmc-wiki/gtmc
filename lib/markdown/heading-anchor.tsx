@@ -1,7 +1,9 @@
 "use client"
 
-import React, { useState, useCallback } from "react"
+import React, { useCallback } from "react"
 import { useTranslations } from "next-intl"
+
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard"
 
 interface HeadingAnchorProps {
   id: string
@@ -16,21 +18,19 @@ const positionClass: Record<1 | 2 | 3, string> = {
 
 export function HeadingAnchor({ id, level }: HeadingAnchorProps) {
   const t = useTranslations("ArticleMeta")
-  const [copied, setCopied] = useState(false)
+  const { state, copy } = useCopyToClipboard()
+  const copied = state === "copied"
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault()
       e.stopPropagation()
 
-      const url = window.location.origin + window.location.pathname + "#" + id
-
-      navigator.clipboard.writeText(url).catch(() => {})
-
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
+      void copy(
+        () => window.location.origin + window.location.pathname + "#" + id
+      )
     },
-    [id]
+    [copy, id]
   )
 
   return (

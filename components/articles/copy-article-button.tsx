@@ -1,91 +1,36 @@
 "use client"
 
-import { CircleAlert } from "lucide-react"
-import { IconButton } from "@/components/ui/icon-button"
-
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback } from "react"
 import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { Check, Clipboard } from "lucide-react"
+
+import { CopyButton } from "@/components/ui/copy-button"
 
 /**
- * "Copy as Markdown" control at the right edge of the article H1. Fetches
- * the public article URL with `Accept: text/markdown` — which the proxy
- * rewrites to the markdown endpoint — and copies the raw markdown to the
- * clipboard.
+ * "Copy as Markdown" control at the right edge of the article H1. Fetches the
+ * public article URL with `Accept: text/markdown` — which the proxy rewrites to
+ * the markdown endpoint — and copies the raw markdown to the clipboard.
  */
-type CopyPageState = "idle" | "pending" | "copied" | "failed"
-
-const COPY_FEEDBACK_MS = 2000
-
 export function CopyArticleButton() {
   const t = useTranslations("ArticleMeta")
   const pathname = usePathname()
-  const [state, setState] = useState<CopyPageState>("idle")
-  const resetTimerRef = useRef<number | null>(null)
 
-  useEffect(
-    () => () => {
-      if (resetTimerRef.current !== null) {
-        window.clearTimeout(resetTimerRef.current)
-      }
-    },
-    []
-  )
-
-  const handleCopy = useCallback(async () => {
-    if (state === "pending") {
-      return
+  const fetchMarkdown = useCallback(async () => {
+    const response = await fetch(pathname, {
+      headers: { Accept: "text/markdown" },
+    })
+    if (!response.ok) {
+      throw new Error(`Markdown request failed with ${response.status}`)
     }
-
-    setState("pending")
-    try {
-      const response = await fetch(pathname, {
-        headers: { Accept: "text/markdown" },
-      })
-      if (!response.ok) {
-        throw new Error(`Markdown request failed with ${response.status}`)
-      }
-      const markdown = await response.text()
-      await navigator.clipboard.writeText(markdown)
-      setState("copied")
-    } catch (error) {
-      console.error("Failed to copy page markdown:", error)
-      setState("failed")
-    }
-
-    if (resetTimerRef.current !== null) {
-      window.clearTimeout(resetTimerRef.current)
-    }
-    resetTimerRef.current = window.setTimeout(
-      () => setState("idle"),
-      COPY_FEEDBACK_MS
-    )
-  }, [pathname, state])
-
-  const label =
-    state === "failed"
-      ? t("copyPageFailed")
-      : state === "copied"
-        ? t("copiedButton")
-        : t("copyPage")
+    return response.text()
+  }, [pathname])
 
   return (
-    <IconButton variant="ghost"
-      type="button"
-      onClick={handleCopy}
-      disabled={state === "pending"}
-      aria-busy={state === "pending"}
-      aria-live="polite"
-      className={state === "failed" ? "text-destructive" : "text-muted-foreground"}
-      label={label}>
-      <span className="t-icon-swap" data-state={state === "copied" ? "b" : "a"} aria-hidden="true">
-        <span className="t-icon" data-icon="a">
-          {state === "failed" ? <CircleAlert className="size-4" /> : <Clipboard className="size-4" />}
-        </span>
-        <span className="t-icon" data-icon="b"><Check className="size-4" /></span>
-      </span>
-      <span className="sr-only" aria-live="polite">{label}</span>
-    </IconButton>
+    <CopyButton
+      getValue={fetchMarkdown}
+      label={t("copyPage")}
+      copiedLabel={t("copiedButton")}
+      failedLabel={t("copyFailed")}
+    />
   )
 }

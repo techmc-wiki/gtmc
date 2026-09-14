@@ -1,7 +1,8 @@
 "use client"
 
+import { CopyButton } from "@/components/ui/copy-button"
 import { IconButton } from "@/components/ui/icon-button"
-import { Check, Copy, WrapText } from "lucide-react"
+import { WrapText } from "lucide-react"
 
 import React, {
   useCallback,
@@ -113,48 +114,6 @@ function LazyCodeBlock({
   )
 }
 
-function ClipboardButton({
-  ariaLabel,
-  doneLabel,
-  getValue,
-  idleLabel,
-}: {
-  ariaLabel: string
-  doneLabel: string
-  getValue: () => string
-  idleLabel: string
-}) {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(getValue())
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  return (
-    <IconButton
-      onClick={handleCopy}
-      label={copied ? doneLabel : ariaLabel}
-      title={idleLabel}>
-      <span
-        className="t-icon-swap"
-        data-state={copied ? "b" : "a"}
-        aria-hidden="true">
-        <span className="t-icon" data-icon="a">
-          <Copy aria-hidden />
-        </span>
-        <span className="t-icon" data-icon="b">
-          <Check aria-hidden />
-        </span>
-      </span>
-      <span className="sr-only" aria-live="polite">
-        {copied ? doneLabel : ""}
-      </span>
-    </IconButton>
-  )
-}
-
 type CodeBlockPreProps = {
   children?: ReactNode
   "data-raw-code"?: string
@@ -171,7 +130,7 @@ type CodeBlockPreProps = {
 
 interface CodeBlockHeaderProps {
   copyCodeLabel: string
-  copyButtonLabel: string
+  copyFailedLabel: string
   copyLinkLabel: string
   copiedLabel: string
   decompiler?: string
@@ -179,7 +138,6 @@ interface CodeBlockHeaderProps {
   isWrapped: boolean
   lang: string
   lineCount: string
-  linkLabel: string
   mapping?: string
   minecraftVersion?: string
   onToggleWrap: () => void
@@ -192,7 +150,7 @@ interface CodeBlockHeaderProps {
 
 function CodeBlockHeader({
   copyCodeLabel,
-  copyButtonLabel,
+  copyFailedLabel,
   copyLinkLabel,
   copiedLabel,
   decompiler,
@@ -200,7 +158,6 @@ function CodeBlockHeader({
   isWrapped,
   lang,
   lineCount,
-  linkLabel,
   mapping,
   minecraftVersion,
   onToggleWrap,
@@ -239,29 +196,30 @@ function CodeBlockHeader({
           {id && (
             <>
               <span className="text-tech-main/50">|</span>
-              <ClipboardButton
-                ariaLabel={copyLinkLabel}
-                doneLabel={copiedLabel}
+              <CopyButton
                 getValue={() =>
                   `${window.location.origin}${window.location.pathname}${window.location.search}#${id}`
                 }
-                idleLabel={linkLabel}
+                label={copyLinkLabel}
+                copiedLabel={copiedLabel}
+                failedLabel={copyFailedLabel}
               />
             </>
           )}
           <span className="text-tech-main/50">|</span>
           <IconButton
+            className="md:size-8"
             label={toggleLineWrapLabel}
             onClick={onToggleWrap}
             aria-pressed={isWrapped}>
             <WrapText aria-hidden />
           </IconButton>
           <span className="text-tech-main/50">|</span>
-          <ClipboardButton
-            ariaLabel={copyCodeLabel}
-            doneLabel={copiedLabel}
+          <CopyButton
             getValue={() => rawCode}
-            idleLabel={copyButtonLabel}
+            label={copyCodeLabel}
+            copiedLabel={copiedLabel}
+            failedLabel={copyFailedLabel}
           />
         </div>
       </div>
@@ -356,7 +314,7 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
     <LazyCodeBlock id={id} lineCount={lineCount}>
       <CodeBlockHeader
         copyCodeLabel={tArticleMeta("copyCode")}
-        copyButtonLabel={tArticleMeta("copyButton")}
+        copyFailedLabel={tArticleMeta("copyFailed")}
         copyLinkLabel={tArticleMeta("copyCodeLink")}
         copiedLabel={tArticleMeta("copiedButton")}
         decompiler={decompiler}
@@ -364,7 +322,6 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
         isWrapped={isWrapped}
         lang={lang}
         lineCount={lineCount}
-        linkLabel={tArticleMeta("linkButton")}
         mapping={mapping}
         minecraftVersion={minecraftVersion}
         onToggleWrap={toggleWrap}

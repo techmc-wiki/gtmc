@@ -1,10 +1,8 @@
 "use client"
 
-import { IconButton } from "@/components/ui/icon-button"
-import { Check, Copy } from "lucide-react"
+import { CopyButton } from "@/components/ui/copy-button"
 
 import { Link } from "@/i18n/navigation"
-import { useState, useCallback } from "react"
 import { useTranslations } from "next-intl"
 import { formatAbsoluteTime } from "@/lib/format-time"
 
@@ -24,7 +22,6 @@ export function ArticleLicenseNotice({
   authors = DEFAULT_AUTHORS,
 }: ArticleLicenseNoticeProps) {
   const t = useTranslations("ArticleMeta")
-  const [isCopied, setIsCopied] = useState(false)
   const orderedAuthors = [...new Set(authors)]
   const sortedAuthors = [...orderedAuthors].toSorted((left, right) =>
     left.localeCompare(right, undefined, { sensitivity: "base" })
@@ -48,16 +45,6 @@ export function ArticleLicenseNotice({
   ]
     .filter(Boolean)
     .join(", ")
-  const handleCopyAttribution = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(attributionLabel)
-      setIsCopied(true)
-      setTimeout(() => setIsCopied(false), 2000)
-    } catch (error) {
-      console.error("Failed to copy attribution:", error)
-    }
-  }, [attributionLabel])
-
   return (
     <section
       aria-label={t("articleLicenseAria")}
@@ -78,17 +65,12 @@ export function ArticleLicenseNotice({
       <span aria-hidden="true" className="text-tech-main/35">
         |
       </span>
-      <IconButton
-        onClick={handleCopyAttribution}
-        label={isCopied ? t("copiedButton") : t("copySuggestedAttributionAria")}>
-        <span className="t-icon-swap" data-state={isCopied ? "b" : "a"} aria-hidden="true">
-          <span className="t-icon" data-icon="a"><Copy className="size-4" /></span>
-          <span className="t-icon" data-icon="b"><Check className="size-4" /></span>
-        </span>
-      </IconButton>
-      <span className="sr-only" aria-live="polite">
-        {isCopied ? t("copiedButton") : ""}
-      </span>
+      <CopyButton
+        getValue={() => attributionLabel}
+        label={t("copySuggestedAttributionAria")}
+        copiedLabel={t("copiedButton")}
+        failedLabel={t("copyFailed")}
+      />
     </section>
   )
 }

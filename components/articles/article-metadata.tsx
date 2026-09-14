@@ -1,6 +1,7 @@
 "use client"
 
-import { Check, ChevronDown, Copy } from "lucide-react"
+import { ChevronDown } from "lucide-react"
+import { CopyButton } from "@/components/ui/copy-button"
 import { IconButton } from "@/components/ui/icon-button"
 
 import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react"
@@ -228,7 +229,6 @@ export function ArticleMetadataFull({
   bannerAlt,
 }: ArticleMetadataFullProps) {
   const t = useTranslations("ArticleMeta")
-  const [copied, setCopied] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(true)
   const detailsId = useId()
   // Prerender-safe timestamp: absolute date in server HTML ("now" would make
@@ -245,16 +245,6 @@ export function ArticleMetadataFull({
   const allContributors = useMemo(() => [author, ...coAuthors], [author, coAuthors])
   const displayContributors = allContributors.slice(0, 5)
   const remainingCount = allContributors.length - 5
-
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(canonicalUrl)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (error) {
-      console.error("Failed to copy:", error)
-    }
-  }, [canonicalUrl])
 
   const toggleCollapsed = useCallback(() => {
     setIsCollapsed((current) => !current)
@@ -433,12 +423,12 @@ export function ArticleMetadataFull({
                   ">
                   {canonicalUrl}
                 </code>
-                <IconButton onClick={handleCopy} label={copied ? t("copiedButton") : t("copyButton")} variant="outline">
-                  <span className="t-icon-swap" data-state={copied ? "b" : "a"} aria-hidden="true">
-                    <span className="t-icon" data-icon="a"><Copy className="size-4" /></span>
-                    <span className="t-icon" data-icon="b"><Check className="size-4" /></span>
-                  </span>
-                </IconButton>
+                <CopyButton
+                  getValue={() => canonicalUrl}
+                  label={t("copyButton")}
+                  copiedLabel={t("copiedButton")}
+                  failedLabel={t("copyFailed")}
+                />
               </div>
 
               <ArticleLicenseNotice

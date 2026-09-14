@@ -69,23 +69,18 @@ function Row({ label, count, active, name, onClick, onToggle }: RowProps) {
   )
 }
 
-function Chevron({ open }: { open: boolean }) {
+function Chevron() {
   return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 12 12"
-      className={cn(
-        "size-3 shrink-0 transition-transform duration-200",
-        open && "rotate-90"
-      )}>
-      <path
-        d="M4 2 L8 6 L4 10"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="square"
-      />
-    </svg>
+    <span className="t-acc-chevron" aria-hidden="true">
+      <svg viewBox="0 0 16 16" className="size-4 shrink-0">
+        <path
+          d="M4 6.5L8 10.5L12 6.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+      </svg>
+    </span>
   )
 }
 
@@ -128,23 +123,33 @@ export function CategoryFilter({
     <Collapsible
       open={isOpen}
       onOpenChange={setIsOpen}
-      className={cn("flex flex-col gap-2", className)}
+      data-open={isOpen}
+      className={cn("t-acc flex flex-col", className)}
       onKeyDown={(event) => {
-        if (event.key === "Escape") setIsOpen(false)
+        if (event.key === "Escape") {
+          setIsOpen(false)
+          event.currentTarget
+            .querySelector<HTMLButtonElement>(".t-acc-head")
+            ?.focus()
+        }
       }}>
       <CollapsibleTrigger asChild>
         <Button
           type="button"
           variant="outline"
-          className="w-full justify-between">
+          className="t-acc-head w-full justify-between">
           <span className="truncate">{triggerLabel}</span>
-          <Chevron open={isOpen} />
+          <Chevron />
         </Button>
       </CollapsibleTrigger>
 
-      <CollapsibleContent>
-        <div className="overflow-hidden">
-          <div id={panelId} className="flex flex-col gap-2 py-2">
+      <CollapsibleContent
+        forceMount
+        className="t-acc-panel"
+        inert={!isOpen}
+        aria-hidden={!isOpen}>
+        <div className="t-acc-panel-inner min-h-0">
+          <div id={panelId} className="flex flex-col gap-2 pt-2">
             <Row
               label={allLabel}
               count={totalCount}

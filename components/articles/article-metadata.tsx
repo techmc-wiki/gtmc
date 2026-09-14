@@ -1,9 +1,9 @@
 "use client"
 
-import { Check, ChevronDown, ChevronUp, Copy } from "lucide-react"
+import { Check, ChevronDown, Copy } from "lucide-react"
 import { IconButton } from "@/components/ui/icon-button"
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react"
+import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react"
 import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
@@ -41,7 +41,7 @@ function ArticleMetadataLayout({
 
       <div
         className="
-          relative mb-5 animate-fade-in border guide-line bg-surface-overlay/80 p-3
+          relative mb-5 border guide-line bg-surface-overlay/80 p-3
           font-mono text-xs text-tech-main
           sm:mb-6 sm:p-3
         ">
@@ -230,6 +230,7 @@ export function ArticleMetadataFull({
   const t = useTranslations("ArticleMeta")
   const [copied, setCopied] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(true)
+  const detailsId = useId()
   // Prerender-safe timestamp: absolute date in server HTML ("now" would make
   // the segment dynamic under cacheComponents), upgraded to relative on mount.
   const [lastEditedLabel, setLastEditedLabel] = useState(() =>
@@ -267,14 +268,17 @@ export function ArticleMetadataFull({
         size="icon-sm"
         onClick={toggleCollapsed}
         aria-expanded={!isCollapsed}
+        aria-controls={detailsId}
         aria-label={
           isCollapsed ? t("expandMetadata") : t("collapseMetadata")
         }
         label={isCollapsed ? t("expandMetadata") : t("collapseMetadata")}>
-        {isCollapsed ? <ChevronDown aria-hidden /> : <ChevronUp aria-hidden />}
+        <span className="t-acc-chevron" aria-hidden="true">
+          <ChevronDown className="size-4" />
+        </span>
       </IconButton>
     ),
-    [toggleCollapsed, isCollapsed, t]
+    [toggleCollapsed, isCollapsed, detailsId, t]
   )
 
   return (
@@ -286,7 +290,7 @@ export function ArticleMetadataFull({
       bannerPath={bannerPath}
       bannerAlt={bannerAlt}
       pathLabel={t("pathLabel")}>
-      <div className="flex flex-col">
+      <div className="t-acc flex flex-col" data-open={!isCollapsed}>
         <div className="flex items-center gap-3">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-tech-main/65 sm:text-xs">
             <span className="inline-flex items-center gap-1.5">
@@ -317,18 +321,11 @@ export function ArticleMetadataFull({
         </div>
 
         <div
+          id={detailsId}
           aria-hidden={isCollapsed}
           inert={isCollapsed ? true : undefined}
-          className={`
-            grid transition-[grid-template-rows,opacity] duration-300 ease-out
-            motion-reduce:transition-none
-            ${
-              isCollapsed
-                ? "grid-rows-[0fr] opacity-0"
-                : "grid-rows-[1fr] opacity-100"
-            }
-          `}>
-          <div className="min-h-0 overflow-hidden">
+          className="t-acc-panel">
+          <div className="t-acc-panel-inner min-h-0">
             <div className="mt-3 flex flex-col gap-3 border-t guide-line pt-3 sm:gap-4">
               <div
                 className="

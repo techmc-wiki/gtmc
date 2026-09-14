@@ -86,7 +86,7 @@ const chapterTitleStyle = { display: "flex" as const, alignItems: "center" as co
 const titleStyle = { fontSize: 64, fontWeight: 400, color: "#20283c", lineHeight: 1.2, marginBottom: 10, letterSpacing: -0.3, display: "flex" as const }
 const metaLineStyle = { display: "flex" as const, alignItems: "center" as const, gap: 12, fontSize: 20, color: "rgba(96, 112, 143, 0.67)", marginBottom: 14, flexShrink: 0 }
 const metaSpanStyle = { display: "flex" as const }
-const metaSepStyle = { color: "#d6d3c8", display: "flex" as const }
+const metaSepStyle = { width: 2, height: 22, background: "#d6d3c8", display: "flex" as const, flexShrink: 0 }
 const advancedBadgeStyle = { border: "1px solid rgba(140,47,57,0.4)", background: "rgba(140,47,57,0.08)", color: "#8c2f39", padding: "2px 8px", fontSize: 12, letterSpacing: 2, textTransform: "uppercase" as const, display: "flex" as const }
 
 const bodyHookWrapperStyle = { position: "relative" as const, flex: 1, overflow: "hidden" as const, display: "flex" as const }
@@ -228,15 +228,13 @@ function createArticleOgImageResponse({
             <div style={titleStyle}>{title}</div>
             <div style={metaLineStyle}>
               {author && <span style={metaSpanStyle}>by {author}</span>}
-              {author && readingTime > 0 && (
-                <span style={metaSepStyle}>|</span>
-              )}
+              {author && readingTime > 0 && <div style={metaSepStyle} />}
               {readingTime > 0 && (
                 <span style={metaSpanStyle}>~{readingTime} min to read</span>
               )}
               {isAdvanced && (
                 <>
-                  <span style={metaSepStyle}>|</span>
+                  <div style={metaSepStyle} />
                   <span style={advancedBadgeStyle}>ADVANCED CONTENT</span>
                 </>
               )}

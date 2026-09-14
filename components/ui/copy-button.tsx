@@ -1,6 +1,7 @@
 "use client"
 
 import { Check, CircleAlert, Copy } from "lucide-react"
+import type { ReactNode } from "react"
 
 import { IconButton } from "@/components/ui/icon-button"
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard"
@@ -15,6 +16,11 @@ interface CopyButtonProps {
   copiedLabel: string
   /** Accessible name after a failed copy. */
   failedLabel: string
+  /**
+   * Idle glyph. Defaults to the copy mark; pass a different one where two copy
+   * controls sit side by side and the mark alone would not tell them apart.
+   */
+  icon?: ReactNode
   className?: string
 }
 
@@ -29,6 +35,7 @@ export function CopyButton({
   label,
   copiedLabel,
   failedLabel,
+  icon,
   className,
 }: CopyButtonProps) {
   const { state, copy } = useCopyToClipboard()
@@ -51,7 +58,7 @@ export function CopyButton({
           {isFailed ? (
             <CircleAlert className="size-4" />
           ) : (
-            <Copy className="size-4" />
+            (icon ?? <Copy className="size-4" />)
           )}
         </span>
         <span className="t-icon" data-icon="b">

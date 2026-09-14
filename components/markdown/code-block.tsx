@@ -2,7 +2,9 @@
 
 import { CopyButton } from "@/components/ui/copy-button"
 import { IconButton } from "@/components/ui/icon-button"
-import { WrapText } from "lucide-react"
+import { Badge } from "@/components/ui/shadcn/badge"
+import { Separator } from "@/components/ui/shadcn/separator"
+import { Link as LinkIcon, WrapText } from "lucide-react"
 
 import React, {
   useCallback,
@@ -82,13 +84,15 @@ function LazyCodeBlock({
       <div
         aria-hidden="true"
         className={`t-skel-skeleton bg-tech-bg pointer-events-none absolute inset-0 z-10 flex flex-col ${isVisible ? "" : "is-pulsing"}`}>
-        <div className="border-tech-main/30 bg-tech-main/10 flex items-center justify-between border-b px-4 py-1.5">
-          <div className="flex items-center gap-2">
-            <span className="bg-tech-main/40 size-1.5" />
-            <span className="bg-tech-accent/20 h-2.5 w-12" />
-          </div>
-          <div className="flex items-center gap-3">
+        <div className="border-tech-main/30 bg-tech-main/5 flex items-center justify-between border-b px-3 py-1">
+          <div className="flex items-center gap-2.5">
+            <span className="bg-tech-accent/25 h-4 w-10" />
             <span className="bg-tech-accent/15 h-2.5 w-16" />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="bg-tech-accent/15 size-3" />
+            <span className="bg-tech-accent/15 size-3" />
+            <span className="bg-tech-accent/15 size-3" />
           </div>
         </div>
 
@@ -137,7 +141,6 @@ interface CodeBlockHeaderProps {
   id?: string
   isWrapped: boolean
   lang: string
-  lineCount: string
   mapping?: string
   minecraftVersion?: string
   onToggleWrap: () => void
@@ -148,6 +151,12 @@ interface CodeBlockHeaderProps {
   toggleLineWrapLabel: string
 }
 
+/**
+ * The listing's caption. The language identifies the block, so it gets a chip;
+ * version, mapping, and decompiler are provenance for that language and stay
+ * quiet behind the chip. The line count is deliberately absent — the gutter
+ * already numbers every line, so repeating the total is chrome, not content.
+ */
 function CodeBlockHeader({
   copyCodeLabel,
   copyFailedLabel,
@@ -157,7 +166,6 @@ function CodeBlockHeader({
   id,
   isWrapped,
   lang,
-  lineCount,
   mapping,
   minecraftVersion,
   onToggleWrap,
@@ -167,55 +175,58 @@ function CodeBlockHeader({
   sourceLines,
   toggleLineWrapLabel,
 }: CodeBlockHeaderProps) {
+  const provenance = [
+    minecraftVersion ? `MC ${minecraftVersion}` : null,
+    mapping,
+    decompiler,
+  ].filter((item): item is string => Boolean(item))
+
   return (
-    <div className="guide-line bg-tech-main/10 border-b">
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-1.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="bg-tech-main/40 size-1.5 animate-pulse" />
-          <span className="text-tech-main text-xs tracking-widest uppercase">
-            {lang}
-          </span>
-          {minecraftVersion && (
-            <span className="border-tech-main/20 text-tech-main/75 border-l pl-2 text-[0.625rem] tracking-wider uppercase">
-              MC {minecraftVersion}
-            </span>
-          )}
-          {mapping && (
-            <span className="text-tech-main/65 text-[0.625rem] tracking-wider uppercase">
-              {mapping}
-            </span>
-          )}
-          {decompiler && (
-            <span className="text-tech-main/50 text-[0.625rem] tracking-wider uppercase">
-              {decompiler}
-            </span>
-          )}
+    <div className="guide-line bg-tech-main/5 border-b">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-3 py-1">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
+          {lang ? (
+            <Badge
+              variant="outline"
+              className="text-tech-main border-tech-main/25 bg-tech-main/5 rounded-none px-1.5 font-mono text-[0.625rem] font-medium tracking-wide uppercase">
+              {lang}
+            </Badge>
+          ) : null}
+          {provenance.length > 0 ? (
+            <div className="text-tech-main/65 flex items-center gap-x-2 font-mono text-[0.625rem] tracking-wide uppercase">
+              {provenance.map((item, index) => (
+                <React.Fragment key={item}>
+                  {index > 0 ? (
+                    <Separator orientation="vertical" className="h-3" />
+                  ) : null}
+                  <span>{item}</span>
+                </React.Fragment>
+              ))}
+            </div>
+          ) : null}
         </div>
-        <div className="text-tech-main flex flex-wrap items-center gap-3 font-mono text-[0.625rem] tracking-widest">
-          <span>{lineCount} LINES</span>
+        <div className="-mr-1.5 flex shrink-0 items-center gap-0.5">
           {id && (
-            <>
-              <span className="text-tech-main/50">|</span>
-              <CopyButton
-                getValue={() =>
-                  `${window.location.origin}${window.location.pathname}${window.location.search}#${id}`
-                }
-                label={copyLinkLabel}
-                copiedLabel={copiedLabel}
-                failedLabel={copyFailedLabel}
-              />
-            </>
+            <CopyButton
+              className="md:size-7"
+              getValue={() =>
+                `${window.location.origin}${window.location.pathname}${window.location.search}#${id}`
+              }
+              label={copyLinkLabel}
+              copiedLabel={copiedLabel}
+              failedLabel={copyFailedLabel}
+              icon={<LinkIcon className="size-3.5" />}
+            />
           )}
-          <span className="text-tech-main/50">|</span>
           <IconButton
-            className="md:size-8"
+            className="md:size-7"
             label={toggleLineWrapLabel}
             onClick={onToggleWrap}
             aria-pressed={isWrapped}>
             <WrapText aria-hidden />
           </IconButton>
-          <span className="text-tech-main/50">|</span>
           <CopyButton
+            className="md:size-7"
             getValue={() => rawCode}
             label={copyCodeLabel}
             copiedLabel={copiedLabel}
@@ -321,7 +332,6 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
         id={id}
         isWrapped={isWrapped}
         lang={lang}
-        lineCount={lineCount}
         mapping={mapping}
         minecraftVersion={minecraftVersion}
         onToggleWrap={toggleWrap}

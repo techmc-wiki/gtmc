@@ -3,7 +3,9 @@
 
 import { signIn } from "next-auth/react"
 import { useTranslations } from "next-intl"
+import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/shadcn/button"
+import { GithubIcon } from "@/components/ui/icons"
 import { useState } from "react"
 import { Link } from "@/i18n/navigation"
 
@@ -80,7 +82,10 @@ export default function LoginPage() {
                     {t("connectingLabel")}
                   </span>
                 ) : (
-                  t("loginCta")
+                  <>
+                    <GithubIcon className="size-4" />
+                    {t("loginCta")}
+                  </>
                 )}
               </Button>
             </div>
@@ -88,7 +93,8 @@ export default function LoginPage() {
             <div className="mt-6 text-xs opacity-60">
               <Link
                 href="/"
-                className="hover:text-tech-main-dark mt-2 inline-block underline decoration-dashed underline-offset-4 transition-colors">
+                className="hover:text-tech-main-dark mt-2 inline-flex items-center gap-1.5 underline decoration-dashed underline-offset-4 transition-colors">
+                <ArrowLeft aria-hidden="true" className="size-3.5" />
                 {t("returnLink")}
               </Link>
             </div>

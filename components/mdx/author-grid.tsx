@@ -1,5 +1,6 @@
 import { cn } from "@/lib/cn"
 import Image from "next/image"
+import { ArrowRight } from "lucide-react"
 import { Link } from "@/i18n/navigation"
 import { Card } from "@/components/ui/shadcn/card"
 import {
@@ -91,11 +92,10 @@ export function AuthorGrid({
                       {footer && (
                         <div className="text-tech-main/50 mt-2 flex items-center justify-between gap-3 font-mono text-[0.625rem] tracking-[0.2em] uppercase">
                           <span className="truncate">{footer}</span>
-                          <span
+                          <ArrowRight
                             aria-hidden="true"
-                            className="text-tech-main/40 group-hover/link:text-tech-signal shrink-0 transition-colors">
-                            →
-                          </span>
+                            className="text-tech-main/40 group-hover/link:text-tech-signal size-3 shrink-0 transition-colors"
+                          />
                         </div>
                       )}
                     </>
@@ -109,8 +109,9 @@ export function AuthorGrid({
       {isCompact && viewAllLabel && (
         <Link
           href="/authors"
-          className="text-tech-main hover:text-tech-main-dark inline-block font-mono text-xs tracking-widest uppercase transition-colors">
+          className="text-tech-main hover:text-tech-main-dark inline-flex items-center gap-1 font-mono text-xs tracking-widest uppercase transition-colors">
           {viewAllLabel}
+          <ArrowRight aria-hidden="true" className="size-3.5" />
         </Link>
       )}
     </>

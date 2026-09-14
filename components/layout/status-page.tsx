@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server"
+import { ArrowRight } from "lucide-react"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/shadcn/button"
 import { HideFooter } from "@/components/layout/footer-context"
@@ -51,7 +52,10 @@ export async function StatusPage({ kind }: StatusPageProps) {
               <Button
                 asChild
                 className="flex h-12 items-center justify-center px-8 transition-transform duration-300 hover:scale-105 active:scale-95">
-                <Link href="/">{returnHome}</Link>
+                <Link href="/">
+                  {returnHome}
+                  <ArrowRight aria-hidden="true" />
+                </Link>
               </Button>
             </div>
           </div>

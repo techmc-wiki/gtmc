@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
+import { ArrowRight, ChevronDown } from "lucide-react"
 import { HeroCard } from "./hero-card"
 import { Button } from "@/components/ui/shadcn/button"
 import { Link } from "@/i18n/navigation"
@@ -42,7 +43,10 @@ export function HomepageClient() {
                 {t("initializing")}
               </>
             ) : (
-              t("startReading")
+              <>
+                {t("startReading")}
+                <ArrowRight aria-hidden="true" />
+              </>
             )}
           </Link>
         </Button>
@@ -57,7 +61,7 @@ export function HomepageClient() {
           {t("scrollHint")}
         </span>
         <span className="text-tech-main/60 group-hover:text-tech-main-dark animate-bounce text-xs transition-colors motion-reduce:animate-none">
-          ▼
+          <ChevronDown aria-hidden="true" className="size-3.5" />
         </span>
       </a>
     </div>

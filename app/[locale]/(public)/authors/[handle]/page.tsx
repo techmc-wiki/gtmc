@@ -1,11 +1,13 @@
 import type { Metadata } from "next"
 import Image from "next/image"
 import { notFound, permanentRedirect } from "next/navigation"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { SectionTitle } from "@/components/ui/headings"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Card } from "@/components/ui/shadcn/card"
+import { Separator } from "@/components/ui/shadcn/separator"
 import {
   Avatar,
   AvatarImage,
@@ -325,6 +327,14 @@ function AuthorContributionSummary({
   | "repositoryStats"
   | "t"
 >) {
+  const contributorSinceLabel = contributorSince
+    ? new Date(contributorSince).toLocaleDateString(locale, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : null
+
   return (
     <div className="text-tech-main/50 mt-4 flex flex-wrap gap-x-6 gap-y-1 text-xs font-medium">
       {maintainer && repositoryStats ? (
@@ -345,16 +355,11 @@ function AuthorContributionSummary({
           <span>
             {t("coAuthoredLabel")}: {coAuthoredCount}
           </span>
-          <span>
-            {t("contributorSinceLabel")}:{" "}
-            {contributorSince
-              ? new Date(contributorSince).toLocaleDateString(locale, {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })
-              : "-"}
-          </span>
+          {contributorSinceLabel ? (
+            <span>
+              {t("contributorSinceLabel")}: {contributorSinceLabel}
+            </span>
+          ) : null}
         </>
       ) : null}
     </div>
@@ -468,13 +473,13 @@ function AuthorPageContent({ data }: { data: AuthorPageData }) {
     <div className="page-container-pb">
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
       <nav aria-label={t("breadcrumbAria")} className="mt-8 mb-6">
-        <p className="font-mono text-xs tracking-widest uppercase">
+        <p className="flex items-center gap-2 font-mono text-xs tracking-widest uppercase">
           <Link
             href="/authors"
             className="text-tech-main/70 hover:text-tech-main-dark transition-colors">
             {t("breadcrumbAuthors")}
           </Link>
-          <span className="text-tech-main/40"> / </span>
+          <Separator orientation="vertical" className="bg-tech-main/25 h-3" />
           <span className="text-tech-main">{handle.toUpperCase()}</span>
         </p>
       </nav>
@@ -484,7 +489,8 @@ function AuthorPageContent({ data }: { data: AuthorPageData }) {
       <nav aria-label={t("backToListAria")} className="mt-10">
         <Link
           href="/authors"
-          className="text-tech-main/70 hover:text-tech-main-dark inline-flex items-center font-mono text-xs tracking-widest uppercase transition-colors">
+          className="text-tech-main/70 hover:text-tech-main-dark inline-flex items-center gap-1.5 font-mono text-xs tracking-widest uppercase transition-colors">
+          <ArrowLeft aria-hidden="true" className="size-3.5" />
           {t("backToList")}
         </Link>
       </nav>
@@ -579,8 +585,8 @@ function ArticleRow({
               {article.isAdvanced && <AdvancedMarker className="ml-1.5" />}
             </p>
             <p className="text-tech-main/50 mt-0.5 truncate font-mono text-[0.625rem] tracking-wider uppercase">
-              {metaParts.join(" / ")}
-              {article.author ? ` / ${article.author}` : ""}
+              {metaParts.join(", ")}
+              {article.author ? `, ${article.author}` : ""}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -589,11 +595,10 @@ function ArticleRow({
                 {coauthoredLabel}
               </span>
             )}
-            <span
+            <ArrowRight
               aria-hidden="true"
-              className="text-tech-main/40 group-hover/article:text-tech-signal transition-colors">
-              →
-            </span>
+              className="text-tech-main/40 group-hover/article:text-tech-signal size-3.5 shrink-0 transition-colors"
+            />
           </div>
         </div>
       </Card>

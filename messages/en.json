@@ -64,14 +64,14 @@
     "connectingLabel": "Signing in...",
     "description": "Sign in with your GitHub account to access your drafts.",
     "heading": "Sign in",
-    "loginCta": "Sign in with GitHub →",
-    "returnLink": "< Back to home"
+    "loginCta": "Sign in with GitHub",
+    "returnLink": "Back to home"
   },
   "AuthorDetail": {
     "articlesLabel": "Articles",
     "articlesSectionTitle": "Articles",
     "articlesSortLabel": "Sorted by chapter order",
-    "backToList": "← All contributors",
+    "backToList": "All contributors",
     "backToListAria": "Back to all contributors",
     "breadcrumbAria": "Breadcrumb",
     "breadcrumbAuthors": "Authors",
@@ -374,7 +374,7 @@
   },
   "forbidden": {
     "description": "You do not have permission to access this page. Please contact an administrator or return home.",
-    "returnHome": "Return to home →",
+    "returnHome": "Return to home",
     "title": "Access denied"
   },
   "Glossary": {
@@ -415,7 +415,7 @@
     "noResults": "No matching terms",
     "pageDescription": "Browse the GTMC glossary of technical Minecraft terms, with concise definitions and translations in 12 languages.",
     "pageTitle": "Glossary",
-    "proposeEditsCta": "+ Propose edits",
+    "proposeEditsCta": "Propose edits",
     "relatedSeeLabel": "See:",
     "relatedSynonymLabel": "Synonym:",
     "searchPlaceholder": "Search...",
@@ -441,7 +441,7 @@
     "scrollHint": "Table of contents",
     "sectionCount": "{count, plural, one {# section} other {# sections}}",
     "slogan": "\"Curiosity in 'cubic' inch.\"",
-    "startReading": "Start reading →",
+    "startReading": "Start reading",
     "tocTitle": "Contents"
   },
   "Nav": {
@@ -454,7 +454,7 @@
   },
   "not-found": {
     "description": "The page you are looking for doesn't exist or has been moved. Please check the URL and try again.",
-    "returnHome": "Return to home →",
+    "returnHome": "Return to home",
     "title": "Page not found"
   },
   "OperationProgress": {
@@ -564,7 +564,7 @@
   },
   "unauthorized": {
     "description": "You need to be signed in to access this page. Please sign in to continue.",
-    "returnHome": "Return to home →",
+    "returnHome": "Return to home",
     "title": "Sign in required"
   }
 }

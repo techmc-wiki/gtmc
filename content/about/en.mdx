@@ -15,7 +15,9 @@ and redstone engineering to the tick-by-tick details of the engine.
   <StatCard label="Articles published" value={props.stats.articleCount} />
   <StatCard label="Contributors" value={props.stats.contributors} />
   <StatCard label="Languages" value="Chinese & English" />
-  <StatCard label="Last revision" value={props.stats.lastRevision} />
+  {props.stats.lastRevision ? (
+    <StatCard label="Last revision" value={props.stats.lastRevision} />
+  ) : null}
 </StatGrid>
 
 ## Contributors
@@ -27,7 +29,7 @@ subsystems, from redstone timing to chunk loading internals.
 <AuthorGrid
   variant="compact"
   authors={props.previewAuthors}
-  viewAllLabel="View all contributors →"
+  viewAllLabel="View all contributors"
 />
 
 ## Contribute

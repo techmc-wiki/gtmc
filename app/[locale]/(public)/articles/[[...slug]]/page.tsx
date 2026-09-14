@@ -4,6 +4,7 @@ import "katex/dist/katex.min.css"
 import type { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
+import { ArrowRight } from "lucide-react"
 import {
   calculateReadingMetrics,
   ensureMetaDescriptionLength,
@@ -172,7 +173,7 @@ export async function generateMetadata({
     )
     const chapterTitle = manifestEntry?.chapterTitleByLocale?.[contentLocale]
     const pageTitle = chapterTitle
-      ? `${chapterTitle} › ${articleTitle}`
+      ? `${chapterTitle}: ${articleTitle}`
       : articleTitle
 
     const description = ensureMetaDescriptionLength(
@@ -568,7 +569,7 @@ function ArticlePageContent({
     <div className="border-tech-main/30 bg-surface/80 relative min-h-screen min-w-0 border p-6 backdrop-blur-sm sm:p-8">
       {bannerPreloadHref ? <link rel="preload" as="image" href={bannerPreloadHref} fetchPriority="high" /> : null}
       <BookmarkRecorder slug={currentSlug} title={articleTitle} />
-      {runningHeadChapters.length > 0 && <RunningHead chapters={runningHeadChapters} articleSlug={effectiveSlug} articleTitle={articleTitle} locale={locale} chapterIndex={runningHeadChapterIndex} chapterIsAppendix={runningHeadIsAppendix} isPreface={runningHeadIsPreface} />}
+      {runningHeadChapters.length > 0 && <RunningHead chapters={runningHeadChapters} locale={locale} chapterIndex={runningHeadChapterIndex} chapterIsAppendix={runningHeadIsAppendix} isPreface={runningHeadIsPreface} />}
       {header}
       <CodeSourceSummary
         label={tArticleMeta("codeBasis")}
@@ -598,7 +599,7 @@ function TranslationNotices({
   const isTranslationPending = contentLocale !== locale
   return (
     <>
-      {isTranslationPending ? <aside data-testid="translation-pending-notice" aria-labelledby="translation-pending-label" className="mt-4 border border-amber-500/40 bg-amber-500/10 p-4 text-amber-950 dark:text-amber-100"><p id="translation-pending-label" data-testid="translation-pending-badge" className="font-mono text-[0.625rem] tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">{t("translationPending")}</p><p className="mt-2 text-sm/relaxed">{t("translationFallbackBody")}</p><a href={`/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`} className="mt-3 inline-flex min-h-11 items-center font-mono text-xs tracking-wider text-amber-900 underline decoration-amber-700/50 underline-offset-4 transition-colors hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:text-amber-100 dark:hover:text-amber-300 dark:focus-visible:outline-amber-300">{t("translationFallbackCta")} →</a></aside> : null}
+      {isTranslationPending ? <aside data-testid="translation-pending-notice" aria-labelledby="translation-pending-label" className="mt-4 border border-amber-500/40 bg-amber-500/10 p-4 text-amber-950 dark:text-amber-100"><p id="translation-pending-label" data-testid="translation-pending-badge" className="font-mono text-[0.625rem] tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">{t("translationPending")}</p><p className="mt-2 text-sm/relaxed">{t("translationFallbackBody")}</p><a href={`/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`} className="mt-3 inline-flex min-h-11 items-center font-mono text-xs tracking-wider text-amber-900 underline decoration-amber-700/50 underline-offset-4 transition-colors hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:text-amber-100 dark:hover:text-amber-300 dark:focus-visible:outline-amber-300">{t("translationFallbackCta")}<ArrowRight aria-hidden="true" className="ml-1 size-3.5" /></a></aside> : null}
       {isTranslationStale && translationStatus ? <aside data-testid="translation-stale-badge" aria-labelledby="translation-outdated-label" className="mt-4 border border-amber-500/40 bg-amber-500/10 p-4 text-amber-950 dark:text-amber-100"><p id="translation-outdated-label" className="font-mono text-[0.625rem] tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">{t("translationOutdatedLabel")}</p><p className="mt-2 text-sm/relaxed">{t("translationOutdatedPrefix")} <a href={translationStatus.latestOriginalCommitUrl} target="_blank" rel="noreferrer" aria-label={t("translationLatestCommitAria", { sha: translationStatus.latestOriginalRevision.slice(0, 7) })} className="font-mono underline decoration-amber-700/50 underline-offset-4 transition-colors hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:hover:text-amber-300 dark:focus-visible:outline-amber-300">{translationStatus.latestOriginalRevision.slice(0, 7)}</a>{". "}{t("translationOutdatedLag", { commitLag: translationStatus.commitLag, dayLag: translationStatus.dayLag })}</p></aside> : null}
     </>
   )

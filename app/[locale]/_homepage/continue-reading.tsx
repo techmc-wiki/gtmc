@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { ArrowRight } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/articles/url"
@@ -41,9 +42,10 @@ export function ContinueReading() {
         <span className="text-tech-main/60 font-mono text-[0.625rem]">
           {pct}%
         </span>
-        <span className="text-tech-main group-hover:text-tech-main-dark font-mono text-xs transition-colors">
-          →
-        </span>
+        <ArrowRight
+          aria-hidden="true"
+          className="text-tech-main group-hover:text-tech-main-dark size-3.5 transition-colors"
+        />
       </span>
     </Link>
   )

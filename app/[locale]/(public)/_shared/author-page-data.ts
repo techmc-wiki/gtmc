@@ -84,7 +84,7 @@ export function buildAboutStats(
           month: "short",
           day: "numeric",
         })
-      : "-",
+      : null,
   }
 }
 

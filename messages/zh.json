@@ -64,14 +64,14 @@
     "connectingLabel": "登录中...",
     "description": "请用 GitHub 账号登录，以访问您的草稿。",
     "heading": "登录",
-    "loginCta": "使用 GitHub 登录 →",
-    "returnLink": "< 返回首页"
+    "loginCta": "使用 GitHub 登录",
+    "returnLink": "返回首页"
   },
   "AuthorDetail": {
     "articlesLabel": "文章",
     "articlesSectionTitle": "文章",
     "articlesSortLabel": "按章节顺序排序",
-    "backToList": "← 所有贡献者",
+    "backToList": "所有贡献者",
     "backToListAria": "返回所有贡献者",
     "breadcrumbAria": "面包屑导航",
     "breadcrumbAuthors": "作者",
@@ -374,7 +374,7 @@
   },
   "forbidden": {
     "description": "您没有权限访问此页面。如需访问，请联系管理员。",
-    "returnHome": "返回首页 →",
+    "returnHome": "返回首页",
     "title": "访问被拒绝"
   },
   "Glossary": {
@@ -415,7 +415,7 @@
     "noResults": "无匹配术语",
     "pageDescription": "浏览 GTMC 术语表：收录技术向 Minecraft 词汇与简明定义，覆盖红石、更新理论、区块加载与引擎相关用语，并提供 12 种语言翻译。",
     "pageTitle": "术语表",
-    "proposeEditsCta": "+ 提议编辑",
+    "proposeEditsCta": "提议编辑",
     "relatedSeeLabel": "参见：",
     "relatedSynonymLabel": "同义词：",
     "searchPlaceholder": "搜索...",
@@ -441,7 +441,7 @@
     "scrollHint": "目录",
     "sectionCount": "{count} 节",
     "slogan": "求知于方寸之间。",
-    "startReading": "开始阅读 →",
+    "startReading": "开始阅读",
     "tocTitle": "目录"
   },
   "Nav": {
@@ -454,7 +454,7 @@
   },
   "not-found": {
     "description": "请求的页面不存在或已被移动。请检查网址后重试。",
-    "returnHome": "返回首页 →",
+    "returnHome": "返回首页",
     "title": "页面未找到"
   },
   "OperationProgress": {
@@ -564,7 +564,7 @@
   },
   "unauthorized": {
     "description": "访问此页面需要先登录您的账号。请登录后继续。",
-    "returnHome": "返回首页 →",
+    "returnHome": "返回首页",
     "title": "请先登录"
   }
 }

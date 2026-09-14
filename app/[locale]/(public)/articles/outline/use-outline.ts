@@ -8,6 +8,7 @@ export interface OutlineItem {
   id: string
   text: string
   depth: OutlineDepth
+  isAdvanced: boolean
 }
 
 const OUTLINE_HEADING_SELECTOR = "main h2[id], main h3[id], main h4[id]"
@@ -44,6 +45,7 @@ function scanHeadings(): OutlineItem[] {
         id: uniqueId,
         text,
         depth: getOutlineDepth(heading),
+        isAdvanced: heading.getAttribute("data-advanced") === "true",
       })
     }
   })

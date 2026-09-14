@@ -1,44 +1,40 @@
 "use client"
 
 import * as React from "react"
+import { Plus, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { LetterBar } from "@/components/glossary/letter-bar"
 import { GlossarySearch } from "@/components/glossary/glossary-search"
-import { ColumnPicker } from "@/components/glossary/column-picker"
-import { DensityToggle } from "@/components/glossary/density-toggle"
+import { FieldPicker } from "@/components/glossary/column-picker"
 import {
-  CategoryFilter,
-  type CategoryFilterCategory,
+  CategoryFacet,
+  type GlossaryCategoryOption,
 } from "@/components/glossary/category-filter"
 import { GlossaryTable } from "@/components/glossary/glossary-table"
 import { GlossaryDetailPanel } from "@/components/glossary/term-detail"
 import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
+import { Badge } from "@/components/ui/shadcn/badge"
 import { Button } from "@/components/ui/shadcn/button"
+import { Separator } from "@/components/ui/shadcn/separator"
 import { Link } from "@/i18n/navigation"
 import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
+import { filterGlossaryEntries } from "@/lib/glossary/filter-entries"
 import {
   OPEN_GLOSSARY_TERM_EVENT,
   type OpenGlossaryTermDetail,
 } from "@/lib/glossary/browser-events"
 import {
   readPersistedGlossaryColumns,
-  readPersistedGlossaryDensity,
   writePersistedGlossaryColumns,
-  writePersistedGlossaryDensity,
 } from "@/lib/glossary/persisted-prefs"
 import {
-  getDefaultGlossaryTableColumns,
-  type GlossaryDensity,
-  type GlossaryTableColumn,
+  GLOSSARY_COLUMNS,
+  isGlossaryColumn,
+  type GlossaryColumn,
 } from "@/lib/glossary/view-options"
 import { useLocalizedGlossary } from "@/lib/glossary/use-localized-glossary"
 import { cn } from "@/lib/cn"
-import {
-  parseAsArrayOf,
-  parseAsString,
-  parseAsStringLiteral,
-  useQueryState,
-} from "nuqs"
+import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs"
 
 const SKELETON_ROWS = 12
 
@@ -53,7 +49,7 @@ function GlossaryTableSkeleton() {
         <table className="w-full table-fixed border-collapse">
           <thead>
             <tr>
-              {["term", "shortForm", "description", "related"].map((col) => (
+              {["term", "shortForm", "description"].map((col) => (
                 <th
                   key={col}
                   className="text-tech-main/50 border-tech-line/30 bg-tech-bg/95 sticky top-0 z-10 border-b px-3 py-2 text-left text-xs font-medium backdrop-blur-sm">
@@ -76,9 +72,6 @@ function GlossaryTableSkeleton() {
                 </td>
                 <td className="px-3 py-3">
                   <SegmentedBar opacity="medium" className="h-4 w-48" />
-                </td>
-                <td className="px-3 py-3">
-                  <SegmentedBar opacity="low" className="h-4 w-24" />
                 </td>
               </tr>
             ))}
@@ -107,11 +100,17 @@ function GlossaryTableSkeleton() {
 }
 
 export interface GlossaryBrowserProps {
-  categories: CategoryFilterCategory[]
+  categories: GlossaryCategoryOption[]
   locale: string
   totalCount: number
   children?: React.ReactNode
   className?: string
+}
+
+function sanitizeColumns(value: unknown): GlossaryColumn[] {
+  if (!Array.isArray(value)) return [...GLOSSARY_COLUMNS]
+  const columns = value.filter(isGlossaryColumn)
+  return columns.length > 0 ? columns : [...GLOSSARY_COLUMNS]
 }
 
 export function GlossaryBrowser({
@@ -124,44 +123,56 @@ export function GlossaryBrowser({
   const t = useTranslations("Glossary")
   const { entries, isLoading: entriesLoading } = useLocalizedGlossary(locale)
 
-  const localeDefaults = React.useMemo(
-    () => getDefaultGlossaryTableColumns(locale),
-    [locale]
-  )
-
-  const resultCount = entries.length
-
   const [query, setQuery] = useQueryState("q", parseAsString.withDefault(""))
-  const [searchScope, setSearchScope] = useQueryState(
-    "scope",
-    parseAsStringLiteral(["active", "all"]).withDefault("active")
-  )
   const [selectedCategories, setSelectedCategories] = useQueryState(
     "categories",
     parseAsArrayOf(parseAsString).withDefault([])
   )
-  const [visibleColumns, setVisibleColumns] = React.useState<
-    GlossaryTableColumn[]
-  >(() => readPersistedGlossaryColumns(locale) ?? localeDefaults)
-  const [density, setDensity] = React.useState<GlossaryDensity>(
-    () => readPersistedGlossaryDensity() ?? "normal"
+  const [visibleColumns, setVisibleColumns] = React.useState<GlossaryColumn[]>(
+    () => sanitizeColumns(readPersistedGlossaryColumns(locale))
   )
 
   const handleVisibleColumnsChange = React.useCallback(
-    (next: GlossaryTableColumn[]) => {
-      setVisibleColumns(next)
-      writePersistedGlossaryColumns(locale, next)
+    (next: GlossaryColumn[]) => {
+      const sanitized = sanitizeColumns(next)
+      setVisibleColumns(sanitized)
+      writePersistedGlossaryColumns(locale, sanitized)
     },
     [locale]
   )
-
-  const handleDensityChange = React.useCallback((next: GlossaryDensity) => {
-    setDensity(next)
-    writePersistedGlossaryDensity(next)
-  }, [])
   const [selectedEntry, setSelectedEntry] =
     React.useState<GlossaryIndexEntry | null>(null)
   const isReady = !entriesLoading
+
+  const filteredEntries = React.useMemo(
+    () =>
+      filterGlossaryEntries(entries, {
+        query,
+        selectedCategories,
+      }),
+    [entries, query, selectedCategories]
+  )
+  const resultCount = filteredEntries.length
+  const hasActiveQuery = query.trim().length > 0
+  const hasActiveFilters = hasActiveQuery || selectedCategories.length > 0
+
+  const handleClearFilters = React.useCallback(() => {
+    void setQuery("")
+    void setSelectedCategories([])
+  }, [setQuery, setSelectedCategories])
+
+  const handleRemoveQuery = React.useCallback(() => {
+    void setQuery("")
+  }, [setQuery])
+
+  const handleRemoveCategory = React.useCallback(
+    (name: string) => {
+      void setSelectedCategories(
+        selectedCategories.filter((entry) => entry !== name)
+      )
+    },
+    [selectedCategories, setSelectedCategories]
+  )
 
   const entriesBySlug = React.useMemo(
     () => new Map(entries.map((entry) => [entry.slug, entry] as const)),
@@ -215,63 +226,108 @@ export function GlossaryBrowser({
   }, [openDetailBySlug])
 
   const availableLetters = React.useMemo(
-    () => [...new Set(entries.map((entry) => entry.indexLetter))],
-    [entries]
+    () =>
+      hasActiveFilters
+        ? []
+        : [...new Set(entries.map((entry) => entry.indexLetter))],
+    [entries, hasActiveFilters]
   )
 
   return (
     <div className={cn("flex flex-col gap-6", className)}>
-      <section aria-label={t("letterBarLabel")} className="relative z-30">
-        <div className="border-tech-main/30 bg-surface-overlay/60 relative flex flex-col gap-3 border p-3 backdrop-blur-sm sm:p-4">
-          <div className="grid gap-3 sm:flex sm:flex-row sm:items-center">
+      <section aria-label={t("controlsLabel")} className="relative z-30">
+        <div className="border-tech-main/30 bg-surface-overlay/60 relative flex flex-col gap-4 border p-3 backdrop-blur-sm sm:p-4">
+          <div className="flex flex-wrap items-center gap-2">
             <GlossarySearch
               query={query}
-              scope={searchScope}
               onQueryChange={setQuery}
-              onScopeChange={setSearchScope}
-              resultCount={resultCount}
-              totalCount={totalCount}
-              className="min-w-0 sm:flex-1"
+              className="min-w-56 flex-1"
             />
-            <div className="flex flex-wrap items-center gap-2">
-              <ColumnPicker
-                locale={locale}
-                visibleColumns={visibleColumns}
-                onChange={handleVisibleColumnsChange}
-              />
-              <DensityToggle value={density} onChange={handleDensityChange} />
-              <Button
-                asChild
-                size="sm"
-                className="ml-auto min-h-11 flex-1 sm:flex-none">
-                <Link href="/glossary/edit/new" locale={locale as "en" | "zh"}>
-                  {t("proposeEditsCta")}
-                </Link>
-              </Button>
-            </div>
+            <CategoryFacet
+              categories={categories}
+              selected={selectedCategories}
+              onChange={setSelectedCategories}
+            />
+            <Separator
+              orientation="vertical"
+              className="bg-tech-line/40 mx-1 hidden h-6 sm:block"
+            />
+            <FieldPicker
+              visibleColumns={visibleColumns}
+              onChange={handleVisibleColumnsChange}
+            />
+            <Button asChild size="sm" className="ml-auto min-h-11">
+              <Link href="/glossary/edit/new" locale={locale as "en" | "zh"}>
+                <Plus aria-hidden="true" />
+                {t("proposeEditsCta")}
+              </Link>
+            </Button>
           </div>
 
-          <CategoryFilter
-            categories={categories}
-            selected={selectedCategories}
-            onChange={setSelectedCategories}
-            totalCount={totalCount}
-          />
+          <output
+            aria-live="polite"
+            aria-atomic="true"
+            className="text-tech-main/60 block text-xs tabular-nums">
+            {t("searchResultSummary", { resultCount, totalCount })}
+          </output>
+
+          {hasActiveFilters ? (
+            <div className="flex flex-wrap items-center gap-2">
+              {hasActiveQuery ? (
+                <Badge variant="neutral" className="gap-1.5 py-1 pr-1 pl-2.5">
+                  <span className="max-w-48 truncate">{query.trim()}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    onClick={handleRemoveQuery}
+                    aria-label={t("removeQueryFilter")}
+                    className="min-h-0">
+                    <X aria-hidden="true" />
+                  </Button>
+                </Badge>
+              ) : null}
+              {selectedCategories.map((name) => (
+                <Badge
+                  key={name}
+                  variant="neutral"
+                  className="gap-1.5 py-1 pr-1 pl-2.5">
+                  <span className="max-w-48 truncate">{name}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    onClick={() => handleRemoveCategory(name)}
+                    aria-label={t("removeCategoryFilter", { name })}
+                    className="min-h-0">
+                    <X aria-hidden="true" />
+                  </Button>
+                </Badge>
+              ))}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleClearFilters}
+                className="min-h-11">
+                {t("clearFilters")}
+              </Button>
+            </div>
+          ) : null}
         </div>
       </section>
 
-      <LetterBar availableLetters={availableLetters} />
+      {hasActiveFilters ? null : (
+        <LetterBar availableLetters={availableLetters} />
+      )}
 
       {entriesLoading ? (
         <GlossaryTableSkeleton />
       ) : (
         <GlossaryTable
-          entries={entries}
+          entries={filteredEntries}
           visibleColumns={visibleColumns}
-          density={density}
-          query={query}
-          searchScope={searchScope}
-          selectedCategories={selectedCategories}
+          hasActiveFilters={hasActiveFilters}
           locale={locale}
           onOpenDetail={setSelectedEntry}
           isReady={isReady}

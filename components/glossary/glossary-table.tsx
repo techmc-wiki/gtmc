@@ -5,89 +5,33 @@ import { useVirtualizer } from "@tanstack/react-virtual"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/cn"
 import { EmptyState } from "@/components/ui/empty-state"
-import { buildGlossarySearchIndex } from "@/lib/glossary/search"
 import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
-import {
-  normalizeGlossarySiteLocale,
-  type GlossarySiteLocale,
-} from "@/lib/glossary/locales"
-import {
-  getGlossaryDisplayName,
-  parseGlossaryTranslationColumn,
-  type GlossaryDensity,
-  type GlossaryTableColumn,
-} from "@/lib/glossary/view-options"
+import type { GlossaryColumn } from "@/lib/glossary/view-options"
 import { GlossaryTableRow, GlossaryCard } from "./glossary-entry"
 
 interface GlossaryTableProps {
   entries: GlossaryIndexEntry[]
-  visibleColumns: GlossaryTableColumn[]
-  density: GlossaryDensity
-  query: string
-  searchScope: "active" | "all"
-  selectedCategories: string[]
+  visibleColumns: GlossaryColumn[]
+  hasActiveFilters: boolean
   locale: string
   onOpenDetail?: (entry: GlossaryIndexEntry) => void
   className?: string
   isReady?: boolean
 }
 
+const COLUMN_LABEL_KEYS: Record<GlossaryColumn, string> = {
+  term: "columnTerm",
+  shortForm: "columnShortForm",
+  description: "columnDescription",
+}
 const VIRTUAL_OVERSCAN = 10
 const VIRTUAL_LETTER_ROW_HEIGHT = 48
-const VIRTUAL_ROW_HEIGHT = {
-  compact: 40,
-  normal: 52,
-  comfortable: 64,
-} as const satisfies Record<GlossaryDensity, number>
-const MOBILE_VIRTUAL_ROW_HEIGHT = {
-  compact: 112,
-  normal: 132,
-  comfortable: 156,
-} as const satisfies Record<GlossaryDensity, number>
+const VIRTUAL_ROW_HEIGHT = 52
+const MOBILE_VIRTUAL_ROW_HEIGHT = 132
 
-type SearchScope = "active" | "all"
-type GlossarySearchIndex = ReturnType<typeof buildGlossarySearchIndex>
 type VirtualGlossaryRow =
   | { type: "letter"; letter: string; count: number }
   | { type: "entry"; entry: GlossaryIndexEntry }
-
-let searchIndexCache: {
-  entries: GlossaryIndexEntry[]
-  scope: SearchScope
-  locale: GlossarySiteLocale
-  index: GlossarySearchIndex
-} | null = null
-
-function getCachedSearchIndex(
-  entries: GlossaryIndexEntry[],
-  scope: SearchScope,
-  locale: GlossarySiteLocale
-): GlossarySearchIndex {
-  if (
-    !searchIndexCache ||
-    searchIndexCache.entries !== entries ||
-    searchIndexCache.scope !== scope ||
-    searchIndexCache.locale !== locale
-  ) {
-    searchIndexCache = {
-      entries,
-      scope,
-      locale,
-      index: buildGlossarySearchIndex(entries, scope, locale),
-    }
-  }
-
-  return searchIndexCache.index
-}
-
-const COLUMN_LABEL_KEYS: Record<string, string> = {
-  term: "columnTerm",
-  shortForm: "columnShortForm",
-  category: "columnCategory",
-  regex: "columnRegex",
-  description: "columnDescription",
-  related: "columnRelated",
-}
 
 const headerCellBase =
   "text-xs font-medium text-tech-main/60 border-tech-line/30 sticky top-0 z-10 border-b bg-tech-bg/95 px-3 py-2 text-left backdrop-blur-sm"
@@ -198,7 +142,6 @@ function MobileLetterVirtualRow({
   )
 }
 function MobileEntryVirtualRow({
-  density,
   entry,
   index,
   isReady,
@@ -208,9 +151,7 @@ function MobileEntryVirtualRow({
   start,
   virtualKey,
   visibleColumns,
-  visibleColumnsSet,
 }: {
-  density: GlossaryDensity
   entry: GlossaryIndexEntry
   index: number
   isReady?: boolean
@@ -219,8 +160,7 @@ function MobileEntryVirtualRow({
   onOpenDetail?: (entry: GlossaryIndexEntry) => void
   start: number
   virtualKey: React.Key
-  visibleColumns: GlossaryTableColumn[]
-  visibleColumnsSet: ReadonlySet<string>
+  visibleColumns: GlossaryColumn[]
 }) {
   const style = React.useMemo<React.CSSProperties>(
     () => ({ transform: `translateY(${start}px)` }),
@@ -237,37 +177,17 @@ function MobileEntryVirtualRow({
       <GlossaryCard
         entry={entry}
         visibleColumns={visibleColumns}
-        visibleColumnsSet={visibleColumnsSet}
         locale={locale}
-        density={density}
         onOpenDetail={onOpenDetail}
         isReady={isReady}
       />
     </div>
   )
 }
-
-function getTranslationColumnLabel(
-  column: string,
-  descriptionLabel: string
-): string | null {
-  const translationColumn = parseGlossaryTranslationColumn(column)
-  if (!translationColumn) return null
-  const displayName = getGlossaryDisplayName(translationColumn.locale)
-  if (translationColumn.field === "term") return displayName
-  if (translationColumn.field === "description") {
-    return `${descriptionLabel} (${displayName})`
-  }
-  return null
-}
-
 export function GlossaryTable({
   entries,
   visibleColumns,
-  density,
-  query,
-  searchScope,
-  selectedCategories,
+  hasActiveFilters,
   locale,
   onOpenDetail,
   className,
@@ -277,43 +197,12 @@ export function GlossaryTable({
   const tableScrollRef = React.useRef<HTMLDivElement>(null)
   const mobileScrollRef = React.useRef<HTMLDivElement>(null)
 
-  const indexLocale = normalizeGlossarySiteLocale(locale)
-
-  const categoryFiltered = React.useMemo(() => {
-    if (selectedCategories.length === 0) return entries
-    const allow = new Set(selectedCategories)
-    return entries.filter((e) => e.categories.some((c) => allow.has(c)))
-  }, [entries, selectedCategories])
-
-  const trimmedQuery = query.trim()
-
-  const filteredEntries = React.useMemo(() => {
-    if (!trimmedQuery) return categoryFiltered
-
-    const index = getCachedSearchIndex(
-      categoryFiltered,
-      searchScope,
-      indexLocale
-    )
-    const hits = index.search(trimmedQuery)
-    const hitOrder = new Map<string, number>()
-    hits.forEach((hit, i) => {
-      hitOrder.set(hit.id as string, i)
-    })
-
-    return categoryFiltered
-      .filter((e) => hitOrder.has(e.slug))
-      .toSorted(
-        (a, b) => (hitOrder.get(a.slug) ?? 0) - (hitOrder.get(b.slug) ?? 0)
-      )
-  }, [categoryFiltered, trimmedQuery, searchScope, indexLocale])
-
   const grouped = React.useMemo(() => {
-    if (trimmedQuery) {
-      return [{ letter: "_results", items: filteredEntries }]
+    if (hasActiveFilters) {
+      return [{ letter: "_results", items: entries }]
     }
     const byLetter = new Map<string, GlossaryIndexEntry[]>()
-    for (const entry of filteredEntries) {
+    for (const entry of entries) {
       const letter = entry.indexLetter
       let bucket = byLetter.get(letter)
       if (!bucket) {
@@ -329,7 +218,7 @@ export function GlossaryTable({
         return a.localeCompare(b)
       })
       .map(([letter, items]) => ({ letter, items }))
-  }, [filteredEntries, trimmedQuery])
+  }, [entries, hasActiveFilters])
 
   const virtualRows = React.useMemo<VirtualGlossaryRow[]>(() => {
     const rows: VirtualGlossaryRow[] = []
@@ -348,13 +237,6 @@ export function GlossaryTable({
     return rows
   }, [grouped])
 
-  const rowHeight = VIRTUAL_ROW_HEIGHT[density]
-  const mobileRowHeight = MOBILE_VIRTUAL_ROW_HEIGHT[density]
-  const visibleColumnsSet = React.useMemo(
-    () => new Set(visibleColumns),
-    [visibleColumns]
-  )
-
   const letterOffsets = React.useMemo(() => {
     let offset = 0
     const offsets: { letter: string; top: number }[] = []
@@ -363,11 +245,11 @@ export function GlossaryTable({
         offsets.push({ letter: row.letter, top: offset })
         offset += VIRTUAL_LETTER_ROW_HEIGHT
       } else {
-        offset += rowHeight
+        offset += VIRTUAL_ROW_HEIGHT
       }
     }
     return offsets
-  }, [rowHeight, virtualRows])
+  }, [virtualRows])
 
   const rowVirtualizer = useVirtualizer({
     count: virtualRows.length,
@@ -375,7 +257,7 @@ export function GlossaryTable({
     estimateSize: (index) =>
       virtualRows[index]?.type === "letter"
         ? VIRTUAL_LETTER_ROW_HEIGHT
-        : rowHeight,
+        : VIRTUAL_ROW_HEIGHT,
     overscan: VIRTUAL_OVERSCAN,
   })
 
@@ -385,7 +267,7 @@ export function GlossaryTable({
     estimateSize: (index) =>
       virtualRows[index]?.type === "letter"
         ? VIRTUAL_LETTER_ROW_HEIGHT
-        : mobileRowHeight,
+        : MOBILE_VIRTUAL_ROW_HEIGHT,
     overscan: VIRTUAL_OVERSCAN,
     measureElement: (element) => element.getBoundingClientRect().height,
   })
@@ -407,14 +289,13 @@ export function GlossaryTable({
         )
       : 0
 
-  if (filteredEntries.length === 0) {
+  if (entries.length === 0) {
     return (
       <div className={className}>
         <EmptyState message={t("noResults")} />
       </div>
     )
   }
-
   const colCount = visibleColumns.length || 1
   const mobileVirtualItems = mobileVirtualizer.getVirtualItems()
 
@@ -422,8 +303,7 @@ export function GlossaryTable({
     <div className={cn("flex flex-col gap-8", className)}>
       <div
         ref={tableScrollRef}
-        className="border-tech-line/30 custom-bottom-scrollbar relative hidden h-[min(70vh,48rem)] overflow-auto border md:block"
-        data-density={density}>
+        className="border-tech-line/30 custom-bottom-scrollbar relative hidden h-[min(70vh,48rem)] overflow-auto border md:block">
         {letterOffsets.length > 0 && (
           <div
             aria-hidden="true"
@@ -436,27 +316,18 @@ export function GlossaryTable({
         <table className="w-full table-fixed border-collapse">
           <thead>
             <tr>
-              {visibleColumns.map((col) => {
-                const key = COLUMN_LABEL_KEYS[col]
-                const translationLabel = getTranslationColumnLabel(
-                  col,
-                  t("columnDescription")
-                )
-                return (
-                  <th
-                    key={col}
-                    scope="col"
-                    className={cn(
-                      headerCellBase,
-                      col === "term" && "min-w-[10rem]",
-                      col === "description" && "max-w-[36rem]",
-                      col.startsWith("translation:") && "max-w-[24rem]"
-                    )}>
-                    {translationLabel ??
-                      (key ? t(key as Parameters<typeof t>[0]) : col)}
-                  </th>
-                )
-              })}
+              {visibleColumns.map((col: GlossaryColumn) => (
+                <th
+                  key={col}
+                  scope="col"
+                  className={cn(
+                    headerCellBase,
+                    col === "term" && "min-w-[10rem]",
+                    col === "description" && "max-w-[36rem]"
+                  )}>
+                  {t(COLUMN_LABEL_KEYS[col] as Parameters<typeof t>[0])}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -490,7 +361,6 @@ export function GlossaryTable({
                   key={virtualItem.key}
                   entry={row.entry}
                   visibleColumns={visibleColumns}
-                  density={density}
                   locale={locale}
                   onOpenDetail={onOpenDetail}
                   isReady={isReady}
@@ -512,8 +382,7 @@ export function GlossaryTable({
 
       <div
         ref={mobileScrollRef}
-        className="custom-bottom-scrollbar relative h-[min(75vh,44rem)] overflow-auto md:hidden"
-        data-density={density}>
+        className="custom-bottom-scrollbar relative h-[min(75vh,44rem)] overflow-auto md:hidden">
         <div className="relative w-full" style={mobileTotalSizeStyle}>
           {mobileVirtualItems.map((virtualItem) => {
             const row = virtualRows[virtualItem.index]
@@ -542,9 +411,7 @@ export function GlossaryTable({
                 start={virtualItem.start}
                 measureElement={mobileVirtualizer.measureElement}
                 visibleColumns={visibleColumns}
-                visibleColumnsSet={visibleColumnsSet}
                 locale={locale}
-                density={density}
                 onOpenDetail={onOpenDetail}
                 isReady={isReady}
               />

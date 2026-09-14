@@ -1,42 +1,47 @@
 "use client"
 
 import * as React from "react"
+import { ChevronDown, ListFilter } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { Badge } from "@/components/ui/shadcn/badge"
 import { Button } from "@/components/ui/shadcn/button"
 import { cn } from "@/lib/cn"
 import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from "@/components/ui/shadcn/collapsible"
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/shadcn/popover"
 
-export interface CategoryFilterCategory {
+export interface GlossaryCategoryOption {
   name: string
   count: number
 }
 
-export interface CategoryFilterProps {
-  categories: CategoryFilterCategory[]
+export interface CategoryFacetProps {
+  categories: GlossaryCategoryOption[]
   selected: string[]
   onChange: (selected: string[]) => void
-  totalCount: number
   className?: string
 }
 
-interface RowProps {
+interface CategoryRowProps {
   label: string
   count: number
   active: boolean
-  name?: string
-  onClick?: () => void
-  onToggle?: (name: string) => void
+  name: string
+  onToggle: (name: string) => void
 }
 
-function Row({ label, count, active, name, onClick, onToggle }: RowProps) {
+function CategoryRow({
+  label,
+  count,
+  active,
+  name,
+  onToggle,
+}: CategoryRowProps) {
   const handleClick = React.useCallback(() => {
-    if (onClick) onClick()
-    else if (onToggle && name) onToggle(name)
-  }, [onClick, onToggle, name])
+    onToggle(name)
+  }, [onToggle, name])
 
   return (
     <Button
@@ -45,7 +50,7 @@ function Row({ label, count, active, name, onClick, onToggle }: RowProps) {
       aria-pressed={active}
       variant="ghost"
       className={cn(
-        "w-full justify-start whitespace-normal text-left",
+        "group w-full justify-start whitespace-normal text-left",
         active && "bg-accent"
       )}>
       <span
@@ -58,46 +63,24 @@ function Row({ label, count, active, name, onClick, onToggle }: RowProps) {
         )}
       />
       <span className="min-w-0 flex-1 truncate">{label}</span>
-      <span
-        className={cn(
-          "shrink-0",
-          active ? "text-tech-main-dark/70" : "text-tech-main/60"
-        )}>
+      <Badge variant="neutral" className="shrink-0 tabular-nums">
         {count}
-      </span>
+      </Badge>
     </Button>
   )
 }
 
-function Chevron() {
-  return (
-    <span className="t-acc-chevron" aria-hidden="true">
-      <svg viewBox="0 0 16 16" className="size-4 shrink-0">
-        <path
-          d="M4 6.5L8 10.5L12 6.5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
-      </svg>
-    </span>
-  )
-}
-
-export function CategoryFilter({
+export function CategoryFacet({
   categories,
   selected,
   onChange,
-  totalCount,
   className,
-}: CategoryFilterProps) {
+}: CategoryFacetProps) {
   const t = useTranslations("Glossary")
-  const allLabel = t("categoryAll")
-  const reactId = React.useId()
-  const panelId = `${reactId}-panel`
-
-  const [isOpen, setIsOpen] = React.useState(false)
-  const noneSelected = selected.length === 0
+  const triggerLabel =
+    selected.length === 0
+      ? t("categoryFacetLabel")
+      : t("categoriesSelectedCount", { count: selected.length })
   const selectedSet = React.useMemo(() => new Set(selected), [selected])
 
   const handleToggle = React.useCallback(
@@ -111,68 +94,40 @@ export function CategoryFilter({
     [selectedSet, selected, onChange]
   )
 
-  const handleSelectAll = React.useCallback(() => {
-    if (selected.length > 0) onChange([])
-  }, [selected, onChange])
-
-  const triggerLabel = noneSelected
-    ? `${allLabel} (${totalCount})`
-    : t("categoriesSelectedCount", { count: selected.length })
-
   return (
-    <Collapsible
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      data-open={isOpen}
-      className={cn("t-acc flex flex-col", className)}
-      onKeyDown={(event) => {
-        if (event.key === "Escape") {
-          setIsOpen(false)
-          event.currentTarget
-            .querySelector<HTMLButtonElement>(".t-acc-head")
-            ?.focus()
-        }
-      }}>
-      <CollapsibleTrigger asChild>
+    <Popover>
+      <PopoverTrigger asChild>
         <Button
           type="button"
           variant="outline"
-          className="t-acc-head w-full justify-between">
+          size="sm"
+          className={cn("min-h-11", className)}>
+          <ListFilter aria-hidden="true" />
           <span className="truncate">{triggerLabel}</span>
-          <Chevron />
+          <ChevronDown aria-hidden="true" />
         </Button>
-      </CollapsibleTrigger>
+      </PopoverTrigger>
 
-      <CollapsibleContent
-        forceMount
-        className="t-acc-panel"
-        inert={!isOpen}
-        aria-hidden={!isOpen}>
-        <div className="t-acc-panel-inner min-h-0">
-          <div id={panelId} className="flex flex-col gap-2 pt-2">
-            <Row
-              label={allLabel}
-              count={totalCount}
-              active={noneSelected}
-              onClick={handleSelectAll}
-            />
-            {categories.length > 0 ? (
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {categories.map((category) => (
-                  <Row
-                    key={category.name}
-                    label={category.name}
-                    name={category.name}
-                    count={category.count}
-                    active={selectedSet.has(category.name)}
-                    onToggle={handleToggle}
-                  />
-                ))}
-              </div>
-            ) : null}
+      <PopoverContent
+        align="start"
+        sideOffset={8}
+        aria-label={t("categoryFacetLabel")}
+        className="border-tech-line/30 bg-surface-overlay/95 w-72 border p-0 backdrop-blur-md">
+        <div className="custom-vertical-scrollbar max-h-[60vh] overflow-y-auto p-3">
+          <div className="flex flex-col gap-2">
+            {categories.map((category) => (
+              <CategoryRow
+                key={category.name}
+                label={category.name}
+                name={category.name}
+                count={category.count}
+                active={selectedSet.has(category.name)}
+                onToggle={handleToggle}
+              />
+            ))}
           </div>
         </div>
-      </CollapsibleContent>
-    </Collapsible>
+      </PopoverContent>
+    </Popover>
   )
 }

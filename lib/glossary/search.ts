@@ -1,6 +1,5 @@
 import MiniSearch from "minisearch"
 import { CJK_TOKENIZER } from "@/lib/search/cjk-tokenizer"
-import type { GlossarySiteLocale } from "./locales"
 import type { GlossaryEntryBase, GlossarySummaryEntry } from "./manifest"
 import summaryData from "@/data/glossary-summary.json" with { type: "json" }
 
@@ -57,54 +56,45 @@ export function searchGlossary(query: string): GlossarySummaryEntry[] {
   }))
 }
 
-type IndexedFullEntry = { id: string } & Record<string, string>
+export type GlossarySearchDocument = { id: string } & Record<string, string>
+export type GlossarySearchIndex = MiniSearch<GlossarySearchDocument>
 type GlossarySearchSource = Pick<
   GlossaryEntryBase,
   "slug" | "fullFormEn" | "shortForm" | "translations"
 >
 
 export function buildGlossarySearchIndex(
-  entries: GlossarySearchSource[],
-  scope: "active" | "all",
-  activeLocale: GlossarySiteLocale
-): MiniSearch<IndexedFullEntry> {
-  let fields: string[]
+  entries: GlossarySearchSource[]
+): GlossarySearchIndex {
+  const fields = [
+    "fullFormEn",
+    "shortForm",
+    "trans_ar",
+    "trans_zh",
+    "trans_fr",
+    "trans_de",
+    "trans_it",
+    "trans_ja",
+    "trans_ko",
+    "trans_pt",
+    "trans_ru",
+    "trans_es",
+  ]
 
-  if (scope === "all") {
-    fields = [
-      "fullFormEn",
-      "shortForm",
-      "trans_ar",
-      "trans_zh",
-      "trans_fr",
-      "trans_de",
-      "trans_it",
-      "trans_ja",
-      "trans_ko",
-      "trans_pt",
-      "trans_ru",
-      "trans_es",
-    ]
-  } else if (activeLocale === "en") {
-    fields = ["fullFormEn", "shortForm"]
-  } else {
-    fields = ["fullFormEn", `trans_${activeLocale}`]
-  }
-
-  const miniSearch = new MiniSearch<IndexedFullEntry>({
+  const miniSearch = new MiniSearch<GlossarySearchDocument>({
     fields,
-    storeFields: ["slug", "fullFormEn", "shortForm"],
+    storeFields: ["id", "slug", "fullFormEn", "shortForm"],
     tokenize: CJK_TOKENIZER,
     searchOptions: {
-      boost: activeLocale === "zh" ? { trans_zh: 2 } : { fullFormEn: 2 },
+      boost: { fullFormEn: 2 },
       fuzzy: 0.2,
       prefix: true,
       tokenize: CJK_TOKENIZER,
     },
   })
 
-  const documents: IndexedFullEntry[] = entries.map((entry) => {
-    const doc: IndexedFullEntry = {
+  const documents: GlossarySearchDocument[] = entries.map((entry) => {
+    const doc: GlossarySearchDocument = {
       id: entry.slug,
       slug: entry.slug,
       fullFormEn: entry.fullFormEn,

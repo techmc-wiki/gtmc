@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { AlertTriangle, Trash2 } from "lucide-react"
+import { AlertTriangle, ChevronDown, Trash2 } from "lucide-react"
 
 import { cn } from "@/lib/cn"
 import { Input } from "@/components/ui/shadcn/input"
@@ -115,7 +115,7 @@ function GlossaryEditCardHeader({
             isDelete && "line-through text-red-700 dark:text-red-400"
           )}
           title={headerTerm}>
-          {headerTerm || "-"}
+          {headerTerm}
         </CardTitle>
       </div>
       {!isReadOnly && (
@@ -565,13 +565,20 @@ function OtherLanguagesFields({
   disabled?: boolean
 }) {
   return (
-    <Collapsible className="border-border bg-surface-overlay/30 border">
+    <Collapsible className="border-border bg-surface-overlay/30 group border">
       <CollapsibleTrigger asChild>
         <button
           type="button"
-          className="text-muted-foreground hover:text-foreground w-full cursor-pointer px-3.5 py-2 text-left text-xs font-medium transition-colors">
-          Show {codes.length} other language{" "}
-          {codes.length === 1 ? "pair" : "pairs"} →
+          className="text-muted-foreground hover:text-foreground flex w-full cursor-pointer items-center gap-1 px-3.5 py-2 text-left text-xs font-medium transition-colors">
+          <span>
+            Show {codes.length} other language{" "}
+            {codes.length === 1 ? "pair" : "pairs"}
+          </span>
+          <span
+            aria-hidden="true"
+            className="inline-flex transition-transform group-data-[state=open]:rotate-180 motion-reduce:transition-none">
+            <ChevronDown aria-hidden="true" className="size-3.5 shrink-0" />
+          </span>
         </button>
       </CollapsibleTrigger>
       <CollapsibleContent className="flex flex-col gap-4 p-3.5 pt-1">

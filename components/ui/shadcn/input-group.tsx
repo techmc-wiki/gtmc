@@ -35,7 +35,7 @@ export function InputGroup({
   return (
     <div
       className={cn(
-        "border-tech-main/30 bg-surface-input relative inline-flex min-h-[44px] w-full min-w-0 items-center border text-tech-main-dark transition-colors has-[input:focus-visible,textarea:focus-visible]:border-tech-main has-data-[slot=input-group-addon][data-align=block-end]:flex-wrap",
+        "border-tech-main/30 bg-surface-input relative inline-flex min-h-11 w-full min-w-0 items-center border text-tech-main-dark transition-colors has-[input:focus-visible,textarea:focus-visible]:border-tech-main has-data-[slot=input-group-addon][data-align=block-end]:flex-wrap",
         className
       )}
       data-slot="input-group"

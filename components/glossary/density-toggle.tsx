@@ -79,7 +79,7 @@ export function DensityToggle({
         <label
           key={density}
           data-density={density}
-          className="t-tab flex min-h-11 items-center justify-center">
+          className="t-tab flex items-center justify-center">
           <input
             type="radio"
             name={groupName}

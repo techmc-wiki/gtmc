@@ -34,24 +34,20 @@ export async function StatusPage({ kind }: StatusPageProps) {
     <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative flex h-screen w-full">
       <HideFooter />
       <main className="relative z-10 mx-auto flex w-full max-w-2xl flex-col items-center justify-center px-4 md:px-0">
-        <div className="group animate-tech-pop-in fill-mode-forwards relative mb-8 w-full opacity-0 [animation-delay:0.2s] [animation-duration:0.8s] motion-reduce:animate-none motion-reduce:opacity-100">
+        <div className="relative mb-8 w-full">
           <div className="border-tech-main/40 bg-surface-overlay/60 relative overflow-hidden border p-8 text-center shadow-sm backdrop-blur-md sm:p-12 md:p-16">
-            <div className="mb-8 flex flex-col items-center">
-              <div className="animate-tech-slide-in fill-mode-forwards mb-4 flex items-center justify-center opacity-0 [animation-delay:0.6s] motion-reduce:animate-none motion-reduce:opacity-100">
-                <h1 className="display-title text-tech-main-dark text-7xl tracking-tight sm:text-8xl md:text-9xl">
-                  {config.code}
-                </h1>
-              </div>
-              <div className="relative overflow-hidden">
-                <h2 className="animate-tech-slide-in display-title text-tech-main-dark fill-mode-forwards text-xl tracking-tight opacity-0 [animation-delay:0.8s] motion-reduce:animate-none motion-reduce:opacity-100 sm:text-2xl">
-                  {title}
-                </h2>
-              </div>
+            <div className="t-stagger is-shown status-entrance mb-8 flex flex-col items-center">
+              <h1 className="t-stagger-line t-stagger-line--1 display-title text-tech-main-dark text-7xl tracking-tight sm:text-8xl md:text-9xl">
+                {config.code}
+              </h1>
+              <h2 className="t-stagger-line t-stagger-line--2 display-title text-tech-main-dark mt-4 text-xl tracking-tight sm:text-2xl">
+                {title}
+              </h2>
+              <p className="t-stagger-line t-stagger-line--3 text-tech-main-dark/80 mx-auto mt-8 mb-10 max-w-md text-center text-base">
+                {description}
+              </p>
             </div>
-            <p className="animate-fade-in text-tech-main-dark/80 fill-mode-forwards mx-auto mb-10 max-w-md text-center text-base opacity-0 [animation-delay:1.0s] motion-reduce:animate-none motion-reduce:opacity-100">
-              {description}
-            </p>
-            <div className="animate-slide-up-fade fill-mode-forwards w-full opacity-0 [animation-delay:1.2s] motion-reduce:animate-none motion-reduce:opacity-100">
+            <div className="w-full">
               <Button
                 asChild
                 className="flex h-12 items-center justify-center px-8 transition-transform duration-300 hover:scale-105 active:scale-95">

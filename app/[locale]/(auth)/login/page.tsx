@@ -37,10 +37,10 @@ export default function LoginPage() {
       {/* ======================================================== */}
       <main className="relative z-10 mx-auto flex w-full max-w-lg flex-col items-center justify-center px-4 md:px-0">
         {/* 信息卡片主体 */}
-        <div className="group animate-tech-pop-in fill-mode-forwards relative mb-8 w-full opacity-0 [animation-delay:0.2s] [animation-duration:0.8s] motion-reduce:animate-none motion-reduce:opacity-100">
-          <div className="border-tech-main/40 bg-surface-overlay/60 relative overflow-hidden border p-6 text-center shadow-sm backdrop-blur-md md:p-10">
+        <div className="group relative mb-8 w-full">
+          <div className="border-tech-main/40 bg-surface-overlay/60 t-stagger is-shown relative overflow-hidden border p-6 text-center shadow-sm backdrop-blur-md md:p-10">
             <div className="mb-8 flex flex-col items-center">
-              <div className="animate-tech-pop-in border-tech-main/40 bg-tech-main/5 fill-mode-forwards mb-4 flex size-12 items-center justify-center border opacity-0 [animation-delay:0.6s] motion-reduce:animate-none motion-reduce:opacity-100">
+              <div className="border-tech-main/40 bg-tech-main/5 mb-4 flex size-12 items-center justify-center border">
                 <svg
                   aria-hidden="true"
                   width="24"
@@ -60,16 +60,16 @@ export default function LoginPage() {
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
               </div>
-              <h1 className="animate-tech-slide-in display-title text-tech-main-dark fill-mode-forwards relative inline-block overflow-hidden text-3xl tracking-tight opacity-0 [animation-delay:0.7s] motion-reduce:animate-none motion-reduce:opacity-100">
+              <h1 className="display-title text-tech-main-dark t-stagger-line relative text-3xl tracking-tight">
                 {t("heading")}
               </h1>
             </div>
 
-            <p className="animate-fade-in text-tech-main-dark/70 fill-mode-forwards mx-auto mb-8 max-w-xs text-sm opacity-0 [animation-delay:1.1s] motion-reduce:animate-none motion-reduce:opacity-100">
+            <p className="text-tech-main-dark/70 t-stagger-line t-stagger-line--2 mx-auto mb-8 max-w-xs text-sm">
               {t("description")}
             </p>
 
-            <div className="animate-slide-up-fade fill-mode-forwards w-full opacity-0 [animation-delay:1.3s] motion-reduce:animate-none motion-reduce:opacity-100">
+            <div className="w-full">
               <Button
                 onClick={handleLogin}
                 disabled={isLoading}
@@ -85,7 +85,7 @@ export default function LoginPage() {
               </Button>
             </div>
 
-            <div className="animate-fade-in fill-mode-forwards mt-6 text-xs opacity-60 [animation-delay:1.6s] motion-reduce:animate-none">
+            <div className="mt-6 text-xs opacity-60">
               <Link
                 href="/"
                 className="hover:text-tech-main-dark mt-2 inline-block underline decoration-dashed underline-offset-4 transition-colors">

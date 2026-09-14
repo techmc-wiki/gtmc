@@ -36,7 +36,7 @@ export default function DraftLoading() {
         <SegmentedBar opacity="low" className="h-4 w-2/3" />
       </div>
       <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
-        <section className="animate-tech-slide-in min-w-0 motion-reduce:animate-none lg:col-start-1 lg:row-start-1">
+        <section className="min-w-0 lg:col-start-1 lg:row-start-1">
           <SectionTitle className="mb-4">In progress</SectionTitle>
           <div className="space-y-4">
             {[1, 2].map((item) => (
@@ -66,7 +66,7 @@ export default function DraftLoading() {
             </div>
           </Card>
         </aside>
-        <section className="animate-tech-slide-in min-w-0 [animation-delay:100ms] motion-reduce:animate-none lg:col-start-1 lg:row-start-2">
+        <section className="min-w-0 lg:col-start-1 lg:row-start-2">
           <SectionTitle className="mb-4">Past work</SectionTitle>
           <Card className="p-0 sm:p-0">
             <DraftRowSkeleton compact />

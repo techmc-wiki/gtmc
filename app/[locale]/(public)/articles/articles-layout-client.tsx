@@ -23,9 +23,9 @@ import {
 } from "@/components/articles/outline-navigation"
 import { useFooterOverlap } from "@/hooks/use-footer-overlap"
 
-const treeDropInStyle: React.CSSProperties = {
-  animation: "tree-drop-in 1.05s cubic-bezier(0.16, 1, 0.3, 1) both",
-}
+const treePanelStyle = {
+  "--panel-translate-y": "12px",
+} as React.CSSProperties
 
 interface ArticlesLayoutProps {
   children: React.ReactNode
@@ -36,12 +36,12 @@ function TreeLoadingPlaceholder() {
   return (
     <div
       className="
-        relative h-full animate-tree-drop-in overflow-hidden border guide-line
+        t-panel-slide relative h-full overflow-hidden border guide-line
         bg-surface-overlay/80 px-3 py-4
-        motion-reduce:animate-none
         md:min-h-160 md:px-4 md:py-5
       "
-      style={treeDropInStyle}
+      style={treePanelStyle}
+      data-open="true"
       aria-hidden="true">
       <SectionRail
         label="Loading"

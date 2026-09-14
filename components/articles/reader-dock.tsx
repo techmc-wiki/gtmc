@@ -5,7 +5,6 @@ import { ArrowUpIcon } from "lucide-react"
 import { SITE_SCROLL_ROOT_ID } from "@/hooks/site-scroll-root"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/shadcn/button"
-import { cn } from "@/lib/cn"
 
 const RING_RADIUS = 15.5
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
@@ -35,7 +34,10 @@ export function ReaderDock({
   const scrollToTop = useCallback(() => {
     document
       .getElementById(SITE_SCROLL_ROOT_ID)
-      ?.scrollTo({ top: 0, behavior: "smooth" })
+      ?.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+      })
   }, [])
 
   const dashOffset = RING_CIRCUMFERENCE * (1 - Math.min(1, Math.max(0, pct / 100)))
@@ -43,12 +45,8 @@ export function ReaderDock({
   return (
     <div
       inert={!visible}
-      className={cn(
-        "border-tech-main/20 bg-surface-overlay/95 backdrop-blur-sm fixed right-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-30 flex items-stretch border transition-[translate,opacity] motion-reduce:transition-none duration-300 xl:hidden",
-        visible
-          ? "translate-y-0 opacity-100"
-          : "pointer-events-none translate-y-2 opacity-0"
-      )}>
+      data-open={visible}
+      className="t-panel-slide border-tech-main/20 bg-surface-overlay/95 backdrop-blur-sm fixed right-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-30 flex items-stretch border [--panel-translate-y:8px] xl:hidden">
       <Button variant="ghost" size="icon"
         type="button"
         onClick={scrollToTop}

@@ -59,7 +59,7 @@ export default async function ProfilePage({
   const roleValue = <RoleValue role={user.role} />
 
   return (
-    <div className="page-container animate-fade-in mt-4 sm:mt-8">
+    <div className="page-container mt-4 sm:mt-8">
       <div className="border-tech-main/40 border-b-2 pb-4">
         <h1 className="display-title text-tech-main-dark text-3xl md:text-5xl">
           {t("pageTitle")}

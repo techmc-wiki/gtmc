@@ -327,7 +327,7 @@ export default async function DraftDashboardPage({
   }
 
   return (
-    <div className="page-container animate-fade-in">
+    <div className="page-container">
       <PageHeader title={t("pageTitle")} />
 
       <p className="text-tech-main max-w-2xl text-base leading-relaxed">

@@ -15,6 +15,11 @@ interface ArticleLicenseNoticeProps {
 
 const DEFAULT_AUTHORS: string[] = []
 
+/**
+ * License and attribution control for the article's reuse terms. Rendered as
+ * the value of a metadata row, so the license name carries no label of its own
+ * and the surrounding grid supplies the gutter.
+ */
 export function ArticleLicenseNotice({
   title,
   canonicalUrl,
@@ -45,32 +50,26 @@ export function ArticleLicenseNotice({
   ]
     .filter(Boolean)
     .join(", ")
+
   return (
-    <section
-      aria-label={t("articleLicenseAria")}
-      className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.6875rem] text-tech-main/70">
-      <span className="mono-label text-[0.625rem] text-tech-main/55">
-        {t("reuseLicenseTitle")}
-      </span>
-      <span aria-hidden="true" className="text-tech-main/35">
-        |
-      </span>
+    <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
       <Link
         href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
         target="_blank"
         rel="noopener noreferrer"
-        className="underline decoration-tech-main/30 underline-offset-4 transition-colors hover:text-tech-main-dark hover:decoration-tech-main-dark">
+        className="
+          underline decoration-tech-main/30 underline-offset-4
+          transition-colors hover:text-tech-main-dark
+          hover:decoration-tech-main-dark
+        ">
         CC BY-NC-SA 4.0
       </Link>
-      <span aria-hidden="true" className="text-tech-main/35">
-        |
-      </span>
       <CopyButton
         getValue={() => attributionLabel}
         label={t("copySuggestedAttributionAria")}
         copiedLabel={t("copiedButton")}
         failedLabel={t("copyFailed")}
       />
-    </section>
+    </span>
   )
 }

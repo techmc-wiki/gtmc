@@ -24,7 +24,6 @@
     "translationPending": "Translation pending"
   },
   "ArticleMeta": {
-    "articleLicenseAria": "Article license",
     "attributionHistoryNote": "Primary authors are shown above. Additional contribution history may also be reflected in the linked source records and repository history.",
     "attributionPromptAlphabetical": "Suggested attribution (authors listed in alphabetical order):",
     "attributionPromptTruncated": "Suggested attribution (truncated to initial author and latest editor):",
@@ -43,6 +42,7 @@
     "copySuggestedAttributionAria": "Copy suggested attribution",
     "copySuggestedAttributionTitle": "Click to copy suggested attribution",
     "created": "Created:",
+    "contributorsLabel": "Contributors:",
     "dateLabel": "Published",
     "editArticle": "Edit article",
     "estReadTime": "Est. read time:",

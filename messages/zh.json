@@ -24,7 +24,6 @@
     "translationPending": "翻译待完成"
   },
   "ArticleMeta": {
-    "articleLicenseAria": "文章许可",
     "attributionHistoryNote": "主要作者显示在上方。其他贡献记录也可能反映在链接的源记录和仓库历史中。",
     "attributionPromptAlphabetical": "建议署名（作者按字母顺序排列）：",
     "attributionPromptTruncated": "建议署名（截断为初始作者和最新编辑者）：",
@@ -43,6 +42,7 @@
     "copySuggestedAttributionAria": "复制建议署名",
     "copySuggestedAttributionTitle": "点击复制建议署名",
     "created": "创建时间：",
+    "contributorsLabel": "贡献者：",
     "dateLabel": "发布日期",
     "editArticle": "编辑文章",
     "estReadTime": "预计阅读时间：",

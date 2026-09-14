@@ -1,13 +1,20 @@
 "use client"
 
 import { ChevronDown } from "lucide-react"
+import { Button } from "@/components/ui/shadcn/button"
 import { CopyButton } from "@/components/ui/copy-button"
 import { IconButton } from "@/components/ui/icon-button"
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/shadcn/avatar"
 
 import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react"
 import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
+import { cn } from "@/lib/cn"
 import { ArticleBanner } from "@/components/articles/article-banner"
 import { ArticleLicenseNotice } from "@/components/articles/article-license-notice"
 import { getArticleAssetPublicUrl } from "@/lib/articles/url"
@@ -113,6 +120,8 @@ export function ArticleMetadataAnonymous({
   bannerPath,
   bannerAlt,
 }: ArticleMetadataAnonymousProps) {
+  const t = useTranslations("ArticleMeta")
+
   return (
     <ArticleMetadataLayout
       title={title}
@@ -121,37 +130,30 @@ export function ArticleMetadataAnonymous({
       isRevising={isRevising}
       bannerPath={bannerPath}
       bannerAlt={bannerAlt}
-      pathLabel="PATH:">
-      <div className="text-tech-main/60">
-        <p>
-          {"WORD_COUNT: "}
-          <span className="text-tech-main">
-            {wordCount.toLocaleString()}
-          </span>
-          <span
-            className="
-              hidden
-              sm:inline
-            ">
-            {" "}
-            |{" "}
-          </span>
-          <br
-            className="
-              block
-              sm:hidden
-            "
-          />
-          {"EST_READ_TIME: "}
-          <span className="text-tech-main">{readingTime} MIN</span>
-        </p>
-      </div>
+      pathLabel={t("pathLabel")}>
+      <dl
+        className="
+          grid grid-cols-1 gap-y-2.5 text-[0.6875rem]
+          md:grid-cols-[auto_minmax(0,1fr)] md:items-baseline md:gap-x-4
+          md:gap-y-2
+        ">
+        <dt className="text-tech-main/55">{t("wordCount")}</dt>
+        <dd className="text-tech-main">{wordCount.toLocaleString()}</dd>
 
-      <ArticleLicenseNotice
-        title={title}
-        canonicalUrl={canonicalUrl}
-        attributionDate={attributionDate}
-      />
+        <dt className="text-tech-main/55">{t("estReadTime")}</dt>
+        <dd className="text-tech-main">
+          {readingTime} {t("minuteUnit")}
+        </dd>
+
+        <dt className="text-tech-main/55">{t("reuseLicenseTitle")}</dt>
+        <dd>
+          <ArticleLicenseNotice
+            title={title}
+            canonicalUrl={canonicalUrl}
+            attributionDate={attributionDate}
+          />
+        </dd>
+      </dl>
     </ArticleMetadataLayout>
   )
 }
@@ -177,35 +179,55 @@ function getAvatarUrl(username: string) {
   return `https://github.com/${username}.png`
 }
 
-function AuthorAvatar({
-  username,
-  sizes,
-  imageSizes,
-  title,
+/**
+ * One contributor in the byline roster. The primary author is set apart by
+ * weight alone — order and emphasis carry the hierarchy, so the roster stays a
+ * single wrapping row that reads the same at two authors or twelve.
+ */
+function ContributorChip({
+  handle,
+  isPrimary,
 }: {
-  username: string
-  sizes: string
-  imageSizes: string
-  title?: string
+  handle: string
+  isPrimary: boolean
 }) {
-  const href = `/authors/${encodeURIComponent(username)}`
-
   return (
-    <span className={`relative border guide-line ${sizes}`}>
+    <li>
       <Link
-        href={href}
-        aria-label={username}
-        className={`relative inline-block ${sizes}`}>
-        <Image
-          src={getAvatarUrl(username)}
-          alt={username}
-          className="border guide-line"
-          fill
-          title={title}
-          sizes={imageSizes}
-        />
+        href={`/authors/${encodeURIComponent(handle)}`}
+        className="
+          group/contributor flex min-h-11 items-center gap-1.5 py-0.5
+          text-[0.6875rem] text-tech-main transition-colors
+          hover:text-tech-main-dark sm:min-h-8
+        ">
+        <Avatar className="border guide-line size-5 shrink-0 sm:size-6">
+          <AvatarImage asChild src={getAvatarUrl(handle)}>
+            <Image
+              src={getAvatarUrl(handle)}
+              alt=""
+              fill
+              sizes="24px"
+              loading="lazy"
+              className="object-cover"
+            />
+          </AvatarImage>
+          <AvatarFallback
+            className="
+              bg-transparent font-mono text-[0.5625rem] font-bold
+              tracking-widest text-tech-main/50 uppercase
+            ">
+            {handle[0]}
+          </AvatarFallback>
+        </Avatar>
+        <span
+          className={cn(
+            "underline decoration-tech-main/30 underline-offset-4 group-hover/contributor:decoration-tech-main-dark",
+            isPrimary && "font-medium text-tech-main-dark"
+          )}>
+          {handle}
+        </span>
       </Link>
-    </span>
+    </li>
   )
 }
 
@@ -241,10 +263,13 @@ export function ArticleMetadataFull({
     setLastEditedLabel(formatRelativeTime(lastModified))
   }, [lastModified])
 
-  // Stable reference for the `authors` prop: recomputed only when author list changes
-  const allContributors = useMemo(() => [author, ...coAuthors], [author, coAuthors])
-  const displayContributors = allContributors.slice(0, 5)
-  const remainingCount = allContributors.length - 5
+  // Stable reference for the `authors` prop: recomputed only when the author
+  // list changes. Deduplicated so a handle repeated across frontmatter and
+  // co-author records yields one byline entry.
+  const allContributors = useMemo(
+    () => [...new Set([author, ...coAuthors])],
+    [author, coAuthors]
+  )
 
   const toggleCollapsed = useCallback(() => {
     setIsCollapsed((current) => !current)
@@ -254,8 +279,7 @@ export function ArticleMetadataFull({
     () => (
       <IconButton
         type="button"
-        variant="outline"
-        size="icon-sm"
+        className="md:size-8"
         onClick={toggleCollapsed}
         aria-expanded={!isCollapsed}
         aria-controls={detailsId}
@@ -284,7 +308,6 @@ export function ArticleMetadataFull({
         <div className="flex items-center gap-3">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-tech-main/65 sm:text-xs">
             <span className="inline-flex items-center gap-1.5">
-              <span className="size-1.5 bg-tech-main/40" />
               <Link
                 href={`/authors/${encodeURIComponent(author)}`}
                 className="text-tech-main underline decoration-tech-main/30 underline-offset-4">
@@ -316,128 +339,86 @@ export function ArticleMetadataFull({
           inert={isCollapsed ? true : undefined}
           className="t-acc-panel">
           <div className="t-acc-panel-inner min-h-0">
-            <div className="mt-3 flex flex-col gap-3 border-t guide-line pt-3 sm:gap-4">
-              <div
+            <div className="mt-3 border-t guide-line pt-3">
+              <dl
                 className="
-                  flex flex-col items-start gap-3
-                  sm:flex-row sm:items-center sm:justify-between
+                  grid grid-cols-1 gap-y-2.5 text-[0.6875rem]
+                  md:grid-cols-[auto_minmax(0,1fr)] md:items-baseline md:gap-x-4
+                  md:gap-y-2
                 ">
-                <div className="flex flex-row items-center gap-2">
-                  <span className="flex items-center gap-2">
-                    <AuthorAvatar
-                      username={author}
-                      sizes="size-6 sm:size-10"
-                      imageSizes="(max-width: 640px) 24px, 40px"
-                    />
-                    <Link
-                      href={`/authors/${encodeURIComponent(author)}`}
-                      className="text-xs text-tech-main underline">
-                      {author}
-                    </Link>
-                  </span>
+                <dt className="text-tech-main/55">
+                  {t("contributorsLabel")}
+                </dt>
+                <dd>
+                  <ul className="flex flex-wrap items-center gap-x-4">
+                    {allContributors.map((contributor, index) => (
+                      <ContributorChip
+                        key={contributor}
+                        handle={contributor}
+                        isPrimary={index === 0}
+                      />
+                    ))}
+                  </ul>
+                </dd>
 
-                  <span className="text-tech-main/60">&&</span>
+                <dt className="text-tech-main/55">{t("created")}</dt>
+                <dd className="text-tech-main">
+                  <time dateTime={createdAt}>
+                    {formatAbsoluteTime(createdAt, false)}
+                  </time>
+                </dd>
 
-                  {coAuthors.length > 0 && (
-                    <span
-                      className="
-                        flex flex-col gap-3
-                        sm:flex-row sm:items-center sm:gap-4
-                      ">
-                      <span className="flex items-center gap-1">
-                        {displayContributors.slice(1).map((contributor) => (
-                          <AuthorAvatar
-                            key={contributor}
-                            username={contributor}
-                            sizes="size-4 sm:size-6"
-                            imageSizes="(max-width: 640px) 16px, 24px"
-                            title={contributor}
-                          />
-                        ))}
-                        {remainingCount > 0 && (
-                          <span className="ml-1 text-tech-main/60">
-                            +{remainingCount}
-                          </span>
-                        )}
-                      </span>
-                    </span>
-                  )}
-                </div>
+                <dt className="text-tech-main/55">{t("lastEdited")}</dt>
+                <dd className="text-tech-main">
+                  <time dateTime={lastModified}>
+                    {formatAbsoluteTime(lastModified, false)}
+                  </time>
+                </dd>
 
-                <Link
-                  href={`/draft/new?file=${encodeURIComponent(editPath)}`}
-                  className="
-                    group relative inline-flex cursor-pointer items-center justify-center
-                    text-tech-main transition-colors after:absolute after:-inset-2.5
-                    after:content-[''] focus-visible:outline-tech-main
-                    focus-visible:outline-2 focus-visible:outline-offset-2
-                  ">
-                  <span
+                <dt className="text-tech-main/55">{t("urlLabel")}</dt>
+                <dd className="flex min-w-0 items-center gap-2">
+                  <code
                     className="
-                      border border-tech-main/40 bg-tech-main/5 px-2.5 py-1
-                      text-[0.6875rem] leading-none uppercase transition-colors
-                      group-hover:bg-tech-main group-hover:text-white
+                      min-w-0 flex-1 truncate border guide-line
+                      bg-tech-accent/10 px-1.5 py-0.5
                     ">
-                    {t("editArticle")}
-                  </span>
-                </Link>
-              </div>
-
-              <hr className="my-1 border-tech-main/40 sm:my-2" />
-
-              <div className="text-tech-main/60">
-                <p>
-                  {t("created")}
-                  <span className="text-tech-main">
-                    <time dateTime={createdAt}>
-                      {formatAbsoluteTime(createdAt, false)}
-                    </time>
-                  </span>
-                  <br
-                    className="
-                      block
-                      sm:hidden
-                    "
+                    {canonicalUrl}
+                  </code>
+                  <CopyButton
+                    getValue={() => canonicalUrl}
+                    label={t("copyButton")}
+                    copiedLabel={t("copiedButton")}
+                    failedLabel={t("copyFailed")}
                   />
-                  <span
-                    className="
-                      hidden
-                      sm:inline
-                    ">
-                    {" | "}
-                  </span>
-                  {t("lastEdited")}
-                  <span className="text-tech-main">
-                    <time dateTime={lastModified}>
-                      {formatAbsoluteTime(lastModified, false)}
-                    </time>
-                  </span>
-                </p>
-              </div>
+                </dd>
 
-              <div className="flex flex-row items-center gap-2">
-                <span className="text-tech-main/60">{t("urlLabel")}</span>
-                <code
+                <dt className="text-tech-main/55">
+                  {t("reuseLicenseTitle")}
+                </dt>
+                <dd>
+                  <ArticleLicenseNotice
+                    title={title}
+                    canonicalUrl={canonicalUrl}
+                    attributionDate={lastModified || createdAt}
+                    authors={allContributors}
+                  />
+                </dd>
+              </dl>
+
+              <div className="mt-3 flex justify-end border-t guide-line pt-3">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="xs"
                   className="
-                    truncate border guide-line bg-tech-accent/10 px-1.5 py-0.5
+                    border-tech-main/40 bg-tech-main/5 uppercase text-tech-main
+                    hover:border-tech-main/60 hover:bg-tech-main/10
                   ">
-                  {canonicalUrl}
-                </code>
-                <CopyButton
-                  getValue={() => canonicalUrl}
-                  label={t("copyButton")}
-                  copiedLabel={t("copiedButton")}
-                  failedLabel={t("copyFailed")}
-                />
+                  <Link href={`/draft/new?file=${encodeURIComponent(editPath)}`}>
+                    {t("editArticle")}
+                  </Link>
+                </Button>
               </div>
-
-              <ArticleLicenseNotice
-                title={title}
-                canonicalUrl={canonicalUrl}
-                attributionDate={lastModified || createdAt}
-                authors={allContributors}
-              />
-
             </div>
           </div>
         </div>

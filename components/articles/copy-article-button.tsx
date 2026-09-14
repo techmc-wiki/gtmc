@@ -77,6 +77,15 @@ export function CopyArticleButton() {
       disabled={state === "pending"}
       aria-busy={state === "pending"}
       aria-live="polite"
-      className={state === "failed" ? "text-destructive" : "text-muted-foreground"} label={label}>{state === "copied" ? <Check aria-hidden /> : state === "failed" ? <CircleAlert aria-hidden /> : <Clipboard aria-hidden />}<span className="sr-only" aria-live="polite">{label}</span></IconButton>
+      className={state === "failed" ? "text-destructive" : "text-muted-foreground"}
+      label={label}>
+      <span className="t-icon-swap" data-state={state === "copied" ? "b" : "a"} aria-hidden="true">
+        <span className="t-icon" data-icon="a">
+          {state === "failed" ? <CircleAlert className="size-4" /> : <Clipboard className="size-4" />}
+        </span>
+        <span className="t-icon" data-icon="b"><Check className="size-4" /></span>
+      </span>
+      <span className="sr-only" aria-live="polite">{label}</span>
+    </IconButton>
   )
 }

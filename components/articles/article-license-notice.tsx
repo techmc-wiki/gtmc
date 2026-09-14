@@ -78,7 +78,14 @@ export function ArticleLicenseNotice({
       <span aria-hidden="true" className="text-tech-main/35">
         |
       </span>
-      <IconButton onClick={handleCopyAttribution} label={isCopied ? t("copiedButton") : t("copySuggestedAttributionAria")}>{isCopied ? <Check aria-hidden /> : <Copy aria-hidden />}</IconButton>
+      <IconButton
+        onClick={handleCopyAttribution}
+        label={isCopied ? t("copiedButton") : t("copySuggestedAttributionAria")}>
+        <span className="t-icon-swap" data-state={isCopied ? "b" : "a"} aria-hidden="true">
+          <span className="t-icon" data-icon="a"><Copy className="size-4" /></span>
+          <span className="t-icon" data-icon="b"><Check className="size-4" /></span>
+        </span>
+      </IconButton>
       <span className="sr-only" aria-live="polite">
         {isCopied ? t("copiedButton") : ""}
       </span>

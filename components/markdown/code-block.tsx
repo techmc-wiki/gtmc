@@ -154,7 +154,17 @@ function ClipboardButton({
       onClick={handleCopy}
       label={copied ? doneLabel : ariaLabel}
       title={idleLabel}>
-      {copied ? <Check aria-hidden /> : <Copy aria-hidden />}
+      <span
+        className="t-icon-swap"
+        data-state={copied ? "b" : "a"}
+        aria-hidden="true">
+        <span className="t-icon" data-icon="a">
+          <Copy aria-hidden />
+        </span>
+        <span className="t-icon" data-icon="b">
+          <Check aria-hidden />
+        </span>
+      </span>
       <span className="sr-only" aria-live="polite">
         {copied ? doneLabel : ""}
       </span>

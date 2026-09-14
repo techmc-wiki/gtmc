@@ -60,15 +60,17 @@ export function ThemeToggle({ className }: { className?: string }) {
             "hover:bg-tech-main/10 hover:text-tech-main-dark hover:no-underline md:size-10",
             className
           )}>
-          {isMounted ? (
-            resolvedIsDark ? (
-              <MoonIcon className="size-4" />
-            ) : (
+          <span
+            aria-hidden="true"
+            className={cn("t-icon-swap", !isMounted && "invisible")}
+            data-state={resolvedIsDark ? "b" : "a"}>
+            <span className="t-icon" data-icon="a">
               <SunIcon className="size-4" />
-            )
-          ) : (
-            <MoonIcon className="size-4 opacity-0" />
-          )}
+            </span>
+            <span className="t-icon" data-icon="b">
+              <MoonIcon className="size-4" />
+            </span>
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

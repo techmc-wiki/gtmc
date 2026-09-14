@@ -433,7 +433,12 @@ export function ArticleMetadataFull({
                   ">
                   {canonicalUrl}
                 </code>
-                <IconButton onClick={handleCopy} label={copied ? t("copiedButton") : t("copyButton")} variant="outline">{copied ? <Check aria-hidden /> : <Copy aria-hidden />}</IconButton>
+                <IconButton onClick={handleCopy} label={copied ? t("copiedButton") : t("copyButton")} variant="outline">
+                  <span className="t-icon-swap" data-state={copied ? "b" : "a"} aria-hidden="true">
+                    <span className="t-icon" data-icon="a"><Copy className="size-4" /></span>
+                    <span className="t-icon" data-icon="b"><Check className="size-4" /></span>
+                  </span>
+                </IconButton>
               </div>
 
               <ArticleLicenseNotice

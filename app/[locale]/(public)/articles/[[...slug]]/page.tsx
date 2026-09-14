@@ -45,7 +45,7 @@ import { serializeJsonLd } from "@/lib/seo/json-ld"
 import { ArticleHighlight } from "@/components/articles/article-highlight"
 import { BookmarkRecorder } from "@/components/articles/bookmark-recorder"
 import { RunningHead, ChapterEndMark } from "@/components/articles/chapter-chrome"
-import { CopyArticleButton } from "@/components/articles/copy-article-button"
+import { ArticleHeadingActions } from "@/components/articles/article-heading-actions"
 import { CodeSourceSummary } from "@/components/articles/code-source-summary"
 import {
   ArticleMetadataFull,
@@ -62,7 +62,6 @@ import { getPublicChapterNav } from "@/lib/articles/public-tree"
 
 
 const EMPTY_STRING_ARRAY: string[] = []
-const COPY_PAGE_ACTION = <CopyArticleButton />
 
 export async function generateStaticParams(): Promise<{ locale: string; slug: string[] }[]> {
   const locales: ArticleLocale[] = ["zh", "en"]
@@ -390,7 +389,6 @@ async function loadArticlePage(params: ArticlePageProps["params"]) {
           kind: "attributed",
           authorName: profileHandles[0] ?? author,
           coAuthors: profileHandles.slice(1),
-          editPath,
         }
       : { kind: "anonymous" }
 
@@ -402,6 +400,7 @@ async function loadArticlePage(params: ArticlePageProps["params"]) {
       contentLocale,
       codeReferences,
       currentSlug,
+      editPath,
       effectiveSlug,
       embeddedArticleContent,
       isTranslationStale,
@@ -450,7 +449,7 @@ type ArticlePageStage = { advanced: boolean; revising: boolean }
 
 type ArticlePageHeaderVariant =
   | { kind: "anonymous" }
-  | { kind: "attributed"; authorName: string; coAuthors: string[]; editPath: string }
+  | { kind: "attributed"; authorName: string; coAuthors: string[] }
 
 interface ArticlePageHeaderProps {
   articleTitle: string
@@ -491,7 +490,6 @@ function ArticlePageHeader({
       filePath={filePath}
       wordCount={wordCount}
       readingTime={readingTime}
-      editPath={variant.editPath}
       isAdvanced={stage.advanced}
       isRevising={stage.revising}
       bannerPath={bannerPath}
@@ -520,6 +518,7 @@ interface ArticlePageContentProps {
   contentLocale: ArticleLocale
   codeReferences: NonNullable<Awaited<ReturnType<typeof getArticleContentBySlug>>>["codeReferences"]
   currentSlug: string
+  editPath: string
   effectiveSlug: string
   embeddedArticleContent: string
   header: ReactNode
@@ -546,6 +545,7 @@ function ArticlePageContent({
   contentLocale,
   codeReferences,
   currentSlug,
+  editPath,
   effectiveSlug,
   embeddedArticleContent,
   header,
@@ -577,7 +577,7 @@ function ArticlePageContent({
         references={codeReferences}
       />
       <TranslationNotices contentLocale={contentLocale} effectiveSlug={effectiveSlug} isTranslationStale={isTranslationStale} locale={locale} t={t} translationStatus={translationStatus} />
-      <article lang={contentLocale} className="article-prose min-w-0" data-article-content><MarkdownRenderer content={embeddedArticleContent} codeReferences={codeReferences} locale={locale} rawPath={targetFilePath} shikiPlugin={shikiPlugin} headingAction={COPY_PAGE_ACTION} /></article>
+      <article lang={contentLocale} className="article-prose min-w-0" data-article-content><MarkdownRenderer content={embeddedArticleContent} codeReferences={codeReferences} locale={locale} rawPath={targetFilePath} shikiPlugin={shikiPlugin} headingAction={<ArticleHeadingActions editPath={editPath} />} /></article>
       <ChapterEndMark isAdvanced={stage.advanced} />
       {(navigation.prev || navigation.next) && <ArticleNavigation locale={locale} next={navigation.next} nextLabel={tArticleMeta("next")} prev={navigation.prev} prevLabel={tArticleMeta("prev")} />}
       <Suspense><ArticleHighlight /></Suspense>

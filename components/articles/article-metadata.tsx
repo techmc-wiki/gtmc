@@ -1,7 +1,6 @@
 "use client"
 
 import { ChevronDown } from "lucide-react"
-import { Button } from "@/components/ui/shadcn/button"
 import { CopyButton } from "@/components/ui/copy-button"
 import { IconButton } from "@/components/ui/icon-button"
 import {
@@ -160,7 +159,6 @@ interface ArticleMetadataFullProps {
   filePath: string
   wordCount: number
   readingTime: number
-  editPath: string
   isAdvanced?: boolean
   isRevising?: boolean
   bannerPath?: string | null
@@ -225,7 +223,7 @@ function ContributorChip({
 
 const DEFAULT_CO_AUTHORS: string[] = []
 
-/** Signed-in-reader metadata: contributors, timestamps, edit + copy controls. */
+/** Signed-in-reader metadata: contributors, timestamps, and license. */
 export function ArticleMetadataFull({
   title,
   author,
@@ -236,7 +234,6 @@ export function ArticleMetadataFull({
   filePath,
   wordCount,
   readingTime,
-  editPath,
   isAdvanced,
   isRevising,
   bannerPath,
@@ -396,21 +393,6 @@ export function ArticleMetadataFull({
                   />
                 </dd>
               </dl>
-
-              <div className="mt-3 flex justify-end border-t guide-line pt-3">
-                <Button
-                  asChild
-                  variant="outline"
-                  size="xs"
-                  className="
-                    border-tech-main/40 bg-tech-main/5 uppercase text-tech-main
-                    hover:border-tech-main/60 hover:bg-tech-main/10
-                  ">
-                  <Link href={`/draft/new?file=${encodeURIComponent(editPath)}`}>
-                    {t("editArticle")}
-                  </Link>
-                </Button>
-              </div>
             </div>
           </div>
         </div>

@@ -8,9 +8,10 @@ export function escapeHtml(text: string): string {
 
 export function unescapeHtml(text: string): string {
   return text
-    .replaceAll("&amp;", "&")
     .replaceAll("&lt;", "<")
     .replaceAll("&gt;", ">")
     .replaceAll("&quot;", '"')
     .replaceAll("&#39;", "'")
+    .replaceAll("&apos;", "'")
+    .replaceAll("&amp;", "&")
 }

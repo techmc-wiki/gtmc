@@ -28,7 +28,7 @@ function TooltipContent({
         data-slot="tooltip-content"
         sideOffset={sideOffset}
         className={cn(
-          "bg-tech-main-dark text-tech-bg z-[60] max-w-64 px-2.5 py-1.5 text-xs leading-relaxed shadow-sm",
+          "t-tooltip bg-tech-main-dark text-tech-bg z-[60] max-w-64 px-2.5 py-1.5 text-xs leading-relaxed shadow-sm",
           className
         )}
         {...props}

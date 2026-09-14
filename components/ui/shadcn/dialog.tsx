@@ -39,7 +39,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "motion-reduce:animate-none fixed inset-0 z-50 bg-tech-main-dark/25 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
+        "t-overlay fixed inset-0 z-50 bg-tech-main-dark/25",
         className
       )}
       {...props}
@@ -61,7 +61,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "motion-reduce:animate-none motion-reduce:transition-none overscroll-contain fixed z-50 flex flex-col border shadow-lg outline-none duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
+          "t-modal overscroll-contain fixed z-50 flex flex-col border shadow-lg outline-none",
           className
         )}
         {...props}>

@@ -1,8 +1,6 @@
-minimumReleaseAge: 10080
-trustPolicy: no-downgrade
 allowBuilds:
-  '@parcel/watcher': true
-  '@prisma/engines': true
-  '@swc/core': true
+  "@parcel/watcher": true
+  "@prisma/engines": true
+  "@swc/core": true
   esbuild: true
   prisma: true

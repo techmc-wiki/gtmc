@@ -26,16 +26,12 @@ runBuildStep(logger, "repository.prepare", () => {
     "update",
     "--init",
     "--recursive",
+    "--remote",
     "articles",
-    "glossary",
   ])
+  run("git", ["submodule", "update", "--init", "--recursive", "glossary"])
   run("git", ["fetch", "--tags"])
 })
-
-process.env.GTMC_ARTICLES_SOURCE = "latest"
-runBuildStep(logger, "articles.prepare", () =>
-  runScript("scripts/prepare-articles-for-build.ts")
-)
 
 runBuildStep(logger, "prisma.generate", () => run("prisma", ["generate"]))
 

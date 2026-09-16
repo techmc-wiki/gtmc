@@ -6,5 +6,5 @@ import { createRehypeCJKSpacing } from "./rehype-cjk-spacing-base"
  * using pangu.js. Skips text inside code and pre elements.
  */
 export const rehypeCJKSpacing = createRehypeCJKSpacing(
-  pangu.spacingText.bind(pangu)
+  pangu.spaceText.bind(pangu)
 )

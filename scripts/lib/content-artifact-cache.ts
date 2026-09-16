@@ -7,7 +7,7 @@ import { createLogger } from "./logger"
 
 const logger = createLogger("content-cache")
 
-const CACHE_FORMAT_VERSION = 2
+const CACHE_FORMAT_VERSION = 3
 const CACHE_DIRECTORY = path.resolve(
   process.cwd(),
   process.env.GTMC_CONTENT_CACHE_DIR ?? ".next/cache/gtmc-content"
@@ -20,6 +20,7 @@ const GENERATED_ARTIFACTS = [
   "data/.shiki-cache.json",
   "data/glossary.json",
   "data/glossary-summary.json",
+  "data/repository-contributor-stats.json",
   "public/article-assets",
 ] as const
 
@@ -39,6 +40,7 @@ const CONTENT_GENERATOR_FILES: string[] = [
   "scripts/generate-article-manifest.ts",
   "scripts/manifest-preview.ts",
   "scripts/generate-glossary-manifest.ts",
+  "scripts/generate-repository-contributor-stats.ts",
   "scripts/generate-article-content.ts",
 ]
 
@@ -46,6 +48,7 @@ const CONTENT_GENERATOR_DIRECTORIES: string[] = [
   "lib/articles",
   "lib/github",
   "lib/glossary",
+  "lib/git",
   "lib/markdown",
 ]
 

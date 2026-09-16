@@ -51,8 +51,10 @@ jobs:
             data/pdf-html
             data/.shiki-cache.json
             data/glossary*.json
+            data/repository-contributor-stats.json
+            public/article-assets
           # Hash dependency resolution plus generators/libs that feed content artifacts.
-          key: content-${{ steps.content-inputs.outputs.articles }}-${{ steps.content-inputs.outputs.glossary }}-${{ hashFiles('package.json', 'pnpm-lock.yaml', 'scripts/build-content.ts', 'scripts/generate-article-manifest.ts', 'scripts/generate-glossary-manifest.ts', 'scripts/generate-article-content.ts', 'scripts/manifest-preview.ts', 'scripts/lib/run.ts', 'lib/articles/**', 'lib/glossary/**', 'lib/markdown/**') }}
+          key: content-${{ steps.content-inputs.outputs.articles }}-${{ steps.content-inputs.outputs.glossary }}-${{ hashFiles('package.json', 'pnpm-lock.yaml', 'scripts/build-content.ts', 'scripts/generate-article-manifest.ts', 'scripts/generate-glossary-manifest.ts', 'scripts/generate-repository-contributor-stats.ts', 'scripts/generate-article-content.ts', 'scripts/manifest-preview.ts', 'scripts/lib/run.ts', 'lib/articles/**', 'lib/glossary/**', 'lib/git/**', 'lib/markdown/**') }}
           restore-keys: |
             content-${{ steps.content-inputs.outputs.articles }}-${{ steps.content-inputs.outputs.glossary }}-
 

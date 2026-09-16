@@ -99,7 +99,7 @@ function DraftRecord({
             [{kindLabel}]
           </Badge>
           <DraftStatusBadge status={status} />
-          <span className="text-tech-main/55 font-mono text-[0.625rem] tracking-wider uppercase sm:ml-1">
+          <span className="text-tech-main/55 font-mono text-xs tracking-wider uppercase sm:ml-1">
             {updatedLabel}
           </span>
         </div>
@@ -118,7 +118,7 @@ function DraftRecord({
               href={prUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-tech-main hover:text-tech-main-dark focus-visible:outline-tech-main inline-flex items-center gap-1 font-mono text-[0.6875rem] tracking-wider uppercase underline decoration-1 underline-offset-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2">
+              className="text-tech-main hover:text-tech-main-dark focus-visible:outline-tech-main inline-flex items-center gap-1 font-mono text-xs tracking-wider uppercase underline decoration-1 underline-offset-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2">
               {prLabel}
               <ArrowUpRight aria-hidden="true" className="size-3.5" />
             </a>
@@ -160,7 +160,7 @@ function DraftRecord({
                   type="submit"
                   variant="destructive"
                   size="sm"
-                  className="min-h-11 w-full text-[0.625rem] uppercase">
+                  className="min-h-11 w-full uppercase">
                   {deleteLabel}
                 </Button>
               </form>

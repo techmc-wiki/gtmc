@@ -111,7 +111,7 @@ function ArticleLink({
       `}>
       <span
         aria-hidden={!prefix}
-        className="text-center font-mono text-[0.6875rem] leading-none text-tech-main/55 tabular-nums">
+        className="text-center font-mono text-xs leading-none text-tech-main/55 tabular-nums">
         {prefix}
       </span>
       <span className="min-w-0">
@@ -200,8 +200,7 @@ export function ChapterNavTree({
               key={row.id}
               className="
                 mt-2.5 mb-1 flex list-none items-center gap-2 pl-1 font-mono
-                text-[0.5625rem] tracking-[0.12em] text-tech-main/50 uppercase
-                md:text-[0.625rem]
+                text-xs tracking-[0.12em] text-tech-main/50 uppercase
               ">
               <span className="h-px flex-1 bg-tech-main/25" />
               <span>{row.title}</span>

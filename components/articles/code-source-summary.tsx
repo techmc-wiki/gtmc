@@ -39,7 +39,7 @@ export function CodeSourceSummary({
   return (
     <aside
       aria-label={label}
-      className="border-tech-main/20 bg-tech-main/5 text-tech-main/65 mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 border px-3 py-2 font-mono text-[0.625rem] tracking-wider uppercase">
+      className="border-tech-main/20 bg-tech-main/5 text-tech-main/65 mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 border px-3 py-2 font-mono text-xs tracking-wider uppercase">
       <span className="text-tech-main/45">{label}</span>
       {sourceBases.map((sourceBase) => (
         <span

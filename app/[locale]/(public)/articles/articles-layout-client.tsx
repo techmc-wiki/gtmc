@@ -45,7 +45,7 @@ function TreeLoadingPlaceholder() {
       aria-hidden="true">
       <SectionRail
         label="Loading"
-        className="mb-3 text-[0.625rem] opacity-75"
+        className="mb-3 text-xs opacity-75"
       />
 
       <div className="space-y-6 pr-3">

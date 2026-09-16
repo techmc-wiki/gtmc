@@ -69,7 +69,7 @@ const revisedDateFormatters: Record<string, Intl.DateTimeFormat> = {
 function RecordRow({ term, value }: RecordRowProps) {
   return (
     <div className="border-tech-main/10 flex items-baseline justify-between gap-4 border-b py-2">
-      <dt className="text-tech-main/50 text-[0.625rem] tracking-[0.12em] uppercase">
+      <dt className="text-tech-main/50 text-xs tracking-[0.12em] uppercase">
         {term}
       </dt>
       <dd className="text-tech-main-dark font-mono text-sm wrap-break-word tabular-nums">

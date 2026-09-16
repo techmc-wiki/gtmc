@@ -33,7 +33,6 @@
     "lint:fix": "vp lint --fix",
     "lint": "vp lint",
     "postinstall": "tsx scripts/postinstall.ts",
-    "prepare:articles": "tsx scripts/prepare-articles-for-build.ts",
     "prepare": "vp config --no-agent",
     "test": "vp test run",
     "typecheck": "tsc --noEmit"

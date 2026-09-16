@@ -6,7 +6,7 @@ import { SITE_SCROLL_ROOT_ID } from "@/hooks/site-scroll-root"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/shadcn/button"
 
-const RING_RADIUS = 15.5
+const RING_RADIUS = 16
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
 
 interface ReaderDockProps {
@@ -61,7 +61,7 @@ export function ReaderDock({
             cy="18"
             r={RING_RADIUS}
             fill="none"
-            strokeWidth="2.5"
+            strokeWidth="2"
             className="stroke-tech-main/20"
           />
           <circle
@@ -69,7 +69,7 @@ export function ReaderDock({
             cy="18"
             r={RING_RADIUS}
             fill="none"
-            strokeWidth="2.5"
+            strokeWidth="2"
             strokeLinecap="butt"
             strokeDasharray={RING_CIRCUMFERENCE}
             strokeDashoffset={dashOffset}

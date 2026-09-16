@@ -226,7 +226,7 @@ export function ChapterNavTree({
             ref={!item.isFolder && isActive ? activeItemRef : undefined}
             className={`
                   relative my-0.5 list-none transition-colors duration-300 md:my-0
-                  before:absolute before:top-0 before:left-0 before:h-full before:w-0.5
+                  before:absolute before:top-0 before:left-0 before:h-full before:w-[2px]
                   before:transition-[width,background-color] motion-reduce:before:transition-none before:duration-200 before:content-['']
                 ${
                   !item.isFolder && isActive

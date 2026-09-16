@@ -269,7 +269,7 @@ th {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--pdf-ink);
-  border-top: 1.5px solid var(--pdf-ink-dark);
+  border-top: 2px solid var(--pdf-ink-dark);
   border-bottom: 1px solid var(--pdf-ink);
   padding: 0.5em 0.7em;
   text-align: left;
@@ -284,7 +284,7 @@ td {
 }
 
 tbody tr:last-child td {
-  border-bottom: 1.5px solid var(--pdf-ink-dark);
+  border-bottom: 2px solid var(--pdf-ink-dark);
 }
 
 tr {
@@ -352,7 +352,7 @@ aside[data-callout] {
   margin: 1.1em 0;
   padding: 0.75em 1em;
   border: 1px solid var(--pdf-line);
-  border-left: 2.5px solid var(--pdf-ink);
+  border-left: 2px solid var(--pdf-ink);
   background: var(--pdf-surface);
   page-break-inside: avoid;
 }
@@ -545,7 +545,7 @@ html:has(.cover-document) {
   width: 4cm;
   margin: 2.2em 0;
   border: none;
-  border-top: 1.5px solid var(--pdf-ink-dark);
+  border-top: 2px solid var(--pdf-ink-dark);
 }
 
 .cover-tagline {
@@ -838,7 +838,7 @@ html:has(.cover-document) {
 }
 
 .colophon-body {
-  border-top: 1.5px solid var(--pdf-ink-dark);
+  border-top: 2px solid var(--pdf-ink-dark);
   padding-top: 1em;
   max-width: 65%;
 }

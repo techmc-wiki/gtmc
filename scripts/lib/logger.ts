@@ -126,6 +126,30 @@ export function runBuildStep<T>(
 
   try {
     const result = action()
+    if (result instanceof Promise) {
+      return result
+        .then((resolved) => {
+          logger.event("stage.completed", {
+            ...attributes,
+            duration_ms: Math.round(performance.now() - startedAt),
+            stage,
+          })
+          return resolved
+        })
+        .catch((error: unknown) => {
+          logger.error(
+            "stage.failed",
+            {
+              ...attributes,
+              duration_ms: Math.round(performance.now() - startedAt),
+              stage,
+            },
+            describeError(error)
+          )
+          throw error
+        }) as T
+    }
+
     logger.event("stage.completed", {
       ...attributes,
       duration_ms: Math.round(performance.now() - startedAt),

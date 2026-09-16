@@ -6,37 +6,37 @@
  *
  * Usage: pnpm build:content
  */
-import { runScript } from "./lib/run"
-import { createLogger, runBuildStep } from "./lib/logger"
+import { runScriptAsync } from "./lib/run"
+import { createLogger, describeError, runBuildStep } from "./lib/logger"
 
 const logger = createLogger("content")
+async function main(): Promise<void> {
+  const startedAt = performance.now()
+  logger.event("content.started", { stage_count: 4 })
 
-const steps: Array<{ stage: string; script: string; args?: string[] }> = [
-  {
-    stage: "repository-contributors",
-    script: "scripts/generate-repository-contributor-stats.ts",
-  },
-  { stage: "manifest", script: "scripts/generate-article-manifest.ts" },
-  {
-    stage: "glossary",
-    script: "scripts/generate-glossary-manifest.ts",
-  },
-  {
-    stage: "article-content",
-    script: "scripts/generate-article-content.ts",
-  },
-]
+  await Promise.all([
+    runBuildStep(logger, "repository-contributors", () =>
+      runScriptAsync("scripts/generate-repository-contributor-stats.ts")
+    ),
+    runBuildStep(logger, "manifest", () =>
+      runScriptAsync("scripts/generate-article-manifest.ts")
+    ),
+    runBuildStep(logger, "glossary", () =>
+      runScriptAsync("scripts/generate-glossary-manifest.ts")
+    ),
+  ])
 
-const startedAt = performance.now()
-logger.event("content.started", { stage_count: steps.length })
-
-for (const step of steps) {
-  runBuildStep(logger, step.stage, () =>
-    runScript(step.script, step.args ?? [])
+  await runBuildStep(logger, "article-content", () =>
+    runScriptAsync("scripts/generate-article-content.ts")
   )
+
+  logger.event("content.completed", {
+    duration_ms: Math.round(performance.now() - startedAt),
+    stage_count: 4,
+  })
 }
 
-logger.event("content.completed", {
-  duration_ms: Math.round(performance.now() - startedAt),
-  stage_count: steps.length,
+main().catch((error: unknown) => {
+  logger.error("content.failed", {}, describeError(error))
+  process.exit(1)
 })

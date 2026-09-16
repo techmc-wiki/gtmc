@@ -3,7 +3,7 @@
 import { FileTextIcon, PlusIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/shadcn/button"
-import { EditorIconButton } from "@/components/editor/editor-icon-button"
+import { IconButton } from "@/components/ui/icon-button"
 import { Input } from "@/components/ui/shadcn/input"
 import { cn } from "@/lib/cn"
 import type { DraftFileCollection } from "@/lib/drafts/files"
@@ -57,12 +57,12 @@ export function DraftFileList({
           </h2>
           <div className="flex items-center gap-1">
             <span className="text-tech-main text-xs">{files.length}</span>{" "}
-            <EditorIconButton
+            <IconButton
               label={fileT("addButton")}
               disabled={isReadOnly}
               onClick={onRequestAddFile}>
               <PlusIcon aria-hidden className="size-4" />
-            </EditorIconButton>
+            </IconButton>
           </div>
         </div>
         <Input

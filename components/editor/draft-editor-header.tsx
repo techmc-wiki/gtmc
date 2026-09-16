@@ -10,7 +10,7 @@ import {
   ArrowRightIcon,
   BookOpenIcon,
 } from "lucide-react"
-import { EditorIconButton } from "@/components/editor/editor-icon-button"
+import { IconButton } from "@/components/ui/icon-button"
 import { Input } from "@/components/ui/shadcn/input"
 
 /** Save/submit activity, rendered as one explicit status line state. */
@@ -89,18 +89,18 @@ export function DraftEditorHeader({
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-1">
-        <EditorIconButton label={t("writingGuide")} onClick={onOpenGuide}>
+        <IconButton label={t("writingGuide")} onClick={onOpenGuide}>
           <BookOpenIcon aria-hidden />
-        </EditorIconButton>
+        </IconButton>
         {!isReadOnly ? (
           <>
-            <EditorIconButton
+            <IconButton
               label={t("saveButton")}
               disabled={save.disabled}
               aria-busy={save.busy}
               onClick={save.onClick}>
               <SaveIcon aria-hidden />
-            </EditorIconButton>
+            </IconButton>
             <Button
               type="button"
               size="sm"

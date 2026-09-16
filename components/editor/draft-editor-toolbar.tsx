@@ -16,7 +16,7 @@ import {
   WrapTextIcon,
   LoaderCircleIcon,
 } from "lucide-react"
-import { EditorIconButton } from "@/components/editor/editor-icon-button"
+import { IconButton } from "@/components/ui/icon-button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -117,17 +117,17 @@ export function DraftEditorToolbar({
             {index === 2 && (
               <span aria-hidden className="bg-tech-main/20 mx-1 h-5 w-px" />
             )}
-            <EditorIconButton
+            <IconButton
               label={label}
               disabled={toolDisabled}
               onMouseDown={(event) => event.preventDefault()}
               onClick={action}>
               <Icon aria-hidden className="size-4" />
-            </EditorIconButton>
+            </IconButton>
           </React.Fragment>
         )
       )}
-      <EditorIconButton
+      <IconButton
         label={
           compressing
             ? t("compressingImage")
@@ -146,7 +146,7 @@ export function DraftEditorToolbar({
         ) : (
           <ImagePlusIcon aria-hidden className="size-4" />
         )}
-      </EditorIconButton>
+      </IconButton>
       <input
         ref={fileInputRef}
         type="file"
@@ -160,9 +160,9 @@ export function DraftEditorToolbar({
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <EditorIconButton label={t("insert")} disabled={disabled}>
+          <IconButton label={t("insert")} disabled={disabled}>
             <PlusIcon aria-hidden className="size-4" />
-          </EditorIconButton>
+          </IconButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
           <DropdownMenuItem onSelect={() => onInsertText(t("calloutTemplate"))}>
@@ -185,13 +185,13 @@ export function DraftEditorToolbar({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <EditorIconButton
+      <IconButton
         className="ml-auto"
         label={t("toolbarWrap")}
         aria-pressed={lineWrap}
         onClick={onWrapToggle}>
         <WrapTextIcon aria-hidden className="size-4" />
-      </EditorIconButton>
+      </IconButton>
     </fieldset>
   )
 }

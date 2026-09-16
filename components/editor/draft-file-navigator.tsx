@@ -16,7 +16,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/shadcn/sheet"
-import { EditorIconButton } from "@/components/editor/editor-icon-button"
+import { IconButton } from "@/components/ui/icon-button"
 import { cn } from "@/lib/cn"
 import type { DraftFileCollection } from "@/lib/drafts/files"
 
@@ -99,13 +99,13 @@ export function DraftFileNavigator({
         </aside>
         <div className="bg-surface min-w-0">
           <div className="border-tech-main/15 flex min-h-12 items-center gap-1 border-b px-2">
-            <EditorIconButton
+            <IconButton
               label={sidebarVisible ? t("hideFiles") : t("showFiles")}
               className="hidden lg:flex"
               aria-expanded={sidebarVisible}
               onClick={() => setSidebarVisible((value) => !value)}>
               <PanelLeftIcon aria-hidden />
-            </EditorIconButton>
+            </IconButton>
             <Sheet open={filesOpen} onOpenChange={setFilesOpen}>
               <SheetTrigger asChild>
                 <Button
@@ -133,11 +133,11 @@ export function DraftFileNavigator({
               {activeFile.filePath || t("targetFileUnset")}
             </p>
             {!activeFile.filePath && !isReadOnly && (
-              <EditorIconButton
+              <IconButton
                 label={t("setFilePath")}
                 onClick={() => setRenaming(true)}>
                 <FileTextIcon aria-hidden />
-              </EditorIconButton>
+              </IconButton>
             )}
             {headerActions}
             <DraftFileActionsMenu

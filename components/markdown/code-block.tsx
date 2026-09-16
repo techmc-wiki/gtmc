@@ -4,6 +4,7 @@ import { CopyButton } from "@/components/ui/copy-button"
 import { IconButton } from "@/components/ui/icon-button"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Separator } from "@/components/ui/shadcn/separator"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { Link as LinkIcon, WrapText } from "lucide-react"
 
 import React, {
@@ -74,10 +75,11 @@ function LazyCodeBlock({
       data-state={isVisible ? "loaded" : "loading"}
       className={`t-skel border-tech-main/30 bg-tech-bg relative my-6 w-full scroll-mt-24 border font-mono text-sm ${isVisible ? "is-revealed" : ""}`}
       style={contentVisibilityStyle}>
-      <div className="border-tech-main/30 pointer-events-none absolute top-0 left-0 z-20 size-3 -translate-px border-t-2 border-l-2" />
-      <div className="border-tech-main/30 pointer-events-none absolute top-0 right-0 z-20 size-3 translate-x-px -translate-y-px border-t-2 border-r-2" />
-      <div className="border-tech-main/30 pointer-events-none absolute bottom-0 left-0 z-20 size-3 -translate-x-px translate-y-px border-b-2 border-l-2" />
-      <div className="border-tech-main/30 pointer-events-none absolute right-0 bottom-0 z-20 size-3 translate-px border-r-2 border-b-2" />
+      <CornerBrackets
+        size="size-3"
+        color="border-tech-main/30"
+        className="z-20"
+      />
 
       <div className="t-skel-content">{children}</div>
 

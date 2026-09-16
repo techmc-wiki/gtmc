@@ -32,7 +32,7 @@ import {
 import { Tabs, TabsContent } from "@/components/ui/shadcn/tabs"
 import { BookOpenIcon } from "lucide-react"
 import { cn } from "@/lib/cn"
-import { EditorIconButton } from "@/components/editor/editor-icon-button"
+import { IconButton } from "@/components/ui/icon-button"
 import styles from "@/components/editor/draft-editor.module.css"
 
 interface DraftEditorProps {
@@ -453,11 +453,11 @@ function DraftEditorSurface({
                   count: state.activeFileContent.split("\n").length,
                 })}
               </span>
-              <EditorIconButton
+              <IconButton
                 label={t("syntaxHintsTitle")}
                 onClick={() => openInspector("guide")}>
                 <BookOpenIcon aria-hidden />
-              </EditorIconButton>
+              </IconButton>
             </div>
           </div>
         </DraftFileNavigator>

@@ -13,7 +13,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/shadcn/tooltip"
-import { EditorIconButton } from "@/components/editor/editor-icon-button"
+import { IconButton } from "@/components/ui/icon-button"
 import { cn } from "@/lib/cn"
 
 /** Write/split/preview switch and the change-review shortcut. */
@@ -50,9 +50,9 @@ export function DraftEditorModeBar({
           </Tooltip>
         ))}
       </TabsList>
-      <EditorIconButton label={t("reviewChanges")} onClick={onOpenChanges}>
+      <IconButton label={t("reviewChanges")} onClick={onOpenChanges}>
         <GitPullRequestIcon aria-hidden />
-      </EditorIconButton>
+      </IconButton>
     </>
   )
 }

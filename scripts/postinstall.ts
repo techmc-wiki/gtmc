@@ -60,11 +60,8 @@ logger.event("setup.started")
 // in the workflow and Vercel prepares them inside build:vercel, so the
 // install-time copy is redundant there, and hard-fails the install when
 // the clone or build cache lacks submodule content.
-const isCI = process.env.CI === "true"
 const isVercel = process.env.VERCEL === "1"
-const skipHeavy =
-  process.env.GTMC_SKIP_POSTINSTALL === "1" ||
-  (isCI && !isVercel && process.env.GTMC_LINT_ONLY === "1")
+const skipHeavy = process.env.GTMC_SKIP_POSTINSTALL === "1" || isVercel
 
 if (!skipHeavy && isGitWorkTree()) {
   run("git", ["config", "--local", "include.path", ".gitconfig"])

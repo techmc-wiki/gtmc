@@ -1,4 +1,4 @@
-import { spawnSync, type SpawnSyncOptions } from "node:child_process"
+import { spawn, spawnSync, type SpawnSyncOptions } from "node:child_process"
 
 import { createLogger } from "./logger"
 
@@ -36,4 +36,30 @@ export function run(
 /** Run a local TypeScript script via tsx (same as package.json generators). */
 export function runScript(scriptPath: string, args: string[] = []): void {
   run("tsx", [scriptPath, ...args])
+}
+
+/** Run a local TypeScript script asynchronously via tsx. */
+export function runScriptAsync(
+  scriptPath: string,
+  args: string[] = []
+): Promise<void> {
+  const { promise, resolve, reject } = Promise.withResolvers<void>()
+  const child = spawn("tsx", [scriptPath, ...args], {
+    stdio: "inherit",
+    shell: process.platform === "win32",
+  })
+  child.on("error", (error) => {
+    logger.error("command.failed", { command: "tsx" }, error.message)
+    reject(error)
+  })
+  child.on("exit", (code) => {
+    if (code === 0) {
+      resolve()
+    } else {
+      const error = new Error(`Command failed with exit code ${code ?? 1}`)
+      logger.error("command.failed", { command: "tsx", exit_code: code ?? 1 })
+      reject(error)
+    }
+  })
+  return promise
 }

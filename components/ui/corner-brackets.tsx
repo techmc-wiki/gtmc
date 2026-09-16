@@ -1,4 +1,5 @@
 import * as React from "react"
+import { cn } from "@/lib/cn"
 
 export interface CornerBracketsProps {
   className?: string
@@ -53,13 +54,17 @@ export function CornerBrackets({
   ref,
 }: CornerBracketsProps) {
   const visibility = getCornerVisibility(corners)
-  const pointerEvents = variant === "hover" ? "" : "pointer-events-none"
+  const pointerEvents =
+    variant === "hover" ? "pointer-events-auto" : "pointer-events-none"
   const cornerClass = `absolute ${size} ${color} ${pointerEvents} ${
     variant === "static" ? "" : hoverClasses
   }`
 
   return (
-    <div ref={ref} className={className}>
+    <div
+      ref={ref}
+      aria-hidden="true"
+      className={cn("pointer-events-none absolute inset-0", className)}>
       {visibility.topLeft && (
         <div
           className={`top-0 left-0 ${cornerPositionClasses.topLeft} ${cornerClass}`}

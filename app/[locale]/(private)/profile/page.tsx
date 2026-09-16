@@ -148,11 +148,9 @@ export default async function ProfilePage({
             </div>
           </div>
 
-          <div className="flex flex-col items-stretch justify-end gap-3 sm:gap-4 md:flex-row md:items-center md:gap-6">
-            <SignOutButton className="w-full" />
-            <Button type="submit" className="w-full">
-              {t("saveButton")}
-            </Button>
+          <div className="flex items-center justify-between gap-4">
+            <SignOutButton />
+            <Button type="submit">{t("saveButton")}</Button>
           </div>
         </form>
       </div>

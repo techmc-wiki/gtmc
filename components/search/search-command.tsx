@@ -22,7 +22,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/shadcn/tooltip"
-import { ArrowDown, ArrowUp, CornerDownLeft, X } from "lucide-react"
+import {
+  ArrowDown,
+  ArrowUp,
+  CornerDownLeft,
+  Search as SearchIcon,
+  X,
+} from "lucide-react"
 
 interface SearchResult {
   title: string
@@ -49,32 +55,6 @@ interface GlossarySearchResult {
   fullFormEn: string
   shortForm: string
   categories: string[]
-}
-
-function SearchIcon({ className = "size-4" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      aria-hidden="true"
-      focusable="false"
-      className={className}>
-      <circle
-        cx="7"
-        cy="7"
-        r="4.25"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="m10.25 10.25 3 3"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="square"
-        strokeWidth="1.5"
-      />
-    </svg>
-  )
 }
 
 function useSearchCommand() {

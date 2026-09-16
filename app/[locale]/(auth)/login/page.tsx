@@ -50,7 +50,7 @@ export default function LoginPage() {
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="1.5"
+                  strokeWidth="2"
                   className="text-tech-main-dark">
                   <rect
                     x="3"

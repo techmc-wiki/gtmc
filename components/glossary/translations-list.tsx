@@ -84,7 +84,7 @@ export function TranslationsList({
                       d="M4 2 L8 6 L4 10"
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth="1.5"
+                      strokeWidth="2"
                       strokeLinecap="square"
                     />
                   </svg>

@@ -73,7 +73,7 @@ export function GlobeIcon({ className = "size-3", ...props }: SocialIconProps) {
       viewBox="0 0 16 16"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.2"
+      strokeWidth="1"
       aria-hidden="true"
       {...props}>
       <circle cx="8" cy="8" r="6.5" />
@@ -85,9 +85,9 @@ export function GlobeIcon({ className = "size-3", ...props }: SocialIconProps) {
 type TriangleDirection = "down" | "left" | "right"
 
 const trianglePathByDirection = {
-  down: "M3.5 5.5h9L8 12.5 3.5 5.5Z",
-  left: "M10.5 3.5v9L3.5 8l7-4.5Z",
-  right: "M5.5 3.5 12.5 8l-7 4.5v-9Z",
+  down: "M4 6h8L8 12 4 6Z",
+  left: "M10 4v8L4 8l6-4Z",
+  right: "M6 4 12 8l-6 4v-8Z",
 } satisfies Record<TriangleDirection, string>
 
 export function TriangleIcon({

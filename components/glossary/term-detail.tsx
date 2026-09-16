@@ -3,14 +3,15 @@
 import * as React from "react"
 import { useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, X } from "lucide-react"
+import { IconButton } from "@/components/ui/icon-button"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Button } from "@/components/ui/shadcn/button"
 import { Link } from "@/i18n/navigation"
 import { CrossRefChips } from "@/components/glossary/cross-ref-chips"
 import { TranslationsList } from "@/components/glossary/translations-list"
 import { parseRelated } from "@/lib/glossary/related"
-import { Dialog, DialogContent } from "@/components/ui/shadcn/dialog"
+import { Sheet, SheetContent, SheetClose } from "@/components/ui/shadcn/sheet"
 import type { GlossaryEntryBase } from "@/lib/glossary/manifest"
 import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
 
@@ -133,16 +134,17 @@ export function GlossaryDetailPanel({
   const hasShortForm = entry.shortForm.trim().length > 0
 
   return (
-    <Dialog
+    <Sheet
       open
       onOpenChange={(open) => {
         if (!open) onClose()
       }}>
-      <DialogContent
+      <SheetContent
+        side="right"
         showCloseButton={false}
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className="border-tech-main/35 bg-surface-modal fixed inset-x-0 top-auto bottom-0 m-0 max-h-[calc(100dvh-0.75rem)] w-full max-w-none overflow-hidden border-x-0 border-t shadow-[-1.5rem_0_4rem_-2.5rem_rgb(15_23_42/0.55)] sm:inset-y-0 sm:right-0 sm:left-auto sm:h-dvh sm:max-h-none sm:w-[min(34rem,calc(100vw-2rem))] sm:border-y-0 sm:border-r-0 sm:border-l">
+        className="border-tech-main/35 bg-surface-modal w-full gap-0 p-0 sm:w-[min(34rem,calc(100vw-2rem))] sm:max-w-none">
         <header className="border-tech-main/25 bg-surface-overlay/95 relative flex shrink-0 items-start gap-4 border-b px-4 py-4 sm:px-6 sm:py-5">
           <span
             aria-hidden="true"
@@ -168,20 +170,14 @@ export function GlossaryDetailPanel({
               {entry.description}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t("detailPanelClose")}
-            className="focus-visible:outline-tech-main text-tech-main hover:bg-tech-main/10 border-tech-main/30 bg-surface-overlay relative flex size-11 shrink-0 cursor-pointer items-center justify-center border transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2">
-            <span
-              aria-hidden="true"
-              className="absolute h-px w-4 rotate-45 bg-current"
-            />
-            <span
-              aria-hidden="true"
-              className="absolute h-px w-4 -rotate-45 bg-current"
-            />
-          </button>
+          <SheetClose asChild>
+            <IconButton
+              type="button"
+              variant="ghost"
+              label={t("detailPanelClose")}>
+              <X aria-hidden />
+            </IconButton>
+          </SheetClose>
         </header>
         <div className="custom-vertical-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-6 sm:px-7 sm:py-7">
           <TermDetail
@@ -191,7 +187,7 @@ export function GlossaryDetailPanel({
             onOpenRelated={onOpenRelated}
           />
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   )
 }

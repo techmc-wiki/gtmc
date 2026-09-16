@@ -2,7 +2,7 @@
 
 import { useCallback } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { GlobeIcon, CheckIcon } from "@/components/ui/icons"
+import { GlobeIcon, CheckIcon } from "lucide-react"
 import { Button } from "@/components/ui/shadcn/button"
 import {
   DropdownMenu,

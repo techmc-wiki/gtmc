@@ -5,17 +5,13 @@ import useSWR from "swr"
 import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
+import { GlobeIcon } from "lucide-react"
 import {
   Avatar,
   AvatarImage,
   AvatarFallback,
 } from "@/components/ui/shadcn/avatar"
-import {
-  BilibiliIcon,
-  GithubIcon,
-  GlobeIcon,
-  TwitterIcon,
-} from "@/components/ui/icons"
+import { BilibiliIcon, GithubIcon, TwitterIcon } from "@/components/ui/icons"
 import {
   Popover,
   PopoverTrigger,

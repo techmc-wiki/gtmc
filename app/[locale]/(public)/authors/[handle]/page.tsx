@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Image from "next/image"
 import { notFound, permanentRedirect } from "next/navigation"
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import { ArrowLeft, ArrowRight, GlobeIcon } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { SectionTitle } from "@/components/ui/headings"
@@ -13,12 +13,7 @@ import {
   AvatarImage,
   AvatarFallback,
 } from "@/components/ui/shadcn/avatar"
-import {
-  GithubIcon,
-  BilibiliIcon,
-  TwitterIcon,
-  GlobeIcon,
-} from "@/components/ui/icons"
+import { GithubIcon, BilibiliIcon, TwitterIcon } from "@/components/ui/icons"
 import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
 import { AdvancedMarker } from "@/components/articles/advanced-marker"
 import {

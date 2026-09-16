@@ -15,7 +15,11 @@ import {
   CommandItem,
 } from "@/components/ui/shadcn/command"
 import { Separator } from "@/components/ui/shadcn/separator"
-import { Input } from "@/components/ui/shadcn/input"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/shadcn/input-group"
 import type { GlossarySummaryEntry } from "@/lib/glossary/manifest"
 import { cn } from "@/lib/cn"
 
@@ -77,9 +81,11 @@ export function GlossaryRowPicker({
     <div className={cn("relative", className)}>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <div className="relative flex w-full items-center">
-            <Search className="text-muted-foreground pointer-events-none absolute left-3 size-4" />
-            <Input
+          <InputGroup className="w-full">
+            <InputGroupAddon align="inline-start">
+              <Search className="text-muted-foreground size-4" />
+            </InputGroupAddon>
+            <InputGroupInput
               type="text"
               aria-label="Search glossary terms"
               value={query}
@@ -91,9 +97,9 @@ export function GlossaryRowPicker({
               placeholder="Search existing terms to edit…"
               autoComplete="off"
               spellCheck={false}
-              className="h-10 pr-3 pl-9 text-sm font-normal sm:pl-9"
+              className="text-sm font-normal"
             />
-          </div>
+          </InputGroup>
         </PopoverTrigger>
 
         <PopoverContent

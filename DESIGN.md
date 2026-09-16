@@ -63,8 +63,8 @@ consult `app/globals.css` and the shared components.
   keep chroma inside the band the rest of the palette occupies, and check the
   hue distance from the tokens it will appear next to, including under
   protanopia, deuteranopia, and tritanopia.
-- Page, section, and article headings use the serif `display-title` or
-  `markdown-title` styles in sentence case. Body text uses sans.
+- Page, section, and article headings use the serif `display-title` style in
+  sentence case. Body text uses sans.
 - Standard controls, labels, dialog titles, and empty states use normal-case
   sans. Mono is opt-in for code, data, identifiers, shortcuts, and occasional
   navigation apparatus; uppercase and wide tracking stay within that apparatus.

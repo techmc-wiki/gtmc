@@ -38,7 +38,7 @@ function AuthIslandContent() {
     return (
       <Link
         href="/login"
-        className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main-dark hover:text-tech-bg flex size-full items-center justify-center border font-mono text-[0.6rem] font-bold uppercase transition-colors duration-300 md:text-xs">
+        className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main-dark hover:text-tech-bg flex size-full items-center justify-center border font-mono text-xs font-bold uppercase transition-colors duration-300">
         {t("login")}
       </Link>
     )
@@ -81,14 +81,14 @@ function AuthIslandContent() {
           <p className="text-tech-main-dark truncate font-mono text-xs font-bold">
             {session.user.name}
           </p>
-          <p className="text-tech-main/70 truncate font-mono text-[0.625rem]">
+          <p className="text-tech-main/70 truncate font-mono text-xs">
             {session.user.email}
           </p>
         </div>
         <DropdownMenuGroup className="flex flex-col gap-1">
           <DropdownMenuItem
             asChild
-            className="text-tech-main-dark hover:bg-tech-main/10 focus:bg-tech-main/10 focus:text-tech-main-dark cursor-pointer rounded-none px-2 py-1.5 font-mono text-[0.625rem] transition-colors">
+            className="text-tech-main-dark hover:bg-tech-main/10 focus:bg-tech-main/10 focus:text-tech-main-dark cursor-pointer rounded-none px-2 py-1.5 font-mono text-xs transition-colors">
             <Link href="/profile">
               <User aria-hidden="true" className="size-3.5" />
               <span>{t("profile")}</span>
@@ -96,7 +96,7 @@ function AuthIslandContent() {
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => signOut({ callbackUrl: "/" })}
-            className="text-tech-main-dark hover:bg-tech-main/10 focus:bg-tech-main/10 focus:text-tech-main-dark cursor-pointer rounded-none px-2 py-1.5 font-mono text-[0.625rem] transition-colors">
+            className="text-tech-main-dark hover:bg-tech-main/10 focus:bg-tech-main/10 focus:text-tech-main-dark cursor-pointer rounded-none px-2 py-1.5 font-mono text-xs transition-colors">
             <LogOut aria-hidden="true" className="size-3.5" />
             <span>{t("signOut")}</span>
           </DropdownMenuItem>

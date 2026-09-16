@@ -142,10 +142,10 @@ function ProgressStatus({
   return (
     <div className="relative flex items-start justify-between gap-3">
       <div className="min-w-0 space-y-1">
-        <p className="text-tech-main/50 text-[0.6875rem]">{title}</p>
+        <p className="text-tech-main/50 text-xs">{title}</p>
         <p
           className={cn(
-            "text-[0.75rem]",
+            "text-xs",
             state === "success"
               ? "text-green-600"
               : state === "error"
@@ -156,7 +156,7 @@ function ProgressStatus({
         </p>
       </div>
 
-      <div className="guide-line text-tech-main/70 bg-surface-overlay/70 shrink-0 border px-2 py-1 text-[0.6875rem]">
+      <div className="guide-line text-tech-main/70 bg-surface-overlay/70 shrink-0 border px-2 py-1 text-xs">
         {percent.toString().padStart(2, "0")}%
       </div>
     </div>
@@ -229,7 +229,6 @@ function ProgressStage({
 }
 
 function ProgressStages({
-  compact,
   displayProgress,
   stageIndex,
   stages,
@@ -237,7 +236,6 @@ function ProgressStages({
   style,
   timeline,
 }: {
-  compact: boolean
   displayProgress: number
   stageIndex: number
   stages: OperationProgressStage[]
@@ -247,10 +245,7 @@ function ProgressStages({
 }) {
   return (
     <ol
-      className={cn(
-        "relative mt-4 grid gap-2 sm:gap-3",
-        compact ? "text-[0.625rem]" : "text-[0.6875rem]"
-      )}
+      className={cn("relative mt-4 grid gap-2 sm:gap-3", "text-xs")}
       style={style}>
       {stages.map((stage, index) => (
         <ProgressStage
@@ -311,7 +306,6 @@ function ProgressDisplay({
       />
       <ProgressBar percent={percent} state={state} title={title} />
       <ProgressStages
-        compact={compact}
         displayProgress={displayProgress}
         stageIndex={stageIndex}
         stages={stages}

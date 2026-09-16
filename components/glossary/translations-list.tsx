@@ -69,7 +69,7 @@ export function TranslationsList({
                   aria-label={`${displayName} translation`}
                   className="hover:bg-tech-main/5 focus-visible:outline-tech-main flex min-h-11 w-full cursor-pointer list-none items-center justify-between gap-3 px-3 text-left transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2">
                   <span className="grid min-w-0 grid-cols-[2.25rem_1fr] items-center gap-2">
-                    <span className="text-tech-main/45 font-mono text-[0.625rem] tracking-widest uppercase">
+                    <span className="text-tech-main/45 font-mono text-xs tracking-widest uppercase">
                       {code.toUpperCase()}
                     </span>
                     <span className="text-tech-main-dark truncate text-sm">

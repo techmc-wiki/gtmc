@@ -584,14 +584,14 @@ function ArticleRow({
               {article.title}
               {article.isAdvanced && <AdvancedMarker className="ml-1.5" />}
             </p>
-            <p className="text-tech-main/50 mt-0.5 truncate font-mono text-[0.625rem] tracking-wider uppercase">
+            <p className="text-tech-main/50 mt-0.5 truncate font-mono text-xs tracking-wider uppercase">
               {metaParts.join(", ")}
               {article.author ? `, ${article.author}` : ""}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {isCoAuthored && (
-              <span className="border-tech-main/30 text-tech-main/60 border px-1.5 py-0.5 font-mono text-[0.5625rem] tracking-wider uppercase">
+              <span className="border-tech-main/30 text-tech-main/60 border px-1.5 py-0.5 font-mono text-xs tracking-wider uppercase">
                 {coauthoredLabel}
               </span>
             )}

@@ -59,7 +59,7 @@ function ArticleMetadataLayout({
             <span
               className="
                 border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5
-                font-mono text-[0.625rem] font-bold tracking-widest
+                font-mono text-xs font-bold tracking-widest
                 text-amber-700 uppercase select-none
                 dark:text-amber-300
               ">
@@ -126,7 +126,7 @@ export function ArticleMetadataAnonymous({
       pathLabel={t("pathLabel")}>
       <dl
         className="
-          grid grid-cols-1 gap-y-2.5 text-[0.6875rem]
+          grid grid-cols-1 gap-y-2.5 text-xs
           md:grid-cols-[auto_minmax(0,1fr)] md:items-baseline md:gap-x-4
           md:gap-y-2
         ">
@@ -189,7 +189,7 @@ function ContributorChip({
         href={`/authors/${encodeURIComponent(handle)}`}
         className="
           group/contributor flex min-h-11 items-center gap-1.5 py-0.5
-          text-[0.6875rem] text-tech-main transition-colors
+          text-xs text-tech-main transition-colors
           hover:text-tech-main-dark sm:min-h-8
         ">
         <Avatar className="border guide-line size-5 shrink-0 sm:size-6">
@@ -205,7 +205,7 @@ function ContributorChip({
           </AvatarImage>
           <AvatarFallback
             className="
-              bg-transparent font-mono text-[0.5625rem] font-bold
+              bg-transparent font-mono text-xs font-bold
               tracking-widest text-tech-main/50 uppercase
             ">
             {handle[0]}
@@ -297,7 +297,7 @@ export function ArticleMetadataFull({
       pathLabel={t("pathLabel")}>
       <div className="t-acc flex flex-col" data-open={!isCollapsed}>
         <div className="flex items-center gap-3">
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-tech-main/65 sm:text-xs">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-tech-main/65">
             <span className="inline-flex items-center gap-1.5">
               <Link
                 href={`/authors/${encodeURIComponent(author)}`}
@@ -344,7 +344,7 @@ export function ArticleMetadataFull({
             <div className="mt-3 border-t guide-line pt-3">
               <dl
                 className="
-                  grid grid-cols-1 gap-y-2.5 text-[0.6875rem]
+                  grid grid-cols-1 gap-y-2.5 text-xs
                   md:grid-cols-[auto_minmax(0,1fr)] md:items-baseline md:gap-x-4
                   md:gap-y-2
                 ">

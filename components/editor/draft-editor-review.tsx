@@ -192,7 +192,7 @@ function ChangePreviewCard({
             {filePath}
           </p>
           <span
-            className={`border px-2 py-1 font-mono text-[0.625rem] ${
+            className={`border px-2 py-1 font-mono text-xs ${
               changeType === "new"
                 ? "border-emerald-500/30 text-emerald-700"
                 : changeType === "modified"
@@ -218,7 +218,7 @@ function ChangePreviewCard({
         ) : changeType === "pending" ? (
           <p className="text-tech-main p-4 text-sm">{t("comparisonPending")}</p>
         ) : (
-          <div className="max-h-96 overflow-auto bg-slate-950/95 font-mono text-[0.6875rem] text-slate-100">
+          <div className="max-h-96 overflow-auto bg-slate-950/95 font-mono text-xs text-slate-100">
             {rows.map((row) => (
               <div
                 key={`${filePath}:${row.oldLine ?? "x"}:${row.newLine ?? "x"}:${row.type}`}

@@ -46,13 +46,13 @@ export function RunningHead({
   return (
     <nav
       aria-label="Chapter"
-      className="mb-4 flex flex-wrap items-center gap-2 font-mono text-[0.6875rem] tracking-[0.15em] uppercase sm:text-xs">
+      className="mb-4 flex flex-wrap items-center gap-2 font-mono text-xs tracking-[0.15em] uppercase">
       {label ? (
-        <span className="bg-tech-signal text-tech-signal-ink inline-flex h-5 items-center px-1.5 text-[0.625rem] font-bold tracking-wider">
+        <span className="bg-tech-signal text-tech-signal-ink inline-flex h-5 items-center px-1.5 text-xs font-bold tracking-wider">
           {chapterIsAppendix ? "APP" : "CH"} {label}
         </span>
       ) : chapterIsAppendix ? (
-        <span className="bg-tech-signal text-tech-signal-ink inline-flex h-5 items-center px-1.5 text-[0.625rem] font-bold tracking-wider">
+        <span className="bg-tech-signal text-tech-signal-ink inline-flex h-5 items-center px-1.5 text-xs font-bold tracking-wider">
           APP
         </span>
       ) : null}

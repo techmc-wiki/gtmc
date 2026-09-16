@@ -66,7 +66,7 @@ function ArticleNavigationLink({
       <div
         className={`
           flex flex-wrap items-center gap-x-2 gap-y-1 font-mono
-          text-[0.625rem] tracking-[0.16em] text-tech-main/60 uppercase
+          text-xs tracking-[0.16em] text-tech-main/60 uppercase
           ${isNext ? "md:justify-end" : ""}
         `}>
         <span>{label}</span>

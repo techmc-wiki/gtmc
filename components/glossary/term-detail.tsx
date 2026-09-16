@@ -156,7 +156,7 @@ export function GlossaryDetailPanel({
                 {entry.fullFormEn}
               </h2>
               {hasShortForm && (
-                <span className="border-tech-line/25 text-tech-main/60 border px-1.5 py-0.5 font-mono text-[0.625rem] tracking-wider uppercase">
+                <span className="border-tech-line/25 text-tech-main/60 border px-1.5 py-0.5 font-mono text-xs tracking-wider uppercase">
                   {entry.shortForm}
                 </span>
               )}

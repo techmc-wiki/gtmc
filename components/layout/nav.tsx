@@ -260,7 +260,7 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
           <nav
             aria-label={t("toggleNavigationMenu")}
             className="flex-1 overflow-y-auto p-3">
-            <p className="text-tech-main/50 mb-2 px-1 font-mono text-[0.625rem] tracking-[0.2em] uppercase">
+            <p className="text-tech-main/50 mb-2 px-1 font-mono text-xs tracking-[0.2em] uppercase">
               {tFooter("sectionRead")}
             </p>
             <ul className="space-y-1">

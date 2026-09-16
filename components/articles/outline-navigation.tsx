@@ -23,9 +23,9 @@ import {
 import styles from "./outline-rail.module.css"
 
 const railDepthClasses = {
-  1: "text-[0.8125rem]/snug",
+  1: "text-xs/snug",
   2: "pl-2 text-xs/snug",
-  3: "pl-4 text-[0.6875rem]/snug",
+  3: "pl-4 text-xs/snug",
 } satisfies Record<1 | 2 | 3, string>
 
 const stationDepthClasses = {
@@ -85,7 +85,7 @@ function PlotterAxis() {
       <span className={`${styles.plotterHead} absolute left-0`} aria-hidden="true">
         <span className="bg-tech-signal absolute top-0 left-0 size-2 -translate-x-1/2 -translate-y-1/2" />
         <span className="bg-tech-signal/75 absolute top-0 right-2 h-px w-2" />
-        <span className="text-tech-signal absolute top-0 right-4 -translate-y-1/2 text-[0.5rem] whitespace-nowrap tabular-nums">
+        <span className="text-tech-signal absolute top-0 right-4 -translate-y-1/2 text-xs whitespace-nowrap tabular-nums">
           {percentage}%
         </span>
       </span>
@@ -143,10 +143,10 @@ export function OutlineRail() {
 
           <div className="flex min-h-0 w-full flex-col pl-16">
             <header className="guide-line flex shrink-0 items-baseline justify-between gap-2 border-b pt-1 pb-3">
-              <span className="text-[0.625rem] font-bold text-tech-main/60">
+              <span className="text-xs font-bold text-tech-main/60">
                 {t("title")}
               </span>
-              <span className="flex items-center gap-1.5 font-mono text-[0.5625rem] tracking-[0.12em] tabular-nums">
+              <span className="flex items-center gap-1.5 font-mono text-xs tracking-[0.12em] tabular-nums">
                 <span className="text-tech-main/70">{activeIndex + 1}</span>
                 <Separator
                   orientation="vertical"
@@ -265,7 +265,7 @@ export function MobileOutlineBar() {
             </SheetTitle>
             <Badge
               variant="neutral"
-              className="font-mono text-[0.625rem] tabular-nums">
+              className="font-mono tabular-nums">
               {pct}%
             </Badge>
           </div>

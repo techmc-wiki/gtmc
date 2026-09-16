@@ -80,20 +80,7 @@
 }
 
 html {
-  /* Fixed bump sizing: avoid continuous viewport-driven recalculation during resize. */
   font-size: 16px;
-}
-
-@media (min-width: 1536px) {
-  html {
-    font-size: 17px;
-  }
-}
-
-@media (min-width: 2560px) {
-  html {
-    font-size: 18px;
-  }
 }
 
 @theme {

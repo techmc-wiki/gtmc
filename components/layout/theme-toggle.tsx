@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { useMounted } from "@/hooks/use-mounted"
 import { useTheme } from "@/lib/theme"
 import { cn } from "@/lib/cn"
-import { MonitorIcon, MoonIcon, SunIcon } from "@/components/ui/icons"
+import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react"
 import { Button } from "@/components/ui/shadcn/button"
 import {
   DropdownMenu,

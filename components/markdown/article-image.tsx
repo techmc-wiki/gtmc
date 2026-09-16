@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react"
 import Image from "next/image"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
 
 interface ArticleImageProps {
   src: string
@@ -35,10 +36,7 @@ export function ArticleImage({ src, alt }: ArticleImageProps) {
         }`}
         aria-hidden="true">
         <div className="bg-tech-accent/10 relative flex size-full flex-1 items-center justify-center overflow-hidden">
-          <div className="border-tech-main/30 absolute top-0 left-0 size-2 border-t-2 border-l-2" />
-          <div className="border-tech-main/30 absolute top-0 right-0 size-2 border-t-2 border-r-2" />
-          <div className="border-tech-main/30 absolute bottom-0 left-0 size-2 border-b-2 border-l-2" />
-          <div className="border-tech-main/30 absolute right-0 bottom-0 size-2 border-r-2 border-b-2" />
+          <CornerBrackets size="size-2" color="border-tech-main/30" />
 
           <span className="text-tech-main/40 relative z-10 text-[0.5625rem] tracking-widest uppercase select-none">
             {status === "error" ? "// LOAD_FAIL" : "// IMG_LOAD"}

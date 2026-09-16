@@ -383,15 +383,6 @@ body {
   }
 }
 
-@utility tracking-tech-wide {
-  letter-spacing: 0.2em;
-}
-
-@utility w-pxfull {
-  width: 1px;
-  height: 100%;
-}
-
 @utility section-label {
   @apply border-tech-main/30 text-tech-main mb-2 inline-block border-b pb-1 text-sm font-semibold tracking-wide;
 }
@@ -423,36 +414,10 @@ body {
   font-weight: 600;
 }
 
-@utility container-safe {
-  width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
-
-  @media (min-width: 768px) {
-    max-width: 1280px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-@utility touch-target {
-  min-height: 44px;
-  min-width: 44px;
-}
-
-@utility corner-bracket {
-  @apply border-tech-main/40 border-2;
-}
-
 @utility guide-line {
   @apply border-tech-main/20;
 }
 
-@utility transition-transform {
-  transition-property: transform, translate, scale, rotate;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 500ms;
-}
 /* Note: ::-webkit-scrollbar is WebKit-only (Chrome, Safari, Edge).
    Firefox uses scrollbar-width/scrollbar-color instead (standard). */
 @utility custom-bottom-scrollbar {
@@ -606,14 +571,6 @@ body {
   [data-slot="resizable-panel"]:has([data-state="inactive"]) {
     display: none !important;
   }
-}
-
-@utility corner-tick {
-  @apply bg-tech-main absolute top-0 right-0 h-px w-8;
-}
-
-@utility mono-label {
-  @apply text-tech-main/50 font-mono text-xs;
 }
 
 @utility nested-list {

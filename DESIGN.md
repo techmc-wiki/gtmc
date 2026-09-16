@@ -63,11 +63,23 @@ consult `app/globals.css` and the shared components.
   keep chroma inside the band the rest of the palette occupies, and check the
   hue distance from the tokens it will appear next to, including under
   protanopia, deuteranopia, and tritanopia.
-- Page, section, and article headings use the serif `display-title` style in
-  sentence case. Body text uses sans.
-- Standard controls, labels, dialog titles, and empty states use normal-case
-  sans. Mono is opt-in for code, data, identifiers, shortcuts, and occasional
-  navigation apparatus; uppercase and wide tracking stay within that apparatus.
+- Typography standardizes on six canonical styles; never introduce ad-hoc sizes
+  or sub-12px (`< text-xs`) micro-typography:
+  1. Display Serif (`display-title text-3xl md:text-5xl font-semibold`): page
+     headers, article H1, error status codes.
+  2. Section Serif (`display-title text-xl md:text-2xl font-semibold`): section
+     titles, article H2 & H3, logo wordmark.
+  3. UI Title (`font-sans text-base leading-none font-semibold`): `DialogTitle`,
+     `CardTitle`, `SheetTitle`.
+  4. Body Prose (`font-sans text-base`): article reading prose (with
+     `leading-relaxed`), `EmptyState`, form inputs (`Input`, `Textarea`).
+  5. UI Text (`font-sans text-sm`): controls (`Button` across all size variants,
+     `TabsTrigger`, `Label`) and descriptions (`CardDescription`,
+     `DialogDescription`, `SheetDescription`, dropdown/command items). Padding
+     and touch-target geometry scale the control, not font size.
+  6. Apparatus (`font-mono text-xs`): `Badge`, `Kbd`, `Toaster`, `mono-label`,
+     chapter navigation prefixes, and progress readouts. Uppercase and wide
+     tracking remain strictly within this apparatus.
 
 ## Layout and reading
 

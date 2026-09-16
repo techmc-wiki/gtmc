@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-dnf install -y \
-  nspr nss atk at-spi2-atk cups-libs libdrm libxkbcommon mesa-libgbm \
-  pango cairo alsa-lib gtk3 libX11 libXcomposite libXdamage libXext \
-  libXfixes libXrandr libxcb dbus-libs expat glib2
-
-pnpm install --frozen-lockfile

@@ -8,6 +8,7 @@ import { PointerLockControls } from "three/addons/controls/PointerLockControls.j
 import { ScanEye, LogOut, RotateCcw, Layers, Square, Check } from "lucide-react"
 import { IconButton } from "@/components/ui/icon-button"
 import { Separator } from "@/components/ui/shadcn/separator"
+import { Kbd } from "@/components/ui/shadcn/kbd"
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js"
 import { useTheme } from "@/lib/theme"
 import { loadSchematicByFileName } from "@/lib/schematic/formats"
@@ -862,10 +863,7 @@ function LitematicaControlKey({
 }) {
   return (
     <span className="flex items-center gap-1.5">
-      <kbd className="rounded-[2px] border border-tech-main/30 bg-surface-overlay px-1.5 py-0.5 font-sans text-[10px] font-semibold text-tech-main shadow-sm">
-        {label}
-      </kbd>{" "}
-      {instruction}
+      <Kbd>{label}</Kbd> {instruction}
     </span>
   )
 }

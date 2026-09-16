@@ -74,9 +74,6 @@
   --border: var(--color-tech-line);
   --input: var(--color-tech-line);
   --ring: var(--color-tech-signal);
-  --font-markdown-title:
-    var(--font-stix-two-text), var(--font-noto-serif-sc, "Songti SC"), "STSong",
-    serif;
 }
 
 html {
@@ -417,12 +414,6 @@ body {
       transition: none;
     }
   }
-}
-
-@utility markdown-title {
-  font-family: var(--font-markdown-title);
-  letter-spacing: 0;
-  text-transform: none;
 }
 
 @utility display-title {

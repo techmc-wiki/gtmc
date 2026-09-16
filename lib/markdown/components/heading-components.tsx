@@ -18,7 +18,7 @@ export function H1Component({
     <h1
       id={id}
       data-advanced={dataAdvanced === "true" ? "true" : undefined}
-      className={`markdown-title group border-tech-main-dark/60 target:animate-target-blink target:border-tech-signal text-tech-main-dark relative mt-8 mb-5 border-b-2 pb-3 text-2xl leading-tight font-semibold text-balance sm:text-3xl lg:text-4xl${action ? " flex items-start gap-4" : ""} `}>
+      className={`display-title group border-tech-main-dark/60 target:animate-target-blink target:border-tech-signal text-tech-main-dark relative mt-8 mb-5 border-b-2 pb-3 text-2xl leading-tight font-semibold text-balance sm:text-3xl lg:text-4xl${action ? " flex items-start gap-4" : ""} `}>
       {action ? <span className="min-w-0 flex-1">{children}</span> : children}
       {action}
     </h1>
@@ -34,7 +34,7 @@ export function H2Component({
     <h2
       id={id}
       data-advanced={dataAdvanced === "true" ? "true" : undefined}
-      className="markdown-title group border-tech-main/40 target:animate-target-blink target:border-tech-signal text-tech-main-dark relative mt-10 mb-4 block w-fit max-w-full border-b pr-8 pb-2 text-2xl leading-tight font-semibold text-balance">
+      className="display-title group border-tech-main/40 target:animate-target-blink target:border-tech-signal text-tech-main-dark relative mt-10 mb-4 block w-fit max-w-full border-b pr-8 pb-2 text-2xl leading-tight font-semibold text-balance">
       {id && <HeadingAnchor id={id} />}
       {children}
     </h2>
@@ -50,7 +50,7 @@ export function H3Component({
     <h3
       id={id}
       data-advanced={dataAdvanced === "true" ? "true" : undefined}
-      className="markdown-title group border-tech-signal target:animate-target-blink text-tech-main-dark relative mt-7 mb-3 border-l-2 pl-3 text-xl leading-snug font-semibold text-balance">
+      className="display-title group border-tech-signal target:animate-target-blink text-tech-main-dark relative mt-7 mb-3 border-l-2 pl-3 text-xl leading-snug font-semibold text-balance">
       {id && <HeadingAnchor id={id} />}
       {children}
     </h3>

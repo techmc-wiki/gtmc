@@ -195,7 +195,7 @@ function createArticleOgImageResponse({
         <div style={bannerContainerStyle}>
           {bannerDataUri && (
             // oxlint-disable-next-line nextjs/no-img-element
-            <img src={bannerDataUri} alt="" style={bannerImgStyle} />
+            <img src={bannerDataUri} alt={title || "Banner"} style={bannerImgStyle} />
           )}
           <div style={computedGridStyle} />
           <div style={cornerTLStyle} />

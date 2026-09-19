@@ -11,7 +11,7 @@ import {
   AvatarImage,
 } from "@/components/ui/shadcn/avatar"
 
-import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react"
+import { useCallback, useId, useMemo, useState, type ReactNode } from "react"
 import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
@@ -22,6 +22,7 @@ import { ArticleLicenseNotice } from "@/components/articles/article-license-noti
 import { getArticleAssetPublicUrl } from "@/lib/articles/url"
 import { formatAbsoluteTime, formatRelativeTime } from "@/lib/format-time"
 
+import { useMounted } from "@/hooks/use-mounted"
 interface ArticleMetadataLayoutProps {
   title: string
   filePath: string
@@ -196,7 +197,7 @@ function ContributorChip({
           <AvatarImage asChild src={getAvatarUrl(handle)}>
             <Image
               src={getAvatarUrl(handle)}
-              alt=""
+              alt={handle}
               fill
               sizes="24px"
               loading="lazy"
@@ -246,14 +247,10 @@ export function ArticleMetadataFull({
   const detailsId = useId()
   // Prerender-safe timestamp: absolute date in server HTML ("now" would make
   // the segment dynamic under cacheComponents), upgraded to relative on mount.
-  const [lastEditedLabel, setLastEditedLabel] = useState(() =>
-    formatAbsoluteTime(lastModified, false)
-  )
-
-  useEffect(() => {
-    setLastEditedLabel(formatRelativeTime(lastModified))
-  }, [lastModified])
-
+  const isMounted = useMounted()
+  const lastEditedLabel = isMounted
+    ? formatRelativeTime(lastModified)
+    : formatAbsoluteTime(lastModified, false)
   // Stable reference for the `authors` prop: recomputed only when the author
   // list changes. Deduplicated so a handle repeated across frontmatter and
   // co-author records yields one byline entry.

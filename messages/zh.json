@@ -485,6 +485,7 @@
   "Pdf": {
     "bookSubtitle": "技术性 Minecraft 入门",
     "bookTitle": "Graduate Texts in Minecraft",
+    "coverAlt": "《Graduate Texts in Minecraft》封面",
     "downloadButton": "下载 PDF",
     "editionLabel": "离线版",
     "mermaidRenderError": "无法渲染 Mermaid 图表。",

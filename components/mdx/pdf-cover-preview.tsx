@@ -27,6 +27,7 @@ export function PdfCoverPreview({ filename }: { filename: string }) {
         className="relative block aspect-[1/1.414] h-auto w-full max-w-[26rem] touch-pan-y overflow-hidden border-0 p-0 whitespace-normal shadow-lg hover:bg-transparent sm:p-0">
         <ImagePeel
           src={`/covers/gtmc-${locale}.png`}
+          alt={t("coverAlt")}
           opened={opened}
           onOpenChange={setOpened}>
           <div className="border-tech-main/40 bg-surface text-tech-main-dark flex h-full flex-col justify-between border p-6 text-left sm:p-10">

@@ -485,6 +485,7 @@
   "Pdf": {
     "bookSubtitle": "An Introduction to Technical Minecraft",
     "bookTitle": "Graduate Texts in Minecraft",
+    "coverAlt": "Graduate Texts in Minecraft book cover",
     "downloadButton": "Download PDF",
     "editionLabel": "Offline Edition",
     "mermaidRenderError": "Unable to render Mermaid diagram.",

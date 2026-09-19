@@ -12,6 +12,7 @@ import { remarkCallouts } from "../syntax/remark-callouts"
 import { remarkCodeProvenance } from "../syntax/remark-code-provenance"
 import { remarkPeopleMentions } from "../syntax/remark-people-mentions"
 import { remarkNumberedHeadingsDot } from "../syntax/remark-heading-numbering"
+import { remarkImageAlt } from "../syntax/remark-image-alt"
 import { remarkWikilinks } from "../syntax/remark-wikilinks"
 import { rehypeAdvancedSections } from "../syntax/rehype-advanced-sections"
 import { rehypeCodeProvenance } from "../syntax/rehype-code-provenance"
@@ -46,6 +47,7 @@ export function buildRemarkPlugins(
     remarkCallouts,
     remarkCodeProvenance,
     remarkPeopleMentions,
+    remarkImageAlt,
     [remarkNumberedHeadingsDot, { startDepth: 2 }],
   ]
 

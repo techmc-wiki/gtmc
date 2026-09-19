@@ -22,6 +22,7 @@ function usePeelCanvas(
   const changeOpen = useEffectEvent(onOpenChange)
 
   useEffect(() => {
+    if (!src) return
     const scene = createPeelScene({
       root: rootRef.current,
       canvas: canvasRef.current,
@@ -37,18 +38,19 @@ function usePeelCanvas(
 
   useEffect(() => {
     sceneRef.current?.setOpen(opened)
-  }, [opened, src])
-
+  }, [opened])
   return { rootRef, canvasRef, imageRef }
 }
 
 export function ImagePeel({
   src,
+  alt = "",
   children,
   opened,
   onOpenChange,
 }: {
   src: string
+  alt?: string
   children: ReactNode
   opened: boolean
   onOpenChange: (opened: boolean) => void
@@ -72,7 +74,7 @@ export function ImagePeel({
       <img
         ref={imageRef}
         src={src}
-        alt=""
+        alt={alt}
         className="relative h-full w-full object-contain group-data-[peel-open=true]/peel:invisible group-data-[peel-ready=true]/peel:invisible"
       />
       <canvas

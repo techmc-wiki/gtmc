@@ -64,7 +64,6 @@ function useSearchCommand() {
   const isMounted = useMounted()
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
-  const inputRef = useRef<HTMLInputElement>(null)
   const prevIsOpenRef = useRef(false)
   const router = useRouter()
   const pathname = usePathname()
@@ -201,7 +200,6 @@ function useSearchCommand() {
     glossaryResults,
     handleQueryChange,
     highlightMatch,
-    inputRef,
     isLoading,
     isMounted,
     isMac,
@@ -220,17 +218,23 @@ type SearchCommandState = ReturnType<typeof useSearchCommand>
 
 export function SearchCommand() {
   const search = useSearchCommand()
-  return <SearchCommandLayout search={search} />
+  const inputRef = useRef<HTMLInputElement>(null)
+  return <SearchCommandLayout search={search} inputRef={inputRef} />
 }
 
-function SearchCommandLayout({ search }: { search: SearchCommandState }) {
+function SearchCommandLayout({
+  search,
+  inputRef,
+}: {
+  search: SearchCommandState
+  inputRef: React.RefObject<HTMLInputElement | null>
+}) {
   if (!search.isMounted) {
     return <SearchCommandPlaceholder t={search.t} />
   }
 
-  return <SearchCommandDialog search={search} />
+  return <SearchCommandDialog search={search} inputRef={inputRef} />
 }
-
 function SearchCommandPlaceholder({ t }: { t: SearchCommandState["t"] }) {
   return (
     <IconButton label={t("searchAriaLabel")} disabled>
@@ -239,14 +243,20 @@ function SearchCommandPlaceholder({ t }: { t: SearchCommandState["t"] }) {
   )
 }
 
-function SearchCommandDialog({ search }: { search: SearchCommandState }) {
+function SearchCommandDialog({
+  search,
+  inputRef,
+}: {
+  search: SearchCommandState
+  inputRef: React.RefObject<HTMLInputElement | null>
+}) {
   return (
     <CommandDialog
       open={search.isOpen}
       onOpenChange={search.setIsOpen}
       onOpenAutoFocus={(event) => {
         event.preventDefault()
-        search.inputRef.current?.focus()
+        inputRef.current?.focus()
       }}
       trigger={
         <Tooltip>
@@ -291,7 +301,7 @@ function SearchCommandDialog({ search }: { search: SearchCommandState }) {
       </header>
       <div className="border-b">
         <CommandInput
-          ref={search.inputRef}
+          ref={inputRef}
           value={search.query}
           onValueChange={search.handleQueryChange}
           placeholder={search.t("placeholder")}

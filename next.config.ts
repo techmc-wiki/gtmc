@@ -123,6 +123,18 @@ const nextConfig: NextConfig = {
             value:
               "AlNE6Dr0We0vv7HNSzPGSc7HI46ID49UvB3aYU/5wKlwPqseeiEaXQQsRsndqjH2/ZQVO+qg2vSyIxk2k7KR/AIAAABoeyJvcmlnaW4iOiJodHRwczovL3d3dy50ZWNobWMud2lraTo0NDMiLCJmZWF0dXJlIjoiSFRNTEluQ2FudmFzIiwiZXhwaXJ5IjoxNzkyNDU0NDAwLCJpc1N1YmRvbWFpbiI6dHJ1ZX0=",
           },
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
         ],
       },
     ]

@@ -126,13 +126,13 @@ export function GlossaryDetailPanel({
   onOpenRelated,
 }: GlossaryDetailPanelProps) {
   const t = useTranslations("Glossary")
+  const headingRef = React.useRef<HTMLHeadingElement>(null)
 
   if (!entry) return null
 
   const titleId = `glossary-detail-panel-${entry.slug}`
   const descriptionId = `${titleId}-description`
   const hasShortForm = entry.shortForm.trim().length > 0
-
   return (
     <Sheet
       open
@@ -142,6 +142,10 @@ export function GlossaryDetailPanel({
       <SheetContent
         side="right"
         showCloseButton={false}
+        onOpenAutoFocus={(event) => {
+          event.preventDefault()
+          headingRef.current?.focus()
+        }}
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         className="border-tech-main/35 bg-surface-modal w-full gap-0 p-0 sm:w-[min(34rem,calc(100vw-2rem))] sm:max-w-none">
@@ -153,8 +157,10 @@ export function GlossaryDetailPanel({
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
               <h2
+                ref={headingRef}
+                tabIndex={-1}
                 id={titleId}
-                className="display-title text-tech-main-dark text-2xl leading-none tracking-tight text-balance sm:text-3xl">
+                className="display-title text-tech-main-dark text-2xl leading-none tracking-tight text-balance outline-none sm:text-3xl">
                 {entry.fullFormEn}
               </h2>
               {hasShortForm && (

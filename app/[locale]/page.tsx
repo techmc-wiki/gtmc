@@ -18,12 +18,36 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "Homepage" })
+  const metaTitle = t("metaTitle")
+  const heroDescription = t("heroDescription")
+  const canonical = `/${locale}`
 
   return {
     title: {
-      absolute: t("metaTitle"),
+      absolute: metaTitle,
     },
-    description: t("heroDescription"),
+    description: heroDescription,
+    openGraph: {
+      type: "website",
+      siteName: "Graduate Texts in Minecraft",
+      url: canonical,
+      title: metaTitle,
+      description: heroDescription,
+      images: [
+        {
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: metaTitle,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: metaTitle,
+      description: heroDescription,
+      images: ["/opengraph-image"],
+    },
   }
 }
 

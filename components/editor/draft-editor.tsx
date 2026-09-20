@@ -240,7 +240,14 @@ function DraftEditorSurface({
   handleRemoveFile,
   hook,
 }: DraftEditorSurfaceProps) {
-  const { state, refs, upload, progress, t, progressT } = hook
+  const {
+    state,
+    refs: { fileInputRef, textareaRef },
+    upload,
+    progress,
+    t,
+    progressT,
+  } = hook
 
   const [mode, setMode] = React.useState<"write" | "split" | "preview">("write")
   const [inspectorOpen, setInspectorOpen] = React.useState(false)
@@ -357,7 +364,7 @@ function DraftEditorSurface({
                   onWrapToggle={() => actions.setLineWrap((value) => !value)}
                   readOnly={state.isReadOnly}
                   uploading={upload.isUploading}
-                  fileInputRef={refs.fileInputRef}
+                  fileInputRef={fileInputRef}
                   onFileSelect={actions.handleUploadWithAutoSave}
                   compressing={upload.isCompressing}
                   onInsertSyntax={actions.insertSyntax}
@@ -386,7 +393,7 @@ function DraftEditorSurface({
                     className="h-full w-full min-w-0 overflow-auto [&_.cm-editor]:min-h-full [&_.cm-editor]:bg-transparent! [&_.cm-scroller]:overflow-auto [&>div]:h-full">
                     <EditorTextareaDynamic
                       key={state.activeFile.id}
-                      ref={refs.textareaRef}
+                      ref={textareaRef}
                       value={state.activeFileContent}
                       onChange={(value) =>
                         actions.updateActiveFile({ content: value })

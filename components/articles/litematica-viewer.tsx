@@ -394,10 +394,9 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
   // Dynamic import is load-bearing: the 16.9 MB wasm must stay in a lazy
   // chunk, and this is the only engine entry point.
   useEffect(() => {
+    let cancelled = false
     const loadToken = ++loadTokenRef.current
-    const isCurrentLoad = () => loadToken === loadTokenRef.current
     const controller = new AbortController()
-
     const cleanUrl = normalizeUrlInput(url)
     const proxyUrl = `/api/litematica-download?${new URLSearchParams({
       url: cleanUrl,
@@ -412,13 +411,14 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
       try {
         nuc = await import("nucleation")
       } catch (error) {
+        if (cancelled) return
         console.error("Error importing nucleation:", error)
         setLoadError("FAILED")
         return
       }
-      if (!isCurrentLoad()) return
+      if (cancelled) return
+      if (loadToken !== loadTokenRef.current) return
       nucRef.current = nuc
-
       let arrayBuffer: ArrayBuffer
       try {
         const response = await fetch(proxyUrl, {
@@ -430,13 +430,14 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
         }
         arrayBuffer = await response.arrayBuffer()
       } catch (error) {
+        if (cancelled) return
         if (error instanceof DOMException && error.name === "AbortError") return
         console.error("Error fetching schematic:", error)
         setLoadError("FAILED")
         return
       }
-      if (!isCurrentLoad()) return
-
+      if (cancelled) return
+      if (loadToken !== loadTokenRef.current) return
       const fileName = cleanUrl.split("/").pop() || "schematic.litematic"
       const bytes = new Uint8Array(arrayBuffer)
 
@@ -446,15 +447,16 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
         schematic = loadSchematicByFileName(nuc, fileName, [...bytes])
         pack = await getSharedResourcePack(nuc)
       } catch (error) {
+        if (cancelled) return
         console.error("Error parsing schematic:", error)
         setLoadError("FAILED")
         return
       }
-      if (!isCurrentLoad()) return
+      if (cancelled) return
+      if (loadToken !== loadTokenRef.current) return
 
       const tight = schematic.tightDimensions()
       tightRef.current = { x: Math.max(1, tight.x), y: Math.max(1, tight.y), z: Math.max(1, tight.z) }
-
       // Mesher exhaustion (very detailed schematics) traps in wasm, so every
       // failure here is surfaced as "too detailed" rather than a stack trace.
       let glb: Uint8Array
@@ -464,32 +466,33 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
         glb = meshed.glb
         bounds = meshed.bounds
       } catch (error) {
+        if (cancelled) return
         console.error("Error meshing schematic:", error)
         setLoadError("TOO_DETAILED")
         return
       }
-      if (!isCurrentLoad()) return
+      if (cancelled) return
+      if (loadToken !== loadTokenRef.current) return
 
       schematicRef.current = schematic
       packRef.current = pack
-
       const scene = sceneRef.current
       if (!scene) return
 
       try {
         const group = await parseGlb(glb)
-        if (!isCurrentLoad()) {
+        if (cancelled || loadToken !== loadTokenRef.current) {
           disposeGroup(group)
           return
         }
         swapMeshGroup(scene, group)
       } catch (error) {
+        if (cancelled) return
         console.error("Error loading mesh:", error)
         setLoadError("TOO_DETAILED")
         return
       }
-
-      // Ground grid sized to the meshed bounds, not the padded declared size.
+      if (cancelled) return
       const widthX = bounds.maxX - bounds.minX
       const widthZ = bounds.maxZ - bounds.minZ
       const grid = new THREE.GridHelper(
@@ -530,6 +533,7 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
     void run()
 
     return () => {
+      cancelled = true
       controller.abort()
       setSchematicReady(false)
       schematicRef.current = null
@@ -545,10 +549,8 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
     const pack = packRef.current
     const scene = sceneRef.current
     if (!nuc || !schematic || !pack || !scene) return
-
+    let cancelled = false
     const token = ++remeshTokenRef.current
-    const isCurrent = () => token === remeshTokenRef.current
-
     const range: LayerRange =
       targetLayer === "all"
         ? { mode: "all" }
@@ -565,20 +567,25 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
     void (async () => {
       try {
         const { glb } = meshSchematic(nuc, schematic, pack, range, tightRef.current)
-        if (!isCurrent()) return
+        if (cancelled || token !== remeshTokenRef.current) return
         const group = await parseGlb(glb)
-        if (!isCurrent()) {
+        if (cancelled || token !== remeshTokenRef.current) {
           disposeGroup(group)
           return
         }
         swapMeshGroup(scene, group)
         needsRenderRef.current = true
       } catch (error) {
+        if (cancelled) return
         // Keep the last good mesh visible; meshing failures are wasm traps.
         console.error("Failed to re-mesh layer range:", error)
         setLoadError("TOO_DETAILED")
       }
     })()
+
+    return () => {
+      cancelled = true
+    }
   }, [schematicReady, targetLayer, layerMode])
 
   const commitLayerSelection = useCallback(() => {

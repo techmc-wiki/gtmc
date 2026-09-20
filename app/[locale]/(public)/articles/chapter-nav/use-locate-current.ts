@@ -25,7 +25,6 @@ interface LocateCurrentOptions {
   tree: ChapterNavNode[]
   effectivePath: string
   mounted: boolean
-  expandedFolders: Set<string>
   expandedFoldersRef: React.RefObject<Set<string>>
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>
   scrollContainerRef: React.RefObject<HTMLDivElement | null>
@@ -63,7 +62,6 @@ export function useLocateCurrent({
   tree,
   effectivePath,
   mounted,
-  expandedFolders,
   expandedFoldersRef,
   setExpandedFolders,
   scrollContainerRef,
@@ -183,8 +181,6 @@ export function useLocateCurrent({
   ])
 
   useEffect(() => {
-    // Run after expanded folder refs have committed to the DOM.
-    void expandedFolders
 
     const state = locateStateRef.current
     if (state.phase !== "expanding") return
@@ -237,7 +233,7 @@ export function useLocateCurrent({
       clearTimeout((locateStateRef.current as unknown as { fallbackTimer?: number }).fallbackTimer)
       transitionCleanupRef.current = null
     }
-  }, [expandedFolders, finishExpansionAndScroll, folderGridRefs])
+  }, [finishExpansionAndScroll, folderGridRefs])
 
   useEffect(() => {
     if (!mounted || tree.length === 0) return

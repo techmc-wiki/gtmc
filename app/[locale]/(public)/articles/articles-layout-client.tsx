@@ -183,11 +183,14 @@ function useChapterNavVisibility() {
   const [isChapterNavOpen, setIsChapterNavOpen] = useState(false)
 
   useEffect(() => {
-    try {
-      setChapterNavHidden(
-        localStorage.getItem(CHAPTER_NAV_HIDDEN_KEY) === "true"
-      )
-    } catch {}
+    const timer = setTimeout(() => {
+      try {
+        setChapterNavHidden(
+          localStorage.getItem(CHAPTER_NAV_HIDDEN_KEY) === "true"
+        )
+      } catch {}
+    }, 0)
+    return () => clearTimeout(timer)
   }, [])
 
   const toggleChapterNavHidden = useCallback(() => {

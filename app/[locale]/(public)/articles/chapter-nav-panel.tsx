@@ -19,7 +19,6 @@ export function ChapterNavPanel({
   const {
     tree,
     effectivePath,
-    expandedFolders,
     setExpandedFolders,
     expandedFoldersRef,
     mounted,
@@ -34,7 +33,6 @@ export function ChapterNavPanel({
     tree,
     effectivePath,
     mounted,
-    expandedFolders,
     expandedFoldersRef,
     setExpandedFolders,
     scrollContainerRef,

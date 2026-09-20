@@ -176,7 +176,22 @@ function handleIntlRequest(req: NextRequest): Response {
     return Response.redirect(redirectUrl, 308)
   }
 
-  return normalizeRedirectOrigin(req, intlMiddleware(req))
+  const response = normalizeRedirectOrigin(req, intlMiddleware(req))
+  if (
+    pathname === "/" &&
+    (response.status === 307 || response.status === 302)
+  ) {
+    const location = response.headers.get("location")
+    if (location) {
+      const headers = new Headers(response.headers)
+      return new Response(response.body, {
+        status: 308,
+        statusText: "Permanent Redirect",
+        headers,
+      })
+    }
+  }
+  return response
 }
 
 const authenticatedProxy = auth(
@@ -232,5 +247,5 @@ export default function proxy(req: NextRequest, event: NextFetchEvent) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
+  matcher: ["/((?!api|_next|_vercel|opengraph-image|.*\\..*).*)"],
 }

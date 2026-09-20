@@ -16,7 +16,7 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: "/",
+      allow: ["/", "/api/assets", "/api/og/", "/api/litematica-assets/"],
       disallow: [
         ...routing.locales.flatMap((locale) =>
           PRIVATE_SEGMENTS.map((segment) => `/${locale}${segment}`)

@@ -335,9 +335,7 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
     document.addEventListener("keyup", onKeyUp)
     canvas.addEventListener("click", onClick)
 
-    let frameHandle = 0
     const loop = (timeMs: number) => {
-      frameHandle = requestAnimationFrame(loop)
       const dt = Math.min((timeMs - lastFrameTimeRef.current) / 1000, 0.1)
       lastFrameTimeRef.current = timeMs
 
@@ -364,10 +362,10 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
         needsRenderRef.current = false
       }
     }
-    frameHandle = requestAnimationFrame(loop)
-
+    lastFrameTimeRef.current = performance.now()
+    renderer.setAnimationLoop(loop)
     return () => {
-      cancelAnimationFrame(frameHandle)
+      renderer.setAnimationLoop(null)
       resizeObserver.disconnect()
       document.removeEventListener("keydown", onKeyDown)
       document.removeEventListener("keyup", onKeyUp)

@@ -32,7 +32,6 @@ export function NewGlossaryDraftStarter({
   const startDraft = React.useCallback(async () => {
     if (inFlightRef.current) return
     inFlightRef.current = true
-    setErrorMessage(null)
     try {
       const creation = pendingDraftCreation ?? createGlossaryDraftAction()
       if (timerRef.current !== null) {
@@ -70,8 +69,11 @@ export function NewGlossaryDraftStarter({
   }, [prefillSlug, router])
 
   React.useEffect(() => {
-    void startDraft()
+    const startTimer = setTimeout(() => {
+      void startDraft()
+    }, 0)
     return () => {
+      clearTimeout(startTimer)
       if (timerRef.current !== null) {
         clearTimeout(timerRef.current)
         timerRef.current = null

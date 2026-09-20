@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import { routing } from "@/i18n/routing";
 import { type ArticleTreeNode } from "@/lib/github";
 
@@ -26,7 +27,7 @@ function getNodeBuiltin<T>(name: string): T {
     return getBuiltinModule(name) as T;
   }
 
-  const nodeRequire = (0, eval)("require") as NodeRequire;
+  const nodeRequire = createRequire(import.meta.url);
   return nodeRequire(name) as T;
 }
 

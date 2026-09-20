@@ -19,6 +19,7 @@ function ReplayOnNavigate({
   const isFirstRender = React.useRef(true)
 
   React.useEffect(() => {
+    if (!pathname) return
     if (isFirstRender.current) {
       isFirstRender.current = false
       return
@@ -62,6 +63,7 @@ function ScrollResetOnNavigate({
   const pathname = useLocalePathname()
 
   React.useEffect(() => {
+    if (!pathname) return
     rootRef.current?.scrollTo({ left: 0, top: 0 })
   }, [pathname, rootRef])
 

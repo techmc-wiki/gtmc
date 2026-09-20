@@ -38,8 +38,15 @@ function AuthIslandContent() {
     return (
       <Link
         href="/login"
-        className="border-tech-main/40 bg-tech-main/10 text-tech-main hover:bg-tech-main-dark hover:text-tech-bg flex size-full items-center justify-center border font-mono text-xs font-bold uppercase transition-colors duration-300">
-        {t("login")}
+        aria-label={t("login")}
+        title={t("login")}
+        className="group hover:bg-tech-main/10 focus-visible:outline-tech-main flex size-11 items-center justify-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2">
+        <Avatar className="border-tech-main/30 bg-tech-main/10 group-hover:border-tech-main/60 relative size-8 items-center justify-center overflow-hidden border transition-colors">
+          <User
+            aria-hidden="true"
+            className="text-tech-main/70 group-hover:text-tech-main-dark size-4 transition-colors"
+          />
+        </Avatar>
       </Link>
     )
   }

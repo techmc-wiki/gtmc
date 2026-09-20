@@ -52,13 +52,12 @@ function scanHeadings(): OutlineItem[] {
   return outlineItems
 }
 
-export function useOutline(pathname: string): OutlineItem[] {
+export function useOutline(): OutlineItem[] {
   const [outline, setOutline] = useState<OutlineItem[]>([])
 
   useEffect(() => {
     if (typeof document === "undefined") return
 
-    void pathname
 
     const frame = requestAnimationFrame(() => {
       setOutline(scanHeadings())
@@ -78,7 +77,7 @@ export function useOutline(pathname: string): OutlineItem[] {
       clearTimeout(timeout)
       cancelAnimationFrame(frame)
     }
-  }, [pathname])
+  }, [])
 
   return outline
 }

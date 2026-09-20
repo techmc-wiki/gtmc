@@ -109,6 +109,7 @@ export function OutlineRail() {
   }, [effectiveActiveHeadingId, outline])
 
   React.useEffect(() => {
+    if (!effectiveActiveHeadingId) return
     const list = outlineListRef.current
     const activeItem = activeItemRef.current
     if (!list || !activeItem) return

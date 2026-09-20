@@ -15,12 +15,15 @@ export function useExpandedFolders() {
   const isFirstRender = useRef(true)
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(SIDEBAR_EXPANDED_KEY)
-      if (stored) {
-        setExpandedFolders(new Set<string>(JSON.parse(stored)))
-      }
-    } catch {}
+    const timer = setTimeout(() => {
+      try {
+        const stored = localStorage.getItem(SIDEBAR_EXPANDED_KEY)
+        if (stored) {
+          setExpandedFolders(new Set<string>(JSON.parse(stored)))
+        }
+      } catch {}
+    }, 0)
+    return () => clearTimeout(timer)
   }, [])
 
   // Persist to localStorage on subsequent state changes

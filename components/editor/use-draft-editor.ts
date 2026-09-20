@@ -202,22 +202,23 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     []
   )
 
-  const updateSaveProgressState = (
-    nextState: Exclude<OperationProgressState, "idle">
-  ) => {
-    if (saveProgressResetRef.current !== null) {
-      window.clearTimeout(saveProgressResetRef.current)
-      saveProgressResetRef.current = null
-    }
-    setSaveProgressState(nextState)
-    if (nextState === "running") return
-    saveProgressResetRef.current = window.setTimeout(
-      () => {
-        setSaveProgressState("idle")
-      },
-      nextState === "success" ? 1400 : 3200
-    )
-  }
+  const updateSaveProgressState = React.useCallback(
+    (nextState: Exclude<OperationProgressState, "idle">) => {
+      if (saveProgressResetRef.current !== null) {
+        window.clearTimeout(saveProgressResetRef.current)
+        saveProgressResetRef.current = null
+      }
+      setSaveProgressState(nextState)
+      if (nextState === "running") return
+      saveProgressResetRef.current = window.setTimeout(
+        () => {
+          setSaveProgressState("idle")
+        },
+        nextState === "success" ? 1400 : 3200
+      )
+    },
+    []
+  )
 
   const updateSubmitProgressState = (
     nextState: Exclude<OperationProgressState, "idle">
@@ -278,13 +279,14 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
       (lastSavedDraftCollection.folders || []).join("|") ||
     unsavedFileIds.size > 0
 
-  const updateDraftCollection = (
-    updater: (current: DraftFileCollection) => DraftFileCollection
-  ) => {
-    setDraftCollection((current) =>
-      normalizeDraftFileCollection(updater(current))
-    )
-  }
+  const updateDraftCollection = React.useCallback(
+    (updater: (current: DraftFileCollection) => DraftFileCollection) => {
+      setDraftCollection((current) =>
+        normalizeDraftFileCollection(updater(current))
+      )
+    },
+    []
+  )
 
   const getDraftContentHistory = React.useCallback((fileId: string) => {
     const existingHistory = contentHistoryRef.current[fileId]
@@ -375,7 +377,12 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
         }
       })
     },
-    [getDraftContentHistory, pushHistoryEntry, syncHistoryAvailability]
+    [
+      getDraftContentHistory,
+      pushHistoryEntry,
+      syncHistoryAvailability,
+      updateDraftCollection,
+    ]
   )
 
   const updateActiveFile = (updates: {
@@ -463,7 +470,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
         }
       }
     },
-    [persistDraft, t, title]
+    [persistDraft, t, title, updateSaveProgressState]
   )
 
   const handleUndoDraftEdit = React.useCallback(() => {
@@ -590,7 +597,6 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
       }
     }
   }, [
-    draftCollection,
     hasUnsavedChanges,
     isReadOnly,
     isSaving,

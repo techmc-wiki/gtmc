@@ -684,30 +684,48 @@ function buildArticleStructuredData({
     proficiencyLevel: isAdvanced ? "Expert" : "Beginner",
     ...(bannerUrl ? { image: bannerUrl } : {}),
   }
-  const breadcrumbChapterItems = runningHeadChapters.flatMap((chapter, index) =>
-    chapter.slug === effectiveSlug
-      ? []
-      : [{
-          "@type": "ListItem" as const,
-          position: index + 3,
-          name: chapter.title,
-          item: `${siteUrl}/${locale}${articleUrl(chapter.slug)}`,
-        }]
-  )
+  const itemListElement: Array<{
+    "@type": "ListItem"
+    position: number
+    name: string
+    item: string
+  }> = [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: `${siteUrl}/${locale}`,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Articles",
+      item: `${siteUrl}/${locale}/articles/preface`,
+    },
+  ]
+
+  for (const chapter of runningHeadChapters) {
+    if (chapter.slug !== effectiveSlug) {
+      itemListElement.push({
+        "@type": "ListItem",
+        position: itemListElement.length + 1,
+        name: chapter.title,
+        item: `${siteUrl}/${locale}${articleUrl(chapter.slug)}`,
+      })
+    }
+  }
+
+  itemListElement.push({
+    "@type": "ListItem",
+    position: itemListElement.length + 1,
+    name: articleTitle,
+    item: canonicalUrl,
+  })
+
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList" as const,
-    itemListElement: [
-      { "@type": "ListItem" as const, position: 1, name: "Home", item: `${siteUrl}/${locale}` },
-      { "@type": "ListItem" as const, position: 2, name: "Articles", item: `${siteUrl}/${locale}/articles` },
-      ...breadcrumbChapterItems,
-      {
-        "@type": "ListItem" as const,
-        position: breadcrumbChapterItems.length + 3,
-        name: articleTitle,
-        item: canonicalUrl,
-      },
-    ],
+    itemListElement,
   }
 
   return { breadcrumbJsonLd, techArticleJsonLd }

@@ -84,12 +84,12 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
   // Delayed release: on leave, the chip lingers briefly so quick diagonal
   // mouse paths across the bar don't flash it away and back.
   const releaseTimer = React.useRef<number | null>(null)
-  const clearRelease = () => {
+  const clearRelease = React.useCallback(() => {
     if (releaseTimer.current !== null) {
       window.clearTimeout(releaseTimer.current)
       releaseTimer.current = null
     }
-  }
+  }, [])
   const previewLink = (href: string) => {
     clearRelease()
     setPreviewKey(href)
@@ -109,7 +109,7 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
   // Hover/focus borrows the chip; otherwise it rests on the active link.
   const chipKey = previewKey ?? activeHref
 
-  React.useEffect(() => clearRelease, [])
+  React.useEffect(() => clearRelease, [clearRelease])
 
   const [resizeTick, setResizeTick] = React.useState(0)
   const lastResizeTick = React.useRef(resizeTick)

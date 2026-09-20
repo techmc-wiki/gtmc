@@ -50,7 +50,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const resolvedTheme = theme === "system" ? systemTheme : theme
   useEffect(() => {
     applyDocumentTheme(theme)
-  }, [systemTheme, theme])
+  }, [theme])
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme)

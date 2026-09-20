@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useSyncExternalStore } from "react"
 
 const DOT_PALETTES = {
   light: { base: "#d6d3c8", active: "#1d6a96" },
@@ -12,29 +12,40 @@ export interface DotPalette {
   active: string
 }
 
+function getDotPaletteThemeSnapshot(): keyof typeof DOT_PALETTES {
+  if (typeof document === "undefined") return "light"
+  return document.documentElement.dataset.theme === "dark" ? "dark" : "light"
+}
+
+function getDotPaletteThemeServerSnapshot(): keyof typeof DOT_PALETTES {
+  return "light"
+}
+
+function subscribeDotPaletteTheme(callback: () => void): () => void {
+  if (
+    typeof document === "undefined" ||
+    typeof MutationObserver === "undefined"
+  ) {
+    return () => {}
+  }
+  const observer = new MutationObserver(callback)
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  })
+  return () => observer.disconnect()
+}
+
 /**
  * Interactive dot-field colors for the runtime theme (`data-theme` is the
  * single source of truth). Shared by the homepage hero field and the footer
  * field so both bookends stay in lockstep across themes.
  */
 export function useDotPalette(): DotPalette {
-  const [theme, setTheme] = useState<keyof typeof DOT_PALETTES>("light")
-
-  useEffect(() => {
-    setTheme(
-      document.documentElement.dataset.theme === "dark" ? "dark" : "light"
-    )
-    const observer = new MutationObserver(() =>
-      setTheme(
-        document.documentElement.dataset.theme === "dark" ? "dark" : "light"
-      )
-    )
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-theme"],
-    })
-    return () => observer.disconnect()
-  }, [])
-
+  const theme = useSyncExternalStore(
+    subscribeDotPaletteTheme,
+    getDotPaletteThemeSnapshot,
+    getDotPaletteThemeServerSnapshot
+  )
   return DOT_PALETTES[theme]
 }

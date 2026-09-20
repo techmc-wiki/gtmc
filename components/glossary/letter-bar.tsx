@@ -126,7 +126,7 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
     return () => {
       observer.disconnect()
     }
-  }, [availableLetters])
+  }, [])
 
   React.useEffect(() => {
     const el = scrollRef.current
@@ -146,7 +146,7 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
       el.removeEventListener("scroll", update)
       ro.disconnect()
     }
-  }, [availableLetters])
+  }, [])
 
   const handleLetterClick = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {

@@ -16,12 +16,12 @@ export function useLocalizedGlossary(locale: string): {
   isLoading: boolean
 } {
   const [entries, setEntries] = React.useState<GlossaryIndexEntry[]>(EMPTY)
-  const [isLoading, setIsLoading] = React.useState(true)
+  const [loadedLocale, setLoadedLocale] = React.useState<string | null>(null)
   const siteLocale = normalizeGlossarySiteLocale(locale)
+  const isLoading = loadedLocale !== siteLocale
 
   React.useEffect(() => {
     let cancelled = false
-    setIsLoading(true)
 
     fetch(`/api/glossary?locale=${siteLocale}`)
       .then((res) => {
@@ -31,12 +31,12 @@ export function useLocalizedGlossary(locale: string): {
       .then((data) => {
         if (!cancelled) {
           setEntries(data)
-          setIsLoading(false)
+          setLoadedLocale(siteLocale)
         }
       })
       .catch((error) => {
         console.error("Failed to load glossary entries:", error)
-        if (!cancelled) setIsLoading(false)
+        if (!cancelled) setLoadedLocale(siteLocale)
       })
 
     return () => {

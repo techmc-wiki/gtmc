@@ -4,7 +4,7 @@ import {
   getGitHubWriteToken,
   getOctokit,
 } from "@/lib/github/articles-repo"
-import { getGithubErrorStatusNumber } from "@/lib/github/errors"
+import { getGithubErrorStatus } from "@/lib/github/errors"
 import type { FileCategory } from "@/lib/uploads/file-upload"
 
 type ArticleAssetUploadErrorCode =
@@ -60,13 +60,9 @@ export async function uploadArticleAssetToGithub({
       content: buffer.toString("base64"),
     })
 
-    if (!Array.isArray(data.content) && data.content?.download_url) {
-      return data.content.download_url
-    }
-
-    return buildArticleAssetUrl(filePath)
+    return data.content?.download_url || buildArticleAssetUrl(filePath)
   } catch (error) {
-    const status = getGithubErrorStatusNumber(error)
+    const status = getGithubErrorStatus(error)
 
     if (status === 401 || status === 403) {
       throw new ArticleAssetUploadError(

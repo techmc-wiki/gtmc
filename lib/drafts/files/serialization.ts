@@ -32,15 +32,7 @@ export function decodeStoredDraftFiles({
     } satisfies DraftFileCollection
   }
 
-  return normalizeDraftFileCollection({
-    activeFileId: contentBundle.activeFileId,
-    folders: contentBundle.folders || [],
-    files: contentBundle.files.map((storedFile) => ({
-      id: storedFile.id,
-      filePath: storedFile.filePath || "",
-      content: storedFile.content || "",
-    })),
-  })
+  return normalizeDraftFileCollection(contentBundle)
 }
 
 export function serializeDraftFilesForStorage(collection: DraftFileCollection) {
@@ -101,11 +93,7 @@ export function deserializeDraftFilesPayload(raw: string | null | undefined) {
       return null
     }
 
-    return normalizeDraftFileCollection({
-      activeFileId: parsed.activeFileId,
-      folders: parsed.folders,
-      files: parsed.files,
-    })
+    return normalizeDraftFileCollection(parsed)
   } catch {
     return null
   }

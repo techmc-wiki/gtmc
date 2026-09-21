@@ -23,6 +23,7 @@ export function buildManifestPreview(
   const roots = entries
     .filter((entry) => !entry.parentSlug || !manifest[entry.parentSlug])
     .toSorted(comparePreviewEntries)
+  const childIndex = indexChildren(entries)
   const maxSlugDepth = entries.reduce(
     (max, entry) => Math.max(max, entry.slug.split("/").length),
     0
@@ -38,12 +39,25 @@ export function buildManifestPreview(
     `Output  ${path.relative(process.cwd(), outputFile) || outputFile}`,
   ]
 
-  const previewLines = formatPreviewEntries(roots)
+  const previewLines = formatPreviewEntries(roots, childIndex)
   if (previewLines.length === 0) {
     previewLines.push("  (no routable articles found)")
   }
 
   return [...summaryLines, "", "Contents", ...previewLines].join("\n")
+}
+
+function indexChildren(entries: ArticleEntry[]): Map<string, ArticleEntry[]> {
+  const childIndex = new Map<string, ArticleEntry[]>()
+
+  for (const entry of entries) {
+    if (!entry.parentSlug) continue
+    const children = childIndex.get(entry.parentSlug) ?? []
+    children.push(entry)
+    childIndex.set(entry.parentSlug, children)
+  }
+
+  return childIndex
 }
 
 function formatFlags(entries: ArticleEntry[]): string {
@@ -69,6 +83,7 @@ function countFlagged(
 
 function formatPreviewEntries(
   entries: ArticleEntry[],
+  childIndex: Map<string, ArticleEntry[]>,
   prefix = "",
   depth = 0
 ): string[] {
@@ -80,14 +95,20 @@ function formatPreviewEntries(
       index === visibleEntries.length - 1 &&
       entries.length === visibleEntries.length
     const branch = isLast ? "└─" : "├─"
-    lines.push(`${prefix}${branch} ${formatPreviewEntry(entry)}`)
+    const children = (childIndex.get(entry.slug) ?? []).toSorted(
+      comparePreviewEntries
+    )
+    lines.push(
+      `${prefix}${branch} ${formatPreviewEntry(entry, children.length)}`
+    )
 
-    const children = [...(entry.children ?? [])].toSorted(comparePreviewEntries)
     if (children.length === 0) continue
 
     const childPrefix = `${prefix}${isLast ? "   " : "│  "}`
     if (depth + 1 < TREE_PREVIEW_DEPTH) {
-      lines.push(...formatPreviewEntries(children, childPrefix, depth + 1))
+      lines.push(
+        ...formatPreviewEntries(children, childIndex, childPrefix, depth + 1)
+      )
     } else {
       lines.push(`${childPrefix}└─ … ${children.length} nested entries`)
     }
@@ -101,13 +122,12 @@ function formatPreviewEntries(
   return lines
 }
 
-function formatPreviewEntry(entry: ArticleEntry): string {
+function formatPreviewEntry(entry: ArticleEntry, childCount: number): string {
   const kind = entry.isFolder ? "📁" : "📄"
   const index = entry.index >= 0 ? `#${entry.index}` : ""
-  const children = entry.children?.length ?? 0
   const details = [
     index,
-    children > 0 ? `📚 ${children}` : "",
+    childCount > 0 ? `📚 ${childCount}` : "",
     ...getMarkers(entry),
   ].filter(Boolean)
   const suffix = details.length > 0 ? `  (${details.join(", ")})` : ""

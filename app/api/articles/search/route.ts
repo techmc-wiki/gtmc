@@ -24,21 +24,11 @@ interface SearchResult {
 
 type SearchMatchMap = Record<string, string[]>
 
-function isSearchMatchMap(value: unknown): value is SearchMatchMap {
-  if (!value || typeof value !== "object") {
-    return false
-  }
-
-  for (const entry of Object.values(value as Record<string, unknown>)) {
-    if (
-      !Array.isArray(entry) ||
-      !entry.every((item) => typeof item === "string")
-    ) {
-      return false
-    }
-  }
-
-  return true
+type IndexedSearchResult = SearchMatchMap & {
+  title: string
+  slug: string
+  content: string
+  match: SearchMatchMap
 }
 
 function extractSnippet(
@@ -134,14 +124,7 @@ export async function GET(req: NextRequest) {
     const results: SearchResult[] = []
 
     for (const result of rawResults) {
-      const title = typeof result.title === "string" ? result.title : ""
-      const slug = typeof result.slug === "string" ? result.slug : ""
-      const content = typeof result.content === "string" ? result.content : ""
-      if (!title || !slug) {
-        continue
-      }
-
-      const matchMap = isSearchMatchMap(result.match) ? result.match : {}
+      const { title, slug, content, match: matchMap } = result as unknown as IndexedSearchResult
       const matchedTerms = Object.keys(matchMap)
       const titleMatchedByTerm = matchedTerms.some((term) =>
         matchMap[term]?.includes("title")

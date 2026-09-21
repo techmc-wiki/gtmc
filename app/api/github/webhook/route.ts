@@ -81,14 +81,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   if (
-    payload.repository?.owner?.login !== ARTICLES_REPO_OWNER ||
-    payload.repository?.name !== ARTICLES_REPO_NAME
+    payload.repository.owner.login !== ARTICLES_REPO_OWNER ||
+    payload.repository.name !== ARTICLES_REPO_NAME
   ) {
     return NextResponse.json({ ok: true })
   }
 
   const outcome =
-    payload.pull_request?.merged === true ? "PR-merged" : "PR-closed"
+    payload.pull_request.merged === true ? "PR-merged" : "PR-closed"
 
   await reconcileDraftAssetsForPRCompletion({
     prNumber: payload.pull_request.number,

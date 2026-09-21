@@ -12,59 +12,6 @@ export interface ArticleContentArtifact {
   translationStatus?: TranslationStatusDetail
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
-}
-
-function isToolReference(value: unknown): boolean {
-  if (!isRecord(value) || typeof value.name !== "string") return false
-  return value.version === undefined || typeof value.version === "string"
-}
-
-function isLineRange(value: unknown): boolean {
-  if (!isRecord(value)) return false
-  if (
-    typeof value.start !== "number" ||
-    !Number.isInteger(value.start) ||
-    value.start < 1
-  ) {
-    return false
-  }
-  return (
-    value.end === undefined ||
-    (typeof value.end === "number" &&
-      Number.isInteger(value.end) &&
-      value.end >= value.start)
-  )
-}
-
-function isCodeReference(value: unknown, expectedIndex: number): boolean {
-  if (!isRecord(value)) return false
-  if (
-    typeof value.id !== "string" ||
-    value.id.length === 0 ||
-    value.blockIndex !== expectedIndex ||
-    value.language !== "java" ||
-    typeof value.minecraftVersion !== "string" ||
-    !isToolReference(value.mapping) ||
-    typeof value.codeHash !== "string" ||
-    value.codeHash.length === 0 ||
-    typeof value.markdownLine !== "number" ||
-    !Number.isInteger(value.markdownLine) ||
-    value.markdownLine < 1
-  ) {
-    return false
-  }
-  if (
-    value.decompiler !== undefined &&
-    !isToolReference(value.decompiler)
-  ) {
-    return false
-  }
-  if (value.file !== undefined && typeof value.file !== "string") return false
-  return value.lines === undefined || isLineRange(value.lines)
-}
-
 /**
  * Produces a flat, filesystem-safe filename for a given article slug.
  *
@@ -84,20 +31,15 @@ export function artifactFilename(slug: string): string {
 }
 
 /**
- * Parses and validates a raw JSON string as an ArticleContentArtifact.
- *
- * Validates the shape of the parsed value at runtime, ensuring all required
- * fields exist with the correct types. In development, returns `null` with
- * a warning on failure. In production, throws an Error.
+ * Parses a raw JSON string as an ArticleContentArtifact generated in this repository.
  */
 function parseArticleContentArtifact(
   raw: string,
   slug: string,
   artifactPath: string
 ): ArticleContentArtifact | null {
-  let parsed: unknown
   try {
-    parsed = JSON.parse(raw)
+    return JSON.parse(raw) as ArticleContentArtifact
   } catch {
     if (process.env.NODE_ENV === "development") {
       console.warn(
@@ -110,65 +52,6 @@ function parseArticleContentArtifact(
     )
   }
 
-  const fail = (field: string): ArticleContentArtifact | null => {
-    if (process.env.NODE_ENV === "development") {
-      console.warn(
-        `[article-content-store] Artifact for slug "${slug}" has invalid/missing field "${field}": ${artifactPath}`
-      )
-      return null
-    }
-    throw new Error(
-      `[article-content-store] Artifact for slug "${slug}" has invalid/missing field "${field}": ${artifactPath}`
-    )
-  }
-
-  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-    return fail("(root)")
-  }
-
-  const obj = parsed as Record<string, unknown>
-
-  if (typeof obj.content !== "string") return fail("content")
-  if (
-    typeof obj.frontmatter !== "object" ||
-    obj.frontmatter === null ||
-    Array.isArray(obj.frontmatter)
-  ) {
-    return fail("frontmatter")
-  }
-  if (
-    !Array.isArray(obj.codeReferences) ||
-    !obj.codeReferences.every((reference, index) =>
-      isCodeReference(reference, index)
-    )
-  ) {
-    return fail("codeReferences")
-  }
-  if (obj.translationStatus !== undefined) {
-    if (
-      typeof obj.translationStatus !== "object" ||
-      obj.translationStatus === null ||
-      Array.isArray(obj.translationStatus)
-    ) {
-      return fail("translationStatus")
-    }
-    const status = obj.translationStatus as Record<string, unknown>
-    if (
-      typeof status.translatedFromRevision !== "string" ||
-      typeof status.latestOriginalRevision !== "string" ||
-      typeof status.commitLag !== "number" ||
-      !Number.isInteger(status.commitLag) ||
-      status.commitLag < 0 ||
-      typeof status.dayLag !== "number" ||
-      !Number.isInteger(status.dayLag) ||
-      status.dayLag < 0 ||
-      typeof status.latestOriginalCommitUrl !== "string"
-    ) {
-      return fail("translationStatus")
-    }
-  }
-
-  return obj as unknown as ArticleContentArtifact
 }
 
 /**

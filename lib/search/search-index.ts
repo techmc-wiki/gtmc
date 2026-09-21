@@ -3,11 +3,6 @@ import { remark } from "remark"
 import stripMarkdownPlugin from "strip-markdown"
 import { CJK_TOKENIZER } from "@/lib/search/cjk-tokenizer"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
-import {
-  getOctokit,
-  ARTICLES_REPO_OWNER,
-  ARTICLES_REPO_NAME,
-} from "@/lib/github/articles-repo"
 import { getArticleContentBySlug } from "@/lib/articles/content"
 import { flattenArticleNodes } from "@/lib/articles/navigation-data"
 
@@ -30,30 +25,12 @@ function stripMarkdown(text: string): string {
 }
 
 const cachedIndexes = new Map<ArticleLocale, MiniSearch<IndexedArticle>>()
-const cacheTimestamps = new Map<ArticleLocale, number>()
-const cachedCommitShas = new Map<ArticleLocale, string | null>()
 const buildPromises = new Map<
   ArticleLocale,
   Promise<MiniSearch<IndexedArticle>>
 >()
 
-const CACHE_TTL = 1800_000
 const FETCH_CONCURRENCY = 5
-
-async function getLatestCommitSha(): Promise<string | null> {
-  try {
-    const octokit = getOctokit()
-    const { data: ref } = await octokit.git.getRef({
-      owner: ARTICLES_REPO_OWNER,
-      repo: ARTICLES_REPO_NAME,
-      ref: "heads/main",
-    })
-    return ref.object.sha
-  } catch (error) {
-    console.error("Failed to get latest commit SHA:", error)
-    return null
-  }
-}
 
 function createMiniSearchIndex(
   documents: IndexedArticle[]
@@ -132,20 +109,8 @@ async function buildIndex(
 export async function getSearchIndex(
   locale: ArticleLocale
 ): Promise<MiniSearch<IndexedArticle>> {
-  const currentSha = await getLatestCommitSha()
-
   const cachedIndex = cachedIndexes.get(locale)
-  const cacheTimestamp = cacheTimestamps.get(locale) ?? 0
-  const cachedCommitSha = cachedCommitShas.get(locale)
-
-  if (
-    cachedIndex &&
-    Date.now() - cacheTimestamp < CACHE_TTL &&
-    currentSha &&
-    currentSha === cachedCommitSha
-  ) {
-    return cachedIndex
-  }
+  if (cachedIndex) return cachedIndex
 
   const existingPromise = buildPromises.get(locale)
   if (existingPromise) {
@@ -155,8 +120,6 @@ export async function getSearchIndex(
   const buildPromise = (async () => {
     const index = await buildIndex(locale)
     cachedIndexes.set(locale, index)
-    cacheTimestamps.set(locale, Date.now())
-    cachedCommitShas.set(locale, currentSha)
     return index
   })().finally(() => {
     buildPromises.delete(locale)

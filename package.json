@@ -48,6 +48,7 @@
     "@mdx-js/react": "^3.1.1",
     "@microsoft/clarity": "^1.0.2",
     "@next/mdx": "16.3.5",
+    "@octokit/request-error": "^7.1.2",
     "@octokit/rest": "^22.0.1",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "7.10.0",

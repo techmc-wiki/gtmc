@@ -762,19 +762,6 @@ async function main(): Promise<void> {
   )
   if (rootEnFileResults.some(Boolean)) hasError = true
 
-  for (const entry of Object.values(manifest)) {
-    entry.children = undefined
-  }
-
-  for (const [slug, entry] of Object.entries(manifest)) {
-    const parent = entry.parentSlug
-    if (!parent || !manifest[parent]) continue
-    if (!manifest[parent].children) {
-      manifest[parent].children = []
-    }
-    manifest[parent].children!.push(manifest[slug])
-  }
-
   if (hasError) {
     reportValidationError(
       "\nArticle manifest generation failed due to validation errors above.\n"

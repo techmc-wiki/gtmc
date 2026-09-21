@@ -50,7 +50,6 @@ export interface ArticleEntry {
   isFolder: boolean;
   isAppendix: boolean;
   isPreface: boolean;
-  children?: ArticleEntry[];
   parentSlug?: string;
   /** generator-derived from git, never read from frontmatter */
   author?: string;
@@ -77,13 +76,6 @@ export interface ArticleEntry {
 export interface LocalizedArticleMetadata {
   chapterTitle: string;
   introTitle: string;
-}
-
-const ARTICLE_LOCALES: ArticleLocale[] = ["zh", "en"];
-
-interface LocaleBanner {
-  src: string;
-  alt?: string;
 }
 
 export function loadArticleManifest(): Record<string, ArticleEntry> {
@@ -152,222 +144,12 @@ export function getManifestStats(locale: ArticleLocale): ManifestStats {
   };
 }
 
-function isArticleLocale(value: unknown): value is ArticleLocale {
-  return (
-    typeof value === "string" &&
-    ARTICLE_LOCALES.includes(value as ArticleLocale)
-  );
-}
-
-function normalizeAvailableLocales(value: unknown): ArticleLocale[] {
-  if (!Array.isArray(value)) return ["zh"];
-
-  const locales = value.filter(isArticleLocale);
-  return locales.length > 0 ? locales : ["zh"];
-}
-
-function normalizeLocalizedFilePaths(
-  value: unknown,
-): Partial<Record<ArticleLocale, string>> {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return {};
-  }
-
-  const paths: Partial<Record<ArticleLocale, string>> = {};
-  for (const locale of ARTICLE_LOCALES) {
-    const filePath = (value as Partial<Record<ArticleLocale, unknown>>)[locale];
-    if (typeof filePath === "string") {
-      paths[locale] = filePath;
-    }
-  }
-
-  return paths;
-}
-
-function normalizeStringByLocale(
-  value: unknown,
-): Partial<Record<ArticleLocale, string>> {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return {};
-  }
-
-  const record: Partial<Record<ArticleLocale, string>> = {};
-  for (const locale of ARTICLE_LOCALES) {
-    const val = (value as Partial<Record<ArticleLocale, unknown>>)[locale];
-    if (typeof val === "string") {
-      record[locale] = val;
-    }
-  }
-
-  return record;
-}
-
-function normalizeFreshnessByLocale(
-  value: unknown,
-): Partial<Record<TranslationLocale, TranslationFreshness>> {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return {};
-  }
-
-  const valid = new Set(["fresh", "stale", "unknown"]);
-  const record: Partial<Record<TranslationLocale, TranslationFreshness>> = {};
-
-  for (const locale of ARTICLE_LOCALES) {
-    if (locale === "zh") continue;
-    const val = (value as Partial<Record<ArticleLocale, unknown>>)[locale];
-    if (typeof val === "string" && valid.has(val)) {
-      record[locale as TranslationLocale] = val as TranslationFreshness;
-    }
-  }
-
-  return record;
-}
-
-function normalizeTranslationStatusByLocale(
-  value: unknown,
-): Partial<Record<TranslationLocale, TranslationStatusDetail>> | undefined {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return undefined;
-  }
-
-  const record: Partial<Record<TranslationLocale, TranslationStatusDetail>> = {};
-  const candidate = (value as Partial<Record<ArticleLocale, unknown>>).en;
-  if (typeof candidate !== "object" || candidate === null || Array.isArray(candidate)) {
-    return undefined;
-  }
-
-  const detail = candidate as Record<string, unknown>;
-  if (
-    typeof detail.translatedFromRevision !== "string" ||
-    typeof detail.latestOriginalRevision !== "string" ||
-    typeof detail.commitLag !== "number" ||
-    !Number.isInteger(detail.commitLag) ||
-    detail.commitLag < 0 ||
-    typeof detail.dayLag !== "number" ||
-    !Number.isInteger(detail.dayLag) ||
-    detail.dayLag < 0 ||
-    typeof detail.latestOriginalCommitUrl !== "string"
-  ) {
-    return undefined;
-  }
-
-  record.en = {
-    translatedFromRevision: detail.translatedFromRevision,
-    latestOriginalRevision: detail.latestOriginalRevision,
-    commitLag: detail.commitLag,
-    dayLag: detail.dayLag,
-    latestOriginalCommitUrl: detail.latestOriginalCommitUrl,
-  };
-  return record;
-}
-
-function normalizeBannerByLocale(
-  value: unknown,
-): Partial<Record<ArticleLocale, LocaleBanner>> | undefined {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return undefined;
-  }
-
-  const record: Partial<Record<ArticleLocale, LocaleBanner>> = {};
-  for (const locale of ARTICLE_LOCALES) {
-    const val = (value as Partial<Record<ArticleLocale, unknown>>)[locale];
-    if (typeof val === "object" && val !== null && !Array.isArray(val)) {
-      const banner = val as Record<string, unknown>;
-      if (typeof banner.src === "string") {
-        record[locale] = {
-          src: banner.src,
-          alt: typeof banner.alt === "string" ? banner.alt : undefined,
-        };
-      }
-    }
-  }
-
-  return Object.keys(record).length > 0 ? record : undefined;
-}
-
-function normalizeArticleEntry(
-  slugKey: string,
-  value: unknown,
-): ArticleEntry | null {
-  if (typeof value !== "object" || value === null) return null;
-
-  const entry = value as Record<string, unknown>;
-  if (typeof entry.filePath !== "string") return null;
-
-  // Reject legacy manifest entries with flat suffixed fields
-  if (
-    "titleEn" in entry ||
-    "chapterTitleEn" in entry ||
-    "introTitleEn" in entry
-  ) {
-    console.error(
-      `[article-manifest] Detected legacy manifest shape for "${slugKey}": ` +
-        "flat *En fields are no longer supported. " +
-        "Migrate to per-locale record fields (titleByLocale, chapterTitleByLocale, etc.).",
-    );
-    return null;
-  }
-
-  const introByLocale = normalizeStringByLocale(entry.introTitleByLocale);
-  const translationStatusByLocale = normalizeTranslationStatusByLocale(
-    entry.translationStatusByLocale,
-  );
-
-  return {
-    filePath: entry.filePath as string,
-    slug: typeof entry.slug === "string" ? entry.slug : slugKey,
-    titleByLocale: normalizeStringByLocale(entry.titleByLocale),
-    availableLocales: normalizeAvailableLocales(entry.availableLocales),
-    localizedFilePaths: normalizeLocalizedFilePaths(entry.localizedFilePaths),
-    chapterTitleByLocale: normalizeStringByLocale(entry.chapterTitleByLocale),
-    introTitleByLocale: introByLocale,
-    descriptionByLocale: normalizeStringByLocale(entry.descriptionByLocale),
-    hasIntro:
-      typeof entry.hasIntro === "boolean"
-        ? entry.hasIntro
-        : Object.values(introByLocale).some((t) => t !== ""),
-    index: typeof entry.index === "number" ? entry.index : 0,
-    isFolder: entry.isFolder === true,
-    isAppendix: entry.isAppendix === true,
-    isPreface: entry.isPreface === true,
-    children: Array.isArray(entry.children)
-      ? entry.children
-          .map((child: unknown) => normalizeArticleEntry(slugKey, child))
-          .filter((child): child is ArticleEntry => child !== null)
-      : undefined,
-    parentSlug:
-      typeof entry.parentSlug === "string" ? entry.parentSlug : undefined,
-    author: typeof entry.author === "string" ? entry.author : undefined,
-    coAuthors: Array.isArray(entry.coAuthors) ? entry.coAuthors : undefined,
-    created: typeof entry.created === "string" ? entry.created : undefined,
-    lastmodByLocale: normalizeStringByLocale(entry.lastmodByLocale),
-    translatedFromRevisionByLocale: normalizeStringByLocale(
-      entry.translatedFromRevisionByLocale,
-    ) as Partial<Record<TranslationLocale, string>>,
-    translationFreshnessByLocale: normalizeFreshnessByLocale(
-      entry.translationFreshnessByLocale,
-    ),
-    ...(translationStatusByLocale ? { translationStatusByLocale } : {}),
-    bannerByLocale: normalizeBannerByLocale(entry.bannerByLocale),
-    isAdvanced: entry.isAdvanced === true,
-    isRevising: entry.isRevising === true,
-  };
-}
-
 function parseArticleManifest(
   raw: string,
   manifestPath: string,
 ): Record<string, ArticleEntry> {
   try {
-    const parsed = JSON.parse(raw) as Record<string, unknown>;
-    const normalized: Record<string, ArticleEntry> = {};
-
-    for (const [slugKey, value] of Object.entries(parsed)) {
-      const entry = normalizeArticleEntry(slugKey, value);
-      if (entry !== null) normalized[slugKey] = entry;
-    }
-
-    return normalized;
+    return JSON.parse(raw) as Record<string, ArticleEntry>;
   } catch (error) {
     throw new Error(
       `[article-manifest] Failed to parse article manifest: ${manifestPath}`,
@@ -433,30 +215,19 @@ async function buildLocalTree(
     .toSorted((a, b) => compareEntries(a, b, locale));
 
   return roots
-    .map((entry) => buildTreeNode(entry, parentIndex, manifest, locale))
+    .map((entry) => buildTreeNode(entry, parentIndex, locale))
     .filter((node): node is ArticleTreeNode => node !== null);
 }
 
 function buildTreeNode(
   entry: ArticleEntry,
   parentIndex: Map<string, ArticleEntry[]>,
-  manifest: Record<string, ArticleEntry>,
   locale: ArticleLocale,
 ): ArticleTreeNode | null {
-  const childrenFromSlug = entry.children ?? [];
   const childrenFromParent = parentIndex.get(entry.slug) ?? [];
-
-  const mergedChildrenBySlug = new Map<string, ArticleEntry>();
-  for (const child of childrenFromSlug) {
-    mergedChildrenBySlug.set(child.slug, manifest[child.slug] ?? child);
-  }
-  for (const child of childrenFromParent) {
-    mergedChildrenBySlug.set(child.slug, child);
-  }
-
-  const children = [...mergedChildrenBySlug.values()]
+  const children = childrenFromParent
     .toSorted((a, b) => compareEntries(a, b, locale))
-    .map((child) => buildTreeNode(child, parentIndex, manifest, locale))
+    .map((child) => buildTreeNode(child, parentIndex, locale))
     .filter((node): node is ArticleTreeNode => node !== null);
 
   if (!entry.isFolder && !entry.availableLocales.includes(locale)) {

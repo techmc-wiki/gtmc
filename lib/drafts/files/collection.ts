@@ -5,7 +5,6 @@ import type {
 } from "./types"
 import { createDraftFile, createDraftFileId } from "./file-operations"
 import {
-  normalizeDraftFilePath,
   normalizeDraftFolderPath,
   collectParentFolders,
   listFolderAncestors,
@@ -14,12 +13,7 @@ import {
 export function normalizeDraftFileCollection(
   input: DraftFileCollectionInput | null | undefined
 ): DraftFileCollection {
-  const files = (input?.files || []).map((file) =>
-    createDraftFile({
-      ...file,
-      filePath: normalizeDraftFilePath(file.filePath || ""),
-    })
-  )
+  const files = (input?.files || []).map(createDraftFile)
 
   const dedupedFiles: DraftFileRecord[] = []
   const usedIds = new Set<string>()

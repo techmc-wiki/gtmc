@@ -196,6 +196,9 @@ importers:
       '@next/mdx':
         specifier: 16.3.5
         version: 16.3.5(@mdx-js/loader@3.1.1(supports-color@8.1.1))(@mdx-js/react@3.1.1(@types/react@19.3.0)(react@19.3.0))
+      '@octokit/request-error':
+        specifier: ^7.1.2
+        version: 7.1.2
       '@octokit/rest':
         specifier: ^22.0.1
         version: 22.0.1

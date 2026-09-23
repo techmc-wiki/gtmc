@@ -251,8 +251,8 @@ importers:
         specifier: ^0.18.7
         version: 0.18.7
       lucide-react:
-        specifier: ^1.46.0
-        version: 1.46.0(react@19.3.0)
+        specifier: ^1.47.0
+        version: 1.47.0(react@19.3.0)
       mermaid:
         specifier: ^12.0.0
         version: 12.0.0
@@ -278,8 +278,8 @@ importers:
         specifier: ^2.10.1
         version: 2.10.1(next@16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
       pangu:
-        specifier: ^10.1.1
-        version: 10.1.1
+        specifier: ^10.2.0
+        version: 10.2.0
       papaparse:
         specifier: ^5.7.0
         version: 5.7.0
@@ -5167,8 +5167,8 @@ packages:
     resolution: {integrity: sha512-5J9ysMYUpYIg9RF2vJpy9SinEmSviFSe0GyPpCQ4L5QSkLAgeLXlTAOu2ZwWUU5m+0SBl6gUU1R1ZQB3aKypfA==}
     engines: {bun: '>=1.0.0', deno: '>=1.30.0', node: '>=8.0.0'}
 
-  lucide-react@1.46.0:
-    resolution: {integrity: sha512-Bv+FZXgZPrxc/NCl1e7JJVQFLdiCxYgxNVhqoV7X0p6I8ADJo8DxBnK1auH0fZz4AmqOJ3jgneL4f1i8LJQRAA==}
+  lucide-react@1.47.0:
+    resolution: {integrity: sha512-o8C23aXpNQypRY73W7fW02EyvWJinEMXgKeGjFoKym0zj3Q73hD97A1IQps1g8C14HTGsOpZL0Am+xjfgFZAbg==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
@@ -5604,8 +5604,8 @@ packages:
   package-manager-detector@1.8.0:
     resolution: {integrity: sha512-yQA4H19AmPEoMUeavPMDIe1higySl/gH/yaQrkT/s07Qp+7pp2hYz30N3z2l5BkjVkF9Ow6o0wjJamm2y7Sn0A==}
 
-  pangu@10.1.1:
-    resolution: {integrity: sha512-lyaxUedpLBRav2MUcuLTbzhZUvAGAd5DGIPKQNcXxyL3k91hRtLne5kPG8xxSiIzGA6w4VaQuq0I0UvdzsknJw==}
+  pangu@10.2.0:
+    resolution: {integrity: sha512-GKRQcritBJZZRrBl8Ntl/M0SpOZrgD+LxsRSMF8Lv/r3aAYUnYWZC9wmxzzp8IOWnYcvT0RcKb/qzBC8Oe/fRw==}
     engines: {node: '>=20.0.0'}
     hasBin: true
 
@@ -10914,7 +10914,7 @@ snapshots:
 
   lru.min@1.1.5: {}
 
-  lucide-react@1.46.0(react@19.3.0):
+  lucide-react@1.47.0(react@19.3.0):
     dependencies:
       react: 19.3.0
 
@@ -11736,7 +11736,7 @@ snapshots:
 
   package-manager-detector@1.8.0: {}
 
-  pangu@10.1.1: {}
+  pangu@10.2.0: {}
 
   papaparse@5.7.0: {}
 

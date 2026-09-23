@@ -126,5 +126,5 @@
     "typescript": "^7.0.2",
     "vite-plus": "0.3.3"
   },
-  "packageManager": "pnpm@12.4.1"
+  "packageManager": "pnpm@12.6.0"
 }

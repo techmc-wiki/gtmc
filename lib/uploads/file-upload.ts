@@ -1,9 +1,5 @@
 import { FILE_MAX_BYTES, IMAGE_MAX_BYTES } from "./constants"
 
-// ---------------------------------------------------------------------------
-// MIME allowlist and category classification
-// ---------------------------------------------------------------------------
-
 export type FileCategory = "images" | "videos" | "files"
 
 interface MimeConfig {
@@ -12,7 +8,6 @@ interface MimeConfig {
 }
 
 const MIME_ALLOWLIST: Partial<Record<string, MimeConfig>> = {
-  // Images: 15 MB
   "image/jpeg": {
     category: "images",
     maxBytes: IMAGE_MAX_BYTES,
@@ -29,7 +24,6 @@ const MIME_ALLOWLIST: Partial<Record<string, MimeConfig>> = {
     category: "images",
     maxBytes: IMAGE_MAX_BYTES,
   },
-  // Videos: 50 MB
   "video/mp4": {
     category: "videos",
     maxBytes: FILE_MAX_BYTES,
@@ -42,7 +36,6 @@ const MIME_ALLOWLIST: Partial<Record<string, MimeConfig>> = {
     category: "videos",
     maxBytes: FILE_MAX_BYTES,
   },
-  // Files: 50 MB
   "application/pdf": {
     category: "files",
     maxBytes: FILE_MAX_BYTES,
@@ -77,7 +70,6 @@ const MIME_ALLOWLIST: Partial<Record<string, MimeConfig>> = {
   },
 }
 
-// MIME-to-extension mapping for filename sanitization
 const MIME_TO_EXT: Partial<Record<string, string>> = {
   "image/jpeg": "jpg",
   "image/png": "png",
@@ -96,10 +88,6 @@ const MIME_TO_EXT: Partial<Record<string, string>> = {
   "text/plain": "txt",
   "text/csv": "csv",
 }
-
-// ---------------------------------------------------------------------------
-// Classification
-// ---------------------------------------------------------------------------
 
 export interface FileClassification {
   category: FileCategory
@@ -122,35 +110,28 @@ export function getAllowedMimeTypes(): string[] {
   return Object.keys(MIME_ALLOWLIST)
 }
 
-// ---------------------------------------------------------------------------
-// Filename sanitization
-// ---------------------------------------------------------------------------
-
 export function sanitizeFilename(
   originalName: string,
   mimeType: string
 ): string {
-  // Extract basename and extension
   const lastDot = originalName.lastIndexOf(".")
   let basename = lastDot > 0 ? originalName.substring(0, lastDot) : originalName
 
-  // MIME-derived extension takes precedence
+  // Prefer the allowlisted MIME extension over a client-supplied extension.
   const ext =
     MIME_TO_EXT[mimeType] ||
     (lastDot > 0 ? originalName.substring(lastDot + 1).toLowerCase() : "bin")
 
-  // Sanitize basename: spaces → dashes, strip non-allowed chars, truncate
   basename = basename
     .replaceAll(/\s+/g, "-")
     .replaceAll(/[^a-zA-Z0-9._-]/g, "")
     .substring(0, 80)
 
-  // Fallback for empty basename
   if (!basename) {
     const config = MIME_ALLOWLIST[mimeType]
     basename = config ? config.category.replace(/s$/, "") : "file"
   }
 
-  // Prepend timestamp for uniqueness
+  // The timestamp prefix reduces collisions between sanitized filenames.
   return `${Date.now()}-${basename}.${ext}`
 }

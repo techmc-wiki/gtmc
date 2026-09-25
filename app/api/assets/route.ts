@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     return new NextResponse("Not Found", { status: 404 })
   }
 
-  // Prevent directory traversal attacks
+  // Keep user-controlled paths inside the article repository namespace.
   const normalizedPath = path.normalize(filePath).replace(/^(\.\.[/\\])+/, "")
   const safePath = normalizedPath.replace(/^\/+/, "")
   const pathsToTry = safePath.endsWith(".md")

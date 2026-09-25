@@ -9,7 +9,6 @@ interface StatusBadgeProps {
   status: string
 }
 
-/** Localized draft and pull-request status. */
 export function DraftStatusBadge({ status }: StatusBadgeProps) {
   const t = useTranslations("Status")
   let label = status

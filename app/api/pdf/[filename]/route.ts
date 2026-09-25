@@ -5,8 +5,8 @@ const IS_ALLOWED_PDF_FILENAME: Record<string, true> = {
   "gtmc-zh.pdf": true,
 }
 /**
- * Proxies the R2-hosted PDF for the cover preview. Keeps the client free of
- * the public base URL and sidesteps CORS on canvas reads.
+ * Proxies allowlisted R2 PDFs through this origin so clients need not know the
+ * public base URL and canvas reads avoid cross-origin restrictions.
  */
 export async function GET(
   _request: Request,
@@ -30,11 +30,8 @@ export async function GET(
   }
 
   try {
-    // pdf.js's initial probe is a plain GET with no Range header; a
-    // compliant 200 would stream the whole ~44 MB file before pdf.js can
-    // cancel. Bounding the upstream request to the first chunks keeps
-    // every response small: pdf.js reads Content-Range's total, marks
-    // range support, and re-fetches exactly what it needs.
+    // pdf.js probes without a Range header, so bound that request to prevent an
+    // upstream 200 from streaming the entire file before pdf.js cancels it.
     const INITIAL_WINDOW_BYTES = 262144
     const range = _request.headers.get("range")
     const upstream = await fetch(`${baseUrl}/${filename}`, {

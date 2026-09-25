@@ -7,9 +7,8 @@ import { AdvancedMarker } from "@/components/articles/advanced-marker"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
 
 /**
- * A deep dive. The reader meets it mid-article, so the header carries the same
- * mark the outline and contents use, then says what the section adds and offers
- * the way past: one line, three pieces of information, no badge, no second row.
+ * Mid-article deep dives reuse the advanced marker and expose a skip target so
+ * readers can bypass optional content without an extra badge or action row.
  */
 function AdvancedSection({
   children,

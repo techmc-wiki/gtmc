@@ -6,44 +6,24 @@ import type { ArticleLocale } from "@/lib/articles/manifest"
 import { artifactFilename } from "@/lib/articles/content"
 import { resolveLocalArticlePath } from "@/lib/articles/fs"
 
-/**
- * A flattened, linearized article ready for PDF consumption.
- *
- * Each entry corresponds to one non-folder leaf in the article tree,
- * enriched with the chapter (section) metadata it belongs to.
- */
 export interface LinearizedFolder {
   slug: string
   title: string
 }
 
 export interface LinearizedArticle {
-  /** Canonical slug used to look up the article (e.g. "tree-farm/basics"). */
   slug: string
-  /** Display title of the article. */
   title: string
-  /**
-   * Resolved file path relative to the articles submodule root.
-   * `null` when `resolveSlug` cannot find a match; the caller should
-   * skip or handle gracefully.
-   */
+  /** Path relative to the articles root, or `null` when the slug cannot be resolved. */
   filePath: string | null
-  /** Slug of the top-level chapter folder (empty string for root-level articles like preface). */
   chapterSlug: string
-  /** Display title of the top-level chapter folder (empty string for root-level articles). */
   chapterTitle: string
   folders: LinearizedFolder[]
-  /** True when this node is flagged as preface content. */
   isPreface: boolean
-  /** True when this node belongs to an appendix section. */
   isAppendix: boolean
-  /** True when this node is marked as advanced content. */
   isAdvanced: boolean
-  /** True when this node is a synthetic README intro of its parent folder. */
   isReadmeIntro: boolean
-  /** Sort index from the manifest (-1 when unset). */
   index: number
-  /** Nesting depth in the article tree (0 = root-level). */
   depth: number
 }
 
@@ -56,16 +36,8 @@ interface LinearizeContext {
 }
 
 /**
- * Flatten a sorted `ChapterNavNode[]` into a display-order array of
- * `LinearizedArticle` entries.
- *
- * The input tree is expected to already be sorted (e.g. the output of
- * `getPublicChapterNav()`).  The DFS traversal preserves that order so the
- * result is ready for serial PDF generation: iterate once and create
- * section/page breaks each time `chapterSlug` changes.
- *
- * Folder nodes become the "chapter" context for their descendants; they are
- * not emitted as articles themselves.
+ * Returns article leaves in the tree's existing display order. Folder nodes only
+ * supply chapter context and are not emitted as articles.
  */
 export async function linearizeArticles(tree: ChapterNavNode[]): Promise<LinearizedArticle[]> {
   async function linearizeNodes(
@@ -156,15 +128,6 @@ function loadArticleArtifactContent(
   }
 }
 
-/**
- * Read the raw markdown content of an article by slug.
- *
- * This is a convenience wrapper over `getArticleContent()` that accepts a
- * slug instead of a raw file path.
- *
- * @returns The article's markdown string, or `null` if the slug cannot be
- *          resolved or the file is missing.
- */
 export async function getArticleContentForPdf(
   slug: string,
   locale: ArticleLocale,

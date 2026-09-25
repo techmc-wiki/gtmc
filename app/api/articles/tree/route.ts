@@ -6,9 +6,6 @@ import type { ArticleLocale } from "@/lib/articles/manifest";
 const TREE_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300";
 const VALID_LOCALES = new Set<ArticleLocale>(["zh", "en"]);
 
-/**
- * Returns the public article tree for the requested locale (defaults to zh).
- */
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const rawLocale = searchParams.get("locale") ?? "zh";

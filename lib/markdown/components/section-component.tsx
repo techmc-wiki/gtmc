@@ -18,7 +18,6 @@ export function SectionComponent({
     )
   }
 
-  // Regular sections render normally
   return (
     <section id={id} {...props}>
       {children}

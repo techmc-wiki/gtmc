@@ -24,13 +24,7 @@ function getCachedSearchIndex(
   return searchIndexCache.index
 }
 
-/**
- * Category filtering + query filtering, in that order.
- * Category match keeps the table's OR semantics: an entry matches when any
- * of its categories is selected. Query match keeps the MiniSearch relevance
- * ordering. An empty (trimmed) query returns the category-filtered list
- * untouched.
- */
+/** Applies category-OR filtering before ranked search; a blank query skips the search stage. */
 export function filterGlossaryEntries(
   entries: GlossaryIndexEntry[],
   options: FilterGlossaryEntriesOptions

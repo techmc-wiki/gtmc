@@ -42,13 +42,6 @@ const consola = createConsola({
   reporters: [reporter],
 })
 
-/**
- * Build logs are a compact event stream: record stage boundaries, decisions,
- * durable outputs, and actionable degradation or failure. Event names stay
- * stable; variable context is emitted as attributes; item-by-item detail is
- * opt-in rather than part of the default build transcript.
- */
-
 function formatValue(value: Exclude<LogValue, undefined>): string {
   const formatted =
     typeof value === "string" && /\s/.test(value)
@@ -86,6 +79,10 @@ function formatEvent(
   return detail ? `${message}\n${detail.trim()}` : message
 }
 
+/**
+ * Build scripts use stable lifecycle events and structured context; item-level
+ * detail is opt-in rather than part of the default transcript.
+ */
 export function createLogger(scope: string) {
   const scopedConsola = consola.withTag(`gtmc:${scope}`)
 
@@ -114,7 +111,6 @@ export function describeError(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
 
-/** Emit one bounded stage lifecycle with a duration and a single failure event. */
 export function runBuildStep<T>(
   logger: BuildLogger,
   stage: string,

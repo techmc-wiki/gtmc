@@ -8,20 +8,12 @@ import {
 } from "@/hooks/site-scroll-root"
 import { useDotPalette } from "@/hooks/use-dot-palette"
 
-/**
- * Interactive dot-grid field behind the homepage hero. Echoes the site-wide
- * dot-grid backdrop motif; dots brighten to the blueprint signal near the
- * cursor and get pushed aside with inertia physics.
- *
- * Theme colors come from the shared useDotPalette hook, which follows the
- * runtime `data-theme` attribute (the single source of truth for theming).
- */
+/** Uses the runtime theme as the source of truth so canvas colors follow theme changes without remounting. */
 export function HomepageDotGrid() {
   const palette = useDotPalette()
   const fadeRef = useRef<HTMLDivElement>(null)
 
-  // Fade the field out across the first viewport so the TOC reads on calm
-  // paper instead of a busy dot matrix.
+  // Fade the field within the first viewport to keep TOC content visually dominant.
   useEffect(() => {
     let raf = 0
     const apply = () => {

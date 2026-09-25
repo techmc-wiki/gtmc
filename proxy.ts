@@ -90,7 +90,7 @@ function canonicalizeArticleRequest(req: NextRequest): Response | null {
 const intlMiddleware = createMiddleware(routing)
 const privateRoutes = ["/admin", "/draft", "/glossary/edit", "/profile"]
 const localePattern = /^\/(en|zh)(?=\/|$)/
-// Detects unrecognized locale prefixes to prevent next-intl redirecting e.g. /fr -> /zh/fr
+// Prevent next-intl from redirecting /fr to /zh/fr.
 const invalidLocalePrefixPattern = /^\/([a-z]{2}(?:-[a-z]{2})?)(?=\/|$)/i
 const configuredLocales = new Set<string>(routing.locales)
 
@@ -142,11 +142,8 @@ function isPrivateRequest(req: NextRequest): boolean {
 }
 
 /**
- * Content negotiation for article pages: requests for a locale-prefixed
- * article URL carrying `Accept: text/markdown` are rewritten to the
- * markdown API route, so one URL serves HTML to browsers and raw markdown
- * to agents and the copy-page button. Runs before auth/fixture handling:
- * articles are a public reader surface.
+ * Negotiate public article URLs before auth and i18n handling. Browsers receive
+ * HTML; clients that include `text/markdown` are rewritten to the markdown API.
  */
 function negotiateMarkdownRewrite(req: NextRequest): Response | null {
   const accept = req.headers.get("accept")
@@ -154,7 +151,6 @@ function negotiateMarkdownRewrite(req: NextRequest): Response | null {
     return null
   }
 
-  // "/{locale}/articles/{slug...}" → "/api/articles/{locale}/{slug...}"
   const articleMatch = /^\/(en|zh)\/articles\/(.+)$/.exec(req.nextUrl.pathname)
   if (!articleMatch) {
     return null
@@ -225,7 +221,6 @@ const authenticatedProxy = auth(
 )
 
 export default function proxy(req: NextRequest, event: NextFetchEvent) {
-  // Markdown content negotiation short-circuits auth and i18n handling.
   const canonicalArticleRedirect = canonicalizeArticleRequest(req)
   if (canonicalArticleRedirect) {
     return canonicalArticleRedirect

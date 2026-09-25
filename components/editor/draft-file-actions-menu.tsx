@@ -21,7 +21,6 @@ interface DraftFileActionsMenuProps {
   onRequestRemove: () => void
 }
 
-/** Overflow menu for whole-draft file operations. */
 export function DraftFileActionsMenu({
   isReadOnly,
   canRemove,

@@ -213,7 +213,7 @@ export async function submitGlossaryDraftAction(
         revalidatePath("/draft")
         revalidatePath("/glossary")
       } catch {
-        // ignore background revalidation error
+        // The PR and submission status are durable; cache refresh is best-effort.
       }
 
       return { success: true, prUrl: result.prUrl, prNumber: result.prNumber }

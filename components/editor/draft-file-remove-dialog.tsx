@@ -19,7 +19,6 @@ interface DraftFileRemoveDialogProps {
   onConfirm: (fileId: string) => void
 }
 
-/** Confirmation step before a draft file leaves the collection. */
 export function DraftFileRemoveDialog({
   file,
   onOpenChange,

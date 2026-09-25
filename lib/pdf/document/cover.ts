@@ -1,11 +1,6 @@
 import { escapeHtml } from "./html-utils"
 import type { BookOptions } from "./types"
 
-/**
- * Title page: dot-grid paper, azure signal band, oversized serif title,
- * tagline, and a mono colophon line. Rendered as its own single-page PDF
- * pass (no running header/footer) and merged in front of the body.
- */
 export function renderCoverHtml(options: BookOptions): string {
   const tagline = options.tagline
     ? `<p class="cover-tagline">${escapeHtml(options.tagline)}</p>`

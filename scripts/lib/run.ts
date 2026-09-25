@@ -4,10 +4,9 @@ import { createLogger } from "./logger"
 
 const logger = createLogger("command")
 
-/**
- * Run a command with inherited stdio. Exits the process on non-zero status.
- * On Windows, uses shell so `.cmd` shims (pnpm, prisma, etc.) resolve correctly.
- */
+// Package-manager CLIs expose `.cmd` shims on Windows, so direct spawns need shell resolution.
+const defaultShell = process.platform === "win32"
+
 export function run(
   command: string,
   args: string[] = [],
@@ -15,7 +14,7 @@ export function run(
 ): void {
   const result = spawnSync(command, args, {
     stdio: "inherit",
-    shell: process.platform === "win32",
+    shell: defaultShell,
     ...options,
   })
 
@@ -33,12 +32,10 @@ export function run(
   }
 }
 
-/** Run a local TypeScript script via tsx (same as package.json generators). */
 export function runScript(scriptPath: string, args: string[] = []): void {
   run("tsx", [scriptPath, ...args])
 }
 
-/** Run a local TypeScript script asynchronously via tsx. */
 export function runScriptAsync(
   scriptPath: string,
   args: string[] = []
@@ -46,7 +43,7 @@ export function runScriptAsync(
   const { promise, resolve, reject } = Promise.withResolvers<void>()
   const child = spawn("tsx", [scriptPath, ...args], {
     stdio: "inherit",
-    shell: process.platform === "win32",
+    shell: defaultShell,
   })
   child.on("error", (error) => {
     logger.error("command.failed", { command: "tsx" }, error.message)

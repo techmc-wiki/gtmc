@@ -23,8 +23,7 @@ export function createGlossarySearch(): MiniSearch<IndexedGlossaryEntry> {
   const documents: IndexedGlossaryEntry[] = glossarySummary.map((entry) => {
     const doc: IndexedGlossaryEntry = Object.assign({}, entry, {
       id: entry.slug,
-      // MiniSearch tokenizes string fields only: index the joined list,
-      // keep `categories` (stored) as the structured value.
+      // MiniSearch indexes strings only; categories remain structured in the stored document.
       category: entry.categories.join("; "),
     })
     return doc
@@ -34,7 +33,6 @@ export function createGlossarySearch(): MiniSearch<IndexedGlossaryEntry> {
   return miniSearch
 }
 
-// Singleton instance: built once per module load (server-side only)
 let glossaryIndex: MiniSearch<IndexedGlossaryEntry> | null = null
 
 function getGlossaryIndex(): MiniSearch<IndexedGlossaryEntry> {

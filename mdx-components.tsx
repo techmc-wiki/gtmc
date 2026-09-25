@@ -4,20 +4,6 @@ import { StatCard, StatGrid } from "@/components/mdx/stats"
 import { AuthorGrid } from "@/components/mdx/author-grid"
 import { DownloadButton } from "@/components/mdx/download-button"
 
-/**
- * Shared rendering engine for every `.mdx` page in the app.
- *
- * Markdown elements map to the design-system voices:
- * - `h1`: display-title page voice
- * - `h2`: `SectionTitle` (signal square + guide rule), spaced from the
- *   previous block with `mt-10`
- * - `p`: secondary body voice, reading-width capped, with paragraph rhythm
- * - `a`: underlined ink link
- * - `ul`: body list with item spacing
- *
- * Data-driven pieces (stat readouts, author grids, the download button)
- * remain components because they render dynamic props.
- */
 const components: MDXComponents = {
   h1: ({ children }) => (
     <h1 className="display-title text-tech-main-dark mb-4 text-3xl tracking-tight text-balance md:text-5xl">

@@ -30,8 +30,7 @@ export interface ResolvedArticleRequest {
 }
 
 /**
- * Resolves a UI locale to the article content locale it should serve.
- * Articles are authored in Chinese; every other locale falls back to it.
+ * Maps Chinese UI locales to the source articles and every other locale to English.
  */
 export function resolveArticleLocale(locale: string): ArticleLocale {
   return locale === SOURCE_ARTICLE_LOCALE ? SOURCE_ARTICLE_LOCALE : "en"
@@ -42,8 +41,7 @@ export function getArticleFallbackLocale(locale: ArticleLocale): ArticleLocale {
 }
 
 /**
- * Resolves an article slug path for a locale, falling back to the source
- * locale when the requested locale has no translation.
+ * Prefers a localized article, then falls back to the source locale when absent.
  */
 export async function resolveArticleRequest(
   requestedSlugPath: string,

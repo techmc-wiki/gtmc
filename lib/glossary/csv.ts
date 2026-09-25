@@ -1,9 +1,6 @@
 import Papa from "papaparse"
 
-/**
- * The 26 column names from the glossary CSV header, in order.
- * "Portugese" is intentionally misspelled (matches the source CSV).
- */
+/** `"Portugese"` intentionally matches the source CSV header. */
 export const GLOSSARY_COLUMNS = [
   "Category",
   "Short Form",
@@ -52,12 +49,7 @@ export interface SerializeGlossaryOptions {
 
 const BOM = "\ufeff"
 
-/**
- * Parse glossary CSV text into structured rows.
- *
- * Validates that the header matches the expected 26 columns exactly.
- * Returns header order (as detected from the CSV), BOM presence, and line ending.
- */
+/** Rejects missing or unexpected columns and captures the source encoding details needed for a byte-preserving rewrite. */
 export function parseGlossaryCsv(input: string): ParseGlossaryResult {
   const hadBom = input.startsWith(BOM)
   const content = hadBom ? input.slice(1) : input
@@ -99,7 +91,6 @@ export function parseGlossaryCsv(input: string): ParseGlossaryResult {
     }
   }
 
-  // Type-narrow: we've validated all columns are present
   const rows = result.data as GlossaryRow[]
 
   const lfCount = (content.match(/\n/g) ?? []).length
@@ -109,11 +100,7 @@ export function parseGlossaryCsv(input: string): ParseGlossaryResult {
   return { rows, headerOrder, hadBom, lineEnding }
 }
 
-/**
- * Escape a CSV cell value: only quote when strictly necessary
- * (contains delimiter, double-quote, or newline) to match the
- * original CSV's quoting style.
- */
+/** Minimal quoting preserves the source CSV's diff-friendly style. */
 function escapeCell(value: string): string {
   if (value.includes(",") || value.includes('"') || value.includes("\n")) {
     return `"${value.replaceAll('"', '""')}"`
@@ -122,16 +109,9 @@ function escapeCell(value: string): string {
 }
 
 /**
- * Serialize glossary rows back to CSV text.
- *
- * Uses a hand-rolled serializer instead of Papa.unparse to avoid
- * auto-quoting cells with leading/trailing whitespace, matching
- * the original CSV's quoting conventions exactly.
- *
- * Produces byte-identical output when the same data is round-tripped:
- * - Preserves the original column order via `headerOrder`
- * - Uses the detected line ending
- * - Re-prepends the UTF-8 BOM if `hadBom` was true
+ * Papa's serializer would quote leading or trailing whitespace, so edits
+ * would create unnecessary CSV diffs. Preserve the parsed header order,
+ * line endings, BOM, and minimal quoting instead.
  */
 export function serializeGlossaryCsv(
   rows: GlossaryRow[],

@@ -9,7 +9,6 @@ interface EditorPreviewFrameProps {
   isEmpty?: boolean
 }
 
-/** Rendered markdown frame with an empty-state fallback. */
 export function EditorPreviewFrame({
   children,
   className = "",

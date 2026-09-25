@@ -100,11 +100,7 @@ function documentShell(
     .join("\n")
 }
 
-/**
- * Build the single-page cover document. Rendered without running
- * header/footer and merged in front of the body PDF, so body folios stay
- * aligned with the page numbers printed in the TOC.
- */
+/** The cover is a separate pass without running furniture so body and TOC folios remain aligned. */
 export function buildCoverHtml(options: BookOptions): string {
   return documentShell(
     options,
@@ -114,11 +110,7 @@ export function buildCoverHtml(options: BookOptions): string {
   )
 }
 
-/**
- * Build the body document: TOC, preface, chapters with openers, appendices,
- * and colophon. Article markdown is rendered concurrently through
- * `options.renderArticle`.
- */
+/** Renders article bodies concurrently and omits entries whose renderer returns empty HTML. */
 export async function buildBodyHtml(
   options: BookOptions,
   plan: BookPlan

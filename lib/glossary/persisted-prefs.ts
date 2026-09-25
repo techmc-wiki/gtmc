@@ -22,7 +22,7 @@ export function readPersistedGlossaryColumns(
       return parsed
     }
   } catch {
-    // private browsing / blocked storage
+    // Storage may be blocked by browser privacy settings.
   }
   return null
 }
@@ -33,7 +33,5 @@ export function writePersistedGlossaryColumns(
 ): void {
   try {
     localStorage.setItem(columnsKey(locale), JSON.stringify(columns))
-  } catch {
-    // ignore
-  }
+  } catch {}
 }

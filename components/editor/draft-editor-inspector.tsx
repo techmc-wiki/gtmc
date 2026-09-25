@@ -32,7 +32,6 @@ interface DraftEditorInspectorProps {
   onSubmit: () => void
 }
 
-/** Slide-over panel holding the change review, writing guide, and submission. */
 export function DraftEditorInspector({
   open,
   onOpenChange,

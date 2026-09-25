@@ -12,7 +12,6 @@ export interface ManifestPreviewOptions {
   maxDepth: number
 }
 
-/** Build the optional, human-readable manifest detail shown with GTMC_LOG_DETAIL=1. */
 export function buildManifestPreview(
   manifest: ArticleManifest,
   { articlesPath, outputFile, maxDepth }: ManifestPreviewOptions

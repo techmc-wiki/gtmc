@@ -35,7 +35,6 @@ function ReplayOnNavigate({
   return null
 }
 
-/** Replays the enter animation on client-side navigation. */
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const ref = React.useRef<HTMLDivElement>(null)
 
@@ -51,10 +50,6 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   )
 }
 
-/**
- * Site scroll container that resets to the top on navigation (including the
- * initial mount), using the locale-aware pathname.
- */
 function ScrollResetOnNavigate({
   rootRef,
 }: {

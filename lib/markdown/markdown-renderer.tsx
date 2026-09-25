@@ -16,7 +16,6 @@ interface MarkdownRendererProps {
   rawPath?: string
   shikiPlugin?: RehypeShikiPlugin
   codeReferences?: readonly CodeReference[]
-  /** Optional control rendered at the right edge of the article H1. */
   headingAction?: ReactNode
 }
 

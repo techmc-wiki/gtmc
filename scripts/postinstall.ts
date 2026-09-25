@@ -56,10 +56,8 @@ function ensureSubmoduleInitialized(path: string) {
 const startedAt = performance.now()
 logger.event("setup.started")
 
-// The skip flag gates submodule/content setup too: CI checks out submodules
-// in the workflow and Vercel prepares them inside build:vercel, so the
-// install-time copy is redundant there, and hard-fails the install when
-// the clone or build cache lacks submodule content.
+// GTMC_SKIP_POSTINSTALL is explicit; CI and Vercel also restore submodules outside
+// install, where a second checkout can fail cached or shallow clones.
 const isVercel = process.env.VERCEL === "1"
 const skipHeavy = process.env.GTMC_SKIP_POSTINSTALL === "1" || isVercel
 

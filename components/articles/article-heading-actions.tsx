@@ -11,15 +11,10 @@ import { Link } from "@/i18n/navigation"
 import { cn } from "@/lib/cn"
 
 export interface ArticleHeadingActionsProps {
-  /** Target file path for the draft editor. */
   editPath: string
   className?: string
 }
 
-/**
- * Action cluster rendered at the right edge of the article H1:
- * "Edit article" and "Copy as Markdown" buttons.
- */
 export function ArticleHeadingActions({
   editPath,
   className,
@@ -33,15 +28,10 @@ export function ArticleHeadingActions({
 }
 
 export interface EditArticleButtonProps {
-  /** Target file path for the draft editor (e.g. "EntityMove/01-实体运动基础.zh"). */
   editPath: string
   className?: string
 }
 
-/**
- * "Edit article" action linking to the draft editor workspace. Sits beside
- * "Copy as Markdown" in the article heading action cluster.
- */
 export function EditArticleButton({
   editPath,
   className,
@@ -62,11 +52,7 @@ export function EditArticleButton({
   )
 }
 
-/**
- * "Copy as Markdown" control at the right edge of the article H1. Fetches the
- * public article URL with `Accept: text/markdown` (which the proxy rewrites to
- * the markdown endpoint) and copies the raw markdown to the clipboard.
- */
+/** Resolves to the current article's raw Markdown through content negotiation. */
 export function CopyArticleButton() {
   const t = useTranslations("ArticleMeta")
   const pathname = usePathname()

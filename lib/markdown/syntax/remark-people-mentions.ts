@@ -47,15 +47,8 @@ function escapeHtml(value: string): string {
 }
 
 /**
- * Scan a single text node for `[@key]` patterns and produce a
- * replacement array of text + html content nodes.
- *
- * The `rawSource` and `textStartOffset` parameters allow checking whether the
- * match was backslash-escaped at the markdown level (i.e. `\[@name]` written
- * in the original source), which the parse step has already consumed.
- *
- * Returns null when no mention is found (optimisation: the caller
- * can keep the original child reference instead of spreading).
+ * Check the original source before transforming matches because Markdown escapes
+ * have already been consumed by the parser.
  */
 function replacePeopleMentions(
   value: string,
@@ -96,7 +89,6 @@ function replacePeopleMentions(
       rawPos === -1 || isBackslashEscapedAt(rawSource, rawPos)
 
     if (wasMarkdownEscaped) {
-      // Backslash-escaped in original markdown → leave as literal text
       nextChildren.push({ type: "text", value: fullMatch })
     } else {
       const encodedKey = escapeHtml(personKey)
@@ -119,11 +111,6 @@ function replacePeopleMentions(
   return nextChildren
 }
 
-/**
- * Walk backwards from `pos` in `source` counting consecutive backslashes.
- * Return `true` when the count is odd (meaning the character at `pos` was
- * markdown-escaped).
- */
 function isBackslashEscapedAt(source: string, pos: number): boolean {
   let count = 0
   let i = pos - 1

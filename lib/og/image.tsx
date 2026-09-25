@@ -31,7 +31,7 @@ export async function createOgImage(title: string, headers?: HeadersInit) {
       : characters.join("")
   const [geist, stix] = await fontData
 
-  // Satori does not resolve CSS variables; these match GTMC's light theme.
+  // Satori does not resolve CSS variables, so inline the light-theme values.
   return new ImageResponse(
     <div
       style={{

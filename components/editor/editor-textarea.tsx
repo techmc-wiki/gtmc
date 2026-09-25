@@ -66,7 +66,7 @@ interface EditorTextareaProps {
   saving?: boolean
   placeholder?: string
   "aria-busy"?: boolean
-  fileId?: string // to preserve state per file
+  fileId?: string
   lineWrap?: boolean
   onWrapToggle?: () => void
   canUndo?: boolean

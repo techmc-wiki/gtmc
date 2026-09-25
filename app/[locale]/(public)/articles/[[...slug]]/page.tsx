@@ -120,9 +120,8 @@ export async function generateMetadata({
   const slugPath = decodeSlugPath(slug ?? []) || "preface"
   const resolvedRequest = await resolveArticleRequest(slugPath, locale)
 
-  // Per Next.js docs: call notFound() from generateMetadata (not return a
-  // fallback metadata object) so the route emits a real HTTP 404 status and
-  // avoids being indexed as a soft-404.
+  // Throwing here propagates the 404 from generateMetadata; fallback metadata
+  // would leave the route indexable as a soft 404.
   if (resolvedRequest === null) {
     notFound()
   }
@@ -166,7 +165,6 @@ export async function generateMetadata({
       locale: contentLocale,
     })
 
-    // Build page title with chapter prefix if available
     const manifestEntry = await getCachedLocalizedArticleEntry(
       effectiveSlug,
       contentLocale
@@ -466,7 +464,6 @@ interface ArticlePageHeaderProps {
   wordCount: number
 }
 
-/** Metadata block: selects the attributed or anonymous variant once, explicitly. */
 function ArticlePageHeader({
   articleTitle,
   bannerAlt,

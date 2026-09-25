@@ -6,11 +6,7 @@ import { normalizeGlossarySiteLocale } from "@/lib/glossary/locales"
 
 const EMPTY: GlossaryIndexEntry[] = []
 
-/**
- * Fetches generated glossary entries after mount so the full data set is not
- * bundled into client JavaScript. The caller can render a skeleton while the
- * locale-specific index streams in.
- */
+/** Defers the locale-specific index fetch so the full glossary is not bundled into client JavaScript. */
 export function useLocalizedGlossary(locale: string): {
   entries: GlossaryIndexEntry[]
   isLoading: boolean

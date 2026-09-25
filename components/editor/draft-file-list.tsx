@@ -19,7 +19,6 @@ interface DraftFileListProps {
   onRequestAddFile: () => void
 }
 
-/** Searchable file list, shared by the desktop sidebar and the mobile sheet. */
 export function DraftFileList({
   files,
   activeFileId,

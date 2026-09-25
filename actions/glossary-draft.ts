@@ -73,7 +73,7 @@ export async function updateGlossaryDraftAction(
     try {
       revalidatePath("/draft")
     } catch {
-      // ignore revalidation error during background save
+      // The revision is already durable; cache refresh failure must not change the save result.
     }
 
     return { success: true }
@@ -107,7 +107,7 @@ export async function deleteGlossaryDraftAction(
     try {
       revalidatePath("/draft")
     } catch {
-      // ignore
+      // The revision is already deleted; cache refresh failure must not change the delete result.
     }
 
     return { success: true }

@@ -1,21 +1,7 @@
-/**
- * Framework-agnostic schema.org JSON-LD builders.
- *
- * These helpers construct plain JSON objects (no React/Next.js APIs) so they
- * can be reused from server components, route handlers, scripts, or tests.
- *
- * Builders always omit optional fields when the value is absent: schema.org
- * consumers treat missing keys cleaner than explicit `null` values.
- */
+/** Omit unavailable optional properties; every builder requires `siteUrl` without a trailing slash. */
 
 import type { ResolvedPerson } from "@/lib/markdown/people"
 
-// --- Shared JSON-LD types ----------------------------------------------------
-
-/**
- * Minimal structural shape for a tagged JSON-LD node. Builders declare their
- * own concrete return types; this just guarantees `@context` / `@type` exist.
- */
 export type JsonLdObject = {
   "@context": "https://schema.org"
   "@type": string
@@ -26,18 +12,11 @@ export function serializeJsonLd(value: unknown): { __html: string } {
   return { __html: JSON.stringify(value).replaceAll("<", "\\u003c") }
 }
 
-// --- Organization ------------------------------------------------------------
-
-/**
- * Optional enrichment for the Organization schema. Callers may supply
- * additional `sameAs` profile URLs when they are known and credible.
- */
+/** Additional canonical, credible profile URLs to append to the default GitHub organization profile. */
 export type OrganizationJsonLdOptions = {
-  /** Additional canonical profile URLs beyond the default GitHub org. */
   sameAs?: string[]
 }
 
-/** Concrete Organization node returned by {@link buildOrganizationJsonLd}. */
 export type OrganizationJsonLd = {
   "@context": "https://schema.org"
   "@type": "Organization"
@@ -55,16 +34,6 @@ export type OrganizationJsonLd = {
   sameAs: string[]
 }
 
-/**
- * Build the GTMC Organization schema.org object.
- *
- * Preserves the historical name / url / description / logo / foundingDate
- * behavior that previously lived inline in `app/[locale]/layout.tsx`. The
- * default `sameAs` list contains the GitHub org; callers may append more
- * via `options.sameAs`.
- *
- * @param siteUrl Absolute site origin (no trailing slash), e.g. `https://techmc.wiki`.
- */
 export function buildOrganizationJsonLd(
   siteUrl: string,
   options: OrganizationJsonLdOptions = {}
@@ -91,20 +60,9 @@ export function buildOrganizationJsonLd(
   }
 }
 
-// --- Person ------------------------------------------------------------------
-
 /**
- * Build a schema.org ProfilePage with the author as its main entity.
- *
- * @param person   The resolved person record (from `resolvePerson`).
- * @param siteUrl  Absolute site origin, used to build the profile URL.
- * @param locale   Locale segment used by the profile route.
- * @param handle   URL-encoded author handle used by the profile route.
- *
- * Optional fields (description, image/avatar, social links) are only emitted
- * when present, avoiding null-heavy schema. `sameAs` aggregates every supported
- * social URL (github, bilibili, twitter, website, custom entries); bare handles
- * are normalized to canonical platform URLs, full URLs pass through unchanged.
+ * `handle` must already be URL-encoded. Bare supported social handles are
+ * normalized to canonical profile URLs; full URLs pass through unchanged.
  */
 export function buildPersonJsonLd(
   person: ResolvedPerson,
@@ -191,16 +149,6 @@ export function buildPersonJsonLd(
   }
 }
 
-// --- WebPage -----------------------------------------------------------------
-
-/**
- * Build a schema.org WebPage object for a site page.
- *
- * @param siteUrl    Absolute site origin (no trailing slash).
- * @param routePath  Route path beginning with `/` (e.g. `/en/about`). Combined with siteUrl to form the canonical URL.
- * @param name       Human-readable page title.
- * @param description Optional page description.
- */
 export function buildWebPageJsonLd(
   siteUrl: string,
   routePath: string,

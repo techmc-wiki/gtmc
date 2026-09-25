@@ -270,7 +270,7 @@ export async function markDraftAssetCleanupFailed(
 ): Promise<void> {
   const db = getDbClient()
 
-  // Fetch current cleanupAttempts to increment manually (Supabase JS v2 has no increment shorthand)
+  // Supabase's JS v2 client has no increment helper, so cleanup retries use a read-modify-write.
   const { data: current, error: fetchError } = await db
     .from("DraftAsset")
     .select("cleanupAttempts")

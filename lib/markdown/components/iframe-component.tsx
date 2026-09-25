@@ -21,7 +21,6 @@ export function IframeComponent({
   allowFullScreen,
   ...props
 }: MarkdownComponentProps) {
-  // Remove deprecated or non-standard DOM attributes.
   const {
     frameborder,
     frameBorder,
@@ -33,7 +32,6 @@ export function IframeComponent({
     // The sandbox is derived from the source below, and `srcdoc` would load same-origin
     // inline markup in place of the embedded URL. Markdown must not control either.
     sandbox: _sandbox,
-    // Raw HTML reaches this component camel-cased by `hast-util-to-jsx-runtime`.
     srcDoc: _srcDoc,
 
     node: _node,

@@ -3,13 +3,11 @@ import { cn } from "@/lib/cn"
 
 export interface CornerBracketsProps {
   className?: string
-  /** Base corner size (Tailwind class). Default: "size-2" */
+  /** Tailwind sizing class. */
   size?: string
-  /** Base corner color (Tailwind border class). Default: "border-tech-main/40" */
+  /** Tailwind border-color class. */
   color?: string
-  /** Which corners to render. Default: "all" */
   corners?: "all" | "top-bottom" | "diagonal-tlbr" | "diagonal-trbl"
-  /** Behavior variant. Default: "static" */
   variant?: "static" | "hover" | "hover-only"
   ref?: React.Ref<HTMLDivElement>
 }
@@ -41,9 +39,8 @@ function getCornerVisibility(
 const hoverClasses = "opacity-0 transition-opacity group-hover:opacity-100"
 
 /**
- * Drafting-table corner brackets. Server-safe: `static` shows the frame,
- * `hover`/`hover-only` reveal it when an ancestor `group` is hovered (the
- * latter keeps the corners click-transparent).
+ * Hover variants require an ancestor group; hover-only corners remain
+ * pointer-transparent.
  */
 export function CornerBrackets({
   className,

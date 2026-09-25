@@ -1,19 +1,11 @@
-// ---------------------------------------------------------------------------
-// Upload size limits
-// ---------------------------------------------------------------------------
-
-// Safe upload limit with FormData overhead headroom
+// Leave room for multipart FormData overhead.
 export const UPLOAD_SAFE_LIMIT_BYTES = 4.3 * 1024 * 1024
 
-// Start compressing above this threshold to leave room for compression
+// Compress early enough for the compressor to reach the safe limit.
 export const COMPRESS_TRIGGER_BYTES = 3.5 * 1024 * 1024
 
-// Target size (MB) for compression: maps to browser-image-compression maxSizeMB
 export const COMPRESS_TARGET_MB = 4.0
 
-// ---------------------------------------------------------------------------
-// MIME allowlist per-category size limits
-// ---------------------------------------------------------------------------
-
 export const IMAGE_MAX_BYTES = 15 * 1024 * 1024
+
 export const FILE_MAX_BYTES = 50 * 1024 * 1024

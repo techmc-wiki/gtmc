@@ -7,9 +7,6 @@ interface PageHeaderProps {
   topMargin?: boolean
 }
 
-/**
- * Page-level title: large display serif over a heavy ink rule.
- */
 export function PageHeader({
   title,
   action,
@@ -38,7 +35,6 @@ interface SectionTitleProps {
   className?: string
 }
 
-/** Section-level title: display serif with a guide rule. */
 export function SectionTitle({ children, className }: SectionTitleProps) {
   return (
     <h2

@@ -3,12 +3,7 @@ import { visit } from "unist-util-visit"
 
 type SpacingText = (text: string) => string
 
-/**
- * Build a Rehype transform that adds spacing between CJK and half-width text.
- *
- * The spacing implementation is supplied by an environment-specific Pangu
- * entrypoint so browser bundles never include its Node filesystem helpers.
- */
+/** Supply Pangu from an environment-specific entrypoint so browser bundles omit its Node filesystem helpers. */
 export function createRehypeCJKSpacing(spacingText: SpacingText) {
   return () => (tree: Root) => {
     visit(tree, (node, _, parent) => {

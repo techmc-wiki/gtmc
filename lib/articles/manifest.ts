@@ -51,9 +51,8 @@ export interface ArticleEntry {
   isAppendix: boolean;
   isPreface: boolean;
   parentSlug?: string;
-  /** generator-derived from git, never read from frontmatter */
+  /** Attribution is derived from Git history, never from frontmatter. */
   author?: string;
-  /** generator-derived from git, never read from frontmatter */
   coAuthors?: string[];
   created?: string;
   lastmodByLocale: Partial<Record<ArticleLocale, string>>;
@@ -168,9 +167,6 @@ export async function getArticleManifest(): Promise<
 
 const localTreeCache = new Map<ArticleLocale, ArticleTreeNode[]>();
 
-/**
- * Builds the article navigation tree for a locale.
- */
 export async function getArticleTree(
   locale: ArticleLocale,
 ): Promise<ArticleTreeNode[]> {

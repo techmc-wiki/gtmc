@@ -7,7 +7,6 @@ function resolveFirstDefinedToken(
   return token ?? undefined
 }
 
-/** Resolve the deployment GitHub credential or an explicit user fallback. */
 export function resolveGithubToken(
   fallbackToken?: string | null
 ): string | undefined {

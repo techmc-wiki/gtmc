@@ -87,9 +87,8 @@ export function findNavigationOwner(
 }
 
 /**
- * Returns the folder hierarchy for an article, ordered from the root chapter
- * to its immediate parent. Folder introductions include their own folder so
- * their breadcrumb still identifies the chapter they introduce.
+ * Returns the root-to-parent folder hierarchy. A folder introduction includes
+ * its own folder so its breadcrumb identifies the chapter it introduces.
  */
 export function getNavigationBreadcrumbs(
   tree: ChapterNavNode[],

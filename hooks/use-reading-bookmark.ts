@@ -106,7 +106,7 @@ export function useBookmarkRecorder(slug: string, title: string) {
         window.localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark))
         emitBookmarkChange()
       } catch {
-        // localStorage unavailable (private mode, quota): bookmark is best-effort
+        // Private-mode or quota failures leave bookmark persistence best-effort.
       }
     }
 

@@ -7,14 +7,10 @@ import { QqIcon } from "@/components/ui/icons"
 import { Button } from "@/components/ui/shadcn/button"
 import { Separator } from "@/components/ui/shadcn/separator"
 
-// Restrained peak tilt at the card edges; the live demo goes far higher.
+// Four degrees keeps the edge tilt perceptible without making the card feel loose.
 const TILT_MAX_DEG = 4
 
-/**
- * The three parts of the book, in reading order. Sentence case in the DOM
- * (the row is uppercased by CSS so screen readers do not spell the words
- * out); hardcoded English pending catalog keys, see the migration report.
- */
+/** Keep sentence case in the DOM; CSS uppercases it without spelling it out for screen readers. */
 const BOOK_CATEGORIES = ["Tutorials", "Explanations", "Code analysis"] as const
 
 export function HeroCard() {
@@ -75,11 +71,9 @@ export function HeroCard() {
         onPointerMove={onPointerMove}
         onPointerLeave={onPointerLeave}
         className="t-tilt">
-        {/* 书籍封面：Springer GTM 风格 */}
         <div
           ref={cardRef}
           className="t-tilt-card border-tech-main-dark/80 bg-surface relative border shadow-[0_8px_24px_-6px_rgba(32,40,60,0.16)]">
-          {/* 顶部书带 */}
           <div className="bg-tech-signal text-tech-signal-ink relative flex items-center justify-between px-6 py-3 sm:px-10 sm:py-4">
             <span className="font-mono text-[0.625rem] font-bold tracking-[0.25em] uppercase sm:text-xs">
               Open Access

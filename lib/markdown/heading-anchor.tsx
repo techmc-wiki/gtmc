@@ -12,22 +12,11 @@ interface HeadingAnchorProps {
 }
 
 /**
- * Copy-link control in the gutter of an H2/H3 markdown heading. Hidden until
- * the heading is hovered or the control itself takes keyboard focus, so a
- * keyboard reader reaches it in the same place a pointer reader sees it. The
- * mark swaps with the copy result and the result is announced through the
- * same live region `CopyButton` uses; a tooltip is deliberately omitted
- * because the control appears under a cursor that is already moving through
- * the prose. The H1 carries no anchor: it is the page title (its id stays for
- * outline/TOC links) and already owns the labelled action cluster.
+ * Keep the anchor discoverable in the same order as headings for pointer and keyboard
+ * readers; H1 remains the page title and owns its action cluster.
  *
- * One gutter geometry for every level. The reader card gutter is `p-6` (24px)
- * below `sm` and `sm:p-8` (32px) at `sm+`, so a `size-5` box at `-left-6`
- * spans [-24, -4] and a `sm:size-6` box at `sm:-left-8` spans [-32, -8]:
- * flush with the padding edge, a small gap to the text, and never outside
- * the gutter. `top-[0.5lh]` centers on the first line box (the button
- * inherits the heading's font and line-height through preflight) instead of
- * the whole padding box, so bottom padding and wrapping never bias it.
+ * The responsive gutter offsets align the control with each card's padding edge while
+ * `top-[0.5lh]` centers it on the first line box, independent of wrapped-line height.
  */
 export function HeadingAnchor({ id }: HeadingAnchorProps) {
   const t = useTranslations("ArticleMeta")

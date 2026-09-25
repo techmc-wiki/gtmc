@@ -37,13 +37,10 @@ export async function openGlossaryPullRequest(
   } = input
   const octokit = getOctokit(token)
 
-  // 1. Get HEAD commit of main branch on the upstream repo
-  // (TechMC-Glossary/TechMC-Glossary). Branching the fork at the upstream
-  // head keeps the pull request free of reverse-diffs whenever our fork's
-  // main falls behind upstream.
+  // Base the fork branch on upstream main so a lagging fork cannot add reverse
+  // diffs to the pull request.
   const upstreamHeadSha = await getMainBranchHeadSha(token, GLOSSARY_REPO)
 
-  // 2. Create the new branch in our fork at that upstream commit
   await octokit.git.createRef({
     owner: GLOSSARY_FORK_REPO.owner,
     repo: GLOSSARY_FORK_REPO.name,
@@ -51,7 +48,6 @@ export async function openGlossaryPullRequest(
     sha: upstreamHeadSha,
   })
 
-  // 3. Commit the updated CSV file to that branch in our fork
   await upsertFileOnBranch({
     authorEmail,
     authorName,
@@ -64,8 +60,6 @@ export async function openGlossaryPullRequest(
   })
 
   try {
-    // 4. Open cross-repository Pull Request from our fork's branch to
-    // upstream main
     const { data: pr } = await octokit.pulls.create({
       owner: GLOSSARY_REPO.owner,
       repo: GLOSSARY_REPO.name,

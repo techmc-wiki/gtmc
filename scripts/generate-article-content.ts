@@ -44,9 +44,6 @@ const PUBLIC_ARTICLE_ASSET_DIR = path.join(
 )
 const IS_PRODUCTION = process.env.NODE_ENV !== "development"
 
-/**
- * Strip YAML frontmatter delimited by `---` and return the body text.
- */
 function stripFrontMatter(raw: string): string {
   const normalized = raw.startsWith("\uFEFF") ? raw.slice(1) : raw
   const match = /^---\r?\n[\s\S]*?\r?\n---\r?\n?/.exec(normalized)
@@ -83,7 +80,7 @@ function copyBannerAssetToPublic(
     fs.mkdirSync(path.dirname(targetPath), { recursive: true })
     fs.copyFileSync(sourcePath, targetPath)
   } catch {
-    // Runtime banner routes can still fall back to the articles repository.
+    // Runtime routes can use the repository URL when a local banner is unavailable.
   }
 }
 
@@ -107,8 +104,6 @@ async function mainAsync(): Promise<void> {
 
   const shikiPlugin = await createRehypeShiki()
   const entries = Object.values(loadArticleManifest())
-  // Independent per-article renders (artifact JSON + PDF-HTML sidecar);
-  // collected and run concurrently after the sync bookkeeping loop.
   const renderJobs: Array<() => Promise<void>> = []
 
   for (const entry of entries) {
@@ -178,7 +173,6 @@ async function mainAsync(): Promise<void> {
     }
   }
 
-  // Renders are independent per article; run them concurrently.
   await Promise.all(renderJobs.map((job) => job()))
 
   if (fs.existsSync(OUTPUT_DIR)) {

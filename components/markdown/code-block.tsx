@@ -285,10 +285,6 @@ function CodeBlockBody({
   )
 }
 
-/**
- * Markdown `<pre>` replacement: language strip with copy/wrap controls over a
- * lazily revealed code frame.
- */
 export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
   const t = useTranslations("CommonA11y")
   const tArticleMeta = useTranslations("ArticleMeta")
@@ -307,7 +303,6 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
     setIsWrapped((v) => !v)
   }, [])
 
-  // Calculate line number width based on digit count
   const lineCountNum = parseInt(lineCount, 10)
   const digitCount = String(lineCountNum).length
   const lineNumWidth =

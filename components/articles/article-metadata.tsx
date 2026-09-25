@@ -34,7 +34,6 @@ interface ArticleMetadataLayoutProps {
   children: ReactNode
 }
 
-/** Shared article metadata frame: imprint strip + banner. */
 function ArticleMetadataLayout({
   title,
   filePath,
@@ -101,7 +100,6 @@ interface ArticleMetadataAnonymousProps {
   bannerAlt?: string
 }
 
-/** Anonymous-reader metadata: word count, reading time, and license. */
 export function ArticleMetadataAnonymous({
   title,
   canonicalUrl,
@@ -172,11 +170,6 @@ function getAvatarUrl(username: string) {
   return `https://github.com/${username}.png`
 }
 
-/**
- * One contributor in the byline roster. The primary author is set apart by
- * weight alone; order and emphasis carry the hierarchy, so the roster stays a
- * single wrapping row that reads the same at two authors or twelve.
- */
 function ContributorChip({
   handle,
   isPrimary,
@@ -226,7 +219,6 @@ function ContributorChip({
 
 const DEFAULT_CO_AUTHORS: string[] = []
 
-/** Signed-in-reader metadata: contributors, timestamps, and license. */
 export function ArticleMetadataFull({
   title,
   author,
@@ -251,9 +243,7 @@ export function ArticleMetadataFull({
   const lastEditedLabel = isMounted
     ? formatRelativeTime(lastModified)
     : formatAbsoluteTime(lastModified, false)
-  // Stable reference for the `authors` prop: recomputed only when the author
-  // list changes. Deduplicated so a handle repeated across frontmatter and
-  // co-author records yields one byline entry.
+  // Preserve byline order while removing handles repeated across author sources.
   const allContributors = useMemo(
     () => [...new Set([author, ...coAuthors])],
     [author, coAuthors]

@@ -35,7 +35,6 @@ export async function resolveDisplayedArticleTitle(
     return localizedTitle
   }
 
-  // Cross-locale fallback: for English locale, use zh title if available
   if (locale === "en" && slugEntry?.titleByLocale?.zh?.trim()) {
     return slugEntry.titleByLocale.zh.trim()
   }
@@ -57,23 +56,17 @@ export function formatArticleTitle(
   return `${prefix}${title}`
 }
 
-/** Everything needed to render the article's displayed heading. */
 export interface ArticleDisplayTitleInput {
-  /** Raw frontmatter title (`chapter-title`). */
   frontmatterTitle: unknown
   filePath: string
   canonicalSlug: string
   index: number
   isPreface: boolean
   isReadmeIntro: boolean
-  /** Content locale the article is served in. */
   locale: ArticleLocale
 }
 
-/**
- * Resolves and formats the full displayed article title, including the
- * chapter index prefix ("1.2 ", appendix/preface markers).
- */
+/** Formats the resolved article title with its navigation index and structural markers. */
 export async function formatArticleDisplayTitle(
   input: ArticleDisplayTitleInput
 ): Promise<string> {

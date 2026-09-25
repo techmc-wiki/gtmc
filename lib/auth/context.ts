@@ -31,11 +31,6 @@ export async function getCurrentUserAuthContext(
   }
 }
 
-/**
- * Requires the caller to be authenticated.
- * Throws an Error with the provided message if not.
- * Returns the session with guaranteed user object.
- */
 export async function requireAuth(
   message = "Unauthorized"
 ): Promise<AuthenticatedSession> {

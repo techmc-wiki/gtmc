@@ -20,7 +20,6 @@ interface DraftFileRenameDialogProps {
   onSubmit: (path: string) => boolean
 }
 
-/** Sets or edits the target path of the active draft file. */
 export function DraftFileRenameDialog({
   open,
   initialPath,

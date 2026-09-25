@@ -108,8 +108,8 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     resolveAlias: {
-      // nucleation's Node<22 fallback imports `fs`, which breaks the browser
-      // bundle; the real `fs` module is kept for server bundles.
+      // Nucleation's Node <22 fallback imports `fs`, so browser bundles use
+      // a stub while server bundles retain the real module.
       fs: {
         browser: "./lib/nucleation/fs-browser-stub.mjs",
       },

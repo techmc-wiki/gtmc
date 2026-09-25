@@ -53,10 +53,6 @@ export function HideFooter() {
   return null
 }
 
-/**
- * Route-aware footer gate: renders `children` unless the footer is suppressed
- * via `HideFooter`.
- */
 export function FooterWrapper({ children }: { children: ReactNode }) {
   const { hidden } = useFooter()
 

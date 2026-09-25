@@ -1,12 +1,7 @@
 import { escapeHtml } from "./html-utils"
 import type { NumberedArticle } from "./types"
 
-/**
- * Article section: a generated heading block (number + serif title with an
- * ink rule and azure tick) followed by the rendered markdown body. Most
- * article artifacts do not carry their own H1, so the PDF supplies the
- * title uniformly; body headings start at H2.
- */
+/** Supply a consistent H1 when article artifacts omit one. */
 export function renderArticleSectionHtml(
   numbered: NumberedArticle,
   htmlContent: string

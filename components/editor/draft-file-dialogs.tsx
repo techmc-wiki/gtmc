@@ -19,7 +19,6 @@ interface DraftFileDialogsProps {
   onInsertFile: (input: { content: string; filePath: string }) => boolean
 }
 
-/** The "add/replace file" and "insert file link" dialog pair. */
 export function DraftFileDialogs({
   activeFilePath,
   fileDialogIntent,

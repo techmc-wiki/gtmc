@@ -1,6 +1,3 @@
-/**
- * Formats a date string to absolute time format "YYYY-MM-DD HH:mm:ss"
- */
 export function formatAbsoluteTime(
   dateString: string,
   displayTime = true
@@ -24,9 +21,6 @@ export function formatAbsoluteTime(
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
-/**
- * Formats a date string to relative time within 180 days, absolute beyond
- */
 export function formatRelativeTime(
   dateString: string,
   displayTime = true

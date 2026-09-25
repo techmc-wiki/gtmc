@@ -13,7 +13,7 @@ function normalizeIdentity(value: string): string {
   return value.trim().toLocaleLowerCase("en-US")
 }
 
-/** Read contributor activity captured during the production build. */
+/** Aggregate contributor activity captured during the production build. */
 export function getRepositoryContributorStats(
   identities: string[]
 ): RepositoryContributorStats {

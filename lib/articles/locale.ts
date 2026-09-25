@@ -1,8 +1,5 @@
 /**
- * Client-safe article locale helper functions.
- *
- * Loads article locale data from manifest.json directly (via JSON import),
- * avoiding the `fs` import in article-manifest-store.ts for client bundles.
+ * Reads locale metadata through a JSON import so this helper remains client-safe.
  */
 import manifestData from "@/data/manifest.json"
 

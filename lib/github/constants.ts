@@ -1,1 +1,0 @@
-export const GIT_BLOB_MODE = "100644" as const

@@ -1,6 +1,6 @@
-import { GIT_BLOB_MODE } from "@/lib/github/constants"
 import { getOctokit, type RepoTarget } from "./repos"
 
+const GIT_BLOB_MODE = "100644" as const
 const MAIN_BRANCH = "main"
 
 interface FileSnapshot {

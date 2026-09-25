@@ -15,11 +15,6 @@ interface ArticleLicenseNoticeProps {
 
 const DEFAULT_AUTHORS: string[] = []
 
-/**
- * License and attribution control for the article's reuse terms. Rendered as
- * the value of a metadata row, so the license name carries no label of its own
- * and the surrounding grid supplies the gutter.
- */
 export function ArticleLicenseNotice({
   title,
   canonicalUrl,

@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react"
 
 export type CopyState = "idle" | "pending" | "copied" | "failed"
 
-/** How long copied/failed feedback stays up before the control returns to idle. */
 const FEEDBACK_MS = 2000
 
 function isThenable(value: string | Promise<string>): value is Promise<string> {
@@ -12,9 +11,8 @@ function isThenable(value: string | Promise<string>): value is Promise<string> {
 }
 
 /**
- * Clipboard write with transient `copied`/`failed` feedback. Text that needs a
- * network round trip (raw markdown, remote snippets) resolves lazily: the
- * control reports `pending` until the promise settles.
+ * Raw Markdown and remote snippets may resolve asynchronously, so the control
+ * reports `pending` until the clipboard value is available.
  */
 export function useCopyToClipboard(feedbackMs: number = FEEDBACK_MS) {
   const [state, setState] = useState<CopyState>("idle")

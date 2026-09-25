@@ -23,8 +23,7 @@ function AuthIslandContent() {
   const { data: session, status } = useSession()
   const t = useTranslations("IconActions")
 
-  // Loading state: pulse skeleton sized to the resolved avatar footprint so
-  // the header controls do not shift when the session lands.
+  // Size the skeleton to the resolved avatar footprint to avoid header shift.
   if (status === "loading") {
     return (
       <div className="flex size-11 items-center justify-center">
@@ -33,7 +32,6 @@ function AuthIslandContent() {
     )
   }
 
-  // Error state: fallback to logged-out state (login button)
   if (status === "unauthenticated" || !session?.user) {
     return (
       <Link
@@ -51,7 +49,6 @@ function AuthIslandContent() {
     )
   }
 
-  // Authenticated state: Avatar trigger + name dropdown
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

@@ -1,20 +1,8 @@
 /**
- * Local font provisioning for the PDF pipeline.
- *
- * The assembled PDF documents link the Google Fonts stylesheet
- * (`PDF_FONT_STYLESHEET_URL`). pdfgen spawns a fresh Chromium per render, so
- * every render pass re-downloads the full font set (five families, ~225 woff2
- * files) from fonts.googleapis.com; repeated rapid fetches from one runner
- * IP hit transient CDN failures and aborted whole runs with a font-readiness
- * timeout. Downloading the set once and rendering from local files removes
- * the network dependency from rendering entirely.
- *
- * The downloaded set lives under `data/pdf-fonts/` (gitignored with the rest
- * of `data/`): a `fonts.css` stylesheet whose woff2 URLs are rewritten to the
- * local `woff2/` directory. `generate-pdf.ts` copies it next to the assembled
- * HTML documents, so renders are deterministic and offline. If the download
- * fails, callers fall back to the Google Fonts stylesheet URL (previous
- * behavior) rather than failing the build.
+ * Cache Google Fonts locally because each pdfgen Chromium render otherwise
+ * refetches the full WOFF2 set, making repeated renders network-dependent and
+ * vulnerable to CDN failures. The local stylesheet keeps renders offline and
+ * deterministic.
  */
 
 import fs from "node:fs"
@@ -30,7 +18,6 @@ const FONTS_DIR = path.join(process.cwd(), "data", "pdf-fonts")
 const CSS_FILENAME = "fonts.css"
 const WOFF2_DIRNAME = "woff2"
 
-/** How many woff2 files to fetch concurrently. */
 const DOWNLOAD_CONCURRENCY = 16
 const FETCH_ATTEMPTS = 3
 const RETRY_BASE_DELAY_MS = 500
@@ -38,12 +25,10 @@ const RETRY_BASE_DELAY_MS = 500
 const WOFF2_URL_PATTERN =
   /url\((https:\/\/fonts\.gstatic\.com\/[^)]+\.woff2)\)/g
 
-/** Absolute path of the local font set (present after `syncPdfFonts`). */
 export function pdfFontsDir(): string {
   return FONTS_DIR
 }
 
-/** True when a previously synced local font set is available. */
 export function hasLocalPdfFonts(): boolean {
   return fs.existsSync(path.join(FONTS_DIR, CSS_FILENAME))
 }
@@ -76,7 +61,7 @@ async function downloadFile(url: string, outPath: string): Promise<void> {
   await fs.promises.writeFile(outPath, buffer)
 }
 
-/** Run `workers` promises with `limit` concurrent slots, first failure aborts. */
+/** Run workers with bounded concurrency; rejects when any worker fails. */
 async function runPool<T>(
   items: T[],
   limit: number,
@@ -99,12 +84,8 @@ async function runPool<T>(
 }
 
 /**
- * Download the Google Fonts stylesheet and every woff2 it references into
- * `data/pdf-fonts/`, rewriting the stylesheet to use local relative URLs.
- *
- * No-op when a previous sync is already present (local repeat builds). Throws
- * if any part of the download fails after retries, so callers can fall back
- * to the CDN stylesheet URL.
+ * No-op when a complete local font set exists. Throws after retries on any
+ * download failure so the caller can fall back to the CDN stylesheet.
  */
 export async function syncPdfFonts(): Promise<void> {
   if (hasLocalPdfFonts()) return

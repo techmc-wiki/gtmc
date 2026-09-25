@@ -1,5 +1,3 @@
-// import imageCompression from "browser-image-compression";
-
 import {
   COMPRESS_TARGET_MB,
   COMPRESS_TRIGGER_BYTES,
@@ -15,7 +13,7 @@ export interface CompressionResult {
 export async function compressImageForUpload(
   file: File
 ): Promise<CompressionResult> {
-  // GIF bypass: compressing GIFs destroys animation
+  // Compressing GIFs can discard animation.
   if (file.type === "image/gif") {
     if (file.size > UPLOAD_SAFE_LIMIT_BYTES) {
       return {
@@ -28,14 +26,12 @@ export async function compressImageForUpload(
     return { file, compressed: false }
   }
 
-  // No compression needed for small files
   if (file.size <= COMPRESS_TRIGGER_BYTES) {
     return { file, compressed: false }
   }
 
   const imageCompression = (await import("browser-image-compression")).default
 
-  // Compress the file
   try {
     const compressedBlob = await imageCompression(file, {
       maxSizeMB: COMPRESS_TARGET_MB,
@@ -46,13 +42,12 @@ export async function compressImageForUpload(
       maxIteration: 15,
     })
 
-    // Rewrap compressed result as File with preserved metadata
     const compressed = new File([compressedBlob], file.name, {
       type: file.type,
       lastModified: file.lastModified,
     })
 
-    // Still too large after compression (library is best-effort)
+    // Compression is best-effort and may miss its target size.
     if (compressed.size > UPLOAD_SAFE_LIMIT_BYTES) {
       return {
         file: compressed,
@@ -62,14 +57,12 @@ export async function compressImageForUpload(
       }
     }
 
-    // Compression made the file larger (e.g. already well-optimized PNG): use original
     if (compressed.size >= file.size) {
       return { file, compressed: false }
     }
 
     return { file: compressed, compressed: true }
   } catch {
-    // Compression failed: fall back to original if it fits, otherwise error
     if (file.size > UPLOAD_SAFE_LIMIT_BYTES) {
       return {
         file,

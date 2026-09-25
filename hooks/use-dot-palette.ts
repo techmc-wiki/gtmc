@@ -36,11 +36,7 @@ function subscribeDotPaletteTheme(callback: () => void): () => void {
   return () => observer.disconnect()
 }
 
-/**
- * Interactive dot-field colors for the runtime theme (`data-theme` is the
- * single source of truth). Shared by the homepage hero field and the footer
- * field so both bookends stay in lockstep across themes.
- */
+/** Keeps the homepage and footer dot fields synchronized with the document's runtime theme. */
 export function useDotPalette(): DotPalette {
   const theme = useSyncExternalStore(
     subscribeDotPaletteTheme,

@@ -30,8 +30,6 @@ export function createPeelScene(options: PeelSceneOptions): PeelScene | null {
   const button = rootEl?.closest("button")
   if (!rootEl || !canvasEl || !imageEl || !button) return null
 
-  // Rebound with explicit types so the listeners below keep the narrowed
-  // values without non-null assertions.
   const root: HTMLElement = rootEl
   const canvas: HTMLCanvasElement = canvasEl
   const image: HTMLImageElement = imageEl

@@ -1,7 +1,4 @@
-/**
- * Resolve the persisted or system theme before the browser's first paint.
- * This must stay synchronous and inline in the document head.
- */
+/** Must stay synchronous and inline in the document head to set the theme before first paint. */
 export const noFlashScript = `
 (function () {
   try {

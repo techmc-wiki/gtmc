@@ -1,21 +1,3 @@
-/**
- * Generate canonical-to-alias author mapping from git history.
- *
- * Ports the logic from `articles/_scripts/author_aliases.py`:
- *   1. Read all commit authors (`git log --all`) from the articles repo.
- *   2. Group display names by email, then resolve each email to a GitHub
- *      username (noreply pattern first, then the GitHub commits API).
- *   3. Group emails by GitHub username; the username becomes the canonical
- *      key and every distinct display name (minus the canonical) becomes an
- *      alias.
- *   4. Apply manual overrides from `author-alias-overrides.yml` last.
- *   5. Write `authors-alias.yml` sorted by canonical key for stable diffs.
- *
- * The GitHub token is optional but recommended to avoid rate limits. Noreply
- * addresses resolve locally; other addresses use the commits API, matching the
- * legacy Python generator.
- */
-
 import { execFileSync } from "node:child_process"
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
@@ -34,6 +16,8 @@ const ARTICLES_PATH =
   process.env.ARTICLES_PATH ?? join(process.cwd(), "articles")
 
 const GITHUB_TOKEN = resolveGithubToken()
+
+// Unauthenticated commit lookups work but consume GitHub's lower rate limit.
 const GITHUB_API_BASE = "https://api.github.com"
 const GITHUB_ARTICLES_REPO = `${process.env.GITHUB_ARTICLES_REPO_OWNER ?? "techmc-wiki"}/${process.env.GITHUB_ARTICLES_REPO_NAME ?? "Articles"}`
 
@@ -46,10 +30,6 @@ interface GitAuthor {
   email: string
 }
 
-/**
- * Read `(displayName, email)` pairs from `git log --all` in the articles repo.
- * Returns `[]` if git fails or the repo is missing.
- */
 function getGitAuthors(): GitAuthor[] {
   let stdout: string
   try {
@@ -76,10 +56,6 @@ function getGitAuthors(): GitAuthor[] {
   return authors
 }
 
-/**
- * Extract a GitHub username from a `users.noreply.github.com` email.
- * Returns `undefined` if the email is not a noreply address.
- */
 function extractNoreplyUsername(email: string): string | undefined {
   const match = email.match(NOREPLY_PATTERN)
   return match?.[1]
@@ -89,11 +65,6 @@ interface GithubCommit {
   author?: { login?: string } | null
 }
 
-/**
- * Query the GitHub commits API to resolve `email` → GitHub login.
- * Returns `undefined` on any network/parse error or empty result.
- * Logs skipped resolution so failures are visible without being fatal.
- */
 async function fetchGithubLoginFromEmail(
   email: string,
   headers: Record<string, string>
@@ -131,12 +102,6 @@ async function fetchGithubLoginFromEmail(
   }
 }
 
-/**
- * Resolve a commit email to a GitHub username.
- *
- * Noreply emails resolve locally. Other addresses use the commits API, with
- * authentication when available.
- */
 async function getGithubUsernameForEmail(
   email: string
 ): Promise<string | undefined> {
@@ -151,9 +116,6 @@ async function getGithubUsernameForEmail(
   return fetchGithubLoginFromEmail(email, headers)
 }
 
-/**
- * Load manual overrides YAML. Returns `{}` if the file is missing.
- */
 function loadManualAliases(): AliasMap {
   if (!existsSync(OVERRIDES_PATH)) return {}
   const parsed = yamlLoad(readFileSync(OVERRIDES_PATH, "utf-8"))
@@ -161,9 +123,7 @@ function loadManualAliases(): AliasMap {
   return parsed as AliasMap
 }
 
-/**
- * Apply authoritative manual corrections to the aliases derived from history.
- */
+// Manual aliases replace history-derived aliases for the same canonical author.
 function mergeAliases(auto: AliasMap, manual: AliasMap): AliasMap {
   const merged = { ...auto }
   for (const [canonical, aliases] of Object.entries(manual)) {
@@ -177,17 +137,9 @@ function mergeAliases(auto: AliasMap, manual: AliasMap): AliasMap {
   return sorted
 }
 
-/**
- * Build the auto-generated alias map from git history.
- *
- * Mirrors the Python `generate_aliases()`: group display names by email,
- * resolve emails to GitHub usernames, then emit `username → [aliases]` where
- * aliases are the display names that differ from the canonical username.
- */
 async function generateAliases(): Promise<AliasMap> {
   const authors = getGitAuthors()
 
-  // email → set of display names
   const emailToDisplayNames = new Map<string, Set<string>>()
   for (const { displayName, email } of authors) {
     const set = emailToDisplayNames.get(email) ?? new Set<string>()
@@ -195,9 +147,7 @@ async function generateAliases(): Promise<AliasMap> {
     emailToDisplayNames.set(email, set)
   }
 
-  // github username → set of emails. Resolve all emails in parallel: order
-  // does not affect the final map, and this avoids both an await-in-loop and
-  // slow serial API round-trips.
+  // Resolution is order-independent, so concurrent lookups avoid serial API latency.
   const distinctEmails = [...emailToDisplayNames.keys()]
   const usernames = await Promise.all(
     distinctEmails.map((email) => getGithubUsernameForEmail(email))

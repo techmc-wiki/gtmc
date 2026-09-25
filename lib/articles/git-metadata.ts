@@ -41,8 +41,6 @@ type GitPathCommitRange = {
 
 const MILLISECONDS_PER_DAY = 86_400_000
 
-// Cache stores various types (e.g., string[] for attribution exclusions, Map<string, string> for aliases,
-// {author, coAuthors} for parsed commits, {created, lastmod} for dates, string for SHAs)
 const cache = new Map<string, any>()
 
 function getCacheKey(cwd: string, relPath: string, type: string): string {
@@ -50,9 +48,8 @@ function getCacheKey(cwd: string, relPath: string, type: string): string {
 }
 
 /**
- * Git usernames from `lib/articles/config/article-edit-exclusions.yml`,
- * lowercased. Does NOT respect author aliases. Signature dropped the
- * former `articlesRepoCwd` param; config is website-owned now.
+ * Returns configured Git usernames in lowercase without resolving aliases.
+ * Attribution filters expand these identities to canonical handles when needed.
  */
 export async function loadArticleEditExclusions(): Promise<string[]> {
   const cacheKey = "config:article-edit-exclusions"
@@ -73,10 +70,8 @@ export async function loadArticleEditExclusions(): Promise<string[]> {
 }
 
 /**
- * Map of every known spelling (canonical + aliases) to canonical username.
- * Auto-generated `authors-alias.yml` is merged first, then
- * `author-alias-overrides.yml` takes precedence. Signature dropped the
- * former `articlesRepoCwd` param; config is website-owned now.
+ * Maps every canonical handle and alias to its canonical username. The
+ * generated alias file is merged first, then optional overrides take precedence.
  */
 export async function loadAuthorAliases(): Promise<Map<string, string>> {
   const cacheKey = "config:aliases"
@@ -91,8 +86,6 @@ export async function loadAuthorAliases(): Promise<Map<string, string>> {
   ): void => {
     if (!entries) return
     for (const [canonical, aliasList] of Object.entries(entries)) {
-      // Re-registering the canonical key and its aliases overrides any prior
-      // mapping, which is exactly the precedence contract for the overrides file.
       aliasMap.set(canonical, canonical)
       for (const alias of aliasList) {
         aliasMap.set(alias, canonical)
@@ -103,16 +96,12 @@ export async function loadAuthorAliases(): Promise<Map<string, string>> {
   try {
     const autoContent = await readFile(ALIASES_PATH, "utf-8")
     mergeEntries(yamlLoad(autoContent) as Record<string, string[]> | null)
-  } catch {
-    // Missing auto-generated aliases is non-fatal; overrides may still apply.
-  }
+  } catch {}
 
   try {
     const overrideContent = await readFile(ALIAS_OVERRIDES_PATH, "utf-8")
     mergeEntries(yamlLoad(overrideContent) as Record<string, string[]> | null)
-  } catch {
-    // Overrides are optional.
-  }
+  } catch {}
 
   cache.set(cacheKey, aliasMap)
   return aliasMap
@@ -185,10 +174,7 @@ export async function getArticleAuthors(
       }
     }
 
-    // Excluded editors must be recognized both by their raw git username
-    // (e.g. `4rcadia`) AND by their alias-resolved canonical form (e.g. `Arcadi4`).
-    // Without this, an excluded editor using an aliased username filters
-    // through as the article author instead of being excluded.
+    // Attribution exclusions must cover raw Git identities and their canonical aliases.
     const excludedEditorsLower = new Set<string>()
     for (const editor of excludedEditors) {
       excludedEditorsLower.add(editor.toLowerCase())

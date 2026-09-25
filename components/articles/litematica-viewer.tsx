@@ -246,8 +246,6 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
     }
   }, [])
 
-  // Engine lifecycle: renderer, scene, camera, controls, render loop.
-  // Runs once per mount; the load effect below swaps scene contents per url.
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -259,11 +257,8 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
     canvas.setPointerCapture = (pointerId: number) => {
       try {
         originalSetPointerCapture(pointerId)
-      } catch {
-        // Transient pointer lifecycle race; next pointerdown re-captures.
-      }
+      } catch {}
     }
-
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
     const flyKeys = new Set<string>()
     renderer.setSize(canvas.clientWidth || 300, canvas.clientHeight || 400, false)
@@ -326,9 +321,7 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
       if (elapsedSinceUnlock < POINTER_LOCK_COOLDOWN_MS) return
       const lockResult = canvas.requestPointerLock()
       if (lockResult && typeof lockResult.catch === "function") {
-        lockResult.catch(() => {
-          // Pointer lock failures are surfaced by the unlock state instead.
-        })
+        lockResult.catch(() => {})
       }
     }
     document.addEventListener("keydown", onKeyDown)
@@ -390,9 +383,7 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
     needsRenderRef.current = true
   }, [backgroundColor])
 
-  // Schematic load: fetch → parse → pack → mesh → GLB → scene.
-  // Dynamic import is load-bearing: the 16.9 MB wasm must stay in a lazy
-  // chunk, and this is the only engine entry point.
+  // Keep the 16.9 MB WASM engine in a lazy chunk; this is its only entry point.
   useEffect(() => {
     let cancelled = false
     const loadToken = ++loadTokenRef.current
@@ -457,8 +448,6 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
 
       const tight = schematic.tightDimensions()
       tightRef.current = { x: Math.max(1, tight.x), y: Math.max(1, tight.y), z: Math.max(1, tight.z) }
-      // Mesher exhaustion (very detailed schematics) traps in wasm, so every
-      // failure here is surfaced as "too detailed" rather than a stack trace.
       let glb: Uint8Array
       let bounds: Bounds
       try {
@@ -511,7 +500,6 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
       if (previousGrid) scene.remove(previousGrid)
       scene.add(grid)
 
-      // Frame the camera on the mesher's actual bounds.
       const camera = cameraRef.current
       const orbit = orbitRef.current
       if (camera && orbit) {
@@ -541,7 +529,6 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
     }
   }, [url])
 
-  // Layer slicing: re-mesh a bounded region and swap it into the scene.
   useEffect(() => {
     if (!schematicReady) return
     const nuc = nucRef.current

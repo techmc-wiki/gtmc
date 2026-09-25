@@ -2,7 +2,6 @@ import { escapeHtml } from "./html-utils"
 import { getLabels } from "./labels"
 import type { BookOptions } from "./types"
 
-/** Closing colophon page: edition facts, license, and the canonical URL. */
 export function renderColophonHtml(
   options: BookOptions,
   articleCount: number

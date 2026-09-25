@@ -21,10 +21,6 @@ export interface NavLink {
   label: string
 }
 
-/**
- * True once the page has scrolled past its top. Drives the header's
- * transparent-at-top -> surfaced-floating-bar transition.
- */
 function useHeaderScrolled() {
   const [scrolled, setScrolled] = React.useState(false)
 
@@ -65,7 +61,6 @@ function useHeaderScrolled() {
   return scrolled
 }
 
-/** How long the preview chip lingers after the cursor leaves before returning. */
 const LEAVE_LINGER_MS = 120
 
 /** Longest href wins so `/draft/123` keeps MY DRAFTS active over partials. */
@@ -75,7 +70,6 @@ function resolveActiveHref(pathname: string, navLinks: NavLink[]) {
   return matches.toSorted((a, b) => b.href.length - a.href.length)[0].href
 }
 
-/** Desktop links with the transitions.dev sliding selection indicator. */
 export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
   const pathname = usePathname()
   const listRef = React.useRef<HTMLUListElement>(null)
@@ -106,7 +100,6 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
     () => resolveActiveHref(pathname, navLinks),
     [pathname, navLinks]
   )
-  // Hover/focus borrows the chip; otherwise it rests on the active link.
   const chipKey = previewKey ?? activeHref
 
   React.useEffect(() => clearRelease, [clearRelease])
@@ -212,12 +205,6 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
   )
 }
 
-/**
- * Mobile navigation: hamburger trigger + modal side drawer (research default
- * over top dropdowns; preserves page context via the scrim and gives the IA
- * room). Radix Dialog supplies the modal semantics: focus trap, Escape,
- * focus return.
- */
 export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
   const t = useTranslations("CommonA11y")
   const tFooter = useTranslations("Footer")
@@ -289,13 +276,6 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
   )
 }
 
-/**
- * Floating site header frame. Transparent and borderless at the top of the
- * page so it reads as part of the hero, then condenses into a surfaced,
- * full-bleed band with a viewport-spanning hairline once the user scrolls.
- * Content aligns to the shared page container so the band's edges always
- * read as intentional chrome, never a plate cut off mid-air.
- */
 export function SiteHeader({
   left,
   right,

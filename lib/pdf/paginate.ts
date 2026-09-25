@@ -1,9 +1,6 @@
 /**
- * TOC folio convergence helpers.
- *
- * pdfgen reports anchor destinations as 0-based body-relative page indices;
- * these helpers fill the assembled HTML and detect whether a subsequent
- * render moved any TOC target.
+ * pdfgen reports anchor destinations as 0-based body-relative page indices.
+ * Rendered TOC folios are 1-based, and refilling after a render detects moves.
  */
 
 import { unescapeHtml } from "./document/html-utils"

@@ -25,10 +25,6 @@ const DOMAIN_PINYIN = { 重载: "chong zai" }
 // Technical terms whose domain pronunciation differs from the library default.
 customPinyin(DOMAIN_PINYIN)
 
-/**
- * Split the CSV `Category` cell (a `"; "`-separated list) into canonical
- * categories (trimmed, de-duplicated, order preserved).
- */
 function parseCategories(raw: string): string[] {
   return [
     ...new Set(

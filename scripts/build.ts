@@ -1,11 +1,3 @@
-/**
- * Full production build: content artifacts (unless skipped) then Next.js.
- *
- * Set GTMC_SKIP_CONTENT_BUILD=true to reuse cached content artifacts
- * (used by CI when the content cache hits).
- *
- * Usage: pnpm build
- */
 import { runScript } from "./lib/run"
 import { createLogger, runBuildStep } from "./lib/logger"
 

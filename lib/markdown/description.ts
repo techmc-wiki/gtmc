@@ -94,13 +94,11 @@ export function generateDescription(
   const lines = normalizedMarkdown.split("\n")
   let lineIndex = 0
 
-  // Skip leading YAML frontmatter block
   if (lines[0]?.trim() === "---") {
     lineIndex = 1
     while (lineIndex < lines.length && lines[lineIndex]?.trim() !== "---") {
       lineIndex++
     }
-    if (lineIndex < lines.length) lineIndex++ // Skip closing ---
   }
 
   let inCodeFence = false
@@ -123,7 +121,6 @@ export function generateDescription(
       continue
     }
 
-    // List items: useful when an article opens with an outline
     if (isListItem(trimmed)) {
       const listBits: string[] = []
       while (lineIndex < lines.length) {
@@ -153,7 +150,6 @@ export function generateDescription(
       continue
     }
 
-    // Contiguous prose paragraph
     const paragraphLines: string[] = []
     while (lineIndex < lines.length) {
       const currentLine = lines[lineIndex]

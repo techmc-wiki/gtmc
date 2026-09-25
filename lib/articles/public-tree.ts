@@ -5,10 +5,6 @@ import type { ArticleTreeNode } from "@/lib/github/sync";
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types";
 import { compareIndex } from "@/lib/articles/navigation-data";
 
-/**
- * 获取公开章节导航树。
- * Chapter navigation is built from the public article source only.
- */
 export async function getPublicChapterNav(
   locale: ArticleLocale = "zh",
 ): Promise<ChapterNavNode[]> {

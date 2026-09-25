@@ -1,14 +1,5 @@
 #!/usr/bin/env npx tsx
 
-/**
- * PDF generation script: archival print edition of the GTMC book.
- *
- * TypeScript owns book planning and HTML assembly. The pdfgen binary owns
- * Chromium rendering and PDF post-processing. Each locale converges TOC folios
- * in at most three body renders before pdfgen merges the cover and writes the
- * measured outline tree.
- */
-
 import { execFileSync, execSync, spawnSync } from "node:child_process"
 import fs from "node:fs"
 import os from "node:os"
@@ -77,7 +68,6 @@ interface OutlineNode {
 
 let resolvedPdfgen: string | undefined
 let pdfgenBuildDir: string | undefined
-/** Local font set synced once per run; null when falling back to the CDN. */
 let syncedPdfFontsDir: string | null = null
 
 function getArticlesRevision(): string | undefined {
@@ -121,6 +111,7 @@ function findOnPath(command: string): string | undefined {
   return resolved || undefined
 }
 
+// Resolve PDFGEN_BIN, then PATH, then build the local Go module into a temporary directory.
 function resolvePdfgen(): string {
   if (resolvedPdfgen) return resolvedPdfgen
 
@@ -524,6 +515,7 @@ async function runPdf(
       return report
     }
 
+    // One measurement pass fills the TOC; up to two correction passes converge it before pdfgen merges the cover.
     const pass1 = renderBody(bodyHtml, "empty")
     const pass1Pages = new Map(Object.entries(pass1.dests))
     const filledPass1 = fillTocFolios(bodyHtml, pass1Pages)

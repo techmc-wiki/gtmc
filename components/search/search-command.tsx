@@ -68,7 +68,6 @@ function useSearchCommand() {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Reset search state when dialog closes (e.g. via Cmd+K toggle)
   useEffect(() => {
     if (prevIsOpenRef.current && !isOpen) {
       setQuery("")
@@ -157,7 +156,6 @@ function useSearchCommand() {
     [router, closeModal]
   )
 
-  // Highlight matched text in title/snippet
   const highlightMatch = useCallback(
     (text: string) => {
       if (!query || query.length < 2) return text

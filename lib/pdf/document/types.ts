@@ -4,7 +4,6 @@ export type PdfLocale = "en" | "zh"
 
 export interface NumberedArticle {
   article: LinearizedArticle
-  /** Dotted article number ("3.2", "A.1") or null for unnumbered entries. */
   number: string | null
 }
 
@@ -24,7 +23,6 @@ export interface ChapterGroup {
   slug: string
   title: string
   isAppendix: boolean
-  /** Chapter numeral: "1", "2", … or "A", "B", … for appendices. */
   number: string
   content: ChapterContent[]
 }
@@ -49,13 +47,10 @@ export interface BookOptions {
   subtitle?: string
   tagline?: string
   locale: PdfLocale
-  /** ISO date (YYYY-MM-DD) shown on the cover and colophon. */
   generatedDate: string
-  /** Short commit hash of the articles submodule checkout. */
   articlesRevision?: string
   sourceUrl?: string
   hasMath?: boolean
-  /** Stylesheet href for the PDF font families; defaults to Google Fonts. */
   fontsHref?: string
   renderArticle: (article: LinearizedArticle) => Promise<string>
 }

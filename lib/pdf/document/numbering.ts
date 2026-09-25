@@ -18,10 +18,7 @@ function appendixLetter(ordinal: number): string {
   return out
 }
 
-/**
- * Group linearized articles into a recursively nested book plan. Articles are
- * numbered flat across the chapter ("3.2", "A.1") regardless of folder depth.
- */
+/** Preserve folder nesting, but number articles flat within each chapter. */
 export function buildBookPlan(articles: LinearizedArticle[]): BookPlan {
   const preface: NumberedArticle[] = []
   const chapters: ChapterGroup[] = []

@@ -16,7 +16,6 @@ import {
 import { IconButton } from "@/components/ui/icon-button"
 import { cn } from "@/lib/cn"
 
-/** Write/split/preview switch and the change-review shortcut. */
 export function DraftEditorModeBar({
   onOpenChanges,
 }: {

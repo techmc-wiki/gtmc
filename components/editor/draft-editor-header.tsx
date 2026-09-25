@@ -13,7 +13,6 @@ import {
 import { IconButton } from "@/components/ui/icon-button"
 import { Input } from "@/components/ui/shadcn/input"
 
-/** Save/submit activity, rendered as one explicit status line state. */
 export type DraftEditorStatus =
   | { kind: "error"; message: string }
   | { kind: "saved" }

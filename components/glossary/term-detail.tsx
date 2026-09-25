@@ -118,7 +118,6 @@ interface GlossaryDetailPanelProps {
   onOpenRelated: (slug: string) => void
 }
 
-/** Modal dialog hosting `TermDetail`, opened from the glossary index. */
 export function GlossaryDetailPanel({
   entry,
   locale,

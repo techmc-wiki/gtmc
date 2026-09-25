@@ -5,10 +5,8 @@ import { defineConfig } from "prisma/config"
 export default defineConfig({
   schema: "schema.prisma",
   datasource: {
-    // Migrations require a direct (non-pooled) connection to avoid
-    // "prepared statement already exists" errors with PgBouncer.
-    // Falls back to DATABASE_URL for local development where pooling
-    // is typically not in the path.
+    // Prisma migrations require a direct connection; DATABASE_URL is the
+    // local-development fallback when no pooler is present.
     url: process.env.DIRECT_URL || process.env.DATABASE_URL || "",
   },
 })

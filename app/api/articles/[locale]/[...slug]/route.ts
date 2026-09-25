@@ -19,13 +19,6 @@ interface ArticleMarkdownRouteContext {
   params: Promise<{ locale: string; slug: string[] }>
 }
 
-/**
- * Serves the raw markdown of an article page. Reached through the proxy's
- * content negotiation: requests for /{locale}/articles/** with
- * `Accept: text/markdown` are rewritten here, so the public article URL
- * returns HTML to browsers and raw markdown to agents and the copy-page
- * button.
- */
 export async function GET(
   request: NextRequest,
   context: ArticleMarkdownRouteContext
@@ -44,8 +37,7 @@ export async function GET(
 
   const { contentLocale, target } = resolvedRequest
 
-  // Mirror the page's folder-URL redirect so negotiation re-runs against the
-  // canonical article path.
+  // Return to the public URL so proxy negotiation resolves the canonical article.
   if (target.redirectToSlug) {
     const redirectUrl = new URL(
       `/${locale}/articles/${encodeSlug(target.redirectToSlug)}`,

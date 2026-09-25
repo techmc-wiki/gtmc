@@ -19,8 +19,6 @@ export function CodeSourceSummary({
 }: CodeSourceSummaryProps) {
   if (references.length === 0) return null
 
-  // One base per (version, mapping) pair; the mapping reads the version, so the
-  // two stay grouped and each is its own token.
   const sourceBases = [
     ...new Map(
       references.map((reference) => {

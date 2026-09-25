@@ -1,4 +1,3 @@
-// 后现代技术风登录页
 "use client"
 
 import { signIn } from "next-auth/react"
@@ -34,11 +33,7 @@ export default function LoginPage() {
 
   return (
     <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative flex min-h-screen w-full overflow-hidden font-sans">
-      {/* ======================================================== */}
-      {/* 核心交互区 */}
-      {/* ======================================================== */}
       <main className="relative z-10 mx-auto flex w-full max-w-lg flex-col items-center justify-center px-4 md:px-0">
-        {/* 信息卡片主体 */}
         <div className="group relative mb-8 w-full">
           <div className="border-tech-main/40 bg-surface-overlay/60 t-stagger is-shown relative overflow-hidden border p-6 text-center shadow-sm backdrop-blur-md md:p-10">
             <div className="mb-8 flex flex-col items-center">

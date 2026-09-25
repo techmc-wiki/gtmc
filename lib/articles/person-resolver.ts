@@ -1,23 +1,6 @@
 /**
- * Unified person data layer for author-centric pages and features.
- *
- * Bridges two config sources:
- * - `people.yml`: person identities (peopleMention keys, social links, bios).
- * - `authors-alias.yml` + overrides: canonical manifest handles and their aliases.
- *
- * Identity mappings (`peopleKey → canonicalManifestHandle` and the reverse)
- * are derived at runtime from `people.yml` keys plus the alias maps (the same
- * rule the former author-profiles generator used: alias-resolve each people
- * key (case-insensitive), falling back to the key itself.
- *
- * The manifest stores canonical git-derived handles (e.g. `Arcadi4`,
- * `hotpad100c`), while `people.yml` keys are the identity handles used in
- * `[@key]` markdown mentions (e.g. `4rcadia`, `Ryan100c`). This module
- * resolves from the manifest space back to the people space so page
- * consumers get a single, normalized `ResolvedPerson`.
- *
- * Server-safe: uses only `node:fs`, `js-yaml`, and sibling lib modules.
- * No React, no Next.js runtime APIs.
+ * Resolves identities between `people.yml` mention keys and canonical manifest
+ * handles. Config resolution is server-only because it reads from disk.
  */
 
 import { readFileSync } from "node:fs"
@@ -46,7 +29,6 @@ const ALIAS_OVERRIDES_PATH = join(CONFIG_DIR, "author-alias-overrides.yml")
 
 type AliasYaml = Record<string, string[]>
 
-/** Locally resolved article summary for author pages. */
 export interface AuthorArticleSummary {
   slug: string
   filePath: string
@@ -61,7 +43,6 @@ export interface AuthorArticleSummary {
   isAdvanced: boolean | undefined
 }
 
-// --- module-level caches (process-scoped, matching people.ts convention) ---
 
 let reverseAliasCache: Map<string, string> | null = null
 let forwardAliasCache: Map<string, string> | null = null
@@ -70,13 +51,8 @@ let maintainerHandlesCache: string[] | null = null
 let articleEditExclusionsCache: Set<string> | null = null
 
 /**
- * Build the forward alias map: every known spelling (canonical + aliases)
- * → canonical manifest handle. Same merge semantics as
- * `loadAuthorAliases()` in `lib/articles/git-metadata.ts`: auto-generated
- * first, then overrides take precedence (last-write-wins).
- *
- * Keys are stored lowercased for case-insensitive lookup. Returned canonical
- * values preserve their original casing from the YAML files.
+ * Lowercases alias keys for case-insensitive lookup while preserving canonical
+ * casing from the YAML files.
  */
 function getForwardAliasMap(): Map<string, string> {
   if (forwardAliasCache !== null) return forwardAliasCache
@@ -94,29 +70,20 @@ function getForwardAliasMap(): Map<string, string> {
 
   try {
     merge(yamlLoad(readFileSync(ALIASES_PATH, "utf8")) as AliasYaml | null)
-  } catch {
-    // auto-generated aliases missing: non-fatal
-  }
+  } catch {}
   try {
     merge(
       yamlLoad(readFileSync(ALIAS_OVERRIDES_PATH, "utf8")) as AliasYaml | null
     )
-  } catch {
-    // overrides optional
-  }
+  } catch {}
 
   forwardAliasCache = map
   return map
 }
 
 /**
- * Build the reverse alias map: canonical manifest handle → people.yml key.
- *
- * Derived by inverting the runtime `peopleKey → canonical` map (from
- * `people.yml` keys + alias resolution). Lookup is case-tolerant: the index
- * is built lowercased and queries are lowercased, but the returned peopleKey
- * preserves its original casing from `people.yml` so `resolvePerson()`
- * receives the exact key.
+ * Maps canonical manifest handles back to their exact `people.yml` keys using
+ * case-insensitive lookup.
  */
 function getReverseAliasMap(): Map<string, string> {
   if (reverseAliasCache !== null) return reverseAliasCache
@@ -133,9 +100,6 @@ function getReverseAliasMap(): Map<string, string> {
 let peopleKeysCache: Map<string, string> | null = null
 let peopleKeyToCanonicalCache: Map<string, string> | null = null
 
-/**
- * Case-insensitive index of `people.yml` keys: lowercased key → original key.
- */
 function getPeopleKeysLower(): Map<string, string> {
   if (peopleKeysCache !== null) return peopleKeysCache
 
@@ -150,9 +114,8 @@ function getPeopleKeysLower(): Map<string, string> {
 }
 
 /**
- * Direct `peopleKey → canonical` map derived from `people.yml` keys plus the
- * forward alias map (alias lookup lowercased, people key as fallback).
- * Preserves original key/value casing.
+ * Resolves each `people.yml` key through the alias map, falling back to the key
+ * itself while preserving the original key and canonical casing.
  */
 function getPeopleKeyToCanonical(): Map<string, string> {
   if (peopleKeyToCanonicalCache !== null) return peopleKeyToCanonicalCache
@@ -168,13 +131,8 @@ function getPeopleKeyToCanonical(): Map<string, string> {
 }
 
 /**
- * Canonicalize a raw manifest author handle to its canonical manifest form.
- *
- * Resolution order:
- * 1. Forward alias map (case-insensitive): covers aliased spellings.
- * 2. People-key case bridge: if the handle case-insensitively matches a
- *    known people key, resolve to that key's canonical manifest handle.
- * 3. Identity: unrecognized handles pass through unchanged (fallback authors).
+ * Resolves a manifest handle through aliases, then the case-insensitive people-key
+ * bridge; unrecognized handles pass through unchanged.
  */
 function canonicalizeHandle(handle: string): string {
   const normalized = handle.trim()
@@ -193,11 +151,7 @@ function canonicalizeHandle(handle: string): string {
   return normalized
 }
 
-/**
- * Lowercased maintainer set (raw git usernames from `maintainers.yml`),
- * expanded with each maintainer's alias-resolved canonical form so that
- * both `4rcadia` (raw) and `Arcadi4` (canonical) are recognized.
- */
+/** Includes each maintainer under both their raw and alias-resolved identities. */
 function getMaintainerSet(): Set<string> {
   if (maintainersCache !== null) return maintainersCache
 
@@ -223,9 +177,8 @@ function getMaintainerSet(): Set<string> {
 }
 
 /**
- * Git identities excluded from article attribution, expanded with their
- * alias-resolved canonical forms. This policy is independent of maintainer
- * identity: maintainers may still be attributed article authors.
+ * Excludes attribution identities and their canonical aliases. This policy is
+ * independent of maintainer status.
  */
 function getExcludedAuthors(): Set<string> {
   if (articleEditExclusionsCache !== null) return articleEditExclusionsCache
@@ -257,17 +210,13 @@ function isExcludedAuthor(handle: string): boolean {
   return getExcludedAuthors().has(handle.toLowerCase())
 }
 
-/** Return whether maintenance commits should be omitted from article credit. */
 export function isArticleAttributionExcluded(handle: string): boolean {
   return isExcludedAuthor(canonicalizeHandle(handle))
 }
 
 /**
- * Return the canonical profile handles for human project maintainers.
- *
- * Service accounts such as `gtmc-bot` are intentionally omitted, as are
- * maintainer entries without a matching person record. This keeps the public
- * profile surface tied to the same identity data as contributor profiles.
+ * Returns canonical human-maintainer handles that have public person profiles;
+ * service accounts and unmatched maintainer entries are excluded.
  */
 export function getMaintainerHandles(): string[] {
   if (maintainerHandlesCache !== null) return maintainerHandlesCache
@@ -290,7 +239,7 @@ export function getMaintainerHandles(): string[] {
   return maintainerHandlesCache
 }
 
-/** Return whether a handle or known alias belongs to a human maintainer. */
+/** Resolves aliases case-insensitively while excluding service accounts. */
 export function isMaintainer(handle: string): boolean {
   const canonical = canonicalizeHandle(handle)
   return (
@@ -300,18 +249,8 @@ export function isMaintainer(handle: string): boolean {
 }
 
 /**
- * Resolve a manifest canonical author handle to a `ResolvedPerson`.
- *
- * - Handles that map back to a `people.yml` key (via the reverse alias map
- *   from people keys + aliases) return a full, non-fallback person.
- * - Handles with no known people entry return a fallback person
- *   (`isFallback: true`) so callers always get a usable display name.
- *
- * @example
- * resolveAuthorPerson("Arcadi4")    // → non-fallback 4rcadia person
- * resolveAuthorPerson("hotpad100c") // → non-fallback Ryan100c person
- * resolveAuthorPerson("Molforte")   // → non-fallback Molforte person (direct)
- * resolveAuthorPerson("Gudu-Z")     // → fallback
+ * Resolves a manifest handle to its full person profile, or a usable fallback
+ * profile when no `people.yml` entry is known.
  */
 export function resolveAuthorPerson(handle: string): ResolvedPerson {
   const canonical = canonicalizeHandle(handle)
@@ -322,17 +261,12 @@ export function resolveAuthorPerson(handle: string): ResolvedPerson {
     return resolvePerson(peopleKey)
   }
 
-  // No known people entry: return a fallback so callers always get a name.
   return resolvePerson(canonical)
 }
 
 /**
- * Resolve a `people.yml` key to its public author profile handle.
- *
- * Returns the canonical manifest handle only when that handle is eligible for
- * a public author/maintainer profile route (`resolveProfileHandle`). Unknown
- * people keys, or people whose canonical handle is not publicly navigable,
- * return `null`.
+ * Returns a people key's canonical handle only when that handle has a public
+ * author or maintainer profile route.
  */
 export function getAuthorProfileHandle(peopleKey: string): string | null {
   const canonical = getPeopleKeyToCanonical().get(peopleKey)
@@ -341,14 +275,8 @@ export function getAuthorProfileHandle(peopleKey: string): string | null {
 }
 
 /**
- * Return sorted unique canonical author handles from the article manifest.
- *
- * Scans every non-folder entry's `author` and `coAuthors` fields. Excludes
- * identities configured in `article-edit-exclusions.yml`. Output is sorted
- * alphabetically for stable UI rendering.
- *
- * @param manifest Optional pre-loaded manifest (e.g. from `loadArticleManifest()`).
- *                 When omitted, the manifest is loaded from disk.
+ * Returns sorted canonical handles from non-folder article attribution, omitting
+ * configured exclusions. An omitted manifest is loaded from disk.
  */
 export function getUniqueAuthors(
   manifest?: Record<string, ArticleEntry>
@@ -382,10 +310,8 @@ export function getUniqueAuthors(
 }
 
 /**
- * Return every canonical handle that has a public profile route.
- *
- * Maintainers and attributed article authors are independent sets; this
- * returns their union so both roles have discoverable profile URLs.
+ * Returns the union of public article-author and maintainer handles. The two
+ * role sets remain independent.
  */
 export function getProfileHandles(
   manifest?: Record<string, ArticleEntry>
@@ -403,8 +329,7 @@ export function getProfileHandles(
 }
 
 /**
- * Resolve an arbitrary profile URL handle or alias to its canonical route.
- * Returns null when the handle does not belong to a public profile.
+ * Resolves a profile URL handle or alias to a canonical public profile handle.
  */
 export function resolveProfileHandle(
   handle: string,
@@ -419,7 +344,7 @@ export function resolveProfileHandle(
   )
 }
 
-/** Compare author handles after applying case-insensitive alias resolution. */
+/** Compares author handles after case-insensitive alias resolution. */
 export function isSameAuthor(first: string, second: string): boolean {
   return (
     canonicalizeHandle(first).toLowerCase() ===
@@ -428,17 +353,8 @@ export function isSameAuthor(first: string, second: string): boolean {
 }
 
 /**
- * Return localized article summaries for articles where `handle` is the
- * primary author or a co-author.
- *
- * The `handle` is treated as a canonical manifest handle. If the handle is
- * an alias rather than canonical (e.g. passed `4rcadia` instead of
- * `Arcadi4`), it is resolved through the forward alias map first so callers
- * can pass either form.
- *
- * @param handle  Canonical manifest author handle (or a known alias).
- * @param locale  Locale to localize `title` and `description` for.
- * @param manifest Optional pre-loaded manifest.
+ * Returns localized summaries where the input handle matches a primary or
+ * co-author, accepting either a canonical manifest handle or a known alias.
  */
 export function getArticlesByAuthor(
   handle: string,

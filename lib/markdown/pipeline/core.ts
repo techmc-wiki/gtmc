@@ -31,11 +31,6 @@ interface RehypePipelineOptions {
   cjkSpacingPlugin: PluggableList[number]
 }
 
-/**
- * Build the remark (markdown AST) plugin list.
- *
- * Shared between React renderer and PDF pipeline to eliminate duplication.
- */
 export function buildRemarkPlugins(
   options: RemarkPipelineOptions = {}
 ): PluggableList {
@@ -60,11 +55,6 @@ export function buildRemarkPlugins(
   return plugins
 }
 
-/**
- * Build the rehype (HTML AST) plugin list.
- *
- * Shared between React renderer and PDF pipeline to eliminate duplication.
- */
 export function buildRehypePlugins(
   options: RehypePipelineOptions
 ): PluggableList {

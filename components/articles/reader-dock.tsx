@@ -18,11 +18,6 @@ interface ReaderDockProps {
   children?: React.ReactNode
 }
 
-/**
- * Bottom-docked reader HUD (mobile): a determinate progress ring wrapped
- * around a back-to-top action, joined to the current-section outline trigger.
- * Unifies what used to be a top strip, a floating pill, and a sheet trigger.
- */
 export function ReaderDock({
   pct,
   visible,

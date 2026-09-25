@@ -4,7 +4,6 @@ import "server-only"
 import { prisma } from "@/lib/prisma"
 import { DEV_FIXTURE_USER } from "@/lib/auth/dev-fixture-config"
 
-/** Creates the local-only account used to exercise authenticated pages in dev. */
 export async function ensureDevFixtureUser() {
   return prisma.user.upsert({
     where: { id: DEV_FIXTURE_USER.id },

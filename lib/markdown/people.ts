@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { load as yamlLoad } from "js-yaml"
 
-/** A single entry in people.yml */
 export type PeopleEntry = {
   name: string
   description?: string
@@ -18,7 +17,6 @@ export type PeopleEntry = {
   }
 }
 
-/** Runtime resolved person, guaranteed to always have a value */
 export type ResolvedPerson = {
   key: string
   name: string
@@ -64,20 +62,13 @@ function normalizePeopleKey(raw: string): string {
   return raw.trim()
 }
 
-/**
- * Return the people.yml identity keys (original casing preserved).
- *
- * Shares the same cached YAML load as `resolvePerson` so callers do not re-parse.
- */
 export function listPeopleKeys(): string[] {
   return Object.keys(loadPeople())
 }
 
 /**
- * Resolve a person key to a `ResolvedPerson`.
- *
- * Returns the matching entry from `lib/articles/config/people.yml` when found,
- * or a fallback with `isFallback: true` when the key is unknown.
+ * Return the matching entry; unknown keys produce a stable fallback with
+ * `isFallback: true`.
  */
 export function resolvePerson(key: string): ResolvedPerson {
   const normalized = normalizePeopleKey(key)

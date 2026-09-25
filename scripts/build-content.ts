@@ -1,11 +1,3 @@
-/**
- * Content-generation phase of the production build.
- *
- * Manifest, glossary, and rendered article sidecars are generated here.
- * PDF generation runs separately via `pnpm build:pdf`.
- *
- * Usage: pnpm build:content
- */
 import { runScriptAsync } from "./lib/run"
 import { createLogger, describeError, runBuildStep } from "./lib/logger"
 

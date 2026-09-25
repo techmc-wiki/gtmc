@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { getOctokit } from "@/lib/github/repos"
 import { ProxyAgent, setGlobalDispatcher } from "undici"
 
-// Allow NextAuth to proxy requests when running in local development (useful in mainland China)
+// Honor configured proxies for NextAuth's undici requests.
 if (process.env.HTTPS_PROXY || process.env.http_proxy) {
   const proxyUrl = process.env.HTTPS_PROXY || process.env.http_proxy
   if (proxyUrl) {
@@ -65,9 +65,8 @@ export const { handlers, auth } = NextAuth({
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Allows relative callback URLs
+      // Only relative and same-origin callbacks are valid; all others use baseUrl.
       if (url.startsWith("/")) return `${baseUrl}${url}`
-      // Allows callback URLs on the same origin
       else if (new URL(url).origin === baseUrl) return url
       return baseUrl
     },
@@ -79,7 +78,7 @@ export const { handlers, auth } = NextAuth({
   session: {
     strategy: "jwt",
   },
-  // Local development may use a deployed HTTPS AUTH_URL while Next runs on HTTP.
+  // A deployed HTTPS AUTH_URL can front an HTTP local development server.
   useSecureCookies: process.env.NODE_ENV !== "development",
   trustHost: true,
   debug: process.env.NODE_ENV === "development",

@@ -4,7 +4,6 @@ import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
 import { HeadingAnchor } from "@/lib/markdown/heading-anchor"
 
 interface H1ComponentProps extends MarkdownComponentProps {
-  /** Optional control rendered at the right edge of the heading row. */
   action?: ReactNode
 }
 

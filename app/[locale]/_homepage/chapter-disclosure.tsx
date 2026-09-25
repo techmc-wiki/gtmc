@@ -4,24 +4,17 @@ import { useId, useState, type ReactNode } from "react"
 import { Button } from "@/components/ui/shadcn/button"
 
 interface ChapterDisclosureProps {
-  /** Server-rendered chapter number + title link. */
   head: ReactNode
-  /** Server-rendered section list. */
   panel: ReactNode
-  /** Visible label, e.g. "5 sections". */
   sectionCountLabel: string
-  /** Button aria-labels with the chapter title already interpolated. */
   expandLabel: string
   collapseLabel: string
 }
 
 /**
- * Minimal client boundary for one expandable TOC chapter. Wraps
- * server-rendered nodes with the exact 21-accordion hooks
- * (`.t-acc[data-open]` + `.t-acc-head` / `.t-acc-chevron` /
- * `.t-acc-panel` > `.t-acc-panel-inner`); CSS owns the height +
- * chevron animation, no measurement or timers. Closed content stays
- * mounted but inert and aria-hidden at zero height.
+ * Keeps server-rendered chapter content mounted while closed; `inert` and
+ * `aria-hidden` prevent interaction and screen-reader exposure, while CSS owns
+ * the height and chevron transitions.
  */
 export function ChapterDisclosure({
   head,

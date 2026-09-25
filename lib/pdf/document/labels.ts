@@ -53,10 +53,6 @@ export function getLabels(locale: PdfLocale): BookLabels {
   return LABELS[locale]
 }
 
-/**
- * Localized chapter designation, e.g. "Chapter 3" / "第 3 章" or
- * "Appendix A" / "附录 A".
- */
 export function formatChapterLabel(
   locale: PdfLocale,
   number: string,

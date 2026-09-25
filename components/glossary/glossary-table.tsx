@@ -75,7 +75,6 @@ export function GlossaryTable({
 
   return (
     <div className={cn("flex flex-col gap-8", className)}>
-      {/* Desktop table */}
       <div
         ref={tableScrollRef}
         className="border-tech-line/30 custom-bottom-scrollbar relative hidden h-[min(70vh,48rem)] overflow-auto border md:block">
@@ -142,7 +141,6 @@ export function GlossaryTable({
         </table>
       </div>
 
-      {/* Mobile card list */}
       <div
         ref={mobileScrollRef}
         className="custom-bottom-scrollbar relative h-[min(75vh,44rem)] space-y-6 overflow-auto md:hidden">

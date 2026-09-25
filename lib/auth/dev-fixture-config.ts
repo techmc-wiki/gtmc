@@ -17,11 +17,8 @@ export function isDevFixtureAuthEnabled(): boolean {
 }
 
 export function isLocalDevelopmentRequest(request: NextRequest): boolean {
-  // Judge by the incoming Host header rather than `request.nextUrl.hostname`:
-  // when `AUTH_URL`/`NEXTAUTH_URL` is set, NextAuth's middleware wrapper
-  // rewrites the request URL's origin to that host (see `reqWithEnvURL` in
-  // next-auth/lib/env.js) before our handler runs. The header survives the
-  // clone, so this stays correct for both the original and rewritten requests.
+  // NextAuth may rewrite the URL origin to AUTH_URL/NEXTAUTH_URL before this
+  // handler, while the incoming Host header remains the original request host.
   const forwardedHost = request.headers.get("x-forwarded-host")
   const host = (
     forwardedHost?.split(",")[0] ??
@@ -29,7 +26,7 @@ export function isLocalDevelopmentRequest(request: NextRequest): boolean {
     request.nextUrl.hostname
   )
     .split(":")[0]
-    .replaceAll(/^\[|\]$/g, "") // strip IPv6 brackets from e.g. [::1]:3000
+    .replaceAll(/^\[|\]$/g, "")
 
   return host === "localhost" || host === "127.0.0.1" || host === "::1"
 }

@@ -29,7 +29,6 @@ function formatChapterLabel(
   return String(index).padStart(2, "0")
 }
 
-/** Running head above an article: chapter chip + chapter trail. */
 export function RunningHead({
   chapters,
   locale,
@@ -79,7 +78,6 @@ interface ChapterEndMarkProps {
   isAdvanced?: boolean
 }
 
-/** Centered chapter-end colophon (three diamonds, accent in the middle). */
 export function ChapterEndMark({ isAdvanced }: ChapterEndMarkProps) {
   const accent = isAdvanced ? "bg-tech-advanced" : "bg-tech-signal"
 

@@ -203,7 +203,6 @@ const DotGrid: React.FC<DotGridProps> = ({
       rafId = requestAnimationFrame(tick)
     }
 
-    // Static frame for reduced motion: plain grid, no listeners, no loop.
     const renderStatic = () => {
       pointerRef.current.x = -10000
       pointerRef.current.y = -10000

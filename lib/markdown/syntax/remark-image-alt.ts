@@ -103,7 +103,6 @@ export function remarkImageAlt() {
 
         if (images.length === 0) continue
 
-        // 1. Next sibling caption (blockquote or paragraph starting with Fig./图)
         let caption = ""
         const nextNode = parent.children[i + 1]
         if (nextNode) {
@@ -117,7 +116,6 @@ export function remarkImageAlt() {
           }
         }
 
-        // 2. Preceding inline text if image is inside a paragraph
         let inlineText = ""
         if (
           node.type === "paragraph" &&
@@ -138,7 +136,6 @@ export function remarkImageAlt() {
           inlineText = cleanSentence(beforeTexts.join(""))
         }
 
-        // 3. Preceding paragraph text
         let precedingContext = ""
         const prevNode = parent.children[i - 1]
         if (prevNode && prevNode.type === "paragraph") {

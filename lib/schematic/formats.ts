@@ -3,12 +3,7 @@ import type * as Nucleation from "nucleation"
 type NucleationModule = typeof Nucleation
 type Schematic = InstanceType<NucleationModule["Schematic"]>
 
-/**
- * Map a schematic file name to the matching Nucleation loader.
- *
- * Loader entry points are constructor names, which are not stable lookup
- * identifiers, so the dispatch stays an explicit switch instead of a table.
- */
+/** Nucleation exposes loaders only as constructor names, so extensions must map explicitly. */
 export function loadSchematicByFileName(
   nuc: NucleationModule,
   fileName: string,

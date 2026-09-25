@@ -49,7 +49,6 @@ export function remarkCallouts() {
         paragraph.children.shift()
       }
 
-      // Remove paragraph entirely if now empty
       if (paragraph.children.length === 0) {
         node.children.shift()
       }

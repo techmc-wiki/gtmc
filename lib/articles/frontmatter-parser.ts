@@ -74,7 +74,6 @@ const TRANSLATION_README_ALLOWED_KEYS = new Set([
   "intro-title",
 ])
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
 
 function checkAdditionalProperties(
   data: Record<string, unknown>,
@@ -138,7 +137,6 @@ function parseBanner(
   }
 }
 
-// ─── Parsers ────────────────────────────────────────────────────────────────
 
 function parseFrontMatterData(content: string): Record<string, unknown> {
   const { data } = matter(content)

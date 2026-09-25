@@ -108,7 +108,7 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  // en default is intentional: if no locale is specified, default to English since zh navigation already provides full Chinese coverage
+  // The Chinese UI already has complete navigation, so omitted locales use English.
   const locale: ArticleLocale = (localeParam as ArticleLocale) || "en"
 
   try {
@@ -146,7 +146,6 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Sort by phrase match priority: exact phrase matches first
     results.sort((a, b) => {
       if (a.exactMatch && !b.exactMatch) return -1
       if (!a.exactMatch && b.exactMatch) return 1

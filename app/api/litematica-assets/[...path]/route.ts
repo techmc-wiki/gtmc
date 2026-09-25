@@ -80,7 +80,6 @@ export async function GET(
   request: Request,
   context: { params: Promise<{ path: string[] }> | { path: string[] } }
 ) {
-  // 在较新的 Next.js 里 params 可能是个 Promise
   const params = await context.params
   const pathArray = params.path
 
@@ -102,11 +101,9 @@ export async function GET(
   }
   let relativeTarget: string | null = null
 
-  // 允许直接以 models/block/xxx.json 或者 textures/block/xxx.png 访问
   if (ASSET_FILES.has(normalizedAssetPath)) {
     relativeTarget = normalizedAssetPath
   } else {
-    // 后备：旧逻辑直接查找 block/xxx 目录
     const directTarget = path.posix.join(
       "textures",
       "block",
@@ -115,7 +112,6 @@ export async function GET(
     if (ASSET_FILES.has(directTarget)) {
       relativeTarget = directTarget
     } else {
-      // 否则从模块加载时建立的全局索引中查找
       relativeTarget = TEXTURE_FILE_PATHS.get(fileName) ?? null
     }
   }
@@ -140,7 +136,6 @@ export async function GET(
   return new NextResponse(new Uint8Array(asset.content), {
     headers: {
       "Content-Type": asset.contentType,
-      // 设置超长缓存，优化连续请求以及 Three.js Texture 加载速度
       "Cache-Control": "public, max-age=31536000, immutable",
     },
   })

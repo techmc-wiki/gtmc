@@ -41,7 +41,6 @@ const SKELETON_ROWS = 12
 function GlossaryTableSkeleton() {
   return (
     <>
-      {/* Desktop skeleton */}
       <div
         aria-busy="true"
         aria-label="Loading glossary entries"
@@ -79,7 +78,6 @@ function GlossaryTableSkeleton() {
         </table>
       </div>
 
-      {/* Mobile skeleton */}
       <div
         aria-busy="true"
         aria-label="Loading glossary entries"

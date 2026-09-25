@@ -3,9 +3,6 @@ import type {
   MarkdownComponentProps,
 } from "@/lib/markdown/component-types"
 
-/**
- * Filter children to exclude whitespace-only text nodes.
- */
 function getMeaningfulChildren(
   children?: MarkdownAstNode[]
 ): MarkdownAstNode[] {
@@ -15,9 +12,6 @@ function getMeaningfulChildren(
   )
 }
 
-/**
- * Check if a node is an image or iframe element.
- */
 function isImageOrIframeElement(node: MarkdownAstNode): boolean {
   return (
     node.type === "element" &&
@@ -37,19 +31,11 @@ function containsImageOrIframeDescendant(node: MarkdownAstNode): boolean {
   return false
 }
 
-/**
- * Check if a node is a single "image/iframe unit":
- * - Direct <img> or <iframe> element
- * - <a> containing exactly one image/iframe element
- * - Formatting wrapper (strong/em/del) containing exactly one image/iframe element
- */
 function isImageOrIframeUnit(node: MarkdownAstNode): boolean {
   if (node.type !== "element") return false
 
-  // Direct image or iframe
   if (node.tagName === "img" || node.tagName === "iframe") return true
 
-  // Allowable wrapper tags that can contain media-only content
   const allowedWrappers = ["a", "strong", "em", "del"]
   if (allowedWrappers.includes(node.tagName ?? "")) {
     const meaningful = getMeaningfulChildren(node.children ?? [])
@@ -59,11 +45,7 @@ function isImageOrIframeUnit(node: MarkdownAstNode): boolean {
   return false
 }
 
-/**
- * Check if a paragraph contains only image/iframe content.
- * This prevents invalid HTML nesting like <p><div>...</div></p>
- * when the image or iframe mapping returns a div inside a paragraph.
- */
+/** Keep media-only paragraphs unwrapped so mapped media can use block layout without creating invalid nested block HTML. */
 function isMediaOnlyParagraph(node: unknown) {
   const paragraphNode = node as MarkdownAstNode | undefined
   if (paragraphNode?.tagName !== "p" || !paragraphNode.children) return false

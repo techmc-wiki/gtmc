@@ -5,11 +5,7 @@ type ResourcePack = InstanceType<NucleationModule["ResourcePack"]>
 
 let sharedPackPromise: Promise<ResourcePack> | null = null
 
-/**
- * Build the site resource pack once per page. Parsing `pack.zip` costs
- * ~100 ms plus a 6.6 MB `Array<number>` conversion, and multiple viewers
- * on one page must not repeat that work.
- */
+/** Share one parse and byte-array conversion across all viewers on the page. */
 export function getSharedResourcePack(
   nuc: NucleationModule
 ): Promise<ResourcePack> {

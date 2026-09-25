@@ -28,7 +28,6 @@ function ControversialMark({ label }: { label: string }) {
   )
 }
 
-/** Mobile/index-card rendering of one glossary entry. */
 export function GlossaryCard({
   entry,
   visibleColumns,
@@ -85,7 +84,6 @@ export function GlossaryCard({
 
 const cellBase = "px-3 py-2 align-top text-sm motion-reduce:transition-none"
 
-/** Desktop/table rendering of one glossary entry. */
 export function GlossaryTableRow({
   entry,
   visibleColumns,

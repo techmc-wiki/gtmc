@@ -32,7 +32,6 @@ function buildContributorLink(
 interface MainSiteShellProps {
   children: React.ReactNode
   locale: string
-  /** Includes the contributor link in the authenticated route shell. */
   includeContributorLink?: boolean
   fullBleed?: boolean
 }

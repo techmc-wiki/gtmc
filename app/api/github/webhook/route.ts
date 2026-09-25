@@ -34,7 +34,7 @@ function parsePullRequestWebhook(
       return { success: true, data: validated.data }
     }
   } catch {
-    // Fall through to the shared invalid payload response.
+    return { success: false }
   }
 
   return { success: false }

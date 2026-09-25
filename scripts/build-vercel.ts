@@ -1,12 +1,3 @@
-/**
- * Vercel production build entrypoint (see vercel.json buildCommand).
- * 1. Initialize Git configuration and both content submodules
- * 2. Refresh tags and select the latest articles revision
- * 3. Generate Prisma Client, restore or generate content artifacts, and apply migrations
- * 4. Build Next.js
- *
- * Usage: pnpm build:vercel
- */
 import {
   createContentArtifactCache,
   restoreContentArtifacts,

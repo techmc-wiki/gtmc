@@ -75,7 +75,6 @@ export function InputGroupText({
   )
 }
 
-/** Shares Input typography, validation, and disabled states; the group owns the frame. */
 export function InputGroupInput({
   className,
   ...props

@@ -26,7 +26,7 @@ export function useExpandedFolders() {
     return () => clearTimeout(timer)
   }, [])
 
-  // Persist to localStorage on subsequent state changes
+  // Do not overwrite storage before the deferred read restores the user's state.
   useEffect(() => {
     expandedFoldersRef.current = expandedFolders
     if (isFirstRender.current) {

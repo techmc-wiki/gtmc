@@ -75,7 +75,7 @@ async function buildIndex(
       nextIndex += 1
 
       const node = githubNodes[currentIndex]
-      const artifact = await getArticleContentBySlug(node.slug, locale) // eslint-disable-line no-await-in-loop
+      const artifact = await getArticleContentBySlug(node.slug, locale) // eslint-disable-line no-await-in-loop -- each worker must settle one fetch before claiming the next article
       if (!artifact) {
         continue
       }

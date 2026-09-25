@@ -35,7 +35,6 @@ export interface GlossaryEntry extends GlossaryEntryBase {
   indexByLocale: Record<GlossarySiteLocale, GlossaryLocaleIndex>
 }
 
-/** Reduced entry for fast client-side search: omits description, regex, related, isControversial, and translations. */
 export interface GlossarySummaryEntry {
   slug: string
   fullFormEn: string
@@ -45,8 +44,7 @@ export interface GlossarySummaryEntry {
 
 const glossaryEntries = fullData as GlossaryEntry[]
 
-// eslint-disable-next-line no-underscore-dangle
-let _summary: GlossarySummaryEntry[] | null = null
+let summaryCache: GlossarySummaryEntry[] | null = null
 
 export async function loadGlossaryManifest(): Promise<{
   entries: GlossaryEntry[]
@@ -58,8 +56,8 @@ export async function loadGlossaryManifest(): Promise<{
 }
 
 export function loadGlossarySummary(): GlossarySummaryEntry[] {
-  if (!_summary) {
-    _summary = summaryData as GlossarySummaryEntry[]
+  if (!summaryCache) {
+    summaryCache = summaryData as GlossarySummaryEntry[]
   }
-  return _summary
+  return summaryCache
 }

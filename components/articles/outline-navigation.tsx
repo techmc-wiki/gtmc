@@ -93,7 +93,6 @@ function PlotterAxis() {
   )
 }
 
-/** Desktop "On This Page" rail with a scroll-progress plotter axis. */
 export function OutlineRail() {
   const t = useTranslations("Outline")
   const { outline, activeHeadingId } = useReaderNavigation()
@@ -202,7 +201,6 @@ export function OutlineRail() {
 
 const emptySubscribe = () => () => {}
 
-/** Mobile outline: floating progress pill + bottom sheet with the same links. */
 export function MobileOutlineBar() {
   const t = useTranslations("Outline")
   const { outline, activeHeadingId } = useReaderNavigation()
@@ -252,13 +250,11 @@ export function MobileOutlineBar() {
           </button>
         </SheetTrigger>
       </ReaderDock>
-      {/* Bottom Sheet */}
       <SheetContent
         side="bottom"
         showCloseButton={false}
         aria-label={t("sheetLabel")}
         className="border-t border-tech-main/30 bg-surface-overlay/95 max-h-[70dvh] p-0 backdrop-blur-md">
-        {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b guide-line px-4 py-3">
           <div className="flex items-center gap-3">
             <SheetTitle className="text-xs font-bold text-tech-main/60">
@@ -286,7 +282,6 @@ export function MobileOutlineBar() {
           </SheetClose>
         </div>
 
-        {/* Outline list */}
         <ul className="flex-1 overflow-y-auto px-4 py-3">
           {outline.map((item) => {
             const isActive = item.id === effectiveActiveHeadingId

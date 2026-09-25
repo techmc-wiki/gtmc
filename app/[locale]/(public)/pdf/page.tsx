@@ -72,7 +72,6 @@ export default async function PdfPage({
     ? formatRevisionDate(stats.lastRevision, locale)
     : null
 
-  // The cover peels open; download and reading links stay regular HTML.
   return (
     <div className="page-container-pb flex w-full flex-1 flex-col justify-center">
       <div className="border-tech-main/40 bg-surface/80 mx-auto w-full max-w-xl border shadow-sm backdrop-blur-sm">

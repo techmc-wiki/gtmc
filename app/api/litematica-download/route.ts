@@ -13,7 +13,7 @@ try {
   SITE_ORIGIN = siteUrl
   ALLOWED_REMOTE_HOSTNAMES.add(siteUrl.hostname)
 } catch {
-  // Ignore malformed site URL and continue with explicit hostname allow-list.
+  // A malformed site URL must not enable remote fetching.
 }
 
 function isAllowedRemotePath(pathname: string): boolean {
@@ -22,13 +22,16 @@ function isAllowedRemotePath(pathname: string): boolean {
   )
 }
 
+/**
+ * Returns only same-origin requests to the download endpoint. Ambiguous URL
+ * encodings and traversal segments are rejected to prevent SSRF and path escape.
+ */
 function getAllowedRemotePathAndQuery(urlString: string): string | null {
   try {
     if (!SITE_ORIGIN) {
       return null
     }
 
-    // Only allow same-origin absolute URLs or root-relative paths.
     let pathname = ""
     let search = ""
 
@@ -66,7 +69,6 @@ function getAllowedRemotePathAndQuery(urlString: string): string | null {
       pathname = parsed.pathname
       search = parsed.search
     } else {
-      // Disallow protocol-relative URLs and require root-relative path input.
       if (urlString.startsWith("//") || !urlString.startsWith("/")) {
         return null
       }
@@ -76,7 +78,6 @@ function getAllowedRemotePathAndQuery(urlString: string): string | null {
       search = parsedRelative.search
     }
 
-    // Ensure canonical root-relative path and block suspicious URL characters.
     if (
       !pathname.startsWith("/") ||
       pathname.includes("\\") ||
@@ -94,7 +95,6 @@ function getAllowedRemotePathAndQuery(urlString: string): string | null {
       return null
     }
 
-    // Reject traversal-style path segments, including encoded forms.
     const decodedPath = decodeURIComponent(pathname)
     if (decodedPath.split("/").some((segment) => segment === "..")) {
       return null
@@ -125,7 +125,7 @@ function normalizeUrlParam(input: string) {
     .trim()
     .replaceAll(/^['"]|['"]$/g, "")
 
-  // Accept both raw and pre-encoded values.
+  // Clients may send either raw or pre-encoded URL parameters.
   for (let i = 0; i < 2; i++) {
     try {
       const decoded = decodeURIComponent(value)

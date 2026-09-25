@@ -65,7 +65,6 @@ const revisedDateFormatters: Record<string, Intl.DateTimeFormat> = {
   }),
 }
 
-/** One ledger line of the printing record. */
 function RecordRow({ term, value }: RecordRowProps) {
   return (
     <div className="border-tech-main/10 flex items-baseline justify-between gap-4 border-b py-2">
@@ -153,7 +152,6 @@ export default async function Footer() {
       aria-label="Site information"
       className="border-tech-main-dark bg-tech-bg relative mt-auto w-full border-t-2 before:pointer-events-none before:absolute before:inset-0 before:z-[-1] before:bg-[url('/bg-grid.svg')] before:bg-size-[24px_24px] before:opacity-[0.04]">
       <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Imprint band */}
         <div className="grid gap-10 py-8 md:grid-cols-12 md:gap-8">
           <div className="md:col-span-7">
             <Logo size="lg" />
@@ -173,7 +171,6 @@ export default async function Footer() {
             </p>
           </div>
 
-          {/* Printing record */}
           <div className="guide-line md:col-span-5 md:border-l md:pl-8">
             <dl aria-label={t("recordHeading")}>
               <RecordRow
@@ -190,7 +187,6 @@ export default async function Footer() {
 
         <Separator className="bg-tech-main/15" />
 
-        {/* Index band */}
         <div className="grid grid-cols-2 gap-x-6 gap-y-10 py-12 sm:grid-cols-3">
           {sections.map((section) => (
             <FooterSection key={section.label} label={section.label}>
@@ -203,10 +199,8 @@ export default async function Footer() {
           ))}
         </div>
 
-        {/* The book ends here: same device that closes each article */}
         <ChapterEndMark />
 
-        {/* Colophon */}
         <div className="flex flex-col gap-6 pt-10 pb-12 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl space-y-2">
             <p className="text-tech-main/70 text-xs/relaxed">
@@ -231,11 +225,6 @@ export default async function Footer() {
           </div>
         </div>
       </div>
-      {/* Closing wordmark: full-bleed spine stamp, like a back cover.
-          Feathered paper→ink mask so the huge caps ease in over ~28px
-          instead of cutting from cream to navy in one pixel, then
-          redrawn as live ascii around the cursor via the CanvasUI
-          Asciify html-in-canvas pass (Chromium; plain type elsewhere). */}
       <FooterWordmark />
     </footer>
   )

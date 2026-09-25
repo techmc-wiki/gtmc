@@ -64,7 +64,6 @@ export function remarkWikilinks() {
           const matchStart = match.index
           const matchLength = match[0].length
 
-          // Push any plain text before this wikilink
           if (matchStart > lastIndex) {
             newChildren.push({
               type: "text",
@@ -73,7 +72,6 @@ export function remarkWikilinks() {
           }
 
           if (isImage) {
-            // Image wikilink: ![[filename.ext]] or ![[filename.ext|alt]]
             const pipeIndex = inner.indexOf("|")
             const filename = pipeIndex >= 0 ? inner.slice(0, pipeIndex) : inner
             const alt = pipeIndex >= 0 ? inner.slice(pipeIndex + 1) : filename
@@ -85,7 +83,6 @@ export function remarkWikilinks() {
               title: null,
             } as Image)
           } else {
-            // Link wikilink: [[target]] or [[display|target]]
             const pipeIndex = inner.indexOf("|")
             const display = pipeIndex >= 0 ? inner.slice(0, pipeIndex) : inner
             const target = pipeIndex >= 0 ? inner.slice(pipeIndex + 1) : inner
@@ -102,7 +99,6 @@ export function remarkWikilinks() {
         }
 
         if (hasMatch) {
-          // Push remaining text after the last match
           if (lastIndex < text.length) {
             newChildren.push({
               type: "text",
@@ -110,7 +106,6 @@ export function remarkWikilinks() {
             } as Text)
           }
         } else {
-          // No wikilinks in this text node: keep as-is
           newChildren.push(child)
         }
       }

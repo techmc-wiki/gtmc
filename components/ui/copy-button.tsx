@@ -24,12 +24,6 @@ interface CopyButtonProps {
   className?: string
 }
 
-/**
- * The single clipboard affordance for reader surfaces: metadata URL,
- * attribution, article markdown, code and code-block links. Sizing and chrome
- * match the rest of the reader apparatus (ghost icon control, 44px touch
- * target that tightens to 32px from `md` up).
- */
 export function CopyButton({
   getValue,
   label,

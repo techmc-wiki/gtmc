@@ -1,19 +1,9 @@
-/* ==========================================================================
-   GTMC PDF Print Stylesheet: Archival Print Edition
-   Warm paper, ink text, serif display, budgeted blueprint-azure signal.
-   Tokens are injected as CSS custom properties from lib/pdf/theme.ts.
-   Target: Chromium via pdfgen.
-   ========================================================================== */
-
-/* --- Page Rules --- */
-/* Horizontal @page margins are zero so the html background fills left/right.
-   Vertical margins remain for Chromium's running apparatus. */
+/* Keep horizontal margins at zero so the page background reaches the paper edges. */
 @page {
   size: A4;
   margin: 2.2cm 0 2.4cm;
 }
 
-/* --- Base --- */
 html {
   font-size: 10pt;
   line-height: 1.65;
@@ -31,10 +21,6 @@ body {
   -webkit-hyphens: auto;
   letter-spacing: -0.005em;
 }
-
-/* ==========================================================================
-   Headings: serif display, sentence case. Mono is reserved for apparatus.
-   ========================================================================== */
 
 h1,
 h2,
@@ -80,7 +66,6 @@ h6 {
   break-after: avoid;
 }
 
-/* --- Body Text --- */
 p {
   margin: 0.6em 0;
   orphans: 3;
@@ -111,10 +96,6 @@ a {
 strong {
   color: var(--pdf-ink-dark);
 }
-
-/* ==========================================================================
-   Code: mono on lifted surface, site-style line numbers via counters
-   ========================================================================== */
 
 code {
   font-family: var(--pdf-font-mono);
@@ -191,7 +172,6 @@ code .line::before {
   padding-top: 0.1em;
 }
 
-/* Short snippets (≤3 lines) skip line numbers */
 pre[data-line-count="1"] code .line,
 pre[data-line-count="2"] code .line,
 pre[data-line-count="3"] code .line {
@@ -203,7 +183,6 @@ pre[data-line-count="3"] code .line::before {
   content: none;
 }
 
-/* Language tag in the block's top-right corner */
 pre[data-lang] {
   position: relative;
 }
@@ -246,10 +225,6 @@ pre[data-lang="text"]::after {
   content: none;
 }
 
-/* ==========================================================================
-   Tables: hairline rules, mono column heads
-   ========================================================================== */
-
 table {
   width: 100%;
   border-collapse: collapse;
@@ -291,10 +266,6 @@ tr {
   page-break-inside: avoid;
 }
 
-/* ==========================================================================
-   Figures
-   ========================================================================== */
-
 img {
   max-width: 82%;
   height: auto;
@@ -326,7 +297,6 @@ figcaption,
   text-decoration: underline;
 }
 
-/* --- Blockquote --- */
 blockquote {
   margin: 1em 0;
   padding: 0.5em 1em;
@@ -343,10 +313,6 @@ dd {
   orphans: 3;
   widows: 3;
 }
-
-/* ==========================================================================
-   Callouts: quiet bracketed asides with a mono label
-   ========================================================================== */
 
 aside[data-callout] {
   margin: 1.1em 0;
@@ -408,7 +374,6 @@ aside[data-callout="CORRUPTION"]::before {
   color: #6d28d9;
 }
 
-/* --- KaTeX Math --- */
 .katex {
   font-size: 1em;
 }
@@ -418,7 +383,6 @@ aside[data-callout="CORRUPTION"]::before {
   page-break-inside: avoid;
 }
 
-/* --- Advanced Sections --- */
 div[data-advanced-section] {
   border-left: 2px solid var(--pdf-accent);
   padding-left: 1em;
@@ -439,7 +403,6 @@ span[data-advanced] {
   margin-right: 0.4em;
 }
 
-/* --- Horizontal Rule --- */
 hr {
   border: none;
   border-top: 1px solid var(--pdf-line);
@@ -447,7 +410,6 @@ hr {
   width: 40%;
 }
 
-/* --- Footnotes --- */
 .footnotes {
   margin-top: 2em;
   padding-top: 0.8em;
@@ -460,7 +422,6 @@ hr {
   padding-left: 1.5em;
 }
 
-/* --- People Mentions --- */
 people-mention {
   font-family: var(--pdf-font-mono);
   font-size: 0.82em;
@@ -479,15 +440,11 @@ people-mention::before {
   margin-right: 0.1em;
 }
 
-/* --- Wikilink (dead in print; styled as a quiet reference) --- */
+/* Wikilinks remain quiet reference markers because their targets are unavailable in print. */
 .wikilink {
   color: var(--pdf-ink-dark);
   border-bottom: 1px dotted var(--pdf-accent);
 }
-
-/* ==========================================================================
-   Cover: separate single-page document, no running header/footer
-   ========================================================================== */
 
 html:has(.cover-document) {
   background-color: var(--pdf-paper);
@@ -567,10 +524,6 @@ html:has(.cover-document) {
   color: var(--pdf-ink);
   padding: 0 2.4cm 2.2cm;
 }
-
-/* ==========================================================================
-   Table of Contents: dotted leaders, real folios (filled in pass 2)
-   ========================================================================== */
 
 .toc-title {
   font-family: var(--pdf-font-serif);
@@ -654,7 +607,6 @@ html:has(.cover-document) {
   text-overflow: ellipsis;
 }
 
-/* Dotted leader between title and folio */
 .toc-link::after {
   content: "";
   flex: 1;
@@ -680,10 +632,6 @@ html:has(.cover-document) {
 .toc-depth-3 .toc-num {
   margin-left: 2.8em;
 }
-
-/* ==========================================================================
-   Chapter opener: oversized serif numeral on dot-grid paper
-   ========================================================================== */
 
 .chapter-opener {
   page-break-before: always;
@@ -763,10 +711,6 @@ html:has(.cover-document) {
   min-width: 2.4em;
 }
 
-/* ==========================================================================
-   Article header: number + serif title with ink rule and azure tick
-   ========================================================================== */
-
 .article {
   page-break-before: always;
 }
@@ -805,17 +749,13 @@ html:has(.cover-document) {
   margin-right: 0.3em;
 }
 
-/* Article bodies start at H2; a stray H1 in content renders like H2 */
+/* Stray article H1s match the body H2 scale. */
 .article-body h1 {
   font-size: 15pt;
   font-weight: 600;
   border-bottom: 1px solid var(--pdf-line);
   padding-bottom: 0.25em;
 }
-
-/* ==========================================================================
-   Colophon: quiet final page
-   ========================================================================== */
 
 .colophon-page {
   page-break-before: always;

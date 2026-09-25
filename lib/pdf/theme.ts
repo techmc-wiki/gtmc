@@ -1,45 +1,22 @@
-/**
- * PDF design tokens: the single source of truth for the print edition's
- * look. Values are consumed by `print.css` and by pdfgen's running apparatus.
- */
-
 export const PDF_COLORS = {
-  /** Warm archival-paper page background (site `tech-bg`). */
   paper: "#f5f4ef",
-  /** Slightly lifted surface for code blocks, tables, callouts. */
   surface: "#fcfbf8",
-  /** Ink-gray for secondary text, borders, apparatus (site `tech-main`). */
   ink: "#4a5468",
-  /** Navy-black ink for body text and headings (site `tech-main-dark`). */
   inkDark: "#20283c",
-  /** Pale blue-gray for subtle fills and selected states (site `tech-accent`). */
   accent: "#c9cfdd",
-  /** Warm hairline for quiet rules and the dot grid (site `tech-line`). */
   line: "#d6d3c8",
-  /** Blueprint azure, budgeted: ticks, chapter numerals, active accents. */
   signal: "#1d6a96",
-  /** Text guaranteed legible on a `signal` fill. */
   signalInk: "#f5f4ef",
 } as const
 
 export const PDF_FONTS = {
-  /** Body text. */
   sans: `"Geist", "Noto Sans SC", "PingFang SC", sans-serif`,
-  /** Display: cover title, chapter numerals, article/section headings. */
   serif: `"STIX Two Text", "Noto Serif SC", "Songti SC", Georgia, serif`,
-  /** Apparatus: labels, folios, captions, code. */
-  // Noto Sans Mono SC is not served via Google Fonts (400 Font family not
-  // found). Keep it for system fallback, but precede it with Noto Sans SC so
-  // headless Chromium (no system CJK) has a real CJK fallback. This covers
-  // TOC chapter labels like "第 1 章" which render in mono and previously
-  // showed tofu in the zh PDF.
+  // Google Fonts does not serve Noto Sans Mono SC. Precede its system fallback
+  // with Noto Sans SC so headless Chromium can render CJK fallback glyphs.
   mono: `"Geist Mono", "Noto Sans SC", "Noto Sans Mono SC", monospace`,
 } as const
 
-/**
- * Google Fonts stylesheet covering every family above (EN + SC subsets).
- * Loaded once from the assembled HTML document.
- */
 export const PDF_FONT_STYLESHEET_URL =
   "https://fonts.googleapis.com/css2" +
   "?family=Geist:wght@400;500;600" +
@@ -58,7 +35,6 @@ export const PDF_REQUIRED_FONTS = [
   '16px "Noto Serif SC"',
 ] as const
 
-/** CSS custom properties block injected ahead of `print.css`. */
 export function buildThemeCssVariables(): string {
   return [
     ":root {",

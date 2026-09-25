@@ -13,26 +13,14 @@ export interface ArticleContentArtifact {
 }
 
 /**
- * Produces a flat, filesystem-safe filename for a given article slug.
- *
- * Encoding strategy: `encodeURIComponent(slug).replace(/%/g, "~")`
- *
- * This ensures the output never contains `/` (which would create directory
- * boundaries) or `%` (which can be misinterpreted in some filesystem contexts).
- * The tilde (`~`) is chosen as a safe, printable ASCII replacement for `%`.
- *
- * @example
- *   artifactFilename("preface")                      // => "preface"
- *   artifactFilename("TreeFarm/foo")                 // => "TreeFarm~2Ffoo"
- *   artifactFilename("Components&Features/活塞")      // => "Components~26Features~2F~E6~B4~BB~E5~A1~9E"
+ * Maps a slug to the stable, flat filename used by generated article artifacts.
+ * Percent escapes are represented with `~` so `/` cannot create directories and
+ * persisted artifact paths remain compatible.
  */
 export function artifactFilename(slug: string): string {
   return encodeURIComponent(slug).replaceAll('%', "~")
 }
 
-/**
- * Parses a raw JSON string as an ArticleContentArtifact generated in this repository.
- */
 function parseArticleContentArtifact(
   raw: string,
   slug: string,
@@ -55,12 +43,8 @@ function parseArticleContentArtifact(
 }
 
 /**
- * Loads an article content artifact by slug and locale from `data/articles/{locale}/`.
- *
- * Reads the JSON artifact file produced by `scripts/generate-article-content.ts`.
- * In development, returns `null` (with a warning) if the file is missing or
- * malformed. In production, throws an error: callers handle not-found via
- * `notFound()`.
+ * Loads the artifact under `data/articles/{locale}/`. Missing and malformed
+ * artifacts yield `null` only in development; production throws.
  */
 export async function getArticleContentBySlug(
   slug: string,

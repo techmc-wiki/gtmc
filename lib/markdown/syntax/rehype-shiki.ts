@@ -42,9 +42,7 @@ function loadPersistedHighlightCache(): void {
         highlightCache.set(key, value)
       }
     }
-  } catch {
-    // First run or unreadable cache: start cold.
-  }
+  } catch {}
 }
 
 /**
@@ -62,9 +60,7 @@ export function persistHighlightCache(): void {
       JSON.stringify(Object.fromEntries(highlightCache)) + "\n"
     )
     highlightCacheDirty = false
-  } catch {
-    // Best-effort: a missing cache only costs a re-highlight.
-  }
+  } catch {}
 }
 
 loadPersistedHighlightCache()

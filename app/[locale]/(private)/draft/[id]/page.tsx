@@ -47,8 +47,11 @@ export default async function EditDraftPage({
     redirect("/login")
   }
 
-  const t = await getTranslations("Editor")
-  const { id } = await params
+  const [{ id }, t, contributingGuides] = await Promise.all([
+    params,
+    getTranslations("Editor"),
+    loadContributingGuides(),
+  ])
 
   const draft = await prisma.revision.findUnique({
     where: { id },
@@ -62,7 +65,6 @@ export default async function EditDraftPage({
     content: draft.content,
     filePath: draft.filePath,
   })
-  const contributingGuides = await loadContributingGuides()
 
   const draftEditorInitialData = buildDraftEditorData(
     draft,

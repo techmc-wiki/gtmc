@@ -1,4 +1,5 @@
 import { routing } from "@/i18n/routing";
+import manifestData from "@/data/manifest.json";
 import { type ArticleTreeNode } from "@/lib/github";
 
 export type ArticleLocale = "en" | "zh";
@@ -351,7 +352,23 @@ export async function getLocalizedArticleEntry(
   };
 }
 
-export {
-  hasArticleLocale,
-  getArticleAvailableLocales,
-} from "./locale";
+/**
+ * Reads locale metadata through a JSON import so these helpers stay client-safe.
+ */
+const manifest = manifestData as Record<
+  string,
+  { availableLocales: ArticleLocale[] }
+>;
+
+export function hasArticleLocale(
+  slug: string,
+  locale: ArticleLocale,
+): boolean {
+  return manifest[slug]?.availableLocales.includes(locale) ?? false;
+}
+
+export function getArticleAvailableLocales(
+  slug: string,
+): ArticleLocale[] {
+  return manifest[slug]?.availableLocales ?? [];
+}

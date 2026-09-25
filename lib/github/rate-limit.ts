@@ -10,3 +10,16 @@ export function getGithubRateLimitResetMs(error: unknown): number | null {
 export function isGithubRateLimitErrorForCache(error: unknown): boolean {
   return getGithubErrorStatus(error) === 403
 }
+
+let rateLimitedUntilMs = 0
+
+export function isGithubSyncRateLimited(): boolean {
+  return Date.now() < rateLimitedUntilMs
+}
+
+export function recordGithubSyncRateLimit(error: unknown): void {
+  if (!isGithubRateLimitErrorForCache(error)) return
+
+  const resetMs = getGithubRateLimitResetMs(error)
+  rateLimitedUntilMs = resetMs ?? Date.now() + 60_000
+}

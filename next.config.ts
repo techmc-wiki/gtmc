@@ -8,6 +8,14 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts")
 const withMDX = createMDX({})
 const remoteArticleAssetTraceExcludes = ["./articles/**", "./.git/**"]
 
+const supabaseImageHostname = (() => {
+  try {
+    return new URL(process.env.SUPABASE_URL ?? "").hostname
+  } catch {
+    return "supabase.invalid"
+  }
+})()
+
 const buildSha: string = (() => {
   if (process.env.VERCEL_GIT_COMMIT_SHA) {
     return process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 7)
@@ -143,11 +151,48 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "avatars.githubusercontent.com",
+        pathname: "/u/**",
       },
       {
-        protocol: "http",
-        hostname: "**",
+        protocol: "https",
+        hostname: "github.com",
+        pathname: "/*.png",
+      },
+      {
+        protocol: "https",
+        hostname: "i0.hdslb.com",
+        pathname: "/bfs/face/**",
+      },
+      {
+        protocol: "https",
+        hostname: "i1.hdslb.com",
+        pathname: "/bfs/face/**",
+      },
+      {
+        protocol: "https",
+        hostname: "i.ibb.co",
+        pathname: "/cSY4MKpg/*",
+      },
+      {
+        protocol: "https",
+        hostname: "www.xhbsh.top",
+        pathname: "/img/**",
+      },
+      {
+        protocol: "https",
+        hostname: "zh.minecraft.wiki",
+        pathname: "/images/**",
+      },
+      {
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+        pathname: "/techmc-wiki/Articles/**",
+      },
+      {
+        protocol: "https",
+        hostname: supabaseImageHostname,
+        pathname: "/storage/v1/object/public/**",
       },
     ],
   },

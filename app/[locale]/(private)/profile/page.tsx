@@ -15,7 +15,9 @@ import {
 import { updateProfileAction } from "@/actions/profile"
 import { SignOutButton } from "@/components/ui/sign-out-button"
 import { getGithubEmailVisibility } from "@/lib/github"
-import { FormField } from "./form-field"
+import { cn } from "@/lib/cn"
+import { Label } from "@/components/ui/shadcn/label"
+import type { ReactNode } from "react"
 
 export const metadata: Metadata = {
   title: "User Profile",
@@ -183,5 +185,23 @@ function RoleValue({ role }: { role: string }) {
     <span className="text-tech-main-dark font-mono text-xs font-bold tracking-widest uppercase sm:text-sm">
       {role}
     </span>
+  )
+}
+
+interface FormFieldProps {
+  label: ReactNode
+  htmlFor?: string
+  children: ReactNode
+  className?: string
+}
+
+function FormField({ label, htmlFor, children, className }: FormFieldProps) {
+  return (
+    <div className={cn(`space-y-3 sm:space-y-4`, className)}>
+      <Label htmlFor={htmlFor} className="block">
+        {label}
+      </Label>
+      {children}
+    </div>
   )
 }

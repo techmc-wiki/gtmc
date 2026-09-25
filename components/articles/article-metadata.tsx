@@ -16,13 +16,114 @@ import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import { cn } from "@/lib/cn"
-import { ArticleBanner } from "@/components/articles/article-banner"
 import { AdvancedMarker } from "@/components/articles/advanced-marker"
-import { ArticleLicenseNotice } from "@/components/articles/article-license-notice"
 import { getArticleAssetPublicUrl } from "@/lib/articles/url"
 import { formatAbsoluteTime, formatRelativeTime } from "@/lib/format-time"
 
 import { useMounted } from "@/hooks/use-mounted"
+
+interface ArticleBannerProps {
+  src: string
+  alt: string
+}
+
+function ArticleBanner({ src, alt }: ArticleBannerProps) {
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading")
+
+  return (
+    <figure className="border-tech-main/40 bg-surface-overlay/60 mb-8 border">
+      {status !== "error" && (
+        <div
+          className={`t-skel relative aspect-21/9 w-full overflow-hidden ${status === "loaded" ? "is-revealed" : ""}`}
+          aria-busy={status === "loading"}>
+          <div className="t-skel-skeleton is-pulsing pointer-events-none" aria-hidden="true">
+            <div className="bg-tech-accent/20 size-full" />
+          </div>
+          <div className="t-skel-content size-full">
+            <Image
+              src={src}
+              alt={alt}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
+              className="object-cover"
+              priority
+              unoptimized={src.startsWith("/article-assets/")}
+              onLoad={() => setStatus("loaded")}
+              onError={() => setStatus("error")}
+            />
+          </div>
+        </div>
+      )}
+      <figcaption className="border-tech-main/30 text-tech-main/80 border-t px-3 py-2 text-sm">
+        {alt}
+      </figcaption>
+    </figure>
+  )
+}
+
+interface ArticleLicenseNoticeProps {
+  title: string
+  canonicalUrl: string
+  attributionDate?: string
+  authors?: string[]
+}
+
+const DEFAULT_AUTHORS: string[] = []
+
+function ArticleLicenseNotice({
+  title,
+  canonicalUrl,
+  attributionDate,
+  authors = DEFAULT_AUTHORS,
+}: ArticleLicenseNoticeProps) {
+  const t = useTranslations("ArticleMeta")
+  const orderedAuthors = [...new Set(authors)]
+  const sortedAuthors = [...orderedAuthors].toSorted((left, right) =>
+    left.localeCompare(right, undefined, { sensitivity: "base" })
+  )
+  const formattedAttributionDate = attributionDate
+    ? formatAbsoluteTime(attributionDate, false)
+    : null
+  const attributionDateLabel =
+    formattedAttributionDate && formattedAttributionDate !== "Invalid Date"
+      ? formattedAttributionDate
+      : null
+  const attributionAuthors =
+    orderedAuthors.length > 7
+      ? [orderedAuthors[0], orderedAuthors.at(-1), "et al."]
+      : sortedAuthors
+  const attributionLabel = [
+    `“${title}” - Graduate Texts in Minecraft (${canonicalUrl})`,
+    attributionAuthors.length > 0 ? attributionAuthors.join(", ") : null,
+    attributionDateLabel,
+    "CC BY-NC-SA 4.0",
+  ]
+    .filter(Boolean)
+    .join(", ")
+
+  return (
+    <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+      <Link
+        href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="
+          underline decoration-tech-main/30 underline-offset-4
+          transition-colors hover:text-tech-main-dark
+          hover:decoration-tech-main-dark
+        ">
+        CC BY-NC-SA 4.0
+      </Link>
+      <CopyButton
+        getValue={() => attributionLabel}
+        label={t("copySuggestedAttributionAria")}
+        copiedLabel={t("copiedButton")}
+        failedLabel={t("copyFailed")}
+      />
+    </span>
+  )
+}
+
 interface ArticleMetadataLayoutProps {
   title: string
   filePath: string

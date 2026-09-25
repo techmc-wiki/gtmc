@@ -7,7 +7,6 @@ import * as THREE from "three"
 import { OrbitControls } from "three/addons/controls/OrbitControls.js"
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js"
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js"
-import { createRectCache } from "./rect-cache"
 export interface ParticleObjectOptions {
   /** URL of the asset to display: GLB/glTF, SVG, PNG, JPEG, WebP, or GIF. Object URLs from a file input work too. The format is sniffed from the bytes, not the extension. */
   src?: string
@@ -118,6 +117,42 @@ const CAMERA_DIR = new THREE.Vector3(0, -1, 4).normalize()
 const MODEL_LIFT = 0.3
 const RASTER_SIZE = 420
 const ALBEDO_SIZE = 128
+
+/**
+ * Cached bounding-rect reader, matching Canvas UI's internal
+ * `rect-cache` helper: avoids layout thrash from per-pointermove
+ * `getBoundingClientRect` calls by invalidating on resize/scroll.
+ */
+interface RectCache {
+  /** Latest cached DOMRect for the target element. */
+  readonly current: DOMRect
+  /** Stop observing and release listeners. */
+  destroy: () => void
+}
+
+function createRectCache(element: HTMLElement): RectCache {
+  let rect = element.getBoundingClientRect()
+
+  const refresh = () => {
+    rect = element.getBoundingClientRect()
+  }
+
+  const observer = new ResizeObserver(refresh)
+  observer.observe(element)
+  window.addEventListener("resize", refresh, { passive: true })
+  window.addEventListener("scroll", refresh, { passive: true, capture: true })
+
+  return {
+    get current() {
+      return rect
+    },
+    destroy() {
+      observer.disconnect()
+      window.removeEventListener("resize", refresh)
+      window.removeEventListener("scroll", refresh, { capture: true })
+    },
+  }
+}
 
 async function fetchParticleAsset(src: string) {
   const response = await fetch(src)

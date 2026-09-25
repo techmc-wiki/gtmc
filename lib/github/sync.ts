@@ -8,7 +8,7 @@ import {
 import {
   isGithubSyncRateLimited,
   recordGithubSyncRateLimit,
-} from "@/lib/github/sync-rate-limit"
+} from "@/lib/github/rate-limit"
 
 export { getRepoContentTree } from "@/lib/github/repo-content-tree"
 export type { ArticleTreeNode } from "@/lib/github/repo-content-tree"

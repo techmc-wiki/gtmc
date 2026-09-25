@@ -7,7 +7,7 @@ import {
 import {
   isGithubSyncRateLimited,
   recordGithubSyncRateLimit,
-} from "@/lib/github/sync-rate-limit"
+} from "@/lib/github/rate-limit"
 
 export interface ArticleTreeNode {
   id: string

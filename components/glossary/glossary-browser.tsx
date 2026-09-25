@@ -20,10 +20,6 @@ import { Link } from "@/i18n/navigation"
 import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
 import { filterGlossaryEntries } from "@/lib/glossary/filter-entries"
 import {
-  OPEN_GLOSSARY_TERM_EVENT,
-  type OpenGlossaryTermDetail,
-} from "@/lib/glossary/browser-events"
-import {
   readPersistedGlossaryColumns,
   writePersistedGlossaryColumns,
 } from "@/lib/glossary/persisted-prefs"
@@ -209,17 +205,10 @@ export function GlossaryBrowser({
       }
     }
 
-    const openDetailFromEvent = (event: Event) => {
-      const { slug } = (event as CustomEvent<OpenGlossaryTermDetail>).detail
-      openDetailBySlug(slug)
-    }
-
     openDetailFromHash()
     window.addEventListener("hashchange", openDetailFromHash)
-    window.addEventListener(OPEN_GLOSSARY_TERM_EVENT, openDetailFromEvent)
     return () => {
       window.removeEventListener("hashchange", openDetailFromHash)
-      window.removeEventListener(OPEN_GLOSSARY_TERM_EVENT, openDetailFromEvent)
     }
   }, [openDetailBySlug])
 

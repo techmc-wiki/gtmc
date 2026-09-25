@@ -1,4 +1,58 @@
-import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
+import type {
+  MarkdownComponent,
+  MarkdownComponentProps,
+} from "@/lib/markdown/component-types"
+
+export function makeSpan(style: Record<string, string>): MarkdownComponent {
+  function SpanComponent({ node: _node, ...props }: MarkdownComponentProps) {
+    return <span style={style} {...props} />
+  }
+  SpanComponent.displayName = "makeSpan"
+  return SpanComponent
+}
+
+export function UnorderedListComponent({ ...props }: MarkdownComponentProps) {
+  return (
+    <ul
+      className="border-tech-main/30 text-tech-main-dark mb-6 list-disc space-y-1.5 border-l pl-8 font-sans text-base/relaxed [&_p]:mb-2 [&_p:last-child]:mb-0"
+      {...props}
+    />
+  )
+}
+
+export function OrderedListComponent({ ...props }: MarkdownComponentProps) {
+  return (
+    <ol
+      className="text-tech-main-dark mb-6 list-decimal space-y-1.5 pl-8 font-sans text-base/relaxed [&_p]:mb-2 [&_p:last-child]:mb-0"
+      {...props}
+    />
+  )
+}
+
+export function SectionComponent({
+  id,
+  children,
+  ...props
+}: MarkdownComponentProps) {
+  // Wrap footnote sections in <aside> for semantic HTML
+  if (id === "footnotes") {
+    return (
+      <aside
+        className="border-tech-main/30 text-tech-main mt-12 border-t pt-6 font-sans text-sm"
+        {...props}>
+        <section id={id} {...props}>
+          {children}
+        </section>
+      </aside>
+    )
+  }
+
+  return (
+    <section id={id} {...props}>
+      {children}
+    </section>
+  )
+}
 
 export function BlockquoteComponent({ ...props }: MarkdownComponentProps) {
   return (

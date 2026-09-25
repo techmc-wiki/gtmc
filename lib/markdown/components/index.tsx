@@ -22,12 +22,13 @@ import { IframeComponent } from "./iframe-component"
 import {
   BlockquoteComponent,
   HrComponent,
+  makeSpan,
+  OrderedListComponent,
+  SectionComponent,
   SupComponent,
+  UnorderedListComponent,
 } from "./misc-components"
-import { OrderedListComponent, UnorderedListComponent } from "./list-components"
 import { ParagraphComponent } from "./paragraph-component"
-import { SectionComponent } from "./section-component"
-import { makeSpan } from "./span-components"
 import {
   TableComponent,
   TableDataCell,

@@ -54,6 +54,7 @@ jobs:
             apps/web/lib/markdown
             apps/web/lib/pdf
             apps/web/lib/pdf-images.ts
+            apps/web/lib/workspace-paths.ts
             package.json
             pnpm-lock.yaml
           )

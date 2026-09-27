@@ -39,7 +39,7 @@ pnpm generate:content
 
 ### How this works in Vercel deployments
 
-During deployment, `pnpm install` runs [package.json](package.json)'s `postinstall` script. That script initializes `articles/` only when the submodule directory is missing or empty. It does not update an existing checkout to the latest articles repo commit.
+During deployment, `pnpm install` runs [apps/web/package.json](apps/web/package.json)'s `postinstall` script. That script initializes `articles/` only when the submodule directory is missing or empty. It does not update an existing checkout to the latest articles repo commit.
 
 Fresh Vercel checkouts therefore use the submodule commit pinned by this website repo. To deploy newer article content, update the `articles` submodule pointer in this repo and commit that pointer change.
 

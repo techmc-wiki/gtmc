@@ -38,7 +38,7 @@ They span the whole stack of technical play: production builds like tree farms, 
 The fastest way to start is to **[visit the site](https://techmc.wiki)**. Want to contribute? You can draft articles and open pull requests right from the site. Reviews and merge conflicts are handled on GitHub.
 
 > [!NOTE]
-> This repo is the **website**. Articles live in [their own repo](https://github.com/techmc-wiki/articles) and are pulled in as a submodule. Other GTMC projects are at [github.com/orgs/techmc-wiki](https://github.com/orgs/techmc-wiki/repositories).
+> This repo is the **website**, laid out as a pnpm workspace: the site lives in `apps/web` and the Go PDF renderer in `tools/pdfgen`. Articles live in [their own repo](https://github.com/techmc-wiki/articles) and are pulled in as a submodule at the workspace root. Other GTMC projects are at [github.com/orgs/techmc-wiki](https://github.com/orgs/techmc-wiki/repositories).
 
 ## Running it locally
 
@@ -48,7 +48,7 @@ The fastest way to start is to **[visit the site](https://techmc.wiki)**. Want t
 git clone https://github.com/techmc-wiki/gtmc.git
 cd gtmc
 vp install              # uses the pinned pnpm version
-cp .env.example .env    # add GitHub OAuth, database URL, etc.
+cp apps/web/.env.example apps/web/.env    # add GitHub OAuth, database URL, etc.
 pnpm dev                # http://localhost:3000
 ```
 
@@ -57,16 +57,16 @@ Common scripts:
 ```bash
 pnpm dev          # Start the dev server
 pnpm build        # Full production build (content + Next.js)
-vp check          # Check formatting and linting
-vp test run       # Run the Vitest suite once
+pnpm check        # vp check (oxfmt + oxlint) + tsc --noEmit
+pnpm test         # Run the Vitest suite once
 pnpm typecheck    # Run the Next.js-aware TypeScript check
 ```
 
 In development, the first localhost request automatically signs in as the local admin fixture (`debug@gtmc.local`) and seeds that user in `DATABASE_URL`. Set `GTMC_DEV_FIXTURE_AUTH=0` before starting `pnpm dev` to use the real GitHub sign-in flow instead.
 
 > [!TIP]
-> `pnpm build` runs in two phases: `build:content` generates the site artifacts (article manifest, glossary, rendered content, and PDF-ready HTML sidecars), then `build:next` builds the site from them. The standalone `pnpm build:pdf` consumes those sidecars and writes `data/pdf-dist/gtmc-en.pdf` and `data/pdf-dist/gtmc-zh.pdf`; `.github/workflows/pdf.yml` publishes them to R2. Run the phases separately when you only need one.
-> Vite+ supplements the Next.js toolchain; `vp dev` and `vp build` are Vite commands and are not used by this project.
+> `pnpm build` runs in two phases: `build:content` generates the site artifacts (article manifest, glossary, rendered content, and PDF-ready HTML sidecars), then `build:next` builds the site from them. The standalone `pnpm build:pdf` consumes those sidecars and writes `apps/web/data/pdf-dist/gtmc-en.pdf` and `apps/web/data/pdf-dist/gtmc-zh.pdf`; `.github/workflows/pdf.yml` publishes them to R2. Run the phases separately when you only need one.
+> Vite+ supplements the Next.js toolchain; `vp dev` and `vp build` are Vite commands and are not used by this project. Run bare `vp` commands from `apps/web`, where `vite.config.ts` lives.
 
 ---
 

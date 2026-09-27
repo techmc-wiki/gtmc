@@ -38,7 +38,7 @@
 最快的上手方式就是**[访问网站](https://techmc.wiki)**。想参与贡献？你可以直接在站内起草文章并创建拉取请求。审阅和合并冲突处理均在 GitHub 上完成。
 
 > [!NOTE]
-> 本仓库是**网站**本体。文章存放在[独立仓库](https://github.com/techmc-wiki/articles)中，以子模块形式引入。其他 GTMC 项目见 [github.com/orgs/techmc-wiki](https://github.com/orgs/techmc-wiki/repositories)。
+> 本仓库是**网站**本体，采用 pnpm 工作区结构：站点位于 `apps/web`，Go PDF 渲染器位于 `tools/pdfgen`。文章存放在[独立仓库](https://github.com/techmc-wiki/articles)中，以子模块形式挂载在工作区根目录。其他 GTMC 项目见 [github.com/orgs/techmc-wiki](https://github.com/orgs/techmc-wiki/repositories)。
 
 ## 本地运行
 
@@ -48,7 +48,7 @@
 git clone https://github.com/techmc-wiki/gtmc.git
 cd gtmc
 vp install              # 使用项目锁定的 pnpm 版本
-cp .env.example .env    # 填写 GitHub OAuth、数据库 URL 等
+cp apps/web/.env.example apps/web/.env    # 填写 GitHub OAuth、数据库 URL 等
 pnpm dev                # http://localhost:3000
 ```
 
@@ -57,14 +57,14 @@ pnpm dev                # http://localhost:3000
 ```bash
 pnpm dev          # 启动开发服务器
 pnpm build        # 完整生产构建（内容 + Next.js）
-vp check          # 检查格式与代码规范
-vp test run       # 运行一次 Vitest 测试套件
+pnpm check        # vp check（oxfmt + oxlint）+ tsc --noEmit
+pnpm test         # 运行一次 Vitest 测试套件
 pnpm typecheck    # 运行 Next.js 感知的 TypeScript 检查
 ```
 
 > [!TIP]
-> `pnpm build` 分两个阶段执行：`build:content` 生成站点产物（文章 manifest、术语表、渲染后的内容和 PDF HTML sidecar），随后 `build:next` 基于这些产物构建站点。独立的 `pnpm build:pdf` 使用这些 sidecar，输出 `data/pdf-dist/gtmc-en.pdf` 和 `data/pdf-dist/gtmc-zh.pdf`；`.github/workflows/pdf.yml` 会将它们发布到 R2。只需其中一个阶段时可单独运行。
-> Vite+ 仅补充 Next.js 工具链；本项目不使用属于 Vite 的 `vp dev` 和 `vp build`。
+> `pnpm build` 分两个阶段执行：`build:content` 生成站点产物（文章 manifest、术语表、渲染后的内容和 PDF HTML sidecar），随后 `build:next` 基于这些产物构建站点。独立的 `pnpm build:pdf` 使用这些 sidecar，输出 `apps/web/data/pdf-dist/gtmc-en.pdf` 和 `apps/web/data/pdf-dist/gtmc-zh.pdf`；`.github/workflows/pdf.yml` 会将它们发布到 R2。只需其中一个阶段时可单独运行。
+> Vite+ 仅补充 Next.js 工具链；本项目不使用属于 Vite 的 `vp dev` 和 `vp build`。直接调用 `vp` 时请在 `apps/web` 下执行，因为 `vite.config.ts` 位于该目录。
 
 ---
 

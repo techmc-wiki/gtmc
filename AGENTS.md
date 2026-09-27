@@ -10,31 +10,44 @@ The site is live at <https://www.techmc.wiki>. The infra was provided by Vercel 
 - Tailwind CSS v4 (tokens in `DESIGN.md` / `app/globals.css`); shadcn/ui primitives in `components/ui/shadcn/`
 - Prisma 7 (Postgres) + NextAuth v5 (GitHub provider); next-intl i18n
 - Markdown pipeline (remark/rehype, KaTeX, Shiki) over the `articles/` and `glossary/` submodules
-- pnpm 12, Vite+ (`vp` for Oxlint, Oxfmt, Vitest)
+- pnpm 12 workspace, Vite+ (`vp` for Oxlint, Oxfmt, Vitest)
+- Go 1.26 for `tools/pdfgen`, the headless-Chromium PDF renderer
 
 ## Layout
 
+This is a pnpm workspace. The root holds only workspace-level concerns; the
+site and the PDF renderer live in their own directories.
+
 ```text
-app/          App Router (locale-scoped [locale] routes, api/)
-actions/      Server actions
-components/   UI components (primitives in components/ui/shadcn/)
-lib/          Article pipeline, auth, db, search, GitHub helpers
-hooks/        Shared React hooks
-i18n/         next-intl config; catalogs in messages/ (en.json, zh.json)
-types/        Ambient type declarations
-content/      Static content (about, authors, pdf)
-articles/     Article content submodule
-glossary/     Glossary data submodule
-data/         Generated manifests, search indices, build caches
-scripts/      Manifest, content, and PDF generators (pdfgen/ is the Go PDF renderer)
-proxy.ts      Auth + i18n middleware
+apps/web/       The Next.js site (@gtmc/web) — everything below is relative to it
+  app/          App Router (locale-scoped [locale] routes, api/)
+  actions/      Server actions
+  components/   UI components (primitives in components/ui/shadcn/)
+  lib/          Article pipeline, auth, db, search, GitHub helpers
+  hooks/        Shared React hooks
+  i18n/         next-intl config; catalogs in messages/ (en.json, zh.json)
+  types/        Ambient type declarations
+  content/      Static content (about, authors, pdf)
+  data/         Generated manifests, search indices, build caches (gitignored)
+  scripts/      Manifest, content, and PDF generators
+  proxy.ts      Auth + i18n middleware
+tools/pdfgen/   Go PDF renderer (CLI; not a pnpm package)
+packages/       Shared libraries (currently empty)
+articles/       Article content submodule
+glossary/       Glossary data submodule
 ```
+
+`articles/` and `glossary/` are git submodules pinned at the workspace root,
+not under `apps/web`. Code that needs them must go through
+`lib/workspace-paths.ts` (`getWorkspaceRoot()` / `workspacePath(...)`) rather
+than `process.cwd()`, which is only correct when a process happens to have
+been started from `apps/web`.
 
 ## Setup
 
 ```bash
 vp install              # Install dependencies with pinned pnpm + run postinstall
-cp .env.example .env    # All environment variables are documented there
+cp apps/web/.env.example apps/web/.env   # All environment variables are documented there
 pnpm dev                # Start development server at http://localhost:3000
 ```
 
@@ -43,17 +56,21 @@ pnpm dev                # Start development server at http://localhost:3000
 ```bash
 pnpm check                       # vp check (oxfmt + oxlint) + tsc --noEmit
 pnpm typecheck                   # tsc --noEmit only
-vp check --fix                   # Auto-format and autofix lint findings
 pnpm test                        # All Vitest suites (vp test run)
+
+# `vp` resolves its config from apps/web/vite.config.ts, so run it from there:
+cd apps/web
+vp check --fix                   # Auto-format and autofix lint findings
 vp test run <file-path>          # Run a specific test file
 vp test run -t "<test-name>"     # Filter by test name
+cd ../..
 
 pnpm build                       # Full build: content generation + next build
 pnpm build:content               # Phase 1: static content and manifest generation
 pnpm build:next                  # Phase 2: Next.js production build
-pnpm generate:manifest           # Rebuild data/manifest.json
+pnpm generate:manifest           # Rebuild apps/web/data/manifest.json
 pnpm generate:content            # Re-render article content artifacts
-pnpm generate:glossary           # Rebuild data/glossary*.json
+pnpm generate:glossary           # Rebuild apps/web/data/glossary*.json
 pnpm articles:update             # Pull latest articles submodule commit
 pnpm glossary:update             # Pull latest glossary submodule commit
 ```
@@ -68,7 +85,7 @@ Before declaring any build-affecting change complete, run `pnpm check && pnpm te
 
 - Never bypass types with `as any`, `@ts-ignore`, or `@ts-expect-error`; fix root types.
 - Use existing shadcn/ui components from `components/ui/shadcn/` before creating custom primitives. Follow `DESIGN.md` for styling, tokens, and geometry.
-- Imports use the `@/*` path alias (repository root). Server actions in `actions/`; route handlers in `app/api/`; middleware in `proxy.ts` (not `middleware.ts`).
+- Imports use the `@/*` path alias, which resolves to `apps/web` (the app root, not the repository root). Server actions in `actions/`; route handlers in `app/api/`; middleware in `proxy.ts` (not `middleware.ts`).
 - Monospace + uppercase + wide tracking is strictly for apparatus controls (buttons, badges, tabs, nav). Standard form labels, empty states, and dialog titles use normal sans capitalization.
 
 ## Pull Request & Git Guidelines
@@ -81,10 +98,10 @@ Before declaring any build-affecting change complete, run `pnpm check && pnpm te
 
 Release tags use the `vX.Y.Z` format (semver) and are published from the `dev` branch. The target commit must already be present on the remote `dev` branch; agents must not push or pull, so stop for a user-managed push when the local branch is ahead. Before publishing, inspect the commits since the previous release, pick the next version (`feat` → minor, `fix`/`perf` → patch, breaking → major), and confirm the worktree is clean.
 
-1. Bump `version` in `package.json` to the new version (bare semver, no `v` prefix) in its own commit. A bump never touches `pnpm-lock.yaml`, so stage the manifest alone and never regenerate dependencies for it.
+1. Bump `version` in `apps/web/package.json` to the new version (bare semver, no `v` prefix) in its own commit. A bump never touches `pnpm-lock.yaml`, so stage the manifest alone and never regenerate dependencies for it. `release.yml` reads this file; the workspace root `package.json` mirrors the version but is not the gate.
 
    ```bash
-   git add package.json
+   git add apps/web/package.json
    git commit -m "chore: bump package version to vX.Y.Z"
    ```
 

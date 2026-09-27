@@ -3,7 +3,7 @@ import {
   restoreContentArtifacts,
   saveContentArtifacts,
 } from "./lib/content-artifact-cache"
-import { WORKSPACE_ROOT } from "@/lib/workspace-paths"
+import { getWorkspaceRoot } from "@/lib/workspace-paths"
 import { run, runScript } from "./lib/run"
 import { createLogger, runBuildStep } from "./lib/logger"
 
@@ -13,7 +13,7 @@ const startedAt = performance.now()
 logger.event("build.started")
 runBuildStep(logger, "repository.prepare", () => {
   // Submodules, .gitconfig, and tag fetches all belong to the workspace root.
-  const cwd = WORKSPACE_ROOT
+  const cwd = getWorkspaceRoot()
   run("git", ["config", "--local", "include.path", ".gitconfig"], { cwd })
   run(
     "git",

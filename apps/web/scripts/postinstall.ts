@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs"
 import { spawnSync } from "node:child_process"
 
-import { WORKSPACE_ROOT, workspacePath } from "@/lib/workspace-paths"
+import { getWorkspaceRoot, workspacePath } from "@/lib/workspace-paths"
 import { run, runScript } from "./lib/run"
 import { createLogger, runBuildStep } from "./lib/logger"
 
@@ -12,7 +12,7 @@ const placeholderDatabaseUrl = "postgresql://localhost:5432/placeholder"
 // Submodules and the shared .gitconfig live at the workspace root, not under
 // apps/web, so every git invocation below is pinned there explicitly rather
 // than inheriting this process's working directory.
-const gitOptions = { cwd: WORKSPACE_ROOT } as const
+const gitOptions = { cwd: getWorkspaceRoot() } as const
 
 function isGitWorkTree() {
   if (!existsSync(workspacePath(".git"))) return false
@@ -47,7 +47,7 @@ function ensureSubmoduleInitialized(submodule: string) {
   let initialized = false
   if (!isSubmoduleInitialized(submodule)) {
     run("git", ["submodule", "update", "--init", "--recursive", submodule], {
-      cwd: WORKSPACE_ROOT,
+      cwd: getWorkspaceRoot(),
     })
     initialized = true
   }
@@ -73,7 +73,7 @@ const skipHeavy = process.env.GTMC_SKIP_POSTINSTALL === "1" || isVercel
 
 if (!skipHeavy && isGitWorkTree()) {
   run("git", ["config", "--local", "include.path", ".gitconfig"], {
-    cwd: WORKSPACE_ROOT,
+    cwd: getWorkspaceRoot(),
   })
 
   ensureSubmoduleInitialized("articles")

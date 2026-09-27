@@ -33,7 +33,7 @@ import { resolveImagesInHtml } from "@/lib/pdf-images"
 import { fillTocFolios, haveTocFolioPagesChanged } from "@/lib/pdf/paginate"
 import { PDF_COLORS, PDF_REQUIRED_FONTS } from "@/lib/pdf/theme"
 import { hasLocalPdfFonts, pdfFontsDir, syncPdfFonts } from "@/lib/pdf/fonts"
-import { WORKSPACE_ROOT, workspacePath } from "@/lib/workspace-paths"
+import { getWorkspaceRoot, workspacePath } from "@/lib/workspace-paths"
 import { createLogger } from "./lib/logger"
 
 const logger = createLogger("pdf")
@@ -138,7 +138,7 @@ function resolvePdfgen(): string {
       ? ["build", "-C", workspacePath("tools", "pdfgen"), "-o", builtPath, "."]
       : ["build", "-o", builtPath, "./tools/pdfgen"]
     execFileSync("go", args, {
-      cwd: WORKSPACE_ROOT,
+      cwd: getWorkspaceRoot(),
       stdio: "inherit",
     })
   } catch (error) {

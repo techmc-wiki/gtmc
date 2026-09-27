@@ -36,5 +36,11 @@
     "test": "pnpm --filter @gtmc/web run test",
     "typecheck": "pnpm --filter @gtmc/web run typecheck"
   },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "tsx": "^4.23.14",
+    "typescript": "^7.0.2",
+    "vite-plus": "0.3.3"
+  },
   "packageManager": "pnpm@12.6.0"
 }

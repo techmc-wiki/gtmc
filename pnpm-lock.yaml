@@ -164,7 +164,20 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.2
+        version: 26.6.3
+      tsx:
+        specifier: ^4.23.14
+        version: 4.23.15
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vite-plus:
+        specifier: 0.3.3
+        version: 0.3.3(@opentelemetry/api@1.9.1)(@types/node@26.6.3)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(typescript@7.0.2)(yaml@2.9.1)
 
   apps/web:
     dependencies:
@@ -373,9 +386,6 @@ importers:
       '@types/mime-types':
         specifier: ^3.0.1
         version: 3.0.1
-      '@types/node':
-        specifier: ^26.6.2
-        version: 26.6.3
       '@types/papaparse':
         specifier: ^5.5.2
         version: 5.5.2
@@ -412,15 +422,6 @@ importers:
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
-      tsx:
-        specifier: ^4.23.14
-        version: 4.23.15
-      typescript:
-        specifier: ^7.0.2
-        version: 7.0.2
-      vite-plus:
-        specifier: 0.3.3
-        version: 0.3.3(@opentelemetry/api@1.9.1)(@types/node@26.6.3)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(typescript@7.0.2)(yaml@2.9.1)
 
 packages:
 

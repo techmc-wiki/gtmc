@@ -50,8 +50,12 @@ const CONTENT_GENERATOR_FILES: string[] = [
 
 // Generator inputs that live at the workspace root, not under apps/web. The
 // lockfile is shared by the whole monorepo, so a dependency bump anywhere must
-// invalidate the content cache.
-const WORKSPACE_GENERATOR_FILES: string[] = ["pnpm-lock.yaml"]
+// invalidate the content cache. The root contribution guide is staged into
+// `data/contributing`, so its edits must invalidate the cache as well.
+const WORKSPACE_GENERATOR_FILES: string[] = [
+  "pnpm-lock.yaml",
+  "CONTRIBUTING.md",
+]
 
 const CONTENT_GENERATOR_DIRECTORIES: string[] = [
   "lib/articles",

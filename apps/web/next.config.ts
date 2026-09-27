@@ -1,3 +1,4 @@
+import path from "node:path"
 import type { NextConfig } from "next"
 import type * as ChildProcess from "child_process"
 import withBundleAnalyzer from "@next/bundle-analyzer"
@@ -90,6 +91,10 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  // Trace from the workspace root so files above apps/web (articles/ and
+  // glossary/ submodules) can be represented in route traces. Keep this
+  // aligned with turbopack.root below.
+  outputFileTracingRoot: path.join(__dirname, "..", ".."),
   outputFileTracingIncludes: {
     "/*": ["data/manifest.json"],
     "/\\[locale\\]/articles/\\[\\[\\.\\.\\.slug\\]\\]": ["data/articles/**"],
@@ -110,6 +115,9 @@ const nextConfig: NextConfig = {
     "/\\[locale\\]/glossary/**": ["../../glossary/**"],
   },
   turbopack: {
+    // Align with outputFileTracingRoot above; the workspace lockfile and any
+    // linked packages live above apps/web.
+    root: path.join(__dirname, "..", ".."),
     resolveAlias: {
       // Nucleation's Node <22 fallback imports `fs`, so browser bundles use
       // a stub while server bundles retain the real module.

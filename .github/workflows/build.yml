@@ -22,8 +22,8 @@ jobs:
           # submodule. A shallow checkout leaves generateStaticParams empty and
           # fails Cache Components builds for /authors/[handle].
           fetch-depth: 0
-          # Initialize articles/ + glossary/ before content-cache key resolution so
-          # we don't depend on postinstall for submodule SHAs.
+          # Initialize content/articles + content/glossary before content-cache
+          # key resolution so we don't depend on postinstall for submodule SHAs.
           submodules: true
 
       - name: Setup pnpm
@@ -38,8 +38,8 @@ jobs:
       - name: Resolve content input SHAs
         id: content-inputs
         run: |
-          echo "articles=$(git -C articles rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          echo "glossary=$(git -C glossary rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "articles=$(git -C content/articles rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "glossary=$(git -C content/glossary rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Cache content artifacts
         id: cache-content

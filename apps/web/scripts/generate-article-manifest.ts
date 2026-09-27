@@ -32,7 +32,7 @@ import { createLogger } from "./lib/logger"
 const logger = createLogger("manifest")
 
 const MANIFEST_FILE_NAME = "manifest.json"
-const ARTICLES_PATH = workspacePath("articles")
+const ARTICLES_PATH = workspacePath("content", "articles")
 const OUTPUT_FILE = path.join(process.cwd(), "data", MANIFEST_FILE_NAME)
 const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const MAX_DEPTH = 3

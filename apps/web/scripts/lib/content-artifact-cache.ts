@@ -131,14 +131,14 @@ function listContentGeneratorFiles(): string[] {
   return files.toSorted()
 }
 
-function readSubmoduleRevision(submodule: string): string {
+function readSubmoduleRevision(...submodule: string[]): string {
   const result = spawnSync("git", ["rev-parse", "HEAD"], {
-    cwd: workspacePath(submodule),
+    cwd: workspacePath(...submodule),
     encoding: "utf-8",
   })
   if (result.status !== 0) {
     throw new Error(
-      `Unable to read ${submodule} revision: ${result.stderr || result.error?.message || "unknown error"}`
+      `Unable to read ${submodule.join("/")} revision: ${result.stderr || result.error?.message || "unknown error"}`
     )
   }
   return result.stdout.trim()
@@ -207,8 +207,8 @@ export function createContentArtifactCache(): ContentArtifactCache | null {
     const hash = createHash("sha256")
     hash.update(`format:${CACHE_FORMAT_VERSION}\n`)
     hash.update(`node:${process.versions.node}\n`)
-    hash.update(`articles:${readSubmoduleRevision("articles")}\n`)
-    hash.update(`glossary:${readSubmoduleRevision("glossary")}\n`)
+    hash.update(`articles:${readSubmoduleRevision("content", "articles")}\n`)
+    hash.update(`glossary:${readSubmoduleRevision("content", "glossary")}\n`)
 
     for (const relativePath of listContentGeneratorFiles()) {
       hash.update(`${relativePath}\0`)

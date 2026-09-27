@@ -38,7 +38,7 @@
 最快的上手方式就是**[访问网站](https://techmc.wiki)**。想参与贡献？你可以直接在站内起草文章并创建拉取请求。审阅和合并冲突处理均在 GitHub 上完成。
 
 > [!NOTE]
-> 本仓库是**网站**本体，采用 pnpm 工作区结构：站点位于 `apps/web`，Go PDF 渲染器位于 `tools/pdfgen`。文章存放在[独立仓库](https://github.com/techmc-wiki/articles)中，以子模块形式挂载在工作区根目录。其他 GTMC 项目见 [github.com/orgs/techmc-wiki](https://github.com/orgs/techmc-wiki/repositories)。
+> 本仓库是**网站**本体，采用 pnpm 工作区结构：站点位于 `apps/web`，Go PDF 渲染器位于 `tools/pdfgen`，内容子模块位于 `content/`。文章存放在[独立仓库](https://github.com/techmc-wiki/articles)中，以子模块形式挂载在 `content/articles`。其他 GTMC 项目见 [github.com/orgs/techmc-wiki](https://github.com/orgs/techmc-wiki/repositories)。
 
 ## 本地运行
 

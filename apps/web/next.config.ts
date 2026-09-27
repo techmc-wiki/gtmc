@@ -8,9 +8,12 @@ import createMDX from "@next/mdx"
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts")
 const withMDX = createMDX({})
 // Trace-exclude globs resolve from the app root (apps/web). The article and
-// glossary submodules live at the workspace root, so they are referenced
-// relative to that.
-const remoteArticleAssetTraceExcludes = ["../../articles/**", "../../.git/**"]
+// glossary submodules live under `content/` at the workspace root, so they are
+// referenced relative to that.
+const remoteArticleAssetTraceExcludes = [
+  "../../content/articles/**",
+  "../../.git/**",
+]
 
 const supabaseImageHostname = (() => {
   try {
@@ -91,9 +94,9 @@ const nextConfig: NextConfig = {
       },
     ]
   },
-  // Trace from the workspace root so files above apps/web (articles/ and
-  // glossary/ submodules) can be represented in route traces. Keep this
-  // aligned with turbopack.root below.
+  // Trace from the workspace root so files above apps/web (the content/
+  // submodules) can be represented in route traces. Keep this aligned with
+  // turbopack.root below.
   outputFileTracingRoot: path.join(__dirname, "..", ".."),
   outputFileTracingIncludes: {
     "/*": ["data/manifest.json"],
@@ -108,14 +111,14 @@ const nextConfig: NextConfig = {
     "/api/assets/banner/\\[\\.\\.\\.path\\]": remoteArticleAssetTraceExcludes,
     "/api/og/articles/\\[\\.\\.\\.slug\\]": remoteArticleAssetTraceExcludes,
     "/api/articles/search": [
-      "../../articles/**/*.{png,gif,jpg,jpeg,webp,svg,mp4,webm,zip,litematic,nbt,schem,schematic,bmp,ico}",
+      "../../content/articles/**/*.{png,gif,jpg,jpeg,webp,svg,mp4,webm,zip,litematic,nbt,schem,schematic,bmp,ico}",
       "../../.git/**",
     ],
     "/api/litematica-assets/\\[\\.\\.\\.path\\]": [
-      "../../articles/**",
+      "../../content/articles/**",
       "../../.git/**",
     ],
-    "/\\[locale\\]/glossary/**": ["../../glossary/**"],
+    "/\\[locale\\]/glossary/**": ["../../content/glossary/**"],
   },
   turbopack: {
     // Align with outputFileTracingRoot above; the workspace lockfile and any

@@ -4,7 +4,7 @@
 
 ### Understanding the Submodule
 
-The `articles/` directory is a Git submodule pointing to the Articles repository. This means:
+The `content/articles` directory is a Git submodule pointing to the Articles repository. This means:
 
 - It's version-locked to a specific commit
 - Changes to Articles repo don't automatically appear locally
@@ -39,7 +39,7 @@ pnpm generate:content
 
 ### How this works in Vercel deployments
 
-During deployment, `pnpm install` runs [apps/web/package.json](apps/web/package.json)'s `postinstall` script. That script initializes `articles/` only when the submodule directory is missing or empty. It does not update an existing checkout to the latest articles repo commit.
+During deployment, `pnpm install` runs [apps/web/package.json](apps/web/package.json)'s `postinstall` script. That script initializes `content/articles` only when the submodule directory is missing or empty. It does not update an existing checkout to the latest articles repo commit.
 
 Fresh Vercel checkouts therefore use the submodule commit pinned by this website repo. To deploy newer article content, update the `articles` submodule pointer in this repo and commit that pointer change.
 
@@ -57,10 +57,10 @@ pnpm articles:update
 
 ### Committing Submodule Changes
 
-If you update the submodule, Git will show `articles` as modified. Commit this change:
+If you update the submodule, Git will show `content/articles` as modified. Commit this change:
 
 ```bash
-git add articles
+git add content/articles
 git commit -m "chore(articles): Update articles submodule to latest"
 ```
 

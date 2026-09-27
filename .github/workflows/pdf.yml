@@ -102,7 +102,7 @@ jobs:
 
       - name: Advance articles to latest
         if: steps.change-check.outputs.should-build == 'true'
-        run: git submodule update --remote articles
+        run: git submodule update --remote content/articles
 
       - name: Set up pnpm
         if: steps.change-check.outputs.should-build == 'true'

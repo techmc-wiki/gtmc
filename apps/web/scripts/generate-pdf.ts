@@ -75,7 +75,7 @@ let syncedPdfFontsDir: string | null = null
 function getArticlesRevision(): string | undefined {
   try {
     return execSync("git rev-parse --short=7 HEAD", {
-      cwd: workspacePath("articles"),
+      cwd: workspacePath("content", "articles"),
       encoding: "utf-8",
     }).trim()
   } catch {

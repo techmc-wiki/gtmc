@@ -15,14 +15,9 @@ runBuildStep(logger, "repository.prepare", () => {
   // Submodules, .gitconfig, and tag fetches all belong to the workspace root.
   const cwd = getWorkspaceRoot()
   run("git", ["config", "--local", "include.path", ".gitconfig"], { cwd })
-  run(
-    "git",
-    ["submodule", "update", "--init", "--recursive", "--remote", "articles"],
-    { cwd }
-  )
-  run("git", ["submodule", "update", "--init", "--recursive", "glossary"], {
-    cwd,
-  })
+  const submoduleUpdate = ["submodule", "update", "--init", "--recursive"]
+  run("git", [...submoduleUpdate, "--remote", "content/articles"], { cwd })
+  run("git", [...submoduleUpdate, "content/glossary"], { cwd })
   run("git", ["fetch", "--tags"], { cwd })
 })
 

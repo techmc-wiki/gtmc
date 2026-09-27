@@ -3,11 +3,12 @@ import path from "node:path"
 /**
  * Workspace root resolution.
  *
- * The site lives at `apps/web`, but the `articles/` and `glossary/` submodules
- * stay at the repository root, and so do `tools/pdfgen` and the shared pnpm
- * lockfile. Code that needs those must go through `getWorkspaceRoot()` /
- * `workspacePath(...)` rather than reaching for `process.cwd()`, which is only
- * correct when a process happens to have been started from `apps/web`.
+ * The site lives at `apps/web`, but the `content/articles` and
+ * `content/glossary` submodules stay at the repository root, and so do
+ * `tools/pdfgen` and the shared pnpm lockfile. Code that needs those must go
+ * through `getWorkspaceRoot()` / `workspacePath(...)` rather than reaching for
+ * `process.cwd()`, which is only correct when a process happens to have been
+ * started from `apps/web`.
  *
  * This module is imported by runtime code (see `lib/articles/fs.ts`), so it
  * deliberately touches no filesystem: every export is a pure `path` operation
@@ -45,7 +46,7 @@ export function getWorkspaceRoot(): string {
   return cachedWorkspaceRoot
 }
 
-/** Path to a workspace member, e.g. `workspacePath("articles")`. */
+/** Path to a workspace member, e.g. `workspacePath("content", "articles")`. */
 export function workspacePath(...segments: string[]): string {
   // Folding over the segments keeps this expression opaque for the same
   // reason as the loop above; a `path.join(root, ...segments)` spread folds

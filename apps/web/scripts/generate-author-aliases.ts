@@ -13,7 +13,8 @@ const CONFIG_DIR = join(process.cwd(), "lib", "articles", "config")
 const OUTPUT_PATH = join(CONFIG_DIR, "authors-alias.yml")
 const OVERRIDES_PATH = join(CONFIG_DIR, "author-alias-overrides.yml")
 
-const ARTICLES_PATH = process.env.ARTICLES_PATH ?? workspacePath("articles")
+const ARTICLES_PATH =
+  process.env.ARTICLES_PATH ?? workspacePath("content", "articles")
 
 const GITHUB_TOKEN = resolveGithubToken()
 

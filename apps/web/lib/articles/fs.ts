@@ -4,7 +4,7 @@ import path from "path"
 import { resolveSlug, type ResolveResult } from "@/lib/articles/slug-resolver"
 import { workspacePath } from "@/lib/workspace-paths"
 
-export const ARTICLES_PATH = workspacePath("articles")
+export const ARTICLES_PATH = workspacePath("content", "articles")
 
 export async function resolveLocalArticlePath(
   slugPath: string

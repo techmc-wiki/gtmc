@@ -9,7 +9,7 @@ The site is live at <https://www.techmc.wiki>. The infra was provided by Vercel 
 - Next.js 16 (App Router, Turbopack) on React 19, TypeScript strict mode
 - Tailwind CSS v4 (tokens in `DESIGN.md` / `app/globals.css`); shadcn/ui primitives in `components/ui/shadcn/`
 - Prisma 7 (Postgres) + NextAuth v5 (GitHub provider); next-intl i18n
-- Markdown pipeline (remark/rehype, KaTeX, Shiki) over the `articles/` and `glossary/` submodules
+- Markdown pipeline (remark/rehype, KaTeX, Shiki) over the `content/articles` and `content/glossary` submodules
 - pnpm 12 workspace, Vite+ (`vp` for Oxlint, Oxfmt, Vitest)
 - Go 1.26 for `tools/pdfgen`, the headless-Chromium PDF renderer
 
@@ -33,12 +33,13 @@ apps/web/       The Next.js site (@gtmc/web) — everything below is relative to
   proxy.ts      Auth + i18n middleware
 tools/pdfgen/   Go PDF renderer (CLI; not a pnpm package)
 packages/       Shared libraries (currently empty)
-articles/       Article content submodule
-glossary/       Glossary data submodule
+content/         Content submodules
+  articles/      Article content submodule
+  glossary/      Glossary data submodule
 ```
 
-`articles/` and `glossary/` are git submodules pinned at the workspace root,
-not under `apps/web`. Code that needs them must go through
+`content/articles` and `content/glossary` are git submodules pinned at the
+workspace root, not under `apps/web`. Code that needs them must go through
 `lib/workspace-paths.ts` (`getWorkspaceRoot()` / `workspacePath(...)`) rather
 than `process.cwd()`, which is only correct when a process happens to have
 been started from `apps/web`.
@@ -91,7 +92,7 @@ Before declaring any build-affecting change complete, run `pnpm check && pnpm te
 ## Pull Request & Git Guidelines
 
 - Conventional Commits (`<type>(<scope>): <subject>`, max 72 chars; types: `feat`, `fix`, `refactor`, `docs`, `style`, `chore`, `test`, `perf`).
-- Never mix submodule pointer updates (`articles/`, `glossary/`) with feature or bugfix commits; commit them separately as `chore(articles): ...`.
+- Never mix submodule pointer updates (`content/articles`, `content/glossary`) with feature or bugfix commits; commit them separately as `chore(articles): ...`.
 - Atomic, reversible commits are fine. **Never** run `git push` or `git pull`. **Never** use destructive Git commands (`reset --hard`, `clean -f`, force push) without explicit instruction.
 
 ### Publishing GitHub releases

@@ -76,8 +76,8 @@ if (!skipHeavy && isGitWorkTree()) {
     cwd: getWorkspaceRoot(),
   })
 
-  ensureSubmoduleInitialized("articles")
-  ensureSubmoduleInitialized("glossary")
+  ensureSubmoduleInitialized("content/articles")
+  ensureSubmoduleInitialized("content/glossary")
 
   runBuildStep(logger, "glossary", () =>
     runScript("scripts/generate-glossary-manifest.ts")

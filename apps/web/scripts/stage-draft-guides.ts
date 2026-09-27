@@ -7,18 +7,18 @@ import { createLogger } from "./lib/logger"
 /**
  * Stage the contribution guides the draft editor shows at request time.
  *
- * The sources live at the workspace root and in the articles submodule, but a
- * deployed task only ships the app's own tree. Reading them through
- * `workspacePath` at request time is also not an option: any `fs` call with a
- * statically unresolvable argument makes Next.js's file tracer fall back to a
- * whole-project wildcard, shipping the repository into the route bundle
+ * The sources live at the workspace root and in the articles submodule under
+ * `content/`, but a deployed task only ships the app's own tree. Reading them
+ * through `workspacePath` at request time is also not an option: any `fs` call
+ * with a statically unresolvable argument makes Next.js's file tracer fall back
+ * to a whole-project wildcard, shipping the repository into the route bundle
  * (measured at 80+ MiB). Copies staged under `data/contributing/` fold to
  * exact files in the trace instead (see
  * `app/[locale]/(private)/draft/[id]/page.tsx`).
  */
 const DRAFT_GUIDES = [
   { source: ["CONTRIBUTING.md"], target: "web.md" },
-  { source: ["articles", "CONTRIBUTING.md"], target: "articles.md" },
+  { source: ["content", "articles", "CONTRIBUTING.md"], target: "articles.md" },
 ] as const
 
 const logger = createLogger("draft-guides")

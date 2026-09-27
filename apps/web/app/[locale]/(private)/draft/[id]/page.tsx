@@ -9,7 +9,7 @@ import { auth } from "@/lib/auth"
 import { decodeStoredDraftFiles } from "@/lib/drafts/files"
 import { notFound, redirect } from "next/navigation"
 import { readFile } from "fs/promises"
-import { workspacePath } from "@/lib/workspace-paths"
+import path from "path"
 
 function buildDraftEditorData(
   draft: {
@@ -88,11 +88,17 @@ export default async function EditDraftPage({
 }
 
 async function loadContributingGuides() {
+  // The guides live at the workspace root and in the articles submodule;
+  // scripts/stage-draft-guides.ts copies them under data/contributing/ at
+  // build time so this page never depends on the workspace layout.
   const guides = await Promise.all([
-    readFile(workspacePath("CONTRIBUTING.md"), "utf8")
+    readFile(path.join(process.cwd(), "data", "contributing", "web.md"), "utf8")
       .then((content) => ({ id: "web", title: "GTMC Web", content }))
       .catch(() => null),
-    readFile(workspacePath("articles", "CONTRIBUTING.md"), "utf8")
+    readFile(
+      path.join(process.cwd(), "data", "contributing", "articles.md"),
+      "utf8"
+    )
       .then((content) => ({ id: "articles", title: "Articles", content }))
       .catch(() => null),
   ])

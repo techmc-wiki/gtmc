@@ -8,7 +8,7 @@ import { workspacePath } from "@/lib/workspace-paths"
 
 const logger = createLogger("content-cache")
 
-const CACHE_FORMAT_VERSION = 3
+const CACHE_FORMAT_VERSION = 4
 const CACHE_DIRECTORY = path.resolve(
   process.cwd(),
   process.env.GTMC_CONTENT_CACHE_DIR ?? ".next/cache/gtmc-content"
@@ -22,12 +22,14 @@ const GENERATED_ARTIFACTS = [
   "data/glossary.json",
   "data/glossary-summary.json",
   "data/repository-contributor-stats.json",
+  "data/contributing",
   "public/article-assets",
 ] as const
 
 const GENERATED_ARTIFACT_DIRECTORIES = new Set([
   "data/articles",
   "data/pdf-html",
+  "data/contributing",
   "public/article-assets",
 ])
 
@@ -43,6 +45,7 @@ const CONTENT_GENERATOR_FILES: string[] = [
   "scripts/generate-glossary-manifest.ts",
   "scripts/generate-repository-contributor-stats.ts",
   "scripts/generate-article-content.ts",
+  "scripts/stage-draft-guides.ts",
 ]
 
 // Generator inputs that live at the workspace root, not under apps/web. The

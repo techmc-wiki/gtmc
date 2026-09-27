@@ -4,7 +4,7 @@ import { createLogger, describeError, runBuildStep } from "./lib/logger"
 const logger = createLogger("content")
 async function main(): Promise<void> {
   const startedAt = performance.now()
-  logger.event("content.started", { stage_count: 4 })
+  logger.event("content.started", { stage_count: 5 })
 
   await Promise.all([
     runBuildStep(logger, "repository-contributors", () =>
@@ -16,6 +16,9 @@ async function main(): Promise<void> {
     runBuildStep(logger, "glossary", () =>
       runScriptAsync("scripts/generate-glossary-manifest.ts")
     ),
+    runBuildStep(logger, "draft-guides", () =>
+      runScriptAsync("scripts/stage-draft-guides.ts")
+    ),
   ])
 
   await runBuildStep(logger, "article-content", () =>
@@ -24,7 +27,7 @@ async function main(): Promise<void> {
 
   logger.event("content.completed", {
     duration_ms: Math.round(performance.now() - startedAt),
-    stage_count: 4,
+    stage_count: 5,
   })
 }
 

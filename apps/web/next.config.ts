@@ -100,6 +100,9 @@ const nextConfig: NextConfig = {
     "/\\[locale\\]/articles/\\[\\[\\.\\.\\.slug\\]\\]": ["data/articles/**"],
     "/\\[locale\\]/glossary": ["data/glossary*.json"],
     "/api/glossary": ["data/glossary*.json"],
+    // The draft editor renders the contribution guides staged by
+    // scripts/stage-draft-guides.ts.
+    "/\\[locale\\]/draft/\\[id\\]": ["data/contributing/*.md"],
   },
   outputFileTracingExcludes: {
     "/api/assets/banner/\\[\\.\\.\\.path\\]": remoteArticleAssetTraceExcludes,

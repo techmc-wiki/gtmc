@@ -52,11 +52,12 @@ jobs:
             apps/web/data/.shiki-cache.json
             apps/web/data/glossary*.json
             apps/web/data/repository-contributor-stats.json
+            apps/web/data/contributing
             apps/web/public/article-assets
           # Hash dependency resolution plus generators/libs that feed content
           # artifacts. Paths are workspace-relative: the app is apps/web, the
           # lockfile is shared at the root.
-          key: content-${{ steps.content-inputs.outputs.articles }}-${{ steps.content-inputs.outputs.glossary }}-${{ hashFiles('package.json', 'apps/web/package.json', 'pnpm-lock.yaml', 'apps/web/scripts/build-content.ts', 'apps/web/scripts/generate-article-manifest.ts', 'apps/web/scripts/generate-glossary-manifest.ts', 'apps/web/scripts/generate-repository-contributor-stats.ts', 'apps/web/scripts/generate-article-content.ts', 'apps/web/scripts/manifest-preview.ts', 'apps/web/scripts/lib/run.ts', 'apps/web/lib/articles/**', 'apps/web/lib/glossary/**', 'apps/web/lib/git/**', 'apps/web/lib/markdown/**') }}
+          key: content-${{ steps.content-inputs.outputs.articles }}-${{ steps.content-inputs.outputs.glossary }}-${{ hashFiles('package.json', 'apps/web/package.json', 'pnpm-lock.yaml', 'apps/web/scripts/build-content.ts', 'apps/web/scripts/generate-article-manifest.ts', 'apps/web/scripts/generate-glossary-manifest.ts', 'apps/web/scripts/generate-repository-contributor-stats.ts', 'apps/web/scripts/generate-article-content.ts', 'apps/web/scripts/stage-draft-guides.ts', 'apps/web/scripts/manifest-preview.ts', 'apps/web/scripts/lib/run.ts', 'apps/web/lib/articles/**', 'apps/web/lib/glossary/**', 'apps/web/lib/git/**', 'apps/web/lib/markdown/**') }}
           restore-keys: |
             content-${{ steps.content-inputs.outputs.articles }}-${{ steps.content-inputs.outputs.glossary }}-
 

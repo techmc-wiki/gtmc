@@ -3,6 +3,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { dump as yamlDump, load as yamlLoad } from "js-yaml"
 
+import { workspacePath } from "@/lib/workspace-paths"
 import { resolveGithubToken } from "@/lib/github/tokens"
 import { createLogger } from "./lib/logger"
 
@@ -12,8 +13,7 @@ const CONFIG_DIR = join(process.cwd(), "lib", "articles", "config")
 const OUTPUT_PATH = join(CONFIG_DIR, "authors-alias.yml")
 const OVERRIDES_PATH = join(CONFIG_DIR, "author-alias-overrides.yml")
 
-const ARTICLES_PATH =
-  process.env.ARTICLES_PATH ?? join(process.cwd(), "articles")
+const ARTICLES_PATH = process.env.ARTICLES_PATH ?? workspacePath("articles")
 
 const GITHUB_TOKEN = resolveGithubToken()
 

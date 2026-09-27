@@ -10,11 +10,12 @@ import type {
 } from "@/lib/glossary/manifest"
 import { LANGUAGE_CODES, LOCALE_TO_COLUMN } from "@/lib/glossary/locales"
 import { generateUniqueSlug } from "@/lib/glossary/slug"
+import { workspacePath } from "@/lib/workspace-paths"
 import { createLogger } from "./lib/logger"
 
 const logger = createLogger("glossary")
 
-const CSV_FILE = path.join(process.cwd(), "glossary", "TechMC Glossary.csv")
+const CSV_FILE = workspacePath("glossary", "TechMC Glossary.csv")
 const OUTPUT_FILE = path.join(process.cwd(), "data", "glossary.json")
 const SUMMARY_FILE = path.join(process.cwd(), "data", "glossary-summary.json")
 

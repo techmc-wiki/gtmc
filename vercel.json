@@ -1,5 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "installCommand": "pnpm install",
   "buildCommand": "pnpm build:vercel",
+  "outputDirectory": "apps/web/.next",
   "ignoreCommand": "if echo \"$VERCEL_GIT_COMMIT_MESSAGE\" | grep -q '\\[skip vercel\\]'; then exit 0; else exit 1; fi"
 }

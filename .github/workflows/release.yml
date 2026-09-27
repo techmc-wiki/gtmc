@@ -2,7 +2,7 @@
 #
 # Tags are pushed by hand (see AGENTS.md § Publishing GitHub releases), so this
 # workflow is the gate that keeps the tag and the manifest honest: a release is
-# only published when the tag matches the version `package.json` declares at
+# only published when the tag matches the version `apps/web/package.json` declares at
 # that commit.
 #
 # The body is initialized with a link to the website. Curate notes afterwards
@@ -31,7 +31,7 @@ jobs:
           set -euo pipefail
 
           tag="${GITHUB_REF_NAME#v}"
-          version="$(jq -r .version package.json)"
+          version="$(jq -r .version apps/web/package.json)"
           if [[ "$tag" != "$version" ]]; then
             echo "Tag $GITHUB_REF_NAME does not match package.json version $version." >&2
             echo "Commit the version bump, then move the tag onto that commit." >&2

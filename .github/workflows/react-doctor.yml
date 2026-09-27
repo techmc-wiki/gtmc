@@ -50,4 +50,7 @@ jobs:
         #   commit-status: false     # Disable the commit status (score + counts, links to the run)
         #   version: "0.4.0"         # Pin to a specific react-doctor version instead of "latest"
         #   directory: apps/web      # Scan a sub-directory (default: ".")
-        #   project: "web,admin"     # In a monorepo, scan specific workspace project(s)
+        #   project: "web"           # In a monorepo, scan specific workspace project(s)
+        with:
+          directory: apps/web
+          project: "web"

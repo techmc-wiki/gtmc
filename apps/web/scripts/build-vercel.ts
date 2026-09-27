@@ -3,6 +3,7 @@ import {
   restoreContentArtifacts,
   saveContentArtifacts,
 } from "./lib/content-artifact-cache"
+import { WORKSPACE_ROOT } from "@/lib/workspace-paths"
 import { run, runScript } from "./lib/run"
 import { createLogger, runBuildStep } from "./lib/logger"
 
@@ -11,17 +12,18 @@ const startedAt = performance.now()
 
 logger.event("build.started")
 runBuildStep(logger, "repository.prepare", () => {
-  run("git", ["config", "--local", "include.path", ".gitconfig"])
-  run("git", [
-    "submodule",
-    "update",
-    "--init",
-    "--recursive",
-    "--remote",
-    "articles",
-  ])
-  run("git", ["submodule", "update", "--init", "--recursive", "glossary"])
-  run("git", ["fetch", "--tags"])
+  // Submodules, .gitconfig, and tag fetches all belong to the workspace root.
+  const cwd = WORKSPACE_ROOT
+  run("git", ["config", "--local", "include.path", ".gitconfig"], { cwd })
+  run(
+    "git",
+    ["submodule", "update", "--init", "--recursive", "--remote", "articles"],
+    { cwd }
+  )
+  run("git", ["submodule", "update", "--init", "--recursive", "glossary"], {
+    cwd,
+  })
+  run("git", ["fetch", "--tags"], { cwd })
 })
 
 runBuildStep(logger, "prisma.generate", () => run("prisma", ["generate"]))

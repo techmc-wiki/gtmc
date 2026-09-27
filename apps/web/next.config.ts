@@ -6,7 +6,10 @@ import createMDX from "@next/mdx"
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts")
 const withMDX = createMDX({})
-const remoteArticleAssetTraceExcludes = ["./articles/**", "./.git/**"]
+// Trace-exclude globs resolve from the app root (apps/web). The article and
+// glossary submodules live at the workspace root, so they are referenced
+// relative to that.
+const remoteArticleAssetTraceExcludes = ["../../articles/**", "../../.git/**"]
 
 const supabaseImageHostname = (() => {
   try {
@@ -97,14 +100,14 @@ const nextConfig: NextConfig = {
     "/api/assets/banner/\\[\\.\\.\\.path\\]": remoteArticleAssetTraceExcludes,
     "/api/og/articles/\\[\\.\\.\\.slug\\]": remoteArticleAssetTraceExcludes,
     "/api/articles/search": [
-      "./articles/**/*.{png,gif,jpg,jpeg,webp,svg,mp4,webm,zip,litematic,nbt,schem,schematic,bmp,ico}",
-      "./.git/**",
+      "../../articles/**/*.{png,gif,jpg,jpeg,webp,svg,mp4,webm,zip,litematic,nbt,schem,schematic,bmp,ico}",
+      "../../.git/**",
     ],
     "/api/litematica-assets/\\[\\.\\.\\.path\\]": [
-      "./articles/**",
-      "./.git/**",
+      "../../articles/**",
+      "../../.git/**",
     ],
-    "/\\[locale\\]/glossary/**": ["./glossary/**"],
+    "/\\[locale\\]/glossary/**": ["../../glossary/**"],
   },
   turbopack: {
     resolveAlias: {

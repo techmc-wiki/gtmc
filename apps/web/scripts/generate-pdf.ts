@@ -4,6 +4,7 @@ import { execFileSync, execSync, spawnSync } from "node:child_process"
 import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
+import { createRequire } from "node:module"
 
 import enMessages from "@/messages/en.json"
 import zhMessages from "@/messages/zh.json"
@@ -32,6 +33,7 @@ import { resolveImagesInHtml } from "@/lib/pdf-images"
 import { fillTocFolios, haveTocFolioPagesChanged } from "@/lib/pdf/paginate"
 import { PDF_COLORS, PDF_REQUIRED_FONTS } from "@/lib/pdf/theme"
 import { hasLocalPdfFonts, pdfFontsDir, syncPdfFonts } from "@/lib/pdf/fonts"
+import { WORKSPACE_ROOT, workspacePath } from "@/lib/workspace-paths"
 import { createLogger } from "./lib/logger"
 
 const logger = createLogger("pdf")
@@ -73,7 +75,7 @@ let syncedPdfFontsDir: string | null = null
 function getArticlesRevision(): string | undefined {
   try {
     return execSync("git rev-parse --short=7 HEAD", {
-      cwd: path.join(process.cwd(), "articles"),
+      cwd: workspacePath("articles"),
       encoding: "utf-8",
     }).trim()
   } catch {
@@ -130,13 +132,13 @@ function resolvePdfgen(): string {
   pdfgenBuildDir = fs.mkdtempSync(path.join(os.tmpdir(), "gtmc-pdfgen-"))
   const builtPath = path.join(pdfgenBuildDir, "pdfgen")
   logger.event("pdfgen.build.started", { output: builtPath })
-  const goProject = fs.existsSync(path.join(process.cwd(), "pdfgen", "go.mod"))
+  const goProject = fs.existsSync(workspacePath("tools", "pdfgen", "go.mod"))
   try {
     const args = goProject
-      ? ["build", "-C", "pdfgen", "-o", builtPath, "."]
-      : ["build", "-o", builtPath, "./pdfgen"]
+      ? ["build", "-C", workspacePath("tools", "pdfgen"), "-o", builtPath, "."]
+      : ["build", "-o", builtPath, "./tools/pdfgen"]
     execFileSync("go", args, {
-      cwd: process.cwd(),
+      cwd: WORKSPACE_ROOT,
       stdio: "inherit",
     })
   } catch (error) {
@@ -152,14 +154,17 @@ function resolvePdfgen(): string {
 
 function commonPdfgenArgs(): string[] {
   const args = ["--fonts", PDF_REQUIRED_FONTS.join(",")]
-  const mermaidPath = path.join(
-    process.cwd(),
-    "node_modules",
-    "mermaid",
-    "dist",
-    "mermaid.min.js"
-  )
-  if (fs.existsSync(mermaidPath)) args.push("--mermaid-js", mermaidPath)
+  // Resolve through Node rather than a cwd-relative path: pnpm links
+  // node_modules per workspace package, and this script may be invoked from
+  // anywhere via `pnpm --filter`.
+  try {
+    args.push(
+      "--mermaid-js",
+      createRequire(import.meta.url).resolve("mermaid/dist/mermaid.min.js")
+    )
+  } catch {
+    // Mermaid is optional for the render; fall back to no diagram bundle.
+  }
 
   const chromiumPath =
     process.env.PDFGEN_CHROMIUM ??

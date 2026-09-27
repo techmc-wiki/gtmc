@@ -1,4 +1,4 @@
-module github.com/techmc-wiki/gtmc/pdfgen
+module github.com/techmc-wiki/gtmc/tools/pdfgen
 
 go 1.26
 

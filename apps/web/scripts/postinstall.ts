@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs"
 import { spawnSync } from "node:child_process"
 
+import { WORKSPACE_ROOT, workspacePath } from "@/lib/workspace-paths"
 import { run, runScript } from "./lib/run"
 import { createLogger, runBuildStep } from "./lib/logger"
 
@@ -8,18 +9,25 @@ const logger = createLogger("setup")
 
 const placeholderDatabaseUrl = "postgresql://localhost:5432/placeholder"
 
+// Submodules and the shared .gitconfig live at the workspace root, not under
+// apps/web, so every git invocation below is pinned there explicitly rather
+// than inheriting this process's working directory.
+const gitOptions = { cwd: WORKSPACE_ROOT } as const
+
 function isGitWorkTree() {
-  if (!existsSync(".git")) return false
+  if (!existsSync(workspacePath(".git"))) return false
 
   const result = spawnSync("git", ["rev-parse", "--is-inside-work-tree"], {
+    ...gitOptions,
     stdio: "ignore",
   })
 
   return result.status === 0
 }
 
-function getSubmoduleStatus(path: string) {
-  return spawnSync("git", ["submodule", "status", "--recursive", path], {
+function getSubmoduleStatus(submodule: string) {
+  return spawnSync("git", ["submodule", "status", "--recursive", submodule], {
+    ...gitOptions,
     encoding: "utf-8",
   })
 }
@@ -35,21 +43,23 @@ function isSubmoduleInitialized(path: string) {
   )
 }
 
-function ensureSubmoduleInitialized(path: string) {
+function ensureSubmoduleInitialized(submodule: string) {
   let initialized = false
-  if (!isSubmoduleInitialized(path)) {
-    run("git", ["submodule", "update", "--init", "--recursive", path])
+  if (!isSubmoduleInitialized(submodule)) {
+    run("git", ["submodule", "update", "--init", "--recursive", submodule], {
+      cwd: WORKSPACE_ROOT,
+    })
     initialized = true
   }
 
-  if (!isSubmoduleInitialized(path)) {
-    logger.error("submodule.unavailable", { path })
+  if (!isSubmoduleInitialized(submodule)) {
+    logger.error("submodule.unavailable", { path: submodule })
     process.exit(1)
   }
 
   logger.event("submodule.ready", {
     action: initialized ? "initialized" : "reused",
-    path,
+    path: submodule,
   })
 }
 
@@ -62,7 +72,9 @@ const isVercel = process.env.VERCEL === "1"
 const skipHeavy = process.env.GTMC_SKIP_POSTINSTALL === "1" || isVercel
 
 if (!skipHeavy && isGitWorkTree()) {
-  run("git", ["config", "--local", "include.path", ".gitconfig"])
+  run("git", ["config", "--local", "include.path", ".gitconfig"], {
+    cwd: WORKSPACE_ROOT,
+  })
 
   ensureSubmoduleInitialized("articles")
   ensureSubmoduleInitialized("glossary")

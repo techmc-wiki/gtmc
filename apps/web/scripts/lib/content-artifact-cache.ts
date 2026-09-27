@@ -4,6 +4,7 @@ import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
 import { createLogger } from "./logger"
+import { workspacePath } from "@/lib/workspace-paths"
 
 const logger = createLogger("content-cache")
 
@@ -30,9 +31,9 @@ const GENERATED_ARTIFACT_DIRECTORIES = new Set([
   "public/article-assets",
 ])
 
+// Generator inputs, relative to the app directory (apps/web).
 const CONTENT_GENERATOR_FILES: string[] = [
   "package.json",
-  "pnpm-lock.yaml",
   "tsconfig.json",
   "i18n/routing.ts",
   "scripts/lib/run.ts",
@@ -43,6 +44,11 @@ const CONTENT_GENERATOR_FILES: string[] = [
   "scripts/generate-repository-contributor-stats.ts",
   "scripts/generate-article-content.ts",
 ]
+
+// Generator inputs that live at the workspace root, not under apps/web. The
+// lockfile is shared by the whole monorepo, so a dependency bump anywhere must
+// invalidate the content cache.
+const WORKSPACE_GENERATOR_FILES: string[] = ["pnpm-lock.yaml"]
 
 const CONTENT_GENERATOR_DIRECTORIES: string[] = [
   "lib/articles",
@@ -118,14 +124,14 @@ function listContentGeneratorFiles(): string[] {
   return files.toSorted()
 }
 
-function readRevision(directory: string): string {
+function readSubmoduleRevision(submodule: string): string {
   const result = spawnSync("git", ["rev-parse", "HEAD"], {
-    cwd: path.join(process.cwd(), directory),
+    cwd: workspacePath(submodule),
     encoding: "utf-8",
   })
   if (result.status !== 0) {
     throw new Error(
-      `Unable to read ${directory} revision: ${result.stderr || result.error?.message || "unknown error"}`
+      `Unable to read ${submodule} revision: ${result.stderr || result.error?.message || "unknown error"}`
     )
   }
   return result.stdout.trim()
@@ -194,12 +200,18 @@ export function createContentArtifactCache(): ContentArtifactCache | null {
     const hash = createHash("sha256")
     hash.update(`format:${CACHE_FORMAT_VERSION}\n`)
     hash.update(`node:${process.versions.node}\n`)
-    hash.update(`articles:${readRevision("articles")}\n`)
-    hash.update(`glossary:${readRevision("glossary")}\n`)
+    hash.update(`articles:${readSubmoduleRevision("articles")}\n`)
+    hash.update(`glossary:${readSubmoduleRevision("glossary")}\n`)
 
     for (const relativePath of listContentGeneratorFiles()) {
       hash.update(`${relativePath}\0`)
       hash.update(fs.readFileSync(path.join(process.cwd(), relativePath)))
+      hash.update("\0")
+    }
+
+    for (const relativePath of WORKSPACE_GENERATOR_FILES) {
+      hash.update(`workspace:${relativePath}\0`)
+      hash.update(fs.readFileSync(workspacePath(relativePath)))
       hash.update("\0")
     }
 

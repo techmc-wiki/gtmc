@@ -67,7 +67,9 @@ jobs:
           GTMC_SKIP_POSTINSTALL: "1"
 
       - name: Generate Prisma Client
-        run: pnpm prisma generate
+        # prisma is a devDependency of @gtmc/web; run it in its workspace.
+        working-directory: apps/web
+        run: pnpm exec prisma generate
         env:
           DATABASE_URL: "postgresql://localhost:5432/placeholder"
 

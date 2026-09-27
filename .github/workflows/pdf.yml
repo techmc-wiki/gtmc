@@ -122,7 +122,9 @@ jobs:
 
       - name: Generate Prisma Client
         if: steps.change-check.outputs.should-build == 'true'
-        run: pnpm prisma generate
+        # prisma is a devDependency of @gtmc/web; run it in its workspace.
+        working-directory: apps/web
+        run: pnpm exec prisma generate
         env:
           DATABASE_URL: "postgresql://localhost:5432/placeholder"
 

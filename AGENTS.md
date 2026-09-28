@@ -11,7 +11,8 @@ The site is live at <https://www.techmc.wiki>. The infra was provided by Vercel 
 - Prisma 7 (Postgres) + NextAuth v5 (GitHub provider); next-intl i18n
 - Markdown pipeline (remark/rehype, KaTeX, Shiki) over the `content/articles` and `content/glossary` submodules
 - pnpm 12 workspace, Vite+ (`vp` for Oxlint, Oxfmt, Vitest)
-- Go 1.26 for `tools/pdfgen`, the headless-Chromium PDF renderer
+- TypeScript + Takumi in `tools/pdf`, the browserless PDF book renderer (pdfcn
+  components, no Go, no headless Chromium)
 
 ## Layout
 
@@ -31,7 +32,8 @@ apps/web/       The Next.js site (@gtmc/web) — everything below is relative to
   data/         Generated manifests, search indices, build caches (gitignored)
   scripts/      Manifest, content, and PDF generators
   proxy.ts      Auth + i18n middleware
-tools/pdfgen/   Go PDF renderer (CLI; not a pnpm package)
+tools/pdf/      PDF book renderer (standalone sidecar; own lockfile, not a pnpm
+                workspace member, so site installs and deploys skip it)
 packages/       Shared libraries (currently empty)
 content/         Content submodules
   articles/      Article content submodule
@@ -43,6 +45,12 @@ workspace root, not under `apps/web`. Code that needs them must go through
 `lib/workspace-paths.ts` (`getWorkspaceRoot()` / `workspacePath(...)`) rather
 than `process.cwd()`, which is only correct when a process happens to have
 been started from `apps/web`.
+
+`tools/pdf` is deliberately outside the pnpm workspace and installs from its
+own lockfile. Site installs, typechecks, and Vercel deploys must never pull in
+the renderer's dependencies; the PDF job installs them separately. The renderer
+reads the site only through generated artifacts under `apps/web/data/`, never by
+importing site code.
 
 ## Setup
 
@@ -74,6 +82,16 @@ pnpm generate:content            # Re-render article content artifacts
 pnpm generate:glossary           # Rebuild apps/web/data/glossary*.json
 pnpm articles:update             # Pull latest articles submodule commit
 pnpm glossary:update             # Pull latest glossary submodule commit
+
+```bash
+# The PDF renderer is a sidecar with its own lockfile. Install it once, then
+# build from the repo root. It never runs as part of a site build.
+cd tools/pdf && pnpm install && cd ../..
+pnpm build:pdf                   # Both editions into apps/web/data/pdf-dist/
+cd tools/pdf
+pnpm run build:pdf -- --locale en    # One edition
+pnpm exec tsx src/cli.tsx pages <file.pdf>   # Page count, for CI checks
+pnpm typecheck                   # Renderer-only typecheck
 ```
 
 Before declaring any build-affecting change complete, run `pnpm check && pnpm test`.

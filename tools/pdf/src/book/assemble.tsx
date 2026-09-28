@@ -43,11 +43,6 @@ export type AssembledBook = {
   articleCount: number
 }
 
-/** Children of a node, or none when the node carries no child list. */
-function childrenOf(node: Node): Node[] {
-  return node.type === "container" ? (node.children ?? []) : []
-}
-
 /** Stamps the internal anchor the table of contents links to. */
 function anchor(node: Node, id: string): Node {
   return { ...node, id }
@@ -72,12 +67,17 @@ export async function assembleBook(
   const css: string[] = []
   let articleCount = 0
 
-  /** Lowers one piece of the shell to nodes and queues it in reading order. */
+  /**
+   * Lowers one piece of the shell to nodes and queues it in reading order.
+   * The lowered root is kept, not unwrapped: the style on a piece's outermost
+   * element is what carries its page break, and dropping the wrapper dropped
+   * every chapter opener's `breakBefore` along with it.
+   */
   const append = async (element: ReactNode): Promise<void> => {
     const lowered = await fromJsx(
       <PdfcnThemeProvider theme={gtmcTheme}>{element}</PdfcnThemeProvider>
     )
-    parts.push(...childrenOf(lowered.node))
+    parts.push(lowered.node)
     css.push(...lowered.css)
   }
 
@@ -86,7 +86,7 @@ export async function assembleBook(
     const head = await fromJsx(
       <PdfcnThemeProvider theme={gtmcTheme}>
         <View style={bookStyles.article}>
-          <ArticleHead article={article} locale={locale} />
+          <ArticleHead article={article} />
         </View>
       </PdfcnThemeProvider>
     )
@@ -102,6 +102,8 @@ export async function assembleBook(
     articleCount += 1
   }
 
+  // The cover fills its page exactly, so the contents would start on the next
+  // one anyway; the explicit break states that rather than relying on it.
   await append(
     <View style={bookStyles.page}>
       <Cover
@@ -113,6 +115,11 @@ export async function assembleBook(
         revision={options.revision}
         sourceUrl={options.sourceUrl}
       />
+    </View>
+  )
+
+  await append(
+    <View style={[bookStyles.page, { breakBefore: "page" }]}>
       <Toc plan={plan} locale={locale} />
     </View>
   )

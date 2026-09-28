@@ -34,7 +34,6 @@ export function Cover({
     <View style={bookStyles.coverRoot}>
       <View style={bookStyles.coverBand} />
       <View style={bookStyles.coverBody}>
-        <Text style={bookStyles.apparatus}>{edition}</Text>
         <Text style={bookStyles.coverTitle}>{title}</Text>
         {subtitle ? (
           <Text style={bookStyles.coverSubtitle}>{subtitle}</Text>
@@ -44,10 +43,17 @@ export function Cover({
           <Text style={bookStyles.coverTagline}>{tagline}</Text>
         ) : null}
       </View>
+      {/* The edition is a fact about this copy, not a title, so it sits with
+          the other facts at the foot instead of above the name. */}
       <View style={bookStyles.coverFoot}>
-        <Text style={bookStyles.apparatusQuiet}>
-          {revision ? `${labels.revision} ${revision.slice(0, 7)}` : ""}
-        </Text>
+        <View>
+          <Text style={bookStyles.coverEdition}>{edition}</Text>
+          {revision ? (
+            <Text style={bookStyles.apparatusQuiet}>
+              {`${labels.revision} ${revision.slice(0, 7)}`}
+            </Text>
+          ) : null}
+        </View>
         <Text style={bookStyles.apparatusQuiet}>{sourceUrl ?? ""}</Text>
       </View>
     </View>

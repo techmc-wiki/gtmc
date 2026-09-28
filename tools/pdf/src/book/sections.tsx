@@ -49,19 +49,16 @@ export function ChapterOpener({ chapter, locale }: ChapterOpenerProps) {
 
 export interface ArticleHeadProps {
   article: BookArticle
-  locale: PdfLocale
 }
 
-/** The article's own head: running number, then title. */
-export function ArticleHead({ article, locale }: ArticleHeadProps) {
-  const labels = bookLabels(locale)
+/**
+ * The article's own head. It carries the title and nothing else: the number
+ * is already on the chapter opener's list and against the contents entry, so
+ * repeating it above the title told the reader the same thing three times.
+ */
+export function ArticleHead({ article }: ArticleHeadProps) {
   return (
     <View style={bookStyles.articleHeader}>
-      <Text style={bookStyles.articleNumber}>
-        {/* A folder introduction opens its chapter without a number of its
-            own, so it carries the title alone. */}
-        {article.number ? `${labels.article} ${article.number}` : ""}
-      </Text>
       {/* The `h2` the article's own sections nest under; see `demoteHeadings`. */}
       <h2 style={bookStyles.articleTitle as React.CSSProperties}>
         {article.title}

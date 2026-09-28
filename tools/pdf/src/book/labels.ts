@@ -17,8 +17,6 @@ export interface BookLabels {
   chapterLabel: (number: string) => string
   appendixLabel: (number: string) => string
   inThisChapter: string
-  /** The running label the article head gives a numbered article. */
-  article: string
   revision: string
   colophonTitle: string
   colophonSource: string
@@ -37,7 +35,6 @@ const LABELS: Record<PdfLocale, BookLabels> = {
     chapterLabel: (number) => `Chapter ${number}`,
     appendixLabel: (number) => `Appendix ${number}`,
     inThisChapter: "In this chapter",
-    article: "Article",
     revision: "Revision",
     colophonTitle: "Colophon",
     colophonSource:
@@ -55,7 +52,6 @@ const LABELS: Record<PdfLocale, BookLabels> = {
     chapterLabel: (number) => `第 ${number} 章`,
     appendixLabel: (number) => `附录 ${number}`,
     inThisChapter: "本章内容",
-    article: "文章",
     revision: "版本",
     colophonTitle: "版本说明",
     colophonSource: "本版本生成自 Graduate Texts in Minecraft 文章仓库。",

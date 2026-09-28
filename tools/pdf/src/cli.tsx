@@ -16,7 +16,7 @@ import { articlesRevision, bookCopy, SOURCE_URL } from "./book/copy"
 import { buildPlan, readManifest } from "./book/manifest"
 import type { PdfLocale } from "./book/manifest"
 import { loadFonts, trimToContent } from "./fonts"
-import { GTMC_COLORS } from "./theme"
+import { FONT_STACKS, GTMC_COLORS } from "./theme"
 import { MARGIN } from "./geometry"
 import { siteRoot } from "./workspace"
 
@@ -178,15 +178,24 @@ async function buildLocale(locale: PdfLocale, output: string): Promise<void> {
         ? { creationDate: new Date().toISOString().slice(0, 19) }
         : {}),
     },
-    // The running head carries the book title, so it is set in the sans face at
-    // sentence case. A full-capital monospace wordmark repeated on every page
-    // is a label pretending to be a name; the folio below it stays monospace
-    // because that is genuine apparatus.
+    // The running head is inset by the page margins, because the band is laid
+    // out across the whole sheet and would otherwise sit left of the text it
+    // heads. It is set in the sans at sentence case: a full-capital mono
+    // wordmark repeated on every page is a label pretending to be a name. The
+    // folio below it stays monospace, because that is genuine apparatus.
+    //
+    // The band cannot vary by section — the renderer resolves one band for the
+    // whole document — so it cannot carry the current chapter. It is dropped
+    // from the cover and the colophon, the two pages that are not part of the
+    // run of text, along with the cover's folio.
     header: (
       <div
         style={{
+          boxSizing: "border-box",
           width: "100%",
-          fontFamily: '"Geist", "Noto Sans SC", sans-serif',
+          paddingLeft: MARGIN.left,
+          paddingRight: MARGIN.right,
+          fontFamily: FONT_STACKS.sans,
           fontSize: 7.5,
           color: GTMC_COLORS.ink,
         }}>
@@ -199,13 +208,17 @@ async function buildLocale(locale: PdfLocale, output: string): Promise<void> {
           display: "flex",
           justifyContent: "center",
           width: "100%",
-          fontFamily: '"Geist Mono", "Noto Sans SC", monospace',
+          fontFamily: FONT_STACKS.mono,
           fontSize: 7,
-          color: "#4a5468",
+          color: GTMC_COLORS.ink,
         }}>
         <span className="pageNumber" />
       </div>
     ),
+    pages: {
+      first: { header: false, footer: false },
+      last: { header: false },
+    },
   })
 
   const target = outputPath(output, locale)

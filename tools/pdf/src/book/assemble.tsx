@@ -217,11 +217,22 @@ pre code .line {
 }
 /* Image sizing is written onto each tag by the asset pipeline: the renderer
    ignores max-width and max-height on replaced elements, so a stylesheet
-   cannot constrain a figure here. */
+   cannot constrain a figure here.
+   An image must be block-level. Laid out inline it sits on a text baseline
+   and its line box reserves a second copy of its height, so every figure left
+   a hole under it as tall as the figure itself. */
+img {
+  display: block;
+  margin: 10pt auto;
+  break-inside: avoid;
+}
 figure {
   margin: 10pt 0;
   text-align: center;
   break-inside: avoid;
+}
+figure img {
+  margin: 0 auto;
 }
 figcaption {
   font-family: ${FONT_STACKS.mono};

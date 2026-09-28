@@ -275,6 +275,12 @@ export async function prepareImages(
       continue
     }
     images.push({ src, data: result.data })
+    // The transcoded bytes carry the same dimensions as the source, so a
+    // converted image is fitted like any other. Without this it embeds at
+    // intrinsic size and runs past the column.
+    if (meta?.width && meta.height) {
+      sized.push({ tag, ...fitToColumn(meta.width, meta.height) })
+    }
     converted.push({
       src,
       file,

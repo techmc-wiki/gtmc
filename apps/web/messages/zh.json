@@ -113,8 +113,6 @@
     "warning_label": "警告"
   },
   "ChapterNav": {
-    "buttonCollapseAll": "折叠全部",
-    "buttonLocate": "定位当前",
     "empty": "目录暂无条目",
     "title": "文章目录"
   },
@@ -354,6 +352,7 @@
   "Footer": {
     "attribution": "贡献者保留各自作品的版权。文章内容以 CC BY-NC-SA 4.0 协议发布，署名信息保存在文章元数据与源代码历史记录中。",
     "copyright": "© {start}–{year} GTMC Collective",
+    "rareUiCredit": "界面组件：Rare UI",
     "disclaimer": "本站为非官方 Minecraft 产品，与 Mojang Studios 无任何关联。",
     "linkAbout": "关于",
     "linkAuthors": "贡献者",
@@ -473,13 +472,10 @@
     "submitTitle": "提交审核"
   },
   "Outline": {
-    "close": "关闭",
-    "closeSheet": "关闭本文目录",
     "openSheet": "打开本文目录",
-    "progressLabel": "阅读进度",
-    "backToTopPct": "阅读进度 {pct}%：回到顶部",
+    "hideRail": "隐藏本文目录",
     "railLabel": "本文目录",
-    "sheetLabel": "本文目录",
+    "showRail": "显示本文目录",
     "title": "本文目录"
   },
   "Pdf": {

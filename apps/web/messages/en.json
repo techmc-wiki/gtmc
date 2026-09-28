@@ -113,8 +113,6 @@
     "warning_label": "Warning"
   },
   "ChapterNav": {
-    "buttonCollapseAll": "Collapse all",
-    "buttonLocate": "Locate current",
     "empty": "No entries in contents",
     "title": "Table of contents"
   },
@@ -354,6 +352,7 @@
   "Footer": {
     "attribution": "Contributors retain copyright. Article content is released under CC BY-NC-SA 4.0 with attribution preserved through article metadata and source history.",
     "copyright": "© {start}–{year} GTMC Collective",
+    "rareUiCredit": "UI components by Rare UI",
     "disclaimer": "Not an official Minecraft product. Not affiliated with Mojang Studios.",
     "linkAbout": "About",
     "linkAuthors": "Authors",
@@ -473,13 +472,10 @@
     "submitTitle": "Submitting for review"
   },
   "Outline": {
-    "close": "Close",
-    "closeSheet": "Close article outline",
     "openSheet": "Open article outline",
-    "progressLabel": "Reading progress",
-    "backToTopPct": "Reading progress {pct}%: back to top",
+    "hideRail": "Hide article outline",
     "railLabel": "On this page",
-    "sheetLabel": "Article outline",
+    "showRail": "Show article outline",
     "title": "On this page"
   },
   "Pdf": {

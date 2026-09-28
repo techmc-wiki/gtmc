@@ -10,7 +10,6 @@
     "analyze": "next experimental-analyze",
     "build:content": "tsx scripts/build-content.ts",
     "build:next": "tsx scripts/build-next.ts",
-    "build:pdf": "tsx scripts/generate-pdf.ts",
     "build:vercel": "tsx scripts/build-vercel.ts",
     "build": "tsx scripts/build.ts",
     "check": "vp check && tsc --noEmit",

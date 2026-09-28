@@ -2,7 +2,7 @@
   "name": "gtmc-workspace",
   "version": "2.8.5",
   "private": true,
-  "description": "GTMC monorepo root. The Next.js site lives in apps/web; the Go PDF renderer lives in tools/pdfgen.",
+  "description": "GTMC monorepo root. The Next.js site lives in apps/web; the PDF renderer lives in tools/pdf.",
   "repository": {
     "type": "git",
     "url": "https://github.com/techmc-wiki/gtmc.git"
@@ -14,7 +14,7 @@
     "articles:update": "git submodule update --remote content/articles",
     "build:content": "pnpm --filter @gtmc/web run build:content",
     "build:next": "pnpm --filter @gtmc/web run build:next",
-    "build:pdf": "pnpm --filter @gtmc/web run build:pdf",
+    "build:pdf": "pnpm --dir tools/pdf run build:pdf",
     "build:vercel": "pnpm --filter @gtmc/web run build:vercel",
     "build": "pnpm --filter @gtmc/web run build",
     "check": "pnpm --filter @gtmc/web run check",

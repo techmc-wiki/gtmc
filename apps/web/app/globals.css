@@ -515,43 +515,6 @@ body {
   }
 }
 
-@utility reader-rail-scrollbar {
-  direction: rtl;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in oklab, var(--color-tech-main) 28%, transparent)
-    transparent;
-
-  & > * {
-    direction: ltr;
-  }
-
-  &::-webkit-scrollbar {
-    width: 3px;
-    height: 3px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: color-mix(
-      in oklab,
-      var(--color-tech-main) 28%,
-      transparent
-    );
-    border-radius: 0;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background-color: color-mix(
-      in oklab,
-      var(--color-tech-main) 60%,
-      transparent
-    );
-  }
-}
-
 @utility page-container {
   @apply mx-auto w-full max-w-6xl space-y-8;
 }
@@ -570,10 +533,6 @@ body {
   [data-slot="resizable-panel"]:has([data-state="inactive"]) {
     display: none !important;
   }
-}
-
-@utility nested-list {
-  @apply guide-line space-y-3 border-l pl-3;
 }
 
 @utility section-divider {

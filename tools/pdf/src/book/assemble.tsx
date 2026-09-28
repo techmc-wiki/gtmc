@@ -177,7 +177,6 @@ code {
 }
 pre code {
   font-size: inherit;
-  background: none;
   padding: 0;
   display: block;
 }
@@ -193,10 +192,14 @@ pre code .line {
    cannot constrain a figure here.
    An image must be block-level. Laid out inline it sits on a text baseline
    and its line box reserves a second copy of its height, so every figure left
-   a hole under it as tall as the figure itself. */
+   a hole under it as tall as the figure itself.
+   The frame is what makes a figure legible on paper: a screenshot of a
+   transparent PNG otherwise ends at whatever the last painted pixel was, and
+   on a white sheet that reads as a picture with a ragged edge. */
 img {
   display: block;
   margin: 10pt auto;
+  border: 0.5pt solid ${GTMC_COLORS.line};
   break-inside: avoid;
 }
 /* A formula is a drawing on a transparent ground, so it takes no frame, and it
@@ -227,11 +230,20 @@ figure {
 figure img {
   margin: 0 auto;
 }
-figcaption {
+figcaption, .gif-caption {
   font-family: ${FONT_STACKS.mono};
   font-size: 7.5pt;
-  color: ${GTMC_COLORS.ink};
+  color: ${GTMC_COLORS.dim};
+  text-align: center;
   margin-top: 4pt;
+}
+/* The way back to the animated original. It is a link, so it is underlined
+   rather than coloured: there is no hue left on the page to set it apart. */
+.gif-source-link {
+  font-family: ${FONT_STACKS.mono};
+  font-size: 7.5pt;
+  color: ${GTMC_COLORS.dim};
+  text-decoration: underline;
 }
 table {
   width: 100%;
@@ -268,9 +280,5 @@ aside[data-callout] {
   padding: 6pt 8pt;
   margin: 8pt 0;
   border-left: 2pt solid ${GTMC_COLORS.ink};
-}
-.gif-caption, .gif-source-link {
-  font-family: ${FONT_STACKS.mono};
-  font-size: 7.5pt;
 }
 `

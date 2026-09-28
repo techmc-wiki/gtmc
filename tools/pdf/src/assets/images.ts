@@ -5,6 +5,7 @@ import path from "node:path"
 import type { ImageSource } from "@takumi-rs/helpers/renderer"
 import sharp from "sharp"
 
+import { COLUMN_WIDTH, MAX_IMAGE_HEIGHT, fitToColumn } from "@/geometry"
 import { articlesRoot, cacheDir } from "@/workspace"
 
 export type { ImageSource }
@@ -197,6 +198,9 @@ export async function prepareImages(
         ? options.baseDir
         : path.join(articlesRoot(), options.baseDir)
 
+  // Sized tags are collected and substituted after the loop, so the scan can
+  // keep reading the original markup while it works out intrinsic sizes.
+  const sized: { tag: string; width: number; height: number }[] = []
   for (const [tag] of html.matchAll(IMG_TAG)) {
     const attr = SRC_ATTR.exec(tag)
     const src = (attr?.[1] ?? attr?.[2] ?? "").trim()
@@ -249,6 +253,11 @@ export async function prepareImages(
 
     if (embedsDirectly) {
       images.push({ src, data: new Uint8Array(bytes) })
+      if (meta?.width && meta.height) {
+        sized.push({ tag, ...fitToColumn(meta.width, meta.height) })
+      } else if (isSvg) {
+        sized.push({ tag, ...fitSvgTag() })
+      }
       continue
     }
 
@@ -276,5 +285,26 @@ export async function prepareImages(
     })
   }
 
-  return { html, images, missing, unreadable, converted }
+  let sizedHtml = html
+  for (const { tag, width, height } of sized) {
+    // The renderer scales a replaced element only from explicit width and
+    // height, so both are written onto the tag. Sizing already in the markup is
+    // replaced rather than compounded.
+    sizedHtml = sizedHtml.replace(
+      tag,
+      tag
+        .replace(/\s(width|height)="[^"]*"/g, "")
+        .replace(/>$/, ` width="${width}" height="${height}" />`)
+    )
+  }
+
+  return { html: sizedHtml, images, missing, unreadable, converted }
+}
+
+/**
+ * An `<img>` pointing at an SVG carries no sharp metadata, so it is sized to
+ * the column at a figure-like proportion rather than left to overflow.
+ */
+function fitSvgTag(): { width: number; height: number } {
+  return { width: COLUMN_WIDTH, height: Math.min(MAX_IMAGE_HEIGHT, 200) }
 }

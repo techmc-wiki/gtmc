@@ -18,7 +18,11 @@ export function ChapterOpener({ chapter }: { chapter: BookChapter }) {
         {chapter.isAppendix ? "Appendix" : "Chapter"}
       </Text>
       <Text style={bookStyles.chapterNumeral}>{chapter.number}</Text>
-      <Text style={bookStyles.chapterTitle}>{chapter.title}</Text>
+      {/* A real `h1`, not a styled span: the PDF outline is built from heading
+          tags, so a chapter that is not one is a chapter with no bookmark. */}
+      <h1 style={bookStyles.chapterTitle as React.CSSProperties}>
+        {chapter.title}
+      </h1>
       <View style={bookStyles.chapterContents}>
         <Text style={bookStyles.chapterContentsLabel}>In this chapter</Text>
         <Stack gap="none">
@@ -39,7 +43,10 @@ export function ArticleHead({ article }: { article: BookArticle }) {
   return (
     <View style={bookStyles.articleHeader}>
       <Text style={bookStyles.articleNumber}>Article {article.number}</Text>
-      <Text style={bookStyles.articleTitle}>{article.title}</Text>
+      {/* The `h2` the article's own sections nest under; see `demoteHeadings`. */}
+      <h2 style={bookStyles.articleTitle as React.CSSProperties}>
+        {article.title}
+      </h2>
     </View>
   )
 }
@@ -58,7 +65,7 @@ export function Colophon({
 }: ColophonProps) {
   return (
     <View style={bookStyles.colophon}>
-      <Text style={bookStyles.articleTitle}>Colophon</Text>
+      <h1 style={bookStyles.articleTitle as React.CSSProperties}>Colophon</h1>
       <View style={bookStyles.coverRule} />
       <Text style={bookStyles.tocText}>
         This edition was generated from the Graduate Texts in Minecraft article

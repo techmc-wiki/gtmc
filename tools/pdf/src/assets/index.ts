@@ -1,5 +1,5 @@
 export { prepareImages } from "@/assets/images"
 export type { ConvertedImage, PreparedImages } from "@/assets/images"
 export { renderMermaidDiagrams } from "@/assets/mermaid"
-export { stripKatexMathml } from "@/assets/cleanup"
+export { demoteHeadings, stripKatexMathml } from "@/assets/cleanup"
 export type { RenderedDiagrams } from "@/assets/mermaid"

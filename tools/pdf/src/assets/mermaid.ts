@@ -1,5 +1,7 @@
 import { Window } from "happy-dom"
 
+import { fitToColumn } from "@/geometry"
+
 /**
  * `<mermaid-diagram>` elements emitted by the content pipeline. The body is raw
  * mermaid source, HTML-escaped.
@@ -246,11 +248,15 @@ function toInlineSvg(svg: string): string {
   // must never come back degenerate.
   const width = vbW !== undefined && vbW > 0 ? vbW : 800
   const height = vbH !== undefined && vbH > 0 ? vbH : 600
+  // The renderer sizes a replaced element only from explicit width and height;
+  // the viewBox aspect ratio is preserved so a wide diagram fits the column
+  // instead of running off the page.
+  const fitted = fitToColumn(width, height)
 
   const open =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${x ?? 0} ${y ?? 0} ${width} ${height}" ` +
-    `width="${Math.round(width)}" height="${Math.round(height)}" ` +
-    `style="display:block;margin:1em auto;max-width:100%;height:auto">`
+    `width="${fitted.width}" height="${fitted.height}" ` +
+    `style="display:block;margin:1em auto">`
 
   return open + body.slice(root.index + root[0].length)
 }

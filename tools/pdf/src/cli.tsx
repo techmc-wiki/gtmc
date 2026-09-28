@@ -4,6 +4,7 @@ import path from "node:path"
 import { PdfRenderer } from "takumi-pdf"
 
 import {
+  demoteHeadings,
   prepareImages,
   renderMermaidDiagrams,
   stripKatexMathml,
@@ -15,6 +16,7 @@ import { buildPlan, readManifest } from "./book/manifest"
 import type { PdfLocale } from "./book/manifest"
 import { loadFonts, trimToContent } from "./fonts"
 import { GTMC_COLORS } from "./theme"
+import { MARGIN } from "./geometry"
 import { siteRoot } from "./workspace"
 
 interface CliOptions {
@@ -104,7 +106,9 @@ async function buildLocale(locale: PdfLocale, output: string): Promise<void> {
     generatedDate: new Date().toISOString().slice(0, 10),
     sourceUrl: SOURCE_URL,
     transform: async (html) => {
-      const withDiagrams = await renderMermaidDiagrams(stripKatexMathml(html))
+      const withDiagrams = await renderMermaidDiagrams(
+        demoteHeadings(stripKatexMathml(html))
+      )
       diagramsRendered += withDiagrams.rendered
       diagramFailures.push(...withDiagrams.failed)
       const prepared = await prepareImages(withDiagrams.html)
@@ -154,7 +158,7 @@ async function buildLocale(locale: PdfLocale, output: string): Promise<void> {
   const pdf = await new PdfRenderer().render(book.node, {
     size: "a4",
     lang: locale === "zh" ? "zh-Hans" : "en",
-    margin: { top: 56, right: 60, bottom: 64, left: 60 },
+    margin: { ...MARGIN },
     backgroundColor: "#f5f4ef",
     css: book.css,
     fonts,

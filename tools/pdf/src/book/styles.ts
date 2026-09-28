@@ -160,6 +160,9 @@ export const bookStyles = StyleSheet.create({
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
+    // A chapter opens on a page of its own; `100vh` alone would let the opener
+    // start wherever the previous article happened to end.
+    breakBefore: "page",
     height: "100vh",
     gap: 10,
   },

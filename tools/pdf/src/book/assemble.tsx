@@ -1,4 +1,11 @@
+import type { ReactNode } from "react"
+
+import { readFileSync } from "node:fs"
+import { createRequire } from "node:module"
+import path from "node:path"
+
 import { fromHtml } from "@takumi-rs/helpers/html"
+
 import { fromJsx } from "@takumi-rs/helpers/jsx"
 import type { Node } from "@takumi-rs/helpers"
 
@@ -60,78 +67,122 @@ function stripLeadingHeading(node: Node): Node {
 }
 
 /**
- * Assembles the book into a single node tree.
+ * Assembles the book into a single node tree, in reading order.
  *
- * The shell — cover, contents, chapter openers, article heads, colophon — is
- * built from pdfcn React components and lowered to nodes. Article bodies arrive
- * as HTML from the site pipeline and are parsed into nodes the shell is spliced
- * onto, so the whole book goes through one pagination pass.
+ * Every piece is lowered to nodes on its own and laid end to end: cover,
+ * contents, then for each chapter its opener followed by each article's head
+ * immediately followed by that article's body, and the colophon last. Article
+ * bodies arrive as HTML from the site pipeline; the shell around them is built
+ * from pdfcn React components. Keeping everything in one ordered list is what
+ * puts a body under its own head, and it also means the whole book goes
+ * through a single pagination pass.
  */
 export async function assembleBook(
   options: AssembleOptions
 ): Promise<AssembledBook> {
   const { plan, transform } = options
 
-  const shell = await fromJsx(
-    <PdfcnThemeProvider theme={gtmcTheme}>
-      <View style={bookStyles.page}>
-        <Cover
-          edition={options.edition}
-          title={options.title}
-          subtitle={options.subtitle}
-          tagline={options.tagline}
-          revision={options.revision}
-          sourceUrl={options.sourceUrl}
-        />
-        <Toc plan={plan} />
-        {plan.preface.map((article) => (
-          <View key={article.slug} style={bookStyles.article}>
-            <ArticleHead article={article} />
-          </View>
-        ))}
-        {plan.chapters.map((chapter) => (
-          <View key={chapter.slug}>
-            <ChapterOpener chapter={chapter} />
-            {chapter.articles.map((article) => (
-              <View key={article.slug} style={bookStyles.article}>
-                <ArticleHead article={article} />
-              </View>
-            ))}
-          </View>
-        ))}
-        <Colophon
-          revision={options.revision}
-          generatedDate={options.generatedDate}
-          sourceUrl={options.sourceUrl}
-        />
-      </View>
-    </PdfcnThemeProvider>
-  )
-
-  const bodies: Node[] = []
-  const css = [...shell.css]
+  const parts: Node[] = []
+  const css: string[] = []
   let articleCount = 0
 
-  const all: BookArticle[] = [
-    ...plan.preface,
-    ...plan.chapters.flatMap((chapter) => chapter.articles),
-  ]
+  /** Lowers one piece of the shell to nodes and queues it in reading order. */
+  const append = async (element: ReactNode): Promise<void> => {
+    const lowered = await fromJsx(
+      <PdfcnThemeProvider theme={gtmcTheme}>{element}</PdfcnThemeProvider>
+    )
+    parts.push(...childrenOf(lowered.node))
+    css.push(...lowered.css)
+  }
 
-  for (const article of all) {
+  const appendArticle = async (article: BookArticle): Promise<void> => {
     const html = await transform(article.html)
-    if (!html) continue
+    const head = await fromJsx(
+      <PdfcnThemeProvider theme={gtmcTheme}>
+        <View style={bookStyles.article}>
+          <ArticleHead article={article} />
+        </View>
+      </PdfcnThemeProvider>
+    )
+    // The anchor goes on the head, so a contents link lands on the article's
+    // title rather than a line further down its body.
+    parts.push(anchor(head.node, article.slug))
+    css.push(...head.css)
+
+    if (!html) return
     const parsed = fromHtml(html)
+    parts.push(stripLeadingHeading(parsed.node))
     css.push(...parsed.css)
-    bodies.push(anchor(stripLeadingHeading(parsed.node), article.slug))
     articleCount += 1
   }
 
-  const node: Node = {
-    type: "container",
-    children: [...childrenOf(shell.node), ...bodies],
+  await append(
+    <View style={bookStyles.page}>
+      <Cover
+        edition={options.edition}
+        title={options.title}
+        subtitle={options.subtitle}
+        tagline={options.tagline}
+        revision={options.revision}
+        sourceUrl={options.sourceUrl}
+      />
+      <Toc plan={plan} />
+    </View>
+  )
+
+  for (const article of plan.preface) {
+    await appendArticle(article)
   }
 
-  return { node, css: [CONTENT_CSS, ...css], articleCount }
+  for (const chapter of plan.chapters) {
+    await append(<ChapterOpener chapter={chapter} />)
+    for (const article of chapter.articles) {
+      await appendArticle(article)
+    }
+  }
+
+  await append(
+    <Colophon
+      revision={options.revision}
+      generatedDate={options.generatedDate}
+      sourceUrl={options.sourceUrl}
+    />
+  )
+
+  // The page style sits on this root, so every queued part inherits the
+  // reading face, the measure, and the warm paper.
+  const node: Node = {
+    type: "container",
+    style: bookStyles.page as React.CSSProperties,
+    children: parts,
+  }
+
+  return { node, css: [katexCss(), CONTENT_CSS, ...css], articleCount }
+}
+
+/**
+ * KaTeX's own stylesheet, read once and memoized.
+ *
+ * The article sidecars are bare fragments with no stylesheet, and KaTeX's
+ * visual layer is meaningless without its CSS: the vertical lists that stack
+ * superscripts and fractions are positioned by `.vlist-t` / `.vlist-r`, and
+ * the inline `height` on `.pstrut` is only meaningful alongside those rules.
+ * Laying it out unstyled rotated and reflowed the text and ran one chapter of
+ * formulas to seven hundred pages.
+ */
+let katexCssCache: string | null = null
+
+function katexCss(): string {
+  if (katexCssCache !== null) return katexCssCache
+  const require = createRequire(import.meta.url)
+  // The package's `exports` map covers its JS entry points, not its
+  // stylesheet, so the file is resolved against the package directory.
+  const packageDir = path.dirname(require.resolve("katex/package.json"))
+  katexCssCache = readFileSync(
+    path.join(packageDir, "dist", "katex.min.css"),
+    "utf8"
+  )
+  return katexCssCache
 }
 
 /**
@@ -169,10 +220,9 @@ pre code .line {
   display: block;
   min-height: 1em;
 }
-img, svg {
-  max-width: 100%;
-  height: auto;
-}
+/* Image sizing is written onto each tag by the asset pipeline: the renderer
+   ignores max-width and max-height on replaced elements, so a stylesheet
+   cannot constrain a figure here. */
 figure {
   margin: 10pt 0;
   text-align: center;

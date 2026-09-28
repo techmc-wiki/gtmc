@@ -156,6 +156,9 @@ export async function assembleBook(
  * site's stylesheet targets a screen, where a long code line scrolls sideways;
  * a page cannot scroll, so code wraps and keeps its hanging indent. Figures and
  * tables are capped to the text column rather than running into the margin.
+ *
+ * Nothing here is tinted: the sheet is white, so a block is separated from the
+ * page by a rule and by its own type size rather than by a fill.
  */
 const CONTENT_CSS = `
 pre {
@@ -165,8 +168,7 @@ pre {
   font-size: 8.5pt;
   line-height: 1.45;
   padding: 6pt 8pt;
-  background-color: ${GTMC_COLORS.surface};
-  border-left: 2pt solid ${GTMC_COLORS.line};
+  border-left: 2pt solid ${GTMC_COLORS.ink};
   break-inside: avoid;
 }
 code {
@@ -238,19 +240,23 @@ table {
   break-inside: avoid;
 }
 th, td {
-  border: 0.5pt solid ${GTMC_COLORS.line};
+  border-bottom: 0.5pt solid ${GTMC_COLORS.line};
   padding: 3pt 5pt;
   text-align: left;
 }
 th {
-  background-color: ${GTMC_COLORS.surface};
+  border-top: 1pt solid ${GTMC_COLORS.ink};
+  border-bottom: 0.5pt solid ${GTMC_COLORS.ink};
   font-weight: 600;
+}
+tbody tr:last-child td {
+  border-bottom: 1pt solid ${GTMC_COLORS.ink};
 }
 blockquote {
   margin: 8pt 0;
   padding-left: 8pt;
-  border-left: 2pt solid ${GTMC_COLORS.line};
-  color: ${GTMC_COLORS.ink};
+  border-left: 2pt solid ${GTMC_COLORS.ink};
+  color: ${GTMC_COLORS.dim};
 }
 hr {
   border: none;
@@ -261,8 +267,7 @@ aside[data-callout] {
   break-inside: avoid;
   padding: 6pt 8pt;
   margin: 8pt 0;
-  border-left: 2pt solid ${GTMC_COLORS.signal};
-  background-color: ${GTMC_COLORS.surface};
+  border-left: 2pt solid ${GTMC_COLORS.ink};
 }
 .gif-caption, .gif-source-link {
   font-family: ${FONT_STACKS.mono};

@@ -1,6 +1,6 @@
 import { StyleSheet } from "@/lib/pdf-primitives"
 
-import { BODY_FONT_SIZE_PT, CALLOUT, FONT_STACKS, GTMC_COLORS } from "../theme"
+import { BODY_FONT_SIZE_PT, FONT_STACKS, GTMC_COLORS } from "../theme"
 import { COLUMN_HEIGHT } from "../geometry"
 
 /**
@@ -25,47 +25,15 @@ export const bookStyles = StyleSheet.create({
   },
 
   // ── Labels ──────────────────────────────────────────────────────────────
-  /**
-   * A label that names something: the chapter a number belongs to, the block
-   * a list introduces, the front matter of the contents. Sentence case in the
-   * sans, with a little tracking so it still sits apart from the title under
-   * it without announcing itself in capitals.
-   */
-  kicker: {
-    fontFamily: FONT_STACKS.sans,
-    fontSize: 8.5,
-    letterSpacing: 0.06,
-    color: GTMC_COLORS.ink,
-  },
-  /** The same label, in the signal colour, where it opens a section. */
-  kickerSignal: {
-    fontFamily: FONT_STACKS.sans,
-    fontSize: 8.5,
-    letterSpacing: 0.06,
-    color: GTMC_COLORS.signal,
-  },
   /** Monospace, for values the reader compares: revision, URL, folio. */
   apparatusQuiet: {
     fontFamily: FONT_STACKS.mono,
     fontSize: 8,
     letterSpacing: 0.06,
-    color: GTMC_COLORS.ink,
+    color: GTMC_COLORS.dim,
   },
 
   // ── Cover ───────────────────────────────────────────────────────────────
-  /**
-   * The wordmark is set in the display serif, not the apparatus face.
-   * Monospace, uppercase, and wide tracking belong to controls and running
-   * furniture; a full-capital mono wordmark reads as a label rather than a
-   * name, and the cover is the one place the name has to carry.
-   */
-  coverWordmark: {
-    fontFamily: FONT_STACKS.serif,
-    fontSize: 13,
-    fontWeight: 600,
-    letterSpacing: 0.04,
-    color: GTMC_COLORS.signal,
-  },
   /**
    * The cover is placed by explicit offsets rather than by filling the page
    * and pushing the foot down. A container as tall as the page is the one box
@@ -79,7 +47,7 @@ export const bookStyles = StyleSheet.create({
   },
   coverBand: {
     height: 6,
-    backgroundColor: GTMC_COLORS.signal,
+    backgroundColor: GTMC_COLORS.ink,
   },
   coverBody: {
     display: "flex",
@@ -93,12 +61,12 @@ export const bookStyles = StyleSheet.create({
     fontSize: 34,
     fontWeight: 700,
     lineHeight: 1.12,
-    color: GTMC_COLORS.inkDark,
+    color: GTMC_COLORS.ink,
   },
   coverSubtitle: {
     fontFamily: FONT_STACKS.serif,
     fontSize: 14,
-    color: GTMC_COLORS.ink,
+    color: GTMC_COLORS.dim,
   },
   coverRule: {
     height: 1,
@@ -108,7 +76,7 @@ export const bookStyles = StyleSheet.create({
     fontFamily: FONT_STACKS.serif,
     fontSize: 11,
     fontStyle: "italic",
-    color: GTMC_COLORS.ink,
+    color: GTMC_COLORS.dim,
   },
   coverFoot: {
     display: "flex",
@@ -123,7 +91,7 @@ export const bookStyles = StyleSheet.create({
   coverEdition: {
     fontFamily: FONT_STACKS.sans,
     fontSize: 9,
-    color: GTMC_COLORS.inkDark,
+    color: GTMC_COLORS.dim,
     marginBottom: 2,
   },
 
@@ -132,7 +100,7 @@ export const bookStyles = StyleSheet.create({
     fontFamily: FONT_STACKS.serif,
     fontSize: 20,
     fontWeight: 600,
-    color: GTMC_COLORS.inkDark,
+    color: GTMC_COLORS.ink,
     marginBottom: 14,
   },
   tocChapter: {
@@ -143,13 +111,13 @@ export const bookStyles = StyleSheet.create({
     fontFamily: FONT_STACKS.sans,
     fontSize: 8.5,
     letterSpacing: 0.06,
-    color: GTMC_COLORS.signal,
+    color: GTMC_COLORS.ink,
   },
   tocChapterTitle: {
     fontFamily: FONT_STACKS.serif,
     fontSize: 13,
     fontWeight: 600,
-    color: GTMC_COLORS.inkDark,
+    color: GTMC_COLORS.ink,
   },
   /** One row: number, title, dot leader, folio. */
   tocRow: {
@@ -163,13 +131,13 @@ export const bookStyles = StyleSheet.create({
   tocNum: {
     fontFamily: FONT_STACKS.mono,
     fontSize: 8,
-    color: GTMC_COLORS.ink,
+    color: GTMC_COLORS.dim,
     minWidth: 18,
   },
   tocText: {
     fontFamily: FONT_STACKS.serif,
     fontSize: BODY_FONT_SIZE_PT,
-    color: GTMC_COLORS.inkDark,
+    color: GTMC_COLORS.ink,
   },
   /** Stretched rule that draws the leader between title and folio. */
   tocLeader: {
@@ -182,7 +150,7 @@ export const bookStyles = StyleSheet.create({
   tocFolio: {
     fontFamily: FONT_STACKS.mono,
     fontSize: 8,
-    color: GTMC_COLORS.ink,
+    color: GTMC_COLORS.dim,
     minWidth: 26,
     textAlign: "right",
   },
@@ -203,7 +171,7 @@ export const bookStyles = StyleSheet.create({
     fontFamily: FONT_STACKS.sans,
     fontSize: 9,
     letterSpacing: 0.08,
-    color: GTMC_COLORS.signal,
+    color: GTMC_COLORS.ink,
   },
   chapterNumeral: {
     fontFamily: FONT_STACKS.serif,
@@ -217,7 +185,7 @@ export const bookStyles = StyleSheet.create({
     fontSize: 26,
     fontWeight: 600,
     lineHeight: 1.2,
-    color: GTMC_COLORS.inkDark,
+    color: GTMC_COLORS.ink,
   },
   chapterContents: {
     marginTop: 10,
@@ -227,7 +195,7 @@ export const bookStyles = StyleSheet.create({
     fontFamily: FONT_STACKS.sans,
     fontSize: 8.5,
     letterSpacing: 0.06,
-    color: GTMC_COLORS.ink,
+    color: GTMC_COLORS.dim,
     marginBottom: 5,
   },
   chapterListRow: {
@@ -256,7 +224,7 @@ export const bookStyles = StyleSheet.create({
     fontSize: 17,
     fontWeight: 600,
     lineHeight: 1.25,
-    color: GTMC_COLORS.inkDark,
+    color: GTMC_COLORS.ink,
   },
 
   // ── Colophon ────────────────────────────────────────────────────────────
@@ -268,8 +236,3 @@ export const bookStyles = StyleSheet.create({
   },
 })
 
-/** Callout accent keyed by the article's `data-callout` value. */
-export function calloutColor(kind: string | undefined): string {
-  if (!kind) return CALLOUT.DEFAULT
-  return CALLOUT[kind as keyof typeof CALLOUT] ?? CALLOUT.DEFAULT
-}

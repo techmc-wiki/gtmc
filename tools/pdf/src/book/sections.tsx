@@ -5,7 +5,7 @@ import { View } from "@/lib/pdf-primitives"
 import { bookLabels } from "./labels"
 import type { BookArticle, BookChapter, PdfLocale } from "./manifest"
 import { bookStyles } from "./styles"
-import { GTMC_COLORS } from "../theme"
+import { FONT_STACKS } from "../theme"
 
 export interface ChapterOpenerProps {
   chapter: BookChapter
@@ -100,7 +100,7 @@ export function Colophon({
       {sourceUrl ? (
         <Text style={bookStyles.tocText}>
           {labels.colophonOnline}{" "}
-          <span style={{ color: GTMC_COLORS.signal }}>{sourceUrl}</span>
+          <span style={{ fontFamily: FONT_STACKS.mono }}>{sourceUrl}</span>
         </Text>
       ) : null}
     </View>

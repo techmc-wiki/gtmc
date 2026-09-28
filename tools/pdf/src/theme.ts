@@ -3,20 +3,26 @@ import type { PdfcnTheme } from "@/types/pdf-themes"
 import { defaultPrimitives } from "@/lib/pdf-themes/primitives"
 
 /**
- * The book is the reader surface, not an app surface: warm paper, dark ink,
- * and a single signal colour reserved for the apparatus. Values mirror the
- * site palette in `apps/web/lib/pdf/theme.ts` so the PDF and the site read as
- * one system.
+ * The book is printed as often as it is read on a screen, and only black on
+ * bare paper is both cheap to print and faithful in a photocopy: a tinted
+ * sheet prints as a gray, and a hue prints as its ink. So the palette is a
+ * ramp of grays and nothing else, each value with one job.
+ *
+ * Losing colour means hierarchy has to be carried by weight and by the rules
+ * that frame a block, which is how a printed page carries it anyway.
  */
 export const GTMC_COLORS = {
-  paper: "#f5f4ef",
-  surface: "#fcfbf8",
-  ink: "#4a5468",
-  inkDark: "#20283c",
-  accent: "#c9cfdd",
-  line: "#d6d3c8",
-  signal: "#1d6a96",
-  signalInk: "#f5f4ef",
+  /** The sheet, and the fill of every block that sits on it. */
+  paper: "#ffffff",
+  surface: "#ffffff",
+  /** Body copy and headings. */
+  ink: "#000000",
+  /** Furniture: folios, running heads, captions, quiet labels. */
+  dim: "#4d4d4d",
+  /** Hairlines, table rules, and the frame around a figure. */
+  line: "#8a8a8a",
+  /** The chapter numeral, which is set large enough to carry a light gray. */
+  accent: "#767676",
 } as const
 
 /**
@@ -25,16 +31,6 @@ export const GTMC_COLORS = {
  */
 export const BODY_FONT_SIZE_PT = 10.5
 
-/** Callout accents, kept clear of each other so severity reads at a glance. */
-export const CALLOUT = {
-  TIP: "#047857",
-  IMPORTANT: GTMC_COLORS.signal,
-  WARNING: "#b45309",
-  CRASH: "#b91c1c",
-  CORRUPTION: "#6d28d9",
-  DEFAULT: GTMC_COLORS.ink,
-} as const
-
 export const gtmcTheme: PdfcnTheme = {
   name: "gtmc",
   primitives: defaultPrimitives,
@@ -42,15 +38,15 @@ export const gtmcTheme: PdfcnTheme = {
     accent: GTMC_COLORS.accent,
     background: GTMC_COLORS.paper,
     border: GTMC_COLORS.line,
-    destructive: CALLOUT.CRASH,
+    destructive: GTMC_COLORS.ink,
     foreground: GTMC_COLORS.ink,
-    info: GTMC_COLORS.signal,
-    muted: GTMC_COLORS.surface,
-    mutedForeground: GTMC_COLORS.ink,
-    primary: GTMC_COLORS.inkDark,
-    primaryForeground: GTMC_COLORS.signalInk,
-    success: CALLOUT.TIP,
-    warning: CALLOUT.WARNING,
+    info: GTMC_COLORS.ink,
+    muted: GTMC_COLORS.paper,
+    mutedForeground: GTMC_COLORS.dim,
+    primary: GTMC_COLORS.ink,
+    primaryForeground: GTMC_COLORS.paper,
+    success: GTMC_COLORS.ink,
+    warning: GTMC_COLORS.ink,
   },
   page: {
     orientation: "portrait",

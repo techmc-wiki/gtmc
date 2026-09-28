@@ -167,7 +167,7 @@ async function buildLocale(locale: PdfLocale, output: string): Promise<void> {
     size: "a4",
     lang: locale === "zh" ? "zh-Hans" : "en",
     margin: { ...MARGIN },
-    backgroundColor: "#f5f4ef",
+    backgroundColor: GTMC_COLORS.paper,
     css: book.css,
     fonts,
     fontFamilies: catalog.families,
@@ -203,7 +203,7 @@ async function buildLocale(locale: PdfLocale, output: string): Promise<void> {
           paddingRight: MARGIN.right,
           fontFamily: FONT_STACKS.sans,
           fontSize: 7.5,
-          color: GTMC_COLORS.ink,
+          color: GTMC_COLORS.dim,
         }}>
         <span>{copy.bookTitle}</span>
       </div>
@@ -216,7 +216,7 @@ async function buildLocale(locale: PdfLocale, output: string): Promise<void> {
           width: "100%",
           fontFamily: FONT_STACKS.mono,
           fontSize: 7,
-          color: GTMC_COLORS.ink,
+          color: GTMC_COLORS.dim,
         }}>
         <span className="pageNumber" />
       </div>

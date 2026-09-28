@@ -20,7 +20,7 @@ browser process and no headless Chromium in this pipeline.
 ```text
 manifest.json + pdf-html sidecars
   → plan (preface, chapters, articles)
-  → article transform (mermaid → SVG, GIF → WebP, image bytes)
+  → article transform (formulas → SVG, mermaid → SVG, GIF → WebP, image bytes)
   → shell: pdfcn components for cover, contents, openers, colophon
   → single node tree, one pagination pass
   → PDF with outline, internal links, and running furniture
@@ -56,20 +56,30 @@ advertise U+207B SUPERSCRIPT MINUS in their `unicode-range` but the subset
 bytes do not contain the glyph, so a range check is not sufficient. Plain
 `Noto Serif` is registered as a last-resort family to close gaps like this.
 
-**KaTeX splits its alphabet across twelve families**, four styles each, and the
-math in these articles needs all of them — the stretchy delimiters and the
-overline live in `KaTeX_Size1` … `KaTeX_Size4`. Faces are registered with
-`subsetOf` so `font-family: KaTeX_Main` expands across that family's styles.
-
 **GIF bytes are rejected; there is no decoder.** The 26 animated diagrams in
 the articles are transcoded to WebP on first use and cached under `.cache/`,
 which takes 18.9 MiB of GIF down to 0.3 MiB.
 
-**KaTeX's MathML annotation must be stripped.** Each formula is emitted twice:
-a visual HTML layer and a hidden `<span class="katex-mathml">`. The site hides
-that layer with a 1px clip, but this renderer lays it out and shapes it, which
-demands glyphs for operators the visual layer never draws. See
-`src/assets/cleanup.ts`.
+**The page is white and the text is black.** The book is printed as often as it
+is read, and a tint prints as its ink. The palette in `src/theme.ts` is a ramp
+of four grays and nothing else, so hierarchy is carried by weight and by the
+rules that frame a block rather than by hue.
+
+**Formulas do not survive KaTeX's markup; they are re-typeset.** The sidecar
+carries each formula as KaTeX's nested tables, absolutely positioned vlists and
+inline SVG — machinery written for a browser's inline layout. This renderer
+lays it out one token per line. So `src/assets/math.ts` reads the TeX back out
+of the MathML annotation, re-typesets it with MathJax, and hands the renderer
+one self-contained SVG per formula. That also ends the dependency on the KaTeX
+webfonts: the glyphs are outlines in the drawing, so nothing is subsetted or
+embedded, and a formula carries no text for the reader to search.
+
+Two things in the MathJax output need rewriting for this renderer. A nested
+`<svg>` viewport — which is how a stretchy delimiter and an equation number
+are placed — is laid out as though it were the whole drawing, so the equation
+number is taken off the source and drawn as a second image beside the formula
+instead. And a formula is a drawing on a transparent ground, so it takes none of
+the frame every other image gets.
 
 **Mermaid has no JavaScript runtime to run in.** Diagrams are rendered to SVG at
 build time under `happy-dom`; see `src/assets/mermaid.ts` for the two settings

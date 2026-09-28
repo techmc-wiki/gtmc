@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export type OutlineDepth = 1 | 2 | 3;
+export type OutlineDepth = 1 | 2 | 3 | 4;
 
 export interface OutlineItem {
   id: string;
@@ -11,11 +11,13 @@ export interface OutlineItem {
   isAdvanced: boolean;
 }
 
-const OUTLINE_HEADING_SELECTOR = "main h2[id], main h3[id], main h4[id]";
+const OUTLINE_HEADING_SELECTOR =
+  "[data-article-content] h1[id], [data-article-content] h2[id], [data-article-content] h3[id], [data-article-content] h4[id]";
 
 function getOutlineDepth(heading: Element): OutlineDepth {
-  if (heading.tagName === "H3") return 2;
-  if (heading.tagName === "H4") return 3;
+  if (heading.tagName === "H2") return 2;
+  if (heading.tagName === "H3") return 3;
+  if (heading.tagName === "H4") return 4;
   return 1;
 }
 
@@ -56,24 +58,33 @@ export function useOutline(): OutlineItem[] {
   const [outline, setOutline] = useState<OutlineItem[]>([]);
 
   useEffect(() => {
-    if (typeof document === "undefined") return;
+    const updateOutline = () => {
+      const next = scanHeadings();
+      setOutline((previous) =>
+        previous.length === next.length &&
+        previous.every(
+          (item, index) =>
+            item.id === next[index]?.id &&
+            item.text === next[index]?.text &&
+            item.depth === next[index]?.depth &&
+            item.isAdvanced === next[index]?.isAdvanced,
+        )
+          ? previous
+          : next,
+      );
+    };
 
     const frame = requestAnimationFrame(() => {
-      setOutline(scanHeadings());
+      updateOutline();
     });
 
-    const observer = new MutationObserver(() => {
-      setOutline(scanHeadings());
-    });
+    const observer = new MutationObserver(updateOutline);
 
     const main = document.querySelector("main") || document.body;
     observer.observe(main, { childList: true, subtree: true });
 
-    const timeout = setTimeout(() => observer.disconnect(), 10000);
-
     return () => {
       observer.disconnect();
-      clearTimeout(timeout);
       cancelAnimationFrame(frame);
     };
   }, []);

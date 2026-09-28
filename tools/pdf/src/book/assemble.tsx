@@ -13,7 +13,7 @@ import { PdfcnThemeProvider } from "@/components/pdf/theme-provider"
 import { View } from "@/lib/pdf-primitives"
 
 import { Cover, Toc } from "./cover-and-toc"
-import type { BookArticle, BookPlan } from "./manifest"
+import type { BookArticle, BookPlan, PdfLocale } from "./manifest"
 import { ArticleHead, ChapterOpener, Colophon } from "./sections"
 import { bookStyles } from "./styles"
 import { FONT_STACKS, GTMC_COLORS, gtmcTheme } from "../theme"
@@ -21,6 +21,8 @@ import { FONT_STACKS, GTMC_COLORS, gtmcTheme } from "../theme"
 export interface AssembleOptions {
   plan: BookPlan
   title: string
+  /** Selects the edition's furniture: cover, contents, openers, colophon. */
+  locale: PdfLocale
   /** Edition label shown above the cover title, in the apparatus face. */
   edition: string
   subtitle?: string
@@ -80,8 +82,7 @@ function stripLeadingHeading(node: Node): Node {
 export async function assembleBook(
   options: AssembleOptions
 ): Promise<AssembledBook> {
-  const { plan, transform } = options
-
+  const { plan, locale, transform } = options
   const parts: Node[] = []
   const css: string[] = []
   let articleCount = 0
@@ -100,7 +101,7 @@ export async function assembleBook(
     const head = await fromJsx(
       <PdfcnThemeProvider theme={gtmcTheme}>
         <View style={bookStyles.article}>
-          <ArticleHead article={article} />
+          <ArticleHead article={article} locale={locale} />
         </View>
       </PdfcnThemeProvider>
     )
@@ -119,6 +120,7 @@ export async function assembleBook(
   await append(
     <View style={bookStyles.page}>
       <Cover
+        locale={locale}
         edition={options.edition}
         title={options.title}
         subtitle={options.subtitle}
@@ -126,7 +128,7 @@ export async function assembleBook(
         revision={options.revision}
         sourceUrl={options.sourceUrl}
       />
-      <Toc plan={plan} />
+      <Toc plan={plan} locale={locale} />
     </View>
   )
 
@@ -135,7 +137,7 @@ export async function assembleBook(
   }
 
   for (const chapter of plan.chapters) {
-    await append(<ChapterOpener chapter={chapter} />)
+    await append(<ChapterOpener chapter={chapter} locale={locale} />)
     for (const article of chapter.articles) {
       await appendArticle(article)
     }
@@ -143,6 +145,7 @@ export async function assembleBook(
 
   await append(
     <Colophon
+      locale={locale}
       revision={options.revision}
       generatedDate={options.generatedDate}
       sourceUrl={options.sourceUrl}

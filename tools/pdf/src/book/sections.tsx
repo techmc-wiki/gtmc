@@ -2,20 +2,27 @@ import { Stack } from "@/components/pdf/stack/stack"
 import { Text } from "@/components/pdf/text/text"
 import { View } from "@/lib/pdf-primitives"
 
-import type { BookArticle, BookChapter } from "./manifest"
+import { bookLabels } from "./labels"
+import type { BookArticle, BookChapter, PdfLocale } from "./manifest"
 import { bookStyles } from "./styles"
 import { GTMC_COLORS } from "../theme"
+
+export interface ChapterOpenerProps {
+  chapter: BookChapter
+  locale: PdfLocale
+}
 
 /**
  * A chapter opener: the numeral, the title, and what the chapter contains.
  * The list earns its space by telling the reader the scope of the chapter
  * before they commit to it.
  */
-export function ChapterOpener({ chapter }: { chapter: BookChapter }) {
+export function ChapterOpener({ chapter, locale }: ChapterOpenerProps) {
+  const labels = bookLabels(locale)
   return (
     <View style={bookStyles.chapterOpener}>
       <Text style={bookStyles.chapterKicker}>
-        {chapter.isAppendix ? "Appendix" : "Chapter"}
+        {chapter.isAppendix ? labels.appendix : labels.chapter}
       </Text>
       <Text style={bookStyles.chapterNumeral}>{chapter.number}</Text>
       {/* A real `h1`, not a styled span: the PDF outline is built from heading
@@ -24,7 +31,9 @@ export function ChapterOpener({ chapter }: { chapter: BookChapter }) {
         {chapter.title}
       </h1>
       <View style={bookStyles.chapterContents}>
-        <Text style={bookStyles.chapterContentsLabel}>In this chapter</Text>
+        <Text style={bookStyles.chapterContentsLabel}>
+          {labels.inThisChapter}
+        </Text>
         <Stack gap="none">
           {chapter.articles.map((article) => (
             <View key={article.slug} style={bookStyles.chapterListRow}>
@@ -38,11 +47,21 @@ export function ChapterOpener({ chapter }: { chapter: BookChapter }) {
   )
 }
 
+export interface ArticleHeadProps {
+  article: BookArticle
+  locale: PdfLocale
+}
+
 /** The article's own head: running number, then title. */
-export function ArticleHead({ article }: { article: BookArticle }) {
+export function ArticleHead({ article, locale }: ArticleHeadProps) {
+  const labels = bookLabels(locale)
   return (
     <View style={bookStyles.articleHeader}>
-      <Text style={bookStyles.articleNumber}>Article {article.number}</Text>
+      <Text style={bookStyles.articleNumber}>
+        {/* A folder introduction opens its chapter without a number of its
+            own, so it carries the title alone. */}
+        {article.number ? `${labels.article} ${article.number}` : ""}
+      </Text>
       {/* The `h2` the article's own sections nest under; see `demoteHeadings`. */}
       <h2 style={bookStyles.articleTitle as React.CSSProperties}>
         {article.title}
@@ -52,6 +71,7 @@ export function ArticleHead({ article }: { article: BookArticle }) {
 }
 
 export interface ColophonProps {
+  locale: PdfLocale
   revision?: string
   generatedDate: string
   sourceUrl?: string
@@ -59,24 +79,31 @@ export interface ColophonProps {
 
 /** The closing page: where the text came from and how to follow it. */
 export function Colophon({
+  locale,
   revision,
   generatedDate,
   sourceUrl,
 }: ColophonProps) {
+  const labels = bookLabels(locale)
   return (
     <View style={bookStyles.colophon}>
-      <h1 style={bookStyles.articleTitle as React.CSSProperties}>Colophon</h1>
+      <h1 style={bookStyles.articleTitle as React.CSSProperties}>
+        {labels.colophonTitle}
+      </h1>
       <View style={bookStyles.coverRule} />
-      <Text style={bookStyles.tocText}>
-        This edition was generated from the Graduate Texts in Minecraft article
-        repository
-        {revision ? ` at revision ${revision.slice(0, 7)}` : ""}.
+      <Text style={bookStyles.tocText}>{labels.colophonSource}</Text>
+      {revision ? (
+        <Text style={bookStyles.tocText}>
+          {labels.colophonRevision} {revision.slice(0, 7)}
+        </Text>
+      ) : null}
+      <Text style={bookStyles.apparatusQuiet}>
+        {labels.colophonGenerated} {generatedDate}
       </Text>
-      <Text style={bookStyles.apparatusQuiet}>Generated {generatedDate}</Text>
       {sourceUrl ? (
-        <Text
-          style={{ ...bookStyles.apparatusQuiet, color: GTMC_COLORS.signal }}>
-          {sourceUrl}
+        <Text style={bookStyles.tocText}>
+          {labels.colophonOnline}{" "}
+          <span style={{ color: GTMC_COLORS.signal }}>{sourceUrl}</span>
         </Text>
       ) : null}
     </View>

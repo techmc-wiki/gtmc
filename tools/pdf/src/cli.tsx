@@ -98,6 +98,7 @@ async function buildLocale(locale: PdfLocale, output: string): Promise<void> {
 
   const book = await assembleBook({
     plan,
+    locale,
     title: copy.bookTitle,
     edition: copy.edition,
     subtitle: copy.bookSubtitle,

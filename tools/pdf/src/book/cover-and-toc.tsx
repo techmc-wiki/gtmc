@@ -5,11 +5,12 @@ import { Stack } from "@/components/pdf/stack/stack"
 import { Text } from "@/components/pdf/text/text"
 import { View } from "@/lib/pdf-primitives"
 
-import type { BookArticle, BookPlan } from "./manifest"
+import { bookLabels } from "./labels"
+import type { BookArticle, BookPlan, PdfLocale } from "./manifest"
 import { bookStyles } from "./styles"
-import { GTMC_COLORS } from "../theme"
 
 export interface CoverProps {
+  locale: PdfLocale
   title: string
   /** Edition label, set in the apparatus face above the title. */
   edition: string
@@ -20,6 +21,7 @@ export interface CoverProps {
 }
 
 export function Cover({
+  locale,
   title,
   edition,
   subtitle,
@@ -27,6 +29,7 @@ export function Cover({
   revision,
   sourceUrl,
 }: CoverProps) {
+  const labels = bookLabels(locale)
   return (
     <View style={bookStyles.coverRoot}>
       <View style={bookStyles.coverBand} />
@@ -43,7 +46,7 @@ export function Cover({
       </View>
       <View style={bookStyles.coverFoot}>
         <Text style={bookStyles.apparatusQuiet}>
-          {revision ? `Revision ${revision.slice(0, 7)}` : ""}
+          {revision ? `${labels.revision} ${revision.slice(0, 7)}` : ""}
         </Text>
         <Text style={bookStyles.apparatusQuiet}>{sourceUrl ?? ""}</Text>
       </View>
@@ -53,11 +56,14 @@ export function Cover({
 
 export interface TocProps {
   plan: BookPlan
+  locale: PdfLocale
 }
 
 interface TocGroup {
   key: string
+  /** Empty for the front matter, which is not a numbered chapter. */
   number: string
+  isAppendix: boolean
   title: string
   articles: BookArticle[]
 }
@@ -68,14 +74,16 @@ interface TocGroup {
  * reserved right column. Folio width is reserved so a digit never widens the
  * row and moves a page break.
  */
-export function Toc({ plan }: TocProps) {
+export function Toc({ plan, locale }: TocProps) {
+  const labels = bookLabels(locale)
   const groups: TocGroup[] = [
     ...(plan.preface.length > 0
       ? [
           {
             key: "preface",
             number: "",
-            title: "Preface",
+            isAppendix: false,
+            title: labels.preface,
             articles: plan.preface,
           },
         ]
@@ -83,6 +91,7 @@ export function Toc({ plan }: TocProps) {
     ...plan.chapters.map((chapter) => ({
       key: chapter.slug,
       number: chapter.number,
+      isAppendix: chapter.isAppendix,
       title: chapter.title,
       articles: chapter.articles,
     })),
@@ -90,12 +99,16 @@ export function Toc({ plan }: TocProps) {
 
   return (
     <View>
-      <Text style={bookStyles.tocTitle}>Contents</Text>
+      <Text style={bookStyles.tocTitle}>{labels.contents}</Text>
       {groups.map((group) => (
         <View key={group.key}>
           <View style={bookStyles.tocChapter}>
             <Text style={bookStyles.tocChapterLabel}>
-              {group.number ? `Chapter ${group.number}` : "Front matter"}
+              {group.number
+                ? group.isAppendix
+                  ? labels.appendixLabel(group.number)
+                  : labels.chapterLabel(group.number)
+                : labels.frontMatter}
             </Text>
             <Text style={bookStyles.tocChapterTitle}>{group.title}</Text>
           </View>

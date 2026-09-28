@@ -55,8 +55,13 @@ jobs:
             exit 1
           fi
 
+          # The content-sidecar phase installs from these manifests, so a
+          # dependency change can change the sidecars and must move the digest.
           pipeline_paths=(
             tools/pdf
+            apps/web/package.json
+            pnpm-lock.yaml
+            pnpm-workspace.yaml
             apps/web/scripts/build-content.ts
             apps/web/scripts/generate-article-content.ts
             apps/web/scripts/generate-article-manifest.ts

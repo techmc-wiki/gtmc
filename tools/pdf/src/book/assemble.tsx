@@ -54,21 +54,6 @@ function anchor(node: Node, id: string): Node {
 }
 
 /**
- * Article HTML opens with an H1 that duplicates the head already drawn above
- * it. Dropping it keeps one heading per article, so the outline stays a
- * chapter/article tree rather than repeating every title.
- */
-function stripLeadingHeading(node: Node): Node {
-  if (node.type !== "container") return node
-  const children = childrenOf(node)
-  const first = children[0]
-  if (first && first.type === "container" && first.tagName === "h1") {
-    return { ...node, children: children.slice(1) }
-  }
-  return node
-}
-
-/**
  * Assembles the book into a single node tree, in reading order.
  *
  * Every piece is lowered to nodes on its own and laid end to end: cover,
@@ -112,7 +97,7 @@ export async function assembleBook(
 
     if (!html) return
     const parsed = fromHtml(html)
-    parts.push(stripLeadingHeading(parsed.node))
+    parts.push(parsed.node)
     css.push(...parsed.css)
     articleCount += 1
   }

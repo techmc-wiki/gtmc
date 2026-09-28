@@ -8,6 +8,7 @@ import {
   prepareImages,
   renderMermaidDiagrams,
   stripKatexMathml,
+  stripLeadingTitle,
 } from "./assets"
 import type { ImageSource } from "./assets/images"
 import { assembleBook } from "./book/assemble"
@@ -108,7 +109,7 @@ async function buildLocale(locale: PdfLocale, output: string): Promise<void> {
     sourceUrl: SOURCE_URL,
     transform: async (html) => {
       const withDiagrams = await renderMermaidDiagrams(
-        demoteHeadings(stripKatexMathml(html))
+        demoteHeadings(stripKatexMathml(stripLeadingTitle(html)))
       )
       diagramsRendered += withDiagrams.rendered
       diagramFailures.push(...withDiagrams.failed)

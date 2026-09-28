@@ -321,14 +321,6 @@
   border-radius: 0;
 }
 
-@starting-style {
-  .t-panel-slide[data-open="true"] {
-    opacity: 0;
-    transform: translateY(var(--panel-translate-y));
-    filter: blur(var(--panel-blur));
-  }
-}
-
 /* Keep the recipe's measured indicator; use the site's square controls. */
 .t-tabs--density {
   --tabs-text-muted: var(--color-tech-main);

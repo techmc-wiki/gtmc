@@ -210,6 +210,15 @@ export default async function Footer() {
             <p className="text-tech-main/55 text-xs/relaxed">
               {t("attribution")}
             </p>
+            <p className="text-tech-main/55 text-xs/relaxed">
+              <a
+                href="https://rareui.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link">
+                {t("rareUiCredit")}
+              </a>
+            </p>
           </div>
           <div className="flex flex-col items-start gap-3 md:items-end">
             <p className="text-tech-main/70 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">

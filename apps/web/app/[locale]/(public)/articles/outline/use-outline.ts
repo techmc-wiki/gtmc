@@ -1,83 +1,93 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 
-export type OutlineDepth = 1 | 2 | 3
+export type OutlineDepth = 1 | 2 | 3 | 4;
 
 export interface OutlineItem {
-  id: string
-  text: string
-  depth: OutlineDepth
-  isAdvanced: boolean
+  id: string;
+  text: string;
+  depth: OutlineDepth;
+  isAdvanced: boolean;
 }
 
-const OUTLINE_HEADING_SELECTOR = "main h2[id], main h3[id], main h4[id]"
+const OUTLINE_HEADING_SELECTOR =
+  "[data-article-content] h1[id], [data-article-content] h2[id], [data-article-content] h3[id], [data-article-content] h4[id]";
 
 function getOutlineDepth(heading: Element): OutlineDepth {
-  if (heading.tagName === "H3") return 2
-  if (heading.tagName === "H4") return 3
-  return 1
+  if (heading.tagName === "H2") return 2;
+  if (heading.tagName === "H3") return 3;
+  if (heading.tagName === "H4") return 4;
+  return 1;
 }
 
 function scanHeadings(): OutlineItem[] {
-  if (typeof document === "undefined") return []
-  const headings = document.querySelectorAll(OUTLINE_HEADING_SELECTOR)
-  if (headings.length === 0) return []
+  if (typeof document === "undefined") return [];
+  const headings = document.querySelectorAll(OUTLINE_HEADING_SELECTOR);
+  if (headings.length === 0) return [];
 
-  const outlineItems: OutlineItem[] = []
-  const seenIds = new Map<string, number>()
+  const outlineItems: OutlineItem[] = [];
+  const seenIds = new Map<string, number>();
   headings.forEach((heading) => {
     if (heading.id && heading.textContent) {
-      const clone = heading.cloneNode(true) as Element
+      const clone = heading.cloneNode(true) as Element;
       clone.querySelectorAll('[aria-hidden="true"]').forEach((el) => {
-        el.remove()
-      })
-      const text = clone.textContent?.replace(/^#\s*/, "") ?? ""
+        el.remove();
+      });
+      const text = clone.textContent?.replace(/^#\s*/, "") ?? "";
 
-      let uniqueId = heading.id
-      const count = seenIds.get(heading.id) ?? 0
+      let uniqueId = heading.id;
+      const count = seenIds.get(heading.id) ?? 0;
       if (count > 0) {
-        uniqueId = `${heading.id}-${count}`
+        uniqueId = `${heading.id}-${count}`;
       }
-      seenIds.set(heading.id, count + 1)
+      seenIds.set(heading.id, count + 1);
 
       outlineItems.push({
         id: uniqueId,
         text,
         depth: getOutlineDepth(heading),
         isAdvanced: heading.getAttribute("data-advanced") === "true",
-      })
+      });
     }
-  })
-  return outlineItems
+  });
+  return outlineItems;
 }
 
 export function useOutline(): OutlineItem[] {
-  const [outline, setOutline] = useState<OutlineItem[]>([])
+  const [outline, setOutline] = useState<OutlineItem[]>([]);
 
   useEffect(() => {
-    if (typeof document === "undefined") return
-
+    const updateOutline = () => {
+      const next = scanHeadings();
+      setOutline((previous) =>
+        previous.length === next.length &&
+        previous.every(
+          (item, index) =>
+            item.id === next[index]?.id &&
+            item.text === next[index]?.text &&
+            item.depth === next[index]?.depth &&
+            item.isAdvanced === next[index]?.isAdvanced,
+        )
+          ? previous
+          : next,
+      );
+    };
 
     const frame = requestAnimationFrame(() => {
-      setOutline(scanHeadings())
-    })
+      updateOutline();
+    });
 
-    const observer = new MutationObserver(() => {
-      setOutline(scanHeadings())
-    })
+    const observer = new MutationObserver(updateOutline);
 
-    const main = document.querySelector("main") || document.body
-    observer.observe(main, { childList: true, subtree: true })
-
-    const timeout = setTimeout(() => observer.disconnect(), 10000)
+    const main = document.querySelector("main") || document.body;
+    observer.observe(main, { childList: true, subtree: true });
 
     return () => {
-      observer.disconnect()
-      clearTimeout(timeout)
-      cancelAnimationFrame(frame)
-    }
-  }, [])
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, []);
 
-  return outline
+  return outline;
 }

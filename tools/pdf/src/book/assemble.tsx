@@ -1,9 +1,5 @@
 import type { ReactNode } from "react"
 
-import { readFileSync } from "node:fs"
-import { createRequire } from "node:module"
-import path from "node:path"
-
 import { fromHtml } from "@takumi-rs/helpers/html"
 
 import { fromJsx } from "@takumi-rs/helpers/jsx"
@@ -152,32 +148,7 @@ export async function assembleBook(
     children: parts,
   }
 
-  return { node, css: [katexCss(), CONTENT_CSS, ...css], articleCount }
-}
-
-/**
- * KaTeX's own stylesheet, read once and memoized.
- *
- * The article sidecars are bare fragments with no stylesheet, and KaTeX's
- * visual layer is meaningless without its CSS: the vertical lists that stack
- * superscripts and fractions are positioned by `.vlist-t` / `.vlist-r`, and
- * the inline `height` on `.pstrut` is only meaningful alongside those rules.
- * Laying it out unstyled rotated and reflowed the text and ran one chapter of
- * formulas to seven hundred pages.
- */
-let katexCssCache: string | null = null
-
-function katexCss(): string {
-  if (katexCssCache !== null) return katexCssCache
-  const require = createRequire(import.meta.url)
-  // The package's `exports` map covers its JS entry points, not its
-  // stylesheet, so the file is resolved against the package directory.
-  const packageDir = path.dirname(require.resolve("katex/package.json"))
-  katexCssCache = readFileSync(
-    path.join(packageDir, "dist", "katex.min.css"),
-    "utf8"
-  )
-  return katexCssCache
+  return { node, css: [CONTENT_CSS, ...css], articleCount }
 }
 
 /**
@@ -226,6 +197,26 @@ img {
   margin: 10pt auto;
   break-inside: avoid;
 }
+/* A formula is a drawing on a transparent ground, so it takes no frame, and it
+   has to sit on the text baseline rather than open a line of its own. */
+img.math {
+  margin: 0;
+  border: none;
+}
+img.math-inline {
+  display: inline-block;
+}
+/* A display equation is a centred row: the equation, and its number set beside
+   it and centred against it, the way a tagged equation reads in a text. */
+.math-eqn {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 0.9em;
+  margin: 8pt 0;
+  break-inside: avoid;
+}
 figure {
   margin: 10pt 0;
   text-align: center;
@@ -272,10 +263,6 @@ aside[data-callout] {
   margin: 8pt 0;
   border-left: 2pt solid ${GTMC_COLORS.signal};
   background-color: ${GTMC_COLORS.surface};
-}
-.katex-display {
-  margin: 8pt 0;
-  break-inside: avoid;
 }
 .gif-caption, .gif-source-link {
   font-family: ${FONT_STACKS.mono};

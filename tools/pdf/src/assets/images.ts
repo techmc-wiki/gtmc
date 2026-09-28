@@ -61,6 +61,12 @@ export interface PrepareImagesOptions {
    * context, so without it resolution falls back to a repository-wide search.
    */
   baseDir?: string
+  /**
+   * `src` values another pass has already embedded — the formula drawings,
+   * which are not files in the articles tree and are not this pass's to
+   * resolve.
+   */
+  skip?: ReadonlySet<string>
 }
 
 const IMG_TAG = /<img\b[^>]*>/g
@@ -205,6 +211,7 @@ export async function prepareImages(
     const attr = SRC_ATTR.exec(tag)
     const src = (attr?.[1] ?? attr?.[2] ?? "").trim()
     if (src === "" || REMOTE_SRC.test(src) || seen.has(src)) continue
+    if (options.skip?.has(src) === true) continue
     seen.add(src)
 
     // `src` is percent-encoded; the files on disk are not.

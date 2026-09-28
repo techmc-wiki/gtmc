@@ -1,9 +1,7 @@
 export { prepareImages } from "@/assets/images"
 export type { ConvertedImage, PreparedImages } from "@/assets/images"
+export { prepareMath } from "@/assets/math"
+export type { PreparedMath } from "@/assets/math"
 export { renderMermaidDiagrams } from "@/assets/mermaid"
-export {
-  demoteHeadings,
-  stripKatexMathml,
-  stripLeadingTitle,
-} from "@/assets/cleanup"
+export { demoteHeadings, stripLeadingTitle } from "@/assets/cleanup"
 export type { RenderedDiagrams } from "@/assets/mermaid"

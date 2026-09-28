@@ -6,8 +6,8 @@ import { PdfRenderer } from "takumi-pdf"
 import {
   demoteHeadings,
   prepareImages,
+  prepareMath,
   renderMermaidDiagrams,
-  stripKatexMathml,
   stripLeadingTitle,
 } from "./assets"
 import type { ImageSource } from "./assets/images"
@@ -109,11 +109,17 @@ async function buildLocale(locale: PdfLocale, output: string): Promise<void> {
     sourceUrl: SOURCE_URL,
     transform: async (html) => {
       const withDiagrams = await renderMermaidDiagrams(
-        demoteHeadings(stripKatexMathml(stripLeadingTitle(html)))
+        demoteHeadings(stripLeadingTitle(html)),
       )
       diagramsRendered += withDiagrams.rendered
       diagramFailures.push(...withDiagrams.failed)
-      const prepared = await prepareImages(withDiagrams.html)
+      const math = prepareMath(withDiagrams.html)
+      for (const image of math.images) {
+        if (!images.has(image.src)) images.set(image.src, image)
+      }
+      const prepared = await prepareImages(math.html, {
+        skip: new Set(math.images.map((image) => image.src)),
+      })
       for (const image of prepared.images) {
         if (!images.has(image.src)) images.set(image.src, image)
       }

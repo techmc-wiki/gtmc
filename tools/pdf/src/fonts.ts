@@ -1,6 +1,3 @@
-import fs from "node:fs"
-import path from "node:path"
-import { createRequire } from "node:module"
 
 import { googleFonts, subsetFonts } from "@takumi-rs/helpers"
 import type { FontLoader } from "@takumi-rs/helpers/renderer"
@@ -37,50 +34,19 @@ const CJK_FAMILIES = [
 ]
 
 /**
- * Last-resort coverage. The SC families advertise codepoints their subsets do
- * not actually carry — U+207B SUPERSCRIPT MINUS, used once in the entity
- * motion chapter, is one — and the renderer resolves an uncovered codepoint
- * against this chain alone. Plain Noto Serif closes those gaps and matches the
- * reading face closely enough to pass unnoticed.
+ * Last-resort coverage. The text families advertise codepoints their subsets
+ * do not actually carry — U+207B SUPERSCRIPT MINUS, used once in the entity
+ * motion chapter, and the U+21A9 return arrow a footnote backref is written
+ * with — and the renderer resolves an uncovered codepoint against this chain
+ * alone. Plain Noto Serif closes the first kind of gap and matches the reading
+ * face closely enough to pass unnoticed; the math face closes the second.
+ * Formulas no longer draw on a font here: they are embedded as drawings.
  */
-const COVERAGE_FAMILIES = [{ name: "Noto Serif", weight: [400] }]
+const COVERAGE_FAMILIES = [
+  { name: "Noto Serif", weight: [400] },
+  { name: "Noto Sans Math", weight: [400] },
+]
 
-/**
- * KaTeX splits its alphabet across twelve families, and math is set entirely in
- * them. The renderer resolves an uncovered codepoint only against the
- * registered families, so a missed one fails the render outright.
- */
-function loadKatexFonts(): { faces: FontLoader[]; families: string[] } {
-  const require = createRequire(import.meta.url)
-  const fontDir = path.join(path.dirname(require.resolve("katex")), "fonts")
-  const faces: FontLoader[] = []
-  const families = new Set<string>()
-
-  for (const entry of fs.readdirSync(fontDir)) {
-    // Family names carry digits: KaTeX_Size1 … KaTeX_Size4 hold the stretchy
-    // delimiter pieces, the overline, and the superscript minus.
-    const match = /^KaTeX_([A-Za-z0-9]+)-([A-Za-z]+)\.ttf$/.exec(entry)
-    if (!match) continue
-    const [, family = "", variant = ""] = match
-    const weight = variant === "Bold" ? 700 : 400
-    const style = variant.endsWith("Italic") ? "italic" : "normal"
-    // One face per family name keeps the renderer's family lookup
-    // unambiguous; the style axis rides on `weight` and `style`.
-    const name = `KaTeX_${family}_${weight}${style === "italic" ? "i" : ""}`
-    faces.push({
-      name,
-      // `subsetOf` keeps the four styles of a family distinct while letting
-      // `font-family: KaTeX_Main` in the chain expand across all of them.
-      subsetOf: `KaTeX_${family}`,
-      data: () => Promise.resolve(fs.readFileSync(path.join(fontDir, entry))),
-      weight,
-      style,
-    })
-    families.add(`KaTeX_${family}`)
-  }
-
-  return { faces, families: [...families].sort() }
-}
 
 export type FontCatalog = {
   faces: FontLoader[]
@@ -111,9 +77,8 @@ export async function loadFonts(locale: PdfLocale): Promise<FontCatalog> {
       }),
   })
 
-  const katex = loadKatexFonts()
   const catalog: FontCatalog = {
-    faces: [...google, ...katex.faces],
+    faces: google,
     families: [
       "STIX Two Text",
       "Geist",
@@ -121,7 +86,7 @@ export async function loadFonts(locale: PdfLocale): Promise<FontCatalog> {
       "Noto Serif SC",
       "Noto Sans SC",
       "Noto Serif",
-      ...katex.families,
+      "Noto Sans Math",
     ],
   }
   cache.set(locale, catalog)

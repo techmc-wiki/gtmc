@@ -1,6 +1,6 @@
 import { StyleSheet } from "@/lib/pdf-primitives"
 
-import { CALLOUT, FONT_STACKS, GTMC_COLORS } from "../theme"
+import { BODY_FONT_SIZE_PT, CALLOUT, FONT_STACKS, GTMC_COLORS } from "../theme"
 import { COLUMN_HEIGHT } from "../geometry"
 
 /**
@@ -17,7 +17,7 @@ export const bookStyles = StyleSheet.create({
     backgroundColor: GTMC_COLORS.paper,
     color: GTMC_COLORS.ink,
     fontFamily: FONT_STACKS.serif,
-    fontSize: 10.5,
+    fontSize: BODY_FONT_SIZE_PT,
     lineHeight: 1.55,
     // Ragged-right body copy; hyphenation belongs to the renderer, and the
     // site sets `text-wrap: pretty` rather than justification.
@@ -168,7 +168,7 @@ export const bookStyles = StyleSheet.create({
   },
   tocText: {
     fontFamily: FONT_STACKS.serif,
-    fontSize: 10.5,
+    fontSize: BODY_FONT_SIZE_PT,
     color: GTMC_COLORS.inkDark,
   },
   /** Stretched rule that draws the leader between title and folio. */

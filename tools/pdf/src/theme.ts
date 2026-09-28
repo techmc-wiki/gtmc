@@ -19,6 +19,12 @@ export const GTMC_COLORS = {
   signalInk: "#f5f4ef",
 } as const
 
+/**
+ * Body copy, in points. The renderer scales points to pixels, and math is
+ * typeset at the same measure, so the two are named together.
+ */
+export const BODY_FONT_SIZE_PT = 10.5
+
 /** Callout accents, kept clear of each other so severity reads at a glance. */
 export const CALLOUT = {
   TIP: "#047857",
@@ -64,7 +70,7 @@ export const gtmcTheme: PdfcnTheme = {
   typography: {
     body: {
       fontFamily: "STIX Two Text",
-      fontSize: 10.5,
+      fontSize: BODY_FONT_SIZE_PT,
       lineHeight: 1.55,
     },
     heading: {

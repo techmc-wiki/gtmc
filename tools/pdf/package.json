@@ -16,9 +16,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@mathjax/src": "^4.1.3",
     "@takumi-rs/helpers": "^2.14.0",
     "happy-dom": "^20.0.0",
-    "katex": "^0.18.9",
     "mermaid": "^12.0.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

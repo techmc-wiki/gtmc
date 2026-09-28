@@ -72,8 +72,13 @@ export function stripKatexMathml(html: string): string {
  * contents and cross-references point at still resolve.
  */
 export function demoteHeadings(html: string): string {
+  // Opening *and* closing tags must move together. Rewriting only the opening
+  // tag leaves `<h3 …>…</h2>`, and the renderer lays malformed markup out
+  // catastrophically — one chapter of these headings ran to seven hundred
+  // pages of text broken a few characters per line.
   return html.replace(
-    /<h([1-5])(\s|>)/g,
-    (_match, level: string, rest: string) => `<h${Number(level) + 1}${rest}`
+    /<(\/?)h([1-5])(\s|>)/g,
+    (_match, slash: string, level: string, rest: string) =>
+      `<${slash}h${Number(level) + 1}${rest}`
   )
 }

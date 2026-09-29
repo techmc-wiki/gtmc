@@ -5,7 +5,19 @@ import Link from "next/link"
 import { useEffect, useRef, useState, type ComponentProps } from "react"
 import { cn } from "@/lib/cn"
 
-export type HookSidebarItem = { id: string; label: string; href?: string }
+export type HookSidebarItem = {
+  id: string
+  label: string
+  href?: string
+  /** Nesting level, 0-based. Deeper rows indent to show hierarchy. */
+  depth?: number
+}
+
+const ROW_PADDING_REM = 1
+const DEPTH_STEP_REM = 1
+
+const rowPadding = (depth: number) =>
+  (ROW_PADDING_REM + depth * DEPTH_STEP_REM) * 16
 
 export function HookSidebar({
   items,
@@ -80,10 +92,12 @@ export function HookSidebar({
         />
         {items.map((item, index) => {
           const active = index === value
+          const depth = item.depth ?? 0
           const classNames = cn(
-            "flex min-h-10 items-center pl-4 text-sm leading-snug transition-colors hover:text-foreground focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-[-2px]",
+            "flex min-h-10 items-center text-sm leading-snug transition-colors hover:text-foreground focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-[-2px]",
             active ? "font-medium text-foreground" : "text-muted-foreground"
           )
+          const style = { paddingLeft: `${rowPadding(depth)}px` }
           return item.href ? (
             <Link
               key={item.id}
@@ -94,6 +108,7 @@ export function HookSidebar({
               data-active={active || undefined}
               aria-current={active ? "page" : undefined}
               className={classNames}
+              style={style}
               onPointerEnter={() => setHovered(index)}
               onFocus={() => setHovered(index)}
               onNavigate={onNavigate}>
@@ -106,6 +121,7 @@ export function HookSidebar({
                 rows.current[index] = element
               }}
               className={cn(classNames, "font-medium")}
+              style={style}
               onPointerEnter={() => setHovered(index)}>
               {item.label}
             </div>

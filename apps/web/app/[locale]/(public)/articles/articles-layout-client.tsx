@@ -52,19 +52,20 @@ function useChapterTree(tree: ChapterNavNode[]) {
 function getNavigationItems(tree: ChapterNavNode[], locale: string) {
   const items: HookSidebarItem[] = [];
 
-  const visit = (nodes: ChapterNavNode[]) => {
+  const visit = (nodes: ChapterNavNode[], depth: number) => {
     for (const node of nodes) {
       if (node.isFolder) {
-        items.push({ id: node.id, label: node.title });
+        items.push({ id: node.id, label: node.title, depth });
       } else {
         const path = `/articles/${encodeSlug(node.slug)}`;
-        items.push({ id: node.id, label: node.title, href: `/${locale}${path}` });
+        items.push({ id: node.id, label: node.title, href: `/${locale}${path}`, depth });
       }
-      visit(node.children);
+      visit(node.children, depth + 1);
     }
   };
 
-  visit(tree);
+  visit(tree, 0);
+
   return items;
 }
 

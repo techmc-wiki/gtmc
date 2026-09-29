@@ -1,93 +1,50 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type RefObject } from "react"
+import type { ProximitySection } from "@/components/ui/shadcn/proximity-sidebar"
 
-export type OutlineDepth = 1 | 2 | 3 | 4;
+export type OutlineItem = ProximitySection
+const EMPTY_OUTLINE: OutlineItem[] = []
 
-export interface OutlineItem {
-  id: string;
-  text: string;
-  depth: OutlineDepth;
-  isAdvanced: boolean;
-}
-
-const OUTLINE_HEADING_SELECTOR =
-  "[data-article-content] h1[id], [data-article-content] h2[id], [data-article-content] h3[id], [data-article-content] h4[id]";
-
-function getOutlineDepth(heading: Element): OutlineDepth {
-  if (heading.tagName === "H2") return 2;
-  if (heading.tagName === "H3") return 3;
-  if (heading.tagName === "H4") return 4;
-  return 1;
-}
-
-function scanHeadings(): OutlineItem[] {
-  if (typeof document === "undefined") return [];
-  const headings = document.querySelectorAll(OUTLINE_HEADING_SELECTOR);
-  if (headings.length === 0) return [];
-
-  const outlineItems: OutlineItem[] = [];
-  const seenIds = new Map<string, number>();
-  headings.forEach((heading) => {
-    if (heading.id && heading.textContent) {
-      const clone = heading.cloneNode(true) as Element;
-      clone.querySelectorAll('[aria-hidden="true"]').forEach((el) => {
-        el.remove();
-      });
-      const text = clone.textContent?.replace(/^#\s*/, "") ?? "";
-
-      let uniqueId = heading.id;
-      const count = seenIds.get(heading.id) ?? 0;
-      if (count > 0) {
-        uniqueId = `${heading.id}-${count}`;
-      }
-      seenIds.set(heading.id, count + 1);
-
-      outlineItems.push({
-        id: uniqueId,
-        text,
-        depth: getOutlineDepth(heading),
-        isAdvanced: heading.getAttribute("data-advanced") === "true",
-      });
-    }
-  });
-  return outlineItems;
-}
-
-export function useOutline(): OutlineItem[] {
-  const [outline, setOutline] = useState<OutlineItem[]>([]);
+export function useOutline(root: RefObject<HTMLElement | null>, pathname: string): OutlineItem[] {
+  const [outline, setOutline] = useState({ pathname, items: EMPTY_OUTLINE })
 
   useEffect(() => {
-    const updateOutline = () => {
-      const next = scanHeadings();
-      setOutline((previous) =>
-        previous.length === next.length &&
-        previous.every(
-          (item, index) =>
-            item.id === next[index]?.id &&
-            item.text === next[index]?.text &&
-            item.depth === next[index]?.depth &&
-            item.isAdvanced === next[index]?.isAdvanced,
-        )
-          ? previous
-          : next,
-      );
-    };
+    const container = root.current
+    if (!container) return
+    let frame = 0
 
-    const frame = requestAnimationFrame(() => {
-      updateOutline();
-    });
+    const scan = () => {
+      frame = 0
+      // Next.js keeps previous pages mounted inside hidden Activity boundaries.
+      const article = [...container.querySelectorAll<HTMLElement>("[data-article-content]")]
+        .find((element) => element.checkVisibility())
+      const seen = new Set<string>()
+      const next: OutlineItem[] = []
+      article?.querySelectorAll<HTMLElement>("h1[id], h2[id], h3[id], h4[id]").forEach((element) => {
+        if (seen.has(element.id)) return
+        seen.add(element.id)
+        const clone = element.cloneNode(true) as HTMLElement
+        clone.querySelectorAll('[aria-hidden="true"], button').forEach((el) => el.remove())
+        const label = clone.textContent?.replace(/^#\s*/, "").trim()
+        if (label) next.push({ id: element.id, label, level: Number(element.tagName[1]), element })
+      })
+      setOutline((previous) => previous.pathname === pathname && previous.items.length === next.length && previous.items.every((item, index) =>
+        item.element === next[index].element && item.label === next[index].label && item.level === next[index].level
+      ) ? previous : { pathname, items: next })
+    }
 
-    const observer = new MutationObserver(updateOutline);
-
-    const main = document.querySelector("main") || document.body;
-    observer.observe(main, { childList: true, subtree: true });
-
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(scan)
+    }
+    schedule()
+    const observer = new MutationObserver(schedule)
+    observer.observe(container, { childList: true, subtree: true })
     return () => {
-      observer.disconnect();
-      cancelAnimationFrame(frame);
-    };
-  }, []);
+      observer.disconnect()
+      cancelAnimationFrame(frame)
+    }
+  }, [root, pathname])
 
-  return outline;
+  return outline.pathname === pathname ? outline.items : EMPTY_OUTLINE
 }

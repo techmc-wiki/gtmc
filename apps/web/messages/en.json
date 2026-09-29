@@ -474,10 +474,7 @@
   },
   "Outline": {
     "openSheet": "Open article outline",
-    "hideRail": "Hide article outline",
-    "railLabel": "On this page",
-    "showRail": "Show article outline",
-    "title": "On this page"
+    "railLabel": "On this page"
   },
   "Pdf": {
     "bookSubtitle": "An Introduction to Technical Minecraft",

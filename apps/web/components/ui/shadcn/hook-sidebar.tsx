@@ -91,6 +91,17 @@ export function HookSidebar({
   const [centers, setCenters] = useState<number[]>([])
   const [tops, setTops] = useState<number[]>([])
   const [hovered, setHovered] = useState<number | null>(null)
+  const [pointerInside, setPointerInside] = useState(false)
+  const [focusInside, setFocusInside] = useState(false)
+
+  // Navigating swaps the active row out from under the pointer, which would
+  // otherwise strand the previous hover. Clear it during render so the stale
+  // rail never paints.
+  const [lastValue, setLastValue] = useState(value)
+  if (value !== lastValue) {
+    setLastValue(value)
+    setHovered(null)
+  }
 
   useEffect(() => {
     const measure = () => {
@@ -115,6 +126,8 @@ export function HookSidebar({
     const clear = (event: Event) => {
       const next = (event as FocusEvent).relatedTarget
       if (next && element.contains(next as Node)) return
+      setPointerInside(false)
+      setFocusInside(false)
       setHovered(null)
     }
     element.addEventListener("pointerleave", clear)
@@ -165,7 +178,9 @@ export function HookSidebar({
       <div ref={list} className="relative flex flex-col">
         <Rail
           from={hoverFrom}
-          y={hovered === value ? null : hoverY}
+          y={
+            (pointerInside || focusInside) && hovered !== value ? hoverY : null
+          }
           depth={hoverDepth}
           className="text-foreground/30"
         />
@@ -194,8 +209,15 @@ export function HookSidebar({
               aria-current={active ? "page" : undefined}
               className={classNames}
               style={style}
-              onPointerEnter={() => setHovered(index)}
-              onFocus={() => setHovered(index)}
+              onPointerEnter={() => {
+                setPointerInside(true)
+                setHovered(index)
+              }}
+              onFocus={() => {
+                setFocusInside(true)
+                setHovered(index)
+              }}
+              onBlur={() => setFocusInside(false)}
               onNavigate={onNavigate}>
               {item.label}
             </Link>
@@ -207,7 +229,10 @@ export function HookSidebar({
               }}
               className={cn(classNames, "font-medium")}
               style={style}
-              onPointerEnter={() => setHovered(index)}>
+              onPointerEnter={() => {
+                setPointerInside(true)
+                setHovered(index)
+              }}>
               {item.label}
             </div>
           )

@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -12,14 +12,14 @@
 .pnpm-store
 
 # testing
-/coverage
+coverage
 
 # next.js
-/.next/
-/out/
+.next/
+out/
 
 # production
-/build
+build
 
 # misc
 .DS_Store
@@ -45,9 +45,9 @@ next-env.d.ts
 # installed skills
 .agents/skills
 
-# generated files
-data
-public/article-assets
+# generated files (all produced by the apps/web content pipeline)
+apps/web/data
+apps/web/public/article-assets
 
 # lighthouse and playwright
 .lighthouseci

@@ -120,17 +120,6 @@ html {
   --color-ansi-bright-white: #475569;
 
   --animate-target-blink: target-blink 1.2s ease-out forwards;
-  --animate-page-enter: page-enter 0.3s ease-in-out forwards;
-
-  @keyframes page-enter {
-    0% {
-      opacity: 0;
-    }
-    100% {
-      opacity: 1;
-    }
-  }
-
   @keyframes target-blink {
     0% {
       background-color: var(--color-tech-signal);
@@ -634,13 +623,7 @@ code[class^="language-"] {
    * This covers headings beyond the custom H1-H3 components as well as
    * generated footnote references and backlinks. */
   .article-prose [id] {
-    scroll-margin-top: 7rem;
-  }
-
-  @media (min-width: 768px) {
-    .article-prose [id] {
-      scroll-margin-top: 10rem;
-    }
+    scroll-margin-top: 2rem;
   }
 
   .article-prose > :first-child {

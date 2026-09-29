@@ -9,7 +9,6 @@ import { AuthIsland } from "@/components/layout/auth-island"
 import { AuthSessionProvider } from "@/components/layout/auth-session-provider"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
-import { PageTransition } from "@/components/layout/navigation-effects"
 import { SearchCommand } from "@/components/search/search-command"
 import { Logo } from "@/components/ui/logo"
 import { Toaster } from "@/components/ui/shadcn/sonner"
@@ -116,7 +115,7 @@ export async function MainSiteShell({
           <main
             id="main-content"
             className="relative flex w-full flex-1 flex-col p-4 sm:p-6 lg:px-12 lg:py-8">
-            <PageTransition>{children}</PageTransition>
+            {children}
           </main>
         </div>
       </div>

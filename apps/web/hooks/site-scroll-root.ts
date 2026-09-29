@@ -1,5 +1,3 @@
-"use client"
-
 export const SITE_SCROLL_ROOT_ID = "site-scroll-root"
 
 function getSiteScrollRoot(): HTMLElement | null {

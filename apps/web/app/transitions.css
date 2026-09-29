@@ -356,3 +356,83 @@
   border-radius: 0;
   box-sizing: border-box;
 }
+
+/* transitions.dev: 01-card-resize.md */
+:root {
+  --resize-dur: 300ms;
+  --resize-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.t-resize {
+  transition:
+    width var(--resize-dur) var(--resize-ease),
+    height var(--resize-dur) var(--resize-ease);
+  will-change: width, height;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-resize {
+    transition: none !important;
+  }
+}
+
+/* Reader geometry. Hook selection uses the existing selection clock;
+   outline labels use the tooltip clock. The article itself stays still. */
+.reader-hook-line {
+  background: repeating-linear-gradient(
+    to top,
+    transparent 0 2px,
+    currentColor 2px 4px
+  );
+  transition:
+    height var(--tabs-dur) var(--tabs-ease),
+    transform var(--tabs-dur) var(--tabs-ease);
+}
+.reader-hook-tip {
+  transition: transform var(--tabs-dur) var(--tabs-ease);
+}
+.reader-proximity-dash {
+  --distance: max(
+    calc(var(--pointer-y, -1000) - var(--row-y)),
+    calc(var(--row-y) - var(--pointer-y, -1000))
+  );
+  --proximity: max(0, calc(1 - var(--distance) / 60));
+  transform: scaleX(
+    calc(var(--dash-scale) + (1 - var(--dash-scale)) * var(--proximity))
+  );
+  transition: transform var(--tabs-dur) var(--tabs-ease);
+}
+.reader-proximity [aria-current] .reader-proximity-dash {
+  background: var(--color-tech-signal);
+  height: 2px;
+}
+.reader-outline-label {
+  opacity: 0;
+  scale: var(--tt-scale);
+  transform-origin: right center;
+  transition:
+    opacity var(--tt-out-dur) var(--tt-out-ease),
+    scale var(--tt-out-dur) var(--tt-out-ease);
+}
+.reader-proximity:is(:hover, :focus-within)
+  [data-level="1"]
+  .reader-outline-label,
+.reader-proximity:is(:hover, :focus-within)
+  [data-level="2"]
+  .reader-outline-label,
+.reader-proximity a:is(:hover, :focus-visible) .reader-outline-label {
+  opacity: 1;
+  scale: 1;
+  transition:
+    opacity var(--tt-in-dur) var(--tt-in-ease) var(--tt-delay),
+    scale var(--tt-in-dur) var(--tt-in-ease) var(--tt-delay);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reader-hook-line,
+  .reader-hook-tip,
+  .reader-proximity-dash,
+  .reader-outline-label {
+    transition: none !important;
+  }
+}

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import ProximitySidebar, { type ProximitySection } from "@/components/ui/shadcn/proximity-sidebar";
+import ProximitySidebar from "@/components/ui/shadcn/proximity-sidebar";
 import { ScrollProgress } from "@/components/ui/shadcn/scroll-progress";
 import { SITE_SCROLL_ROOT_ID } from "@/hooks/site-scroll-root";
 import type { OutlineItem } from "@/app/[locale]/(public)/articles/outline/use-outline";
@@ -25,20 +25,10 @@ export function ArticleOutlineNavigation({
     return () => cancelAnimationFrame(frame);
   }, [mobile]);
 
-  const sections = React.useMemo(
-    () =>
-      outline.map((item): ProximitySection => ({
-        id: item.id,
-        label: item.text,
-        level: item.depth,
-      })),
-    [outline],
-  );
-
   if (mobile) {
     return scrollRootReady && outline.length > 0 ? (
       <ScrollProgress
-        sections={sections}
+        sections={outline}
         containerRef={scrollRootRef}
         ariaLabel={t("openSheet")}
         className="lg:hidden"
@@ -48,11 +38,8 @@ export function ArticleOutlineNavigation({
 
   return (
     <div className="sticky top-24 flex h-[calc(100dvh-7rem)] min-h-0 flex-col">
-      <h2 className="pb-3 text-sm font-semibold">{t("title")}</h2>
       {outline.length > 0 && (
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <ProximitySidebar sections={sections} side="left" ariaLabel={t("railLabel")} />
-        </div>
+        <ProximitySidebar sections={outline} ariaLabel={t("railLabel")} />
       )}
     </div>
   );

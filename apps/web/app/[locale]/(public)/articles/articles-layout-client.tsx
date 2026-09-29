@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Menu, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, X } from "lucide-react";
+import { Menu, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { Button } from "@/components/ui/shadcn/button";
-import { BounceSidebar, type BounceSidebarItem } from "@/components/ui/shadcn/bounce-sidebar";
+import { HookSidebar, type HookSidebarItem } from "@/components/ui/shadcn/hook-sidebar";
+import { IconButton } from "@/components/ui/icon-button";
 import { ScrollArea } from "@/components/ui/shadcn/scroll-area";
 import {
   Sheet,
@@ -49,12 +50,12 @@ function useChapterTree(tree: ChapterNavNode[]) {
 }
 
 function getNavigationItems(tree: ChapterNavNode[], locale: string) {
-  const items: BounceSidebarItem[] = [];
+  const items: HookSidebarItem[] = [];
 
   const visit = (nodes: ChapterNavNode[]) => {
     for (const node of nodes) {
       if (node.isFolder) {
-        items.push({ id: node.id, label: node.title, heading: true });
+        items.push({ id: node.id, label: node.title });
       } else {
         const path = `/articles/${encodeSlug(node.slug)}`;
         items.push({ id: node.id, label: node.title, href: `/${locale}${path}` });
@@ -72,12 +73,12 @@ function SiteNavigation({
   activeIndex,
   onNavigate,
 }: {
-  items: BounceSidebarItem[];
+  items: HookSidebarItem[];
   activeIndex: number;
   onNavigate?: () => void;
 }) {
   const t = useTranslations("ChapterNav");
-  const containerRef = React.useRef<HTMLElement>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (!items.length || activeIndex < 0) return;
@@ -86,6 +87,9 @@ function SiteNavigation({
     );
     const active = viewport?.querySelector<HTMLElement>('[data-active="true"]');
     if (!viewport || !active) return;
+    const bounds = viewport.getBoundingClientRect();
+    const row = active.getBoundingClientRect();
+    if (row.top >= bounds.top && row.bottom <= bounds.bottom) return;
     viewport.scrollTop = Math.max(
       0,
       active.offsetTop - viewport.offsetTop - viewport.clientHeight / 3,
@@ -93,14 +97,13 @@ function SiteNavigation({
   }, [activeIndex, items.length]);
 
   return (
-    <nav ref={containerRef} aria-label={t("title")} className="flex min-h-0 flex-1 flex-col">
+    <div ref={containerRef} className="flex min-h-0 flex-1 flex-col">
       <ScrollArea className="min-h-0 flex-1">
         {items.length ? (
-          <BounceSidebar
+          <HookSidebar
             items={items}
             value={activeIndex}
-            onChange={onNavigate}
-            dotColor="var(--color-tech-signal)"
+            onNavigate={onNavigate}
             aria-label={t("title")}
             className="pr-3 pb-8"
           />
@@ -108,20 +111,19 @@ function SiteNavigation({
           <p className="px-4 py-3 text-sm text-muted-foreground">{t("empty")}</p>
         )}
       </ScrollArea>
-    </nav>
+    </div>
   );
 }
 
 export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
   const t = useTranslations("ChapterNav");
   const tA11y = useTranslations("CommonA11y");
-  const tOutline = useTranslations("Outline");
   const locale = useLocale();
   const pathname = usePathname();
   const treeData = useChapterTree(tree);
-  const outline = useOutline();
+  const contentRef = React.useRef<HTMLDivElement>(null);
+  const outline = useOutline(contentRef, pathname);
   const [siteOpen, setSiteOpen] = React.useState(true);
-  const [outlineOpen, setOutlineOpen] = React.useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -138,26 +140,24 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
     pathname === "/articles" || pathname === "/articles/" ? "/articles/preface" : pathname;
   const activeIndex = items.findIndex(
     (item) =>
-      typeof item !== "string" &&
-      "href" in item &&
-      decodeURIComponent(item.href ?? "").endsWith(
+      item.href &&
+      decodeURIComponent(item.href).endsWith(
         decodeURIComponent(currentPath).replace(/\/$/, ""),
       ),
   );
-  const expandedReader = !siteOpen && !outlineOpen;
 
   return (
     <>
-      <div className="sticky top-16 z-30 border-b bg-tech-bg lg:hidden">
+      <div className="fixed bottom-6 left-4 z-30 lg:hidden">
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild>
             <Button
-              variant="ghost"
-              className="w-full justify-start gap-3"
+              variant="outline"
+              size="icon"
+              className="bg-surface"
               aria-label={tA11y("toggleArticleTree")}
             >
               <Menu aria-hidden="true" />
-              {t("title")}
             </Button>
           </SheetTrigger>
           <SheetContent side="left" showCloseButton={false} className="w-[min(88vw,24rem)] p-0">
@@ -180,57 +180,33 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         </Sheet>
       </div>
 
-      <div
-        className={`relative mx-auto flex w-full min-w-0 flex-1 gap-6 ${expandedReader ? "max-w-none" : "max-w-[98rem]"}`}
-      >
-        {siteOpen && (
-          <aside className="hidden w-60 shrink-0 self-stretch lg:block" aria-label={t("title")}>
-            <div className="sticky top-24 flex h-[calc(100dvh-7rem)] min-h-0 flex-col border-r pr-3">
-              <h2 className="px-4 pb-3 text-sm font-semibold">{t("title")}</h2>
+      <div className="relative flex w-full min-w-0 flex-1 gap-4 lg:-mx-8 lg:w-[calc(100%+4rem)]">
+        <aside className={`t-resize relative hidden shrink-0 lg:block ${siteOpen ? "w-64" : "w-8"}`}>
+          <div className="sticky top-24 flex h-[calc(100dvh-7rem)] min-h-0">
+            <div id="article-chapters" inert={!siteOpen} className={`flex w-56 shrink-0 flex-col ${siteOpen ? "" : "invisible"}`}>
+              <h2 className="pb-3 pl-5 text-sm font-semibold">{t("title")}</h2>
               <SiteNavigation items={items} activeIndex={activeIndex} />
             </div>
-          </aside>
-        )}
-
-        <main
-          className={`my-5 min-w-0 flex-1 ${expandedReader ? "max-w-none" : "mx-auto max-w-5xl"}`}
-        >
-          <div className="sticky top-20 z-20 mb-3 hidden items-center justify-between bg-tech-bg/95 py-1 lg:flex">
-            <Button
-              variant="ghost"
+            <IconButton
               size="icon-sm"
-              aria-label={siteOpen ? tA11y("hideChapterNav") : tA11y("showChapterNav")}
+              className="absolute top-0 right-0"
+              label={siteOpen ? tA11y("hideChapterNav") : tA11y("showChapterNav")}
+              aria-controls="article-chapters"
               aria-expanded={siteOpen}
-              onClick={() => setSiteOpen((open) => !open)}
-            >
-              {siteOpen ? (
-                <PanelLeftClose aria-hidden="true" />
-              ) : (
-                <PanelLeftOpen aria-hidden="true" />
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label={outlineOpen ? tOutline("hideRail") : tOutline("showRail")}
-              aria-expanded={outlineOpen}
-              onClick={() => setOutlineOpen((open) => !open)}
-            >
-              {outlineOpen ? (
-                <PanelRightClose aria-hidden="true" />
-              ) : (
-                <PanelRightOpen aria-hidden="true" />
-              )}
-            </Button>
+              onClick={() => setSiteOpen((open) => !open)}>
+              <span className="t-icon-swap" data-state={siteOpen ? "a" : "b"}>
+                <PanelLeftClose className="t-icon" data-icon="a" aria-hidden />
+                <PanelLeftOpen className="t-icon" data-icon="b" aria-hidden />
+              </span>
+            </IconButton>
           </div>
+        </aside>
+        <div ref={contentRef} data-reader-content className="min-w-0 flex-1">
           {children}
-        </main>
-
-        {outlineOpen && (
-          <aside className="hidden w-40 shrink-0 self-stretch lg:block">
-            <ArticleOutlineNavigation outline={outline} />
-          </aside>
-        )}
+        </div>
+        <aside className="relative z-20 hidden w-10 shrink-0 lg:block">
+          <ArticleOutlineNavigation outline={outline} />
+        </aside>
       </div>
       <ArticleOutlineNavigation outline={outline} mobile />
     </>

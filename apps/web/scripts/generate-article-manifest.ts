@@ -141,17 +141,10 @@ async function processSourceFile(
     throw error
   }
 
-  const { author, coAuthors } = await getArticleAuthors(
-    repoCwd,
-    relPath,
-    articleEditExclusions,
-    aliases
-  )
-  const { created, lastmod } = await getArticleDates(
-    repoCwd,
-    relPath,
-    articleEditExclusions
-  )
+  const [{ author, coAuthors }, { created, lastmod }] = await Promise.all([
+    getArticleAuthors(repoCwd, relPath, articleEditExclusions, aliases),
+    getArticleDates(repoCwd, relPath, articleEditExclusions),
+  ])
   const chapterTitle = "chapter-title" in fm ? fm["chapter-title"] : undefined
   const introTitle = "intro-title" in fm ? fm["intro-title"] : undefined
 
@@ -578,8 +571,10 @@ async function main(): Promise<void> {
     process.exit(1)
   }
 
-  const articleEditExclusions = await loadArticleEditExclusions()
-  const aliases = await loadAuthorAliases()
+  const [articleEditExclusions, aliases] = await Promise.all([
+    loadArticleEditExclusions(),
+    loadAuthorAliases(),
+  ])
 
   const topLevelFolders = fs
     .readdirSync(ARTICLES_PATH, { withFileTypes: true })

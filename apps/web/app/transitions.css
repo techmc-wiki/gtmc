@@ -388,7 +388,10 @@
     height var(--tabs-dur) var(--tabs-ease),
     transform var(--tabs-dur) var(--tabs-ease);
 }
-.reader-hook-tip {
+.reader-hook-rail {
+  transition: opacity var(--tt-in-dur) var(--tt-in-ease);
+}
+.reader-hook-elbow {
   transition: transform var(--tabs-dur) var(--tabs-ease);
 }
 .reader-proximity-dash {
@@ -430,7 +433,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .reader-hook-line,
-  .reader-hook-tip,
+  .reader-hook-elbow,
+  .reader-hook-rail,
   .reader-proximity-dash,
   .reader-outline-label {
     transition: none !important;

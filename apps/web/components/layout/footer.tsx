@@ -150,7 +150,7 @@ export default async function Footer() {
   return (
     <footer
       aria-label="Site information"
-      className="border-tech-main-dark bg-tech-bg relative mt-auto w-full border-t-2 before:pointer-events-none before:absolute before:inset-0 before:z-[-1] before:bg-[url('/bg-grid.svg')] before:bg-size-[24px_24px] before:opacity-[0.04]">
+      className="border-tech-main-dark bg-tech-bg relative mt-auto w-full border-t-2 before:pointer-events-none before:absolute before:inset-0 before:z-[-1] before:bg-[radial-gradient(var(--color-tech-line)_1px,transparent_1px)] before:bg-[length:24px_24px] before:opacity-[0.04]">
       <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-10 py-8 md:grid-cols-12 md:gap-8">
           <div className="md:col-span-7">

@@ -12,7 +12,11 @@ import {
 
 import { cn } from "@/lib/cn"
 
-export type ScrollProgressSection = { id: string; label: string }
+export type ScrollProgressSection = {
+  id: string
+  label: string
+  element: HTMLElement
+}
 const EMPTY_SECTIONS: ScrollProgressSection[] = []
 
 const EASE_IN_OUT = [0.65, 0, 0.35, 1] as const
@@ -66,10 +70,9 @@ const ScrollProgress = ({
       if (scrollLock.current) return
       const anchor =
         (containerRef?.current?.getBoundingClientRect().top ?? 0) + offset
-      const active = sections.findLast(({ id }) => {
-        const top = document.getElementById(id)?.getBoundingClientRect().top
-        return top !== undefined && top <= anchor
-      })
+      const active = sections.findLast(
+        ({ element }) => element.getBoundingClientRect().top <= anchor
+      )
       setActiveId(active?.id ?? sections[0]?.id)
     }
 
@@ -149,10 +152,12 @@ const ScrollProgress = ({
 
     setActiveId(id)
     setOpen(false)
-    document.getElementById(id)?.scrollIntoView({
-      behavior: reduceMotion ? "auto" : "smooth",
-      block: "start",
-    })
+    sections
+      .find((section) => section.id === id)
+      ?.element.scrollIntoView({
+        behavior: reduceMotion ? "instant" : "smooth",
+        block: "start",
+      })
   }
 
   const size = open ? openSize : collapsedSize
@@ -163,16 +168,16 @@ const ScrollProgress = ({
     <div
       ref={rootRef}
       data-slot="scroll-progress"
-      className={cn("fixed bottom-6 left-1/2 z-30 -translate-x-1/2", className)}
+      className={cn("fixed bottom-6 left-1/2 z-40 -translate-x-1/2", className)}
       {...props}>
       <div className="pointer-events-none invisible absolute" aria-hidden>
         <div
           ref={collapsedRef}
-          className="inline-flex items-center gap-2.5 py-1.5 pr-4 pl-2">
+          className="inline-flex min-h-11 items-center gap-2.5 py-1.5 pr-4 pl-2">
           <span className="h-5 w-5" />
           <span
             ref={labelRef}
-            className="max-w-[min(60vw,14rem)] truncate text-sm leading-none font-medium whitespace-nowrap">
+            className="max-w-[min(42vw,14rem)] truncate text-sm leading-none font-medium whitespace-nowrap">
             {label}
           </span>
         </div>
@@ -288,7 +293,7 @@ const ScrollProgress = ({
                 type="button"
                 onClick={() => setOpen(true)}
                 aria-label={ariaLabel}
-                className="absolute inset-0 flex items-center gap-2.5 py-1.5 pr-4 pl-2"
+                className="absolute inset-0 flex min-h-11 items-center gap-2.5 py-1.5 pr-4 pl-2"
                 initial={{
                   opacity: 0,
                   filter: reduceMotion ? undefined : "blur(4px)",
@@ -333,7 +338,7 @@ const ScrollProgress = ({
                       <motion.span
                         key={label}
                         data-slot="scroll-progress-label"
-                        className="text-foreground absolute inset-y-0 left-0 flex max-w-[min(60vw,14rem)] items-center truncate text-sm leading-none font-medium whitespace-nowrap"
+                        className="text-foreground absolute inset-y-0 left-0 flex max-w-[min(42vw,14rem)] items-center truncate text-sm leading-none font-medium whitespace-nowrap"
                         initial={
                           reduceMotion
                             ? { opacity: 0 }

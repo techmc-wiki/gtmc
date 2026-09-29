@@ -168,7 +168,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${baseFontVariables} scroll-smooth`}
+      className={`${baseFontVariables} motion-safe:scroll-smooth`}
       data-scroll-behavior="smooth"
       suppressHydrationWarning>
       <head>

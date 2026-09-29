@@ -89,15 +89,18 @@ export function HookSidebar({
   const list = useRef<HTMLDivElement>(null)
   const rows = useRef<(HTMLAnchorElement | HTMLDivElement | null)[]>([])
   const [centers, setCenters] = useState<number[]>([])
+  const [tops, setTops] = useState<number[]>([])
   const [hovered, setHovered] = useState<number | null>(null)
 
   useEffect(() => {
-    const measure = () =>
+    const measure = () => {
       setCenters(
         rows.current.map((row) =>
           row ? row.offsetTop + row.offsetHeight / 2 : 0
         )
       )
+      setTops(rows.current.map((row) => (row ? row.offsetTop : 0)))
+    }
     measure()
     const observer = new ResizeObserver(measure)
     if (list.current) observer.observe(list.current)
@@ -127,12 +130,31 @@ export function HookSidebar({
   const activeDepth = value < 0 ? 0 : (items[value]?.depth ?? 0)
   const hoverDepth = hovered === null ? 0 : (items[hovered]?.depth ?? 0)
 
-  // Above the active row the accent rail already covers the span, so the hover
-  // rail draws only the elbow corner.
+  // A chapter's rail starts below its header row, at the first child. Without
+  // children the header is its own anchor.
+  const chapterStart = (index: number) => {
+    let root = index
+    while (root > 0 && (items[root]?.depth ?? 0) > 0) root--
+    if ((items[index]?.depth ?? 0) === 0) return tops[index] ?? 0
+    return tops[root + 1] ?? tops[root] ?? 0
+  }
+
+  // Each chapter owns its rail, so the persistent one is rooted at the active
+  // chapter rather than at the top of the whole list.
+  const activeFrom = chapterStart(value)
+
+  const hoverChapter = hovered === null ? -1 : chapterStart(hovered)
+
+  // A hover in a different chapter has no accent rail under it, so that
+  // chapter roots its own rail. Otherwise stay in the active chapter: above the
+  // active row the accent rail already covers the span, so only the elbow
+  // corner is drawn.
   const hoverFrom =
-    activeY !== null && hoverY !== null && hoverY <= activeY
-      ? Math.max(0, hoverY - CORNER)
-      : (activeY ?? 0)
+    hoverChapter >= 0 && hoverChapter !== activeFrom
+      ? hoverChapter
+      : activeY !== null && hoverY !== null && hoverY <= activeY
+        ? Math.max(0, hoverY - CORNER)
+        : (activeY ?? 0)
 
   return (
     <nav
@@ -147,7 +169,12 @@ export function HookSidebar({
           depth={hoverDepth}
           className="text-foreground/30"
         />
-        <Rail y={activeY} depth={activeDepth} className="text-tech-signal" />
+        <Rail
+          from={activeFrom}
+          y={activeY}
+          depth={activeDepth}
+          className="text-tech-signal"
+        />
         {items.map((item, index) => {
           const active = index === value
           const depth = item.depth ?? 0

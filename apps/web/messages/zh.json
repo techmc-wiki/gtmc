@@ -474,10 +474,7 @@
   },
   "Outline": {
     "openSheet": "打开本文目录",
-    "hideRail": "隐藏本文目录",
-    "railLabel": "本文目录",
-    "showRail": "显示本文目录",
-    "title": "本文目录"
+    "railLabel": "文章段落"
   },
   "Pdf": {
     "bookSubtitle": "技术性 Minecraft 入门",

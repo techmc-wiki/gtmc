@@ -46,14 +46,15 @@ jobs:
           fi
 
           pipeline_paths=(
-            pdfgen
-            scripts/build-content.ts
-            scripts/generate-article-content.ts
-            scripts/generate-pdf.ts
-            lib/articles
-            lib/markdown
-            lib/pdf
-            lib/pdf-images.ts
+            tools/pdfgen
+            apps/web/scripts/build-content.ts
+            apps/web/scripts/generate-article-content.ts
+            apps/web/scripts/generate-pdf.ts
+            apps/web/lib/articles
+            apps/web/lib/markdown
+            apps/web/lib/pdf
+            apps/web/lib/pdf-images.ts
+            apps/web/lib/workspace-paths.ts
             package.json
             pnpm-lock.yaml
           )
@@ -101,7 +102,7 @@ jobs:
 
       - name: Advance articles to latest
         if: steps.change-check.outputs.should-build == 'true'
-        run: git submodule update --remote articles
+        run: git submodule update --remote content/articles
 
       - name: Set up pnpm
         if: steps.change-check.outputs.should-build == 'true'
@@ -122,7 +123,9 @@ jobs:
 
       - name: Generate Prisma Client
         if: steps.change-check.outputs.should-build == 'true'
-        run: pnpm prisma generate
+        # prisma is a devDependency of @gtmc/web; run it in its workspace.
+        working-directory: apps/web
+        run: pnpm exec prisma generate
         env:
           DATABASE_URL: "postgresql://localhost:5432/placeholder"
 
@@ -130,7 +133,7 @@ jobs:
         if: steps.change-check.outputs.should-build == 'true'
         uses: actions/setup-go@v7.0.0
         with:
-          go-version-file: pdfgen/go.mod
+          go-version-file: tools/pdfgen/go.mod
           cache: false
 
       - name: Provision pinned Chromium headless shell
@@ -167,7 +170,7 @@ jobs:
 
       - name: Build pdfgen binary
         if: steps.change-check.outputs.should-build == 'true'
-        run: go build -C pdfgen -o "$RUNNER_TEMP/pdfgen" .
+        run: go build -C tools/pdfgen -o "$RUNNER_TEMP/pdfgen" .
 
       - name: Build PDFs
         if: steps.change-check.outputs.should-build == 'true'
@@ -182,7 +185,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          for pdf in data/pdf-dist/gtmc-en.pdf data/pdf-dist/gtmc-zh.pdf; do
+          for pdf in apps/web/data/pdf-dist/gtmc-en.pdf apps/web/data/pdf-dist/gtmc-zh.pdf; do
             if [[ ! -s "$pdf" ]]; then
               echo "Missing or empty PDF: $pdf" >&2
               exit 1
@@ -204,7 +207,7 @@ jobs:
           set -euo pipefail
 
           for locale in en zh; do
-            aws s3 cp "data/pdf-dist/gtmc-${locale}.pdf" \
+            aws s3 cp "apps/web/data/pdf-dist/gtmc-${locale}.pdf" \
               "s3://${R2_BUCKET_NAME}/gtmc-${locale}.pdf" \
               --endpoint-url "$R2_ENDPOINT" \
               --content-type application/pdf \

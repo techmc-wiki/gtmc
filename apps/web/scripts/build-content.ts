@@ -1,0 +1,37 @@
+import { runScriptAsync } from "./lib/run"
+import { createLogger, describeError, runBuildStep } from "./lib/logger"
+
+const logger = createLogger("content")
+async function main(): Promise<void> {
+  const startedAt = performance.now()
+  logger.event("content.started", { stage_count: 5 })
+
+  await Promise.all([
+    runBuildStep(logger, "repository-contributors", () =>
+      runScriptAsync("scripts/generate-repository-contributor-stats.ts")
+    ),
+    runBuildStep(logger, "manifest", () =>
+      runScriptAsync("scripts/generate-article-manifest.ts")
+    ),
+    runBuildStep(logger, "glossary", () =>
+      runScriptAsync("scripts/generate-glossary-manifest.ts")
+    ),
+    runBuildStep(logger, "draft-guides", () =>
+      runScriptAsync("scripts/stage-draft-guides.ts")
+    ),
+  ])
+
+  await runBuildStep(logger, "article-content", () =>
+    runScriptAsync("scripts/generate-article-content.ts")
+  )
+
+  logger.event("content.completed", {
+    duration_ms: Math.round(performance.now() - startedAt),
+    stage_count: 5,
+  })
+}
+
+main().catch((error: unknown) => {
+  logger.error("content.failed", {}, describeError(error))
+  process.exit(1)
+})

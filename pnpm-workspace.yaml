@@ -1,3 +1,9 @@
+# Workspace members. `tools/*` is intentionally absent: the Go PDF renderer is
+# built by the Go toolchain, not by pnpm.
+packages:
+  - "apps/*"
+  - "packages/*"
+
 allowBuilds:
   "@parcel/watcher": true
   "@prisma/engines": true

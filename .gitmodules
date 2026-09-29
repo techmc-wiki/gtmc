@@ -1,7 +1,7 @@
 [submodule "articles"]
-	path = articles
+	path = content/articles
 	url = https://github.com/techmc-wiki/Articles.git
 	branch = main
 [submodule "glossary"]
-	path = glossary
+	path = content/glossary
 	url = https://github.com/TechMC-Glossary/TechMC-Glossary

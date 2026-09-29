@@ -1,1 +1,1 @@
-vp staged
+cd apps/web && vp staged

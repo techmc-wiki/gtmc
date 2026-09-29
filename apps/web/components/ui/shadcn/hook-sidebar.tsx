@@ -19,6 +19,61 @@ const DEPTH_STEP_REM = 1
 const rowPadding = (depth: number) =>
   (ROW_PADDING_REM + depth * DEPTH_STEP_REM) * 16
 
+/** Vertical gap the rail leaves above a row so the elbow can sit on its own. */
+const CORNER = 6
+/** Width of the elbow arc, matching the upstream corner radius. */
+const ELBOW_ARC = 12
+const RAIL_HEIGHT = 7
+
+/**
+ * The dashed rail plus the elbow that hooks it into a row. `y` is the row's
+ * vertical centre; the rail stops `CORNER` above it so the elbow closes the gap.
+ */
+function Rail({
+  from = 0,
+  y,
+  depth = 0,
+  className,
+}: {
+  from?: number
+  y: number | null
+  depth?: number
+  className?: string
+}) {
+  // The arc is fixed; only the horizontal run grows to reach an indented row.
+  const width = Math.max(ELBOW_ARC, rowPadding(depth) - 4)
+
+  return (
+    <span
+      aria-hidden
+      style={{ opacity: y === null ? 0 : 1 }}
+      className={cn(
+        "reader-hook-rail pointer-events-none absolute inset-0",
+        className
+      )}>
+      <span
+        className="reader-hook-line absolute top-0 left-0.5 w-px"
+        style={{
+          height: Math.max(0, (y ?? 0) - CORNER - from),
+          transform: `translateY(${from}px)`,
+        }}
+      />
+      <svg
+        width={width}
+        height={RAIL_HEIGHT}
+        viewBox={`0 0 ${width} ${RAIL_HEIGHT}`}
+        fill="none"
+        className="reader-hook-elbow absolute top-0 left-0.5"
+        style={{ transform: `translateY(${(y ?? 0) - CORNER}px)` }}>
+        <path
+          d={`M0.5 0a6 6 0 0 0 6 6H${width}`}
+          stroke="currentColor"
+          strokeDasharray="2 2"
+        />
+      </svg>
+    </span>
+  )
+}
 export function HookSidebar({
   items,
   value,
@@ -67,8 +122,17 @@ export function HookSidebar({
     }
   }, [])
 
-  const activeY = centers[value] ?? 0
-  const hoverY = centers[hovered ?? value] ?? activeY
+  const activeY = value < 0 ? null : (centers[value] ?? null)
+  const hoverY = hovered === null ? null : (centers[hovered] ?? null)
+  const activeDepth = value < 0 ? 0 : (items[value]?.depth ?? 0)
+  const hoverDepth = hovered === null ? 0 : (items[hovered]?.depth ?? 0)
+
+  // Above the active row the accent rail already covers the span, so the hover
+  // rail draws only the elbow corner.
+  const hoverFrom =
+    activeY !== null && hoverY !== null && hoverY <= activeY
+      ? Math.max(0, hoverY - CORNER)
+      : (activeY ?? 0)
 
   return (
     <nav
@@ -77,19 +141,13 @@ export function HookSidebar({
       ref={nav}
       {...props}>
       <div ref={list} className="relative flex flex-col">
-        <span
-          aria-hidden
-          className="reader-hook-line text-tech-signal pointer-events-none absolute top-0 left-0 w-px"
-          style={{
-            height: Math.abs(hoverY - activeY),
-            transform: `translateY(${Math.min(activeY, hoverY)}px)`,
-          }}
+        <Rail
+          from={hoverFrom}
+          y={hovered === value ? null : hoverY}
+          depth={hoverDepth}
+          className="text-foreground/30"
         />
-        <span
-          aria-hidden
-          className="reader-hook-tip bg-tech-signal pointer-events-none absolute top-0 left-0 size-2 -translate-x-1/2 rounded-full"
-          style={{ transform: `translate(-50%, ${activeY}px)` }}
-        />
+        <Rail y={activeY} depth={activeDepth} className="text-tech-signal" />
         {items.map((item, index) => {
           const active = index === value
           const depth = item.depth ?? 0

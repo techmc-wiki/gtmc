@@ -417,10 +417,10 @@
     opacity var(--tt-out-dur) var(--tt-out-ease),
     scale var(--tt-out-dur) var(--tt-out-ease);
 }
-.reader-proximity:is(:hover, :focus-within)
+.reader-proximity:is(:hover, :has(:focus-visible))
   [data-level="1"]
   .reader-outline-label,
-.reader-proximity:is(:hover, :focus-within)
+.reader-proximity:is(:hover, :has(:focus-visible))
   [data-level="2"]
   .reader-outline-label,
 .reader-proximity a:is(:hover, :focus-visible) .reader-outline-label {

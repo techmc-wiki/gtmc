@@ -48,9 +48,9 @@ export default function ProximitySidebar({
     <nav
       data-slot="proximity-sidebar"
       aria-label={ariaLabel}
-      className="reader-proximity absolute inset-y-0 right-0 flex w-10 [scrollbar-width:none] flex-col overflow-y-auto overscroll-contain focus-within:w-72 hover:w-72">
+      className="reader-proximity pointer-events-none absolute inset-y-0 right-0 flex w-72 [scrollbar-width:none] flex-col overflow-y-auto overscroll-contain">
       <div
-        className="my-auto shrink-0 py-1"
+        className="pointer-events-none my-auto ml-auto shrink-0 py-1"
         onPointerMove={(event) =>
           event.currentTarget.style.setProperty(
             "--pointer-y",
@@ -77,7 +77,7 @@ export default function ProximitySidebar({
                 "--dash-scale": Math.max(0.25, 1 - section.level * 0.2),
               } as CSSProperties
             }
-            className="focus-visible:outline-tech-signal relative flex h-6 items-center justify-end pr-1 focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
+            className="focus-visible:outline-tech-signal pointer-events-auto relative ml-auto flex h-6 w-12 items-center justify-end pr-1 focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
             onClick={(event) => {
               event.preventDefault()
               section.element.scrollIntoView({
@@ -93,10 +93,11 @@ export default function ProximitySidebar({
                 `#${encodeURIComponent(section.id)}`
               )
               setActiveId(section.id)
+              event.currentTarget.blur()
             }}>
             <span
               aria-hidden
-              className="reader-outline-label bg-surface-overlay text-foreground border-tech-line absolute right-12 max-w-60 truncate border px-2 py-1 text-sm shadow-sm">
+              className="reader-outline-label bg-surface-overlay text-foreground border-tech-line pointer-events-auto absolute right-12 max-w-60 truncate border px-2 py-1 text-sm shadow-sm">
               {section.label}
             </span>
             <span

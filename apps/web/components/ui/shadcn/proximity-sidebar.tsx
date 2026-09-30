@@ -96,7 +96,7 @@ export default function ProximitySidebar({
             }}>
             <span
               aria-hidden
-              className="reader-outline-label bg-surface text-foreground absolute right-12 max-w-60 truncate px-2 py-1 text-sm">
+              className="reader-outline-label bg-surface-overlay text-foreground border-tech-line absolute right-12 max-w-60 truncate border px-2 py-1 text-sm shadow-sm">
               {section.label}
             </span>
             <span

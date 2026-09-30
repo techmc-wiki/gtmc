@@ -1,0 +1,5 @@
+# The sidecar keeps its own ignores so it stays self-contained outside the
+# pnpm workspace. Fonts and transcoded assets are cached here and rebuilt on
+# demand; neither belongs in the repository.
+.cache
+node_modules

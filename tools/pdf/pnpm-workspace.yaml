@@ -1,0 +1,10 @@
+# Standalone sidecar root. Deliberately NOT a member of the site workspace:
+# `pnpm install` at the repository root must never fetch these dependencies.
+packages:
+  - "."
+
+allowBuilds:
+  # sharp decodes GIF frames and re-encodes raster assets for embedding.
+  sharp: true
+  # esbuild backs tsx, the CLI runner.
+  esbuild: true

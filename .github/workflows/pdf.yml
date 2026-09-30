@@ -4,12 +4,16 @@ permissions:
   contents: read
 
 on:
+  # The articles repository dispatches this after a push that changed book
+  # content. A maintainer can also run it by hand to re-cut an edition.
+  repository_dispatch:
+    types: [articles-rebuild]
   workflow_dispatch:
-  schedule:
-    # Check for article updates every six hours without aligning with the hour.
-    - cron: "17 */6 * * *"
-  push:
-    branches: ["dev"]
+    inputs:
+      articles_sha:
+        description: Articles revision to build. Defaults to the current tip.
+        required: false
+        type: string
 
 concurrency:
   group: pdf-${{ github.ref }}
@@ -39,24 +43,31 @@ jobs:
         run: |
           set -euo pipefail
 
-          articles_sha="$(git ls-remote https://github.com/techmc-wiki/Articles.git refs/heads/main | cut -f1)"
+          # The caller names the revision so the edition matches the push that
+          # asked for it; either trigger may supply it, and without one the
+          # current tip is used.
+          articles_sha="${{ github.event.client_payload.articles_sha || inputs.articles_sha }}"
           if [[ -z "$articles_sha" ]]; then
-            echo "Could not resolve Articles/main" >&2
+            articles_sha="$(git ls-remote https://github.com/techmc-wiki/Articles.git refs/heads/main | cut -f1)"
+          fi
+          if [[ -z "$articles_sha" ]]; then
+            echo "Could not resolve the Articles revision" >&2
             exit 1
           fi
 
+          # The content-sidecar phase installs from these manifests, so a
+          # dependency change can change the sidecars and must move the digest.
           pipeline_paths=(
-            tools/pdfgen
+            tools/pdf
+            apps/web/package.json
+            pnpm-lock.yaml
+            pnpm-workspace.yaml
             apps/web/scripts/build-content.ts
             apps/web/scripts/generate-article-content.ts
-            apps/web/scripts/generate-pdf.ts
+            apps/web/scripts/generate-article-manifest.ts
             apps/web/lib/articles
             apps/web/lib/markdown
-            apps/web/lib/pdf
-            apps/web/lib/pdf-images.ts
             apps/web/lib/workspace-paths.ts
-            package.json
-            pnpm-lock.yaml
           )
           code_sha="$(git ls-tree -r HEAD -- "${pipeline_paths[@]}" | sha256sum | cut -d' ' -f1)"
           echo "articles_sha=$articles_sha" >> "$GITHUB_OUTPUT"
@@ -92,7 +103,7 @@ jobs:
           fi
 
           if [[ "$ARTICLES_SHA" == "$previous_articles_sha" && "$CODE_SHA" == "$previous_code_sha" ]]; then
-            echo "no changes"
+            echo "This edition was already built; nothing to publish."
             echo "should-build=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -100,9 +111,20 @@ jobs:
           echo "PDF inputs changed; building PDFs."
           echo "should-build=true" >> "$GITHUB_OUTPUT"
 
-      - name: Advance articles to latest
+      - name: Advance articles to the requested revision
         if: steps.change-check.outputs.should-build == 'true'
-        run: git submodule update --remote content/articles
+        env:
+          ARTICLES_SHA: ${{ steps.revisions.outputs.articles_sha }}
+        run: |
+          set -euo pipefail
+          git submodule update --remote content/articles
+          resolved="$(git -C content/articles rev-parse HEAD)"
+          if [[ "$resolved" != "$ARTICLES_SHA" ]]; then
+            echo "Articles is at $resolved but $ARTICLES_SHA was requested; checking out the requested revision."
+            git -C content/articles fetch origin "$ARTICLES_SHA"
+            git -C content/articles checkout --detach "$ARTICLES_SHA"
+          fi
+          echo "Articles checked out at $(git -C content/articles rev-parse HEAD)"
 
       - name: Set up pnpm
         if: steps.change-check.outputs.should-build == 'true'
@@ -114,8 +136,11 @@ jobs:
         with:
           node-version: "26"
           cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            tools/pdf/pnpm-lock.yaml
 
-      - name: Install dependencies
+      - name: Install site dependencies
         if: steps.change-check.outputs.should-build == 'true'
         run: pnpm install --frozen-lockfile --ignore-scripts
         env:
@@ -129,38 +154,12 @@ jobs:
         env:
           DATABASE_URL: "postgresql://localhost:5432/placeholder"
 
-      - name: Set up Go
+      - name: Install PDF renderer dependencies
         if: steps.change-check.outputs.should-build == 'true'
-        uses: actions/setup-go@v7.0.0
-        with:
-          go-version-file: tools/pdfgen/go.mod
-          cache: false
-
-      - name: Provision pinned Chromium headless shell
-        if: steps.change-check.outputs.should-build == 'true'
-        id: chromium
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          playwright_version="1.62.1"
-          dry_run="$(npx -y "playwright@${playwright_version}" install --only-shell --dry-run chromium 2>&1)"
-          printf '%s\n' "$dry_run"
-          install_root="$(printf '%s\n' "$dry_run" | sed -n 's/^[[:space:]]*Install location:[[:space:]]*//p' | sed -n '1p')"
-          if [[ -z "$install_root" ]]; then
-            echo "Could not determine the Playwright browser install location." >&2
-            exit 1
-          fi
-
-          npx -y "playwright@${playwright_version}" install --only-shell chromium
-          chromium_path="$install_root/chrome-headless-shell-linux64/chrome-headless-shell"
-          if [[ ! -x "$chromium_path" ]]; then
-            echo "Expected Chromium executable was not installed: $chromium_path" >&2
-            exit 1
-          fi
-
-          echo "executable=$chromium_path" >> "$GITHUB_OUTPUT"
-          echo "Chromium executable: $chromium_path"
+        # The renderer is a standalone sidecar with its own lockfile, so the site
+        # install above never pulls in its toolchain.
+        working-directory: tools/pdf
+        run: pnpm install --frozen-lockfile
 
       - name: Build content sidecars
         if: steps.change-check.outputs.should-build == 'true'
@@ -168,33 +167,28 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Build pdfgen binary
-        if: steps.change-check.outputs.should-build == 'true'
-        run: go build -C tools/pdfgen -o "$RUNNER_TEMP/pdfgen" .
-
       - name: Build PDFs
         if: steps.change-check.outputs.should-build == 'true'
-        run: pnpm build:pdf
-        env:
-          PDFGEN_BIN: ${{ runner.temp }}/pdfgen
-          PDFGEN_CHROMIUM: ${{ steps.chromium.outputs.executable }}
+        working-directory: tools/pdf
+        run: pnpm run build:pdf
 
       - name: Check generated PDF pages
         if: steps.change-check.outputs.should-build == 'true'
+        working-directory: tools/pdf
         shell: bash
         run: |
           set -euo pipefail
 
-          for pdf in apps/web/data/pdf-dist/gtmc-en.pdf apps/web/data/pdf-dist/gtmc-zh.pdf; do
+          for locale in en zh; do
+            pdf="../../apps/web/data/pdf-dist/gtmc-${locale}.pdf"
             if [[ ! -s "$pdf" ]]; then
               echo "Missing or empty PDF: $pdf" >&2
               exit 1
             fi
 
-            pages_json="$("$RUNNER_TEMP/pdfgen" pages "$pdf")"
-            pages="$(jq -r '.pages // 0' <<< "$pages_json")"
+            pages="$(jq -r '.pages // 0' <<<"$(pnpm exec tsx src/cli.tsx pages "$pdf")")"
             if [[ "$pages" -le 0 ]]; then
-              echo "PDF has no pages: $pdf ($pages_json)" >&2
+              echo "PDF has no pages: $pdf" >&2
               exit 1
             fi
             echo "$pdf: $pages pages"

@@ -1,5 +1,6 @@
-# Workspace members. `tools/*` is intentionally absent: the Go PDF renderer is
-# built by the Go toolchain, not by pnpm.
+# Workspace members. `tools/*` is intentionally absent: the PDF renderer in
+# tools/pdf is a standalone sidecar with its own lockfile, so that site installs
+# and deploys never pull in its renderer dependencies.
 packages:
   - "apps/*"
   - "packages/*"

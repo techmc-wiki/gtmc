@@ -1,10 +1,6 @@
-/* Overlay motion: transitions.dev 05-menu-dropdown, 06-modal, 07-panel-reveal,
- * 17-tooltip.
+/* Overlay motion: transitions.dev 05-menu-dropdown, 06-modal, 17-tooltip.
  *
- * The 07 .t-panel-slide block below is the recipe verbatim (ReaderDock drives
- * it via data-open). All Radix Presence adapters in this file additionally
- * require a data-slot attribute, so they never match dock or other recipe
- * consumers. One deliberate adaptation: Radix Presence keeps a closing
+ * Radix Presence keeps a closing
  * primitive mounted only while a CSS *animation* runs on it, so plain
  * .is-open/.is-closing transitions would unmount instantly with no exit
  * motion. The open/close states below are therefore data-state-driven
@@ -119,40 +115,9 @@
   animation: t-overlay-out var(--modal-close-dur) var(--modal-ease);
 }
 
-/* transitions.dev: 07-panel-reveal.md: verbatim recipe; ReaderDock drives it
- * via data-open with its own --panel-translate-y. Leave untouched. */
-:root {
-  --panel-open-dur: 400ms;
-  --panel-close-dur: 350ms;
-  --panel-translate-y: 100px;
-  --panel-blur: 2px;
-  --panel-ease: cubic-bezier(0.22, 1, 0.36, 1);
-}
-.t-panel-slide {
-  transform: translateY(var(--panel-translate-y));
-  opacity: 0;
-  filter: blur(var(--panel-blur));
-  pointer-events: none;
-  transition:
-    transform var(--panel-close-dur) var(--panel-ease),
-    opacity var(--panel-close-dur) var(--panel-ease),
-    filter var(--panel-close-dur) var(--panel-ease);
-  will-change: transform, opacity, filter;
-}
-.t-panel-slide[data-open="true"] {
-  transform: translateY(0);
-  opacity: 1;
-  filter: blur(0);
-  pointer-events: auto;
-  transition:
-    transform var(--panel-open-dur) var(--panel-ease),
-    opacity var(--panel-open-dur) var(--panel-ease),
-    filter var(--panel-open-dur) var(--panel-ease);
-}
 /* Sheet Presence bridge: per-side travel read by the shared keyframes so open
  * and close stay symmetric. `translate` (not `transform`) avoids collisions
- * with layout positioning. Scoped to the sheet slot so dock panels using
- * .t-panel-slide are unaffected. */
+ * with layout positioning. */
 [data-slot="sheet-content"].t-sheet--right {
   --sheet-travel: 100% 0;
 }
@@ -242,9 +207,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .t-panel-slide {
-    transition: none !important;
-  }
   .t-menu[data-slot],
   .t-modal[data-slot],
   .t-overlay[data-slot],

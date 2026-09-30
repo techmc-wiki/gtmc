@@ -1,437 +1,215 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
+import { Menu, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { usePathname } from "@/i18n/navigation";
+import { Button } from "@/components/ui/shadcn/button";
+import { HookSidebar, type HookSidebarItem } from "@/components/ui/shadcn/hook-sidebar";
+import { IconButton } from "@/components/ui/icon-button";
+import { ScrollArea } from "@/components/ui/shadcn/scroll-area";
 import {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-} from "react"
-import { ChapterNavPanel } from "./chapter-nav-panel"
-import { ReaderNavigationProvider } from "./reader-navigation/context"
-import {
-  SectionRail,
-  SegmentedBar,
-} from "@/components/ui/loading-shell-primitives"
-import { Button } from "@/components/ui/shadcn/button"
-import { TriangleIcon } from "@/components/ui/icons"
-import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
-import { useLocale, useTranslations } from "next-intl"
-import {
-  OutlineRail,
-  MobileOutlineBar,
-} from "@/components/articles/outline-navigation"
-import { useFooterOverlap } from "@/hooks/use-footer-overlap"
-
-const treePanelStyle = {
-  "--panel-translate-y": "12px",
-} as React.CSSProperties
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/shadcn/sheet";
+import { ArticleOutlineNavigation } from "@/components/articles/outline-navigation";
+import { useOutline } from "./outline/use-outline";
+import { encodeSlug } from "@/lib/articles/slug-resolver";
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types";
 
 interface ArticlesLayoutProps {
-  children: React.ReactNode
-  tree: ChapterNavNode[]
+  children: React.ReactNode;
+  tree: ChapterNavNode[];
 }
-
-function TreeLoadingPlaceholder() {
-  return (
-    <div
-      className="
-        t-panel-slide relative h-full overflow-hidden border guide-line
-        bg-surface-overlay/80 px-3 py-4
-        md:min-h-160 md:px-4 md:py-5
-      "
-      style={treePanelStyle}
-      data-open="true"
-      aria-hidden="true">
-      <SectionRail
-        label="Loading"
-        className="mb-3 text-xs opacity-75"
-      />
-
-      <div className="space-y-6 pr-3">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="size-1 bg-tech-main/45" />
-            <SegmentedBar opacity="high" className="h-4 w-4/5" />
-          </div>
-
-          <div className="nested-list">
-            <div className="flex items-center gap-2">
-              <span className="h-px w-2 bg-tech-main/40" />
-              <SegmentedBar opacity="medium" className="h-3.5 w-3/4" />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="h-px w-2 bg-tech-main/40" />
-              <SegmentedBar opacity="medium" className="h-3.5 w-2/3" />
-            </div>
-
-            <div className="ml-2 nested-list">
-              <div className="flex items-center gap-2">
-                <span className="size-1 rounded-full bg-tech-main/35" />
-                <SegmentedBar opacity="low" className="h-3 w-3/5" />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="size-1 rounded-full bg-tech-main/35" />
-                <SegmentedBar opacity="low" className="h-3 w-2/5" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="size-1 bg-tech-main/45" />
-            <SegmentedBar opacity="high" className="h-4 w-2/3" />
-          </div>
-
-          <div className="nested-list">
-            <div className="flex items-center gap-2">
-              <span className="h-px w-2 bg-tech-main/40" />
-              <SegmentedBar opacity="medium" className="h-3.5 w-3/5" />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="h-px w-2 bg-tech-main/40" />
-              <SegmentedBar opacity="low" className="h-3.5 w-1/3" />
-            </div>
-          </div>
-        </div>
-
-        <div className="nested-list">
-          <div className="flex items-center gap-2">
-            <span className="h-px w-2 bg-tech-main/35" />
-            <SegmentedBar opacity="medium" className="h-3.5 w-1/2" />
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-px w-2 bg-tech-main/35" />
-            <SegmentedBar opacity="low" className="h-3.5 w-2/5" />
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-px w-2 bg-tech-main/35" />
-            <SegmentedBar opacity="low" className="h-3.5 w-1/3" />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const CHAPTER_NAV_HIDDEN_KEY = "gtmc_chapter_nav_hidden"
 
 function useChapterTree(tree: ChapterNavNode[]) {
-  const [fetchedTreeData, setFetchedTreeData] = useState<ChapterNavNode[]>([])
-  const [hasTreeFetchSettled, setHasTreeFetchSettled] = useState(
-    () => tree.length > 0
-  )
-  const locale = useLocale()
+  const [fetchedTree, setFetchedTree] = React.useState<ChapterNavNode[]>([]);
+  const locale = useLocale();
 
-  useEffect(() => {
-    if (tree.length > 0) {
-      return
-    }
+  React.useEffect(() => {
+    if (tree.length) return;
+    const controller = new AbortController();
 
-    let cancelled = false
-    const controller = new AbortController()
+    void fetch(`/api/articles/tree?locale=${locale}`, {
+      signal: controller.signal,
+    })
+      .then((response) => (response.ok ? response.json() : []))
+      .then((result: ChapterNavNode[]) => {
+        if (!controller.signal.aborted && Array.isArray(result)) setFetchedTree(result);
+      })
+      .catch(() => {});
 
-    const loadTree = async () => {
-      try {
-        const response = await fetch(`/api/articles/tree?locale=${locale}`, {
-          method: "GET",
-          signal: controller.signal,
-        })
+    return () => controller.abort();
+  }, [locale, tree]);
 
-        if (cancelled) return
+  return tree.length ? tree : fetchedTree;
+}
 
-        if (!response.ok) {
-          return
-        }
+function getNavigationItems(tree: ChapterNavNode[], locale: string) {
+  const items: HookSidebarItem[] = [];
 
-        const payload = (await response.json()) as ChapterNavNode[]
-        if (cancelled) return
-        if (Array.isArray(payload)) {
-          setFetchedTreeData(payload)
-        }
-      } catch (error) {
-        if (cancelled) return
-        if (error instanceof Error && error.name === "AbortError") {
-          return
-        }
-      } finally {
-        if (!cancelled) {
-          setHasTreeFetchSettled(true)
-        }
+  const visit = (nodes: ChapterNavNode[], depth: number) => {
+    for (const node of nodes) {
+      if (node.isFolder) {
+        items.push({ id: node.id, label: node.title, depth });
+      } else {
+        const path = `/articles/${encodeSlug(node.slug)}`;
+        items.push({ id: node.id, label: node.title, href: `/${locale}${path}`, depth });
       }
+      visit(node.children, depth + 1);
     }
+  };
 
-    void loadTree()
+  visit(tree, 0);
 
-    return () => {
-      cancelled = true
-      controller.abort()
-    }
-  }, [locale, tree, tree.length])
-
-  const treeData = tree.length > 0 ? tree : fetchedTreeData
-  return {
-    treeData,
-    showChapterNavPlaceholder:
-      tree.length === 0 && !hasTreeFetchSettled && treeData.length === 0,
-  }
+  return items;
 }
 
-function useChapterNavVisibility() {
-  const [chapterNavHidden, setChapterNavHidden] = useState(false)
-  const [isChapterNavOpen, setIsChapterNavOpen] = useState(false)
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        setChapterNavHidden(
-          localStorage.getItem(CHAPTER_NAV_HIDDEN_KEY) === "true"
-        )
-      } catch {}
-    }, 0)
-    return () => clearTimeout(timer)
-  }, [])
-
-  const toggleChapterNavHidden = useCallback(() => {
-    const next = !chapterNavHidden
-    setChapterNavHidden(next)
-    try {
-      localStorage.setItem(CHAPTER_NAV_HIDDEN_KEY, String(next))
-    } catch {}
-  }, [chapterNavHidden])
-
-  const closeChapterNav = useCallback(() => {
-    setIsChapterNavOpen(false)
-  }, [])
-
-  const toggleMobileChapterNav = useCallback(() => {
-    setIsChapterNavOpen((open) => !open)
-  }, [])
-
-  return {
-    chapterNavHidden,
-    closeChapterNav,
-    isChapterNavOpen,
-    toggleChapterNavHidden,
-    toggleMobileChapterNav,
-  }
-}
-
-interface MobileChapterNavigationProps {
-  isChapterNavOpen: boolean
-  isOverlappingFooter: boolean
-  onNavigate: () => void
-  onToggle: () => void
-}
-
-function MobileChapterNavigation({
-  isChapterNavOpen,
-  isOverlappingFooter,
+function SiteNavigation({
+  items,
+  activeIndex,
   onNavigate,
-  onToggle,
-}: MobileChapterNavigationProps) {
-  const t = useTranslations("ChapterNav")
-  const tA11y = useTranslations("CommonA11y")
-
-  return (
-    <div
-      className={`
-        border-tech-main/40 bg-surface-overlay/95 sticky top-16 z-30 border-y
-        shadow-sm backdrop-blur-sm transition-[opacity] duration-200 md:hidden
-        ${isOverlappingFooter && !isChapterNavOpen ? "pointer-events-none opacity-0" : "opacity-100"}
-      `}>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={onToggle}
-          aria-expanded={isChapterNavOpen}
-          aria-label={tA11y("toggleArticleTree")}
-          data-testid="mobile-tree-toggle"
-          className="h-12 w-full justify-between">
-          <span>{t("title")}</span>
-          <TriangleIcon
-            direction={isChapterNavOpen ? "down" : "right"}
-            className="size-3"
-          />
-        </Button>
-        <div
-          inert={!isChapterNavOpen}
-          className={`
-            grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none
-            ${isChapterNavOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}
-          `}>
-          <div className="overflow-hidden">
-            <div className="border-tech-main/30 bg-surface-overlay/95 max-h-[calc(100dvh-12rem)] overflow-y-auto overscroll-contain border-t px-4 pt-3 pb-4">
-              <ChapterNavPanel onNavigate={onNavigate} />
-            </div>
-          </div>
-        </div>
-    </div>
-  )
-}
-
-interface DesktopChapterNavigationProps {
-  chapterNavHidden: boolean
-  onToggle: () => void
-  showPlaceholder: boolean
-}
-
-function DesktopChapterNavigation({
-  chapterNavHidden,
-  onToggle,
-  showPlaceholder,
-}: DesktopChapterNavigationProps) {
-  const t = useTranslations("ChapterNav")
-  const tA11y = useTranslations("CommonA11y")
-  const asideStyle = useMemo(
-    (): React.CSSProperties => ({
-      width: chapterNavHidden ? 0 : undefined,
-      opacity: chapterNavHidden ? 0 : 1,
-      borderRightWidth: chapterNavHidden ? 0 : undefined,
-    }),
-    [chapterNavHidden]
-  )
-
-  return (
-    <div
-      className={`
-        relative hidden shrink-0 self-stretch
-        md:col-start-1 md:justify-self-end md:block
-        ${chapterNavHidden ? "md:col-span-1" : "md:col-span-3"}
-      `}
-      data-chapter-nav-region
-      data-chapter-nav-hidden={chapterNavHidden ? "" : undefined}>
-      <div className="flex h-full">
-        <aside
-          inert={chapterNavHidden}
-          className="
-            h-full w-56 overflow-clip border-r guide-line
-            transition-[width,opacity,border-color] duration-300
-            ease-[cubic-bezier(0.16,1,0.3,1)]
-          "
-          style={asideStyle}>
-          <div
-            className="
-              sticky top-20 flex w-56 flex-col justify-center
-              hover:z-20
-              sm:top-26 sm:h-[calc(100dvh-128px)]
-              lg:top-28 lg:h-[calc(100dvh-144px)]
-            ">
-            <div
-              className="
-                flex max-h-4/5 min-h-0 flex-1 flex-col overflow-visible
-                border-b guide-line text-tech-main
-                md:px-4 md:py-2
-              ">
-              {showPlaceholder ? (
-                <div
-                  className="
-                    reader-rail-scrollbar h-full min-h-0 flex-1
-                    overflow-y-auto
-                  ">
-                  <h2 className="mb-2 text-sm font-semibold">{t("title")}</h2>
-                  <TreeLoadingPlaceholder />
-                </div>
-              ) : (
-                <ChapterNavPanel showTitle scrollClassName="pr-1" />
-              )}
-            </div>
-          </div>
-        </aside>
-
-        <div className="relative h-full w-0">
-          <div className="sticky top-[50vh] -translate-y-1/2 justify-center overflow-visible">
-            <Button variant="outline" size="icon-sm"
-              type="button"
-              onClick={onToggle}
-              aria-label={
-                chapterNavHidden
-                  ? tA11y("showChapterNav")
-                  : tA11y("hideChapterNav")
-              }
-              aria-expanded={!chapterNavHidden}
-              data-chapter-nav-toggle=""
-              className="absolute top-0 -left-4 z-40 -translate-y-1/2">
-              <span
-                className="
-                  flex size-3 items-center justify-center select-none
-                ">
-                <TriangleIcon
-                  direction={chapterNavHidden ? "right" : "left"}
-                  className="size-2.5"
-                />
-              </span>
-            </Button>
-
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function ArticleContentColumn({
-  chapterNavHidden,
-  children,
 }: {
-  chapterNavHidden: boolean
-  children: React.ReactNode
+  items: HookSidebarItem[];
+  activeIndex: number;
+  onNavigate?: () => void;
 }) {
+  const t = useTranslations("ChapterNav");
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!items.length || activeIndex < 0) return;
+    const viewport = containerRef.current?.querySelector<HTMLElement>(
+      '[data-slot="scroll-area-viewport"]',
+    );
+    const active = viewport?.querySelector<HTMLElement>('[data-active="true"]');
+    if (!viewport || !active) return;
+    const bounds = viewport.getBoundingClientRect();
+    const row = active.getBoundingClientRect();
+    if (row.top >= bounds.top && row.bottom <= bounds.bottom) return;
+    viewport.scrollTop = Math.max(
+      0,
+      active.offsetTop - viewport.offsetTop - viewport.clientHeight / 3,
+    );
+  }, [activeIndex, items.length]);
+
   return (
-    <main
-      className={`
-        relative my-6 min-w-0
-        md:w-full
-        md:mx-auto
-        md:max-w-4xl
-        ${chapterNavHidden ? "md:col-start-3 md:col-span-10 xl:col-span-9" : "md:col-start-4 md:col-span-9 xl:col-span-7"}
-      `}>
-      {children}
-    </main>
-  )
+    <div ref={containerRef} className="flex min-h-0 flex-1 flex-col">
+      <ScrollArea className="min-h-0 flex-1">
+        {items.length ? (
+          <HookSidebar
+            items={items}
+            value={activeIndex}
+            onNavigate={onNavigate}
+            aria-label={t("title")}
+            className="pr-3 pb-8"
+          />
+        ) : (
+          <p className="px-4 py-3 text-sm text-muted-foreground">{t("empty")}</p>
+        )}
+      </ScrollArea>
+    </div>
+  );
 }
 
 export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
-  const { treeData, showChapterNavPlaceholder } = useChapterTree(tree)
-  const {
-    chapterNavHidden,
-    closeChapterNav,
-    isChapterNavOpen,
-    toggleChapterNavHidden,
-    toggleMobileChapterNav,
-  } = useChapterNavVisibility()
-  const isOverlappingFooter = useFooterOverlap()
+  const t = useTranslations("ChapterNav");
+  const tA11y = useTranslations("CommonA11y");
+  const locale = useLocale();
+  const pathname = usePathname();
+  const treeData = useChapterTree(tree);
+  const contentRef = React.useRef<HTMLDivElement>(null);
+  const outline = useOutline(contentRef, pathname);
+  const [siteOpen, setSiteOpen] = React.useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 64rem)");
+    const closeOnDesktop = (event: MediaQueryListEvent) => {
+      if (event.matches) setMobileMenuOpen(false);
+    };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => desktop.removeEventListener("change", closeOnDesktop);
+  }, []);
+
+  const items = React.useMemo(() => getNavigationItems(treeData, locale), [treeData, locale]);
+  const currentPath =
+    pathname === "/articles" || pathname === "/articles/" ? "/articles/preface" : pathname;
+  const activeIndex = items.findIndex(
+    (item) =>
+      item.href &&
+      decodeURIComponent(item.href).endsWith(
+        decodeURIComponent(currentPath).replace(/\/$/, ""),
+      ),
+  );
 
   return (
-    <ReaderNavigationProvider tree={treeData}>
-      <MobileOutlineBar />
-      <div
-        className="
-          relative isolate flex min-h-[calc(100dvh-8rem)] min-w-0
-          flex-col overflow-x-clip
-          md:grid md:grid-cols-12
-          md:gap-6
-          md:max-w-360 md:mx-auto
-        ">
-        <MobileChapterNavigation
-          isChapterNavOpen={isChapterNavOpen}
-          isOverlappingFooter={isOverlappingFooter}
-          onNavigate={closeChapterNav}
-          onToggle={toggleMobileChapterNav}
-        />
-        <DesktopChapterNavigation
-          chapterNavHidden={chapterNavHidden}
-          onToggle={toggleChapterNavHidden}
-          showPlaceholder={showChapterNavPlaceholder}
-        />
-        <ArticleContentColumn chapterNavHidden={chapterNavHidden}>
-          {children}
-        </ArticleContentColumn>
-        <div className="hidden xl:col-start-11 xl:col-span-2 xl:block xl:justify-self-stretch xl:self-stretch">
-          <OutlineRail />
-        </div>
+    <>
+      <div className="fixed bottom-6 left-4 z-30 lg:hidden">
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="bg-surface"
+              aria-label={tA11y("toggleArticleTree")}
+            >
+              <Menu aria-hidden="true" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" showCloseButton={false} className="w-[min(88vw,24rem)] p-0">
+            <SheetHeader className="border-b">
+              <div className="flex items-center justify-between gap-3">
+                <SheetTitle>{t("title")}</SheetTitle>
+                <SheetClose asChild>
+                  <Button variant="ghost" size="icon" aria-label={tA11y("closeNavigationMenu")}>
+                    <X aria-hidden="true" />
+                  </Button>
+                </SheetClose>
+              </div>
+            </SheetHeader>
+            <SiteNavigation
+              items={items}
+              activeIndex={activeIndex}
+              onNavigate={() => setMobileMenuOpen(false)}
+            />
+          </SheetContent>
+        </Sheet>
       </div>
-    </ReaderNavigationProvider>
-  )
+
+      <div className="relative flex w-full min-w-0 flex-1 gap-4 lg:-mx-8 lg:w-[calc(100%+4rem)]">
+        <aside className={`t-resize relative hidden shrink-0 lg:block ${siteOpen ? "w-64" : "w-8"}`}>
+          <div className="sticky top-24 flex h-[calc(100dvh-7rem)] min-h-0">
+            <div id="article-chapters" inert={!siteOpen} className={`flex w-56 shrink-0 flex-col ${siteOpen ? "" : "invisible"}`}>
+              <h2 className="pb-3 pl-5 text-sm font-semibold">{t("title")}</h2>
+              <SiteNavigation items={items} activeIndex={activeIndex} />
+            </div>
+            <IconButton
+              size="icon-sm"
+              className="absolute top-0 right-0"
+              label={siteOpen ? tA11y("hideChapterNav") : tA11y("showChapterNav")}
+              aria-controls="article-chapters"
+              aria-expanded={siteOpen}
+              onClick={() => setSiteOpen((open) => !open)}>
+              <span className="t-icon-swap" data-state={siteOpen ? "a" : "b"}>
+                <PanelLeftClose className="t-icon" data-icon="a" aria-hidden />
+                <PanelLeftOpen className="t-icon" data-icon="b" aria-hidden />
+              </span>
+            </IconButton>
+          </div>
+        </aside>
+        <div ref={contentRef} data-reader-content className="min-w-0 flex-1">
+          {children}
+        </div>
+        <aside className="relative z-20 hidden w-10 shrink-0 lg:block">
+          <ArticleOutlineNavigation outline={outline} />
+        </aside>
+      </div>
+      <ArticleOutlineNavigation outline={outline} mobile />
+    </>
+  );
 }

@@ -90,6 +90,8 @@ const nextConfig: NextConfig = {
     "/\\[locale\\]/articles/\\[\\[\\.\\.\\.slug\\]\\]": ["data/articles/**"],
     "/\\[locale\\]/glossary": ["data/glossary*.json"],
     "/api/glossary": ["data/glossary*.json"],
+    "/api/properties": ["../../properties/data/*.json"],
+    "/\\[locale\\]/properties": ["../../properties/data/block_data.json"],
     // The draft editor renders the contribution guides staged by
     // scripts/stage-draft-guides.ts.
     "/\\[locale\\]/draft/\\[id\\]": ["data/contributing/*.md"],

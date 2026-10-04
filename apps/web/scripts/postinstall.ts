@@ -76,6 +76,7 @@ if (!skipHeavy && isGitWorkTree()) {
 
   ensureSubmoduleInitialized("content/articles")
   ensureSubmoduleInitialized("content/glossary")
+  ensureSubmoduleInitialized("properties")
 
   runBuildStep(logger, "glossary", () =>
     runScript("scripts/generate-glossary-manifest.ts")

@@ -67,11 +67,8 @@ import {
 } from "@/lib/properties/types"
 import { PropertyPicker } from "./property-picker"
 import { PropertyValueView } from "./property-value"
-import {
-  PropertyDetails,
-  PropertyComparison,
-  propertyFetcher,
-} from "./property-details"
+import { PropertyDetails, PropertyComparison } from "./property-details"
+import { propertyFetcher } from "@/lib/properties/fetcher"
 
 const filtersParser = parseAsJson(
   z

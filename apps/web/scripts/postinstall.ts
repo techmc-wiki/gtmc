@@ -7,8 +7,6 @@ import { createLogger, runBuildStep } from "./lib/logger"
 
 const logger = createLogger("setup")
 
-const placeholderDatabaseUrl = "postgresql://localhost:5432/placeholder"
-
 // Submodules and the shared .gitconfig live at the workspace root, not under
 // apps/web, so every git invocation below is pinned there explicitly rather
 // than inheriting this process's working directory.
@@ -91,14 +89,6 @@ if (!skipHeavy && isGitWorkTree()) {
 if (skipHeavy) {
   logger.event("setup.heavy-work.skipped", { reason: "environment" })
 } else {
-  runBuildStep(logger, "prisma.generate", () =>
-    run("prisma", ["generate"], {
-      env: {
-        ...process.env,
-        DATABASE_URL: process.env.DATABASE_URL ?? placeholderDatabaseUrl,
-      },
-    })
-  )
   runBuildStep(logger, "manifest", () =>
     runScript("scripts/generate-article-manifest.ts")
   )

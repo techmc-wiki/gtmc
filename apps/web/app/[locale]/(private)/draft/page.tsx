@@ -1,7 +1,11 @@
 import { ArrowRight, ArrowUpRight, MoreHorizontal } from "lucide-react"
 import { IconButton } from "@/components/ui/icon-button"
 import type { Metadata } from "next"
-import type { GlossaryRevision, Revision } from "@prisma/client"
+import {
+  listDrafts,
+  type GlossaryDraft,
+  type ArticleDraft,
+} from "@/lib/drafts/store"
 
 import { getTranslations } from "next-intl/server"
 
@@ -20,10 +24,7 @@ import {
 } from "@/components/ui/shadcn/collapsible"
 import { Link } from "@/i18n/navigation"
 import { guardUser } from "@/lib/auth/guards"
-import { countCleanupFailedByRevision } from "@/lib/drafts/asset-db"
-import { decodeStoredDraftFiles } from "@/lib/drafts/files"
 import { getArticlePullRequest } from "@/lib/articles/pr"
-import { prisma } from "@/lib/prisma"
 
 const ARCHIVED_DRAFT_STATUSES = new Set(["ARCHIVED", "MERGED", "CLOSED"])
 
@@ -40,14 +41,13 @@ export const metadata: Metadata = {
 
 type ArticleDraftItem = {
   kind: "article"
-  cleanupFailedCount: number
   displayStatus: string
   fileCount: number
-} & Revision
+} & ArticleDraft
 
 type GlossaryDraftItem = {
   kind: "glossary"
-} & GlossaryRevision
+} & GlossaryDraft
 
 type DraftItem = ArticleDraftItem | GlossaryDraftItem
 
@@ -67,7 +67,6 @@ interface DraftRecordProps {
   status: string
   title: string
   updatedLabel: string
-  warning?: string
 }
 
 function DraftRecord({
@@ -86,7 +85,6 @@ function DraftRecord({
   status,
   title,
   updatedLabel,
-  warning,
 }: DraftRecordProps) {
   const content = (
     <div
@@ -124,12 +122,6 @@ function DraftRecord({
             </a>
           ) : null}
         </div>
-
-        {warning ? (
-          <p className="mt-3 border-l-2 border-red-500/50 pl-3 text-sm text-red-600">
-            {warning}
-          </p>
-        ) : null}
       </div>
 
       <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:min-w-40 sm:items-end">
@@ -195,35 +187,13 @@ export default async function DraftDashboardPage({
   const dateFormatter = dateFormatters[locale] ?? dateFormatters.en
   const authorId = session.user.id
 
-  const [allDraftsRaw, glossaryDraftsRaw] = await Promise.all([
-    prisma.revision.findMany({
-      where: { authorId },
-      orderBy: { updatedAt: "desc" },
-    }),
-    prisma.glossaryRevision.findMany({
-      where: { authorId },
-      orderBy: { updatedAt: "desc" },
-    }),
-  ])
-
-  const cleanupFailedByRevisionId = new Map<string, number>()
-  if (allDraftsRaw.length > 0) {
-    const counts = await countCleanupFailedByRevision(
-      allDraftsRaw.map((draft) => draft.id)
-    )
-    for (const [revisionId, count] of counts) {
-      cleanupFailedByRevisionId.set(revisionId, count)
-    }
-  }
+  const drafts = await listDrafts(authorId)
+  const allDraftsRaw = drafts.filter((draft) => draft.kind === "article")
+  const glossaryDraftsRaw = drafts.filter((draft) => draft.kind === "glossary")
 
   const articleDrafts: ArticleDraftItem[] = await Promise.all(
     allDraftsRaw.map(async (draft) => {
       let displayStatus = draft.status
-      const decodedDraft = decodeStoredDraftFiles({
-        content: draft.content,
-        filePath: draft.filePath,
-      })
-
       if (draft.githubPrNum) {
         try {
           const pr = await getArticlePullRequest(draft.githubPrNum)
@@ -237,9 +207,8 @@ export default async function DraftDashboardPage({
 
       return Object.assign({}, draft, {
         kind: "article" as const,
-        cleanupFailedCount: cleanupFailedByRevisionId.get(draft.id) ?? 0,
         displayStatus,
-        fileCount: decodedDraft.files.length,
+        fileCount: draft.files.length,
       })
     })
   )
@@ -249,7 +218,7 @@ export default async function DraftDashboardPage({
   )
 
   const allItems: DraftItem[] = [...articleDrafts, ...glossaryDrafts].toSorted(
-    (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
+    (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
   )
 
   const activeItems = allItems.filter((item) => {
@@ -316,13 +285,8 @@ export default async function DraftDashboardPage({
         status={status}
         title={title}
         updatedLabel={t("updatedAt", {
-          date: dateFormatter.format(item.updatedAt),
+          date: dateFormatter.format(new Date(item.updatedAt)),
         })}
-        warning={
-          isArticle && item.cleanupFailedCount > 0
-            ? t("cleanupWarning")
-            : undefined
-        }
       />
     )
   }

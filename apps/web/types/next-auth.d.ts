@@ -1,4 +1,4 @@
-import type { DefaultSession, DefaultUser } from "next-auth"
+import type { DefaultSession } from "next-auth"
 // eslint-disable-next-line import/no-unassigned-import
 import "next-auth/jwt"
 
@@ -7,12 +7,9 @@ declare module "next-auth" {
     user: {
       id: string
       githubLogin: string | null
+      emailVisibility: "private" | "public"
     } & DefaultSession["user"]
     lastAuthAt?: number
-  }
-
-  interface User extends DefaultUser {
-    id: string
   }
 }
 
@@ -21,5 +18,6 @@ declare module "next-auth/jwt" {
     sub: string
     lastAuthAt?: number
     githubLogin?: string | null
+    emailVisibility?: "private" | "public"
   }
 }

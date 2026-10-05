@@ -298,6 +298,7 @@ function DraftEditorSurface({
   return (
     <div className="border-tech-main/25 bg-surface w-full min-w-0 border">
       <DraftEditorHeader
+        canResume={state.draftStatus === "PENDING"}
         onOpenGuide={() => openInspector("guide")}
         isReadOnly={state.isReadOnly}
         onTitleChange={actions.setTitle}
@@ -318,7 +319,10 @@ function DraftEditorSurface({
         submit={{
           busy: state.isSubmitting,
           disabled: state.isSubmitting,
-          onClick: () => openInspector("changes"),
+          onClick: () =>
+            state.draftStatus === "PENDING"
+              ? void actions.handleSubmitDraft()
+              : openInspector("changes"),
         }}
         title={state.title}
       />

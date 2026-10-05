@@ -1,369 +1,145 @@
 "use server"
 
+import { createHash } from "node:crypto"
+import path from "node:path"
 import { revalidatePath } from "next/cache"
-import {
-  getMainBranchHeadSha,
-  type BranchFileEntry,
-} from "@/lib/articles/branch"
+import { getMainBranchHeadSha } from "@/lib/articles/branch"
 import { openDraftPullRequest } from "@/lib/articles/pr"
+import { getAuthorIdentity, requireAuth } from "@/lib/auth/context"
+import { getDuplicateDraftFilePaths } from "@/lib/drafts/files"
+import { parseImageRefs, rewriteImageUrls } from "@/lib/drafts/markdown"
 import {
-  buildMigrationTargets,
-  type MigrationAssetInput,
-  parseDraftTempImageRefs,
-  rewriteDraftTempUrls,
-} from "@/lib/drafts/markdown"
-import {
-  decodeStoredDraftFiles,
-  getDuplicateDraftFilePaths,
-  serializeDraftFilesForStorage,
-} from "@/lib/drafts/files"
-import { downloadDraftAsset } from "@/lib/drafts/storage"
-import { requireAuth } from "@/lib/auth/context"
+  deleteDraftAssets,
+  downloadDraftAsset,
+  draftAssetPrefix,
+} from "@/lib/drafts/storage"
+import { readDraft, requireDraftVersion, writeDraft } from "@/lib/drafts/store"
+import { lockSubmission } from "@/lib/drafts/submission"
 import { getGitHubWriteToken } from "@/lib/github/articles-repo"
-import { prisma } from "@/lib/prisma"
-import {
-  findDraftAssetsByRevisionForSubmit,
-  markDraftAssetMigrated,
-  reconcileDraftAssetReferences,
-} from "@/lib/drafts/asset-db"
 
 const UPLOAD_PLACEHOLDER_RE = /<!--\s*UPLOAD_PENDING_[a-f0-9-]+\s*-->/i
 
-export async function submitDraftAction(revisionId: string) {
-  if (!revisionId) {
-    throw new Error("Revision ID is required")
-  }
-
+export async function submitDraftAction(revisionId: string, etag: string) {
   const session = await requireAuth()
-
-  const existing = await prisma.revision.findUnique({
-    where: { id: revisionId },
-    include: { author: true },
-  })
-
-  if (!existing) {
-    throw new Error("Revision not found")
+  const record = await readDraft(session.user.id, revisionId)
+  if (!record || record.draft.kind !== "article") {
+    throw new Error("Draft not found")
   }
-
-  if (existing.authorId !== session.user.id) {
-    throw new Error("Unauthorized")
-  }
-
+  const existing = record.draft
   if (existing.status === "SUBMITTED" && existing.githubPrNum) {
     return { success: true, status: existing.status }
   }
-
-  if (existing.status !== "DRAFT") {
-    throw new Error("Only a draft can open a PR")
+  if (existing.status === "DRAFT") requireDraftVersion(record.etag, etag)
+  if (existing.files.some((file) => !file.filePath)) {
+    throw new Error("Every file requires a file path before opening a PR")
   }
-
-  const submitLock = await prisma.revision.updateMany({
-    where: {
-      id: revisionId,
-      authorId: session.user.id,
-      status: "DRAFT",
-    },
-    data: {
-      status: "PENDING",
-    },
-  })
-
-  if (submitLock.count === 0) {
-    const latestState = await prisma.revision.findUnique({
-      where: { id: revisionId },
-      select: { status: true, githubPrNum: true },
-    })
-
-    if (latestState?.githubPrNum && latestState.status === "SUBMITTED") {
-      return { success: true, status: latestState.status }
-    }
-
-    throw new Error(
-      latestState?.status === "PENDING"
-        ? "Submit already in progress for this draft"
-        : "Only a draft can open a PR"
-    )
+  const duplicates = getDuplicateDraftFilePaths(existing.files)
+  if (duplicates.length) {
+    throw new Error(`Duplicate file paths: ${duplicates.join(", ")}`)
   }
-
-  try {
-    const storedDraftFiles = decodeStoredDraftFiles({
-      content: existing.content,
-      filePath: existing.filePath,
-    })
-    const missingFilePath = storedDraftFiles.files.find(
-      (file) => !file.filePath
-    )
-    if (missingFilePath) {
-      throw new Error(
-        "Every file in a draft requires a file path before opening a PR."
-      )
-    }
-
-    const duplicateFilePaths = getDuplicateDraftFilePaths(
-      storedDraftFiles.files
-    )
-    if (duplicateFilePaths.length > 0) {
-      throw new Error(
-        `Duplicate file paths are not allowed in one draft: ${duplicateFilePaths.join(", ")}`
-      )
-    }
-
-    const fileWithPendingUpload = storedDraftFiles.files.find((file) =>
-      UPLOAD_PLACEHOLDER_RE.test(file.content)
-    )
-    if (fileWithPendingUpload) {
-      throw new Error(
-        `Draft still contains upload placeholder in ${fileWithPendingUpload.filePath || "an unsaved file"}. Finish upload before opening a PR.`
-      )
-    }
-
-    await reconcileDraftAssetReferences(revisionId, storedDraftFiles.files)
-
-    const token = getGitHubWriteToken(existing.author.githubPat)
-
-    if (!token) {
-      throw new Error(
-        "Failed to create PR: missing GITHUB_TOKEN or another token with Articles write permission."
-      )
-    }
-
-    const authorName = session.user.name || "GTMC Author"
-    const authorEmail = session.user.email || "author@gtmc.dev"
-    const baseMainSha =
-      existing.baseMainSha || (await getMainBranchHeadSha(token))
-
-    const tempPrefix = process.env.DRAFT_STORAGE_TEMP_PREFIX ?? "draft-temp"
-    const parsedRefsByFileId = new Map<
-      string,
-      ReturnType<typeof parseDraftTempImageRefs>
-    >()
-    const referencedStoragePaths = new Set<string>()
-    const migrationTargetByStoragePath = new Map<
-      string,
-      { assetId: string; storagePath: string; repoPath: string }
-    >()
-    const migrationTargetsByRepoPath = new Map<
-      string,
-      { assetId: string; storagePath: string; repoPath: string }
-    >()
-    const migratedAssetsById = new Map<
-      string,
-      { assetId: string; repoPath: string }
-    >()
-    const allStoragePathsToDownload = new Set<string>()
-
-    for (const file of storedDraftFiles.files) {
-      const refs = parseDraftTempImageRefs(file.content, tempPrefix)
-      parsedRefsByFileId.set(file.id, refs)
-
-      for (const ref of refs) {
-        referencedStoragePaths.add(ref.storagePath)
+  if (existing.files.some((file) => UPLOAD_PLACEHOLDER_RE.test(file.content))) {
+    throw new Error("Finish image uploads before opening a PR")
+  }
+  const token = getGitHubWriteToken()
+  if (!token) {
+    throw new Error("GitHub write access is not configured (GITHUB_TOKEN)")
+  }
+  const identity = await getAuthorIdentity(session)
+  const prefix = draftAssetPrefix(session.user.id, revisionId)
+  const refsByFile = existing.files.map((file) =>
+    parseImageRefs(file.content, "draft-assets")
+  )
+  const paths = new Set(refsByFile.flat().map((ref) => ref.storagePath))
+  const assets = await Promise.all(
+    [...paths].map(async (storagePath) => {
+      if (!storagePath.startsWith(prefix)) {
+        throw new Error("An image belongs to another draft")
       }
-    }
-
-    if (referencedStoragePaths.size > 0) {
-      const draftAssets = await findDraftAssetsByRevisionForSubmit(revisionId)
-      const draftAssetByStoragePath = new Map(
-        draftAssets.map((asset) => [asset.storagePath, asset])
-      )
-
-      for (const storagePath of referencedStoragePaths) {
-        if (!draftAssetByStoragePath.has(storagePath)) {
-          throw new Error(
-            `Referenced draft asset is missing from database for revision ${revisionId}: ${storagePath}`
-          )
-        }
-      }
-
-      for (const file of storedDraftFiles.files) {
-        const refs = parsedRefsByFileId.get(file.id) || []
-        if (refs.length === 0) {
-          continue
-        }
-
-        const uniqueStoragePaths = [
-          ...new Set(refs.map((ref) => ref.storagePath)),
-        ]
-        const unresolvedStoragePaths = uniqueStoragePaths.filter(
-          (storagePath) => !migrationTargetByStoragePath.has(storagePath)
-        )
-
-        if (unresolvedStoragePaths.length > 0) {
-          const migrationAssets: MigrationAssetInput[] =
-            unresolvedStoragePaths.map((storagePath) => {
-              const matchingAsset = draftAssetByStoragePath.get(storagePath)
-              if (!matchingAsset) {
-                throw new Error(
-                  `Referenced draft asset is missing from database for revision ${revisionId}: ${storagePath}`
-                )
-              }
-
-              return {
-                id: matchingAsset.id,
-                storagePath: matchingAsset.storagePath,
-                filename: matchingAsset.filename,
-                contentHash: matchingAsset.contentHash,
-              }
-            })
-
-          const migrationTargets = buildMigrationTargets(
-            file.filePath,
-            migrationAssets
-          )
-          for (const target of migrationTargets) {
-            migrationTargetByStoragePath.set(target.storagePath, {
-              assetId: target.assetId,
-              storagePath: target.storagePath,
-              repoPath: target.repoPath,
-            })
-          }
-        }
-      }
-    }
-
-    const rewrittenDraftFiles = storedDraftFiles.files.map((file) => {
-      const refs = parsedRefsByFileId.get(file.id) || []
-      if (refs.length === 0) {
-        return file
-      }
-
-      const fileUrlToRepoPath = new Map<string, string>()
-      for (const ref of refs) {
-        const migrationTarget = migrationTargetByStoragePath.get(
-          ref.storagePath
-        )
-        if (!migrationTarget) {
-          throw new Error(
-            `Failed to resolve migration target for storage path: ${ref.storagePath}`
-          )
-        }
-
-        fileUrlToRepoPath.set(ref.url, migrationTarget.repoPath)
-      }
-
+      const content = await downloadDraftAsset(storagePath)
       return {
-        ...file,
-        content: rewriteDraftTempUrls(file.content, fileUrlToRepoPath),
-      }
-    })
-
-    for (const file of rewrittenDraftFiles) {
-      if (UPLOAD_PLACEHOLDER_RE.test(file.content)) {
-        throw new Error(
-          `Draft still contains upload placeholder in ${file.filePath}. Finish upload before opening a PR.`
-        )
-      }
-
-      const staleRefs = parseDraftTempImageRefs(file.content, tempPrefix)
-      if (staleRefs.length > 0) {
-        throw new Error(
-          `Stale draft-temp URL remained after rewrite in ${file.filePath}.`
-        )
-      }
-    }
-
-    for (const target of migrationTargetByStoragePath.values()) {
-      const repoPathKey = target.repoPath.toLowerCase()
-      if (!migrationTargetsByRepoPath.has(repoPathKey)) {
-        migrationTargetsByRepoPath.set(repoPathKey, target)
-      }
-
-      if (!migratedAssetsById.has(target.assetId)) {
-        migratedAssetsById.set(target.assetId, {
-          assetId: target.assetId,
-          repoPath: target.repoPath,
-        })
-      }
-
-      allStoragePathsToDownload.add(target.storagePath)
-    }
-
-    const downloadedAssetByStoragePath = new Map<string, Buffer>()
-    if (allStoragePathsToDownload.size > 0) {
-      await Promise.all(
-        [...allStoragePathsToDownload].map(async (storagePath) => {
-          const downloaded = await downloadDraftAsset(storagePath)
-          downloadedAssetByStoragePath.set(storagePath, downloaded)
-        })
-      )
-    }
-
-    const imageEntries: BranchFileEntry[] = [
-      ...migrationTargetsByRepoPath.values(),
-    ].map((target) => {
-      const content = downloadedAssetByStoragePath.get(target.storagePath)
-      if (!content) {
-        throw new Error(
-          `Missing downloaded draft asset content: ${target.storagePath}`
-        )
-      }
-
-      return {
-        path: target.repoPath,
+        id: storagePath,
+        storagePath,
+        filename: storagePath
+          .slice(prefix.length)
+          .replace(/^[a-f0-9-]{36}-/, ""),
+        contentHash: createHash("sha256").update(content).digest("hex"),
         content,
       }
     })
-
-    const result = await openDraftPullRequest({
-      activeFileId: storedDraftFiles.activeFileId,
-      authorEmail,
-      files: rewrittenDraftFiles,
-      ...(imageEntries.length > 0 ? { imageEntries } : {}),
-      title: existing.title,
-      baseMainSha,
-      authorName,
-      draftId: existing.id,
-      token,
-    })
-
-    const submittedDraftStorage = serializeDraftFilesForStorage({
-      activeFileId: result.activeFileId,
-      folders: [],
-      files: result.files,
-    })
-
-    if (migratedAssetsById.size > 0) {
-      const migratedAt = new Date()
-      await Promise.all(
-        [...migratedAssetsById.values()].map((target) =>
-          markDraftAssetMigrated(
-            target.assetId,
-            target.repoPath,
-            result.prNumber,
-            migratedAt
-          )
+  )
+  const targetsByPath = new Map<string, string>()
+  const files = existing.files.map((file, index) => {
+    for (const ref of refsByFile[index]) {
+      if (targetsByPath.has(ref.storagePath)) continue
+      const asset = assets.find(
+        (candidate) => candidate.storagePath === ref.storagePath
+      )!
+      const ext = path.posix.extname(asset.filename)
+      const stem = asset.filename.slice(0, asset.filename.length - ext.length)
+      targetsByPath.set(
+        asset.storagePath,
+        path.posix.join(
+          path.posix.dirname(file.filePath),
+          "img",
+          `${stem}-${asset.contentHash.slice(0, 12)}${ext}`
         )
       )
     }
-
-    await prisma.revision.update({
-      where: { id: revisionId },
-      data: {
-        baseMainSha,
-        content: submittedDraftStorage.content,
-        filePath: submittedDraftStorage.filePath,
-        githubPrNum: result.prNumber,
-        githubPrUrl: result.prUrl,
-        status: "SUBMITTED",
-        submittedAt: new Date(),
-      },
-    })
-
-    revalidatePath("/draft")
-    return { success: true, status: "SUBMITTED" }
-  } catch (error) {
-    await prisma.revision.updateMany({
-      where: { id: revisionId, status: "PENDING" },
-      data: { status: "DRAFT" },
-    })
-
-    const message = error instanceof Error ? error.message : "Unknown error"
-    if (message.includes("Resource not accessible by personal access token")) {
-      throw new Error(
-        "Failed to create PR: the configured GitHub token cannot create branches in the Articles repo. Set GITHUB_TOKEN with Articles write access on Vercel.",
-        { cause: error }
-      )
+    const replacements = new Map(
+      refsByFile[index].map((ref) => [
+        ref.url,
+        targetsByPath.get(ref.storagePath)!,
+      ])
+    )
+    return {
+      ...file,
+      content: rewriteImageUrls(file.content, replacements),
     }
-    throw error
+  })
+  const imageEntries = [
+    ...new Map(
+      assets.map((asset) => [
+        targetsByPath.get(asset.storagePath)!,
+        { path: targetsByPath.get(asset.storagePath)!, content: asset.content },
+      ])
+    ).values(),
+  ]
+  const baseMainSha =
+    existing.baseMainSha || (await getMainBranchHeadSha(token))
+  const locked = await lockSubmission(existing, record.etag)
+  const result = await openDraftPullRequest({
+    activeFileId: existing.activeFileId,
+    branchName: locked.draft.branchName!,
+    recoverOnly: locked.recoverOnly,
+    authorName: identity.name,
+    authorEmail: identity.email,
+    files,
+    imageEntries,
+    title: existing.title,
+    baseMainSha,
+    token,
+  })
+  const now = new Date().toISOString()
+  await writeDraft(
+    {
+      ...existing,
+      activeFileId: result.activeFileId,
+      files: result.files,
+      baseMainSha,
+      branchName: locked.draft.branchName,
+      status: "SUBMITTED",
+      githubPrNum: result.prNumber,
+      githubPrUrl: result.prUrl,
+      submittedAt: now,
+      updatedAt: now,
+    },
+    locked.etag
+  )
+  try {
+    await deleteDraftAssets(session.user.id, revisionId)
+  } catch (error) {
+    console.error("Submitted draft asset cleanup failed:", error)
   }
+  revalidatePath("/draft")
+  return { success: true, status: "SUBMITTED" }
 }

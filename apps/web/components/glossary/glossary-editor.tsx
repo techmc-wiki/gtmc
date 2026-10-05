@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/shadcn/dialog"
+import { Button } from "@/components/ui/shadcn/button"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { GlossaryEditToolbar } from "@/components/glossary/glossary-edit-toolbar"
 import {
@@ -43,6 +44,7 @@ import { useRouter } from "@/i18n/navigation"
 
 export interface GlossaryEditorProps {
   draftId: string
+  initialEtag: string
   initialTitle: string
   initialOperations: GlossaryEditOperation[]
   prefillSlug?: string
@@ -155,7 +157,7 @@ export function GlossaryEditor(props: GlossaryEditorProps) {
 
   return (
     <GlossaryEditorInner
-      key={`${props.draftId}:${props.prefillSlug ?? ""}`}
+      key={`${props.draftId}:${props.initialEtag}:${props.prefillSlug ?? ""}`}
       {...props}
       initialOperations={resolvedInitialOperations}
     />
@@ -165,6 +167,7 @@ export function GlossaryEditor(props: GlossaryEditorProps) {
 function GlossaryEditorInner({
   draftId,
   initialTitle,
+  initialEtag,
   initialOperations,
   manifestEntries,
   summaryEntries,
@@ -179,7 +182,29 @@ function GlossaryEditorInner({
   const t = useTranslations("Glossary")
   const router = useRouter()
 
-  const isReadOnly = status === "SUBMITTED" || status === "PENDING"
+  const etagRef = React.useRef(initialEtag)
+  const saveQueueRef = React.useRef(Promise.resolve())
+  const saveDraft = React.useCallback(
+    (id: string, operations: GlossaryEditOperation[], title: string) => {
+      const result = saveQueueRef.current.then(async () => {
+        const saved = await updateGlossaryDraftAction(
+          id,
+          operations,
+          title,
+          etagRef.current
+        )
+        if (saved.etag) etagRef.current = saved.etag
+        return saved
+      })
+      saveQueueRef.current = result.then(
+        () => undefined,
+        () => undefined
+      )
+      return result
+    },
+    []
+  )
+  const isReadOnly = status !== "DRAFT"
 
   const entriesBySlug = React.useMemo(() => {
     const map = new Map<string, GlossaryEntry>()
@@ -213,6 +238,7 @@ function GlossaryEditorInner({
     isReadOnly,
     operations,
     title,
+    saveDraft,
   })
 
   const handleTitleChange = React.useCallback(
@@ -352,18 +378,16 @@ function GlossaryEditorInner({
         saveTimeoutRef.current = null
       }
       try {
-        const saveRes = await updateGlossaryDraftAction(
-          draftId,
-          operations,
-          title
-        )
-        if (!saveRes.success) {
-          const message =
-            saveRes.errors?.general ||
-            saveRes.errors?.operations?.join(", ") ||
-            "Failed to save draft before submitting"
-          setSubmitError(message)
-          return
+        if (status === "DRAFT") {
+          const saveRes = await saveDraft(draftId, operations, title)
+          if (!saveRes.success) {
+            const message =
+              saveRes.errors?.general ||
+              saveRes.errors?.operations?.join(", ") ||
+              "Failed to save draft before submitting"
+            setSubmitError(message)
+            return
+          }
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : "SAVE FAILED"
@@ -378,6 +402,7 @@ function GlossaryEditorInner({
       try {
         const result = await submitGlossaryDraftAction(draftId, {
           useRealEmail: useReal,
+          etag: etagRef.current,
         })
         if (result.success) {
           setSubmitState("success")
@@ -385,6 +410,7 @@ function GlossaryEditorInner({
         } else {
           setSubmitState("error")
           setSubmitError(result.error)
+          router.refresh()
         }
       } catch (error) {
         const message =
@@ -395,7 +421,16 @@ function GlossaryEditorInner({
         setIsSubmitting(false)
       }
     },
-    [draftId, operations, title, isSubmitting, saveTimeoutRef]
+    [
+      draftId,
+      operations,
+      title,
+      isSubmitting,
+      saveTimeoutRef,
+      saveDraft,
+      status,
+      router,
+    ]
   )
 
   const handleDismissSuccess = React.useCallback(() => {
@@ -417,43 +452,56 @@ function GlossaryEditorInner({
   }, [isSubmitting])
 
   return (
-    <GlossaryEditorContent
-      authorName={authorName}
-      githubPrNum={githubPrNum}
-      githubPrUrl={githubPrUrl}
-      handleAddNew={handleAddNew}
-      handleAddNewTerm={handleAddNewTerm}
-      handleClosePreview={handleClosePreview}
-      handleDismissSuccess={handleDismissSuccess}
-      handleDiscard={handleDiscard}
-      handleOpenPreview={handleOpenPreview}
-      handleOperationChange={handleOperationChange}
-      handleOperationRemove={handleOperationRemove}
-      handlePick={handlePick}
-      handleSubmit={handleSubmit}
-      handleTitleChange={handleTitleChange}
-      isReadOnly={isReadOnly}
-      locale={locale}
-      manifestEntries={manifestEntries}
-      noreplyEmail={noreplyEmail}
-      operations={operations}
-      realEmail={realEmail}
-      saveStateLabel={saveState}
-      showPreview={showPreview}
-      status={status}
-      submitError={submitError}
-      submitResult={submitResult}
-      submitState={submitState}
-      summaryEntries={summaryEntries}
-      t={t}
-      title={title}
-      useRealEmail={useRealEmail}
-      onUseRealEmailChange={setUseRealEmail}
-    />
+    <>
+      {status === "PENDING" && (
+        <div className="space-y-2">
+          <Button
+            disabled={isSubmitting}
+            onClick={() => void handleSubmit({ useRealEmail })}>
+            {t("resumeSubmission")}
+          </Button>
+          {submitError && <p role="alert">{submitError}</p>}
+        </div>
+      )}
+      <GlossaryEditorContent
+        authorName={authorName}
+        githubPrNum={githubPrNum}
+        githubPrUrl={githubPrUrl}
+        handleAddNew={handleAddNew}
+        handleAddNewTerm={handleAddNewTerm}
+        handleClosePreview={handleClosePreview}
+        handleDismissSuccess={handleDismissSuccess}
+        handleDiscard={handleDiscard}
+        handleOpenPreview={handleOpenPreview}
+        handleOperationChange={handleOperationChange}
+        handleOperationRemove={handleOperationRemove}
+        handlePick={handlePick}
+        handleSubmit={handleSubmit}
+        handleTitleChange={handleTitleChange}
+        isReadOnly={isReadOnly}
+        locale={locale}
+        manifestEntries={manifestEntries}
+        noreplyEmail={noreplyEmail}
+        operations={operations}
+        realEmail={realEmail}
+        saveStateLabel={saveState}
+        showPreview={showPreview}
+        status={status}
+        submitError={submitError}
+        submitResult={submitResult}
+        submitState={submitState}
+        summaryEntries={summaryEntries}
+        t={t}
+        title={title}
+        useRealEmail={useRealEmail}
+        onUseRealEmailChange={setUseRealEmail}
+      />
+    </>
   )
 }
 
 function useGlossaryAutosave({
+  saveDraft,
   draftId,
   isReadOnly,
   operations,
@@ -461,6 +509,11 @@ function useGlossaryAutosave({
 }: {
   draftId: string
   isReadOnly: boolean
+  saveDraft: (
+    id: string,
+    operations: GlossaryEditOperation[],
+    title: string
+  ) => ReturnType<typeof updateGlossaryDraftAction>
   operations: GlossaryEditOperation[]
   title: string
 }) {
@@ -483,7 +536,7 @@ function useGlossaryAutosave({
     setSaveState("Saving…")
     saveTimeoutRef.current = setTimeout(async () => {
       try {
-        const result = await updateGlossaryDraftAction(
+        const result = await saveDraft(
           draftId,
           operationsRef.current,
           titleRef.current
@@ -507,7 +560,7 @@ function useGlossaryAutosave({
         setSaveState("")
       }
     }, SAVE_DEBOUNCE_MS)
-  }, [draftId, isReadOnly])
+  }, [draftId, isReadOnly, saveDraft])
 
   React.useEffect(
     () => () => {

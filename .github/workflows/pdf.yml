@@ -123,14 +123,6 @@ jobs:
         env:
           GTMC_SKIP_POSTINSTALL: "1"
 
-      - name: Generate Prisma Client
-        if: steps.change-check.outputs.should-build == 'true'
-        # prisma is a devDependency of @gtmc/web; run it in its workspace.
-        working-directory: apps/web
-        run: pnpm exec prisma generate
-        env:
-          DATABASE_URL: "postgresql://localhost:5432/placeholder"
-
       - name: Set up Go
         if: steps.change-check.outputs.should-build == 'true'
         uses: actions/setup-go@v7.0.0

@@ -1,23 +1,8 @@
-/**
- * Server-only draft asset storage.
- *
- * Requires `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; never expose the service-role key to client code. `DRAFT_STORAGE_BUCKET` and `DRAFT_STORAGE_TEMP_PREFIX` default to `gtmc-drafts` and `draft-temp`.
- *
- * Paths use `${prefix}/${revisionId}/{uuid}.{ext}` so revision-scoped cleanup can query them efficiently.
- */
-
-import { createClient } from "@supabase/supabase-js"
-import { randomUUID } from "crypto"
-import path from "path"
-
+import { del, get, list, put } from "@vercel/blob"
+import { randomUUID } from "node:crypto"
+import path from "node:path"
 import { getRepoContentTree, getRepoFileContent } from "@/lib/github"
-
-export class DraftStorageConfigError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = "DraftStorageConfigError"
-  }
-}
+import { draftBlobOptions, draftPath } from "@/lib/drafts/store"
 
 export interface DraftRepoTreeNode {
   id: string
@@ -25,38 +10,6 @@ export interface DraftRepoTreeNode {
   path: string
   isFolder: boolean
   children: DraftRepoTreeNode[]
-}
-
-interface DraftStorageConfig {
-  url: string
-  key: string
-  bucket: string
-  prefix: string
-}
-
-function getDraftStorageConfig(): DraftStorageConfig {
-  const url = process.env.SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  const bucket = process.env.DRAFT_STORAGE_BUCKET ?? "gtmc-drafts"
-  const prefix = process.env.DRAFT_STORAGE_TEMP_PREFIX ?? "draft-temp"
-
-  if (!url || !key) {
-    throw new DraftStorageConfigError(
-      "Missing Supabase configuration. Required env vars: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY."
-    )
-  }
-
-  return { url, key, bucket, prefix }
-}
-
-function createSupabaseClient() {
-  const config = getDraftStorageConfig()
-  return createClient(config.url, config.key, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  })
 }
 
 export async function getDraftRepoTree() {
@@ -109,79 +62,58 @@ function mapRepoTreeNode(node: {
   }
 }
 
-export function computeDraftStoragePath(
-  revisionId: string,
-  filename: string
-): string {
-  const config = getDraftStorageConfig()
-  const ext = path.extname(filename).toLowerCase().slice(1) || "bin"
-  const uuid = randomUUID()
-  return `${config.prefix}/${revisionId}/${uuid}.${ext}`
-}
-
-function getDraftAssetPublicUrl(storagePath: string): string {
-  const config = getDraftStorageConfig()
-  const client = createSupabaseClient()
-  const { data } = client.storage.from(config.bucket).getPublicUrl(storagePath)
-  return data.publicUrl
+export function draftAssetPrefix(authorId: string, draftId: string) {
+  draftPath(authorId, draftId)
+  return `draft-assets/${authorId}/${draftId}/`
 }
 
 export async function uploadDraftAsset(
-  storagePath: string,
-  data: Buffer | Uint8Array,
+  authorId: string,
+  draftId: string,
+  filename: string,
+  data: Buffer,
   mimeType: string
-): Promise<{ publicUrl: string }> {
-  const config = getDraftStorageConfig()
-  const client = createSupabaseClient()
+) {
+  const storagePath = `${draftAssetPrefix(authorId, draftId)}${randomUUID()}-${path.posix.basename(filename)}`
+  await put(storagePath, data, {
+    ...draftBlobOptions(),
+    access: "private",
+    addRandomSuffix: false,
+    contentType: mimeType,
+  })
+  return { storagePath, url: `/api/${storagePath}` }
+}
 
-  const { error } = await client.storage
-    .from(config.bucket)
-    .upload(storagePath, data, {
-      contentType: mimeType,
-      upsert: false,
+export async function downloadDraftAsset(storagePath: string) {
+  const blob = await get(storagePath, {
+    ...draftBlobOptions(),
+    access: "private",
+    useCache: false,
+  })
+  if (!blob) throw new Error("Draft asset not found")
+  return Buffer.from(await new Response(blob.stream).arrayBuffer())
+}
+
+export async function deleteDraftAsset(storagePath: string) {
+  await del(storagePath, draftBlobOptions())
+}
+
+export async function deleteDraftAssets(authorId: string, draftId: string) {
+  let cursor: string | undefined
+  do {
+    // oxlint-disable-next-line no-await-in-loop -- each page needs the previous cursor
+    const page = await list({
+      ...draftBlobOptions(),
+      prefix: draftAssetPrefix(authorId, draftId),
+      cursor,
     })
-
-  if (error) {
-    throw new Error(
-      `Failed to upload draft asset to ${storagePath}: ${error.message}`
-    )
-  }
-
-  const publicUrl = getDraftAssetPublicUrl(storagePath)
-  return { publicUrl }
-}
-
-export async function downloadDraftAsset(storagePath: string): Promise<Buffer> {
-  const config = getDraftStorageConfig()
-  const client = createSupabaseClient()
-
-  const { data, error } = await client.storage
-    .from(config.bucket)
-    .download(storagePath)
-
-  if (error) {
-    throw new Error(
-      `Failed to download draft asset from ${storagePath}: ${error.message}`
-    )
-  }
-
-  return Buffer.from(await data.arrayBuffer())
-}
-
-/**
- * A missing asset is already deleted; other Supabase deletion failures are thrown.
- */
-export async function deleteDraftAsset(storagePath: string): Promise<void> {
-  const config = getDraftStorageConfig()
-  const client = createSupabaseClient()
-
-  const { error } = await client.storage
-    .from(config.bucket)
-    .remove([storagePath])
-
-  if (error && error.message !== "Not found") {
-    throw new Error(
-      `Failed to delete draft asset at ${storagePath}: ${error.message}`
-    )
-  }
+    if (page.blobs.length) {
+      // oxlint-disable-next-line no-await-in-loop -- finish deleting this page before advancing
+      await del(
+        page.blobs.map((blob) => blob.pathname),
+        draftBlobOptions()
+      )
+    }
+    cursor = page.hasMore ? page.cursor : undefined
+  } while (cursor)
 }

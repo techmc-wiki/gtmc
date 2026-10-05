@@ -1,35 +1,21 @@
 "use server"
 
 import { requireAuth } from "@/lib/auth/context"
-import { prisma } from "@/lib/prisma"
+import { profileSchema, writeProfile } from "@/lib/auth/profile"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { z } from "zod"
-
-const updateProfileSchema = z.object({
-  name: z.string().min(1, "Name is required").trim(),
-  image: z.string().optional(),
-})
 
 export async function updateProfileAction(formData: FormData) {
   const session = await requireAuth()
 
   const raw = Object.fromEntries(formData)
-  const validated = updateProfileSchema.safeParse(raw)
+  const validated = profileSchema.safeParse(raw)
 
   if (!validated.success) {
     return { errors: validated.error.flatten().fieldErrors }
   }
 
-  const { name, image } = validated.data
-
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: {
-      name,
-      ...(image ? { image } : {}),
-    },
-  })
+  await writeProfile(session.user.id, validated.data)
 
   revalidatePath("/profile")
   revalidatePath("/")

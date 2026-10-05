@@ -21,8 +21,6 @@ runBuildStep(logger, "repository.prepare", () => {
   run("git", ["fetch", "--tags"], { cwd })
 })
 
-runBuildStep(logger, "prisma.generate", () => run("prisma", ["generate"]))
-
 const contentCache = createContentArtifactCache()
 const restoredContent = contentCache
   ? restoreContentArtifacts(contentCache)
@@ -33,9 +31,6 @@ if (restoredContent) {
 } else {
   delete process.env.GTMC_SKIP_CONTENT_BUILD
 }
-runBuildStep(logger, "prisma.migrate", () =>
-  run("prisma", ["migrate", "deploy"])
-)
 runBuildStep(logger, "application.build", () => runScript("scripts/build.ts"))
 
 if (contentCache && !restoredContent) {

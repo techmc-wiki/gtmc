@@ -42,7 +42,7 @@
 
 ## 本地运行
 
-<a href="https://skillicons.dev"><img src="https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,prisma,supabase,vercel" alt="Next.js, React, TypeScript, Tailwind CSS, Prisma, Supabase, Vercel" /></a>
+<a href="https://skillicons.dev"><img src="https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,vercel" alt="Next.js, React, TypeScript, Tailwind CSS, Vercel" /></a>
 
 ```bash
 git clone https://github.com/techmc-wiki/gtmc.git

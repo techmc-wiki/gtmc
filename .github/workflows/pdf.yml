@@ -191,7 +191,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          for pdf in apps/web/data/pdf-dist/gtmc-en.pdf apps/web/data/pdf-dist/gtmc-zh.pdf; do
+          for pdf in tools/pdfgen/dist/gtmc-en.pdf tools/pdfgen/dist/gtmc-zh.pdf; do
             if [[ ! -s "$pdf" ]]; then
               echo "Missing or empty PDF: $pdf" >&2
               exit 1
@@ -213,7 +213,7 @@ jobs:
           set -euo pipefail
 
           for locale in en zh; do
-            aws s3 cp "apps/web/data/pdf-dist/gtmc-${locale}.pdf" \
+            aws s3 cp "tools/pdfgen/dist/gtmc-${locale}.pdf" \
               "s3://${R2_BUCKET_NAME}/gtmc-${locale}.pdf" \
               --endpoint-url "$R2_ENDPOINT" \
               --content-type application/pdf \

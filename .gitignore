@@ -49,6 +49,12 @@ next-env.d.ts
 apps/web/data
 apps/web/public/article-assets
 
+# generated PDF artifacts (tools/pdfgen pipeline)
+/tools/pdfgen/html
+/tools/pdfgen/fonts
+/tools/pdfgen/work
+/tools/pdfgen/dist
+
 # lighthouse and playwright
 .lighthouseci
 .playwright-mcp

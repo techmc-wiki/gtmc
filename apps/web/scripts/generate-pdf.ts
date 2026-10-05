@@ -323,9 +323,7 @@ async function analyzeArticles(
 
 function loadPdfHtmlSidecar(slug: string, locale: PdfLocale): string {
   const sidecarPath = path.join(
-    process.cwd(),
-    "data",
-    "pdf-html",
+    workspacePath("tools", "pdfgen", "html"),
     locale,
     `${artifactFilename(slug)}.html`
   )
@@ -333,7 +331,7 @@ function loadPdfHtmlSidecar(slug: string, locale: PdfLocale): string {
     return fs.readFileSync(sidecarPath, "utf-8")
   } catch {
     throw new Error(
-      `Missing PDF HTML sidecar: ${sidecarPath}. Run pnpm build:content or pnpm generate:content first.`
+      `Missing PDF HTML sidecar: ${sidecarPath}. Run pnpm generate:pdf-html first.`
     )
   }
 }
@@ -420,7 +418,7 @@ async function runPdf(
   const startedAt = performance.now()
   const output =
     requestedOutput ||
-    path.join(process.cwd(), "data", "pdf-dist", `gtmc-${locale}.pdf`)
+    path.join(workspacePath("tools", "pdfgen", "dist"), `gtmc-${locale}.pdf`)
   fs.mkdirSync(path.dirname(output), { recursive: true })
   logger.event("pdf.started", { locale, output })
 
@@ -475,7 +473,9 @@ async function runPdf(
     size_mb: (bodyHtml.length / 1024 / 1024).toFixed(1),
   })
 
-  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), `gtmc-pdf-${locale}-`))
+  const workRoot = workspacePath("tools", "pdfgen", "work")
+  fs.mkdirSync(workRoot, { recursive: true })
+  const workDir = fs.mkdtempSync(path.join(workRoot, `gtmc-pdf-${locale}-`))
   const coverHtmlPath = path.join(workDir, "cover.html")
   const bodyHtmlPath = path.join(workDir, "body.html")
   const coverPdfPath = path.join(workDir, "cover.pdf")

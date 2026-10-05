@@ -70,6 +70,7 @@ export function PropertyResultsTable({
       </Card>
     )
   }
+  const selectedNames = new Set(selected)
   return (
     <div aria-busy={pending} className="border-border border">
       <Table>
@@ -145,15 +146,15 @@ export function PropertyResultsTable({
             <TableRow
               key={entry.name}
               data-state={
-                selected.includes(entry.name) ? "selected" : undefined
+                selectedNames.has(entry.name) ? "selected" : undefined
               }>
               <TableCell className="bg-card sticky left-0 z-10 align-top">
                 <div className="flex items-center gap-2">
                   <Label className="flex size-11 shrink-0 items-center justify-center">
                     <Checkbox
-                      checked={selected.includes(entry.name)}
+                      checked={selectedNames.has(entry.name)}
                       disabled={
-                        !selected.includes(entry.name) && selected.length >= 4
+                        !selectedNames.has(entry.name) && selected.length >= 4
                       }
                       onCheckedChange={() => toggleCompare(entry.name)}
                       aria-label={t("selectComparison", {

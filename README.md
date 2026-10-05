@@ -38,7 +38,7 @@ They span the whole stack of technical play: production builds like tree farms, 
 The fastest way to start is to **[visit the site](https://techmc.wiki)**. Want to contribute? You can draft articles and open pull requests right from the site. Reviews and merge conflicts are handled on GitHub.
 
 > [!NOTE]
-> This repo is the **website**, laid out as a pnpm workspace: the site lives in `apps/web`, the Go PDF renderer in `tools/pdfgen`, and the content submodules in `content/`. Articles live in [their own repo](https://github.com/techmc-wiki/articles) and are pulled in as a submodule at `content/articles`. Other GTMC projects are at [github.com/orgs/techmc-wiki](https://github.com/orgs/techmc-wiki/repositories).
+> This repo is the **website**, laid out as a pnpm workspace: the site lives in `apps/web`, the Go PDF renderer in `tools/pdfgen`, and the content submodules in `content/`. Articles live in [their own repo](https://github.com/techmc-wiki/articles) and are pulled in as a submodule at `content/articles`; Minecraft property data lives in [MCPropertyEncyclopedia](https://github.com/JoakimThorsen/MCPropertyEncyclopedia) at `content/properties`. Other GTMC projects are at [github.com/orgs/techmc-wiki](https://github.com/orgs/techmc-wiki/repositories).
 
 ## Running it locally
 

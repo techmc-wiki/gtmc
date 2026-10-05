@@ -113,6 +113,5 @@
     "rehype-stringify": "^10.0.1",
     "remark-rehype": "^11.1.2",
     "tailwindcss": "^4.3.3"
-  },
-  "packageManager": "pnpm@12.6.0"
+  }
 }

@@ -1,15 +1,8 @@
-import { createHash } from "crypto"
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
-import { createDraftAsset } from "@/lib/drafts/asset-db"
-import {
-  DraftStorageConfigError,
-  computeDraftStoragePath,
-  deleteDraftAsset,
-  uploadDraftAsset,
-} from "@/lib/drafts/storage"
+import { readDraft } from "@/lib/drafts/store"
+import { deleteDraftAsset, uploadDraftAsset } from "@/lib/drafts/storage"
 import {
   classifyFile,
   isImageMime,
@@ -53,14 +46,14 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const revision = await prisma.revision.findUnique({
-      where: { id: revisionId },
-      select: { authorId: true },
-    })
-
-    if (!revision || revision.authorId !== userId) {
+    const record = await readDraft(userId, revisionId)
+    if (
+      !record ||
+      record.draft.kind !== "article" ||
+      record.draft.status !== "DRAFT"
+    ) {
       return NextResponse.json(
-        { error: "You do not have access to this revision." },
+        { error: "This draft cannot receive uploads." },
         { status: 403 }
       )
     }
@@ -77,47 +70,29 @@ export async function POST(req: NextRequest) {
     }
 
     const filename = sanitizeFilename(file.name, file.type)
-    const contentHash = createHash("sha256").update(buffer).digest("hex")
-    const storagePath = computeDraftStoragePath(revisionId, filename)
-
-    const { publicUrl } = await uploadDraftAsset(storagePath, buffer, file.type)
-
+    const asset = await uploadDraftAsset(
+      userId,
+      revisionId,
+      filename,
+      buffer,
+      file.type
+    )
     try {
-      const asset = await createDraftAsset({
-        revisionId,
-        storagePath,
-        mimeType: file.type,
-        fileSize: buffer.length,
-        filename,
-        status: "uploaded",
-        contentHash,
-      })
-
-      return NextResponse.json({
-        assetId: asset.id,
-        url: publicUrl,
-        storagePath,
-        mimeType: file.type,
-        fileSize: buffer.length,
-        filename,
-      })
-    } catch (dbError) {
-      try {
-        await deleteDraftAsset(storagePath)
-      } catch (cleanupError) {
-        console.error("Draft upload cleanup error:", cleanupError)
+      const current = await readDraft(userId, revisionId)
+      if (!current || current.draft.status !== "DRAFT") {
+        throw new Error("Draft is no longer editable")
       }
-
-      throw dbError
+      return NextResponse.json({
+        ...asset,
+        filename,
+        mimeType: file.type,
+        fileSize: buffer.length,
+      })
+    } catch (error) {
+      await deleteDraftAsset(asset.storagePath)
+      throw error
     }
   } catch (error) {
-    if (error instanceof DraftStorageConfigError) {
-      return NextResponse.json(
-        { error: "Draft upload is not configured on this server." },
-        { status: 500 }
-      )
-    }
-
     console.error("Draft upload error:", error)
     return NextResponse.json({ error: "Upload failed." }, { status: 500 })
   }

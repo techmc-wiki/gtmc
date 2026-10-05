@@ -4,8 +4,6 @@ export type {
   DraftFileCollectionInput,
 } from "./types"
 
-export { DRAFT_BUNDLE_PREFIX } from "./types"
-
 export {
   normalizeDraftFilePath,
   normalizeDraftFolderPath,
@@ -20,8 +18,6 @@ export {
 export { normalizeDraftFileCollection } from "./collection"
 
 export {
-  decodeStoredDraftFiles,
-  serializeDraftFilesForStorage,
   serializeDraftFilesPayload,
   deserializeDraftFilesPayload,
 } from "./serialization"

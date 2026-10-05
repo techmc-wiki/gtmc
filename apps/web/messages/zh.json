@@ -171,7 +171,6 @@
   "Drafts": {
     "articleType": "文章",
     "changesCount": "{count} 处修改",
-    "cleanupWarning": "部分已上传资源未能清理。请打开草稿进行检查。",
     "continueDraft": "继续编辑",
     "deleteDraft": "删除草稿",
     "deleteWarning": "此操作会永久删除该草稿。",
@@ -319,7 +318,8 @@
     "comparisonPending": "请设置文件路径，待原文件加载后查看差异。",
     "hideFiles": "隐藏文件列表",
     "showFiles": "显示文件列表",
-    "replaceFileWarning": "所选文件会替换当前文件及其正文。若要保留两者，请取消并使用文件列表中的添加按钮。"
+    "replaceFileWarning": "所选文件会替换当前文件及其正文。若要保留两者，请取消并使用文件列表中的添加按钮。",
+    "resumeSubmission": "继续提交"
   },
   "EditorialPolicy": {
     "lastReviewed": "最近一次对照源文档审阅：{date}。",
@@ -416,7 +416,8 @@
     "removeCategoryFilter": "移除分类筛选 {name}",
     "removeQueryFilter": "移除搜索筛选",
     "searchPlaceholder": "搜索...",
-    "searchResultSummary": "{resultCount} / 共 {totalCount} 项"
+    "searchResultSummary": "{resultCount} / 共 {totalCount} 项",
+    "resumeSubmission": "继续提交"
   },
   "Homepage": {
     "appendixHeading": "附录",

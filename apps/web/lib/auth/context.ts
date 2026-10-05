@@ -1,32 +1,10 @@
 import type { Session } from "next-auth"
 
 import { auth } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
-import { getGitHubWriteToken } from "@/lib/github/articles-repo"
+import { readProfile } from "@/lib/auth/profile"
 
 type AuthenticatedSession = Session & {
   user: NonNullable<Session["user"]> & { id: string }
-}
-
-type AuthContext = {
-  id: string
-  githubPat: string | null
-}
-
-export async function getCurrentUserAuthContext(
-  userId: string
-): Promise<AuthContext> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { id: true, githubPat: true },
-  })
-  if (!user) {
-    throw new Error("User not found or has been deleted")
-  }
-  return {
-    id: user.id,
-    githubPat: user.githubPat ?? null,
-  }
 }
 
 export async function requireAuth(
@@ -39,9 +17,12 @@ export async function requireAuth(
   return session as AuthenticatedSession
 }
 
-export async function getGithubPatForUser(
-  userId: string
-): Promise<string | undefined> {
-  const ctx = await getCurrentUserAuthContext(userId)
-  return getGitHubWriteToken(ctx.githubPat ?? undefined)
+export async function getAuthorIdentity(session: AuthenticatedSession) {
+  const profile = await readProfile(session.user.id)
+  return {
+    name: profile?.name || session.user.name || "GTMC Contributor",
+    email: session.user.githubLogin
+      ? `${session.user.id}+${session.user.githubLogin}@users.noreply.github.com`
+      : session.user.email || "author@gtmc.dev",
+  }
 }

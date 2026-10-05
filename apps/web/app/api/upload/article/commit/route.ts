@@ -4,7 +4,7 @@ import { del } from "@vercel/blob"
 import { z } from "zod"
 
 import { auth } from "@/lib/auth"
-import { getGithubPatForUser } from "@/lib/auth/context"
+import { getGitHubWriteToken } from "@/lib/github/articles-repo"
 import { classifyFile, sanitizeFilename } from "@/lib/uploads/file-upload"
 import {
   uploadArticleAssetToGithub,
@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
     }
 
     const sanitized = sanitizeFilename(filename, mimeType)
-    const token = (await getGithubPatForUser(session.user.id)) ?? null
+    const token = getGitHubWriteToken() ?? null
     const url = await uploadArticleAssetToGithub({
       buffer,
       category: classification.category,

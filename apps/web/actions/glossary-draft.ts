@@ -1,85 +1,65 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import type { Prisma } from "@prisma/client"
-import { z } from "zod"
-
 import { requireAuth } from "@/lib/auth/context"
-import { prisma } from "@/lib/prisma"
-
-const operationsSchema = z.array(z.record(z.string(), z.unknown()))
+import {
+  deleteDraft,
+  draftErrorMessage,
+  glossaryOperationsSchema,
+  newDraftFields,
+  readDraft,
+  requireDraftVersion,
+  writeDraft,
+} from "@/lib/drafts/store"
 
 export async function createGlossaryDraftAction(): Promise<{ id: string }> {
   const session = await requireAuth()
-  const userId = session.user.id
-
-  const revision = await prisma.glossaryRevision.create({
-    data: {
-      authorId: userId,
-      status: "DRAFT",
-      operations: [],
-      baseSubmoduleSha: null,
-    },
-  })
-
+  const draft = {
+    ...newDraftFields(session.user.id),
+    kind: "glossary" as const,
+    operations: [],
+  }
+  await writeDraft(draft)
   revalidatePath("/draft")
-  return { id: revision.id }
+  return { id: draft.id }
 }
 
 export async function updateGlossaryDraftAction(
   id: string,
   operations: unknown[],
-  title?: string
-): Promise<{
-  success: boolean
-  errors?: { operations?: string[]; general?: string }
-}> {
+  title: string,
+  etag: string
+) {
   try {
     const session = await requireAuth()
-    const userId = session.user.id
-
-    const validated = operationsSchema.safeParse(operations)
+    const validated = glossaryOperationsSchema.safeParse(operations)
     if (!validated.success) {
       return {
         success: false,
         errors: { operations: validated.error.issues.map((i) => i.message) },
       }
     }
-
-    const existing = await prisma.glossaryRevision.findUnique({ where: { id } })
-    if (!existing) {
-      return { success: false, errors: { general: "Draft not found" } }
+    const record = await readDraft(session.user.id, id)
+    if (!record || record.draft.kind !== "glossary") {
+      throw new Error("Draft not found")
     }
-    if (existing.authorId !== userId) {
-      return { success: false, errors: { general: "Unauthorized" } }
+    if (record.draft.status !== "DRAFT") {
+      throw new Error("Cannot edit a draft after submission has started")
     }
-    if (existing.status !== "DRAFT") {
-      return {
-        success: false,
-        errors: {
-          general: "Cannot edit a draft after submission has started",
-        },
-      }
-    }
-
-    await prisma.glossaryRevision.update({
-      where: { id },
-      data: {
-        operations: validated.data as Prisma.InputJsonValue,
-        ...(title !== undefined ? { title: title.trim() || null } : {}),
+    requireDraftVersion(record.etag, etag)
+    const nextEtag = await writeDraft(
+      {
+        ...record.draft,
+        operations: validated.data,
+        title: title.trim(),
+        updatedAt: new Date().toISOString(),
       },
-    })
-
-    try {
-      revalidatePath("/draft")
-    } catch {
-      // The revision is already durable; cache refresh failure must not change the save result.
-    }
-
-    return { success: true }
+      record.etag
+    )
+    revalidatePath("/draft")
+    return { success: true, etag: nextEtag }
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Update failed"
-    return { success: false, errors: { general: message } }
+    return { success: false, errors: { general: draftErrorMessage(error) } }
   }
 }
 
@@ -88,31 +68,17 @@ export async function deleteGlossaryDraftAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const session = await requireAuth()
-    const userId = session.user.id
-
-    const existing = await prisma.glossaryRevision.findUnique({ where: { id } })
-    if (!existing) return { success: false, error: "Draft not found" }
-    if (existing.authorId !== userId) {
-      return { success: false, error: "Unauthorized" }
+    const record = await readDraft(session.user.id, id)
+    if (!record || record.draft.kind !== "glossary") {
+      throw new Error("Draft not found")
     }
-    if (existing.status !== "DRAFT") {
-      return {
-        success: false,
-        error: "Cannot delete a draft that has already been submitted",
-      }
+    if (record.draft.status !== "DRAFT") {
+      throw new Error("Cannot delete a draft after submission has started")
     }
-
-    await prisma.glossaryRevision.delete({ where: { id } })
-
-    try {
-      revalidatePath("/draft")
-    } catch {
-      // The revision is already deleted; cache refresh failure must not change the delete result.
-    }
-
+    await deleteDraft(record.draft, record.etag)
+    revalidatePath("/draft")
     return { success: true }
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Delete failed"
-    return { success: false, error: message }
+    return { success: false, error: draftErrorMessage(error) }
   }
 }

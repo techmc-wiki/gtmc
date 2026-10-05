@@ -42,7 +42,7 @@ The fastest way to start is to **[visit the site](https://techmc.wiki)**. Want t
 
 ## Running it locally
 
-<a href="https://skillicons.dev"><img src="https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,prisma,supabase,vercel" alt="Next.js, React, TypeScript, Tailwind CSS, Prisma, Supabase, Vercel" /></a>
+<a href="https://skillicons.dev"><img src="https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,vercel" alt="Next.js, React, TypeScript, Tailwind CSS, Vercel" /></a>
 
 ```bash
 git clone https://github.com/techmc-wiki/gtmc.git
@@ -62,7 +62,7 @@ pnpm test         # Run the Vitest suite once
 pnpm typecheck    # Run the Next.js-aware TypeScript check
 ```
 
-In development, the first localhost request automatically signs in as the local admin fixture (`debug@gtmc.local`) and seeds that user in `DATABASE_URL`. Set `GTMC_DEV_FIXTURE_AUTH=0` before starting `pnpm dev` to use the real GitHub sign-in flow instead.
+In development, the first localhost request automatically signs in as the local debug fixture (`debug@gtmc.local`) without a database. Set `GTMC_DEV_FIXTURE_AUTH=0` before starting `pnpm dev` to use the real GitHub sign-in flow instead.
 
 > [!TIP]
 > `pnpm build` runs in two phases: `build:content` generates the site artifacts (article manifest, glossary, and rendered content), then `build:next` builds the site from them. The PDF pipeline is separate: `pnpm generate:pdf-html` turns those artifacts into the print-ready HTML under `tools/pdfgen/html`, and `pnpm build:pdf` consumes it to write `tools/pdfgen/dist/gtmc-en.pdf` and `tools/pdfgen/dist/gtmc-zh.pdf`; `.github/workflows/pdf.yml` runs both and publishes the PDFs to R2. Run the phases separately when you only need one.

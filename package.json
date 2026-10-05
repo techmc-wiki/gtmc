@@ -18,7 +18,6 @@
     "build:vercel": "pnpm --filter @gtmc/web run build:vercel",
     "build": "pnpm --filter @gtmc/web run build",
     "check": "pnpm --filter @gtmc/ssg run check && pnpm --filter @gtmc/web run check",
-    "db:migrate:deploy": "pnpm --filter @gtmc/web run db:migrate:deploy",
     "dev": "pnpm --filter @gtmc/web run dev",
     "doctor": "pnpm --filter @gtmc/web run doctor",
     "fmt:fix": "pnpm --filter @gtmc/ssg exec vp fmt --write && pnpm --filter @gtmc/web run fmt:fix",

@@ -19,7 +19,8 @@ const MAIN_BRANCH = "main"
 
 interface DraftSubmissionInput {
   activeFileId?: string
-  draftId: string
+  branchName: string
+  recoverOnly: boolean
   title: string
   files: DraftFileRecord[]
   imageEntries?: BranchFileEntry[]
@@ -31,7 +32,8 @@ interface DraftSubmissionInput {
 
 export async function openDraftPullRequest({
   activeFileId,
-  draftId,
+  branchName,
+  recoverOnly,
   title,
   files,
   imageEntries,
@@ -64,14 +66,22 @@ export async function openDraftPullRequest({
       `Duplicate resolved file paths are not allowed: ${duplicateResolvedPaths.join(", ")}`
     )
   }
-  const branchName = buildBranchName(draftId)
-
-  await octokit.git.createRef({
-    owner: ARTICLES_REPO_OWNER,
-    repo: ARTICLES_REPO_NAME,
-    ref: `refs/heads/${branchName}`,
-    sha: baseMainSha,
+  const { data: existingPrs } = await octokit.pulls.list({
+    owner: ARTICLES_REPO_OWNER, repo: ARTICLES_REPO_NAME,
+    head: `${ARTICLES_REPO_OWNER}:${branchName}`, state: "all",
   })
+  const existingPr = existingPrs[0]
+  if (existingPr) {return {
+    activeFileId: normalizedFiles.activeFileId, files: normalizedFiles.files,
+    prNumber: existingPr.number, prUrl: existingPr.html_url,
+  }}
+  if (recoverOnly) throw new Error("Submission is still in progress. Retry shortly; interrupted submissions can be resumed after 15 minutes.")
+  try {
+    await octokit.git.getRef({ owner: ARTICLES_REPO_OWNER, repo: ARTICLES_REPO_NAME, ref: `heads/${branchName}` })
+  } catch (error) {
+    if (!(error instanceof Error) || !("status" in error) || error.status !== 404) throw error
+    await octokit.git.createRef({ owner: ARTICLES_REPO_OWNER, repo: ARTICLES_REPO_NAME, ref: `refs/heads/${branchName}`, sha: baseMainSha })
+  }
 
   if (normalizedFiles.files.length === 1) {
     const file = normalizedFiles.files[0]
@@ -124,8 +134,4 @@ export async function getArticlePullRequest(prNumber: number, token?: string) {
     pull_number: prNumber,
   })
   return data
-}
-
-function buildBranchName(draftId: string) {
-  return `submission-${draftId}-${Date.now()}`.replaceAll(/[^a-zA-Z0-9/_-]/g, "-")
 }

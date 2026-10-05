@@ -15,14 +15,6 @@ const remoteArticleAssetTraceExcludes = [
   "../../.git/**",
 ]
 
-const supabaseImageHostname = (() => {
-  try {
-    return new URL(process.env.SUPABASE_URL ?? "").hostname
-  } catch {
-    return "supabase.invalid"
-  }
-})()
-
 const buildSha: string = (() => {
   if (process.env.VERCEL_GIT_COMMIT_SHA) {
     return process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 7)
@@ -59,12 +51,7 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_APP_VERSION: appVersion,
     NEXT_PUBLIC_BUILD_SHA: buildSha,
   },
-  serverExternalPackages: [
-    "@prisma/client",
-    "prisma",
-    "gray-matter",
-    "papaparse",
-  ],
+  serverExternalPackages: ["gray-matter", "papaparse"],
   experimental: {
     cpus: 2,
     useTypeScriptCli: true,
@@ -205,11 +192,6 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "raw.githubusercontent.com",
         pathname: "/techmc-wiki/Articles/**",
-      },
-      {
-        protocol: "https",
-        hostname: supabaseImageHostname,
-        pathname: "/storage/v1/object/public/**",
       },
     ],
   },

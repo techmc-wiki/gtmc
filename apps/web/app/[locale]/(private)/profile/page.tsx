@@ -1,9 +1,8 @@
 import type { Metadata } from "next"
 import Image from "next/image"
 import { getTranslations } from "next-intl/server"
-import { prisma } from "@/lib/prisma"
+import { readProfile } from "@/lib/auth/profile"
 import { guardUser } from "@/lib/auth/guards"
-import { redirect } from "next/navigation"
 import { Button } from "@/components/ui/shadcn/button"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Input } from "@/components/ui/shadcn/input"
@@ -14,7 +13,6 @@ import {
 } from "@/components/ui/shadcn/avatar"
 import { updateProfileAction } from "@/actions/profile"
 import { SignOutButton } from "@/components/ui/sign-out-button"
-import { getGithubEmailVisibility } from "@/lib/github"
 import { cn } from "@/lib/cn"
 import { Label } from "@/components/ui/shadcn/label"
 import type { ReactNode } from "react"
@@ -33,22 +31,10 @@ export default async function ProfilePage({
   const { locale } = await params
   const session = await guardUser(locale, `/${locale}/profile`)
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-  })
-
-  if (!user) {
-    redirect("/login")
-  }
-
+  const profile = await readProfile(session.user.id)
+  const user = { ...session.user, ...profile }
   const t = await getTranslations("Profile")
-
-  const account = await prisma.account.findFirst({
-    where: { provider: "github", userId: user.id },
-  })
-  const emailVisibility = await getGithubEmailVisibility(
-    account?.access_token || ""
-  )
+  const emailVisibility = session.user.emailVisibility
 
   const emailLabel = (
     <EmailLabel

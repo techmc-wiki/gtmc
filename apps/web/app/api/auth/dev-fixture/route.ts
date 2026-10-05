@@ -1,7 +1,6 @@
 import { encode } from "next-auth/jwt"
 import { NextResponse, type NextRequest } from "next/server"
 
-import { ensureDevFixtureUser } from "@/lib/auth/dev-fixture"
 import {
   DEV_FIXTURE_USER,
   getDevSessionCookie,
@@ -23,15 +22,6 @@ function getSafeCallbackUrl(request: NextRequest): URL {
 export async function GET(request: NextRequest) {
   if (!isDevFixtureAuthEnabled() || !isLocalDevelopmentRequest(request)) {
     return new NextResponse(null, { status: 404 })
-  }
-
-  try {
-    await ensureDevFixtureUser()
-  } catch {
-    return new NextResponse(
-      "Local fixture authentication requires a reachable DATABASE_URL.",
-      { status: 503 }
-    )
   }
 
   const sessionCookie = getDevSessionCookie(request)

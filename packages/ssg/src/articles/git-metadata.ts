@@ -6,14 +6,6 @@ import { load as yamlLoad } from "js-yaml"
 
 const execFileAsync = promisify(execFile)
 
-const CONFIG_DIR = join(process.cwd(), "lib", "articles", "config")
-const ARTICLE_EDIT_EXCLUSIONS_PATH = join(
-  CONFIG_DIR,
-  "article-edit-exclusions.yml"
-)
-const ALIASES_PATH = join(CONFIG_DIR, "authors-alias.yml")
-const ALIAS_OVERRIDES_PATH = join(CONFIG_DIR, "author-alias-overrides.yml")
-
 interface Commit {
   author: string
   committer: string
@@ -41,7 +33,13 @@ type GitPathCommitRange = {
 
 const MILLISECONDS_PER_DAY = 86_400_000
 
-const cache = new Map<string, any>()
+const exclusionsCache = new Map<string, string[]>()
+const aliasesCache = new Map<string, Map<string, string>>()
+const authorsCache = new Map<string, { author: string; coAuthors: string[] }>()
+const datesCache = new Map<
+  string,
+  { created: string | null; lastmod: string | null }
+>()
 
 function getCacheKey(cwd: string, relPath: string, type: string): string {
   return `${cwd}:${relPath}:${type}`
@@ -51,20 +49,24 @@ function getCacheKey(cwd: string, relPath: string, type: string): string {
  * Returns configured Git usernames in lowercase without resolving aliases.
  * Attribution filters expand these identities to canonical handles when needed.
  */
-export async function loadArticleEditExclusions(): Promise<string[]> {
-  const cacheKey = "config:article-edit-exclusions"
-  if (cache.has(cacheKey)) {
-    return cache.get(cacheKey)
-  }
+export async function loadArticleEditExclusions(
+  configDir: string
+): Promise<string[]> {
+  const cacheKey = `config:${configDir}:article-edit-exclusions`
+  const cached = exclusionsCache.get(cacheKey)
+  if (cached) return cached
 
   try {
-    const content = await readFile(ARTICLE_EDIT_EXCLUSIONS_PATH, "utf-8")
+    const content = await readFile(
+      join(configDir, "article-edit-exclusions.yml"),
+      "utf-8"
+    )
     const exclusions = (yamlLoad(content) as string[]) || []
     const lowercased = exclusions.map((identity) => identity.toLowerCase())
-    cache.set(cacheKey, lowercased)
+    exclusionsCache.set(cacheKey, lowercased)
     return lowercased
   } catch {
-    cache.set(cacheKey, [])
+    exclusionsCache.set(cacheKey, [])
     return []
   }
 }
@@ -73,11 +75,12 @@ export async function loadArticleEditExclusions(): Promise<string[]> {
  * Maps every canonical handle and alias to its canonical username. The
  * generated alias file is merged first, then optional overrides take precedence.
  */
-export async function loadAuthorAliases(): Promise<Map<string, string>> {
-  const cacheKey = "config:aliases"
-  if (cache.has(cacheKey)) {
-    return cache.get(cacheKey)
-  }
+export async function loadAuthorAliases(
+  configDir: string
+): Promise<Map<string, string>> {
+  const cacheKey = `config:${configDir}:aliases`
+  const cached = aliasesCache.get(cacheKey)
+  if (cached) return cached
 
   const aliasMap = new Map<string, string>()
 
@@ -94,16 +97,22 @@ export async function loadAuthorAliases(): Promise<Map<string, string>> {
   }
 
   try {
-    const autoContent = await readFile(ALIASES_PATH, "utf-8")
+    const autoContent = await readFile(
+      join(configDir, "authors-alias.yml"),
+      "utf-8"
+    )
     mergeEntries(yamlLoad(autoContent) as Record<string, string[]> | null)
   } catch {}
 
   try {
-    const overrideContent = await readFile(ALIAS_OVERRIDES_PATH, "utf-8")
+    const overrideContent = await readFile(
+      join(configDir, "author-alias-overrides.yml"),
+      "utf-8"
+    )
     mergeEntries(yamlLoad(overrideContent) as Record<string, string[]> | null)
   } catch {}
 
-  cache.set(cacheKey, aliasMap)
+  aliasesCache.set(cacheKey, aliasMap)
   return aliasMap
 }
 
@@ -114,9 +123,8 @@ export async function getArticleAuthors(
   aliases: Map<string, string>
 ): Promise<{ author: string; coAuthors: string[] }> {
   const cacheKey = getCacheKey(repoCwd, relPath, "authors")
-  if (cache.has(cacheKey)) {
-    return cache.get(cacheKey)
-  }
+  const cached = authorsCache.get(cacheKey)
+  if (cached) return cached
 
   try {
     const { stdout } = await execFileAsync(
@@ -163,7 +171,7 @@ export async function getArticleAuthors(
 
     if (commits.length === 0) {
       const result = { author: "", coAuthors: [] }
-      cache.set(cacheKey, result)
+      authorsCache.set(cacheKey, result)
       return result
     }
 
@@ -297,11 +305,11 @@ export async function getArticleAuthors(
       }
     }
 
-    cache.set(cacheKey, result)
+    authorsCache.set(cacheKey, result)
     return result
   } catch {
     const result = { author: "", coAuthors: [] }
-    cache.set(cacheKey, result)
+    authorsCache.set(cacheKey, result)
     return result
   }
 }
@@ -312,9 +320,8 @@ export async function getArticleDates(
   excludedEditors: string[]
 ): Promise<{ created: string | null; lastmod: string | null }> {
   const cacheKey = getCacheKey(repoCwd, relPath, "dates")
-  if (cache.has(cacheKey)) {
-    return cache.get(cacheKey)
-  }
+  const cached = datesCache.get(cacheKey)
+  if (cached) return cached
 
   try {
     const { stdout } = await execFileAsync(
@@ -354,16 +361,14 @@ export async function getArticleDates(
       result = { created: dates[dates.length - 1], lastmod: dates[0] }
     }
 
-    cache.set(cacheKey, result)
+    datesCache.set(cacheKey, result)
     return result
   } catch {
     const result = { created: null, lastmod: null }
-    cache.set(cacheKey, result)
+    datesCache.set(cacheKey, result)
     return result
   }
 }
-
-
 
 export async function getLatestPathCommit(
   repoCwd: string,
@@ -450,4 +455,3 @@ export async function getTranslationProvenance(
     throw error
   }
 }
-

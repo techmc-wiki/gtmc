@@ -4,7 +4,7 @@ import { CJK_TOKENIZER } from "@/lib/search/cjk-tokenizer"
 import { getSearchIndex } from "@/lib/search/search-index"
 import { searchGlossary } from "@/lib/glossary/search"
 import type { GlossarySummaryEntry } from "@/lib/glossary/manifest"
-import type { ArticleLocale } from "@/lib/articles/manifest"
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 
 const GLOSSARY_RESULT_CAP = 5
 

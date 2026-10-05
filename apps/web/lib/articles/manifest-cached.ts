@@ -1,14 +1,8 @@
 "use cache"
 
 import { cacheLife, cacheTag } from "next/cache"
-import {
-  getArticleManifest,
-  getArticleTree,
-  getLocalizedArticleEntry,
-  type ArticleEntry,
-  type ArticleLocale,
-  type LocalizedArticleMetadata,
-} from "@/lib/articles/manifest"
+import { getArticleManifest, getArticleTree, getLocalizedArticleEntry, type LocalizedArticleMetadata } from "@/lib/articles/manifest"
+import { type ArticleEntry, type ArticleLocale } from "@gtmc/ssg/articles/types"
 import type { ArticleTreeNode } from "@/lib/github"
 
 export async function getCachedArticleTree(

@@ -1,5 +1,4 @@
-import path from "path"
-import type { ArticleEntry } from "@/lib/articles/manifest"
+import type { ArticleEntry } from "./articles/types"
 
 const TREE_PREVIEW_DEPTH = 2
 const TREE_PREVIEW_CHILD_LIMIT = 8
@@ -34,8 +33,8 @@ export function buildManifestPreview(
     `  ${roots.length} top-level routes, ${maxSlugDepth}/${maxDepth} slug/directory depth`,
     `  ${formatFlags(entries)}`,
     "",
-    `Source  ${path.relative(process.cwd(), articlesPath) || "."}`,
-    `Output  ${path.relative(process.cwd(), outputFile) || outputFile}`,
+    `Source  ${articlesPath}`,
+    `Output  ${outputFile}`,
   ]
 
   const previewLines = formatPreviewEntries(roots, childIndex)

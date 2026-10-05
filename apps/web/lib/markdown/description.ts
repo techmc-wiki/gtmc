@@ -2,7 +2,7 @@ import { remark } from "remark"
 import stripMarkdown from "strip-markdown"
 import { visit } from "unist-util-visit"
 import type { Html } from "mdast"
-import { stripAnsiColorMarkup } from "@/lib/markdown/ansi-colors"
+import { stripAnsiColorMarkup } from "@gtmc/ssg/markdown/ansi-colors"
 
 /** Typical Bing/Google SERP target: long enough to be informative, short enough not to truncate. */
 export const META_DESCRIPTION_MAX_LENGTH = 155

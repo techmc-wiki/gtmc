@@ -5,7 +5,7 @@ import {
   resolveAuthorPerson,
 } from "@/lib/articles/person-resolver"
 import { getRepositoryContributorStats } from "@/lib/git/repository-contributor-stats"
-import type { ArticleLocale } from "@/lib/articles/manifest"
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 import type { AuthorGridItem } from "@/components/mdx/author-grid"
 
 export async function buildMaintainers(

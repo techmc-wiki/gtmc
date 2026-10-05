@@ -2,10 +2,7 @@ import type { Nodes, Root } from "mdast"
 import type { Options as RemarkDirectiveOptions } from "remark-directive"
 import type { VisitorResult } from "unist-util-visit"
 import { SKIP, visit } from "unist-util-visit"
-import {
-  ANSI_COLOR_NAMES,
-  createAnsiColorTagName,
-} from "@/lib/markdown/ansi-colors"
+import { ANSI_COLOR_NAMES, createAnsiColorTagName } from "../ansi-colors"
 
 interface RawFile extends Pick<RemarkDirectiveOptions, never> {
   value: string | Uint8Array

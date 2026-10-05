@@ -41,7 +41,6 @@ const CONTENT_GENERATOR_FILES: string[] = [
   "scripts/lib/run.ts",
   "scripts/build-content.ts",
   "scripts/generate-article-manifest.ts",
-  "scripts/manifest-preview.ts",
   "scripts/generate-glossary-manifest.ts",
   "scripts/generate-repository-contributor-stats.ts",
   "scripts/generate-article-content.ts",
@@ -55,9 +54,12 @@ const CONTENT_GENERATOR_FILES: string[] = [
 const WORKSPACE_GENERATOR_FILES: string[] = [
   "pnpm-lock.yaml",
   "CONTRIBUTING.md",
+  "packages/ssg/package.json",
+  "packages/ssg/tsconfig.json",
 ]
 
 const CONTENT_GENERATOR_DIRECTORIES: string[] = [
+  "../../packages/ssg/src",
   "lib/articles",
   "lib/github",
   "lib/glossary",

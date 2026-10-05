@@ -1,14 +1,14 @@
 import ReactMarkdown from "react-markdown"
 import type { ReactNode } from "react"
 
-import type { RehypeShikiPlugin } from "@/lib/markdown/syntax/rehype-shiki"
-import type { CodeReference } from "@/lib/markdown/code-provenance"
+import type { RehypeShikiPlugin } from "@gtmc/ssg/markdown/syntax/rehype-shiki"
+import type { CodeReference } from "@gtmc/ssg/markdown/code-provenance"
 import { getMarkdownComponents } from "@/lib/markdown/components"
 import {
   buildRehypePlugins,
   buildRemarkPlugins,
-} from "@/lib/markdown/pipeline/core"
-import { rehypeCJKSpacingBrowser } from "@/lib/markdown/transforms/rehype-cjk-spacing.browser"
+} from "@gtmc/ssg/markdown/pipeline/core"
+import { rehypeCJKSpacingBrowser } from "@gtmc/ssg/markdown/transforms/rehype-cjk-spacing.browser"
 
 interface MarkdownRendererProps {
   content: string

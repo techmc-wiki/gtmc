@@ -1,4 +1,4 @@
-import type { ArticleLocale } from "@/lib/articles/manifest"
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 import { getCachedLocalizedArticleEntry } from "@/lib/articles/manifest-cached"
 import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
 import { findNavigationOwner } from "@/lib/articles/navigation-data"

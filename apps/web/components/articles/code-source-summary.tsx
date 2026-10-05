@@ -1,7 +1,7 @@
 import {
   formatToolReference,
   type CodeReference,
-} from "@/lib/markdown/code-provenance"
+} from "@gtmc/ssg/markdown/code-provenance"
 import { Separator } from "@/components/ui/shadcn/separator"
 
 interface CodeSourceSummaryProps {

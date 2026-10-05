@@ -1,16 +1,10 @@
 # packages
 
-Shared libraries for the GTMC workspace.
+Workspace packages, picked up by the `packages/*` glob in
+[`pnpm-workspace.yaml`](../pnpm-workspace.yaml).
 
-Anything here must be **runtime-agnostic**: no Next.js imports, no `app/`
-conventions, and no `process.cwd()`-relative assumptions. The web app lives in
-[`apps/web`](../apps/web) and the Go PDF renderer in
-[`tools/pdfgen`](../tools/pdfgen).
+- [`ssg`](ssg): the article build pipeline and shared Markdown transforms.
+  Its paths and host settings are explicit inputs; it has no Next.js imports.
 
-This directory is currently empty. Populate it when there is a genuine shared
-boundary between two consumers — not to hold code that only the web app uses,
-which belongs in `apps/web/lib/`.
-
-Members are picked up automatically by the `packages/*` glob in
-[`pnpm-workspace.yaml`](../pnpm-workspace.yaml); no root `package.json` edit is
-needed to add one.
+The Next.js site lives in [`apps/web`](../apps/web), and the Go PDF renderer
+lives in [`tools/pdfgen`](../tools/pdfgen).

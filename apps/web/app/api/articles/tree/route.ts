@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { getPublicChapterNav } from "@/lib/articles/public-tree";
-import type { ArticleLocale } from "@/lib/articles/manifest";
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 
 const TREE_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300";
 const VALID_LOCALES = new Set<ArticleLocale>(["zh", "en"]);

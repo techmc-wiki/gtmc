@@ -1,7 +1,7 @@
 import * as React from "react"
 import { ArticlesLayoutClient } from "./articles-layout-client"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
-import type { ArticleLocale } from "@/lib/articles/manifest"
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 
 function normalizeLocale(locale: string): ArticleLocale {
   return locale === "en" ? "en" : "zh"

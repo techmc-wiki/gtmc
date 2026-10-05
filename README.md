@@ -65,7 +65,7 @@ pnpm typecheck    # Run the Next.js-aware TypeScript check
 In development, the first localhost request automatically signs in as the local admin fixture (`debug@gtmc.local`) and seeds that user in `DATABASE_URL`. Set `GTMC_DEV_FIXTURE_AUTH=0` before starting `pnpm dev` to use the real GitHub sign-in flow instead.
 
 > [!TIP]
-> `pnpm build` runs in two phases: `build:content` generates the site artifacts (article manifest, glossary, rendered content, and PDF-ready HTML sidecars), then `build:next` builds the site from them. The standalone `pnpm build:pdf` consumes those sidecars and writes `apps/web/data/pdf-dist/gtmc-en.pdf` and `apps/web/data/pdf-dist/gtmc-zh.pdf`; `.github/workflows/pdf.yml` publishes them to R2. Run the phases separately when you only need one.
+> `pnpm build` runs in two phases: `build:content` generates the site artifacts (article manifest, glossary, and rendered content), then `build:next` builds the site from them. The PDF pipeline is separate: `pnpm generate:pdf-html` turns those artifacts into the print-ready HTML under `apps/web/data/pdf-html`, and `pnpm build:pdf` consumes it to write `apps/web/data/pdf-dist/gtmc-en.pdf` and `apps/web/data/pdf-dist/gtmc-zh.pdf`; `.github/workflows/pdf.yml` runs both and publishes the PDFs to R2. Run the phases separately when you only need one.
 > Vite+ supplements the Next.js toolchain; `vp dev` and `vp build` are Vite commands and are not used by this project. Run bare `vp` commands from `apps/web`, where `vite.config.ts` lives.
 
 ---

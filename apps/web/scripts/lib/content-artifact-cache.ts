@@ -17,8 +17,6 @@ const CACHE_DIRECTORY = path.resolve(
 const GENERATED_ARTIFACTS = [
   "data/manifest.json",
   "data/articles",
-  "data/pdf-html",
-  "data/.shiki-cache.json",
   "data/glossary.json",
   "data/glossary-summary.json",
   "data/repository-contributor-stats.json",
@@ -26,12 +24,11 @@ const GENERATED_ARTIFACTS = [
   "public/article-assets",
 ] as const
 
-const GENERATED_ARTIFACT_DIRECTORIES = new Set([
-  "data/articles",
-  "data/pdf-html",
-  "data/contributing",
-  "public/article-assets",
-])
+const GENERATED_ARTIFACT_DIRECTORIES: Record<string, true> = {
+  "data/articles": true,
+  "data/contributing": true,
+  "public/article-assets": true,
+}
 
 // Generator inputs, relative to the app directory (apps/web).
 const CONTENT_GENERATOR_FILES: string[] = [
@@ -153,7 +150,7 @@ function hasEveryGeneratedArtifact(root: string): string | null {
     if (!exists) return relativePath
 
     const stats = fs.statSync(absolutePath)
-    if (GENERATED_ARTIFACT_DIRECTORIES.has(relativePath)) {
+    if (GENERATED_ARTIFACT_DIRECTORIES[relativePath]) {
       if (!stats.isDirectory()) return relativePath
     } else if (!stats.isFile()) {
       return relativePath
@@ -176,7 +173,7 @@ function runTar(arguments_: string[]): TarResult {
 }
 
 function validateArchiveEntries(entries: string[]): string | null {
-  const expectedDirectories = [...GENERATED_ARTIFACT_DIRECTORIES]
+  const expectedDirectories = Object.keys(GENERATED_ARTIFACT_DIRECTORIES)
   for (const entry of entries) {
     const normalizedEntry = entry.replace(/\/+$/, "")
     const normalizedPath = path.posix.normalize(normalizedEntry)
@@ -323,7 +320,7 @@ export function restoreContentArtifacts(cache: ContentArtifactCache): boolean {
       for (const relativePath of GENERATED_ARTIFACTS) {
         const sourcePath = path.join(temporaryDirectory, relativePath)
         const targetPath = path.join(process.cwd(), relativePath)
-        if (GENERATED_ARTIFACT_DIRECTORIES.has(relativePath)) {
+        if (GENERATED_ARTIFACT_DIRECTORIES[relativePath]) {
           fs.rmSync(targetPath, { recursive: true, force: true })
         } else {
           fs.rmSync(targetPath, { force: true })

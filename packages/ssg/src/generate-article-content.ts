@@ -20,13 +20,7 @@ import type {
   TranslationReadmeFrontMatter,
   TranslationFrontMatter,
 } from "./articles/frontmatter-parser"
-import { renderMarkdownToHtml } from "./markdown/pdf-html"
 import { analyzeJavaCodeReferences } from "./markdown/code-provenance.server"
-import {
-  createRehypeShiki,
-  persistHighlightCache,
-  type RehypeShikiPlugin,
-} from "./markdown/syntax/rehype-shiki"
 import type { BuildLogger } from "./logger"
 
 export interface ArticleContentOptions {
@@ -55,8 +49,6 @@ export async function generateArticleContent({
 }: ArticleContentOptions): Promise<void> {
   const OUTPUT_DIR = path.join(dataDir, "articles")
   const TEMP_DIR = path.join(dataDir, "articles.tmp")
-  const PDF_HTML_DIR = path.join(dataDir, "pdf-html")
-  const PDF_HTML_TEMP_DIR = path.join(dataDir, "pdf-html.tmp")
   const PUBLIC_ARTICLE_ASSET_DIR = articleAssetDir
   const ARTICLES_PATH = articlesPath
   const IS_PRODUCTION = production
@@ -103,18 +95,10 @@ export async function generateArticleContent({
   }
   fs.mkdirSync(TEMP_DIR, { recursive: true })
 
-  if (fs.existsSync(PDF_HTML_TEMP_DIR)) {
-    fs.rmSync(PDF_HTML_TEMP_DIR, { recursive: true })
-  }
-  fs.mkdirSync(PDF_HTML_TEMP_DIR, { recursive: true })
-
   if (fs.existsSync(PUBLIC_ARTICLE_ASSET_DIR)) {
     fs.rmSync(PUBLIC_ARTICLE_ASSET_DIR, { recursive: true })
   }
 
-  const shikiPlugin = await createRehypeShiki(
-    path.join(dataDir, ".shiki-cache.json")
-  )
   const entries = Object.values(
     JSON.parse(
       fs.readFileSync(path.join(dataDir, "manifest.json"), "utf-8")
@@ -139,10 +123,6 @@ export async function generateArticleContent({
       fs.mkdirSync(localeDir, { recursive: true })
       const filename = `${artifactFilename(entry.slug)}.json`
       const tempOutputPath = path.join(localeDir, filename)
-      const htmlFilename = `${artifactFilename(entry.slug)}.html`
-      const pdfHtmlLocaleDir = path.join(PDF_HTML_TEMP_DIR, locale)
-      fs.mkdirSync(pdfHtmlLocaleDir, { recursive: true })
-      const tempHtmlPath = path.join(pdfHtmlLocaleDir, htmlFilename)
 
       let fileContent: string
       try {
@@ -167,11 +147,8 @@ export async function generateArticleContent({
         const rendered = await renderArtifact(
           entry,
           locale,
-          localizedPath,
           fileContent,
-          tempOutputPath,
-          tempHtmlPath,
-          shikiPlugin
+          tempOutputPath
         )
         if (rendered) {
           copyBannerAssetToPublic(
@@ -196,13 +173,6 @@ export async function generateArticleContent({
   }
   fs.renameSync(TEMP_DIR, OUTPUT_DIR)
 
-  if (fs.existsSync(PDF_HTML_DIR)) {
-    fs.rmSync(PDF_HTML_DIR, { recursive: true })
-  }
-  fs.renameSync(PDF_HTML_TEMP_DIR, PDF_HTML_DIR)
-
-  persistHighlightCache(path.join(dataDir, ".shiki-cache.json"))
-
   logger.event("article-content.generated", {
     generated_count: generatedCount,
   })
@@ -214,11 +184,8 @@ export async function generateArticleContent({
   async function renderArtifact(
     entry: ArticleEntry,
     locale: string,
-    localizedPath: string,
     fileContent: string,
-    outputPath: string,
-    htmlOutputPath: string,
-    highlightPlugin: RehypeShikiPlugin
+    outputPath: string
   ): Promise<Record<string, unknown> | null> {
     let artifactContent: string
     let frontmatter: Record<string, unknown>
@@ -329,24 +296,6 @@ export async function generateArticleContent({
     }
 
     fs.writeFileSync(outputPath, JSON.stringify(artifact, null, 2) + "\n")
-
-    try {
-      const html = await renderMarkdownToHtml(artifact.content, {
-        articleSlug: entry.slug,
-        codeReferences: artifact.codeReferences,
-        locale: locale as "en" | "zh",
-        shikiPlugin: highlightPlugin,
-      })
-      fs.mkdirSync(path.dirname(htmlOutputPath), { recursive: true })
-      fs.writeFileSync(htmlOutputPath, html)
-    } catch (error) {
-      logger.error(
-        "article-content.pdf-html.render-failed",
-        { locale, slug: entry.slug },
-        String(error)
-      )
-      return null
-    }
 
     return frontmatter
   }

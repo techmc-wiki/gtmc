@@ -22,11 +22,11 @@ let highlighterPromise: Promise<HighlighterCore> | null = null
 /**
  * Load a persisted highlight cache written by a previous build phase.
  *
- * The article content phase and the PDF generator render every article with
- * this highlighter; persisting the cache lets the Next.js SSG build reuse
- * those highlights instead of re-running the (regex-engine) highlighter on
- * every unchanged code block. Entries are content-addressed, so a stale
- * cache can never produce wrong output: it only costs a re-highlight.
+ * The PDF HTML phase renders every article with this highlighter; persisting
+ * the cache lets the Next.js SSG build reuse those highlights instead of
+ * re-running the (regex-engine) highlighter on every unchanged code block.
+ * Entries are content-addressed, so a stale cache can never produce wrong
+ * output: it only costs a re-highlight.
  */
 function loadPersistedHighlightCache(cacheFile: string): void {
   try {
@@ -41,10 +41,9 @@ function loadPersistedHighlightCache(cacheFile: string): void {
 }
 
 /**
- * Persist the in-process highlight cache to disk so later build phases
- * (PDF generation, the Next.js SSG) reuse it. Best-effort: a missing cache
- * only costs a re-highlight. No-op unless new entries were added since the
- * cache was loaded.
+ * Persist the in-process highlight cache to disk so the Next.js SSG build can
+ * reuse it. Best-effort: a missing cache only costs a re-highlight. No-op
+ * unless new entries were added since the cache was loaded.
  */
 export function persistHighlightCache(cacheFile: string): void {
   if (!highlightCacheDirty) return

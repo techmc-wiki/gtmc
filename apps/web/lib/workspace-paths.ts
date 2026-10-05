@@ -14,11 +14,8 @@ import path from "node:path"
  * deliberately touches no filesystem: every export is a pure `path` operation
  * over a fixed depth.
  *
- * Resolution order:
- * 1. `GTMC_WORKSPACE_ROOT` — explicit override for environments whose working
- *    directory is outside the checkout (e.g. a deployed serverless task).
- * 2. `process.cwd()/../..` — the fixed depth of the layout: `apps/web` is two
- *    levels below the root.
+ * The root is `process.cwd()/../..` — the fixed depth of the layout:
+ * `apps/web` is two levels below the root.
  *
  * The root is computed once and cached; both it and `workspacePath` are kept
  * opaque to Next.js's static file-trace analysis (see the comments below), or
@@ -41,7 +38,7 @@ export function getWorkspaceRoot(): string {
     for (let depth = 0; depth < 2; depth += 1) {
       root = path.dirname(root)
     }
-    cachedWorkspaceRoot = path.resolve(process.env.GTMC_WORKSPACE_ROOT ?? root)
+    cachedWorkspaceRoot = root
   }
   return cachedWorkspaceRoot
 }

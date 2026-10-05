@@ -511,7 +511,6 @@
     "websiteLabel": "website"
   },
   "Profile": {
-    "assignedRole": "Assigned role:",
     "avatarUrlHint": "Required: direct image link (.png/.jpg/.gif)",
     "avatarUrlLabel": "Avatar URL",
     "emailLabel": "Email",

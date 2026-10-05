@@ -9,7 +9,6 @@ export async function ensureDevFixtureUser() {
     where: { id: DEV_FIXTURE_USER.id },
     create: {
       ...DEV_FIXTURE_USER,
-      role: "ADMIN",
     },
     update: {
       name: DEV_FIXTURE_USER.name,
@@ -17,7 +16,6 @@ export async function ensureDevFixtureUser() {
       githubLogin: DEV_FIXTURE_USER.githubLogin,
       image: null,
       githubPat: null,
-      role: "ADMIN",
     },
   })
 }

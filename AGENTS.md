@@ -32,6 +32,7 @@ apps/web/       The Next.js site (@gtmc/web) — everything below is relative to
   scripts/      Manifest, content, and PDF generators
   proxy.ts      Auth + i18n middleware
 tools/pdfgen/   Go PDF renderer (CLI; not a pnpm package)
+  html/ fonts/ work/ dist/   Generated PDF inputs, render scratch, and output (gitignored)
 packages/ssg/   Article generation and shared Markdown transforms (@gtmc/ssg)
 content/         Content submodules
   articles/      Article content submodule
@@ -72,7 +73,8 @@ pnpm build:next                  # Phase 2: Next.js production build
 pnpm generate:manifest           # Rebuild apps/web/data/manifest.json
 pnpm generate:content            # Re-render article content artifacts
 pnpm generate:glossary           # Rebuild apps/web/data/glossary*.json
-pnpm generate:pdf-html            # Render article artifacts to apps/web/data/pdf-html
+pnpm generate:pdf-html            # Render article artifacts to tools/pdfgen/html
+pnpm build:pdf                    # Build tools/pdfgen/dist/gtmc-{en,zh}.pdf
 pnpm articles:update             # Pull latest articles submodule commit
 pnpm glossary:update             # Pull latest glossary submodule commit
 ```

@@ -103,7 +103,10 @@ const datasets = new Map<DatasetId, Promise<Dataset>>()
 function loadDataset(id: DatasetId): Promise<Dataset> {
   let pending = datasets.get(id)
   if (!pending) {
-    pending = readFile(workspacePath("properties", "data", files[id]), "utf8")
+    pending = readFile(
+      workspacePath("content", "properties", "data", files[id]),
+      "utf8"
+    )
       .then((text) => {
         const source = JSON.parse(text) as SourceDataset
         const categories = new Map<string, string>()

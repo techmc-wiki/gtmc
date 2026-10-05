@@ -24,6 +24,7 @@
     "generate:contributors": "tsx scripts/generate-repository-contributor-stats.ts",
     "generate:glossary": "tsx scripts/generate-glossary-manifest.ts",
     "generate:manifest": "tsx scripts/generate-article-manifest.ts",
+    "generate:pdf-html": "tsx scripts/generate-pdf-html.ts",
     "lint": "vp lint",
     "lint:fix": "vp lint --fix",
     "postinstall": "tsx scripts/postinstall.ts",

@@ -51,6 +51,7 @@ jobs:
             apps/web/scripts/build-content.ts
             apps/web/scripts/generate-article-content.ts
             apps/web/scripts/generate-pdf.ts
+            apps/web/scripts/generate-pdf-html.ts
             apps/web/lib/articles
             apps/web/lib/markdown
             apps/web/lib/pdf
@@ -163,11 +164,15 @@ jobs:
           echo "executable=$chromium_path" >> "$GITHUB_OUTPUT"
           echo "Chromium executable: $chromium_path"
 
-      - name: Build content sidecars
+      - name: Build content artifacts
         if: steps.change-check.outputs.should-build == 'true'
         run: pnpm build:content
         env:
           GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Generate PDF HTML
+        if: steps.change-check.outputs.should-build == 'true'
+        run: pnpm generate:pdf-html
 
       - name: Build pdfgen binary
         if: steps.change-check.outputs.should-build == 'true'

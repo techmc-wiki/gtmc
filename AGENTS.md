@@ -72,6 +72,7 @@ pnpm build:next                  # Phase 2: Next.js production build
 pnpm generate:manifest           # Rebuild apps/web/data/manifest.json
 pnpm generate:content            # Re-render article content artifacts
 pnpm generate:glossary           # Rebuild apps/web/data/glossary*.json
+pnpm generate:pdf-html            # Render article artifacts to apps/web/data/pdf-html
 pnpm articles:update             # Pull latest articles submodule commit
 pnpm glossary:update             # Pull latest glossary submodule commit
 ```

@@ -36,6 +36,7 @@ export function PropertyPicker({
 }) {
   const t = useTranslations("Properties")
   const [open, setOpen] = useState(false)
+  const selectedIds = new Set(selected)
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -61,7 +62,7 @@ export function PropertyPicker({
                   key={property.id}
                   disabled={
                     multiple &&
-                    (selected.includes(property.id)
+                    (selectedIds.has(property.id)
                       ? selected.length <= 1
                       : selected.length >= 8)
                   }
@@ -74,7 +75,7 @@ export function PropertyPicker({
                   <Check
                     aria-hidden="true"
                     className={
-                      selected.includes(property.id)
+                      selectedIds.has(property.id)
                         ? "mt-0.5 opacity-100"
                         : "mt-0.5 opacity-0"
                     }

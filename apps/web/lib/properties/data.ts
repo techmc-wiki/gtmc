@@ -205,9 +205,9 @@ export async function getPropertyDetails(
   dataset: DatasetId,
   names: string[]
 ): Promise<PropertyEntry[]> {
-  const { source } = await loadDataset(dataset)
+  const { source, search } = await loadDataset(dataset)
   return names
-    .filter((name) => source.key_list.includes(name))
+    .filter((name) => search.has(name))
     .map((name) => ({
       name,
       values: Object.fromEntries(
@@ -273,17 +273,17 @@ export async function searchProperties(
     .split("|")
     .map((group) => group.trim().split(/\s+/).filter(Boolean))
   const filters = options.filters.filter((filter) => filter.value.trim())
-  const names = source.key_list.filter(
-    (name) =>
-      groups.some((group) =>
-        group.every((term) => search.get(name)?.includes(term))
-      ) &&
+  const names = source.key_list.filter((name) => {
+    const text = search.get(name) ?? ""
+    return (
+      groups.some((group) => group.every((term) => text.includes(term))) &&
       filters.every(
         (filter) =>
           Object.hasOwn(source.properties, filter.property) &&
           matches(valueFor(source.properties[filter.property], name), filter)
       )
-  )
+    )
+  })
   const property = Object.hasOwn(source.properties, options.sort)
     ? source.properties[options.sort]
     : undefined

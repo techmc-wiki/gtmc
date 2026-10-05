@@ -88,7 +88,7 @@ function canonicalizeArticleRequest(req: NextRequest): Response | null {
 }
 
 const intlMiddleware = createMiddleware(routing)
-const privateRoutes = ["/admin", "/draft", "/glossary/edit", "/profile"]
+const privateRoutes = ["/draft", "/glossary/edit", "/profile"]
 const localePattern = /^\/(en|zh)(?=\/|$)/
 // Prevent next-intl from redirecting /fr to /zh/fr.
 const invalidLocalePrefixPattern = /^\/([a-z]{2}(?:-[a-z]{2})?)(?=\/|$)/i

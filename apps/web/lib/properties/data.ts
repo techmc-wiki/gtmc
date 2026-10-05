@@ -276,11 +276,14 @@ export async function searchProperties(
     .replaceAll("_", " ")
     .split("|")
     .map((group) => group.trim().split(/\s+/).filter(Boolean))
+    .filter((group) => group.length > 0)
+  const queryIsBlank = options.query.trim() === ""
   const filters = options.filters.filter((filter) => filter.value.trim())
   const names = source.key_list.filter((name) => {
     const text = search.get(name) ?? ""
     return (
-      groups.some((group) => group.every((term) => text.includes(term))) &&
+      (queryIsBlank ||
+        groups.some((group) => group.every((term) => text.includes(term)))) &&
       filters.every(
         (filter) =>
           Object.hasOwn(source.properties, filter.property) &&

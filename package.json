@@ -28,6 +28,7 @@
     "generate:contributors": "pnpm --filter @gtmc/web run generate:contributors",
     "generate:glossary": "pnpm --filter @gtmc/web run generate:glossary",
     "generate:manifest": "pnpm --filter @gtmc/web run generate:manifest",
+    "generate:pdf-html": "pnpm --filter @gtmc/web run generate:pdf-html",
     "glossary:init": "git submodule update --init --recursive content/glossary",
     "glossary:status": "git submodule status content/glossary",
     "glossary:update": "git submodule update --remote content/glossary",

@@ -51,6 +51,7 @@ interface DraftEditorInitialData {
   }>
   folders?: string[]
   id?: string
+  etag?: string
   githubPrUrl?: string
   files: DraftFileCollection["files"]
   title: string
@@ -129,6 +130,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     {}
   )
   const repoSnapshotRequestsRef = React.useRef<Record<string, string>>({})
+  const etagRef = React.useRef(initialData?.etag)
   const revisionIdRef = React.useRef<string | undefined>(initialRevisionId)
   const saveQueueRef = React.useRef<Promise<unknown> | null>(null)
   const submissionInFlightRef = React.useRef(false)
@@ -410,30 +412,28 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     setPendingSaveCount((count) => count + 1)
     const previousSave = saveQueueRef.current || Promise.resolve()
     const saveTask = previousSave.then(async () => {
-      const primaryFile = getActiveDraftFile(snapshot.draftCollection)
       const formData = new FormData()
       formData.append("title", snapshot.title)
-      formData.append("activeFileId", snapshot.draftCollection.activeFileId)
-      formData.append("content", primaryFile.content)
       formData.append(
         "draftFiles",
         serializeDraftFilesPayload(snapshot.draftCollection)
       )
-      formData.append("filePath", primaryFile.filePath)
       if (revisionIdRef.current) {
         formData.append("revisionId", revisionIdRef.current)
       }
 
+      if (etagRef.current) formData.append("etag", etagRef.current)
       const result = await saveDraftAction(formData)
       if (!result.success || !result.revisionId) {
-        throw new Error("Failed to save draft")
+        throw new Error(result.error || "Failed to save draft")
       }
 
+      etagRef.current = result.etag
       revisionIdRef.current = result.revisionId
       setLastSavedDraftCollection(snapshot.draftCollection)
       setLastSavedTitle(snapshot.title)
       setRevisionId(result.revisionId)
-      return { revisionId: result.revisionId }
+      return { revisionId: result.revisionId, etag: result.etag }
     })
 
     saveQueueRef.current = saveTask.catch(() => undefined)
@@ -698,7 +698,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
   }
   const handleSubmitDraft = async () => {
     if (
-      isReadOnly ||
+      (isReadOnly && draftStatus !== "PENDING") ||
       submissionInFlightRef.current ||
       isSaving ||
       isUploading
@@ -720,8 +720,14 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     setIsSubmitting(true)
     updateSubmitProgressState("running")
     try {
-      const persistedDraft = await persistDraft()
-      const result = await submitDraftAction(persistedDraft.revisionId)
+      const persistedDraft =
+        draftStatus === "PENDING" && revisionIdRef.current
+          ? { revisionId: revisionIdRef.current, etag: etagRef.current }
+          : await persistDraft()
+      const result = await submitDraftAction(
+        persistedDraft.revisionId,
+        persistedDraft.etag!
+      )
       setDraftStatus(result.status)
       updateSubmitProgressState("success")
       toast.success(t("badgePrOpened"), { duration: 4000 })
@@ -730,7 +736,10 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     } catch (error) {
       console.error(error)
       updateSubmitProgressState("error")
-      toast.error(t("badgeSubmitFailed"))
+      toast.error(
+        error instanceof Error ? error.message : t("badgeSubmitFailed")
+      )
+      router.refresh()
     } finally {
       submissionInFlightRef.current = false
       setIsSubmitting(false)

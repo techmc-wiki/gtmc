@@ -8,7 +8,7 @@ The site is live at <https://www.techmc.wiki>. The infra was provided by Vercel 
 
 - Next.js 16 (App Router, Turbopack) on React 19, TypeScript strict mode
 - Tailwind CSS v4 (tokens in `DESIGN.md` / `app/globals.css`); shadcn/ui primitives in `components/ui/shadcn/`
-- Prisma 7 (Postgres) + NextAuth v5 (GitHub provider); next-intl i18n
+- Private Vercel Blob drafts + NextAuth v5 (GitHub provider, JWT sessions); next-intl i18n
 - Markdown pipeline (remark/rehype, KaTeX, Shiki) over the `content/articles` and `content/glossary` submodules
 - pnpm 12 workspace, Vite+ (`vp` for Oxlint, Oxfmt, Vitest)
 - Go 1.26 for `tools/pdfgen`, the headless-Chromium PDF renderer
@@ -23,7 +23,7 @@ apps/web/       The Next.js site (@gtmc/web) — everything below is relative to
   app/          App Router (locale-scoped [locale] routes, api/)
   actions/      Server actions
   components/   UI components (primitives in components/ui/shadcn/)
-  lib/          Article pipeline, auth, db, search, GitHub helpers
+  lib/          Article pipeline, auth, drafts, search, GitHub helpers
   hooks/        Shared React hooks
   i18n/         next-intl config; catalogs in messages/ (en.json, zh.json)
   types/        Ambient type declarations

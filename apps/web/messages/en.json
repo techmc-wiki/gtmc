@@ -171,7 +171,6 @@
   "Drafts": {
     "articleType": "Article",
     "changesCount": "{count, plural, one {# change} other {# changes}}",
-    "cleanupWarning": "Some uploaded assets could not be cleaned up. Open the draft to review them.",
     "continueDraft": "Continue editing",
     "deleteDraft": "Delete draft",
     "deleteWarning": "This permanently deletes the draft.",
@@ -319,7 +318,8 @@
     "comparisonPending": "Choose a file path and wait for the original file to load before reviewing differences.",
     "hideFiles": "Hide files",
     "showFiles": "Show files",
-    "replaceFileWarning": "The selected file will replace the active file and its contents. To keep both files, cancel and use Add in the file sidebar."
+    "replaceFileWarning": "The selected file will replace the active file and its contents. To keep both files, cancel and use Add in the file sidebar.",
+    "resumeSubmission": "Resume submission"
   },
   "EditorialPolicy": {
     "lastReviewed": "Last reviewed against the source documents: {date}.",
@@ -416,7 +416,8 @@
     "removeCategoryFilter": "Remove category filter {name}",
     "removeQueryFilter": "Remove search filter",
     "searchPlaceholder": "Search...",
-    "searchResultSummary": "{resultCount, plural, =1 {1 term} other {# terms}} of {totalCount}"
+    "searchResultSummary": "{resultCount, plural, =1 {1 term} other {# terms}} of {totalCount}",
+    "resumeSubmission": "Resume submission"
   },
   "Homepage": {
     "appendixHeading": "Appendices",

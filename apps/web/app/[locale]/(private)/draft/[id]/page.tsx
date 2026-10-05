@@ -4,9 +4,9 @@ import { ArrowLeftIcon } from "lucide-react"
 import type { Metadata } from "next"
 import { DraftEditor } from "@/components/editor/draft-editor"
 import { Link } from "@/i18n/navigation"
-import { prisma } from "@/lib/prisma"
+import { readDraft } from "@/lib/drafts/store"
 import { auth } from "@/lib/auth"
-import { decodeStoredDraftFiles } from "@/lib/drafts/files"
+import type { DraftFileCollection } from "@/lib/drafts/files"
 import { notFound, redirect } from "next/navigation"
 import { readFile } from "fs/promises"
 import path from "path"
@@ -18,12 +18,14 @@ function buildDraftEditorData(
     status: string
     githubPrUrl: string | null
   },
-  draftFiles: ReturnType<typeof decodeStoredDraftFiles>,
+  draftFiles: DraftFileCollection,
+  etag: string,
   contributingGuides: Awaited<ReturnType<typeof loadContributingGuides>>
 ) {
   return {
     activeFileId: draftFiles.activeFileId,
     id: draft.id,
+    etag,
     files: draftFiles.files,
     folders: draftFiles.folders,
     title: draft.title,
@@ -53,22 +55,14 @@ export default async function EditDraftPage({
     loadContributingGuides(),
   ])
 
-  const draft = await prisma.revision.findUnique({
-    where: { id },
-  })
-
-  if (!draft || draft.authorId !== session.user.id) {
-    notFound()
-  }
-
-  const draftFiles = decodeStoredDraftFiles({
-    content: draft.content,
-    filePath: draft.filePath,
-  })
+  const record = await readDraft(session.user.id, id)
+  if (!record || record.draft.kind !== "article") notFound()
+  const draft = record.draft
 
   const draftEditorInitialData = buildDraftEditorData(
     draft,
-    draftFiles,
+    draft,
+    record.etag,
     contributingGuides
   )
 
@@ -82,7 +76,7 @@ export default async function EditDraftPage({
         </IconButton>
         <p className="text-tech-main/60 text-sm">{t("articleDraft")}</p>
       </header>
-      <DraftEditor initialData={draftEditorInitialData} />
+      <DraftEditor key={record.etag} initialData={draftEditorInitialData} />
     </div>
   )
 }

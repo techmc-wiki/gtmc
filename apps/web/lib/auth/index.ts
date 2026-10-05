@@ -1,8 +1,10 @@
 import NextAuth from "next-auth"
 import GitHub from "next-auth/providers/github"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { prisma } from "@/lib/prisma"
-import { getOctokit } from "@/lib/github/repos"
+import { getGithubEmailVisibility } from "@/lib/github/user"
+import {
+  DEV_FIXTURE_USER,
+  isDevFixtureAuthEnabled,
+} from "@/lib/auth/dev-fixture-config"
 import { ProxyAgent, setGlobalDispatcher } from "undici"
 
 // Honor configured proxies for NextAuth's undici requests.
@@ -23,7 +25,6 @@ const authSecret =
 
 export const { handlers, auth } = NextAuth({
   secret: authSecret,
-  adapter: PrismaAdapter(prisma),
   providers: [
     GitHub({
       clientId: process.env.GITHUB_ID!,
@@ -31,23 +32,21 @@ export const { handlers, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account, trigger }) {
-      if (user?.id) {
-        token.sub = user.id
+    async jwt({ token, account, profile, trigger }) {
+      if (account?.provider === "github") {
+        token.sub = account.providerAccountId
+        token.githubLogin =
+          typeof profile?.login === "string" ? profile.login : null
+        token.emailVisibility = await getGithubEmailVisibility(
+          account.access_token || ""
+        )
       }
 
-      if (account?.provider === "github" && user?.id) {
-        try {
-          const octokit = getOctokit(account.access_token!)
-          const { data: githubUser } = await octokit.users.getAuthenticated()
-          token.githubLogin = githubUser.login
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { githubLogin: githubUser.login },
-          })
-        } catch {
-          token.githubLogin = null
-        }
+      if (
+        !/^\d+$/.test(token.sub || "") &&
+        !(isDevFixtureAuthEnabled() && token.sub === DEV_FIXTURE_USER.id)
+      ) {
+        return null
       }
 
       if (trigger === "signIn" || !token.lastAuthAt) {
@@ -60,6 +59,7 @@ export const { handlers, auth } = NextAuth({
       if (session?.user) {
         session.user.id = token.sub ?? ""
         session.user.githubLogin = (token.githubLogin as string) ?? null
+        session.user.emailVisibility = token.emailVisibility ?? "private"
         session.lastAuthAt = token.lastAuthAt
       }
       return session

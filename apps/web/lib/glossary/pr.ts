@@ -12,6 +12,7 @@ export interface GlossaryPrInput {
   title: string
   body: string
   branchName: string
+  recoverOnly: boolean
   authorName: string
   authorEmail: string
   token: string
@@ -31,22 +32,53 @@ export async function openGlossaryPullRequest(
     title,
     body,
     branchName,
+    recoverOnly,
     authorName,
     authorEmail,
     token,
   } = input
   const octokit = getOctokit(token)
 
-  // Base the fork branch on upstream main so a lagging fork cannot add reverse
-  // diffs to the pull request.
-  const upstreamHeadSha = await getMainBranchHeadSha(token, GLOSSARY_REPO)
-
-  await octokit.git.createRef({
-    owner: GLOSSARY_FORK_REPO.owner,
-    repo: GLOSSARY_FORK_REPO.name,
-    ref: `refs/heads/${branchName}`,
-    sha: upstreamHeadSha,
+  const { data: existingPrs } = await octokit.pulls.list({
+    owner: GLOSSARY_REPO.owner,
+    repo: GLOSSARY_REPO.name,
+    head: `${GLOSSARY_FORK_REPO.owner}:${branchName}`,
+    state: "all",
   })
+  if (existingPrs[0]) {
+    return {
+      prUrl: existingPrs[0].html_url,
+      prNumber: existingPrs[0].number,
+      branchName,
+    }
+  }
+  if (recoverOnly) {
+    throw new Error(
+      "Submission is still in progress. Retry shortly; interrupted submissions can be resumed after 15 minutes."
+    )
+  }
+  const upstreamHeadSha = await getMainBranchHeadSha(token, GLOSSARY_REPO)
+  try {
+    await octokit.git.getRef({
+      owner: GLOSSARY_FORK_REPO.owner,
+      repo: GLOSSARY_FORK_REPO.name,
+      ref: `heads/${branchName}`,
+    })
+  } catch (error) {
+    if (
+      !(error instanceof Error) ||
+      !("status" in error) ||
+      error.status !== 404
+    ) {
+      throw error
+    }
+    await octokit.git.createRef({
+      owner: GLOSSARY_FORK_REPO.owner,
+      repo: GLOSSARY_FORK_REPO.name,
+      ref: `refs/heads/${branchName}`,
+      sha: upstreamHeadSha,
+    })
+  }
 
   await upsertFileOnBranch({
     authorEmail,

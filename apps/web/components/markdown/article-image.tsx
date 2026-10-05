@@ -54,7 +54,9 @@ export function ArticleImage({ src, alt }: ArticleImageProps) {
           onLoad={handleLoad}
           onError={handleError}
           className="border-tech-main/30 bg-tech-main/5 border object-contain p-1 shadow-sm"
-          unoptimized={src.includes("/api/assets")}
+          unoptimized={
+            src.includes("/api/assets") || src.startsWith("/api/draft-assets/")
+          }
         />
       </div>
     </div>

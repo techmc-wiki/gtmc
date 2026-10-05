@@ -28,6 +28,7 @@ interface DraftEditorHeaderAction {
 interface DraftEditorHeaderProps {
   onOpenGuide: () => void
   isReadOnly: boolean
+  canResume: boolean
   onTitleChange: (title: string) => void
   save: DraftEditorHeaderAction
   status: DraftEditorStatus
@@ -38,6 +39,7 @@ interface DraftEditorHeaderProps {
 export function DraftEditorHeader({
   onOpenGuide,
   isReadOnly,
+  canResume,
   onTitleChange,
   save,
   status,
@@ -111,6 +113,13 @@ export function DraftEditorHeader({
               <ArrowRightIcon aria-hidden className="size-4" />
             </Button>
           </>
+        ) : canResume ? (
+          <Button
+            onClick={submit.onClick}
+            disabled={submit.disabled}
+            aria-busy={submit.busy}>
+            {t("resumeSubmission")}
+          </Button>
         ) : (
           <span className="text-tech-main text-sm">{t("readOnlyDraft")}</span>
         )}

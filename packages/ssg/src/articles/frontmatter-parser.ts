@@ -35,91 +35,49 @@ export interface TranslationReadmeFrontMatter {
 
 type BannerFrontMatter = { src: string; alt?: string }
 
-const SOURCE_ALLOWED_KEYS = new Set([
-  "skip",
-  "slug",
-  "title",
-  "description",
-  "index",
-  "is-advanced",
-  "revising",
-  "appendix",
-  "banner",
-])
-
-const TRANSLATION_ALLOWED_KEYS = new Set([
-  "skip",
-  "translates",
-  "translated-from-revision",
-  "title",
-  "description",
-  "banner",
-])
-
-const SOURCE_README_ALLOWED_KEYS = new Set([
-  "skip",
-  "slug",
-  "chapter-title",
-  "intro-title",
-  "index",
-  "appendix",
-  "revising",
-])
-
-const TRANSLATION_README_ALLOWED_KEYS = new Set([
-  "skip",
-  "translates",
-  "translated-from-revision",
-  "chapter-title",
-  "intro-title",
-])
-
-function checkAdditionalProperties(
-  data: Record<string, unknown>,
-  allowedKeys: Set<string>
-): void {
-  for (const key of Object.keys(data)) {
-    if (!allowedKeys.has(key)) {
-      throw new Error(`unknown key '${key}' not allowed`)
-    }
-  }
-}
-
-function parseRequiredString(
-  data: Record<string, unknown>,
-  key: string
-): string {
-  const value = data[key]
-  if (typeof value !== "string") {
-    throw new Error(`missing required key '${key}'`)
-  }
-  return value
-}
-
-function parseRequiredNonEmptyString(
-  data: Record<string, unknown>,
-  key: string
-): string {
-  const value = parseRequiredString(data, key)
-  if (value === "") {
-    throw new Error(`missing required key '${key}'`)
-  }
-  return value
-}
-
-function parseOptionalString(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined
+const ALLOWED_KEYS: Record<string, readonly string[]> = {
+  source: [
+    "skip",
+    "slug",
+    "title",
+    "description",
+    "index",
+    "is-advanced",
+    "revising",
+    "appendix",
+    "banner",
+  ],
+  translation: [
+    "skip",
+    "translates",
+    "translated-from-revision",
+    "title",
+    "description",
+    "banner",
+  ],
+  sourceReadme: [
+    "skip",
+    "slug",
+    "chapter-title",
+    "intro-title",
+    "index",
+    "appendix",
+    "revising",
+  ],
+  translationReadme: [
+    "skip",
+    "translates",
+    "translated-from-revision",
+    "chapter-title",
+    "intro-title",
+  ],
 }
 
 function parseIndex(value: unknown): number {
-  if (typeof value === "number" && Number.isInteger(value)) {
-    return value
-  }
+  if (typeof value === "number" && Number.isInteger(value)) return value
   if (typeof value === "string") {
     const parsed = parseInt(value, 10)
-    if (!isNaN(parsed)) {
-      return parsed
-    }
+    if (!isNaN(parsed)) return parsed
   }
   return -1
 }
@@ -134,23 +92,38 @@ function parseBanner(value: unknown): BannerFrontMatter | undefined {
   }
 }
 
-function parseFrontMatterData(content: string): Record<string, unknown> {
+function parseFrontMatter(content: string, variant: keyof typeof ALLOWED_KEYS) {
   const { data } = matter(content)
-  return data as Record<string, unknown>
+  const raw = data as Record<string, unknown>
+  const allowed = ALLOWED_KEYS[variant]
+  for (const key of Object.keys(raw)) {
+    if (!allowed.includes(key)) {
+      throw new Error(`unknown key '${key}' not allowed`)
+    }
+  }
+  return raw
 }
 
 export function shouldSkipArticleFile(content: string): boolean {
-  return parseFrontMatterData(content).skip === true
+  const { data } = matter(content)
+  return (data as Record<string, unknown>).skip === true
 }
 
 export function parseSourceFrontMatter(content: string): SourceFrontMatter {
-  const raw = parseFrontMatterData(content)
-  checkAdditionalProperties(raw, SOURCE_ALLOWED_KEYS)
-
+  const raw = parseFrontMatter(content, "source")
+  const slug = raw.slug
+  const title = raw.title
+  if (typeof slug !== "string" || slug === "") {
+    throw new Error(`missing required key 'slug'`)
+  }
+  if (typeof title !== "string" || title === "") {
+    throw new Error(`missing required key 'title'`)
+  }
   return {
-    slug: parseRequiredNonEmptyString(raw, "slug"),
-    title: parseRequiredNonEmptyString(raw, "title"),
-    description: parseOptionalString(raw.description),
+    slug,
+    title,
+    description:
+      typeof raw.description === "string" ? raw.description : undefined,
     index: parseIndex(raw.index),
     "is-advanced": raw["is-advanced"] === true ? true : undefined,
     revising: raw.revising === true ? true : undefined,
@@ -162,13 +135,16 @@ export function parseSourceFrontMatter(content: string): SourceFrontMatter {
 export function parseTranslationFrontMatter(
   content: string
 ): TranslationFrontMatter {
-  const raw = parseFrontMatterData(content)
-  checkAdditionalProperties(raw, TRANSLATION_ALLOWED_KEYS)
-
+  const raw = parseFrontMatter(content, "translation")
+  const translates = raw.translates
+  if (typeof translates !== "string" || translates === "") {
+    throw new Error(`missing required key 'translates'`)
+  }
   return {
-    translates: parseRequiredNonEmptyString(raw, "translates"),
-    title: parseOptionalString(raw.title),
-    description: parseOptionalString(raw.description),
+    translates,
+    title: typeof raw.title === "string" ? raw.title : undefined,
+    description:
+      typeof raw.description === "string" ? raw.description : undefined,
     banner: parseBanner(raw.banner),
   }
 }
@@ -176,13 +152,20 @@ export function parseTranslationFrontMatter(
 export function parseSourceReadmeFrontMatter(
   content: string
 ): SourceReadmeFrontMatter {
-  const raw = parseFrontMatterData(content)
-  checkAdditionalProperties(raw, SOURCE_README_ALLOWED_KEYS)
-
+  const raw = parseFrontMatter(content, "sourceReadme")
+  const slug = raw.slug
+  const chapterTitle = raw["chapter-title"]
+  if (typeof slug !== "string") {
+    throw new Error(`missing required key 'slug'`)
+  }
+  if (typeof chapterTitle !== "string" || chapterTitle === "") {
+    throw new Error(`missing required key 'chapter-title'`)
+  }
   return {
-    slug: parseRequiredString(raw, "slug"),
-    "chapter-title": parseRequiredNonEmptyString(raw, "chapter-title"),
-    "intro-title": parseOptionalString(raw["intro-title"]),
+    slug,
+    "chapter-title": chapterTitle,
+    "intro-title":
+      typeof raw["intro-title"] === "string" ? raw["intro-title"] : undefined,
     index: parseIndex(raw.index),
     appendix: raw.appendix === true ? true : undefined,
     revising: raw.revising === true ? true : undefined,
@@ -192,12 +175,19 @@ export function parseSourceReadmeFrontMatter(
 export function parseTranslationReadmeFrontMatter(
   content: string
 ): TranslationReadmeFrontMatter {
-  const raw = parseFrontMatterData(content)
-  checkAdditionalProperties(raw, TRANSLATION_README_ALLOWED_KEYS)
-
+  const raw = parseFrontMatter(content, "translationReadme")
+  const translates = raw.translates
+  const chapterTitle = raw["chapter-title"]
+  if (typeof translates !== "string" || translates === "") {
+    throw new Error(`missing required key 'translates'`)
+  }
+  if (typeof chapterTitle !== "string" || chapterTitle === "") {
+    throw new Error(`missing required key 'chapter-title'`)
+  }
   return {
-    translates: parseRequiredNonEmptyString(raw, "translates"),
-    "chapter-title": parseRequiredNonEmptyString(raw, "chapter-title"),
-    "intro-title": parseOptionalString(raw["intro-title"]),
+    translates,
+    "chapter-title": chapterTitle,
+    "intro-title":
+      typeof raw["intro-title"] === "string" ? raw["intro-title"] : undefined,
   }
 }

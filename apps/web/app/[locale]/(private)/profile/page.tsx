@@ -59,8 +59,6 @@ export default async function ProfilePage({
     />
   )
 
-  const roleValue = <RoleValue role={user.role} />
-
   return (
     <div className="page-container mt-4 sm:mt-8">
       <div className="border-tech-main/40 border-b-2 pb-4">
@@ -141,15 +139,6 @@ export default async function ProfilePage({
             </FormField>
           </div>
 
-          <div className="border-tech-main/30 flex flex-col items-start justify-between gap-3 border-b py-3 sm:flex-row sm:items-center sm:gap-4">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <span className="text-muted-foreground text-sm sm:w-24">
-                {t("assignedRole")}
-              </span>
-              <span className="wrap-break-word">{roleValue}</span>
-            </div>
-          </div>
-
           <div className="flex items-center justify-between gap-4">
             <SignOutButton />
             <Button type="submit">{t("saveButton")}</Button>
@@ -176,14 +165,6 @@ function EmailLabel({
       {label}
       <Badge variant="neutral">{readOnlyBadge}</Badge>
       {isPrivate && <Badge variant="pending">{privateBadge}</Badge>}
-    </span>
-  )
-}
-
-function RoleValue({ role }: { role: string }) {
-  return (
-    <span className="text-tech-main-dark font-mono text-xs font-bold tracking-widest uppercase sm:text-sm">
-      {role}
     </span>
   )
 }

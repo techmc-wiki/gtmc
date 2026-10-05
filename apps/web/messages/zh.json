@@ -511,7 +511,6 @@
     "websiteLabel": "网站"
   },
   "Profile": {
-    "assignedRole": "分配角色：",
     "avatarUrlHint": "必填：直接图片链接（.PNG/.JPG/.GIF）",
     "avatarUrlLabel": "头像链接",
     "emailLabel": "邮箱",

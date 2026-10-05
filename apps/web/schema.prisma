@@ -16,7 +16,6 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  role          String    @default("USER")
   githubPat     String?
   githubLogin   String?
 

@@ -10,7 +10,6 @@ type AuthenticatedSession = Session & {
 
 type AuthContext = {
   id: string
-  role: string
   githubPat: string | null
 }
 
@@ -19,14 +18,13 @@ export async function getCurrentUserAuthContext(
 ): Promise<AuthContext> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, role: true, githubPat: true },
+    select: { id: true, githubPat: true },
   })
   if (!user) {
     throw new Error("User not found or has been deleted")
   }
   return {
     id: user.id,
-    role: user.role,
     githubPat: user.githubPat ?? null,
   }
 }

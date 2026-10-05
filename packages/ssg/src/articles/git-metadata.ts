@@ -33,17 +33,7 @@ type GitPathCommitRange = {
 
 const MILLISECONDS_PER_DAY = 86_400_000
 
-const exclusionsCache = new Map<string, string[]>()
-const aliasesCache = new Map<string, Map<string, string>>()
-const authorsCache = new Map<string, { author: string; coAuthors: string[] }>()
-const datesCache = new Map<
-  string,
-  { created: string | null; lastmod: string | null }
->()
-
-function getCacheKey(cwd: string, relPath: string, type: string): string {
-  return `${cwd}:${relPath}:${type}`
-}
+const cache = new Map<string, unknown>()
 
 /**
  * Returns configured Git usernames in lowercase without resolving aliases.
@@ -52,8 +42,8 @@ function getCacheKey(cwd: string, relPath: string, type: string): string {
 export async function loadArticleEditExclusions(
   configDir: string
 ): Promise<string[]> {
-  const cacheKey = `config:${configDir}:article-edit-exclusions`
-  const cached = exclusionsCache.get(cacheKey)
+  const key = `exclusions:${configDir}`
+  const cached = cache.get(key) as string[] | undefined
   if (cached) return cached
 
   try {
@@ -61,12 +51,13 @@ export async function loadArticleEditExclusions(
       join(configDir, "article-edit-exclusions.yml"),
       "utf-8"
     )
-    const exclusions = (yamlLoad(content) as string[]) || []
-    const lowercased = exclusions.map((identity) => identity.toLowerCase())
-    exclusionsCache.set(cacheKey, lowercased)
-    return lowercased
+    const exclusions = ((yamlLoad(content) as string[]) || []).map((id) =>
+      id.toLowerCase()
+    )
+    cache.set(key, exclusions)
+    return exclusions
   } catch {
-    exclusionsCache.set(cacheKey, [])
+    cache.set(key, [])
     return []
   }
 }
@@ -78,41 +69,36 @@ export async function loadArticleEditExclusions(
 export async function loadAuthorAliases(
   configDir: string
 ): Promise<Map<string, string>> {
-  const cacheKey = `config:${configDir}:aliases`
-  const cached = aliasesCache.get(cacheKey)
+  const key = `aliases:${configDir}`
+  const cached = cache.get(key) as Map<string, string> | undefined
   if (cached) return cached
 
   const aliasMap = new Map<string, string>()
-
-  const mergeEntries = (
-    entries: Record<string, string[]> | null | undefined
-  ): void => {
+  const merge = (entries: Record<string, string[]> | null | undefined) => {
     if (!entries) return
     for (const [canonical, aliasList] of Object.entries(entries)) {
       aliasMap.set(canonical, canonical)
-      for (const alias of aliasList) {
-        aliasMap.set(alias, canonical)
-      }
+      for (const alias of aliasList) aliasMap.set(alias, canonical)
     }
   }
 
   try {
-    const autoContent = await readFile(
+    const content = await readFile(
       join(configDir, "authors-alias.yml"),
       "utf-8"
     )
-    mergeEntries(yamlLoad(autoContent) as Record<string, string[]> | null)
+    merge(yamlLoad(content) as Record<string, string[]> | null)
   } catch {}
 
   try {
-    const overrideContent = await readFile(
+    const content = await readFile(
       join(configDir, "author-alias-overrides.yml"),
       "utf-8"
     )
-    mergeEntries(yamlLoad(overrideContent) as Record<string, string[]> | null)
+    merge(yamlLoad(content) as Record<string, string[]> | null)
   } catch {}
 
-  aliasesCache.set(cacheKey, aliasMap)
+  cache.set(key, aliasMap)
   return aliasMap
 }
 
@@ -122,8 +108,10 @@ export async function getArticleAuthors(
   excludedEditors: string[],
   aliases: Map<string, string>
 ): Promise<{ author: string; coAuthors: string[] }> {
-  const cacheKey = getCacheKey(repoCwd, relPath, "authors")
-  const cached = authorsCache.get(cacheKey)
+  const key = `authors:${repoCwd}:${relPath}`
+  const cached = cache.get(key) as
+    | { author: string; coAuthors: string[] }
+    | undefined
   if (cached) return cached
 
   try {
@@ -139,177 +127,107 @@ export async function getArticleAuthors(
       { cwd: repoCwd, encoding: "utf-8" }
     )
 
-    const commitBlocks = stdout.trim().split("---COMMIT---")
-    const commits: Commit[] = []
-
-    for (const block of commitBlocks) {
-      const trimmed = block.trim()
-      if (!trimmed) continue
-
-      const parts = trimmed.split("\x00", 3)
-      if (parts.length < 3) continue
-
-      const author = parts[0].trim()
-      const committer = parts[1].trim()
-      const body = parts[2].trim()
-
-      const coAuthors: string[] = []
-      for (const line of body.split("\n")) {
-        if (line.trim().startsWith("Co-authored-by:")) {
-          let coAuthorRaw = line.replace("Co-authored-by:", "").trim()
-          if (coAuthorRaw.includes("<")) {
-            coAuthorRaw = coAuthorRaw.split("<")[0].trim()
-          }
-          if (coAuthorRaw) {
-            coAuthors.push(coAuthorRaw)
-          }
+    const commits: Commit[] = stdout
+      .trim()
+      .split("---COMMIT---")
+      .filter(Boolean)
+      .map((block) => {
+        const parts = block.trim().split("\x00", 3)
+        if (parts.length < 3) return null
+        const coAuthors = parts[2]
+          .split("\n")
+          .filter((line) => line.trim().startsWith("Co-authored-by:"))
+          .map((line) => {
+            let name = line.replace("Co-authored-by:", "").trim()
+            if (name.includes("<")) name = name.split("<")[0].trim()
+            return name
+          })
+          .filter(Boolean)
+        return {
+          author: parts[0].trim(),
+          committer: parts[1].trim(),
+          coAuthors,
         }
-      }
-
-      commits.push({ author, committer, coAuthors })
-    }
+      })
+      .filter((c): c is Commit => c !== null)
 
     if (commits.length === 0) {
       const result = { author: "", coAuthors: [] }
-      authorsCache.set(cacheKey, result)
+      cache.set(key, result)
       return result
     }
 
-    const allCoauthorsSet = new Set<string>()
-    for (const commit of commits) {
-      for (const coauthor of commit.coAuthors) {
-        allCoauthorsSet.add(coauthor)
-      }
-    }
-
-    // Attribution exclusions must cover raw Git identities and their canonical aliases.
-    const excludedEditorsLower = new Set<string>()
-    for (const editor of excludedEditors) {
-      excludedEditorsLower.add(editor.toLowerCase())
-      const resolved = aliases.get(editor)
-      if (resolved) {
-        excludedEditorsLower.add(resolved.toLowerCase())
-      }
-    }
-    const isExcludedEditor = (name: string) => {
-      const lower = name.toLowerCase()
-      if (excludedEditorsLower.has(lower)) return true
-      const resolved = aliases.get(name)
-      return (
-        resolved !== undefined &&
-        excludedEditorsLower.has(resolved.toLowerCase())
-      )
-    }
     const resolve = (name: string) => aliases.get(name) || name
-
-    const firstCommit = commits[commits.length - 1]
-    const firstAuthor = resolve(firstCommit.author)
-
-    const uniqueAuthorsRaw: string[] = []
-    const seen = new Set<string>()
-    for (const commit of commits) {
-      if (!seen.has(commit.author)) {
-        seen.add(commit.author)
-        uniqueAuthorsRaw.push(commit.author)
-      }
-    }
-
-    const seenResolved = new Set<string>()
-    const uniqueAuthors: string[] = []
-    for (const authorRaw of uniqueAuthorsRaw) {
-      const resolved = resolve(authorRaw)
-      if (!seenResolved.has(resolved)) {
-        seenResolved.add(resolved)
-        uniqueAuthors.push(resolved)
-      }
-    }
-
-    const allCoauthorsResolved: string[] = []
-    const seenCoauthors = new Set<string>()
-    for (const coauthorRaw of allCoauthorsSet) {
-      const resolved = resolve(coauthorRaw)
-      if (!seenCoauthors.has(resolved)) {
-        seenCoauthors.add(resolved)
-        allCoauthorsResolved.push(resolved)
-      }
-    }
-
-    const attributedAuthors = uniqueAuthors.filter((a) => !isExcludedEditor(a))
-    const attributedCoauthors = allCoauthorsResolved.filter(
-      (a) => !isExcludedEditor(a)
+    const excludedLower = new Set(
+      excludedEditors.flatMap((e) => [
+        e.toLowerCase(),
+        resolve(e).toLowerCase(),
+      ])
     )
+    const isExcluded = (name: string) => {
+      const lower = name.toLowerCase()
+      const resolvedLower = resolve(name).toLowerCase()
+      return excludedLower.has(lower) || excludedLower.has(resolvedLower)
+    }
 
-    let result: { author: string; coAuthors: string[] }
+    const seenAuthors = new Map<string, string>()
+    for (const c of commits) {
+      const resolved = resolve(c.author)
+      if (!seenAuthors.has(resolved)) seenAuthors.set(resolved, c.author)
+    }
 
-    if (isExcludedEditor(firstAuthor)) {
-      if (allCoauthorsResolved.length > 0) {
-        const firstAuthorNew =
-          allCoauthorsResolved[allCoauthorsResolved.length - 1]
-        const coAuthorsList = allCoauthorsResolved.filter(
-          (a) => a !== firstAuthorNew
-        )
-        const coAuthorsSet = new Set(coAuthorsList)
-        for (const a of attributedAuthors) {
-          if (a !== firstAuthorNew && !coAuthorsSet.has(a)) {
-            coAuthorsSet.add(a)
-            coAuthorsList.push(a)
-          }
-        }
-
-        result = { author: firstAuthorNew, coAuthors: coAuthorsList }
-      } else {
-        if (attributedAuthors.length > 0) {
-          const firstAuthorNew = attributedAuthors[0]
-          const coAuthorsList = attributedAuthors.filter(
-            (a) => a !== firstAuthorNew
-          )
-          result = { author: firstAuthorNew, coAuthors: coAuthorsList }
-        } else {
-          const firstAuthorNew =
-            uniqueAuthors.length > 0
-              ? uniqueAuthors[uniqueAuthors.length - 1]
-              : ""
-          result = { author: firstAuthorNew, coAuthors: [] }
-        }
-      }
-    } else {
-      if (attributedAuthors.length > 0) {
-        const firstAuthorNew = attributedAuthors[attributedAuthors.length - 1]
-        const coAuthorsList = attributedAuthors.filter(
-          (a) => a !== firstAuthorNew
-        )
-        const coAuthorsSet = new Set(coAuthorsList)
-        for (const a of attributedCoauthors) {
-          if (!coAuthorsSet.has(a)) {
-            coAuthorsSet.add(a)
-            coAuthorsList.push(a)
-          }
-        }
-
-        result = { author: firstAuthorNew, coAuthors: coAuthorsList }
-      } else {
-        if (attributedCoauthors.length > 0) {
-          const firstAuthorNew =
-            attributedCoauthors[attributedCoauthors.length - 1]
-          const coAuthorsList = attributedCoauthors.filter(
-            (a) => a !== firstAuthorNew
-          )
-          result = { author: firstAuthorNew, coAuthors: coAuthorsList }
-        } else {
-          const firstAuthorNew =
-            uniqueAuthors.length > 0
-              ? uniqueAuthors[uniqueAuthors.length - 1]
-              : ""
-          result = { author: firstAuthorNew, coAuthors: [] }
-        }
+    const seenCoauthors = new Map<string, string>()
+    for (const c of commits) {
+      for (const co of c.coAuthors) {
+        const resolved = resolve(co)
+        if (!seenCoauthors.has(resolved)) seenCoauthors.set(resolved, co)
       }
     }
 
-    authorsCache.set(cacheKey, result)
+    const authors = [...seenAuthors.keys()]
+    const coauthors = [...seenCoauthors.keys()]
+    const firstCommitAuthor = resolve(commits[commits.length - 1].author)
+
+    const attributedAuthors = authors.filter((a) => !isExcluded(a))
+    const attributedCoauthors = coauthors.filter((a) => !isExcluded(a))
+
+    let primary: string
+    let rest: string[]
+
+    if (isExcluded(firstCommitAuthor)) {
+      if (coauthors.length > 0) {
+        primary = coauthors.at(-1) ?? ""
+        rest = coauthors.filter((a) => a !== primary)
+        for (const a of attributedAuthors) {
+          if (a !== primary && !rest.includes(a)) rest.push(a)
+        }
+      } else if (attributedAuthors.length > 0) {
+        primary = attributedAuthors[0]
+        rest = attributedAuthors.filter((a) => a !== primary)
+      } else {
+        primary = authors.at(-1) ?? ""
+        rest = []
+      }
+    } else if (attributedAuthors.length > 0) {
+      primary = attributedAuthors.at(-1) ?? ""
+      rest = attributedAuthors.filter((a) => a !== primary)
+      for (const a of attributedCoauthors) {
+        if (!rest.includes(a)) rest.push(a)
+      }
+    } else if (attributedCoauthors.length > 0) {
+      primary = attributedCoauthors.at(-1) ?? ""
+      rest = attributedCoauthors.filter((a) => a !== primary)
+    } else {
+      primary = authors.at(-1) ?? ""
+      rest = []
+    }
+
+    const result = { author: primary, coAuthors: rest }
+    cache.set(key, result)
     return result
   } catch {
     const result = { author: "", coAuthors: [] }
-    authorsCache.set(cacheKey, result)
+    cache.set(key, result)
     return result
   }
 }
@@ -319,8 +237,10 @@ export async function getArticleDates(
   relPath: string,
   excludedEditors: string[]
 ): Promise<{ created: string | null; lastmod: string | null }> {
-  const cacheKey = getCacheKey(repoCwd, relPath, "dates")
-  const cached = datesCache.get(cacheKey)
+  const key = `dates:${repoCwd}:${relPath}`
+  const cached = cache.get(key) as
+    | { created: string | null; lastmod: string | null }
+    | undefined
   if (cached) return cached
 
   try {
@@ -330,42 +250,28 @@ export async function getArticleDates(
       { cwd: repoCwd, encoding: "utf-8" }
     )
 
-    const lines = stdout
-      .trim()
-      .split("\n")
-      .filter((l) => l.trim())
+    const lines = stdout.trim().split("\n").filter(Boolean)
     const dates: string[] = []
     const allDates: string[] = []
-    const excludedEditorsSet = new Set(excludedEditors)
 
     for (const line of lines) {
-      if (!line.includes("\t")) continue
       const [date, author] = line.split("\t", 2)
       allDates.push(date)
-      if (!excludedEditorsSet.has(author)) {
-        dates.push(date)
-      }
+      if (!excludedEditors.includes(author)) dates.push(date)
     }
 
-    let result: { created: string | null; lastmod: string | null }
-    if (dates.length === 0) {
-      if (allDates.length > 0) {
-        result = {
-          created: allDates[allDates.length - 1],
-          lastmod: allDates[0],
-        }
-      } else {
-        result = { created: null, lastmod: null }
-      }
-    } else {
-      result = { created: dates[dates.length - 1], lastmod: dates[0] }
-    }
+    const result =
+      dates.length > 0
+        ? { created: dates[dates.length - 1], lastmod: dates[0] }
+        : allDates.length > 0
+          ? { created: allDates[allDates.length - 1], lastmod: allDates[0] }
+          : { created: null, lastmod: null }
 
-    datesCache.set(cacheKey, result)
+    cache.set(key, result)
     return result
   } catch {
     const result = { created: null, lastmod: null }
-    datesCache.set(cacheKey, result)
+    cache.set(key, result)
     return result
   }
 }

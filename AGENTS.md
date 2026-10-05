@@ -7,7 +7,7 @@ Agent context for the **GTMC website** (Graduate Texts in Minecraft), live at <h
 - Next.js 16 (App Router, Turbopack) on React 19, TypeScript strict mode
 - Tailwind CSS v4 (`DESIGN.md` / `app/globals.css`); shadcn/ui primitives (`components/ui/shadcn/`)
 - Private Vercel Blob drafts + NextAuth v5 (GitHub provider, JWT sessions); next-intl i18n
-- Markdown pipeline (remark/rehype, KaTeX, Shiki) over `content/articles` and `content/glossary`
+- Markdown pipeline (remark/rehype, KaTeX, Shiki) over `content/articles` and `content/glossary`; Minecraft property data from `content/properties`
 - pnpm 12 workspace, Vite+ (`vp` for Oxlint, Oxfmt, Vitest)
 - Typst 0.15.1 for book PDFs in `tools/pdf` (`brew install typst`)
 
@@ -25,10 +25,10 @@ apps/web/       Next.js site (@gtmc/web)
   proxy.ts      Auth + i18n middleware
 tools/pdf/      Typst book template and PDF build (see tools/pdf/README.md)
 packages/ssg/   Article generation and shared Markdown transforms (@gtmc/ssg)
-content/        Git submodules (articles, glossary)
+content/        Git submodules (articles, glossary, properties)
 ```
 
-`content/articles` and `content/glossary` are git submodules pinned at the workspace root, not under `apps/web`. Code that needs them must use `lib/workspace-paths.ts` (`getWorkspaceRoot()` / `workspacePath(...)`), never `process.cwd()`.
+`content/articles`, `content/glossary`, and `content/properties` are git submodules pinned at the workspace root, not under `apps/web`. Code that needs them must use `lib/workspace-paths.ts` (`getWorkspaceRoot()` / `workspacePath(...)`), never `process.cwd()`.
 
 ## Setup & Commands
 

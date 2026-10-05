@@ -35,13 +35,8 @@ import type {
   PropertyEntry,
   PropertyInfo,
 } from "@/lib/properties/types"
+import { propertyFetcher } from "@/lib/properties/fetcher"
 import { PropertyValueView } from "./property-value"
-
-export async function propertyFetcher<T>(url: string): Promise<T> {
-  const response = await fetch(url)
-  if (!response.ok) throw new Error("Property lookup failed")
-  return response.json() as Promise<T>
-}
 
 function DetailContent({
   dataset,

@@ -16,7 +16,7 @@
     "check": "vp check && tsc --noEmit",
     "db:migrate:deploy": "prisma migrate deploy",
     "dev": "next dev",
-    "doctor": "npx react-doctor@latest",
+    "doctor": "pnpx react-doctor@latest",
     "fmt:fix": "vp fmt --write",
     "fmt": "vp fmt --check",
     "generate:aliases": "tsx scripts/generate-author-aliases.ts",
@@ -110,7 +110,6 @@
     "picocolors": "^1.1.1",
     "pinyin-pro": "^3.29.4",
     "prisma": "7.10.0",
-    "react-doctor": "^0.9.14",
     "rehype-stringify": "^10.0.1",
     "remark-rehype": "^11.1.2",
     "tailwindcss": "^4.3.3"

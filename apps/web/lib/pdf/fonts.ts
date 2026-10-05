@@ -7,14 +7,14 @@
 
 import fs from "node:fs"
 import path from "node:path"
-
+import { workspacePath } from "@/lib/workspace-paths"
 import { PDF_FONT_STYLESHEET_URL } from "./theme"
 
 /** Chrome UA so Google Fonts serves woff2 (the format Chromium can load). */
 const CHROME_UA =
   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 
-const FONTS_DIR = path.join(process.cwd(), "data", "pdf-fonts")
+const FONTS_DIR = workspacePath("tools", "pdfgen", "fonts")
 const CSS_FILENAME = "fonts.css"
 const WOFF2_DIRNAME = "woff2"
 

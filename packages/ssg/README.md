@@ -15,7 +15,7 @@ The web app's `scripts/generate-article-{manifest,content}.ts` and
 `scripts/generate-pdf-html.ts` supply their paths and settings.
 `pnpm generate:manifest` and `pnpm generate:content` write to
 `apps/web/data` and `apps/web/public/article-assets`; `pnpm generate:pdf-html`
-reads those artifacts and writes to `apps/web/data/pdf-html`. Runtime artifact
+reads those artifacts and writes to `tools/pdfgen/html`. Runtime artifact
 loading, Next.js caching, React Markdown components, and overall build
 orchestration stay in `apps/web`.
 

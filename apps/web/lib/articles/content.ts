@@ -1,25 +1,9 @@
+import { artifactFilename, type ArticleContentArtifact } from "@gtmc/ssg/articles/content"
 import fs from "fs"
 import path from "path"
 import { cacheLife, cacheTag } from "next/cache"
 
-import type { CodeReference } from "@/lib/markdown/code-provenance"
-import type { ArticleLocale, TranslationStatusDetail } from "./manifest"
-
-export interface ArticleContentArtifact {
-  content: string
-  frontmatter: Record<string, unknown>
-  codeReferences: CodeReference[]
-  translationStatus?: TranslationStatusDetail
-}
-
-/**
- * Maps a slug to the stable, flat filename used by generated article artifacts.
- * Percent escapes are represented with `~` so `/` cannot create directories and
- * persisted artifact paths remain compatible.
- */
-export function artifactFilename(slug: string): string {
-  return encodeURIComponent(slug).replaceAll('%', "~")
-}
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 
 function parseArticleContentArtifact(
   raw: string,

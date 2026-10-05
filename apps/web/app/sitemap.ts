@@ -4,10 +4,8 @@ import { cacheLife } from "next/cache"
 import { getSiteUrl } from "@/lib/site-url"
 import { encodeSlug } from "@/lib/articles/slug-resolver"
 import { getProfileHandles } from "@/lib/articles/person-resolver"
-import {
-  loadArticleManifest,
-  type ArticleLocale,
-} from "@/lib/articles/manifest"
+import { loadArticleManifest } from "@/lib/articles/manifest"
+import { type ArticleLocale } from "@gtmc/ssg/articles/types"
 import { loadGlossaryManifest } from "@/lib/glossary/manifest"
 
 const SITE_LOCALES: ArticleLocale[] = ["zh", "en"]

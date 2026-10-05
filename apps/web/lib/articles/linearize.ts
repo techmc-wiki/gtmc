@@ -2,8 +2,8 @@ import fs from "fs"
 import path from "path"
 
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
-import type { ArticleLocale } from "@/lib/articles/manifest"
-import { artifactFilename } from "@/lib/articles/content"
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
+import { artifactFilename } from "@gtmc/ssg/articles/content"
 import { resolveLocalArticlePath } from "@/lib/articles/fs"
 
 export interface LinearizedFolder {

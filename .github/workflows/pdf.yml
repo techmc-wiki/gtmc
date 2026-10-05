@@ -47,6 +47,7 @@ jobs:
 
           pipeline_paths=(
             tools/pdfgen
+            packages/ssg
             apps/web/scripts/build-content.ts
             apps/web/scripts/generate-article-content.ts
             apps/web/scripts/generate-pdf.ts

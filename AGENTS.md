@@ -32,7 +32,7 @@ apps/web/       The Next.js site (@gtmc/web) — everything below is relative to
   scripts/      Manifest, content, and PDF generators
   proxy.ts      Auth + i18n middleware
 tools/pdfgen/   Go PDF renderer (CLI; not a pnpm package)
-packages/       Shared libraries (currently empty)
+packages/ssg/   Article generation and shared Markdown transforms (@gtmc/ssg)
 content/         Content submodules
   articles/      Article content submodule
   glossary/      Glossary data submodule

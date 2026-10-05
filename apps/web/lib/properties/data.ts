@@ -72,6 +72,7 @@ function plainText(value: string): string {
           : match
       }
     )
+    .replaceAll(/[<>]/g, "")
     .trim()
 }
 function normalize(value: PropertyValue): PropertyValue {

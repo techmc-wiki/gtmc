@@ -15,7 +15,7 @@ import {
   linearizeArticles,
 } from "@/lib/articles/linearize"
 import type { LinearizedArticle } from "@/lib/articles/linearize"
-import { artifactFilename } from "@/lib/articles/content"
+import { artifactFilename } from "@gtmc/ssg/articles/content"
 import {
   buildBodyHtml,
   buildBookPlan,

@@ -15,7 +15,7 @@ import { markdown, markdownLanguage } from "@codemirror/lang-markdown"
 import { languages } from "@codemirror/language-data"
 import { linter } from "@codemirror/lint"
 import { useTheme } from "@/lib/theme"
-import { getJavaFenceDiagnostics } from "@/lib/markdown/code-provenance"
+import { getJavaFenceDiagnostics } from "@gtmc/ssg/markdown/code-provenance"
 
 const techTheme = EditorView.theme({
   "&": {

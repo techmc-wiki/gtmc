@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation"
 import { PdfCoverPreview } from "@/components/mdx/pdf-cover-preview"
 import { toAbsoluteUrl } from "@/lib/site-url"
 import { getManifestStats } from "@/lib/articles/manifest"
-import type { ArticleLocale } from "@/lib/articles/manifest"
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 
 function formatRevisionDate(iso: string, locale: string): string {
   return new Intl.DateTimeFormat(locale, {

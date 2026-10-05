@@ -1,7 +1,5 @@
-import {
-  getArticleManifest,
-  type ArticleEntry,
-} from "@/lib/articles/manifest"
+import { getArticleManifest } from "@/lib/articles/manifest"
+import { type ArticleEntry } from "@gtmc/ssg/articles/types"
 
 export { getArticleManifest }
 export type { ArticleEntry }

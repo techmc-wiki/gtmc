@@ -1,4 +1,4 @@
-import { stripAnsiColorMarkup } from "@/lib/markdown/ansi-colors"
+import { stripAnsiColorMarkup } from "@gtmc/ssg/markdown/ansi-colors"
 
 /** Reading time weights English words, Chinese characters, and code lines at 225/min, 350/min, and 100 lines/min respectively. */
 export function calculateReadingMetrics(content: string) {

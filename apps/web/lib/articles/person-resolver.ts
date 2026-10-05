@@ -7,11 +7,8 @@ import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { load as yamlLoad } from "js-yaml"
 
-import {
-  type ArticleEntry,
-  type ArticleLocale,
-  loadArticleManifest,
-} from "@/lib/articles/manifest"
+import { loadArticleManifest } from "@/lib/articles/manifest"
+import { type ArticleEntry, type ArticleLocale } from "@gtmc/ssg/articles/types"
 import {
   listPeopleKeys,
   resolvePerson,

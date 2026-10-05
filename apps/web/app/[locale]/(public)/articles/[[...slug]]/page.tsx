@@ -1,3 +1,4 @@
+import path from "node:path"
 import { Suspense, type ReactNode } from "react"
 // eslint-disable-next-line import/no-unassigned-import
 import "katex/dist/katex.min.css"
@@ -11,13 +12,9 @@ import {
   generateDescription,
   MarkdownRenderer,
 } from "@/lib/markdown"
-import { getCachedRehypeShiki } from "@/lib/markdown/syntax/rehype-shiki"
-import {
-  getArticleAvailableLocales,
-  hasArticleLocale,
-  loadArticleManifest,
-  type ArticleLocale,
-} from "@/lib/articles/manifest"
+import { getCachedRehypeShiki } from "@gtmc/ssg/markdown/syntax/rehype-shiki"
+import { getArticleAvailableLocales, hasArticleLocale, loadArticleManifest } from "@/lib/articles/manifest"
+import { type ArticleLocale } from "@gtmc/ssg/articles/types"
 import {
   resolveAuthorPerson,
   resolveProfileHandle,
@@ -28,7 +25,7 @@ import {
   getCachedSlugForFilePath,
 } from "@/lib/articles/manifest-cached"
 import { getArticleContentBySlug } from "@/lib/articles/content"
-import { resolveArticleAssetPath } from "@/lib/articles/article-asset-path"
+import { resolveArticleAssetPath } from "@gtmc/ssg/articles/article-asset-path"
 import {
   resolveArticleLocale,
   resolveArticleRequest,
@@ -289,7 +286,7 @@ async function loadArticlePage(params: ArticlePageProps["params"]) {
   const editPath = normalizeDraftTargetPath(target.filePath)
 
   const { wordCount, readingTime } = calculateReadingMetrics(renderedContent)
-  const shikiPlugin = await getCachedRehypeShiki(renderedContent)
+  const shikiPlugin = await getCachedRehypeShiki(renderedContent, path.join(process.cwd(), "data", ".shiki-cache.json"))
 
   const siteUrl = getSiteUrl()
   const effectiveSlug =

@@ -28,10 +28,8 @@ import {
 import { getPersonDescription } from "@/lib/markdown/people"
 import { getRepositoryContributorStats } from "@/lib/git/repository-contributor-stats"
 import { buildPersonJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
-import {
-  loadArticleManifest,
-  type ArticleLocale,
-} from "@/lib/articles/manifest"
+import { loadArticleManifest } from "@/lib/articles/manifest"
+import { type ArticleLocale } from "@gtmc/ssg/articles/types"
 import type { AuthorArticleSummary } from "@/lib/articles/person-resolver"
 
 interface AuthorDetailPageProps {

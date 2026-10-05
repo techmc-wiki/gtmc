@@ -5,7 +5,7 @@ import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
 import { getManifestStats, loadArticleManifest } from "@/lib/articles/manifest"
 import { getUniqueAuthors } from "@/lib/articles/person-resolver"
 import { buildWebPageJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
-import type { ArticleLocale } from "@/lib/articles/manifest"
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 import AboutContentEn from "@/content/about/en.mdx"
 import AboutContentZh from "@/content/about/zh.mdx"
 

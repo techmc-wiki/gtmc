@@ -14,11 +14,6 @@ import solarizedLight from "shiki/themes/solarized-light.mjs"
 
 export type RehypeShikiPlugin = Awaited<ReturnType<typeof createRehypeShiki>>
 
-const HIGHLIGHT_CACHE_FILE = path.join(
-  process.cwd(),
-  "data",
-  ".shiki-cache.json"
-)
 const highlightCache = new Map<string, Element | null>()
 let highlightCacheDirty = false
 let pluginPromise: Promise<RehypeShikiPlugin> | null = null
@@ -33,9 +28,9 @@ let highlighterPromise: Promise<HighlighterCore> | null = null
  * every unchanged code block. Entries are content-addressed, so a stale
  * cache can never produce wrong output: it only costs a re-highlight.
  */
-function loadPersistedHighlightCache(): void {
+function loadPersistedHighlightCache(cacheFile: string): void {
   try {
-    const raw = fs.readFileSync(HIGHLIGHT_CACHE_FILE, "utf-8")
+    const raw = fs.readFileSync(cacheFile, "utf-8")
     const parsed = JSON.parse(raw) as Record<string, Element | null> | null
     if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
       for (const [key, value] of Object.entries(parsed)) {
@@ -51,19 +46,17 @@ function loadPersistedHighlightCache(): void {
  * only costs a re-highlight. No-op unless new entries were added since the
  * cache was loaded.
  */
-export function persistHighlightCache(): void {
+export function persistHighlightCache(cacheFile: string): void {
   if (!highlightCacheDirty) return
   try {
-    fs.mkdirSync(path.dirname(HIGHLIGHT_CACHE_FILE), { recursive: true })
+    fs.mkdirSync(path.dirname(cacheFile), { recursive: true })
     fs.writeFileSync(
-      HIGHLIGHT_CACHE_FILE,
+      cacheFile,
       JSON.stringify(Object.fromEntries(highlightCache)) + "\n"
     )
     highlightCacheDirty = false
   } catch {}
 }
-
-loadPersistedHighlightCache()
 
 function getArticleHighlighter(): Promise<HighlighterCore> {
   highlighterPromise ??= createHighlighterCore({
@@ -98,7 +91,8 @@ function extractLangsFromMarkdown(content: string): string[] {
   return [...langs]
 }
 
-export async function createRehypeShiki() {
+export async function createRehypeShiki(cacheFile?: string) {
+  if (cacheFile) loadPersistedHighlightCache(cacheFile)
   const highlighter = await getArticleHighlighter()
 
   return function rehypeShiki() {
@@ -222,14 +216,15 @@ export async function createRehypeShiki() {
 }
 
 export function getCachedRehypeShiki(
-  content?: string
+  content?: string,
+  cacheFile?: string
 ): Promise<RehypeShikiPlugin> {
   const langs = content ? extractLangsFromMarkdown(content) : []
   if (langs.length === 0) {
     return Promise.resolve(createNoopRehypeShiki())
   }
 
-  pluginPromise ??= createRehypeShiki()
+  pluginPromise ??= createRehypeShiki(cacheFile)
   return pluginPromise
 }
 

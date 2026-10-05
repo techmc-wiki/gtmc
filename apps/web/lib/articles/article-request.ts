@@ -1,8 +1,6 @@
 import { getFirstArticleInChapter } from "@/lib/articles/navigation-data"
-import {
-  hasArticleLocale,
-  type ArticleLocale,
-} from "@/lib/articles/manifest"
+import { hasArticleLocale } from "@/lib/articles/manifest"
+import { type ArticleLocale } from "@gtmc/ssg/articles/types"
 import {
   getCachedArticleTree,
   getCachedLocalizedArticleEntry,

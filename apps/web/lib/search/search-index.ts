@@ -6,7 +6,7 @@ import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import { getArticleContentBySlug } from "@/lib/articles/content"
 import { flattenArticleNodes } from "@/lib/articles/navigation-data"
 
-import type { ArticleLocale } from "@/lib/articles/manifest"
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 
 interface IndexedArticle {
   id: string

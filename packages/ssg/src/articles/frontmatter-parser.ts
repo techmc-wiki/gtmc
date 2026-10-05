@@ -74,7 +74,6 @@ const TRANSLATION_README_ALLOWED_KEYS = new Set([
   "intro-title",
 ])
 
-
 function checkAdditionalProperties(
   data: Record<string, unknown>,
   allowedKeys: Set<string>
@@ -125,9 +124,7 @@ function parseIndex(value: unknown): number {
   return -1
 }
 
-function parseBanner(
-  value: unknown
-): BannerFrontMatter | undefined {
+function parseBanner(value: unknown): BannerFrontMatter | undefined {
   if (typeof value !== "object" || value === null) return undefined
   const obj = value as Record<string, unknown>
   if (typeof obj.src !== "string") return undefined
@@ -136,7 +133,6 @@ function parseBanner(
     alt: typeof obj.alt === "string" ? obj.alt : undefined,
   }
 }
-
 
 function parseFrontMatterData(content: string): Record<string, unknown> {
   const { data } = matter(content)

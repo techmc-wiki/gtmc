@@ -1,4 +1,4 @@
-import { shouldSkipArticleFile } from "@/lib/articles/frontmatter-parser"
+import { shouldSkipArticleFile } from "@gtmc/ssg/articles/frontmatter-parser"
 import {
   ARTICLES_REPO_NAME,
   ARTICLES_REPO_OWNER,

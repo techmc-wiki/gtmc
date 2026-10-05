@@ -8,7 +8,7 @@ import {
   ANSI_COLOR_NAMES,
   createAnsiColorTagName,
   type AnsiColorName,
-} from "@/lib/markdown/ansi-colors"
+} from "@gtmc/ssg/markdown/ansi-colors"
 import type {
   MarkdownComponent,
   MarkdownComponentProps,

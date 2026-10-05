@@ -3,13 +3,10 @@ import remarkParse from "remark-parse"
 import remarkRehype from "remark-rehype"
 import rehypeStringify from "rehype-stringify"
 
-import type { RehypeShikiPlugin } from "@/lib/markdown/syntax/rehype-shiki"
-import type { CodeReference } from "@/lib/markdown/code-provenance"
-import {
-  buildRemarkPlugins,
-  buildRehypePlugins,
-} from "@/lib/markdown/pipeline/core"
-import { rehypeCJKSpacing } from "@/lib/markdown/transforms/rehype-cjk-spacing"
+import type { RehypeShikiPlugin } from "./syntax/rehype-shiki"
+import type { CodeReference } from "./code-provenance"
+import { buildRemarkPlugins, buildRehypePlugins } from "./pipeline/core"
+import { rehypeCJKSpacing } from "./transforms/rehype-cjk-spacing"
 
 interface PdfPipelineOptions {
   shikiPlugin?: RehypeShikiPlugin

@@ -8,7 +8,8 @@ import { ChapterEndMark } from "@/components/articles/chapter-chrome"
 import { Separator } from "@/components/ui/shadcn/separator"
 import { FooterWordmark } from "@/components/layout/footer-wordmark"
 import { articleUrl } from "@/lib/articles/url"
-import { getManifestStats, type ArticleLocale } from "@/lib/articles/manifest"
+import { getManifestStats } from "@/lib/articles/manifest"
+import { type ArticleLocale } from "@gtmc/ssg/articles/types"
 
 interface FooterSectionProps {
   label: string

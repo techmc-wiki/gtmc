@@ -7,7 +7,7 @@ import rehypeRaw from "rehype-raw"
 import rehypeKatex from "rehype-katex"
 import rehypeSlug from "rehype-slug"
 
-import { remarkDirectiveHandler } from "@/lib/markdown/syntax/remark-directive-handler"
+import { remarkDirectiveHandler } from "../syntax/remark-directive-handler"
 import { remarkCallouts } from "../syntax/remark-callouts"
 import { remarkCodeProvenance } from "../syntax/remark-code-provenance"
 import { remarkPeopleMentions } from "../syntax/remark-people-mentions"

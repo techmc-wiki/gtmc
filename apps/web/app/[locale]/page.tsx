@@ -5,7 +5,7 @@ import { HomepageDotGrid } from "./_homepage/homepage-dot-grid"
 import { TocSection } from "./_homepage/toc-section"
 import { MainSiteShell } from "@/components/layout/main-site-shell"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
-import type { ArticleLocale } from "@/lib/articles/manifest"
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 
 function normalizeLocale(locale: string): ArticleLocale {
   return locale === "en" ? "en" : "zh"

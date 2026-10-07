@@ -38,7 +38,7 @@
 最快的上手方式就是**[访问网站](https://techmc.wiki)**。想参与贡献？你可以直接在站内起草文章并创建拉取请求。审阅和合并冲突处理均在 GitHub 上完成。
 
 > [!NOTE]
-> 本仓库是**网站**本体，采用 pnpm 工作区结构：站点位于 `apps/web`，Go PDF 渲染器位于 `tools/pdfgen`，内容子模块位于 `content/`。文章存放在[独立仓库](https://github.com/techmc-wiki/articles)中，以子模块形式挂载在 `content/articles`。其他 GTMC 项目见 [github.com/orgs/techmc-wiki](https://github.com/orgs/techmc-wiki/repositories)。
+> 本仓库是**网站**本体，采用 pnpm 工作区结构：站点位于 `apps/web`，Go PDF 渲染器位于 `tools/pdfgen`，内容子模块位于 `content/`。文章存放在[独立仓库](https://github.com/techmc-wiki/articles)中，以子模块形式挂载在 `content/articles`；Minecraft 属性数据来自 [MCPropertyEncyclopedia](https://github.com/JoakimThorsen/MCPropertyEncyclopedia)，挂载在 `content/properties`。其他 GTMC 项目见 [github.com/orgs/techmc-wiki](https://github.com/orgs/techmc-wiki/repositories)。
 
 ## 本地运行
 
@@ -61,6 +61,8 @@ pnpm check        # vp check（oxfmt + oxlint）+ tsc --noEmit
 pnpm test         # 运行一次 Vitest 测试套件
 pnpm typecheck    # 运行 Next.js 感知的 TypeScript 检查
 ```
+
+特性查询位于 `apps/web/components/properties`：查询 hook 管理 URL 状态和数据加载，筛选控件、结果和详情弹窗拆分为独立组件。它们共用的 HTTP 请求函数位于 `apps/web/lib/properties/fetcher.ts`，服务端数据集加载则保留在 `apps/web/lib/properties/data.ts`。
 
 > [!TIP]
 > `pnpm build` 分两个阶段执行：`build:content` 生成站点产物（文章 manifest、术语表和渲染后的内容），随后 `build:next` 基于这些产物构建站点。PDF 流程独立：`pnpm generate:pdf-html` 把这些产物转换为 `tools/pdfgen/html` 下的打印用 HTML，`pnpm build:pdf` 再据此输出 `tools/pdfgen/dist/gtmc-en.pdf` 和 `tools/pdfgen/dist/gtmc-zh.pdf`；`.github/workflows/pdf.yml` 会依次执行两步并将 PDF 发布到 R2。只需其中一个阶段时可单独运行。

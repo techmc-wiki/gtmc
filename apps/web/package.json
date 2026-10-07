@@ -61,6 +61,7 @@
     "mermaid": "^12.0.0",
     "mime-types": "^3.0.2",
     "minisearch": "^7.2.0",
+    "motion": "^13.4.4",
     "next": "16.3.8",
     "next-auth": "5.0.0-beta.32",
     "next-intl": "^4.14.8",

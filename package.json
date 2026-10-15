@@ -37,7 +37,7 @@
     "typecheck": "pnpm --filter @gtmc/ssg run typecheck && pnpm --filter @gtmc/web run typecheck"
   },
   "devDependencies": {
-    "@types/node": "^26.6.2",
+    "@types/node": "^26.6.5",
     "tsx": "^4.23.14",
     "typescript": "^7.0.2",
     "vite-plus": "1.1.0"

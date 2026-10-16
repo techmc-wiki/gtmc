@@ -19,6 +19,12 @@
       "skillPath": "skills/churn-prevention/SKILL.md",
       "computedHash": "527c4740617d9eeea66e14c3f7b7ecede41d6b0520c252f413fdfd0b763a6c64"
     },
+    "cleanup-useeffect": {
+      "source": "arcadi4/skills",
+      "sourceType": "github",
+      "skillPath": "cleanup-useeffect/SKILL.md",
+      "computedHash": "3fa0f379beb932bfcbe8555b3726c15d3174e9768f085104106d7ee8cda215e6"
+    },
     "community-marketing": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",

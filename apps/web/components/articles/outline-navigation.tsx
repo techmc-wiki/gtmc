@@ -1,311 +1,46 @@
-"use client"
+"use client";
 
-import { ChevronRight, X } from "lucide-react"
-import { IconButton } from "@/components/ui/icon-button"
-import { Badge } from "@/components/ui/shadcn/badge"
-import { Separator } from "@/components/ui/shadcn/separator"
+import * as React from "react";
+import { useTranslations } from "next-intl";
+import ProximitySidebar from "@/components/ui/shadcn/proximity-sidebar";
+import { ScrollProgress } from "@/components/ui/shadcn/scroll-progress";
+import { SITE_SCROLL_ROOT_ID } from "@/hooks/site-scroll-root";
+import type { OutlineItem } from "@/app/[locale]/(public)/articles/outline/use-outline";
 
-import * as React from "react"
-import { useTranslations } from "next-intl"
-import { Link } from "@/i18n/navigation"
-import { useReaderNavigation } from "@/app/[locale]/(public)/articles/reader-navigation/context"
-import { useFooterOverlap } from "@/hooks/use-footer-overlap"
-import { useScrollProgress } from "@/hooks/use-scroll-progress"
-import { ReaderDock } from "@/components/articles/reader-dock"
-import { AdvancedMarker } from "@/components/articles/advanced-marker"
-import {
-  Sheet,
-  SheetTrigger,
-  SheetClose,
-  SheetContent,
-  SheetTitle,
-} from "@/components/ui/shadcn/sheet"
-import styles from "./outline-rail.module.css"
-
-const railDepthClasses = {
-  1: "text-xs/snug",
-  2: "pl-2 text-xs/snug",
-  3: "pl-4 text-xs/snug",
-} satisfies Record<1 | 2 | 3, string>
-
-const stationDepthClasses = {
-  1: "scale-x-[0.72]",
-  2: "scale-x-[0.46]",
-  3: "scale-x-[0.24]",
-} satisfies Record<1 | 2 | 3, string>
-
-const inactiveDepthClasses = {
-  1: "text-tech-main/65",
-  2: "text-tech-main/50",
-  3: "text-tech-main/40",
-} satisfies Record<1 | 2 | 3, string>
-
-const mobileDepthClasses = {
-  1: "pl-4 text-sm/snug",
-  2: "pl-7 text-[0.8125rem]/snug",
-  3: "pl-10 text-xs/snug",
-} satisfies Record<1 | 2 | 3, string>
-
-type ProgressStyle = React.CSSProperties & {
-  "--outline-progress": number
-  "--outline-progress-position": string
-}
-
-function PlotterAxis() {
-  const t = useTranslations("Outline")
-  const { progress } = useScrollProgress()
-  const percentage = Math.round(progress * 100)
-  const progressStyle = React.useMemo<ProgressStyle>(
-    () => ({
-      "--outline-progress": progress,
-      "--outline-progress-position": `${progress * 100}%`,
-    }),
-    [progress]
-  )
-
-  return (
-    <div
-      className="pointer-events-none absolute inset-y-0 left-14 w-px"
-      style={progressStyle}>
-      <progress
-        className="sr-only"
-        aria-label={t("progressLabel")}
-        max={100}
-        value={percentage}>
-        {percentage}%
-      </progress>
-      <span className="bg-tech-main/15 absolute inset-y-0 left-0 w-px" />
-      <span
-        className={`${styles.trace} bg-tech-signal/70 absolute inset-y-0 left-0 w-px`}
-      />
-
-      <span className="border-tech-main/30 bg-tech-bg absolute top-0 left-0 size-2 -translate-x-1/2 -translate-y-1/2 border" />
-      <span className="border-tech-main/30 bg-tech-bg absolute bottom-0 left-0 size-2 -translate-x-1/2 translate-y-1/2 border" />
-
-      <span className={`${styles.plotterHead} absolute left-0`} aria-hidden="true">
-        <span className="bg-tech-signal absolute top-0 left-0 size-2 -translate-x-1/2 -translate-y-1/2" />
-        <span className="bg-tech-signal/75 absolute top-0 right-2 h-px w-2" />
-        <span className="text-tech-signal absolute top-0 right-4 -translate-y-1/2 text-xs whitespace-nowrap tabular-nums">
-          {percentage}%
-        </span>
-      </span>
-    </div>
-  )
-}
-
-export function OutlineRail() {
-  const t = useTranslations("Outline")
-  const { outline, activeHeadingId } = useReaderNavigation()
-  const outlineListRef = React.useRef<HTMLUListElement | null>(null)
-  const activeItemRef = React.useRef<HTMLLIElement | null>(null)
-  const effectiveActiveHeadingId = activeHeadingId ?? outline[0]?.id ?? null
-
-  const activeIndex = React.useMemo(() => {
-    const index = outline.findIndex(
-      (item) => item.id === effectiveActiveHeadingId
-    )
-    return index >= 0 ? index : 0
-  }, [effectiveActiveHeadingId, outline])
+export function ArticleOutlineNavigation({
+  outline,
+  mobile = false,
+}: {
+  outline: OutlineItem[];
+  mobile?: boolean;
+}) {
+  const t = useTranslations("Outline");
+  const scrollRootRef = React.useRef<HTMLElement | null>(null);
+  const [scrollRootReady, setScrollRootReady] = React.useState(false);
 
   React.useEffect(() => {
-    if (!effectiveActiveHeadingId) return
-    const list = outlineListRef.current
-    const activeItem = activeItemRef.current
-    if (!list || !activeItem) return
+    if (!mobile) return;
+    scrollRootRef.current = document.getElementById(SITE_SCROLL_ROOT_ID);
+    const frame = requestAnimationFrame(() => setScrollRootReady(true));
+    return () => cancelAnimationFrame(frame);
+  }, [mobile]);
 
-    const targetTop = Math.max(
-      0,
-      activeItem.offsetTop - list.clientHeight * 0.3
-    )
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches
-
-    list.scrollTo({
-      top: targetTop,
-      behavior: prefersReducedMotion ? "auto" : "smooth",
-    })
-  }, [effectiveActiveHeadingId])
-
-  if (outline.length === 0) {
-    return (
-      <div className="hidden h-full w-full min-w-0 shrink-0 xl:block" aria-hidden="true" />
-    )
+  if (mobile) {
+    return scrollRootReady && outline.length > 0 ? (
+      <ScrollProgress
+        sections={outline}
+        containerRef={scrollRootRef}
+        ariaLabel={t("openSheet")}
+        className="lg:hidden"
+      />
+    ) : null;
   }
 
   return (
-    <div className="hidden h-full w-full min-w-0 shrink-0 xl:block">
-      <div className="sticky top-28 z-20 h-[calc(100dvh-9rem)] min-h-0">
-        <nav
-          aria-label={t("railLabel")}
-          className="relative flex h-full min-h-0 w-full overflow-visible pr-2">
-          <PlotterAxis />
-
-          <div className="flex min-h-0 w-full flex-col pl-16">
-            <header className="guide-line flex shrink-0 items-baseline justify-between gap-2 border-b pt-1 pb-3">
-              <span className="text-xs font-bold text-tech-main/60">
-                {t("title")}
-              </span>
-              <span className="flex items-center gap-1.5 font-mono text-xs tracking-[0.12em] tabular-nums">
-                <span className="text-tech-main/70">{activeIndex + 1}</span>
-                <Separator
-                  orientation="vertical"
-                  className="bg-tech-main/25 h-2.5"
-                />
-                <span className="text-tech-main/35">{outline.length}</span>
-              </span>
-            </header>
-
-            <ul
-              ref={outlineListRef}
-              className="custom-vertical-scrollbar -ml-2 flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto py-4 pr-2 pl-2 overscroll-contain">
-              {outline.map((item) => {
-                const isActive = item.id === effectiveActiveHeadingId
-
-                return (
-                  <li
-                    key={item.id}
-                    ref={isActive ? activeItemRef : undefined}
-                    className="group/station relative">
-                    <span
-                      aria-hidden="true"
-                      className={`absolute top-1/2 -left-2 h-px w-2 origin-right -translate-y-1/2 transition-[scale,background-color,opacity] duration-200 motion-reduce:transition-none group-hover/station:scale-x-100 group-focus-within/station:scale-x-100 ${
-                        isActive
-                          ? "scale-x-100 bg-tech-signal"
-                          : `bg-tech-main/25 ${stationDepthClasses[item.depth]}`
-                      }`}
-                    />
-                    <Link
-                      href={`#${item.id}`}
-                      aria-current={isActive ? "location" : undefined}
-                      className={`relative block py-1.5 pr-1 wrap-break-word transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-tech-main motion-reduce:transition-none ${railDepthClasses[item.depth]} ${
-                        isActive
-                          ? "font-semibold text-tech-main-dark"
-                          : `${inactiveDepthClasses[item.depth]} hover:text-tech-main-dark`
-                      }`}>
-                      {item.text}
-                      {item.isAdvanced && (
-                        <AdvancedMarker className="ml-1.5 -mb-0.5 align-middle" />
-                      )}
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        </nav>
-      </div>
+    <div className="sticky top-24 flex h-[calc(100dvh-7rem)] min-h-0 flex-col">
+      {outline.length > 0 && (
+        <ProximitySidebar sections={outline} ariaLabel={t("railLabel")} />
+      )}
     </div>
-  )
-}
-
-const emptySubscribe = () => () => {}
-
-export function MobileOutlineBar() {
-  const t = useTranslations("Outline")
-  const { outline, activeHeadingId } = useReaderNavigation()
-  const { hasScrolledPastNavbar, progress } = useScrollProgress({
-    navbarThreshold: 64,
-  })
-  const isOverlappingFooter = useFooterOverlap()
-  const [isSheetOpen, setIsSheetOpen] = React.useState(false)
-  const closeSheet = React.useCallback(() => setIsSheetOpen(false), [])
-  const mounted = React.useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false
-  )
-
-  const pct = Math.round(progress * 100)
-  const progressWidthStyle = React.useMemo(
-    (): React.CSSProperties => ({ width: `${pct}%` }),
-    [pct]
-  )
-
-  if (!mounted || outline.length === 0) return null
-
-  const effectiveActiveHeadingId = activeHeadingId ?? outline[0]?.id ?? null
-  const activeItem = outline.find(
-    (item) => item.id === effectiveActiveHeadingId
-  )
-  return (
-    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-      <ReaderDock
-        pct={pct}
-        visible={hasScrolledPastNavbar && !isOverlappingFooter}
-        sectionLabel={activeItem?.text ?? null}>
-        <SheetTrigger asChild>
-          <button
-            type="button"
-            className="text-tech-main-dark hover:bg-tech-main/5 flex h-full min-w-0 cursor-pointer items-center gap-2 px-3 py-2 text-left transition-colors"
-            aria-label={t("openSheet")}>
-            <span className="max-w-[38vw] truncate font-mono text-xs font-bold">
-              {activeItem?.text}
-            </span>
-            <span
-              aria-hidden="true"
-              className="text-tech-main/50 flex shrink-0 items-center">
-              <ChevronRight aria-hidden="true" className="size-3.5" />
-            </span>
-          </button>
-        </SheetTrigger>
-      </ReaderDock>
-      <SheetContent
-        side="bottom"
-        showCloseButton={false}
-        aria-label={t("sheetLabel")}
-        className="border-t border-tech-main/30 bg-surface-overlay/95 max-h-[70dvh] p-0 backdrop-blur-md">
-        <div className="flex shrink-0 items-center justify-between border-b guide-line px-4 py-3">
-          <div className="flex items-center gap-3">
-            <SheetTitle className="text-xs font-bold text-tech-main/60">
-              {t("title")}
-            </SheetTitle>
-            <Badge
-              variant="neutral"
-              className="font-mono tabular-nums">
-              {pct}%
-            </Badge>
-          </div>
-
-          <div className="mx-4 h-0.5 flex-1 bg-tech-main/15">
-            <div
-              className="h-full bg-tech-signal transition-[width] duration-150"
-              style={progressWidthStyle}
-            />
-          </div>
-
-          <SheetClose asChild>
-            <IconButton
-              type="button"
-              variant="ghost"
-              aria-label={t("closeSheet")} label={t("closeSheet")}><X aria-hidden /></IconButton>
-          </SheetClose>
-        </div>
-
-        <ul className="flex-1 overflow-y-auto px-4 py-3">
-          {outline.map((item) => {
-            const isActive = item.id === effectiveActiveHeadingId
-            return (
-              <li key={item.id}>
-                <Link
-                  href={`#${item.id}`}
-                  aria-current={isActive ? "location" : undefined}
-                  onClick={closeSheet}
-                  className={`block border-l-[3px] py-2.5 pr-2 transition-colors duration-200 ${mobileDepthClasses[item.depth]} ${
-                    isActive
-                      ? "border-tech-signal text-tech-main-dark font-semibold"
-                      : "text-tech-main/60 hover:border-tech-main/30 hover:text-tech-main border-transparent"
-                  }`}>
-                  {item.text}
-                  {item.isAdvanced && (
-                    <AdvancedMarker className="ml-1.5 -mb-0.5 align-middle" />
-                  )}
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
-      </SheetContent>
-    </Sheet>
-  )
+  );
 }

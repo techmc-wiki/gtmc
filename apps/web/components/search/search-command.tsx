@@ -64,21 +64,26 @@ function useSearchCommand() {
   const isMounted = useMounted()
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
-  const prevIsOpenRef = useRef(false)
   const router = useRouter()
   const pathname = usePathname()
-
-  useEffect(() => {
-    if (prevIsOpenRef.current && !isOpen) {
-      setQuery("")
-    }
-    prevIsOpenRef.current = isOpen
-  }, [isOpen])
 
   const closeModal = useCallback(() => {
     setIsOpen(false)
     setQuery("")
   }, [])
+
+  // Every close path (Escape, overlay click, Cmd+K toggle, dismiss button)
+  // routes through here so the query resets without a watcher Effect.
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) {
+        setIsOpen(true)
+      } else {
+        closeModal()
+      }
+    },
+    [closeModal]
+  )
 
   // Global Cmd+K / Ctrl+K handler. Register in the capture phase so dormant
   // article dialogs do not intercept the shortcut before search can open.
@@ -86,12 +91,16 @@ function useSearchCommand() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault()
-        setIsOpen((prev) => !prev)
+        if (isOpen) {
+          closeModal()
+        } else {
+          setIsOpen(true)
+        }
       }
     }
     document.addEventListener("keydown", handleKeyDown, { capture: true })
     return () => document.removeEventListener("keydown", handleKeyDown, true)
-  }, [])
+  }, [isOpen, closeModal])
 
   // Debounce only the query key; SWR owns the request lifecycle.
   useEffect(() => {
@@ -196,13 +205,13 @@ function useSearchCommand() {
   return {
     closeModal,
     glossaryResults,
+    handleOpenChange,
     handleQueryChange,
     highlightMatch,
     isLoading,
     isMounted,
     isMac,
     isOpen,
-    setIsOpen,
     navigateToGlossaryResult,
     navigateToResult,
     query,
@@ -251,7 +260,7 @@ function SearchCommandDialog({
   return (
     <CommandDialog
       open={search.isOpen}
-      onOpenChange={search.setIsOpen}
+      onOpenChange={search.handleOpenChange}
       onOpenAutoFocus={(event) => {
         event.preventDefault()
         inputRef.current?.focus()

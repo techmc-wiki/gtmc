@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import {
   CircleCheckIcon,
   InfoIcon,
@@ -9,27 +8,7 @@ import {
   TriangleAlertIcon,
 } from "lucide-react"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
-
-/** Observes the runtime `data-theme` attribute, the single source of truth for theming. */
-function useDataTheme(): "light" | "dark" {
-  const [theme, setTheme] = useState<"light" | "dark">("light")
-
-  useEffect(() => {
-    const read = () =>
-      setTheme(
-        document.documentElement.dataset.theme === "dark" ? "dark" : "light"
-      )
-    read()
-    const observer = new MutationObserver(read)
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-theme"],
-    })
-    return () => observer.disconnect()
-  }, [])
-
-  return theme
-}
+import { useTheme } from "@/lib/theme"
 
 const TOASTER_ICONS = {
   success: <CircleCheckIcon className="size-4" />,
@@ -45,11 +24,11 @@ const TOASTER_OPTIONS: ToasterProps["toastOptions"] = {
 }
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const theme = useDataTheme()
+  const { resolvedTheme } = useTheme()
 
   return (
     <Sonner
-      theme={theme}
+      theme={resolvedTheme}
       className="toaster group"
       icons={TOASTER_ICONS}
       toastOptions={TOASTER_OPTIONS}

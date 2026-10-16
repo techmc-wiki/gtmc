@@ -2,22 +2,12 @@
 
 import * as React from "react"
 import { ParticleObject } from "@/components/canvasui/ParticleObject"
+import { useTheme } from "@/lib/theme"
 
 export function FooterWordmark() {
-  const [isDark, setIsDark] = React.useState(false)
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === "dark"
   const [isCompact, setIsCompact] = React.useState(false)
-
-  React.useEffect(() => {
-    const root = document.documentElement
-    const update = () => setIsDark(root.dataset.theme === "dark")
-    update()
-    const observer = new MutationObserver(update)
-    observer.observe(root, {
-      attributes: true,
-      attributeFilter: ["data-theme"],
-    })
-    return () => observer.disconnect()
-  }, [])
 
   React.useEffect(() => {
     const viewport = window.matchMedia("(max-width: 39.999rem)")

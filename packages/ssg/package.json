@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
-    "js-yaml": "^5.4.3",
+    "js-yaml": "^5.5.0",
     "pangu": "^10.4.0",
     "rehype-katex": "^7.0.1",
     "rehype-raw": "^7.0.0",

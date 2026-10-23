@@ -81,12 +81,12 @@ function getAllowedRemotePathAndQuery(urlString: string): string | null {
     if (
       !pathname.startsWith("/") ||
       pathname.includes("\\") ||
-      /[\u0000-\u001F\u007F]/.test(pathname)
+      /\p{Cc}/u.test(pathname)
     ) {
       return null
     }
 
-    if (search.includes("#") || /[\u0000-\u001F\u007F]/.test(search)) {
+    if (search.includes("#") || /\p{Cc}/u.test(search)) {
       return null
     }
 

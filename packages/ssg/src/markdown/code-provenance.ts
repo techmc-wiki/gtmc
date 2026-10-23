@@ -169,7 +169,7 @@ export function parseJavaCodeProvenance(
   )
   const decompilerValue = values.get("decompiler")
   const file = values.get("file")
-  if (file && (file.includes("`") || /[\u0000-\u001f]/.test(file))) {
+  if (file && (file.includes("`") || /\p{Cc}/u.test(file))) {
     throw new CodeProvenanceSyntaxError(
       "invalid-file",
       "file must be a printable path without backticks",

@@ -18,6 +18,7 @@ runBuildStep(logger, "repository.prepare", () => {
   const submoduleUpdate = ["submodule", "update", "--init", "--recursive"]
   run("git", [...submoduleUpdate, "--remote", "content/articles"], { cwd })
   run("git", [...submoduleUpdate, "content/glossary"], { cwd })
+  run("git", [...submoduleUpdate, "content/properties"], { cwd })
   run("git", ["fetch", "--tags"], { cwd })
 })
 

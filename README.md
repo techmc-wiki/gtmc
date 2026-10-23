@@ -38,7 +38,7 @@ They span the whole stack of technical play: production builds like tree farms, 
 The fastest way to start is to **[visit the site](https://techmc.wiki)**. Want to contribute? You can draft articles and open pull requests right from the site. Reviews and merge conflicts are handled on GitHub.
 
 > [!NOTE]
-> This repo is the **website**, laid out as a pnpm workspace: the site lives in `apps/web`, the Go PDF renderer in `tools/pdfgen`, and the content submodules in `content/`. Articles live in [their own repo](https://github.com/techmc-wiki/articles) and are pulled in as a submodule at `content/articles`. Other GTMC projects are at [github.com/orgs/techmc-wiki](https://github.com/orgs/techmc-wiki/repositories).
+> This repo is the **website**, laid out as a pnpm workspace: the site lives in `apps/web`, the Go PDF renderer in `tools/pdfgen`, and the content submodules in `content/`. Articles live in [their own repo](https://github.com/techmc-wiki/articles) and are pulled in as a submodule at `content/articles`; Minecraft property data lives in [MCPropertyEncyclopedia](https://github.com/JoakimThorsen/MCPropertyEncyclopedia) at `content/properties`. Other GTMC projects are at [github.com/orgs/techmc-wiki](https://github.com/orgs/techmc-wiki/repositories).
 
 ## Running it locally
 
@@ -63,6 +63,8 @@ pnpm typecheck    # Run the Next.js-aware TypeScript check
 ```
 
 In development, the first localhost request automatically signs in as the local debug fixture (`debug@gtmc.local`) without a database. Set `GTMC_DEV_FIXTURE_AUTH=0` before starting `pnpm dev` to use the real GitHub sign-in flow instead.
+
+Property lookup lives in `apps/web/components/properties`: the lookup hook owns URL state and data loading, while filter controls, results, and detail dialogs are separate components. Their shared HTTP fetcher lives in `apps/web/lib/properties/fetcher.ts`; server-side dataset loading stays in `apps/web/lib/properties/data.ts`.
 
 > [!TIP]
 > `pnpm build` runs in two phases: `build:content` generates the site artifacts (article manifest, glossary, and rendered content), then `build:next` builds the site from them. The PDF pipeline is separate: `pnpm generate:pdf-html` turns those artifacts into the print-ready HTML under `tools/pdfgen/html`, and `pnpm build:pdf` consumes it to write `tools/pdfgen/dist/gtmc-en.pdf` and `tools/pdfgen/dist/gtmc-zh.pdf`; `.github/workflows/pdf.yml` runs both and publishes the PDFs to R2. Run the phases separately when you only need one.

@@ -5,3 +5,6 @@
 [submodule "glossary"]
 	path = content/glossary
 	url = https://github.com/TechMC-Glossary/TechMC-Glossary
+[submodule "properties"]
+	path = content/properties
+	url = https://github.com/JoakimThorsen/MCPropertyEncyclopedia

@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { getPublicChapterNav } from "@/lib/articles/public-tree";
-import type { ArticleLocale } from "@gtmc/ssg/articles/types"
+import type { ArticleLocale } from "@gtmc/ssg/articles/types";
 
 const TREE_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300";
 const VALID_LOCALES = new Set<ArticleLocale>(["zh", "en"]);
@@ -25,11 +25,7 @@ export async function GET(request: NextRequest) {
     const message = error instanceof Error ? error.message : "Unknown error";
 
     if (isDev) {
-      console.error(
-        '[articles/tree] Failed to load tree for locale="%s":',
-        locale,
-        error,
-      );
+      console.error('[articles/tree] Failed to load tree for locale="%s":', locale, error);
       return NextResponse.json(
         { error: message, locale },
         { status: 500, headers: { "Cache-Control": "no-store" } },

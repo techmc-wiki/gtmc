@@ -1,19 +1,15 @@
-import { useTranslations } from "next-intl"
-import { FoldVertical, LocateFixed } from "lucide-react"
-import { Button } from "@/components/ui/shadcn/button"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/shadcn/tooltip"
-import { ChapterNavTree } from "./chapter-nav/tree"
-import { useLocateCurrent } from "./chapter-nav/use-locate-current"
-import { useReaderNavigation } from "./reader-navigation/context"
+import { useTranslations } from "next-intl";
+import { FoldVertical, LocateFixed } from "lucide-react";
+import { Button } from "@/components/ui/shadcn/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/tooltip";
+import { ChapterNavTree } from "./chapter-nav/tree";
+import { useLocateCurrent } from "./chapter-nav/use-locate-current";
+import { useReaderNavigation } from "./reader-navigation/context";
 
 interface ChapterNavPanelProps {
-  showTitle?: boolean
-  onNavigate?: () => void
-  scrollClassName?: string
+  showTitle?: boolean;
+  onNavigate?: () => void;
+  scrollClassName?: string;
 }
 
 export function ChapterNavPanel({
@@ -21,7 +17,7 @@ export function ChapterNavPanel({
   showTitle = false,
   scrollClassName = "",
 }: ChapterNavPanelProps) {
-  const t = useTranslations("ChapterNav")
+  const t = useTranslations("ChapterNav");
   const {
     tree,
     effectivePath,
@@ -33,7 +29,7 @@ export function ChapterNavPanel({
     collapseAll,
     activeItemRef,
     folderGridRefs,
-  } = useReaderNavigation()
+  } = useReaderNavigation();
 
   const locateCurrent = useLocateCurrent({
     tree,
@@ -45,7 +41,7 @@ export function ChapterNavPanel({
     activeItemRef,
     folderGridRefs,
     setHighlightActive,
-  })
+  });
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col">
@@ -55,27 +51,26 @@ export function ChapterNavPanel({
       </div>
       <div
         ref={scrollContainerRef}
-        className={`reader-rail-scrollbar min-h-0 flex-1 overflow-y-auto pt-2 pb-4 ${scrollClassName}`}>
+        className={`reader-rail-scrollbar min-h-0 flex-1 overflow-y-auto pt-2 pb-4 ${scrollClassName}`}
+      >
         {tree.length === 0 ? (
-          <div className="mt-4 text-sm text-muted-foreground">
-            {t("empty")}
-          </div>
+          <div className="mt-4 text-sm text-muted-foreground">{t("empty")}</div>
         ) : (
           <ChapterNavTree onNavigate={onNavigate} items={tree} />
         )}
       </div>
     </div>
-  )
+  );
 }
 
 function ChapterNavToolbar({
   onCollapseAll,
   onLocate,
 }: {
-  onCollapseAll: () => void
-  onLocate: () => void
+  onCollapseAll: () => void;
+  onLocate: () => void;
 }) {
-  const t = useTranslations("ChapterNav")
+  const t = useTranslations("ChapterNav");
 
   return (
     <div className="ml-auto flex shrink-0 items-center">
@@ -87,7 +82,8 @@ function ChapterNavToolbar({
             size="icon"
             className="md:size-8"
             aria-label={t("buttonCollapseAll")}
-            onClick={onCollapseAll}>
+            onClick={onCollapseAll}
+          >
             <FoldVertical aria-hidden />
           </Button>
         </TooltipTrigger>
@@ -101,12 +97,13 @@ function ChapterNavToolbar({
             size="icon"
             className="md:size-8"
             aria-label={t("buttonLocate")}
-            onClick={onLocate}>
+            onClick={onLocate}
+          >
             <LocateFixed aria-hidden />
           </Button>
         </TooltipTrigger>
         <TooltipContent>{t("buttonLocate")}</TooltipContent>
       </Tooltip>
     </div>
-  )
+  );
 }

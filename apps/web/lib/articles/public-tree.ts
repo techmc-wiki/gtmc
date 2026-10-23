@@ -1,13 +1,11 @@
 import { cacheLife, cacheTag } from "next/cache";
-import type { ArticleLocale } from "@gtmc/ssg/articles/types"
+import type { ArticleLocale } from "@gtmc/ssg/articles/types";
 import { getCachedArticleTree } from "@/lib/articles/manifest-cached";
 import type { ArticleTreeNode } from "@/lib/github/sync";
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types";
 import { compareIndex } from "@/lib/articles/navigation-data";
 
-export async function getPublicChapterNav(
-  locale: ArticleLocale = "zh",
-): Promise<ChapterNavNode[]> {
+export async function getPublicChapterNav(locale: ArticleLocale = "zh"): Promise<ChapterNavNode[]> {
   "use cache";
   cacheLife("max");
   cacheTag("article-tree", `article-tree-${locale}`);
@@ -15,9 +13,7 @@ export async function getPublicChapterNav(
   return preparePublicChapterNav(await getCachedArticleTree(locale));
 }
 
-export function preparePublicChapterNav(
-  source: ArticleTreeNode[],
-): ChapterNavNode[] {
+export function preparePublicChapterNav(source: ArticleTreeNode[]): ChapterNavNode[] {
   const tree = cloneNodes(source);
 
   injectReadmeIntroNodes(tree);

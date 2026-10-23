@@ -1,29 +1,29 @@
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
-import { articleUrl } from "@/lib/articles/url"
-import { CornerBrackets } from "../ui/corner-brackets"
+import { articleUrl } from "@/lib/articles/url";
+import { CornerBrackets } from "../ui/corner-brackets";
 
 interface ArticleInfo {
-  slug: string
-  title: string
-  isCrossFolder: boolean
-  chapterTitle?: string
+  slug: string;
+  title: string;
+  isCrossFolder: boolean;
+  chapterTitle?: string;
 }
 
 interface ArticleNavigationProps {
-  locale: string
-  nextLabel: string
-  prev: ArticleInfo | null
-  prevLabel: string
-  next: ArticleInfo | null
+  locale: string;
+  nextLabel: string;
+  prev: ArticleInfo | null;
+  prevLabel: string;
+  next: ArticleInfo | null;
 }
 
 interface ArticleNavigationLinkProps {
-  article: ArticleInfo
-  className?: string
-  direction: "prev" | "next"
-  label: string
-  locale: string
+  article: ArticleInfo;
+  className?: string;
+  direction: "prev" | "next";
+  label: string;
+  locale: string;
 }
 
 function ArticleNavigationLink({
@@ -33,12 +33,12 @@ function ArticleNavigationLink({
   label,
   locale,
 }: ArticleNavigationLinkProps) {
-  const isNext = direction === "next"
-  const ArrowIcon = isNext ? ArrowRight : ArrowLeft
+  const isNext = direction === "next";
+  const ArrowIcon = isNext ? ArrowRight : ArrowLeft;
 
   return (
-      <a
-        href={`/${locale}${articleUrl(article.slug)}`}
+    <a
+      href={`/${locale}${articleUrl(article.slug)}`}
       className={`
         group relative flex min-h-24 w-full flex-col justify-between
         overflow-hidden border border-tech-main/30 bg-surface/55 p-4
@@ -48,7 +48,8 @@ function ArticleNavigationLink({
         focus-visible:outline-offset-2 focus:outline-none
         ${isNext ? "md:items-end md:text-right" : ""}
         ${className}
-      `}>
+      `}
+    >
       <span
         aria-hidden="true"
         className={`
@@ -57,18 +58,15 @@ function ArticleNavigationLink({
           ${isNext ? "right-4" : "left-4"}
         `}
       />
-      <CornerBrackets
-        size="size-2"
-        color="border-tech-main/35"
-        variant="hover-only"
-      />
+      <CornerBrackets size="size-2" color="border-tech-main/35" variant="hover-only" />
 
       <div
         className={`
           flex flex-wrap items-center gap-x-2 gap-y-1 font-mono
           text-xs tracking-[0.16em] text-tech-main/60 uppercase
           ${isNext ? "md:justify-end" : ""}
-        `}>
+        `}
+      >
         <span>{label}</span>
         {article.isCrossFolder && article.chapterTitle && (
           <span className="border border-tech-main/25 px-1.5 py-0.5 text-tech-main/45">
@@ -81,7 +79,8 @@ function ArticleNavigationLink({
         className={`
           mt-4 flex items-end gap-3
           ${isNext ? "md:flex-row-reverse" : ""}
-        `}>
+        `}
+      >
         <span
           aria-hidden="true"
           className="
@@ -89,15 +88,16 @@ function ArticleNavigationLink({
             border-tech-main/30 bg-tech-bg/60 leading-none text-tech-main
             transition-colors
             group-hover:border-tech-main/60 group-hover:bg-tech-main/10
-          ">
+          "
+        >
           <ArrowIcon className="size-3.5" />
         </span>
         <span className="line-clamp-2 text-sm font-medium text-tech-main-dark sm:text-base">
           {article.title}
         </span>
       </div>
-      </a>
-  )
+    </a>
+  );
 }
 
 export function ArticleNavigation({
@@ -110,11 +110,9 @@ export function ArticleNavigation({
   return (
     <nav
       aria-label={`${prevLabel}, ${nextLabel}`}
-      className="relative mt-14 border-t border-tech-main/25 pt-6">
-      <span
-        aria-hidden="true"
-        className="bg-tech-signal absolute -top-px left-0 h-0.5 w-28"
-      />
+      className="relative mt-14 border-t border-tech-main/25 pt-6"
+    >
+      <span aria-hidden="true" className="bg-tech-signal absolute -top-px left-0 h-0.5 w-28" />
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
         {prev && (
@@ -137,5 +135,5 @@ export function ArticleNavigation({
         )}
       </div>
     </nav>
-  )
+  );
 }

@@ -1,61 +1,51 @@
-import type { NextRequest } from "next/server"
-import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
-import { getArticleContentBySlug } from "@/lib/articles/content"
-import {
-  resolveArticleLocale,
-  resolveArticleRequest,
-} from "@/lib/articles/article-request"
-import {
-  embedTitleInMarkdown,
-  formatArticleDisplayTitle,
-} from "@/lib/articles/article-title"
-import { decodeSlugPath, encodeSlug } from "@/lib/articles/slug-resolver"
+import { getArticleContentBySlug } from "@/lib/articles/content";
+import { resolveArticleLocale, resolveArticleRequest } from "@/lib/articles/article-request";
+import { embedTitleInMarkdown, formatArticleDisplayTitle } from "@/lib/articles/article-title";
+import { decodeSlugPath, encodeSlug } from "@/lib/articles/slug-resolver";
 
-const MARKDOWN_CACHE_CONTROL =
-  "public, max-age=300, stale-while-revalidate=86400"
+const MARKDOWN_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=86400";
 
 interface ArticleMarkdownRouteContext {
-  params: Promise<{ locale: string; slug: string[] }>
+  params: Promise<{ locale: string; slug: string[] }>;
 }
 
 export async function GET(
   request: NextRequest,
-  context: ArticleMarkdownRouteContext
+  context: ArticleMarkdownRouteContext,
 ): Promise<NextResponse> {
-  const { locale: rawLocale, slug } = await context.params
-  const locale = resolveArticleLocale(rawLocale)
-  const slugPath = decodeSlugPath(slug) || "preface"
-  const resolvedRequest = await resolveArticleRequest(slugPath, locale)
+  const { locale: rawLocale, slug } = await context.params;
+  const locale = resolveArticleLocale(rawLocale);
+  const slugPath = decodeSlugPath(slug) || "preface";
+  const resolvedRequest = await resolveArticleRequest(slugPath, locale);
 
   if (resolvedRequest === null) {
     return new NextResponse("Not Found", {
       status: 404,
       headers: { "Cache-Control": "no-store" },
-    })
+    });
   }
 
-  const { contentLocale, target } = resolvedRequest
+  const { contentLocale, target } = resolvedRequest;
 
   // Return to the public URL so proxy negotiation resolves the canonical article.
   if (target.redirectToSlug) {
     const redirectUrl = new URL(
       `/${locale}/articles/${encodeSlug(target.redirectToSlug)}`,
-      request.url
-    )
-    return NextResponse.redirect(redirectUrl, 307)
+      request.url,
+    );
+    return NextResponse.redirect(redirectUrl, 307);
   }
 
-  const artifact = await getArticleContentBySlug(
-    target.canonicalSlug ?? slugPath,
-    contentLocale
-  )
+  const artifact = await getArticleContentBySlug(target.canonicalSlug ?? slugPath, contentLocale);
 
   if (!artifact) {
     return new NextResponse("Not Found", {
       status: 404,
       headers: { "Cache-Control": "no-store" },
-    })
+    });
   }
 
   const articleTitle = await formatArticleDisplayTitle({
@@ -66,14 +56,14 @@ export async function GET(
     isPreface: target.isPreface,
     isReadmeIntro: target.isReadmeIntro,
     locale: contentLocale,
-  })
+  });
 
-  const markdown = embedTitleInMarkdown(artifact.content, articleTitle)
+  const markdown = embedTitleInMarkdown(artifact.content, articleTitle);
 
   return new NextResponse(markdown, {
     headers: {
       "Content-Type": "text/markdown; charset=utf-8",
       "Cache-Control": MARKDOWN_CACHE_CONTROL,
     },
-  })
+  });
 }

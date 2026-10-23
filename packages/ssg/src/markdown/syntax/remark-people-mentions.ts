@@ -1,12 +1,12 @@
-import type { Content, Html, Parent, Root } from "mdast"
-import { visit } from "unist-util-visit"
+import type { Content, Html, Parent, Root } from "mdast";
+import { visit } from "unist-util-visit";
 
 /**
  * Minimal VFile shape needed by this plugin.
  * The full type comes from the `vfile` package (transitive dependency of unified).
  */
 interface RawFile {
-  value: string | Uint8Array
+  value: string | Uint8Array;
 }
 
 /**
@@ -14,7 +14,7 @@ interface RawFile {
  * The negative character class `[^\[\]]+` allows CJK, spaces, underscores,
  * hyphens, periods, and mixed case: any character that isn't `[` or `]`.
  */
-const MENTION_PATTERN = /\[@([^[\]]+)\]/g
+const MENTION_PATTERN = /\[@([^[\]]+)\]/g;
 
 /**
  * Parent node types whose text children MUST NOT be transformed.
@@ -27,10 +27,10 @@ const SKIP_PARENT_TYPES = new Set([
   "image",
   "imageReference",
   "definition",
-])
+]);
 
 function isParentNode(node: unknown): node is Parent {
-  return Array.isArray((node as Parent | undefined)?.children)
+  return Array.isArray((node as Parent | undefined)?.children);
 }
 
 /**
@@ -43,7 +43,7 @@ function escapeHtml(value: string): string {
     .replaceAll("&", "&amp;")
     .replaceAll('"', "&quot;")
     .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
+    .replaceAll(">", "&gt;");
 }
 
 /**
@@ -53,24 +53,24 @@ function escapeHtml(value: string): string {
 function replacePeopleMentions(
   value: string,
   rawSource: string,
-  textStartOffset: number
+  textStartOffset: number,
 ): Content[] | null {
-  MENTION_PATTERN.lastIndex = 0
+  MENTION_PATTERN.lastIndex = 0;
 
-  const nextChildren: Content[] = []
-  let lastIndex = 0
-  let hasMatch = false
+  const nextChildren: Content[] = [];
+  let lastIndex = 0;
+  let hasMatch = false;
 
   for (const match of value.matchAll(MENTION_PATTERN)) {
-    const fullMatch = match[0]
-    const personKey = match[1]
-    const matchIndex = match.index
+    const fullMatch = match[0];
+    const personKey = match[1];
+    const matchIndex = match.index;
 
     if (matchIndex > lastIndex) {
       nextChildren.push({
         type: "text",
         value: value.slice(lastIndex, matchIndex),
-      })
+      });
     }
 
     // --- Backslash-escape detection ---
@@ -79,46 +79,45 @@ function replacePeopleMentions(
     // markdown-level escapes such as `\[@name]` that remark-parse has
     // already consumed (so the escaped backslash no longer appears in the
     // text-node value).
-    const searchStart = textStartOffset + matchIndex
-    const rawPos = rawSource.indexOf(fullMatch, searchStart)
+    const searchStart = textStartOffset + matchIndex;
+    const rawPos = rawSource.indexOf(fullMatch, searchStart);
 
     // rawPos could be -1 when the markdown source doesn't contain the exact
     // match string (e.g. both brackets escaped with `\]`).  In that case
     // we conservatively treat it as escaped.
-    const wasMarkdownEscaped =
-      rawPos === -1 || isBackslashEscapedAt(rawSource, rawPos)
+    const wasMarkdownEscaped = rawPos === -1 || isBackslashEscapedAt(rawSource, rawPos);
 
     if (wasMarkdownEscaped) {
-      nextChildren.push({ type: "text", value: fullMatch })
+      nextChildren.push({ type: "text", value: fullMatch });
     } else {
-      const encodedKey = escapeHtml(personKey)
+      const encodedKey = escapeHtml(personKey);
       nextChildren.push({
         type: "html",
         value: `<people-mention data-person-key="${encodedKey}">${escapeHtml(personKey)}</people-mention>`,
-      } as Html)
-      hasMatch = true
+      } as Html);
+      hasMatch = true;
     }
 
-    lastIndex = matchIndex + fullMatch.length
+    lastIndex = matchIndex + fullMatch.length;
   }
 
-  if (!hasMatch) return null
+  if (!hasMatch) return null;
 
   if (lastIndex < value.length) {
-    nextChildren.push({ type: "text", value: value.slice(lastIndex) })
+    nextChildren.push({ type: "text", value: value.slice(lastIndex) });
   }
 
-  return nextChildren
+  return nextChildren;
 }
 
 function isBackslashEscapedAt(source: string, pos: number): boolean {
-  let count = 0
-  let i = pos - 1
+  let count = 0;
+  let i = pos - 1;
   while (i >= 0 && source[i] === "\\") {
-    count++
-    i--
+    count++;
+    i--;
   }
-  return count % 2 !== 0
+  return count % 2 !== 0;
 }
 
 /**
@@ -133,40 +132,36 @@ function isBackslashEscapedAt(source: string, pos: number): boolean {
  */
 export function remarkPeopleMentions() {
   return (tree: Root, file: RawFile) => {
-    const rawSource = String(file.value)
+    const rawSource = String(file.value);
 
     visit(tree, (node) => {
-      if (!isParentNode(node)) return
+      if (!isParentNode(node)) return;
 
-      if (SKIP_PARENT_TYPES.has(node.type)) return
+      if (SKIP_PARENT_TYPES.has(node.type)) return;
 
-      const nextChildren: Content[] = []
-      let didChange = false
+      const nextChildren: Content[] = [];
+      let didChange = false;
 
       for (const child of node.children) {
         if (child.type !== "text") {
-          nextChildren.push(child)
-          continue
+          nextChildren.push(child);
+          continue;
         }
 
-        const textStartOffset = child.position?.start?.offset ?? 0
-        const replacement = replacePeopleMentions(
-          child.value,
-          rawSource,
-          textStartOffset
-        )
+        const textStartOffset = child.position?.start?.offset ?? 0;
+        const replacement = replacePeopleMentions(child.value, rawSource, textStartOffset);
         if (replacement === null) {
-          nextChildren.push(child)
-          continue
+          nextChildren.push(child);
+          continue;
         }
 
-        nextChildren.push(...replacement)
-        didChange = true
+        nextChildren.push(...replacement);
+        didChange = true;
       }
 
       if (didChange) {
-        node.children = nextChildren
+        node.children = nextChildren;
       }
-    })
-  }
+    });
+  };
 }

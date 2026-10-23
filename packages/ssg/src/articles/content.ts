@@ -1,11 +1,11 @@
-import type { CodeReference } from "../markdown/code-provenance"
-import type { TranslationStatusDetail } from "./types"
+import type { CodeReference } from "../markdown/code-provenance";
+import type { TranslationStatusDetail } from "./types";
 
 export interface ArticleContentArtifact {
-  content: string
-  frontmatter: Record<string, unknown>
-  codeReferences: CodeReference[]
-  translationStatus?: TranslationStatusDetail
+  content: string;
+  frontmatter: Record<string, unknown>;
+  codeReferences: CodeReference[];
+  translationStatus?: TranslationStatusDetail;
 }
 
 /**
@@ -14,5 +14,5 @@ export interface ArticleContentArtifact {
  * persisted artifact paths remain compatible.
  */
 export function artifactFilename(slug: string): string {
-  return encodeURIComponent(slug).replaceAll("%", "~")
+  return encodeURIComponent(slug).replaceAll("%", "~");
 }

@@ -1,42 +1,42 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { usePathname } from "@/i18n/navigation"
-import { useExpandedFolders } from "../chapter-nav/use-expanded-folders"
-import { useActiveHeading } from "../outline/use-active-heading"
-import { useOutline, type OutlineItem } from "../outline/use-outline"
-import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
+import * as React from "react";
+import { usePathname } from "@/i18n/navigation";
+import { useExpandedFolders } from "../chapter-nav/use-expanded-folders";
+import { useActiveHeading } from "../outline/use-active-heading";
+import { useOutline, type OutlineItem } from "../outline/use-outline";
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types";
 
 interface ReaderNavigationProviderProps {
-  tree: ChapterNavNode[]
-  children: React.ReactNode
+  tree: ChapterNavNode[];
+  children: React.ReactNode;
 }
 
 interface ReaderNavigationContextValue {
-  expandedFolders: Set<string>
-  setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>
-  expandedFoldersRef: React.RefObject<Set<string>>
-  mounted: boolean
-  isFolderExpanded: (id: string) => boolean
-  toggleFolder: (id: string) => void
+  expandedFolders: Set<string>;
+  setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
+  expandedFoldersRef: React.RefObject<Set<string>>;
+  mounted: boolean;
+  isFolderExpanded: (id: string) => boolean;
+  toggleFolder: (id: string) => void;
 
-  highlightActive: boolean
-  setHighlightActive: React.Dispatch<React.SetStateAction<boolean>>
+  highlightActive: boolean;
+  setHighlightActive: React.Dispatch<React.SetStateAction<boolean>>;
 
-  outline: OutlineItem[]
-  activeHeadingId: string | null
+  outline: OutlineItem[];
+  activeHeadingId: string | null;
 
-  tree: ChapterNavNode[]
-  effectivePath: string
+  tree: ChapterNavNode[];
+  effectivePath: string;
 
-  activeItemRef: React.RefObject<HTMLLIElement | null>
-  folderGridRefs: React.RefObject<Map<string, HTMLDivElement>>
-  scrollContainerRef: React.RefObject<HTMLDivElement | null>
+  activeItemRef: React.RefObject<HTMLLIElement | null>;
+  folderGridRefs: React.RefObject<Map<string, HTMLDivElement>>;
+  scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 
-  collapseAll: () => void
+  collapseAll: () => void;
 }
 
-const ReaderNavigationContext = React.createContext<ReaderNavigationContextValue | null>(null)
+const ReaderNavigationContext = React.createContext<ReaderNavigationContextValue | null>(null);
 
 export function ReaderNavigationProvider({ tree, children }: ReaderNavigationProviderProps) {
   return (
@@ -45,23 +45,21 @@ export function ReaderNavigationProvider({ tree, children }: ReaderNavigationPro
         <ReaderNavigationProviderContent pathname="/articles/preface" tree={tree}>
           {children}
         </ReaderNavigationProviderContent>
-      }>
+      }
+    >
       <ReaderNavigationProviderWithPathname tree={tree}>
         {children}
       </ReaderNavigationProviderWithPathname>
     </React.Suspense>
-  )
+  );
 }
 
-function ReaderNavigationProviderWithPathname({
-  tree,
-  children,
-}: ReaderNavigationProviderProps) {
+function ReaderNavigationProviderWithPathname({ tree, children }: ReaderNavigationProviderProps) {
   return (
     <ReaderNavigationProviderContent pathname={usePathname()} tree={tree}>
       {children}
     </ReaderNavigationProviderContent>
-  )
+  );
 }
 
 function ReaderNavigationProviderContent({
@@ -69,46 +67,41 @@ function ReaderNavigationProviderContent({
   children,
   pathname,
 }: ReaderNavigationProviderProps & { pathname: string }) {
-  const {
-    expandedFolders,
-    setExpandedFolders,
-    expandedFoldersRef,
-    mounted,
-    isFolderExpanded,
-  } = useExpandedFolders()
+  const { expandedFolders, setExpandedFolders, expandedFoldersRef, mounted, isFolderExpanded } =
+    useExpandedFolders();
 
-  const outline = useOutline()
-  const activeHeadingId = useActiveHeading(outline, pathname)
+  const outline = useOutline();
+  const activeHeadingId = useActiveHeading(outline, pathname);
 
-  const [highlightActive, setHighlightActive] = React.useState(false)
+  const [highlightActive, setHighlightActive] = React.useState(false);
 
-  const activeItemRef = React.useRef<HTMLLIElement | null>(null)
-  const folderGridRefs = React.useRef<Map<string, HTMLDivElement>>(new Map())
-  const scrollContainerRef = React.useRef<HTMLDivElement | null>(null)
+  const activeItemRef = React.useRef<HTMLLIElement | null>(null);
+  const folderGridRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
+  const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
 
   const effectivePath =
     pathname === "/articles" || pathname === "/articles/" || pathname === "/"
       ? "/articles/preface"
-      : pathname
+      : pathname;
 
   const toggleFolder = React.useCallback(
     (id: string) => {
       setExpandedFolders((prev) => {
-        const next = new Set(prev)
+        const next = new Set(prev);
         if (next.has(id)) {
-          next.delete(id)
+          next.delete(id);
         } else {
-          next.add(id)
+          next.add(id);
         }
-        return next
-      })
+        return next;
+      });
     },
-    [setExpandedFolders]
-  )
+    [setExpandedFolders],
+  );
 
   const collapseAll = React.useCallback(() => {
-    setExpandedFolders(new Set())
-  }, [setExpandedFolders])
+    setExpandedFolders(new Set());
+  }, [setExpandedFolders]);
 
   const value = React.useMemo<ReaderNavigationContextValue>(
     () => ({
@@ -142,18 +135,18 @@ function ReaderNavigationProviderContent({
       tree,
       effectivePath,
       collapseAll,
-    ]
-  )
+    ],
+  );
 
   return (
     <ReaderNavigationContext.Provider value={value}>{children}</ReaderNavigationContext.Provider>
-  )
+  );
 }
 
 export function useReaderNavigation(): ReaderNavigationContextValue {
-  const context = React.use(ReaderNavigationContext)
+  const context = React.use(ReaderNavigationContext);
   if (!context) {
-    throw new Error("useReaderNavigation must be used within ReaderNavigationProvider")
+    throw new Error("useReaderNavigation must be used within ReaderNavigationProvider");
   }
-  return context
+  return context;
 }

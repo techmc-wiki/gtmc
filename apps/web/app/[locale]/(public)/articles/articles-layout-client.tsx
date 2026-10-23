@@ -1,35 +1,24 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-} from "react"
-import { ChapterNavPanel } from "./chapter-nav-panel"
-import { ReaderNavigationProvider } from "./reader-navigation/context"
-import {
-  SectionRail,
-  SegmentedBar,
-} from "@/components/ui/loading-shell-primitives"
-import { Button } from "@/components/ui/shadcn/button"
-import { TriangleIcon } from "@/components/ui/icons"
-import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
-import { useLocale, useTranslations } from "next-intl"
-import {
-  OutlineRail,
-  MobileOutlineBar,
-} from "@/components/articles/outline-navigation"
-import { useFooterOverlap } from "@/hooks/use-footer-overlap"
+import * as React from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { ChapterNavPanel } from "./chapter-nav-panel";
+import { ReaderNavigationProvider } from "./reader-navigation/context";
+import { SectionRail, SegmentedBar } from "@/components/ui/loading-shell-primitives";
+import { Button } from "@/components/ui/shadcn/button";
+import { TriangleIcon } from "@/components/ui/icons";
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types";
+import { useLocale, useTranslations } from "next-intl";
+import { OutlineRail, MobileOutlineBar } from "@/components/articles/outline-navigation";
+import { useFooterOverlap } from "@/hooks/use-footer-overlap";
 
 const treePanelStyle = {
   "--panel-translate-y": "12px",
-} as React.CSSProperties
+} as React.CSSProperties;
 
 interface ArticlesLayoutProps {
-  children: React.ReactNode
-  tree: ChapterNavNode[]
+  children: React.ReactNode;
+  tree: ChapterNavNode[];
 }
 
 function TreeLoadingPlaceholder() {
@@ -42,11 +31,9 @@ function TreeLoadingPlaceholder() {
       "
       style={treePanelStyle}
       data-open="true"
-      aria-hidden="true">
-      <SectionRail
-        label="Loading"
-        className="mb-3 text-xs opacity-75"
-      />
+      aria-hidden="true"
+    >
+      <SectionRail label="Loading" className="mb-3 text-xs opacity-75" />
 
       <div className="space-y-6 pr-3">
         <div className="space-y-3">
@@ -112,102 +99,97 @@ function TreeLoadingPlaceholder() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-const CHAPTER_NAV_HIDDEN_KEY = "gtmc_chapter_nav_hidden"
+const CHAPTER_NAV_HIDDEN_KEY = "gtmc_chapter_nav_hidden";
 
 function useChapterTree(tree: ChapterNavNode[]) {
-  const [fetchedTreeData, setFetchedTreeData] = useState<ChapterNavNode[]>([])
-  const [hasTreeFetchSettled, setHasTreeFetchSettled] = useState(
-    () => tree.length > 0
-  )
-  const locale = useLocale()
+  const [fetchedTreeData, setFetchedTreeData] = useState<ChapterNavNode[]>([]);
+  const [hasTreeFetchSettled, setHasTreeFetchSettled] = useState(() => tree.length > 0);
+  const locale = useLocale();
 
   useEffect(() => {
     if (tree.length > 0) {
-      return
+      return;
     }
 
-    let cancelled = false
-    const controller = new AbortController()
+    let cancelled = false;
+    const controller = new AbortController();
 
     const loadTree = async () => {
       try {
         const response = await fetch(`/api/articles/tree?locale=${locale}`, {
           method: "GET",
           signal: controller.signal,
-        })
+        });
 
-        if (cancelled) return
+        if (cancelled) return;
 
         if (!response.ok) {
-          return
+          return;
         }
 
-        const payload = (await response.json()) as ChapterNavNode[]
-        if (cancelled) return
+        const payload = (await response.json()) as ChapterNavNode[];
+        if (cancelled) return;
         if (Array.isArray(payload)) {
-          setFetchedTreeData(payload)
+          setFetchedTreeData(payload);
         }
       } catch (error) {
-        if (cancelled) return
+        if (cancelled) return;
         if (error instanceof Error && error.name === "AbortError") {
-          return
+          return;
         }
       } finally {
         if (!cancelled) {
-          setHasTreeFetchSettled(true)
+          setHasTreeFetchSettled(true);
         }
       }
-    }
+    };
 
-    void loadTree()
+    void loadTree();
 
     return () => {
-      cancelled = true
-      controller.abort()
-    }
-  }, [locale, tree, tree.length])
+      cancelled = true;
+      controller.abort();
+    };
+  }, [locale, tree, tree.length]);
 
-  const treeData = tree.length > 0 ? tree : fetchedTreeData
+  const treeData = tree.length > 0 ? tree : fetchedTreeData;
   return {
     treeData,
-    showChapterNavPlaceholder:
-      tree.length === 0 && !hasTreeFetchSettled && treeData.length === 0,
-  }
+    showChapterNavPlaceholder: tree.length === 0 && !hasTreeFetchSettled && treeData.length === 0,
+  };
 }
 
 function useChapterNavVisibility() {
-  const [chapterNavHidden, setChapterNavHidden] = useState(false)
-  const [isChapterNavOpen, setIsChapterNavOpen] = useState(false)
+  const [chapterNavHidden, setChapterNavHidden] = useState(false);
+  const [isChapterNavOpen, setIsChapterNavOpen] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       try {
-        setChapterNavHidden(
-          localStorage.getItem(CHAPTER_NAV_HIDDEN_KEY) === "true"
-        )
+        setChapterNavHidden(localStorage.getItem(CHAPTER_NAV_HIDDEN_KEY) === "true");
       } catch {}
-    }, 0)
-    return () => clearTimeout(timer)
-  }, [])
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const toggleChapterNavHidden = useCallback(() => {
-    const next = !chapterNavHidden
-    setChapterNavHidden(next)
+    const next = !chapterNavHidden;
+    setChapterNavHidden(next);
     try {
-      localStorage.setItem(CHAPTER_NAV_HIDDEN_KEY, String(next))
+      localStorage.setItem(CHAPTER_NAV_HIDDEN_KEY, String(next));
     } catch {}
-  }, [chapterNavHidden])
+  }, [chapterNavHidden]);
 
   const closeChapterNav = useCallback(() => {
-    setIsChapterNavOpen(false)
-  }, [])
+    setIsChapterNavOpen(false);
+  }, []);
 
   const toggleMobileChapterNav = useCallback(() => {
-    setIsChapterNavOpen((open) => !open)
-  }, [])
+    setIsChapterNavOpen((open) => !open);
+  }, []);
 
   return {
     chapterNavHidden,
@@ -215,14 +197,14 @@ function useChapterNavVisibility() {
     isChapterNavOpen,
     toggleChapterNavHidden,
     toggleMobileChapterNav,
-  }
+  };
 }
 
 interface MobileChapterNavigationProps {
-  isChapterNavOpen: boolean
-  isOverlappingFooter: boolean
-  onNavigate: () => void
-  onToggle: () => void
+  isChapterNavOpen: boolean;
+  isOverlappingFooter: boolean;
+  onNavigate: () => void;
+  onToggle: () => void;
 }
 
 function MobileChapterNavigation({
@@ -231,8 +213,8 @@ function MobileChapterNavigation({
   onNavigate,
   onToggle,
 }: MobileChapterNavigationProps) {
-  const t = useTranslations("ChapterNav")
-  const tA11y = useTranslations("CommonA11y")
+  const t = useTranslations("ChapterNav");
+  const tA11y = useTranslations("CommonA11y");
 
   return (
     <div
@@ -240,41 +222,41 @@ function MobileChapterNavigation({
         border-tech-main/40 bg-surface-overlay/95 sticky top-16 z-30 border-y
         shadow-sm backdrop-blur-sm transition-[opacity] duration-200 md:hidden
         ${isOverlappingFooter && !isChapterNavOpen ? "pointer-events-none opacity-0" : "opacity-100"}
-      `}>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={onToggle}
-          aria-expanded={isChapterNavOpen}
-          aria-label={tA11y("toggleArticleTree")}
-          data-testid="mobile-tree-toggle"
-          className="h-12 w-full justify-between">
-          <span>{t("title")}</span>
-          <TriangleIcon
-            direction={isChapterNavOpen ? "down" : "right"}
-            className="size-3"
-          />
-        </Button>
-        <div
-          inert={!isChapterNavOpen}
-          className={`
+      `}
+    >
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={onToggle}
+        aria-expanded={isChapterNavOpen}
+        aria-label={tA11y("toggleArticleTree")}
+        data-testid="mobile-tree-toggle"
+        className="h-12 w-full justify-between"
+      >
+        <span>{t("title")}</span>
+        <TriangleIcon direction={isChapterNavOpen ? "down" : "right"} className="size-3" />
+      </Button>
+      <div
+        inert={!isChapterNavOpen}
+        className={`
             grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none
             ${isChapterNavOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}
-          `}>
-          <div className="overflow-hidden">
-            <div className="border-tech-main/30 bg-surface-overlay/95 max-h-[calc(100dvh-12rem)] overflow-y-auto overscroll-contain border-t px-4 pt-3 pb-4">
-              <ChapterNavPanel onNavigate={onNavigate} />
-            </div>
+          `}
+      >
+        <div className="overflow-hidden">
+          <div className="border-tech-main/30 bg-surface-overlay/95 max-h-[calc(100dvh-12rem)] overflow-y-auto overscroll-contain border-t px-4 pt-3 pb-4">
+            <ChapterNavPanel onNavigate={onNavigate} />
           </div>
         </div>
+      </div>
     </div>
-  )
+  );
 }
 
 interface DesktopChapterNavigationProps {
-  chapterNavHidden: boolean
-  onToggle: () => void
-  showPlaceholder: boolean
+  chapterNavHidden: boolean;
+  onToggle: () => void;
+  showPlaceholder: boolean;
 }
 
 function DesktopChapterNavigation({
@@ -282,16 +264,16 @@ function DesktopChapterNavigation({
   onToggle,
   showPlaceholder,
 }: DesktopChapterNavigationProps) {
-  const t = useTranslations("ChapterNav")
-  const tA11y = useTranslations("CommonA11y")
+  const t = useTranslations("ChapterNav");
+  const tA11y = useTranslations("CommonA11y");
   const asideStyle = useMemo(
     (): React.CSSProperties => ({
       width: chapterNavHidden ? 0 : undefined,
       opacity: chapterNavHidden ? 0 : 1,
       borderRightWidth: chapterNavHidden ? 0 : undefined,
     }),
-    [chapterNavHidden]
-  )
+    [chapterNavHidden],
+  );
 
   return (
     <div
@@ -301,7 +283,8 @@ function DesktopChapterNavigation({
         ${chapterNavHidden ? "md:col-span-1" : "md:col-span-3"}
       `}
       data-chapter-nav-region
-      data-chapter-nav-hidden={chapterNavHidden ? "" : undefined}>
+      data-chapter-nav-hidden={chapterNavHidden ? "" : undefined}
+    >
       <div className="flex h-full">
         <aside
           inert={chapterNavHidden}
@@ -310,26 +293,30 @@ function DesktopChapterNavigation({
             transition-[width,opacity,border-color] duration-300
             ease-[cubic-bezier(0.16,1,0.3,1)]
           "
-          style={asideStyle}>
+          style={asideStyle}
+        >
           <div
             className="
               sticky top-20 flex w-56 flex-col justify-center
               hover:z-20
               sm:top-26 sm:h-[calc(100dvh-128px)]
               lg:top-28 lg:h-[calc(100dvh-144px)]
-            ">
+            "
+          >
             <div
               className="
                 flex max-h-4/5 min-h-0 flex-1 flex-col overflow-visible
                 border-b guide-line text-tech-main
                 md:px-4 md:py-2
-              ">
+              "
+            >
               {showPlaceholder ? (
                 <div
                   className="
                     reader-rail-scrollbar h-full min-h-0 flex-1
                     overflow-y-auto
-                  ">
+                  "
+                >
                   <h2 className="mb-2 text-sm font-semibold">{t("title")}</h2>
                   <TreeLoadingPlaceholder />
                 </div>
@@ -342,41 +329,40 @@ function DesktopChapterNavigation({
 
         <div className="relative h-full w-0">
           <div className="sticky top-[50vh] -translate-y-1/2 justify-center overflow-visible">
-            <Button variant="outline" size="icon-sm"
+            <Button
+              variant="outline"
+              size="icon-sm"
               type="button"
               onClick={onToggle}
-              aria-label={
-                chapterNavHidden
-                  ? tA11y("showChapterNav")
-                  : tA11y("hideChapterNav")
-              }
+              aria-label={chapterNavHidden ? tA11y("showChapterNav") : tA11y("hideChapterNav")}
               aria-expanded={!chapterNavHidden}
               data-chapter-nav-toggle=""
-              className="absolute top-0 -left-4 z-40 -translate-y-1/2">
+              className="absolute top-0 -left-4 z-40 -translate-y-1/2"
+            >
               <span
                 className="
                   flex size-3 items-center justify-center select-none
-                ">
+                "
+              >
                 <TriangleIcon
                   direction={chapterNavHidden ? "right" : "left"}
                   className="size-2.5"
                 />
               </span>
             </Button>
-
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function ArticleContentColumn({
   chapterNavHidden,
   children,
 }: {
-  chapterNavHidden: boolean
-  children: React.ReactNode
+  chapterNavHidden: boolean;
+  children: React.ReactNode;
 }) {
   return (
     <main
@@ -386,22 +372,23 @@ function ArticleContentColumn({
         md:mx-auto
         md:max-w-4xl
         ${chapterNavHidden ? "md:col-start-3 md:col-span-10 xl:col-span-9" : "md:col-start-4 md:col-span-9 xl:col-span-7"}
-      `}>
+      `}
+    >
       {children}
     </main>
-  )
+  );
 }
 
 export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
-  const { treeData, showChapterNavPlaceholder } = useChapterTree(tree)
+  const { treeData, showChapterNavPlaceholder } = useChapterTree(tree);
   const {
     chapterNavHidden,
     closeChapterNav,
     isChapterNavOpen,
     toggleChapterNavHidden,
     toggleMobileChapterNav,
-  } = useChapterNavVisibility()
-  const isOverlappingFooter = useFooterOverlap()
+  } = useChapterNavVisibility();
+  const isOverlappingFooter = useFooterOverlap();
 
   return (
     <ReaderNavigationProvider tree={treeData}>
@@ -413,7 +400,8 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           md:grid md:grid-cols-12
           md:gap-6
           md:max-w-360 md:mx-auto
-        ">
+        "
+      >
         <MobileChapterNavigation
           isChapterNavOpen={isChapterNavOpen}
           isOverlappingFooter={isOverlappingFooter}
@@ -425,13 +413,11 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           onToggle={toggleChapterNavHidden}
           showPlaceholder={showChapterNavPlaceholder}
         />
-        <ArticleContentColumn chapterNavHidden={chapterNavHidden}>
-          {children}
-        </ArticleContentColumn>
+        <ArticleContentColumn chapterNavHidden={chapterNavHidden}>{children}</ArticleContentColumn>
         <div className="hidden xl:col-start-11 xl:col-span-2 xl:block xl:justify-self-stretch xl:self-stretch">
           <OutlineRail />
         </div>
       </div>
     </ReaderNavigationProvider>
-  )
+  );
 }

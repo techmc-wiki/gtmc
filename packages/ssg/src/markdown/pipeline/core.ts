@@ -1,39 +1,37 @@
-import type { PluggableList } from "unified"
-import remarkGfm from "remark-gfm"
-import remarkMath from "remark-math"
-import remarkBreaks from "remark-breaks"
-import remarkDirective from "remark-directive"
-import rehypeRaw from "rehype-raw"
-import rehypeKatex from "rehype-katex"
-import rehypeSlug from "rehype-slug"
+import type { PluggableList } from "unified";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import remarkBreaks from "remark-breaks";
+import remarkDirective from "remark-directive";
+import rehypeRaw from "rehype-raw";
+import rehypeKatex from "rehype-katex";
+import rehypeSlug from "rehype-slug";
 
-import { remarkDirectiveHandler } from "../syntax/remark-directive-handler"
-import { remarkCallouts } from "../syntax/remark-callouts"
-import { remarkCodeProvenance } from "../syntax/remark-code-provenance"
-import { remarkPeopleMentions } from "../syntax/remark-people-mentions"
-import { remarkNumberedHeadingsDot } from "../syntax/remark-heading-numbering"
-import { remarkImageAlt } from "../syntax/remark-image-alt"
-import { remarkWikilinks } from "../syntax/remark-wikilinks"
-import { rehypeAdvancedSections } from "../syntax/rehype-advanced-sections"
-import { rehypeCodeProvenance } from "../syntax/rehype-code-provenance"
-import { rehypeMermaid } from "../syntax/rehype-mermaid"
-import { rehypeLinkedCode } from "../transforms/rehype-linked-code"
-import type { CodeReference } from "../code-provenance"
-import type { RehypeShikiPlugin } from "../syntax/rehype-shiki"
+import { remarkDirectiveHandler } from "../syntax/remark-directive-handler";
+import { remarkCallouts } from "../syntax/remark-callouts";
+import { remarkCodeProvenance } from "../syntax/remark-code-provenance";
+import { remarkPeopleMentions } from "../syntax/remark-people-mentions";
+import { remarkNumberedHeadingsDot } from "../syntax/remark-heading-numbering";
+import { remarkImageAlt } from "../syntax/remark-image-alt";
+import { remarkWikilinks } from "../syntax/remark-wikilinks";
+import { rehypeAdvancedSections } from "../syntax/rehype-advanced-sections";
+import { rehypeCodeProvenance } from "../syntax/rehype-code-provenance";
+import { rehypeMermaid } from "../syntax/rehype-mermaid";
+import { rehypeLinkedCode } from "../transforms/rehype-linked-code";
+import type { CodeReference } from "../code-provenance";
+import type { RehypeShikiPlugin } from "../syntax/rehype-shiki";
 
 interface RemarkPipelineOptions {
-  includeWikilinks?: boolean
+  includeWikilinks?: boolean;
 }
 
 interface RehypePipelineOptions {
-  shikiPlugin?: RehypeShikiPlugin
-  codeReferences?: readonly CodeReference[]
-  cjkSpacingPlugin: PluggableList[number]
+  shikiPlugin?: RehypeShikiPlugin;
+  codeReferences?: readonly CodeReference[];
+  cjkSpacingPlugin: PluggableList[number];
 }
 
-export function buildRemarkPlugins(
-  options: RemarkPipelineOptions = {}
-): PluggableList {
+export function buildRemarkPlugins(options: RemarkPipelineOptions = {}): PluggableList {
   const plugins: PluggableList = [
     remarkGfm,
     remarkBreaks,
@@ -44,20 +42,18 @@ export function buildRemarkPlugins(
     remarkPeopleMentions,
     remarkImageAlt,
     [remarkNumberedHeadingsDot, { startDepth: 2 }],
-  ]
+  ];
 
   if (options.includeWikilinks) {
-    plugins.splice(2, 0, remarkWikilinks)
+    plugins.splice(2, 0, remarkWikilinks);
   }
 
-  plugins.push(remarkMath)
+  plugins.push(remarkMath);
 
-  return plugins
+  return plugins;
 }
 
-export function buildRehypePlugins(
-  options: RehypePipelineOptions
-): PluggableList {
+export function buildRehypePlugins(options: RehypePipelineOptions): PluggableList {
   const plugins: PluggableList = [
     rehypeRaw,
     [rehypeCodeProvenance, { references: options.codeReferences }],
@@ -65,14 +61,14 @@ export function buildRehypePlugins(
     rehypeSlug,
     rehypeAdvancedSections,
     rehypeLinkedCode,
-  ]
+  ];
 
   if (options.shikiPlugin) {
-    plugins.push(options.shikiPlugin)
+    plugins.push(options.shikiPlugin);
   }
 
-  plugins.push(rehypeKatex)
-  plugins.push(options.cjkSpacingPlugin)
+  plugins.push(rehypeKatex);
+  plugins.push(options.cjkSpacingPlugin);
 
-  return plugins
+  return plugins;
 }

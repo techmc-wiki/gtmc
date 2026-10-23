@@ -1,44 +1,41 @@
-import { Link } from "@/i18n/navigation"
-import { AdvancedMarker } from "@/components/articles/advanced-marker"
-import { TriangleIcon } from "@/components/ui/icons"
-import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
-import { partitionAppendixNodes } from "@/lib/articles/navigation-data"
-import { encodeSlug } from "@/lib/articles/slug-resolver"
-import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
-import React from "react"
-import { useReaderNavigation } from "../reader-navigation/context"
+import { Link } from "@/i18n/navigation";
+import { AdvancedMarker } from "@/components/articles/advanced-marker";
+import { TriangleIcon } from "@/components/ui/icons";
+import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix";
+import { partitionAppendixNodes } from "@/lib/articles/navigation-data";
+import { encodeSlug } from "@/lib/articles/slug-resolver";
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types";
+import React from "react";
+import { useReaderNavigation } from "../reader-navigation/context";
 
 type ChapterNavRow =
   | { kind: "appendix-separator"; id: string; title: string }
-  | { kind: "node"; item: ChapterNavNode; isAppendix: boolean }
+  | { kind: "node"; item: ChapterNavNode; isAppendix: boolean };
 
-function buildChapterNavRows(
-  items: ChapterNavNode[],
-  parentIsAppendix: boolean
-): ChapterNavRow[] {
-  const { regularNodes, appendixGroups } = partitionAppendixNodes(items)
+function buildChapterNavRows(items: ChapterNavNode[], parentIsAppendix: boolean): ChapterNavRow[] {
+  const { regularNodes, appendixGroups } = partitionAppendixNodes(items);
   const rows = regularNodes.map<ChapterNavRow>((item) => ({
     kind: "node",
     item,
     isAppendix: parentIsAppendix,
-  }))
+  }));
 
   for (const { owner, nodes } of appendixGroups) {
     rows.push({
       kind: "appendix-separator",
       id: `${owner.id}-appendix-separator`,
       title: owner.title,
-    })
+    });
     for (const item of nodes) {
       rows.push({
         kind: "node",
         item,
         isAppendix: true,
-      })
+      });
     }
   }
 
-  return rows
+  return rows;
 }
 
 function FolderButton({
@@ -47,10 +44,10 @@ function FolderButton({
   folderExpanded,
   toggleFolder,
 }: {
-  itemId: string
-  title: string
-  folderExpanded: boolean
-  toggleFolder: (id: string) => void
+  itemId: string;
+  title: string;
+  folderExpanded: boolean;
+  toggleFolder: (id: string) => void;
 }) {
   return (
     <button
@@ -62,16 +59,14 @@ function FolderButton({
         font-sans text-[0.8125rem] leading-snug font-semibold text-tech-main/80
         transition-colors hover:text-tech-main-dark md:mt-1 md:min-h-7
         focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 focus:outline-none
-      ">
+      "
+    >
       <span className="flex w-4 shrink-0 items-center justify-center text-tech-main/50">
-        <TriangleIcon
-          direction={folderExpanded ? "down" : "right"}
-          className="size-3"
-        />
+        <TriangleIcon direction={folderExpanded ? "down" : "right"} className="size-3" />
       </span>
       <span>{title}</span>
     </button>
-  )
+  );
 }
 
 function ArticleLink({
@@ -81,21 +76,17 @@ function ArticleLink({
   isAppendix,
   onNavigate,
 }: {
-  item: ChapterNavNode
-  fileRoute: string
-  isActive: boolean
-  isAppendix: boolean
-  onNavigate?: () => void
+  item: ChapterNavNode;
+  fileRoute: string;
+  isActive: boolean;
+  isAppendix: boolean;
+  onNavigate?: () => void;
 }) {
   const prefix = item.isReadmeIntro
     ? "00"
     : !item.isFolder && item.index !== undefined
-      ? formatIndexPrefix(
-          item.index,
-          isAppendix,
-          item.isPreface ?? false
-        ).trim()
-      : ""
+      ? formatIndexPrefix(item.index, isAppendix, item.isPreface ?? false).trim()
+      : "";
 
   return (
     <Link
@@ -108,10 +99,12 @@ function ArticleLink({
         transition-colors focus-visible:outline-tech-main focus-visible:outline-2
         focus-visible:outline-offset-2 md:min-h-7 md:py-0.5 md:text-sm
         ${isActive ? "font-semibold text-tech-main-dark" : "text-tech-main hover:text-tech-main-dark"}
-      `}>
+      `}
+    >
       <span
         aria-hidden={!prefix}
-        className="text-center font-mono text-xs leading-none text-tech-main/55 tabular-nums">
+        className="text-center font-mono text-xs leading-none text-tech-main/55 tabular-nums"
+      >
         {prefix}
       </span>
       <span className="min-w-0">
@@ -119,7 +112,7 @@ function ArticleLink({
         {item.isAdvanced && <AdvancedMarker className="ml-1.5 -mb-0.5 align-middle" />}
       </span>
     </Link>
-  )
+  );
 }
 
 function FolderGrid({
@@ -131,28 +124,29 @@ function FolderGrid({
   folderGridRefs,
   onNavigate,
 }: {
-  itemId: string
-  isFolder: boolean
-  folderExpanded: boolean
-  items: ChapterNavNode[]
-  parentIsAppendix: boolean
-  folderGridRefs: React.RefObject<Map<string, HTMLDivElement>>
-  onNavigate?: () => void
+  itemId: string;
+  isFolder: boolean;
+  folderExpanded: boolean;
+  items: ChapterNavNode[];
+  parentIsAppendix: boolean;
+  folderGridRefs: React.RefObject<Map<string, HTMLDivElement>>;
+  onNavigate?: () => void;
 }) {
-  const collapsed = isFolder && !folderExpanded
+  const collapsed = isFolder && !folderExpanded;
 
   return (
     <div
       aria-hidden={collapsed}
       inert={collapsed ? true : undefined}
       ref={(el) => {
-        if (el) folderGridRefs.current.set(itemId, el)
-        else folderGridRefs.current.delete(itemId)
+        if (el) folderGridRefs.current.set(itemId, el);
+        else folderGridRefs.current.delete(itemId);
       }}
       className={`
         grid transition-[grid-template-rows,opacity] motion-reduce:transition-none duration-300 ease-out
         ${collapsed ? `grid-rows-[0fr] opacity-0` : `grid-rows-[1fr] opacity-100`}
-      `}>
+      `}
+    >
       <div className="overflow-hidden">
         <ChapterNavTree
           items={items}
@@ -162,7 +156,7 @@ function FolderGrid({
         />
       </div>
     </div>
-  )
+  );
 }
 
 export function ChapterNavTree({
@@ -171,10 +165,10 @@ export function ChapterNavTree({
   onNavigate,
   isNested = false,
 }: {
-  items: ChapterNavNode[]
-  parentIsAppendix?: boolean
-  onNavigate?: () => void
-  isNested?: boolean
+  items: ChapterNavNode[];
+  parentIsAppendix?: boolean;
+  onNavigate?: () => void;
+  isNested?: boolean;
 }) {
   const {
     effectivePath,
@@ -183,16 +177,13 @@ export function ChapterNavTree({
     highlightActive,
     activeItemRef,
     folderGridRefs,
-  } = useReaderNavigation()
+  } = useReaderNavigation();
 
-  const decodedPathname = decodeURIComponent(effectivePath)
-  const rows = buildChapterNavRows(items, parentIsAppendix)
+  const decodedPathname = decodeURIComponent(effectivePath);
+  const rows = buildChapterNavRows(items, parentIsAppendix);
 
   return (
-    <ul
-      className={
-        isNested ? "my-0.5 ml-2 border-l pl-2 guide-line" : "my-0.5"
-      }>
+    <ul className={isNested ? "my-0.5 ml-2 border-l pl-2 guide-line" : "my-0.5"}>
       {rows.map((row) => {
         if (row.kind === "appendix-separator") {
           return (
@@ -201,22 +192,22 @@ export function ChapterNavTree({
               className="
                 mt-2.5 mb-1 flex list-none items-center gap-2 pl-1 font-mono
                 text-xs tracking-[0.12em] text-tech-main/50 uppercase
-              ">
+              "
+            >
               <span className="h-px flex-1 bg-tech-main/25" />
               <span>{row.title}</span>
               <span className="h-px w-4 bg-tech-main/25" />
             </li>
-          )
+          );
         }
 
-        const { item, isAppendix } = row
-        const fileRoute = `/articles/${encodeSlug(item.slug)}`
-        const decodedRoute = decodeURIComponent(fileRoute)
+        const { item, isAppendix } = row;
+        const fileRoute = `/articles/${encodeSlug(item.slug)}`;
+        const decodedRoute = decodeURIComponent(fileRoute);
         const isActive =
           !item.isFolder &&
-          (decodedPathname === decodedRoute ||
-            decodedPathname === `${decodedRoute}/`)
-        const folderExpanded = item.isFolder ? isFolderExpanded(item.id) : false
+          (decodedPathname === decodedRoute || decodedPathname === `${decodedRoute}/`);
+        const folderExpanded = item.isFolder ? isFolderExpanded(item.id) : false;
 
         return (
           <li
@@ -246,7 +237,8 @@ export function ChapterNavTree({
                         ? `hover:bg-tech-main/5`
                         : ``
                 }
-             `}>
+             `}
+          >
             {item.isFolder ? (
               <FolderButton
                 itemId={item.id}
@@ -276,8 +268,8 @@ export function ChapterNavTree({
               />
             )}
           </li>
-        )
+        );
       })}
     </ul>
-  )
+  );
 }

@@ -1,6 +1,4 @@
-import { pangu } from "pangu/browser"
-import { createRehypeCJKSpacing } from "./rehype-cjk-spacing-base"
+import { pangu } from "pangu/browser";
+import { createRehypeCJKSpacing } from "./rehype-cjk-spacing-base";
 
-export const rehypeCJKSpacingBrowser = createRehypeCJKSpacing(
-  pangu.spaceText.bind(pangu)
-)
+export const rehypeCJKSpacingBrowser = createRehypeCJKSpacing(pangu.spaceText.bind(pangu));

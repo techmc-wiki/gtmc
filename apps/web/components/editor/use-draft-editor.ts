@@ -712,7 +712,9 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     if (duplicateFilePaths.length > 0) {
       toast.error(
         t("duplicatePathsError", { paths: duplicateFilePaths.join(", ") }),
-        { duration: 4000 }
+        {
+          duration: 4000,
+        }
       )
       return
     }

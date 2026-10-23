@@ -21,14 +21,9 @@ export function IframeComponent({
   allowFullScreen,
   ...props
 }: MarkdownComponentProps) {
+  // Inert presentational attributes (`frameBorder`, `marginHeight`, `scrolling`, …) are
+  // forwarded as authored; browsers ignore them on modern documents.
   const {
-    frameborder,
-    frameBorder,
-    scrolling,
-    framespacing,
-    marginheight,
-    marginwidth,
-    allowfullscreen,
     // The sandbox is derived from the source below, and `srcdoc` would load same-origin
     // inline markup in place of the embedded URL. Markdown must not control either.
     sandbox: _sandbox,

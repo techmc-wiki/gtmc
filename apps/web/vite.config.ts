@@ -64,7 +64,6 @@ export default defineConfig({
     rules: {
       "eslint/arrow-body-style": "warn",
       "eslint/default-case-last": "warn",
-      "no-control-regex": "off",
       "react-perf/jsx-no-jsx-as-prop": "off",
       "react-perf/jsx-no-new-array-as-prop": "off",
       "react-perf/jsx-no-new-function-as-prop": "off",

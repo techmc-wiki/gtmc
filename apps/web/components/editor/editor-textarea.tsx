@@ -66,9 +66,7 @@ interface EditorTextareaProps {
   saving?: boolean
   placeholder?: string
   "aria-busy"?: boolean
-  fileId?: string
   lineWrap?: boolean
-  onWrapToggle?: () => void
   canUndo?: boolean
   canRedo?: boolean
   enableSyntaxHints?: boolean
@@ -203,9 +201,7 @@ export function EditorTextarea({
   readOnly,
   saving,
   placeholder,
-  fileId,
   lineWrap = false,
-  onWrapToggle,
   canUndo = false,
   canRedo = false,
   enableSyntaxHints = false,

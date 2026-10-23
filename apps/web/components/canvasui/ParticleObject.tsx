@@ -568,7 +568,9 @@ function loadImageElement(url: string): Promise<HTMLImageElement> {
   image.addEventListener(
     "error",
     () => reject(new Error("Could not decode the image")),
-    { once: true }
+    {
+      once: true,
+    }
   )
   image.src = url
   return promise

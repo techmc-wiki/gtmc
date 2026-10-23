@@ -1,32 +1,32 @@
-import { ChevronRight } from "lucide-react"
+import { ChevronRight } from "lucide-react";
 
-import { articleUrl } from "@/lib/articles/url"
+import { articleUrl } from "@/lib/articles/url";
 
 interface BreadcrumbChapter {
-  slug: string
-  title: string
+  slug: string;
+  title: string;
 }
 
 interface RunningHeadProps {
-  chapters: BreadcrumbChapter[]
-  locale: string
-  chapterIndex?: number
-  chapterIsAppendix?: boolean
-  isPreface?: boolean
+  chapters: BreadcrumbChapter[];
+  locale: string;
+  chapterIndex?: number;
+  chapterIsAppendix?: boolean;
+  isPreface?: boolean;
 }
 
 function formatChapterLabel(
   index: number | undefined,
   isAppendix: boolean | undefined,
-  isPreface: boolean | undefined
+  isPreface: boolean | undefined,
 ): string | null {
-  if (isPreface) return "00"
-  if (index === undefined || index < 0) return null
+  if (isPreface) return "00";
+  if (index === undefined || index < 0) return null;
   if (isAppendix) {
-    if (index < 1 || index > 26) return null
-    return String.fromCharCode(64 + index)
+    if (index < 1 || index > 26) return null;
+    return String.fromCharCode(64 + index);
   }
-  return String(index).padStart(2, "0")
+  return String(index).padStart(2, "0");
 }
 
 export function RunningHead({
@@ -36,16 +36,13 @@ export function RunningHead({
   chapterIsAppendix,
   isPreface,
 }: RunningHeadProps) {
-  const label = formatChapterLabel(
-    chapterIndex,
-    chapterIsAppendix,
-    isPreface
-  )
+  const label = formatChapterLabel(chapterIndex, chapterIsAppendix, isPreface);
 
   return (
     <nav
       aria-label="Chapter"
-      className="mb-4 flex flex-wrap items-center gap-2 font-mono text-xs tracking-[0.15em] uppercase">
+      className="mb-4 flex flex-wrap items-center gap-2 font-mono text-xs tracking-[0.15em] uppercase"
+    >
       {label ? (
         <span className="bg-tech-signal text-tech-signal-ink inline-flex h-5 items-center px-1.5 text-xs font-bold tracking-wider">
           {chapterIsAppendix ? "APP" : "CH"} {label}
@@ -59,32 +56,28 @@ export function RunningHead({
         <span key={chapter.slug} className="contents">
           <a
             href={`/${locale}${articleUrl(chapter.slug)}`}
-            className="text-tech-main/70 hover:text-tech-main-dark hover:decoration-tech-main/40 transition-colors hover:underline hover:underline-offset-4">
+            className="text-tech-main/70 hover:text-tech-main-dark hover:decoration-tech-main/40 transition-colors hover:underline hover:underline-offset-4"
+          >
             {chapter.title}
           </a>
           {index < chapters.length - 1 && (
-            <ChevronRight
-              aria-hidden="true"
-              className="text-tech-main/40 size-3 shrink-0"
-            />
+            <ChevronRight aria-hidden="true" className="text-tech-main/40 size-3 shrink-0" />
           )}
         </span>
       ))}
     </nav>
-  )
+  );
 }
 
 interface ChapterEndMarkProps {
-  isAdvanced?: boolean
+  isAdvanced?: boolean;
 }
 
 export function ChapterEndMark({ isAdvanced }: ChapterEndMarkProps) {
-  const accent = isAdvanced ? "bg-tech-advanced" : "bg-tech-signal"
+  const accent = isAdvanced ? "bg-tech-advanced" : "bg-tech-signal";
 
   return (
-    <div
-      className="mt-14 flex items-center justify-center gap-4"
-      aria-hidden="true">
+    <div className="mt-14 flex items-center justify-center gap-4" aria-hidden="true">
       <span className="bg-tech-main/20 h-px w-20" />
       <span className="flex items-center gap-1.5">
         <span className="bg-tech-main/40 size-1 rotate-45" />
@@ -93,5 +86,5 @@ export function ChapterEndMark({ isAdvanced }: ChapterEndMarkProps) {
       </span>
       <span className="bg-tech-main/20 h-px w-20" />
     </div>
-  )
+  );
 }

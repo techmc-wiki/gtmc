@@ -1,36 +1,32 @@
-import path from "path"
+import path from "path";
 
 export function resolveArticleAssetPath(
   assetSrc: string | undefined,
-  articleFilePath: string
+  articleFilePath: string,
 ): string | null {
-  if (!assetSrc) return null
+  if (!assetSrc) return null;
 
-  const trimmedSrc = assetSrc.trim()
-  if (!trimmedSrc) return null
-  if (isExternalArticleAssetUrl(trimmedSrc)) return trimmedSrc
-  if (trimmedSrc.split(/[\\/]+/).includes("..")) return null
+  const trimmedSrc = assetSrc.trim();
+  if (!trimmedSrc) return null;
+  if (isExternalArticleAssetUrl(trimmedSrc)) return trimmedSrc;
+  if (trimmedSrc.split(/[\\/]+/).includes("..")) return null;
 
   const rawPath = trimmedSrc.startsWith("/")
     ? trimmedSrc.slice(1)
-    : path.join(path.dirname(articleFilePath), trimmedSrc)
-  const normalized = path.normalize(rawPath).replaceAll("\\", "/")
+    : path.join(path.dirname(articleFilePath), trimmedSrc);
+  const normalized = path.normalize(rawPath).replaceAll("\\", "/");
 
-  if (
-    normalized === ".." ||
-    normalized.startsWith("../") ||
-    path.isAbsolute(normalized)
-  ) {
-    return null
+  if (normalized === ".." || normalized.startsWith("../") || path.isAbsolute(normalized)) {
+    return null;
   }
 
-  return normalized
+  return normalized;
 }
 
 function isExternalArticleAssetUrl(assetSrc: string): boolean {
-  return assetSrc.startsWith("https://") || assetSrc.startsWith("http://")
+  return assetSrc.startsWith("https://") || assetSrc.startsWith("http://");
 }
 
 export function isLocalArticleAssetPath(assetSrc: string): boolean {
-  return !isExternalArticleAssetUrl(assetSrc)
+  return !isExternalArticleAssetUrl(assetSrc);
 }

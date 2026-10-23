@@ -1,167 +1,149 @@
-import type { NextRequest} from "next/server";
-import { NextResponse } from "next/server"
-import { CJK_TOKENIZER } from "@/lib/search/cjk-tokenizer"
-import { getSearchIndex } from "@/lib/search/search-index"
-import { searchGlossary } from "@/lib/glossary/search"
-import type { GlossarySummaryEntry } from "@/lib/glossary/manifest"
-import type { ArticleLocale } from "@gtmc/ssg/articles/types"
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { CJK_TOKENIZER } from "@/lib/search/cjk-tokenizer";
+import { getSearchIndex } from "@/lib/search/search-index";
+import { searchGlossary } from "@/lib/glossary/search";
+import type { GlossarySummaryEntry } from "@/lib/glossary/manifest";
+import type { ArticleLocale } from "@gtmc/ssg/articles/types";
 
-const GLOSSARY_RESULT_CAP = 5
+const GLOSSARY_RESULT_CAP = 5;
 
-const SEARCH_CACHE_CONTROL = "public, max-age=30, stale-while-revalidate=120"
+const SEARCH_CACHE_CONTROL = "public, max-age=30, stale-while-revalidate=120";
 
 function isValidLocale(locale: string | null): locale is ArticleLocale {
-  return locale === "zh" || locale === "en"
+  return locale === "zh" || locale === "en";
 }
 
 interface SearchResult {
-  title: string
-  slug: string
-  snippet: string | null
-  matchType: "title" | "content"
-  exactMatch: boolean
+  title: string;
+  slug: string;
+  snippet: string | null;
+  matchType: "title" | "content";
+  exactMatch: boolean;
 }
 
-type SearchMatchMap = Record<string, string[]>
+type SearchMatchMap = Record<string, string[]>;
 
 type IndexedSearchResult = SearchMatchMap & {
-  title: string
-  slug: string
-  content: string
-  match: SearchMatchMap
-}
+  title: string;
+  slug: string;
+  content: string;
+  match: SearchMatchMap;
+};
 
-function extractSnippet(
-  content: string,
-  query: string,
-  terms: string[]
-): string | null {
+function extractSnippet(content: string, query: string, terms: string[]): string | null {
   if (!content) {
-    return null
+    return null;
   }
 
-  const loweredContent = content.toLowerCase()
-  const loweredQuery = query.toLowerCase()
-  const index = loweredContent.indexOf(loweredQuery)
+  const loweredContent = content.toLowerCase();
+  const loweredQuery = query.toLowerCase();
+  const index = loweredContent.indexOf(loweredQuery);
 
   if (index === -1) {
-    let termIndex = -1
-    let matchedTerm = ""
+    let termIndex = -1;
+    let matchedTerm = "";
     for (const term of terms) {
-      const i = loweredContent.indexOf(term.toLowerCase())
+      const i = loweredContent.indexOf(term.toLowerCase());
       if (i !== -1 && (termIndex === -1 || i < termIndex)) {
-        termIndex = i
-        matchedTerm = term
+        termIndex = i;
+        matchedTerm = term;
       }
     }
 
     if (termIndex !== -1) {
-      const start = Math.max(0, termIndex - 50)
-      const end = Math.min(content.length, termIndex + matchedTerm.length + 70)
-      let snippet = content.slice(start, end).trim()
-      if (start > 0) snippet = `...${snippet}`
-      if (end < content.length) snippet = `${snippet}...`
-      return snippet
+      const start = Math.max(0, termIndex - 50);
+      const end = Math.min(content.length, termIndex + matchedTerm.length + 70);
+      let snippet = content.slice(start, end).trim();
+      if (start > 0) snippet = `...${snippet}`;
+      if (end < content.length) snippet = `${snippet}...`;
+      return snippet;
     }
 
-    const fallback = content.slice(0, 120).trim()
+    const fallback = content.slice(0, 120).trim();
     return fallback.length > 0 && fallback.length < content.length
       ? `${fallback}...`
-      : fallback || null
+      : fallback || null;
   }
 
-  const start = Math.max(0, index - 50)
-  const end = Math.min(content.length, index + query.length + 70)
-  let snippet = content.slice(start, end).trim()
+  const start = Math.max(0, index - 50);
+  const end = Math.min(content.length, index + query.length + 70);
+  let snippet = content.slice(start, end).trim();
 
   if (start > 0) {
-    snippet = `...${snippet}`
+    snippet = `...${snippet}`;
   }
   if (end < content.length) {
-    snippet = `${snippet}...`
+    snippet = `${snippet}...`;
   }
 
-  return snippet
+  return snippet;
 }
 
-function jsonResponse(
-  results: SearchResult[],
-  glossary: GlossarySummaryEntry[] = []
-) {
+function jsonResponse(results: SearchResult[], glossary: GlossarySummaryEntry[] = []) {
   return NextResponse.json(
     { results, glossary },
-    { headers: { "Cache-Control": SEARCH_CACHE_CONTROL } }
-  )
+    { headers: { "Cache-Control": SEARCH_CACHE_CONTROL } },
+  );
 }
 
 export async function GET(req: NextRequest) {
-  const query = req.nextUrl.searchParams.get("q")?.trim()
+  const query = req.nextUrl.searchParams.get("q")?.trim();
   if (!query || query.length < 2) {
-    return jsonResponse([])
+    return jsonResponse([]);
   }
 
-  const localeParam = req.nextUrl.searchParams.get("locale")
+  const localeParam = req.nextUrl.searchParams.get("locale");
   if (localeParam && !isValidLocale(localeParam)) {
-    return NextResponse.json(
-      { error: "Invalid locale. Must be 'zh' or 'en'." },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: "Invalid locale. Must be 'zh' or 'en'." }, { status: 400 });
   }
 
   // The Chinese UI already has complete navigation, so omitted locales use English.
-  const locale: ArticleLocale = (localeParam as ArticleLocale) || "en"
+  const locale: ArticleLocale = (localeParam as ArticleLocale) || "en";
 
   try {
-    const index = await getSearchIndex(locale)
+    const index = await getSearchIndex(locale);
     const rawResults = index.search(query, {
       tokenize: CJK_TOKENIZER,
       boost: { title: 2 },
       fuzzy: 0.2,
       prefix: true,
-    })
+    });
 
-    const loweredQuery = query.toLowerCase()
-    const results: SearchResult[] = []
+    const loweredQuery = query.toLowerCase();
+    const results: SearchResult[] = [];
 
     for (const result of rawResults) {
-      const { title, slug, content, match: matchMap } = result as unknown as IndexedSearchResult
-      const matchedTerms = Object.keys(matchMap)
-      const titleMatchedByTerm = matchedTerms.some((term) =>
-        matchMap[term]?.includes("title")
-      )
+      const { title, slug, content, match: matchMap } = result as unknown as IndexedSearchResult;
+      const matchedTerms = Object.keys(matchMap);
+      const titleMatchedByTerm = matchedTerms.some((term) => matchMap[term]?.includes("title"));
 
-      const titleExact = title.toLowerCase().includes(loweredQuery)
-      const contentExact = content.toLowerCase().includes(loweredQuery)
-      const matchType: "title" | "content" =
-        titleExact || titleMatchedByTerm ? "title" : "content"
+      const titleExact = title.toLowerCase().includes(loweredQuery);
+      const contentExact = content.toLowerCase().includes(loweredQuery);
+      const matchType: "title" | "content" = titleExact || titleMatchedByTerm ? "title" : "content";
 
       results.push({
         title,
         slug,
-        snippet: contentExact
-          ? extractSnippet(content, query, matchedTerms)
-          : null,
+        snippet: contentExact ? extractSnippet(content, query, matchedTerms) : null,
         matchType,
         exactMatch: titleExact || contentExact,
-      })
+      });
     }
 
     results.sort((a, b) => {
-      if (a.exactMatch && !b.exactMatch) return -1
-      if (!a.exactMatch && b.exactMatch) return 1
-      if (a.matchType === "title" && b.matchType === "content") return -1
-      if (a.matchType === "content" && b.matchType === "title") return 1
-      return 0
-    })
+      if (a.exactMatch && !b.exactMatch) return -1;
+      if (!a.exactMatch && b.exactMatch) return 1;
+      if (a.matchType === "title" && b.matchType === "content") return -1;
+      if (a.matchType === "content" && b.matchType === "title") return 1;
+      return 0;
+    });
 
-    const glossaryMatches = searchGlossary(query).slice(
-      0,
-      GLOSSARY_RESULT_CAP
-    )
+    const glossaryMatches = searchGlossary(query).slice(0, GLOSSARY_RESULT_CAP);
 
-    return jsonResponse(results.slice(0, 20), glossaryMatches)
+    return jsonResponse(results.slice(0, 20), glossaryMatches);
   } catch (error) {
-    console.error("MiniSearch query failed:", error)
-    return jsonResponse([])
+    console.error("MiniSearch query failed:", error);
+    return jsonResponse([]);
   }
 }

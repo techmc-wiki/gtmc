@@ -1,124 +1,116 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import { useSearchParams } from "next/navigation"
+import { useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 
-function performHighlight(
-  query: string,
-  containerSelector: string
-): (() => void) | undefined {
-  const container = document.querySelector(containerSelector)
-  if (!container) return
+function performHighlight(query: string, containerSelector: string): (() => void) | undefined {
+  const container = document.querySelector(containerSelector);
+  if (!container) return;
 
-  const lowerQuery = query.toLowerCase()
-  const walker = document.createTreeWalker(
-    container,
-    NodeFilter.SHOW_TEXT,
-    null
-  )
+  const lowerQuery = query.toLowerCase();
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
 
-  let targetNode: Text | null = null
-  let matchIndex = -1
+  let targetNode: Text | null = null;
+  let matchIndex = -1;
 
   while (walker.nextNode()) {
-    const textNode = walker.currentNode as Text
-    const text = textNode.textContent?.toLowerCase() ?? ""
-    const idx = text.indexOf(lowerQuery)
+    const textNode = walker.currentNode as Text;
+    const text = textNode.textContent?.toLowerCase() ?? "";
+    const idx = text.indexOf(lowerQuery);
     if (idx !== -1) {
-      targetNode = textNode
-      matchIndex = idx
-      break
+      targetNode = textNode;
+      matchIndex = idx;
+      break;
     }
   }
 
-  if (!targetNode || matchIndex === -1) return
+  if (!targetNode || matchIndex === -1) return;
 
-  const parent = targetNode.parentNode
-  if (!parent) return
+  const parent = targetNode.parentNode;
+  if (!parent) return;
 
-  const originalText = targetNode.textContent ?? ""
-  const before = originalText.slice(0, matchIndex)
-  const matched = originalText.slice(matchIndex, matchIndex + query.length)
-  const after = originalText.slice(matchIndex + query.length)
+  const originalText = targetNode.textContent ?? "";
+  const before = originalText.slice(0, matchIndex);
+  const matched = originalText.slice(matchIndex, matchIndex + query.length);
+  const after = originalText.slice(matchIndex + query.length);
 
-  const mark = document.createElement("mark")
-  mark.textContent = matched
-  mark.style.cssText =
-    `background-color: var(--color-tech-main); color: white; padding: 2px 4px; transition: all 2.4s cubic-bezier(0.4, 0, 0.2, 1);`
+  const mark = document.createElement("mark");
+  mark.textContent = matched;
+  mark.style.cssText = `background-color: var(--color-tech-main); color: white; padding: 2px 4px; transition: all 2.4s cubic-bezier(0.4, 0, 0.2, 1);`;
 
-  const fragment = document.createDocumentFragment()
-  if (before) fragment.appendChild(document.createTextNode(before))
-  fragment.appendChild(mark)
-  if (after) fragment.appendChild(document.createTextNode(after))
-  parent.replaceChild(fragment, targetNode)
+  const fragment = document.createDocumentFragment();
+  if (before) fragment.appendChild(document.createTextNode(before));
+  fragment.appendChild(mark);
+  if (after) fragment.appendChild(document.createTextNode(after));
+  parent.replaceChild(fragment, targetNode);
 
-  mark.scrollIntoView({ behavior: "smooth", block: "center" })
+  mark.scrollIntoView({ behavior: "smooth", block: "center" });
 
   const t1 = setTimeout(() => {
-    mark.style.backgroundColor = "rgb(var(--color-tech-main) / 0)"
-    mark.style.color = "inherit"
-    mark.style.padding = "0"
-  }, 3600)
+    mark.style.backgroundColor = "rgb(var(--color-tech-main) / 0)";
+    mark.style.color = "inherit";
+    mark.style.padding = "0";
+  }, 3600);
 
   const t2 = setTimeout(() => {
     if (mark.parentNode) {
-      const text = document.createTextNode(mark.textContent ?? "")
-      mark.parentNode.replaceChild(text, mark)
-      mark.parentNode?.normalize?.()
+      const text = document.createTextNode(mark.textContent ?? "");
+      mark.parentNode.replaceChild(text, mark);
+      mark.parentNode?.normalize?.();
     }
-  }, 6000)
+  }, 6000);
 
   return () => {
-    clearTimeout(t1)
-    clearTimeout(t2)
-  }
+    clearTimeout(t1);
+    clearTimeout(t2);
+  };
 }
 
 export function ArticleHighlight({
   containerSelector = "[data-article-content]",
 }: {
-  containerSelector?: string
+  containerSelector?: string;
 }) {
-  const searchParams = useSearchParams()
-  const highlightQuery = searchParams.get("highlight")
-  const didHighlightRef = useRef(false)
-  const highlightCleanupRef = useRef<(() => void) | null>(null)
+  const searchParams = useSearchParams();
+  const highlightQuery = searchParams.get("highlight");
+  const didHighlightRef = useRef(false);
+  const highlightCleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    if (!highlightQuery || highlightQuery.trim().length < 2) return
-    if (didHighlightRef.current) return
+    if (!highlightQuery || highlightQuery.trim().length < 2) return;
+    if (didHighlightRef.current) return;
 
     const timeout = setTimeout(() => {
-      if (didHighlightRef.current) return
-      didHighlightRef.current = true
+      if (didHighlightRef.current) return;
+      didHighlightRef.current = true;
       highlightCleanupRef.current =
-        performHighlight(highlightQuery.trim(), containerSelector) ?? null
+        performHighlight(highlightQuery.trim(), containerSelector) ?? null;
 
-      const url = new URL(window.location.href)
-      url.searchParams.delete("highlight")
-      window.history.replaceState(null, "", url.pathname + url.search)
-    }, 300)
+      const url = new URL(window.location.href);
+      url.searchParams.delete("highlight");
+      window.history.replaceState(null, "", url.pathname + url.search);
+    }, 300);
 
     return () => {
-      clearTimeout(timeout)
-      highlightCleanupRef.current?.()
-      highlightCleanupRef.current = null
-    }
-  }, [highlightQuery, containerSelector])
+      clearTimeout(timeout);
+      highlightCleanupRef.current?.();
+      highlightCleanupRef.current = null;
+    };
+  }, [highlightQuery, containerSelector]);
 
   useEffect(() => {
     const handleHighlightEvent = (e: Event) => {
-      const customEvent = e as CustomEvent<{ query: string }>
+      const customEvent = e as CustomEvent<{ query: string }>;
       if (customEvent.detail?.query) {
-        performHighlight(customEvent.detail.query, containerSelector)
+        performHighlight(customEvent.detail.query, containerSelector);
       }
-    }
+    };
 
-    window.addEventListener("highlight-search", handleHighlightEvent)
+    window.addEventListener("highlight-search", handleHighlightEvent);
     return () => {
-      window.removeEventListener("highlight-search", handleHighlightEvent)
-    }
-  }, [containerSelector])
+      window.removeEventListener("highlight-search", handleHighlightEvent);
+    };
+  }, [containerSelector]);
 
-  return null
+  return null;
 }

@@ -1,32 +1,32 @@
-import { unified } from "unified"
-import remarkParse from "remark-parse"
-import remarkRehype from "remark-rehype"
-import rehypeStringify from "rehype-stringify"
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkRehype from "remark-rehype";
+import rehypeStringify from "rehype-stringify";
 
-import type { RehypeShikiPlugin } from "./syntax/rehype-shiki"
-import type { CodeReference } from "./code-provenance"
-import { buildRemarkPlugins, buildRehypePlugins } from "./pipeline/core"
-import { rehypeCJKSpacing } from "./transforms/rehype-cjk-spacing"
+import type { RehypeShikiPlugin } from "./syntax/rehype-shiki";
+import type { CodeReference } from "./code-provenance";
+import { buildRemarkPlugins, buildRehypePlugins } from "./pipeline/core";
+import { rehypeCJKSpacing } from "./transforms/rehype-cjk-spacing";
 
 interface PdfPipelineOptions {
-  shikiPlugin?: RehypeShikiPlugin
-  codeReferences?: readonly CodeReference[]
-  articleSlug?: string
-  locale?: "en" | "zh"
+  shikiPlugin?: RehypeShikiPlugin;
+  codeReferences?: readonly CodeReference[];
+  articleSlug?: string;
+  locale?: "en" | "zh";
 }
 
 export async function renderMarkdownToHtml(
   content: string,
-  options: PdfPipelineOptions
+  options: PdfPipelineOptions,
 ): Promise<string> {
   const remarkPlugins = buildRemarkPlugins({
     includeWikilinks: true,
-  })
+  });
   const rehypePlugins = buildRehypePlugins({
     shikiPlugin: options.shikiPlugin,
     codeReferences: options.codeReferences,
     cjkSpacingPlugin: rehypeCJKSpacing,
-  })
+  });
 
   const file = await unified()
     .use(remarkParse)
@@ -34,27 +34,25 @@ export async function renderMarkdownToHtml(
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypePlugins)
     .use(rehypeStringify, { allowDangerousHtml: true })
-    .process(content)
+    .process(content);
 
-  let html = String(file)
+  let html = String(file);
   html = html.replaceAll(
     /<a\s+href="[^"]*"([^>]*class="[^"]*wikilink[^"]*"[^>]*)>(.*?)<\/a>/gi,
-    "<span$1>$2</span>"
-  )
+    "<span$1>$2</span>",
+  );
 
-  const locale = options.locale ?? "en"
-  const notice = locale === "zh" ? "该图为动图。" : "This figure is animated."
-  const linkText = locale === "zh" ? "查看原图" : "View original"
+  const locale = options.locale ?? "en";
+  const notice = locale === "zh" ? "该图为动图。" : "This figure is animated.";
+  const linkText = locale === "zh" ? "查看原图" : "View original";
   const baseUrl = options.articleSlug
     ? `https://techmc.wiki/${locale}/articles/${options.articleSlug}`
-    : ""
-  const sourceLink = baseUrl
-    ? ` <a href="${baseUrl}" class="gif-source-link">${linkText}</a>`
-    : ""
+    : "";
+  const sourceLink = baseUrl ? ` <a href="${baseUrl}" class="gif-source-link">${linkText}</a>` : "";
   html = html.replaceAll(
     /(<img[^>]*src="(?!data:)[^"]*\.gif[^>]*\/?\s*>)/gi,
-    `$1<p class="gif-caption">▶ ${notice}${sourceLink}</p>`
-  )
+    `$1<p class="gif-caption">▶ ${notice}${sourceLink}</p>`,
+  );
 
-  return html
+  return html;
 }

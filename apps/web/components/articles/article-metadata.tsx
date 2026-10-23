@@ -1,41 +1,38 @@
-"use client"
+"use client";
 
-import { ChevronDown } from "lucide-react"
-import { CopyButton } from "@/components/ui/copy-button"
-import { IconButton } from "@/components/ui/icon-button"
-import { Badge } from "@/components/ui/shadcn/badge"
-import { Separator } from "@/components/ui/shadcn/separator"
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/shadcn/avatar"
+import { ChevronDown } from "lucide-react";
+import { CopyButton } from "@/components/ui/copy-button";
+import { IconButton } from "@/components/ui/icon-button";
+import { Badge } from "@/components/ui/shadcn/badge";
+import { Separator } from "@/components/ui/shadcn/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/shadcn/avatar";
 
-import { useCallback, useId, useMemo, useState, type ReactNode } from "react"
-import Image from "next/image"
-import { useTranslations } from "next-intl"
-import { Link } from "@/i18n/navigation"
-import { cn } from "@/lib/cn"
-import { AdvancedMarker } from "@/components/articles/advanced-marker"
-import { getArticleAssetPublicUrl } from "@/lib/articles/url"
-import { formatAbsoluteTime, formatRelativeTime } from "@/lib/format-time"
+import { useCallback, useId, useMemo, useState, type ReactNode } from "react";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/cn";
+import { AdvancedMarker } from "@/components/articles/advanced-marker";
+import { getArticleAssetPublicUrl } from "@/lib/articles/url";
+import { formatAbsoluteTime, formatRelativeTime } from "@/lib/format-time";
 
-import { useMounted } from "@/hooks/use-mounted"
+import { useMounted } from "@/hooks/use-mounted";
 
 interface ArticleBannerProps {
-  src: string
-  alt: string
+  src: string;
+  alt: string;
 }
 
 function ArticleBanner({ src, alt }: ArticleBannerProps) {
-  const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading")
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
 
   return (
     <figure className="border-tech-main/40 bg-surface-overlay/60 mb-8 border">
       {status !== "error" && (
         <div
           className={`t-skel relative aspect-21/9 w-full overflow-hidden ${status === "loaded" ? "is-revealed" : ""}`}
-          aria-busy={status === "loading"}>
+          aria-busy={status === "loading"}
+        >
           <div className="t-skel-skeleton is-pulsing pointer-events-none" aria-hidden="true">
             <div className="bg-tech-accent/20 size-full" />
           </div>
@@ -58,17 +55,17 @@ function ArticleBanner({ src, alt }: ArticleBannerProps) {
         {alt}
       </figcaption>
     </figure>
-  )
+  );
 }
 
 interface ArticleLicenseNoticeProps {
-  title: string
-  canonicalUrl: string
-  attributionDate?: string
-  authors?: string[]
+  title: string;
+  canonicalUrl: string;
+  attributionDate?: string;
+  authors?: string[];
 }
 
-const DEFAULT_AUTHORS: string[] = []
+const DEFAULT_AUTHORS: string[] = [];
 
 function ArticleLicenseNotice({
   title,
@@ -76,22 +73,22 @@ function ArticleLicenseNotice({
   attributionDate,
   authors = DEFAULT_AUTHORS,
 }: ArticleLicenseNoticeProps) {
-  const t = useTranslations("ArticleMeta")
-  const orderedAuthors = [...new Set(authors)]
+  const t = useTranslations("ArticleMeta");
+  const orderedAuthors = [...new Set(authors)];
   const sortedAuthors = [...orderedAuthors].toSorted((left, right) =>
-    left.localeCompare(right, undefined, { sensitivity: "base" })
-  )
+    left.localeCompare(right, undefined, { sensitivity: "base" }),
+  );
   const formattedAttributionDate = attributionDate
     ? formatAbsoluteTime(attributionDate, false)
-    : null
+    : null;
   const attributionDateLabel =
     formattedAttributionDate && formattedAttributionDate !== "Invalid Date"
       ? formattedAttributionDate
-      : null
+      : null;
   const attributionAuthors =
     orderedAuthors.length > 7
       ? [orderedAuthors[0], orderedAuthors.at(-1), "et al."]
-      : sortedAuthors
+      : sortedAuthors;
   const attributionLabel = [
     `“${title}” - Graduate Texts in Minecraft (${canonicalUrl})`,
     attributionAuthors.length > 0 ? attributionAuthors.join(", ") : null,
@@ -99,7 +96,7 @@ function ArticleLicenseNotice({
     "CC BY-NC-SA 4.0",
   ]
     .filter(Boolean)
-    .join(", ")
+    .join(", ");
 
   return (
     <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -111,7 +108,8 @@ function ArticleLicenseNotice({
           underline decoration-tech-main/30 underline-offset-4
           transition-colors hover:text-tech-main-dark
           hover:decoration-tech-main-dark
-        ">
+        "
+      >
         CC BY-NC-SA 4.0
       </Link>
       <CopyButton
@@ -121,18 +119,18 @@ function ArticleLicenseNotice({
         failedLabel={t("copyFailed")}
       />
     </span>
-  )
+  );
 }
 
 interface ArticleMetadataLayoutProps {
-  title: string
-  filePath: string
-  isAdvanced?: boolean
-  isRevising?: boolean
-  bannerPath?: string | null
-  bannerAlt?: string
-  pathLabel?: string
-  children: ReactNode
+  title: string;
+  filePath: string;
+  isAdvanced?: boolean;
+  isRevising?: boolean;
+  bannerPath?: string | null;
+  bannerAlt?: string;
+  pathLabel?: string;
+  children: ReactNode;
 }
 
 function ArticleMetadataLayout({
@@ -145,7 +143,7 @@ function ArticleMetadataLayout({
   pathLabel = "PATH:",
   children,
 }: ArticleMetadataLayoutProps) {
-  const t = useTranslations("ArticleMeta")
+  const t = useTranslations("ArticleMeta");
 
   return (
     <header>
@@ -154,7 +152,8 @@ function ArticleMetadataLayout({
           relative mb-5 border guide-line bg-surface-overlay/80 p-3
           font-mono text-xs text-tech-main
           sm:mb-6 sm:p-3
-        ">
+        "
+      >
         <div className="hidden flex-wrap items-center gap-x-3 gap-y-2 text-tech-main/50 sm:flex">
           {isRevising ? (
             <span
@@ -163,7 +162,8 @@ function ArticleMetadataLayout({
                 font-mono text-xs font-bold tracking-widest
                 text-amber-700 uppercase select-none
                 dark:text-amber-300
-              ">
+              "
+            >
               {t("underRevision")}
             </span>
           ) : null}
@@ -173,32 +173,27 @@ function ArticleMetadataLayout({
           {isAdvanced && <AdvancedMarker className="-ml-1" />}
         </div>
 
-        <div className="flex flex-col gap-3 sm:mt-2 sm:gap-4">
-          {children}
-        </div>
+        <div className="flex flex-col gap-3 sm:mt-2 sm:gap-4">{children}</div>
       </div>
 
       {bannerPath && (
-        <ArticleBanner
-          src={getArticleAssetPublicUrl(bannerPath)}
-          alt={bannerAlt || title}
-        />
+        <ArticleBanner src={getArticleAssetPublicUrl(bannerPath)} alt={bannerAlt || title} />
       )}
     </header>
-  )
+  );
 }
 
 interface ArticleMetadataAnonymousProps {
-  title: string
-  canonicalUrl: string
-  attributionDate?: string
-  filePath: string
-  wordCount: number
-  readingTime: number
-  isAdvanced?: boolean
-  isRevising?: boolean
-  bannerPath?: string | null
-  bannerAlt?: string
+  title: string;
+  canonicalUrl: string;
+  attributionDate?: string;
+  filePath: string;
+  wordCount: number;
+  readingTime: number;
+  isAdvanced?: boolean;
+  isRevising?: boolean;
+  bannerPath?: string | null;
+  bannerAlt?: string;
 }
 
 export function ArticleMetadataAnonymous({
@@ -213,7 +208,7 @@ export function ArticleMetadataAnonymous({
   bannerPath,
   bannerAlt,
 }: ArticleMetadataAnonymousProps) {
-  const t = useTranslations("ArticleMeta")
+  const t = useTranslations("ArticleMeta");
 
   return (
     <ArticleMetadataLayout
@@ -223,13 +218,15 @@ export function ArticleMetadataAnonymous({
       isRevising={isRevising}
       bannerPath={bannerPath}
       bannerAlt={bannerAlt}
-      pathLabel={t("pathLabel")}>
+      pathLabel={t("pathLabel")}
+    >
       <dl
         className="
           grid grid-cols-1 gap-y-2.5 text-xs
           md:grid-cols-[auto_minmax(0,1fr)] md:items-baseline md:gap-x-4
           md:gap-y-2
-        ">
+        "
+      >
         <dt className="text-tech-main/55">{t("wordCount")}</dt>
         <dd className="text-tech-main">{wordCount.toLocaleString()}</dd>
 
@@ -248,36 +245,30 @@ export function ArticleMetadataAnonymous({
         </dd>
       </dl>
     </ArticleMetadataLayout>
-  )
+  );
 }
 
 interface ArticleMetadataFullProps {
-  title: string
-  author: string
-  coAuthors?: string[]
-  createdAt: string
-  lastModified: string
-  canonicalUrl: string
-  filePath: string
-  wordCount: number
-  readingTime: number
-  isAdvanced?: boolean
-  isRevising?: boolean
-  bannerPath?: string | null
-  bannerAlt?: string
+  title: string;
+  author: string;
+  coAuthors?: string[];
+  createdAt: string;
+  lastModified: string;
+  canonicalUrl: string;
+  filePath: string;
+  wordCount: number;
+  readingTime: number;
+  isAdvanced?: boolean;
+  isRevising?: boolean;
+  bannerPath?: string | null;
+  bannerAlt?: string;
 }
 
 function getAvatarUrl(username: string) {
-  return `https://github.com/${username}.png`
+  return `https://github.com/${username}.png`;
 }
 
-function ContributorChip({
-  handle,
-  isPrimary,
-}: {
-  handle: string
-  isPrimary: boolean
-}) {
+function ContributorChip({ handle, isPrimary }: { handle: string; isPrimary: boolean }) {
   return (
     <li>
       <Link
@@ -286,7 +277,8 @@ function ContributorChip({
           group/contributor flex min-h-11 items-center gap-1.5 py-0.5
           text-xs text-tech-main transition-colors
           hover:text-tech-main-dark sm:min-h-8
-        ">
+        "
+      >
         <Avatar className="border guide-line size-5 shrink-0 sm:size-6">
           <AvatarImage asChild src={getAvatarUrl(handle)}>
             <Image
@@ -302,23 +294,25 @@ function ContributorChip({
             className="
               bg-transparent font-mono text-xs font-bold
               tracking-widest text-tech-main/50 uppercase
-            ">
+            "
+          >
             {handle[0]}
           </AvatarFallback>
         </Avatar>
         <span
           className={cn(
             "underline decoration-tech-main/30 underline-offset-4 group-hover/contributor:decoration-tech-main-dark",
-            isPrimary && "font-medium text-tech-main-dark"
-          )}>
+            isPrimary && "font-medium text-tech-main-dark",
+          )}
+        >
           {handle}
         </span>
       </Link>
     </li>
-  )
+  );
 }
 
-const DEFAULT_CO_AUTHORS: string[] = []
+const DEFAULT_CO_AUTHORS: string[] = [];
 
 export function ArticleMetadataFull({
   title,
@@ -335,24 +329,21 @@ export function ArticleMetadataFull({
   bannerPath,
   bannerAlt,
 }: ArticleMetadataFullProps) {
-  const t = useTranslations("ArticleMeta")
-  const [isCollapsed, setIsCollapsed] = useState(true)
-  const detailsId = useId()
+  const t = useTranslations("ArticleMeta");
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const detailsId = useId();
   // Prerender-safe timestamp: absolute date in server HTML ("now" would make
   // the segment dynamic under cacheComponents), upgraded to relative on mount.
-  const isMounted = useMounted()
+  const isMounted = useMounted();
   const lastEditedLabel = isMounted
     ? formatRelativeTime(lastModified)
-    : formatAbsoluteTime(lastModified, false)
+    : formatAbsoluteTime(lastModified, false);
   // Preserve byline order while removing handles repeated across author sources.
-  const allContributors = useMemo(
-    () => [...new Set([author, ...coAuthors])],
-    [author, coAuthors]
-  )
+  const allContributors = useMemo(() => [...new Set([author, ...coAuthors])], [author, coAuthors]);
 
   const toggleCollapsed = useCallback(() => {
-    setIsCollapsed((current) => !current)
-  }, [])
+    setIsCollapsed((current) => !current);
+  }, []);
 
   const collapseButton = useMemo(
     () => (
@@ -362,17 +353,16 @@ export function ArticleMetadataFull({
         onClick={toggleCollapsed}
         aria-expanded={!isCollapsed}
         aria-controls={detailsId}
-        aria-label={
-          isCollapsed ? t("expandMetadata") : t("collapseMetadata")
-        }
-        label={isCollapsed ? t("expandMetadata") : t("collapseMetadata")}>
+        aria-label={isCollapsed ? t("expandMetadata") : t("collapseMetadata")}
+        label={isCollapsed ? t("expandMetadata") : t("collapseMetadata")}
+      >
         <span className="t-acc-chevron" aria-hidden="true">
           <ChevronDown className="size-4" />
         </span>
       </IconButton>
     ),
-    [toggleCollapsed, isCollapsed, detailsId, t]
-  )
+    [toggleCollapsed, isCollapsed, detailsId, t],
+  );
 
   return (
     <ArticleMetadataLayout
@@ -382,14 +372,16 @@ export function ArticleMetadataFull({
       isRevising={isRevising}
       bannerPath={bannerPath}
       bannerAlt={bannerAlt}
-      pathLabel={t("pathLabel")}>
+      pathLabel={t("pathLabel")}
+    >
       <div className="t-acc flex flex-col" data-open={!isCollapsed}>
         <div className="flex items-center gap-3">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-tech-main/65">
             <span className="inline-flex items-center gap-1.5">
               <Link
                 href={`/authors/${encodeURIComponent(author)}`}
-                className="text-tech-main underline decoration-tech-main/30 underline-offset-4">
+                className="text-tech-main underline decoration-tech-main/30 underline-offset-4"
+              >
                 {author}
               </Link>
               {coAuthors.length > 0 && (
@@ -398,24 +390,15 @@ export function ArticleMetadataFull({
                 </Badge>
               )}
             </span>
-            <Separator
-              orientation="vertical"
-              className="bg-tech-main/35 h-3"
-            />
+            <Separator orientation="vertical" className="bg-tech-main/35 h-3" />
             <span>
               {t("wordCount")} {wordCount.toLocaleString()}
             </span>
-            <Separator
-              orientation="vertical"
-              className="bg-tech-main/35 h-3"
-            />
+            <Separator orientation="vertical" className="bg-tech-main/35 h-3" />
             <span>
               {t("estReadTime")} {readingTime} {t("minuteUnit")}
             </span>
-            <Separator
-              orientation="vertical"
-              className="bg-tech-main/35 h-3"
-            />
+            <Separator orientation="vertical" className="bg-tech-main/35 h-3" />
             <span>
               {t("lastEdited")} {lastEditedLabel}
             </span>
@@ -427,7 +410,8 @@ export function ArticleMetadataFull({
           id={detailsId}
           aria-hidden={isCollapsed}
           inert={isCollapsed ? true : undefined}
-          className="t-acc-panel">
+          className="t-acc-panel"
+        >
           <div className="t-acc-panel-inner min-h-0">
             <div className="mt-3 border-t guide-line pt-3">
               <dl
@@ -435,10 +419,9 @@ export function ArticleMetadataFull({
                   grid grid-cols-1 gap-y-2.5 text-xs
                   md:grid-cols-[auto_minmax(0,1fr)] md:items-baseline md:gap-x-4
                   md:gap-y-2
-                ">
-                <dt className="text-tech-main/55">
-                  {t("contributorsLabel")}
-                </dt>
+                "
+              >
+                <dt className="text-tech-main/55">{t("contributorsLabel")}</dt>
                 <dd>
                   <ul className="flex flex-wrap items-center gap-x-4">
                     {allContributors.map((contributor, index) => (
@@ -453,16 +436,12 @@ export function ArticleMetadataFull({
 
                 <dt className="text-tech-main/55">{t("created")}</dt>
                 <dd className="text-tech-main">
-                  <time dateTime={createdAt}>
-                    {formatAbsoluteTime(createdAt, false)}
-                  </time>
+                  <time dateTime={createdAt}>{formatAbsoluteTime(createdAt, false)}</time>
                 </dd>
 
                 <dt className="text-tech-main/55">{t("lastEdited")}</dt>
                 <dd className="text-tech-main">
-                  <time dateTime={lastModified}>
-                    {formatAbsoluteTime(lastModified, false)}
-                  </time>
+                  <time dateTime={lastModified}>{formatAbsoluteTime(lastModified, false)}</time>
                 </dd>
 
                 <dt className="text-tech-main/55">{t("urlLabel")}</dt>
@@ -471,7 +450,8 @@ export function ArticleMetadataFull({
                     className="
                       min-w-0 flex-1 truncate border guide-line
                       bg-tech-accent/10 px-1.5 py-0.5
-                    ">
+                    "
+                  >
                     {canonicalUrl}
                   </code>
                   <CopyButton
@@ -482,9 +462,7 @@ export function ArticleMetadataFull({
                   />
                 </dd>
 
-                <dt className="text-tech-main/55">
-                  {t("reuseLicenseTitle")}
-                </dt>
+                <dt className="text-tech-main/55">{t("reuseLicenseTitle")}</dt>
                 <dd>
                   <ArticleLicenseNotice
                     title={title}
@@ -499,5 +477,5 @@ export function ArticleMetadataFull({
         </div>
       </div>
     </ArticleMetadataLayout>
-  )
+  );
 }

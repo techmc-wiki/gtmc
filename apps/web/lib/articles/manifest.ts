@@ -1,4 +1,4 @@
-import type { ArticleEntry, ArticleLocale } from "@gtmc/ssg/articles/types"
+import type { ArticleEntry, ArticleLocale } from "@gtmc/ssg/articles/types";
 import { routing } from "@/i18n/routing";
 import manifestData from "@/data/manifest.json";
 import { type ArticleTreeNode } from "@/lib/github";
@@ -41,18 +41,13 @@ export function loadArticleManifest(): Record<string, ArticleEntry> {
     raw = fs.readFileSync(manifestPath, "utf-8");
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
-      console.warn(
-        `[article-manifest] Missing article manifest: ${manifestPath}`,
-      );
+      console.warn(`[article-manifest] Missing article manifest: ${manifestPath}`);
       return {};
     }
 
-    throw new Error(
-      `[article-manifest] Failed to load article manifest: ${manifestPath}`,
-      {
-        cause: error,
-      },
-    );
+    throw new Error(`[article-manifest] Failed to load article manifest: ${manifestPath}`, {
+      cause: error,
+    });
   }
 
   return parseArticleManifest(raw, manifestPath);
@@ -97,33 +92,23 @@ export function getManifestStats(locale: ArticleLocale): ManifestStats {
   };
 }
 
-function parseArticleManifest(
-  raw: string,
-  manifestPath: string,
-): Record<string, ArticleEntry> {
+function parseArticleManifest(raw: string, manifestPath: string): Record<string, ArticleEntry> {
   try {
     return JSON.parse(raw) as Record<string, ArticleEntry>;
   } catch (error) {
-    throw new Error(
-      `[article-manifest] Failed to parse article manifest: ${manifestPath}`,
-      {
-        cause: error,
-      },
-    );
+    throw new Error(`[article-manifest] Failed to parse article manifest: ${manifestPath}`, {
+      cause: error,
+    });
   }
 }
 
-export async function getArticleManifest(): Promise<
-  Record<string, ArticleEntry>
-> {
+export async function getArticleManifest(): Promise<Record<string, ArticleEntry>> {
   return loadArticleManifest();
 }
 
 const localTreeCache = new Map<ArticleLocale, ArticleTreeNode[]>();
 
-export async function getArticleTree(
-  locale: ArticleLocale,
-): Promise<ArticleTreeNode[]> {
+export async function getArticleTree(locale: ArticleLocale): Promise<ArticleTreeNode[]> {
   const cached = localTreeCache.get(locale);
   if (cached) return cached;
 
@@ -133,19 +118,14 @@ export async function getArticleTree(
     return tree;
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
-      console.warn(
-        "[article-manifest] Failed to build local tree from article manifest",
-        error,
-      );
+      console.warn("[article-manifest] Failed to build local tree from article manifest", error);
     }
   }
 
   return [];
 }
 
-async function buildLocalTree(
-  locale: ArticleLocale,
-): Promise<ArticleTreeNode[]> {
+async function buildLocalTree(locale: ArticleLocale): Promise<ArticleTreeNode[]> {
   const manifest = await getArticleManifest();
   const entries = Object.values(manifest);
   if (entries.length === 0) {
@@ -184,11 +164,7 @@ function buildTreeNode(
     return null;
   }
 
-  if (
-    entry.isFolder &&
-    children.length === 0 &&
-    !entry.availableLocales.includes(locale)
-  ) {
+  if (entry.isFolder && children.length === 0 && !entry.availableLocales.includes(locale)) {
     return null;
   }
 
@@ -217,11 +193,7 @@ function buildTreeNode(
   return node;
 }
 
-function compareEntries(
-  a: ArticleEntry,
-  b: ArticleEntry,
-  locale: ArticleLocale,
-): number {
+function compareEntries(a: ArticleEntry, b: ArticleEntry, locale: ArticleLocale): number {
   if (a.isFolder === b.isFolder) {
     return getNodeTitle(a, locale).localeCompare(getNodeTitle(b, locale));
   }
@@ -240,12 +212,7 @@ function getNodeTitle(entry: ArticleEntry, locale: ArticleLocale): string {
   }
 
   if (locale === routing.defaultLocale) {
-    return (
-      entry.titleByLocale[locale]?.trim() ||
-      chapterTitle ||
-      fileTitle ||
-      slugTitle
-    );
+    return entry.titleByLocale[locale]?.trim() || chapterTitle || fileTitle || slugTitle;
   }
 
   if (entry.isPreface) {
@@ -253,20 +220,10 @@ function getNodeTitle(entry: ArticleEntry, locale: ArticleLocale): string {
   }
 
   if (entry.isAppendix) {
-    return (
-      chapterTitle ||
-      entry.titleByLocale[locale]?.trim() ||
-      fileTitle ||
-      slugTitle
-    );
+    return chapterTitle || entry.titleByLocale[locale]?.trim() || fileTitle || slugTitle;
   }
 
-  return (
-    chapterTitle ||
-    entry.titleByLocale[locale]?.trim() ||
-    fileTitle ||
-    slugTitle
-  );
+  return chapterTitle || entry.titleByLocale[locale]?.trim() || fileTitle || slugTitle;
 }
 
 export function getLocalizedArticleMetadata(
@@ -308,20 +265,12 @@ export async function getLocalizedArticleEntry(
 /**
  * Reads locale metadata through a JSON import so these helpers stay client-safe.
  */
-const manifest = manifestData as Record<
-  string,
-  { availableLocales: ArticleLocale[] }
->;
+const manifest = manifestData as Record<string, { availableLocales: ArticleLocale[] }>;
 
-export function hasArticleLocale(
-  slug: string,
-  locale: ArticleLocale,
-): boolean {
+export function hasArticleLocale(slug: string, locale: ArticleLocale): boolean {
   return manifest[slug]?.availableLocales.includes(locale) ?? false;
 }
 
-export function getArticleAvailableLocales(
-  slug: string,
-): ArticleLocale[] {
+export function getArticleAvailableLocales(slug: string): ArticleLocale[] {
   return manifest[slug]?.availableLocales ?? [];
 }

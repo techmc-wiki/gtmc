@@ -1,5 +1,5 @@
-import type { Root, Paragraph, Text, Image, Link } from "mdast"
-import { visit } from "unist-util-visit"
+import type { Root, Paragraph, Text, Image, Link } from "mdast";
+import { visit } from "unist-util-visit";
 
 /**
  * Regex for Obsidian-style wikilinks.
@@ -13,14 +13,14 @@ import { visit } from "unist-util-visit"
  *   - `[[display|target]]`       (link with display text)
  *   - `[[target]]`               (link without display text)
  */
-const WIKILINK_REGEX = /(!?)\[\[([^\]]+)\]\]/g
+const WIKILINK_REGEX = /(!?)\[\[([^\]]+)\]\]/g;
 
 /**
  * Encode URL-invalid characters (spaces, Chinese, `#`, `?`) while preserving
  * path separators and other valid URL characters.
  */
 function urlEncode(str: string): string {
-  return encodeURI(str).replaceAll("#", "%23").replaceAll("?", "%3F")
+  return encodeURI(str).replaceAll("#", "%23").replaceAll("?", "%3F");
 }
 
 /**
@@ -36,66 +36,66 @@ function urlEncode(str: string): string {
  */
 export function remarkWikilinks() {
   return (tree: Root) => {
-    if (!tree || !tree.children) return
+    if (!tree || !tree.children) return;
 
     visit(tree, "paragraph", (node: Paragraph) => {
-      if (!node.children || node.children.length === 0) return
+      if (!node.children || node.children.length === 0) return;
 
-      const newChildren: Paragraph["children"] = []
+      const newChildren: Paragraph["children"] = [];
 
       for (const child of node.children) {
         if (child.type !== "text") {
-          newChildren.push(child)
-          continue
+          newChildren.push(child);
+          continue;
         }
 
-        const text = (child as Text).value
-        let hasMatch = false
-        let lastIndex = 0
-        let match: RegExpExecArray | null
+        const text = (child as Text).value;
+        let hasMatch = false;
+        let lastIndex = 0;
+        let match: RegExpExecArray | null;
 
         // Reset regex state before each text node
-        WIKILINK_REGEX.lastIndex = 0
+        WIKILINK_REGEX.lastIndex = 0;
 
         while ((match = WIKILINK_REGEX.exec(text)) !== null) {
-          hasMatch = true
-          const isImage = match[1] === "!"
-          const inner = match[2]
-          const matchStart = match.index
-          const matchLength = match[0].length
+          hasMatch = true;
+          const isImage = match[1] === "!";
+          const inner = match[2];
+          const matchStart = match.index;
+          const matchLength = match[0].length;
 
           if (matchStart > lastIndex) {
             newChildren.push({
               type: "text",
               value: text.slice(lastIndex, matchStart),
-            } as Text)
+            } as Text);
           }
 
           if (isImage) {
-            const pipeIndex = inner.indexOf("|")
-            const filename = pipeIndex >= 0 ? inner.slice(0, pipeIndex) : inner
-            const alt = pipeIndex >= 0 ? inner.slice(pipeIndex + 1) : filename
+            const pipeIndex = inner.indexOf("|");
+            const filename = pipeIndex >= 0 ? inner.slice(0, pipeIndex) : inner;
+            const alt = pipeIndex >= 0 ? inner.slice(pipeIndex + 1) : filename;
 
             newChildren.push({
               type: "image",
               url: urlEncode(filename),
               alt: alt,
               title: null,
-            } as Image)
+            } as Image);
           } else {
-            const pipeIndex = inner.indexOf("|")
-            const display = pipeIndex >= 0 ? inner.slice(0, pipeIndex) : inner
-            const target = pipeIndex >= 0 ? inner.slice(pipeIndex + 1) : inner
+            const pipeIndex = inner.indexOf("|");
+            const display = pipeIndex >= 0 ? inner.slice(0, pipeIndex) : inner;
+            const target = pipeIndex >= 0 ? inner.slice(pipeIndex + 1) : inner;
 
             newChildren.push({
               type: "link",
               url: urlEncode(target),
               title: null,
               children: [{ type: "text", value: display } as Text],
-            } as Link)
+            } as Link);
           }
 
-          lastIndex = matchStart + matchLength
+          lastIndex = matchStart + matchLength;
         }
 
         if (hasMatch) {
@@ -103,14 +103,14 @@ export function remarkWikilinks() {
             newChildren.push({
               type: "text",
               value: text.slice(lastIndex),
-            } as Text)
+            } as Text);
           }
         } else {
-          newChildren.push(child)
+          newChildren.push(child);
         }
       }
 
-      node.children = newChildren
-    })
-  }
+      node.children = newChildren;
+    });
+  };
 }

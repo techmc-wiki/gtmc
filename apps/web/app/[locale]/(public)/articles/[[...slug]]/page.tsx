@@ -1,156 +1,142 @@
-import path from "node:path"
-import { Suspense, type ReactNode } from "react"
+import path from "node:path";
+import { Suspense, type ReactNode } from "react";
 // eslint-disable-next-line import/no-unassigned-import
-import "katex/dist/katex.min.css"
-import type { Metadata } from "next"
-import { notFound, permanentRedirect } from "next/navigation"
-import { getTranslations } from "next-intl/server"
-import { ArrowRight } from "lucide-react"
+import "katex/dist/katex.min.css";
+import type { Metadata } from "next";
+import { notFound, permanentRedirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { ArrowRight } from "lucide-react";
 import {
   calculateReadingMetrics,
   ensureMetaDescriptionLength,
   generateDescription,
   MarkdownRenderer,
-} from "@/lib/markdown"
-import { getCachedRehypeShiki } from "@gtmc/ssg/markdown/syntax/rehype-shiki"
-import { getArticleAvailableLocales, hasArticleLocale, loadArticleManifest } from "@/lib/articles/manifest"
-import { type ArticleLocale } from "@gtmc/ssg/articles/types"
+} from "@/lib/markdown";
+import { getCachedRehypeShiki } from "@gtmc/ssg/markdown/syntax/rehype-shiki";
 import {
-  resolveAuthorPerson,
-  resolveProfileHandle,
-} from "@/lib/articles/person-resolver"
+  getArticleAvailableLocales,
+  hasArticleLocale,
+  loadArticleManifest,
+} from "@/lib/articles/manifest";
+import { type ArticleLocale } from "@gtmc/ssg/articles/types";
+import { resolveAuthorPerson, resolveProfileHandle } from "@/lib/articles/person-resolver";
 import {
   getCachedArticleTree,
   getCachedLocalizedArticleEntry,
   getCachedSlugForFilePath,
-} from "@/lib/articles/manifest-cached"
-import { getArticleContentBySlug } from "@/lib/articles/content"
-import { resolveArticleAssetPath } from "@gtmc/ssg/articles/article-asset-path"
+} from "@/lib/articles/manifest-cached";
+import { getArticleContentBySlug } from "@/lib/articles/content";
+import { resolveArticleAssetPath } from "@gtmc/ssg/articles/article-asset-path";
 import {
   resolveArticleLocale,
   resolveArticleRequest,
   type ArticleTreeNode,
-} from "@/lib/articles/article-request"
-import {
-  embedTitleInMarkdown,
-  formatArticleDisplayTitle,
-} from "@/lib/articles/article-title"
-import { articleUrl, getArticleAssetPublicUrl } from "@/lib/articles/url"
-import { decodeSlugPath, encodeSlug } from "@/lib/articles/slug-resolver"
-import { getSiteUrl } from "@/lib/site-url"
-import { serializeJsonLd } from "@/lib/seo/json-ld"
+} from "@/lib/articles/article-request";
+import { embedTitleInMarkdown, formatArticleDisplayTitle } from "@/lib/articles/article-title";
+import { articleUrl, getArticleAssetPublicUrl } from "@/lib/articles/url";
+import { decodeSlugPath, encodeSlug } from "@/lib/articles/slug-resolver";
+import { getSiteUrl } from "@/lib/site-url";
+import { serializeJsonLd } from "@/lib/seo/json-ld";
 
-import { ArticleHighlight } from "@/components/articles/article-highlight"
-import { BookmarkRecorder } from "@/components/articles/bookmark-recorder"
-import { RunningHead, ChapterEndMark } from "@/components/articles/chapter-chrome"
-import { ArticleHeadingActions } from "@/components/articles/article-heading-actions"
-import { CodeSourceSummary } from "@/components/articles/code-source-summary"
+import { ArticleHighlight } from "@/components/articles/article-highlight";
+import { BookmarkRecorder } from "@/components/articles/bookmark-recorder";
+import { RunningHead, ChapterEndMark } from "@/components/articles/chapter-chrome";
+import { ArticleHeadingActions } from "@/components/articles/article-heading-actions";
+import { CodeSourceSummary } from "@/components/articles/code-source-summary";
 import {
   ArticleMetadataFull,
   ArticleMetadataAnonymous,
-} from "@/components/articles/article-metadata"
-import { ArticleNavigation } from "@/components/articles/article-navigation"
+} from "@/components/articles/article-metadata";
+import { ArticleNavigation } from "@/components/articles/article-navigation";
 import {
   getNavigationBreadcrumbs,
   findNavigationOwner,
   flattenArticleTree,
   getArticleNavigation,
-} from "@/lib/articles/navigation-data"
-import { getPublicChapterNav } from "@/lib/articles/public-tree"
+} from "@/lib/articles/navigation-data";
+import { getPublicChapterNav } from "@/lib/articles/public-tree";
 
-
-const EMPTY_STRING_ARRAY: string[] = []
+const EMPTY_STRING_ARRAY: string[] = [];
 
 export async function generateStaticParams(): Promise<{ locale: string; slug: string[] }[]> {
-  const locales: ArticleLocale[] = ["zh", "en"]
+  const locales: ArticleLocale[] = ["zh", "en"];
   const paramsByLocale = await Promise.all(
     locales.map(async (locale) => {
-      const tree = await getCachedArticleTree(locale)
-      const collectSlugs = async (
-        nodes: ArticleTreeNode[]
-      ): Promise<string[]> => {
+      const tree = await getCachedArticleTree(locale);
+      const collectSlugs = async (nodes: ArticleTreeNode[]): Promise<string[]> => {
         const slugGroups = await Promise.all(
           nodes.map(async (node) => {
-            const manifestEntry = await getCachedLocalizedArticleEntry(
-              node.slug,
-              locale
-            )
+            const manifestEntry = await getCachedLocalizedArticleEntry(node.slug, locale);
             const ownSlugs =
-              (!node.isFolder || manifestEntry?.hasIntro) &&
-              hasArticleLocale(node.slug, locale)
+              (!node.isFolder || manifestEntry?.hasIntro) && hasArticleLocale(node.slug, locale)
                 ? [node.slug]
-                : []
-            const childSlugs = await collectSlugs(node.children ?? [])
-            return [...ownSlugs, ...childSlugs]
-          })
-        )
-        return slugGroups.flat()
-      }
+                : [];
+            const childSlugs = await collectSlugs(node.children ?? []);
+            return [...ownSlugs, ...childSlugs];
+          }),
+        );
+        return slugGroups.flat();
+      };
 
-      const slugs = await collectSlugs(tree)
-      const entries: Array<{ locale: ArticleLocale; slug: string[] }> = []
+      const slugs = await collectSlugs(tree);
+      const entries: Array<{ locale: ArticleLocale; slug: string[] }> = [];
       for (const slug of slugs) {
         entries.push({
           locale,
           slug: slug.split("/").filter(Boolean),
-        })
+        });
       }
-      return entries
-    })
-  )
+      return entries;
+    }),
+  );
 
-  return paramsByLocale.flat()
+  return paramsByLocale.flat();
 }
 
 interface ArticlePageProps {
   params: Promise<{
-    locale: string
-    slug?: string[]
-  }>
+    locale: string;
+    slug?: string[];
+  }>;
 }
 
-export async function generateMetadata({
-  params,
-}: ArticlePageProps): Promise<Metadata> {
-  const { locale: rawLocale, slug } = await params
-  const locale = resolveArticleLocale(rawLocale)
-  const slugPath = decodeSlugPath(slug ?? []) || "preface"
-  const resolvedRequest = await resolveArticleRequest(slugPath, locale)
+export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
+  const { locale: rawLocale, slug } = await params;
+  const locale = resolveArticleLocale(rawLocale);
+  const slugPath = decodeSlugPath(slug ?? []) || "preface";
+  const resolvedRequest = await resolveArticleRequest(slugPath, locale);
 
   // Throwing here propagates the 404 from generateMetadata; fallback metadata
   // would leave the route indexable as a soft 404.
   if (resolvedRequest === null) {
-    notFound()
+    notFound();
   }
 
-  const { contentLocale, target, redirectToLocale } = resolvedRequest
+  const { contentLocale, target, redirectToLocale } = resolvedRequest;
 
   if (!slug?.length || target.redirectToSlug || redirectToLocale) {
     permanentRedirect(
-      `/${redirectToLocale ?? locale}/articles/${encodeSlug(target.canonicalSlug)}`
-    )
+      `/${redirectToLocale ?? locale}/articles/${encodeSlug(target.canonicalSlug)}`,
+    );
   }
 
-  let artifact: Awaited<ReturnType<typeof getArticleContentBySlug>> | null = null
+  let artifact: Awaited<ReturnType<typeof getArticleContentBySlug>> | null = null;
   try {
-    artifact = await getArticleContentBySlug(
-      target.canonicalSlug ?? slugPath,
-      contentLocale
-    )
+    artifact = await getArticleContentBySlug(target.canonicalSlug ?? slugPath, contentLocale);
   } catch {
-    notFound()
+    notFound();
   }
 
   if (!artifact) {
-    notFound()
+    notFound();
   }
 
   try {
-    const { content: mdBody, frontmatter: data } = artifact
-    const siteUrl = getSiteUrl()
+    const { content: mdBody, frontmatter: data } = artifact;
+    const siteUrl = getSiteUrl();
     const effectiveSlug =
-      target.canonicalSlug ?? (await getCachedSlugForFilePath(target.filePath)) ?? slugPath
-    const canonicalUrl = `${getSiteUrl()}/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`
+      target.canonicalSlug ?? (await getCachedSlugForFilePath(target.filePath)) ?? slugPath;
+    const canonicalUrl = `${getSiteUrl()}/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`;
 
     const articleTitle = await formatArticleDisplayTitle({
       frontmatterTitle: data["chapter-title"],
@@ -160,16 +146,11 @@ export async function generateMetadata({
       isPreface: target.isPreface,
       isReadmeIntro: target.isReadmeIntro,
       locale: contentLocale,
-    })
+    });
 
-    const manifestEntry = await getCachedLocalizedArticleEntry(
-      effectiveSlug,
-      contentLocale
-    )
-    const chapterTitle = manifestEntry?.chapterTitleByLocale?.[contentLocale]
-    const pageTitle = chapterTitle
-      ? `${chapterTitle}: ${articleTitle}`
-      : articleTitle
+    const manifestEntry = await getCachedLocalizedArticleEntry(effectiveSlug, contentLocale);
+    const chapterTitle = manifestEntry?.chapterTitleByLocale?.[contentLocale];
+    const pageTitle = chapterTitle ? `${chapterTitle}: ${articleTitle}` : articleTitle;
 
     const description = ensureMetaDescriptionLength(
       generateDescription(mdBody, data.description as string | undefined),
@@ -177,26 +158,24 @@ export async function generateMetadata({
         title: articleTitle,
         chapterTitle,
         locale: contentLocale,
-      }
-    )
+      },
+    );
 
-    const articlePath = encodeSlug(effectiveSlug)
-    const availableLocales = getArticleAvailableLocales(effectiveSlug)
-    const defaultLocale = availableLocales.includes("zh")
-      ? "zh"
-      : availableLocales[0]
+    const articlePath = encodeSlug(effectiveSlug);
+    const availableLocales = getArticleAvailableLocales(effectiveSlug);
+    const defaultLocale = availableLocales.includes("zh") ? "zh" : availableLocales[0];
     const languageAlternates = Object.fromEntries(
       availableLocales.map((availableLocale) => [
         availableLocale,
         `${siteUrl}/${availableLocale}/articles/${articlePath}`,
-      ])
-    )
+      ]),
+    );
 
     if (defaultLocale) {
-      languageAlternates["x-default"] = `${siteUrl}/${defaultLocale}/articles/${articlePath}`
+      languageAlternates["x-default"] = `${siteUrl}/${defaultLocale}/articles/${articlePath}`;
     }
 
-    const ogImageUrl = `${siteUrl}/api/og/articles/${effectiveSlug}?locale=${contentLocale}`
+    const ogImageUrl = `${siteUrl}/api/og/articles/${effectiveSlug}?locale=${contentLocale}`;
 
     return {
       title: pageTitle,
@@ -218,42 +197,39 @@ export async function generateMetadata({
         description,
         images: [ogImageUrl],
       },
-    }
+    };
   } catch {
-    notFound()
+    notFound();
   }
 }
 
 async function loadArticlePage(params: ArticlePageProps["params"]) {
-  const { locale: rawLocale, slug } = await params
-  const locale = resolveArticleLocale(rawLocale)
+  const { locale: rawLocale, slug } = await params;
+  const locale = resolveArticleLocale(rawLocale);
   const [t, tArticleMeta] = await Promise.all([
     getTranslations({ locale, namespace: "Article" }),
     getTranslations({ locale, namespace: "ArticleMeta" }),
-  ])
+  ]);
 
-  const slugPath = decodeSlugPath(slug ?? []) || "preface"
-  const resolvedRequest = await resolveArticleRequest(slugPath, locale)
+  const slugPath = decodeSlugPath(slug ?? []) || "preface";
+  const resolvedRequest = await resolveArticleRequest(slugPath, locale);
 
   if (resolvedRequest === null) {
-    notFound()
+    notFound();
   }
 
-  const { contentLocale, target, redirectToLocale } = resolvedRequest
+  const { contentLocale, target, redirectToLocale } = resolvedRequest;
 
   if (!slug?.length || target.redirectToSlug || redirectToLocale) {
     permanentRedirect(
-      `/${redirectToLocale ?? locale}/articles/${encodeSlug(target.canonicalSlug)}`
-    )
+      `/${redirectToLocale ?? locale}/articles/${encodeSlug(target.canonicalSlug)}`,
+    );
   }
 
-  const artifact = await getArticleContentBySlug(
-    target.canonicalSlug ?? slugPath,
-    contentLocale
-  )
+  const artifact = await getArticleContentBySlug(target.canonicalSlug ?? slugPath, contentLocale);
 
   if (!artifact) {
-    notFound()
+    notFound();
   }
 
   const {
@@ -261,7 +237,7 @@ async function loadArticlePage(params: ArticlePageProps["params"]) {
     codeReferences,
     frontmatter: data,
     translationStatus,
-  } = artifact
+  } = artifact;
   const [articleTitle, tree] = await Promise.all([
     formatArticleDisplayTitle({
       frontmatterTitle: data["chapter-title"],
@@ -273,83 +249,65 @@ async function loadArticlePage(params: ArticlePageProps["params"]) {
       locale: contentLocale,
     }),
     getPublicChapterNav(contentLocale),
-  ])
-  const currentSlug = target.canonicalSlug || slugPath
-  const runningHeadOwner = findNavigationOwner(tree, currentSlug)
-  const runningHeadChapters = getNavigationBreadcrumbs(tree, currentSlug)
-  const isStructuralAppendix = runningHeadOwner?.isAppendix ?? false
-  const embeddedArticleContent = embedTitleInMarkdown(
+  ]);
+  const currentSlug = target.canonicalSlug || slugPath;
+  const runningHeadOwner = findNavigationOwner(tree, currentSlug);
+  const runningHeadChapters = getNavigationBreadcrumbs(tree, currentSlug);
+  const isStructuralAppendix = runningHeadOwner?.isAppendix ?? false;
+  const embeddedArticleContent = embedTitleInMarkdown(renderedContent, articleTitle);
+
+  const editPath = normalizeDraftTargetPath(target.filePath);
+
+  const { wordCount, readingTime } = calculateReadingMetrics(renderedContent);
+  const shikiPlugin = await getCachedRehypeShiki(
     renderedContent,
-    articleTitle
-  )
+    path.join(process.cwd(), "data", ".shiki-cache.json"),
+  );
 
-  const editPath = normalizeDraftTargetPath(target.filePath)
-
-  const { wordCount, readingTime } = calculateReadingMetrics(renderedContent)
-  const shikiPlugin = await getCachedRehypeShiki(renderedContent, path.join(process.cwd(), "data", ".shiki-cache.json"))
-
-  const siteUrl = getSiteUrl()
+  const siteUrl = getSiteUrl();
   const effectiveSlug =
-    target.canonicalSlug ??
-    (await getCachedSlugForFilePath(target.filePath)) ??
-    slugPath
-  const canonicalUrl = `${siteUrl}/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`
-  const manifestEntry = await getCachedLocalizedArticleEntry(
-    effectiveSlug,
-    contentLocale
-  )
-  const chapterTitle = manifestEntry?.chapterTitleByLocale?.[contentLocale]
+    target.canonicalSlug ?? (await getCachedSlugForFilePath(target.filePath)) ?? slugPath;
+  const canonicalUrl = `${siteUrl}/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`;
+  const manifestEntry = await getCachedLocalizedArticleEntry(effectiveSlug, contentLocale);
+  const chapterTitle = manifestEntry?.chapterTitleByLocale?.[contentLocale];
   const description = ensureMetaDescriptionLength(
-    generateDescription(
-      renderedContent,
-      data.description as string | undefined
-    ),
+    generateDescription(renderedContent, data.description as string | undefined),
     {
       title: articleTitle,
       chapterTitle,
       locale: contentLocale,
-    }
-  )
+    },
+  );
 
-  const author = data.author as string | undefined
-  const coAuthors: string[] =
-    (data.coAuthors as string[] | undefined) ?? EMPTY_STRING_ARRAY
-  const createdAt = data.created as string | undefined
-  const lastModified = data.lastmod as string | undefined
-  const isAdvanced = data["is-advanced"] === true
-  const isRevising = manifestEntry?.isRevising === true
+  const author = data.author as string | undefined;
+  const coAuthors: string[] = (data.coAuthors as string[] | undefined) ?? EMPTY_STRING_ARRAY;
+  const createdAt = data.created as string | undefined;
+  const lastModified = data.lastmod as string | undefined;
+  const isAdvanced = data["is-advanced"] === true;
+  const isRevising = manifestEntry?.isRevising === true;
 
-  const allAuthors = [
-    ...new Set([author, ...coAuthors].filter(Boolean) as string[]),
-  ]
-  const profileManifest = loadArticleManifest()
+  const allAuthors = [...new Set([author, ...coAuthors].filter(Boolean) as string[])];
+  const profileManifest = loadArticleManifest();
   const profileHandles = [
-    ...new Set(
-      allAuthors.map(
-        (name) => resolveProfileHandle(name, profileManifest) ?? name
-      )
-    ),
-  ]
+    ...new Set(allAuthors.map((name) => resolveProfileHandle(name, profileManifest) ?? name)),
+  ];
   const authorArray = profileHandles.map((handle) => ({
     "@type": "Person" as const,
     "@id": `${siteUrl}/${locale}/authors/${encodeURIComponent(handle)}#person`,
     name: resolveAuthorPerson(handle).name,
     url: `${siteUrl}/${locale}/authors/${encodeURIComponent(handle)}`,
-  }))
+  }));
   const isTranslationStale =
     locale === "en" &&
     manifestEntry?.translationFreshnessByLocale.en === "stale" &&
-    translationStatus !== undefined
+    translationStatus !== undefined;
 
-  const bannerSrc = (data.banner as { src?: string } | undefined)?.src
-  const bannerUrl = resolveBannerUrl(bannerSrc, target.filePath, siteUrl)
-  const bannerPath = resolveBannerPath(bannerSrc, target.filePath)
-  const bannerAlt =
-    (data.banner as { alt?: string } | undefined)?.alt || articleTitle
+  const bannerSrc = (data.banner as { src?: string } | undefined)?.src;
+  const bannerUrl = resolveBannerUrl(bannerSrc, target.filePath, siteUrl);
+  const bannerPath = resolveBannerPath(bannerSrc, target.filePath);
+  const bannerAlt = (data.banner as { alt?: string } | undefined)?.alt || articleTitle;
 
-  const bannerPreloadHref = bannerPath
-    ? getArticleAssetPublicUrl(bannerPath)
-    : null
+  const bannerPreloadHref = bannerPath ? getArticleAssetPublicUrl(bannerPath) : null;
 
   const { breadcrumbJsonLd, techArticleJsonLd } = buildArticleStructuredData({
     articleTitle,
@@ -367,18 +325,14 @@ async function loadArticlePage(params: ArticlePageProps["params"]) {
     siteUrl,
     wordCount,
     description,
-  })
+  });
 
-  const flattenedArticles = flattenArticleTree(tree)
-  const navigation = await getArticleNavigation(
-    currentSlug,
-    flattenedArticles,
-    locale
-  )
+  const flattenedArticles = flattenArticleTree(tree);
+  const navigation = await getArticleNavigation(currentSlug, flattenedArticles, locale);
   const stage: ArticlePageStage = {
     advanced: isAdvanced,
     revising: isRevising,
-  }
+  };
   const headerVariant: ArticlePageHeaderVariant =
     author && createdAt && lastModified
       ? {
@@ -386,7 +340,7 @@ async function loadArticlePage(params: ArticlePageProps["params"]) {
           authorName: profileHandles[0] ?? author,
           coAuthors: profileHandles.slice(1),
         }
-      : { kind: "anonymous" }
+      : { kind: "anonymous" };
 
   return {
     contentProps: {
@@ -427,38 +381,33 @@ async function loadArticlePage(params: ArticlePageProps["params"]) {
       variant: headerVariant,
       wordCount,
     },
-  }
+  };
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
-  const { contentProps, headerProps } = await loadArticlePage(params)
+  const { contentProps, headerProps } = await loadArticlePage(params);
 
-  return (
-    <ArticlePageContent
-      {...contentProps}
-      header={<ArticlePageHeader {...headerProps} />}
-    />
-  )
+  return <ArticlePageContent {...contentProps} header={<ArticlePageHeader {...headerProps} />} />;
 }
 
-type ArticlePageStage = { advanced: boolean; revising: boolean }
+type ArticlePageStage = { advanced: boolean; revising: boolean };
 
 type ArticlePageHeaderVariant =
   | { kind: "anonymous" }
-  | { kind: "attributed"; authorName: string; coAuthors: string[] }
+  | { kind: "attributed"; authorName: string; coAuthors: string[] };
 
 interface ArticlePageHeaderProps {
-  articleTitle: string
-  bannerAlt: string
-  bannerPath: string | null
-  canonicalUrl: string
-  createdAt: string | undefined
-  filePath: string
-  lastModified: string | undefined
-  readingTime: number
-  stage: ArticlePageStage
-  variant: ArticlePageHeaderVariant
-  wordCount: number
+  articleTitle: string;
+  bannerAlt: string;
+  bannerPath: string | null;
+  canonicalUrl: string;
+  createdAt: string | undefined;
+  filePath: string;
+  lastModified: string | undefined;
+  readingTime: number;
+  stage: ArticlePageStage;
+  variant: ArticlePageHeaderVariant;
+  wordCount: number;
 }
 
 function ArticlePageHeader({
@@ -503,34 +452,38 @@ function ArticlePageHeader({
       bannerPath={bannerPath}
       bannerAlt={bannerAlt}
     />
-  )
+  );
 }
 
 interface ArticlePageContentProps {
-  articleTitle: string
-  bannerPreloadHref: string | null
-  breadcrumbJsonLd: object
-  contentLocale: ArticleLocale
-  codeReferences: NonNullable<Awaited<ReturnType<typeof getArticleContentBySlug>>>["codeReferences"]
-  currentSlug: string
-  editPath: string
-  effectiveSlug: string
-  embeddedArticleContent: string
-  header: ReactNode
-  isTranslationStale: boolean
-  locale: ArticleLocale
-  navigation: Awaited<ReturnType<typeof getArticleNavigation>>
-  runningHeadChapterIndex: number | undefined
-  runningHeadChapters: Awaited<ReturnType<typeof getNavigationBreadcrumbs>>
-  runningHeadIsAppendix: boolean
-  runningHeadIsPreface: boolean
-  shikiPlugin: Awaited<ReturnType<typeof getCachedRehypeShiki>>
-  stage: ArticlePageStage
-  t: Awaited<ReturnType<typeof getTranslations>>
-  tArticleMeta: Awaited<ReturnType<typeof getTranslations>>
-  targetFilePath: string
-  techArticleJsonLd: object
-  translationStatus: NonNullable<Awaited<ReturnType<typeof getArticleContentBySlug>>>["translationStatus"]
+  articleTitle: string;
+  bannerPreloadHref: string | null;
+  breadcrumbJsonLd: object;
+  contentLocale: ArticleLocale;
+  codeReferences: NonNullable<
+    Awaited<ReturnType<typeof getArticleContentBySlug>>
+  >["codeReferences"];
+  currentSlug: string;
+  editPath: string;
+  effectiveSlug: string;
+  embeddedArticleContent: string;
+  header: ReactNode;
+  isTranslationStale: boolean;
+  locale: ArticleLocale;
+  navigation: Awaited<ReturnType<typeof getArticleNavigation>>;
+  runningHeadChapterIndex: number | undefined;
+  runningHeadChapters: Awaited<ReturnType<typeof getNavigationBreadcrumbs>>;
+  runningHeadIsAppendix: boolean;
+  runningHeadIsPreface: boolean;
+  shikiPlugin: Awaited<ReturnType<typeof getCachedRehypeShiki>>;
+  stage: ArticlePageStage;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+  tArticleMeta: Awaited<ReturnType<typeof getTranslations>>;
+  targetFilePath: string;
+  techArticleJsonLd: object;
+  translationStatus: NonNullable<
+    Awaited<ReturnType<typeof getArticleContentBySlug>>
+  >["translationStatus"];
 }
 
 function ArticlePageContent({
@@ -561,9 +514,19 @@ function ArticlePageContent({
 }: ArticlePageContentProps) {
   return (
     <div className="border-tech-main/30 bg-surface/80 relative min-h-screen min-w-0 border p-6 backdrop-blur-sm sm:p-8">
-      {bannerPreloadHref ? <link rel="preload" as="image" href={bannerPreloadHref} fetchPriority="high" /> : null}
+      {bannerPreloadHref ? (
+        <link rel="preload" as="image" href={bannerPreloadHref} fetchPriority="high" />
+      ) : null}
       <BookmarkRecorder slug={currentSlug} title={articleTitle} />
-      {runningHeadChapters.length > 0 && <RunningHead chapters={runningHeadChapters} locale={locale} chapterIndex={runningHeadChapterIndex} chapterIsAppendix={runningHeadIsAppendix} isPreface={runningHeadIsPreface} />}
+      {runningHeadChapters.length > 0 && (
+        <RunningHead
+          chapters={runningHeadChapters}
+          locale={locale}
+          chapterIndex={runningHeadChapterIndex}
+          chapterIsAppendix={runningHeadIsAppendix}
+          isPreface={runningHeadIsPreface}
+        />
+      )}
       {header}
       <CodeSourceSummary
         label={tArticleMeta("codeBasis")}
@@ -571,15 +534,47 @@ function ArticlePageContent({
         referenceLabel={tArticleMeta("codeReferences", { count: codeReferences.length })}
         references={codeReferences}
       />
-      <TranslationNotices contentLocale={contentLocale} effectiveSlug={effectiveSlug} isTranslationStale={isTranslationStale} locale={locale} t={t} translationStatus={translationStatus} />
-      <article lang={contentLocale} className="article-prose min-w-0" data-article-content><MarkdownRenderer content={embeddedArticleContent} codeReferences={codeReferences} locale={locale} rawPath={targetFilePath} shikiPlugin={shikiPlugin} headingAction={<ArticleHeadingActions editPath={editPath} />} /></article>
+      <TranslationNotices
+        contentLocale={contentLocale}
+        effectiveSlug={effectiveSlug}
+        isTranslationStale={isTranslationStale}
+        locale={locale}
+        t={t}
+        translationStatus={translationStatus}
+      />
+      <article lang={contentLocale} className="article-prose min-w-0" data-article-content>
+        <MarkdownRenderer
+          content={embeddedArticleContent}
+          codeReferences={codeReferences}
+          locale={locale}
+          rawPath={targetFilePath}
+          shikiPlugin={shikiPlugin}
+          headingAction={<ArticleHeadingActions editPath={editPath} />}
+        />
+      </article>
       <ChapterEndMark isAdvanced={stage.advanced} />
-      {(navigation.prev || navigation.next) && <ArticleNavigation locale={locale} next={navigation.next} nextLabel={tArticleMeta("next")} prev={navigation.prev} prevLabel={tArticleMeta("prev")} />}
-      <Suspense><ArticleHighlight /></Suspense>
-      <script type="application/ld+json" dangerouslySetInnerHTML={serializeJsonLd(techArticleJsonLd)} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={serializeJsonLd(breadcrumbJsonLd)} />
+      {(navigation.prev || navigation.next) && (
+        <ArticleNavigation
+          locale={locale}
+          next={navigation.next}
+          nextLabel={tArticleMeta("next")}
+          prev={navigation.prev}
+          prevLabel={tArticleMeta("prev")}
+        />
+      )}
+      <Suspense>
+        <ArticleHighlight />
+      </Suspense>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={serializeJsonLd(techArticleJsonLd)}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={serializeJsonLd(breadcrumbJsonLd)}
+      />
     </div>
-  )
+  );
 }
 
 function TranslationNotices({
@@ -589,45 +584,99 @@ function TranslationNotices({
   locale,
   t,
   translationStatus,
-}: Pick<ArticlePageContentProps, "contentLocale" | "effectiveSlug" | "isTranslationStale" | "locale" | "t" | "translationStatus">) {
-  const isTranslationPending = contentLocale !== locale
+}: Pick<
+  ArticlePageContentProps,
+  "contentLocale" | "effectiveSlug" | "isTranslationStale" | "locale" | "t" | "translationStatus"
+>) {
+  const isTranslationPending = contentLocale !== locale;
   return (
     <>
-      {isTranslationPending ? <aside data-testid="translation-pending-notice" aria-labelledby="translation-pending-label" className="mt-4 border border-amber-500/40 bg-amber-500/10 p-4 text-amber-950 dark:text-amber-100"><p id="translation-pending-label" data-testid="translation-pending-badge" className="font-mono text-xs tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">{t("translationPending")}</p><p className="mt-2 text-sm/relaxed">{t("translationFallbackBody")}</p><a href={`/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`} className="mt-3 inline-flex min-h-11 items-center font-mono text-xs tracking-wider text-amber-900 underline decoration-amber-700/50 underline-offset-4 transition-colors hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:text-amber-100 dark:hover:text-amber-300 dark:focus-visible:outline-amber-300">{t("translationFallbackCta")}<ArrowRight aria-hidden="true" className="ml-1 size-3.5" /></a></aside> : null}
-      {isTranslationStale && translationStatus ? <aside data-testid="translation-stale-badge" aria-labelledby="translation-outdated-label" className="mt-4 border border-amber-500/40 bg-amber-500/10 p-4 text-amber-950 dark:text-amber-100"><p id="translation-outdated-label" className="font-mono text-xs tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">{t("translationOutdatedLabel")}</p><p className="mt-2 text-sm/relaxed">{t("translationOutdatedPrefix")} <a href={translationStatus.latestOriginalCommitUrl} target="_blank" rel="noreferrer" aria-label={t("translationLatestCommitAria", { sha: translationStatus.latestOriginalRevision.slice(0, 7) })} className="font-mono underline decoration-amber-700/50 underline-offset-4 transition-colors hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:hover:text-amber-300 dark:focus-visible:outline-amber-300">{translationStatus.latestOriginalRevision.slice(0, 7)}</a>{". "}{t("translationOutdatedLag", { commitLag: translationStatus.commitLag, dayLag: translationStatus.dayLag })}</p></aside> : null}
+      {isTranslationPending ? (
+        <aside
+          data-testid="translation-pending-notice"
+          aria-labelledby="translation-pending-label"
+          className="mt-4 border border-amber-500/40 bg-amber-500/10 p-4 text-amber-950 dark:text-amber-100"
+        >
+          <p
+            id="translation-pending-label"
+            data-testid="translation-pending-badge"
+            className="font-mono text-xs tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300"
+          >
+            {t("translationPending")}
+          </p>
+          <p className="mt-2 text-sm/relaxed">{t("translationFallbackBody")}</p>
+          <a
+            href={`/${contentLocale}/articles/${encodeSlug(effectiveSlug)}`}
+            className="mt-3 inline-flex min-h-11 items-center font-mono text-xs tracking-wider text-amber-900 underline decoration-amber-700/50 underline-offset-4 transition-colors hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:text-amber-100 dark:hover:text-amber-300 dark:focus-visible:outline-amber-300"
+          >
+            {t("translationFallbackCta")}
+            <ArrowRight aria-hidden="true" className="ml-1 size-3.5" />
+          </a>
+        </aside>
+      ) : null}
+      {isTranslationStale && translationStatus ? (
+        <aside
+          data-testid="translation-stale-badge"
+          aria-labelledby="translation-outdated-label"
+          className="mt-4 border border-amber-500/40 bg-amber-500/10 p-4 text-amber-950 dark:text-amber-100"
+        >
+          <p
+            id="translation-outdated-label"
+            className="font-mono text-xs tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300"
+          >
+            {t("translationOutdatedLabel")}
+          </p>
+          <p className="mt-2 text-sm/relaxed">
+            {t("translationOutdatedPrefix")}{" "}
+            <a
+              href={translationStatus.latestOriginalCommitUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t("translationLatestCommitAria", {
+                sha: translationStatus.latestOriginalRevision.slice(0, 7),
+              })}
+              className="font-mono underline decoration-amber-700/50 underline-offset-4 transition-colors hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:hover:text-amber-300 dark:focus-visible:outline-amber-300"
+            >
+              {translationStatus.latestOriginalRevision.slice(0, 7)}
+            </a>
+            {". "}
+            {t("translationOutdatedLag", {
+              commitLag: translationStatus.commitLag,
+              dayLag: translationStatus.dayLag,
+            })}
+          </p>
+        </aside>
+      ) : null}
     </>
-  )
+  );
 }
 
 function normalizeDraftTargetPath(filePath: string) {
   if (filePath === "README.md" || filePath.endsWith("/README.md")) {
-    return filePath
+    return filePath;
   }
 
-  return filePath.replace(/\.md$/, "")
+  return filePath.replace(/\.md$/, "");
 }
 
 function resolveBannerUrl(
   bannerSrc: string | undefined,
   filePath: string,
-  siteUrl: string
+  siteUrl: string,
 ): string | null {
-  const resolved = resolveArticleAssetPath(bannerSrc, filePath)
-  if (!resolved) return null
+  const resolved = resolveArticleAssetPath(bannerSrc, filePath);
+  if (!resolved) return null;
 
-  const publicUrl = getArticleAssetPublicUrl(resolved)
+  const publicUrl = getArticleAssetPublicUrl(resolved);
   if (publicUrl.startsWith("https://") || publicUrl.startsWith("http://")) {
-    return publicUrl
+    return publicUrl;
   }
 
-  return `${siteUrl}${publicUrl}`
+  return `${siteUrl}${publicUrl}`;
 }
 
-function resolveBannerPath(
-  bannerSrc: string | undefined,
-  filePath: string
-): string | null {
-  return resolveArticleAssetPath(bannerSrc, filePath)
+function resolveBannerPath(bannerSrc: string | undefined, filePath: string): string | null {
+  return resolveArticleAssetPath(bannerSrc, filePath);
 }
 
 function buildArticleStructuredData({
@@ -647,21 +696,21 @@ function buildArticleStructuredData({
   siteUrl,
   wordCount,
 }: {
-  articleTitle: string
-  authorArray: Array<{ "@type": "Person"; "@id": string; name: string; url: string }>
-  bannerUrl: string | null
-  canonicalUrl: string
-  chapterTitle: string | undefined
-  createdAt: string | undefined
-  description: string
-  effectiveSlug: string
-  isAdvanced: boolean
-  lastModified: string | undefined
-  locale: ArticleLocale
-  readingTime: number
-  runningHeadChapters: Awaited<ReturnType<typeof getNavigationBreadcrumbs>>
-  siteUrl: string
-  wordCount: number
+  articleTitle: string;
+  authorArray: Array<{ "@type": "Person"; "@id": string; name: string; url: string }>;
+  bannerUrl: string | null;
+  canonicalUrl: string;
+  chapterTitle: string | undefined;
+  createdAt: string | undefined;
+  description: string;
+  effectiveSlug: string;
+  isAdvanced: boolean;
+  lastModified: string | undefined;
+  locale: ArticleLocale;
+  readingTime: number;
+  runningHeadChapters: Awaited<ReturnType<typeof getNavigationBreadcrumbs>>;
+  siteUrl: string;
+  wordCount: number;
 }) {
   const techArticleJsonLd = {
     "@context": "https://schema.org",
@@ -677,12 +726,12 @@ function buildArticleStructuredData({
     ...(chapterTitle ? { articleSection: chapterTitle } : {}),
     proficiencyLevel: isAdvanced ? "Expert" : "Beginner",
     ...(bannerUrl ? { image: bannerUrl } : {}),
-  }
+  };
   const itemListElement: Array<{
-    "@type": "ListItem"
-    position: number
-    name: string
-    item: string
+    "@type": "ListItem";
+    position: number;
+    name: string;
+    item: string;
   }> = [
     {
       "@type": "ListItem",
@@ -696,7 +745,7 @@ function buildArticleStructuredData({
       name: "Articles",
       item: `${siteUrl}/${locale}/articles/preface`,
     },
-  ]
+  ];
 
   for (const chapter of runningHeadChapters) {
     if (chapter.slug !== effectiveSlug) {
@@ -705,7 +754,7 @@ function buildArticleStructuredData({
         position: itemListElement.length + 1,
         name: chapter.title,
         item: `${siteUrl}/${locale}${articleUrl(chapter.slug)}`,
-      })
+      });
     }
   }
 
@@ -714,13 +763,13 @@ function buildArticleStructuredData({
     position: itemListElement.length + 1,
     name: articleTitle,
     item: canonicalUrl,
-  })
+  });
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList" as const,
     itemListElement,
-  }
+  };
 
-  return { breadcrumbJsonLd, techArticleJsonLd }
+  return { breadcrumbJsonLd, techArticleJsonLd };
 }

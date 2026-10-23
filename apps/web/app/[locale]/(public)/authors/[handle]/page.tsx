@@ -92,9 +92,7 @@ export async function generateMetadata({
               articleCount: articles.length,
             })
           : t("metaDescriptionFallback")))
-  const title = `${person.name} | ${t(
-    maintainer ? "maintainerLabel" : "articlesLabel"
-  )}`
+  const title = `${person.name} | ${t(maintainer ? "maintainerLabel" : "articlesLabel")}`
 
   return {
     title,
@@ -165,7 +163,9 @@ async function loadAuthorPage(params: AuthorDetailPageProps["params"]) {
       siteUrl,
       locale,
       urlHandle,
-      { role: maintainer ? t("maintainerLabel") : t("joinedLabel") }
+      {
+        role: maintainer ? t("maintainerLabel") : t("joinedLabel"),
+      }
     )
   )
   const contributorSince = articleAttributionExcluded

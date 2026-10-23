@@ -1,89 +1,89 @@
-import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
-import { getLocalizedArticleEntry } from "./manifest"
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types";
+import { getLocalizedArticleEntry } from "./manifest";
 
 interface FlatArticle {
-  slug: string
-  title: string
-  parentPath: string
-  chapterTitle?: string
+  slug: string;
+  title: string;
+  parentPath: string;
+  chapterTitle?: string;
 }
 
 interface ArticleInfo {
-  slug: string
-  title: string
-  isCrossFolder: boolean
-  chapterTitle?: string
+  slug: string;
+  title: string;
+  isCrossFolder: boolean;
+  chapterTitle?: string;
 }
 
 interface NavigationResult {
-  prev: ArticleInfo | null
-  next: ArticleInfo | null
+  prev: ArticleInfo | null;
+  next: ArticleInfo | null;
 }
 
 export interface AppendixGroup {
-  owner: ChapterNavNode
-  nodes: ChapterNavNode[]
+  owner: ChapterNavNode;
+  nodes: ChapterNavNode[];
 }
 
 export function partitionAppendixNodes(nodes: ChapterNavNode[]): {
-  regularNodes: ChapterNavNode[]
-  appendixGroups: AppendixGroup[]
+  regularNodes: ChapterNavNode[];
+  appendixGroups: AppendixGroup[];
 } {
-  const regularNodes: ChapterNavNode[] = []
-  const appendixGroups: AppendixGroup[] = []
+  const regularNodes: ChapterNavNode[] = [];
+  const appendixGroups: AppendixGroup[] = [];
 
   for (const node of nodes) {
     if (node.isAppendix) {
       appendixGroups.push({
         owner: node,
         nodes: node.isFolder ? node.children : [node],
-      })
+      });
     } else {
-      regularNodes.push(node)
+      regularNodes.push(node);
     }
   }
 
-  return { regularNodes, appendixGroups }
+  return { regularNodes, appendixGroups };
 }
 
 export function collectAppendixGroups(nodes: ChapterNavNode[]): AppendixGroup[] {
-  const groups: AppendixGroup[] = []
+  const groups: AppendixGroup[] = [];
 
   for (const node of nodes) {
     if (node.isAppendix) {
-      groups.push({ owner: node, nodes: node.isFolder ? node.children : [node] })
+      groups.push({ owner: node, nodes: node.isFolder ? node.children : [node] });
     } else {
-      groups.push(...collectAppendixGroups(node.children))
+      groups.push(...collectAppendixGroups(node.children));
     }
   }
 
-  return groups
+  return groups;
 }
 
 export function findNavigationOwner(
   tree: ChapterNavNode[],
-  currentSlug: string
+  currentSlug: string,
 ): ChapterNavNode | null {
   function visit(
     node: ChapterNavNode,
     root: ChapterNavNode | null,
-    appendix: ChapterNavNode | null
+    appendix: ChapterNavNode | null,
   ): ChapterNavNode | null {
-    const nextAppendix = node.isAppendix ? node : appendix
-    if (node.slug === currentSlug) return nextAppendix ?? root ?? node
+    const nextAppendix = node.isAppendix ? node : appendix;
+    if (node.slug === currentSlug) return nextAppendix ?? root ?? node;
 
     for (const child of node.children) {
-      const owner = visit(child, root, nextAppendix)
-      if (owner) return owner
+      const owner = visit(child, root, nextAppendix);
+      if (owner) return owner;
     }
-    return null
+    return null;
   }
 
   for (const root of tree) {
-    const owner = visit(root, root.isFolder ? root : null, null)
-    if (owner) return owner
+    const owner = visit(root, root.isFolder ? root : null, null);
+    if (owner) return owner;
   }
-  return null
+  return null;
 }
 
 /**
@@ -92,150 +92,149 @@ export function findNavigationOwner(
  */
 export function getNavigationBreadcrumbs(
   tree: ChapterNavNode[],
-  currentSlug: string
+  currentSlug: string,
 ): ChapterNavNode[] {
-  const path = findNavigationPath(tree, currentSlug)
+  const path = findNavigationPath(tree, currentSlug);
   if (!path) {
-    return []
+    return [];
   }
 
-  const chapters = path.filter((node) => node.isFolder)
-  return chapters.length > 0 ? chapters : path
+  const chapters = path.filter((node) => node.isFolder);
+  return chapters.length > 0 ? chapters : path;
 }
 
 function findNavigationPath(
   nodes: ChapterNavNode[],
   currentSlug: string,
-  parents: ChapterNavNode[] = []
+  parents: ChapterNavNode[] = [],
 ): ChapterNavNode[] | null {
   for (const node of nodes) {
-    const path = [...parents, node]
+    const path = [...parents, node];
     if (node.slug === currentSlug) {
-      return path
+      return path;
     }
 
-    const nested = findNavigationPath(node.children, currentSlug, path)
+    const nested = findNavigationPath(node.children, currentSlug, path);
     if (nested) {
-      return nested
+      return nested;
     }
   }
 
-  return null
+  return null;
 }
 
 function visitArticleNodes(
   nodes: ChapterNavNode[],
   visitor: (node: ChapterNavNode, parent: ChapterNavNode | null) => void,
-  parent: ChapterNavNode | null = null
+  parent: ChapterNavNode | null = null,
 ): void {
   for (const node of nodes) {
     if (!node.isFolder) {
-      visitor(node, parent)
+      visitor(node, parent);
     }
     if (node.children.length > 0) {
-      visitArticleNodes(node.children, visitor, node)
+      visitArticleNodes(node.children, visitor, node);
     }
   }
 }
 
 export function flattenArticleNodes(tree: ChapterNavNode[]): ChapterNavNode[] {
-  const articles: ChapterNavNode[] = []
-  visitArticleNodes(tree, (node) => articles.push(node))
-  return articles
+  const articles: ChapterNavNode[] = [];
+  visitArticleNodes(tree, (node) => articles.push(node));
+  return articles;
 }
 
 export function flattenArticleTree(tree: ChapterNavNode[]): FlatArticle[] {
-  const result: FlatArticle[] = []
+  const result: FlatArticle[] = [];
 
   visitArticleNodes(tree, (node, parent) => {
     const inferredParentPath = node.isReadmeIntro
       ? node.slug
-      : node.slug.split("/").slice(0, -1).join("/")
-    const parentPath = parent?.slug || inferredParentPath
+      : node.slug.split("/").slice(0, -1).join("/");
+    const parentPath = parent?.slug || inferredParentPath;
     result.push({
       slug: node.slug,
       title: node.title,
       parentPath,
       ...(parent ? { chapterTitle: parent.title } : {}),
-    })
-  })
-  return result
+    });
+  });
+  return result;
 }
 
 export interface ArticleNavigationEntry {
-  filePath: string
-  slug: string
-  index: number
-  isFolder: boolean
-  children?: ArticleNavigationEntry[]
+  filePath: string;
+  slug: string;
+  index: number;
+  isFolder: boolean;
+  children?: ArticleNavigationEntry[];
 }
 
 export function compareIndex(a: number, b: number): number {
-  const aNoIndex = a === -1
-  const bNoIndex = b === -1
+  const aNoIndex = a === -1;
+  const bNoIndex = b === -1;
 
   if (aNoIndex !== bNoIndex) {
-    return aNoIndex ? 1 : -1
+    return aNoIndex ? 1 : -1;
   }
 
   if (aNoIndex && bNoIndex) {
-    return 0
+    return 0;
   }
 
-  return a - b
+  return a - b;
 }
 
 export function getFirstArticleInChapter(
-  articles: ArticleNavigationEntry[]
+  articles: ArticleNavigationEntry[],
 ): ArticleNavigationEntry | null {
   if (!articles || articles.length === 0) {
-    return null
+    return null;
   }
 
   const sorted = [...articles].toSorted((a, b) => {
-    const indexCmp = compareIndex(a.index, b.index)
+    const indexCmp = compareIndex(a.index, b.index);
     if (indexCmp !== 0) {
-      return indexCmp
+      return indexCmp;
     }
 
-    const aFileName = a.filePath.split("/").pop() || ""
-    const bFileName = b.filePath.split("/").pop() || ""
-    return aFileName.localeCompare(bFileName)
-  })
+    const aFileName = a.filePath.split("/").pop() || "";
+    const bFileName = b.filePath.split("/").pop() || "";
+    return aFileName.localeCompare(bFileName);
+  });
 
-  return sorted[0]
+  return sorted[0];
 }
 
 export async function getArticleNavigation(
   currentSlug: string,
   articles: FlatArticle[],
-  locale: "en" | "zh" = "zh"
+  locale: "en" | "zh" = "zh",
 ): Promise<NavigationResult> {
-  const currentIndex = articles.findIndex((a) => a.slug === currentSlug)
+  const currentIndex = articles.findIndex((a) => a.slug === currentSlug);
 
   if (currentIndex === -1) {
-    return { prev: null, next: null }
+    return { prev: null, next: null };
   }
 
   const getChapterTitle = async (article: FlatArticle): Promise<string | undefined> => {
     if (article.chapterTitle) {
-      return article.chapterTitle
+      return article.chapterTitle;
     }
 
     if (!article.parentPath) {
-      return undefined
+      return undefined;
     }
 
-    const entry = await getLocalizedArticleEntry(article.parentPath, locale)
-    const chapterTitle =
-      entry?.chapterTitle || entry?.titleByLocale[locale]?.trim()
+    const entry = await getLocalizedArticleEntry(article.parentPath, locale);
+    const chapterTitle = entry?.chapterTitle || entry?.titleByLocale[locale]?.trim();
     if (chapterTitle) {
-      return chapterTitle
+      return chapterTitle;
     }
 
-    const parts = article.parentPath.split("/")
-    return parts.at(-1)
-  }
+    const parts = article.parentPath.split("/");
+    return parts.at(-1);
+  };
 
   const prev =
     currentIndex > 0
@@ -243,11 +242,10 @@ export async function getArticleNavigation(
           slug: articles[currentIndex - 1].slug,
           title: articles[currentIndex - 1].title,
           isCrossFolder:
-            articles[currentIndex - 1].parentPath !==
-            articles[currentIndex].parentPath,
+            articles[currentIndex - 1].parentPath !== articles[currentIndex].parentPath,
           chapterTitle: await getChapterTitle(articles[currentIndex - 1]),
         }
-      : null
+      : null;
 
   const next =
     currentIndex < articles.length - 1
@@ -255,11 +253,10 @@ export async function getArticleNavigation(
           slug: articles[currentIndex + 1].slug,
           title: articles[currentIndex + 1].title,
           isCrossFolder:
-            articles[currentIndex + 1].parentPath !==
-            articles[currentIndex].parentPath,
+            articles[currentIndex + 1].parentPath !== articles[currentIndex].parentPath,
           chapterTitle: await getChapterTitle(articles[currentIndex + 1]),
         }
-      : null
+      : null;
 
-  return { prev, next }
+  return { prev, next };
 }

@@ -1,14 +1,8 @@
-"use client"
+"use client";
 
-import { useBookmarkRecorder } from "@/hooks/use-reading-bookmark"
+import { useBookmarkRecorder } from "@/hooks/use-reading-bookmark";
 
-export function BookmarkRecorder({
-  slug,
-  title,
-}: {
-  slug: string
-  title: string
-}) {
-  useBookmarkRecorder(slug, title)
-  return null
+export function BookmarkRecorder({ slug, title }: { slug: string; title: string }) {
+  useBookmarkRecorder(slug, title);
+  return null;
 }

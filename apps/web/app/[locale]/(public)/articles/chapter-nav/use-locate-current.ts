@@ -1,61 +1,58 @@
-import React, { useCallback, useEffect, useRef } from "react"
-import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
-import { articleUrl } from "@/lib/articles/url"
+import React, { useCallback, useEffect, useRef } from "react";
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types";
+import { articleUrl } from "@/lib/articles/url";
 
-const HIGHLIGHT_TIMEOUT_MS = 2000
-const LOCATE_FALLBACK_MS = 600
+const HIGHLIGHT_TIMEOUT_MS = 2000;
+const LOCATE_FALLBACK_MS = 600;
 
 function attachTransitionEnd(grid: HTMLDivElement, handler: (e: TransitionEvent) => void) {
-  grid.addEventListener("transitionend", handler)
+  grid.addEventListener("transitionend", handler);
 }
 
 function detachTransitionEnd(grid: HTMLDivElement, handler: (e: TransitionEvent) => void) {
-  grid.removeEventListener("transitionend", handler)
+  grid.removeEventListener("transitionend", handler);
 }
 
 type LocateState =
   | { phase: "idle" }
   | {
-      phase: "expanding"
-      pendingIds: string[]
-      fallbackTimer: ReturnType<typeof setTimeout>
-    }
+      phase: "expanding";
+      pendingIds: string[];
+      fallbackTimer: ReturnType<typeof setTimeout>;
+    };
 
 interface LocateCurrentOptions {
-  tree: ChapterNavNode[]
-  effectivePath: string
-  mounted: boolean
-  expandedFoldersRef: React.RefObject<Set<string>>
-  setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>
-  scrollContainerRef: React.RefObject<HTMLDivElement | null>
-  activeItemRef: React.RefObject<HTMLLIElement | null>
-  folderGridRefs: React.RefObject<Map<string, HTMLDivElement>>
-  setHighlightActive: React.Dispatch<React.SetStateAction<boolean>>
+  tree: ChapterNavNode[];
+  effectivePath: string;
+  mounted: boolean;
+  expandedFoldersRef: React.RefObject<Set<string>>;
+  setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
+  scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+  activeItemRef: React.RefObject<HTMLLIElement | null>;
+  folderGridRefs: React.RefObject<Map<string, HTMLDivElement>>;
+  setHighlightActive: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function findParentIds(items: ChapterNavNode[], target: string): string[] {
-  const decodedTarget = decodeURIComponent(target).toLowerCase()
+  const decodedTarget = decodeURIComponent(target).toLowerCase();
 
-  const walk = (
-    nodes: ChapterNavNode[],
-    parents: string[] = []
-  ): string[] | null => {
+  const walk = (nodes: ChapterNavNode[], parents: string[] = []): string[] | null => {
     for (const item of nodes) {
       if (item.children?.length) {
-        const result = walk(item.children, [...parents, item.id])
-        if (result) return result
+        const result = walk(item.children, [...parents, item.id]);
+        if (result) return result;
       }
 
-      const slug = decodeURIComponent(articleUrl(item.slug)).toLowerCase()
+      const slug = decodeURIComponent(articleUrl(item.slug)).toLowerCase();
       if (slug === decodedTarget || `${slug}/` === decodedTarget) {
-        return parents
+        return parents;
       }
     }
 
-    return null
-  }
+    return null;
+  };
 
-  return walk(items) ?? []
+  return walk(items) ?? [];
 }
 
 export function useLocateCurrent({
@@ -69,107 +66,105 @@ export function useLocateCurrent({
   folderGridRefs,
   setHighlightActive,
 }: LocateCurrentOptions) {
-  const locateStateRef = useRef<LocateState>({ phase: "idle" })
-  const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const transitionCleanupRef = useRef<(() => void) | null>(null)
+  const locateStateRef = useRef<LocateState>({ phase: "idle" });
+  const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transitionCleanupRef = useRef<(() => void) | null>(null);
 
   const clearHighlightTimer = useCallback(() => {
     if (highlightTimerRef.current !== null) {
-      clearTimeout(highlightTimerRef.current)
-      highlightTimerRef.current = null
+      clearTimeout(highlightTimerRef.current);
+      highlightTimerRef.current = null;
     }
-  }, [])
+  }, []);
 
   const clearTransitionListeners = useCallback(() => {
     if (transitionCleanupRef.current !== null) {
-      transitionCleanupRef.current()
-      transitionCleanupRef.current = null
+      transitionCleanupRef.current();
+      transitionCleanupRef.current = null;
     }
-  }, [])
+  }, []);
 
   const resetLocateState = useCallback(() => {
-    const state = locateStateRef.current
+    const state = locateStateRef.current;
     if (state.phase === "expanding") {
-      clearTimeout(state.fallbackTimer)
+      clearTimeout(state.fallbackTimer);
     }
-    clearTransitionListeners()
-    locateStateRef.current = { phase: "idle" }
-  }, [clearTransitionListeners])
+    clearTransitionListeners();
+    locateStateRef.current = { phase: "idle" };
+  }, [clearTransitionListeners]);
 
   useEffect(
     () => () => {
-      clearHighlightTimer()
-      resetLocateState()
+      clearHighlightTimer();
+      resetLocateState();
     },
-    [clearHighlightTimer, resetLocateState]
-  )
+    [clearHighlightTimer, resetLocateState],
+  );
 
   const scrollActiveItem = useCallback(() => {
-    const item = activeItemRef.current
-    const container = scrollContainerRef.current
-    if (!item) return
+    const item = activeItemRef.current;
+    const container = scrollContainerRef.current;
+    if (!item) return;
 
     if (container) {
-      const ir = item.getBoundingClientRect()
-      const cr = container.getBoundingClientRect()
-      const top = ir.top - cr.top + container.scrollTop - cr.height / 4
-      container.scrollTo({ top: Math.max(0, top), behavior: "smooth" })
+      const ir = item.getBoundingClientRect();
+      const cr = container.getBoundingClientRect();
+      const top = ir.top - cr.top + container.scrollTop - cr.height / 4;
+      container.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
     } else {
-      item.scrollIntoView({ block: "start", behavior: "smooth" })
+      item.scrollIntoView({ block: "start", behavior: "smooth" });
     }
 
-    setHighlightActive(true)
-    clearHighlightTimer()
+    setHighlightActive(true);
+    clearHighlightTimer();
     highlightTimerRef.current = setTimeout(() => {
-      setHighlightActive(false)
-      highlightTimerRef.current = null
-    }, HIGHLIGHT_TIMEOUT_MS)
-  }, [clearHighlightTimer, scrollContainerRef, activeItemRef, setHighlightActive])
+      setHighlightActive(false);
+      highlightTimerRef.current = null;
+    }, HIGHLIGHT_TIMEOUT_MS);
+  }, [clearHighlightTimer, scrollContainerRef, activeItemRef, setHighlightActive]);
 
   const scrollAndReset = useCallback(() => {
-    scrollActiveItem()
-    locateStateRef.current = { phase: "idle" }
-  }, [scrollActiveItem])
+    scrollActiveItem();
+    locateStateRef.current = { phase: "idle" };
+  }, [scrollActiveItem]);
 
   const finishExpansionAndScroll = useCallback(() => {
-    const state = locateStateRef.current
-    if (state.phase !== "expanding") return
+    const state = locateStateRef.current;
+    if (state.phase !== "expanding") return;
 
-    clearTimeout(state.fallbackTimer)
-    clearTransitionListeners()
-    scrollAndReset()
-  }, [clearTransitionListeners, scrollAndReset])
+    clearTimeout(state.fallbackTimer);
+    clearTransitionListeners();
+    scrollAndReset();
+  }, [clearTransitionListeners, scrollAndReset]);
 
   const locateCurrent = useCallback(() => {
-    const parentIds = findParentIds(tree, effectivePath)
-    const pendingIds = parentIds.filter(
-      (id) => !expandedFoldersRef.current.has(id)
-    )
+    const parentIds = findParentIds(tree, effectivePath);
+    const pendingIds = parentIds.filter((id) => !expandedFoldersRef.current.has(id));
 
-    resetLocateState()
+    resetLocateState();
 
     if (pendingIds.length === 0) {
-      scrollAndReset()
-      return
+      scrollAndReset();
+      return;
     }
 
     setExpandedFolders((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
       pendingIds.forEach((id) => {
-        next.add(id)
-      })
-      return next
-    })
+        next.add(id);
+      });
+      return next;
+    });
 
     const fallbackTimer = setTimeout(() => {
-      finishExpansionAndScroll()
-    }, LOCATE_FALLBACK_MS)
+      finishExpansionAndScroll();
+    }, LOCATE_FALLBACK_MS);
 
     locateStateRef.current = {
       phase: "expanding",
       pendingIds,
       fallbackTimer,
-    }
+    };
   }, [
     effectivePath,
     expandedFoldersRef,
@@ -178,73 +173,70 @@ export function useLocateCurrent({
     scrollAndReset,
     setExpandedFolders,
     tree,
-  ])
+  ]);
 
   useEffect(() => {
-
-    const state = locateStateRef.current
-    if (state.phase !== "expanding") return
+    const state = locateStateRef.current;
+    if (state.phase !== "expanding") return;
 
     const watchEntries = state.pendingIds
       .map((id) => [id, folderGridRefs.current.get(id)] as const)
-      .filter((entry): entry is readonly [string, HTMLDivElement] => !!entry[1])
+      .filter((entry): entry is readonly [string, HTMLDivElement] => !!entry[1]);
 
-    const remainingIds = new Set(watchEntries.map(([id]) => id))
+    const remainingIds = new Set(watchEntries.map(([id]) => id));
 
     const onTransitionEnd = (event: TransitionEvent) => {
-      if (event.propertyName !== "grid-template-rows") return
+      if (event.propertyName !== "grid-template-rows") return;
 
-      const finishedId = watchEntries.find(
-        ([, grid]) => grid === event.currentTarget
-      )?.[0]
-      if (!finishedId || !remainingIds.has(finishedId)) return
+      const finishedId = watchEntries.find(([, grid]) => grid === event.currentTarget)?.[0];
+      if (!finishedId || !remainingIds.has(finishedId)) return;
 
-      remainingIds.delete(finishedId)
+      remainingIds.delete(finishedId);
       if (remainingIds.size === 0) {
-        finishExpansionAndScroll()
+        finishExpansionAndScroll();
       }
-    }
+    };
 
-    let immediateFinishTimer: number | undefined
+    let immediateFinishTimer: number | undefined;
     if (watchEntries.length === 0) {
       immediateFinishTimer = window.setTimeout(() => {
-        finishExpansionAndScroll()
-      }, 0)
+        finishExpansionAndScroll();
+      }, 0);
     }
     for (const [, grid] of watchEntries) {
-      attachTransitionEnd(grid, onTransitionEnd)
+      attachTransitionEnd(grid, onTransitionEnd);
     }
 
     const cleanup = () => {
-      clearTimeout(immediateFinishTimer)
+      clearTimeout(immediateFinishTimer);
       for (const [, grid] of watchEntries) {
-        detachTransitionEnd(grid, onTransitionEnd)
+        detachTransitionEnd(grid, onTransitionEnd);
       }
-      clearTimeout((locateStateRef.current as unknown as { fallbackTimer?: number }).fallbackTimer)
-    }
+      clearTimeout((locateStateRef.current as unknown as { fallbackTimer?: number }).fallbackTimer);
+    };
 
-    transitionCleanupRef.current = cleanup
+    transitionCleanupRef.current = cleanup;
 
     return () => {
-      clearTimeout(immediateFinishTimer)
+      clearTimeout(immediateFinishTimer);
       for (const [, grid] of watchEntries) {
-        detachTransitionEnd(grid, onTransitionEnd)
+        detachTransitionEnd(grid, onTransitionEnd);
       }
-      clearTimeout((locateStateRef.current as unknown as { fallbackTimer?: number }).fallbackTimer)
-      transitionCleanupRef.current = null
-    }
-  }, [finishExpansionAndScroll, folderGridRefs])
+      clearTimeout((locateStateRef.current as unknown as { fallbackTimer?: number }).fallbackTimer);
+      transitionCleanupRef.current = null;
+    };
+  }, [finishExpansionAndScroll, folderGridRefs]);
 
   useEffect(() => {
-    if (!mounted || tree.length === 0) return
+    if (!mounted || tree.length === 0) return;
     const routeLocateTimer = window.setTimeout(() => {
-      locateCurrent()
-    }, 0)
+      locateCurrent();
+    }, 0);
 
     return () => {
-      clearTimeout(routeLocateTimer)
-    }
-  }, [locateCurrent, mounted, tree])
+      clearTimeout(routeLocateTimer);
+    };
+  }, [locateCurrent, mounted, tree]);
 
-  return locateCurrent
+  return locateCurrent;
 }

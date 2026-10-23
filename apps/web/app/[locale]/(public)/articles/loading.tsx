@@ -1,9 +1,5 @@
-import { PageSkeleton } from "@/components/layout/page-skeleton"
-import {
-  SectionFrame,
-  SectionRail,
-  SegmentedBar,
-} from "@/components/ui/loading-shell-primitives"
+import { PageSkeleton } from "@/components/layout/page-skeleton";
+import { SectionFrame, SectionRail, SegmentedBar } from "@/components/ui/loading-shell-primitives";
 
 export default function ArticlesLoading() {
   return (
@@ -29,5 +25,5 @@ export default function ArticlesLoading() {
         </div>
       </SectionFrame>
     </PageSkeleton>
-  )
+  );
 }

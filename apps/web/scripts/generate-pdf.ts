@@ -207,7 +207,9 @@ function runPdfgen(args: string[], report = false): PdfgenReport | undefined {
   } catch (error) {
     throw new Error(
       `pdfgen render returned invalid report JSON: ${String(error)}`,
-      { cause: error }
+      {
+        cause: error,
+      }
     )
   }
   if (

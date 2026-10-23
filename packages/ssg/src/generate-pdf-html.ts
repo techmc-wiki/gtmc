@@ -1,27 +1,24 @@
-import fs from "fs"
-import path from "path"
+import fs from "fs";
+import path from "path";
 
-import type { ArticleEntry } from "./articles/types"
-import {
-  artifactFilename,
-  type ArticleContentArtifact,
-} from "./articles/content"
-import { renderMarkdownToHtml } from "./markdown/pdf-html"
+import type { ArticleEntry } from "./articles/types";
+import { artifactFilename, type ArticleContentArtifact } from "./articles/content";
+import { renderMarkdownToHtml } from "./markdown/pdf-html";
 import {
   createRehypeShiki,
   persistHighlightCache,
   type RehypeShikiPlugin,
-} from "./markdown/syntax/rehype-shiki"
-import type { BuildLogger } from "./logger"
+} from "./markdown/syntax/rehype-shiki";
+import type { BuildLogger } from "./logger";
 
 export interface PdfHtmlOptions {
   /** Directory holding `manifest.json` and the generated `articles/` artifacts. */
-  dataDir: string
+  dataDir: string;
   /** Directory that receives the `<locale>/<slug>.html` sidecars. */
-  htmlDir: string
+  htmlDir: string;
   /** Shiki highlight cache shared with the site render. */
-  highlightCachePath: string
-  logger: BuildLogger
+  highlightCachePath: string;
+  logger: BuildLogger;
 }
 
 /**
@@ -37,66 +34,62 @@ export async function generatePdfHtml({
   highlightCachePath,
   logger,
 }: PdfHtmlOptions): Promise<void> {
-  const TEMP_DIR = `${htmlDir}.tmp`
-  let generatedCount = 0
-  let errorCount = 0
+  const TEMP_DIR = `${htmlDir}.tmp`;
+  let generatedCount = 0;
+  let errorCount = 0;
 
-  fs.rmSync(TEMP_DIR, { recursive: true, force: true })
-  fs.mkdirSync(TEMP_DIR, { recursive: true })
+  fs.rmSync(TEMP_DIR, { recursive: true, force: true });
+  fs.mkdirSync(TEMP_DIR, { recursive: true });
 
-  const shikiPlugin = await createRehypeShiki(highlightCachePath)
+  const shikiPlugin = await createRehypeShiki(highlightCachePath);
   const entries = Object.values(
-    JSON.parse(
-      fs.readFileSync(path.join(dataDir, "manifest.json"), "utf-8")
-    ) as Record<string, ArticleEntry>
-  )
+    JSON.parse(fs.readFileSync(path.join(dataDir, "manifest.json"), "utf-8")) as Record<
+      string,
+      ArticleEntry
+    >,
+  );
 
   const renderJobs = entries.flatMap((entry) => {
-    if (
-      !entry.filePath.endsWith(".md") ||
-      (entry.isFolder && !entry.hasIntro)
-    ) {
-      return []
+    if (!entry.filePath.endsWith(".md") || (entry.isFolder && !entry.hasIntro)) {
+      return [];
     }
     return Object.keys(entry.localizedFilePaths).map(
-      (locale) => () => renderSidecar(entry, locale, shikiPlugin)
-    )
-  })
+      (locale) => () => renderSidecar(entry, locale, shikiPlugin),
+    );
+  });
 
-  await Promise.all(renderJobs.map((job) => job()))
+  await Promise.all(renderJobs.map((job) => job()));
 
-  fs.rmSync(htmlDir, { recursive: true, force: true })
-  fs.renameSync(TEMP_DIR, htmlDir)
+  fs.rmSync(htmlDir, { recursive: true, force: true });
+  fs.renameSync(TEMP_DIR, htmlDir);
 
-  persistHighlightCache(highlightCachePath)
+  persistHighlightCache(highlightCachePath);
 
-  logger.event("pdf-html.generated", { generated_count: generatedCount })
+  logger.event("pdf-html.generated", { generated_count: generatedCount });
 
   if (errorCount > 0) {
-    throw new Error("PDF HTML generation failed")
+    throw new Error("PDF HTML generation failed");
   }
 
   async function renderSidecar(
     entry: ArticleEntry,
     locale: string,
-    highlightPlugin: RehypeShikiPlugin
+    highlightPlugin: RehypeShikiPlugin,
   ): Promise<void> {
-    const filename = `${artifactFilename(entry.slug)}.json`
-    const artifactPath = path.join(dataDir, "articles", locale, filename)
+    const filename = `${artifactFilename(entry.slug)}.json`;
+    const artifactPath = path.join(dataDir, "articles", locale, filename);
 
-    let artifact: ArticleContentArtifact
+    let artifact: ArticleContentArtifact;
     try {
-      artifact = JSON.parse(
-        fs.readFileSync(artifactPath, "utf-8")
-      ) as ArticleContentArtifact
+      artifact = JSON.parse(fs.readFileSync(artifactPath, "utf-8")) as ArticleContentArtifact;
     } catch (error) {
       logger.error(
         "pdf-html.artifact.read-failed",
         { locale, slug: entry.slug },
-        `${artifactPath}: ${String(error)}`
-      )
-      errorCount++
-      return
+        `${artifactPath}: ${String(error)}`,
+      );
+      errorCount++;
+      return;
     }
 
     try {
@@ -105,21 +98,14 @@ export async function generatePdfHtml({
         codeReferences: artifact.codeReferences,
         locale: locale as "en" | "zh",
         shikiPlugin: highlightPlugin,
-      })
-      const localeDir = path.join(TEMP_DIR, locale)
-      fs.mkdirSync(localeDir, { recursive: true })
-      fs.writeFileSync(
-        path.join(localeDir, `${artifactFilename(entry.slug)}.html`),
-        html
-      )
-      generatedCount++
+      });
+      const localeDir = path.join(TEMP_DIR, locale);
+      fs.mkdirSync(localeDir, { recursive: true });
+      fs.writeFileSync(path.join(localeDir, `${artifactFilename(entry.slug)}.html`), html);
+      generatedCount++;
     } catch (error) {
-      logger.error(
-        "pdf-html.render-failed",
-        { locale, slug: entry.slug },
-        String(error)
-      )
-      errorCount++
+      logger.error("pdf-html.render-failed", { locale, slug: entry.slug }, String(error));
+      errorCount++;
     }
   }
 }

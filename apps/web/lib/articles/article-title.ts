@@ -1,19 +1,18 @@
-import type { ArticleLocale } from "@gtmc/ssg/articles/types"
-import { getCachedLocalizedArticleEntry } from "@/lib/articles/manifest-cached"
-import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix"
-import { findNavigationOwner } from "@/lib/articles/navigation-data"
-import { getPublicChapterNav } from "@/lib/articles/public-tree"
+import type { ArticleLocale } from "@gtmc/ssg/articles/types";
+import { getCachedLocalizedArticleEntry } from "@/lib/articles/manifest-cached";
+import { formatIndexPrefix } from "@/lib/articles/chapter-index-prefix";
+import { findNavigationOwner } from "@/lib/articles/navigation-data";
+import { getPublicChapterNav } from "@/lib/articles/public-tree";
 
 function resolveArticleTitle(rawTitle: unknown, fallbackPath: string): string {
   if (typeof rawTitle === "string" && rawTitle.trim()) {
-    return rawTitle.trim()
+    return rawTitle.trim();
   }
 
   const fallback =
-    fallbackPath.replace(/\/$/, "").split("/").pop()?.replace(/\.md$/i, "") ||
-    "Article"
+    fallbackPath.replace(/\/$/, "").split("/").pop()?.replace(/\.md$/i, "") || "Article";
 
-  return fallback
+  return fallback;
 }
 
 export async function resolveDisplayedArticleTitle(
@@ -21,25 +20,25 @@ export async function resolveDisplayedArticleTitle(
   fallbackPath: string,
   canonicalSlug: string,
   isReadmeIntro: boolean,
-  locale: ArticleLocale
+  locale: ArticleLocale,
 ): Promise<string> {
-  const slugEntry = await getCachedLocalizedArticleEntry(canonicalSlug, locale)
-  const introTitle = slugEntry?.introTitleByLocale?.[locale]?.trim()
+  const slugEntry = await getCachedLocalizedArticleEntry(canonicalSlug, locale);
+  const introTitle = slugEntry?.introTitleByLocale?.[locale]?.trim();
 
   if (isReadmeIntro && introTitle) {
-    return introTitle
+    return introTitle;
   }
 
-  const localizedTitle = slugEntry?.titleByLocale?.[locale]?.trim()
+  const localizedTitle = slugEntry?.titleByLocale?.[locale]?.trim();
   if (localizedTitle) {
-    return localizedTitle
+    return localizedTitle;
   }
 
   if (locale === "en" && slugEntry?.titleByLocale?.zh?.trim()) {
-    return slugEntry.titleByLocale.zh.trim()
+    return slugEntry.titleByLocale.zh.trim();
   }
 
-  return resolveArticleTitle(rawTitle, fallbackPath)
+  return resolveArticleTitle(rawTitle, fallbackPath);
 }
 
 export function formatArticleTitle(
@@ -47,48 +46,46 @@ export function formatArticleTitle(
   index: number,
   isAppendix: boolean,
   isPreface: boolean,
-  isReadmeIntro: boolean
+  isReadmeIntro: boolean,
 ): string {
   const prefix = isReadmeIntro
     ? formatIndexPrefix(0, false, false)
-    : formatIndexPrefix(index, isAppendix, isPreface)
+    : formatIndexPrefix(index, isAppendix, isPreface);
 
-  return `${prefix}${title}`
+  return `${prefix}${title}`;
 }
 
 export interface ArticleDisplayTitleInput {
-  frontmatterTitle: unknown
-  filePath: string
-  canonicalSlug: string
-  index: number
-  isPreface: boolean
-  isReadmeIntro: boolean
-  locale: ArticleLocale
+  frontmatterTitle: unknown;
+  filePath: string;
+  canonicalSlug: string;
+  index: number;
+  isPreface: boolean;
+  isReadmeIntro: boolean;
+  locale: ArticleLocale;
 }
 
 /** Formats the resolved article title with its navigation index and structural markers. */
-export async function formatArticleDisplayTitle(
-  input: ArticleDisplayTitleInput
-): Promise<string> {
+export async function formatArticleDisplayTitle(input: ArticleDisplayTitleInput): Promise<string> {
   const [displayTitle, tree] = await Promise.all([
     resolveDisplayedArticleTitle(
       input.frontmatterTitle,
       input.filePath,
       input.canonicalSlug,
       input.isReadmeIntro,
-      input.locale
+      input.locale,
     ),
     getPublicChapterNav(input.locale),
-  ])
-  const structuralOwner = findNavigationOwner(tree, input.canonicalSlug)
+  ]);
+  const structuralOwner = findNavigationOwner(tree, input.canonicalSlug);
 
   return formatArticleTitle(
     displayTitle,
     input.index,
     structuralOwner?.isAppendix ?? false,
     input.isPreface,
-    input.isReadmeIntro
-  )
+    input.isReadmeIntro,
+  );
 }
 
 /**
@@ -96,25 +93,20 @@ export async function formatArticleDisplayTitle(
  * title: replaces a differing top-level heading or prepends one.
  */
 export function embedTitleInMarkdown(content: string, title: string): string {
-  const leadingWhitespace = content.match(/^\s*/)?.[0] ?? ""
-  const trimmedStartContent = content.slice(leadingWhitespace.length)
-  const escapedTitle = title.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&")
-  const sameTitleHeadingPattern = new RegExp(
-    `^#\\s+${escapedTitle}\\s*(?:\\r?\\n|$)`
-  )
-  const topLevelHeadingPattern = /^#\s+.+\s*(?:\r?\n|$)/
+  const leadingWhitespace = content.match(/^\s*/)?.[0] ?? "";
+  const trimmedStartContent = content.slice(leadingWhitespace.length);
+  const escapedTitle = title.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const sameTitleHeadingPattern = new RegExp(`^#\\s+${escapedTitle}\\s*(?:\\r?\\n|$)`);
+  const topLevelHeadingPattern = /^#\s+.+\s*(?:\r?\n|$)/;
 
   if (sameTitleHeadingPattern.test(trimmedStartContent)) {
-    return content
+    return content;
   }
 
   if (topLevelHeadingPattern.test(trimmedStartContent)) {
-    const replacedContent = trimmedStartContent.replace(
-      topLevelHeadingPattern,
-      `# ${title}\n`
-    )
-    return `${leadingWhitespace}${replacedContent}`
+    const replacedContent = trimmedStartContent.replace(topLevelHeadingPattern, `# ${title}\n`);
+    return `${leadingWhitespace}${replacedContent}`;
   }
 
-  return `# ${title}\n\n${content}`
+  return `# ${title}\n\n${content}`;
 }

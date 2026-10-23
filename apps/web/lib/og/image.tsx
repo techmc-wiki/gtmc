@@ -13,7 +13,8 @@ export async function createOgImage(title: string, headers?: HeadersInit) {
   // CJK glyphs occupy roughly twice the width of Latin characters.
   const characters = [...title.trim()]
   const titleWidth = characters.reduce(
-    (width, character) => width + (/[^\u0000-\u024f]/.test(character) ? 2 : 1),
+    (width, character) =>
+      width + (/[\u0250-\u{10ffff}]/u.test(character) ? 2 : 1),
     0
   )
   const hasCjk = /[\p{Script=Han}]/u.test(title)

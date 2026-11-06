@@ -4,11 +4,13 @@
 import * as React from "react"
 import {
   AnimatePresence,
-  motion,
+  LazyMotion,
+  domMax,
+  m,
   useReducedMotion,
   useScroll,
-  type MotionValue,
   useSpring,
+  type MotionValue,
 } from "motion/react"
 
 import { cn } from "@/lib/cn"
@@ -224,7 +226,7 @@ function ProgressPill({
   onOpen: () => void
 }) {
   return (
-    <motion.button
+    <m.button
       ref={triggerRef}
       type="button"
       onClick={onOpen}
@@ -250,7 +252,7 @@ function ProgressPill({
             strokeWidth="2.5"
             className="stroke-foreground/15"
           />
-          <motion.circle
+          <m.circle
             cx="12"
             cy="12"
             r="10"
@@ -266,7 +268,7 @@ function ProgressPill({
       <span className="relative h-5 shrink-0" style={{ width: labelWidth }}>
         {labelSlot}
       </span>
-    </motion.button>
+    </m.button>
   )
 }
 
@@ -286,7 +288,7 @@ function SectionList({
   onSelect: (id: string) => void
 }) {
   return (
-    <motion.ul
+    <m.ul
       ref={listRef}
       className="absolute inset-0 flex flex-col overflow-y-auto p-1.5"
       initial={{
@@ -315,7 +317,7 @@ function SectionList({
                   : "text-foreground/55 hover:text-foreground/80"
               )}>
               {isActive && (
-                <motion.span
+                <m.span
                   layoutId={`${layoutId}-active`}
                   className={cn(
                     "absolute inset-0 rounded-[14px] bg-foreground/10",
@@ -324,7 +326,7 @@ function SectionList({
                   transition={reduceMotion ? { duration: 0 } : SIZE_SPRING}
                 />
               )}
-              <motion.span
+              <m.span
                 className={cn(
                   "relative h-1.5 w-1.5 shrink-0 rounded-full",
                   isActive ? "bg-foreground" : "bg-foreground/30"
@@ -341,7 +343,7 @@ function SectionList({
                   delay: reduceMotion ? 0 : 0.04 + i * 0.03,
                 }}
               />
-              <motion.span
+              <m.span
                 className="relative min-w-0 truncate whitespace-nowrap"
                 initial={
                   reduceMotion
@@ -355,12 +357,12 @@ function SectionList({
                   delay: reduceMotion ? 0 : 0.04 + i * 0.03,
                 }}>
                 {s.label}
-              </motion.span>
+              </m.span>
             </button>
           </li>
         )
       })}
-    </motion.ul>
+    </m.ul>
   )
 }
 
@@ -466,32 +468,32 @@ const ScrollProgress = ({
   const radius = open ? 26 : (collapsedSize?.height ?? 32) / 2
 
   return (
-    <div
-      ref={rootRef}
-      data-slot="scroll-progress"
-      className={cn("fixed bottom-6 left-1/2 z-40 -translate-x-1/2", className)}
-      {...props}>
-      <SizeProbe
-        sections={sections}
-        label={label}
-        collapsedRef={collapsedRef}
-        labelRef={labelRef}
-        openRef={openRef}
-      />
+    <LazyMotion features={domMax}>
+      <div
+        ref={rootRef}
+        data-slot="scroll-progress"
+        className={cn(
+          "fixed bottom-6 left-1/2 z-40 -translate-x-1/2",
+          className
+        )}
+        {...props}>
+        <SizeProbe
+          sections={sections}
+          label={label}
+          collapsedRef={collapsedRef}
+          labelRef={labelRef}
+          openRef={openRef}
+        />
 
-      {size && (
-        <motion.div
+        <m.div
+          layout
           data-slot="scroll-progress-surface"
           className={cn(
             "absolute bottom-0 left-1/2 -translate-x-1/2 overflow-hidden border border-border bg-surface-overlay shadow-sm",
             SQUIRCLE
           )}
-          initial={false}
-          animate={{
-            width: size.width,
-            height: size.height,
-            borderRadius: radius,
-          }}
+          style={size ? { width: size.width, height: size.height } : undefined}
+          animate={{ borderRadius: radius }}
           transition={reduceMotion ? { duration: 0 } : SIZE_SPRING}>
           <AnimatePresence initial={false} mode="popLayout">
             {open ? (
@@ -514,7 +516,7 @@ const ScrollProgress = ({
                 labelSlot={
                   <AnimatePresence initial={false}>
                     {label && (
-                      <motion.span
+                      <m.span
                         key={label}
                         data-slot="scroll-progress-label"
                         className="text-foreground absolute inset-y-0 left-0 flex max-w-[min(42vw,14rem)] items-center truncate text-sm leading-none font-medium whitespace-nowrap"
@@ -531,7 +533,7 @@ const ScrollProgress = ({
                         }
                         transition={LABEL_CROSSFADE}>
                         {label}
-                      </motion.span>
+                      </m.span>
                     )}
                   </AnimatePresence>
                 }
@@ -540,9 +542,9 @@ const ScrollProgress = ({
               />
             )}
           </AnimatePresence>
-        </motion.div>
-      )}
-    </div>
+        </m.div>
+      </div>
+    </LazyMotion>
   )
 }
 

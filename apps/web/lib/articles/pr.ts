@@ -11,7 +11,15 @@ import {
   upsertFilesOnBranch,
   type BranchFileEntry,
 } from "@/lib/articles/branch";
+import { SubmissionInProgressError } from "@/lib/drafts/submission";
 const MAIN_BRANCH = "main";
+
+export interface DraftPullRequestResult {
+  activeFileId: string;
+  files: DraftFileRecord[];
+  prNumber: number;
+  prUrl: string;
+}
 
 interface DraftSubmissionInput {
   activeFileId?: string;
@@ -26,6 +34,20 @@ interface DraftSubmissionInput {
   token?: string;
 }
 
+export async function findArticlePullRequestByBranch(
+  branchName: string,
+  token?: string
+) {
+  const octokit = getOctokit(token);
+  const { data } = await octokit.pulls.list({
+    owner: ARTICLES_REPO_OWNER,
+    repo: ARTICLES_REPO_NAME,
+    head: `${ARTICLES_REPO_OWNER}:${branchName}`,
+    state: "all",
+  });
+  return data[0] ?? null;
+}
+
 export async function openDraftPullRequest({
   activeFileId,
   branchName,
@@ -37,7 +59,7 @@ export async function openDraftPullRequest({
   authorName,
   authorEmail,
   token,
-}: DraftSubmissionInput) {
+}: DraftSubmissionInput): Promise<DraftPullRequestResult> {
   const octokit = getOctokit(token);
   const latestMainSha = await getMainBranchHeadSha(token);
   const resolvedDraftFiles = await Promise.all(
@@ -56,13 +78,7 @@ export async function openDraftPullRequest({
       `Duplicate resolved file paths are not allowed: ${duplicateResolvedPaths.join(", ")}`,
     );
   }
-  const { data: existingPrs } = await octokit.pulls.list({
-    owner: ARTICLES_REPO_OWNER,
-    repo: ARTICLES_REPO_NAME,
-    head: `${ARTICLES_REPO_OWNER}:${branchName}`,
-    state: "all",
-  });
-  const existingPr = existingPrs[0];
+  const existingPr = await findArticlePullRequestByBranch(branchName, token);
   if (existingPr) {
     return {
       activeFileId: normalizedFiles.activeFileId,
@@ -71,10 +87,9 @@ export async function openDraftPullRequest({
       prUrl: existingPr.html_url,
     };
   }
-  if (recoverOnly)
-    {throw new Error(
-      "Submission is still in progress. Retry shortly; interrupted submissions can be resumed after 15 minutes.",
-    );}
+  if (recoverOnly) {
+    throw new SubmissionInProgressError();
+  }
   try {
     await octokit.git.getRef({
       owner: ARTICLES_REPO_OWNER,
@@ -87,7 +102,7 @@ export async function openDraftPullRequest({
       owner: ARTICLES_REPO_OWNER,
       repo: ARTICLES_REPO_NAME,
       ref: `refs/heads/${branchName}`,
-      sha: baseMainSha,
+      sha: latestMainSha,
     });
   }
 

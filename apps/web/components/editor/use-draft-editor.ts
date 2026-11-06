@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror"
+import { useMachine } from "@xstate/react"
 import { useRouter } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 import { saveDraftAction } from "@/actions/article-draft"
@@ -15,9 +16,19 @@ import {
   type DraftFileCollection,
 } from "@/lib/drafts/files"
 import { toast } from "sonner"
-import { useDraftImageUpload } from "@/hooks/use-draft-image-upload"
+import {
+  createUploadPlaceholder,
+  useDraftImageUpload,
+} from "@/hooks/use-draft-image-upload"
 import type { OperationProgressState } from "@/components/ui/operation-progress"
 import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
+import {
+  createEditorSessionMachine,
+  isEditorReadOnly,
+  isEditorSaving,
+  isEditorSubmitting,
+} from "@/lib/drafts/editor-session"
+import type { DraftStatus } from "@/lib/drafts/store"
 
 const MAX_DRAFT_HISTORY_ENTRIES = 100
 
@@ -55,7 +66,7 @@ interface DraftEditorInitialData {
   githubPrUrl?: string
   files: DraftFileCollection["files"]
   title: string
-  status?: string
+  status?: DraftStatus
 }
 
 function normalizeDraftEditorInput(initialData?: DraftEditorInitialData) {
@@ -69,7 +80,7 @@ function normalizeDraftEditorInput(initialData?: DraftEditorInitialData) {
     contributingGuides: initialData?.contributingGuides || [],
     githubPrUrl: initialData?.githubPrUrl,
     revisionId: initialData?.id,
-    status: initialData?.status || "DRAFT",
+    status: initialData?.status ?? "DRAFT",
     title: initialData?.title || "",
   }
 }
@@ -88,7 +99,16 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     title: initialTitle,
   } = normalizeDraftEditorInput(initialData)
 
-  const [draftStatus, setDraftStatus] = React.useState(initialStatus)
+  const editorMachine = React.useMemo(
+    () => createEditorSessionMachine(initialStatus),
+    [initialStatus]
+  )
+  const [session, send, actorRef] = useMachine(editorMachine)
+  const draftStatus = session.context.status
+  const isSaving = isEditorSaving(session)
+  const isSubmitting = isEditorSubmitting(session)
+  const isReadOnly = isEditorReadOnly(session)
+
   const [title, setTitle] = React.useState(initialTitle)
   const [draftCollection, setDraftCollection] = React.useState(
     initialDraftCollection
@@ -101,8 +121,6 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
   )
   const [fileDialogIntent, setFileDialogIntent] =
     React.useState<DraftFileDialogIntent | null>(null)
-  const [pendingSaveCount, setPendingSaveCount] = React.useState(0)
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [saveProgressState, setSaveProgressState] =
     React.useState<OperationProgressState>("idle")
   const [submitProgressState, setSubmitProgressState] =
@@ -133,7 +151,6 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
   const etagRef = React.useRef(initialData?.etag)
   const revisionIdRef = React.useRef<string | undefined>(initialRevisionId)
   const saveQueueRef = React.useRef<Promise<unknown> | null>(null)
-  const submissionInFlightRef = React.useRef(false)
 
   const saveProgressStages = React.useMemo(
     () => [
@@ -239,8 +256,6 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     )
   }
 
-  const isSaving = pendingSaveCount > 0
-  const isReadOnly = draftStatus !== "DRAFT"
   const activeFile = getActiveDraftFile(draftCollection)
   const activeFileContent = activeFile.content
   const duplicateFilePaths = getDuplicateDraftFilePaths(draftCollection.files)
@@ -387,6 +402,33 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     ]
   )
 
+  const transformFileContent = React.useCallback(
+    (fileId: string, transform: (content: string) => string) => {
+      updateDraftCollection((current) => {
+        const targetFile = current.files.find((file) => file.id === fileId)
+        if (!targetFile) return current
+        const nextContent = transform(targetFile.content)
+        if (nextContent === targetFile.content) return current
+        const history = getDraftContentHistory(fileId)
+        pushHistoryEntry(history.undoStack, targetFile.content)
+        history.redoStack = []
+        syncHistoryAvailability(fileId)
+        return {
+          ...current,
+          files: current.files.map((file) =>
+            file.id === fileId ? { ...file, content: nextContent } : file
+          ),
+        }
+      })
+    },
+    [
+      getDraftContentHistory,
+      pushHistoryEntry,
+      syncHistoryAvailability,
+      updateDraftCollection,
+    ]
+  )
+
   const updateActiveFile = (updates: {
     content?: string
     filePath?: string
@@ -402,6 +444,10 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
   }
 
   const persistDraft = React.useCallback(async () => {
+    if (isEditorSubmitting(actorRef.getSnapshot())) {
+      throw new Error("Cannot save while submission is in progress")
+    }
+
     const normalizedDraftCollection =
       normalizeDraftFileCollection(draftCollection)
     const snapshot = {
@@ -409,7 +455,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
       title,
     }
 
-    setPendingSaveCount((count) => count + 1)
+    send({ type: "SAVE_STARTED" })
     const previousSave = saveQueueRef.current || Promise.resolve()
     const saveTask = previousSave.then(async () => {
       const formData = new FormData()
@@ -437,16 +483,21 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     })
 
     saveQueueRef.current = saveTask.catch(() => undefined)
+    let failed = false
     try {
       return await saveTask
+    } catch (error) {
+      failed = true
+      throw error
     } finally {
-      setPendingSaveCount((count) => Math.max(0, count - 1))
+      send({ type: failed ? "SAVE_FAILED" : "SAVE_SETTLED" })
     }
-  }, [draftCollection, title])
+  }, [actorRef, draftCollection, send, title])
 
   const saveDraftWithFeedback = React.useCallback(
     async (mode: "manual" | "auto" = "manual") => {
       if (!title.trim()) return
+      if (isEditorSubmitting(actorRef.getSnapshot())) return
       if (autoSaveTimeoutRef.current !== null) {
         window.clearTimeout(autoSaveTimeoutRef.current)
         autoSaveTimeoutRef.current = null
@@ -470,7 +521,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
         }
       }
     },
-    [persistDraft, t, title, updateSaveProgressState]
+    [actorRef, persistDraft, t, title, updateSaveProgressState]
   )
 
   const handleUndoDraftEdit = React.useCallback(() => {
@@ -554,28 +605,71 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     [t]
   )
 
-  const { uploadFile, isUploading, isCompressing } = useDraftImageUpload({
-    upload: draftUploadAdapter,
-    onInsertContent: (text: string) => {
-      if (text === "") {
-        updateActiveFile({
-          content: activeFileContent.replaceAll(
-            /<!-- UPLOAD_PENDING_[a-f0-9-]+ -->\n?/g,
-            ""
-          ),
-        })
-      } else if (text.startsWith("<!--")) {
-        insertTextAtCursor(text)
-      } else {
-        updateActiveFile({
-          content: activeFileContent.replace(
-            /<!-- UPLOAD_PENDING_[a-f0-9-]+ -->/,
-            text
-          ),
-        })
+  const uploadTargetsRef = React.useRef<Record<string, string>>({})
+
+  const purgeUploadPlaceholder = (uploadId: string, replacement: string) => {
+    const placeholder = createUploadPlaceholder(uploadId)
+    for (const history of Object.values(contentHistoryRef.current)) {
+      for (const stack of [history.undoStack, history.redoStack]) {
+        for (let index = 0; index < stack.length; index++) {
+          stack[index] = stack[index].replaceAll(placeholder, replacement)
+        }
       }
-    },
-  })
+    }
+  }
+
+  const insertUploadPlaceholder = (uploadId: string) => {
+    uploadTargetsRef.current[uploadId] = draftCollection.activeFileId
+    insertTextAtCursor(`${createUploadPlaceholder(uploadId)}\n`)
+  }
+
+  const replaceUploadPlaceholder = (uploadId: string, text: string) => {
+    const fileId = uploadTargetsRef.current[uploadId]
+    if (!fileId) return
+    delete uploadTargetsRef.current[uploadId]
+    const placeholder = createUploadPlaceholder(uploadId)
+    purgeUploadPlaceholder(uploadId, text)
+    transformFileContent(fileId, (content) =>
+      content.replace(placeholder, text)
+    )
+  }
+
+  const removeUploadPlaceholder = (uploadId: string) => {
+    const fileId = uploadTargetsRef.current[uploadId]
+    if (!fileId) return
+    delete uploadTargetsRef.current[uploadId]
+    const placeholder = createUploadPlaceholder(uploadId)
+    purgeUploadPlaceholder(uploadId, "")
+    transformFileContent(fileId, (content) =>
+      content.replace(`${placeholder}\n`, "").replace(placeholder, "")
+    )
+  }
+
+  const ensureDraftSavedForUpload = async () => {
+    if (revisionIdRef.current) return
+    const savingToastId = toast.loading(t("badgeSavingBeforeUpload"))
+    updateSaveProgressState("running")
+    try {
+      await persistDraft()
+      updateSaveProgressState("success")
+      toast.dismiss(savingToastId)
+    } catch {
+      updateSaveProgressState("error")
+      toast.dismiss(savingToastId)
+      toast.error(t("badgeSaveFailedUpload"))
+      throw new Error(t("badgeSaveFailedUpload"))
+    }
+  }
+
+  const { uploadFile, phase, isUploading, isCompressing } = useDraftImageUpload(
+    {
+      upload: draftUploadAdapter,
+      onInsertPlaceholder: insertUploadPlaceholder,
+      onReplacePlaceholder: replaceUploadPlaceholder,
+      onRemovePlaceholder: removeUploadPlaceholder,
+      beforeUpload: ensureDraftSavedForUpload,
+    }
+  )
 
   React.useEffect(() => {
     if (isReadOnly || !title.trim() || !hasUnsavedChanges) {
@@ -649,22 +743,8 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     title,
   ])
 
-  const handleUploadWithAutoSave = async (file: File) => {
-    if (!revisionIdRef.current) {
-      const savingToastId = toast.loading(t("badgeSavingBeforeUpload"))
-      updateSaveProgressState("running")
-      try {
-        await persistDraft()
-        updateSaveProgressState("success")
-        toast.dismiss(savingToastId)
-      } catch {
-        updateSaveProgressState("error")
-        toast.dismiss(savingToastId)
-        toast.error(t("badgeSaveFailedUpload"))
-        return
-      }
-    }
-    uploadFile(file)
+  const handleUploadWithAutoSave = (file: File) => {
+    void uploadFile(file)
   }
 
   const handlePaste = (e: React.ClipboardEvent) => {
@@ -699,7 +779,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
   const handleSubmitDraft = async () => {
     if (
       (isReadOnly && draftStatus !== "PENDING") ||
-      submissionInFlightRef.current ||
+      isEditorSubmitting(actorRef.getSnapshot()) ||
       isSaving ||
       isUploading
     ) {
@@ -718,33 +798,31 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
       )
       return
     }
-    submissionInFlightRef.current = true
-    setIsSubmitting(true)
     updateSubmitProgressState("running")
     try {
       const persistedDraft =
         draftStatus === "PENDING" && revisionIdRef.current
           ? { revisionId: revisionIdRef.current, etag: etagRef.current }
           : await persistDraft()
-      const result = await submitDraftAction(
-        persistedDraft.revisionId,
-        persistedDraft.etag!
-      )
-      setDraftStatus(result.status)
+      if (!persistedDraft.etag) {
+        throw new Error("Draft version is missing")
+      }
+      send({ type: "SUBMIT_STARTED" })
+      await submitDraftAction(persistedDraft.revisionId, persistedDraft.etag)
+      send({ type: "SUBMIT_SUCCEEDED" })
+      send({ type: "DRAFT_STATUS_CHANGED", status: "SUBMITTED" })
       updateSubmitProgressState("success")
       toast.success(t("badgePrOpened"), { duration: 4000 })
       router.push(`/draft/${persistedDraft.revisionId}`)
       router.refresh()
     } catch (error) {
       console.error(error)
+      send({ type: "SUBMIT_FAILED" })
       updateSubmitProgressState("error")
       toast.error(
         error instanceof Error ? error.message : t("badgeSubmitFailed")
       )
       router.refresh()
-    } finally {
-      submissionInFlightRef.current = false
-      setIsSubmitting(false)
     }
   }
 
@@ -910,7 +988,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
       insertSyntax,
       openFileDialog,
     },
-    upload: { uploadFile, isUploading, isCompressing },
+    upload: { uploadFile, phase, isUploading, isCompressing },
     progress: { saveProgressStages, submitProgressStages },
     t,
     progressT,

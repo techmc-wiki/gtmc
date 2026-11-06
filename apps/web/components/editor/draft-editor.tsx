@@ -23,6 +23,7 @@ import {
   type DraftFileCollection,
 } from "@/lib/drafts/files"
 import { OperationProgress } from "@/components/ui/operation-progress"
+import type { DraftStatus } from "@/lib/drafts/store"
 import {
   ResizableHandle,
   ResizablePanel,
@@ -47,7 +48,7 @@ interface DraftEditorProps {
     githubPrUrl?: string
     files: DraftFileCollection["files"]
     title: string
-    status?: string
+    status?: DraftStatus
   }
 }
 
@@ -318,7 +319,7 @@ function DraftEditorSurface({
         }
         submit={{
           busy: state.isSubmitting,
-          disabled: state.isSubmitting,
+          disabled: state.submitDisabled,
           onClick: () =>
             state.draftStatus === "PENDING"
               ? void actions.handleSubmitDraft()

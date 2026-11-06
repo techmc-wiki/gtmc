@@ -295,7 +295,7 @@ export class BodyEmitter {
     const highlighted = !plain && elementsOf(code.children).length > 0
     const lines = highlighted
       ? highlightedLines(code, attr(el, "data-raw-code"), error)
-      : plainLines(textOf(code))
+      : plainLines(attr(el, "data-raw-code") ?? textOf(code))
     return `#codeblock(lang: ${stringLiteral(lang)}, label: ${labelArg}, lines: ${lines})`
   }
 

@@ -7,6 +7,9 @@ owns the site artifacts; `renderMarkdownToHast` and `hastToTypst` turn the same
 Markdown into the Typst fragments that `pnpm build:pdf` compiles (see
 `tools/pdf/README.md` for the template vocabulary the emitter targets).
 
+Code fences retain their source line breaks and whitespace in the PDF, including
+plain-text fences and whitespace-only lines omitted by syntax highlighting.
+
 `generateArticleManifest` and `generateArticleContent` take explicit article,
 configuration, data, and asset paths plus the host's logger. The manifest builder
 also takes the host's GitHub commit URL resolver. The package has no Next.js,

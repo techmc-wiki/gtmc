@@ -164,16 +164,15 @@ export function highlightedLines(
   }
   let next = 0
   for (const source of sources) {
-    if (source === "") {
-      out.push("()")
-      continue
-    }
     const span = spans[next]
-    if (span === undefined || texts[next] !== source) {
+    if (span !== undefined && texts[next] === source) {
+      out.push(lineExpr(collectTokens(span.children, error, PLAIN)))
+      next++
+    } else if (source.trim() === "") {
+      out.push(source === "" ? "()" : lineExpr([{ ...PLAIN, text: source }]))
+    } else {
       throw error("highlighted lines do not match their source")
     }
-    out.push(lineExpr(collectTokens(span.children, error, PLAIN)))
-    next++
   }
   if (next !== spans.length)
     throw error("highlighted lines do not match their source")

@@ -34,7 +34,8 @@
     "lint:fix": "pnpm --filter @gtmc/ssg exec vp lint --fix && pnpm --filter @gtmc/web run lint:fix",
     "lint": "pnpm --filter @gtmc/ssg exec vp lint && pnpm --filter @gtmc/web run lint",
     "test": "pnpm --filter @gtmc/web run test",
-    "typecheck": "pnpm --filter @gtmc/ssg run typecheck && pnpm --filter @gtmc/web run typecheck"
+    "typecheck": "pnpm --filter @gtmc/ssg run typecheck && pnpm --filter @gtmc/web run typecheck",
+    "prepare": "vp config"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

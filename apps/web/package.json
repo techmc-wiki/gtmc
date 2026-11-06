@@ -41,7 +41,7 @@
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@microsoft/clarity": "^1.0.2",
-    "@next/mdx": "16.4.3",
+    "@next/mdx": "16.4.4",
     "@octokit/request-error": "^7.1.2",
     "@octokit/rest": "^22.0.1",
     "@uiw/react-codemirror": "^4.25.11",
@@ -51,7 +51,7 @@
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.1.1",
-    "cn": "^0.5.1",
+    "cn": "^0.5.2",
     "diff": "^9.0.0",
     "gray-matter": "^4.0.3",
     "gsap": "^3.15.0",
@@ -61,7 +61,7 @@
     "mermaid": "^12.2.0",
     "mime-types": "^3.0.2",
     "minisearch": "^7.2.0",
-    "next": "16.4.3",
+    "next": "16.4.4",
     "next-auth": "5.0.0-beta.32",
     "next-intl": "^4.14.8",
     "nucleation": "0.12.0",
@@ -71,7 +71,7 @@
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "react-markdown": "^10.1.0",
-    "react-resizable-panels": "^4.16.0",
+    "react-resizable-panels": "^4.17.0",
     "remark": "^15.0.1",
     "sonner": "^2.0.8",
     "strip-markdown": "^6.0.0",
@@ -82,8 +82,8 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^16.4.3",
-    "@tailwindcss/postcss": "^4.3.3",
+    "@next/bundle-analyzer": "^16.4.4",
+    "@tailwindcss/postcss": "^4.3.4",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",
@@ -95,6 +95,6 @@
     "dotenv": "^18.0.9",
     "picocolors": "^1.1.1",
     "pinyin-pro": "^3.29.5",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.4"
   }
 }

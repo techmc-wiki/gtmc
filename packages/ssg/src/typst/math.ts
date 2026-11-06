@@ -659,7 +659,7 @@ function splitTag(tex: string): { body: string; tag: string | undefined } {
   if (tag !== undefined && (tag === "" || /["\\\n]/.test(tag))) {
     throw new TypstMathError(tex, "unusable \\tag value")
   }
-  const body = tex.replace(TAG, "")
+  const body = tex.replaceAll(TAG, "")
   if (body.includes("\\tag")) throw new TypstMathError(tex, "malformed \\tag")
   return { body, tag }
 }

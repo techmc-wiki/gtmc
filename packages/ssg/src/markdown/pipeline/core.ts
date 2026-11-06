@@ -1,5 +1,6 @@
 import type { PluggableList } from "unified";
 import remarkGfm from "remark-gfm";
+import remarkCjkFriendly from "remark-cjk-friendly";
 import remarkMath from "remark-math";
 import remarkBreaks from "remark-breaks";
 import remarkDirective from "remark-directive";
@@ -28,12 +29,15 @@ interface RemarkPipelineOptions {
 interface RehypePipelineOptions {
   shikiPlugin?: RehypeShikiPlugin;
   codeReferences?: readonly CodeReference[];
-  cjkSpacingPlugin: PluggableList[number];
+  cjkSpacingPlugin?: PluggableList[number];
+  katex?: boolean;
 }
 
 export function buildRemarkPlugins(options: RemarkPipelineOptions = {}): PluggableList {
   const plugins: PluggableList = [
     remarkGfm,
+    // CommonMark flanking rules leave `_**中文**_` literal next to CJK text.
+    remarkCjkFriendly,
     remarkBreaks,
     remarkDirective,
     remarkDirectiveHandler,
@@ -67,8 +71,12 @@ export function buildRehypePlugins(options: RehypePipelineOptions): PluggableLis
     plugins.push(options.shikiPlugin);
   }
 
-  plugins.push(rehypeKatex);
-  plugins.push(options.cjkSpacingPlugin);
+  if (options.katex ?? true) {
+    plugins.push(rehypeKatex);
+  }
+  if (options.cjkSpacingPlugin) {
+    plugins.push(options.cjkSpacingPlugin);
+  }
 
   return plugins;
 }

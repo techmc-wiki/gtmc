@@ -1,12 +1,22 @@
 import type { LinearizedArticle } from "@/lib/articles/linearize"
 
-import { unescapeHtml } from "./html-utils"
 import type {
   BookPlan,
   ChapterContent,
   ChapterGroup,
   NumberedArticle,
 } from "./types"
+
+/** Article metadata may carry HTML entities; the book prints plain text. */
+export function unescapeHtml(text: string): string {
+  return text
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
+    .replaceAll("&apos;", "'")
+    .replaceAll("&amp;", "&")
+}
 
 function appendixLetter(ordinal: number): string {
   let n = ordinal

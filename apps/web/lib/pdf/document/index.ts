@@ -1,11 +1,10 @@
 export type {
-  BookOptions,
   BookPlan,
   ChapterContent,
   ChapterGroup,
   NumberedArticle,
   PdfLocale,
 } from "./types"
-export { buildBookPlan } from "./numbering"
-export { buildBodyHtml, buildCoverHtml } from "./assemble"
-export { getLabels, formatChapterLabel } from "./labels"
+export { chapterArticles } from "./types"
+export { unescapeHtml } from "./numbering"
+export { assembleBookPlan } from "./assemble"

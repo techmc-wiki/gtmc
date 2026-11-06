@@ -2,20 +2,23 @@
 
 The article build pipeline: source and translation frontmatter, Git attribution
 and freshness, manifest generation, Markdown transforms, Shiki highlighting,
-article artifacts, PDF HTML sidecars, and banner assets. `generateArticleContent`
-owns the site artifacts; `generatePdfHtml` turns those artifacts into the
-`<locale>/<slug>.html` sidecars that `pnpm build:pdf` prints.
+article artifacts, the Typst PDF emitter, and banner assets. `generateArticleContent`
+owns the site artifacts; `renderMarkdownToHast` and `hastToTypst` turn the same
+Markdown into the Typst fragments that `pnpm build:pdf` compiles (see
+`tools/pdf/README.md` for the template vocabulary the emitter targets).
 
-`generateArticleManifest`, `generateArticleContent`, and `generatePdfHtml` take
-explicit article, configuration, data, and asset paths plus the host's logger.
-The manifest builder also takes the host's GitHub commit URL resolver. The
-package has no Next.js, React, app alias, or working-directory dependency.
+Code fences retain their source line breaks and whitespace in the PDF, including
+plain-text fences and whitespace-only lines omitted by syntax highlighting.
 
-The web app's `scripts/generate-article-{manifest,content}.ts` and
-`scripts/generate-pdf-html.ts` supply their paths and settings.
+`generateArticleManifest` and `generateArticleContent` take explicit article,
+configuration, data, and asset paths plus the host's logger. The manifest builder
+also takes the host's GitHub commit URL resolver. The package has no Next.js,
+React, app alias, or working-directory dependency.
+
+The web app's `scripts/generate-article-{manifest,content}.ts` supply their paths
+and settings, and `scripts/generate-pdf.ts` drives the PDF build.
 `pnpm generate:manifest` and `pnpm generate:content` write to
-`apps/web/data` and `apps/web/public/article-assets`; `pnpm generate:pdf-html`
-reads those artifacts and writes to `tools/pdfgen/html`. Runtime artifact
+`apps/web/data` and `apps/web/public/article-assets`. Runtime artifact
 loading, Next.js caching, React Markdown components, and overall build
 orchestration stay in `apps/web`.
 

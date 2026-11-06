@@ -1,0 +1,6 @@
+{
+  "$schema": "https://react.doctor/schema/config.json",
+  "ignore": {
+    "files": ["lib/pdf/mermaid.ts", "scripts/generate-pdf.ts"]
+  }
+}

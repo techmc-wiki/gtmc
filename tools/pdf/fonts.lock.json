@@ -1,0 +1,138 @@
+{
+  "$comment": "Pinned static font files for the Typst PDF pipeline. ensurePdfFonts() downloads each entry into tools/pdf/fonts and verifies sha256. Files are OFL-1.1; URLs point at the exact npm package versions served by jsDelivr.",
+  "fonts": [
+    {
+      "family": "Geist",
+      "file": "Geist-Regular.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/geist@1.9.1/dist/fonts/geist-sans/Geist-Regular.ttf",
+      "sha256": "9ab5743f837ab2ca0339b29ed73d6a42764b427424cfa93c831253ea766c6be3",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "Geist",
+      "file": "Geist-Medium.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/geist@1.9.1/dist/fonts/geist-sans/Geist-Medium.ttf",
+      "sha256": "faabfdaef16f0c6badf0bb639f538f028b4d84217d115111ae0fd48d4b7fdb15",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "Geist",
+      "file": "Geist-SemiBold.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/geist@1.9.1/dist/fonts/geist-sans/Geist-SemiBold.ttf",
+      "sha256": "e4003bb294788a645b90fab60cd8db6042b376b50e94ed19607884c7f70972be",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "Geist",
+      "file": "Geist-Italic.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/geist@1.9.1/dist/fonts/geist-sans/Geist-Italic.ttf",
+      "sha256": "c4b1e73c51ed6b35ef67988a1e839e1ac842c7f3b2c62b45df135cbd2440d2ab",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "Geist Mono",
+      "file": "GeistMono-Regular.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/geist@1.9.1/dist/fonts/geist-mono/GeistMono-Regular.ttf",
+      "sha256": "3c759092cce66128efd2e87276768b01db42a59e2b11cae2a1ce959314dc0234",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "Geist Mono",
+      "file": "GeistMono-Medium.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/geist@1.9.1/dist/fonts/geist-mono/GeistMono-Medium.ttf",
+      "sha256": "b861aec03978a1aad8b5ba2dd101c0c9b6cc5e5905f910d1d55c1e513bf5a8aa",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "Geist Mono",
+      "file": "GeistMono-Bold.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/geist@1.9.1/dist/fonts/geist-mono/GeistMono-Bold.ttf",
+      "sha256": "863682ca0b25842b672c5b7467c67f85958e7b8de59e554e6df1641c2dad0e5b",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "STIX Two Text",
+      "file": "STIXTwoText-Regular.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/@expo-google-fonts/stix-two-text@0.4.2/400Regular/STIXTwoText_400Regular.ttf",
+      "sha256": "d2a222614cf280f2db1d4ebd7d6f0dad5772541f8945a96ee4bf899c845b695b",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "STIX Two Text",
+      "file": "STIXTwoText-Italic.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/@expo-google-fonts/stix-two-text@0.4.2/400Regular_Italic/STIXTwoText_400Regular_Italic.ttf",
+      "sha256": "8695733706c0768637c6051141abad7cdb854184c7c36fb5050cdd0f4b148e7c",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "STIX Two Text",
+      "file": "STIXTwoText-SemiBold.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/@expo-google-fonts/stix-two-text@0.4.2/600SemiBold/STIXTwoText_600SemiBold.ttf",
+      "sha256": "8bbea0bf51fee2efa04d9cf45232dba1082faf4080186dd7bce04c8feffd38e8",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "STIX Two Text",
+      "file": "STIXTwoText-Bold.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/@expo-google-fonts/stix-two-text@0.4.2/700Bold/STIXTwoText_700Bold.ttf",
+      "sha256": "35e4a0ec786d071271e64a3755fe86e5847fc8709ae3b0898f6708c1eba34641",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "STIX Two Text",
+      "file": "STIXTwoText-BoldItalic.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/@expo-google-fonts/stix-two-text@0.4.2/700Bold_Italic/STIXTwoText_700Bold_Italic.ttf",
+      "sha256": "4e91e54ad6f9dcb84dbcc3a82b17db4be845197441213aa4fc6ee34f10778a9b",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "STIX Two Math",
+      "file": "STIXTwoMath-Regular.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/@expo-google-fonts/stix-two-math@0.4.0/400Regular/STIXTwoMath_400Regular.ttf",
+      "sha256": "c3377c20641ecee349677e3f6cc71a6405c30cda7171a4cbc4a1c3970cfff0b4",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "Noto Sans SC",
+      "file": "NotoSansSC-Regular.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/@expo-google-fonts/noto-sans-sc@0.4.4/400Regular/NotoSansSC_400Regular.ttf",
+      "sha256": "d45f67f0a7c0ca3f256950777ce6a61cc7ce5f9696d02900cbbaac25f8aa7d16",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "Noto Sans SC",
+      "file": "NotoSansSC-Medium.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/@expo-google-fonts/noto-sans-sc@0.4.4/500Medium/NotoSansSC_500Medium.ttf",
+      "sha256": "b30853d205f3ecdde938b1488c735ee15a2e870d31331b992fdc53971e23ec4a",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "Noto Sans SC",
+      "file": "NotoSansSC-Bold.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/@expo-google-fonts/noto-sans-sc@0.4.4/700Bold/NotoSansSC_700Bold.ttf",
+      "sha256": "9a38ae0ab28cd5a256f9ea8e00dedc688aac17f7915fcb000572990afa956b96",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "Noto Serif SC",
+      "file": "NotoSerifSC-Regular.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/@expo-google-fonts/noto-serif-sc@0.4.4/400Regular/NotoSerifSC_400Regular.ttf",
+      "sha256": "c358a69de3df5f423a8946a7b03e3126fb6ba116f1130a463455b4e39e1f0742",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "Noto Serif SC",
+      "file": "NotoSerifSC-SemiBold.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/@expo-google-fonts/noto-serif-sc@0.4.4/600SemiBold/NotoSerifSC_600SemiBold.ttf",
+      "sha256": "5d19e0f438d4a30371f584d34a87c9232dba0a85237db63fe5337fe743487def",
+      "license": "OFL-1.1"
+    },
+    {
+      "family": "Noto Serif SC",
+      "file": "NotoSerifSC-Bold.ttf",
+      "url": "https://cdn.jsdelivr.net/npm/@expo-google-fonts/noto-serif-sc@0.4.4/700Bold/NotoSerifSC_700Bold.ttf",
+      "sha256": "9c6a2ba736e4b499c84f65ce366bd3625c0401885fd3e585ace50fb738b96ff6",
+      "license": "OFL-1.1"
+    }
+  ]
+}

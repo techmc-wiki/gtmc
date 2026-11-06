@@ -11,12 +11,12 @@ The site is live at <https://www.techmc.wiki>. The infra was provided by Vercel 
 - Private Vercel Blob drafts + NextAuth v5 (GitHub provider, JWT sessions); next-intl i18n
 - Markdown pipeline (remark/rehype, KaTeX, Shiki) over the `content/articles` and `content/glossary` submodules
 - pnpm 12 workspace, Vite+ (`vp` for Oxlint, Oxfmt, Vitest)
-- Go 1.26 for `tools/pdfgen`, the headless-Chromium PDF renderer
+- Typst 0.15.1 for the book PDFs in `tools/pdf`: one `typst compile` per locale, with the `typst` binary on PATH (`brew install typst` locally)
 
 ## Layout
 
 This is a pnpm workspace. The root holds only workspace-level concerns; the
-site and the PDF renderer live in their own directories.
+site and the PDF pipeline live in their own directories.
 
 ```text
 apps/web/       The Next.js site (@gtmc/web) — everything below is relative to it
@@ -31,8 +31,10 @@ apps/web/       The Next.js site (@gtmc/web) — everything below is relative to
   data/         Generated manifests, search indices, build caches (gitignored)
   scripts/      Manifest, content, and PDF generators
   proxy.ts      Auth + i18n middleware
-tools/pdfgen/   Go PDF renderer (CLI; not a pnpm package)
-  html/ fonts/ work/ dist/   Generated PDF inputs, render scratch, and output (gitignored)
+tools/pdf/      Typst book template and PDF build (not a pnpm package; see tools/pdf/README.md)
+  template/     Typst library; gtmc.typ re-exports it
+  fonts.lock.json  Pinned font files and checksums
+  fonts/ work/ dist/   Downloaded fonts, generated Typst inputs, and output (gitignored)
 packages/ssg/   Article generation and shared Markdown transforms (@gtmc/ssg)
 content/         Content submodules
   articles/      Article content submodule
@@ -51,6 +53,7 @@ been started from `apps/web`.
 vp install              # Install dependencies with pinned pnpm + run postinstall
 cp apps/web/.env.example apps/web/.env   # All environment variables are documented there
 pnpm dev                # Start development server at http://localhost:3000
+brew install typst      # PDF builds need the typst binary (CI pins 0.15.1); TYPST_BIN overrides it
 ```
 
 ## Commands
@@ -73,8 +76,8 @@ pnpm build:next                  # Phase 2: Next.js production build
 pnpm generate:manifest           # Rebuild apps/web/data/manifest.json
 pnpm generate:content            # Re-render article content artifacts
 pnpm generate:glossary           # Rebuild apps/web/data/glossary*.json
-pnpm generate:pdf-html            # Render article artifacts to tools/pdfgen/html
-pnpm build:pdf                    # Build tools/pdfgen/dist/gtmc-{en,zh}.pdf
+pnpm build:pdf                    # Build tools/pdf/dist/gtmc-{en,zh}.pdf (needs typst on PATH)
+pnpm build:pdf -- --locale en    # Build one locale only (en or zh); --output needs one locale
 pnpm articles:update             # Pull latest articles submodule commit
 pnpm glossary:update             # Pull latest glossary submodule commit
 ```

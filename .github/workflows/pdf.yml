@@ -22,6 +22,8 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: auto
+  # Pinned: the template's layout depends on the exact Typst release.
+  TYPST_VERSION: "0.15.1"
 
 jobs:
   publish:
@@ -46,17 +48,19 @@ jobs:
           fi
 
           pipeline_paths=(
-            tools/pdfgen
+            tools/pdf
             packages/ssg
             apps/web/scripts/build-content.ts
             apps/web/scripts/generate-article-content.ts
             apps/web/scripts/generate-pdf.ts
-            apps/web/scripts/generate-pdf-html.ts
+            apps/web/scripts/lib
             apps/web/lib/articles
             apps/web/lib/markdown
             apps/web/lib/pdf
-            apps/web/lib/pdf-images.ts
             apps/web/lib/workspace-paths.ts
+            apps/web/app/globals.css
+            apps/web/messages/en.json
+            apps/web/messages/zh.json
             package.json
             pnpm-lock.yaml
           )
@@ -123,14 +127,36 @@ jobs:
         env:
           GTMC_SKIP_POSTINSTALL: "1"
 
-      - name: Set up Go
+      - name: Install Typst
         if: steps.change-check.outputs.should-build == 'true'
-        uses: actions/setup-go@v7.0.0
+        uses: typst-community/setup-typst@v5.3.1
         with:
-          go-version-file: tools/pdfgen/go.mod
-          cache: false
+          typst-version: ${{ env.TYPST_VERSION }}
 
-      - name: Provision pinned Chromium headless shell
+      - name: Verify Typst version
+        if: steps.change-check.outputs.should-build == 'true'
+        shell: bash
+        env:
+          EXPECTED_TYPST_VERSION: ${{ env.TYPST_VERSION }}
+        run: |
+          set -euo pipefail
+
+          version="$(typst --version)"
+          echo "$version"
+          if [[ "$version" != "typst $EXPECTED_TYPST_VERSION"* ]]; then
+            echo "Expected typst $EXPECTED_TYPST_VERSION, got: $version" >&2
+            exit 1
+          fi
+
+      - name: Restore pinned PDF fonts
+        if: steps.change-check.outputs.should-build == 'true'
+        uses: actions/cache@v6.1.0
+        with:
+          path: tools/pdf/fonts
+          key: pdf-fonts-${{ hashFiles('tools/pdf/fonts.lock.json') }}
+
+      # Mermaid is the only browser use left in the PDF pipeline; mermaid.ts reads PDF_CHROMIUM.
+      - name: Provision pinned Chromium headless shell for Mermaid
         if: steps.change-check.outputs.should-build == 'true'
         id: chromium
         shell: bash
@@ -162,37 +188,28 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Generate PDF HTML
-        if: steps.change-check.outputs.should-build == 'true'
-        run: pnpm generate:pdf-html
-
-      - name: Build pdfgen binary
-        if: steps.change-check.outputs.should-build == 'true'
-        run: go build -C tools/pdfgen -o "$RUNNER_TEMP/pdfgen" .
-
       - name: Build PDFs
         if: steps.change-check.outputs.should-build == 'true'
         run: pnpm build:pdf
         env:
-          PDFGEN_BIN: ${{ runner.temp }}/pdfgen
-          PDFGEN_CHROMIUM: ${{ steps.chromium.outputs.executable }}
+          PDF_CHROMIUM: ${{ steps.chromium.outputs.executable }}
 
-      - name: Check generated PDF pages
+      - name: Check generated PDFs
         if: steps.change-check.outputs.should-build == 'true'
         shell: bash
         run: |
           set -euo pipefail
 
-          for pdf in tools/pdfgen/dist/gtmc-en.pdf tools/pdfgen/dist/gtmc-zh.pdf; do
+          for locale in en zh; do
+            pdf="tools/pdf/dist/gtmc-${locale}.pdf"
             if [[ ! -s "$pdf" ]]; then
               echo "Missing or empty PDF: $pdf" >&2
               exit 1
             fi
 
-            pages_json="$("$RUNNER_TEMP/pdfgen" pages "$pdf")"
-            pages="$(jq -r '.pages // 0' <<< "$pages_json")"
-            if [[ "$pages" -le 0 ]]; then
-              echo "PDF has no pages: $pdf ($pages_json)" >&2
+            pages="$(pdfinfo "$pdf" | awk '/^Pages:/ { print $2 }')"
+            if [[ ! "$pages" =~ ^[0-9]+$ ]] || (( pages <= 0 )); then
+              echo "PDF has no pages: $pdf (pdfinfo reported '$pages')" >&2
               exit 1
             fi
             echo "$pdf: $pages pages"
@@ -205,7 +222,7 @@ jobs:
           set -euo pipefail
 
           for locale in en zh; do
-            aws s3 cp "tools/pdfgen/dist/gtmc-${locale}.pdf" \
+            aws s3 cp "tools/pdf/dist/gtmc-${locale}.pdf" \
               "s3://${R2_BUCKET_NAME}/gtmc-${locale}.pdf" \
               --endpoint-url "$R2_ENDPOINT" \
               --content-type application/pdf \

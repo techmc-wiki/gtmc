@@ -1,9 +1,4 @@
-import fs from "fs";
-import path from "path";
-
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types";
-import type { ArticleLocale } from "@gtmc/ssg/articles/types";
-import { artifactFilename } from "@gtmc/ssg/articles/content";
 import { resolveLocalArticlePath } from "@/lib/articles/fs";
 
 export interface LinearizedFolder {
@@ -100,39 +95,4 @@ export async function linearizeArticles(tree: ChapterNavNode[]): Promise<Lineari
     folders: [],
     depth: 0,
   });
-}
-
-const contentCache = new Map<string, string | null>();
-
-function loadArticleArtifactContent(slug: string, locale: ArticleLocale): string | null {
-  const filePath = path.join(
-    process.cwd(),
-    "data",
-    "articles",
-    locale,
-    `${artifactFilename(slug)}.json`,
-  );
-
-  try {
-    const raw = fs.readFileSync(filePath, "utf-8");
-    const artifact = JSON.parse(raw) as { content?: unknown };
-    return typeof artifact.content === "string" ? artifact.content : null;
-  } catch {
-    return null;
-  }
-}
-
-export async function getArticleContentForPdf(
-  slug: string,
-  locale: ArticleLocale,
-): Promise<string | null> {
-  const cacheKey = `${locale}:${slug}`;
-  if (contentCache.has(cacheKey)) {
-    return contentCache.get(cacheKey) ?? null;
-  }
-
-  const content = loadArticleArtifactContent(slug, locale);
-
-  contentCache.set(cacheKey, content);
-  return content;
 }

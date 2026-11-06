@@ -5,7 +5,7 @@ import path from "node:path"
  *
  * The site lives at `apps/web`, but the `content/articles` and
  * `content/glossary` submodules stay at the repository root, and so do
- * `tools/pdfgen` and the shared pnpm lockfile. Code that needs those must go
+ * `tools/pdf` and the shared pnpm lockfile. Code that needs those must go
  * through `getWorkspaceRoot()` / `workspacePath(...)` rather than reaching for
  * `process.cwd()`, which is only correct when a process happens to have been
  * started from `apps/web`.

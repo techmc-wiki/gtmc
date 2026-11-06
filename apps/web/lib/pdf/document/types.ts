@@ -41,16 +41,3 @@ function flattenChapterContent(content: ChapterContent[]): NumberedArticle[] {
 export function chapterArticles(chapter: ChapterGroup): NumberedArticle[] {
   return flattenChapterContent(chapter.content)
 }
-
-export interface BookOptions {
-  title: string
-  subtitle?: string
-  tagline?: string
-  locale: PdfLocale
-  generatedDate: string
-  articlesRevision?: string
-  sourceUrl?: string
-  hasMath?: boolean
-  fontsHref?: string
-  renderArticle: (article: LinearizedArticle) => Promise<string>
-}

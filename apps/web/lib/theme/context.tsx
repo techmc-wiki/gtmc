@@ -25,8 +25,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
-function applyDocumentTheme(theme: Theme): void {
-  const resolvedTheme = theme === "system" ? getSystemThemeSnapshot() : theme
+function applyDocumentTheme(resolvedTheme: ResolvedTheme): void {
   const root = document.documentElement
 
   if (root.dataset.theme !== resolvedTheme) {
@@ -49,12 +48,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   )
   const resolvedTheme = theme === "system" ? systemTheme : theme
   useEffect(() => {
-    applyDocumentTheme(theme)
-  }, [theme])
+    applyDocumentTheme(resolvedTheme)
+  }, [resolvedTheme])
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme)
-    applyDocumentTheme(newTheme)
     document.cookie = serializeThemeCookie(newTheme)
   }, [])
 

@@ -6,6 +6,7 @@ import {
   getOctokit,
 } from "@/lib/github/articles-repo"
 import {
+  isGithubRateLimitErrorForCache,
   isGithubSyncRateLimited,
   recordGithubSyncRateLimit,
 } from "@/lib/github/rate-limit"
@@ -40,7 +41,11 @@ export async function getRepoFileContent(
     },
     onError: (error, attempt, totalRetries) => {
       const status = getGithubErrorStatus(error)
-      recordGithubSyncRateLimit(error)
+
+      if (isGithubRateLimitErrorForCache(error)) {
+        recordGithubSyncRateLimit(error)
+        return { type: "return", value: null }
+      }
 
       if (status === 404) {
         return { type: "return", value: null }
@@ -88,7 +93,11 @@ export async function getRepoFileBuffer(
     },
     onError: (error, attempt, totalRetries) => {
       const status = getGithubErrorStatus(error)
-      recordGithubSyncRateLimit(error)
+
+      if (isGithubRateLimitErrorForCache(error)) {
+        recordGithubSyncRateLimit(error)
+        return { type: "return", value: null }
+      }
 
       if (status === 404) {
         return { type: "return", value: null }

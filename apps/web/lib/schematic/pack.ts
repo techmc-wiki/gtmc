@@ -20,5 +20,10 @@ export function getSharedResourcePack(
     return nuc.ResourcePack.fromBytes([...bytes])
   })()
 
-  return sharedPackPromise
+  const promise = sharedPackPromise
+  promise.catch(() => {
+    if (sharedPackPromise === promise) sharedPackPromise = null
+  })
+
+  return promise
 }

@@ -114,10 +114,11 @@ function useSearchCommand() {
     debouncedQuery.length >= 2
       ? `/api/articles/search?q=${encodeURIComponent(debouncedQuery)}&locale=${locale}`
       : null
-  const { data: searchData, isValidating } = useSWR<SearchResponse>(
-    searchKey,
-    fetchSearchResults
-  )
+  const {
+    data: searchData,
+    error,
+    isValidating,
+  } = useSWR<SearchResponse>(searchKey, fetchSearchResults)
   const results = searchData?.results || []
   const glossaryResults = searchData?.glossary || []
   const isLoading =
@@ -215,6 +216,7 @@ function useSearchCommand() {
     navigateToGlossaryResult,
     navigateToResult,
     query,
+    requestError: error,
     results,
     shortcutLabel,
     t,
@@ -343,9 +345,14 @@ function SearchCommandDialog({
 }
 
 function SearchCommandResults({ search }: { search: SearchCommandState }) {
+  const hasRequestError =
+    search.query.length >= 2 &&
+    Boolean(search.requestError) &&
+    !search.isLoading
+
   return (
     <CommandList className="custom-left-scrollbar max-h-[50vh]">
-      {search.query.length >= 2 && (
+      {search.query.length >= 2 && !hasRequestError && (
         <output className="text-muted-foreground block px-4 py-2 text-xs">
           {search.isLoading
             ? search.t("scanning")
@@ -421,7 +428,15 @@ function SearchCommandResults({ search }: { search: SearchCommandState }) {
           ))}
         </CommandGroup>
       )}
-      {!search.isLoading &&
+      {hasRequestError && (
+        <div className="px-4 py-8 text-center">
+          <div className="text-tech-main/60 text-sm">
+            {search.t("requestFailed")}
+          </div>
+        </div>
+      )}
+      {!hasRequestError &&
+        !search.isLoading &&
         search.query.length >= 2 &&
         search.results.length === 0 &&
         search.glossaryResults.length === 0 && (

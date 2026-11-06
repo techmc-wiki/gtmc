@@ -33,6 +33,8 @@ import {
   isArchivedDraftStatus,
 } from "@/lib/drafts/lifecycle"
 import type { DraftStatus } from "@/lib/drafts/store"
+import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
+import { Suspense } from "react"
 
 const dateFormatters: Record<string, Intl.DateTimeFormat> = {
   en: new Intl.DateTimeFormat("en", { dateStyle: "medium" }),
@@ -186,8 +188,26 @@ export default async function DraftDashboardPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "Drafts" })
+
+  return (
+    <div className="page-container">
+      <PageHeader title={t("pageTitle")} />
+
+      <p className="text-tech-main max-w-2xl text-base leading-relaxed">
+        {t("pageDescription")}
+      </p>
+
+      <Suspense fallback={<DraftDashboardFallback />}>
+        <DraftDashboard locale={locale} />
+      </Suspense>
+    </div>
+  )
+}
+
+async function DraftDashboard({ locale }: { locale: string }) {
   const session = await guardUser(locale, `/${locale}/draft`)
-  const t = await getTranslations("Drafts")
+  const t = await getTranslations({ locale, namespace: "Drafts" })
   const dateFormatter = dateFormatters[locale] ?? dateFormatters.en
   const authorId = session.user.id
 
@@ -290,79 +310,112 @@ export default async function DraftDashboardPage({
   }
 
   return (
-    <div className="page-container">
-      <PageHeader title={t("pageTitle")} />
+    <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
+      <section className="min-w-0 lg:col-start-1 lg:row-start-1">
+        <SectionTitle className="mb-4">
+          <span>{t("inProgress")}</span>
+          <span className="text-tech-main/50 ml-auto font-mono text-xs font-normal tracking-widest">
+            {activeItems.length}
+          </span>
+        </SectionTitle>
 
-      <p className="text-tech-main max-w-2xl text-base leading-relaxed">
-        {t("pageDescription")}
-      </p>
+        {activeItems.length === 0 ? (
+          <EmptyState message={t("noActiveTitle")} className="py-12" />
+        ) : (
+          <div className="space-y-4">
+            {activeItems.map((item) => renderRecord(item))}
+          </div>
+        )}
+      </section>
 
-      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
-        <section className="min-w-0 lg:col-start-1 lg:row-start-1">
+      <aside className="lg:sticky lg:top-28 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+        <Card className="border-t-tech-signal border-t-2">
+          <p className="text-tech-main/60 text-xs font-medium">
+            {t("newDraftLabel")}
+          </p>
+          <h2 className="display-title text-tech-main-dark mt-2 text-2xl">
+            {t("newDraftTitle")}
+          </h2>
+          <p className="text-tech-main/75 mt-3 text-sm leading-relaxed">
+            {t("newDraftDescription")}
+          </p>
+
+          <div className="mt-6 space-y-3">
+            <Button asChild className="w-full justify-between">
+              <Link href="/draft/new">
+                <span>{t("newArticle")}</span>
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="w-full justify-between">
+              <Link href="/glossary/edit/new">
+                <span>{t("newGlossary")}</span>
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            </Button>
+          </div>
+        </Card>
+      </aside>
+
+      {archivedItems.length > 0 ? (
+        <section className="min-w-0 lg:col-start-1 lg:row-start-2">
           <SectionTitle className="mb-4">
-            <span>{t("inProgress")}</span>
+            <span>{t("pastWork")}</span>
             <span className="text-tech-main/50 ml-auto font-mono text-xs font-normal tracking-widest">
-              {activeItems.length}
+              {archivedItems.length}
             </span>
           </SectionTitle>
-
-          {activeItems.length === 0 ? (
-            <EmptyState message={t("noActiveTitle")} className="py-12" />
-          ) : (
-            <div className="space-y-4">
-              {activeItems.map((item) => renderRecord(item))}
-            </div>
-          )}
-        </section>
-
-        <aside className="lg:sticky lg:top-28 lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <Card className="border-t-tech-signal border-t-2">
-            <p className="text-tech-main/60 text-xs font-medium">
-              {t("newDraftLabel")}
-            </p>
-            <h2 className="display-title text-tech-main-dark mt-2 text-2xl">
-              {t("newDraftTitle")}
-            </h2>
-            <p className="text-tech-main/75 mt-3 text-sm leading-relaxed">
-              {t("newDraftDescription")}
-            </p>
-
-            <div className="mt-6 space-y-3">
-              <Button asChild className="w-full justify-between">
-                <Link href="/draft/new">
-                  <span>{t("newArticle")}</span>
-                  <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="w-full justify-between">
-                <Link href="/glossary/edit/new">
-                  <span>{t("newGlossary")}</span>
-                  <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
-            </div>
+          <Card className="p-0 sm:p-0">
+            <ul className="divide-tech-main/15 divide-y">
+              {archivedItems.map((item) => renderRecord(item, true))}
+            </ul>
           </Card>
-        </aside>
+        </section>
+      ) : null}
+    </div>
+  )
+}
 
-        {archivedItems.length > 0 ? (
-          <section className="min-w-0 lg:col-start-1 lg:row-start-2">
-            <SectionTitle className="mb-4">
-              <span>{t("pastWork")}</span>
-              <span className="text-tech-main/50 ml-auto font-mono text-xs font-normal tracking-widest">
-                {archivedItems.length}
-              </span>
-            </SectionTitle>
-            <Card className="p-0 sm:p-0">
-              <ul className="divide-tech-main/15 divide-y">
-                {archivedItems.map((item) => renderRecord(item, true))}
-              </ul>
+function DraftDashboardFallback() {
+  return (
+    <div
+      aria-busy="true"
+      aria-live="polite"
+      className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
+      <section className="min-w-0 lg:col-start-1 lg:row-start-1">
+        <SegmentedBar opacity="low" className="mb-4 h-4 w-28" />
+        <div className="space-y-4">
+          {[0, 1].map((row) => (
+            <Card key={row} className="p-5 sm:p-6">
+              <SegmentedBar opacity="medium" className="h-6 w-20" />
+              <SegmentedBar opacity="high" className="mt-4 h-7 w-3/5" />
+              <SegmentedBar opacity="medium" className="mt-3 h-4 w-24" />
             </Card>
-          </section>
-        ) : null}
-      </div>
+          ))}
+        </div>
+      </section>
+
+      <aside className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
+        <Card className="border-t-tech-signal border-t-2">
+          <SegmentedBar opacity="low" className="h-3 w-24" />
+          <SegmentedBar opacity="high" className="mt-3 h-7 w-4/5" />
+          <SegmentedBar opacity="medium" className="mt-4 h-4 w-full" />
+          <SegmentedBar opacity="low" className="mt-2 h-4 w-3/4" />
+          <SegmentedBar
+            opacity="high"
+            showBorder
+            className="mt-6 h-11 w-full"
+          />
+          <SegmentedBar
+            opacity="medium"
+            showBorder
+            className="mt-3 h-11 w-full"
+          />
+        </Card>
+      </aside>
     </div>
   )
 }

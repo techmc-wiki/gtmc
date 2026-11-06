@@ -38,9 +38,9 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
-    "tsx": "^4.23.14",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vite-plus": "1.4.0"
+    "vite-plus": "catalog:"
   },
   "packageManager": "pnpm@12.15.0"
 }

@@ -12,6 +12,7 @@ updates:
     groups:
       npm:
         patterns: ["*"]
+        exclude-patterns: ["vite-plus"]
 
   - package-ecosystem: "github-actions"
     directory: "/"

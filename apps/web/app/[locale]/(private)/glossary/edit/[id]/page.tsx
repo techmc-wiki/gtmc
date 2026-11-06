@@ -1,8 +1,10 @@
 import type { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
 import { getLocale } from "next-intl/server"
+import { Suspense } from "react"
 
 import { GlossaryEditor } from "@/components/glossary/glossary-editor"
+import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
 import { auth } from "@/lib/auth"
 import { readDraft } from "@/lib/drafts/store"
 import { getAuthorIdentity, requireAuth } from "@/lib/auth/context"
@@ -15,7 +17,33 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default async function EditGlossaryDraftPage({
+function EditGlossaryFallback() {
+  return (
+    <div
+      aria-busy="true"
+      aria-live="polite"
+      className="flex h-[70vh] w-full flex-col gap-3">
+      <SegmentedBar opacity="low" className="h-4 w-40" />
+      <div className="border-tech-main/20 bg-surface-overlay/30 w-full flex-1 border" />
+    </div>
+  )
+}
+
+export default function EditGlossaryDraftPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string; locale: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  return (
+    <Suspense fallback={<EditGlossaryFallback />}>
+      <EditGlossaryDraft params={params} searchParams={searchParams} />
+    </Suspense>
+  )
+}
+
+async function EditGlossaryDraft({
   params,
   searchParams,
 }: {

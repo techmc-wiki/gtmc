@@ -9,7 +9,7 @@
 
 Read tutorials, mechanics deep-dives, and source-code walkthroughs. All openly written and reviewed.
 
-[![Website](https://img.shields.io/badge/site-techmc.wiki-60708F?style=flat-square&labelColor=4A5A78)](https://techmc.wiki) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/techmc-wiki/gtmc) [![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org) [![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org) [![License](https://img.shields.io/badge/Code-Apache--2.0-yellow?style=flat-square)](LICENSE) [![Articles](https://img.shields.io/badge/Articles-CC--BY--NC--SA%204.0-lightgrey?style=flat-square)](LICENSE)
+[![Website](https://img.shields.io/badge/site-techmc.wiki-60708F?style=flat-square&labelColor=4A5A78)](https://techmc.wiki) [![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org) [![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org) [![License](https://img.shields.io/badge/Code-Apache--2.0-yellow?style=flat-square)](LICENSE) [![Articles](https://img.shields.io/badge/Articles-CC--BY--NC--SA%204.0-lightgrey?style=flat-square)](LICENSE)
 
 [Visit the Site](https://techmc.wiki) | [Browse Raw Articles](https://github.com/techmc-wiki/articles) | [More GTMC Projects](https://github.com/orgs/techmc-wiki/repositories)
 
@@ -38,7 +38,7 @@ They span the whole stack of technical play: production builds like tree farms, 
 The fastest way to start is to **[visit the site](https://techmc.wiki)**. Want to contribute? You can draft articles and open pull requests right from the site. Reviews and merge conflicts are handled on GitHub.
 
 > [!NOTE]
-> This repo is the **website**, laid out as a pnpm workspace: the site lives in `apps/web`, the Go PDF renderer in `tools/pdfgen`, and the content submodules in `content/`. Articles live in [their own repo](https://github.com/techmc-wiki/articles) and are pulled in as a submodule at `content/articles`. Other GTMC projects are at [github.com/orgs/techmc-wiki](https://github.com/orgs/techmc-wiki/repositories).
+> This is a monorepo. You can find the website frontend in `apps/web`, the Go PDF renderer in `tools/pdfgen`, and content submodules in `content/`. Other GTMC projects are at [github.com/orgs/techmc-wiki](https://github.com/orgs/techmc-wiki/repositories).
 
 ## Running it locally
 
@@ -61,12 +61,6 @@ pnpm check        # vp check (oxfmt + oxlint) + tsc --noEmit
 pnpm test         # Run the Vitest suite once
 pnpm typecheck    # Run the Next.js-aware TypeScript check
 ```
-
-In development, the first localhost request automatically signs in as the local debug fixture (`debug@gtmc.local`) without a database. Set `GTMC_DEV_FIXTURE_AUTH=0` before starting `pnpm dev` to use the real GitHub sign-in flow instead.
-
-> [!TIP]
-> `pnpm build` runs in two phases: `build:content` generates the site artifacts (article manifest, glossary, and rendered content), then `build:next` builds the site from them. The PDF pipeline is separate: `pnpm generate:pdf-html` turns those artifacts into the print-ready HTML under `tools/pdfgen/html`, and `pnpm build:pdf` consumes it to write `tools/pdfgen/dist/gtmc-en.pdf` and `tools/pdfgen/dist/gtmc-zh.pdf`; `.github/workflows/pdf.yml` runs both and publishes the PDFs to R2. Run the phases separately when you only need one.
-> Vite+ supplements the Next.js toolchain; `vp dev` and `vp build` are Vite commands and are not used by this project. Run bare `vp` commands from `apps/web`, where `vite.config.ts` lives.
 
 ---
 

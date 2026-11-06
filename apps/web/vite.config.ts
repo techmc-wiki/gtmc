@@ -62,6 +62,12 @@ export default defineConfig({
       "unicorn",
     ],
     rules: {
+      // Flags effect-local cancellation flags and rAF ids, which are the
+      // documented React idiom; its suggested fix (use state) would re-render.
+      "react/immutability": "off",
+      // Fires on intentionally sequential work: shared CDP browser, shared
+      // caches, and the bounded-concurrency pool in lib/pdf/fonts.ts.
+      "eslint/no-await-in-loop": "off",
       "eslint/arrow-body-style": "warn",
       "eslint/default-case-last": "warn",
       "react-perf/jsx-no-jsx-as-prop": "off",

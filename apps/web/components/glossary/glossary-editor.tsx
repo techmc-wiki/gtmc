@@ -241,6 +241,11 @@ function GlossaryEditorInner({
     saveDraft,
   })
 
+  const hasInvalidOperations = operations.some(
+    (op) =>
+      op.kind !== "delete" && !(op.after?.["Full Form (English)"] ?? "").trim()
+  )
+
   const handleTitleChange = React.useCallback(
     (next: string) => {
       if (isReadOnly) return
@@ -339,6 +344,21 @@ function GlossaryEditorInner({
     [scheduleAutosave, isReadOnly]
   )
 
+  const handleOperationMarkDelete = React.useCallback(
+    (slug: string) => {
+      if (isReadOnly) return
+      setOperations((prev) =>
+        prev.map((op) =>
+          op.slug === slug && op.kind === "edit"
+            ? { kind: "delete", slug, before: op.before }
+            : op
+        )
+      )
+      scheduleAutosave()
+    },
+    [scheduleAutosave, isReadOnly]
+  )
+
   const handleOperationRemove = React.useCallback(
     (slug: string) => {
       if (isReadOnly) return
@@ -373,6 +393,10 @@ function GlossaryEditorInner({
   const handleSubmit = React.useCallback(
     async ({ useRealEmail: useReal }: { useRealEmail: boolean }) => {
       if (isSubmitting) return
+      if (hasInvalidOperations) {
+        setSubmitError(t("invalidOperations"))
+        return
+      }
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
         saveTimeoutRef.current = null
@@ -426,10 +450,12 @@ function GlossaryEditorInner({
       operations,
       title,
       isSubmitting,
+      hasInvalidOperations,
       saveTimeoutRef,
       saveDraft,
       status,
       router,
+      t,
     ]
   )
 
@@ -474,10 +500,12 @@ function GlossaryEditorInner({
         handleDiscard={handleDiscard}
         handleOpenPreview={handleOpenPreview}
         handleOperationChange={handleOperationChange}
+        handleOperationMarkDelete={handleOperationMarkDelete}
         handleOperationRemove={handleOperationRemove}
         handlePick={handlePick}
         handleSubmit={handleSubmit}
         handleTitleChange={handleTitleChange}
+        hasInvalidOperations={hasInvalidOperations}
         isReadOnly={isReadOnly}
         locale={locale}
         manifestEntries={manifestEntries}
@@ -532,7 +560,7 @@ function useGlossaryAutosave({
   const scheduleAutosave = React.useCallback(() => {
     if (isReadOnly) return
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
-    const savingToastId = toast.loading("Saving…")
+    const savingToastId = toast.loading("Saving…", { id: "glossary-autosave" })
     setSaveState("Saving…")
     saveTimeoutRef.current = setTimeout(async () => {
       try {
@@ -583,10 +611,12 @@ interface GlossaryEditorContentProps {
   handleDiscard: () => void
   handleOpenPreview: () => void
   handleOperationChange: (input: { slug: string; after: GlossaryRow }) => void
+  handleOperationMarkDelete: (slug: string) => void
   handleOperationRemove: (slug: string) => void
   handlePick: (slug: string) => void
   handleSubmit: (input: { useRealEmail: boolean }) => Promise<void>
   handleTitleChange: (title: string) => void
+  hasInvalidOperations: boolean
   isReadOnly: boolean
   locale: string
   manifestEntries: GlossaryEntry[]
@@ -617,10 +647,12 @@ function GlossaryEditorContent({
   handleDiscard,
   handleOpenPreview,
   handleOperationChange,
+  handleOperationMarkDelete,
   handleOperationRemove,
   handlePick,
   handleSubmit,
   handleTitleChange,
+  hasInvalidOperations,
   isReadOnly,
   locale,
   manifestEntries,
@@ -665,7 +697,7 @@ function GlossaryEditorContent({
         onTitleChange={handleTitleChange}
         onDiscard={handleDiscard}
         onSubmit={handleOpenPreview}
-        canSubmit={operations.length > 0}
+        canSubmit={operations.length > 0 && !hasInvalidOperations}
         saveState={saveStateLabel}
         isReadOnly={isReadOnly}
       />
@@ -718,6 +750,7 @@ function GlossaryEditorContent({
                 operation={operation}
                 locale={locale}
                 onChange={handleOperationChange}
+                onMarkDelete={handleOperationMarkDelete}
                 onRemove={handleOperationRemove}
                 danglingRefs={danglingRefs}
                 isReadOnly={isReadOnly}
@@ -760,11 +793,17 @@ function GlossaryEditorContent({
               onClose={handleClosePreview}
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
-              validationMessage={submitError ?? undefined}
-              canSubmit={!isSubmitting}
+              validationMessage={
+                hasInvalidOperations
+                  ? t("invalidOperations")
+                  : (submitError ?? undefined)
+              }
+              canSubmit={!isSubmitting && !hasInvalidOperations}
               authorName={authorName}
               noreplyEmail={noreplyEmail}
               realEmail={realEmail}
+              useRealEmail={useRealEmail}
+              onUseRealEmailChange={onUseRealEmailChange}
               submitState={submitState}
               submitResult={submitResult}
               onDismissSuccess={handleDismissSuccess}

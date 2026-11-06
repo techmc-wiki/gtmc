@@ -380,6 +380,19 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
     needsRenderRef.current = true;
   }, [backgroundColor]);
 
+  // Switching articles must drop pointer lock and fly mode; the inline reset
+  // above only clears React state.
+  const lastUrlRef = useRef(url);
+  useEffect(() => {
+    if (lastUrlRef.current === url) return;
+    lastUrlRef.current = url;
+    if (isFlyEnabledRef.current) {
+      isFlyEnabledRef.current = false;
+      if (document.pointerLockElement === canvasRef.current) document.exitPointerLock();
+    }
+    lastUnlockAtRef.current = Number.NEGATIVE_INFINITY;
+  }, [url]);
+
   // Keep the 16.9 MB WASM engine in a lazy chunk; this is its only entry point.
   useEffect(() => {
     let cancelled = false;
@@ -563,6 +576,7 @@ function useLitematicaViewer({ url, height = 400 }: LitematicaViewerProps) {
         }
         swapMeshGroup(scene, group);
         needsRenderRef.current = true;
+        setLoadError(null);
       } catch (error) {
         if (cancelled) return;
         // Keep the last good mesh visible; meshing failures are wasm traps.

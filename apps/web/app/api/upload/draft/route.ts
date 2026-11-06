@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
+import { canUploadDraftAsset } from "@/lib/drafts/lifecycle"
 import { readDraft } from "@/lib/drafts/store"
 import { deleteDraftAsset, uploadDraftAsset } from "@/lib/drafts/storage"
 import {
@@ -47,11 +48,7 @@ export async function POST(req: NextRequest) {
     }
 
     const record = await readDraft(userId, revisionId)
-    if (
-      !record ||
-      record.draft.kind !== "article" ||
-      record.draft.status !== "DRAFT"
-    ) {
+    if (!record || !canUploadDraftAsset(record.draft)) {
       return NextResponse.json(
         { error: "This draft cannot receive uploads." },
         { status: 403 }
@@ -79,7 +76,7 @@ export async function POST(req: NextRequest) {
     )
     try {
       const current = await readDraft(userId, revisionId)
-      if (!current || current.draft.status !== "DRAFT") {
+      if (!current || !canUploadDraftAsset(current.draft)) {
         throw new Error("Draft is no longer editable")
       }
       return NextResponse.json({

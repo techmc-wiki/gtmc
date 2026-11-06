@@ -115,7 +115,6 @@ export function useBookmarkRecorder(slug: string, title: string) {
       frame = requestAnimationFrame(save)
     }
 
-    save()
     const removeSiteScrollListener = addSiteScrollListener(onScroll, {
       passive: true,
     })

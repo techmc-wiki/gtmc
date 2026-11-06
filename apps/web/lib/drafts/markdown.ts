@@ -118,7 +118,7 @@ export function rewriteImageUrls(
 ): string {
   if (urlToRepoPath.size === 0) return markdown
 
-  return markdown.replace(
+  return markdown.replaceAll(
     MARKDOWN_IMAGE_RE,
     (fullMatch, rawDestination: string) => {
       const { destinationToken, trailing } =

@@ -8,16 +8,28 @@ export interface FilterGlossaryEntriesOptions {
 
 let searchIndexCache: {
   entries: GlossaryIndexEntry[]
+  categoryKey: string
   index: GlossarySearchIndex
 } | null = null
 
+/**
+ * Keyed by the source entries reference and the category set, not by the
+ * category-filtered array, which is rebuilt on every call.
+ */
 function getCachedSearchIndex(
-  entries: GlossaryIndexEntry[]
+  entries: GlossaryIndexEntry[],
+  categoryKey: string,
+  categoryFiltered: GlossaryIndexEntry[]
 ): GlossarySearchIndex {
-  if (!searchIndexCache || searchIndexCache.entries !== entries) {
+  if (
+    !searchIndexCache ||
+    searchIndexCache.entries !== entries ||
+    searchIndexCache.categoryKey !== categoryKey
+  ) {
     searchIndexCache = {
       entries,
-      index: buildGlossarySearchIndex(entries),
+      categoryKey,
+      index: buildGlossarySearchIndex(categoryFiltered),
     }
   }
 
@@ -42,7 +54,10 @@ export function filterGlossaryEntries(
   const trimmedQuery = query.trim()
   if (!trimmedQuery) return categoryFiltered
 
-  const index = getCachedSearchIndex(categoryFiltered)
+  const categoryKey = JSON.stringify(
+    [...new Set(selectedCategories)].toSorted()
+  )
+  const index = getCachedSearchIndex(entries, categoryKey, categoryFiltered)
   const hits = index.search(trimmedQuery)
   const hitOrder = new Map<string, number>()
   hits.forEach((hit, i) => {

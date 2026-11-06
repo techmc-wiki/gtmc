@@ -52,6 +52,7 @@ export const draftSchema = z.discriminatedUnion("kind", [
   }),
 ])
 export type Draft = z.infer<typeof draftSchema>
+export type DraftStatus = Draft["status"]
 export type ArticleDraft = Extract<Draft, { kind: "article" }>
 export type GlossaryDraft = Extract<Draft, { kind: "glossary" }>
 

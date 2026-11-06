@@ -9,7 +9,7 @@ export function calculateReadingMetrics(content: string) {
   const codeContent = codeBlocks.join(" ")
   const codeCount = codeContent.length
 
-  const nonCodeContent = normalizedContent.replace(codeBlockRegex, " ")
+  const nonCodeContent = normalizedContent.replaceAll(codeBlockRegex, " ")
 
   const cjkCount = (nonCodeContent.match(/[\u4e00-\u9fa5]/g) || []).length
 

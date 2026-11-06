@@ -4,23 +4,31 @@ import { ArrowLeftIcon } from "lucide-react"
 import type { Metadata } from "next"
 import { DraftEditor } from "@/components/editor/draft-editor"
 import { Link } from "@/i18n/navigation"
-import { readDraft } from "@/lib/drafts/store"
+import { readDraft, type DraftStatus } from "@/lib/drafts/store"
+import { deriveDisplayStatus } from "@/lib/drafts/lifecycle"
+import { getArticlePullRequest } from "@/lib/articles/pr"
 import { auth } from "@/lib/auth"
 import type { DraftFileCollection } from "@/lib/drafts/files"
 import { notFound, redirect } from "next/navigation"
 import { readFile } from "fs/promises"
 import path from "path"
 
+export interface ContributingGuide {
+  id: string
+  title: string
+  content: string
+}
+
 function buildDraftEditorData(
   draft: {
     id: string
     title: string
-    status: string
     githubPrUrl: string | null
   },
   draftFiles: DraftFileCollection,
   etag: string,
-  contributingGuides: Awaited<ReturnType<typeof loadContributingGuides>>
+  contributingGuides: ContributingGuide[],
+  status: DraftStatus
 ) {
   return {
     activeFileId: draftFiles.activeFileId,
@@ -30,7 +38,7 @@ function buildDraftEditorData(
     folders: draftFiles.folders,
     title: draft.title,
     githubPrUrl: draft.githubPrUrl || undefined,
-    status: draft.status,
+    status,
     contributingGuides,
   }
 }
@@ -59,11 +67,24 @@ export default async function EditDraftPage({
   if (!record || record.draft.kind !== "article") notFound()
   const draft = record.draft
 
+  let displayStatus: DraftStatus = draft.status
+  if (draft.githubPrNum) {
+    try {
+      displayStatus = deriveDisplayStatus(
+        draft.status,
+        await getArticlePullRequest(draft.githubPrNum)
+      )
+    } catch (error) {
+      console.error(`Failed to fetch PR #${draft.githubPrNum}:`, error)
+    }
+  }
+
   const draftEditorInitialData = buildDraftEditorData(
     draft,
     draft,
     record.etag,
-    contributingGuides
+    contributingGuides,
+    displayStatus
   )
 
   return (
@@ -97,13 +118,5 @@ async function loadContributingGuides() {
       .catch(() => null),
   ])
 
-  return guides.filter(
-    (
-      guide
-    ): guide is {
-      id: string
-      title: string
-      content: string
-    } => Boolean(guide)
-  )
+  return guides.filter((guide): guide is ContributingGuide => Boolean(guide))
 }

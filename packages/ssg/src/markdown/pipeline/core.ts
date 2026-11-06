@@ -28,7 +28,8 @@ interface RemarkPipelineOptions {
 interface RehypePipelineOptions {
   shikiPlugin?: RehypeShikiPlugin;
   codeReferences?: readonly CodeReference[];
-  cjkSpacingPlugin: PluggableList[number];
+  cjkSpacingPlugin?: PluggableList[number];
+  katex?: boolean;
 }
 
 export function buildRemarkPlugins(options: RemarkPipelineOptions = {}): PluggableList {
@@ -67,8 +68,12 @@ export function buildRehypePlugins(options: RehypePipelineOptions): PluggableLis
     plugins.push(options.shikiPlugin);
   }
 
-  plugins.push(rehypeKatex);
-  plugins.push(options.cjkSpacingPlugin);
+  if (options.katex ?? true) {
+    plugins.push(rehypeKatex);
+  }
+  if (options.cjkSpacingPlugin) {
+    plugins.push(options.cjkSpacingPlugin);
+  }
 
   return plugins;
 }

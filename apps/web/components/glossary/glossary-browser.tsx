@@ -115,7 +115,12 @@ export function GlossaryBrowser({
   className,
 }: GlossaryBrowserProps) {
   const t = useTranslations("Glossary")
-  const { entries, isLoading: entriesLoading } = useLocalizedGlossary(locale)
+  const {
+    entries,
+    isLoading: entriesLoading,
+    error: entriesError,
+    retry: retryEntries,
+  } = useLocalizedGlossary(locale)
 
   const [query, setQuery] = useQueryState("q", parseAsString.withDefault(""))
   const [selectedCategories, setSelectedCategories] = useQueryState(
@@ -310,6 +315,20 @@ export function GlossaryBrowser({
 
       {entriesLoading ? (
         <GlossaryTableSkeleton />
+      ) : entriesError !== null && entries.length === 0 ? (
+        <div
+          role="alert"
+          className="border-tech-line/30 flex flex-col items-start gap-3 border p-4">
+          <p className="text-tech-main/80 text-sm">{t("loadError")}</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={retryEntries}
+            className="min-h-11">
+            {t("retry")}
+          </Button>
+        </div>
       ) : (
         <GlossaryTable
           entries={filteredEntries}

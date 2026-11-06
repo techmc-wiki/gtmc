@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { requireAuth } from "@/lib/auth/context"
+import { canDeleteDraft, canEditDraft } from "@/lib/drafts/lifecycle"
 import {
   deleteDraft,
   draftErrorMessage,
@@ -43,7 +44,7 @@ export async function updateGlossaryDraftAction(
     if (!record || record.draft.kind !== "glossary") {
       throw new Error("Draft not found")
     }
-    if (record.draft.status !== "DRAFT") {
+    if (!canEditDraft(record.draft)) {
       throw new Error("Cannot edit a draft after submission has started")
     }
     requireDraftVersion(record.etag, etag)
@@ -72,7 +73,7 @@ export async function deleteGlossaryDraftAction(
     if (!record || record.draft.kind !== "glossary") {
       throw new Error("Draft not found")
     }
-    if (record.draft.status !== "DRAFT") {
+    if (!canDeleteDraft(record.draft)) {
       throw new Error("Cannot delete a draft after submission has started")
     }
     await deleteDraft(record.draft, record.etag)

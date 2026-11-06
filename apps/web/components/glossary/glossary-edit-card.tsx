@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { AlertTriangle, ChevronDown, Trash2 } from "lucide-react"
+import { AlertTriangle, ChevronDown, RotateCcw, Trash2 } from "lucide-react"
 
 import { cn } from "@/lib/cn"
 import { Input } from "@/components/ui/shadcn/input"
@@ -54,6 +54,7 @@ export interface GlossaryEditCardProps {
   locale: string
   onChange: (updated: { slug: string; after: GlossaryRow }) => void
   onRemove: (slug: string) => void
+  onMarkDelete?: (slug: string) => void
   danglingRefs?: ReadonlyArray<GlossaryEditCardDanglingRef>
   isReadOnly?: boolean
 }
@@ -75,7 +76,6 @@ const ENGLISH_FIELDS: ReadonlyArray<EnglishFieldDef> = [
 
 type TabValue = "active" | "english" | "other"
 
-const DEBOUNCE_MS = 200
 const EMPTY_DANGLING_REFS: ReadonlyArray<GlossaryEditCardDanglingRef> = []
 
 function getOperationBadge(kind: GlossaryEditOperationKind) {
@@ -93,12 +93,14 @@ function GlossaryEditCardHeader({
   isDelete,
   isReadOnly,
   kind,
+  onMarkDelete,
   onRemove,
 }: {
   headerTerm: string
   isDelete: boolean
   isReadOnly: boolean
   kind: GlossaryEditOperationKind
+  onMarkDelete?: () => void
   onRemove: () => void
 }) {
   const badge = getOperationBadge(kind)
@@ -119,15 +121,42 @@ function GlossaryEditCardHeader({
         </CardTitle>
       </div>
       {!isReadOnly && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          onClick={onRemove}
-          aria-label="Remove term edit"
-          className="text-muted-foreground hover:bg-red-500/10 hover:text-red-600">
-          <Trash2 className="size-3.5" />
-        </Button>
+        <div className="flex shrink-0 items-center gap-1">
+          {kind === "edit" ? (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                onClick={onRemove}
+                aria-label="Revert change"
+                className="text-muted-foreground hover:bg-surface-overlay hover:text-foreground">
+                <RotateCcw className="size-3.5" />
+              </Button>
+              {onMarkDelete && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={onMarkDelete}
+                  aria-label="Mark for deletion"
+                  className="text-muted-foreground hover:bg-red-500/10 hover:text-red-600">
+                  <Trash2 className="size-3.5" />
+                </Button>
+              )}
+            </>
+          ) : (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              onClick={onRemove}
+              aria-label="Remove term edit"
+              className="text-muted-foreground hover:bg-red-500/10 hover:text-red-600">
+              <Trash2 className="size-3.5" />
+            </Button>
+          )}
+        </div>
       )}
     </CardHeader>
   )
@@ -232,6 +261,7 @@ export function GlossaryEditCard({
   operation,
   locale,
   onChange,
+  onMarkDelete,
   onRemove,
   danglingRefs = EMPTY_DANGLING_REFS,
   isReadOnly = false,
@@ -244,9 +274,6 @@ export function GlossaryEditCard({
     seed ? ({ ...seed } as GlossaryRow) : null
   )
   const rowRef = React.useRef(row)
-  React.useEffect(() => {
-    rowRef.current = row
-  }, [row])
 
   const activeLocale: GlossaryLocale | null = isGlossaryLocale(locale)
     ? locale
@@ -256,28 +283,15 @@ export function GlossaryEditCard({
     activeLocale ? "active" : "english"
   )
 
-  const debounceRef = React.useRef<number | undefined>(undefined)
-
-  React.useEffect(
-    () => () => {
-      clearTimeout(debounceRef.current)
-    },
-    []
-  )
-
   const updateField = React.useCallback(
     (column: GlossaryColumn, value: string) => {
       if (isReadOnly) return
-      setRow((prev) => {
-        if (!prev) return prev
-        return { ...prev, [column]: value }
-      })
-      clearTimeout(debounceRef.current)
-      debounceRef.current = window.setTimeout(() => {
-        if (rowRef.current) {
-          onChange({ slug: operation.slug, after: rowRef.current })
-        }
-      }, DEBOUNCE_MS)
+      const current = rowRef.current
+      if (!current) return
+      const next: GlossaryRow = { ...current, [column]: value }
+      rowRef.current = next
+      setRow(next)
+      onChange({ slug: operation.slug, after: next })
     },
     [onChange, operation.slug, isReadOnly]
   )
@@ -285,6 +299,10 @@ export function GlossaryEditCard({
   const handleRemove = React.useCallback(() => {
     onRemove(operation.slug)
   }, [onRemove, operation.slug])
+
+  const handleMarkDelete = React.useCallback(() => {
+    onMarkDelete?.(operation.slug)
+  }, [onMarkDelete, operation.slug])
 
   const headerTerm = isDelete
     ? (operation.before?.["Full Form (English)"] ?? operation.slug)
@@ -323,6 +341,7 @@ export function GlossaryEditCard({
         isDelete={isDelete}
         isReadOnly={isReadOnly}
         kind={operation.kind}
+        onMarkDelete={onMarkDelete ? handleMarkDelete : undefined}
         onRemove={handleRemove}
       />
       <GlossaryEditCardBody

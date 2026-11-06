@@ -17,8 +17,20 @@ interface NewGlossaryDraftStarterProps {
   prefillSlug?: string
 }
 
-let pendingDraftCreation: Promise<{ id: string }> | null = null
-let clearPendingDraftCreation: ReturnType<typeof setTimeout> | null = null
+const PENDING_DRAFT_TTL_MS = 5000
+let pendingDraftCreation: {
+  promise: Promise<{ id: string }>
+  expiresAt: number
+} | null = null
+
+function getPendingDraftCreation(): Promise<{ id: string }> | null {
+  if (!pendingDraftCreation) return null
+  if (Date.now() < pendingDraftCreation.expiresAt) {
+    return pendingDraftCreation.promise
+  }
+  pendingDraftCreation = null
+  return null
+}
 
 export function NewGlossaryDraftStarter({
   prefillSlug,
@@ -27,36 +39,23 @@ export function NewGlossaryDraftStarter({
   const inFlightRef = React.useRef(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
-  const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
-
   const startDraft = React.useCallback(async () => {
     if (inFlightRef.current) return
     inFlightRef.current = true
     try {
-      const creation = pendingDraftCreation ?? createGlossaryDraftAction()
-      if (timerRef.current !== null) {
-        clearTimeout(timerRef.current)
-        timerRef.current = null
+      const pending = getPendingDraftCreation()
+      const creation = pending ?? createGlossaryDraftAction()
+      if (!pending) {
+        pendingDraftCreation = {
+          promise: creation,
+          expiresAt: Date.now() + PENDING_DRAFT_TTL_MS,
+        }
       }
-      if (clearPendingDraftCreation) {
-        clearTimeout(clearPendingDraftCreation)
-        clearPendingDraftCreation = null
-      }
-      pendingDraftCreation = creation
       const { id } = await creation
       const params = new URLSearchParams()
       if (prefillSlug) params.set("prefill", prefillSlug)
       const qs = params.toString()
       router.replace(`/glossary/edit/${id}${qs ? `?${qs}` : ""}`)
-      const timer = setTimeout(() => {
-        if (pendingDraftCreation === creation) {
-          pendingDraftCreation = null
-        }
-        timerRef.current = null
-        clearPendingDraftCreation = null
-      }, 5000)
-      timerRef.current = timer
-      clearPendingDraftCreation = timer
     } catch (error) {
       inFlightRef.current = false
       pendingDraftCreation = null
@@ -74,14 +73,6 @@ export function NewGlossaryDraftStarter({
     }, 0)
     return () => {
       clearTimeout(startTimer)
-      if (timerRef.current !== null) {
-        clearTimeout(timerRef.current)
-        timerRef.current = null
-      }
-      if (clearPendingDraftCreation !== null) {
-        clearTimeout(clearPendingDraftCreation)
-        clearPendingDraftCreation = null
-      }
     }
   }, [startDraft])
   return (

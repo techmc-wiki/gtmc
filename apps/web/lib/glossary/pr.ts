@@ -1,3 +1,4 @@
+import { SubmissionInProgressError } from "@/lib/drafts/submission"
 import { getMainBranchHeadSha, upsertFileOnBranch } from "@/lib/github/branch"
 import {
   GLOSSARY_FORK_REPO,
@@ -24,6 +25,20 @@ export interface GlossaryPrResult {
   branchName: string
 }
 
+export async function findGlossaryPullRequestByBranch(
+  branchName: string,
+  token: string
+) {
+  const octokit = getOctokit(token)
+  const { data } = await octokit.pulls.list({
+    owner: GLOSSARY_REPO.owner,
+    repo: GLOSSARY_REPO.name,
+    head: `${GLOSSARY_FORK_REPO.owner}:${branchName}`,
+    state: "all",
+  })
+  return data[0] ?? null
+}
+
 export async function openGlossaryPullRequest(
   input: GlossaryPrInput
 ): Promise<GlossaryPrResult> {
@@ -39,23 +54,16 @@ export async function openGlossaryPullRequest(
   } = input
   const octokit = getOctokit(token)
 
-  const { data: existingPrs } = await octokit.pulls.list({
-    owner: GLOSSARY_REPO.owner,
-    repo: GLOSSARY_REPO.name,
-    head: `${GLOSSARY_FORK_REPO.owner}:${branchName}`,
-    state: "all",
-  })
-  if (existingPrs[0]) {
+  const existingPr = await findGlossaryPullRequestByBranch(branchName, token)
+  if (existingPr) {
     return {
-      prUrl: existingPrs[0].html_url,
-      prNumber: existingPrs[0].number,
+      prUrl: existingPr.html_url,
+      prNumber: existingPr.number,
       branchName,
     }
   }
   if (recoverOnly) {
-    throw new Error(
-      "Submission is still in progress. Retry shortly; interrupted submissions can be resumed after 15 minutes."
-    )
+    throw new SubmissionInProgressError()
   }
   const upstreamHeadSha = await getMainBranchHeadSha(token, GLOSSARY_REPO)
   try {

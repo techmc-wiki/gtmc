@@ -82,13 +82,15 @@ function isBreak(node: RootContent): boolean {
 function trimRun(nodes: readonly RootContent[]): RootContent[] {
   let start = 0
   let end = nodes.length
-  while (start < end && (isIgnorable(nodes[start]) || isBreak(nodes[start])))
+  while (start < end && (isIgnorable(nodes[start]) || isBreak(nodes[start]))) {
     start++
+  }
   while (
     end > start &&
     (isIgnorable(nodes[end - 1]) || isBreak(nodes[end - 1]))
-  )
+  ) {
     end--
+  }
   return nodes.slice(start, end)
 }
 
@@ -195,8 +197,9 @@ export class BodyEmitter {
         if (
           parent.type === "root" &&
           textOf(el).trim() === this.ctx.title.trim()
-        )
+        ) {
           return ""
+        }
         return this.heading(el)
       case "h2":
       case "h3":
@@ -244,8 +247,9 @@ export class BodyEmitter {
 
   heading(el: Element): string {
     const level = Number(el.tagName.slice(1))
-    if (level < 2)
+    if (level < 2) {
       throw this.fail(el, "heading level below 2 is not in the vocabulary")
+    }
     const id = attr(el, "id")
     const anchor =
       id === undefined ? "none" : stringLiteral(`${this.ctx.articleSlug}#${id}`)
@@ -255,8 +259,9 @@ export class BodyEmitter {
   list(el: Element): string {
     for (const child of el.children) {
       if (isIgnorable(child)) continue
-      if (child.type !== "element" || child.tagName !== "li")
+      if (child.type !== "element" || child.tagName !== "li") {
         throw this.fail(el, "list contains something other than <li>")
+      }
     }
     const items = elementsOf(el.children)
     const loose = items.some((item) =>
@@ -267,8 +272,9 @@ export class BodyEmitter {
     if (el.tagName === "ol") {
       const start = attr(el, "start")
       const first = start === undefined ? 1 : Number(start)
-      if (!Number.isInteger(first))
+      if (!Number.isInteger(first)) {
         throw this.fail(el, "ol start is not an integer")
+      }
       return `#enum(start: ${first}, tight: ${!loose}, ${bodies.join(", ")}${trailing})`
     }
     return `#list(tight: ${!loose}, ${bodies.join(", ")}${trailing})`
@@ -280,8 +286,9 @@ export class BodyEmitter {
     )
     if (code === undefined) throw this.fail(el, "pre without code")
     const classes = classList(code)
-    if (classes.includes("language-mermaid"))
+    if (classes.includes("language-mermaid")) {
       throw this.fail(el, "mermaid fence was not converted")
+    }
     const language = classes
       .find((name) => name.startsWith("language-"))
       ?.slice("language-".length)
@@ -307,8 +314,9 @@ export class BodyEmitter {
         `callout kind "${kind ?? ""}" is not in the vocabulary`
       )
     }
-    if (attr(el, "data-callout-empty") === "true")
+    if (attr(el, "data-callout-empty") === "true") {
       return `#callout(${stringLiteral(kind)}, [])`
+    }
     return `#callout(${stringLiteral(kind)}, [${this.blocks(el.children, el)}])`
   }
 
@@ -326,22 +334,25 @@ export class BodyEmitter {
           : stringLiteral(`${this.ctx.articleSlug}#${heading}`)
       return `#advanced(${id})[${this.blocks(el.children, el)}]`
     }
-    if (classList(el).includes("scheduled-ticks-comparison"))
+    if (classList(el).includes("scheduled-ticks-comparison")) {
       return this.blocks(el.children, el)
+    }
     throw this.fail(el, "div is not an advanced section or comparison block")
   }
 
   table(el: Element): string {
     const sections = elementsOf(el.children)
     for (const child of sections) {
-      if (child.tagName !== "thead" && child.tagName !== "tbody")
+      if (child.tagName !== "thead" && child.tagName !== "tbody") {
         throw this.fail(el, `table child <${child.tagName}>`)
+      }
     }
     const headRows = sections
       .filter((child) => child.tagName === "thead")
       .flatMap((head) => this.rows(head))
-    if (headRows.length > 1)
+    if (headRows.length > 1) {
       throw this.fail(el, "table has more than one header row")
+    }
     const header = headRows[0] ?? []
     const bodyRows = sections
       .filter((child) => child.tagName === "tbody")
@@ -351,11 +362,12 @@ export class BodyEmitter {
     if (columns === 0) throw this.fail(el, "table has no cells")
     const align = Array.from({ length: columns }, (_, index) => {
       const value = alignOf(header, bodyRows[0] ?? [], index)
-      if (!ALIGNS.has(value))
+      if (!ALIGNS.has(value)) {
         throw this.fail(
           el,
           `table alignment "${value}" is not in the vocabulary`
         )
+      }
       return stringLiteral(value)
     })
     const headerCells = header.map((cell) => cell.body)
@@ -370,8 +382,9 @@ export class BodyEmitter {
   rows(section: Element): Cell[][] {
     const rows: Cell[][] = []
     for (const child of elementsOf(section.children)) {
-      if (child.tagName !== "tr")
+      if (child.tagName !== "tr") {
         throw this.fail(section, "table section child is not <tr>")
+      }
       rows.push(this.cells(child))
     }
     return rows
@@ -387,8 +400,9 @@ export class BodyEmitter {
       ) {
         throw this.fail(row, "table row contains something other than a cell")
       }
-      if (attr(child, "rowspan") !== undefined)
+      if (attr(child, "rowspan") !== undefined) {
         throw this.fail(child, "rowspan is not in the vocabulary")
+      }
       const colspan = attr(child, "colspan")
       const content = `[${this.inlines(child.children, child).trim()}]`
       const body =
@@ -406,8 +420,9 @@ export class BodyEmitter {
 
   mermaid(el: Element): string {
     const asset = this.ctx.assets.mermaid(textOf(el))
-    if (asset === null)
+    if (asset === null) {
       throw this.fail(el, "mermaid source has no rendered asset")
+    }
     return `#fig(${stringLiteral(asset.path)}, kind: "diagram")`
   }
 
@@ -415,10 +430,12 @@ export class BodyEmitter {
     const src = attr(img, "src") ?? ""
     const alt = stringLiteral(attr(img, "alt") ?? "")
     const asset = this.ctx.assets.image(src)
-    if (asset === null)
+    if (asset === null) {
       throw this.fail(img, `image ${src} has no resolved asset`)
-    if ("missing" in asset)
+    }
+    if ("missing" in asset) {
       return `#fig-missing(alt: ${alt}, src: ${stringLiteral(asset.missing)})`
+    }
     if (isAnimatedImage(img)) {
       const page = `https://techmc.wiki/${this.ctx.locale}/articles/${this.ctx.articleSlug}`
       return `#fig(${stringLiteral(asset.path)}, alt: ${alt}, kind: "animated", width: ${this.widthArg(img)}, url: ${stringLiteral(page)})`
@@ -427,15 +444,18 @@ export class BodyEmitter {
   }
 
   inlineImage(img: Element): string {
-    if (isAnimatedImage(img))
+    if (isAnimatedImage(img)) {
       throw this.fail(img, "animated image outside a block context")
+    }
     const src = attr(img, "src") ?? ""
     const alt = stringLiteral(attr(img, "alt") ?? "")
     const asset = this.ctx.assets.image(src)
-    if (asset === null)
+    if (asset === null) {
       throw this.fail(img, `image ${src} has no resolved asset`)
-    if ("missing" in asset)
+    }
+    if ("missing" in asset) {
       return `#img-missing(alt: ${alt}, src: ${stringLiteral(asset.missing)})`
+    }
     return `#img(${stringLiteral(asset.path)}, alt: ${alt}, width: ${this.widthArg(img)})`
   }
 
@@ -447,8 +467,9 @@ export class BodyEmitter {
     const raw = attr(img, "width") ?? attr(img, "data-width") ?? style
     if (raw === undefined) return "none"
     const percent = /^([0-9.]+)%$/.exec(raw.trim())
-    if (percent === null)
+    if (percent === null) {
       throw this.fail(img, `unsupported image width "${raw}"`)
+    }
     return stringLiteral(`${percent[1]}%`)
   }
 
@@ -457,14 +478,16 @@ export class BodyEmitter {
     const inner = (): string => this.inlines(el.children, el)
     if (tag === "sup") {
       const ref = soleElement(el)
-      if (ref?.tagName === "a" && attr(ref, "dataFootnoteRef") !== undefined)
+      if (ref?.tagName === "a" && attr(ref, "dataFootnoteRef") !== undefined) {
         return this.link(ref)
+      }
     }
     const wrapper = INLINE_WRAPPERS[tag]
     if (wrapper !== undefined) return `#${wrapper}[${inner()}]`
     const update = UPDATE_KINDS[tag]
-    if (update !== undefined)
+    if (update !== undefined) {
       return `#upd(${stringLiteral(update)})[${inner()}]`
+    }
     const ansi = ansiColorOf(tag)
     if (ansi !== undefined) return `#ansi(${stringLiteral(ansi)})[${inner()}]`
     if (TEXT_WRAPPERS.has(tag)) return inner()
@@ -495,17 +518,20 @@ export class BodyEmitter {
   }
 
   inlineCode(el: Element): string {
-    if (elementsOf(el.children).length > 0)
+    if (elementsOf(el.children).length > 0) {
       throw this.fail(el, "inline code contains an element")
-    if (classList(el).includes("language-math"))
+    }
+    if (classList(el).includes("language-math")) {
       return this.ctx.math(textOf(el), false)
+    }
     return `#icode(${stringLiteral(textOf(el))})`
   }
 
   link(el: Element): string {
     const href = attr(el, "href") ?? ""
-    if (attr(el, "dataFootnoteRef") !== undefined)
+    if (attr(el, "dataFootnoteRef") !== undefined) {
       return this.footnoteRef(el, href)
+    }
     if (attr(el, "dataFootnoteBackref") !== undefined) return ""
     const target = classifyHref(href, (value) =>
       this.ctx.resolveArticleLink(value)
@@ -526,8 +552,9 @@ export class BodyEmitter {
   /** `a[data-footnote-ref]` becomes `#footnote[...]` with the definition's content at this reference. */
   footnoteRef(a: Element, href: string): string {
     const definition = this.footnotes.get(href.replace(/^#/, ""))
-    if (definition === undefined)
+    if (definition === undefined) {
       throw this.fail(a, `footnote ${href} has no definition`)
+    }
     return `#footnote[${this.blocks(definition.children, definition)}]`
   }
 
@@ -547,8 +574,9 @@ export class BodyEmitter {
 
   iframe(el: Element): string {
     const src = attr(el, "src") ?? ""
-    if (!/^https?:\/\//i.test(src))
+    if (!/^https?:\/\//i.test(src)) {
       throw this.fail(el, "iframe source is not http(s)")
+    }
     return `#online("iframe", ${stringLiteral(src)})`
   }
 

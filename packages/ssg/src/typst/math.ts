@@ -379,8 +379,9 @@ class MathParser {
       if (inner === "") throw this.error("empty script")
       return inner
     }
-    if (c === "" || c === "_" || c === "^")
+    if (c === "" || c === "_" || c === "^") {
       throw this.error("script without argument")
+    }
     return this.atom(true).out
   }
 
@@ -405,8 +406,9 @@ class MathParser {
       return { out: digits, group: false, digits }
     }
     const symbol = lookup(CHARS, c)
-    if (symbol === undefined)
+    if (symbol === undefined) {
       throw this.error(`unsupported character ${JSON.stringify(c)}`)
+    }
     this.pos += 1
     return plain(symbol)
   }
@@ -505,14 +507,16 @@ class MathParser {
         return plain(`op("limsup", limits: ${this.limits()})`)
       case "text": {
         const raw = this.rawGroup()
-        if (/[\\{}$%~&_^#]/.test(raw))
+        if (/[\\{}$%~&_^#]/.test(raw)) {
           throw this.error("\\text containing markup characters")
+        }
         return plain(`"${raw.replaceAll('"', '\\"')}"`)
       }
       case "operatorname": {
         const raw = this.rawGroup()
-        if (!/^[A-Za-z]+$/.test(raw))
+        if (!/^[A-Za-z]+$/.test(raw)) {
           throw this.error("\\operatorname with non-letters")
+        }
         return plain(`op("${raw}")`)
       }
       case "left": {
@@ -545,8 +549,9 @@ class MathParser {
       default:
         break
     }
-    if (LIMIT_OPERATORS[name] === true)
+    if (LIMIT_OPERATORS[name] === true) {
       return plain(`op("${name}", limits: ${this.limits()})`)
+    }
     if (OPERATORS[name] === true) return plain(`op("${name}")`)
     const symbol = lookup(SYMBOLS, name)
     if (symbol !== undefined) return plain(symbol)
@@ -566,8 +571,9 @@ class MathParser {
       side === "left" ? LEFT_DELIMITERS : RIGHT_DELIMITERS,
       key
     )
-    if (symbol === undefined)
+    if (symbol === undefined) {
       throw this.error(`unsupported ${side} delimiter ${key}`)
+    }
     this.pos += key.length
     return symbol
   }
@@ -588,10 +594,12 @@ class MathParser {
     while (
       rows.length > 1 &&
       rows[rows.length - 1].every((cell) => cell === "")
-    )
+    ) {
       rows.pop()
-    if (rows.every((row) => row.every((cell) => cell === "")))
+    }
+    if (rows.every((row) => row.every((cell) => cell === ""))) {
       throw this.error("empty environment")
+    }
     if (
       name === "matrix" &&
       rows.some((row) => row.length !== rows[0].length)
@@ -632,8 +640,9 @@ class MathParser {
         this.pos += 1
       } else if (this.rest().startsWith("\\\\")) {
         this.pos += 2
-        if (/^\s*[[*]/.test(this.rest()))
+        if (/^\s*[[*]/.test(this.rest())) {
           throw this.error("row spacing options are not supported")
+        }
         rows.push([])
       } else {
         throw this.error("unterminated environment")
@@ -657,8 +666,9 @@ function splitTag(tex: string): { body: string; tag: string | undefined } {
 
 export function texToTypst(tex: string, display: boolean): string {
   const { body, tag } = splitTag(tex)
-  if (!display && tag !== undefined)
+  if (!display && tag !== undefined) {
     throw new TypstMathError(tex, "\\tag outside display math")
+  }
   if (!display && /\\begin\{aligned\}/.test(body)) {
     throw new TypstMathError(tex, "aligned is display-only")
   }

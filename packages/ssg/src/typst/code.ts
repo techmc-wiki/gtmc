@@ -79,8 +79,9 @@ function collectTokens(
       if (node.value !== "") tokens.push({ ...inherited, text: node.value })
       continue
     }
-    if (node.type !== "element")
+    if (node.type !== "element") {
       throw error("unexpected node inside highlighted code")
+    }
     if (node.tagName === "span") {
       const style = attr(node, "style")
       tokens.push(
@@ -144,8 +145,9 @@ export function highlightedLines(
   for (const child of code.children) {
     if (child.type === "comment") continue
     if (child.type === "text" && child.value.trim() === "") continue
-    if (!isLineSpan(child))
+    if (!isLineSpan(child)) {
       throw error("code contains a node that is not a Shiki line")
+    }
     spans.push(child)
   }
   const texts = spans.map((span) => textOf(span))
@@ -174,8 +176,9 @@ export function highlightedLines(
       throw error("highlighted lines do not match their source")
     }
   }
-  if (next !== spans.length)
+  if (next !== spans.length) {
     throw error("highlighted lines do not match their source")
+  }
   return typstArray(out)
 }
 

@@ -13,8 +13,9 @@ export function classifyHref(
   href: string,
   resolve: (href: string) => string | null
 ): LinkTarget {
-  if (href.startsWith("#"))
+  if (href.startsWith("#")) {
     return { kind: "anchor", id: safeDecode(href.slice(1)) }
+  }
   if (/^https?:\/\//i.test(href)) return { kind: "external", url: href }
   if (SCHEME.test(href)) return { kind: "text" }
   const id = resolve(href)

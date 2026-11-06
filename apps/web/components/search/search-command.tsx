@@ -344,121 +344,156 @@ function SearchCommandDialog({
   )
 }
 
+type SearchView = "awaiting" | "loading" | "error" | "results" | "empty"
+
+function getSearchView(search: SearchCommandState): SearchView {
+  if (search.query.length < 2) return "awaiting"
+  if (search.isLoading) return "loading"
+  if (search.requestError) return "error"
+  if (!search.results.length && !search.glossaryResults.length) return "empty"
+  return "results"
+}
+
+function getResultCountLabel(search: SearchCommandState): string {
+  if (search.isLoading) return search.t("scanning")
+  if (search.results.length === 20) {
+    return search.t("resultsCountCapped", { count: search.results.length })
+  }
+  return search.t("resultsCount", { count: search.results.length })
+}
+
+function SearchResultSummary({ search }: { search: SearchCommandState }) {
+  return (
+    <output className="text-muted-foreground block px-4 py-2 text-xs">
+      {getResultCountLabel(search)}
+    </output>
+  )
+}
+
+function SearchLoadingSkeleton() {
+  return (
+    <div className="px-4 py-6">
+      <div className="space-y-3">
+        {[1, 2, 3].map((index) => (
+          <div key={index} className="space-y-1.5">
+            <div className="bg-tech-main/10 h-4 w-3/5 animate-pulse motion-reduce:animate-none" />
+            <div className="bg-tech-main/5 h-3 w-2/5 animate-pulse motion-reduce:animate-none" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ArticleSearchResults({ search }: { search: SearchCommandState }) {
+  return (
+    <CommandGroup className="p-2">
+      {search.results.map((result) => (
+        <CommandItem
+          key={result.slug}
+          value={result.slug}
+          onSelect={() => search.navigateToResult(result)}
+          className="cursor-pointer items-start px-3 py-3"
+          aria-label={search.t("selectResult", { title: result.title })}>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-3">
+              <div className="text-tech-main-dark text-sm font-medium">
+                {search.highlightMatch(result.title)}
+              </div>
+            </div>
+            {result.snippet ? (
+              <div className="text-tech-main/70 mt-1.5 line-clamp-2 text-xs/relaxed">
+                {search.highlightMatch(result.snippet)}
+              </div>
+            ) : null}
+          </div>
+        </CommandItem>
+      ))}
+    </CommandGroup>
+  )
+}
+
+function GlossarySearchResults({ search }: { search: SearchCommandState }) {
+  return (
+    <CommandGroup className="guide-line border-t">
+      <div className="text-tech-main/50 flex items-center gap-2 px-4 pt-3 pb-1 text-xs font-medium">
+        <span className="bg-tech-signal inline-block size-1.5" />
+        {search.t("glossarySection")}
+      </div>
+      {search.glossaryResults.map((entry) => (
+        <CommandItem
+          key={entry.slug}
+          value={`glossary-${entry.slug}`}
+          onSelect={() => search.navigateToGlossaryResult(entry)}
+          className="flex cursor-pointer items-baseline gap-3 px-4 py-2.5"
+          aria-label={search.t("selectResult", {
+            title: entry.fullFormEn,
+          })}>
+          <span className="text-tech-main-dark text-sm font-medium">
+            {search.highlightMatch(entry.fullFormEn)}
+          </span>
+          {entry.shortForm ? (
+            <span className="text-tech-main/60 font-mono text-xs">
+              {search.highlightMatch(entry.shortForm)}
+            </span>
+          ) : null}
+          <span className="text-tech-main/40 ml-auto font-mono text-[0.5625rem] tracking-wider">
+            {entry.categories.join("; ")}
+          </span>
+        </CommandItem>
+      ))}
+    </CommandGroup>
+  )
+}
+
+function SearchMessage({ title, hint }: { title: string; hint?: string }) {
+  return (
+    <div className="px-4 py-8 text-center">
+      <div className="text-tech-main/60 text-sm">{title}</div>
+      {hint ? (
+        <div className="text-tech-main/40 mt-1 text-xs">{hint}</div>
+      ) : null}
+    </div>
+  )
+}
+
+function SearchResults({ search }: { search: SearchCommandState }) {
+  return (
+    <>
+      {search.results.length > 0 ? (
+        <ArticleSearchResults search={search} />
+      ) : null}
+      {search.glossaryResults.length > 0 ? (
+        <GlossarySearchResults search={search} />
+      ) : null}
+    </>
+  )
+}
+
 function SearchCommandResults({ search }: { search: SearchCommandState }) {
-  const hasRequestError =
-    search.query.length >= 2 &&
-    Boolean(search.requestError) &&
-    !search.isLoading
+  const view = getSearchView(search)
+  const showSummary = view !== "awaiting" && view !== "error"
 
   return (
     <CommandList className="custom-left-scrollbar max-h-[50vh]">
-      {search.query.length >= 2 && !hasRequestError && (
-        <output className="text-muted-foreground block px-4 py-2 text-xs">
-          {search.isLoading
-            ? search.t("scanning")
-            : search.results.length === 20
-              ? search.t("resultsCountCapped", { count: search.results.length })
-              : search.t("resultsCount", { count: search.results.length })}
-        </output>
-      )}
-      {search.isLoading && (
-        <div className="px-4 py-6">
-          <div className="space-y-3">
-            {[1, 2, 3].map((index) => (
-              <div key={index} className="space-y-1.5">
-                <div className="bg-tech-main/10 h-4 w-3/5 animate-pulse motion-reduce:animate-none" />
-                <div className="bg-tech-main/5 h-3 w-2/5 animate-pulse motion-reduce:animate-none" />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      {!search.isLoading && search.results.length > 0 && (
-        <CommandGroup className="p-2">
-          {search.results.map((result) => (
-            <CommandItem
-              key={result.slug}
-              value={result.slug}
-              onSelect={() => search.navigateToResult(result)}
-              className="cursor-pointer items-start px-3 py-3"
-              aria-label={search.t("selectResult", { title: result.title })}>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="text-tech-main-dark text-sm font-medium">
-                    {search.highlightMatch(result.title)}
-                  </div>
-                </div>
-                {result.snippet && (
-                  <div className="text-tech-main/70 mt-1.5 line-clamp-2 text-xs/relaxed">
-                    {search.highlightMatch(result.snippet)}
-                  </div>
-                )}
-              </div>
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      )}
-      {!search.isLoading && search.glossaryResults.length > 0 && (
-        <CommandGroup className="guide-line border-t">
-          <div className="text-tech-main/50 flex items-center gap-2 px-4 pt-3 pb-1 text-xs font-medium">
-            <span className="bg-tech-signal inline-block size-1.5" />
-            {search.t("glossarySection")}
-          </div>
-          {search.glossaryResults.map((entry) => (
-            <CommandItem
-              key={entry.slug}
-              value={`glossary-${entry.slug}`}
-              onSelect={() => search.navigateToGlossaryResult(entry)}
-              className="flex cursor-pointer items-baseline gap-3 px-4 py-2.5"
-              aria-label={search.t("selectResult", {
-                title: entry.fullFormEn,
-              })}>
-              <span className="text-tech-main-dark text-sm font-medium">
-                {search.highlightMatch(entry.fullFormEn)}
-              </span>
-              {entry.shortForm && (
-                <span className="text-tech-main/60 font-mono text-xs">
-                  {search.highlightMatch(entry.shortForm)}
-                </span>
-              )}
-              <span className="text-tech-main/40 ml-auto font-mono text-[0.5625rem] tracking-wider">
-                {entry.categories.join("; ")}
-              </span>
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      )}
-      {hasRequestError && (
-        <div className="px-4 py-8 text-center">
-          <div className="text-tech-main/60 text-sm">
-            {search.t("requestFailed")}
-          </div>
-        </div>
-      )}
-      {!hasRequestError &&
-        !search.isLoading &&
-        search.query.length >= 2 &&
-        search.results.length === 0 &&
-        search.glossaryResults.length === 0 && (
-          <div className="px-4 py-8 text-center">
-            <div className="text-tech-main/60 text-sm">
-              {search.t("noMatch")}
-            </div>
-            <div className="text-tech-main/40 mt-1 text-xs">
-              {search.t("tryDifferentKeywords")}
-            </div>
-          </div>
-        )}
-      {search.query.length < 2 && (
-        <div className="px-4 py-8 text-center">
-          <div className="text-tech-main/60 text-sm">
-            {search.t("awaitingInput")}
-          </div>
-          <div className="text-tech-main/40 mt-1 text-xs">
-            {search.t("minCharsHint")}
-          </div>
-        </div>
-      )}
+      {showSummary ? <SearchResultSummary search={search} /> : null}
+      {view === "loading" ? <SearchLoadingSkeleton /> : null}
+      {view === "results" ? <SearchResults search={search} /> : null}
+      {view === "error" ? (
+        <SearchMessage title={search.t("requestFailed")} />
+      ) : null}
+      {view === "empty" ? (
+        <SearchMessage
+          title={search.t("noMatch")}
+          hint={search.t("tryDifferentKeywords")}
+        />
+      ) : null}
+      {view === "awaiting" ? (
+        <SearchMessage
+          title={search.t("awaitingInput")}
+          hint={search.t("minCharsHint")}
+        />
+      ) : null}
     </CommandList>
   )
 }

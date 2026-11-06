@@ -5,13 +5,18 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm" # See documentation for possible values
+  - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "cron"
-      cronjob: "0 7 * * 0,3"
+      interval: "weekly"
     groups:
-      dev:
-        dependency-type: "development"
-      prod:
-        dependency-type: "production"
+      npm:
+        patterns: ["*"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions:
+        patterns: ["*"]

@@ -25,10 +25,14 @@ import {
 import { Link } from "@/i18n/navigation"
 import { guardUser } from "@/lib/auth/guards"
 import { getArticlePullRequest } from "@/lib/articles/pr"
-
-const ARCHIVED_DRAFT_STATUSES = new Set(["ARCHIVED", "MERGED", "CLOSED"])
-
-const ARCHIVED_GLOSSARY_STATUSES = new Set(["SUBMITTED"])
+import {
+  canContinueDraft,
+  canDeleteArticleDraft,
+  canDeleteDraft,
+  deriveDisplayStatus,
+  isArchivedDraftStatus,
+} from "@/lib/drafts/lifecycle"
+import type { DraftStatus } from "@/lib/drafts/store"
 
 const dateFormatters: Record<string, Intl.DateTimeFormat> = {
   en: new Intl.DateTimeFormat("en", { dateStyle: "medium" }),
@@ -41,7 +45,7 @@ export const metadata: Metadata = {
 
 type ArticleDraftItem = {
   kind: "article"
-  displayStatus: string
+  displayStatus: DraftStatus
   fileCount: number
 } & ArticleDraft
 
@@ -64,7 +68,7 @@ interface DraftRecordProps {
   moreActionsLabelForDraft: string
   prLabel: string
   prUrl?: string | null
-  status: string
+  status: DraftStatus
   title: string
   updatedLabel: string
 }
@@ -197,9 +201,7 @@ export default async function DraftDashboardPage({
       if (draft.githubPrNum) {
         try {
           const pr = await getArticlePullRequest(draft.githubPrNum)
-          if (pr.state === "closed") {
-            displayStatus = pr.merged ? "MERGED" : "CLOSED"
-          }
+          displayStatus = deriveDisplayStatus(draft.status, pr)
         } catch (error) {
           console.error(`Failed to fetch PR #${draft.githubPrNum}:`, error)
         }
@@ -221,27 +223,23 @@ export default async function DraftDashboardPage({
     (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
   )
 
-  const activeItems = allItems.filter((item) => {
+  const isArchived = (item: DraftItem) => {
     if (item.kind === "article") {
-      return !ARCHIVED_DRAFT_STATUSES.has(item.displayStatus)
+      return isArchivedDraftStatus(item.displayStatus)
     }
-    return !ARCHIVED_GLOSSARY_STATUSES.has(item.status)
-  })
+    return item.status === "SUBMITTED" || isArchivedDraftStatus(item.status)
+  }
 
-  const archivedItems = allItems.filter((item) => {
-    if (item.kind === "article") {
-      return ARCHIVED_DRAFT_STATUSES.has(item.displayStatus)
-    }
-    return ARCHIVED_GLOSSARY_STATUSES.has(item.status)
-  })
+  const activeItems = allItems.filter((item) => !isArchived(item))
+  const archivedItems = allItems.filter(isArchived)
 
   const renderRecord = (item: DraftItem, history = false) => {
     const isArticle = item.kind === "article"
     const title = isArticle
       ? item.title || t("untitledArticle")
       : item.title || t("untitledGlossary")
-    const status = isArticle ? item.displayStatus : item.status
-    const canContinue = status === "DRAFT"
+    const status: DraftStatus = isArticle ? item.displayStatus : item.status
+    const canContinue = canContinueDraft(status)
     const actionLabel = canContinue ? t("continueDraft") : t("viewDraft")
     const detail = isArticle
       ? t("filesCount", { count: item.fileCount })
@@ -252,8 +250,8 @@ export default async function DraftDashboardPage({
       ? (`/draft/${item.id}` as const)
       : (`/glossary/edit/${item.id}` as const)
     const canDelete = isArticle
-      ? item.status === "DRAFT" && !item.githubPrNum
-      : item.status === "DRAFT"
+      ? canDeleteArticleDraft(item, status)
+      : canDeleteDraft(item)
 
     const deleteAction =
       !history && canDelete

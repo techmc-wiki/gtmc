@@ -39,6 +39,8 @@ export interface GlossaryDiffPreviewProps {
   onClose: () => void
   onSubmit: (opts: { useRealEmail: boolean }) => Promise<void>
   isSubmitting: boolean
+  useRealEmail: boolean
+  onUseRealEmailChange: (value: boolean) => void
   canSubmit?: boolean
   validationMessage?: string
   className?: string
@@ -428,6 +430,8 @@ export function GlossaryDiffPreview({
   onClose,
   onSubmit,
   isSubmitting,
+  useRealEmail,
+  onUseRealEmailChange,
   canSubmit = true,
   validationMessage,
   className,
@@ -439,7 +443,6 @@ export function GlossaryDiffPreview({
   onDismissSuccess,
 }: GlossaryDiffPreviewProps) {
   const t = useTranslations("Glossary")
-  const [useRealEmail, setUseRealEmail] = React.useState(false)
 
   const counts = React.useMemo(() => {
     let edit = 0
@@ -479,7 +482,7 @@ export function GlossaryDiffPreview({
         authorName={authorName}
         isSubmitting={isSubmitting}
         noreplyEmail={noreplyEmail}
-        onChange={setUseRealEmail}
+        onChange={onUseRealEmailChange}
         realEmail={realEmail}
         toggleLabel={t("editorRealEmailToggleLabel")}
         useRealEmail={useRealEmail}

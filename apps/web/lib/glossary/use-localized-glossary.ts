@@ -1,44 +1,50 @@
 "use client"
 
 import * as React from "react"
+import useSWR from "swr"
 import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
-import { normalizeGlossarySiteLocale } from "@/lib/glossary/locales"
+import {
+  normalizeGlossarySiteLocale,
+  type GlossarySiteLocale,
+} from "@/lib/glossary/locales"
 
 const EMPTY: GlossaryIndexEntry[] = []
+
+interface GlossaryIndexResponse {
+  locale: GlossarySiteLocale
+  entries: GlossaryIndexEntry[]
+}
 
 /** Defers the locale-specific index fetch so the full glossary is not bundled into client JavaScript. */
 export function useLocalizedGlossary(locale: string): {
   entries: GlossaryIndexEntry[]
   isLoading: boolean
+  error: string | null
+  retry: () => void
 } {
-  const [entries, setEntries] = React.useState<GlossaryIndexEntry[]>(EMPTY)
-  const [loadedLocale, setLoadedLocale] = React.useState<string | null>(null)
   const siteLocale = normalizeGlossarySiteLocale(locale)
-  const isLoading = loadedLocale !== siteLocale
+  const url = `/api/glossary?locale=${siteLocale}`
 
-  React.useEffect(() => {
-    let cancelled = false
+  const { data, error, mutate } = useSWR<GlossaryIndexResponse, Error>(
+    url,
+    async () => {
+      const res = await fetch(url)
+      if (!res.ok) throw new Error(`glossary fetch ${res.status}`)
+      const entries = (await res.json()) as GlossaryIndexEntry[]
+      return { locale: siteLocale, entries }
+    },
+    { keepPreviousData: true }
+  )
 
-    fetch(`/api/glossary?locale=${siteLocale}`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`glossary fetch ${res.status}`)
-        return res.json() as Promise<GlossaryIndexEntry[]>
-      })
-      .then((data) => {
-        if (!cancelled) {
-          setEntries(data)
-          setLoadedLocale(siteLocale)
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to load glossary entries:", error)
-        if (!cancelled) setLoadedLocale(siteLocale)
-      })
+  const retry = React.useCallback(() => {
+    void mutate()
+  }, [mutate])
 
-    return () => {
-      cancelled = true
-    }
-  }, [siteLocale])
-
-  return { entries, isLoading }
+  // Entries from a previous locale are never returned; a locale switch reads as loading.
+  return {
+    entries: data?.locale === siteLocale ? data.entries : EMPTY,
+    isLoading: data?.locale !== siteLocale && !error,
+    error: error ? error.message : null,
+    retry,
+  }
 }

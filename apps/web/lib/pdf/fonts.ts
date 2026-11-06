@@ -111,7 +111,7 @@ export async function syncPdfFonts(): Promise<void> {
     await downloadFile(url, path.join(woff2Dir, fileName))
   })
 
-  const localCss = css.replace(
+  const localCss = css.replaceAll(
     WOFF2_URL_PATTERN,
     (_, url: string) =>
       `url(${WOFF2_DIRNAME}/${path.basename(new URL(url).pathname)})`

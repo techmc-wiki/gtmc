@@ -48,6 +48,7 @@
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "2.8.2",
     "@vercel/speed-insights": "^2.0.0",
+    "@xstate/react": "^6.1.0",
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.1.1",
@@ -79,6 +80,7 @@
     "three": "^0.187.0",
     "undici": "^8.12.3",
     "unist-util-visit": "^5.2.0",
+    "xstate": "^5.33.3",
     "zod": "^4.6.7"
   },
   "devDependencies": {

@@ -11,6 +11,7 @@ import {
   normalizeDraftFileCollection,
   normalizeDraftFilePath,
 } from "@/lib/drafts/files"
+import { canDeleteDraft, canEditDraft } from "@/lib/drafts/lifecycle"
 import { deleteDraftAssets } from "@/lib/drafts/storage"
 import {
   deleteDraft,
@@ -80,7 +81,7 @@ export async function saveDraftAction(formData: FormData) {
       if (!record || record.draft.kind !== "article") {
         throw new Error("Draft not found")
       }
-      if (record.draft.status !== "DRAFT") {
+      if (!canEditDraft(record.draft)) {
         throw new Error("Cannot edit a draft after submission")
       }
       requireDraftVersion(record.etag, etag)
@@ -117,7 +118,7 @@ export async function deleteDraftAction(revisionId: string) {
   if (!record || record.draft.kind !== "article") {
     throw new Error("Draft not found")
   }
-  if (record.draft.status !== "DRAFT") {
+  if (!canDeleteDraft(record.draft)) {
     throw new Error("Cannot delete a draft after submission has started")
   }
   await deleteDraft(record.draft, record.etag)

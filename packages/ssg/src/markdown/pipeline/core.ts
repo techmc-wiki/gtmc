@@ -1,5 +1,6 @@
 import type { PluggableList } from "unified";
 import remarkGfm from "remark-gfm";
+import remarkCjkFriendly from "remark-cjk-friendly";
 import remarkMath from "remark-math";
 import remarkBreaks from "remark-breaks";
 import remarkDirective from "remark-directive";
@@ -35,6 +36,8 @@ interface RehypePipelineOptions {
 export function buildRemarkPlugins(options: RemarkPipelineOptions = {}): PluggableList {
   const plugins: PluggableList = [
     remarkGfm,
+    // CommonMark flanking rules leave `_**中文**_` literal next to CJK text.
+    remarkCjkFriendly,
     remarkBreaks,
     remarkDirective,
     remarkDirectiveHandler,

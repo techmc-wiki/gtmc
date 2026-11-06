@@ -12,6 +12,8 @@ import type { DraftFileCollection } from "@/lib/drafts/files"
 import { notFound, redirect } from "next/navigation"
 import { readFile } from "fs/promises"
 import path from "path"
+import { Suspense } from "react"
+import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
 
 export interface ContributingGuide {
   id: string
@@ -47,11 +49,19 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default async function EditDraftPage({
+export default function EditDraftPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
+  return (
+    <Suspense fallback={<EditDraftFallback />}>
+      <EditDraft params={params} />
+    </Suspense>
+  )
+}
+
+async function EditDraft({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session?.user) {
     redirect("/login")
@@ -98,6 +108,21 @@ export default async function EditDraftPage({
         <p className="text-tech-main/60 text-sm">{t("articleDraft")}</p>
       </header>
       <DraftEditor key={record.etag} initialData={draftEditorInitialData} />
+    </div>
+  )
+}
+
+function EditDraftFallback() {
+  return (
+    <div
+      aria-busy="true"
+      aria-live="polite"
+      className="mx-auto w-full max-w-[1800px] space-y-3">
+      <div className="flex items-center justify-between gap-4">
+        <SegmentedBar opacity="low" className="size-9" />
+        <SegmentedBar opacity="low" className="h-4 w-24" />
+      </div>
+      <div className="border-tech-main/20 bg-surface-overlay/30 h-[70vh] w-full border" />
     </div>
   )
 }

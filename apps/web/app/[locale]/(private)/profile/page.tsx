@@ -15,7 +15,8 @@ import { updateProfileAction } from "@/actions/profile"
 import { SignOutButton } from "@/components/ui/sign-out-button"
 import { cn } from "@/lib/cn"
 import { Label } from "@/components/ui/shadcn/label"
-import type { ReactNode } from "react"
+import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
+import { Suspense, type ReactNode } from "react"
 
 export const metadata: Metadata = {
   title: "User Profile",
@@ -29,11 +30,29 @@ export default async function ProfilePage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "Profile" })
+
+  return (
+    <div className="page-container mt-4 sm:mt-8">
+      <div className="border-tech-main/40 border-b-2 pb-4">
+        <h1 className="display-title text-tech-main-dark text-3xl md:text-5xl">
+          {t("pageTitle")}
+        </h1>
+      </div>
+
+      <Suspense fallback={<ProfileFormFallback />}>
+        <ProfileForm locale={locale} />
+      </Suspense>
+    </div>
+  )
+}
+
+async function ProfileForm({ locale }: { locale: string }) {
   const session = await guardUser(locale, `/${locale}/profile`)
 
   const profile = await readProfile(session.user.id)
   const user = { ...session.user, ...profile }
-  const t = await getTranslations("Profile")
+  const t = await getTranslations({ locale, namespace: "Profile" })
   const emailVisibility = session.user.emailVisibility
 
   const emailLabel = (
@@ -46,90 +65,118 @@ export default async function ProfilePage({
   )
 
   return (
-    <div className="page-container mt-4 sm:mt-8">
-      <div className="border-tech-main/40 border-b-2 pb-4">
-        <h1 className="display-title text-tech-main-dark text-3xl md:text-5xl">
-          {t("pageTitle")}
-        </h1>
-      </div>
+    <div className="border-tech-main/40 bg-surface-overlay/60 w-full border">
+      <form
+        action={updateProfileAction as unknown as (formData: FormData) => void}
+        className="space-y-8 p-4 sm:p-6 md:p-8 lg:p-12">
+        <div className="flex flex-col items-start gap-4 sm:gap-6 md:gap-8">
+          <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-24 items-center justify-center overflow-hidden rounded-none border-2 p-1 ring-1 sm:size-32 md:size-40">
+            {user.image ? (
+              <AvatarImage asChild src={user.image}>
+                <Image
+                  src={user.image}
+                  alt={user.name || "Avatar"}
+                  fill
+                  sizes="(max-width: 640px) 96px, (max-width: 768px) 128px, 160px"
+                  loading="lazy"
+                  className="object-cover"
+                />
+              </AvatarImage>
+            ) : (
+              <AvatarFallback className="text-tech-main/50 bg-transparent font-mono text-xl font-bold tracking-widest uppercase">
+                {(user.name || "?")[0]}
+              </AvatarFallback>
+            )}
+          </Avatar>
 
-      <div className="border-tech-main/40 bg-surface-overlay/60 w-full border">
-        <form
-          action={
-            updateProfileAction as unknown as (formData: FormData) => void
-          }
-          className="space-y-8 p-4 sm:p-6 md:p-8 lg:p-12">
-          <div className="flex flex-col items-start gap-4 sm:gap-6 md:gap-8">
-            <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-24 items-center justify-center overflow-hidden rounded-none border-2 p-1 ring-1 sm:size-32 md:size-40">
-              {user.image ? (
-                <AvatarImage asChild src={user.image}>
-                  <Image
-                    src={user.image}
-                    alt={user.name || "Avatar"}
-                    fill
-                    sizes="(max-width: 640px) 96px, (max-width: 768px) 128px, 160px"
-                    loading="lazy"
-                    className="object-cover"
-                  />
-                </AvatarImage>
-              ) : (
-                <AvatarFallback className="text-tech-main/50 bg-transparent font-mono text-xl font-bold tracking-widest uppercase">
-                  {(user.name || "?")[0]}
-                </AvatarFallback>
-              )}
-            </Avatar>
+          <FormField
+            htmlFor="profile-image"
+            label={t("avatarUrlLabel")}
+            className="w-full flex-1">
+            <Input
+              id="profile-image"
+              name="image"
+              type="url"
+              autoComplete="url"
+              aria-describedby="profile-image-hint"
+              defaultValue={user.image || ""}
+              placeholder="https://..."
+            />
+            <p
+              id="profile-image-hint"
+              className="text-muted-foreground text-xs">
+              {t("avatarUrlHint")}
+            </p>
+          </FormField>
+        </div>
 
-            <FormField
-              htmlFor="profile-image"
-              label={t("avatarUrlLabel")}
-              className="w-full flex-1">
-              <Input
-                id="profile-image"
-                name="image"
-                type="url"
-                autoComplete="url"
-                aria-describedby="profile-image-hint"
-                defaultValue={user.image || ""}
-                placeholder="https://..."
-              />
-              <p
-                id="profile-image-hint"
-                className="text-muted-foreground text-xs">
-                {t("avatarUrlHint")}
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
+          <FormField htmlFor="profile-name" label={t("usernameLabel")}>
+            <Input
+              id="profile-name"
+              name="name"
+              autoComplete="name"
+              defaultValue={user.name || ""}
+              required
+            />
+          </FormField>
+          <FormField htmlFor="profile-email" label={emailLabel}>
+            <Input
+              id="profile-email"
+              type="email"
+              defaultValue={user.email || ""}
+              disabled
+            />
+            {emailVisibility === "private" && (
+              <p className="text-muted-foreground text-xs">
+                {t("emailPrivateNotice")}
               </p>
-            </FormField>
-          </div>
+            )}
+          </FormField>
+        </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
-            <FormField htmlFor="profile-name" label={t("usernameLabel")}>
-              <Input
-                id="profile-name"
-                name="name"
-                autoComplete="name"
-                defaultValue={user.name || ""}
-                required
-              />
-            </FormField>
-            <FormField htmlFor="profile-email" label={emailLabel}>
-              <Input
-                id="profile-email"
-                type="email"
-                defaultValue={user.email || ""}
-                disabled
-              />
-              {emailVisibility === "private" && (
-                <p className="text-muted-foreground text-xs">
-                  {t("emailPrivateNotice")}
-                </p>
-              )}
-            </FormField>
-          </div>
+        <div className="flex items-center justify-between gap-4">
+          <SignOutButton />
+          <Button type="submit">{t("saveButton")}</Button>
+        </div>
+      </form>
+    </div>
+  )
+}
 
-          <div className="flex items-center justify-between gap-4">
-            <SignOutButton />
-            <Button type="submit">{t("saveButton")}</Button>
+function ProfileFormFallback() {
+  return (
+    <div
+      aria-busy="true"
+      aria-live="polite"
+      className="border-tech-main/40 bg-surface-overlay/60 w-full border">
+      <div className="space-y-8 p-4 sm:p-6 md:p-8 lg:p-12">
+        <div className="flex flex-col items-start gap-4 sm:gap-6 md:gap-8">
+          <SegmentedBar
+            opacity="high"
+            className="size-24 sm:size-32 md:size-40"
+          />
+          <div className="w-full flex-1 space-y-3">
+            <SegmentedBar opacity="low" className="h-3 w-24" />
+            <SegmentedBar opacity="medium" showBorder className="h-11 w-full" />
           </div>
-        </form>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
+          {[0, 1].map((field) => (
+            <div key={field} className="space-y-3">
+              <SegmentedBar opacity="low" className="h-3 w-20" />
+              <SegmentedBar
+                opacity="medium"
+                showBorder
+                className="h-11 w-full"
+              />
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <SegmentedBar opacity="low" className="h-10 w-24" />
+          <SegmentedBar opacity="high" className="h-10 w-24" />
+        </div>
       </div>
     </div>
   )

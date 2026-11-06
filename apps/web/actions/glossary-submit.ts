@@ -47,8 +47,8 @@ async function reconcileSubmission(
 
   const pullRequest =
     outcome ??
-    (await findGlossaryPullRequestByBranch(draft.branchName, token).then(
-      (pr) => (pr ? { prUrl: pr.html_url, prNumber: pr.number } : null)
+    (await findGlossaryPullRequestByBranch(draft.branchName, token).then((pr) =>
+      pr ? { prUrl: pr.html_url, prNumber: pr.number } : null
     ))
 
   if (!pullRequest) {

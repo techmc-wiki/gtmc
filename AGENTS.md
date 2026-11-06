@@ -60,6 +60,13 @@ vp test run -t "<test-name>"     # Filter by test name
 - Run standalone scripts with `vpx <file>` (handles TS and tsconfig paths; do not use `tsx` or `ts-node`).
 - Before declaring any build-affecting change complete, run `pnpm check && pnpm test`.
 
+## Cloudflare
+
+The `cf` CLI manages Cloudflare edge resources (DNS for `techmc.wiki`, R2 bucket `gtmc-pdf` for book PDFs, cache, and worker previews):
+
+- Run `cf` to see guides.
+- Never use `wrangler`.
+
 ## Testing
 
 - Test only on logic-heavy code. Assert on higher-level behavior (API responses, server actions, route handlers) rather than implementation details.

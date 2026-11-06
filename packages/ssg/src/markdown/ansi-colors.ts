@@ -37,6 +37,6 @@ export function createAnsiColorTagName(color: AnsiColorName) {
 
 export function stripAnsiColorMarkup(markdown: string) {
   return markdown
-    .replace(ANSI_COLOR_TAG_PATTERN, "$2")
-    .replace(ANSI_DIRECTIVE_PATTERN, "$2")
+    .replaceAll(ANSI_COLOR_TAG_PATTERN, "$2")
+    .replaceAll(ANSI_DIRECTIVE_PATTERN, "$2")
 }

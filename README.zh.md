@@ -62,6 +62,8 @@ pnpm test         # 运行一次 Vitest 测试套件
 pnpm typecheck    # 运行 Next.js 感知的 TypeScript 检查
 ```
 
+特性查询位于 `apps/web/components/properties`：查询 hook 管理 URL 状态和数据加载，筛选控件、结果和详情弹窗拆分为独立组件。它们共用的 HTTP 请求函数位于 `apps/web/lib/properties/fetcher.ts`，服务端数据集加载则保留在 `apps/web/lib/properties/data.ts`。
+
 > [!TIP]
 > `pnpm build` 分两个阶段执行：`build:content` 生成站点产物（文章 manifest、术语表和渲染后的内容），随后 `build:next` 基于这些产物构建站点。PDF 流程独立：`pnpm generate:pdf-html` 把这些产物转换为 `tools/pdfgen/html` 下的打印用 HTML，`pnpm build:pdf` 再据此输出 `tools/pdfgen/dist/gtmc-en.pdf` 和 `tools/pdfgen/dist/gtmc-zh.pdf`；`.github/workflows/pdf.yml` 会依次执行两步并将 PDF 发布到 R2。只需其中一个阶段时可单独运行。
 > Vite+ 仅补充 Next.js 工具链；本项目不使用属于 Vite 的 `vp dev` 和 `vp build`。直接调用 `vp` 时请在 `apps/web` 下执行，因为 `vite.config.ts` 位于该目录。

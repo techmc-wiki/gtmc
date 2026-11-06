@@ -47,6 +47,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.9,
       },
       {
+        url: `${base}/${locale}/properties`,
+        alternates: localizedAlternates(base, "/properties"),
+        changeFrequency: "monthly" as const,
+        priority: 0.8,
+      },
+      {
         url: `${base}/${locale}/pdf`,
         alternates: localizedAlternates(base, "/pdf"),
         changeFrequency: "monthly" as const,

@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           submodules: recursive
@@ -108,11 +108,11 @@ jobs:
 
       - name: Set up pnpm
         if: steps.change-check.outputs.should-build == 'true'
-        uses: pnpm/action-setup@v6.0.10
+        uses: pnpm/action-setup@v6.1.1
 
       - name: Set up Node.js
         if: steps.change-check.outputs.should-build == 'true'
-        uses: actions/setup-node@v7.0.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version: "26"
           cache: pnpm

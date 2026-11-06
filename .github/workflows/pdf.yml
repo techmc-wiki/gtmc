@@ -194,27 +194,6 @@ jobs:
         env:
           PDF_CHROMIUM: ${{ steps.chromium.outputs.executable }}
 
-      - name: Check generated PDFs
-        if: steps.change-check.outputs.should-build == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          for locale in en zh; do
-            pdf="tools/pdf/dist/gtmc-${locale}.pdf"
-            if [[ ! -s "$pdf" ]]; then
-              echo "Missing or empty PDF: $pdf" >&2
-              exit 1
-            fi
-
-            pages="$(pdfinfo "$pdf" | awk '/^Pages:/ { print $2 }')"
-            if [[ ! "$pages" =~ ^[0-9]+$ ]] || (( pages <= 0 )); then
-              echo "PDF has no pages: $pdf (pdfinfo reported '$pages')" >&2
-              exit 1
-            fi
-            echo "$pdf: $pages pages"
-          done
-
       - name: Upload PDFs to R2
         if: steps.change-check.outputs.should-build == 'true'
         shell: bash

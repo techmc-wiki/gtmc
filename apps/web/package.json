@@ -23,7 +23,6 @@
     "generate:contributors": "vpx scripts/generate-repository-contributor-stats.ts",
     "generate:glossary": "vpx scripts/generate-glossary-manifest.ts",
     "generate:manifest": "vpx scripts/generate-article-manifest.ts",
-    "generate:pdf-html": "vpx scripts/generate-pdf-html.ts",
     "lint": "vp lint",
     "lint:fix": "vp lint --fix",
     "postinstall": "vpx scripts/postinstall.ts",

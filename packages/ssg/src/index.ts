@@ -1,5 +1,4 @@
 export { generateArticleManifest } from "./generate-article-manifest";
-export { generatePdfHtml } from "./generate-pdf-html";
 export { generateArticleContent } from "./generate-article-content";
 export { renderMarkdownToHast, type PdfHastOptions } from "./markdown/pdf-hast";
 export {

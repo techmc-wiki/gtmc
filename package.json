@@ -2,7 +2,7 @@
   "name": "gtmc-workspace",
   "version": "2.9.0",
   "private": true,
-  "description": "GTMC monorepo root. The Next.js site lives in apps/web; the Go PDF renderer lives in tools/pdfgen.",
+  "description": "GTMC monorepo root. The Next.js site lives in apps/web; the Typst book PDF pipeline lives in tools/pdf.",
   "repository": {
     "type": "git",
     "url": "https://github.com/techmc-wiki/gtmc.git"
@@ -27,7 +27,6 @@
     "generate:contributors": "pnpm --filter @gtmc/web run generate:contributors",
     "generate:glossary": "pnpm --filter @gtmc/web run generate:glossary",
     "generate:manifest": "pnpm --filter @gtmc/web run generate:manifest",
-    "generate:pdf-html": "pnpm --filter @gtmc/web run generate:pdf-html",
     "glossary:init": "git submodule update --init --recursive content/glossary",
     "glossary:status": "git submodule status content/glossary",
     "glossary:update": "git submodule update --remote content/glossary",

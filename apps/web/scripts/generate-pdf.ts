@@ -1,634 +1,547 @@
 #!/usr/bin/env npx tsx
 
-import { execFileSync, execSync, spawnSync } from "node:child_process"
+import { execFileSync, spawn } from "node:child_process"
 import fs from "node:fs"
-import os from "node:os"
 import path from "node:path"
-import { createRequire } from "node:module"
+import readline from "node:readline"
 
 import enMessages from "@/messages/en.json"
 import zhMessages from "@/messages/zh.json"
-import { getArticleTree } from "@/lib/articles/manifest"
+import {
+  linearizeArticles,
+  type LinearizedArticle,
+} from "@/lib/articles/linearize"
+import { getArticleManifest, getArticleTree } from "@/lib/articles/manifest"
 import { preparePublicChapterNav } from "@/lib/articles/public-tree"
 import {
-  getArticleContentForPdf,
-  linearizeArticles,
-} from "@/lib/articles/linearize"
-import type { LinearizedArticle } from "@/lib/articles/linearize"
-import { artifactFilename } from "@gtmc/ssg/articles/content"
+  assembleBookPlan,
+  chapterArticles,
+  unescapeHtml,
+  type NumberedArticle,
+  type PdfLocale,
+} from "@/lib/pdf/document"
+import { ensurePdfFonts } from "@/lib/pdf/fonts"
+import { resolvePdfImages } from "@/lib/pdf/images"
+import { renderMermaidSvgs } from "@/lib/pdf/mermaid"
+import { writeTokensTypst } from "@/lib/pdf/tokens"
 import {
-  buildBodyHtml,
-  buildBookPlan,
-  buildCoverHtml,
-  formatChapterLabel,
-  getLabels,
-} from "@/lib/pdf/document"
-import type {
-  BookOptions,
-  BookPlan,
-  ChapterContent,
-  PdfLocale,
-} from "@/lib/pdf/document"
-import { resolveImagesInHtml } from "@/lib/pdf-images"
-import { fillTocFolios, haveTocFolioPagesChanged } from "@/lib/pdf/paginate"
-import { PDF_COLORS, PDF_REQUIRED_FONTS } from "@/lib/pdf/theme"
-import { hasLocalPdfFonts, pdfFontsDir, syncPdfFonts } from "@/lib/pdf/fonts"
-import { getWorkspaceRoot, workspacePath } from "@/lib/workspace-paths"
-import { createLogger } from "./lib/logger"
+  articleFileName,
+  renderArticleSource,
+  renderBookSource,
+} from "@/lib/pdf/typst-source"
+import {
+  hasExplicitUrlScheme,
+  resolveRelativeArticlePath,
+} from "@/lib/markdown/url-utils"
+import { workspacePath } from "@/lib/workspace-paths"
+import type { ArticleEntry } from "@gtmc/ssg/articles/types"
+import {
+  artifactFilename,
+  type ArticleContentArtifact,
+} from "@gtmc/ssg/articles/content"
+import {
+  collectAssets,
+  hastToTypst,
+  renderMarkdownToHast,
+  texToTypst,
+} from "@gtmc/ssg"
+import {
+  createRehypeShiki,
+  persistHighlightCache,
+  type RehypeShikiPlugin,
+} from "@gtmc/ssg/markdown/syntax/rehype-shiki"
+import { createLogger, describeError } from "./lib/logger"
 
 const logger = createLogger("pdf")
+const LOCALES: readonly PdfLocale[] = ["en", "zh"]
 const SOURCE_URL = "https://techmc.wiki"
-const PDFGEN_ENV = "PDFGEN_BIN"
-
 const PDF_MESSAGES = {
   en: enMessages.Pdf,
   zh: zhMessages.Pdf,
 } satisfies Record<
   PdfLocale,
-  {
-    bookTitle: string
-    bookSubtitle: string
-    slogan: string
-  }
+  { bookTitle: string; bookSubtitle: string; slogan: string }
 >
 
+const PDF_ROOT = workspacePath("tools", "pdf")
+const WORK_DIR = path.join(PDF_ROOT, "work")
+const DIST_DIR = path.join(PDF_ROOT, "dist")
+const TOKENS_FILE = path.join(WORK_DIR, "tokens.typ")
+const MERMAID_CACHE_DIR = path.join(WORK_DIR, ".cache", "mermaid")
+const ARTIFACTS_DIR = workspacePath("apps", "web", "data", "articles")
+// Not the site's `.shiki-cache.json`: the site pipeline spaces CJK/Latin runs inside
+// cached code highlights, which would no longer match the source the emitter checks.
+const HIGHLIGHT_CACHE_FILE = path.join(WORK_DIR, ".cache", "shiki.json")
+// Article routes as the site serves them: `/articles/<slug>` and `/<locale>/articles/<slug>`.
+const ARTICLE_ROUTE = /^\/(?:(?:en|zh)\/)?articles\/(.+?)\/?$/
+
+type LinkResolver = (href: string) => string | null
+
 interface CliOptions {
-  locale: PdfLocale | "all"
-  output: string
+  locales: PdfLocale[]
+  output: string | null
 }
 
-interface PdfgenReport {
-  pages: number
-  dests: Record<string, number>
+interface SharedContext {
+  fontsDir: string
+  generatedDate: string
+  manifest: Record<string, ArticleEntry>
+  revision: string | null
+  shikiPlugin: RehypeShikiPlugin
 }
 
-interface OutlineNode {
-  title: string
-  page: number
-  children: OutlineNode[]
+interface LocaleContext {
+  locale: PdfLocale
+  assetsDir: string
+  manifest: Record<string, ArticleEntry>
+  shikiPlugin: RehypeShikiPlugin
 }
 
-let resolvedPdfgen: string | undefined
-let pdfgenBuildDir: string | undefined
-let syncedPdfFontsDir: string | null = null
+interface PreparedArticle {
+  article: LinearizedArticle
+  /** Source file in the book's locale; relative links and images resolve against it. */
+  filePath: string | null
+  missingImages: number
+  /** `title` is the exact string passed to `#article(title:)`; the emitter drops a body heading equal to it. */
+  emit: (title: string, resolveArticleLink: LinkResolver) => string
+}
 
-function getArticlesRevision(): string | undefined {
+/** The articles in the book, and the source file of each in either locale. */
+interface BookIndex {
+  slugs: ReadonlySet<string>
+  slugByFile: ReadonlyMap<string, string>
+}
+
+function parseArgs(argv: readonly string[]): CliOptions {
+  const locales: PdfLocale[] = []
+  let output: string | null = null
+
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i]
+    const value: string | undefined = argv[i + 1]
+    if (arg === "--") continue
+    if (arg === "--locale") {
+      if (value !== "en" && value !== "zh") {
+        throw new Error(`--locale expects en or zh, got ${value ?? "nothing"}`)
+      }
+      if (!locales.includes(value)) locales.push(value)
+    } else if (arg === "--output" && value !== undefined) {
+      output = path.resolve(process.cwd(), value)
+    } else {
+      throw new Error(`Unknown or incomplete argument: ${arg}`)
+    }
+    i++
+  }
+
+  if (output !== null && locales.length !== 1) {
+    throw new Error("--output needs exactly one --locale")
+  }
+  return { locales: locales.length > 0 ? locales : [...LOCALES], output }
+}
+
+function getArticlesRevision(): string | null {
   try {
-    return execSync("git rev-parse --short=7 HEAD", {
+    return execFileSync("git", ["rev-parse", "--short=7", "HEAD"], {
       cwd: workspacePath("content", "articles"),
       encoding: "utf-8",
+      stdio: ["ignore", "pipe", "ignore"],
     }).trim()
   } catch {
-    return undefined
+    return null
   }
 }
 
-function parseArgs(): CliOptions {
-  const args = process.argv.slice(2)
-  let locale: PdfLocale | "all" = "all"
-  let output = ""
-
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i]
-    if (arg === "--locale" && i + 1 < args.length) {
-      const value = args[i + 1].toLowerCase()
-      if (value === "en" || value === "zh" || value === "all") locale = value
-      i++
-    } else if (arg === "--output" && i + 1 < args.length) {
-      output = path.resolve(process.cwd(), args[i + 1])
-      i++
-    }
-  }
-
-  return { locale, output }
-}
-
-function findOnPath(command: string): string | undefined {
-  const result = spawnSync("which", [command], {
-    encoding: "utf-8",
-    stdio: ["ignore", "pipe", "ignore"],
-  })
-  if (result.status !== 0) return undefined
-  const resolved = result.stdout.trim()
-  return resolved || undefined
-}
-
-// Resolve PDFGEN_BIN, then PATH, then build the local Go module into a temporary directory.
-function resolvePdfgen(): string {
-  if (resolvedPdfgen) return resolvedPdfgen
-
-  const configured = process.env[PDFGEN_ENV]
-  if (configured) {
-    resolvedPdfgen = configured
-    return configured
-  }
-
-  const onPath = findOnPath("pdfgen")
-  if (onPath) {
-    resolvedPdfgen = onPath
-    return onPath
-  }
-
-  pdfgenBuildDir = fs.mkdtempSync(path.join(os.tmpdir(), "gtmc-pdfgen-"))
-  const builtPath = path.join(pdfgenBuildDir, "pdfgen")
-  logger.event("pdfgen.build.started", { output: builtPath })
-  const goProject = fs.existsSync(workspacePath("tools", "pdfgen", "go.mod"))
+function readArtifact(slug: string, locale: PdfLocale): ArticleContentArtifact {
+  const artifactPath = path.join(
+    ARTIFACTS_DIR,
+    locale,
+    `${artifactFilename(slug)}.json`
+  )
+  let artifact: ArticleContentArtifact
   try {
-    const args = goProject
-      ? ["build", "-C", workspacePath("tools", "pdfgen"), "-o", builtPath, "."]
-      : ["build", "-o", builtPath, "./tools/pdfgen"]
-    execFileSync("go", args, {
-      cwd: getWorkspaceRoot(),
-      stdio: "inherit",
-    })
+    artifact = JSON.parse(
+      fs.readFileSync(artifactPath, "utf-8")
+    ) as ArticleContentArtifact
   } catch (error) {
     throw new Error(
-      `Unable to find pdfgen in PATH or build the pdfgen Go module: ${String(error)}`,
+      `Unreadable article artifact ${artifactPath}: ${describeError(error)}. Run pnpm build:content first.`,
       { cause: error }
     )
   }
-  resolvedPdfgen = builtPath
-  logger.event("pdfgen.build.completed", { output: builtPath })
-  return builtPath
-}
-
-function commonPdfgenArgs(): string[] {
-  const args = ["--fonts", PDF_REQUIRED_FONTS.join(",")]
-  // Resolve through Node rather than a cwd-relative path: pnpm links
-  // node_modules per workspace package, and this script may be invoked from
-  // anywhere via `pnpm --filter`.
-  try {
-    args.push(
-      "--mermaid-js",
-      createRequire(import.meta.url).resolve("mermaid/dist/mermaid.min.js")
-    )
-  } catch {
-    // Mermaid is optional for the render; fall back to no diagram bundle.
+  if (typeof artifact.content !== "string") {
+    throw new Error(`Article artifact has no content: ${artifactPath}`)
   }
-
-  const chromiumPath =
-    process.env.PDFGEN_CHROMIUM ??
-    process.env.CHROMIUM_PATH ??
-    process.env.CHROMIUM
-  if (chromiumPath) args.push("--chromium", chromiumPath)
-
-  return args
+  return artifact
 }
 
-function runPdfgen(args: string[], report = false): PdfgenReport | undefined {
-  const binary = resolvePdfgen()
-  const result = spawnSync(binary, args, {
-    cwd: process.cwd(),
-    encoding: "utf-8",
-    stdio: ["ignore", "pipe", "pipe"],
+function sourceFileOf(
+  manifest: Record<string, ArticleEntry>,
+  slug: string,
+  locale: PdfLocale,
+  fallback: string | null
+): string | null {
+  const entry: ArticleEntry | undefined = manifest[slug]
+  return entry?.localizedFilePaths[locale] ?? fallback
+}
+
+async function prepareArticle(
+  article: LinearizedArticle,
+  ctx: LocaleContext
+): Promise<PreparedArticle> {
+  const artifact = readArtifact(article.slug, ctx.locale)
+  const root = await renderMarkdownToHast(artifact.content, {
+    articleSlug: article.slug,
+    codeReferences: artifact.codeReferences,
+    locale: ctx.locale,
+    shikiPlugin: ctx.shikiPlugin,
   })
-  if (result.error) {
-    throw new Error(`pdfgen failed to start: ${result.error.message}`)
-  }
-  if (result.status !== 0) {
-    const detail = [result.stderr.trim(), result.stdout.trim()]
-      .filter(Boolean)
-      .join("\n")
-    throw new Error(`pdfgen ${args[0] ?? "command"} failed: ${detail}`)
-  }
-  if (!report) return undefined
-
-  const lines = result.stdout
-    .trim()
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-  const lastLine = lines.at(-1)
-  if (!lastLine) throw new Error("pdfgen render did not report page data")
-
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(lastLine)
-  } catch (error) {
-    throw new Error(
-      `pdfgen render returned invalid report JSON: ${String(error)}`,
-      {
-        cause: error,
-      }
-    )
-  }
-  if (
-    !parsed ||
-    typeof parsed !== "object" ||
-    Array.isArray(parsed) ||
-    !("pages" in parsed) ||
-    !("dests" in parsed)
-  ) {
-    throw new Error("pdfgen render report is not an object")
-  }
-  const pages = parsed.pages
-  const rawDests = parsed.dests
-  if (
-    typeof pages !== "number" ||
-    !Number.isInteger(pages) ||
-    pages < 0 ||
-    !rawDests ||
-    typeof rawDests !== "object" ||
-    Array.isArray(rawDests)
-  ) {
-    throw new Error("pdfgen render report has an invalid pages/dests shape")
-  }
-
-  const dests: Record<string, number> = {}
-  for (const [anchor, page] of Object.entries(rawDests)) {
-    if (typeof page !== "number" || !Number.isInteger(page) || page < 0) {
-      throw new Error(`pdfgen render reported an invalid page for ${anchor}`)
-    }
-    dests[anchor] = page
-  }
-
-  return { pages, dests }
-}
-
-function pdfgenPages(pdfPath: string): number {
-  const binary = resolvePdfgen()
-  const pageResult = spawnSync(binary, ["pages", pdfPath], {
-    cwd: process.cwd(),
-    encoding: "utf-8",
-    stdio: ["ignore", "pipe", "pipe"],
+  const assets = collectAssets(root)
+  const filePath = sourceFileOf(
+    ctx.manifest,
+    article.slug,
+    ctx.locale,
+    article.filePath
+  )
+  const images = await resolvePdfImages(assets.images, {
+    articleFilePath: filePath,
+    outDir: ctx.assetsDir,
+    locale: ctx.locale,
   })
-  if (pageResult.error || pageResult.status !== 0) {
-    throw new Error(
-      `pdfgen pages failed: ${pageResult.stderr?.trim() || pageResult.error?.message || "unknown error"}`
-    )
+  const mermaid = await renderMermaidSvgs(assets.mermaid, {
+    outDir: ctx.assetsDir,
+    cacheDir: MERMAID_CACHE_DIR,
+  })
+  return {
+    article,
+    filePath,
+    missingImages: [...images.values()].filter((asset) => "missing" in asset)
+      .length,
+    emit: (title, resolveArticleLink) =>
+      hastToTypst(root, {
+        articleSlug: article.slug,
+        locale: ctx.locale,
+        title,
+        resolveArticleLink,
+        assets: {
+          image: (src: string) => images.get(src) ?? null,
+          mermaid: (source: string) => mermaid.get(source) ?? null,
+        },
+        math: texToTypst,
+      }),
   }
-  const lines = pageResult.stdout
-    .trim()
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-  const lastLine = lines.at(-1)
-  if (!lastLine) throw new Error("pdfgen pages returned no JSON")
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(lastLine)
-  } catch (error) {
-    throw new Error(`pdfgen pages returned invalid JSON: ${String(error)}`, {
-      cause: error,
-    })
-  }
-  if (
-    !parsed ||
-    typeof parsed !== "object" ||
-    Array.isArray(parsed) ||
-    !("pages" in parsed) ||
-    typeof parsed.pages !== "number" ||
-    !Number.isInteger(parsed.pages) ||
-    parsed.pages < 0
-  ) {
-    throw new Error("pdfgen pages returned an invalid response")
-  }
-  return parsed.pages
 }
 
-async function analyzeArticles(
-  articles: LinearizedArticle[],
-  locale: PdfLocale
-): Promise<{
-  codeLangs: string[]
-  hasMath: boolean
-}> {
-  const allLangs = new Set<string>()
-  let hasMath = false
-
-  await Promise.all(
-    articles.map(async (article) => {
-      const body = await getArticleContentForPdf(article.slug, locale).catch(
-        () => null
+function indexBook(
+  slugs: ReadonlySet<string>,
+  manifest: Record<string, ArticleEntry>
+): BookIndex {
+  const slugByFile = new Map<string, string>()
+  for (const slug of slugs) {
+    const entry: ArticleEntry | undefined = manifest[slug]
+    if (entry === undefined) {
+      throw new Error(
+        `Book article ${slug} is missing from the article manifest`
       )
-      if (!body) return
-
-      for (const match of body.matchAll(/^```(\w+)/gm)) {
-        const lang = match[1].toLowerCase()
-        if (
-          lang !== "" &&
-          lang !== "text" &&
-          lang !== "plain" &&
-          lang !== "mermaid"
-        ) {
-          allLangs.add(lang)
-        }
-      }
-      if (body.includes("$") || body.includes("\\(") || body.includes("\\[")) {
-        hasMath = true
-      }
-    })
-  )
-
-  return { codeLangs: [...allLangs], hasMath }
-}
-
-function loadPdfHtmlSidecar(slug: string, locale: PdfLocale): string {
-  const sidecarPath = path.join(
-    workspacePath("tools", "pdfgen", "html"),
-    locale,
-    `${artifactFilename(slug)}.html`
-  )
-  try {
-    return fs.readFileSync(sidecarPath, "utf-8")
-  } catch {
-    throw new Error(
-      `Missing PDF HTML sidecar: ${sidecarPath}. Run pnpm generate:pdf-html first.`
-    )
-  }
-}
-
-function createRenderArticle(
-  locale: PdfLocale,
-  sourceCounters: { cached: number }
-): BookOptions["renderArticle"] {
-  return async (article: LinearizedArticle): Promise<string> => {
-    const html = loadPdfHtmlSidecar(article.slug, locale)
-    sourceCounters.cached++
-    return resolveImagesInHtml(html, article.filePath)
-  }
-}
-
-function buildOutlineTree(
-  plan: BookPlan,
-  anchorPages: Map<string, number>,
-  locale: PdfLocale
-): OutlineNode[] {
-  const root: OutlineNode[] = [
-    { title: getLabels(locale).tocTitle, page: 0, children: [] },
-  ]
-  const pageOf = (anchor: string): number | undefined => anchorPages.get(anchor)
-
-  for (const entry of plan.preface) {
-    const page = pageOf(`article-${entry.article.slug}`)
-    if (page === undefined) continue
-    root.push({ title: entry.article.title, page, children: [] })
-  }
-
-  function outlineContent(content: ChapterContent[]): OutlineNode[] {
-    const children: OutlineNode[] = []
-    for (const item of content) {
-      if (item.kind === "article") {
-        const page = pageOf(`article-${item.entry.article.slug}`)
-        if (page !== undefined) {
-          const prefix = item.entry.number ? `${item.entry.number}  ` : ""
-          children.push({
-            title: `${prefix}${item.entry.article.title}`,
-            page,
-            children: [],
-          })
-        }
-        continue
-      }
-
-      const nested = outlineContent(item.content)
-      const firstDescendant = nested[0]
-      if (firstDescendant) {
-        children.push({
-          title: item.title,
-          page: firstDescendant.page,
-          children: nested,
-        })
-      }
     }
-    return children
+    for (const file of [
+      entry.filePath,
+      ...Object.values(entry.localizedFilePaths),
+    ]) {
+      if (file) slugByFile.set(file.replaceAll("\\", "/"), slug)
+    }
   }
-
-  for (const chapter of plan.chapters) {
-    const page = pageOf(`chapter-${chapter.slug}`)
-    if (page === undefined) continue
-    root.push({
-      title: `${formatChapterLabel(locale, chapter.number, chapter.isAppendix)}: ${chapter.title}`,
-      page,
-      children: outlineContent(chapter.content),
-    })
-  }
-
-  return root
+  return { slugs, slugByFile }
 }
 
-function writeBodyHtml(workDir: string, html: string, pass: string): string {
-  const filePath = path.join(workDir, `body-${pass}.html`)
-  fs.writeFileSync(filePath, html, "utf-8")
-  return filePath
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
 }
 
-async function runPdf(
+// A bare `x.md` link means the book's own locale when that file exists, then the other locale.
+function sourceFileCandidates(file: string, locale: PdfLocale): string[] {
+  if (!/\.md$/i.test(file)) return []
+  if (/\.(?:zh|en)\.md$/i.test(file)) return [file]
+  const stem = file.slice(0, -".md".length)
+  return [file, `${stem}.${locale}.md`, `${stem}.zh.md`, `${stem}.en.md`]
+}
+
+function resolveTarget(
+  decodedPath: string,
+  articleFile: string,
   locale: PdfLocale,
-  requestedOutput: string
-): Promise<void> {
-  const startedAt = performance.now()
-  const output =
-    requestedOutput ||
-    path.join(workspacePath("tools", "pdfgen", "dist"), `gtmc-${locale}.pdf`)
-  fs.mkdirSync(path.dirname(output), { recursive: true })
-  logger.event("pdf.started", { locale, output })
+  index: BookIndex
+): string | null {
+  if (decodedPath.startsWith("/")) {
+    const route = ARTICLE_ROUTE.exec(decodedPath)
+    if (route === null) return null
+    const slug = route[1].replace(/\.md$/i, "")
+    return index.slugs.has(slug) ? slug : null
+  }
 
+  const file = resolveRelativeArticlePath(articleFile, decodedPath)
+  for (const candidate of sourceFileCandidates(file, locale)) {
+    const slug = index.slugByFile.get(candidate)
+    if (slug !== undefined) return slug
+  }
+  return null
+}
+
+/**
+ * Maps a raw body href to an xref id for the book. The href arrives percent-encoded,
+ * so the path and the anchor are decoded separately. Anything that does not name an
+ * article in the book returns null and prints as plain text.
+ */
+function createLinkResolver(
+  articleFile: string | null,
+  locale: PdfLocale,
+  index: BookIndex
+): LinkResolver {
+  return (href) => {
+    // In-article anchors and external URLs are not article links.
+    if (href.startsWith("#") || hasExplicitUrlScheme(href)) return null
+    const hash = href.indexOf("#")
+    const target = resolveTarget(
+      safeDecode(hash === -1 ? href : href.slice(0, hash)),
+      articleFile ?? "",
+      locale,
+      index
+    )
+    if (target === null || hash === -1) return target
+    const anchor = safeDecode(href.slice(hash + 1))
+    return anchor === "" ? target : `${target}#${anchor}`
+  }
+}
+
+function writeArticle(
+  dir: string,
+  entry: NumberedArticle,
+  body: string,
+  preface: boolean
+): void {
+  fs.writeFileSync(
+    path.join(dir, articleFileName(entry.article.slug)),
+    renderArticleSource(entry, body, preface),
+    "utf-8"
+  )
+}
+
+function outputTargets(
+  locale: PdfLocale,
+  output: string | null
+): { pdf: string; cover: string } {
+  if (output === null) {
+    return {
+      pdf: path.join(DIST_DIR, `gtmc-${locale}.pdf`),
+      cover: path.join(DIST_DIR, `gtmc-${locale}.cover.png`),
+    }
+  }
+  const { dir, name } = path.parse(output)
+  return { pdf: output, cover: path.join(dir, `${name}.cover.png`) }
+}
+
+function typstArgs(
+  fontsDir: string,
+  input: string,
+  output: string,
+  extra: readonly string[] = []
+): string[] {
+  return [
+    "compile",
+    "--root",
+    PDF_ROOT,
+    "--font-path",
+    fontsDir,
+    "--ignore-system-fonts",
+    ...extra,
+    input,
+    output,
+  ]
+}
+
+// Diagnostics stream through with the locale prefixed; a non-zero exit rejects.
+function runTypst(locale: PdfLocale, args: readonly string[]): Promise<void> {
+  const binary = process.env.TYPST_BIN || "typst"
+  const { promise, resolve, reject } = Promise.withResolvers<void>()
+  const child = spawn(binary, args, { stdio: ["ignore", "pipe", "pipe"] })
+  readline.createInterface({ input: child.stdout }).on("line", (line) => {
+    process.stdout.write(`[${locale}] ${line}\n`)
+  })
+  readline.createInterface({ input: child.stderr }).on("line", (line) => {
+    process.stderr.write(`[${locale}] ${line}\n`)
+  })
+  child.once("error", (error) => {
+    reject(
+      new Error(
+        `Unable to run ${binary}: ${error.message}. Install Typst (brew install typst) or set TYPST_BIN.`,
+        { cause: error }
+      )
+    )
+  })
+  child.once("close", (code) => {
+    if (code === 0) resolve()
+    else {
+      reject(
+        new Error(`${binary} ${args[0]} for ${locale} exited with code ${code}`)
+      )
+    }
+  })
+  return promise
+}
+
+async function buildLocale(
+  locale: PdfLocale,
+  output: string | null,
+  shared: SharedContext
+): Promise<number> {
+  logger.event("pdf.started", { locale })
   const tree = preparePublicChapterNav(await getArticleTree(locale))
-  if (!tree || tree.length === 0) {
+  if (tree.length === 0) {
     logger.warn("pdf.skipped", { locale, reason: "empty-article-tree" })
-    return
+    return 0
   }
 
   const linearized = await linearizeArticles(tree)
-  const { codeLangs, hasMath } = await analyzeArticles(linearized, locale)
-  const plan = buildBookPlan(
-    linearized.filter((article) =>
-      loadPdfHtmlSidecar(article.slug, locale).trim()
-    )
-  )
-  logger.event("pdf.content.analyzed", {
-    article_count: linearized.length,
-    chapter_count: plan.chapters.length,
-    code_language_count: codeLangs.length,
-    has_math: hasMath,
+  const localeDir = path.join(WORK_DIR, locale)
+  const articlesDir = path.join(localeDir, "articles")
+  const assetsDir = path.join(localeDir, "assets")
+  fs.rmSync(localeDir, { recursive: true, force: true })
+  fs.mkdirSync(articlesDir, { recursive: true })
+  fs.mkdirSync(assetsDir, { recursive: true })
+
+  // Sequential: each renderMermaidSvgs call may launch Chromium for uncached diagrams.
+  const ctx: LocaleContext = {
     locale,
-    tree_entry_count: linearized.length,
+    assetsDir,
+    manifest: shared.manifest,
+    shikiPlugin: shared.shikiPlugin,
+  }
+  const prepared = new Map<string, PreparedArticle>()
+  for (const article of linearized) {
+    prepared.set(article.slug, await prepareArticle(article, ctx))
+  }
+
+  // Emptiness does not depend on link targets, so the book's shape is fixed before any link resolves.
+  const hasBody = new Set<string>()
+  for (const item of prepared.values()) {
+    const body = item.emit(unescapeHtml(item.article.title), () => null)
+    if (body.trim() !== "") hasBody.add(item.article.slug)
+  }
+  const plan = assembleBookPlan(linearized, (slug) => hasBody.has(slug))
+  const chapterEntries = plan.chapters.flatMap(chapterArticles)
+  const included = [...plan.preface, ...chapterEntries]
+  const index = indexBook(
+    new Set(included.map((entry) => entry.article.slug)),
+    shared.manifest
+  )
+
+  let missingImages = 0
+  const writeEntry = (entry: NumberedArticle, preface: boolean): void => {
+    const item = prepared.get(entry.article.slug)
+    if (item === undefined) {
+      throw new Error(`No prepared article for ${entry.article.slug}`)
+    }
+    missingImages += item.missingImages
+    const body = item.emit(
+      entry.article.title,
+      createLinkResolver(item.filePath, locale, index)
+    )
+    writeArticle(articlesDir, entry, body, preface)
+  }
+  for (const entry of plan.preface) writeEntry(entry, true)
+  for (const entry of chapterEntries) writeEntry(entry, false)
+  logger.event("pdf.content.emitted", {
+    locale,
+    article_count: included.length,
+    omitted_count: linearized.length - included.length,
   })
 
   const messages = PDF_MESSAGES[locale]
-  const sourceCounters = { cached: 0 }
-  const bookOptions = {
-    title: messages.bookTitle,
-    subtitle: messages.bookSubtitle,
-    tagline: messages.slogan,
-    locale,
-    generatedDate: new Date().toISOString().split("T")[0],
-    articlesRevision: getArticlesRevision(),
-    sourceUrl: SOURCE_URL,
-    hasMath,
-    fontsHref: syncedPdfFontsDir ? "fonts/fonts.css" : undefined,
-    renderArticle: createRenderArticle(locale, sourceCounters),
-  }
-
-  const coverHtml = buildCoverHtml(bookOptions)
-  const { html: bodyHtml, plan: effectivePlan } = await buildBodyHtml(
-    bookOptions,
-    plan
-  )
-  logger.event("pdf.html.source", {
-    locale,
-    cached: sourceCounters.cached,
-  })
-  logger.event("pdf.html.generated", {
-    locale,
-    size_mb: (bodyHtml.length / 1024 / 1024).toFixed(1),
-  })
-
-  const workRoot = workspacePath("tools", "pdfgen", "work")
-  fs.mkdirSync(workRoot, { recursive: true })
-  const workDir = fs.mkdtempSync(path.join(workRoot, `gtmc-pdf-${locale}-`))
-  const coverHtmlPath = path.join(workDir, "cover.html")
-  const bodyHtmlPath = path.join(workDir, "body.html")
-  const coverPdfPath = path.join(workDir, "cover.pdf")
-  const bodyPdfPath = path.join(workDir, "body.pdf")
-  const outlinesPath = path.join(workDir, "outlines.json")
-  if (syncedPdfFontsDir) {
-    fs.cpSync(syncedPdfFontsDir, path.join(workDir, "fonts"), {
-      recursive: true,
-    })
-  }
-  fs.writeFileSync(coverHtmlPath, coverHtml, "utf-8")
-  fs.writeFileSync(bodyHtmlPath, bodyHtml, "utf-8")
-
-  try {
-    runPdfgen([
-      "render",
-      "--html",
-      coverHtmlPath,
-      "--out",
-      coverPdfPath,
-      ...commonPdfgenArgs(),
-    ])
-
-    const renderBody = (html: string, pass: string): PdfgenReport => {
-      const htmlPath =
-        pass === "empty" ? bodyHtmlPath : writeBodyHtml(workDir, html, pass)
-      const report = runPdfgen(
-        [
-          "render",
-          "--html",
-          htmlPath,
-          "--out",
-          bodyPdfPath,
-          "--report-pages",
-          "--report-dests",
-          "--header-footer",
-          ...commonPdfgenArgs(),
-        ],
-        true
-      )
-      if (!report) throw new Error("pdfgen did not return a body report")
-      return report
-    }
-
-    // One measurement pass fills the TOC; up to two correction passes converge it before pdfgen merges the cover.
-    const pass1 = renderBody(bodyHtml, "empty")
-    const pass1Pages = new Map(Object.entries(pass1.dests))
-    const filledPass1 = fillTocFolios(bodyHtml, pass1Pages)
-    if (filledPass1.missing.length > 0) {
-      logger.warn(
-        "pdf.toc.anchors-missing",
-        { count: filledPass1.missing.length, locale },
-        filledPass1.missing.slice(0, 3).join(", ")
-      )
-    }
-    let finalReport = renderBody(filledPass1.html, "filled-1")
-    const pass2Pages = new Map(Object.entries(finalReport.dests))
-    if (haveTocFolioPagesChanged(bodyHtml, pass1Pages, pass2Pages)) {
-      const filledPass2 = fillTocFolios(bodyHtml, pass2Pages)
-      finalReport = renderBody(filledPass2.html, "filled-2")
-      const pass3Pages = new Map(Object.entries(finalReport.dests))
-      if (haveTocFolioPagesChanged(bodyHtml, pass2Pages, pass3Pages)) {
-        throw new Error(
-          "[pdf] TOC folios did not converge after the final pass"
-        )
-      }
-    }
-
-    const finalAnchorPages = new Map(Object.entries(finalReport.dests))
-    fs.writeFileSync(
-      outlinesPath,
-      `${JSON.stringify(buildOutlineTree(effectivePlan, finalAnchorPages, locale))}\n`,
-      "utf-8"
-    )
-
-    runPdfgen([
-      "postprocess",
-      "--cover",
-      coverPdfPath,
-      "--body",
-      bodyPdfPath,
-      "--out",
-      output,
-      "--outlines",
-      outlinesPath,
-      "--background",
-      PDF_COLORS.paper,
-      "--title",
-      `${messages.bookTitle}: ${messages.bookSubtitle}`,
-      "--subject",
-      messages.slogan,
-      "--author",
-      "The GTMC community",
-    ])
-
-    const coverPages = pdfgenPages(coverPdfPath)
-    const finalPages = pdfgenPages(output)
-    logger.event("pdf.generated", {
-      body_pages: finalReport.pages,
-      cover_pages: coverPages,
-      duration_ms: Math.round(performance.now() - startedAt),
+  const bookPath = path.join(localeDir, "book.typ")
+  fs.writeFileSync(
+    bookPath,
+    renderBookSource({
       locale,
-      output,
-      page_count: finalPages,
-      size_mb: (fs.statSync(output).size / 1024 / 1024).toFixed(1),
-    })
-  } catch (error) {
-    throw new Error(`[pdf] PDF generation failed: ${String(error)}`, {
-      cause: error,
-    })
-  } finally {
-    fs.rmSync(workDir, { recursive: true, force: true })
-  }
+      title: messages.bookTitle,
+      subtitle: messages.bookSubtitle,
+      tagline: messages.slogan,
+      date: shared.generatedDate,
+      revision: shared.revision,
+      sourceUrl: SOURCE_URL,
+      articleCount: chapterEntries.length,
+      preface: plan.preface,
+      chapters: plan.chapters,
+    }),
+    "utf-8"
+  )
+
+  const targets = outputTargets(locale, output)
+  fs.mkdirSync(path.dirname(targets.pdf), { recursive: true })
+  // A failed compile must not leave the previous edition behind.
+  fs.rmSync(targets.pdf, { force: true })
+  fs.rmSync(targets.cover, { force: true })
+
+  await runTypst(locale, typstArgs(shared.fontsDir, bookPath, targets.pdf))
+  await runTypst(
+    locale,
+    typstArgs(shared.fontsDir, bookPath, targets.cover, [
+      "--format",
+      "png",
+      "--pages",
+      "1",
+      "--ppi",
+      "144",
+    ])
+  )
+
+  logger.event("pdf.generated", {
+    locale,
+    output: targets.pdf,
+    size_mb: (fs.statSync(targets.pdf).size / 1024 / 1024).toFixed(1),
+  })
+  return missingImages
 }
 
 async function main(): Promise<void> {
-  const { locale, output } = parseArgs()
-  try {
-    if (hasLocalPdfFonts()) {
-      logger.event("pdf.fonts.local", {})
-    } else {
-      await syncPdfFonts()
-      logger.event("pdf.fonts.synced", {})
-    }
-    syncedPdfFontsDir = pdfFontsDir()
-  } catch (error) {
-    logger.warn(
-      "pdf.fonts.fallback",
-      {},
-      `Local font sync failed (${String(error)}); rendering will use the Google Fonts CDN.`
-    )
+  const { locales, output } = parseArgs(process.argv.slice(2))
+  const shared: SharedContext = {
+    fontsDir: await ensurePdfFonts(),
+    generatedDate: new Date().toISOString().split("T")[0],
+    manifest: await getArticleManifest(),
+    revision: getArticlesRevision(),
+    shikiPlugin: await createRehypeShiki(HIGHLIGHT_CACHE_FILE),
   }
+  await writeTokensTypst(TOKENS_FILE)
 
-  try {
-    if (locale === "all") {
-      await Promise.all([runPdf("en", ""), runPdf("zh", "")])
-    } else {
-      await runPdf(locale, output)
-    }
-  } catch (error) {
-    logger.error(
-      "pdf.failed",
-      {},
-      error instanceof Error ? (error.stack ?? error.message) : String(error)
-    )
-    process.exitCode = 1
-  } finally {
-    if (pdfgenBuildDir) {
-      fs.rmSync(pdfgenBuildDir, { recursive: true, force: true })
+  // Locales build one after another: both read and write the shared image and Mermaid caches.
+  let missingImages = 0
+  let failures = 0
+  for (const locale of locales) {
+    try {
+      missingImages += await buildLocale(locale, output, shared)
+    } catch (error) {
+      failures += 1
+      logger.error("pdf.failed", { locale }, describeError(error))
     }
   }
+  persistHighlightCache(HIGHLIGHT_CACHE_FILE)
+
+  if (missingImages > 0) {
+    logger.warn(
+      "pdf.images.missing",
+      { count: missingImages },
+      "Remote images that could not be downloaded print as placeholders; the warnings above name each source."
+    )
+  } else {
+    logger.event("pdf.images.missing", { count: 0 })
+  }
+  if (failures > 0) process.exitCode = 1
 }
 
-void main()
+void main().catch((error: unknown) => {
+  logger.error("pdf.failed", {}, describeError(error))
+  process.exitCode = 1
+})

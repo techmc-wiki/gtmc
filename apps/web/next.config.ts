@@ -67,6 +67,7 @@ const nextConfig: NextConfig = {
     ],
   },
   cacheComponents: true,
+  partialPrefetching: true,
   redirects() {
     return [
       {

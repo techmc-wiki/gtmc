@@ -91,6 +91,9 @@ const ScrollProgress = ({
   const openRef = React.useRef<HTMLDivElement>(null)
   const labelRef = React.useRef<HTMLSpanElement>(null)
   const rootRef = React.useRef<HTMLDivElement>(null)
+  const triggerRef = React.useRef<HTMLButtonElement>(null)
+  const listRef = React.useRef<HTMLUListElement>(null)
+  const restoreFocus = React.useRef(false)
 
   const [collapsedSize, setCollapsedSize] = React.useState<Size>()
   const [openSize, setOpenSize] = React.useState<Size>()
@@ -128,13 +131,27 @@ const ScrollProgress = ({
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
     }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false)
+      if (e.key === "Escape") {
+        restoreFocus.current = true
+        setOpen(false)
+      }
     }
     document.addEventListener("pointerdown", onPointer)
     document.addEventListener("keydown", onKey)
     return () => {
       document.removeEventListener("pointerdown", onPointer)
       document.removeEventListener("keydown", onKey)
+    }
+  }, [open])
+
+  React.useEffect(() => {
+    if (open) {
+      listRef.current
+        ?.querySelector<HTMLButtonElement>("[data-active]")
+        ?.focus({ preventScroll: true })
+    } else if (restoreFocus.current) {
+      restoreFocus.current = false
+      triggerRef.current?.focus({ preventScroll: true })
     }
   }, [open])
 
@@ -151,6 +168,7 @@ const ScrollProgress = ({
     )
 
     setActiveId(id)
+    restoreFocus.current = true
     setOpen(false)
     sections
       .find((section) => section.id === id)
@@ -213,6 +231,7 @@ const ScrollProgress = ({
             {open ? (
               <motion.ul
                 key="list"
+                ref={listRef}
                 className="absolute inset-0 flex flex-col overflow-y-auto p-1.5"
                 initial={{
                   opacity: 0,
@@ -230,6 +249,7 @@ const ScrollProgress = ({
                     <li key={s.id}>
                       <button
                         type="button"
+                        data-active={isActive || undefined}
                         onClick={() => selectSection(s.id)}
                         className={cn(
                           "relative flex min-h-11 w-full items-center gap-3 rounded-[14px] px-3 py-2 text-left text-sm font-medium leading-none transition-colors",
@@ -290,6 +310,7 @@ const ScrollProgress = ({
             ) : (
               <motion.button
                 key="pill"
+                ref={triggerRef}
                 type="button"
                 onClick={() => setOpen(true)}
                 aria-label={ariaLabel}

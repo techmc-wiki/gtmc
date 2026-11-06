@@ -26,8 +26,9 @@ export function elementsOf(nodes: readonly RootContent[]): Element[] {
 
 export function textOf(node: Root | RootContent): string {
   if (node.type === "text") return node.value
-  if (node.type === "element" || node.type === "root")
+  if (node.type === "element" || node.type === "root") {
     return node.children.map(textOf).join("")
+  }
   return ""
 }
 

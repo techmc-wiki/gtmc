@@ -1,125 +1,101 @@
 # AGENTS.md
 
-Agent context for the **GTMC website**, the public site for Graduate Texts in Minecraft (reader surfaces, drafts workspace, GitHub PR integration).
-
-The site is live at <https://www.techmc.wiki>. The infra was provided by Vercel and DNS by Cloudflare.
+Agent context for the **GTMC website** (Graduate Texts in Minecraft), live at <https://www.techmc.wiki> (Vercel infra, Cloudflare DNS).
 
 ## Stack
 
 - Next.js 16 (App Router, Turbopack) on React 19, TypeScript strict mode
-- Tailwind CSS v4 (tokens in `DESIGN.md` / `app/globals.css`); shadcn/ui primitives in `components/ui/shadcn/`
+- Tailwind CSS v4 (`DESIGN.md` / `app/globals.css`); shadcn/ui primitives (`components/ui/shadcn/`)
 - Private Vercel Blob drafts + NextAuth v5 (GitHub provider, JWT sessions); next-intl i18n
-- Markdown pipeline (remark/rehype, KaTeX, Shiki) over the `content/articles` and `content/glossary` submodules
+- Markdown pipeline (remark/rehype, KaTeX, Shiki) over `content/articles` and `content/glossary`
 - pnpm 12 workspace, Vite+ (`vp` for Oxlint, Oxfmt, Vitest)
-- Typst 0.15.1 for the book PDFs in `tools/pdf`: one `typst compile` per locale, with the `typst` binary on PATH (`brew install typst` locally)
+- Typst 0.15.1 for book PDFs in `tools/pdf` (`brew install typst`)
 
 ## Layout
 
-This is a pnpm workspace. The root holds only workspace-level concerns; the
-site and the PDF pipeline live in their own directories.
-
 ```text
-apps/web/       The Next.js site (@gtmc/web) — everything below is relative to it
+apps/web/       Next.js site (@gtmc/web)
   app/          App Router (locale-scoped [locale] routes, api/)
   actions/      Server actions
   components/   UI components (primitives in components/ui/shadcn/)
   lib/          Article pipeline, auth, drafts, search, GitHub helpers
   hooks/        Shared React hooks
   i18n/         next-intl config; catalogs in messages/ (en.json, zh.json)
-  types/        Ambient type declarations
-  content/      Static content (about, authors, pdf)
-  data/         Generated manifests, search indices, build caches (gitignored)
   scripts/      Manifest, content, and PDF generators
   proxy.ts      Auth + i18n middleware
-tools/pdf/      Typst book template and PDF build (not a pnpm package; see tools/pdf/README.md)
-  template/     Typst library; gtmc.typ re-exports it
-  fonts.lock.json  Pinned font files and checksums
-  fonts/ work/ dist/   Downloaded fonts, generated Typst inputs, and output (gitignored)
+tools/pdf/      Typst book template and PDF build (see tools/pdf/README.md)
 packages/ssg/   Article generation and shared Markdown transforms (@gtmc/ssg)
-content/         Content submodules
-  articles/      Article content submodule
-  glossary/      Glossary data submodule
+content/        Git submodules (articles, glossary)
 ```
 
-`content/articles` and `content/glossary` are git submodules pinned at the
-workspace root, not under `apps/web`. Code that needs them must go through
-`lib/workspace-paths.ts` (`getWorkspaceRoot()` / `workspacePath(...)`) rather
-than `process.cwd()`, which is only correct when a process happens to have
-been started from `apps/web`.
+`content/articles` and `content/glossary` are git submodules pinned at the workspace root, not under `apps/web`. Code that needs them must use `lib/workspace-paths.ts` (`getWorkspaceRoot()` / `workspacePath(...)`), never `process.cwd()`.
 
-## Setup
+## Setup & Commands
 
 ```bash
 vp install              # Install dependencies with pinned pnpm + run postinstall
-cp apps/web/.env.example apps/web/.env   # All environment variables are documented there
+cp apps/web/.env.example apps/web/.env
 pnpm dev                # Start development server at http://localhost:3000
-brew install typst      # PDF builds need the typst binary (CI pins 0.15.1); TYPST_BIN overrides it
+brew install typst      # PDF builds need the typst binary (CI pins 0.15.1; TYPST_BIN overrides)
 ```
-
-## Commands
 
 ```bash
 pnpm check                       # vp check (oxfmt + oxlint) + tsc --noEmit
 pnpm typecheck                   # tsc --noEmit only
-pnpm test                        # All Vitest suites (vp test run)
+pnpm test                        # Run all Vitest suites
+pnpm build                       # Full build: content generation + next build
+pnpm build:content               # Static content and manifest generation
+pnpm build:next                  # Next.js production build
+pnpm build:pdf                   # Build tools/pdf/dist/gtmc-{en,zh}.pdf
+pnpm articles:update             # Pull latest articles submodule commit
+pnpm glossary:update             # Pull latest glossary submodule commit
 
-# `vp` resolves its config from apps/web/vite.config.ts, so run it from there:
+# Targeted checks (from apps/web):
 cd apps/web
 vp check --fix                   # Auto-format and autofix lint findings
 vp test run <file-path>          # Run a specific test file
 vp test run -t "<test-name>"     # Filter by test name
-cd ../..
-
-pnpm build                       # Full build: content generation + next build
-pnpm build:content               # Phase 1: static content and manifest generation
-pnpm build:next                  # Phase 2: Next.js production build
-pnpm generate:manifest           # Rebuild apps/web/data/manifest.json
-pnpm generate:content            # Re-render article content artifacts
-pnpm generate:glossary           # Rebuild apps/web/data/glossary*.json
-pnpm build:pdf                    # Build tools/pdf/dist/gtmc-{en,zh}.pdf (needs typst on PATH)
-pnpm build:pdf -- --locale en    # Build one locale only (en or zh); --output needs one locale
-pnpm articles:update             # Pull latest articles submodule commit
-pnpm glossary:update             # Pull latest glossary submodule commit
 ```
 
-Before declaring any build-affecting change complete, run `pnpm check && pnpm test`.
+- Run standalone scripts with `vpx <file>` (handles TS and tsconfig paths; do not use `tsx` or `ts-node`).
+- Before declaring any build-affecting change complete, run `pnpm check && pnpm test`.
 
 ## Testing
 
-**Standing policy**: Do not add or propose tests unless explicitly requested.
+- Test only on logic-heavy code. Assert on higher-level behavior (API responses, server actions, route handlers) rather than implementation details.
+- Do not add tests for UI components unless they have nontrivial logic (state, effects, context).
 
 ## Code Style
 
 - Never bypass types with `as any`, `@ts-ignore`, or `@ts-expect-error`; fix root types.
-- Use existing shadcn/ui components from `components/ui/shadcn/` before creating custom primitives. Follow `DESIGN.md` for styling, tokens, and geometry.
-- Imports use the `@/*` path alias, which resolves to `apps/web` (the app root, not the repository root). Server actions in `actions/`; route handlers in `app/api/`; middleware in `proxy.ts` (not `middleware.ts`).
-- Monospace + uppercase + wide tracking is strictly for apparatus controls (buttons, badges, tabs, nav). Standard form labels, empty states, and dialog titles use normal sans capitalization.
+- Use existing shadcn/ui components (`components/ui/shadcn/`) before creating custom primitives. Follow `DESIGN.md` for styling, tokens, and geometry.
+- Imports use `@/*`, resolving to `apps/web`. Server actions in `actions/`; route handlers in `app/api/`; middleware in `proxy.ts`.
 
-## Pull Request & Git Guidelines
+## Git
 
 - Conventional Commits (`<type>(<scope>): <subject>`, max 72 chars; types: `feat`, `fix`, `refactor`, `docs`, `style`, `chore`, `test`, `perf`).
-- Never mix submodule pointer updates (`content/articles`, `content/glossary`) with feature or bugfix commits; commit them separately as `chore(articles): ...`.
-- Atomic, reversible commits are fine. **Never** run `git push` or `git pull`. **Never** use destructive Git commands (`reset --hard`, `clean -f`, force push) without explicit instruction.
+- Commit submodule changes separately as `chore(submodule): bump <module_name>`. Don't bump submodules unless there are related changes in the main codebase. Latest submodules are pulled during CD.
+- Do not run `git push` or `git pull` on `dev` or `production` without permission.
 
-### Publishing GitHub releases
+### Publishing GitHub Releases
 
-Release tags use the `vX.Y.Z` format (semver) and are published from the `dev` branch. The target commit must already be present on the remote `dev` branch; agents must not push or pull, so stop for a user-managed push when the local branch is ahead. Before publishing, inspect the commits since the previous release, pick the next version (`feat` → minor, `fix`/`perf` → patch, breaking → major), and confirm the worktree is clean.
+Releases use `vX.Y.Z` (semver) from `dev`. Ensure the target commit is on remote `dev`, worktree is clean, and pick the next version (`feat` → minor, `fix`/`perf` → patch, breaking → major).
 
-1. Bump `version` in `apps/web/package.json` to the new version (bare semver, no `v` prefix) in its own commit. A bump never touches `pnpm-lock.yaml`, so stage the manifest alone and never regenerate dependencies for it. `release.yml` reads this file; the workspace root `package.json` mirrors the version but is not the gate.
+1. Bump `version` in `apps/web/package.json` (bare semver, no `v` prefix) in its own commit (never touch `pnpm-lock.yaml`):
 
    ```bash
    git add apps/web/package.json
    git commit -m "chore: bump package version to vX.Y.Z"
    ```
 
-2. Tag that same commit and push the tag. `-m ""` makes an empty-message annotated tag (signed, per `tag.gpgSign`) without opening an editor.
+2. Create an annotated tag and push it:
 
    ```bash
    git tag -m "" vX.Y.Z
    git push origin vX.Y.Z
    ```
 
-3. Once the release appears on GitHub (initialized by CI with `[Graduate Texts in Minecraft](https://www.techmc.wiki)`), edit it to match the existing style: always preserve the leading website link, followed by `Features:` and optional `Dev:` headings with numbered lists under each. Never overwrite or omit the leading `[Graduate Texts in Minecraft](https://www.techmc.wiki)` link when rewriting or updating notes. Keep `Dev` selective: developer workflow, CI/CD, or release process only.
+3. Edit release notes on GitHub (always preserve the leading website link, followed by `Features:` and optional `Dev:` headings with numbered lists; verify not draft/prerelease):
 
    ```bash
    gh release edit vX.Y.Z \
@@ -127,15 +103,13 @@ Release tags use the `vX.Y.Z` format (semver) and are published from the `dev` b
      --notes $'[Graduate Texts in Minecraft](https://www.techmc.wiki)\n\nFeatures:\n\n1. Describe the user-facing change\n\nDev:\n\n1. Describe the developer-facing change'
    ```
 
-Tags are never re-pointed at an already-published release. Verify the release is neither a draft nor a prerelease and that it appears in `gh release list` after publishing.
-
 <!--VITE PLUS START-->
 
 # Using Vite+, the Unified Toolchain for the Web
 
 This project is using Vite+, a unified toolchain built on top of Vite, Rolldown, Vitest, tsdown, Oxlint, Oxfmt, and Vite Task. Vite+ wraps runtime management, package management, and frontend tooling in a single global CLI called `vp`. Vite+ is distinct from Vite, and it invokes Vite through `vp dev` and `vp build`. Run `vp help` to print a list of commands and `vp <command> --help` for information about a specific command.
 
-Docs are local at `node_modules/vite-plus/docs` or online at https://viteplus.dev/guide/.
+Docs are local at `node_modules/vite-plus/docs` or online at <https://viteplus.dev/guide/>.
 
 ## Built-in Commands vs Scripts
 

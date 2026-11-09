@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { Filter, Search, X } from "lucide-react"
+import { Columns3, Filter, Plus, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/shadcn/button"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Card } from "@/components/ui/shadcn/card"
@@ -92,6 +92,7 @@ export function PropertyControls({
           properties={properties}
           selected={columns}
           label={t("columns")}
+          icon={Columns3}
           count={columns.length}
           multiple
           onSelect={toggleColumn}
@@ -152,11 +153,14 @@ export function PropertyControls({
               <Badge variant="secondary">{state.filters.length}</Badge>
             )}
           </h2>
-          <PropertyPicker
-            properties={state.filters.length < 8 ? properties : []}
-            label={t("addFilter")}
-            onSelect={addFilter}
-          />
+          <div className="flex items-center gap-2">
+            <PropertyPicker
+              properties={state.filters.length < 8 ? properties : []}
+              label={t("addFilter")}
+              icon={Plus}
+              onSelect={addFilter}
+            />
+          </div>
         </div>
         {state.filters.length > 0 && (
           <div className="space-y-2">

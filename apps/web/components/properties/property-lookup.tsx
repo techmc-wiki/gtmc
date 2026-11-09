@@ -15,8 +15,8 @@ import { z } from "zod"
 import {
   ChevronLeft,
   ChevronRight,
-  Columns3,
   GitCompareArrows,
+  RotateCcw,
   X,
 } from "lucide-react"
 import { Button } from "@/components/ui/shadcn/button"
@@ -329,19 +329,11 @@ export function PropertyLookup({
                 {t("compare")}
                 <Badge variant="secondary">{selected.length}</Badge>
               </Button>
-              {(state.q || state.filters.length > 0) && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="min-h-11"
-                  onClick={clearFilters}>
-                  {t("clearFilters")}
-                </Button>
-              )}
               <Button
                 variant="ghost"
-                size="sm"
-                className="min-h-11"
+                size="icon"
+                aria-label={t("resetColumns")}
+                title={t("resetColumns")}
                 onClick={() =>
                   void setState({
                     columns: [],
@@ -350,8 +342,7 @@ export function PropertyLookup({
                     page: 1,
                   })
                 }>
-                <Columns3 aria-hidden="true" />
-                {t("resetColumns")}
+                <RotateCcw aria-hidden="true" />
               </Button>
             </div>
           </div>

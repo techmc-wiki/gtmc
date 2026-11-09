@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, type LucideIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/shadcn/button"
 import { Badge } from "@/components/ui/shadcn/badge"
@@ -26,6 +26,7 @@ export function PropertyPicker({
   properties,
   selected = NO_SELECTION,
   label,
+  icon: Icon,
   count,
   multiple = false,
   onSelect,
@@ -33,6 +34,7 @@ export function PropertyPicker({
   properties: PropertyInfo[]
   selected?: string[]
   label: string
+  icon?: LucideIcon
   count?: number
   multiple?: boolean
   onSelect: (id: string) => void
@@ -43,14 +45,26 @@ export function PropertyPicker({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className="min-h-11 min-w-0 justify-between"
-          aria-expanded={open}>
-          <span className="truncate text-left">{label}</span>
-          {count !== undefined && <Badge variant="secondary">{count}</Badge>}
-          <ChevronsUpDown aria-hidden="true" className="shrink-0" />
-        </Button>
+        {Icon ? (
+          <Button
+            variant="outline"
+            size="icon"
+            className={count === undefined ? undefined : "w-auto gap-1.5 px-2"}
+            aria-label={label}
+            title={label}
+            aria-expanded={open}>
+            <Icon aria-hidden="true" />
+            {count !== undefined && <Badge variant="secondary">{count}</Badge>}
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            className="h-11 min-w-0 justify-between py-0 sm:py-0"
+            aria-expanded={open}>
+            <span className="truncate text-left">{label}</span>
+            <ChevronsUpDown aria-hidden="true" className="shrink-0" />
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent
         align="start"

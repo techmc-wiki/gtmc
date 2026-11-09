@@ -9,6 +9,12 @@ import {
 import { dirname, join } from "node:path"
 
 import { resolveGithubToken } from "@/lib/github/tokens"
+import {
+  collectContributorHistory,
+  type GitHubCommitHistory,
+  type GitHubHistoryResult,
+  type RepositoryContributorStats,
+} from "@/lib/github/contributor-history"
 import { createLogger } from "./lib/logger"
 
 const logger = createLogger("repository-contributors")
@@ -29,25 +35,14 @@ const COMMIT_MARKER = "__GTMC_COMMIT__"
 const FIELD_SEPARATOR = "\u001f"
 const CACHE_FORMAT_VERSION = 1
 
-type GitHubCommitActivity = {
-  additions: number
-  deletions: number
-  changedFilesIfAvailable: number | null
-  author: { user: { login: string } | null } | null
-  parents: { totalCount: number }
-}
-
-type GitHubCommitHistory = {
-  nodes: Array<GitHubCommitActivity | null>
-  pageInfo: { hasNextPage: boolean; endCursor: string | null }
-}
-
 type GitHubHistoryPage = {
   data?: {
     repository?: {
       defaultBranchRef?: {
         target?: {
-          history?: GitHubCommitHistory
+          history?: Omit<GitHubCommitHistory, "nodes"> & {
+            nodes?: GitHubCommitHistory["nodes"]
+          }
           oid?: string
         }
       }
@@ -55,16 +50,6 @@ type GitHubHistoryPage = {
   }
   errors?: Array<{ message: string }>
 }
-
-interface GitHubHistoryResult {
-  revision: string
-  history: GitHubCommitHistory
-}
-
-type RepositoryContributorStats = Record<
-  string,
-  { commits: number; linesChanged: number }
->
 
 interface CachedContributorStats {
   formatVersion: number
@@ -85,14 +70,16 @@ const HISTORY_QUERY = `
     $owner: String!
     $name: String!
     $cursor: String
+    $pageSize: Int!
+    $includeActivity: Boolean!
   ) {
     repository(owner: $owner, name: $name) {
       defaultBranchRef {
         target {
           ... on Commit {
             oid
-            history(first: 100, after: $cursor) {
-              nodes {
+            history(first: $pageSize, after: $cursor) {
+              nodes @include(if: $includeActivity) {
                 additions
                 deletions
                 changedFilesIfAvailable
@@ -189,9 +176,8 @@ function isRepositoryContributorStats(
 }
 
 function loadCachedContributorStats(
-  repository: string,
-  revision: string
-): RepositoryContributorStats | null {
+  repository: string
+): CachedContributorStats | null {
   try {
     const cached = JSON.parse(readFileSync(CACHE_PATH, "utf8")) as unknown
     if (
@@ -211,12 +197,13 @@ function loadCachedContributorStats(
     if (
       formatVersion !== CACHE_FORMAT_VERSION ||
       cachedRepository !== repository ||
-      cachedRevision !== revision ||
+      typeof cachedRevision !== "string" ||
+      !cachedRevision ||
       !isRepositoryContributorStats(stats)
     ) {
       return null
     }
-    return stats
+    return cached as CachedContributorStats
   } catch {
     return null
   }
@@ -314,7 +301,9 @@ async function fetchHistoryPage(
   owner: string,
   name: string,
   cursor: string | null,
-  token: string
+  token: string,
+  pageSize = 100,
+  includeActivity = true
 ): Promise<GitHubHistoryResult> {
   const response = await fetch(GITHUB_GRAPHQL_URL, {
     method: "POST",
@@ -326,7 +315,7 @@ async function fetchHistoryPage(
     },
     body: JSON.stringify({
       query: HISTORY_QUERY,
-      variables: { owner, name, cursor },
+      variables: { owner, name, cursor, pageSize, includeActivity },
     }),
   })
   if (!response.ok) {
@@ -341,10 +330,10 @@ async function fetchHistoryPage(
   const target = payload.data?.repository?.defaultBranchRef?.target
   const revision = target?.oid
   const history = target?.history
-  if (!revision || !history) {
+  if (!revision || !history || (includeActivity && !history.nodes)) {
     throw new Error("GitHub returned no default-branch commit history")
   }
-  return { revision, history }
+  return { revision, history: { ...history, nodes: history.nodes ?? [] } }
 }
 
 async function loadContributorStats(
@@ -356,45 +345,25 @@ async function loadContributorStats(
     throw new Error(`Invalid GitHub repository: ${repository}`)
   }
 
-  const initial = await fetchHistoryPage(owner, name, null, token)
-  const cached = loadCachedContributorStats(repository, initial.revision)
-  if (cached) {
+  const cached = loadCachedContributorStats(repository)
+  // An unchanged revision needs only its first commit, not 100 expensive diffs.
+  const initial = await fetchHistoryPage(
+    owner,
+    name,
+    null,
+    token,
+    cached ? 1 : 100
+  )
+  if (cached?.revision === initial.revision) {
     logger.event("repository-contributors.cache", { outcome: "hit" })
-    return cached
+    return cached.stats
   }
 
-  const stats: RepositoryContributorStats = {}
-  const loadPage = async (
-    history: GitHubCommitHistory,
-    pageCount: number
-  ): Promise<number> => {
-    for (const commit of history.nodes) {
-      const login = commit?.author?.user?.login
-      if (!commit || !login || commit.changedFilesIfAvailable === 0) {
-        continue
-      }
-
-      const key = login.toLocaleLowerCase("en-US")
-      const contributor = stats[key] ?? { commits: 0, linesChanged: 0 }
-      if (commit.parents.totalCount <= 1) contributor.commits += 1
-      contributor.linesChanged += commit.additions + commit.deletions
-      stats[key] = contributor
-    }
-
-    const nextPageCount = pageCount + 1
-    if (!history.pageInfo.hasNextPage) return nextPageCount
-    const nextCursor = history.pageInfo.endCursor
-    if (!nextCursor) {
-      throw new Error("GitHub history pagination omitted its cursor")
-    }
-    const next = await fetchHistoryPage(owner, name, nextCursor, token)
-    if (next.revision !== initial.revision) {
-      throw new Error("GitHub default branch changed while loading history")
-    }
-    return loadPage(next.history, nextPageCount)
-  }
-
-  const pageCount = await loadPage(initial.history, 0)
+  const { stats, pageCount } = await collectContributorHistory(
+    initial,
+    (cursor, includeActivity) =>
+      fetchHistoryPage(owner, name, cursor, token, 100, includeActivity)
+  )
   const sorted = Object.fromEntries(
     Object.entries(stats).toSorted(([left], [right]) =>
       left.localeCompare(right)

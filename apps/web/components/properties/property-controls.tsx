@@ -73,7 +73,6 @@ export function PropertyControls({
                 void setState({ q: event.target.value, page: 1 })
               }
               placeholder={t(`search_${kind}`)}
-              aria-describedby="property-search-help"
             />
             {state.q && (
               <InputGroupAddon align="inline-end">
@@ -101,9 +100,6 @@ export function PropertyControls({
           onSelect={addFilter}
         />
       </div>
-      <p id="property-search-help" className="text-muted-foreground text-sm">
-        {t("searchHelp")}
-      </p>
       {!state.q && !state.filters.length && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground text-sm">{t("try")}</span>
@@ -220,9 +216,6 @@ export function PropertyControls({
           </Button>
         </div>
       ))}
-      {state.filters.length > 0 && (
-        <p className="text-muted-foreground text-sm">{t("filterHelp")}</p>
-      )}
     </Card>
   )
 }

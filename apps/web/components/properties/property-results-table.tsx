@@ -63,7 +63,6 @@ export function PropertyResultsTable({
     return (
       <Card className="space-y-3 text-center">
         <h2 className="text-base font-semibold">{t("noResults")}</h2>
-        <p className="text-muted-foreground">{t("noResultsHelp")}</p>
         <Button variant="outline" onClick={onClearFilters}>
           {t("clearFilters")}
         </Button>

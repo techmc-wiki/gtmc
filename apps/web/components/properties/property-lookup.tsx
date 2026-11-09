@@ -254,9 +254,6 @@ export function PropertyLookup({
 
   return (
     <div className="space-y-6">
-      <p className="text-muted-foreground max-w-3xl text-base leading-relaxed">
-        {t("intro")}
-      </p>
       <Tabs
         value={kind}
         onValueChange={(value) =>
@@ -372,9 +369,6 @@ export function PropertyLookup({
                   <X aria-hidden="true" />
                 </Button>
               ))}
-              <span className="text-muted-foreground text-sm">
-                {t("compareHelp")}
-              </span>
             </div>
           )}
           <PropertyResultsTable
@@ -395,8 +389,7 @@ export function PropertyLookup({
             onOpenDetail={(name) => void setState({ entry: name })}
           />
           {results && results.total > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-muted-foreground text-sm">{t("sortHelp")}</p>
+            <div className="flex flex-wrap items-center justify-end gap-3">
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"

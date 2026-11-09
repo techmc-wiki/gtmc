@@ -7,7 +7,8 @@ import { ARTICLES_PATH } from "@/lib/articles/fs"
 import { hasExplicitUrlScheme } from "@/lib/markdown/url-utils"
 import { workspacePath } from "@/lib/workspace-paths"
 
-const PDF_ROOT = workspacePath("tools", "pdf")
+import { toTypstRootPath, writeFileAtomic } from "./artifacts"
+
 const REMOTE_CACHE_DIR = workspacePath(
   "tools",
   "pdf",
@@ -296,23 +297,4 @@ function decodeBmp(bytes: Buffer): {
 async function writeIfMissing(target: string, bytes: Buffer): Promise<void> {
   if (fs.existsSync(target)) return
   await writeFileAtomic(target, bytes)
-}
-
-async function writeFileAtomic(target: string, bytes: Buffer): Promise<void> {
-  const temp = `${target}.${process.pid}.${crypto.randomUUID()}.part`
-  try {
-    await fs.promises.writeFile(temp, bytes)
-    await fs.promises.rename(temp, target)
-  } catch (error) {
-    await fs.promises.rm(temp, { force: true })
-    throw error
-  }
-}
-
-function toTypstRootPath(file: string): string {
-  const relative = path.relative(PDF_ROOT, file)
-  if (relative.startsWith("..") || path.isAbsolute(relative)) {
-    throw new Error(`Output ${file} is outside the Typst root ${PDF_ROOT}`)
-  }
-  return `/${relative.split(path.sep).join("/")}`
 }

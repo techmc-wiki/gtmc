@@ -11,6 +11,8 @@ import { setTimeout as sleep } from "node:timers/promises"
 import { z } from "zod"
 import { workspacePath } from "@/lib/workspace-paths"
 
+import { writeFileAtomic } from "./artifacts"
+
 const FONTS_DIR = workspacePath("tools", "pdf", "fonts")
 const LOCK_PATH = workspacePath("tools", "pdf", "fonts.lock.json")
 
@@ -111,17 +113,6 @@ async function downloadVerified(
     }
     await sleep(RETRY_BASE_DELAY_MS * 2 ** (attempt - 1))
     return downloadVerified(entry, target, attempt + 1)
-  }
-}
-
-async function writeFileAtomic(target: string, bytes: Buffer): Promise<void> {
-  const temp = `${target}.${process.pid}.${crypto.randomUUID()}.part`
-  try {
-    await fs.promises.writeFile(temp, bytes)
-    await fs.promises.rename(temp, target)
-  } catch (error) {
-    await fs.promises.rm(temp, { force: true })
-    throw error
   }
 }
 

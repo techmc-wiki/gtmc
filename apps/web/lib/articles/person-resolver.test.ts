@@ -19,9 +19,11 @@ import {
 } from "./person-resolver"
 
 /**
- * Deterministic identities. None of these handles appear in the checked-in
- * roster, so the positive expectations below can only pass when the resolver
- * reads these fixtures instead of the repository configuration.
+ * Deterministic fixtures. The human identities are synthetic, so the positive
+ * expectations below can only pass when the resolver reads these fixtures
+ * instead of the repository configuration. The `GTMC Bot`/`gtmc-bot` service
+ * account is the exception: it exists in the checked-in configuration and is
+ * reused here to exercise the service-account exclusion.
  *
  * Fixture builders are function declarations at module scope: declarations are
  * initialized before any statement runs, so the hoisted manifest mock can

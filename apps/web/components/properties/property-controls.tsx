@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { Columns3, Filter, Plus, Search, X } from "lucide-react"
+import { Columns3, Filter, FilterX, Plus, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/shadcn/button"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Card } from "@/components/ui/shadcn/card"
@@ -154,6 +154,16 @@ export function PropertyControls({
             )}
           </h2>
           <div className="flex items-center gap-2">
+            {state.filters.length > 0 && (
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t("clearAllFilters")}
+                title={t("clearAllFilters")}
+                onClick={() => void setState({ filters: [], page: 1 })}>
+                <FilterX aria-hidden="true" />
+              </Button>
+            )}
             <PropertyPicker
               properties={state.filters.length < 8 ? properties : []}
               label={t("addFilter")}

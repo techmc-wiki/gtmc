@@ -589,6 +589,7 @@
     "filters": "Filters",
     "filterColumn": "Filter",
     "filterValueFor": "Filter value for {name}",
+    "clearAllFilters": "Clear all filters",
     "findProperty": "Find a property",
     "noProperty": "No matching properties.",
     "columnLimit": "Choose properties",

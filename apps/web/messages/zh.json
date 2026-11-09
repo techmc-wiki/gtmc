@@ -589,6 +589,7 @@
     "filters": "筛选",
     "filterColumn": "筛选条件",
     "filterValueFor": "{name} 的筛选值",
+    "clearAllFilters": "清除全部筛选",
     "findProperty": "查找属性",
     "noProperty": "没有匹配的属性。",
     "columnLimit": "选择属性",

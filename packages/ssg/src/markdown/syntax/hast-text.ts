@@ -1,9 +1,6 @@
 import type { Element, Text } from "hast"
 
-/**
- * Concatenate the text descendants of a HAST node. Element children are
- * traversed recursively; comments and other non-text nodes contribute nothing.
- */
+/** Concatenate the text descendants of a HAST node. */
 export function getHastText(node: Element | Text): string {
   if (node.type === "text") return node.value
 

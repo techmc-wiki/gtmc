@@ -65,7 +65,6 @@ export interface ArticleDisplayTitleInput {
   locale: ArticleLocale;
 }
 
-/** Formats the resolved article title with its navigation index and structural markers. */
 export async function formatArticleDisplayTitle(input: ArticleDisplayTitleInput): Promise<string> {
   const [displayTitle, tree] = await Promise.all([
     resolveDisplayedArticleTitle(

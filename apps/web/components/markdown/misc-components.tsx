@@ -23,7 +23,6 @@ export function SectionComponent({
   children,
   ...props
 }: MarkdownComponentProps) {
-  // Wrap footnote sections in <aside> for semantic HTML
   if (id === "footnotes") {
     return (
       <aside

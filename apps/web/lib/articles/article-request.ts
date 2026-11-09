@@ -27,9 +27,6 @@ export interface ResolvedArticleRequest {
   redirectToLocale?: ArticleLocale;
 }
 
-/**
- * Maps Chinese UI locales to the source articles and every other locale to English.
- */
 export function resolveArticleLocale(locale: string): ArticleLocale {
   return locale === SOURCE_ARTICLE_LOCALE ? SOURCE_ARTICLE_LOCALE : "en";
 }

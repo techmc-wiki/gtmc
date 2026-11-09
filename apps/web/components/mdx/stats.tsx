@@ -1,7 +1,6 @@
 import * as React from "react"
 import { Card } from "@/components/ui/shadcn/card"
 
-/** Single labeled statistic readout. */
 export function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <Card className="sm:p-4">

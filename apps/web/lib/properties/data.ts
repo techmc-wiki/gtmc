@@ -9,18 +9,22 @@ import {
   translateValue,
   translatedCategory,
   translatedProperty,
+  translatedSynthetic,
   translatedUnit,
   type Locale,
   type PropertyOverlay,
 } from "./i18n/overlay"
-import type {
-  DatasetId,
-  PropertyCatalog,
-  PropertyEntry,
-  PropertyFilter,
-  PropertyInfo,
-  PropertyResults,
-  PropertyValue,
+import {
+  TAGS_PROPERTY,
+  type DatasetId,
+  type PropertyCatalog,
+  type PropertyEntry,
+  type PropertyFilter,
+  type PropertyInfo,
+  type PropertyKind,
+  type PropertyOption,
+  type PropertyResults,
+  type PropertyValue,
 } from "./types"
 
 const files: Record<DatasetId, string> = {
@@ -49,6 +53,16 @@ const preferred: Record<DatasetId, string[]> = {
   entities: ["health", "width", "height", "type"],
   items: ["stackability", "survival_obtainable", "renewable"],
 }
+/** Upstream flags every tag as its own boolean property. */
+const TAG_PREFIX = "tag_"
+/** A closed string set larger than this reads as free text rather than an enum. */
+const ENUM_LIMIT = 64
+/** Numeric properties carry occasional sentinels (`Not Applicable`, `N/A`). */
+const NUMERIC_SHARE = 0.9
+/** Below this many distinct values, numbers read better as a selector. */
+const NUMERIC_DISTINCT = 10
+const TAG_PREFIX_PATTERN = /^tag:\s*/i
+
 interface SourceProperty {
   property_name: string
   property_description?: string
@@ -70,11 +84,13 @@ interface SourceDataset {
 interface RawDataset {
   source: SourceDataset
   search: Map<string, string>
+  tags: Map<string, string>
 }
 /** Raw data projected through one locale's translation overlay. */
 interface LocalizedDataset extends RawDataset {
   catalog: PropertyCatalog
   overlay: PropertyOverlay
+  tagProperty?: PropertyInfo
 }
 
 // Upstream strings contain presentation HTML. Expose plain text only; React
@@ -138,6 +154,111 @@ function valueFor(property: SourceProperty, name: string): PropertyValue {
     : (property.default_value ?? null)
 }
 
+const NUMERIC = /^[-+]?(?:\d+(?:\.\d+)?|\.\d+)$/
+function parseNumber(value: string | number | boolean): number | null {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null
+  if (typeof value !== "string") return null
+  const text = value.trim()
+  if (text === "∞") return Number.POSITIVE_INFINITY
+  if (text === "-∞") return Number.NEGATIVE_INFINITY
+  if (!NUMERIC.test(text)) return null
+  const parsed = Number(text)
+  return Number.isFinite(parsed) ? parsed : null
+}
+/** A tag, or any other yes/no flag, counts as present unless explicitly false. */
+function isPresent(value: string | number | boolean): boolean {
+  if (typeof value === "boolean") return value
+  if (typeof value === "number") return value !== 0
+  return !/^(no|false|)$/i.test(value.trim())
+}
+function propertyLeaves(
+  property: SourceProperty
+): (string | number | boolean)[] {
+  return [
+    property.default_value ?? null,
+    ...Object.values(property.entries),
+  ].flatMap(leaves)
+}
+function propertyKind(property: SourceProperty): PropertyKind {
+  const items = propertyLeaves(property).filter(
+    (item) => String(item).trim() !== ""
+  )
+  if (!items.length) return "text"
+  if (
+    items.every(
+      (item) =>
+        typeof item === "boolean" ||
+        (typeof item === "string" && /^(yes|no|true|false)$/i.test(item.trim()))
+    )
+  ) {
+    return "boolean"
+  }
+  const distinct = new Set(items.map(String))
+  const numeric = items.filter((item) => parseNumber(item) !== null).length
+  if (
+    distinct.size >= NUMERIC_DISTINCT &&
+    numeric / items.length >= NUMERIC_SHARE
+  ) {
+    return "number"
+  }
+  return distinct.size <= ENUM_LIMIT ? "enum" : "text"
+}
+function propertyOptions(
+  kind: PropertyKind,
+  items: (string | number | boolean)[],
+  overlay: PropertyOverlay,
+  locale: Locale
+): PropertyOption[] | undefined {
+  if (kind === "boolean") {
+    return ["Yes", "No"].map((value) => ({
+      value,
+      label: translateText(overlay, value),
+    }))
+  }
+  if (kind !== "enum") return undefined
+  return [...new Set(items.map(String).filter((item) => item.trim() !== ""))]
+    .map((value) => ({ value, label: translateText(overlay, value) }))
+    .toSorted((a, b) => a.label.localeCompare(b.label, locale))
+}
+function tagsProperty(
+  overlay: PropertyOverlay,
+  tags: Map<string, string>,
+  locale: Locale
+): PropertyInfo | undefined {
+  if (!tags.size) return undefined
+  const translated = translatedSynthetic(
+    overlay,
+    TAGS_PROPERTY,
+    "Tags",
+    "Game tags this entry belongs to."
+  )
+  return {
+    id: TAGS_PROPERTY,
+    name: translated.name,
+    description: translated.description,
+    category: "",
+    kind: "tags",
+    options: [...tags]
+      .map(([value, label]) => ({ value, label }))
+      .toSorted((a, b) => a.label.localeCompare(b.label, locale)),
+  }
+}
+/** Tags an entry carries, as display labels. */
+function tagsFor(
+  source: SourceDataset,
+  tags: Map<string, string>,
+  name: string
+): string[] {
+  const present: string[] = []
+  for (const [id, label] of tags) {
+    const property = source.properties[id]
+    if (property && leaves(valueFor(property, name)).some(isPresent)) {
+      present.push(label)
+    }
+  }
+  return present.toSorted((a, b) => a.localeCompare(b))
+}
+
 const datasets = new Map<DatasetId, Promise<RawDataset>>()
 function loadDataset(id: DatasetId): Promise<RawDataset> {
   let pending = datasets.get(id)
@@ -170,7 +291,19 @@ function loadDataset(id: DatasetId): Promise<RawDataset> {
             ]
           })
         )
-        return { source, search }
+        const tags = new Map<string, string>()
+        for (const [propertyId, property] of Object.entries(
+          source.properties
+        )) {
+          if (!propertyId.startsWith(TAG_PREFIX)) continue
+          const description = plainText(property.property_description ?? "")
+          const name = plainText(property.property_name).replace(
+            TAG_PREFIX_PATTERN,
+            ""
+          )
+          tags.set(propertyId, description || name)
+        }
+        return { source, search, tags }
       })
       .catch((error: unknown) => {
         datasets.delete(id)
@@ -190,7 +323,7 @@ function loadLocalized(
   let pending = localized.get(cacheKey)
   if (!pending) {
     pending = loadDataset(id)
-      .then(({ source, search }) => {
+      .then(({ source, search, tags }) => {
         const overlay = getPropertyOverlay(locale)
         const categories = new Map<string, string>()
         function visit(structure: PropertyStructure, category = "") {
@@ -210,32 +343,48 @@ function loadLocalized(
           }
         }
         visit(source.property_structure)
-        const properties: PropertyInfo[] = Object.entries(source.properties)
-          .map(([propertyId, property]) => {
-            const translated = translatedProperty(
+        const properties: PropertyInfo[] = []
+        for (const [propertyId, property] of Object.entries(
+          source.properties
+        )) {
+          if (propertyId.startsWith(TAG_PREFIX)) continue
+          const translated = translatedProperty(
+            overlay,
+            id,
+            propertyId,
+            plainText(property.property_name),
+            plainText(property.property_description ?? "")
+          )
+          const kind = propertyKind(property)
+          properties.push({
+            id: propertyId,
+            name: translated.name,
+            description: translated.description,
+            category: categories.get(propertyId) ?? "",
+            unit: translatedUnit(overlay, property.size_type),
+            kind,
+            options: propertyOptions(
+              kind,
+              propertyLeaves(property),
               overlay,
-              id,
-              propertyId,
-              plainText(property.property_name),
-              plainText(property.property_description ?? "")
-            )
-            return {
-              id: propertyId,
-              name: translated.name,
-              description: translated.description,
-              category: categories.get(propertyId) ?? "",
-              unit: translatedUnit(overlay, property.size_type),
-            }
+              locale
+            ),
           })
-          .toSorted((a, b) => a.name.localeCompare(b.name, locale))
+        }
+        const tagProperty = tagsProperty(overlay, tags, locale)
+        if (tagProperty) properties.push(tagProperty)
         return {
           source,
           search,
+          tags,
           overlay,
+          tagProperty,
           catalog: {
             dataset: id,
             count: source.key_list.length,
-            properties,
+            properties: properties.toSorted((a, b) =>
+              a.name.localeCompare(b.name, locale)
+            ),
             defaults: preferred[id].filter((key) => key in source.properties),
           },
         }
@@ -258,22 +407,36 @@ export async function getPropertyCatalog(
   cacheTag("properties-catalog")
   return (await loadLocalized(dataset, locale)).catalog
 }
+
+function entryValue(
+  source: SourceDataset,
+  overlay: PropertyOverlay,
+  tags: Map<string, string>,
+  id: string,
+  name: string
+): PropertyValue {
+  return id === TAGS_PROPERTY
+    ? tagsFor(source, tags, name)
+    : translateValue(overlay, valueFor(source.properties[id], name))
+}
+
 export async function getPropertyDetails(
   dataset: DatasetId,
   locale: Locale,
   names: string[]
 ): Promise<PropertyEntry[]> {
-  const { source, search, overlay } = await loadLocalized(dataset, locale)
+  const { source, search, tags, overlay } = await loadLocalized(dataset, locale)
   return names
     .filter((name) => search.has(name))
     .map((name) => ({
       name,
-      values: Object.fromEntries(
-        Object.entries(source.properties).map(([id, property]) => [
+      values: Object.fromEntries([
+        ...Object.keys(source.properties).map((id) => [
           id,
-          translateValue(overlay, valueFor(property, name)),
-        ])
-      ),
+          entryValue(source, overlay, tags, id, name),
+        ]),
+        [TAGS_PROPERTY, tagsFor(source, tags, name)],
+      ]),
     }))
 }
 
@@ -284,34 +447,53 @@ function matches(
 ): boolean {
   const raw = filter.value.trim()
   const expected = raw.toLowerCase()
-  return leaves(value).some((leaf) => {
-    if (filter.operator === "gte" || filter.operator === "lte") {
-      const number = typeof leaf === "number" ? leaf : Number(leaf)
-      const target = Number(expected)
-      if (
-        String(leaf).trim() === "" ||
-        !Number.isFinite(number) ||
-        !Number.isFinite(target)
-      ) {
-        return false
-      }
-      return filter.operator === "gte" ? number >= target : number <= target
-    }
+  if (filter.operator === "gte" || filter.operator === "lte") {
+    const target = parseNumber(raw)
+    if (target === null) return false
+    return leaves(value).some((leaf) => {
+      const number = parseNumber(leaf)
+      return (
+        number !== null &&
+        (filter.operator === "gte" ? number >= target : number <= target)
+      )
+    })
+  }
+  // Compare against both the upstream value and its translation so filters
+  // work whether the user picks "Yes" or "是".
+  const localizedNeedle = translateText(overlay, raw)
+  const needles = [expected]
+  if (localizedNeedle !== raw) needles.push(localizedNeedle.toLowerCase())
+  const equal = leaves(value).some((leaf) => {
     const text = String(leaf)
-    // Compare against both the upstream value and its translation so filters
-    // work whether the user types "Yes" or "是".
     const candidates = [text.toLowerCase()]
     const localizedText = translateText(overlay, text)
     if (localizedText !== text) candidates.push(localizedText.toLowerCase())
-    const needles = [expected]
-    const localizedNeedle = translateText(overlay, raw)
-    if (localizedNeedle !== raw) needles.push(localizedNeedle.toLowerCase())
-    return filter.operator === "eq"
-      ? candidates.some((candidate) => needles.includes(candidate))
-      : candidates.some((candidate) =>
-          needles.some((needle) => candidate.includes(needle))
-        )
+    return candidates.some((candidate) => needles.includes(candidate))
   })
+  if (filter.operator === "eq") return equal
+  if (filter.operator === "ne") return !equal
+  return leaves(value).some((leaf) => {
+    const text = String(leaf).toLowerCase()
+    const localizedText = translateText(overlay, String(leaf)).toLowerCase()
+    return needles.some(
+      (needle) => text.includes(needle) || localizedText.includes(needle)
+    )
+  })
+}
+function matchesFilter(
+  source: SourceDataset,
+  overlay: PropertyOverlay,
+  filter: PropertyFilter,
+  name: string
+): boolean {
+  if (filter.property === TAGS_PROPERTY) {
+    const property = source.properties[filter.value]
+    if (!property || !filter.value.startsWith(TAG_PREFIX)) return false
+    const present = leaves(valueFor(property, name)).some(isPresent)
+    return filter.operator === "ne" ? !present : present
+  }
+  const property = source.properties[filter.property]
+  return Boolean(property) && matches(overlay, valueFor(property, name), filter)
 }
 function sortValue(
   overlay: PropertyOverlay,
@@ -327,6 +509,7 @@ function sortValue(
     .map((item) => translateText(overlay, String(item)))
     .toSorted()[0]
 }
+
 export async function searchProperties(
   dataset: DatasetId,
   locale: Locale,
@@ -339,14 +522,16 @@ export async function searchProperties(
     page: number
   }
 ): Promise<PropertyResults> {
-  const { source, search, catalog, overlay } = await loadLocalized(
-    dataset,
-    locale
-  )
+  const { source, search, catalog, overlay, tags, tagProperty } =
+    await loadLocalized(dataset, locale)
+  const known = new Set([
+    ...Object.keys(source.properties),
+    ...(tagProperty ? [TAGS_PROPERTY] : []),
+  ])
   const columns = [
     ...new Set(options.columns.length ? options.columns : catalog.defaults),
   ]
-    .filter((id) => Object.hasOwn(source.properties, id))
+    .filter((id) => known.has(id))
     .slice(0, 8)
   const groups = options.query
     .toLowerCase()
@@ -362,25 +547,17 @@ export async function searchProperties(
     return (
       (queryIsBlank ||
         groups.some((group) => group.every((term) => text.includes(term)))) &&
-      filters.every(
-        (filter) =>
-          Object.hasOwn(source.properties, filter.property) &&
-          matches(
-            overlay,
-            valueFor(source.properties[filter.property], name),
-            filter
-          )
-      )
+      filters.every((filter) => matchesFilter(source, overlay, filter, name))
     )
   })
-  const property = Object.hasOwn(source.properties, options.sort)
-    ? source.properties[options.sort]
-    : undefined
-  const sortValues = property
+  const sortValues = known.has(options.sort)
     ? new Map(
         names.map((name) => [
           name,
-          sortValue(overlay, valueFor(property, name)),
+          sortValue(
+            overlay,
+            entryValue(source, overlay, tags, options.sort, name)
+          ),
         ])
       )
     : null
@@ -405,10 +582,7 @@ export async function searchProperties(
     entries: names.slice((page - 1) * 40, page * 40).map((name) => ({
       name,
       values: Object.fromEntries(
-        columns.map((id) => [
-          id,
-          translateValue(overlay, valueFor(source.properties[id], name)),
-        ])
+        columns.map((id) => [id, entryValue(source, overlay, tags, id, name)])
       ),
     })),
   }

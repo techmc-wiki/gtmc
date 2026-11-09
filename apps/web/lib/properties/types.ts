@@ -13,13 +13,36 @@ export type PropertyValue =
   | null
   | PropertyValue[]
   | { [state: string]: PropertyValue }
+/**
+ * How a property's values are expressed, which decides the filter control:
+ * numbers take an operator and a numeric input, closed string sets and
+ * booleans take a value selector, and tags take a tag plus a yes/no selector.
+ */
+export const PROPERTY_KINDS = [
+  "number",
+  "boolean",
+  "enum",
+  "text",
+  "tags",
+] as const
+export type PropertyKind = (typeof PROPERTY_KINDS)[number]
+export interface PropertyOption {
+  /** Upstream leaf value, stored in the filter. */
+  value: string
+  /** Localized display string. */
+  label: string
+}
 export interface PropertyInfo {
   id: string
   name: string
   description: string
   category: string
   unit?: string
+  kind: PropertyKind
+  options?: PropertyOption[]
 }
+/** Synthetic property that gathers every upstream `tag_*` boolean. */
+export const TAGS_PROPERTY = "tags"
 export interface PropertyCatalog {
   dataset: DatasetId
   count: number
@@ -30,12 +53,14 @@ export interface PropertyEntry {
   name: string
   values: Record<string, PropertyValue>
 }
-export const FILTER_OPERATORS = ["eq", "contains", "gte", "lte"] as const
+export const FILTER_OPERATORS = ["eq", "ne", "contains", "gte", "lte"] as const
 export type FilterOperator = (typeof FILTER_OPERATORS)[number]
 export interface PropertyFilter {
   id: string
   property: string
+  /** `ne` negates a tag membership; other kinds only use the operators their control offers. */
   operator: FilterOperator
+  /** Numeric text, an enum/boolean value, or a `tag_*` property id. */
   value: string
 }
 export interface PropertyResults {

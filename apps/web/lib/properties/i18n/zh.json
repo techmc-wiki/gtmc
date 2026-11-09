@@ -1655,6 +1655,12 @@
       "name": "空岛可获得"
     }
   },
+  "synthetic": {
+    "tags": {
+      "name": "标签",
+      "description": "该条目所属的游戏标签。"
+    }
+  },
   "datasets": {
     "experimental": {
       "properties": {

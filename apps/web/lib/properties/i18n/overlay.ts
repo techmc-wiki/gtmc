@@ -32,6 +32,8 @@ export interface DatasetTranslations {
 
 export interface PropertyOverlay {
   properties?: Record<string, PropertyTranslation>
+  /** Generated properties with no upstream counterpart, keyed by id. */
+  synthetic?: Record<string, PropertyTranslation>
   datasets?: Partial<Record<DatasetId, DatasetTranslations>>
   categories?: Record<string, string>
   units?: Record<string, string>
@@ -67,6 +69,20 @@ export function translatedCategory(
   category: string
 ): string {
   return overlay.categories?.[category] ?? category
+}
+
+/** Resolves the display strings of a property this app generates itself. */
+export function translatedSynthetic(
+  overlay: PropertyOverlay,
+  id: string,
+  name: string,
+  description: string
+): { name: string; description: string } {
+  const override = overlay.synthetic?.[id]
+  return {
+    name: override?.name ?? name,
+    description: override?.description ?? description,
+  }
 }
 
 export function translatedUnit(

@@ -14,6 +14,7 @@ import type {
 } from "@/lib/properties/i18n/overlay"
 import {
   DATASETS,
+  TAGS_PROPERTY,
   type DatasetId,
   type PropertyValue,
 } from "@/lib/properties/types"
@@ -106,6 +107,11 @@ function unknown(
 }
 
 unknown("property id", Object.keys(overlay.properties ?? {}), ids)
+unknown(
+  "synthetic property id",
+  Object.keys(overlay.synthetic ?? {}),
+  new Set([TAGS_PROPERTY])
+)
 const categoryLabels = new Set<string>()
 for (const labels of categoriesByDataset.values()) {
   for (const label of labels) categoryLabels.add(label)

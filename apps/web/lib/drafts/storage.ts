@@ -1,7 +1,7 @@
 import { del, get, list, put } from "@vercel/blob"
 import { randomUUID } from "node:crypto"
 import path from "node:path"
-import { privateBlobOptions } from "@/lib/private-blob"
+import { privateBlobOptions } from "@/lib/blob-stores"
 import { draftPath } from "@/lib/drafts/store"
 
 export function draftAssetPrefix(authorId: string, draftId: string) {

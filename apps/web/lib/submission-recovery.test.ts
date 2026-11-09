@@ -154,7 +154,7 @@ const AUTHOR_ID = "author-1"
 const DRAFT_ID = "draft-1"
 const FIXTURE_CREATED_AT = "2020-01-01T00:00:00.000Z"
 const FIXTURE_UPDATED_AT = "2020-01-02T00:00:00.000Z"
-const ORIGINAL_BLOB_TOKEN = process.env.DRAFT_BLOB_READ_WRITE_TOKEN
+const ORIGINAL_BLOB_STORE_ID = process.env.DRAFT_BLOB_STORE_ID
 
 function glossaryRow(overrides: Partial<GlossaryRow> = {}): GlossaryRow {
   const row = Object.fromEntries(
@@ -238,7 +238,7 @@ async function readStoredDraft() {
 }
 
 beforeEach(() => {
-  process.env.DRAFT_BLOB_READ_WRITE_TOKEN = "test-blob-token"
+  process.env.DRAFT_BLOB_STORE_ID = "store_test"
   vi.clearAllMocks()
   blobState.reset()
   github.findArticlePullRequestByBranch.mockReset()
@@ -246,10 +246,10 @@ beforeEach(() => {
 })
 
 afterAll(() => {
-  if (ORIGINAL_BLOB_TOKEN === undefined) {
-    delete process.env.DRAFT_BLOB_READ_WRITE_TOKEN
+  if (ORIGINAL_BLOB_STORE_ID === undefined) {
+    delete process.env.DRAFT_BLOB_STORE_ID
   } else {
-    process.env.DRAFT_BLOB_READ_WRITE_TOKEN = ORIGINAL_BLOB_TOKEN
+    process.env.DRAFT_BLOB_STORE_ID = ORIGINAL_BLOB_STORE_ID
   }
 })
 

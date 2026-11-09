@@ -2,7 +2,7 @@ import { get } from "@vercel/blob"
 import { auth } from "@/lib/auth"
 import { readDraft } from "@/lib/drafts/store"
 import { draftAssetPrefix } from "@/lib/drafts/storage"
-import { privateBlobOptions } from "@/lib/private-blob"
+import { privateBlobOptions } from "@/lib/blob-stores"
 
 export async function GET(
   _request: Request,

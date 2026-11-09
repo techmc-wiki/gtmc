@@ -126,16 +126,8 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Chrome HTML-in-Canvas origin trial: enables the CanvasUI
-        // DecryptReveal effect on the PDF download page. Token is bound
-        // to https://www.techmc.wiki and expires 2026-10-19.
         source: "/:path*",
         headers: [
-          {
-            key: "Origin-Trial",
-            value:
-              "AlNE6Dr0We0vv7HNSzPGSc7HI46ID49UvB3aYU/5wKlwPqseeiEaXQQsRsndqjH2/ZQVO+qg2vSyIxk2k7KR/AIAAABoeyJvcmlnaW4iOiJodHRwczovL3d3dy50ZWNobWMud2lraTo0NDMiLCJmZWF0dXJlIjoiSFRNTEluQ2FudmFzIiwiZXhwaXJ5IjoxNzkyNDU0NDAwLCJpc1N1YmRvbWFpbiI6dHJ1ZX0=",
-          },
           {
             key: "X-Content-Type-Options",
             value: "nosniff",

@@ -76,7 +76,11 @@ export function PropertyResultsTable({
         <TableHeader>
           <TableRow>
             <TableHead
-              className="bg-card sticky left-0 z-10 min-w-52"
+              className="bg-card sticky left-0 z-20 w-11"
+              aria-hidden
+            />
+            <TableHead
+              className="bg-card sticky left-11 z-10 min-w-48"
               aria-sort={
                 state.sort === ""
                   ? state.direction === "desc"
@@ -86,8 +90,8 @@ export function PropertyResultsTable({
               }>
               <Button
                 variant="ghost"
-                size="sm"
-                className="min-h-11"
+                size="xs"
+                className="-mx-2 h-9 gap-1 px-2 font-medium"
                 onClick={() => sortBy("")}>
                 {t("name")}
                 {state.sort === "" ? (
@@ -111,17 +115,17 @@ export function PropertyResultsTable({
                       : "ascending"
                     : undefined
                 }
-                className="min-w-40 whitespace-normal">
+                className="min-w-36 whitespace-normal">
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className="h-auto min-h-11 justify-start whitespace-normal"
+                  size="xs"
+                  className="-mx-2 h-9 gap-1 px-2 font-medium"
                   onClick={() => sortBy(id)}
                   title={byId.get(id)?.description}>
                   <span>
                     {byId.get(id)?.name}
                     {byId.get(id)?.unit && (
-                      <span className="text-muted-foreground block text-xs">
+                      <span className="text-muted-foreground block text-xs font-normal">
                         {t("unit", { unit: byId.get(id)?.unit ?? "" })}
                       </span>
                     )}
@@ -147,36 +151,34 @@ export function PropertyResultsTable({
               data-state={
                 selectedNames.has(entry.name) ? "selected" : undefined
               }>
-              <TableCell className="bg-card sticky left-0 z-10 align-top">
-                <div className="flex items-center gap-2">
-                  <Label className="flex size-11 shrink-0 items-center justify-center">
-                    <Checkbox
-                      checked={selectedNames.has(entry.name)}
-                      disabled={
-                        !selectedNames.has(entry.name) && selected.length >= 4
-                      }
-                      onCheckedChange={() => toggleCompare(entry.name)}
-                      aria-label={t("selectComparison", {
-                        name: entry.name,
-                      })}
-                    />
-                  </Label>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto min-h-11 max-w-56 justify-start px-1 text-left whitespace-normal"
-                    onClick={() => onOpenDetail(entry.name)}>
-                    {entry.name}
-                  </Button>
-                </div>
+              <TableCell className="bg-card sticky left-0 z-20 p-0">
+                <Label className="flex size-11 shrink-0 items-center justify-center sm:h-9 sm:w-11">
+                  <Checkbox
+                    checked={selectedNames.has(entry.name)}
+                    disabled={
+                      !selectedNames.has(entry.name) && selected.length >= 4
+                    }
+                    onCheckedChange={() => toggleCompare(entry.name)}
+                    aria-label={t("selectComparison", {
+                      name: entry.name,
+                    })}
+                  />
+                </Label>
+              </TableCell>
+              <TableCell className="bg-card sticky left-11 z-10 py-1">
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  className="h-auto min-h-8 justify-start px-1 py-1 text-left whitespace-normal"
+                  onClick={() => onOpenDetail(entry.name)}>
+                  {entry.name}
+                </Button>
               </TableCell>
               {results.columns.map((id) => (
                 <TableCell
                   key={id}
-                  className="max-w-72 py-4 align-top whitespace-normal">
-                  <div className="max-h-32 overflow-y-auto">
-                    <PropertyValueView value={entry.values[id] ?? null} />
-                  </div>
+                  className="max-w-72 py-1 align-top whitespace-normal">
+                  <PropertyValueView value={entry.values[id] ?? null} dense />
                 </TableCell>
               ))}
             </TableRow>

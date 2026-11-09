@@ -34,7 +34,7 @@ import {
 import { useMounted } from "@/hooks/use-mounted"
 import { submitGlossaryDraftAction } from "@/actions/glossary-submit"
 import { GLOSSARY_COLUMNS, type GlossaryRow } from "@/lib/glossary/csv"
-import { generateSlug } from "@/lib/glossary/slug"
+import { generateUniqueSlug } from "@/lib/glossary/slug"
 import type {
   GlossaryEntry,
   GlossarySummaryEntry,
@@ -290,13 +290,7 @@ function GlossaryEditorInner({
       if (isReadOnly) return
       const trimmed = query.trim()
       if (!trimmed) return
-      const baseSlug = generateSlug(trimmed)
-      let slug = baseSlug
-      let counter = 2
-      while (usedSlugs.has(slug)) {
-        slug = `${baseSlug}-${counter}`
-        counter++
-      }
+      const slug = generateUniqueSlug(trimmed, new Set(usedSlugs))
       const row = emptyRow()
       row["Full Form (English)"] = trimmed
       setOperations((prev) => [
@@ -314,13 +308,7 @@ function GlossaryEditorInner({
 
   const handleAddNewTerm = React.useCallback(() => {
     if (isReadOnly) return
-    const baseSlug = "new-term"
-    let slug = baseSlug
-    let counter = 2
-    while (usedSlugs.has(slug)) {
-      slug = `${baseSlug}-${counter}`
-      counter++
-    }
+    const slug = generateUniqueSlug("new-term", new Set(usedSlugs))
     const row = emptyRow()
     setOperations((prev) => [
       ...prev,

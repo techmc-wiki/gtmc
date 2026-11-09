@@ -10,6 +10,7 @@ export function generateSlug(englishTerm: string): string {
   return slug || "term"
 }
 
+/** Returns a slug unique within `used`, recording the result in that set. */
 export function generateUniqueSlug(
   englishTerm: string,
   used: Set<string>

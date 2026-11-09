@@ -12,6 +12,10 @@ async function main(): Promise<void> {
     ),
     runBuildStep(logger, "manifest", () =>
       runScriptAsync("scripts/generate-article-manifest.ts")
+    ).then(() =>
+      runBuildStep(logger, "article-content", () =>
+        runScriptAsync("scripts/generate-article-content.ts")
+      )
     ),
     runBuildStep(logger, "glossary", () =>
       runScriptAsync("scripts/generate-glossary-manifest.ts")
@@ -20,10 +24,6 @@ async function main(): Promise<void> {
       runScriptAsync("scripts/stage-draft-guides.ts")
     ),
   ])
-
-  await runBuildStep(logger, "article-content", () =>
-    runScriptAsync("scripts/generate-article-content.ts")
-  )
 
   logger.event("content.completed", {
     duration_ms: Math.round(performance.now() - startedAt),

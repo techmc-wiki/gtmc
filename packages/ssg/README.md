@@ -22,6 +22,20 @@ and settings, and `scripts/generate-pdf.ts` drives the PDF build.
 loading, Next.js caching, React Markdown components, and overall build
 orchestration stay in `apps/web`.
 
+`pnpm build:content` runs contributors, manifest, glossary, and guide staging
+concurrently; article artifacts start as soon as the manifest is ready. Contributor
+totals persist in `apps/web/.next/cache/repository-contributors/stats.json`.
+An unchanged default-branch revision fetches only one commit. On a cache miss,
+lightweight requests discover GitHub's opaque pagination cursors without computing
+commit diffs, then up to four concurrent requests load activity pages. Every miss
+refreshes the complete history and current GitHub author identities; no historical
+totals are reused across revisions.
+
+Next.js prerendering uses up to four workers, capped by the host's available CPUs.
+Benchmark content with `time pnpm build:content` and prerendering separately with
+`time pnpm build:next`; compare cold contributor-cache misses separately from
+repeat builds. Logs report each content stage's duration and contributor page count.
+
 Shared contracts and transforms are imported through `@gtmc/ssg/articles/*` and
 `@gtmc/ssg/markdown/*`. Browser consumers use the browser CJK spacing transform;
 Shiki and provenance analysis are server modules. The host passes the persisted

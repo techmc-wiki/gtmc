@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import type { OutlineItem } from "./use-outline";
 import { addSiteScrollListener } from "@/hooks/site-scroll-root";
 
@@ -23,7 +23,7 @@ function getHeadingEntries(toc: OutlineItem[]): HeadingEntry[] {
   });
 }
 
-function computeInitialActiveHeading(toc: OutlineItem[]): string | null {
+function computeActiveHeading(toc: OutlineItem[]): string | null {
   if (!toc || toc.length === 0) return null;
 
   const headingEntries = getHeadingEntries(toc);
@@ -43,47 +43,25 @@ function computeInitialActiveHeading(toc: OutlineItem[]): string | null {
   return activeId;
 }
 
-export function useActiveHeading(toc: OutlineItem[], pathname: string): string | null {
+export function useActiveHeading(toc: OutlineItem[]): string | null {
   const [activeHeadingId, setActiveHeadingId] = useState<string | null>(() =>
-    computeInitialActiveHeading(toc),
+    computeActiveHeading(toc),
   );
-  const pathnameRef = useRef(pathname);
 
   useEffect(() => {
-    if (pathnameRef.current !== pathname) {
-      pathnameRef.current = pathname;
-      setActiveHeadingId(computeInitialActiveHeading(toc));
-    }
-  }, [pathname, toc]);
-
-  useEffect(() => {
-    if (!toc || toc.length === 0) {
-      return;
-    }
-
-    const getActiveId = (): string | null => {
-      const headingEntries = getHeadingEntries(toc);
-      if (headingEntries.length === 0) return null;
-
-      const threshold = window.innerHeight * 0.25;
-      let activeId: string | null = headingEntries[0]?.id ?? null;
-
-      for (const entry of headingEntries) {
-        const rect = entry.element.getBoundingClientRect();
-        if (rect.top <= threshold) {
-          activeId = entry.id;
-        } else {
-          break;
-        }
-      }
-      return activeId;
+    const updateActiveHeading = () => {
+      setActiveHeadingId(computeActiveHeading(toc));
     };
 
-    const onScroll = () => {
-      setActiveHeadingId(getActiveId());
-    };
+    // Compute as soon as an outline appears or is replaced: on the first outline, on a
+    // route change (useOutline yields the empty outline for the new pathname, then the
+    // re-tagged items) and when headings stream in after the initial scan. Waiting for
+    // a scroll event would leave the previous heading highlighted indefinitely.
+    updateActiveHeading();
 
-    return addSiteScrollListener(onScroll, { passive: true });
+    if (toc.length === 0) return;
+
+    return addSiteScrollListener(updateActiveHeading, { passive: true });
   }, [toc]);
 
   return activeHeadingId;

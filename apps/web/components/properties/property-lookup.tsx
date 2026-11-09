@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react"
 import useSWRImmutable from "swr/immutable"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import {
   parseAsArrayOf,
   parseAsInteger,
@@ -83,6 +83,7 @@ function useDebounced(value: string) {
 }
 
 function usePropertyLookup(initialCatalog: PropertyCatalog) {
+  const locale = useLocale()
   const [state, setState] = useQueryStates({
     dataset: parseAsStringLiteral(DATASETS).withDefault("blocks"),
     q: parseAsString.withDefault(""),
@@ -95,7 +96,7 @@ function usePropertyLookup(initialCatalog: PropertyCatalog) {
     compare: parseAsArrayOf(parseAsString).withDefault([]),
   })
   const [comparisonOpen, setComparisonOpen] = useState(false)
-  const catalogKey = `/api/properties?dataset=${state.dataset}&mode=catalog`
+  const catalogKey = `/api/properties?dataset=${state.dataset}&locale=${locale}&mode=catalog`
   const {
     data: catalog,
     error: catalogError,
@@ -110,6 +111,7 @@ function usePropertyLookup(initialCatalog: PropertyCatalog) {
   const selected = state.compare.slice(0, 4)
   const parameters = new URLSearchParams({
     dataset: state.dataset,
+    locale,
     q: state.q.slice(0, 200),
     columns: columns.join(","),
     filters: JSON.stringify(state.filters),

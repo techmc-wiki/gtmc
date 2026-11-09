@@ -1,14 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
+import { routing } from "@/i18n/routing"
 import {
   getPropertyCatalog,
   getPropertyDetails,
   searchProperties,
 } from "@/lib/properties/data"
+import { normalizeLocale } from "@/lib/properties/i18n"
 import { DATASETS, FILTER_OPERATORS } from "@/lib/properties/types"
 
 const input = z.object({
   dataset: z.enum(DATASETS).default("blocks"),
+  locale: z
+    .string()
+    .max(16)
+    .default(routing.defaultLocale)
+    .transform((value) => normalizeLocale(value)),
   mode: z.enum(["catalog", "entries", "details"]).default("entries"),
   q: z.string().max(200).default(""),
   columns: z.string().max(1000).default(""),
@@ -67,10 +74,14 @@ export async function GET(request: NextRequest) {
   const options = parsed.data
   const data =
     options.mode === "catalog"
-      ? await getPropertyCatalog(options.dataset)
+      ? await getPropertyCatalog(options.dataset, options.locale)
       : options.mode === "details"
-        ? await getPropertyDetails(options.dataset, options.names)
-        : await searchProperties(options.dataset, {
+        ? await getPropertyDetails(
+            options.dataset,
+            options.locale,
+            options.names
+          )
+        : await searchProperties(options.dataset, options.locale, {
             query: options.q,
             columns: options.columns.split(",").filter(Boolean),
             filters: options.filters,

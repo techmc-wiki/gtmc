@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import useSWRImmutable from "swr/immutable"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import {
   Sheet,
   SheetContent,
@@ -48,9 +48,10 @@ function DetailContent({
   properties: PropertyInfo[]
 }) {
   const t = useTranslations("Properties")
+  const locale = useLocale()
   const [query, setQuery] = useState("")
   const [differencesOnly, setDifferencesOnly] = useState(names.length > 1)
-  const key = `/api/properties?${new URLSearchParams({ dataset, mode: "details", names: JSON.stringify(names) })}`
+  const key = `/api/properties?${new URLSearchParams({ dataset, locale, mode: "details", names: JSON.stringify(names) })}`
   const { data, error, mutate } = useSWRImmutable<PropertyEntry[]>(
     key,
     propertyFetcher

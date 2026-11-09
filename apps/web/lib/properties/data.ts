@@ -1,8 +1,18 @@
 // eslint-disable-next-line import/no-unassigned-import -- Prevent data and filesystem access in browser bundles.
 import "server-only"
 import { readFile } from "node:fs/promises"
-import { cacheLife } from "next/cache"
+import { cacheLife, cacheTag } from "next/cache"
 import { workspacePath } from "@/lib/workspace-paths"
+import { getPropertyOverlay } from "./i18n"
+import {
+  translateText,
+  translateValue,
+  translatedCategory,
+  translatedProperty,
+  translatedUnit,
+  type Locale,
+  type PropertyOverlay,
+} from "./i18n/overlay"
 import type {
   DatasetId,
   PropertyCatalog,
@@ -19,6 +29,25 @@ const files: Record<DatasetId, string> = {
   legacy: "block_data_1.12.json",
   entities: "entity_data.json",
   items: "item_data.json",
+}
+const preferred: Record<DatasetId, string[]> = {
+  blocks: [
+    "conductive",
+    "movable",
+    "blast_resistance",
+    "hardness",
+    "luminance",
+  ],
+  experimental: [
+    "conductive",
+    "movable",
+    "blast_resistance",
+    "hardness",
+    "luminance",
+  ],
+  legacy: ["hardness", "blast_resistance", "get_push_reaction", "material"],
+  entities: ["health", "width", "height", "type"],
+  items: ["stackability", "survival_obtainable", "renewable"],
 }
 interface SourceProperty {
   property_name: string
@@ -37,10 +66,15 @@ interface SourceDataset {
   property_structure: PropertyStructure
   properties: Record<string, SourceProperty>
 }
-interface Dataset {
+/** Upstream data, normalized to plain text, shared by every locale. */
+interface RawDataset {
   source: SourceDataset
-  catalog: PropertyCatalog
   search: Map<string, string>
+}
+/** Raw data projected through one locale's translation overlay. */
+interface LocalizedDataset extends RawDataset {
+  catalog: PropertyCatalog
+  overlay: PropertyOverlay
 }
 
 // Upstream strings contain presentation HTML. Expose plain text only; React
@@ -100,8 +134,8 @@ function valueFor(property: SourceProperty, name: string): PropertyValue {
     : (property.default_value ?? null)
 }
 
-const datasets = new Map<DatasetId, Promise<Dataset>>()
-function loadDataset(id: DatasetId): Promise<Dataset> {
+const datasets = new Map<DatasetId, Promise<RawDataset>>()
+function loadDataset(id: DatasetId): Promise<RawDataset> {
   let pending = datasets.get(id)
   if (!pending) {
     pending = readFile(
@@ -110,60 +144,14 @@ function loadDataset(id: DatasetId): Promise<Dataset> {
     )
       .then((text) => {
         const source = JSON.parse(text) as SourceDataset
-        const categories = new Map<string, string>()
-        function visit(structure: PropertyStructure, category = "") {
-          for (const item of structure) {
-            if (typeof item === "string") categories.set(item, category)
-            else {
-              visit(
-                item.contents,
-                [category, plainText(item.category)].filter(Boolean).join(" / ")
-              )
-            }
-          }
-        }
-        visit(source.property_structure)
-        const properties: PropertyInfo[] = Object.entries(source.properties)
-          .map(([key, property]) => {
-            property.entries = Object.fromEntries(
-              Object.entries(property.entries).map(([name, value]) => [
-                name,
-                normalize(value),
-              ])
-            )
-            property.default_value = normalize(property.default_value ?? null)
-            return {
-              id: key,
-              name: plainText(property.property_name),
-              description: plainText(property.property_description ?? ""),
-              category: categories.get(key) ?? "",
-              unit: property.size_type,
-            }
-          })
-          .toSorted((a, b) => a.name.localeCompare(b.name, "en"))
-        const preferred: Record<DatasetId, string[]> = {
-          blocks: [
-            "conductive",
-            "movable",
-            "blast_resistance",
-            "hardness",
-            "luminance",
-          ],
-          experimental: [
-            "conductive",
-            "movable",
-            "blast_resistance",
-            "hardness",
-            "luminance",
-          ],
-          legacy: [
-            "hardness",
-            "blast_resistance",
-            "get_push_reaction",
-            "material",
-          ],
-          entities: ["health", "width", "height", "type"],
-          items: ["stackability", "survival_obtainable", "renewable"],
+        for (const property of Object.values(source.properties)) {
+          property.entries = Object.fromEntries(
+            Object.entries(property.entries).map(([name, value]) => [
+              name,
+              normalize(value),
+            ])
+          )
+          property.default_value = normalize(property.default_value ?? null)
         }
         const search = new Map(
           source.key_list.map((name) => {
@@ -178,16 +166,7 @@ function loadDataset(id: DatasetId): Promise<Dataset> {
             ]
           })
         )
-        return {
-          source,
-          search,
-          catalog: {
-            dataset: id,
-            count: source.key_list.length,
-            properties,
-            defaults: preferred[id].filter((key) => key in source.properties),
-          },
-        }
+        return { source, search }
       })
       .catch((error: unknown) => {
         datasets.delete(id)
@@ -198,18 +177,89 @@ function loadDataset(id: DatasetId): Promise<Dataset> {
   return pending
 }
 
+const localized = new Map<string, Promise<LocalizedDataset>>()
+function loadLocalized(
+  id: DatasetId,
+  locale: Locale
+): Promise<LocalizedDataset> {
+  const cacheKey = `${id}:${locale}`
+  let pending = localized.get(cacheKey)
+  if (!pending) {
+    pending = loadDataset(id)
+      .then(({ source, search }) => {
+        const overlay = getPropertyOverlay(locale)
+        const categories = new Map<string, string>()
+        function visit(structure: PropertyStructure, category = "") {
+          for (const item of structure) {
+            if (typeof item === "string") categories.set(item, category)
+            else {
+              visit(
+                item.contents,
+                [
+                  category,
+                  translatedCategory(overlay, plainText(item.category)),
+                ]
+                  .filter(Boolean)
+                  .join(" / ")
+              )
+            }
+          }
+        }
+        visit(source.property_structure)
+        const properties: PropertyInfo[] = Object.entries(source.properties)
+          .map(([propertyId, property]) => {
+            const translated = translatedProperty(
+              overlay,
+              id,
+              propertyId,
+              plainText(property.property_name),
+              plainText(property.property_description ?? "")
+            )
+            return {
+              id: propertyId,
+              name: translated.name,
+              description: translated.description,
+              category: categories.get(propertyId) ?? "",
+              unit: translatedUnit(overlay, property.size_type),
+            }
+          })
+          .toSorted((a, b) => a.name.localeCompare(b.name, locale))
+        return {
+          source,
+          search,
+          overlay,
+          catalog: {
+            dataset: id,
+            count: source.key_list.length,
+            properties,
+            defaults: preferred[id].filter((key) => key in source.properties),
+          },
+        }
+      })
+      .catch((error: unknown) => {
+        localized.delete(cacheKey)
+        throw error
+      })
+    localized.set(cacheKey, pending)
+  }
+  return pending
+}
+
 export async function getPropertyCatalog(
-  dataset: DatasetId
+  dataset: DatasetId,
+  locale: Locale
 ): Promise<PropertyCatalog> {
   "use cache"
   cacheLife("max")
-  return (await loadDataset(dataset)).catalog
+  cacheTag("properties-catalog")
+  return (await loadLocalized(dataset, locale)).catalog
 }
 export async function getPropertyDetails(
   dataset: DatasetId,
+  locale: Locale,
   names: string[]
 ): Promise<PropertyEntry[]> {
-  const { source, search } = await loadDataset(dataset)
+  const { source, search, overlay } = await loadLocalized(dataset, locale)
   return names
     .filter((name) => search.has(name))
     .map((name) => ({
@@ -217,14 +267,19 @@ export async function getPropertyDetails(
       values: Object.fromEntries(
         Object.entries(source.properties).map(([id, property]) => [
           id,
-          valueFor(property, name),
+          translateValue(overlay, valueFor(property, name)),
         ])
       ),
     }))
 }
 
-function matches(value: PropertyValue, filter: PropertyFilter): boolean {
-  const expected = filter.value.trim().toLowerCase()
+function matches(
+  overlay: PropertyOverlay,
+  value: PropertyValue,
+  filter: PropertyFilter
+): boolean {
+  const raw = filter.value.trim()
+  const expected = raw.toLowerCase()
   return leaves(value).some((leaf) => {
     if (filter.operator === "gte" || filter.operator === "lte") {
       const number = typeof leaf === "number" ? leaf : Number(leaf)
@@ -238,23 +293,39 @@ function matches(value: PropertyValue, filter: PropertyFilter): boolean {
       }
       return filter.operator === "gte" ? number >= target : number <= target
     }
-    const text = String(leaf).toLowerCase()
+    const text = String(leaf)
+    // Compare against both the upstream value and its translation so filters
+    // work whether the user types "Yes" or "是".
+    const candidates = [text.toLowerCase()]
+    const localizedText = translateText(overlay, text)
+    if (localizedText !== text) candidates.push(localizedText.toLowerCase())
+    const needles = [expected]
+    const localizedNeedle = translateText(overlay, raw)
+    if (localizedNeedle !== raw) needles.push(localizedNeedle.toLowerCase())
     return filter.operator === "eq"
-      ? text === expected
-      : text.includes(expected)
+      ? candidates.some((candidate) => needles.includes(candidate))
+      : candidates.some((candidate) =>
+          needles.some((needle) => candidate.includes(needle))
+        )
   })
 }
-function sortValue(value: PropertyValue): string | number | null {
+function sortValue(
+  overlay: PropertyOverlay,
+  value: PropertyValue
+): string | number | null {
   const values = leaves(value)
   if (!values.length) return null
   // For state-dependent numeric properties, order by the lowest state value.
   if (values.every((item) => typeof item === "number")) {
     return Math.min(...values)
   }
-  return values.map(String).toSorted()[0]
+  return values
+    .map((item) => translateText(overlay, String(item)))
+    .toSorted()[0]
 }
 export async function searchProperties(
   dataset: DatasetId,
+  locale: Locale,
   options: {
     query: string
     columns: string[]
@@ -264,7 +335,10 @@ export async function searchProperties(
     page: number
   }
 ): Promise<PropertyResults> {
-  const { source, search, catalog } = await loadDataset(dataset)
+  const { source, search, catalog, overlay } = await loadLocalized(
+    dataset,
+    locale
+  )
   const columns = [
     ...new Set(options.columns.length ? options.columns : catalog.defaults),
   ]
@@ -287,7 +361,11 @@ export async function searchProperties(
       filters.every(
         (filter) =>
           Object.hasOwn(source.properties, filter.property) &&
-          matches(valueFor(source.properties[filter.property], name), filter)
+          matches(
+            overlay,
+            valueFor(source.properties[filter.property], name),
+            filter
+          )
       )
     )
   })
@@ -295,7 +373,12 @@ export async function searchProperties(
     ? source.properties[options.sort]
     : undefined
   const sortValues = property
-    ? new Map(names.map((name) => [name, sortValue(valueFor(property, name))]))
+    ? new Map(
+        names.map((name) => [
+          name,
+          sortValue(overlay, valueFor(property, name)),
+        ])
+      )
     : null
   names.sort((a, b) => {
     const left = sortValues ? sortValues.get(a) : a
@@ -305,7 +388,7 @@ export async function searchProperties(
     const order =
       typeof left === "number" && typeof right === "number"
         ? left - right
-        : String(left).localeCompare(String(right), "en", { numeric: true })
+        : String(left).localeCompare(String(right), locale, { numeric: true })
     return (options.descending ? -order : order) || a.localeCompare(b)
   })
   const pages = Math.max(1, Math.ceil(names.length / 40))
@@ -318,7 +401,10 @@ export async function searchProperties(
     entries: names.slice((page - 1) * 40, page * 40).map((name) => ({
       name,
       values: Object.fromEntries(
-        columns.map((id) => [id, valueFor(source.properties[id], name)])
+        columns.map((id) => [
+          id,
+          translateValue(overlay, valueFor(source.properties[id], name)),
+        ])
       ),
     })),
   }

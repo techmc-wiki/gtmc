@@ -30,19 +30,7 @@ export function remarkCallouts() {
         paragraph.children.shift()
       }
 
-      if (
-        paragraph.children.length > 0 &&
-        paragraph.children[0].type === "break"
-      ) {
-        paragraph.children.shift()
-      }
-
-      if (paragraph.children.length === 0) {
-        node.children.shift()
-      }
-
-      // Strip trailing break node inserted by remarkBreaks after the marker
-      if (
+      while (
         paragraph.children.length > 0 &&
         paragraph.children[0].type === "break"
       ) {

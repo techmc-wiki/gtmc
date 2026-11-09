@@ -91,9 +91,13 @@ function plainText(value: string): string {
     times: "×",
     deg: "°",
   }
-  return value
-    .replaceAll(/<br\s*\/?\s*>/gi, "\n")
-    .replaceAll(/<[^>]*>/g, "")
+  let stripped = value.replaceAll(/<br\s*\/?\s*>/gi, "\n")
+  let previous: string
+  do {
+    previous = stripped
+    stripped = stripped.replaceAll(/<[^>]*>/g, "")
+  } while (stripped !== previous)
+  return stripped
     .replaceAll(
       /&(#x[\da-f]+|#\d+|\w+);/gi,
       (match: string, entity: string) => {

@@ -24,6 +24,7 @@ import {
   type FilterOperator,
   type PropertyFilter,
   type PropertyInfo,
+  type PropertyKind,
 } from "@/lib/properties/types"
 import { PropertyPicker } from "./property-picker"
 
@@ -283,32 +284,19 @@ function PropertyFilterRow({
   const hasProperty = Boolean(filter.property)
   const propertyName = info?.name ?? filter.property
   const shown = hasProperty && selected.has(filter.property)
+  const removeLabel = hasProperty
+    ? t("removeFilter", { name: propertyName })
+    : t("removeCondition")
   const visibilityLabel = hasProperty
-    ? shown
-      ? t("hideColumn", { name: propertyName })
-      : t("showColumn", { name: propertyName })
+    ? t(shown ? "hideColumn" : "showColumn", { name: propertyName })
     : t("columnVisibility")
-  const operators =
-    info?.kind === "number"
-      ? NUMBER_OPERATORS
-      : info?.kind && info.kind !== "text"
-        ? null
-        : TEXT_OPERATORS
   return (
     <div className="border-border grid grid-cols-[2.75rem_2.75rem_minmax(0,1fr)] items-center gap-2 border-b pb-2 sm:grid-cols-[2.75rem_2.75rem_minmax(0,14rem)_minmax(0,1fr)] sm:border-b-0 sm:pb-0">
       <Button
         variant="outline"
         size="icon"
-        aria-label={
-          hasProperty
-            ? t("removeFilter", { name: propertyName })
-            : t("removeCondition")
-        }
-        title={
-          hasProperty
-            ? t("removeFilter", { name: propertyName })
-            : t("removeCondition")
-        }
+        aria-label={removeLabel}
+        title={removeLabel}
         onClick={onRemove}>
         <X aria-hidden="true" />
       </Button>
@@ -329,104 +317,189 @@ function PropertyFilterRow({
           onPatch({ property, operator: "eq", value: "" })
         }
       />
-      <div className="col-span-3 flex flex-wrap items-center gap-2 sm:col-span-1">
-        {operators && (
-          <Select
-            value={filter.operator}
-            disabled={!hasProperty}
-            onValueChange={(operator) => {
-              if (FILTER_OPERATORS.includes(operator as FilterOperator)) {
-                onPatch({ operator: operator as FilterOperator })
-              }
-            }}>
-            <SelectTrigger
-              className="min-h-11 w-full min-w-0 sm:w-36"
-              aria-label={
-                hasProperty ? `${propertyName} ${t("operator")}` : t("operator")
-              }>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {operators.map((operator) => (
-                <SelectItem key={operator} value={operator}>
-                  {t(`op_${operator}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-        {info?.kind === "number" ? (
-          <Input
-            type="number"
-            inputMode="decimal"
-            step="any"
-            className="h-11 w-full min-w-0 py-0 sm:max-w-64 sm:py-0"
-            value={filter.value}
-            disabled={!hasProperty}
-            placeholder={t("numberPlaceholder")}
-            aria-label={t("filterValueFor", { name: propertyName })}
-            onChange={(event) => onPatch({ value: event.target.value })}
-          />
-        ) : info?.kind === "enum" ||
-          info?.kind === "boolean" ||
-          info?.kind === "tags" ? (
-          <Select
-            value={filter.value}
-            disabled={!hasProperty}
-            onValueChange={(value) => onPatch({ value })}>
-            <SelectTrigger
-              className="min-h-11 w-full min-w-0 sm:w-56"
-              aria-label={
-                info.kind === "tags" ? t("selectTag") : t("selectValue")
-              }>
-              <SelectValue
-                placeholder={
-                  info.kind === "tags" ? t("selectTag") : t("selectValue")
-                }
-              />
-            </SelectTrigger>
-            <SelectContent>
-              {(info.options ?? []).map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <Input
-            className="h-11 w-full min-w-0 py-0 sm:max-w-64 sm:py-0"
-            value={filter.value}
-            maxLength={200}
-            disabled={!hasProperty}
-            placeholder={t("filterValue")}
-            aria-label={
-              hasProperty
-                ? t("filterValueFor", { name: propertyName })
-                : t("filterValue")
-            }
-            onChange={(event) => onPatch({ value: event.target.value })}
-          />
-        )}
-        {info?.kind === "tags" && (
-          <Select
-            value={filter.operator === "ne" ? "ne" : "eq"}
-            disabled={!hasProperty}
-            onValueChange={(value) =>
-              onPatch({ operator: value === "ne" ? "ne" : "eq" })
-            }>
-            <SelectTrigger
-              className="min-h-11 w-full min-w-0 sm:w-28"
-              aria-label={t("tagPresence")}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="eq">{t("yes")}</SelectItem>
-              <SelectItem value="ne">{t("no")}</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
-      </div>
+      <FilterCondition
+        filter={filter}
+        info={info}
+        hasProperty={hasProperty}
+        propertyName={propertyName}
+        onPatch={onPatch}
+      />
     </div>
+  )
+}
+
+interface FilterConditionProps {
+  filter: PropertyFilter
+  info: PropertyInfo | undefined
+  hasProperty: boolean
+  propertyName: string
+  onPatch: (patch: Partial<PropertyFilter>) => void
+}
+
+function FilterCondition({
+  filter,
+  info,
+  hasProperty,
+  propertyName,
+  onPatch,
+}: FilterConditionProps) {
+  const t = useTranslations("Properties")
+  const operators = operatorsFor(info?.kind)
+  return (
+    <div className="col-span-3 flex flex-wrap items-center gap-2 sm:col-span-1">
+      {operators && (
+        <Select
+          value={filter.operator}
+          disabled={!hasProperty}
+          onValueChange={(operator) => {
+            if (FILTER_OPERATORS.includes(operator as FilterOperator)) {
+              onPatch({ operator: operator as FilterOperator })
+            }
+          }}>
+          <SelectTrigger
+            className="min-h-11 w-full min-w-0 sm:w-36"
+            aria-label={
+              hasProperty ? `${propertyName} ${t("operator")}` : t("operator")
+            }>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {operators.map((operator) => (
+              <SelectItem key={operator} value={operator}>
+                {t(`op_${operator}`)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+      <FilterValueField
+        info={info}
+        value={filter.value}
+        disabled={!hasProperty}
+        propertyName={propertyName}
+        hasProperty={hasProperty}
+        onChange={(value) => onPatch({ value })}
+      />
+      {info?.kind === "tags" && (
+        <TagPresenceSelect
+          value={filter.operator === "ne" ? "ne" : "eq"}
+          disabled={!hasProperty}
+          onChange={(operator) => onPatch({ operator })}
+        />
+      )}
+    </div>
+  )
+}
+
+/** Operator choices a property kind supports; null means typed text. */
+function operatorsFor(kind: PropertyKind | undefined): FilterOperator[] | null {
+  if (kind === "number") return NUMBER_OPERATORS
+  if (kind && kind !== "text") return null
+  return TEXT_OPERATORS
+}
+
+interface FilterValueFieldProps {
+  info: PropertyInfo | undefined
+  value: string
+  disabled: boolean
+  hasProperty: boolean
+  propertyName: string
+  onChange: (value: string) => void
+}
+
+function FilterValueField({
+  info,
+  value,
+  disabled,
+  hasProperty,
+  propertyName,
+  onChange,
+}: FilterValueFieldProps) {
+  const t = useTranslations("Properties")
+  if (info?.kind === "number") {
+    return (
+      <Input
+        type="number"
+        inputMode="decimal"
+        step="any"
+        className="h-11 w-full min-w-0 py-0 sm:max-w-64 sm:py-0"
+        value={value}
+        disabled={disabled}
+        placeholder={t("numberPlaceholder")}
+        aria-label={t("filterValueFor", { name: propertyName })}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    )
+  }
+  if (
+    info?.kind === "enum" ||
+    info?.kind === "boolean" ||
+    info?.kind === "tags"
+  ) {
+    const valueLabel = info.kind === "tags" ? t("selectTag") : t("selectValue")
+    return (
+      <Select
+        value={value}
+        disabled={disabled}
+        onValueChange={(next) => onChange(next)}>
+        <SelectTrigger
+          className="min-h-11 w-full min-w-0 sm:w-56"
+          aria-label={valueLabel}>
+          <SelectValue placeholder={valueLabel} />
+        </SelectTrigger>
+        <SelectContent>
+          {(info.options ?? []).map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    )
+  }
+  return (
+    <Input
+      className="h-11 w-full min-w-0 py-0 sm:max-w-64 sm:py-0"
+      value={value}
+      maxLength={200}
+      disabled={disabled}
+      placeholder={t("filterValue")}
+      aria-label={
+        hasProperty
+          ? t("filterValueFor", { name: propertyName })
+          : t("filterValue")
+      }
+      onChange={(event) => onChange(event.target.value)}
+    />
+  )
+}
+
+interface TagPresenceSelectProps {
+  value: "eq" | "ne"
+  disabled: boolean
+  onChange: (operator: "eq" | "ne") => void
+}
+
+function TagPresenceSelect({
+  value,
+  disabled,
+  onChange,
+}: TagPresenceSelectProps) {
+  const t = useTranslations("Properties")
+  return (
+    <Select
+      value={value}
+      disabled={disabled}
+      onValueChange={(next) => onChange(next === "ne" ? "ne" : "eq")}>
+      <SelectTrigger
+        className="min-h-11 w-full min-w-0 sm:w-28"
+        aria-label={t("tagPresence")}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="eq">{t("yes")}</SelectItem>
+        <SelectItem value="ne">{t("no")}</SelectItem>
+      </SelectContent>
+    </Select>
   )
 }

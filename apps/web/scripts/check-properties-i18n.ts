@@ -59,18 +59,22 @@ function categories(structure: PropertyStructure): string[] {
   )
 }
 
-const data = new Map<DatasetId, SourceDataset>()
-for (const dataset of DATASETS) {
-  data.set(
-    dataset,
-    JSON.parse(
-      await readFile(
-        workspacePath("content", "properties", "data", files[dataset]),
-        "utf8"
-      )
-    ) as SourceDataset
+const data = new Map<DatasetId, SourceDataset>(
+  await Promise.all(
+    DATASETS.map(
+      async (dataset) =>
+        [
+          dataset,
+          JSON.parse(
+            await readFile(
+              workspacePath("content", "properties", "data", files[dataset]),
+              "utf8"
+            )
+          ) as SourceDataset,
+        ] as const
+    )
   )
-}
+)
 
 const ids = new Set<string>()
 const categoriesByDataset = new Map<DatasetId, Set<string>>()

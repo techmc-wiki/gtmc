@@ -12,7 +12,6 @@ import {
 } from "@/lib/github/rate-limit"
 
 export { getRepoContentTree } from "@/lib/github/repo-content-tree"
-export type { ArticleTreeNode } from "@/lib/github/repo-content-tree"
 
 async function fetchRepoFile<TResult>(
   filePath: string,

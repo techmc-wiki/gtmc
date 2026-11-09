@@ -1,4 +1,5 @@
 import { shouldSkipArticleFile } from "@gtmc/ssg/articles/frontmatter-parser"
+import type { ArticleTreeNode } from "@/lib/articles/article-tree-types"
 import {
   ARTICLES_REPO_NAME,
   ARTICLES_REPO_OWNER,
@@ -8,17 +9,6 @@ import {
   isGithubSyncRateLimited,
   recordGithubSyncRateLimit,
 } from "@/lib/github/rate-limit"
-
-export interface ArticleTreeNode {
-  id: string
-  title: string
-  slug: string
-  isFolder: boolean
-  introTitle?: string
-  isAdvanced?: boolean
-  parentId: string | null
-  children: ArticleTreeNode[]
-}
 
 function isReservedArticlePath(filePath: string): boolean {
   return filePath.split("/").some((segment) => segment.startsWith("_"))

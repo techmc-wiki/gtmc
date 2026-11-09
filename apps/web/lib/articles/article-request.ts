@@ -6,7 +6,7 @@ import {
   getCachedLocalizedArticleEntry,
 } from "@/lib/articles/manifest-cached";
 
-import type { ArticleTreeNode as BaseArticleTreeNode } from "@/lib/github/sync";
+import type { ArticleTreeNode as BaseArticleTreeNode } from "@/lib/articles/article-tree-types";
 
 export const SOURCE_ARTICLE_LOCALE: ArticleLocale = "zh";
 

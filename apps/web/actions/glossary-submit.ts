@@ -16,13 +16,14 @@ import {
   findGlossaryPullRequestByBranch,
   openGlossaryPullRequest,
 } from "@/lib/glossary/pr"
+import {
+  GLOSSARY_SOURCE_BRANCH,
+  GLOSSARY_SOURCE_FILENAME,
+} from "@/lib/glossary/source"
 import { getFileSnapshot } from "@/lib/github/branch"
 import { generateSlug } from "@/lib/glossary/slug"
 import { GLOSSARY_FORK_REPO, GLOSSARY_REPO } from "@/lib/github/repos"
 import { resolveGithubToken } from "@/lib/github/tokens"
-
-const GLOSSARY_MAIN_BRANCH = "main"
-const GLOSSARY_CSV_PATH = "TechMC Glossary.csv"
 
 export type SubmitGlossaryResult =
   | { success: true; prUrl: string; prNumber: number }
@@ -136,16 +137,16 @@ export async function submitGlossaryDraftAction(
     const authorName = identity.name
 
     let snapshot = await getFileSnapshot(
-      GLOSSARY_CSV_PATH,
-      GLOSSARY_MAIN_BRANCH,
+      GLOSSARY_SOURCE_FILENAME,
+      GLOSSARY_SOURCE_BRANCH,
       token,
       GLOSSARY_REPO
     )
 
     if (!snapshot) {
       snapshot = await getFileSnapshot(
-        GLOSSARY_CSV_PATH,
-        GLOSSARY_MAIN_BRANCH,
+        GLOSSARY_SOURCE_FILENAME,
+        GLOSSARY_SOURCE_BRANCH,
         token,
         GLOSSARY_FORK_REPO
       )
@@ -153,7 +154,7 @@ export async function submitGlossaryDraftAction(
 
     if (!snapshot) {
       throw new Error(
-        `Failed to fetch "${GLOSSARY_CSV_PATH}" from GitHub (${GLOSSARY_REPO.owner}/${GLOSSARY_REPO.name}).`
+        `Failed to fetch "${GLOSSARY_SOURCE_FILENAME}" from GitHub (${GLOSSARY_REPO.owner}/${GLOSSARY_REPO.name}).`
       )
     }
 

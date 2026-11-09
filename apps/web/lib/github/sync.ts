@@ -1,10 +1,7 @@
+import { ARTICLES_SOURCE_BRANCH } from "@/lib/articles/source"
 import { getGithubErrorStatus } from "@/lib/github/errors"
 import { executeWithRetry } from "@/lib/github/retry-fetch"
-import {
-  ARTICLES_REPO_NAME,
-  ARTICLES_REPO_OWNER,
-  getOctokit,
-} from "@/lib/github/articles-repo"
+import { ARTICLES_REPO, getOctokit } from "@/lib/github/repos"
 import {
   isGithubRateLimitErrorForCache,
   isGithubSyncRateLimited,
@@ -29,9 +26,10 @@ async function fetchRepoFile<TResult>(
     retries,
     operation: async () => {
       const { data } = await octokit.repos.getContent({
-        owner: ARTICLES_REPO_OWNER,
-        repo: ARTICLES_REPO_NAME,
+        owner: ARTICLES_REPO.owner,
+        repo: ARTICLES_REPO.name,
         path: filePath,
+        ref: ARTICLES_SOURCE_BRANCH,
       })
 
       if (!Array.isArray(data) && data.type === "file") {

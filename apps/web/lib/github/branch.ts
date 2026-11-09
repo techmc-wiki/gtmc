@@ -1,7 +1,6 @@
 import { getOctokit, type RepoTarget } from "./repos"
 
 const GIT_BLOB_MODE = "100644" as const
-const MAIN_BRANCH = "main"
 
 interface FileSnapshot {
   content: string
@@ -14,15 +13,16 @@ export type BranchFileEntry = {
   encoding?: "utf-8" | "base64"
 }
 
-export async function getMainBranchHeadSha(
+export async function getBranchHeadSha(
   token: string | undefined,
-  repo: RepoTarget
+  repo: RepoTarget,
+  branch: string
 ) {
   const octokit = getOctokit(token)
   const { data } = await octokit.git.getRef({
     owner: repo.owner,
     repo: repo.name,
-    ref: `heads/${MAIN_BRANCH}`,
+    ref: `heads/${branch}`,
   })
 
   return data.object.sha

@@ -1,10 +1,7 @@
-import {
-  ARTICLES_REPO_NAME,
-  ARTICLES_REPO_OWNER,
-  getGitHubWriteToken,
-  getOctokit,
-} from "@/lib/github/articles-repo"
+import { ARTICLES_SOURCE_BRANCH } from "@/lib/articles/source"
 import { getGithubErrorStatus } from "@/lib/github/errors"
+import { ARTICLES_REPO, getOctokit } from "@/lib/github/repos"
+import { resolveGithubToken } from "@/lib/github/tokens"
 import type { FileCategory } from "@/lib/uploads/file-upload"
 
 type ArticleAssetUploadErrorCode =
@@ -39,7 +36,7 @@ export async function uploadArticleAssetToGithub({
   filename: string
   token?: string | null
 }) {
-  const writeToken = getGitHubWriteToken(token)
+  const writeToken = resolveGithubToken(token)
 
   if (!writeToken) {
     throw new ArticleAssetUploadError(
@@ -53,9 +50,10 @@ export async function uploadArticleAssetToGithub({
 
   try {
     const { data } = await octokit.repos.createOrUpdateFileContents({
-      owner: ARTICLES_REPO_OWNER,
-      repo: ARTICLES_REPO_NAME,
+      owner: ARTICLES_REPO.owner,
+      repo: ARTICLES_REPO.name,
       path: filePath,
+      branch: ARTICLES_SOURCE_BRANCH,
       message: `docs(assets): upload ${category.replace(/s$/, "")} ${filename}`,
       content: buffer.toString("base64"),
     })
@@ -81,5 +79,5 @@ export async function uploadArticleAssetToGithub({
 }
 
 function buildArticleAssetUrl(filePath: string) {
-  return `https://raw.githubusercontent.com/${ARTICLES_REPO_OWNER}/${ARTICLES_REPO_NAME}/main/${filePath}`
+  return `https://raw.githubusercontent.com/${ARTICLES_REPO.owner}/${ARTICLES_REPO.name}/${ARTICLES_SOURCE_BRANCH}/${filePath}`
 }

@@ -1,10 +1,7 @@
 import { shouldSkipArticleFile } from "@gtmc/ssg/articles/frontmatter-parser"
 import type { ArticleTreeNode } from "@/lib/articles/article-tree-types"
-import {
-  ARTICLES_REPO_NAME,
-  ARTICLES_REPO_OWNER,
-  getOctokit,
-} from "@/lib/github/articles-repo"
+import { ARTICLES_SOURCE_BRANCH } from "@/lib/articles/source"
+import { ARTICLES_REPO, getOctokit } from "@/lib/github/repos"
 import {
   isGithubSyncRateLimited,
   recordGithubSyncRateLimit,
@@ -22,13 +19,13 @@ export async function getRepoContentTree(): Promise<ArticleTreeNode[]> {
 
   try {
     const { data: ref } = await octokit.git.getRef({
-      owner: ARTICLES_REPO_OWNER,
-      repo: ARTICLES_REPO_NAME,
-      ref: "heads/main",
+      owner: ARTICLES_REPO.owner,
+      repo: ARTICLES_REPO.name,
+      ref: `heads/${ARTICLES_SOURCE_BRANCH}`,
     })
     const { data: tree } = await octokit.git.getTree({
-      owner: ARTICLES_REPO_OWNER,
-      repo: ARTICLES_REPO_NAME,
+      owner: ARTICLES_REPO.owner,
+      repo: ARTICLES_REPO.name,
       tree_sha: ref.object.sha,
       recursive: "1",
     })
@@ -42,8 +39,8 @@ export async function getRepoContentTree(): Promise<ArticleTreeNode[]> {
     const candidates = await Promise.all(
       markdownFiles.map(async (item) => {
         const { data } = await octokit.git.getBlob({
-          owner: ARTICLES_REPO_OWNER,
-          repo: ARTICLES_REPO_NAME,
+          owner: ARTICLES_REPO.owner,
+          repo: ARTICLES_REPO.name,
           file_sha: item.sha!,
         })
         const content = Buffer.from(data.content, "base64").toString("utf-8")

@@ -8,7 +8,7 @@ import {
   findArticlePullRequestByBranch,
   openDraftPullRequest,
 } from "@/lib/articles/pr"
-import { getMainBranchHeadSha } from "@/lib/articles/branch"
+import { getArticleSourceHeadSha } from "@/lib/articles/branch"
 import { getAuthorIdentity, requireAuth } from "@/lib/auth/context"
 import { getDuplicateDraftFilePaths } from "@/lib/drafts/files"
 import { assertDraftStatus, canSubmitDraft } from "@/lib/drafts/lifecycle"
@@ -30,7 +30,7 @@ import {
   releaseFailedSubmission,
   SubmissionInProgressError,
 } from "@/lib/drafts/submission"
-import { getGitHubWriteToken } from "@/lib/github/articles-repo"
+import { resolveGithubToken } from "@/lib/github/tokens"
 
 const UPLOAD_PLACEHOLDER_RE = /<!--\s*UPLOAD_PENDING_[a-f0-9-]+\s*-->/i
 
@@ -114,7 +114,7 @@ export async function submitDraftAction(revisionId: string, etag: string) {
   if (existing.files.some((file) => UPLOAD_PLACEHOLDER_RE.test(file.content))) {
     throw new Error("Finish image uploads before opening a PR")
   }
-  const token = getGitHubWriteToken()
+  const token = resolveGithubToken()
   if (!token) {
     throw new Error("GitHub write access is not configured (GITHUB_TOKEN)")
   }
@@ -179,7 +179,7 @@ export async function submitDraftAction(revisionId: string, etag: string) {
     ).values(),
   ]
   const baseMainSha =
-    existing.baseMainSha || (await getMainBranchHeadSha(token))
+    existing.baseMainSha || (await getArticleSourceHeadSha(token))
 
   let locked: SubmissionLock
   try {

@@ -228,7 +228,7 @@ export function PropertyControls({
                         }
                       }}>
                       <SelectTrigger
-                        className="min-h-11 w-full min-w-0 sm:w-fit"
+                        className="min-h-11 w-full min-w-0 sm:w-36"
                         aria-label={`${propertyName} ${t("operator")}`}>
                         <SelectValue />
                       </SelectTrigger>
@@ -241,7 +241,7 @@ export function PropertyControls({
                       </SelectContent>
                     </Select>
                     <Input
-                      className="w-full min-w-0 sm:max-w-64"
+                      className="h-11 w-full min-w-0 py-0 sm:max-w-64 sm:py-0"
                       value={filter.value}
                       maxLength={200}
                       placeholder={t("filterValue")}

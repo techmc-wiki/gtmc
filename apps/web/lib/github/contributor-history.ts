@@ -44,16 +44,18 @@ export async function collectContributorHistory(
   addActivity(initial.history)
   let nextPage = 0
   await Promise.all(
-    Array.from({ length: Math.min(4, cursors.length) }, async () => {
-      while (nextPage < cursors.length) {
-        const cursor = cursors[nextPage++]
-        const page = await loadPage(cursor, true)
-        assertRevision(page)
-        addActivity(page.history)
-      }
-    })
+    Array.from({ length: Math.min(4, cursors.length) }, loadActivityPage)
   )
   return { stats, pageCount: cursors.length + 1 }
+
+  async function loadActivityPage(): Promise<void> {
+    if (nextPage >= cursors.length) return
+    const cursor = cursors[nextPage++]
+    const page = await loadPage(cursor, true)
+    assertRevision(page)
+    addActivity(page.history)
+    return loadActivityPage()
+  }
 
   function assertRevision(page: GitHubHistoryResult): void {
     if (page.revision !== initial.revision) {

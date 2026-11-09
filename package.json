@@ -1,6 +1,6 @@
 {
   "name": "gtmc-workspace",
-  "version": "0.1.0",
+  "version": "2.10.1",
   "private": true,
   "description": "GTMC monorepo root. The Next.js site lives in apps/web; the Typst book PDF pipeline lives in tools/pdf.",
   "repository": {

@@ -13,6 +13,7 @@
     "build:next": "vpx scripts/build-next.ts",
     "build:pdf": "vpx scripts/generate-pdf.ts",
     "build:vercel": "vpx scripts/build-vercel.ts",
+    "bump": "vpx ../../scripts/bump.ts",
     "check": "vp check && tsc --noEmit",
     "dev": "next dev",
     "doctor": "pnpx react-doctor@latest",

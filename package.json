@@ -1,6 +1,6 @@
 {
   "name": "gtmc-workspace",
-  "version": "2.9.0",
+  "version": "0.1.0",
   "private": true,
   "description": "GTMC monorepo root. The Next.js site lives in apps/web; the Typst book PDF pipeline lives in tools/pdf.",
   "repository": {
@@ -17,6 +17,7 @@
     "build:pdf": "pnpm --filter @gtmc/web run build:pdf",
     "build:vercel": "pnpm --filter @gtmc/web run build:vercel",
     "build": "pnpm --filter @gtmc/web run build",
+    "bump": "vpx scripts/bump.ts",
     "check": "pnpm --filter @gtmc/ssg run check && pnpm --filter @gtmc/web run check",
     "dev": "pnpm --filter @gtmc/web run dev",
     "doctor": "pnpm --filter @gtmc/web run doctor",

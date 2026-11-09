@@ -47,6 +47,7 @@ pnpm build                       # Full build: content generation + next build
 pnpm build:content               # Static content and manifest generation
 pnpm build:next                  # Next.js production build
 pnpm build:pdf                   # Build tools/pdf/dist/gtmc-{en,zh}.pdf
+pnpm bump [patch|minor|major]    # Bump version, commit, and create tag (dev branch only)
 pnpm articles:update             # Pull latest articles submodule commit
 pnpm glossary:update             # Pull latest glossary submodule commit
 
@@ -88,17 +89,15 @@ The `cf` CLI manages Cloudflare edge resources (DNS for `techmc.wiki`, R2 bucket
 
 Releases use `vX.Y.Z` (semver) from `dev`. Ensure the target commit is on remote `dev`, worktree is clean, and pick the next version (`feat` → minor, `fix`/`perf` → patch, breaking → major).
 
-1. Bump `version` in `apps/web/package.json` (bare semver, no `v` prefix) in its own commit (never touch `pnpm-lock.yaml`):
+1. Run the bump script on `dev` (updates `apps/web/package.json` and `package.json`, commits, and creates an annotated tag; defaults to `patch`):
 
    ```bash
-   git add apps/web/package.json
-   git commit -m "chore: bump package version to vX.Y.Z"
+   pnpm bump [patch|minor|major]
    ```
 
-2. Create an annotated tag and push it:
+2. Push the tag:
 
    ```bash
-   git tag -m "" vX.Y.Z
    git push origin vX.Y.Z
    ```
 
@@ -116,7 +115,7 @@ Releases use `vX.Y.Z` (semver) from `dev`. Ensure the target commit is on remote
 
 This project is using Vite+, a unified toolchain built on top of Vite, Rolldown, Vitest, tsdown, Oxlint, Oxfmt, and Vite Task. Vite+ wraps runtime management, package management, and frontend tooling in a single global CLI called `vp`. Vite+ is distinct from Vite, and it invokes Vite through `vp dev` and `vp build`. Run `vp help` to print a list of commands and `vp <command> --help` for information about a specific command.
 
-Docs are local at `node_modules/vite-plus/docs` or online at <https://viteplus.dev/guide/>.
+Docs are local at `node_modules/vite-plus/docs` or online at https://viteplus.dev/guide/.
 
 ## Built-in Commands vs Scripts
 

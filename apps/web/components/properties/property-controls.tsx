@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { Columns3, Filter, FilterX, Plus, Search, X } from "lucide-react"
+import { Eye, Filter, FilterX, Plus, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/shadcn/button"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Card } from "@/components/ui/shadcn/card"
@@ -92,7 +92,7 @@ export function PropertyControls({
           properties={properties}
           selected={columns}
           label={t("columns")}
-          icon={Columns3}
+          icon={Eye}
           count={columns.length}
           multiple
           onSelect={toggleColumn}

@@ -27,6 +27,9 @@ import {
 } from "@/lib/properties/types"
 import { PropertyPicker } from "./property-picker"
 
+const NUMBER_OPERATORS: FilterOperator[] = ["eq", "gte", "lte"]
+const TEXT_OPERATORS: FilterOperator[] = ["eq", "contains"]
+
 interface PropertyControlsProps {
   kind: "blocks" | "entities" | "items"
   state: { q: string; filters: PropertyFilter[] }
@@ -146,43 +149,37 @@ export function PropertyControls({
         </div>
       )}
       <section className="border-border space-y-3 border-t pt-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 font-sans text-sm font-semibold">
-            {t("filters")}
-            {state.filters.length > 0 && (
-              <Badge variant="secondary">{state.filters.length}</Badge>
-            )}
-          </h2>
+        <h2 className="flex items-center gap-2 font-sans text-sm font-semibold">
+          {t("filters")}
           {state.filters.length > 0 && (
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={t("clearAllFilters")}
-              title={t("clearAllFilters")}
-              onClick={() => void setState({ filters: [], page: 1 })}>
-              <FilterX aria-hidden="true" />
-            </Button>
+            <Badge variant="secondary">{state.filters.length}</Badge>
           )}
-        </div>
+        </h2>
         <div className="space-y-2">
           {state.filters.length > 0 && (
-            <div className="text-muted-foreground hidden gap-2 text-sm sm:grid sm:grid-cols-[2.75rem_minmax(0,14rem)_2.75rem_minmax(0,1fr)]">
+            <div className="text-muted-foreground hidden gap-2 text-sm sm:grid sm:grid-cols-[2.75rem_2.75rem_minmax(0,14rem)_minmax(0,1fr)]">
+              <span aria-hidden="true" />
               <span aria-hidden="true" />
               <span>{t("property")}</span>
-              <span aria-hidden="true" />
               <span>{t("filterColumn")}</span>
             </div>
           )}
           {state.filters.map((filter) => {
+            const info = byId.get(filter.property)
             const hasProperty = Boolean(filter.property)
-            const propertyName =
-              byId.get(filter.property)?.name ?? filter.property
+            const propertyName = info?.name ?? filter.property
             const shown = hasProperty && columns.includes(filter.property)
             const visibilityLabel = hasProperty
               ? shown
                 ? t("hideColumn", { name: propertyName })
                 : t("showColumn", { name: propertyName })
               : t("columnVisibility")
+            const operators =
+              info?.kind === "number"
+                ? NUMBER_OPERATORS
+                : info?.kind && info.kind !== "text"
+                  ? null
+                  : TEXT_OPERATORS
             function patchFilter(patch: Partial<PropertyFilter>) {
               void setState({
                 filters: state.filters.map((item) =>
@@ -194,11 +191,16 @@ export function PropertyControls({
             return (
               <div
                 key={filter.id}
-                className="border-border grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-2 border-b pb-2 sm:grid-cols-[2.75rem_minmax(0,14rem)_2.75rem_minmax(0,1fr)] sm:border-b-0 sm:pb-0">
+                className="border-border grid grid-cols-[2.75rem_2.75rem_minmax(0,1fr)] items-center gap-2 border-b pb-2 sm:grid-cols-[2.75rem_2.75rem_minmax(0,14rem)_minmax(0,1fr)] sm:border-b-0 sm:pb-0">
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="icon"
                   aria-label={
+                    hasProperty
+                      ? t("removeFilter", { name: propertyName })
+                      : t("removeCondition")
+                  }
+                  title={
                     hasProperty
                       ? t("removeFilter", { name: propertyName })
                       : t("removeCondition")
@@ -213,14 +215,8 @@ export function PropertyControls({
                   }>
                   <X aria-hidden="true" />
                 </Button>
-                <PropertyPicker
-                  properties={properties}
-                  selected={hasProperty ? [filter.property] : []}
-                  label={hasProperty ? propertyName : t("selectProperty")}
-                  onSelect={(property) => patchFilter({ property })}
-                />
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="icon"
                   disabled={!hasProperty || (!shown && columns.length >= 8)}
                   aria-label={visibilityLabel}
@@ -232,64 +228,150 @@ export function PropertyControls({
                     <EyeOff aria-hidden="true" />
                   )}
                 </Button>
+                <PropertyPicker
+                  properties={properties}
+                  selected={hasProperty ? [filter.property] : []}
+                  label={hasProperty ? propertyName : t("selectProperty")}
+                  onSelect={(property) =>
+                    patchFilter({ property, operator: "eq", value: "" })
+                  }
+                />
                 <div className="col-span-3 flex flex-wrap items-center gap-2 sm:col-span-1">
-                  <Select
-                    value={filter.operator}
-                    disabled={!hasProperty}
-                    onValueChange={(operator) => {
-                      if (
-                        FILTER_OPERATORS.includes(operator as FilterOperator)
-                      ) {
-                        patchFilter({
-                          operator: operator as FilterOperator,
-                        })
+                  {operators && (
+                    <Select
+                      value={filter.operator}
+                      disabled={!hasProperty}
+                      onValueChange={(operator) => {
+                        if (
+                          FILTER_OPERATORS.includes(operator as FilterOperator)
+                        ) {
+                          patchFilter({
+                            operator: operator as FilterOperator,
+                          })
+                        }
+                      }}>
+                      <SelectTrigger
+                        className="min-h-11 w-full min-w-0 sm:w-36"
+                        aria-label={
+                          hasProperty
+                            ? `${propertyName} ${t("operator")}`
+                            : t("operator")
+                        }>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {operators.map((operator) => (
+                          <SelectItem key={operator} value={operator}>
+                            {t(`op_${operator}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  {info?.kind === "number" ? (
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      step="any"
+                      className="h-11 w-full min-w-0 py-0 sm:max-w-64 sm:py-0"
+                      value={filter.value}
+                      disabled={!hasProperty}
+                      placeholder={t("numberPlaceholder")}
+                      aria-label={t("filterValueFor", { name: propertyName })}
+                      onChange={(event) =>
+                        patchFilter({ value: event.target.value })
                       }
-                    }}>
-                    <SelectTrigger
-                      className="min-h-11 w-full min-w-0 sm:w-36"
+                    />
+                  ) : info?.kind === "enum" ||
+                    info?.kind === "boolean" ||
+                    info?.kind === "tags" ? (
+                    <Select
+                      value={filter.value}
+                      disabled={!hasProperty}
+                      onValueChange={(value) => patchFilter({ value })}>
+                      <SelectTrigger
+                        className="min-h-11 w-full min-w-0 sm:w-56"
+                        aria-label={
+                          info.kind === "tags"
+                            ? t("selectTag")
+                            : t("selectValue")
+                        }>
+                        <SelectValue
+                          placeholder={
+                            info.kind === "tags"
+                              ? t("selectTag")
+                              : t("selectValue")
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(info.options ?? []).map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      className="h-11 w-full min-w-0 py-0 sm:max-w-64 sm:py-0"
+                      value={filter.value}
+                      maxLength={200}
+                      disabled={!hasProperty}
+                      placeholder={t("filterValue")}
                       aria-label={
                         hasProperty
-                          ? `${propertyName} ${t("operator")}`
-                          : t("operator")
+                          ? t("filterValueFor", { name: propertyName })
+                          : t("filterValue")
+                      }
+                      onChange={(event) =>
+                        patchFilter({ value: event.target.value })
+                      }
+                    />
+                  )}
+                  {info?.kind === "tags" && (
+                    <Select
+                      value={filter.operator === "ne" ? "ne" : "eq"}
+                      disabled={!hasProperty}
+                      onValueChange={(value) =>
+                        patchFilter({ operator: value === "ne" ? "ne" : "eq" })
                       }>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {FILTER_OPERATORS.map((operator) => (
-                        <SelectItem key={operator} value={operator}>
-                          {t(`op_${operator}`)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Input
-                    className="h-11 w-full min-w-0 py-0 sm:max-w-64 sm:py-0"
-                    value={filter.value}
-                    maxLength={200}
-                    disabled={!hasProperty}
-                    placeholder={t("filterValue")}
-                    aria-label={
-                      hasProperty
-                        ? t("filterValueFor", { name: propertyName })
-                        : t("filterValue")
-                    }
-                    onChange={(event) =>
-                      patchFilter({ value: event.target.value })
-                    }
-                  />
+                      <SelectTrigger
+                        className="min-h-11 w-full min-w-0 sm:w-28"
+                        aria-label={t("tagPresence")}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="eq">{t("yes")}</SelectItem>
+                        <SelectItem value="ne">{t("no")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
               </div>
             )
           })}
-          <Button
-            variant="outline"
-            size="icon"
-            aria-label={t("addCondition")}
-            title={t("addCondition")}
-            disabled={state.filters.length >= 8}
-            onClick={() => addFilter("")}>
-            <Plus aria-hidden="true" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label={t("addCondition")}
+              title={t("addCondition")}
+              disabled={state.filters.length >= 8}
+              onClick={() => addFilter("")}>
+              <Plus aria-hidden="true" />
+            </Button>
+            {state.filters.length > 0 && (
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label={t("clearAllFilters")}
+                title={t("clearAllFilters")}
+                onClick={() => void setState({ filters: [], page: 1 })}>
+                <FilterX aria-hidden="true" />
+              </Button>
+            )}
+          </div>
         </div>
       </section>
     </Card>

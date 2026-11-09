@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { Eye, Filter, FilterX, Plus, Search, X } from "lucide-react"
+import { Eye, EyeOff, Filter, FilterX, Plus, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/shadcn/button"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Card } from "@/components/ui/shadcn/card"
@@ -166,9 +166,10 @@ export function PropertyControls({
         </div>
         <div className="space-y-2">
           {state.filters.length > 0 && (
-            <div className="text-muted-foreground hidden gap-2 text-sm sm:grid sm:grid-cols-[2.75rem_minmax(0,14rem)_minmax(0,1fr)]">
+            <div className="text-muted-foreground hidden gap-2 text-sm sm:grid sm:grid-cols-[2.75rem_minmax(0,14rem)_2.75rem_minmax(0,1fr)]">
               <span aria-hidden="true" />
               <span>{t("property")}</span>
+              <span aria-hidden="true" />
               <span>{t("filterColumn")}</span>
             </div>
           )}
@@ -176,6 +177,12 @@ export function PropertyControls({
             const hasProperty = Boolean(filter.property)
             const propertyName =
               byId.get(filter.property)?.name ?? filter.property
+            const shown = hasProperty && columns.includes(filter.property)
+            const visibilityLabel = hasProperty
+              ? shown
+                ? t("hideColumn", { name: propertyName })
+                : t("showColumn", { name: propertyName })
+              : t("columnVisibility")
             function patchFilter(patch: Partial<PropertyFilter>) {
               void setState({
                 filters: state.filters.map((item) =>
@@ -187,7 +194,7 @@ export function PropertyControls({
             return (
               <div
                 key={filter.id}
-                className="border-border grid grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-2 border-b pb-2 sm:grid-cols-[2.75rem_minmax(0,14rem)_minmax(0,1fr)] sm:border-b-0 sm:pb-0">
+                className="border-border grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-2 border-b pb-2 sm:grid-cols-[2.75rem_minmax(0,14rem)_2.75rem_minmax(0,1fr)] sm:border-b-0 sm:pb-0">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -212,7 +219,20 @@ export function PropertyControls({
                   label={hasProperty ? propertyName : t("selectProperty")}
                   onSelect={(property) => patchFilter({ property })}
                 />
-                <div className="col-span-2 flex flex-wrap items-center gap-2 sm:col-span-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={!hasProperty || (!shown && columns.length >= 8)}
+                  aria-label={visibilityLabel}
+                  title={visibilityLabel}
+                  onClick={() => toggleColumn(filter.property)}>
+                  {shown ? (
+                    <Eye aria-hidden="true" />
+                  ) : (
+                    <EyeOff aria-hidden="true" />
+                  )}
+                </Button>
+                <div className="col-span-3 flex flex-wrap items-center gap-2 sm:col-span-1">
                   <Select
                     value={filter.operator}
                     disabled={!hasProperty}

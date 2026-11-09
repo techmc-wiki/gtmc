@@ -15,7 +15,6 @@ const badgeVariants = cva(
           "border-red-500/40 bg-red-500/10 text-red-600 [a&]:hover:bg-red-500/20",
         outline: "border-border text-foreground",
         ghost: "border-transparent bg-transparent text-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
         pending: "border-yellow-500/40 bg-yellow-500/10 text-yellow-700",
         "in-progress": "border-blue-500/40 bg-blue-500/10 text-blue-600",
         success: "border-green-500/40 bg-green-500/10 text-green-600",

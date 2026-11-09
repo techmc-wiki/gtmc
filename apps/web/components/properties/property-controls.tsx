@@ -29,9 +29,12 @@ import { PropertyPicker } from "./property-picker"
 
 const NUMBER_OPERATORS: FilterOperator[] = ["eq", "gte", "lte"]
 const TEXT_OPERATORS: FilterOperator[] = ["eq", "contains"]
+const MAX_COLUMNS = 8
+
+type Kind = "blocks" | "entities" | "items"
 
 interface PropertyControlsProps {
-  kind: "blocks" | "entities" | "items"
+  kind: Kind
   state: { q: string; filters: PropertyFilter[] }
   setState: (patch: {
     q?: string
@@ -49,6 +52,13 @@ interface PropertyControlsProps {
   ) => void
 }
 
+/** Example query and filter per dataset, both guaranteed to return rows. */
+const EXAMPLES: Record<Kind, { query: string; filter: string }> = {
+  blocks: { query: "slime|honey", filter: "conductive" },
+  entities: { query: "zombie|skeleton", filter: "fire_immune" },
+  items: { query: "sword", filter: "renewable" },
+}
+
 export function PropertyControls({
   kind,
   state,
@@ -60,93 +70,24 @@ export function PropertyControls({
   addFilter,
 }: PropertyControlsProps) {
   const t = useTranslations("Properties")
+  const selected = new Set(columns)
   return (
     <Card className="space-y-4">
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="min-w-48 flex-1 space-y-2">
-          <Label htmlFor="property-search">{t("searchLabel")}</Label>
-          <InputGroup>
-            <InputGroupAddon>
-              <Search aria-hidden="true" />
-            </InputGroupAddon>
-            <InputGroupInput
-              id="property-search"
-              value={state.q}
-              maxLength={200}
-              onChange={(event) =>
-                void setState({ q: event.target.value, page: 1 })
-              }
-              placeholder={t(`search_${kind}`)}
-            />
-            {state.q && (
-              <InputGroupAddon align="inline-end">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => void setState({ q: "", page: 1 })}
-                  aria-label={t("clearSearch")}>
-                  <X aria-hidden="true" />
-                </Button>
-              </InputGroupAddon>
-            )}
-          </InputGroup>
-        </div>
-        <PropertyPicker
-          properties={properties}
-          selected={columns}
-          label={t("columns")}
-          icon={Eye}
-          count={columns.length}
-          multiple
-          onSelect={toggleColumn}
-        />
-      </div>
+      <PropertySearch
+        kind={kind}
+        query={state.q}
+        properties={properties}
+        columns={columns}
+        onQueryChange={(q) => setState({ q, page: 1 })}
+        toggleColumn={toggleColumn}
+      />
       {!state.q && !state.filters.length && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-muted-foreground text-sm">{t("try")}</span>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="min-h-11"
-            onClick={() =>
-              void setState({
-                q:
-                  kind === "blocks"
-                    ? "slime|honey"
-                    : kind === "entities"
-                      ? "zombie|skeleton"
-                      : "sword",
-                page: 1,
-              })
-            }>
-            {t(`example_${kind}`)}
-          </Button>
-          {byId.has(
-            kind === "blocks"
-              ? "conductive"
-              : kind === "entities"
-                ? "fire_immune"
-                : "renewable"
-          ) && (
-            <Button
-              variant="secondary"
-              size="sm"
-              className="min-h-11"
-              onClick={() =>
-                addFilter(
-                  kind === "blocks"
-                    ? "conductive"
-                    : kind === "entities"
-                      ? "fire_immune"
-                      : "renewable",
-                  "Yes"
-                )
-              }>
-              <Filter aria-hidden="true" />
-              {t(`filterExample_${kind}`)}
-            </Button>
-          )}
-        </div>
+        <PropertyExamples
+          kind={kind}
+          byId={byId}
+          setState={setState}
+          addFilter={addFilter}
+        />
       )}
       <section className="border-border space-y-3 border-t pt-4">
         <h2 className="flex items-center gap-2 font-sans text-sm font-semibold">
@@ -164,193 +105,33 @@ export function PropertyControls({
               <span>{t("filterColumn")}</span>
             </div>
           )}
-          {state.filters.map((filter) => {
-            const info = byId.get(filter.property)
-            const hasProperty = Boolean(filter.property)
-            const propertyName = info?.name ?? filter.property
-            const shown = hasProperty && columns.includes(filter.property)
-            const visibilityLabel = hasProperty
-              ? shown
-                ? t("hideColumn", { name: propertyName })
-                : t("showColumn", { name: propertyName })
-              : t("columnVisibility")
-            const operators =
-              info?.kind === "number"
-                ? NUMBER_OPERATORS
-                : info?.kind && info.kind !== "text"
-                  ? null
-                  : TEXT_OPERATORS
-            function patchFilter(patch: Partial<PropertyFilter>) {
-              void setState({
-                filters: state.filters.map((item) =>
-                  item.id === filter.id ? { ...item, ...patch } : item
-                ),
-                page: 1,
-              })
-            }
-            return (
-              <div
-                key={filter.id}
-                className="border-border grid grid-cols-[2.75rem_2.75rem_minmax(0,1fr)] items-center gap-2 border-b pb-2 sm:grid-cols-[2.75rem_2.75rem_minmax(0,14rem)_minmax(0,1fr)] sm:border-b-0 sm:pb-0">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  aria-label={
-                    hasProperty
-                      ? t("removeFilter", { name: propertyName })
-                      : t("removeCondition")
-                  }
-                  title={
-                    hasProperty
-                      ? t("removeFilter", { name: propertyName })
-                      : t("removeCondition")
-                  }
-                  onClick={() =>
-                    void setState({
-                      filters: state.filters.filter(
-                        (item) => item.id !== filter.id
-                      ),
-                      page: 1,
-                    })
-                  }>
-                  <X aria-hidden="true" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={!hasProperty || (!shown && columns.length >= 8)}
-                  aria-label={visibilityLabel}
-                  title={visibilityLabel}
-                  onClick={() => toggleColumn(filter.property)}>
-                  {shown ? (
-                    <Eye aria-hidden="true" />
-                  ) : (
-                    <EyeOff aria-hidden="true" />
-                  )}
-                </Button>
-                <PropertyPicker
-                  properties={properties}
-                  selected={hasProperty ? [filter.property] : []}
-                  label={hasProperty ? propertyName : t("selectProperty")}
-                  onSelect={(property) =>
-                    patchFilter({ property, operator: "eq", value: "" })
-                  }
-                />
-                <div className="col-span-3 flex flex-wrap items-center gap-2 sm:col-span-1">
-                  {operators && (
-                    <Select
-                      value={filter.operator}
-                      disabled={!hasProperty}
-                      onValueChange={(operator) => {
-                        if (
-                          FILTER_OPERATORS.includes(operator as FilterOperator)
-                        ) {
-                          patchFilter({
-                            operator: operator as FilterOperator,
-                          })
-                        }
-                      }}>
-                      <SelectTrigger
-                        className="min-h-11 w-full min-w-0 sm:w-36"
-                        aria-label={
-                          hasProperty
-                            ? `${propertyName} ${t("operator")}`
-                            : t("operator")
-                        }>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {operators.map((operator) => (
-                          <SelectItem key={operator} value={operator}>
-                            {t(`op_${operator}`)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                  {info?.kind === "number" ? (
-                    <Input
-                      type="number"
-                      inputMode="decimal"
-                      step="any"
-                      className="h-11 w-full min-w-0 py-0 sm:max-w-64 sm:py-0"
-                      value={filter.value}
-                      disabled={!hasProperty}
-                      placeholder={t("numberPlaceholder")}
-                      aria-label={t("filterValueFor", { name: propertyName })}
-                      onChange={(event) =>
-                        patchFilter({ value: event.target.value })
-                      }
-                    />
-                  ) : info?.kind === "enum" ||
-                    info?.kind === "boolean" ||
-                    info?.kind === "tags" ? (
-                    <Select
-                      value={filter.value}
-                      disabled={!hasProperty}
-                      onValueChange={(value) => patchFilter({ value })}>
-                      <SelectTrigger
-                        className="min-h-11 w-full min-w-0 sm:w-56"
-                        aria-label={
-                          info.kind === "tags"
-                            ? t("selectTag")
-                            : t("selectValue")
-                        }>
-                        <SelectValue
-                          placeholder={
-                            info.kind === "tags"
-                              ? t("selectTag")
-                              : t("selectValue")
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(info.options ?? []).map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Input
-                      className="h-11 w-full min-w-0 py-0 sm:max-w-64 sm:py-0"
-                      value={filter.value}
-                      maxLength={200}
-                      disabled={!hasProperty}
-                      placeholder={t("filterValue")}
-                      aria-label={
-                        hasProperty
-                          ? t("filterValueFor", { name: propertyName })
-                          : t("filterValue")
-                      }
-                      onChange={(event) =>
-                        patchFilter({ value: event.target.value })
-                      }
-                    />
-                  )}
-                  {info?.kind === "tags" && (
-                    <Select
-                      value={filter.operator === "ne" ? "ne" : "eq"}
-                      disabled={!hasProperty}
-                      onValueChange={(value) =>
-                        patchFilter({ operator: value === "ne" ? "ne" : "eq" })
-                      }>
-                      <SelectTrigger
-                        className="min-h-11 w-full min-w-0 sm:w-28"
-                        aria-label={t("tagPresence")}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="eq">{t("yes")}</SelectItem>
-                        <SelectItem value="ne">{t("no")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-              </div>
-            )
-          })}
+          {state.filters.map((filter) => (
+            <PropertyFilterRow
+              key={filter.id}
+              filter={filter}
+              byId={byId}
+              properties={properties}
+              selected={selected}
+              columnCount={columns.length}
+              toggleColumn={toggleColumn}
+              onPatch={(patch) =>
+                setState({
+                  filters: state.filters.map((item) =>
+                    item.id === filter.id ? { ...item, ...patch } : item
+                  ),
+                  page: 1,
+                })
+              }
+              onRemove={() =>
+                setState({
+                  filters: state.filters.filter(
+                    (item) => item.id !== filter.id
+                  ),
+                  page: 1,
+                })
+              }
+            />
+          ))}
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -375,5 +156,277 @@ export function PropertyControls({
         </div>
       </section>
     </Card>
+  )
+}
+
+interface PropertySearchProps {
+  kind: Kind
+  query: string
+  properties: PropertyInfo[]
+  columns: string[]
+  onQueryChange: (query: string) => void
+  toggleColumn: (id: string) => void
+}
+
+function PropertySearch({
+  kind,
+  query,
+  properties,
+  columns,
+  onQueryChange,
+  toggleColumn,
+}: PropertySearchProps) {
+  const t = useTranslations("Properties")
+  return (
+    <div className="flex flex-wrap items-end gap-3">
+      <div className="min-w-48 flex-1 space-y-2">
+        <Label htmlFor="property-search">{t("searchLabel")}</Label>
+        <InputGroup>
+          <InputGroupAddon>
+            <Search aria-hidden="true" />
+          </InputGroupAddon>
+          <InputGroupInput
+            id="property-search"
+            value={query}
+            maxLength={200}
+            onChange={(event) => onQueryChange(event.target.value)}
+            placeholder={t(`search_${kind}`)}
+          />
+          {query && (
+            <InputGroupAddon align="inline-end">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onQueryChange("")}
+                aria-label={t("clearSearch")}>
+                <X aria-hidden="true" />
+              </Button>
+            </InputGroupAddon>
+          )}
+        </InputGroup>
+      </div>
+      <PropertyPicker
+        properties={properties}
+        selected={columns}
+        label={t("columns")}
+        icon={Eye}
+        count={columns.length}
+        multiple
+        onSelect={toggleColumn}
+      />
+    </div>
+  )
+}
+
+interface PropertyExamplesProps {
+  kind: Kind
+  byId: Map<string, PropertyInfo>
+  setState: PropertyControlsProps["setState"]
+  addFilter: PropertyControlsProps["addFilter"]
+}
+
+function PropertyExamples({
+  kind,
+  byId,
+  setState,
+  addFilter,
+}: PropertyExamplesProps) {
+  const t = useTranslations("Properties")
+  const example = EXAMPLES[kind]
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="text-muted-foreground text-sm">{t("try")}</span>
+      <Button
+        variant="secondary"
+        size="sm"
+        className="min-h-11"
+        onClick={() => void setState({ q: example.query, page: 1 })}>
+        {t(`example_${kind}`)}
+      </Button>
+      {byId.has(example.filter) && (
+        <Button
+          variant="secondary"
+          size="sm"
+          className="min-h-11"
+          onClick={() => addFilter(example.filter, "Yes")}>
+          <Filter aria-hidden="true" />
+          {t(`filterExample_${kind}`)}
+        </Button>
+      )}
+    </div>
+  )
+}
+
+interface PropertyFilterRowProps {
+  filter: PropertyFilter
+  byId: Map<string, PropertyInfo>
+  properties: PropertyInfo[]
+  selected: Set<string>
+  columnCount: number
+  toggleColumn: (id: string) => void
+  onPatch: (patch: Partial<PropertyFilter>) => void
+  onRemove: () => void
+}
+
+function PropertyFilterRow({
+  filter,
+  byId,
+  properties,
+  selected,
+  columnCount,
+  toggleColumn,
+  onPatch,
+  onRemove,
+}: PropertyFilterRowProps) {
+  const t = useTranslations("Properties")
+  const info = byId.get(filter.property)
+  const hasProperty = Boolean(filter.property)
+  const propertyName = info?.name ?? filter.property
+  const shown = hasProperty && selected.has(filter.property)
+  const visibilityLabel = hasProperty
+    ? shown
+      ? t("hideColumn", { name: propertyName })
+      : t("showColumn", { name: propertyName })
+    : t("columnVisibility")
+  const operators =
+    info?.kind === "number"
+      ? NUMBER_OPERATORS
+      : info?.kind && info.kind !== "text"
+        ? null
+        : TEXT_OPERATORS
+  return (
+    <div className="border-border grid grid-cols-[2.75rem_2.75rem_minmax(0,1fr)] items-center gap-2 border-b pb-2 sm:grid-cols-[2.75rem_2.75rem_minmax(0,14rem)_minmax(0,1fr)] sm:border-b-0 sm:pb-0">
+      <Button
+        variant="outline"
+        size="icon"
+        aria-label={
+          hasProperty
+            ? t("removeFilter", { name: propertyName })
+            : t("removeCondition")
+        }
+        title={
+          hasProperty
+            ? t("removeFilter", { name: propertyName })
+            : t("removeCondition")
+        }
+        onClick={onRemove}>
+        <X aria-hidden="true" />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        disabled={!hasProperty || (!shown && columnCount >= MAX_COLUMNS)}
+        aria-label={visibilityLabel}
+        title={visibilityLabel}
+        onClick={() => toggleColumn(filter.property)}>
+        {shown ? <Eye aria-hidden="true" /> : <EyeOff aria-hidden="true" />}
+      </Button>
+      <PropertyPicker
+        properties={properties}
+        selected={hasProperty ? [filter.property] : []}
+        label={hasProperty ? propertyName : t("selectProperty")}
+        onSelect={(property) =>
+          onPatch({ property, operator: "eq", value: "" })
+        }
+      />
+      <div className="col-span-3 flex flex-wrap items-center gap-2 sm:col-span-1">
+        {operators && (
+          <Select
+            value={filter.operator}
+            disabled={!hasProperty}
+            onValueChange={(operator) => {
+              if (FILTER_OPERATORS.includes(operator as FilterOperator)) {
+                onPatch({ operator: operator as FilterOperator })
+              }
+            }}>
+            <SelectTrigger
+              className="min-h-11 w-full min-w-0 sm:w-36"
+              aria-label={
+                hasProperty ? `${propertyName} ${t("operator")}` : t("operator")
+              }>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {operators.map((operator) => (
+                <SelectItem key={operator} value={operator}>
+                  {t(`op_${operator}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        {info?.kind === "number" ? (
+          <Input
+            type="number"
+            inputMode="decimal"
+            step="any"
+            className="h-11 w-full min-w-0 py-0 sm:max-w-64 sm:py-0"
+            value={filter.value}
+            disabled={!hasProperty}
+            placeholder={t("numberPlaceholder")}
+            aria-label={t("filterValueFor", { name: propertyName })}
+            onChange={(event) => onPatch({ value: event.target.value })}
+          />
+        ) : info?.kind === "enum" ||
+          info?.kind === "boolean" ||
+          info?.kind === "tags" ? (
+          <Select
+            value={filter.value}
+            disabled={!hasProperty}
+            onValueChange={(value) => onPatch({ value })}>
+            <SelectTrigger
+              className="min-h-11 w-full min-w-0 sm:w-56"
+              aria-label={
+                info.kind === "tags" ? t("selectTag") : t("selectValue")
+              }>
+              <SelectValue
+                placeholder={
+                  info.kind === "tags" ? t("selectTag") : t("selectValue")
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {(info.options ?? []).map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <Input
+            className="h-11 w-full min-w-0 py-0 sm:max-w-64 sm:py-0"
+            value={filter.value}
+            maxLength={200}
+            disabled={!hasProperty}
+            placeholder={t("filterValue")}
+            aria-label={
+              hasProperty
+                ? t("filterValueFor", { name: propertyName })
+                : t("filterValue")
+            }
+            onChange={(event) => onPatch({ value: event.target.value })}
+          />
+        )}
+        {info?.kind === "tags" && (
+          <Select
+            value={filter.operator === "ne" ? "ne" : "eq"}
+            disabled={!hasProperty}
+            onValueChange={(value) =>
+              onPatch({ operator: value === "ne" ? "ne" : "eq" })
+            }>
+            <SelectTrigger
+              className="min-h-11 w-full min-w-0 sm:w-28"
+              aria-label={t("tagPresence")}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="eq">{t("yes")}</SelectItem>
+              <SelectItem value="ne">{t("no")}</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+    </div>
   )
 }

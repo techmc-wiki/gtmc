@@ -5,7 +5,7 @@ import { GLOSSARY_COLUMNS } from "@/lib/glossary/csv"
 import {
   assertPrivateBlobIdentifier,
   privateBlobOptions,
-} from "@/lib/private-blob"
+} from "@/lib/blob-stores"
 
 const fileSchema = z.object({
   id: z.string(),

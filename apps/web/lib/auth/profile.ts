@@ -3,7 +3,7 @@ import { z } from "zod"
 import {
   assertPrivateBlobIdentifier,
   privateBlobOptions,
-} from "@/lib/private-blob"
+} from "@/lib/blob-stores"
 
 export const profileSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),

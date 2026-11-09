@@ -14,17 +14,19 @@ import {
 export { getRepoContentTree } from "@/lib/github/repo-content-tree"
 export type { ArticleTreeNode } from "@/lib/github/repo-content-tree"
 
-export async function getRepoFileContent(
+async function fetchRepoFile<TResult>(
   filePath: string,
-  retries = 3
-): Promise<string | null> {
+  retries: number,
+  decode: (base64Content: string) => TResult,
+  failureLogFormat: string
+): Promise<TResult | null> {
   if (isGithubSyncRateLimited()) {
     return null
   }
 
   const octokit = getOctokit(undefined, true)
 
-  return executeWithRetry<string | null>({
+  return executeWithRetry<TResult | null>({
     retries,
     operation: async () => {
       const { data } = await octokit.repos.getContent({
@@ -34,7 +36,7 @@ export async function getRepoFileContent(
       })
 
       if (!Array.isArray(data) && data.type === "file") {
-        return Buffer.from(data.content, "base64").toString("utf-8")
+        return decode(data.content)
       }
 
       return null
@@ -52,12 +54,7 @@ export async function getRepoFileContent(
       }
 
       if (attempt === totalRetries - 1) {
-        console.error(
-          "[github-pr] Failed to fetch %s after %d attempts:",
-          filePath,
-          totalRetries,
-          error
-        )
+        console.error(failureLogFormat, filePath, totalRetries, error)
         return { type: "return", value: null }
       }
 
@@ -66,54 +63,26 @@ export async function getRepoFileContent(
   })
 }
 
+export async function getRepoFileContent(
+  filePath: string,
+  retries = 3
+): Promise<string | null> {
+  return fetchRepoFile(
+    filePath,
+    retries,
+    (content) => Buffer.from(content, "base64").toString("utf-8"),
+    "[github-pr] Failed to fetch %s after %d attempts:"
+  )
+}
+
 export async function getRepoFileBuffer(
   filePath: string,
   retries = 3
 ): Promise<Buffer | null> {
-  if (isGithubSyncRateLimited()) {
-    return null
-  }
-
-  const octokit = getOctokit(undefined, true)
-
-  return executeWithRetry<Buffer | null>({
+  return fetchRepoFile(
+    filePath,
     retries,
-    operation: async () => {
-      const { data } = await octokit.repos.getContent({
-        owner: ARTICLES_REPO_OWNER,
-        repo: ARTICLES_REPO_NAME,
-        path: filePath,
-      })
-
-      if (!Array.isArray(data) && data.type === "file") {
-        return Buffer.from(data.content, "base64")
-      }
-
-      return null
-    },
-    onError: (error, attempt, totalRetries) => {
-      const status = getGithubErrorStatus(error)
-
-      if (isGithubRateLimitErrorForCache(error)) {
-        recordGithubSyncRateLimit(error)
-        return { type: "return", value: null }
-      }
-
-      if (status === 404) {
-        return { type: "return", value: null }
-      }
-
-      if (attempt === totalRetries - 1) {
-        console.error(
-          "[github-pr] Failed to fetch buffer %s after %d attempts:",
-          filePath,
-          totalRetries,
-          error
-        )
-        return { type: "return", value: null }
-      }
-
-      return { type: "retry" }
-    },
-  })
+    (content) => Buffer.from(content, "base64"),
+    "[github-pr] Failed to fetch buffer %s after %d attempts:"
+  )
 }

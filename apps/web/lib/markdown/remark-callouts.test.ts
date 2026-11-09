@@ -46,9 +46,7 @@ function textContent(node: Root | Element): string {
 
 describe("remarkCallouts", () => {
   test("keeps the heading and paragraph after a marker-only callout", async () => {
-    const root = await render(
-      "> [!WARNING]\n> ## Heading\n> Paragraph text.\n"
-    )
+    const root = await render("> [!WARNING]\n> ## Heading\n> Paragraph text.\n")
     const aside = findElement(root, "aside")
 
     expect(aside?.properties.dataCallout).toBe("warning")

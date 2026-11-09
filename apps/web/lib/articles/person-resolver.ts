@@ -9,7 +9,7 @@ import { load as yamlLoad } from "js-yaml";
 
 import { loadArticleManifest } from "@/lib/articles/manifest";
 import { type ArticleEntry, type ArticleLocale } from "@gtmc/ssg/articles/types";
-import { listPeopleKeys, resolvePerson, type ResolvedPerson } from "@/lib/markdown/people";
+import { listPeopleKeys, resolvePerson, type ResolvedPerson } from "@/lib/articles/people";
 
 const CONFIG_DIR = join(process.cwd(), "lib", "articles", "config");
 const MAINTAINERS_PATH = join(CONFIG_DIR, "maintainers.yml");
@@ -316,7 +316,6 @@ export function resolveProfileHandle(
   );
 }
 
-/** Compares author handles after case-insensitive alias resolution. */
 export function isSameAuthor(first: string, second: string): boolean {
   return canonicalizeHandle(first).toLowerCase() === canonicalizeHandle(second).toLowerCase();
 }

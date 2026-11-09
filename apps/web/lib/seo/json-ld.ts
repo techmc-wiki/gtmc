@@ -1,6 +1,6 @@
 /** Omit unavailable optional properties; every builder requires `siteUrl` without a trailing slash. */
 
-import type { ResolvedPerson } from "@/lib/markdown/people"
+import type { ResolvedPerson } from "@/lib/articles/people"
 
 export type JsonLdObject = {
   "@context": "https://schema.org"

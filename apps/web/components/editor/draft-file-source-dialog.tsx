@@ -21,15 +21,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/shadcn/dialog"
+import type { DraftRepoTreeNode } from "@/lib/drafts/repo-tree"
 import { normalizeDraftFilePath } from "@/lib/drafts/files"
-
-interface DraftRepoTreeNode {
-  id: string
-  title: string
-  path: string
-  isFolder: boolean
-  children: DraftRepoTreeNode[]
-}
 
 async function fetchDraftRepoTree() {
   const response = await fetch("/api/draft/repo-tree", {

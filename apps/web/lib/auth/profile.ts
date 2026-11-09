@@ -1,6 +1,9 @@
 import { get, put } from "@vercel/blob"
 import { z } from "zod"
-import { draftBlobOptions, draftPath } from "@/lib/drafts/store"
+import {
+  assertPrivateBlobIdentifier,
+  privateBlobOptions,
+} from "@/lib/private-blob"
 
 export const profileSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),
@@ -9,7 +12,7 @@ export const profileSchema = z.object({
 
 export async function readProfile(userId: string) {
   const result = await get(profilePath(userId), {
-    ...draftBlobOptions(),
+    ...privateBlobOptions(),
     access: "private",
     useCache: false,
   })
@@ -23,7 +26,7 @@ export async function writeProfile(
   profile: z.infer<typeof profileSchema>
 ) {
   await put(profilePath(userId), JSON.stringify(profileSchema.parse(profile)), {
-    ...draftBlobOptions(),
+    ...privateBlobOptions(),
     access: "private",
     addRandomSuffix: false,
     allowOverwrite: true,
@@ -32,5 +35,6 @@ export async function writeProfile(
 }
 
 function profilePath(userId: string) {
-  return draftPath(userId, "profile").replace("drafts/", "profiles/")
+  assertPrivateBlobIdentifier(userId)
+  return `profiles/${userId}/profile.json`
 }

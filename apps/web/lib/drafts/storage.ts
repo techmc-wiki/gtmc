@@ -2,7 +2,8 @@ import { del, get, list, put } from "@vercel/blob"
 import { randomUUID } from "node:crypto"
 import path from "node:path"
 import { getRepoContentTree, getRepoFileContent } from "@/lib/github"
-import { draftBlobOptions, draftPath } from "@/lib/drafts/store"
+import { privateBlobOptions } from "@/lib/private-blob"
+import { draftPath } from "@/lib/drafts/store"
 
 export interface DraftRepoTreeNode {
   id: string
@@ -76,7 +77,7 @@ export async function uploadDraftAsset(
 ) {
   const storagePath = `${draftAssetPrefix(authorId, draftId)}${randomUUID()}-${path.posix.basename(filename)}`
   await put(storagePath, data, {
-    ...draftBlobOptions(),
+    ...privateBlobOptions(),
     access: "private",
     addRandomSuffix: false,
     contentType: mimeType,
@@ -86,7 +87,7 @@ export async function uploadDraftAsset(
 
 export async function downloadDraftAsset(storagePath: string) {
   const blob = await get(storagePath, {
-    ...draftBlobOptions(),
+    ...privateBlobOptions(),
     access: "private",
     useCache: false,
   })
@@ -95,7 +96,7 @@ export async function downloadDraftAsset(storagePath: string) {
 }
 
 export async function deleteDraftAsset(storagePath: string) {
-  await del(storagePath, draftBlobOptions())
+  await del(storagePath, privateBlobOptions())
 }
 
 export async function deleteDraftAssets(authorId: string, draftId: string) {
@@ -103,7 +104,7 @@ export async function deleteDraftAssets(authorId: string, draftId: string) {
   do {
     // oxlint-disable-next-line no-await-in-loop -- each page needs the previous cursor
     const page = await list({
-      ...draftBlobOptions(),
+      ...privateBlobOptions(),
       prefix: draftAssetPrefix(authorId, draftId),
       cursor,
     })
@@ -111,7 +112,7 @@ export async function deleteDraftAssets(authorId: string, draftId: string) {
       // oxlint-disable-next-line no-await-in-loop -- finish deleting this page before advancing
       await del(
         page.blobs.map((blob) => blob.pathname),
-        draftBlobOptions()
+        privateBlobOptions()
       )
     }
     cursor = page.hasMore ? page.cursor : undefined

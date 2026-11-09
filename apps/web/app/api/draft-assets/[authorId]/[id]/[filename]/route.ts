@@ -1,7 +1,8 @@
 import { get } from "@vercel/blob"
 import { auth } from "@/lib/auth"
-import { draftBlobOptions, readDraft } from "@/lib/drafts/store"
+import { readDraft } from "@/lib/drafts/store"
 import { draftAssetPrefix } from "@/lib/drafts/storage"
+import { privateBlobOptions } from "@/lib/private-blob"
 
 export async function GET(
   _request: Request,
@@ -27,7 +28,7 @@ export async function GET(
     return new Response(null, { status: 404 })
   }
   const blob = await get(`${draftAssetPrefix(authorId, id)}${filename}`, {
-    ...draftBlobOptions(),
+    ...privateBlobOptions(),
     access: "private",
   })
   if (!blob) return new Response(null, { status: 404 })

@@ -8,7 +8,10 @@ interface LazyMarkdownPreviewProps {
 }
 
 export const LazyMarkdownPreview = dynamic<LazyMarkdownPreviewProps>(
-  () => import("@/lib/markdown").then((mod) => mod.MarkdownRenderer),
+  () =>
+    import("@/components/markdown/markdown-renderer").then(
+      (mod) => mod.MarkdownRenderer
+    ),
   {
     ssr: false,
     loading: () => <p className="editor-panel">LOADING_PREVIEW_</p>,

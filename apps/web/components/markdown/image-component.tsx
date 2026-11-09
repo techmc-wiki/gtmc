@@ -1,6 +1,9 @@
 import { ArticleImage } from "@/components/markdown/article-image"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
-import { hasExplicitUrlScheme, resolveRelativeArticlePath } from "./url-utils"
+import {
+  hasExplicitUrlScheme,
+  resolveRelativeArticlePath,
+} from "@/lib/markdown/url-utils"
 
 function decodeImageSource(src: string): string {
   try {

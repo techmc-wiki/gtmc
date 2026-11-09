@@ -3,7 +3,6 @@ import type { ReactNode } from "react"
 
 import { MermaidDiagram } from "@/components/markdown/mermaid-diagram"
 import { PeopleMention } from "@/components/markdown/people-mention"
-import { createAComponent } from "@/lib/markdown/a-component"
 import {
   ANSI_COLOR_NAMES,
   createAnsiColorTagName,
@@ -13,12 +12,13 @@ import type {
   MarkdownComponent,
   MarkdownComponentProps,
 } from "@/lib/markdown/component-types"
-import { createImageComponent } from "@/lib/markdown/image-component"
+import { createAComponent } from "./a-component"
 import { AdvancedSectionDivComponent } from "./advanced-section"
 import { CalloutAside } from "./callout-aside"
 import { CodeComponent, PreComponent } from "./code-components"
 import { H1Component, H2Component, H3Component } from "./heading-components"
 import { IframeComponent } from "./iframe-component"
+import { createImageComponent } from "./image-component"
 import {
   BlockquoteComponent,
   HrComponent,

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react"
 
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
-import { HeadingAnchor } from "@/lib/markdown/heading-anchor"
+import { HeadingAnchor } from "./heading-anchor"
 
 interface H1ComponentProps extends MarkdownComponentProps {
   action?: ReactNode

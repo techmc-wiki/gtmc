@@ -1,7 +1,10 @@
 import { Link } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/articles/url"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
-import { hasExplicitUrlScheme, resolveRelativeArticlePath } from "./url-utils"
+import {
+  hasExplicitUrlScheme,
+  resolveRelativeArticlePath,
+} from "@/lib/markdown/url-utils"
 
 function resolveHref(initialHref: string, rawPath: string): string {
   let href = initialHref

@@ -1,3 +1,4 @@
+import { availableParallelism } from "node:os"
 import path from "node:path"
 import type { NextConfig } from "next"
 import type * as ChildProcess from "child_process"
@@ -53,7 +54,8 @@ const nextConfig: NextConfig = {
   },
   serverExternalPackages: ["gray-matter", "papaparse"],
   experimental: {
-    cpus: 2,
+    // Standard Vercel builders have four cores; don't oversubscribe smaller hosts.
+    cpus: Math.min(4, availableParallelism()),
     useTypeScriptCli: true,
     optimizePackageImports: [
       "@codemirror/state",

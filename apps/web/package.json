@@ -14,6 +14,7 @@
     "build:pdf": "vpx scripts/generate-pdf.ts",
     "build:vercel": "vpx scripts/build-vercel.ts",
     "bump": "vpx ../../scripts/bump.ts",
+    "check:properties-i18n": "vpx scripts/check-properties-i18n.ts",
     "dev": "next dev",
     "doctor": "pnpx react-doctor@latest",
     "generate:aliases": "vpx scripts/generate-author-aliases.ts",

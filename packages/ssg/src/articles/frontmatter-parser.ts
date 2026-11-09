@@ -33,6 +33,11 @@ export interface TranslationReadmeFrontMatter {
   "intro-title"?: string
 }
 
+export interface ParsedFrontMatter<F> {
+  frontmatter: F
+  content: string
+}
+
 type BannerFrontMatter = { src: string; alt?: string }
 
 const ALLOWED_KEYS: Record<string, readonly string[]> = {
@@ -92,16 +97,39 @@ function parseBanner(value: unknown): BannerFrontMatter | undefined {
   }
 }
 
+const OPENING_DELIMITER = /^---\r?\n/
+const FRONT_MATTER_BLOCK = /^---\r?\n[\s\S]*?\r?\n---\r?\n?/
+
+/**
+ * The body comes from the same gray-matter parse that yields the metadata.
+ * Its delimiter rules differ from the previous standalone scan only at
+ * degenerate boundaries: an empty frontmatter block, a missing closing
+ * delimiter (which makes the rest of the file frontmatter and leaves an empty
+ * `content`), and opening lines the previous scan did not treat as
+ * frontmatter (a language tag or trailing whitespace after the delimiter).
+ * Those keep their previous bytes; everything else uses the parsed body.
+ */
+function extractBody(
+  content: string,
+  parsed: { content: string; isEmpty?: boolean }
+): string {
+  const normalized = content.startsWith("\uFEFF") ? content.slice(1) : content
+  if (!OPENING_DELIMITER.test(normalized)) return normalized
+  if (parsed.isEmpty !== true && parsed.content !== "") return parsed.content
+  const match = FRONT_MATTER_BLOCK.exec(normalized)
+  return match ? normalized.slice(match[0].length) : normalized
+}
+
 function parseFrontMatter(content: string, variant: keyof typeof ALLOWED_KEYS) {
-  const { data } = matter(content)
-  const raw = data as Record<string, unknown>
+  const parsed = matter(content)
+  const raw = parsed.data as Record<string, unknown>
   const allowed = ALLOWED_KEYS[variant]
   for (const key of Object.keys(raw)) {
     if (!allowed.includes(key)) {
       throw new Error(`unknown key '${key}' not allowed`)
     }
   }
-  return raw
+  return { raw, content: extractBody(content, parsed) }
 }
 
 export function shouldSkipArticleFile(content: string): boolean {
@@ -109,8 +137,10 @@ export function shouldSkipArticleFile(content: string): boolean {
   return (data as Record<string, unknown>).skip === true
 }
 
-export function parseSourceFrontMatter(content: string): SourceFrontMatter {
-  const raw = parseFrontMatter(content, "source")
+export function parseSourceFrontMatter(
+  content: string
+): ParsedFrontMatter<SourceFrontMatter> {
+  const { raw, content: body } = parseFrontMatter(content, "source")
   const slug = raw.slug
   const title = raw.title
   if (typeof slug !== "string" || slug === "") {
@@ -120,39 +150,45 @@ export function parseSourceFrontMatter(content: string): SourceFrontMatter {
     throw new Error(`missing required key 'title'`)
   }
   return {
-    slug,
-    title,
-    description:
-      typeof raw.description === "string" ? raw.description : undefined,
-    index: parseIndex(raw.index),
-    "is-advanced": raw["is-advanced"] === true ? true : undefined,
-    revising: raw.revising === true ? true : undefined,
-    appendix: raw.appendix === true ? true : undefined,
-    banner: parseBanner(raw.banner),
+    frontmatter: {
+      slug,
+      title,
+      description:
+        typeof raw.description === "string" ? raw.description : undefined,
+      index: parseIndex(raw.index),
+      "is-advanced": raw["is-advanced"] === true ? true : undefined,
+      revising: raw.revising === true ? true : undefined,
+      appendix: raw.appendix === true ? true : undefined,
+      banner: parseBanner(raw.banner),
+    },
+    content: body,
   }
 }
 
 export function parseTranslationFrontMatter(
   content: string
-): TranslationFrontMatter {
-  const raw = parseFrontMatter(content, "translation")
+): ParsedFrontMatter<TranslationFrontMatter> {
+  const { raw, content: body } = parseFrontMatter(content, "translation")
   const translates = raw.translates
   if (typeof translates !== "string" || translates === "") {
     throw new Error(`missing required key 'translates'`)
   }
   return {
-    translates,
-    title: typeof raw.title === "string" ? raw.title : undefined,
-    description:
-      typeof raw.description === "string" ? raw.description : undefined,
-    banner: parseBanner(raw.banner),
+    frontmatter: {
+      translates,
+      title: typeof raw.title === "string" ? raw.title : undefined,
+      description:
+        typeof raw.description === "string" ? raw.description : undefined,
+      banner: parseBanner(raw.banner),
+    },
+    content: body,
   }
 }
 
 export function parseSourceReadmeFrontMatter(
   content: string
-): SourceReadmeFrontMatter {
-  const raw = parseFrontMatter(content, "sourceReadme")
+): ParsedFrontMatter<SourceReadmeFrontMatter> {
+  const { raw, content: body } = parseFrontMatter(content, "sourceReadme")
   const slug = raw.slug
   const chapterTitle = raw["chapter-title"]
   if (typeof slug !== "string") {
@@ -162,20 +198,23 @@ export function parseSourceReadmeFrontMatter(
     throw new Error(`missing required key 'chapter-title'`)
   }
   return {
-    slug,
-    "chapter-title": chapterTitle,
-    "intro-title":
-      typeof raw["intro-title"] === "string" ? raw["intro-title"] : undefined,
-    index: parseIndex(raw.index),
-    appendix: raw.appendix === true ? true : undefined,
-    revising: raw.revising === true ? true : undefined,
+    frontmatter: {
+      slug,
+      "chapter-title": chapterTitle,
+      "intro-title":
+        typeof raw["intro-title"] === "string" ? raw["intro-title"] : undefined,
+      index: parseIndex(raw.index),
+      appendix: raw.appendix === true ? true : undefined,
+      revising: raw.revising === true ? true : undefined,
+    },
+    content: body,
   }
 }
 
 export function parseTranslationReadmeFrontMatter(
   content: string
-): TranslationReadmeFrontMatter {
-  const raw = parseFrontMatter(content, "translationReadme")
+): ParsedFrontMatter<TranslationReadmeFrontMatter> {
+  const { raw, content: body } = parseFrontMatter(content, "translationReadme")
   const translates = raw.translates
   const chapterTitle = raw["chapter-title"]
   if (typeof translates !== "string" || translates === "") {
@@ -185,9 +224,12 @@ export function parseTranslationReadmeFrontMatter(
     throw new Error(`missing required key 'chapter-title'`)
   }
   return {
-    translates,
-    "chapter-title": chapterTitle,
-    "intro-title":
-      typeof raw["intro-title"] === "string" ? raw["intro-title"] : undefined,
+    frontmatter: {
+      translates,
+      "chapter-title": chapterTitle,
+      "intro-title":
+        typeof raw["intro-title"] === "string" ? raw["intro-title"] : undefined,
+    },
+    content: body,
   }
 }

@@ -31,15 +31,6 @@ export interface ArticleContentOptions {
   logger: BuildLogger
 }
 
-function stripFrontMatter(raw: string): string {
-  const normalized = raw.startsWith("\uFEFF") ? raw.slice(1) : raw
-  const match = /^---\r?\n[\s\S]*?\r?\n---\r?\n?/.exec(normalized)
-  if (match) {
-    return normalized.slice(match[0].length)
-  }
-  return normalized
-}
-
 export async function generateArticleContent({
   articlesPath,
   dataDir,
@@ -193,9 +184,11 @@ export async function generateArticleContent({
     if (locale === "zh") {
       let fm: SourceFrontMatter | SourceReadmeFrontMatter
       try {
-        fm = entry.isFolder
+        const parsed = entry.isFolder
           ? parseSourceReadmeFrontMatter(fileContent)
           : parseSourceFrontMatter(fileContent)
+        fm = parsed.frontmatter
+        artifactContent = parsed.content
       } catch (error) {
         logger.error(
           "article-content.frontmatter.parse-failed",
@@ -205,7 +198,6 @@ export async function generateArticleContent({
         return null
       }
 
-      artifactContent = stripFrontMatter(fileContent)
       const chapterTitle =
         "chapter-title" in fm ? fm["chapter-title"] : undefined
       const introTitle = "intro-title" in fm ? fm["intro-title"] : undefined
@@ -231,9 +223,11 @@ export async function generateArticleContent({
     } else if (locale === "en") {
       let fm: TranslationFrontMatter | TranslationReadmeFrontMatter
       try {
-        fm = entry.isFolder
+        const parsed = entry.isFolder
           ? parseTranslationReadmeFrontMatter(fileContent)
           : parseTranslationFrontMatter(fileContent)
+        fm = parsed.frontmatter
+        artifactContent = parsed.content
       } catch (error) {
         logger.error(
           "article-content.frontmatter.parse-failed",
@@ -243,7 +237,6 @@ export async function generateArticleContent({
         return null
       }
 
-      artifactContent = stripFrontMatter(fileContent)
       const chapterTitle =
         "chapter-title" in fm ? fm["chapter-title"] : undefined
       const introTitle = "intro-title" in fm ? fm["intro-title"] : undefined

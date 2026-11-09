@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl"
 import { Filter, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/shadcn/button"
+import { Badge } from "@/components/ui/shadcn/badge"
 import { Card } from "@/components/ui/shadcn/card"
 import { Input } from "@/components/ui/shadcn/input"
 import {
@@ -95,11 +96,6 @@ export function PropertyControls({
           multiple
           onSelect={toggleColumn}
         />
-        <PropertyPicker
-          properties={state.filters.length < 8 ? properties : []}
-          label={t("addFilter")}
-          onSelect={addFilter}
-        />
       </div>
       {!state.q && !state.filters.length && (
         <div className="flex flex-wrap items-center gap-2">
@@ -148,75 +144,105 @@ export function PropertyControls({
           )}
         </div>
       )}
-      {state.filters.map((filter) => (
-        <div
-          key={filter.id}
-          className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.75rem] items-center gap-2 sm:flex sm:flex-wrap">
-          <Label
-            htmlFor={`filter-${filter.id}`}
-            className="col-span-3 min-w-0 sm:min-w-40">
-            {byId.get(filter.property)?.name ?? filter.property}
-          </Label>
-          <Select
-            value={filter.operator}
-            onValueChange={(operator) => {
-              if (FILTER_OPERATORS.includes(operator as FilterOperator)) {
+      <section className="border-border space-y-3 border-t pt-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="flex items-center gap-2 font-sans text-sm font-semibold">
+            {t("filters")}
+            {state.filters.length > 0 && (
+              <Badge variant="secondary">{state.filters.length}</Badge>
+            )}
+          </h2>
+          <PropertyPicker
+            properties={state.filters.length < 8 ? properties : []}
+            label={t("addFilter")}
+            onSelect={addFilter}
+          />
+        </div>
+        {state.filters.length > 0 && (
+          <div className="space-y-2">
+            <div className="text-muted-foreground hidden gap-2 text-sm sm:grid sm:grid-cols-[2.75rem_minmax(0,14rem)_minmax(0,1fr)]">
+              <span aria-hidden="true" />
+              <span>{t("property")}</span>
+              <span>{t("filterColumn")}</span>
+            </div>
+            {state.filters.map((filter) => {
+              const propertyName =
+                byId.get(filter.property)?.name ?? filter.property
+              function patchFilter(patch: Partial<PropertyFilter>) {
                 void setState({
                   filters: state.filters.map((item) =>
-                    item.id === filter.id
-                      ? { ...item, operator: operator as FilterOperator }
-                      : item
+                    item.id === filter.id ? { ...item, ...patch } : item
                   ),
                   page: 1,
                 })
               }
-            }}>
-            <SelectTrigger
-              className="min-h-11 w-full min-w-0 sm:w-fit"
-              aria-label={t("operator")}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {FILTER_OPERATORS.map((operator) => (
-                <SelectItem key={operator} value={operator}>
-                  {t(`op_${operator}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Input
-            id={`filter-${filter.id}`}
-            className="w-full min-w-0 sm:w-40 sm:flex-none"
-            value={filter.value}
-            maxLength={200}
-            placeholder={t("filterValue")}
-            onChange={(event) =>
-              void setState({
-                filters: state.filters.map((item) =>
-                  item.id === filter.id
-                    ? { ...item, value: event.target.value }
-                    : item
-                ),
-                page: 1,
-              })
-            }
-          />
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={t("removeFilter", {
-              name: byId.get(filter.property)?.name ?? filter.property,
+              return (
+                <div
+                  key={filter.id}
+                  className="grid grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-2 sm:grid-cols-[2.75rem_minmax(0,14rem)_minmax(0,1fr)]">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="min-h-11 min-w-11"
+                    aria-label={t("removeFilter", { name: propertyName })}
+                    onClick={() =>
+                      void setState({
+                        filters: state.filters.filter(
+                          (item) => item.id !== filter.id
+                        ),
+                        page: 1,
+                      })
+                    }>
+                    <X aria-hidden="true" />
+                  </Button>
+                  <PropertyPicker
+                    properties={properties}
+                    selected={[filter.property]}
+                    label={propertyName}
+                    onSelect={(property) => patchFilter({ property })}
+                  />
+                  <div className="col-span-2 flex flex-wrap items-center gap-2 sm:col-span-1">
+                    <Select
+                      value={filter.operator}
+                      onValueChange={(operator) => {
+                        if (
+                          FILTER_OPERATORS.includes(operator as FilterOperator)
+                        ) {
+                          patchFilter({
+                            operator: operator as FilterOperator,
+                          })
+                        }
+                      }}>
+                      <SelectTrigger
+                        className="min-h-11 w-full min-w-0 sm:w-fit"
+                        aria-label={`${propertyName} ${t("operator")}`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {FILTER_OPERATORS.map((operator) => (
+                          <SelectItem key={operator} value={operator}>
+                            {t(`op_${operator}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      className="w-full min-w-0 sm:max-w-64"
+                      value={filter.value}
+                      maxLength={200}
+                      placeholder={t("filterValue")}
+                      aria-label={t("filterValueFor", { name: propertyName })}
+                      onChange={(event) =>
+                        patchFilter({ value: event.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+              )
             })}
-            onClick={() =>
-              void setState({
-                filters: state.filters.filter((item) => item.id !== filter.id),
-                page: 1,
-              })
-            }>
-            <X aria-hidden="true" />
-          </Button>
-        </div>
-      ))}
+          </div>
+        )}
+      </section>
     </Card>
   )
 }

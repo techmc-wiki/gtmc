@@ -164,6 +164,22 @@ function CommandItem({
   )
 }
 
+function CommandShortcut({
+  className,
+  ...props
+}: React.ComponentProps<"span">) {
+  return (
+    <span
+      data-slot="command-shortcut"
+      className={cn(
+        "ml-auto text-xs tracking-widest text-muted-foreground",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
 export {
   Command,
   CommandDialog,
@@ -172,5 +188,6 @@ export {
   CommandEmpty,
   CommandGroup,
   CommandItem,
+  CommandShortcut,
   CommandSeparator,
 }

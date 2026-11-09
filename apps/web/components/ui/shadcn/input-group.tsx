@@ -15,6 +15,12 @@ const inputGroupAddonVariants = cva(
     },
     variants: {
       align: {
+        "block-end":
+          "order-last w-full justify-start px-3 pb-2.5 [.border-t]:pt-2.5",
+        "block-start":
+          "order-first w-full justify-start px-3 pt-2.5 [.border-b]:pb-2.5",
+        "inline-end":
+          "order-last pr-3 has-[>button]:-me-1 has-[>kbd:last-child]:me-[-0.35rem]",
         "inline-start":
           "order-first pl-3 has-[>button]:-ms-1 has-[>kbd:last-child]:ms-[-0.35rem]",
       },
@@ -29,7 +35,7 @@ export function InputGroup({
   return (
     <div
       className={cn(
-        "border-tech-main/30 bg-surface-input relative inline-flex min-h-11 w-full min-w-0 items-center border text-tech-main-dark transition-colors has-[input:focus-visible,textarea:focus-visible]:border-tech-main",
+        "border-tech-main/30 bg-surface-input relative inline-flex min-h-11 w-full min-w-0 items-center border text-tech-main-dark transition-colors has-[input:focus-visible,textarea:focus-visible]:border-tech-main has-data-[slot=input-group-addon][data-align=block-end]:flex-wrap",
         className
       )}
       data-slot="input-group"
@@ -49,6 +55,21 @@ export function InputGroupAddon({
       className={cn(inputGroupAddonVariants({ align }), className)}
       data-align={align}
       data-slot="input-group-addon"
+      {...props}
+    />
+  )
+}
+
+export function InputGroupText({
+  className,
+  ...props
+}: React.ComponentProps<"span">): React.ReactElement {
+  return (
+    <span
+      className={cn(
+        "text-tech-main/60 flex items-center gap-2 truncate text-xs select-none",
+        className
+      )}
       {...props}
     />
   )

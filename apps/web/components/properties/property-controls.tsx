@@ -90,7 +90,8 @@ export function PropertyControls({
         <PropertyPicker
           properties={properties}
           selected={columns}
-          label={t("columns", { count: columns.length })}
+          label={t("columns")}
+          count={columns.length}
           multiple
           onSelect={toggleColumn}
         />

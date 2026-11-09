@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/shadcn/button"
+import { Badge } from "@/components/ui/shadcn/badge"
 import {
   Popover,
   PopoverContent,
@@ -25,12 +26,14 @@ export function PropertyPicker({
   properties,
   selected = NO_SELECTION,
   label,
+  count,
   multiple = false,
   onSelect,
 }: {
   properties: PropertyInfo[]
   selected?: string[]
   label: string
+  count?: number
   multiple?: boolean
   onSelect: (id: string) => void
 }) {
@@ -40,23 +43,28 @@ export function PropertyPicker({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="min-h-11" aria-expanded={open}>
-          {label}
-          <ChevronsUpDown aria-hidden="true" />
+        <Button
+          variant="outline"
+          className="min-h-11 min-w-0 justify-between"
+          aria-expanded={open}>
+          <span className="truncate text-left">{label}</span>
+          {count !== undefined && <Badge variant="secondary">{count}</Badge>}
+          <ChevronsUpDown aria-hidden="true" className="shrink-0" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-[min(28rem,calc(100vw-2rem))] p-0">
+        className="w-[min(40rem,calc(100vw-2rem))] p-0">
         <Command>
           <CommandInput
             placeholder={t("findProperty")}
             aria-label={t("findProperty")}
           />
-          <CommandList className="max-h-80">
+          <CommandList className="max-h-96">
             <CommandEmpty>{t("noProperty")}</CommandEmpty>
             <CommandGroup
-              heading={multiple ? t("columnLimit") : t("chooseProperty")}>
+              heading={multiple ? t("columnLimit") : t("chooseProperty")}
+              className="[&_[cmdk-group-items]]:grid [&_[cmdk-group-items]]:gap-1 sm:[&_[cmdk-group-items]]:grid-cols-2">
               {properties.map((property) => (
                 <CommandItem
                   key={property.id}
@@ -67,32 +75,30 @@ export function PropertyPicker({
                       : selected.length >= 8)
                   }
                   value={`${property.id} ${property.name} ${property.category} ${property.description}`}
+                  title={property.description || undefined}
                   onSelect={() => {
                     onSelect(property.id)
                     if (!multiple) setOpen(false)
                   }}
-                  className="min-h-11 items-start py-3">
+                  className="min-h-11 items-start px-2 py-2">
                   <Check
                     aria-hidden="true"
                     className={
                       selectedIds.has(property.id)
-                        ? "mt-0.5 opacity-100"
-                        : "mt-0.5 opacity-0"
+                        ? "mt-0.5 shrink-0 opacity-100"
+                        : "mt-0.5 shrink-0 opacity-0"
                     }
                   />
-                  <div className="min-w-0 space-y-1">
-                    <span className="block font-medium">{property.name}</span>
+                  <span className="min-w-0">
+                    <span className="line-clamp-2 block leading-snug font-medium">
+                      {property.name}
+                    </span>
                     {property.category && (
-                      <span className="text-muted-foreground block text-xs">
+                      <span className="text-muted-foreground mt-0.5 block truncate text-xs">
                         {property.category}
                       </span>
                     )}
-                    {property.description && (
-                      <span className="text-muted-foreground block text-sm leading-relaxed">
-                        {property.description}
-                      </span>
-                    )}
-                  </div>
+                  </span>
                 </CommandItem>
               ))}
             </CommandGroup>

@@ -584,7 +584,7 @@
     "search_entities": "搜索实体，例如 creeper",
     "search_items": "搜索物品，例如 diamond_sword",
     "clearSearch": "清除搜索",
-    "columns": "显示属性（{count}）",
+    "columns": "显示属性",
     "addFilter": "添加属性值筛选",
     "findProperty": "查找属性",
     "noProperty": "没有匹配的属性。",

@@ -584,7 +584,7 @@
     "search_entities": "Search entities, e.g. creeper",
     "search_items": "Search items, e.g. diamond_sword",
     "clearSearch": "Clear search",
-    "columns": "Properties ({count})",
+    "columns": "Properties",
     "addFilter": "Add a value filter",
     "findProperty": "Find a property",
     "noProperty": "No matching properties.",

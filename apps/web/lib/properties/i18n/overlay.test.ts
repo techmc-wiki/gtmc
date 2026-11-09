@@ -141,6 +141,14 @@ describe("value and category helpers", () => {
     expect(translateText(testOverlay, "No")).toBe("No")
     expect(translateText(testOverlay, "Yes")).toBe("是")
   })
+
+  it("ignores inherited object members", () => {
+    for (const key of ["constructor", "toString", "__proto__"]) {
+      expect(translateText(testOverlay, key)).toBe(key)
+      expect(translatedCategory(testOverlay, key)).toBe(key)
+      expect(translatedUnit(testOverlay, key)).toBe(key)
+    }
+  })
 })
 
 describe("zh overlay against the pinned upstream data", () => {

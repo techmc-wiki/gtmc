@@ -109,12 +109,13 @@ function usePropertyLookup(initialCatalog: PropertyCatalog) {
     ? state.columns.slice(0, 8)
     : (catalog?.defaults ?? [])
   const selected = state.compare.slice(0, 4)
+  const activeFilters = state.filters.filter((filter) => filter.property)
   const parameters = new URLSearchParams({
     dataset: state.dataset,
     locale,
     q: state.q.slice(0, 200),
     columns: columns.join(","),
-    filters: JSON.stringify(state.filters),
+    filters: JSON.stringify(activeFilters),
     sort: state.sort,
     direction: state.direction,
     page: String(Math.max(1, state.page)),

@@ -33,7 +33,7 @@ export function run(
 }
 
 export function runScript(scriptPath: string, args: string[] = []): void {
-  run("tsx", [scriptPath, ...args])
+  run("vpx", [scriptPath, ...args])
 }
 
 export function runScriptAsync(
@@ -41,12 +41,12 @@ export function runScriptAsync(
   args: string[] = []
 ): Promise<void> {
   const { promise, resolve, reject } = Promise.withResolvers<void>()
-  const child = spawn("tsx", [scriptPath, ...args], {
+  const child = spawn("vpx", [scriptPath, ...args], {
     stdio: "inherit",
     shell: defaultShell,
   })
   child.on("error", (error) => {
-    logger.error("command.failed", { command: "tsx" }, error.message)
+    logger.error("command.failed", { command: "vpx" }, error.message)
     reject(error)
   })
   child.on("exit", (code) => {
@@ -54,7 +54,7 @@ export function runScriptAsync(
       resolve()
     } else {
       const error = new Error(`Command failed with exit code ${code ?? 1}`)
-      logger.error("command.failed", { command: "tsx", exit_code: code ?? 1 })
+      logger.error("command.failed", { command: "vpx", exit_code: code ?? 1 })
       reject(error)
     }
   })

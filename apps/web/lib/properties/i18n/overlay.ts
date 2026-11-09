@@ -43,6 +43,18 @@ export interface PropertyOverlay {
 export const EMPTY_OVERLAY: PropertyOverlay = {}
 
 /**
+ * Reads an own dictionary entry. Overlay objects come from JSON, so they
+ * inherit `Object.prototype`: a filter for `constructor` or `__proto__` must
+ * fall through to the input string instead of matching an inherited member.
+ */
+function own<T>(
+  record: Record<string, T> | undefined,
+  key: string
+): T | undefined {
+  return record && Object.hasOwn(record, key) ? record[key] : undefined
+}
+
+/**
  * Resolves a property's display strings. Descriptions stay empty when the
  * upstream description is empty: the legacy dataset has no descriptions, and a
  * translation written for another dataset must not fill that gap.
@@ -54,8 +66,9 @@ export function translatedProperty(
   name: string,
   description: string
 ): { name: string; description: string } {
-  const override = overlay.datasets?.[dataset]?.properties?.[id]
-  const base = overlay.properties?.[id]
+  const datasetOverlay = own(overlay.datasets, dataset)
+  const override = own(datasetOverlay?.properties, id)
+  const base = own(overlay.properties, id)
   return {
     name: override?.name ?? base?.name ?? name,
     description: description
@@ -68,7 +81,7 @@ export function translatedCategory(
   overlay: PropertyOverlay,
   category: string
 ): string {
-  return overlay.categories?.[category] ?? category
+  return own(overlay.categories, category) ?? category
 }
 
 /** Resolves the display strings of a property this app generates itself. */
@@ -78,7 +91,7 @@ export function translatedSynthetic(
   name: string,
   description: string
 ): { name: string; description: string } {
-  const override = overlay.synthetic?.[id]
+  const override = own(overlay.synthetic, id)
   return {
     name: override?.name ?? name,
     description: override?.description ?? description,
@@ -90,11 +103,11 @@ export function translatedUnit(
   unit: string | undefined
 ): string | undefined {
   if (!unit) return unit
-  return overlay.units?.[unit] ?? unit
+  return own(overlay.units, unit) ?? unit
 }
 
 export function translateText(overlay: PropertyOverlay, text: string): string {
-  return overlay.values?.[text] ?? text
+  return own(overlay.values, text) ?? text
 }
 
 /** Translates value leaves only; state-label object keys stay untouched. */

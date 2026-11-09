@@ -153,6 +153,15 @@ function valueFor(property: SourceProperty, name: string): PropertyValue {
     ? property.entries[name]
     : (property.default_value ?? null)
 }
+/** Upstream maps are JSON objects: filter ids may name inherited members. */
+function ownProperty(
+  source: SourceDataset,
+  id: string
+): SourceProperty | undefined {
+  return Object.hasOwn(source.properties, id)
+    ? source.properties[id]
+    : undefined
+}
 
 const NUMERIC = /^[-+]?(?:\d+(?:\.\d+)?|\.\d+)$/
 function parseNumber(value: string | number | boolean): number | null {
@@ -487,13 +496,15 @@ function matchesFilter(
   name: string
 ): boolean {
   if (filter.property === TAGS_PROPERTY) {
-    const property = source.properties[filter.value]
-    if (!property || !filter.value.startsWith(TAG_PREFIX)) return false
+    if (!filter.value.startsWith(TAG_PREFIX)) return false
+    const property = ownProperty(source, filter.value)
+    if (!property) return false
     const present = leaves(valueFor(property, name)).some(isPresent)
     return filter.operator === "ne" ? !present : present
   }
-  const property = source.properties[filter.property]
-  return Boolean(property) && matches(overlay, valueFor(property, name), filter)
+  const property = ownProperty(source, filter.property)
+  if (!property) return false
+  return matches(overlay, valueFor(property, name), filter)
 }
 function sortValue(
   overlay: PropertyOverlay,

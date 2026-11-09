@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
-import { getMainBranchHeadSha } from "@/lib/articles/branch"
+import { getArticleSourceHeadSha } from "@/lib/articles/branch"
 import { requireAuth } from "@/lib/auth/context"
 import {
   createDraftFile,
@@ -58,7 +58,7 @@ export async function createDraftAction(formData: FormData): Promise<never> {
       files: [createDraftFile({ content, filePath })],
     }),
     kind: "article" as const,
-    baseMainSha: await getMainBranchHeadSha(),
+    baseMainSha: await getArticleSourceHeadSha(),
     title: filePath || "Untitled article",
   }
   await writeDraft(draft)
@@ -102,7 +102,7 @@ export async function saveDraftAction(formData: FormData) {
       ...collection,
       kind: "article" as const,
       title,
-      baseMainSha: await getMainBranchHeadSha(),
+      baseMainSha: await getArticleSourceHeadSha(),
     }
     const nextEtag = await writeDraft(draft)
     revalidatePath("/draft")

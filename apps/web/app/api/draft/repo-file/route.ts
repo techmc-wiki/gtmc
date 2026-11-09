@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
 import { auth } from "@/lib/auth"
-import { getDraftRepoFile } from "@/lib/drafts/storage"
+import { getRepoFileContent } from "@/lib/github"
 
 export async function GET(req: NextRequest) {
   const session = await auth()
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Invalid path" }, { status: 400 })
   }
 
-  const content = await getDraftRepoFile(normalizedPath)
+  const content = await getRepoFileContent(normalizedPath)
 
   if (content === null) {
     return NextResponse.json({ error: "File not found" }, { status: 404 })

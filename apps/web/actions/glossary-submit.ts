@@ -5,73 +5,28 @@ import { revalidatePath } from "next/cache"
 import { getAuthorIdentity, requireAuth } from "@/lib/auth/context"
 import { assertDraftStatus, canSubmitDraft } from "@/lib/drafts/lifecycle"
 import { readDraft, requireDraftVersion, writeDraft } from "@/lib/drafts/store"
+import { reconcileSubmission } from "@/lib/submission-recovery"
 import {
   lockSubmission,
-  releaseFailedSubmission,
   SubmissionInProgressError,
 } from "@/lib/drafts/submission"
 import { parseGlossaryCsv, serializeGlossaryCsv } from "@/lib/glossary/csv"
 import {
   type GlossaryPrResult,
-  findGlossaryPullRequestByBranch,
   openGlossaryPullRequest,
 } from "@/lib/glossary/pr"
+import {
+  GLOSSARY_SOURCE_BRANCH,
+  GLOSSARY_SOURCE_FILENAME,
+} from "@/lib/glossary/source"
 import { getFileSnapshot } from "@/lib/github/branch"
 import { generateSlug } from "@/lib/glossary/slug"
 import { GLOSSARY_FORK_REPO, GLOSSARY_REPO } from "@/lib/github/repos"
 import { resolveGithubToken } from "@/lib/github/tokens"
 
-const GLOSSARY_MAIN_BRANCH = "main"
-const GLOSSARY_CSV_PATH = "TechMC Glossary.csv"
-
 export type SubmitGlossaryResult =
   | { success: true; prUrl: string; prNumber: number }
   | { success: false; error: string }
-
-interface GlossaryPrOutcome {
-  prUrl: string
-  prNumber: number
-}
-
-/** Finalizes a PENDING attempt when a PR exists, otherwise unlocks the draft. */
-async function reconcileSubmission(
-  authorId: string,
-  id: string,
-  token: string,
-  outcome?: GlossaryPrOutcome
-): Promise<GlossaryPrOutcome | null> {
-  const record = await readDraft(authorId, id)
-  if (!record || record.draft.kind !== "glossary") return null
-  const draft = record.draft
-  if (draft.status !== "PENDING" || !draft.branchName) return null
-
-  const pullRequest =
-    outcome ??
-    (await findGlossaryPullRequestByBranch(draft.branchName, token).then((pr) =>
-      pr ? { prUrl: pr.html_url, prNumber: pr.number } : null
-    ))
-
-  if (!pullRequest) {
-    await releaseFailedSubmission(draft, record.etag)
-    return null
-  }
-
-  const now = new Date().toISOString()
-  await writeDraft(
-    {
-      ...draft,
-      status: assertDraftStatus(draft.status, {
-        type: "SUBMISSION_SUCCEEDED",
-      }),
-      githubPrUrl: pullRequest.prUrl,
-      githubPrNum: pullRequest.prNumber,
-      submittedAt: now,
-      updatedAt: now,
-    },
-    record.etag
-  )
-  return pullRequest
-}
 
 export async function submitGlossaryDraftAction(
   id: string,
@@ -136,16 +91,16 @@ export async function submitGlossaryDraftAction(
     const authorName = identity.name
 
     let snapshot = await getFileSnapshot(
-      GLOSSARY_CSV_PATH,
-      GLOSSARY_MAIN_BRANCH,
+      GLOSSARY_SOURCE_FILENAME,
+      GLOSSARY_SOURCE_BRANCH,
       token,
       GLOSSARY_REPO
     )
 
     if (!snapshot) {
       snapshot = await getFileSnapshot(
-        GLOSSARY_CSV_PATH,
-        GLOSSARY_MAIN_BRANCH,
+        GLOSSARY_SOURCE_FILENAME,
+        GLOSSARY_SOURCE_BRANCH,
         token,
         GLOSSARY_FORK_REPO
       )
@@ -153,7 +108,7 @@ export async function submitGlossaryDraftAction(
 
     if (!snapshot) {
       throw new Error(
-        `Failed to fetch "${GLOSSARY_CSV_PATH}" from GitHub (${GLOSSARY_REPO.owner}/${GLOSSARY_REPO.name}).`
+        `Failed to fetch "${GLOSSARY_SOURCE_FILENAME}" from GitHub (${GLOSSARY_REPO.owner}/${GLOSSARY_REPO.name}).`
       )
     }
 
@@ -222,11 +177,12 @@ export async function submitGlossaryDraftAction(
       })
     } catch (error) {
       if (!(error instanceof SubmissionInProgressError)) {
-        const recovered = await reconcileSubmission(
-          session.user.id,
-          id,
-          token
-        ).catch((reconcileError) => {
+        const recovered = await reconcileSubmission({
+          kind: "glossary",
+          authorId: session.user.id,
+          draftId: id,
+          token,
+        }).catch((reconcileError) => {
           console.error(
             "Failed to reconcile glossary submission:",
             reconcileError
@@ -261,12 +217,13 @@ export async function submitGlossaryDraftAction(
         locked.etag
       )
     } catch (error) {
-      const recovered = await reconcileSubmission(
-        session.user.id,
-        id,
+      const recovered = await reconcileSubmission({
+        kind: "glossary",
+        authorId: session.user.id,
+        draftId: id,
         token,
-        result
-      ).catch((reconcileError) => {
+        result,
+      }).catch((reconcileError) => {
         console.error(
           "Failed to persist submitted glossary draft:",
           reconcileError

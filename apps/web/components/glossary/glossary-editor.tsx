@@ -34,7 +34,7 @@ import {
 import { useMounted } from "@/hooks/use-mounted"
 import { submitGlossaryDraftAction } from "@/actions/glossary-submit"
 import { GLOSSARY_COLUMNS, type GlossaryRow } from "@/lib/glossary/csv"
-import { generateSlug } from "@/lib/glossary/slug"
+import { generateUniqueSlug } from "@/lib/glossary/slug"
 import type {
   GlossaryEntry,
   GlossarySummaryEntry,
@@ -233,7 +233,7 @@ function GlossaryEditorInner({
       : null
   )
 
-  const { saveState, saveTimeoutRef, scheduleAutosave } = useGlossaryAutosave({
+  const { isSaving, saveTimeoutRef, scheduleAutosave } = useGlossaryAutosave({
     draftId,
     isReadOnly,
     operations,
@@ -290,13 +290,7 @@ function GlossaryEditorInner({
       if (isReadOnly) return
       const trimmed = query.trim()
       if (!trimmed) return
-      const baseSlug = generateSlug(trimmed)
-      let slug = baseSlug
-      let counter = 2
-      while (usedSlugs.has(slug)) {
-        slug = `${baseSlug}-${counter}`
-        counter++
-      }
+      const slug = generateUniqueSlug(trimmed, new Set(usedSlugs))
       const row = emptyRow()
       row["Full Form (English)"] = trimmed
       setOperations((prev) => [
@@ -314,13 +308,7 @@ function GlossaryEditorInner({
 
   const handleAddNewTerm = React.useCallback(() => {
     if (isReadOnly) return
-    const baseSlug = "new-term"
-    let slug = baseSlug
-    let counter = 2
-    while (usedSlugs.has(slug)) {
-      slug = `${baseSlug}-${counter}`
-      counter++
-    }
+    const slug = generateUniqueSlug("new-term", new Set(usedSlugs))
     const row = emptyRow()
     setOperations((prev) => [
       ...prev,
@@ -507,12 +495,12 @@ function GlossaryEditorInner({
         handleTitleChange={handleTitleChange}
         hasInvalidOperations={hasInvalidOperations}
         isReadOnly={isReadOnly}
+        isSaving={isSaving}
         locale={locale}
         manifestEntries={manifestEntries}
         noreplyEmail={noreplyEmail}
         operations={operations}
         realEmail={realEmail}
-        saveStateLabel={saveState}
         showPreview={showPreview}
         status={status}
         submitError={submitError}
@@ -545,7 +533,7 @@ function useGlossaryAutosave({
   operations: GlossaryEditOperation[]
   title: string
 }) {
-  const [saveState, setSaveState] = React.useState("")
+  const [isSaving, setIsSaving] = React.useState(false)
   const saveTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
     null
   )
@@ -561,7 +549,7 @@ function useGlossaryAutosave({
     if (isReadOnly) return
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
     const savingToastId = toast.loading("Saving…", { id: "glossary-autosave" })
-    setSaveState("Saving…")
+    setIsSaving(true)
     saveTimeoutRef.current = setTimeout(async () => {
       try {
         const result = await saveDraft(
@@ -571,7 +559,7 @@ function useGlossaryAutosave({
         )
         if (result.success) {
           toast.success("Saved", { id: savingToastId })
-          setTimeout(() => setSaveState(""), 2000)
+          setTimeout(() => setIsSaving(false), 2000)
           return
         }
         const message =
@@ -579,13 +567,13 @@ function useGlossaryAutosave({
           Object.values(result.errors ?? {}).find(Boolean) ||
           "Save failed"
         toast.error(message, { id: savingToastId, duration: 3000 })
-        setSaveState("")
+        setIsSaving(false)
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Save failed", {
           id: savingToastId,
           duration: 3000,
         })
-        setSaveState("")
+        setIsSaving(false)
       }
     }, SAVE_DEBOUNCE_MS)
   }, [draftId, isReadOnly, saveDraft])
@@ -597,7 +585,7 @@ function useGlossaryAutosave({
     []
   )
 
-  return { saveState, saveTimeoutRef, scheduleAutosave }
+  return { isSaving, saveTimeoutRef, scheduleAutosave }
 }
 
 interface GlossaryEditorContentProps {
@@ -618,13 +606,13 @@ interface GlossaryEditorContentProps {
   handleTitleChange: (title: string) => void
   hasInvalidOperations: boolean
   isReadOnly: boolean
+  isSaving: boolean
   locale: string
   manifestEntries: GlossaryEntry[]
   noreplyEmail: string
   operations: GlossaryEditOperation[]
   onUseRealEmailChange: (value: boolean) => void
   realEmail: string | null
-  saveStateLabel: string
   showPreview: boolean
   status: string
   submitError: string | null
@@ -654,13 +642,13 @@ function GlossaryEditorContent({
   handleTitleChange,
   hasInvalidOperations,
   isReadOnly,
+  isSaving,
   locale,
   manifestEntries,
   noreplyEmail,
   operations,
   onUseRealEmailChange,
   realEmail,
-  saveStateLabel,
   showPreview,
   status,
   submitError,
@@ -698,7 +686,7 @@ function GlossaryEditorContent({
         onDiscard={handleDiscard}
         onSubmit={handleOpenPreview}
         canSubmit={operations.length > 0 && !hasInvalidOperations}
-        saveState={saveStateLabel}
+        isSaving={isSaving}
         isReadOnly={isReadOnly}
       />
       <ComplexChangesNotice />

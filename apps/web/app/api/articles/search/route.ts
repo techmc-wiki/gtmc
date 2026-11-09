@@ -1,6 +1,5 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { CJK_TOKENIZER } from "@/lib/search/cjk-tokenizer";
 import { getSearchIndex } from "@/lib/search/search-index";
 import { searchGlossary } from "@/lib/glossary/search";
 import type { GlossarySummaryEntry } from "@/lib/glossary/manifest";
@@ -103,12 +102,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const index = await getSearchIndex(locale);
-    const rawResults = index.search(query, {
-      tokenize: CJK_TOKENIZER,
-      boost: { title: 2 },
-      fuzzy: 0.2,
-      prefix: true,
-    });
+    const rawResults = index.search(query);
 
     const loweredQuery = query.toLowerCase();
     const results: SearchResult[] = [];

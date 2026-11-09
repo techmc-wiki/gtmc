@@ -4,7 +4,7 @@ import type { LinearizedArticle } from "@/lib/articles/linearize"
 import { linearizeArticles } from "@/lib/articles/linearize"
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import { preparePublicChapterNav } from "@/lib/articles/public-tree"
-import type { ArticleTreeNode } from "@/lib/github/sync"
+import type { ArticleTreeNode } from "@/lib/articles/article-tree-types"
 
 import { buildBookPlan } from "./numbering"
 import { chapterArticles } from "./types"

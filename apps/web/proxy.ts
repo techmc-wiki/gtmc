@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth"
+import type { ArticleEntry, ArticleLocale } from "@gtmc/ssg/articles/types"
 import type { NextAuthRequest } from "next-auth"
 import {
   isDevFixtureAuthEnabled,
@@ -12,22 +13,8 @@ import {
 } from "next/server"
 import { routing } from "@/i18n/routing"
 import articleManifest from "./data/manifest.json" with { type: "json" }
-interface SitemapArticleEntry {
-  slug: string
-  availableLocales: string[]
-  hasIntro: boolean
-  isFolder: boolean
-  children?: SitemapArticleEntry[]
-}
 
-const articleEntries: SitemapArticleEntry[] = []
-function collectArticleEntries(entries: SitemapArticleEntry[]): void {
-  for (const entry of entries) {
-    articleEntries.push(entry)
-    collectArticleEntries(entry.children ?? [])
-  }
-}
-collectArticleEntries(Object.values(articleManifest) as SitemapArticleEntry[])
+const articleEntriesBySlug = articleManifest as Record<string, ArticleEntry>
 
 function decodeArticlePath(path: string): string {
   try {
@@ -42,8 +29,8 @@ function decodeArticlePath(path: string): string {
 }
 
 function resolveCanonicalArticleSlug(
-  entry: SitemapArticleEntry,
-  locale: string
+  entry: ArticleEntry,
+  locale: ArticleLocale
 ): string | null {
   if (!entry.isFolder) {
     return entry.availableLocales.includes(locale) ? entry.slug : null
@@ -53,11 +40,6 @@ function resolveCanonicalArticleSlug(
     return entry.slug
   }
 
-  for (const child of entry.children ?? []) {
-    const slug = resolveCanonicalArticleSlug(child, locale)
-    if (slug) return slug
-  }
-
   return null
 }
 
@@ -65,11 +47,13 @@ function canonicalizeArticleRequest(req: NextRequest): Response | null {
   const match = /^\/(en|zh)\/articles(?:\/(.*))?$/.exec(req.nextUrl.pathname)
   if (!match) return null
 
-  const [, requestedLocale, rawPath] = match
+  const [, requestedLocaleSegment, rawPath] = match
+  const requestedLocale: ArticleLocale =
+    requestedLocaleSegment === "en" ? "en" : "zh"
   const requestedSlug = rawPath ? decodeArticlePath(rawPath) : "preface"
-  const entry = articleEntries.find(
-    (candidate) => candidate.slug === requestedSlug
-  )
+  const entry = Object.hasOwn(articleEntriesBySlug, requestedSlug)
+    ? articleEntriesBySlug[requestedSlug]
+    : undefined
   if (!entry) return null
 
   const contentLocale = entry.availableLocales.includes(requestedLocale)

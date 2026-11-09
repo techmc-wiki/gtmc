@@ -9,7 +9,6 @@ import { GitPullRequest, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/shadcn/button"
 import { Input } from "@/components/ui/shadcn/input"
 import { Badge } from "@/components/ui/shadcn/badge"
-import { cn } from "@/lib/cn"
 
 export interface GlossaryEditToolbarProps {
   title: string
@@ -17,8 +16,7 @@ export interface GlossaryEditToolbarProps {
   onDiscard: () => void
   onSubmit: () => void
   canSubmit: boolean
-  saveState: string
-  className?: string
+  isSaving: boolean
   isReadOnly?: boolean
 }
 
@@ -28,8 +26,7 @@ export function GlossaryEditToolbar({
   onDiscard,
   onSubmit,
   canSubmit,
-  saveState,
-  className,
+  isSaving,
   isReadOnly = false,
 }: GlossaryEditToolbarProps) {
   const t = useTranslations("Glossary")
@@ -41,17 +38,8 @@ export function GlossaryEditToolbar({
     [onTitleChange]
   )
 
-  const isSaving = saveState.toLowerCase().includes("saving")
-  const isError =
-    saveState.toLowerCase().includes("fail") ||
-    saveState.toLowerCase().includes("error")
-
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-3 rounded-none border border-border bg-surface p-3 sm:flex-row sm:items-center sm:justify-between sm:px-4",
-        className
-      )}>
+    <div className="border-border bg-surface flex flex-col gap-3 rounded-none border p-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
       <div className="flex flex-1 items-center gap-3">
         <Input
           type="text"
@@ -62,14 +50,7 @@ export function GlossaryEditToolbar({
           aria-label={t("editorTitlePlaceholder")}
           className="max-w-xs sm:max-w-md"
         />
-        {saveState && (
-          <Badge
-            variant={
-              isError ? "destructive" : isSaving ? "pending" : "neutral"
-            }>
-            {saveState}
-          </Badge>
-        )}
+        {isSaving && <Badge variant="pending">Saving…</Badge>}
       </div>
 
       <div className="flex items-center gap-2 self-end sm:self-auto">

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { auth } from "@/lib/auth"
-import { getDraftRepoTree } from "@/lib/drafts/storage"
+import { getDraftRepoTree } from "@/lib/drafts/repo-tree"
 
 export async function GET() {
   const session = await auth()

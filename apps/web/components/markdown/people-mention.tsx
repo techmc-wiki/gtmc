@@ -18,7 +18,7 @@ import {
   PopoverContent,
 } from "@/components/ui/shadcn/popover"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
-import type { ResolvedPerson } from "@/lib/markdown/people"
+import type { ResolvedPerson } from "@/lib/articles/people"
 
 type PersonResponse = ResolvedPerson & { profileHandle: string | null }
 

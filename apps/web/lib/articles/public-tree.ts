@@ -1,7 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import type { ArticleLocale } from "@gtmc/ssg/articles/types";
 import { getCachedArticleTree } from "@/lib/articles/manifest-cached";
-import type { ArticleTreeNode } from "@/lib/github/sync";
+import type { ArticleTreeNode } from "@/lib/articles/article-tree-types";
 import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types";
 import { compareIndex } from "@/lib/articles/navigation-data";
 

@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { resolvePerson } from "@/lib/markdown/people"
+import { resolvePerson } from "@/lib/articles/people"
 import { getAuthorProfileHandle } from "@/lib/articles/person-resolver"
 
 const PEOPLE_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=3600"

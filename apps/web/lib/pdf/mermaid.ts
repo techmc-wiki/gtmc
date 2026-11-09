@@ -7,7 +7,8 @@ import path from "node:path"
 import { z } from "zod"
 import { workspacePath } from "@/lib/workspace-paths"
 
-const PDF_ROOT = workspacePath("tools", "pdf")
+import { toTypstRootPath, writeFileAtomic } from "./artifacts"
+
 const FONTS_DIR = workspacePath("tools", "pdf", "fonts")
 
 const require = createRequire(import.meta.url)
@@ -448,17 +449,6 @@ function toStandaloneSvg(svg: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n${svg.slice(0, open.index)}${root}${body}`
 }
 
-async function writeFileAtomic(target: string, content: string): Promise<void> {
-  const temp = `${target}.${process.pid}.${crypto.randomUUID()}.part`
-  try {
-    await fs.promises.writeFile(temp, content, "utf-8")
-    await fs.promises.rename(temp, target)
-  } catch (error) {
-    await fs.promises.rm(temp, { force: true })
-    throw error
-  }
-}
-
 /**
  * Mermaid escapes unknown HTML in SVG labels, so `<pre>..</pre>` would print
  * as literal text. Keep the text and drop the wrapper; the template's mono
@@ -466,12 +456,4 @@ async function writeFileAtomic(target: string, content: string): Promise<void> {
  */
 function stripUnsupportedLabelTags(source: string): string {
   return source.replaceAll(/<\/pre>|<pre>/g, "")
-}
-
-function toTypstRootPath(file: string): string {
-  const relative = path.relative(PDF_ROOT, file)
-  if (relative.startsWith("..") || path.isAbsolute(relative)) {
-    throw new Error(`Output ${file} is outside the Typst root ${PDF_ROOT}`)
-  }
-  return `/${relative.split(path.sep).join("/")}`
 }

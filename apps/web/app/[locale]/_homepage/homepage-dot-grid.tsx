@@ -41,7 +41,6 @@ function subscribeDotPaletteTheme(callback: () => void): () => void {
   return () => observer.disconnect()
 }
 
-/** Keeps the homepage dot field synchronized with the document's runtime theme. */
 function useDotPalette(): DotPalette {
   const theme = useSyncExternalStore(
     subscribeDotPaletteTheme,

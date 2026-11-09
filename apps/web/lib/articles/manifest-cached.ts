@@ -8,7 +8,7 @@ import {
   type LocalizedArticleMetadata,
 } from "@/lib/articles/manifest";
 import { type ArticleEntry, type ArticleLocale } from "@gtmc/ssg/articles/types";
-import type { ArticleTreeNode } from "@/lib/github";
+import type { ArticleTreeNode } from "@/lib/articles/article-tree-types";
 
 export async function getCachedArticleTree(
   locale: ArticleLocale = "zh",

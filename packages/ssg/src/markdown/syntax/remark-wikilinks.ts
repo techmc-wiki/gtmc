@@ -4,10 +4,6 @@ import { visit } from "unist-util-visit"
 /**
  * Regex for Obsidian-style wikilinks.
  *
- * Captures two groups:
- *   1. An optional `!` prefix indicating an image wikilink
- *   2. The inner content between `[[` and `]]`
- *
  * Matches:
  *   - `![[filename.png]]`        (image)
  *   - `[[display|target]]`       (link with display text)
@@ -54,7 +50,6 @@ export function remarkWikilinks() {
         let lastIndex = 0
         let match: RegExpExecArray | null
 
-        // Reset regex state before each text node
         WIKILINK_REGEX.lastIndex = 0
 
         while ((match = WIKILINK_REGEX.exec(text)) !== null) {

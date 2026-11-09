@@ -301,7 +301,6 @@ function createLinkResolver(
   index: BookIndex
 ): LinkResolver {
   return (href) => {
-    // In-article anchors and external URLs are not article links.
     if (href.startsWith("#") || hasExplicitUrlScheme(href)) return null
     const hash = href.indexOf("#")
     const target = resolveTarget(
@@ -362,7 +361,6 @@ function typstArgs(
   ]
 }
 
-// Diagnostics stream through with the locale prefixed; a non-zero exit rejects.
 function runTypst(locale: PdfLocale, args: readonly string[]): Promise<void> {
   const binary = process.env.TYPST_BIN || "typst"
   const { promise, resolve, reject } = Promise.withResolvers<void>()

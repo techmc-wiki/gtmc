@@ -3,7 +3,7 @@ import type { ReactNode } from "react"
 
 import type { RehypeShikiPlugin } from "@gtmc/ssg/markdown/syntax/rehype-shiki"
 import type { CodeReference } from "@gtmc/ssg/markdown/code-provenance"
-import { getMarkdownComponents } from "@/lib/markdown/components"
+import { getMarkdownComponents } from "./get-markdown-components"
 import {
   buildRehypePlugins,
   buildRemarkPlugins,

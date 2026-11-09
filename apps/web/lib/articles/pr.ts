@@ -1,18 +1,18 @@
-import { ARTICLES_REPO_NAME, ARTICLES_REPO_OWNER, getOctokit } from "@/lib/github/articles-repo";
+import { ARTICLES_SOURCE_BRANCH } from "@/lib/articles/source";
 import {
   getDuplicateDraftFilePaths,
   normalizeDraftFileCollection,
   type DraftFileRecord,
 } from "@/lib/drafts/files";
 import {
-  getMainBranchHeadSha,
+  getArticleSourceHeadSha,
   resolveArticleFilePath,
   upsertFileOnBranch,
   upsertFilesOnBranch,
   type BranchFileEntry,
 } from "@/lib/articles/branch";
+import { ARTICLES_REPO, getOctokit } from "@/lib/github/repos";
 import { SubmissionInProgressError } from "@/lib/drafts/submission";
-const MAIN_BRANCH = "main";
 
 export interface DraftPullRequestResult {
   activeFileId: string;
@@ -40,9 +40,9 @@ export async function findArticlePullRequestByBranch(
 ) {
   const octokit = getOctokit(token);
   const { data } = await octokit.pulls.list({
-    owner: ARTICLES_REPO_OWNER,
-    repo: ARTICLES_REPO_NAME,
-    head: `${ARTICLES_REPO_OWNER}:${branchName}`,
+    owner: ARTICLES_REPO.owner,
+    repo: ARTICLES_REPO.name,
+    head: `${ARTICLES_REPO.owner}:${branchName}`,
     state: "all",
   });
   return data[0] ?? null;
@@ -61,7 +61,7 @@ export async function openDraftPullRequest({
   token,
 }: DraftSubmissionInput): Promise<DraftPullRequestResult> {
   const octokit = getOctokit(token);
-  const latestMainSha = await getMainBranchHeadSha(token);
+  const latestMainSha = await getArticleSourceHeadSha(token);
   const resolvedDraftFiles = await Promise.all(
     files.map(async (file) => ({
       ...file,
@@ -92,15 +92,15 @@ export async function openDraftPullRequest({
   }
   try {
     await octokit.git.getRef({
-      owner: ARTICLES_REPO_OWNER,
-      repo: ARTICLES_REPO_NAME,
+      owner: ARTICLES_REPO.owner,
+      repo: ARTICLES_REPO.name,
       ref: `heads/${branchName}`,
     });
   } catch (error) {
     if (!(error instanceof Error) || !("status" in error) || error.status !== 404) throw error;
     await octokit.git.createRef({
-      owner: ARTICLES_REPO_OWNER,
-      repo: ARTICLES_REPO_NAME,
+      owner: ARTICLES_REPO.owner,
+      repo: ARTICLES_REPO.name,
       ref: `refs/heads/${branchName}`,
       sha: latestMainSha,
     });
@@ -134,11 +134,11 @@ export async function openDraftPullRequest({
   }
 
   const { data: pr } = await octokit.pulls.create({
-    owner: ARTICLES_REPO_OWNER,
-    repo: ARTICLES_REPO_NAME,
+    owner: ARTICLES_REPO.owner,
+    repo: ARTICLES_REPO.name,
     title,
     head: branchName,
-    base: MAIN_BRANCH,
+    base: ARTICLES_SOURCE_BRANCH,
     body: `由 ${authorName} 提交审核。`,
   });
 
@@ -152,8 +152,8 @@ export async function openDraftPullRequest({
 
 export async function getArticlePullRequest(prNumber: number, token?: string) {
   const { data } = await getOctokit(token).pulls.get({
-    owner: ARTICLES_REPO_OWNER,
-    repo: ARTICLES_REPO_NAME,
+    owner: ARTICLES_REPO.owner,
+    repo: ARTICLES_REPO.name,
     pull_number: prNumber,
   });
   return data;

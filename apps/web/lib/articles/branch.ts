@@ -1,16 +1,17 @@
 import { ARTICLES_REPO } from "@/lib/github/repos";
 import {
+  getBranchHeadSha as getBranchHeadShaShared,
   getFileSnapshot as getFileSnapshotShared,
-  getMainBranchHeadSha as getMainBranchHeadShaShared,
   upsertFileOnBranch as upsertFileOnBranchShared,
   upsertFilesOnBranch as upsertFilesOnBranchShared,
   type BranchFileEntry,
 } from "@/lib/github/branch";
+import { ARTICLES_SOURCE_BRANCH } from "./source";
 
 export type { BranchFileEntry };
 
-export async function getMainBranchHeadSha(token?: string) {
-  return getMainBranchHeadShaShared(token, ARTICLES_REPO);
+export async function getArticleSourceHeadSha(token?: string) {
+  return getBranchHeadShaShared(token, ARTICLES_REPO, ARTICLES_SOURCE_BRANCH);
 }
 
 export async function resolveArticleFilePath(filePath: string, refs: string[], token?: string) {

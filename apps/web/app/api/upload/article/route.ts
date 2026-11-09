@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
 import { auth } from "@/lib/auth"
-import { getGitHubWriteToken } from "@/lib/github/articles-repo"
+import { resolveGithubToken } from "@/lib/github/tokens"
 import { classifyFile, sanitizeFilename } from "@/lib/uploads/file-upload"
 import {
   uploadArticleAssetToGithub,
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       buffer,
       category: classification.category,
       filename,
-      token: getGitHubWriteToken() ?? null,
+      token: resolveGithubToken() ?? null,
     })
 
     return NextResponse.json({

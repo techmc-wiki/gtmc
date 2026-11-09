@@ -5,10 +5,9 @@ import path from "node:path"
 import { revalidatePath } from "next/cache"
 import {
   type DraftPullRequestResult,
-  findArticlePullRequestByBranch,
   openDraftPullRequest,
 } from "@/lib/articles/pr"
-import { getMainBranchHeadSha } from "@/lib/articles/branch"
+import { getArticleSourceHeadSha } from "@/lib/articles/branch"
 import { getAuthorIdentity, requireAuth } from "@/lib/auth/context"
 import { getDuplicateDraftFilePaths } from "@/lib/drafts/files"
 import { assertDraftStatus, canSubmitDraft } from "@/lib/drafts/lifecycle"
@@ -24,67 +23,15 @@ import {
   requireDraftVersion,
   writeDraft,
 } from "@/lib/drafts/store"
+import { reconcileSubmission } from "@/lib/submission-recovery"
 import {
   type SubmissionLock,
   lockSubmission,
-  releaseFailedSubmission,
   SubmissionInProgressError,
 } from "@/lib/drafts/submission"
-import { getGitHubWriteToken } from "@/lib/github/articles-repo"
+import { resolveGithubToken } from "@/lib/github/tokens"
 
 const UPLOAD_PLACEHOLDER_RE = /<!--\s*UPLOAD_PENDING_[a-f0-9-]+\s*-->/i
-
-/**
- * Persists the outcome of a submission attempt that already opened (or may
- * have opened) a PR. If no PR exists, the draft lock is rolled back to DRAFT.
- */
-async function reconcileSubmission(
-  authorId: string,
-  revisionId: string,
-  token: string | undefined,
-  result?: DraftPullRequestResult
-): Promise<boolean> {
-  const record = await readDraft(authorId, revisionId)
-  if (!record || record.draft.kind !== "article") return false
-  const draft = record.draft
-  if (draft.status !== "PENDING" || !draft.branchName) return false
-
-  const pullRequest =
-    result ??
-    (await findArticlePullRequestByBranch(draft.branchName, token).then((pr) =>
-      pr
-        ? {
-            activeFileId: draft.activeFileId,
-            files: draft.files,
-            prNumber: pr.number,
-            prUrl: pr.html_url,
-          }
-        : null
-    ))
-
-  if (!pullRequest) {
-    await releaseFailedSubmission(draft, record.etag)
-    return false
-  }
-
-  const now = new Date().toISOString()
-  await writeDraft(
-    {
-      ...draft,
-      activeFileId: pullRequest.activeFileId,
-      files: pullRequest.files,
-      status: assertDraftStatus(draft.status, {
-        type: "SUBMISSION_SUCCEEDED",
-      }),
-      githubPrNum: pullRequest.prNumber,
-      githubPrUrl: pullRequest.prUrl,
-      submittedAt: now,
-      updatedAt: now,
-    },
-    record.etag
-  )
-  return true
-}
 
 export async function submitDraftAction(revisionId: string, etag: string) {
   const session = await requireAuth()
@@ -114,7 +61,7 @@ export async function submitDraftAction(revisionId: string, etag: string) {
   if (existing.files.some((file) => UPLOAD_PLACEHOLDER_RE.test(file.content))) {
     throw new Error("Finish image uploads before opening a PR")
   }
-  const token = getGitHubWriteToken()
+  const token = resolveGithubToken()
   if (!token) {
     throw new Error("GitHub write access is not configured (GITHUB_TOKEN)")
   }
@@ -179,7 +126,7 @@ export async function submitDraftAction(revisionId: string, etag: string) {
     ).values(),
   ]
   const baseMainSha =
-    existing.baseMainSha || (await getMainBranchHeadSha(token))
+    existing.baseMainSha || (await getArticleSourceHeadSha(token))
 
   let locked: SubmissionLock
   try {
@@ -206,13 +153,14 @@ export async function submitDraftAction(revisionId: string, etag: string) {
     // A recent in-flight attempt may still own the lock; never roll it back.
     // Every other failure releases the draft so the author can fix and retry.
     if (!(error instanceof SubmissionInProgressError)) {
-      const recovered = await reconcileSubmission(
-        session.user.id,
-        revisionId,
-        token
-      ).catch((reconcileError) => {
+      const recovered = await reconcileSubmission({
+        kind: "article",
+        authorId: session.user.id,
+        draftId: revisionId,
+        token,
+      }).catch((reconcileError) => {
         console.error("Failed to reconcile submission:", reconcileError)
-        return false
+        return null
       })
       if (recovered) return { success: true, status: "SUBMITTED" }
     }
@@ -239,14 +187,15 @@ export async function submitDraftAction(revisionId: string, etag: string) {
       locked.etag
     )
   } catch (error) {
-    const recovered = await reconcileSubmission(
-      session.user.id,
-      revisionId,
+    const recovered = await reconcileSubmission({
+      kind: "article",
+      authorId: session.user.id,
+      draftId: revisionId,
       token,
-      result
-    ).catch((reconcileError) => {
+      result,
+    }).catch((reconcileError) => {
       console.error("Failed to persist submitted draft:", reconcileError)
-      return false
+      return null
     })
     if (!recovered) {
       throw new Error(draftErrorMessage(error), { cause: error })

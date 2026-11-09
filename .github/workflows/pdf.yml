@@ -6,7 +6,6 @@ permissions:
 on:
   workflow_dispatch:
   schedule:
-    # Check for article updates every six hours without aligning with the hour.
     - cron: "17 */6 * * *"
   push:
     branches: ["dev"]

@@ -11,8 +11,6 @@ interface RawFile {
 
 /**
  * Regex matching `[@name]` where name is one or more non-bracket characters.
- * The negative character class `[^\[\]]+` allows CJK, spaces, underscores,
- * hyphens, periods, and mixed case: any character that isn't `[` or `]`.
  */
 const MENTION_PATTERN = /\[@([^[\]]+)\]/g
 
@@ -33,11 +31,6 @@ function isParentNode(node: unknown): node is Parent {
   return Array.isArray((node as Parent | undefined)?.children)
 }
 
-/**
- * Minimal HTML-attribute and text-content escaping.
- * For attribute values: escape &, ", <, >
- * For text content: escape &, <, >
- */
 function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")

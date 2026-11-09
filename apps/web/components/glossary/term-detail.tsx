@@ -87,12 +87,7 @@ function TermDetail({ entry, locale, slug, onOpenRelated }: TermDetailProps) {
           <h3 className="text-tech-main/60 mb-3 text-xs font-medium">
             {t("detailRelatedLabel")}
           </h3>
-          <CrossRefChips
-            related={parsedRelated}
-            mode="detail"
-            locale={locale}
-            onOpenDetail={onOpenRelated}
-          />
+          <CrossRefChips related={parsedRelated} onOpenDetail={onOpenRelated} />
         </section>
       )}
 

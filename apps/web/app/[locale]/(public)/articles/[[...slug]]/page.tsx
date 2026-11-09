@@ -10,8 +10,8 @@ import {
   calculateReadingMetrics,
   ensureMetaDescriptionLength,
   generateDescription,
-  MarkdownRenderer,
 } from "@/lib/markdown";
+import { MarkdownRenderer } from "@/components/markdown/markdown-renderer";
 import { getCachedRehypeShiki } from "@gtmc/ssg/markdown/syntax/rehype-shiki";
 import {
   getArticleAvailableLocales,

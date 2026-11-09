@@ -43,18 +43,20 @@ function parseSourceMetadata(
   content: string,
   isReadme: boolean
 ): SourceFrontMatter | SourceReadmeFrontMatter {
-  return isReadme
+  const parsed = isReadme
     ? parseSourceReadmeFrontMatter(content)
     : parseSourceFrontMatter(content)
+  return parsed.frontmatter
 }
 
 function parseTranslationMetadata(
   content: string,
   isReadme: boolean
 ): TranslationFrontMatter | TranslationReadmeFrontMatter {
-  return isReadme
+  const parsed = isReadme
     ? parseTranslationReadmeFrontMatter(content)
     : parseTranslationFrontMatter(content)
+  return parsed.frontmatter
 }
 
 function isExplicitlySkippedFile(filePath: string): boolean {

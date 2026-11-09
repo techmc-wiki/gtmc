@@ -25,7 +25,7 @@ import {
   isMaintainer,
   isSameAuthor,
 } from "@/lib/articles/person-resolver"
-import { getPersonDescription } from "@/lib/markdown/people"
+import { getPersonDescription } from "@/lib/articles/people"
 import { getRepositoryContributorStats } from "@/lib/git/repository-contributor-stats"
 import { buildPersonJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
 import { loadArticleManifest } from "@/lib/articles/manifest"

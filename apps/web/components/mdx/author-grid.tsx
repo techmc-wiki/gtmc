@@ -8,7 +8,7 @@ import {
   AvatarImage,
   AvatarFallback,
 } from "@/components/ui/shadcn/avatar"
-import type { ResolvedPerson } from "@/lib/markdown/people"
+import type { ResolvedPerson } from "@/lib/articles/people"
 
 export interface AuthorGridItem {
   handle: string

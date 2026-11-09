@@ -1,5 +1,7 @@
-import type { Element, Parent, Root, Text } from "hast"
+import type { Element, Parent, Root } from "hast"
 import { SKIP, visit } from "unist-util-visit"
+
+import { getHastText } from "./hast-text"
 
 export const MERMAID_DIAGRAM_TAG = "mermaid-diagram"
 
@@ -21,7 +23,7 @@ export function rehypeMermaid() {
           type: "element",
           tagName: MERMAID_DIAGRAM_TAG,
           properties: { "data-mermaid-diagram": true },
-          children: [{ type: "text", value: getTextContent(codeNode) }],
+          children: [{ type: "text", value: getHastText(codeNode) }],
         }
 
         return [SKIP, index]
@@ -36,16 +38,4 @@ function isMermaidCode(node: Element): boolean {
     : []
 
   return classNames.includes("language-mermaid")
-}
-
-function getTextContent(node: Element | Text): string {
-  if (node.type === "text") return node.value
-
-  return node.children
-    .map((child) => {
-      if (child.type === "text") return child.value
-      if (child.type === "element") return getTextContent(child)
-      return ""
-    })
-    .join("")
 }

@@ -32,10 +32,6 @@ const LINE_WIDTHS = [
   "w-2/3 bg-tech-accent/15",
 ] as const
 
-/**
- * Intersection-observed code container: shows a skeleton until the block is
- * near the viewport, then reveals the rendered code.
- */
 function LazyCodeBlock({
   id,
   lineCount,

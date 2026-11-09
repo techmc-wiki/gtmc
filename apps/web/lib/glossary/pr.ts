@@ -1,13 +1,15 @@
 import { SubmissionInProgressError } from "@/lib/drafts/submission"
-import { getMainBranchHeadSha, upsertFileOnBranch } from "@/lib/github/branch"
+import {
+  GLOSSARY_SOURCE_BRANCH,
+  GLOSSARY_SOURCE_FILENAME,
+} from "@/lib/glossary/source"
+import { getBranchHeadSha, upsertFileOnBranch } from "@/lib/github/branch"
 import {
   GLOSSARY_FORK_REPO,
   GLOSSARY_REPO,
   getOctokit,
 } from "@/lib/github/repos"
 
-const GLOSSARY_MAIN_BRANCH = "main"
-const GLOSSARY_CSV_PATH = "TechMC Glossary.csv"
 export interface GlossaryPrInput {
   csvContent: string
   title: string
@@ -65,7 +67,11 @@ export async function openGlossaryPullRequest(
   if (recoverOnly) {
     throw new SubmissionInProgressError()
   }
-  const upstreamHeadSha = await getMainBranchHeadSha(token, GLOSSARY_REPO)
+  const upstreamHeadSha = await getBranchHeadSha(
+    token,
+    GLOSSARY_REPO,
+    GLOSSARY_SOURCE_BRANCH
+  )
   try {
     await octokit.git.getRef({
       owner: GLOSSARY_FORK_REPO.owner,
@@ -93,7 +99,7 @@ export async function openGlossaryPullRequest(
     authorName,
     branchName,
     content: csvContent,
-    filePath: GLOSSARY_CSV_PATH,
+    filePath: GLOSSARY_SOURCE_FILENAME,
     message: `docs: ${title}`,
     token,
     repo: GLOSSARY_FORK_REPO,
@@ -105,7 +111,7 @@ export async function openGlossaryPullRequest(
       repo: GLOSSARY_REPO.name,
       title,
       head: `${GLOSSARY_FORK_REPO.owner}:${branchName}`,
-      base: GLOSSARY_MAIN_BRANCH,
+      base: GLOSSARY_SOURCE_BRANCH,
       body,
     })
 

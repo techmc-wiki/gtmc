@@ -70,8 +70,8 @@ function ReaderNavigationProviderContent({
   const { expandedFolders, setExpandedFolders, expandedFoldersRef, mounted, isFolderExpanded } =
     useExpandedFolders();
 
-  const outline = useOutline();
-  const activeHeadingId = useActiveHeading(outline, pathname);
+  const outline = useOutline(pathname);
+  const activeHeadingId = useActiveHeading(outline);
 
   const [highlightActive, setHighlightActive] = React.useState(false);
 

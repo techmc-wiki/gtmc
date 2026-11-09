@@ -2,6 +2,10 @@ import { BlobPreconditionFailedError, del, get, list, put } from "@vercel/blob"
 import { randomUUID } from "node:crypto"
 import { z } from "zod"
 import { GLOSSARY_COLUMNS } from "@/lib/glossary/csv"
+import {
+  assertPrivateBlobIdentifier,
+  privateBlobOptions,
+} from "@/lib/private-blob"
 
 const fileSchema = z.object({
   id: z.string(),
@@ -56,28 +60,14 @@ export type DraftStatus = Draft["status"]
 export type ArticleDraft = Extract<Draft, { kind: "article" }>
 export type GlossaryDraft = Extract<Draft, { kind: "glossary" }>
 
-export function draftBlobOptions() {
-  const token = process.env.DRAFT_BLOB_READ_WRITE_TOKEN
-  if (!token) {
-    throw new Error(
-      "Private draft storage is not configured (DRAFT_BLOB_READ_WRITE_TOKEN)"
-    )
-  }
-  return { token }
-}
-
 export function draftPath(authorId: string, id: string) {
-  for (const segment of [authorId, id]) {
-    if (!/^[a-zA-Z0-9_-]+$/.test(segment)) {
-      throw new Error("Invalid draft identifier")
-    }
-  }
+  assertPrivateBlobIdentifier(authorId, id)
   return `drafts/${authorId}/${id}.json`
 }
 
 export async function readDraft(authorId: string, id: string) {
   const result = await get(draftPath(authorId, id), {
-    ...draftBlobOptions(),
+    ...privateBlobOptions(),
     access: "private",
     useCache: false,
   })
@@ -95,7 +85,7 @@ export async function writeDraft(draft: Draft, etag?: string) {
     draftPath(draft.authorId, draft.id),
     JSON.stringify(draftSchema.parse(draft)),
     {
-      ...draftBlobOptions(),
+      ...privateBlobOptions(),
       access: "private",
       addRandomSuffix: false,
       contentType: "application/json",
@@ -111,7 +101,7 @@ export async function listDrafts(authorId: string) {
   let cursor: string | undefined
   do {
     // oxlint-disable-next-line no-await-in-loop -- each page needs the previous cursor
-    const page = await list({ ...draftBlobOptions(), prefix, cursor })
+    const page = await list({ ...privateBlobOptions(), prefix, cursor })
     paths.push(...page.blobs.map((blob) => blob.pathname))
     cursor = page.hasMore ? page.cursor : undefined
   } while (cursor)
@@ -125,7 +115,7 @@ export async function listDrafts(authorId: string) {
 
 export async function deleteDraft(draft: Draft, etag: string) {
   await del(draftPath(draft.authorId, draft.id), {
-    ...draftBlobOptions(),
+    ...privateBlobOptions(),
     ifMatch: etag,
   })
 }

@@ -1,7 +1,7 @@
 import type { ArticleEntry, ArticleLocale } from "@gtmc/ssg/articles/types";
 import { routing } from "@/i18n/routing";
 import manifestData from "@/data/manifest.json";
-import { type ArticleTreeNode } from "@/lib/github";
+import { type ArticleTreeNode } from "@/lib/articles/article-tree-types";
 
 export const MANIFEST_FILE_NAME = "manifest.json";
 

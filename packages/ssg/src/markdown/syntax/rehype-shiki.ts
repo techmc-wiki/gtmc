@@ -12,6 +12,8 @@ import yaml from "shiki/langs/yaml.mjs"
 import minDark from "shiki/themes/min-dark.mjs"
 import solarizedLight from "shiki/themes/solarized-light.mjs"
 
+import { getHastText } from "./hast-text"
+
 export type RehypeShikiPlugin = Awaited<ReturnType<typeof createRehypeShiki>>
 
 const highlightCache = new Map<string, Element | null>()
@@ -112,7 +114,7 @@ export async function createRehypeShiki(cacheFile?: string) {
         if (!langClass) return
 
         const lang = langClass.replace("language-", "")
-        const rawCode = getTextContent(codeNode)
+        const rawCode = getHastText(codeNode)
         const cacheKey = `v3-dual:${lang}:${rawCode}`
 
         try {
@@ -164,7 +166,7 @@ export async function createRehypeShiki(cacheFile?: string) {
           if (
             lastChild?.type === "element" &&
             lastChild.tagName === "span" &&
-            getTextContent(lastChild).trim() === ""
+            getHastText(lastChild).trim() === ""
           ) {
             filtered.pop()
           }
@@ -225,18 +227,4 @@ export function getCachedRehypeShiki(
 
   pluginPromise ??= createRehypeShiki(cacheFile)
   return pluginPromise
-}
-
-function getTextContent(node: Element | Text): string {
-  if (node.type === "text") return node.value
-  if (node.type === "element") {
-    return (node as Element).children
-      .map((child) => {
-        if (child.type === "text") return child.value
-        if (child.type === "element") return getTextContent(child as Element)
-        return ""
-      })
-      .join("")
-  }
-  return ""
 }

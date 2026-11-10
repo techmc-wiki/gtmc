@@ -452,7 +452,8 @@ export async function getPropertyDetails(
 function matches(
   overlay: PropertyOverlay,
   value: PropertyValue,
-  filter: PropertyCondition
+  filter: PropertyCondition,
+  kind: PropertyKind | undefined
 ): boolean {
   const raw = filter.value.trim()
   const expected = raw.toLowerCase()
@@ -466,6 +467,13 @@ function matches(
         (filter.operator === "gte" ? number >= target : number <= target)
       )
     })
+  }
+  if (filter.operator === "eq" && kind === "number") {
+    // The numeric input accepts equivalent spellings such as `1.0` or `01`.
+    const target = parseNumber(raw)
+    if (target !== null) {
+      return leaves(value).some((leaf) => parseNumber(leaf) === target)
+    }
   }
   // Compare against both the upstream value and its translation so filters
   // work whether the user picks "Yes" or "是".
@@ -493,6 +501,7 @@ function matchesFilter(
   source: SourceDataset,
   overlay: PropertyOverlay,
   filter: PropertyCondition,
+  kind: PropertyKind | undefined,
   name: string
 ): boolean {
   if (filter.property === TAGS_PROPERTY) {
@@ -504,7 +513,7 @@ function matchesFilter(
   }
   const property = ownProperty(source, filter.property)
   if (!property) return false
-  return matches(overlay, valueFor(property, name), filter)
+  return matches(overlay, valueFor(property, name), filter, kind)
 }
 function sortValue(
   overlay: PropertyOverlay,
@@ -552,13 +561,18 @@ export async function searchProperties(
     .map((group) => group.trim().split(/\s+/).filter(Boolean))
     .filter((group) => group.length > 0)
   const queryIsBlank = options.query.trim() === ""
+  const kinds = new Map(
+    catalog.properties.map((property) => [property.id, property.kind])
+  )
   const filters = options.filters.filter((filter) => filter.value.trim())
   const names = source.key_list.filter((name) => {
     const text = search.get(name) ?? ""
     return (
       (queryIsBlank ||
         groups.some((group) => group.every((term) => text.includes(term)))) &&
-      filters.every((filter) => matchesFilter(source, overlay, filter, name))
+      filters.every((filter) =>
+        matchesFilter(source, overlay, filter, kinds.get(filter.property), name)
+      )
     )
   })
   const sortValues = known.has(options.sort)

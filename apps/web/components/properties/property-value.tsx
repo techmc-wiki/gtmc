@@ -31,8 +31,10 @@ function StateLabels({ labels }: { labels: string[] }) {
 function StateEntries({ entries, dense }: { entries: Entry[]; dense: boolean }) {
   return (
     <dl className={dense ? "space-y-0.5" : "space-y-1"}>
-      {entries.map((entry, index) => (
-        <div key={index} className="border-border flex flex-wrap gap-x-1.5 border-l-2 pl-1.5">
+      {entries.map((entry) => (
+        <div
+          key={entry.labels.join("\n")}
+          className="border-border flex flex-wrap gap-x-1.5 border-l-2 pl-1.5">
           <dt className="text-muted-foreground min-w-0 text-xs">
             <StateLabels labels={entry.labels} />
           </dt>
@@ -42,6 +44,29 @@ function StateEntries({ entries, dense }: { entries: Entry[]; dense: boolean }) 
         </div>
       ))}
     </dl>
+  )
+}
+
+/**
+ * Renders an array value. Items carry no id, so each one is keyed by its
+ * content signature; the occurrence counter keeps repeated values distinct
+ * while a reorder keeps every item's identity.
+ */
+function ValueList({ items, dense }: { items: PropertyValue[]; dense: boolean }) {
+  const seen = new Map<string, number>()
+  return (
+    <div className="space-y-1">
+      {items.map((item) => {
+        const signature = JSON.stringify(item)
+        const occurrence = (seen.get(signature) ?? 0) + 1
+        seen.set(signature, occurrence)
+        return (
+          <div key={`${occurrence}:${signature}`}>
+            {item === null ? "null" : <ValueContent value={item} dense={dense} />}
+          </div>
+        )
+      })}
+    </div>
   )
 }
 
@@ -55,28 +80,14 @@ function ValueContent({ value, dense }: { value: PropertyValue; dense: boolean }
           <summary className="cursor-pointer rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2">
             {t("valueCount", { count: value.length })}
           </summary>
-          <div className="space-y-1">
-            {value.map((item, index) => (
-              <div key={index}>
-                {item === null ? "null" : <ValueContent value={item} dense={dense} />}
-              </div>
-            ))}
-          </div>
+          <ValueList items={value} dense={dense} />
         </details>
       )
     }
     if (value.every((item) => item === null || typeof item !== "object")) {
       return <span className="whitespace-pre-line">{value.map(String).join(", ")}</span>
     }
-    return (
-      <div className="space-y-1">
-        {value.map((item, index) => (
-          <div key={index}>
-            {item === null ? "null" : <ValueContent value={item} dense={dense} />}
-          </div>
-        ))}
-      </div>
-    )
+    return <ValueList items={value} dense={dense} />
   }
   if (typeof value === "object") {
     const boolean = booleanBranches(value)

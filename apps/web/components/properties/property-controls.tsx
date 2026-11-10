@@ -388,11 +388,14 @@ function FilterCondition({
       />
       {info?.kind === "tags" && (
         <TagPresenceSelect
-          value={filter.value ? (filter.operator === "ne" ? "ne" : "eq") : null}
-          disabled={!hasProperty || !filter.value}
-          onChange={(operator) =>
-            onPatch(operator ? { operator } : { value: "" })
+          value={
+            filter.value &&
+            (filter.operator === "eq" || filter.operator === "ne")
+              ? filter.operator
+              : null
           }
+          disabled={!hasProperty || !filter.value}
+          onChange={(operator) => onPatch({ operator: operator ?? "" })}
         />
       )}
     </div>

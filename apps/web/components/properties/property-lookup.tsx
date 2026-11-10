@@ -41,6 +41,7 @@ import {
   type DatasetId,
   type FilterOperator,
   type PropertyCatalog,
+  type PropertyCondition,
   type PropertyFilter,
   type PropertyResults,
 } from "@/lib/properties/types"
@@ -50,23 +51,26 @@ import { PropertyDetails, PropertyComparison } from "./property-details"
 import { propertyFetcher } from "@/lib/properties/fetcher"
 
 /**
- * Query shape of the filter list. Row ids are client-only, blank conditions
- * match everything, and ANDed conditions are order- and repetition-insensitive,
- * so those differences must not change the lookup key. Otherwise editing a row
- * refetches a response equivalent to one already cached.
+ * Query shape of the filter list. Row ids are client-only, conditions without
+ * a value or presence match everything, and ANDed conditions are order- and
+ * repetition-insensitive, so those differences must not change the lookup key.
+ * Otherwise editing a row refetches a response equivalent to one already
+ * cached.
  */
-function canonicalFilters(filters: PropertyFilter[]) {
-  const unique = new Map(
-    filters
-      .filter((filter) => filter.property && filter.value.trim())
-      .map(({ property, operator, value }) => {
-        const condition = { property, operator, value }
-        return [JSON.stringify(condition), condition] as const
-      })
+function canonicalFilters(filters: PropertyFilter[]): PropertyCondition[] {
+  const unique = new Map<string, PropertyCondition>()
+  for (const filter of filters) {
+    if (!filter.property || !filter.operator || !filter.value.trim()) continue
+    const condition: PropertyCondition = {
+      property: filter.property,
+      operator: filter.operator,
+      value: filter.value,
+    }
+    unique.set(JSON.stringify(condition), condition)
+  }
+  return [...unique.values()].toSorted((left, right) =>
+    JSON.stringify(left).localeCompare(JSON.stringify(right))
   )
-  return [...unique]
-    .toSorted(([left], [right]) => left.localeCompare(right))
-    .map(([, condition]) => condition)
 }
 
 const filtersParser = parseAsJson(
@@ -75,7 +79,7 @@ const filtersParser = parseAsJson(
       z.object({
         id: z.string().max(50),
         property: z.string().max(150),
-        operator: z.enum(FILTER_OPERATORS),
+        operator: z.union([z.enum(FILTER_OPERATORS), z.literal("")]),
         value: z.string().max(200),
       })
     )

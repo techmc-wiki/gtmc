@@ -63,9 +63,16 @@ export interface PropertyCondition {
   /** Numeric text, an enum/boolean value, or a `tag_*` property id. */
   value: string
 }
-export interface PropertyFilter extends PropertyCondition {
+export interface PropertyFilter {
   /** Client-only row identity; it is not part of the query. */
   id: string
+  property: string
+  /**
+   * Empty while a tag condition has no presence chosen; other kinds always
+   * carry an operator, and an empty one leaves the condition unapplied.
+   */
+  operator: FilterOperator | ""
+  value: string
 }
 export interface PropertyResults {
   entries: PropertyEntry[]

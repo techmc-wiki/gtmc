@@ -6,6 +6,7 @@ import {
 } from "@/components/layout/auth-aware-nav"
 import { SiteHeader } from "@/components/layout/nav"
 import { AuthIsland } from "@/components/layout/auth-island"
+import { AuthSessionProvider } from "@/components/layout/auth-session-provider"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { PageTransition } from "@/components/layout/navigation-effects"
@@ -33,14 +34,12 @@ interface MainSiteShellProps {
   children: React.ReactNode
   locale: string
   includeContributorLink?: boolean
-  fullBleed?: boolean
 }
 
 export async function MainSiteShell({
   children,
   locale,
   includeContributorLink = false,
-  fullBleed,
 }: MainSiteShellProps) {
   const [t, tCommonA11y] = await Promise.all([
     getTranslations({ locale, namespace: "Nav" }),
@@ -100,26 +99,26 @@ export async function MainSiteShell({
   )
 
   return (
-    <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative min-h-screen w-full font-sans">
-      <Toaster />
-      <a
-        href="#main-content"
-        className="focus:bg-surface-overlay focus:border-tech-main focus:text-tech-main-dark sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:border focus:px-4 focus:py-2 focus:font-mono focus:text-xs focus:outline-none">
-        {tCommonA11y("skipToMainContent")}
-      </a>
-      <SiteHeader left={leftSlot} right={rightSlot} />
+    <AuthSessionProvider>
+      <div className="text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative min-h-screen w-full font-sans">
+        <Toaster />
+        <a
+          href="#main-content"
+          className="focus:bg-surface-overlay focus:border-tech-main focus:text-tech-main-dark sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:border focus:px-4 focus:py-2 focus:font-mono focus:text-xs focus:outline-none">
+          {tCommonA11y("skipToMainContent")}
+        </a>
+        <SiteHeader left={leftSlot} right={rightSlot} />
 
-      <div className="flex min-h-screen w-full flex-col overflow-x-clip">
-        <div className="h-16 shrink-0 md:h-20" aria-hidden="true" />
+        <div className="flex min-h-screen w-full flex-col overflow-x-clip">
+          <div className="h-16 shrink-0 md:h-20" aria-hidden="true" />
 
-        <main
-          id="main-content"
-          className={`relative flex w-full flex-1 flex-col ${
-            fullBleed ? "" : "p-4 sm:p-6 lg:px-12 lg:py-8"
-          }`}>
-          <PageTransition>{children}</PageTransition>
-        </main>
+          <main
+            id="main-content"
+            className="relative flex w-full flex-1 flex-col p-4 sm:p-6 lg:px-12 lg:py-8">
+            <PageTransition>{children}</PageTransition>
+          </main>
+        </div>
       </div>
-    </div>
+    </AuthSessionProvider>
   )
 }

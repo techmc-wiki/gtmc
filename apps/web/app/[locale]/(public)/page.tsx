@@ -3,7 +3,6 @@ import { getTranslations } from "next-intl/server"
 import { HomepageClient } from "./_homepage/homepage-client"
 import { HomepageDotGrid } from "./_homepage/homepage-dot-grid"
 import { TocSection } from "./_homepage/toc-section"
-import { MainSiteShell } from "@/components/layout/main-site-shell"
 import { getPublicChapterNav } from "@/lib/articles/public-tree"
 import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 
@@ -60,15 +59,15 @@ export default async function Home({
   const normalizedLocale = normalizeLocale(locale)
   const tree = await getPublicChapterNav(normalizedLocale)
 
+  // The public layout pads `main`; the hero spans the viewport, so this cancels
+  // that padding. Keep the values in sync with `MainSiteShell`.
   return (
-    <MainSiteShell fullBleed locale={locale}>
-      <div className="bg-tech-bg text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative isolate flex w-full flex-col overflow-hidden font-sans">
-        <HomepageDotGrid />
-        <section className="relative z-10 flex min-h-[calc(100dvh-4rem)] w-full md:min-h-[calc(100dvh-5rem)]">
-          <HomepageClient />
-        </section>
-        <TocSection tree={tree} locale={normalizedLocale} />
-      </div>
-    </MainSiteShell>
+    <div className="bg-tech-bg text-tech-main selection:bg-tech-main/20 selection:text-tech-main-dark relative isolate -m-4 flex flex-col overflow-hidden font-sans sm:-m-6 lg:-mx-12 lg:-my-8">
+      <HomepageDotGrid />
+      <section className="relative z-10 flex min-h-[calc(100dvh-4rem)] w-full md:min-h-[calc(100dvh-5rem)]">
+        <HomepageClient />
+      </section>
+      <TocSection tree={tree} locale={normalizedLocale} />
+    </div>
   )
 }

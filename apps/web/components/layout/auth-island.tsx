@@ -1,8 +1,7 @@
 "use client"
 
-import * as React from "react"
 import Image from "next/image"
-import { SessionProvider, useSession, signOut } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { useTranslations } from "next-intl"
 import { LogOut, User } from "lucide-react"
 import { Link } from "@/i18n/navigation"
@@ -113,9 +112,7 @@ function AuthIslandContent() {
 export function AuthIsland() {
   return (
     <div className="relative size-11 shrink-0">
-      <SessionProvider>
-        <AuthIslandContent />
-      </SessionProvider>
+      <AuthIslandContent />
     </div>
   )
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { SessionProvider, useSession } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import { DesktopNav, MobileNav, type NavLink } from "@/components/layout/nav"
 
 interface AuthAwareNavProps {
@@ -54,17 +54,9 @@ function AuthAwareMobileNavContent({
 }
 
 export function AuthAwareDesktopNav(props: AuthAwareNavProps) {
-  return (
-    <SessionProvider>
-      <AuthAwareDesktopNavContent {...props} />
-    </SessionProvider>
-  )
+  return <AuthAwareDesktopNavContent {...props} />
 }
 
 export function AuthAwareMobileNav(props: AuthAwareNavProps) {
-  return (
-    <SessionProvider>
-      <AuthAwareMobileNavContent {...props} />
-    </SessionProvider>
-  )
+  return <AuthAwareMobileNavContent {...props} />
 }

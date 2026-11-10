@@ -31,6 +31,12 @@ import { PropertyPicker } from "./property-picker"
 const NUMBER_OPERATORS: FilterOperator[] = ["eq", "gte", "lte"]
 const TEXT_OPERATORS: FilterOperator[] = ["eq", "contains"]
 const MAX_COLUMNS = 8
+/**
+ * Select value for the "(None)" choice. Selects need a non-empty item value,
+ * but choosing it stores an empty filter value, which leaves the condition
+ * unapplied; the sentinel never reaches the query or the URL.
+ */
+const NO_VALUE = "__none__"
 
 type Kind = "blocks" | "entities" | "items"
 
@@ -382,9 +388,11 @@ function FilterCondition({
       />
       {info?.kind === "tags" && (
         <TagPresenceSelect
-          value={filter.operator === "ne" ? "ne" : "eq"}
-          disabled={!hasProperty}
-          onChange={(operator) => onPatch({ operator })}
+          value={filter.value ? (filter.operator === "ne" ? "ne" : "eq") : null}
+          disabled={!hasProperty || !filter.value}
+          onChange={(operator) =>
+            onPatch(operator ? { operator } : { value: "" })
+          }
         />
       )}
     </div>
@@ -439,15 +447,18 @@ function FilterValueField({
     const valueLabel = info.kind === "tags" ? t("selectTag") : t("selectValue")
     return (
       <Select
-        value={value}
+        value={value || NO_VALUE}
         disabled={disabled}
-        onValueChange={(next) => onChange(next)}>
+        onValueChange={(next) => onChange(next === NO_VALUE ? "" : next)}>
         <SelectTrigger
           className="min-h-11 w-full min-w-0 sm:w-56"
           aria-label={valueLabel}>
-          <SelectValue placeholder={valueLabel} />
+          <SelectValue />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value={NO_VALUE}>
+            <span className="text-muted-foreground">{t("none")}</span>
+          </SelectItem>
           {(info.options ?? []).map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
@@ -475,9 +486,10 @@ function FilterValueField({
 }
 
 interface TagPresenceSelectProps {
-  value: "eq" | "ne"
+  /** Null while the filter has no tag chosen, so no presence applies. */
+  value: "eq" | "ne" | null
   disabled: boolean
-  onChange: (operator: "eq" | "ne") => void
+  onChange: (operator: "eq" | "ne" | null) => void
 }
 
 function TagPresenceSelect({
@@ -488,15 +500,20 @@ function TagPresenceSelect({
   const t = useTranslations("Properties")
   return (
     <Select
-      value={value}
+      value={value ?? NO_VALUE}
       disabled={disabled}
-      onValueChange={(next) => onChange(next === "ne" ? "ne" : "eq")}>
+      onValueChange={(next) =>
+        onChange(next === NO_VALUE ? null : next === "ne" ? "ne" : "eq")
+      }>
       <SelectTrigger
         className="min-h-11 w-full min-w-0 sm:w-28"
         aria-label={t("tagPresence")}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
+        <SelectItem value={NO_VALUE}>
+          <span className="text-muted-foreground">{t("none")}</span>
+        </SelectItem>
         <SelectItem value="eq">{t("yes")}</SelectItem>
         <SelectItem value="ne">{t("no")}</SelectItem>
       </SelectContent>

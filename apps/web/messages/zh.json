@@ -621,6 +621,7 @@
     "tagPresence": "标签匹配",
     "yes": "是",
     "no": "否",
+    "none": "（无）",
     "numberPlaceholder": "例如 6",
     "removeFilter": "移除 {name} 筛选",
     "loading": "正在查询属性…",

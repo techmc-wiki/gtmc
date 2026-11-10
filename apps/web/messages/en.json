@@ -621,6 +621,7 @@
     "tagPresence": "Tag presence",
     "yes": "Yes",
     "no": "No",
+    "none": "(None)",
     "numberPlaceholder": "e.g. 6",
     "removeFilter": "Remove {name} filter",
     "loading": "Looking up properties…",

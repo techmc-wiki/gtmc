@@ -641,6 +641,9 @@
     "nextPage": "Next page",
     "pageCount": "Page {page} of {pages}",
     "source": "Data from <source>Minecraft Property Encyclopedia</source> by JoakimThorsen and contributors (GPL-3.0). These datasets are maintained separately and may cover different game versions; some values may be incomplete.",
-    "differencesOnly": "Show only differences"
+    "differencesOnly": "Show only differences",
+    "labelCount": "{count, plural, one {# label} other {# labels}}",
+    "valueCount": "{count, plural, one {# value} other {# values}}",
+    "moreStates": "{count, plural, one {Show # more state} other {Show # more states}}"
   }
 }

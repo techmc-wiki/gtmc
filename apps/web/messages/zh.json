@@ -641,6 +641,9 @@
     "nextPage": "下一页",
     "pageCount": "第 {page} 页，共 {pages} 页",
     "source": "数据来自 JoakimThorsen 及贡献者维护的 <source>Minecraft Property Encyclopedia</source>（GPL-3.0）。各数据集独立维护，可能对应不同游戏版本，部分属性值尚不完整。",
-    "differencesOnly": "仅显示差异"
+    "differencesOnly": "仅显示差异",
+    "labelCount": "{count} 个标签",
+    "valueCount": "{count} 个值",
+    "moreStates": "显示另外 {count} 个状态"
   }
 }

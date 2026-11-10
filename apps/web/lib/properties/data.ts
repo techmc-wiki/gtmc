@@ -227,7 +227,14 @@ function propertyOptions(
   if (kind !== "enum") return undefined
   return [...new Set(items.map(String).filter((item) => item.trim() !== ""))]
     .map((value) => ({ value, label: translateText(overlay, value) }))
-    .toSorted((a, b) => a.label.localeCompare(b.label, locale))
+    .toSorted((a, b) => {
+      const left = parseNumber(a.value)
+      const right = parseNumber(b.value)
+      if (left !== null && right !== null) {
+        return left - right || a.label.localeCompare(b.label, locale)
+      }
+      return a.label.localeCompare(b.label, locale, { numeric: true })
+    })
 }
 function tagsProperty(
   overlay: PropertyOverlay,
@@ -521,10 +528,12 @@ function sortValue(
 ): string | number | null {
   const values = leaves(value)
   if (!values.length) return null
-  // For state-dependent numeric properties, order by the lowest state value.
-  if (values.every((item) => typeof item === "number")) {
-    return Math.min(...values)
-  }
+  // Numeric-like values (including numeric enum strings) order by value; for
+  // state-dependent numeric properties, use the lowest state value.
+  const numbers = values
+    .map((item) => parseNumber(item))
+    .filter((number): number is number => number !== null)
+  if (numbers.length === values.length) return Math.min(...numbers)
   return values
     .map((item) => translateText(overlay, String(item)))
     .toSorted()[0]

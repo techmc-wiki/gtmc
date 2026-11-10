@@ -41,12 +41,33 @@ import {
   type DatasetId,
   type FilterOperator,
   type PropertyCatalog,
+  type PropertyFilter,
   type PropertyResults,
 } from "@/lib/properties/types"
 import { PropertyControls } from "./property-controls"
 import { PropertyResultsTable } from "./property-results-table"
 import { PropertyDetails, PropertyComparison } from "./property-details"
 import { propertyFetcher } from "@/lib/properties/fetcher"
+
+/**
+ * Query shape of the filter list. Row ids are client-only, blank conditions
+ * match everything, and ANDed conditions are order- and repetition-insensitive,
+ * so those differences must not change the lookup key. Otherwise editing a row
+ * refetches a response equivalent to one already cached.
+ */
+function canonicalFilters(filters: PropertyFilter[]) {
+  const unique = new Map(
+    filters
+      .filter((filter) => filter.property && filter.value.trim())
+      .map(({ property, operator, value }) => {
+        const condition = { property, operator, value }
+        return [JSON.stringify(condition), condition] as const
+      })
+  )
+  return [...unique]
+    .toSorted(([left], [right]) => left.localeCompare(right))
+    .map(([, condition]) => condition)
+}
 
 const filtersParser = parseAsJson(
   z
@@ -109,7 +130,7 @@ function usePropertyLookup(initialCatalog: PropertyCatalog) {
     ? state.columns.slice(0, 8)
     : (catalog?.defaults ?? [])
   const selected = state.compare.slice(0, 4)
-  const activeFilters = state.filters.filter((filter) => filter.property)
+  const activeFilters = canonicalFilters(state.filters)
   const parameters = new URLSearchParams({
     dataset: state.dataset,
     locale,

@@ -35,7 +35,6 @@ const input = z.object({
       z
         .array(
           z.object({
-            id: z.string().max(50),
             property: z.string().max(150),
             operator: z.enum(FILTER_OPERATORS),
             value: z.string().max(200),

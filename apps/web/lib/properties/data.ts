@@ -19,7 +19,7 @@ import {
   type DatasetId,
   type PropertyCatalog,
   type PropertyEntry,
-  type PropertyFilter,
+  type PropertyCondition,
   type PropertyInfo,
   type PropertyKind,
   type PropertyOption,
@@ -452,7 +452,7 @@ export async function getPropertyDetails(
 function matches(
   overlay: PropertyOverlay,
   value: PropertyValue,
-  filter: PropertyFilter
+  filter: PropertyCondition
 ): boolean {
   const raw = filter.value.trim()
   const expected = raw.toLowerCase()
@@ -492,7 +492,7 @@ function matches(
 function matchesFilter(
   source: SourceDataset,
   overlay: PropertyOverlay,
-  filter: PropertyFilter,
+  filter: PropertyCondition,
   name: string
 ): boolean {
   if (filter.property === TAGS_PROPERTY) {
@@ -527,7 +527,7 @@ export async function searchProperties(
   options: {
     query: string
     columns: string[]
-    filters: PropertyFilter[]
+    filters: PropertyCondition[]
     sort: string
     descending: boolean
     page: number

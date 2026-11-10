@@ -55,13 +55,17 @@ export interface PropertyEntry {
 }
 export const FILTER_OPERATORS = ["eq", "ne", "contains", "gte", "lte"] as const
 export type FilterOperator = (typeof FILTER_OPERATORS)[number]
-export interface PropertyFilter {
-  id: string
+/** One filter condition; this is what a lookup request carries. */
+export interface PropertyCondition {
   property: string
   /** `ne` negates a tag membership; other kinds only use the operators their control offers. */
   operator: FilterOperator
   /** Numeric text, an enum/boolean value, or a `tag_*` property id. */
   value: string
+}
+export interface PropertyFilter extends PropertyCondition {
+  /** Client-only row identity; it is not part of the query. */
+  id: string
 }
 export interface PropertyResults {
   entries: PropertyEntry[]

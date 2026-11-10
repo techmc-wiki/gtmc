@@ -439,102 +439,47 @@ interface FilterValueFieldProps {
   onValuesChange: (values: string[]) => void
 }
 
-function FilterValueField({
-  info,
+/** Value control for the filter's property kind. */
+function FilterValueField(props: FilterValueFieldProps) {
+  const kind = props.info?.kind
+  if (kind === "number") return <NumberValueField {...props} />
+  if (kind === "enum") return <EnumValueField {...props} />
+  if (kind === "boolean" || kind === "tags") {
+    return <ChoiceValueField {...props} kind={kind} />
+  }
+  return <TextValueField {...props} />
+}
+
+function NumberValueField({
   value,
-  values,
+  disabled,
+  propertyName,
+  onChange,
+}: FilterValueFieldProps) {
+  const t = useTranslations("Properties")
+  return (
+    <Input
+      type="number"
+      inputMode="decimal"
+      step="any"
+      className="h-11 w-full min-w-0 py-0 sm:max-w-64 sm:py-0"
+      value={value}
+      disabled={disabled}
+      placeholder={t("numberPlaceholder")}
+      aria-label={t("filterValueFor", { name: propertyName })}
+      onChange={(event) => onChange(event.target.value)}
+    />
+  )
+}
+
+function TextValueField({
+  value,
   disabled,
   hasProperty,
   propertyName,
   onChange,
-  onValuesChange,
 }: FilterValueFieldProps) {
   const t = useTranslations("Properties")
-  if (info?.kind === "number") {
-    return (
-      <Input
-        type="number"
-        inputMode="decimal"
-        step="any"
-        className="h-11 w-full min-w-0 py-0 sm:max-w-64 sm:py-0"
-        value={value}
-        disabled={disabled}
-        placeholder={t("numberPlaceholder")}
-        aria-label={t("filterValueFor", { name: propertyName })}
-        onChange={(event) => onChange(event.target.value)}
-      />
-    )
-  }
-  if (info?.kind === "enum") {
-    const selected = values ?? (value ? [value] : [])
-    const labels = (info.options ?? [])
-      .filter((option) => selected.includes(option.value))
-      .map((option) => option.label)
-    return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            disabled={disabled}
-            className="h-11 w-full min-w-0 justify-between sm:w-56"
-            aria-label={`${t("filterValueFor", { name: propertyName })}: ${labels.length ? labels.join(", ") : t("none")}`}>
-            <span className="truncate">
-              {labels.length ? labels.join(", ") : t("none")}
-            </span>
-            <ChevronsUpDown aria-hidden="true" className="shrink-0" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          align="start"
-          className="w-64 max-w-[calc(100vw-2rem)] p-2">
-          <div className="max-h-96 overflow-y-auto">
-            {(info.options ?? []).map((option) => (
-              <label
-                key={option.value}
-                className="hover:bg-accent flex min-h-11 cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm">
-                <Checkbox
-                  checked={selected.includes(option.value)}
-                  onCheckedChange={(checked) =>
-                    onValuesChange(
-                      checked === true
-                        ? [...selected, option.value]
-                        : selected.filter((item) => item !== option.value)
-                    )
-                  }
-                />
-                <span>{option.label}</span>
-              </label>
-            ))}
-          </div>
-        </PopoverContent>
-      </Popover>
-    )
-  }
-  if (info?.kind === "boolean" || info?.kind === "tags") {
-    const valueLabel = info.kind === "tags" ? t("selectTag") : t("selectValue")
-    return (
-      <Select
-        value={value || NO_VALUE}
-        disabled={disabled}
-        onValueChange={(next) => onChange(next === NO_VALUE ? "" : next)}>
-        <SelectTrigger
-          className="min-h-11 w-full min-w-0 sm:w-56"
-          aria-label={valueLabel}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={NO_VALUE}>
-            <span className="text-muted-foreground">{t("none")}</span>
-          </SelectItem>
-          {(info.options ?? []).map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    )
-  }
   return (
     <Input
       className="h-11 w-full min-w-0 py-0 sm:max-w-64 sm:py-0"
@@ -549,6 +494,95 @@ function FilterValueField({
       }
       onChange={(event) => onChange(event.target.value)}
     />
+  )
+}
+
+function ChoiceValueField({
+  info,
+  kind,
+  value,
+  disabled,
+  onChange,
+}: FilterValueFieldProps & { kind: "boolean" | "tags" }) {
+  const t = useTranslations("Properties")
+  const valueLabel = kind === "tags" ? t("selectTag") : t("selectValue")
+  return (
+    <Select
+      value={value || NO_VALUE}
+      disabled={disabled}
+      onValueChange={(next) => onChange(next === NO_VALUE ? "" : next)}>
+      <SelectTrigger
+        className="min-h-11 w-full min-w-0 sm:w-56"
+        aria-label={valueLabel}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={NO_VALUE}>
+          <span className="text-muted-foreground">{t("none")}</span>
+        </SelectItem>
+        {(info?.options ?? []).map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
+}
+
+function EnumValueField({
+  info,
+  value,
+  values,
+  disabled,
+  propertyName,
+  onValuesChange,
+}: FilterValueFieldProps) {
+  const t = useTranslations("Properties")
+  const options = info?.options ?? []
+  const selectedValues = values ?? (value ? [value] : [])
+  const selected = new Set(selectedValues)
+  const labels = options
+    .filter((option) => selected.has(option.value))
+    .map((option) => option.label)
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          disabled={disabled}
+          className="h-11 w-full min-w-0 justify-between sm:w-56"
+          aria-label={`${t("filterValueFor", { name: propertyName })}: ${labels.length ? labels.join(", ") : t("none")}`}>
+          <span className="truncate">
+            {labels.length ? labels.join(", ") : t("none")}
+          </span>
+          <ChevronsUpDown aria-hidden="true" className="shrink-0" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="w-64 max-w-[calc(100vw-2rem)] p-2">
+        <div className="max-h-96 overflow-y-auto">
+          {options.map((option) => (
+            <label
+              key={option.value}
+              className="hover:bg-accent flex min-h-11 cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm">
+              <Checkbox
+                checked={selected.has(option.value)}
+                onCheckedChange={(checked) =>
+                  onValuesChange(
+                    checked === true
+                      ? [...selectedValues, option.value]
+                      : selectedValues.filter((item) => item !== option.value)
+                  )
+                }
+              />
+              <span>{option.label}</span>
+            </label>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
   )
 }
 

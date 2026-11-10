@@ -1,10 +1,21 @@
 "use client"
 
+import {
+  ChevronsUpDown,
+  Eye,
+  EyeOff,
+  Filter,
+  FilterX,
+  Plus,
+  Search,
+  X,
+} from "lucide-react"
 import { useTranslations } from "next-intl"
-import { Eye, EyeOff, Filter, FilterX, Plus, Search, X } from "lucide-react"
-import { Button } from "@/components/ui/shadcn/button"
+
 import { Badge } from "@/components/ui/shadcn/badge"
+import { Button } from "@/components/ui/shadcn/button"
 import { Card } from "@/components/ui/shadcn/card"
+import { Checkbox } from "@/components/ui/shadcn/checkbox"
 import { Input } from "@/components/ui/shadcn/input"
 import {
   InputGroup,
@@ -12,6 +23,11 @@ import {
   InputGroupInput,
 } from "@/components/ui/shadcn/input-group"
 import { Label } from "@/components/ui/shadcn/label"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/shadcn/popover"
 import {
   Select,
   SelectTrigger,
@@ -26,6 +42,7 @@ import {
   type PropertyInfo,
   type PropertyKind,
 } from "@/lib/properties/types"
+
 import { PropertyPicker } from "./property-picker"
 
 const NUMBER_OPERATORS: FilterOperator[] = ["eq", "gte", "lte"]
@@ -320,7 +337,7 @@ function PropertyFilterRow({
         selected={hasProperty ? [filter.property] : []}
         label={hasProperty ? propertyName : t("selectProperty")}
         onSelect={(property) =>
-          onPatch({ property, operator: "eq", value: "" })
+          onPatch({ property, operator: "eq", value: "", values: undefined })
         }
       />
       <FilterCondition
@@ -381,10 +398,12 @@ function FilterCondition({
       <FilterValueField
         info={info}
         value={filter.value}
+        values={filter.values}
         disabled={!hasProperty}
         propertyName={propertyName}
         hasProperty={hasProperty}
         onChange={(value) => onPatch({ value })}
+        onValuesChange={(values) => onPatch({ value: "", values })}
       />
       {info?.kind === "tags" && (
         <TagPresenceSelect
@@ -412,19 +431,23 @@ function operatorsFor(kind: PropertyKind | undefined): FilterOperator[] | null {
 interface FilterValueFieldProps {
   info: PropertyInfo | undefined
   value: string
+  values?: string[]
   disabled: boolean
   hasProperty: boolean
   propertyName: string
   onChange: (value: string) => void
+  onValuesChange: (values: string[]) => void
 }
 
 function FilterValueField({
   info,
   value,
+  values,
   disabled,
   hasProperty,
   propertyName,
   onChange,
+  onValuesChange,
 }: FilterValueFieldProps) {
   const t = useTranslations("Properties")
   if (info?.kind === "number") {
@@ -442,11 +465,52 @@ function FilterValueField({
       />
     )
   }
-  if (
-    info?.kind === "enum" ||
-    info?.kind === "boolean" ||
-    info?.kind === "tags"
-  ) {
+  if (info?.kind === "enum") {
+    const selected = values ?? (value ? [value] : [])
+    const labels = (info.options ?? [])
+      .filter((option) => selected.includes(option.value))
+      .map((option) => option.label)
+    return (
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            disabled={disabled}
+            className="h-11 w-full min-w-0 justify-between sm:w-56"
+            aria-label={`${t("filterValueFor", { name: propertyName })}: ${labels.length ? labels.join(", ") : t("none")}`}>
+            <span className="truncate">
+              {labels.length ? labels.join(", ") : t("none")}
+            </span>
+            <ChevronsUpDown aria-hidden="true" className="shrink-0" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="start"
+          className="w-64 max-w-[calc(100vw-2rem)] p-2">
+          <div className="max-h-96 overflow-y-auto">
+            {(info.options ?? []).map((option) => (
+              <label
+                key={option.value}
+                className="hover:bg-accent flex min-h-11 cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm">
+                <Checkbox
+                  checked={selected.includes(option.value)}
+                  onCheckedChange={(checked) =>
+                    onValuesChange(
+                      checked === true
+                        ? [...selected, option.value]
+                        : selected.filter((item) => item !== option.value)
+                    )
+                  }
+                />
+                <span>{option.label}</span>
+              </label>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+    )
+  }
+  if (info?.kind === "boolean" || info?.kind === "tags") {
     const valueLabel = info.kind === "tags" ? t("selectTag") : t("selectValue")
     return (
       <Select

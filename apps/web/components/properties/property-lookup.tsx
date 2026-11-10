@@ -1,7 +1,12 @@
 "use client"
 
-import { useEffect, useState, type ReactNode } from "react"
-import useSWRImmutable from "swr/immutable"
+import {
+  ChevronLeft,
+  ChevronRight,
+  GitCompareArrows,
+  RotateCcw,
+  X,
+} from "lucide-react"
 import { useTranslations, useLocale } from "next-intl"
 import {
   parseAsArrayOf,
@@ -11,16 +16,12 @@ import {
   parseAsStringLiteral,
   useQueryStates,
 } from "nuqs"
+import { useEffect, useState, type ReactNode } from "react"
+import useSWRImmutable from "swr/immutable"
 import { z } from "zod"
-import {
-  ChevronLeft,
-  ChevronRight,
-  GitCompareArrows,
-  RotateCcw,
-  X,
-} from "lucide-react"
-import { Button } from "@/components/ui/shadcn/button"
+
 import { Badge } from "@/components/ui/shadcn/badge"
+import { Button } from "@/components/ui/shadcn/button"
 import { Label } from "@/components/ui/shadcn/label"
 import {
   Select,
@@ -35,6 +36,7 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@/components/ui/shadcn/tabs"
+import { propertyFetcher } from "@/lib/properties/fetcher"
 import {
   DATASETS,
   FILTER_OPERATORS,
@@ -45,10 +47,10 @@ import {
   type PropertyFilter,
   type PropertyResults,
 } from "@/lib/properties/types"
+
 import { PropertyControls } from "./property-controls"
-import { PropertyResultsTable } from "./property-results-table"
 import { PropertyDetails, PropertyComparison } from "./property-details"
-import { propertyFetcher } from "@/lib/properties/fetcher"
+import { PropertyResultsTable } from "./property-results-table"
 
 /**
  * Query shape of the filter list. Row ids are client-only, conditions without
@@ -60,11 +62,21 @@ import { propertyFetcher } from "@/lib/properties/fetcher"
 function canonicalFilters(filters: PropertyFilter[]): PropertyCondition[] {
   const unique = new Map<string, PropertyCondition>()
   for (const filter of filters) {
-    if (!filter.property || !filter.operator || !filter.value.trim()) continue
+    const values =
+      filter.values === undefined
+        ? undefined
+        : [...new Set(filter.values)].sort()
+    if (
+      !filter.property ||
+      !filter.operator ||
+      (values ? !values.length : !filter.value.trim())
+    )
+      continue
     const condition: PropertyCondition = {
       property: filter.property,
       operator: filter.operator,
       value: filter.value,
+      ...(values ? { values } : {}),
     }
     unique.set(JSON.stringify(condition), condition)
   }
@@ -81,6 +93,7 @@ const filtersParser = parseAsJson(
         property: z.string().max(150),
         operator: z.union([z.enum(FILTER_OPERATORS), z.literal("")]),
         value: z.string().max(200),
+        values: z.array(z.string().max(200)).max(64).optional(),
       })
     )
     .max(8)

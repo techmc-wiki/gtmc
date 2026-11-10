@@ -1,8 +1,11 @@
 // eslint-disable-next-line import/no-unassigned-import -- Prevent data and filesystem access in browser bundles.
 import "server-only"
 import { readFile } from "node:fs/promises"
+
 import { cacheLife, cacheTag } from "next/cache"
+
 import { workspacePath } from "@/lib/workspace-paths"
+
 import { getPropertyOverlay } from "./i18n"
 import {
   translateText,
@@ -463,6 +466,17 @@ function matches(
   kind: PropertyKind | undefined
 ): boolean {
   const raw = filter.value.trim()
+  const selected = selectedValues(filter)
+  if (selected !== null) {
+    // Multi-select enums match when any selected value equals the row's value;
+    // an empty selection applies no constraint.
+    return (
+      selected.length > 0 &&
+      leaves(value).some((leaf) =>
+        selected.some((candidate) => equalText(overlay, leaf, candidate))
+      )
+    )
+  }
   const expected = raw.toLowerCase()
   if (filter.operator === "gte" || filter.operator === "lte") {
     const target = parseNumber(raw)
@@ -487,13 +501,7 @@ function matches(
   const localizedNeedle = translateText(overlay, raw)
   const needles = [expected]
   if (localizedNeedle !== raw) needles.push(localizedNeedle.toLowerCase())
-  const equal = leaves(value).some((leaf) => {
-    const text = String(leaf)
-    const candidates = [text.toLowerCase()]
-    const localizedText = translateText(overlay, text)
-    if (localizedText !== text) candidates.push(localizedText.toLowerCase())
-    return candidates.some((candidate) => needles.includes(candidate))
-  })
+  const equal = leaves(value).some((leaf) => equalText(overlay, leaf, raw))
   if (filter.operator === "eq") return equal
   if (filter.operator === "ne") return !equal
   return leaves(value).some((leaf) => {
@@ -538,6 +546,27 @@ function sortValue(
     .map((item) => translateText(overlay, String(item)))
     .toSorted()[0]
 }
+/** Selected values of a multi-select condition; `null` means single value. */
+function selectedValues(filter: PropertyCondition): string[] | null {
+  if (filter.values === undefined) return null
+  return filter.values.map((value) => value.trim()).filter(Boolean)
+}
+/** Equality against both the upstream value and its translation. */
+function equalText(
+  overlay: PropertyOverlay,
+  leaf: string | number | boolean,
+  raw: string
+): boolean {
+  const text = String(leaf)
+  const candidates = [text.toLowerCase()]
+  const localizedText = translateText(overlay, text)
+  if (localizedText !== text) candidates.push(localizedText.toLowerCase())
+  const expected = raw.toLowerCase()
+  const localizedExpected = translateText(overlay, raw).toLowerCase()
+  return candidates.some(
+    (candidate) => candidate === expected || candidate === localizedExpected
+  )
+}
 
 export async function searchProperties(
   dataset: DatasetId,
@@ -573,7 +602,10 @@ export async function searchProperties(
   const kinds = new Map(
     catalog.properties.map((property) => [property.id, property.kind])
   )
-  const filters = options.filters.filter((filter) => filter.value.trim())
+  const filters = options.filters.filter((filter) => {
+    const selected = selectedValues(filter)
+    return selected === null ? filter.value.trim() !== "" : selected.length > 0
+  })
   const names = source.key_list.filter((name) => {
     const text = search.get(name) ?? ""
     return (

@@ -62,6 +62,11 @@ export interface PropertyCondition {
   operator: FilterOperator
   /** Numeric text, an enum/boolean value, or a `tag_*` property id. */
   value: string
+  /**
+   * Selected enum values, matched with OR equality. When present, these take
+   * precedence over `value`; an empty selection leaves the condition inactive.
+   */
+  values?: string[]
 }
 export interface PropertyFilter {
   /** Client-only row identity; it is not part of the query. */
@@ -73,6 +78,8 @@ export interface PropertyFilter {
    */
   operator: FilterOperator | ""
   value: string
+  /** Multi-select enum values; absent for single-value conditions. */
+  values?: string[]
 }
 export interface PropertyResults {
   entries: PropertyEntry[]

@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
+
 import { routing } from "@/i18n/routing"
 import {
   getPropertyCatalog,
@@ -21,7 +22,7 @@ const input = z.object({
   columns: z.string().max(1000).default(""),
   filters: z
     .string()
-    .max(3000)
+    .max(131072)
     .default("[]")
     .transform((text, ctx) => {
       try {
@@ -38,6 +39,7 @@ const input = z.object({
             property: z.string().max(150),
             operator: z.enum(FILTER_OPERATORS),
             value: z.string().max(200),
+            values: z.array(z.string().max(200)).max(64).optional(),
           })
         )
         .max(8)

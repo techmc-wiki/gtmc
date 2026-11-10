@@ -163,7 +163,7 @@ function ownProperty(
     : undefined
 }
 
-const NUMERIC = /^[-+]?(?:\d+(?:\.\d+)?|\.\d+)$/
+const NUMERIC = /^[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?$/
 function parseNumber(value: string | number | boolean): number | null {
   if (typeof value === "number") return Number.isFinite(value) ? value : null
   if (typeof value !== "string") return null

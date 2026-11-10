@@ -8,7 +8,6 @@
     "./markdown/*": "./src/markdown/*.ts"
   },
   "scripts": {
-    "check": "vp check && tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

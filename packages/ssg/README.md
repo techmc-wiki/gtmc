@@ -41,6 +41,6 @@ Shared contracts and transforms are imported through `@gtmc/ssg/articles/*` and
 Shiki and provenance analysis are server modules. The host passes the persisted
 Shiki cache path so content generation and article rendering reuse highlights.
 
-Run `pnpm --filter @gtmc/ssg run check` to format-check, lint, and typecheck this
-package. Root `pnpm check` and `pnpm typecheck` include it. The content cache and
+Run `pnpm check` from the workspace root to format-check, lint, and typecheck the
+workspace, including this package. The content cache and
 PDF workflow hash its sources to invalidate generated output after changes.

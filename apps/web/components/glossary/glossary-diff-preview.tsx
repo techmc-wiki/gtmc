@@ -1,6 +1,5 @@
 "use client"
 
-import { X } from "lucide-react"
 import { IconButton } from "@/components/ui/icon-button"
 
 import * as React from "react"
@@ -12,6 +11,7 @@ import {
   ExternalLink,
   GitPullRequest,
   Loader2,
+  X,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/shadcn/button"

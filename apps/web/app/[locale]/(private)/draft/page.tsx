@@ -3,6 +3,7 @@ import { IconButton } from "@/components/ui/icon-button"
 import type { Metadata } from "next"
 import {
   listDrafts,
+  type DraftStatus,
   type GlossaryDraft,
   type ArticleDraft,
 } from "@/lib/drafts/store"
@@ -32,7 +33,6 @@ import {
   deriveDisplayStatus,
   isArchivedDraftStatus,
 } from "@/lib/drafts/lifecycle"
-import type { DraftStatus } from "@/lib/drafts/store"
 import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
 import { Suspense } from "react"
 

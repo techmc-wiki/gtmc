@@ -111,20 +111,7 @@ jobs:
 
       - name: Set up pnpm
         if: steps.change-check.outputs.should-build == 'true'
-        uses: pnpm/action-setup@v6.1.1
-
-      - name: Set up Node.js
-        if: steps.change-check.outputs.should-build == 'true'
-        uses: actions/setup-node@v7.1.0
-        with:
-          node-version: "26"
-          cache: pnpm
-
-      - name: Install dependencies
-        if: steps.change-check.outputs.should-build == 'true'
-        run: pnpm install --frozen-lockfile --ignore-scripts
-        env:
-          GTMC_SKIP_POSTINSTALL: "1"
+        uses: pnpm/setup@v3
 
       - name: Install Typst
         if: steps.change-check.outputs.should-build == 'true'

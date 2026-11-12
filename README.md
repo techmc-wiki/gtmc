@@ -62,6 +62,8 @@ pnpm test         # Run the Vitest suite once
 pnpm typecheck    # Run the Next.js-aware TypeScript check
 ```
 
+Property lookup supports selecting multiple enum values in one filter; entries matching any selected value are included. An empty selection leaves the filter inactive. Long property values are summarized; expand the labels or remaining states to see the full data.
+
 ---
 
 <div align="center">

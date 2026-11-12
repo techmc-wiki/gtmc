@@ -122,6 +122,23 @@ describe("enum option ordering", () => {
     )
     expect(numericOrder).toEqual(["5", "20", "60", "100"])
   })
+
+  it("prepends each locale's yes/no values as one group", async () => {
+    const catalogs = await Promise.all([
+      getPropertyCatalog("blocks", "en"),
+      getPropertyCatalog("blocks", "zh"),
+    ])
+    const heads = catalogs.map((testCatalog) =>
+      testCatalog.properties
+        .find((property) => property.id === "movable")
+        ?.options?.slice(0, 2)
+        .map((option) => option.label)
+    )
+    expect(heads).toEqual([
+      ["Yes", "No"],
+      ["是", "否"],
+    ])
+  })
 })
 
 describe("numeric filters", () => {

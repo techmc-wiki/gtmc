@@ -191,6 +191,14 @@ function propertyLeaves(
     ...Object.values(property.entries),
   ].flatMap(leaves)
 }
+const BOOLEAN_VALUE = /^(yes|no|true|false)$/i
+/** Rank of a yes/no value; other values follow. Keeps the pair at list heads. */
+function booleanRank(value: string): number {
+  const text = value.trim()
+  if (/^(yes|true)$/i.test(text)) return 0
+  if (/^(no|false)$/i.test(text)) return 1
+  return 2
+}
 function propertyKind(property: SourceProperty): PropertyKind {
   const items = propertyLeaves(property).filter(
     (item) => String(item).trim() !== ""
@@ -200,7 +208,7 @@ function propertyKind(property: SourceProperty): PropertyKind {
     items.every(
       (item) =>
         typeof item === "boolean" ||
-        (typeof item === "string" && /^(yes|no|true|false)$/i.test(item.trim()))
+        (typeof item === "string" && BOOLEAN_VALUE.test(item.trim()))
     )
   ) {
     return "boolean"
@@ -231,6 +239,8 @@ function propertyOptions(
   return [...new Set(items.map(String).filter((item) => item.trim() !== ""))]
     .map((value) => ({ value, label: translateText(overlay, value) }))
     .toSorted((a, b) => {
+      const rank = booleanRank(a.value) - booleanRank(b.value)
+      if (rank) return rank
       const left = parseNumber(a.value)
       const right = parseNumber(b.value)
       if (left !== null && right !== null) {

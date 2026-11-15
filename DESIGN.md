@@ -36,9 +36,9 @@ Reader surfaces evoke an academic book; app surfaces stay quiet and functional. 
 
 - **Layout**: Mobile-first with `page-container`, shared headings, and standard gutters. Use column grids only for sidebars or rails.
 - **Navigation**: Homepage table of contents is primary navigation (bookmarks, chapter context, glossary). Reader routes are public; drafts require authentication. Localize reader labels in `messages/`.
-- **Article Reader**: Markdown renders via `components/markdown/`, not Tailwind `prose-*`. Body copy is ragged-right (`.article-prose` sets `text-wrap: pretty`); hyphenation is reserved for Typst PDF only. Retain thematic breaks; close the reader with the plain previous/next rule, not an ornament stacked above it.
 - **Reader Images**: Open loaded article images in a viewport-sized dialog, with localized controls and keyboard dismissal. Preserve the image's aspect ratio.
-- **Reader Media**: Open loaded article images, banners, and Mermaid diagrams in a viewport-sized dialog, with localized controls and keyboard dismissal. Preserve image aspect ratios and allow large diagrams to scroll.
+- **Article Reader**: Markdown renders via `components/markdown/`, not Tailwind `prose-*`. Body copy is ragged-right (`.article-prose` sets `text-wrap: pretty`); hyphenation is reserved for Typst PDF only. Retain thematic-break and chapter-end devices. Close the reader with the plain previous/next rule, not an ornament stacked above it.
+- **Reader Media**: Open loaded article images, banners, and Mermaid diagrams in a viewport-sized dialog, with localized controls and keyboard dismissal. Frame images at their intrinsic ratio, capped at their natural pixel width and at 70% of the viewport height, so a wide reader enlarges diagrams without upscaling or letterboxing a small source. Allow large diagrams to scroll.
 - **Reader Width**: Left-align the reader at 768px by default. Use one right-edge shadcn `Resizable` handle; double-click or Enter resets to 768px. Remember desktop width locally and use the full available width below the desktop breakpoint.
 - **Reader Outline**: Show section titles over one transparent regional backdrop with progressive blur tapering across a broad margin at all four edges. Keep the outline above the resize handle; never add individual label backgrounds or blur the whole page.
 

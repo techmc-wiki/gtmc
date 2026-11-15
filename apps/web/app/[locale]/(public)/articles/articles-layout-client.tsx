@@ -1,13 +1,15 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { Menu, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { usePathname } from "@/i18n/navigation";
-import { Button } from "@/components/ui/shadcn/button";
-import { HookSidebar, type HookSidebarItem } from "@/components/ui/shadcn/hook-sidebar";
-import { IconButton } from "@/components/ui/icon-button";
-import { ScrollArea } from "@/components/ui/shadcn/scroll-area";
+import { Menu, PanelLeftClose, PanelLeftOpen, X } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
+import * as React from "react"
+
+import { ArticleOutlineNavigation } from "@/components/articles/outline-navigation"
+import { ResizableReader } from "@/components/articles/resizable-reader"
+import { IconButton } from "@/components/ui/icon-button"
+import { Button } from "@/components/ui/shadcn/button"
+import { HookSidebar, type HookSidebarItem } from "@/components/ui/shadcn/hook-sidebar"
+import { ScrollArea } from "@/components/ui/shadcn/scroll-area"
 import {
   Sheet,
   SheetClose,
@@ -15,58 +17,59 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/shadcn/sheet";
-import { ArticleOutlineNavigation } from "@/components/articles/outline-navigation";
-import { useOutline } from "./outline/use-outline";
-import { encodeSlug } from "@/lib/articles/slug-resolver";
-import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types";
+} from "@/components/ui/shadcn/sheet"
+import { usePathname } from "@/i18n/navigation"
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
+import { encodeSlug } from "@/lib/articles/slug-resolver"
+
+import { useOutline } from "./outline/use-outline"
 
 interface ArticlesLayoutProps {
-  children: React.ReactNode;
-  tree: ChapterNavNode[];
+  children: React.ReactNode
+  tree: ChapterNavNode[]
 }
 
 function useChapterTree(tree: ChapterNavNode[]) {
-  const [fetchedTree, setFetchedTree] = React.useState<ChapterNavNode[]>([]);
-  const locale = useLocale();
+  const [fetchedTree, setFetchedTree] = React.useState<ChapterNavNode[]>([])
+  const locale = useLocale()
 
   React.useEffect(() => {
-    if (tree.length) return;
-    const controller = new AbortController();
+    if (tree.length) return
+    const controller = new AbortController()
 
     void fetch(`/api/articles/tree?locale=${locale}`, {
       signal: controller.signal,
     })
       .then((response) => (response.ok ? response.json() : []))
       .then((result: ChapterNavNode[]) => {
-        if (!controller.signal.aborted && Array.isArray(result)) setFetchedTree(result);
+        if (!controller.signal.aborted && Array.isArray(result)) setFetchedTree(result)
       })
-      .catch(() => {});
+      .catch(() => {})
 
-    return () => controller.abort();
-  }, [locale, tree]);
+    return () => controller.abort()
+  }, [locale, tree])
 
-  return tree.length ? tree : fetchedTree;
+  return tree.length ? tree : fetchedTree
 }
 
 function getNavigationItems(tree: ChapterNavNode[], locale: string) {
-  const items: HookSidebarItem[] = [];
+  const items: HookSidebarItem[] = []
 
   const visit = (nodes: ChapterNavNode[], depth: number) => {
     for (const node of nodes) {
       if (node.isFolder) {
-        items.push({ id: node.id, label: node.title, depth });
+        items.push({ id: node.id, label: node.title, depth })
       } else {
-        const path = `/articles/${encodeSlug(node.slug)}`;
-        items.push({ id: node.id, label: node.title, href: `/${locale}${path}`, depth });
+        const path = `/articles/${encodeSlug(node.slug)}`
+        items.push({ id: node.id, label: node.title, href: `/${locale}${path}`, depth })
       }
-      visit(node.children, depth + 1);
+      visit(node.children, depth + 1)
     }
-  };
+  }
 
-  visit(tree, 0);
+  visit(tree, 0)
 
-  return items;
+  return items
 }
 
 function SiteNavigation({
@@ -74,28 +77,28 @@ function SiteNavigation({
   activeIndex,
   onNavigate,
 }: {
-  items: HookSidebarItem[];
-  activeIndex: number;
-  onNavigate?: () => void;
+  items: HookSidebarItem[]
+  activeIndex: number
+  onNavigate?: () => void
 }) {
-  const t = useTranslations("ChapterNav");
-  const containerRef = React.useRef<HTMLDivElement>(null);
+  const t = useTranslations("ChapterNav")
+  const containerRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
-    if (!items.length || activeIndex < 0) return;
+    if (!items.length || activeIndex < 0) return
     const viewport = containerRef.current?.querySelector<HTMLElement>(
       '[data-slot="scroll-area-viewport"]',
-    );
-    const active = viewport?.querySelector<HTMLElement>('[data-active="true"]');
-    if (!viewport || !active) return;
-    const bounds = viewport.getBoundingClientRect();
-    const row = active.getBoundingClientRect();
-    if (row.top >= bounds.top && row.bottom <= bounds.bottom) return;
+    )
+    const active = viewport?.querySelector<HTMLElement>('[data-active="true"]')
+    if (!viewport || !active) return
+    const bounds = viewport.getBoundingClientRect()
+    const row = active.getBoundingClientRect()
+    if (row.top >= bounds.top && row.bottom <= bounds.bottom) return
     viewport.scrollTop = Math.max(
       0,
       active.offsetTop - viewport.offsetTop - viewport.clientHeight / 3,
-    );
-  }, [activeIndex, items.length]);
+    )
+  }, [activeIndex, items.length])
 
   return (
     <div ref={containerRef} className="flex min-h-0 flex-1 flex-col">
@@ -109,43 +112,41 @@ function SiteNavigation({
             className="pr-3 pb-8"
           />
         ) : (
-          <p className="px-4 py-3 text-sm text-muted-foreground">{t("empty")}</p>
+          <p className="text-muted-foreground px-4 py-3 text-sm">{t("empty")}</p>
         )}
       </ScrollArea>
     </div>
-  );
+  )
 }
 
 export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
-  const t = useTranslations("ChapterNav");
-  const tA11y = useTranslations("CommonA11y");
-  const locale = useLocale();
-  const pathname = usePathname();
-  const treeData = useChapterTree(tree);
-  const contentRef = React.useRef<HTMLDivElement>(null);
-  const outline = useOutline(contentRef, pathname);
-  const [siteOpen, setSiteOpen] = React.useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const t = useTranslations("ChapterNav")
+  const tA11y = useTranslations("CommonA11y")
+  const locale = useLocale()
+  const pathname = usePathname()
+  const treeData = useChapterTree(tree)
+  const contentRef = React.useRef<HTMLDivElement>(null)
+  const outline = useOutline(contentRef, pathname)
+  const [siteOpen, setSiteOpen] = React.useState(true)
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
 
   React.useEffect(() => {
-    const desktop = window.matchMedia("(min-width: 64rem)");
+    const desktop = window.matchMedia("(min-width: 64rem)")
     const closeOnDesktop = (event: MediaQueryListEvent) => {
-      if (event.matches) setMobileMenuOpen(false);
-    };
-    desktop.addEventListener("change", closeOnDesktop);
-    return () => desktop.removeEventListener("change", closeOnDesktop);
-  }, []);
+      if (event.matches) setMobileMenuOpen(false)
+    }
+    desktop.addEventListener("change", closeOnDesktop)
+    return () => desktop.removeEventListener("change", closeOnDesktop)
+  }, [])
 
-  const items = React.useMemo(() => getNavigationItems(treeData, locale), [treeData, locale]);
+  const items = React.useMemo(() => getNavigationItems(treeData, locale), [treeData, locale])
   const currentPath =
-    pathname === "/articles" || pathname === "/articles/" ? "/articles/preface" : pathname;
+    pathname === "/articles" || pathname === "/articles/" ? "/articles/preface" : pathname
   const activeIndex = items.findIndex(
     (item) =>
       item.href &&
-      decodeURIComponent(item.href).endsWith(
-        decodeURIComponent(currentPath).replace(/\/$/, ""),
-      ),
-  );
+      decodeURIComponent(item.href).endsWith(decodeURIComponent(currentPath).replace(/\/$/, "")),
+  )
 
   return (
     <>
@@ -156,8 +157,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
               variant="outline"
               size="icon"
               className="bg-surface"
-              aria-label={tA11y("toggleArticleTree")}
-            >
+              aria-label={tA11y("toggleArticleTree")}>
               <Menu aria-hidden="true" />
             </Button>
           </SheetTrigger>
@@ -182,9 +182,13 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       </div>
 
       <div className="relative flex w-full min-w-0 flex-1 gap-4 lg:-mx-8 lg:w-[calc(100%+4rem)]">
-        <aside className={`t-resize relative hidden shrink-0 lg:block ${siteOpen ? "w-64" : "w-8"}`}>
+        <aside
+          className={`t-resize relative hidden shrink-0 lg:block ${siteOpen ? "w-64" : "w-8"}`}>
           <div className="sticky top-24 flex h-[calc(100dvh-7rem)] min-h-0">
-            <div id="article-chapters" inert={!siteOpen} className={`flex w-56 shrink-0 flex-col ${siteOpen ? "" : "invisible"}`}>
+            <div
+              id="article-chapters"
+              inert={!siteOpen}
+              className={`flex w-56 shrink-0 flex-col ${siteOpen ? "" : "invisible"}`}>
               <h2 className="pb-3 pl-5 text-sm font-semibold">{t("title")}</h2>
               <SiteNavigation items={items} activeIndex={activeIndex} />
             </div>
@@ -203,7 +207,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
           </div>
         </aside>
         <div ref={contentRef} data-reader-content className="min-w-0 flex-1">
-          {children}
+          <ResizableReader>{children}</ResizableReader>
         </div>
         <aside className="relative z-20 hidden w-10 shrink-0 lg:block">
           <ArticleOutlineNavigation outline={outline} />
@@ -211,5 +215,5 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
       </div>
       <ArticleOutlineNavigation outline={outline} mobile />
     </>
-  );
+  )
 }

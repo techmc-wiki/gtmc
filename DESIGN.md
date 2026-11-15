@@ -37,6 +37,7 @@ Reader surfaces evoke an academic book; app surfaces stay quiet and functional. 
 - **Layout**: Mobile-first with `page-container`, shared headings, and standard gutters. Use column grids only for sidebars or rails.
 - **Navigation**: Homepage table of contents is primary navigation (bookmarks, chapter context, glossary). Reader routes are public; drafts require authentication. Localize reader labels in `messages/`.
 - **Article Reader**: Markdown renders via `components/markdown/`, not Tailwind `prose-*`. Body copy is ragged-right (`.article-prose` sets `text-wrap: pretty`); hyphenation is reserved for Typst PDF only. Retain thematic breaks; close the reader with the plain previous/next rule, not an ornament stacked above it.
+- **Reader Width**: Left-align the reader at 768px by default. Use one right-edge shadcn `Resizable` handle; double-click or Enter resets to 768px. Remember desktop width locally and use the full available width below the desktop breakpoint.
 
 ## Interaction and Motion
 

@@ -123,6 +123,8 @@
     "loadingMermaidDiagram": "Rendering diagram",
     "mermaidDiagram": "Mermaid diagram",
     "mermaidRenderError": "Unable to render Mermaid diagram.",
+    "resizeReader": "Resize reader width",
+    "resizeReaderHint": "Drag to resize. Double-click or press Enter to reset to 768px.",
     "showChapterNav": "Show chapter navigation",
     "skipToMainContent": "Skip to main content",
     "toggleArticleTree": "Toggle article tree",

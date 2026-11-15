@@ -123,6 +123,8 @@
     "loadingMermaidDiagram": "正在渲染图表",
     "mermaidDiagram": "Mermaid 图表",
     "mermaidRenderError": "无法渲染 Mermaid 图表。",
+    "resizeReader": "调整阅读宽度",
+    "resizeReaderHint": "拖动以调整宽度，双击或按 Enter 键恢复为 768px。",
     "showChapterNav": "显示章节导航",
     "skipToMainContent": "跳转到主要内容",
     "toggleArticleTree": "切换文章树",

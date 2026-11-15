@@ -1,0 +1,19 @@
+.handle {
+  z-index: 10;
+}
+
+.handle > div {
+  position: sticky;
+  top: 50dvh;
+}
+
+@media (width < 64rem) {
+  .group > [data-slot="resizable-panel"]:first-child {
+    flex: 1 1 100% !important;
+  }
+
+  .group > [data-slot="resizable-panel"]:last-child,
+  .handle {
+    display: none !important;
+  }
+}

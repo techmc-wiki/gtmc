@@ -1,13 +1,13 @@
 "use client"
 
-import * as React from "react"
 import { MenuIcon, XIcon } from "lucide-react"
-import { Button } from "@/components/ui/shadcn/button"
 import { useTranslations } from "next-intl"
-import { Link, usePathname } from "@/i18n/navigation"
+import * as React from "react"
+
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
-import { Logo } from "@/components/ui/logo"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
+import { Logo } from "@/components/ui/logo"
+import { Button } from "@/components/ui/shadcn/button"
 import {
   Sheet,
   SheetTrigger,
@@ -15,6 +15,7 @@ import {
   SheetClose,
   SheetTitle,
 } from "@/components/ui/shadcn/sheet"
+import { Link, usePathname } from "@/i18n/navigation"
 
 export interface NavLink {
   href: string
@@ -27,24 +28,17 @@ function useHeaderScrolled() {
   React.useEffect(() => {
     const update = (evt: Event | null) => {
       const target: EventTarget | null = evt ? evt.target : null
-      // The homepage scrolls inside an h-dvh overflow container that wraps
-      // the page content, so accept the window plus any scroller that is an
-      // ancestor of (or nested within) #main-content. Ignore unrelated
-      // scroll surfaces (command palettes, side rails).
+      // The page scrolls inside an h-dvh overflow container that wraps
+      // #main-content, so accept the window plus only scrollers that contain
+      // it. Scroll events from surfaces inside the page (the article outline,
+      // command palettes) must not put the header into its scrolled state.
       const main = document.getElementById("main-content")
       const isWindowOrDoc = target === window || target === document
-      const relatesToMain =
-        main !== null &&
-        target instanceof Node &&
-        (main.contains(target) ||
-          (target instanceof Element && target.contains(main)))
-      if (!isWindowOrDoc && !relatesToMain) {
+      const wrapsMain = target instanceof Element && main !== null && target.contains(main)
+      if (!isWindowOrDoc && !wrapsMain) {
         return
       }
-      const y =
-        target === window || target === document || !(target instanceof Element)
-          ? window.scrollY
-          : target.scrollTop
+      const y = !(target instanceof Element) ? window.scrollY : target.scrollTop
       setScrolled(y > 8)
     }
     update(null)
@@ -54,8 +48,7 @@ function useHeaderScrolled() {
       passive: true,
       capture: true,
     })
-    return () =>
-      document.removeEventListener("scroll", update, { capture: true })
+    return () => document.removeEventListener("scroll", update, { capture: true })
   }, [])
 
   return scrolled
@@ -98,7 +91,7 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
 
   const activeHref = React.useMemo(
     () => resolveActiveHref(pathname, navLinks),
-    [pathname, navLinks]
+    [pathname, navLinks],
   )
   const chipKey = previewKey ?? activeHref
 
@@ -132,9 +125,7 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
       chipEl.style.visibility = "hidden"
     }
     const link = chipKey
-      ? listEl.querySelector<HTMLElement>(
-          `[data-nav-key="${CSS.escape(chipKey)}"]`
-        )
+      ? listEl.querySelector<HTMLElement>(`[data-nav-key="${CSS.escape(chipKey)}"]`)
       : null
     if (!link) {
       hide()
@@ -146,9 +137,7 @@ export function DesktopNav({ navLinks }: { navLinks: NavLink[] }) {
     const linkRect = link.getBoundingClientRect()
     const left = linkRect.left - listRect.left + listEl.scrollLeft
     const width = linkRect.width
-    const animate =
-      chipEl.style.visibility === "visible" &&
-      lastResizeTick.current === resizeTick
+    const animate = chipEl.style.visibility === "visible" && lastResizeTick.current === resizeTick
     lastResizeTick.current = resizeTick
     if (!animate) chipEl.style.transition = "none"
     chipEl.style.transform = `translateX(${left}px)`
@@ -232,21 +221,14 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
         <div className="flex h-full flex-col">
           <div className="border-tech-main/30 flex h-16 shrink-0 items-center justify-between border-b px-4">
             <Logo size="md" />
-            <SheetTitle className="sr-only">
-              {t("toggleNavigationMenu")}
-            </SheetTitle>
+            <SheetTitle className="sr-only">{t("toggleNavigationMenu")}</SheetTitle>
             <SheetClose asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={t("closeNavigationMenu")}>
+              <Button variant="ghost" size="icon" aria-label={t("closeNavigationMenu")}>
                 <XIcon className="size-5" />
               </Button>
             </SheetClose>
           </div>
-          <nav
-            aria-label={t("toggleNavigationMenu")}
-            className="flex-1 overflow-y-auto p-3">
+          <nav aria-label={t("toggleNavigationMenu")} className="flex-1 overflow-y-auto p-3">
             <p className="text-tech-main/50 mb-2 px-1 font-mono text-xs tracking-[0.2em] uppercase">
               {tFooter("sectionRead")}
             </p>
@@ -276,13 +258,7 @@ export function MobileNav({ navLinks }: { navLinks: NavLink[] }) {
   )
 }
 
-export function SiteHeader({
-  left,
-  right,
-}: {
-  left: React.ReactNode
-  right: React.ReactNode
-}) {
+export function SiteHeader({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {
   const scrolled = useHeaderScrolled()
 
   return (

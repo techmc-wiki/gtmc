@@ -379,11 +379,7 @@
 /* Reader geometry. Hook selection uses the existing selection clock;
    outline labels use the tooltip clock. The article itself stays still. */
 .reader-hook-line {
-  background: repeating-linear-gradient(
-    to top,
-    transparent 0 2px,
-    currentColor 2px 4px
-  );
+  background: repeating-linear-gradient(to top, transparent 0 2px, currentColor 2px 4px);
   transition:
     height var(--tabs-dur) var(--tabs-ease),
     transform var(--tabs-dur) var(--tabs-ease);
@@ -400,14 +396,40 @@
     calc(var(--row-y) - var(--pointer-y, -1000))
   );
   --proximity: max(0, calc(1 - var(--distance) / 60));
-  transform: scaleX(
-    calc(var(--dash-scale) + (1 - var(--dash-scale)) * var(--proximity))
-  );
+  transform: scaleX(calc(var(--dash-scale) + (1 - var(--dash-scale)) * var(--proximity)));
   transition: transform var(--tabs-dur) var(--tabs-ease);
 }
 .reader-proximity [aria-current] .reader-proximity-dash {
   background: var(--color-tech-signal);
   height: 2px;
+}
+.reader-outline-blur {
+  position: absolute;
+  inset: -1.5rem 1.5rem -1.5rem 0;
+  pointer-events: none;
+  backdrop-filter: blur(var(--blur));
+  mask-image:
+    linear-gradient(
+      to right,
+      transparent var(--fade-start),
+      currentColor var(--fade-end),
+      currentColor calc(100% - var(--fade-end)),
+      transparent calc(100% - var(--fade-start))
+    ),
+    linear-gradient(
+      to bottom,
+      transparent var(--fade-start),
+      currentColor var(--fade-end),
+      currentColor calc(100% - var(--fade-end)),
+      transparent calc(100% - var(--fade-start))
+    );
+  mask-composite: intersect;
+  opacity: 0;
+  transition: opacity var(--tt-out-dur) var(--tt-out-ease);
+}
+.reader-proximity:is(:hover, :has(:focus-visible)) .reader-outline-blur {
+  opacity: 1;
+  transition: opacity var(--tt-in-dur) var(--tt-in-ease) var(--tt-delay);
 }
 .reader-outline-label {
   opacity: 0;
@@ -417,13 +439,10 @@
     opacity var(--tt-out-dur) var(--tt-out-ease),
     scale var(--tt-out-dur) var(--tt-out-ease);
 }
-.reader-proximity:is(:hover, :has(:focus-visible))
-  [data-level="1"]
-  .reader-outline-label,
-.reader-proximity:is(:hover, :has(:focus-visible))
-  [data-level="2"]
-  .reader-outline-label,
+.reader-proximity:is(:hover, :has(:focus-visible)) [data-level="1"] .reader-outline-label,
+.reader-proximity:is(:hover, :has(:focus-visible)) [data-level="2"] .reader-outline-label,
 .reader-proximity a:is(:hover, :focus-visible) .reader-outline-label {
+  pointer-events: auto;
   opacity: 1;
   scale: 1;
   transition:
@@ -436,6 +455,7 @@
   .reader-hook-elbow,
   .reader-hook-rail,
   .reader-proximity-dash,
+  .reader-outline-blur,
   .reader-outline-label {
     transition: none !important;
   }

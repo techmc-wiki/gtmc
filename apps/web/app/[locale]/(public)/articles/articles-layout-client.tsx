@@ -181,7 +181,7 @@ export function ArticlesLayoutClient({ children, tree }: ArticlesLayoutProps) {
         </Sheet>
       </div>
 
-      <div className="relative flex w-full min-w-0 flex-1 gap-4 lg:-mx-8 lg:w-[calc(100%+4rem)]">
+      <div className="relative mx-auto flex w-full min-w-0 flex-1 gap-4 lg:max-w-[120rem]">
         <aside
           className={`t-resize relative hidden shrink-0 lg:block ${siteOpen ? "w-64" : "w-8"}`}>
           <div className="sticky top-24 flex h-[calc(100dvh-7rem)] min-h-0">

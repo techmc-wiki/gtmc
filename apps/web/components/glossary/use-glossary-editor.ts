@@ -51,11 +51,11 @@ export interface UseGlossaryEditorOptions {
  */
 function useGlossarySaveQueue(initialEtag: string) {
   const etagRef = React.useRef(initialEtag)
-  const queueRef = React.useRef(Promise.resolve())
+  const queueRef = React.useRef<Promise<void> | null>(null)
 
   const saveDraft = React.useCallback(
     (id: string, operations: GlossaryEditOperation[], title: string) => {
-      const result = queueRef.current.then(async () => {
+      const result = (queueRef.current ?? Promise.resolve()).then(async () => {
         const saved = await updateGlossaryDraftAction(id, operations, title, etagRef.current)
         if (saved.etag) etagRef.current = saved.etag
         return saved

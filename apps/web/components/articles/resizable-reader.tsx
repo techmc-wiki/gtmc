@@ -15,18 +15,38 @@ import styles from "./resizable-reader.module.css"
 const DEFAULT_READER_WIDTH = 768
 const READER_WIDTH_STORAGE_KEY = "article-reader-width"
 
+function readReaderWidth(): number | null {
+  try {
+    const raw = window.localStorage.getItem(READER_WIDTH_STORAGE_KEY)
+    if (raw === null) return null
+    const width = Number(raw)
+    return Number.isFinite(width) ? width : null
+  } catch {
+    // Storage may be blocked by browser privacy settings.
+    return null
+  }
+}
+
+function persistReaderWidth(width: number): void {
+  try {
+    window.localStorage.setItem(READER_WIDTH_STORAGE_KEY, String(width))
+  } catch {
+    // A blocked or full storage quota leaves width persistence best-effort.
+  }
+}
+
 export function ResizableReader({ children }: { children: ReactNode }) {
   const t = useTranslations("CommonA11y")
   const hintId = useId()
   const readerRef = usePanelRef()
   // Restore after hydration so the initial browser and server layouts agree.
   useEffect(() => {
-    const width = Number(window.localStorage.getItem(READER_WIDTH_STORAGE_KEY))
-    if (Number.isFinite(width) && width >= 384) readerRef.current?.resize(width)
+    const width = readReaderWidth()
+    if (width !== null && width >= 384) readerRef.current?.resize(width)
   }, [readerRef])
   const resetWidth = () => {
     readerRef.current?.resize(DEFAULT_READER_WIDTH)
-    window.localStorage.setItem(READER_WIDTH_STORAGE_KEY, String(DEFAULT_READER_WIDTH))
+    persistReaderWidth(DEFAULT_READER_WIDTH)
   }
 
   return (
@@ -42,7 +62,7 @@ export function ResizableReader({ children }: { children: ReactNode }) {
           if (meta.isUserInteraction && window.matchMedia("(min-width: 64rem)").matches) {
             const width = readerRef.current?.getSize().inPixels
             if (width !== undefined) {
-              window.localStorage.setItem(READER_WIDTH_STORAGE_KEY, String(width))
+              persistReaderWidth(width)
             }
           }
         }}>

@@ -321,14 +321,6 @@
   border-radius: 0;
 }
 
-@starting-style {
-  .t-panel-slide[data-open="true"] {
-    opacity: 0;
-    transform: translateY(var(--panel-translate-y));
-    filter: blur(var(--panel-blur));
-  }
-}
-
 /* Keep the recipe's measured indicator; use the site's square controls. */
 .t-tabs--density {
   --tabs-text-muted: var(--color-tech-main);
@@ -363,4 +355,148 @@
   height: 100%;
   border-radius: 0;
   box-sizing: border-box;
+}
+
+/* transitions.dev: 01-card-resize.md */
+:root {
+  --resize-dur: 300ms;
+  --resize-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.t-resize {
+  transition:
+    width var(--resize-dur) var(--resize-ease),
+    height var(--resize-dur) var(--resize-ease);
+  will-change: width, height;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-resize {
+    transition: none !important;
+  }
+}
+
+/* Reader geometry. Hook selection uses the existing selection clock;
+   outline labels use the tooltip clock. The article itself stays still. */
+.reader-hook-line {
+  background: repeating-linear-gradient(to top, transparent 0 2px, currentColor 2px 4px);
+  transition:
+    height var(--tabs-dur) var(--tabs-ease),
+    transform var(--tabs-dur) var(--tabs-ease);
+}
+.reader-hook-rail {
+  transition: opacity var(--tt-in-dur) var(--tt-in-ease);
+}
+.reader-hook-elbow {
+  transition: transform var(--tabs-dur) var(--tabs-ease);
+}
+.reader-proximity-dash {
+  --distance: max(
+    calc(var(--pointer-y, -1000) - var(--row-y)),
+    calc(var(--row-y) - var(--pointer-y, -1000))
+  );
+  --proximity: max(0, calc(1 - var(--distance) / 60));
+  transform: scaleX(calc(var(--dash-scale) + (1 - var(--dash-scale)) * var(--proximity)));
+  transition: transform var(--tabs-dur) var(--tabs-ease);
+}
+.reader-proximity [aria-current] .reader-proximity-dash {
+  background: var(--color-tech-signal);
+  height: 2px;
+}
+.reader-outline-blur {
+  --fade-edge: 1rem;
+  position: absolute;
+  top: -4rem;
+  right: 0;
+  bottom: -4rem;
+  width: calc(var(--outline-content-width, 20rem) + var(--outline-blur-bleed, 100px));
+  max-width: 100%;
+  pointer-events: none;
+  backdrop-filter: blur(var(--blur));
+  mask-image:
+    linear-gradient(
+      to right,
+      transparent var(--fade-start),
+      currentColor var(--fade-end),
+      currentColor calc(100% - var(--fade-edge)),
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent var(--fade-start),
+      currentColor var(--fade-end),
+      currentColor calc(100% - var(--fade-end)),
+      transparent calc(100% - var(--fade-start))
+    );
+  mask-composite: intersect;
+  opacity: 0;
+  transition: opacity var(--tt-out-dur) var(--tt-out-ease);
+}
+.reader-proximity[data-expanded="true"] .reader-outline-blur,
+.reader-proximity:has(:focus-visible) .reader-outline-blur {
+  opacity: 1;
+  transition: opacity var(--tt-in-dur) var(--tt-in-ease) var(--tt-delay);
+}
+.reader-outline-label {
+  --outline-indent: 0rem;
+  color: var(--foreground);
+  width: var(--outline-label-width, auto);
+  padding-inline: calc(0.75rem + var(--outline-indent)) 0.75rem;
+  text-align: left;
+  opacity: 0;
+  scale: var(--tt-scale);
+  transform-origin: right center;
+  transition:
+    opacity var(--tt-out-dur) var(--tt-out-ease),
+    scale var(--tt-out-dur) var(--tt-out-ease);
+}
+/* Depth reads through weight and color, so four levels stay distinct. */
+.reader-proximity [data-level="1"] .reader-outline-label {
+  color: var(--foreground);
+  font-weight: 700;
+}
+.reader-proximity [data-level="2"] .reader-outline-label {
+  --outline-indent: 0.75rem;
+  color: var(--muted-foreground);
+  font-weight: 600;
+}
+.reader-proximity [data-level="3"] .reader-outline-label {
+  --outline-indent: 1.5rem;
+  color: color-mix(in oklab, var(--muted-foreground) 62%, transparent);
+}
+.reader-proximity [data-level="4"] .reader-outline-label {
+  --outline-indent: 2.25rem;
+  color: color-mix(in oklab, var(--muted-foreground) 52%, transparent);
+}
+/* Advanced sections keep the theme accent reserved for deep dives. */
+.reader-proximity [data-advanced="true"] .reader-outline-label {
+  color: var(--color-tech-advanced);
+}
+.reader-proximity [data-advanced="true"][data-level="3"] .reader-outline-label {
+  color: color-mix(in oklab, var(--color-tech-advanced) 78%, transparent);
+}
+.reader-proximity [data-advanced="true"][data-level="4"] .reader-outline-label {
+  color: color-mix(in oklab, var(--color-tech-advanced) 62%, transparent);
+}
+/* Approaching the rail shows every title, not just the current row's. */
+.reader-proximity[data-expanded="true"] .reader-outline-label,
+.reader-proximity:has(:focus-visible) .reader-outline-label,
+.reader-proximity a:is(:hover, :focus-visible) .reader-outline-label {
+  pointer-events: auto;
+  opacity: 1;
+  scale: 1;
+  transition:
+    opacity var(--tt-in-dur) var(--tt-in-ease) var(--tt-delay),
+    scale var(--tt-in-dur) var(--tt-in-ease) var(--tt-delay);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reader-hook-line,
+  .reader-hook-elbow,
+  .reader-hook-rail,
+  .reader-proximity-dash,
+  .reader-outline-blur,
+  .reader-outline-label {
+    transition: none !important;
+  }
 }

@@ -1,0 +1,97 @@
+"use client"
+
+import { useTranslations } from "next-intl"
+import { useId, useLayoutEffect, type ReactNode } from "react"
+import { usePanelRef } from "react-resizable-panels"
+
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/shadcn/resizable"
+
+import styles from "./resizable-reader.module.css"
+
+const DEFAULT_READER_WIDTH = 768
+const READER_WIDTH_STORAGE_KEY = "article-reader-width"
+
+function readReaderWidth(): number | null {
+  try {
+    const raw = window.localStorage.getItem(READER_WIDTH_STORAGE_KEY)
+    if (raw === null) return null
+    const width = Number(raw)
+    return Number.isFinite(width) ? width : null
+  } catch {
+    // Storage may be blocked by browser privacy settings.
+    return null
+  }
+}
+
+function persistReaderWidth(width: number): void {
+  try {
+    window.localStorage.setItem(READER_WIDTH_STORAGE_KEY, String(width))
+  } catch {
+    // A blocked or full storage quota leaves width persistence best-effort.
+  }
+}
+
+export function ResizableReader({ children }: { children: ReactNode }) {
+  const t = useTranslations("CommonA11y")
+  const hintId = useId()
+  const readerRef = usePanelRef()
+  // Restore before paint so returning readers never see a frame at the default
+  // width, and after hydration so the server and browser layouts agree.
+  useLayoutEffect(() => {
+    const width = readReaderWidth()
+    if (width !== null && width >= 384) readerRef.current?.resize(width)
+  }, [readerRef])
+  const resetWidth = () => {
+    readerRef.current?.resize(DEFAULT_READER_WIDTH)
+    persistReaderWidth(DEFAULT_READER_WIDTH)
+  }
+
+  return (
+    <>
+      <span id={hintId} className="sr-only">
+        {t("resizeReaderHint")}
+      </span>
+      <ResizablePanelGroup
+        orientation="horizontal"
+        className={`${styles.group} h-auto min-w-0 items-stretch`}
+        style={{ overflow: "visible" }}
+        onLayoutChanged={(_layout, meta) => {
+          if (meta.isUserInteraction && window.matchMedia("(min-width: 64rem)").matches) {
+            const width = readerRef.current?.getSize().inPixels
+            if (width !== undefined) {
+              persistReaderWidth(width)
+            }
+          }
+        }}>
+        <ResizablePanel
+          id="article-reader"
+          panelRef={readerRef}
+          defaultSize={DEFAULT_READER_WIDTH}
+          minSize="24rem"
+          groupResizeBehavior="preserve-pixel-size"
+          style={{ overflow: "visible" }}>
+          {children}
+        </ResizablePanel>
+        <ResizableHandle
+          withHandle
+          className={`${styles.handle} items-start`}
+          aria-label={t("resizeReader")}
+          aria-describedby={hintId}
+          title={t("resizeReaderHint")}
+          onDoubleClick={resetWidth}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault()
+              resetWidth()
+            }
+          }}
+        />
+        <ResizablePanel id="article-reader-space" minSize="0%" style={{ overflow: "visible" }} />
+      </ResizablePanelGroup>
+    </>
+  )
+}

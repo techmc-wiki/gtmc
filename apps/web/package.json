@@ -49,6 +49,7 @@
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.1.1",
     "cn": "^0.5.2",
+    "d3-transition": "^3.0.2",
     "diff": "^9.0.0",
     "gray-matter": "^4.0.3",
     "gsap": "^3.15.0",
@@ -58,6 +59,7 @@
     "mermaid": "^12.2.0",
     "mime-types": "^3.0.2",
     "minisearch": "^7.2.0",
+    "motion": "^13.4.4",
     "next": "16.4.5",
     "next-auth": "5.0.0-beta.32",
     "next-intl": "^4.14.8",
@@ -83,6 +85,7 @@
   "devDependencies": {
     "@next/bundle-analyzer": "^16.4.4",
     "@tailwindcss/postcss": "^4.3.4",
+    "@types/d3-transition": "^3.0.9",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.14",

@@ -1,7 +1,11 @@
 "use client"
 
-import { useEffect, useId, useRef, useState, type ReactNode } from "react"
+import { Maximize2 } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useEffect, useId, useRef, useState, type ReactNode } from "react"
+
+import { MediaViewer } from "@/components/markdown/media-viewer"
+import { Button } from "@/components/ui/shadcn/button"
 import { getMermaidConfig } from "@/lib/markdown/mermaid-config"
 import { useTheme } from "@/lib/theme"
 
@@ -12,6 +16,13 @@ interface MermaidDiagramProps {
 type RenderState = "loading" | "ready" | "error"
 
 export function MermaidDiagram({ children }: MermaidDiagramProps) {
+  return <MermaidDiagramView>{children}</MermaidDiagramView>
+}
+
+function MermaidDiagramView({
+  children,
+  expanded = false,
+}: MermaidDiagramProps & { expanded?: boolean }) {
   const t = useTranslations("CommonA11y")
   const { resolvedTheme } = useTheme()
   const reactId = useId()
@@ -34,7 +45,14 @@ export function MermaidDiagram({ children }: MermaidDiagramProps) {
       container.replaceChildren()
 
       try {
-        const { default: mermaid } = await import("mermaid")
+        // Mermaid's ESM build selects nodes through d3 but never imports
+        // d3-transition, and d3 declares itself side-effect free, so tree
+        // shaking drops the patch that defines selection.transition. Mermaid's
+        // diagram tooltips call it on hover, which throws without this import.
+        const [{ default: mermaid }] = await Promise.all([
+          import("mermaid"),
+          import("d3-transition"),
+        ])
         mermaid.initialize(getMermaidConfig(resolvedTheme))
         const { svg, bindFunctions } = await mermaid.render(diagramId, source)
 
@@ -59,15 +77,28 @@ export function MermaidDiagram({ children }: MermaidDiagramProps) {
     <figure
       aria-label={t("mermaidDiagram")}
       className="guide-line bg-surface-overlay/70 border-tech-main/35 my-6 overflow-hidden border p-3 sm:p-5">
+      {!expanded && state === "ready" ? (
+        <div className="mb-2 flex justify-end">
+          <MediaViewer
+            title={t("mermaidDiagram")}
+            trigger={
+              <Button variant="ghost" size="icon" className="size-11" aria-label={t("viewDiagram")}>
+                <Maximize2 aria-hidden="true" />
+              </Button>
+            }>
+            <div className="max-h-[75vh] overflow-auto">
+              <MermaidDiagramView expanded>{children}</MermaidDiagramView>
+            </div>
+          </MediaViewer>
+        </div>
+      ) : null}
       <div
         ref={containerRef}
         aria-hidden={state !== "ready"}
         className="custom-bottom-scrollbar overflow-x-auto [&_svg]:mx-auto [&_svg]:h-auto [&_svg]:max-w-none"
       />
       {state === "loading" ? (
-        <output className="text-tech-main/60 m-0 text-xs">
-          {t("loadingMermaidDiagram")}
-        </output>
+        <output className="text-tech-main/60 m-0 text-xs">{t("loadingMermaidDiagram")}</output>
       ) : null}
       {state === "error" ? (
         <div role="alert" className="text-tech-main-dark space-y-3">

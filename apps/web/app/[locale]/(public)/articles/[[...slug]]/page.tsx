@@ -1,16 +1,14 @@
 import path from "node:path"
-
-import { resolveArticleAssetPath } from "@gtmc/ssg/articles/article-asset-path"
-
+import { Suspense, type ReactNode } from "react"
 // eslint-disable-next-line import/no-unassigned-import
 import "katex/dist/katex.min.css"
 import { type ArticleLocale } from "@gtmc/ssg/articles/types"
+import { resolveArticleAssetPath } from "@gtmc/ssg/articles/article-asset-path"
 import { getCachedRehypeShiki } from "@gtmc/ssg/markdown/syntax/rehype-shiki"
 import { ArrowRight } from "lucide-react"
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { notFound, permanentRedirect } from "next/navigation"
-import { Suspense, type ReactNode } from "react"
 
 import { ArticleHeadingActions } from "@/components/articles/article-heading-actions"
 import { ArticleHighlight } from "@/components/articles/article-highlight"
@@ -20,15 +18,23 @@ import {
 } from "@/components/articles/article-metadata"
 import { ArticleNavigation } from "@/components/articles/article-navigation"
 import { BookmarkRecorder } from "@/components/articles/bookmark-recorder"
-import { RunningHead } from "@/components/articles/chapter-chrome"
+import { RunningHead, ChapterEndMark } from "@/components/articles/chapter-chrome"
 import { CodeSourceSummary } from "@/components/articles/code-source-summary"
 import { MarkdownRenderer } from "@/components/markdown/markdown-renderer"
+import {
+  calculateReadingMetrics,
+  ensureMetaDescriptionLength,
+  generateDescription,
+} from "@/lib/markdown"
 import {
   resolveArticleLocale,
   resolveArticleRequest,
   type ArticleTreeNode,
 } from "@/lib/articles/article-request"
-import { embedTitleInMarkdown, formatArticleDisplayTitle } from "@/lib/articles/article-title"
+import {
+  embedTitleInMarkdown,
+  formatArticleDisplayTitle,
+} from "@/lib/articles/article-title"
 import { getArticleContentBySlug } from "@/lib/articles/content"
 import {
   getArticleAvailableLocales,
@@ -40,29 +46,27 @@ import {
   getCachedLocalizedArticleEntry,
   getCachedSlugForFilePath,
 } from "@/lib/articles/manifest-cached"
+import { articleUrl, getArticleAssetPublicUrl } from "@/lib/articles/url"
+import { decodeSlugPath, encodeSlug } from "@/lib/articles/slug-resolver"
+import { getSiteUrl } from "@/lib/site-url"
+import { serializeJsonLd } from "@/lib/seo/json-ld"
 import {
   getNavigationBreadcrumbs,
   findNavigationOwner,
   flattenArticleTree,
   getArticleNavigation,
 } from "@/lib/articles/navigation-data"
-import { resolveAuthorPerson, resolveProfileHandle } from "@/lib/articles/person-resolver"
-import { getPublicChapterNav } from "@/lib/articles/public-tree"
-import { decodeSlugPath, encodeSlug } from "@/lib/articles/slug-resolver"
-import { articleUrl, getArticleAssetPublicUrl } from "@/lib/articles/url"
 import {
-  calculateReadingMetrics,
-  ensureMetaDescriptionLength,
-  generateDescription,
-} from "@/lib/markdown"
-import { serializeJsonLd } from "@/lib/seo/json-ld"
-import { getSiteUrl } from "@/lib/site-url"
+  resolveAuthorPerson,
+  resolveProfileHandle,
+} from "@/lib/articles/person-resolver"
+import { getPublicChapterNav } from "@/lib/articles/public-tree"
 
 const EMPTY_STRING_ARRAY: string[] = []
 
-// The whole page — header, body and navigation — is derived from the slug, so
-// there is no shared shell to prefetch; block rather than paint an empty one.
-// See: https://nextjs.org/docs/messages/instant-shell-url-data
+// The reader's entire output is selected by the URL, so the segment has no
+// shell worth sharing across links and prefetching still works. Wrapping the
+// page in a Suspense boundary would only render an empty shell around it.
 export const instant = false
 
 export async function generateStaticParams(): Promise<{ locale: string; slug: string[] }[]> {
@@ -75,7 +79,8 @@ export async function generateStaticParams(): Promise<{ locale: string; slug: st
           nodes.map(async (node) => {
             const manifestEntry = await getCachedLocalizedArticleEntry(node.slug, locale)
             const ownSlugs =
-              (!node.isFolder || manifestEntry?.hasIntro) && hasArticleLocale(node.slug, locale)
+              (!node.isFolder || manifestEntry?.hasIntro) &&
+              hasArticleLocale(node.slug, locale)
                 ? [node.slug]
                 : []
             const childSlugs = await collectSlugs(node.children ?? [])
@@ -274,7 +279,10 @@ async function loadArticlePage(params: ArticlePageProps["params"]) {
   const manifestEntry = await getCachedLocalizedArticleEntry(effectiveSlug, contentLocale)
   const chapterTitle = manifestEntry?.chapterTitleByLocale?.[contentLocale]
   const description = ensureMetaDescriptionLength(
-    generateDescription(renderedContent, data.description as string | undefined),
+    generateDescription(
+      renderedContent,
+      data.description as string | undefined
+    ),
     {
       title: articleTitle,
       chapterTitle,
@@ -511,20 +519,10 @@ function ArticlePageContent({
   translationStatus,
 }: ArticlePageContentProps) {
   return (
-    <div className="border-tech-main/30 bg-surface/80 relative min-h-screen min-w-0 border p-6 backdrop-blur-sm sm:p-8">
-      {bannerPreloadHref ? (
-        <link rel="preload" as="image" href={bannerPreloadHref} fetchPriority="high" />
-      ) : null}
+    <div className="relative min-h-screen min-w-0 border border-tech-line bg-surface p-6 sm:p-8">
+      {bannerPreloadHref ? <link rel="preload" as="image" href={bannerPreloadHref} fetchPriority="high" /> : null}
       <BookmarkRecorder slug={currentSlug} title={articleTitle} />
-      {runningHeadChapters.length > 0 && (
-        <RunningHead
-          chapters={runningHeadChapters}
-          locale={locale}
-          chapterIndex={runningHeadChapterIndex}
-          chapterIsAppendix={runningHeadIsAppendix}
-          isPreface={runningHeadIsPreface}
-        />
-      )}
+      {runningHeadChapters.length > 0 && <RunningHead chapters={runningHeadChapters} locale={locale} chapterIndex={runningHeadChapterIndex} chapterIsAppendix={runningHeadIsAppendix} isPreface={runningHeadIsPreface} />}
       {header}
       <CodeSourceSummary
         label={tArticleMeta("codeBasis")}
@@ -550,6 +548,7 @@ function ArticlePageContent({
           headingAction={<ArticleHeadingActions editPath={editPath} />}
         />
       </article>
+      <ChapterEndMark />
       {(navigation.prev || navigation.next) && (
         <ArticleNavigation
           locale={locale}
@@ -653,7 +652,7 @@ function normalizeDraftTargetPath(filePath: string) {
 function resolveBannerUrl(
   bannerSrc: string | undefined,
   filePath: string,
-  siteUrl: string,
+  siteUrl: string
 ): string | null {
   const resolved = resolveArticleAssetPath(bannerSrc, filePath)
   if (!resolved) return null

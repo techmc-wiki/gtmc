@@ -438,8 +438,10 @@
   transition: opacity var(--tt-in-dur) var(--tt-in-ease) var(--tt-delay);
 }
 .reader-outline-label {
+  --outline-indent: 0rem;
   color: var(--foreground);
   width: var(--outline-label-width, auto);
+  padding-inline: calc(0.75rem + var(--outline-indent)) 0.75rem;
   text-align: left;
   opacity: 0;
   scale: var(--tt-scale);
@@ -454,13 +456,16 @@
   font-weight: 700;
 }
 .reader-proximity [data-level="2"] .reader-outline-label {
+  --outline-indent: 0.75rem;
   color: var(--muted-foreground);
   font-weight: 600;
 }
 .reader-proximity [data-level="3"] .reader-outline-label {
+  --outline-indent: 1.5rem;
   color: color-mix(in oklab, var(--muted-foreground) 62%, transparent);
 }
 .reader-proximity [data-level="4"] .reader-outline-label {
+  --outline-indent: 2.25rem;
   color: color-mix(in oklab, var(--muted-foreground) 52%, transparent);
 }
 /* Advanced sections keep the theme accent reserved for deep dives. */

@@ -242,7 +242,7 @@ export default function ProximitySidebar({
             }}>
             <span
               aria-hidden
-              className="reader-outline-label pointer-events-none absolute right-12 max-w-60 truncate px-3 text-sm leading-6">
+              className="reader-outline-label pointer-events-none absolute right-12 max-w-60 truncate text-sm leading-6">
               {section.label}
             </span>
             <span

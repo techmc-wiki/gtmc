@@ -1,8 +1,19 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { X } from "lucide-react"
+import { useTranslations } from "next-intl"
 import Image from "next/image"
+import { useCallback, useState } from "react"
+
 import { CornerBrackets } from "@/components/ui/corner-brackets"
+import { Button } from "@/components/ui/shadcn/button"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/shadcn/dialog"
 
 interface ArticleImageProps {
   src: string
@@ -10,9 +21,8 @@ interface ArticleImageProps {
 }
 
 export function ArticleImage({ src, alt }: ArticleImageProps) {
-  const [status, setStatus] = useState<"loading" | "loaded" | "error">(
-    "loading"
-  )
+  const t = useTranslations("CommonA11y")
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading")
 
   const handleLoad = useCallback(() => {
     setStatus("loaded")
@@ -44,21 +54,52 @@ export function ArticleImage({ src, alt }: ArticleImageProps) {
         </div>
       </div>
 
-      <div className="t-skel-content">
-        <Image
-          src={src}
-          alt={alt}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 900px"
-          loading="lazy"
-          onLoad={handleLoad}
-          onError={handleError}
-          className="border-tech-main/30 bg-tech-main/5 border object-contain p-1 shadow-sm"
-          unoptimized={
-            src.includes("/api/assets") || src.startsWith("/api/draft-assets/")
-          }
-        />
-      </div>
+      <Dialog>
+        <DialogTrigger asChild>
+          <button
+            type="button"
+            disabled={!isRevealed}
+            aria-label={t("viewImage", { alt })}
+            className="t-skel-content focus-visible:outline-tech-signal absolute inset-0 w-full cursor-zoom-in focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-default">
+            <Image
+              src={src}
+              alt={alt}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 900px"
+              loading="lazy"
+              onLoad={handleLoad}
+              onError={handleError}
+              className="border-tech-main/30 bg-tech-main/5 border object-contain p-1 shadow-sm"
+              unoptimized={src.includes("/api/assets") || src.startsWith("/api/draft-assets/")}
+            />
+          </button>
+        </DialogTrigger>
+        <DialogContent
+          showCloseButton={false}
+          aria-describedby={undefined}
+          className="bg-surface fixed top-1/2 left-1/2 w-[min(96vw,90rem)] -translate-x-1/2 -translate-y-1/2 p-3 sm:p-5">
+          <DialogTitle className="sr-only">{alt}</DialogTitle>
+          <DialogClose asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-auto size-11"
+              aria-label={t("closeImage")}>
+              <X aria-hidden="true" />
+            </Button>
+          </DialogClose>
+          <div className="relative h-[min(75vh,60rem)] w-full">
+            <Image
+              src={src}
+              alt={alt}
+              fill
+              sizes="96vw"
+              className="object-contain"
+              unoptimized={src.includes("/api/assets") || src.startsWith("/api/draft-assets/")}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

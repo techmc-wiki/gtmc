@@ -117,6 +117,7 @@
     "title": "Table of contents"
   },
   "CommonA11y": {
+    "closeImage": "Close image",
     "closeNavigationMenu": "Close navigation menu",
     "hideChapterNav": "Hide chapter navigation",
     "languageSwitcher": "Switch language",
@@ -129,7 +130,8 @@
     "skipToMainContent": "Skip to main content",
     "toggleArticleTree": "Toggle article tree",
     "toggleLineWrap": "Toggle line wrap",
-    "toggleNavigationMenu": "Toggle navigation menu"
+    "toggleNavigationMenu": "Toggle navigation menu",
+    "viewImage": "View image: {alt}"
   },
   "DraftFiles": {
     "addButton": "Add",

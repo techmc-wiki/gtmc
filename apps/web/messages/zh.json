@@ -117,6 +117,7 @@
     "title": "文章目录"
   },
   "CommonA11y": {
+    "closeImage": "关闭图片",
     "closeNavigationMenu": "关闭导航菜单",
     "hideChapterNav": "隐藏章节导航",
     "languageSwitcher": "切换语言",
@@ -129,7 +130,8 @@
     "skipToMainContent": "跳转到主要内容",
     "toggleArticleTree": "切换文章树",
     "toggleLineWrap": "切换自动换行",
-    "toggleNavigationMenu": "切换导航菜单"
+    "toggleNavigationMenu": "切换导航菜单",
+    "viewImage": "查看图片：{alt}"
   },
   "DraftFiles": {
     "addButton": "添加",

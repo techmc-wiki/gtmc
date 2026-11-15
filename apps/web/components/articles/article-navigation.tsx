@@ -42,10 +42,9 @@ function ArticleNavigationLink({
     <a
       href={`/${locale}${articleUrl(article.slug)}`}
       className={cn(
-        "group flex min-h-20 flex-col justify-center gap-2 py-5 transition-colors",
+        "group flex min-h-20 flex-col justify-center gap-2 px-6 py-5 transition-colors sm:px-8",
         "hover:bg-tech-main/5 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-tech-main focus:outline-none",
-        isNext && "sm:items-end sm:pl-8 sm:text-right",
-        isNext ? "" : "sm:pr-8",
+        isNext && "sm:items-end sm:text-right",
         className,
       )}>
       <span className="text-tech-main flex items-center gap-2 text-xs">
@@ -81,8 +80,12 @@ export function ArticleNavigation({
   prevLabel,
   next,
 }: ArticleNavigationProps) {
+  // Negative margins cancel the article card's p-6/sm:p-8 so the rule and hover
+  // rows reach its edges while the content keeps its alignment.
   return (
-    <nav aria-label={`${prevLabel}, ${nextLabel}`} className="border-tech-line mt-16 border-t">
+    <nav
+      aria-label={`${prevLabel}, ${nextLabel}`}
+      className="border-tech-line -mx-6 mt-16 border-t sm:-mx-8">
       <div
         className={cn(
           "grid grid-cols-1 sm:grid-cols-2",

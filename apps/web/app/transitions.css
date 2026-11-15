@@ -405,7 +405,7 @@
 }
 .reader-outline-blur {
   position: absolute;
-  inset: -1.5rem 1.5rem -1.5rem 0;
+  inset: -4rem 0;
   pointer-events: none;
   backdrop-filter: blur(var(--blur));
   mask-image:

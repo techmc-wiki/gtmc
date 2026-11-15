@@ -9,8 +9,8 @@ const OUTLINE_BLUR_LAYERS = [1, 2, 4, 8, 16].map((blur, index) => ({
   blur,
   style: {
     "--blur": `${blur}px`,
-    "--fade-start": `${index * 4}px`,
-    "--fade-end": `${(index + 1) * 4}px`,
+    "--fade-start": `${index * 12}px`,
+    "--fade-end": `${(index + 1) * 12}px`,
   } as CSSProperties,
 }))
 
@@ -56,7 +56,7 @@ export default function ProximitySidebar({
     <nav
       data-slot="proximity-sidebar"
       aria-label={ariaLabel}
-      className="reader-proximity pointer-events-none absolute inset-y-0 right-0 flex w-80 [scrollbar-width:none] flex-col overflow-y-auto overscroll-contain">
+      className="reader-proximity pointer-events-none absolute inset-y-0 right-0 flex w-96 [scrollbar-width:none] flex-col overflow-y-auto overscroll-contain">
       <div
         className="reader-outline-surface pointer-events-none relative my-auto w-full shrink-0 py-1"
         onPointerMove={(event) =>

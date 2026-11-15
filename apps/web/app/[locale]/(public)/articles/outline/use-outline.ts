@@ -36,7 +36,7 @@ export function useOutline(root: RefObject<HTMLElement | null>, pathname: string
               id: element.id,
               label,
               level: Number(element.tagName[1]),
-              advanced: element.dataset.advanced === "true",
+              advanced: element.closest("[data-advanced-section]") !== null,
               element,
             })
           }

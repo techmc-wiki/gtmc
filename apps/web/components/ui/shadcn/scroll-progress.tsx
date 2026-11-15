@@ -1,7 +1,6 @@
 // Rare UI. Copyright (c) 2026 Swami Malode. See RARE-UI-LICENSE.
 "use client"
 
-import * as React from "react"
 import {
   AnimatePresence,
   LazyMotion,
@@ -12,6 +11,7 @@ import {
   useSpring,
   type MotionValue,
 } from "motion/react"
+import * as React from "react"
 
 import { cn } from "@/lib/cn"
 
@@ -29,8 +29,7 @@ const LABEL_CROSSFADE = { duration: 0.22, ease: EASE_OUT } as const
 const LAYER_FADE = { duration: 0.24, ease: EASE_IN_OUT } as const
 const SQUIRCLE = "[corner-shape:squircle]"
 
-const useIsoLayoutEffect =
-  typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect
+const useIsoLayoutEffect = typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect
 
 type Size = { width: number; height: number }
 type Progress = MotionValue<number>
@@ -63,10 +62,9 @@ function useActiveSection({
 
     const update = () => {
       if (scrollLock.current) return
-      const anchor =
-        (containerRef?.current?.getBoundingClientRect().top ?? 0) + offset
+      const anchor = (containerRef?.current?.getBoundingClientRect().top ?? 0) + offset
       const active = sections.findLast(
-        ({ element }) => element.getBoundingClientRect().top <= anchor
+        ({ element }) => element.getBoundingClientRect().top <= anchor,
       )
       setActiveId(active?.id ?? sections[0]?.id)
     }
@@ -89,7 +87,7 @@ function useActiveSection({
       () => {
         scrollLock.current = false
       },
-      reduceMotion ? 0 : 700
+      reduceMotion ? 0 : 700,
     )
     setActiveId(id)
   }
@@ -312,30 +310,21 @@ function SectionList({
               className={cn(
                 "relative flex min-h-11 w-full items-center gap-3 rounded-[14px] px-3 py-2 text-left text-sm font-medium leading-none transition-colors",
                 SQUIRCLE,
-                isActive
-                  ? "text-foreground"
-                  : "text-foreground/55 hover:text-foreground/80"
+                isActive ? "text-foreground" : "text-foreground/55 hover:text-foreground/80",
               )}>
               {isActive && (
                 <m.span
                   layoutId={`${layoutId}-active`}
-                  className={cn(
-                    "absolute inset-0 rounded-[14px] bg-foreground/10",
-                    SQUIRCLE
-                  )}
+                  className={cn("absolute inset-0 rounded-[14px] bg-foreground/10", SQUIRCLE)}
                   transition={reduceMotion ? { duration: 0 } : SIZE_SPRING}
                 />
               )}
               <m.span
                 className={cn(
                   "relative h-1.5 w-1.5 shrink-0 rounded-full",
-                  isActive ? "bg-foreground" : "bg-foreground/30"
+                  isActive ? "bg-foreground" : "bg-foreground/30",
                 )}
-                initial={
-                  reduceMotion
-                    ? undefined
-                    : { opacity: 0, y: 4, filter: "blur(3px)" }
-                }
+                initial={reduceMotion ? undefined : { opacity: 0, y: 4, filter: "blur(3px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{
                   duration: 0.3,
@@ -345,11 +334,7 @@ function SectionList({
               />
               <m.span
                 className="relative min-w-0 truncate whitespace-nowrap"
-                initial={
-                  reduceMotion
-                    ? undefined
-                    : { opacity: 0, y: 4, filter: "blur(3px)" }
-                }
+                initial={reduceMotion ? undefined : { opacity: 0, y: 4, filter: "blur(3px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{
                   duration: 0.3,
@@ -384,7 +369,7 @@ function SizeProbe({
     <div className="pointer-events-none invisible absolute" aria-hidden>
       <div
         ref={collapsedRef}
-        className="inline-flex min-h-11 items-center gap-2.5 py-1.5 pr-4 pl-2">
+        className="inline-flex min-h-11 items-center gap-2.5 border border-transparent py-1.5 pr-4 pl-2">
         <span className="h-5 w-5" />
         <span
           ref={labelRef}
@@ -394,11 +379,11 @@ function SizeProbe({
       </div>
       <div
         ref={openRef}
-        className="max-h-[min(60dvh,28rem)] w-[min(90vw,22rem)] overflow-y-auto p-1.5">
+        className="max-h-[min(60dvh,28rem)] w-[min(90vw,22rem)] overflow-y-auto border border-transparent p-1.5">
         {sections.map((s) => (
           <div
             key={s.id}
-            className="flex items-center gap-3 px-3 py-2 text-sm leading-none font-medium">
+            className="flex min-h-11 items-center gap-3 px-3 py-2 text-sm leading-none font-medium">
             <span className="h-1.5 w-1.5" />
             <span className="truncate whitespace-nowrap">{s.label}</span>
           </div>
@@ -419,9 +404,7 @@ const ScrollProgress = ({
   const layoutId = React.useId()
   const reduceMotion = useReducedMotion()
 
-  const { scrollYProgress } = useScroll(
-    containerRef ? { container: containerRef } : undefined
-  )
+  const { scrollYProgress } = useScroll(containerRef ? { container: containerRef } : undefined)
   const progress = useSpring(scrollYProgress, {
     stiffness: 120,
     damping: 30,
@@ -441,14 +424,8 @@ const ScrollProgress = ({
   const triggerRef = React.useRef<HTMLButtonElement>(null)
   const listRef = React.useRef<HTMLUListElement>(null)
 
-  const {
-    collapsedRef,
-    openRef,
-    labelRef,
-    collapsedSize,
-    openSize,
-    labelWidth,
-  } = useMeasuredSizes(sections)
+  const { collapsedRef, openRef, labelRef, collapsedSize, openSize, labelWidth } =
+    useMeasuredSizes(sections)
   const { armRestore } = useOutlineFocus({ open, listRef, triggerRef })
   useDismiss({ open, rootRef, setOpen, armRestore })
 
@@ -472,10 +449,7 @@ const ScrollProgress = ({
       <div
         ref={rootRef}
         data-slot="scroll-progress"
-        className={cn(
-          "fixed bottom-6 left-1/2 z-40 -translate-x-1/2",
-          className
-        )}
+        className={cn("fixed bottom-6 left-1/2 z-40 -translate-x-1/2", className)}
         {...props}>
         <SizeProbe
           sections={sections}
@@ -490,7 +464,7 @@ const ScrollProgress = ({
           data-slot="scroll-progress-surface"
           className={cn(
             "absolute bottom-0 left-1/2 -translate-x-1/2 overflow-hidden border border-border bg-surface-overlay shadow-sm",
-            SQUIRCLE
+            SQUIRCLE,
           )}
           style={size ? { width: size.width, height: size.height } : undefined}
           animate={{ borderRadius: radius }}
@@ -521,16 +495,10 @@ const ScrollProgress = ({
                         data-slot="scroll-progress-label"
                         className="text-foreground absolute inset-y-0 left-0 flex max-w-[min(42vw,14rem)] items-center truncate text-sm leading-none font-medium whitespace-nowrap"
                         initial={
-                          reduceMotion
-                            ? { opacity: 0 }
-                            : { opacity: 0, filter: "blur(1.5px)" }
+                          reduceMotion ? { opacity: 0 } : { opacity: 0, filter: "blur(1.5px)" }
                         }
                         animate={{ opacity: 1, filter: "blur(0px)" }}
-                        exit={
-                          reduceMotion
-                            ? { opacity: 0 }
-                            : { opacity: 0, filter: "blur(1.5px)" }
-                        }
+                        exit={reduceMotion ? { opacity: 0 } : { opacity: 0, filter: "blur(1.5px)" }}
                         transition={LABEL_CROSSFADE}>
                         {label}
                       </m.span>

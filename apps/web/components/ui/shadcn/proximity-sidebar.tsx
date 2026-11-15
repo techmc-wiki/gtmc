@@ -1,7 +1,7 @@
 // Adapted from Rare UI. Copyright (c) 2026 Swami Malode. See RARE-UI-LICENSE.
 "use client"
 
-import { useEffect, useState, type CSSProperties } from "react"
+import { useEffect, useRef, useState, type CSSProperties } from "react"
 
 import { addSiteScrollListener } from "@/hooks/site-scroll-root"
 
@@ -29,6 +29,22 @@ export default function ProximitySidebar({
   ariaLabel: string
 }) {
   const [activeId, setActiveId] = useState(sections[0]?.id)
+  const navRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const nav = navRef.current
+    const active = nav?.querySelector<HTMLElement>('[aria-current="location"]')
+    if (!nav || !active || !activeId) return
+    // Scroll the outline so the active dash stays inside its own viewport; a
+    // list taller than the reader would otherwise leave it below the fold.
+    const navRect = nav.getBoundingClientRect()
+    const activeRect = active.getBoundingClientRect()
+    const target = nav.scrollTop + activeRect.top - navRect.top - nav.clientHeight * 0.3
+    nav.scrollTo({
+      top: Math.max(0, target),
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    })
+  }, [activeId])
 
   useEffect(() => {
     let frame = 0
@@ -54,6 +70,7 @@ export default function ProximitySidebar({
 
   return (
     <nav
+      ref={navRef}
       data-slot="proximity-sidebar"
       aria-label={ariaLabel}
       className="reader-proximity pointer-events-none absolute inset-y-0 right-0 flex w-96 [scrollbar-width:none] flex-col overflow-y-auto overscroll-contain">

@@ -174,7 +174,7 @@ function useDismiss({
 
 /**
  * Owns focus across an open and close cycle. Opening moves focus onto the
- * first section. `armRestore` marks the next close as one that should return
+ * current section. `armRestore` marks the next close as one that should return
  * focus to the trigger, which keyboard and selection dismissals do.
  */
 function useOutlineFocus({
@@ -190,9 +190,15 @@ function useOutlineFocus({
 
   React.useEffect(() => {
     if (open) {
-      listRef.current
-        ?.querySelector<HTMLButtonElement>("[data-active]")
-        ?.focus({ preventScroll: true })
+      const list = listRef.current
+      const active = list?.querySelector<HTMLButtonElement>("[data-active]")
+      if (!list || !active) return
+      active.focus({ preventScroll: true })
+      // The list mounts at scroll position zero, so centre the active entry
+      // inside the panel itself without moving the article.
+      const listRect = list.getBoundingClientRect()
+      const activeRect = active.getBoundingClientRect()
+      list.scrollTop += activeRect.top - listRect.top - (list.clientHeight - activeRect.height) / 2
     } else if (restore.current) {
       restore.current = false
       triggerRef.current?.focus({ preventScroll: true })

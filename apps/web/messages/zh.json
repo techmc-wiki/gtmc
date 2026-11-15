@@ -131,6 +131,7 @@
     "toggleArticleTree": "切换文章树",
     "toggleLineWrap": "切换自动换行",
     "toggleNavigationMenu": "切换导航菜单",
+    "viewDiagram": "查看图表",
     "viewImage": "查看图片：{alt}"
   },
   "DraftFiles": {

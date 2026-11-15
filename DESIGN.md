@@ -38,6 +38,7 @@ Reader surfaces evoke an academic book; app surfaces stay quiet and functional. 
 - **Navigation**: Homepage table of contents is primary navigation (bookmarks, chapter context, glossary). Reader routes are public; drafts require authentication. Localize reader labels in `messages/`.
 - **Article Reader**: Markdown renders via `components/markdown/`, not Tailwind `prose-*`. Body copy is ragged-right (`.article-prose` sets `text-wrap: pretty`); hyphenation is reserved for Typst PDF only. Retain thematic breaks; close the reader with the plain previous/next rule, not an ornament stacked above it.
 - **Reader Images**: Open loaded article images in a viewport-sized dialog, with localized controls and keyboard dismissal. Preserve the image's aspect ratio.
+- **Reader Media**: Open loaded article images, banners, and Mermaid diagrams in a viewport-sized dialog, with localized controls and keyboard dismissal. Preserve image aspect ratios and allow large diagrams to scroll.
 - **Reader Width**: Left-align the reader at 768px by default. Use one right-edge shadcn `Resizable` handle; double-click or Enter resets to 768px. Remember desktop width locally and use the full available width below the desktop breakpoint.
 - **Reader Outline**: Show section titles over one transparent regional backdrop with progressive blur tapering across a broad margin at all four edges. Keep the outline above the resize handle; never add individual label backgrounds or blur the whole page.
 

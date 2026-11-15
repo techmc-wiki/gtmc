@@ -131,6 +131,7 @@
     "toggleArticleTree": "Toggle article tree",
     "toggleLineWrap": "Toggle line wrap",
     "toggleNavigationMenu": "Toggle navigation menu",
+    "viewDiagram": "View diagram",
     "viewImage": "View image: {alt}"
   },
   "DraftFiles": {

@@ -254,6 +254,9 @@ importers:
       cn:
         specifier: ^0.5.2
         version: 0.5.2
+      d3-transition:
+        specifier: ^3.0.2
+        version: 3.0.2(d3-selection@3.0.1)
       diff:
         specifier: ^9.0.0
         version: 9.0.0
@@ -354,6 +357,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4.3.4
         version: 4.3.5
+      '@types/d3-transition':
+        specifier: ^3.0.9
+        version: 3.0.9
       '@types/hast':
         specifier: ^3.0.5
         version: 3.0.5

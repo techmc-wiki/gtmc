@@ -45,7 +45,14 @@ function MermaidDiagramView({
       container.replaceChildren()
 
       try {
-        const { default: mermaid } = await import("mermaid")
+        // Mermaid's ESM build selects nodes through d3 but never imports
+        // d3-transition, and d3 declares itself side-effect free, so tree
+        // shaking drops the patch that defines selection.transition. Mermaid's
+        // diagram tooltips call it on hover, which throws without this import.
+        const [{ default: mermaid }] = await Promise.all([
+          import("mermaid"),
+          import("d3-transition"),
+        ])
         mermaid.initialize(getMermaidConfig(resolvedTheme))
         const { svg, bindFunctions } = await mermaid.render(diagramId, source)
 

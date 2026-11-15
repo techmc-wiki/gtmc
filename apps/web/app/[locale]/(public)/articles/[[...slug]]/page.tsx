@@ -64,9 +64,9 @@ import { getPublicChapterNav } from "@/lib/articles/public-tree"
 
 const EMPTY_STRING_ARRAY: string[] = []
 
-// The whole page — header, body and navigation — is derived from the slug, so
-// there is no shared shell to prefetch; block rather than paint an empty one.
-// See: https://nextjs.org/docs/messages/instant-shell-url-data
+// The reader's entire output is selected by the URL, so the segment has no
+// shell worth sharing across links and prefetching still works. Wrapping the
+// page in a Suspense boundary would only render an empty shell around it.
 export const instant = false
 
 export async function generateStaticParams(): Promise<{ locale: string; slug: string[] }[]> {

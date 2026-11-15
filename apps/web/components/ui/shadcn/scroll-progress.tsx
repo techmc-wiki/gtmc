@@ -439,12 +439,13 @@ const ScrollProgress = ({
     select(id)
     armRestore()
     setOpen(false)
-    sections
-      .find((section) => section.id === id)
-      ?.element.scrollIntoView({
-        behavior: reduceMotion ? "instant" : "smooth",
-        block: "start",
-      })
+    const section = sections.find((candidate) => candidate.id === id)
+    if (!section) return
+    section.element.scrollIntoView({
+      behavior: reduceMotion ? "instant" : "smooth",
+      block: "start",
+    })
+    window.history.replaceState(window.history.state, "", `#${encodeURIComponent(id)}`)
   }
 
   const size = open ? openSize : collapsedSize

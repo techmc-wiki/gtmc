@@ -88,13 +88,14 @@ export async function submitDraftAction(revisionId: string, etag: string) {
       }
     })
   )
+  const assetsByPath = new Map<string, (typeof assets)[number]>(
+    assets.map((asset) => [asset.storagePath, asset])
+  )
   const targetsByPath = new Map<string, string>()
   const files = existing.files.map((file, index) => {
     for (const ref of refsByFile[index]) {
       if (targetsByPath.has(ref.storagePath)) continue
-      const asset = assets.find(
-        (candidate) => candidate.storagePath === ref.storagePath
-      )!
+      const asset = assetsByPath.get(ref.storagePath)!
       const ext = path.posix.extname(asset.filename)
       const stem = asset.filename.slice(0, asset.filename.length - ext.length)
       targetsByPath.set(

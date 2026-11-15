@@ -60,6 +60,11 @@ import { getSiteUrl } from "@/lib/site-url"
 
 const EMPTY_STRING_ARRAY: string[] = []
 
+// The whole page — header, body and navigation — is derived from the slug, so
+// there is no shared shell to prefetch; block rather than paint an empty one.
+// See: https://nextjs.org/docs/messages/instant-shell-url-data
+export const instant = false
+
 export async function generateStaticParams(): Promise<{ locale: string; slug: string[] }[]> {
   const locales: ArticleLocale[] = ["zh", "en"]
   const paramsByLocale = await Promise.all(

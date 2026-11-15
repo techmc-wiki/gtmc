@@ -117,7 +117,7 @@
     "title": "Table of contents"
   },
   "CommonA11y": {
-    "closeImage": "Close image",
+    "closeViewer": "Close viewer",
     "closeNavigationMenu": "Close navigation menu",
     "hideChapterNav": "Hide chapter navigation",
     "languageSwitcher": "Switch language",

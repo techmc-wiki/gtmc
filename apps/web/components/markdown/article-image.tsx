@@ -1,19 +1,11 @@
 "use client"
 
-import { X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import Image from "next/image"
 import { useCallback, useState } from "react"
 
+import { MediaViewer } from "@/components/markdown/media-viewer"
 import { CornerBrackets } from "@/components/ui/corner-brackets"
-import { Button } from "@/components/ui/shadcn/button"
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/shadcn/dialog"
 
 interface ArticleImageProps {
   src: string
@@ -54,8 +46,9 @@ export function ArticleImage({ src, alt }: ArticleImageProps) {
         </div>
       </div>
 
-      <Dialog>
-        <DialogTrigger asChild>
+      <MediaViewer
+        title={alt}
+        trigger={
           <button
             type="button"
             disabled={!isRevealed}
@@ -73,33 +66,18 @@ export function ArticleImage({ src, alt }: ArticleImageProps) {
               unoptimized={src.includes("/api/assets") || src.startsWith("/api/draft-assets/")}
             />
           </button>
-        </DialogTrigger>
-        <DialogContent
-          showCloseButton={false}
-          aria-describedby={undefined}
-          className="bg-surface fixed top-1/2 left-1/2 w-[min(96vw,90rem)] -translate-x-1/2 -translate-y-1/2 p-3 sm:p-5">
-          <DialogTitle className="sr-only">{alt}</DialogTitle>
-          <DialogClose asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="ml-auto size-11"
-              aria-label={t("closeImage")}>
-              <X aria-hidden="true" />
-            </Button>
-          </DialogClose>
-          <div className="relative h-[min(75vh,60rem)] w-full">
-            <Image
-              src={src}
-              alt={alt}
-              fill
-              sizes="96vw"
-              className="object-contain"
-              unoptimized={src.includes("/api/assets") || src.startsWith("/api/draft-assets/")}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
+        }>
+        <div className="relative h-[min(75vh,60rem)] w-full">
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            sizes="96vw"
+            className="object-contain"
+            unoptimized={src.includes("/api/assets") || src.startsWith("/api/draft-assets/")}
+          />
+        </div>
+      </MediaViewer>
     </div>
   )
 }

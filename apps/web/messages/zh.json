@@ -117,7 +117,7 @@
     "title": "文章目录"
   },
   "CommonA11y": {
-    "closeImage": "关闭图片",
+    "closeViewer": "关闭查看器",
     "closeNavigationMenu": "关闭导航菜单",
     "hideChapterNav": "隐藏章节导航",
     "languageSwitcher": "切换语言",

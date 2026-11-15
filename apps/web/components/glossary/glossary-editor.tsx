@@ -1,11 +1,10 @@
 "use client"
 
-import { IconButton } from "@/components/ui/icon-button"
-
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import { ExternalLink, GitPullRequest, Plus } from "lucide-react"
 
+import { IconButton } from "@/components/ui/icon-button"
 import {
   Dialog,
   DialogContent,
@@ -26,92 +25,30 @@ import {
   type GlossaryEditOperation,
 } from "@/components/glossary/glossary-edit-card"
 import { GlossaryDiffPreview } from "@/components/glossary/glossary-diff-preview"
-import { toast } from "sonner"
 import {
-  deleteGlossaryDraftAction,
-  updateGlossaryDraftAction,
-} from "@/actions/glossary-draft"
+  useGlossaryEditor,
+  type GlossarySubmitResult,
+  type GlossarySubmitState,
+  type UseGlossaryEditorOptions,
+} from "@/components/glossary/use-glossary-editor"
 import { useMounted } from "@/hooks/use-mounted"
-import { submitGlossaryDraftAction } from "@/actions/glossary-submit"
-import { GLOSSARY_COLUMNS, type GlossaryRow } from "@/lib/glossary/csv"
-import { generateUniqueSlug } from "@/lib/glossary/slug"
+import type { GlossaryRow } from "@/lib/glossary/csv"
 import type {
   GlossaryEntry,
   GlossarySummaryEntry,
 } from "@/lib/glossary/manifest"
-import { LOCALE_TO_COLUMN, type GlossaryLocale } from "@/lib/glossary/locales"
-import { useRouter } from "@/i18n/navigation"
+import {
+  findDanglingGlossaryRefs,
+  glossaryEntryToRow,
+} from "@/lib/glossary/rows"
 
-export interface GlossaryEditorProps {
-  draftId: string
-  initialEtag: string
-  initialTitle: string
-  initialOperations: GlossaryEditOperation[]
+export interface GlossaryEditorProps extends UseGlossaryEditorOptions {
   prefillSlug?: string
-  manifestEntries: GlossaryEntry[]
   summaryEntries: GlossarySummaryEntry[]
   locale: string
   authorName: string
   noreplyEmail: string
   realEmail: string | null
-  status?: string
-  githubPrUrl?: string | null
-  githubPrNum?: number | null
-}
-
-const SAVE_DEBOUNCE_MS = 2000
-
-function emptyRow(): GlossaryRow {
-  const row = {} as GlossaryRow
-  for (const col of GLOSSARY_COLUMNS) {
-    row[col] = ""
-  }
-  return row
-}
-
-function entryToRow(entry: GlossaryEntry): GlossaryRow {
-  const row = emptyRow()
-  row["Full Form (English)"] = entry.fullFormEn
-  row["Short Form"] = entry.shortForm
-  row["Category"] = entry.categories.join("; ")
-  row["Regex"] = entry.regex
-  row["Description"] = entry.isControversial
-    ? `${entry.description}*`
-    : entry.description
-  row["Related"] = entry.related
-
-  for (const code of Object.keys(LOCALE_TO_COLUMN) as GlossaryLocale[]) {
-    const translation = entry.translations[code]
-    if (translation) {
-      const { termColumn, descColumn } = LOCALE_TO_COLUMN[code]
-      row[termColumn as keyof GlossaryRow] = translation.value
-      row[descColumn as keyof GlossaryRow] = translation.description
-    }
-  }
-  return row
-}
-
-function findDanglingRefsFor(
-  slug: string,
-  fullFormEn: string,
-  entries: GlossaryEntry[]
-): { slug: string; fullFormEn: string }[] {
-  const fullFormLower = fullFormEn.trim().toLowerCase()
-  const found: { slug: string; fullFormEn: string }[] = []
-  for (const entry of entries) {
-    if (entry.slug === slug) continue
-    if (!entry.related) continue
-    const tokens = new Set(
-      entry.related
-        .split(/\s+/)
-        .map((token) => token.trim().toLowerCase())
-        .filter(Boolean)
-    )
-    if (tokens.has(slug) || (fullFormLower && tokens.has(fullFormLower))) {
-      found.push({ slug: entry.slug, fullFormEn: entry.fullFormEn })
-    }
-  }
-  return found
 }
 
 function applyPrefillToOperations(
@@ -124,7 +61,7 @@ function applyPrefillToOperations(
   }
   const entry = entriesBySlug.get(prefillSlug)
   if (!entry) return operations
-  const row = entryToRow(entry)
+  const row = glossaryEntryToRow(entry)
   return [
     ...operations,
     {
@@ -164,428 +101,60 @@ export function GlossaryEditor(props: GlossaryEditorProps) {
   )
 }
 
-function GlossaryEditorInner({
-  draftId,
-  initialTitle,
-  initialEtag,
-  initialOperations,
-  manifestEntries,
-  summaryEntries,
-  locale,
-  authorName,
-  noreplyEmail,
-  realEmail,
-  status = "DRAFT",
-  githubPrUrl,
-  githubPrNum,
-}: GlossaryEditorProps) {
+function GlossaryEditorInner(props: GlossaryEditorProps) {
   const t = useTranslations("Glossary")
-  const router = useRouter()
-
-  const etagRef = React.useRef(initialEtag)
-  const saveQueueRef = React.useRef(Promise.resolve())
-  const saveDraft = React.useCallback(
-    (id: string, operations: GlossaryEditOperation[], title: string) => {
-      const result = saveQueueRef.current.then(async () => {
-        const saved = await updateGlossaryDraftAction(
-          id,
-          operations,
-          title,
-          etagRef.current
-        )
-        if (saved.etag) etagRef.current = saved.etag
-        return saved
-      })
-      saveQueueRef.current = result.then(
-        () => undefined,
-        () => undefined
-      )
-      return result
-    },
-    []
-  )
-  const isReadOnly = status !== "DRAFT"
-
-  const entriesBySlug = React.useMemo(() => {
-    const map = new Map<string, GlossaryEntry>()
-    for (const entry of manifestEntries) {
-      map.set(entry.slug, entry)
-    }
-    return map
-  }, [manifestEntries])
-
-  const [title, setTitle] = React.useState(initialTitle)
-  const [operations, setOperations] =
-    React.useState<GlossaryEditOperation[]>(initialOperations)
-  const [showPreview, setShowPreview] = React.useState(false)
-  const [useRealEmail, setUseRealEmail] = React.useState(false)
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
-  const [submitState, setSubmitState] = React.useState<
-    "idle" | "running" | "success" | "error"
-  >("idle")
-  const [submitError, setSubmitError] = React.useState<string | null>(null)
-  const [submitResult, setSubmitResult] = React.useState<{
-    prUrl: string
-    prNumber: number
-  } | null>(
-    githubPrUrl && githubPrNum
-      ? { prUrl: githubPrUrl, prNumber: githubPrNum }
-      : null
-  )
-
-  const { isSaving, saveTimeoutRef, scheduleAutosave } = useGlossaryAutosave({
-    draftId,
-    isReadOnly,
-    operations,
-    title,
-    saveDraft,
-  })
-
-  const hasInvalidOperations = operations.some(
-    (op) =>
-      op.kind !== "delete" && !(op.after?.["Full Form (English)"] ?? "").trim()
-  )
-
-  const handleTitleChange = React.useCallback(
-    (next: string) => {
-      if (isReadOnly) return
-      setTitle(next)
-      scheduleAutosave()
-    },
-    [scheduleAutosave, isReadOnly]
-  )
-
-  const handlePick = React.useCallback(
-    (slug: string) => {
-      if (isReadOnly) return
-      const entry = entriesBySlug.get(slug)
-      if (!entry) return
-      const row = entryToRow(entry)
-      setOperations((prev) => {
-        if (prev.some((op) => op.slug === slug)) return prev
-        return [
-          ...prev,
-          {
-            kind: "edit",
-            slug,
-            before: row,
-            after: { ...row },
-          },
-        ]
-      })
-      scheduleAutosave()
-    },
-    [entriesBySlug, scheduleAutosave, isReadOnly]
-  )
-
-  const usedSlugs = React.useMemo(() => {
-    const set = new Set<string>()
-    for (const entry of manifestEntries) set.add(entry.slug)
-    for (const op of operations) set.add(op.slug)
-    return set
-  }, [manifestEntries, operations])
-
-  const handleAddNew = React.useCallback(
-    (query: string) => {
-      if (isReadOnly) return
-      const trimmed = query.trim()
-      if (!trimmed) return
-      const slug = generateUniqueSlug(trimmed, new Set(usedSlugs))
-      const row = emptyRow()
-      row["Full Form (English)"] = trimmed
-      setOperations((prev) => [
-        ...prev,
-        {
-          kind: "add",
-          slug,
-          after: row,
-        },
-      ])
-      scheduleAutosave()
-    },
-    [usedSlugs, scheduleAutosave, isReadOnly]
-  )
-
-  const handleAddNewTerm = React.useCallback(() => {
-    if (isReadOnly) return
-    const slug = generateUniqueSlug("new-term", new Set(usedSlugs))
-    const row = emptyRow()
-    setOperations((prev) => [
-      ...prev,
-      {
-        kind: "add",
-        slug,
-        after: row,
-      },
-    ])
-    scheduleAutosave()
-  }, [usedSlugs, scheduleAutosave, isReadOnly])
-
-  const handleOperationChange = React.useCallback(
-    ({ slug, after }: { slug: string; after: GlossaryRow }) => {
-      if (isReadOnly) return
-      setOperations((prev) =>
-        prev.map((op) => (op.slug === slug ? { ...op, after } : op))
-      )
-      scheduleAutosave()
-    },
-    [scheduleAutosave, isReadOnly]
-  )
-
-  const handleOperationMarkDelete = React.useCallback(
-    (slug: string) => {
-      if (isReadOnly) return
-      setOperations((prev) =>
-        prev.map((op) =>
-          op.slug === slug && op.kind === "edit"
-            ? { kind: "delete", slug, before: op.before }
-            : op
-        )
-      )
-      scheduleAutosave()
-    },
-    [scheduleAutosave, isReadOnly]
-  )
-
-  const handleOperationRemove = React.useCallback(
-    (slug: string) => {
-      if (isReadOnly) return
-      setOperations((prev) => prev.filter((op) => op.slug !== slug))
-      scheduleAutosave()
-    },
-    [scheduleAutosave, isReadOnly]
-  )
-
-  const handleDiscard = React.useCallback(async () => {
-    const confirmed = window.confirm(
-      "Discard this draft? This cannot be undone."
-    )
-    if (!confirmed) return
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
-      saveTimeoutRef.current = null
-    }
-    try {
-      const result = await deleteGlossaryDraftAction(draftId)
-      if (result.success) {
-        router.push("/draft")
-      } else {
-        toast.error(result.error || "Delete failed", { duration: 3000 })
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Delete failed"
-      toast.error(message, { duration: 3000 })
-    }
-  }, [draftId, router, saveTimeoutRef])
-
-  const handleSubmit = React.useCallback(
-    async ({ useRealEmail: useReal }: { useRealEmail: boolean }) => {
-      if (isSubmitting) return
-      if (hasInvalidOperations) {
-        setSubmitError(t("invalidOperations"))
-        return
-      }
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current)
-        saveTimeoutRef.current = null
-      }
-      try {
-        if (status === "DRAFT") {
-          const saveRes = await saveDraft(draftId, operations, title)
-          if (!saveRes.success) {
-            const message =
-              saveRes.errors?.general ||
-              saveRes.errors?.operations?.join(", ") ||
-              "Failed to save draft before submitting"
-            setSubmitError(message)
-            return
-          }
-        }
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "SAVE FAILED"
-        setSubmitError(message)
-        return
-      }
-
-      setIsSubmitting(true)
-      setSubmitState("running")
-      setSubmitError(null)
-      setSubmitResult(null)
-      try {
-        const result = await submitGlossaryDraftAction(draftId, {
-          useRealEmail: useReal,
-          etag: etagRef.current,
-        })
-        if (result.success) {
-          setSubmitState("success")
-          setSubmitResult({ prUrl: result.prUrl, prNumber: result.prNumber })
-        } else {
-          setSubmitState("error")
-          setSubmitError(result.error)
-          router.refresh()
-        }
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Submission failed"
-        setSubmitState("error")
-        setSubmitError(message)
-      } finally {
-        setIsSubmitting(false)
-      }
-    },
-    [
-      draftId,
-      operations,
-      title,
-      isSubmitting,
-      hasInvalidOperations,
-      saveTimeoutRef,
-      saveDraft,
-      status,
-      router,
-      t,
-    ]
-  )
-
-  const handleDismissSuccess = React.useCallback(() => {
-    setIsSubmitting(false)
-    setShowPreview(false)
-    setSubmitState("idle")
-    router.push("/draft")
-  }, [router])
-
-  const handleOpenPreview = React.useCallback(() => {
-    setShowPreview(true)
-  }, [])
-
-  const handleClosePreview = React.useCallback(() => {
-    if (isSubmitting) return
-    setShowPreview(false)
-    setSubmitState("idle")
-    setSubmitError(null)
-  }, [isSubmitting])
+  const { state, actions } = useGlossaryEditor(props)
 
   return (
     <>
-      {status === "PENDING" && (
+      {state.status === "PENDING" && (
         <div className="space-y-2">
           <Button
-            disabled={isSubmitting}
-            onClick={() => void handleSubmit({ useRealEmail })}>
+            disabled={state.isSubmitting}
+            onClick={() =>
+              void actions.handleSubmit({ useRealEmail: state.useRealEmail })
+            }>
             {t("resumeSubmission")}
           </Button>
-          {submitError && <p role="alert">{submitError}</p>}
+          {state.submitError && <p role="alert">{state.submitError}</p>}
         </div>
       )}
       <GlossaryEditorContent
-        authorName={authorName}
-        githubPrNum={githubPrNum}
-        githubPrUrl={githubPrUrl}
-        handleAddNew={handleAddNew}
-        handleAddNewTerm={handleAddNewTerm}
-        handleClosePreview={handleClosePreview}
-        handleDismissSuccess={handleDismissSuccess}
-        handleDiscard={handleDiscard}
-        handleOpenPreview={handleOpenPreview}
-        handleOperationChange={handleOperationChange}
-        handleOperationMarkDelete={handleOperationMarkDelete}
-        handleOperationRemove={handleOperationRemove}
-        handlePick={handlePick}
-        handleSubmit={handleSubmit}
-        handleTitleChange={handleTitleChange}
-        hasInvalidOperations={hasInvalidOperations}
-        isReadOnly={isReadOnly}
-        isSaving={isSaving}
-        locale={locale}
-        manifestEntries={manifestEntries}
-        noreplyEmail={noreplyEmail}
-        operations={operations}
-        realEmail={realEmail}
-        showPreview={showPreview}
-        status={status}
-        submitError={submitError}
-        submitResult={submitResult}
-        submitState={submitState}
-        summaryEntries={summaryEntries}
-        t={t}
-        title={title}
-        useRealEmail={useRealEmail}
-        onUseRealEmailChange={setUseRealEmail}
+        authorName={props.authorName}
+        githubPrNum={props.githubPrNum}
+        githubPrUrl={props.githubPrUrl}
+        handleAddNew={actions.handleAddNew}
+        handleAddNewTerm={actions.handleAddNewTerm}
+        handleClosePreview={actions.handleClosePreview}
+        handleDismissSuccess={actions.handleDismissSuccess}
+        handleDiscard={actions.handleDiscard}
+        handleOpenPreview={actions.handleOpenPreview}
+        handleOperationChange={actions.handleOperationChange}
+        handleOperationMarkDelete={actions.handleOperationMarkDelete}
+        handleOperationRemove={actions.handleOperationRemove}
+        handlePick={actions.handlePick}
+        handleSubmit={actions.handleSubmit}
+        handleTitleChange={actions.handleTitleChange}
+        hasInvalidOperations={state.hasInvalidOperations}
+        isReadOnly={state.isReadOnly}
+        isSaving={state.isSaving}
+        locale={props.locale}
+        manifestEntries={props.manifestEntries}
+        noreplyEmail={props.noreplyEmail}
+        operations={state.operations}
+        realEmail={props.realEmail}
+        showPreview={state.showPreview}
+        status={state.status}
+        submitError={state.submitError}
+        submitResult={state.submitResult}
+        submitState={state.submitState}
+        summaryEntries={props.summaryEntries}
+        title={state.title}
+        useRealEmail={state.useRealEmail}
+        onUseRealEmailChange={actions.setUseRealEmail}
       />
     </>
   )
-}
-
-function useGlossaryAutosave({
-  saveDraft,
-  draftId,
-  isReadOnly,
-  operations,
-  title,
-}: {
-  draftId: string
-  isReadOnly: boolean
-  saveDraft: (
-    id: string,
-    operations: GlossaryEditOperation[],
-    title: string
-  ) => ReturnType<typeof updateGlossaryDraftAction>
-  operations: GlossaryEditOperation[]
-  title: string
-}) {
-  const [isSaving, setIsSaving] = React.useState(false)
-  const saveTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  )
-  const operationsRef = React.useRef(operations)
-  const titleRef = React.useRef(title)
-
-  React.useEffect(() => {
-    operationsRef.current = operations
-    titleRef.current = title
-  }, [operations, title])
-
-  const scheduleAutosave = React.useCallback(() => {
-    if (isReadOnly) return
-    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
-    const savingToastId = toast.loading("Saving…", { id: "glossary-autosave" })
-    setIsSaving(true)
-    saveTimeoutRef.current = setTimeout(async () => {
-      try {
-        const result = await saveDraft(
-          draftId,
-          operationsRef.current,
-          titleRef.current
-        )
-        if (result.success) {
-          toast.success("Saved", { id: savingToastId })
-          setTimeout(() => setIsSaving(false), 2000)
-          return
-        }
-        const message =
-          result.errors?.general ||
-          Object.values(result.errors ?? {}).find(Boolean) ||
-          "Save failed"
-        toast.error(message, { id: savingToastId, duration: 3000 })
-        setIsSaving(false)
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Save failed", {
-          id: savingToastId,
-          duration: 3000,
-        })
-        setIsSaving(false)
-      }
-    }, SAVE_DEBOUNCE_MS)
-  }, [draftId, isReadOnly, saveDraft])
-
-  React.useEffect(
-    () => () => {
-      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
-    },
-    []
-  )
-
-  return { isSaving, saveTimeoutRef, scheduleAutosave }
 }
 
 interface GlossaryEditorContentProps {
@@ -616,10 +185,9 @@ interface GlossaryEditorContentProps {
   showPreview: boolean
   status: string
   submitError: string | null
-  submitResult: { prUrl: string; prNumber: number } | null
-  submitState: "idle" | "running" | "success" | "error"
+  submitResult: GlossarySubmitResult | null
+  submitState: GlossarySubmitState
   summaryEntries: GlossarySummaryEntry[]
-  t: ReturnType<typeof useTranslations>
   title: string
   useRealEmail: boolean
 }
@@ -655,10 +223,10 @@ function GlossaryEditorContent({
   submitResult,
   submitState,
   summaryEntries,
-  t,
   title,
   useRealEmail,
 }: GlossaryEditorContentProps) {
+  const t = useTranslations("Glossary")
   const isMounted = useMounted()
   const isSubmitting = submitState === "running"
   return (
@@ -726,7 +294,7 @@ function GlossaryEditorContent({
               operation.slug
             const danglingRefs =
               operation.kind === "delete"
-                ? findDanglingRefsFor(
+                ? findDanglingGlossaryRefs(
                     operation.slug,
                     headerEnglish,
                     manifestEntries

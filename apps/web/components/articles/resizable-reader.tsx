@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useEffect, useId, type ReactNode } from "react"
+import { useId, useLayoutEffect, type ReactNode } from "react"
 import { usePanelRef } from "react-resizable-panels"
 
 import {
@@ -39,8 +39,9 @@ export function ResizableReader({ children }: { children: ReactNode }) {
   const t = useTranslations("CommonA11y")
   const hintId = useId()
   const readerRef = usePanelRef()
-  // Restore after hydration so the initial browser and server layouts agree.
-  useEffect(() => {
+  // Restore before paint so returning readers never see a frame at the default
+  // width, and after hydration so the server and browser layouts agree.
+  useLayoutEffect(() => {
     const width = readReaderWidth()
     if (width !== null && width >= 384) readerRef.current?.resize(width)
   }, [readerRef])

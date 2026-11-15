@@ -109,9 +109,14 @@ jobs:
         if: steps.change-check.outputs.should-build == 'true'
         run: git submodule update --remote content/articles
 
+      # Dependency installation only. The postinstall pipeline regenerates the same
+      # data/ artifacts as build:content, but it runs inside the install lifecycle,
+      # where there is no GITHUB_TOKEN for the contributor-stats stage.
       - name: Set up pnpm
         if: steps.change-check.outputs.should-build == 'true'
         uses: pnpm/setup@v3
+        env:
+          GTMC_SKIP_POSTINSTALL: "1"
 
       - name: Install Typst
         if: steps.change-check.outputs.should-build == 'true'

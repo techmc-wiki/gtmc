@@ -27,7 +27,6 @@ const EASE_OUT = [0.22, 1, 0.36, 1] as const
 const SIZE_SPRING = { type: "spring", bounce: 0.16, duration: 0.5 } as const
 const LABEL_CROSSFADE = { duration: 0.22, ease: EASE_OUT } as const
 const LAYER_FADE = { duration: 0.24, ease: EASE_IN_OUT } as const
-const SQUIRCLE = "[corner-shape:squircle]"
 
 const useIsoLayoutEffect = typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect
 
@@ -314,14 +313,13 @@ function SectionList({
               data-active={isActive || undefined}
               onClick={() => onSelect(s.id)}
               className={cn(
-                "relative flex min-h-11 w-full items-center gap-3 rounded-[14px] px-3 py-2 text-left text-sm font-medium leading-none transition-colors",
-                SQUIRCLE,
+                "relative flex min-h-11 w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium leading-none transition-colors",
                 isActive ? "text-foreground" : "text-foreground/55 hover:text-foreground/80",
               )}>
               {isActive && (
                 <m.span
                   layoutId={`${layoutId}-active`}
-                  className={cn("absolute inset-0 rounded-[14px] bg-foreground/10", SQUIRCLE)}
+                  className="bg-foreground/10 absolute inset-0"
                   transition={reduceMotion ? { duration: 0 } : SIZE_SPRING}
                 />
               )}
@@ -449,7 +447,6 @@ const ScrollProgress = ({
   }
 
   const size = open ? openSize : collapsedSize
-  const radius = open ? 26 : (collapsedSize?.height ?? 32) / 2
 
   return (
     <LazyMotion features={domMax}>
@@ -469,12 +466,8 @@ const ScrollProgress = ({
         <m.div
           layout
           data-slot="scroll-progress-surface"
-          className={cn(
-            "absolute bottom-0 left-1/2 -translate-x-1/2 overflow-hidden border border-border bg-surface-overlay shadow-sm",
-            SQUIRCLE,
-          )}
+          className="border-border bg-surface-overlay absolute bottom-0 left-1/2 -translate-x-1/2 overflow-hidden border shadow-sm"
           style={size ? { width: size.width, height: size.height } : undefined}
-          animate={{ borderRadius: radius }}
           transition={reduceMotion ? { duration: 0 } : SIZE_SPRING}>
           <AnimatePresence initial={false} mode="popLayout">
             {open ? (

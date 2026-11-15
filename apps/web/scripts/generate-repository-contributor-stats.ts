@@ -1,35 +1,20 @@
 import { execFileSync } from "node:child_process"
-import {
-  mkdirSync,
-  readFileSync,
-  renameSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs"
+import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 
-import { resolveGithubToken } from "@/lib/github/tokens"
 import {
   collectContributorHistory,
   type GitHubCommitHistory,
   type GitHubHistoryResult,
   type RepositoryContributorStats,
 } from "@/lib/github/contributor-history"
+import { resolveGithubToken } from "@/lib/github/tokens"
+
 import { createLogger } from "./lib/logger"
 
 const logger = createLogger("repository-contributors")
-const OUTPUT_PATH = join(
-  process.cwd(),
-  "data",
-  "repository-contributor-stats.json"
-)
-const CACHE_PATH = join(
-  process.cwd(),
-  ".next",
-  "cache",
-  "repository-contributors",
-  "stats.json"
-)
+const OUTPUT_PATH = join(process.cwd(), "data", "repository-contributor-stats.json")
+const CACHE_PATH = join(process.cwd(), ".next", "cache", "repository-contributors", "stats.json")
 const GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
 const COMMIT_MARKER = "__GTMC_COMMIT__"
 const FIELD_SEPARATOR = "\u001f"
@@ -115,7 +100,7 @@ function getRepositoryFromEnvironment(): string | null {
 function getRepositoryFromPackage(): string | null {
   try {
     const packageMetadata = JSON.parse(
-      readFileSync(join(process.cwd(), "package.json"), "utf8")
+      readFileSync(join(process.cwd(), "package.json"), "utf8"),
     ) as { repository?: string | { url?: string } }
     const repository = packageMetadata.repository
     const url = typeof repository === "string" ? repository : repository?.url
@@ -128,14 +113,10 @@ function getRepositoryFromPackage(): string | null {
 
 function getRepositoryFromRemote(): string | null {
   try {
-    const remote = execFileSync(
-      "git",
-      ["config", "--get", "remote.origin.url"],
-      {
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "ignore"],
-      }
-    ).trim()
+    const remote = execFileSync("git", ["config", "--get", "remote.origin.url"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim()
     return /github\.com[/:]([^/]+\/[^/]+?)(?:\.git)?$/.exec(remote)?.[1] ?? null
   } catch {
     return null
@@ -156,9 +137,7 @@ function getGitHubToken(): string | null {
   }
 }
 
-function isRepositoryContributorStats(
-  value: unknown
-): value is RepositoryContributorStats {
+function isRepositoryContributorStats(value: unknown): value is RepositoryContributorStats {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return false
   }
@@ -171,20 +150,14 @@ function isRepositoryContributorStats(
       typeof contributor.commits === "number" &&
       Number.isFinite(contributor.commits) &&
       typeof contributor.linesChanged === "number" &&
-      Number.isFinite(contributor.linesChanged)
+      Number.isFinite(contributor.linesChanged),
   )
 }
 
-function loadCachedContributorStats(
-  repository: string
-): CachedContributorStats | null {
+function loadCachedContributorStats(repository: string): CachedContributorStats | null {
   try {
     const cached = JSON.parse(readFileSync(CACHE_PATH, "utf8")) as unknown
-    if (
-      typeof cached !== "object" ||
-      cached === null ||
-      Array.isArray(cached)
-    ) {
+    if (typeof cached !== "object" || cached === null || Array.isArray(cached)) {
       return null
     }
 
@@ -212,7 +185,7 @@ function loadCachedContributorStats(
 function saveCachedContributorStats(
   repository: string,
   revision: string,
-  stats: RepositoryContributorStats
+  stats: RepositoryContributorStats,
 ): void {
   mkdirSync(dirname(CACHE_PATH), { recursive: true })
   const temporaryPath = `${CACHE_PATH}.${process.pid}.tmp`
@@ -231,9 +204,7 @@ function saveCachedContributorStats(
 }
 
 function getNoreplyLogin(email: string): string | null {
-  return (
-    /^(?:\d+\+)?([^@]+)@users\.noreply\.github\.com$/i.exec(email)?.[1] ?? null
-  )
+  return /^(?:\d+\+)?([^@]+)@users\.noreply\.github\.com$/i.exec(email)?.[1] ?? null
 }
 
 function loadLocalContributorStats(): RepositoryContributorStats {
@@ -251,7 +222,7 @@ function loadLocalContributorStats(): RepositoryContributorStats {
       ":(exclude)articles",
       ":(exclude)glossary",
     ],
-    { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }
+    { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
   )
   const commits: LocalCommitActivity[] = []
   let current: LocalCommitActivity | null = null
@@ -269,8 +240,7 @@ function loadLocalContributorStats(): RepositoryContributorStats {
     if (!match) continue
     current.hasChanges = true
     current.linesChanged +=
-      (match[1] === "-" ? 0 : Number(match[1])) +
-      (match[2] === "-" ? 0 : Number(match[2]))
+      (match[1] === "-" ? 0 : Number(match[1])) + (match[2] === "-" ? 0 : Number(match[2]))
   }
 
   const loginByAuthorName = new Map<string, string>()
@@ -303,7 +273,7 @@ async function fetchHistoryPage(
   cursor: string | null,
   token: string,
   pageSize = 100,
-  includeActivity = true
+  includeActivity = true,
 ): Promise<GitHubHistoryResult> {
   const response = await fetch(GITHUB_GRAPHQL_URL, {
     method: "POST",
@@ -338,7 +308,7 @@ async function fetchHistoryPage(
 
 async function loadContributorStats(
   repository: string,
-  token: string
+  token: string,
 ): Promise<RepositoryContributorStats> {
   const [owner, name, ...rest] = repository.split("/")
   if (!owner || !name || rest.length > 0) {
@@ -347,27 +317,17 @@ async function loadContributorStats(
 
   const cached = loadCachedContributorStats(repository)
   // An unchanged revision needs only its first commit, not 100 expensive diffs.
-  const initial = await fetchHistoryPage(
-    owner,
-    name,
-    null,
-    token,
-    cached ? 1 : 100
-  )
+  const initial = await fetchHistoryPage(owner, name, null, token, cached ? 1 : 100)
   if (cached?.revision === initial.revision) {
     logger.event("repository-contributors.cache", { outcome: "hit" })
     return cached.stats
   }
 
-  const { stats, pageCount } = await collectContributorHistory(
-    initial,
-    (cursor, includeActivity) =>
-      fetchHistoryPage(owner, name, cursor, token, 100, includeActivity)
+  const { stats, pageCount } = await collectContributorHistory(initial, (cursor, includeActivity) =>
+    fetchHistoryPage(owner, name, cursor, token, 100, includeActivity),
   )
   const sorted = Object.fromEntries(
-    Object.entries(stats).toSorted(([left], [right]) =>
-      left.localeCompare(right)
-    )
+    Object.entries(stats).toSorted(([left], [right]) => left.localeCompare(right)),
   )
   saveCachedContributorStats(repository, initial.revision, sorted)
   logger.event("repository-contributors.cache", { outcome: "miss" })
@@ -377,9 +337,7 @@ async function loadContributorStats(
 
 async function main(): Promise<void> {
   const repository =
-    getRepositoryFromEnvironment() ??
-    getRepositoryFromPackage() ??
-    getRepositoryFromRemote()
+    getRepositoryFromEnvironment() ?? getRepositoryFromPackage() ?? getRepositoryFromRemote()
   if (!repository) throw new Error("Unable to determine the GitHub repository")
 
   const token = getGitHubToken()
@@ -392,9 +350,7 @@ async function main(): Promise<void> {
       reason: "authentication-unavailable",
     })
   }
-  const stats = token
-    ? await loadContributorStats(repository, token)
-    : loadLocalContributorStats()
+  const stats = token ? await loadContributorStats(repository, token) : loadLocalContributorStats()
   mkdirSync(dirname(OUTPUT_PATH), { recursive: true })
   writeFileSync(OUTPUT_PATH, `${JSON.stringify(stats, null, 2)}\n`)
   logger.event("repository-contributors.generated", {

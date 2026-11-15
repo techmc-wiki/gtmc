@@ -18,11 +18,7 @@ export function OrderedListComponent({ ...props }: MarkdownComponentProps) {
   )
 }
 
-export function SectionComponent({
-  id,
-  children,
-  ...props
-}: MarkdownComponentProps) {
+export function SectionComponent({ id, children, ...props }: MarkdownComponentProps) {
   if (id === "footnotes") {
     return (
       <aside
@@ -53,9 +49,7 @@ export function BlockquoteComponent({ ...props }: MarkdownComponentProps) {
 
 export function HrComponent() {
   return (
-    <div
-      className="my-10 flex items-center justify-center gap-3"
-      aria-hidden="true">
+    <div className="my-10 flex items-center justify-center gap-3" aria-hidden="true">
       <span className="bg-tech-main/25 h-px w-16" />
       <span className="text-tech-main/45 rotate-45">
         <span className="border-tech-main/45 block size-1.5 border" />

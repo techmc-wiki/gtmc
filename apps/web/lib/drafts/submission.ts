@@ -7,7 +7,7 @@ export const SUBMISSION_TIMEOUT_MS = 15 * 60 * 1000
 export class SubmissionInProgressError extends Error {
   constructor() {
     super(
-      "Submission is still in progress. Retry shortly; interrupted submissions can be resumed after 15 minutes."
+      "Submission is still in progress. Retry shortly; interrupted submissions can be resumed after 15 minutes.",
     )
     this.name = "SubmissionInProgressError"
   }
@@ -25,10 +25,7 @@ export interface SubmissionLock {
  * `recoverOnly` means a recent attempt may still be running: callers may look
  * for an existing PR but must not push another branch update.
  */
-export async function lockSubmission(
-  draft: Draft,
-  etag: string
-): Promise<SubmissionLock> {
+export async function lockSubmission(draft: Draft, etag: string): Promise<SubmissionLock> {
   if (draft.status === "PENDING") {
     const ageMs = Date.now() - Date.parse(draft.updatedAt)
     if (ageMs < SUBMISSION_TIMEOUT_MS) {
@@ -74,7 +71,7 @@ export async function lockSubmission(
  */
 export async function releaseFailedSubmission(
   draft: Draft,
-  etag: string
+  etag: string,
 ): Promise<{ draft: Draft; etag: string } | null> {
   if (draft.status !== "PENDING") return null
 

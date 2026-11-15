@@ -1,4 +1,5 @@
 import * as React from "react"
+
 import { Button } from "@/components/ui/shadcn/button"
 
 /** Primary download button wired to the R2-hosted PDF asset. */
@@ -11,10 +12,7 @@ export function DownloadButton({
   unavailableNote: React.ReactNode
   children: React.ReactNode
 }) {
-  const baseUrl = process.env.NEXT_PUBLIC_PDF_BASE_URL?.trim().replace(
-    /\/+$/,
-    ""
-  )
+  const baseUrl = process.env.NEXT_PUBLIC_PDF_BASE_URL?.trim().replace(/\/+$/, "")
 
   if (!baseUrl) {
     return (
@@ -22,9 +20,7 @@ export function DownloadButton({
         <Button className="w-full sm:w-auto" disabled aria-disabled="true">
           {children}
         </Button>
-        <p className="text-tech-main/60 font-mono text-xs tracking-wide">
-          {unavailableNote}
-        </p>
+        <p className="text-tech-main/60 font-mono text-xs tracking-wide">{unavailableNote}</p>
       </div>
     )
   }

@@ -1,27 +1,22 @@
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 import { getTranslations } from "next-intl/server"
+
+import type { AuthorGridItem } from "@/components/mdx/author-grid"
 import {
   getArticlesByAuthor,
   getMaintainerHandles,
   resolveAuthorPerson,
 } from "@/lib/articles/person-resolver"
 import { getRepositoryContributorStats } from "@/lib/git/repository-contributor-stats"
-import type { ArticleLocale } from "@gtmc/ssg/articles/types"
-import type { AuthorGridItem } from "@/components/mdx/author-grid"
 
-export async function buildMaintainers(
-  articleLocale: ArticleLocale
-): Promise<AuthorGridItem[]> {
+export async function buildMaintainers(articleLocale: ArticleLocale): Promise<AuthorGridItem[]> {
   const t = await getTranslations({
     locale: articleLocale,
     namespace: "Authors",
   })
   return getMaintainerHandles().map((handle) => {
     const person = resolveAuthorPerson(handle)
-    const repositoryStats = getRepositoryContributorStats([
-      handle,
-      person.key,
-      person.name,
-    ])
+    const repositoryStats = getRepositoryContributorStats([handle, person.key, person.name])
     return {
       handle,
       person,
@@ -34,7 +29,7 @@ const PREVIEW_AUTHOR_COUNT = 8
 export function buildPreviewAuthors(
   articleLocale: ArticleLocale,
   allAuthors: string[],
-  manifest: Parameters<typeof getArticlesByAuthor>[2]
+  manifest: Parameters<typeof getArticlesByAuthor>[2],
 ): AuthorGridItem[] {
   return allAuthors
     .map((handle) => ({
@@ -50,7 +45,7 @@ export function buildPreviewAuthors(
 export async function buildProfiles(
   articleLocale: ArticleLocale,
   allAuthors: string[],
-  manifest: Parameters<typeof getArticlesByAuthor>[2]
+  manifest: Parameters<typeof getArticlesByAuthor>[2],
 ): Promise<AuthorGridItem[]> {
   const t = await getTranslations({
     locale: articleLocale,
@@ -73,7 +68,7 @@ export async function buildProfiles(
 export function buildAboutStats(
   stats: { articleCount: number; lastRevision: string | null },
   allAuthors: string[],
-  locale: string
+  locale: string,
 ) {
   return {
     articleCount: String(stats.articleCount),

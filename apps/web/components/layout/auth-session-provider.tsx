@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
 import { SessionProvider } from "next-auth/react"
+import * as React from "react"
 
 /**
  * Single session boundary for the site shell.
@@ -12,12 +12,6 @@ import { SessionProvider } from "next-auth/react"
  * `refetchOnWindowFocus` is off because sign-in and sign-out still propagate
  * through the provider's broadcast channel.
  */
-export function AuthSessionProvider({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <SessionProvider refetchOnWindowFocus={false}>{children}</SessionProvider>
-  )
+export function AuthSessionProvider({ children }: { children: React.ReactNode }) {
+  return <SessionProvider refetchOnWindowFocus={false}>{children}</SessionProvider>
 }

@@ -4,10 +4,7 @@ export function hasExplicitUrlScheme(value: string): boolean {
   return EXPLICIT_SCHEME_RE.test(value)
 }
 
-export function resolveRelativeArticlePath(
-  articlePath: string,
-  relativePath: string
-): string {
+export function resolveRelativeArticlePath(articlePath: string, relativePath: string): string {
   const segments = articlePath.replaceAll("\\", "/").split("/")
   segments.pop()
 

@@ -1,7 +1,4 @@
-export type RepositoryContributorStats = Record<
-  string,
-  { commits: number; linesChanged: number }
->
+export type RepositoryContributorStats = Record<string, { commits: number; linesChanged: number }>
 
 export interface GitHubCommitActivity {
   additions: number
@@ -24,10 +21,7 @@ export interface GitHubHistoryResult {
 /** Discover opaque cursors without computing diffs, then load four pages at a time. */
 export async function collectContributorHistory(
   initial: GitHubHistoryResult,
-  loadPage: (
-    cursor: string,
-    includeActivity: boolean
-  ) => Promise<GitHubHistoryResult>
+  loadPage: (cursor: string, includeActivity: boolean) => Promise<GitHubHistoryResult>,
 ): Promise<{ stats: RepositoryContributorStats; pageCount: number }> {
   const cursors: string[] = []
   let pageInfo = initial.history.pageInfo
@@ -43,9 +37,7 @@ export async function collectContributorHistory(
   const stats: RepositoryContributorStats = {}
   addActivity(initial.history)
   let nextPage = 0
-  await Promise.all(
-    Array.from({ length: Math.min(4, cursors.length) }, loadActivityPage)
-  )
+  await Promise.all(Array.from({ length: Math.min(4, cursors.length) }, loadActivityPage))
   return { stats, pageCount: cursors.length + 1 }
 
   async function loadActivityPage(): Promise<void> {

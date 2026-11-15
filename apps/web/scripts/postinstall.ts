@@ -1,9 +1,10 @@
-import { existsSync } from "node:fs"
 import { spawnSync } from "node:child_process"
+import { existsSync } from "node:fs"
 
 import { getWorkspaceRoot, workspacePath } from "@/lib/workspace-paths"
-import { run, runScript } from "./lib/run"
+
 import { createLogger, runBuildStep } from "./lib/logger"
+import { run, runScript } from "./lib/run"
 
 const logger = createLogger("setup")
 
@@ -35,10 +36,7 @@ function isSubmoduleInitialized(path: string) {
   if (result.status !== 0) return false
 
   const lines = result.stdout.split("\n").filter(Boolean)
-  return (
-    lines.length > 0 &&
-    lines.every((line) => line.startsWith(" ") || line.startsWith("+"))
-  )
+  return lines.length > 0 && lines.every((line) => line.startsWith(" ") || line.startsWith("+"))
 }
 
 function ensureSubmoduleInitialized(submodule: string) {
@@ -78,9 +76,7 @@ if (!skipHeavy && isGitWorkTree()) {
   ensureSubmoduleInitialized("content/glossary")
   ensureSubmoduleInitialized("content/properties")
 
-  runBuildStep(logger, "glossary", () =>
-    runScript("scripts/generate-glossary-manifest.ts")
-  )
+  runBuildStep(logger, "glossary", () => runScript("scripts/generate-glossary-manifest.ts"))
 } else if (isGitWorkTree()) {
   logger.event("setup.submodules.skipped", { reason: "environment" })
 } else {
@@ -90,11 +86,9 @@ if (!skipHeavy && isGitWorkTree()) {
 if (skipHeavy) {
   logger.event("setup.heavy-work.skipped", { reason: "environment" })
 } else {
-  runBuildStep(logger, "manifest", () =>
-    runScript("scripts/generate-article-manifest.ts")
-  )
+  runBuildStep(logger, "manifest", () => runScript("scripts/generate-article-manifest.ts"))
   runBuildStep(logger, "repository-contributors", () =>
-    runScript("scripts/generate-repository-contributor-stats.ts")
+    runScript("scripts/generate-repository-contributor-stats.ts"),
   )
 }
 

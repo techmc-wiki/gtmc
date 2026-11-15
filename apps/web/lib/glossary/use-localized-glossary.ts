@@ -2,11 +2,9 @@
 
 import * as React from "react"
 import useSWR from "swr"
+
+import { normalizeGlossarySiteLocale, type GlossarySiteLocale } from "@/lib/glossary/locales"
 import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
-import {
-  normalizeGlossarySiteLocale,
-  type GlossarySiteLocale,
-} from "@/lib/glossary/locales"
 
 const EMPTY: GlossaryIndexEntry[] = []
 
@@ -33,7 +31,7 @@ export function useLocalizedGlossary(locale: string): {
       const entries = (await res.json()) as GlossaryIndexEntry[]
       return { locale: siteLocale, entries }
     },
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   )
 
   const retry = React.useCallback(() => {

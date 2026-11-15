@@ -1,5 +1,7 @@
-import { NextResponse } from "next/server"
 import path from "path"
+
+import { NextResponse } from "next/server"
+
 import { getRepoFileBuffer } from "@/lib/github/sync"
 
 function errorResponse(message: string, status: number) {
@@ -40,9 +42,7 @@ function normalizeArticleRepoPath(input: string) {
     return null
   }
 
-  return safePath.startsWith("articles/")
-    ? safePath.slice("articles/".length)
-    : safePath
+  return safePath.startsWith("articles/") ? safePath.slice("articles/".length) : safePath
 }
 
 async function getRemoteLitematicaBuffer(filePath: string) {
@@ -76,8 +76,7 @@ export async function GET(request: Request) {
       return errorResponse("Invalid path", 403)
     }
 
-    const { buffer, resolvedFromZip } =
-      await getRemoteLitematicaBuffer(articlePath)
+    const { buffer, resolvedFromZip } = await getRemoteLitematicaBuffer(articlePath)
 
     if (!buffer) {
       return errorResponse("File not found: " + urlParam, 404)
@@ -94,8 +93,7 @@ export async function GET(request: Request) {
 
     return new NextResponse(new Uint8Array(buffer), { headers })
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Internal Server Error"
+    const message = error instanceof Error ? error.message : "Internal Server Error"
     console.error("Error fetching litematica file:", error)
     return errorResponse(message, 500)
   }

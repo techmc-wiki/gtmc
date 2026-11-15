@@ -10,7 +10,7 @@ export function rehypeLinkedCode() {
     visit(tree, "element", (node: Element) => {
       if (node.tagName === "a") {
         const codeChild = node.children.some(
-          (c) => c.type === "element" && (c as Element).tagName === "code"
+          (c) => c.type === "element" && (c as Element).tagName === "code",
         )
         if (codeChild) {
           node.properties = node.properties || {}
@@ -25,7 +25,7 @@ export function rehypeLinkedCode() {
       }
       if (node.tagName === "code") {
         const linkChild = node.children.some(
-          (c) => c.type === "element" && (c as Element).tagName === "a"
+          (c) => c.type === "element" && (c as Element).tagName === "a",
         )
         if (linkChild) {
           node.properties = node.properties || {}

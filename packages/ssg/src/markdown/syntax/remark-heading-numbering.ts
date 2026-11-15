@@ -28,10 +28,7 @@ export function remarkNumberedHeadingsDot(options?: Options) {
         node.children.unshift(textNode)
       }
 
-      const text = (textNode as { value: string }).value.replace(
-        /^([0-9.-])+ /,
-        ""
-      )
+      const text = (textNode as { value: string }).value.replace(/^([0-9.-])+ /, "")
 
       const length = counterIndex + 1
       while (counters.length > length) counters.pop()
@@ -42,8 +39,7 @@ export function remarkNumberedHeadingsDot(options?: Options) {
         while (counters.length < length) counters.push(1)
       }
 
-      ;(textNode as { value: string }).value =
-        `${prefix}${counters.join(".")} ${text}`
+      ;(textNode as { value: string }).value = `${prefix}${counters.join(".")} ${text}`
     })
   }
 }

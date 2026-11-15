@@ -1,16 +1,13 @@
 "use client"
 
-import * as React from "react"
 import { ChevronDown, ListFilter } from "lucide-react"
 import { useTranslations } from "next-intl"
+import * as React from "react"
+
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Button } from "@/components/ui/shadcn/button"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/shadcn/popover"
 import { cn } from "@/lib/cn"
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/shadcn/popover"
 
 export interface GlossaryCategoryOption {
   name: string
@@ -32,13 +29,7 @@ interface CategoryRowProps {
   onToggle: (name: string) => void
 }
 
-function CategoryRow({
-  label,
-  count,
-  active,
-  name,
-  onToggle,
-}: CategoryRowProps) {
+function CategoryRow({ label, count, active, name, onToggle }: CategoryRowProps) {
   const handleClick = React.useCallback(() => {
     onToggle(name)
   }, [onToggle, name])
@@ -51,7 +42,7 @@ function CategoryRow({
       variant="ghost"
       className={cn(
         "group w-full justify-start whitespace-normal text-left",
-        active && "bg-accent"
+        active && "bg-accent",
       )}>
       <span
         aria-hidden="true"
@@ -59,7 +50,7 @@ function CategoryRow({
           "size-2.5 shrink-0 border transition-colors",
           active
             ? "border-tech-main bg-tech-main"
-            : "border-tech-main/50 group-hover:border-tech-main bg-transparent"
+            : "border-tech-main/50 group-hover:border-tech-main bg-transparent",
         )}
       />
       <span className="min-w-0 flex-1 truncate">{label}</span>
@@ -70,12 +61,7 @@ function CategoryRow({
   )
 }
 
-export function CategoryFacet({
-  categories,
-  selected,
-  onChange,
-  className,
-}: CategoryFacetProps) {
+export function CategoryFacet({ categories, selected, onChange, className }: CategoryFacetProps) {
   const t = useTranslations("Glossary")
   const triggerLabel =
     selected.length === 0
@@ -91,17 +77,13 @@ export function CategoryFacet({
         onChange([...selected, name])
       }
     },
-    [selectedSet, selected, onChange]
+    [selectedSet, selected, onChange],
   )
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className={cn("min-h-11", className)}>
+        <Button type="button" variant="outline" size="sm" className={cn("min-h-11", className)}>
           <ListFilter aria-hidden="true" />
           <span className="truncate">{triggerLabel}</span>
           <ChevronDown aria-hidden="true" />

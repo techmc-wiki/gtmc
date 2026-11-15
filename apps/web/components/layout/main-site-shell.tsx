@@ -1,13 +1,11 @@
-import * as React from "react"
 import { getTranslations } from "next-intl/server"
-import {
-  AuthAwareDesktopNav,
-  AuthAwareMobileNav,
-} from "@/components/layout/auth-aware-nav"
-import { SiteHeader } from "@/components/layout/nav"
+import * as React from "react"
+
+import { AuthAwareDesktopNav, AuthAwareMobileNav } from "@/components/layout/auth-aware-nav"
 import { AuthIsland } from "@/components/layout/auth-island"
 import { AuthSessionProvider } from "@/components/layout/auth-session-provider"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
+import { SiteHeader } from "@/components/layout/nav"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { SearchCommand } from "@/components/search/search-command"
 import { Logo } from "@/components/ui/logo"
@@ -24,9 +22,7 @@ function buildNavLinks(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
   ]
 }
 
-function buildContributorLink(
-  t: Awaited<ReturnType<typeof getTranslations<"Nav">>>
-) {
+function buildContributorLink(t: Awaited<ReturnType<typeof getTranslations<"Nav">>>) {
   return { href: "/draft", label: t("drafts") }
 }
 
@@ -50,9 +46,7 @@ export async function MainSiteShell({
 
   let initialLinks = baseLinks
   if (includeContributorLink) {
-    const glossaryIndex = initialLinks.findIndex(
-      (link) => link.href === "/glossary"
-    )
+    const glossaryIndex = initialLinks.findIndex((link) => link.href === "/glossary")
     initialLinks =
       glossaryIndex === -1
         ? [...initialLinks, contributorLink]
@@ -67,10 +61,7 @@ export async function MainSiteShell({
     <>
       <Logo size="md" className="min-h-11 shrink-0" />
       <React.Suspense fallback={null}>
-        <AuthAwareDesktopNav
-          navLinks={initialLinks}
-          contributorLink={contributorLink}
-        />
+        <AuthAwareDesktopNav navLinks={initialLinks} contributorLink={contributorLink} />
       </React.Suspense>
     </>
   )
@@ -84,16 +75,10 @@ export async function MainSiteShell({
       <React.Suspense fallback={null}>
         <LanguageSwitcher className="hidden size-11 md:size-11 xl:flex" />
       </React.Suspense>
-      <AuthAwareMobileNav
-        navLinks={initialLinks}
-        contributorLink={contributorLink}
-      />
+      <AuthAwareMobileNav navLinks={initialLinks} contributorLink={contributorLink} />
       {/* Controls read as one group; identity terminates the header so the
           account menu anchors to the container edge at every width. */}
-      <span
-        aria-hidden="true"
-        className="bg-tech-main/20 mx-1 h-6 w-px shrink-0"
-      />
+      <span aria-hidden="true" className="bg-tech-main/20 mx-1 h-6 w-px shrink-0" />
       <AuthIsland />
     </>
   )

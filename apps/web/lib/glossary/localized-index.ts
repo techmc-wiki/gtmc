@@ -1,13 +1,6 @@
+import { normalizeGlossarySiteLocale, type GlossaryContentLocale } from "./locales"
+import type { GlossaryEntry, GlossaryEntryBase, GlossaryTranslation } from "./manifest"
 import { parseRelated, type ParsedRelatedToken } from "./related"
-import type {
-  GlossaryEntry,
-  GlossaryEntryBase,
-  GlossaryTranslation,
-} from "./manifest"
-import {
-  normalizeGlossarySiteLocale,
-  type GlossaryContentLocale,
-} from "./locales"
 
 export type GlossaryIndexEntry = GlossaryEntryBase & {
   indexLetter: string
@@ -18,14 +11,11 @@ export type GlossaryIndexRelatedTerm = ParsedRelatedToken & {
   indexLetter: string
 }
 
-type GlossaryContentSource = Pick<
-  GlossaryEntryBase,
-  "description" | "fullFormEn" | "translations"
->
+type GlossaryContentSource = Pick<GlossaryEntryBase, "description" | "fullFormEn" | "translations">
 
 export function getGlossaryContent(
   entry: GlossaryContentSource,
-  locale: GlossaryContentLocale
+  locale: GlossaryContentLocale,
 ): GlossaryTranslation | undefined {
   if (locale === "en") {
     return {
@@ -39,17 +29,12 @@ export function getGlossaryContent(
 
 export function getPrimaryGlossaryContent(
   entry: GlossaryContentSource,
-  locale: string
+  locale: string,
 ): GlossaryTranslation {
-  const localized = getGlossaryContent(
-    entry,
-    normalizeGlossarySiteLocale(locale)
-  )
+  const localized = getGlossaryContent(entry, normalizeGlossarySiteLocale(locale))
   return {
     value: localized?.value.trim() ? localized.value : entry.fullFormEn,
-    description: localized?.description.trim()
-      ? localized.description
-      : entry.description,
+    description: localized?.description.trim() ? localized.description : entry.description,
   }
 }
 
@@ -69,7 +54,7 @@ function fallbackRelatedIndexLetter(target: string): string {
 
 export function projectGlossaryIndex(
   entries: readonly GlossaryEntry[],
-  locale: string
+  locale: string,
 ): GlossaryIndexEntry[] {
   const primaryLocale = normalizeGlossarySiteLocale(locale)
   const entriesByEnglishTerm = new Map<string, GlossaryEntry>()
@@ -83,13 +68,13 @@ export function projectGlossaryIndex(
       ? entries.toSorted((left, right) => {
           const primaryComparison = compareIndexText(
             left.indexByLocale.zh.sortKey,
-            right.indexByLocale.zh.sortKey
+            right.indexByLocale.zh.sortKey,
           )
           if (primaryComparison !== 0) return primaryComparison
 
           const englishComparison = compareIndexText(
             left.indexByLocale.en.sortKey,
-            right.indexByLocale.en.sortKey
+            right.indexByLocale.en.sortKey,
           )
           if (englishComparison !== 0) return englishComparison
 
@@ -99,9 +84,7 @@ export function projectGlossaryIndex(
 
   return orderedEntries.map((entry) => {
     const relatedTerms = parseRelated(entry.related).map((related) => {
-      const targetEntry = entriesByEnglishTerm.get(
-        normalizeRelatedTarget(related.target)
-      )
+      const targetEntry = entriesByEnglishTerm.get(normalizeRelatedTarget(related.target))
       return Object.assign({}, related, {
         indexLetter:
           targetEntry?.indexByLocale[primaryLocale].letter ??

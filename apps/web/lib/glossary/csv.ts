@@ -62,9 +62,7 @@ export function parseGlossaryCsv(input: string): ParseGlossaryResult {
 
   if (result.errors.length > 0) {
     const firstErr = result.errors[0]
-    throw new Error(
-      `CSV parse error at row ${firstErr.row ?? "?"}: ${firstErr.message}`
-    )
+    throw new Error(`CSV parse error at row ${firstErr.row ?? "?"}: ${firstErr.message}`)
   }
 
   const detectedFields = result.meta.fields ?? []
@@ -75,7 +73,7 @@ export function parseGlossaryCsv(input: string): ParseGlossaryResult {
 
   if (detectedSet.size !== expectedSet.size) {
     throw new Error(
-      `Header column count mismatch: expected ${GLOSSARY_COLUMNS.length}, got ${detectedFields.length}`
+      `Header column count mismatch: expected ${GLOSSARY_COLUMNS.length}, got ${detectedFields.length}`,
     )
   }
 
@@ -113,17 +111,12 @@ function escapeCell(value: string): string {
  * would create unnecessary CSV diffs. Preserve the parsed header order,
  * line endings, BOM, and minimal quoting instead.
  */
-export function serializeGlossaryCsv(
-  rows: GlossaryRow[],
-  opts: SerializeGlossaryOptions
-): string {
+export function serializeGlossaryCsv(rows: GlossaryRow[], opts: SerializeGlossaryOptions): string {
   const { headerOrder, hadBom, lineEnding } = opts
 
   const headerLine = headerOrder.join(",")
 
-  const dataLines = rows.map((row) =>
-    headerOrder.map((col) => escapeCell(row[col])).join(",")
-  )
+  const dataLines = rows.map((row) => headerOrder.map((col) => escapeCell(row[col])).join(","))
 
   let csv = headerLine + lineEnding + dataLines.join(lineEnding)
 

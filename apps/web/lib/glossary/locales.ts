@@ -1,16 +1,6 @@
 import type { GlossaryColumn } from "./csv"
 
-export type GlossaryLocale =
-  | "ar"
-  | "zh"
-  | "fr"
-  | "de"
-  | "it"
-  | "ja"
-  | "ko"
-  | "pt"
-  | "ru"
-  | "es"
+export type GlossaryLocale = "ar" | "zh" | "fr" | "de" | "it" | "ja" | "ko" | "pt" | "ru" | "es"
 
 export type GlossarySiteLocale = "en" | "zh"
 export type GlossaryContentLocale = "en" | GlossaryLocale
@@ -52,15 +42,11 @@ export function isGlossaryLocale(locale: string): locale is GlossaryLocale {
   return GLOSSARY_LOCALES.has(locale)
 }
 
-export function isGlossaryContentLocale(
-  locale: string
-): locale is GlossaryContentLocale {
+export function isGlossaryContentLocale(locale: string): locale is GlossaryContentLocale {
   return locale === "en" || isGlossaryLocale(locale)
 }
 
-export function normalizeGlossarySiteLocale(
-  locale: string
-): GlossarySiteLocale {
+export function normalizeGlossarySiteLocale(locale: string): GlossarySiteLocale {
   const language = locale.trim().toLocaleLowerCase("en").split(/[-_]/, 1)[0]
   return language === "zh" ? "zh" : "en"
 }

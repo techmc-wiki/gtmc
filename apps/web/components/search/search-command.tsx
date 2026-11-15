@@ -1,12 +1,13 @@
 "use client"
 
-import * as React from "react"
-import useSWR from "swr"
-import { useState, useEffect, useRef, useCallback, useMemo } from "react"
+import { ArrowDown, ArrowUp, CornerDownLeft, Search as SearchIcon, X } from "lucide-react"
 import { useTranslations, useLocale } from "next-intl"
-import { useRouter, usePathname } from "@/i18n/navigation"
-import { articleUrl } from "@/lib/articles/url"
-import { useMounted } from "@/hooks/use-mounted"
+import * as React from "react"
+import { useState, useEffect, useRef, useCallback, useMemo } from "react"
+import useSWR from "swr"
+
+import { IconButton } from "@/components/ui/icon-button"
+import { Button } from "@/components/ui/shadcn/button"
 import {
   CommandDialog,
   CommandInput,
@@ -14,21 +15,11 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/shadcn/command"
-import { IconButton } from "@/components/ui/icon-button"
-import { Button } from "@/components/ui/shadcn/button"
 import { Kbd, KbdGroup } from "@/components/ui/shadcn/kbd"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/shadcn/tooltip"
-import {
-  ArrowDown,
-  ArrowUp,
-  CornerDownLeft,
-  Search as SearchIcon,
-  X,
-} from "lucide-react"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/tooltip"
+import { useMounted } from "@/hooks/use-mounted"
+import { useRouter, usePathname } from "@/i18n/navigation"
+import { articleUrl } from "@/lib/articles/url"
 
 interface SearchResult {
   title: string
@@ -82,7 +73,7 @@ function useSearchCommand() {
         closeModal()
       }
     },
-    [closeModal]
+    [closeModal],
   )
 
   // Global Cmd+K / Ctrl+K handler. Register in the capture phase so dormant
@@ -121,8 +112,7 @@ function useSearchCommand() {
   } = useSWR<SearchResponse>(searchKey, fetchSearchResults)
   const results = searchData?.results || []
   const glossaryResults = searchData?.glossary || []
-  const isLoading =
-    query.length >= 2 && (debouncedQuery !== query || isValidating)
+  const isLoading = query.length >= 2 && (debouncedQuery !== query || isValidating)
 
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value)
@@ -132,10 +122,7 @@ function useSearchCommand() {
   const navigateToResult = useCallback(
     (result: SearchResult) => {
       const currentSlug = pathname.replace(/^\/articles\//, "")
-      const decodedCurrentSlug = currentSlug
-        .split("/")
-        .map(decodeURIComponent)
-        .join("/")
+      const decodedCurrentSlug = currentSlug.split("/").map(decodeURIComponent).join("/")
 
       if (decodedCurrentSlug === result.slug) {
         closeModal()
@@ -155,7 +142,7 @@ function useSearchCommand() {
           : ""
       router.push(`${articleUrl(result.slug)}${highlightParam}`)
     },
-    [router, closeModal, query, pathname]
+    [router, closeModal, query, pathname],
   )
 
   const navigateToGlossaryResult = useCallback(
@@ -163,7 +150,7 @@ function useSearchCommand() {
       closeModal()
       router.push(`/glossary/${encodeURIComponent(entry.slug)}`)
     },
-    [router, closeModal]
+    [router, closeModal],
   )
 
   const highlightMatch = useCallback(
@@ -179,9 +166,7 @@ function useSearchCommand() {
         position += part.length
 
         return i % 2 === 1 ? (
-          <mark
-            key={`${part}-${start}`}
-            className="bg-tech-main/20 text-tech-main-dark px-0.5">
+          <mark key={`${part}-${start}`} className="bg-tech-main/20 text-tech-main-dark px-0.5">
             {part}
           </mark>
         ) : (
@@ -189,7 +174,7 @@ function useSearchCommand() {
         )
       })
     },
-    [query]
+    [query],
   )
 
   // Platform detection for the search shortcut. The dialog renders only
@@ -450,9 +435,7 @@ function SearchMessage({ title, hint }: { title: string; hint?: string }) {
   return (
     <div className="px-4 py-8 text-center">
       <div className="text-tech-main/60 text-sm">{title}</div>
-      {hint ? (
-        <div className="text-tech-main/40 mt-1 text-xs">{hint}</div>
-      ) : null}
+      {hint ? <div className="text-tech-main/40 mt-1 text-xs">{hint}</div> : null}
     </div>
   )
 }
@@ -460,12 +443,8 @@ function SearchMessage({ title, hint }: { title: string; hint?: string }) {
 function SearchResults({ search }: { search: SearchCommandState }) {
   return (
     <>
-      {search.results.length > 0 ? (
-        <ArticleSearchResults search={search} />
-      ) : null}
-      {search.glossaryResults.length > 0 ? (
-        <GlossarySearchResults search={search} />
-      ) : null}
+      {search.results.length > 0 ? <ArticleSearchResults search={search} /> : null}
+      {search.glossaryResults.length > 0 ? <GlossarySearchResults search={search} /> : null}
     </>
   )
 }
@@ -479,20 +458,12 @@ function SearchCommandResults({ search }: { search: SearchCommandState }) {
       {showSummary ? <SearchResultSummary search={search} /> : null}
       {view === "loading" ? <SearchLoadingSkeleton /> : null}
       {view === "results" ? <SearchResults search={search} /> : null}
-      {view === "error" ? (
-        <SearchMessage title={search.t("requestFailed")} />
-      ) : null}
+      {view === "error" ? <SearchMessage title={search.t("requestFailed")} /> : null}
       {view === "empty" ? (
-        <SearchMessage
-          title={search.t("noMatch")}
-          hint={search.t("tryDifferentKeywords")}
-        />
+        <SearchMessage title={search.t("noMatch")} hint={search.t("tryDifferentKeywords")} />
       ) : null}
       {view === "awaiting" ? (
-        <SearchMessage
-          title={search.t("awaitingInput")}
-          hint={search.t("minCharsHint")}
-        />
+        <SearchMessage title={search.t("awaitingInput")} hint={search.t("minCharsHint")} />
       ) : null}
     </CommandList>
   )

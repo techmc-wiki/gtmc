@@ -1,7 +1,8 @@
 import * as React from "react"
+
 import { Link } from "@/i18n/navigation"
-import lightMark from "@/public/logo-mark-light.svg"
 import darkMark from "@/public/logo-mark-dark.svg"
+import lightMark from "@/public/logo-mark-light.svg"
 
 const markStyle: React.CSSProperties = {
   ["--gtmc-mark-light" as string]: `url("${lightMark.src}")`,
@@ -55,9 +56,7 @@ export function Logo({ className = "", size = "md" }: LogoProps) {
       href="/"
       className={`group inline-flex items-center gap-2 transition-opacity hover:opacity-80 ${sizeClasses[size]} ${className} `}>
       <LogoMark className={`shrink-0 ${markClasses[size]}`} />
-      <span className="display-title text-tech-main-dark tracking-tight">
-        GTMC
-      </span>
+      <span className="display-title text-tech-main-dark tracking-tight">GTMC</span>
     </Link>
   )
 }

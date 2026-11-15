@@ -1,9 +1,10 @@
 "use client"
 
-import { signOut } from "next-auth/react"
-import { IconButton } from "@/components/ui/icon-button"
 import { LogOut } from "lucide-react"
+import { signOut } from "next-auth/react"
 import { useTranslations } from "next-intl"
+
+import { IconButton } from "@/components/ui/icon-button"
 
 type SignOutButtonProps = {
   className?: string

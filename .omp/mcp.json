@@ -8,9 +8,7 @@
     "chrome": {
       "type": "stdio",
       "command": "pnpx",
-      "args": [
-        "chrome-devtools-mcp"
-      ]
+      "args": ["chrome-devtools-mcp"]
     }
   }
 }

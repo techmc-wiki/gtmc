@@ -1,23 +1,14 @@
-import type {
-  MarkdownAstNode,
-  MarkdownComponentProps,
-} from "@/lib/markdown/component-types"
+import type { MarkdownAstNode, MarkdownComponentProps } from "@/lib/markdown/component-types"
 
-function getMeaningfulChildren(
-  children?: MarkdownAstNode[]
-): MarkdownAstNode[] {
+function getMeaningfulChildren(children?: MarkdownAstNode[]): MarkdownAstNode[] {
   if (!children) return []
-  return children.filter(
-    (child) => !(child.type === "text" && child.value?.trim() === "")
-  )
+  return children.filter((child) => !(child.type === "text" && child.value?.trim() === ""))
 }
 
 function isImageOrIframeElement(node: MarkdownAstNode): boolean {
   return (
     node.type === "element" &&
-    (node.tagName === "img" ||
-      node.tagName === "iframe" ||
-      node.tagName === "litematicaviewer")
+    (node.tagName === "img" || node.tagName === "iframe" || node.tagName === "litematicaviewer")
   )
 }
 
@@ -64,29 +55,19 @@ function paragraphContainsMedia(node: unknown): boolean {
   if (paragraphNode?.tagName !== "p" || !paragraphNode.children) return false
 
   return getMeaningfulChildren(paragraphNode.children).some((child) =>
-    containsImageOrIframeDescendant(child)
+    containsImageOrIframeDescendant(child),
   )
 }
 
-export function ParagraphComponent({
-  node,
-  children,
-  ...props
-}: MarkdownComponentProps) {
+export function ParagraphComponent({ node, children, ...props }: MarkdownComponentProps) {
   if (isMediaOnlyParagraph(node)) return <>{children}</>
 
   if (paragraphContainsMedia(node)) {
-    return (
-      <div className="text-tech-main-dark mb-4 font-sans text-base/relaxed">
-        {children}
-      </div>
-    )
+    return <div className="text-tech-main-dark mb-4 font-sans text-base/relaxed">{children}</div>
   }
 
   return (
-    <p
-      className="text-tech-main-dark mb-4 font-sans text-base/relaxed"
-      {...props}>
+    <p className="text-tech-main-dark mb-4 font-sans text-base/relaxed" {...props}>
       {children}
     </p>
   )

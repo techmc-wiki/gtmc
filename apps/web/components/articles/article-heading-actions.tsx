@@ -1,18 +1,18 @@
-"use client";
+"use client"
 
-import { useCallback } from "react";
-import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { Pen } from "lucide-react";
+import { Pen } from "lucide-react"
+import { useTranslations } from "next-intl"
+import { usePathname } from "next/navigation"
+import { useCallback } from "react"
 
-import { CopyButton } from "@/components/ui/copy-button";
-import { IconButton } from "@/components/ui/icon-button";
-import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/cn";
+import { CopyButton } from "@/components/ui/copy-button"
+import { IconButton } from "@/components/ui/icon-button"
+import { Link } from "@/i18n/navigation"
+import { cn } from "@/lib/cn"
 
 export interface ArticleHeadingActionsProps {
-  editPath: string;
-  className?: string;
+  editPath: string
+  className?: string
 }
 
 export function ArticleHeadingActions({ editPath, className }: ArticleHeadingActionsProps) {
@@ -21,16 +21,16 @@ export function ArticleHeadingActions({ editPath, className }: ArticleHeadingAct
       <EditArticleButton editPath={editPath} />
       <CopyArticleButton />
     </div>
-  );
+  )
 }
 
 export interface EditArticleButtonProps {
-  editPath: string;
-  className?: string;
+  editPath: string
+  className?: string
 }
 
 export function EditArticleButton({ editPath, className }: EditArticleButtonProps) {
-  const t = useTranslations("ArticleMeta");
+  const t = useTranslations("ArticleMeta")
 
   return (
     <IconButton asChild className={cn("md:size-8", className)} label={t("editArticle")}>
@@ -38,23 +38,23 @@ export function EditArticleButton({ editPath, className }: EditArticleButtonProp
         <Pen className="size-4" aria-hidden="true" />
       </Link>
     </IconButton>
-  );
+  )
 }
 
 /** Resolves to the current article's raw Markdown through content negotiation. */
 export function CopyArticleButton() {
-  const t = useTranslations("ArticleMeta");
-  const pathname = usePathname();
+  const t = useTranslations("ArticleMeta")
+  const pathname = usePathname()
 
   const fetchMarkdown = useCallback(async () => {
     const response = await fetch(pathname, {
       headers: { Accept: "text/markdown" },
-    });
+    })
     if (!response.ok) {
-      throw new Error(`Markdown request failed with ${response.status}`);
+      throw new Error(`Markdown request failed with ${response.status}`)
     }
-    return response.text();
-  }, [pathname]);
+    return response.text()
+  }, [pathname])
 
   return (
     <CopyButton
@@ -63,5 +63,5 @@ export function CopyArticleButton() {
       copiedLabel={t("copiedButton")}
       failedLabel={t("copyFailed")}
     />
-  );
+  )
 }

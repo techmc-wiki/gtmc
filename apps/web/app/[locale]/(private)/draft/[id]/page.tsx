@@ -1,19 +1,21 @@
-import { IconButton } from "@/components/ui/icon-button"
-import { getTranslations } from "next-intl/server"
+import { readFile } from "fs/promises"
+import path from "path"
+
 import { ArrowLeftIcon } from "lucide-react"
 import type { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
+import { notFound, redirect } from "next/navigation"
+import { Suspense } from "react"
+
 import { DraftEditor } from "@/components/editor/draft-editor"
+import { IconButton } from "@/components/ui/icon-button"
+import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
 import { Link } from "@/i18n/navigation"
-import { readDraft, type DraftStatus } from "@/lib/drafts/store"
-import { deriveDisplayStatus } from "@/lib/drafts/lifecycle"
 import { getArticlePullRequest } from "@/lib/articles/pr"
 import { auth } from "@/lib/auth"
 import type { DraftFileCollection } from "@/lib/drafts/files"
-import { notFound, redirect } from "next/navigation"
-import { readFile } from "fs/promises"
-import path from "path"
-import { Suspense } from "react"
-import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
+import { deriveDisplayStatus } from "@/lib/drafts/lifecycle"
+import { readDraft, type DraftStatus } from "@/lib/drafts/store"
 
 export interface ContributingGuide {
   id: string
@@ -30,7 +32,7 @@ function buildDraftEditorData(
   draftFiles: DraftFileCollection,
   etag: string,
   contributingGuides: ContributingGuide[],
-  status: DraftStatus
+  status: DraftStatus,
 ) {
   return {
     activeFileId: draftFiles.activeFileId,
@@ -49,11 +51,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default function EditDraftPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default function EditDraftPage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <Suspense fallback={<EditDraftFallback />}>
       <EditDraft params={params} />
@@ -82,7 +80,7 @@ async function EditDraft({ params }: { params: Promise<{ id: string }> }) {
     try {
       displayStatus = deriveDisplayStatus(
         draft.status,
-        await getArticlePullRequest(draft.githubPrNum)
+        await getArticlePullRequest(draft.githubPrNum),
       )
     } catch (error) {
       console.error(`Failed to fetch PR #${draft.githubPrNum}:`, error)
@@ -94,7 +92,7 @@ async function EditDraft({ params }: { params: Promise<{ id: string }> }) {
     draft,
     record.etag,
     contributingGuides,
-    displayStatus
+    displayStatus,
   )
 
   return (
@@ -114,10 +112,7 @@ async function EditDraft({ params }: { params: Promise<{ id: string }> }) {
 
 function EditDraftFallback() {
   return (
-    <div
-      aria-busy="true"
-      aria-live="polite"
-      className="mx-auto w-full max-w-[1800px] space-y-3">
+    <div aria-busy="true" aria-live="polite" className="mx-auto w-full max-w-[1800px] space-y-3">
       <div className="flex items-center justify-between gap-4">
         <SegmentedBar opacity="low" className="size-9" />
         <SegmentedBar opacity="low" className="h-4 w-24" />
@@ -135,10 +130,7 @@ async function loadContributingGuides() {
     readFile(path.join(process.cwd(), "data", "contributing", "web.md"), "utf8")
       .then((content) => ({ id: "web", title: "GTMC Web", content }))
       .catch(() => null),
-    readFile(
-      path.join(process.cwd(), "data", "contributing", "articles.md"),
-      "utf8"
-    )
+    readFile(path.join(process.cwd(), "data", "contributing", "articles.md"), "utf8")
       .then((content) => ({ id: "articles", title: "Articles", content }))
       .catch(() => null),
   ])

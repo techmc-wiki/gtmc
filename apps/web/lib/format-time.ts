@@ -1,7 +1,4 @@
-export function formatAbsoluteTime(
-  dateString: string,
-  displayTime = true
-): string {
+export function formatAbsoluteTime(dateString: string, displayTime = true): string {
   const date = new Date(dateString)
   if (isNaN(date.getTime())) {
     return "Invalid Date"
@@ -21,10 +18,7 @@ export function formatAbsoluteTime(
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
-export function formatRelativeTime(
-  dateString: string,
-  displayTime = true
-): string {
+export function formatRelativeTime(dateString: string, displayTime = true): string {
   const date = new Date(dateString)
   if (isNaN(date.getTime())) {
     return "Invalid Date"

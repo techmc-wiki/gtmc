@@ -1,21 +1,14 @@
 "use client"
 
+import { Link as LinkIcon, WrapText } from "lucide-react"
+import { useTranslations } from "next-intl"
+import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
+
 import { CopyButton } from "@/components/ui/copy-button"
+import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { IconButton } from "@/components/ui/icon-button"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Separator } from "@/components/ui/shadcn/separator"
-import { CornerBrackets } from "@/components/ui/corner-brackets"
-import { Link as LinkIcon, WrapText } from "lucide-react"
-
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react"
-import { useTranslations } from "next-intl"
 
 const contentVisibilityStyle: React.CSSProperties = {
   contentVisibility: "auto",
@@ -55,7 +48,7 @@ function LazyCodeBlock({
           observer.disconnect()
         }
       },
-      { rootMargin: "400px", threshold: 0 }
+      { rootMargin: "400px", threshold: 0 },
     )
 
     observer.observe(el)
@@ -71,11 +64,7 @@ function LazyCodeBlock({
       data-state={isVisible ? "loaded" : "loading"}
       className={`t-skel border-tech-main/30 bg-tech-bg relative my-6 w-full scroll-mt-24 border font-mono text-sm ${isVisible ? "is-revealed" : ""}`}
       style={contentVisibilityStyle}>
-      <CornerBrackets
-        size="size-3"
-        color="border-tech-main/30"
-        className="z-20"
-      />
+      <CornerBrackets size="size-3" color="border-tech-main/30" className="z-20" />
 
       <div className="t-skel-content">{children}</div>
 
@@ -194,9 +183,7 @@ function CodeBlockHeader({
             <div className="text-tech-main/65 flex items-center gap-x-2 font-mono text-[0.625rem] tracking-wide uppercase">
               {provenance.map((item, index) => (
                 <React.Fragment key={item}>
-                  {index > 0 ? (
-                    <Separator orientation="vertical" className="h-3" />
-                  ) : null}
+                  {index > 0 ? <Separator orientation="vertical" className="h-3" /> : null}
                   <span>{item}</span>
                 </React.Fragment>
               ))}
@@ -235,12 +222,8 @@ function CodeBlockHeader({
       {sourceFile || sourceLines ? (
         <div className="border-tech-main/15 text-tech-main/55 flex flex-wrap items-center gap-x-2 border-t px-4 py-1 font-mono text-[0.5625rem] tracking-wider">
           <span className="uppercase">{sourceLabel}</span>
-          {sourceFile && (
-            <span className="text-tech-main/75">{sourceFile}</span>
-          )}
-          {sourceLines && (
-            <span className="text-tech-main/60">L{sourceLines}</span>
-          )}
+          {sourceFile && <span className="text-tech-main/75">{sourceFile}</span>}
+          {sourceLines && <span className="text-tech-main/60">L{sourceLines}</span>}
         </div>
       ) : null}
     </div>
@@ -261,10 +244,7 @@ function CodeBlockBody({
       <div className="border-tech-main/10 pointer-events-none absolute inset-0 border" />
       <div className="bg-tech-main/3 pointer-events-none absolute inset-x-0 top-1/4 h-px" />
       <div className="bg-tech-main/3 pointer-events-none absolute inset-x-0 top-3/4 h-px" />
-      <div
-        className="code-block-pre relative"
-        data-wrapped={isWrapped}
-        style={codeBlockStyle}>
+      <div className="code-block-pre relative" data-wrapped={isWrapped} style={codeBlockStyle}>
         <div className="custom-bottom-scrollbar overflow-x-auto">
           <div
             dir="ltr"
@@ -301,15 +281,14 @@ export function CodeBlockPre({ children, ...props }: CodeBlockPreProps) {
 
   const lineCountNum = parseInt(lineCount, 10)
   const digitCount = String(lineCountNum).length
-  const lineNumWidth =
-    digitCount === 1 ? "2.5rem" : digitCount === 2 ? "3rem" : "3.5rem"
+  const lineNumWidth = digitCount === 1 ? "2.5rem" : digitCount === 2 ? "3rem" : "3.5rem"
 
   const codeBlockStyle = useMemo(
     (): React.CSSProperties =>
       ({
         "--line-num-width": lineNumWidth,
       }) as React.CSSProperties,
-    [lineNumWidth]
+    [lineNumWidth],
   )
 
   if (!rawCode) return <>{children}</>

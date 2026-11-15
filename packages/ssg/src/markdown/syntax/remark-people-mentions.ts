@@ -46,7 +46,7 @@ function escapeHtml(value: string): string {
 function replacePeopleMentions(
   value: string,
   rawSource: string,
-  textStartOffset: number
+  textStartOffset: number,
 ): Content[] | null {
   MENTION_PATTERN.lastIndex = 0
 
@@ -78,8 +78,7 @@ function replacePeopleMentions(
     // rawPos could be -1 when the markdown source doesn't contain the exact
     // match string (e.g. both brackets escaped with `\]`).  In that case
     // we conservatively treat it as escaped.
-    const wasMarkdownEscaped =
-      rawPos === -1 || isBackslashEscapedAt(rawSource, rawPos)
+    const wasMarkdownEscaped = rawPos === -1 || isBackslashEscapedAt(rawSource, rawPos)
 
     if (wasMarkdownEscaped) {
       nextChildren.push({ type: "text", value: fullMatch })
@@ -143,11 +142,7 @@ export function remarkPeopleMentions() {
         }
 
         const textStartOffset = child.position?.start?.offset ?? 0
-        const replacement = replacePeopleMentions(
-          child.value,
-          rawSource,
-          textStartOffset
-        )
+        const replacement = replacePeopleMentions(child.value, rawSource, textStartOffset)
         if (replacement === null) {
           nextChildren.push(child)
           continue

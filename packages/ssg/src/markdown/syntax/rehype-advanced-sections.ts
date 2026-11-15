@@ -14,8 +14,7 @@ function isAdvancedHeading(node: ElementContent): node is Element {
   const headingDepth = getHeadingDepth(node)
   if (headingDepth === null) return false
 
-  const dataAdvanced =
-    node.properties["data-advanced"] ?? node.properties.dataAdvanced
+  const dataAdvanced = node.properties["data-advanced"] ?? node.properties.dataAdvanced
 
   return dataAdvanced === "true" || dataAdvanced === true
 }

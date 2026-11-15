@@ -1,87 +1,88 @@
-import type { ArticleEntry, ArticleLocale } from "@gtmc/ssg/articles/types";
-import { routing } from "@/i18n/routing";
-import manifestData from "@/data/manifest.json";
-import { type ArticleTreeNode } from "@/lib/articles/article-tree-types";
+import type { ArticleEntry, ArticleLocale } from "@gtmc/ssg/articles/types"
 
-export const MANIFEST_FILE_NAME = "manifest.json";
+import manifestData from "@/data/manifest.json"
+import { routing } from "@/i18n/routing"
+import { type ArticleTreeNode } from "@/lib/articles/article-tree-types"
+
+export const MANIFEST_FILE_NAME = "manifest.json"
 
 function getNodeBuiltin<T>(name: string): T {
   const getBuiltinModule = (
     process as typeof process & {
-      getBuiltinModule?: (id: string) => unknown;
+      getBuiltinModule?: (id: string) => unknown
     }
-  ).getBuiltinModule;
+  ).getBuiltinModule
 
   if (getBuiltinModule) {
-    return getBuiltinModule(name) as T;
+    return getBuiltinModule(name) as T
   }
   // eslint-disable-next-line no-eval
-  const nodeRequire = (0, eval)("require") as NodeRequire;
-  return nodeRequire(name) as T;
+  const nodeRequire = (0, eval)("require") as NodeRequire
+  return nodeRequire(name) as T
 }
 
 export function getManifestPath(): string {
   // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-  const path = getNodeBuiltin<typeof import("path")>("path");
-  return path.join(process.cwd(), "data", MANIFEST_FILE_NAME);
+  const path = getNodeBuiltin<typeof import("path")>("path")
+  return path.join(process.cwd(), "data", MANIFEST_FILE_NAME)
 }
 
 export interface LocalizedArticleMetadata {
-  chapterTitle: string;
-  introTitle: string;
+  chapterTitle: string
+  introTitle: string
 }
 
 export function loadArticleManifest(): Record<string, ArticleEntry> {
-  let raw: string;
-  const manifestPath = getManifestPath();
+  let raw: string
+  const manifestPath = getManifestPath()
   // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-  const fs = getNodeBuiltin<typeof import("fs")>("fs");
+  const fs = getNodeBuiltin<typeof import("fs")>("fs")
 
   try {
-    raw = fs.readFileSync(manifestPath, "utf-8");
+    raw = fs.readFileSync(manifestPath, "utf-8")
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
-      console.warn(`[article-manifest] Missing article manifest: ${manifestPath}`);
-      return {};
+      console.warn(`[article-manifest] Missing article manifest: ${manifestPath}`)
+      return {}
     }
 
     throw new Error(`[article-manifest] Failed to load article manifest: ${manifestPath}`, {
       cause: error,
-    });
+    })
   }
 
-  return parseArticleManifest(raw, manifestPath);
+  return parseArticleManifest(raw, manifestPath)
 }
 
 export interface ManifestStats {
-  articleCount: number;
-  authorCount: number;
-  lastRevision: string | null;
+  articleCount: number
+  authorCount: number
+  lastRevision: string | null
 }
 
 export function getManifestStats(locale: ArticleLocale): ManifestStats {
-  const manifest = loadArticleManifest();
-  const entries = Object.values(manifest);
+  const manifest = loadArticleManifest()
+  const entries = Object.values(manifest)
 
-  let articleCount = 0;
-  const allAuthors = new Set<string>();
-  let maxLastmod: string | null = null;
+  let articleCount = 0
+  const allAuthors = new Set<string>()
+  let maxLastmod: string | null = null
 
   for (const entry of entries) {
-    if (entry.isFolder) continue;
+    if (entry.isFolder) continue
 
-    articleCount++;
+    articleCount++
 
-    if (entry.author) allAuthors.add(entry.author);
+    if (entry.author) allAuthors.add(entry.author)
     if (entry.coAuthors) {
       for (const coAuthor of entry.coAuthors) {
-        if (coAuthor) allAuthors.add(coAuthor);
+        if (coAuthor) allAuthors.add(coAuthor)
       }
     }
 
-    const localeLastmod = entry.lastmodByLocale[locale];
+    const localeLastmod = entry.lastmodByLocale[locale]
     if (localeLastmod && (!maxLastmod || localeLastmod > maxLastmod)) {
-      maxLastmod = localeLastmod;
+      maxLastmod = localeLastmod
     }
   }
 
@@ -89,64 +90,64 @@ export function getManifestStats(locale: ArticleLocale): ManifestStats {
     articleCount,
     authorCount: allAuthors.size,
     lastRevision: maxLastmod,
-  };
+  }
 }
 
 function parseArticleManifest(raw: string, manifestPath: string): Record<string, ArticleEntry> {
   try {
-    return JSON.parse(raw) as Record<string, ArticleEntry>;
+    return JSON.parse(raw) as Record<string, ArticleEntry>
   } catch (error) {
     throw new Error(`[article-manifest] Failed to parse article manifest: ${manifestPath}`, {
       cause: error,
-    });
+    })
   }
 }
 
 export async function getArticleManifest(): Promise<Record<string, ArticleEntry>> {
-  return loadArticleManifest();
+  return loadArticleManifest()
 }
 
-const localTreeCache = new Map<ArticleLocale, ArticleTreeNode[]>();
+const localTreeCache = new Map<ArticleLocale, ArticleTreeNode[]>()
 
 export async function getArticleTree(locale: ArticleLocale): Promise<ArticleTreeNode[]> {
-  const cached = localTreeCache.get(locale);
-  if (cached) return cached;
+  const cached = localTreeCache.get(locale)
+  if (cached) return cached
 
   try {
-    const tree = await buildLocalTree(locale);
-    localTreeCache.set(locale, tree);
-    return tree;
+    const tree = await buildLocalTree(locale)
+    localTreeCache.set(locale, tree)
+    return tree
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
-      console.warn("[article-manifest] Failed to build local tree from article manifest", error);
+      console.warn("[article-manifest] Failed to build local tree from article manifest", error)
     }
   }
 
-  return [];
+  return []
 }
 
 async function buildLocalTree(locale: ArticleLocale): Promise<ArticleTreeNode[]> {
-  const manifest = await getArticleManifest();
-  const entries = Object.values(manifest);
+  const manifest = await getArticleManifest()
+  const entries = Object.values(manifest)
   if (entries.length === 0) {
-    return [];
+    return []
   }
 
-  const parentIndex = new Map<string, ArticleEntry[]>();
+  const parentIndex = new Map<string, ArticleEntry[]>()
   for (const entry of entries) {
-    if (!entry.parentSlug) continue;
-    const siblings = parentIndex.get(entry.parentSlug) ?? [];
-    siblings.push(entry);
-    parentIndex.set(entry.parentSlug, siblings);
+    if (!entry.parentSlug) continue
+    const siblings = parentIndex.get(entry.parentSlug) ?? []
+    siblings.push(entry)
+    parentIndex.set(entry.parentSlug, siblings)
   }
 
   const roots = entries
     .filter((entry) => !entry.parentSlug || !manifest[entry.parentSlug])
-    .toSorted((a, b) => compareEntries(a, b, locale));
+    .toSorted((a, b) => compareEntries(a, b, locale))
 
   return roots
     .map((entry) => buildTreeNode(entry, parentIndex, locale))
-    .filter((node): node is ArticleTreeNode => node !== null);
+    .filter((node): node is ArticleTreeNode => node !== null)
 }
 
 function buildTreeNode(
@@ -154,28 +155,28 @@ function buildTreeNode(
   parentIndex: Map<string, ArticleEntry[]>,
   locale: ArticleLocale,
 ): ArticleTreeNode | null {
-  const childrenFromParent = parentIndex.get(entry.slug) ?? [];
+  const childrenFromParent = parentIndex.get(entry.slug) ?? []
   const children = childrenFromParent
     .toSorted((a, b) => compareEntries(a, b, locale))
     .map((child) => buildTreeNode(child, parentIndex, locale))
-    .filter((node): node is ArticleTreeNode => node !== null);
+    .filter((node): node is ArticleTreeNode => node !== null)
 
   if (!entry.isFolder && !entry.availableLocales.includes(locale)) {
-    return null;
+    return null
   }
 
   if (entry.isFolder && children.length === 0 && !entry.availableLocales.includes(locale)) {
-    return null;
+    return null
   }
 
-  const localizedMetadata = getLocalizedArticleMetadata(entry, locale);
+  const localizedMetadata = getLocalizedArticleMetadata(entry, locale)
 
   const node: ArticleTreeNode & {
-    index: number;
-    isAppendix: boolean;
-    isPreface: boolean;
-    introTitle?: string;
-    isAdvanced?: boolean;
+    index: number
+    isAppendix: boolean
+    isPreface: boolean
+    introTitle?: string
+    isAdvanced?: boolean
   } = {
     id: entry.isFolder ? entry.slug : entry.filePath.replace(/\.md$/i, ""),
     title: getNodeTitle(entry, locale),
@@ -188,42 +189,42 @@ function buildTreeNode(
     isAdvanced: entry.isAdvanced,
     parentId: entry.parentSlug ?? null,
     children,
-  };
+  }
 
-  return node;
+  return node
 }
 
 function compareEntries(a: ArticleEntry, b: ArticleEntry, locale: ArticleLocale): number {
   if (a.isFolder === b.isFolder) {
-    return getNodeTitle(a, locale).localeCompare(getNodeTitle(b, locale));
+    return getNodeTitle(a, locale).localeCompare(getNodeTitle(b, locale))
   }
-  return a.isFolder ? -1 : 1;
+  return a.isFolder ? -1 : 1
 }
 
 function getNodeTitle(entry: ArticleEntry, locale: ArticleLocale): string {
-  const { chapterTitle } = getLocalizedArticleMetadata(entry, locale);
-  const fileTitle = entry.filePath.split("/").pop()?.replace(/\.md$/i, "");
-  const sourceChapterTitle = entry.chapterTitleByLocale.zh?.trim();
-  const sourceTitle = entry.titleByLocale.zh?.trim();
-  const slugTitle = entry.slug.split("/").pop() || entry.slug;
+  const { chapterTitle } = getLocalizedArticleMetadata(entry, locale)
+  const fileTitle = entry.filePath.split("/").pop()?.replace(/\.md$/i, "")
+  const sourceChapterTitle = entry.chapterTitleByLocale.zh?.trim()
+  const sourceTitle = entry.titleByLocale.zh?.trim()
+  const slugTitle = entry.slug.split("/").pop() || entry.slug
 
   if (entry.isFolder) {
-    return chapterTitle || sourceChapterTitle || sourceTitle || slugTitle;
+    return chapterTitle || sourceChapterTitle || sourceTitle || slugTitle
   }
 
   if (locale === routing.defaultLocale) {
-    return entry.titleByLocale[locale]?.trim() || chapterTitle || fileTitle || slugTitle;
+    return entry.titleByLocale[locale]?.trim() || chapterTitle || fileTitle || slugTitle
   }
 
   if (entry.isPreface) {
-    return entry.titleByLocale[locale]?.trim() || chapterTitle || slugTitle;
+    return entry.titleByLocale[locale]?.trim() || chapterTitle || slugTitle
   }
 
   if (entry.isAppendix) {
-    return chapterTitle || entry.titleByLocale[locale]?.trim() || fileTitle || slugTitle;
+    return chapterTitle || entry.titleByLocale[locale]?.trim() || fileTitle || slugTitle
   }
 
-  return chapterTitle || entry.titleByLocale[locale]?.trim() || fileTitle || slugTitle;
+  return chapterTitle || entry.titleByLocale[locale]?.trim() || fileTitle || slugTitle
 }
 
 export function getLocalizedArticleMetadata(
@@ -234,43 +235,43 @@ export function getLocalizedArticleMetadata(
     return {
       chapterTitle: "",
       introTitle: "",
-    };
+    }
   }
 
-  const chapterTitle = entry.chapterTitleByLocale[locale]?.trim() || "";
+  const chapterTitle = entry.chapterTitleByLocale[locale]?.trim() || ""
 
-  const introTitle = entry.introTitleByLocale[locale]?.trim() || "";
+  const introTitle = entry.introTitleByLocale[locale]?.trim() || ""
 
   return {
     chapterTitle,
     introTitle,
-  };
+  }
 }
 
 export async function getLocalizedArticleEntry(
   slugPath: string,
   locale: ArticleLocale = "zh",
 ): Promise<(ArticleEntry & LocalizedArticleMetadata) | null> {
-  const entry = (await getArticleManifest())[slugPath];
+  const entry = (await getArticleManifest())[slugPath]
   if (!entry) {
-    return null;
+    return null
   }
 
   return {
     ...entry,
     ...getLocalizedArticleMetadata(entry, locale),
-  };
+  }
 }
 
 /**
  * Reads locale metadata through a JSON import so these helpers stay client-safe.
  */
-const manifest = manifestData as Record<string, { availableLocales: ArticleLocale[] }>;
+const manifest = manifestData as Record<string, { availableLocales: ArticleLocale[] }>
 
 export function hasArticleLocale(slug: string, locale: ArticleLocale): boolean {
-  return manifest[slug]?.availableLocales.includes(locale) ?? false;
+  return manifest[slug]?.availableLocales.includes(locale) ?? false
 }
 
 export function getArticleAvailableLocales(slug: string): ArticleLocale[] {
-  return manifest[slug]?.availableLocales ?? [];
+  return manifest[slug]?.availableLocales ?? []
 }

@@ -34,7 +34,7 @@ export interface BookPlan {
 
 function flattenChapterContent(content: ChapterContent[]): NumberedArticle[] {
   return content.flatMap((item) =>
-    item.kind === "article" ? [item.entry] : flattenChapterContent(item.content)
+    item.kind === "article" ? [item.entry] : flattenChapterContent(item.content),
   )
 }
 

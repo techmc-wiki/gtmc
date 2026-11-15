@@ -2,12 +2,9 @@ import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
 import { auth } from "@/lib/auth"
+import { uploadArticleAssetToGithub, ArticleAssetUploadError } from "@/lib/github/articles-assets"
 import { resolveGithubToken } from "@/lib/github/tokens"
 import { classifyFile, sanitizeFilename } from "@/lib/uploads/file-upload"
-import {
-  uploadArticleAssetToGithub,
-  ArticleAssetUploadError,
-} from "@/lib/github/articles-assets"
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -26,10 +23,7 @@ export async function POST(req: NextRequest) {
 
     const classification = classifyFile(file.type)
     if (!classification) {
-      return NextResponse.json(
-        { error: "File type not allowed." },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "File type not allowed." }, { status: 400 })
     }
 
     const arrayBuffer = await file.arrayBuffer()
@@ -37,10 +31,7 @@ export async function POST(req: NextRequest) {
 
     if (buffer.length > classification.maxBytes) {
       const maxMB = Math.round(classification.maxBytes / (1024 * 1024))
-      return NextResponse.json(
-        { error: `File too large (max ${maxMB}MB).` },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: `File too large (max ${maxMB}MB).` }, { status: 400 })
     }
 
     const filename = sanitizeFilename(file.name, file.type)

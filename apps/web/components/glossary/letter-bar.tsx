@@ -1,8 +1,7 @@
 "use client"
 
-import * as React from "react"
-
 import { useTranslations } from "next-intl"
+import * as React from "react"
 
 import { cn } from "@/lib/cn"
 
@@ -42,9 +41,7 @@ const LETTER_ID_PREFIX = "letter-"
 
 function getVisibleLetterTarget(letter: string): HTMLElement | null {
   const desktopTarget = document.getElementById(`${LETTER_ID_PREFIX}${letter}`)
-  const mobileTarget = document.getElementById(
-    `${LETTER_ID_PREFIX}${letter}-mobile`
-  )
+  const mobileTarget = document.getElementById(`${LETTER_ID_PREFIX}${letter}-mobile`)
   const candidates = window.matchMedia("(min-width: 768px)").matches
     ? [desktopTarget, mobileTarget]
     : [mobileTarget, desktopTarget]
@@ -80,18 +77,15 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
   const [canScrollRight, setCanScrollRight] = React.useState(false)
 
   const availableSet = React.useMemo(
-    () =>
-      new Set(availableLetters.map((letter) => letter.trim().toUpperCase())),
-    [availableLetters]
+    () => new Set(availableLetters.map((letter) => letter.trim().toUpperCase())),
+    [availableLetters],
   )
 
   React.useEffect(() => {
     if (typeof window === "undefined") return
     if (typeof IntersectionObserver === "undefined") return
 
-    const sections = [
-      ...document.querySelectorAll<HTMLElement>(`[id^="${LETTER_ID_PREFIX}"]`),
-    ]
+    const sections = [...document.querySelectorAll<HTMLElement>(`[id^="${LETTER_ID_PREFIX}"]`)]
     if (sections.length === 0) return
 
     const observer = new IntersectionObserver(
@@ -99,9 +93,7 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
         // The section closest to the top trigger band is the active one.
         const visible = entries
           .filter((entry) => entry.isIntersecting)
-          .toSorted(
-            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top
-          )
+          .toSorted((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
         const topEntry = visible[0]
         if (!topEntry) return
         const id = topEntry.target.id
@@ -116,7 +108,7 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
         // bottom 80% of the viewport so only the top section wins.
         rootMargin: "-10% 0px -80% 0px",
         threshold: 0,
-      }
+      },
     )
 
     for (const section of sections) {
@@ -148,28 +140,25 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
     }
   }, [])
 
-  const handleLetterClick = React.useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      const letter = event.currentTarget.dataset.letter
-      if (!letter) return
-      const target = getVisibleLetterTarget(letter)
-      if (target) {
-        target.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        })
-        setActiveLetter(letter)
-      }
-    },
-    []
-  )
+  const handleLetterClick = React.useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    const letter = event.currentTarget.dataset.letter
+    if (!letter) return
+    const target = getVisibleLetterTarget(letter)
+    if (target) {
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+      setActiveLetter(letter)
+    }
+  }, [])
 
   return (
     <nav
       aria-label={t("letterBarLabel")}
       className={cn(
         "border-tech-line/30 bg-surface-overlay/85 sticky top-18 z-20 border-b backdrop-blur-sm md:top-22",
-        className
+        className,
       )}>
       <div className="relative">
         <ul
@@ -192,13 +181,11 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
                     "relative flex h-9 min-w-9 items-center justify-center px-2 font-mono text-xs tracking-[0.18em] transition-colors duration-200 select-none",
                     "after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:transition-colors after:duration-200",
                     "focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2",
-                    isActive &&
-                      "after:bg-tech-main bg-tech-main/10 text-tech-main-dark font-bold",
+                    isActive && "after:bg-tech-main bg-tech-main/10 text-tech-main-dark font-bold",
                     !isActive &&
                       isAvailable &&
                       "text-tech-main hover:bg-tech-main/5 cursor-pointer after:bg-transparent",
-                    !isAvailable &&
-                      "text-tech-main cursor-default opacity-30 after:bg-transparent"
+                    !isAvailable && "text-tech-main cursor-default opacity-30 after:bg-transparent",
                   )}>
                   {letter}
                 </button>
@@ -210,21 +197,21 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
           aria-hidden="true"
           className={cn(
             "from-surface-overlay/90 via-surface-overlay/60 pointer-events-none absolute top-0 right-0 bottom-0 w-10 bg-gradient-to-l to-transparent transition-opacity duration-200",
-            canScrollRight ? "opacity-100" : "opacity-0"
+            canScrollRight ? "opacity-100" : "opacity-0",
           )}
         />
         <div
           aria-hidden="true"
           className={cn(
             "from-surface-overlay/80 pointer-events-none absolute top-0 bottom-0 left-0 w-8 bg-gradient-to-r to-transparent transition-opacity duration-200",
-            canScrollLeft ? "opacity-100" : "opacity-0"
+            canScrollLeft ? "opacity-100" : "opacity-0",
           )}
         />
         <span
           aria-hidden="true"
           className={cn(
             "text-tech-main/60 pointer-events-none absolute top-1/2 right-2 z-10 flex size-6 -translate-y-1/2 items-center justify-center transition-opacity duration-200",
-            canScrollRight ? "opacity-100" : "opacity-0"
+            canScrollRight ? "opacity-100" : "opacity-0",
           )}>
           <span className="size-2 rotate-45 border-t border-r border-current" />
         </span>
@@ -232,7 +219,7 @@ export function LetterBar({ availableLetters, className }: LetterBarProps) {
           aria-hidden="true"
           className={cn(
             "text-tech-main/50 pointer-events-none absolute top-1/2 left-2 z-10 flex size-6 -translate-y-1/2 items-center justify-center transition-opacity duration-200",
-            canScrollLeft ? "opacity-100" : "opacity-0"
+            canScrollLeft ? "opacity-100" : "opacity-0",
           )}>
           <span className="size-2 -rotate-[135deg] border-t border-r border-current" />
         </span>

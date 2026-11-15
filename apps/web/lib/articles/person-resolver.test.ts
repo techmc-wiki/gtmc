@@ -31,10 +31,7 @@ import {
  * table sits inside `vi.hoisted`, because the fs mock reads it while the
  * resolver module is still being imported.
  */
-function article(
-  slug: string,
-  overrides: Partial<ArticleEntry> = {}
-): ArticleEntry {
+function article(slug: string, overrides: Partial<ArticleEntry> = {}): ArticleEntry {
   return {
     filePath: `articles/${slug}.mdx`,
     slug,
@@ -142,16 +139,11 @@ gtmc-bot:
 vi.mock("node:fs", async (importOriginal) => {
   const actual = await importOriginal<typeof NodeFs>()
 
-  function readFileSync(
-    path: string | Buffer | URL,
-    options?: BufferEncoding
-  ): string | Buffer {
+  function readFileSync(path: string | Buffer | URL, options?: BufferEncoding): string | Buffer {
     const fileName = String(path).split(/[/\\]/u).pop() ?? ""
     const fixture = fixtures.configFiles[fileName]
     if (fixture !== undefined) return fixture
-    return options === undefined
-      ? actual.readFileSync(path)
-      : actual.readFileSync(path, options)
+    return options === undefined ? actual.readFileSync(path) : actual.readFileSync(path, options)
   }
 
   return { ...actual, readFileSync }
@@ -284,18 +276,8 @@ describe("article attribution", () => {
   it("unions authors with maintainers without merging the policies", () => {
     // Quillon is attribution-excluded yet still a public maintainer, so it
     // returns through the maintainer role rather than through attribution.
-    expect(getProfileHandles()).toEqual([
-      "Fjord",
-      "Mire",
-      "Quillon",
-      "Sable",
-    ])
-    expect(getProfileHandles(explicitManifest)).toEqual([
-      "Fjord",
-      "Mire",
-      "Nyx",
-      "Quillon",
-    ])
+    expect(getProfileHandles()).toEqual(["Fjord", "Mire", "Quillon", "Sable"])
+    expect(getProfileHandles(explicitManifest)).toEqual(["Fjord", "Mire", "Nyx", "Quillon"])
   })
 })
 

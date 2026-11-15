@@ -1,9 +1,6 @@
-import {
-  createConsola,
-  type ConsolaReporter,
-  type LogObject,
-} from "consola/basic"
 import { formatWithOptions } from "node:util"
+
+import { createConsola, type ConsolaReporter, type LogObject } from "consola/basic"
 import pc from "picocolors"
 
 type LogValue = boolean | number | string | undefined
@@ -30,9 +27,7 @@ const reporter: ConsolaReporter = {
       log.type === "error" || log.type === "warn"
         ? (options.stderr ?? process.stderr)
         : (options.stdout ?? process.stdout)
-    const message = indentDetail(
-      formatWithOptions(options.formatOptions, ...log.args)
-    )
+    const message = indentDetail(formatWithOptions(options.formatOptions, ...log.args))
     stream.write(`${formatLevel(log)} ${formatPrefix(log.tag)}  ${message}\n`)
   },
 }
@@ -44,9 +39,7 @@ const consola = createConsola({
 
 function formatValue(value: Exclude<LogValue, undefined>): string {
   const formatted =
-    typeof value === "string" && /\s/.test(value)
-      ? JSON.stringify(value)
-      : String(value)
+    typeof value === "string" && /\s/.test(value) ? JSON.stringify(value) : String(value)
   return pc.dim(formatted)
 }
 
@@ -62,11 +55,7 @@ function formatEventName(event: string): string {
   return pc.bold(event)
 }
 
-function formatEvent(
-  event: string,
-  attributes: LogAttributes,
-  detail?: string
-): string {
+function formatEvent(event: string, attributes: LogAttributes, detail?: string): string {
   const attributeText = Object.entries(attributes)
     .filter(([, value]) => value !== undefined)
     .toSorted(([left], [right]) => left.localeCompare(right))
@@ -87,21 +76,12 @@ export function createLogger(scope: string) {
   const scopedConsola = consola.withTag(`gtmc:${scope}`)
 
   return {
-    event: (
-      event: string,
-      attributes: LogAttributes = {},
-      detail?: string
-    ): void => scopedConsola.info(formatEvent(event, attributes, detail)),
-    warn: (
-      event: string,
-      attributes: LogAttributes = {},
-      detail?: string
-    ): void => scopedConsola.warn(formatEvent(event, attributes, detail)),
-    error: (
-      event: string,
-      attributes: LogAttributes = {},
-      detail?: string
-    ): void => scopedConsola.error(formatEvent(event, attributes, detail)),
+    event: (event: string, attributes: LogAttributes = {}, detail?: string): void =>
+      scopedConsola.info(formatEvent(event, attributes, detail)),
+    warn: (event: string, attributes: LogAttributes = {}, detail?: string): void =>
+      scopedConsola.warn(formatEvent(event, attributes, detail)),
+    error: (event: string, attributes: LogAttributes = {}, detail?: string): void =>
+      scopedConsola.error(formatEvent(event, attributes, detail)),
   }
 }
 
@@ -115,7 +95,7 @@ export function runBuildStep<T>(
   logger: BuildLogger,
   stage: string,
   action: () => T,
-  attributes: LogAttributes = {}
+  attributes: LogAttributes = {},
 ): T {
   const startedAt = performance.now()
   logger.event("stage.started", { ...attributes, stage })
@@ -140,7 +120,7 @@ export function runBuildStep<T>(
               duration_ms: Math.round(performance.now() - startedAt),
               stage,
             },
-            describeError(error)
+            describeError(error),
           )
           throw error
         }) as T
@@ -160,7 +140,7 @@ export function runBuildStep<T>(
         duration_ms: Math.round(performance.now() - startedAt),
         stage,
       },
-      describeError(error)
+      describeError(error),
     )
     throw error
   }

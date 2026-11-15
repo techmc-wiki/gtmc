@@ -38,9 +38,8 @@ export function IframeComponent({
   // that cannot be parsed is relative, so it resolves against this origin and stays opaque.
   let embedHost = ""
   try {
-    embedHost = new URL(
-      embedSource.startsWith("//") ? `https:${embedSource}` : embedSource
-    ).hostname
+    embedHost = new URL(embedSource.startsWith("//") ? `https:${embedSource}` : embedSource)
+      .hostname
   } catch {
     embedHost = ""
   }
@@ -52,11 +51,7 @@ export function IframeComponent({
         title={(title as string) || "Embedded Video"}
         className="size-full"
         loading="lazy"
-        sandbox={
-          embedHost === PLAYER_EMBED_HOST
-            ? PLAYER_EMBED_TOKENS
-            : DEFAULT_EMBED_TOKENS
-        }
+        sandbox={embedHost === PLAYER_EMBED_HOST ? PLAYER_EMBED_TOKENS : DEFAULT_EMBED_TOKENS}
         allowFullScreen={allowFullScreen !== false}
         {...rest}
       />

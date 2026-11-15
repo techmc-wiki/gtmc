@@ -48,8 +48,5 @@ export function workspacePath(...segments: string[]): string {
   // Folding over the segments keeps this expression opaque for the same
   // reason as the loop above; a `path.join(root, ...segments)` spread folds
   // to "dynamic path under root".
-  return segments.reduce(
-    (dir, segment) => path.join(dir, segment),
-    getWorkspaceRoot()
-  )
+  return segments.reduce((dir, segment) => path.join(dir, segment), getWorkspaceRoot())
 }

@@ -4,10 +4,7 @@ interface SocialIconProps extends SVGProps<SVGSVGElement> {
   className?: string
 }
 
-export function GithubIcon({
-  className = "size-3",
-  ...props
-}: SocialIconProps) {
+export function GithubIcon({ className = "size-3", ...props }: SocialIconProps) {
   return (
     <svg
       className={className}
@@ -20,10 +17,7 @@ export function GithubIcon({
   )
 }
 
-export function BilibiliIcon({
-  className = "size-3",
-  ...props
-}: SocialIconProps) {
+export function BilibiliIcon({ className = "size-3", ...props }: SocialIconProps) {
   return (
     <svg
       className={className}
@@ -36,10 +30,7 @@ export function BilibiliIcon({
   )
 }
 
-export function TwitterIcon({
-  className = "size-3",
-  ...props
-}: SocialIconProps) {
+export function TwitterIcon({ className = "size-3", ...props }: SocialIconProps) {
   return (
     <svg
       className={className}
@@ -80,12 +71,7 @@ export function TriangleIcon({
   ...props
 }: { direction: TriangleDirection } & SVGProps<SVGSVGElement>) {
   return (
-    <svg
-      viewBox="0 0 16 16"
-      aria-hidden="true"
-      focusable="false"
-      className={className}
-      {...props}>
+    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" className={className} {...props}>
       <path d={trianglePathByDirection[direction]} fill="currentColor" />
     </svg>
   )

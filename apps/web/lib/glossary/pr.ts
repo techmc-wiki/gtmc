@@ -1,14 +1,7 @@
 import { SubmissionInProgressError } from "@/lib/drafts/submission"
-import {
-  GLOSSARY_SOURCE_BRANCH,
-  GLOSSARY_SOURCE_FILENAME,
-} from "@/lib/glossary/source"
 import { getBranchHeadSha, upsertFileOnBranch } from "@/lib/github/branch"
-import {
-  GLOSSARY_FORK_REPO,
-  GLOSSARY_REPO,
-  getOctokit,
-} from "@/lib/github/repos"
+import { GLOSSARY_FORK_REPO, GLOSSARY_REPO, getOctokit } from "@/lib/github/repos"
+import { GLOSSARY_SOURCE_BRANCH, GLOSSARY_SOURCE_FILENAME } from "@/lib/glossary/source"
 
 export interface GlossaryPrInput {
   csvContent: string
@@ -27,10 +20,7 @@ export interface GlossaryPrResult {
   branchName: string
 }
 
-export async function findGlossaryPullRequestByBranch(
-  branchName: string,
-  token: string
-) {
+export async function findGlossaryPullRequestByBranch(branchName: string, token: string) {
   const octokit = getOctokit(token)
   const { data } = await octokit.pulls.list({
     owner: GLOSSARY_REPO.owner,
@@ -41,19 +31,8 @@ export async function findGlossaryPullRequestByBranch(
   return data[0] ?? null
 }
 
-export async function openGlossaryPullRequest(
-  input: GlossaryPrInput
-): Promise<GlossaryPrResult> {
-  const {
-    csvContent,
-    title,
-    body,
-    branchName,
-    recoverOnly,
-    authorName,
-    authorEmail,
-    token,
-  } = input
+export async function openGlossaryPullRequest(input: GlossaryPrInput): Promise<GlossaryPrResult> {
+  const { csvContent, title, body, branchName, recoverOnly, authorName, authorEmail, token } = input
   const octokit = getOctokit(token)
 
   const existingPr = await findGlossaryPullRequestByBranch(branchName, token)
@@ -67,11 +46,7 @@ export async function openGlossaryPullRequest(
   if (recoverOnly) {
     throw new SubmissionInProgressError()
   }
-  const upstreamHeadSha = await getBranchHeadSha(
-    token,
-    GLOSSARY_REPO,
-    GLOSSARY_SOURCE_BRANCH
-  )
+  const upstreamHeadSha = await getBranchHeadSha(token, GLOSSARY_REPO, GLOSSARY_SOURCE_BRANCH)
   try {
     await octokit.git.getRef({
       owner: GLOSSARY_FORK_REPO.owner,
@@ -79,11 +54,7 @@ export async function openGlossaryPullRequest(
       ref: `heads/${branchName}`,
     })
   } catch (error) {
-    if (
-      !(error instanceof Error) ||
-      !("status" in error) ||
-      error.status !== 404
-    ) {
+    if (!(error instanceof Error) || !("status" in error) || error.status !== 404) {
       throw error
     }
     await octokit.git.createRef({
@@ -130,7 +101,7 @@ export async function openGlossaryPullRequest(
           `${GLOSSARY_REPO.owner}/${GLOSSARY_REPO.name} cannot be added to ` +
           `their repository access. Set GITHUB_TOKEN to a classic PAT with the public_repo ` +
           `scope.`,
-        { cause: error }
+        { cause: error },
       )
     }
     throw error

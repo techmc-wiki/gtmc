@@ -1,10 +1,26 @@
 "use client"
 
-import * as React from "react"
-import { useTranslations } from "next-intl"
 import { ExternalLink, GitPullRequest, Plus } from "lucide-react"
+import { useTranslations } from "next-intl"
+import * as React from "react"
 
+import { GlossaryDiffPreview } from "@/components/glossary/glossary-diff-preview"
+import {
+  GlossaryEditCard,
+  type GlossaryEditOperation,
+} from "@/components/glossary/glossary-edit-card"
+import { GlossaryEditToolbar } from "@/components/glossary/glossary-edit-toolbar"
+import { ComplexChangesNotice, AttributionWarning } from "@/components/glossary/glossary-notices"
+import { GlossaryRowPicker } from "@/components/glossary/glossary-row-picker"
+import {
+  useGlossaryEditor,
+  type GlossarySubmitResult,
+  type GlossarySubmitState,
+  type UseGlossaryEditorOptions,
+} from "@/components/glossary/use-glossary-editor"
 import { IconButton } from "@/components/ui/icon-button"
+import { Badge } from "@/components/ui/shadcn/badge"
+import { Button } from "@/components/ui/shadcn/button"
 import {
   Dialog,
   DialogContent,
@@ -12,35 +28,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/shadcn/dialog"
-import { Button } from "@/components/ui/shadcn/button"
-import { Badge } from "@/components/ui/shadcn/badge"
-import { GlossaryEditToolbar } from "@/components/glossary/glossary-edit-toolbar"
-import {
-  ComplexChangesNotice,
-  AttributionWarning,
-} from "@/components/glossary/glossary-notices"
-import { GlossaryRowPicker } from "@/components/glossary/glossary-row-picker"
-import {
-  GlossaryEditCard,
-  type GlossaryEditOperation,
-} from "@/components/glossary/glossary-edit-card"
-import { GlossaryDiffPreview } from "@/components/glossary/glossary-diff-preview"
-import {
-  useGlossaryEditor,
-  type GlossarySubmitResult,
-  type GlossarySubmitState,
-  type UseGlossaryEditorOptions,
-} from "@/components/glossary/use-glossary-editor"
 import { useMounted } from "@/hooks/use-mounted"
 import type { GlossaryRow } from "@/lib/glossary/csv"
-import type {
-  GlossaryEntry,
-  GlossarySummaryEntry,
-} from "@/lib/glossary/manifest"
-import {
-  findDanglingGlossaryRefs,
-  glossaryEntryToRow,
-} from "@/lib/glossary/rows"
+import type { GlossaryEntry, GlossarySummaryEntry } from "@/lib/glossary/manifest"
+import { findDanglingGlossaryRefs, glossaryEntryToRow } from "@/lib/glossary/rows"
 
 export interface GlossaryEditorProps extends UseGlossaryEditorOptions {
   prefillSlug?: string
@@ -54,7 +45,7 @@ export interface GlossaryEditorProps extends UseGlossaryEditorOptions {
 function applyPrefillToOperations(
   operations: GlossaryEditOperation[],
   prefillSlug: string | undefined,
-  entriesBySlug: Map<string, GlossaryEntry>
+  entriesBySlug: Map<string, GlossaryEntry>,
 ): GlossaryEditOperation[] {
   if (!prefillSlug || operations.some((op) => op.slug === prefillSlug)) {
     return operations
@@ -83,13 +74,8 @@ export function GlossaryEditor(props: GlossaryEditorProps) {
   }, [props.manifestEntries])
 
   const resolvedInitialOperations = React.useMemo(
-    () =>
-      applyPrefillToOperations(
-        props.initialOperations,
-        props.prefillSlug,
-        entriesBySlug
-      ),
-    [props.initialOperations, props.prefillSlug, entriesBySlug]
+    () => applyPrefillToOperations(props.initialOperations, props.prefillSlug, entriesBySlug),
+    [props.initialOperations, props.prefillSlug, entriesBySlug],
   )
 
   return (
@@ -111,9 +97,7 @@ function GlossaryEditorInner(props: GlossaryEditorProps) {
         <div className="space-y-2">
           <Button
             disabled={state.isSubmitting}
-            onClick={() =>
-              void actions.handleSubmit({ useRealEmail: state.useRealEmail })
-            }>
+            onClick={() => void actions.handleSubmit({ useRealEmail: state.useRealEmail })}>
             {t("resumeSubmission")}
           </Button>
           {state.submitError && <p role="alert">{state.submitError}</p>}
@@ -280,9 +264,8 @@ function GlossaryEditorContent({
       {operations.length === 0 ? (
         <div className="border-border bg-surface/30 rounded-none border border-dashed p-8 text-center">
           <p className="text-muted-foreground text-sm">
-            Search existing terms above to propose changes, or click &ldquo;Add
-            term&rdquo; to create a new glossary entry. Changes are saved
-            automatically.
+            Search existing terms above to propose changes, or click &ldquo;Add term&rdquo; to
+            create a new glossary entry. Changes are saved automatically.
           </p>
         </div>
       ) : (
@@ -294,11 +277,7 @@ function GlossaryEditorContent({
               operation.slug
             const danglingRefs =
               operation.kind === "delete"
-                ? findDanglingGlossaryRefs(
-                    operation.slug,
-                    headerEnglish,
-                    manifestEntries
-                  )
+                ? findDanglingGlossaryRefs(operation.slug, headerEnglish, manifestEntries)
                 : undefined
             return (
               <GlossaryEditCard
@@ -334,9 +313,7 @@ function GlossaryEditorContent({
             <DialogHeader className="border-border border-b p-4 sm:p-5">
               <DialogTitle className="text-foreground flex items-center gap-2 text-base font-semibold">
                 <GitPullRequest className="text-tech-signal size-4" />
-                {submitState === "success"
-                  ? "Pull Request Submitted"
-                  : t("editorPreviewDiff")}
+                {submitState === "success" ? "Pull Request Submitted" : t("editorPreviewDiff")}
               </DialogTitle>
               <DialogDescription className="text-muted-foreground text-xs">
                 {submitState === "success"
@@ -350,9 +327,7 @@ function GlossaryEditorContent({
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
               validationMessage={
-                hasInvalidOperations
-                  ? t("invalidOperations")
-                  : (submitError ?? undefined)
+                hasInvalidOperations ? t("invalidOperations") : (submitError ?? undefined)
               }
               canSubmit={!isSubmitting && !hasInvalidOperations}
               authorName={authorName}

@@ -1,13 +1,15 @@
 "use client"
 
-import { useState, useCallback, useMemo } from "react"
 import { ArrowRight, ChevronDown } from "lucide-react"
-import { HeroCard } from "./hero-card"
-import { Button } from "@/components/ui/shadcn/button"
-import { Link } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
+import { useState, useCallback, useMemo } from "react"
+
+import { Button } from "@/components/ui/shadcn/button"
 import { useReadingBookmark } from "@/hooks/use-reading-bookmark"
+import { Link } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/articles/url"
+
+import { HeroCard } from "./hero-card"
 
 export function HomepageClient() {
   const t = useTranslations("Homepage")
@@ -21,7 +23,7 @@ export function HomepageClient() {
       }
       setIsAccessingDatabase(true)
     },
-    [isAccessingDatabase]
+    [isAccessingDatabase],
   )
 
   return (
@@ -33,9 +35,7 @@ export function HomepageClient() {
           asChild
           aria-disabled={isAccessingDatabase}
           className={`flex h-12 w-full items-center justify-center text-xs tracking-widest uppercase shadow-md transition-transform duration-300 hover:scale-102 active:scale-95 ${
-            isAccessingDatabase
-              ? "pointer-events-none cursor-wait opacity-90"
-              : ""
+            isAccessingDatabase ? "pointer-events-none cursor-wait opacity-90" : ""
           } sm:w-72 sm:text-sm`}>
           <Link href="/articles/preface" onClick={handleArticlesClick}>
             {isAccessingDatabase ? (
@@ -74,10 +74,7 @@ function ContinueReading() {
   const bookmark = useReadingBookmark()
 
   const pct = bookmark ? Math.round(bookmark.progress * 100) : 0
-  const progressStyle = useMemo(
-    (): React.CSSProperties => ({ width: `${pct}%` }),
-    [pct]
-  )
+  const progressStyle = useMemo((): React.CSSProperties => ({ width: `${pct}%` }), [pct])
 
   if (!bookmark) return null
 
@@ -90,20 +87,13 @@ function ContinueReading() {
         <span className="text-tech-main/60 font-mono text-[0.5625rem] tracking-[0.2em] uppercase">
           {t("continueReading")}
         </span>
-        <span className="text-tech-main-dark truncate text-sm font-medium">
-          {bookmark.title}
-        </span>
+        <span className="text-tech-main-dark truncate text-sm font-medium">{bookmark.title}</span>
       </span>
       <span className="flex shrink-0 items-center gap-2">
         <span className="bg-tech-main/15 relative h-1 w-16 overflow-hidden">
-          <span
-            className="bg-tech-signal absolute inset-y-0 left-0"
-            style={progressStyle}
-          />
+          <span className="bg-tech-signal absolute inset-y-0 left-0" style={progressStyle} />
         </span>
-        <span className="text-tech-main/60 font-mono text-[0.625rem]">
-          {pct}%
-        </span>
+        <span className="text-tech-main/60 font-mono text-[0.625rem]">{pct}%</span>
         <ArrowRight
           aria-hidden="true"
           className="text-tech-main group-hover:text-tech-main-dark size-3.5 transition-colors"

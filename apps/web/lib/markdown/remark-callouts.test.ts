@@ -1,12 +1,8 @@
+import { renderMarkdownToHast } from "@gtmc/ssg/markdown/pdf-hast"
+import { createRehypeShiki, type RehypeShikiPlugin } from "@gtmc/ssg/markdown/syntax/rehype-shiki"
 import type { Element, Root, Text } from "hast"
 import { visit } from "unist-util-visit"
 import { describe, expect, test } from "vite-plus/test"
-
-import { renderMarkdownToHast } from "@gtmc/ssg/markdown/pdf-hast"
-import {
-  createRehypeShiki,
-  type RehypeShikiPlugin,
-} from "@gtmc/ssg/markdown/syntax/rehype-shiki"
 
 let shikiPlugin: RehypeShikiPlugin | undefined
 
@@ -31,8 +27,7 @@ function findElement(root: Root, tagName: string): Element | undefined {
 
 function childElements(node: Element, tagName: string): Element[] {
   return node.children.filter(
-    (child): child is Element =>
-      child.type === "element" && child.tagName === tagName
+    (child): child is Element => child.type === "element" && child.tagName === tagName,
   )
 }
 
@@ -68,8 +63,7 @@ describe("remarkCallouts", () => {
     expect(aside?.properties.dataCallout).toBe("tip")
     expect(aside?.properties.dataCalloutEmpty).toBe("true")
 
-    const nestedElements =
-      aside?.children.filter((child) => child.type === "element") ?? []
+    const nestedElements = aside?.children.filter((child) => child.type === "element") ?? []
     expect(nestedElements).toEqual([])
   })
 })

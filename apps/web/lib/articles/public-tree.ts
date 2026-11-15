@@ -1,30 +1,31 @@
-import { cacheLife, cacheTag } from "next/cache";
-import type { ArticleLocale } from "@gtmc/ssg/articles/types";
-import { getCachedArticleTree } from "@/lib/articles/manifest-cached";
-import type { ArticleTreeNode } from "@/lib/articles/article-tree-types";
-import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types";
-import { compareIndex } from "@/lib/articles/navigation-data";
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
+import { cacheLife, cacheTag } from "next/cache"
+
+import type { ArticleTreeNode } from "@/lib/articles/article-tree-types"
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
+import { getCachedArticleTree } from "@/lib/articles/manifest-cached"
+import { compareIndex } from "@/lib/articles/navigation-data"
 
 export async function getPublicChapterNav(locale: ArticleLocale = "zh"): Promise<ChapterNavNode[]> {
-  "use cache";
-  cacheLife("max");
-  cacheTag("article-tree", `article-tree-${locale}`);
+  "use cache"
+  cacheLife("max")
+  cacheTag("article-tree", `article-tree-${locale}`)
 
-  return preparePublicChapterNav(await getCachedArticleTree(locale));
+  return preparePublicChapterNav(await getCachedArticleTree(locale))
 }
 
 export function preparePublicChapterNav(source: ArticleTreeNode[]): ChapterNavNode[] {
-  const tree = cloneNodes(source);
+  const tree = cloneNodes(source)
 
-  injectReadmeIntroNodes(tree);
-  sortTree(tree);
+  injectReadmeIntroNodes(tree)
+  sortTree(tree)
 
-  return tree;
+  return tree
 }
 
 function cloneNodes(nodes: ArticleTreeNode[]): ChapterNavNode[] {
   return nodes.map((node) => {
-    const nodeWithMeta = node as ArticleTreeNode & Partial<ChapterNavNode>;
+    const nodeWithMeta = node as ArticleTreeNode & Partial<ChapterNavNode>
 
     return {
       ...node,
@@ -34,39 +35,39 @@ function cloneNodes(nodes: ArticleTreeNode[]): ChapterNavNode[] {
       isAdvanced: nodeWithMeta.isAdvanced ?? false,
       introTitle: nodeWithMeta.introTitle ?? "",
       children: cloneNodes(node.children),
-    };
-  });
+    }
+  })
 }
 
 function sortTree(nodes: ChapterNavNode[]) {
   nodes.sort((a, b) => {
     if (a.isPreface !== b.isPreface) {
-      return a.isPreface ? -1 : 1;
+      return a.isPreface ? -1 : 1
     }
 
     if (a.isReadmeIntro !== b.isReadmeIntro) {
-      return a.isReadmeIntro ? -1 : 1;
+      return a.isReadmeIntro ? -1 : 1
     }
 
     if (a.isAppendix !== b.isAppendix) {
-      return a.isAppendix ? 1 : -1;
+      return a.isAppendix ? 1 : -1
     }
 
-    const indexComparison = compareIndex(a.index ?? -1, b.index ?? -1);
+    const indexComparison = compareIndex(a.index ?? -1, b.index ?? -1)
     if (indexComparison !== 0) {
-      return indexComparison;
+      return indexComparison
     }
 
-    const titleComparison = a.title.localeCompare(b.title);
+    const titleComparison = a.title.localeCompare(b.title)
     if (titleComparison !== 0) {
-      return titleComparison;
+      return titleComparison
     }
 
-    return a.slug.localeCompare(b.slug);
-  });
+    return a.slug.localeCompare(b.slug)
+  })
   for (const node of nodes) {
     if (node.children && node.children.length > 0) {
-      sortTree(node.children);
+      sortTree(node.children)
     }
   }
 }
@@ -74,17 +75,17 @@ function sortTree(nodes: ChapterNavNode[]) {
 function injectReadmeIntroNodes(nodes: ChapterNavNode[]) {
   for (const node of nodes) {
     if (node.children && node.children.length > 0) {
-      injectReadmeIntroNodes(node.children);
+      injectReadmeIntroNodes(node.children)
     }
 
-    const introTitle = node.introTitle?.trim() ?? "";
+    const introTitle = node.introTitle?.trim() ?? ""
     if (!node.isFolder || node.isPreface || introTitle === "") {
-      continue;
+      continue
     }
 
-    const hasInjectedIntro = node.children.some((child) => child.isReadmeIntro);
+    const hasInjectedIntro = node.children.some((child) => child.isReadmeIntro)
     if (hasInjectedIntro) {
-      continue;
+      continue
     }
 
     node.children.push({
@@ -99,6 +100,6 @@ function injectReadmeIntroNodes(nodes: ChapterNavNode[]) {
       isReadmeIntro: true,
       parentId: node.id,
       children: [],
-    });
+    })
   }
 }

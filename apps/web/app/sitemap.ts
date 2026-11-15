@@ -1,22 +1,22 @@
+import { type ArticleLocale } from "@gtmc/ssg/articles/types"
 import type { MetadataRoute } from "next"
 import { cacheLife } from "next/cache"
 
-import { getSiteUrl } from "@/lib/site-url"
-import { encodeSlug } from "@/lib/articles/slug-resolver"
-import { getProfileHandles } from "@/lib/articles/person-resolver"
 import { loadArticleManifest } from "@/lib/articles/manifest"
-import { type ArticleLocale } from "@gtmc/ssg/articles/types"
+import { getProfileHandles } from "@/lib/articles/person-resolver"
+import { encodeSlug } from "@/lib/articles/slug-resolver"
 import { loadGlossaryManifest } from "@/lib/glossary/manifest"
+import { getSiteUrl } from "@/lib/site-url"
 
 const SITE_LOCALES: ArticleLocale[] = ["zh", "en"]
 
 function localizedAlternates(
   base: string,
   path: string,
-  locales: readonly ArticleLocale[] = SITE_LOCALES
+  locales: readonly ArticleLocale[] = SITE_LOCALES,
 ) {
   const languages = Object.fromEntries(
-    locales.map((locale) => [locale, `${base}/${locale}${path}`])
+    locales.map((locale) => [locale, `${base}/${locale}${path}`]),
   )
   const defaultLocale = locales.includes("zh") ? "zh" : locales[0]
 
@@ -91,11 +91,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return {
         url: `${base}/${locale}${articlePath}`,
         ...(modified ? { lastModified: modified } : {}),
-        alternates: localizedAlternates(
-          base,
-          articlePath,
-          entry.availableLocales
-        ),
+        alternates: localizedAlternates(base, articlePath, entry.availableLocales),
         changeFrequency: "weekly" as const,
         priority: 0.8,
       }

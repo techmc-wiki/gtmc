@@ -1,21 +1,15 @@
 "use client"
 
-import * as React from "react"
-import { useTranslations } from "next-intl"
-import CodeMirror, {
-  EditorView,
-  type ReactCodeMirrorRef,
-} from "@uiw/react-codemirror"
-import {
-  autocompletion,
-  type CompletionContext,
-  snippetCompletion,
-} from "@codemirror/autocomplete"
+import { autocompletion, type CompletionContext, snippetCompletion } from "@codemirror/autocomplete"
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown"
 import { languages } from "@codemirror/language-data"
 import { linter } from "@codemirror/lint"
-import { useTheme } from "@/lib/theme"
 import { getJavaFenceDiagnostics } from "@gtmc/ssg/markdown/code-provenance"
+import CodeMirror, { EditorView, type ReactCodeMirrorRef } from "@uiw/react-codemirror"
+import { useTranslations } from "next-intl"
+import * as React from "react"
+
+import { useTheme } from "@/lib/theme"
 
 const techTheme = EditorView.theme({
   "&": {
@@ -35,11 +29,9 @@ const techTheme = EditorView.theme({
   ".cm-cursor": {
     borderLeftColor: "var(--color-tech-main, #000)",
   },
-  "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
-    {
-      backgroundColor:
-        "color-mix(in oklab, var(--color-tech-main) 15%, transparent)",
-    },
+  "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
+    backgroundColor: "color-mix(in oklab, var(--color-tech-main) 15%, transparent)",
+  },
   ".cm-gutters": {
     backgroundColor: "transparent",
     color: "color-mix(in oklab, var(--color-tech-main) 50%, transparent)",
@@ -119,14 +111,11 @@ const markdownSyntaxHints = [
     detail: "Minecraft Java source",
     info: "Insert a versioned Minecraft Java code block",
   }),
-  snippetCompletion(
-    "| Column | Value |\n| --- | --- |\n| ${left} | ${right} |",
-    {
-      label: "table",
-      detail: "Table",
-      info: "Insert a markdown table",
-    }
-  ),
+  snippetCompletion("| Column | Value |\n| --- | --- |\n| ${left} | ${right} |", {
+    label: "table",
+    detail: "Table",
+    info: "Insert a markdown table",
+  }),
   snippetCompletion("$$\n${formula}\n$$", {
     label: "math-block",
     detail: "KaTeX",
@@ -174,10 +163,7 @@ function markdownSyntaxHintSource(context: CompletionContext) {
     const trigger = prefix.slice(-1)
     const onlyWhitespace = prefix.trim().length === 0
 
-    if (
-      !onlyWhitespace &&
-      !["#", "-", ">", "[", "!", "`", "|"].includes(trigger)
-    ) {
+    if (!onlyWhitespace && !["#", "-", ">", "[", "!", "`", "|"].includes(trigger)) {
       return null
     }
   }
@@ -219,57 +205,55 @@ export function EditorTextarea({
         ? [
             autocompletion({ override: [markdownSyntaxHintSource] }),
             linter((view) =>
-              getJavaFenceDiagnostics(view.state.doc.toString()).map(
-                (diagnostic) => {
-                  let message: string
-                  switch (diagnostic.code) {
-                    case "expected-field":
-                      message = t("provenanceExpectedField")
-                      break
-                    case "unknown-field":
-                      message = t("provenanceUnknownField", {
-                        field: diagnostic.field ?? "",
-                      })
-                      break
-                    case "duplicate-field":
-                      message = t("provenanceDuplicateField", {
-                        field: diagnostic.field ?? "",
-                      })
-                      break
-                    case "empty-value":
-                      message = t("provenanceEmptyValue", {
-                        field: diagnostic.field ?? "",
-                      })
-                      break
-                    case "invalid-minecraft-version":
-                      message = t("provenanceInvalidMinecraftVersion")
-                      break
-                    case "invalid-tool":
-                      message = t("provenanceInvalidTool", {
-                        field: diagnostic.field ?? "tool",
-                      })
-                      break
-                    case "invalid-file":
-                      message = t("provenanceInvalidFile")
-                      break
-                    case "invalid-lines":
-                      message = t("provenanceInvalidLines")
-                      break
-                  }
-                  return {
-                    from: diagnostic.from,
-                    to: Math.max(diagnostic.from + 1, diagnostic.to),
-                    severity: "error" as const,
-                    message,
-                  }
+              getJavaFenceDiagnostics(view.state.doc.toString()).map((diagnostic) => {
+                let message: string
+                switch (diagnostic.code) {
+                  case "expected-field":
+                    message = t("provenanceExpectedField")
+                    break
+                  case "unknown-field":
+                    message = t("provenanceUnknownField", {
+                      field: diagnostic.field ?? "",
+                    })
+                    break
+                  case "duplicate-field":
+                    message = t("provenanceDuplicateField", {
+                      field: diagnostic.field ?? "",
+                    })
+                    break
+                  case "empty-value":
+                    message = t("provenanceEmptyValue", {
+                      field: diagnostic.field ?? "",
+                    })
+                    break
+                  case "invalid-minecraft-version":
+                    message = t("provenanceInvalidMinecraftVersion")
+                    break
+                  case "invalid-tool":
+                    message = t("provenanceInvalidTool", {
+                      field: diagnostic.field ?? "tool",
+                    })
+                    break
+                  case "invalid-file":
+                    message = t("provenanceInvalidFile")
+                    break
+                  case "invalid-lines":
+                    message = t("provenanceInvalidLines")
+                    break
                 }
-              )
+                return {
+                  from: diagnostic.from,
+                  to: Math.max(diagnostic.from + 1, diagnostic.to),
+                  severity: "error" as const,
+                  message,
+                }
+              }),
             ),
           ]
         : []),
       ...(lineWrap ? [EditorView.lineWrapping] : []),
     ],
-    [enableSyntaxHints, lineWrap, t]
+    [enableSyntaxHints, lineWrap, t],
   )
 
   const handleKeyDownCapture = React.useCallback(
@@ -282,8 +266,7 @@ export function EditorTextarea({
       const isModifierPressed = event.ctrlKey || event.metaKey
       const isUndo = isModifierPressed && !event.shiftKey && key === "z"
       const isRedo =
-        isModifierPressed &&
-        ((event.shiftKey && key === "z") || (!event.shiftKey && key === "y"))
+        isModifierPressed && ((event.shiftKey && key === "z") || (!event.shiftKey && key === "y"))
 
       if (isUndo && onUndo) {
         event.preventDefault()
@@ -304,7 +287,7 @@ export function EditorTextarea({
         }
       }
     },
-    [canRedo, canUndo, readOnly, onRedo, onUndo]
+    [canRedo, canUndo, readOnly, onRedo, onUndo],
   )
 
   return (

@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto"
+
 import type { Code } from "mdast"
 import remarkParse from "remark-parse"
 import { unified } from "unified"
@@ -27,7 +28,7 @@ export function analyzeJavaCodeReferences(content: string): CodeReference[] {
         throw new CodeProvenanceSyntaxError(
           error.code,
           `Java code provenance at Markdown line ${markdownLine}: ${error.message}`,
-          error.field
+          error.field,
         )
       }
       throw error

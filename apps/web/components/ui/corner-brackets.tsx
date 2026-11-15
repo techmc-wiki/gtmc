@@ -1,4 +1,5 @@
 import * as React from "react"
+
 import { cn } from "@/lib/cn"
 
 export interface CornerBracketsProps {
@@ -19,20 +20,12 @@ const cornerPositionClasses = {
   bottomRight: "translate-px border-r-2 border-b-2",
 } as const
 
-function getCornerVisibility(
-  corners: NonNullable<CornerBracketsProps["corners"]>
-) {
+function getCornerVisibility(corners: NonNullable<CornerBracketsProps["corners"]>) {
   return {
-    topLeft:
-      corners === "all" ||
-      corners === "top-bottom" ||
-      corners === "diagonal-tlbr",
+    topLeft: corners === "all" || corners === "top-bottom" || corners === "diagonal-tlbr",
     topRight: corners === "all" || corners === "diagonal-trbl",
     bottomLeft: corners === "all" || corners === "diagonal-trbl",
-    bottomRight:
-      corners === "all" ||
-      corners === "top-bottom" ||
-      corners === "diagonal-tlbr",
+    bottomRight: corners === "all" || corners === "top-bottom" || corners === "diagonal-tlbr",
   }
 }
 
@@ -51,8 +44,7 @@ export function CornerBrackets({
   ref,
 }: CornerBracketsProps) {
   const visibility = getCornerVisibility(corners)
-  const pointerEvents =
-    variant === "hover" ? "pointer-events-auto" : "pointer-events-none"
+  const pointerEvents = variant === "hover" ? "pointer-events-auto" : "pointer-events-none"
   const cornerClass = `absolute ${size} ${color} ${pointerEvents} ${
     variant === "static" ? "" : hoverClasses
   }`
@@ -63,24 +55,16 @@ export function CornerBrackets({
       aria-hidden="true"
       className={cn("pointer-events-none absolute inset-0", className)}>
       {visibility.topLeft && (
-        <div
-          className={`top-0 left-0 ${cornerPositionClasses.topLeft} ${cornerClass}`}
-        />
+        <div className={`top-0 left-0 ${cornerPositionClasses.topLeft} ${cornerClass}`} />
       )}
       {visibility.topRight && (
-        <div
-          className={`top-0 right-0 ${cornerPositionClasses.topRight} ${cornerClass}`}
-        />
+        <div className={`top-0 right-0 ${cornerPositionClasses.topRight} ${cornerClass}`} />
       )}
       {visibility.bottomLeft && (
-        <div
-          className={`bottom-0 left-0 ${cornerPositionClasses.bottomLeft} ${cornerClass}`}
-        />
+        <div className={`bottom-0 left-0 ${cornerPositionClasses.bottomLeft} ${cornerClass}`} />
       )}
       {visibility.bottomRight && (
-        <div
-          className={`right-0 bottom-0 ${cornerPositionClasses.bottomRight} ${cornerClass}`}
-        />
+        <div className={`right-0 bottom-0 ${cornerPositionClasses.bottomRight} ${cornerClass}`} />
       )}
     </div>
   )

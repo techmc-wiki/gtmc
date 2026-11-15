@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server"
+
 import { resolvePerson } from "@/lib/articles/people"
 import { getAuthorProfileHandle } from "@/lib/articles/person-resolver"
 
@@ -10,6 +11,6 @@ export function GET(request: NextRequest) {
 
   return NextResponse.json(
     { ...person, profileHandle: getAuthorProfileHandle(person.key) },
-    { headers: { "Cache-Control": PEOPLE_CACHE_CONTROL } }
+    { headers: { "Cache-Control": PEOPLE_CACHE_CONTROL } },
   )
 }

@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
+
 import { load as yamlLoad } from "js-yaml"
 
 export type PeopleEntry = {
@@ -35,13 +36,7 @@ export type ResolvedPerson = {
 
 type PeopleYaml = Record<string, PeopleEntry>
 
-const PEOPLE_YAML_PATH = join(
-  process.cwd(),
-  "lib",
-  "articles",
-  "config",
-  "people.yml"
-)
+const PEOPLE_YAML_PATH = join(process.cwd(), "lib", "articles", "config", "people.yml")
 
 let peopleCache: PeopleYaml | null = null
 
@@ -98,10 +93,7 @@ export function resolvePerson(key: string): ResolvedPerson {
   }
 }
 
-export function getPersonDescription(
-  person: ResolvedPerson,
-  locale: "en" | "zh"
-): string | null {
+export function getPersonDescription(person: ResolvedPerson, locale: "en" | "zh"): string | null {
   const entry = loadPeople()[person.key]
   const localized = entry?.descriptions?.[locale]?.trim()
   if (localized) return localized

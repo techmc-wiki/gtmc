@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
+
 import { ImageResponse } from "next/og"
 
 export const OG_IMAGE_SIZE = { width: 1200, height: 630 }
@@ -13,9 +14,8 @@ export async function createOgImage(title: string, headers?: HeadersInit) {
   // CJK glyphs occupy roughly twice the width of Latin characters.
   const characters = [...title.trim()]
   const titleWidth = characters.reduce(
-    (width, character) =>
-      width + (/[\u0250-\u{10ffff}]/u.test(character) ? 2 : 1),
-    0
+    (width, character) => width + (/[\u0250-\u{10ffff}]/u.test(character) ? 2 : 1),
+    0,
   )
   const hasCjk = /[\p{Script=Han}]/u.test(title)
   const fontSize =
@@ -77,9 +77,7 @@ export async function createOgImage(title: string, headers?: HeadersInit) {
           {displayTitle}
         </div>
       </div>
-      <div style={{ display: "flex", fontSize: 22, color: "#4a5468" }}>
-        techmc.wiki
-      </div>
+      <div style={{ display: "flex", fontSize: 22, color: "#4a5468" }}>techmc.wiki</div>
     </div>,
     {
       ...OG_IMAGE_SIZE,
@@ -88,6 +86,6 @@ export async function createOgImage(title: string, headers?: HeadersInit) {
         { name: "STIX", data: stix, weight: 600, style: "normal" },
       ],
       headers,
-    }
+    },
   )
 }

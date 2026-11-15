@@ -2,6 +2,7 @@ import type { Nodes, Root } from "mdast"
 import type { Options as RemarkDirectiveOptions } from "remark-directive"
 import type { VisitorResult } from "unist-util-visit"
 import { SKIP, visit } from "unist-util-visit"
+
 import { ANSI_COLOR_NAMES, createAnsiColorTagName } from "../ansi-colors"
 
 interface RawFile extends Pick<RemarkDirectiveOptions, never> {
@@ -14,7 +15,7 @@ type LeafDirective = Extract<Nodes, { type: "leafDirective" }>
 function handleTextDirective(
   node: TextDirective,
   index: number | undefined,
-  parent: Nodes | undefined
+  parent: Nodes | undefined,
 ): VisitorResult {
   if (node.name === "hidden") {
     node.data = node.data ?? {}
@@ -29,11 +30,7 @@ function handleTextDirective(
     return true
   }
 
-  if (
-    node.name === "advanced" &&
-    parent?.type === "heading" &&
-    index !== undefined
-  ) {
+  if (node.name === "advanced" && parent?.type === "heading" && index !== undefined) {
     parent.data = parent.data ?? {}
     parent.data.hProperties = {
       ...parent.data.hProperties,

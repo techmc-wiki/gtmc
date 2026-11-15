@@ -1,9 +1,10 @@
-import { Suspense } from "react"
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
+import { Suspense } from "react"
+
+import { PropertyLookup } from "@/components/properties/property-lookup"
 import { PageHeader } from "@/components/ui/headings"
 import { Skeleton } from "@/components/ui/shadcn/skeleton"
-import { PropertyLookup } from "@/components/properties/property-lookup"
 import { getPropertyCatalog } from "@/lib/properties/data"
 import { normalizeLocale } from "@/lib/properties/i18n"
 import { toAbsoluteUrl } from "@/lib/site-url"
@@ -28,11 +29,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function PropertiesPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
+export default async function PropertiesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   const [t, catalog] = await Promise.all([
     getTranslations({ locale, namespace: "Properties" }),

@@ -1,11 +1,9 @@
 "use client"
 
-import * as React from "react"
-import { useTranslations } from "next-intl"
-import { useMounted } from "@/hooks/use-mounted"
-import { useTheme } from "@/lib/theme"
-import { cn } from "@/lib/cn"
 import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react"
+import { useTranslations } from "next-intl"
+import * as React from "react"
+
 import { Button } from "@/components/ui/shadcn/button"
 import {
   DropdownMenu,
@@ -14,17 +12,19 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/shadcn/dropdown-menu"
+import { useMounted } from "@/hooks/use-mounted"
+import { cn } from "@/lib/cn"
+import { useTheme } from "@/lib/theme"
 
 type Mode = "light" | "dark" | "system"
 
 const MODES: readonly Mode[] = ["light", "dark", "system"]
 
-const MENU_LABEL_KEY: Record<Mode, "labelLight" | "labelDark" | "labelSystem"> =
-  {
-    light: "labelLight",
-    dark: "labelDark",
-    system: "labelSystem",
-  }
+const MENU_LABEL_KEY: Record<Mode, "labelLight" | "labelDark" | "labelSystem"> = {
+  light: "labelLight",
+  dark: "labelDark",
+  system: "labelSystem",
+}
 
 function ModeIcon({ mode, className }: { mode: Mode; className?: string }) {
   if (mode === "light") return <SunIcon className={className} />
@@ -44,7 +44,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       ? "toggleLight"
       : effectiveMode === "dark"
         ? "toggleDark"
-        : "toggleSystem"
+        : "toggleSystem",
   )
 
   return (
@@ -58,7 +58,7 @@ export function ThemeToggle({ className }: { className?: string }) {
           title={toggleAriaLabel}
           className={cn(
             "hover:bg-tech-main/10 hover:text-tech-main-dark hover:no-underline md:size-10",
-            className
+            className,
           )}>
           <span
             aria-hidden="true"

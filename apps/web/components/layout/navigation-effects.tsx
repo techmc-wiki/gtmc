@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+
 import { SITE_SCROLL_ROOT_ID } from "@/hooks/site-scroll-root"
 
 export function ScrollRoot({ children }: { children: ReactNode }) {

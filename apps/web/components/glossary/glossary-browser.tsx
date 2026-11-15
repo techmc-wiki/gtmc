@@ -1,36 +1,34 @@
 "use client"
 
-import * as React from "react"
 import { Plus, X } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { LetterBar } from "@/components/glossary/letter-bar"
-import { GlossarySearch } from "@/components/glossary/glossary-search"
+import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs"
+import * as React from "react"
+
+import { CategoryFacet, type GlossaryCategoryOption } from "@/components/glossary/category-filter"
 import { FieldPicker } from "@/components/glossary/column-picker"
-import {
-  CategoryFacet,
-  type GlossaryCategoryOption,
-} from "@/components/glossary/category-filter"
+import { GlossarySearch } from "@/components/glossary/glossary-search"
 import { GlossaryTable } from "@/components/glossary/glossary-table"
+import { LetterBar } from "@/components/glossary/letter-bar"
 import { GlossaryDetailPanel } from "@/components/glossary/term-detail"
 import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Button } from "@/components/ui/shadcn/button"
 import { Separator } from "@/components/ui/shadcn/separator"
 import { Link } from "@/i18n/navigation"
-import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
+import { cn } from "@/lib/cn"
 import { filterGlossaryEntries } from "@/lib/glossary/filter-entries"
+import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
 import {
   readPersistedGlossaryColumns,
   writePersistedGlossaryColumns,
 } from "@/lib/glossary/persisted-prefs"
+import { useLocalizedGlossary } from "@/lib/glossary/use-localized-glossary"
 import {
   GLOSSARY_COLUMNS,
   isGlossaryColumn,
   type GlossaryColumn,
 } from "@/lib/glossary/view-options"
-import { useLocalizedGlossary } from "@/lib/glossary/use-localized-glossary"
-import { cn } from "@/lib/cn"
-import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs"
 
 const SKELETON_ROWS = 12
 
@@ -57,10 +55,7 @@ function GlossaryTableSkeleton() {
             {Array.from({ length: SKELETON_ROWS }, (_, i) => (
               <tr key={i} className="border-tech-line/30 border-b">
                 <td className="px-3 py-3">
-                  <SegmentedBar
-                    opacity={i % 3 === 0 ? "high" : "medium"}
-                    className="h-4 w-32"
-                  />
+                  <SegmentedBar opacity={i % 3 === 0 ? "high" : "medium"} className="h-4 w-32" />
                 </td>
                 <td className="px-3 py-3">
                   <SegmentedBar opacity="low" className="h-4 w-16" />
@@ -80,10 +75,7 @@ function GlossaryTableSkeleton() {
         className="relative space-y-3 md:hidden">
         {Array.from({ length: 6 }, (_, i) => (
           <div key={i} className="border-tech-line/30 space-y-2 border p-3">
-            <SegmentedBar
-              opacity={i % 2 === 0 ? "high" : "medium"}
-              className="h-4 w-36"
-            />
+            <SegmentedBar opacity={i % 2 === 0 ? "high" : "medium"} className="h-4 w-36" />
             <SegmentedBar opacity="low" className="h-3 w-20" />
             <SegmentedBar opacity="medium" className="h-3 w-full" />
           </div>
@@ -125,10 +117,10 @@ export function GlossaryBrowser({
   const [query, setQuery] = useQueryState("q", parseAsString.withDefault(""))
   const [selectedCategories, setSelectedCategories] = useQueryState(
     "categories",
-    parseAsArrayOf(parseAsString).withDefault([])
+    parseAsArrayOf(parseAsString).withDefault([]),
   )
-  const [visibleColumns, setVisibleColumns] = React.useState<GlossaryColumn[]>(
-    () => sanitizeColumns(readPersistedGlossaryColumns(locale))
+  const [visibleColumns, setVisibleColumns] = React.useState<GlossaryColumn[]>(() =>
+    sanitizeColumns(readPersistedGlossaryColumns(locale)),
   )
 
   const handleVisibleColumnsChange = React.useCallback(
@@ -137,10 +129,9 @@ export function GlossaryBrowser({
       setVisibleColumns(sanitized)
       writePersistedGlossaryColumns(locale, sanitized)
     },
-    [locale]
+    [locale],
   )
-  const [selectedEntry, setSelectedEntry] =
-    React.useState<GlossaryIndexEntry | null>(null)
+  const [selectedEntry, setSelectedEntry] = React.useState<GlossaryIndexEntry | null>(null)
   const isReady = !entriesLoading
 
   const filteredEntries = React.useMemo(
@@ -149,7 +140,7 @@ export function GlossaryBrowser({
         query,
         selectedCategories,
       }),
-    [entries, query, selectedCategories]
+    [entries, query, selectedCategories],
   )
   const resultCount = filteredEntries.length
   const hasActiveQuery = query.trim().length > 0
@@ -166,16 +157,14 @@ export function GlossaryBrowser({
 
   const handleRemoveCategory = React.useCallback(
     (name: string) => {
-      void setSelectedCategories(
-        selectedCategories.filter((entry) => entry !== name)
-      )
+      void setSelectedCategories(selectedCategories.filter((entry) => entry !== name))
     },
-    [selectedCategories, setSelectedCategories]
+    [selectedCategories, setSelectedCategories],
   )
 
   const entriesBySlug = React.useMemo(
     () => new Map(entries.map((entry) => [entry.slug, entry] as const)),
-    [entries]
+    [entries],
   )
 
   const openDetailBySlug = React.useCallback(
@@ -183,18 +172,14 @@ export function GlossaryBrowser({
       const entry = entriesBySlug.get(slug)
       if (entry) setSelectedEntry(entry)
     },
-    [entriesBySlug]
+    [entriesBySlug],
   )
 
   const closeDetailPanel = React.useCallback(() => {
     setSelectedEntry(null)
 
     if (window.location.hash.startsWith("#term=")) {
-      window.history.replaceState(
-        null,
-        "",
-        `${window.location.pathname}${window.location.search}`
-      )
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`)
     }
   }, [])
 
@@ -218,11 +203,8 @@ export function GlossaryBrowser({
   }, [openDetailBySlug])
 
   const availableLetters = React.useMemo(
-    () =>
-      hasActiveFilters
-        ? []
-        : [...new Set(entries.map((entry) => entry.indexLetter))],
-    [entries, hasActiveFilters]
+    () => (hasActiveFilters ? [] : [...new Set(entries.map((entry) => entry.indexLetter))]),
+    [entries, hasActiveFilters],
   )
 
   return (
@@ -230,11 +212,7 @@ export function GlossaryBrowser({
       <section aria-label={t("controlsLabel")} className="relative z-30">
         <div className="border-tech-main/30 bg-surface-overlay/60 relative flex flex-col gap-4 border p-3 backdrop-blur-sm sm:p-4">
           <div className="flex flex-wrap items-center gap-2">
-            <GlossarySearch
-              query={query}
-              onQueryChange={setQuery}
-              className="min-w-56 flex-1"
-            />
+            <GlossarySearch query={query} onQueryChange={setQuery} className="min-w-56 flex-1" />
             <CategoryFacet
               categories={categories}
               selected={selectedCategories}
@@ -244,10 +222,7 @@ export function GlossaryBrowser({
               orientation="vertical"
               className="bg-tech-line/40 mx-1 hidden h-6 sm:block"
             />
-            <FieldPicker
-              visibleColumns={visibleColumns}
-              onChange={handleVisibleColumnsChange}
-            />
+            <FieldPicker visibleColumns={visibleColumns} onChange={handleVisibleColumnsChange} />
             <Button asChild size="sm" className="ml-auto min-h-11">
               <Link href="/glossary/edit/new" locale={locale as "en" | "zh"}>
                 <Plus aria-hidden="true" />
@@ -280,10 +255,7 @@ export function GlossaryBrowser({
                 </Badge>
               ) : null}
               {selectedCategories.map((name) => (
-                <Badge
-                  key={name}
-                  variant="neutral"
-                  className="gap-1.5 py-1 pr-1 pl-2.5">
+                <Badge key={name} variant="neutral" className="gap-1.5 py-1 pr-1 pl-2.5">
                   <span className="max-w-48 truncate">{name}</span>
                   <Button
                     type="button"
@@ -309,9 +281,7 @@ export function GlossaryBrowser({
         </div>
       </section>
 
-      {hasActiveFilters ? null : (
-        <LetterBar availableLetters={availableLetters} />
-      )}
+      {hasActiveFilters ? null : <LetterBar availableLetters={availableLetters} />}
 
       {entriesLoading ? (
         <GlossaryTableSkeleton />

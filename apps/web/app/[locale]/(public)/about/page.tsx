@@ -1,20 +1,18 @@
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
+
 import { PageHeader } from "@/components/ui/headings"
-import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
+import AboutContentEn from "@/content/about/en.mdx"
+import AboutContentZh from "@/content/about/zh.mdx"
 import { getManifestStats, loadArticleManifest } from "@/lib/articles/manifest"
 import { getUniqueAuthors } from "@/lib/articles/person-resolver"
 import { buildWebPageJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
-import type { ArticleLocale } from "@gtmc/ssg/articles/types"
-import AboutContentEn from "@/content/about/en.mdx"
-import AboutContentZh from "@/content/about/zh.mdx"
+import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
 
 const aboutContentByLocale = { en: AboutContentEn, zh: AboutContentZh } as const
 
-import {
-  buildAboutStats,
-  buildPreviewAuthors,
-} from "../_shared/author-page-data"
+import { buildAboutStats, buildPreviewAuthors } from "../_shared/author-page-data"
 
 export async function generateMetadata({
   params,
@@ -50,11 +48,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function AboutPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
+export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   const articleLocale = locale as ArticleLocale
   const t = await getTranslations({ locale, namespace: "About" })
@@ -63,20 +57,11 @@ export default async function AboutPage({
   const stats = getManifestStats(articleLocale)
   const manifest = loadArticleManifest()
   const allAuthors = getUniqueAuthors(manifest)
-  const previewAuthors = buildPreviewAuthors(
-    articleLocale,
-    allAuthors,
-    manifest
-  )
+  const previewAuthors = buildPreviewAuthors(articleLocale, allAuthors, manifest)
   const displayStats = buildAboutStats(stats, allAuthors, locale)
 
   const jsonLd = serializeJsonLd(
-    buildWebPageJsonLd(
-      siteUrl,
-      `/${locale}/about`,
-      t("pageTitle"),
-      t("metaDescription")
-    )
+    buildWebPageJsonLd(siteUrl, `/${locale}/about`, t("pageTitle"), t("metaDescription")),
   )
 
   const Content = aboutContentByLocale[articleLocale]

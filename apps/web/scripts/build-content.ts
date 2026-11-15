@@ -1,5 +1,5 @@
-import { runScriptAsync } from "./lib/run"
 import { createLogger, describeError, runBuildStep } from "./lib/logger"
+import { runScriptAsync } from "./lib/run"
 
 const logger = createLogger("content")
 async function main(): Promise<void> {
@@ -8,21 +8,17 @@ async function main(): Promise<void> {
 
   await Promise.all([
     runBuildStep(logger, "repository-contributors", () =>
-      runScriptAsync("scripts/generate-repository-contributor-stats.ts")
+      runScriptAsync("scripts/generate-repository-contributor-stats.ts"),
     ),
     runBuildStep(logger, "manifest", () =>
-      runScriptAsync("scripts/generate-article-manifest.ts")
+      runScriptAsync("scripts/generate-article-manifest.ts"),
     ).then(() =>
       runBuildStep(logger, "article-content", () =>
-        runScriptAsync("scripts/generate-article-content.ts")
-      )
+        runScriptAsync("scripts/generate-article-content.ts"),
+      ),
     ),
-    runBuildStep(logger, "glossary", () =>
-      runScriptAsync("scripts/generate-glossary-manifest.ts")
-    ),
-    runBuildStep(logger, "draft-guides", () =>
-      runScriptAsync("scripts/stage-draft-guides.ts")
-    ),
+    runBuildStep(logger, "glossary", () => runScriptAsync("scripts/generate-glossary-manifest.ts")),
+    runBuildStep(logger, "draft-guides", () => runScriptAsync("scripts/stage-draft-guides.ts")),
   ])
 
   logger.event("content.completed", {

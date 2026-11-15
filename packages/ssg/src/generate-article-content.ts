@@ -1,13 +1,9 @@
 import fs from "fs"
 import path from "path"
 
-import type { ArticleEntry } from "./articles/types"
+import { isLocalArticleAssetPath, resolveArticleAssetPath } from "./articles/article-asset-path"
 import { artifactFilename } from "./articles/content"
 import type { ArticleContentArtifact } from "./articles/content"
-import {
-  isLocalArticleAssetPath,
-  resolveArticleAssetPath,
-} from "./articles/article-asset-path"
 import {
   parseSourceReadmeFrontMatter,
   parseSourceFrontMatter,
@@ -20,8 +16,9 @@ import type {
   TranslationReadmeFrontMatter,
   TranslationFrontMatter,
 } from "./articles/frontmatter-parser"
-import { analyzeJavaCodeReferences } from "./markdown/code-provenance.server"
+import type { ArticleEntry } from "./articles/types"
 import type { BuildLogger } from "./logger"
+import { analyzeJavaCodeReferences } from "./markdown/code-provenance.server"
 
 export interface ArticleContentOptions {
   articlesPath: string
@@ -46,22 +43,16 @@ export async function generateArticleContent({
 
   function copyBannerAssetToPublic(
     banner: { src: string } | undefined,
-    articleFilePath: string
+    articleFilePath: string,
   ): void {
-    const resolvedBannerPath = resolveArticleAssetPath(
-      banner?.src,
-      articleFilePath
-    )
+    const resolvedBannerPath = resolveArticleAssetPath(banner?.src, articleFilePath)
     if (!resolvedBannerPath) return
     if (!isLocalArticleAssetPath(resolvedBannerPath)) return
 
     const sourcePath = path.join(ARTICLES_PATH, resolvedBannerPath)
     const targetPath = path.join(PUBLIC_ARTICLE_ASSET_DIR, resolvedBannerPath)
 
-    const relativeTargetPath = path.relative(
-      PUBLIC_ARTICLE_ASSET_DIR,
-      targetPath
-    )
+    const relativeTargetPath = path.relative(PUBLIC_ARTICLE_ASSET_DIR, targetPath)
     if (
       relativeTargetPath === ".." ||
       relativeTargetPath.startsWith(`..${path.sep}`) ||
@@ -91,23 +82,19 @@ export async function generateArticleContent({
   }
 
   const entries = Object.values(
-    JSON.parse(
-      fs.readFileSync(path.join(dataDir, "manifest.json"), "utf-8")
-    ) as Record<string, ArticleEntry>
+    JSON.parse(fs.readFileSync(path.join(dataDir, "manifest.json"), "utf-8")) as Record<
+      string,
+      ArticleEntry
+    >,
   )
   const renderJobs: Array<() => Promise<void>> = []
 
   for (const entry of entries) {
-    if (
-      !entry.filePath.endsWith(".md") ||
-      (entry.isFolder && !entry.hasIntro)
-    ) {
+    if (!entry.filePath.endsWith(".md") || (entry.isFolder && !entry.hasIntro)) {
       continue
     }
 
-    for (const [locale, localizedPath] of Object.entries(
-      entry.localizedFilePaths
-    )) {
+    for (const [locale, localizedPath] of Object.entries(entry.localizedFilePaths)) {
       const sourcePath = path.join(ARTICLES_PATH, localizedPath)
 
       const localeDir = path.join(TEMP_DIR, locale)
@@ -125,7 +112,7 @@ export async function generateArticleContent({
             locale,
             slug: entry.slug,
           },
-          sourcePath
+          sourcePath,
         )
         errorCount++
         if (IS_PRODUCTION) {
@@ -135,17 +122,9 @@ export async function generateArticleContent({
       }
 
       renderJobs.push(async () => {
-        const rendered = await renderArtifact(
-          entry,
-          locale,
-          fileContent,
-          tempOutputPath
-        )
+        const rendered = await renderArtifact(entry, locale, fileContent, tempOutputPath)
         if (rendered) {
-          copyBannerAssetToPublic(
-            rendered.banner as { src: string } | undefined,
-            localizedPath
-          )
+          copyBannerAssetToPublic(rendered.banner as { src: string } | undefined, localizedPath)
           generatedCount++
         } else {
           errorCount++
@@ -176,7 +155,7 @@ export async function generateArticleContent({
     entry: ArticleEntry,
     locale: string,
     fileContent: string,
-    outputPath: string
+    outputPath: string,
   ): Promise<Record<string, unknown> | null> {
     let artifactContent: string
     let frontmatter: Record<string, unknown>
@@ -193,13 +172,12 @@ export async function generateArticleContent({
         logger.error(
           "article-content.frontmatter.parse-failed",
           { locale, slug: entry.slug, type: "source" },
-          String(error)
+          String(error),
         )
         return null
       }
 
-      const chapterTitle =
-        "chapter-title" in fm ? fm["chapter-title"] : undefined
+      const chapterTitle = "chapter-title" in fm ? fm["chapter-title"] : undefined
       const introTitle = "intro-title" in fm ? fm["intro-title"] : undefined
       frontmatter = {
         ...("title" in fm && { title: fm.title }),
@@ -207,8 +185,7 @@ export async function generateArticleContent({
           "chapter-title": chapterTitle,
         }),
         ...(introTitle && { "intro-title": introTitle }),
-        ...("description" in fm &&
-          fm.description && { description: fm.description }),
+        ...("description" in fm && fm.description && { description: fm.description }),
         index: fm.index,
         ...("is-advanced" in fm &&
           fm["is-advanced"] !== undefined && {
@@ -232,13 +209,12 @@ export async function generateArticleContent({
         logger.error(
           "article-content.frontmatter.parse-failed",
           { locale, slug: entry.slug, type: "translation" },
-          String(error)
+          String(error),
         )
         return null
       }
 
-      const chapterTitle =
-        "chapter-title" in fm ? fm["chapter-title"] : undefined
+      const chapterTitle = "chapter-title" in fm ? fm["chapter-title"] : undefined
       const introTitle = "intro-title" in fm ? fm["intro-title"] : undefined
       frontmatter = {
         ...("title" in fm && fm.title && { title: fm.title }),
@@ -246,12 +222,10 @@ export async function generateArticleContent({
           "chapter-title": chapterTitle,
         }),
         ...(introTitle && { "intro-title": introTitle }),
-        ...("description" in fm &&
-          fm.description && { description: fm.description }),
+        ...("description" in fm && fm.description && { description: fm.description }),
         ...("banner" in fm && fm.banner && { banner: fm.banner }),
         translatedFromRevision: entry.translatedFromRevisionByLocale.en,
-        translationFreshness:
-          entry.translationFreshnessByLocale.en || undefined,
+        translationFreshness: entry.translationFreshnessByLocale.en || undefined,
         created: entry.created || undefined,
         lastmod: entry.lastmodByLocale.en || undefined,
         index: entry.index >= 0 ? entry.index : undefined,
@@ -274,7 +248,7 @@ export async function generateArticleContent({
       logger.error(
         "article-content.code-provenance.invalid",
         { locale, slug: entry.slug },
-        String(error)
+        String(error),
       )
       return null
     }

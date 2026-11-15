@@ -1,11 +1,9 @@
 "use client"
 
 import { useEffect, useRef, useSyncExternalStore } from "react"
+
 import DotGrid from "@/components/DotGrid"
-import {
-  addSiteScrollListener,
-  getSiteScrollMetrics,
-} from "@/hooks/site-scroll-root"
+import { addSiteScrollListener, getSiteScrollMetrics } from "@/hooks/site-scroll-root"
 
 const DOT_PALETTES = {
   light: { base: "#d6d3c8", active: "#1d6a96" },
@@ -27,10 +25,7 @@ function getDotPaletteThemeServerSnapshot(): keyof typeof DOT_PALETTES {
 }
 
 function subscribeDotPaletteTheme(callback: () => void): () => void {
-  if (
-    typeof document === "undefined" ||
-    typeof MutationObserver === "undefined"
-  ) {
+  if (typeof document === "undefined" || typeof MutationObserver === "undefined") {
     return () => {}
   }
   const observer = new MutationObserver(callback)
@@ -45,7 +40,7 @@ function useDotPalette(): DotPalette {
   const theme = useSyncExternalStore(
     subscribeDotPaletteTheme,
     getDotPaletteThemeSnapshot,
-    getDotPaletteThemeServerSnapshot
+    getDotPaletteThemeServerSnapshot,
   )
   return DOT_PALETTES[theme]
 }

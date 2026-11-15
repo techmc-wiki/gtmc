@@ -1,7 +1,8 @@
 "use client"
 
-import * as React from "react"
 import { useTranslations } from "next-intl"
+import * as React from "react"
+
 import {
   Collapsible,
   CollapsibleTrigger,
@@ -20,10 +21,7 @@ interface TranslationsListProps {
   activeLocale: string
 }
 
-export function TranslationsList({
-  translations,
-  activeLocale,
-}: TranslationsListProps) {
+export function TranslationsList({ translations, activeLocale }: TranslationsListProps) {
   const t = useTranslations("Glossary")
 
   const availableLocales = LANGUAGE_CODES.filter((code) => {
@@ -39,9 +37,7 @@ export function TranslationsList({
     )
   }
 
-  const activeGlossaryLocale: GlossaryLocale | null = isGlossaryLocale(
-    activeLocale
-  )
+  const activeGlossaryLocale: GlossaryLocale | null = isGlossaryLocale(activeLocale)
     ? activeLocale
     : null
 
@@ -72,9 +68,7 @@ export function TranslationsList({
                     <span className="text-tech-main/45 font-mono text-xs tracking-widest uppercase">
                       {code.toUpperCase()}
                     </span>
-                    <span className="text-tech-main-dark truncate text-sm">
-                      {displayName}
-                    </span>
+                    <span className="text-tech-main-dark truncate text-sm">{displayName}</span>
                   </span>
                   <svg
                     aria-hidden="true"
@@ -99,9 +93,7 @@ export function TranslationsList({
                     {translation.value}
                   </p>
                   {translation.description.trim().length > 0 && (
-                    <p
-                      className="text-tech-main/70 text-sm/relaxed wrap-break-word"
-                      lang={code}>
+                    <p className="text-tech-main/70 text-sm/relaxed wrap-break-word" lang={code}>
                       {translation.description}
                     </p>
                   )}

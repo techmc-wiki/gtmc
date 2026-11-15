@@ -28,10 +28,7 @@ export function getSiteScrollProgress() {
   return docHeight > 0 ? Math.min(1, Math.max(0, scrollTop / docHeight)) : 0
 }
 
-export function addSiteScrollListener(
-  listener: EventListener,
-  options?: AddEventListenerOptions
-) {
+export function addSiteScrollListener(listener: EventListener, options?: AddEventListenerOptions) {
   const target = getSiteScrollRoot() ?? window
 
   target.addEventListener("scroll", listener, options)

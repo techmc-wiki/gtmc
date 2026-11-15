@@ -1,10 +1,12 @@
 import { ArrowRight } from "lucide-react"
 import { getTranslations } from "next-intl/server"
-import { Link } from "@/i18n/navigation"
+
 import { AdvancedMarker } from "@/components/articles/advanced-marker"
+import { Link } from "@/i18n/navigation"
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import { collectAppendixGroups } from "@/lib/articles/navigation-data"
 import { articleUrl } from "@/lib/articles/url"
-import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
+
 import { ChapterDisclosure } from "./chapter-disclosure"
 
 interface TocSectionProps {
@@ -35,17 +37,12 @@ function formatChapterNumber(chapter: ChapterNavNode): string | null {
   return index >= 1 ? String(index).padStart(2, "0") : null
 }
 
-function formatSectionNumber(
-  chapter: ChapterNavNode,
-  sectionIndex: number
-): string | null {
+function formatSectionNumber(chapter: ChapterNavNode, sectionIndex: number): string | null {
   const chapterIndex = chapter.index ?? -1
   if (chapterIndex < 1 || sectionIndex < 1) {
     return null
   }
-  const chapterPart = chapter.isAppendix
-    ? formatChapterNumber(chapter)
-    : String(chapterIndex)
+  const chapterPart = chapter.isAppendix ? formatChapterNumber(chapter) : String(chapterIndex)
   if (chapterPart === null) {
     return null
   }
@@ -92,9 +89,7 @@ function ChapterBlock({
     return (
       <li className="group/chapter-entry relative">
         <ChapterRegistrationTick />
-        <div className="group/chapter flex items-baseline gap-4 sm:gap-6">
-          {head}
-        </div>
+        <div className="group/chapter flex items-baseline gap-4 sm:gap-6">{head}</div>
       </li>
     )
   }
@@ -111,9 +106,7 @@ function ChapterBlock({
             </span>
             <span className="text-sm sm:text-base">
               {section.title}
-              {section.isAdvanced && (
-                <AdvancedMarker className="-mb-0.5 ml-1.5 align-middle" />
-              )}
+              {section.isAdvanced && <AdvancedMarker className="-mb-0.5 ml-1.5 align-middle" />}
             </span>
             <span className="border-tech-main/25 mb-1 grow self-end border-b border-dotted" />
             <span className="text-tech-main/0 group-hover/section:text-tech-main-dark shrink-0 transition-colors">
@@ -144,18 +137,16 @@ export async function TocSection({ tree, locale }: TocSectionProps) {
 
   const preface = tree.find((node) => node.isPreface && !node.isFolder)
   const chapters = tree.filter((node) => node.isFolder && !node.isAppendix)
-  const appendices = collectAppendixGroups(tree).map<ChapterNavNode>(
-    ({ owner, nodes }, index) => ({
-      id: owner.id,
-      title: owner.title,
-      slug: owner.slug,
-      isFolder: true,
-      parentId: null,
-      children: owner.isFolder ? nodes : [],
-      index: index + 1,
-      isAppendix: true,
-    })
-  )
+  const appendices = collectAppendixGroups(tree).map<ChapterNavNode>(({ owner, nodes }, index) => ({
+    id: owner.id,
+    title: owner.title,
+    slug: owner.slug,
+    isFolder: true,
+    parentId: null,
+    children: owner.isFolder ? nodes : [],
+    index: index + 1,
+    isAppendix: true,
+  }))
 
   return (
     <section
@@ -239,9 +230,7 @@ export async function TocSection({ tree, locale }: TocSectionProps) {
             <Link
               href="/glossary"
               className="group border-tech-main/40 hover:border-tech-main-dark hover:bg-tech-main-dark hover:text-tech-bg flex flex-col gap-2 border p-5 transition-colors">
-              <span className="display-title text-lg">
-                {t("glossaryCardTitle")}
-              </span>
+              <span className="display-title text-lg">{t("glossaryCardTitle")}</span>
               <span className="text-tech-main group-hover:text-tech-bg/80 text-xs/relaxed transition-colors">
                 {t("glossaryCardDesc")}
               </span>
@@ -257,9 +246,7 @@ export async function TocSection({ tree, locale }: TocSectionProps) {
             <Link
               href="/draft"
               className="group border-tech-main/40 hover:border-tech-main-dark hover:bg-tech-main-dark hover:text-tech-bg flex flex-col gap-2 border p-5 transition-colors">
-              <span className="display-title text-lg">
-                {t("contributeCardTitle")}
-              </span>
+              <span className="display-title text-lg">{t("contributeCardTitle")}</span>
               <span className="text-tech-main group-hover:text-tech-bg/80 text-xs/relaxed transition-colors">
                 {t("contributeCardDesc")}
               </span>

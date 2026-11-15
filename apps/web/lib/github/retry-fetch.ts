@@ -10,11 +10,7 @@ function sleep(ms: number): Promise<void> {
 export async function executeWithRetry<TResult>(params: {
   retries: number
   operation: () => Promise<TResult>
-  onError: (
-    error: unknown,
-    attempt: number,
-    retries: number
-  ) => RetryErrorAction<TResult>
+  onError: (error: unknown, attempt: number, retries: number) => RetryErrorAction<TResult>
   getBackoffMs?: (attempt: number) => number
 }): Promise<TResult> {
   const { retries, operation, onError, getBackoffMs } = params

@@ -1,51 +1,48 @@
-import { ARTICLES_SOURCE_BRANCH } from "@/lib/articles/source";
-import {
-  getDuplicateDraftFilePaths,
-  normalizeDraftFileCollection,
-  type DraftFileRecord,
-} from "@/lib/drafts/files";
 import {
   getArticleSourceHeadSha,
   resolveArticleFilePath,
   upsertFileOnBranch,
   upsertFilesOnBranch,
   type BranchFileEntry,
-} from "@/lib/articles/branch";
-import { ARTICLES_REPO, getOctokit } from "@/lib/github/repos";
-import { SubmissionInProgressError } from "@/lib/drafts/submission";
+} from "@/lib/articles/branch"
+import { ARTICLES_SOURCE_BRANCH } from "@/lib/articles/source"
+import {
+  getDuplicateDraftFilePaths,
+  normalizeDraftFileCollection,
+  type DraftFileRecord,
+} from "@/lib/drafts/files"
+import { SubmissionInProgressError } from "@/lib/drafts/submission"
+import { ARTICLES_REPO, getOctokit } from "@/lib/github/repos"
 
 export interface DraftPullRequestResult {
-  activeFileId: string;
-  files: DraftFileRecord[];
-  prNumber: number;
-  prUrl: string;
+  activeFileId: string
+  files: DraftFileRecord[]
+  prNumber: number
+  prUrl: string
 }
 
 interface DraftSubmissionInput {
-  activeFileId?: string;
-  branchName: string;
-  recoverOnly: boolean;
-  title: string;
-  files: DraftFileRecord[];
-  imageEntries?: BranchFileEntry[];
-  baseMainSha: string;
-  authorName: string;
-  authorEmail: string;
-  token?: string;
+  activeFileId?: string
+  branchName: string
+  recoverOnly: boolean
+  title: string
+  files: DraftFileRecord[]
+  imageEntries?: BranchFileEntry[]
+  baseMainSha: string
+  authorName: string
+  authorEmail: string
+  token?: string
 }
 
-export async function findArticlePullRequestByBranch(
-  branchName: string,
-  token?: string
-) {
-  const octokit = getOctokit(token);
+export async function findArticlePullRequestByBranch(branchName: string, token?: string) {
+  const octokit = getOctokit(token)
   const { data } = await octokit.pulls.list({
     owner: ARTICLES_REPO.owner,
     repo: ARTICLES_REPO.name,
     head: `${ARTICLES_REPO.owner}:${branchName}`,
     state: "all",
-  });
-  return data[0] ?? null;
+  })
+  return data[0] ?? null
 }
 
 export async function openDraftPullRequest({
@@ -60,54 +57,54 @@ export async function openDraftPullRequest({
   authorEmail,
   token,
 }: DraftSubmissionInput): Promise<DraftPullRequestResult> {
-  const octokit = getOctokit(token);
-  const latestMainSha = await getArticleSourceHeadSha(token);
+  const octokit = getOctokit(token)
+  const latestMainSha = await getArticleSourceHeadSha(token)
   const resolvedDraftFiles = await Promise.all(
     files.map(async (file) => ({
       ...file,
       filePath: await resolveArticleFilePath(file.filePath, [baseMainSha, latestMainSha], token),
     })),
-  );
+  )
   const normalizedFiles = normalizeDraftFileCollection({
     activeFileId,
     files: resolvedDraftFiles,
-  });
-  const duplicateResolvedPaths = getDuplicateDraftFilePaths(normalizedFiles.files);
+  })
+  const duplicateResolvedPaths = getDuplicateDraftFilePaths(normalizedFiles.files)
   if (duplicateResolvedPaths.length > 0) {
     throw new Error(
       `Duplicate resolved file paths are not allowed: ${duplicateResolvedPaths.join(", ")}`,
-    );
+    )
   }
-  const existingPr = await findArticlePullRequestByBranch(branchName, token);
+  const existingPr = await findArticlePullRequestByBranch(branchName, token)
   if (existingPr) {
     return {
       activeFileId: normalizedFiles.activeFileId,
       files: normalizedFiles.files,
       prNumber: existingPr.number,
       prUrl: existingPr.html_url,
-    };
+    }
   }
   if (recoverOnly) {
-    throw new SubmissionInProgressError();
+    throw new SubmissionInProgressError()
   }
   try {
     await octokit.git.getRef({
       owner: ARTICLES_REPO.owner,
       repo: ARTICLES_REPO.name,
       ref: `heads/${branchName}`,
-    });
+    })
   } catch (error) {
-    if (!(error instanceof Error) || !("status" in error) || error.status !== 404) throw error;
+    if (!(error instanceof Error) || !("status" in error) || error.status !== 404) throw error
     await octokit.git.createRef({
       owner: ARTICLES_REPO.owner,
       repo: ARTICLES_REPO.name,
       ref: `refs/heads/${branchName}`,
       sha: latestMainSha,
-    });
+    })
   }
 
   if (normalizedFiles.files.length === 1) {
-    const file = normalizedFiles.files[0];
+    const file = normalizedFiles.files[0]
     await upsertFileOnBranch({
       authorEmail,
       authorName,
@@ -116,7 +113,7 @@ export async function openDraftPullRequest({
       filePath: file.filePath,
       message: `docs: ${title}`,
       token,
-    });
+    })
   } else if (normalizedFiles.files.length > 1) {
     await upsertFilesOnBranch(
       token,
@@ -126,11 +123,11 @@ export async function openDraftPullRequest({
       })),
       branchName,
       { name: authorName, email: authorEmail },
-    );
+    )
   }
 
   if (imageEntries && imageEntries.length > 0) {
-    await upsertFilesOnBranch(token, imageEntries, branchName);
+    await upsertFilesOnBranch(token, imageEntries, branchName)
   }
 
   const { data: pr } = await octokit.pulls.create({
@@ -140,14 +137,14 @@ export async function openDraftPullRequest({
     head: branchName,
     base: ARTICLES_SOURCE_BRANCH,
     body: `由 ${authorName} 提交审核。`,
-  });
+  })
 
   return {
     activeFileId: normalizedFiles.activeFileId,
     files: normalizedFiles.files,
     prNumber: pr.number,
     prUrl: pr.html_url,
-  };
+  }
 }
 
 export async function getArticlePullRequest(prNumber: number, token?: string) {
@@ -155,6 +152,6 @@ export async function getArticlePullRequest(prNumber: number, token?: string) {
     owner: ARTICLES_REPO.owner,
     repo: ARTICLES_REPO.name,
     pull_number: prNumber,
-  });
-  return data;
+  })
+  return data
 }

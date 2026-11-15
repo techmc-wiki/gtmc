@@ -6,6 +6,7 @@
 import crypto from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
+
 import { workspacePath } from "@/lib/workspace-paths"
 
 const PDF_ROOT = workspacePath("tools", "pdf")
@@ -14,10 +15,7 @@ const PDF_ROOT = workspacePath("tools", "pdf")
  * Writes through a sibling temporary file and renames it into place, so a
  * concurrent reader never observes a partially written artifact.
  */
-export async function writeFileAtomic(
-  target: string,
-  data: string | Buffer
-): Promise<void> {
+export async function writeFileAtomic(target: string, data: string | Buffer): Promise<void> {
   const temp = `${target}.${process.pid}.${crypto.randomUUID()}.part`
   try {
     await fs.promises.writeFile(temp, data, "utf-8")

@@ -1,4 +1,5 @@
 import { Octokit } from "@octokit/rest"
+
 import { resolveGithubToken } from "./tokens"
 
 export type RepoTarget = { owner: string; name: string }

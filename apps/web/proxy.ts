@@ -1,17 +1,12 @@
-import { auth } from "@/lib/auth"
 import type { ArticleEntry, ArticleLocale } from "@gtmc/ssg/articles/types"
 import type { NextAuthRequest } from "next-auth"
-import {
-  isDevFixtureAuthEnabled,
-  isLocalDevelopmentRequest,
-} from "@/lib/auth/dev-fixture-config"
 import createMiddleware from "next-intl/middleware"
-import {
-  NextResponse,
-  type NextFetchEvent,
-  type NextRequest,
-} from "next/server"
+import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server"
+
 import { routing } from "@/i18n/routing"
+import { auth } from "@/lib/auth"
+import { isDevFixtureAuthEnabled, isLocalDevelopmentRequest } from "@/lib/auth/dev-fixture-config"
+
 import articleManifest from "./data/manifest.json" with { type: "json" }
 
 const articleEntriesBySlug = articleManifest as Record<string, ArticleEntry>
@@ -28,10 +23,7 @@ function decodeArticlePath(path: string): string {
   }
 }
 
-function resolveCanonicalArticleSlug(
-  entry: ArticleEntry,
-  locale: ArticleLocale
-): string | null {
+function resolveCanonicalArticleSlug(entry: ArticleEntry, locale: ArticleLocale): string | null {
   if (!entry.isFolder) {
     return entry.availableLocales.includes(locale) ? entry.slug : null
   }
@@ -48,17 +40,14 @@ function canonicalizeArticleRequest(req: NextRequest): Response | null {
   if (!match) return null
 
   const [, requestedLocaleSegment, rawPath] = match
-  const requestedLocale: ArticleLocale =
-    requestedLocaleSegment === "en" ? "en" : "zh"
+  const requestedLocale: ArticleLocale = requestedLocaleSegment === "en" ? "en" : "zh"
   const requestedSlug = rawPath ? decodeArticlePath(rawPath) : "preface"
   const entry = Object.hasOwn(articleEntriesBySlug, requestedSlug)
     ? articleEntriesBySlug[requestedSlug]
     : undefined
   if (!entry) return null
 
-  const contentLocale = entry.availableLocales.includes(requestedLocale)
-    ? requestedLocale
-    : "zh"
+  const contentLocale = entry.availableLocales.includes(requestedLocale) ? requestedLocale : "zh"
   const canonicalSlug = resolveCanonicalArticleSlug(entry, contentLocale)
   if (!canonicalSlug) return null
 
@@ -84,16 +73,12 @@ function getRequestOrigin(req: NextRequest): string {
     return req.nextUrl.origin
   }
 
-  const protocol =
-    req.headers.get("x-forwarded-proto") ?? req.nextUrl.protocol.slice(0, -1)
+  const protocol = req.headers.get("x-forwarded-proto") ?? req.nextUrl.protocol.slice(0, -1)
 
   return `${protocol}://${host}`
 }
 
-function normalizeRedirectOrigin(
-  req: NextRequest,
-  response: Response
-): Response {
+function normalizeRedirectOrigin(req: NextRequest, response: Response): Response {
   const location = response.headers.get("location")
   if (!location) {
     return response
@@ -116,12 +101,10 @@ function normalizeRedirectOrigin(
 }
 
 function isPrivateRequest(req: NextRequest): boolean {
-  const pathWithoutLocale =
-    req.nextUrl.pathname.replace(localePattern, "") || "/"
+  const pathWithoutLocale = req.nextUrl.pathname.replace(localePattern, "") || "/"
 
   return privateRoutes.some(
-    (route) =>
-      pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`)
+    (route) => pathWithoutLocale === route || pathWithoutLocale.startsWith(`${route}/`),
   )
 }
 
@@ -157,10 +140,7 @@ function handleIntlRequest(req: NextRequest): Response {
   }
 
   const response = normalizeRedirectOrigin(req, intlMiddleware(req))
-  if (
-    pathname === "/" &&
-    (response.status === 307 || response.status === 302)
-  ) {
+  if (pathname === "/" && (response.status === 307 || response.status === 302)) {
     const location = response.headers.get("location")
     if (location) {
       const headers = new Headers(response.headers)
@@ -174,35 +154,26 @@ function handleIntlRequest(req: NextRequest): Response {
   return response
 }
 
-const authenticatedProxy = auth(
-  (req: NextAuthRequest, event: NextFetchEvent) => {
-    void event
+const authenticatedProxy = auth((req: NextAuthRequest, event: NextFetchEvent) => {
+  void event
 
-    if (
-      isDevFixtureAuthEnabled() &&
-      isLocalDevelopmentRequest(req) &&
-      !req.auth?.user
-    ) {
-      const fixtureUrl = new URL("/api/auth/dev-fixture", getRequestOrigin(req))
-      fixtureUrl.searchParams.set(
-        "callbackUrl",
-        req.nextUrl.pathname + req.nextUrl.search
-      )
-      return Response.redirect(fixtureUrl)
-    }
-
-    const pathname = req.nextUrl.pathname
-    const locale = pathname.match(localePattern)?.[1] ?? routing.defaultLocale
-
-    if (!req.auth?.user) {
-      const loginUrl = new URL(`/${locale}/login`, getRequestOrigin(req))
-      loginUrl.searchParams.set("callbackUrl", pathname + req.nextUrl.search)
-      return Response.redirect(loginUrl)
-    }
-
-    return handleIntlRequest(req)
+  if (isDevFixtureAuthEnabled() && isLocalDevelopmentRequest(req) && !req.auth?.user) {
+    const fixtureUrl = new URL("/api/auth/dev-fixture", getRequestOrigin(req))
+    fixtureUrl.searchParams.set("callbackUrl", req.nextUrl.pathname + req.nextUrl.search)
+    return Response.redirect(fixtureUrl)
   }
-)
+
+  const pathname = req.nextUrl.pathname
+  const locale = pathname.match(localePattern)?.[1] ?? routing.defaultLocale
+
+  if (!req.auth?.user) {
+    const loginUrl = new URL(`/${locale}/login`, getRequestOrigin(req))
+    loginUrl.searchParams.set("callbackUrl", pathname + req.nextUrl.search)
+    return Response.redirect(loginUrl)
+  }
+
+  return handleIntlRequest(req)
+})
 
 export default function proxy(req: NextRequest, event: NextFetchEvent) {
   const canonicalArticleRedirect = canonicalizeArticleRequest(req)
@@ -215,10 +186,7 @@ export default function proxy(req: NextRequest, event: NextFetchEvent) {
     return markdownRewrite
   }
 
-  if (
-    isPrivateRequest(req) ||
-    (isDevFixtureAuthEnabled() && isLocalDevelopmentRequest(req))
-  ) {
+  if (isPrivateRequest(req) || (isDevFixtureAuthEnabled() && isLocalDevelopmentRequest(req))) {
     return authenticatedProxy(req, event)
   }
 

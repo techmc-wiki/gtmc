@@ -6,11 +6,7 @@ type PageSkeletonProps = {
   framed?: boolean
 }
 
-export function PageSkeleton({
-  label,
-  children,
-  framed = false,
-}: PageSkeletonProps) {
+export function PageSkeleton({ label, children, framed = false }: PageSkeletonProps) {
   return (
     <div>
       <div

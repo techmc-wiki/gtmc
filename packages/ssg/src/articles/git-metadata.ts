@@ -1,7 +1,8 @@
 import { execFile } from "node:child_process"
-import { promisify } from "node:util"
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
+import { promisify } from "node:util"
+
 import { load as yamlLoad } from "js-yaml"
 
 const execFileAsync = promisify(execFile)
@@ -39,21 +40,14 @@ const cache = new Map<string, unknown>()
  * Returns configured Git usernames in lowercase without resolving aliases.
  * Attribution filters expand these identities to canonical handles when needed.
  */
-export async function loadArticleEditExclusions(
-  configDir: string
-): Promise<string[]> {
+export async function loadArticleEditExclusions(configDir: string): Promise<string[]> {
   const key = `exclusions:${configDir}`
   const cached = cache.get(key) as string[] | undefined
   if (cached) return cached
 
   try {
-    const content = await readFile(
-      join(configDir, "article-edit-exclusions.yml"),
-      "utf-8"
-    )
-    const exclusions = ((yamlLoad(content) as string[]) || []).map((id) =>
-      id.toLowerCase()
-    )
+    const content = await readFile(join(configDir, "article-edit-exclusions.yml"), "utf-8")
+    const exclusions = ((yamlLoad(content) as string[]) || []).map((id) => id.toLowerCase())
     cache.set(key, exclusions)
     return exclusions
   } catch {
@@ -66,9 +60,7 @@ export async function loadArticleEditExclusions(
  * Maps every canonical handle and alias to its canonical username. The
  * generated alias file is merged first, then optional overrides take precedence.
  */
-export async function loadAuthorAliases(
-  configDir: string
-): Promise<Map<string, string>> {
+export async function loadAuthorAliases(configDir: string): Promise<Map<string, string>> {
   const key = `aliases:${configDir}`
   const cached = cache.get(key) as Map<string, string> | undefined
   if (cached) return cached
@@ -83,18 +75,12 @@ export async function loadAuthorAliases(
   }
 
   try {
-    const content = await readFile(
-      join(configDir, "authors-alias.yml"),
-      "utf-8"
-    )
+    const content = await readFile(join(configDir, "authors-alias.yml"), "utf-8")
     merge(yamlLoad(content) as Record<string, string[]> | null)
   } catch {}
 
   try {
-    const content = await readFile(
-      join(configDir, "author-alias-overrides.yml"),
-      "utf-8"
-    )
+    const content = await readFile(join(configDir, "author-alias-overrides.yml"), "utf-8")
     merge(yamlLoad(content) as Record<string, string[]> | null)
   } catch {}
 
@@ -106,25 +92,17 @@ export async function getArticleAuthors(
   repoCwd: string,
   relPath: string,
   excludedEditors: string[],
-  aliases: Map<string, string>
+  aliases: Map<string, string>,
 ): Promise<{ author: string; coAuthors: string[] }> {
   const key = `authors:${repoCwd}:${relPath}`
-  const cached = cache.get(key) as
-    | { author: string; coAuthors: string[] }
-    | undefined
+  const cached = cache.get(key) as { author: string; coAuthors: string[] } | undefined
   if (cached) return cached
 
   try {
     const { stdout } = await execFileAsync(
       "git",
-      [
-        "log",
-        "--follow",
-        "--format=%an%x00%cn%x00%B%x00---COMMIT---",
-        "--",
-        relPath,
-      ],
-      { cwd: repoCwd, encoding: "utf-8" }
+      ["log", "--follow", "--format=%an%x00%cn%x00%B%x00---COMMIT---", "--", relPath],
+      { cwd: repoCwd, encoding: "utf-8" },
     )
 
     const commits: Commit[] = stdout
@@ -159,10 +137,7 @@ export async function getArticleAuthors(
 
     const resolve = (name: string) => aliases.get(name) || name
     const excludedLower = new Set(
-      excludedEditors.flatMap((e) => [
-        e.toLowerCase(),
-        resolve(e).toLowerCase(),
-      ])
+      excludedEditors.flatMap((e) => [e.toLowerCase(), resolve(e).toLowerCase()]),
     )
     const isExcluded = (name: string) => {
       const lower = name.toLowerCase()
@@ -235,19 +210,17 @@ export async function getArticleAuthors(
 export async function getArticleDates(
   repoCwd: string,
   relPath: string,
-  excludedEditors: string[]
+  excludedEditors: string[],
 ): Promise<{ created: string | null; lastmod: string | null }> {
   const key = `dates:${repoCwd}:${relPath}`
-  const cached = cache.get(key) as
-    | { created: string | null; lastmod: string | null }
-    | undefined
+  const cached = cache.get(key) as { created: string | null; lastmod: string | null } | undefined
   if (cached) return cached
 
   try {
     const { stdout } = await execFileAsync(
       "git",
       ["log", "--follow", "--format=%aI%x09%an", "--", relPath],
-      { cwd: repoCwd, encoding: "utf-8" }
+      { cwd: repoCwd, encoding: "utf-8" },
     )
 
     const lines = stdout.trim().split("\n").filter(Boolean)
@@ -279,12 +252,12 @@ export async function getArticleDates(
 export async function getLatestPathCommit(
   repoCwd: string,
   relPath: string,
-  revision = "HEAD"
+  revision = "HEAD",
 ): Promise<GitPathCommit | null> {
   const { stdout } = await execFileAsync(
     "git",
     ["log", "-n", "1", "--format=%H%x00%cI", revision, "--", relPath],
-    { cwd: repoCwd, encoding: "utf-8" }
+    { cwd: repoCwd, encoding: "utf-8" },
   )
   const [commitRevision, committedAt] = stdout.trim().split("\x00", 2)
   if (!commitRevision || !committedAt) return null
@@ -299,14 +272,8 @@ export async function getPathCommitCount({
 }: GitPathCommitRange): Promise<number> {
   const { stdout } = await execFileAsync(
     "git",
-    [
-      "log",
-      "--format=%H",
-      `${ancestorRevision}..${descendantRevision}`,
-      "--",
-      relPath,
-    ],
-    { cwd: repoCwd, encoding: "utf-8" }
+    ["log", "--format=%H", `${ancestorRevision}..${descendantRevision}`, "--", relPath],
+    { cwd: repoCwd, encoding: "utf-8" },
   )
   return stdout.split("\n").filter(Boolean).length
 }
@@ -314,13 +281,10 @@ export async function getPathCommitCount({
 export async function getTranslationProvenance(
   repoCwd: string,
   translationRelPath: string,
-  sourceRelPath: string
+  sourceRelPath: string,
 ): Promise<TranslationProvenance | null> {
   try {
-    const translationCommit = await getLatestPathCommit(
-      repoCwd,
-      translationRelPath
-    )
+    const translationCommit = await getLatestPathCommit(repoCwd, translationRelPath)
     if (!translationCommit) return null
 
     const [translatedFromCommit, latestOriginalCommit] = await Promise.all([
@@ -337,10 +301,7 @@ export async function getTranslationProvenance(
     })
     const latestOriginalTimestamp = Date.parse(latestOriginalCommit.committedAt)
     const translationTimestamp = Date.parse(translationCommit.committedAt)
-    if (
-      !Number.isFinite(latestOriginalTimestamp) ||
-      !Number.isFinite(translationTimestamp)
-    ) {
+    if (!Number.isFinite(latestOriginalTimestamp) || !Number.isFinite(translationTimestamp)) {
       return null
     }
 
@@ -350,10 +311,7 @@ export async function getTranslationProvenance(
       commitLag,
       dayLag: Math.max(
         0,
-        Math.floor(
-          (latestOriginalTimestamp - translationTimestamp) /
-            MILLISECONDS_PER_DAY
-        )
+        Math.floor((latestOriginalTimestamp - translationTimestamp) / MILLISECONDS_PER_DAY),
       ),
     }
   } catch (error) {

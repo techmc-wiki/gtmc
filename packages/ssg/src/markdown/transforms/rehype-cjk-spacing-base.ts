@@ -10,11 +10,7 @@ export function createRehypeCJKSpacing(spacingText: SpacingText) {
       if (node.type !== "text") return
       if (parent?.type === "element") {
         const parentTag = (parent as Element).tagName
-        if (
-          parentTag === "code" ||
-          parentTag === "pre" ||
-          parentTag === "mermaid-diagram"
-        ) {
+        if (parentTag === "code" || parentTag === "pre" || parentTag === "mermaid-diagram") {
           return
         }
       }

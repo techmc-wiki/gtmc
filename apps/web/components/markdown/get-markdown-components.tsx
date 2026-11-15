@@ -1,17 +1,15 @@
-import { LitematicaViewerDynamic } from "@/components/articles/litematica-viewer-dynamic"
-import type { ReactNode } from "react"
-
-import { MermaidDiagram } from "@/components/markdown/mermaid-diagram"
-import { PeopleMention } from "@/components/markdown/people-mention"
 import {
   ANSI_COLOR_NAMES,
   createAnsiColorTagName,
   type AnsiColorName,
 } from "@gtmc/ssg/markdown/ansi-colors"
-import type {
-  MarkdownComponent,
-  MarkdownComponentProps,
-} from "@/lib/markdown/component-types"
+import type { ReactNode } from "react"
+
+import { LitematicaViewerDynamic } from "@/components/articles/litematica-viewer-dynamic"
+import { MermaidDiagram } from "@/components/markdown/mermaid-diagram"
+import { PeopleMention } from "@/components/markdown/people-mention"
+import type { MarkdownComponent, MarkdownComponentProps } from "@/lib/markdown/component-types"
+
 import { createAComponent } from "./a-component"
 import { AdvancedSectionDivComponent } from "./advanced-section"
 import { CalloutAside } from "./callout-aside"
@@ -27,17 +25,11 @@ import {
   SupComponent,
   UnorderedListComponent,
 } from "./misc-components"
-import { makeSpan } from "./span-component"
 import { ParagraphComponent } from "./paragraph-component"
-import {
-  TableComponent,
-  TableDataCell,
-  TableHead,
-  TableHeaderCell,
-} from "./table-components"
+import { makeSpan } from "./span-component"
+import { TableComponent, TableDataCell, TableHead, TableHeaderCell } from "./table-components"
 
-const LITEMATICA_VIEWER_CONTENT_RE =
-  /(?:<\s*litematicaviewer\b|::litematica(?=$|[\s{]))/i
+const LITEMATICA_VIEWER_CONTENT_RE = /(?:<\s*litematicaviewer\b|::litematica(?=$|[\s{]))/i
 
 const ansiColorStyles: Record<AnsiColorName, Record<string, string>> = {
   black: { color: "var(--color-ansi-black)" },
@@ -62,7 +54,7 @@ export function getMarkdownComponents(
   rawPath: string,
   content = "",
   locale?: string,
-  headingAction?: ReactNode
+  headingAction?: ReactNode,
 ): Record<string, MarkdownComponent> {
   const aComponent = createAComponent(rawPath, locale)
   const imageComponent = createImageComponent(rawPath)
@@ -71,7 +63,7 @@ export function getMarkdownComponents(
     ANSI_COLOR_NAMES.map((color) => [
       createAnsiColorTagName(color),
       makeSpan(ansiColorStyles[color]),
-    ])
+    ]),
   ) satisfies Record<string, MarkdownComponent>
 
   const components = {
@@ -83,12 +75,8 @@ export function getMarkdownComponents(
     eucolor: makeSpan({ color: "blue" }),
     tecolor: makeSpan({ color: "blueviolet" }),
     atcolor: makeSpan({ color: "purple" }),
-    nc: ({ node: _node, ...props }: MarkdownComponentProps) => (
-      <span {...props} />
-    ),
-    pp: ({ node: _node, ...props }: MarkdownComponentProps) => (
-      <span {...props} />
-    ),
+    nc: ({ node: _node, ...props }: MarkdownComponentProps) => <span {...props} />,
+    pp: ({ node: _node, ...props }: MarkdownComponentProps) => <span {...props} />,
     hidden: HiddenComponent,
     table: TableComponent,
     thead: TableHead,
@@ -121,9 +109,7 @@ export function getMarkdownComponents(
   const withH1Action = headingAction
     ? {
         ...components,
-        h1: (props: MarkdownComponentProps) => (
-          <H1Component {...props} action={headingAction} />
-        ),
+        h1: (props: MarkdownComponentProps) => <H1Component {...props} action={headingAction} />,
       }
     : components
 
@@ -139,12 +125,7 @@ export function getMarkdownComponents(
   }
 }
 
-function HiddenComponent({
-  className,
-  children,
-  node: _node,
-  ...props
-}: MarkdownComponentProps) {
+function HiddenComponent({ className, children, node: _node, ...props }: MarkdownComponentProps) {
   return (
     <span
       className={[

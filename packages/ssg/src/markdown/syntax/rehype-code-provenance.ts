@@ -17,15 +17,12 @@ interface RehypeCodeProvenanceOptions {
 
 function getCodeNode(node: Element): Element | undefined {
   return node.children.find(
-    (child): child is Element =>
-      child.type === "element" && child.tagName === "code"
+    (child): child is Element => child.type === "element" && child.tagName === "code",
   )
 }
 
 function isJavaCodeNode(node: Element): boolean {
-  const classNames = Array.isArray(node.properties.className)
-    ? node.properties.className
-    : []
+  const classNames = Array.isArray(node.properties.className) ? node.properties.className : []
   return classNames.includes("language-java")
 }
 
@@ -39,7 +36,7 @@ function attachProvenance(
   node: Element,
   provenance: ResolvedJavaCodeProvenance,
   id: string,
-  blockIndex: number
+  blockIndex: number,
 ): void {
   node.properties.id = id
   node.properties["data-code-reference"] = "true"
@@ -49,9 +46,7 @@ function attachProvenance(
   node.properties["data-code-label"] = formatCodeProvenanceLabel(provenance)
 
   if (provenance.decompiler) {
-    node.properties["data-decompiler"] = formatToolReference(
-      provenance.decompiler
-    )
+    node.properties["data-decompiler"] = formatToolReference(provenance.decompiler)
   }
   if (provenance.file) {
     node.properties["data-source-file"] = provenance.file
@@ -61,9 +56,7 @@ function attachProvenance(
   }
 }
 
-export function rehypeCodeProvenance(
-  options: RehypeCodeProvenanceOptions = {}
-) {
+export function rehypeCodeProvenance(options: RehypeCodeProvenanceOptions = {}) {
   return function transformer(tree: Root): void {
     let javaBlockIndex = 0
 
@@ -78,23 +71,13 @@ export function rehypeCodeProvenance(
       const generatedReference = options.references?.[blockIndex]
 
       if (generatedReference) {
-        attachProvenance(
-          node,
-          generatedReference,
-          generatedReference.id,
-          blockIndex
-        )
+        attachProvenance(node, generatedReference, generatedReference.id, blockIndex)
         return
       }
 
       try {
         const provenance = parseJavaCodeProvenance(fenceMeta)
-        attachProvenance(
-          node,
-          provenance,
-          `code-java-${blockIndex + 1}`,
-          blockIndex
-        )
+        attachProvenance(node, provenance, `code-java-${blockIndex + 1}`, blockIndex)
       } catch {
         // Draft preview keeps malformed blocks readable; CodeMirror reports
         // the structured syntax diagnostic at the opening fence.

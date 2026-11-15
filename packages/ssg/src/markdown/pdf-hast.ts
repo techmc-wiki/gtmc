@@ -21,7 +21,7 @@ export interface PdfHastOptions {
  */
 export async function renderMarkdownToHast(
   content: string,
-  options: PdfHastOptions
+  options: PdfHastOptions,
 ): Promise<Root> {
   const processor = unified()
     .use(remarkParse)
@@ -32,18 +32,15 @@ export async function renderMarkdownToHast(
         shikiPlugin: options.shikiPlugin,
         codeReferences: options.codeReferences,
         katex: false,
-      })
+      }),
     )
 
   try {
     // The source string is the VFile value: directive and people-mention plugins read it.
     return await processor.run(processor.parse(content), content)
   } catch (error) {
-    throw new Error(
-      `${options.locale}/${options.articleSlug}: markdown pipeline failed`,
-      {
-        cause: error,
-      }
-    )
+    throw new Error(`${options.locale}/${options.articleSlug}: markdown pipeline failed`, {
+      cause: error,
+    })
   }
 }

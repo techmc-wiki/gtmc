@@ -31,12 +31,8 @@ export interface ArticleEntry {
   created?: string
   lastmodByLocale: Partial<Record<ArticleLocale, string>>
   translatedFromRevisionByLocale: Partial<Record<TranslationLocale, string>>
-  translationFreshnessByLocale: Partial<
-    Record<TranslationLocale, TranslationFreshness>
-  >
-  translationStatusByLocale?: Partial<
-    Record<TranslationLocale, TranslationStatusDetail>
-  >
+  translationFreshnessByLocale: Partial<Record<TranslationLocale, TranslationFreshness>>
+  translationStatusByLocale?: Partial<Record<TranslationLocale, TranslationStatusDetail>>
   bannerByLocale?: Partial<Record<ArticleLocale, { src: string; alt?: string }>>
   isAdvanced?: boolean
   isRevising?: boolean

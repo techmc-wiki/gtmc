@@ -1,10 +1,7 @@
 import { Link } from "@/i18n/navigation"
 import { articleUrl } from "@/lib/articles/url"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
-import {
-  hasExplicitUrlScheme,
-  resolveRelativeArticlePath,
-} from "@/lib/markdown/url-utils"
+import { hasExplicitUrlScheme, resolveRelativeArticlePath } from "@/lib/markdown/url-utils"
 
 function resolveHref(initialHref: string, rawPath: string): string {
   let href = initialHref
@@ -17,11 +14,7 @@ function resolveHref(initialHref: string, rawPath: string): string {
     }
   } else if (hasExplicitUrlScheme(href)) {
     return href
-  } else if (
-    !href.startsWith("http") &&
-    !href.startsWith("#") &&
-    !href.startsWith("/")
-  ) {
+  } else if (!href.startsWith("http") && !href.startsWith("#") && !href.startsWith("/")) {
     const resolved = resolveRelativeArticlePath(rawPath, href)
     href = articleUrl(resolved)
   }
@@ -29,14 +22,9 @@ function resolveHref(initialHref: string, rawPath: string): string {
 }
 
 export function createAComponent(rawPath: string, locale?: string) {
-  function AComponent({
-    href: initialHref,
-    children,
-    ...props
-  }: MarkdownComponentProps) {
+  function AComponent({ href: initialHref, children, ...props }: MarkdownComponentProps) {
     const href = resolveHref((initialHref as string) || "", rawPath)
-    const localizedHref =
-      locale && href.startsWith("/") ? `/${locale}${href}` : href
+    const localizedHref = locale && href.startsWith("/") ? `/${locale}${href}` : href
     if (props["data-in-code"] === "true") {
       const { "data-in-code": _inCode, ...rest } = props
       if (locale) {
@@ -63,20 +51,13 @@ export function createAComponent(rawPath: string, locale?: string) {
       const { "data-has-code": _hasCode, ...rest } = props
       if (locale) {
         return (
-          <a
-            href={localizedHref}
-            className="group/lc text-tech-main font-mono"
-            {...rest}>
+          <a href={localizedHref} className="group/lc text-tech-main font-mono" {...rest}>
             {children}
           </a>
         )
       }
       return (
-        <Link
-          href={href}
-          locale={locale}
-          className="group/lc text-tech-main font-mono"
-          {...rest}>
+        <Link href={href} locale={locale} className="group/lc text-tech-main font-mono" {...rest}>
           {children}
         </Link>
       )

@@ -1,9 +1,7 @@
 import { get, put } from "@vercel/blob"
 import { z } from "zod"
-import {
-  assertPrivateBlobIdentifier,
-  privateBlobOptions,
-} from "@/lib/blob-stores"
+
+import { assertPrivateBlobIdentifier, privateBlobOptions } from "@/lib/blob-stores"
 
 export const profileSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),
@@ -16,15 +14,10 @@ export async function readProfile(userId: string) {
     access: "private",
     useCache: false,
   })
-  return result
-    ? profileSchema.parse(await new Response(result.stream).json())
-    : null
+  return result ? profileSchema.parse(await new Response(result.stream).json()) : null
 }
 
-export async function writeProfile(
-  userId: string,
-  profile: z.infer<typeof profileSchema>
-) {
+export async function writeProfile(userId: string, profile: z.infer<typeof profileSchema>) {
   await put(profilePath(userId), JSON.stringify(profileSchema.parse(profile)), {
     ...privateBlobOptions(),
     access: "private",

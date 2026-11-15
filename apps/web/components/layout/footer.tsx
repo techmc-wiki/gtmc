@@ -1,15 +1,16 @@
-import { Suspense, type ReactNode } from "react"
+import { type ArticleLocale } from "@gtmc/ssg/articles/types"
 import { ArrowRight } from "lucide-react"
 import { getLocale, getTranslations } from "next-intl/server"
-import { Link } from "@/i18n/navigation"
-import { Logo } from "@/components/ui/logo"
-import { LanguageSwitcher } from "@/components/layout/language-switcher"
+import { Suspense, type ReactNode } from "react"
+
 import { ChapterEndMark } from "@/components/articles/chapter-chrome"
-import { Separator } from "@/components/ui/shadcn/separator"
 import { FooterWordmark } from "@/components/layout/footer-wordmark"
-import { articleUrl } from "@/lib/articles/url"
+import { LanguageSwitcher } from "@/components/layout/language-switcher"
+import { Logo } from "@/components/ui/logo"
+import { Separator } from "@/components/ui/shadcn/separator"
+import { Link } from "@/i18n/navigation"
 import { getManifestStats } from "@/lib/articles/manifest"
-import { type ArticleLocale } from "@gtmc/ssg/articles/types"
+import { articleUrl } from "@/lib/articles/url"
 
 interface FooterSectionProps {
   label: string
@@ -69,9 +70,7 @@ const revisedDateFormatters: Record<string, Intl.DateTimeFormat> = {
 function RecordRow({ term, value }: RecordRowProps) {
   return (
     <div className="border-tech-main/10 flex items-baseline justify-between gap-4 border-b py-2">
-      <dt className="text-tech-main/50 text-xs tracking-[0.12em] uppercase">
-        {term}
-      </dt>
+      <dt className="text-tech-main/50 text-xs tracking-[0.12em] uppercase">{term}</dt>
       <dd className="text-tech-main-dark font-mono text-sm wrap-break-word tabular-nums">
         {value}
       </dd>
@@ -84,12 +83,10 @@ export default async function Footer() {
   const t = await getTranslations({ locale, namespace: "Footer" })
   const stats = getManifestStats(locale)
   const startYear = 2024
-  const currentYear = stats.lastRevision
-    ? Number(stats.lastRevision.slice(0, 4))
-    : startYear
+  const currentYear = stats.lastRevision ? Number(stats.lastRevision.slice(0, 4)) : startYear
   const revised = stats.lastRevision
     ? (revisedDateFormatters[locale] ?? revisedDateFormatters.en).format(
-        new Date(stats.lastRevision)
+        new Date(stats.lastRevision),
       )
     : null
   const buildSha = process.env.NEXT_PUBLIC_BUILD_SHA
@@ -159,9 +156,7 @@ export default async function Footer() {
             <p className="display-title text-tech-main-dark mt-6 text-2xl md:text-4xl">
               Graduate Texts in Minecraft
             </p>
-            <p className="text-tech-main mt-3 max-w-md text-sm/relaxed">
-              {t("slogan")}
-            </p>
+            <p className="text-tech-main mt-3 max-w-md text-sm/relaxed">{t("slogan")}</p>
             <p className="mt-4">
               <Link
                 href={articleUrl("preface")}
@@ -174,14 +169,9 @@ export default async function Footer() {
 
           <div className="guide-line md:col-span-5 md:border-l md:pl-8">
             <dl aria-label={t("recordHeading")}>
-              <RecordRow
-                term={t("recordArticles")}
-                value={stats.articleCount}
-              />
+              <RecordRow term={t("recordArticles")} value={stats.articleCount} />
               <RecordRow term={t("recordAuthors")} value={stats.authorCount} />
-              {revised ? (
-                <RecordRow term={t("recordRevised")} value={revised} />
-              ) : null}
+              {revised ? <RecordRow term={t("recordRevised")} value={revised} /> : null}
             </dl>
           </div>
         </div>
@@ -204,12 +194,8 @@ export default async function Footer() {
 
         <div className="flex flex-col gap-6 pt-10 pb-12 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl space-y-2">
-            <p className="text-tech-main/70 text-xs/relaxed">
-              {t("disclaimer")}
-            </p>
-            <p className="text-tech-main/55 text-xs/relaxed">
-              {t("attribution")}
-            </p>
+            <p className="text-tech-main/70 text-xs/relaxed">{t("disclaimer")}</p>
+            <p className="text-tech-main/55 text-xs/relaxed">{t("attribution")}</p>
             <p className="text-tech-main/55 text-xs/relaxed">
               <a
                 href="https://rareui.com"
@@ -222,12 +208,8 @@ export default async function Footer() {
           </div>
           <div className="flex flex-col items-start gap-3 md:items-end">
             <p className="text-tech-main/70 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-              <span>
-                {t("copyright", { start: startYear, year: currentYear })}
-              </span>
-              {buildSha ? (
-                <span className="text-tech-main/40 font-mono">{buildSha}</span>
-              ) : null}
+              <span>{t("copyright", { start: startYear, year: currentYear })}</span>
+              {buildSha ? <span className="text-tech-main/40 font-mono">{buildSha}</span> : null}
             </p>
             <Suspense fallback={null}>
               <LanguageSwitcher />

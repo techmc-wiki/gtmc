@@ -6,18 +6,11 @@
  * Run with `pnpm --filter @gtmc/web run check:properties-i18n`.
  */
 import { readFile } from "node:fs/promises"
-import { workspacePath } from "@/lib/workspace-paths"
+
+import type { DatasetTranslations, PropertyOverlay } from "@/lib/properties/i18n/overlay"
 import zh from "@/lib/properties/i18n/zh.json"
-import type {
-  DatasetTranslations,
-  PropertyOverlay,
-} from "@/lib/properties/i18n/overlay"
-import {
-  DATASETS,
-  TAGS_PROPERTY,
-  type DatasetId,
-  type PropertyValue,
-} from "@/lib/properties/types"
+import { DATASETS, TAGS_PROPERTY, type DatasetId, type PropertyValue } from "@/lib/properties/types"
+import { workspacePath } from "@/lib/workspace-paths"
 
 const files: Record<DatasetId, string> = {
   blocks: "block_data.json",
@@ -32,10 +25,7 @@ interface SourceProperty {
   size_type?: string
   entries: Record<string, PropertyValue>
 }
-type PropertyStructure = (
-  | string
-  | { category: string; contents: PropertyStructure }
-)[]
+type PropertyStructure = (string | { category: string; contents: PropertyStructure })[]
 interface SourceDataset {
   property_structure: PropertyStructure
   properties: Record<string, SourceProperty>
@@ -54,9 +44,7 @@ function strings(value: PropertyValue): string[] {
 
 function categories(structure: PropertyStructure): string[] {
   return structure.flatMap((item) =>
-    typeof item === "string"
-      ? []
-      : [item.category, ...categories(item.contents)]
+    typeof item === "string" ? [] : [item.category, ...categories(item.contents)],
   )
 }
 
@@ -67,14 +55,11 @@ const data = new Map<DatasetId, SourceDataset>(
         [
           dataset,
           JSON.parse(
-            await readFile(
-              workspacePath("content", "properties", "data", files[dataset]),
-              "utf8"
-            )
+            await readFile(workspacePath("content", "properties", "data", files[dataset]), "utf8"),
           ) as SourceDataset,
-        ] as const
-    )
-  )
+        ] as const,
+    ),
+  ),
 )
 
 const ids = new Set<string>()
@@ -89,29 +74,18 @@ for (const [dataset, source] of data) {
       for (const text of strings(value)) values.add(text)
     }
   }
-  categoriesByDataset.set(
-    dataset,
-    new Set(categories(source.property_structure))
-  )
+  categoriesByDataset.set(dataset, new Set(categories(source.property_structure)))
 }
 
 const errors: string[] = []
-function unknown(
-  label: string,
-  keys: Iterable<string>,
-  known: ReadonlySet<string>
-) {
+function unknown(label: string, keys: Iterable<string>, known: ReadonlySet<string>) {
   for (const key of keys) {
     if (!known.has(key)) errors.push(`unknown ${label}: ${JSON.stringify(key)}`)
   }
 }
 
 unknown("property id", Object.keys(overlay.properties ?? {}), ids)
-unknown(
-  "synthetic property id",
-  Object.keys(overlay.synthetic ?? {}),
-  new Set([TAGS_PROPERTY])
-)
+unknown("synthetic property id", Object.keys(overlay.synthetic ?? {}), new Set([TAGS_PROPERTY]))
 const categoryLabels = new Set<string>()
 for (const labels of categoriesByDataset.values()) {
   for (const label of labels) categoryLabels.add(label)
@@ -119,9 +93,10 @@ for (const labels of categoriesByDataset.values()) {
 unknown("category", Object.keys(overlay.categories ?? {}), categoryLabels)
 unknown("unit", Object.keys(overlay.units ?? {}), units)
 unknown("value", Object.keys(overlay.values ?? {}), values)
-for (const [dataset, translations] of Object.entries(
-  overlay.datasets ?? {}
-) as [DatasetId, DatasetTranslations][]) {
+for (const [dataset, translations] of Object.entries(overlay.datasets ?? {}) as [
+  DatasetId,
+  DatasetTranslations,
+][]) {
   const datasetIds = data.get(dataset)
   if (!datasetIds) {
     errors.push(`unknown dataset: ${dataset}`)
@@ -130,18 +105,13 @@ for (const [dataset, translations] of Object.entries(
   unknown(
     `${dataset} property id`,
     Object.keys(translations.properties ?? {}),
-    new Set(Object.keys(datasetIds.properties))
+    new Set(Object.keys(datasetIds.properties)),
   )
 }
 
-function translated(
-  dataset: DatasetId,
-  id: string,
-  field: "name" | "description"
-): boolean {
+function translated(dataset: DatasetId, id: string, field: "name" | "description"): boolean {
   return Boolean(
-    overlay.datasets?.[dataset]?.properties?.[id]?.[field] ??
-    overlay.properties?.[id]?.[field]
+    overlay.datasets?.[dataset]?.properties?.[id]?.[field] ?? overlay.properties?.[id]?.[field],
   )
 }
 
@@ -150,19 +120,17 @@ for (const [dataset, source] of data) {
   const entries = Object.entries(source.properties)
   const names = entries.filter(([id]) => translated(dataset, id, "name")).length
   const described = entries.filter(
-    ([, property]) => (property.property_description ?? "").trim() !== ""
+    ([, property]) => (property.property_description ?? "").trim() !== "",
   )
-  const descriptions = described.filter(([id]) =>
-    translated(dataset, id, "description")
-  ).length
+  const descriptions = described.filter(([id]) => translated(dataset, id, "description")).length
   report.push(
-    `${dataset}: names ${names}/${entries.length}, descriptions ${descriptions}/${described.length}`
+    `${dataset}: names ${names}/${entries.length}, descriptions ${descriptions}/${described.length}`,
   )
 }
 const missing = [...ids].filter((id) => !translated("blocks", id, "name"))
 if (missing.length) {
   report.push(
-    `missing names: ${missing.slice(0, 20).join(", ")}${missing.length > 20 ? ", …" : ""}`
+    `missing names: ${missing.slice(0, 20).join(", ")}${missing.length > 20 ? ", …" : ""}`,
   )
 }
 

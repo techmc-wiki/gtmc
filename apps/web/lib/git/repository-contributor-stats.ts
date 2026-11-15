@@ -14,14 +14,12 @@ function normalizeIdentity(value: string): string {
 }
 
 /** Aggregate contributor activity captured during the production build. */
-export function getRepositoryContributorStats(
-  identities: string[]
-): RepositoryContributorStats {
+export function getRepositoryContributorStats(identities: string[]): RepositoryContributorStats {
   const targets = new Set(
     identities.flatMap((identity) => {
       const normalized = normalizeIdentity(identity)
       return normalized ? [normalized] : []
-    })
+    }),
   )
   let commits = 0
   let linesChanged = 0

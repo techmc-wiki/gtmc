@@ -1,6 +1,9 @@
 import path from "node:path"
+
 import { generateArticleContent } from "@gtmc/ssg"
+
 import { workspacePath } from "@/lib/workspace-paths"
+
 import { createLogger, describeError } from "./lib/logger"
 
 const logger = createLogger("article-content")

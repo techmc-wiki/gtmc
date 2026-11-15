@@ -1,7 +1,10 @@
 import path from "node:path"
+
 import { generateArticleManifest } from "@gtmc/ssg"
+
 import { getArticlesCommitUrl } from "@/lib/github/repos"
 import { workspacePath } from "@/lib/workspace-paths"
+
 import { createLogger, describeError } from "./lib/logger"
 
 const logger = createLogger("manifest")

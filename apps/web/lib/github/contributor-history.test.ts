@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vite-plus/test"
+
 import {
   collectContributorHistory,
   type GitHubCommitActivity,
@@ -10,7 +11,7 @@ function commit(
   additions = 10,
   deletions = 2,
   parentCount = 1,
-  changedFilesIfAvailable: number | null = 1
+  changedFilesIfAvailable: number | null = 1,
 ): GitHubCommitActivity {
   return {
     author: { user: login ? { login } : null },
@@ -24,7 +25,7 @@ function commit(
 function page(
   nodes: Array<GitHubCommitActivity | null>,
   cursor: string | null = null,
-  revision = "head"
+  revision = "head",
 ): GitHubHistoryResult {
   return {
     revision,
@@ -52,7 +53,7 @@ describe("collectContributorHistory", () => {
         await release.promise
         active -= 1
         return page([commit("Bob", index, 1)], nextCursor)
-      }
+      },
     )
     await saturated.promise
     expect(active).toBe(4)
@@ -76,7 +77,7 @@ describe("collectContributorHistory", () => {
       ]),
       async () => {
         throw new Error("Unexpected history request")
-      }
+      },
     )
     expect(result.stats).toEqual({
       alice: { commits: 0, linesChanged: 7 },
@@ -86,19 +87,15 @@ describe("collectContributorHistory", () => {
 
   it("rejects a branch change during cursor discovery", async () => {
     await expect(
-      collectContributorHistory(page([commit()], "next"), async () =>
-        page([], null, "new-head")
-      )
+      collectContributorHistory(page([commit()], "next"), async () => page([], null, "new-head")),
     ).rejects.toThrow("GitHub default branch changed")
   })
 
   it("rejects a branch change during activity fetching", async () => {
     await expect(
-      collectContributorHistory(
-        page([commit()], "next"),
-        async (_cursor, includeActivity) =>
-          page([], null, includeActivity ? "new-head" : "head")
-      )
+      collectContributorHistory(page([commit()], "next"), async (_cursor, includeActivity) =>
+        page([], null, includeActivity ? "new-head" : "head"),
+      ),
     ).rejects.toThrow("GitHub default branch changed")
   })
 
@@ -108,19 +105,16 @@ describe("collectContributorHistory", () => {
     await expect(
       collectContributorHistory(initial, async () => {
         throw new Error("Unexpected history request")
-      })
+      }),
     ).rejects.toThrow("pagination omitted its cursor")
   })
 
   it("propagates failed activity requests instead of returning partial totals", async () => {
     await expect(
-      collectContributorHistory(
-        page([commit()], "next"),
-        async (_cursor, includeActivity) => {
-          if (includeActivity) throw new Error("GitHub unavailable")
-          return page([])
-        }
-      )
+      collectContributorHistory(page([commit()], "next"), async (_cursor, includeActivity) => {
+        if (includeActivity) throw new Error("GitHub unavailable")
+        return page([])
+      }),
     ).rejects.toThrow("GitHub unavailable")
   })
 })

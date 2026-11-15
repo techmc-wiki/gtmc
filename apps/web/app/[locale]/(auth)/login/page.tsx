@@ -1,11 +1,12 @@
 "use client"
 
+import { ArrowLeft } from "lucide-react"
 import { signIn } from "next-auth/react"
 import { useTranslations } from "next-intl"
-import { ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/shadcn/button"
-import { GithubIcon } from "@/components/ui/icons"
 import { useState } from "react"
+
+import { GithubIcon } from "@/components/ui/icons"
+import { Button } from "@/components/ui/shadcn/button"
 import { Link } from "@/i18n/navigation"
 
 function sanitizeCallbackUrl(raw: string | null): string {
@@ -26,7 +27,7 @@ export default function LoginPage() {
   const handleLogin = async () => {
     setIsLoading(true)
     const callbackUrl = sanitizeCallbackUrl(
-      new URLSearchParams(window.location.search).get("callbackUrl")
+      new URLSearchParams(window.location.search).get("callbackUrl"),
     )
     await signIn("github", { callbackUrl })
   }
@@ -47,13 +48,7 @@ export default function LoginPage() {
                   stroke="currentColor"
                   strokeWidth="2"
                   className="text-tech-main-dark">
-                  <rect
-                    x="3"
-                    y="11"
-                    width="18"
-                    height="11"
-                    rx="2"
-                    ry="2"></rect>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
               </div>

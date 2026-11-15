@@ -1,4 +1,5 @@
 import * as THREE from "three"
+
 import { SHEET_FRAG, SHEET_VERT } from "@/components/canvasui/peel-shaders"
 
 /** A live peel surface. `setOpen` drives the page turn; `dispose` releases the GPU. */
@@ -21,12 +22,7 @@ interface PeelSceneOptions {
  * image as the complete fallback.
  */
 export function createPeelScene(options: PeelSceneOptions): PeelScene | null {
-  const {
-    canvas: canvasEl,
-    image: imageEl,
-    root: rootEl,
-    onOpenChange,
-  } = options
+  const { canvas: canvasEl, image: imageEl, root: rootEl, onOpenChange } = options
   const button = rootEl?.closest("button")
   if (!rootEl || !canvasEl || !imageEl || !button) return null
 
@@ -116,8 +112,7 @@ export function createPeelScene(options: PeelSceneOptions): PeelScene | null {
     amount += (desired - amount) * (1 - Math.exp(-delta / 0.18))
     uniforms.uPointer.value.lerp(pointer, 1 - Math.exp(-delta / 0.1))
     const settled =
-      Math.abs(desired - amount) < 0.0005 &&
-      uniforms.uPointer.value.distanceTo(pointer) < 0.1
+      Math.abs(desired - amount) < 0.0005 && uniforms.uPointer.value.distanceTo(pointer) < 0.1
     if (settled) {
       amount = desired
       uniforms.uPointer.value.copy(pointer)
@@ -128,14 +123,7 @@ export function createPeelScene(options: PeelSceneOptions): PeelScene | null {
   }
 
   function wake() {
-    if (
-      frameId ||
-      !ready ||
-      !visible ||
-      document.hidden ||
-      contextLost ||
-      disposed
-    ) {
+    if (frameId || !ready || !visible || document.hidden || contextLost || disposed) {
       return
     }
     previous = performance.now()

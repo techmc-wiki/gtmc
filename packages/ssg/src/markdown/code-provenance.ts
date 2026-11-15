@@ -2,13 +2,7 @@ export const DEFAULT_MINECRAFT_VERSION = "1.20.1"
 export const DEFAULT_MAPPING_NAME = "yarn"
 export const JAVA_CODE_PROVENANCE_META_PROPERTY = "dataJavaProvenanceMeta"
 
-const PROVENANCE_KEYS = new Set([
-  "mc",
-  "mapping",
-  "decompiler",
-  "file",
-  "lines",
-])
+const PROVENANCE_KEYS = new Set(["mc", "mapping", "decompiler", "file", "lines"])
 const VERSION_RE = /^[A-Za-z0-9][A-Za-z0-9._+-]*$/
 const TOOL_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
 const TOOL_VERSION_RE = /^[A-Za-z0-9][A-Za-z0-9._+:-]*$/
@@ -61,10 +55,7 @@ export class CodeProvenanceSyntaxError extends Error {
   }
 }
 
-function parseToolReference(
-  value: string,
-  field: "mapping" | "decompiler"
-): CodeToolReference {
+function parseToolReference(value: string, field: "mapping" | "decompiler"): CodeToolReference {
   const parts = value.split("@")
   const name = parts[0]
   const version = parts[1]
@@ -78,7 +69,7 @@ function parseToolReference(
     throw new CodeProvenanceSyntaxError(
       "invalid-tool",
       `${field} must use name or name@version`,
-      field
+      field,
     )
   }
 
@@ -94,7 +85,7 @@ function parseLineRange(value: string): CodeLineRange {
     throw new CodeProvenanceSyntaxError(
       "invalid-lines",
       "lines must be a positive line number or start-end range",
-      "lines"
+      "lines",
     )
   }
 
@@ -104,7 +95,7 @@ function parseLineRange(value: string): CodeLineRange {
     throw new CodeProvenanceSyntaxError(
       "invalid-lines",
       "lines must be a positive ascending range",
-      "lines"
+      "lines",
     )
   }
 
@@ -112,7 +103,7 @@ function parseLineRange(value: string): CodeLineRange {
 }
 
 export function parseJavaCodeProvenance(
-  meta: string | null | undefined
+  meta: string | null | undefined,
 ): ResolvedJavaCodeProvenance {
   const values = new Map<string, string>()
   const trimmedMeta = meta?.trim() ?? ""
@@ -123,7 +114,7 @@ export function parseJavaCodeProvenance(
       if (separatorIndex <= 0) {
         throw new CodeProvenanceSyntaxError(
           "expected-field",
-          `expected key=value metadata, received "${token}"`
+          `expected key=value metadata, received "${token}"`,
         )
       }
 
@@ -133,21 +124,21 @@ export function parseJavaCodeProvenance(
         throw new CodeProvenanceSyntaxError(
           "unknown-field",
           `unknown Java provenance field "${key}"`,
-          key
+          key,
         )
       }
       if (values.has(key)) {
         throw new CodeProvenanceSyntaxError(
           "duplicate-field",
           `duplicate Java provenance field "${key}"`,
-          key
+          key,
         )
       }
       if (!value) {
         throw new CodeProvenanceSyntaxError(
           "empty-value",
           `Java provenance field "${key}" cannot be empty`,
-          key
+          key,
         )
       }
       values.set(key, value)
@@ -159,21 +150,18 @@ export function parseJavaCodeProvenance(
     throw new CodeProvenanceSyntaxError(
       "invalid-minecraft-version",
       "mc must be a Minecraft version without whitespace",
-      "mc"
+      "mc",
     )
   }
 
-  const mapping = parseToolReference(
-    values.get("mapping") ?? DEFAULT_MAPPING_NAME,
-    "mapping"
-  )
+  const mapping = parseToolReference(values.get("mapping") ?? DEFAULT_MAPPING_NAME, "mapping")
   const decompilerValue = values.get("decompiler")
   const file = values.get("file")
   if (file && (file.includes("`") || /\p{Cc}/u.test(file))) {
     throw new CodeProvenanceSyntaxError(
       "invalid-file",
       "file must be a printable path without backticks",
-      "file"
+      "file",
     )
   }
 
@@ -181,29 +169,21 @@ export function parseJavaCodeProvenance(
   return {
     minecraftVersion,
     mapping,
-    ...(decompilerValue
-      ? { decompiler: parseToolReference(decompilerValue, "decompiler") }
-      : {}),
+    ...(decompilerValue ? { decompiler: parseToolReference(decompilerValue, "decompiler") } : {}),
     ...(file ? { file } : {}),
     ...(linesValue ? { lines: parseLineRange(linesValue) } : {}),
   }
 }
 
 export function formatToolReference(tool: CodeToolReference): string {
-  return tool.version
-    ? `${tool.name.toUpperCase()}@${tool.version}`
-    : tool.name.toUpperCase()
+  return tool.version ? `${tool.name.toUpperCase()}@${tool.version}` : tool.name.toUpperCase()
 }
 
 export function formatLineRange(lines: CodeLineRange): string {
-  return lines.end === undefined
-    ? String(lines.start)
-    : `${lines.start}-${lines.end}`
+  return lines.end === undefined ? String(lines.start) : `${lines.start}-${lines.end}`
 }
 
-export function formatCodeProvenanceLabel(
-  provenance: ResolvedJavaCodeProvenance
-): string {
+export function formatCodeProvenanceLabel(provenance: ResolvedJavaCodeProvenance): string {
   const parts = [
     "JAVA",
     `MC ${provenance.minecraftVersion}`,
@@ -216,7 +196,7 @@ export function formatCodeProvenanceLabel(
     parts.push(
       provenance.lines
         ? `${provenance.file}:${formatLineRange(provenance.lines)}`
-        : provenance.file
+        : provenance.file,
     )
   } else if (provenance.lines) {
     parts.push(`L${formatLineRange(provenance.lines)}`)
@@ -233,17 +213,13 @@ export interface JavaFenceDiagnostic {
   message: string
 }
 
-export function getJavaFenceDiagnostics(
-  markdown: string
-): JavaFenceDiagnostic[] {
+export function getJavaFenceDiagnostics(markdown: string): JavaFenceDiagnostic[] {
   const diagnostics: JavaFenceDiagnostic[] = []
   let offset = 0
 
   for (const [index, rawLine] of markdown.split("\n").entries()) {
     const line = rawLine.endsWith("\r") ? rawLine.slice(0, -1) : rawLine
-    const match = /^( {0,3})(?:`{3,}|~{3,})java(?:[ \t]+(.*?))?[ \t]*$/i.exec(
-      line
-    )
+    const match = /^( {0,3})(?:`{3,}|~{3,})java(?:[ \t]+(.*?))?[ \t]*$/i.exec(line)
     if (match) {
       try {
         parseJavaCodeProvenance(match[2])

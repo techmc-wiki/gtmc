@@ -1,8 +1,9 @@
-import { getTranslations } from "next-intl/server"
 import { ArrowRight } from "lucide-react"
-import { Link } from "@/i18n/navigation"
-import { Button } from "@/components/ui/shadcn/button"
+import { getTranslations } from "next-intl/server"
+
 import { HideFooter } from "@/components/layout/footer-context"
+import { Button } from "@/components/ui/shadcn/button"
+import { Link } from "@/i18n/navigation"
 type StatusPageKind = "unauthorized" | "forbidden" | "not-found"
 
 type StatusPageProps = {

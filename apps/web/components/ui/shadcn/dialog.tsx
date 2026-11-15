@@ -1,33 +1,25 @@
 "use client"
 
-import * as React from "react"
 import { XIcon } from "lucide-react"
 import { Dialog as DialogPrimitive } from "radix-ui"
+import * as React from "react"
 
-import { cn } from "@/lib/cn"
 import { Button } from "@/components/ui/shadcn/button"
+import { cn } from "@/lib/cn"
 
-function Dialog({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Root>) {
+function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 
-function DialogTrigger({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
+function DialogTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
 }
 
-function DialogPortal({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Portal>) {
+function DialogPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
 }
 
-function DialogClose({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Close>) {
+function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
 }
 
@@ -38,10 +30,7 @@ function DialogOverlay({
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
-      className={cn(
-        "t-overlay fixed inset-0 z-50 bg-tech-main-dark/25",
-        className
-      )}
+      className={cn("t-overlay fixed inset-0 z-50 bg-tech-main-dark/25", className)}
       {...props}
     />
   )
@@ -62,16 +51,13 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           "t-modal overscroll-contain fixed z-50 flex flex-col border shadow-lg outline-none",
-          className
+          className,
         )}
         {...props}>
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2">
+            <Button variant="ghost" size="icon" className="absolute top-2 right-2">
               <XIcon />
               <span className="sr-only">Close</span>
             </Button>
@@ -103,10 +89,7 @@ function DialogFooter({
   return (
     <div
       data-slot="dialog-footer"
-      className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        className
-      )}
+      className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
       {...props}>
       {children}
       {showCloseButton && (
@@ -118,10 +101,7 @@ function DialogFooter({
   )
 }
 
-function DialogTitle({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Title>) {
+function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"

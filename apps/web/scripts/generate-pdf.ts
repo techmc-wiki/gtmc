@@ -5,14 +5,19 @@ import fs from "node:fs"
 import path from "node:path"
 import readline from "node:readline"
 
-import enMessages from "@/messages/en.json"
-import zhMessages from "@/messages/zh.json"
+import { collectAssets, hastToTypst, renderMarkdownToHast, texToTypst } from "@gtmc/ssg"
+import { artifactFilename, type ArticleContentArtifact } from "@gtmc/ssg/articles/content"
+import type { ArticleEntry } from "@gtmc/ssg/articles/types"
 import {
-  linearizeArticles,
-  type LinearizedArticle,
-} from "@/lib/articles/linearize"
+  createRehypeShiki,
+  persistHighlightCache,
+  type RehypeShikiPlugin,
+} from "@gtmc/ssg/markdown/syntax/rehype-shiki"
+
+import { linearizeArticles, type LinearizedArticle } from "@/lib/articles/linearize"
 import { getArticleManifest, getArticleTree } from "@/lib/articles/manifest"
 import { preparePublicChapterNav } from "@/lib/articles/public-tree"
+import { hasExplicitUrlScheme, resolveRelativeArticlePath } from "@/lib/markdown/url-utils"
 import {
   assembleBookPlan,
   chapterArticles,
@@ -24,32 +29,11 @@ import { ensurePdfFonts } from "@/lib/pdf/fonts"
 import { resolvePdfImages } from "@/lib/pdf/images"
 import { renderMermaidSvgs } from "@/lib/pdf/mermaid"
 import { writeTokensTypst } from "@/lib/pdf/tokens"
-import {
-  articleFileName,
-  renderArticleSource,
-  renderBookSource,
-} from "@/lib/pdf/typst-source"
-import {
-  hasExplicitUrlScheme,
-  resolveRelativeArticlePath,
-} from "@/lib/markdown/url-utils"
+import { articleFileName, renderArticleSource, renderBookSource } from "@/lib/pdf/typst-source"
 import { workspacePath } from "@/lib/workspace-paths"
-import type { ArticleEntry } from "@gtmc/ssg/articles/types"
-import {
-  artifactFilename,
-  type ArticleContentArtifact,
-} from "@gtmc/ssg/articles/content"
-import {
-  collectAssets,
-  hastToTypst,
-  renderMarkdownToHast,
-  texToTypst,
-} from "@gtmc/ssg"
-import {
-  createRehypeShiki,
-  persistHighlightCache,
-  type RehypeShikiPlugin,
-} from "@gtmc/ssg/markdown/syntax/rehype-shiki"
+import enMessages from "@/messages/en.json"
+import zhMessages from "@/messages/zh.json"
+
 import { createLogger, describeError } from "./lib/logger"
 
 const logger = createLogger("pdf")
@@ -58,10 +42,7 @@ const SOURCE_URL = "https://techmc.wiki"
 const PDF_MESSAGES = {
   en: enMessages.Pdf,
   zh: zhMessages.Pdf,
-} satisfies Record<
-  PdfLocale,
-  { bookTitle: string; bookSubtitle: string; slogan: string }
->
+} satisfies Record<PdfLocale, { bookTitle: string; bookSubtitle: string; slogan: string }>
 
 const PDF_ROOT = workspacePath("tools", "pdf")
 const WORK_DIR = path.join(PDF_ROOT, "work")
@@ -152,20 +133,14 @@ function getArticlesRevision(): string | null {
 }
 
 function readArtifact(slug: string, locale: PdfLocale): ArticleContentArtifact {
-  const artifactPath = path.join(
-    ARTIFACTS_DIR,
-    locale,
-    `${artifactFilename(slug)}.json`
-  )
+  const artifactPath = path.join(ARTIFACTS_DIR, locale, `${artifactFilename(slug)}.json`)
   let artifact: ArticleContentArtifact
   try {
-    artifact = JSON.parse(
-      fs.readFileSync(artifactPath, "utf-8")
-    ) as ArticleContentArtifact
+    artifact = JSON.parse(fs.readFileSync(artifactPath, "utf-8")) as ArticleContentArtifact
   } catch (error) {
     throw new Error(
       `Unreadable article artifact ${artifactPath}: ${describeError(error)}. Run pnpm build:content first.`,
-      { cause: error }
+      { cause: error },
     )
   }
   if (typeof artifact.content !== "string") {
@@ -178,7 +153,7 @@ function sourceFileOf(
   manifest: Record<string, ArticleEntry>,
   slug: string,
   locale: PdfLocale,
-  fallback: string | null
+  fallback: string | null,
 ): string | null {
   const entry: ArticleEntry | undefined = manifest[slug]
   return entry?.localizedFilePaths[locale] ?? fallback
@@ -186,7 +161,7 @@ function sourceFileOf(
 
 async function prepareArticle(
   article: LinearizedArticle,
-  ctx: LocaleContext
+  ctx: LocaleContext,
 ): Promise<PreparedArticle> {
   const artifact = readArtifact(article.slug, ctx.locale)
   const root = await renderMarkdownToHast(artifact.content, {
@@ -196,12 +171,7 @@ async function prepareArticle(
     shikiPlugin: ctx.shikiPlugin,
   })
   const assets = collectAssets(root)
-  const filePath = sourceFileOf(
-    ctx.manifest,
-    article.slug,
-    ctx.locale,
-    article.filePath
-  )
+  const filePath = sourceFileOf(ctx.manifest, article.slug, ctx.locale, article.filePath)
   const images = await resolvePdfImages(assets.images, {
     articleFilePath: filePath,
     outDir: ctx.assetsDir,
@@ -214,8 +184,7 @@ async function prepareArticle(
   return {
     article,
     filePath,
-    missingImages: [...images.values()].filter((asset) => "missing" in asset)
-      .length,
+    missingImages: [...images.values()].filter((asset) => "missing" in asset).length,
     emit: (title, resolveArticleLink) =>
       hastToTypst(root, {
         articleSlug: article.slug,
@@ -231,22 +200,14 @@ async function prepareArticle(
   }
 }
 
-function indexBook(
-  slugs: ReadonlySet<string>,
-  manifest: Record<string, ArticleEntry>
-): BookIndex {
+function indexBook(slugs: ReadonlySet<string>, manifest: Record<string, ArticleEntry>): BookIndex {
   const slugByFile = new Map<string, string>()
   for (const slug of slugs) {
     const entry: ArticleEntry | undefined = manifest[slug]
     if (entry === undefined) {
-      throw new Error(
-        `Book article ${slug} is missing from the article manifest`
-      )
+      throw new Error(`Book article ${slug} is missing from the article manifest`)
     }
-    for (const file of [
-      entry.filePath,
-      ...Object.values(entry.localizedFilePaths),
-    ]) {
+    for (const file of [entry.filePath, ...Object.values(entry.localizedFilePaths)]) {
       if (file) slugByFile.set(file.replaceAll("\\", "/"), slug)
     }
   }
@@ -273,7 +234,7 @@ function resolveTarget(
   decodedPath: string,
   articleFile: string,
   locale: PdfLocale,
-  index: BookIndex
+  index: BookIndex,
 ): string | null {
   if (decodedPath.startsWith("/")) {
     const route = ARTICLE_ROUTE.exec(decodedPath)
@@ -298,7 +259,7 @@ function resolveTarget(
 function createLinkResolver(
   articleFile: string | null,
   locale: PdfLocale,
-  index: BookIndex
+  index: BookIndex,
 ): LinkResolver {
   return (href) => {
     if (href.startsWith("#") || hasExplicitUrlScheme(href)) return null
@@ -307,7 +268,7 @@ function createLinkResolver(
       safeDecode(hash === -1 ? href : href.slice(0, hash)),
       articleFile ?? "",
       locale,
-      index
+      index,
     )
     if (target === null || hash === -1) return target
     const anchor = safeDecode(href.slice(hash + 1))
@@ -315,23 +276,15 @@ function createLinkResolver(
   }
 }
 
-function writeArticle(
-  dir: string,
-  entry: NumberedArticle,
-  body: string,
-  preface: boolean
-): void {
+function writeArticle(dir: string, entry: NumberedArticle, body: string, preface: boolean): void {
   fs.writeFileSync(
     path.join(dir, articleFileName(entry.article.slug)),
     renderArticleSource(entry, body, preface),
-    "utf-8"
+    "utf-8",
   )
 }
 
-function outputTargets(
-  locale: PdfLocale,
-  output: string | null
-): { pdf: string; cover: string } {
+function outputTargets(locale: PdfLocale, output: string | null): { pdf: string; cover: string } {
   if (output === null) {
     return {
       pdf: path.join(DIST_DIR, `gtmc-${locale}.pdf`),
@@ -346,7 +299,7 @@ function typstArgs(
   fontsDir: string,
   input: string,
   output: string,
-  extra: readonly string[] = []
+  extra: readonly string[] = [],
 ): string[] {
   return [
     "compile",
@@ -375,16 +328,14 @@ function runTypst(locale: PdfLocale, args: readonly string[]): Promise<void> {
     reject(
       new Error(
         `Unable to run ${binary}: ${error.message}. Install Typst (brew install typst) or set TYPST_BIN.`,
-        { cause: error }
-      )
+        { cause: error },
+      ),
     )
   })
   child.once("close", (code) => {
     if (code === 0) resolve()
     else {
-      reject(
-        new Error(`${binary} ${args[0]} for ${locale} exited with code ${code}`)
-      )
+      reject(new Error(`${binary} ${args[0]} for ${locale} exited with code ${code}`))
     }
   })
   return promise
@@ -393,7 +344,7 @@ function runTypst(locale: PdfLocale, args: readonly string[]): Promise<void> {
 async function buildLocale(
   locale: PdfLocale,
   output: string | null,
-  shared: SharedContext
+  shared: SharedContext,
 ): Promise<number> {
   logger.event("pdf.started", { locale })
   const tree = preparePublicChapterNav(await getArticleTree(locale))
@@ -431,10 +382,7 @@ async function buildLocale(
   const plan = assembleBookPlan(linearized, (slug) => hasBody.has(slug))
   const chapterEntries = plan.chapters.flatMap(chapterArticles)
   const included = [...plan.preface, ...chapterEntries]
-  const index = indexBook(
-    new Set(included.map((entry) => entry.article.slug)),
-    shared.manifest
-  )
+  const index = indexBook(new Set(included.map((entry) => entry.article.slug)), shared.manifest)
 
   let missingImages = 0
   const writeEntry = (entry: NumberedArticle, preface: boolean): void => {
@@ -443,10 +391,7 @@ async function buildLocale(
       throw new Error(`No prepared article for ${entry.article.slug}`)
     }
     missingImages += item.missingImages
-    const body = item.emit(
-      entry.article.title,
-      createLinkResolver(item.filePath, locale, index)
-    )
+    const body = item.emit(entry.article.title, createLinkResolver(item.filePath, locale, index))
     writeArticle(articlesDir, entry, body, preface)
   }
   for (const entry of plan.preface) writeEntry(entry, true)
@@ -473,7 +418,7 @@ async function buildLocale(
       preface: plan.preface,
       chapters: plan.chapters,
     }),
-    "utf-8"
+    "utf-8",
   )
 
   const targets = outputTargets(locale, output)
@@ -492,7 +437,7 @@ async function buildLocale(
       "1",
       "--ppi",
       "144",
-    ])
+    ]),
   )
 
   logger.event("pdf.generated", {
@@ -531,7 +476,7 @@ async function main(): Promise<void> {
     logger.warn(
       "pdf.images.missing",
       { count: missingImages },
-      "Remote images that could not be downloaded print as placeholders; the warnings above name each source."
+      "Remote images that could not be downloaded print as placeholders; the warnings above name each source.",
     )
   } else {
     logger.event("pdf.images.missing", { count: 0 })

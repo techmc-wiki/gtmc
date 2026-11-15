@@ -1,10 +1,12 @@
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
+
+import { getPublicChapterNav } from "@/lib/articles/public-tree"
+
 import { HomepageClient } from "./_homepage/homepage-client"
 import { HomepageDotGrid } from "./_homepage/homepage-dot-grid"
 import { TocSection } from "./_homepage/toc-section"
-import { getPublicChapterNav } from "@/lib/articles/public-tree"
-import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 
 function normalizeLocale(locale: string): ArticleLocale {
   return locale === "en" ? "en" : "zh"
@@ -50,11 +52,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function Home({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
+export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   const normalizedLocale = normalizeLocale(locale)
   const tree = await getPublicChapterNav(normalizedLocale)

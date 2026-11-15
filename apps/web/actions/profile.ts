@@ -1,9 +1,10 @@
 "use server"
 
-import { requireAuth } from "@/lib/auth/context"
-import { profileSchema, writeProfile } from "@/lib/auth/profile"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+
+import { requireAuth } from "@/lib/auth/context"
+import { profileSchema, writeProfile } from "@/lib/auth/profile"
 
 export async function updateProfileAction(formData: FormData) {
   const session = await requireAuth()

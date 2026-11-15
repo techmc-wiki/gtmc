@@ -1,38 +1,38 @@
-import { getFirstArticleInChapter } from "@/lib/articles/navigation-data";
-import { hasArticleLocale } from "@/lib/articles/manifest";
-import { type ArticleLocale } from "@gtmc/ssg/articles/types";
+import { type ArticleLocale } from "@gtmc/ssg/articles/types"
+
+import type { ArticleTreeNode as BaseArticleTreeNode } from "@/lib/articles/article-tree-types"
+import { hasArticleLocale } from "@/lib/articles/manifest"
 import {
   getCachedArticleTree,
   getCachedLocalizedArticleEntry,
-} from "@/lib/articles/manifest-cached";
+} from "@/lib/articles/manifest-cached"
+import { getFirstArticleInChapter } from "@/lib/articles/navigation-data"
 
-import type { ArticleTreeNode as BaseArticleTreeNode } from "@/lib/articles/article-tree-types";
+export const SOURCE_ARTICLE_LOCALE: ArticleLocale = "zh"
 
-export const SOURCE_ARTICLE_LOCALE: ArticleLocale = "zh";
-
-export type ArticleTreeNode = BaseArticleTreeNode & { index?: number };
+export type ArticleTreeNode = BaseArticleTreeNode & { index?: number }
 
 export interface ResolvedArticleTarget {
-  filePath: string;
-  canonicalSlug: string;
-  index: number;
-  isPreface: boolean;
-  isReadmeIntro: boolean;
-  redirectToSlug?: string;
+  filePath: string
+  canonicalSlug: string
+  index: number
+  isPreface: boolean
+  isReadmeIntro: boolean
+  redirectToSlug?: string
 }
 
 export interface ResolvedArticleRequest {
-  contentLocale: ArticleLocale;
-  target: ResolvedArticleTarget;
-  redirectToLocale?: ArticleLocale;
+  contentLocale: ArticleLocale
+  target: ResolvedArticleTarget
+  redirectToLocale?: ArticleLocale
 }
 
 export function resolveArticleLocale(locale: string): ArticleLocale {
-  return locale === SOURCE_ARTICLE_LOCALE ? SOURCE_ARTICLE_LOCALE : "en";
+  return locale === SOURCE_ARTICLE_LOCALE ? SOURCE_ARTICLE_LOCALE : "en"
 }
 
 export function getArticleFallbackLocale(locale: ArticleLocale): ArticleLocale {
-  return locale === SOURCE_ARTICLE_LOCALE ? locale : SOURCE_ARTICLE_LOCALE;
+  return locale === SOURCE_ARTICLE_LOCALE ? locale : SOURCE_ARTICLE_LOCALE
 }
 
 /**
@@ -42,58 +42,58 @@ export async function resolveArticleRequest(
   requestedSlugPath: string,
   locale: ArticleLocale,
 ): Promise<ResolvedArticleRequest | null> {
-  const localizedTarget = await resolveArticleTarget(requestedSlugPath, locale);
+  const localizedTarget = await resolveArticleTarget(requestedSlugPath, locale)
   if (localizedTarget) {
-    return { contentLocale: locale, target: localizedTarget };
+    return { contentLocale: locale, target: localizedTarget }
   }
 
-  const fallbackLocale = getArticleFallbackLocale(locale);
+  const fallbackLocale = getArticleFallbackLocale(locale)
   if (fallbackLocale === locale) {
-    return null;
+    return null
   }
 
-  const fallbackTarget = await resolveArticleTarget(requestedSlugPath, fallbackLocale);
+  const fallbackTarget = await resolveArticleTarget(requestedSlugPath, fallbackLocale)
   return fallbackTarget
     ? {
         contentLocale: fallbackLocale,
         target: fallbackTarget,
         redirectToLocale: fallbackLocale,
       }
-    : null;
+    : null
 }
 
 async function resolveArticleTarget(
   requestedSlugPath: string,
   locale: ArticleLocale,
 ): Promise<ResolvedArticleTarget | null> {
-  const normalizedSlug = requestedSlugPath.replace(/\.md$/i, "");
-  const tree: ArticleTreeNode[] = await getCachedArticleTree(locale);
-  const targetNode = findNodeBySlug(tree, normalizedSlug);
+  const normalizedSlug = requestedSlugPath.replace(/\.md$/i, "")
+  const tree: ArticleTreeNode[] = await getCachedArticleTree(locale)
+  const targetNode = findNodeBySlug(tree, normalizedSlug)
 
   if (!targetNode) {
-    return null;
+    return null
   }
 
   const canonicalSlug = targetNode.isFolder
     ? await resolveCanonicalSlugForFolder(targetNode, locale)
-    : targetNode.slug;
+    : targetNode.slug
 
   if (!canonicalSlug) {
-    return null;
+    return null
   }
 
   if (!hasArticleLocale(canonicalSlug, locale)) {
-    return null;
+    return null
   }
 
-  const slugEntry = await getCachedLocalizedArticleEntry(canonicalSlug, locale);
-  const filePath = slugEntry?.filePath ?? null;
+  const slugEntry = await getCachedLocalizedArticleEntry(canonicalSlug, locale)
+  const filePath = slugEntry?.filePath ?? null
   if (!filePath) {
-    return null;
+    return null
   }
 
   const redirectToSlug =
-    targetNode.isFolder && canonicalSlug !== normalizedSlug ? canonicalSlug : undefined;
+    targetNode.isFolder && canonicalSlug !== normalizedSlug ? canonicalSlug : undefined
 
   return {
     filePath,
@@ -102,34 +102,34 @@ async function resolveArticleTarget(
     isPreface: slugEntry?.isPreface ?? false,
     isReadmeIntro: Boolean(slugEntry?.isFolder && slugEntry?.hasIntro),
     redirectToSlug,
-  };
+  }
 }
 
 async function resolveCanonicalSlugForFolder(
   targetNode: ArticleTreeNode,
   locale: ArticleLocale,
 ): Promise<string | null> {
-  const mapEntry = await getCachedLocalizedArticleEntry(targetNode.slug, locale);
+  const mapEntry = await getCachedLocalizedArticleEntry(targetNode.slug, locale)
   if (mapEntry?.hasIntro && hasArticleLocale(targetNode.slug, locale)) {
-    return targetNode.slug;
+    return targetNode.slug
   }
 
-  return resolveFirstArticleSlug(targetNode.children ?? [], locale);
+  return resolveFirstArticleSlug(targetNode.children ?? [], locale)
 }
 
 function findNodeBySlug(nodes: ArticleTreeNode[], targetSlug: string): ArticleTreeNode | null {
   for (const node of nodes) {
     if (node.slug === targetSlug) {
-      return node;
+      return node
     }
 
-    const nested = findNodeBySlug(node.children ?? [], targetSlug);
+    const nested = findNodeBySlug(node.children ?? [], targetSlug)
     if (nested) {
-      return nested;
+      return nested
     }
   }
 
-  return null;
+  return null
 }
 
 async function resolveFirstArticleSlug(
@@ -137,7 +137,7 @@ async function resolveFirstArticleSlug(
   locale: ArticleLocale,
 ): Promise<string | null> {
   if (!children || children.length === 0) {
-    return null;
+    return null
   }
 
   const chapterEntries = await Promise.all(
@@ -148,21 +148,21 @@ async function resolveFirstArticleSlug(
       index: child.index ?? -1,
       isFolder: child.isFolder,
     })),
-  );
+  )
 
-  const firstEntry = getFirstArticleInChapter(chapterEntries);
+  const firstEntry = getFirstArticleInChapter(chapterEntries)
   if (!firstEntry) {
-    return null;
+    return null
   }
 
   if (!firstEntry.isFolder) {
-    return hasArticleLocale(firstEntry.slug, locale) ? firstEntry.slug : null;
+    return hasArticleLocale(firstEntry.slug, locale) ? firstEntry.slug : null
   }
 
-  const matchedFolder = children.find((child) => child.slug === firstEntry.slug);
+  const matchedFolder = children.find((child) => child.slug === firstEntry.slug)
   if (!matchedFolder) {
-    return null;
+    return null
   }
 
-  return resolveFirstArticleSlug(matchedFolder.children ?? [], locale);
+  return resolveFirstArticleSlug(matchedFolder.children ?? [], locale)
 }

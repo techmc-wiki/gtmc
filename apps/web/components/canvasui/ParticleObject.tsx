@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react"
 import useSWR from "swr"
-
 import * as THREE from "three"
 import { OrbitControls } from "three/addons/controls/OrbitControls.js"
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js"
@@ -239,9 +238,7 @@ function disposeObject(root: THREE.Object3D) {
   root.traverse((node) => {
     const mesh = node as THREE.Mesh
     if (mesh.geometry) mesh.geometry.dispose()
-    const materials = Array.isArray(mesh.material)
-      ? mesh.material
-      : [mesh.material]
+    const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
     for (const material of materials) {
       if (!material) continue
       for (const value of Object.values(material)) {
@@ -253,11 +250,7 @@ function disposeObject(root: THREE.Object3D) {
 }
 
 function readAlbedo(map: THREE.Texture | null): ImageData | null {
-  const image = map?.image as
-    | HTMLImageElement
-    | HTMLCanvasElement
-    | ImageBitmap
-    | undefined
+  const image = map?.image as HTMLImageElement | HTMLCanvasElement | ImageBitmap | undefined
   if (!image || !image.width || !image.height) return null
   try {
     const ratio = Math.min(1, ALBEDO_SIZE / Math.max(image.width, image.height))
@@ -275,28 +268,19 @@ function readAlbedo(map: THREE.Texture | null): ImageData | null {
   }
 }
 
-function sampleAlbedo(
-  data: ImageData,
-  u: number,
-  v: number,
-  flipY: boolean,
-  out: THREE.Color
-) {
-  const x = Math.min(
-    data.width - 1,
-    Math.max(0, Math.floor((u - Math.floor(u)) * data.width))
-  )
+function sampleAlbedo(data: ImageData, u: number, v: number, flipY: boolean, out: THREE.Color) {
+  const x = Math.min(data.width - 1, Math.max(0, Math.floor((u - Math.floor(u)) * data.width)))
   const vWrapped = v - Math.floor(v)
   const y = Math.min(
     data.height - 1,
-    Math.max(0, Math.floor((flipY ? 1 - vWrapped : vWrapped) * data.height))
+    Math.max(0, Math.floor((flipY ? 1 - vWrapped : vWrapped) * data.height)),
   )
   const i = (y * data.width + x) * 4
   out.setRGB(
     data.data[i] / 255,
     data.data[i + 1] / 255,
     data.data[i + 2] / 255,
-    THREE.SRGBColorSpace
+    THREE.SRGBColorSpace,
   )
 }
 
@@ -315,9 +299,7 @@ function sampleMesh(scene: THREE.Group, count: number): CloudSample {
     const positions = geometry.getAttribute("position")
     if (!positions) return
     const index = geometry.getIndex()
-    const triangleCount = Math.floor(
-      (index ? index.count : positions.count) / 3
-    )
+    const triangleCount = Math.floor((index ? index.count : positions.count) / 3)
     if (triangleCount === 0) return
     const material = (
       Array.isArray(mesh.material) ? mesh.material[0] : mesh.material
@@ -406,14 +388,8 @@ function sampleMesh(scene: THREE.Group, count: number): CloudSample {
 
     albedo.copy(bucket.baseColor)
     if (bucket.albedo && bucket.uvs) {
-      const tu =
-        bucket.uvs.getX(i0) * w +
-        bucket.uvs.getX(i1) * u +
-        bucket.uvs.getX(i2) * v
-      const tv =
-        bucket.uvs.getY(i0) * w +
-        bucket.uvs.getY(i1) * u +
-        bucket.uvs.getY(i2) * v
+      const tu = bucket.uvs.getX(i0) * w + bucket.uvs.getX(i1) * u + bucket.uvs.getX(i2) * v
+      const tv = bucket.uvs.getY(i0) * w + bucket.uvs.getY(i1) * u + bucket.uvs.getY(i2) * v
       sampleAlbedo(bucket.albedo, tu, tv, bucket.albedoFlipY, texel)
       albedo.multiply(texel)
     }
@@ -428,22 +404,16 @@ function sampleMesh(scene: THREE.Group, count: number): CloudSample {
           bucket.vertexColors.getZ(i0) * w +
           bucket.vertexColors.getZ(i1) * u +
           bucket.vertexColors.getZ(i2) * v) /
-          3
+          3,
       )
     }
 
     let shade = 0.85
     if (bucket.normals) {
       normal.set(
-        bucket.normals.getX(i0) * w +
-          bucket.normals.getX(i1) * u +
-          bucket.normals.getX(i2) * v,
-        bucket.normals.getY(i0) * w +
-          bucket.normals.getY(i1) * u +
-          bucket.normals.getY(i2) * v,
-        bucket.normals.getZ(i0) * w +
-          bucket.normals.getZ(i1) * u +
-          bucket.normals.getZ(i2) * v
+        bucket.normals.getX(i0) * w + bucket.normals.getX(i1) * u + bucket.normals.getX(i2) * v,
+        bucket.normals.getY(i0) * w + bucket.normals.getY(i1) * u + bucket.normals.getY(i2) * v,
+        bucket.normals.getZ(i0) * w + bucket.normals.getZ(i1) * u + bucket.normals.getZ(i2) * v,
       )
       normal.applyMatrix3(bucket.normalMatrix).normalize()
       shade = 0.45 + 0.65 * Math.max(normal.dot(light) * 0.5 + 0.5, 0)
@@ -530,9 +500,7 @@ function normalizeCloud(sample: CloudSample) {
   }
 }
 
-function sniffKind(
-  bytes: Uint8Array
-): "glb" | "gltf" | "svg" | "bitmap" | null {
+function sniffKind(bytes: Uint8Array): "glb" | "gltf" | "svg" | "bitmap" | null {
   if (bytes.length < 4) return null
   const ascii = (start: number, text: string) => {
     for (let i = 0; i < text.length; i++) {
@@ -565,13 +533,9 @@ function loadImageElement(url: string): Promise<HTMLImageElement> {
   const { promise, resolve, reject } = Promise.withResolvers<HTMLImageElement>()
   const image = new Image()
   image.addEventListener("load", () => resolve(image), { once: true })
-  image.addEventListener(
-    "error",
-    () => reject(new Error("Could not decode the image")),
-    {
-      once: true,
-    }
-  )
+  image.addEventListener("error", () => reject(new Error("Could not decode the image")), {
+    once: true,
+  })
   image.src = url
   return promise
 }
@@ -597,7 +561,7 @@ async function rasterizeImage(blob: Blob): Promise<ImageData> {
 
 function createParticleObject(
   elements: ParticleObjectElements,
-  options: ParticleObjectRuntimeOptions = {}
+  options: ParticleObjectRuntimeOptions = {},
 ): ParticleObjectInstance | null {
   const { canvas } = elements
   const config = { ...DEFAULTS, ...options }
@@ -697,10 +661,7 @@ function createParticleObject(
     for (let i = 0; i < count; i++) seeds[i] = Math.random()
 
     const geometry = new THREE.BufferGeometry()
-    const positionAttr = new THREE.BufferAttribute(
-      new Float32Array(sample.positions),
-      3
-    )
+    const positionAttr = new THREE.BufferAttribute(new Float32Array(sample.positions), 3)
     geometry.setAttribute("position", positionAttr)
     geometry.setAttribute("aColor", new THREE.BufferAttribute(sample.colors, 3))
     geometry.setAttribute("aShade", new THREE.BufferAttribute(sample.shades, 1))
@@ -785,7 +746,7 @@ function createParticleObject(
   function applyOptions() {
     renderer.setClearColor(
       new THREE.Color(config.background || "#000000"),
-      config.background ? 1 : 0
+      config.background ? 1 : 0,
     )
     controls.enableRotate = config.orbit
     controls.enableZoom = config.zoom
@@ -796,14 +757,9 @@ function createParticleObject(
     floatGroup.position.x = config.xOffset
     floatGroup.position.y = MODEL_LIFT + config.yOffset
     fitGroup.scale.setScalar(config.scale)
-    material.uniforms.uDrift.value = reducedMotion
-      ? 0
-      : Math.max(config.drift, 0)
+    material.uniforms.uDrift.value = reducedMotion ? 0 : Math.max(config.drift, 0)
     material.uniforms.uSize.value = Math.max(config.size, 0.1)
-    material.uniforms.uVariance.value = Math.min(
-      Math.max(config.sizeVariance, 0),
-      1
-    )
+    material.uniforms.uVariance.value = Math.min(Math.max(config.sizeVariance, 0), 1)
     material.uniforms.uRefDist.value = config.cameraDistance
     if (config.color) {
       tint.set(config.color)
@@ -888,9 +844,7 @@ function createParticleObject(
 
   function simulate(delta: number) {
     if (!points || !homes || !velocities || particleCount === 0) return
-    const positionAttr = points.geometry.getAttribute(
-      "position"
-    ) as THREE.BufferAttribute
+    const positionAttr = points.geometry.getAttribute("position") as THREE.BufferAttribute
     const p = positionAttr.array as Float32Array
     const h = homes
     const v = velocities
@@ -1015,16 +969,11 @@ function createParticleObject(
 
     if (!reducedMotion) {
       elapsed += delta * config.floatSpeed
-      floatGroup.rotation.x =
-        (Math.cos(elapsed / 4) / 8) * config.rotationIntensity
-      floatGroup.rotation.y =
-        (Math.sin(elapsed / 4) / 8) * config.rotationIntensity
-      floatGroup.rotation.z =
-        (Math.sin(elapsed / 4) / 20) * config.rotationIntensity
+      floatGroup.rotation.x = (Math.cos(elapsed / 4) / 8) * config.rotationIntensity
+      floatGroup.rotation.y = (Math.sin(elapsed / 4) / 8) * config.rotationIntensity
+      floatGroup.rotation.z = (Math.sin(elapsed / 4) / 20) * config.rotationIntensity
       floatGroup.position.y =
-        MODEL_LIFT +
-        config.yOffset +
-        (Math.sin(elapsed / 1.5) / 10) * config.floatIntensity
+        MODEL_LIFT + config.yOffset + (Math.sin(elapsed / 1.5) / 10) * config.floatIntensity
       material.uniforms.uTime.value += delta
     }
 
@@ -1125,17 +1074,13 @@ const PARTICLE_CANVAS_STYLE: React.CSSProperties = {
   touchAction: "none",
 }
 
-export function ParticleObject({
-  className,
-  style,
-  ...options
-}: ParticleObjectProps) {
+export function ParticleObject({ className, style, ...options }: ParticleObjectProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const instanceRef = useRef<ParticleObjectInstance | null>(null)
   const [initialOptions] = useState(options)
   const { data: assetData, error: assetError } = useSWR<ArrayBuffer>(
     options.src || null,
-    fetchParticleAsset
+    fetchParticleAsset,
   )
 
   useEffect(() => {

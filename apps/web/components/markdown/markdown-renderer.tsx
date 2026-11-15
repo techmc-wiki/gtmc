@@ -1,14 +1,11 @@
-import ReactMarkdown from "react-markdown"
-import type { ReactNode } from "react"
-
-import type { RehypeShikiPlugin } from "@gtmc/ssg/markdown/syntax/rehype-shiki"
 import type { CodeReference } from "@gtmc/ssg/markdown/code-provenance"
-import { getMarkdownComponents } from "./get-markdown-components"
-import {
-  buildRehypePlugins,
-  buildRemarkPlugins,
-} from "@gtmc/ssg/markdown/pipeline/core"
+import { buildRehypePlugins, buildRemarkPlugins } from "@gtmc/ssg/markdown/pipeline/core"
+import type { RehypeShikiPlugin } from "@gtmc/ssg/markdown/syntax/rehype-shiki"
 import { rehypeCJKSpacingBrowser } from "@gtmc/ssg/markdown/transforms/rehype-cjk-spacing.browser"
+import type { ReactNode } from "react"
+import ReactMarkdown from "react-markdown"
+
+import { getMarkdownComponents } from "./get-markdown-components"
 
 interface MarkdownRendererProps {
   content: string
@@ -38,12 +35,7 @@ export function MarkdownRenderer({
     <ReactMarkdown
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
-      components={getMarkdownComponents(
-        rawPath,
-        content,
-        locale,
-        headingAction
-      )}>
+      components={getMarkdownComponents(rawPath, content, locale, headingAction)}>
       {content}
     </ReactMarkdown>
   )

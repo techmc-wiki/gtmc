@@ -1,13 +1,10 @@
 "use client"
 
-import { useCallback, useEffect, useRef, type ChangeEvent } from "react"
-import { useTranslations } from "next-intl"
 import { SearchIcon } from "lucide-react"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/shadcn/input-group"
+import { useTranslations } from "next-intl"
+import { useCallback, useEffect, useRef, type ChangeEvent } from "react"
+
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/shadcn/input-group"
 
 export interface GlossarySearchProps {
   /** URL-backed query state owned by the parent (nuqs). */
@@ -16,11 +13,7 @@ export interface GlossarySearchProps {
   className?: string
 }
 
-export function GlossarySearch({
-  query,
-  onQueryChange,
-  className = "",
-}: GlossarySearchProps) {
+export function GlossarySearch({ query, onQueryChange, className = "" }: GlossarySearchProps) {
   const t = useTranslations("Glossary")
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -30,35 +23,26 @@ export function GlossarySearch({
       if (e.key === "/" && !e.metaKey && !e.ctrlKey && !e.altKey) {
         const target = e.target as HTMLElement | null
         const tag = target?.tagName
-        if (
-          tag === "INPUT" ||
-          tag === "TEXTAREA" ||
-          target?.isContentEditable
-        ) {
+        if (tag === "INPUT" || tag === "TEXTAREA" || target?.isContentEditable) {
           return
         }
         e.preventDefault()
         inputRef.current?.focus()
         return
       }
-      if (
-        e.key === "Escape" &&
-        document.activeElement === inputRef.current &&
-        query.length > 0
-      ) {
+      if (e.key === "Escape" && document.activeElement === inputRef.current && query.length > 0) {
         onQueryChange("")
       }
     }
     document.addEventListener("keydown", handleKeyDown, { capture: true })
-    return () =>
-      document.removeEventListener("keydown", handleKeyDown, { capture: true })
+    return () => document.removeEventListener("keydown", handleKeyDown, { capture: true })
   }, [query, onQueryChange])
 
   const handleInputChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       onQueryChange(e.target.value)
     },
-    [onQueryChange]
+    [onQueryChange],
   )
 
   return (

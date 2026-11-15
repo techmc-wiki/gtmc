@@ -1,22 +1,19 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import { getTranslations } from "next-intl/server"
-import { readProfile } from "@/lib/auth/profile"
-import { guardUser } from "@/lib/auth/guards"
-import { Button } from "@/components/ui/shadcn/button"
-import { Badge } from "@/components/ui/shadcn/badge"
-import { Input } from "@/components/ui/shadcn/input"
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-} from "@/components/ui/shadcn/avatar"
-import { updateProfileAction } from "@/actions/profile"
-import { SignOutButton } from "@/components/ui/sign-out-button"
-import { cn } from "@/lib/cn"
-import { Label } from "@/components/ui/shadcn/label"
-import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
+import Image from "next/image"
 import { Suspense, type ReactNode } from "react"
+
+import { updateProfileAction } from "@/actions/profile"
+import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/shadcn/avatar"
+import { Badge } from "@/components/ui/shadcn/badge"
+import { Button } from "@/components/ui/shadcn/button"
+import { Input } from "@/components/ui/shadcn/input"
+import { Label } from "@/components/ui/shadcn/label"
+import { SignOutButton } from "@/components/ui/sign-out-button"
+import { guardUser } from "@/lib/auth/guards"
+import { readProfile } from "@/lib/auth/profile"
+import { cn } from "@/lib/cn"
 
 export const metadata: Metadata = {
   title: "User Profile",
@@ -24,20 +21,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default async function ProfilePage({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
+export default async function ProfilePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "Profile" })
 
   return (
     <div className="page-container mt-4 sm:mt-8">
       <div className="border-tech-main/40 border-b-2 pb-4">
-        <h1 className="display-title text-tech-main-dark text-3xl md:text-5xl">
-          {t("pageTitle")}
-        </h1>
+        <h1 className="display-title text-tech-main-dark text-3xl md:text-5xl">{t("pageTitle")}</h1>
       </div>
 
       <Suspense fallback={<ProfileFormFallback />}>
@@ -89,10 +80,7 @@ async function ProfileForm({ locale }: { locale: string }) {
             )}
           </Avatar>
 
-          <FormField
-            htmlFor="profile-image"
-            label={t("avatarUrlLabel")}
-            className="w-full flex-1">
+          <FormField htmlFor="profile-image" label={t("avatarUrlLabel")} className="w-full flex-1">
             <Input
               id="profile-image"
               name="image"
@@ -102,9 +90,7 @@ async function ProfileForm({ locale }: { locale: string }) {
               defaultValue={user.image || ""}
               placeholder="https://..."
             />
-            <p
-              id="profile-image-hint"
-              className="text-muted-foreground text-xs">
+            <p id="profile-image-hint" className="text-muted-foreground text-xs">
               {t("avatarUrlHint")}
             </p>
           </FormField>
@@ -121,16 +107,9 @@ async function ProfileForm({ locale }: { locale: string }) {
             />
           </FormField>
           <FormField htmlFor="profile-email" label={emailLabel}>
-            <Input
-              id="profile-email"
-              type="email"
-              defaultValue={user.email || ""}
-              disabled
-            />
+            <Input id="profile-email" type="email" defaultValue={user.email || ""} disabled />
             {emailVisibility === "private" && (
-              <p className="text-muted-foreground text-xs">
-                {t("emailPrivateNotice")}
-              </p>
+              <p className="text-muted-foreground text-xs">{t("emailPrivateNotice")}</p>
             )}
           </FormField>
         </div>
@@ -152,10 +131,7 @@ function ProfileFormFallback() {
       className="border-tech-main/40 bg-surface-overlay/60 w-full border">
       <div className="space-y-8 p-4 sm:p-6 md:p-8 lg:p-12">
         <div className="flex flex-col items-start gap-4 sm:gap-6 md:gap-8">
-          <SegmentedBar
-            opacity="high"
-            className="size-24 sm:size-32 md:size-40"
-          />
+          <SegmentedBar opacity="high" className="size-24 sm:size-32 md:size-40" />
           <div className="w-full flex-1 space-y-3">
             <SegmentedBar opacity="low" className="h-3 w-24" />
             <SegmentedBar opacity="medium" showBorder className="h-11 w-full" />
@@ -165,11 +141,7 @@ function ProfileFormFallback() {
           {[0, 1].map((field) => (
             <div key={field} className="space-y-3">
               <SegmentedBar opacity="low" className="h-3 w-20" />
-              <SegmentedBar
-                opacity="medium"
-                showBorder
-                className="h-11 w-full"
-              />
+              <SegmentedBar opacity="medium" showBorder className="h-11 w-full" />
             </div>
           ))}
         </div>

@@ -3,15 +3,17 @@ import { createHash } from "node:crypto"
 import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
-import { createLogger } from "./logger"
+
 import { workspacePath } from "@/lib/workspace-paths"
+
+import { createLogger } from "./logger"
 
 const logger = createLogger("content-cache")
 
 const CACHE_FORMAT_VERSION = 4
 const CACHE_DIRECTORY = path.resolve(
   process.cwd(),
-  process.env.GTMC_CONTENT_CACHE_DIR ?? ".next/cache/gtmc-content"
+  process.env.GTMC_CONTENT_CACHE_DIR ?? ".next/cache/gtmc-content",
 )
 
 const GENERATED_ARTIFACTS = [
@@ -137,7 +139,7 @@ function readSubmoduleRevision(...submodule: string[]): string {
   })
   if (result.status !== 0) {
     throw new Error(
-      `Unable to read ${submodule.join("/")} revision: ${result.stderr || result.error?.message || "unknown error"}`
+      `Unable to read ${submodule.join("/")} revision: ${result.stderr || result.error?.message || "unknown error"}`,
     )
   }
   return result.stdout.trim()
@@ -187,11 +189,11 @@ function validateArchiveEntries(entries: string[]): string | null {
     }
 
     const isExpectedArtifact = GENERATED_ARTIFACTS.includes(
-      normalizedPath as (typeof GENERATED_ARTIFACTS)[number]
+      normalizedPath as (typeof GENERATED_ARTIFACTS)[number],
     )
     const isParentDirectory = ARCHIVE_PARENT_DIRECTORIES.has(normalizedPath)
     const isNestedArtifact = expectedDirectories.some((directory) =>
-      normalizedPath.startsWith(`${directory}/`)
+      normalizedPath.startsWith(`${directory}/`),
     )
     if (!isExpectedArtifact && !isParentDirectory && !isNestedArtifact) {
       return entry
@@ -235,10 +237,7 @@ export function createContentArtifactCache(): ContentArtifactCache | null {
 
 export function restoreContentArtifacts(cache: ContentArtifactCache): boolean {
   try {
-    if (
-      !fs.existsSync(cache.archivePath) ||
-      !fs.existsSync(cache.manifestPath)
-    ) {
+    if (!fs.existsSync(cache.archivePath) || !fs.existsSync(cache.manifestPath)) {
       logger.event("content-cache.restore", {
         outcome: "miss",
         reason: "not-found",
@@ -247,7 +246,7 @@ export function restoreContentArtifacts(cache: ContentArtifactCache): boolean {
     }
 
     const manifest = JSON.parse(
-      fs.readFileSync(cache.manifestPath, "utf-8")
+      fs.readFileSync(cache.manifestPath, "utf-8"),
     ) as ContentArtifactCacheManifest
     const expectedArtifacts = [...GENERATED_ARTIFACTS]
     if (
@@ -268,14 +267,12 @@ export function restoreContentArtifacts(cache: ContentArtifactCache): boolean {
       logger.warn(
         "content-cache.restore",
         { outcome: "miss", reason: "unreadable" },
-        listing.output
+        listing.output,
       )
       return false
     }
 
-    const unexpectedEntry = validateArchiveEntries(
-      listing.output.split("\n").filter(Boolean)
-    )
+    const unexpectedEntry = validateArchiveEntries(listing.output.split("\n").filter(Boolean))
     if (unexpectedEntry) {
       logger.warn(
         "content-cache.restore",
@@ -283,26 +280,19 @@ export function restoreContentArtifacts(cache: ContentArtifactCache): boolean {
           outcome: "miss",
           reason: "unexpected-entry",
         },
-        unexpectedEntry
+        unexpectedEntry,
       )
       return false
     }
 
-    const temporaryDirectory = fs.mkdtempSync(
-      path.join(os.tmpdir(), "gtmc-content-cache-")
-    )
+    const temporaryDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "gtmc-content-cache-"))
     try {
-      const extracted = runTar([
-        "-xzf",
-        cache.archivePath,
-        "-C",
-        temporaryDirectory,
-      ])
+      const extracted = runTar(["-xzf", cache.archivePath, "-C", temporaryDirectory])
       if (!extracted.ok) {
         logger.warn(
           "content-cache.restore",
           { outcome: "miss", reason: "extract-failed" },
-          extracted.output
+          extracted.output,
         )
         return false
       }
@@ -312,7 +302,7 @@ export function restoreContentArtifacts(cache: ContentArtifactCache): boolean {
         logger.warn(
           "content-cache.restore",
           { outcome: "miss", reason: "missing-artifact" },
-          missingArtifact
+          missingArtifact,
         )
         return false
       }
@@ -338,11 +328,7 @@ export function restoreContentArtifacts(cache: ContentArtifactCache): boolean {
     })
     return true
   } catch (error) {
-    logger.warn(
-      "content-cache.restore",
-      { outcome: "miss", reason: "exception" },
-      String(error)
-    )
+    logger.warn("content-cache.restore", { outcome: "miss", reason: "exception" }, String(error))
     return false
   }
 }
@@ -354,7 +340,7 @@ export function saveContentArtifacts(cache: ContentArtifactCache): void {
       logger.warn(
         "content-cache.save",
         { outcome: "skipped", reason: "missing-artifact" },
-        missingArtifact
+        missingArtifact,
       )
       return
     }
@@ -363,16 +349,12 @@ export function saveContentArtifacts(cache: ContentArtifactCache): void {
     const temporaryArchivePath = `${cache.archivePath}.${process.pid}.tmp`
     const temporaryManifestPath = `${cache.manifestPath}.${process.pid}.tmp`
     try {
-      const archived = runTar([
-        "-czf",
-        temporaryArchivePath,
-        ...GENERATED_ARTIFACTS,
-      ])
+      const archived = runTar(["-czf", temporaryArchivePath, ...GENERATED_ARTIFACTS])
       if (!archived.ok) {
         logger.warn(
           "content-cache.save",
           { outcome: "failed", reason: "archive-failed" },
-          archived.output
+          archived.output,
         )
         return
       }
@@ -383,11 +365,7 @@ export function saveContentArtifacts(cache: ContentArtifactCache): void {
         artifacts: GENERATED_ARTIFACTS,
         nodeVersion: process.versions.node,
       }
-      fs.writeFileSync(
-        temporaryManifestPath,
-        `${JSON.stringify(manifest)}\n`,
-        "utf-8"
-      )
+      fs.writeFileSync(temporaryManifestPath, `${JSON.stringify(manifest)}\n`, "utf-8")
       fs.renameSync(temporaryArchivePath, cache.archivePath)
       fs.renameSync(temporaryManifestPath, cache.manifestPath)
       logger.event("content-cache.save", {
@@ -399,10 +377,6 @@ export function saveContentArtifacts(cache: ContentArtifactCache): void {
       fs.rmSync(temporaryManifestPath, { force: true })
     }
   } catch (error) {
-    logger.warn(
-      "content-cache.save",
-      { outcome: "failed", reason: "exception" },
-      String(error)
-    )
+    logger.warn("content-cache.save", { outcome: "failed", reason: "exception" }, String(error))
   }
 }

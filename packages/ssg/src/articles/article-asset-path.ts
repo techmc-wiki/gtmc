@@ -2,7 +2,7 @@ import path from "path"
 
 export function resolveArticleAssetPath(
   assetSrc: string | undefined,
-  articleFilePath: string
+  articleFilePath: string,
 ): string | null {
   if (!assetSrc) return null
 
@@ -16,11 +16,7 @@ export function resolveArticleAssetPath(
     : path.join(path.dirname(articleFilePath), trimmedSrc)
   const normalized = path.normalize(rawPath).replaceAll("\\", "/")
 
-  if (
-    normalized === ".." ||
-    normalized.startsWith("../") ||
-    path.isAbsolute(normalized)
-  ) {
+  if (normalized === ".." || normalized.startsWith("../") || path.isAbsolute(normalized)) {
     return null
   }
 

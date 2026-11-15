@@ -1,15 +1,11 @@
 "use client"
 
+import { useTranslations, useLocale } from "next-intl"
 import { useState } from "react"
 import useSWRImmutable from "swr/immutable"
-import { useTranslations, useLocale } from "next-intl"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/shadcn/sheet"
+
+import { Button } from "@/components/ui/shadcn/button"
+import { Checkbox } from "@/components/ui/shadcn/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -19,8 +15,13 @@ import {
 } from "@/components/ui/shadcn/dialog"
 import { Input } from "@/components/ui/shadcn/input"
 import { Label } from "@/components/ui/shadcn/label"
-import { Checkbox } from "@/components/ui/shadcn/checkbox"
-import { Button } from "@/components/ui/shadcn/button"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/shadcn/sheet"
 import { Skeleton } from "@/components/ui/shadcn/skeleton"
 import {
   Table,
@@ -30,12 +31,9 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/shadcn/table"
-import type {
-  DatasetId,
-  PropertyEntry,
-  PropertyInfo,
-} from "@/lib/properties/types"
 import { propertyFetcher } from "@/lib/properties/fetcher"
+import type { DatasetId, PropertyEntry, PropertyInfo } from "@/lib/properties/types"
+
 import { PropertyValueView } from "./property-value"
 
 function DetailContent({
@@ -52,10 +50,7 @@ function DetailContent({
   const [query, setQuery] = useState("")
   const [differencesOnly, setDifferencesOnly] = useState(names.length > 1)
   const key = `/api/properties?${new URLSearchParams({ dataset, locale, mode: "details", names: JSON.stringify(names) })}`
-  const { data, error, mutate } = useSWRImmutable<PropertyEntry[]>(
-    key,
-    propertyFetcher
-  )
+  const { data, error, mutate } = useSWRImmutable<PropertyEntry[]>(key, propertyFetcher)
   const visible = properties.filter(
     (property) =>
       `${property.name} ${property.id} ${property.category} ${property.description}`
@@ -63,9 +58,7 @@ function DetailContent({
         .includes(query.toLowerCase()) &&
       (!differencesOnly ||
         !data ||
-        new Set(
-          data.map((entry) => JSON.stringify(entry.values[property.id] ?? null))
-        ).size > 1)
+        new Set(data.map((entry) => JSON.stringify(entry.values[property.id] ?? null))).size > 1),
   )
   return (
     <>
@@ -81,9 +74,7 @@ function DetailContent({
           <Label className="flex min-h-11 items-center gap-2">
             <Checkbox
               checked={differencesOnly}
-              onCheckedChange={(checked) =>
-                setDifferencesOnly(checked === true)
-              }
+              onCheckedChange={(checked) => setDifferencesOnly(checked === true)}
             />
             {t("differencesOnly")}
           </Label>
@@ -135,9 +126,7 @@ function DetailContent({
                     <TableCell
                       key={entry.name}
                       className="max-w-96 py-4 align-top whitespace-normal">
-                      <PropertyValueView
-                        value={entry.values[property.id] ?? null}
-                      />
+                      <PropertyValueView value={entry.values[property.id] ?? null} />
                     </TableCell>
                   ))}
                 </TableRow>
@@ -145,9 +134,7 @@ function DetailContent({
             </TableBody>
           </Table>
         )}
-        {data && !visible.length && (
-          <p className="py-6 text-center">{t("noProperty")}</p>
-        )}
+        {data && !visible.length && <p className="py-6 text-center">{t("noProperty")}</p>}
       </div>
     </>
   )
@@ -176,11 +163,7 @@ export function PropertyDetails({
           <SheetTitle>{name}</SheetTitle>
           <SheetDescription>{t("detailDescription")}</SheetDescription>
         </SheetHeader>
-        <DetailContent
-          dataset={dataset}
-          names={[name]}
-          properties={properties}
-        />
+        <DetailContent dataset={dataset} names={[name]} properties={properties} />
       </SheetContent>
     </Sheet>
   )
@@ -209,11 +192,7 @@ export function PropertyComparison({
           <DialogTitle>{t("comparisonTitle")}</DialogTitle>
           <DialogDescription>{t("comparisonDescription")}</DialogDescription>
         </DialogHeader>
-        <DetailContent
-          dataset={dataset}
-          names={names}
-          properties={properties}
-        />
+        <DetailContent dataset={dataset} names={names} properties={properties} />
       </DialogContent>
     </Dialog>
   )

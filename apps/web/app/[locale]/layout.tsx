@@ -1,28 +1,26 @@
-import { TooltipProvider } from "@/components/ui/shadcn/tooltip"
-import type { Metadata, Viewport } from "next"
-import { cacheLife } from "next/cache"
-import { Geist, Geist_Mono, STIX_Two_Text } from "next/font/google"
-// oxlint-disable-next-line import/no-unassigned-import
-import "../globals.css"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import type { Metadata, Viewport } from "next"
+import { NextIntlClientProvider, hasLocale } from "next-intl"
+
+// oxlint-disable-next-line import/no-unassigned-import
+import "../globals.css"
+import { setRequestLocale } from "next-intl/server"
+import { cacheLife } from "next/cache"
+import { Geist, Geist_Mono, STIX_Two_Text } from "next/font/google"
+import { notFound } from "next/navigation"
+import React from "react"
+
 import { ClarityAnalytics } from "@/components/layout/clarity-analytics"
-import { ThemeProvider, ThemeScript } from "@/lib/theme"
-import {
-  FooterProvider,
-  FooterWrapper,
-} from "@/components/layout/footer-context"
 import Footer from "@/components/layout/footer"
+import { FooterProvider, FooterWrapper } from "@/components/layout/footer-context"
 import { ScrollRoot } from "@/components/layout/navigation-effects"
 import { SpeculationRules } from "@/components/layout/speculation-rules"
-import { getSiteUrl } from "@/lib/site-url"
-import { buildOrganizationJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
-import { NextIntlClientProvider, hasLocale } from "next-intl"
-import { setRequestLocale } from "next-intl/server"
-import { notFound } from "next/navigation"
+import { TooltipProvider } from "@/components/ui/shadcn/tooltip"
 import { routing } from "@/i18n/routing"
-
-import React from "react"
+import { buildOrganizationJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
+import { getSiteUrl } from "@/lib/site-url"
+import { ThemeProvider, ThemeScript } from "@/lib/theme"
 
 const siteUrl = getSiteUrl()
 

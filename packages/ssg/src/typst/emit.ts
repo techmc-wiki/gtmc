@@ -35,13 +35,7 @@ const BLOCK_TAGS = new Set([
   "style",
 ])
 
-const CALLOUT_KINDS = new Set([
-  "warning",
-  "tip",
-  "important",
-  "crash",
-  "corruption",
-])
+const CALLOUT_KINDS = new Set(["warning", "tip", "important", "crash", "corruption"])
 const ALIGNS = new Set(["left", "center", "right"])
 
 const UPDATE_KINDS: Readonly<Record<string, string>> = {
@@ -85,10 +79,7 @@ function trimRun(nodes: readonly RootContent[]): RootContent[] {
   while (start < end && (isIgnorable(nodes[start]) || isBreak(nodes[start]))) {
     start++
   }
-  while (
-    end > start &&
-    (isIgnorable(nodes[end - 1]) || isBreak(nodes[end - 1]))
-  ) {
+  while (end > start && (isIgnorable(nodes[end - 1]) || isBreak(nodes[end - 1]))) {
     end--
   }
   return nodes.slice(start, end)
@@ -101,11 +92,7 @@ function soleElement(el: Element): Element | undefined {
   return only?.type === "element" ? only : undefined
 }
 
-function alignOf(
-  header: readonly Cell[],
-  firstBody: readonly Cell[],
-  index: number
-): string {
+function alignOf(header: readonly Cell[], firstBody: readonly Cell[], index: number): string {
   return header[index]?.align ?? firstBody[index]?.align ?? "left"
 }
 
@@ -129,7 +116,7 @@ export class BodyEmitter {
 
   constructor(
     private readonly ctx: EmitContext,
-    root: Root
+    root: Root,
   ) {
     this.footnotes = collectFootnotes(root)
   }
@@ -182,10 +169,7 @@ export class BodyEmitter {
       case "element":
         return this.inlineElement(node)
       default:
-        throw this.fail(
-          parent.type === "element" ? parent : null,
-          `unexpected ${node.type} node`
-        )
+        throw this.fail(parent.type === "element" ? parent : null, `unexpected ${node.type} node`)
     }
   }
 
@@ -194,10 +178,7 @@ export class BodyEmitter {
       case "p":
         return this.paragraph(el)
       case "h1":
-        if (
-          parent.type === "root" &&
-          textOf(el).trim() === this.ctx.title.trim()
-        ) {
+        if (parent.type === "root" && textOf(el).trim() === this.ctx.title.trim()) {
           return ""
         }
         return this.heading(el)
@@ -234,7 +215,7 @@ export class BodyEmitter {
       default:
         throw this.fail(
           el,
-          `block element is not in the vocabulary (inside ${parent.type === "root" ? "article" : parent.tagName})`
+          `block element is not in the vocabulary (inside ${parent.type === "root" ? "article" : parent.tagName})`,
         )
     }
   }
@@ -251,8 +232,7 @@ export class BodyEmitter {
       throw this.fail(el, "heading level below 2 is not in the vocabulary")
     }
     const id = attr(el, "id")
-    const anchor =
-      id === undefined ? "none" : stringLiteral(`${this.ctx.articleSlug}#${id}`)
+    const anchor = id === undefined ? "none" : stringLiteral(`${this.ctx.articleSlug}#${id}`)
     return `#sec(${level}, ${anchor})[${this.inlines(el.children, el).trim()}]`
   }
 
@@ -265,7 +245,7 @@ export class BodyEmitter {
     }
     const items = elementsOf(el.children)
     const loose = items.some((item) =>
-      elementsOf(item.children).some((child) => child.tagName === "p")
+      elementsOf(item.children).some((child) => child.tagName === "p"),
     )
     const bodies = items.map((item) => `[${this.blocks(item.children, item)}]`)
     const trailing = bodies.length === 1 ? "," : ""
@@ -281,20 +261,15 @@ export class BodyEmitter {
   }
 
   pre(el: Element): string {
-    const code = elementsOf(el.children).find(
-      (child) => child.tagName === "code"
-    )
+    const code = elementsOf(el.children).find((child) => child.tagName === "code")
     if (code === undefined) throw this.fail(el, "pre without code")
     const classes = classList(code)
     if (classes.includes("language-mermaid")) {
       throw this.fail(el, "mermaid fence was not converted")
     }
-    const language = classes
-      .find((name) => name.startsWith("language-"))
-      ?.slice("language-".length)
+    const language = classes.find((name) => name.startsWith("language-"))?.slice("language-".length)
     if (language === "math") return this.ctx.math(textOf(code), true)
-    const plain =
-      language === undefined || language === "text" || language === "plaintext"
+    const plain = language === undefined || language === "text" || language === "plaintext"
     const lang = plain || language === undefined ? "text" : language
     const label = attr(el, "data-code-label")
     const labelArg = label === undefined ? "none" : stringLiteral(label)
@@ -309,10 +284,7 @@ export class BodyEmitter {
   aside(el: Element): string {
     const kind = attr(el, "data-callout")
     if (kind === undefined || !CALLOUT_KINDS.has(kind)) {
-      throw this.fail(
-        el,
-        `callout kind "${kind ?? ""}" is not in the vocabulary`
-      )
+      throw this.fail(el, `callout kind "${kind ?? ""}" is not in the vocabulary`)
     }
     if (attr(el, "data-callout-empty") === "true") {
       return `#callout(${stringLiteral(kind)}, [])`
@@ -329,9 +301,7 @@ export class BodyEmitter {
     if (attr(el, "data-advanced-section") === "true") {
       const heading = attr(el, "data-advanced-heading")
       const id =
-        heading === undefined
-          ? "none"
-          : stringLiteral(`${this.ctx.articleSlug}#${heading}`)
+        heading === undefined ? "none" : stringLiteral(`${this.ctx.articleSlug}#${heading}`)
       return `#advanced(${id})[${this.blocks(el.children, el)}]`
     }
     if (classList(el).includes("scheduled-ticks-comparison")) {
@@ -357,25 +327,18 @@ export class BodyEmitter {
     const bodyRows = sections
       .filter((child) => child.tagName === "tbody")
       .flatMap((body) => this.rows(body))
-    const columns =
-      header.length > 0 ? header.length : (bodyRows[0]?.length ?? 0)
+    const columns = header.length > 0 ? header.length : (bodyRows[0]?.length ?? 0)
     if (columns === 0) throw this.fail(el, "table has no cells")
     const align = Array.from({ length: columns }, (_, index) => {
       const value = alignOf(header, bodyRows[0] ?? [], index)
       if (!ALIGNS.has(value)) {
-        throw this.fail(
-          el,
-          `table alignment "${value}" is not in the vocabulary`
-        )
+        throw this.fail(el, `table alignment "${value}" is not in the vocabulary`)
       }
       return stringLiteral(value)
     })
     const headerCells = header.map((cell) => cell.body)
-    const headerArg =
-      headerCells.length > 0 ? `header: ${typstArray(headerCells)}, ` : ""
-    const rowArgs = bodyRows.map((row) =>
-      typstArray(row.map((cell) => cell.body))
-    )
+    const headerArg = headerCells.length > 0 ? `header: ${typstArray(headerCells)}, ` : ""
+    const rowArgs = bodyRows.map((row) => typstArray(row.map((cell) => cell.body)))
     return `#tbl(align: ${typstArray(align)}, ${headerArg}rows: ${typstArray(rowArgs)})`
   }
 
@@ -394,10 +357,7 @@ export class BodyEmitter {
     const cells: Cell[] = []
     for (const child of row.children) {
       if (isIgnorable(child)) continue
-      if (
-        child.type !== "element" ||
-        (child.tagName !== "td" && child.tagName !== "th")
-      ) {
+      if (child.type !== "element" || (child.tagName !== "td" && child.tagName !== "th")) {
         throw this.fail(row, "table row contains something other than a cell")
       }
       if (attr(child, "rowspan") !== undefined) {
@@ -461,9 +421,7 @@ export class BodyEmitter {
 
   /** `width`, else `data-width`, else `style="width: N%"`. Only percentages are in the vocabulary. */
   widthArg(img: Element): string {
-    const style = /(?:^|;)\s*width:\s*([0-9.]+%)/.exec(
-      attr(img, "style") ?? ""
-    )?.[1]
+    const style = /(?:^|;)\s*width:\s*([0-9.]+%)/.exec(attr(img, "style") ?? "")?.[1]
     const raw = attr(img, "width") ?? attr(img, "data-width") ?? style
     if (raw === undefined) return "none"
     const percent = /^([0-9.]+)%$/.exec(raw.trim())
@@ -533,9 +491,7 @@ export class BodyEmitter {
       return this.footnoteRef(el, href)
     }
     if (attr(el, "dataFootnoteBackref") !== undefined) return ""
-    const target = classifyHref(href, (value) =>
-      this.ctx.resolveArticleLink(value)
-    )
+    const target = classifyHref(href, (value) => this.ctx.resolveArticleLink(value))
     const body = this.inlines(el.children, el)
     switch (target.kind) {
       case "anchor":
@@ -560,15 +516,9 @@ export class BodyEmitter {
 
   span(el: Element): string {
     const classes = classList(el)
-    const binary = classes.some(
-      (name) => name === "binary" || name.startsWith("binary-")
-    )
+    const binary = classes.some((name) => name === "binary" || name.startsWith("binary-"))
     if (!binary) throw this.fail(el, "span is not in the vocabulary")
-    const kind = classes.includes("binary-0")
-      ? "0"
-      : classes.includes("binary-1")
-        ? "1"
-        : ""
+    const kind = classes.includes("binary-0") ? "0" : classes.includes("binary-1") ? "1" : ""
     return `#bin(${stringLiteral(kind)})[${this.inlines(el.children, el)}]`
   }
 

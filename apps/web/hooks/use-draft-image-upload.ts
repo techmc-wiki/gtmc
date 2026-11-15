@@ -3,8 +3,8 @@
 import * as React from "react"
 import { toast } from "sonner"
 
-import { compressImageForUpload } from "@/lib/uploads/image-compression"
 import { classifyFile, isImageMime } from "@/lib/uploads/file-upload"
+import { compressImageForUpload } from "@/lib/uploads/image-compression"
 
 export type DraftImageUploadPhase = "idle" | "compressing" | "uploading"
 
@@ -68,10 +68,7 @@ export function useDraftImageUpload(config: UseDraftImageUploadConfig) {
         const result = await config.upload(compressed.file)
         const displayName = result.filename.replace(/^\d+-/, "")
 
-        config.onReplacePlaceholder(
-          uploadId,
-          `![${displayName}](${result.url})`
-        )
+        config.onReplacePlaceholder(uploadId, `![${displayName}](${result.url})`)
         toast.dismiss(stageToastId)
       } catch (error) {
         const message = error instanceof Error ? error.message : "Upload error"
@@ -84,7 +81,7 @@ export function useDraftImageUpload(config: UseDraftImageUploadConfig) {
         setPhase("idle")
       }
     },
-    [config]
+    [config],
   )
 
   return {

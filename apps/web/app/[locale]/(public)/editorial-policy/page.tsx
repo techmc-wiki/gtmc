@@ -1,9 +1,10 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
+
 import { PageHeader, SectionTitle } from "@/components/ui/headings"
 import { Separator } from "@/components/ui/shadcn/separator"
-import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
 import { buildWebPageJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
+import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
 
 export async function generateMetadata({
   params,
@@ -53,8 +54,8 @@ export default async function EditorialPolicyPage({
       siteUrl,
       `/${locale}/editorial-policy`,
       t("pageTitle"),
-      t("metaDescription")
-    )
+      t("metaDescription"),
+    ),
   )
 
   return (
@@ -84,9 +85,7 @@ export default async function EditorialPolicyPage({
             {t("sourceConduct")}
           </a>
         </p>
-        <p className="text-tech-main/60 mt-1">
-          {t("lastReviewed", { date: "2026-06-28" })}
-        </p>
+        <p className="text-tech-main/60 mt-1">{t("lastReviewed", { date: "2026-06-28" })}</p>
       </aside>
 
       <section className="mt-10">

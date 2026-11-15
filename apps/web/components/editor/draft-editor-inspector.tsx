@@ -1,7 +1,10 @@
 "use client"
 
-import { useTranslations } from "next-intl"
 import { GitPullRequestIcon } from "lucide-react"
+import { useTranslations } from "next-intl"
+
+import { DraftEditorReview } from "@/components/editor/draft-editor-review"
+import type { DraftChangeEntry } from "@/components/editor/draft-editor-review"
 import { Button } from "@/components/ui/shadcn/button"
 import {
   Sheet,
@@ -10,8 +13,6 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/shadcn/sheet"
-import { DraftEditorReview } from "@/components/editor/draft-editor-review"
-import type { DraftChangeEntry } from "@/components/editor/draft-editor-review"
 
 interface DraftEditorInspectorProps {
   open: boolean
@@ -70,9 +71,7 @@ export function DraftEditorInspector({
             {activeTab === "changes" ? t("reviewAndSubmit") : t("writingGuide")}
           </SheetTitle>
           <SheetDescription>
-            {activeTab === "changes"
-              ? t("reviewDescription")
-              : t("guideDescription")}
+            {activeTab === "changes" ? t("reviewDescription") : t("guideDescription")}
           </SheetDescription>
         </SheetHeader>
         <div className="min-h-0 flex-1 overflow-y-auto">

@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl"
+
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
 
 type CalloutStyle = {
@@ -43,10 +44,7 @@ const CALLOUT_STYLES = {
 
 type CalloutType = keyof typeof CALLOUT_STYLES
 
-const CALLOUT_TYPES_WITH_DEFAULT = [
-  "crash",
-  "corruption",
-] as const satisfies readonly CalloutType[]
+const CALLOUT_TYPES_WITH_DEFAULT = ["crash", "corruption"] as const satisfies readonly CalloutType[]
 
 function isCalloutType(type: string): type is CalloutType {
   return type in CALLOUT_STYLES
@@ -65,28 +63,20 @@ export function CalloutAside({
   }
 
   const type = String(dataCallout)
-  const styles = isCalloutType(type)
-    ? CALLOUT_STYLES[type]
-    : CALLOUT_STYLES.important
+  const styles = isCalloutType(type) ? CALLOUT_STYLES[type] : CALLOUT_STYLES.important
   const labelKey = `${type}_label` as Parameters<typeof t>[0]
   const isEmpty = dataCalloutEmpty === "true"
-  const hasDefault = CALLOUT_TYPES_WITH_DEFAULT.some(
-    (defaultType) => defaultType === type
-  )
+  const hasDefault = CALLOUT_TYPES_WITH_DEFAULT.some((defaultType) => defaultType === type)
 
   return (
-    <aside
-      className={`my-6 border-l-2 px-6 py-4 ${styles.border} ${styles.bg}`}
-      {...rest}>
+    <aside className={`my-6 border-l-2 px-6 py-4 ${styles.border} ${styles.bg}`} {...rest}>
       <div
         className={`mb-1.5 font-mono text-xs font-bold tracking-widest uppercase ${styles.title}`}>
         {t(labelKey)}
       </div>
       <div
         className={`font-sans text-sm [&_ol]:mb-0 [&_p]:mb-0 [&_p]:text-sm [&_p]:text-inherit [&_ul]:mb-0 ${styles.text}`}>
-        {isEmpty && hasDefault
-          ? t(`${type}_default` as Parameters<typeof t>[0])
-          : children}
+        {isEmpty && hasDefault ? t(`${type}_default` as Parameters<typeof t>[0]) : children}
       </div>
     </aside>
   )

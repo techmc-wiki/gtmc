@@ -1,17 +1,13 @@
-import type {
-  DraftFileCollection,
-  DraftFileCollectionInput,
-  DraftFileRecord,
-} from "./types"
 import { createDraftFile, createDraftFileId } from "./file-operations"
 import {
   normalizeDraftFolderPath,
   collectParentFolders,
   listFolderAncestors,
 } from "./normalization"
+import type { DraftFileCollection, DraftFileCollectionInput, DraftFileRecord } from "./types"
 
 export function normalizeDraftFileCollection(
-  input: DraftFileCollectionInput | null | undefined
+  input: DraftFileCollectionInput | null | undefined,
 ): DraftFileCollection {
   const files = (input?.files || []).map(createDraftFile)
 
@@ -42,17 +38,11 @@ export function normalizeDraftFileCollection(
   }
 }
 
-function resolveActiveFileId(
-  activeFileId: string | undefined,
-  files: DraftFileRecord[]
-) {
+function resolveActiveFileId(activeFileId: string | undefined, files: DraftFileRecord[]) {
   return files.find((file) => file.id === activeFileId)?.id || files[0].id
 }
 
-function dedupeNormalizedFolders(
-  folders: string[],
-  files: DraftFileRecord[]
-): string[] {
+function dedupeNormalizedFolders(folders: string[], files: DraftFileRecord[]): string[] {
   const normalizedFolders = new Set<string>()
 
   for (const folder of folders) {
@@ -66,13 +56,11 @@ function dedupeNormalizedFolders(
     }
   }
 
-  for (const folder of collectParentFolders(
-    files.map((file) => file.filePath)
-  )) {
+  for (const folder of collectParentFolders(files.map((file) => file.filePath))) {
     normalizedFolders.add(folder)
   }
 
   return [...normalizedFolders].toSorted((left, right) =>
-    left.localeCompare(right, undefined, { sensitivity: "base" })
+    left.localeCompare(right, undefined, { sensitivity: "base" }),
   )
 }

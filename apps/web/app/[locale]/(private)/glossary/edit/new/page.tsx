@@ -3,8 +3,9 @@ import { redirect } from "next/navigation"
 import { Suspense } from "react"
 
 import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
-import { NewGlossaryDraftStarter } from "./new-glossary-draft-starter"
 import { auth } from "@/lib/auth"
+
+import { NewGlossaryDraftStarter } from "./new-glossary-draft-starter"
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -33,18 +34,14 @@ async function NewGlossaryDraft({
   }
 
   const { prefill: prefillParam } = await searchParams
-  const prefillSlug =
-    typeof prefillParam === "string" ? prefillParam : undefined
+  const prefillSlug = typeof prefillParam === "string" ? prefillParam : undefined
 
   return <NewGlossaryDraftStarter prefillSlug={prefillSlug} />
 }
 
 function NewGlossaryDraftFallback() {
   return (
-    <div
-      aria-busy="true"
-      aria-live="polite"
-      className="flex h-[70vh] w-full flex-col gap-3">
+    <div aria-busy="true" aria-live="polite" className="flex h-[70vh] w-full flex-col gap-3">
       <SegmentedBar opacity="low" className="h-4 w-40" />
       <div className="border-tech-main/20 bg-surface-overlay/30 w-full flex-1 border" />
     </div>

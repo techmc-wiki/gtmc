@@ -1,19 +1,20 @@
 "use client"
 
-import * as React from "react"
+import { ArrowRight, X } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
-import { ArrowRight, X } from "lucide-react"
+import * as React from "react"
+
+import { CrossRefChips } from "@/components/glossary/cross-ref-chips"
+import { TranslationsList } from "@/components/glossary/translations-list"
 import { IconButton } from "@/components/ui/icon-button"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Button } from "@/components/ui/shadcn/button"
-import { Link } from "@/i18n/navigation"
-import { CrossRefChips } from "@/components/glossary/cross-ref-chips"
-import { TranslationsList } from "@/components/glossary/translations-list"
-import { parseRelated } from "@/lib/glossary/related"
 import { Sheet, SheetContent, SheetClose } from "@/components/ui/shadcn/sheet"
-import type { GlossaryEntryBase } from "@/lib/glossary/manifest"
+import { Link } from "@/i18n/navigation"
 import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
+import type { GlossaryEntryBase } from "@/lib/glossary/manifest"
+import { parseRelated } from "@/lib/glossary/related"
 
 interface TermDetailProps {
   entry: GlossaryEntryBase
@@ -48,10 +49,7 @@ function EditTermCta({ locale, slug }: { locale: string; slug: string }) {
 
 function TermDetail({ entry, locale, slug, onOpenRelated }: TermDetailProps) {
   const t = useTranslations("Glossary")
-  const parsedRelated = React.useMemo(
-    () => parseRelated(entry.related),
-    [entry.related]
-  )
+  const parsedRelated = React.useMemo(() => parseRelated(entry.related), [entry.related])
 
   const hasRegex = entry.regex.trim().length > 0
   const hasRelated = parsedRelated.length > 0
@@ -63,9 +61,7 @@ function TermDetail({ entry, locale, slug, onOpenRelated }: TermDetailProps) {
           aria-hidden="true"
           className="bg-tech-signal absolute top-1.5 bottom-1.5 left-0 w-0.5"
         />
-        <h3 className="text-tech-main/60 mb-2 text-xs font-medium">
-          {t("columnDescription")}
-        </h3>
+        <h3 className="text-tech-main/60 mb-2 text-xs font-medium">{t("columnDescription")}</h3>
         <p className="text-tech-main-dark text-[0.9375rem]/7 wrap-break-word sm:text-base/7">
           {entry.description}
         </p>
@@ -84,9 +80,7 @@ function TermDetail({ entry, locale, slug, onOpenRelated }: TermDetailProps) {
 
       {hasRelated && (
         <section>
-          <h3 className="text-tech-main/60 mb-3 text-xs font-medium">
-            {t("detailRelatedLabel")}
-          </h3>
+          <h3 className="text-tech-main/60 mb-3 text-xs font-medium">{t("detailRelatedLabel")}</h3>
           <CrossRefChips related={parsedRelated} onOpenDetail={onOpenRelated} />
         </section>
       )}
@@ -95,10 +89,7 @@ function TermDetail({ entry, locale, slug, onOpenRelated }: TermDetailProps) {
         <h3 className="text-tech-main/60 mb-3 text-xs font-medium">
           {t("detailTranslationsLabel")}
         </h3>
-        <TranslationsList
-          translations={entry.translations}
-          activeLocale={locale}
-        />
+        <TranslationsList translations={entry.translations} activeLocale={locale} />
       </section>
 
       <EditTermCta locale={locale} slug={slug} />
@@ -144,10 +135,7 @@ export function GlossaryDetailPanel({
         aria-describedby={descriptionId}
         className="border-tech-main/35 bg-surface-modal w-full gap-0 p-0 sm:w-[min(34rem,calc(100vw-2rem))] sm:max-w-none">
         <header className="border-tech-main/25 bg-surface-overlay/95 relative flex shrink-0 items-start gap-4 border-b px-4 py-4 sm:px-6 sm:py-5">
-          <span
-            aria-hidden="true"
-            className="bg-tech-signal h-10 w-1 shrink-0"
-          />
+          <span aria-hidden="true" className="bg-tech-signal h-10 w-1 shrink-0" />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
               <h2
@@ -162,19 +150,14 @@ export function GlossaryDetailPanel({
                   {entry.shortForm}
                 </span>
               )}
-              {entry.isControversial && (
-                <ControversyBadge label={t("controversialBadge")} />
-              )}
+              {entry.isControversial && <ControversyBadge label={t("controversialBadge")} />}
             </div>
             <p id={descriptionId} className="sr-only">
               {entry.description}
             </p>
           </div>
           <SheetClose asChild>
-            <IconButton
-              type="button"
-              variant="ghost"
-              label={t("detailPanelClose")}>
+            <IconButton type="button" variant="ghost" label={t("detailPanelClose")}>
               <X aria-hidden />
             </IconButton>
           </SheetClose>

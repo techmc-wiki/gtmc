@@ -1,11 +1,12 @@
+import { getWorkspaceRoot } from "@/lib/workspace-paths"
+
 import {
   createContentArtifactCache,
   restoreContentArtifacts,
   saveContentArtifacts,
 } from "./lib/content-artifact-cache"
-import { getWorkspaceRoot } from "@/lib/workspace-paths"
-import { run, runScript } from "./lib/run"
 import { createLogger, runBuildStep } from "./lib/logger"
+import { run, runScript } from "./lib/run"
 
 const logger = createLogger("vercel")
 const startedAt = performance.now()
@@ -23,9 +24,7 @@ runBuildStep(logger, "repository.prepare", () => {
 })
 
 const contentCache = createContentArtifactCache()
-const restoredContent = contentCache
-  ? restoreContentArtifacts(contentCache)
-  : false
+const restoredContent = contentCache ? restoreContentArtifacts(contentCache) : false
 
 if (restoredContent) {
   process.env.GTMC_SKIP_CONTENT_BUILD = "true"

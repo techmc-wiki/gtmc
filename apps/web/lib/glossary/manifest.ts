@@ -1,6 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache"
-import fullData from "@/data/glossary.json" with { type: "json" }
+
 import summaryData from "@/data/glossary-summary.json" with { type: "json" }
+import fullData from "@/data/glossary.json" with { type: "json" }
 import type { GlossaryLocale, GlossarySiteLocale } from "@/lib/glossary/locales"
 
 export interface GlossaryLocaleIndex {

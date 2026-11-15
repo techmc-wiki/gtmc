@@ -82,10 +82,7 @@ function extractStoragePathFromUrl(url: string, normalizedPrefix: string) {
   return storagePath
 }
 
-export function parseImageRefs(
-  markdown: string,
-  storageTempPrefix: string
-): ParsedImageRef[] {
+export function parseImageRefs(markdown: string, storageTempPrefix: string): ParsedImageRef[] {
   const normalizedPrefix = storageTempPrefix.replaceAll(/^\/+|\/+$/g, "")
   if (!normalizedPrefix) return []
 
@@ -112,27 +109,18 @@ export function parseImageRefs(
   return refs
 }
 
-export function rewriteImageUrls(
-  markdown: string,
-  urlToRepoPath: Map<string, string>
-): string {
+export function rewriteImageUrls(markdown: string, urlToRepoPath: Map<string, string>): string {
   if (urlToRepoPath.size === 0) return markdown
 
-  return markdown.replaceAll(
-    MARKDOWN_IMAGE_RE,
-    (fullMatch, rawDestination: string) => {
-      const { destinationToken, trailing } =
-        splitDestinationAndTitle(rawDestination)
-      const originalUrl = unwrapDestinationToken(destinationToken)
-      const rewrittenPath = urlToRepoPath.get(originalUrl)
+  return markdown.replaceAll(MARKDOWN_IMAGE_RE, (fullMatch, rawDestination: string) => {
+    const { destinationToken, trailing } = splitDestinationAndTitle(rawDestination)
+    const originalUrl = unwrapDestinationToken(destinationToken)
+    const rewrittenPath = urlToRepoPath.get(originalUrl)
 
-      if (!rewrittenPath) return fullMatch
+    if (!rewrittenPath) return fullMatch
 
-      const nextToken = destinationToken.trim().startsWith("<")
-        ? `<${rewrittenPath}>`
-        : rewrittenPath
+    const nextToken = destinationToken.trim().startsWith("<") ? `<${rewrittenPath}>` : rewrittenPath
 
-      return fullMatch.replace(rawDestination, `${nextToken}${trailing}`)
-    }
-  )
+    return fullMatch.replace(rawDestination, `${nextToken}${trailing}`)
+  })
 }

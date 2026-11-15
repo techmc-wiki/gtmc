@@ -33,9 +33,7 @@ export function collectParentFolders(filePaths: string[]) {
 
 export function listFolderAncestors(folderPath: string) {
   const ancestors: string[] = []
-  const segments = normalizeDraftFolderPath(folderPath)
-    .split("/")
-    .filter(Boolean)
+  const segments = normalizeDraftFolderPath(folderPath).split("/").filter(Boolean)
   let cursor = ""
 
   for (const segment of segments) {

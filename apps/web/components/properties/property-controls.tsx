@@ -1,15 +1,6 @@
 "use client"
 
-import {
-  ChevronsUpDown,
-  Eye,
-  EyeOff,
-  Filter,
-  FilterX,
-  Plus,
-  Search,
-  X,
-} from "lucide-react"
+import { ChevronsUpDown, Eye, EyeOff, Filter, FilterX, Plus, Search, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { Badge } from "@/components/ui/shadcn/badge"
@@ -17,17 +8,9 @@ import { Button } from "@/components/ui/shadcn/button"
 import { Card } from "@/components/ui/shadcn/card"
 import { Checkbox } from "@/components/ui/shadcn/checkbox"
 import { Input } from "@/components/ui/shadcn/input"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/shadcn/input-group"
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/shadcn/input-group"
 import { Label } from "@/components/ui/shadcn/label"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/shadcn/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/shadcn/popover"
 import {
   Select,
   SelectTrigger,
@@ -60,20 +43,12 @@ type Kind = "blocks" | "entities" | "items"
 interface PropertyControlsProps {
   kind: Kind
   state: { q: string; filters: PropertyFilter[] }
-  setState: (patch: {
-    q?: string
-    filters?: PropertyFilter[]
-    page: number
-  }) => void
+  setState: (patch: { q?: string; filters?: PropertyFilter[]; page: number }) => void
   columns: string[]
   properties: PropertyInfo[]
   byId: Map<string, PropertyInfo>
   toggleColumn: (id: string) => void
-  addFilter: (
-    property: string,
-    value?: string,
-    operator?: FilterOperator
-  ) => void
+  addFilter: (property: string, value?: string, operator?: FilterOperator) => void
 }
 
 /** Example query and filter per dataset, both guaranteed to return rows. */
@@ -106,19 +81,12 @@ export function PropertyControls({
         toggleColumn={toggleColumn}
       />
       {!state.q && !state.filters.length && (
-        <PropertyExamples
-          kind={kind}
-          byId={byId}
-          setState={setState}
-          addFilter={addFilter}
-        />
+        <PropertyExamples kind={kind} byId={byId} setState={setState} addFilter={addFilter} />
       )}
       <section className="border-border space-y-3 border-t pt-4">
         <h2 className="flex items-center gap-2 font-sans text-sm font-semibold">
           {t("filters")}
-          {state.filters.length > 0 && (
-            <Badge variant="secondary">{state.filters.length}</Badge>
-          )}
+          {state.filters.length > 0 && <Badge variant="secondary">{state.filters.length}</Badge>}
         </h2>
         <div className="space-y-2">
           {state.filters.length > 0 && (
@@ -141,16 +109,14 @@ export function PropertyControls({
               onPatch={(patch) =>
                 setState({
                   filters: state.filters.map((item) =>
-                    item.id === filter.id ? { ...item, ...patch } : item
+                    item.id === filter.id ? { ...item, ...patch } : item,
                   ),
                   page: 1,
                 })
               }
               onRemove={() =>
                 setState({
-                  filters: state.filters.filter(
-                    (item) => item.id !== filter.id
-                  ),
+                  filters: state.filters.filter((item) => item.id !== filter.id),
                   page: 1,
                 })
               }
@@ -249,12 +215,7 @@ interface PropertyExamplesProps {
   addFilter: PropertyControlsProps["addFilter"]
 }
 
-function PropertyExamples({
-  kind,
-  byId,
-  setState,
-  addFilter,
-}: PropertyExamplesProps) {
+function PropertyExamples({ kind, byId, setState, addFilter }: PropertyExamplesProps) {
   const t = useTranslations("Properties")
   const example = EXAMPLES[kind]
   return (
@@ -307,9 +268,7 @@ function PropertyFilterRow({
   const hasProperty = Boolean(filter.property)
   const propertyName = info?.name ?? filter.property
   const shown = hasProperty && selected.has(filter.property)
-  const removeLabel = hasProperty
-    ? t("removeFilter", { name: propertyName })
-    : t("removeCondition")
+  const removeLabel = hasProperty ? t("removeFilter", { name: propertyName }) : t("removeCondition")
   const visibilityLabel = hasProperty
     ? t(shown ? "hideColumn" : "showColumn", { name: propertyName })
     : t("columnVisibility")
@@ -336,9 +295,7 @@ function PropertyFilterRow({
         properties={properties}
         selected={hasProperty ? [filter.property] : []}
         label={hasProperty ? propertyName : t("selectProperty")}
-        onSelect={(property) =>
-          onPatch({ property, operator: "eq", value: "", values: undefined })
-        }
+        onSelect={(property) => onPatch({ property, operator: "eq", value: "", values: undefined })}
       />
       <FilterCondition
         filter={filter}
@@ -381,9 +338,7 @@ function FilterCondition({
           }}>
           <SelectTrigger
             className="min-h-11 w-full min-w-0 sm:w-36"
-            aria-label={
-              hasProperty ? `${propertyName} ${t("operator")}` : t("operator")
-            }>
+            aria-label={hasProperty ? `${propertyName} ${t("operator")}` : t("operator")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -408,8 +363,7 @@ function FilterCondition({
       {info?.kind === "tags" && (
         <TagPresenceSelect
           value={
-            filter.value &&
-            (filter.operator === "eq" || filter.operator === "ne")
+            filter.value && (filter.operator === "eq" || filter.operator === "ne")
               ? filter.operator
               : null
           }
@@ -450,12 +404,7 @@ function FilterValueField(props: FilterValueFieldProps) {
   return <TextValueField {...props} />
 }
 
-function NumberValueField({
-  value,
-  disabled,
-  propertyName,
-  onChange,
-}: FilterValueFieldProps) {
+function NumberValueField({ value, disabled, propertyName, onChange }: FilterValueFieldProps) {
   const t = useTranslations("Properties")
   return (
     <Input
@@ -487,11 +436,7 @@ function TextValueField({
       maxLength={200}
       disabled={disabled}
       placeholder={t("filterValue")}
-      aria-label={
-        hasProperty
-          ? t("filterValueFor", { name: propertyName })
-          : t("filterValue")
-      }
+      aria-label={hasProperty ? t("filterValueFor", { name: propertyName }) : t("filterValue")}
       onChange={(event) => onChange(event.target.value)}
     />
   )
@@ -511,9 +456,7 @@ function ChoiceValueField({
       value={value || NO_VALUE}
       disabled={disabled}
       onValueChange={(next) => onChange(next === NO_VALUE ? "" : next)}>
-      <SelectTrigger
-        className="min-h-11 w-full min-w-0 sm:w-56"
-        aria-label={valueLabel}>
+      <SelectTrigger className="min-h-11 w-full min-w-0 sm:w-56" aria-label={valueLabel}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -553,15 +496,11 @@ function EnumValueField({
           disabled={disabled}
           className="h-11 w-full min-w-0 justify-between sm:w-56"
           aria-label={`${t("filterValueFor", { name: propertyName })}: ${labels.length ? labels.join(", ") : t("none")}`}>
-          <span className="truncate">
-            {labels.length ? labels.join(", ") : t("none")}
-          </span>
+          <span className="truncate">{labels.length ? labels.join(", ") : t("none")}</span>
           <ChevronsUpDown aria-hidden="true" className="shrink-0" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        className="w-64 max-w-[calc(100vw-2rem)] p-2">
+      <PopoverContent align="start" className="w-64 max-w-[calc(100vw-2rem)] p-2">
         <div className="max-h-96 overflow-y-auto">
           {options.map((option) => (
             <label
@@ -573,7 +512,7 @@ function EnumValueField({
                   onValuesChange(
                     checked === true
                       ? [...selectedValues, option.value]
-                      : selectedValues.filter((item) => item !== option.value)
+                      : selectedValues.filter((item) => item !== option.value),
                   )
                 }
               />
@@ -593,22 +532,14 @@ interface TagPresenceSelectProps {
   onChange: (operator: "eq" | "ne" | null) => void
 }
 
-function TagPresenceSelect({
-  value,
-  disabled,
-  onChange,
-}: TagPresenceSelectProps) {
+function TagPresenceSelect({ value, disabled, onChange }: TagPresenceSelectProps) {
   const t = useTranslations("Properties")
   return (
     <Select
       value={value ?? NO_VALUE}
       disabled={disabled}
-      onValueChange={(next) =>
-        onChange(next === NO_VALUE ? null : next === "ne" ? "ne" : "eq")
-      }>
-      <SelectTrigger
-        className="min-h-11 w-full min-w-0 sm:w-28"
-        aria-label={t("tagPresence")}>
+      onValueChange={(next) => onChange(next === NO_VALUE ? null : next === "ne" ? "ne" : "eq")}>
+      <SelectTrigger className="min-h-11 w-full min-w-0 sm:w-28" aria-label={t("tagPresence")}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

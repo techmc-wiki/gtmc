@@ -1,5 +1,5 @@
-import type { DraftFileCollection, DraftFileRecord } from "./types"
 import { normalizeDraftFileCollection } from "./collection"
+import type { DraftFileCollection, DraftFileRecord } from "./types"
 
 export function serializeDraftFilesPayload(collection: DraftFileCollection) {
   const normalized = normalizeDraftFileCollection(collection)

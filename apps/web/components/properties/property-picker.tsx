@@ -1,15 +1,11 @@
 "use client"
 
-import { useState } from "react"
 import { Check, ChevronsUpDown, type LucideIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { Button } from "@/components/ui/shadcn/button"
+import { useState } from "react"
+
 import { Badge } from "@/components/ui/shadcn/badge"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/shadcn/popover"
+import { Button } from "@/components/ui/shadcn/button"
 import {
   Command,
   CommandInput,
@@ -18,6 +14,7 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/shadcn/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/shadcn/popover"
 import type { PropertyInfo } from "@/lib/properties/types"
 
 const NO_SELECTION: string[] = []
@@ -66,14 +63,9 @@ export function PropertyPicker({
           </Button>
         )}
       </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        className="w-[min(40rem,calc(100vw-2rem))] p-0">
+      <PopoverContent align="start" className="w-[min(40rem,calc(100vw-2rem))] p-0">
         <Command>
-          <CommandInput
-            placeholder={t("findProperty")}
-            aria-label={t("findProperty")}
-          />
+          <CommandInput placeholder={t("findProperty")} aria-label={t("findProperty")} />
           <CommandList className="max-h-96">
             <CommandEmpty>{t("noProperty")}</CommandEmpty>
             <CommandGroup
@@ -84,9 +76,7 @@ export function PropertyPicker({
                   key={property.id}
                   disabled={
                     multiple &&
-                    (selectedIds.has(property.id)
-                      ? selected.length <= 1
-                      : selected.length >= 8)
+                    (selectedIds.has(property.id) ? selected.length <= 1 : selected.length >= 8)
                   }
                   value={`${property.id} ${property.name} ${property.category} ${property.description}`}
                   title={property.description || undefined}

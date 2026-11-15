@@ -16,7 +16,7 @@ export type BranchFileEntry = {
 export async function getBranchHeadSha(
   token: string | undefined,
   repo: RepoTarget,
-  branch: string
+  branch: string,
 ) {
   const octokit = getOctokit(token)
   const { data } = await octokit.git.getRef({
@@ -32,7 +32,7 @@ export async function getFileSnapshot(
   filePath: string,
   ref: string,
   token: string | undefined,
-  repo: RepoTarget
+  repo: RepoTarget,
 ) {
   const octokit = getOctokit(token)
 
@@ -106,7 +106,7 @@ export async function upsertFilesOnBranch(
   entries: BranchFileEntry[],
   branchName: string,
   repo: RepoTarget,
-  author?: { name: string; email: string }
+  author?: { name: string; email: string },
 ): Promise<void> {
   if (entries.length === 0) {
     return
@@ -129,8 +129,7 @@ export async function upsertFilesOnBranch(
 
   const blobEntries = await Promise.all(
     entries.map(async (entry) => {
-      const usesBase64 =
-        Buffer.isBuffer(entry.content) || entry.encoding === "base64"
+      const usesBase64 = Buffer.isBuffer(entry.content) || entry.encoding === "base64"
       const blobEncoding: "utf-8" | "base64" = usesBase64 ? "base64" : "utf-8"
       const blobContent = Buffer.isBuffer(entry.content)
         ? entry.content.toString("base64")
@@ -149,7 +148,7 @@ export async function upsertFilesOnBranch(
         type: "blob" as const,
         sha: blobData.sha,
       }
-    })
+    }),
   )
 
   const { data: treeData } = await octokit.git.createTree({

@@ -1,10 +1,10 @@
-import { PageSkeleton } from "@/components/layout/page-skeleton";
-import { SectionFrame, SectionRail, SegmentedBar } from "@/components/ui/loading-shell-primitives";
+import { PageSkeleton } from "@/components/layout/page-skeleton"
+import { SectionFrame, SectionRail, SegmentedBar } from "@/components/ui/loading-shell-primitives"
 
 export default function ArticlesLoading() {
   return (
     <PageSkeleton label="Loading article content" framed>
-      <SectionFrame className="relative mb-8 flex flex-col gap-4 border guide-line bg-surface-overlay/80 p-4 backdrop-blur-sm sm:p-6">
+      <SectionFrame className="guide-line bg-surface-overlay/80 relative mb-8 flex flex-col gap-4 border p-4 backdrop-blur-sm sm:p-6">
         <SectionRail label="Loading" className="mb-2" />
         <SegmentedBar opacity="medium" className="h-3 w-1/3" />
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
@@ -25,5 +25,5 @@ export default function ArticlesLoading() {
         </div>
       </SectionFrame>
     </PageSkeleton>
-  );
+  )
 }

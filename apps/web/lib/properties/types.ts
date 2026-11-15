@@ -1,10 +1,4 @@
-export const DATASETS = [
-  "blocks",
-  "experimental",
-  "legacy",
-  "entities",
-  "items",
-] as const
+export const DATASETS = ["blocks", "experimental", "legacy", "entities", "items"] as const
 export type DatasetId = (typeof DATASETS)[number]
 export type PropertyValue =
   | string
@@ -18,13 +12,7 @@ export type PropertyValue =
  * numbers take an operator and a numeric input, closed string sets and
  * booleans take a value selector, and tags take a tag plus a yes/no selector.
  */
-export const PROPERTY_KINDS = [
-  "number",
-  "boolean",
-  "enum",
-  "text",
-  "tags",
-] as const
+export const PROPERTY_KINDS = ["number", "boolean", "enum", "text", "tags"] as const
 export type PropertyKind = (typeof PROPERTY_KINDS)[number]
 export interface PropertyOption {
   /** Upstream leaf value, stored in the filter. */

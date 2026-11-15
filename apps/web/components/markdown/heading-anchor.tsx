@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useCallback } from "react"
 import { Check, CircleAlert, Link2 } from "lucide-react"
 import { useTranslations } from "next-intl"
+import React, { useCallback } from "react"
 
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard"
 import { cn } from "@/lib/cn"
@@ -23,22 +23,16 @@ export function HeadingAnchor({ id }: HeadingAnchorProps) {
   const { state, copy } = useCopyToClipboard()
   const isCopied = state === "copied"
   const isFailed = state === "failed"
-  const label = isFailed
-    ? t("copyFailed")
-    : isCopied
-      ? t("copiedButton")
-      : t("copyHeadingLink")
+  const label = isFailed ? t("copyFailed") : isCopied ? t("copiedButton") : t("copyHeadingLink")
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault()
       e.stopPropagation()
 
-      void copy(
-        () => window.location.origin + window.location.pathname + "#" + id
-      )
+      void copy(() => window.location.origin + window.location.pathname + "#" + id)
     },
-    [copy, id]
+    [copy, id],
   )
 
   return (
@@ -51,12 +45,9 @@ export function HeadingAnchor({ id }: HeadingAnchorProps) {
       className={cn(
         "absolute -left-6 top-[0.5lh] size-5 -translate-y-1/2 sm:-left-8 sm:size-6",
         "text-tech-main/50 hover:text-tech-main-dark group-hover:opacity-100 focus-visible:opacity-100 flex cursor-pointer items-center justify-center border-none bg-transparent p-0 opacity-0 no-underline transition-opacity focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-none",
-        isFailed && "text-destructive"
+        isFailed && "text-destructive",
       )}>
-      <span
-        className="t-icon-swap"
-        data-state={isCopied ? "b" : "a"}
-        aria-hidden="true">
+      <span className="t-icon-swap" data-state={isCopied ? "b" : "a"} aria-hidden="true">
         <span className="t-icon" data-icon="a">
           {isFailed ? (
             <CircleAlert className="size-3.5 sm:size-4" />

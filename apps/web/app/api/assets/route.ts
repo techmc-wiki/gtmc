@@ -1,6 +1,8 @@
-import { NextResponse } from "next/server"
 import path from "path"
+
 import mime from "mime-types"
+import { NextResponse } from "next/server"
+
 import { getRepoFileBuffer } from "@/lib/github/sync"
 
 export async function GET(request: Request) {
@@ -14,9 +16,7 @@ export async function GET(request: Request) {
   // Keep user-controlled paths inside the article repository namespace.
   const normalizedPath = path.normalize(filePath).replace(/^(\.\.[/\\])+/, "")
   const safePath = normalizedPath.replace(/^\/+/, "")
-  const pathsToTry = safePath.endsWith(".md")
-    ? [safePath]
-    : [safePath, `${safePath}.md`]
+  const pathsToTry = safePath.endsWith(".md") ? [safePath] : [safePath, `${safePath}.md`]
 
   /* oxlint-disable eslint/no-await-in-loop -- sequential: returns on first match, avoids unnecessary fetches */
   for (const candidate of pathsToTry) {

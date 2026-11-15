@@ -1,26 +1,20 @@
 import { get } from "@vercel/blob"
+
 import { auth } from "@/lib/auth"
-import { readDraft } from "@/lib/drafts/store"
-import { draftAssetPrefix } from "@/lib/drafts/storage"
 import { privateBlobOptions } from "@/lib/blob-stores"
+import { draftAssetPrefix } from "@/lib/drafts/storage"
+import { readDraft } from "@/lib/drafts/store"
 
 export async function GET(
   _request: Request,
-  {
-    params,
-  }: { params: Promise<{ authorId: string; id: string; filename: string }> }
+  { params }: { params: Promise<{ authorId: string; id: string; filename: string }> },
 ) {
   const session = await auth()
   const { authorId, id, filename } = await params
   if (!session?.user?.id || session.user.id !== authorId) {
     return new Response(null, { status: 401 })
   }
-  if (
-    filename.includes("/") ||
-    filename.includes("\\") ||
-    filename === "." ||
-    filename === ".."
-  ) {
+  if (filename.includes("/") || filename.includes("\\") || filename === "." || filename === "..") {
     return new Response(null, { status: 400 })
   }
   const record = await readDraft(authorId, id)

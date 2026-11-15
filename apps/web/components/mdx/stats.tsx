@@ -1,4 +1,5 @@
 import * as React from "react"
+
 import { Card } from "@/components/ui/shadcn/card"
 
 export function StatCard({ label, value }: { label: string; value: string }) {
@@ -25,9 +26,7 @@ export function StatGrid({
   return (
     <div
       className={
-        variant === "pair"
-          ? "grid grid-cols-2 gap-4"
-          : "grid grid-cols-2 gap-4 md:grid-cols-4"
+        variant === "pair" ? "grid grid-cols-2 gap-4" : "grid grid-cols-2 gap-4 md:grid-cols-4"
       }>
       {children}
     </div>

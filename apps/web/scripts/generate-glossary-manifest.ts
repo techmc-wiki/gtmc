@@ -1,17 +1,19 @@
 import fs from "fs"
 import path from "path"
+
 import { customPinyin, pinyin } from "pinyin-pro"
 
 import { parseGlossaryCsv } from "@/lib/glossary/csv"
+import { LANGUAGE_CODES, LOCALE_TO_COLUMN } from "@/lib/glossary/locales"
 import type {
   GlossaryEntry,
   GlossaryLocaleIndex,
   GlossarySummaryEntry,
 } from "@/lib/glossary/manifest"
-import { LANGUAGE_CODES, LOCALE_TO_COLUMN } from "@/lib/glossary/locales"
-import { GLOSSARY_SOURCE_FILENAME } from "@/lib/glossary/source"
 import { generateUniqueSlug } from "@/lib/glossary/slug"
+import { GLOSSARY_SOURCE_FILENAME } from "@/lib/glossary/source"
 import { workspacePath } from "@/lib/workspace-paths"
+
 import { createLogger } from "./lib/logger"
 
 const logger = createLogger("glossary")
@@ -33,7 +35,7 @@ function parseCategories(raw: string): string[] {
       raw
         .split(";")
         .map((category) => category.trim())
-        .filter(Boolean)
+        .filter(Boolean),
     ),
   ]
 }
@@ -59,7 +61,7 @@ function createIndexRecord(value: string): GlossaryLocaleIndex {
 
 function createEntryIndex(
   fullFormEn: string,
-  chinese: string | undefined
+  chinese: string | undefined,
 ): GlossaryEntry["indexByLocale"] {
   const english = createIndexRecord(fullFormEn)
 
@@ -117,9 +119,7 @@ function main(): void {
     const fullFormEn = row["Full Form (English)"]
     const rawDescription = row["Description"]
     const isControversial = rawDescription.endsWith("*")
-    const description = isControversial
-      ? rawDescription.slice(0, -1)
-      : rawDescription
+    const description = isControversial ? rawDescription.slice(0, -1) : rawDescription
 
     const slug = generateUniqueSlug(fullFormEn, usedSlugs)
 
@@ -165,9 +165,7 @@ function main(): void {
   }
 
   const controversial = entries.filter((e) => e.isControversial).length
-  const withTranslations = entries.filter(
-    (e) => Object.keys(e.translations).length > 0
-  ).length
+  const withTranslations = entries.filter((e) => Object.keys(e.translations).length > 0).length
 
   logger.event("glossary.generated", {
     controversial_count: controversial,

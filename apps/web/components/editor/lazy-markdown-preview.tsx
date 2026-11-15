@@ -1,4 +1,5 @@
 import dynamic from "next/dynamic"
+
 // oxlint-disable-next-line import/no-unassigned-import
 import "katex/dist/katex.min.css"
 
@@ -8,12 +9,9 @@ interface LazyMarkdownPreviewProps {
 }
 
 export const LazyMarkdownPreview = dynamic<LazyMarkdownPreviewProps>(
-  () =>
-    import("@/components/markdown/markdown-renderer").then(
-      (mod) => mod.MarkdownRenderer
-    ),
+  () => import("@/components/markdown/markdown-renderer").then((mod) => mod.MarkdownRenderer),
   {
     ssr: false,
     loading: () => <p className="editor-panel">LOADING_PREVIEW_</p>,
-  }
+  },
 )

@@ -39,7 +39,7 @@ function getTraceSize(tracePath: string, trace: FunctionTrace): number {
   const traceDirectory = path.dirname(tracePath)
   return trace.files.reduce(
     (total, file) => total + getFileSize(path.resolve(traceDirectory, file)),
-    0
+    0,
   )
 }
 
@@ -60,7 +60,7 @@ function listFunctionTraces(appServerDir: string): string[] {
 
 export function auditFunctionTraces(
   projectRoot = process.cwd(),
-  distDir = path.join(projectRoot, ".next")
+  distDir = path.join(projectRoot, ".next"),
 ): void {
   const appServerDir = path.join(distDir, "server", "app")
   const traces = listFunctionTraces(appServerDir).map((tracePath) => {
@@ -86,18 +86,14 @@ export function auditFunctionTraces(
     largest_route: largest.route,
   })
 
-  const overBudget = traces.filter(
-    ({ bytes }) => bytes > FUNCTION_TRACE_BUDGET_BYTES
-  )
+  const overBudget = traces.filter(({ bytes }) => bytes > FUNCTION_TRACE_BUDGET_BYTES)
   if (overBudget.length > 0) {
     const detail = overBudget
       .toSorted((left, right) => right.bytes - left.bytes)
-      .map(
-        ({ bytes, route }) => `${route}: ${(bytes / 1024 ** 2).toFixed(2)} MiB`
-      )
+      .map(({ bytes, route }) => `${route}: ${(bytes / 1024 ** 2).toFixed(2)} MiB`)
       .join("\n")
     throw new Error(
-      `Function trace budget exceeded (${FUNCTION_TRACE_BUDGET_BYTES / 1024 ** 2} MiB)\n${detail}`
+      `Function trace budget exceeded (${FUNCTION_TRACE_BUDGET_BYTES / 1024 ** 2} MiB)\n${detail}`,
     )
   }
 }

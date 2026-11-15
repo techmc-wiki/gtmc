@@ -38,20 +38,8 @@ const files: Record<DatasetId, string> = {
   items: "item_data.json",
 }
 const preferred: Record<DatasetId, string[]> = {
-  blocks: [
-    "conductive",
-    "movable",
-    "blast_resistance",
-    "hardness",
-    "luminance",
-  ],
-  experimental: [
-    "conductive",
-    "movable",
-    "blast_resistance",
-    "hardness",
-    "luminance",
-  ],
+  blocks: ["conductive", "movable", "blast_resistance", "hardness", "luminance"],
+  experimental: ["conductive", "movable", "blast_resistance", "hardness", "luminance"],
   legacy: ["hardness", "blast_resistance", "get_push_reaction", "material"],
   entities: ["health", "width", "height", "type"],
   items: ["stackability", "survival_obtainable", "renewable"],
@@ -74,10 +62,7 @@ interface SourceProperty {
   size_type?: string
   entries: Record<string, PropertyValue>
 }
-type PropertyStructure = (
-  | string
-  | { category: string; contents: PropertyStructure }
-)[]
+type PropertyStructure = (string | { category: string; contents: PropertyStructure })[]
 interface SourceDataset {
   key_list: string[]
   property_structure: PropertyStructure
@@ -117,18 +102,13 @@ function plainText(value: string): string {
     stripped = stripped.replaceAll(/<[^>]*>/g, "")
   } while (stripped !== previous)
   return stripped
-    .replaceAll(
-      /&(#x[\da-f]+|#\d+|\w+);/gi,
-      (match: string, entity: string) => {
-        if (!entity.startsWith("#")) return entities[entity] ?? match
-        const code = entity.startsWith("#x")
-          ? Number.parseInt(entity.slice(2), 16)
-          : Number(entity.slice(1))
-        return code >= 0 && code <= 0x10ffff
-          ? String.fromCodePoint(code)
-          : match
-      }
-    )
+    .replaceAll(/&(#x[\da-f]+|#\d+|\w+);/gi, (match: string, entity: string) => {
+      if (!entity.startsWith("#")) return entities[entity] ?? match
+      const code = entity.startsWith("#x")
+        ? Number.parseInt(entity.slice(2), 16)
+        : Number(entity.slice(1))
+      return code >= 0 && code <= 0x10ffff ? String.fromCodePoint(code) : match
+    })
     .replaceAll(/[<>]/g, "")
     .trim()
 }
@@ -137,10 +117,7 @@ function normalize(value: PropertyValue): PropertyValue {
   if (Array.isArray(value)) return value.map(normalize)
   if (value !== null && typeof value === "object") {
     return Object.fromEntries(
-      Object.entries(value).map(([key, child]) => [
-        plainText(key),
-        normalize(child),
-      ])
+      Object.entries(value).map(([key, child]) => [plainText(key), normalize(child)]),
     )
   }
   return value
@@ -157,13 +134,8 @@ function valueFor(property: SourceProperty, name: string): PropertyValue {
     : (property.default_value ?? null)
 }
 /** Upstream maps are JSON objects: filter ids may name inherited members. */
-function ownProperty(
-  source: SourceDataset,
-  id: string
-): SourceProperty | undefined {
-  return Object.hasOwn(source.properties, id)
-    ? source.properties[id]
-    : undefined
+function ownProperty(source: SourceDataset, id: string): SourceProperty | undefined {
+  return Object.hasOwn(source.properties, id) ? source.properties[id] : undefined
 }
 
 const NUMERIC = /^[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?$/
@@ -183,13 +155,8 @@ function isPresent(value: string | number | boolean): boolean {
   if (typeof value === "number") return value !== 0
   return !/^(no|false|)$/i.test(value.trim())
 }
-function propertyLeaves(
-  property: SourceProperty
-): (string | number | boolean)[] {
-  return [
-    property.default_value ?? null,
-    ...Object.values(property.entries),
-  ].flatMap(leaves)
+function propertyLeaves(property: SourceProperty): (string | number | boolean)[] {
+  return [property.default_value ?? null, ...Object.values(property.entries)].flatMap(leaves)
 }
 const BOOLEAN_VALUE = /^(yes|no|true|false)$/i
 /** Rank of a yes/no value; other values follow. Keeps the pair at list heads. */
@@ -200,25 +167,19 @@ function booleanRank(value: string): number {
   return 2
 }
 function propertyKind(property: SourceProperty): PropertyKind {
-  const items = propertyLeaves(property).filter(
-    (item) => String(item).trim() !== ""
-  )
+  const items = propertyLeaves(property).filter((item) => String(item).trim() !== "")
   if (!items.length) return "text"
   if (
     items.every(
       (item) =>
-        typeof item === "boolean" ||
-        (typeof item === "string" && BOOLEAN_VALUE.test(item.trim()))
+        typeof item === "boolean" || (typeof item === "string" && BOOLEAN_VALUE.test(item.trim())),
     )
   ) {
     return "boolean"
   }
   const distinct = new Set(items.map(String))
   const numeric = items.filter((item) => parseNumber(item) !== null).length
-  if (
-    distinct.size >= NUMERIC_DISTINCT &&
-    numeric / items.length >= NUMERIC_SHARE
-  ) {
+  if (distinct.size >= NUMERIC_DISTINCT && numeric / items.length >= NUMERIC_SHARE) {
     return "number"
   }
   return distinct.size <= ENUM_LIMIT ? "enum" : "text"
@@ -227,7 +188,7 @@ function propertyOptions(
   kind: PropertyKind,
   items: (string | number | boolean)[],
   overlay: PropertyOverlay,
-  locale: Locale
+  locale: Locale,
 ): PropertyOption[] | undefined {
   if (kind === "boolean") {
     return ["Yes", "No"].map((value) => ({
@@ -252,14 +213,14 @@ function propertyOptions(
 function tagsProperty(
   overlay: PropertyOverlay,
   tags: Map<string, string>,
-  locale: Locale
+  locale: Locale,
 ): PropertyInfo | undefined {
   if (!tags.size) return undefined
   const translated = translatedSynthetic(
     overlay,
     TAGS_PROPERTY,
     "Tags",
-    "Game tags this entry belongs to."
+    "Game tags this entry belongs to.",
   )
   return {
     id: TAGS_PROPERTY,
@@ -273,11 +234,7 @@ function tagsProperty(
   }
 }
 /** Tags an entry carries, as display labels. */
-function tagsFor(
-  source: SourceDataset,
-  tags: Map<string, string>,
-  name: string
-): string[] {
+function tagsFor(source: SourceDataset, tags: Map<string, string>, name: string): string[] {
   const present: string[] = []
   for (const [id, label] of tags) {
     const property = source.properties[id]
@@ -292,44 +249,28 @@ const datasets = new Map<DatasetId, Promise<RawDataset>>()
 function loadDataset(id: DatasetId): Promise<RawDataset> {
   let pending = datasets.get(id)
   if (!pending) {
-    pending = readFile(
-      workspacePath("content", "properties", "data", files[id]),
-      "utf8"
-    )
+    pending = readFile(workspacePath("content", "properties", "data", files[id]), "utf8")
       .then((text) => {
         const source = JSON.parse(text) as SourceDataset
         for (const property of Object.values(source.properties)) {
           property.entries = Object.fromEntries(
-            Object.entries(property.entries).map(([name, value]) => [
-              name,
-              normalize(value),
-            ])
+            Object.entries(property.entries).map(([name, value]) => [name, normalize(value)]),
           )
           property.default_value = normalize(property.default_value ?? null)
         }
         const search = new Map(
           source.key_list.map((name) => {
             const aliases = ["id", "block_id", "variants"].flatMap((key) =>
-              source.properties[key]
-                ? leaves(valueFor(source.properties[key], name))
-                : []
+              source.properties[key] ? leaves(valueFor(source.properties[key], name)) : [],
             )
-            return [
-              name,
-              [name, ...aliases].join(" ").replaceAll("_", " ").toLowerCase(),
-            ]
-          })
+            return [name, [name, ...aliases].join(" ").replaceAll("_", " ").toLowerCase()]
+          }),
         )
         const tags = new Map<string, string>()
-        for (const [propertyId, property] of Object.entries(
-          source.properties
-        )) {
+        for (const [propertyId, property] of Object.entries(source.properties)) {
           if (!propertyId.startsWith(TAG_PREFIX)) continue
           const description = plainText(property.property_description ?? "")
-          const name = plainText(property.property_name).replace(
-            TAG_PREFIX_PATTERN,
-            ""
-          )
+          const name = plainText(property.property_name).replace(TAG_PREFIX_PATTERN, "")
           tags.set(propertyId, description || name)
         }
         return { source, search, tags }
@@ -344,10 +285,7 @@ function loadDataset(id: DatasetId): Promise<RawDataset> {
 }
 
 const localized = new Map<string, Promise<LocalizedDataset>>()
-function loadLocalized(
-  id: DatasetId,
-  locale: Locale
-): Promise<LocalizedDataset> {
+function loadLocalized(id: DatasetId, locale: Locale): Promise<LocalizedDataset> {
   const cacheKey = `${id}:${locale}`
   let pending = localized.get(cacheKey)
   if (!pending) {
@@ -361,28 +299,23 @@ function loadLocalized(
             else {
               visit(
                 item.contents,
-                [
-                  category,
-                  translatedCategory(overlay, plainText(item.category)),
-                ]
+                [category, translatedCategory(overlay, plainText(item.category))]
                   .filter(Boolean)
-                  .join(" / ")
+                  .join(" / "),
               )
             }
           }
         }
         visit(source.property_structure)
         const properties: PropertyInfo[] = []
-        for (const [propertyId, property] of Object.entries(
-          source.properties
-        )) {
+        for (const [propertyId, property] of Object.entries(source.properties)) {
           if (propertyId.startsWith(TAG_PREFIX)) continue
           const translated = translatedProperty(
             overlay,
             id,
             propertyId,
             plainText(property.property_name),
-            plainText(property.property_description ?? "")
+            plainText(property.property_description ?? ""),
           )
           const kind = propertyKind(property)
           properties.push({
@@ -392,12 +325,7 @@ function loadLocalized(
             category: categories.get(propertyId) ?? "",
             unit: translatedUnit(overlay, property.size_type),
             kind,
-            options: propertyOptions(
-              kind,
-              propertyLeaves(property),
-              overlay,
-              locale
-            ),
+            options: propertyOptions(kind, propertyLeaves(property), overlay, locale),
           })
         }
         const tagProperty = tagsProperty(overlay, tags, locale)
@@ -411,9 +339,7 @@ function loadLocalized(
           catalog: {
             dataset: id,
             count: source.key_list.length,
-            properties: properties.toSorted((a, b) =>
-              a.name.localeCompare(b.name, locale)
-            ),
+            properties: properties.toSorted((a, b) => a.name.localeCompare(b.name, locale)),
             defaults: preferred[id].filter((key) => key in source.properties),
           },
         }
@@ -429,7 +355,7 @@ function loadLocalized(
 
 export async function getPropertyCatalog(
   dataset: DatasetId,
-  locale: Locale
+  locale: Locale,
 ): Promise<PropertyCatalog> {
   "use cache"
   cacheLife("max")
@@ -442,7 +368,7 @@ function entryValue(
   overlay: PropertyOverlay,
   tags: Map<string, string>,
   id: string,
-  name: string
+  name: string,
 ): PropertyValue {
   return id === TAGS_PROPERTY
     ? tagsFor(source, tags, name)
@@ -452,7 +378,7 @@ function entryValue(
 export async function getPropertyDetails(
   dataset: DatasetId,
   locale: Locale,
-  names: string[]
+  names: string[],
 ): Promise<PropertyEntry[]> {
   const { source, search, tags, overlay } = await loadLocalized(dataset, locale)
   return names
@@ -473,7 +399,7 @@ function matches(
   overlay: PropertyOverlay,
   value: PropertyValue,
   filter: PropertyCondition,
-  kind: PropertyKind | undefined
+  kind: PropertyKind | undefined,
 ): boolean {
   const raw = filter.value.trim()
   const selected = selectedValues(filter)
@@ -483,7 +409,7 @@ function matches(
     return (
       selected.length > 0 &&
       leaves(value).some((leaf) =>
-        selected.some((candidate) => equalText(overlay, leaf, candidate))
+        selected.some((candidate) => equalText(overlay, leaf, candidate)),
       )
     )
   }
@@ -493,10 +419,7 @@ function matches(
     if (target === null) return false
     return leaves(value).some((leaf) => {
       const number = parseNumber(leaf)
-      return (
-        number !== null &&
-        (filter.operator === "gte" ? number >= target : number <= target)
-      )
+      return number !== null && (filter.operator === "gte" ? number >= target : number <= target)
     })
   }
   if (filter.operator === "eq" && kind === "number") {
@@ -517,9 +440,7 @@ function matches(
   return leaves(value).some((leaf) => {
     const text = String(leaf).toLowerCase()
     const localizedText = translateText(overlay, String(leaf)).toLowerCase()
-    return needles.some(
-      (needle) => text.includes(needle) || localizedText.includes(needle)
-    )
+    return needles.some((needle) => text.includes(needle) || localizedText.includes(needle))
   })
 }
 function matchesFilter(
@@ -527,7 +448,7 @@ function matchesFilter(
   overlay: PropertyOverlay,
   filter: PropertyCondition,
   kind: PropertyKind | undefined,
-  name: string
+  name: string,
 ): boolean {
   if (filter.property === TAGS_PROPERTY) {
     if (!filter.value.startsWith(TAG_PREFIX)) return false
@@ -540,10 +461,7 @@ function matchesFilter(
   if (!property) return false
   return matches(overlay, valueFor(property, name), filter, kind)
 }
-function sortValue(
-  overlay: PropertyOverlay,
-  value: PropertyValue
-): string | number | null {
+function sortValue(overlay: PropertyOverlay, value: PropertyValue): string | number | null {
   const values = leaves(value)
   if (!values.length) return null
   // Numeric-like values (including numeric enum strings) order by value; for
@@ -552,9 +470,7 @@ function sortValue(
     .map((item) => parseNumber(item))
     .filter((number): number is number => number !== null)
   if (numbers.length === values.length) return Math.min(...numbers)
-  return values
-    .map((item) => translateText(overlay, String(item)))
-    .toSorted()[0]
+  return values.map((item) => translateText(overlay, String(item))).toSorted()[0]
 }
 /** Selected values of a multi-select condition; `null` means single value. */
 function selectedValues(filter: PropertyCondition): string[] | null {
@@ -565,7 +481,7 @@ function selectedValues(filter: PropertyCondition): string[] | null {
 function equalText(
   overlay: PropertyOverlay,
   leaf: string | number | boolean,
-  raw: string
+  raw: string,
 ): boolean {
   const text = String(leaf)
   const candidates = [text.toLowerCase()]
@@ -573,9 +489,7 @@ function equalText(
   if (localizedText !== text) candidates.push(localizedText.toLowerCase())
   const expected = raw.toLowerCase()
   const localizedExpected = translateText(overlay, raw).toLowerCase()
-  return candidates.some(
-    (candidate) => candidate === expected || candidate === localizedExpected
-  )
+  return candidates.some((candidate) => candidate === expected || candidate === localizedExpected)
 }
 
 export async function searchProperties(
@@ -588,17 +502,17 @@ export async function searchProperties(
     sort: string
     descending: boolean
     page: number
-  }
+  },
 ): Promise<PropertyResults> {
-  const { source, search, catalog, overlay, tags, tagProperty } =
-    await loadLocalized(dataset, locale)
+  const { source, search, catalog, overlay, tags, tagProperty } = await loadLocalized(
+    dataset,
+    locale,
+  )
   const known = new Set([
     ...Object.keys(source.properties),
     ...(tagProperty ? [TAGS_PROPERTY] : []),
   ])
-  const columns = [
-    ...new Set(options.columns.length ? options.columns : catalog.defaults),
-  ]
+  const columns = [...new Set(options.columns.length ? options.columns : catalog.defaults)]
     .filter((id) => known.has(id))
     .slice(0, 8)
   const groups = options.query
@@ -609,9 +523,7 @@ export async function searchProperties(
     .map((group) => group.trim().split(/\s+/).filter(Boolean))
     .filter((group) => group.length > 0)
   const queryIsBlank = options.query.trim() === ""
-  const kinds = new Map(
-    catalog.properties.map((property) => [property.id, property.kind])
-  )
+  const kinds = new Map(catalog.properties.map((property) => [property.id, property.kind]))
   const filters = options.filters.filter((filter) => {
     const selected = selectedValues(filter)
     return selected === null ? filter.value.trim() !== "" : selected.length > 0
@@ -619,10 +531,9 @@ export async function searchProperties(
   const names = source.key_list.filter((name) => {
     const text = search.get(name) ?? ""
     return (
-      (queryIsBlank ||
-        groups.some((group) => group.every((term) => text.includes(term)))) &&
+      (queryIsBlank || groups.some((group) => group.every((term) => text.includes(term)))) &&
       filters.every((filter) =>
-        matchesFilter(source, overlay, filter, kinds.get(filter.property), name)
+        matchesFilter(source, overlay, filter, kinds.get(filter.property), name),
       )
     )
   })
@@ -630,11 +541,8 @@ export async function searchProperties(
     ? new Map(
         names.map((name) => [
           name,
-          sortValue(
-            overlay,
-            entryValue(source, overlay, tags, options.sort, name)
-          ),
-        ])
+          sortValue(overlay, entryValue(source, overlay, tags, options.sort, name)),
+        ]),
       )
     : null
   names.sort((a, b) => {
@@ -658,7 +566,7 @@ export async function searchProperties(
     entries: names.slice((page - 1) * 40, page * 40).map((name) => ({
       name,
       values: Object.fromEntries(
-        columns.map((id) => [id, entryValue(source, overlay, tags, id, name)])
+        columns.map((id) => [id, entryValue(source, overlay, tags, id, name)]),
       ),
     })),
   }

@@ -2,6 +2,7 @@
 
 import { MoreHorizontalIcon, Trash2Icon } from "lucide-react"
 import { useTranslations } from "next-intl"
+
 import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
 import { Button } from "@/components/ui/shadcn/button"
 import {
@@ -45,12 +46,8 @@ export function DraftFileActionsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={onRequestRename}>
-          {t("renameFile")}
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={onInsertFileLink}>
-          {t("insertFileLink")}
-        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={onRequestRename}>{t("renameFile")}</DropdownMenuItem>
+        <DropdownMenuItem onSelect={onInsertFileLink}>{t("insertFileLink")}</DropdownMenuItem>
         <DropdownMenuItem onSelect={() => onOpenFileDialog("add", "folder")}>
           {t("createFolder")}
         </DropdownMenuItem>
@@ -58,8 +55,7 @@ export function DraftFileActionsMenu({
         <DropdownMenuItem onSelect={() => onOpenFileDialog("replace", "repo")}>
           {t("chooseExistingFile")}
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onSelect={() => onOpenFileDialog("replace", "upload")}>
+        <DropdownMenuItem onSelect={() => onOpenFileDialog("replace", "upload")}>
           {t("importTargetFile")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />

@@ -1,11 +1,9 @@
 import NextAuth from "next-auth"
 import GitHub from "next-auth/providers/github"
-import { getGithubEmailVisibility } from "@/lib/github/user"
-import {
-  DEV_FIXTURE_USER,
-  isDevFixtureAuthEnabled,
-} from "@/lib/auth/dev-fixture-config"
 import { ProxyAgent, setGlobalDispatcher } from "undici"
+
+import { DEV_FIXTURE_USER, isDevFixtureAuthEnabled } from "@/lib/auth/dev-fixture-config"
+import { getGithubEmailVisibility } from "@/lib/github/user"
 
 // Honor configured proxies for NextAuth's undici requests.
 if (process.env.HTTPS_PROXY || process.env.http_proxy) {
@@ -19,9 +17,7 @@ if (process.env.HTTPS_PROXY || process.env.http_proxy) {
 
 const authSecret =
   process.env.NEXTAUTH_SECRET ??
-  (process.env.NODE_ENV === "development"
-    ? "gtmc-local-dev-auth-secret"
-    : undefined)
+  (process.env.NODE_ENV === "development" ? "gtmc-local-dev-auth-secret" : undefined)
 
 export const { handlers, auth } = NextAuth({
   secret: authSecret,
@@ -35,11 +31,8 @@ export const { handlers, auth } = NextAuth({
     async jwt({ token, account, profile, trigger }) {
       if (account?.provider === "github") {
         token.sub = account.providerAccountId
-        token.githubLogin =
-          typeof profile?.login === "string" ? profile.login : null
-        token.emailVisibility = await getGithubEmailVisibility(
-          account.access_token || ""
-        )
+        token.githubLogin = typeof profile?.login === "string" ? profile.login : null
+        token.emailVisibility = await getGithubEmailVisibility(account.access_token || "")
       }
 
       if (

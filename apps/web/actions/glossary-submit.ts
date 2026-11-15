@@ -5,24 +5,15 @@ import { revalidatePath } from "next/cache"
 import { getAuthorIdentity, requireAuth } from "@/lib/auth/context"
 import { assertDraftStatus, canSubmitDraft } from "@/lib/drafts/lifecycle"
 import { readDraft, requireDraftVersion, writeDraft } from "@/lib/drafts/store"
-import { reconcileSubmission } from "@/lib/submission-recovery"
-import {
-  lockSubmission,
-  SubmissionInProgressError,
-} from "@/lib/drafts/submission"
-import { parseGlossaryCsv, serializeGlossaryCsv } from "@/lib/glossary/csv"
-import {
-  type GlossaryPrResult,
-  openGlossaryPullRequest,
-} from "@/lib/glossary/pr"
-import {
-  GLOSSARY_SOURCE_BRANCH,
-  GLOSSARY_SOURCE_FILENAME,
-} from "@/lib/glossary/source"
+import { lockSubmission, SubmissionInProgressError } from "@/lib/drafts/submission"
 import { getFileSnapshot } from "@/lib/github/branch"
-import { generateSlug } from "@/lib/glossary/slug"
 import { GLOSSARY_FORK_REPO, GLOSSARY_REPO } from "@/lib/github/repos"
 import { resolveGithubToken } from "@/lib/github/tokens"
+import { parseGlossaryCsv, serializeGlossaryCsv } from "@/lib/glossary/csv"
+import { type GlossaryPrResult, openGlossaryPullRequest } from "@/lib/glossary/pr"
+import { generateSlug } from "@/lib/glossary/slug"
+import { GLOSSARY_SOURCE_BRANCH, GLOSSARY_SOURCE_FILENAME } from "@/lib/glossary/source"
+import { reconcileSubmission } from "@/lib/submission-recovery"
 
 export type SubmitGlossaryResult =
   | { success: true; prUrl: string; prNumber: number }
@@ -30,7 +21,7 @@ export type SubmitGlossaryResult =
 
 export async function submitGlossaryDraftAction(
   id: string,
-  opts: { useRealEmail?: boolean; etag: string }
+  opts: { useRealEmail?: boolean; etag: string },
 ): Promise<SubmitGlossaryResult> {
   try {
     const session = await requireAuth()
@@ -40,11 +31,7 @@ export async function submitGlossaryDraftAction(
       return { success: false, error: "Draft not found" }
     }
     const draft = record.draft
-    if (
-      draft.status === "SUBMITTED" &&
-      draft.githubPrUrl &&
-      draft.githubPrNum
-    ) {
+    if (draft.status === "SUBMITTED" && draft.githubPrUrl && draft.githubPrNum) {
       return {
         success: true,
         prUrl: draft.githubPrUrl,
@@ -62,8 +49,7 @@ export async function submitGlossaryDraftAction(
     if (
       operations.some(
         (operation) =>
-          operation.kind !== "delete" &&
-          !(operation.after?.["Full Form (English)"] ?? "").trim()
+          operation.kind !== "delete" && !(operation.after?.["Full Form (English)"] ?? "").trim(),
       )
     ) {
       return {
@@ -85,16 +71,14 @@ export async function submitGlossaryDraftAction(
     const identity = await getAuthorIdentity(session)
     const githubLogin = session.user.githubLogin
     const authorEmail =
-      opts.useRealEmail && session.user.email
-        ? session.user.email
-        : identity.email
+      opts.useRealEmail && session.user.email ? session.user.email : identity.email
     const authorName = identity.name
 
     let snapshot = await getFileSnapshot(
       GLOSSARY_SOURCE_FILENAME,
       GLOSSARY_SOURCE_BRANCH,
       token,
-      GLOSSARY_REPO
+      GLOSSARY_REPO,
     )
 
     if (!snapshot) {
@@ -102,13 +86,13 @@ export async function submitGlossaryDraftAction(
         GLOSSARY_SOURCE_FILENAME,
         GLOSSARY_SOURCE_BRANCH,
         token,
-        GLOSSARY_FORK_REPO
+        GLOSSARY_FORK_REPO,
       )
     }
 
     if (!snapshot) {
       throw new Error(
-        `Failed to fetch "${GLOSSARY_SOURCE_FILENAME}" from GitHub (${GLOSSARY_REPO.owner}/${GLOSSARY_REPO.name}).`
+        `Failed to fetch "${GLOSSARY_SOURCE_FILENAME}" from GitHub (${GLOSSARY_REPO.owner}/${GLOSSARY_REPO.name}).`,
       )
     }
 
@@ -183,10 +167,7 @@ export async function submitGlossaryDraftAction(
           draftId: id,
           token,
         }).catch((reconcileError) => {
-          console.error(
-            "Failed to reconcile glossary submission:",
-            reconcileError
-          )
+          console.error("Failed to reconcile glossary submission:", reconcileError)
           return null
         })
         if (recovered !== null) {
@@ -214,7 +195,7 @@ export async function submitGlossaryDraftAction(
           submittedAt: now,
           updatedAt: now,
         },
-        locked.etag
+        locked.etag,
       )
     } catch (error) {
       const recovered = await reconcileSubmission({
@@ -224,10 +205,7 @@ export async function submitGlossaryDraftAction(
         token,
         result,
       }).catch((reconcileError) => {
-        console.error(
-          "Failed to persist submitted glossary draft:",
-          reconcileError
-        )
+        console.error("Failed to persist submitted glossary draft:", reconcileError)
         return null
       })
       if (recovered === null) {
@@ -244,8 +222,7 @@ export async function submitGlossaryDraftAction(
 
     return { success: true, prUrl: result.prUrl, prNumber: result.prNumber }
   } catch (outerError) {
-    const message =
-      outerError instanceof Error ? outerError.message : "Submission failed"
+    const message = outerError instanceof Error ? outerError.message : "Submission failed"
     return { success: false, error: message }
   }
 }

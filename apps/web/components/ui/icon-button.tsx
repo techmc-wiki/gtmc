@@ -1,12 +1,9 @@
 "use client"
 
 import * as React from "react"
+
 import { Button } from "@/components/ui/shadcn/button"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/shadcn/tooltip"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/tooltip"
 import { cn } from "@/lib/cn"
 
 export function IconButton({
@@ -24,10 +21,7 @@ export function IconButton({
           variant="ghost"
           size="icon"
           aria-label={label}
-          className={cn(
-            "hover:bg-accent hover:no-underline aria-pressed:bg-accent",
-            className
-          )}
+          className={cn("hover:bg-accent hover:no-underline aria-pressed:bg-accent", className)}
           {...props}>
           {children}
         </Button>

@@ -2,8 +2,9 @@
 
 import { FileTextIcon, PlusIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { Button } from "@/components/ui/shadcn/button"
+
 import { IconButton } from "@/components/ui/icon-button"
+import { Button } from "@/components/ui/shadcn/button"
 import { Input } from "@/components/ui/shadcn/input"
 import { cn } from "@/lib/cn"
 import type { DraftFileCollection } from "@/lib/drafts/files"
@@ -44,22 +45,17 @@ export function DraftFileList({
 
   const query = search.toLowerCase()
   const visibleFiles = fileRows.filter(({ file, label }) =>
-    `${file.filePath} ${label}`.toLowerCase().includes(query)
+    `${file.filePath} ${label}`.toLowerCase().includes(query),
   )
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="space-y-1 p-2">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-tech-main-dark text-sm font-semibold">
-            {t("filesLabel")}
-          </h2>
+          <h2 className="text-tech-main-dark text-sm font-semibold">{t("filesLabel")}</h2>
           <div className="flex items-center gap-1">
             <span className="text-tech-main text-xs">{files.length}</span>{" "}
-            <IconButton
-              label={fileT("addButton")}
-              disabled={isReadOnly}
-              onClick={onRequestAddFile}>
+            <IconButton label={fileT("addButton")} disabled={isReadOnly} onClick={onRequestAddFile}>
               <PlusIcon aria-hidden className="size-4" />
             </IconButton>
           </div>
@@ -72,9 +68,7 @@ export function DraftFileList({
           className="hover:border-tech-main/20 focus:border-tech-main min-h-11 border-transparent bg-transparent px-2 font-sans text-sm shadow-none"
         />
       </div>
-      <nav
-        aria-label={t("filesAria")}
-        className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
+      <nav aria-label={t("filesAria")} className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
         {visibleFiles.map(({ file, isActive, isUnsaved, label }) => (
           <Button
             key={file.id}
@@ -84,15 +78,11 @@ export function DraftFileList({
             title={file.filePath || label}
             className={cn(
               "mb-0.5 h-auto min-h-11 w-full justify-start gap-2 border-0 border-l-2 px-2 py-1.5 text-left font-sans tracking-normal normal-case",
-              isActive
-                ? "border-tech-signal bg-tech-main/5"
-                : "border-transparent"
+              isActive ? "border-tech-signal bg-tech-main/5" : "border-transparent",
             )}>
             <FileTextIcon aria-hidden className="size-4 shrink-0" />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-medium">
-                {label}
-              </span>
+              <span className="block truncate text-sm font-medium">{label}</span>
               <span className="text-tech-main/70 block truncate text-[11px] font-normal">
                 {file.filePath.split("/").slice(0, -1).join("/")}
               </span>

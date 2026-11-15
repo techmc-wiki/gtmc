@@ -1,12 +1,7 @@
+import { normalizeDraftFilePath, normalizeComparablePath } from "./normalization"
 import type { DraftFileRecord } from "./types"
-import {
-  normalizeDraftFilePath,
-  normalizeComparablePath,
-} from "./normalization"
 
-export function createDraftFile(
-  overrides: Partial<DraftFileRecord> = {}
-): DraftFileRecord {
+export function createDraftFile(overrides: Partial<DraftFileRecord> = {}): DraftFileRecord {
   const filePath = normalizeDraftFilePath(overrides.filePath || "")
 
   return {
@@ -27,19 +22,11 @@ export function createDraftFileId(filePath?: string) {
       ? globalThis.crypto.randomUUID()
       : Math.random().toString(36).slice(2, 10)
 
-  return pathSegment
-    ? `draft-file-${pathSegment}-${randomSegment}`
-    : `draft-file-${randomSegment}`
+  return pathSegment ? `draft-file-${pathSegment}-${randomSegment}` : `draft-file-${randomSegment}`
 }
 
-export function getActiveDraftFile(collection: {
-  activeFileId: string
-  files: DraftFileRecord[]
-}) {
-  return (
-    collection.files.find((file) => file.id === collection.activeFileId) ||
-    collection.files[0]
-  )
+export function getActiveDraftFile(collection: { activeFileId: string; files: DraftFileRecord[] }) {
+  return collection.files.find((file) => file.id === collection.activeFileId) || collection.files[0]
 }
 
 export function getDuplicateDraftFilePaths(files: DraftFileRecord[]) {

@@ -1,5 +1,6 @@
 import fs from "node:fs"
 import path from "node:path"
+
 import { workspacePath } from "@/lib/workspace-paths"
 
 const GLOBALS_CSS = workspacePath("apps", "web", "app", "globals.css")
@@ -58,9 +59,7 @@ function lightRootDeclarations(css: string): Map<string, string> {
   const body = withoutComments.slice(open, close - 1)
 
   const declarations = new Map<string, string>()
-  for (const [, name, value] of body.matchAll(
-    /(--[a-zA-Z0-9-]+)\s*:\s*([^;]+);/g
-  )) {
+  for (const [, name, value] of body.matchAll(/(--[a-zA-Z0-9-]+)\s*:\s*([^;]+);/g)) {
     declarations.set(name, value.trim())
   }
   return declarations
@@ -69,9 +68,7 @@ function lightRootDeclarations(css: string): Map<string, string> {
 function requireColor(declarations: Map<string, string>, name: string): string {
   const value = declarations.get(name)
   if (value === undefined) {
-    throw new Error(
-      `Missing ${name} in the light :root block of ${GLOBALS_CSS}`
-    )
+    throw new Error(`Missing ${name} in the light :root block of ${GLOBALS_CSS}`)
   }
   if (!HEX_COLOR.test(value)) {
     throw new Error(`${name} is not a #rrggbb colour: ${value}`)
@@ -84,16 +81,13 @@ function requireColor(declarations: Map<string, string>, name: string): string {
  * from `globals.css`, plus an `ansi` dictionary for code-block colours.
  */
 export async function writeTokensTypst(outFile: string): Promise<void> {
-  const declarations = lightRootDeclarations(
-    await fs.promises.readFile(GLOBALS_CSS, "utf-8")
-  )
+  const declarations = lightRootDeclarations(await fs.promises.readFile(GLOBALS_CSS, "utf-8"))
 
   const colors = COLOR_TOKENS.map(
-    ({ css, key }) => `${key}: rgb("${requireColor(declarations, css)}")`
+    ({ css, key }) => `${key}: rgb("${requireColor(declarations, css)}")`,
   )
   const ansi = ANSI_NAMES.map(
-    (name) =>
-      `${name}: rgb("${requireColor(declarations, `--color-ansi-${name}`)}")`
+    (name) => `${name}: rgb("${requireColor(declarations, `--color-ansi-${name}`)}")`,
   )
 
   const body = [...colors, `ansi: (${ansi.join(", ")})`].join(", ")

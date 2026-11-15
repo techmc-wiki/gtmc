@@ -1,7 +1,7 @@
 import fs from "node:fs"
 import path from "node:path"
+
 import type { Root, Element, Text } from "hast"
-import { visit } from "unist-util-visit"
 import { createHighlighterCore, type HighlighterCore } from "shiki/core"
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript"
 import java from "shiki/langs/java.mjs"
@@ -11,6 +11,7 @@ import perl from "shiki/langs/perl.mjs"
 import yaml from "shiki/langs/yaml.mjs"
 import minDark from "shiki/themes/min-dark.mjs"
 import solarizedLight from "shiki/themes/solarized-light.mjs"
+import { visit } from "unist-util-visit"
 
 import { getHastText } from "./hast-text"
 
@@ -51,10 +52,7 @@ export function persistHighlightCache(cacheFile: string): void {
   if (!highlightCacheDirty) return
   try {
     fs.mkdirSync(path.dirname(cacheFile), { recursive: true })
-    fs.writeFileSync(
-      cacheFile,
-      JSON.stringify(Object.fromEntries(highlightCache)) + "\n"
-    )
+    fs.writeFileSync(cacheFile, JSON.stringify(Object.fromEntries(highlightCache)) + "\n")
     highlightCacheDirty = false
   } catch {}
 }
@@ -80,12 +78,7 @@ function extractLangsFromMarkdown(content: string): string[] {
   const matches = content.matchAll(/^(?:`{3,}|~{3,})(\w+)/gm)
   const langs = new Set<string>()
   for (const match of matches) {
-    if (
-      match[1] &&
-      match[1] !== "text" &&
-      match[1] !== "plain" &&
-      match[1] !== "mermaid"
-    ) {
+    if (match[1] && match[1] !== "text" && match[1] !== "plain" && match[1] !== "mermaid") {
       langs.add(match[1].toLowerCase())
     }
   }
@@ -102,8 +95,7 @@ export async function createRehypeShiki(cacheFile?: string) {
         if (node.tagName !== "pre") return
 
         const codeNode = node.children.find(
-          (child): child is Element =>
-            child.type === "element" && child.tagName === "code"
+          (child): child is Element => child.type === "element" && child.tagName === "code",
         )
         if (!codeNode) return
 
@@ -127,7 +119,7 @@ export async function createRehypeShiki(cacheFile?: string) {
               node.properties["data-line-count"] = String(
                 rawCode.endsWith("\n")
                   ? rawCode.split("\n").length - 1
-                  : rawCode.split("\n").length
+                  : rawCode.split("\n").length,
               )
             }
             return
@@ -143,12 +135,12 @@ export async function createRehypeShiki(cacheFile?: string) {
           })
 
           const highlightedPre = highlighted.children.find(
-            (c): c is Element => c.type === "element" && c.tagName === "pre"
+            (c): c is Element => c.type === "element" && c.tagName === "pre",
           )
           if (!highlightedPre) return
 
           const highlightedCode = highlightedPre.children.find(
-            (c): c is Element => c.type === "element" && c.tagName === "code"
+            (c): c is Element => c.type === "element" && c.tagName === "code",
           )
           if (!highlightedCode) return
 
@@ -159,7 +151,7 @@ export async function createRehypeShiki(cacheFile?: string) {
                 child.type === "element" &&
                 (child as Element).tagName === "span" &&
                 (child as Element).children.length === 0
-              )
+              ),
           )
 
           const lastChild = filtered.at(-1)
@@ -174,18 +166,13 @@ export async function createRehypeShiki(cacheFile?: string) {
           for (const child of filtered) {
             if (child.type !== "element") continue
             const lineEl = child as Element
-            const firstToken = lineEl.children.find(
-              (c) => c.type === "element"
-            ) as Element | undefined
+            const firstToken = lineEl.children.find((c) => c.type === "element") as
+              | Element
+              | undefined
             const firstText =
-              firstToken?.children[0]?.type === "text"
-                ? (firstToken.children[0] as Text).value
-                : ""
+              firstToken?.children[0]?.type === "text" ? (firstToken.children[0] as Text).value : ""
             const leadingSpaces = firstText.match(/^(\s*)/)?.[1] ?? ""
-            const indent = [...leadingSpaces].reduce(
-              (n, ch) => n + (ch === "\t" ? 4 : 1),
-              0
-            )
+            const indent = [...leadingSpaces].reduce((n, ch) => n + (ch === "\t" ? 4 : 1), 0)
             if (indent > 0) {
               const existing = (lineEl.properties.style as string) ?? ""
               lineEl.properties.style =
@@ -204,9 +191,7 @@ export async function createRehypeShiki(cacheFile?: string) {
           node.properties["data-raw-code"] = rawCode
           node.properties["data-lang"] = lang
           node.properties["data-line-count"] = String(
-            rawCode.endsWith("\n")
-              ? rawCode.split("\n").length - 1
-              : rawCode.split("\n").length
+            rawCode.endsWith("\n") ? rawCode.split("\n").length - 1 : rawCode.split("\n").length,
           )
         } catch {
           /* unsupported language or highlighting error: leave node untouched */
@@ -218,7 +203,7 @@ export async function createRehypeShiki(cacheFile?: string) {
 
 export function getCachedRehypeShiki(
   content?: string,
-  cacheFile?: string
+  cacheFile?: string,
 ): Promise<RehypeShikiPlugin> {
   const langs = content ? extractLangsFromMarkdown(content) : []
   if (langs.length === 0) {

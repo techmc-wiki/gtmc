@@ -2,20 +2,16 @@ import crypto from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
+
 import sharp from "sharp"
+
 import { ARTICLES_PATH } from "@/lib/articles/fs"
 import { hasExplicitUrlScheme } from "@/lib/markdown/url-utils"
 import { workspacePath } from "@/lib/workspace-paths"
 
 import { toTypstRootPath, writeFileAtomic } from "./artifacts"
 
-const REMOTE_CACHE_DIR = workspacePath(
-  "tools",
-  "pdf",
-  "work",
-  ".cache",
-  "images"
-)
+const REMOTE_CACHE_DIR = workspacePath("tools", "pdf", "work", ".cache", "images")
 
 const MAX_WIDTH = 2000
 const LARGE_PNG_BYTES = 8 * 1024 * 1024
@@ -24,9 +20,7 @@ const FETCH_ATTEMPTS = 3
 const RETRY_BASE_DELAY_MS = 500
 const USER_AGENT = "gtmc-pdf-images/1.0 (+https://www.techmc.wiki)"
 
-const PNG_SIGNATURE = Buffer.from([
-  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-])
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 const SVG_SNIFF_BYTES = 64 * 1024
 
 type SourceFormat = "png" | "jpeg" | "gif" | "webp" | "avif" | "svg" | "bmp"
@@ -51,7 +45,7 @@ class ImageDownloadError extends Error {}
  */
 export async function resolvePdfImages(
   sources: string[],
-  opts: { articleFilePath: string | null; outDir: string; locale: string }
+  opts: { articleFilePath: string | null; outDir: string; locale: string },
 ): Promise<Map<string, PdfImageResult>> {
   await fs.promises.mkdir(opts.outDir, { recursive: true })
 
@@ -70,16 +64,16 @@ export async function resolvePdfImages(
         const isMissingFile = (error as NodeJS.ErrnoException).code === "ENOENT"
         if (error instanceof ImageDownloadError || isMissingFile) {
           console.warn(
-            `[pdf] missing image in ${article} (${opts.locale}): ${source} (${error instanceof Error ? error.message : String(error)})`
+            `[pdf] missing image in ${article} (${opts.locale}): ${source} (${error instanceof Error ? error.message : String(error)})`,
           )
           return [source, { missing: source }]
         }
         throw new Error(
           `Cannot resolve image "${source}" in ${article} (${opts.locale}): ${error instanceof Error ? error.message : String(error)}`,
-          { cause: error }
+          { cause: error },
         )
       }
-    })
+    }),
   )
   return new Map(resolved)
 }
@@ -116,10 +110,7 @@ function resolveLocalPath({ source, articleFilePath }: Context): string {
   if (!articleFilePath) {
     throw new Error("a relative path needs an article file to resolve against")
   }
-  return path.resolve(
-    path.dirname(path.join(ARTICLES_PATH, articleFilePath)),
-    decoded
-  )
+  return path.resolve(path.dirname(path.join(ARTICLES_PATH, articleFilePath)), decoded)
 }
 
 function decodeDataUri(source: string): Buffer {
@@ -134,14 +125,12 @@ function decodeDataUri(source: string): Buffer {
 async function loadRemote(url: string): Promise<Buffer> {
   const cacheFile = path.join(
     REMOTE_CACHE_DIR,
-    crypto.createHash("sha256").update(url).digest("hex")
+    crypto.createHash("sha256").update(url).digest("hex"),
   )
   try {
     return await fs.promises.readFile(cacheFile)
   } catch (error) {
-    if (
-      !(error instanceof Error && "code" in error && error.code === "ENOENT")
-    ) {
+    if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) {
       throw error
     }
   }
@@ -164,7 +153,7 @@ async function fetchWithRetry(url: string, attempt: number): Promise<Buffer> {
     if (attempt >= FETCH_ATTEMPTS) {
       throw new ImageDownloadError(
         `download failed after ${FETCH_ATTEMPTS} attempts: ${error instanceof Error ? error.message : String(error)}`,
-        { cause: error }
+        { cause: error },
       )
     }
     await sleep(RETRY_BASE_DELAY_MS * 2 ** (attempt - 1))
@@ -203,10 +192,7 @@ type TypstImage = { bytes: Buffer; ext: "png" | "jpg" | "svg" }
  * never enlarged, and EXIF orientation is applied so the Typst output matches
  * what the site shows.
  */
-async function toTypstImage(
-  bytes: Buffer,
-  format: SourceFormat
-): Promise<TypstImage> {
+async function toTypstImage(bytes: Buffer, format: SourceFormat): Promise<TypstImage> {
   if (format === "svg") return { bytes, ext: "svg" }
   if (format === "bmp") {
     // The article repo contains BMP files named `.png`; libvips cannot read BMP.
@@ -232,15 +218,10 @@ async function toTypstImage(
   const isPng = format === "png"
   const isJpeg = format === "jpeg"
   const keepSource =
-    (isPng || isJpeg) &&
-    !tooWide &&
-    orientation === 1 &&
-    !(isPng && bytes.length > LARGE_PNG_BYTES)
+    (isPng || isJpeg) && !tooWide && orientation === 1 && !(isPng && bytes.length > LARGE_PNG_BYTES)
   if (keepSource) return { bytes, ext: isPng ? "png" : "jpg" }
 
-  const pipeline = tooWide
-    ? image.rotate().resize({ width: MAX_WIDTH })
-    : image.rotate()
+  const pipeline = tooWide ? image.rotate().resize({ width: MAX_WIDTH }) : image.rotate()
   if (isJpeg) {
     return {
       bytes: await pipeline.jpeg({ quality: 92 }).toBuffer(),
@@ -248,9 +229,7 @@ async function toTypstImage(
     }
   }
   return {
-    bytes: await pipeline
-      .png({ compressionLevel: 9, adaptiveFiltering: true })
-      .toBuffer(),
+    bytes: await pipeline.png({ compressionLevel: 9, adaptiveFiltering: true }).toBuffer(),
     ext: "png",
   }
 }
@@ -267,14 +246,8 @@ function decodeBmp(bytes: Buffer): {
   const signedHeight = bytes.readInt32LE(22)
   const bitCount = bytes.readUInt16LE(28)
   const compression = bytes.readUInt32LE(30)
-  if (
-    headerSize < 40 ||
-    compression !== 0 ||
-    (bitCount !== 24 && bitCount !== 32)
-  ) {
-    throw new Error(
-      `unsupported BMP (${bitCount}-bit, compression ${compression})`
-    )
+  if (headerSize < 40 || compression !== 0 || (bitCount !== 24 && bitCount !== 32)) {
+    throw new Error(`unsupported BMP (${bitCount}-bit, compression ${compression})`)
   }
 
   const height = Math.abs(signedHeight)

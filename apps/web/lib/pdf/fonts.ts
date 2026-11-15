@@ -8,7 +8,9 @@ import crypto from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
+
 import { z } from "zod"
+
 import { workspacePath } from "@/lib/workspace-paths"
 
 import { writeFileAtomic } from "./artifacts"
@@ -31,7 +33,7 @@ const LockSchema = z.object({
         url: z.url(),
         sha256: z.string().regex(/^[0-9a-f]{64}$/),
         license: z.string().min(1),
-      })
+      }),
     )
     .min(1),
 })
@@ -52,9 +54,7 @@ export async function ensurePdfFonts(): Promise<string> {
 }
 
 async function readLock(): Promise<PdfFontEntry[]> {
-  const raw: unknown = JSON.parse(
-    await fs.promises.readFile(LOCK_PATH, "utf-8")
-  )
+  const raw: unknown = JSON.parse(await fs.promises.readFile(LOCK_PATH, "utf-8"))
   const { fonts } = LockSchema.parse(raw)
 
   if (new Set(fonts.map((entry) => entry.file)).size !== fonts.length) {
@@ -68,17 +68,14 @@ async function syncPdfFonts(): Promise<string> {
   await fs.promises.mkdir(FONTS_DIR, { recursive: true })
 
   await runPool(entries, FONT_CONCURRENCY, (entry) =>
-    ensureFontFile(entry, path.join(FONTS_DIR, entry.file))
+    ensureFontFile(entry, path.join(FONTS_DIR, entry.file)),
   )
   await removeUnlistedFonts(new Set(entries.map((entry) => entry.file)))
 
   return FONTS_DIR
 }
 
-async function ensureFontFile(
-  entry: PdfFontEntry,
-  target: string
-): Promise<void> {
+async function ensureFontFile(entry: PdfFontEntry, target: string): Promise<void> {
   if ((await sha256OfFile(target)) === entry.sha256) return
   await downloadVerified(entry, target, 1)
 }
@@ -86,7 +83,7 @@ async function ensureFontFile(
 async function downloadVerified(
   entry: PdfFontEntry,
   target: string,
-  attempt: number
+  attempt: number,
 ): Promise<void> {
   try {
     const response = await fetch(entry.url, {
@@ -99,16 +96,14 @@ async function downloadVerified(
     const bytes = Buffer.from(await response.arrayBuffer())
     const digest = crypto.createHash("sha256").update(bytes).digest("hex")
     if (digest !== entry.sha256) {
-      throw new Error(
-        `sha256 mismatch: expected ${entry.sha256}, got ${digest}`
-      )
+      throw new Error(`sha256 mismatch: expected ${entry.sha256}, got ${digest}`)
     }
     await writeFileAtomic(target, bytes)
   } catch (error) {
     if (attempt >= FETCH_ATTEMPTS) {
       throw new Error(
         `Failed to download font ${entry.family} (${entry.file}) from ${entry.url}: ${error instanceof Error ? error.message : String(error)}`,
-        { cause: error }
+        { cause: error },
       )
     }
     await sleep(RETRY_BASE_DELAY_MS * 2 ** (attempt - 1))
@@ -121,9 +116,7 @@ async function removeUnlistedFonts(listed: Set<string>): Promise<void> {
   await Promise.all(
     names
       .filter((name) => /\.(?:ttf|otf)$/.test(name) && !listed.has(name))
-      .map((name) =>
-        fs.promises.rm(path.join(FONTS_DIR, name), { force: true })
-      )
+      .map((name) => fs.promises.rm(path.join(FONTS_DIR, name), { force: true })),
   )
 }
 
@@ -145,7 +138,7 @@ async function sha256OfFile(file: string): Promise<string | undefined> {
 async function runPool<T>(
   items: T[],
   limit: number,
-  worker: (item: T) => Promise<void>
+  worker: (item: T) => Promise<void>,
 ): Promise<void> {
   let next = 0
   const slot = async (): Promise<void> => {
@@ -155,7 +148,5 @@ async function runPool<T>(
       await worker(item)
     }
   }
-  await Promise.all(
-    Array.from({ length: Math.min(limit, items.length) }, () => slot())
-  )
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, () => slot()))
 }

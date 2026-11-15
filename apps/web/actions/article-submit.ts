@@ -2,34 +2,24 @@
 
 import { createHash } from "node:crypto"
 import path from "node:path"
+
 import { revalidatePath } from "next/cache"
-import {
-  type DraftPullRequestResult,
-  openDraftPullRequest,
-} from "@/lib/articles/pr"
+
 import { getArticleSourceHeadSha } from "@/lib/articles/branch"
+import { type DraftPullRequestResult, openDraftPullRequest } from "@/lib/articles/pr"
 import { getAuthorIdentity, requireAuth } from "@/lib/auth/context"
 import { getDuplicateDraftFilePaths } from "@/lib/drafts/files"
 import { assertDraftStatus, canSubmitDraft } from "@/lib/drafts/lifecycle"
 import { parseImageRefs, rewriteImageUrls } from "@/lib/drafts/markdown"
-import {
-  deleteDraftAssets,
-  downloadDraftAsset,
-  draftAssetPrefix,
-} from "@/lib/drafts/storage"
-import {
-  draftErrorMessage,
-  readDraft,
-  requireDraftVersion,
-  writeDraft,
-} from "@/lib/drafts/store"
-import { reconcileSubmission } from "@/lib/submission-recovery"
+import { deleteDraftAssets, downloadDraftAsset, draftAssetPrefix } from "@/lib/drafts/storage"
+import { draftErrorMessage, readDraft, requireDraftVersion, writeDraft } from "@/lib/drafts/store"
 import {
   type SubmissionLock,
   lockSubmission,
   SubmissionInProgressError,
 } from "@/lib/drafts/submission"
 import { resolveGithubToken } from "@/lib/github/tokens"
+import { reconcileSubmission } from "@/lib/submission-recovery"
 
 const UPLOAD_PLACEHOLDER_RE = /<!--\s*UPLOAD_PENDING_[a-f0-9-]+\s*-->/i
 
@@ -67,9 +57,7 @@ export async function submitDraftAction(revisionId: string, etag: string) {
   }
   const identity = await getAuthorIdentity(session)
   const prefix = draftAssetPrefix(session.user.id, revisionId)
-  const refsByFile = existing.files.map((file) =>
-    parseImageRefs(file.content, "draft-assets")
-  )
+  const refsByFile = existing.files.map((file) => parseImageRefs(file.content, "draft-assets"))
   const paths = new Set(refsByFile.flat().map((ref) => ref.storagePath))
   const assets = await Promise.all(
     [...paths].map(async (storagePath) => {
@@ -80,16 +68,14 @@ export async function submitDraftAction(revisionId: string, etag: string) {
       return {
         id: storagePath,
         storagePath,
-        filename: storagePath
-          .slice(prefix.length)
-          .replace(/^[a-f0-9-]{36}-/, ""),
+        filename: storagePath.slice(prefix.length).replace(/^[a-f0-9-]{36}-/, ""),
         contentHash: createHash("sha256").update(content).digest("hex"),
         content,
       }
-    })
+    }),
   )
   const assetsByPath = new Map<string, (typeof assets)[number]>(
-    assets.map((asset) => [asset.storagePath, asset])
+    assets.map((asset) => [asset.storagePath, asset]),
   )
   const targetsByPath = new Map<string, string>()
   const files = existing.files.map((file, index) => {
@@ -103,15 +89,12 @@ export async function submitDraftAction(revisionId: string, etag: string) {
         path.posix.join(
           path.posix.dirname(file.filePath),
           "img",
-          `${stem}-${asset.contentHash.slice(0, 12)}${ext}`
-        )
+          `${stem}-${asset.contentHash.slice(0, 12)}${ext}`,
+        ),
       )
     }
     const replacements = new Map(
-      refsByFile[index].map((ref) => [
-        ref.url,
-        targetsByPath.get(ref.storagePath)!,
-      ])
+      refsByFile[index].map((ref) => [ref.url, targetsByPath.get(ref.storagePath)!]),
     )
     return {
       ...file,
@@ -123,11 +106,10 @@ export async function submitDraftAction(revisionId: string, etag: string) {
       assets.map((asset) => [
         targetsByPath.get(asset.storagePath)!,
         { path: targetsByPath.get(asset.storagePath)!, content: asset.content },
-      ])
+      ]),
     ).values(),
   ]
-  const baseMainSha =
-    existing.baseMainSha || (await getArticleSourceHeadSha(token))
+  const baseMainSha = existing.baseMainSha || (await getArticleSourceHeadSha(token))
 
   let locked: SubmissionLock
   try {
@@ -185,7 +167,7 @@ export async function submitDraftAction(revisionId: string, etag: string) {
         submittedAt: now,
         updatedAt: now,
       },
-      locked.etag
+      locked.etag,
     )
   } catch (error) {
     const recovered = await reconcileSubmission({

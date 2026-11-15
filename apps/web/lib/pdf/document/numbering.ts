@@ -1,11 +1,6 @@
 import type { LinearizedArticle } from "@/lib/articles/linearize"
 
-import type {
-  BookPlan,
-  ChapterContent,
-  ChapterGroup,
-  NumberedArticle,
-} from "./types"
+import type { BookPlan, ChapterContent, ChapterGroup, NumberedArticle } from "./types"
 
 /** Article metadata may carry HTML entities; the book prints plain text. */
 export function unescapeHtml(text: string): string {
@@ -67,7 +62,7 @@ export function buildBookPlan(articles: LinearizedArticle[]): BookPlan {
     for (const folder of article.folders) {
       let folderContent = content.find(
         (item): item is Extract<ChapterContent, { kind: "folder" }> =>
-          item.kind === "folder" && item.slug === folder.slug
+          item.kind === "folder" && item.slug === folder.slug,
       )
       if (!folderContent) {
         folderContent = {

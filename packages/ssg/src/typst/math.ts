@@ -23,10 +23,7 @@ const TAG = /\\tag\{([^{}]*)\}/g
 const COMMAND_NAME = /^\\([A-Za-z]+|[^A-Za-z])/
 
 // Object literals inherit keys such as `constructor`, so every lookup checks ownership.
-function lookup(
-  table: Record<string, string>,
-  key: string
-): string | undefined {
+function lookup(table: Record<string, string>, key: string): string | undefined {
   return Object.hasOwn(table, key) ? table[key] : undefined
 }
 
@@ -271,11 +268,7 @@ function plain(out: string): Atom {
   return { out, group: false }
 }
 
-function attached(
-  base: Atom,
-  sub: string | undefined,
-  sup: string | undefined
-): string {
+function attached(base: Atom, sub: string | undefined, sup: string | undefined): string {
   if (base.group) {
     const args = [base.out]
     if (sub !== undefined) args.push(`b: ${sub}`)
@@ -414,9 +407,7 @@ class MathParser {
   }
 
   private number(singleDigit: boolean): string {
-    const match = (singleDigit ? /^[0-9]/ : /^[0-9]+(?:\.[0-9]+)?/).exec(
-      this.rest()
-    )
+    const match = (singleDigit ? /^[0-9]/ : /^[0-9]+(?:\.[0-9]+)?/).exec(this.rest())
     if (match === null) throw this.error("expected a digit")
     this.pos += match[0].length
     return match[0]
@@ -528,7 +519,7 @@ class MathParser {
         this.pos += "\\right".length
         const close = this.delimiter("right")
         const parts = [open, body, close].filter(
-          (part): part is string => part !== null && part !== ""
+          (part): part is string => part !== null && part !== "",
         )
         if (parts.length === 0) throw this.error("empty \\left...\\right")
         return plain(`lr(${parts.join(" ")})`)
@@ -539,8 +530,7 @@ class MathParser {
         const start = this.pos - "\\begin".length
         const envName = this.rawGroup()
         const math = this.environment(envName)
-        const whole =
-          this.src.slice(0, start).trim() === "" && this.rest().trim() === ""
+        const whole = this.src.slice(0, start).trim() === "" && this.rest().trim() === ""
         if (envName === "aligned" && (this.nesting > 0 || !whole)) {
           throw this.error("aligned must be the whole expression")
         }
@@ -567,10 +557,7 @@ class MathParser {
     }
     const match = this.peek() === "\\" ? COMMAND_NAME.exec(this.rest()) : null
     const key = match === null ? this.peek() : match[0]
-    const symbol = lookup(
-      side === "left" ? LEFT_DELIMITERS : RIGHT_DELIMITERS,
-      key
-    )
+    const symbol = lookup(side === "left" ? LEFT_DELIMITERS : RIGHT_DELIMITERS, key)
     if (symbol === undefined) {
       throw this.error(`unsupported ${side} delimiter ${key}`)
     }
@@ -591,25 +578,16 @@ class MathParser {
     const rows = this.rows(atEnd)
     this.nesting -= 1
     this.pos += end.length
-    while (
-      rows.length > 1 &&
-      rows[rows.length - 1].every((cell) => cell === "")
-    ) {
+    while (rows.length > 1 && rows[rows.length - 1].every((cell) => cell === "")) {
       rows.pop()
     }
     if (rows.every((row) => row.every((cell) => cell === ""))) {
       throw this.error("empty environment")
     }
-    if (
-      name === "matrix" &&
-      rows.some((row) => row.length !== rows[0].length)
-    ) {
+    if (name === "matrix" && rows.some((row) => row.length !== rows[0].length)) {
       throw this.error("matrix rows of unequal length")
     }
-    if (
-      name === "matrix" &&
-      rows.some((row) => row.some((cell) => cell === ""))
-    ) {
+    if (name === "matrix" && rows.some((row) => row.some((cell) => cell === ""))) {
       throw this.error("empty matrix cell")
     }
 
@@ -629,8 +607,7 @@ class MathParser {
 
   private rows(atEnd: () => boolean): string[][] {
     const rows: string[][] = [[]]
-    const atSeparator = (): boolean =>
-      this.peek() === "&" || this.rest().startsWith("\\\\")
+    const atSeparator = (): boolean => this.peek() === "&" || this.rest().startsWith("\\\\")
     for (;;) {
       const cell = this.sequence(() => atEnd() || atSeparator())
       rows[rows.length - 1].push(cell)

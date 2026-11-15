@@ -2,13 +2,8 @@
 "use client"
 
 import Link from "next/link"
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ComponentProps,
-  type RefObject,
-} from "react"
+import { useEffect, useRef, useState, type ComponentProps, type RefObject } from "react"
+
 import { cn } from "@/lib/cn"
 
 export type HookSidebarItem = {
@@ -22,8 +17,7 @@ export type HookSidebarItem = {
 const ROW_PADDING_REM = 1
 const DEPTH_STEP_REM = 1
 
-const rowPadding = (depth: number) =>
-  (ROW_PADDING_REM + depth * DEPTH_STEP_REM) * 16
+const rowPadding = (depth: number) => (ROW_PADDING_REM + depth * DEPTH_STEP_REM) * 16
 
 /** Vertical gap the rail leaves above a row so the elbow can sit on its own. */
 const CORNER = 6
@@ -53,10 +47,7 @@ function Rail({
     <span
       aria-hidden
       style={{ opacity: y === null ? 0 : 1 }}
-      className={cn(
-        "reader-hook-rail pointer-events-none absolute inset-0",
-        className
-      )}>
+      className={cn("reader-hook-rail pointer-events-none absolute inset-0", className)}>
       <span
         className="reader-hook-line absolute top-0 left-0.5 w-px"
         style={{
@@ -71,11 +62,7 @@ function Rail({
         fill="none"
         className="reader-hook-elbow absolute top-0 left-0.5"
         style={{ transform: `translateY(${(y ?? 0) - CORNER}px)` }}>
-        <path
-          d={`M0.5 0a6 6 0 0 0 6 6H${width}`}
-          stroke="currentColor"
-          strokeDasharray="2 2"
-        />
+        <path d={`M0.5 0a6 6 0 0 0 6 6H${width}`} stroke="currentColor" strokeDasharray="2 2" />
       </svg>
     </span>
   )
@@ -120,18 +107,14 @@ function hoverRailFrom({
 function useRowMetrics(
   items: HookSidebarItem[],
   rows: RefObject<(HTMLAnchorElement | HTMLDivElement | null)[]>,
-  list: RefObject<HTMLDivElement | null>
+  list: RefObject<HTMLDivElement | null>,
 ) {
   const [centers, setCenters] = useState<number[]>([])
   const [tops, setTops] = useState<number[]>([])
 
   useEffect(() => {
     const measure = () => {
-      setCenters(
-        rows.current.map((row) =>
-          row ? row.offsetTop + row.offsetHeight / 2 : 0
-        )
-      )
+      setCenters(rows.current.map((row) => (row ? row.offsetTop + row.offsetHeight / 2 : 0)))
       setTops(rows.current.map((row) => (row ? row.offsetTop : 0)))
     }
     measure()
@@ -165,7 +148,7 @@ function HookSidebarRow({
   const depth = item.depth ?? 0
   const classNames = cn(
     "flex min-h-10 items-center text-sm leading-snug transition-colors hover:text-foreground focus-visible:outline-tech-main focus-visible:outline-2 focus-visible:outline-offset-[-2px]",
-    active ? "font-medium text-foreground" : "text-muted-foreground"
+    active ? "font-medium text-foreground" : "text-muted-foreground",
   )
   const style = { paddingLeft: `${rowPadding(depth)}px` }
 
@@ -254,8 +237,7 @@ export function HookSidebar({
   // Each chapter owns its rail, so the persistent one is rooted at the active
   // chapter rather than at the top of the whole list.
   const activeFrom = chapterStart(items, tops, value)
-  const hoverChapter =
-    hovered === null ? -1 : chapterStart(items, tops, hovered)
+  const hoverChapter = hovered === null ? -1 : chapterStart(items, tops, hovered)
   const hoverFrom = hoverRailFrom({ hoverChapter, activeFrom, activeY, hoverY })
 
   return (
@@ -267,18 +249,11 @@ export function HookSidebar({
       <div ref={list} className="relative flex flex-col">
         <Rail
           from={hoverFrom}
-          y={
-            (pointerInside || focusInside) && hovered !== value ? hoverY : null
-          }
+          y={(pointerInside || focusInside) && hovered !== value ? hoverY : null}
           depth={hoverDepth}
           className="text-foreground/30"
         />
-        <Rail
-          from={activeFrom}
-          y={activeY}
-          depth={activeDepth}
-          className="text-tech-signal"
-        />
+        <Rail from={activeFrom} y={activeY} depth={activeDepth} className="text-tech-signal" />
         {items.map((item, index) => (
           <HookSidebarRow
             key={item.id}

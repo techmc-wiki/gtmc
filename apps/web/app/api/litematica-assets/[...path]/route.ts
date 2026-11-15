@@ -1,13 +1,9 @@
-import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
 
-const BASE_MINECRAFT_DIR = path.join(
-  process.cwd(),
-  "litematica-renderer",
-  "assets",
-  "minecraft"
-)
+import { NextResponse } from "next/server"
+
+const BASE_MINECRAFT_DIR = path.join(process.cwd(), "litematica-renderer", "assets", "minecraft")
 
 interface LitematicaAsset {
   content: Buffer
@@ -37,9 +33,7 @@ async function createAssetIndex(): Promise<{
           return indexDirectory(fullPath)
         }
 
-        const relativePath = path
-          .relative(BASE_MINECRAFT_DIR, fullPath)
-          .replaceAll(path.sep, "/")
+        const relativePath = path.relative(BASE_MINECRAFT_DIR, fullPath).replaceAll(path.sep, "/")
         const content = await fs.promises.readFile(fullPath)
         const contentType =
           relativePath.endsWith(".json") || relativePath.endsWith(".mcmeta")
@@ -47,7 +41,7 @@ async function createAssetIndex(): Promise<{
             : "image/png"
 
         return [{ entry, relativePath, content, contentType }]
-      })
+      }),
     )
 
     return indexedEntries.flat()
@@ -57,10 +51,7 @@ async function createAssetIndex(): Promise<{
     const indexedAssets = await indexDirectory(BASE_MINECRAFT_DIR)
     indexedAssets.forEach(({ entry, relativePath, content, contentType }) => {
       assetFiles.set(relativePath, { content, contentType })
-      if (
-        relativePath.startsWith("textures/") &&
-        !textureFilePaths.has(entry.name)
-      ) {
+      if (relativePath.startsWith("textures/") && !textureFilePaths.has(entry.name)) {
         textureFilePaths.set(entry.name, relativePath)
       }
     })
@@ -73,12 +64,11 @@ async function createAssetIndex(): Promise<{
   return { assetFiles, textureFilePaths }
 }
 
-const { assetFiles: ASSET_FILES, textureFilePaths: TEXTURE_FILE_PATHS } =
-  await createAssetIndex()
+const { assetFiles: ASSET_FILES, textureFilePaths: TEXTURE_FILE_PATHS } = await createAssetIndex()
 
 export async function GET(
   request: Request,
-  context: { params: Promise<{ path: string[] }> | { path: string[] } }
+  context: { params: Promise<{ path: string[] }> | { path: string[] } },
 ) {
   const params = await context.params
   const pathArray = params.path
@@ -104,11 +94,7 @@ export async function GET(
   if (ASSET_FILES.has(normalizedAssetPath)) {
     relativeTarget = normalizedAssetPath
   } else {
-    const directTarget = path.posix.join(
-      "textures",
-      "block",
-      normalizedAssetPath
-    )
+    const directTarget = path.posix.join("textures", "block", normalizedAssetPath)
     if (ASSET_FILES.has(directTarget)) {
       relativeTarget = directTarget
     } else {

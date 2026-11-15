@@ -1,8 +1,9 @@
 "use client"
 
-import { useCallback } from "react"
-import { useLocale, useTranslations } from "next-intl"
 import { GlobeIcon, CheckIcon } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
+import { useCallback } from "react"
+
 import { Button } from "@/components/ui/shadcn/button"
 import {
   DropdownMenu,
@@ -32,7 +33,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
 
       router.replace(pathname, { locale: newLocale })
     },
-    [locale, pathname, router]
+    [locale, pathname, router],
   )
 
   return (
@@ -46,7 +47,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
           title={t("languageSwitcher")}
           className={cn(
             "hover:bg-tech-main/10 hover:text-tech-main-dark hover:no-underline md:size-10",
-            className
+            className,
           )}>
           <GlobeIcon className="size-4" />
         </Button>
@@ -62,9 +63,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
             onSelect={() => switchLocale(item.value)}
             className="text-tech-main-dark focus:bg-tech-main/10 focus:text-tech-main-dark cursor-pointer gap-2 rounded-none">
             <span className="flex-1">{item.label}</span>
-            {locale === item.value && (
-              <CheckIcon className="text-tech-signal size-3.5 shrink-0" />
-            )}
+            {locale === item.value && <CheckIcon className="text-tech-signal size-3.5 shrink-0" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

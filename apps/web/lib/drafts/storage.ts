@@ -1,6 +1,8 @@
-import { del, get, list, put } from "@vercel/blob"
 import { randomUUID } from "node:crypto"
 import path from "node:path"
+
+import { del, get, list, put } from "@vercel/blob"
+
 import { privateBlobOptions } from "@/lib/blob-stores"
 import { draftPath } from "@/lib/drafts/store"
 
@@ -14,7 +16,7 @@ export async function uploadDraftAsset(
   draftId: string,
   filename: string,
   data: Buffer,
-  mimeType: string
+  mimeType: string,
 ) {
   const storagePath = `${draftAssetPrefix(authorId, draftId)}${randomUUID()}-${path.posix.basename(filename)}`
   await put(storagePath, data, {
@@ -53,7 +55,7 @@ export async function deleteDraftAssets(authorId: string, draftId: string) {
       // oxlint-disable-next-line no-await-in-loop -- finish deleting this page before advancing
       await del(
         page.blobs.map((blob) => blob.pathname),
-        privateBlobOptions()
+        privateBlobOptions(),
       )
     }
     cursor = page.hasMore ? page.cursor : undefined

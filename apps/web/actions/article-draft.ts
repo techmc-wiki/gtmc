@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
+
 import { getArticleSourceHeadSha } from "@/lib/articles/branch"
 import { requireAuth } from "@/lib/auth/context"
 import {
@@ -33,9 +34,7 @@ const saveDraftSchema = z.object({
 export async function createDraftAction(formData: FormData): Promise<never> {
   const session = await requireAuth()
   const rawFilePath = formData.get("filePath")
-  const normalizedPath = normalizeDraftFilePath(
-    typeof rawFilePath === "string" ? rawFilePath : ""
-  )
+  const normalizedPath = normalizeDraftFilePath(typeof rawFilePath === "string" ? rawFilePath : "")
   if (normalizedPath.includes("..")) throw new Error("Invalid draft file path")
   let content = ""
   let filePath = normalizedPath
@@ -43,9 +42,7 @@ export async function createDraftAction(formData: FormData): Promise<never> {
     const candidates = normalizedPath.endsWith(".md")
       ? [normalizedPath]
       : [normalizedPath, `${normalizedPath}.md`]
-    const contents = await Promise.all(
-      candidates.map((candidate) => getRepoFileContent(candidate))
-    )
+    const contents = await Promise.all(candidates.map((candidate) => getRepoFileContent(candidate)))
     const matchedIndex = contents.findIndex((value) => value !== null)
     if (matchedIndex >= 0) {
       content = contents[matchedIndex] ?? ""
@@ -92,7 +89,7 @@ export async function saveDraftAction(formData: FormData) {
           title,
           updatedAt: new Date().toISOString(),
         },
-        record.etag
+        record.etag,
       )
       revalidatePath("/draft")
       return { success: true, revisionId, etag: nextEtag }

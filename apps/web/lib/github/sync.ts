@@ -1,12 +1,12 @@
 import { ARTICLES_SOURCE_BRANCH } from "@/lib/articles/source"
 import { getGithubErrorStatus } from "@/lib/github/errors"
-import { executeWithRetry } from "@/lib/github/retry-fetch"
-import { ARTICLES_REPO, getOctokit } from "@/lib/github/repos"
 import {
   isGithubRateLimitErrorForCache,
   isGithubSyncRateLimited,
   recordGithubSyncRateLimit,
 } from "@/lib/github/rate-limit"
+import { ARTICLES_REPO, getOctokit } from "@/lib/github/repos"
+import { executeWithRetry } from "@/lib/github/retry-fetch"
 
 export { getRepoContentTree } from "@/lib/github/repo-content-tree"
 
@@ -14,7 +14,7 @@ async function fetchRepoFile<TResult>(
   filePath: string,
   retries: number,
   decode: (base64Content: string) => TResult,
-  failureLogFormat: string
+  failureLogFormat: string,
 ): Promise<TResult | null> {
   if (isGithubSyncRateLimited()) {
     return null
@@ -60,26 +60,20 @@ async function fetchRepoFile<TResult>(
   })
 }
 
-export async function getRepoFileContent(
-  filePath: string,
-  retries = 3
-): Promise<string | null> {
+export async function getRepoFileContent(filePath: string, retries = 3): Promise<string | null> {
   return fetchRepoFile(
     filePath,
     retries,
     (content) => Buffer.from(content, "base64").toString("utf-8"),
-    "[github-pr] Failed to fetch %s after %d attempts:"
+    "[github-pr] Failed to fetch %s after %d attempts:",
   )
 }
 
-export async function getRepoFileBuffer(
-  filePath: string,
-  retries = 3
-): Promise<Buffer | null> {
+export async function getRepoFileBuffer(filePath: string, retries = 3): Promise<Buffer | null> {
   return fetchRepoFile(
     filePath,
     retries,
     (content) => Buffer.from(content, "base64"),
-    "[github-pr] Failed to fetch buffer %s after %d attempts:"
+    "[github-pr] Failed to fetch buffer %s after %d attempts:",
   )
 }

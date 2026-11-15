@@ -1,6 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
+
 import { DraftFileSourceDialog } from "@/components/editor/draft-file-source-dialog"
 import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
 import { normalizeDraftFilePath } from "@/lib/drafts/files"
@@ -40,11 +41,7 @@ export function DraftFileDialogs({
             ? `${fileDialogIntent.kind}:${fileDialogIntent.initialMode}:${parentFolderPath}`
             : "closed:file-dialog"
         }
-        description={
-          fileDialogIntent?.kind === "replace"
-            ? t("replaceFileWarning")
-            : undefined
-        }
+        description={fileDialogIntent?.kind === "replace" ? t("replaceFileWarning") : undefined}
         isOpen={fileDialogIntent !== null}
         initialFolderPath={parentFolderPath}
         initialMode={fileDialogIntent?.initialMode}
@@ -53,11 +50,7 @@ export function DraftFileDialogs({
         onCreateFolder={onCreateFolder}
       />
       <DraftFileSourceDialog
-        key={
-          insertDialogOpen
-            ? `insert:${parentFolderPath}`
-            : "closed:insert-dialog"
-        }
+        key={insertDialogOpen ? `insert:${parentFolderPath}` : "closed:insert-dialog"}
         isOpen={insertDialogOpen}
         initialFolderPath={parentFolderPath}
         initialMode="repo"

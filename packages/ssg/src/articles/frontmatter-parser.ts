@@ -52,23 +52,8 @@ const ALLOWED_KEYS: Record<string, readonly string[]> = {
     "appendix",
     "banner",
   ],
-  translation: [
-    "skip",
-    "translates",
-    "translated-from-revision",
-    "title",
-    "description",
-    "banner",
-  ],
-  sourceReadme: [
-    "skip",
-    "slug",
-    "chapter-title",
-    "intro-title",
-    "index",
-    "appendix",
-    "revising",
-  ],
+  translation: ["skip", "translates", "translated-from-revision", "title", "description", "banner"],
+  sourceReadme: ["skip", "slug", "chapter-title", "intro-title", "index", "appendix", "revising"],
   translationReadme: [
     "skip",
     "translates",
@@ -109,10 +94,7 @@ const FRONT_MATTER_BLOCK = /^---\r?\n[\s\S]*?\r?\n---\r?\n?/
  * frontmatter (a language tag or trailing whitespace after the delimiter).
  * Those keep their previous bytes; everything else uses the parsed body.
  */
-function extractBody(
-  content: string,
-  parsed: { content: string; isEmpty?: boolean }
-): string {
+function extractBody(content: string, parsed: { content: string; isEmpty?: boolean }): string {
   const normalized = content.startsWith("\uFEFF") ? content.slice(1) : content
   if (!OPENING_DELIMITER.test(normalized)) return normalized
   if (parsed.isEmpty !== true && parsed.content !== "") return parsed.content
@@ -137,9 +119,7 @@ export function shouldSkipArticleFile(content: string): boolean {
   return (data as Record<string, unknown>).skip === true
 }
 
-export function parseSourceFrontMatter(
-  content: string
-): ParsedFrontMatter<SourceFrontMatter> {
+export function parseSourceFrontMatter(content: string): ParsedFrontMatter<SourceFrontMatter> {
   const { raw, content: body } = parseFrontMatter(content, "source")
   const slug = raw.slug
   const title = raw.title
@@ -153,8 +133,7 @@ export function parseSourceFrontMatter(
     frontmatter: {
       slug,
       title,
-      description:
-        typeof raw.description === "string" ? raw.description : undefined,
+      description: typeof raw.description === "string" ? raw.description : undefined,
       index: parseIndex(raw.index),
       "is-advanced": raw["is-advanced"] === true ? true : undefined,
       revising: raw.revising === true ? true : undefined,
@@ -166,7 +145,7 @@ export function parseSourceFrontMatter(
 }
 
 export function parseTranslationFrontMatter(
-  content: string
+  content: string,
 ): ParsedFrontMatter<TranslationFrontMatter> {
   const { raw, content: body } = parseFrontMatter(content, "translation")
   const translates = raw.translates
@@ -177,8 +156,7 @@ export function parseTranslationFrontMatter(
     frontmatter: {
       translates,
       title: typeof raw.title === "string" ? raw.title : undefined,
-      description:
-        typeof raw.description === "string" ? raw.description : undefined,
+      description: typeof raw.description === "string" ? raw.description : undefined,
       banner: parseBanner(raw.banner),
     },
     content: body,
@@ -186,7 +164,7 @@ export function parseTranslationFrontMatter(
 }
 
 export function parseSourceReadmeFrontMatter(
-  content: string
+  content: string,
 ): ParsedFrontMatter<SourceReadmeFrontMatter> {
   const { raw, content: body } = parseFrontMatter(content, "sourceReadme")
   const slug = raw.slug
@@ -201,8 +179,7 @@ export function parseSourceReadmeFrontMatter(
     frontmatter: {
       slug,
       "chapter-title": chapterTitle,
-      "intro-title":
-        typeof raw["intro-title"] === "string" ? raw["intro-title"] : undefined,
+      "intro-title": typeof raw["intro-title"] === "string" ? raw["intro-title"] : undefined,
       index: parseIndex(raw.index),
       appendix: raw.appendix === true ? true : undefined,
       revising: raw.revising === true ? true : undefined,
@@ -212,7 +189,7 @@ export function parseSourceReadmeFrontMatter(
 }
 
 export function parseTranslationReadmeFrontMatter(
-  content: string
+  content: string,
 ): ParsedFrontMatter<TranslationReadmeFrontMatter> {
   const { raw, content: body } = parseFrontMatter(content, "translationReadme")
   const translates = raw.translates
@@ -227,8 +204,7 @@ export function parseTranslationReadmeFrontMatter(
     frontmatter: {
       translates,
       "chapter-title": chapterTitle,
-      "intro-title":
-        typeof raw["intro-title"] === "string" ? raw["intro-title"] : undefined,
+      "intro-title": typeof raw["intro-title"] === "string" ? raw["intro-title"] : undefined,
     },
     content: body,
   }

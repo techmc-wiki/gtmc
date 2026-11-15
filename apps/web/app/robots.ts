@@ -1,14 +1,9 @@
 import type { MetadataRoute } from "next"
+
 import { routing } from "@/i18n/routing"
 import { getSiteUrl, toAbsoluteUrl } from "@/lib/site-url"
 
-const PRIVATE_SEGMENTS = [
-  "/draft",
-  "/profile",
-  "/admin",
-  "/login",
-  "/glossary/edit",
-]
+const PRIVATE_SEGMENTS = ["/draft", "/profile", "/admin", "/login", "/glossary/edit"]
 
 export default function robots(): MetadataRoute.Robots {
   const siteUrl = getSiteUrl()
@@ -19,7 +14,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: ["/", "/api/assets", "/api/og/", "/api/litematica-assets/"],
       disallow: [
         ...routing.locales.flatMap((locale) =>
-          PRIVATE_SEGMENTS.map((segment) => `/${locale}${segment}`)
+          PRIVATE_SEGMENTS.map((segment) => `/${locale}${segment}`),
         ),
         "/api/",
       ],

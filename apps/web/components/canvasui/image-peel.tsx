@@ -1,20 +1,14 @@
 "use client"
 
 import { useEffect, useEffectEvent, useRef, type ReactNode } from "react"
-import {
-  createPeelScene,
-  type PeelScene,
-} from "@/components/canvasui/peel-scene"
+
+import { createPeelScene, type PeelScene } from "@/components/canvasui/peel-scene"
 
 // Paper geometry and lighting adapted from Canvas UI Peel by David Haz.
 // https://canvasui.dev/docs/components/peel (MIT + Commons Clause)
 // A direct image texture keeps this version independent of HTML-in-canvas.
 
-function usePeelCanvas(
-  src: string,
-  opened: boolean,
-  onOpenChange: (opened: boolean) => void
-) {
+function usePeelCanvas(src: string, opened: boolean, onOpenChange: (opened: boolean) => void) {
   const rootRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
@@ -55,11 +49,7 @@ export function ImagePeel({
   opened: boolean
   onOpenChange: (opened: boolean) => void
 }) {
-  const { rootRef, canvasRef, imageRef } = usePeelCanvas(
-    src,
-    opened,
-    onOpenChange
-  )
+  const { rootRef, canvasRef, imageRef } = usePeelCanvas(src, opened, onOpenChange)
 
   return (
     <div

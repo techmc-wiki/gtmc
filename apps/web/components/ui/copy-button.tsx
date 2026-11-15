@@ -44,16 +44,9 @@ export function CopyButton({
       disabled={state === "pending"}
       aria-busy={state === "pending"}
       label={activeLabel}>
-      <span
-        className="t-icon-swap"
-        data-state={isCopied ? "b" : "a"}
-        aria-hidden="true">
+      <span className="t-icon-swap" data-state={isCopied ? "b" : "a"} aria-hidden="true">
         <span className="t-icon" data-icon="a">
-          {isFailed ? (
-            <CircleAlert className="size-4" />
-          ) : (
-            (icon ?? <Copy className="size-4" />)
-          )}
+          {isFailed ? <CircleAlert className="size-4" /> : (icon ?? <Copy className="size-4" />)}
         </span>
         <span className="t-icon" data-icon="b">
           <Check className="size-4" />

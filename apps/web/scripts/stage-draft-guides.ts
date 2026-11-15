@@ -2,6 +2,7 @@ import { copyFileSync, mkdirSync } from "node:fs"
 import path from "node:path"
 
 import { workspacePath } from "@/lib/workspace-paths"
+
 import { createLogger } from "./lib/logger"
 
 /**

@@ -1,44 +1,45 @@
-"use cache";
+"use cache"
 
-import { cacheLife, cacheTag } from "next/cache";
+import { type ArticleEntry, type ArticleLocale } from "@gtmc/ssg/articles/types"
+import { cacheLife, cacheTag } from "next/cache"
+
+import type { ArticleTreeNode } from "@/lib/articles/article-tree-types"
 import {
   getArticleManifest,
   getArticleTree,
   getLocalizedArticleEntry,
   type LocalizedArticleMetadata,
-} from "@/lib/articles/manifest";
-import { type ArticleEntry, type ArticleLocale } from "@gtmc/ssg/articles/types";
-import type { ArticleTreeNode } from "@/lib/articles/article-tree-types";
+} from "@/lib/articles/manifest"
 
 export async function getCachedArticleTree(
   locale: ArticleLocale = "zh",
 ): Promise<ArticleTreeNode[]> {
-  cacheLife("max");
-  cacheTag("article-tree", `article-tree-${locale}`);
+  cacheLife("max")
+  cacheTag("article-tree", `article-tree-${locale}`)
 
-  return getArticleTree(locale);
+  return getArticleTree(locale)
 }
 
 export async function getCachedLocalizedArticleEntry(
   slugPath: string,
   locale: ArticleLocale = "zh",
 ): Promise<(ArticleEntry & LocalizedArticleMetadata) | null> {
-  cacheLife("max");
-  cacheTag("article-manifest", `article-entry-${locale}-${slugPath}`);
+  cacheLife("max")
+  cacheTag("article-manifest", `article-entry-${locale}-${slugPath}`)
 
-  return getLocalizedArticleEntry(slugPath, locale);
+  return getLocalizedArticleEntry(slugPath, locale)
 }
 
 export async function getCachedSlugForFilePath(filePath: string): Promise<string | null> {
-  cacheLife("max");
-  cacheTag("article-manifest");
+  cacheLife("max")
+  cacheTag("article-manifest")
 
-  const normalizedFilePath = filePath.replace(/\.md$/i, "");
+  const normalizedFilePath = filePath.replace(/\.md$/i, "")
   for (const [slugKey, entry] of Object.entries(await getArticleManifest())) {
     if (entry.filePath.replace(/\.md$/i, "") === normalizedFilePath) {
-      return slugKey;
+      return slugKey
     }
   }
 
-  return null;
+  return null
 }

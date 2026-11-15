@@ -111,10 +111,7 @@ export function getAllowedMimeTypes(): string[] {
   return Object.keys(MIME_DEFINITIONS)
 }
 
-export function sanitizeFilename(
-  originalName: string,
-  mimeType: string
-): string {
+export function sanitizeFilename(originalName: string, mimeType: string): string {
   const lastDot = originalName.lastIndexOf(".")
   let basename = lastDot > 0 ? originalName.substring(0, lastDot) : originalName
 

@@ -11,10 +11,7 @@ export function generateSlug(englishTerm: string): string {
 }
 
 /** Returns a slug unique within `used`, recording the result in that set. */
-export function generateUniqueSlug(
-  englishTerm: string,
-  used: Set<string>
-): string {
+export function generateUniqueSlug(englishTerm: string, used: Set<string>): string {
   const base = generateSlug(englishTerm)
   if (!used.has(base)) {
     used.add(base)

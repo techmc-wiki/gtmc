@@ -1,9 +1,5 @@
 import { PageSkeleton } from "@/components/layout/page-skeleton"
-import {
-  SectionFrame,
-  SectionRail,
-  SegmentedBar,
-} from "@/components/ui/loading-shell-primitives"
+import { SectionFrame, SectionRail, SegmentedBar } from "@/components/ui/loading-shell-primitives"
 
 const ALPHABET_NAV_KEYS = Array.from({ length: 14 }, (_, i) => `alpha-nav-${i}`)
 

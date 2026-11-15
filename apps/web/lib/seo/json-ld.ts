@@ -36,7 +36,7 @@ export type OrganizationJsonLd = {
 
 export function buildOrganizationJsonLd(
   siteUrl: string,
-  options: OrganizationJsonLdOptions = {}
+  options: OrganizationJsonLdOptions = {},
 ): OrganizationJsonLd {
   const baseSameAs = ["https://github.com/techmc-wiki/gtmc"]
   const sameAs = [...baseSameAs, ...(options.sameAs ?? [])]
@@ -69,7 +69,7 @@ export function buildPersonJsonLd(
   siteUrl: string,
   locale: string,
   handle: string,
-  options: { role?: string } = {}
+  options: { role?: string } = {},
 ): JsonLdObject {
   const profileUrl = `${siteUrl}/${locale}/authors/${handle}`
   const personId = `${profileUrl}#person`
@@ -80,21 +80,21 @@ export function buildPersonJsonLd(
     sameAs.push(
       person.social.github.startsWith("http")
         ? person.social.github
-        : `https://github.com/${person.social.github}`
+        : `https://github.com/${person.social.github}`,
     )
   }
   if (person.social.bilibili) {
     sameAs.push(
       person.social.bilibili.startsWith("http")
         ? person.social.bilibili
-        : `https://space.bilibili.com/${person.social.bilibili}`
+        : `https://space.bilibili.com/${person.social.bilibili}`,
     )
   }
   if (person.social.twitter) {
     sameAs.push(
       person.social.twitter.startsWith("http")
         ? person.social.twitter
-        : `https://twitter.com/${person.social.twitter}`
+        : `https://twitter.com/${person.social.twitter}`,
     )
   }
   if (person.social.website) {
@@ -153,7 +153,7 @@ export function buildWebPageJsonLd(
   siteUrl: string,
   routePath: string,
   name: string,
-  description?: string
+  description?: string,
 ): JsonLdObject {
   const normalizedPath = routePath.startsWith("/") ? routePath : `/${routePath}`
   const url = `${siteUrl}${normalizedPath}`

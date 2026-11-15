@@ -1,15 +1,11 @@
 "use client"
 
-import Image from "next/image"
+import { LogOut, User } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 import { useTranslations } from "next-intl"
-import { LogOut, User } from "lucide-react"
-import { Link } from "@/i18n/navigation"
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-} from "@/components/ui/shadcn/avatar"
+import Image from "next/image"
+
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/shadcn/avatar"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -17,6 +13,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
 } from "@/components/ui/shadcn/dropdown-menu"
+import { Link } from "@/i18n/navigation"
 
 function AuthIslandContent() {
   const { data: session, status } = useSession()
@@ -84,9 +81,7 @@ function AuthIslandContent() {
           <p className="text-tech-main-dark truncate font-mono text-xs font-bold">
             {session.user.name}
           </p>
-          <p className="text-tech-main/70 truncate font-mono text-xs">
-            {session.user.email}
-          </p>
+          <p className="text-tech-main/70 truncate font-mono text-xs">{session.user.email}</p>
         </div>
         <DropdownMenuGroup className="flex flex-col gap-1">
           <DropdownMenuItem

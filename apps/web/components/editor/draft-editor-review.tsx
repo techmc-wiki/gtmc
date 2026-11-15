@@ -1,20 +1,16 @@
 "use client"
 
+import { ChevronDownIcon, Ellipsis, Minus, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
+
 import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
 import { Button } from "@/components/ui/shadcn/button"
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/shadcn/tabs"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/shadcn/collapsible"
-import { ChevronDownIcon, Ellipsis, Minus, Plus } from "lucide-react"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/shadcn/tabs"
 import type { DraftFileRecord } from "@/lib/drafts/files"
 
 export interface DraftDiffRow {
@@ -76,22 +72,14 @@ export function DraftEditorReview({
               <ReviewStat
                 label={t("modifiedFiles")}
                 value={String(
-                  changeEntries.filter(
-                    (entry) => entry.changeType === "modified"
-                  ).length
+                  changeEntries.filter((entry) => entry.changeType === "modified").length,
                 )}
               />
               <ReviewStat
                 label={t("newFiles")}
-                value={String(
-                  changeEntries.filter((entry) => entry.changeType === "new")
-                    .length
-                )}
+                value={String(changeEntries.filter((entry) => entry.changeType === "new").length)}
               />
-              <ReviewStat
-                label={t("newFolders")}
-                value={String(folders.length)}
-              />
+              <ReviewStat label={t("newFolders")} value={String(folders.length)} />
             </div>
 
             {changeEntries.length === 0 ? (
@@ -113,9 +101,7 @@ export function DraftEditorReview({
 
             {newFolderPaths.length > 0 ? (
               <div className="guide-line bg-tech-main/5 border p-4">
-                <p className="text-tech-main/60 text-xs font-medium">
-                  {t("newFolders")}
-                </p>
+                <p className="text-tech-main/60 text-xs font-medium">{t("newFolders")}</p>
                 <div className="mt-2 space-y-1 font-mono text-xs text-emerald-700">
                   {newFolderPaths.map((folderPath) => (
                     <p key={folderPath}>+ {folderPath}</p>
@@ -135,9 +121,7 @@ export function DraftEditorReview({
                     <Button
                       key={guide.id}
                       type="button"
-                      variant={
-                        selectedGuideId === guide.id ? "default" : "secondary"
-                      }
+                      variant={selectedGuideId === guide.id ? "default" : "secondary"}
                       size="sm"
                       onClick={() => onSelectGuide(guide.id)}>
                       {guide.title}
@@ -147,9 +131,8 @@ export function DraftEditorReview({
                 <div className="min-w-0">
                   <LazyMarkdownPreview
                     content={
-                      contributingGuides.find(
-                        (guide) => guide.id === selectedGuideId
-                      )?.content || contributingGuides[0].content
+                      contributingGuides.find((guide) => guide.id === selectedGuideId)?.content ||
+                      contributingGuides[0].content
                     }
                     rawPath="CONTRIBUTING.md"
                   />
@@ -188,9 +171,7 @@ function ChangePreviewCard({
         <Button
           variant="ghost"
           className="h-auto min-h-14 w-full justify-between gap-3 px-3 py-3 text-left font-sans tracking-normal normal-case">
-          <p className="text-tech-main font-mono text-xs break-all">
-            {filePath}
-          </p>
+          <p className="text-tech-main font-mono text-xs break-all">{filePath}</p>
           <span
             className={`border px-2 py-1 font-mono text-xs ${
               changeType === "new"
@@ -212,9 +193,7 @@ function ChangePreviewCard({
       </CollapsibleTrigger>
       <CollapsibleContent>
         {changeType === "error" ? (
-          <p className="p-4 text-sm text-amber-800 dark:text-amber-300">
-            {t("comparisonError")}
-          </p>
+          <p className="p-4 text-sm text-amber-800 dark:text-amber-300">{t("comparisonError")}</p>
         ) : changeType === "pending" ? (
           <p className="text-tech-main p-4 text-sm">{t("comparisonPending")}</p>
         ) : (

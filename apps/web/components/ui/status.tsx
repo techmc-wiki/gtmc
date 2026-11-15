@@ -1,7 +1,7 @@
 "use client"
 
-import type { ComponentProps } from "react"
 import { useTranslations } from "next-intl"
+import type { ComponentProps } from "react"
 
 import { Badge } from "@/components/ui/shadcn/badge"
 

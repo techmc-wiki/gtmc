@@ -8,6 +8,6 @@ export function useMounted(): boolean {
   return useSyncExternalStore(
     emptySubscribe,
     () => true,
-    () => false
+    () => false,
   )
 }

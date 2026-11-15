@@ -24,7 +24,7 @@ export function useCopyToClipboard(feedbackMs: number = FEEDBACK_MS) {
         window.clearTimeout(resetTimerRef.current)
       }
     },
-    []
+    [],
   )
 
   const copy = useCallback(
@@ -49,12 +49,9 @@ export function useCopyToClipboard(feedbackMs: number = FEEDBACK_MS) {
       if (resetTimerRef.current !== null) {
         window.clearTimeout(resetTimerRef.current)
       }
-      resetTimerRef.current = window.setTimeout(
-        () => setState("idle"),
-        feedbackMs
-      )
+      resetTimerRef.current = window.setTimeout(() => setState("idle"), feedbackMs)
     },
-    [feedbackMs, state]
+    [feedbackMs, state],
   )
 
   return { state, copy }

@@ -1,7 +1,9 @@
 import MiniSearch from "minisearch"
-import { CJK_TOKENIZER } from "@/lib/search/cjk-tokenizer"
-import type { GlossaryEntryBase, GlossarySummaryEntry } from "./manifest"
+
 import summaryData from "@/data/glossary-summary.json" with { type: "json" }
+import { CJK_TOKENIZER } from "@/lib/search/cjk-tokenizer"
+
+import type { GlossaryEntryBase, GlossarySummaryEntry } from "./manifest"
 
 const glossarySummary = summaryData as GlossarySummaryEntry[]
 
@@ -61,9 +63,7 @@ type GlossarySearchSource = Pick<
   "slug" | "fullFormEn" | "shortForm" | "translations"
 >
 
-export function buildGlossarySearchIndex(
-  entries: GlossarySearchSource[]
-): GlossarySearchIndex {
+export function buildGlossarySearchIndex(entries: GlossarySearchSource[]): GlossarySearchIndex {
   const fields = [
     "fullFormEn",
     "shortForm",

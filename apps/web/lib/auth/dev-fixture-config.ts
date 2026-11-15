@@ -10,10 +10,7 @@ export const DEV_FIXTURE_USER = {
 const DEV_SESSION_COOKIE = "authjs.session-token"
 
 export function isDevFixtureAuthEnabled(): boolean {
-  return (
-    process.env.NODE_ENV === "development" &&
-    process.env.GTMC_DEV_FIXTURE_AUTH !== "0"
-  )
+  return process.env.NODE_ENV === "development" && process.env.GTMC_DEV_FIXTURE_AUTH !== "0"
 }
 
 export function isLocalDevelopmentRequest(request: NextRequest): boolean {

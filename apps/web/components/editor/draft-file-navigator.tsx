@@ -1,14 +1,16 @@
 "use client"
 
-import * as React from "react"
 import { FileTextIcon, PanelLeftIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
-import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
-import { Button } from "@/components/ui/shadcn/button"
+import * as React from "react"
+
 import { DraftFileActionsMenu } from "@/components/editor/draft-file-actions-menu"
 import { DraftFileList } from "@/components/editor/draft-file-list"
 import { DraftFileRemoveDialog } from "@/components/editor/draft-file-remove-dialog"
 import { DraftFileRenameDialog } from "@/components/editor/draft-file-rename-dialog"
+import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
+import { IconButton } from "@/components/ui/icon-button"
+import { Button } from "@/components/ui/shadcn/button"
 import {
   Sheet,
   SheetContent,
@@ -16,7 +18,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/shadcn/sheet"
-import { IconButton } from "@/components/ui/icon-button"
 import { cn } from "@/lib/cn"
 import type { DraftFileCollection } from "@/lib/drafts/files"
 
@@ -61,8 +62,7 @@ export function DraftFileNavigator({
   const [filePendingRemoval, setFilePendingRemoval] = React.useState<
     DraftFileCollection["files"][number] | null
   >(null)
-  const hasDuplicatePaths =
-    activeFileHasDuplicatePath || duplicateFilePaths.length > 0
+  const hasDuplicatePaths = activeFileHasDuplicatePath || duplicateFilePaths.length > 0
 
   const fileList = (
     <DraftFileList
@@ -85,15 +85,11 @@ export function DraftFileNavigator({
 
   return (
     <>
-      <div
-        className={cn(
-          "grid min-w-0",
-          sidebarVisible && "lg:grid-cols-[13rem_minmax(0,1fr)]"
-        )}>
+      <div className={cn("grid min-w-0", sidebarVisible && "lg:grid-cols-[13rem_minmax(0,1fr)]")}>
         <aside
           className={cn(
             "bg-tech-bg/50 border-tech-main/15 hidden min-h-0 border-r",
-            sidebarVisible && "lg:flex lg:flex-col"
+            sidebarVisible && "lg:flex lg:flex-col",
           )}>
           {fileList}
         </aside>
@@ -133,9 +129,7 @@ export function DraftFileNavigator({
               {activeFile.filePath || t("targetFileUnset")}
             </p>
             {!activeFile.filePath && !isReadOnly && (
-              <IconButton
-                label={t("setFilePath")}
-                onClick={() => setRenaming(true)}>
+              <IconButton label={t("setFilePath")} onClick={() => setRenaming(true)}>
                 <FileTextIcon aria-hidden />
               </IconButton>
             )}

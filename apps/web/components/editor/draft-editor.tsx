@@ -1,38 +1,37 @@
 "use client"
 
-import * as React from "react"
 import { diffLines } from "diff"
-import { useDraftEditor } from "@/components/editor/use-draft-editor"
-import { DraftEditorToolbar } from "@/components/editor/draft-editor-toolbar"
-import { DraftFileNavigator } from "@/components/editor/draft-file-navigator"
-import { DraftEditorModeBar } from "@/components/editor/draft-editor-mode-bar"
+import { BookOpenIcon } from "lucide-react"
+import * as React from "react"
+import { toast } from "sonner"
+
 import { DraftEditorHeader } from "@/components/editor/draft-editor-header"
 import { DraftEditorInspector } from "@/components/editor/draft-editor-inspector"
+import { DraftEditorModeBar } from "@/components/editor/draft-editor-mode-bar"
+import type { DraftChangeEntry, DraftDiffRow } from "@/components/editor/draft-editor-review"
+import { DraftEditorToolbar } from "@/components/editor/draft-editor-toolbar"
 import { DraftFileDialogs } from "@/components/editor/draft-file-dialogs"
-import type {
-  DraftChangeEntry,
-  DraftDiffRow,
-} from "@/components/editor/draft-editor-review"
-import { toast } from "sonner"
-import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
+import { DraftFileNavigator } from "@/components/editor/draft-file-navigator"
 import { EditorTextareaDynamic } from "@/components/editor/editor-textarea-dynamic"
-import {
-  createDraftFile,
-  normalizeDraftFilePath,
-  normalizeDraftFolderPath,
-  type DraftFileCollection,
-} from "@/lib/drafts/files"
+import { LazyMarkdownPreview } from "@/components/editor/lazy-markdown-preview"
+import { useDraftEditor } from "@/components/editor/use-draft-editor"
+import { IconButton } from "@/components/ui/icon-button"
 import { OperationProgress } from "@/components/ui/operation-progress"
-import type { DraftStatus } from "@/lib/drafts/store"
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/shadcn/resizable"
 import { Tabs, TabsContent } from "@/components/ui/shadcn/tabs"
-import { BookOpenIcon } from "lucide-react"
 import { cn } from "@/lib/cn"
-import { IconButton } from "@/components/ui/icon-button"
+import {
+  createDraftFile,
+  normalizeDraftFilePath,
+  normalizeDraftFolderPath,
+  type DraftFileCollection,
+} from "@/lib/drafts/files"
+import type { DraftStatus } from "@/lib/drafts/store"
+
 import styles from "@/components/editor/draft-editor.module.css"
 
 interface DraftEditorProps {
@@ -63,8 +62,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       const remainingFiles = current.files.filter((file) => file.id !== fileId)
       const nextActiveFile =
         current.activeFileId === fileId
-          ? remainingFiles[Math.max(0, currentIndex - 1)]?.id ||
-            remainingFiles[0]?.id
+          ? remainingFiles[Math.max(0, currentIndex - 1)]?.id || remainingFiles[0]?.id
           : current.activeFileId
       return {
         activeFileId: nextActiveFile,
@@ -85,8 +83,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
     const hasDuplicate = state.draftCollection.files.some(
       (file) =>
         normalizeDraftFilePath(file.filePath) === normalizedPath &&
-        (state.fileDialogIntent?.kind !== "replace" ||
-          file.id !== state.activeFile.id)
+        (state.fileDialogIntent?.kind !== "replace" || file.id !== state.activeFile.id),
     )
     if (hasDuplicate) {
       toast.error(t("badgeFileAlreadyExists"), { duration: 3000 })
@@ -96,9 +93,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       actions.updateDraftCollection((current) => ({
         ...current,
         files: current.files.map((file) =>
-          file.id === current.activeFileId
-            ? { ...file, content, filePath: normalizedPath }
-            : file
+          file.id === current.activeFileId ? { ...file, content, filePath: normalizedPath } : file,
         ),
       }))
       actions.setFileDialogIntent(null)
@@ -128,11 +123,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
             },
           ]
         }
-        if (
-          !snapshot ||
-          snapshot.filePath !== normalizedPath ||
-          snapshot.status === "loading"
-        ) {
+        if (!snapshot || snapshot.filePath !== normalizedPath || snapshot.status === "loading") {
           return [
             {
               changeType: "pending",
@@ -164,15 +155,10 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
           },
         ]
       }),
-    [state.draftCollection.files, state.repoSnapshots]
+    [state.draftCollection.files, state.repoSnapshots],
   )
 
-  const handleInsertSelectedFile = ({
-    filePath,
-  }: {
-    content: string
-    filePath: string
-  }) => {
+  const handleInsertSelectedFile = ({ filePath }: { content: string; filePath: string }) => {
     const normalizedTargetPath = normalizeDraftFilePath(filePath)
     if (!normalizedTargetPath) return false
     const linkLabel = normalizedTargetPath
@@ -180,9 +166,7 @@ export function DraftEditor({ initialData }: DraftEditorProps) {
       .filter(Boolean)
       .slice(-1)[0]
       ?.replace(/\.md$/i, "")
-    actions.insertTextAtCursor(
-      `[${linkLabel || "linked-file"}](${normalizedTargetPath})`
-    )
+    actions.insertTextAtCursor(`[${linkLabel || "linked-file"}](${normalizedTargetPath})`)
     actions.setInsertDialogIntent(false)
     return true
   }
@@ -247,15 +231,9 @@ function EditorPreviewFrame({
 interface DraftEditorSurfaceProps {
   actions: ReturnType<typeof useDraftEditor>["actions"]
   changeEntries: DraftChangeEntry[]
-  handleApplyDraftFileSource: (input: {
-    content: string
-    filePath: string
-  }) => boolean
+  handleApplyDraftFileSource: (input: { content: string; filePath: string }) => boolean
   handleCreateFolder: (folderPath: string) => boolean
-  handleInsertSelectedFile: (input: {
-    content: string
-    filePath: string
-  }) => boolean
+  handleInsertSelectedFile: (input: { content: string; filePath: string }) => boolean
   handleRemoveFile: (fileId: string) => void
   hook: ReturnType<typeof useDraftEditor>
 }
@@ -348,11 +326,7 @@ function DraftEditorSurface({
         }}
         className="min-w-0">
         <DraftFileNavigator
-          headerActions={
-            <DraftEditorModeBar
-              onOpenChanges={() => openInspector("changes")}
-            />
-          }
+          headerActions={<DraftEditorModeBar onOpenChanges={() => openInspector("changes")} />}
           onRenameFile={(path) => {
             const normalized = normalizeDraftFilePath(path)
             if (!normalized) return false
@@ -360,7 +334,7 @@ function DraftEditorSurface({
               state.draftCollection.files.some(
                 (file) =>
                   file.id !== state.activeFile.id &&
-                  normalizeDraftFilePath(file.filePath) === normalized
+                  normalizeDraftFilePath(file.filePath) === normalized,
               )
             ) {
               toast.error(t("badgeFileAlreadyExists"))
@@ -404,12 +378,8 @@ function DraftEditorSurface({
                   onInsertText={actions.insertTextAtCursor}
                   onUndo={actions.handleUndoDraftEdit}
                   onRedo={actions.handleRedoDraftEdit}
-                  canUndo={Boolean(
-                    state.activeFileHistoryAvailability?.undoCount
-                  )}
-                  canRedo={Boolean(
-                    state.activeFileHistoryAvailability?.redoCount
-                  )}
+                  canUndo={Boolean(state.activeFileHistoryAvailability?.undoCount)}
+                  canRedo={Boolean(state.activeFileHistoryAvailability?.redoCount)}
                 />
               )}
               <ResizablePanelGroup
@@ -428,9 +398,7 @@ function DraftEditorSurface({
                       key={state.activeFile.id}
                       ref={textareaRef}
                       value={state.activeFileContent}
-                      onChange={(value) =>
-                        actions.updateActiveFile({ content: value })
-                      }
+                      onChange={(value) => actions.updateActiveFile({ content: value })}
                       onUndo={actions.handleUndoDraftEdit}
                       onRedo={actions.handleRedoDraftEdit}
                       onPaste={actions.handlePaste}
@@ -445,22 +413,15 @@ function DraftEditorSurface({
                       saving={state.isSaving}
                       placeholder={t("contentPlaceholder")}
                       lineWrap={state.lineWrap}
-                      canUndo={Boolean(
-                        state.activeFileHistoryAvailability?.undoCount
-                      )}
-                      canRedo={Boolean(
-                        state.activeFileHistoryAvailability?.redoCount
-                      )}
+                      canUndo={Boolean(state.activeFileHistoryAvailability?.undoCount)}
+                      canRedo={Boolean(state.activeFileHistoryAvailability?.redoCount)}
                       enableSyntaxHints
                     />
                   </section>
                 </ResizablePanel>
                 <ResizableHandle
                   withHandle
-                  className={cn(
-                    "bg-tech-main/20 hidden w-px",
-                    mode === "split" && "md:flex"
-                  )}
+                  className={cn("bg-tech-main/20 hidden w-px", mode === "split" && "md:flex")}
                 />
                 <ResizablePanel
                   id="preview"
@@ -493,9 +454,7 @@ function DraftEditorSurface({
                   count: state.activeFileContent.split("\n").length,
                 })}
               </span>
-              <IconButton
-                label={t("syntaxHintsTitle")}
-                onClick={() => openInspector("guide")}>
+              <IconButton label={t("syntaxHintsTitle")} onClick={() => openInspector("guide")}>
                 <BookOpenIcon aria-hidden />
               </IconButton>
             </div>
@@ -556,12 +515,8 @@ function DraftEditorStatusPanels({
 }: {
   progress: ReturnType<typeof useDraftEditor>["progress"]
   progressT: ReturnType<typeof useDraftEditor>["progressT"]
-  saveProgressState: ReturnType<
-    typeof useDraftEditor
-  >["state"]["saveProgressState"]
-  submitProgressState: ReturnType<
-    typeof useDraftEditor
-  >["state"]["submitProgressState"]
+  saveProgressState: ReturnType<typeof useDraftEditor>["state"]["saveProgressState"]
+  submitProgressState: ReturnType<typeof useDraftEditor>["state"]["submitProgressState"]
 }) {
   return (
     <>

@@ -1,16 +1,7 @@
 import { beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
-import {
-  getPropertyCatalog,
-  getPropertyDetails,
-  searchProperties,
-} from "./data"
-import type {
-  PropertyCatalog,
-  PropertyCondition,
-  PropertyResults,
-  PropertyValue,
-} from "./types"
+import { getPropertyCatalog, getPropertyDetails, searchProperties } from "./data"
+import type { PropertyCatalog, PropertyCondition, PropertyResults, PropertyValue } from "./types"
 
 vi.mock("next/cache", () => ({
   cacheLife: () => {},
@@ -27,7 +18,7 @@ const base = {
 
 function search(
   filters: PropertyCondition[],
-  extra: Partial<typeof base> = {}
+  extra: Partial<typeof base> = {},
 ): Promise<PropertyResults> {
   return searchProperties("blocks", "en", { ...base, filters, ...extra })
 }
@@ -84,12 +75,8 @@ describe("enum multi-select filters", () => {
     ])
     expect(five.total).toBeGreaterThan(0)
     expect(twenty.total).toBeGreaterThan(0)
-    expect(new Set(names(both))).toEqual(
-      new Set([...names(five), ...names(twenty)])
-    )
-    expect(names(both)).toEqual(
-      expect.arrayContaining(["Block of Coal", "Bee Nest"])
-    )
+    expect(new Set(names(both))).toEqual(new Set([...names(five), ...names(twenty)]))
+    expect(names(both)).toEqual(expect.arrayContaining(["Block of Coal", "Bee Nest"]))
     expect(names(both)).not.toContain("Dead Bush")
     expect(names(singleValue)).toEqual(names(five))
   })
@@ -97,12 +84,8 @@ describe("enum multi-select filters", () => {
   it("treats an empty selection as inactive", async () => {
     const [baseline, empty, staleValue] = await Promise.all([
       search([]),
-      search([
-        { property: "burn_odds", operator: "eq", value: "", values: [] },
-      ]),
-      search([
-        { property: "burn_odds", operator: "eq", value: "5", values: [] },
-      ]),
+      search([{ property: "burn_odds", operator: "eq", value: "", values: [] }]),
+      search([{ property: "burn_odds", operator: "eq", value: "5", values: [] }]),
     ])
     expect(empty.total).toBe(baseline.total)
     expect(staleValue.total).toBe(baseline.total)
@@ -111,15 +94,11 @@ describe("enum multi-select filters", () => {
 
 describe("enum option ordering", () => {
   it("sorts numeric-looking values numerically", () => {
-    const burnOdds = catalog.properties.find(
-      (property) => property.id === "burn_odds"
-    )
+    const burnOdds = catalog.properties.find((property) => property.id === "burn_odds")
     expect(burnOdds?.kind).toBe("enum")
     const values = (burnOdds?.options ?? []).map((option) => option.value)
     expect(values).toEqual(expect.arrayContaining(["5", "20", "60", "100"]))
-    const numericOrder = values.filter((value) =>
-      ["5", "20", "60", "100"].includes(value)
-    )
+    const numericOrder = values.filter((value) => ["5", "20", "60", "100"].includes(value))
     expect(numericOrder).toEqual(["5", "20", "60", "100"])
   })
 
@@ -132,7 +111,7 @@ describe("enum option ordering", () => {
       testCatalog.properties
         .find((property) => property.id === "movable")
         ?.options?.slice(0, 2)
-        .map((option) => option.label)
+        .map((option) => option.label),
     )
     expect(heads).toEqual([
       ["Yes", "No"],

@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+
 import { requireAuth } from "@/lib/auth/context"
 import { canDeleteDraft, canEditDraft } from "@/lib/drafts/lifecycle"
 import {
@@ -29,7 +30,7 @@ export async function updateGlossaryDraftAction(
   id: string,
   operations: unknown[],
   title: string,
-  etag: string
+  etag: string,
 ) {
   try {
     const session = await requireAuth()
@@ -55,7 +56,7 @@ export async function updateGlossaryDraftAction(
         title: title.trim(),
         updatedAt: new Date().toISOString(),
       },
-      record.etag
+      record.etag,
     )
     revalidatePath("/draft")
     return { success: true, etag: nextEtag }
@@ -65,7 +66,7 @@ export async function updateGlossaryDraftAction(
 }
 
 export async function deleteGlossaryDraftAction(
-  id: string
+  id: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const session = await requireAuth()

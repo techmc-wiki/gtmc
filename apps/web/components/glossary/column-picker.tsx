@@ -1,19 +1,13 @@
 "use client"
 
-import * as React from "react"
 import { ChevronDown, Eye } from "lucide-react"
 import { useTranslations } from "next-intl"
+import * as React from "react"
+
 import { Button } from "@/components/ui/shadcn/button"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/shadcn/popover"
 import { cn } from "@/lib/cn"
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/shadcn/popover"
-import {
-  GLOSSARY_COLUMNS,
-  type GlossaryColumn,
-} from "@/lib/glossary/view-options"
+import { GLOSSARY_COLUMNS, type GlossaryColumn } from "@/lib/glossary/view-options"
 
 export interface FieldPickerProps {
   visibleColumns: GlossaryColumn[]
@@ -21,17 +15,10 @@ export interface FieldPickerProps {
   className?: string
 }
 
-export function FieldPicker({
-  visibleColumns,
-  onChange,
-  className,
-}: FieldPickerProps) {
+export function FieldPicker({ visibleColumns, onChange, className }: FieldPickerProps) {
   const t = useTranslations("Glossary")
   const [open, setOpen] = React.useState(false)
-  const visibleColumnSet = React.useMemo(
-    () => new Set(visibleColumns),
-    [visibleColumns]
-  )
+  const visibleColumnSet = React.useMemo(() => new Set(visibleColumns), [visibleColumns])
 
   const toggle = React.useCallback(
     (column: GlossaryColumn) => {
@@ -40,17 +27,13 @@ export function FieldPicker({
         : [...visibleColumns, column]
       onChange(next)
     },
-    [onChange, visibleColumnSet, visibleColumns]
+    [onChange, visibleColumnSet, visibleColumns],
   )
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className={cn("min-h-11", className)}>
+        <Button type="button" variant="outline" size="sm" className={cn("min-h-11", className)}>
           <Eye aria-hidden="true" />
           <span>{t("fieldPickerLabel")}</span>
           <ChevronDown aria-hidden="true" />
@@ -71,14 +54,14 @@ export function FieldPicker({
                   ? "columnTerm"
                   : column === "shortForm"
                     ? "columnShortForm"
-                    : "columnDescription"
+                    : "columnDescription",
               )
               return (
                 <li key={column}>
                   <label
                     className={cn(
                       "hover:bg-tech-main/5 flex cursor-pointer items-center gap-2.5 px-1.5 py-1.5 transition-colors",
-                      checked && "bg-tech-main/10"
+                      checked && "bg-tech-main/10",
                     )}>
                     <input
                       type="checkbox"
@@ -87,9 +70,7 @@ export function FieldPicker({
                       aria-label={label}
                       className="accent-tech-main size-3.5 cursor-pointer"
                     />
-                    <span className="text-tech-main text-xs font-medium">
-                      {label}
-                    </span>
+                    <span className="text-tech-main text-xs font-medium">{label}</span>
                   </label>
                 </li>
               )

@@ -1,8 +1,10 @@
-import { beforeAll, describe, expect, it } from "vite-plus/test"
 import { readFile } from "node:fs/promises"
+
+import { beforeAll, describe, expect, it } from "vite-plus/test"
+
 import { workspacePath } from "@/lib/workspace-paths"
+
 import type { DatasetId, PropertyValue } from "../types"
-import zh from "./zh.json"
 import {
   EMPTY_OVERLAY,
   normalizeLocale,
@@ -13,6 +15,7 @@ import {
   translatedUnit,
   type PropertyOverlay,
 } from "./overlay"
+import zh from "./zh.json"
 
 const overlay = zh as PropertyOverlay
 
@@ -45,9 +48,7 @@ function strings(value: PropertyValue): string[] {
 }
 function categories(structure: Structure): string[] {
   return structure.flatMap((item) =>
-    typeof item === "string"
-      ? []
-      : [item.category, ...categories(item.contents)]
+    typeof item === "string" ? [] : [item.category, ...categories(item.contents)],
   )
 }
 
@@ -68,8 +69,8 @@ describe("translatedProperty", () => {
         "blocks",
         "hardness",
         "Hardness",
-        "Determines how fast the block can be mined."
-      )
+        "Determines how fast the block can be mined.",
+      ),
     ).toEqual({
       name: "Hardness",
       description: "Determines how fast the block can be mined.",
@@ -83,17 +84,12 @@ describe("translatedProperty", () => {
         legacy: { properties: { instrument: { name: "音符盒乐器" } } },
       },
     }
+    expect(translatedProperty(testOverlay, "blocks", "instrument", "Instrument", "")).toEqual({
+      name: "乐器",
+      description: "",
+    })
     expect(
-      translatedProperty(testOverlay, "blocks", "instrument", "Instrument", "")
-    ).toEqual({ name: "乐器", description: "" })
-    expect(
-      translatedProperty(
-        testOverlay,
-        "legacy",
-        "instrument",
-        "Note Block Instrument",
-        ""
-      )
+      translatedProperty(testOverlay, "legacy", "instrument", "Note Block Instrument", ""),
     ).toEqual({ name: "音符盒乐器", description: "" })
   })
 
@@ -104,8 +100,8 @@ describe("translatedProperty", () => {
         "legacy",
         "hardness",
         "Hardness",
-        ""
-      )
+        "",
+      ),
     ).toEqual({ name: "Hardness", description: "" })
   })
 })
@@ -132,9 +128,7 @@ describe("value and category helpers", () => {
 
   it("falls back for categories, units, and unknown values", () => {
     expect(translatedCategory(testOverlay, "Tags")).toBe("Tags")
-    expect(translatedCategory(testOverlay, "Block interaction")).toBe(
-      "方块交互"
-    )
+    expect(translatedCategory(testOverlay, "Block interaction")).toBe("方块交互")
     expect(translatedUnit(testOverlay, "block")).toBe("block")
     expect(translatedUnit(testOverlay, undefined)).toBeUndefined()
     expect(translatedUnit(testOverlay, "pixel")).toBe("像素")
@@ -158,62 +152,45 @@ describe("zh overlay against the pinned upstream data", () => {
       sources.set(
         dataset,
         JSON.parse(
-          await readFile(
-            workspacePath("content", "properties", "data", files[dataset]),
-            "utf8"
-          )
-        ) as Source
+          await readFile(workspacePath("content", "properties", "data", files[dataset]), "utf8"),
+        ) as Source,
       )
     }
   })
 
   it("only uses keys that still exist upstream", () => {
-    const ids = new Set(
-      [...sources.values()].flatMap((source) => Object.keys(source.properties))
-    )
+    const ids = new Set([...sources.values()].flatMap((source) => Object.keys(source.properties)))
     const categoryLabels = new Set(
-      [...sources.values()].flatMap((source) =>
-        categories(source.property_structure)
-      )
+      [...sources.values()].flatMap((source) => categories(source.property_structure)),
     )
     const units = new Set(
       [...sources.values()].flatMap((source) =>
         Object.values(source.properties)
           .map((property) => property.size_type)
-          .filter((unit): unit is string => Boolean(unit))
-      )
+          .filter((unit): unit is string => Boolean(unit)),
+      ),
     )
     const values = new Set(
       [...sources.values()].flatMap((source) =>
         Object.values(source.properties).flatMap((property) =>
-          Object.values(property.entries).flatMap(strings)
-        )
-      )
+          Object.values(property.entries).flatMap(strings),
+        ),
+      ),
     )
 
-    expect(
-      Object.keys(overlay.properties ?? {}).filter((key) => !ids.has(key))
-    ).toEqual([])
-    expect(
-      Object.keys(overlay.categories ?? {}).filter(
-        (key) => !categoryLabels.has(key)
-      )
-    ).toEqual([])
-    expect(
-      Object.keys(overlay.units ?? {}).filter((key) => !units.has(key))
-    ).toEqual([])
-    expect(
-      Object.keys(overlay.values ?? {}).filter((key) => !values.has(key))
-    ).toEqual([])
-    for (const [dataset, translations] of Object.entries(
-      overlay.datasets ?? {}
-    )) {
+    expect(Object.keys(overlay.properties ?? {}).filter((key) => !ids.has(key))).toEqual([])
+    expect(Object.keys(overlay.categories ?? {}).filter((key) => !categoryLabels.has(key))).toEqual(
+      [],
+    )
+    expect(Object.keys(overlay.units ?? {}).filter((key) => !units.has(key))).toEqual([])
+    expect(Object.keys(overlay.values ?? {}).filter((key) => !values.has(key))).toEqual([])
+    for (const [dataset, translations] of Object.entries(overlay.datasets ?? {})) {
       const source = sources.get(dataset as DatasetId)
       expect(source).toBeDefined()
       expect(
         Object.keys(translations.properties ?? {}).filter(
-          (key) => !(source && key in source.properties)
-        )
+          (key) => !(source && key in source.properties),
+        ),
       ).toEqual([])
     }
   })
@@ -249,11 +226,9 @@ describe("zh overlay against the pinned upstream data", () => {
       [...sources.values()].flatMap((source) =>
         Object.values(source.properties)
           .map((property) => property.size_type)
-          .filter((unit): unit is string => Boolean(unit))
-      )
+          .filter((unit): unit is string => Boolean(unit)),
+      ),
     )
-    expect(
-      [...units].filter((unit) => !(unit in (overlay.units ?? {})))
-    ).toEqual([])
+    expect([...units].filter((unit) => !(unit in (overlay.units ?? {})))).toEqual([])
   })
 })

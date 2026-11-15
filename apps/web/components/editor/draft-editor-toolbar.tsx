@@ -1,7 +1,5 @@
 "use client"
 
-import * as React from "react"
-import { useTranslations } from "next-intl"
 import {
   BoldIcon,
   ItalicIcon,
@@ -16,6 +14,9 @@ import {
   WrapTextIcon,
   LoaderCircleIcon,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
+import * as React from "react"
+
 import { IconButton } from "@/components/ui/icon-button"
 import {
   DropdownMenu,
@@ -111,29 +112,21 @@ export function DraftEditorToolbar({
     <fieldset
       className="border-tech-main/20 bg-surface flex w-full min-w-0 items-center gap-0.5 overflow-x-auto border-b px-2 py-1"
       aria-label={t("formattingTools")}>
-      {tools.map(
-        ({ label, icon: Icon, action, disabled: toolDisabled }, index) => (
-          <React.Fragment key={label}>
-            {index === 2 && (
-              <span aria-hidden className="bg-tech-main/20 mx-1 h-5 w-px" />
-            )}
-            <IconButton
-              label={label}
-              disabled={toolDisabled}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={action}>
-              <Icon aria-hidden className="size-4" />
-            </IconButton>
-          </React.Fragment>
-        )
-      )}
+      {tools.map(({ label, icon: Icon, action, disabled: toolDisabled }, index) => (
+        <React.Fragment key={label}>
+          {index === 2 && <span aria-hidden className="bg-tech-main/20 mx-1 h-5 w-px" />}
+          <IconButton
+            label={label}
+            disabled={toolDisabled}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={action}>
+            <Icon aria-hidden className="size-4" />
+          </IconButton>
+        </React.Fragment>
+      ))}
       <IconButton
         label={
-          compressing
-            ? t("compressingImage")
-            : uploading
-              ? t("uploadingImage")
-              : t("uploadImage")
+          compressing ? t("compressingImage") : uploading ? t("uploadingImage") : t("uploadImage")
         }
         aria-busy={uploading}
         disabled={disabled}
@@ -178,9 +171,7 @@ export function DraftEditorToolbar({
             {t("mathBlock")}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onSelect={() =>
-              onInsertText("\n```java mc=1.20.1 mapping=yarn\n\n```\n")
-            }>
+            onSelect={() => onInsertText("\n```java mc=1.20.1 mapping=yarn\n\n```\n")}>
             {t("javaSource")}
           </DropdownMenuItem>
         </DropdownMenuContent>

@@ -1,31 +1,21 @@
 "use client"
 
-import * as React from "react"
 import { AlertTriangle, ChevronDown, RotateCcw, Trash2 } from "lucide-react"
+import * as React from "react"
 
-import { cn } from "@/lib/cn"
-import { Input } from "@/components/ui/shadcn/input"
-import { Textarea } from "@/components/ui/shadcn/textarea"
-import { Label } from "@/components/ui/shadcn/label"
-import { Button } from "@/components/ui/shadcn/button"
 import { Badge } from "@/components/ui/shadcn/badge"
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/shadcn/card"
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/shadcn/tabs"
+import { Button } from "@/components/ui/shadcn/button"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/shadcn/card"
 import {
   Collapsible,
   CollapsibleTrigger,
   CollapsibleContent,
 } from "@/components/ui/shadcn/collapsible"
+import { Input } from "@/components/ui/shadcn/input"
+import { Label } from "@/components/ui/shadcn/label"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/shadcn/tabs"
+import { Textarea } from "@/components/ui/shadcn/textarea"
+import { cn } from "@/lib/cn"
 import type { GlossaryRow, GlossaryColumn } from "@/lib/glossary/csv"
 import {
   LANGUAGE_CODES,
@@ -114,7 +104,7 @@ function GlossaryEditCardHeader({
         <CardTitle
           className={cn(
             "text-sm font-semibold truncate",
-            isDelete && "line-through text-red-700 dark:text-red-400"
+            isDelete && "line-through text-red-700 dark:text-red-400",
           )}
           title={headerTerm}>
           {headerTerm}
@@ -196,10 +186,7 @@ function GlossaryEditCardBody({
   if (isDelete) {
     return (
       <CardContent className="p-0 pt-3">
-        <DeleteSummary
-          before={operation.before ?? null}
-          danglingRefs={danglingRefs}
-        />
+        <DeleteSummary before={operation.before ?? null} danglingRefs={danglingRefs} />
       </CardContent>
     )
   }
@@ -213,10 +200,7 @@ function GlossaryEditCardBody({
           className="w-full">
           <TabsList className="mb-3 h-8 self-start p-0.5">
             {tabOptions.map((option) => (
-              <TabsTrigger
-                key={option.value}
-                value={option.value}
-                className="h-7 px-3 text-xs">
+              <TabsTrigger key={option.value} value={option.value} className="h-7 px-3 text-xs">
                 {option.label}
               </TabsTrigger>
             ))}
@@ -271,17 +255,13 @@ export function GlossaryEditCard({
 
   const seed = operation.after ?? operation.before ?? null
   const [row, setRow] = React.useState<GlossaryRow | null>(
-    seed ? ({ ...seed } as GlossaryRow) : null
+    seed ? ({ ...seed } as GlossaryRow) : null,
   )
   const rowRef = React.useRef(row)
 
-  const activeLocale: GlossaryLocale | null = isGlossaryLocale(locale)
-    ? locale
-    : null
+  const activeLocale: GlossaryLocale | null = isGlossaryLocale(locale) ? locale : null
 
-  const [tab, setTab] = React.useState<TabValue>(
-    activeLocale ? "active" : "english"
-  )
+  const [tab, setTab] = React.useState<TabValue>(activeLocale ? "active" : "english")
 
   const updateField = React.useCallback(
     (column: GlossaryColumn, value: string) => {
@@ -293,7 +273,7 @@ export function GlossaryEditCard({
       setRow(next)
       onChange({ slug: operation.slug, after: next })
     },
-    [onChange, operation.slug, isReadOnly]
+    [onChange, operation.slug, isReadOnly],
   )
 
   const handleRemove = React.useCallback(() => {
@@ -314,7 +294,7 @@ export function GlossaryEditCard({
 
   const otherLanguageCodes = React.useMemo(
     () => LANGUAGE_CODES.filter((code) => code !== activeLocale),
-    [activeLocale]
+    [activeLocale],
   )
 
   const tabOptions = React.useMemo(() => {
@@ -334,7 +314,7 @@ export function GlossaryEditCard({
     <Card
       className={cn(
         "sm:p-4",
-        isDelete && "border-destructive/30 bg-destructive/5 text-destructive"
+        isDelete && "border-destructive/30 bg-destructive/5 text-destructive",
       )}>
       <GlossaryEditCardHeader
         headerTerm={headerTerm}
@@ -437,7 +417,7 @@ function EnglishFieldItem({
     (value: string) => {
       onChange(field.column, value)
     },
-    [onChange, field.column]
+    [onChange, field.column],
   )
 
   return (
@@ -496,14 +476,7 @@ function ActiveLocaleFields({
   onChange: (column: GlossaryColumn, value: string) => void
   disabled?: boolean
 }) {
-  return (
-    <LanguageFields
-      row={row}
-      code={code}
-      onChange={onChange}
-      disabled={disabled}
-    />
-  )
+  return <LanguageFields row={row} code={code} onChange={onChange} disabled={disabled} />
 }
 
 interface LanguagePairFieldsProps {
@@ -513,12 +486,7 @@ interface LanguagePairFieldsProps {
   disabled?: boolean
 }
 
-function LanguagePairFields({
-  row,
-  code,
-  onChange,
-  disabled = false,
-}: LanguagePairFieldsProps) {
+function LanguagePairFields({ row, code, onChange, disabled = false }: LanguagePairFieldsProps) {
   return (
     <LanguageFields
       row={row}
@@ -544,11 +512,11 @@ function LanguageFields({
 
   const handleTermChange = React.useCallback(
     (value: string) => onChange(termCol, value),
-    [onChange, termCol]
+    [onChange, termCol],
   )
   const handleDescChange = React.useCallback(
     (value: string) => onChange(descCol, value),
-    [onChange, descCol]
+    [onChange, descCol],
   )
 
   return (
@@ -590,8 +558,7 @@ function OtherLanguagesFields({
           type="button"
           className="text-muted-foreground hover:text-foreground flex w-full cursor-pointer items-center gap-1 px-3.5 py-2 text-left text-xs font-medium transition-colors">
           <span>
-            Show {codes.length} other language{" "}
-            {codes.length === 1 ? "pair" : "pairs"}
+            Show {codes.length} other language {codes.length === 1 ? "pair" : "pairs"}
           </span>
           <span
             aria-hidden="true"
@@ -645,7 +612,7 @@ function Field({
     (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       onValueChange(event.target.value)
     },
-    [onValueChange]
+    [onValueChange],
   )
 
   return (
@@ -660,9 +627,7 @@ function Field({
           value={value}
           disabled={disabled}
           aria-invalid={error || undefined}
-          aria-describedby={
-            error && errorMessage ? `${fieldId}-error` : undefined
-          }
+          aria-describedby={error && errorMessage ? `${fieldId}-error` : undefined}
           className="leading-relaxed"
           onChange={handleChange}
           rows={3}
@@ -673,9 +638,7 @@ function Field({
           value={value}
           disabled={disabled}
           aria-invalid={error || undefined}
-          aria-describedby={
-            error && errorMessage ? `${fieldId}-error` : undefined
-          }
+          aria-describedby={error && errorMessage ? `${fieldId}-error` : undefined}
           onChange={handleChange}
         />
       )}

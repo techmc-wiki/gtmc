@@ -10,7 +10,7 @@ const IS_ALLOWED_PDF_FILENAME: Record<string, true> = {
  */
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ filename: string }> }
+  { params }: { params: Promise<{ filename: string }> },
 ) {
   const { filename } = await params
 
@@ -18,15 +18,9 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_PDF_BASE_URL?.trim().replace(
-    /\/+$/,
-    ""
-  )
+  const baseUrl = process.env.NEXT_PUBLIC_PDF_BASE_URL?.trim().replace(/\/+$/, "")
   if (!baseUrl) {
-    return NextResponse.json(
-      { error: "PDF downloads are not configured" },
-      { status: 503 }
-    )
+    return NextResponse.json({ error: "PDF downloads are not configured" }, { status: 503 })
   }
 
   try {
@@ -43,17 +37,11 @@ export async function GET(
     })
 
     if (!upstream.ok && upstream.status !== 206) {
-      return NextResponse.json(
-        { error: "Upstream fetch failed" },
-        { status: 502 }
-      )
+      return NextResponse.json({ error: "Upstream fetch failed" }, { status: 502 })
     }
 
     if (!upstream.body) {
-      return NextResponse.json(
-        { error: "Upstream fetch failed" },
-        { status: 502 }
-      )
+      return NextResponse.json({ error: "Upstream fetch failed" }, { status: 502 })
     }
 
     const headers = new Headers({

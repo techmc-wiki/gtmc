@@ -1,12 +1,12 @@
 "use client"
+import { gsap } from "gsap"
+import { InertiaPlugin } from "gsap/InertiaPlugin"
 // Vendored from ReactBits (reactbits.dev/r/DotGrid-TS-TW), then adapted for GTMC:
 // - respects prefers-reduced-motion (single static frame, no listeners)
 // - rAF loop sleeps when the pointer is idle/away and when off-screen
 // - devicePixelRatio capped at 2
 // - global click-shock removed (restraint over spectacle)
 import React, { useRef, useEffect, useCallback, useMemo } from "react"
-import { gsap } from "gsap"
-import { InertiaPlugin } from "gsap/InertiaPlugin"
 
 import { cn } from "@/lib/cn"
 
@@ -182,9 +182,7 @@ const DotGrid: React.FC<DotGridProps> = ({
     }
 
     const hasSettledDots = () =>
-      dotsRef.current.some(
-        (dot) => dot.xOffset !== 0 || dot.yOffset !== 0 || dot.inertiaApplied
-      )
+      dotsRef.current.some((dot) => dot.xOffset !== 0 || dot.yOffset !== 0 || dot.inertiaApplied)
 
     const tick = () => {
       drawFrame()

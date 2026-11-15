@@ -1,12 +1,12 @@
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 import MiniSearch from "minisearch"
 import { remark } from "remark"
 import stripMarkdownPlugin from "strip-markdown"
-import { CJK_TOKENIZER } from "@/lib/search/cjk-tokenizer"
-import { getPublicChapterNav } from "@/lib/articles/public-tree"
+
 import { getArticleContentBySlug } from "@/lib/articles/content"
 import { flattenArticleNodes } from "@/lib/articles/navigation-data"
-
-import type { ArticleLocale } from "@gtmc/ssg/articles/types"
+import { getPublicChapterNav } from "@/lib/articles/public-tree"
+import { CJK_TOKENIZER } from "@/lib/search/cjk-tokenizer"
 
 interface IndexedArticle {
   id: string
@@ -25,16 +25,11 @@ function stripMarkdown(text: string): string {
 }
 
 const cachedIndexes = new Map<ArticleLocale, MiniSearch<IndexedArticle>>()
-const buildPromises = new Map<
-  ArticleLocale,
-  Promise<MiniSearch<IndexedArticle>>
->()
+const buildPromises = new Map<ArticleLocale, Promise<MiniSearch<IndexedArticle>>>()
 
 const FETCH_CONCURRENCY = 5
 
-function createMiniSearchIndex(
-  documents: IndexedArticle[]
-): MiniSearch<IndexedArticle> {
+function createMiniSearchIndex(documents: IndexedArticle[]): MiniSearch<IndexedArticle> {
   const miniSearch = new MiniSearch<IndexedArticle>({
     fields: ["title", "content"],
     storeFields: ["title", "slug", "content"],
@@ -51,9 +46,7 @@ function createMiniSearchIndex(
   return miniSearch
 }
 
-async function buildIndex(
-  locale: ArticleLocale
-): Promise<MiniSearch<IndexedArticle>> {
+async function buildIndex(locale: ArticleLocale): Promise<MiniSearch<IndexedArticle>> {
   const tree = await getPublicChapterNav(locale)
 
   const articles: IndexedArticle[] = []
@@ -96,9 +89,8 @@ async function buildIndex(
     }
   }
 
-  const workers = Array.from(
-    { length: Math.min(FETCH_CONCURRENCY, githubNodes.length) },
-    () => worker()
+  const workers = Array.from({ length: Math.min(FETCH_CONCURRENCY, githubNodes.length) }, () =>
+    worker(),
   )
 
   await Promise.all(workers)
@@ -106,9 +98,7 @@ async function buildIndex(
   return createMiniSearchIndex(articles)
 }
 
-export async function getSearchIndex(
-  locale: ArticleLocale
-): Promise<MiniSearch<IndexedArticle>> {
+export async function getSearchIndex(locale: ArticleLocale): Promise<MiniSearch<IndexedArticle>> {
   const cachedIndex = cachedIndexes.get(locale)
   if (cachedIndex) return cachedIndex
 

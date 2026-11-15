@@ -18,10 +18,7 @@ const SPECULATION_RULES = {
   prerender: [
     {
       where: {
-        and: [
-          { href_matches: "/*/articles/**" },
-          { not: { href_matches: "/**/edit/**" } },
-        ],
+        and: [{ href_matches: "/*/articles/**" }, { not: { href_matches: "/**/edit/**" } }],
       },
       eagerness: "moderate",
     },
@@ -38,11 +35,7 @@ const RULES_HTML = { __html: RULES_JSON }
 
 export function SpeculationRules() {
   useServerInsertedHTML(() => (
-    <script
-      key="speculation-rules"
-      type="speculationrules"
-      dangerouslySetInnerHTML={RULES_HTML}
-    />
+    <script key="speculation-rules" type="speculationrules" dangerouslySetInnerHTML={RULES_HTML} />
   ))
   return null
 }

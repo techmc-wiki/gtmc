@@ -1,4 +1,5 @@
 import * as React from "react"
+
 import { CornerBrackets } from "@/components/ui/corner-brackets"
 import { cn } from "@/lib/cn"
 
@@ -17,12 +18,10 @@ export function SectionFrame({
       ref={ref}
       className={cn(
         "border-tech-main/40 bg-surface-overlay/80 relative border p-6 backdrop-blur-sm sm:p-8",
-        className
+        className,
       )}
       {...props}>
-      {showBrackets && (
-        <CornerBrackets size="size-2" color="border-tech-main/60" />
-      )}
+      {showBrackets && <CornerBrackets size="size-2" color="border-tech-main/60" />}
       {children}
     </div>
   )
@@ -38,10 +37,7 @@ export function SectionRail({
   ref?: React.Ref<HTMLDivElement>
 }) {
   return (
-    <div
-      ref={ref}
-      className={cn("text-xs text-tech-main/40", className)}
-      {...props}>
+    <div ref={ref} className={cn("text-xs text-tech-main/40", className)} {...props}>
       {label}
     </div>
   )
@@ -71,7 +67,7 @@ export function SegmentedBar({
         "h-2",
         OPACITY_MAP[opacity],
         showBorder && "border-tech-line border",
-        className
+        className,
       )}
       {...props}
     />

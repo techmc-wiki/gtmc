@@ -1,7 +1,8 @@
 "use client"
 
-import * as React from "react"
 import { useSession } from "next-auth/react"
+import * as React from "react"
+
 import { DesktopNav, MobileNav, type NavLink } from "@/components/layout/nav"
 
 interface AuthAwareNavProps {
@@ -16,10 +17,7 @@ function useAuthAwareLinks(navLinks: NavLink[], contributorLink: NavLink) {
   return React.useMemo(() => {
     let links = navLinks
 
-    if (
-      isAuthenticated &&
-      !links.some((link) => link.href === contributorLink.href)
-    ) {
+    if (isAuthenticated && !links.some((link) => link.href === contributorLink.href)) {
       const glossaryIndex = links.findIndex((link) => link.href === "/glossary")
       links =
         glossaryIndex === -1
@@ -35,19 +33,13 @@ function useAuthAwareLinks(navLinks: NavLink[], contributorLink: NavLink) {
   }, [contributorLink, isAuthenticated, navLinks])
 }
 
-function AuthAwareDesktopNavContent({
-  navLinks,
-  contributorLink,
-}: AuthAwareNavProps) {
+function AuthAwareDesktopNavContent({ navLinks, contributorLink }: AuthAwareNavProps) {
   const links = useAuthAwareLinks(navLinks, contributorLink)
 
   return <DesktopNav navLinks={links} />
 }
 
-function AuthAwareMobileNavContent({
-  navLinks,
-  contributorLink,
-}: AuthAwareNavProps) {
+function AuthAwareMobileNavContent({ navLinks, contributorLink }: AuthAwareNavProps) {
   const links = useAuthAwareLinks(navLinks, contributorLink)
 
   return <MobileNav navLinks={links} />

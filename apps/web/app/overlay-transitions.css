@@ -193,13 +193,9 @@
     opacity: 0;
   }
 }
-.t-tooltip[data-slot]:is(
-    [data-state="delayed-open"],
-    [data-state="instant-open"]
-  ) {
+.t-tooltip[data-slot]:is([data-state="delayed-open"], [data-state="instant-open"]) {
   transform-origin: var(--radix-tooltip-content-transform-origin);
-  animation: t-tooltip-in var(--tt-in-dur) var(--tt-in-ease) var(--tt-delay)
-    both;
+  animation: t-tooltip-in var(--tt-in-dur) var(--tt-in-ease) var(--tt-delay) both;
 }
 .t-tooltip[data-slot][data-state="closed"] {
   transform-origin: var(--radix-tooltip-content-transform-origin);

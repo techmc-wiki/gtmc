@@ -9,6 +9,7 @@ import React, {
   useState,
   useSyncExternalStore,
 } from "react"
+
 import { parseThemeCookie, serializeThemeCookie } from "./cookie"
 import {
   getSystemThemeServerSnapshot,
@@ -44,7 +45,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemTheme = useSyncExternalStore(
     subscribeSystemTheme,
     getSystemThemeSnapshot,
-    getSystemThemeServerSnapshot
+    getSystemThemeServerSnapshot,
   )
   const resolvedTheme = theme === "system" ? systemTheme : theme
   useEffect(() => {
@@ -58,14 +59,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const contextValue = useMemo(
     () => ({ theme, resolvedTheme, setTheme }),
-    [theme, resolvedTheme, setTheme]
+    [theme, resolvedTheme, setTheme],
   )
 
-  return (
-    <ThemeContext.Provider value={contextValue}>
-      {children}
-    </ThemeContext.Provider>
-  )
+  return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>
 }
 
 export function useTheme(): ThemeContextValue {

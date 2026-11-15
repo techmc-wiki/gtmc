@@ -1,10 +1,12 @@
 import { execFileSync } from "node:child_process"
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
+
 import { dump as yamlDump, load as yamlLoad } from "js-yaml"
 
-import { workspacePath } from "@/lib/workspace-paths"
 import { resolveGithubToken } from "@/lib/github/tokens"
+import { workspacePath } from "@/lib/workspace-paths"
+
 import { createLogger } from "./lib/logger"
 
 const logger = createLogger("authors")
@@ -13,8 +15,7 @@ const CONFIG_DIR = join(process.cwd(), "lib", "articles", "config")
 const OUTPUT_PATH = join(CONFIG_DIR, "authors-alias.yml")
 const OVERRIDES_PATH = join(CONFIG_DIR, "author-alias-overrides.yml")
 
-const ARTICLES_PATH =
-  process.env.ARTICLES_PATH ?? workspacePath("content", "articles")
+const ARTICLES_PATH = process.env.ARTICLES_PATH ?? workspacePath("content", "articles")
 
 const GITHUB_TOKEN = resolveGithubToken()
 
@@ -68,7 +69,7 @@ interface GithubCommit {
 
 async function fetchGithubLoginFromEmail(
   email: string,
-  headers: Record<string, string>
+  headers: Record<string, string>,
 ): Promise<string | undefined> {
   const url = `${GITHUB_API_BASE}/repos/${GITHUB_ARTICLES_REPO}/commits?author=${encodeURIComponent(email)}&per_page=1`
   try {
@@ -94,18 +95,12 @@ async function fetchGithubLoginFromEmail(
     return undefined
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    logger.warn(
-      "authors.alias.lookup-skipped",
-      { reason: "request-failed" },
-      message
-    )
+    logger.warn("authors.alias.lookup-skipped", { reason: "request-failed" }, message)
     return undefined
   }
 }
 
-async function getGithubUsernameForEmail(
-  email: string
-): Promise<string | undefined> {
+async function getGithubUsernameForEmail(email: string): Promise<string | undefined> {
   const noreply = extractNoreplyUsername(email)
   if (noreply) return noreply
 
@@ -151,7 +146,7 @@ async function generateAliases(): Promise<AliasMap> {
   // Resolution is order-independent, so concurrent lookups avoid serial API latency.
   const distinctEmails = [...emailToDisplayNames.keys()]
   const usernames = await Promise.all(
-    distinctEmails.map((email) => getGithubUsernameForEmail(email))
+    distinctEmails.map((email) => getGithubUsernameForEmail(email)),
   )
   const usernameToEmails = new Map<string, Set<string>>()
   for (let i = 0; i < distinctEmails.length; i++) {

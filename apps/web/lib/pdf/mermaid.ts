@@ -4,7 +4,9 @@ import fs from "node:fs"
 import { createRequire } from "node:module"
 import os from "node:os"
 import path from "node:path"
+
 import { z } from "zod"
+
 import { workspacePath } from "@/lib/workspace-paths"
 
 import { toTypstRootPath, writeFileAtomic } from "./artifacts"
@@ -17,11 +19,8 @@ const MERMAID_VERSION = z
   .object({ version: z.string().min(1) })
   .parse(
     JSON.parse(
-      fs.readFileSync(
-        path.join(path.dirname(MERMAID_BUNDLE), "..", "package.json"),
-        "utf-8"
-      )
-    )
+      fs.readFileSync(path.join(path.dirname(MERMAID_BUNDLE), "..", "package.json"), "utf-8"),
+    ),
   ).version
 
 const FONT_FAMILY = "Geist, Noto Sans SC, sans-serif"
@@ -97,7 +96,7 @@ const EvaluateResponse = z.object({
  */
 export async function renderMermaidSvgs(
   sources: string[],
-  opts: { outDir: string; cacheDir: string }
+  opts: { outDir: string; cacheDir: string },
 ): Promise<Map<string, { path: string }>> {
   const result = new Map<string, { path: string }>()
   const unique = [...new Set(sources)]
@@ -162,11 +161,7 @@ class ChromeMermaid {
   #nextId = 1
   #sessionId: string | undefined
 
-  private constructor(
-    process: ChildProcess,
-    socket: WebSocket,
-    profileDir: string
-  ) {
+  private constructor(process: ChildProcess, socket: WebSocket, profileDir: string) {
     this.#process = process
     this.#socket = socket
     this.#profileDir = profileDir
@@ -196,7 +191,7 @@ class ChromeMermaid {
         `--user-data-dir=${profileDir}`,
         "about:blank",
       ],
-      { stdio: ["ignore", "ignore", "pipe"] }
+      { stdio: ["ignore", "ignore", "pipe"] },
     )
     try {
       const wsUrl = await waitForDevToolsUrl(child)
@@ -214,40 +209,30 @@ class ChromeMermaid {
 
   async #initPage(): Promise<void> {
     const created = TargetCreated.parse(
-      await this.#send(
-        "Target.createTarget",
-        { url: "about:blank" },
-        CDP_TIMEOUT_MS
-      )
+      await this.#send("Target.createTarget", { url: "about:blank" }, CDP_TIMEOUT_MS),
     )
     const attached = SessionAttached.parse(
       await this.#send(
         "Target.attachToTarget",
         { targetId: created.targetId, flatten: true },
-        CDP_TIMEOUT_MS
-      )
+        CDP_TIMEOUT_MS,
+      ),
     )
     this.#sessionId = attached.sessionId
 
     await this.#loadFonts()
-    await this.#evaluate(
-      fs.readFileSync(MERMAID_BUNDLE, "utf-8"),
-      false,
-      CDP_TIMEOUT_MS
-    )
+    await this.#evaluate(fs.readFileSync(MERMAID_BUNDLE, "utf-8"), false, CDP_TIMEOUT_MS)
     await this.#evaluate(
       `globalThis.mermaid.initialize(${JSON.stringify(MERMAID_CONFIG)});
        true`,
       false,
-      CDP_TIMEOUT_MS
+      CDP_TIMEOUT_MS,
     )
   }
 
   async #loadFonts(): Promise<void> {
     for (const { family, file } of MEASURE_FONTS) {
-      const base64 = fs
-        .readFileSync(path.join(FONTS_DIR, file))
-        .toString("base64")
+      const base64 = fs.readFileSync(path.join(FONTS_DIR, file)).toString("base64")
       await this.#evaluate(
         `(async () => {
           const bytes = Uint8Array.from(atob(${JSON.stringify(base64)}), (c) => c.charCodeAt(0));
@@ -256,7 +241,7 @@ class ChromeMermaid {
           return true;
         })()`,
         true,
-        CDP_TIMEOUT_MS
+        CDP_TIMEOUT_MS,
       )
     }
   }
@@ -269,20 +254,17 @@ class ChromeMermaid {
           return svg;
         })()`,
         true,
-        RENDER_TIMEOUT_MS
-      )
+        RENDER_TIMEOUT_MS,
+      ),
     )
     return toStandaloneSvg(svg)
   }
 
   async close(): Promise<void> {
     try {
-      await this.#send("Browser.close", {}, CDP_TIMEOUT_MS).catch(
-        () => undefined
-      )
+      await this.#send("Browser.close", {}, CDP_TIMEOUT_MS).catch(() => undefined)
     } finally {
-      const alreadyExited =
-        this.#process.exitCode !== null || this.#process.signalCode !== null
+      const alreadyExited = this.#process.exitCode !== null || this.#process.signalCode !== null
       const { promise: exited, resolve: onExit } = Promise.withResolvers<void>()
       this.#process.once("exit", () => onExit())
       this.#socket.close()
@@ -298,17 +280,13 @@ class ChromeMermaid {
     }
   }
 
-  async #evaluate(
-    expression: string,
-    awaitPromise: boolean,
-    timeoutMs: number
-  ): Promise<unknown> {
+  async #evaluate(expression: string, awaitPromise: boolean, timeoutMs: number): Promise<unknown> {
     const response = EvaluateResponse.parse(
       await this.#send(
         "Runtime.evaluate",
         { expression, awaitPromise, returnByValue: true },
-        timeoutMs
-      )
+        timeoutMs,
+      ),
     )
     if (response.exceptionDetails) {
       const { exception, text } = response.exceptionDetails
@@ -317,11 +295,7 @@ class ChromeMermaid {
     return response.result.value
   }
 
-  #send(
-    method: string,
-    params: Record<string, unknown>,
-    timeoutMs: number
-  ): Promise<unknown> {
+  #send(method: string, params: Record<string, unknown>, timeoutMs: number): Promise<unknown> {
     const id = this.#nextId++
     const { promise, resolve, reject } = Promise.withResolvers<unknown>()
     const timer = setTimeout(() => {
@@ -338,9 +312,7 @@ class ChromeMermaid {
         reject(error)
       },
     })
-    this.#socket.send(
-      JSON.stringify({ id, method, params, sessionId: this.#sessionId })
-    )
+    this.#socket.send(JSON.stringify({ id, method, params, sessionId: this.#sessionId }))
     return promise
   }
 }
@@ -348,11 +320,9 @@ class ChromeMermaid {
 async function waitForOpen(socket: WebSocket, url: string): Promise<void> {
   const { promise, resolve, reject } = Promise.withResolvers<void>()
   socket.addEventListener("open", () => resolve(), { once: true })
-  socket.addEventListener(
-    "error",
-    () => reject(new Error(`DevTools socket failed: ${url}`)),
-    { once: true }
-  )
+  socket.addEventListener("error", () => reject(new Error(`DevTools socket failed: ${url}`)), {
+    once: true,
+  })
   return promise
 }
 
@@ -368,19 +338,12 @@ async function waitForDevToolsUrl(child: ChildProcess): Promise<string> {
   child.once("error", (error) => reject(error))
   child.once("exit", (code) =>
     reject(
-      new Error(
-        `Chrome exited (code ${code}) before exposing DevTools: ${stderr.slice(-500)}`
-      )
-    )
+      new Error(`Chrome exited (code ${code}) before exposing DevTools: ${stderr.slice(-500)}`),
+    ),
   )
   const timer = setTimeout(
-    () =>
-      reject(
-        new Error(
-          `Chrome did not expose DevTools within ${LAUNCH_TIMEOUT_MS}ms`
-        )
-      ),
-    LAUNCH_TIMEOUT_MS
+    () => reject(new Error(`Chrome did not expose DevTools within ${LAUNCH_TIMEOUT_MS}ms`)),
+    LAUNCH_TIMEOUT_MS,
   )
   try {
     return await promise
@@ -399,14 +362,10 @@ function resolveChromeExecutable(): string {
     return fromEnv
   }
   if (process.platform === "darwin") {
-    const found = CHROME_CANDIDATES_MACOS.find((candidate) =>
-      fs.existsSync(candidate)
-    )
+    const found = CHROME_CANDIDATES_MACOS.find((candidate) => fs.existsSync(candidate))
     if (found) return found
   }
-  const pathDirs = (process.env.PATH ?? "")
-    .split(path.delimiter)
-    .filter(Boolean)
+  const pathDirs = (process.env.PATH ?? "").split(path.delimiter).filter(Boolean)
   for (const name of CHROME_NAMES_ON_PATH) {
     for (const dir of pathDirs) {
       const candidate = path.join(dir, name)
@@ -415,7 +374,7 @@ function resolveChromeExecutable(): string {
   }
   throw new Error(
     "No Chromium found for Mermaid rendering. Set PDF_CHROMIUM to a Chrome/Chromium executable " +
-      "or install Google Chrome (checked macOS app bundles and chromium/google-chrome on PATH)."
+      "or install Google Chrome (checked macOS app bundles and chromium/google-chrome on PATH).",
   )
 }
 
@@ -427,9 +386,7 @@ function resolveChromeExecutable(): string {
 function toStandaloneSvg(svg: string): string {
   const open = /<svg\b[^>]*>/.exec(svg)
   if (!open) throw new Error("Mermaid returned no <svg> root")
-  const viewBox = /viewBox="([-\d.]+)\s+([-\d.]+)\s+([\d.]+)\s+([\d.]+)"/.exec(
-    open[0]
-  )
+  const viewBox = /viewBox="([-\d.]+)\s+([-\d.]+)\s+([\d.]+)\s+([\d.]+)"/.exec(open[0])
   if (!viewBox) throw new Error("Mermaid <svg> root has no viewBox")
   const width = Number(viewBox[3])
   const height = Number(viewBox[4])
@@ -442,9 +399,7 @@ function toStandaloneSvg(svg: string): string {
 
   const body = svg.slice(open.index + open[0].length)
   if (/<foreignObject\b/.test(body)) {
-    throw new Error(
-      "Mermaid emitted foreignObject labels; Typst cannot render them"
-    )
+    throw new Error("Mermaid emitted foreignObject labels; Typst cannot render them")
   }
   return `<?xml version="1.0" encoding="UTF-8"?>\n${svg.slice(0, open.index)}${root}${body}`
 }

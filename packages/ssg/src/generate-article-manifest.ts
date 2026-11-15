@@ -1,8 +1,6 @@
 import fs from "fs"
 import path from "path"
-import type { ArticleEntry } from "./articles/types"
 
-import { buildManifestPreview } from "./manifest-preview"
 import {
   parseSourceReadmeFrontMatter,
   parseSourceFrontMatter,
@@ -21,7 +19,9 @@ import {
   getArticleDates,
   getTranslationProvenance,
 } from "./articles/git-metadata"
+import type { ArticleEntry } from "./articles/types"
 import type { BuildLogger } from "./logger"
+import { buildManifestPreview } from "./manifest-preview"
 
 export interface ArticleManifestOptions {
   articlesPath: string
@@ -41,17 +41,15 @@ function isReadmeLocaleFile(filename: string): boolean {
 
 function parseSourceMetadata(
   content: string,
-  isReadme: boolean
+  isReadme: boolean,
 ): SourceFrontMatter | SourceReadmeFrontMatter {
-  const parsed = isReadme
-    ? parseSourceReadmeFrontMatter(content)
-    : parseSourceFrontMatter(content)
+  const parsed = isReadme ? parseSourceReadmeFrontMatter(content) : parseSourceFrontMatter(content)
   return parsed.frontmatter
 }
 
 function parseTranslationMetadata(
   content: string,
-  isReadme: boolean
+  isReadme: boolean,
 ): TranslationFrontMatter | TranslationReadmeFrontMatter {
   const parsed = isReadme
     ? parseTranslationReadmeFrontMatter(content)
@@ -71,9 +69,7 @@ function getParentSlug(slug: string): string | undefined {
 
 function resolveSourceSlug(slugPrefix: string, articleSlug: string): string {
   if (slugPrefix === "") return articleSlug
-  return slugPrefix === articleSlug
-    ? articleSlug
-    : `${slugPrefix}/${articleSlug}`
+  return slugPrefix === articleSlug ? articleSlug : `${slugPrefix}/${articleSlug}`
 }
 
 function slugsToPath(segments: string[], length: number): string[] {
@@ -88,7 +84,7 @@ async function processSourceFile(
   parentSlug: string | undefined,
   repoCwd: string,
   articleEditExclusions: string[],
-  aliases: Map<string, string>
+  aliases: Map<string, string>,
 ): Promise<Partial<ArticleEntry>> {
   const content = fs.readFileSync(filePath, "utf-8")
 
@@ -118,14 +114,12 @@ async function processSourceFile(
     localizedFilePaths: { zh: relPath },
     chapterTitleByLocale: chapterTitle ? { zh: chapterTitle } : {},
     introTitleByLocale: introTitle ? { zh: introTitle } : {},
-    descriptionByLocale:
-      "description" in fm && fm.description ? { zh: fm.description } : {},
+    descriptionByLocale: "description" in fm && fm.description ? { zh: fm.description } : {},
     hasIntro: !!introTitle,
     index: fm.index,
     isFolder,
     isAppendix: "appendix" in fm && fm.appendix === true,
-    isPreface:
-      /(^|\/)preface(\/|$)/i.test(slug) || /^preface\.zh\.md$/i.test(relPath),
+    isPreface: /(^|\/)preface(\/|$)/i.test(slug) || /^preface\.zh\.md$/i.test(relPath),
     parentSlug,
     author: author || undefined,
     coAuthors: coAuthors.length > 0 ? coAuthors : undefined,
@@ -147,10 +141,7 @@ async function processSourceFile(
 
 function readSlugFromFile(filePath: string): string {
   const content = fs.readFileSync(filePath, "utf-8")
-  return parseSourceMetadata(
-    content,
-    isReadmeLocaleFile(path.basename(filePath))
-  ).slug
+  return parseSourceMetadata(content, isReadmeLocaleFile(path.basename(filePath))).slug
 }
 
 function tryReadSlugFromFile(filePath: string): string | null {
@@ -189,13 +180,13 @@ export async function generateArticleManifest({
         ARTICLES_PATH,
         ...slugsToPath(segments, slugs.length),
         segment,
-        "README.zh.md"
+        "README.zh.md",
       )
       const readmePath = path.join(
         ARTICLES_PATH,
         ...slugsToPath(segments, slugs.length),
         segment,
-        "README.md"
+        "README.md",
       )
       const readmeSource = fs.existsSync(readmeZhPath)
         ? readmeZhPath
@@ -217,7 +208,7 @@ export async function generateArticleManifest({
     relPath: string,
     repoCwd: string,
     articleEditExclusions: string[],
-    manifest: ArticleManifest
+    manifest: ArticleManifest,
   ): Promise<void> {
     const content = fs.readFileSync(filePath, "utf-8")
     const isReadme = isReadmeLocaleFile(path.basename(filePath))
@@ -227,9 +218,7 @@ export async function generateArticleManifest({
     const translatesPath = path.join(dirPath, fm.translates)
 
     if (!fs.existsSync(translatesPath)) {
-      throw new Error(
-        `${relPath}: translates field points to non-existent file: ${fm.translates}`
-      )
+      throw new Error(`${relPath}: translates field points to non-existent file: ${fm.translates}`)
     }
 
     const translatesRelPath = path.relative(ARTICLES_PATH, translatesPath)
@@ -241,7 +230,7 @@ export async function generateArticleManifest({
     } catch (error) {
       throw new Error(
         `${relPath}: source frontmatter invalid in ${translatesRelPath}: ${error instanceof Error ? error.message : String(error)}`,
-        { cause: error }
+        { cause: error },
       )
     }
     const sourceSlug = sourceFm.slug
@@ -252,16 +241,10 @@ export async function generateArticleManifest({
 
     const entry = manifest[resolvedSourceSlug]
     if (!entry) {
-      throw new Error(
-        `${relPath}: source slug "${resolvedSourceSlug}" not found in manifest`
-      )
+      throw new Error(`${relPath}: source slug "${resolvedSourceSlug}" not found in manifest`)
     }
 
-    const { lastmod } = await getArticleDates(
-      repoCwd,
-      relPath,
-      articleEditExclusions
-    )
+    const { lastmod } = await getArticleDates(repoCwd, relPath, articleEditExclusions)
 
     if (!entry.availableLocales.includes("en")) {
       entry.availableLocales.push("en")
@@ -287,28 +270,21 @@ export async function generateArticleManifest({
 
     if (lastmod) entry.lastmodByLocale.en = lastmod
 
-    const provenance = await getTranslationProvenance(
-      repoCwd,
-      relPath,
-      translatesRelPath
-    )
+    const provenance = await getTranslationProvenance(repoCwd, relPath, translatesRelPath)
     if (!provenance) {
       entry.translationFreshnessByLocale.en = "unknown"
       return
     }
 
     entry.translatedFromRevisionByLocale.en = provenance.translatedFromRevision
-    entry.translationFreshnessByLocale.en =
-      provenance.commitLag > 0 ? "stale" : "fresh"
+    entry.translationFreshnessByLocale.en = provenance.commitLag > 0 ? "stale" : "fresh"
     entry.translationStatusByLocale ??= {}
     entry.translationStatusByLocale.en = {
       translatedFromRevision: provenance.translatedFromRevision,
       latestOriginalRevision: provenance.latestOriginalRevision,
       commitLag: provenance.commitLag,
       dayLag: provenance.dayLag,
-      latestOriginalCommitUrl: getArticlesCommitUrl(
-        provenance.latestOriginalRevision
-      ),
+      latestOriginalCommitUrl: getArticlesCommitUrl(provenance.latestOriginalRevision),
     }
   }
 
@@ -320,18 +296,14 @@ export async function generateArticleManifest({
     manifest: ArticleManifest,
     repoCwd: string,
     articleEditExclusions: string[],
-    aliases: Map<string, string>
+    aliases: Map<string, string>,
   ): Promise<boolean> {
     let hasError = false
 
     const entries = fs.readdirSync(dirPath, { withFileTypes: true })
 
-    const readmeZh = entries.find(
-      (e) => e.isFile() && e.name === "README.zh.md"
-    )
-    const readmeFallback = entries.find(
-      (e) => e.isFile() && e.name === "README.md"
-    )
+    const readmeZh = entries.find((e) => e.isFile() && e.name === "README.zh.md")
+    const readmeFallback = entries.find((e) => e.isFile() && e.name === "README.md")
     const readmeSource = readmeZh || readmeFallback
 
     if (readmeSource) {
@@ -352,12 +324,12 @@ export async function generateArticleManifest({
             parentSlug,
             repoCwd,
             articleEditExclusions,
-            aliases
+            aliases,
           )
           manifest[slugPrefix] = entry as ArticleEntry
         } catch (error) {
           reportValidationError(
-            `Error: ${error instanceof Error ? error.message : String(error)}\n`
+            `Error: ${error instanceof Error ? error.message : String(error)}\n`,
           )
           hasError = true
         }
@@ -367,11 +339,10 @@ export async function generateArticleManifest({
     const sourceFiles = entries.filter(
       (e) =>
         e.isFile() &&
-        (e.name.endsWith(".zh.md") ||
-          (e.name.endsWith(".md") && !e.name.endsWith(".en.md"))) &&
+        (e.name.endsWith(".zh.md") || (e.name.endsWith(".md") && !e.name.endsWith(".en.md"))) &&
         !isReservedArticlePath(e.name) &&
         !isReadmeLocaleFile(e.name) &&
-        !isExplicitlySkippedFile(path.join(dirPath, e.name))
+        !isExplicitlySkippedFile(path.join(dirPath, e.name)),
     )
 
     const sourceFileJobs: Array<{
@@ -386,17 +357,13 @@ export async function generateArticleManifest({
 
       const articleSlug = tryReadSlugFromFile(sourcePath)
       if (!articleSlug) {
-        logger.warn(
-          "manifest.file.skipped",
-          { reason: "missing-slug" },
-          `articles/${relPath}`
-        )
+        logger.warn("manifest.file.skipped", { reason: "missing-slug" }, `articles/${relPath}`)
         continue
       }
 
       if (!SLUG_REGEX.test(articleSlug)) {
         reportValidationError(
-          `Error: Invalid slug format "${articleSlug}" in: articles/${relPath}\n`
+          `Error: Invalid slug format "${articleSlug}" in: articles/${relPath}\n`,
         )
         hasError = true
         continue
@@ -408,28 +375,26 @@ export async function generateArticleManifest({
     }
 
     const sourceFileResults = await Promise.all(
-      sourceFileJobs.map(
-        async ({ sourcePath, relPath, compositeSlug, parentSlug }) => {
-          try {
-            const entry = await processSourceFile(
-              sourcePath,
-              relPath,
-              compositeSlug,
-              false,
-              parentSlug,
-              repoCwd,
-              articleEditExclusions,
-              aliases
-            )
-            return { compositeSlug, entry: entry as ArticleEntry, error: false }
-          } catch (error) {
-            reportValidationError(
-              `Error: ${error instanceof Error ? error.message : String(error)}\n`
-            )
-            return { compositeSlug, entry: null, error: true }
-          }
+      sourceFileJobs.map(async ({ sourcePath, relPath, compositeSlug, parentSlug }) => {
+        try {
+          const entry = await processSourceFile(
+            sourcePath,
+            relPath,
+            compositeSlug,
+            false,
+            parentSlug,
+            repoCwd,
+            articleEditExclusions,
+            aliases,
+          )
+          return { compositeSlug, entry: entry as ArticleEntry, error: false }
+        } catch (error) {
+          reportValidationError(
+            `Error: ${error instanceof Error ? error.message : String(error)}\n`,
+          )
+          return { compositeSlug, entry: null, error: true }
         }
-      )
+      }),
     )
     for (const result of sourceFileResults) {
       if (result.entry) {
@@ -438,9 +403,7 @@ export async function generateArticleManifest({
       if (result.error) hasError = true
     }
 
-    const readmeEn = entries.find(
-      (e) => e.isFile() && e.name === "README.en.md"
-    )
+    const readmeEn = entries.find((e) => e.isFile() && e.name === "README.en.md")
     if (
       readmeEn &&
       manifest[slugPrefix] &&
@@ -453,12 +416,10 @@ export async function generateArticleManifest({
           `${relFromArticles}/${readmeEn.name}`,
           repoCwd,
           articleEditExclusions,
-          manifest
+          manifest,
         )
       } catch (error) {
-        reportValidationError(
-          `Error: ${error instanceof Error ? error.message : String(error)}\n`
-        )
+        reportValidationError(`Error: ${error instanceof Error ? error.message : String(error)}\n`)
         hasError = true
       }
     }
@@ -469,7 +430,7 @@ export async function generateArticleManifest({
         e.name.endsWith(".en.md") &&
         !isReservedArticlePath(e.name) &&
         !isReadmeLocaleFile(e.name) &&
-        !isExplicitlySkippedFile(path.join(dirPath, e.name))
+        !isExplicitlySkippedFile(path.join(dirPath, e.name)),
     )
 
     const enFileResults = await Promise.all(
@@ -478,27 +439,19 @@ export async function generateArticleManifest({
         const relPath = `${relFromArticles}/${enFile.name}`
 
         try {
-          await processTranslationFile(
-            enPath,
-            relPath,
-            repoCwd,
-            articleEditExclusions,
-            manifest
-          )
+          await processTranslationFile(enPath, relPath, repoCwd, articleEditExclusions, manifest)
           return false
         } catch (error) {
           reportValidationError(
-            `Error: ${error instanceof Error ? error.message : String(error)}\n`
+            `Error: ${error instanceof Error ? error.message : String(error)}\n`,
           )
           return true
         }
-      })
+      }),
     )
     if (enFileResults.some(Boolean)) hasError = true
 
-    const subDirs = entries.filter(
-      (e) => e.isDirectory() && !isReservedArticlePath(e.name)
-    )
+    const subDirs = entries.filter((e) => e.isDirectory() && !isReservedArticlePath(e.name))
 
     const subDirJobs: Array<() => Promise<boolean>> = []
     for (const subDirEntry of subDirs) {
@@ -507,7 +460,7 @@ export async function generateArticleManifest({
 
       if (depth >= MAX_DEPTH) {
         reportValidationError(
-          `Error: Directory nesting exceeds maximum depth of ${MAX_DEPTH}: articles/${subRelPath}\n`
+          `Error: Directory nesting exceeds maximum depth of ${MAX_DEPTH}: articles/${subRelPath}\n`,
         )
         hasError = true
         continue
@@ -528,7 +481,7 @@ export async function generateArticleManifest({
       if (!subSlug) {
         if (depth < 1) {
           reportValidationError(
-            `Error: Empty slug not allowed in top-level folder: articles/${subRelPath}/README.zh.md\n`
+            `Error: Empty slug not allowed in top-level folder: articles/${subRelPath}/README.zh.md\n`,
           )
           hasError = true
           continue
@@ -542,15 +495,15 @@ export async function generateArticleManifest({
             manifest,
             repoCwd,
             articleEditExclusions,
-            aliases
-          )
+            aliases,
+          ),
         )
         continue
       }
 
       if (!SLUG_REGEX.test(subSlug)) {
         reportValidationError(
-          `Error: Invalid slug format "${subSlug}" in: articles/${subRelPath}/README.zh.md\n`
+          `Error: Invalid slug format "${subSlug}" in: articles/${subRelPath}/README.zh.md\n`,
         )
         hasError = true
         continue
@@ -566,8 +519,8 @@ export async function generateArticleManifest({
           manifest,
           repoCwd,
           articleEditExclusions,
-          aliases
-        )
+          aliases,
+        ),
       )
     }
 
@@ -581,9 +534,7 @@ export async function generateArticleManifest({
   let hasError = false
 
   if (!fs.existsSync(ARTICLES_PATH)) {
-    reportValidationError(
-      `Error: articles/ directory not found at ${ARTICLES_PATH}\n`
-    )
+    reportValidationError(`Error: articles/ directory not found at ${ARTICLES_PATH}\n`)
     throw new Error("Article manifest generation failed")
   }
 
@@ -623,7 +574,7 @@ export async function generateArticleManifest({
       folderSlug = readSlugFromFile(readmeExists)
     } catch (error) {
       reportValidationError(
-        `Error: articles/${folderName}/README.zh.md: ${error instanceof Error ? error.message : String(error)}\n`
+        `Error: articles/${folderName}/README.zh.md: ${error instanceof Error ? error.message : String(error)}\n`,
       )
       hasError = true
       continue
@@ -631,7 +582,7 @@ export async function generateArticleManifest({
 
     if (!folderSlug) {
       reportValidationError(
-        `Error: Missing slug in folder README: articles/${folderName}/README.zh.md\n`
+        `Error: Missing slug in folder README: articles/${folderName}/README.zh.md\n`,
       )
       hasError = true
       continue
@@ -639,7 +590,7 @@ export async function generateArticleManifest({
 
     if (!SLUG_REGEX.test(folderSlug)) {
       reportValidationError(
-        `Error: Invalid slug format "${folderSlug}" in: articles/${folderName}/README.zh.md\n`
+        `Error: Invalid slug format "${folderSlug}" in: articles/${folderName}/README.zh.md\n`,
       )
       hasError = true
       continue
@@ -658,9 +609,9 @@ export async function generateArticleManifest({
         manifest,
         ARTICLES_PATH,
         articleEditExclusions,
-        aliases
-      )
-    )
+        aliases,
+      ),
+    ),
   )
   if (folderResults.some(Boolean)) hasError = true
 
@@ -669,11 +620,10 @@ export async function generateArticleManifest({
     .filter(
       (e) =>
         e.isFile() &&
-        (e.name.endsWith(".zh.md") ||
-          (e.name.endsWith(".md") && !e.name.endsWith(".en.md"))) &&
+        (e.name.endsWith(".zh.md") || (e.name.endsWith(".md") && !e.name.endsWith(".en.md"))) &&
         !isReservedArticlePath(e.name) &&
         !isReadmeLocaleFile(e.name) &&
-        !isExplicitlySkippedFile(path.join(ARTICLES_PATH, e.name))
+        !isExplicitlySkippedFile(path.join(ARTICLES_PATH, e.name)),
     )
     .map((e) => e.name)
 
@@ -693,9 +643,7 @@ export async function generateArticleManifest({
     }
 
     if (!SLUG_REGEX.test(rawSlug)) {
-      reportValidationError(
-        `Error: Invalid slug format "${rawSlug}" in: articles/${rootFile}\n`
-      )
+      reportValidationError(`Error: Invalid slug format "${rawSlug}" in: articles/${rootFile}\n`)
       hasError = true
       continue
     }
@@ -707,7 +655,7 @@ export async function generateArticleManifest({
     logger.warn(
       "manifest.files.skipped",
       { count: skippedRootFilesWithoutSlugs.length, reason: "missing-slug" },
-      skippedRootFilesWithoutSlugs.map((file) => `• ${file}`).join("\n")
+      skippedRootFilesWithoutSlugs.map((file) => `• ${file}`).join("\n"),
     )
   }
 
@@ -722,16 +670,14 @@ export async function generateArticleManifest({
           undefined,
           ARTICLES_PATH,
           articleEditExclusions,
-          aliases
+          aliases,
         )
         return { rawSlug, entry: entry as ArticleEntry, error: false }
       } catch (error) {
-        reportValidationError(
-          `Error: ${error instanceof Error ? error.message : String(error)}\n`
-        )
+        reportValidationError(`Error: ${error instanceof Error ? error.message : String(error)}\n`)
         return { rawSlug, entry: null, error: true }
       }
-    })
+    }),
   )
   for (const result of rootFileResults) {
     if (result.entry) {
@@ -748,7 +694,7 @@ export async function generateArticleManifest({
         e.name.endsWith(".en.md") &&
         !isReservedArticlePath(e.name) &&
         !isReadmeLocaleFile(e.name) &&
-        !isExplicitlySkippedFile(path.join(ARTICLES_PATH, e.name))
+        !isExplicitlySkippedFile(path.join(ARTICLES_PATH, e.name)),
     )
     .map((e) => e.name)
 
@@ -761,23 +707,19 @@ export async function generateArticleManifest({
           rootEnFile,
           ARTICLES_PATH,
           articleEditExclusions,
-          manifest
+          manifest,
         )
         return false
       } catch (error) {
-        reportValidationError(
-          `Error: ${error instanceof Error ? error.message : String(error)}\n`
-        )
+        reportValidationError(`Error: ${error instanceof Error ? error.message : String(error)}\n`)
         return true
       }
-    })
+    }),
   )
   if (rootEnFileResults.some(Boolean)) hasError = true
 
   if (hasError) {
-    reportValidationError(
-      "\nArticle manifest generation failed due to validation errors above.\n"
-    )
+    reportValidationError("\nArticle manifest generation failed due to validation errors above.\n")
     throw new Error("Article manifest generation failed")
   }
 
@@ -804,6 +746,6 @@ export async function generateArticleManifest({
           outputFile: OUTPUT_FILE,
           maxDepth: MAX_DEPTH,
         })
-      : undefined
+      : undefined,
   )
 }

@@ -1,11 +1,10 @@
-import { BlobPreconditionFailedError, del, get, list, put } from "@vercel/blob"
 import { randomUUID } from "node:crypto"
+
+import { BlobPreconditionFailedError, del, get, list, put } from "@vercel/blob"
 import { z } from "zod"
+
+import { assertPrivateBlobIdentifier, privateBlobOptions } from "@/lib/blob-stores"
 import { GLOSSARY_COLUMNS } from "@/lib/glossary/csv"
-import {
-  assertPrivateBlobIdentifier,
-  privateBlobOptions,
-} from "@/lib/blob-stores"
 
 const fileSchema = z.object({
   id: z.string(),
@@ -19,20 +18,13 @@ export const glossaryOperationsSchema = z.array(
     slug: z.string(),
     before: rowSchema.optional(),
     after: rowSchema.optional(),
-  })
+  }),
 )
 const common = {
   id: z.string(),
   authorId: z.string(),
   title: z.string(),
-  status: z.enum([
-    "DRAFT",
-    "PENDING",
-    "SUBMITTED",
-    "MERGED",
-    "CLOSED",
-    "ARCHIVED",
-  ]),
+  status: z.enum(["DRAFT", "PENDING", "SUBMITTED", "MERGED", "CLOSED", "ARCHIVED"]),
   githubPrUrl: z.string().nullable(),
   githubPrNum: z.number().int().nullable(),
   branchName: z.string().nullable(),
@@ -90,7 +82,7 @@ export async function writeDraft(draft: Draft, etag?: string) {
       addRandomSuffix: false,
       contentType: "application/json",
       ...(etag ? { ifMatch: etag } : {}),
-    }
+    },
   )
   return blob.etag
 }
@@ -106,9 +98,7 @@ export async function listDrafts(authorId: string) {
     cursor = page.hasMore ? page.cursor : undefined
   } while (cursor)
   const drafts = await Promise.all(
-    paths.map((pathname) =>
-      readDraft(authorId, pathname.slice(prefix.length, -5))
-    )
+    paths.map((pathname) => readDraft(authorId, pathname.slice(prefix.length, -5))),
   )
   return drafts.flatMap((record) => (record ? [record.draft] : []))
 }
@@ -136,10 +126,7 @@ export function newDraftFields(authorId: string) {
   }
 }
 
-export function requireDraftVersion(
-  actual: string,
-  expected: string | null | undefined
-) {
+export function requireDraftVersion(actual: string, expected: string | null | undefined) {
   if (actual !== expected) {
     throw new Error("This draft changed in another tab. Reload before saving.")
   }

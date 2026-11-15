@@ -1,14 +1,13 @@
 "use client"
 
-import { IconButton } from "@/components/ui/icon-button"
-
-import * as React from "react"
-import { useTranslations } from "next-intl"
 import { GitPullRequest, Trash2 } from "lucide-react"
+import { useTranslations } from "next-intl"
+import * as React from "react"
 
+import { IconButton } from "@/components/ui/icon-button"
+import { Badge } from "@/components/ui/shadcn/badge"
 import { Button } from "@/components/ui/shadcn/button"
 import { Input } from "@/components/ui/shadcn/input"
-import { Badge } from "@/components/ui/shadcn/badge"
 
 export interface GlossaryEditToolbarProps {
   title: string
@@ -35,7 +34,7 @@ export function GlossaryEditToolbar({
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onTitleChange(event.target.value)
     },
-    [onTitleChange]
+    [onTitleChange],
   )
 
   return (

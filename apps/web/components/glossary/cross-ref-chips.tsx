@@ -1,9 +1,10 @@
 "use client"
 
 import * as React from "react"
+
 import { cn } from "@/lib/cn"
-import { generateSlug } from "@/lib/glossary/slug"
 import type { ParsedRelatedToken } from "@/lib/glossary/related"
+import { generateSlug } from "@/lib/glossary/slug"
 
 interface CrossRefChipsProps {
   related: ParsedRelatedToken[]
@@ -19,19 +20,11 @@ const labelMap = {
   see: "see:",
 } as const satisfies Record<ParsedRelatedToken["kind"], string>
 
-export function CrossRefChips({
-  related,
-  onOpenDetail,
-  className,
-}: CrossRefChipsProps) {
+export function CrossRefChips({ related, onOpenDetail, className }: CrossRefChipsProps) {
   if (related.length === 0) return null
 
   return (
-    <span
-      className={cn(
-        "inline-flex flex-wrap items-center gap-x-1 gap-y-1",
-        className
-      )}>
+    <span className={cn("inline-flex flex-wrap items-center gap-x-1 gap-y-1", className)}>
       {related.map((entry, index) => {
         const isLast = index === related.length - 1
         const display = `${labelMap[entry.kind]}${entry.target}`

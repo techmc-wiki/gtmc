@@ -1,5 +1,5 @@
-import { buildGlossarySearchIndex, type GlossarySearchIndex } from "./search"
 import type { GlossaryIndexEntry } from "./localized-index"
+import { buildGlossarySearchIndex, type GlossarySearchIndex } from "./search"
 
 export interface FilterGlossaryEntriesOptions {
   query: string
@@ -19,7 +19,7 @@ let searchIndexCache: {
 function getCachedSearchIndex(
   entries: GlossaryIndexEntry[],
   categoryKey: string,
-  categoryFiltered: GlossaryIndexEntry[]
+  categoryFiltered: GlossaryIndexEntry[],
 ): GlossarySearchIndex {
   if (
     !searchIndexCache ||
@@ -39,7 +39,7 @@ function getCachedSearchIndex(
 /** Applies category-OR filtering before ranked search; a blank query skips the search stage. */
 export function filterGlossaryEntries(
   entries: GlossaryIndexEntry[],
-  options: FilterGlossaryEntriesOptions
+  options: FilterGlossaryEntriesOptions,
 ): GlossaryIndexEntry[] {
   const { query, selectedCategories } = options
 
@@ -47,16 +47,14 @@ export function filterGlossaryEntries(
   if (selectedCategories.length > 0) {
     const allow = new Set(selectedCategories)
     categoryFiltered = entries.filter((entry) =>
-      entry.categories.some((category) => allow.has(category))
+      entry.categories.some((category) => allow.has(category)),
     )
   }
 
   const trimmedQuery = query.trim()
   if (!trimmedQuery) return categoryFiltered
 
-  const categoryKey = JSON.stringify(
-    [...new Set(selectedCategories)].toSorted()
-  )
+  const categoryKey = JSON.stringify([...new Set(selectedCategories)].toSorted())
   const index = getCachedSearchIndex(entries, categoryKey, categoryFiltered)
   const hits = index.search(trimmedQuery)
   const hitOrder = new Map<string, number>()
@@ -66,7 +64,5 @@ export function filterGlossaryEntries(
 
   return categoryFiltered
     .filter((entry) => hitOrder.has(entry.slug))
-    .toSorted(
-      (a, b) => (hitOrder.get(a.slug) ?? 0) - (hitOrder.get(b.slug) ?? 0)
-    )
+    .toSorted((a, b) => (hitOrder.get(a.slug) ?? 0) - (hitOrder.get(b.slug) ?? 0))
 }

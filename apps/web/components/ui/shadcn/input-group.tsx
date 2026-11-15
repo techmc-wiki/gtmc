@@ -4,6 +4,7 @@
 // The group owns the border and focus treatment.
 import { cva, type VariantProps } from "class-variance-authority"
 import type * as React from "react"
+
 import { Input } from "@/components/ui/shadcn/input"
 import { cn } from "@/lib/cn"
 
@@ -15,17 +16,13 @@ const inputGroupAddonVariants = cva(
     },
     variants: {
       align: {
-        "block-end":
-          "order-last w-full justify-start px-3 pb-2.5 [.border-t]:pt-2.5",
-        "block-start":
-          "order-first w-full justify-start px-3 pt-2.5 [.border-b]:pb-2.5",
-        "inline-end":
-          "order-last pr-3 has-[>button]:-me-1 has-[>kbd:last-child]:me-[-0.35rem]",
-        "inline-start":
-          "order-first pl-3 has-[>button]:-ms-1 has-[>kbd:last-child]:ms-[-0.35rem]",
+        "block-end": "order-last w-full justify-start px-3 pb-2.5 [.border-t]:pt-2.5",
+        "block-start": "order-first w-full justify-start px-3 pt-2.5 [.border-b]:pb-2.5",
+        "inline-end": "order-last pr-3 has-[>button]:-me-1 has-[>kbd:last-child]:me-[-0.35rem]",
+        "inline-start": "order-first pl-3 has-[>button]:-ms-1 has-[>kbd:last-child]:ms-[-0.35rem]",
       },
     },
-  }
+  },
 )
 
 export function InputGroup({
@@ -36,7 +33,7 @@ export function InputGroup({
     <div
       className={cn(
         "border-tech-main/30 bg-surface-input relative inline-flex min-h-11 w-full min-w-0 items-center border text-tech-main-dark transition-colors has-[input:focus-visible,textarea:focus-visible]:border-tech-main has-data-[slot=input-group-addon][data-align=block-end]:flex-wrap",
-        className
+        className,
       )}
       data-slot="input-group"
       {...props}
@@ -48,8 +45,7 @@ export function InputGroupAddon({
   className,
   align = "inline-start",
   ...props
-}: React.ComponentProps<"div"> &
-  VariantProps<typeof inputGroupAddonVariants>): React.ReactElement {
+}: React.ComponentProps<"div"> & VariantProps<typeof inputGroupAddonVariants>): React.ReactElement {
   return (
     <div
       className={cn(inputGroupAddonVariants({ align }), className)}
@@ -68,7 +64,7 @@ export function InputGroupText({
     <span
       className={cn(
         "text-tech-main/60 flex items-center gap-2 truncate text-xs select-none",
-        className
+        className,
       )}
       {...props}
     />
@@ -84,7 +80,7 @@ export function InputGroupInput({
       type="text"
       className={cn(
         "h-full min-h-0 flex-1 border-0 bg-transparent px-1 py-2 sm:px-1 sm:py-2",
-        className
+        className,
       )}
       {...props}
     />

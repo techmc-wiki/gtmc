@@ -1,24 +1,21 @@
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
+
 import { PageHeader } from "@/components/ui/headings"
-import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
+import AuthorsContentEn from "@/content/authors/en.mdx"
+import AuthorsContentZh from "@/content/authors/zh.mdx"
 import { getManifestStats, loadArticleManifest } from "@/lib/articles/manifest"
 import { getUniqueAuthors } from "@/lib/articles/person-resolver"
 import { buildWebPageJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
-import type { ArticleLocale } from "@gtmc/ssg/articles/types"
-import AuthorsContentEn from "@/content/authors/en.mdx"
-import AuthorsContentZh from "@/content/authors/zh.mdx"
+import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
 
 const authorsContentByLocale = {
   en: AuthorsContentEn,
   zh: AuthorsContentZh,
 } as const
 
-import {
-  buildAuthorsStats,
-  buildMaintainers,
-  buildProfiles,
-} from "../_shared/author-page-data"
+import { buildAuthorsStats, buildMaintainers, buildProfiles } from "../_shared/author-page-data"
 
 export async function generateMetadata({
   params,
@@ -54,11 +51,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function AuthorsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
+export default async function AuthorsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   const articleLocale = locale as ArticleLocale
   const t = await getTranslations({ locale, namespace: "Authors" })
@@ -76,12 +69,7 @@ export default async function AuthorsPage({
   const displayStats = buildAuthorsStats(allAuthors, stats.articleCount)
 
   const jsonLd = serializeJsonLd(
-    buildWebPageJsonLd(
-      siteUrl,
-      `/${locale}/authors`,
-      t("pageTitle"),
-      t("metaDescription")
-    )
+    buildWebPageJsonLd(siteUrl, `/${locale}/authors`, t("pageTitle"), t("metaDescription")),
   )
 
   const Content = authorsContentByLocale[articleLocale]

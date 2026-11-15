@@ -1,7 +1,8 @@
 "use client"
 
-import * as React from "react"
 import { useTranslations } from "next-intl"
+import * as React from "react"
+
 import { Button } from "@/components/ui/shadcn/button"
 import {
   Dialog,

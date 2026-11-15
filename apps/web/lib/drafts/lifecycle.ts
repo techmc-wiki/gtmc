@@ -57,7 +57,7 @@ const draftLifecycleMachine = createMachine({
  */
 export function nextDraftStatus(
   status: DraftStatus,
-  event: DraftLifecycleEvent
+  event: DraftLifecycleEvent,
 ): DraftStatus | null {
   const snapshot = draftLifecycleMachine.resolveState({
     value: status,
@@ -68,10 +68,7 @@ export function nextDraftStatus(
   return next.value as DraftStatus
 }
 
-export function assertDraftStatus(
-  status: DraftStatus,
-  event: DraftLifecycleEvent
-): DraftStatus {
+export function assertDraftStatus(status: DraftStatus, event: DraftLifecycleEvent): DraftStatus {
   const next = nextDraftStatus(status, event)
   if (next === null) {
     throw new Error(`Draft cannot handle ${event.type} while ${status}`)
@@ -89,10 +86,7 @@ export function isSubmissionLocked(status: DraftStatus): boolean {
 
 export function isTerminalDraftStatus(status: DraftStatus): boolean {
   return (
-    status === "SUBMITTED" ||
-    status === "MERGED" ||
-    status === "CLOSED" ||
-    status === "ARCHIVED"
+    status === "SUBMITTED" || status === "MERGED" || status === "CLOSED" || status === "ARCHIVED"
   )
 }
 
@@ -128,7 +122,7 @@ export interface PullRequestState {
  */
 export function deriveDisplayStatus(
   status: DraftStatus,
-  pr: PullRequestState | null | undefined
+  pr: PullRequestState | null | undefined,
 ): DraftStatus {
   if (status === "SUBMITTED" && pr?.state === "closed") {
     return pr.merged ? "MERGED" : "CLOSED"
@@ -140,13 +134,6 @@ export function canContinueDraft(displayStatus: DraftStatus): boolean {
   return displayStatus === "DRAFT"
 }
 
-export function canDeleteArticleDraft(
-  draft: Draft,
-  displayStatus: DraftStatus
-): boolean {
-  return (
-    draft.status === "DRAFT" &&
-    draft.githubPrNum === null &&
-    displayStatus === "DRAFT"
-  )
+export function canDeleteArticleDraft(draft: Draft, displayStatus: DraftStatus): boolean {
+  return draft.status === "DRAFT" && draft.githubPrNum === null && displayStatus === "DRAFT"
 }

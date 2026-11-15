@@ -7,11 +7,7 @@ const logger = createLogger("command")
 // Package-manager CLIs expose `.cmd` shims on Windows, so direct spawns need shell resolution.
 const defaultShell = process.platform === "win32"
 
-export function run(
-  command: string,
-  args: string[] = [],
-  options: SpawnSyncOptions = {}
-): void {
+export function run(command: string, args: string[] = [], options: SpawnSyncOptions = {}): void {
   const result = spawnSync(command, args, {
     stdio: "inherit",
     shell: defaultShell,
@@ -36,10 +32,7 @@ export function runScript(scriptPath: string, args: string[] = []): void {
   run("vpx", [scriptPath, ...args])
 }
 
-export function runScriptAsync(
-  scriptPath: string,
-  args: string[] = []
-): Promise<void> {
+export function runScriptAsync(scriptPath: string, args: string[] = []): Promise<void> {
   const { promise, resolve, reject } = Promise.withResolvers<void>()
   const child = spawn("vpx", [scriptPath, ...args], {
     stdio: "inherit",

@@ -13,7 +13,7 @@ export interface ManifestPreviewOptions {
 
 export function buildManifestPreview(
   manifest: ArticleManifest,
-  { articlesPath, outputFile, maxDepth }: ManifestPreviewOptions
+  { articlesPath, outputFile, maxDepth }: ManifestPreviewOptions,
 ): string {
   const entries = Object.values(manifest)
   const folders = entries.filter((entry) => entry.isFolder)
@@ -24,7 +24,7 @@ export function buildManifestPreview(
   const childIndex = indexChildren(entries)
   const maxSlugDepth = entries.reduce(
     (max, entry) => Math.max(max, entry.slug.split("/").length),
-    0
+    0,
   )
 
   const summaryLines = [
@@ -74,7 +74,7 @@ function formatFlags(entries: ArticleEntry[]): string {
 
 function countFlagged(
   entries: ArticleEntry[],
-  field: "isPreface" | "isAppendix" | "isAdvanced" | "hasIntro"
+  field: "isPreface" | "isAppendix" | "isAdvanced" | "hasIntro",
 ): number {
   return entries.filter((entry) => entry[field]).length
 }
@@ -83,30 +83,22 @@ function formatPreviewEntries(
   entries: ArticleEntry[],
   childIndex: Map<string, ArticleEntry[]>,
   prefix = "",
-  depth = 0
+  depth = 0,
 ): string[] {
   const visibleEntries = entries.slice(0, TREE_PREVIEW_CHILD_LIMIT)
   const lines: string[] = []
 
   for (const [index, entry] of visibleEntries.entries()) {
-    const isLast =
-      index === visibleEntries.length - 1 &&
-      entries.length === visibleEntries.length
+    const isLast = index === visibleEntries.length - 1 && entries.length === visibleEntries.length
     const branch = isLast ? "└─" : "├─"
-    const children = (childIndex.get(entry.slug) ?? []).toSorted(
-      comparePreviewEntries
-    )
-    lines.push(
-      `${prefix}${branch} ${formatPreviewEntry(entry, children.length)}`
-    )
+    const children = (childIndex.get(entry.slug) ?? []).toSorted(comparePreviewEntries)
+    lines.push(`${prefix}${branch} ${formatPreviewEntry(entry, children.length)}`)
 
     if (children.length === 0) continue
 
     const childPrefix = `${prefix}${isLast ? "   " : "│  "}`
     if (depth + 1 < TREE_PREVIEW_DEPTH) {
-      lines.push(
-        ...formatPreviewEntries(children, childIndex, childPrefix, depth + 1)
-      )
+      lines.push(...formatPreviewEntries(children, childIndex, childPrefix, depth + 1))
     } else {
       lines.push(`${childPrefix}└─ … ${children.length} nested entries`)
     }
@@ -123,11 +115,9 @@ function formatPreviewEntries(
 function formatPreviewEntry(entry: ArticleEntry, childCount: number): string {
   const kind = entry.isFolder ? "📁" : "📄"
   const index = entry.index >= 0 ? `#${entry.index}` : ""
-  const details = [
-    index,
-    childCount > 0 ? `📚 ${childCount}` : "",
-    ...getMarkers(entry),
-  ].filter(Boolean)
+  const details = [index, childCount > 0 ? `📚 ${childCount}` : "", ...getMarkers(entry)].filter(
+    Boolean,
+  )
   const suffix = details.length > 0 ? `  (${details.join(", ")})` : ""
 
   return `${kind} ${truncate(getPreviewTitle(entry), 54)}  ${entry.slug}${suffix}`

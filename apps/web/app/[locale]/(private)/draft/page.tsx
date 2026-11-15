@@ -1,20 +1,14 @@
 import { ArrowRight, ArrowUpRight, MoreHorizontal } from "lucide-react"
-import { IconButton } from "@/components/ui/icon-button"
 import type { Metadata } from "next"
-import {
-  listDrafts,
-  type DraftStatus,
-  type GlossaryDraft,
-  type ArticleDraft,
-} from "@/lib/drafts/store"
-
 import { getTranslations } from "next-intl/server"
+import { Suspense } from "react"
 
 import { deleteDraftAction } from "@/actions/article-draft"
 import { deleteGlossaryDraftAction } from "@/actions/glossary-draft"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageHeader, SectionTitle } from "@/components/ui/headings"
-import { DraftStatusBadge } from "@/components/ui/status"
+import { IconButton } from "@/components/ui/icon-button"
+import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Button } from "@/components/ui/shadcn/button"
 import { Card } from "@/components/ui/shadcn/card"
@@ -23,9 +17,10 @@ import {
   CollapsibleTrigger,
   CollapsibleContent,
 } from "@/components/ui/shadcn/collapsible"
+import { DraftStatusBadge } from "@/components/ui/status"
 import { Link } from "@/i18n/navigation"
-import { guardUser } from "@/lib/auth/guards"
 import { getArticlePullRequest } from "@/lib/articles/pr"
+import { guardUser } from "@/lib/auth/guards"
 import {
   canContinueDraft,
   canDeleteArticleDraft,
@@ -33,8 +28,12 @@ import {
   deriveDisplayStatus,
   isArchivedDraftStatus,
 } from "@/lib/drafts/lifecycle"
-import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
-import { Suspense } from "react"
+import {
+  listDrafts,
+  type DraftStatus,
+  type GlossaryDraft,
+  type ArticleDraft,
+} from "@/lib/drafts/store"
 
 const dateFormatters: Record<string, Intl.DateTimeFormat> = {
   en: new Intl.DateTimeFormat("en", { dateStyle: "medium" }),
@@ -99,9 +98,7 @@ function DraftRecord({
       }`}>
       <div className="min-w-0">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <Badge className="border-tech-main/30 bg-tech-main/5 text-tech-main">
-            [{kindLabel}]
-          </Badge>
+          <Badge className="border-tech-main/30 bg-tech-main/5 text-tech-main">[{kindLabel}]</Badge>
           <DraftStatusBadge status={status} />
           <span className="text-tech-main/55 font-mono text-xs tracking-wider uppercase sm:ml-1">
             {updatedLabel}
@@ -143,16 +140,12 @@ function DraftRecord({
         {deleteAction ? (
           <Collapsible className="w-full text-left sm:w-auto sm:text-right">
             <CollapsibleTrigger asChild>
-              <IconButton
-                label={moreActionsLabelForDraft}
-                title={moreActionsLabel}>
+              <IconButton label={moreActionsLabelForDraft} title={moreActionsLabel}>
                 <MoreHorizontal aria-hidden />
               </IconButton>
             </CollapsibleTrigger>
             <CollapsibleContent className="border-tech-main/20 mt-1 space-y-2 border-t pt-3 sm:w-52">
-              <p className="text-tech-main/65 text-xs leading-relaxed">
-                {deleteWarning}
-              </p>
+              <p className="text-tech-main/65 text-xs leading-relaxed">{deleteWarning}</p>
               <form action={deleteAction}>
                 <Button
                   type="submit"
@@ -175,9 +168,7 @@ function DraftRecord({
 
   return (
     <article>
-      <Card className="hover:border-ring p-0 transition-colors sm:p-0">
-        {content}
-      </Card>
+      <Card className="hover:border-ring p-0 transition-colors sm:p-0">{content}</Card>
     </article>
   )
 }
@@ -194,9 +185,7 @@ export default async function DraftDashboardPage({
     <div className="page-container">
       <PageHeader title={t("pageTitle")} />
 
-      <p className="text-tech-main max-w-2xl text-base leading-relaxed">
-        {t("pageDescription")}
-      </p>
+      <p className="text-tech-main max-w-2xl text-base leading-relaxed">{t("pageDescription")}</p>
 
       <Suspense fallback={<DraftDashboardFallback />}>
         <DraftDashboard locale={locale} />
@@ -232,15 +221,15 @@ async function DraftDashboard({ locale }: { locale: string }) {
         displayStatus,
         fileCount: draft.files.length,
       })
-    })
+    }),
   )
 
   const glossaryDrafts: GlossaryDraftItem[] = glossaryDraftsRaw.map((draft) =>
-    Object.assign({}, draft, { kind: "glossary" as const })
+    Object.assign({}, draft, { kind: "glossary" as const }),
   )
 
   const allItems: DraftItem[] = [...articleDrafts, ...glossaryDrafts].toSorted(
-    (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
+    (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt),
   )
 
   const isArchived = (item: DraftItem) => {
@@ -266,12 +255,8 @@ async function DraftDashboard({ locale }: { locale: string }) {
       : t("changesCount", {
           count: Array.isArray(item.operations) ? item.operations.length : 0,
         })
-    const href = isArticle
-      ? (`/draft/${item.id}` as const)
-      : (`/glossary/edit/${item.id}` as const)
-    const canDelete = isArticle
-      ? canDeleteArticleDraft(item, status)
-      : canDeleteDraft(item)
+    const href = isArticle ? (`/draft/${item.id}` as const) : (`/glossary/edit/${item.id}` as const)
+    const canDelete = isArticle ? canDeleteArticleDraft(item, status) : canDeleteDraft(item)
 
     const deleteAction =
       !history && canDelete
@@ -322,20 +307,14 @@ async function DraftDashboard({ locale }: { locale: string }) {
         {activeItems.length === 0 ? (
           <EmptyState message={t("noActiveTitle")} className="py-12" />
         ) : (
-          <div className="space-y-4">
-            {activeItems.map((item) => renderRecord(item))}
-          </div>
+          <div className="space-y-4">{activeItems.map((item) => renderRecord(item))}</div>
         )}
       </section>
 
       <aside className="lg:sticky lg:top-28 lg:col-start-2 lg:row-span-2 lg:row-start-1">
         <Card className="border-t-tech-signal border-t-2">
-          <p className="text-tech-main/60 text-xs font-medium">
-            {t("newDraftLabel")}
-          </p>
-          <h2 className="display-title text-tech-main-dark mt-2 text-2xl">
-            {t("newDraftTitle")}
-          </h2>
+          <p className="text-tech-main/60 text-xs font-medium">{t("newDraftLabel")}</p>
+          <h2 className="display-title text-tech-main-dark mt-2 text-2xl">{t("newDraftTitle")}</h2>
           <p className="text-tech-main/75 mt-3 text-sm leading-relaxed">
             {t("newDraftDescription")}
           </p>
@@ -347,10 +326,7 @@ async function DraftDashboard({ locale }: { locale: string }) {
                 <ArrowRight aria-hidden="true" />
               </Link>
             </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="w-full justify-between">
+            <Button asChild variant="outline" className="w-full justify-between">
               <Link href="/glossary/edit/new">
                 <span>{t("newGlossary")}</span>
                 <ArrowRight aria-hidden="true" />
@@ -404,16 +380,8 @@ function DraftDashboardFallback() {
           <SegmentedBar opacity="high" className="mt-3 h-7 w-4/5" />
           <SegmentedBar opacity="medium" className="mt-4 h-4 w-full" />
           <SegmentedBar opacity="low" className="mt-2 h-4 w-3/4" />
-          <SegmentedBar
-            opacity="high"
-            showBorder
-            className="mt-6 h-11 w-full"
-          />
-          <SegmentedBar
-            opacity="medium"
-            showBorder
-            className="mt-3 h-11 w-full"
-          />
+          <SegmentedBar opacity="high" showBorder className="mt-6 h-11 w-full" />
+          <SegmentedBar opacity="medium" showBorder className="mt-3 h-11 w-full" />
         </Card>
       </aside>
     </div>

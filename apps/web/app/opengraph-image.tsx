@@ -1,10 +1,6 @@
 import { createOgImage } from "@/lib/og/image"
 
-if (
-  process.env.NODE_ENV === "production" &&
-  !process.env.CI &&
-  !process.env.VERCEL
-) {
+if (process.env.NODE_ENV === "production" && !process.env.CI && !process.env.VERCEL) {
   process.env.VERCEL = "0"
 }
 

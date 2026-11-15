@@ -1,10 +1,11 @@
+import type { ArticleLocale } from "@gtmc/ssg/articles/types"
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
-import { Link } from "@/i18n/navigation"
+
 import { PdfCoverPreview } from "@/components/mdx/pdf-cover-preview"
-import { toAbsoluteUrl } from "@/lib/site-url"
+import { Link } from "@/i18n/navigation"
 import { getManifestStats } from "@/lib/articles/manifest"
-import type { ArticleLocale } from "@gtmc/ssg/articles/types"
+import { toAbsoluteUrl } from "@/lib/site-url"
 
 function formatRevisionDate(iso: string, locale: string): string {
   return new Intl.DateTimeFormat(locale, {
@@ -58,19 +59,13 @@ export async function generateMetadata({
   }
 }
 
-export default async function PdfPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
+export default async function PdfPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   const articleLocale = locale as ArticleLocale
   const t = await getTranslations({ locale, namespace: "Pdf" })
   const filename = `gtmc-${articleLocale}.pdf`
   const stats = getManifestStats(articleLocale)
-  const lastRevision = stats.lastRevision
-    ? formatRevisionDate(stats.lastRevision, locale)
-    : null
+  const lastRevision = stats.lastRevision ? formatRevisionDate(stats.lastRevision, locale) : null
 
   return (
     <div className="page-container-pb flex w-full flex-1 flex-col justify-center">
@@ -79,9 +74,7 @@ export default async function PdfPage({
           <h1 className="display-title text-tech-main-dark text-3xl text-balance md:text-4xl">
             {t("bookTitle")}
           </h1>
-          <p className="text-tech-main mt-2 text-base/relaxed">
-            {t("bookSubtitle")}
-          </p>
+          <p className="text-tech-main mt-2 text-base/relaxed">{t("bookSubtitle")}</p>
 
           <div className="mt-8 w-full">
             <PdfCoverPreview filename={filename} />

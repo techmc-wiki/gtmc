@@ -1,14 +1,11 @@
-import { cn } from "@/lib/cn"
-import Image from "next/image"
 import { ArrowRight } from "lucide-react"
-import { Link } from "@/i18n/navigation"
+import Image from "next/image"
+
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/shadcn/avatar"
 import { Card } from "@/components/ui/shadcn/card"
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-} from "@/components/ui/shadcn/avatar"
+import { Link } from "@/i18n/navigation"
 import type { ResolvedPerson } from "@/lib/articles/people"
+import { cn } from "@/lib/cn"
 
 export interface AuthorGridItem {
   handle: string
@@ -47,16 +44,8 @@ export function AuthorGrid({
             href={`/authors/${encodeURIComponent(handle)}`}
             className="group/link focus-visible:outline-tech-main block focus-visible:outline-2 focus-visible:outline-offset-2">
             <Card
-              className={cn(
-                "sm:p-4 transition-colors hover:border-ring",
-                !isCompact && "h-full"
-              )}>
-              <div
-                className={
-                  isCompact
-                    ? "flex items-center gap-3"
-                    : "flex items-start gap-3"
-                }>
+              className={cn("sm:p-4 transition-colors hover:border-ring", !isCompact && "h-full")}>
+              <div className={isCompact ? "flex items-center gap-3" : "flex items-start gap-3"}>
                 <div className={`shrink-0 ${isCompact ? "size-9" : "size-12"}`}>
                   <Avatar className="border-tech-main/60 bg-tech-main/10 ring-tech-main/20 relative box-border flex aspect-square size-full items-center justify-center overflow-hidden border-2 p-1 ring-1">
                     {person.profile ? (
@@ -78,12 +67,8 @@ export function AuthorGrid({
                   </Avatar>
                 </div>
                 <div className={isCompact ? "min-w-0" : "min-w-0 flex-1"}>
-                  <p className="text-tech-main-dark truncate text-sm font-medium">
-                    {person.name}
-                  </p>
-                  <p className="text-tech-main/60 truncate font-mono text-xs">
-                    @{handle}
-                  </p>
+                  <p className="text-tech-main-dark truncate text-sm font-medium">{person.name}</p>
+                  <p className="text-tech-main/60 truncate font-mono text-xs">@{handle}</p>
                   {!isCompact && (
                     <>
                       <p className="text-tech-main mt-1 line-clamp-2 text-xs/relaxed">

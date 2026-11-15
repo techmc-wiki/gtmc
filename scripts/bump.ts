@@ -21,7 +21,7 @@ function git(args: string[], cwd?: string): string {
   } catch (error: unknown) {
     const err = error as { stderr?: string; message?: string }
     const message = err.stderr ? err.stderr.trim() : (err.message ?? String(error))
-    throw new Error(`git ${args.join(" ")} failed: ${message}`)
+    throw new Error(`git ${args.join(" ")} failed: ${message}`, { cause: error })
   }
 }
 
@@ -92,7 +92,7 @@ function main(): void {
   const defaultBranch = getDefaultBranch(repoRoot)
   if (currentBranch !== defaultBranch) {
     console.error(
-      `Error: bump can only be run on the default branch ("${defaultBranch}"). Currently on "${currentBranch}".`
+      `Error: bump can only be run on the default branch ("${defaultBranch}"). Currently on "${currentBranch}".`,
     )
     process.exit(1)
   }

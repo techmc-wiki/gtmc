@@ -1,27 +1,15 @@
 "use client"
 
+import { Plus, Search } from "lucide-react"
 import * as React from "react"
 import { useCallback, useMemo, useState } from "react"
-import { Plus, Search } from "lucide-react"
 
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/shadcn/popover"
-import {
-  Command,
-  CommandList,
-  CommandItem,
-} from "@/components/ui/shadcn/command"
+import { Command, CommandList, CommandItem } from "@/components/ui/shadcn/command"
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/shadcn/input-group"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/shadcn/popover"
 import { Separator } from "@/components/ui/shadcn/separator"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/shadcn/input-group"
-import type { GlossarySummaryEntry } from "@/lib/glossary/manifest"
 import { cn } from "@/lib/cn"
+import type { GlossarySummaryEntry } from "@/lib/glossary/manifest"
 
 const MAX_RESULTS = 10
 
@@ -67,7 +55,7 @@ export function GlossaryRowPicker({
       setQuery("")
       setIsOpen(false)
     },
-    [onPick]
+    [onPick],
   )
 
   const handleAddNew = useCallback(() => {
@@ -116,9 +104,7 @@ export function GlossaryRowPicker({
                     onSelect={() => handlePick(entry.slug)}
                     className="cursor-pointer px-3.5 py-2">
                     <div>
-                      <div className="text-foreground text-sm font-medium">
-                        {entry.fullFormEn}
-                      </div>
+                      <div className="text-foreground text-sm font-medium">{entry.fullFormEn}</div>
                       <div className="text-muted-foreground mt-0.5 flex items-center gap-1.5 text-xs">
                         {entry.shortForm && <span>{entry.shortForm}</span>}
                         {entry.shortForm && entry.categories.length > 0 && (
@@ -127,9 +113,7 @@ export function GlossaryRowPicker({
                             className="bg-muted-foreground/40 h-3"
                           />
                         )}
-                        {entry.categories.length > 0 && (
-                          <span>{entry.categories.join("; ")}</span>
-                        )}
+                        {entry.categories.length > 0 && <span>{entry.categories.join("; ")}</span>}
                       </div>
                     </div>
                   </CommandItem>

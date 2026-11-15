@@ -10,7 +10,7 @@ import type { BookPlan } from "./types"
  */
 export function assembleBookPlan(
   articles: LinearizedArticle[],
-  hasContent: (slug: string) => boolean
+  hasContent: (slug: string) => boolean,
 ): BookPlan {
   return buildBookPlan(articles.filter((article) => hasContent(article.slug)))
 }

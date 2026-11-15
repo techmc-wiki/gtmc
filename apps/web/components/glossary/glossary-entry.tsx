@@ -1,12 +1,10 @@
 "use client"
 
-import { useTranslations } from "next-intl"
 import { Asterisk } from "lucide-react"
+import { useTranslations } from "next-intl"
+
 import { cn } from "@/lib/cn"
-import {
-  getPrimaryGlossaryContent,
-  type GlossaryIndexEntry,
-} from "@/lib/glossary/localized-index"
+import { getPrimaryGlossaryContent, type GlossaryIndexEntry } from "@/lib/glossary/localized-index"
 import type { GlossaryColumn } from "@/lib/glossary/view-options"
 
 interface GlossaryEntryViewProps {
@@ -50,7 +48,7 @@ export function GlossaryCard({
         isReady
           ? "transition-[padding,gap,border-color,background-color] duration-300"
           : "transition-[border-color,background-color] duration-150",
-        className
+        className,
       )}>
       <header className="flex items-baseline justify-between gap-3">
         <a
@@ -62,21 +60,15 @@ export function GlossaryCard({
           }}
           className={cn(termTriggerClass, "text-base leading-snug")}>
           {primaryContent.value}
-          {entry.isControversial && (
-            <ControversialMark label={t("controversialBadge")} />
-          )}
+          {entry.isControversial && <ControversialMark label={t("controversialBadge")} />}
         </a>
         {showShortForm && entry.shortForm && (
-          <span className="text-tech-main/60 shrink-0 font-mono text-xs">
-            {entry.shortForm}
-          </span>
+          <span className="text-tech-main/60 shrink-0 font-mono text-xs">{entry.shortForm}</span>
         )}
       </header>
 
       {showDescription && primaryContent.description && (
-        <p className="text-tech-main/80 line-clamp-2 text-sm">
-          {primaryContent.description}
-        </p>
+        <p className="text-tech-main/80 line-clamp-2 text-sm">{primaryContent.description}</p>
       )}
     </article>
   )
@@ -93,28 +85,21 @@ export function GlossaryTableRow({
 }: GlossaryEntryViewProps) {
   const t = useTranslations("Glossary")
   const primaryContent = getPrimaryGlossaryContent(entry, locale)
-  const cellClass = cn(
-    cellBase,
-    isReady && "transition-[padding] duration-300 ease-out"
-  )
+  const cellClass = cn(cellBase, isReady && "transition-[padding] duration-300 ease-out")
 
   return (
     <tr className="border-tech-line/10 hover:bg-tech-accent/5 border-b transition-colors duration-150">
       {visibleColumns.map((column) => {
         if (column === "shortForm") {
           return (
-            <td
-              key={column}
-              className={cn(cellClass, "text-tech-main/70 font-mono text-xs")}>
+            <td key={column} className={cn(cellClass, "text-tech-main/70 font-mono text-xs")}>
               {entry.shortForm || ""}
             </td>
           )
         }
         if (column === "description") {
           return (
-            <td
-              key={column}
-              className={cn(cellClass, "text-tech-main/80 max-w-[36rem]")}>
+            <td key={column} className={cn(cellClass, "text-tech-main/80 max-w-[36rem]")}>
               <span className="line-clamp-2">{primaryContent.description}</span>
             </td>
           )
@@ -131,9 +116,7 @@ export function GlossaryTableRow({
               className={cn(termTriggerClass, "tracking-tight")}>
               {primaryContent.value}
             </a>
-            {entry.isControversial && (
-              <ControversialMark label={t("controversialBadge")} />
-            )}
+            {entry.isControversial && <ControversialMark label={t("controversialBadge")} />}
           </td>
         )
       })}

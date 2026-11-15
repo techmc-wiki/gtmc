@@ -3,12 +3,12 @@
  * article requests and the GitHub repository content tree.
  */
 export interface ArticleTreeNode {
-  id: string;
-  title: string;
-  slug: string;
-  isFolder: boolean;
-  introTitle?: string;
-  isAdvanced?: boolean;
-  parentId: string | null;
-  children: ArticleTreeNode[];
+  id: string
+  title: string
+  slug: string
+  isFolder: boolean
+  introTitle?: string
+  isAdvanced?: boolean
+  parentId: string | null
+  children: ArticleTreeNode[]
 }

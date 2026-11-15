@@ -1,28 +1,22 @@
 "use client"
 
 import { ChevronRight, X } from "lucide-react"
-import { IconButton } from "@/components/ui/icon-button"
-
+import { useTranslations } from "next-intl"
 import * as React from "react"
 import useSWR from "swr"
-import { useTranslations } from "next-intl"
 
+import { IconButton } from "@/components/ui/icon-button"
 import { Button } from "@/components/ui/shadcn/button"
-import { Input } from "@/components/ui/shadcn/input"
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/shadcn/tabs"
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/shadcn/dialog"
-import type { DraftRepoTreeNode } from "@/lib/drafts/repo-tree"
+import { Input } from "@/components/ui/shadcn/input"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/shadcn/tabs"
 import { normalizeDraftFilePath } from "@/lib/drafts/files"
+import type { DraftRepoTreeNode } from "@/lib/drafts/repo-tree"
 
 async function fetchDraftRepoTree() {
   const response = await fetch("/api/draft/repo-tree", {
@@ -47,10 +41,7 @@ interface DraftFileSourceDialogProps {
   initialMode?: SourceMode
   onClose: () => void
   onCreateFolder?: (folderPath: string) => boolean | Promise<boolean>
-  onCreate: (input: {
-    content: string
-    filePath: string
-  }) => boolean | Promise<boolean>
+  onCreate: (input: { content: string; filePath: string }) => boolean | Promise<boolean>
 }
 
 export type SourceMode = "folder" | "repo" | "upload" | "new"
@@ -74,12 +65,10 @@ function useDraftFileSourceDialog({
   const t = useTranslations("DraftFiles")
   const [mode, setMode] = React.useState<SourceMode>(initialMode)
   const [expandedPaths, setExpandedPaths] = React.useState<Set<string>>(
-    () => new Set(["", initialFolderPath || ""])
+    () => new Set(["", initialFolderPath || ""]),
   )
   const [selectedRepoFilePath, setSelectedRepoFilePath] = React.useState("")
-  const [selectedFolderPath, setSelectedFolderPath] = React.useState(
-    initialFolderPath || ""
-  )
+  const [selectedFolderPath, setSelectedFolderPath] = React.useState(initialFolderPath || "")
   const [newFileName, setNewFileName] = React.useState("")
   const [newFolderName, setNewFolderName] = React.useState("")
   const [localFile, setLocalFile] = React.useState<File | null>(null)
@@ -91,24 +80,17 @@ function useDraftFileSourceDialog({
       { value: "repo" as const, label: t("modeRepo") },
       { value: "upload" as const, label: t("modeLocal") },
       { value: "new" as const, label: t("modeNew") },
-      ...(onCreateFolder
-        ? [{ value: "folder" as const, label: t("modeFolder") }]
-        : []),
+      ...(onCreateFolder ? [{ value: "folder" as const, label: t("modeFolder") }] : []),
     ],
-    [t, onCreateFolder]
+    [t, onCreateFolder],
   )
 
   const {
     data: tree = [],
     error: treeFetchError,
     isLoading: isLoadingTree,
-  } = useSWR<DraftRepoTreeNode[]>(
-    isOpen ? "/api/draft/repo-tree" : null,
-    fetchDraftRepoTree
-  )
-  const [localTreeError, setLocalTreeError] = React.useState<string | null>(
-    null
-  )
+  } = useSWR<DraftRepoTreeNode[]>(isOpen ? "/api/draft/repo-tree" : null, fetchDraftRepoTree)
+  const [localTreeError, setLocalTreeError] = React.useState<string | null>(null)
   const treeError = treeFetchError
     ? treeFetchError instanceof Error
       ? treeFetchError.message
@@ -136,7 +118,7 @@ function useDraftFileSourceDialog({
     try {
       const response = await fetch(
         `/api/draft/repo-file?path=${encodeURIComponent(selectedRepoFilePath)}`,
-        { cache: "no-store" }
+        { cache: "no-store" },
       )
       const data = (await response.json()) as {
         content?: string
@@ -187,9 +169,7 @@ function useDraftFileSourceDialog({
       return
     }
 
-    const folderPath = [selectedFolderPath, normalizedFolderName]
-      .filter(Boolean)
-      .join("/")
+    const folderPath = [selectedFolderPath, normalizedFolderName].filter(Boolean).join("/")
 
     Promise.resolve(onCreateFolder(folderPath)).then((created) => {
       if (created) {
@@ -226,31 +206,25 @@ function useDraftFileSourceDialog({
     }
   }, [localFile, customUploadName, selectedFolderPath, onCreate, onClose, t])
 
-  const handleFileInputChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0] || null
-      setLocalFile(file)
-      setCustomUploadName(file?.name || "")
-    },
-    []
-  )
+  const handleFileInputChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null
+    setLocalFile(file)
+    setCustomUploadName(file?.name || "")
+  }, [])
 
   const handleNewFileNameChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) =>
-      setNewFileName(event.target.value),
-    []
+    (event: React.ChangeEvent<HTMLInputElement>) => setNewFileName(event.target.value),
+    [],
   )
 
   const handleNewFolderNameChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) =>
-      setNewFolderName(event.target.value),
-    []
+    (event: React.ChangeEvent<HTMLInputElement>) => setNewFolderName(event.target.value),
+    [],
   )
 
   const handleCustomUploadNameChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) =>
-      setCustomUploadName(event.target.value),
-    []
+    (event: React.ChangeEvent<HTMLInputElement>) => setCustomUploadName(event.target.value),
+    [],
   )
 
   return {
@@ -309,9 +283,7 @@ function DraftFileSourceDialogLayout({
   onClose: () => void
 }) {
   const t = useTranslations("DraftFiles")
-  const treeRoots = [
-    { ...ROOT_NODE, title: t("rootFolder"), children: dialog.tree },
-  ]
+  const treeRoots = [{ ...ROOT_NODE, title: t("rootFolder"), children: dialog.tree }]
 
   return (
     <Dialog
@@ -331,11 +303,7 @@ function DraftFileSourceDialogLayout({
               {description || t("dialogSubtitle")}
             </DialogDescription>
           </div>
-          <IconButton
-            type="button"
-            variant="ghost"
-            onClick={onClose}
-            label={t("close")}>
+          <IconButton type="button" variant="ghost" onClick={onClose} label={t("close")}>
             <X aria-hidden />
           </IconButton>
         </div>
@@ -346,9 +314,7 @@ function DraftFileSourceDialogLayout({
             </div>
             <div className="max-h-40 flex-1 overflow-y-auto p-3 lg:max-h-[60dvh]">
               {dialog.isLoadingTree ? (
-                <p className="text-muted-foreground text-sm">
-                  {t("loadingRepo")}
-                </p>
+                <p className="text-muted-foreground text-sm">{t("loadingRepo")}</p>
               ) : (
                 <div className="space-y-1">
                   {treeRoots.map((node) => (
@@ -375,11 +341,7 @@ function DraftFileSourceDialogLayout({
   )
 }
 
-function DraftFileSourcePanels({
-  dialog,
-}: {
-  dialog: DraftFileSourceDialogState
-}) {
+function DraftFileSourcePanels({ dialog }: { dialog: DraftFileSourceDialogState }) {
   const t = useTranslations("DraftFiles")
   return (
     <div className="min-h-0 overflow-y-auto p-5">
@@ -389,10 +351,7 @@ function DraftFileSourcePanels({
         className="gap-2">
         <TabsList className="flex-wrap" aria-label={t("sourceModeLabel")}>
           {dialog.sourceModeOptions.map((option) => (
-            <TabsTrigger
-              key={option.value}
-              value={option.value}
-              className="min-h-11">
+            <TabsTrigger key={option.value} value={option.value} className="min-h-11">
               {option.label}
             </TabsTrigger>
           ))}
@@ -405,21 +364,16 @@ function DraftFileSourcePanels({
         <TabsContent value="repo" className="space-y-4">
           <SectionLabel>{t("selectExistingFile")}</SectionLabel>
           <p className="text-tech-main/60 text-xs">
-            {t("selected")}:{" "}
-            {dialog.selectedRepoFilePath || t("nothingSelected")}
+            {t("selected")}: {dialog.selectedRepoFilePath || t("nothingSelected")}
           </p>
-          <Button
-            type="button"
-            onClick={dialog.handleAddRepoFile}
-            disabled={!dialog.canSubmitRepo}>
+          <Button type="button" onClick={dialog.handleAddRepoFile} disabled={!dialog.canSubmitRepo}>
             {dialog.isSubmitting ? t("adding") : t("addExistingFile")}
           </Button>
         </TabsContent>
         <TabsContent value="upload" className="space-y-4">
           <SectionLabel>{t("importLocalText")}</SectionLabel>
           <p className="text-tech-main/60 text-xs">
-            {t("destinationFolder")}:{" "}
-            {dialog.selectedFolderPath || t("rootFolder")}
+            {t("destinationFolder")}: {dialog.selectedFolderPath || t("rootFolder")}
           </p>
           <input
             type="file"
@@ -429,9 +383,7 @@ function DraftFileSourcePanels({
             onChange={dialog.handleFileInputChange}
           />
           <div className="space-y-2">
-            <label
-              className="text-tech-main/60 text-xs font-medium"
-              htmlFor="draft-import-name">
+            <label className="text-tech-main/60 text-xs font-medium" htmlFor="draft-import-name">
               {t("fileNameLabel")}
             </label>
             <Input
@@ -451,13 +403,10 @@ function DraftFileSourcePanels({
         <TabsContent value="new" className="space-y-4">
           <SectionLabel>{t("createNewFile")}</SectionLabel>
           <p className="text-tech-main/60 text-xs">
-            {t("destinationFolder")}:{" "}
-            {dialog.selectedFolderPath || t("rootFolder")}
+            {t("destinationFolder")}: {dialog.selectedFolderPath || t("rootFolder")}
           </p>
           <div className="space-y-2">
-            <label
-              className="text-tech-main/60 text-xs font-medium"
-              htmlFor="draft-new-file-name">
+            <label className="text-tech-main/60 text-xs font-medium" htmlFor="draft-new-file-name">
               {t("fileNameLabel")}
             </label>
             <Input
@@ -469,10 +418,7 @@ function DraftFileSourcePanels({
           </div>
           <div className="text-tech-main/60 text-xs">
             {t("result")}:{" "}
-            {buildDraftFilePath(
-              dialog.selectedFolderPath,
-              dialog.newFileName
-            ) || t("pending")}
+            {buildDraftFilePath(dialog.selectedFolderPath, dialog.newFileName) || t("pending")}
           </div>
           <Button
             type="button"
@@ -484,8 +430,7 @@ function DraftFileSourcePanels({
         <TabsContent value="folder" className="space-y-4">
           <SectionLabel>{t("modeFolder")}</SectionLabel>
           <p className="text-tech-main/60 text-xs">
-            {t("destinationFolder")}:{" "}
-            {dialog.selectedFolderPath || t("rootFolder")}
+            {t("destinationFolder")}: {dialog.selectedFolderPath || t("rootFolder")}
           </p>
           <div className="space-y-2">
             <label
@@ -502,9 +447,8 @@ function DraftFileSourcePanels({
           </div>
           <div className="text-tech-main/60 text-xs">
             {t("result")}:{" "}
-            {[dialog.selectedFolderPath, dialog.newFolderName.trim()]
-              .filter(Boolean)
-              .join("/") || t("pending")}
+            {[dialog.selectedFolderPath, dialog.newFolderName.trim()].filter(Boolean).join("/") ||
+              t("pending")}
           </div>
           <Button
             type="button"
@@ -544,9 +488,7 @@ function TreeNodeToggle({
 }) {
   const t = useTranslations("DraftFiles")
   if (!node.isFolder) {
-    return (
-      <span className="inline-flex size-11 shrink-0 items-center justify-center" />
-    )
+    return <span className="inline-flex size-11 shrink-0 items-center justify-center" />
   }
 
   return (
@@ -610,14 +552,10 @@ function TreeNode({
   const isExpanded = expandedPaths.has(node.path)
   const isFolderSelected = selectedFolderPath === node.path
   const isFileSelected = selectedFilePath === node.path
-  const isSelectableFolder =
-    mode === "new" || mode === "upload" || mode === "folder"
+  const isSelectableFolder = mode === "new" || mode === "upload" || mode === "folder"
   const isSelectableFile = mode === "repo"
 
-  const handleToggle = React.useCallback(
-    () => onTogglePath(node.path),
-    [onTogglePath, node.path]
-  )
+  const handleToggle = React.useCallback(() => onTogglePath(node.path), [onTogglePath, node.path])
 
   const handleSelect = React.useCallback(() => {
     if (node.isFolder && isSelectableFolder) {
@@ -628,23 +566,12 @@ function TreeNode({
     if (!node.isFolder && isSelectableFile) {
       onSelectFile(node.path)
     }
-  }, [
-    node.isFolder,
-    node.path,
-    isSelectableFolder,
-    isSelectableFile,
-    onSelectFolder,
-    onSelectFile,
-  ])
+  }, [node.isFolder, node.path, isSelectableFolder, isSelectableFile, onSelectFolder, onSelectFile])
 
   return (
     <div className="space-y-0.5">
       <div className="group relative flex items-center">
-        <TreeNodeToggle
-          isExpanded={isExpanded}
-          node={node}
-          onToggle={handleToggle}
-        />
+        <TreeNodeToggle isExpanded={isExpanded} node={node} onToggle={handleToggle} />
 
         <button
           type="button"
@@ -683,17 +610,12 @@ function TreeNode({
 
 function buildDraftFilePath(folderPath: string, rawFileName: string) {
   const normalizedFolder = normalizeDraftFilePath(folderPath)
-  const sanitizedName = normalizeDraftFilePath(rawFileName)
-    .replace(/\/$/, "")
-    .split("/")
-    .pop()
+  const sanitizedName = normalizeDraftFilePath(rawFileName).replace(/\/$/, "").split("/").pop()
 
   if (!sanitizedName) {
     return ""
   }
 
-  const fileName = sanitizedName.endsWith(".md")
-    ? sanitizedName
-    : `${sanitizedName}.md`
+  const fileName = sanitizedName.endsWith(".md") ? sanitizedName : `${sanitizedName}.md`
   return normalizedFolder ? `${normalizedFolder}/${fileName}` : fileName
 }

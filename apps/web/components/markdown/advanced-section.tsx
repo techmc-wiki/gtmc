@@ -1,22 +1,16 @@
-import { useId, type ReactNode } from "react"
 import { ArrowDown } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useId, type ReactNode } from "react"
 
-import { Button } from "@/components/ui/shadcn/button"
 import { AdvancedMarker } from "@/components/articles/advanced-marker"
+import { Button } from "@/components/ui/shadcn/button"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
 
 /**
  * Mid-article deep dives reuse the advanced marker and expose a skip target so
  * readers can bypass optional content without an extra badge or action row.
  */
-function AdvancedSection({
-  children,
-  headingId,
-}: {
-  children: ReactNode
-  headingId?: string
-}) {
+function AdvancedSection({ children, headingId }: { children: ReactNode; headingId?: string }) {
   const t = useTranslations("AdvancedReading")
   const fallbackId = useId()
   const endId = `advanced-end-${headingId ?? fallbackId}`
@@ -62,11 +56,7 @@ export function AdvancedSectionDivComponent({
   if (dataAdvancedSection === "true") {
     return (
       <AdvancedSection
-        headingId={
-          typeof dataAdvancedHeading === "string"
-            ? dataAdvancedHeading
-            : undefined
-        }>
+        headingId={typeof dataAdvancedHeading === "string" ? dataAdvancedHeading : undefined}>
         {children}
       </AdvancedSection>
     )

@@ -9,14 +9,13 @@
 :root {
   color-scheme: light;
   --font-sans:
-    var(--font-geist-sans), var(--font-noto-sans-sc, "PingFang SC"),
-    "Microsoft YaHei", "微软雅黑", sans-serif;
+    var(--font-geist-sans), var(--font-noto-sans-sc, "PingFang SC"), "Microsoft YaHei", "微软雅黑",
+    sans-serif;
   --font-mono:
-    var(--font-geist-mono), "SF Mono", "Consolas", "Noto Sans Mono SC",
-    "PingFang Mono", "Microsoft YaHei Mono", monospace;
+    var(--font-geist-mono), "SF Mono", "Consolas", "Noto Sans Mono SC", "PingFang Mono",
+    "Microsoft YaHei Mono", monospace;
   --font-serif:
-    var(--font-stix-two-text), var(--font-noto-serif-sc, "Songti SC"), "STSong",
-    Georgia, serif;
+    var(--font-stix-two-text), var(--font-noto-serif-sc, "Songti SC"), "STSong", Georgia, serif;
   --color-tech-bg: #f5f4ef;
   --color-tech-main: #4a5468;
   --color-tech-main-dark: #20283c;
@@ -81,14 +80,13 @@ html {
 
 @theme {
   --font-sans:
-    var(--font-geist-sans), var(--font-noto-sans-sc, "PingFang SC"),
-    "Microsoft YaHei", "微软雅黑", sans-serif;
+    var(--font-geist-sans), var(--font-noto-sans-sc, "PingFang SC"), "Microsoft YaHei", "微软雅黑",
+    sans-serif;
   --font-mono:
-    var(--font-geist-mono), "SF Mono", "Consolas", "Noto Sans Mono SC",
-    "PingFang Mono", "Microsoft YaHei Mono", monospace;
+    var(--font-geist-mono), "SF Mono", "Consolas", "Noto Sans Mono SC", "PingFang Mono",
+    "Microsoft YaHei Mono", monospace;
   --font-serif:
-    var(--font-stix-two-text), var(--font-noto-serif-sc, "Songti SC"), "STSong",
-    Georgia, serif;
+    var(--font-stix-two-text), var(--font-noto-serif-sc, "Songti SC"), "STSong", Georgia, serif;
   --color-tech-bg: #f5f4ef;
   --color-tech-main: #4a5468;
   --color-tech-main-dark: #20283c;
@@ -286,10 +284,7 @@ html {
 
 body {
   background-color: var(--background);
-  background-image: radial-gradient(
-    var(--color-tech-line) 1px,
-    transparent 1px
-  );
+  background-image: radial-gradient(var(--color-tech-line) 1px, transparent 1px);
   background-size: clamp(20px, 5vw, 40px) clamp(20px, 5vw, 40px);
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
@@ -329,12 +324,7 @@ body {
    */
   html {
     scrollbar-width: thin;
-    scrollbar-color: color-mix(
-        in oklab,
-        var(--color-tech-main) 38%,
-        transparent
-      )
-      transparent;
+    scrollbar-color: color-mix(in oklab, var(--color-tech-main) 38%, transparent) transparent;
   }
 
   *::-webkit-scrollbar {
@@ -347,22 +337,14 @@ body {
   }
 
   *::-webkit-scrollbar-thumb {
-    background-color: color-mix(
-      in oklab,
-      var(--color-tech-main) 32%,
-      transparent
-    );
+    background-color: color-mix(in oklab, var(--color-tech-main) 32%, transparent);
     border: 2px solid transparent;
     background-clip: padding-box;
     border-radius: 0;
   }
 
   *::-webkit-scrollbar-thumb:hover {
-    background-color: color-mix(
-      in oklab,
-      var(--color-tech-main-dark) 60%,
-      transparent
-    );
+    background-color: color-mix(in oklab, var(--color-tech-main-dark) 60%, transparent);
     background-clip: padding-box;
   }
 
@@ -419,21 +401,13 @@ body {
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: color-mix(
-      in oklab,
-      var(--color-tech-main) 30%,
-      transparent
-    );
+    background-color: color-mix(in oklab, var(--color-tech-main) 30%, transparent);
     border-radius: 0;
     opacity: 0.5;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: color-mix(
-      in oklab,
-      var(--color-tech-main-dark) 70%,
-      transparent
-    );
+    background-color: color-mix(in oklab, var(--color-tech-main-dark) 70%, transparent);
   }
 }
 
@@ -447,26 +421,17 @@ body {
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: color-mix(
-      in oklab,
-      var(--color-tech-main) 30%,
-      transparent
-    );
+    background-color: color-mix(in oklab, var(--color-tech-main) 30%, transparent);
     border-radius: 0;
     opacity: 0.5;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: color-mix(
-      in oklab,
-      var(--color-tech-main-dark) 70%,
-      transparent
-    );
+    background-color: color-mix(in oklab, var(--color-tech-main-dark) 70%, transparent);
   }
 
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in oklab, var(--color-tech-main) 40%, transparent)
-    transparent;
+  scrollbar-color: color-mix(in oklab, var(--color-tech-main) 40%, transparent) transparent;
 }
 
 @utility custom-left-scrollbar {
@@ -482,25 +447,16 @@ body {
 
   &::-webkit-scrollbar-track {
     background: transparent;
-    border-right: 1px dashed
-      color-mix(in oklab, var(--color-tech-main) 20%, transparent);
+    border-right: 1px dashed color-mix(in oklab, var(--color-tech-main) 20%, transparent);
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: color-mix(
-      in oklab,
-      var(--color-tech-main) 40%,
-      transparent
-    );
+    background-color: color-mix(in oklab, var(--color-tech-main) 40%, transparent);
     border-radius: 0;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: color-mix(
-      in oklab,
-      var(--color-tech-main) 80%,
-      transparent
-    );
+    background-color: color-mix(in oklab, var(--color-tech-main) 80%, transparent);
   }
 }
 
@@ -584,9 +540,7 @@ code .line {
 }
 
 .code-block-pre[data-wrapped="true"] .line {
-  padding-left: calc(
-    var(--line-num-width, 2.75rem) + 1rem + var(--line-indent, 0ch)
-  );
+  padding-left: calc(var(--line-num-width, 2.75rem) + 1rem + var(--line-indent, 0ch));
   text-indent: calc(-1 * var(--line-indent, 0ch));
 }
 
@@ -599,8 +553,7 @@ code .line {
   width: var(--line-num-width, 2.75rem);
   text-align: right;
   padding-right: 0.5rem;
-  border-right: 1px solid
-    color-mix(in srgb, var(--color-tech-main) 20%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--color-tech-main) 20%, transparent);
   color: var(--color-tech-main);
   opacity: 0.4;
   user-select: none;

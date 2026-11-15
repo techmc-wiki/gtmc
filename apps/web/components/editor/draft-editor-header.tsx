@@ -1,7 +1,5 @@
 "use client"
 
-import { useTranslations } from "next-intl"
-import { Button } from "@/components/ui/shadcn/button"
 import {
   CheckIcon,
   CircleAlertIcon,
@@ -10,7 +8,10 @@ import {
   ArrowRightIcon,
   BookOpenIcon,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
+
 import { IconButton } from "@/components/ui/icon-button"
+import { Button } from "@/components/ui/shadcn/button"
 import { Input } from "@/components/ui/shadcn/input"
 
 export type DraftEditorStatus =
@@ -51,9 +52,7 @@ export function DraftEditorHeader({
   return (
     <header className="border-tech-main/25 flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
       <div className="min-w-0 flex-1 space-y-1">
-        <label
-          htmlFor="draft-title"
-          className="text-tech-main/60 text-xs font-medium">
+        <label htmlFor="draft-title" className="text-tech-main/60 text-xs font-medium">
           {t("titleLabel")}
         </label>
         <Input
@@ -114,10 +113,7 @@ export function DraftEditorHeader({
             </Button>
           </>
         ) : canResume ? (
-          <Button
-            onClick={submit.onClick}
-            disabled={submit.disabled}
-            aria-busy={submit.busy}>
+          <Button onClick={submit.onClick} disabled={submit.disabled} aria-busy={submit.busy}>
             {t("resumeSubmission")}
           </Button>
         ) : (

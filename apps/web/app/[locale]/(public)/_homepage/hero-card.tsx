@@ -1,7 +1,7 @@
 "use client"
 
-import { Fragment, useCallback, useRef } from "react"
 import { useTranslations } from "next-intl"
+import { Fragment, useCallback, useRef } from "react"
 
 import { QqIcon } from "@/components/ui/icons"
 import { Button } from "@/components/ui/shadcn/button"
@@ -18,41 +18,26 @@ export function HeroCard() {
   const tiltRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
 
-  const onPointerMove = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      if (
-        event.pointerType !== "mouse" ||
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      ) {
-        return
-      }
-      const wrapper = tiltRef.current
-      const card = cardRef.current
-      if (!wrapper || !card) return
-      const rect = wrapper.getBoundingClientRect()
-      const px = Math.min(
-        1,
-        Math.max(0, (event.clientX - rect.left) / rect.width)
-      )
-      const py = Math.min(
-        1,
-        Math.max(0, (event.clientY - rect.top) / rect.height)
-      )
-      wrapper.classList.add("is-hover")
-      card.classList.add("is-tilting")
-      card.style.setProperty(
-        "--tilt-ry",
-        ((px - 0.5) * TILT_MAX_DEG).toFixed(2) + "deg"
-      )
-      card.style.setProperty(
-        "--tilt-rx",
-        ((0.5 - py) * TILT_MAX_DEG).toFixed(2) + "deg"
-      )
-      card.style.setProperty("--tilt-gx", (px * 100).toFixed(1) + "%")
-      card.style.setProperty("--tilt-gy", (py * 100).toFixed(1) + "%")
-    },
-    []
-  )
+  const onPointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (
+      event.pointerType !== "mouse" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return
+    }
+    const wrapper = tiltRef.current
+    const card = cardRef.current
+    if (!wrapper || !card) return
+    const rect = wrapper.getBoundingClientRect()
+    const px = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width))
+    const py = Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height))
+    wrapper.classList.add("is-hover")
+    card.classList.add("is-tilting")
+    card.style.setProperty("--tilt-ry", ((px - 0.5) * TILT_MAX_DEG).toFixed(2) + "deg")
+    card.style.setProperty("--tilt-rx", ((0.5 - py) * TILT_MAX_DEG).toFixed(2) + "deg")
+    card.style.setProperty("--tilt-gx", (px * 100).toFixed(1) + "%")
+    card.style.setProperty("--tilt-gy", (py * 100).toFixed(1) + "%")
+  }, [])
 
   const onPointerLeave = useCallback(() => {
     const wrapper = tiltRef.current
@@ -88,14 +73,10 @@ export function HeroCard() {
               <h1
                 aria-label="Graduate Texts in Minecraft"
                 className="text-tech-main-dark relative mb-6 flex flex-col items-start text-4xl tracking-tight sm:mb-8 sm:gap-1 sm:text-6xl lg:text-7xl">
-                <span
-                  aria-hidden="true"
-                  className="t-stagger-line t-stagger-line--1 display-title">
+                <span aria-hidden="true" className="t-stagger-line t-stagger-line--1 display-title">
                   Graduate Texts
                 </span>
-                <span
-                  aria-hidden="true"
-                  className="t-stagger-line t-stagger-line--2">
+                <span aria-hidden="true" className="t-stagger-line t-stagger-line--2">
                   <span className="display-title text-tech-main flex flex-row items-baseline gap-3 sm:gap-5">
                     in Minecraft
                     <span
@@ -115,10 +96,7 @@ export function HeroCard() {
                   {BOOK_CATEGORIES.map((category, index) => (
                     <Fragment key={category}>
                       {index > 0 && (
-                        <Separator
-                          orientation="vertical"
-                          className="bg-tech-main/30 h-3"
-                        />
+                        <Separator orientation="vertical" className="bg-tech-main/30 h-3" />
                       )}
                       <span>{category}</span>
                     </Fragment>
@@ -126,15 +104,8 @@ export function HeroCard() {
                 </div>
               </div>
             </div>
-            <Button
-              asChild
-              variant="secondary"
-              size="sm"
-              className="mt-4 self-start sm:mt-6">
-              <a
-                href="https://qm.qq.com/q/IIaL1EnBuY"
-                target="_blank"
-                rel="noopener noreferrer">
+            <Button asChild variant="secondary" size="sm" className="mt-4 self-start sm:mt-6">
+              <a href="https://qm.qq.com/q/IIaL1EnBuY" target="_blank" rel="noopener noreferrer">
                 <QqIcon className="size-4" />
                 {t("joinQqGroup")}
               </a>

@@ -1,24 +1,17 @@
 "use client"
 
+import { GlobeIcon } from "lucide-react"
+import { useTranslations } from "next-intl"
+import Image from "next/image"
 import { useState, useEffect, useRef, useId, type ReactNode } from "react"
 import useSWR from "swr"
-import Image from "next/image"
-import { useTranslations } from "next-intl"
-import { Link } from "@/i18n/navigation"
-import { GlobeIcon } from "lucide-react"
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-} from "@/components/ui/shadcn/avatar"
+
 import { BilibiliIcon, GithubIcon, TwitterIcon } from "@/components/ui/icons"
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/shadcn/popover"
-import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/shadcn/avatar"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/shadcn/popover"
+import { Link } from "@/i18n/navigation"
 import type { ResolvedPerson } from "@/lib/articles/people"
+import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
 
 type PersonResponse = ResolvedPerson & { profileHandle: string | null }
 
@@ -242,11 +235,7 @@ function PersonDetails({
   person: PersonResponse
 }) {
   if (person.isFallback) {
-    return (
-      <p className="text-tech-main/40 mt-3 font-mono text-xs">
-        {labels.fallback}
-      </p>
-    )
+    return <p className="text-tech-main/40 mt-3 font-mono text-xs">{labels.fallback}</p>
   }
 
   return (
@@ -300,14 +289,10 @@ function PersonPopoverContent({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       className="border-tech-main/40 bg-surface-overlay/70 w-72 max-w-[calc(100vw-2rem)] border p-4 backdrop-blur-sm sm:w-80">
-      <p className="text-tech-main/60 mb-3 font-mono text-[10px] tracking-wide">
-        {labels.panel}
-      </p>
+      <p className="text-tech-main/60 mb-3 font-mono text-[10px] tracking-wide">{labels.panel}</p>
       <div className="flex items-center gap-3">
         <PersonAvatar person={person} />
-        <span className="font-mono text-sm font-medium tracking-wide">
-          {person.name}
-        </span>
+        <span className="font-mono text-sm font-medium tracking-wide">{person.name}</span>
       </div>
       <PersonDetails labels={labels} person={person} />
     </PopoverContent>
@@ -327,11 +312,9 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
 
   const fallbackPerson = createFallbackPerson(normalizedPersonKey)
   const { data: fetchedPerson, mutate: refreshPerson } = useSWR<PersonResponse>(
-    normalizedPersonKey
-      ? `/api/people?key=${encodeURIComponent(normalizedPersonKey)}`
-      : null,
+    normalizedPersonKey ? `/api/people?key=${encodeURIComponent(normalizedPersonKey)}` : null,
     () => getPerson(normalizedPersonKey),
-    { fallbackData: personCache.get(normalizedPersonKey) }
+    { fallbackData: personCache.get(normalizedPersonKey) },
   )
   const person = fetchedPerson || fallbackPerson
 
@@ -388,7 +371,7 @@ export function PeopleMention({ children, ...props }: MarkdownComponentProps) {
       if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
       if (openTimerRef.current) clearTimeout(openTimerRef.current)
     },
-    []
+    [],
   )
 
   const labels: PeopleMentionLabels = {

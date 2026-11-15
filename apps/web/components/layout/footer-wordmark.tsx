@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+
 import { ParticleObject } from "@/components/canvasui/ParticleObject"
 import { useTheme } from "@/lib/theme"
 
@@ -29,9 +30,7 @@ export function FooterWordmark() {
   }, [isDark, particleText])
 
   return (
-    <div
-      aria-hidden="true"
-      className="bg-tech-bg relative w-full overflow-hidden select-none">
+    <div aria-hidden="true" className="bg-tech-bg relative w-full overflow-hidden select-none">
       <div className="@container mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="relative h-[28cqi] max-h-85 min-h-47.5 w-full">
           {/* Complete static fallback when WebGL is unavailable. */}

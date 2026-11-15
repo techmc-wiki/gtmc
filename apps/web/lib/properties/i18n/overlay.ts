@@ -1,4 +1,5 @@
 import { routing } from "@/i18n/routing"
+
 import type { DatasetId, PropertyValue } from "../types"
 
 export type Locale = (typeof routing.locales)[number]
@@ -6,9 +7,7 @@ export type Locale = (typeof routing.locales)[number]
 export const DEFAULT_LOCALE = routing.defaultLocale
 
 export function normalizeLocale(value: string): Locale {
-  return routing.locales.includes(value as Locale)
-    ? (value as Locale)
-    : routing.defaultLocale
+  return routing.locales.includes(value as Locale) ? (value as Locale) : routing.defaultLocale
 }
 
 /**
@@ -47,10 +46,7 @@ export const EMPTY_OVERLAY: PropertyOverlay = {}
  * inherit `Object.prototype`: a filter for `constructor` or `__proto__` must
  * fall through to the input string instead of matching an inherited member.
  */
-function own<T>(
-  record: Record<string, T> | undefined,
-  key: string
-): T | undefined {
+function own<T>(record: Record<string, T> | undefined, key: string): T | undefined {
   return record && Object.hasOwn(record, key) ? record[key] : undefined
 }
 
@@ -64,23 +60,18 @@ export function translatedProperty(
   dataset: DatasetId,
   id: string,
   name: string,
-  description: string
+  description: string,
 ): { name: string; description: string } {
   const datasetOverlay = own(overlay.datasets, dataset)
   const override = own(datasetOverlay?.properties, id)
   const base = own(overlay.properties, id)
   return {
     name: override?.name ?? base?.name ?? name,
-    description: description
-      ? (override?.description ?? base?.description ?? description)
-      : "",
+    description: description ? (override?.description ?? base?.description ?? description) : "",
   }
 }
 
-export function translatedCategory(
-  overlay: PropertyOverlay,
-  category: string
-): string {
+export function translatedCategory(overlay: PropertyOverlay, category: string): string {
   return own(overlay.categories, category) ?? category
 }
 
@@ -89,7 +80,7 @@ export function translatedSynthetic(
   overlay: PropertyOverlay,
   id: string,
   name: string,
-  description: string
+  description: string,
 ): { name: string; description: string } {
   const override = own(overlay.synthetic, id)
   return {
@@ -100,7 +91,7 @@ export function translatedSynthetic(
 
 export function translatedUnit(
   overlay: PropertyOverlay,
-  unit: string | undefined
+  unit: string | undefined,
 ): string | undefined {
   if (!unit) return unit
   return own(overlay.units, unit) ?? unit
@@ -111,20 +102,14 @@ export function translateText(overlay: PropertyOverlay, text: string): string {
 }
 
 /** Translates value leaves only; state-label object keys stay untouched. */
-export function translateValue(
-  overlay: PropertyOverlay,
-  value: PropertyValue
-): PropertyValue {
+export function translateValue(overlay: PropertyOverlay, value: PropertyValue): PropertyValue {
   if (typeof value === "string") return translateText(overlay, value)
   if (Array.isArray(value)) {
     return value.map((item) => translateValue(overlay, item))
   }
   if (value !== null && typeof value === "object") {
     return Object.fromEntries(
-      Object.entries(value).map(([key, child]) => [
-        key,
-        translateValue(overlay, child),
-      ])
+      Object.entries(value).map(([key, child]) => [key, translateValue(overlay, child)]),
     )
   }
   return value

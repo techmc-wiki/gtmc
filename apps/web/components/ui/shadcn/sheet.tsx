@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
 import { XIcon } from "lucide-react"
 import { Dialog as SheetPrimitive } from "radix-ui"
+import * as React from "react"
 
 import { Button } from "@/components/ui/shadcn/button"
 import { cn } from "@/lib/cn"
@@ -11,21 +11,15 @@ function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
 }
 
-function SheetTrigger({
-  ...props
-}: React.ComponentProps<typeof SheetPrimitive.Trigger>) {
+function SheetTrigger({ ...props }: React.ComponentProps<typeof SheetPrimitive.Trigger>) {
   return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />
 }
 
-function SheetClose({
-  ...props
-}: React.ComponentProps<typeof SheetPrimitive.Close>) {
+function SheetClose({ ...props }: React.ComponentProps<typeof SheetPrimitive.Close>) {
   return <SheetPrimitive.Close data-slot="sheet-close" {...props} />
 }
 
-function SheetPortal({
-  ...props
-}: React.ComponentProps<typeof SheetPrimitive.Portal>) {
+function SheetPortal({ ...props }: React.ComponentProps<typeof SheetPrimitive.Portal>) {
   return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />
 }
 
@@ -36,10 +30,7 @@ function SheetOverlay({
   return (
     <SheetPrimitive.Overlay
       data-slot="sheet-overlay"
-      className={cn(
-        "t-overlay fixed inset-0 z-50 bg-tech-main-dark/25",
-        className
-      )}
+      className={cn("t-overlay fixed inset-0 z-50 bg-tech-main-dark/25", className)}
       {...props}
     />
   )
@@ -62,23 +53,17 @@ function SheetContent({
         data-slot="sheet-content"
         className={cn(
           "t-sheet overscroll-contain fixed z-50 flex flex-col bg-background shadow-lg",
-          side === "right" &&
-            "t-sheet--right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm",
-          side === "left" &&
-            "t-sheet--left inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm",
+          side === "right" && "t-sheet--right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm",
+          side === "left" && "t-sheet--left inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm",
           side === "top" && "t-sheet--top inset-x-0 top-0 h-auto border-b",
-          side === "bottom" &&
-            "t-sheet--bottom inset-x-0 bottom-0 h-auto border-t",
-          className
+          side === "bottom" && "t-sheet--bottom inset-x-0 bottom-0 h-auto border-t",
+          className,
         )}
         {...props}>
         {children}
         {showCloseButton && (
           <SheetPrimitive.Close asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2">
+            <Button variant="ghost" size="icon" className="absolute top-2 right-2">
               <XIcon />
               <span className="sr-only">Close</span>
             </Button>
@@ -109,17 +94,11 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function SheetTitle({
-  className,
-  ...props
-}: React.ComponentProps<typeof SheetPrimitive.Title>) {
+function SheetTitle({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Title>) {
   return (
     <SheetPrimitive.Title
       data-slot="sheet-title"
-      className={cn(
-        "text-base leading-none font-semibold text-foreground",
-        className
-      )}
+      className={cn("text-base leading-none font-semibold text-foreground", className)}
       {...props}
     />
   )

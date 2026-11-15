@@ -1,5 +1,5 @@
-import { runScript } from "./lib/run"
 import { createLogger, runBuildStep } from "./lib/logger"
+import { runScript } from "./lib/run"
 
 const logger = createLogger("build")
 

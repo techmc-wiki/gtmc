@@ -1,11 +1,9 @@
 import { shouldSkipArticleFile } from "@gtmc/ssg/articles/frontmatter-parser"
+
 import type { ArticleTreeNode } from "@/lib/articles/article-tree-types"
 import { ARTICLES_SOURCE_BRANCH } from "@/lib/articles/source"
+import { isGithubSyncRateLimited, recordGithubSyncRateLimit } from "@/lib/github/rate-limit"
 import { ARTICLES_REPO, getOctokit } from "@/lib/github/repos"
-import {
-  isGithubSyncRateLimited,
-  recordGithubSyncRateLimit,
-} from "@/lib/github/rate-limit"
 
 function isReservedArticlePath(filePath: string): boolean {
   return filePath.split("/").some((segment) => segment.startsWith("_"))
@@ -34,7 +32,7 @@ export async function getRepoContentTree(): Promise<ArticleTreeNode[]> {
         item.type === "blob" &&
         item.path?.toLowerCase().endsWith(".md") &&
         !isReservedArticlePath(item.path) &&
-        item.sha
+        item.sha,
     )
     const candidates = await Promise.all(
       markdownFiles.map(async (item) => {
@@ -46,12 +44,10 @@ export async function getRepoContentTree(): Promise<ArticleTreeNode[]> {
         const content = Buffer.from(data.content, "base64").toString("utf-8")
 
         return shouldSkipArticleFile(content) ? null : item.path!
-      })
+      }),
     )
 
-    return buildRepoContentTree(
-      candidates.filter((path): path is string => path !== null)
-    )
+    return buildRepoContentTree(candidates.filter((path): path is string => path !== null))
   } catch (error) {
     recordGithubSyncRateLimit(error)
     return []

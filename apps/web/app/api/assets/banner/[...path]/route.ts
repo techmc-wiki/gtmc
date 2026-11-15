@@ -1,14 +1,13 @@
-import { NextResponse } from "next/server"
 import path from "path"
+
 import mime from "mime-types"
+import { NextResponse } from "next/server"
+
 import { getRepoFileBuffer } from "@/lib/github/sync"
 
 const ARTICLE_BANNER_CACHE_CONTROL = "public, max-age=86400, s-maxage=86400"
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ path: string[] }> }
-) {
+export async function GET(_request: Request, { params }: { params: Promise<{ path: string[] }> }) {
   const { path: pathSegments } = await params
   const filePath = pathSegments.join("/")
 

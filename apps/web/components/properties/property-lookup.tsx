@@ -1,12 +1,6 @@
 "use client"
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  GitCompareArrows,
-  RotateCcw,
-  X,
-} from "lucide-react"
+import { ChevronLeft, ChevronRight, GitCompareArrows, RotateCcw, X } from "lucide-react"
 import { useTranslations, useLocale } from "next-intl"
 import {
   parseAsArrayOf,
@@ -30,12 +24,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/shadcn/select"
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/shadcn/tabs"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/shadcn/tabs"
 import { propertyFetcher } from "@/lib/properties/fetcher"
 import {
   DATASETS,
@@ -62,16 +51,10 @@ import { PropertyResultsTable } from "./property-results-table"
 function canonicalFilters(filters: PropertyFilter[]): PropertyCondition[] {
   const unique = new Map<string, PropertyCondition>()
   for (const filter of filters) {
-    const values =
-      filter.values === undefined
-        ? undefined
-        : [...new Set(filter.values)].sort()
-    if (
-      !filter.property ||
-      !filter.operator ||
-      (values ? !values.length : !filter.value.trim())
-    )
+    const values = filter.values === undefined ? undefined : [...new Set(filter.values)].sort()
+    if (!filter.property || !filter.operator || (values ? !values.length : !filter.value.trim())) {
       continue
+    }
     const condition: PropertyCondition = {
       property: filter.property,
       operator: filter.operator,
@@ -81,7 +64,7 @@ function canonicalFilters(filters: PropertyFilter[]): PropertyCondition[] {
     unique.set(JSON.stringify(condition), condition)
   }
   return [...unique.values()].toSorted((left, right) =>
-    JSON.stringify(left).localeCompare(JSON.stringify(right))
+    JSON.stringify(left).localeCompare(JSON.stringify(right)),
   )
 }
 
@@ -94,9 +77,9 @@ const filtersParser = parseAsJson(
         operator: z.union([z.enum(FILTER_OPERATORS), z.literal("")]),
         value: z.string().max(200),
         values: z.array(z.string().max(200)).max(64).optional(),
-      })
+      }),
     )
-    .max(8)
+    .max(8),
 ).withDefault([])
 
 function SourceLink(chunks: ReactNode) {
@@ -140,12 +123,9 @@ function usePropertyLookup(initialCatalog: PropertyCatalog) {
     error: catalogError,
     mutate: reloadCatalog,
   } = useSWRImmutable<PropertyCatalog>(catalogKey, propertyFetcher, {
-    fallbackData:
-      state.dataset === initialCatalog.dataset ? initialCatalog : undefined,
+    fallbackData: state.dataset === initialCatalog.dataset ? initialCatalog : undefined,
   })
-  const columns = state.columns.length
-    ? state.columns.slice(0, 8)
-    : (catalog?.defaults ?? [])
+  const columns = state.columns.length ? state.columns.slice(0, 8) : (catalog?.defaults ?? [])
   const selected = state.compare.slice(0, 4)
   const activeFilters = canonicalFilters(state.filters)
   const parameters = new URLSearchParams({
@@ -166,7 +146,7 @@ function usePropertyLookup(initialCatalog: PropertyCatalog) {
     mutate,
   } = useSWRImmutable<PropertyResults>(
     catalog && queryKey.includes(`dataset=${state.dataset}&`) ? queryKey : null,
-    propertyFetcher
+    propertyFetcher,
   )
   const pending = isLoading || queryKey !== `/api/properties?${parameters}`
   const properties = (catalog?.properties ?? []).toSorted((a, b) => {
@@ -176,9 +156,7 @@ function usePropertyLookup(initialCatalog: PropertyCatalog) {
   })
   const byId = new Map(properties.map((property) => [property.id, property]))
   const kind: "blocks" | "entities" | "items" =
-    state.dataset === "entities" || state.dataset === "items"
-      ? state.dataset
-      : "blocks"
+    state.dataset === "entities" || state.dataset === "items" ? state.dataset : "blocks"
 
   function changeDataset(dataset: DatasetId) {
     void setState({
@@ -201,17 +179,10 @@ function usePropertyLookup(initialCatalog: PropertyCatalog) {
         : columns
     if (next.length) void setState({ columns: next, page: 1 })
   }
-  function addFilter(
-    property: string,
-    value = "",
-    operator: FilterOperator = "eq"
-  ) {
+  function addFilter(property: string, value = "", operator: FilterOperator = "eq") {
     if (state.filters.length < 8) {
       void setState({
-        filters: [
-          ...state.filters,
-          { id: crypto.randomUUID(), property, operator, value },
-        ],
+        filters: [...state.filters, { id: crypto.randomUUID(), property, operator, value }],
         page: 1,
       })
     }
@@ -219,8 +190,7 @@ function usePropertyLookup(initialCatalog: PropertyCatalog) {
   function sortBy(id: string) {
     void setState({
       sort: id,
-      direction:
-        state.sort === id && state.direction === "asc" ? "desc" : "asc",
+      direction: state.sort === id && state.direction === "asc" ? "desc" : "asc",
       page: 1,
     })
   }
@@ -260,11 +230,7 @@ function usePropertyLookup(initialCatalog: PropertyCatalog) {
   }
 }
 
-export function PropertyLookup({
-  initialCatalog,
-}: {
-  initialCatalog: PropertyCatalog
-}) {
+export function PropertyLookup({ initialCatalog }: { initialCatalog: PropertyCatalog }) {
   const t = useTranslations("Properties")
   const {
     state,
@@ -295,9 +261,7 @@ export function PropertyLookup({
     <div className="space-y-6">
       <Tabs
         value={kind}
-        onValueChange={(value) =>
-          changeDataset(value as "blocks" | "entities" | "items")
-        }>
+        onValueChange={(value) => changeDataset(value as "blocks" | "entities" | "items")}>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <TabsList className="gap-2">
             {(["blocks", "entities", "items"] as const).map((id) => (
@@ -312,11 +276,7 @@ export function PropertyLookup({
               <Select
                 value={state.dataset}
                 onValueChange={(value) => {
-                  if (
-                    value === "blocks" ||
-                    value === "experimental" ||
-                    value === "legacy"
-                  ) {
+                  if (value === "blocks" || value === "experimental" || value === "legacy") {
                     changeDataset(value)
                   }
                 }}>
@@ -346,10 +306,7 @@ export function PropertyLookup({
             addFilter={addFilter}
           />
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <output
-              aria-live="polite"
-              aria-atomic="true"
-              className="text-muted-foreground text-sm">
+            <output aria-live="polite" aria-atomic="true" className="text-muted-foreground text-sm">
               {pending || !results
                 ? t("loading")
                 : t("resultCount", {

@@ -1,11 +1,12 @@
 "use client"
 
-import { useTranslations } from "next-intl"
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
+import { useTranslations } from "next-intl"
+
 import { Button } from "@/components/ui/shadcn/button"
+import { Card } from "@/components/ui/shadcn/card"
 import { Checkbox } from "@/components/ui/shadcn/checkbox"
 import { Label } from "@/components/ui/shadcn/label"
-import { Card } from "@/components/ui/shadcn/card"
 import { Skeleton } from "@/components/ui/shadcn/skeleton"
 import {
   Table,
@@ -16,6 +17,7 @@ import {
   TableCell,
 } from "@/components/ui/shadcn/table"
 import type { PropertyInfo, PropertyResults } from "@/lib/properties/types"
+
 import { PropertyValueView } from "./property-value"
 
 interface PropertyResultsTableProps {
@@ -75,10 +77,7 @@ export function PropertyResultsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead
-              className="bg-card sticky left-0 z-20 w-11"
-              aria-hidden
-            />
+            <TableHead className="bg-card sticky left-0 z-20 w-11" aria-hidden />
             <TableHead
               className="bg-card sticky left-11 z-10 min-w-48"
               aria-sort={
@@ -148,16 +147,12 @@ export function PropertyResultsTable({
           {results.entries.map((entry) => (
             <TableRow
               key={entry.name}
-              data-state={
-                selectedNames.has(entry.name) ? "selected" : undefined
-              }>
+              data-state={selectedNames.has(entry.name) ? "selected" : undefined}>
               <TableCell className="bg-card sticky left-0 z-20 p-0">
                 <Label className="flex size-11 shrink-0 items-center justify-center sm:h-9 sm:w-11">
                   <Checkbox
                     checked={selectedNames.has(entry.name)}
-                    disabled={
-                      !selectedNames.has(entry.name) && selected.length >= 4
-                    }
+                    disabled={!selectedNames.has(entry.name) && selected.length >= 4}
                     onCheckedChange={() => toggleCompare(entry.name)}
                     aria-label={t("selectComparison", {
                       name: entry.name,
@@ -175,9 +170,7 @@ export function PropertyResultsTable({
                 </Button>
               </TableCell>
               {results.columns.map((id) => (
-                <TableCell
-                  key={id}
-                  className="max-w-72 py-1 align-top whitespace-normal">
+                <TableCell key={id} className="max-w-72 py-1 align-top whitespace-normal">
                   <PropertyValueView value={entry.values[id] ?? null} dense />
                 </TableCell>
               ))}

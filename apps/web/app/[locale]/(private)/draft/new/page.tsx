@@ -4,9 +4,9 @@ import { redirect } from "next/navigation"
 import { Suspense } from "react"
 
 import { createDraftAction } from "@/actions/article-draft"
+import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
 import { Button } from "@/components/ui/shadcn/button"
 import { Input } from "@/components/ui/shadcn/input"
-import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
 import { auth } from "@/lib/auth"
 
 export const metadata: Metadata = {
@@ -26,12 +26,8 @@ export default async function NewDraftPage({
   return (
     <main className="mx-auto max-w-xl space-y-6 p-4 md:p-8">
       <header className="border-tech-main/40 border-b pb-4">
-        <h1 className="display-title text-tech-main-dark text-3xl">
-          {t("newArticleDraftTitle")}
-        </h1>
-        <p className="text-tech-main/70 mt-2 text-sm/relaxed">
-          {t("newArticleDraftDescription")}
-        </p>
+        <h1 className="display-title text-tech-main-dark text-3xl">{t("newArticleDraftTitle")}</h1>
+        <p className="text-tech-main/70 mt-2 text-sm/relaxed">{t("newArticleDraftDescription")}</p>
       </header>
       <Suspense fallback={<NewDraftFormFallback />}>
         <NewDraftForm locale={locale} searchParams={searchParams} />
@@ -61,9 +57,7 @@ async function NewDraftForm({
       action={createDraftAction}
       className="border-tech-main/40 bg-surface-overlay/80 space-y-5 border p-4 backdrop-blur-sm sm:p-6">
       <div className="space-y-2">
-        <label
-          htmlFor="draft-file-path"
-          className="text-tech-main/60 text-xs font-medium">
+        <label htmlFor="draft-file-path" className="text-tech-main/60 text-xs font-medium">
           {t("existingFilePath")}
         </label>
         <Input
@@ -72,9 +66,7 @@ async function NewDraftForm({
           defaultValue={filePath}
           placeholder="e.g. SlimeTech/Molforte/04-new-machine.md"
         />
-        <p className="text-tech-main/60 text-xs/relaxed">
-          {t("existingFilePathHint")}
-        </p>
+        <p className="text-tech-main/60 text-xs/relaxed">{t("existingFilePathHint")}</p>
       </div>
       <Button type="submit">{t("createDraft")}</Button>
     </form>

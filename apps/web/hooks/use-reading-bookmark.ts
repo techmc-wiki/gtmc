@@ -1,10 +1,8 @@
 "use client"
 
 import * as React from "react"
-import {
-  addSiteScrollListener,
-  getSiteScrollProgress,
-} from "@/hooks/site-scroll-root"
+
+import { addSiteScrollListener, getSiteScrollProgress } from "@/hooks/site-scroll-root"
 
 export interface ReadingBookmark {
   slug: string
@@ -83,11 +81,7 @@ export function readBookmark(): ReadingBookmark | null {
 const getServerSnapshot = (): null => null
 
 export function useReadingBookmark(): ReadingBookmark | null {
-  return React.useSyncExternalStore(
-    subscribeBookmark,
-    readBookmark,
-    getServerSnapshot
-  )
+  return React.useSyncExternalStore(subscribeBookmark, readBookmark, getServerSnapshot)
 }
 export function useBookmarkRecorder(slug: string, title: string) {
   React.useEffect(() => {

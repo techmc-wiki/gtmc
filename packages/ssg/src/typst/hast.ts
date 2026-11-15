@@ -38,10 +38,7 @@ export function isIgnorable(node: RootContent): boolean {
   return node.type === "comment" || node.type === "doctype"
 }
 
-export function walkElements(
-  node: Root | RootContent,
-  visit: (el: Element) => void
-): void {
+export function walkElements(node: Root | RootContent, visit: (el: Element) => void): void {
   if (node.type === "element") visit(node)
   if (node.type === "element" || node.type === "root") {
     for (const child of node.children) walkElements(child, visit)

@@ -1,19 +1,13 @@
 "use client"
 
-import * as React from "react"
-import { useTranslations } from "next-intl"
 import { ExternalLink, Info, UserCheck } from "lucide-react"
+import { useTranslations } from "next-intl"
+import * as React from "react"
 
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/shadcn/card"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/shadcn/card"
 import { cn } from "@/lib/cn"
 
-const DEFAULT_GLOSSARY_REPO_URL =
-  "https://github.com/TechMC-Glossary/TechMC-Glossary"
+const DEFAULT_GLOSSARY_REPO_URL = "https://github.com/TechMC-Glossary/TechMC-Glossary"
 
 export interface ComplexChangesNoticeProps {
   repoUrl?: string
@@ -37,14 +31,14 @@ export function ComplexChangesNotice({
         <ExternalLink className="ml-0.5 size-3" />
       </a>
     ),
-    [repoUrl]
+    [repoUrl],
   )
 
   return (
     <div
       className={cn(
         "flex items-start gap-3 rounded-none border border-border/60 bg-surface/50 p-3.5 text-xs text-muted-foreground leading-relaxed",
-        className
+        className,
       )}>
       <Info className="text-tech-signal mt-0.5 size-4 shrink-0" />
       <div>
@@ -75,26 +69,21 @@ export function AttributionWarning({
 }: AttributionWarningProps) {
   const t = useTranslations("Glossary")
 
-  const canToggleRealEmail = Boolean(
-    realEmail && realEmail !== githubNoreplyEmail
-  )
-  const displayedEmail =
-    canToggleRealEmail && useRealEmail ? realEmail : githubNoreplyEmail
+  const canToggleRealEmail = Boolean(realEmail && realEmail !== githubNoreplyEmail)
+  const displayedEmail = canToggleRealEmail && useRealEmail ? realEmail : githubNoreplyEmail
 
   const authorNameTag = React.useCallback(
     (chunks: React.ReactNode) => (
       <strong className="text-foreground font-semibold">{chunks}</strong>
     ),
-    []
+    [],
   )
 
   const authorEmailTag = React.useCallback(
     (chunks: React.ReactNode) => (
-      <span className="text-foreground font-mono text-[11px]">
-        &lt;{chunks}&gt;
-      </span>
+      <span className="text-foreground font-mono text-[11px]">&lt;{chunks}&gt;</span>
     ),
-    []
+    [],
   )
 
   return (

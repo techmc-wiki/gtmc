@@ -10,20 +10,14 @@ Graduate Texts in Minecraft（GTMC）是一个面向 Minecraft 技术玩法的�
   <StatCard label="已发布文章" value={props.stats.articleCount} />
   <StatCard label="贡献者" value={props.stats.contributors} />
   <StatCard label="语言" value="中文和英文" />
-  {props.stats.lastRevision ? (
-    <StatCard label="最近修订" value={props.stats.lastRevision} />
-  ) : null}
+  {props.stats.lastRevision ? <StatCard label="最近修订" value={props.stats.lastRevision} /> : null}
 </StatGrid>
 
 ## 贡献者
 
 文章由有技术向 Minecraft 实践经验的社区成员撰写。每位贡献者在特定子系统上有深入研究，例如红石时序或区块加载内部原理。
 
-<AuthorGrid
-  variant="compact"
-  authors={props.previewAuthors}
-  viewAllLabel="查看所有贡献者"
-/>
+<AuthorGrid variant="compact" authors={props.previewAuthors} viewAllLabel="查看所有贡献者" />
 
 ## 参与贡献
 

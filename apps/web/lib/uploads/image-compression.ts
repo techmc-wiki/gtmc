@@ -1,8 +1,4 @@
-import {
-  COMPRESS_TARGET_MB,
-  COMPRESS_TRIGGER_BYTES,
-  UPLOAD_SAFE_LIMIT_BYTES,
-} from "./constants"
+import { COMPRESS_TARGET_MB, COMPRESS_TRIGGER_BYTES, UPLOAD_SAFE_LIMIT_BYTES } from "./constants"
 
 export interface CompressionResult {
   file: File
@@ -10,9 +6,7 @@ export interface CompressionResult {
   error?: string
 }
 
-export async function compressImageForUpload(
-  file: File
-): Promise<CompressionResult> {
+export async function compressImageForUpload(file: File): Promise<CompressionResult> {
   // Compressing GIFs can discard animation.
   if (file.type === "image/gif") {
     if (file.size > UPLOAD_SAFE_LIMIT_BYTES) {

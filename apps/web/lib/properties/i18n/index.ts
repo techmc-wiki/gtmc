@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-unassigned-import -- Keep translations and their loader out of browser bundles.
 import "server-only"
-import zh from "./zh.json"
 import { EMPTY_OVERLAY, type Locale, type PropertyOverlay } from "./overlay"
+import zh from "./zh.json"
 
 export {
   DEFAULT_LOCALE,

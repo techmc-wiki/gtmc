@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vite-plus/test"
 
+import type { ArticleTreeNode } from "@/lib/articles/article-tree-types"
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import type { LinearizedArticle } from "@/lib/articles/linearize"
 import { linearizeArticles } from "@/lib/articles/linearize"
-import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
 import { preparePublicChapterNav } from "@/lib/articles/public-tree"
-import type { ArticleTreeNode } from "@/lib/articles/article-tree-types"
 
 import { buildBookPlan } from "./numbering"
 import { chapterArticles } from "./types"
@@ -67,10 +67,7 @@ describe("buildBookPlan", () => {
     ])
 
     expect(plan.chapters.map((c) => c.number)).toEqual(["1", "2"])
-    expect(chapterArticles(plan.chapters[0]).map((a) => a.number)).toEqual([
-      "1.1",
-      "1.2",
-    ])
+    expect(chapterArticles(plan.chapters[0]).map((a) => a.number)).toEqual(["1.1", "1.2"])
     expect(chapterArticles(plan.chapters[1])[0].number).toBe("2.1")
   })
 
@@ -123,12 +120,7 @@ describe("buildBookPlan", () => {
       "appendix/first",
       "appendix/second",
     ])
-    expect(plan.chapters.map((chapter) => chapter.number)).toEqual([
-      "1",
-      "2",
-      "A",
-      "B",
-    ])
+    expect(plan.chapters.map((chapter) => chapter.number)).toEqual(["1", "2", "A", "B"])
   })
 
   it("keeps readme-intro articles in place but unnumbered", () => {
@@ -205,7 +197,7 @@ describe("buildBookPlan", () => {
 })
 
 function node(
-  overrides: Partial<ArticleTreeNode & ChapterNavNode> & { slug: string }
+  overrides: Partial<ArticleTreeNode & ChapterNavNode> & { slug: string },
 ): ArticleTreeNode & Partial<ChapterNavNode> {
   return {
     id: overrides.slug,
@@ -250,11 +242,7 @@ describe("preparePublicChapterNav", () => {
 
     const prepared = preparePublicChapterNav(source)
 
-    expect(prepared.map((item) => item.slug)).toEqual([
-      "article",
-      "folder",
-      "unindexed",
-    ])
+    expect(prepared.map((item) => item.slug)).toEqual(["article", "folder", "unindexed"])
     expect(prepared[1].children[0]).toMatchObject({
       slug: "folder",
       title: "Folder intro",
@@ -412,10 +400,6 @@ describe("preparePublicChapterNav", () => {
       "ordinary/nested-appendix",
       "ordinary/standalone-appendix",
     ])
-    expect(plan.chapters.map((chapter) => chapter.number)).toEqual([
-      "1",
-      "A",
-      "B",
-    ])
+    expect(plan.chapters.map((chapter) => chapter.number)).toEqual(["1", "A", "B"])
   })
 })

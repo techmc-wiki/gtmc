@@ -1,12 +1,23 @@
 "use client"
 
-import * as React from "react"
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror"
 import { useMachine } from "@xstate/react"
-import { useRouter } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
+import * as React from "react"
+import { toast } from "sonner"
+
 import { saveDraftAction } from "@/actions/article-draft"
 import { submitDraftAction } from "@/actions/article-submit"
+import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
+import type { OperationProgressState } from "@/components/ui/operation-progress"
+import { createUploadPlaceholder, useDraftImageUpload } from "@/hooks/use-draft-image-upload"
+import { useRouter } from "@/i18n/navigation"
+import {
+  createEditorSessionMachine,
+  isEditorReadOnly,
+  isEditorSaving,
+  isEditorSubmitting,
+} from "@/lib/drafts/editor-session"
 import {
   getActiveDraftFile,
   getDuplicateDraftFilePaths,
@@ -15,19 +26,6 @@ import {
   serializeDraftFilesPayload,
   type DraftFileCollection,
 } from "@/lib/drafts/files"
-import { toast } from "sonner"
-import {
-  createUploadPlaceholder,
-  useDraftImageUpload,
-} from "@/hooks/use-draft-image-upload"
-import type { OperationProgressState } from "@/components/ui/operation-progress"
-import type { SourceMode } from "@/components/editor/draft-file-source-dialog"
-import {
-  createEditorSessionMachine,
-  isEditorReadOnly,
-  isEditorSaving,
-  isEditorSubmitting,
-} from "@/lib/drafts/editor-session"
 import type { DraftStatus } from "@/lib/drafts/store"
 
 const MAX_DRAFT_HISTORY_ENTRIES = 100
@@ -101,7 +99,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
 
   const editorMachine = React.useMemo(
     () => createEditorSessionMachine(initialStatus),
-    [initialStatus]
+    [initialStatus],
   )
   const [session, send, actorRef] = useMachine(editorMachine)
   const draftStatus = session.context.status
@@ -110,30 +108,20 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
   const isReadOnly = isEditorReadOnly(session)
 
   const [title, setTitle] = React.useState(initialTitle)
-  const [draftCollection, setDraftCollection] = React.useState(
-    initialDraftCollection
-  )
+  const [draftCollection, setDraftCollection] = React.useState(initialDraftCollection)
   const [lastSavedDraftCollection, setLastSavedDraftCollection] =
     React.useState(initialDraftCollection)
   const [lastSavedTitle, setLastSavedTitle] = React.useState(initialTitle)
-  const [revisionId, setRevisionId] = React.useState<string | undefined>(
-    initialRevisionId
-  )
-  const [fileDialogIntent, setFileDialogIntent] =
-    React.useState<DraftFileDialogIntent | null>(null)
-  const [saveProgressState, setSaveProgressState] =
-    React.useState<OperationProgressState>("idle")
+  const [revisionId, setRevisionId] = React.useState<string | undefined>(initialRevisionId)
+  const [fileDialogIntent, setFileDialogIntent] = React.useState<DraftFileDialogIntent | null>(null)
+  const [saveProgressState, setSaveProgressState] = React.useState<OperationProgressState>("idle")
   const [submitProgressState, setSubmitProgressState] =
     React.useState<OperationProgressState>("idle")
   const [saveError, setSaveError] = React.useState<string | null>(null)
   const [lineWrap, setLineWrap] = React.useState(true)
-  const [activeInfoTab, setActiveInfoTab] = React.useState<"changes" | "guide">(
-    "changes"
-  )
+  const [activeInfoTab, setActiveInfoTab] = React.useState<"changes" | "guide">("changes")
   const [activeGuideId, setActiveGuideId] = React.useState(initialGuideId)
-  const [repoSnapshots, setRepoSnapshots] = React.useState<
-    Record<string, RepoFileSnapshot>
-  >({})
+  const [repoSnapshots, setRepoSnapshots] = React.useState<Record<string, RepoFileSnapshot>>({})
   const [historyAvailability, setHistoryAvailability] = React.useState<
     Record<string, DraftHistoryAvailability>
   >({})
@@ -144,9 +132,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
   const autoSaveTimeoutRef = React.useRef<number | null>(null)
   const saveProgressResetRef = React.useRef<number | null>(null)
   const submitProgressResetRef = React.useRef<number | null>(null)
-  const contentHistoryRef = React.useRef<Record<string, DraftContentHistory>>(
-    {}
-  )
+  const contentHistoryRef = React.useRef<Record<string, DraftContentHistory>>({})
   const repoSnapshotRequestsRef = React.useRef<Record<string, string>>({})
   const etagRef = React.useRef(initialData?.etag)
   const revisionIdRef = React.useRef<string | undefined>(initialRevisionId)
@@ -180,7 +166,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
         durationMs: 280,
       },
     ],
-    [progressT]
+    [progressT],
   )
 
   const submitProgressStages = React.useMemo(
@@ -203,7 +189,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
         durationMs: 300,
       },
     ],
-    [progressT]
+    [progressT],
   )
 
   React.useEffect(
@@ -218,7 +204,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
         window.clearTimeout(submitProgressResetRef.current)
       }
     },
-    []
+    [],
   )
 
   const updateSaveProgressState = React.useCallback(
@@ -233,15 +219,13 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
         () => {
           setSaveProgressState("idle")
         },
-        nextState === "success" ? 1400 : 3200
+        nextState === "success" ? 1400 : 3200,
       )
     },
-    []
+    [],
   )
 
-  const updateSubmitProgressState = (
-    nextState: Exclude<OperationProgressState, "idle">
-  ) => {
+  const updateSubmitProgressState = (nextState: Exclude<OperationProgressState, "idle">) => {
     if (submitProgressResetRef.current !== null) {
       window.clearTimeout(submitProgressResetRef.current)
       submitProgressResetRef.current = null
@@ -252,36 +236,28 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
       () => {
         setSubmitProgressState("idle")
       },
-      nextState === "success" ? 1400 : 3200
+      nextState === "success" ? 1400 : 3200,
     )
   }
 
   const activeFile = getActiveDraftFile(draftCollection)
   const activeFileContent = activeFile.content
   const duplicateFilePaths = getDuplicateDraftFilePaths(draftCollection.files)
-  const hasMissingFilePath = draftCollection.files.some(
-    (file) => !file.filePath
-  )
+  const hasMissingFilePath = draftCollection.files.some((file) => !file.filePath)
   const activeFileHasDuplicatePath = duplicateFilePaths.some(
-    (filePath) =>
-      normalizeDraftFilePath(filePath) ===
-      normalizeDraftFilePath(activeFile.filePath)
+    (filePath) => normalizeDraftFilePath(filePath) === normalizeDraftFilePath(activeFile.filePath),
   )
-  const activeFileIndex =
-    draftCollection.files.findIndex((file) => file.id === activeFile.id) + 1
+  const activeFileIndex = draftCollection.files.findIndex((file) => file.id === activeFile.id) + 1
 
   const unsavedFileIds = React.useMemo(() => {
-    const savedFilesById = new Map(
-      lastSavedDraftCollection.files.map((file) => [file.id, file])
-    )
+    const savedFilesById = new Map(lastSavedDraftCollection.files.map((file) => [file.id, file]))
     const nextUnsavedFileIds = new Set<string>()
     for (const file of draftCollection.files) {
       const savedFile = savedFilesById.get(file.id)
       if (
         !savedFile ||
         savedFile.content !== file.content ||
-        normalizeDraftFilePath(savedFile.filePath) !==
-          normalizeDraftFilePath(file.filePath)
+        normalizeDraftFilePath(savedFile.filePath) !== normalizeDraftFilePath(file.filePath)
       ) {
         nextUnsavedFileIds.add(file.id)
       }
@@ -298,11 +274,9 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
 
   const updateDraftCollection = React.useCallback(
     (updater: (current: DraftFileCollection) => DraftFileCollection) => {
-      setDraftCollection((current) =>
-        normalizeDraftFileCollection(updater(current))
-      )
+      setDraftCollection((current) => normalizeDraftFileCollection(updater(current)))
     },
-    []
+    [],
   )
 
   const getDraftContentHistory = React.useCallback((fileId: string) => {
@@ -331,23 +305,20 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     })
   }, [])
 
-  const pushHistoryEntry = React.useCallback(
-    (stack: string[], value: string) => {
-      if (stack[stack.length - 1] === value) return
-      stack.push(value)
-      if (stack.length > MAX_DRAFT_HISTORY_ENTRIES) {
-        stack.splice(0, stack.length - MAX_DRAFT_HISTORY_ENTRIES)
-      }
-    },
-    []
-  )
+  const pushHistoryEntry = React.useCallback((stack: string[], value: string) => {
+    if (stack[stack.length - 1] === value) return
+    stack.push(value)
+    if (stack.length > MAX_DRAFT_HISTORY_ENTRIES) {
+      stack.splice(0, stack.length - MAX_DRAFT_HISTORY_ENTRIES)
+    }
+  }, [])
 
   const updateFileById = (
     fileId: string,
     updates: {
       content?: string
       filePath?: string
-    }
+    },
   ) => {
     updateDraftCollection((current) => ({
       ...current,
@@ -355,24 +326,18 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
         file.id === fileId
           ? {
               ...file,
-              ...(updates.content !== undefined
-                ? { content: updates.content }
-                : {}),
+              ...(updates.content !== undefined ? { content: updates.content } : {}),
               ...(updates.filePath !== undefined
                 ? { filePath: normalizeDraftFilePath(updates.filePath) }
                 : {}),
             }
-          : file
+          : file,
       ),
     }))
   }
 
   const updateFileContent = React.useCallback(
-    (
-      fileId: string,
-      nextContent: string,
-      mode: "record" | "undo" | "redo" = "record"
-    ) => {
+    (fileId: string, nextContent: string, mode: "record" | "undo" | "redo" = "record") => {
       updateDraftCollection((current) => {
         const targetFile = current.files.find((file) => file.id === fileId)
         if (!targetFile || targetFile.content === nextContent) return current
@@ -389,17 +354,12 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
         return {
           ...current,
           files: current.files.map((file) =>
-            file.id === fileId ? { ...file, content: nextContent } : file
+            file.id === fileId ? { ...file, content: nextContent } : file,
           ),
         }
       })
     },
-    [
-      getDraftContentHistory,
-      pushHistoryEntry,
-      syncHistoryAvailability,
-      updateDraftCollection,
-    ]
+    [getDraftContentHistory, pushHistoryEntry, syncHistoryAvailability, updateDraftCollection],
   )
 
   const transformFileContent = React.useCallback(
@@ -416,23 +376,15 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
         return {
           ...current,
           files: current.files.map((file) =>
-            file.id === fileId ? { ...file, content: nextContent } : file
+            file.id === fileId ? { ...file, content: nextContent } : file,
           ),
         }
       })
     },
-    [
-      getDraftContentHistory,
-      pushHistoryEntry,
-      syncHistoryAvailability,
-      updateDraftCollection,
-    ]
+    [getDraftContentHistory, pushHistoryEntry, syncHistoryAvailability, updateDraftCollection],
   )
 
-  const updateActiveFile = (updates: {
-    content?: string
-    filePath?: string
-  }) => {
+  const updateActiveFile = (updates: { content?: string; filePath?: string }) => {
     if (updates.content !== undefined) {
       updateFileContent(draftCollection.activeFileId, updates.content)
     }
@@ -448,8 +400,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
       throw new Error("Cannot save while submission is in progress")
     }
 
-    const normalizedDraftCollection =
-      normalizeDraftFileCollection(draftCollection)
+    const normalizedDraftCollection = normalizeDraftFileCollection(draftCollection)
     const snapshot = {
       draftCollection: normalizedDraftCollection,
       title,
@@ -460,10 +411,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     const saveTask = previousSave.then(async () => {
       const formData = new FormData()
       formData.append("title", snapshot.title)
-      formData.append(
-        "draftFiles",
-        serializeDraftFilesPayload(snapshot.draftCollection)
-      )
+      formData.append("draftFiles", serializeDraftFilesPayload(snapshot.draftCollection))
       if (revisionIdRef.current) {
         formData.append("revisionId", revisionIdRef.current)
       }
@@ -521,7 +469,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
         }
       }
     },
-    [actorRef, persistDraft, t, title, updateSaveProgressState]
+    [actorRef, persistDraft, t, title, updateSaveProgressState],
   )
 
   const handleUndoDraftEdit = React.useCallback(() => {
@@ -531,12 +479,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     syncHistoryAvailability(draftCollection.activeFileId)
     if (previousContent === undefined) return
     updateFileContent(draftCollection.activeFileId, previousContent, "undo")
-  }, [
-    draftCollection.activeFileId,
-    isReadOnly,
-    syncHistoryAvailability,
-    updateFileContent,
-  ])
+  }, [draftCollection.activeFileId, isReadOnly, syncHistoryAvailability, updateFileContent])
 
   const handleRedoDraftEdit = React.useCallback(() => {
     if (isReadOnly) return
@@ -545,12 +488,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     syncHistoryAvailability(draftCollection.activeFileId)
     if (nextContent === undefined) return
     updateFileContent(draftCollection.activeFileId, nextContent, "redo")
-  }, [
-    draftCollection.activeFileId,
-    isReadOnly,
-    syncHistoryAvailability,
-    updateFileContent,
-  ])
+  }, [draftCollection.activeFileId, isReadOnly, syncHistoryAvailability, updateFileContent])
 
   const insertTextAtCursor = (text: string) => {
     if (!textareaRef.current) return
@@ -602,7 +540,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
       if (!res.ok) throw new Error(data.error || t("errorUploadFailed"))
       return { url: data.url, filename: data.filename }
     },
-    [t]
+    [t],
   )
 
   const uploadTargetsRef = React.useRef<Record<string, string>>({})
@@ -629,9 +567,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     delete uploadTargetsRef.current[uploadId]
     const placeholder = createUploadPlaceholder(uploadId)
     purgeUploadPlaceholder(uploadId, text)
-    transformFileContent(fileId, (content) =>
-      content.replace(placeholder, text)
-    )
+    transformFileContent(fileId, (content) => content.replace(placeholder, text))
   }
 
   const removeUploadPlaceholder = (uploadId: string) => {
@@ -641,7 +577,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     const placeholder = createUploadPlaceholder(uploadId)
     purgeUploadPlaceholder(uploadId, "")
     transformFileContent(fileId, (content) =>
-      content.replace(`${placeholder}\n`, "").replace(placeholder, "")
+      content.replace(`${placeholder}\n`, "").replace(placeholder, ""),
     )
   }
 
@@ -661,15 +597,13 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     }
   }
 
-  const { uploadFile, phase, isUploading, isCompressing } = useDraftImageUpload(
-    {
-      upload: draftUploadAdapter,
-      onInsertPlaceholder: insertUploadPlaceholder,
-      onReplacePlaceholder: replaceUploadPlaceholder,
-      onRemovePlaceholder: removeUploadPlaceholder,
-      beforeUpload: ensureDraftSavedForUpload,
-    }
-  )
+  const { uploadFile, phase, isUploading, isCompressing } = useDraftImageUpload({
+    upload: draftUploadAdapter,
+    onInsertPlaceholder: insertUploadPlaceholder,
+    onReplacePlaceholder: replaceUploadPlaceholder,
+    onRemovePlaceholder: removeUploadPlaceholder,
+    beforeUpload: ensureDraftSavedForUpload,
+  })
 
   React.useEffect(() => {
     if (isReadOnly || !title.trim() || !hasUnsavedChanges) {
@@ -722,10 +656,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
   React.useEffect(() => {
     if (isReadOnly) return
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        !(event.ctrlKey || event.metaKey) ||
-        event.key.toLowerCase() !== "s"
-      ) {
+      if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== "s") {
         return
       }
       event.preventDefault()
@@ -734,14 +665,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [
-    isReadOnly,
-    isSaving,
-    isSubmitting,
-    isUploading,
-    saveDraftWithFeedback,
-    title,
-  ])
+  }, [isReadOnly, isSaving, isSubmitting, isUploading, saveDraftWithFeedback, title])
 
   const handleUploadWithAutoSave = (file: File) => {
     void uploadFile(file)
@@ -790,12 +714,9 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
       return
     }
     if (duplicateFilePaths.length > 0) {
-      toast.error(
-        t("duplicatePathsError", { paths: duplicateFilePaths.join(", ") }),
-        {
-          duration: 4000,
-        }
-      )
+      toast.error(t("duplicatePathsError", { paths: duplicateFilePaths.join(", ") }), {
+        duration: 4000,
+      })
       return
     }
     updateSubmitProgressState("running")
@@ -819,9 +740,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
       console.error(error)
       send({ type: "SUBMIT_FAILED" })
       updateSubmitProgressState("error")
-      toast.error(
-        error instanceof Error ? error.message : t("badgeSubmitFailed")
-      )
+      toast.error(error instanceof Error ? error.message : t("badgeSubmitFailed"))
       router.refresh()
     }
   }
@@ -831,7 +750,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
       if (isReadOnly) return
       setFileDialogIntent({ kind, initialMode })
     },
-    [isReadOnly]
+    [isReadOnly],
   )
 
   React.useEffect(() => {
@@ -855,7 +774,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
         try {
           const response = await fetch(
             `/api/draft/repo-file?path=${encodeURIComponent(normalizedPath)}`,
-            { cache: "no-store", signal: controller.signal }
+            { cache: "no-store", signal: controller.signal },
           )
           if (cancelled) return
           if (response.status === 404) {
@@ -912,9 +831,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
       controller.abort()
       // A content edit can interrupt comparisons; allow the next effect to retry.
       for (const file of pendingFiles) {
-        if (
-          snapshotRequests[file.id] === normalizeDraftFilePath(file.filePath)
-        ) {
+        if (snapshotRequests[file.id] === normalizeDraftFilePath(file.filePath)) {
           delete snapshotRequests[file.id]
         }
       }
@@ -922,8 +839,7 @@ export function useDraftEditor(initialData?: DraftEditorInitialData) {
   }, [draftCollection.files, repoSnapshots])
 
   const saveDisabled = isSaving || !title.trim()
-  const activeFileHistoryAvailability =
-    historyAvailability[draftCollection.activeFileId]
+  const activeFileHistoryAvailability = historyAvailability[draftCollection.activeFileId]
   const submitDisabled =
     isSubmitting ||
     isSaving ||

@@ -55,9 +55,7 @@ export function ansiColorOf(tagName: string): AnsiColorName | undefined {
 
 /** Shiki writes `color:#rrggbb;--shiki-dark:…`; the first colour is the light theme's. */
 function lightColor(style: string | undefined): string | undefined {
-  const hex = /(?:^|;)\s*color:\s*(#[0-9a-fA-F]{6})\s*(?:;|$)/.exec(
-    style ?? ""
-  )?.[1]
+  const hex = /(?:^|;)\s*color:\s*(#[0-9a-fA-F]{6})\s*(?:;|$)/.exec(style ?? "")?.[1]
   return hex === undefined ? undefined : hex.toLowerCase()
 }
 
@@ -70,7 +68,7 @@ function fontStyleOf(style: string | undefined): FontStyle | undefined {
 function collectTokens(
   nodes: readonly RootContent[],
   error: ErrorFactory,
-  inherited: Inherited
+  inherited: Inherited,
 ): Token[] {
   const tokens: Token[] = []
   for (const node of nodes) {
@@ -88,7 +86,7 @@ function collectTokens(
         ...collectTokens(node.children, error, {
           color: lightColor(style) ?? inherited.color,
           style: fontStyleOf(style) ?? inherited.style,
-        })
+        }),
       )
       continue
     }
@@ -98,7 +96,7 @@ function collectTokens(
         ...collectTokens(node.children, error, {
           color: ANSI_LIGHT[ansi],
           style: inherited.style,
-        })
+        }),
       )
       continue
     }
@@ -125,11 +123,7 @@ function sourceLines(text: string): string[] {
 }
 
 function isLineSpan(node: RootContent): node is Element {
-  return (
-    node.type === "element" &&
-    node.tagName === "span" &&
-    classList(node).includes("line")
-  )
+  return node.type === "element" && node.tagName === "span" && classList(node).includes("line")
 }
 
 /**
@@ -139,7 +133,7 @@ function isLineSpan(node: RootContent): node is Element {
 export function highlightedLines(
   code: Element,
   raw: string | undefined,
-  error: ErrorFactory
+  error: ErrorFactory,
 ): string {
   const spans: Element[] = []
   for (const child of code.children) {
@@ -157,7 +151,7 @@ export function highlightedLines(
     for (const [index, span] of spans.entries()) {
       if (sources[index] !== texts[index]) {
         throw error(
-          `highlighted line ${index + 1} differs from its source: ${JSON.stringify(sources[index])} vs ${JSON.stringify(texts[index])}`
+          `highlighted line ${index + 1} differs from its source: ${JSON.stringify(sources[index])} vs ${JSON.stringify(texts[index])}`,
         )
       }
       out.push(lineExpr(collectTokens(span.children, error, PLAIN)))
@@ -185,7 +179,7 @@ export function highlightedLines(
 /** Unhighlighted code: one uncoloured line per source line. */
 export function plainLines(text: string): string {
   const lines = sourceLines(text).map((line) =>
-    line === "" ? "()" : `((none, ${stringLiteral(line)}),)`
+    line === "" ? "()" : `((none, ${stringLiteral(line)}),)`,
   )
   return typstArray(lines)
 }

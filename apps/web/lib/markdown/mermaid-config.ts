@@ -1,4 +1,5 @@
 import type { MermaidConfig } from "mermaid"
+
 import type { ResolvedTheme } from "@/lib/theme"
 
 const THEME_VARIABLES = {
@@ -31,8 +32,7 @@ export function getMermaidConfig(theme: ResolvedTheme): MermaidConfig {
     suppressErrorRendering: true,
     theme: "base",
     darkMode: theme === "dark",
-    fontFamily:
-      'var(--font-geist-sans), var(--font-noto-sans-sc, "PingFang SC"), sans-serif',
+    fontFamily: 'var(--font-geist-sans), var(--font-noto-sans-sc, "PingFang SC"), sans-serif',
     themeVariables: THEME_VARIABLES[theme],
   }
 }

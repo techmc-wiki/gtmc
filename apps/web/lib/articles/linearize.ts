@@ -1,33 +1,33 @@
-import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types";
-import { resolveLocalArticlePath } from "@/lib/articles/fs";
+import type { ChapterNavNode } from "@/lib/articles/chapter-nav-types"
+import { resolveLocalArticlePath } from "@/lib/articles/fs"
 
 export interface LinearizedFolder {
-  slug: string;
-  title: string;
+  slug: string
+  title: string
 }
 
 export interface LinearizedArticle {
-  slug: string;
-  title: string;
+  slug: string
+  title: string
   /** Path relative to the articles root, or `null` when the slug cannot be resolved. */
-  filePath: string | null;
-  chapterSlug: string;
-  chapterTitle: string;
-  folders: LinearizedFolder[];
-  isPreface: boolean;
-  isAppendix: boolean;
-  isAdvanced: boolean;
-  isReadmeIntro: boolean;
-  index: number;
-  depth: number;
+  filePath: string | null
+  chapterSlug: string
+  chapterTitle: string
+  folders: LinearizedFolder[]
+  isPreface: boolean
+  isAppendix: boolean
+  isAdvanced: boolean
+  isReadmeIntro: boolean
+  index: number
+  depth: number
 }
 
 interface LinearizeContext {
-  chapterSlug: string;
-  chapterTitle: string;
-  isAppendix: boolean;
-  folders: LinearizedFolder[];
-  depth: number;
+  chapterSlug: string
+  chapterTitle: string
+  isAppendix: boolean
+  folders: LinearizedFolder[]
+  depth: number
 }
 
 /**
@@ -41,7 +41,7 @@ export async function linearizeArticles(tree: ChapterNavNode[]): Promise<Lineari
   ): Promise<LinearizedArticle[]> {
     const nested = await Promise.all(
       nodes.map(async (node): Promise<LinearizedArticle[]> => {
-        const isAppendix = context.isAppendix || (node.isAppendix ?? false);
+        const isAppendix = context.isAppendix || (node.isAppendix ?? false)
 
         if (node.isFolder) {
           if (node.isAppendix || context.depth === 0) {
@@ -51,20 +51,20 @@ export async function linearizeArticles(tree: ChapterNavNode[]): Promise<Lineari
               isAppendix,
               folders: [],
               depth: context.depth + 1,
-            });
+            })
           }
           return linearizeNodes(node.children, {
             ...context,
             isAppendix,
             folders: [...context.folders, { slug: node.slug, title: node.title }],
             depth: context.depth + 1,
-          });
+          })
         }
 
-        const filePath = await resolveLocalArticlePath(node.slug);
-        const startsAppendix = node.isAppendix && !node.isReadmeIntro;
-        const chapterSlug = startsAppendix ? node.slug : context.chapterSlug;
-        const chapterTitle = startsAppendix ? node.title : context.chapterTitle;
+        const filePath = await resolveLocalArticlePath(node.slug)
+        const startsAppendix = node.isAppendix && !node.isReadmeIntro
+        const chapterSlug = startsAppendix ? node.slug : context.chapterSlug
+        const chapterTitle = startsAppendix ? node.title : context.chapterTitle
 
         return [
           {
@@ -81,11 +81,11 @@ export async function linearizeArticles(tree: ChapterNavNode[]): Promise<Lineari
             index: node.index ?? -1,
             depth: context.depth,
           },
-        ];
+        ]
       }),
-    );
+    )
 
-    return nested.flat();
+    return nested.flat()
   }
 
   return linearizeNodes(tree, {
@@ -94,5 +94,5 @@ export async function linearizeArticles(tree: ChapterNavNode[]): Promise<Lineari
     isAppendix: false,
     folders: [],
     depth: 0,
-  });
+  })
 }

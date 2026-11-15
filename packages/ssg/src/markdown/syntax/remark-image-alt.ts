@@ -1,8 +1,7 @@
 import type { Root, Image, Node, Literal } from "mdast"
 import { visit } from "unist-util-visit"
 
-const FILENAME_ALT_PATTERN =
-  /^[\p{L}\p{N}\-._ ]+\.(png|jpe?g|gif|webp|svg|bmp|tiff)$/iu
+const FILENAME_ALT_PATTERN = /^[\p{L}\p{N}\-._ ]+\.(png|jpe?g|gif|webp|svg|bmp|tiff)$/iu
 const CAPTION_STARTER_PATTERN = /^(?:图|Figure|Fig\.)\s*[\d.]+/iu
 const TRAILING_PROMPT_PATTERN =
   /(?:效果如下|如下所示|示例如下|如下图所示|如图所示|，效果如下|，示例如下|最终结果如图|最终结果如下图|效果如图|如下图|如图|Example)\s*[:：]?\s*$/iu
@@ -52,12 +51,7 @@ function hasMeaningfulAlt(alt: string | null | undefined): boolean {
   if (trimmed.length === 0) return false
   if (FILENAME_ALT_PATTERN.test(trimmed)) return false
   const lower = trimmed.toLowerCase()
-  if (
-    lower === "image" ||
-    lower === "untitled" ||
-    lower === "photo" ||
-    lower === "picture"
-  ) {
+  if (lower === "image" || lower === "untitled" || lower === "photo" || lower === "picture") {
     return false
   }
   return true
@@ -117,11 +111,7 @@ export function remarkImageAlt() {
         }
 
         let inlineText = ""
-        if (
-          node.type === "paragraph" &&
-          "children" in node &&
-          Array.isArray(node.children)
-        ) {
+        if (node.type === "paragraph" && "children" in node && Array.isArray(node.children)) {
           const beforeTexts: string[] = []
           for (const child of node.children as Node[]) {
             if (child.type === "image") break

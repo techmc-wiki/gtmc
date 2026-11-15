@@ -1,18 +1,13 @@
 "use client"
 
-import {
-  isGlossaryColumn,
-  type GlossaryColumn,
-} from "@/lib/glossary/view-options"
 import { normalizeGlossarySiteLocale } from "@/lib/glossary/locales"
+import { isGlossaryColumn, type GlossaryColumn } from "@/lib/glossary/view-options"
 
 function columnsKey(locale: string): string {
   return `gtmc:glossary:columns:v2:${normalizeGlossarySiteLocale(locale)}`
 }
 
-export function readPersistedGlossaryColumns(
-  locale: string
-): GlossaryColumn[] | null {
+export function readPersistedGlossaryColumns(locale: string): GlossaryColumn[] | null {
   if (typeof window === "undefined") return null
   try {
     const raw = localStorage.getItem(columnsKey(locale))
@@ -29,7 +24,7 @@ export function readPersistedGlossaryColumns(
 
 export function writePersistedGlossaryColumns(
   locale: string,
-  columns: readonly GlossaryColumn[]
+  columns: readonly GlossaryColumn[],
 ): void {
   try {
     localStorage.setItem(columnsKey(locale), JSON.stringify(columns))

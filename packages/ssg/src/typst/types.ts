@@ -1,6 +1,4 @@
-export type ImageAsset =
-  | { readonly path: string }
-  | { readonly missing: string }
+export type ImageAsset = { readonly path: string } | { readonly missing: string }
 
 export interface MermaidAsset {
   readonly path: string

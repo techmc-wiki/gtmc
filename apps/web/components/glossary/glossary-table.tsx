@@ -1,11 +1,13 @@
 "use client"
 
-import * as React from "react"
 import { useTranslations } from "next-intl"
-import { cn } from "@/lib/cn"
+import * as React from "react"
+
 import { EmptyState } from "@/components/ui/empty-state"
+import { cn } from "@/lib/cn"
 import type { GlossaryIndexEntry } from "@/lib/glossary/localized-index"
 import type { GlossaryColumn } from "@/lib/glossary/view-options"
+
 import { GlossaryTableRow, GlossaryCard } from "./glossary-entry"
 
 interface GlossaryTableProps {
@@ -88,7 +90,7 @@ export function GlossaryTable({
                   className={cn(
                     headerCellBase,
                     col === "term" && "min-w-[10rem]",
-                    col === "description" && "max-w-[36rem]"
+                    col === "description" && "max-w-[36rem]",
                   )}>
                   {t(COLUMN_LABEL_KEYS[col] as Parameters<typeof t>[0])}
                 </th>
@@ -97,9 +99,7 @@ export function GlossaryTable({
           </thead>
           {grouped.map((group) => {
             const isResultGroup = group.letter === "_results"
-            const letterId = isResultGroup
-              ? "letter-results"
-              : `letter-${group.letter}`
+            const letterId = isResultGroup ? "letter-results" : `letter-${group.letter}`
 
             return (
               <tbody
@@ -146,23 +146,17 @@ export function GlossaryTable({
         className="custom-bottom-scrollbar relative h-[min(75vh,44rem)] space-y-6 overflow-auto md:hidden">
         {grouped.map((group) => {
           const isResultGroup = group.letter === "_results"
-          const letterId = isResultGroup
-            ? "letter-results-mobile"
-            : `letter-${group.letter}-mobile`
+          const letterId = isResultGroup ? "letter-results-mobile" : `letter-${group.letter}-mobile`
 
           return (
             <section
               key={group.letter}
               id={letterId}
-              aria-label={
-                isResultGroup ? "search results" : `letter ${group.letter}`
-              }
+              aria-label={isResultGroup ? "search results" : `letter ${group.letter}`}
               className="scroll-mt-4 [contain-intrinsic-size:auto_280px] [content-visibility:auto]">
               {!isResultGroup && (
                 <div className="border-tech-line/30 mb-2 flex items-baseline gap-3 border-b pb-1">
-                  <h2 className="display-title text-tech-main-dark text-2xl">
-                    {group.letter}
-                  </h2>
+                  <h2 className="display-title text-tech-main-dark text-2xl">{group.letter}</h2>
                   <span className="text-tech-main/40 text-xs tabular-nums">
                     {group.items.length}
                   </span>

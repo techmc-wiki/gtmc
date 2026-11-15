@@ -1,21 +1,20 @@
+import { type ArticleLocale } from "@gtmc/ssg/articles/types"
+import { ArrowLeft, ArrowRight, GlobeIcon } from "lucide-react"
 import type { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import Image from "next/image"
 import { notFound, permanentRedirect } from "next/navigation"
-import { ArrowLeft, ArrowRight, GlobeIcon } from "lucide-react"
-import { getTranslations } from "next-intl/server"
-import { Link } from "@/i18n/navigation"
+
+import { AdvancedMarker } from "@/components/articles/advanced-marker"
 import { SectionTitle } from "@/components/ui/headings"
+import { GithubIcon, BilibiliIcon, TwitterIcon } from "@/components/ui/icons"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/shadcn/avatar"
 import { Badge } from "@/components/ui/shadcn/badge"
 import { Card } from "@/components/ui/shadcn/card"
 import { Separator } from "@/components/ui/shadcn/separator"
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-} from "@/components/ui/shadcn/avatar"
-import { GithubIcon, BilibiliIcon, TwitterIcon } from "@/components/ui/icons"
-import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
-import { AdvancedMarker } from "@/components/articles/advanced-marker"
+import { Link } from "@/i18n/navigation"
+import { loadArticleManifest } from "@/lib/articles/manifest"
+import { getPersonDescription } from "@/lib/articles/people"
 import {
   getProfileHandles,
   resolveAuthorPerson,
@@ -25,12 +24,10 @@ import {
   isMaintainer,
   isSameAuthor,
 } from "@/lib/articles/person-resolver"
-import { getPersonDescription } from "@/lib/articles/people"
+import type { AuthorArticleSummary } from "@/lib/articles/person-resolver"
 import { getRepositoryContributorStats } from "@/lib/git/repository-contributor-stats"
 import { buildPersonJsonLd, serializeJsonLd } from "@/lib/seo/json-ld"
-import { loadArticleManifest } from "@/lib/articles/manifest"
-import { type ArticleLocale } from "@gtmc/ssg/articles/types"
-import type { AuthorArticleSummary } from "@/lib/articles/person-resolver"
+import { toAbsoluteUrl, getSiteUrl } from "@/lib/site-url"
 
 interface AuthorDetailPageProps {
   params: Promise<{ locale: string; handle: string }>
@@ -44,19 +41,13 @@ function decodeHandle(rawHandle: string): string {
   }
 }
 
-export async function generateStaticParams(): Promise<
-  { locale: string; handle: string }[]
-> {
+export async function generateStaticParams(): Promise<{ locale: string; handle: string }[]> {
   const handles = getProfileHandles()
   const locales = ["en", "zh"]
-  return locales.flatMap((locale) =>
-    handles.map((handle) => ({ locale, handle }))
-  )
+  return locales.flatMap((locale) => handles.map((handle) => ({ locale, handle })))
 }
 
-export async function generateMetadata({
-  params,
-}: AuthorDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: AuthorDetailPageProps): Promise<Metadata> {
   const { locale, handle: rawHandle } = await params
   const requestedHandle = decodeHandle(rawHandle)
   const manifest = loadArticleManifest()
@@ -152,21 +143,14 @@ async function loadAuthorPage(params: AuthorDetailPageProps["params"]) {
   const coAuthoredCount = articleAttributionExcluded
     ? 0
     : articles.filter(
-        (article) =>
-          article.author !== undefined && !isSameAuthor(article.author, handle)
+        (article) => article.author !== undefined && !isSameAuthor(article.author, handle),
       ).length
 
   const personDescription = getPersonDescription(person, locale as "en" | "zh")
   const jsonLd = serializeJsonLd(
-    buildPersonJsonLd(
-      { ...person, description: personDescription },
-      siteUrl,
-      locale,
-      urlHandle,
-      {
-        role: maintainer ? t("maintainerLabel") : t("joinedLabel"),
-      }
-    )
+    buildPersonJsonLd({ ...person, description: personDescription }, siteUrl, locale, urlHandle, {
+      role: maintainer ? t("maintainerLabel") : t("joinedLabel"),
+    }),
   )
   const contributorSince = articleAttributionExcluded
     ? undefined
@@ -248,12 +232,7 @@ function AuthorSocialLinks({
   websiteUrl,
 }: Pick<
   AuthorPageData,
-  | "bilibiliUrl"
-  | "customLinks"
-  | "githubUrl"
-  | "t"
-  | "twitterUrl"
-  | "websiteUrl"
+  "bilibiliUrl" | "customLinks" | "githubUrl" | "t" | "twitterUrl" | "websiteUrl"
 >) {
   const hasSocialLinks =
     githubUrl !== null ||
@@ -266,9 +245,7 @@ function AuthorSocialLinks({
 
   return (
     <div className="mt-4">
-      <p className="text-tech-main/50 mb-2 text-xs font-medium">
-        {t("socialLinksLabel")}
-      </p>
+      <p className="text-tech-main/50 mb-2 text-xs font-medium">{t("socialLinksLabel")}</p>
       <div className="flex flex-wrap gap-3">
         {githubUrl && (
           <SocialLink href={githubUrl} label={t("githubProfile")}>
@@ -426,10 +403,7 @@ function AuthorArticles({
   articles,
   handle,
   t,
-}: Pick<
-  AuthorPageData,
-  "articleAttributionExcluded" | "articles" | "handle" | "t"
->) {
+}: Pick<AuthorPageData, "articleAttributionExcluded" | "articles" | "handle" | "t">) {
   if (articleAttributionExcluded) return null
 
   return (
@@ -491,9 +465,7 @@ function AuthorPageContent({ data }: { data: AuthorPageData }) {
   )
 }
 
-export default async function AuthorDetailPage({
-  params,
-}: AuthorDetailPageProps) {
+export default async function AuthorDetailPage({ params }: AuthorDetailPageProps) {
   const data = await loadAuthorPage(params)
   return <AuthorPageContent data={data} />
 }
@@ -555,8 +527,7 @@ function ArticleRow({
   rowIndex: number
   coauthoredLabel: string
 }) {
-  const isCoAuthored =
-    article.author !== undefined && !isSameAuthor(article.author, handle)
+  const isCoAuthored = article.author !== undefined && !isSameAuthor(article.author, handle)
 
   const metaParts: string[] = []
   if (article.isPreface) metaParts.push("PREFACE")

@@ -1,31 +1,18 @@
 "use client"
 
-import { IconButton } from "@/components/ui/icon-button"
-
-import * as React from "react"
 import { diffWords } from "diff"
+import { AlertCircle, CheckCircle2, ExternalLink, GitPullRequest, Loader2, X } from "lucide-react"
 import { useTranslations } from "next-intl"
-import {
-  AlertCircle,
-  CheckCircle2,
-  ExternalLink,
-  GitPullRequest,
-  Loader2,
-  X,
-} from "lucide-react"
+import * as React from "react"
 
-import { Button } from "@/components/ui/shadcn/button"
+import { IconButton } from "@/components/ui/icon-button"
 import { Badge } from "@/components/ui/shadcn/badge"
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/shadcn/card"
+import { Button } from "@/components/ui/shadcn/button"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/shadcn/card"
 import { ScrollArea } from "@/components/ui/shadcn/scroll-area"
 import { Separator } from "@/components/ui/shadcn/separator"
-import { GLOSSARY_COLUMNS, type GlossaryRow } from "@/lib/glossary/csv"
 import { cn } from "@/lib/cn"
+import { GLOSSARY_COLUMNS, type GlossaryRow } from "@/lib/glossary/csv"
 
 export interface GlossaryDiffOperation {
   kind: "edit" | "add" | "delete"
@@ -81,14 +68,12 @@ function renderInlineDiff(oldText: string, newText: string): React.ReactNode {
 
 function changedColumns(
   before: GlossaryRow,
-  after: GlossaryRow
+  after: GlossaryRow,
 ): readonly (typeof GLOSSARY_COLUMNS)[number][] {
   return GLOSSARY_COLUMNS.filter((col) => before[col] !== after[col])
 }
 
-function populatedColumns(
-  row: GlossaryRow
-): readonly (typeof GLOSSARY_COLUMNS)[number][] {
+function populatedColumns(row: GlossaryRow): readonly (typeof GLOSSARY_COLUMNS)[number][] {
   return GLOSSARY_COLUMNS.filter((col) => row[col]?.trim() !== "")
 }
 
@@ -115,18 +100,14 @@ function EditOperationCard({ operation }: OperationCardProps) {
       </CardHeader>
       <CardContent className="p-0">
         {fields.length === 0 ? (
-          <p className="text-muted-foreground text-xs italic">
-            No field changes detected.
-          </p>
+          <p className="text-muted-foreground text-xs italic">No field changes detected.</p>
         ) : (
           <div className="flex flex-col gap-2.5">
             {fields.map((field) => (
               <div
                 key={field}
                 className="bg-surface-overlay/50 border-border/50 rounded-none border p-2.5 text-xs">
-                <div className="text-muted-foreground mb-1 text-[11px]">
-                  {field}
-                </div>
+                <div className="text-muted-foreground mb-1 text-[11px]">{field}</div>
                 <div className="text-foreground leading-relaxed break-words whitespace-pre-wrap">
                   {renderInlineDiff(before[field] || "", after[field] || "")}
                 </div>
@@ -162,9 +143,7 @@ function AddOperationCard({ operation }: OperationCardProps) {
               <div
                 key={field}
                 className="bg-surface-overlay/50 border-border/50 rounded-none border p-2 text-xs">
-                <span className="text-muted-foreground block text-[10px]">
-                  {field}
-                </span>
+                <span className="text-muted-foreground block text-[10px]">{field}</span>
                 <span className="text-foreground mt-0.5 block break-words whitespace-pre-wrap">
                   {after[field]}
                 </span>
@@ -196,12 +175,8 @@ function DeleteOperationCard({ operation }: OperationCardProps) {
           <div className="flex flex-col gap-1 text-xs opacity-75">
             {fields.map((field) => (
               <div key={field} className="flex gap-2">
-                <span className="text-muted-foreground shrink-0 text-[10px] sm:w-32">
-                  {field}:
-                </span>
-                <span className="text-foreground break-words line-through">
-                  {before[field]}
-                </span>
+                <span className="text-muted-foreground shrink-0 text-[10px] sm:w-32">{field}:</span>
+                <span className="text-foreground break-words line-through">{before[field]}</span>
               </div>
             ))}
           </div>
@@ -294,9 +269,7 @@ function OperationSummary({
   )
 }
 
-function OperationList({
-  operations,
-}: Pick<GlossaryDiffPreviewProps, "operations">) {
+function OperationList({ operations }: Pick<GlossaryDiffPreviewProps, "operations">) {
   return (
     <ScrollArea className="min-h-0 flex-1 px-4 py-4 sm:px-6">
       <div className="flex flex-col gap-3 pr-3">
@@ -329,17 +302,12 @@ function CommitAuthorToggle({
   realEmail,
   toggleLabel,
   useRealEmail,
-}: Pick<
-  GlossaryDiffPreviewProps,
-  "authorName" | "isSubmitting" | "noreplyEmail" | "realEmail"
-> & {
+}: Pick<GlossaryDiffPreviewProps, "authorName" | "isSubmitting" | "noreplyEmail" | "realEmail"> & {
   onChange: (checked: boolean) => void
   toggleLabel: string
   useRealEmail: boolean
 }) {
-  const canToggle = Boolean(
-    realEmail && noreplyEmail && realEmail !== noreplyEmail
-  )
+  const canToggle = Boolean(realEmail && noreplyEmail && realEmail !== noreplyEmail)
 
   if (!canToggle) return null
 
@@ -473,8 +441,7 @@ export function GlossaryDiffPreview({
   }
 
   return (
-    <div
-      className={cn("flex min-h-0 flex-1 flex-col overflow-hidden", className)}>
+    <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden", className)}>
       <OperationSummary counts={counts} operationCount={operations.length} />
       <OperationList operations={operations} />
       <Separator />

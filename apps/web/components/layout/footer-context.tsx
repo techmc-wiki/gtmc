@@ -30,14 +30,9 @@ export function FooterProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const value = useMemo(
-    () => ({ hidden: hideCount > 0, registerHide }),
-    [hideCount, registerHide]
-  )
+  const value = useMemo(() => ({ hidden: hideCount > 0, registerHide }), [hideCount, registerHide])
 
-  return (
-    <FooterContext.Provider value={value}>{children}</FooterContext.Provider>
-  )
+  return <FooterContext.Provider value={value}>{children}</FooterContext.Provider>
 }
 
 export function useFooter() {

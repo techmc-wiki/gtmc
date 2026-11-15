@@ -1,8 +1,9 @@
 import type { MDXComponents } from "mdx/types"
-import { SectionTitle } from "@/components/ui/headings"
-import { StatCard, StatGrid } from "@/components/mdx/stats"
+
 import { AuthorGrid } from "@/components/mdx/author-grid"
 import { DownloadButton } from "@/components/mdx/download-button"
+import { StatCard, StatGrid } from "@/components/mdx/stats"
+import { SectionTitle } from "@/components/ui/headings"
 
 const components: MDXComponents = {
   h1: ({ children }) => (
@@ -10,12 +11,8 @@ const components: MDXComponents = {
       {children}
     </h1>
   ),
-  h2: ({ children }) => (
-    <SectionTitle className="mt-10">{children}</SectionTitle>
-  ),
-  p: ({ children }) => (
-    <p className="text-tech-main mb-4 max-w-3xl text-sm/relaxed">{children}</p>
-  ),
+  h2: ({ children }) => <SectionTitle className="mt-10">{children}</SectionTitle>,
+  p: ({ children }) => <p className="text-tech-main mb-4 max-w-3xl text-sm/relaxed">{children}</p>,
   a: ({ href, children }) => (
     <a
       href={href}
@@ -24,9 +21,7 @@ const components: MDXComponents = {
     </a>
   ),
   ul: ({ children }) => (
-    <ul className="text-tech-main mb-4 max-w-3xl space-y-2 text-sm/relaxed">
-      {children}
-    </ul>
+    <ul className="text-tech-main mb-4 max-w-3xl space-y-2 text-sm/relaxed">{children}</ul>
   ),
   StatGrid,
   StatCard,

@@ -40,7 +40,7 @@ export function articleFileName(slug: string): string {
 export function renderArticleSource(
   entry: NumberedArticle,
   body: string,
-  preface: boolean
+  preface: boolean,
 ): string {
   const { article, number } = entry
   return [
@@ -90,11 +90,9 @@ export function renderBookSource(book: BookSource): string {
   for (const chapter of book.chapters) {
     lines.push(
       `#chapter(number: ${typstString(chapter.number)}, title: ${typstString(chapter.title)}, appendix: ${chapter.isAppendix}, articles: (`,
-      ...chapterArticles(chapter).map(
-        (entry) => `  ${articleReference(entry)},`
-      ),
+      ...chapterArticles(chapter).map((entry) => `  ${articleReference(entry)},`),
       "))",
-      ...contentLines(chapter.content)
+      ...contentLines(chapter.content),
     )
   }
 
@@ -110,12 +108,11 @@ function contentLines(content: ChapterContent[]): string[] {
   return content.flatMap((item) =>
     item.kind === "folder"
       ? [`#folder(${typstString(item.title)})`, ...contentLines(item.content)]
-      : [includeArticle(item.entry.article.slug)]
+      : [includeArticle(item.entry.article.slug)],
   )
 }
 
 function articleReference(entry: NumberedArticle): string {
-  const number =
-    entry.number === null ? "" : `number: ${typstString(entry.number)}, `
+  const number = entry.number === null ? "" : `number: ${typstString(entry.number)}, `
   return `(${number}title: ${typstString(entry.article.title)}, slug: ${typstString(entry.article.slug)})`
 }

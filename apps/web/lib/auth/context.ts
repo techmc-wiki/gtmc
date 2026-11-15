@@ -7,9 +7,7 @@ type AuthenticatedSession = Session & {
   user: NonNullable<Session["user"]> & { id: string }
 }
 
-export async function requireAuth(
-  message = "Unauthorized"
-): Promise<AuthenticatedSession> {
+export async function requireAuth(message = "Unauthorized"): Promise<AuthenticatedSession> {
   const session = await auth()
   if (!session?.user?.id) {
     throw new Error(message)

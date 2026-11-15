@@ -1,20 +1,18 @@
+import type * as ChildProcess from "child_process"
 import { availableParallelism } from "node:os"
 import path from "node:path"
-import type { NextConfig } from "next"
-import type * as ChildProcess from "child_process"
+
 import withBundleAnalyzer from "@next/bundle-analyzer"
-import createNextIntlPlugin from "next-intl/plugin"
 import createMDX from "@next/mdx"
+import type { NextConfig } from "next"
+import createNextIntlPlugin from "next-intl/plugin"
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts")
 const withMDX = createMDX({})
 // Trace-exclude globs resolve from the app root (apps/web). The article and
 // glossary submodules live under `content/` at the workspace root, so they are
 // referenced relative to that.
-const remoteArticleAssetTraceExcludes = [
-  "../../content/articles/**",
-  "../../.git/**",
-]
+const remoteArticleAssetTraceExcludes = ["../../content/articles/**", "../../.git/**"]
 
 const buildSha: string = (() => {
   if (process.env.VERCEL_GIT_COMMIT_SHA) {
@@ -94,9 +92,7 @@ const nextConfig: NextConfig = {
     "/\\[locale\\]/glossary": ["data/glossary*.json"],
     "/api/glossary": ["data/glossary*.json"],
     "/api/properties": ["../../content/properties/data/*.json"],
-    "/\\[locale\\]/properties": [
-      "../../content/properties/data/block_data.json",
-    ],
+    "/\\[locale\\]/properties": ["../../content/properties/data/block_data.json"],
     // The draft editor renders the contribution guides staged by
     // scripts/stage-draft-guides.ts.
     "/\\[locale\\]/draft/\\[id\\]": ["data/contributing/*.md"],
@@ -108,10 +104,7 @@ const nextConfig: NextConfig = {
       "../../content/articles/**/*.{png,gif,jpg,jpeg,webp,svg,mp4,webm,zip,litematic,nbt,schem,schematic,bmp,ico}",
       "../../.git/**",
     ],
-    "/api/litematica-assets/\\[\\.\\.\\.path\\]": [
-      "../../content/articles/**",
-      "../../.git/**",
-    ],
+    "/api/litematica-assets/\\[\\.\\.\\.path\\]": ["../../content/articles/**", "../../.git/**"],
     "/\\[locale\\]/glossary/**": ["../../content/glossary/**"],
   },
   turbopack: {
@@ -197,8 +190,6 @@ const nextConfig: NextConfig = {
 }
 
 const config =
-  process.env.ANALYZE === "true"
-    ? withBundleAnalyzer({ enabled: true })(nextConfig)
-    : nextConfig
+  process.env.ANALYZE === "true" ? withBundleAnalyzer({ enabled: true })(nextConfig) : nextConfig
 
 export default withNextIntl(withMDX(config))

@@ -7,7 +7,7 @@ type Schematic = InstanceType<NucleationModule["Schematic"]>
 export function loadSchematicByFileName(
   nuc: NucleationModule,
   fileName: string,
-  data: Array<number>
+  data: Array<number>,
 ): Schematic {
   const extension = fileName.split(".").pop()?.toLowerCase() ?? ""
 

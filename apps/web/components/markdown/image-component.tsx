@@ -1,9 +1,6 @@
 import { ArticleImage } from "@/components/markdown/article-image"
 import type { MarkdownComponentProps } from "@/lib/markdown/component-types"
-import {
-  hasExplicitUrlScheme,
-  resolveRelativeArticlePath,
-} from "@/lib/markdown/url-utils"
+import { hasExplicitUrlScheme, resolveRelativeArticlePath } from "@/lib/markdown/url-utils"
 
 function decodeImageSource(src: string): string {
   try {
@@ -12,11 +9,7 @@ function decodeImageSource(src: string): string {
     return src
   }
 }
-function getFallbackImageAlt(
-  alt: unknown,
-  src: string,
-  rawPath: string
-): string {
+function getFallbackImageAlt(alt: unknown, src: string, rawPath: string): string {
   if (typeof alt === "string" && alt.trim().length > 0) {
     return alt.trim()
   }
@@ -50,15 +43,10 @@ export function createImageComponent(rawPath: string) {
         src.startsWith("../") ||
         (!src.startsWith("http") && !src.startsWith("/")))
     ) {
-      const resolved = resolveRelativeArticlePath(
-        rawPath,
-        decodeImageSource(src)
-      )
+      const resolved = resolveRelativeArticlePath(rawPath, decodeImageSource(src))
       src = `/api/assets?path=${encodeURIComponent(resolved)}`
     }
-    return (
-      <ArticleImage src={src} alt={getFallbackImageAlt(alt, src, rawPath)} />
-    )
+    return <ArticleImage src={src} alt={getFallbackImageAlt(alt, src, rawPath)} />
   }
 
   ImageComponent.displayName = "ImageComponent"

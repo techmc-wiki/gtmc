@@ -1,12 +1,6 @@
-import {
-  afterAll,
-  beforeEach,
-  describe,
-  expect,
-  test,
-  vi,
-} from "vite-plus/test"
+import { afterAll, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
+import type { DraftPullRequestResult } from "@/lib/articles/pr"
 import {
   canEditDraft,
   canSubmitDraft,
@@ -24,7 +18,6 @@ import {
   writeDraft,
 } from "@/lib/drafts/store"
 import { GLOSSARY_COLUMNS, type GlossaryRow } from "@/lib/glossary/csv"
-import type { DraftPullRequestResult } from "@/lib/articles/pr"
 import { reconcileSubmission } from "@/lib/submission-recovery"
 
 /**
@@ -71,32 +64,28 @@ const blobState = vi.hoisted(() => {
     }
   })
 
-  const put = vi.fn(
-    async (pathname: string, body: string, options?: { ifMatch?: string }) => {
-      const current = entries.get(pathname)
-      if (options?.ifMatch !== undefined && current?.etag !== options.ifMatch) {
-        throw new BlobPreconditionFailedError()
-      }
-      const blob = { body, etag: nextEtag() }
-      entries.set(pathname, blob)
-      return {
-        etag: blob.etag,
-        pathname,
-        url: `https://blob.example/${pathname}`,
-      }
+  const put = vi.fn(async (pathname: string, body: string, options?: { ifMatch?: string }) => {
+    const current = entries.get(pathname)
+    if (options?.ifMatch !== undefined && current?.etag !== options.ifMatch) {
+      throw new BlobPreconditionFailedError()
     }
-  )
+    const blob = { body, etag: nextEtag() }
+    entries.set(pathname, blob)
+    return {
+      etag: blob.etag,
+      pathname,
+      url: `https://blob.example/${pathname}`,
+    }
+  })
 
-  const del = vi.fn(
-    async (pathname: string, options?: { ifMatch?: string }) => {
-      const current = entries.get(pathname)
-      if (options?.ifMatch !== undefined && current?.etag !== options.ifMatch) {
-        throw new BlobPreconditionFailedError()
-      }
-      entries.delete(pathname)
-      return { pathname }
+  const del = vi.fn(async (pathname: string, options?: { ifMatch?: string }) => {
+    const current = entries.get(pathname)
+    if (options?.ifMatch !== undefined && current?.etag !== options.ifMatch) {
+      throw new BlobPreconditionFailedError()
     }
-  )
+    entries.delete(pathname)
+    return { pathname }
+  })
 
   const list = vi.fn(async (options?: { prefix?: string }) => {
     const prefix = options?.prefix ?? ""
@@ -157,9 +146,7 @@ const FIXTURE_UPDATED_AT = "2020-01-02T00:00:00.000Z"
 const ORIGINAL_BLOB_STORE_ID = process.env.DRAFT_BLOB_STORE_ID
 
 function glossaryRow(overrides: Partial<GlossaryRow> = {}): GlossaryRow {
-  const row = Object.fromEntries(
-    GLOSSARY_COLUMNS.map((column) => [column, ""])
-  ) as GlossaryRow
+  const row = Object.fromEntries(GLOSSARY_COLUMNS.map((column) => [column, ""])) as GlossaryRow
   return Object.assign(row, overrides)
 }
 
@@ -269,7 +256,7 @@ describe("reconcileSubmission", () => {
     expect(recovered).toBeNull()
     expect(github.findArticlePullRequestByBranch).toHaveBeenCalledWith(
       fixture.branchName,
-      "article-token"
+      "article-token",
     )
 
     const record = await readStoredDraft()
@@ -307,7 +294,7 @@ describe("reconcileSubmission", () => {
     expect(recovered).toBeNull()
     expect(github.findGlossaryPullRequestByBranch).toHaveBeenCalledWith(
       fixture.branchName,
-      "glossary-token"
+      "glossary-token",
     )
     expect(github.findArticlePullRequestByBranch).not.toHaveBeenCalled()
 
@@ -356,9 +343,7 @@ describe("reconcileSubmission", () => {
     expect(draft.updatedAt).not.toBe(FIXTURE_UPDATED_AT)
     expect(isTerminalDraftStatus(draft.status)).toBe(true)
     expect(canEditDraft(draft)).toBe(false)
-    expect(
-      deriveDisplayStatus(draft.status, { state: "closed", merged: true })
-    ).toBe("MERGED")
+    expect(deriveDisplayStatus(draft.status, { state: "closed", merged: true })).toBe("MERGED")
   })
 
   test("finalizes an article draft from a supplied result", async () => {
@@ -546,7 +531,7 @@ describe("reconcileSubmission", () => {
         authorId: AUTHOR_ID,
         draftId: DRAFT_ID,
         token: "article-token",
-      })
+      }),
     ).rejects.toBeInstanceOf(blobState.BlobPreconditionFailedError)
 
     const record = await readStoredDraft()
@@ -563,9 +548,7 @@ describe("reconcileSubmission", () => {
   test("propagates a lookup failure without releasing the draft", async () => {
     const fixture = articleDraft()
     const initialEtag = await writeDraft(fixture)
-    github.findArticlePullRequestByBranch.mockRejectedValue(
-      new Error("GitHub is unavailable")
-    )
+    github.findArticlePullRequestByBranch.mockRejectedValue(new Error("GitHub is unavailable"))
 
     await expect(
       reconcileSubmission({
@@ -573,7 +556,7 @@ describe("reconcileSubmission", () => {
         authorId: AUTHOR_ID,
         draftId: DRAFT_ID,
         token: "article-token",
-      })
+      }),
     ).rejects.toThrow("GitHub is unavailable")
 
     expect(github.findGlossaryPullRequestByBranch).not.toHaveBeenCalled()

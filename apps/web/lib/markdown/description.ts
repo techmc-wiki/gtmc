@@ -1,8 +1,8 @@
+import { stripAnsiColorMarkup } from "@gtmc/ssg/markdown/ansi-colors"
+import type { Html } from "mdast"
 import { remark } from "remark"
 import stripMarkdown from "strip-markdown"
 import { visit } from "unist-util-visit"
-import type { Html } from "mdast"
-import { stripAnsiColorMarkup } from "@gtmc/ssg/markdown/ansi-colors"
 
 /** Typical Bing/Google SERP target: long enough to be informative, short enough not to truncate. */
 export const META_DESCRIPTION_MAX_LENGTH = 155
@@ -78,7 +78,7 @@ export function generateDescription(
   markdown: string,
   frontmatterDescription?: string,
   maxLength: number = META_DESCRIPTION_MAX_LENGTH,
-  minLength: number = META_DESCRIPTION_MIN_LENGTH
+  minLength: number = META_DESCRIPTION_MIN_LENGTH,
 ): string {
   const normalizedMarkdown = removeRawHtmlBlocks(stripAnsiColorMarkup(markdown))
   const parts: string[] = []
@@ -138,9 +138,7 @@ export function generateDescription(
         }
         listBits.push(stripListMarker(currentTrimmed))
         lineIndex++
-        if (
-          toPlainText([...parts, ...listBits].join(" ")).length >= minLength
-        ) {
+        if (toPlainText([...parts, ...listBits].join(" ")).length >= minLength) {
           break
         }
       }
@@ -203,22 +201,20 @@ export function ensureMetaDescriptionLength(
     locale?: string
   },
   maxLength: number = META_DESCRIPTION_MAX_LENGTH,
-  minLength: number = META_DESCRIPTION_MIN_LENGTH
+  minLength: number = META_DESCRIPTION_MIN_LENGTH,
 ): string {
   const siteName = context.siteName ?? "Graduate Texts in Minecraft"
   const title = context.title.trim()
   const chapter = context.chapterTitle?.trim()
   let result = description.trim()
-  const isZh =
-    context.locale === "zh" ||
-    looksMostlyCjk(`${result} ${title} ${chapter ?? ""}`)
+  const isZh = context.locale === "zh" || looksMostlyCjk(`${result} ${title} ${chapter ?? ""}`)
 
   if (result.length >= minLength) {
     return truncateAtWord(result, maxLength)
   }
 
   const contextBits = [title, chapter].filter((bit): bit is string =>
-    Boolean(bit && bit.length > 0)
+    Boolean(bit && bit.length > 0),
   )
 
   for (const bit of contextBits) {
@@ -237,11 +233,7 @@ export function ensureMetaDescriptionLength(
       : isZh
         ? `${siteName}：${topicFiller}`
         : `${siteName} ${topicFiller}`
-    const next = result
-      ? isZh
-        ? `${result}，${filler}`
-        : `${result}, ${filler}`
-      : filler
+    const next = result ? (isZh ? `${result}，${filler}` : `${result}, ${filler}`) : filler
     if (next === result) break
     result = next
   }

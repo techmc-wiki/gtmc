@@ -1,8 +1,7 @@
 import type { Root, Blockquote, Paragraph, Text } from "mdast"
 import { visit } from "unist-util-visit"
 
-const CALLOUT_MARKER_REGEX =
-  /^\s*\[!(WARNING|TIP|IMPORTANT|CRASH|CORRUPTION)\]\s*/i
+const CALLOUT_MARKER_REGEX = /^\s*\[!(WARNING|TIP|IMPORTANT|CRASH|CORRUPTION)\]\s*/i
 
 export function remarkCallouts() {
   return (tree: Root) => {
@@ -30,10 +29,7 @@ export function remarkCallouts() {
         paragraph.children.shift()
       }
 
-      while (
-        paragraph.children.length > 0 &&
-        paragraph.children[0].type === "break"
-      ) {
+      while (paragraph.children.length > 0 && paragraph.children[0].type === "break") {
         paragraph.children.shift()
       }
 

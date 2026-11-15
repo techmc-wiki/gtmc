@@ -1,7 +1,7 @@
 import { PageSkeleton } from "@/components/layout/page-skeleton"
 import { SectionTitle } from "@/components/ui/headings"
-import { Card } from "@/components/ui/shadcn/card"
 import { SegmentedBar } from "@/components/ui/loading-shell-primitives"
+import { Card } from "@/components/ui/shadcn/card"
 
 function DraftRowSkeleton({ compact = false }: { compact?: boolean }) {
   return (
@@ -55,14 +55,8 @@ export default function DraftLoading() {
               <SegmentedBar opacity="low" className="h-4 w-3/4" />
             </div>
             <div className="mt-6 space-y-3">
-              <SegmentedBar
-                opacity="high"
-                className="border-tech-main/30 h-11 w-full border"
-              />
-              <SegmentedBar
-                opacity="medium"
-                className="border-tech-main/30 h-11 w-full border"
-              />
+              <SegmentedBar opacity="high" className="border-tech-main/30 h-11 w-full border" />
+              <SegmentedBar opacity="medium" className="border-tech-main/30 h-11 w-full border" />
             </div>
           </Card>
         </aside>

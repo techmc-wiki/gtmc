@@ -1,4 +1,5 @@
 import { RequestError } from "@octokit/request-error"
+
 import { getGithubErrorStatus } from "@/lib/github/errors"
 
 export function getGithubRateLimitResetMs(error: unknown): number | null {

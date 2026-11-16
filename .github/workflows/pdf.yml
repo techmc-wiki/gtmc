@@ -120,7 +120,7 @@ jobs:
 
       - name: Install Typst
         if: steps.change-check.outputs.should-build == 'true'
-        uses: typst-community/setup-typst@v5.3.1
+        uses: typst-community/setup-typst@v5.3.2
         with:
           typst-version: ${{ env.TYPST_VERSION }}
 

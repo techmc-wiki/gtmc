@@ -357,7 +357,7 @@
   "Footer": {
     "attribution": "Contributors retain copyright. Article content is released under CC BY-NC-SA 4.0 with attribution preserved through article metadata and source history.",
     "copyright": "© {start}–{year} GTMC Collective",
-    "rareUiCredit": "UI components by Rare UI",
+    "rareUiCredit": "This site uses Rare UI",
     "disclaimer": "Not an official Minecraft product. Not affiliated with Mojang Studios.",
     "linkAbout": "About",
     "linkAuthors": "Authors",
